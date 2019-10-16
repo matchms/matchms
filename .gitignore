@@ -1,0 +1,16 @@
+*.txt
+*.cys
+*.graphml
+*.csv
+*.png
+*.pdf
+*.npy
+*.model
+*.h5
+*.npz
+*.xlsx
+output/
+data/
+models_trained/
+notebooks/.ipynb_checkpoints/
+__pycache__/
