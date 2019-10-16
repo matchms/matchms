@@ -1,5 +1,5 @@
 #
-# SeSiMe
+# Spec2Vec
 #
 # Copyright 2019 Netherlands eScience Center
 #
