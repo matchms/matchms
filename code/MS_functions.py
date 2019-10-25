@@ -815,9 +815,9 @@ def create_MS_documents(spectra,
 
 
 def get_mol_fingerprints(spectra_dict, method = "daylight"):
-    """ Calculate molecule fingerprints based on given smiles (using RDkit).
+    """ Calculate molecule fingerprints based on given inchi or smiles (using RDkit).
     
-    Output: exclude_IDs list with spectra that had no smiles or problems when deriving fingerprint
+    Output: exclude_IDs list with spectra that had no inchi or smiles or problems when deriving fingerprint
     
     Args:
     --------
@@ -834,19 +834,30 @@ def get_mol_fingerprints(spectra_dict, method = "daylight"):
     molecules = []
     for key, value in spectra_dict.items():
         if "inchi" in value["metadata"]:
+            mol = 1
             keys.append(key) 
-            molecules.append(Chem.MolFromInchi(value["metadata"]["inchi"], 
-                                               sanitize=True, 
-                                               removeHs=True, 
-                                               logLevel=None, 
-                                               treatWarningAsError=False))
-        elif "smiles" in value:  # Smiles but no InChikey
+            try:
+                mol = Chem.MolFromInchi(value["metadata"]["inchi"], 
+                                                   sanitize=True, 
+                                                   removeHs=True, 
+                                                   logLevel=None, 
+                                                   treatWarningAsError=True)
+            except:
+                print('error handling inchi:', value["metadata"]["inchi"])
+                mol = 0
+        
+        if "smiles" in value or mol == 0:  # Smiles but no InChikey or inchi handling failed
             keys.append(key) 
-            molecules.append(Chem.MolFromSmiles(value["smiles"]))
-        else:
+            try:
+                mol = Chem.MolFromSmiles(value["smiles"])
+            except:
+                print('error handling smiles:', value["smiles"])
+                mol = 0
+        if mol == 0 or mol == 1:
             print("No smiles found for spectra ", key, ".")
-            molecules.append(Chem.MolFromSmiles("H20")) # Just have some water when you get stuck
+            mol = Chem.MolFromSmiles("H20") # Just have some water when you get stuck
             exclude_IDs.append(int(value["id"]))
+        molecules.append(mol)   
         
     fingerprints = []
     for i in range(len(molecules)):
