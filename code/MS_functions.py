@@ -814,6 +814,32 @@ def create_MS_documents(spectra,
     return MS_documents, MS_documents_intensity, spectra_metadata
 
 
+def mol_converter(mol_input, input_type, output_type, method = 'openbabel'):
+    """ Convert molecular representations using openbabel (or RDkit). E.g. smiles to inchi,
+    or inchi to inchikey.
+    
+    Args:
+    --------
+    mol_input: str
+        Input data, e.g. inchi or smiles.
+    input_type: str
+        Define input type (as named in openbabel). E.g. "smi"for smiles and "inchi" for inchi.
+    output_type: str
+        Define input type (as named in openbabel). E.g. "smi"for smiles and "inchi" for inchi.
+    """
+    conv = ob.OBConversion()
+    conv.SetInAndOutFormats(input_type, output_type)
+    mol = ob.OBMol()
+    try:
+        conv.ReadString(mol, mol_input)
+        output = conv.WriteString(mol)
+    except:
+        print("error when converting...")
+        output = None
+        
+    return output
+
+
 def get_mol_fingerprints(spectra_dict, method = "daylight"):
     """ Calculate molecule fingerprints based on given inchi or smiles (using RDkit).
     
