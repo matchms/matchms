@@ -32,6 +32,9 @@ import pandas as pd
 
 from pyteomics import mgf
 
+from openbabel import openbabel as ob
+from openbabel import pybel
+
 from rdkit import DataStructs
 from rdkit import Chem
 from rdkit.Chem import Draw
@@ -291,6 +294,11 @@ class Spectrum(object):
         # TODO: now array is tranfered back to list (to be able to store as json later). Seems weird.
         losses_list = [(x[0], x[1]) for x in losses[keep_idx,:]]
         self.losses = losses_list      
+
+
+## --------------------------------------------------------------------------------------------------
+## ---------------------------- Spectrum processing functions ---------------------------------------
+## --------------------------------------------------------------------------------------------------
 
         
 def dict_to_spectrum(spectra_dict): 
@@ -826,18 +834,22 @@ def mol_converter(mol_input, input_type, output_type, method = 'openbabel'):
         Define input type (as named in openbabel). E.g. "smi"for smiles and "inchi" for inchi.
     output_type: str
         Define input type (as named in openbabel). E.g. "smi"for smiles and "inchi" for inchi.
+    method: str
+        Default is making use of 'openbabel'. Alternative option could be 'RDkit'. Not supported yet.
+        TODO: add RDkit as alternative ?
     """
-    conv = ob.OBConversion()
-    conv.SetInAndOutFormats(input_type, output_type)
-    mol = ob.OBMol()
-    try:
-        conv.ReadString(mol, mol_input)
-        output = conv.WriteString(mol)
-    except:
-        print("error when converting...")
-        output = None
-        
-    return output
+    if method == 'openbabel':
+        conv = ob.OBConversion()
+        conv.SetInAndOutFormats(input_type, output_type)
+        mol = ob.OBMol()
+        try:
+            conv.ReadString(mol, mol_input)
+            mol_output = conv.WriteString(mol)
+        except:
+            print("error when converting...")
+            mol_output = None
+            
+        return mol_output   
 
 
 def get_mol_fingerprints(spectra_dict, method = "daylight"):
