@@ -919,6 +919,7 @@ def find_pubchem_match(compound_name,
     formula_search_depth: int
         How many of the most relevant formula matches to explore deeper. Default = 25.
     """
+    
     corrected = False
     inchi_pubchem = None
         
