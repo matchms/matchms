@@ -941,26 +941,28 @@ def find_pubchem_match(compound_name,
     if not corrected:
         if formula_search: # Do additional search on Pubchem with the formula
             # Get formula from inchi
-            compound_formula = inchi.split('InChI=')[1].split('/')[1]
-            
-            # Search formula on Pubchem
-            sids_pubchem = pcp.get_sids(compound_formula, 'formula', listkey_count = formula_search_depth)
-            print("Found at least", len(sids_pubchem), "compounds with formula", compound_formula,"on pubchem.")
-
-            results_pubchem = []
-            for sid in sids_pubchem:
-                result = pcp.Compound.from_cid(sid['CID'])
-                results_pubchem.append(result)
+            inchi_parts = inchi.split('InChI=')[1].split('/')
+            if len(inchi_parts) >= min_agreement:
+                compound_formula = inchi_parts[1]
                 
-            for result in results_pubchem:
-                inchi_pubchem = '"' + result.inchi + '"'
-
-                if likely_inchi_match(inchi, inchi_pubchem, min_agreement = min_agreement):
-                    print("--> FOUND MATCHING COMPOUND ON PUBCHEM.")
-                    print("Inchi ( input ): " + inchi)
-                    print("Inchi (pubchem): " + inchi_pubchem + "\n")
-                    corrected = True
-                    break
+                # Search formula on Pubchem
+                sids_pubchem = pcp.get_sids(compound_formula, 'formula', listkey_count = formula_search_depth)
+                print("Found at least", len(sids_pubchem), "compounds with formula", compound_formula,"on pubchem.")
+    
+                results_pubchem = []
+                for sid in sids_pubchem:
+                    result = pcp.Compound.from_cid(sid['CID'])
+                    results_pubchem.append(result)
+                    
+                for result in results_pubchem:
+                    inchi_pubchem = '"' + result.inchi + '"'
+    
+                    if likely_inchi_match(inchi, inchi_pubchem, min_agreement = min_agreement):
+                        print("--> FOUND MATCHING COMPOUND ON PUBCHEM.")
+                        print("Inchi ( input ): " + inchi)
+                        print("Inchi (pubchem): " + inchi_pubchem + "\n")
+                        corrected = True
+                        break
     
     if not corrected:    
         inchi_pubchem = None
