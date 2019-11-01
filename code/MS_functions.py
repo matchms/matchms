@@ -877,9 +877,13 @@ def likely_inchi_match(inchi_1, inchi_2, min_agreement = 3):
     
     agreement = 0
     
+    # Remove spaces and '"' to account for different notations
+    inchi_1 = inchi_1.replace('"', '').replace(' ', '')
+    inchi_2 = inchi_2.replace('"', '').replace(' ', '')
+    
     # Split inchi in parts. And ignore '-' to account for defective inchi.
-    inchi_1_parts = inchi_1.replace('-', '').replace(' ', '').split('/')
-    inchi_2_parts = inchi_2.replace('-', '').replace(' ', '').split('/')
+    inchi_1_parts = inchi_1.replace('-', '').split('/')
+    inchi_2_parts = inchi_2.replace('-', '').split('/')
     
     # Check if both inchi have sufficient parts (seperated by '/')
     if len(inchi_1_parts) >= min_agreement and len(inchi_2_parts) >= min_agreement:
