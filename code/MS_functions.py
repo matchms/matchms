@@ -1022,16 +1022,16 @@ def find_pubchem_match(compound_name,
             match_inchi = likely_inchi_match(inchi, inchi_pubchem, min_agreement = min_inchi_match)
         if inchikey is not None:
             match_inchikey = likely_inchikey_match(inchikey, inchikey_pubchem, min_agreement = min_inchikey_match)
-            
-            if operate(match_inchi, match_inchikey): # found match for inchi and/or inchikey (depends on mode = 'and'/'or')
-                print("--> FOUND MATCHING COMPOUND ON PUBCHEM.")
-                if inchi is not None:
-                    print("Inchi ( input ): " + inchi)
-                    print("Inchi (pubchem): " + inchi_pubchem + "\n")
-                if inchikey is not None:
-                    print("Inchikey ( input ): " + inchikey)
-                    print("Inchikey (pubchem): " + inchikey_pubchem + "\n")
-                break
+                     
+        if operate(match_inchi, match_inchikey): # found match for inchi and/or inchikey (depends on mode = 'and'/'or')
+            print("--> FOUND MATCHING COMPOUND ON PUBCHEM.")
+            if inchi is not None:
+                print("Inchi ( input ): " + inchi)
+                print("Inchi (pubchem): " + inchi_pubchem + "\n")
+            if inchikey is not None:
+                print("Inchikey ( input ): " + inchikey)
+                print("Inchikey (pubchem): " + inchikey_pubchem + "\n")
+            break
             
     if not operate(match_inchi, match_inchikey):
         if inchi is not None \
@@ -1073,7 +1073,14 @@ def find_pubchem_match(compound_name,
     
     if not operate(match_inchi, match_inchikey):    
         inchi_pubchem = None
-        print("No matches found. \n")
+        inchikey_pubchem = None
+        
+        if inchi is not None and inchikey is not None:
+            print("No matches found for inchi", inchi, mode, " inchikey", inchikey, "\n")
+        elif inchikey is None:
+            print("No matches found for inchi", inchi, "\n")
+        else:
+            print("No matches found for inchikey", inchikey, "\n")
     
     return inchi_pubchem, inchikey_pubchem
 
