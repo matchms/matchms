@@ -952,8 +952,11 @@ def find_pubchem_match(compound_name,
                        name_search_depth = 10,
                        formula_search = False,
                        formula_search_depth = 25):
-    """ Search pubmed for compounds based on name.
-    Than check if inchi can be matched to (defective) input inchi.
+    """ Searches pubmed for compounds based on name.
+    Then check if inchi and/or inchikey can be matched to (defective) input inchi and/or inchikey.
+    
+    In case no matches are found: For formula_search = True, the search will continue based on the
+    formula extracted from the inchi. 
     
     Outputs found inchi and found inchikey (will be None if none is found).
     
@@ -965,6 +968,10 @@ def find_pubchem_match(compound_name,
         Inchi (correct, or defective...). Set to None to ignore.
     inchikey: str
         Inchikey (correct, or defective...). Set to None to ignore.
+    mode: str
+        Determines the final matching criteria (can be se to 'and' or 'or'). 
+        For 'and' and given inchi AND inchikey, a match has to be a match with inchi AND inchikey.
+        For 'or' it will be sufficient to find a good enough match with either inchi OR inchikey.
     min_inchi_match: int
         Minimum number of first parts that MUST be a match between both input inchi to finally consider 
         it a match. Default is min_inchi_match=3.
@@ -1025,30 +1032,6 @@ def find_pubchem_match(compound_name,
                     print("Inchikey ( input ): " + inchikey)
                     print("Inchikey (pubchem): " + inchikey_pubchem + "\n")
                 break
-
-    """if inchi is not None:
-        # Loop through first 'name_search_depth' results found on pubchem. Stop once first match is found.
-        for result in results_pubchem:
-            inchi_pubchem = '"' + result.inchi + '"'
-    
-            if likely_inchi_match(inchi, inchi_pubchem, min_agreement = min_inchi_match):
-                print("--> FOUND MATCHING COMPOUND ON PUBCHEM.")
-                print("Inchi ( input ): " + inchi)
-                print("Inchi (pubchem): " + inchi_pubchem + "\n")
-                match_inchi = True
-                break
-            
-    if inchikey is not None:
-        # Loop through first 'name_search_depth' results found on pubchem. Stop once first match is found.
-        for result in results_pubchem:
-            inchikey_pubchem = result.inchikey
-    
-            if likely_inchikey_match(inchikey, inchikey_pubchem, min_agreement = min_inchikey_match):
-                print("--> FOUND MATCHING COMPOUND ON PUBCHEM.")
-                print("Inchikey ( input ): " + inchikey)
-                print("Inchikey (pubchem): " + inchikey_pubchem + "\n")
-                match_inchikey = True
-                break"""
             
     if not operate(match_inchi, match_inchikey):
         if inchi is not None \
@@ -1087,13 +1070,6 @@ def find_pubchem_match(compound_name,
                             print("Inchikey ( input ): " + inchikey)
                             print("Inchikey (pubchem): " + inchikey_pubchem + "\n")
                         break
-    
-                    """if likely_inchi_match(inchi, inchi_pubchem, min_agreement = min_inchi_match):
-                        print("--> FOUND MATCHING COMPOUND ON PUBCHEM.")
-                        print("Inchi ( input ): " + inchi)
-                        print("Inchi (pubchem): " + inchi_pubchem + "\n")
-                        match_inchi = True
-                        break"""
     
     if not operate(match_inchi, match_inchikey):    
         inchi_pubchem = None
