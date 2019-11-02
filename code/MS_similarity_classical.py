@@ -17,11 +17,63 @@
 
 import numpy as np
 from scipy.optimize import linear_sum_assignment
+from scipy import spatial
 
 from rdkit import DataStructs
 
 # Add multi core parallelization
 from concurrent.futures import ThreadPoolExecutor, as_completed
+
+
+
+def mol_sim_matrix(fingerprints1,
+                   fingerprints2,
+                   method = 'cosine',
+                  filename = None):
+    """ Create Matrix of all molecular similarities (based on molecular fingerprints).
+    If filename is not None, the result will be saved as npy.
+    To create molecular fingerprints see mol_fingerprints() function from MS_functions.
+    
+    Args:
+    --------
+    fingerprints1: list
+        List of molecular fingerprints (generated based on openbabel).
+    fingerprints2: list
+        List of molecular fingerprints (generated based on openbabel).
+    method: str
+        Method to compare molecular fingerprints. Can be 'cosine', 'dice' etc. (see scipy.spatial.distance.cdist).
+    filename: str
+        Filename to save results to. OR: If file already exists it will be loaded instead.
+    """  
+    
+    if filename is not None:
+        try: 
+            molecular_similarities = np.load(filename)
+            print("Molecular similarity scores found and loaded.")
+            collect_new_data = False
+                
+        except FileNotFoundError: 
+            print("Could not find file ", filename) 
+            print("Molecular scores will be calculated from scratch.")
+            collect_new_data = True
+    
+    if collect_new_data == True:             
+        
+        # Implement alternative way using 
+        fingerprints_arr1 = np.array([fpt.fp for fpt in fingerprints1])
+        fingerprints_arr2 = np.array([fpt.fp for fpt in fingerprints2])
+        molecular_similarities = spatial.distance.cdist(fingerprints_arr1,
+                                                      fingerprints_arr2, 
+                                                      method)
+    
+        if filename is not None:
+            np.save(filename, molecular_similarities)
+
+    return molecular_similarities
+
+
+
+
 
 ## --------------------------------------------------------------------------------------------------
 ## ---------------------------- classical spectra similarity measures -------------------------------
