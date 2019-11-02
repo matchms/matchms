@@ -1085,9 +1085,83 @@ def find_pubchem_match(compound_name,
     return inchi_pubchem, inchikey_pubchem
 
 
-
-def get_mol_fingerprints(spectra_dict, method = "daylight"):
+def mol_fingerprints(spectra_dict, 
+                     method = "ecfp6"):
     """ Calculate molecule fingerprints based on given inchi or smiles (using RDkit).
+    
+    Output: exclude_IDs list with spectra that had no inchi or smiles or problems when deriving fingerprint
+    
+    Args:
+    --------
+    spectra_dict: dict
+        Dictionary containing all spectrum objects information (peaks, losses, metadata...).
+    method: str
+        Determine method for deriving molecular fingerprints. Supported choices from openbabel are 'ecfp0',
+        'ecfp10', 'ecfp2', 'ecfp4', 'ecfp6', 'ecfp8', 'fp2', 'fp3', 'fp4', 'maccs'. (see "pybel.fps")
+    """
+    
+    # If spectra is given as a dictionary
+    keys = []
+    exclude_IDs = []
+    molecules = []
+    
+    for key, value in spectra_dict.items():
+        mol = 0
+        if "inchi" in value["metadata"] and len(value["metadata"]["inchi"]) > 12:
+            inchi = value["metadata"]["inchi"]
+            if inchi.split('InChI=')[-1][0] == '1':  # only select right format
+                mol = 1
+                keys.append(key) 
+                try:
+                    mol = pybel.readstring("inchi", inchi) 
+                except:
+                    print(key, ' ---- ')
+                    print('error handling inchi:', inchi)
+                    mol = 0
+
+        if "smiles" in value and mol == 0:  # Smiles but no InChikey or inchi handling failed
+            keys.append(key) 
+            smiles = value["metadata"]["smiles"]
+            if len(smiles) > 5:
+                try:
+                    mol = pybel.readstring("smi", smiles)
+                    if len(mol.atoms)>2:
+                        print('Molecule found using smiles:', smiles)
+                except:
+                    print('error handling smiles:', smiles)
+                    mol = 0
+    
+        if mol == 0: #or mol == 1:
+            print("No smiles found for spectra ", key, ".")
+            mol = ''
+            molecules.append(mol)
+            exclude_IDs.append(int(value["id"]))
+        else:
+            #mol = ''
+            molecules.append(mol)
+
+        
+    fingerprints = []
+    for i in range(len(molecules)):
+        if molecules[i] is None \
+        or molecules[i] == '':
+            print("Problem with molecule " + str(spectra_dict[keys[i]]["id"]))
+            fp = 0
+        else:
+            try:
+                fp = molecules[i].calcfp(method)
+            except:
+                fp = 0
+
+        fingerprints.append(fp)
+    
+    return molecules, fingerprints, exclude_IDs
+
+
+""" 
+old function using RDkit
+def get_mol_fingerprints(spectra_dict, method = "daylight"):
+    "" Calculate molecule fingerprints based on given inchi or smiles (using RDkit).
     
     Output: exclude_IDs list with spectra that had no inchi or smiles or problems when deriving fingerprint
     
@@ -1098,7 +1172,7 @@ def get_mol_fingerprints(spectra_dict, method = "daylight"):
     method: str
         Determine method for deriving molecular fingerprints. Supported choices are 'daylight', 
         'morgan1', 'morgan2', 'morgan3'.
-    """
+    ""
     
     # If spectra is given as a dictionary
     keys = []
@@ -1152,6 +1226,8 @@ def get_mol_fingerprints(spectra_dict, method = "daylight"):
         fingerprints.append(fp)
     
     return molecules, fingerprints, exclude_IDs
+"""    
+    
 
 
 # TODO: this function is not needed anymore? 
