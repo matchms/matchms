@@ -20,7 +20,6 @@ from scipy.optimize import linear_sum_assignment
 from scipy import spatial
 
 import numba
-#from rdkit import DataStructs
 
 # Add multi core parallelization
 from concurrent.futures import ThreadPoolExecutor #, as_completed
