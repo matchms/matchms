@@ -23,7 +23,8 @@ import numba
 #from rdkit import DataStructs
 
 # Add multi core parallelization
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor #, as_completed
+#TODO better use joblib ? or dask?
 
 
 
@@ -242,14 +243,21 @@ def cosine_matrix_fast(spectra,
     return 1 - Cdist
 
 
-def cosine_matrix(spectra, 
+
+def cosine_score_matrix(spectra, 
                   tol, 
-                  max_mz, 
-                  min_mz = 0, 
-                  min_intens = 0.01,
+                  max_mz = 1000.0, 
+                  #min_mz = 0, 
+                  min_intens = 0,
+                  mass_shifting = False,
+                  method='hungarian',
+                  num_workers = 4,
                   filename = None,
-                  num_workers = 4):
-    """ Create Matrix of all cosine similarities.
+                  safety_points = None):
+    """ Create Matrix of all modified cosine similarities.
+    Takes some time to calculate, so better only do it once and save as npy.
+    
+    Now implemented: parallelization of code using concurrent.futures and numba options.
     
     spectra: list
         List of spectra (of Spectrum class)
@@ -257,31 +265,42 @@ def cosine_matrix(spectra,
         Tolerance to still count peaks a match (mz +- tolerance).
     max_mz: float
         Maxium m-z mass to take into account
-    min_mz: float 
-        Minimum m-z mass to take into account
-#    min_match: int
-#        Minimum numbe of peaks that need to be matches. Otherwise score will be set to 0
+    #min_mz: float 
+    #    Minimum m-z mass to take into account
     min_intens: float
         Sets the minimum relative intensity peaks must have to be looked at for potential matches.
+    mass_shifting: bool
+        Set to 'True' if mass difference between spectra should be accounted for --> "modified cosine" score
+        Set to 'False'  for --> "normal cosine" score
+    method: 'greedy', 'greedy-numba', 'hungarian'
+        "greedy" will use Simon's molnet scoring which is faster than hungarian, but not 100% accurate
+        regarding the weighted bipartite matching problem.
+        "hungarian" will use the Hungarian algorithm, which is more accurate. Since its slower, numba
+        is used here to compile in time.
+        "greedy-numba" will use a (partly) numba compiled version of greedy. Much faster, but needs numba.
+    num_workers: int
+        Number of threads to use for calculation. 
     filename: str/ None
         Filename to look for existing npy-file with molent matrix. Or, if not found, to 
         use to save the newly calculated matrix.
-    num_workers: int
-        Number of threads to use for calculation.
-    """  
+    safety_points: int
+        Number of safety points, i.e. number of times the modcos-matrix is saved during process.
+        Set to 'None' to avoid saving matrix on the way.
+    """   
     if filename is not None:
+        # Try loading saved data
         try: 
-            cosine_sim = np.load(filename)
-            cosine_matches = np.load(filename[:-4]+ "_matches.npy")
+            modcos_sim = np.load(filename)
+            modcos_matches = np.load(filename[:-4]+ "_matches.npy")
+            
             # Check if matrix was calculated to the end:
-            diagonal = cosine_sim.diagonal()
+            diagonal = modcos_sim.diagonal()
             if np.min(diagonal) == 0:
                 print("Uncomplete cosine similarity scores found and loaded.")
                 missing_scores = np.where(diagonal == 0)[0].astype(int)     
                 print("Missing cosine scores will be calculated.")
                 counter_total = int((len(spectra)**2)/2)
                 counter_init = counter_total - np.sum(len(spectra) - missing_scores)
-
                 print("About ", 100*(counter_init/counter_total),"% of the values already completed.")
                 collect_new_data = True
             else:    
@@ -292,115 +311,10 @@ def cosine_matrix(spectra,
                 
         except FileNotFoundError: 
             print("Could not find file ", filename) 
-            print("Cosine scores will be calculated from scratch.")
-            collect_new_data = True
-            missing_scores = np.arange(0,len(spectra))
-            counter_init = 0
-    else:
-        print("No filename given.")    
-        print("Cosine scores will be calculated from scratch.")
-        collect_new_data = True
-        counter_init = 0
-    
-    if collect_new_data == True:  
-        if counter_init == 0:
-            cosine_sim = np.zeros((len(spectra), len(spectra)))
-            cosine_matches = np.zeros((len(spectra), len(spectra)))
-
-        counter = counter_init
-        print("Calculate pairwise cosine scores by ", num_workers, "number of workers.")
-        for i in missing_scores: #range(n_start, len(spectra)):
-            parameter_collection = []    
-            for j in range(i,len(spectra)):
-                parameter_collection.append([spectra[i], spectra[j], i, j, tol, min_intens, counter])
-                counter += 1
-
-            # Create a pool of processes. For instance one for each core in your machine.
-            cosine_pairs = []
-            with ThreadPoolExecutor(max_workers=num_workers) as executor:
-                futures = [executor.submit(cosine_pair, X, len(spectra)) for X in parameter_collection]
-                cosine_pairs.append(futures)
-             
-            for m, future in enumerate(cosine_pairs[0]):
-                spec_i, spec_j, ind_i, ind_j, _, _, counting = parameter_collection[m]
-                cosine_sim[ind_i,ind_j] = future.result()[0]
-                cosine_matches[ind_i,ind_j] = future.result()[1]
-
-        # Symmetric matrix --> fill        
-        for i in range(1,len(spectra)):
-            for j in range(i):  
-                cosine_sim[i,j] = cosine_sim[j,i]      
-                cosine_matches[i,j] = cosine_matches[j,i]
-    
-        if filename is not None:
-            np.save(filename, cosine_sim)
-            np.save(filename[:-4]+ "_matches.npy", cosine_matches)
-            
-    return cosine_sim, cosine_matches
-
-
-def modcos_matrix(spectra, 
-                  tol, 
-                  max_mz = 1000.0, 
-                  min_mz = 0, 
-                  min_intens = 0,
-                  filename = None,
-                  method='hungarian',
-                  num_workers = 4,
-                  safety_points = 10):
-    """ Create Matrix of all modified cosine similarities.
-    Takes some time to calculate, so better only do it once and save as npy.
-    Now implemented: parallelization of code using concurrent.futures.
-    
-    spectra: list
-        List of spectra (of Spectrum class)
-    tol: float
-        Tolerance to still count peaks a match (mz +- tolerance).
-    max_mz: float
-        Maxium m-z mass to take into account
-    min_mz: float 
-        Minimum m-z mass to take into account
-#    min_match: int
-#        Minimum numbe of peaks that need to be matches. Otherwise score will be set to 0
-    min_intens: float
-        Sets the minimum relative intensity peaks must have to be looked at for potential matches.
-    filename: str/ None
-        Filename to look for existing npy-file with molent matrix. Or, if not found, to 
-        use to save the newly calculated matrix.
-    method: 'greedy', 'greedy-numba', 'hungarian'
-        "greedy" will use Simon's molnet scoring which is faster than hungarian, but not 100% accurate
-        regarding the weighted bipartite matching problem.
-        "hungarian" will use the Hungarian algorithm, which is more accurate. Since its slower, numba
-        is used here to compile in time.
-        "greedy-numba" will use a (partly) numba compiled version of greedy. Much faster, but needs numba.
-    num_workers: int
-        Number of threads to use for calculation. 
-    safety_points: int
-        Number of safety points, i.e. number of times the modcos-matrix is saved during process.
-    """   
-    if filename is not None:
-        try: 
-            modcos_sim = np.load(filename)
-            modcos_matches = np.load(filename[:-4]+ "_matches.npy")
-            # Check if matrix was calculated to the end:
-            diagonal = modcos_sim.diagonal()
-            if np.min(diagonal) == 0:
-                print("Uncomplete modified cosine similarity scores found and loaded.")
-                missing_scores = np.where(diagonal == 0)[0].astype(int)     
-                print("Missing modified cosine scores will be calculated.")
-                counter_total = int((len(spectra)**2)/2)
-                counter_init = counter_total - np.sum(len(spectra) - missing_scores)
-                print("About ", 100*(counter_init/counter_total),"% of the values already completed.")
-                collect_new_data = True
-            else:    
-                print("Complete modcos similarity scores found and loaded.")
-                missing_scores = []
-                counter_init = 0
-                collect_new_data = False
-                
-        except FileNotFoundError: 
-            print("Could not find file ", filename) 
-            print("Modified cosine scores will be calculated from scratch.")
+            if mass_shifting:
+                print("Modified cosine scores will be calculated from scratch.")
+            else:
+                print("Cosine scores will be calculated from scratch.")
             collect_new_data = True
             missing_scores = np.arange(0,len(spectra))
             counter_init = 0
@@ -415,14 +329,21 @@ def modcos_matrix(spectra,
             modcos_matches = np.zeros((len(spectra), len(spectra)))
 
         counter = counter_init
-        safety_save = int(((len(spectra)**2)/2)/safety_points)  # Save modcos-matrix along process
-        print("Calculate pairwise modified cosine scores by ", num_workers, "number of workers.")
+        if safety_points is not None:
+            safety_save = int(((len(spectra)**2)/2)/safety_points)  # Save modcos-matrix along process
+            
+        print("Calculate pairwise scores by ", num_workers, "number of workers.")
         for i in missing_scores: #range(n_start, len(spectra)):
             spec1 = np.array(spectra[i].peaks, dtype=float)
+            spec1 = spec1[spec1[:,0] > max_mz,:]
             parameter_collection = []    
             for j in range(i,len(spectra)):
                 spec2 = np.array(spectra[j].peaks, dtype=float)
-                mass_shift = spectra[i].parent_mz - spectra[j].parent_mz
+                spec2 = spec2[spec2[:,0] > max_mz,:]
+                if mass_shifting:
+                    mass_shift = spectra[i].parent_mz - spectra[j].parent_mz
+                else:
+                    mass_shift = None
                 parameter_collection.append([spec1, spec2, i, j, 
                                              mass_shift, tol, min_intens, 
                                              method, counter])
@@ -438,27 +359,29 @@ def modcos_matrix(spectra,
                 spec_i, spec_j, ind_i, ind_j, _, _, _, _, counting = parameter_collection[m]
                 modcos_sim[ind_i,ind_j] = future.result()[0]
                 modcos_matches[ind_i,ind_j] = future.result()[1]
-                if filename is not None:
+                if filename is not None \
+                and safety_points is not None:
                     if (counting+1) % safety_save == 0:
                         np.save(filename[:-4]+ str(i), modcos_sim)
                         np.save(filename[:-4]+ "_matches.npy" + str(i), modcos_matches)
 
         # Symmetric matrix --> fill        
-        for i in range(1,len(spectra)):
+        for i in range(1, len(spectra)):
             for j in range(i):  
-                modcos_sim[i,j] = modcos_sim[j,i]    
-                modcos_matches[i,j] = modcos_matches[j,i] 
-    
+                modcos_sim[i, j] = modcos_sim[j, i]    
+                modcos_matches[i, j] = modcos_matches[j, i] 
+        
+         # Save final results 
         if filename is not None:
             np.save(filename, modcos_sim)
             np.save(filename[:-4]+ "_matches.npy", modcos_matches)
             
     return modcos_sim, modcos_matches
 
-
+"""
 def cosine_pair(X, len_spectra):
-    """ Single molnet pair calculation
-    """ 
+    "" Single molnet pair calculation
+    "" 
     spectra_i, spectra_j, i, j, mass_shift, tol, min_intens, counter = X
     cosine_pair, used_matches = cosine_score_greedy(spectra_i, 
                                                     spectra_j, 
@@ -471,7 +394,7 @@ def cosine_pair(X, len_spectra):
         print('\r', ' Calculated cosine for pair ', i, '--', j, '. ( ', np.round(200*(counter+1)/len_spectra**2, 2), ' % done).', end="")
 
     return cosine_pair, len(used_matches)
-
+"""
 
 def modcos_pair(X, len_spectra):
     """ Single molnet pair calculation
@@ -488,7 +411,9 @@ def modcos_pair(X, len_spectra):
                                                         min_intens = min_intens, 
                                                         use_numba = True)
     elif method == 'hungarian':
-        molnet_pair, used_matches = cosine_score_hungarian(spectra_i, spectra_j, tol, 0, min_intens = min_intens)
+        molnet_pair, used_matches = cosine_score_hungarian(spectra_i, spectra_j, 
+                                                        mass_shift, tol, 
+                                                        min_intens = min_intens)
     else:
         print("Given method does not exist...")
 
