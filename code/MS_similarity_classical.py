@@ -376,6 +376,10 @@ def cosine_score_matrix(spectra,
             
     return modcos_sim, modcos_matches
 
+
+
+
+
 """
 def cosine_pair(X, len_spectra):
     "" Single molnet pair calculation
@@ -457,7 +461,7 @@ def find_pairs_numba(spec1, spec2, tol, shift=0):
     
     for idx in range(len(spec1)):
         intensity = spec1[idx,1]
-        matches = np.where((np.abs(spec2[:,0] - spec1[idx,0]) <= tol))[0]
+        matches = np.where((np.abs(spec2[:,0] - spec1[idx,0] + shift) <= tol))[0]
         for match in matches:
             matching_pairs.append((idx, match, intensity*spec2[match][1]))
                   
