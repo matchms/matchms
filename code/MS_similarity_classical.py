@@ -26,7 +26,6 @@ from concurrent.futures import ThreadPoolExecutor #, as_completed
 #TODO better use joblib ? or dask?
 
 
-
 def mol_sim_matrix(fingerprints1,
                    fingerprints2,
                    method = 'cosine',
@@ -453,6 +452,21 @@ def one_hot_spectrum(spec,
 
 @numba.njit
 def find_pairs_numba(spec1, spec2, tol, shift=0):
+    
+    matching_pairs = []
+    
+    for idx in range(len(spec1)):
+        intensity = spec1[idx,1]
+        matches = np.where((np.abs(spec2[:,0] - spec1[idx,0]) <= tol))[0]
+        for match in matches:
+            matching_pairs.append((idx, match, intensity*spec2[match][1]))
+                  
+    return matching_pairs 
+
+"""
+@numba.njit
+def find_pairs_numba(spec1, spec2, tol, shift=0):
+    
     matching_pairs = []
     spec2lowpos = 0
     spec2length = len(spec2)
@@ -471,9 +485,14 @@ def find_pairs_numba(spec1, spec2, tol, shift=0):
             spec2pos += 1
         
     return matching_pairs 
+"""
 
 
 def find_pairs(spec1, spec2, tol, shift=0):
+    # Sort peaks and losses by m/z 
+    spec1 = spec1[np.lexsort((spec1[:,1], spec1[:,0])),:]
+    spec2 = spec2[np.lexsort((spec2[:,1], spec2[:,0])),:]
+    
     matching_pairs = []
     spec2lowpos = 0
     spec2length = len(spec2)
