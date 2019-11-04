@@ -335,11 +335,11 @@ def cosine_score_matrix(spectra,
         print("Calculate pairwise scores by ", num_workers, "number of workers.")
         for i in missing_scores: #range(n_start, len(spectra)):
             spec1 = np.array(spectra[i].peaks, dtype=float)
-            spec1 = spec1[spec1[:,0] > max_mz,:]
+            spec1 = spec1[spec1[:,0] < max_mz,:]
             parameter_collection = []    
             for j in range(i,len(spectra)):
                 spec2 = np.array(spectra[j].peaks, dtype=float)
-                spec2 = spec2[spec2[:,0] > max_mz,:]
+                spec2 = spec2[spec2[:,0] < max_mz,:]
                 if mass_shifting:
                     mass_shift = spectra[i].parent_mz - spectra[j].parent_mz
                 else:
