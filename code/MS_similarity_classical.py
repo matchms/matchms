@@ -67,8 +67,11 @@ def mol_sim_matrix(fingerprints1,
         molecular_similarities = 1 - spatial.distance.cdist(fingerprints_arr1,
                                                               fingerprints_arr2, 
                                                               method) 
+        print(20 * '--')
+        print("Succesfully calculated matrix containing all-vs-all molecular similarity values.")
         if filename is not None:
             np.save(filename, molecular_similarities)
+            print("Matrix was saved under:", filename)
 
     return molecular_similarities
 
