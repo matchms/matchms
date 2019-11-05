@@ -56,16 +56,17 @@ def mol_sim_matrix(fingerprints1,
             print("Could not find file ", filename) 
             print("Molecular scores will be calculated from scratch.")
             collect_new_data = True
+    else:
+        collect_new_data = True
     
-    if collect_new_data == True:             
-        
-        # Implement alternative way using 
+    if collect_new_data == True:                  
+        # Collect all finterprints
         fingerprints_arr1 = np.array([fpt.fp for fpt in fingerprints1])
         fingerprints_arr2 = np.array([fpt.fp for fpt in fingerprints2])
-        molecular_similarities = spatial.distance.cdist(fingerprints_arr1,
-                                                      fingerprints_arr2, 
-                                                      method)
-    
+        # Calculate all-vs-all similarity matrix (similarity here= 1-distance )
+        molecular_similarities = 1 - spatial.distance.cdist(fingerprints_arr1,
+                                                              fingerprints_arr2, 
+                                                              method) 
         if filename is not None:
             np.save(filename, molecular_similarities)
 
