@@ -626,7 +626,7 @@ def load_MS_data(path_data, path_json,
 
 def load_MGF_data(file_mgf, 
                  file_json = None,
-                 num_decimals,
+                 num_decimals = 2,
                  min_frag = 0.0, max_frag = 1000.0,
                  min_loss = 10.0, max_loss = 200.0,
                  min_intensity_perc = 0.0,
@@ -635,7 +635,8 @@ def load_MGF_data(file_mgf,
                  min_peaks = 10,
                  max_peaks = None,
                  peak_loss_words = ['peak_', 'loss_'],
-                 ignore_losses = False):        
+                 ignore_losses = False,
+                 create_docs = True):        
     """ Collect spectra from MGF file
     1) Importing MGF file - based on pyteomics parser.
     2) Filter spectra: can be based on mininum relative intensity or  based on 
@@ -678,6 +679,9 @@ def load_MGF_data(file_mgf,
         Maximum number of peaks to keep (Default = None).
     ignore_losses: bool
         If False: Calculate losses and create documents from both peaks and losses.
+    create_docs: bool.
+        If True create documents for all spectra (or load if present). Otherwise skip
+        this step.
     """
     
     spectra = []
@@ -694,18 +698,21 @@ def load_MGF_data(file_mgf,
             spectra = dict_to_spectrum(spectra_dict)
             collect_new_data = False
             
-            with open(file_json[:-4] + "txt", "r") as f:
-                for line in f:
-                    line = line.replace('"', '').replace("'", "").replace("[", "").replace("]", "").replace("\n", "")
-                    MS_documents.append(line.split(", "))
-                    
-            with open(file_json[:-5] + "_intensity.txt", "r") as f:
-                for line in f:
-                    line = line.replace("[", "").replace("]", "")
-                    MS_documents_intensity.append([int(x) for x in line.split(", ")])
+            if create_docs:
+                with open(file_json[:-4] + "txt", "r") as f:
+                    for line in f:
+                        line = line.replace('"', '').replace("'", "").replace("[", "").replace("]", "").replace("\n", "")
+                        MS_documents.append(line.split(", "))
+                        
+                with open(file_json[:-5] + "_intensity.txt", "r") as f:
+                    for line in f:
+                        line = line.replace("[", "").replace("]", "")
+                        MS_documents_intensity.append([int(x) for x in line.split(", ")])
                 
         except FileNotFoundError: 
+            print(20 * '--')
             print("Could not find file ", file_json) 
+            print(20 * '--')
             print("Data will be imported from ", file_mgf)
 
     # Read data from files if no pre-stored data is found:
@@ -751,10 +758,10 @@ def load_MGF_data(file_mgf,
                     print("Found empty spectra for ID: ", i)
             
         # Filter out spectra with few peaks -----------------------------------------------------
+        print(20 * '--')
         min_peaks_absolute = min_peaks
         num_spectra_initial = len(spectra)
-        spectra = [copy.deepcopy(x) for x in spectra if len(x.peaks) >= min_peaks_absolute]
-        print(20 * '--')
+        spectra = [copy.deepcopy(x) for x in spectra if len(x.peaks) >= min_peaks_absolute]  
         print("Take", len(spectra), "spectra out of", num_spectra_initial)
 
         # Check spectrum IDs
@@ -770,29 +777,36 @@ def load_MGF_data(file_mgf,
         for spec in spectra:
             id = spec.id
             spectra_dict[id] = spec.__dict__
-
-        # Create documents from peaks (and losses)
-        MS_documents, MS_documents_intensity, spectra_metadata = create_MS_documents(spectra, 
-                                                                                     num_decimals, 
-                                                                                     peak_loss_words, 
-                                                                                     min_loss, 
-                                                                                     max_loss,
-                                                                                     ignore_losses = ignore_losses)
+        
+        if create_docs:
+            # Create documents from peaks (and losses)
+            MS_documents, MS_documents_intensity, spectra_metadata = create_MS_documents(spectra, 
+                                                                                         num_decimals, 
+                                                                                         peak_loss_words, 
+                                                                                         min_loss, 
+                                                                                         max_loss,
+                                                                                         ignore_losses = ignore_losses)
 
         # Save collected data ----------------------------------------------------------------------
         if collect_new_data == True:
-            spectra_metadata.to_csv(file_json[:-5] + "_metadata.csv", index=False)
+            # Store spectra
+            print(20 * '--')
+            print("Saving spectra...")
+            spectra_metadata.to_csv(file_json[:-5] + "_metadata.csv", index=False)           
+            functions.dict_to_json(spectra_dict, file_json) 
             
-            functions.dict_to_json(spectra_dict, file_json)     
-            # Store documents
-            with open(file_json[:-4] + "txt", "w") as f:
-                for s in MS_documents:
-                    f.write(str(s) +"\n")
+            if create_docs:
+                # Store documents
+                print(20 * '--')
+                print("Saving documents...")
+                with open(file_json[:-4] + "txt", "w") as f:
+                    for s in MS_documents:
+                        f.write(str(s) +"\n")
+                        
+                with open(file_json[:-5] + "_intensity.txt", "w") as f:
+                    for s in MS_documents_intensity:
+                        f.write(str(s) +"\n")
                     
-            with open(file_json[:-5] + "_intensity.txt", "w") as f:
-                for s in MS_documents_intensity:
-                    f.write(str(s) +"\n")
-
     return spectra, spectra_dict, MS_documents, MS_documents_intensity, spectra_metadata
 
 
