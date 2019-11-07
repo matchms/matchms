@@ -626,7 +626,7 @@ def load_MS_data(path_data, path_json,
 
 def load_MGF_data(file_mgf, 
                  file_json = None,
-                 num_decimals = 3,
+                 num_decimals,
                  min_frag = 0.0, max_frag = 1000.0,
                  min_loss = 10.0, max_loss = 200.0,
                  min_intensity_perc = 0.0,
@@ -634,7 +634,8 @@ def load_MGF_data(file_mgf,
                  peaks_per_mz = 20/200,
                  min_peaks = 10,
                  max_peaks = None,
-                 peak_loss_words = ['peak_', 'loss_']):        
+                 peak_loss_words = ['peak_', 'loss_'],
+                 ignore_losses = False):        
     """ Collect spectra from MGF file
     1) Importing MGF file - based on pyteomics parser.
     2) Filter spectra: can be based on mininum relative intensity or  based on 
@@ -673,13 +674,10 @@ def load_MGF_data(file_mgf,
         parentmass. Formula is: int(min_peaks + peaks_per_mz * parentmass).
     min_peaks: int
         Minimum number of peaks to keep, unless less are present from the start (Default = 10).
-    merge_energies: bool
-        Merge close peaks or not (False | True, Default is True).
-    merge_ppm: int
-        Merge peaks if their m/z is <= 1e6*merge_ppm (Default = 10).
-    replace: 'max' or None
-        If peaks are merged, either the heighest intensity of both is taken ('max'), 
-        or their intensitites are added (None). 
+    max_peaks: int
+        Maximum number of peaks to keep (Default = None).
+    ignore_losses: bool
+        If False: Calculate losses and create documents from both peaks and losses.
     """
     
     spectra = []
@@ -739,10 +737,11 @@ def load_MGF_data(file_mgf,
                     
                     id = i #spec.spectrum_id
                     spectrum.read_spectrum_mgf(spec, id)
-                    spectrum.get_losses
+                    #spectrum.get_losses
         
                     # Calculate losses:
-                    if len(spectrum.peaks) >= min_peaks: 
+                    if len(spectrum.peaks) >= min_peaks \
+                    and not ignore_losses:
                         spectrum.get_losses()
                     
                     # Collect in form of list of spectrum objects
@@ -751,11 +750,12 @@ def load_MGF_data(file_mgf,
                 else:
                     print("Found empty spectra for ID: ", i)
             
-        # Filter out spectra with few peaks
+        # Filter out spectra with few peaks -----------------------------------------------------
         min_peaks_absolute = min_peaks
         num_spectra_initial = len(spectra)
         spectra = [copy.deepcopy(x) for x in spectra if len(x.peaks) >= min_peaks_absolute]
-        print("Take ", len(spectra), "spectra out of ", num_spectra_initial, ".")
+        print(20 * '--')
+        print("Take", len(spectra), "spectra out of", num_spectra_initial)
 
         # Check spectrum IDs
         ids = []
@@ -772,9 +772,12 @@ def load_MGF_data(file_mgf,
             spectra_dict[id] = spec.__dict__
 
         # Create documents from peaks (and losses)
-        MS_documents, MS_documents_intensity, spectra_metadata = create_MS_documents(spectra, num_decimals, 
-                                                                                             peak_loss_words, 
-                                                                                             min_loss, max_loss)
+        MS_documents, MS_documents_intensity, spectra_metadata = create_MS_documents(spectra, 
+                                                                                     num_decimals, 
+                                                                                     peak_loss_words, 
+                                                                                     min_loss, 
+                                                                                     max_loss,
+                                                                                     ignore_losses = ignore_losses)
 
         # Save collected data ----------------------------------------------------------------------
         if collect_new_data == True:
@@ -837,8 +840,8 @@ def create_MS_documents(spectra,
             if len(losses) > 0: 
                 keep_idx = np.where((losses[:,0] > min_loss) & (losses[:,0] < max_loss))[0]
                 losses = losses[keep_idx,:]
-            else:
-                print("No losses detected for: ", spec_id, spectrum.id)
+            #else:
+                #print("No losses detected for: ", spec_id, spectrum.id)
 
         peaks = np.array(spectrum.peaks)
         
