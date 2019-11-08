@@ -88,15 +88,17 @@ class Spectrum(object):
         If peaks are merged, either the heighest intensity of both is taken ('max'), 
         or their intensitites are added (None). 
     """
-    def __init__(self, min_frag = 0.0, max_frag = 1000.0,
-                 min_loss = 10.0, max_loss = 200.0,
+    def __init__(self, min_frag = 0.0, 
+                 max_frag = 1000.0,
+                 min_loss = 10.0, 
+                 max_loss = 200.0,
                  min_intensity_perc = 0.0,
                  exp_intensity_filter = 0.01,
-                 peaks_per_mz = 20/200,
                  min_peaks = 10,
                  max_peaks = None,
+                 aim_min_peak = None,
                  merge_energies = True,
-                 merge_ppm = 10,
+                 merge_ppm = 1,
                  replace = 'max'):
 
         self.id = []
@@ -125,7 +127,7 @@ class Spectrum(object):
             self.exp_intensity_filter = None
         else:
             self.exp_intensity_filter = exp_intensity_filter
-        self.peaks_per_mz = peaks_per_mz
+        self.aim_min_peak = aim_min_peak
         self.min_peaks = min_peaks
         self.max_peaks = max_peaks
         self.merge_energies = merge_energies
@@ -237,9 +239,14 @@ class Spectrum(object):
                             temp_intensity.append(intensity)
         
         peaks = list(zip(temp_mass, temp_intensity))
-        peaks = process_peaks(peaks, self.min_frag, self.max_frag,
-                              self.min_intensity_perc, self.exp_intensity_filter,
-                              self.min_peaks, self.max_peaks)
+        peaks = process_peaks(peaks, 
+                              self.min_frag, 
+                              self.max_frag,
+                              self.min_intensity_perc, 
+                              self.exp_intensity_filter,
+                              self.min_peaks, 
+                              self.max_peaks,
+                              self.aim_min_peak)
         
         self.peaks = peaks
         self.n_peaks = len(peaks)
@@ -286,9 +293,14 @@ class Spectrum(object):
 
         peaks = list(zip(spectrum_mgf['m/z array'], spectrum_mgf['intensity array']))
         if len(peaks) >= self.min_peaks:
-            peaks = process_peaks(peaks, self.min_frag, self.max_frag,
-                                  self.min_intensity_perc, self.exp_intensity_filter,
-                                  self.min_peaks, self.max_peaks)
+            peaks = process_peaks(peaks, 
+                                  self.min_frag, 
+                                  self.max_frag,
+                                  self.min_intensity_perc, 
+                                  self.exp_intensity_filter,
+                                  self.min_peaks, 
+                                  self.max_peaks,
+                                  self.aim_min_peak)
         
         self.peaks = peaks
         self.n_peaks = len(peaks)
@@ -376,13 +388,15 @@ def dict_to_spectrum(spectra_dict):
     return spectra
 
 
-def process_peaks(peaks, min_frag, max_frag, 
-                  min_intensity_perc,
-                  exp_intensity_filter,
-                  min_peaks,
-                  max_peaks = None):
-    """ Process peaks
-    
+def process_peaks(peaks, 
+                  min_frag = 0.0, 
+                  max_frag = 1000.0, 
+                  min_intensity_perc = 0,
+                  exp_intensity_filter = 0.01,
+                  min_peaks = 10,
+                  max_peaks = None,
+                  aim_min_peaks = None):
+    """ Processes peaks.   
     Remove peaks outside window min_frag <-> max_frag.
     Remove peaks with intensities < min_intensity_perc/100*max(intensities)
     
@@ -406,8 +420,16 @@ def process_peaks(peaks, min_frag, max_frag,
         Minimum number of peaks to keep, unless less are present from the start (Default = 10).
     max_peaks: int
         Maximum number of peaks to keep. Set to 'None' to ignore  (Default = 'None').    
-   
+    aim_min_peaks: int
+        Minium number of peaks to keep (if present) during exponential filtering.      
     """
+    # Fixed parameters:
+    num_bins = 100  # number of bins for histogram
+    min_peaks_for_exp_fit = 25 # With less peaks exponential fit doesn't make any sense.
+    
+    if aim_min_peaks is None: # aim_min_peaks is not given
+        aim_min_peaks = min_peaks
+            
     def exponential_func(x, a, b):
         return a*np.exp(-b*x)
    
@@ -416,45 +438,46 @@ def process_peaks(peaks, min_frag, max_frag,
         if peaks.shape[1] != 2:
             print("Peaks were given in unexpected format...")
     
+    # Remove peaks outside min_frag <-> max_frag window:
+    keep_idx = np.where((peaks[:,0] > min_frag) & (peaks[:,0] < max_frag))[0]
+    peaks = peaks[keep_idx,:]
+    
+    # Remove peaks based on relative intensity below min_intensity_perc/100 * max_intensity
     if min_intensity_perc > 0:
         intensity_thres = np.max(peaks[:,1]) * min_intensity_perc/100
         keep_idx = np.where((peaks[:,0] > min_frag) & (peaks[:,0] < max_frag) & (peaks[:,1] > intensity_thres))[0]
-        if (len(keep_idx) < min_peaks): 
-            # If not enough peaks selected, try again without intensity threshold
-            keep_idx2 = np.where((peaks[:,0] > min_frag) & (peaks[:,0] < max_frag))[0]
-            peaks = peaks[keep_idx2,:]
-        else:
+        if len(keep_idx) > min_peaks: 
             peaks = peaks[keep_idx,:]
-    else: 
-        keep_idx = np.where((peaks[:,0] > min_frag) & (peaks[:,0] < max_frag))[0]
-        peaks = peaks[keep_idx,:]
 
-    if (exp_intensity_filter is not None) and len(peaks) > 2*min_peaks:
-        # Fit exponential to peak intensity distribution 
-        num_bins = 100  # number of bins for histogram
+    # Fit exponential to peak intensity distribution
+    if (exp_intensity_filter is not None) and len(peaks) >= min_peaks_for_exp_fit: 
 
         # Ignore highest peak for further analysis 
         peaks2 = peaks.copy()
         peaks2[np.where(peaks2[:,1] == np.max(peaks2[:,1])),:] = 0
+        
+        # Create histogram
         hist, bins = np.histogram(peaks2[:,1], bins=num_bins)
-        start = np.where(hist == np.max(hist))[0][0]  # Take maximum intensity bin as starting point
+        offset = np.where(hist == np.max(hist))[0][0]  # Take maximum intensity bin as starting point
         last = int(num_bins/2)
-        x = bins[start:last]
-        y = hist[start:last]
+        x = bins[offset:last]
+        y = hist[offset:last]
+        # Try exponential fit:
         try:
             popt, pcov = curve_fit(exponential_func, x , y, p0=(peaks.shape[0], 1e-4)) 
-            threshold = -np.log(exp_intensity_filter)/popt[1]
+            lower_guess_offset = bins[max(0,offset-1)]
+            threshold = lower_guess_offset -np.log(1 - exp_intensity_filter)/popt[1]
         except RuntimeError:
-            print("RuntimeError for ", len(peaks), " peaks. Use mean intensity as threshold.")
-            threshold = np.mean(peaks2[:,1])
+            print("RuntimeError for ", len(peaks), " peaks. Use 1/2 mean intensity as threshold.")
+            threshold = np.mean(peaks2[:,1])/2
         except TypeError:
-            print("Unclear TypeError for ", len(peaks), " peaks. Use mean intensity as threshold.")
+            print("Unclear TypeError for ", len(peaks), " peaks. Use 1/2 mean intensity as threshold.")
             print(x, "and y: ", y)
-            threshold = np.mean(peaks2[:,1])
+            threshold = np.mean(peaks2[:,1])/2
 
         keep_idx = np.where(peaks[:,1] > threshold)[0]
-        if len(keep_idx) < min_peaks:
-            peaks = peaks[np.lexsort((peaks[:,0], peaks[:,1])),:][-min_peaks:]
+        if len(keep_idx) < aim_min_peaks:
+            peaks = peaks[np.lexsort((peaks[:,0], peaks[:,1])),:][-aim_min_peaks:]
         else:
             peaks = peaks[keep_idx, :]
                   
@@ -486,12 +509,14 @@ def load_MS_data(path_data, path_json,
                  min_loss = 10.0, max_loss = 200.0,
                  min_intensity_perc = 0.0,
                  exp_intensity_filter = 0.01,
-                 peaks_per_mz = 20/200,
+                 min_keep_peaks_0 = 10,
+                 min_keep_peaks_per_mz = 20/200,
                  min_peaks = 10,
                  max_peaks = None,
-                 merge_energies = True,
-                 merge_ppm = 10,
-                 replace = 'max',
+                 aim_min_peak = None,
+                 #merge_energies = False,
+                 #merge_ppm = 10,
+                 #replace = 'max',
                  peak_loss_words = ['peak_', 'loss_']):        
     """ Collect spectra from set of files
     Partly taken from ms2ldaviz.
@@ -540,22 +565,20 @@ def load_MS_data(path_data, path_json,
             # Show progress
             if (i+1) % 10 == 0 or i == len(spectra_files)-1:  
                 print('\r', ' Load spectrum ', i+1, ' of ', len(spectra_files), ' spectra.', end="")
-            
-            if peaks_per_mz != 0:
+
+            if min_keep_peaks_per_mz != 0\
+            and min_keep_peaks_0 > min_peaks:
                 # TODO: remove following BAD BAD hack:
                 # Import first (acutally only needed is PRECURSOR MASS)
                 spec = Spectrum(min_frag = min_frag, 
-                        max_frag = max_frag,
-                        min_loss = min_loss, 
-                        max_loss = max_loss,
-                        min_intensity_perc = min_intensity_perc,
-                        exp_intensity_filter = None,
-                        peaks_per_mz = peaks_per_mz,
-                        min_peaks = min_peaks,
-                        max_peaks = max_peaks,
-                        merge_energies = merge_energies,
-                        merge_ppm = merge_ppm,
-                        replace = replace)
+                                        max_frag = max_frag,
+                                        min_loss = min_loss, 
+                                        max_loss = max_loss,
+                                        min_intensity_perc = min_intensity_perc,
+                                        exp_intensity_filter = exp_intensity_filter,
+                                        min_peaks = min_peaks,
+                                        max_peaks = max_peaks,
+                                        aim_min_peak = aim_min_peak)
                 
                 # Load spectrum data from file:
                 spec.read_spectrum(path_data, filename, i)
@@ -564,22 +587,19 @@ def load_MS_data(path_data, path_json,
                 def min_peak_scaling(x, A, B):
                     return int(A + B * x)
                 
-                min_peaks_scaled = min_peak_scaling(spec.precursor_mz, min_peaks, peaks_per_mz)        
+                min_peaks_scaled = min_peak_scaling(spec.precursor_mz, min_keep_peaks_0, min_keep_peaks_per_mz)        
             else:
                 min_peaks_scaled = min_peaks
             
             spectrum = Spectrum(min_frag = min_frag, 
-                                max_frag = max_frag,
-                                min_loss = min_loss, 
-                                max_loss = max_loss,
-                                min_intensity_perc = min_intensity_perc,
-                                exp_intensity_filter = exp_intensity_filter,
-                                peaks_per_mz = peaks_per_mz,
-                                min_peaks = min_peaks_scaled,
-                                max_peaks = max_peaks,
-                                merge_energies = merge_energies,
-                                merge_ppm = merge_ppm,
-                                replace = replace)
+                                        max_frag = max_frag,
+                                        min_loss = min_loss, 
+                                        max_loss = max_loss,
+                                        min_intensity_perc = min_intensity_perc,
+                                        exp_intensity_filter = exp_intensity_filter,
+                                        min_peaks = min_peaks,
+                                        max_peaks = max_peaks,
+                                        aim_min_peak = min_peaks_scaled)
             
             # Load spectrum data from file:
             spectrum.read_spectrum(path_data, filename, i)
@@ -598,9 +618,10 @@ def load_MS_data(path_data, path_json,
             spectra.append(spectrum)
             spectra_dict[filename] = spectrum.__dict__
 
-        MS_documents, MS_documents_intensity, spectra_metadata = create_MS_documents(spectra, num_decimals, 
-                                                                     peak_loss_words, 
-                                                                    min_loss, max_loss)
+        MS_documents, MS_documents_intensity, spectra_metadata = create_MS_documents(spectra, 
+                                                                                     num_decimals, 
+                                                                                     peak_loss_words, 
+                                                                                     min_loss, max_loss)
         # Add filenames to metadata
         filenames = []
         for spectrum in spectra:
@@ -631,7 +652,8 @@ def load_MGF_data(file_mgf,
                  min_loss = 10.0, max_loss = 200.0,
                  min_intensity_perc = 0.0,
                  exp_intensity_filter = 0.01,
-                 peaks_per_mz = 20/200,
+                 min_keep_peaks_0 = 10,
+                 min_keep_peaks_per_mz = 20/200,
                  min_peaks = 10,
                  max_peaks = None,
                  peak_loss_words = ['peak_', 'loss_'],
@@ -665,14 +687,19 @@ def load_MGF_data(file_mgf,
         Upper limit of losses to take into account (Default = 200.0).
     min_intensity_perc: float
         Filter out peaks with intensities lower than the min_intensity_perc percentage
-        of the highest peak intensity (Default = 0.0, essentially meaning: OFF).
+        of the highest peak intensity. min_intensity_perc = 1.0 will lead to removal of
+        all peaks with intensities below 1% of the maximum intensity.
+        (Default = 0.0, essentially meaning: OFF).
     exp_intensity_filter: float
         Filter out peaks by applying an exponential fit to the intensity histogram.
         Intensity threshold will be set at where the exponential function will have dropped 
         to exp_intensity_filter (Default = 0.01).
-    peaks_per_mz: float
+    min_keep_peaks_0: float
+        Factor to describe constant of mininum peaks per spectrum with increasing
+        parentmass. Formula is: int(min_keep_peaks_0 + min_keep_peaks_per_mz * parentmass).
+    min_keep_peaks_per_mz: float
         Factor to describe linear increase of mininum peaks per spectrum with increasing
-        parentmass. Formula is: int(min_peaks + peaks_per_mz * parentmass).
+        parentmass. Formula is: int(min_keep_peaks_0 + min_keep_peaks_per_mz * parentmass).
     min_peaks: int
         Minimum number of peaks to keep, unless less are present from the start (Default = 10).
     max_peaks: int
@@ -688,6 +715,7 @@ def load_MGF_data(file_mgf,
     spectra_dict = {}
     MS_documents = []
     MS_documents_intensity = []
+    spectra_metadata = []
     collect_new_data = True
         
     if file_json is not None:
@@ -728,9 +756,10 @@ def load_MGF_data(file_mgf,
                 # Make conform with spectrum class as defined in MS_functions.py
                 #--------------------------------------------------------------------
 
-                # Scale the min_peak filter
+                # Peaks will only be removed if they do not bring the total number of peaks
+                # below min_peaks_scaled.
                 if spec is not None:
-                    min_peaks_scaled = min_peak_scaling(spec['params']['pepmass'][0], min_peaks, peaks_per_mz)
+                    min_peaks_scaled = min_peak_scaling(spec['params']['pepmass'][0], min_keep_peaks_0, min_keep_peaks_per_mz)   
                 
                     spectrum = Spectrum(min_frag = min_frag, 
                                         max_frag = max_frag,
@@ -738,9 +767,9 @@ def load_MGF_data(file_mgf,
                                         max_loss = max_loss,
                                         min_intensity_perc = min_intensity_perc,
                                         exp_intensity_filter = exp_intensity_filter,
-                                        peaks_per_mz = peaks_per_mz,
-                                        min_peaks = min_peaks_scaled,
-                                        max_peaks = max_peaks)
+                                        min_peaks = min_peaks,
+                                        max_peaks = max_peaks,
+                                        aim_min_peak = min_peaks_scaled)
                     
                     id = i #spec.spectrum_id
                     spectrum.read_spectrum_mgf(spec, id)
@@ -788,11 +817,13 @@ def load_MGF_data(file_mgf,
                                                                                          ignore_losses = ignore_losses)
 
         # Save collected data ----------------------------------------------------------------------
+        print()
         if collect_new_data == True:
             # Store spectra
             print(20 * '--')
             print("Saving spectra...")
-            spectra_metadata.to_csv(file_json[:-5] + "_metadata.csv", index=False)           
+            if create_docs:
+                spectra_metadata.to_csv(file_json[:-5] + "_metadata.csv", index=False)           
             functions.dict_to_json(spectra_dict, file_json) 
             
             if create_docs:
