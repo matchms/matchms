@@ -41,8 +41,12 @@ class EpochLogger(CallbackAny2Vec):
     def __init__(self, num_of_epochs):
         self.epoch = 0
         self.num_of_epochs = num_of_epochs
+        self.loss_to_be_subed = 0
     def on_epoch_end(self, model):
+        loss = model.get_latest_training_loss()
+        loss_now = loss - self.loss_to_be_subed
         print('\r', 'Epoch ', (self.epoch+1), ' of ', self.num_of_epochs, '.' , end="")
+        print('Loss after epoch {}: {}'.format(self.epoch, loss_now))
         self.epoch += 1
 
 
@@ -189,10 +193,15 @@ class SimilarityMeasures():
             # Set up GENSIM logging
             logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.WARNING)
             # Train word2vec model
-            self.model_word2vec = gensim.models.Word2Vec(self.corpus, size=size,
-                                                         window=window, min_count=min_count, 
-                                                         workers=workers, iter=iter,
-                                                         seed=42, callbacks=[epoch_logger])
+            self.model_word2vec = gensim.models.Word2Vec(self.corpus, 
+                                                         size=size,
+                                                         window=window, 
+                                                         min_count=min_count, 
+                                                         workers=workers, 
+                                                         iter=iter,
+                                                         seed=42, 
+                                                         compute_loss=True,
+                                                         callbacks=[epoch_logger])
             
             # Save model
             self.model_word2vec.save(file_model_word2vec)          
@@ -295,7 +304,7 @@ class SimilarityMeasures():
             True, False
         weight_method: str
             Select method for how to weigh the extra_weights...
-            'sqrt' - weight word vectors by sqrt or extra_weights
+            'sqrt' - weight word vectors by sqrt of extra_weights
             None
         tfidf_model: str
             Give filename if pre-defined tfidf model should be used. Otherwise set to None.
