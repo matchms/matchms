@@ -38,16 +38,27 @@ import helper_functions as functions
 class EpochLogger(CallbackAny2Vec):
     '''Callback to log information about training progress.
     Used to keep track of gensim model training (word2vec, lda...)'''
-    def __init__(self, num_of_epochs):
+    def __init__(self, num_of_epochs, iterations, filename):
         self.epoch = 0
         self.num_of_epochs = num_of_epochs
-        self.loss_to_be_subed = 0
+        self.iterations = iterations
+        self.filename = filename
+        self.loss = 0
+        #self.loss_to_be_subed = 0
     def on_epoch_end(self, model):
         loss = model.get_latest_training_loss()
-        loss_now = loss - self.loss_to_be_subed
+        #loss_now = loss - self.loss_to_be_subed
         print('\r', 'Epoch ', (self.epoch+1), ' of ', self.num_of_epochs, '.' , end="")
-        print('Loss after epoch {}: {}'.format(self.epoch, loss_now))
+        print('Change in loss after epoch {}: {}'.format(self.epoch+1, loss - self.loss))
         self.epoch += 1
+        self.loss = loss
+        
+        # Save model during training if specified in iterations list
+        if self.epoch in [int(x + np.sum(self.iterations[:i])) for i, x in enumerate(self.iterations)]:
+            if self.epoch < self.num_of_epochs:
+                filename = self.filename.split('.')[0] + '_TEMP_' + str(self.epoch) + '.model'
+                print('Saving model with name:', filename)
+                model.save(filename)
 
 
 class SimilarityMeasures():
@@ -156,7 +167,7 @@ class SimilarityMeasures():
         
     def build_model_word2vec(self, file_model_word2vec, size=100, 
                              window=50, min_count=1, workers=4, 
-                             iter=100, use_stored_model=True):
+                             iterations=100, use_stored_model=True):
         """ Build Word2Vec model (using gensim)
         
         Args:
@@ -172,13 +183,14 @@ class SimilarityMeasures():
             Only consider words that occur at least min_count times in the corpus (default =1).
         workers: int,
             Number of threads to run the training on (should not be more than number of cores/threads, default = 4).
-        iter: int,
-            Number of training iterations (default=100). 
+        iterations: int, list
+            Number of training iterations (default=100). If given as list training will loop through
+            all given iterations [iter0, iter1, ...] in the list and save the model after each completed
+            cycle. Temporary models will be saved using the name: file_model_word2ve + '_TEMP_#epoch.model'
         use_stored_model: bool,
             Load stored model if True, else train new model.
         """
-        
-        epoch_logger = EpochLogger(iter)
+
 
         # Check if model already exists and should be loaded
         if os.path.isfile(file_model_word2vec) and use_stored_model:   
@@ -192,7 +204,12 @@ class SimilarityMeasures():
         
             # Set up GENSIM logging
             logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.WARNING)
-            # Train word2vec model
+            
+            if not isinstance(iterations, list):
+                iterations = list(iterations)
+                
+            epoch_logger = EpochLogger(np.sum(iterations), iterations, file_model_word2vec)
+            iter = np.sum(iterations)
             self.model_word2vec = gensim.models.Word2Vec(self.corpus, 
                                                          size=size,
                                                          window=window, 
@@ -201,9 +218,9 @@ class SimilarityMeasures():
                                                          iter=iter,
                                                          seed=42, 
                                                          compute_loss=True,
-                                                         callbacks=[epoch_logger])
-            
-            # Save model
+                                                         callbacks=[epoch_logger])     
+            # Save final model
+            print('Saving model with name:', file_model_word2vec)
             self.model_word2vec.save(file_model_word2vec)          
             
             
