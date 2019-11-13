@@ -48,7 +48,7 @@ class EpochLogger(CallbackAny2Vec):
     def on_epoch_end(self, model):
         loss = model.get_latest_training_loss()
         #loss_now = loss - self.loss_to_be_subed
-        print('\r', 'Epoch ', (self.epoch+1), ' of ', self.num_of_epochs, '.' , end="")
+        print('\r' + ' Epoch ' + str(self.epoch+1) + ' of ' + str(self.num_of_epochs) + '.', end="")
         print('Change in loss after epoch {}: {}'.format(self.epoch+1, loss - self.loss))
         self.epoch += 1
         self.loss = loss
@@ -165,15 +165,27 @@ class SimilarityMeasures():
 ## ---------------------- Model building & training  ----------------------------
 ## ------------------------------------------------------------------------------
         
-    def build_model_word2vec(self, file_model_word2vec, size=100, 
-                             window=50, min_count=1, workers=4, 
-                             iterations=100, use_stored_model=True):
+    def build_model_word2vec(self, 
+                             file_model_word2vec, 
+                             sg=0, 
+                             negative = 5,
+                             size=100, 
+                             window=50, 
+                             min_count=1, 
+                             workers=4, 
+                             iterations=100, 
+                             use_stored_model=True):
         """ Build Word2Vec model (using gensim)
         
         Args:
         --------
         file_model_word2vec: str,
             Filename to save model (or load model if it exists under this name).
+        sg: int (0,1)
+            For sg = 0 --> CBOW model, for sg = 1 --> skip gram model (see Gensim documentation).
+        negative: int
+            from Gensim:  If > 0, negative sampling will be used, the int for negative specifies how many “noise words” 
+            should be drawn (usually between 5-20). If set to 0, no negative sampling is used.
         size: int,
             Dimensions of word vectors (default = 100) 
         window: int,
@@ -211,6 +223,8 @@ class SimilarityMeasures():
             epoch_logger = EpochLogger(np.sum(iterations), iterations, file_model_word2vec)
             iter = np.sum(iterations)
             self.model_word2vec = gensim.models.Word2Vec(self.corpus, 
+                                                         sg=sg,
+                                                         negative = negative,
                                                          size=size,
                                                          window=window, 
                                                          min_count=min_count, 
