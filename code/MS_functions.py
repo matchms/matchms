@@ -289,7 +289,7 @@ class Spectrum(object):
         if 'inchi' in self.metadata:
             self.inchi = self.metadata['inchi']
         if 'inchikey' in self.metadata:
-            self.inchikey = self.metadata['inchi']
+            self.inchikey = self.metadata['inchikey']
 
         peaks = list(zip(spectrum_mgf['m/z array'], spectrum_mgf['intensity array']))
         if len(peaks) >= self.min_peaks:
