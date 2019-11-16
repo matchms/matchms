@@ -875,7 +875,11 @@ def create_MS_documents(spectra,
     
     MS_documents = []
     MS_documents_intensity = []
-    spectra_metadata = pd.DataFrame(columns=['doc_ID', 'spectrum_ID', 'sub_ID', 'precursor_mz', 'parent_intensity', 'no_peaks_losses'])
+    
+    # Collect spectra metadata in pandas DataFrame
+    spectra_metadata = pd.DataFrame(columns=['doc_ID', 'gnps_ID', 'name', 'title',
+                                             'precursor_mz', 'num_peaks_losses', 
+                                             'inchi', 'inchikey', 'smiles', 'charge'])
     
     for spec_id, spectrum in enumerate(spectra):
         doc = []
@@ -909,7 +913,22 @@ def create_MS_documents(spectra,
 
         MS_documents.append(doc)
         MS_documents_intensity.append(doc_intensity)
-        spectra_metadata.loc[spec_id] = [spec_id, int(spectrum.id), 0, spectrum.precursor_mz, 1, len(doc)]
+
+        if 'spectrumid' in spectrum.metadata:
+            gnps_ID = spectrum.metadata['spectrumid']
+        else:
+            gnps_ID = 'n/a'
+        if 'name' in spectrum.metadata:
+            spec_name = spectrum.metadata['name']
+        else:
+            spec_name = 'n/a'
+        if 'title' in spectrum.metadata:
+            spec_title = spectrum.metadata['title']
+        else:
+            spec_title = 'n/a'
+        spectra_metadata.loc[spec_id] = [spec_id, gnps_ID, spec_name, spec_title,
+                            spectrum.precursor_mz, len(doc),
+                            spectrum.inchi, spectrum.inchikey, spectrum.smiles, spectrum.metadata['charge']]
          
     return MS_documents, MS_documents_intensity, spectra_metadata
 
