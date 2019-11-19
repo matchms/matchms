@@ -23,15 +23,15 @@ import json
 import math
 import pandas as pd
 
-##
+## ----------------------------------------------------------------------------
 ## ---------------- Document processing functions -----------------------------
-## 
+## ----------------------------------------------------------------------------
 
 def preprocess_document(corpus, stopwords, min_frequency = 2):
     """ Basic preprocessing of document words
     
     - Remove common words from stopwords and tokenize
-    - Only include words that appear at least *min_frequency* times. Default = 2
+    - Only include words that appear at least *min_frequency* times. 
     - Set words to lower case.
     
     Args:
@@ -41,11 +41,11 @@ def preprocess_document(corpus, stopwords, min_frequency = 2):
     stopwords: list
         List of stopwords to exclude from documents.
     min_frequency: int
-        Minimum total occurence of a word necessary to be included in processed corpus.
+        Minimum total occurence of a word necessary to be included in processed corpus. Default = 2
     """
     corpus_lowered = [[word.lower() for word in document if word not in stopwords] for document in corpus]
 
-    # Remove words that appear only once
+    # Count word occurences
     from collections import defaultdict
     
     frequency = defaultdict(int)
@@ -53,6 +53,7 @@ def preprocess_document(corpus, stopwords, min_frequency = 2):
         for word in list(set(document)):
             frequency[word] += 1
     
+    # Remove words that appear less than min_frequency times
     corpus_lowered = [[word for word in document if frequency[word] >= min_frequency] for document in corpus_lowered]
     
     return corpus_lowered, frequency

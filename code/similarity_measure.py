@@ -55,10 +55,10 @@ class EpochLogger(CallbackAny2Vec):
         
         # Save model during training if specified in iterations list
         if self.epoch in [int(x + np.sum(self.iterations[:i])) for i, x in enumerate(self.iterations)]:
-            if self.epoch < self.num_of_epochs:
-                filename = self.filename.split('.')[0] + '_TEMP_' + str(self.epoch) + '.model'
-                print('Saving model with name:', filename)
-                model.save(filename)
+            #if self.epoch < self.num_of_epochs:
+            filename = self.filename.split('.')[0] + '_iter_' + str(self.epoch) + '.model'
+            print('Saving model with name:', filename)
+            model.save(filename)
 
 
 class SimilarityMeasures():
@@ -210,7 +210,7 @@ class SimilarityMeasures():
             self.model_word2vec = gensim.models.Word2Vec.load(file_model_word2vec)
         else:
             if use_stored_model:
-                print("Stored word2vec model not found!")
+                print("No saved word2vec model found with given filename!")
             
             print("Calculating new word2vec model...")
         
@@ -233,9 +233,7 @@ class SimilarityMeasures():
                                                          seed=42, 
                                                          compute_loss=True,
                                                          callbacks=[epoch_logger])     
-            # Save final model
-            print('Saving model with name:', file_model_word2vec)
-            self.model_word2vec.save(file_model_word2vec)          
+         
             
             
     def build_model_lda(self, file_model_lda, num_of_topics=100, num_pass=4, 
