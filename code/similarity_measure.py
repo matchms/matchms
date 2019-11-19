@@ -174,7 +174,9 @@ class SimilarityMeasures():
                              min_count=1, 
                              workers=4, 
                              iterations=100, 
-                             use_stored_model=True):
+                             use_stored_model=True,
+                             learning_rate_initial = 0.025,
+                             learning_rate_decay = 0.00025):
         """ Build Word2Vec model (using gensim)
         
         Args:
@@ -222,6 +224,11 @@ class SimilarityMeasures():
                 
             epoch_logger = EpochLogger(np.sum(iterations), iterations, file_model_word2vec)
             iter = np.sum(iterations)
+            min_alpha = learning_rate_initial - iter * learning_rate_decay
+            if min_alpha < 0:
+                print("Warning! Number of iterations is too high for specified learning_rate decay.")
+                print("Learning_rate_decay will be set from", learning_rate_decay, "to", learning_rate_initial/iter)
+                min_alpha = 0
             self.model_word2vec = gensim.models.Word2Vec(self.corpus, 
                                                          sg=sg,
                                                          negative = negative,
@@ -230,6 +237,8 @@ class SimilarityMeasures():
                                                          min_count=min_count, 
                                                          workers=workers, 
                                                          iter=iter,
+                                                         alpha = learning_rate_initial,
+                                                         min_alpha = min_alpha, 
                                                          seed=42, 
                                                          compute_loss=True,
                                                          callbacks=[epoch_logger])     
