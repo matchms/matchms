@@ -1224,7 +1224,7 @@ def get_mol_fingerprints(spectra, method = "daylight", nBits = 1024):
     for i in range(len(molecules)):
         if molecules[i] is None:
             print("Problem with molecule from spectrum", i)
-            fp = np.zeros((nBits))
+            fp = np.zeros((nBits)).astype(int)
         else:
             if method == "daylight":
                 fp = Chem.RDKFingerprint(molecules[i], fpSize = nBits)
@@ -1244,60 +1244,6 @@ def get_mol_fingerprints(spectra, method = "daylight", nBits = 1024):
         fingerprints.append(fp)
     
     return fingerprints, exclude_IDs
-
-
-def get_mol_fingerprint(inchi, smiles, 
-                     type = "ecfp6"):
-    """ Calculate molecule fingerprints based on given inchi or smiles (using openbabel).
-    Preference will be given to fingerprint from inchi. Only if that won't work, smiles are used.
-    
-    Output: derived fingerprint.
-    
-    Args:
-    --------
-    inchi: str
-        Inchi. Set to None to ignore.
-    smiles: str
-        Smiles. Set to None to ignore.
-    type: str
-        Determine type of molecular fingerprint to be calculated. Supports choices from openbabel, e.g:
-        'ecfp0', 'ecfp10', 'ecfp2', 'ecfp4', 'ecfp6', 'ecfp8', 'fp2', 'fp3', 'fp4', 'maccs'. (see "pybel.fps").
-        Default is = "ecfp6".
-    """
-     
-    mol = None
-    if inchi is not None:
-        if len(inchi) > 12 \
-        and inchi.split('InChI=')[-1][0] == '1': # try to sort out empty and defective inchis
-            #mol = 1
-            try:
-                mol = pybel.readstring("inchi", inchi) 
-            except:
-                print('Error while handling inchi:', inchi)
-                mol = None
-
-    if smiles is not None and mol is None:  # Smiles but no InChikey or inchi handling failed
-        if len(smiles) > 5: # try to sort out empty and defective smiles
-            try:
-                mol = pybel.readstring("smi", smiles)
-                if len(mol.atoms)>2:
-                    print('Molecule found using smiles:', smiles)
-            except:
-                print('Error while handling smiles:', smiles)
-                mol = None
-        
-    if mol is None \
-    or mol == '':
-        print("Problem with molecule.")
-        fingerprint = None
-    else:
-        try:
-            fingerprint = mol.calcfp(type)
-        except:
-            print("Problem deriving molecular fingerprint.")
-            fingerprint = None
-    
-    return fingerprint
 
 
 
