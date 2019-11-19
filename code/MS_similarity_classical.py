@@ -29,7 +29,7 @@ from concurrent.futures import ThreadPoolExecutor #, as_completed
 def mol_sim_matrix(fingerprints1,
                    fingerprints2,
                    method = 'cosine',
-                   filename = None):
+                  filename = None):
     """ Create Matrix of all molecular similarities (based on molecular fingerprints).
     If filename is not None, the result will be saved as npy.
     To create molecular fingerprints see mol_fingerprints() function from MS_functions.
@@ -60,9 +60,9 @@ def mol_sim_matrix(fingerprints1,
         collect_new_data = True
     
     if collect_new_data == True:                  
-        # Collect all finterprints
-        fingerprints_arr1 = np.array([fpt.fp for fpt in fingerprints1])
-        fingerprints_arr2 = np.array([fpt.fp for fpt in fingerprints2])
+        # Create array of all finterprints
+        fingerprints_arr1 = np.array(fingerprints1)
+        fingerprints_arr2 = np.array(fingerprints2)
         # Calculate all-vs-all similarity matrix (similarity here= 1-distance )
         molecular_similarities = 1 - spatial.distance.cdist(fingerprints_arr1,
                                                               fingerprints_arr2, 
