@@ -29,7 +29,8 @@ from concurrent.futures import ThreadPoolExecutor #, as_completed
 def mol_sim_matrix(fingerprints1,
                    fingerprints2,
                    method = 'cosine',
-                  filename = None):
+                   filename = None,
+                   max_size = 1000):
     """ Create Matrix of all molecular similarities (based on molecular fingerprints).
     If filename is not None, the result will be saved as npy.
     To create molecular fingerprints see mol_fingerprints() function from MS_functions.
@@ -44,6 +45,9 @@ def mol_sim_matrix(fingerprints1,
         Method to compare molecular fingerprints. Can be 'cosine', 'dice' etc. (see scipy.spatial.distance.cdist).
     filename: str
         Filename to save results to. OR: If file already exists it will be loaded instead.
+    max_size: int
+        Maximum size of (sub) all-vs-all matrix to handle in one go. Will split up larger matrices into 
+        max_size x max_size matrices.
     """  
     
     if filename is not None:
@@ -63,10 +67,30 @@ def mol_sim_matrix(fingerprints1,
         # Create array of all finterprints
         fingerprints_arr1 = np.array(fingerprints1)
         fingerprints_arr2 = np.array(fingerprints2)
+        
         # Calculate all-vs-all similarity matrix (similarity here= 1-distance )
-        molecular_similarities = 1 - spatial.distance.cdist(fingerprints_arr1,
-                                                              fingerprints_arr2, 
-                                                              method) 
+        matrix_size = (fingerprints_arr1.shape[0], fingerprints_arr2.shape[0])
+        
+        molecular_similarities = np.zeros(matrix_size)
+        
+        # Split large matrices up into smaller ones to track progress
+        splits = int(np.ceil(matrix_size[0]/max_size) * np.ceil(matrix_size[1]/max_size))
+        count_splits = 0
+        
+        for i in range(int(np.ceil(matrix_size[0]/max_size))):
+            low1 = i*max_size
+            high1 = min((i+1) * max_size, matrix_size[0])
+            for j in range(int(np.ceil(matrix_size[1]/max_size))):
+                low2 = j*max_size
+                high2 = min((j+1) * max_size, matrix_size[1])
+                    
+                molecular_similarities[low1:high1, low2:high2] = 1 - spatial.distance.cdist(fingerprints_arr1[low1:high1],
+                                                                                          fingerprints_arr2[low2:high2], 
+                                                                                          method) 
+                # Track progress:
+                count_splits += 1
+                print('\r', "Calculated submatrix", count_splits, "out of", splits, end="")
+
         print(20 * '--')
         print("Succesfully calculated matrix containing all-vs-all molecular similarity values.")
         if filename is not None:
