@@ -113,8 +113,8 @@ class Spectrum(object):
         self.smiles = None
         self.inchi = None
         self.inchikey = None
-        self.fingerprint = None
-        self.fingerprint_type = None
+        #self.fingerprint = None
+        #self.fingerprint_type = None
         
         self.PROTON_MASS = 1.00727645199076
         
@@ -322,28 +322,6 @@ class Spectrum(object):
         losses_list = [(x[0], x[1]) for x in losses[keep_idx,:]]
         self.losses = losses_list      
         
-        
-    def get_fingerprint(self, type = "ecfp6"):
-        """ Calculate molecule fingerprint for spectrum object based on given inchi or smiles (using openbabel).
-        
-        Output: exclude_IDs list with spectra that had no inchi or smiles or problems when deriving fingerprint
-        
-        Args:
-        --------
-        type: str
-            Determine type of molecular fingerprint to be calculated. Supports choices from openbabel, e.g:
-            'ecfp0', 'ecfp10', 'ecfp2', 'ecfp4', 'ecfp6', 'ecfp8', 'fp2', 'fp3', 'fp4', 'maccs'. (see "pybel.fps").
-            Default is = "ecfp6".
-        """
-        self.fingerprint_type = type
-        
-        if self.inchi is not None \
-        or self.smiles is not None:   
-            self.fingerprint = get_mol_fingerprint(self.inchi, self.smiles, type = type)
-             
-        else: 
-            self.fingerprint = None
-            print("Spectrum object contains no inchi or smiles --> No molecular fingerprint can be derived.")
 
 
 
@@ -929,7 +907,7 @@ def create_MS_documents(spectra,
                         spectrum.inchi, spectrum.inchikey, spectrum.smiles, spectrum.metadata['charge']]]
     
     # Transfer metadata to pandas dataframe
-    spectra_metadata = pd.DataFrame(metadata_lst, columns=['doc_ID', 'gnps_ID', 'name', 'title',
+    spectra_metadata = pd.DataFrame(metadata_lst, columns=['ID', 'gnps_ID', 'name', 'title',
                                          'precursor_mz', 'num_peaks_losses', 
                                          'inchi', 'inchikey', 'smiles', 'charge'])
          
@@ -1193,6 +1171,79 @@ def find_pubchem_match(compound_name,
             print("No matches found for inchikey", inchikey, "\n")
     
     return inchi_pubchem, inchikey_pubchem
+
+
+def get_mol_fingerprints(spectra, method = "daylight", nBits = 1024):
+    """ Calculate molecule fingerprints based on given smiles.
+    (using RDkit)
+    
+    Output: exclude_IDs list with spectra that had no smiles or problems when deriving fingerprint
+    
+    Args:
+    --------
+    spectra: list of spectrum objects
+        List containing all spectrum objects which also includes peaks, losses, metadata.
+    method: str
+        Determine method for deriving molecular fingerprints. Supported choices are 'daylight', 
+        'morgan1', 'morgan2', 'morgan3'.
+    nBits: int
+        Dimension or number of bits of generated fingerprint. Default is nBits = 1024.
+    """
+    
+    # If spectra is given as a dictionary
+    print("---- (1) Generating RDkit molecules from inchi or smiles...")
+    exclude_IDs = []
+    molecules = []
+    
+    if not isinstance(spectra, list):
+        spectra = [spectra]
+    if not isinstance(spectra[0], Spectrum):
+        print("Wrong input: spectra must be list of Spectrum objects.")
+     
+    for i, spec in enumerate(spectra):
+        mol = None
+        if spec.inchi is not None:         
+            mol = Chem.MolFromInchi(spec.inchi.replace('"', ''), 
+                                   sanitize=True, 
+                                   removeHs=True, 
+                                   logLevel=None, 
+                                   treatWarningAsError=False)
+        if mol is None or mol.GetNumAtoms() < 3:
+            if spec.smiles is not None:  # Smiles but no InChikey OR too small fingerprint
+                mol = Chem.MolFromSmiles(spec.smiles)
+        if mol is None or mol.GetNumAtoms() < 3:
+            print("No proper molecule generated for spectrum", i)
+            #molecules.append(Chem.MolFromSmiles("H20")) # just have some water when you get stuck
+            mol = None
+            exclude_IDs.append(i)
+            
+        molecules.append(mol)   
+    
+    print("---- (2) Generating fingerprints from molecules...")
+    fingerprints = []
+    for i in range(len(molecules)):
+        if molecules[i] is None:
+            print("Problem with molecule from spectrum", i)
+            fp = np.zeros((nBits))
+        else:
+            if method == "daylight":
+                fp = Chem.RDKFingerprint(molecules[i], fpSize = nBits)
+                #fp = FingerprintMols.FingerprintMol(molecules[i], fpSize = nBits)
+            elif method == "morgan1":
+                fp = AllChem.GetMorganFingerprintAsBitVect(molecules[i], 1, nBits=nBits)
+                #p = AllChem.GetMorganFingerprint(molecules[i],1)
+            elif method == "morgan2":
+                fp = AllChem.GetMorganFingerprintAsBitVect(molecules[i], 2, nBits=nBits)
+                #fp = AllChem.GetMorganFingerprint(molecules[i],2)
+            elif method == "morgan3":
+                fp = AllChem.GetMorganFingerprintAsBitVect(molecules[i], 3, nBits=nBits)
+                #fp = AllChem.GetMorganFingerprint(molecules[i],3)
+            else:
+                print("Unkown fingerprint method given...")
+            fp = np.array(fp)
+        fingerprints.append(fp)
+    
+    return fingerprints, exclude_IDs
 
 
 def get_mol_fingerprint(inchi, smiles, 
