@@ -61,9 +61,15 @@ class EpochLogger(CallbackAny2Vec):
             model.save(filename)
 
 
+
+
+## ------------------------------------------------------------------------------
+## ---------------------- SimilarityMeasures class ------------------------------
+## ------------------------------------------------------------------------------
+
 class SimilarityMeasures():
     """ Class to run different similarity measure on sentence-like data.
-    Words can be representing all kind of things (Pfam domains for proteins, peaks for spectra etc.).
+    Words can be representing all kind of things (e.g. peaks for spectra).
     Documents lists of words.
     
     Similarity measuring methods:
@@ -161,9 +167,9 @@ class SimilarityMeasures():
         self.bow_corpus = [self.dictionary.doc2bow(text) for text in self.corpus]
 
 
-## ------------------------------------------------------------------------------
-## ---------------------- Model building & training  ----------------------------
-## ------------------------------------------------------------------------------
+    ## ------------------------------------------------------------------------------
+    ## ---------------------- Model building & training  ----------------------------
+    ## ------------------------------------------------------------------------------
         
     def build_model_word2vec(self, 
                              file_model_word2vec, 
@@ -315,9 +321,9 @@ class SimilarityMeasures():
             self.model_lsi.save(file_model_lsi)
 
  
-## ------------------------------------------------------------------------------
-## -------------------- Calculate document vectors ------------------------------
-## ------------------------------------------------------------------------------
+    ## ------------------------------------------------------------------------------
+    ## -------------------- Calculate document vectors ------------------------------
+    ## ------------------------------------------------------------------------------
             
     def get_vectors_centroid(self, method = 'update', 
                              extra_weights = None, 
@@ -325,7 +331,7 @@ class SimilarityMeasures():
                              weight_method = 'sqrt', 
                              tfidf_model = None,
                              extra_epochs = 10):
-        """ Calculate centroid vectors for all documents
+        """ Calculate centroid vectors for all documents of the library.
         
         Individual word vectors are weighted using tfidf (unless weighted=False).
         
@@ -465,9 +471,9 @@ class SimilarityMeasures():
         self.vectors_pca = pca.fit_transform(self.X_data)
 
 
-## ------------------------------------------------------------------------------
-## -------------------- Calculate similarities ----------------------------------
-## ------------------------------------------------------------------------------
+    ## ------------------------------------------------------------------------------
+    ## -------------------- Calculate similarities ----------------------------------
+    ## ------------------------------------------------------------------------------
         
     def get_centroid_similarity(self, num_hits=25, method='cosine'):
         """ Calculate centroid similarities(all-versus-all --> matrix)
