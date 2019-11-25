@@ -36,15 +36,17 @@ import pandas as pd
 from pyteomics import mgf
 
 from openbabel import openbabel as ob
-from openbabel import pybel
+#from openbabel import pybel
 
 import pubchempy as pcp
 
-from rdkit import DataStructs
+#from rdkit import DataStructs
 from rdkit import Chem
-from rdkit.Chem import Draw
-from rdkit.Chem.Fingerprints import FingerprintMols
+#from rdkit.Chem import Draw
+#from rdkit.Chem.Fingerprints import FingerprintMols
 from rdkit.Chem import AllChem
+
+from gensim import corpora
 
 
 
@@ -1246,173 +1248,99 @@ def get_mol_fingerprints(spectra, method = "daylight", nBits = 1024):
     return fingerprints, exclude_IDs
 
 
-
-# TODO: this function is not needed anymore? 
-def compare_molecule_selection(query_id, spectra_dict, MS_measure, 
-                               fingerprints,
-                               num_candidates = 25, 
-                               similarity_method = "centroid"):
-    """ Compare spectra-based similarity with smile-based similarity.
+def vectorize_spectra(spectra,
+                      MS_library,
+                      num_decimals = 2,
+                      min_loss = 5.0, 
+                      max_loss = 500.0,
+                      peak_loss_words = ['peak_', 'loss_'],
+                      intensities_as_weights = True,
+                     weight_method = 'sqrt'):
+    """ Calculate Spec2Vec vectors for all given spectra (independent of whether
+    they also a part of the MS_library).
     
     Args:
-    -------
-    query_id: int
-        Number of spectra to use as query.
-    spectra_dict: dict
-        Dictionary containing all spectra peaks, losses, metadata.
-    MS_measure: object
-        Similariy object containing the model and distance matrices.
-    fingerprints: object
-        Fingerprint objects for all molecules (if smiles exist for the spectra).
-    num_candidates: int
-        Number of candidates to list (default = 25) .
-    similarity_method: str
-        Define method to use (default = "centroid").
+    --------
+    spectra: list of spectrum objects
+        Spectra (as spectrum objects) for which Spec2Vec vectors should be derived.
+    MS_library: SimilarityMeasures() object
+        Spectral library in form of SimilarityMeasures() object (see similarity_measure.py).
+    num_decimals: int
+        Number decimals to take into account for making words from peaks. Default = 2.
+    min_loss: float
+        Lower limit of losses to take into account (Default = 50.0).
+    max_loss: float
+        Upper limit of losses to take into account (Default = 500.0).
+    peak_loss_words = ['peak_', 'loss_'],
+    intensities_as_weights: bool
+        If True, than peak intensities will be used to weight word vectors.
+    weight_method: str
+        If = 'sqrt'
     """
     
-    # Select chosen similarity methods
-    if similarity_method == "centroid":
-        candidates_idx = MS_measure.list_similars_ctr_idx[query_id, :num_candidates]
-        candidates_dist = MS_measure.list_similars_ctr[query_id, :num_candidates]
-    elif similarity_method == "pca":
-        candidates_idx = MS_measure.list_similars_pca_idx[query_id, :num_candidates]
-        candidates_dist = MS_measure.list_similars_pca[query_id, :num_candidates]
-    elif similarity_method == "autoencoder":
-        candidates_idx = MS_measure.list_similars_ae_idx[query_id, :num_candidates]
-        candidates_dist = MS_measure.list_similars_ae[query_id, :num_candidates]
-    elif similarity_method == "lda":
-        candidates_idx = MS_measure.list_similars_lda_idx[query_id, :num_candidates]
-        candidates_dist = MS_measure.list_similars_lda[query_id, :num_candidates]
-    elif similarity_method == "lsi":
-        candidates_idx = MS_measure.list_similars_lsi_idx[query_id, :num_candidates]
-        candidates_dist = MS_measure.list_similars_lsi[query_id, :num_candidates]
-    elif similarity_method == "doc2vec":
-        candidates_idx = MS_measure.list_similars_d2v_idx[query_id, :num_candidates]
-        candidates_dist = MS_measure.list_similars_d2v[query_id, :num_candidates]
-    else:
-        print("Chosen similarity measuring method not found.")
-        
-    mol_sim = np.zeros((len(fingerprints)))
-    if fingerprints[query_id] != 0:
-        for j in range(len(fingerprints)):
-            if fingerprints[j] != 0:     
-                mol_sim[j] = DataStructs.FingerprintSimilarity(fingerprints[query_id], fingerprints[j])
-                
-    smiles_similarity = np.array([np.arange(0, len(mol_sim)), mol_sim]).T
-    smiles_similarity = smiles_similarity[np.lexsort((smiles_similarity[:,0], smiles_similarity[:,1])),:]
+    # Make document of spectrum
+    MS_documents, MS_documents_intensity, _ = create_MS_documents(spectra, 
+                                                                 num_decimals, 
+                                                                 peak_loss_words, 
+                                                                 min_loss, max_loss)
     
-    print("Selected candidates based on spectrum: ")
-    print(candidates_idx)
-    print("Selected candidates based on smiles: ")
-    print(smiles_similarity[:num_candidates,0])
-    print("Selected candidates based on spectrum: ")
-    for i in range(num_candidates):
-        print("id: "+ str(candidates_idx[i]) + " (similarity: " +  str(candidates_dist[i]) + " | Tanimoto: " + str(mol_sim[candidates_idx[i]]) +")")
-
-
-def evaluate_measure(spectra_dict, 
-                     spectra,
-                     MS_measure, 
-                     fingerprints,
-                     num_candidates = 25,
-                     num_of_molecules = "all", 
-                     similarity_method = "centroid",
-                     molnet_sim = None,
-                     reference_list = None):
-    """ Compare spectra-based similarity with smile-based similarity.
+    corpus = [[word.lower() for word in document] for document in MS_documents]
     
-    Output:
-    -------
-    mol_sim: matrix with molecule similarity scores for TOP 'num_candidates' for 'num_of_molecules'.
-    spec_sim: matrix with spectra similarity for TOP 'num_candidates' for 'num_of_molecules' (using 'similarity_method').
-    spec_idx: matrix with spectra IDs corresponding to spec_sim values.
-    reference_list: list of selected 'num_of_molecules'. Will contain all IDs if num_of_molecules = "all".
-        
-    Args:
-    -------
-    spectra_dict: dict
-        Dictionary containing all spectra peaks, losses, metadata.
-    MS_measure: object
-        Similariy object containing the model and distance matrices.
-    fingerprints: object
-        Fingerprint objects for all molecules (if smiles exist for the spectra).
-    num_candidates: int
-        Number of candidates to list (default = 25) .
-    num_of_molecules: int
-        Number of molecules to test method on (default= 100)
-    similarity_method: str
-        Define method to use (default = "centroid").
-    """
-    num_spectra = len(MS_measure.corpus)
+    # Check if all words are included in trained word2vec model
+    dictionary = corpora.Dictionary(corpus)
     
-    # Create reference list if not given as args:
-    if reference_list is None:
-        if num_of_molecules == "all":
-            reference_list = np.arange(num_spectra)
-        elif isinstance(num_of_molecules, int): 
-            reference_list = np.array(random.sample(list(np.arange(len(fingerprints))),k=num_of_molecules))
-        else:
-            print("num_of_molecules needs to be integer or 'all'.")
-        
-    mol_sim = np.zeros((len(reference_list), num_candidates))
-    spec_sim = np.zeros((len(reference_list), num_candidates))
-    spec_idx = np.zeros((len(reference_list), num_candidates))
-    
-    candidates_idx = np.zeros((num_candidates), dtype=int)
-    candidates_sim = np.zeros((num_candidates))
-    
-    for i, query_id in enumerate(reference_list):
-        # Show progress:
-        
-        if (i+1) % 10 == 0 or i == len(reference_list)-1:  
-                print('\r', ' Evaluate spectrum ', i+1, ' of ', len(reference_list), ' spectra.', end="")
-
-        # Select chosen similarity methods
-        if similarity_method == "centroid":
-            candidates_idx = MS_measure.list_similars_ctr_idx[query_id, :num_candidates]
-            candidates_sim = MS_measure.list_similars_ctr[query_id, :num_candidates]
-        elif similarity_method == "pca":
-            candidates_idx = MS_measure.list_similars_pca_idx[query_id, :num_candidates]
-            candidates_sim = MS_measure.list_similars_pca[query_id, :num_candidates]
-        elif similarity_method == "autoencoder":
-            candidates_idx = MS_measure.list_similars_ae_idx[query_id, :num_candidates]
-            candidates_sim = MS_measure.list_similars_ae[query_id, :num_candidates]
-        elif similarity_method == "lda":
-            candidates_idx = MS_measure.list_similars_lda_idx[query_id, :num_candidates]
-            candidates_sim = MS_measure.list_similars_lda[query_id, :num_candidates]
-        elif similarity_method == "lsi":
-            candidates_idx = MS_measure.list_similars_lsi_idx[query_id, :num_candidates]
-            candidates_sim = MS_measure.list_similars_lsi[query_id, :num_candidates]
-        elif similarity_method == "doc2vec":
-            candidates_idx = MS_measure.list_similars_d2v_idx[query_id, :num_candidates]
-            candidates_sim = MS_measure.list_similars_d2v[query_id, :num_candidates]
+    dictionary_lst = [dictionary[x] for x in dictionary]
+    test_vocab = []
+    for i, word in enumerate(dictionary_lst):                
+        if word not in MS_library.model_word2vec.wv.vocab:
+            test_vocab.append((i, word))
             
-        elif similarity_method == "molnet":      
-            candidates_idx = molnet_sim[i,:].argsort()[-num_candidates:][::-1]
-            candidates_sim = molnet_sim[i, candidates_idx]
-                         
-        else:
-            print("Chosen similarity measuring method not found.")
+    if len(test_vocab) > 0:
+        print("Not all 'words' of the given documents are present in the trained word2vec model!")
+        print(len(test_vocab), " out of ", len(dictionary), " 'words' were not found in the word2vec model.")
+        print("'Words'missing in the pretrained word2vec model will be ignored.")
 
-        # Check type of fingerprints given as input:
-        try: 
-            DataStructs.FingerprintSimilarity(fingerprints[0], fingerprints[0])
-            fingerprint_type = "daylight" # at least assumed here
+        _, missing_vocab = zip(*test_vocab)
+        print("Removing missing 'words' from corpus...")
+        # Update corpus and BOW-corpus
+        corpus = [[word for word in document if word not in missing_vocab] for document in corpus]
+        bow_corpus = [dictionary.doc2bow(text) for text in corpus]
+    
+    vector_size = MS_library.model_word2vec.wv.vector_size
+    vectors_centroid = []
         
-        except AttributeError:
-            fingerprint_type = "morgan" # at least assumed here
+    for i in range(len(bow_corpus)):
+        if (i+1) % 10 == 0 or i == len(bow_corpus)-1:  # show progress
+            print('\r', ' Calculated centroid vectors for ', i+1, ' of ', len(bow_corpus), ' documents.', end="")
 
-        # Calculate Tanimoto similarity for selected candidates
-        if fingerprints[query_id] != 0:
-            for j, cand_id in enumerate(candidates_idx): 
-                if fingerprints[cand_id] != 0:     
-                    if fingerprint_type == "daylight":
-                        mol_sim[i, j] = DataStructs.FingerprintSimilarity(fingerprints[query_id], fingerprints[cand_id])
-                    elif fingerprint_type == "morgan":
-                        mol_sim[i, j] = DataStructs.DiceSimilarity(fingerprints[query_id], fingerprints[cand_id])
+        document = [dictionary[x[0]] for x in bow_corpus[i]]
+        if intensities_as_weights:
+            document_weight = [MS_documents_intensity[i][MS_documents[i].index(dictionary[x[0]])] for x in bow_corpus[i]]
+            document_weight = np.array(document_weight)/np.max(document_weight)  # normalize
+            if len(document_weight) == 0:
+                print("Something might have gone wrong with: ", i)
+                np.ones((len(document)))
+            elif weight_method == 'sqrt':
+                document_weight = np.sqrt(document_weight)  # idea: take sqrt to make huge intensity differences less severe
+            elif weight_method is None:
+                pass
+            else:
+                print("Unkown weight adding method.")
+        else:
+            document_weight = np.ones((len(document)))
+        if len(document) > 0:
+            term1 = MS_library.model_word2vec.wv[document]
+            #if tfidf_weighted:
+                #term2 = np.array(list(zip(*MS_library.tfidf[self.bow_corpus[i]]))[1])
+            #else:
+            term2 = np.ones((len(document)))
 
-        spec_sim[i,:] = candidates_sim
-        spec_idx[i,:] = candidates_idx
+            term1 = term1 * np.tile(document_weight, (vector_size,1)).T
+            weighted_docvector = np.sum((term1.T * term2).T, axis=0)
+        else:
+            weighted_docvector = np.zeros((MS_library.model_word2vec.vector_size))
+        vectors_centroid.append(weighted_docvector)
 
-    return mol_sim, spec_sim, spec_idx, reference_list
+    return np.array(vectors_centroid) 
+
 
