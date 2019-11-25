@@ -110,8 +110,11 @@ class SimilarityMeasures():
         self.list_similars_lsi_idx = None
 
 
-    def preprocess_documents(self, max_fraction, min_frequency, 
-                             remove_stopwords = None, create_stopwords = False):
+    def preprocess_documents(self, 
+                             max_fraction, 
+                             min_frequency, 
+                             remove_stopwords = None, 
+                             create_stopwords = False):
         """ Preprocess 'documents'
         
         Obvious steps: 
@@ -251,8 +254,12 @@ class SimilarityMeasures():
          
             
             
-    def build_model_lda(self, file_model_lda, num_of_topics=100, num_pass=4, 
-                        num_iter=100, use_stored_model=True):
+    def build_model_lda(self, 
+                        file_model_lda, 
+                        num_of_topics=100, 
+                        num_pass=4, 
+                        num_iter=100, 
+                        use_stored_model=True):
         """ Build LDA model (using gensim).
                 
         Args:
@@ -288,8 +295,11 @@ class SimilarityMeasures():
             pprint(self.model_lda.print_topics())
         
         
-    def build_model_lsi(self, file_model_lsi, num_of_topics=100, 
-                        num_iter=10, use_stored_model=True):
+    def build_model_lsi(self, 
+                        file_model_lsi, 
+                        num_of_topics=100, 
+                        num_iter=10, 
+                        pyuse_stored_model=True):
         """ Build LSI model (using gensim).
         
         Args:
@@ -573,3 +583,35 @@ class SimilarityMeasures():
 
         self.list_similars_lsi_idx = list_similars_idx
         self.list_similars_lsi = list_similars
+        
+    
+    def save(self, filename):
+        """ Save entire SimilarityMeasures() object to file.
+        Uses pickle. Not ideal, but fine for now.
+        
+        Args:
+        -------
+        filename: str
+            Filename to save object to. 
+        """
+        import pickle 
+        f = open(filename, 'wb') 
+        pickle.dump(self.__dict__, f)
+        f.close()
+        
+        
+    def load(self, filename):
+        """ Load SimilarityMeasures() object from file.
+        Uses pickle. Not ideal, but fine for now.
+        
+        Args:
+        -------
+        filename: str
+            Filename to load object from. 
+        """
+        import pickle 
+        f = open(filename, 'rb') 
+        tmp_dict = pickle.load(f)
+        self.__dict__.update(tmp_dict)
+        f.close()
+        
