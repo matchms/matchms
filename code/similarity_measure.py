@@ -428,7 +428,10 @@ class SimilarityMeasures():
             if self.corpus_weights is not None:
                 # TODO: maybe next line can be skipped?
                 document_weight = [self.corpus_weights[i][self.corpus[i].index(self.dictionary[x[0]])] for x in self.bow_corpus[i]]
-                document_weight = np.array(document_weight)**weighting_power/np.max(document_weight)  # normalize
+                if len(document_weight) > 0:
+                    document_weight = np.array(document_weight)**weighting_power/np.max(document_weight)  # normalize
+            else:
+                document_weight = np.ones((len(document)))
             if len(document) > 0:
                 term1 = self.model_word2vec.wv[document]
                 if tfidf_weighted:

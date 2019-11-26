@@ -1255,7 +1255,7 @@ def vectorize_spectra(spectra,
                       max_loss = 500.0,
                       peak_loss_words = ['peak_', 'loss_'],
                       intensities_as_weights = True,
-                     weight_method = 'sqrt'):
+                      weight_method = 'sqrt'):
     """ Calculate Spec2Vec vectors for all given spectra (independent of whether
     they also a part of the MS_library).
     
@@ -1296,6 +1296,7 @@ def vectorize_spectra(spectra,
             test_vocab.append((i, word))
             
     if len(test_vocab) > 0:
+        print('\n', 20 * '--')
         print("Not all 'words' of the given documents are present in the trained word2vec model!")
         print(len(test_vocab), " out of ", len(dictionary), " 'words' were not found in the word2vec model.")
         print("'Words'missing in the pretrained word2vec model will be ignored.")
