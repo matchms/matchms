@@ -27,7 +27,10 @@ import pandas as pd
 ## ---------------- Document processing functions -----------------------------
 ## ----------------------------------------------------------------------------
 
-def preprocess_document(corpus, stopwords, min_frequency = 2):
+def preprocess_document(corpus, 
+                        corpus_weights = None, 
+                        stopwords = [], 
+                        min_frequency = 2):
     """ Basic preprocessing of document words
     
     - Remove common words from stopwords and tokenize
@@ -38,8 +41,10 @@ def preprocess_document(corpus, stopwords, min_frequency = 2):
     -------
     corpus: list
         Corpus of documents.
-    stopwords: list
-        List of stopwords to exclude from documents.
+    corpus_weights: list, optional
+        Weights for all words in all documents of corpus. Default = None
+    stopwords: list, optional
+        List of stopwords to exclude from documents. Default = []
     min_frequency: int
         Minimum total occurence of a word necessary to be included in processed corpus. Default = 2
     """
@@ -54,9 +59,11 @@ def preprocess_document(corpus, stopwords, min_frequency = 2):
             frequency[word] += 1
     
     # Remove words that appear less than min_frequency times
-    corpus_lowered = [[word for word in document if frequency[word] >= min_frequency] for document in corpus_lowered]
+    corpus_lowered_new = [[word for word in document if frequency[word] >= min_frequency] for document in corpus_lowered]
+    if corpus_weights is not None:
+        corpus_weights = [[weights[x] for x in range(len(weights)) if frequency[corpus_lowered[i][x]] >= min_frequency] for i, weights in enumerate(corpus_weights)]
     
-    return corpus_lowered, frequency
+    return corpus_lowered_new, corpus_weights
 
 
 def create_distance_network(Cdistances_ids, 
