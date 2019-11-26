@@ -81,9 +81,9 @@ class SimilarityMeasures():
         b) LSI
     """
        
-    def __init__(self, initial_documents):
-        self.initial_documents = initial_documents
-        self.corpus = []
+    def __init__(self, initial_documents, initial_documents_weights = None):
+        self.corpus = initial_documents
+        self.corpus_weights = initial_documents_weights
         self.dictionary = []
         self.bow_corpus = []
         self.stopwords = []
@@ -143,11 +143,15 @@ class SimilarityMeasures():
         # Preprocess documents (all lower letters, every word exists at least 2 times)
         print("Preprocess documents...")
         if remove_stopwords is None:
-            self.corpus, frequency = functions.preprocess_document(self.initial_documents, 
-                                                                       stopwords = [], min_frequency = min_frequency)
+            self.corpus, self.corpus_weights = functions.preprocess_document(self.corpus, 
+                                                                             self.corpus_weights,
+                                                                             stopwords = [], 
+                                                                             min_frequency = min_frequency)
         else:
-            self.corpus, frequency = functions.preprocess_document(self.initial_documents, 
-                                                                       stopwords = remove_stopwords, min_frequency = min_frequency)    
+            self.corpus, self.corpus_weights = functions.preprocess_document(self.corpus, 
+                                                                             self.corpus_weights,
+                                                                             stopwords = remove_stopwords, 
+                                                                             min_frequency = min_frequency)    
         
         # Create dictionary (or "vocabulary") containting all unique words from documents
         self.dictionary = corpora.Dictionary(self.corpus)
@@ -165,7 +169,7 @@ class SimilarityMeasures():
                   len(self.dictionary), " words in the entire corpus.")
             
             # Create corpus, dictionary, and BOW corpus
-            self.corpus, frequency = functions.preprocess_document(self.corpus, self.stopwords, min_frequency = min_frequency)
+            self.corpus, self.corpus_weights = functions.preprocess_document(self.corpus, self.stopwords, min_frequency = min_frequency)
             
         self.bow_corpus = [self.dictionary.doc2bow(text) for text in self.corpus]
 
@@ -336,9 +340,8 @@ class SimilarityMeasures():
     ## ------------------------------------------------------------------------------
             
     def get_vectors_centroid(self, method = 'update', 
-                             extra_weights = None, 
                              tfidf_weighted=True, 
-                             weight_method = 'sqrt', 
+                             weighting_power = 0.5, 
                              tfidf_model = None,
                              extra_epochs = 10):
         """ Calculate centroid vectors for all documents of the library.
@@ -352,14 +355,12 @@ class SimilarityMeasures():
             'update': word2vec model will be updated by additional training of the model.
             'ignore': will ignore all 'words' not present in the pre-trained model.
             TODO 'substitute": will look to replace missing words with closest matches?
-        extra_weights: list
-            List of extra weights for add documents (and every word). Set to "False" if not used.
         tfidf_weighted: bool
             True, False
-        weight_method: str
-            Select method for how to weigh the extra_weights...
-            'sqrt' - weight word vectors by sqrt of extra_weights
-            None
+        weighting_power: float
+            If weights are present (self.corpus_weights), than those weights will be
+            used to the power of 'weighting_power'.
+            Set to 0 to ignore.
         tfidf_model: str
             Give filename if pre-defined tfidf model should be used. Otherwise set to None.
         extra_epochs: int
@@ -424,20 +425,10 @@ class SimilarityMeasures():
                 print('\r', ' Calculated centroid vectors for ', i+1, ' of ', len(self.bow_corpus), ' documents.', end="")
             
             document = [self.dictionary[x[0]] for x in self.bow_corpus[i]]
-            if extra_weights is not None:
-                document_weight = [extra_weights[i][self.initial_documents[i].index(self.dictionary[x[0]])] for x in self.bow_corpus[i]]
-                document_weight = np.array(document_weight)/np.max(document_weight)  # normalize
-                if len(document_weight) == 0:
-                    print("Something might have gone wrong with: ", i)
-                    np.ones((len(document)))
-                elif weight_method == 'sqrt':
-                    document_weight = np.sqrt(document_weight)  # idea: take sqrt to make huge intensity differences less severe
-                elif weight_method is None:
-                    pass
-                else:
-                    print("Unkown weight adding method.")
-            else:
-                document_weight = np.ones((len(document)))
+            if self.corpus_weights is not None:
+                # TODO: maybe next line can be skipped?
+                document_weight = [self.corpus_weights[i][self.corpus[i].index(self.dictionary[x[0]])] for x in self.bow_corpus[i]]
+                document_weight = np.array(document_weight)**weighting_power/np.max(document_weight)  # normalize
             if len(document) > 0:
                 term1 = self.model_word2vec.wv[document]
                 if tfidf_weighted:

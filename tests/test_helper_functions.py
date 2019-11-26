@@ -5,8 +5,8 @@ from helper_functions import calculate_similarities, preprocess_document
 
 def test_preprocess_document():
     # Test with test-vectors and known outcome
-    corpus = [['aa', 'BB', 'cc'], ['aA', 'Bb', 'cC', 'DD']] 
-    corpus_weights = [[1, 2, 3], [5, 5, 5, 5]] 
+    corpus = [['aa', 'BB', 'cc'], ['aA', 'Bb', 'DD', 'cC']] 
+    corpus_weights = [[1, 2, 3], [5, 4, 3, 2]] 
     
     # Run function:
     corpus_lowered, corpus_weights_new = preprocess_document(corpus, 
@@ -23,7 +23,7 @@ def test_preprocess_document():
                                                             min_frequency = 2)    
     
     assert corpus_lowered[1] == ['aa', 'bb', 'cc']
-    assert corpus_weights_new[1] == [5, 5, 5]
+    assert corpus_weights_new[1] == [5, 4, 2]
     
 
 def test_calculate_similarities():
