@@ -1310,9 +1310,10 @@ def vectorize_spectra(spectra,
     vector_size = MS_library.model_word2vec.wv.vector_size
     vectors_centroid = []
         
+    print("----- Deriving Spec2Vec spectra vectors -----")
     for i in range(len(bow_corpus)):
         if (i+1) % 10 == 0 or i == len(bow_corpus)-1:  # show progress
-            print('\r', ' Calculated centroid vectors for ', i+1, ' of ', len(bow_corpus), ' documents.', end="")
+            print('\r', ' Calculated Spec2Vec spectra vectors for ', i+1, ' of ', len(bow_corpus), ' documents.', end="")
 
         document = [dictionary[x[0]] for x in bow_corpus[i]]
         if intensities_as_weights:
