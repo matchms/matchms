@@ -1254,8 +1254,7 @@ def vectorize_spectra(spectra,
                       min_loss = 5.0, 
                       max_loss = 500.0,
                       peak_loss_words = ['peak_', 'loss_'],
-                      intensities_as_weights = True,
-                      weight_method = 'sqrt'):
+                      weighting_power = 0.5):
     """ Calculate Spec2Vec vectors for all given spectra (independent of whether
     they also a part of the MS_library).
     
@@ -1272,10 +1271,10 @@ def vectorize_spectra(spectra,
     max_loss: float
         Upper limit of losses to take into account (Default = 500.0).
     peak_loss_words = ['peak_', 'loss_'],
-    intensities_as_weights: bool
-        If True, than peak intensities will be used to weight word vectors.
-    weight_method: str
-        If = 'sqrt'
+    weighting_power: float
+        If weights are present (self.corpus_weights), than those weights will be
+        used to the power of 'weighting_power'.
+        Set to 0 to ignore.
     """
     
     # Make document of spectrum
@@ -1316,18 +1315,9 @@ def vectorize_spectra(spectra,
             print('\r', ' Calculated Spec2Vec spectra vectors for ', i+1, ' of ', len(bow_corpus), ' documents.', end="")
 
         document = [dictionary[x[0]] for x in bow_corpus[i]]
-        if intensities_as_weights:
+        if weighting_power != 0 and MS_documents_intensity is not None:
             document_weight = [MS_documents_intensity[i][MS_documents[i].index(dictionary[x[0]])] for x in bow_corpus[i]]
             document_weight = np.array(document_weight)/np.max(document_weight)  # normalize
-            if len(document_weight) == 0:
-                print("Something might have gone wrong with: ", i)
-                np.ones((len(document)))
-            elif weight_method == 'sqrt':
-                document_weight = np.sqrt(document_weight)  # idea: take sqrt to make huge intensity differences less severe
-            elif weight_method is None:
-                pass
-            else:
-                print("Unkown weight adding method.")
         else:
             document_weight = np.ones((len(document)))
         if len(document) > 0:

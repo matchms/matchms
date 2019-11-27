@@ -446,7 +446,6 @@ class SimilarityMeasures():
             vectors_centroid.append(weighted_docvector)
             
         self.vectors_centroid = np.array(vectors_centroid)        
-#        # TODO add save and load options
 
         
     def get_vectors_pca(self, dimension=100):
