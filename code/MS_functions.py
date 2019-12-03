@@ -24,29 +24,19 @@ import os
 import operator
 
 import helper_functions as functions
-import MS_similarity_classical as MS_sim_classic
 
 import fnmatch
 import copy
 import numpy as np
 from scipy.optimize import curve_fit
-import random
 import pandas as pd
 
 from pyteomics import mgf
-
 from openbabel import openbabel as ob
-#from openbabel import pybel
-
 import pubchempy as pcp
-
-#from rdkit import DataStructs
 from rdkit import Chem
-#from rdkit.Chem import Draw
-#from rdkit.Chem.Fingerprints import FingerprintMols
 from rdkit.Chem import AllChem
 
-from gensim import corpora
 
 
 
@@ -831,8 +821,8 @@ def load_MGF_data(file_mgf,
 def create_MS_documents(spectra, 
                         num_decimals, 
                         peak_loss_words = ['peak_', 'loss_'],
-                        min_loss = 10.0, 
-                        max_loss = 200.0, 
+                        min_loss = 5.0, 
+                        max_loss = 500.0, 
                         ignore_losses = False):
     """ Create documents from peaks and losses.
     
@@ -846,9 +836,9 @@ def create_MS_documents(spectra,
     num_decimals: int
         Number of decimals to take into account
     min_loss: float
-        Lower limit of losses to take into account (Default = 10.0).
+        Lower limit of losses to take into account (Default = 5.0).
     max_loss: float
-        Upper limit of losses to take into account (Default = 200.0).
+        Upper limit of losses to take into account (Default = 500.0).
     ignore_losses: bool
         True: Ignore losses, False: make words from losses and peaks.
     """
@@ -916,8 +906,9 @@ def create_MS_documents(spectra,
     return MS_documents, MS_documents_intensity, spectra_metadata
 
 
+
 def mol_converter(mol_input, input_type, output_type, method = 'openbabel'):
-    """ Convert molecular representations using openbabel (or RDkit). E.g. smiles to inchi,
+    """ Convert molecular representations using openbabel. E.g. smiles to inchi,
     or inchi to inchikey.
     
     Args:
@@ -944,6 +935,7 @@ def mol_converter(mol_input, input_type, output_type, method = 'openbabel'):
             mol_output = None
             
         return mol_output   
+
 
 
 def likely_inchi_match(inchi_1, inchi_2, min_agreement = 3):
@@ -989,6 +981,7 @@ def likely_inchi_match(inchi_1, inchi_2, min_agreement = 3):
         return True
     else:
         return False
+
 
 
 def likely_inchikey_match(inchikey_1, inchikey_2, min_agreement = 2):
@@ -1175,6 +1168,7 @@ def find_pubchem_match(compound_name,
     return inchi_pubchem, inchikey_pubchem
 
 
+
 def get_mol_fingerprints(spectra, method = "daylight", nBits = 1024):
     """ Calculate molecule fingerprints based on given smiles.
     (using RDkit)
@@ -1246,93 +1240,3 @@ def get_mol_fingerprints(spectra, method = "daylight", nBits = 1024):
         fingerprints.append(fp)
     
     return fingerprints, exclude_IDs
-
-
-def vectorize_spectra(spectra,
-                      MS_library,
-                      num_decimals = 2,
-                      min_loss = 5.0, 
-                      max_loss = 500.0,
-                      peak_loss_words = ['peak_', 'loss_'],
-                      weighting_power = 0.5):
-    """ Calculate Spec2Vec vectors for all given spectra (independent of whether
-    they also a part of the MS_library).
-    
-    Args:
-    --------
-    spectra: list of spectrum objects
-        Spectra (as spectrum objects) for which Spec2Vec vectors should be derived.
-    MS_library: SimilarityMeasures() object
-        Spectral library in form of SimilarityMeasures() object (see similarity_measure.py).
-    num_decimals: int
-        Number decimals to take into account for making words from peaks. Default = 2.
-    min_loss: float
-        Lower limit of losses to take into account (Default = 50.0).
-    max_loss: float
-        Upper limit of losses to take into account (Default = 500.0).
-    peak_loss_words = ['peak_', 'loss_'],
-    weighting_power: float
-        If weights are present (self.corpus_weights), than those weights will be
-        used to the power of 'weighting_power'.
-        Set to 0 to ignore.
-    """
-    
-    # Make document of spectrum
-    MS_documents, MS_documents_intensity, _ = create_MS_documents(spectra, 
-                                                                 num_decimals, 
-                                                                 peak_loss_words, 
-                                                                 min_loss, max_loss)
-    
-    corpus = [[word.lower() for word in document] for document in MS_documents]
-    
-    # Check if all words are included in trained word2vec model
-    dictionary = corpora.Dictionary(corpus)
-    
-    dictionary_lst = [dictionary[x] for x in dictionary]
-    test_vocab = []
-    for i, word in enumerate(dictionary_lst):                
-        if word not in MS_library.model_word2vec.wv.vocab:
-            test_vocab.append((i, word))
-            
-    if len(test_vocab) > 0:
-        print('\n', 20 * '--')
-        print("Not all 'words' of the given documents are present in the trained word2vec model!")
-        print(len(test_vocab), " out of ", len(dictionary), " 'words' were not found in the word2vec model.")
-        print("'Words'missing in the pretrained word2vec model will be ignored.")
-
-        _, missing_vocab = zip(*test_vocab)
-        print("Removing missing 'words' from corpus...")
-        # Update corpus and BOW-corpus
-        corpus = [[word for word in document if word not in missing_vocab] for document in corpus]
-        bow_corpus = [dictionary.doc2bow(text) for text in corpus]
-    
-    vector_size = MS_library.model_word2vec.wv.vector_size
-    vectors_centroid = []
-        
-    print("----- Deriving Spec2Vec spectra vectors -----")
-    for i in range(len(bow_corpus)):
-        if (i+1) % 10 == 0 or i == len(bow_corpus)-1:  # show progress
-            print('\r', ' Calculated Spec2Vec spectra vectors for ', i+1, ' of ', len(bow_corpus), ' documents.', end="")
-
-        document = [dictionary[x[0]] for x in bow_corpus[i]]
-        if weighting_power != 0 and MS_documents_intensity is not None:
-            document_weight = [MS_documents_intensity[i][MS_documents[i].index(dictionary[x[0]])] for x in bow_corpus[i]]
-            document_weight = np.array(document_weight)/np.max(document_weight)  # normalize
-        else:
-            document_weight = np.ones((len(document)))
-        if len(document) > 0:
-            term1 = MS_library.model_word2vec.wv[document]
-            #if tfidf_weighted:
-                #term2 = np.array(list(zip(*MS_library.tfidf[self.bow_corpus[i]]))[1])
-            #else:
-            term2 = np.ones((len(document)))
-
-            term1 = term1 * np.tile(document_weight, (vector_size,1)).T
-            weighted_docvector = np.sum((term1.T * term2).T, axis=0)
-        else:
-            weighted_docvector = np.zeros((MS_library.model_word2vec.vector_size))
-        vectors_centroid.append(weighted_docvector)
-
-    return np.array(vectors_centroid) 
-
-
