@@ -1191,8 +1191,8 @@ def get_mol_fingerprints(spectra,
         If True, print phase of the run to indicate progress. Default = True.
     """
     
-    # If spectra is given as a dictionary
-    print("---- (1) Generating RDkit molecules from inchi or smiles...")
+    if print_stage:
+        print("---- (1) Generating RDkit molecules from inchi or smiles...")
     exclude_IDs = []
     molecules = []
     
@@ -1219,7 +1219,8 @@ def get_mol_fingerprints(spectra,
             
         molecules.append(mol)   
     
-    print("---- (2) Generating fingerprints from molecules...")
+    if print_stage:
+        print("---- (2) Generating fingerprints from molecules...")
     fingerprints = []
     for i in range(len(molecules)):
         if molecules[i] is None:
