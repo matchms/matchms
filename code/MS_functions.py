@@ -1169,7 +1169,10 @@ def find_pubchem_match(compound_name,
 
 
 
-def get_mol_fingerprints(spectra, method = "daylight", nBits = 1024):
+def get_mol_fingerprints(spectra, 
+                         method = "daylight", 
+                         nBits = 1024,
+                         print_stage = True):
     """ Calculate molecule fingerprints based on given smiles.
     (using RDkit)
     
@@ -1184,6 +1187,8 @@ def get_mol_fingerprints(spectra, method = "daylight", nBits = 1024):
         'morgan1', 'morgan2', 'morgan3'.
     nBits: int
         Dimension or number of bits of generated fingerprint. Default is nBits = 1024.
+    print_stage: bool, optional
+        If True, print phase of the run to indicate progress. Default = True.
     """
     
     # If spectra is given as a dictionary
@@ -1209,7 +1214,6 @@ def get_mol_fingerprints(spectra, method = "daylight", nBits = 1024):
                 mol = Chem.MolFromSmiles(spec.smiles)
         if mol is None or mol.GetNumAtoms() < 3:
             print("No proper molecule generated for spectrum", i)
-            #molecules.append(Chem.MolFromSmiles("H20")) # just have some water when you get stuck
             mol = None
             exclude_IDs.append(i)
             
@@ -1224,16 +1228,12 @@ def get_mol_fingerprints(spectra, method = "daylight", nBits = 1024):
         else:
             if method == "daylight":
                 fp = Chem.RDKFingerprint(molecules[i], fpSize = nBits)
-                #fp = FingerprintMols.FingerprintMol(molecules[i], fpSize = nBits)
             elif method == "morgan1":
                 fp = AllChem.GetMorganFingerprintAsBitVect(molecules[i], 1, nBits=nBits)
-                #p = AllChem.GetMorganFingerprint(molecules[i],1)
             elif method == "morgan2":
                 fp = AllChem.GetMorganFingerprintAsBitVect(molecules[i], 2, nBits=nBits)
-                #fp = AllChem.GetMorganFingerprint(molecules[i],2)
             elif method == "morgan3":
                 fp = AllChem.GetMorganFingerprintAsBitVect(molecules[i], 3, nBits=nBits)
-                #fp = AllChem.GetMorganFingerprint(molecules[i],3)
             else:
                 print("Unkown fingerprint method given...")
             fp = np.array(fp)
