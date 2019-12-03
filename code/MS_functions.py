@@ -1172,7 +1172,7 @@ def find_pubchem_match(compound_name,
 def get_mol_fingerprints(spectra, 
                          method = "daylight", 
                          nBits = 1024,
-                         print_stage = True):
+                         print_progress = True):
     """ Calculate molecule fingerprints based on given smiles.
     (using RDkit)
     
@@ -1187,11 +1187,11 @@ def get_mol_fingerprints(spectra,
         'morgan1', 'morgan2', 'morgan3'.
     nBits: int
         Dimension or number of bits of generated fingerprint. Default is nBits = 1024.
-    print_stage: bool, optional
+    print_progress: bool, optional
         If True, print phase of the run to indicate progress. Default = True.
     """
     
-    if print_stage:
+    if print_progress:
         print("---- (1) Generating RDkit molecules from inchi or smiles...")
     exclude_IDs = []
     molecules = []
@@ -1219,7 +1219,7 @@ def get_mol_fingerprints(spectra,
             
         molecules.append(mol)   
     
-    if print_stage:
+    if print_progress:
         print("---- (2) Generating fingerprints from molecules...")
     fingerprints = []
     for i in range(len(molecules)):

@@ -30,7 +30,8 @@ def mol_sim_matrix(fingerprints1,
                    fingerprints2,
                    method = 'cosine',
                    filename = None,
-                   max_size = 1000):
+                   max_size = 1000,
+                   print_progress = True):
     """ Create Matrix of all molecular similarities (based on molecular fingerprints).
     If filename is not None, the result will be saved as npy.
     To create molecular fingerprints see mol_fingerprints() function from MS_functions.
@@ -48,6 +49,8 @@ def mol_sim_matrix(fingerprints1,
     max_size: int
         Maximum size of (sub) all-vs-all matrix to handle in one go. Will split up larger matrices into 
         max_size x max_size matrices.
+    print_progress: bool, optional
+        If True, print phase of the run to indicate progress. Default = True.
     """  
     
     if filename is not None:
@@ -89,10 +92,12 @@ def mol_sim_matrix(fingerprints1,
                                                                                           method) 
                 # Track progress:
                 count_splits += 1
-                print('\r', "Calculated submatrix", count_splits, "out of", splits, end="")
+                if print_progress:
+                    print('\r', "Calculated submatrix", count_splits, "out of", splits, end="")
 
-        print(20 * '--')
-        print("Succesfully calculated matrix containing all-vs-all molecular similarity values.")
+        if print_progress:
+            print(20 * '--')
+            print("Succesfully calculated matrix containing all-vs-all molecular similarity values.")
         if filename is not None:
             np.save(filename, molecular_similarities)
             print("Matrix was saved under:", filename)
