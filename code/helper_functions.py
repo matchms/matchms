@@ -179,7 +179,9 @@ def ifd_scores(vocabulary, corpus):
     return pd.DataFrame(idf_scores, columns=["id", "word", "word count", "idf score"])
 
 
-def calculate_similarities(vectors, num_hits=25, method='cosine'):
+def calculate_similarities(vectors, 
+                           num_hits=25, 
+                           method='cosine'):
     """ Calculate similarities (all-versus-all --> matrix) based on array of all vectors
     
     Args:
@@ -193,6 +195,7 @@ def calculate_similarities(vectors, num_hits=25, method='cosine'):
     """
     Cdist = spatial.distance.cdist(vectors, vectors, method)
     mean_similarity = 1 - np.mean(Cdist)
+    
     # Create numpy arrays to store distances
     list_similars_ids = np.zeros((Cdist.shape[0],num_hits), dtype=int)
     list_similars = np.zeros((Cdist.shape[0],num_hits))

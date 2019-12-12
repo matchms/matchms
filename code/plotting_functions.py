@@ -596,11 +596,11 @@ def plot_best_results(avg_best_scores,
 def MS_similarity_network(MS_measure, 
                           similarity_method="centroid", 
                           link_method = "single", 
-                          filename="MS_word2vec_test.graphml", 
+                          filename="MS_Spec2Vec_graph.graphml", 
                           cutoff = 0.7,
                           max_links = 10,
                           extern_matrix = None):
-    """ Built network from closest connections found
+    """ Built network from closest connections found.
         Using networkx
         
     Args:
@@ -619,21 +619,12 @@ def MS_similarity_network(MS_measure,
     if similarity_method == "centroid":
         list_similars_idx = MS_measure.list_similars_ctr_idx
         list_similars = MS_measure.list_similars_ctr
-    elif similarity_method == "pca":
-        list_similars_idx = MS_measure.list_similars_pca_idx
-        list_similars = MS_measure.list_similars_pca
-    elif similarity_method == "autoencoder":
-        list_similars_idx = MS_measure.list_similars_ae_idx
-        list_similars = MS_measure.list_similars_ae
     elif similarity_method == "lda":
         list_similars_idx = MS_measure.list_similars_lda_idx
         list_similars = MS_measure.list_similars_lda
     elif similarity_method == "lsi":
         list_similars_idx = MS_measure.list_similars_lsi_idx
         list_similars = MS_measure.list_similars_lsi
-    elif similarity_method == "doc2vec":
-        list_similars_idx = MS_measure.list_similars_d2v_idx
-        list_similars = MS_measure.list_similars_d2v
     elif similarity_method == "extern":
         num_candidates = MS_measure.list_similars_ctr_idx.shape[1]
         list_similars = np.zeros((MS_measure.list_similars_ctr_idx.shape))
