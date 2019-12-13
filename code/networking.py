@@ -544,22 +544,23 @@ def evaluate_clusters(graph_main,
     ref_sim_var_nodes = []
     
     for graph in graphs:
-        num_nodes.append(len(graph.nodes))
-        num_edges.append(len(graph.edges)) 
-        
-        edges = list(graph.edges)
-        mol_sim_edges = np.array([M_sim_ref[x] for x in edges])
-        mol_sim_edges = np.nan_to_num(mol_sim_edges)
-        ref_sim_mean_edges.append(np.mean(mol_sim_edges))
-        ref_sim_var_edges.append(np.var(mol_sim_edges))        
-        
-        nodes = list(graph.nodes)
-        mean_mol_sims = []
-        for node in nodes:
-            mean_mol_sims.append(M_sim_ref[node, nodes])
-
-        ref_sim_mean_nodes.append(np.mean(mean_mol_sims))
-        ref_sim_var_nodes.append(np.var(mean_mol_sims))
+        if len(graph.edges) > 0: # exclude singletons
+            num_nodes.append(len(graph.nodes))
+            num_edges.append(len(graph.edges)) 
+            
+            edges = list(graph.edges)
+            mol_sim_edges = np.array([M_sim_ref[x] for x in edges])
+            mol_sim_edges = np.nan_to_num(mol_sim_edges)
+            ref_sim_mean_edges.append(np.mean(mol_sim_edges))
+            ref_sim_var_edges.append(np.var(mol_sim_edges))        
+            
+            nodes = list(graph.nodes)
+            mean_mol_sims = []
+            for node in nodes:
+                mean_mol_sims.append(M_sim_ref[node, nodes])
+    
+            ref_sim_mean_nodes.append(np.mean(mean_mol_sims))
+            ref_sim_var_nodes.append(np.var(mean_mol_sims))
     
     cluster_data = pd.DataFrame(list(zip(num_nodes,
                                  num_edges,
