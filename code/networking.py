@@ -430,9 +430,12 @@ def split_cluster(graph_main,
                         pass
 
                 # Check if more suited cuts are expected for the same number of cuts
-                idx = np.argsort(min_size_after_cutting)[::-1][1]
-                if min_size_after_cutting[idx] >= min_cluster_size and multiple_cuts_per_level:
-                    pass
+                if len(min_size_after_cutting) > 1:
+                    idx = np.argsort(min_size_after_cutting)[::-1][1]
+                    if min_size_after_cutting[idx] >= min_cluster_size and multiple_cuts_per_level:
+                        pass
+                    else:
+                        j += 1
                 else:
                     j += 1
             
@@ -472,7 +475,7 @@ def refine_network(graph_main,
     print(20 * '---')
     while cluster_max > max_cluster_size and counter < max_split_iterations:
         print("Splitting iteration:", counter+1, "Max cluster size =", cluster_max, '\n')
-        graph_main, links = split_cluster(graph_main,
+        graph_main, links = split_cluster(graph_main.copy(),
                                  max_cluster_size = max_cluster_size,
                                  min_cluster_size = min_cluster_size,
                                  max_search_steps = max_search_steps,
@@ -543,24 +546,29 @@ def evaluate_clusters(graph_main,
     ref_sim_mean_nodes = []
     ref_sim_var_nodes = []
     
-    for graph in graphs:
-        if len(graph.edges) > 0: # exclude singletons
-            num_nodes.append(len(graph.nodes))
+    # Loop through clusters
+    for graph in graphs:    
+        num_nodes.append(len(graph.nodes))
+        if len(graph.edges) > 0: # no edges for singletons
             num_edges.append(len(graph.edges)) 
             
             edges = list(graph.edges)
             mol_sim_edges = np.array([M_sim_ref[x] for x in edges])
             mol_sim_edges = np.nan_to_num(mol_sim_edges)
             ref_sim_mean_edges.append(np.mean(mol_sim_edges))
-            ref_sim_var_edges.append(np.var(mol_sim_edges))        
-            
-            nodes = list(graph.nodes)
-            mean_mol_sims = []
-            for node in nodes:
-                mean_mol_sims.append(M_sim_ref[node, nodes])
-    
-            ref_sim_mean_nodes.append(np.mean(mean_mol_sims))
-            ref_sim_var_nodes.append(np.var(mean_mol_sims))
+            ref_sim_var_edges.append(np.var(mol_sim_edges)) 
+        else:
+            num_edges.append(0)
+            ref_sim_mean_edges.append(0)
+            ref_sim_var_edges.append(0) 
+        
+        nodes = list(graph.nodes)
+        mean_mol_sims = []
+        for node in nodes:
+            mean_mol_sims.append(M_sim_ref[node, nodes])
+
+        ref_sim_mean_nodes.append(np.mean(mean_mol_sims))
+        ref_sim_var_nodes.append(np.var(mean_mol_sims))
     
     cluster_data = pd.DataFrame(list(zip(num_nodes,
                                  num_edges,
