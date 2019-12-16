@@ -229,12 +229,14 @@ def dilate_cluster(graph_main,
             
             for ID in selected_candidates:
                 node_ID = list(graph.nodes)[ID]
-
+                
+                # Only add link if no cluster > max_cluster_size is formed by it
                 if (len(nx.node_connected_component(graph_main, potential_links[ID])) + cluster_size) <= max_cluster_size:
                     # Actual adding of new links
-                    #print("new link: (" + str(node_ID) + ", " + str(potential_links[ID]) + ")")
                     graph_main.add_edge(node_ID, potential_links[ID], weight=best_scores[ID])
                     links_added.append((node_ID, potential_links[ID]))
+                    # Update cluster_size to keep track of growing clusters
+                    cluster_size = len(nx.node_connected_component(graph_main, potential_links[ID]))
     
     return graph_main, links_added
 
@@ -383,20 +385,25 @@ def split_cluster(graph_main,
                 # ----------------------------------------------
                 # Test removing proposed links for all pairs
                 # ----------------------------------------------
-                min_size_after_cutting = []
-                for pair in pairs:
-                    new_graph_testing = new_graph.copy()
+                if len(pairs) > 0:
+                    min_size_after_cutting = []
+                    for pair in pairs:
+                        new_graph_testing = new_graph.copy()
 
-                    # Remove edges in pair
-                    for m in range(int(pairs.shape[1]/2)):
-                        new_graph_testing.remove_edge(pair[m*2], pair[m*2+1])
+                        # Remove edges in pair
+                        for m in range(int(pairs.shape[1]/2)):
+                            new_graph_testing.remove_edge(pair[m*2], pair[m*2+1])
 
-                    # Check if created subclustes are big enough:
-                    subgraphs = list(nx.connected_component_subgraphs(new_graph_testing))
-                    min_size_after_cutting.append(min([len(x.nodes) for x in subgraphs]))
+                        # Check if created subclustes are big enough:
+                        subgraphs = list(nx.connected_component_subgraphs(new_graph_testing))
+                        min_size_after_cutting.append(min([len(x.nodes) for x in subgraphs]))
 
-                # Select best partition of graph (creating most similar sized subclusters)
-                best_partition = np.argmax(min_size_after_cutting)
+                    # Select best partition of graph (creating most similar sized subclusters)
+                    min_size_after_cutting = np.array(min_size_after_cutting)
+                    best_partition = np.argmax(min_size_after_cutting)
+                else:
+                    min_size_after_cutting = [0]
+                    best_partition = 0
                 
                 # ----------------------------------------------
                 # Actual removal of links
