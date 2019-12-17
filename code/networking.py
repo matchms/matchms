@@ -296,7 +296,8 @@ def erode_clusters(graph_main,
 
 def add_intra_cluster_links(graph_main,
                            M_sim, 
-                           min_weight = 0.5):
+                           min_weight = 0.5,
+                           max_links = 20):
     """ Add links within each separate cluster if weights above min_weight.
     
     Args:
@@ -308,14 +309,22 @@ def add_intra_cluster_links(graph_main,
     min_weight: float
         Set minimum weight to be considered for making link. Default = 0.5.
     """
-    
     # Split graph into separate clusters
     graphs = list(nx.connected_component_subgraphs(graph_main))    
     
     for graph in graphs:
-        nodes = graph.nodes
+        nodes = list(graph.nodes)
+        nodes0 = nodes.copy()
         for node in nodes:
-            M_sim[node, nodes]    
+            del nodes0[0]
+            weights = M_sim[node, nodes0]
+            weights_select = np.where(weights >= min_weight)[0][:max_links]
+            new_edges = [(node, nodes0[x], weights[x]) for x in weights_select]
+            
+            graph_main.add_weighted_edges_from(new_edges)
+            
+    return graph_main   
+            
 
 
 def split_cluster(graph_main,
