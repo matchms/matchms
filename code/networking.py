@@ -769,9 +769,9 @@ def plot_clustering_performance(data_collection,
 
     for cluster_data in data_collection:
         nodes_clustered_well = np.sum(cluster_data[(cluster_data['num_nodes']>1) 
-                                                   &(cluster_data['ref_sim_mean_nodes']>0.6)]['num_nodes'].values)
+                                                   &(cluster_data['ref_sim_mean_nodes']>thres_well)]['num_nodes'].values)
         nodes_clustered_poor = np.sum(cluster_data[(cluster_data['num_nodes']>1) 
-                                                   &(cluster_data['ref_sim_mean_nodes']<0.4)]['num_nodes'].values)
+                                                   &(cluster_data['ref_sim_mean_nodes']<thres_poor)]['num_nodes'].values)
         nodes_not_clustered = np.sum(cluster_data[(cluster_data['num_nodes']<2)]['num_nodes'].values)
 
         performance_data.append([nodes_clustered_well, nodes_clustered_poor, nodes_not_clustered])
