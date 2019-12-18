@@ -617,6 +617,7 @@ import matplotlib
 
 def plots_cluster_evaluations(cluster_data_collection,
                               M_sim_ref,
+                              total_num_nodes,
                               size_bins,
                               labels,
                               title):
@@ -653,7 +654,7 @@ def plots_cluster_evaluations(cluster_data_collection,
             mean_node_sim.append(np.mean(cluster_data[(cluster_data['num_nodes'] < bins[i+1]) 
                         & (cluster_data['num_nodes'] > bins[i]) ]['ref_sim_mean_nodes'].values))
 
-        num_elements[0] = len(spectra) - np.sum(num_elements[1:])
+        num_elements[0] = total_num_nodes - np.sum(num_elements[1:])
         if np.isnan(mean_edge_sim[0]):
              mean_edge_sim[0] = 0
         
