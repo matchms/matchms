@@ -731,6 +731,39 @@ def plot_clustering_performance(data_collection,
     ax.legend(loc='upper center', bbox_to_anchor=(1.25, 1))
 
 
+def plot_cluster(G):
+    """ Very basic plotting function to inspect small to medium sized clusters (or networks).
+    
+    Args:
+    --------
+    G: networkx.Graph
+        Networkx generated graph containing nodes and edges.
+    """
+    if len(G.nodes) > 1:
+        edges = [(u, v) for (u, v, d) in G.edges(data=True) ]
+        weights = [d['weight'] for (u, v, d) in G.edges(data=True) ]
+        weights = weights - 0.95*np.min(weights)
+        weights = weights/np.max(weights)
+
+        # Positions for all nodes
+        pos = nx.spring_layout(G)  
+        
+        plt.figure(figsize=(12,12))
+        
+        # Nodes
+        nx.draw_networkx_nodes(G, pos, node_size=100)
+
+        # Edges
+        nx.draw_networkx_edges(G, pos, edgelist=edges, width=4*weights, alpha=0.5)
+
+        # Labels
+        nx.draw_networkx_labels(G, pos, font_size=5, font_family='sans-serif')
+
+        plt.axis('off')
+        plt.show()
+    else:
+        print("Given graph has not enough nodes to plot network.")
+
 ## ----------------------------------------------------------------------------
 ## -------------------------- Small helper functions --------------------------
 ## ----------------------------------------------------------------------------
