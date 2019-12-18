@@ -171,14 +171,16 @@ def dilate_cluster(graph_main,
                    similars,
                    max_cluster_size = 100,   
                    min_cluster_size = 10,
-                   max_addition = None,
+                   max_per_node = 1,
+                   max_per_cluster = None,
                    min_weight = 0.5):
     """ Add more links to clusters that are < min_cluster_size.
     This function is in particular made to avoid small remaining clusters or singletons. 
     
     Will only add links if they won't lead to clusters > max_cluster_size,
     and if the links have weights > min_weight.
-    Starts iteratively from highest weight links that are not yet part of the network.
+    Starts iteratively from highest weight links that are not yet part of the network
+    (out of given top-n links).
     
     Args:
     --------
@@ -192,7 +194,9 @@ def dilate_cluster(graph_main,
         Maximum desired size of clusters. Default = 100.
     min_cluster_size: int
         Minimum desired size of clusters. Default = 10.
-    max_addition: int, None 
+    max_per_node: int 
+        Only add the top max_addition ones per cluster. Default = 1.
+    max_per_cluster: int, None 
         Only add the top max_addition ones per cluster. Ignore if set to None. Default = None.
     min_weight: float
         Set minimum weight to be considered for making link. Default = 0.5.
@@ -215,28 +219,32 @@ def dilate_cluster(graph_main,
                     nodes_connected.append(key)
 
                 potential_new_links = [(i, x) for i, x in enumerate(similars_idx[ID]) if x not in nodes_connected and x != ID]
-                best_score = similars[ID][list(zip(*potential_new_links))[0][0]]
-                if best_score >= min_weight:
-                    best_scores.append(best_score)
-                    potential_link = list(zip(*potential_new_links))[1][0]
-                    potential_links.append(potential_link)
+                best_score_arr = similars[ID][[x[0] for x in potential_new_links]]
+                select = np.where(best_score_arr >= min_weight)[0][:max_per_node]
+                #if best_score >= min_weight:
+                if select.shape[0] > 0:
+                    for s in select:
+                        best_scores.append(best_score_arr[s])
+                        potential_link = (ID, [x[1] for x in potential_new_links][s])
+                        potential_links.append(potential_link)
                        
             if max_addition is None:
                 selected_candidates = np.argsort(best_scores)[::-1]
             else:
                 # Only add the top max_addition ones
-                selected_candidates = np.argsort(best_scores)[::-1][:max_addition]
+                selected_candidates = np.argsort(best_scores)[::-1][:max_per_cluster]
             
             for ID in selected_candidates:
-                node_ID = list(graph.nodes)[ID]
+                #node_ID = list(graph.nodes)[ID]
+                node_ID = potential_links[ID][0]
                 
                 # Only add link if no cluster > max_cluster_size is formed by it
-                if (len(nx.node_connected_component(graph_main, potential_links[ID])) + cluster_size) <= max_cluster_size:
+                if (len(nx.node_connected_component(graph_main, potential_links[ID][1])) + cluster_size) <= max_cluster_size:
                     # Actual adding of new links
-                    graph_main.add_edge(node_ID, potential_links[ID], weight=best_scores[ID])
-                    links_added.append((node_ID, potential_links[ID]))
+                    graph_main.add_edge(node_ID, potential_links[ID][1], weight=best_scores[ID])
+                    links_added.append((node_ID, potential_links[ID][1]))
                     # Update cluster_size to keep track of growing clusters
-                    cluster_size = len(nx.node_connected_component(graph_main, potential_links[ID]))
+                    cluster_size = len(nx.node_connected_component(graph_main, potential_links[ID][1]))
     
     return graph_main, links_added
 
@@ -318,7 +326,8 @@ def add_intra_cluster_links(graph_main,
         for node in nodes:
             del nodes0[0]
             weights = M_sim[node, nodes0]
-            weights_select = np.where(weights >= min_weight)[0][:max_links]
+            weights_select = weights.argsort()[::-1][:max_links]
+            weights_select = np.where(weights[weights_select] >= min_weight)[0]
             new_edges = [(node, nodes0[x], weights[x]) for x in weights_select]
             
             graph_main.add_weighted_edges_from(new_edges)
@@ -599,6 +608,127 @@ def evaluate_clusters(graph_main,
                                                              'ref_sim_var_nodes'])
     return cluster_data
 
+
+## ----------------------------------------------------------------------------
+## --------------------- Graph related plotting functions ---------------------
+## ----------------------------------------------------------------------------
+from matplotlib import pyplot as plt
+import matplotlib
+
+def plots_cluster_evaluations(cluster_data_collection,
+                              M_sim_ref,
+                              size_bins,
+                              labels,
+                              title):
+    """ Plot cluster sizes and mean node similarity.
+    
+    Args:
+    --------
+    
+    """
+    
+    fig = plt.figure(figsize=(12,5))
+    ax = plt.subplot(111)
+    
+    num_plots = len(cluster_data_collection)
+    cmap = matplotlib.cm.get_cmap('inferno') #'Spectral')
+    bins = [0] + [x+1 for x in size_bins]
+    x_labels = ['<' + str(bins[1])] 
+    x_labels += [str(bins[i]) + '-' + str(bins[i+1]-1) for i in range(1,len(bins)-2)]
+    x_labels += ['>' + str(bins[-2]-1)]
+    
+    for count, cluster_data in enumerate(cluster_data_collection):
+
+        num_elements = []
+        mean_edge_sim = []
+        mean_node_sim = []
+        for i in range(len(bins)-1):
+            num_elements.append(np.sum(cluster_data[(cluster_data['num_nodes'] < bins[i+1]) 
+                        & (cluster_data['num_nodes'] > bins[i]) ]['num_nodes'].values))
+            
+            if 'ref_sim_mean_edges' in cluster_data.columns:
+                mean_edge_sim.append(np.mean(cluster_data[(cluster_data['num_nodes'] < bins[i+1]) 
+                            & (cluster_data['num_nodes'] > bins[i]) ]['ref_sim_mean_edges'].values))
+
+            mean_node_sim.append(np.mean(cluster_data[(cluster_data['num_nodes'] < bins[i+1]) 
+                        & (cluster_data['num_nodes'] > bins[i]) ]['ref_sim_mean_nodes'].values))
+
+        num_elements[0] = len(spectra) - np.sum(num_elements[1:])
+        if np.isnan(mean_edge_sim[0]):
+             mean_edge_sim[0] = 0
+        
+        plt.scatter(x_labels, mean_node_sim, s=num_elements, facecolor="None", 
+            edgecolors=[cmap(count/(num_plots))], lw= 3,
+            alpha= 0.7, label=labels[count])
+
+    plt.xlabel('cluster size')
+    plt.ylabel('mean molecular similarity of nodes in cluster')   
+    chartBox = ax.get_position()
+    ax.set_position([chartBox.x0, chartBox.y0, chartBox.width*0.8, chartBox.height])
+    lgnd = ax.legend(loc='upper center', bbox_to_anchor=(1.12, 1))
+    for i in range(num_plots):
+        lgnd.legendHandles[i]._sizes = [30]
+
+    plt.title(title)
+    
+
+def plot_clustering_performance(data_collection,
+                                labels,
+                                total_num_nodes,
+                                thres_well = 0.6,
+                                thres_poor = 0.4,
+                                title = None):
+    """ Plot cluster evaluations for all conditions found in data_collection.
+    Cluster will be classified as "well clustered" if the mean(similarity) across 
+    all nodes is > thres_well. Or as "poorly clustered" if < thres_poor.
+    Clusters with only one node (singletons) will be counted as "non-clustered".
+    
+    Args:
+    --------
+    data_collection: list of pandas.DataFrame() 
+        List of DataFrames as created by evaluate_clusters().
+    labels: list
+        List of labels for the different conditions found in data_collection.
+    total_num_nodes: int
+        Give the total number of nodes present in the network.
+    thres_well: float
+        Threshold above which clusters will be classified as "well clustered". Default = 0.6.
+    thres_poor: float
+        Threshold below which clusters will be classified as "poorly clustered". Default = 0.4.
+    title: str
+        Title for plot. Default = None
+    """
+    
+    performance_data = []
+    ymax = total_num_nodes
+    legend_labels = ['well clustered nodes', 'poorly clustered nodes', 'non-clustered nodes']
+
+    for cluster_data in data_collection:
+        nodes_clustered_well = np.sum(cluster_data[(cluster_data['num_nodes']>1) 
+                                                   &(cluster_data['ref_sim_mean_nodes']>0.6)]['num_nodes'].values)
+        nodes_clustered_poor = np.sum(cluster_data[(cluster_data['num_nodes']>1) 
+                                                   &(cluster_data['ref_sim_mean_nodes']<0.4)]['num_nodes'].values)
+        nodes_not_clustered = np.sum(cluster_data[(cluster_data['num_nodes']<2)]['num_nodes'].values)
+
+        performance_data.append([nodes_clustered_well, nodes_clustered_poor, nodes_not_clustered])
+
+    fig = plt.figure(figsize=(8,5))
+    ax = plt.subplot(111)
+    plt.plot(labels, [x[0]/ymax for x in performance_data], 
+             'o-', color = 'crimson', label = legend_labels[0])
+    plt.plot(labels, [x[1]/ymax for x in performance_data], 
+             'o-', color = 'teal', label = legend_labels[1])
+    plt.plot(labels, [x[2]/ymax for x in performance_data], 
+             'o-', color = 'darkblue', alpha = 0.6, label = legend_labels[2])
+    plt.title(title)
+    plt.ylabel("Fraction of total nodes")
+    plt.xlabel("networking conditions")
+    plt.legend()
+
+    # Place legend
+    chartBox = ax.get_position()
+    ax.set_position([chartBox.x0, chartBox.y0, chartBox.width*0.8, chartBox.height])
+    ax.legend(loc='upper center', bbox_to_anchor=(1.25, 1))
 
 
 ## ----------------------------------------------------------------------------
