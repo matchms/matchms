@@ -19,7 +19,8 @@
 # Import libraries
 import numpy as np
 import networkx as nx
-from networkx.algorithms.connectivity import minimum_st_node_cut, minimum_st_edge_cut
+import community
+from networkx.algorithms.connectivity import minimum_st_edge_cut #, minimum_st_node_cut
 from networkx.algorithms.flow import shortest_augmenting_path
 import pandas as pd
 
@@ -228,7 +229,7 @@ def dilate_cluster(graph_main,
                         potential_link = (ID, [x[1] for x in potential_new_links][s])
                         potential_links.append(potential_link)
                        
-            if max_addition is None:
+            if max_per_cluster is None:
                 selected_candidates = np.argsort(best_scores)[::-1]
             else:
                 # Only add the top max_addition ones
@@ -609,6 +610,56 @@ def evaluate_clusters(graph_main,
     return cluster_data
 
 
+def evaluate_clusters_louvain(graph_main,
+                             M_sim_ref,
+                             resolution = 1.0):
+    """ Cluster given network using Louvain algorithm.
+    Then evaluate clusters of network based on given reference matrix.
+    
+    Args:
+    -------
+    graph_main: networkx.Graph
+        Graph, e.g. made using create_network() function. Based on networkx.
+    M_sim_ref: numpy array
+        2D array with all reference similarity values between all-vs-all nodes.
+    resolution: float
+        Louvain algorithm resolution parameter. Will change size of communities.
+        See also: https://python-louvain.readthedocs.io/en/latest/api.html Default=1.0
+    """
+    plt.style.use('ggplot')
+    # Find clusters using Louvain algorithm (and python-louvain library)
+    communities = community.best_partition(graph_main, 
+                                           weight='weight',
+                                           resolution = resolution)
+    nx.set_node_attributes(graph_main, communities, 'modularity')
+
+    clusters = []
+    for cluster_id in set(communities.values()):
+        cluster = [nodes for nodes in communities.keys() if communities[nodes] == cluster_id]
+        clusters.append(cluster)
+
+    num_nodes = []
+    ref_sim_mean_nodes = []
+    ref_sim_var_nodes = []
+
+    for cluster in clusters:
+        num_nodes.append(len(cluster))
+        mean_mol_sims = []
+        for node in cluster:
+            mean_mol_sims.append(M_sim_ref[node, cluster])
+
+        ref_sim_mean_nodes.append(np.mean(mean_mol_sims))
+        ref_sim_var_nodes.append(np.var(mean_mol_sims))
+
+    cluster_data = pd.DataFrame(list(zip(num_nodes,
+                                 ref_sim_mean_nodes,
+                                 ref_sim_var_nodes)), columns=['num_nodes',
+                                                             'ref_sim_mean_nodes',
+                                                             'ref_sim_var_nodes']) 
+    
+    return graph_main, cluster_data
+
+
 ## ----------------------------------------------------------------------------
 ## --------------------- Graph related plotting functions ---------------------
 ## ----------------------------------------------------------------------------
@@ -620,14 +671,18 @@ def plots_cluster_evaluations(cluster_data_collection,
                               total_num_nodes,
                               size_bins,
                               labels,
-                              title):
+                              title,
+                              filename = None):
     """ Plot cluster sizes and mean node similarity.
     
     Args:
     --------
-    
+    title: str
+        Title for plot. Default = None
+    filename: str
+        If not None: save figure to file with given name.
     """
-    
+    plt.style.use('ggplot')
     fig = plt.figure(figsize=(12,5))
     ax = plt.subplot(111)
     
@@ -655,8 +710,9 @@ def plots_cluster_evaluations(cluster_data_collection,
                         & (cluster_data['num_nodes'] > bins[i]) ]['ref_sim_mean_nodes'].values))
 
         num_elements[0] = total_num_nodes - np.sum(num_elements[1:])
-        if np.isnan(mean_edge_sim[0]):
-             mean_edge_sim[0] = 0
+        if 'ref_sim_mean_edges' in cluster_data.columns:
+            if np.isnan(mean_edge_sim[0]):
+                mean_edge_sim[0] = 0
         
         plt.scatter(x_labels, mean_node_sim, s=num_elements, facecolor="None", 
             edgecolors=[cmap(count/(num_plots))], lw= 3,
@@ -672,13 +728,18 @@ def plots_cluster_evaluations(cluster_data_collection,
 
     plt.title(title)
     
+    # Save figure to file
+    if filename is not None:
+        plt.savefig(filename, dpi=600)
+    
 
 def plot_clustering_performance(data_collection,
                                 labels,
                                 total_num_nodes,
                                 thres_well = 0.6,
                                 thres_poor = 0.4,
-                                title = None):
+                                title = None,
+                                filename = None):
     """ Plot cluster evaluations for all conditions found in data_collection.
     Cluster will be classified as "well clustered" if the mean(similarity) across 
     all nodes is > thres_well. Or as "poorly clustered" if < thres_poor.
@@ -698,6 +759,8 @@ def plot_clustering_performance(data_collection,
         Threshold below which clusters will be classified as "poorly clustered". Default = 0.4.
     title: str
         Title for plot. Default = None
+    filename: str
+        If not none: save figure to file with given name.
     """
     
     performance_data = []
@@ -730,15 +793,22 @@ def plot_clustering_performance(data_collection,
     chartBox = ax.get_position()
     ax.set_position([chartBox.x0, chartBox.y0, chartBox.width*0.8, chartBox.height])
     ax.legend(loc='upper center', bbox_to_anchor=(1.25, 1))
+    
+    # Save figure to file
+    if filename is not None:
+        plt.savefig(filename, dpi=600)
 
 
-def plot_cluster(G):
+def plot_cluster(G,
+                 filename = None):
     """ Very basic plotting function to inspect small to medium sized clusters (or networks).
     
     Args:
     --------
     G: networkx.Graph
         Networkx generated graph containing nodes and edges.
+    filename: str
+        If not none: save figure to file with given name.
     """
     if len(G.nodes) > 1:
         edges = [(u, v) for (u, v, d) in G.edges(data=True) ]
@@ -762,6 +832,9 @@ def plot_cluster(G):
 
         plt.axis('off')
         plt.show()
+        
+        if filename is not None:
+            plt.savefig(filename, dpi=600)
     else:
         print("Given graph has not enough nodes to plot network.")
 
