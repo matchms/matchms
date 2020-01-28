@@ -8,6 +8,7 @@
 *.h5
 *.npz
 *.xlsx
+config.py
 output/
 data/
 models_trained/
