@@ -12,5 +12,6 @@ config.py
 output/
 data/
 models_trained/
+computed_results/
 notebooks/.ipynb_checkpoints/
 __pycache__/
