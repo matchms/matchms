@@ -262,6 +262,7 @@ def library_matching(spectra_query,
         # Add Spec2Vec scores for all entries
         # And calculate if found inchikey is a match
         inchikey_match = []
+        inchikey_copies = []
         s2v_score_lst = []
         for m, idx in enumerate(IDs):
             #if s2v_match_lst[m] == 0:
@@ -271,9 +272,11 @@ def library_matching(spectra_query,
             else:
                 s2v_score_lst.append(M_spec2vec_similairies[idx,i])
                 
-            inchikey_match.append(1 * (spectra_library[idx].inchikey[:14] == spectra_query[i].inchikey[:14]))
-        matches_df = pd.DataFrame(list(zip(IDs, mass_match_lst, s2v_match_lst, s2v_score_lst, inchikey_match)),
-                                       columns = ['spectra_ID', 
+            inchikey = spectra_library[idx].inchikey[:14]
+            inchikey_match.append(1 * (inchikey == spectra_query[i].inchikey[:14]))
+            inchikey_copies.append(np.where(library_spectra_metadata["inchikey"].str[:14] == inchikey)[0].shape[0])
+        matches_df = pd.DataFrame(list(zip(IDs, inchikey_copies, mass_match_lst, s2v_match_lst, s2v_score_lst, inchikey_match)),
+                                       columns = ['spectra_ID', 'inchikey_copies', 
                                                   'mass_match_'+ str(int(mz_ppm[0])) + 'ppm', 
                                                   'S2V_top_n', 'S2V_similarity', 'inchikey_match'])
         # Add mass matches from other ppms (if given)
@@ -310,7 +313,7 @@ def library_matching(spectra_query,
         a, b = list(zip(*cosine_scores))
         found_matches[i]['modcosine_score'] = a
         found_matches[i]['modcosine_matches'] = b
-                
+
     return found_matches
 
 
