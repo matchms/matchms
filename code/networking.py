@@ -677,11 +677,22 @@ def plots_cluster_evaluations(cluster_data_collection,
     
     Args:
     --------
+    cluster_data_collection:  list
+        List of cluster data for all scenarios to be plotted.
+    M_sim_ref: numpy array
+        2D array with all reference similarity values between all-vs-all nodes.
+    total_num_nodes: int
+        Total number of nodes of graph.
+    size_bins: list of int
+        List of bins for cluster sizes.
+    labels: list of str
+        List of labels for all scenarios in list of cluster_data_collection.
     title: str
         Title for plot. Default = None
     filename: str
         If not None: save figure to file with given name.
     """
+    
     plt.style.use('ggplot')
     fig = plt.figure(figsize=(12,5))
     ax = plt.subplot(111)
@@ -793,9 +804,9 @@ def plot_clustering_performance(data_collection,
     plt.legend()
 
     # Place legend
-    chartBox = ax.get_position()
-    ax.set_position([chartBox.x0, chartBox.y0, chartBox.width*0.8, chartBox.height])
-    ax.legend(loc='upper center', bbox_to_anchor=(1.25, 1))
+    #chartBox = ax.get_position()
+    #ax.set_position([chartBox.x0, chartBox.y0, chartBox.width*0.8, chartBox.height])
+    #ax.legend(loc='upper center', bbox_to_anchor=(1.25, 1))
     
     # Save figure to file
     if filename is not None:
