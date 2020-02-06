@@ -739,7 +739,8 @@ def plot_clustering_performance(data_collection,
                                 thres_well = 0.6,
                                 thres_poor = 0.4,
                                 title = None,
-                                filename = None):
+                                filename = None,
+                                size_xy = (8,5)):
     """ Plot cluster evaluations for all conditions found in data_collection.
     Cluster will be classified as "well clustered" if the mean(similarity) across 
     all nodes is > thres_well. Or as "poorly clustered" if < thres_poor.
@@ -761,6 +762,8 @@ def plot_clustering_performance(data_collection,
         Title for plot. Default = None
     filename: str
         If not none: save figure to file with given name.
+    size_xy: tuple
+        Figure size. Default is (8,5).
     """
     
     performance_data = []
@@ -776,7 +779,7 @@ def plot_clustering_performance(data_collection,
 
         performance_data.append([nodes_clustered_well, nodes_clustered_poor, nodes_not_clustered])
 
-    fig = plt.figure(figsize=(8,5))
+    fig = plt.figure(figsize=size_xy)
     ax = plt.subplot(111)
     plt.plot(labels, [x[0]/ymax for x in performance_data], 
              'o-', color = 'crimson', label = legend_labels[0])
