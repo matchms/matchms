@@ -663,7 +663,7 @@ def evaluate_clusters_louvain(graph_main,
 ## ----------------------------------------------------------------------------
 ## --------------------- Graph related plotting functions ---------------------
 ## ----------------------------------------------------------------------------
-from matplotlib import pyplot as plt
+from matplotlib import pyplot as pltc
 import matplotlib
 
 def plots_cluster_evaluations(cluster_data_collection,
