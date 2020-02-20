@@ -3,6 +3,7 @@
 *.csv
 *.png
 *.pdf
+*.svg
 *.npy
 *.model
 *.h5
