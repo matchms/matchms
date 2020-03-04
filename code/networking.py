@@ -23,6 +23,7 @@ import community
 from networkx.algorithms.connectivity import minimum_st_edge_cut #, minimum_st_node_cut
 from networkx.algorithms.flow import shortest_augmenting_path
 import pandas as pd
+from matplotlib import pyplot as plt
 
 ## ----------------------------------------------------------------------------
 ## ---------------- Graph / networking related functions ----------------------
