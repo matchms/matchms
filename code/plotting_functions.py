@@ -19,7 +19,10 @@
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.ticker import PercentFormatter
+from rdkit import Chem
 
+from MS_functions import create_MS_documents
+import MS_similarity_classical as MS_sim_classic
 
 ## ----------------------------------------------------------------------------------------
 ## ---------------------------- Plotting functions ----------------------------------------
@@ -292,7 +295,7 @@ def plot_spectra_comparison(MS_measure,
         for i, candidate_id in enumerate([ID1, ID2]):
             smiles.append(spectra[candidate_id].metadata["smiles"])
             mol = Chem.MolFromSmiles(smiles[i])
-            Draw.MolToMPL(mol, size=size, kekulize=True, wedgeBonds=True, imageType=None, fitImage=True)
+            Chem.Draw.MolToMPL(mol, size=size, kekulize=True, wedgeBonds=True, imageType=None, fitImage=True)
             plt.xlim((0, 2.5))
             plt.ylim((0, 2.5))
     
@@ -353,7 +356,7 @@ def plot_smiles(query_id, spectra, MS_measure, num_candidates = 10,
             if mol != None:
                 mol.SetProp('_Name', smiles[i])
                 if plot_type == 'single':
-                    Draw.MolToMPL(mol, size=size)
+                    Chem.Draw.MolToMPL(mol, size=size)
         
         if plot_type != "single":    # this will only work if there's no conflict with rdkit and pillow...       
             Chem.Draw.MolsToGridImage(molecules,legends=[mol.GetProp('_Name') for mol in molecules])
@@ -367,7 +370,7 @@ def plot_smiles(query_id, spectra, MS_measure, num_candidates = 10,
             mol = Chem.MolFromSmiles(smiles[i])
 #            mol.SetProp('_Name', smiles[i])
             if plot_type == 'single':
-                Draw.MolToMPL(mol, size=size)
+                Chem.Draw.MolToMPL(mol, size=size)
         
         if plot_type != "single":    # this will only work if there's no conflict with rdkit and pillow...       
             Chem.Draw.MolsToGridImage(molecules,legends=[mol.GetProp('_Name') for mol in molecules])
