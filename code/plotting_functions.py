@@ -20,6 +20,9 @@ import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.ticker import PercentFormatter
 from rdkit import Chem
+from rdkit.Chem import Draw
+from IPython.display import SVG, display
+from scour import scour
 
 from MS_functions import create_MS_documents
 import MS_similarity_classical as MS_sim_classic
@@ -155,42 +158,46 @@ def plot_spectra_comparison(MS_measure,
                             max_mz = 500,
                             threshold = 0.01,
                             tol = 0.5,
-                            method = 'cosine', #'molnet'
+                            method = 'cosine', 
                             wordsim_cutoff = 0.5,
-                            plot_molecules = False):
-    """
-
-    """
-    from scipy import spatial
-    #import matplotlib
-    plot_colors = ['darkcyan', 'purple']#['seagreen', 'steelblue']#['darkcyan', 'firebrick']
+                            display_molecules = False):
+    """ In-depth visual comparison of spectral similarity scores,
+    calculated based on cosine/mod.cosine and Spev2Vec.
     
+    Args:
+    --------
+    method: str
+        'cosine' or 'modcos' (modified cosine score)
+    """
+    plt.style.use('ggplot')
+    
+    from scipy import spatial
+    plot_colors = ['darkcyan', 'purple'] 
     
     # Definitions for the axes
     left, width = 0.1, 0.65
     bottom, height = 0.1, 0.65
     spacing = 0.005
-#    cbar_space = 0.1
 
     rect_wordsim = [left, bottom, width, height]
     rect_specx = [left, bottom + height + spacing, width, 0.2]
-    rect_specy = [left + width, bottom, 0.2, height]
-#    rect_cbar = [left, bottom, width, cbar_space]
-    
+    rect_specy = [left + width, bottom, 0.2, height] 
     
     peaks1 = np.array(spectra[ID1].peaks.copy())
     peaks2 = np.array(spectra[ID2].peaks.copy())
-#    peak_number.append(len(peaks))
-#    max_intens = max(np.max(peaks1[:,1]), np.max(peaks2[:,1])) 
     peaks1[:,1] = peaks1[:,1]/np.max(peaks1[:,1])
     peaks2[:,1] = peaks2[:,1]/np.max(peaks2[:,1])
     
+    # Sort by m/z to be in line with word order in MS_documents
+    peaks1 = peaks1[np.lexsort((peaks1[:,1], peaks1[:,0])),:]
+    peaks2 = peaks2[np.lexsort((peaks2[:,1], peaks2[:,0])),:]
+    
     # Remove peaks lower than threshold
-    dictionary = [MS_measure.dictionary[x] for x in MS_measure.dictionary]
     select1 = np.where((peaks1[:,1] > threshold) & (peaks1[:,0] <= max_mz) & (peaks1[:,0] >= min_mz))[0]
     select2 = np.where((peaks2[:,1] > threshold) & (peaks2[:,0] <= max_mz) & (peaks2[:,0] >= min_mz))[0]
     
     # TODO: only include sub-function to create documents...
+    dictionary = [MS_measure.dictionary[x] for x in MS_measure.dictionary]
     MS_documents, MS_documents_intensity, _ = create_MS_documents([spectra[x] for x in [ID1,ID2]], 
                                                                  num_decimals = num_decimals, 
                                                                  peak_loss_words = ['peak_', 'loss_'],
@@ -211,7 +218,6 @@ def plot_spectra_comparison(MS_measure,
     Csim_words = 1 - spatial.distance.cdist(word_vectors1, word_vectors2, 'cosine')
     Csim_words[Csim_words < wordsim_cutoff] = 0  # Remove values below cutoff
     
-
     # Plot spectra
     # -------------------------------------------------------------------------
     plt.figure(figsize=(12, 12))
@@ -222,9 +228,8 @@ def plot_spectra_comparison(MS_measure,
     ax_specx.tick_params(direction='in', labelbottom=False)
     ax_specy = plt.axes(rect_specy)
     ax_specy.tick_params(direction='in', labelleft=False)
-#    ax_cbar= fig.add_axes(rect_cbar)
     
-    # Word similarity plot:
+    # Spec2Vec similarity plot:
     # -------------------------------------------------------------------------
     data_x = []
     data_y = []
@@ -235,37 +240,25 @@ def plot_spectra_comparison(MS_measure,
             data_y.append(peaks2[j,0])
             data_z.append(Csim_words[i,j])
 
-
-    cm = plt.cm.get_cmap('PuRd') #PuRdYlGn('RdYlBu')
-    
+    cm = plt.cm.get_cmap('YlOrRd') #'PuRd') #PuRdYlGn('RdYlBu')
     ax_wordsim.scatter(data_x, data_y, s = 500*np.array(data_z)**2, c= data_z, cmap=cm, alpha=0.4) #s = 10000*np.array(data_z)**2 
 
-    zero_pairs = MS_sim_classic.find_pairs(peaks1, peaks2, tol=tol, shift=0.0)
-    
+    # (modified) Cosine similarity plot:
+    # -------------------------------------------------------------------------    
     if method == 'cosine':
-        matching_pairs = zero_pairs
-    elif method == 'molnet':
+        shift = 0
+    elif method == 'modcos':
         shift = spectra[ID1].parent_mz - spectra[ID2].parent_mz
-        nonzero_pairs = MS_sim_classic.find_pairs(peaks1, peaks2, tol=tol, shift=shift)
-        matching_pairs = zero_pairs + nonzero_pairs
     else:
-        print("Given method inkown.")
-        
-    matching_pairs = sorted(matching_pairs,key = lambda x: x[2], reverse = True)
-    used1 = set()
-    used2 = set()
-    score = 0.0
-    used_matches = []
-    for m in matching_pairs:
-        if not m[0] in used1 and not m[1] in used2:
-            score += m[2]
-            used1.add(m[0])
-            used2.add(m[1])
-            used_matches.append(m)
+        print("Given method unkown.")
+    
+    _, used_matches = MS_sim_classic.cosine_score_greedy(peaks1,
+                                                          peaks2,
+                                                           mass_shift = shift,
+                                                           tol = 0.005,
+                                                           min_intens = 0,
+                                                           use_numba = True)     
        
-#    zero_pairs = find_pairs(peaks1, peaks2, tol=tol, shift=0.0)
-#    zero_pairs = sorted(zero_pairs, key = lambda x: x[2], reverse = True)
-#    idx1, idx2, _ = zip(*zero_pairs)
     idx1, idx2, _ = zip(*used_matches)
     cosine_x = []
     cosine_y = []
@@ -277,31 +270,69 @@ def plot_spectra_comparison(MS_measure,
     ax_specx.vlines(peaks1[:,0], [0], peaks1[:,1], color=plot_colors[0])
     ax_specx.plot(peaks1[:,0], peaks1[:,1], '.')  # Stem ends
     ax_specx.plot([peaks1[:,0].max(), peaks1[:,0].min()], [0, 0],  '--')  # Middle bar
-#    plt.title('Spectrum 1')
     
     ax_specy.hlines(peaks2[:,0], [0], peaks2[:,1], color=plot_colors[1])
     ax_specy.plot(peaks2[:,1], peaks2[:,0], '.')  # Stem ends
     ax_specy.plot([0, 0], [peaks2[:,0].min(), peaks2[:,0].max()], '--')  # Middle bar
-#    plt.title('Spectrum 2')
 
    
     plt.show()
     
     # Plot molecules
     # -------------------------------------------------------------------------
-    if plot_molecules:
-        size = (200, 200)
+    if display_molecules:
         smiles = []  
         for i, candidate_id in enumerate([ID1, ID2]):
             smiles.append(spectra[candidate_id].metadata["smiles"])
-            mol = Chem.MolFromSmiles(smiles[i])
-            Chem.Draw.MolToMPL(mol, size=size, kekulize=True, wedgeBonds=True, imageType=None, fitImage=True)
-            plt.xlim((0, 2.5))
-            plt.ylim((0, 2.5))
+
+        plot_molecules(smiles)
     
     return Csim_words
 
 
+def Scour(target, source, env=[]):
+    """ Use scour to clean an svg file.
+    
+    """
+    options = scour.generateDefaultOptions()
+
+    ## override defaults for max cleansing
+    options.enable_viewboxing = True
+    options.strip_comments = True
+    options.strip_ids = True
+    options.remove_metadata = True
+    options.indent_type = None
+    options.shorten_ids = True
+
+    if 'SCOUR_OPTIONS' in env:
+        options.__dict__.update(env['SCOUR_OPTIONS'])
+
+    if False:
+        from pprint import pprint
+        print("\nUsing Scour options:\n")
+        pprint(options.__dict__)
+
+    instream = open(source, 'rb')
+    outstream = open(target, 'wb')
+
+    scour.start(options, instream, outstream)
+    
+
+def plot_molecules(smiles_lst):
+    if not isinstance(smiles_lst, list):
+        smiles_lst = [smiles_lst]
+    for smiles in smiles_lst:
+        filename = "draw_mols_temp.svg"
+        mol = Chem.MolFromSmiles(smiles)
+        Draw.MolToFile(mol, filename)
+        
+        # Clean svg using scour
+        Scour("draw_mols_temp_corr.svg", filename, [])
+        
+        # Display cleaned svg
+        display(SVG(filename='draw_mols_temp_corr.svg'))
+        
+        
 def plot_smiles(query_id, spectra, MS_measure, num_candidates = 10,
                    sharex=True, labels=False, similarity_method = "centroid",
                    plot_type = "single", molnet_sim = None):
@@ -356,10 +387,10 @@ def plot_smiles(query_id, spectra, MS_measure, num_candidates = 10,
             if mol != None:
                 mol.SetProp('_Name', smiles[i])
                 if plot_type == 'single':
-                    Chem.Draw.MolToMPL(mol, size=size)
+                    Draw.MolToMPL(mol, size=size)
         
         if plot_type != "single":    # this will only work if there's no conflict with rdkit and pillow...       
-            Chem.Draw.MolsToGridImage(molecules,legends=[mol.GetProp('_Name') for mol in molecules])
+            Draw.MolsToGridImage(molecules,legends=[mol.GetProp('_Name') for mol in molecules])
             
     elif isinstance(spectra, list):
         # Assume that it is then a list of Spectrum objects
@@ -368,12 +399,11 @@ def plot_smiles(query_id, spectra, MS_measure, num_candidates = 10,
         for i, candidate_id in enumerate(candidates_idx):
             smiles.append(spectra[candidate_id].metadata["smiles"])
             mol = Chem.MolFromSmiles(smiles[i])
-#            mol.SetProp('_Name', smiles[i])
             if plot_type == 'single':
-                Chem.Draw.MolToMPL(mol, size=size)
+                Draw.MolToMPL(mol, size=size)
         
         if plot_type != "single":    # this will only work if there's no conflict with rdkit and pillow...       
-            Chem.Draw.MolsToGridImage(molecules,legends=[mol.GetProp('_Name') for mol in molecules])
+            Draw.MolsToGridImage(molecules,legends=[mol.GetProp('_Name') for mol in molecules])
 
 
 def top_score_histogram(spec_sim, mol_sim, 
