@@ -35,7 +35,7 @@ import MS_similarity_classical as MS_sim_classic
 def plot_precentile(Arr_sim, Arr_ref, num_bins = 1000, show_top_percentile = 1.0):
     """ Plot top percentile (as specified by show_top_percentile) of best restults
     in Arr_sim and compare against reference values in Arr_ref.
-    
+
     Args:
     -------
     Arr_sim: numpy array
@@ -43,7 +43,7 @@ def plot_precentile(Arr_sim, Arr_ref, num_bins = 1000, show_top_percentile = 1.0
     Arr_ref: numpy array
         Array of reference values to evaluate the quality of Arr_sim.
     num_bins: int
-        Number of bins to divide data (default = 1000)   
+        Number of bins to divide data (default = 1000)
     show_top_percentile
         Choose which part to plot. Will plot the top 'show_top_percentile' part of
         all similarity values given in Arr_sim. Default = 1.0
@@ -53,30 +53,30 @@ def plot_precentile(Arr_sim, Arr_ref, num_bins = 1000, show_top_percentile = 1.0
     starting_point = Arr_sim[idx[-start]]
     if starting_point == 0:
         print("not enough datapoints != 0 above given top-precentile")
-        
+
     # Remove all data below show_top_percentile
     low_As = np.where(Arr_sim < starting_point)[0]
 
     length_selected = Arr_sim.shape[0] - low_As.shape[0] #start+1
-    
+
     Data = np.zeros((2, length_selected))
     Data[0,:] = np.delete(Arr_sim, low_As)
     Data[1,:] = np.delete(Arr_ref, low_As)
     Data = Data[:,np.lexsort((Data[1,:], Data[0,:]))]
 
     ref_score_cum = []
-    
+
     for i in range(num_bins):
         low = int(i * length_selected/num_bins)
         #high = int((i+1) * length_selected/num_bins)
         ref_score_cum.append(np.mean(Data[1,low:]))
     ref_score_cum = np.array(ref_score_cum)
-                         
+
     fig, ax = plt.subplots(figsize=(6,6))
     plt.plot((show_top_percentile/num_bins*(1+np.arange(num_bins)))[::-1], ref_score_cum, color='black')
     plt.xlabel("Top percentile of spectral similarity score g(s,s')")
     plt.ylabel("Mean molecular similarity (f(t,t') within that percentile)")
-    
+
     return ref_score_cum
 
 
@@ -84,15 +84,15 @@ def plot_precentile(Arr_sim, Arr_ref, num_bins = 1000, show_top_percentile = 1.0
 def get_spaced_colors_hex(n):
     """ Create set of 'n' well-distinguishable colors
     """
-    spaced_colors = ["FF0000", "00FF00", "0000FF", "FFFF00", "FF00FF", "00FFFF", "000000", 
-        "800000", "008000", "000080", "808000", "800080", "008080", "808080", 
-        "C00000", "00C000", "0000C0", "C0C000", "C000C0", "00C0C0", "C0C0C0", 
-        "400000", "004000", "000040", "404000", "400040", "004040", "404040", 
-        "200000", "002000", "000020", "202000", "200020", "002020", "202020", 
-        "600000", "006000", "000060", "606000", "600060", "006060", "606060", 
-        "A00000", "00A000", "0000A0", "A0A000", "A000A0", "00A0A0", "A0A0A0", 
+    spaced_colors = ["FF0000", "00FF00", "0000FF", "FFFF00", "FF00FF", "00FFFF", "000000",
+        "800000", "008000", "000080", "808000", "800080", "008080", "808080",
+        "C00000", "00C000", "0000C0", "C0C000", "C000C0", "00C0C0", "C0C0C0",
+        "400000", "004000", "000040", "404000", "400040", "004040", "404040",
+        "200000", "002000", "000020", "202000", "200020", "002020", "202020",
+        "600000", "006000", "000060", "606000", "600060", "006060", "606060",
+        "A00000", "00A000", "0000A0", "A0A000", "A000A0", "00A0A0", "A0A0A0",
         "E00000", "00E000", "0000E0", "E0E000", "E000E0", "00E0E0", "E0E0E0"]
-    
+
     RGB_colors = ["#"+x for x in spaced_colors[:n] ]
 
     return RGB_colors
@@ -108,19 +108,19 @@ def plot_spectra(spectra, compare_ids, min_mz = 50, max_mz = 500):
     for i, id in enumerate(compare_ids):
         peaks = np.array(spectra[id].peaks.copy())
         peak_number.append(len(peaks))
-        peaks[:,1] = peaks[:,1]/np.max(peaks[:,1]); 
+        peaks[:,1] = peaks[:,1]/np.max(peaks[:,1]);
 
         markerline, stemlines, baseline = plt.stem(peaks[:,0], peaks[:,1], linefmt='-', markerfmt='.', basefmt='r-')
         plt.setp(stemlines, 'color', RGB_colors[i])
-    
+
     plt.xlim((min_mz, max_mz))
     plt.grid(True)
     plt.title('Spectrum')
     plt.xlabel('m/z')
     plt.ylabel('peak intensity')
-    
+
     plt.show()
-    
+
     print("Number of peaks: ", peak_number)
 
 
@@ -134,46 +134,50 @@ def plot_losses(spectra, compare_ids, min_loss = 0, max_loss = 500):
     for i, id in enumerate(compare_ids):
         losses = np.array(spectra[id].losses.copy())
         losses_number.append(len(losses))
-        losses[:,1] = losses[:,1]/np.max(losses[:,1]); 
+        losses[:,1] = losses[:,1]/np.max(losses[:,1]);
 
         markerline, stemlines, baseline = plt.stem(losses[:,0], losses[:,1], linefmt='-', markerfmt='.', basefmt='r-')
         plt.setp(stemlines, 'color', RGB_colors[i])
-    
+
     plt.xlim((min_loss, max_loss))
     plt.grid(True)
     plt.title('Spectrum')
     plt.xlabel('m/z')
     plt.ylabel('peak intensity')
-    
+
     plt.show()
-    
+
     print("Number of peaks: ", losses_number)
 
 
 def plot_spectra_comparison(MS_measure,
                             spectra,
                             num_decimals,
-                            ID1, ID2, 
-                            min_mz = 5, 
+                            ID1, ID2,
+                            min_mz = 5,
                             max_mz = 500,
                             threshold = 0.01,
                             tol = 0.5,
-                            method = 'cosine', 
+                            method = 'cosine',
                             wordsim_cutoff = 0.5,
-                            display_molecules = False):
+                            circle_size = 5,
+                            padding = 10,
+                            display_molecules = False,
+                            figsize=(12, 12),
+                            filename = None):
     """ In-depth visual comparison of spectral similarity scores,
     calculated based on cosine/mod.cosine and Spev2Vec.
-    
+
     Args:
     --------
     method: str
         'cosine' or 'modcos' (modified cosine score)
     """
     plt.style.use('ggplot')
-    
+
     from scipy import spatial
-    plot_colors = ['darkcyan', 'purple'] 
-    
+    plot_colors = ['darkcyan', 'purple']
+
     # Definitions for the axes
     left, width = 0.1, 0.65
     bottom, height = 0.1, 0.65
@@ -181,54 +185,61 @@ def plot_spectra_comparison(MS_measure,
 
     rect_wordsim = [left, bottom, width, height]
     rect_specx = [left, bottom + height + spacing, width, 0.2]
-    rect_specy = [left + width, bottom, 0.2, height] 
-    
+    rect_specy = [left + width, bottom, 0.2, height]
+
     peaks1 = np.array(spectra[ID1].peaks.copy())
     peaks2 = np.array(spectra[ID2].peaks.copy())
     peaks1[:,1] = peaks1[:,1]/np.max(peaks1[:,1])
     peaks2[:,1] = peaks2[:,1]/np.max(peaks2[:,1])
-    
+
     # Sort by m/z to be in line with word order in MS_documents
     peaks1 = peaks1[np.lexsort((peaks1[:,1], peaks1[:,0])),:]
     peaks2 = peaks2[np.lexsort((peaks2[:,1], peaks2[:,0])),:]
-    
+
     # Remove peaks lower than threshold
     select1 = np.where((peaks1[:,1] > threshold) & (peaks1[:,0] <= max_mz) & (peaks1[:,0] >= min_mz))[0]
     select2 = np.where((peaks2[:,1] > threshold) & (peaks2[:,0] <= max_mz) & (peaks2[:,0] >= min_mz))[0]
-    
+
     # TODO: only include sub-function to create documents...
     dictionary = [MS_measure.dictionary[x] for x in MS_measure.dictionary]
-    MS_documents, MS_documents_intensity, _ = create_MS_documents([spectra[x] for x in [ID1,ID2]], 
-                                                                 num_decimals = num_decimals, 
+    MS_documents, MS_documents_intensity, _ = create_MS_documents([spectra[x] for x in [ID1,ID2]],
+                                                                 num_decimals = num_decimals,
                                                                  peak_loss_words = ['peak_', 'loss_'],
-                                                                 min_loss = 0, 
+                                                                 min_loss = 0,
                                                                  max_loss = max_mz,
                                                                  ignore_losses = True)
-    
+
     # Remove words/peaks that are not in dictionary
-    select1 = np.array([x for x in select1 if MS_documents[0][x] in dictionary])    
-    select2 = np.array([x for x in select2 if MS_documents[1][x] in dictionary])    
-    
+    select1 = np.array([x for x in select1 if MS_documents[0][x] in dictionary])
+    select2 = np.array([x for x in select2 if MS_documents[1][x] in dictionary])
+
     peaks1 = peaks1[select1, :]
-    peaks2 = peaks2[select2, :] 
+    peaks2 = peaks2[select2, :]
+    min_peaks1 = np.min(peaks1[:,0])
+    min_peaks2 = np.min(peaks2[:,0])
+    max_peaks1 = np.max(peaks1[:,0])
+    max_peaks2 = np.max(peaks2[:,0])
 
     word_vectors1 = MS_measure.model_word2vec.wv[[MS_documents[0][x] for x in select1]]
     word_vectors2 = MS_measure.model_word2vec.wv[[MS_documents[1][x] for x in select2]]
-    
+
     Csim_words = 1 - spatial.distance.cdist(word_vectors1, word_vectors2, 'cosine')
     Csim_words[Csim_words < wordsim_cutoff] = 0  # Remove values below cutoff
-    
+    print(np.min(Csim_words))
+
     # Plot spectra
     # -------------------------------------------------------------------------
-    plt.figure(figsize=(12, 12))
-    
+    fig = plt.figure(figsize=figsize)
+    # Word similariy plot (central)
     ax_wordsim = plt.axes(rect_wordsim)
     ax_wordsim.tick_params(direction='in', top=True, right=True)
+    # Spectra plot (top)
     ax_specx = plt.axes(rect_specx)
     ax_specx.tick_params(direction='in', labelbottom=False)
+    # Spectra plo 2 (right)
     ax_specy = plt.axes(rect_specy)
     ax_specy.tick_params(direction='in', labelleft=False)
-    
+
     # Spec2Vec similarity plot:
     # -------------------------------------------------------------------------
     data_x = []
@@ -240,59 +251,90 @@ def plot_spectra_comparison(MS_measure,
             data_y.append(peaks2[j,0])
             data_z.append(Csim_words[i,j])
 
-    cm = plt.cm.get_cmap('YlOrRd') #'PuRd') #PuRdYlGn('RdYlBu')
-    ax_wordsim.scatter(data_x, data_y, s = 500*np.array(data_z)**2, c= data_z, cmap=cm, alpha=0.4) #s = 10000*np.array(data_z)**2 
+    # Sort by word similarity
+    data_x = np.array(data_x)
+    data_y = np.array(data_y)
+    data_z = np.array(data_z)
+    idx = np.lexsort((data_x, data_y, data_z))
+
+
+    cm = plt.cm.get_cmap('RdYlBu_r') #'YlOrRd') #'RdBu_r')
+
+    # Plot word similarities
+    wordsimplot = ax_wordsim.scatter(data_x[idx], data_y[idx],
+                       s = 100 * circle_size * (0.01 + np.array(data_z[idx])**2),
+                       c= data_z[idx], cmap=cm, alpha=0.6)
 
     # (modified) Cosine similarity plot:
-    # -------------------------------------------------------------------------    
+    # -------------------------------------------------------------------------
     if method == 'cosine':
         shift = 0
     elif method == 'modcos':
         shift = spectra[ID1].parent_mz - spectra[ID2].parent_mz
     else:
         print("Given method unkown.")
-    
+
     _, used_matches = MS_sim_classic.cosine_score_greedy(peaks1,
-                                                          peaks2,
-                                                           mass_shift = shift,
-                                                           tol = 0.005,
-                                                           min_intens = 0,
-                                                           use_numba = True)     
-       
+                                                         peaks2,
+                                                         mass_shift = shift,
+                                                         tol = 0.005,
+                                                         min_intens = 0,
+                                                         use_numba = True)
+
     idx1, idx2, _ = zip(*used_matches)
     cosine_x = []
     cosine_y = []
     for i in range(len(idx1)):
         cosine_x.append(peaks1[idx1[i],0])
         cosine_y.append(peaks2[idx2[i],0])
-    ax_wordsim.scatter(cosine_x, cosine_y, s= 50, c = 'black')    
 
+    # Plot (mod.) cosine similarities
+    ax_wordsim.scatter(cosine_x, cosine_y, s= 100, c = 'black', marker=(5, 2))
+    ax_wordsim.set_xlim(min_peaks1-padding, max_peaks1+padding)
+    ax_wordsim.set_ylim(min_peaks2-padding, max_peaks2+padding)
+    ax_wordsim.set_xlabel('spectra 1 - fragment mz', fontsize=16)
+    ax_wordsim.set_ylabel('spectra 2 - fragment mz', fontsize=16)
+    ax_wordsim.tick_params(labelsize=13)
+
+    # Plot spectra 1
     ax_specx.vlines(peaks1[:,0], [0], peaks1[:,1], color=plot_colors[0])
     ax_specx.plot(peaks1[:,0], peaks1[:,1], '.')  # Stem ends
     ax_specx.plot([peaks1[:,0].max(), peaks1[:,0].min()], [0, 0],  '--')  # Middle bar
-    
+    ax_specx.set_xlim(min_peaks1-padding, max_peaks1+padding)
+    ax_specx.set_ylabel('peak intensity (relative)', fontsize=16)
+    ax_specx.tick_params(labelsize=13)
+
+    # Plot spectra 2
     ax_specy.hlines(peaks2[:,0], [0], peaks2[:,1], color=plot_colors[1])
     ax_specy.plot(peaks2[:,1], peaks2[:,0], '.')  # Stem ends
     ax_specy.plot([0, 0], [peaks2[:,0].min(), peaks2[:,0].max()], '--')  # Middle bar
+    ax_specy.set_ylim(min_peaks2-padding, max_peaks2+padding)
+    ax_specy.set_xlabel('peak intensity (relative)', fontsize=16)
+    ax_specy.tick_params(labelsize=13)
 
-   
+    fig.colorbar(wordsimplot, ax=ax_specy)
+    if filename is not None:
+        plt.savefig(filename)
     plt.show()
-    
+
     # Plot molecules
     # -------------------------------------------------------------------------
     if display_molecules:
-        smiles = []  
+        smiles = []
         for i, candidate_id in enumerate([ID1, ID2]):
             smiles.append(spectra[candidate_id].metadata["smiles"])
 
-        plot_molecules(smiles)
-    
-    return Csim_words
+        if filename is not None:
+            plot_molecules(smiles,
+                          filename = filename[:-4] + '_molecules')
+        else:
+            plot_molecules(smiles)
 
+    return Csim_words
 
 def Scour(target, source, env=[]):
     """ Use scour to clean an svg file.
-    
+
     """
     options = scour.generateDefaultOptions()
 
@@ -316,28 +358,40 @@ def Scour(target, source, env=[]):
     outstream = open(target, 'wb')
 
     scour.start(options, instream, outstream)
-    
 
-def plot_molecules(smiles_lst):
+
+def plot_molecules(smiles_lst,
+                  filename = None):
+    """ Plot molecule from smile(s).
+    Uses Scour to clean rdkit svg.
+
+    filename: str
+        If filename is given, molecules will be saved to filename.
+    """
     if not isinstance(smiles_lst, list):
         smiles_lst = [smiles_lst]
-    for smiles in smiles_lst:
-        filename = "draw_mols_temp.svg"
+    for i, smiles in enumerate(smiles_lst):
+        temp_file = "draw_mols_temp.svg"
         mol = Chem.MolFromSmiles(smiles)
-        Draw.MolToFile(mol, filename)
-        
+        Draw.MolToFile(mol, temp_file)
+
         # Clean svg using scour
-        Scour("draw_mols_temp_corr.svg", filename, [])
-        
+        if filename is not None:
+            file = filename.split('.svg')[0] + str(i) + '.svg'
+        else:
+            file = "draw_mols_temp_corr.svg"
+        Scour(file, temp_file , [])
+
         # Display cleaned svg
-        display(SVG(filename='draw_mols_temp_corr.svg'))
-        
-        
+        display(SVG(filename=temp_file))
+
+
+
 def plot_smiles(query_id, spectra, MS_measure, num_candidates = 10,
                    sharex=True, labels=False, similarity_method = "centroid",
                    plot_type = "single", molnet_sim = None):
     """ Plot molecules for closest candidates
-    
+
     """
 
     # Select chosen similarity methods
@@ -375,11 +429,11 @@ def plot_smiles(query_id, spectra, MS_measure, num_candidates = 10,
         # If spectra is given as a dictionary
         keys = []
         for key, value in spectra.items():
-            keys.append(key)  
-            
-        smiles = []  
+            keys.append(key)
+
+        smiles = []
         molecules = []
-        
+
         for i, candidate_id in enumerate(candidates_idx):
             key = keys[candidate_id]
             smiles.append(spectra[key]["smiles"])
@@ -388,38 +442,38 @@ def plot_smiles(query_id, spectra, MS_measure, num_candidates = 10,
                 mol.SetProp('_Name', smiles[i])
                 if plot_type == 'single':
                     Draw.MolToMPL(mol, size=size)
-        
-        if plot_type != "single":    # this will only work if there's no conflict with rdkit and pillow...       
+
+        if plot_type != "single":    # this will only work if there's no conflict with rdkit and pillow...
             Draw.MolsToGridImage(molecules,legends=[mol.GetProp('_Name') for mol in molecules])
-            
+
     elif isinstance(spectra, list):
         # Assume that it is then a list of Spectrum objects
-        
-        smiles = []  
+
+        smiles = []
         for i, candidate_id in enumerate(candidates_idx):
             smiles.append(spectra[candidate_id].metadata["smiles"])
             mol = Chem.MolFromSmiles(smiles[i])
             if plot_type == 'single':
                 Draw.MolToMPL(mol, size=size)
-        
-        if plot_type != "single":    # this will only work if there's no conflict with rdkit and pillow...       
+
+        if plot_type != "single":    # this will only work if there's no conflict with rdkit and pillow...
             Draw.MolsToGridImage(molecules,legends=[mol.GetProp('_Name') for mol in molecules])
 
 
-def top_score_histogram(spec_sim, mol_sim, 
-                        score_threshold, 
-                        num_candidates, 
-                        num_bins = 50, 
+def top_score_histogram(spec_sim, mol_sim,
+                        score_threshold,
+                        num_candidates,
+                        num_bins = 50,
                         filename = None):
-    """ Plot histogram of Tanimoto scores (mol_sim) of top selected candidates based on 
-    spectrum similarity scores (spec_sim). 
-    
+    """ Plot histogram of Tanimoto scores (mol_sim) of top selected candidates based on
+    spectrum similarity scores (spec_sim).
+
     spec_sim, mol_sim : to be calculated with evaluate_measure function.
-    
+
     filename: str
         If not none: save figure to file with given name.
     """
-    
+
     fig, ax = plt.subplots(figsize=(10,10))
 
     selection = np.where(spec_sim[:,1:] > score_threshold)
@@ -441,29 +495,29 @@ def top_score_histogram(spec_sim, mol_sim,
 
     if filename is not None:
         plt.savefig(filename, dpi=600)
-    
+
     plt.show()
 
 
-def similarity_histogram(M_sim, M_sim_ref, 
+def similarity_histogram(M_sim, M_sim_ref,
                          score_threshold,
-                         num_bins = 50, 
+                         num_bins = 50,
                          exclude_IDs = None,
                          filename = None,
                          exclude_diagonal = True):
-    """ Plot histogram of Reference scores (from matrix M_sim_ref) for all pairs 
-    with similarity score >= score_threshold. 
-    
+    """ Plot histogram of Reference scores (from matrix M_sim_ref) for all pairs
+    with similarity score >= score_threshold.
+
     M_sim: numpy array
         Matrix with similarities between pairs.
     M_sim_ref: numpy array
         Matrix with reference scores/similarity values between pairs.
-    
+
     filename: str
         If not none: save figure to file with given name.
     """
     fig, ax = plt.subplots(figsize=(10,10))
-    
+
     if exclude_IDs is not None:
         # Remove elements in exclude_IDs array
         IDs = np.arange(0,M_sim.shape[0])
@@ -471,32 +525,32 @@ def similarity_histogram(M_sim, M_sim_ref,
         M_sim = np.delete(M_sim, IDs[exclude_IDs], axis=1)
         M_sim_ref = np.delete(M_sim_ref, IDs[exclude_IDs], axis=0)
         M_sim_ref = np.delete(M_sim_ref, IDs[exclude_IDs], axis=1)
-        
+
         IDs = np.delete(IDs, IDs[exclude_IDs])
-        
+
     if exclude_diagonal == True:
         # Exclude diagonal
         M_sim[np.arange(0,M_sim.shape[0]), np.arange(0,M_sim.shape[0])] = score_threshold - 1
-    
+
     selection = np.where(M_sim[:,:] >= score_threshold)
     X = M_sim_ref[selection].reshape(len(selection[0]))
     n, bins, patches = plt.hist(X, num_bins, weights=np.ones(len(X))/len(X), facecolor='blue', edgecolor='white', alpha=0.9)
     plt.gca().yaxis.set_major_formatter(PercentFormatter(1))
     plt.title("Total reference scores for all candidates with similarity score > " + str(score_threshold), fontsize = 16)
 #    plt.set_xticklabels(rotation=0, fontsize=12)
-    ax.tick_params(labelsize=12)   
+    ax.tick_params(labelsize=12)
     plt.xlabel("Reference score.", fontsize = 14)
     plt.ylabel("Percentage", fontsize = 14)
 
     if filename is not None:
         plt.savefig(filename, dpi=600)
-    
+
     plt.show()
 
     return n, bins
 
 
-def compare_best_results(spectra_dict, 
+def compare_best_results(spectra_dict,
                          spectra,
                          MS_measure,
                          tanimoto_sim,
@@ -521,12 +575,12 @@ def compare_best_results(spectra_dict,
         Define method to use (default = "centroid").
     """
     num_spectra = len(spectra)
-        
+
     spec_best = np.zeros((num_spectra, num_candidates, len(similarity_method)))
 #    spec_best_idx = np.zeros((num_spectra, num_candidates))
     mol_best = np.zeros((num_spectra, num_candidates))
     tanimoto_best = np.zeros((num_spectra, num_candidates))
-    
+
     candidates_idx = np.zeros((num_candidates), dtype=int)
     candidates_sim = np.zeros((num_candidates))
     for k, method in enumerate(similarity_method):
@@ -550,15 +604,15 @@ def compare_best_results(spectra_dict,
             candidates_sim = tanimoto_sim[i, candidates_idx]
             spec_best[i,:,k] = candidates_sim
 
-    for i in range(num_spectra):        
+    for i in range(num_spectra):
         # Compare to molecular networking score
         molnet_candidates_idx = molnet_sim[i,:].argsort()[-num_candidates:][::-1]
         molnet_candidates_sim = tanimoto_sim[i, molnet_candidates_idx]
-        
+
         # Compare to maximum possible Tanimoto score
         tanimoto_candidates_idx = tanimoto_sim[i,:].argsort()[-num_candidates:][::-1]
-        tanimoto_candidates_sim = tanimoto_sim[i, tanimoto_candidates_idx]     
-                
+        tanimoto_candidates_sim = tanimoto_sim[i, tanimoto_candidates_idx]
+
         mol_best[i,:] = molnet_candidates_sim
         tanimoto_best[i,:] = tanimoto_candidates_sim
 
@@ -568,7 +622,7 @@ def compare_best_results(spectra_dict,
     avg_best_scores.append(np.mean(tanimoto_best, axis=0))
     labels.append('Mol.networking score')
     avg_best_scores.append(np.mean(mol_best, axis=0))
-    
+
     for k, method in enumerate(similarity_method):
         labels.append('Spectrum similarity (' + method + ')')
         avg_best_scores.append(np.mean(spec_best[:,:,k], axis=0))
@@ -576,71 +630,71 @@ def compare_best_results(spectra_dict,
     return avg_best_scores, labels
 
 
-def plot_best_results(avg_best_scores,  
+def plot_best_results(avg_best_scores,
                       labels,
                       tanimoto_sim,
                       filename = None):
     """ Plot best candidate average results.
     """
-    
+
     num_candidates = len(avg_best_scores[0])
 
     # These are the colors that will be used in the plot
-    color_sequence = ['#003f5c','#882556', '#D65113', '#ffa600', '#58508d', '#bc5090', 
-                      '#2651d1', '#2f4b7c', '#ff6361', '#a05195', '#d45087'] 
+    color_sequence = ['#003f5c','#882556', '#D65113', '#ffa600', '#58508d', '#bc5090',
+                      '#2651d1', '#2f4b7c', '#ff6361', '#a05195', '#d45087']
     markers = ['^', 'v', 'o']#, 'v']
-                      
+
     fig, ax = plt.subplots(figsize=(10,16))
     plt.subplot(211)
     for i, label in enumerate(labels):
-        plt.plot(np.arange(0,num_candidates), avg_best_scores[i], 
+        plt.plot(np.arange(0,num_candidates), avg_best_scores[i],
                  label=label, linewidth=1, markersize=12,
                  marker=markers[min(i,len(markers)-1)], linestyle=':', color=color_sequence[i])
-    
+
     # Add mean Tanimoto baseline
     plt.plot(np.arange(0,num_candidates), np.mean(tanimoto_sim)*np.ones((num_candidates)),
-             label='Average Tanimoto similarity', linewidth=2, color='black')    
+             label='Average Tanimoto similarity', linewidth=2, color='black')
 
     plt.legend(fontsize = 12)
     plt.xticks(range(0, num_candidates), fontsize=12)
     plt.xlabel("Top 'x' candidates")
     plt.ylabel("Average Tanimoto score.")
-    
+
 #    fig, ax = plt.subplots(figsize=(10,8))
     plt.subplot(212)
     for i, label in enumerate(labels[1:], start=1):
-        plt.plot(np.arange(1,num_candidates), avg_best_scores[i][1:]/avg_best_scores[0][1:], 
+        plt.plot(np.arange(1,num_candidates), avg_best_scores[i][1:]/avg_best_scores[0][1:],
                  label=label+'/Tanimoto max', linewidth=1, markersize=12,
                  marker=markers[min(i,len(markers)-1)], linestyle=':', color=color_sequence[i])
 
     # Add mean Tanimoto baseline
     plt.plot(np.arange(1,num_candidates), np.mean(tanimoto_sim)*np.ones((num_candidates-1))/avg_best_scores[0][1:],
-             label='Baseline: random candidate selection', linewidth=2, color='black')  
-    
+             label='Baseline: random candidate selection', linewidth=2, color='black')
+
     plt.legend(fontsize = 12)
     plt.xticks(range(1, num_candidates), fontsize=12)
     plt.xlabel("Top 'x' candidates")
     plt.ylabel("Fraction of max. possible average Tanimoto score")
-    
+
     if filename is not None:
         plt.savefig(filename, dpi=600)
-        
-        
-def MS_similarity_network(MS_measure, 
-                          similarity_method="centroid", 
-                          link_method = "single", 
-                          filename="MS_Spec2Vec_graph.graphml", 
+
+
+def MS_similarity_network(MS_measure,
+                          similarity_method="centroid",
+                          link_method = "single",
+                          filename="MS_Spec2Vec_graph.graphml",
                           cutoff = 0.7,
                           max_links = 10,
                           extern_matrix = None):
     """ Built network from closest connections found.
         Using networkx
-        
+
     Args:
     -------
-    MS_measure: SimilarityMeasures object   
+    MS_measure: SimilarityMeasures object
     method: str
-        Determine similarity method (default = "centroid"). 
+        Determine similarity method (default = "centroid").
     filename: str
         Filename to save network to (as graphml file).
     cutoff: float
@@ -662,11 +716,11 @@ def MS_similarity_network(MS_measure,
         num_candidates = MS_measure.list_similars_ctr_idx.shape[1]
         list_similars = np.zeros((MS_measure.list_similars_ctr_idx.shape))
         list_similars_idx = np.zeros((MS_measure.list_similars_ctr_idx.shape)).astype(int)
-        
+
         if extern_matrix is None:
             print("Need externally derived similarity matrix to proceed.")
         else:
-            if extern_matrix.shape[0] == extern_matrix.shape[1] == list_similars.shape[0]: 
+            if extern_matrix.shape[0] == extern_matrix.shape[1] == list_similars.shape[0]:
                 for i in range(0, list_similars.shape[0]):
                     list_similars_idx[i,:] = (-extern_matrix[i]).argsort()[:num_candidates].astype(int)
                     list_similars[i,:] = extern_matrix[i, list_similars_idx[i,:]]
@@ -675,19 +729,19 @@ def MS_similarity_network(MS_measure,
     else:
         print("Wrong method given. Or method not yet implemented in function.")
 
-        
+
     if max_links > (list_similars_idx.shape[1] - 1):
         print("Maximum number of candidate links exceeds dimension of 'list_similars'-array.")
 
-    
+
     dimension = list_similars_idx.shape[0]
-    
+
     # Initialize network graph
     import networkx as nx
-    MSnet = nx.Graph()               
-    MSnet.add_nodes_from(np.arange(0, dimension))   
-       
-    for i in range(0, dimension):      
+    MSnet = nx.Graph()
+    MSnet.add_nodes_from(np.arange(0, dimension))
+
+    for i in range(0, dimension):
         idx = np.where(list_similars[i,:] > cutoff)[0][:max_links]
         if link_method == "single":
             new_edges = [(i, int(list_similars_idx[i,x]), float(list_similars[i,x])) for x in idx if list_similars_idx[i,x] != i]
@@ -696,7 +750,7 @@ def MS_similarity_network(MS_measure,
         else:
             print("Link method not kown")
         MSnet.add_weighted_edges_from(new_edges)
-        
+
     # Export graph for drawing (e.g. using Cytoscape)
     nx.write_graphml(MSnet, filename)
     print("Network stored as graphml file under: ", filename)
