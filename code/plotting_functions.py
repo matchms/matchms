@@ -161,6 +161,7 @@ def plot_spectra_comparison(MS_measure,
                             method = 'cosine',
                             wordsim_cutoff = 0.5,
                             circle_size = 5,
+                            circle_scaling = 'wordsim', 
                             padding = 10,
                             display_molecules = False,
                             figsize=(12, 12),
@@ -172,6 +173,8 @@ def plot_spectra_comparison(MS_measure,
     --------
     method: str
         'cosine' or 'modcos' (modified cosine score)
+    circle_scaling: str
+        Scale circles based on 'wordsim' or 'peak_product'
     """
     plt.style.use('ggplot')
 
@@ -245,25 +248,34 @@ def plot_spectra_comparison(MS_measure,
     data_x = []
     data_y = []
     data_z = []
+    data_peak_product = []
     for i in range(len(select1)):
         for j in range(len(select2)):
             data_x.append(peaks1[i,0])
             data_y.append(peaks2[j,0])
             data_z.append(Csim_words[i,j])
+            data_peak_product.append(peaks1[i,1]*peaks2[j,1])
 
     # Sort by word similarity
     data_x = np.array(data_x)
     data_y = np.array(data_y)
     data_z = np.array(data_z)
+    data_peak_product = np.array(data_peak_product)
     idx = np.lexsort((data_x, data_y, data_z))
 
 
     cm = plt.cm.get_cmap('RdYlBu_r') #'YlOrRd') #'RdBu_r')
 
     # Plot word similarities
-    wordsimplot = ax_wordsim.scatter(data_x[idx], data_y[idx],
-                       s = 100 * circle_size * (0.01 + np.array(data_z[idx])**2),
-                       c= data_z[idx], cmap=cm, alpha=0.6)
+    if circle_scaling == 'peak_product':
+        wordsimplot = ax_wordsim.scatter(data_x[idx], data_y[idx],
+                           s = 100 * circle_size * (0.01 + data_peak_product[idx]**2),
+                           c= data_z[idx], cmap=cm, alpha=0.6)
+    elif circle_scaling == 'wordsim':
+        wordsimplot = ax_wordsim.scatter(data_x[idx], data_y[idx],
+                           s = 100 * circle_size * (0.01 + data_z[idx]**2),
+                           c= data_z[idx], cmap=cm, alpha=0.6)
+
 
     # (modified) Cosine similarity plot:
     # -------------------------------------------------------------------------
