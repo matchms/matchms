@@ -1,17 +1,18 @@
 # YAML 1.2
 ---
 abstract: "Vector representation and similarity measure for mass spectrometry data."
-authors: 
+authors:
   -
     affiliation: "Netherlands eScience Center"
     family-names: Huber
     given-names: Florian
+    orcid: "https://orcid.org/0000-0002-3535-9406"
   -
     affiliation: "University of Glasgow"
     family-names: Rogers
     given-names: Simon
 cff-version: "1.1.0"
-keywords: 
+keywords:
   - "mass spectrometry"
   - word2vec
   - "similarity measures"
