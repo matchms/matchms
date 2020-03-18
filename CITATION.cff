@@ -1,0 +1,22 @@
+# YAML 1.2
+---
+abstract: "Vector representation and similarity measure for mass spectrometry data."
+authors: 
+  -
+    affiliation: "Netherlands eScience Center"
+    family-names: Huber
+    given-names: Florian
+  -
+    affiliation: "University of Glasgow"
+    family-names: Rogers
+    given-names: Simon
+cff-version: "1.1.0"
+keywords: 
+  - "mass spectrometry"
+  - word2vec
+  - "similarity measures"
+license: "Apache-2.0"
+message: "If you use this software, please cite it using these metadata."
+repository-code: "https://github.com/NLeSC/spec2vec"
+title: spec2vec
+...
