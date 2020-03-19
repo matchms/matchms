@@ -36,8 +36,8 @@
    :target: https://doi.org/10.5281/zenodo.3716379
    :alt: Zenodo Badge
 
-.. |CII Best Practices Badge| image:: https://bestpractices.coreinfrastructure.org/projects/1811/badge
-   :target: https://bestpractices.coreinfrastructure.org/projects/1811
+.. |CII Best Practices Badge| image:: https://bestpractices.coreinfrastructure.org/projects/3792/badge
+   :target: https://bestpractices.coreinfrastructure.org/projects/3792
    :alt: CII Best Practices Badge
 
 ################################################################################
