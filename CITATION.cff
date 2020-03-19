@@ -19,5 +19,5 @@ keywords:
 license: "Apache-2.0"
 message: "If you use this software, please cite it using these metadata."
 repository-code: "https://github.com/NLeSC/spec2vec"
-title: spec2vec
+title: matchms
 ...
