@@ -18,7 +18,7 @@
 (Customize these badges with your own links, and check https://shields.io/ or https://badgen.net/ to see which other badges are available.)
 
 .. |GitHub Badge| image:: https://img.shields.io/badge/github-repo-000.svg?logo=github&labelColor=gray&color=blue
-   :target: https://github.com/citation-file-format/cff-converter-python
+   :target: https://github.com/matchms/matchms
    :alt: GitHub Badge
 
 .. |License Badge| image:: https://img.shields.io/github/license/citation-file-format/cff-converter-python
