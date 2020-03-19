@@ -1,3 +1,28 @@
+*.py[cod]
+*.egg-info
+*.eggs
+.ipynb_checkpoints
+
+build
+dist
+.cache
+__pycache__
+
+htmlcov
+.coverage
+coverage.xml
+.pytest_cache
+
+docs/_build
+docs/apidocs
+
+# ide
+.idea
+.eclipse
+.vscode
+
+# Mac
+.DS_Store
 *.cys
 *.graphml
 *.csv
