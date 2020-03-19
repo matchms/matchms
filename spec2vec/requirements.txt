@@ -1,7 +1,0 @@
-numba>=0.44
-numpy==1.15.4
-openbabel==3.0.0
-pandas==0.24.0
-PubChemPy==1.0.4
-pyteomics==4.1.2
-scipy==1.2.0
