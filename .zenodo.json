@@ -1,0 +1,23 @@
+{
+   "creators": [
+      {
+         "affiliation": "Netherlands eScience Center", 
+         "name": "Huber, Florian", 
+         "orcid": "0000-0002-3535-9406"
+      }, 
+      {
+         "affiliation": "University of Glasgow", 
+         "name": "Rogers, Simon"
+      }
+   ], 
+   "description": "Vector representation and similarity measure for mass spectrometry data.", 
+   "keywords": [
+      "mass spectrometry", 
+      "word2vec", 
+      "similarity measures"
+   ], 
+   "license": {
+      "id": "Apache-2.0"
+   }, 
+   "title": "spec2vec"
+}
