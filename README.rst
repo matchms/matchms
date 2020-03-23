@@ -72,6 +72,10 @@ Glossary of terms
 
    * - Term
      - Description
+   * - adduct / addition product
+     - During ionization in a mass spectrometer, the molecules of the injected compound break apart 
+       into fragments. When fragments combine into a new compound, this is known as an addition 
+       product, or adduct.  `Wikipedia <https://en.wikipedia.org/wiki/Adduct>`__
    * - GNPS
      - Knowledge base for sharing of mass spectrometry data (`link <https://gnps.ucsd.edu/ProteoSAFe/static/gnps-splash.jsp>`__).
    * - InChI / :code:`INCHI`
