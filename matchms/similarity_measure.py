@@ -32,7 +32,7 @@ from gensim.models.callbacks import CallbackAny2Vec
 from sklearn.decomposition import PCA
 
 # Imports from Spec2Vec functions
-import helper_functions as functions
+import matchms.helper_functions as functions
 
        
 class EpochLogger(CallbackAny2Vec):
