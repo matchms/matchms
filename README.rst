@@ -1,3 +1,7 @@
+################################################################################
+matchms
+################################################################################
+
 .. list-table::
    :widths: 25 25
    :header-rows: 1
@@ -41,12 +45,7 @@ https://badgen.net/ to see which other badges are available.)
    :target: https://bestpractices.coreinfrastructure.org/projects/3792
    :alt: CII Best Practices Badge
 
-################################################################################
-matchms
-################################################################################
-
 Vector representation and similarity measure for mass spectrometry data
-
 
 The project setup is documented in `a separate document <project_setup.rst>`_.
 Feel free to remove this document (and/or the link to this document) if you
