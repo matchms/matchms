@@ -2,13 +2,13 @@
 """Documentation about matchms"""
 import logging
 
-from .helper_functions import *
-from .MS_functions import *
-from .MS_library_search import *
-from .MS_similarity_classical import *
-from .networking import *
-from .plotting_functions import *
-from .similarity_measure import *
+import matchms.helper_functions as helper_functions
+import matchms.MS_functions as MS_functions
+import matchms.MS_library_search as MS_library_search
+import matchms.MS_similarity_classical as MS_similarity_classical 
+import matchms.networking as networking
+import matchms.plotting_functions as plotting_functions
+import matchms.similarity_measure as similarity_measure
 
 from .__version__ import __version__
 
