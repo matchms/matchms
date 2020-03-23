@@ -72,6 +72,8 @@ Glossary of terms
 
    * - Term
      - Description
+   * - GNPS
+     - Knowledge base for sharing of mass spectrometry data (`link <https://gnps.ucsd.edu/ProteoSAFe/static/gnps-splash.jsp>`__).
    * - InChI / :code:`INCHI`
      - InChI is short for International Chemical Identifier. InChIs are useful
        in retrieving information associated with a certain molecule from a
@@ -80,8 +82,6 @@ Glossary of terms
      - An indentifier for molecules. For example, the InChI key for carbon
        dioxide is :code:`InChIKey=CURLTUGMZLYLDI-UHFFFAOYSA-N` (yes, it
        includes the substring :code:`InChIKey=`).
-   * - GNPS
-     - Knowledge base for sharing of mass spectrometry data. `link <https://gnps.ucsd.edu/ProteoSAFe/static/gnps-splash.jsp>`__
    * - SMILES
      - A line notation for describing the structure of chemical species using
        short ASCII strings. For example, water is encoded as :code:`O[H]O`,
