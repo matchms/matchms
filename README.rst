@@ -55,14 +55,14 @@ don't need it.
 Documentation for users
 ***********************
 
+Installation
+============
+
 Install matchms from PyPI with
 
 .. code-block:: console
 
   pip install --user matchms
-
-Installation
-============
 
 Glossary of terms
 =================
@@ -91,6 +91,9 @@ Glossary of terms
 ****************************
 Documentation for developers
 ****************************
+
+Installation
+============
 
 To install matchms, do:
 
