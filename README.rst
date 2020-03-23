@@ -82,6 +82,9 @@ Glossary of terms
      - An indentifier for molecules. For example, the InChI key for carbon
        dioxide is :code:`InChIKey=CURLTUGMZLYLDI-UHFFFAOYSA-N` (yes, it
        includes the substring :code:`InChIKey=`).
+   * - MGF File / Mascot Generic Format
+     - A plan ASCII file format to store peak list data from a mass spectrometry experiment. Links: `matrixscience.com <http://www.matrixscience.com/help/data_file_help.html#GEN>`__, 
+       `fiehnlab.ucdavis.edu <https://fiehnlab.ucdavis.edu/projects/lipidblast/mgf-files>`__.
    * - SMILES
      - A line notation for describing the structure of chemical species using
        short ASCII strings. For example, water is encoded as :code:`O[H]O`,
