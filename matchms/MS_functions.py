@@ -23,7 +23,7 @@
 import os
 import operator
 
-import helper_functions as functions
+import matchms.helper_functions as functions
 
 import fnmatch
 import copy
