@@ -2,7 +2,7 @@
 """Documentation about matchms"""
 import logging
 
-from .helper_functions import *
+from .helper_functions import * as helper_functions
 from .MS_functions import *
 from .MS_library_search import *
 from .MS_similarity_classical import *
