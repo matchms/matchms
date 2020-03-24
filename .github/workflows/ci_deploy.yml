@@ -14,11 +14,11 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v1
       with:
-        python-version: 3.8
+        python-version: 3.7
     - name: Install dependencies
       run: |
-        python3 -m pip install --upgrade pip
-        pip3 install setuptools wheel twine
+        python -m pip install --upgrade pip
+        pip install setuptools wheel twine
     - name: Publish package
       if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
       uses: pypa/gh-action-pypi-publish@master
