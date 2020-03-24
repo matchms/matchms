@@ -29,11 +29,13 @@ jobs:
         shell: pwsh
         run: conda list
       - name: Build
+        shell: bash -l {0}
         run: |
           conda activate matchms
           python --version
           python3 setup.py build
       - name: Test
+        shell: bash -l {0}
         run: |
           conda activate matchms
           python3 setup.py test
