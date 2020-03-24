@@ -19,5 +19,8 @@ dependencies:
   - scour==0.37
   - pip:
     - community==1.0.0b1
+    - isort
+    - prospector[with_pyroma]
     - pyteomics==4.2
     - setuptools==46.1.1
+    - yapf
