@@ -23,7 +23,7 @@
 import os
 import operator
 
-import matchms.helper_functions as functions
+from . import helper_functions as functions
 
 import fnmatch
 import copy
@@ -47,16 +47,16 @@ from rdkit.Chem import AllChem
 
 class Spectrum(object):
     """ Spectrum class to store key information
-    
+
     Functions include:
         - Import data from mass spec files (protoype so far, works with only few formats)
         - Calculate losses from peaks.
         - Process / filter peaks
-        
+
     Args:
     -------
     min_frag: float
-        Lower limit of m/z to take into account (Default = 0.0). 
+        Lower limit of m/z to take into account (Default = 0.0).
     max_frag: float
         Upper limit of m/z to take into account (Default = 1000.0).
     min_loss: float
@@ -68,7 +68,7 @@ class Spectrum(object):
         of the highest peak intensity (Default = 0.0, essentially meaning: OFF).
     exp_intensity_filter: float
         Filter out peaks by applying an exponential fit to the intensity histogram.
-        Intensity threshold will be set at where the exponential function will have dropped 
+        Intensity threshold will be set at where the exponential function will have dropped
         to exp_intensity_filter (Default = 0.01).
     min_peaks: int
         Minimum number of peaks to keep, unless less are present from the start (Default = 10).
@@ -77,12 +77,12 @@ class Spectrum(object):
     merge_ppm: int
         Merge peaks if their m/z is <= 1e6*merge_ppm (Default = 10).
     replace: 'max' or None
-        If peaks are merged, either the heighest intensity of both is taken ('max'), 
-        or their intensitites are added (None). 
+        If peaks are merged, either the heighest intensity of both is taken ('max'),
+        or their intensitites are added (None).
     """
-    def __init__(self, min_frag = 0.0, 
+    def __init__(self, min_frag = 0.0,
                  max_frag = 1000.0,
-                 min_loss = 10.0, 
+                 min_loss = 10.0,
                  max_loss = 200.0,
                  min_intensity_perc = 0.0,
                  exp_intensity_filter = 0.01,
@@ -107,10 +107,10 @@ class Spectrum(object):
         self.inchikey = None
         #self.fingerprint = None
         #self.fingerprint_type = None
-        
+
         self.PROTON_MASS = 1.00727645199076
-        
-        self.min_frag = min_frag 
+
+        self.min_frag = min_frag
         self.max_frag = max_frag
         self.min_loss = min_loss
         self.max_loss = max_loss
@@ -125,11 +125,11 @@ class Spectrum(object):
         self.merge_energies = merge_energies
         self.merge_ppm = merge_ppm
         self.replace = replace
-    
-    
+
+
     def ion_masses(self, precursormass, int_charge):
         """
-        Compute the parent masses. Single charge version is used for 
+        Compute the parent masses. Single charge version is used for
         loss computation.
         """
         mul = abs(int_charge)
@@ -172,13 +172,13 @@ class Spectrum(object):
         except:
             int_charge = 1
         return int_charge
-    
-    
+
+
     def read_spectrum(self, path, file, id):
         """ Read .ms file and extract most relevant information
         """
-    
-        with open(os.path.join(path, file),'r') as f:            
+
+        with open(os.path.join(path, file),'r') as f:
             temp_mass = []
             temp_intensity = []
             doc_name = file.split('/')[-1]
@@ -212,7 +212,7 @@ class Spectrum(object):
                         # If it gets here, its a fragment peak (MS2 level peak)
                         sr = rline.split(' ')
                         mass = float(sr[0])
-                        intensity = float(sr[1])                
+                        intensity = float(sr[1])
                         if self.merge_energies and len(temp_mass)>0:
                             # Compare to other peaks
                             errs = 1e6*np.abs(mass-np.array(temp_mass))/mass
@@ -229,23 +229,23 @@ class Spectrum(object):
                         else:
                             temp_mass.append(mass)
                             temp_intensity.append(intensity)
-        
+
         peaks = list(zip(temp_mass, temp_intensity))
-        peaks = process_peaks(peaks, 
-                              self.min_frag, 
+        peaks = process_peaks(peaks,
+                              self.min_frag,
                               self.max_frag,
-                              self.min_intensity_perc, 
+                              self.min_intensity_perc,
                               self.exp_intensity_filter,
-                              self.min_peaks, 
+                              self.min_peaks,
                               self.max_peaks,
                               self.aim_min_peak)
-        
+
         self.peaks = peaks
         self.n_peaks = len(peaks)
 
 
     def read_spectrum_mgf(self, spectrum_mgf, id):
-        """ Translate spectrum dictionary as created by pyteomics package 
+        """ Translate spectrum dictionary as created by pyteomics package
         into metabolomics.py spectrum object.
         """
         self.id = id
@@ -256,7 +256,7 @@ class Spectrum(object):
             self.metadata['charge'] = 1
         self.metadata['precursormass'] = spectrum_mgf['params']['pepmass'][0]
         self.metadata['parentintensity'] = spectrum_mgf['params']['pepmass'][1]
-        
+
         # Following corrects parentmass according to charge if charge is known.
         #  This should lead to better computation of neutral losses
         single_charge_precursor_mass = self.metadata['precursormass']
@@ -271,11 +271,11 @@ class Spectrum(object):
         self.metadata['parentmass'] = parent_mass
         self.metadata['singlechargeprecursormass'] = single_charge_precursor_mass
         self.metadata['charge'] = int_charge
-        
+
         # Get precursor mass (later used to calculate losses!)
         self.precursor_mz = float(self.metadata['precursormass'])
         self.parent_mz = float(self.metadata['parentmass'])
-        
+
         if 'smiles' in self.metadata:
             self.smiles = self.metadata['smiles']
         if 'inchi' in self.metadata:
@@ -285,15 +285,15 @@ class Spectrum(object):
 
         peaks = list(zip(spectrum_mgf['m/z array'], spectrum_mgf['intensity array']))
         if len(peaks) >= self.min_peaks:
-            peaks = process_peaks(peaks, 
-                                  self.min_frag, 
+            peaks = process_peaks(peaks,
+                                  self.min_frag,
                                   self.max_frag,
-                                  self.min_intensity_perc, 
+                                  self.min_intensity_perc,
                                   self.exp_intensity_filter,
-                                  self.min_peaks, 
+                                  self.min_peaks,
                                   self.max_peaks,
                                   self.aim_min_peak)
-        
+
         self.peaks = peaks
         self.n_peaks = len(peaks)
 
@@ -301,19 +301,19 @@ class Spectrum(object):
     def get_losses(self):
         """ Use spectrum class and extract peaks and losses
         Losses are here the differences between the spectrum precursor mz and the MS2 level peaks.
-        
+
         Remove losses outside window min_loss <-> max_loss.
-        """ 
-        
+        """
+
         MS1_peak = self.precursor_mz
         losses = np.array(self.peaks.copy())
         losses[:,0] = MS1_peak - losses[:,0]
         keep_idx = np.where((losses[:,0] > self.min_loss) & (losses[:,0] < self.max_loss))[0]
-        
+
         # TODO: now array is tranfered back to list (to be able to store as json later). Seems weird.
         losses_list = [(x[0], x[1]) for x in losses[keep_idx,:]]
-        self.losses = losses_list      
-        
+        self.losses = losses_list
+
 
 
 
@@ -321,62 +321,62 @@ class Spectrum(object):
 ## ---------------------------- Spectrum processing functions ---------------------------------------
 ## --------------------------------------------------------------------------------------------------
 
-        
-def dict_to_spectrum(spectra_dict): 
+
+def dict_to_spectrum(spectra_dict):
     """ Create spectrum object from spectra_dict.
-    Spectra_dict is a python dictionary that stores all information for a set of spectra 
+    Spectra_dict is a python dictionary that stores all information for a set of spectra
     that is needed to re-create spectrum objects for all spectra.
     This includes peaks and intensities as well as annotations and method metadata.
-    
+
     Outputs a list of spectrum objects.
     """
     spectra = []
     keys = []
     for key, value in spectra_dict.items():
-        keys.append(key) 
-        
+        keys.append(key)
+
         if "max_peaks" not in value:
             value["max_peaks"] = None
-            
-        spectrum = Spectrum(min_frag = value["min_frag"], 
+
+        spectrum = Spectrum(min_frag = value["min_frag"],
                             max_frag = value["max_frag"],
-                            min_loss = value["min_loss"], 
+                            min_loss = value["min_loss"],
                             max_loss = value["max_loss"],
                             min_intensity_perc = 0,
                             exp_intensity_filter = value["exp_intensity_filter"],
                             min_peaks = value["min_peaks"],
                             max_peaks = value["max_peaks"])
-        
+
         for key2, value2 in value.items():
             setattr(spectrum, key2, value2)
-         
+
         spectrum.peaks = [(x[0],x[1]) for x in spectrum.peaks]  # convert to tuples
-        
+
         # Collect in form of list of spectrum objects
         spectra.append(spectrum)
-        
+
     return spectra
 
 
-def process_peaks(peaks, 
-                  min_frag = 0.0, 
-                  max_frag = 1000.0, 
+def process_peaks(peaks,
+                  min_frag = 0.0,
+                  max_frag = 1000.0,
                   min_intensity_perc = 0,
                   exp_intensity_filter = 0.01,
                   min_peaks = 10,
                   max_peaks = None,
                   aim_min_peaks = None):
-    """ Processes peaks.   
+    """ Processes peaks.
     Remove peaks outside window min_frag <-> max_frag.
     Remove peaks with intensities < min_intensity_perc/100*max(intensities)
-    
+
     Uses exponential fit to intensity histogram. Threshold for maximum allowed peak
     intensity will be set where the exponential fit reaches exp_intensity_filter.
-    
+
     Args:
     -------
     min_frag: float
-        Lower limit of m/z to take into account (Default = 0.0). 
+        Lower limit of m/z to take into account (Default = 0.0).
     max_frag: float
         Upper limit of m/z to take into account (Default = 1000.0).
     min_intensity_perc: float
@@ -384,48 +384,48 @@ def process_peaks(peaks,
         of the highest peak intensity (Default = 0.0, essentially meaning: OFF).
     exp_intensity_filter: float
         Filter out peaks by applying an exponential fit to the intensity histogram.
-        Intensity threshold will be set at where the exponential function will have dropped 
+        Intensity threshold will be set at where the exponential function will have dropped
         to exp_intensity_filter (Default = 0.01).
     min_peaks: int
         Minimum number of peaks to keep, unless less are present from the start (Default = 10).
     max_peaks: int
-        Maximum number of peaks to keep. Set to 'None' to ignore  (Default = 'None').    
+        Maximum number of peaks to keep. Set to 'None' to ignore  (Default = 'None').
     aim_min_peaks: int
-        Minium number of peaks to keep (if present) during exponential filtering.      
+        Minium number of peaks to keep (if present) during exponential filtering.
     """
     # Fixed parameters:
     num_bins = 100  # number of bins for histogram
     min_peaks_for_exp_fit = 25 # With less peaks exponential fit doesn't make any sense.
-    
+
     if aim_min_peaks is None: # aim_min_peaks is not given
         aim_min_peaks = min_peaks
-            
+
     def exponential_func(x, a, b):
         return a*np.exp(-b*x)
-   
+
     if isinstance(peaks, list):
         peaks = np.array(peaks)
         if peaks.shape[1] != 2:
             print("Peaks were given in unexpected format...")
-    
+
     # Remove peaks outside min_frag <-> max_frag window:
     keep_idx = np.where((peaks[:,0] > min_frag) & (peaks[:,0] < max_frag))[0]
     peaks = peaks[keep_idx,:]
-    
+
     # Remove peaks based on relative intensity below min_intensity_perc/100 * max_intensity
     if min_intensity_perc > 0:
         intensity_thres = np.max(peaks[:,1]) * min_intensity_perc/100
         keep_idx = np.where((peaks[:,0] > min_frag) & (peaks[:,0] < max_frag) & (peaks[:,1] > intensity_thres))[0]
-        if len(keep_idx) > min_peaks: 
+        if len(keep_idx) > min_peaks:
             peaks = peaks[keep_idx,:]
 
     # Fit exponential to peak intensity distribution
-    if (exp_intensity_filter is not None) and len(peaks) >= min_peaks_for_exp_fit: 
+    if (exp_intensity_filter is not None) and len(peaks) >= min_peaks_for_exp_fit:
 
-        # Ignore highest peak for further analysis 
+        # Ignore highest peak for further analysis
         peaks2 = peaks.copy()
         peaks2[np.where(peaks2[:,1] == np.max(peaks2[:,1])),:] = 0
-        
+
         # Create histogram
         hist, bins = np.histogram(peaks2[:,1], bins=num_bins)
         offset = np.where(hist == np.max(hist))[0][0]  # Take maximum intensity bin as starting point
@@ -434,7 +434,7 @@ def process_peaks(peaks,
         y = hist[offset:last]
         # Try exponential fit:
         try:
-            popt, pcov = curve_fit(exponential_func, x , y, p0=(peaks.shape[0], 1e-4)) 
+            popt, pcov = curve_fit(exponential_func, x , y, p0=(peaks.shape[0], 1e-4))
             lower_guess_offset = bins[max(0,offset-1)]
             threshold = lower_guess_offset -np.log(1 - exp_intensity_filter)/popt[1]
         except RuntimeError:
@@ -450,14 +450,14 @@ def process_peaks(peaks,
             peaks = peaks[np.lexsort((peaks[:,0], peaks[:,1])),:][-aim_min_peaks:]
         else:
             peaks = peaks[keep_idx, :]
-                  
+
         # Sort by peak intensity
         peaks = peaks[np.lexsort((peaks[:,0], peaks[:,1])),:]
         if max_peaks is not None:
             return [(x[0], x[1]) for x in peaks[-max_peaks:,:]] # TODO: now array is transfered back to list (to be able to store as json later). Seems weird.
 
         else:
-            return [(x[0], x[1]) for x in peaks]   
+            return [(x[0], x[1]) for x in peaks]
     else:
         # Sort by peak intensity
         peaks = peaks[np.lexsort((peaks[:,0], peaks[:,1])),:]
@@ -472,7 +472,7 @@ def process_peaks(peaks,
 ## ----------------------------------------------------------------------------
 
 def load_MS_data(path_data, path_json,
-                 filefilter="*.*", 
+                 filefilter="*.*",
                  results_file = None,
                  num_decimals = 3,
                  min_frag = 0.0, max_frag = 1000.0,
@@ -487,11 +487,11 @@ def load_MS_data(path_data, path_json,
                  #merge_energies = False,
                  #merge_ppm = 10,
                  #replace = 'max',
-                 peak_loss_words = ['peak_', 'loss_']):        
+                 peak_loss_words = ['peak_', 'loss_']):
     """ Collect spectra from set of files
     Partly taken from ms2ldaviz.
     Prototype. Needs to be replaces by more versatile parser, accepting more MS data formats.
-    
+
     # TODO: add documentation.
     """
 
@@ -502,27 +502,27 @@ def load_MS_data(path_data, path_json,
 
     dirs = os.listdir(path_data)
     spectra_files = fnmatch.filter(dirs, filefilter)
-        
+
     if results_file is not None:
-        try: 
+        try:
             spectra_dict = functions.json_to_dict(path_json + results_file)
             spectra_metadata = pd.read_csv(path_json + results_file[:-5] + "_metadata.csv")
             print("Spectra json file found and loaded.")
             spectra = dict_to_spectrum(spectra_dict)
             collect_new_data = False
-            
+
             with open(path_json + results_file[:-4] + "txt", "r") as f:
                 for line in f:
                     line = line.replace('"', '').replace("'", "").replace("[", "").replace("]", "").replace("\n", "")
                     MS_documents.append(line.split(", "))
-                    
+
             with open(path_json + results_file[:-5] + "_intensity.txt", "r") as f:
                 for line in f:
                     line = line.replace("[", "").replace("]", "")
                     MS_documents_intensity.append([int(x) for x in line.split(", ")])
-                
-        except FileNotFoundError: 
-            print("Could not find file ", path_json,  results_file) 
+
+        except FileNotFoundError:
+            print("Could not find file ", path_json,  results_file)
             print("New data from ", path_data, " will be imported.")
             collect_new_data = True
 
@@ -531,83 +531,83 @@ def load_MS_data(path_data, path_json,
 
         # Run over all spectrum files:
         for i, filename in enumerate(spectra_files):
-            
+
             # Show progress
-            if (i+1) % 10 == 0 or i == len(spectra_files)-1:  
+            if (i+1) % 10 == 0 or i == len(spectra_files)-1:
                 print('\r', ' Load spectrum ', i+1, ' of ', len(spectra_files), ' spectra.', end="")
 
             if min_keep_peaks_per_mz != 0\
             and min_keep_peaks_0 > min_peaks:
                 # TODO: remove following BAD BAD hack:
                 # Import first (acutally only needed is PRECURSOR MASS)
-                spec = Spectrum(min_frag = min_frag, 
+                spec = Spectrum(min_frag = min_frag,
                                         max_frag = max_frag,
-                                        min_loss = min_loss, 
+                                        min_loss = min_loss,
                                         max_loss = max_loss,
                                         min_intensity_perc = min_intensity_perc,
                                         exp_intensity_filter = exp_intensity_filter,
                                         min_peaks = min_peaks,
                                         max_peaks = max_peaks,
                                         aim_min_peak = aim_min_peak)
-                
+
                 # Load spectrum data from file:
                 spec.read_spectrum(path_data, filename, i)
-                
+
                 # Scale the min_peak filter
                 def min_peak_scaling(x, A, B):
                     return int(A + B * x)
-                
-                min_peaks_scaled = min_peak_scaling(spec.precursor_mz, min_keep_peaks_0, min_keep_peaks_per_mz)        
+
+                min_peaks_scaled = min_peak_scaling(spec.precursor_mz, min_keep_peaks_0, min_keep_peaks_per_mz)
             else:
                 min_peaks_scaled = min_peaks
-            
-            spectrum = Spectrum(min_frag = min_frag, 
+
+            spectrum = Spectrum(min_frag = min_frag,
                                         max_frag = max_frag,
-                                        min_loss = min_loss, 
+                                        min_loss = min_loss,
                                         max_loss = max_loss,
                                         min_intensity_perc = min_intensity_perc,
                                         exp_intensity_filter = exp_intensity_filter,
                                         min_peaks = min_peaks,
                                         max_peaks = max_peaks,
                                         aim_min_peak = min_peaks_scaled)
-            
+
             # Load spectrum data from file:
             spectrum.read_spectrum(path_data, filename, i)
-            
+
             # Get precursor mass (later used to calculate losses!)
             if spec.precursor_mz is not None:
                 if 'Precursor_MZ' in spec.metadata:
                     spec.precursor_mz = float(spec.metadata['Precursor_MZ'])
                 else:
                     spec.precursor_mz = spec.parent_mz
-            
+
             # Calculate losses:
             spectrum.get_losses()
-            
+
             # Collect in form of list of spectrum objects, and as dictionary
             spectra.append(spectrum)
             spectra_dict[filename] = spectrum.__dict__
 
-        MS_documents, MS_documents_intensity, spectra_metadata = create_MS_documents(spectra, 
-                                                                                     num_decimals, 
-                                                                                     peak_loss_words, 
+        MS_documents, MS_documents_intensity, spectra_metadata = create_MS_documents(spectra,
+                                                                                     num_decimals,
+                                                                                     peak_loss_words,
                                                                                      min_loss, max_loss)
         # Add filenames to metadata
         filenames = []
         for spectrum in spectra:
             filenames.append(spectrum.filename)
         spectra_metadata["filename"] = filenames
-        
+
         # Save collected data
         if collect_new_data == True:
             spectra_metadata.to_csv(path_json + results_file[:-5] + "_metadata.csv", index=False)
-            
-            functions.dict_to_json(spectra_dict, path_json + results_file)     
+
+            functions.dict_to_json(spectra_dict, path_json + results_file)
             # Store documents
             with open(path_json + results_file[:-4] + "txt", "w") as f:
                 for s in MS_documents:
                     f.write(str(s) +"\n")
-                    
+
             with open(path_json + results_file[:-5] + "_intensity.txt", "w") as f:
                 for s in MS_documents_intensity:
                     f.write(str(s) +"\n")
@@ -615,7 +615,7 @@ def load_MS_data(path_data, path_json,
     return spectra, spectra_dict, MS_documents, MS_documents_intensity, spectra_metadata
 
 
-def load_MGF_data(file_mgf, 
+def load_MGF_data(file_mgf,
                  file_json = None,
                  num_decimals = 2,
                  min_frag = 0.0, max_frag = 1000.0,
@@ -628,14 +628,14 @@ def load_MGF_data(file_mgf,
                  max_peaks = None,
                  peak_loss_words = ['peak_', 'loss_'],
                  ignore_losses = False,
-                 create_docs = True):        
+                 create_docs = True):
     """ Collect spectra from MGF file
     1) Importing MGF file - based on pyteomics parser.
-    2) Filter spectra: can be based on mininum relative intensity or  based on 
+    2) Filter spectra: can be based on mininum relative intensity or  based on
     and exponential intenstiy distribution.
-    3) Create documents with peaks (and losses) as words. Words are constructed 
+    3) Create documents with peaks (and losses) as words. Words are constructed
     from peak mz values and restricted to 'num_decimals' decimals.
-    
+
     Args:
     -------
     file_mgf: str
@@ -643,12 +643,12 @@ def load_MGF_data(file_mgf,
     file_json: str
         File under which already processed data is stored. If not None and if it
         exists, data will simply be imported from that file.
-        Otherwise data will be imported from file_mgf and final results are stored 
+        Otherwise data will be imported from file_mgf and final results are stored
         under file_json.(default= None).
     num_decimals: int
         Number of decimals to keep from each peak-position for creating words.
     min_frag: float
-        Lower limit of m/z to take into account (Default = 0.0). 
+        Lower limit of m/z to take into account (Default = 0.0).
     max_frag: float
         Upper limit of m/z to take into account (Default = 1000.0).
     min_loss: float
@@ -662,7 +662,7 @@ def load_MGF_data(file_mgf,
         (Default = 0.0, essentially meaning: OFF).
     exp_intensity_filter: float
         Filter out peaks by applying an exponential fit to the intensity histogram.
-        Intensity threshold will be set at where the exponential function will have dropped 
+        Intensity threshold will be set at where the exponential function will have dropped
         to exp_intensity_filter (Default = 0.01).
     min_keep_peaks_0: float
         Factor to describe constant of mininum peaks per spectrum with increasing
@@ -680,87 +680,87 @@ def load_MGF_data(file_mgf,
         If True create documents for all spectra (or load if present). Otherwise skip
         this step.
     """
-    
+
     spectra = []
     spectra_dict = {}
     MS_documents = []
     MS_documents_intensity = []
     spectra_metadata = []
     collect_new_data = True
-        
+
     if file_json is not None:
-        try: 
+        try:
             spectra_dict = functions.json_to_dict(file_json)
             spectra_metadata = pd.read_csv(file_json[:-5] + "_metadata.csv")
             print("Spectra json file found and loaded.")
             spectra = dict_to_spectrum(spectra_dict)
             collect_new_data = False
-            
+
             if create_docs:
                 with open(file_json[:-4] + "txt", "r") as f:
                     for line in f:
                         line = line.replace('"', '').replace("'", "").replace("[", "").replace("]", "").replace("\n", "")
                         MS_documents.append(line.split(", "))
-                        
+
                 with open(file_json[:-5] + "_intensity.txt", "r") as f:
                     for line in f:
                         line = line.replace("[", "").replace("]", "")
                         MS_documents_intensity.append([int(x) for x in line.split(", ")])
-                
-        except FileNotFoundError: 
+
+        except FileNotFoundError:
             print(20 * '--')
-            print("Could not find file ", file_json) 
+            print("Could not find file ", file_json)
             print(20 * '--')
             print("Data will be imported from ", file_mgf)
 
     # Read data from files if no pre-stored data is found:
     if spectra_dict == {} or file_json is None:
-        
+
         # Scale the min_peak filter
         def min_peak_scaling(x, A, B):
             return int(A + B * x)
 
         with mgf.MGF(file_mgf) as reader:
             for i, spec in enumerate(reader):
-        
+
                 # Make conform with spectrum class as defined in MS_functions.py
                 #--------------------------------------------------------------------
 
                 # Peaks will only be removed if they do not bring the total number of peaks
                 # below min_peaks_scaled.
                 if spec is not None:
-                    min_peaks_scaled = min_peak_scaling(spec['params']['pepmass'][0], min_keep_peaks_0, min_keep_peaks_per_mz)   
-                
-                    spectrum = Spectrum(min_frag = min_frag, 
+                    min_peaks_scaled = min_peak_scaling(spec['params']['pepmass'][0], min_keep_peaks_0, min_keep_peaks_per_mz)
+
+                    spectrum = Spectrum(min_frag = min_frag,
                                         max_frag = max_frag,
-                                        min_loss = min_loss, 
+                                        min_loss = min_loss,
                                         max_loss = max_loss,
                                         min_intensity_perc = min_intensity_perc,
                                         exp_intensity_filter = exp_intensity_filter,
                                         min_peaks = min_peaks,
                                         max_peaks = max_peaks,
                                         aim_min_peak = min_peaks_scaled)
-                    
+
                     id = i #spec.spectrum_id
                     spectrum.read_spectrum_mgf(spec, id)
                     #spectrum.get_losses
-        
+
                     # Calculate losses:
                     if len(spectrum.peaks) >= min_peaks \
                     and not ignore_losses:
                         spectrum.get_losses()
-                    
+
                     # Collect in form of list of spectrum objects
                     spectra.append(spectrum)
-                    
+
                 else:
                     print("Found empty spectra for ID: ", i)
-            
+
         # Filter out spectra with few peaks -----------------------------------------------------
         print(20 * '--')
         min_peaks_absolute = min_peaks
         num_spectra_initial = len(spectra)
-        spectra = [copy.deepcopy(x) for x in spectra if len(x.peaks) >= min_peaks_absolute]  
+        spectra = [copy.deepcopy(x) for x in spectra if len(x.peaks) >= min_peaks_absolute]
         print("Take", len(spectra), "spectra out of", num_spectra_initial)
 
         # Check spectrum IDs
@@ -771,18 +771,18 @@ def load_MGF_data(file_mgf,
             print("Non-unique spectrum IDs found. Resetting all IDs.")
             for i, spec in enumerate(spectra):
                 spectra[i].id = i
-        
+
         # Collect dictionary
         for spec in spectra:
             id = spec.id
             spectra_dict[id] = spec.__dict__
-        
+
         if create_docs:
             # Create documents from peaks (and losses)
-            MS_documents, MS_documents_intensity, spectra_metadata = create_MS_documents(spectra, 
-                                                                                         num_decimals, 
-                                                                                         peak_loss_words, 
-                                                                                         min_loss, 
+            MS_documents, MS_documents_intensity, spectra_metadata = create_MS_documents(spectra,
+                                                                                         num_decimals,
+                                                                                         peak_loss_words,
+                                                                                         min_loss,
                                                                                          max_loss,
                                                                                          ignore_losses = ignore_losses)
 
@@ -793,9 +793,9 @@ def load_MGF_data(file_mgf,
             print(20 * '--')
             print("Saving spectra...")
             if create_docs:
-                spectra_metadata.to_csv(file_json[:-5] + "_metadata.csv", index=False)           
-            functions.dict_to_json(spectra_dict, file_json) 
-            
+                spectra_metadata.to_csv(file_json[:-5] + "_metadata.csv", index=False)
+            functions.dict_to_json(spectra_dict, file_json)
+
             if create_docs:
                 # Store documents
                 print(20 * '--')
@@ -803,11 +803,11 @@ def load_MGF_data(file_mgf,
                 with open(file_json[:-4] + "txt", "w") as f:
                     for s in MS_documents:
                         f.write(str(s) +"\n")
-                        
+
                 with open(file_json[:-5] + "_intensity.txt", "w") as f:
                     for s in MS_documents_intensity:
                         f.write(str(s) +"\n")
-                    
+
     return spectra, spectra_dict, MS_documents, MS_documents_intensity, spectra_metadata
 
 
@@ -818,17 +818,17 @@ def load_MGF_data(file_mgf,
 ## --------------------------------------------------------------------------------------------------
 
 
-def create_MS_documents(spectra, 
-                        num_decimals, 
+def create_MS_documents(spectra,
+                        num_decimals,
                         peak_loss_words = ['peak_', 'loss_'],
-                        min_loss = 5.0, 
-                        max_loss = 500.0, 
+                        min_loss = 5.0,
+                        max_loss = 500.0,
                         ignore_losses = False):
     """ Create documents from peaks and losses.
-    
+
     Every peak and every loss will be transformed into a WORD.
-    Words then look like this: "peak_100.038" or "loss_59.240". 
-    
+    Words then look like this: "peak_100.038" or "loss_59.240".
+
     Args:
     --------
     spectra: list
@@ -842,10 +842,10 @@ def create_MS_documents(spectra,
     ignore_losses: bool
         True: Ignore losses, False: make words from losses and peaks.
     """
-    
+
     MS_documents = []
     MS_documents_intensity = []
-    
+
     # Collect spectra metadata
     metadata_lst = []
 
@@ -854,27 +854,27 @@ def create_MS_documents(spectra,
         doc_intensity = []
         if not ignore_losses:
             losses = np.array(spectrum.losses)
-            if len(losses) > 0: 
+            if len(losses) > 0:
                 keep_idx = np.where((losses[:,0] > min_loss) & (losses[:,0] < max_loss))[0]
                 losses = losses[keep_idx,:]
             #else:
                 #print("No losses detected for: ", spec_id, spectrum.id)
 
         peaks = np.array(spectrum.peaks)
-        
-        # Sort peaks and losses by m/z 
+
+        # Sort peaks and losses by m/z
         peaks = peaks[np.lexsort((peaks[:,1], peaks[:,0])),:]
         if not ignore_losses:
-            if len(losses) > 0: 
+            if len(losses) > 0:
                 losses = losses[np.lexsort((losses[:,1], losses[:,0])),:]
 
         if (spec_id+1) % 100 == 0 or spec_id == len(spectra)-1:  # show progress
                 print('\r', ' Created documents for ', spec_id+1, ' of ', len(spectra), ' spectra.', end="")
-                
+
         for i in range(len(peaks)):
             doc.append(peak_loss_words[0] + "{:.{}f}".format(peaks[i,0], num_decimals))
             doc_intensity.append(int(peaks[i,1]))
-        if not ignore_losses:    
+        if not ignore_losses:
             for i in range(len(losses)):
                 doc.append(peak_loss_words[1]  + "{:.{}f}".format(losses[i,0], num_decimals))
                 doc_intensity.append(int(losses[i,1]))
@@ -897,12 +897,12 @@ def create_MS_documents(spectra,
         metadata_lst += [[spec_id, gnps_ID, spec_name, spec_title,
                         spectrum.precursor_mz, len(MS_documents[spec_id]),
                         spectrum.inchi, spectrum.inchikey, spectrum.smiles, spectrum.metadata['charge']]]
-    
+
     # Transfer metadata to pandas dataframe
     spectra_metadata = pd.DataFrame(metadata_lst, columns=['ID', 'gnps_ID', 'name', 'title',
-                                         'precursor_mz', 'num_peaks_losses', 
+                                         'precursor_mz', 'num_peaks_losses',
                                          'inchi', 'inchikey', 'smiles', 'charge'])
-         
+
     return MS_documents, MS_documents_intensity, spectra_metadata
 
 
@@ -910,7 +910,7 @@ def create_MS_documents(spectra,
 def mol_converter(mol_input, input_type, output_type, method = 'openbabel'):
     """ Convert molecular representations using openbabel. E.g. smiles to inchi,
     or inchi to inchikey.
-    
+
     Args:
     --------
     mol_input: str
@@ -933,18 +933,18 @@ def mol_converter(mol_input, input_type, output_type, method = 'openbabel'):
         except:
             print("error when converting...")
             mol_output = None
-            
-        return mol_output   
+
+        return mol_output
 
 
 
 def likely_inchi_match(inchi_1, inchi_2, min_agreement = 3):
     """ Try to match defective inchi to non-defective ones.
-    Compares inchi parts seperately. Match is found if at least the first 'min_agreement' parts 
-    are a good enough match. 
+    Compares inchi parts seperately. Match is found if at least the first 'min_agreement' parts
+    are a good enough match.
     The main 'defects' this method accounts for are missing '-' in the inchi.
     In addition differences between '-', '+', and '?'will be ignored.
-    
+
     Args:
     --------
     inchi_1: str
@@ -952,28 +952,28 @@ def likely_inchi_match(inchi_1, inchi_2, min_agreement = 3):
     inchi_2: str
         inchi of molecule.
     min_agreement: int
-        Minimum number of first parts that MUST be a match between both input inchi to finally consider 
+        Minimum number of first parts that MUST be a match between both input inchi to finally consider
         it a match. Default is min_agreement=3.
     """
-    
+
     if min_agreement < 2:
         print("Warning! 'min_agreement' < 2 has no discriminative power. Should be => 2.")
-    
+
     agreement = 0
-    
-    # Remove spaces and '"' to account for different notations. And remove all we assume is of minor importance only.    
+
+    # Remove spaces and '"' to account for different notations. And remove all we assume is of minor importance only.
     ignore_lst = ['"', ' ', '-', '+', '?']
     for ignore in ignore_lst:
         inchi_1 = inchi_1.replace(ignore, '')
         inchi_2 = inchi_2.replace(ignore, '')
-    
+
     # Split inchi in parts. And ignore '-' to account for defective inchi.
     inchi_1_parts = inchi_1.split('/')
     inchi_2_parts = inchi_2.split('/')
-    
+
     # Check if both inchi have sufficient parts (seperated by '/')
     if len(inchi_1_parts) >= min_agreement and len(inchi_2_parts) >= min_agreement:
-        # Count how many parts mostly agree 
+        # Count how many parts mostly agree
         for i in range(min_agreement):
             agreement += (inchi_1_parts[i] == inchi_2_parts[i])
 
@@ -986,9 +986,9 @@ def likely_inchi_match(inchi_1, inchi_2, min_agreement = 3):
 
 def likely_inchikey_match(inchikey_1, inchikey_2, min_agreement = 2):
     """ Try to match inchikeys.
-    Compares inchikey parts seperately. Match is found if at least the first 'min_agreement' parts 
-    are a good enough match. 
-    
+    Compares inchikey parts seperately. Match is found if at least the first 'min_agreement' parts
+    are a good enough match.
+
     Args:
     --------
     inchikey_1: str
@@ -996,26 +996,26 @@ def likely_inchikey_match(inchikey_1, inchikey_2, min_agreement = 2):
     inchikey_2: str
         inchikey of molecule.
     min_agreement: int
-        Minimum number of first parts that MUST be a match between both input inchikey to finally consider 
+        Minimum number of first parts that MUST be a match between both input inchikey to finally consider
         it a match. Default is min_agreement=2.
     """
-    
+
     if min_agreement not in [1, 2, 3]:
         print("Warning! 'min_agreement' should be 1, 2, or 3.")
-    
+
     agreement = 0
-    
+
     # Make sure all letters are capitalized. Remove spaces and '"' to account for different notations
     inchikey_1 = inchikey_1.upper().replace('"', '').replace(' ', '')
     inchikey_2 = inchikey_2.upper().replace('"', '').replace(' ', '')
-    
-    # Split inchikey in parts. 
+
+    # Split inchikey in parts.
     inchikey_1_parts = inchikey_1.split('-')
     inchikey_2_parts = inchikey_2.split('-')
-    
+
     # Check if both inchikey have sufficient parts (seperated by '/')
     if len(inchikey_1_parts) >= min_agreement and len(inchikey_2_parts) >= min_agreement:
-        # Count how many parts mostly agree 
+        # Count how many parts mostly agree
         for i in range(min_agreement):
             agreement += (inchikey_1_parts[i] == inchikey_2_parts[i])
 
@@ -1026,8 +1026,8 @@ def likely_inchikey_match(inchikey_1, inchikey_2, min_agreement = 2):
 
 
 
-def find_pubchem_match(compound_name, 
-                       inchi, 
+def find_pubchem_match(compound_name,
+                       inchi,
                        inchikey = None,
                        mode = 'and',
                        min_inchi_match = 3,
@@ -1037,12 +1037,12 @@ def find_pubchem_match(compound_name,
                        formula_search_depth = 25):
     """ Searches pubmed for compounds based on name.
     Then check if inchi and/or inchikey can be matched to (defective) input inchi and/or inchikey.
-    
+
     In case no matches are found: For formula_search = True, the search will continue based on the
-    formula extracted from the inchi. 
-    
+    formula extracted from the inchi.
+
     Outputs found inchi and found inchikey (will be None if none is found).
-    
+
     Args:
     -------
     compound_name: str
@@ -1052,50 +1052,50 @@ def find_pubchem_match(compound_name,
     inchikey: str
         Inchikey (correct, or defective...). Set to None to ignore.
     mode: str
-        Determines the final matching criteria (can be se to 'and' or 'or'). 
+        Determines the final matching criteria (can be se to 'and' or 'or').
         For 'and' and given inchi AND inchikey, a match has to be a match with inchi AND inchikey.
         For 'or' it will be sufficient to find a good enough match with either inchi OR inchikey.
     min_inchi_match: int
-        Minimum number of first parts that MUST be a match between both input inchi to finally consider 
+        Minimum number of first parts that MUST be a match between both input inchi to finally consider
         it a match. Default is min_inchi_match=3.
     min_inchikey_match: int
         Minimum parts of inchikey that must be equal to be considered a match. Can be 1, 2, or 3.
     name_search_depth: int
         How many of the most relevant name matches to explore deeper. Default = 10.
     formula_search: bool
-        If True an additional search using the chemical formula is done if the name did not 
-        already give a good match. Makes the search considerable slower. 
+        If True an additional search using the chemical formula is done if the name did not
+        already give a good match. Makes the search considerable slower.
     formula_search_depth: int
         How many of the most relevant formula matches to explore deeper. Default = 25.
     """
-     
+
     if inchi is None:
         match_inchi = True
         mode = 'and' # do not allow 'or' in that case.
     else:
         match_inchi = False
-        
+
     if inchikey is None:
         match_inchikey = True
         mode = 'and' # do not allow 'or' in that case.
     else:
         match_inchikey = False
-        
+
     if mode == 'and':
         operate = operator.and_
     elif mode == 'or':
         operate = operator.or_
     else:
         print("Wrong mode was given!")
-        
+
     inchi_pubchem = None
     inchikey_pubchem = None
-        
+
     # Search pubmed for compound name:
     results_pubchem = pcp.get_compounds(compound_name, 'name', listkey_count = name_search_depth)
     print("Found at least", len(results_pubchem), "compounds of that name on pubchem.")
-    
-    
+
+
     # Loop through first 'name_search_depth' results found on pubchem. Stop once first match is found.
     for result in results_pubchem:
         inchi_pubchem = '"' + result.inchi + '"'
@@ -1105,7 +1105,7 @@ def find_pubchem_match(compound_name,
             match_inchi = likely_inchi_match(inchi, inchi_pubchem, min_agreement = min_inchi_match)
         if inchikey is not None:
             match_inchikey = likely_inchikey_match(inchikey, inchikey_pubchem, min_agreement = min_inchikey_match)
-                     
+
         if operate(match_inchi, match_inchikey): # found match for inchi and/or inchikey (depends on mode = 'and'/'or')
             print("--> FOUND MATCHING COMPOUND ON PUBCHEM.")
             if inchi is not None:
@@ -1115,35 +1115,35 @@ def find_pubchem_match(compound_name,
                 print("Inchikey ( input ): " + inchikey)
                 print("Inchikey (pubchem): " + inchikey_pubchem + "\n")
             break
-            
+
     if not operate(match_inchi, match_inchikey):
         if inchi is not None \
         and formula_search:
             # Do additional search on Pubchem with the formula
-            
+
             # Get formula from inchi
             inchi_parts = inchi.split('InChI=')[1].split('/')
             if len(inchi_parts) >= min_inchi_match:
                 compound_formula = inchi_parts[1]
-                
+
                 # Search formula on Pubchem
                 sids_pubchem = pcp.get_sids(compound_formula, 'formula', listkey_count = formula_search_depth)
                 print("Found at least", len(sids_pubchem), "compounds with formula", compound_formula,"on pubchem.")
-    
+
                 results_pubchem = []
                 for sid in sids_pubchem:
                     result = pcp.Compound.from_cid(sid['CID'])
                     results_pubchem.append(result)
-                    
+
                 for result in results_pubchem:
                     inchi_pubchem = '"' + result.inchi + '"'
                     inchikey_pubchem = result.inchikey
-                    
+
                     if inchi is not None:
                         match_inchi = likely_inchi_match(inchi, inchi_pubchem, min_agreement = min_inchi_match)
                     if inchikey is not None:
                         match_inchikey = likely_inchikey_match(inchikey, inchikey_pubchem, min_agreement = min_inchikey_match)
-                    
+
                     if operate(match_inchi, match_inchikey): # found match for inchi and/or inchikey (depends on mode = 'and'/'or')
                         print("--> FOUND MATCHING COMPOUND ON PUBCHEM.")
                         if inchi is not None:
@@ -1153,61 +1153,61 @@ def find_pubchem_match(compound_name,
                             print("Inchikey ( input ): " + inchikey)
                             print("Inchikey (pubchem): " + inchikey_pubchem + "\n")
                         break
-    
-    if not operate(match_inchi, match_inchikey):    
+
+    if not operate(match_inchi, match_inchikey):
         inchi_pubchem = None
         inchikey_pubchem = None
-        
+
         if inchi is not None and inchikey is not None:
             print("No matches found for inchi", inchi, mode, " inchikey", inchikey, "\n")
         elif inchikey is None:
             print("No matches found for inchi", inchi, "\n")
         else:
             print("No matches found for inchikey", inchikey, "\n")
-    
+
     return inchi_pubchem, inchikey_pubchem
 
 
 
-def get_mol_fingerprints(spectra, 
-                         method = "daylight", 
+def get_mol_fingerprints(spectra,
+                         method = "daylight",
                          nBits = 1024,
                          print_progress = True):
     """ Calculate molecule fingerprints based on given smiles.
     (using RDkit)
-    
+
     Output: exclude_IDs list with spectra that had no smiles or problems when deriving fingerprint
-    
+
     Args:
     --------
     spectra: list of spectrum objects
         List containing all spectrum objects which also includes peaks, losses, metadata.
     method: str
-        Determine method for deriving molecular fingerprints. Supported choices are 'daylight', 
+        Determine method for deriving molecular fingerprints. Supported choices are 'daylight',
         'morgan1', 'morgan2', 'morgan3'.
     nBits: int
         Dimension or number of bits of generated fingerprint. Default is nBits = 1024.
     print_progress: bool, optional
         If True, print phase of the run to indicate progress. Default = True.
     """
-    
+
     if print_progress:
         print("---- (1) Generating RDkit molecules from inchi or smiles...")
     exclude_IDs = []
     molecules = []
-    
+
     if not isinstance(spectra, list):
         spectra = [spectra]
     if not isinstance(spectra[0], Spectrum):
         print("Wrong input: spectra must be list of Spectrum objects.")
-     
+
     for i, spec in enumerate(spectra):
         mol = None
-        if spec.inchi is not None:         
-            mol = Chem.MolFromInchi(spec.inchi.replace('"', ''), 
-                                   sanitize=True, 
-                                   removeHs=True, 
-                                   logLevel=None, 
+        if spec.inchi is not None:
+            mol = Chem.MolFromInchi(spec.inchi.replace('"', ''),
+                                   sanitize=True,
+                                   removeHs=True,
+                                   logLevel=None,
                                    treatWarningAsError=False)
         if mol is None or mol.GetNumAtoms() < 3:
             if spec.smiles is not None:  # Smiles but no InChikey OR too small fingerprint
@@ -1216,9 +1216,9 @@ def get_mol_fingerprints(spectra,
             print("No proper molecule generated for spectrum", i)
             mol = None
             exclude_IDs.append(i)
-            
-        molecules.append(mol)   
-    
+
+        molecules.append(mol)
+
     if print_progress:
         print("---- (2) Generating fingerprints from molecules...")
     fingerprints = []
@@ -1239,5 +1239,5 @@ def get_mol_fingerprints(spectra,
                 print("Unkown fingerprint method given...")
             fp = np.array(fp)
         fingerprints.append(fp)
-    
+
     return fingerprints, exclude_IDs

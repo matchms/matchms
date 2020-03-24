@@ -24,8 +24,8 @@ from rdkit.Chem import Draw
 from IPython.display import SVG, display
 from scour import scour
 
-from MS_functions import create_MS_documents
-import MS_similarity_classical as MS_sim_classic
+from .MS_functions import create_MS_documents
+from . import MS_similarity_classical as MS_sim_classic
 
 ## ----------------------------------------------------------------------------------------
 ## ---------------------------- Plotting functions ----------------------------------------
@@ -161,7 +161,7 @@ def plot_spectra_comparison(MS_measure,
                             method = 'cosine',
                             wordsim_cutoff = 0.5,
                             circle_size = 5,
-                            circle_scaling = 'wordsim', 
+                            circle_scaling = 'wordsim',
                             padding = 10,
                             display_molecules = False,
                             figsize=(12, 12),
