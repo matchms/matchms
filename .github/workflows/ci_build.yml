@@ -18,7 +18,7 @@ jobs:
         with:
           auto-update-conda: true
           python-version: ${{ matrix.python-version }}
-          activate-environment: anaconda-client-env
+          activate-environment: matchms
           environment-file: environment.yml
           condarc-file: condarc.yml
           auto-activate-base: false
