@@ -17,7 +17,7 @@ dependencies:
   - scikit-learn==0.22.1
   - scipy==1.4.1
   - scour==0.37
-  - setuptools==46.1.1
   - pip:
     - community==1.0.0b1
     - pyteomics==4.2
+    - setuptools==46.1.1
