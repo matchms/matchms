@@ -30,7 +30,10 @@ jobs:
         run: conda list
       - name: Build
         run: |
-          python setup.py build
+          conda activate matchms
+          python --version
+          python3 setup.py build
       - name: Test
         run: |
-          python setup.py test
+          conda activate matchms
+          python3 setup.py test

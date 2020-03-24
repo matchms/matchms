@@ -18,9 +18,15 @@ dependencies:
   - scipy==1.4.1
   - scour==0.37
   - pip:
+    # Building
     - community==1.0.0b1
     - isort
     - prospector[with_pyroma]
     - pyteomics==4.2
     - setuptools==46.1.1
     - yapf
+    # Testing
+    - pytest<5.0.0,>=3.3.0
+    - pytest-cookies
+    - pycodestyle
+    - ruamel.yaml
