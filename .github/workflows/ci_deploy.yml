@@ -1,0 +1,27 @@
+name: matchms
+
+on:
+  release:
+    types: [published, edited]
+
+jobs:
+  deploy:
+
+    if: cookiecutter.pypi_user != 'no_pypi_travis_deployment'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.8
+    - name: Install dependencies
+      run: |
+        python3 -m pip install --upgrade pip
+        pip3 install setuptools wheel twine
+    - name: Publish package
+      if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
+      uses: pypa/gh-action-pypi-publish@master
+      with:
+        user: ${{ secrets.pypi_user }}
+        password: ${{ secrets.pypi_password }}
