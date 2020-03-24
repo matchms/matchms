@@ -30,7 +30,7 @@ jobs:
         run: conda list
       - name: Build
         run: |
-          python3 setup.py build
+          python setup.py build
       - name: Test
         run: |
-          python3 setup.py test
+          python setup.py test
