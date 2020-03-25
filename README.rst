@@ -58,8 +58,9 @@ To install matchms, do:
 
   git clone https://github.com/matchms/matchms.git
   cd matchms
+  conda env create --name matchms --file=environment.yml
+  conda activate matchms
   pip install .
-
 
 Run tests (including coverage) with:
 
