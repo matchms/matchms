@@ -1,7 +1,7 @@
 # test functions
 
 import numpy as np
-from MS_functions import Spectrum
+from matchms.MS_functions import Spectrum
 import pytest
 import unittest
 
