@@ -33,6 +33,9 @@ jobs:
       - name: Conda list
         shell: pwsh
         run: conda list
+      - name: Check style against standards using prospector
+        shell: bash -l {0}
+        run: prospector
       - name: Build
         shell: bash -l {0}
         run: |
