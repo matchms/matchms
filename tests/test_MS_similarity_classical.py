@@ -5,7 +5,7 @@ from MS_functions import Spectrum
 import pytest
 import unittest
 
-from MS_similarity_classical import cosine_score_greedy
+from matchms.MS_similarity_classical import cosine_score_greedy
 
 class ModelGenerationSuite(unittest.TestCase):
     """Basic test cases."""

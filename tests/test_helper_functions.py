@@ -1,7 +1,7 @@
 # test functions
 
 import numpy as np
-from helper_functions import calculate_similarities, preprocess_document
+from matchms.helper_functions import calculate_similarities, preprocess_document
 
 def test_preprocess_document():
     # Test with test-vectors and known outcome
