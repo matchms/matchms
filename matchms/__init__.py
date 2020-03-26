@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 """Documentation about matchms"""
 
-from .helper_functions import *
-from .ms_functions import *
-from .ms_library_search import *
-from .ms_similarity_classical import *
-from .networking import *
-from .plotting_functions import *
-from .similarity_measure import *
-from .similarity_measure import *
+import matchms.helper_functions
+import matchms.ms_functions
+import matchms.ms_library_search
+import matchms.ms_similarity_classical
+import matchms.networking
+import matchms.plotting_functions
+import matchms.similarity_measure
+import matchms.similarity_measure
 
 from .__version__ import __version__
 
