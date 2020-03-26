@@ -57,7 +57,7 @@ class EpochLogger(CallbackAny2Vec):
         if self.filename is not None:
             if self.epoch in [int(x + np.sum(self.iterations[:i])) for i, x in enumerate(self.iterations)]:
                 #if self.epoch < self.num_of_epochs:
-                filename = self.filename.split('.')[0] + '_iter_' + str(self.epoch) + '.model'
+                filename = self.filename.split('.model')[0] + '_iter_' + str(self.epoch) + '.model'
                 print('Saving model with name:', filename)
                 model.save(filename)
 
