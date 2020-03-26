@@ -21,29 +21,29 @@ import pandas as pd
 from scipy import spatial
 from gensim import corpora
 
-from .MS_functions import create_MS_documents
-from . import MS_similarity_classical as MS_sim_classic
+from .ms_functions import create_ms_documents
+from . import ms_similarity_classical as MS_sim_classic
 
-## --------------------------------------------------------------------------------------------------
-## --------------------- Functions for MS library search (using Spec2Vec) ---------------------------
-## --------------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------------
+# --------------------- Functions for MS library search (using Spec2Vec) ---------------------------
+# --------------------------------------------------------------------------------------------------
 
 
 def vectorize_spectra(spectra,
-                      MS_library,
+                      ms_library,
                       num_decimals=2,
                       min_loss=5.0,
                       max_loss=500.0,
                       peak_loss_words=['peak_', 'loss_'],
                       weighting_power=0.5):
     """ Calculate Spec2Vec vectors for all given spectra (independent of whether
-    they also a part of the MS_library).
+    they also a part of the ms_library).
 
     Args:
     --------
     spectra: list of spectrum objects
         Spectra (as spectrum objects) for which Spec2Vec vectors should be derived.
-    MS_library: SimilarityMeasures() object
+    ms_library: SimilarityMeasures() object
         Spectral library in form of SimilarityMeasures() object (see similarity_measure.py).
     num_decimals: int
         Number decimals to take into account for making words from peaks. Default = 2.
@@ -59,10 +59,10 @@ def vectorize_spectra(spectra,
     """
 
     # Make document of spectrum
-    MS_documents, MS_documents_intensity, _ = create_MS_documents(
+    ms_documents, ms_documents_intensity, _ = create_ms_documents(
         spectra, num_decimals, peak_loss_words, min_loss, max_loss)
 
-    corpus = [[word.lower() for word in document] for document in MS_documents]
+    corpus = [[word.lower() for word in document] for document in ms_documents]
 
     # Check if all words are included in trained word2vec model
     dictionary = corpora.Dictionary(corpus)
@@ -70,7 +70,7 @@ def vectorize_spectra(spectra,
     dictionary_lst = [dictionary[x] for x in dictionary]
     test_vocab = []
     for i, word in enumerate(dictionary_lst):
-        if word not in MS_library.model_word2vec.wv.vocab:
+        if word not in ms_library.model_word2vec.wv.vocab:
             test_vocab.append((i, word))
 
     if len(test_vocab) > 0:
@@ -90,7 +90,7 @@ def vectorize_spectra(spectra,
                   for document in corpus]
         bow_corpus = [dictionary.doc2bow(text) for text in corpus]
 
-    vector_size = MS_library.model_word2vec.wv.vector_size
+    vector_size = ms_library.model_word2vec.wv.vector_size
     vectors_centroid = []
 
     print("----- Deriving Spec2Vec spectra vectors -----")
@@ -105,9 +105,9 @@ def vectorize_spectra(spectra,
                   end="")
 
         document = [dictionary[x[0]] for x in bow_corpus[i]]
-        if weighting_power != 0 and MS_documents_intensity is not None:
+        if weighting_power != 0 and ms_documents_intensity is not None:
             document_weight = [
-                MS_documents_intensity[i][MS_documents[i].index(
+                ms_documents_intensity[i][ms_documents[i].index(
                     dictionary[x[0]])] for x in bow_corpus[i]
             ]
             document_weight = np.array(document_weight) / np.max(
@@ -115,17 +115,17 @@ def vectorize_spectra(spectra,
         else:
             document_weight = np.ones((len(document)))
         if len(document) > 0:
-            term1 = MS_library.model_word2vec.wv[document]
-            #if tfidf_weighted:
-            #term2 = np.array(list(zip(*MS_library.tfidf[self.bow_corpus[i]]))[1])
-            #else:
+            term1 = ms_library.model_word2vec.wv[document]
+            # if tfidf_weighted:
+            # term2 = np.array(list(zip(*ms_library.tfidf[self.bow_corpus[i]]))[1])
+            # else:
             term2 = np.ones((len(document)))
 
             term1 = term1 * np.tile(document_weight, (vector_size, 1)).T
             weighted_docvector = np.sum((term1.T * term2).T, axis=0)
         else:
             weighted_docvector = np.zeros(
-                (MS_library.model_word2vec.vector_size))
+                ms_library.model_word2vec.vector_size)
         vectors_centroid.append(weighted_docvector)
 
     return np.array(vectors_centroid)
@@ -134,7 +134,7 @@ def vectorize_spectra(spectra,
 def library_matching(spectra_query,
                      spectra_library,
                      library_spectra_metadata,
-                     MS_library,
+                     ms_library,
                      top_n=10,
                      mz_ppm=10,
                      spectra_vectors=None,
@@ -155,7 +155,7 @@ def library_matching(spectra_query,
     library_spectra_metadata: pandas DataFrame
         Metadata of all library spectra in form of a pandas DataFrame, as given by the load_MGF_data() function
         from MS_functions.py.
-    MS_library: SimilarityMeasures() object
+    ms_library: SimilarityMeasures() object
         Spec2Vec SimilarityMeasures() object built on library spectra, including trained model and spectra vectors.
     top_n: int, optional
         Number of entries witht the top_n highest Spec2Vec scores to keep as found matches. Default = 10.
@@ -177,11 +177,11 @@ def library_matching(spectra_query,
         print(
             "Warning! Library spectra metadata input does not match given library spectra."
         )
-    if len(spectra_library) != len(MS_library.corpus):
+    if len(spectra_library) != len(ms_library.corpus):
         print(
-            "Warning! Library spectra input does not match dimension of given MS_library object."
+            "Warning! Library spectra input does not match dimension of given ms_library object."
         )
-    if MS_library.vectors_centroid.shape[0] != library_spectra_metadata.shape[
+    if ms_library.vectors_centroid.shape[0] != library_spectra_metadata.shape[
             0]:
         print(
             "Warning! Number of found Spec2Vec spectral vectors does not agree with library metadata dimension."
@@ -193,26 +193,26 @@ def library_matching(spectra_query,
 
     # Initializations
     found_matches = []
-    S2V_matches = []
+    s2v_matches = []
 
     if ignore_non_annotated:
-        # Get array of all IDs for spectra with smiles
-        annotated_spectra_IDs = np.where(
-            library_spectra_metadata['smiles'].isna().values == False)[0]
+        # Get array of all ids for spectra with smiles
+        annotated_spectra_ids = np.where(
+            library_spectra_metadata['smiles'].isna().values is False)[0]
 
     # --------------------------------------------------------------------------
     # 1. Search for top-n Spec2Vec matches -------------------------------------
     # --------------------------------------------------------------------------
 
-    #Check if Spec2Vec vectors are present for library
-    if len(MS_library.vectors_centroid) == 0:
+    # Check if Spec2Vec vectors are present for library
+    if len(ms_library.vectors_centroid) == 0:
         print(
             "Apparently Spec2Vec spectra vectors have not yet been derived for library data."
         )
         print(
             "Spec2Vec spectra vectors will be calculated using default parameters."
         )
-        MS_library.get_vectors_centroid(method='ignore',
+        ms_library.get_vectors_centroid(method='ignore',
                                         extra_weights=None,
                                         tfidf_weighted=False,
                                         weight_method='sqrt',
@@ -222,35 +222,35 @@ def library_matching(spectra_query,
         print("Spec2Vec spectra vectors found for library data.")
 
     if ignore_non_annotated:
-        library_vectors = MS_library.vectors_centroid[annotated_spectra_IDs]
+        library_vectors = ms_library.vectors_centroid[annotated_spectra_ids]
     else:
-        library_vectors = MS_library.vectors_centroid
-    M_spec2vec_similairies = 1 - spatial.distance.cdist(
+        library_vectors = ms_library.vectors_centroid
+    m_spec2vec_similairies = 1 - spatial.distance.cdist(
         library_vectors, spectra_vectors, 'cosine')
 
     # Select top_n similarity values:
-    Top_n = np.argpartition(M_spec2vec_similairies, -top_n, axis=0)[-top_n:, :]
+    top_n = np.argpartition(m_spec2vec_similairies, -top_n, axis=0)[-top_n:, :]
 
     # Sort selected values by order
     for i in range(len(spectra_query)):
-        Top_n_sorted = Top_n[:, i][np.argsort(M_spec2vec_similairies[Top_n[:,
+        top_n_sorted = top_n[:, i][np.argsort(m_spec2vec_similairies[top_n[:,
                                                                            i],
                                                                      i])][::-1]
         if ignore_non_annotated:
-            Top_n_corrected_IDs = annotated_spectra_IDs[Top_n_sorted]
+            top_n_corrected_ids = annotated_spectra_ids[top_n_sorted]
         else:
-            Top_n_corrected_IDs = Top_n_sorted
+            top_n_corrected_ids = top_n_sorted
 
-        S2V_match = list(
-            zip(Top_n_corrected_IDs, M_spec2vec_similairies[Top_n_sorted, i]))
-        S2V_matches.append(S2V_match)
+        s2v_match = list(
+            zip(top_n_corrected_ids, m_spec2vec_similairies[top_n_sorted, i]))
+        s2v_matches.append(s2v_match)
 
     # --------------------------------------------------------------------------
     # 2. Search for precursor mz based matches --------------------------------
     # --------------------------------------------------------------------------
     if ignore_non_annotated:
         library_masses = library_spectra_metadata['precursor_mz'].values[
-            annotated_spectra_IDs]
+            annotated_spectra_ids]
     else:
         library_masses = library_spectra_metadata['precursor_mz'].values
 
@@ -269,7 +269,7 @@ def library_matching(spectra_query,
                 (library_masses + library_masses_tol) > mass) & (
                     (library_masses - library_masses_tol) < mass))[0]
             if ignore_non_annotated:
-                mass_matches.append(annotated_spectra_IDs[mass_match])
+                mass_matches.append(annotated_spectra_ids[mass_match])
             else:
                 mass_matches.append(mass_match)
         mass_matches_ppms.append(mass_matches)
@@ -278,17 +278,17 @@ def library_matching(spectra_query,
     # 3. Combine found matches -------------------------------------------------
     # --------------------------------------------------------------------------
     for i in range(len(spectra_query)):
-        IDs = list(mass_matches_ppms[0][i])
+        ids = list(mass_matches_ppms[0][i])
         mass_match_lst = len(mass_matches_ppms[0][i]) * [1]
         s2v_match_lst = len(mass_matches_ppms[0][i]) * [0]
 
         # Add Spec2Vec top_n matches to list
-        a, _ = list(zip(*S2V_matches[i]))
+        a, _ = list(zip(*s2v_matches[i]))
         for match in a:
-            if match in IDs:
-                s2v_match_lst[IDs.index(match)] = 1
+            if match in ids:
+                s2v_match_lst[ids.index(match)] = 1
             else:
-                IDs.append(match)
+                ids.append(match)
                 mass_match_lst.append(0)
                 s2v_match_lst.append(1)
 
@@ -297,15 +297,15 @@ def library_matching(spectra_query,
         inchikey_match = []
         inchikey_copies = []
         s2v_score_lst = []
-        for m, idx in enumerate(IDs):
-            #if s2v_match_lst[m] == 0:
+        for m, idx in enumerate(ids):
+            # if s2v_match_lst[m] == 0:
             if ignore_non_annotated:
                 idx_uncorrected = int(
-                    np.where(annotated_spectra_IDs == idx)[0])
-                s2v_score_lst.append(M_spec2vec_similairies[idx_uncorrected,
+                    np.where(annotated_spectra_ids == idx)[0])
+                s2v_score_lst.append(m_spec2vec_similairies[idx_uncorrected,
                                                             i])
             else:
-                s2v_score_lst.append(M_spec2vec_similairies[idx, i])
+                s2v_score_lst.append(m_spec2vec_similairies[idx, i])
 
             inchikey = spectra_library[idx].inchikey[:14]
             inchikey_match.append(1 *
@@ -315,7 +315,7 @@ def library_matching(spectra_query,
                          inchikey)[0].shape[0])
         matches_df = pd.DataFrame(
             list(
-                zip(IDs, inchikey_copies, mass_match_lst, s2v_match_lst,
+                zip(ids, inchikey_copies, mass_match_lst, s2v_match_lst,
                     s2v_score_lst, inchikey_match)),
             columns=[
                 'spectra_ID', 'inchikey_copies',
