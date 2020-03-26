@@ -66,51 +66,6 @@ def preprocess_document(corpus,
     return corpus_lowered_new, corpus_weights
 
 
-def create_distance_network(Cdistances_ids, 
-                            Cdistances, 
-                            filename="word2vec_test.graphml", 
-                            cutoff_dist = 0.1,
-                            max_connections = 25,
-                            min_connections = 2):
-    """ Built network from closest connections found.
-        Using networkx.
-        
-    Args:
-    -------
-    Cdistances_ids
-    Cdistances
-    filename: str
-    cutoff_dist: float
-    max_connections: int
-    min_connections: int
-    
-    TODO: Add maximum number of connections 
-    TODO: complete documentation
-    """
-    
-    dimension = Cdistances_ids.shape[0]
-    
-    # Form network
-    import networkx as nx
-    Bnet = nx.Graph()               
-    Bnet.add_nodes_from(np.arange(0,dimension))   
-    
-    for i in range(0,dimension):      
-#        idx = Cdistances_ids[i, (Cdistances[i,:] < cutoff_dist)]
-        idx = np.where(Cdistances[i,:] < cutoff_dist)[0]
-        if idx.shape[0] > max_connections:
-            idx = idx[:(max_connections+1)]
-        if idx.shape[0] <= min_connections:
-            idx = np.arange(0, (min_connections+1))
-        new_edges = [(i, int(Cdistances_ids[i,x]), float(Cdistances[i,x])) for x in idx if Cdistances_ids[i,x] != i]
-        Bnet.add_weighted_edges_from(new_edges)
-#        Bnet.add_edge(i, int(candidate), weight=float((max_distance - distances[i,candidate])/max_distance) )
-        
-    # export graph for drawing (e.g. using Cytoscape)
-    nx.write_graphml(Bnet, filename)
-    return Bnet
-
-
 
 ##
 ## ---------------- General functions ----------------------------------------
