@@ -3,7 +3,7 @@
 import numpy as np
 import unittest
 
-from helper_functions import calculate_similarities, preprocess_document
+from matchms.helper_functions import calculate_similarities, preprocess_document
 
 class ModelGenerationSuite(unittest.TestCase):
     """Basic test cases."""
