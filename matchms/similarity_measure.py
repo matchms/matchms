@@ -28,7 +28,7 @@ from gensim import models
 from gensim.test.utils import get_tmpfile
 from gensim.models.callbacks import CallbackAny2Vec
 
-#from scipy import spatial
+# from scipy import spatial
 from sklearn.decomposition import PCA
 
 # Imports from Spec2Vec functions
@@ -36,18 +36,19 @@ from . import helper_functions as functions
 
 
 class EpochLogger(CallbackAny2Vec):
-    '''Callback to log information about training progress.
-    Used to keep track of gensim model training (word2vec, lda...)'''
+    """Callback to log information about training progress.
+    Used to keep track of gensim model training (word2vec, lda...)"""
     def __init__(self, num_of_epochs, iterations, filename):
         self.epoch = 0
         self.num_of_epochs = num_of_epochs
         self.iterations = iterations
         self.filename = filename
         self.loss = 0
-        #self.loss_to_be_subed = 0
+        # self.loss_to_be_subed = 0
+
     def on_epoch_end(self, model):
         loss = model.get_latest_training_loss()
-        #loss_now = loss - self.loss_to_be_subed
+        # loss_now = loss - self.loss_to_be_subed
         print('\r' + ' Epoch ' + str(self.epoch + 1) + ' of ' +
               str(self.num_of_epochs) + '.',
               end="")
@@ -61,19 +62,19 @@ class EpochLogger(CallbackAny2Vec):
                 int(x + np.sum(self.iterations[:i]))
                 for i, x in enumerate(self.iterations)
         ]:
-            #if self.epoch < self.num_of_epochs:
+            # if self.epoch < self.num_of_epochs:
             filename = self.filename.split('.')[0] + '_iter_' + str(
                 self.epoch) + '.model'
             print('Saving model with name:', filename)
             model.save(filename)
 
 
-## ------------------------------------------------------------------------------
-## ---------------------- SimilarityMeasures class ------------------------------
-## ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+# ---------------------- SimilarityMeasures class ------------------------------
+# ------------------------------------------------------------------------------
 
 
-class SimilarityMeasures():
+class SimilarityMeasures:
     """ Class to run different similarity measure on sentence-like data.
     Words can be representing all kind of things (e.g. peaks for spectra).
     Documents lists of words.
@@ -93,6 +94,8 @@ class SimilarityMeasures():
         self.bow_corpus = []
         self.stopwords = []
         self.X_data = None
+
+        self.idf_scores = None
 
         # Trained models
         self.model_word2vec = None
@@ -186,9 +189,9 @@ class SimilarityMeasures():
             self.dictionary.doc2bow(text) for text in self.corpus
         ]
 
-    ## ------------------------------------------------------------------------------
-    ## ---------------------- Model building & training  ----------------------------
-    ## ------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------
+    # ---------------------- Model building & training  ----------------------------
+    # ------------------------------------------------------------------------------
 
     def build_model_word2vec(self,
                              file_model_word2vec,
@@ -251,14 +254,14 @@ class SimilarityMeasures():
 
             epoch_logger = EpochLogger(np.sum(iterations), iterations,
                                        file_model_word2vec)
-            iter = np.sum(iterations)
-            min_alpha = learning_rate_initial - iter * learning_rate_decay
+            iters = np.sum(iterations)
+            min_alpha = learning_rate_initial - iters * learning_rate_decay
             if min_alpha < 0:
                 print(
                     "Warning! Number of iterations is too high for specified learning_rate decay."
                 )
                 print("Learning_rate_decay will be set from",
-                      learning_rate_decay, "to", learning_rate_initial / iter)
+                      learning_rate_decay, "to", learning_rate_initial / iters)
                 min_alpha = 0
             self.model_word2vec = gensim.models.Word2Vec(
                 self.corpus,
@@ -268,7 +271,7 @@ class SimilarityMeasures():
                 window=window,
                 min_count=min_count,
                 workers=workers,
-                iter=iter,
+                iter=iters,
                 alpha=learning_rate_initial,
                 min_alpha=min_alpha,
                 seed=42,
@@ -321,8 +324,7 @@ class SimilarityMeasures():
     def build_model_lsi(self,
                         file_model_lsi,
                         num_of_topics=100,
-                        num_iter=10,
-                        pyuse_stored_model=True):
+                        num_iter=10):
         """ Build LSI model (using gensim).
 
         Args:
@@ -353,9 +355,9 @@ class SimilarityMeasures():
             # Save model
             self.model_lsi.save(file_model_lsi)
 
-    ## ------------------------------------------------------------------------------
-    ## -------------------- Calculate document vectors ------------------------------
-    ## ------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------
+    # -------------------- Calculate document vectors ------------------------------
+    # ------------------------------------------------------------------------------
 
     def get_vectors_centroid(self,
                              method='update',
@@ -492,8 +494,7 @@ class SimilarityMeasures():
                 term1 = term1 * np.tile(document_weight, (vector_size, 1)).T
                 weighted_docvector = np.sum((term1.T * term2).T, axis=0)
             else:
-                weighted_docvector = np.zeros(
-                    (self.model_word2vec.vector_size))
+                weighted_docvector = np.zeros(self.model_word2vec.vector_size)
             vectors_centroid.append(weighted_docvector)
 
         self.vectors_centroid = np.array(vectors_centroid)
@@ -526,9 +527,9 @@ class SimilarityMeasures():
 
         self.vectors_pca = pca.fit_transform(self.X_data)
 
-    ## ------------------------------------------------------------------------------
-    ## -------------------- Calculate similarities ----------------------------------
-    ## ------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------
+    # -------------------- Calculate similarities ----------------------------------
+    # ------------------------------------------------------------------------------
 
     def get_centroid_similarity(self, num_hits=25, method='cosine'):
         """ Calculate centroid similarities(all-versus-all --> matrix)
@@ -581,20 +582,20 @@ class SimilarityMeasures():
             index_tmpfile,
             self.model_lda[self.bow_corpus],
             num_features=len(self.dictionary))  # build the index
-        Cdist = np.zeros((len(self.corpus), len(self.corpus)))
+        cdist = np.zeros((len(self.corpus), len(self.corpus)))
         for i, similarities in enumerate(
                 index):  # yield similarities of all indexed documents
-            Cdist[:, i] = similarities
+            cdist[:, i] = similarities
 
-#        Cdist = 1 - Cdist  # switch from similarity to distance
+#        cdist = 1 - cdist  # switch from similarity to distance
 
 # Create numpy arrays to store similarities
-        list_similars_idx = np.zeros((Cdist.shape[0], num_hits), dtype=int)
-        list_similars = np.zeros((Cdist.shape[0], num_hits))
+        list_similars_idx = np.zeros((cdist.shape[0], num_hits), dtype=int)
+        list_similars = np.zeros((cdist.shape[0], num_hits))
 
-        for i in range(Cdist.shape[0]):
-            list_similars_idx[i, :] = Cdist[i, :].argsort()[-num_hits:][::-1]
-            list_similars[i, :] = Cdist[i, list_similars_idx[i, :]]
+        for i in range(cdist.shape[0]):
+            list_similars_idx[i, :] = cdist[i, :].argsort()[-num_hits:][::-1]
+            list_similars[i, :] = cdist[i, list_similars_idx[i, :]]
 
         self.list_similars_lda_idx = list_similars_idx
         self.list_similars_lda = list_similars
@@ -615,21 +616,21 @@ class SimilarityMeasures():
             index_tmpfile,
             self.model_lsi[self.bow_corpus],
             num_features=len(self.dictionary))  # build the index
-        Cdist = np.zeros((len(self.corpus), len(self.corpus)))
+        cdist = np.zeros((len(self.corpus), len(self.corpus)))
         for i, similarities in enumerate(
                 index):  # yield similarities of all indexed documents
-            Cdist[:, i] = similarities
+            cdist[:, i] = similarities
 
 
-#        Cdist = 1 - Cdist  # switch from similarity to distance
+#        cdist = 1 - cdist  # switch from similarity to distance
 
 # Create numpy arrays to store distances
-        list_similars_idx = np.zeros((Cdist.shape[0], num_hits), dtype=int)
-        list_similars = np.zeros((Cdist.shape[0], num_hits))
+        list_similars_idx = np.zeros((cdist.shape[0], num_hits), dtype=int)
+        list_similars = np.zeros((cdist.shape[0], num_hits))
 
-        for i in range(Cdist.shape[0]):
-            list_similars_idx[i, :] = Cdist[i, :].argsort()[-num_hits:][::-1]
-            list_similars[i, :] = Cdist[i, list_similars_idx[i, :]]
+        for i in range(cdist.shape[0]):
+            list_similars_idx[i, :] = cdist[i, :].argsort()[-num_hits:][::-1]
+            list_similars[i, :] = cdist[i, list_similars_idx[i, :]]
 
         self.list_similars_lsi_idx = list_similars_idx
         self.list_similars_lsi = list_similars

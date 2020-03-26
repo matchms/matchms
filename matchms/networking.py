@@ -20,14 +20,15 @@
 import numpy as np
 import networkx as nx
 import community
-from networkx.algorithms.connectivity import minimum_st_edge_cut  #, minimum_st_node_cut
+from networkx.algorithms.connectivity import minimum_st_edge_cut  # , minimum_st_node_cut
 from networkx.algorithms.flow import shortest_augmenting_path
 import pandas as pd
 from matplotlib import pyplot as plt
+import matplotlib
 
-## ----------------------------------------------------------------------------
-## ---------------- Graph / networking related functions ----------------------
-## ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
+# ---------------- Graph / networking related functions ----------------------
+# ----------------------------------------------------------------------------
 
 
 def create_network(similars_idx,
@@ -37,7 +38,7 @@ def create_network(similars_idx,
                    link_method='single'):
     """
     Function to create network from given top-n similarity values.
-    
+
     Args:
     --------
     similars_idx: numpy array
@@ -59,8 +60,8 @@ def create_network(similars_idx,
     dimension = similars_idx.shape[0]
 
     # Initialize network graph, add nodes
-    MSnet = nx.Graph()
-    MSnet.add_nodes_from(np.arange(0, dimension))
+    msnet = nx.Graph()
+    msnet.add_nodes_from(np.arange(0, dimension))
 
     # Add edges based on global threshold for weights
     for i in range(0, dimension):
@@ -75,9 +76,9 @@ def create_network(similars_idx,
                          ]
         else:
             print("Link method not kown")
-        MSnet.add_weighted_edges_from(new_edges)
+        msnet.add_weighted_edges_from(new_edges)
 
-    return MSnet
+    return msnet
 
 
 def sample_cuts(graph, max_steps=1000, max_cuts=1):
@@ -86,19 +87,19 @@ def sample_cuts(graph, max_steps=1000, max_cuts=1):
     parts of the network. Those links are searched for by counting minimum cuts between
     a large number of node pairs (up to max_steps pairs will be explored).
     If more pairs exist than max_steps allows to explore, pick max_steps random pairs.
-    
+
     Args:
     -------
     graph: networkx graph
         Graph of individual cluster (created using networkx).
-    max_steps 
+    max_steps
         Up to max_steps pairs will be explored to search for cuts. Default = 1000.
-    max_cuts 
+    max_cuts
         Maximum numbers of links allowed to be cut. Default = 1.
     """
 
     num_nodes = graph.number_of_nodes()
-    #num_edges = graph.number_of_edges()
+    # num_edges = graph.number_of_edges()
 
     # Make list of all pairs within graph
     nodes = np.array(graph.nodes)
@@ -121,9 +122,9 @@ def sample_cuts(graph, max_steps=1000, max_cuts=1):
                                    pair[0],
                                    pair[1],
                                    flow_func=shortest_augmenting_path)
-        #nx.node_connectivity(graphs[4], 592, 376)
-        #cuts = nx.minimum_st_edge_cut(graph, pair[0], pair[1])
-        #cuts = nx.minimum_edge_cut(graph, pair[0], pair[1])#, flow_func=shortest_augmenting_path)
+        # nx.node_connectivity(graphs[4], 592, 376)
+        # cuts = nx.minimum_st_edge_cut(graph, pair[0], pair[1])
+        # cuts = nx.minimum_edge_cut(graph, pair[0], pair[1])#, flow_func=shortest_augmenting_path)
         if len(cuts) <= max_cuts:
             sampled_cuts.append(cuts)
 
@@ -136,14 +137,14 @@ def weak_link_finder(graph, max_steps=1000, max_cuts=1):
     parts of the network. Those links are searched for by counting minimum cuts between
     a large number of node pairs (up to max_steps pairs will be explored).
     If more pairs exist than max_steps allows to explore, pick max_steps random pairs.
-    
+
     Args:
     -------
     graph: networkx graph
         Graph of individual cluster (created using networkx).
-    max_steps 
+    max_steps
         Up to max_steps pairs will be explored to search for cuts. Default = 1000.
-    max_cuts 
+    max_cuts
         Maximum numbers of links allowed to be cut. Default = 1.
     """
 
@@ -183,13 +184,13 @@ def dilate_cluster(graph_main,
                    max_per_cluster=None,
                    min_weight=0.5):
     """ Add more links to clusters that are < min_cluster_size.
-    This function is in particular made to avoid small remaining clusters or singletons. 
-    
+    This function is in particular made to avoid small remaining clusters or singletons.
+
     Will only add links if they won't lead to clusters > max_cluster_size,
     and if the links have weights > min_weight.
     Starts iteratively from highest weight links that are not yet part of the network
     (out of given top-n links).
-    
+
     Args:
     --------
     graph_main: networkx graph
@@ -202,9 +203,9 @@ def dilate_cluster(graph_main,
         Maximum desired size of clusters. Default = 100.
     min_cluster_size: int
         Minimum desired size of clusters. Default = 10.
-    max_per_node: int 
+    max_per_node: int
         Only add the top max_addition ones per cluster. Default = 1.
-    max_per_cluster: int, None 
+    max_per_cluster: int, None
         Only add the top max_addition ones per cluster. Ignore if set to None. Default = None.
     min_weight: float
         Set minimum weight to be considered for making link. Default = 0.5.
@@ -234,7 +235,7 @@ def dilate_cluster(graph_main,
                 ]]
                 select = np.where(
                     best_score_arr >= min_weight)[0][:max_per_node]
-                #if best_score >= min_weight:
+                # if best_score >= min_weight:
                 if select.shape[0] > 0:
                     for s in select:
                         best_scores.append(best_score_arr[s])
@@ -251,8 +252,8 @@ def dilate_cluster(graph_main,
                     best_scores)[::-1][:max_per_cluster]
 
             for ID in selected_candidates:
-                #node_ID = list(graph.nodes)[ID]
-                node_ID = potential_links[ID][0]
+                # node_id = list(graph.nodes)[ID]
+                node_id = potential_links[ID][0]
 
                 # Only add link if no cluster > max_cluster_size is formed by it
                 if (len(
@@ -260,10 +261,10 @@ def dilate_cluster(graph_main,
                                                     potential_links[ID][1])) +
                         cluster_size) <= max_cluster_size:
                     # Actual adding of new links
-                    graph_main.add_edge(node_ID,
+                    graph_main.add_edge(node_id,
                                         potential_links[ID][1],
                                         weight=best_scores[ID])
-                    links_added.append((node_ID, potential_links[ID][1]))
+                    links_added.append((node_id, potential_links[ID][1]))
                     # Update cluster_size to keep track of growing clusters
                     cluster_size = len(
                         nx.node_connected_component(graph_main,
@@ -274,12 +275,12 @@ def dilate_cluster(graph_main,
 
 def erode_clusters(graph_main, max_cluster_size=100, keep_weights_above=0.8):
     """ Remove links from clusters that are > max_cluster_size.
-    This function is in particular made to avoid small remaining clusters or singletons. 
-    
+    This function is in particular made to avoid small remaining clusters or singletons.
+
     Will only add links if they won't lead to clusters > max_cluster_size,
     and if the links have weights > min_weight.
     Starts iteratively from highest weight links that are not yet part of the network.
-    
+
     Args:
     --------
     graph_main: networkx graph
@@ -327,14 +328,14 @@ def erode_clusters(graph_main, max_cluster_size=100, keep_weights_above=0.8):
     return graph_main, links_removed
 
 
-def add_intra_cluster_links(graph_main, M_sim, min_weight=0.5, max_links=20):
+def add_intra_cluster_links(graph_main, m_sim, min_weight=0.5, max_links=20):
     """ Add links within each separate cluster if weights above min_weight.
-    
+
     Args:
     -------
     graph_main: networkx graph
         Graph, e.g. made using create_network() function. Based on networkx.
-    M_sim: numpy array
+    m_sim: numpy array
         2D array with all reference similarity values between all-vs-all nodes.
     min_weight: float
         Set minimum weight to be considered for making link. Default = 0.5.
@@ -347,7 +348,7 @@ def add_intra_cluster_links(graph_main, M_sim, min_weight=0.5, max_links=20):
         nodes0 = nodes.copy()
         for node in nodes:
             del nodes0[0]
-            weights = M_sim[node, nodes0]
+            weights = m_sim[node, nodes0]
             weights_select = weights.argsort()[::-1][:max_links]
             weights_select = np.where(weights[weights_select] >= min_weight)[0]
             new_edges = [(node, nodes0[x], weights[x]) for x in weights_select]
@@ -365,7 +366,7 @@ def split_cluster(graph_main,
                   multiple_cuts_per_level=True):
     """
     Function to split clusters at weak links.
-    
+
     Args:
     ---------
     graph_main: networkx graph
@@ -374,11 +375,11 @@ def split_cluster(graph_main,
         Maximum desired size of clusters. Default = 100.
     min_cluster_size: int
         Minimum desired size of clusters. Default = 10.
-    max_steps 
+    max_steps
         Up to max_steps pairs will be explored to search for cuts. Default = 1000.
-    max_cuts 
+    max_cuts
         Maximum numbers of links allowed to be cut. Default = 1.
-    multiple_cuts_per_level 
+    multiple_cuts_per_level
         If true allow multiple cuts to be done per level and run. Default = True.
     """
 
@@ -404,7 +405,7 @@ def split_cluster(graph_main,
                 pairs = weak_links[j][1]
                 pair_counts = weak_links[j][2]
                 pairs = pairs[pair_counts.argsort()[::-1]]
-                #print(i,j, pairs)
+                # print(i,j, pairs)
 
                 # ----------------------------------------------
                 # Check if pairs have already been removed in former iteration
@@ -499,9 +500,9 @@ def split_cluster(graph_main,
     return graph_main, links_removed
 
 
-## ----------------------------------------------------------------------------
-## ---------------------- Functions to refine network -------------------------
-## ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
+# ---------------------- Functions to refine network -------------------------
+# ----------------------------------------------------------------------------
 
 
 def refine_network(graph_main,
@@ -526,7 +527,7 @@ def refine_network(graph_main,
     links_removed = []
     links_added = []
 
-    #n_cluster = len(graphs)
+    # n_cluster = len(graphs)
     cluster_max = np.max([len(x.nodes) for x in graphs])
     counter = 0
 
@@ -553,7 +554,7 @@ def refine_network(graph_main,
         graph_main, links = split_cluster(
             graph_main,
             max_cluster_size=2 *
-            min_cluster_size,  #! here we try to 'sanitize most clusters'
+            min_cluster_size,  # ! here we try to 'sanitize most clusters'
             min_cluster_size=min_cluster_size,
             max_search_steps=max_search_steps,
             max_cuts=1,
@@ -581,19 +582,19 @@ def refine_network(graph_main,
     return graph_main, links_added, links_removed
 
 
-## ----------------------------------------------------------------------------
-## -------------------- Functions to evaluate networks ------------------------
-## ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
+# -------------------- Functions to evaluate networks ------------------------
+# ----------------------------------------------------------------------------
 
 
-def evaluate_clusters(graph_main, M_sim_ref):
+def evaluate_clusters(graph_main, m_sim_ref):
     """ Evaluate separate clusters of network based on given reference matrix.
-    
+
     Args:
     -------
     graph_main: networkx graph
         Graph, e.g. made using create_network() function. Based on networkx.
-    M_sim_ref: numpy array
+    m_sim_ref: numpy array
         2D array with all reference similarity values between all-vs-all nodes.
     """
 
@@ -614,7 +615,7 @@ def evaluate_clusters(graph_main, M_sim_ref):
             num_edges.append(len(graph.edges))
 
             edges = list(graph.edges)
-            mol_sim_edges = np.array([M_sim_ref[x] for x in edges])
+            mol_sim_edges = np.array([m_sim_ref[x] for x in edges])
             mol_sim_edges = np.nan_to_num(mol_sim_edges)
             ref_sim_mean_edges.append(np.mean(mol_sim_edges))
             ref_sim_var_edges.append(np.var(mol_sim_edges))
@@ -626,7 +627,7 @@ def evaluate_clusters(graph_main, M_sim_ref):
         nodes = list(graph.nodes)
         mean_mol_sims = []
         for node in nodes:
-            mean_mol_sims.append(M_sim_ref[node, nodes])
+            mean_mol_sims.append(m_sim_ref[node, nodes])
 
         ref_sim_mean_nodes.append(np.mean(mean_mol_sims))
         ref_sim_var_nodes.append(np.var(mean_mol_sims))
@@ -642,15 +643,15 @@ def evaluate_clusters(graph_main, M_sim_ref):
     return cluster_data
 
 
-def evaluate_clusters_louvain(graph_main, M_sim_ref, resolution=1.0):
+def evaluate_clusters_louvain(graph_main, m_sim_ref, resolution=1.0):
     """ Cluster given network using Louvain algorithm.
     Then evaluate clusters of network based on given reference matrix.
-    
+
     Args:
     -------
     graph_main: networkx.Graph
         Graph, e.g. made using create_network() function. Based on networkx.
-    M_sim_ref: numpy array
+    m_sim_ref: numpy array
         2D array with all reference similarity values between all-vs-all nodes.
     resolution: float
         Louvain algorithm resolution parameter. Will change size of communities.
@@ -679,7 +680,7 @@ def evaluate_clusters_louvain(graph_main, M_sim_ref, resolution=1.0):
         num_nodes.append(len(cluster))
         mean_mol_sims = []
         for node in cluster:
-            mean_mol_sims.append(M_sim_ref[node, cluster])
+            mean_mol_sims.append(m_sim_ref[node, cluster])
 
         ref_sim_mean_nodes.append(np.mean(mean_mol_sims))
         ref_sim_var_nodes.append(np.var(mean_mol_sims))
@@ -691,27 +692,23 @@ def evaluate_clusters_louvain(graph_main, M_sim_ref, resolution=1.0):
     return graph_main, cluster_data
 
 
-## ----------------------------------------------------------------------------
-## --------------------- Graph related plotting functions ---------------------
-## ----------------------------------------------------------------------------
-from matplotlib import pyplot as pltc
-import matplotlib
-
-
+# ----------------------------------------------------------------------------
+# --------------------- Graph related plotting functions ---------------------
+# ----------------------------------------------------------------------------
 def plots_cluster_evaluations(cluster_data_collection,
-                              M_sim_ref,
+                              m_sim_ref,
                               total_num_nodes,
                               size_bins,
                               labels,
                               title,
                               filename=None):
     """ Plot cluster sizes and mean node similarity.
-    
+
     Args:
     --------
     cluster_data_collection:  list
         List of cluster data for all scenarios to be plotted.
-    M_sim_ref: numpy array
+    m_sim_ref: numpy array
         2D array with all reference similarity values between all-vs-all nodes.
     total_num_nodes: int
         Total number of nodes of graph.
@@ -730,7 +727,7 @@ def plots_cluster_evaluations(cluster_data_collection,
     ax = plt.subplot(111)
 
     num_plots = len(cluster_data_collection)
-    cmap = matplotlib.cm.get_cmap('inferno')  #'Spectral')
+    cmap = matplotlib.cm.get_cmap('inferno')  # 'Spectral')
     bins = [0] + [x + 1 for x in size_bins]
     x_labels = ['<' + str(bins[1])]
     x_labels += [
@@ -772,16 +769,16 @@ def plots_cluster_evaluations(cluster_data_collection,
                     mean_node_sim,
                     s=num_elements,
                     facecolor="None",
-                    edgecolors=[cmap(count / (num_plots))],
+                    edgecolors=[cmap(count / num_plots)],
                     lw=3,
                     alpha=0.7,
                     label=labels[count])
 
     plt.xlabel('cluster size')
     plt.ylabel('mean molecular similarity of nodes in cluster')
-    chartBox = ax.get_position()
+    chartbox = ax.get_position()
     ax.set_position(
-        [chartBox.x0, chartBox.y0, chartBox.width * 0.8, chartBox.height])
+        [chartbox.x0, chartbox.y0, chartbox.width * 0.8, chartbox.height])
     lgnd = ax.legend(loc='upper center', bbox_to_anchor=(1.12, 1))
     for i in range(num_plots):
         lgnd.legendHandles[i]._sizes = [30]
@@ -802,13 +799,13 @@ def plot_clustering_performance(data_collection,
                                 filename=None,
                                 size_xy=(8, 5)):
     """ Plot cluster evaluations for all conditions found in data_collection.
-    Cluster will be classified as "well clustered" if the mean(similarity) across 
+    Cluster will be classified as "well clustered" if the mean(similarity) across
     all nodes is > thres_well. Or as "poorly clustered" if < thres_poor.
     Clusters with only one node (singletons) will be counted as "non-clustered".
-    
+
     Args:
     --------
-    data_collection: list of pandas.DataFrame() 
+    data_collection: list of pandas.DataFrame()
         List of DataFrames as created by evaluate_clusters().
     labels: list
         List of labels for the different conditions found in data_collection.
@@ -868,48 +865,48 @@ def plot_clustering_performance(data_collection,
     plt.legend()
 
     # Place legend
-    #chartBox = ax.get_position()
-    #ax.set_position([chartBox.x0, chartBox.y0, chartBox.width*0.8, chartBox.height])
-    #ax.legend(loc='upper center', bbox_to_anchor=(1.25, 1))
+    # chartbox = ax.get_position()
+    # ax.set_position([chartbox.x0, chartbox.y0, chartbox.width*0.8, chartbox.height])
+    # ax.legend(loc='upper center', bbox_to_anchor=(1.25, 1))
 
     # Save figure to file
     if filename is not None:
         plt.savefig(filename, dpi=600)
 
 
-def plot_cluster(G, filename=None):
+def plot_cluster(g, filename=None):
     """ Very basic plotting function to inspect small to medium sized clusters (or networks).
-    
+
     Args:
     --------
-    G: networkx.Graph
+    g: networkx.Graph
         Networkx generated graph containing nodes and edges.
     filename: str
         If not none: save figure to file with given name.
     """
-    if len(G.nodes) > 1:
-        edges = [(u, v) for (u, v, d) in G.edges(data=True)]
-        weights = [d['weight'] for (u, v, d) in G.edges(data=True)]
+    if len(g.nodes) > 1:
+        edges = [(u, v) for (u, v, d) in g.edges(data=True)]
+        weights = [d['weight'] for (u, v, d) in g.edges(data=True)]
         weights = weights - 0.95 * np.min(weights)
         weights = weights / np.max(weights)
 
         # Positions for all nodes
-        pos = nx.spring_layout(G)
+        pos = nx.spring_layout(g)
 
         plt.figure(figsize=(12, 12))
 
         # Nodes
-        nx.draw_networkx_nodes(G, pos, node_size=100)
+        nx.draw_networkx_nodes(g, pos, node_size=100)
 
         # Edges
-        nx.draw_networkx_edges(G,
+        nx.draw_networkx_edges(g,
                                pos,
                                edgelist=edges,
                                width=4 * weights,
                                alpha=0.5)
 
         # Labels
-        nx.draw_networkx_labels(G, pos, font_size=5, font_family='sans-serif')
+        nx.draw_networkx_labels(g, pos, font_size=5, font_family='sans-serif')
 
         plt.axis('off')
         plt.show()
@@ -920,9 +917,9 @@ def plot_cluster(G, filename=None):
         print("Given graph has not enough nodes to plot network.")
 
 
-## ----------------------------------------------------------------------------
-## -------------------------- Small helper functions --------------------------
-## ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
+# -------------------------- Small helper functions --------------------------
+# ----------------------------------------------------------------------------
 
 
 def row_counts(array):

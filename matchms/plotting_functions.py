@@ -24,52 +24,52 @@ from rdkit.Chem import Draw
 from IPython.display import SVG, display
 from scour import scour
 
-from .MS_functions import create_MS_documents
+from .MS_functions import create_ms_documents
 from . import MS_similarity_classical as MS_sim_classic
 
-## ----------------------------------------------------------------------------------------
-## ---------------------------- Plotting functions ----------------------------------------
-## ----------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+# ---------------------------- Plotting functions ----------------------------------------
+# ----------------------------------------------------------------------------------------
 
 
-def plot_precentile(Arr_sim, Arr_ref, num_bins=1000, show_top_percentile=1.0):
+def plot_precentile(arr_sim, arr_ref, num_bins=1000, show_top_percentile=1.0):
     """ Plot top percentile (as specified by show_top_percentile) of best restults
-    in Arr_sim and compare against reference values in Arr_ref.
+    in arr_sim and compare against reference values in arr_ref.
 
     Args:
     -------
-    Arr_sim: numpy array
+    arr_sim: numpy array
         Array of similarity values to evaluate.
-    Arr_ref: numpy array
-        Array of reference values to evaluate the quality of Arr_sim.
+    arr_ref: numpy array
+        Array of reference values to evaluate the quality of arr_sim.
     num_bins: int
         Number of bins to divide data (default = 1000)
     show_top_percentile
         Choose which part to plot. Will plot the top 'show_top_percentile' part of
-        all similarity values given in Arr_sim. Default = 1.0
+        all similarity values given in arr_sim. Default = 1.0
     """
-    start = int(Arr_sim.shape[0] * show_top_percentile / 100)
-    idx = np.argpartition(Arr_sim, -start)
-    starting_point = Arr_sim[idx[-start]]
+    start = int(arr_sim.shape[0] * show_top_percentile / 100)
+    idx = np.argpartition(arr_sim, -start)
+    starting_point = arr_sim[idx[-start]]
     if starting_point == 0:
         print("not enough datapoints != 0 above given top-precentile")
 
     # Remove all data below show_top_percentile
-    low_As = np.where(Arr_sim < starting_point)[0]
+    low_as = np.where(arr_sim < starting_point)[0]
 
-    length_selected = Arr_sim.shape[0] - low_As.shape[0]  #start+1
+    length_selected = arr_sim.shape[0] - low_as.shape[0]  # start+1
 
-    Data = np.zeros((2, length_selected))
-    Data[0, :] = np.delete(Arr_sim, low_As)
-    Data[1, :] = np.delete(Arr_ref, low_As)
-    Data = Data[:, np.lexsort((Data[1, :], Data[0, :]))]
+    data = np.zeros((2, length_selected))
+    data[0, :] = np.delete(arr_sim, low_as)
+    data[1, :] = np.delete(arr_ref, low_as)
+    data = data[:, np.lexsort((data[1, :], data[0, :]))]
 
     ref_score_cum = []
 
     for i in range(num_bins):
         low = int(i * length_selected / num_bins)
-        #high = int((i+1) * length_selected/num_bins)
-        ref_score_cum.append(np.mean(Data[1, low:]))
+        # high = int((i+1) * length_selected/num_bins)
+        ref_score_cum.append(np.mean(data[1, low:]))
     ref_score_cum = np.array(ref_score_cum)
 
     fig, ax = plt.subplots(figsize=(6, 6))
@@ -97,9 +97,7 @@ def get_spaced_colors_hex(n):
         "E00000", "00E000", "0000E0", "E0E000", "E000E0", "00E0E0", "E0E0E0"
     ]
 
-    RGB_colors = ["#" + x for x in spaced_colors[:n]]
-
-    return RGB_colors
+    return ["#" + x for x in spaced_colors[:n]]
 
 
 def plot_spectra(spectra, compare_ids, min_mz=50, max_mz=500):
@@ -108,7 +106,7 @@ def plot_spectra(spectra, compare_ids, min_mz=50, max_mz=500):
     plt.figure(figsize=(10, 10))
 
     peak_number = []
-    RGB_colors = get_spaced_colors_hex(len(compare_ids))
+    rgb_colors = get_spaced_colors_hex(len(compare_ids))
     for i, id in enumerate(compare_ids):
         peaks = np.array(spectra[id].peaks.copy())
         peak_number.append(len(peaks))
@@ -119,7 +117,7 @@ def plot_spectra(spectra, compare_ids, min_mz=50, max_mz=500):
                                                    linefmt='-',
                                                    markerfmt='.',
                                                    basefmt='r-')
-        plt.setp(stemlines, 'color', RGB_colors[i])
+        plt.setp(stemlines, 'color', rgb_colors[i])
 
     plt.xlim((min_mz, max_mz))
     plt.grid(True)
@@ -138,7 +136,7 @@ def plot_losses(spectra, compare_ids, min_loss=0, max_loss=500):
     plt.figure(figsize=(10, 10))
 
     losses_number = []
-    RGB_colors = get_spaced_colors_hex(len(compare_ids) + 5)
+    rgb_colors = get_spaced_colors_hex(len(compare_ids) + 5)
     for i, id in enumerate(compare_ids):
         losses = np.array(spectra[id].losses.copy())
         losses_number.append(len(losses))
@@ -149,7 +147,7 @@ def plot_losses(spectra, compare_ids, min_loss=0, max_loss=500):
                                                    linefmt='-',
                                                    markerfmt='.',
                                                    basefmt='r-')
-        plt.setp(stemlines, 'color', RGB_colors[i])
+        plt.setp(stemlines, 'color', rgb_colors[i])
 
     plt.xlim((min_loss, max_loss))
     plt.grid(True)
@@ -162,15 +160,14 @@ def plot_losses(spectra, compare_ids, min_loss=0, max_loss=500):
     print("Number of peaks: ", losses_number)
 
 
-def plot_spectra_comparison(MS_measure,
+def plot_spectra_comparison(ms_measure,
                             spectra,
                             num_decimals,
-                            ID1,
-                            ID2,
+                            id1,
+                            id2,
                             min_mz=5,
                             max_mz=500,
                             threshold=0.01,
-                            tol=0.5,
                             method='cosine',
                             wordsim_cutoff=0.5,
                             circle_size=5,
@@ -203,8 +200,8 @@ def plot_spectra_comparison(MS_measure,
     rect_specx = [left, bottom + height + spacing, width, 0.2]
     rect_specy = [left + width, bottom, 0.2, height]
 
-    peaks1 = np.array(spectra[ID1].peaks.copy())
-    peaks2 = np.array(spectra[ID2].peaks.copy())
+    peaks1 = np.array(spectra[id1].peaks.copy())
+    peaks2 = np.array(spectra[id2].peaks.copy())
     peaks1[:, 1] = peaks1[:, 1] / np.max(peaks1[:, 1])
     peaks2[:, 1] = peaks2[:, 1] / np.max(peaks2[:, 1])
 
@@ -219,9 +216,9 @@ def plot_spectra_comparison(MS_measure,
                        & (peaks2[:, 0] >= min_mz))[0]
 
     # TODO: only include sub-function to create documents...
-    dictionary = [MS_measure.dictionary[x] for x in MS_measure.dictionary]
-    MS_documents, MS_documents_intensity, _ = create_MS_documents(
-        [spectra[x] for x in [ID1, ID2]],
+    dictionary = [ms_measure.dictionary[x] for x in ms_measure.dictionary]
+    ms_documents, ms_documents_intensity, _ = create_ms_documents(
+        [spectra[x] for x in [id1, id2]],
         num_decimals=num_decimals,
         peak_loss_words=['peak_', 'loss_'],
         min_loss=0,
@@ -230,9 +227,9 @@ def plot_spectra_comparison(MS_measure,
 
     # Remove words/peaks that are not in dictionary
     select1 = np.array(
-        [x for x in select1 if MS_documents[0][x] in dictionary])
+        [x for x in select1 if ms_documents[0][x] in dictionary])
     select2 = np.array(
-        [x for x in select2 if MS_documents[1][x] in dictionary])
+        [x for x in select2 if ms_documents[1][x] in dictionary])
 
     peaks1 = peaks1[select1, :]
     peaks2 = peaks2[select2, :]
@@ -241,17 +238,17 @@ def plot_spectra_comparison(MS_measure,
     max_peaks1 = np.max(peaks1[:, 0])
     max_peaks2 = np.max(peaks2[:, 0])
 
-    word_vectors1 = MS_measure.model_word2vec.wv[[
-        MS_documents[0][x] for x in select1
+    word_vectors1 = ms_measure.model_word2vec.wv[[
+        ms_documents[0][x] for x in select1
     ]]
-    word_vectors2 = MS_measure.model_word2vec.wv[[
-        MS_documents[1][x] for x in select2
+    word_vectors2 = ms_measure.model_word2vec.wv[[
+        ms_documents[1][x] for x in select2
     ]]
 
-    Csim_words = 1 - spatial.distance.cdist(word_vectors1, word_vectors2,
+    csim_words = 1 - spatial.distance.cdist(word_vectors1, word_vectors2,
                                             'cosine')
-    Csim_words[Csim_words < wordsim_cutoff] = 0  # Remove values below cutoff
-    print(np.min(Csim_words))
+    csim_words[csim_words < wordsim_cutoff] = 0  # Remove values below cutoff
+    print(np.min(csim_words))
 
     # Plot spectra
     # -------------------------------------------------------------------------
@@ -276,7 +273,7 @@ def plot_spectra_comparison(MS_measure,
         for j in range(len(select2)):
             data_x.append(peaks1[i, 0])
             data_y.append(peaks2[j, 0])
-            data_z.append(Csim_words[i, j])
+            data_z.append(csim_words[i, j])
             data_peak_product.append(peaks1[i, 1] * peaks2[j, 1])
 
     # Sort by word similarity
@@ -286,7 +283,7 @@ def plot_spectra_comparison(MS_measure,
     data_peak_product = np.array(data_peak_product)
     idx = np.lexsort((data_x, data_y, data_z))
 
-    cm = plt.cm.get_cmap('RdYlBu_r')  #'YlOrRd') #'RdBu_r')
+    cm = plt.cm.get_cmap('RdYlBu_r')  # 'YlOrRd') #'RdBu_r')
 
     # Plot word similarities
     if circle_scaling == 'peak_product':
@@ -311,7 +308,7 @@ def plot_spectra_comparison(MS_measure,
     if method == 'cosine':
         shift = 0
     elif method == 'modcos':
-        shift = spectra[ID1].parent_mz - spectra[ID2].parent_mz
+        shift = spectra[id1].parent_mz - spectra[id2].parent_mz
     else:
         print("Given method unkown.")
 
@@ -364,7 +361,7 @@ def plot_spectra_comparison(MS_measure,
     # -------------------------------------------------------------------------
     if display_molecules:
         smiles = []
-        for i, candidate_id in enumerate([ID1, ID2]):
+        for i, candidate_id in enumerate([id1, id2]):
             smiles.append(spectra[candidate_id].metadata["smiles"])
 
         if filename is not None:
@@ -372,16 +369,16 @@ def plot_spectra_comparison(MS_measure,
         else:
             plot_molecules(smiles)
 
-    return Csim_words
+    return csim_words
 
 
-def Scour(target, source, env=[]):
+def scour(target, source, env=[]):
     """ Use scour to clean an svg file.
 
     """
     options = scour.generateDefaultOptions()
 
-    ## override defaults for max cleansing
+    # override defaults for max cleansing
     options.enable_viewboxing = True
     options.strip_comments = True
     options.strip_ids = True
@@ -422,7 +419,7 @@ def plot_molecules(smiles_lst, filename=None):
             file = filename.split('.svg')[0] + str(i) + '.svg'
         else:
             file = "draw_mols_temp_corr.svg"
-        Scour(file, temp_file, [])
+        scour(file, temp_file, [])
 
         # Display cleaned svg
         display(SVG(filename=temp_file))
@@ -430,10 +427,8 @@ def plot_molecules(smiles_lst, filename=None):
 
 def plot_smiles(query_id,
                 spectra,
-                MS_measure,
+                ms_measure,
                 num_candidates=10,
-                sharex=True,
-                labels=False,
                 similarity_method="centroid",
                 plot_type="single",
                 molnet_sim=None):
@@ -443,33 +438,33 @@ def plot_smiles(query_id,
 
     # Select chosen similarity methods
     if similarity_method == "centroid":
-        candidates_idx = MS_measure.list_similars_ctr_idx[
+        candidates_idx = ms_measure.list_similars_ctr_idx[
             query_id, :num_candidates]
-        candidates_sim = MS_measure.list_similars_ctr[
+        candidates_sim = ms_measure.list_similars_ctr[
             query_id, :num_candidates]
     elif similarity_method == "pca":
-        candidates_idx = MS_measure.list_similars_pca_idx[
+        candidates_idx = ms_measure.list_similars_pca_idx[
             query_id, :num_candidates]
-        candidates_sim = MS_measure.list_similars_pca[
+        candidates_sim = ms_measure.list_similars_pca[
             query_id, :num_candidates]
     elif similarity_method == "autoencoder":
-        candidates_idx = MS_measure.list_similars_ae_idx[
+        candidates_idx = ms_measure.list_similars_ae_idx[
             query_id, :num_candidates]
-        candidates_sim = MS_measure.list_similars_ae[query_id, :num_candidates]
+        candidates_sim = ms_measure.list_similars_ae[query_id, :num_candidates]
     elif similarity_method == "lda":
-        candidates_idx = MS_measure.list_similars_lda_idx[
+        candidates_idx = ms_measure.list_similars_lda_idx[
             query_id, :num_candidates]
-        candidates_sim = MS_measure.list_similars_lda[
+        candidates_sim = ms_measure.list_similars_lda[
             query_id, :num_candidates]
     elif similarity_method == "lsi":
-        candidates_idx = MS_measure.list_similars_lsi_idx[
+        candidates_idx = ms_measure.list_similars_lsi_idx[
             query_id, :num_candidates]
-        candidates_sim = MS_measure.list_similars_lsi[
+        candidates_sim = ms_measure.list_similars_lsi[
             query_id, :num_candidates]
     elif similarity_method == "doc2vec":
-        candidates_idx = MS_measure.list_similars_d2v_idx[
+        candidates_idx = ms_measure.list_similars_d2v_idx[
             query_id, :num_candidates]
-        candidates_sim = MS_measure.list_similars_d2v[
+        candidates_sim = ms_measure.list_similars_d2v[
             query_id, :num_candidates]
     elif similarity_method == "molnet":
         if molnet_sim is None:
@@ -541,10 +536,10 @@ def top_score_histogram(spec_sim,
     fig, ax = plt.subplots(figsize=(10, 10))
 
     selection = np.where(spec_sim[:, 1:] > score_threshold)
-    X = mol_sim[selection[0], selection[1] + 1].reshape(len(selection[0]))
-    n, bins, patches = plt.hist(X,
+    x = mol_sim[selection[0], selection[1] + 1].reshape(len(selection[0]))
+    n, bins, patches = plt.hist(x,
                                 num_bins,
-                                weights=np.ones(len(X)) / len(X),
+                                weights=np.ones(len(x)) / len(x),
                                 facecolor='blue',
                                 edgecolor='white',
                                 alpha=0.9)
@@ -572,19 +567,19 @@ def top_score_histogram(spec_sim,
     plt.show()
 
 
-def similarity_histogram(M_sim,
-                         M_sim_ref,
+def similarity_histogram(m_sim,
+                         m_sim_ref,
                          score_threshold,
                          num_bins=50,
-                         exclude_IDs=None,
+                         exclude_ids=None,
                          filename=None,
                          exclude_diagonal=True):
-    """ Plot histogram of Reference scores (from matrix M_sim_ref) for all pairs
+    """ Plot histogram of Reference scores (from matrix m_sim_ref) for all pairs
     with similarity score >= score_threshold.
 
-    M_sim: numpy array
+    m_sim: numpy array
         Matrix with similarities between pairs.
-    M_sim_ref: numpy array
+    m_sim_ref: numpy array
         Matrix with reference scores/similarity values between pairs.
 
     filename: str
@@ -592,26 +587,26 @@ def similarity_histogram(M_sim,
     """
     fig, ax = plt.subplots(figsize=(10, 10))
 
-    if exclude_IDs is not None:
-        # Remove elements in exclude_IDs array
-        IDs = np.arange(0, M_sim.shape[0])
-        M_sim = np.delete(M_sim, IDs[exclude_IDs], axis=0)
-        M_sim = np.delete(M_sim, IDs[exclude_IDs], axis=1)
-        M_sim_ref = np.delete(M_sim_ref, IDs[exclude_IDs], axis=0)
-        M_sim_ref = np.delete(M_sim_ref, IDs[exclude_IDs], axis=1)
+    if exclude_ids is not None:
+        # Remove elements in exclude_ids array
+        ids = np.arange(0, m_sim.shape[0])
+        m_sim = np.delete(m_sim, ids[exclude_ids], axis=0)
+        m_sim = np.delete(m_sim, ids[exclude_ids], axis=1)
+        m_sim_ref = np.delete(m_sim_ref, ids[exclude_ids], axis=0)
+        m_sim_ref = np.delete(m_sim_ref, ids[exclude_ids], axis=1)
 
-        IDs = np.delete(IDs, IDs[exclude_IDs])
+        ids = np.delete(ids, ids[exclude_ids])
 
-    if exclude_diagonal == True:
+    if exclude_diagonal:
         # Exclude diagonal
-        M_sim[np.arange(0, M_sim.shape[0]),
-              np.arange(0, M_sim.shape[0])] = score_threshold - 1
+        m_sim[np.arange(0, m_sim.shape[0]),
+              np.arange(0, m_sim.shape[0])] = score_threshold - 1
 
-    selection = np.where(M_sim[:, :] >= score_threshold)
-    X = M_sim_ref[selection].reshape(len(selection[0]))
-    n, bins, patches = plt.hist(X,
+    selection = np.where(m_sim[:, :] >= score_threshold)
+    x = m_sim_ref[selection].reshape(len(selection[0]))
+    n, bins, patches = plt.hist(x,
                                 num_bins,
-                                weights=np.ones(len(X)) / len(X),
+                                weights=np.ones(len(x)) / len(x),
                                 facecolor='blue',
                                 edgecolor='white',
                                 alpha=0.9)
@@ -635,7 +630,7 @@ def similarity_histogram(M_sim,
 
 def compare_best_results(spectra_dict,
                          spectra,
-                         MS_measure,
+                         ms_measure,
                          tanimoto_sim,
                          molnet_sim,
                          num_candidates=25,
@@ -646,7 +641,7 @@ def compare_best_results(spectra_dict,
     -------
     spectra_dict: dict
         Dictionary containing all spectra peaks, losses, metadata.
-    MS_measure: object
+    ms_measure: object
         Similariy object containing the model and distance matrices.
     tanimoto_sim: numpy array
         Matrix of Tanimoto similarities between SMILES of spectra.
@@ -664,28 +659,28 @@ def compare_best_results(spectra_dict,
     mol_best = np.zeros((num_spectra, num_candidates))
     tanimoto_best = np.zeros((num_spectra, num_candidates))
 
-    candidates_idx = np.zeros((num_candidates), dtype=int)
-    candidates_sim = np.zeros((num_candidates))
+    candidates_idx = np.zeros(num_candidates, dtype=int)
+    candidates_sim = np.zeros(num_candidates)
     for k, method in enumerate(similarity_method):
         for i in range(num_spectra):
             # Select chosen similarity methods
             if method == "centroid":
-                candidates_idx = MS_measure.list_similars_ctr_idx[
+                candidates_idx = ms_measure.list_similars_ctr_idx[
                     i, :num_candidates]
             elif method == "pca":
-                candidates_idx = MS_measure.list_similars_pca_idx[
+                candidates_idx = ms_measure.list_similars_pca_idx[
                     i, :num_candidates]
             elif method == "autoencoder":
-                candidates_idx = MS_measure.list_similars_ae_idx[
+                candidates_idx = ms_measure.list_similars_ae_idx[
                     i, :num_candidates]
             elif method == "lda":
-                candidates_idx = MS_measure.list_similars_lda_idx[
+                candidates_idx = ms_measure.list_similars_lda_idx[
                     i, :num_candidates]
             elif method == "lsi":
-                candidates_idx = MS_measure.list_similars_lsi_idx[
+                candidates_idx = ms_measure.list_similars_lsi_idx[
                     i, :num_candidates]
             elif method == "doc2vec":
-                candidates_idx = MS_measure.list_similars_d2v_idx[
+                candidates_idx = ms_measure.list_similars_d2v_idx[
                     i, :num_candidates]
             else:
                 print("Chosen similarity measuring method not found.")
@@ -732,7 +727,7 @@ def plot_best_results(avg_best_scores, labels, tanimoto_sim, filename=None):
         '#003f5c', '#882556', '#D65113', '#ffa600', '#58508d', '#bc5090',
         '#2651d1', '#2f4b7c', '#ff6361', '#a05195', '#d45087'
     ]
-    markers = ['^', 'v', 'o']  #, 'v']
+    markers = ['^', 'v', 'o']  # , 'v']
 
     fig, ax = plt.subplots(figsize=(10, 16))
     plt.subplot(211)
@@ -749,7 +744,7 @@ def plot_best_results(avg_best_scores, labels, tanimoto_sim, filename=None):
 
     # Add mean Tanimoto baseline
     plt.plot(np.arange(0, num_candidates),
-             np.mean(tanimoto_sim) * np.ones((num_candidates)),
+             np.mean(tanimoto_sim) * np.ones(num_candidates),
              label='Average Tanimoto similarity',
              linewidth=2,
              color='black')
@@ -789,7 +784,7 @@ def plot_best_results(avg_best_scores, labels, tanimoto_sim, filename=None):
         plt.savefig(filename, dpi=600)
 
 
-def MS_similarity_network(MS_measure,
+def ms_similarity_network(ms_measure,
                           similarity_method="centroid",
                           link_method="single",
                           filename="MS_Spec2Vec_graph.graphml",
@@ -801,7 +796,7 @@ def MS_similarity_network(MS_measure,
 
     Args:
     -------
-    MS_measure: SimilarityMeasures object
+    ms_measure: SimilarityMeasures object
     method: str
         Determine similarity method (default = "centroid").
     filename: str
@@ -813,19 +808,19 @@ def MS_similarity_network(MS_measure,
     """
 
     if similarity_method == "centroid":
-        list_similars_idx = MS_measure.list_similars_ctr_idx
-        list_similars = MS_measure.list_similars_ctr
+        list_similars_idx = ms_measure.list_similars_ctr_idx
+        list_similars = ms_measure.list_similars_ctr
     elif similarity_method == "lda":
-        list_similars_idx = MS_measure.list_similars_lda_idx
-        list_similars = MS_measure.list_similars_lda
+        list_similars_idx = ms_measure.list_similars_lda_idx
+        list_similars = ms_measure.list_similars_lda
     elif similarity_method == "lsi":
-        list_similars_idx = MS_measure.list_similars_lsi_idx
-        list_similars = MS_measure.list_similars_lsi
+        list_similars_idx = ms_measure.list_similars_lsi_idx
+        list_similars = ms_measure.list_similars_lsi
     elif similarity_method == "extern":
-        num_candidates = MS_measure.list_similars_ctr_idx.shape[1]
-        list_similars = np.zeros((MS_measure.list_similars_ctr_idx.shape))
+        num_candidates = ms_measure.list_similars_ctr_idx.shape[1]
+        list_similars = np.zeros(ms_measure.list_similars_ctr_idx.shape)
         list_similars_idx = np.zeros(
-            (MS_measure.list_similars_ctr_idx.shape)).astype(int)
+            ms_measure.list_similars_ctr_idx.shape).astype(int)
 
         if extern_matrix is None:
             print("Need externally derived similarity matrix to proceed.")

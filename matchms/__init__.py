@@ -2,9 +2,9 @@
 """Documentation about matchms"""
 
 import matchms.helper_functions
-import matchms.MS_functions
-import matchms.MS_library_search
-import matchms.MS_similarity_classical
+import matchms.ms_functions
+import matchms.ms_library_search
+import matchms.ms_similarity_classical
 import matchms.networking
 import matchms.plotting_functions
 import matchms.similarity_measure

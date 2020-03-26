@@ -36,9 +36,9 @@ import pubchempy as pcp
 from rdkit import Chem
 from rdkit.Chem import AllChem
 
-## --------------------------------------------------------------------------------------------------
-## ---------------------------- Spectrum class ------------------------------------------------------
-## --------------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------------
+# ---------------------------- Spectrum class ------------------------------------------------------
+# --------------------------------------------------------------------------------------------------
 
 
 class Spectrum(object):
@@ -102,8 +102,12 @@ class Spectrum(object):
         self.smiles = None
         self.inchi = None
         self.inchikey = None
-        #self.fingerprint = None
-        #self.fingerprint_type = None
+        # self.fingerprint = None
+        # self.fingerprint_type = None
+
+        self.losses = None
+        self.n_peaks = None
+        self.intensity = None
 
         self.PROTON_MASS = 1.00727645199076
 
@@ -294,9 +298,9 @@ class Spectrum(object):
         Remove losses outside window min_loss <-> max_loss.
         """
 
-        MS1_peak = self.precursor_mz
+        ms1_peak = self.precursor_mz
         losses = np.array(self.peaks.copy())
-        losses[:, 0] = MS1_peak - losses[:, 0]
+        losses[:, 0] = ms1_peak - losses[:, 0]
         keep_idx = np.where((losses[:, 0] > self.min_loss)
                             & (losses[:, 0] < self.max_loss))[0]
 
@@ -305,9 +309,9 @@ class Spectrum(object):
         self.losses = losses_list
 
 
-## --------------------------------------------------------------------------------------------------
-## ---------------------------- Spectrum processing functions ---------------------------------------
-## --------------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------------
+# ---------------------------- Spectrum processing functions ---------------------------------------
+# --------------------------------------------------------------------------------------------------
 
 
 def dict_to_spectrum(spectra_dict):
@@ -468,32 +472,32 @@ def process_peaks(peaks,
             return [(x[0], x[1]) for x in peaks]
 
 
-## ----------------------------------------------------------------------------
-## -------------------------- Functions to load MS data------------------------
-## ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
+# -------------------------- Functions to load MS data------------------------
+# ----------------------------------------------------------------------------
 
 
-def load_MS_data(
-    path_data,
-    path_json,
-    filefilter="*.*",
-    results_file=None,
-    num_decimals=3,
-    min_frag=0.0,
-    max_frag=1000.0,
-    min_loss=5.0,
-    max_loss=500.0,
-    min_intensity_perc=0.0,
-    exp_intensity_filter=0.01,
-    min_keep_peaks_0=10,
-    min_keep_peaks_per_mz=20 / 200,
-    min_peaks=10,
-    max_peaks=None,
-    aim_min_peak=None,
-    #merge_energies = False,
-    #merge_ppm = 10,
-    #replace = 'max',
-    peak_loss_words=['peak_', 'loss_']):
+def load_ms_data(path_data,
+                 path_json,
+                 filefilter="*.*",
+                 results_file=None,
+                 num_decimals=3,
+                 min_frag=0.0,
+                 max_frag=1000.0,
+                 min_loss=5.0,
+                 max_loss=500.0,
+                 min_intensity_perc=0.0,
+                 exp_intensity_filter=0.01,
+                 min_keep_peaks_0=10,
+                 min_keep_peaks_per_mz=20 / 200,
+                 min_peaks=10,
+                 max_peaks=None,
+                 aim_min_peak=None,
+                 # merge_energies = False,
+                 # merge_ppm = 10,
+                 # replace = 'max',
+                 peak_loss_words=['peak_', 'loss_']):
+
     """ Collect spectra from set of files
     Partly taken from ms2ldaviz.
     Prototype. Needs to be replaces by more versatile parser, accepting more MS data formats.
@@ -503,8 +507,8 @@ def load_MS_data(
 
     spectra = []
     spectra_dict = {}
-    MS_documents = []
-    MS_documents_intensity = []
+    ms_documents = []
+    ms_documents_intensity = []
 
     dirs = os.listdir(path_data)
     spectra_files = fnmatch.filter(dirs, filefilter)
@@ -522,13 +526,13 @@ def load_MS_data(
                 for line in f:
                     line = line.replace('"', '').replace("'", "").replace(
                         "[", "").replace("]", "").replace("\n", "")
-                    MS_documents.append(line.split(", "))
+                    ms_documents.append(line.split(", "))
 
             with open(path_json + results_file[:-5] + "_intensity.txt",
                       "r") as f:
                 for line in f:
                     line = line.replace("[", "").replace("]", "")
-                    MS_documents_intensity.append(
+                    ms_documents_intensity.append(
                         [int(x) for x in line.split(", ")])
 
         except FileNotFoundError:
@@ -552,8 +556,7 @@ def load_MS_data(
                       ' spectra.',
                       end="")
 
-            if min_keep_peaks_per_mz != 0\
-            and min_keep_peaks_0 > min_peaks:
+            if min_keep_peaks_per_mz != 0 and min_keep_peaks_0 > min_peaks:
                 # TODO: remove following BAD BAD hack:
                 # Import first (acutally only needed is PRECURSOR MASS)
                 spec = Spectrum(min_frag=min_frag,
@@ -570,8 +573,8 @@ def load_MS_data(
                 spec.read_spectrum(path_data, filename, i)
 
                 # Scale the min_peak filter
-                def min_peak_scaling(x, A, B):
-                    return int(A + B * x)
+                def min_peak_scaling(x, a, B):
+                    return int(a + B * x)
 
                 min_peaks_scaled = min_peak_scaling(spec.precursor_mz,
                                                     min_keep_peaks_0,
@@ -606,7 +609,7 @@ def load_MS_data(
             spectra.append(spectrum)
             spectra_dict[filename] = spectrum.__dict__
 
-        MS_documents, MS_documents_intensity, spectra_metadata = create_MS_documents(
+        ms_documents, ms_documents_intensity, spectra_metadata = create_ms_documents(
             spectra, num_decimals, peak_loss_words, min_loss, max_loss)
         # Add filenames to metadata
         filenames = []
@@ -615,7 +618,7 @@ def load_MS_data(
         spectra_metadata["filename"] = filenames
 
         # Save collected data
-        if collect_new_data == True:
+        if collect_new_data is True:
             spectra_metadata.to_csv(path_json + results_file[:-5] +
                                     "_metadata.csv",
                                     index=False)
@@ -623,18 +626,18 @@ def load_MS_data(
             functions.dict_to_json(spectra_dict, path_json + results_file)
             # Store documents
             with open(path_json + results_file[:-4] + "txt", "w") as f:
-                for s in MS_documents:
+                for s in ms_documents:
                     f.write(str(s) + "\n")
 
             with open(path_json + results_file[:-5] + "_intensity.txt",
                       "w") as f:
-                for s in MS_documents_intensity:
+                for s in ms_documents_intensity:
                     f.write(str(s) + "\n")
 
-    return spectra, spectra_dict, MS_documents, MS_documents_intensity, spectra_metadata
+    return spectra, spectra_dict, ms_documents, ms_documents_intensity, spectra_metadata
 
 
-def load_MGF_data(file_mgf,
+def load_mgf_data(file_mgf,
                   file_json=None,
                   num_decimals=2,
                   min_frag=0.0,
@@ -704,8 +707,8 @@ def load_MGF_data(file_mgf,
 
     spectra = []
     spectra_dict = {}
-    MS_documents = []
-    MS_documents_intensity = []
+    ms_documents = []
+    ms_documents_intensity = []
     spectra_metadata = []
     collect_new_data = True
 
@@ -722,12 +725,12 @@ def load_MGF_data(file_mgf,
                     for line in f:
                         line = line.replace('"', '').replace("'", "").replace(
                             "[", "").replace("]", "").replace("\n", "")
-                        MS_documents.append(line.split(", "))
+                        ms_documents.append(line.split(", "))
 
                 with open(file_json[:-5] + "_intensity.txt", "r") as f:
                     for line in f:
                         line = line.replace("[", "").replace("]", "")
-                        MS_documents_intensity.append(
+                        ms_documents_intensity.append(
                             [int(x) for x in line.split(", ")])
 
         except FileNotFoundError:
@@ -740,14 +743,14 @@ def load_MGF_data(file_mgf,
     if spectra_dict == {} or file_json is None:
 
         # Scale the min_peak filter
-        def min_peak_scaling(x, A, B):
-            return int(A + B * x)
+        def min_peak_scaling(x, a, b):
+            return int(a + b * x)
 
         with mgf.MGF(file_mgf) as reader:
             for i, spec in enumerate(reader):
 
                 # Make conform with spectrum class as defined in MS_functions.py
-                #--------------------------------------------------------------------
+                # --------------------------------------------------------------------
 
                 # Peaks will only be removed if they do not bring the total number of peaks
                 # below min_peaks_scaled.
@@ -767,13 +770,12 @@ def load_MGF_data(file_mgf,
                         max_peaks=max_peaks,
                         aim_min_peak=min_peaks_scaled)
 
-                    id = i  #spec.spectrum_id
+                    id = i  # spec.spectrum_id
                     spectrum.read_spectrum_mgf(spec, id)
-                    #spectrum.get_losses
+                    # spectrum.get_losses
 
                     # Calculate losses:
-                    if len(spectrum.peaks) >= min_peaks \
-                    and not ignore_losses:
+                    if len(spectrum.peaks) >= min_peaks and not ignore_losses:
                         spectrum.get_losses()
 
                     # Collect in form of list of spectrum objects
@@ -808,7 +810,7 @@ def load_MGF_data(file_mgf,
 
         if create_docs:
             # Create documents from peaks (and losses)
-            MS_documents, MS_documents_intensity, spectra_metadata = create_MS_documents(
+            ms_documents, ms_documents_intensity, spectra_metadata = create_ms_documents(
                 spectra,
                 num_decimals,
                 peak_loss_words,
@@ -818,7 +820,7 @@ def load_MGF_data(file_mgf,
 
         # Save collected data ----------------------------------------------------------------------
         print()
-        if collect_new_data == True:
+        if collect_new_data is True:
             # Store spectra
             print(20 * '--')
             print("Saving spectra...")
@@ -832,22 +834,22 @@ def load_MGF_data(file_mgf,
                 print(20 * '--')
                 print("Saving documents...")
                 with open(file_json[:-4] + "txt", "w") as f:
-                    for s in MS_documents:
+                    for s in ms_documents:
                         f.write(str(s) + "\n")
 
                 with open(file_json[:-5] + "_intensity.txt", "w") as f:
-                    for s in MS_documents_intensity:
+                    for s in ms_documents_intensity:
                         f.write(str(s) + "\n")
 
-    return spectra, spectra_dict, MS_documents, MS_documents_intensity, spectra_metadata
+    return spectra, spectra_dict, ms_documents, ms_documents_intensity, spectra_metadata
 
 
-## --------------------------------------------------------------------------------------------------
-## ---------------------- Functions to analyse MS data ----------------------------------------------
-## --------------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------------
+# ---------------------- Functions to analyse MS data ----------------------------------------------
+# --------------------------------------------------------------------------------------------------
 
 
-def create_MS_documents(spectra,
+def create_ms_documents(spectra,
                         num_decimals,
                         peak_loss_words=['peak_', 'loss_'],
                         min_loss=5.0,
@@ -872,8 +874,8 @@ def create_MS_documents(spectra,
         True: Ignore losses, False: make words from losses and peaks.
     """
 
-    MS_documents = []
-    MS_documents_intensity = []
+    ms_documents = []
+    ms_documents_intensity = []
 
     # Collect spectra metadata
     metadata_lst = []
@@ -887,8 +889,8 @@ def create_MS_documents(spectra,
                 keep_idx = np.where((losses[:, 0] > min_loss)
                                     & (losses[:, 0] < max_loss))[0]
                 losses = losses[keep_idx, :]
-            #else:
-            #print("No losses detected for: ", spec_id, spectrum.id)
+            # else:
+            # print("No losses detected for: ", spec_id, spectrum.id)
 
         peaks = np.array(spectrum.peaks)
 
@@ -918,13 +920,13 @@ def create_MS_documents(spectra,
                            "{:.{}f}".format(losses[i, 0], num_decimals))
                 doc_intensity.append(int(losses[i, 1]))
 
-        MS_documents.append(doc)
-        MS_documents_intensity.append(doc_intensity)
+        ms_documents.append(doc)
+        ms_documents_intensity.append(doc_intensity)
 
         if 'spectrumid' in spectrum.metadata:
-            gnps_ID = spectrum.metadata['spectrumid']
+            gnps_id = spectrum.metadata['spectrumid']
         else:
-            gnps_ID = 'n/a'
+            gnps_id = 'n/a'
         if 'name' in spectrum.metadata:
             spec_name = spectrum.metadata['name']
         else:
@@ -934,8 +936,8 @@ def create_MS_documents(spectra,
         else:
             spec_title = 'n/a'
         metadata_lst += [[
-            spec_id, gnps_ID, spec_name, spec_title, spectrum.precursor_mz,
-            len(MS_documents[spec_id]), spectrum.inchi, spectrum.inchikey,
+            spec_id, gnps_id, spec_name, spec_title, spectrum.precursor_mz,
+            len(ms_documents[spec_id]), spectrum.inchi, spectrum.inchikey,
             spectrum.smiles, spectrum.metadata['charge']
         ]]
 
@@ -947,7 +949,7 @@ def create_MS_documents(spectra,
                                         'inchi', 'inchikey', 'smiles', 'charge'
                                     ])
 
-    return MS_documents, MS_documents_intensity, spectra_metadata
+    return ms_documents, ms_documents_intensity, spectra_metadata
 
 
 def mol_converter(mol_input, input_type, output_type, method='openbabel'):
@@ -1168,8 +1170,7 @@ def find_pubchem_match(compound_name,
             break
 
     if not operate(match_inchi, match_inchikey):
-        if inchi is not None \
-        and formula_search:
+        if inchi is not None and formula_search:
             # Do additional search on Pubchem with the formula
 
             # Get formula from inchi
@@ -1235,12 +1236,12 @@ def find_pubchem_match(compound_name,
 
 def get_mol_fingerprints(spectra,
                          method="daylight",
-                         nBits=1024,
+                         nbits=1024,
                          print_progress=True):
     """ Calculate molecule fingerprints based on given smiles.
     (using RDkit)
 
-    Output: exclude_IDs list with spectra that had no smiles or problems when deriving fingerprint
+    Output: exclude_ids list with spectra that had no smiles or problems when deriving fingerprint
 
     Args:
     --------
@@ -1249,15 +1250,15 @@ def get_mol_fingerprints(spectra,
     method: str
         Determine method for deriving molecular fingerprints. Supported choices are 'daylight',
         'morgan1', 'morgan2', 'morgan3'.
-    nBits: int
-        Dimension or number of bits of generated fingerprint. Default is nBits = 1024.
+    nbits: int
+        Dimension or number of bits of generated fingerprint. Default is nbits = 1024.
     print_progress: bool, optional
         If True, print phase of the run to indicate progress. Default = True.
     """
 
     if print_progress:
         print("---- (1) Generating RDkit molecules from inchi or smiles...")
-    exclude_IDs = []
+    exclude_ids = []
     molecules = []
 
     if not isinstance(spectra, list):
@@ -1279,7 +1280,7 @@ def get_mol_fingerprints(spectra,
         if mol is None or mol.GetNumAtoms() < 3:
             print("No proper molecule generated for spectrum", i)
             mol = None
-            exclude_IDs.append(i)
+            exclude_ids.append(i)
 
         molecules.append(mol)
 
@@ -1289,25 +1290,25 @@ def get_mol_fingerprints(spectra,
     for i in range(len(molecules)):
         if molecules[i] is None:
             print("Problem with molecule from spectrum", i)
-            fp = np.zeros((nBits)).astype(int)
+            fp = np.zeros(nbits).astype(int)
         else:
             if method == "daylight":
-                fp = Chem.RDKFingerprint(molecules[i], fpSize=nBits)
+                fp = Chem.RDKFingerprint(molecules[i], fpSize=nbits)
             elif method == "morgan1":
                 fp = AllChem.GetMorganFingerprintAsBitVect(molecules[i],
                                                            1,
-                                                           nBits=nBits)
+                                                           nBits=nbits)
             elif method == "morgan2":
                 fp = AllChem.GetMorganFingerprintAsBitVect(molecules[i],
                                                            2,
-                                                           nBits=nBits)
+                                                           nBits=nbits)
             elif method == "morgan3":
                 fp = AllChem.GetMorganFingerprintAsBitVect(molecules[i],
                                                            3,
-                                                           nBits=nBits)
+                                                           nBits=nbits)
             else:
                 print("Unkown fingerprint method given...")
             fp = np.array(fp)
         fingerprints.append(fp)
 
-    return fingerprints, exclude_IDs
+    return fingerprints, exclude_ids
