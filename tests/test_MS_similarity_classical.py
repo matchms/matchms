@@ -1,11 +1,14 @@
 # test functions
 
 import numpy as np
-from matchms.MS_functions import Spectrum
 import pytest
 import unittest
 
-from matchms.MS_similarity_classical import cosine_score_greedy
+from matchms.MS_functions import Spectrum, load_MGF_data
+from matchms.MS_similarity_classical import cosine_score_greedy, cosine_score_matrix
+
+# Use test data from following folder
+PATH_TESTDATA = os.path.join(os.path.dirname(__file__), 'testdata')
 
 class ModelGenerationSuite(unittest.TestCase):
     """Basic test cases."""
@@ -48,6 +51,57 @@ class ModelGenerationSuite(unittest.TestCase):
         score12_shift10, _ = cosine_score_greedy(spec1, spec2, mass_shift=10, tol=0.2)
         assert score12_shift10 == 1, 'expected different modified cosine score'
 
+    def test_cosine_score_matrix(self):
+        """ Test importing spectra, calculating cosine score matrix and modified
+        cosine matrix. """
+        # Import spectra
+        test_mgf_file = os.path.join(PATH_TESTDATA, 'GNPS-COLLECTIONS-PESTICIDES-NEGATIVE.mgf')
+        spectra, _, _, _, _ = load_MGF_data(test_mgf_file,
+                                            file_json = None,
+                                            num_decimals = 1,
+                                            min_frag = 0.0, max_frag = 1000.0,
+                                            min_loss = 5.0, max_loss = 500.0,
+                                            min_intensity_perc = 0,
+                                            exp_intensity_filter = 0.8,
+                                            min_keep_peaks_0 = 10,
+                                            min_keep_peaks_per_mz = 20/200,
+                                            min_peaks = 5,
+                                            max_peaks = None,
+                                            peak_loss_words = ['peak_', 'loss_'])
+
+        # Calculate cosine score all-vs-all matrix and save results
+        filename = os.path.join(PATH_TESTDATA, 'M_sim_modcos.npy')
+        M_sim_modcos, M_matches_modcos = cosine_score_matrix(spectra, 
+                          tol = 0.005,
+                          max_mz = 1000.0, 
+                          min_intens = 0,
+                          mass_shifting = True,
+                          method='greedy-numba', 
+                          num_workers = 4,
+                          filename = filename,
+                          safety_points = None)
+        
+        assert os.path.isfile(filename) == os.path.isfile(filename[:-4] + '_matches.npy') == True, 'Similarity matrix was not saved as expected.'
+        assert M_sim_modcos.shape == M_sim_modcos.shape == (76,76), 'Different shape expected for modified cosine similarity matrices.'
+        assert np.mean(M_sim_modcos.diagonal()) == 1.0, 'diagonal values of all-vs-all similarity matrix should be 1'
+        assert np.max(M_sim_modcos) <= 1.000001, 'similarity matrix cannot contain values > 1 (except minor rounding error)'
+
+        # Test loading already computed results
+        filename = os.path.join(PATH_TESTDATA, 'M_sim_modcos.npy')
+        M_sim_modcos, M_matches_modcos = cosine_score_matrix([], 
+                          tol = 0.005,
+                          max_mz = 1000.0, 
+                          min_intens = 0,
+                          mass_shifting = True,
+                          method='greedy-numba', 
+                          num_workers = 4,
+                          filename = filename,
+                          safety_points = None)
+        
+        # Remove saved similarity matrix files
+        os.remove(filename)
+        os.remove(filename[:-4] + '_matches.npy') 
+        assert os.path.isfile(filename) == False
 
 
 if __name__ == '__main__':
