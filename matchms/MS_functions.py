@@ -258,7 +258,7 @@ class Spectrum(object):
         self.metadata['parentintensity'] = spectrum_mgf['params']['pepmass'][1]
 
         # Following corrects parentmass according to charge if charge is known.
-        #  This should lead to better computation of neutral losses
+        # This should lead to better computation of neutral losses
         single_charge_precursor_mass = self.metadata['precursormass']
         precursor_mass = self.metadata['precursormass']
         parent_mass = self.metadata['precursormass']
@@ -313,7 +313,6 @@ class Spectrum(object):
         # TODO: now array is tranfered back to list (to be able to store as json later). Seems weird.
         losses_list = [(x[0], x[1]) for x in losses[keep_idx,:]]
         self.losses = losses_list
-
 
 
 
@@ -400,9 +399,6 @@ def process_peaks(peaks,
     if aim_min_peaks is None: # aim_min_peaks is not given
         aim_min_peaks = min_peaks
 
-    def exponential_func(x, a, b):
-        return a*np.exp(-b*x)
-
     if isinstance(peaks, list):
         peaks = np.array(peaks)
         if peaks.shape[1] != 2:
@@ -422,34 +418,10 @@ def process_peaks(peaks,
     # Fit exponential to peak intensity distribution
     if (exp_intensity_filter is not None) and len(peaks) >= min_peaks_for_exp_fit:
 
-        # Ignore highest peak for further analysis
-        peaks2 = peaks.copy()
-        peaks2[np.where(peaks2[:,1] == np.max(peaks2[:,1])),:] = 0
-
-        # Create histogram
-        hist, bins = np.histogram(peaks2[:,1], bins=num_bins)
-        offset = np.where(hist == np.max(hist))[0][0]  # Take maximum intensity bin as starting point
-        last = int(num_bins/2)
-        x = bins[offset:last]
-        y = hist[offset:last]
-        # Try exponential fit:
-        try:
-            popt, pcov = curve_fit(exponential_func, x , y, p0=(peaks.shape[0], 1e-4))
-            lower_guess_offset = bins[max(0,offset-1)]
-            threshold = lower_guess_offset -np.log(1 - exp_intensity_filter)/popt[1]
-        except RuntimeError:
-            print("RuntimeError for ", len(peaks), " peaks. Use 1/2 mean intensity as threshold.")
-            threshold = np.mean(peaks2[:,1])/2
-        except TypeError:
-            print("Unclear TypeError for ", len(peaks), " peaks. Use 1/2 mean intensity as threshold.")
-            print(x, "and y: ", y)
-            threshold = np.mean(peaks2[:,1])/2
-
-        keep_idx = np.where(peaks[:,1] > threshold)[0]
-        if len(keep_idx) < aim_min_peaks:
-            peaks = peaks[np.lexsort((peaks[:,0], peaks[:,1])),:][-aim_min_peaks:]
-        else:
-            peaks = peaks[keep_idx, :]
+        peaks = exponential_peak_filter(peaks,
+                                        exp_intensity_filter,
+                                        aim_min_peaks,
+                                        num_bins)
 
         # Sort by peak intensity
         peaks = peaks[np.lexsort((peaks[:,0], peaks[:,1])),:]
@@ -465,6 +437,64 @@ def process_peaks(peaks,
             return [(x[0], x[1]) for x in peaks[-max_peaks:,:]]
         else:
             return [(x[0], x[1]) for x in peaks]
+
+
+def exponential_peak_filter(peaks,
+                            exp_intensity_filter,
+                            aim_min_peaks,
+                            num_bins):
+    """ Fit exponential to peak intensity distribution and
+    
+    Args:
+    -------
+    peaks: list of tuples 
+        List of tuples containing (m/z, intensity) pairs.
+    exp_intensity_filter: float
+        Intensity threshold will be set where exponential fit to intensity
+        histogram drops below 1 - exp_intensity_filter.
+    aim_min_peaks: int
+        Desired minimum number of peaks. Filtering step will stop removing peaks
+        when it reaches aim_min_peaks.
+    num_bins: int
+        Number of bins for histogram (to fit exponential to).
+
+    Returns
+    -------
+    Filtered List of tuples containing (m/z, intensity) pairs.
+    """
+    def exponential_func(x, a, b):
+        return a*np.exp(-b*x)
+
+    # Ignore highest peak for further analysis
+    peaks2 = peaks.copy()
+    peaks2[np.where(peaks2[:,1] == np.max(peaks2[:,1])),:] = 0
+
+    # Create histogram
+    hist, bins = np.histogram(peaks2[:,1], bins=num_bins)
+    offset = np.where(hist == np.max(hist))[0][0]  # Take maximum intensity bin as starting point
+    last = int(num_bins/2)
+    x = bins[offset:last]
+    y = hist[offset:last]
+    # Try exponential fit:
+    try:
+        popt, pcov = curve_fit(exponential_func, x , y, p0=(peaks.shape[0], 1e-4))
+        lower_guess_offset = bins[max(0,offset-1)]
+        threshold = lower_guess_offset -np.log(1 - exp_intensity_filter)/popt[1]
+    except RuntimeError:
+        print("RuntimeError for ", len(peaks), " peaks. Use 1/2 mean intensity as threshold.")
+        threshold = np.mean(peaks2[:,1])/2
+    except TypeError:
+        print("Unclear TypeError for ", len(peaks), " peaks. Use 1/2 mean intensity as threshold.")
+        print(x, "and y: ", y)
+        threshold = np.mean(peaks2[:,1])/2
+
+    keep_idx = np.where(peaks[:,1] > threshold)[0]
+    if len(keep_idx) < aim_min_peaks:
+        peaks = peaks[np.lexsort((peaks[:,0], peaks[:,1])),:][-aim_min_peaks:]
+    else:
+        peaks = peaks[keep_idx, :]
+        
+    return peaks
 
 
 ## ----------------------------------------------------------------------------
@@ -493,6 +523,8 @@ def load_MS_data(path_data, path_json,
     Prototype. Needs to be replaces by more versatile parser, accepting more MS data formats.
 
     # TODO: add documentation.
+
+    #TODO: consider removing this function alltogether and only allow for MGF input.
     """
 
     spectra = []
@@ -692,9 +724,12 @@ def load_MGF_data(file_mgf,
         try:
             spectra_dict = functions.json_to_dict(file_json)
             spectra_metadata = pd.read_csv(file_json[:-5] + "_metadata.csv")
-            print("Spectra json file found and loaded.")
             spectra = dict_to_spectrum(spectra_dict)
-            collect_new_data = False
+            if len(spectra) > 0:
+                print("Spectra json file found and loaded.")
+                collect_new_data = False
+            else:
+                print("Found json file empty or not expected format.")
 
             if create_docs:
                 with open(file_json[:-4] + "txt", "r") as f:
@@ -711,10 +746,15 @@ def load_MGF_data(file_mgf,
             print(20 * '--')
             print("Could not find file ", file_json)
             print(20 * '--')
+
+    if len(spectra) == 0: # No data was loaded.
+        if os.path.isfile(file_mgf):
             print("Data will be imported from ", file_mgf)
+        else:
+            print("No data was imported. Could not find MGF file", file_mgf)
 
     # Read data from files if no pre-stored data is found:
-    if spectra_dict == {} or file_json is None:
+    if len(spectra) == 0:
 
         # Scale the min_peak filter
         def min_peak_scaling(x, A, B):
@@ -788,7 +828,7 @@ def load_MGF_data(file_mgf,
 
         # Save collected data ----------------------------------------------------------------------
         print()
-        if collect_new_data == True:
+        if collect_new_data == True and file_json is not None:
             # Store spectra
             print(20 * '--')
             print("Saving spectra...")
@@ -958,7 +998,8 @@ def likely_inchi_match(inchi_1, inchi_2, min_agreement = 3):
 
     if min_agreement < 2:
         print("Warning! 'min_agreement' < 2 has no discriminative power. Should be => 2.")
-
+    if min_agreement == 2:
+        print("Warning! 'min_agreement' == 2 has little discriminative power (only looking at structure formula. Better use > 2.")
     agreement = 0
 
     # Remove spaces and '"' to account for different notations. And remove all we assume is of minor importance only.
@@ -1001,7 +1042,7 @@ def likely_inchikey_match(inchikey_1, inchikey_2, min_agreement = 2):
     """
 
     if min_agreement not in [1, 2, 3]:
-        print("Warning! 'min_agreement' should be 1, 2, or 3.")
+        print("Warning! 'min_agreement' of 1, 2, or 3.")
 
     agreement = 0
 
