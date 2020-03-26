@@ -54,12 +54,12 @@ class EpochLogger(CallbackAny2Vec):
         self.loss = loss
 
         # Save model during training if specified in iterations list
-        if self.epoch in [int(x + np.sum(self.iterations[:i])) for i, x in enumerate(self.iterations)]:
-            #if self.epoch < self.num_of_epochs:
-            filename = self.filename.split('.')[0] + '_iter_' + str(self.epoch) + '.model'
-            print('Saving model with name:', filename)
-            model.save(filename)
-
+        if self.filename is not None:
+            if self.epoch in [int(x + np.sum(self.iterations[:i])) for i, x in enumerate(self.iterations)]:
+                #if self.epoch < self.num_of_epochs:
+                filename = self.filename.split('.')[0] + '_iter_' + str(self.epoch) + '.model'
+                print('Saving model with name:', filename)
+                model.save(filename)
 
 
 
@@ -218,26 +218,30 @@ class SimilarityMeasures():
             Load stored model if True, else train new model.
         """
 
-
         # Check if model already exists and should be loaded
-        if os.path.isfile(file_model_word2vec) and use_stored_model:
-            print("Load stored word2vec model ...")
-            self.model_word2vec = gensim.models.Word2Vec.load(file_model_word2vec)
+        if file_model_word2vec is None or not use_stored_model:
+            train_new_model = True
         else:
-            if use_stored_model:
-                print("No saved word2vec model found with given filename!")
+            train_new_model = False
 
+        if not train_new_model:
+            if os.path.isfile(file_model_word2vec):
+                print("Load stored word2vec model ...")
+                self.model_word2vec = gensim.models.Word2Vec.load(file_model_word2vec)
+            else:
+                print("No saved word2vec model found with given filename!")
+        else:
             print("Calculating new word2vec model...")
 
             # Set up GENSIM logging
             logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.WARNING)
 
             if not isinstance(iterations, list):
-                iterations = list(iterations)
+                iterations = [iterations]
 
             epoch_logger = EpochLogger(np.sum(iterations), iterations, file_model_word2vec)
-            iter = np.sum(iterations)
-            min_alpha = learning_rate_initial - iter * learning_rate_decay
+            iter_sum = np.sum(iterations)
+            min_alpha = learning_rate_initial - iter_sum * learning_rate_decay
             if min_alpha < 0:
                 print("Warning! Number of iterations is too high for specified learning_rate decay.")
                 print("Learning_rate_decay will be set from", learning_rate_decay, "to", learning_rate_initial/iter)
@@ -249,7 +253,7 @@ class SimilarityMeasures():
                                                          window=window,
                                                          min_count=min_count,
                                                          workers=workers,
-                                                         iter=iter,
+                                                         iter=iter_sum,
                                                          alpha = learning_rate_initial,
                                                          min_alpha = min_alpha,
                                                          seed=42,
@@ -303,7 +307,7 @@ class SimilarityMeasures():
                         file_model_lsi,
                         num_of_topics=100,
                         num_iter=10,
-                        pyuse_stored_model=True):
+                        use_stored_model=True):
         """ Build LSI model (using gensim).
 
         Args:
