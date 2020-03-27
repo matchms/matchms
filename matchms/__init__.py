@@ -8,7 +8,6 @@ import matchms.ms_similarity_classical
 import matchms.networking
 import matchms.plotting_functions
 import matchms.similarity_measure
-import matchms.similarity_measure
 
 from .__version__ import __version__
 

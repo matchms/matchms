@@ -22,7 +22,8 @@ from scipy import spatial
 import json
 import math
 import pandas as pd
-
+from collections import defaultdict
+import networkx as nx
 # ----------------------------------------------------------------------------
 # ---------------- Document processing functions -----------------------------
 # ----------------------------------------------------------------------------
@@ -54,8 +55,6 @@ def preprocess_document(corpus,
     ] for document in corpus]
 
     # Count word occurences
-    from collections import defaultdict
-
     frequency = defaultdict(int)
     for document in corpus_lowered:
         for word in list(set(document)):
@@ -99,7 +98,6 @@ def create_distance_network(cdistances_ids,
     dimension = cdistances_ids.shape[0]
 
     # Form network
-    import networkx as nx
     bnet = nx.Graph()
     bnet.add_nodes_from(np.arange(0, dimension))
 

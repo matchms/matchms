@@ -41,7 +41,7 @@ from rdkit.Chem import AllChem
 # --------------------------------------------------------------------------------------------------
 
 
-class Spectrum(object):
+class Spectrum:
     """ Spectrum class to store key information
 
     Functions include:
@@ -154,7 +154,7 @@ class Spectrum(object):
         if not charge:
             return 1
         try:
-            if not type(charge) == str:
+            if not isinstance(charge, str):
                 charge = str(charge)
 
             # Try removing any + signs
@@ -460,7 +460,6 @@ def process_peaks(peaks,
             return [
                 (x[0], x[1]) for x in peaks[-max_peaks:, :]
             ]  # TODO: now array is transfered back to list (to be able to store as json later). Seems weird.
-
         else:
             return [(x[0], x[1]) for x in peaks]
     else:
@@ -573,8 +572,8 @@ def load_ms_data(path_data,
                 spec.read_spectrum(path_data, filename, i)
 
                 # Scale the min_peak filter
-                def min_peak_scaling(x, a, B):
-                    return int(a + B * x)
+                def min_peak_scaling(x, a, b):
+                    return int(a + b * x)
 
                 min_peaks_scaled = min_peak_scaling(spec.precursor_mz,
                                                     min_keep_peaks_0,
@@ -1024,10 +1023,7 @@ def likely_inchi_match(inchi_1, inchi_2, min_agreement=3):
         for i in range(min_agreement):
             agreement += (inchi_1_parts[i] == inchi_2_parts[i])
 
-    if agreement == min_agreement:
-        return True
-    else:
-        return False
+    return agreement == min_agreement
 
 
 def likely_inchikey_match(inchikey_1, inchikey_2, min_agreement=2):
@@ -1066,10 +1062,7 @@ def likely_inchikey_match(inchikey_1, inchikey_2, min_agreement=2):
         for i in range(min_agreement):
             agreement += (inchikey_1_parts[i] == inchikey_2_parts[i])
 
-    if agreement == min_agreement:
-        return True
-    else:
-        return False
+    return agreement == min_agreement
 
 
 def find_pubchem_match(compound_name,

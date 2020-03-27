@@ -23,9 +23,9 @@ from rdkit import Chem
 from rdkit.Chem import Draw
 from IPython.display import SVG, display
 from scour import scour
-
+from scipy import spatial
+import networkx as nx
 from .ms_functions import create_ms_documents
-from . import ms_similarity_classical as ms_sim_classic
 
 # ----------------------------------------------------------------------------------------
 # ---------------------------- Plotting functions ----------------------------------------
@@ -188,7 +188,6 @@ def plot_spectra_comparison(ms_measure,
     """
     plt.style.use('ggplot')
 
-    from scipy import spatial
     plot_colors = ['darkcyan', 'purple']
 
     # Definitions for the axes
@@ -389,11 +388,6 @@ def scour(target, source, env=[]):
     if 'SCOUR_OPTIONS' in env:
         options.__dict__.update(env['SCOUR_OPTIONS'])
 
-    if False:
-        from pprint import pprint
-        print("\nUsing Scour options:\n")
-        pprint(options.__dict__)
-
     instream = open(source, 'rb')
     outstream = open(target, 'wb')
 
@@ -494,7 +488,7 @@ def plot_smiles(query_id,
             key = keys[candidate_id]
             smiles.append(spectra[key]["smiles"])
             mol = Chem.MolFromSmiles(smiles[i])
-            if mol != None:
+            if mol is None:
                 mol.SetProp('_Name', smiles[i])
                 if plot_type == 'single':
                     Draw.MolToMPL(mol, size=size)
@@ -847,9 +841,8 @@ def ms_similarity_network(ms_measure,
     dimension = list_similars_idx.shape[0]
 
     # Initialize network graph
-    import networkx as nx
-    MSnet = nx.Graph()
-    MSnet.add_nodes_from(np.arange(0, dimension))
+    msnet = nx.Graph()
+    msnet.add_nodes_from(np.arange(0, dimension))
 
     for i in range(0, dimension):
         idx = np.where(list_similars[i, :] > cutoff)[0][:max_links]
@@ -864,8 +857,8 @@ def ms_similarity_network(ms_measure,
                          if i in list_similars_idx[x, :]]
         else:
             print("Link method not kown")
-        MSnet.add_weighted_edges_from(new_edges)
+        msnet.add_weighted_edges_from(new_edges)
 
     # Export graph for drawing (e.g. using Cytoscape)
-    nx.write_graphml(MSnet, filename)
+    nx.write_graphml(msnet, filename)
     print("Network stored as graphml file under: ", filename)

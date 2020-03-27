@@ -570,7 +570,6 @@ def refine_network(graph_main,
                                            similars,
                                            max_cluster_size=max_cluster_size,
                                            min_cluster_size=min_cluster_size,
-                                           max_addition=None,
                                            min_weight=weigh_bounds[0])
         links_added.extend(links)
 
@@ -632,14 +631,9 @@ def evaluate_clusters(graph_main, m_sim_ref):
         ref_sim_mean_nodes.append(np.mean(mean_mol_sims))
         ref_sim_var_nodes.append(np.var(mean_mol_sims))
 
-    cluster_data = pd.DataFrame(list(
-        zip(num_nodes, num_edges, ref_sim_mean_edges, ref_sim_var_edges,
-            ref_sim_mean_nodes, ref_sim_var_nodes)),
-                                columns=[
-                                    'num_nodes', 'num_edges',
-                                    'ref_sim_mean_edges', 'ref_sim_var_edges',
-                                    'ref_sim_mean_nodes', 'ref_sim_var_nodes'
-                                ])
+    zipped = zip(num_nodes, num_edges, ref_sim_mean_edges, ref_sim_var_edges, ref_sim_mean_nodes, ref_sim_var_nodes)
+    cluster_data = pd.DataFrame(list(zipped), columns=['num_nodes', 'num_edges', 'ref_sim_mean_edges',
+                                                       'ref_sim_var_edges', 'ref_sim_mean_nodes', 'ref_sim_var_nodes'])
     return cluster_data
 
 

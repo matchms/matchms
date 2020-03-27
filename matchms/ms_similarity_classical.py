@@ -256,8 +256,6 @@ def cosine_matrix_fast(spectra, tol, max_mz, min_mz=0):
     Also: tol here is about tol/2 when compared to cosine_matrix or molnet_matrix...
     """
 
-    from scipy import spatial
-
     for i, spectrum in enumerate(spectra):
         spec = np.array(spectrum.peaks.copy(), dtype=float)
 
@@ -435,16 +433,16 @@ def cosine_score_matrix(spectra,
 """
 def cosine_pair(x, len_spectra):
     "" Single molnet pair calculation
-    "" 
+    ""
     spectra_i, spectra_j, i, j, mass_shift, tol, min_intens, counter = x
-    cosine_pair, used_matches = cosine_score_greedy(spectra_i, 
-                                                    spectra_j, 
+    cosine_pair, used_matches = cosine_score_greedy(spectra_i,
+                                                    spectra_j,
                                                     mass_shift = None,
-                                                    tol = tol, 
+                                                    tol = tol,
                                                     min_intens = min_intens,
                                                     use_numba = use_numba)
 
-    if (counter+1) % 1000 == 0 or counter == len_spectra-1:  
+    if (counter+1) % 1000 == 0 or counter == len_spectra-1:
         print('\r', ' Calculated cosine for pair ', i, '--', j, '. ( ', np.round(200*(counter+1)/len_spectra**2, 2), ' % done).', end="")
 
     return cosine_pair, len(used_matches)
@@ -530,11 +528,11 @@ def find_pairs_numba(spec1, spec2, tol, shift=0):
 """
 @numba.njit
 def find_pairs_numba(spec1, spec2, tol, shift=0):
-    
+
     matching_pairs = []
     spec2lowpos = 0
     spec2length = len(spec2)
-    
+
     for idx in range(len(spec1)):
         mz = spec1[idx,0]
         intensity = spec1[idx,1]
@@ -547,8 +545,8 @@ def find_pairs_numba(spec1, spec2, tol, shift=0):
         while(spec2pos < spec2length and spec2[spec2pos][0] + shift < mz + tol):
             matching_pairs.append((idx, spec2pos, intensity*spec2[spec2pos][1]))
             spec2pos += 1
-        
-    return matching_pairs 
+
+    return matching_pairs
 """
 
 

@@ -22,7 +22,6 @@ from scipy import spatial
 from gensim import corpora
 
 from .ms_functions import create_ms_documents
-from . import ms_similarity_classical as MS_sim_classic
 
 # --------------------------------------------------------------------------------------------------
 # --------------------- Functions for MS library search (using Spec2Vec) ---------------------------

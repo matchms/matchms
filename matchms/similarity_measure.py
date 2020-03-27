@@ -21,7 +21,10 @@ from __future__ import print_function
 import os
 import numpy as np
 import logging
+import pickle
 from pprint import pprint
+
+
 import gensim
 from gensim import corpora
 from gensim import models
@@ -644,7 +647,6 @@ class SimilarityMeasures:
         filename: str
             Filename to save object to.
         """
-        import pickle
         f = open(filename, 'wb')
         pickle.dump(self.__dict__, f)
         f.close()
@@ -658,7 +660,6 @@ class SimilarityMeasures:
         filename: str
             Filename to load object from.
         """
-        import pickle
         f = open(filename, 'rb')
         tmp_dict = pickle.load(f)
         self.__dict__.update(tmp_dict)
