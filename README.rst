@@ -55,10 +55,10 @@ https://badgen.net/ to see which other badges are available.)
    :target: https://github.com/matchms/matchms
    :alt: GitHub Actions Badge
 
-.. |ReadTheDocs Badge| image:: https://matchms.readthedocs.io/en/latest/?badge=latest
-   :target: https://readthedocs.org/projects/matchms/?version=latest
-   :alt: ReadTheDocs Badge
-
+.. |ReadTheDocs Badge| image:: https://readthedocs.org/projects/matchms/badge/?version=latest
+    :alt: Documentation Status
+    :scale: 100%
+    :target: https://matchms.readthedocs.io/en/latest/?badge=latest
 
 Vector representation and similarity measure for mass spectrometry data
 
