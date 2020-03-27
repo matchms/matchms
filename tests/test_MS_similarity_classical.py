@@ -8,7 +8,8 @@ from matchms.MS_functions import Spectrum, load_MGF_data
 from matchms.MS_similarity_classical import cosine_score_greedy, cosine_score_matrix
 
 # Use test data from following folder
-PATH_TESTDATA = os.path.join(os.path.dirname(__file__), 'testdata')
+PATH_TEST = os.path.dirname(os.path.abspath(__file__))
+PATH_TESTDATA = os.path.join(PATH_TEST, 'testdata')
 
 class ModelGenerationSuite(unittest.TestCase):
     """Basic test cases."""
