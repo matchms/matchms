@@ -1,7 +1,6 @@
-# test functions
-
-import numpy as np
 from matchms.helper_functions import calculate_similarities, preprocess_document
+import numpy as np
+
 
 def test_preprocess_document():
     # Test with test-vectors and known outcome
@@ -10,17 +9,17 @@ def test_preprocess_document():
 
     # Run function:
     corpus_lowered, corpus_weights_new = preprocess_document(corpus,
-                                                            corpus_weights = None,
-                                                            stopwords = [],
-                                                            min_frequency = 1)
+                                                             corpus_weights=None,
+                                                             stopwords=[],
+                                                             min_frequency=1)
 
     # assert corpus_lowered[1] == ['aa', 'bb', 'cc', 'dd']
     # assert corpus_weights_new is None
 
     corpus_lowered, corpus_weights_new = preprocess_document(corpus,
-                                                            corpus_weights = corpus_weights,
-                                                            stopwords = [],
-                                                            min_frequency = 2)
+                                                             corpus_weights=corpus_weights,
+                                                             stopwords=[],
+                                                             min_frequency=2)
 
     # assert corpus_lowered[1] == ['aa', 'bb', 'cc']
     # assert corpus_weights_new[1] == [5, 4, 2]
@@ -28,7 +27,7 @@ def test_preprocess_document():
 
 def test_calculate_similarities():
     # Test with test-vectors and known outcome
-    testvectors = np.array([[0,0,0,0,1], [1,0,0,0,1], [1,1,1,0,0], [0.5,0.5,0.5,0,0]])
+    testvectors = np.array([[0, 0, 0, 0, 1], [1, 0, 0, 0, 1], [1, 1, 1, 0, 0], [0.5, 0.5, 0.5, 0, 0]])
 
     # Run function:
     list_similars_ids, list_similars, mean_similarity = calculate_similarities(testvectors, num_hits=4, method='cosine')
