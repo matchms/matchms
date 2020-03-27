@@ -37,13 +37,12 @@ from rdkit import Chem
 from rdkit.Chem import AllChem
 
 
-
 # --------------------------------------------------------------------------------------------------
 # ---------------------------- Spectrum class ------------------------------------------------------
 # --------------------------------------------------------------------------------------------------
 
 class Spectrum(object):
-    """ Spectrum class to store key information
+    """ Spectrum class to store key information.
 
     Functions include:
         - Import data from mass spec files (protoype so far, works with only few formats)
@@ -302,9 +301,9 @@ class Spectrum(object):
         """
         ms1_peak = self.precursor_mz
         losses = np.array(self.peaks.copy())
-        losses[:,0] = ms1_peak - losses[:,0]
-        keep_idx = np.where((losses[:,0] > self.min_loss)
-                            & (losses[:,0] < self.max_loss))[0]
+        losses[:, 0] = ms1_peak - losses[:, 0]
+        keep_idx = np.where((losses[:, 0] > self.min_loss)
+                            & (losses[:, 0] < self.max_loss))[0]
 
         # TODO: now array is tranfered back to list (to be able to store as json later). Seems weird.
         losses_list = [(x[0], x[1]) for x in losses[keep_idx, :]]
@@ -344,7 +343,7 @@ def dict_to_spectrum(spectra_dict):
         for key2, value2 in value.items():
             setattr(spectrum, key2, value2)
 
-        spectrum.peaks = [(x[0],x[1]) for x in spectrum.peaks]  # convert to tuples
+        spectrum.peaks = [(x[0], x[1]) for x in spectrum.peaks]  # convert to tuples
 
         # Collect in form of list of spectrum objects
         spectra.append(spectrum)
@@ -400,8 +399,8 @@ def process_peaks(peaks,
             print("Peaks were given in unexpected format...")
 
     # Remove peaks outside min_frag <-> max_frag window:
-    keep_idx = np.where((peaks[:,0] > min_frag) & (peaks[:,0] < max_frag))[0]
-    peaks = peaks[keep_idx,:]
+    keep_idx = np.where((peaks[:, 0] > min_frag) & (peaks[:, 0] < max_frag))[0]
+    peaks = peaks[keep_idx, :]
 
     # Remove peaks based on relative intensity below min_intensity_perc/100 * max_intensity
     if min_intensity_perc > 0:
@@ -409,7 +408,7 @@ def process_peaks(peaks,
         keep_idx = np.where((peaks[:, 0] > min_frag) & (peaks[:, 0] < max_frag)
                             & (peaks[:, 1] > intensity_thres))[0]
         if len(keep_idx) > min_peaks:
-            peaks = peaks[keep_idx,:]
+            peaks = peaks[keep_idx, :]
 
     # Fit exponential to peak intensity distribution
     if (exp_intensity_filter is not None) and len(peaks) >= min_peaks_for_exp_fit:
@@ -420,17 +419,17 @@ def process_peaks(peaks,
                                         num_bins)
 
         # Sort by peak intensity
-        peaks = peaks[np.lexsort((peaks[:, 0], peaks[:, 1])),:]
+        peaks = peaks[np.lexsort((peaks[:, 0], peaks[:, 1])), :]
         if max_peaks is not None:
-            return [(x[0], x[1]) for x in peaks[-max_peaks:,:]]  # TODO: now array is transfered back to list (to be able to store as json later). Seems weird.
+            return [(x[0], x[1]) for x in peaks[-max_peaks:, :]]  # TODO: now array is transfered back to list (to be able to store as json later). Seems weird.
 
         else:
             return [(x[0], x[1]) for x in peaks]
     else:
         # Sort by peak intensity
-        peaks = peaks[np.lexsort((peaks[:,0], peaks[:,1])),:]
+        peaks = peaks[np.lexsort((peaks[:, 0], peaks[:, 1])), :]
         if max_peaks is not None:
-            return [(x[0], x[1]) for x in peaks[-max_peaks:,:]]
+            return [(x[0], x[1]) for x in peaks[-max_peaks:, :]]
         else:
             return [(x[0], x[1]) for x in peaks]
 
@@ -463,7 +462,7 @@ def exponential_peak_filter(peaks,
 
     # Ignore highest peak for further analysis
     peaks2 = peaks.copy()
-    peaks2[np.where(peaks2[:, 1] == np.max(peaks2[:, 1])),:] = 0
+    peaks2[np.where(peaks2[:, 1] == np.max(peaks2[:, 1])), :] = 0
 
     # Create histogram
     hist, bins = np.histogram(peaks2[:, 1], bins=num_bins)
@@ -474,19 +473,19 @@ def exponential_peak_filter(peaks,
     # Try exponential fit:
     try:
         popt, _ = curve_fit(exponential_func, x , y, p0=(peaks.shape[0], 1e-4))
-        lower_guess_offset = bins[max(0,offset-1)]
+        lower_guess_offset = bins[max(0, offset-1)]
         threshold = lower_guess_offset -np.log(1 - exp_intensity_filter)/popt[1]
     except RuntimeError:
         print("RuntimeError for ", len(peaks), " peaks. Use 1/2 mean intensity as threshold.")
-        threshold = np.mean(peaks2[:,1])/2
+        threshold = np.mean(peaks2[:, 1])/2
     except TypeError:
         print("Unclear TypeError for ", len(peaks), " peaks. Use 1/2 mean intensity as threshold.")
         print(x, "and y: ", y)
-        threshold = np.mean(peaks2[:,1])/2
+        threshold = np.mean(peaks2[:, 1])/2
 
     keep_idx = np.where(peaks[:, 1] > threshold)[0]
     if len(keep_idx) < aim_min_peaks:
-        peaks = peaks[np.lexsort((peaks[:, 0], peaks[:, 1])),:][-aim_min_peaks:]
+        peaks = peaks[np.lexsort((peaks[:, 0], peaks[:, 1])), :][-aim_min_peaks:]
     else:
         peaks = peaks[keep_idx, :]
 
@@ -511,9 +510,6 @@ def load_MS_data(path_data,
                  min_peaks = 10,
                  max_peaks = None,
                  aim_min_peak = None,
-                 #merge_energies = False,
-                 #merge_ppm = 10,
-                 #replace = 'max',
                  peak_loss_words = ['peak_', 'loss_']):
     """ Collect spectra from set of files
     Partly taken from ms2ldaviz.
@@ -582,8 +578,8 @@ def load_MS_data(path_data,
                 spec.read_spectrum(path_data, filename, i)
 
                 # Scale the min_peak filter
-                def min_peak_scaling(x, A, B):
-                    return int(A + B * x)
+                def min_peak_scaling(x, a, b):
+                    return int(a + b * x)
 
                 min_peaks_scaled = min_peak_scaling(spec.precursor_mz, min_keep_peaks_0, min_keep_peaks_per_mz)
             else:
@@ -627,7 +623,7 @@ def load_MS_data(path_data,
         spectra_metadata["filename"] = filenames
 
         # Save collected data
-        if collect_new_data == True:
+        if collect_new_data:
             spectra_metadata.to_csv(path_json + results_file[:-5] + "_metadata.csv", index=False)
 
             functions.dict_to_json(spectra_dict, path_json + results_file)
@@ -745,7 +741,7 @@ def load_MGF_data(file_mgf,
             print("Could not find file ", file_json)
             print(20 * '--')
 
-    if len(spectra) == 0: # No data was loaded.
+    if len(spectra) == 0:  # No data was loaded.
         if os.path.isfile(file_mgf):
             print("Data will be imported from ", file_mgf)
         else:
@@ -830,7 +826,7 @@ def load_MGF_data(file_mgf,
 
         # Save collected data ----------------------------------------------------------------------
         print()
-        if collect_new_data == True and file_json is not None:
+        if collect_new_data and file_json is not None:
             # Store spectra
             print(20 * '--')
             print("Saving spectra...")
@@ -852,8 +848,6 @@ def load_MGF_data(file_mgf,
                         f.write(str(s) +"\n")
 
     return spectra, spectra_dict, ms_documents, ms_documents_intensity, spectra_metadata
-
-
 
 
 # --------------------------------------------------------------------------------------------------

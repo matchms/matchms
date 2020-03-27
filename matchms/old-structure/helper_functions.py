@@ -27,10 +27,11 @@ from collections import defaultdict
 # ---------------- Document processing functions -----------------------------
 # ----------------------------------------------------------------------------
 
+
 def preprocess_document(corpus,
-                        corpus_weights = None,
-                        stopwords = [],
-                        min_frequency = 2):
+                        corpus_weights=None,
+                        stopwords=[],
+                        min_frequency=2):
     """ Basic preprocessing of document words
 
     - Remove common words from stopwords and tokenize
@@ -100,7 +101,7 @@ def full_wv(vocab_size, word_idx, word_count):
 #
 
 def ifd_scores(vocabulary, corpus):
-    """ Calulate idf score (Inverse Document Frequency score) for all words in 
+    """ Calulate idf score (Inverse Document Frequency score) for all words in
     vocabulary over a given corpus.
 
     Args:
@@ -122,7 +123,6 @@ def ifd_scores(vocabulary, corpus):
     corpus_size = len(corpus)
 
     for i in range(0, vocabulary_size):
-        if (i+1) % 100 == 0 or i == vocabulary_size-1:  # show progress
         if (i + 1) % 100 == 0 or i == vocabulary_size - 1:  # show progress
             print('\r',
                   ' Calculated scores for {} of {} words.'.format(i + 1, vocabulary_size),
@@ -136,14 +136,14 @@ def ifd_scores(vocabulary, corpus):
 
         idf_scores.append([i, word, word_containing, idf_score])
     print("")
-    return pd.DataFrame(idf_scores, 
+    return pd.DataFrame(idf_scores,
                         columns=["id", "word", "word count", "idf score"])
 
 
 def calculate_similarities(vectors,
                            num_hits=25,
                            method='cosine'):
-    """ Calculate similarities (all-versus-all --> matrix) based on array of 
+    """ Calculate similarities (all-versus-all --> matrix) based on array of
     all vectors.
 
     Args:
@@ -163,7 +163,7 @@ def calculate_similarities(vectors,
     list_similars = np.zeros((cdist.shape[0],num_hits))
 
     for i in range(cdist.shape[0]):
-        list_similars_ids[i,:] = cdist[i,:].argsort()[:num_hits]
-        list_similars[i,:] = 1- cdist[i, list_similars_ids[i,:]]
+        list_similars_ids[i, :] = cdist[i, :].argsort()[:num_hits]
+        list_similars[i, :] = 1- cdist[i, list_similars_ids[i, :]]
 
     return list_similars_ids, list_similars, mean_similarity
