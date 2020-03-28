@@ -17,12 +17,13 @@
 #
 
 from __future__ import print_function
-import numpy as np
-from scipy import spatial
 import json
 import math
-import pandas as pd
 from collections import defaultdict
+import numpy as np
+from scipy import spatial
+import pandas as pd
+
 # ----------------------------------------------------------------------------
 # ---------------- Document processing functions -----------------------------
 # ----------------------------------------------------------------------------
@@ -32,7 +33,7 @@ def preprocess_document(corpus,
                         corpus_weights=None,
                         stopwords=[],
                         min_frequency=2):
-    """ Basic preprocessing of document words
+    """Basic preprocessing of document words
 
     - Remove common words from stopwords and tokenize
     - Only include words that appear at least *min_frequency* times.
@@ -49,7 +50,9 @@ def preprocess_document(corpus,
     min_frequency: int
         Minimum total occurence of a word necessary to be included in processed corpus. Default = 2
     """
-    corpus_lowered = [[word.lower() for word in document if word not in stopwords] for document in corpus]
+    corpus_lowered = [[
+        word.lower() for word in document if word not in stopwords
+    ] for document in corpus]
 
     # Count word occurences
     frequency = defaultdict(int)
@@ -75,13 +78,13 @@ def preprocess_document(corpus,
 #
 
 def dict_to_json(mydict, file_json):
-    # save dictionary as json file
+    """Save dictionary as json file."""
     with open(file_json, 'w') as outfile:
         json.dump(mydict, outfile)
 
 
 def json_to_dict(file_json):
-    # create dictionary from json file
+    """Create dictionary from json file."""
     with open(file_json) as infile:
         mydict = json.load(infile)
 
@@ -89,8 +92,7 @@ def json_to_dict(file_json):
 
 
 def full_wv(vocab_size, word_idx, word_count):
-    """ Create full word vector
-    """
+    """Create full word vector."""
     one_hot = np.zeros((vocab_size))
     one_hot[word_idx] = word_count
     return one_hot
@@ -101,7 +103,7 @@ def full_wv(vocab_size, word_idx, word_count):
 #
 
 def ifd_scores(vocabulary, corpus):
-    """ Calulate idf score (Inverse Document Frequency score) for all words in
+    """Calulate idf score (Inverse Document Frequency score) for all words in
     vocabulary over a given corpus.
 
     Args:
@@ -143,7 +145,7 @@ def ifd_scores(vocabulary, corpus):
 def calculate_similarities(vectors,
                            num_hits=25,
                            method='cosine'):
-    """ Calculate similarities (all-versus-all --> matrix) based on array of
+    """Calculate similarities (all-versus-all --> matrix) based on array of
     all vectors.
 
     Args:
@@ -159,8 +161,8 @@ def calculate_similarities(vectors,
     mean_similarity = 1 - np.mean(cdist)
 
     # Create numpy arrays to store distances
-    list_similars_ids = np.zeros((cdist.shape[0],num_hits), dtype=int)
-    list_similars = np.zeros((cdist.shape[0],num_hits))
+    list_similars_ids = np.zeros((cdist.shape[0], num_hits), dtype=int)
+    list_similars = np.zeros((cdist.shape[0], num_hits))
 
     for i in range(cdist.shape[0]):
         list_similars_ids[i, :] = cdist[i, :].argsort()[:num_hits]

@@ -22,10 +22,11 @@ from scipy import spatial
 from gensim import corpora
 
 from .ms_functions import create_ms_documents
+from .ms_similarity_classical import cosine_score_greedy
 
-# --------------------------------------------------------------------------------------------------
-# --------------------- Functions for MS library search (using Spec2Vec) ---------------------------
-# --------------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# --------------------- Functions for MS library search (using Spec2Vec) ------
+# -----------------------------------------------------------------------------
 
 
 def vectorize_spectra(spectra,
@@ -35,7 +36,7 @@ def vectorize_spectra(spectra,
                       max_loss=500.0,
                       peak_loss_words=['peak_', 'loss_'],
                       weighting_power=0.5):
-    """ Calculate Spec2Vec vectors for all given spectra (independent of whether
+    """Calculate Spec2Vec vectors for all given spectra (independent of whether
     they also a part of the ms_library).
 
     Args:
@@ -141,9 +142,9 @@ def library_matching(spectra_query,
                      cosine_tol=0.005):
     """
     Function to select potential spectra matches.
-    Suitable candidates will be selected by 1) top_n Spec2Vec similarity, and 2) 
+    Suitable candidates will be selected by 1) top_n Spec2Vec similarity, and 2)
     same precursor mass (within given mz_ppm tolerance(s)).
-    For later matching routines, additional scores (cosine, modified cosine) 
+    For later matching routines, additional scores (cosine, modified cosine)
     are added as well.
 
     Args:
@@ -153,24 +154,24 @@ def library_matching(spectra_query,
     spectra_library: list of spectrum objects
         List containing all library spectrum objects.
     library_spectra_metadata: pandas DataFrame
-        Metadata of all library spectra in form of a pandas DataFrame, as given 
+        Metadata of all library spectra in form of a pandas DataFrame, as given
         by the load_MGF_data() function from MS_functions.py.
     ms_library: SimilarityMeasures() object
-        Spec2Vec SimilarityMeasures() object built on library spectra, including 
+        Spec2Vec SimilarityMeasures() object built on library spectra, including
         trained model and spectra vectors.
     top_n: int, optional
-        Number of entries witht the top_n highest Spec2Vec scores to keep as 
+        Number of entries witht the top_n highest Spec2Vec scores to keep as
         found matches. Default = 10.
     mz_ppm: int / list of int, optional
-        Single int value or list of int values that determine the tolerance for 
-        precursor-mz matching. Masses are considered to be a match if they lie 
-        within +- 1e-6 * mz_ppm. If list of ppm values is given, all matches for 
+        Single int value or list of int values that determine the tolerance for
+        precursor-mz matching. Masses are considered to be a match if they lie
+        within +- 1e-6 * mz_ppm. If list of ppm values is given, all matches for
         the respective ppm values will be added to the final table. Default = 10.
     spectra_vectors: numpy array, optional
-        Numpy array made from all Spec2Vec spectra vectors of the query spectra. 
+        Numpy array made from all Spec2Vec spectra vectors of the query spectra.
         Default = None.
     ignore_non_annotated: bool, optional
-        If True, only annotated spectra will be considered for matching. 
+        If True, only annotated spectra will be considered for matching.
         Default = True.
     cosine_tol: float, optional
         Set tolerance for the cosine and modified cosine score. Default = 0.005
@@ -204,9 +205,9 @@ def library_matching(spectra_query,
         annotated_spectra_ids = np.where(
             library_spectra_metadata['smiles'].isna().values is False)[0]
 
-    # --------------------------------------------------------------------------
-    # 1. Search for top-n Spec2Vec matches -------------------------------------
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
+    # 1. Search for top-n Spec2Vec matches ------------------------------------
+    # -------------------------------------------------------------------------
 
     # Check if Spec2Vec vectors are present for library
     if len(ms_library.vectors_centroid) == 0:
@@ -249,9 +250,9 @@ def library_matching(spectra_query,
             zip(top_n_corrected_ids, m_spec2vec_similairies[top_n_sorted, i]))
         s2v_matches.append(s2v_match)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # 2. Search for precursor mz based matches --------------------------------
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     if ignore_non_annotated:
         library_masses = library_spectra_metadata['precursor_mz'].values[
             annotated_spectra_ids]
@@ -278,9 +279,9 @@ def library_matching(spectra_query,
                 mass_matches.append(mass_match)
         mass_matches_ppms.append(mass_matches)
 
-    # --------------------------------------------------------------------------
-    # 3. Combine found matches -------------------------------------------------
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
+    # 3. Combine found matches ------------------------------------------------
+    # -------------------------------------------------------------------------
     for i in range(len(spectra_query)):
         ids = list(mass_matches_ppms[0][i])
         mass_match_lst = len(mass_matches_ppms[0][i]) * [1]
@@ -336,9 +337,9 @@ def library_matching(spectra_query,
 
         found_matches.append(matches_df)
 
-    # --------------------------------------------------------------------------
-    # 4. Add additonal similarity measures (cosine + mod.cosine) ---------------
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
+    # 4. Add additonal similarity measures (cosine + mod.cosine) --------------
+    # -------------------------------------------------------------------------
     for i in range(len(spectra_query)):
         cosine_scores = []
         for j in found_matches[i]['spectra_ID']:
@@ -367,7 +368,7 @@ def library_matching(spectra_query,
 
 
 def cosine_check(spectra1, spectra2, tol=0.005, mod_cosine=False):
-    """ Small helper function to calculate cosine or modified cosine score for pair of spectra.
+    """Small helper function to calculate cosine or modified cosine score for pair of spectra.
 
     Args:
     --------
@@ -384,10 +385,10 @@ def cosine_check(spectra1, spectra2, tol=0.005, mod_cosine=False):
         mass_shift = None
     spec1 = np.array(spectra1.peaks, dtype=float)
     spec2 = np.array(spectra2.peaks, dtype=float)
-    cosine_score = MS_sim_classic.cosine_score_greedy(spec1,
-                                                      spec2,
-                                                      mass_shift=mass_shift,
-                                                      tol=tol,
-                                                      min_intens=0,
-                                                      use_numba=True)
+    cosine_score = cosine_score_greedy(spec1,
+                                       spec2,
+                                       mass_shift=mass_shift,
+                                       tol=tol,
+                                       min_intens=0,
+                                       use_numba=True)
     return (cosine_score[0], len(cosine_score[1]))
