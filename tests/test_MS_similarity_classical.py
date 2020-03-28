@@ -4,8 +4,8 @@ import numpy as np
 import pytest
 import unittest
 
-from matchms.MS_functions import Spectrum, load_MGF_data
-from matchms.MS_similarity_classical import cosine_score_greedy, cosine_score_matrix
+from matchms.ms_functions import Spectrum, load_MGF_data
+from matchms.ms_similarity_classical import cosine_score_greedy, cosine_score_matrix
 
 # Use test data from following folder
 PATH_TEST = os.path.dirname(os.path.abspath(__file__))

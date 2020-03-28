@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 import unittest
 
-from matchms.MS_functions import Spectrum, load_MGF_data
+from matchms.ms_functions import Spectrum, load_MGF_data
 from matchms.similarity_measure import SimilarityMeasures
 
 # Use test data from following folder
@@ -19,7 +19,7 @@ class ModelGenerationSuite(unittest.TestCase):
         cosine matrix. """
         # Import spectra
         test_mgf_file = os.path.join(PATH_TESTDATA, 'GNPS-COLLECTIONS-PESTICIDES-NEGATIVE.mgf')
-        spectra, spec_dict, MS_docs, MS_docs_intensity, metadata = load_MGF_data(test_mgf_file,
+        spectra, spec_dict, ms_docs, ms_docs_intensity, metadata = load_MGF_data(test_mgf_file,
                                             file_json = None,
                                             num_decimals = 1,
                                             min_frag = 0.0, max_frag = 1000.0,
@@ -33,18 +33,18 @@ class ModelGenerationSuite(unittest.TestCase):
                                             peak_loss_words = ['peak_', 'loss_'])
 
         # Create SimilarityMeasures object
-        MS_measure = SimilarityMeasures(MS_docs)
-        MS_measure.preprocess_documents(0.2, min_frequency = 2, create_stopwords = False)
+        ms_measure = SimilarityMeasures(ms_docs)
+        ms_measure.preprocess_documents(0.2, min_frequency = 2, create_stopwords = False)
 
-        assert len(MS_measure.dictionary) == 1237, 'expected different number of words in dictionary'
-        assert MS_measure.corpus[0][-5:] == ['loss_70.1', 'loss_88.1', 'loss_88.1', 'loss_88.1', 'loss_108.1']
+        assert len(ms_measure.dictionary) == 1237, 'expected different number of words in dictionary'
+        assert ms_measure.corpus[0][-5:] == ['loss_70.1', 'loss_88.1', 'loss_88.1', 'loss_88.1', 'loss_108.1']
 
         # Train a word2vec model
         # -----------------------------------------------------------------------------
         file_model = os.path.join(PATH_TESTDATA, 'Spec2Vec_model.model')
         vector_dimension = 100
 
-        MS_measure.build_model_word2vec(file_model, size=vector_dimension, window=500,
+        ms_measure.build_model_word2vec(file_model, size=vector_dimension, window=500,
                                      min_count=1, workers=4, iterations=20,
                                      use_stored_model=False)
 
@@ -54,31 +54,31 @@ class ModelGenerationSuite(unittest.TestCase):
         """ TODO: This test causes issues. Apparently exporting/importing word2vec models is very sensitive to the environment!
         # Test loading pre-trained word2vec model
         file_model_test = os.path.join(PATH_TESTDATA, 'Spec2Vec_model_test.model')
-        MS_measure.build_model_word2vec(file_model_test,
+        ms_measure.build_model_word2vec(file_model_test,
                                         size=vector_dimension, window=500,
                                      min_count=1, workers=4, iterations=20,
                                      use_stored_model=True)
 
-        assert MS_measure.model_word2vec.wv.vectors.shape == (1237, 100), 'unexpected number or shape of word2vec vectors'
-        assert np.sum(MS_measure.model_word2vec.wv.vectors[0]) == pytest.approx(20.86065, 0.0001), 'unexpected values for word2vec vectors'
+        assert ms_measure.model_word2vec.wv.vectors.shape == (1237, 100), 'unexpected number or shape of word2vec vectors'
+        assert np.sum(ms_measure.model_word2vec.wv.vectors[0]) == pytest.approx(20.86065, 0.0001), 'unexpected values for word2vec vectors'
         """
 
         # Calculate Spec2Vec vectors for all spectra
         # -----------------------------------------------------------------------------
-        MS_measure.get_vectors_centroid(method = 'ignore',
+        ms_measure.get_vectors_centroid(method = 'ignore',
                                      tfidf_weighted=True,
                                      weighting_power = 0.5,
                                      tfidf_model = None)
 
-        assert MS_measure.vectors_centroid.shape == (76, vector_dimension)
+        assert ms_measure.vectors_centroid.shape == (76, vector_dimension)
 
 
         # Calculate matrix of all-vs-all similarity scores:
         # -----------------------------------------------------------------------------
         from scipy import spatial
 
-        M_sim = 1 - spatial.distance.cdist(MS_measure.vectors_centroid,
-                                           MS_measure.vectors_centroid, 'cosine')
+        M_sim = 1 - spatial.distance.cdist(ms_measure.vectors_centroid,
+                                           ms_measure.vectors_centroid, 'cosine')
 
         assert np.mean(M_sim.diagonal()) == 1.0, 'diagonal values of all-vs-all similarity matrix should be 1'
         assert np.max(M_sim) <= 1.0, 'similarity matrix cannot contain values > 1'
