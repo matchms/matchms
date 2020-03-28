@@ -166,6 +166,6 @@ def calculate_similarities(vectors,
 
     for i in range(cdist.shape[0]):
         list_similars_ids[i, :] = cdist[i, :].argsort()[:num_hits]
-        list_similars[i, :] = 1- cdist[i, list_similars_ids[i, :]]
+        list_similars[i, :] = 1 - cdist[i, list_similars_ids[i, :]]
 
     return list_similars_ids, list_similars, mean_similarity

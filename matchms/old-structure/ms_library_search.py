@@ -140,8 +140,8 @@ def library_matching(spectra_query,
                      spectra_vectors=None,
                      ignore_non_annotated=True,
                      cosine_tol=0.005):
-    """
-    Function to select potential spectra matches.
+    """Selecting potential spectra matches with spectra library.
+
     Suitable candidates will be selected by 1) top_n Spec2Vec similarity, and 2)
     same precursor mass (within given mz_ppm tolerance(s)).
     For later matching routines, additional scores (cosine, modified cosine)
@@ -176,7 +176,6 @@ def library_matching(spectra_query,
     cosine_tol: float, optional
         Set tolerance for the cosine and modified cosine score. Default = 0.005
     """
-
     # Check input data
     if len(spectra_library) != library_spectra_metadata.shape[0]:
         print(
@@ -371,7 +370,7 @@ def cosine_check(spectra1, spectra2, tol=0.005, mod_cosine=False):
     """Small helper function to calculate cosine or modified cosine score for pair of spectra.
 
     Args:
-    --------
+    ----
     spectra1: spectrum() object
     spectra2: spectrum() object
     tol: float

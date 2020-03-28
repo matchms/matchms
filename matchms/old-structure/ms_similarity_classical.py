@@ -32,11 +32,12 @@ def mol_sim_matrix(fingerprints1,
                    max_size=1000,
                    print_progress=True):
     """Create Matrix of all molecular similarities (based on molecular fingerprints).
+
     If filename is not None, the result will be saved as npy.
     To create molecular fingerprints see mol_fingerprints() function from MS_functions.
 
     Args:
-    --------
+    ----
     fingerprints1: list
         List of molecular fingerprints (numpy arrays).
     fingerprints2: list
@@ -123,11 +124,12 @@ def cosine_score_greedy(spec1,
                         min_intens=0,
                         use_numba=True):
     """Calculate cosine score between spectrum1 and spectrum2.
+
     If mass_shifted = True it will shift the spectra with respect to each other
     by difference in their parentmasses.
 
     Args:
-    --------
+    ----
     spec1: Spectrum peaks and intensities as numpy array.
     spec2: Spectrum peaks and intensities as numpy array.
     tol: float
@@ -185,8 +187,9 @@ def cosine_score_hungarian(spec1,
                            mass_shift,
                            tol,
                            min_intens=0):
-    """Taking full care of weighted bipartite matching problem:
-        Use Hungarian algorithm (slow...)
+    """Taking full care of weighted bipartite matching problem.
+
+    Use Hungarian algorithm (slow...)
 
     Args:
     --------
@@ -249,7 +252,8 @@ def cosine_matrix_fast(spectra,
                        tol,
                        max_mz,
                        min_mz=0):
-    """
+    """Calculates cosine similarity matrix.
+
     Be careful! Binning is here done by creating one-hot vectors.
     It is hence really actual "bining" and different from the tolerance-based
     approach used for the cosine_matrix or molnet_matrix!
@@ -280,7 +284,7 @@ def cosine_matrix_fast(spectra,
 def cosine_score_matrix(spectra,
                         tol,
                         max_mz=1000.0,
-                        #min_mz=0,
+                        # min_mz=0,
                         min_intens=0,
                         mass_shifting=False,
                         method='hungarian',
@@ -288,6 +292,7 @@ def cosine_score_matrix(spectra,
                         filename=None,
                         safety_points=None):
     """Create Matrix of all modified cosine similarities.
+
     Takes some time to calculate, so better only do it once and save as npy.
 
     Now implemented: parallelization of code using concurrent.futures and numba options.
@@ -333,7 +338,7 @@ def cosine_score_matrix(spectra,
             print("Loading similarity scores from", filename)
             modcos_sim = np.load(filename)
             print("Loading min_match values from", filename[:-4]+ "_matches.npy")
-            modcos_matches = np.load(filename[:-4]+ "_matches.npy")
+            modcos_matches = np.load(filename[:-4] + "_matches.npy")
 
             # Check if matrix was calculated to the end:
             diagonal = modcos_sim.diagonal()
@@ -353,7 +358,8 @@ def cosine_score_matrix(spectra,
                 collect_new_data = False
 
         except FileNotFoundError:
-            print("Could not find file ", filename, "or file", filename[:-4]+ "_matches.npy")
+            print("Could not find file ", filename, "or file",
+                  filename[:-4] + "_matches.npy")
             if mass_shifting:
                 print("Modified cosine scores will be calculated from scratch.")
             else:
@@ -366,7 +372,7 @@ def cosine_score_matrix(spectra,
         missing_scores = np.arange(0, len(spectra))
         counter_init = 0
 
-    if collect_new_data == True:
+    if collect_new_data:
         if counter_init == 0:
             modcos_sim = np.zeros((len(spectra), len(spectra)))
             modcos_matches = np.zeros((len(spectra), len(spectra)))
@@ -552,7 +558,7 @@ def find_pairs(spec1, spec2, tol, shift=0):
             break
         spec2pos = spec2lowpos
         while(spec2pos < spec2length and spec2[spec2pos][0] + shift < mz + tol):
-            matching_pairs.append((idx, spec2pos, intensity*spec2[spec2pos][1]))
+            matching_pairs.append((idx, spec2pos, intensity * spec2[spec2pos][1]))
             spec2pos += 1
 
     return matching_pairs
