@@ -77,18 +77,18 @@ class Spectrum(object):
         or their intensitites are added (None).
     """
     def __init__(self,
-                 min_frag = 0.0,
-                 max_frag = 1000.0,
-                 min_loss = 10.0,
-                 max_loss = 200.0,
-                 min_intensity_perc = 0.0,
-                 exp_intensity_filter = 0.01,
-                 min_peaks = 10,
-                 max_peaks = None,
-                 aim_min_peak = None,
-                 merge_energies = True,
-                 merge_ppm = 1,
-                 replace = 'max'):
+                 min_frag=0.0,
+                 max_frag=1000.0,
+                 min_loss=10.0,
+                 max_loss=200.0,
+                 min_intensity_perc=0.0,
+                 exp_intensity_filter=0.01,
+                 min_peaks=10,
+                 max_peaks=None,
+                 aim_min_peak=None,
+                 merge_energies=True,
+                 merge_ppm=1,
+                 replace='max'):
 
         self.id = []
         self.filename = []
@@ -352,13 +352,13 @@ def dict_to_spectrum(spectra_dict):
 
 
 def process_peaks(peaks,
-                  min_frag = 0.0,
-                  max_frag = 1000.0,
-                  min_intensity_perc = 0,
-                  exp_intensity_filter = 0.01,
-                  min_peaks = 10,
-                  max_peaks = None,
-                  aim_min_peaks = None):
+                  min_frag=0.0,
+                  max_frag=1000.0,
+                  min_intensity_perc=0,
+                  exp_intensity_filter=0.01,
+                  min_peaks=10,
+                  max_peaks=None,
+                  aim_min_peaks=None):
     """ Processes peaks.
     Remove peaks outside window min_frag <-> max_frag.
     Remove peaks with intensities < min_intensity_perc/100*max(intensities)
@@ -499,18 +499,18 @@ def exponential_peak_filter(peaks,
 def load_MS_data(path_data,
                  path_json,
                  filefilter="*.*",
-                 results_file = None,
-                 num_decimals = 3,
-                 min_frag = 0.0, max_frag = 1000.0,
-                 min_loss = 5.0, max_loss = 500.0,
-                 min_intensity_perc = 0.0,
-                 exp_intensity_filter = 0.01,
-                 min_keep_peaks_0 = 10,
-                 min_keep_peaks_per_mz = 20/200,
-                 min_peaks = 10,
-                 max_peaks = None,
-                 aim_min_peak = None,
-                 peak_loss_words = ['peak_', 'loss_']):
+                 results_file=None,
+                 num_decimals=3,
+                 min_frag=0.0, max_frag=1000.0,
+                 min_loss=5.0, max_loss=500.0,
+                 min_intensity_perc=0.0,
+                 exp_intensity_filter=0.01,
+                 min_keep_peaks_0=10,
+                 min_keep_peaks_per_mz=20/200,
+                 min_peaks=10,
+                 max_peaks=None,
+                 aim_min_peak=None,
+                 peak_loss_words=['peak_', 'loss_']):
     """ Collect spectra from set of files
     Partly taken from ms2ldaviz.
     Prototype. Needs to be replaces by more versatile parser, accepting more MS data formats.
@@ -581,19 +581,21 @@ def load_MS_data(path_data,
                 def min_peak_scaling(x, a, b):
                     return int(a + b * x)
 
-                min_peaks_scaled = min_peak_scaling(spec.precursor_mz, min_keep_peaks_0, min_keep_peaks_per_mz)
+                min_peaks_scaled = min_peak_scaling(spec.precursor_mz,
+                                                    min_keep_peaks_0,
+                                                    min_keep_peaks_per_mz)
             else:
                 min_peaks_scaled = min_peaks
 
-            spectrum = Spectrum(min_frag = min_frag,
-                                max_frag = max_frag,
-                                min_loss = min_loss,
-                                max_loss = max_loss,
-                                min_intensity_perc = min_intensity_perc,
-                                exp_intensity_filter = exp_intensity_filter,
-                                min_peaks = min_peaks,
-                                max_peaks = max_peaks,
-                                aim_min_peak = min_peaks_scaled)
+            spectrum = Spectrum(min_frag=min_frag,
+                                max_frag=max_frag,
+                                min_loss=min_loss,
+                                max_loss=max_loss,
+                                min_intensity_perc=min_intensity_perc,
+                                exp_intensity_filter=exp_intensity_filter,
+                                min_peaks=min_peaks,
+                                max_peaks=max_peaks,
+                                aim_min_peak=min_peaks_scaled)
 
             # Load spectrum data from file:
             spectrum.read_spectrum(path_data, filename, i)
@@ -612,10 +614,11 @@ def load_MS_data(path_data,
             spectra.append(spectrum)
             spectra_dict[filename] = spectrum.__dict__
 
-        ms_documents, ms_documents_intensity, spectra_metadata = create_ms_documents(spectra,
-                                                                                     num_decimals,
-                                                                                     peak_loss_words,
-                                                                                     min_loss, max_loss)
+        ms_documents, ms_documents_intensity, spectra_metadata = create_ms_documents(
+            spectra,
+            num_decimals,
+            peak_loss_words,
+            min_loss, max_loss)
         # Add filenames to metadata
         filenames = []
         for spectrum in spectra:
@@ -640,19 +643,19 @@ def load_MS_data(path_data,
 
 
 def load_MGF_data(file_mgf,
-                 file_json = None,
-                 num_decimals = 2,
-                 min_frag = 0.0, max_frag = 1000.0,
-                 min_loss = 10.0, max_loss = 200.0,
-                 min_intensity_perc = 0.0,
-                 exp_intensity_filter = 0.01,
-                 min_keep_peaks_0 = 10,
-                 min_keep_peaks_per_mz = 20/200,
-                 min_peaks = 10,
-                 max_peaks = None,
-                 peak_loss_words = ['peak_', 'loss_'],
-                 ignore_losses = False,
-                 create_docs = True):
+                 file_json=None,
+                 num_decimals=2,
+                 min_frag=0.0, max_frag=1000.0,
+                 min_loss=10.0, max_loss=200.0,
+                 min_intensity_perc=0.0,
+                 exp_intensity_filter=0.01,
+                 min_keep_peaks_0=10,
+                 min_keep_peaks_per_mz=20/200,
+                 min_peaks=10,
+                 max_peaks=None,
+                 peak_loss_words=['peak_', 'loss_'],
+                 ignore_losses=False,
+                 create_docs=True):
     """ Collect spectra from MGF file
     1) Importing MGF file - based on pyteomics parser.
     2) Filter spectra: can be based on mininum relative intensity or  based on
@@ -768,15 +771,15 @@ def load_MGF_data(file_mgf,
                         min_keep_peaks_per_mz)
 
                     spectrum = Spectrum(
-                        min_frag = min_frag,
-                        max_frag = max_frag,
-                        min_loss = min_loss,
-                        max_loss = max_loss,
-                        min_intensity_perc = min_intensity_perc,
-                        exp_intensity_filter = exp_intensity_filter,
-                        min_peaks = min_peaks,
-                        max_peaks = max_peaks,
-                        aim_min_peak = min_peaks_scaled)
+                        min_frag=min_frag,
+                        max_frag=max_frag,
+                        min_loss=min_loss,
+                        max_loss=max_loss,
+                        min_intensity_perc=min_intensity_perc,
+                        exp_intensity_filter=exp_intensity_filter,
+                        min_peaks=min_peaks,
+                        max_peaks=max_peaks,
+                        aim_min_peak=min_peaks_scaled)
 
                     id = i  #spec.spectrum_id
                     spectrum.read_spectrum_mgf(spec, id)
@@ -857,10 +860,10 @@ def load_MGF_data(file_mgf,
 
 def create_ms_documents(spectra,
                         num_decimals,
-                        peak_loss_words = ['peak_', 'loss_'],
-                        min_loss = 5.0,
-                        max_loss = 500.0,
-                        ignore_losses = False):
+                        peak_loss_words=['peak_', 'loss_'],
+                        min_loss=5.0,
+                        max_loss=500.0,
+                        ignore_losses=False):
     """ Create documents from peaks and losses.
 
     Every peak and every loss will be transformed into a WORD.
@@ -1236,9 +1239,9 @@ def find_pubchem_match(compound_name,
 
 
 def get_mol_fingerprints(spectra,
-                         method = "daylight",
-                         nbits = 1024,
-                         print_progress = True):
+                         method="daylight",
+                         nbits=1024,
+                         print_progress=True):
     """ Calculate molecule fingerprints based on given smiles.
     (using RDkit)
 

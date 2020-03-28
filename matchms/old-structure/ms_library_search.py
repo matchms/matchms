@@ -141,9 +141,10 @@ def library_matching(spectra_query,
                      cosine_tol=0.005):
     """
     Function to select potential spectra matches.
-    Suitable candidates will be selected by 1) top_n Spec2Vec similarity, and 2) same precursor mass
-    (within given mz_ppm tolerance(s)).
-    For later matching routines, additional scores (cosine, modified cosine) are added as well.
+    Suitable candidates will be selected by 1) top_n Spec2Vec similarity, and 2) 
+    same precursor mass (within given mz_ppm tolerance(s)).
+    For later matching routines, additional scores (cosine, modified cosine) 
+    are added as well.
 
     Args:
     --------
@@ -152,21 +153,25 @@ def library_matching(spectra_query,
     spectra_library: list of spectrum objects
         List containing all library spectrum objects.
     library_spectra_metadata: pandas DataFrame
-        Metadata of all library spectra in form of a pandas DataFrame, as given by the load_MGF_data() function
-        from MS_functions.py.
+        Metadata of all library spectra in form of a pandas DataFrame, as given 
+        by the load_MGF_data() function from MS_functions.py.
     ms_library: SimilarityMeasures() object
-        Spec2Vec SimilarityMeasures() object built on library spectra, including trained model and spectra vectors.
+        Spec2Vec SimilarityMeasures() object built on library spectra, including 
+        trained model and spectra vectors.
     top_n: int, optional
-        Number of entries witht the top_n highest Spec2Vec scores to keep as found matches. Default = 10.
+        Number of entries witht the top_n highest Spec2Vec scores to keep as 
+        found matches. Default = 10.
     mz_ppm: int / list of int, optional
-        Single int value or list of int values that determine the tolerance for precursor-mz matching. Masses are
-        considered to be a match if they lie within +- 1e-6 * mz_ppm.
-        If list of ppm values is given, all matches for the respective ppm values will be added to the final table.
-        Default = 10.
+        Single int value or list of int values that determine the tolerance for 
+        precursor-mz matching. Masses are considered to be a match if they lie 
+        within +- 1e-6 * mz_ppm. If list of ppm values is given, all matches for 
+        the respective ppm values will be added to the final table. Default = 10.
     spectra_vectors: numpy array, optional
-        Numpy array made from all Spec2Vec spectra vectors of the query spectra. Default = None.
+        Numpy array made from all Spec2Vec spectra vectors of the query spectra. 
+        Default = None.
     ignore_non_annotated: bool, optional
-        If True, only annotated spectra will be considered for matching. Default = True.
+        If True, only annotated spectra will be considered for matching. 
+        Default = True.
     cosine_tol: float, optional
         Set tolerance for the cosine and modified cosine score. Default = 0.005
     """

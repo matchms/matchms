@@ -28,10 +28,10 @@ from concurrent.futures import ThreadPoolExecutor #, as_completed
 
 def mol_sim_matrix(fingerprints1,
                    fingerprints2,
-                   method = 'cosine',
-                   filename = None,
-                   max_size = 1000,
-                   print_progress = True):
+                   method='cosine',
+                   filename=None,
+                   max_size=1000,
+                   print_progress=True):
     """ Create Matrix of all molecular similarities (based on molecular fingerprints).
     If filename is not None, the result will be saved as npy.
     To create molecular fingerprints see mol_fingerprints() function from MS_functions.
@@ -43,11 +43,14 @@ def mol_sim_matrix(fingerprints1,
     fingerprints2: list
         List of molecular fingerprints (numpy arrays).
     method: str
-        Method to compare molecular fingerprints. Can be 'cosine', 'dice' etc. (see scipy.spatial.distance.cdist).
+        Method to compare molecular fingerprints. Can be 'cosine', 'dice' etc.
+        (see scipy.spatial.distance.cdist).
     filename: str
-        Filename to save results to. OR: If file already exists it will be loaded instead.
+        Filename to save results to. OR: If file already exists it will be
+        loaded instead.
     max_size: int
-        Maximum size of (sub) all-vs-all matrix to handle in one go. Will split up larger matrices into
+        Maximum size of (sub) all-vs-all matrix to handle in one go. Will split
+        up larger matrices into
         max_size x max_size matrices.
     print_progress: bool, optional
         If True, print phase of the run to indicate progress. Default = True.
@@ -81,19 +84,23 @@ def mol_sim_matrix(fingerprints1,
         count_splits = 0
 
         for i in range(int(np.ceil(matrix_size[0]/max_size))):
-            low1 = i*max_size
-            high1 = min((i+1) * max_size, matrix_size[0])
+            low1 = i * max_size
+            high1 = min((i + 1) * max_size, matrix_size[0])
             for j in range(int(np.ceil(matrix_size[1]/max_size))):
-                low2 = j*max_size
-                high2 = min((j+1) * max_size, matrix_size[1])
+                low2 = j * max_size
+                high2 = min((j + 1) * max_size, matrix_size[1])
 
-                molecular_similarities[low1:high1, low2:high2] = 1 - spatial.distance.cdist(fingerprints_arr1[low1:high1],
-                                                                                          fingerprints_arr2[low2:high2],
-                                                                                          method)
+                molecular_similarities[low1:high1, low2:high2] = 1 - spatial.distance.cdist(
+                    fingerprints_arr1[low1:high1],
+                    fingerprints_arr2[low2:high2],
+                    method
+                    )
                 # Track progress:
                 count_splits += 1
                 if print_progress:
-                    print('\r', "Calculated submatrix", count_splits, "out of", splits, end="")
+                    print('\r',
+                          "Calculated submatrix {} out of {}".format(count_splits, splits),
+                          end="")
 
         if print_progress:
             print(20 * '--')
@@ -105,19 +112,17 @@ def mol_sim_matrix(fingerprints1,
     return molecular_similarities
 
 
-
-
-## --------------------------------------------------------------------------------------------------
-## ---------------------------- classical spectra similarity measures -------------------------------
-## --------------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------------
+# ---------------------------- classical spectra similarity measures -------------------------------
+# --------------------------------------------------------------------------------------------------
 
 
 def cosine_score_greedy(spec1,
                         spec2,
                         mass_shift,
                         tol,
-                        min_intens = 0,
-                        use_numba = True):
+                        min_intens=0,
+                        use_numba=True):
     """ Calculate cosine score between spectrum1 and spectrum2.
     If mass_shifted = True it will shift the spectra with respect to each other
     by difference in their parentmasses.
@@ -134,15 +139,15 @@ def cosine_score_greedy(spec1,
     """
 
     if spec1.shape[0] == 0 or spec2.shape[0] == 0:
-        return 0.0,[]
+        return 0.0, []
 
     # normalize intensities:
-    spec1[:,1] = spec1[:,1]/max(spec1[:,1])
-    spec2[:,1] = spec2[:,1]/max(spec2[:,1])
+    spec1[:, 1] = spec1[:, 1]/max(spec1[:, 1])
+    spec2[:, 1] = spec2[:, 1]/max(spec2[:, 1])
 
     # filter, if wanted:
-    spec1 = spec1[spec1[:,1] > min_intens,:]
-    spec2 = spec2[spec2[:,1] > min_intens,:]
+    spec1 = spec1[spec1[:, 1] > min_intens, :]
+    spec2 = spec2[spec2[:, 1] > min_intens, :]
 
     if use_numba:
         zero_pairs = find_pairs_numba(spec1, spec2, tol, shift=0.0)
@@ -151,13 +156,13 @@ def cosine_score_greedy(spec1,
     if mass_shift is not None \
     and mass_shift != 0.0:
         if use_numba:
-            nonzero_pairs = find_pairs_numba(spec1, spec2, tol, shift = mass_shift)
+            nonzero_pairs = find_pairs_numba(spec1, spec2, tol, shift=mass_shift)
         else:
-            nonzero_pairs = find_pairs(spec1, spec2, tol, shift = mass_shift)
+            nonzero_pairs = find_pairs(spec1, spec2, tol, shift=mass_shift)
         matching_pairs = zero_pairs + nonzero_pairs
     else:
         matching_pairs = zero_pairs
-    matching_pairs = sorted(matching_pairs,key = lambda x: x[2], reverse = True)
+    matching_pairs = sorted(matching_pairs, key=lambda x: x[2], reverse=True)
 
     used1 = set()
     used2 = set()
@@ -171,16 +176,16 @@ def cosine_score_greedy(spec1,
             used_matches.append(m)
 
     # Normalize score:
-    score = score/max(np.sum(spec1[:,1]**2), np.sum(spec2[:,1]**2))
+    score = score/max(np.sum(spec1[:, 1]**2), np.sum(spec2[:, 1]**2))
 
     return score, used_matches
 
 
 def cosine_score_hungarian(spec1,
-                            spec2,
-                            mass_shift,
-                            tol,
-                            min_intens=0):
+                           spec2,
+                           mass_shift,
+                           tol,
+                           min_intens=0):
     """ Taking full care of weighted bipartite matching problem:
         Use Hungarian algorithm (slow...)
 
@@ -199,24 +204,24 @@ def cosine_score_hungarian(spec1,
     """
 
     if spec1.shape[0] == 0 or spec2.shape[0] == 0:
-        return 0.0,[]
+        return 0.0, []
 
     # Normalize intensities:
-    spec1[:,1] = spec1[:,1]/max(spec1[:,1])
-    spec2[:,1] = spec2[:,1]/max(spec2[:,1])
+    spec1[:, 1] = spec1[:, 1]/max(spec1[:, 1])
+    spec2[:, 1] = spec2[:, 1]/max(spec2[:, 1])
 
     # Filter, if wanted:
-    spec1 = spec1[spec1[:,1] > min_intens,:]
-    spec2 = spec2[spec2[:,1] > min_intens,:]
+    spec1 = spec1[spec1[:, 1] > min_intens, :]
+    spec2 = spec2[spec2[:, 1] > min_intens, :]
 
     zero_pairs = find_pairs_numba(spec1, spec2, tol, shift=0.0)
     if mass_shift is not None \
     and mass_shift != 0.0:
-        nonzero_pairs = find_pairs_numba(spec1, spec2, tol, shift = mass_shift)
+        nonzero_pairs = find_pairs_numba(spec1, spec2, tol, shift=mass_shift)
         matching_pairs = zero_pairs + nonzero_pairs
     else:
         matching_pairs = zero_pairs
-    matching_pairs = sorted(matching_pairs,key = lambda x: x[2], reverse = True)
+    matching_pairs = sorted(matching_pairs, key=lambda x: x[2], reverse=True)
 
     # Use Hungarian_algorithm:
     used_matches = []
@@ -227,14 +232,14 @@ def cosine_score_hungarian(spec1,
 
     if len(matching_pairs) > 0:
         for m in matching_pairs:
-            matrix[list1.index(m[0]),list2.index(m[1])] = 1 - m[2]
+            matrix[list1.index(m[0]), list2.index(m[1])] = 1 - m[2]
 
         # Use hungarian agorithm to solve the linear sum assignment problem
         row_ind, col_ind = linear_sum_assignment(matrix)
         score = len(row_ind) - matrix[row_ind, col_ind].sum()
         used_matches = [(list1[x], list2[y]) for (x, y) in zip(row_ind, col_ind)]
         # Normalize score:
-        score = score/max(np.sum(spec1[:,1]**2), np.sum(spec2[:,1]**2))
+        score = score/max(np.sum(spec1[:, 1]**2), np.sum(spec2[:, 1]**2))
     else:
         score = 0.0
 
@@ -244,7 +249,7 @@ def cosine_score_hungarian(spec1,
 def cosine_matrix_fast(spectra,
                        tol,
                        max_mz,
-                       min_mz = 0):
+                       min_mz=0):
     """
     Be careful! Binning is here done by creating one-hot vectors.
     It is hence really actual "bining" and different from the tolerance-based
@@ -259,31 +264,32 @@ def cosine_matrix_fast(spectra,
         spec = np.array(spectrum.peaks.copy(), dtype=float)
 
         # Normalize intensities:
-        spec[:,1] = spec[:,1]/np.max(spec[:,1])
+        spec[:, 1] = spec[:, 1]/np.max(spec[:, 1])
 
         if i == 0:
-            vector = one_hot_spectrum(spec, tol, max_mz, shift = 0, min_mz = min_mz, method='max')
+            vector = one_hot_spectrum(spec, tol, max_mz, shift=0, min_mz=min_mz, method='max')
             spec_vectors = np.zeros((len(spectra), vector.shape[0]))
-            spec_vectors[0,:] = vector
+            spec_vectors[0, :] = vector
         else:
-            spec_vectors[i,:] = one_hot_spectrum(spec, tol, max_mz, shift = 0, min_mz = min_mz, method='max')
+            spec_vectors[i, :] = one_hot_spectrum(spec, tol,
+                                                  max_mz, shift=0,
+                                                  min_mz=min_mz,
+                                                  method='max')
 
     Cdist = spatial.distance.cdist(spec_vectors, spec_vectors, 'cosine')
-
     return 1 - Cdist
 
 
-
 def cosine_score_matrix(spectra,
-                  tol,
-                  max_mz = 1000.0,
-                  #min_mz = 0,
-                  min_intens = 0,
-                  mass_shifting = False,
-                  method='hungarian',
-                  num_workers = 4,
-                  filename = None,
-                  safety_points = None):
+                        tol,
+                        max_mz=1000.0,
+                        #min_mz=0,
+                        min_intens=0,
+                        mass_shifting=False,
+                        method='hungarian',
+                        num_workers=4,
+                        filename=None,
+                        safety_points=None):
     """ Create Matrix of all modified cosine similarities.
     Takes some time to calculate, so better only do it once and save as npy.
 
@@ -298,24 +304,28 @@ def cosine_score_matrix(spectra,
     #min_mz: float
     #    Minimum m-z mass to take into account
     min_intens: float
-        Sets the minimum relative intensity peaks must have to be looked at for potential matches.
+        Sets the minimum relative intensity peaks must have to be looked at for
+        potential matches.
     mass_shifting: bool
-        Set to 'True' if mass difference between spectra should be accounted for --> "modified cosine" score
+        Set to 'True' if mass difference between spectra should be accounted for
+        --> "modified cosine" score
         Set to 'False'  for --> "normal cosine" score
     method: 'greedy', 'greedy-numba', 'hungarian'
-        "greedy" will use Simon's molnet scoring which is faster than hungarian, but not 100% accurate
+        "greedy" will use Simon's molnet scoring which is faster than hungarian,
+        but not 100% accurate
         regarding the weighted bipartite matching problem.
-        "hungarian" will use the Hungarian algorithm, which is more accurate. Since its slower, numba
-        is used here to compile in time.
-        "greedy-numba" will use a (partly) numba compiled version of greedy. Much faster, but needs numba.
+        "hungarian" will use the Hungarian algorithm, which is more accurate.
+        Since its slower, numba is used here to compile in time.
+        "greedy-numba" will use a (partly) numba compiled version of greedy.
+        Much faster, but needs numba.
     num_workers: int
         Number of threads to use for calculation.
     filename: str/ None
-        Filename to look for existing npy-file with molent matrix. Or, if not found, to
-        use to save the newly calculated matrix.
+        Filename to look for existing npy-file with molent matrix. Or, if not
+        found, to use to save the newly calculated matrix.
     safety_points: int
-        Number of safety points, i.e. number of times the modcos-matrix is saved during process.
-        Set to 'None' to avoid saving matrix on the way.
+        Number of safety points, i.e. number of times the modcos-matrix is saved
+        during process. Set to 'None' to avoid saving matrix on the way.
     """
     if filename is not None:
         if filename[-4:] != '.npy':
@@ -336,7 +346,8 @@ def cosine_score_matrix(spectra,
                 print("Missing cosine scores will be calculated.")
                 counter_total = int((len(spectra)**2)/2)
                 counter_init = counter_total - np.sum(len(spectra) - missing_scores)
-                print("About ", 100*(counter_init/counter_total),"% of the values already completed.")
+                print("About ", 100*(counter_init/counter_total), 
+                      "% of the values already completed.")
                 collect_new_data = True
             else:
                 print("Complete cosine similarity scores found and loaded.")
@@ -351,11 +362,11 @@ def cosine_score_matrix(spectra,
             else:
                 print("Cosine scores will be calculated from scratch.")
             collect_new_data = True
-            missing_scores = np.arange(0,len(spectra))
+            missing_scores = np.arange(0, len(spectra))
             counter_init = 0
     else:
         collect_new_data = True
-        missing_scores = np.arange(0,len(spectra))
+        missing_scores = np.arange(0, len(spectra))
         counter_init = 0
 
     if collect_new_data == True:
@@ -365,16 +376,17 @@ def cosine_score_matrix(spectra,
 
         counter = counter_init
         if safety_points is not None:
-            safety_save = int(((len(spectra)**2)/2)/safety_points)  # Save modcos-matrix along process
+            # Save modcos-matrix along process
+            safety_save = int(((len(spectra)**2)/2)/safety_points
 
-        print("Calculate pairwise scores by ", num_workers, "number of workers.")
+        print("Calculate pairwise scores by", num_workers, "number of workers.")
         for i in missing_scores: #range(n_start, len(spectra)):
             spec1 = np.array(spectra[i].peaks, dtype=float)
-            spec1 = spec1[spec1[:,0] < max_mz,:]
+            spec1 = spec1[spec1[:, 0] < max_mz, :]
             parameter_collection = []
             for j in range(i,len(spectra)):
                 spec2 = np.array(spectra[j].peaks, dtype=float)
-                spec2 = spec2[spec2[:,0] < max_mz,:]
+                spec2 = spec2[spec2[:, 0] < max_mz, :]
                 if mass_shifting:
                     mass_shift = spectra[i].parent_mz - spectra[j].parent_mz
                 else:
@@ -391,9 +403,9 @@ def cosine_score_matrix(spectra,
                 modcos_pairs.append(futures)
 
             for m, future in enumerate(modcos_pairs[0]):
-                spec_i, spec_j, ind_i, ind_j, _, _, _, _, counting = parameter_collection[m]
-                modcos_sim[ind_i,ind_j] = future.result()[0]
-                modcos_matches[ind_i,ind_j] = future.result()[1]
+                _, _, ind_i, ind_j, _, _, _, _, counting = parameter_collection[m]
+                modcos_sim[ind_i, ind_j] = future.result()[0]
+                modcos_matches[ind_i, ind_j] = future.result()[1]
                 if filename is not None \
                 and safety_points is not None:
                     if (counting+1) % safety_save == 0:
@@ -422,22 +434,25 @@ def modcos_pair(X, len_spectra):
     if method == 'greedy':
         molnet_pair, used_matches = cosine_score_greedy(spectra_i, spectra_j,
                                                         mass_shift, tol,
-                                                        min_intens = min_intens,
-                                                        use_numba = False)
+                                                        min_intens=min_intens,
+                                                        use_numba=False)
     elif method == 'greedy-numba':
         molnet_pair, used_matches = cosine_score_greedy(spectra_i, spectra_j,
                                                         mass_shift, tol,
-                                                        min_intens = min_intens,
-                                                        use_numba = True)
+                                                        min_intens=min_intens,
+                                                        use_numba=True)
     elif method == 'hungarian':
         molnet_pair, used_matches = cosine_score_hungarian(spectra_i, spectra_j,
                                                         mass_shift, tol,
-                                                        min_intens = min_intens)
+                                                        min_intens=min_intens)
     else:
         print("Given method does not exist...")
 
     if (counter+1) % 1000 == 0 or counter == len_spectra-1:
-        print('\r', ' Calculated MolNet for pair ', i, '--', j, '. ( ', np.round(200*(counter+1)/len_spectra**2, 2), ' % done).', end="")
+        print('\r', 
+              ' Calculated MolNet for pair {} -- {}'.format(i, j),
+              '. ( ', np.round(200*(counter+1)/len_spectra**2, 2), ' % done).', 
+              end="")
 
     return molnet_pair, len(used_matches)
 
@@ -445,9 +460,9 @@ def modcos_pair(X, len_spectra):
 def one_hot_spectrum(spec,
                      tol,
                      max_mz,
-                     shift = 0,
-                     min_mz = 0,
-                     method = 'max'):
+                     shift=0,
+                     min_mz=0,
+                     method='max'):
     """ Convert spectrum peaks into on-hot-vector
 
     method: str
@@ -461,10 +476,10 @@ def one_hot_spectrum(spec,
     idx[idx<0] = 0
     if method == 'max':
         for id1 in set(idx):
-            one_hot_spec[id1] = np.max(spec[(idx==id1),1])
+            one_hot_spec[id1] = np.max(spec[(idx==id1), 1])
     elif method == 'sum':
         for id1 in set(idx):
-            one_hot_spec[id1] = np.sum(spec[(idx==id1),1])
+            one_hot_spec[id1] = np.sum(spec[(idx==id1), 1])
     else:
         print("Method not known...")
     return one_hot_spec
@@ -477,7 +492,7 @@ def find_pairs_numba(spec1, spec2, tol, shift=0):
 
     for idx in range(len(spec1)):
         intensity = spec1[idx,1]
-        matches = np.where((np.abs(spec2[:,0] - spec1[idx,0] + shift) <= tol))[0]
+        matches = np.where((np.abs(spec2[:, 0] - spec1[idx, 0] + shift) <= tol))[0]
         for match in matches:
             matching_pairs.append((idx, match, intensity*spec2[match][1]))
 
@@ -486,8 +501,8 @@ def find_pairs_numba(spec1, spec2, tol, shift=0):
 
 def find_pairs(spec1, spec2, tol, shift=0):
     # Sort peaks and losses by m/z
-    spec1 = spec1[np.lexsort((spec1[:,1], spec1[:,0])),:]
-    spec2 = spec2[np.lexsort((spec2[:,1], spec2[:,0])),:]
+    spec1 = spec1[np.lexsort((spec1[:, 1], spec1[:, 0])), :]
+    spec2 = spec2[np.lexsort((spec2[:, 1], spec2[:, 0])), :]
 
     matching_pairs = []
     spec2lowpos = 0
