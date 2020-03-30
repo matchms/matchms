@@ -125,7 +125,6 @@ Flowchart
   :width: 400
   :alt: Flowchart
 
-To install matchms, do:
 Contributing
 ============
 
