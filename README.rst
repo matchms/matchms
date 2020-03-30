@@ -118,6 +118,14 @@ Run tests (including coverage) with:
 
   python setup.py test
 
+Flowchart
+=========
+
+.. image:: flowchart.svg.png
+  :width: 400
+  :alt: Flowchart
+
+To install matchms, do:
 Contributing
 ============
 
