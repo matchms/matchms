@@ -17,13 +17,13 @@
 #
 
 from __future__ import print_function
-import numpy as np
-from scipy import spatial
 import json
 import math
-import pandas as pd
 from collections import defaultdict
-import networkx as nx
+import numpy as np
+from scipy import spatial
+import pandas as pd
+
 # ----------------------------------------------------------------------------
 # ---------------- Document processing functions -----------------------------
 # ----------------------------------------------------------------------------
@@ -33,7 +33,7 @@ def preprocess_document(corpus,
                         corpus_weights=None,
                         stopwords=[],
                         min_frequency=2):
-    """ Basic preprocessing of document words
+    """Basic preprocessing of document words
 
     - Remove common words from stopwords and tokenize
     - Only include words that appear at least *min_frequency* times.
@@ -73,64 +73,18 @@ def preprocess_document(corpus,
     return corpus_lowered_new, corpus_weights
 
 
-def create_distance_network(cdistances_ids,
-                            cdistances,
-                            filename="word2vec_test.graphml",
-                            cutoff_dist=0.1,
-                            max_connections=25,
-                            min_connections=2):
-    """ Built network from closest connections found.
-        Using networkx.
-
-    Args:
-    -------
-    cdistances_ids
-    cdistances
-    filename: str
-    cutoff_dist: float
-    max_connections: int
-    min_connections: int
-
-    TODO: Add maximum number of connections
-    TODO: complete documentation
-    """
-
-    dimension = cdistances_ids.shape[0]
-
-    # Form network
-    bnet = nx.Graph()
-    bnet.add_nodes_from(np.arange(0, dimension))
-
-    for i in range(0, dimension):
-        #        idx = cdistances_ids[i, (cdistances[i,:] < cutoff_dist)]
-        idx = np.where(cdistances[i, :] < cutoff_dist)[0]
-        if idx.shape[0] > max_connections:
-            idx = idx[:(max_connections + 1)]
-        if idx.shape[0] <= min_connections:
-            idx = np.arange(0, (min_connections + 1))
-        new_edges = [(i, int(cdistances_ids[i, x]), float(cdistances[i, x]))
-                     for x in idx if cdistances_ids[i, x] != i]
-        bnet.add_weighted_edges_from(new_edges)
-#        bnet.add_edge(i, int(candidate), weight=float((max_distance - distances[i,candidate])/max_distance) )
-
-# export graph for drawing (e.g. using Cytoscape)
-    nx.write_graphml(bnet, filename)
-    return bnet
-
-
 #
 # ---------------- General functions ----------------------------------------
 #
 
-
 def dict_to_json(mydict, file_json):
-    # save dictionary as json file
+    """Save dictionary as json file."""
     with open(file_json, 'w') as outfile:
         json.dump(mydict, outfile)
 
 
 def json_to_dict(file_json):
-    # create dictionary from json file
+    """Create dictionary from json file."""
     with open(file_json) as infile:
         mydict = json.load(infile)
 
@@ -138,9 +92,8 @@ def json_to_dict(file_json):
 
 
 def full_wv(vocab_size, word_idx, word_count):
-    """ Create full word vector
-    """
-    one_hot = np.zeros(vocab_size)
+    """Create full word vector."""
+    one_hot = np.zeros((vocab_size))
     one_hot[word_idx] = word_count
     return one_hot
 
@@ -149,9 +102,9 @@ def full_wv(vocab_size, word_idx, word_count):
 # ---------------- Clustering & metrics functions ----------------------------
 #
 
-
 def ifd_scores(vocabulary, corpus):
-    """ Calulate idf score (Inverse Document Frequency score) for all words in vocabulary over a given corpus
+    """Calulate idf score (Inverse Document Frequency score) for all words in
+    vocabulary over a given corpus.
 
     Args:
     --------
@@ -174,11 +127,7 @@ def ifd_scores(vocabulary, corpus):
     for i in range(0, vocabulary_size):
         if (i + 1) % 100 == 0 or i == vocabulary_size - 1:  # show progress
             print('\r',
-                  ' Calculated scores for ',
-                  i + 1,
-                  ' of ',
-                  vocabulary_size,
-                  ' words.',
+                  ' Calculated scores for {} of {} words.'.format(i + 1, vocabulary_size),
                   end="")
 
         word_containing = 0
@@ -193,8 +142,11 @@ def ifd_scores(vocabulary, corpus):
                         columns=["id", "word", "word count", "idf score"])
 
 
-def calculate_similarities(vectors, num_hits=25, method='cosine'):
-    """ Calculate similarities (all-versus-all --> matrix) based on array of all vectors
+def calculate_similarities(vectors,
+                           num_hits=25,
+                           method='cosine'):
+    """Calculate similarities (all-versus-all --> matrix) based on array of
+    all vectors.
 
     Args:
     -------
