@@ -2,9 +2,9 @@
 """Documentation about matchms"""
 
 
-from .exporting import *
-from .harmonization import *
-from .similarity import *
+import .exporting
+import .harmonization
+import .similarity
 
 from .importing.load_from_mgf import load_from_mgf
 from .Spectrum import Spectrum
