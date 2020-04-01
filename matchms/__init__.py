@@ -2,13 +2,14 @@
 """Documentation about matchms"""
 
 
-import matchms.exporting
-import matchms.harmonization
-import matchms.similarity
+from .exporting import *
+from .harmonization import *
+from .similarity import *
 
-from matchms.importing.load_from_mgf import load_from_mgf
-from matchms.Spectrum import Spectrum
-from matchms.Scores import Scores
+from .importing.load_from_mgf import load_from_mgf
+from .Spectrum import Spectrum
+from .Scores import Scores
+from .calculate_scores import calculate_scores
 
 from .__version__ import __version__
 

@@ -1,5 +1,6 @@
 from pyteomics.mgf import MGF
-
+from matchms.Spectrum import Spectrum
 
 def load_from_mgf(filename):
-    return list(MGF(filename, convert_arrays=1))
+
+    return [Spectrum(s) for s in list(MGF(filename, convert_arrays=1))]
