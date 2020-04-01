@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 """Documentation about matchms"""
 
-import matchms.importing
+
 import matchms.exporting
 import matchms.harmonization
 import matchms.similarity
+
+from matchms.importing.load_from_mgf import load_from_mgf
 from matchms.Spectrum import Spectrum
-import matchms.Scores
+from matchms.Scores import Scores
 
 from .__version__ import __version__
 
