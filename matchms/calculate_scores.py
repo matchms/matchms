@@ -1,4 +1,4 @@
-from .Scores import Scores
+from matchms import Scores
 
 def calculate_scores(measured_spectrums, reference_spectrums,
                      harmonization_functions, similarity_functions):
