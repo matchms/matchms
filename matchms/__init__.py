@@ -5,7 +5,7 @@ import matchms.importing
 import matchms.exporting
 import matchms.harmonization
 import matchms.similarity
-import matchms.Spectrum
+from matchms.Spectrum import Spectrum
 import matchms.Scores
 
 from .__version__ import __version__
