@@ -3,9 +3,9 @@
 import os
 import numpy as np
 import unittest
-from matchms.ms_functions import Spectrum, load_MGF_data
-from matchms.ms_functions import process_peaks, exponential_peak_filter
-from matchms.ms_functions import likely_inchi_match, likely_inchikey_match
+from matchms.old.ms_functions import Spectrum, load_MGF_data
+from matchms.old.ms_functions import process_peaks, exponential_peak_filter
+from matchms.old.ms_functions import likely_inchi_match, likely_inchikey_match
 
 # Use test data from following folder
 PATH_TEST = os.path.dirname(os.path.abspath(__file__))
