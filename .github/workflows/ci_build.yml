@@ -35,7 +35,7 @@ jobs:
         run: conda list
       - name: Check style against standards using prospector
         shell: bash -l {0}
-        run: prospector --path matchms --ignore-paths matchms/old-structure
+        run: prospector --path matchms --ignore-paths matchms/old
       - name: Build
         shell: bash -l {0}
         run: |
