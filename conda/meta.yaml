@@ -9,13 +9,6 @@ package:
   version: {{ version }}
 
 source:
-  # url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  #
-  # url: https://github.com/matchms/matchms/releases/download/{{ version }}/matchms-{{ version }}.tar.gz
-  #
-  # url: https://github.com/matchms/matchms/archive/{{ version }}.tar.gz
-  # sha256: d58439c548433adcda98e695be53e526ba940a4b9c44fb9a05d92cd495cdd47f
-  #
   # git_rev: master
   # git_url: https://github.com/matchms/matchms.git
 
@@ -67,7 +60,6 @@ test:
   # List all the packages/modules that `run_test.py` imports.
   imports:
     - matchms
-    # - matchms.tests
 
 about:
   home: https://github.com/matchms/matchms
