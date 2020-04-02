@@ -1,5 +1,6 @@
 # file: matchms/Spectrum.py
 
+
 class Spectrum:
 
     def __init__(self, pyteomics_spectrum):
