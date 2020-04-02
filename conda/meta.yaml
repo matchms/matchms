@@ -71,7 +71,15 @@ test:
 
 about:
   home: https://github.com/matchms/matchms
-
+  license: Apache-2.0
+  license_family: Apache
+  license_file: LICENSE
+  summary: 'Vector representation of mass spectral data (e.g. MS-MS) and spectral similarity measure. '
+  description: |
+    Vector representation of mass spectral data (e.g. MS-MS) and
+    spectral similarity measure.
+  doc_url: https://matchms.readthedocs.io/
+  dev_url: https://github.com/matchms/matchms
 
 extra:
   recipe-maintainers:
