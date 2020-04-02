@@ -4,7 +4,6 @@
 class Spectrum:
 
     def __init__(self, pyteomics_spectrum):
-        #self.pyteomics_spectrum = pyteomics_spectrum  # Seems redundent with .mz and .intensities
         self.metadata = pyteomics_spectrum.get("params", None)
         self.mz = pyteomics_spectrum["m/z array"]
         self.intensities = pyteomics_spectrum["intensity array"]
@@ -37,7 +36,6 @@ class Spectrum:
 
     def ion_masses(self, precursormass, int_charge):
         """Compute the parent masses.
-        
         Single charge version is used for loss computation.
         """
         mul = abs(int_charge)
@@ -55,7 +53,7 @@ class Spectrum:
 
     def interpret_charge(self, charge):
         """Interpret the charge field.
-        
+
         Method to interpret the ever variable charge field in the different
         formats.
         """
