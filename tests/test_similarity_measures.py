@@ -4,8 +4,8 @@ import numpy as np
 import pytest
 import unittest
 
-from matchms.ms_functions import Spectrum, load_MGF_data
-from matchms.similarity_measure import SimilarityMeasures
+from matchms.old.ms_functions import Spectrum, load_MGF_data
+from matchms.old.similarity_measure import SimilarityMeasures
 
 # Use test data from following folder
 PATH_TEST = os.path.dirname(os.path.abspath(__file__))
@@ -85,7 +85,3 @@ class ModelGenerationSuite(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-
-
-
-
