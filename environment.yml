@@ -27,6 +27,7 @@ dependencies:
     - yapf
     # Testing
     - pytest<5.0.0,>=3.3.0
+    - pytest-cov
     - pytest-cookies
     - pycodestyle
     - ruamel.yaml
