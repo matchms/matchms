@@ -33,8 +33,6 @@ jobs:
           conda config --show
           conda config --set anaconda_upload no
           export CONDA_BLD_PATH=../conda-tmp
-          export VERSION=`date +%Y.%m.%d`
-          export SHORT_OS_STR=$(uname -s)
           conda install conda-build conda-verify anaconda
-          conda build -c bioconda -c conda-forge -c nlesc .
-          anaconda -t ${{ secrets.ANACONDA_TOKEN }} upload -u nlesc -l $CONDA_BLD_PATH/$SHORT_OS_STR/matchms-`date +%Y.%m.%d`-0.tar.bz2 --force
+          conda build -c bioconda -c conda-forge -c nlesc --output-folder $CONDA_BLD_PATH .
+          anaconda -t ${{ secrets.ANACONDA_TOKEN }} upload -u nlesc -l *.tar.bz2 --force
