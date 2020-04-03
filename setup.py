@@ -40,7 +40,7 @@ setup(
         'Programming Language :: Python :: 3.7',
     ],
     test_suite='tests',
-    install_requires=["pyteomics", "numpy"],  # FIXME: add your package's dependencies to this list
+    install_requires=["pyteomics", "numpy", "matplotlib"],  # FIXME: add your package's dependencies to this list
     setup_requires=[
         # dependency for `python setup.py test`
         'pytest-runner',
