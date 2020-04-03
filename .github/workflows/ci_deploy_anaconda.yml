@@ -32,7 +32,7 @@ jobs:
           conda config --show-sources
           conda config --show
           conda config --set anaconda_upload no
-          export CONDA_BLD_PATH=./conda-bld
+          export CONDA_BLD_PATH=../conda-tmp
           export VERSION=`date +%Y.%m.%d`
           export SHORT_OS_STR=$(uname -s)
           conda install conda-build conda-verify anaconda
