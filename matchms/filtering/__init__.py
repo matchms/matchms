@@ -1,3 +1,4 @@
-from .harmfun1 import harmfun1
+from .filterfun1 import filterfun1
+from .filterfun2 import filterfun2
 
-__all__ = ["harmfun1"]
+__all__ = ["filterfun1", "filterfun2"]
