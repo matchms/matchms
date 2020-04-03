@@ -2,10 +2,9 @@ import numpy
 
 
 class Scores:
-    def __init__(self, measured_spectrums, reference_spectrums, harmonization_functions, similarity_functions):
-        self.measured_spectrums = measured_spectrums
+    def __init__(self, measured_spectrum, reference_spectrums, similarity_functions, scores=None):
+        self.measured_spectrum = measured_spectrum
         self.reference_spectrums = reference_spectrums
-        self.harmonization_functions = harmonization_functions
         self.similarity_functions = similarity_functions
         self.scores = numpy.empty([len(self.reference_spectrums),
                                    len(self.measured_spectrums),
