@@ -32,7 +32,6 @@ jobs:
           conda config --show-sources
           conda config --show
           conda config --set anaconda_upload no
-          export CONDA_BLD_PATH=../../conda-tmp
           conda install conda-build conda-verify anaconda
-          conda build -c bioconda -c conda-forge -c nlesc --output-folder $CONDA_BLD_PATH .
-          anaconda -t ${{ secrets.ANACONDA_TOKEN }} upload -u nlesc -l *.tar.bz2 --force
+          conda build -c bioconda -c conda-forge -c nlesc --keep-old-work --dirty --output-folder ../../conda-tmp --debug .
+          anaconda -t ${{ secrets.ANACONDA_TOKEN }} upload -u nlesc -l ../../conda-tmp/*.tar.bz2 --force
