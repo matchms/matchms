@@ -17,11 +17,6 @@ build:
   noarch: python
   number: 0
   script: {{PYTHON}} -m pip install --no-deps .
-  # script: {{PYTHON}} -m pip install -e . -vv
-  # script: |
-      # {{PYTHON}} setup.py install --no-deps --ignore-installed --single-version-externally-managed --record=/tmp/record.txt
-  #     # {{PYTHON}} setup.py install
-  #     # pip install .
 
 requirements:
   build:
