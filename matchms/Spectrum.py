@@ -1,4 +1,3 @@
-# file: matchms/Spectrum.py
 from matplotlib import pyplot as plt
 
 
