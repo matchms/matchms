@@ -7,7 +7,7 @@ on:
 jobs:
 
   publish:
-    name: Build (${{ matrix.python-version }}, ${{ matrix.os }})
+    name: Publish conda (${{ matrix.python-version }}, ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
