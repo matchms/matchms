@@ -38,8 +38,7 @@ setup(
         'Programming Language :: Python :: 3.7',
     ],
     test_suite='tests',
-    install_requires=[
-    ],
+    install_requires=["pyteomics", "numpy"],  # FIXME: add your package's dependencies to this list
     setup_requires=[],
     tests_require=[
         'pytest',

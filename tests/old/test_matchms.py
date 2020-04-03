@@ -5,8 +5,6 @@
 """
 import pytest
 
-from matchms import matchms
-
 
 def test_something():
     assert True
@@ -15,7 +13,7 @@ def test_something():
 def test_with_error():
     with pytest.raises(ValueError):
         # Do something that raises a ValueError
-        raise(ValueError)
+        raise ValueError
 
 
 # Fixture example

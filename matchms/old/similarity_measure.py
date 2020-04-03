@@ -19,16 +19,17 @@
 from __future__ import print_function
 
 import os
-import numpy as np
 import logging
+import pickle
 from pprint import pprint
+import numpy as np
+
 import gensim
 from gensim import corpora
 from gensim import models
 from gensim.test.utils import get_tmpfile
 from gensim.models.callbacks import CallbackAny2Vec
 
-#from scipy import spatial
 from sklearn.decomposition import PCA
 
 # Imports from Spec2Vec functions
@@ -36,39 +37,43 @@ from . import helper_functions as functions
 
 
 class EpochLogger(CallbackAny2Vec):
-    '''Callback to log information about training progress.
-    Used to keep track of gensim model training (word2vec, lda...)'''
+    """Callback to log information about training progress.
+    Used to keep track of gensim model training (word2vec, lda...)"""
+
     def __init__(self, num_of_epochs, iterations, filename):
         self.epoch = 0
         self.num_of_epochs = num_of_epochs
         self.iterations = iterations
         self.filename = filename
         self.loss = 0
-        #self.loss_to_be_subed = 0
+        # self.loss_to_be_subed = 0
+
     def on_epoch_end(self, model):
+        """Allow saving model during training when specified in iterations."""
         loss = model.get_latest_training_loss()
-        #loss_now = loss - self.loss_to_be_subed
-        print('\r' + ' Epoch ' + str(self.epoch+1) + ' of ' + str(self.num_of_epochs) + '.', end="")
+        # loss_now = loss - self.loss_to_be_subed
+        print('\r',
+              ' Epoch ' + str(self.epoch+1) + ' of ' + str(self.num_of_epochs) + '.',
+              end="")
         print('Change in loss after epoch {}: {}'.format(self.epoch+1, loss - self.loss))
         self.epoch += 1
         self.loss = loss
 
         # Save model during training if specified in iterations list
-        if self.epoch in [int(x + np.sum(self.iterations[:i])) for i, x in enumerate(self.iterations)]:
-            #if self.epoch < self.num_of_epochs:
-            filename = self.filename.split('.')[0] + '_iter_' + str(self.epoch) + '.model'
-            print('Saving model with name:', filename)
-            model.save(filename)
+        if self.filename is not None:
+            if self.epoch in [int(x + np.sum(self.iterations[:i])) for i, x in enumerate(self.iterations)]:
+                # if self.epoch < self.num_of_epochs:
+                filename = self.filename.split('.model')[0] + '_iter_' + str(self.epoch) + '.model'
+                print('Saving model with name:', filename)
+                model.save(filename)
 
 
-
-
-## ------------------------------------------------------------------------------
-## ---------------------- SimilarityMeasures class ------------------------------
-## ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+# ---------------------- SimilarityMeasures class ------------------------------
+# ------------------------------------------------------------------------------
 
 class SimilarityMeasures():
-    """ Class to run different similarity measure on sentence-like data.
+    """Class to run different similarity measure on sentence-like data.
     Words can be representing all kind of things (e.g. peaks for spectra).
     Documents lists of words.
 
@@ -81,7 +86,7 @@ class SimilarityMeasures():
         b) LSI
     """
 
-    def __init__(self, initial_documents, initial_documents_weights = None):
+    def __init__(self, initial_documents, initial_documents_weights=None):
         self.corpus = initial_documents
         self.corpus_weights = initial_documents_weights
         self.dictionary = []
@@ -113,9 +118,9 @@ class SimilarityMeasures():
     def preprocess_documents(self,
                              max_fraction,
                              min_frequency,
-                             remove_stopwords = None,
-                             create_stopwords = False):
-        """ Preprocess 'documents'
+                             remove_stopwords=None,
+                             create_stopwords=False):
+        """Preprocess 'documents'
 
         Obvious steps:
             --> in 'helper_functions.preprocess_document'
@@ -123,7 +128,8 @@ class SimilarityMeasures():
             - Lower case
 
         Calculate word frequency
-        --> Words that occur more than max_fraction will become stopwords (words with no or little discriminative power)
+        --> Words that occur more than max_fraction will become stopwords
+        (words with no or little discriminative power)
 
         Args:
         --------
@@ -143,15 +149,17 @@ class SimilarityMeasures():
         # Preprocess documents (all lower letters, every word exists at least 2 times)
         print("Preprocess documents...")
         if remove_stopwords is None:
-            self.corpus, self.corpus_weights = functions.preprocess_document(self.corpus,
-                                                                             self.corpus_weights,
-                                                                             stopwords = [],
-                                                                             min_frequency = min_frequency)
+            self.corpus, self.corpus_weights = functions.preprocess_document(
+                self.corpus,
+                self.corpus_weights,
+                stopwords=[],
+                min_frequency=min_frequency)
         else:
-            self.corpus, self.corpus_weights = functions.preprocess_document(self.corpus,
-                                                                             self.corpus_weights,
-                                                                             stopwords = remove_stopwords,
-                                                                             min_frequency = min_frequency)
+            self.corpus, self.corpus_weights = functions.preprocess_document(
+                self.corpus,
+                self.corpus_weights,
+                stopwords=remove_stopwords,
+                min_frequency=min_frequency)
 
         # Create dictionary (or "vocabulary") containting all unique words from documents
         self.dictionary = corpora.Dictionary(self.corpus)
@@ -163,95 +171,110 @@ class SimilarityMeasures():
             self.idf_scores = functions.ifd_scores(self.dictionary, self.corpus)
 
             # Words that appear too frequently (fraction>max_fration) become stopwords
-            self.stopwords = self.idf_scores["word"][self.idf_scores["word count"] > documents_size*max_fraction]
+            self.stopwords = self.idf_scores[
+                "word"][self.idf_scores["word count"] > documents_size*max_fraction]
 
             print(len(self.stopwords), " stopwords were selected from a total of ",
                   len(self.dictionary), " words in the entire corpus.")
 
             # Create corpus, dictionary, and BOW corpus
-            self.corpus, self.corpus_weights = functions.preprocess_document(self.corpus, self.stopwords, min_frequency = min_frequency)
+            self.corpus, self.corpus_weights = functions.preprocess_document(
+                self.corpus,
+                self.stopwords,
+                min_frequency=min_frequency)
 
         self.bow_corpus = [self.dictionary.doc2bow(text) for text in self.corpus]
 
 
-    ## ------------------------------------------------------------------------------
-    ## ---------------------- Model building & training  ----------------------------
-    ## ------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------
+    # ---------------------- Model building & training  ----------------------------
+    # ------------------------------------------------------------------------------
 
     def build_model_word2vec(self,
                              file_model_word2vec,
                              sg=0,
-                             negative = 5,
+                             negative=5,
                              size=100,
                              window=50,
                              min_count=1,
                              workers=4,
                              iterations=100,
                              use_stored_model=True,
-                             learning_rate_initial = 0.025,
-                             learning_rate_decay = 0.00025):
-        """ Build Word2Vec model (using gensim)
+                             learning_rate_initial=0.025,
+                             learning_rate_decay=0.00025):
+        """Build Word2Vec model (using gensim)
 
         Args:
         --------
         file_model_word2vec: str,
             Filename to save model (or load model if it exists under this name).
         sg: int (0,1)
-            For sg = 0 --> CBOW model, for sg = 1 --> skip gram model (see Gensim documentation).
+            For sg = 0 --> CBOW model, for sg = 1 --> skip gram model
+            (see Gensim documentation).
         negative: int
-            from Gensim:  If > 0, negative sampling will be used, the int for negative specifies how many “noise words”
-            should be drawn (usually between 5-20). If set to 0, no negative sampling is used.
+            from Gensim:  If > 0, negative sampling will be used, the int for
+            negative specifies how many “noise words” should be drawn (usually
+            between 5-20). If set to 0, no negative sampling is used.
         size: int,
             Dimensions of word vectors (default = 100)
         window: int,
             Window size for context words (small for local context,
             larger for global context, default = 50)
         min_count: int,
-            Only consider words that occur at least min_count times in the corpus (default =1).
+            Only consider words that occur at least min_count times in the corpus
+            (default =1).
         workers: int,
-            Number of threads to run the training on (should not be more than number of cores/threads, default = 4).
+            Number of threads to run the training on (should not be more than
+            number of cores/threads, default = 4).
         iterations: int, list
-            Number of training iterations (default=100). If given as list training will loop through
-            all given iterations [iter0, iter1, ...] in the list and save the model after each completed
-            cycle. Temporary models will be saved using the name: file_model_word2ve + '_TEMP_#epoch.model'
+            Number of training iterations (default=100). If given as list training
+            will loop through all given iterations [iter0, iter1, ...] in the list
+            and save the model after each completed cycle. Temporary models will
+            be saved using the name: file_model_word2ve + '_TEMP_#epoch.model'
         use_stored_model: bool,
             Load stored model if True, else train new model.
         """
 
-
         # Check if model already exists and should be loaded
-        if os.path.isfile(file_model_word2vec) and use_stored_model:
-            print("Load stored word2vec model ...")
-            self.model_word2vec = gensim.models.Word2Vec.load(file_model_word2vec)
+        if file_model_word2vec is None or not use_stored_model:
+            train_new_model = True
         else:
-            if use_stored_model:
-                print("No saved word2vec model found with given filename!")
+            train_new_model = False
 
+        if not train_new_model:
+            if os.path.isfile(file_model_word2vec):
+                print("Load stored word2vec model ...")
+                self.model_word2vec = gensim.models.Word2Vec.load(file_model_word2vec)
+            else:
+                print("No saved word2vec model found with given filename!")
+        else:
             print("Calculating new word2vec model...")
 
             # Set up GENSIM logging
-            logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.WARNING)
-
+            logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s',
+                                level=logging.WARNING)
             if not isinstance(iterations, list):
-                iterations = list(iterations)
+                iterations = [iterations]
 
             epoch_logger = EpochLogger(np.sum(iterations), iterations, file_model_word2vec)
-            iter = np.sum(iterations)
-            min_alpha = learning_rate_initial - iter * learning_rate_decay
+            iter_sum = np.sum(iterations)
+            min_alpha = learning_rate_initial - iter_sum * learning_rate_decay
             if min_alpha < 0:
                 print("Warning! Number of iterations is too high for specified learning_rate decay.")
-                print("Learning_rate_decay will be set from", learning_rate_decay, "to", learning_rate_initial/iter)
+                print("Learning_rate_decay will be set from",
+                      learning_rate_decay, "to",
+                      learning_rate_initial/iter)
                 min_alpha = 0
             self.model_word2vec = gensim.models.Word2Vec(self.corpus,
                                                          sg=sg,
-                                                         negative = negative,
+                                                         negative=negative,
                                                          size=size,
                                                          window=window,
                                                          min_count=min_count,
                                                          workers=workers,
-                                                         iter=iter,
-                                                         alpha = learning_rate_initial,
-                                                         min_alpha = min_alpha,
+                                                         iter=iter_sum,
+                                                         alpha=learning_rate_initial,
+                                                         min_alpha=min_alpha,
                                                          seed=42,
                                                          compute_loss=True,
                                                          callbacks=[epoch_logger])
@@ -264,7 +287,7 @@ class SimilarityMeasures():
                         num_pass=4,
                         num_iter=100,
                         use_stored_model=True):
-        """ Build LDA model (using gensim).
+        """Build LDA model (using gensim).
 
         Args:
         --------
@@ -288,8 +311,11 @@ class SimilarityMeasures():
             if use_stored_model:
                 print("Stored LDA model not found!")
             print("Calculating new LDA model...")
-            self.model_lda = gensim.models.LdaModel(self.bow_corpus, id2word=self.dictionary,
-                                               num_topics=num_of_topics, passes=num_pass, iterations=num_iter)
+            self.model_lda = gensim.models.LdaModel(self.bow_corpus,
+                                                    id2word=self.dictionary,
+                                                    num_topics=num_of_topics,
+                                                    passes=num_pass,
+                                                    iterations=num_iter)
 
             # Save model
             self.model_lda.save(file_model_lda)
@@ -303,8 +329,8 @@ class SimilarityMeasures():
                         file_model_lsi,
                         num_of_topics=100,
                         num_iter=10,
-                        pyuse_stored_model=True):
-        """ Build LSI model (using gensim).
+                        use_stored_model=True):
+        """Build LSI model (using gensim).
 
         Args:
         --------
@@ -335,16 +361,17 @@ class SimilarityMeasures():
             self.model_lsi.save(file_model_lsi)
 
 
-    ## ------------------------------------------------------------------------------
-    ## -------------------- Calculate document vectors ------------------------------
-    ## ------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------
+    # -------------------- Calculate document vectors ------------------------------
+    # ------------------------------------------------------------------------------
 
-    def get_vectors_centroid(self, method = 'update',
+    def get_vectors_centroid(self,
+                             method='update',
                              tfidf_weighted=True,
-                             weighting_power = 0.5,
-                             tfidf_model = None,
-                             extra_epochs = 10):
-        """ Calculate centroid vectors for all documents of the library.
+                             weighting_power=0.5,
+                             tfidf_model=None,
+                             extra_epochs=10):
+        """Calculate centroid vectors for all documents of the library.
 
         Individual word vectors are weighted using tfidf (unless weighted=False).
 
@@ -384,11 +411,14 @@ class SimilarityMeasures():
 
         if len(test_vocab) > 0:
             print("Not all 'words' of the given documents are present in the trained word2vec model!")
-            print(len(test_vocab), " out of ", len(self.dictionary), " 'words' were not found in the word2vec model.")
+            print(len(test_vocab), " out of ", len(self.dictionary),
+                  " 'words' were not found in the word2vec model.")
             if method == 'update':
                 print("The word2vec model will hence be updated by additional training.")
                 self.model_word2vec.build_vocab(self.corpus, update=True)
-                self.model_word2vec.train(self.corpus, total_examples=len(self.corpus), epochs = extra_epochs)
+                self.model_word2vec.train(self.corpus,
+                                          total_examples=len(self.corpus),
+                                          epochs=extra_epochs)
                 self.model_word2vec.save('newmodel')
 
             elif method == 'ignore':
@@ -397,7 +427,9 @@ class SimilarityMeasures():
                 _, missing_vocab = zip(*test_vocab)
                 print("Removing missing 'words' from corpus...")
                 # Update corpus and BOW-corpus
-                self.corpus = [[word for word in document if word not in missing_vocab] for document in self.corpus]
+                self.corpus = [[
+                    word for word in document if word not in missing_vocab
+                ] for document in self.corpus]
                 self.bow_corpus = [self.dictionary.doc2bow(text) for text in self.corpus]
                 # TODO: add check with word intensities
             else:
@@ -422,12 +454,16 @@ class SimilarityMeasures():
 
         for i in range(len(self.bow_corpus)):
             if (i+1) % 10 == 0 or i == len(self.bow_corpus)-1:  # show progress
-                print('\r', ' Calculated centroid vectors for ', i+1, ' of ', len(self.bow_corpus), ' documents.', end="")
+                print('\r',
+                      ' Calculated centroid vectors for {} of {} documents'.format(i+1, len(self.bow_corpus)),
+                      end="")
 
             document = [self.dictionary[x[0]] for x in self.bow_corpus[i]]
             if self.corpus_weights is not None:
                 # TODO: maybe next line can be skipped?
-                document_weight = [self.corpus_weights[i][self.corpus[i].index(self.dictionary[x[0]])] for x in self.bow_corpus[i]]
+                document_weight = [self.corpus_weights[i][
+                    self.corpus[i].index(self.dictionary[x[0]])
+                    ] for x in self.bow_corpus[i]]
                 if len(document_weight) > 0:
                     document_weight = np.array(document_weight)**weighting_power/np.max(document_weight)  # normalize
             else:
@@ -439,7 +475,7 @@ class SimilarityMeasures():
                 else:
                     term2 = np.ones((len(document)))
 
-                term1 = term1 * np.tile(document_weight, (vector_size,1)).T
+                term1 = term1 * np.tile(document_weight, (vector_size, 1)).T
                 weighted_docvector = np.sum((term1.T * term2).T, axis=0)
             else:
                 weighted_docvector = np.zeros((self.model_word2vec.vector_size))
@@ -449,7 +485,7 @@ class SimilarityMeasures():
 
 
     def get_vectors_pca(self, dimension=100):
-        """ Calculate PCA vectors for all documents.
+        """Calculate PCA vectors for all documents.
 
         Args:
         -------
@@ -469,17 +505,17 @@ class SimilarityMeasures():
             for i, bow_doc in enumerate(self.bow_corpus[:corpus_dim]):
                 word_vector_bow = np.array([x[0] for x in bow_doc]).astype(int)
                 word_vector_count = np.array([x[1] for x in bow_doc]).astype(int)
-                self.X_data[i,:] = functions.full_wv(input_dim, word_vector_bow, word_vector_count)
+                self.X_data[i, :] = functions.full_wv(input_dim, word_vector_bow, word_vector_count)
 
         self.vectors_pca = pca.fit_transform(self.X_data)
 
 
-    ## ------------------------------------------------------------------------------
-    ## -------------------- Calculate similarities ----------------------------------
-    ## ------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------
+    # -------------------- Calculate similarities ----------------------------------
+    # ------------------------------------------------------------------------------
 
     def get_centroid_similarity(self, num_hits=25, method='cosine'):
-        """ Calculate centroid similarities(all-versus-all --> matrix)
+        """Calculate centroid similarities(all-versus-all --> matrix)
 
         Args:
         -------
@@ -489,15 +525,17 @@ class SimilarityMeasures():
             See scipy spatial.distance.cdist for options. Default is 'cosine'.
 
         """
-        list_similars_idx, list_similars, mean_similarity = functions.calculate_similarities(self.vectors_centroid,
-                                                                   num_hits, method = method)
+        list_similars_idx, list_similars, _ = functions.calculate_similarities(
+            self.vectors_centroid,
+            num_hits,
+            method=method)
         print("Calculated distances between ", list_similars.shape[0], " documents.")
         self.list_similars_ctr_idx = list_similars_idx
         self.list_similars_ctr = list_similars
 
 
     def get_pca_similarity(self, num_hits=25, method='cosine'):
-        """ Calculate PCA similarities(all-versus-all --> matrix)
+        """Calculate PCA similarities(all-versus-all --> matrix)
 
         Args:
         -------
@@ -507,15 +545,17 @@ class SimilarityMeasures():
             See scipy spatial.distance.cdist for options. Default is 'cosine'.
 
         """
-        list_similars_idx, list_similars, mean_similarity = functions.calculate_similarities(self.vectors_pca,
-                                                                   num_hits, method = method)
+        list_similars_idx, list_similars, _ = functions.calculate_similarities(
+            self.vectors_pca,
+            num_hits,
+            method=method)
 
         self.list_similars_pca_idx = list_similars_idx
         self.list_similars_pca = list_similars
 
 
     def get_lda_similarity(self, num_hits=25):
-        """ Calculate LDA topic based similarities (all-versus-all)
+        """Calculate LDA topic based similarities (all-versus-all)
 
         Args:
         -------
@@ -526,28 +566,27 @@ class SimilarityMeasures():
 
         # Now using faster gensim way (also not requiering to load everything into memory at once)
         index_tmpfile = get_tmpfile("index")
-        index = gensim.similarities.Similarity(index_tmpfile, self.model_lda[self.bow_corpus],
-                                               num_features=len(self.dictionary))  # build the index
-        Cdist = np.zeros((len(self.corpus), len(self.corpus)))
+        index = gensim.similarities.Similarity(index_tmpfile,
+                                               self.model_lda[self.bow_corpus],
+                                               num_features=len(self.dictionary))
+        cdist = np.zeros((len(self.corpus), len(self.corpus)))
         for i, similarities in enumerate(index):  # yield similarities of all indexed documents
-            Cdist[:,i] = similarities
-
-#        Cdist = 1 - Cdist  # switch from similarity to distance
+            cdist[:, i] = similarities
 
         # Create numpy arrays to store similarities
-        list_similars_idx = np.zeros((Cdist.shape[0],num_hits), dtype=int)
-        list_similars = np.zeros((Cdist.shape[0],num_hits))
+        list_similars_idx = np.zeros((cdist.shape[0], num_hits), dtype=int)
+        list_similars = np.zeros((cdist.shape[0], num_hits))
 
-        for i in range(Cdist.shape[0]):
-            list_similars_idx[i,:] = Cdist[i,:].argsort()[-num_hits:][::-1]
-            list_similars[i,:] = Cdist[i, list_similars_idx[i,:]]
+        for i in range(cdist.shape[0]):
+            list_similars_idx[i, :] = cdist[i, :].argsort()[-num_hits:][::-1]
+            list_similars[i, :] = cdist[i, list_similars_idx[i, :]]
 
         self.list_similars_lda_idx = list_similars_idx
         self.list_similars_lda = list_similars
 
 
     def get_lsi_similarity(self, num_hits=25):
-        """ Calculate LSI based similarities (all-versus-all)
+        """Calculate LSI based similarities (all-versus-all)
 
         Args:
         -------
@@ -555,46 +594,43 @@ class SimilarityMeasures():
             Function will store the num_centroid_hits closest matches. Default is 25.
 
         """
-
         # Now using faster gensim way (also not requiering to load everything into memory at once)
         index_tmpfile = get_tmpfile("index")
-        index = gensim.similarities.Similarity(index_tmpfile, self.model_lsi[self.bow_corpus],
-                                               num_features=len(self.dictionary))  # build the index
-        Cdist = np.zeros((len(self.corpus), len(self.corpus)))
+        index = gensim.similarities.Similarity(index_tmpfile,
+                                               self.model_lsi[self.bow_corpus],
+                                               num_features=len(self.dictionary))
+        cdist = np.zeros((len(self.corpus), len(self.corpus)))
         for i, similarities in enumerate(index):  # yield similarities of all indexed documents
-            Cdist[:,i] = similarities
-
-#        Cdist = 1 - Cdist  # switch from similarity to distance
+            cdist[:, i] = similarities
 
         # Create numpy arrays to store distances
-        list_similars_idx = np.zeros((Cdist.shape[0],num_hits), dtype=int)
-        list_similars = np.zeros((Cdist.shape[0],num_hits))
+        list_similars_idx = np.zeros((cdist.shape[0], num_hits), dtype=int)
+        list_similars = np.zeros((cdist.shape[0], num_hits))
 
-        for i in range(Cdist.shape[0]):
-            list_similars_idx[i,:] = Cdist[i,:].argsort()[-num_hits:][::-1]
-            list_similars[i,:] = Cdist[i, list_similars_idx[i,:]]
+        for i in range(cdist.shape[0]):
+            list_similars_idx[i, :] = cdist[i, :].argsort()[-num_hits:][::-1]
+            list_similars[i, :] = cdist[i, list_similars_idx[i, :]]
 
         self.list_similars_lsi_idx = list_similars_idx
         self.list_similars_lsi = list_similars
 
 
     def save(self, filename):
-        """ Save entire SimilarityMeasures() object to file.
+        """Save entire SimilarityMeasures() object to file.
         Uses pickle. Not ideal, but fine for now.
 
         Args:
-        -------
+        ----
         filename: str
             Filename to save object to.
         """
-        import pickle
         f = open(filename, 'wb')
         pickle.dump(self.__dict__, f)
         f.close()
 
 
     def load(self, filename):
-        """ Load SimilarityMeasures() object from file.
+        """Load SimilarityMeasures() object from file.
         Uses pickle. Not ideal, but fine for now.
 
         Args:
@@ -602,7 +638,6 @@ class SimilarityMeasures():
         filename: str
             Filename to load object from.
         """
-        import pickle
         f = open(filename, 'rb')
         tmp_dict = pickle.load(f)
         self.__dict__.update(tmp_dict)

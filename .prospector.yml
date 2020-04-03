@@ -11,6 +11,10 @@ member-warnings: false
 
 ignore-paths:
   - docs
+  - matchms/old
+  - matchms\old
+  - tests/old
+  - tests\old
 
 pyroma:
     run: true

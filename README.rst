@@ -18,6 +18,12 @@ matchms
      - |Zenodo Badge|
    * - \5. Checklist
      - |CII Best Practices Badge|
+   * - **Other best practices**
+     -
+   * - Continuous integration
+     - |GitHub Actions Badge|
+   * - Documentation
+     - |ReadTheDocs Badge|
 
 (Customize these badges with your own links, and check https://shields.io/ or
 https://badgen.net/ to see which other badges are available.)
@@ -44,6 +50,15 @@ https://badgen.net/ to see which other badges are available.)
 .. |CII Best Practices Badge| image:: https://bestpractices.coreinfrastructure.org/projects/3792/badge
    :target: https://bestpractices.coreinfrastructure.org/projects/3792
    :alt: CII Best Practices Badge
+
+.. |GitHub Actions Badge| image:: https://img.shields.io/github/workflow/status/matchms/matchms/matchms
+   :target: https://github.com/matchms/matchms
+   :alt: GitHub Actions Badge
+
+.. |ReadTheDocs Badge| image:: https://readthedocs.org/projects/matchms/badge/?version=latest
+    :alt: Documentation Status
+    :scale: 100%
+    :target: https://matchms.readthedocs.io/en/latest/?badge=latest
 
 Vector representation and similarity measure for mass spectrometry data
 
@@ -117,6 +132,13 @@ Run tests (including coverage) with:
 .. code-block:: console
 
   python setup.py test
+
+Flowchart
+=========
+
+.. image:: flowchart.svg.png
+  :width: 400
+  :alt: Flowchart
 
 Contributing
 ============

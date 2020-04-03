@@ -1,23 +1,21 @@
 # -*- coding: utf-8 -*-
 """Documentation about matchms"""
 
-import matchms.helper_functions
-import matchms.MS_functions
-import matchms.MS_library_search
-import matchms.MS_similarity_classical
-import matchms.networking
-import matchms.plotting_functions
-import matchms.similarity_measure
-
-from .similarity_measure import SimilarityMeasures
-
-from .__version__ import __version__
+from .calculate_scores import calculate_scores
+from .Scores import Scores
+from .Spectrum import Spectrum
 
 import logging
 logging.getLogger(__name__).addHandler(logging.NullHandler())
 
-# remove unnecessary members
-# del logging
-
 __author__ = "Netherlands eScience Center"
 __email__ = 'generalization@esciencecenter.nl'
+__all__ = [
+    "exporting",
+    "harmonization",
+    "importing",
+    "similarity",
+    "calculate_scores",
+    "Scores",
+    "Spectrum"
+]
