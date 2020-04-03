@@ -1,5 +1,5 @@
 from pyteomics.mgf import MGF
-from matchms.Spectrum import Spectrum
+from ..Spectrum import Spectrum
 
 
 def load_from_mgf(filename):
