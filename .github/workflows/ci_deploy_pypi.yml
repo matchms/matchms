@@ -1,4 +1,4 @@
-name: matchms
+name: 'Publish pypi package'
 
 on:
   release:
