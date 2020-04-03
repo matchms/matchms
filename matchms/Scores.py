@@ -17,7 +17,6 @@ class Scores:
 
     def calculate(self):
         for i_ref, reference_spectrum in enumerate(self.reference_spectrums):
-            for i_meas, measured_spectrum in enumerate(self.measured_spectrums):
-                for i_simfun, simfun in enumerate(self.similarity_functions):
-                    self.scores[i_ref][i_meas][i_simfun] = simfun(measured_spectrum, reference_spectrum)
+            for i_simfun, simfun in enumerate(self.similarity_functions):
+                self.scores[i_ref][i_simfun] = simfun(self.measured_spectrum, reference_spectrum)
         return self
