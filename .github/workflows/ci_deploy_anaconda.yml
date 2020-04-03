@@ -1,0 +1,40 @@
+name: publish_conda_package
+
+on:
+  release:
+    types: [published]
+
+jobs:
+
+  publish:
+    name: Build (${{ matrix.python-version }}, ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ['ubuntu-latest', 'macos-latest', 'windows-latest']
+        python-version: ['3.7']
+    steps:
+      - uses: actions/checkout@v2
+      - uses: goanpeca/setup-miniconda@v1
+        with:
+          miniconda-version: 'latest'
+          auto-update-conda: true
+          python-version: ${{ matrix.python-version }}
+          activate-environment: matchms
+          auto-activate-base: false
+          channels: conda-forge,bioconda,nlesc
+      - name: Build the conda package
+        shell: bash -l {0}
+        run: |
+          conda info
+          conda list
+          conda config --show-sources
+          conda config --show
+          conda config --set anaconda_upload no
+          export CONDA_BLD_PATH=./conda-bld
+          export VERSION=`date +%Y.%m.%d`
+          SHORT_OS_STR=$(uname -s)
+          conda build .
+          conda install conda-build conda-verify anaconda
+          anaconda -t ${{ secrets.ANACONDA_TOKEN }} upload -u nlesc -l $CONDA_BLD_PATH/$SHORT_OS_STR/matchms-`date +%Y.%m.%d`-0.tar.bz2 --force
