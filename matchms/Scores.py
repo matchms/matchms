@@ -6,9 +6,14 @@ class Scores:
         self.measured_spectrum = measured_spectrum
         self.reference_spectrums = reference_spectrums
         self.similarity_functions = similarity_functions
-        self.scores = numpy.empty([len(self.reference_spectrums),
-                                   len(self.measured_spectrums),
-                                   len(self.similarity_functions)])
+        if scores is None:
+            self.scores = numpy.empty([len(self.reference_spectrums),
+                                       len(self.similarity_functions)])
+        else:
+            self.scores = scores
+
+    def __str__(self):
+        return self.scores.__str__()
 
     def calculate(self):
         for i_ref, reference_spectrum in enumerate(self.reference_spectrums):
