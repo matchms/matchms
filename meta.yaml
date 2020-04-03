@@ -1,5 +1,5 @@
 # Build commmand:
-# conda build . -c conda-forge
+# conda build -c conda-forge -c bioconda -c nlesc .
 
 {% set name = "matchms" %}
 {% set version = "0.1.0" %}
@@ -16,44 +16,40 @@ source:
 build:
   noarch: python
   number: 0
-  script: python -m pip install --no-deps --ignore-installed .
+  script: {{PYTHON}} -m pip install --no-deps .
+  # script: {{PYTHON}} -m pip install -e . -vv
+  # script: |
+      # {{PYTHON}} setup.py install --no-deps --ignore-installed --single-version-externally-managed --record=/tmp/record.txt
+  #     # {{PYTHON}} setup.py install
+  #     # pip install .
 
 requirements:
   build:
-    - gensim==3.8.0
+    # dependencies only from anaconda
+    - gensim==3.8.1
+    - openbabel==3.0.0
+    - rdkit==2019.09.3
+  host:
+    - python==3.7
+    - pip==20.0.2
+    - setuptools
+  run:
+    - python==3.7
+    - gensim==3.8.1
+    - openbabel==3.0.0
+    - rdkit==2019.09.3
     - ipython==7.13.0
-    - matplotlib==3.1.3
+    - community==1.0.0b1
+    - matplotlib==2.2.2
     - networkx==2.4
     - numba==0.48.0
     - numpy==1.18.1
-    - openbabel==3.0.0
     - pandas==1.0.3
-    - pip==20.0.2
     - pubchempy==1.0.4
-    - rdkit==2019.09.3
-    - scikit-learn==0.22.1
+    - pyteomics==4.1.2
+    - scikit-learn==0.22.2.post1
     - scipy==1.4.1
     - scour==0.37
-    - docutils>=0.11
-    # # - pip:
-    #   # Building
-    #   - community==1.0.0b1
-    #   - isort
-    #   - prospector[with_pyroma]
-    #   - pyteomics==4.2
-    #   - setuptools==46.1.1
-    #   - yapf
-    #   # Testing
-    #   - pytest<5.0.0,>=3.3.0
-    #   - pytest-cookies
-    #   - pycodestyle
-    #   - ruamel.yaml
-  host:
-    - python
-    - pip
-  run:
-    - python
-
 test:
   imports:
     - matchms
