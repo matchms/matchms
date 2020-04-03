@@ -2,7 +2,7 @@ name: publish_conda_package
 
 on:
   release:
-    types: [published]
+    types: [created,edited,published]
 
 jobs:
 
