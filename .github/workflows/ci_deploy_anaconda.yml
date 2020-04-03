@@ -35,4 +35,4 @@ jobs:
           conda install conda-build conda-verify anaconda
           mkdir -p ../../conda-tmp ./output
           conda build -c bioconda -c conda-forge -c nlesc --croot ../../conda-tmp --output-folder ./output --debug .
-          anaconda -t ${{ secrets.ANACONDA_TOKEN }} upload -u nlesc -l ./output/noarch/*.tar.bz2 --force
+          anaconda -t ${{ secrets.ANACONDA_TOKEN }} upload -u nlesc --force ./output/noarch/*.tar.bz2
