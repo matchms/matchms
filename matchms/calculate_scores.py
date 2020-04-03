@@ -1,4 +1,4 @@
-from matchms.Scores import Scores
+from .Scores import Scores
 
 
 def calculate_scores(measured_spectrum,
