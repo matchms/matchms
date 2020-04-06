@@ -1,6 +1,4 @@
 import os
-import sys
-sys.path.insert(1, os.getcwd())
 
 from matchms.importing import load_from_mgf
 from matchms.filtering import clean_inchis
