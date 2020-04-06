@@ -17,17 +17,36 @@ Python API
 .. toctree::
     :maxdepth: 1
 
-    MS Functions <matchms.MS_functions>
-    MS Library Search <matchms.MS_library_search>
-    Similarity Measures (Novel) <matchms.similarity_measure>
-    Similarity Measures (Classical) <matchms.MS_similarity_classical>
-    Networking <matchms.networking>
-    Plot Functions <matchms.plotting_functions>
-    Helper Functions <matchms.helper_functions>
+Indices and tables
+==================
 
+* :ref:`genindex`
+* :ref:`search`
+
+
+.. matchms documentation master file, created by
+   sphinx-quickstart on Thu Jun 21 11:07:11 2018.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+Welcome to matchms's documentation!
+==========================================================
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+
+API Reference
+=============
+
+.. toctree::
+  :maxdepth: 2
+
+  matchms <apidocs/matchms.rst>
 
 Indices and tables
 ==================
 
 * :ref:`genindex`
+* :ref:`modindex`
 * :ref:`search`
