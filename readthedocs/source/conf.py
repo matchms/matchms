@@ -30,8 +30,14 @@ author = 'Netherlands eScience Center'
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.coverage',
-    'sphinx.ext.napoleon'
+    'sphinx.ext.napoleon',
+    'sphinxcontrib.apidoc'
 ]
+
+apidoc_module_dir = '../../'
+apidoc_output_dir = '../build'
+apidoc_excluded_paths = ['tests']
+apidoc_separate_modules = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
