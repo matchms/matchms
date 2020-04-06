@@ -182,38 +182,6 @@ def cosine_score_greedy(spec1,
     return score, used_matches
 
 
-@numba.njit
-def find_pairs_numba(spec1, spec2, tol, shift=0):
-    """Find matching pairs between two spectra.
-
-    Args
-    ----
-    spec1 : list of tuples
-        List of (mz, intensity) tuples.
-    spec2 : list of tuples
-        List of (mz, intensity) tuples.
-    tol : float
-        Tolerance. Peaks will be considered a match when < tol appart.
-    shift : float, optional
-        Shift spectra peaks by shift. The default is 0.
-
-    Returns
-    -------
-    matching_pairs : list
-        List of found matching peaks.
-
-    """
-    matching_pairs = []
-
-    for idx in range(len(spec1)):
-        intensity = spec1[idx, 1]
-        matches = np.where((np.abs(spec2[:, 0] - spec1[idx, 0] + shift) <= tol))[0]
-        for match in matches:
-            matching_pairs.append((idx, match, intensity*spec2[match][1]))
-
-    return matching_pairs
-
-
 def find_pairs(spec1, spec2, tol, shift=0):
     """Find matching pairs between two spectra.
 
