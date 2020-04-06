@@ -26,7 +26,7 @@ build:
 
 requirements:
   build:
-    # dependencies only from anaconda
+    - pytest-runner==5.2
   host:
     - python==3.7
     - pip==20.0.2
@@ -42,7 +42,6 @@ requirements:
     - pycodestyle==2.5.0
     - pytest==5.4.1
     - pytest-cov==2.8.1
-    - pytest-runner==5.2
     - pyteomics==4.1.2
     - pubchempy==1.0.4
     - rdkit==2019.09.3
