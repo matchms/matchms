@@ -138,43 +138,6 @@ def create_ms_documents(spectra,
     return ms_documents, ms_documents_intensity, spectra_metadata
 
 
-def likely_inchikey_match(inchikey_1, inchikey_2, min_agreement=2):
-    """Try to match inchikeys.
-    Compares inchikey parts seperately. Match is found if at least the first
-    'min_agreement' parts are a good enough match.
-
-    Args:
-    --------
-    inchikey_1: str
-        inchikey of molecule.
-    inchikey_2: str
-        inchikey of molecule.
-    min_agreement: int
-        Minimum number of first parts that MUST be a match between both input
-        inchikey to finally consider it a match. Default is min_agreement=2.
-    """
-    if min_agreement not in [1, 2, 3]:
-        print("Warning! 'min_agreement' should be 1, 2, or 3.")
-    agreement = 0
-
-    # Make sure all letters are capitalized. Remove spaces and '"' to account for different notations
-    inchikey_1 = inchikey_1.upper().replace('"', '').replace(' ', '')
-    inchikey_2 = inchikey_2.upper().replace('"', '').replace(' ', '')
-
-    # Split inchikey in parts.
-    inchikey_1_parts = inchikey_1.split('-')
-    inchikey_2_parts = inchikey_2.split('-')
-
-    # Check if both inchikey have sufficient parts (seperated by '/')
-    if len(inchikey_1_parts) >= min_agreement and len(
-            inchikey_2_parts) >= min_agreement:
-        # Count how many parts mostly agree
-        for i in range(min_agreement):
-            agreement += (inchikey_1_parts[i] == inchikey_2_parts[i])
-
-    return agreement == min_agreement
-
-
 def find_pubchem_match(compound_name,
                        inchi,
                        inchikey=None,
