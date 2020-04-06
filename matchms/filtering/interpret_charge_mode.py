@@ -30,15 +30,15 @@ def interpret_charge_mode(spectrum,
     if not charge:
         charge = 0
     if charge == 0:
-        if ionmode.lower() == 'positive':
+        if ionmode == 'positive':
             charge = 1
-        elif ionmode.lower() == 'negative':
+        elif ionmode == 'negative':
             charge = -1
 
     # 2) Correct charge when in conflict with ionmode (trust ionmode more!)
-    if np.sign(charge) == 1 and ionmode.lower() == 'negative':
+    if np.sign(charge) == 1 and ionmode == 'negative':
         charge *= -1
-    elif np.sign(charge) == -1 and ionmode.lower() == 'positive':
+    elif np.sign(charge) == -1 and ionmode == 'positive':
         charge *= -1
 
     # TODO: 3) extend method to deduce charge value based on adduct
@@ -80,12 +80,12 @@ def complete_ionmode(spectrum, file_known_adducts):
         adduct = None
 
     # Try completing missing or incorrect ionmodes
-    if ionmode.lower() not in ['positive', 'negative']:
+    if ionmode not in ['positive', 'negative']:
         if adduct in known_adducts["adducts_positive"]:
-            ionmode = 'Positive'
+            ionmode = 'positive'
             print("Added ionmode=", ionmode, "based on adduct:", adduct)
         elif adduct in known_adducts["adducts_negative"]:
-            ionmode = 'Negative'
+            ionmode = 'negative'
             print("Added ionmode=", ionmode, "based on adduct:", adduct)
         else:
             ionmode = 'n/a'
