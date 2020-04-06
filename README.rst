@@ -24,6 +24,9 @@ matchms
      - |GitHub Actions Badge|
    * - Documentation
      - |ReadTheDocs Badge|
+   * - Code Quality
+     - |Sonarcloud Badge|
+
 
 (Customize these badges with your own links, and check https://shields.io/ or
 https://badgen.net/ to see which other badges are available.)
@@ -59,6 +62,10 @@ https://badgen.net/ to see which other badges are available.)
     :alt: Documentation Status
     :scale: 100%
     :target: https://matchms.readthedocs.io/en/latest/?badge=latest
+
+.. |Sonarcloud Badge| image:: https://sonarcloud.io/api/project_badges/measure?project=matchms_matchms&metric=alert_status
+   :target: https://sonarcloud.io/dashboard?id=matchms_matchms
+   :alt: Sonarcloud Badge
 
 Vector representation and similarity measure for mass spectrometry data
 
