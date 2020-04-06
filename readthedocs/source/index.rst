@@ -1,11 +1,11 @@
-Welcome to Getting Started with Sphinx's documentation!
-=======================================================
+API documentation for matchms
+=============================
 
 .. automodule:: matchms
    :members:
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Contents:
 
 Indices and tables
