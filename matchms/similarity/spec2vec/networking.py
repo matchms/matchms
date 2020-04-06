@@ -31,61 +31,6 @@ import matplotlib
 # ----------------------------------------------------------------------------
 
 
-def erode_clusters(graph_main, max_cluster_size=100, keep_weights_above=0.8):
-    """ Remove links from clusters that are > max_cluster_size.
-    This function is in particular made to avoid small remaining clusters or singletons.
-
-    Will only add links if they won't lead to clusters > max_cluster_size,
-    and if the links have weights > min_weight.
-    Starts iteratively from highest weight links that are not yet part of the network.
-
-    Args:
-    --------
-    graph_main: networkx graph
-        Graph, e.g. made using create_network() function. Based on networkx.
-    max_cluster_size: int
-        Maximum desired size of clusters. Default = 100.
-    keep_weights_above: float
-        Set threshold above which weights will not be removed. Default = 0.8.
-    """
-
-    links_removed = []
-
-    # Split graph into separate clusters
-    graphs = list(nx.connected_component_subgraphs(graph_main))
-
-    for graph in graphs:
-        cluster_size = len(graph.nodes)
-        while cluster_size > max_cluster_size:
-
-            edges = list(graph.edges)
-            edges_weights = np.array(
-                [graph[x[0]][x[1]]['weight'] for x in edges])
-
-            weakest_edge = edges_weights.argsort()[0]
-            if edges_weights[weakest_edge] < keep_weights_above:
-                print("Remove edge:", edges[weakest_edge][0],
-                      edges[weakest_edge][1])
-                graph.remove_edge(edges[weakest_edge][0],
-                                  edges[weakest_edge][1])
-                graph_main.remove_edge(edges[weakest_edge][0],
-                                       edges[weakest_edge][1])
-                links_removed.append(edges[weakest_edge])
-
-            # If link removal caused split of cluster:
-            if not nx.is_connected(graph):
-                subgraphs = list(nx.connected_component_subgraphs(graph))
-                print("Getting from cluster with", len(graph.nodes),
-                      "nodes, to clusters with",
-                      [len(x.nodes) for x in subgraphs], "nodes.")
-                idx1 = np.argmax([len(x.nodes) for x in subgraphs])
-                graph = subgraphs[idx1]  # keep largest subcluster here
-
-            cluster_size = len(graph.nodes)
-
-    return graph_main, links_removed
-
-
 def add_intra_cluster_links(graph_main, m_sim, min_weight=0.5, max_links=20):
     """ Add links within each separate cluster if weights above min_weight.
 
