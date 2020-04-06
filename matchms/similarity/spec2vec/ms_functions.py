@@ -138,54 +138,6 @@ def create_ms_documents(spectra,
     return ms_documents, ms_documents_intensity, spectra_metadata
 
 
-def likely_inchi_match(inchi_1, inchi_2, min_agreement=3):
-    """Try to match defective inchi to non-defective ones.
-    Compares inchi parts seperately. Match is found if at least the first 'min_agreement' parts
-    are a good enough match.
-    The main 'defects' this method accounts for are missing '-' in the inchi.
-    In addition differences between '-', '+', and '?'will be ignored.
-
-    Args:
-    --------
-    inchi_1: str
-        inchi of molecule.
-    inchi_2: str
-        inchi of molecule.
-    min_agreement: int
-        Minimum number of first parts that MUST be a match between both input inchi to finally consider
-        it a match. Default is min_agreement=3.
-    """
-    if min_agreement < 2:
-        print("Warning! 'min_agreement' < 2 has no discriminative power. Should be => 2.")
-    if min_agreement == 2:
-        print("Warning! 'min_agreement' == 2 has little discriminative power",
-              "(only looking at structure formula. Better use > 2.")
-    agreement = 0
-
-    # Remove spaces and '"' to account for different notations.
-    # And remove all we assume is of minor importance only.
-    ignore_lst = ['"', ' ', '-', '+', '?']
-    for ignore in ignore_lst:
-        inchi_1 = inchi_1.replace(ignore, '')
-        inchi_2 = inchi_2.replace(ignore, '')
-
-    # Split inchi in parts. And ignore '-' to account for defective inchi.
-    inchi_1_parts = inchi_1.split('/')
-    inchi_2_parts = inchi_2.split('/')
-
-    # Check if both inchi have sufficient parts (seperated by '/')
-    if len(inchi_1_parts) >= min_agreement and len(
-            inchi_2_parts) >= min_agreement:
-        # Count how many parts mostly agree
-        for i in range(min_agreement):
-            agreement += (inchi_1_parts[i] == inchi_2_parts[i])
-
-    if agreement == min_agreement:
-        return True
-    else:
-        return False
-
-
 def likely_inchikey_match(inchikey_1, inchikey_2, min_agreement=2):
     """Try to match inchikeys.
     Compares inchikey parts seperately. Match is found if at least the first
