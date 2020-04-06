@@ -138,37 +138,6 @@ def create_ms_documents(spectra,
     return ms_documents, ms_documents_intensity, spectra_metadata
 
 
-def mol_converter(mol_input, input_type, output_type, method='openbabel'):
-    """Convert molecular representations using openbabel. E.g. smiles to inchi,
-    or inchi to inchikey.
-
-    Args:
-    --------
-    mol_input: str
-        Input data, e.g. inchi or smiles.
-    input_type: str
-        Define input type (as named in openbabel). E.g. "smi"for smiles and "inchi" for inchi.
-    output_type: str
-        Define input type (as named in openbabel). E.g. "smi"for smiles and "inchi" for inchi.
-    method: str
-        Default is making use of 'openbabel'. Alternative option could be 'RDkit'.
-        Not supported yet.
-        TODO: add RDkit as alternative ?
-    """
-    if method == 'openbabel':
-        conv = ob.OBConversion()
-        conv.SetInAndOutFormats(input_type, output_type)
-        mol = ob.OBMol()
-        try:
-            conv.ReadString(mol, mol_input)
-            mol_output = conv.WriteString(mol)
-        except:
-            print("error when converting...")
-            mol_output = None
-
-        return mol_output
-
-
 def likely_inchi_match(inchi_1, inchi_2, min_agreement=3):
     """Try to match defective inchi to non-defective ones.
     Compares inchi parts seperately. Match is found if at least the first 'min_agreement' parts
