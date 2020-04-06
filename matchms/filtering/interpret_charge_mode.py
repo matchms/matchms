@@ -77,7 +77,7 @@ def complete_ionmode(spectrum, file_known_adducts):
     if "adduct" in spectrum.metadata:
         adduct = spectrum.metadata["adduct"]
     else:
-        adduct - None
+        adduct = None
 
     # Try completing missing or incorrect ionmodes
     if ionmode.lower() not in ['positive', 'negative']:
