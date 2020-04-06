@@ -19,9 +19,9 @@ class Spectrum:
             self.metadata["ionmode"] = 'n/a'
 
     def clone(self):
-        return Spectrum(mz=self.mz,
-                        intensities=self.intensities,
-                        metadata=self.metadata)
+        return Spectrum(mz=self.mz.copy(),
+                        intensities=self.intensities.copy(),
+                        metadata=self.metadata.copy())
 
     def plot(self):
         plt.figure(figsize=(10, 10))

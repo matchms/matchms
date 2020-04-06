@@ -20,7 +20,6 @@ def interpret_charge_mode(spectrum,
         Filename of yaml listing known adduct strings.
         Default is 'known_adducts.yaml'.
     """
-    spectrum = spectrum.clone()
     # Start by completing missing ionmode fields
     complete_ionmode(spectrum, file_known_adducts)
     charge = spectrum.metadata["charge"]
@@ -70,7 +69,6 @@ def complete_ionmode(spectrum, file_known_adducts):
         print("Could not find yaml file with known adducts.")
         known_adducts = {'adducts_positive': [],
                          'adducts_negative': []}
-    spectrum = spectrum.clone()
     ionmode = spectrum.metadata["ionmode"]
     # Try extracting the adduct from given compound name
     add_adducts(spectrum)
@@ -98,7 +96,6 @@ def add_adducts(spectrum):
 
     Method to interpret the given compound name to find the adduct.
     """
-    spectrum = spectrum.clone()
     if 'adduct' not in spectrum.metadata:
         try:
             name = spectrum.metadata["name"]
