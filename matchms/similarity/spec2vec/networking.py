@@ -40,58 +40,6 @@ import matplotlib
 # -------------------- Functions to evaluate networks ------------------------
 # ----------------------------------------------------------------------------
 
-
-def evaluate_clusters(graph_main, m_sim_ref):
-    """ Evaluate separate clusters of network based on given reference matrix.
-
-    Args:
-    -------
-    graph_main: networkx graph
-        Graph, e.g. made using create_network() function. Based on networkx.
-    m_sim_ref: numpy array
-        2D array with all reference similarity values between all-vs-all nodes.
-    """
-
-    # Split graph into separate clusters
-    graphs = list(nx.connected_component_subgraphs(graph_main))
-
-    num_nodes = []
-    num_edges = []
-    ref_sim_mean_edges = []
-    ref_sim_var_edges = []
-    ref_sim_mean_nodes = []
-    ref_sim_var_nodes = []
-
-    # Loop through clusters
-    for graph in graphs:
-        num_nodes.append(len(graph.nodes))
-        if len(graph.edges) > 0:  # no edges for singletons
-            num_edges.append(len(graph.edges))
-
-            edges = list(graph.edges)
-            mol_sim_edges = np.array([m_sim_ref[x] for x in edges])
-            mol_sim_edges = np.nan_to_num(mol_sim_edges)
-            ref_sim_mean_edges.append(np.mean(mol_sim_edges))
-            ref_sim_var_edges.append(np.var(mol_sim_edges))
-        else:
-            num_edges.append(0)
-            ref_sim_mean_edges.append(0)
-            ref_sim_var_edges.append(0)
-
-        nodes = list(graph.nodes)
-        mean_mol_sims = []
-        for node in nodes:
-            mean_mol_sims.append(m_sim_ref[node, nodes])
-
-        ref_sim_mean_nodes.append(np.mean(mean_mol_sims))
-        ref_sim_var_nodes.append(np.var(mean_mol_sims))
-
-    zipped = zip(num_nodes, num_edges, ref_sim_mean_edges, ref_sim_var_edges, ref_sim_mean_nodes, ref_sim_var_nodes)
-    cluster_data = pd.DataFrame(list(zipped), columns=['num_nodes', 'num_edges', 'ref_sim_mean_edges',
-                                                       'ref_sim_var_edges', 'ref_sim_mean_nodes', 'ref_sim_var_nodes'])
-    return cluster_data
-
-
 def evaluate_clusters_louvain(graph_main, m_sim_ref, resolution=1.0):
     """ Cluster given network using Louvain algorithm.
     Then evaluate clusters of network based on given reference matrix.
