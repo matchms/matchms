@@ -39,11 +39,12 @@ jobs:
         shell: bash -l {0}
         run: |
           conda config --set anaconda_upload no
-          # mkdir -p ../../conda-tmp ./output
-          # conda build -c bioconda -c conda-forge -c nlesc --croot ../../conda-tmp --output-folder ./output .
-          mkdir -p ./output
-          conda build -c bioconda -c conda-forge -c nlesc --output-folder ./output .
+          export BUILD_FOLDER=./output
+          export BUILD_DATE=`date +%Y.%m.%d`
+          mkdir -p $BUILD_FOLDER
+          conda build -c bioconda -c conda-forge -c nlesc --output-folder $BUILD_FOLDER .
       - name: Push the package to anaconda cloud
         shell: bash -l {0}
         run: |
-          anaconda -t ${{ secrets.ANACONDA_TOKEN }} upload -u nlesc --force ./output/noarch/*.tar.bz2
+          anaconda -t ${{ secrets.ANACONDA_TOKEN }} upload -u nlesc --force $BUILD_FOLDER/noarch/*.tar.bz2
+          # anaconda -t ${{ secrets.ANACONDA_TOKEN }} upload -u nlesc --force $BUILD_FOLDER/${{ matrix.os }}/$PKG_NAME-$BUILD_DATE-0.tar.bz2 --force

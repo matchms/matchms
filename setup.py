@@ -40,6 +40,7 @@ setup(
     test_suite='tests',
     install_requires=["pyteomics", "numpy", "matplotlib"],
     setup_requires=[
+        'pytest-runner'
     ],
     tests_require=[
         'pycodestyle',
