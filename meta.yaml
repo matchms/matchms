@@ -13,6 +13,12 @@ source:
   # git_url: https://github.com/matchms/matchms.git
   path: .
 
+extra:
+  channels:
+    - conda-forge
+    - bioconda
+    - nlesc
+
 build:
   noarch: python
   number: 0
