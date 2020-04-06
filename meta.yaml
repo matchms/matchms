@@ -27,30 +27,15 @@ build:
 requirements:
   build:
     # dependencies only from anaconda
-    - gensim==3.8.1
-    - openbabel==3.0.0
-    - rdkit==2019.09.3
   host:
     - python==3.7
     - pip==20.0.2
     - setuptools
   run:
     - python==3.7
-    - gensim==3.8.1
-    - openbabel==3.0.0
-    - rdkit==2019.09.3
-    - ipython==7.13.0
-    - community==1.0.0b1
     - matplotlib==2.2.2
-    - networkx==2.4
-    - numba==0.48.0
     - numpy==1.18.1
-    - pandas==1.0.3
-    - pubchempy==1.0.4
     - pyteomics==4.1.2
-    - scikit-learn==0.22.2.post1
-    - scipy==1.4.1
-    - scour==0.37
 test:
   imports:
     - matchms
