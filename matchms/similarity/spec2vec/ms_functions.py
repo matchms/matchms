@@ -41,42 +41,6 @@ from . import helper_functions as functions
 # -----------------------------------------------------------------------------
 
 
-def dict_to_spectrum(spectra_dict):
-    """Create spectrum object from spectra_dict.
-    Spectra_dict is a python dictionary that stores all information for a set of spectra
-    that is needed to re-create spectrum objects for all spectra.
-    This includes peaks and intensities as well as annotations and method metadata.
-
-    Outputs a list of spectrum objects.
-    """
-    spectra = []
-    keys = []
-    for key, value in spectra_dict.items():
-        keys.append(key)
-
-        if "max_peaks" not in value:
-            value["max_peaks"] = None
-
-        spectrum = Spectrum(min_frag=value["min_frag"],
-                            max_frag=value["max_frag"],
-                            min_loss=value["min_loss"],
-                            max_loss=value["max_loss"],
-                            min_intensity_perc=0,
-                            exp_intensity_filter=value["exp_intensity_filter"],
-                            min_peaks=value["min_peaks"],
-                            max_peaks=value["max_peaks"])
-
-        for key2, value2 in value.items():
-            setattr(spectrum, key2, value2)
-
-        spectrum.peaks = [(x[0], x[1]) for x in spectrum.peaks]  # convert to tuples
-
-        # Collect in form of list of spectrum objects
-        spectra.append(spectrum)
-
-    return spectra
-
-
 def process_peaks(peaks,
                   min_frag=0.0,
                   max_frag=1000.0,
