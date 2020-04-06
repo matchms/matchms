@@ -40,7 +40,6 @@ setup(
     test_suite='tests',
     install_requires=["pyteomics", "numpy", "matplotlib"],
     setup_requires=[
-        'pytest-runner'
     ],
     tests_require=[
         'pycodestyle',
@@ -50,15 +49,13 @@ setup(
     ],
     extras_require={
         'dev':  [
-            'prospector[with_pyroma]',
-            'yapf',
             'isort',
-            # dependency for `python setup.py test`
+            'prospector[with_pyroma]',
+            'recommonmark'
             'pytest-runner',
-            # dependencies for `python setup.py build_sphinx`
             'sphinx',
             'sphinx_rtd_theme',
-            'recommonmark'
+            'yapf'
         ]
     }
 )

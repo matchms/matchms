@@ -39,8 +39,10 @@ jobs:
         shell: bash -l {0}
         run: |
           conda config --set anaconda_upload no
-          mkdir -p ../../conda-tmp ./output
-          conda build -c bioconda -c conda-forge -c nlesc --croot ../../conda-tmp --output-folder ./output .
+          # mkdir -p ../../conda-tmp ./output
+          # conda build -c bioconda -c conda-forge -c nlesc --croot ../../conda-tmp --output-folder ./output .
+          mkdir -p ./output
+          conda build -c bioconda -c conda-forge -c nlesc --output-folder ./output .
       - name: Push the package to anaconda cloud
         shell: bash -l {0}
         run: |
