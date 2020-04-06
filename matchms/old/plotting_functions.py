@@ -26,6 +26,7 @@ from scour import scour
 from scipy import spatial
 import networkx as nx
 from .ms_functions import create_ms_documents
+from .ms_similarity_classical import cosine_score_greedy
 
 # ----------------------------------------------------------------------------------------
 # ---------------------------- Plotting functions ----------------------------------------
@@ -311,12 +312,12 @@ def plot_spectra_comparison(ms_measure,
     else:
         print("Given method unkown.")
 
-    _, used_matches = MS_sim_classic.cosine_score_greedy(peaks1,
-                                                         peaks2,
-                                                         mass_shift=shift,
-                                                         tol=0.005,
-                                                         min_intens=0,
-                                                         use_numba=True)
+    _, used_matches = cosine_score_greedy(peaks1,
+                                          peaks2,
+                                          mass_shift=shift,
+                                          tol=0.005,
+                                          min_intens=0,
+                                          use_numba=True)
 
     idx1, idx2, _ = zip(*used_matches)
     cosine_x = []

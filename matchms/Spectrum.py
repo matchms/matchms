@@ -7,6 +7,8 @@ class Spectrum:
         self.mz = mz
         self.intensities = intensities
         self.metadata = metadata
+        if isinstance(self.metadata["charge"], list):  # Avoid pyteomics ChargeList
+            self.metadata["charge"] = int(self.metadata["charge"][0])
 
     def clone(self):
         return Spectrum(mz=self.mz, intensities=self.intensities, metadata=self.metadata)
