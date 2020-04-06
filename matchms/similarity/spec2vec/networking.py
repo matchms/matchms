@@ -31,50 +31,6 @@ import matplotlib
 # ----------------------------------------------------------------------------
 
 
-def weak_link_finder(graph, max_steps=1000, max_cuts=1):
-    """ Function to detect critical links in the given graph.
-    Critical links here are links which -once removed- would disconnect considerable
-    parts of the network. Those links are searched for by counting minimum cuts between
-    a large number of node pairs (up to max_steps pairs will be explored).
-    If more pairs exist than max_steps allows to explore, pick max_steps random pairs.
-
-    Args:
-    -------
-    graph: networkx graph
-        Graph of individual cluster (created using networkx).
-    max_steps
-        Up to max_steps pairs will be explored to search for cuts. Default = 1000.
-    max_cuts
-        Maximum numbers of links allowed to be cut. Default = 1.
-    """
-
-    sampled_cuts = sample_cuts(graph, max_steps=max_steps, max_cuts=max_cuts)
-
-    sampled_cuts_len = [len(x) for x in sampled_cuts]
-    proposed_cuts = []
-    for min_cuts in list(set(sampled_cuts_len)):
-        sampled_cuts_select = [
-            list(x)[:min_cuts] for x in sampled_cuts if len(x) == min_cuts
-        ]
-
-        sampled_cuts_select = np.array(sampled_cuts_select)
-        # Sort array
-        if min_cuts > 1:
-            sampled_cuts_select = np.sort(np.sort(sampled_cuts_select, axis=2),
-                                          axis=1)
-        else:
-            sampled_cuts_select = np.sort(sampled_cuts_select, axis=2)
-
-        # Find unique cuts and count occurences
-        cuts_unique, cuts_count = row_counts(
-            sampled_cuts_select.reshape(-1, min_cuts * 2))
-
-        # Return most promising cuts
-        proposed_cuts.append((min_cuts, cuts_unique, cuts_count))
-
-    return proposed_cuts
-
-
 def dilate_cluster(graph_main,
                    similars_idx,
                    similars,
