@@ -11,11 +11,11 @@ logging.getLogger(__name__).addHandler(logging.NullHandler())
 __author__ = "Netherlands eScience Center"
 __email__ = 'generalization@esciencecenter.nl'
 __all__ = [
-    "exporting",
-    "harmonization",
-    "importing",
-    "similarity",
     "calculate_scores",
+    "exporting",
+    "filtering",
+    "importing",
     "Scores",
+    "similarity",
     "Spectrum"
 ]
