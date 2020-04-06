@@ -182,34 +182,6 @@ def cosine_score_greedy(spec1,
     return score, used_matches
 
 
-def one_hot_spectrum(spec,
-                     tol,
-                     max_mz,
-                     shift=0,
-                     min_mz=0,
-                     method='max'):
-    """Convert spectrum peaks into on-hot-vector
-
-    method: str
-        'max' take highest intensity peak within every bin.
-        'sum' take sum of all peaks within every bin.
-    """
-    dim_vector = int((max_mz - min_mz)/tol)
-    one_hot_spec = np.zeros((dim_vector))
-    idx = ((spec[:, 0] + shift)*1/tol).astype(int)
-    idx[idx >= dim_vector] = 0
-    idx[idx < 0] = 0
-    if method == 'max':
-        for id1 in set(idx):
-            one_hot_spec[id1] = np.max(spec[(idx == id1), 1])
-    elif method == 'sum':
-        for id1 in set(idx):
-            one_hot_spec[id1] = np.sum(spec[(idx == id1), 1])
-    else:
-        print("Method not known...")
-    return one_hot_spec
-
-
 @numba.njit
 def find_pairs_numba(spec1, spec2, tol, shift=0):
     """Find matching pairs between two spectra.
