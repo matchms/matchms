@@ -26,7 +26,7 @@ def test_interpret_charge_mode():
 
     # Filtering
     for s in reference_spectrums:
-        s = apply_filters(s)
+        apply_filters(s)
 
     apply_filters(query_spectrum)
     assert query_spectrum_raw.metadata["ionmode"] == 'n/a', 'expected ionmode: "n/a"'
