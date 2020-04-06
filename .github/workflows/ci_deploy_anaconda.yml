@@ -24,6 +24,10 @@ jobs:
           activate-environment: matchms
           auto-activate-base: false
           channels: conda-forge,bioconda,nlesc
+      - name: Install required packages
+        shell: bash -l {0}
+        run: |
+          conda install conda-build conda-verify anaconda
       - name: Show conda config
         shell: bash -l {0}
         run: |
@@ -35,7 +39,6 @@ jobs:
         shell: bash -l {0}
         run: |
           conda config --set anaconda_upload no
-          conda install conda-build conda-verify anaconda
           mkdir -p ../../conda-tmp ./output
           conda build -c bioconda -c conda-forge -c nlesc --croot ../../conda-tmp --output-folder ./output .
       - name: Push the package to anaconda cloud
