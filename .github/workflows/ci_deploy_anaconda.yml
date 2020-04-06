@@ -46,5 +46,6 @@ jobs:
       - name: Push the package to anaconda cloud
         shell: bash -l {0}
         run: |
+          export BUILD_FOLDER=./output
           anaconda -t ${{ secrets.ANACONDA_TOKEN }} upload -u nlesc --force $BUILD_FOLDER/noarch/*.tar.bz2
           # anaconda -t ${{ secrets.ANACONDA_TOKEN }} upload -u nlesc --force $BUILD_FOLDER/${{ matrix.os }}/$PKG_NAME-$BUILD_DATE-0.tar.bz2 --force
