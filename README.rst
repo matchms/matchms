@@ -13,7 +13,7 @@ matchms
    * - \2. License
      - |License Badge|
    * - \3. Community Registry
-     - |PyPI Badge| |Research Software Directory Badge|
+     - |Conda Badge| |Research Software Directory Badge|
    * - \4. Enable Citation
      - |Zenodo Badge|
    * - \5. Checklist
@@ -36,9 +36,9 @@ https://badgen.net/ to see which other badges are available.)
    :target: https://github.com/matchms/matchms
    :alt: License Badge
 
-.. |PyPI Badge| image:: https://img.shields.io/pypi/v/cffconvert.svg?colorB=blue
-   :target: https://pypi.python.org/pypi/cffconvert/
-   :alt: PyPI Badge
+.. |Conda Badge| image:: https://anaconda.org/nlesc/matchms/badges/installer/conda.svg
+   :target: https://conda.anaconda.org/nlesc
+   :alt: Conda Badge
 .. |Research Software Directory Badge| image:: https://img.shields.io/badge/rsd-matchms-00a3e3.svg
    :target: https://www.research-software.nl/software/matchms
    :alt: Research Software Directory Badge
