@@ -35,60 +35,6 @@ import matplotlib
 # ---------------------- Functions to refine network -------------------------
 # ----------------------------------------------------------------------------
 
-
-# ----------------------------------------------------------------------------
-# -------------------- Functions to evaluate networks ------------------------
-# ----------------------------------------------------------------------------
-
-def evaluate_clusters_louvain(graph_main, m_sim_ref, resolution=1.0):
-    """ Cluster given network using Louvain algorithm.
-    Then evaluate clusters of network based on given reference matrix.
-
-    Args:
-    -------
-    graph_main: networkx.Graph
-        Graph, e.g. made using create_network() function. Based on networkx.
-    m_sim_ref: numpy array
-        2D array with all reference similarity values between all-vs-all nodes.
-    resolution: float
-        Louvain algorithm resolution parameter. Will change size of communities.
-        See also: https://python-louvain.readthedocs.io/en/latest/api.html Default=1.0
-    """
-    plt.style.use('ggplot')
-    # Find clusters using Louvain algorithm (and python-louvain library)
-    communities = community.best_partition(graph_main,
-                                           weight='weight',
-                                           resolution=resolution)
-    nx.set_node_attributes(graph_main, communities, 'modularity')
-
-    clusters = []
-    for cluster_id in set(communities.values()):
-        cluster = [
-            nodes for nodes in communities.keys()
-            if communities[nodes] == cluster_id
-        ]
-        clusters.append(cluster)
-
-    num_nodes = []
-    ref_sim_mean_nodes = []
-    ref_sim_var_nodes = []
-
-    for cluster in clusters:
-        num_nodes.append(len(cluster))
-        mean_mol_sims = []
-        for node in cluster:
-            mean_mol_sims.append(m_sim_ref[node, cluster])
-
-        ref_sim_mean_nodes.append(np.mean(mean_mol_sims))
-        ref_sim_var_nodes.append(np.var(mean_mol_sims))
-
-    cluster_data = pd.DataFrame(
-        list(zip(num_nodes, ref_sim_mean_nodes, ref_sim_var_nodes)),
-        columns=['num_nodes', 'ref_sim_mean_nodes', 'ref_sim_var_nodes'])
-
-    return graph_main, cluster_data
-
-
 # ----------------------------------------------------------------------------
 # --------------------- Graph related plotting functions ---------------------
 # ----------------------------------------------------------------------------
