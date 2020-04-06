@@ -1,17 +1,28 @@
+import os
+import yaml
 import numpy as np
 
 
-def interpret_charge_mode(spectrum):
+def interpret_charge_mode(spectrum,
+                          file_known_adducts='known_adducts.yaml'):
     """Derive the charge value and complete ionmode based on metadata.
 
     Often, MGF files do not provide a correct charge value or ionmode. This
     function corrects for some of the most common errors by extracting the
     adduct and using this to complete missing ionmode fields. Finally, this
     is used to infering the correct charge sign.
+
+    Args:
+    ----
+    spectrum: matchms.Spectrum.Spectrum()
+        Input spectrum.
+    known_adducts_yaml: str
+        Filename of yaml listing known adduct strings.
+        Default is 'known_adducts.yaml'.
     """
     spectrum = spectrum.clone()
     # Start by completing missing ionmode fields
-    complete_ionmode(spectrum)
+    complete_ionmode(spectrum, file_known_adducts)
     charge = spectrum.metadata["charge"]
     ionmode = spectrum.metadata["ionmode"]
 
@@ -35,24 +46,30 @@ def interpret_charge_mode(spectrum):
     return spectrum
 
 
-def complete_ionmode(spectrum):
+def complete_ionmode(spectrum, file_known_adducts):
     """Derive missing ionmode based on adduct.
 
     MGF files do not always provide a correct ionmode. This function reads
     the adduct from the metadata and uses this to fill in the correct ionmode
     where missing.
-    """
-    # Lists of known adducts (Justin JJ van der Hooft, 2020)
-    # TODO: Read those from yaml or json file?
-    known_adducts_positive = ['M-2H2O+H', 'M+H', 'M+H-CH3NH2', 'M+Na', 'M-H2O+H+', 'M+H+Na',
-                              'M+H+', 'M+K', 'M+H', 'M+K+', '2M+Na', 'M+', 'M+3H', 'M+2H++',
-                              'M+NH4', 'M+ACN+H', 'M+H-NH3', 'M-H2O+H', 'M+', 'M+Na+', 'M+',
-                              'M+2H', 'M+H-H2O', 'M-2H2O+H+', 'M+', 'M+NH4+', 'Cat', 'M+',
-                              'M+Na', '2M+H', 'M+H-2H2O', 'M+2H', 'M+2H']
-    known_adducts_negative = ['M+CH3COO-/M-CH3-', 'M-H', 'M+CH3COO-', 'M-', '2M-H', 'M-H-/M-Ser-',
-                              'M-', 'M-H-', 'M-2H-', 'M-H2O-H', 'M+FA-H', 'M+Cl', '(M+CH3COOH)-H-',
-                              'M-H-H2O', 'M-H-CO2-2HF-']
 
+    Args:
+    ----
+    spectrum: matchms.Spectrum.Spectrum()
+        Input spectrum.
+    known_adducts_yaml: str
+        Filename of yaml listing known adduct strings.
+    """
+    # Load lists of known adducts
+    file_known_adducts = os.path.join(os.path.dirname(__file__),
+                                      file_known_adducts)
+    if os.path.isfile(file_known_adducts):
+        with open(file_known_adducts, 'r') as ymlfile:
+            known_adducts = yaml.full_load(ymlfile)
+    else:
+        print("Could not find yaml file with known adducts.")
+        known_adducts = {'adducts_positive': [],
+                         'adducts_negative': []}
     spectrum = spectrum.clone()
     ionmode = spectrum.metadata["ionmode"]
     # Try extracting the adduct from given compound name
@@ -64,10 +81,10 @@ def complete_ionmode(spectrum):
 
     # Try completing missing or incorrect ionmodes
     if ionmode.lower() not in ['positive', 'negative']:
-        if adduct in known_adducts_positive:
+        if adduct in known_adducts["adducts_positive"]:
             ionmode = 'Positive'
             print("Added ionmode=", ionmode, "based on adduct:", adduct)
-        elif adduct in known_adducts_negative:
+        elif adduct in known_adducts["adducts_negative"]:
             ionmode = 'Negative'
             print("Added ionmode=", ionmode, "based on adduct:", adduct)
         else:
