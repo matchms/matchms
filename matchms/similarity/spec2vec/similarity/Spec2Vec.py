@@ -5,7 +5,8 @@ class Spec2Vec:
 
     def __call__(self, sentence, reference_sentence):
 
-        similarity = None # replace with actual calculation based
-                          # on sentence, reference_sentence, and self.model
+        # replace with actual calculation based on sentence,
+        # reference_sentence, and self.model
+        similarity = None
 
         return similarity
