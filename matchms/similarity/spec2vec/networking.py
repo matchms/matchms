@@ -31,36 +31,6 @@ import matplotlib
 # ----------------------------------------------------------------------------
 
 
-def add_intra_cluster_links(graph_main, m_sim, min_weight=0.5, max_links=20):
-    """ Add links within each separate cluster if weights above min_weight.
-
-    Args:
-    -------
-    graph_main: networkx graph
-        Graph, e.g. made using create_network() function. Based on networkx.
-    m_sim: numpy array
-        2D array with all reference similarity values between all-vs-all nodes.
-    min_weight: float
-        Set minimum weight to be considered for making link. Default = 0.5.
-    """
-    # Split graph into separate clusters
-    graphs = list(nx.connected_component_subgraphs(graph_main))
-
-    for graph in graphs:
-        nodes = list(graph.nodes)
-        nodes0 = nodes.copy()
-        for node in nodes:
-            del nodes0[0]
-            weights = m_sim[node, nodes0]
-            weights_select = weights.argsort()[::-1][:max_links]
-            weights_select = np.where(weights[weights_select] >= min_weight)[0]
-            new_edges = [(node, nodes0[x], weights[x]) for x in weights_select]
-
-            graph_main.add_weighted_edges_from(new_edges)
-
-    return graph_main
-
-
 def split_cluster(graph_main,
                   max_cluster_size=100,
                   min_cluster_size=10,
