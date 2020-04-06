@@ -1,5 +1,6 @@
 import os
 
+
 from matchms.importing import load_from_mgf
 from matchms.filtering import clean_inchis
 
@@ -13,7 +14,7 @@ def test_clean_inchis():
         clean_inchis(s)
 
     # Loading
-    references_file = os.path.join(module_root, 'tests', 'testdata01.mgf')
+    references_file = os.path.join(module_root, 'tests', 'testdata.mgf')
 
     reference_spectrums_raw = load_from_mgf(references_file)
     reference_spectrums = [s.clone() for s in reference_spectrums_raw]
