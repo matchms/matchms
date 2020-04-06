@@ -2,18 +2,55 @@ import numpy
 
 
 class Scores:
-    def __init__(self, measured_spectrums, reference_spectrums, harmonization_functions, similarity_functions):
-        self.measured_spectrums = measured_spectrums
+    def __init__(self, measured_spectrum, reference_spectrums, similarity_functions, scores=None):
+        self.measured_spectrum = measured_spectrum
         self.reference_spectrums = reference_spectrums
-        self.harmonization_functions = harmonization_functions
         self.similarity_functions = similarity_functions
-        self.scores = numpy.empty([len(self.reference_spectrums),
-                                   len(self.measured_spectrums),
-                                   len(self.similarity_functions)])
+        if scores is None:
+            self.scores = numpy.empty([len(self.reference_spectrums),
+                                       len(self.similarity_functions)])
+        else:
+            self.scores = scores
+
+    def __str__(self):
+        return self.scores.__str__()
 
     def calculate(self):
         for i_ref, reference_spectrum in enumerate(self.reference_spectrums):
-            for i_meas, measured_spectrum in enumerate(self.measured_spectrums):
-                for i_simfun, simfun in enumerate(self.similarity_functions):
-                    self.scores[i_ref][i_meas][i_simfun] = simfun(measured_spectrum, reference_spectrum)
+            for i_simfun, simfun in enumerate(self.similarity_functions):
+                self.scores[i_ref][i_simfun] = simfun(self.measured_spectrum, reference_spectrum)
         return self
+
+    def sort_by(self, label, kind='quicksort'):
+        found = False
+        i_simfun = None
+        for i_simfun, simfun in enumerate(self.similarity_functions):
+            if simfun.label == label:
+                found = True
+                break
+
+        assert found, "Label '{0}' not found in similarity functions.".format(label)
+        axis = 0
+        row_numbers = self.scores[:, i_simfun].argsort(axis=axis, kind=kind)
+
+        reference_spectrums = self.reference_spectrums
+        scores = self.scores[row_numbers, :]
+        return Scores(measured_spectrum=self.measured_spectrum,
+                      reference_spectrums=reference_spectrums,
+                      similarity_functions=self.similarity_functions,
+                      scores=scores)
+
+    def top(self, n):
+        reference_spectrums = [s.clone() for s in self.reference_spectrums[:n]]
+        return Scores(measured_spectrum=self.measured_spectrum,
+                      reference_spectrums=reference_spectrums,
+                      similarity_functions=self.similarity_functions,
+                      scores=self.scores.copy()[:n])
+
+    def reverse(self):
+        scores = self.scores[::-1, :]
+        reference_spectrums = self.reference_spectrums[::-1]
+        return Scores(measured_spectrum=self.measured_spectrum,
+                      reference_spectrums=reference_spectrums,
+                      similarity_functions=self.similarity_functions,
+                      scores=scores)
