@@ -11,9 +11,21 @@ member-warnings: false
 
 ignore-paths:
   - docs
+  # separator = '/' (Linux, Mac)
   - matchms/old
-  - matchms\old
+  - matchms/similarity/spec2vec/helper_functions.py
+  - matchms/similarity/spec2vec/ms_functions.py
+  - matchms/similarity/spec2vec/ms_library_search.py
+  - matchms/similarity/spec2vec/ms_similarity_classical.py
+  - matchms/similarity/spec2vec/similarity_measure.py
   - tests/old
+  # separator = '\' (Windows)
+  - matchms\old
+  - matchms\similarity\spec2vec\helper_functions.py
+  - matchms\similarity\spec2vec\ms_functions.py
+  - matchms\similarity\spec2vec\ms_library_search.py
+  - matchms\similarity\spec2vec\ms_similarity_classical.py
+  - matchms\similarity\spec2vec\similarity_measure.py
   - tests\old
 
 pyroma:
