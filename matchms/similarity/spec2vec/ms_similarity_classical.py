@@ -182,39 +182,6 @@ def cosine_score_greedy(spec1,
     return score, used_matches
 
 
-def cosine_matrix_fast(spectra,
-                       tol,
-                       max_mz,
-                       min_mz=0):
-    """Calculates cosine similarity matrix.
-
-    Be careful! Binning is here done by creating one-hot vectors.
-    It is hence really actual "bining" and different from the tolerance-based
-    approach used for the cosine_matrix or molnet_matrix!
-
-    Also: tol here is about tol/2 when compared to cosine_matrix or molnet_matrix...
-    """
-
-    for i, spectrum in enumerate(spectra):
-        spec = np.array(spectrum.peaks.copy(), dtype=float)
-
-        # Normalize intensities:
-        spec[:, 1] = spec[:, 1]/np.max(spec[:, 1])
-
-        if i == 0:
-            vector = one_hot_spectrum(spec, tol, max_mz, shift=0, min_mz=min_mz, method='max')
-            spec_vectors = np.zeros((len(spectra), vector.shape[0]))
-            spec_vectors[0, :] = vector
-        else:
-            spec_vectors[i, :] = one_hot_spectrum(spec, tol,
-                                                  max_mz, shift=0,
-                                                  min_mz=min_mz,
-                                                  method='max')
-
-    Cdist = spatial.distance.cdist(spec_vectors, spec_vectors, 'cosine')
-    return 1 - Cdist
-
-
 def cosine_score_matrix(spectra,
                         tol,
                         max_mz=1000.0,
