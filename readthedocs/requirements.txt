@@ -1,1 +1,2 @@
 sphinx==3.*
+sphinxcontrib-apidoc
