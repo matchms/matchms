@@ -81,10 +81,10 @@ def complete_ionmode(spectrum, file_known_adducts):
     if ionmode not in ['positive', 'negative']:
         if adduct in known_adducts["adducts_positive"]:
             ionmode = 'positive'
-            print("Added ionmode=", ionmode, "based on adduct:", adduct)
+            print("Added ionmode '" + ionmode + "' based on adduct:", adduct)
         elif adduct in known_adducts["adducts_negative"]:
             ionmode = 'negative'
-            print("Added ionmode=", ionmode, "based on adduct:", adduct)
+            print("Added ionmode '" + ionmode + "' based on adduct:", adduct)
         else:
             ionmode = 'n/a'
     spectrum.metadata["ionmode"] = ionmode
