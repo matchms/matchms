@@ -12,8 +12,10 @@
 #
 import os
 import sys
-sys.path.insert(0, '/home/daisycutter/github/matchms/matchms')
+d = os.path.dirname(os.path.realpath(__file__))
+sys.path.insert(0, os.path.join(d,'..'))
 
+import matchms
 
 # -- Project information -----------------------------------------------------
 
@@ -34,9 +36,9 @@ extensions = [
     'sphinxcontrib.apidoc'
 ]
 
-apidoc_module_dir = '.'
-apidoc_output_dir = '.'
-apidoc_excluded_paths = ['tests']
+apidoc_module_dir = '../matchms'
+apidoc_output_dir = './api'
+apidoc_excluded_paths = ['tests', 'readthedocs']
 apidoc_separate_modules = True
 apidoc_module_first = True
 
@@ -53,7 +55,7 @@ language = 'en'
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'readthedocs/conf.rst']
 
 
 # -- Options for HTML output -------------------------------------------------

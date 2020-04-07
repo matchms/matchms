@@ -6,6 +6,11 @@ from .calculate_scores import calculate_scores
 from .Scores import Scores
 from .Spectrum import Spectrum
 
+from . import exporting
+from . import filtering
+from . import importing
+from . import similarity
+
 import logging
 logging.getLogger(__name__).addHandler(logging.NullHandler())
 
