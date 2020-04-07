@@ -9,5 +9,3 @@ def select_by_mz(spectrum, mz_from=0.0, mz_to=1000.0):
 
     spectrum.mz = spectrum.mz[condition]
     spectrum.intensities = spectrum.intensities[condition]
-    return
-
