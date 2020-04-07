@@ -1,13 +1,13 @@
-name: matchms
+name: 'Publish pypi package'
 
 on:
   release:
-    types: [published, edited]
+    types: [published]
 
 jobs:
   deploy:
 
-    if: cookiecutter.pypi_user != 'no_pypi_travis_deployment'
+    if: secrets.PYPI_USER && secrets.PYPI_PASSWORD
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -24,5 +24,5 @@ jobs:
       if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
       uses: pypa/gh-action-pypi-publish@master
       with:
-        user: ${{ secrets.pypi_user }}
-        password: ${{ secrets.pypi_password }}
+        user: ${{ secrets.PYPI_USER }}
+        password: ${{ secrets.PYPI_PASSWORD }}

@@ -1,4 +1,4 @@
-name: matchms
+name: 'Build matchms'
 
 on: [push, pull_request]
 

@@ -35,26 +35,28 @@ setup(
         'License :: OSI Approved :: Apache Software License',
         'Natural Language :: English',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.7'
     ],
     test_suite='tests',
-    install_requires=["pyteomics", "numpy", "matplotlib"],  # FIXME: add your package's dependencies to this list
+    install_requires=["pyteomics", "numpy", "matplotlib"],
     setup_requires=[
-        # dependency for `python setup.py test`
-        'pytest-runner',
-        # dependencies for `python setup.py build_sphinx`
-        'sphinx',
-        'sphinx_rtd_theme',
-        'recommonmark'
+        'pytest-runner'
     ],
     tests_require=[
+        'pycodestyle',
         'pytest',
         'pytest-cov',
-        'pycodestyle',
+        'pytest-runner'
     ],
     extras_require={
-        'dev':  ['prospector[with_pyroma]', 'yapf', 'isort'],
+        'dev':  [
+            'isort',
+            'prospector[with_pyroma]',
+            'recommonmark'
+            'pytest-runner',
+            'sphinx',
+            'sphinx_rtd_theme',
+            'yapf'
+        ]
     }
 )
