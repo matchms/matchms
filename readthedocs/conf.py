@@ -12,7 +12,7 @@
 #
 import os
 import sys
-sys.path.insert(0, '/home/daisycutter/github/matchms/matchms/matchms')
+sys.path.insert(0, '/home/daisycutter/github/matchms/matchms')
 
 
 # -- Project information -----------------------------------------------------
@@ -36,7 +36,7 @@ extensions = [
 
 apidoc_module_dir = '.'
 apidoc_output_dir = '.'
-#apidoc_excluded_paths = ['tests']
+apidoc_excluded_paths = ['tests']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
