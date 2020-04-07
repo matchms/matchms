@@ -21,7 +21,7 @@ jobs:
         pip install setuptools wheel twine
         python setup.py bdist_wheel
     - name: Publish package
-      if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
+      # if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
       uses: pypa/gh-action-pypi-publish@master
       with:
         user: __token__
