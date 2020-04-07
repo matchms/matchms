@@ -2,7 +2,6 @@ API documentation for matchms
 =============================
 
 .. automodule:: matchms
-   :members:
 
 .. toctree::
    :maxdepth: 3

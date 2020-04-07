@@ -14,7 +14,6 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath(os.path.join('..', '..')))
 
-
 # -- Project information -----------------------------------------------------
 
 project = 'matchms'
@@ -35,9 +34,8 @@ extensions = [
 ]
 
 apidoc_module_dir = '../../'
-apidoc_output_dir = '../build'
+apidoc_output_dir = '.'
 apidoc_excluded_paths = ['tests']
-apidoc_separate_modules = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

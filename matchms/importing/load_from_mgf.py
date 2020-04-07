@@ -3,6 +3,7 @@ from ..Spectrum import Spectrum
 
 
 def load_from_mgf(filename):
+    """load from mgf file"""
 
     spectrums = list()
     for pyteomics_spectrum in MGF(filename, convert_arrays=1):

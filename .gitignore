@@ -30,3 +30,15 @@ models_trained/
 computed_results/
 notebooks/.ipynb_checkpoints/
 __pycache__/
+
+
+# generated api docs files
+readthedocs/source/matchms.exporting.rst
+readthedocs/source/matchms.filtering.rst
+readthedocs/source/matchms.importing.rst
+readthedocs/source/matchms.rst
+readthedocs/source/matchms.similarity.rst
+readthedocs/source/matchms.similarity.spec2vec.rst
+readthedocs/source/matchms.similarity.spec2vec.similarity.rst
+readthedocs/source/modules.rst
+
