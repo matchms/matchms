@@ -5,9 +5,7 @@ on:
     types: [published]
 
 jobs:
-  deploy:
-
-    # if: ${{ secrets.PYPI_USER }} && ${{ secrets.PYPI_PASSWORD }}
+  publish:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -21,7 +19,6 @@ jobs:
         pip install setuptools wheel twine
         python setup.py bdist_wheel
     - name: Publish package
-      # if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
       uses: pypa/gh-action-pypi-publish@master
       with:
         user: __token__
