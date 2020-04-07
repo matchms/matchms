@@ -42,6 +42,8 @@ apidoc_excluded_paths = ['tests', 'readthedocs']
 apidoc_separate_modules = True
 apidoc_module_first = True
 
+autodoc_mock_imports = ['numpy', 'matplotlib']
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 

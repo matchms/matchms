@@ -42,3 +42,4 @@ readthedocs/**/matchms.similarity.spec2vec.rst
 readthedocs/**/matchms.similarity.spec2vec.similarity.rst
 readthedocs/**/modules.rst
 readthedocs/_build
+readthedocs/api
