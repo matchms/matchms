@@ -4,7 +4,7 @@ API documentation for matchms
 .. automodule:: matchms
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 2
    :caption: Contents:
 
 Indices and tables
