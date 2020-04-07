@@ -1,2 +1,4 @@
 Sphinx==3.*
 sphinxcontrib-apidoc
+numpy
+matplotlib
