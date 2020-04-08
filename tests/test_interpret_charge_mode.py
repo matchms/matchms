@@ -9,10 +9,10 @@ def test_interpret_charge_mode():
     """Draft for test.
     """
     module_root = os.path.join(os.path.dirname(__file__), '..')
+    yaml_file = os.path.join(module_root, 'matchms',
+                             'filtering', 'known_adducts.yaml')
 
     def apply_filters(s):
-        yaml_file = os.path.join(module_root, 'matchms',
-                                 'filtering', 'known_adducts.yaml')
         interpret_charge_mode(s, yaml_file)
 
     # Loading
