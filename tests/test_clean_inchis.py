@@ -10,9 +10,6 @@ def test_clean_inchis():
     """
     module_root = os.path.join(os.path.dirname(__file__), '..')
 
-    def apply_filters(s):
-        clean_inchis(s)
-
     # Loading
     references_file = os.path.join(module_root, 'tests', 'testdata.mgf')
 
@@ -24,9 +21,9 @@ def test_clean_inchis():
 
     # Filtering
     for s in reference_spectrums:
-        apply_filters(s)
+        clean_inchis(s)
 
-    apply_filters(query_spectrum)
+    clean_inchis(query_spectrum)
     assert query_spectrum_raw.metadata["inchi"].startswith('InChI='), 'expected different InChI'
     assert query_spectrum.metadata["inchi"].startswith('"InChI='), 'InChI style not as expected.'
     original_inchi = reference_spectrums_raw[2].metadata["inchi"]
