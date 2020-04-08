@@ -74,8 +74,8 @@ def test_select_by_intensity_with_from_and_to_parameters():
 
 
 if __name__ == '__main__':
-    test_select_by_intensity_lower_bound_only()
-    test_select_by_intensity_upper_bound_only()
-    test_select_by_intensity_lower_and_upper_bound()
-    test_select_by_intensity_no_bounds()
-    test_select_by_intensity_no_bounds_2()
+    test_select_by_intensity_no_parameters_1()
+    test_select_by_intensity_no_parameters_2()
+    test_select_by_intensity_with_from_parameter()
+    test_select_by_intensity_with_to_parameter()
+    test_select_by_intensity_with_from_and_to_parameters()
