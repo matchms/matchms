@@ -11,8 +11,8 @@ def test_select_by_mz_no_parameters_1():
 
     select_by_mz(spectrum)
 
-    assert len(spectrum.mz) == 4
-    assert len(spectrum.mz) == len(spectrum.intensities)
+    assert spectrum.mz.size == 4
+    assert spectrum.mz.size == spectrum.intensities.size
     assert numpy.array_equal(spectrum.mz, numpy.array([10, 20, 30, 40], dtype="float"))
     assert numpy.array_equal(spectrum.intensities, numpy.array([1, 10, 100, 1000], dtype="float"))
 
@@ -25,8 +25,8 @@ def test_select_by_mz_no_parameters_2():
 
     select_by_mz(spectrum)
 
-    assert len(spectrum.mz) == 3
-    assert len(spectrum.mz) == len(spectrum.intensities)
+    assert spectrum.mz.size == 3
+    assert spectrum.mz.size == spectrum.intensities.size
     assert numpy.array_equal(spectrum.mz, numpy.array([998, 999, 1000], dtype="float"))
     assert numpy.array_equal(spectrum.intensities, numpy.array([1, 10, 100], dtype="float"))
 
@@ -39,8 +39,8 @@ def test_select_by_mz_with_from_parameter():
 
     select_by_mz(spectrum, mz_from=15.0)
 
-    assert len(spectrum.mz) == 3
-    assert len(spectrum.mz) == len(spectrum.intensities)
+    assert spectrum.mz.size == 3
+    assert spectrum.mz.size == spectrum.intensities.size
     assert numpy.array_equal(spectrum.mz, numpy.array([20, 30, 40], dtype="float"))
     assert numpy.array_equal(spectrum.intensities, numpy.array([10, 100, 1000], dtype="float"))
 
@@ -53,8 +53,8 @@ def test_select_by_mz_with_to_parameter():
 
     select_by_mz(spectrum, mz_to=35.0)
 
-    assert len(spectrum.mz) == 3
-    assert len(spectrum.mz) == len(spectrum.intensities)
+    assert spectrum.mz.size == 3
+    assert spectrum.mz.size == spectrum.intensities.size
     assert numpy.array_equal(spectrum.mz, numpy.array([10, 20, 30], dtype="float"))
     assert numpy.array_equal(spectrum.intensities, numpy.array([1, 10, 100], dtype="float"))
 
@@ -67,8 +67,8 @@ def test_select_by_mz_with_from_and_to_parameters():
 
     select_by_mz(spectrum, mz_from=15.0, mz_to=35.0)
 
-    assert len(spectrum.mz) == 2
-    assert len(spectrum.mz) == len(spectrum.intensities)
+    assert spectrum.mz.size == 2
+    assert spectrum.mz.size == spectrum.intensities.size
     assert numpy.array_equal(spectrum.mz, numpy.array([20, 30], dtype="float"))
     assert numpy.array_equal(spectrum.intensities, numpy.array([10, 100], dtype="float"))
 
