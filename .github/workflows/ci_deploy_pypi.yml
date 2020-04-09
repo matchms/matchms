@@ -1,13 +1,11 @@
-name: matchms
+name: 'Publish pypi package'
 
 on:
   release:
-    types: [published, edited]
+    types: [published]
 
 jobs:
-  deploy:
-
-    if: cookiecutter.pypi_user != 'no_pypi_travis_deployment'
+  publish:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -21,8 +19,7 @@ jobs:
         pip install setuptools wheel twine
         python setup.py bdist_wheel
     - name: Publish package
-      if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
       uses: pypa/gh-action-pypi-publish@master
       with:
-        user: ${{ secrets.pypi_user }}
-        password: ${{ secrets.pypi_password }}
+        user: __token__
+        password: ${{ secrets.PYPI_PASSWORD }}

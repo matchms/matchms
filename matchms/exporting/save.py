@@ -1,2 +1,2 @@
 def save():
-    pass
+    """save function"""
