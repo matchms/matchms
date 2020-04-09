@@ -2,9 +2,13 @@ import os
 import yaml
 
 
-def load_known_adducts(filename="known_adducts.yaml"):
+def load_adducts(filename=None):
 
-    known_adducts_file = os.path.join(os.path.dirname(__file__), filename)
+    if filename is None:
+        known_adducts_file = os.path.join(os.path.dirname(__file__), "..", "data", "known_adducts.yaml")
+    else:
+        known_adducts_file = filename
+
     if os.path.isfile(known_adducts_file):
         with open(known_adducts_file, 'r') as f:
             known_adducts = yaml.safe_load(f)

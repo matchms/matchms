@@ -1,4 +1,4 @@
-from matchms.data import load_known_adducts
+from matchms.importing import load_adducts
 
 
 def derive_ionmode(spectrum):
@@ -15,7 +15,7 @@ def derive_ionmode(spectrum):
     """
 
     # Load lists of known adducts
-    known_adducts = load_known_adducts()
+    known_adducts = load_adducts()
 
     adduct = spectrum.metadata.get("adduct", None)
 
