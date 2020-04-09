@@ -25,7 +25,7 @@ docs/apidocs
 .DS_Store
 config.py
 output/
-data/
+/data/
 models_trained/
 computed_results/
 notebooks/.ipynb_checkpoints/
