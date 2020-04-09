@@ -44,4 +44,15 @@ class Spectrum:
 
     @mz.setter
     def mz(self, value):
+        """setter method for mz private variable"""
         self.__mz = value
+
+    @property
+    def intensities(self):
+        """getter method for intensities private variable"""
+        return self.__intensities.copy()
+
+    @intensities.setter
+    def intensities(self, value):
+        """setter method for intensities private variable"""
+        self.__intensities = value
