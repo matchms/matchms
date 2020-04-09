@@ -38,7 +38,12 @@ setup(
         'Programming Language :: Python :: 3.7'
     ],
     test_suite='tests',
-    install_requires=["pyteomics", "numpy", "matplotlib"],
+    install_requires=[
+        "pyteomics",
+        "numpy",
+        "matplotlib",
+        "scipy"
+    ],
     setup_requires=[
         'pytest-runner'
     ],
