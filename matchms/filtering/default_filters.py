@@ -1,5 +1,9 @@
-from matchms.filtering import (add_adduct, derive_ionmode, correct_charge, make_ionmode_lowercase,
-                               make_charge_scalar, set_ionmode_na_when_missing)
+from .add_adduct import add_adduct
+from .correct_charge import correct_charge
+from .derive_ionmode import derive_ionmode
+from .make_charge_scalar import make_charge_scalar
+from .make_ionmode_lowercase import make_ionmode_lowercase
+from .set_ionmode_na_when_missing import set_ionmode_na_when_missing
 
 
 def default_filters(s):
