@@ -6,9 +6,9 @@ def add_adduct(spectrum_in):
 
     spectrum = spectrum_in.clone()
 
-    if 'adduct' not in spectrum.metadata:
+    if spectrum.get("adduct", None) is None:
         try:
-            name = spectrum.metadata["name"]
+            name = spectrum.get("name")
             adduct = name.split(' ')[-1]
             adduct = adduct.replace('\n', '') \
                            .replace(' ', '')  \
@@ -16,7 +16,7 @@ def add_adduct(spectrum_in):
                            .replace(']', '')  \
                            .replace('*', '')
             if adduct:
-                spectrum.metadata["adduct"] = adduct
+                spectrum.set("adduct", adduct)
         except KeyError:
             print("Spectrum's metadata does not have a 'name'.")
 

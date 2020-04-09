@@ -7,13 +7,16 @@ class Spectrum:
         """An example docstring for a constructor."""
         self.mz = mz
         self.intensities = intensities
-        self.metadata = metadata
+        self._metadata = metadata
 
     def clone(self):
         """An example docstring for a method."""
         return Spectrum(mz=self.mz.copy(),
                         intensities=self.intensities.copy(),
-                        metadata=self.metadata.copy())
+                        metadata=self._metadata.copy())
+
+    def get(self, key, default=None):
+        return self._metadata.get(key, default)
 
     def plot(self):
         """An example docstring for a method."""
@@ -29,3 +32,7 @@ class Spectrum:
         plt.title('Chromatogram')
         plt.xlabel('M/z')
         plt.ylabel('Intensity')
+
+    def set(self, key, value):
+        self._metadata[key] = value
+        return self
