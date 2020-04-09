@@ -14,16 +14,13 @@ def test_clean_inchis():
     references_file = os.path.join(module_root, 'tests', 'testdata.mgf')
 
     reference_spectrums_raw = load_from_mgf(references_file)
-    reference_spectrums = [s.clone() for s in reference_spectrums_raw]
+
+    reference_spectrums = [clean_inchis(s) for s in reference_spectrums_raw]
 
     query_spectrum_raw = reference_spectrums_raw[0]
-    query_spectrum = query_spectrum_raw.clone()
 
-    # Filtering
-    for s in reference_spectrums:
-        clean_inchis(s)
+    query_spectrum = clean_inchis(query_spectrum_raw)
 
-    clean_inchis(query_spectrum)
     assert query_spectrum_raw.metadata["inchi"].startswith('InChI='), 'expected different InChI'
     assert query_spectrum.metadata["inchi"].startswith('"InChI='), 'InChI style not as expected.'
     original_inchi = reference_spectrums_raw[2].metadata["inchi"]

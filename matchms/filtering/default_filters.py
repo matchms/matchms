@@ -6,10 +6,11 @@ from .make_ionmode_lowercase import make_ionmode_lowercase
 from .set_ionmode_na_when_missing import set_ionmode_na_when_missing
 
 
-def default_filters(s):
-    make_charge_scalar(s)
-    make_ionmode_lowercase(s)
-    set_ionmode_na_when_missing(s)
-    add_adduct(s)
-    derive_ionmode(s)
-    correct_charge(s)
+def default_filters(spectrum):
+    spectrum = make_charge_scalar(spectrum)
+    spectrum = make_ionmode_lowercase(spectrum)
+    spectrum = set_ionmode_na_when_missing(spectrum)
+    spectrum = add_adduct(spectrum)
+    spectrum = derive_ionmode(spectrum)
+    spectrum = correct_charge(spectrum)
+    return spectrum

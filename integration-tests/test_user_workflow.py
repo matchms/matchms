@@ -7,8 +7,8 @@ from matchms import calculate_scores
 
 def test_user_workflow():
 
-    def apply_filters(s):
-        select_by_intensity(s, intensity_from=0.0, intensity_to=1e9)
+    def apply_filters(spectrum):
+        select_by_intensity(spectrum, intensity_from=0.0, intensity_to=1e9)
 
     module_root = os.path.join(os.path.dirname(__file__), '..')
     references_file = os.path.join(module_root, 'tests', 'pesticides.mgf')

@@ -1,7 +1,10 @@
 import numpy
 
 
-def correct_charge(spectrum):
+def correct_charge(spectrum_in):
+
+    spectrum = spectrum_in.clone()
+
     ionmode = spectrum.metadata.get("ionmode", None)
 
     charge = spectrum.metadata.get("charge", None)
@@ -20,3 +23,5 @@ def correct_charge(spectrum):
         charge *= -1
     elif numpy.sign(charge) == -1 and ionmode == 'positive':
         charge *= -1
+
+    return spectrum
