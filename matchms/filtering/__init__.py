@@ -1,9 +1,14 @@
-from .filterfun1 import filterfun1
-from .filterfun2 import filterfun2
+from .normalize_intensities import normalize_intensities
+from .select_by_intensity import select_by_intensity
 from .select_by_intensity_expfit import select_by_intensity_expfit
+from .select_by_mz import select_by_mz
+from .select_by_relative_intensity import select_by_relative_intensity
+
 
 __all__ = [
-    "filterfun1",
-    "filterfun2",
-    "select_by_intensity_expfit"
-    ]
+    "normalize_intensities",
+    "select_by_intensity",
+    "select_by_intensity_expfit",
+    "select_by_mz",
+    "select_by_relative_intensity"
+]
