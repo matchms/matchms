@@ -36,3 +36,12 @@ class Spectrum:
     def set(self, key, value):
         self._metadata[key] = value
         return self
+
+    @property
+    def mz(self):
+        """getter method for mz private variable"""
+        return self.__mz.copy()
+
+    @mz.setter
+    def mz(self, value):
+        self.__mz = value
