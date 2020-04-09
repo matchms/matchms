@@ -11,4 +11,8 @@ class IntersectMz:
         mz_ref = set(reference_spectrum.mz)
         intersected = mz.intersection(mz_ref)
         unioned = mz.union(mz_ref)
+
+        if len(unioned) == 0:
+            return 0
+
         return len(intersected) / len(unioned)
