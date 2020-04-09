@@ -2,18 +2,16 @@ import os
 
 
 from matchms.importing import load_from_mgf
-from matchms.filtering import interpret_charge_mode
+from matchms.filtering import default_filters
 
 
 def test_interpret_charge_mode():
     """Draft for test.
     """
     module_root = os.path.join(os.path.dirname(__file__), '..')
-    yaml_file = os.path.join(module_root, 'matchms',
-                             'filtering', 'known_adducts.yaml')
 
     def apply_filters(s):
-        interpret_charge_mode(s, yaml_file)
+        default_filters(s)
 
     # Loading
     references_file = os.path.join(module_root, 'tests', 'testdata.mgf')

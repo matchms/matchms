@@ -12,6 +12,7 @@ __author__ = "Netherlands eScience Center"
 __email__ = 'generalization@esciencecenter.nl'
 __all__ = [
     "calculate_scores",
+    "data",
     "exporting",
     "filtering",
     "importing",
