@@ -2,7 +2,7 @@ import os
 
 
 from matchms.importing import load_from_mgf
-from matchms.filtering import add_adduct, derive_ionmode, correct_charge
+from matchms.filtering import default_filters
 
 
 def test_interpret_charge_mode():
@@ -11,9 +11,7 @@ def test_interpret_charge_mode():
     module_root = os.path.join(os.path.dirname(__file__), '..')
 
     def apply_filters(s):
-        add_adduct(s)
-        derive_ionmode(s)
-        correct_charge(s)
+        default_filters(s)
 
     # Loading
     references_file = os.path.join(module_root, 'tests', 'testdata.mgf')

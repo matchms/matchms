@@ -2,11 +2,19 @@ from .add_adduct import add_adduct
 from .clean_inchis import clean_inchis
 from .correct_charge import correct_charge
 from .derive_ionmode import derive_ionmode
+from .default_filters import default_filters
+from .make_charge_scalar import make_charge_scalar
+from .make_ionmode_lowercase import make_ionmode_lowercase
+from .set_ionmode_na_when_missing import set_ionmode_na_when_missing
 
 
 __all__ = [
     "add_adduct",
     "clean_inchis",
     "correct_charge",
-    "derive_ionmode"
+    "default_filters",
+    "derive_ionmode",
+    "make_charge_scalar",
+    "make_ionmode_lowercase",
+    "set_ionmode_na_when_missing"
 ]

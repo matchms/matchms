@@ -8,16 +8,6 @@ class Spectrum:
         self.intensities = intensities
         self.metadata = metadata
 
-        # Avoid pyteomics ChargeList
-        if isinstance(self.metadata["charge"], list):
-            self.metadata["charge"] = int(self.metadata["charge"][0])
-
-        # Lowercase ionmode and replace missing ones by'n/a'
-        if "ionmode" in self.metadata:
-            self.metadata["ionmode"] = self.metadata["ionmode"].lower()
-        else:
-            self.metadata["ionmode"] = 'n/a'
-
     def clone(self):
         return Spectrum(mz=self.mz.copy(),
                         intensities=self.intensities.copy(),
