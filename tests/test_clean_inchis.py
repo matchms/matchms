@@ -21,11 +21,11 @@ def test_clean_inchis():
 
     query_spectrum = clean_inchis(query_spectrum_raw)
 
-    assert query_spectrum_raw.metadata["inchi"].startswith('InChI='), 'expected different InChI'
-    assert query_spectrum.metadata["inchi"].startswith('"InChI='), 'InChI style not as expected.'
-    original_inchi = reference_spectrums_raw[2].metadata["inchi"]
+    assert query_spectrum_raw.get("inchi").startswith('InChI='), 'expected different InChI'
+    assert query_spectrum.get("inchi").startswith('"InChI='), 'InChI style not as expected.'
+    original_inchi = reference_spectrums_raw[2].get("inchi")
     assert original_inchi.startswith('"InChI=CCCCCCCCCCCCCCCC(=O)'), "expected misplaced smiles"
-    modified_inchi = reference_spectrums[2].metadata["inchi"]
+    modified_inchi = reference_spectrums[2].get("inchi")
     assert modified_inchi.startswith('"InChI=1S/C24H50NO7P/'), "inchi was not converted correctly"
 
 

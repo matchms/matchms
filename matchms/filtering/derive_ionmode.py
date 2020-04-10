@@ -19,9 +19,9 @@ def derive_ionmode(spectrum_in):
     # Load lists of known adducts
     known_adducts = load_adducts()
 
-    adduct = spectrum.metadata.get("adduct", None)
+    adduct = spectrum.get("adduct", None)
 
-    ionmode = spectrum.metadata["ionmode"]
+    ionmode = spectrum.get("ionmode")
 
     # Try completing missing or incorrect ionmodes
     if ionmode not in ["positive", "negative"]:
@@ -33,6 +33,6 @@ def derive_ionmode(spectrum_in):
             print("Added ionmode '" + ionmode + "' based on adduct: ", adduct)
         else:
             ionmode = "n/a"
-    spectrum.metadata["ionmode"] = ionmode
+    spectrum.set("ionmode", ionmode)
 
     return spectrum
