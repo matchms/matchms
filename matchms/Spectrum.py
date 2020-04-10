@@ -26,27 +26,17 @@ class Spectrum:
     def plot(self, intensity_from=0.0, intensity_to=None, with_histogram=False, with_expfit=False):
         """An example docstring for a method."""
 
-        def calc_bin_edges_intensity():
-            """calculate various properties of the histogram bins, given a range in intensity defined by
-            'intensity_from' and 'intensity_to', assuming a number of bins equal to 100."""
-            edges = numpy.linspace(intensity_from, intensity_to, n_bins + 1)
-            lefts = edges[:-1]
-            rights = edges[1:]
-            middles = (lefts + rights) / 2
-            widths = rights - lefts
-            return edges, middles, widths
-
-        def make_stems():
-            """calculate where the stems of the spectrum peaks are going to be"""
-            x = numpy.empty([2, self.mz.size], dtype="float")
-            y = numpy.empty_like(x)
-            for i, mz in enumerate(self.mz):
-                x[0:2, i] = [mz, mz]
-                y[0:2, i] = [0, self.intensities[i]]
-            return x, y
-
         def plot_histogram():
             """plot the histogram of intensity values as horizontal bars, aligned with the spectrum axes"""
+            def calc_bin_edges_intensity():
+                """calculate various properties of the histogram bins, given a range in intensity defined by
+                'intensity_from' and 'intensity_to', assuming a number of bins equal to 100."""
+                edges = numpy.linspace(intensity_from, intensity_to, n_bins + 1)
+                lefts = edges[:-1]
+                rights = edges[1:]
+                middles = (lefts + rights) / 2
+                widths = rights - lefts
+                return edges, middles, widths
 
             def exponential_decay_function(x, init, decay_factor):
                 """function describing exponential decay"""
@@ -86,6 +76,15 @@ class Spectrum:
 
         def plot_spectrum():
             """plot mz v. intensity"""
+            def make_stems():
+                """calculate where the stems of the spectrum peaks are going to be"""
+                x = numpy.empty([2, self.mz.size], dtype="float")
+                y = numpy.empty_like(x)
+                for i, mz in enumerate(self.mz):
+                    x[0:2, i] = [mz, mz]
+                    y[0:2, i] = [0, self.intensities[i]]
+                return x, y
+
             spectrum_ax.set_ylim(bottom=intensity_from, top=intensity_to)
             x, y = make_stems()
             plt.plot(x, y, color="#444", linewidth=1.0, marker="")
@@ -97,7 +96,7 @@ class Spectrum:
             assert with_histogram, "When 'with_expfit' is True, 'with_histogram' should also be True."
 
         if intensity_to is None:
-            intensity_to = self.intensities.max()
+            intensity_to = self.intensities.max() * 1.05
 
         n_bins = 100
         decay_factor_max = 1.0
