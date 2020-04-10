@@ -15,7 +15,7 @@ def clean_inchis(spectrum_in, rescue_smiles=True):
     # Empirically found list of strings that represent empty entries
     empty_entry_types = ['N/A', 'n/a', 'NA', 0, '0', '""', '', 'nodata',
                          '"InChI=n/a"', '"InChI="', 'InChI=1S/N\n', '\t\r\n']
-    inchi = spectrum.metadata["inchi"]
+    inchi = spectrum.get("inchi")
     if inchi in empty_entry_types:
         inchi = 'n/a'
     else:
@@ -36,5 +36,5 @@ def clean_inchis(spectrum_in, rescue_smiles=True):
             inchi = '"InChI=' + inchi[:-3] + '"'
         else:
             inchi = '"InChI=' + inchi + '"'
-    spectrum.metadata["inchi"] = inchi
+    spectrum.set("inchi", inchi)
     return spectrum
