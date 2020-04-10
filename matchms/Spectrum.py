@@ -11,7 +11,9 @@ class Spectrum:
 
     def clone(self):
         """An example docstring for a method."""
-        return Spectrum(mz=self.mz, intensities=self.intensities, metadata=self.metadata)
+        return Spectrum(mz=self.mz.copy(),
+                        intensities=self.intensities.copy(),
+                        metadata=self.metadata.copy())
 
     def plot(self):
         """An example docstring for a method."""

@@ -42,6 +42,7 @@ setup(
         "pyteomics",
         "numpy",
         "matplotlib",
+        "pyyaml",
         "scipy"
     ],
     setup_requires=[
