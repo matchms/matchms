@@ -21,8 +21,6 @@ def test_spectrum_plot_with_histogram_unspecified():
     assert len(fig.axes[0].lines) == 11
     assert isinstance(fig.axes[0].lines[0], plt.Line2D)
     assert hasattr(fig.axes[0].lines[0], "_x")
-    assert isinstance(fig.axes[0].lines[0]._x, numpy.ndarray)
-    assert numpy.all(fig.axes[0].lines[0]._x == numpy.asarray([10, 10], dtype="float"))
 
 
 def test_spectrum_plot_with_histogram_false():
@@ -43,8 +41,6 @@ def test_spectrum_plot_with_histogram_false():
     assert len(fig.axes[0].lines) == 11
     assert isinstance(fig.axes[0].lines[0], plt.Line2D)
     assert hasattr(fig.axes[0].lines[0], "_x")
-    assert isinstance(fig.axes[0].lines[0]._x, numpy.ndarray)
-    assert numpy.all(fig.axes[0].lines[0]._x == numpy.asarray([10, 10], dtype="float"))
 
 
 def test_spectrum_plot_with_histogram_true():
@@ -65,8 +61,6 @@ def test_spectrum_plot_with_histogram_true():
     assert len(fig.axes[0].lines) == 11
     assert isinstance(fig.axes[0].lines[0], plt.Line2D)
     assert hasattr(fig.axes[0].lines[0], "_x")
-    assert isinstance(fig.axes[0].lines[0]._x, numpy.ndarray)
-    assert numpy.all(fig.axes[0].lines[0]._x == numpy.asarray([10, 10], dtype="float"))
 
 
 def test_spectrum_plot_with_histogram_true_and_intensity_limit():
@@ -87,8 +81,6 @@ def test_spectrum_plot_with_histogram_true_and_intensity_limit():
     assert len(fig.axes[0].lines) == 11
     assert isinstance(fig.axes[0].lines[0], plt.Line2D)
     assert hasattr(fig.axes[0].lines[0], "_x")
-    assert isinstance(fig.axes[0].lines[0]._x, numpy.ndarray)
-    assert numpy.all(fig.axes[0].lines[0]._x == numpy.asarray([10, 10], dtype="float"))
 
 
 def test_spectrum_plot_with_histogram_true_and_expfit_true_and_intensity_limit():
@@ -109,8 +101,6 @@ def test_spectrum_plot_with_histogram_true_and_expfit_true_and_intensity_limit()
     assert len(fig.axes[0].lines) == 11
     assert isinstance(fig.axes[0].lines[0], plt.Line2D)
     assert hasattr(fig.axes[0].lines[0], "_x")
-    assert isinstance(fig.axes[0].lines[0]._x, numpy.ndarray)
-    assert numpy.all(fig.axes[0].lines[0]._x == numpy.asarray([10, 10], dtype="float"))
 
 
 if __name__ == "__main__":

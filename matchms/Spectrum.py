@@ -5,11 +5,14 @@ from scipy.optimize import curve_fit
 
 class Spectrum:
     """An example docstring for a class."""
-    def __init__(self, mz, intensities, metadata=dict()):
+    def __init__(self, mz, intensities, metadata=None):
         """An example docstring for a constructor."""
         self.mz = mz
         self.intensities = intensities
-        self._metadata = metadata
+        if metadata is None:
+            self._metadata = dict()
+        else:
+            self._metadata = metadata
 
     def clone(self):
         """Return a deepcopy of the spectrum instance."""
@@ -31,7 +34,7 @@ class Spectrum:
             rights = edges[1:]
             middles = (lefts + rights) / 2
             widths = rights - lefts
-            return edges, lefts, middles, rights, widths
+            return edges, middles, widths
 
         def make_stems():
             """calculate where the stems of the spectrum peaks are going to be"""
@@ -62,17 +65,17 @@ class Spectrum:
                 lower_bounds = [counts.max() - 1e-10, 0]
                 upper_bounds = [counts.max() + 1e-10, decay_factor_max]
                 try:
-                    popt, pcov = curve_fit(exponential_decay_function,
-                                           x_fit_nozero,
-                                           y_fit_nozero,
-                                           bounds=(lower_bounds, upper_bounds))
+                    popt, _ = curve_fit(exponential_decay_function,
+                                        x_fit_nozero,
+                                        y_fit_nozero,
+                                        bounds=(lower_bounds, upper_bounds))
                 except Exception as e:
                     print(e)
                     popt = lower_bounds, 0.1
                 ax1_expfit = exponential_decay_function(x_fit, *popt)
                 plt.plot(ax1_expfit, x_fit + offset, color="#F80", marker=".")
 
-            bin_edges, bin_lefts, bin_middles, bin_rights, bin_widths = calc_bin_edges_intensity()
+            bin_edges, bin_middles, bin_widths = calc_bin_edges_intensity()
             counts, _ = numpy.histogram(self.intensities, bins=bin_edges)
             histogram_ax.set_ylim(bottom=intensity_from, top=intensity_to)
             plt.barh(bin_middles, counts, height=bin_widths)
