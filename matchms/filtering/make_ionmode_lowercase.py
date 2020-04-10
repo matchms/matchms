@@ -6,4 +6,4 @@ def make_ionmode_lowercase(spectrum_in):
     if spectrum.get("ionmode") is not None:
         spectrum.set("ionmode", spectrum.get("ionmode").lower())
 
-    return spectrum_in
+    return spectrum
