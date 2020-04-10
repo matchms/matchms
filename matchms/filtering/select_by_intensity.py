@@ -1,7 +1,9 @@
 import numpy
 
 
-def select_by_intensity(spectrum, intensity_from=10.0, intensity_to=200.0):
+def select_by_intensity(spectrum_in, intensity_from=10.0, intensity_to=200.0):
+
+    spectrum = spectrum_in.clone()
 
     assert intensity_from <= intensity_to, "'intensity_from' should be smaller than or equal to 'intensity_to'."
 
@@ -9,3 +11,5 @@ def select_by_intensity(spectrum, intensity_from=10.0, intensity_to=200.0):
 
     spectrum.mz = spectrum.mz[condition]
     spectrum.intensities = spectrum.intensities[condition]
+
+    return spectrum

@@ -1,29 +1,18 @@
 import os
 from matchms.importing import load_from_mgf
-from matchms.filtering import select_by_intensity
+from matchms.filtering import default_filters
 from matchms.similarity import IntersectMz
 from matchms import calculate_scores
 
 
 def test_user_workflow():
 
-    def apply_filters(s):
-        select_by_intensity(s, intensity_from=0.0, intensity_to=1e9)
-
     module_root = os.path.join(os.path.dirname(__file__), '..')
     references_file = os.path.join(module_root, 'tests', 'pesticides.mgf')
 
-    reference_spectrums_raw = load_from_mgf(references_file)
-    reference_spectrums = [s.clone() for s in reference_spectrums_raw]
+    reference_spectrums = [default_filters(s) for s in load_from_mgf(references_file)]
 
-    query_spectrum_raw = reference_spectrums_raw[0]
-    query_spectrum = query_spectrum_raw.clone()
-
-    # filtering
-    for s in reference_spectrums:
-        apply_filters(s)
-
-    apply_filters(query_spectrum)
+    query_spectrum = reference_spectrums[0].clone()
 
     # define similarity functions
     similarity_functions = [IntersectMz("intersect")]

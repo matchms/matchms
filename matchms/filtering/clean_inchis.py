@@ -1,7 +1,7 @@
 from matchms.utils import mol_converter
 
 
-def clean_inchis(spectrum, rescue_smiles=True):
+def clean_inchis(spectrum_in, rescue_smiles=True):
     """Make inchi style more consistent and wrongly given smiles.
 
     Read spectrum, look for inchi. Then:
@@ -9,6 +9,9 @@ def clean_inchis(spectrum, rescue_smiles=True):
     2) if rescue_smiles is True then try to detect inchi that are actually smiles
     and convert to proper inchi (using openbabel based function from MS_functions.py).
     """
+
+    spectrum = spectrum_in.clone()
+
     # Empirically found list of strings that represent empty entries
     empty_entry_types = ['N/A', 'n/a', 'NA', 0, '0', '""', '', 'nodata',
                          '"InChI=n/a"', '"InChI="', 'InChI=1S/N\n', '\t\r\n']
