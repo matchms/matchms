@@ -17,7 +17,7 @@ def test_clean_inchis():
 
     reference_spectrums = [clean_inchis(s) for s in reference_spectrums_raw]
 
-    query_spectrum_raw = reference_spectrums_raw[0]
+    query_spectrum_raw = reference_spectrums_raw[0].clone()
 
     query_spectrum = clean_inchis(query_spectrum_raw)
 
