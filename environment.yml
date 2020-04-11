@@ -6,7 +6,7 @@ channels:
   - nlesc
 dependencies:
   - python==3.7
-  - matplotlib==2.2.2
+  - matplotlib==3.2.1
   - numpy==1.18.1
   - openbabel==3.0.0
   - pyteomics==4.1.2
