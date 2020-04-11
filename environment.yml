@@ -3,7 +3,6 @@ channels:
   - defaults
   - conda-forge
   - bioconda
-  - nlesc
 dependencies:
   - python==3.7
   - matplotlib==3.2.1
