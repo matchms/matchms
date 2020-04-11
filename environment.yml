@@ -10,6 +10,7 @@ dependencies:
   - openbabel==3.0.0
   - pyteomics==4.2
   - scipy==1.4.1
+  - pip==20.0.2
   - pip:
     - isort
     - prospector[with_pyroma]
