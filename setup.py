@@ -39,9 +39,10 @@ setup(
     ],
     test_suite='tests',
     install_requires=[
-        "pyteomics",
-        "numpy",
+        "gensim",
         "matplotlib",
+        "numpy",
+        "pyteomics",
         "pyyaml"
     ],
     setup_requires=[
