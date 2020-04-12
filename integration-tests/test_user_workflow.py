@@ -23,7 +23,7 @@ def test_user_workflow():
                               references,
                               intersect_mz)
 
-    queries_top10, reference_top10, scores_top10, = scores.top(10)
+    queries_top10, reference_top10, scores_top10, = scores.top(10, omit_self_comparisons=False)
 
     print(scores_top10)
 
