@@ -31,8 +31,16 @@ class Scores:
         r, c = unravel_index(sortorder, self.scores.shape)
         return vstack(self.queries[c]), self.references[r], vstack(self.scores[r, c])
 
-    def top(self, n, kind="quicksort"):
+    def top(self, n, kind="quicksort", omit_self_comparisons=True):
 
         queries_sorted, references_sorted, scores_sorted = self.sort(kind=kind)
+
+        if omit_self_comparisons:
+            zipped = zip(queries_sorted, references_sorted, scores_sorted)
+            self_comparisons_omitted = [(q, r, s) for q, r, s in zipped if q != r]
+            return \
+                vstack([q for q, _, _ in self_comparisons_omitted[:n]]),\
+                vstack([r for _, r, _ in self_comparisons_omitted[:n]]),\
+                vstack([s for _, _, s in self_comparisons_omitted[:n]])
 
         return queries_sorted[:n], references_sorted[:n], scores_sorted[:n]
