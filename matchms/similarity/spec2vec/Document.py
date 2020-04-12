@@ -20,4 +20,3 @@ class Document:
 
     def __str__(self):
         return self.words.__str__()
-

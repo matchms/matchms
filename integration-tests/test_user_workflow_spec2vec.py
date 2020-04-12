@@ -4,6 +4,7 @@ from matchms.filtering import default_filters
 from matchms.similarity.spec2vec import convert_spectrum_to_document, build_model_word2vec, Spec2Vec
 from matchms import calculate_scores
 
+
 def test_user_workflow_spec2vec():
 
     module_root = os.path.join(os.path.dirname(__file__), '..')
@@ -22,9 +23,10 @@ def test_user_workflow_spec2vec():
     references = documents[6:]
 
     # call calc_scores
-    calculate_scores(queries, references, spec2vec)
+    queries_top3, references_top3, scores_top3 = \
+        calculate_scores(queries, references, spec2vec).top(3, omit_self_comparisons=True)
 
-
+    print(scores_top3)
 
 
 if __name__ == '__main__':
