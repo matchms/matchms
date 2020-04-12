@@ -26,7 +26,11 @@ def test_user_workflow_spec2vec():
     queries_top3, references_top3, scores_top3 = \
         calculate_scores(queries, references, spec2vec).top(3, omit_self_comparisons=True)
 
+    print(queries_top3)
+    print(references_top3)
     print(scores_top3)
+
+    assert True
 
 
 if __name__ == '__main__':
