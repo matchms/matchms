@@ -16,9 +16,9 @@ class Spectrum:
 
     def clone(self):
         """Return a deepcopy of the spectrum instance."""
-        return Spectrum(mz=self.__mz,
-                        intensities=self.__intensities,
-                        metadata=self._metadata)
+        return Spectrum(mz=self.mz,
+                        intensities=self.intensities,
+                        metadata=self._metadata.copy())
 
     def get(self, key, default=None):
         return self._metadata.get(key, default)
