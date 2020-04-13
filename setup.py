@@ -42,7 +42,8 @@ setup(
         "pyteomics",
         "numpy",
         "matplotlib",
-        "pyyaml"
+        "pyyaml",
+        "scipy"
     ],
     setup_requires=[
         'pytest-runner'
