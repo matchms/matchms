@@ -9,7 +9,7 @@ def add_parent_mass(spectrum_in):
 
     if spectrum.get("parent_mass", None) is None:
         try:
-            int_charge = int(spectrum.get("charge"]))
+            int_charge = int(spectrum.get("charge"))
             precursor_mass = spectrum.get("pepmass")[0]
             parent_mass = precursor_mass * abs(int_charge)
             parent_mass -= int_charge * proton_mass
