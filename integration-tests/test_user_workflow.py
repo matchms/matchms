@@ -16,7 +16,7 @@ def test_user_workflow():
     references = spectrums[6:]
 
     # define similarity function
-    intersect_mz = IntersectMz("intersect")
+    intersect_mz = IntersectMz()
 
     # calculate_scores
     scores = calculate_scores(queries,
