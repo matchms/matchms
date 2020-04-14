@@ -9,10 +9,12 @@ def add_parent_mass(spectrum_in):
 
     if spectrum.get("parent_mass", None) is None:
         try:
-            int_charge = int(spectrum.metadata["charge"])
-            precursor_mass = spectrum.metadata["pepmass"][0]
+            int_charge = int(spectrum.get("charge"]))
+            precursor_mass = spectrum.get("pepmass")[0]
             parent_mass = precursor_mass * abs(int_charge)
             parent_mass -= int_charge * proton_mass
+            if parent_mass:
+                spectrum.set("parent_mass", parent_mass)
         except KeyError:
             print("Not sufficient spectrum metadata to derive parent mass.")
 
