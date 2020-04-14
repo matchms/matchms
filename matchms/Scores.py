@@ -3,16 +3,13 @@ from numpy import empty, argsort, unravel_index, hstack, vstack
 
 class Scores:
     """An example docstring for a class definition."""
-    def __init__(self, queries, references, similarity_function, scores=None):
+    def __init__(self, queries, references, similarity_function):
         """An example docstring for a constructor."""
         self.queries = hstack(queries)
         self.references = vstack(references)
         self.similarity_function = similarity_function
-        if scores is None:
-            self.scores = empty([len(self.references),
-                                 len(self.queries)])
-        else:
-            self.scores = scores
+        self.scores = empty([len(self.references),
+                             len(self.queries)])
 
     def __str__(self):
         return self.scores.__str__()
@@ -44,3 +41,13 @@ class Scores:
                 vstack([s for _, _, s in self_comparisons_omitted[:n]])
 
         return queries_sorted[:n], references_sorted[:n], scores_sorted[:n]
+
+    @property
+    def scores(self):
+        """getter method for scores private variable"""
+        return self._scores.copy()
+
+    @scores.setter
+    def scores(self, value):
+        """setter method for scores private variable"""
+        self._scores = value
