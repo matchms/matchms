@@ -6,8 +6,7 @@ def test_scores_init():
 
     scores = Scores(queries=numpy.asarray(["q0", "q1"]),
                     references=numpy.asarray(["r0", "r1", "r2"]),
-                    similarity_function=None,
-                    scores=None)
+                    similarity_function=None)
 
     assert scores.scores.shape == (3, 2)
 
@@ -16,8 +15,9 @@ def test_scores_sort():
 
     scores = Scores(queries=numpy.asarray(["q0", "q1"]),
                     references=numpy.asarray(["r0", "r1", "r2"]),
-                    similarity_function=None,
-                    scores=numpy.asarray([[1, 2], [5, 4], [3, 6]], dtype="float"))
+                    similarity_function=None)
+
+    scores.scores = numpy.asarray([[1, 2], [5, 4], [3, 6]], dtype="float")
 
     queries_sorted, references_sorted, scores_sorted = scores.sort()
 
@@ -30,8 +30,9 @@ def test_scores_top():
 
     scores = Scores(queries=numpy.asarray(["q0", "q1"]),
                     references=numpy.asarray(["r0", "q1", "r2"]),
-                    similarity_function=None,
-                    scores=numpy.asarray([[1, 2], [5, 4], [3, 6]], dtype="float"))
+                    similarity_function=None)
+
+    scores.scores = numpy.asarray([[1, 2], [5, 4], [3, 6]], dtype="float")
 
     queries_top_2, references_top_2, scores_top_2 = scores.top(2, omit_self_comparisons=True)
 
