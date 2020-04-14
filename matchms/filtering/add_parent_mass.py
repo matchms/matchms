@@ -4,7 +4,7 @@ def add_parent_mass(spectrum_in):
     Method to calculate the parent mass from given precursor mass
     and charge.
     """
-    PROTON_MASS = 1.00727645199076  # TODO: where to put this constant?
+    proton_mass = 1.00727645199076  # TODO: where to put this constant?
     spectrum = spectrum_in.clone()
 
     if spectrum.get("parent_mass", None) is None:
@@ -12,7 +12,7 @@ def add_parent_mass(spectrum_in):
             int_charge = int(spectrum.metadata["charge"])
             precursor_mass = spectrum.metadata["pepmass"][0]
             parent_mass = precursor_mass * abs(int_charge)
-            parent_mass -= int_charge * PROTON_MASS
+            parent_mass -= int_charge * proton_mass
         except KeyError:
             print("Not sufficient spectrum metadata to derive parent mass.")
 
