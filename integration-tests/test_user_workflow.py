@@ -8,23 +8,28 @@ from matchms import calculate_scores
 def test_user_workflow():
 
     module_root = os.path.join(os.path.dirname(__file__), '..')
-    references_file = os.path.join(module_root, 'tests', 'pesticides.mgf')
+    spectrums_file = os.path.join(module_root, 'tests', 'pesticides.mgf')
 
-    reference_spectrums = [default_filters(s) for s in load_from_mgf(references_file)]
+    spectrums = [default_filters(s) for s in load_from_mgf(spectrums_file)]
 
-    query_spectrum = reference_spectrums[0].clone()
+    queries = spectrums[:7]
+    references = spectrums[6:]
 
-    # define similarity functions
-    similarity_functions = [IntersectMz("intersect")]
+    # define similarity function
+    intersect_mz = IntersectMz()
 
     # calculate_scores
-    scores = calculate_scores(query_spectrum,
-                              reference_spectrums,
-                              similarity_functions).sort_by("intersect").reverse().top(10)
+    scores = calculate_scores(queries,
+                              references,
+                              intersect_mz)
 
-    assert scores.scores[0] == 1., "Intersection of spectrum with itself should yield a perfect match."
-    assert scores.scores.shape == (10, 1), "Expected a table of 10 rows, 1 columns."
-    assert scores.scores[0] > scores.scores[1], "Expected a different sort order."
+    queries_top10, reference_top10, scores_top10, = scores.top(10, include_self_comparisons=True)
+
+    print(scores_top10)
+
+    assert scores.scores[0, 6] == 1., "Intersection of spectrum with itself should yield a perfect match."
+    assert scores.scores.shape == (70, 7), "Expected a table of 10 rows, 1 columns."
+    assert queries_top10[0] == reference_top10[0], "Expected the best match between two copies of the same spectrum."
 
 
 if __name__ == '__main__':

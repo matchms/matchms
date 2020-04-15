@@ -39,11 +39,12 @@ setup(
     ],
     test_suite='tests',
     install_requires=[
-        "pyteomics",
-        "numpy",
+        "gensim",
         "matplotlib",
+        "numpy",
+        "pyteomics",
         "pyyaml",
-        "scipy"
+        "scipy",
     ],
     setup_requires=[
         'pytest-runner'
