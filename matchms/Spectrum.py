@@ -16,8 +16,8 @@ class Spectrum:
 
     def __eq__(self, other):
         return \
-            numpy.all(self.mz == other.mz) and \
-            numpy.all(self.intensities == other.intensities) and \
+            numpy.allclose(self.mz, other.mz) and \
+            numpy.allclose(self.intensities, other.intensities) and \
             self.metadata == other.metadata
 
     def clone(self):
