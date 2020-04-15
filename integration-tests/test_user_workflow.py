@@ -16,14 +16,14 @@ def test_user_workflow():
     references = spectrums[6:]
 
     # define similarity function
-    intersect_mz = IntersectMz("intersect")
+    intersect_mz = IntersectMz()
 
     # calculate_scores
     scores = calculate_scores(queries,
                               references,
                               intersect_mz)
 
-    queries_top10, reference_top10, scores_top10, = scores.top(10, omit_self_comparisons=False)
+    queries_top10, reference_top10, scores_top10, = scores.top(10, include_self_comparisons=True)
 
     print(scores_top10)
 

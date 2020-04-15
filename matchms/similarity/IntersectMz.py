@@ -1,9 +1,8 @@
 class IntersectMz:
     """IntersectMz function factory"""
 
-    def __init__(self, label):
+    def __init__(self):
         """constructor"""
-        self.label = label
 
     def __call__(self, spectrum, reference_spectrum):
         """call method"""
