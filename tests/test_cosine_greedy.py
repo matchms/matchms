@@ -39,7 +39,7 @@ def test_cosine_score_greedy_with_tolerance_0_2():
     score, matches = cosine_greedy(norm_spectrum_1, norm_spectrum_2)
 
     assert score == pytest.approx(0.2273, 0.0001), 'expected different cosine score'
-    assert matches == 4, 'expected different number of matches'
+    assert matches == 5, 'expected different number of matches'
 
 
 def test_cosine_score_greedy_with_tolerance_1_0():
