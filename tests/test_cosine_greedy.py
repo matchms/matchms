@@ -18,9 +18,10 @@ def test_cosine_greedy_without_parameters():
     norm_spectrum_1 = normalize_intensities(spectrum_1)
     norm_spectrum_2 = normalize_intensities(spectrum_2)
     cosine_greedy = CosineGreedy("cosine-greedy")
-    score = cosine_greedy(norm_spectrum_1, norm_spectrum_2)
+    score, matches = cosine_greedy(norm_spectrum_1, norm_spectrum_2)
 
     assert score == pytest.approx(0.81421, 0.0001), 'expected different cosine score'
+    assert matches == 3, 'expected different number of matches'
 
 
 def test_cosine_score_greedy_with_tolerance_0_2():
@@ -35,9 +36,10 @@ def test_cosine_score_greedy_with_tolerance_0_2():
     norm_spectrum_1 = normalize_intensities(spectrum_1)
     norm_spectrum_2 = normalize_intensities(spectrum_2)
     cosine_greedy = CosineGreedy("cosine-greedy", tolerance=0.2)
-    score = cosine_greedy(norm_spectrum_1, norm_spectrum_2)
+    score, matches = cosine_greedy(norm_spectrum_1, norm_spectrum_2)
 
     assert score == pytest.approx(0.2273, 0.0001), 'expected different cosine score'
+    assert matches == 4, 'expected different number of matches'
 
 
 def test_cosine_score_greedy_with_tolerance_1_0():
@@ -53,11 +55,12 @@ def test_cosine_score_greedy_with_tolerance_1_0():
     norm_spectrum_1 = normalize_intensities(spectrum_1)
     norm_spectrum_2 = normalize_intensities(spectrum_2)
     cosine_greedy = CosineGreedy("cosine-greedy", tolerance=1.0)
-    score = cosine_greedy(norm_spectrum_1, norm_spectrum_2)
-    score_inverse = cosine_greedy(norm_spectrum_2, norm_spectrum_1)
+    score, matches = cosine_greedy(norm_spectrum_1, norm_spectrum_2)
+    score_inverse, _ = cosine_greedy(norm_spectrum_2, norm_spectrum_1)
 
     assert score == pytest.approx(0.87121, 0.0001), 'expected different cosine score'
     assert score == pytest.approx(score_inverse, 0.0001), 'scores should be equal'
+    assert matches == 5, 'expected different number of matches'
 
 
 def test_cosine_score_greedy_with_tolerance_2_0():
@@ -73,9 +76,10 @@ def test_cosine_score_greedy_with_tolerance_2_0():
     norm_spectrum_1 = normalize_intensities(spectrum_1)
     norm_spectrum_2 = normalize_intensities(spectrum_2)
     cosine_greedy = CosineGreedy("cosine-greedy", tolerance=2.0)
-    score = cosine_greedy(norm_spectrum_1, norm_spectrum_2)
+    score, matches = cosine_greedy(norm_spectrum_1, norm_spectrum_2)
 
     assert score == pytest.approx(0.903412, 0.0001), 'expected different cosine score'
+    assert matches == 6, 'expected different number of matches'
 
 
 if __name__ == '__main__':
