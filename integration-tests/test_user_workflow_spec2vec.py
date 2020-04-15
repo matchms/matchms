@@ -24,7 +24,7 @@ def test_user_workflow_spec2vec():
 
     # call calc_scores
     queries_top3, references_top3, scores_top3 = \
-        calculate_scores(queries, references, spec2vec).top(3, omit_self_comparisons=True)
+        calculate_scores(queries, references, spec2vec).top(3, include_self_comparisons=False)
 
     print(queries_top3)
     print(references_top3)
