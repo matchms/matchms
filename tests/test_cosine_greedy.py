@@ -25,12 +25,12 @@ def test_cosine_greedy_without_parameters():
 
 
 def test_cosine_score_greedy_with_tolerance_0_2():
-    spectrum_1 = Spectrum(mz=numpy.array([100, 200, 299, 300, 301, 500, 510], dtype="float"),
-                          intensities=numpy.array([10, 10, 500, 100, 200, 20, 100], dtype="float"),
+    spectrum_1 = Spectrum(mz=numpy.array([100, 150, 200, 300, 500, 510, 1100], dtype="float"),
+                          intensities=numpy.array([700, 200, 100, 1000, 200, 5, 500], dtype="float"),
                           metadata=dict())
 
-    spectrum_2 = Spectrum(mz=numpy.array([100, 200, 300, 301, 500, 512], dtype="float"),
-                          intensities=numpy.array([10, 10, 500, 100, 20, 100], dtype="float"),
+    spectrum_2 = Spectrum(mz=numpy.array([50, 100, 200, 299.5, 489.5, 510.5, 1040], dtype="float"),
+                          intensities=numpy.array([700, 200, 100, 1000, 200, 5, 500], dtype="float"),
                           metadata=dict())
 
     norm_spectrum_1 = normalize_intensities(spectrum_1)
@@ -38,52 +38,28 @@ def test_cosine_score_greedy_with_tolerance_0_2():
     cosine_greedy = CosineGreedy("cosine-greedy", tolerance=0.2)
     score, matches = cosine_greedy(norm_spectrum_1, norm_spectrum_2)
 
-    assert score == pytest.approx(0.2273, 0.0001), 'expected different cosine score'
-    assert matches == 5, 'expected different number of matches'
+    assert score == pytest.approx(0.081966, 0.0001), 'expected different cosine score'
 
 
-def test_cosine_score_greedy_with_tolerance_1_0():
+def test_cosine_score_greedy_with_tolerance_0_5():
 
-    spectrum_1 = Spectrum(mz=numpy.array([100, 200, 299, 300, 301, 500, 510], dtype="float"),
-                          intensities=numpy.array([10, 10, 500, 100, 200, 20, 100], dtype="float"),
+    spectrum_1 = Spectrum(mz=numpy.array([100, 150, 200, 300, 500, 510, 1100], dtype="float"),
+                          intensities=numpy.array([700, 200, 100, 1000, 200, 5, 500], dtype="float"),
                           metadata=dict())
 
-    spectrum_2 = Spectrum(mz=numpy.array([100, 200, 300, 301, 500, 512], dtype="float"),
-                          intensities=numpy.array([10, 10, 500, 100, 20, 100], dtype="float"),
-                          metadata=dict())
-
-    norm_spectrum_1 = normalize_intensities(spectrum_1)
-    norm_spectrum_2 = normalize_intensities(spectrum_2)
-    cosine_greedy = CosineGreedy("cosine-greedy", tolerance=1.0)
-    score, matches = cosine_greedy(norm_spectrum_1, norm_spectrum_2)
-    score_inverse, _ = cosine_greedy(norm_spectrum_2, norm_spectrum_1)
-
-    assert score == pytest.approx(0.87121, 0.0001), 'expected different cosine score'
-    assert score == pytest.approx(score_inverse, 0.0001), 'scores should be equal'
-    assert matches == 5, 'expected different number of matches'
-
-
-def test_cosine_score_greedy_with_tolerance_2_0():
-
-    spectrum_1 = Spectrum(mz=numpy.array([100, 200, 299, 300, 301, 500, 510], dtype="float"),
-                          intensities=numpy.array([10, 10, 500, 100, 200, 20, 100], dtype="float"),
-                          metadata=dict())
-
-    spectrum_2 = Spectrum(mz=numpy.array([100, 200, 300, 301, 500, 512], dtype="float"),
-                          intensities=numpy.array([10, 10, 500, 100, 20, 100], dtype="float"),
+    spectrum_2 = Spectrum(mz=numpy.array([50, 100, 200, 299.5, 489.5, 510.5, 1040], dtype="float"),
+                          intensities=numpy.array([700, 200, 100, 1000, 200, 5, 500], dtype="float"),
                           metadata=dict())
 
     norm_spectrum_1 = normalize_intensities(spectrum_1)
     norm_spectrum_2 = normalize_intensities(spectrum_2)
-    cosine_greedy = CosineGreedy("cosine-greedy", tolerance=2.0)
-    score, matches = cosine_greedy(norm_spectrum_1, norm_spectrum_2)
+    cosine_greedy = CosineGreedy("cosine-greedy", tolerance=0.5)
+    score = cosine_greedy(norm_spectrum_1, norm_spectrum_2)
 
-    assert score == pytest.approx(0.903412, 0.0001), 'expected different cosine score'
-    assert matches == 6, 'expected different number of matches'
+    assert score == pytest.approx(0.6284203, 0.0001), 'expected different cosine score'
 
 
 if __name__ == '__main__':
     test_cosine_greedy_without_parameters()
     test_cosine_score_greedy_with_tolerance_0_2()
-    test_cosine_score_greedy_with_tolerance_1_0()
-    test_cosine_score_greedy_with_tolerance_2_0()
+    test_cosine_score_greedy_with_tolerance_0_5()
