@@ -3,3 +3,6 @@ sphinxcontrib-apidoc
 numpy
 matplotlib
 pyteomics
+gensim
+pyyaml
+scipy
