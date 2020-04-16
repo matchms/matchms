@@ -1,7 +1,8 @@
 import os
+import gensim
 from matchms.importing import load_from_mgf
 from matchms.filtering import default_filters
-from matchms.similarity.spec2vec import convert_spectrum_to_document, build_model_word2vec, Spec2Vec
+from matchms.similarity.spec2vec import convert_spectrum_to_document, Spec2Vec
 from matchms import calculate_scores
 
 
@@ -13,11 +14,12 @@ def test_user_workflow_spec2vec():
     spectrums = [default_filters(s) for s in load_from_mgf(references_file)]
     documents = [convert_spectrum_to_document(s) for s in spectrums]
 
-    # train model
-    model = build_model_word2vec(documents)
+    # create and train model
+    model = gensim.models.Word2Vec(documents, size=5)
+    model.train([d.words for d in documents], total_examples=len(documents), epochs=20)
 
     # define similarity_function
-    spec2vec = Spec2Vec(model=model)
+    spec2vec = Spec2Vec(model=model, documents=documents)
 
     queries = documents[:7]
     references = documents[6:]
