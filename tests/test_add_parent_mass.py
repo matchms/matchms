@@ -5,8 +5,8 @@ import numpy as np
 
 def test_add_parent_mass():
     """Test if parent mass is correctly derived."""
-    mz = np.array([10, 20, 30, 40], dtype='float')
-    intensities = np.array([0, 1, 10, 100], dtype='float')
+    mz = np.array([], dtype='float')
+    intensities = np.array([], dtype='float')
     metadata = {"pepmass": (444.0, 10),
                 "charge": -1}
     spectrum_in = Spectrum(mz=mz,
