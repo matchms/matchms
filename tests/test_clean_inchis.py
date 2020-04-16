@@ -6,8 +6,8 @@ from matchms.filtering import clean_inchis
 def test_clean_inchis_misplaced_smiles():
     """Test if misplaced smiles are corrected.
     """
-    spectrum_in = Spectrum(mz=np.array([10, 20, 30, 40], dtype='float'),
-                           intensities=np.array([0, 1, 10, 100], dtype='float'),
+    spectrum_in = Spectrum(mz=np.array([], dtype='float'),
+                           intensities=np.array([], dtype='float'),
                            metadata={"inchi": "C1CCCCC1"})
 
     spectrum = clean_inchis(spectrum_in)
@@ -17,12 +17,12 @@ def test_clean_inchis_misplaced_smiles():
 def test_clean_inchis_harmonize_strings():
     """Test if inchi strings are made consistent in style.
     """
-    spectrum_in1 = Spectrum(mz=np.array([10, 20, 30, 40], dtype='float'),
-                            intensities=np.array([0, 1, 10, 100], dtype='float'),
+    spectrum_in1 = Spectrum(mz=np.array([], dtype='float'),
+                            intensities=np.array([], dtype='float'),
                             metadata={"inchi": 'InChI=1S/C6H12'})
 
-    spectrum_in2 = Spectrum(mz=np.array([10, 20, 30, 40], dtype='float'),
-                            intensities=np.array([0, 1, 10, 100], dtype='float'),
+    spectrum_in2 = Spectrum(mz=np.array([], dtype='float'),
+                            intensities=np.array([], dtype='float'),
                             metadata={"inchi": '1S/C6H12'})
 
     spectrum1 = clean_inchis(spectrum_in1)
