@@ -20,7 +20,7 @@ def test_cosine_greedy_without_parameters():
     cosine_greedy = CosineGreedy("cosine-greedy")
     score = cosine_greedy(norm_spectrum_1, norm_spectrum_2)
 
-    assert score == pytest.approx(0.81421, 0.0001), "expected different cosine score"
+    assert score == pytest.approx(0.81421, 0.0001), "Expected different cosine score."
 
 
 def test_cosine_score_greedy_with_tolerance_0_2():
@@ -37,7 +37,7 @@ def test_cosine_score_greedy_with_tolerance_0_2():
     cosine_greedy = CosineGreedy("cosine-greedy", tolerance=0.2)
     score = cosine_greedy(norm_spectrum_1, norm_spectrum_2)
 
-    assert score == pytest.approx(0.081966, 0.0001), "expected different cosine score"
+    assert score == pytest.approx(0.081966, 0.0001), "Expected different cosine score."
 
 
 def test_cosine_score_greedy_with_tolerance_2_0():
@@ -55,10 +55,31 @@ def test_cosine_score_greedy_with_tolerance_2_0():
     cosine_greedy = CosineGreedy("cosine-greedy", tolerance=2.0)
     score = cosine_greedy(norm_spectrum_1, norm_spectrum_2)
 
-    assert score == pytest.approx(0.903412, 0.0001), "expected different cosine score"
+    assert score == pytest.approx(0.903412, 0.0001), "Expected different cosine score."
+
+
+def test_cosine_score_greedy_order_of_arguments():
+
+    spectrum_1 = Spectrum(mz=numpy.array([100, 200, 299, 300, 301, 500, 510], dtype="float"),
+                          intensities=numpy.array([10, 10, 500, 100, 200, 20, 100], dtype="float"),
+                          metadata=dict())
+
+    spectrum_2 = Spectrum(mz=numpy.array([100, 200, 300, 301, 500, 512], dtype="float"),
+                          intensities=numpy.array([10, 10, 500, 100, 20, 100], dtype="float"),
+                          metadata=dict())
+
+    norm_spectrum_1 = normalize_intensities(spectrum_1)
+    norm_spectrum_2 = normalize_intensities(spectrum_2)
+
+    cosine_greedy = CosineGreedy("cosine-greedy", tolerance=2.0)
+    score_1_2 = cosine_greedy(norm_spectrum_1, norm_spectrum_2)
+    score_2_1 = cosine_greedy(norm_spectrum_2, norm_spectrum_1)
+
+    assert score_1_2 == score_2_1, "Expected that the order of the arguments would not matter."
 
 
 if __name__ == "__main__":
     test_cosine_greedy_without_parameters()
     test_cosine_score_greedy_with_tolerance_0_2()
     test_cosine_score_greedy_with_tolerance_2_0()
+    test_cosine_score_greedy_order_of_arguments()
