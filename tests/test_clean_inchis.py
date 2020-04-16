@@ -28,7 +28,7 @@ def test_clean_inchis_harmonize_strings():
     spectrum1 = clean_inchis(spectrum_in1)
     spectrum2 = clean_inchis(spectrum_in2)
     assert spectrum1.get("inchi").startswith('"InChI='), "InChI style not as expected"
-    assert spectrum2.get("inchi").startswith('"InChI='), "InChI style not as expected"
+    assert spectrum1 == spectrum2, 'after cleaning both spectra should be equal'
 
 
 if __name__ == '__main__':
