@@ -25,7 +25,8 @@ def clean_inchis(spectrum_in, rescue_smiles=True):
                 # Try to 'rescue' given inchi which are actually smiles!
                 assumed_smile = inchi.split('InChI=')[-1].replace('"', '')
                 inchi = mol_converter(assumed_smile, "smi", "inchi")
-                print('new inchi:', inchi, assumed_smile)
+                print("New inchi:", inchi.replace('\n', ''))
+                print("Derived from assumed_smile:", assumed_smile)
 
         inchi = inchi.strip().split('InChI=')[-1]
         if inchi.endswith('"'):
