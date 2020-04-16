@@ -46,8 +46,8 @@ https://badgen.net/ to see which other badges are available.)
    :target: https://www.research-software.nl/software/matchms
    :alt: Research Software Directory Badge
 
-.. |Zenodo Badge| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.3716379.svg
-   :target: https://doi.org/10.5281/zenodo.3716379
+.. |Zenodo Badge| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.3716378.svg
+   :target: https://doi.org/10.5281/zenodo.3716378
    :alt: Zenodo Badge
 
 .. |CII Best Practices Badge| image:: https://bestpractices.coreinfrastructure.org/projects/3792/badge

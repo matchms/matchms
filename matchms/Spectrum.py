@@ -10,18 +10,21 @@ class Spectrum:
         self.mz = mz
         self.intensities = intensities
         if metadata is None:
-            self._metadata = dict()
+            self.metadata = dict()
         else:
-            self._metadata = metadata
+            self.metadata = metadata
+
+    def __eq__(self, other):
+        return \
+            numpy.allclose(self.mz, other.mz) and \
+            numpy.allclose(self.intensities, other.intensities) and \
+            self.metadata == other.metadata
 
     def clone(self):
         """Return a deepcopy of the spectrum instance."""
         return Spectrum(mz=self.mz,
                         intensities=self.intensities,
-                        metadata=self._metadata.copy())
-
-    def get(self, key, default=None):
-        return self._metadata.get(key, default)
+                        metadata=self.metadata)
 
     def plot(self, intensity_from=0.0, intensity_to=None, with_histogram=False, with_expfit=False):
         """An example docstring for a method."""
@@ -115,6 +118,9 @@ class Spectrum:
 
         return fig
 
+    def get(self, key, default=None):
+        return self._metadata.get(key, default)
+
     def set(self, key, value):
         self._metadata[key] = value
         return self
@@ -122,19 +128,29 @@ class Spectrum:
     @property
     def mz(self):
         """getter method for mz private variable"""
-        return self.__mz.copy()
+        return self._mz.copy()
 
     @mz.setter
     def mz(self, value):
         """setter method for mz private variable"""
-        self.__mz = value
+        self._mz = value
 
     @property
     def intensities(self):
         """getter method for intensities private variable"""
-        return self.__intensities.copy()
+        return self._intensities.copy()
 
     @intensities.setter
     def intensities(self, value):
         """setter method for intensities private variable"""
-        self.__intensities = value
+        self._intensities = value
+
+    @property
+    def metadata(self):
+        """getter method for metadata private variable"""
+        return self._metadata.copy()
+
+    @metadata.setter
+    def metadata(self, value):
+        """setter method for metadata private variable"""
+        self._metadata = value
