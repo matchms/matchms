@@ -43,7 +43,7 @@ def test_save_as_mgf_spectrum_list():
     # Test if content of mgf file is correct
     with open('test.mgf', 'r') as f:
         mgf_content = f.readlines()
-    assert mgf_content[6] == mgf_content[12] == 'END IONS\n'
+    assert mgf_content[5] == mgf_content[12] == 'END IONS\n'
     assert mgf_content[1].split("=")[1] == 'test1\n'
     assert mgf_content[8].split("=")[1] == 'test2\n'
     # Remove testfile again
