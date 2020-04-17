@@ -4,7 +4,7 @@ from matchms import Spectrum
 from matchms.exporting import save_as_mgf
 
 
-def test_save_as_mgf_single_spectrum(tmpdir):
+def test_save_as_mgf_single_spectrum(tmp_path):
     """Test saving spectrum to .mgf file"""
     spectrum = Spectrum(mz=np.array([100, 200, 300], dtype="float"),
                         intensities=np.array([10, 10, 500], dtype="float"),
@@ -13,7 +13,7 @@ def test_save_as_mgf_single_spectrum(tmpdir):
                                   "pepmass": (100, 10.0),
                                   "test_field": 'test'})
     # Write to test file
-    file = tmpdir.join('test.mgf')
+    file = tmp_path.join('test.mgf')
     save_as_mgf(spectrum, file)
     assert os.path.isfile(file)
 
@@ -24,8 +24,6 @@ def test_save_as_mgf_single_spectrum(tmpdir):
     assert mgf_content[2] == 'CHARGE=1-\n'
     assert mgf_content[4] == 'TEST_FIELD=test\n'
     assert mgf_content[7].split(" ")[0] == '300.0'
-    # Remove testfile again
-    os.remove('test.mgf')
 
 
 def test_save_as_mgf_spectrum_list():
@@ -52,5 +50,5 @@ def test_save_as_mgf_spectrum_list():
 
 
 if __name__ == "__main__":
-    test_save_as_mgf_single_spectrum(tmpdir)
+    test_save_as_mgf_single_spectrum()
     test_save_as_mgf_spectrum_list()
