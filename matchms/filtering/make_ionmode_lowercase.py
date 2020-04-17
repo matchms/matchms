@@ -1,5 +1,8 @@
 def make_ionmode_lowercase(spectrum_in):
 
+    if spectrum_in is None:
+        return None
+
     spectrum = spectrum_in.clone()
 
     # if the ionmode key exists in the metadata, lowercase its value

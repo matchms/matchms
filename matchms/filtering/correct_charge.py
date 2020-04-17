@@ -3,6 +3,9 @@ import numpy
 
 def correct_charge(spectrum_in):
 
+    if spectrum_in is None:
+        return None
+
     spectrum = spectrum_in.clone()
 
     ionmode = spectrum.get("ionmode", None)

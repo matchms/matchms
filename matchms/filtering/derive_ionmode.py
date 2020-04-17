@@ -14,6 +14,9 @@ def derive_ionmode(spectrum_in):
         Input spectrum.
     """
 
+    if spectrum_in is None:
+        return None
+
     spectrum = spectrum_in.clone()
 
     # Load lists of known adducts
