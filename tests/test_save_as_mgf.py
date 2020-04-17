@@ -30,20 +30,20 @@ def test_save_as_mgf_single_spectrum():
 def test_save_as_mgf_spectrum_list():
     """Test saving spectrum list to .mgf file"""
     spectrum1 = Spectrum(mz=np.array([100, 200, 300], dtype="float"),
-                        intensities=np.array([10, 10, 500], dtype="float"),
-                        metadata={"test_field": 'test1'})
-    
+                         intensities=np.array([10, 10, 500], dtype="float"),
+                         metadata={"test_field": 'test1'})
+
     spectrum2 = Spectrum(mz=np.array([100, 200, 300], dtype="float"),
-                        intensities=np.array([10, 10, 500], dtype="float"),
-                        metadata={"test_field": 'test2'})
+                         intensities=np.array([10, 10, 500], dtype="float"),
+                         metadata={"test_field": 'test2'})
     # Write to test file
-    save_as_mgf([spectrum, spectrum], 'test.mgf')
+    save_as_mgf([spectrum1, spectrum2], 'test.mgf')
     assert os.path.isfile('test.mgf')
 
     # Test if content of mgf file is correct
     with open('test.mgf', 'r') as f:
         mgf_content = f.readlines()
-    assert mgf_content[6] ==  mgf_content[12] == 'END IONS\n'
+    assert mgf_content[6] == mgf_content[12] == 'END IONS\n'
     assert mgf_content[1].split("=")[1] == 'test1\n'
     assert mgf_content[8].split("=")[1] == 'test2\n'
     # Remove testfile again
