@@ -19,9 +19,7 @@ def complete_compound_annotation(spectrum_in):
     inchikey = spectrum.get("inchikey")
 
     # 1) If smiles but no Inchi
-    if inchi is None \
-        or inchi in empty_entry_types \
-        or len(inchi) < 12:
+    if inchi is None or inchi in empty_entry_types or len(inchi) < 12:
         if smiles and smiles not in empty_entry_types:
             inchi = mol_converter(smiles, "smi", "inchi")
             if not inchi:
