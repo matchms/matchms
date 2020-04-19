@@ -16,7 +16,9 @@ def clean_inchis(spectrum_in, rescue_smiles=True):
     empty_entry_types = ['N/A', 'n/a', 'NA', 0, '0', '""', '', 'nodata',
                          '"InChI=n/a"', '"InChI="', 'InChI=1S/N\n', '\t\r\n']
     inchi = spectrum.get("inchi")
-    if inchi in empty_entry_types:
+    if inchi is None \
+        or inchi in empty_entry_types \
+        or len(inchi) < 12:
         inchi = 'n/a'
     else:
         inchi = inchi.replace(" ", "")  # Remove empty spaces
