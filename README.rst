@@ -111,6 +111,12 @@ Glossary of terms
    * - MGF File / Mascot Generic Format
      - A plan ASCII file format to store peak list data from a mass spectrometry experiment. Links: `matrixscience.com <http://www.matrixscience.com/help/data_file_help.html#GEN>`__, 
        `fiehnlab.ucdavis.edu <https://fiehnlab.ucdavis.edu/projects/lipidblast/mgf-files>`__.
+   * - parent mass / :code:`parent_mass`
+     - Actual mass (in Dalton) of the original compound prior to fragmentation. 
+       It can be recalculated from the precursor m/z by taking      
+       into account the charge state and proton/electron masses.
+   * - precursor m/z / :code:`precursor_mz`
+     - Mass-to-charge ratio of the compound targeted for fragmentation.
    * - SMILES
      - A line notation for describing the structure of chemical species using
        short ASCII strings. For example, water is encoded as :code:`O[H]O`,
