@@ -27,6 +27,8 @@ def complete_compound_annotation(spectrum_in):
             if not inchi:
                 print("Could not convert smiles", smiles, "to InChI.")
                 inchi = '"InChI=n\a"'
+            # Clean inchi
+            inchi = clean_inchi_style(inchi)
             spectrum.set("inchi", inchi)
 
     # 2) If Inchi but no smiles
@@ -46,8 +48,6 @@ def complete_compound_annotation(spectrum_in):
         if not inchikey:
             print("Could not convert InChI", inchi, "to inchikey.")
             inchikey = 'n\a'
-        # Clean inchi
-        inchi = clean_inchi_style(inchi)
         spectrum.set("inchikey", inchikey)
 
     return spectrum
