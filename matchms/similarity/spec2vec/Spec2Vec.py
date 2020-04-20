@@ -1,4 +1,6 @@
 import gensim
+import numpy
+import scipy
 
 
 class Spec2Vec:
@@ -12,9 +14,12 @@ class Spec2Vec:
         def calc_vector(document):
             bag_of_words = self.dictionary.doc2bow(document.words)
             words = [self.dictionary[item[0]] for item in bag_of_words]
-            return self.model.wv[words]
+            word_vectors = self.model.wv[words]
+
+            return numpy.mean(word_vectors, 0)
 
         query_vector = calc_vector(query)
         reference_vector = calc_vector(reference)
+        cdist = scipy.spatial.distance.cosine(query_vector, reference_vector)
 
-        return query_vector * reference_vector.T
+        return 1 - numpy.mean(cdist)

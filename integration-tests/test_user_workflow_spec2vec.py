@@ -15,7 +15,7 @@ def test_user_workflow_spec2vec():
     documents = [convert_spectrum_to_document(s) for s in spectrums]
 
     # create and train model
-    model = gensim.models.Word2Vec(documents, size=5)
+    model = gensim.models.Word2Vec([d.words for d in documents], size=5, min_count=1)
     model.train([d.words for d in documents], total_examples=len(documents), epochs=20)
 
     # define similarity_function
@@ -24,15 +24,11 @@ def test_user_workflow_spec2vec():
     queries = documents[:7]
     references = documents[6:]
 
-    # call calc_scores
+    # calculate scores on all combinations of references and queries
     queries_top3, references_top3, scores_top3 = \
         calculate_scores(queries, references, spec2vec).top(3, include_self_comparisons=False)
 
-    print(queries_top3)
-    print(references_top3)
-    print(scores_top3)
-
-    assert True
+    assert scores_top3[0][0] > 0.99, "Expected some really good scores."
 
 
 if __name__ == '__main__':
