@@ -25,7 +25,7 @@ def test_user_workflow_spec2vec():
     references = documents[6:]
 
     # calculate scores on all combinations of references and queries
-    queries_top3, references_top3, scores_top3 = \
+    _, _, scores_top3 = \
         calculate_scores(queries, references, spec2vec).top(3, include_self_comparisons=False)
 
     assert scores_top3[0][0] > 0.99, "Expected some really good scores."
