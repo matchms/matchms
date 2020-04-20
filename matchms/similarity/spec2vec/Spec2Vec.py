@@ -22,4 +22,4 @@ class Spec2Vec:
         reference_vector = calc_vector(reference)
         cdist = scipy.spatial.distance.cosine(query_vector, reference_vector)
 
-        return 1 - numpy.mean(cdist)
+        return 1 - cdist
