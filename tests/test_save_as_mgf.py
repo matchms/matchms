@@ -12,45 +12,47 @@ def test_save_as_mgf_single_spectrum():
                         metadata={"charge": -1,
                                   "inchi": '"InChI=1S/C6H12"',
                                   "pepmass": (100, 10.0),
-                                  "test_field": 'test'})
+                                  "test_field": "test"})
     # Write to test file
-    with tempfile.NamedTemporaryFile() as fp:
-        save_as_mgf(spectrum, fp.name)
+    with tempfile.TemporaryDirectory() as d:
+        f = os.path.join(d, "test.mgf")
+        save_as_mgf(spectrum, f)
 
         # test if file exists
-        assert os.path.isfile(fp.name)
+        assert os.path.isfile(f)
 
         # Test if content of mgf file is correct
-        with open(fp.name, 'r') as f:
+        with open(f, "r") as f:
             mgf_content = f.readlines()
-        assert mgf_content[0] == 'BEGIN IONS\n'
-        assert mgf_content[2] == 'CHARGE=1-\n'
-        assert mgf_content[4] == 'TEST_FIELD=test\n'
-        assert mgf_content[7].split(" ")[0] == '300.0'
+        assert mgf_content[0] == "BEGIN IONS\n"
+        assert mgf_content[2] == "CHARGE=1-\n"
+        assert mgf_content[4] == "TEST_FIELD=test\n"
+        assert mgf_content[7].split(" ")[0] == "300.0"
 
 
 def test_save_as_mgf_spectrum_list():
     """Test saving spectrum list to .mgf file"""
     spectrum1 = Spectrum(mz=np.array([100, 200, 300], dtype="float"),
                          intensities=np.array([10, 10, 500], dtype="float"),
-                         metadata={"test_field": 'test1'})
+                         metadata={"test_field": "test1"})
 
     spectrum2 = Spectrum(mz=np.array([100, 200, 300], dtype="float"),
                          intensities=np.array([10, 10, 500], dtype="float"),
-                         metadata={"test_field": 'test2'})
+                         metadata={"test_field": "test2"})
     # Write to test file
-    with tempfile.NamedTemporaryFile() as fp:
-        save_as_mgf([spectrum1, spectrum2], fp.name)
+    with tempfile.TemporaryDirectory() as d:
+        f = os.path.join(d, "test.mgf")
+        save_as_mgf([spectrum1, spectrum2], f)
 
         # test if file exists
-        assert os.path.isfile(fp.name)
+        assert os.path.isfile(f)
 
         # Test if content of mgf file is correct
-        with open(fp.name, 'r') as f:
+        with open(f, "r") as f:
             mgf_content = f.readlines()
-        assert mgf_content[5] == mgf_content[12] == 'END IONS\n'
-        assert mgf_content[1].split("=")[1] == 'test1\n'
-        assert mgf_content[8].split("=")[1] == 'test2\n'
+        assert mgf_content[5] == mgf_content[12] == "END IONS\n"
+        assert mgf_content[1].split("=")[1] == "test1\n"
+        assert mgf_content[8].split("=")[1] == "test2\n"
 
 
 if __name__ == "__main__":
