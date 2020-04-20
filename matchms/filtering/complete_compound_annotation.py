@@ -12,7 +12,7 @@ def complete_compound_annotation(spectrum_in):
     spectrum = spectrum_in.clone()
 
     # Empirically found list of strings that represent empty entries
-    empty_entry_types = ['N/A', 'n/a', 'NA', 0, '0', '""', '', 'nodata',
+    empty_entry_types = ['N/A', 'n/a', 'n\a', 'NA', 0, '0', '""', '', 'nodata',
                          '"InChI=n/a"', '"InChI="', 'InChI=1S/N\n', '\t\r\n']
     inchi = spectrum.get("inchi")
     smiles = spectrum.get("smiles")
@@ -26,7 +26,7 @@ def complete_compound_annotation(spectrum_in):
                 inchi = mol_converter(smiles, "smy", "inchi")  # test smiley parser
             if not inchi:
                 print("Could not convert smiles", smiles, "to InChI.")
-                inchi = '"InChI=n\a"'
+                inchi = '"InChI=n/a"'
             # Clean inchi
             inchi = clean_inchi_style(inchi)
             spectrum.set("inchi", inchi)
@@ -37,9 +37,9 @@ def complete_compound_annotation(spectrum_in):
             smiles = mol_converter(inchi, "inchi", "smi")
             if not smiles:
                 print("Could not convert InChI", inchi, "to smiles.")
-                smiles = 'n\a'
+                smiles = 'n/a'
             # Clean string
-            smiles = smiles.replace('\n', '').replace('\t', '')
+            smiles = smiles.replace('\n', '').replace('\t', '').replace('\r', '')
             spectrum.set("smiles", smiles)
 
     # 3) If no Inchikey
@@ -47,7 +47,7 @@ def complete_compound_annotation(spectrum_in):
         inchikey = mol_converter(inchi, "inchi", "inchikey")
         if not inchikey:
             print("Could not convert InChI", inchi, "to inchikey.")
-            inchikey = 'n\a'
+            inchikey = 'n/a'
         spectrum.set("inchikey", inchikey)
 
     return spectrum

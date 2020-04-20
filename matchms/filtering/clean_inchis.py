@@ -21,7 +21,7 @@ def clean_inchis(spectrum_in, rescue_smiles=True):
     spectrum = spectrum_in.clone()
 
     # Empirically found list of strings that represent empty entries
-    empty_entry_types = ['N/A', 'n/a', 'NA', 0, '0', '""', '', 'nodata',
+    empty_entry_types = ['N/A', 'n/a', 'n\a', 'NA', 0, '0', '""', '', 'nodata',
                          '"InChI=n/a"', '"InChI="', 'InChI=1S/N\n', '\t\r\n']
     inchi = spectrum.get("inchi")
     if inchi is None or inchi in empty_entry_types:
