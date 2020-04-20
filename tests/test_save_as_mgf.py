@@ -15,14 +15,14 @@ def test_save_as_mgf_single_spectrum():
                                   "test_field": "test"})
     # Write to test file
     with tempfile.TemporaryDirectory() as d:
-        f = os.path.join(d, "test.mgf")
-        save_as_mgf(spectrum, f)
+        filename = os.path.join(d, "test.mgf")
+        save_as_mgf(spectrum, filename)
 
         # test if file exists
-        assert os.path.isfile(f)
+        assert os.path.isfile(filename)
 
         # Test if content of mgf file is correct
-        with open(f, "r") as f:
+        with open(filename, "r") as f:
             mgf_content = f.readlines()
         assert mgf_content[0] == "BEGIN IONS\n"
         assert mgf_content[2] == "CHARGE=1-\n"
@@ -41,14 +41,14 @@ def test_save_as_mgf_spectrum_list():
                          metadata={"test_field": "test2"})
     # Write to test file
     with tempfile.TemporaryDirectory() as d:
-        f = os.path.join(d, "test.mgf")
-        save_as_mgf([spectrum1, spectrum2], f)
+        filename = os.path.join(d, "test.mgf")
+        save_as_mgf([spectrum1, spectrum2], filename)
 
         # test if file exists
-        assert os.path.isfile(f)
+        assert os.path.isfile(filename)
 
         # Test if content of mgf file is correct
-        with open(f, "r") as f:
+        with open(filename, "r") as f:
             mgf_content = f.readlines()
         assert mgf_content[5] == mgf_content[12] == "END IONS\n"
         assert mgf_content[1].split("=")[1] == "test1\n"
