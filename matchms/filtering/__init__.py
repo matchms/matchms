@@ -1,7 +1,6 @@
 from .add_adduct import add_adduct
 from .add_parent_mass import add_parent_mass
 from .clean_inchis import clean_inchis
-from .complete_compound_annotation import complete_compound_annotation
 from .correct_charge import correct_charge
 from .default_filters import default_filters
 from .derive_inchi_from_smiles import derive_inchi_from_smiles
@@ -21,7 +20,6 @@ __all__ = [
     "add_adduct",
     "add_parent_mass",
     "clean_inchis",
-    "complete_compound_annotation",
     "correct_charge",
     "default_filters",
     "derive_inchi_from_smiles",
