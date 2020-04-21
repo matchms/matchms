@@ -31,7 +31,7 @@ def derive_inchi_from_smiles(spectrum_in):
         if not inchi:
             print("Could not convert smiles", smiles, "to InChI.")
             inchi = '"InChI=n/a"'
-        # Clean inchi
+        inchi = inchi.replace('\n', '').replace('\t', '').replace('\r', '')
         spectrum.set("inchi", inchi)
 
     return spectrum
