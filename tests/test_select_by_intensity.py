@@ -71,11 +71,3 @@ def test_select_by_intensity_with_from_and_to_parameters():
     assert spectrum.mz.size == spectrum.intensities.size
     assert numpy.array_equal(spectrum.mz, numpy.array([30], dtype="float"))
     assert numpy.array_equal(spectrum.intensities, numpy.array([100], dtype="float"))
-
-
-if __name__ == '__main__':
-    test_select_by_intensity_no_parameters_1()
-    test_select_by_intensity_no_parameters_2()
-    test_select_by_intensity_with_from_parameter()
-    test_select_by_intensity_with_to_parameter()
-    test_select_by_intensity_with_from_and_to_parameters()

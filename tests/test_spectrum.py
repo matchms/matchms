@@ -101,11 +101,3 @@ def test_spectrum_plot_with_histogram_true_and_expfit_true_and_intensity_limit()
     assert len(fig.axes[0].lines) == 11
     assert isinstance(fig.axes[0].lines[0], plt.Line2D)
     assert hasattr(fig.axes[0].lines[0], "_x")
-
-
-if __name__ == "__main__":
-    test_spectrum_plot_with_histogram_unspecified()
-    test_spectrum_plot_with_histogram_false()
-    test_spectrum_plot_with_histogram_true()
-    test_spectrum_plot_with_histogram_true_and_intensity_limit()
-    test_spectrum_plot_with_histogram_true_and_expfit_true_and_intensity_limit()

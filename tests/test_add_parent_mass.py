@@ -16,7 +16,3 @@ def test_add_parent_mass():
     spectrum = add_parent_mass(spectrum_in)
 
     assert np.abs(spectrum.get("parent_mass") - 445.0) < .01, "Expected parent mass of about 445.0."
-
-
-if __name__ == '__main__':
-    test_add_parent_mass()

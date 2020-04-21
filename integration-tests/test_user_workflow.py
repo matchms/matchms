@@ -30,7 +30,3 @@ def test_user_workflow():
     assert scores.scores[0, 6] == 1., "Intersection of spectrum with itself should yield a perfect match."
     assert scores.scores.shape == (70, 7), "Expected a table of 10 rows, 1 columns."
     assert queries_top10[0] == reference_top10[0], "Expected the best match between two copies of the same spectrum."
-
-
-if __name__ == '__main__':
-    test_user_workflow()

@@ -88,13 +88,3 @@ def test_require_minimum_number_of_peaks_required_5_or_10():
 
     assert spectrum is None, "Did not expect the spectrum to qualify because the number of peaks (4) is less " \
                              "than the required number (10)."
-
-
-if __name__ == '__main__':
-    test_require_minimum_number_of_peaks_no_params()
-    test_require_minimum_number_of_peaks_required_4()
-    test_require_minimum_number_of_peaks_required_4_or_1_no_parent_mass()
-    test_require_minimum_number_of_peaks_required_4_or_1()
-    test_require_minimum_number_of_peaks_required_4_or_10()
-    test_require_minimum_number_of_peaks_required_5_or_1()
-    test_require_minimum_number_of_peaks_required_5_or_10()
