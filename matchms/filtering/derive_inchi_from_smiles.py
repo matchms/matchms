@@ -7,12 +7,15 @@ def derive_inchi_from_smiles(spectrum_in):
         """Return True if input is not an empty inchi."""
         empty_entry_types = ['N/A', 'n/a', 'n\a', 'NA', 0, '0', '""', '', 'nodata',
                              '"InChI=n/a"', '"InChI="', 'InChI=1S/N\n', '\t\r\n']
-        return inchi is not None or inchi in empty_entry_types or len(inchi) < 12
+        if inchi:
+            return inchi not in empty_entry_types or len(inchi) < 12
+        else:
+            return False
 
     def has_smiles():
         """Return True if input is not an empty "smiles"."""
         empty_entry_types = ['N/A', 'n/a', 'n\a', 'NA', 0, '0', '""', '', 'nodata']
-        return smiles is not None or smiles in empty_entry_types
+        return smiles is not None or smiles not in empty_entry_types
 
     spectrum = spectrum_in.clone()
 
