@@ -11,7 +11,7 @@ def derive_inchikey_from_inchi(spectrum_in):
             is_empty = inchi in empty_entry_types or len(inchi) < 12
         else:
             is_empty = True
-            return is_empty
+        return is_empty
 
     def inchikey_is_empty():
         """Return True if input is not an empty inchikey."""

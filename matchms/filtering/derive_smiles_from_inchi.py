@@ -11,7 +11,7 @@ def derive_smiles_from_inchi(spectrum_in):
             is_empty = inchi in empty_entry_types or len(inchi) < 12
         else:
             is_empty = True
-            return is_empty
+        return is_empty
 
     def smiles_is_empty():
         """Return True if input is an empty "smiles"."""
