@@ -12,7 +12,7 @@ def derive_inchikey_from_inchi(spectrum_in):
     def has_inchikey():
         """Return True if input is not an empty inchikey."""
         empty_entry_types = ['N/A', 'n/a', 'n\a', 'NA', 0, '0', '""', '', 'nodata']
-        return inchikey is not None or inchi in empty_entry_types
+        return inchikey is not None or inchikey in empty_entry_types
 
     spectrum = spectrum_in.clone()
 
