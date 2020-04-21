@@ -5,7 +5,7 @@ from matchms.filtering import derive_smiles_from_inchi
 
 
 def test_derive_smiles_from_inchi():
-    """Test if conversion to inchi and inchikey works when only smiles is given.
+    """Test if conversion to smiles works when only inchi is given.
     """
     spectrum_in = Spectrum(mz=np.array([], dtype='float'),
                            intensities=np.array([], dtype='float'),
