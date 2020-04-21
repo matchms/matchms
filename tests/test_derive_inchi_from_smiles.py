@@ -15,7 +15,6 @@ def test_derive_inchi_from_smiles():
     spectrum = derive_inchi_from_smiles(spectrum_in)
     inchi = spectrum.get("inchi").replace('"', '')
     assert inchi == 'InChI=1S/C6H12/c1-2-4-6-5-3-1/h1-6H2', "Expected different InChI"
-    assert spectrum.get("inchikey")[:14] == 'XDTMQSROBMDMFD', "Expected different inchikey"
 
 
 if __name__ == '__main__':
