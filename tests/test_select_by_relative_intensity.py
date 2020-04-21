@@ -78,12 +78,3 @@ def test_select_by_relative_intensity_with_from_and_to_parameters():
     assert spectrum.mz.size == spectrum.intensities.size
     assert numpy.array_equal(spectrum.mz, numpy.array([20, 30], dtype="float"))
     assert numpy.array_equal(spectrum.intensities, numpy.array([10, 100], dtype="float"))
-
-
-if __name__ == '__main__':
-    test_select_by_relative_intensity_no_parameters()
-    test_select_by_relative_intensity_with_from_parameter()
-    test_select_by_relative_intensity_with_from_parameter_too_small()
-    test_select_by_relative_intensity_with_to_parameter()
-    test_select_by_relative_intensity_with_to_parameter_too_large()
-    test_select_by_relative_intensity_with_from_and_to_parameters()

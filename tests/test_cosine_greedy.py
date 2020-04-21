@@ -76,10 +76,3 @@ def test_cosine_score_greedy_order_of_arguments():
     score_2_1 = cosine_greedy(norm_spectrum_2, norm_spectrum_1)
 
     assert score_1_2 == score_2_1, "Expected that the order of the arguments would not matter."
-
-
-if __name__ == "__main__":
-    test_cosine_greedy_without_parameters()
-    test_cosine_score_greedy_with_tolerance_0_2()
-    test_cosine_score_greedy_with_tolerance_2_0()
-    test_cosine_score_greedy_order_of_arguments()

@@ -39,9 +39,3 @@ def test_scores_top():
     assert numpy.all(queries_top_2 == numpy.asarray([["q1"], ["q0"]]))
     assert numpy.all(references_top_2 == numpy.asarray([["r2"], ["q1"]]))
     assert numpy.all(scores_top_2 == numpy.asarray([[6.], [4.]], dtype="float"))
-
-
-if __name__ == '__main__':
-    test_scores_init()
-    test_scores_sort()
-    test_scores_top()
