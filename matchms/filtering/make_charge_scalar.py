@@ -1,4 +1,8 @@
 def make_charge_scalar(spectrum_in):
+
+    if spectrum_in is None:
+        return None
+
     spectrum = spectrum_in.clone()
 
     # Avoid pyteomics ChargeList
