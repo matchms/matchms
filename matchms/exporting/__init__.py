@@ -1,4 +1,3 @@
+from .save_as_mgf import save_as_mgf
 
-from .save import save
-
-__all__ = ["save"]
+__all__ = ["save_as_mgf"]
