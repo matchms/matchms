@@ -1,7 +1,9 @@
 import os
 import yaml
+from functools import lru_cache
 
 
+@lru_cache(maxsize=4)
 def load_adducts(filename=None):
 
     if filename is None:
