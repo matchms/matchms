@@ -20,9 +20,8 @@ def test_normalize_intensities_empty_peaks():
 
     mz = numpy.array([], dtype='float')
     intensities = numpy.array([], dtype='float')
-    spectrum_in = Spectrum(mz=mz, intensities=intensities,
-                           metadata={"testfield": "TEST"})
+    spectrum_in = Spectrum(mz=mz, intensities=intensities)
 
     spectrum = normalize_intensities(spectrum_in)
 
-    assert spectrum.metadata["testfield"] == "TEST", "Expected 'TEST' int metadata testfield"
+    assert spectrum == spectrum_in, "Spectrum should remain unchanged."

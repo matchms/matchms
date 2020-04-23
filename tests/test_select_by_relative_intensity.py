@@ -85,9 +85,8 @@ def test_select_by_relative_intensity_with_empty_peaks():
     have empty arrays as peaks. Functions shouldn't break in those cases."""
     mz = numpy.array([], dtype="float")
     intensities = numpy.array([], dtype="float")
-    spectrum_in = Spectrum(mz=mz, intensities=intensities,
-                           metadata={"testfield": "TEST"})
+    spectrum_in = Spectrum(mz=mz, intensities=intensities)
 
     spectrum = select_by_relative_intensity(spectrum_in, intensity_from=0.01, intensity_to=0.99)
 
-    assert spectrum.metadata["testfield"] == "TEST", "Expected 'TEST' int metadata testfield"
+    assert spectrum == spectrum_in, "Spectrum should remain unchanged."
