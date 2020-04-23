@@ -4,14 +4,13 @@ from numpy import absolute, reshape, zeros_like, where, power, argsort
 
 class CosineGreedy:
 
-    def __init__(self, label, tolerance=0.3):
-        self.label = label
+    def __init__(self, tolerance=0.3):
         self.tolerance = tolerance
 
     def __call__(self, spectrum, reference_spectrum):
         def calc_mz_distance():
-            mz_row_vector = spectrum.mz
-            mz_col_vector = reshape(reference_spectrum.mz, (n_rows, 1))
+            mz_row_vector = spectrum.peaks.mz
+            mz_col_vector = reshape(reference_spectrum.peaks.mz, (n_rows, 1))
 
             mz1 = repmat(mz_row_vector, n_rows, 1)
             mz2 = repmat(mz_col_vector, 1, n_cols)
@@ -19,8 +18,8 @@ class CosineGreedy:
             return mz1 - mz2
 
         def calc_intensities_product():
-            intensities_row_vector = spectrum.intensities
-            intensities_col_vector = reshape(reference_spectrum.intensities, (n_rows, 1))
+            intensities_row_vector = spectrum.peaks.intensities
+            intensities_col_vector = reshape(reference_spectrum.peaks.intensities, (n_rows, 1))
 
             intensities1 = repmat(intensities_row_vector, n_rows, 1)
             intensities2 = repmat(intensities_col_vector, 1, n_cols)
@@ -51,12 +50,12 @@ class CosineGreedy:
                     intensities_product_within_tolerance[:, c] = 0
             return score
 
-        n_rows = reference_spectrum.mz.size
-        n_cols = spectrum.mz.size
+        n_rows = reference_spectrum.peaks.mz.size
+        n_cols = spectrum.peaks.mz.size
 
         intensities_product_within_tolerance = calc_intensities_product_within_tolerance()
 
-        squared1 = power(spectrum.intensities, 2)
-        squared2 = power(reference_spectrum.intensities, 2)
+        squared1 = power(spectrum.peaks.intensities, 2)
+        squared2 = power(reference_spectrum.peaks.intensities, 2)
 
         return calc_score() / max(sum(squared1), sum(squared2))

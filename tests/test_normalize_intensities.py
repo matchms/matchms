@@ -11,6 +11,6 @@ def test_normalize_intensities():
 
     spectrum = normalize_intensities(spectrum_in)
 
-    assert max(spectrum.intensities) == 1.0, "Expected the spectrum to be scaled to 1.0."
-    assert numpy.array_equal(spectrum.mz, mz), "Expected the spectrum's intensity locations along "\
-                                               "the mz-axis to be unaffected."
+    assert max(spectrum.peaks.intensities) == 1.0, "Expected the spectrum to be scaled to 1.0."
+    assert numpy.array_equal(spectrum.peaks.mz, mz), "Expected the spectrum's intensity locations along "\
+                                                     "the mz-axis to be unaffected."

@@ -1,0 +1,39 @@
+import numpy
+
+
+class Spikes:
+    def __init__(self, mz=None, intensities=None):
+        assert isinstance(mz, numpy.ndarray), "Input argument 'mz' should be a numpy.array."
+        assert isinstance(intensities, numpy.ndarray), "Input argument 'intensities' should be a numpy.array."
+        assert mz.shape == intensities.shape, "Input arguments 'mz' and 'intensities' should be the same shape."
+        assert mz.dtype == "float", "Input argument 'mz' should be an array of type float."
+        assert intensities.dtype == "float", "Input argument 'intensities' should be an array of type float."
+
+        self._mz = mz
+        self._intensities = intensities
+
+        assert self._is_sorted(), "mz values are out of order."
+
+    def __eq__(self, other):
+        return \
+            numpy.allclose(self.mz, other.mz) and \
+            numpy.allclose(self.intensities, other.intensities)
+
+    def __getitem__(self, item):
+        return [self.mz, self.intensities].__getitem__(item)
+
+    def _is_sorted(self):
+        return numpy.all(self.mz[:-1] < self.mz[1:])
+
+    def clone(self):
+        return Spikes(self.mz, self.intensities)
+
+    @property
+    def mz(self):
+        """getter method for mz private variable"""
+        return self._mz.copy()
+
+    @property
+    def intensities(self):
+        """getter method for intensities private variable"""
+        return self._intensities.copy()

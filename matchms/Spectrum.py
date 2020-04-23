@@ -1,14 +1,15 @@
 from matplotlib import pyplot as plt
 import numpy
 from scipy.optimize import curve_fit
+from .Spikes import Spikes
 
 
 class Spectrum:
     """An example docstring for a class."""
     def __init__(self, mz, intensities, metadata=None):
         """An example docstring for a constructor."""
-        self.mz = mz
-        self.intensities = intensities
+        self.peaks = Spikes(mz=mz, intensities=intensities)
+        self.losses = None
         if metadata is None:
             self.metadata = dict()
         else:
@@ -16,14 +17,16 @@ class Spectrum:
 
     def __eq__(self, other):
         return \
-            numpy.allclose(self.mz, other.mz) and \
-            numpy.allclose(self.intensities, other.intensities) and \
+            self.peaks.mz.shape == other.peaks.mz.shape and \
+            numpy.allclose(self.peaks.mz, other.peaks.mz) and \
+            self.peaks.intensities.shape == other.peaks.intensities.shape and \
+            numpy.allclose(self.peaks.intensities, other.peaks.intensities) and \
             self.metadata == other.metadata
 
     def clone(self):
         """Return a deepcopy of the spectrum instance."""
-        return Spectrum(mz=self.mz,
-                        intensities=self.intensities,
+        return Spectrum(mz=self.peaks.mz,
+                        intensities=self.peaks.intensities,
                         metadata=self.metadata)
 
     def plot(self, intensity_from=0.0, intensity_to=None, with_histogram=False, with_expfit=False):
@@ -69,7 +72,7 @@ class Spectrum:
                 plt.plot(ax1_expfit, x_fit + offset, color="#F80", marker=".")
 
             bin_edges, bin_middles, bin_widths = calc_bin_edges_intensity()
-            counts, _ = numpy.histogram(self.intensities, bins=bin_edges)
+            counts, _ = numpy.histogram(self.peaks.intensities, bins=bin_edges)
             histogram_ax.set_ylim(bottom=intensity_from, top=intensity_to)
             plt.barh(bin_middles, counts, height=bin_widths)
             plt.title("histogram (n_bins={0})".format(n_bins))
@@ -81,11 +84,11 @@ class Spectrum:
             """plot mz v. intensity"""
             def make_stems():
                 """calculate where the stems of the spectrum peaks are going to be"""
-                x = numpy.empty([2, self.mz.size], dtype="float")
+                x = numpy.empty([2, self.peaks.mz.size], dtype="float")
                 y = numpy.empty_like(x)
-                for i, mz in enumerate(self.mz):
+                for i, mz in enumerate(self.peaks.mz):
                     x[0:2, i] = [mz, mz]
-                    y[0:2, i] = [0, self.intensities[i]]
+                    y[0:2, i] = [0, self.peaks.intensities[i]]
                 return x, y
 
             spectrum_ax.set_ylim(bottom=intensity_from, top=intensity_to)
@@ -99,7 +102,7 @@ class Spectrum:
             assert with_histogram, "When 'with_expfit' is True, 'with_histogram' should also be True."
 
         if intensity_to is None:
-            intensity_to = self.intensities.max() * 1.05
+            intensity_to = self.peaks.intensities.max() * 1.05
 
         n_bins = 100
         decay_factor_max = 1.0
@@ -126,26 +129,6 @@ class Spectrum:
         return self
 
     @property
-    def mz(self):
-        """getter method for mz private variable"""
-        return self._mz.copy()
-
-    @mz.setter
-    def mz(self, value):
-        """setter method for mz private variable"""
-        self._mz = value
-
-    @property
-    def intensities(self):
-        """getter method for intensities private variable"""
-        return self._intensities.copy()
-
-    @intensities.setter
-    def intensities(self, value):
-        """setter method for intensities private variable"""
-        self._intensities = value
-
-    @property
     def metadata(self):
         """getter method for metadata private variable"""
         return self._metadata.copy()
@@ -154,3 +137,13 @@ class Spectrum:
     def metadata(self, value):
         """setter method for metadata private variable"""
         self._metadata = value
+
+    @property
+    def peaks(self):
+        """getter method for metadata private variable"""
+        return self._peaks.clone()
+
+    @peaks.setter
+    def peaks(self, value):
+        """setter method for metadata private variable"""
+        self._peaks = value
