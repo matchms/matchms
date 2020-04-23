@@ -1,6 +1,6 @@
 class Document:
-    def __init__(self, spectrum, words):
-        self._spectrum = spectrum
+    def __init__(self, obj, words):
+        self._obj = obj
         self.words = words
         self._index = -1
 
@@ -24,4 +24,4 @@ class Document:
     @property
     def weights(self):
         """getter method for _spectrum.intensities private variable"""
-        return self._spectrum.intensities.copy()
+        return self._obj.intensities.copy()
