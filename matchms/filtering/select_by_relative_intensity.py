@@ -1,7 +1,9 @@
+from typing import Union
 import numpy
+from matchms import Spectrum
 
 
-def select_by_relative_intensity(spectrum_in, intensity_from=0.0, intensity_to=1.0):
+def select_by_relative_intensity(spectrum_in, intensity_from=0.0, intensity_to=1.0) -> Union[Spectrum, None]:
 
     if spectrum_in is None:
         return None

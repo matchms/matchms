@@ -1,6 +1,15 @@
-def has_valid_smiles(spectrum):
+from typing import Union
+from matchms import Spectrum
 
+
+def has_valid_smiles(spectrum_in) -> Union[Spectrum, None]:
     """Return True if input is a valid "smiles" string."""
+
+    if spectrum_in is None:
+        return None
+
+    spectrum = spectrum_in.clone()
+
     empty_entry_types = [
         "N/A",
         "n/a",

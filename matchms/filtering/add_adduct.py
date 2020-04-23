@@ -1,4 +1,8 @@
-def add_adduct(spectrum_in):
+from typing import Union
+from matchms import Spectrum
+
+
+def add_adduct(spectrum_in) -> Union[Spectrum, None]:
     """Add adduct to metadata (if not present yet).
 
     Method to interpret the given compound name to find the adduct.

@@ -1,7 +1,9 @@
+from typing import Union
 import numpy
+from matchms import Spectrum
 
 
-def select_by_mz(spectrum_in, mz_from=0.0, mz_to=1000.0):
+def select_by_mz(spectrum_in, mz_from=0.0, mz_to=1000.0) -> Union[Spectrum, None]:
 
     if spectrum_in is None:
         return None
