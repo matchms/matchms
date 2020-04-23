@@ -1,11 +1,12 @@
 from matplotlib import pyplot as plt
 import numpy
 from scipy.optimize import curve_fit
+from matchms import Spectrum
 
 
 class Spectrum:
     """An example docstring for a class."""
-    def __init__(self, mz, intensities, metadata=None):
+    def __init__(self, mz: numpy.array, intensities: numpy.array, metadata=None):
         """An example docstring for a constructor."""
         self.mz = mz
         self.intensities = intensities
@@ -14,7 +15,7 @@ class Spectrum:
         else:
             self.metadata = metadata
 
-    def __eq__(self, other):
+    def __eq__(self, other: Spectrum):
         return \
             self.mz.shape == other.mz.shape and \
             numpy.allclose(self.mz, other.mz) and \
@@ -120,10 +121,10 @@ class Spectrum:
 
         return fig
 
-    def get(self, key, default=None):
+    def get(self, key: str, default=None):
         return self._metadata.get(key, default)
 
-    def set(self, key, value):
+    def set(self, key: str, value):
         self._metadata[key] = value
         return self
 

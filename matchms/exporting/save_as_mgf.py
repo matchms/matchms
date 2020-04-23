@@ -1,7 +1,9 @@
+from typing import List, Union
 import pyteomics.mgf as py_mgf
+from matchms import Spectrum
 
 
-def save_as_mgf(spectrums, filename):
+def save_as_mgf(spectrums: Union[Spectrum, List[Spectrum]], filename: str):
     """Save spectrum(s) as mgf file.
 
     Args:

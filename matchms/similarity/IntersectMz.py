@@ -1,10 +1,13 @@
+from matchms import Spectrum
+
+
 class IntersectMz:
     """IntersectMz function factory"""
 
     def __init__(self):
         """constructor"""
 
-    def __call__(self, spectrum, reference_spectrum):
+    def __call__(self, spectrum: Spectrum, reference_spectrum: Spectrum) -> float:
         """call method"""
         mz = set(spectrum.mz)
         mz_ref = set(reference_spectrum.mz)
