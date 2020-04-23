@@ -4,8 +4,7 @@ from numpy import absolute, reshape, zeros_like, where, power, argsort
 
 class CosineGreedy:
 
-    def __init__(self, label, tolerance=0.3):
-        self.label = label
+    def __init__(self, tolerance=0.3):
         self.tolerance = tolerance
 
     def __call__(self, spectrum, reference_spectrum):
