@@ -37,7 +37,7 @@ jobs:
         run: conda list
       - name: Check style against standards using prospector
         shell: bash -l {0}
-        run: prospector
+        run: prospector -o grouped -o pylint:pylint-report.txt
       - name: Build
         shell: bash -l {0}
         run: |
