@@ -20,8 +20,3 @@ class Document:
 
     def __str__(self):
         return self.words.__str__()
-
-    @property
-    def weights(self):
-        """getter method for _spectrum.intensities private variable"""
-        return self._obj.intensities.copy()
