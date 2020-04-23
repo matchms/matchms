@@ -1,7 +1,7 @@
 from matchms.importing import load_adducts
 
 
-def derive_ionmode(spectrum_in):
+def derive_ionmode(spectrum_in, adducts_filename=None):
     """Derive missing ionmode based on adduct.
 
     MGF files do not always provide a correct ionmode. This function reads
@@ -20,7 +20,7 @@ def derive_ionmode(spectrum_in):
     spectrum = spectrum_in.clone()
 
     # Load lists of known adducts
-    known_adducts = load_adducts()
+    known_adducts = load_adducts(filename=adducts_filename)
 
     adduct = spectrum.get("adduct", None)
 
