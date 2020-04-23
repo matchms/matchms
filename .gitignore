@@ -12,6 +12,9 @@ htmlcov
 .coverage
 coverage.xml
 .pytest_cache
+pylint-report.txt
+xunit-result.xml
+.scannerwork/
 
 docs/_build
 docs/apidocs
