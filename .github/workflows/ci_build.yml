@@ -47,6 +47,7 @@ jobs:
         run: |
           python setup.py test
       - name: SonarCloud Scan
+        if: matrix.os == 'unbuntu-latest'
         uses: sonarsource/sonarcloud-github-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
