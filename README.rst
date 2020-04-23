@@ -25,8 +25,7 @@ matchms
    * - Documentation
      - |ReadTheDocs Badge|
    * - Code Quality
-     - |Sonarcloud Quality Gate Badge|
-     - |Sonarcloud Coverage Badge|
+     - |Sonarcloud Quality Gate Badge| |Sonarcloud Coverage Badge|
 
 
 (Customize these badges with your own links, and check https://shields.io/ or
