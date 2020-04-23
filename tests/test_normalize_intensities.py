@@ -14,3 +14,15 @@ def test_normalize_intensities():
     assert max(spectrum.intensities) == 1.0, "Expected the spectrum to be scaled to 1.0."
     assert numpy.array_equal(spectrum.mz, mz), "Expected the spectrum's intensity locations along "\
                                                "the mz-axis to be unaffected."
+
+
+def test_normalize_intensities_empty_peaks():
+
+    mz = numpy.array([], dtype='float')
+    intensities = numpy.array([], dtype='float')
+    spectrum_in = Spectrum(mz=mz, intensities=intensities,
+                           metadata={"testfield": "TEST"})
+
+    spectrum = normalize_intensities(spectrum_in)
+
+    assert spectrum.metadata["testfield"] == "TEST", "Expected 'TEST' int metadata testfield"
