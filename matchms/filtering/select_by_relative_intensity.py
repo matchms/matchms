@@ -3,7 +3,7 @@ import numpy
 from matchms import Spectrum
 
 
-def select_by_relative_intensity(spectrum_in, intensity_from=0.0, intensity_to=1.0) -> Union[Spectrum, None]:
+def select_by_relative_intensity(spectrum_in: Union[Spectrum, None], intensity_from=0.0, intensity_to=1.0) -> Union[Spectrum, None]:
 
     if spectrum_in is None:
         return None

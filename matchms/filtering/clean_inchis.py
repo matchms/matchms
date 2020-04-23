@@ -3,7 +3,7 @@ from matchms.utils import mol_converter
 from matchms import Spectrum
 
 
-def clean_inchis(spectrum_in, rescue_smiles=True) -> Union[Spectrum, None]:
+def clean_inchis(spectrum_in: Union[Spectrum, None], rescue_smiles=True) -> Union[Spectrum, None]:
     """Make inchi style more consistent and wrongly given smiles.
 
     Args:

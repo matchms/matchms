@@ -5,7 +5,7 @@ from .has_valid_smiles import has_valid_smiles
 from .has_valid_inchi import has_valid_inchi
 
 
-def derive_smiles_from_inchi(spectrum_in) -> Union[Spectrum, None]:
+def derive_smiles_from_inchi(spectrum_in: Union[Spectrum, None]) -> Union[Spectrum, None]:
     """Find missing smiles and derive from Inchi where possible."""
 
     spectrum = spectrum_in.clone()

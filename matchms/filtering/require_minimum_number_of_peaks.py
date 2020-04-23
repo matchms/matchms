@@ -3,7 +3,7 @@ from math import ceil
 from matchms import Spectrum
 
 
-def require_minimum_number_of_peaks(spectrum_in, n_required=10, ratio_required=None) -> Union[Spectrum, None]:
+def require_minimum_number_of_peaks(spectrum_in: Union[Spectrum, None], n_required=10, ratio_required=None) -> Union[Spectrum, None]:
 
     if spectrum_in is None:
         return None

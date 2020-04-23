@@ -3,7 +3,7 @@ import numpy
 from matchms import Spectrum
 
 
-def normalize_intensities(spectrum_in) -> Union[Spectrum, None]:
+def normalize_intensities(spectrum_in: Union[Spectrum, None]) -> Union[Spectrum, None]:
     """Normalize intensities to unit height."""
 
     if spectrum_in is None:

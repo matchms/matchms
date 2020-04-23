@@ -2,7 +2,7 @@ from typing import Union
 from matchms import Spectrum
 
 
-def has_valid_inchi(spectrum_in) -> Union[Spectrum, None]:
+def has_valid_inchi(spectrum_in: Union[Spectrum, None]) -> Union[Spectrum, None]:
 
     """Return True if input is a valid inchi string."""
     if spectrum_in is None:

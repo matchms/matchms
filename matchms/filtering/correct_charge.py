@@ -3,7 +3,7 @@ import numpy
 from matchms import Spectrum
 
 
-def correct_charge(spectrum_in) -> Union[Spectrum, None]:
+def correct_charge(spectrum_in: Union[Spectrum, None]) -> Union[Spectrum, None]:
 
     if spectrum_in is None:
         return None

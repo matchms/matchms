@@ -2,7 +2,7 @@ from typing import Union
 from matchms import Spectrum
 
 
-def set_ionmode_na_when_missing(spectrum_in) -> Union[Spectrum, None]:
+def set_ionmode_na_when_missing(spectrum_in: Union[Spectrum, None]) -> Union[Spectrum, None]:
 
     if spectrum_in is None:
         return None
