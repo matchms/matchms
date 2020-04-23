@@ -3,13 +3,13 @@ from math import ceil
 
 def require_minimum_number_of_peaks(spectrum_in, n_required=10, ratio_required=None):
     """Spectrum will be set to None when it has fewer peaks than required.
-    
+
     Args:
     ----
     spectrum_in: matchms.Spectrum()
         Input spectrum.
     n_required: int
-        Number of minimum required peaks. Spectra with fewer peaks will be set 
+        Number of minimum required peaks. Spectra with fewer peaks will be set
         to 'None'.
     ratio_required: float, optional
         Set desired ratio between minimum number of peaks and parent mass.
