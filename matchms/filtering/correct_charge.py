@@ -1,9 +1,8 @@
-from typing import Union
 import numpy
-from matchms import Spectrum
+from matchms.typing import SpectrumType
 
 
-def correct_charge(spectrum_in: Union[Spectrum, None]) -> Union[Spectrum, None]:
+def correct_charge(spectrum_in: SpectrumType) -> SpectrumType:
 
     if spectrum_in is None:
         return None

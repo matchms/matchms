@@ -1,4 +1,4 @@
-from matchms import Spectrum
+from matchms.typing import SpectrumType
 
 
 class IntersectMz:
@@ -7,7 +7,7 @@ class IntersectMz:
     def __init__(self):
         """constructor"""
 
-    def __call__(self, spectrum: Spectrum, reference_spectrum: Spectrum) -> float:
+    def __call__(self, spectrum: SpectrumType, reference_spectrum: SpectrumType) -> float:
         """call method"""
         mz = set(spectrum.mz)
         mz_ref = set(reference_spectrum.mz)

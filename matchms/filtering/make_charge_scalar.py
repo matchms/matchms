@@ -1,8 +1,7 @@
-from typing import Union
-from matchms import Spectrum
+from matchms.typing import SpectrumType
 
 
-def make_charge_scalar(spectrum_in: Union[Spectrum, None]) -> Union[Spectrum, None]:
+def make_charge_scalar(spectrum_in: SpectrumType) -> SpectrumType:
 
     if spectrum_in is None:
         return None

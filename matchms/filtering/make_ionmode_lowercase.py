@@ -1,8 +1,7 @@
-from typing import Union
-from matchms import Spectrum
+from matchms.typing import SpectrumType
 
 
-def make_ionmode_lowercase(spectrum_in: Union[Spectrum, None]) -> Union[Spectrum, None]:
+def make_ionmode_lowercase(spectrum_in: SpectrumType) -> SpectrumType:
 
     if spectrum_in is None:
         return None

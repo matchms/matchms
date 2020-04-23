@@ -1,9 +1,8 @@
-from typing import Union
 from matchms.constants import PROTON_MASS
-from matchms import Spectrum
+from matchms.typing import SpectrumType
 
 
-def add_parent_mass(spectrum_in: Union[Spectrum, None]) -> Union[Spectrum, None]:
+def add_parent_mass(spectrum_in: SpectrumType) -> SpectrumType:
     """Add parentmass to metadata (if not present yet).
 
     Method to calculate the parent mass from given precursor mass

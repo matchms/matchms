@@ -1,8 +1,7 @@
-from typing import Union
-from matchms import Spectrum
+from matchms.typing import SpectrumType
 
 
-def has_valid_inchikey(spectrum_in: Union[Spectrum, None]) -> Union[Spectrum, None]:
+def has_valid_inchikey(spectrum_in: SpectrumType) -> SpectrumType:
     """Return True if input spectrum has a valid inchikey string."""
 
     if spectrum_in is None:

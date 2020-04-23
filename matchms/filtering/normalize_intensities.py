@@ -1,9 +1,8 @@
-from typing import Union
 import numpy
-from matchms import Spectrum
+from matchms.typing import SpectrumType
 
 
-def normalize_intensities(spectrum_in: Union[Spectrum, None]) -> Union[Spectrum, None]:
+def normalize_intensities(spectrum_in: SpectrumType) -> SpectrumType:
     """Normalize intensities to unit height."""
 
     if spectrum_in is None:

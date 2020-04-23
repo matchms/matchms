@@ -1,7 +1,6 @@
 from matplotlib import pyplot as plt
 import numpy
 from scipy.optimize import curve_fit
-from matchms import Spectrum
 
 
 class Spectrum:
@@ -15,7 +14,7 @@ class Spectrum:
         else:
             self.metadata = metadata
 
-    def __eq__(self, other: Spectrum):
+    def __eq__(self, other):
         return \
             self.mz.shape == other.mz.shape and \
             numpy.allclose(self.mz, other.mz) and \

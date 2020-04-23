@@ -1,9 +1,8 @@
-from typing import Union
 from math import ceil
-from matchms import Spectrum
+from matchms.typing import SpectrumType
 
 
-def require_minimum_number_of_peaks(spectrum_in: Union[Spectrum, None], n_required=10, ratio_required=None) -> Union[Spectrum, None]:
+def require_minimum_number_of_peaks(spectrum_in: SpectrumType, n_required=10, ratio_required=None) -> SpectrumType:
 
     if spectrum_in is None:
         return None

@@ -1,8 +1,7 @@
-from typing import Union
-from matchms import Spectrum
+from matchms.typing import SpectrumType
 
 
-def has_valid_smiles(spectrum_in: Union[Spectrum, None]) -> Union[Spectrum, None]:
+def has_valid_smiles(spectrum_in: SpectrumType) -> SpectrumType:
     """Return True if input is a valid "smiles" string."""
 
     if spectrum_in is None:
