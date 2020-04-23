@@ -72,9 +72,6 @@ https://badgen.net/ to see which other badges are available.)
    :target: https://sonarcloud.io/component_measures?id=matchms_matchms&metric=Coverage&view=list
    :alt: Sonarcloud Coverage
 
-
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=matchms_matchms&metric=coverage)](https://sonarcloud.io/dashboard?id=matchms_matchms)
-
 Vector representation and similarity measure for mass spectrometry data
 
 The project setup is documented in `a separate document <project_setup.rst>`_.
