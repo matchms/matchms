@@ -4,38 +4,36 @@ import numpy
 
 def test_scores_init():
 
-    scores = Scores(queries=numpy.asarray(["q0", "q1"]),
-                    references=numpy.asarray(["r0", "r1", "r2"]),
+    scores = Scores(references=numpy.asarray(["r0", "r1", "r2"]),
+                    queries=numpy.asarray(["q0", "q1"]),
                     similarity_function=None)
 
     assert scores.scores.shape == (3, 2)
 
 
-def test_scores_sort():
+def test_scores_next():
 
-    scores = Scores(queries=numpy.asarray(["q0", "q1"]),
-                    references=numpy.asarray(["r0", "r1", "r2"]),
-                    similarity_function=None)
+    class DummySimilarityFunction:
 
-    scores.scores = numpy.asarray([[1, 2], [5, 4], [3, 6]], dtype="float")
+        def __init__(self):
+            """constructor"""
 
-    queries_sorted, references_sorted, scores_sorted = scores.sort()
+        def __call__(self, reference, query):
+            """call method"""
 
-    assert numpy.all(queries_sorted == numpy.asarray([["q1"], ["q0"], ["q1"], ["q0"], ["q1"], ["q0"]]))
-    assert numpy.all(references_sorted == numpy.asarray([["r2"], ["r1"], ["r1"], ["r2"], ["r0"], ["r0"]]))
-    assert numpy.all(scores_sorted == numpy.arange(1, 7)[::-1].reshape(6, 1))
+            s = reference + query
 
+            return s, len(s)
 
-def test_scores_top():
+    dummy_similarity_function = DummySimilarityFunction()
 
-    scores = Scores(queries=numpy.asarray(["q0", "q1"]),
-                    references=numpy.asarray(["r0", "q1", "r2"]),
-                    similarity_function=None)
+    scores = Scores(references=numpy.asarray(["r", "rr", "rrr"]),
+                    queries=numpy.asarray(["q", "qq"]),
+                    similarity_function=dummy_similarity_function).calculate()
 
-    scores.scores = numpy.asarray([[1, 2], [4, 5], [3, 6]], dtype="float")
-
-    queries_top_2, references_top_2, scores_top_2 = scores.top(2, include_self_comparisons=False)
-
-    assert numpy.all(queries_top_2 == numpy.asarray([["q1"], ["q0"]]))
-    assert numpy.all(references_top_2 == numpy.asarray([["r2"], ["q1"]]))
-    assert numpy.all(scores_top_2 == numpy.asarray([[6.], [4.]], dtype="float"))
+    assert next(scores) == ("r", "q", "rq", 2)
+    assert next(scores) == ("r", "qq", "rqq", 3)
+    assert next(scores) == ("rr", "q", "rrq", 3)
+    assert next(scores) == ("rr", "qq", "rrqq", 4)
+    assert next(scores) == ("rrr", "q", "rrrq", 4)
+    assert next(scores) == ("rrr", "qq", "rrrqq", 5)

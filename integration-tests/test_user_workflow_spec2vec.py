@@ -8,6 +8,23 @@ from matchms import calculate_scores
 
 def test_user_workflow_spec2vec():
 
+    def evaluate_assert_set_1():
+        r, q, _ = scores.__next__()
+        scores.reset_iterator()
+        assert r == references[0]
+        assert q == queries[0]
+
+    def evaluate_assert_set_2():
+        filtered = [triplet for triplet in scores if triplet[2] > 0.9999]
+        assert len(filtered) > 1, "Expected some really good scores."
+
+        sorted_by_score = sorted(scores, key=lambda elem: elem[2], reverse=True)
+        rd = sorted_by_score[0][0]
+        qd = sorted_by_score[0][1]
+
+        assert rd == references[-1], "The best match should be between two copies of documents[69]"
+        assert qd == queries[0], "The best match should be between two copies of documents[69]"
+
     module_root = os.path.join(os.path.dirname(__file__), '..')
     references_file = os.path.join(module_root, 'tests', 'pesticides.mgf')
 
@@ -21,15 +38,11 @@ def test_user_workflow_spec2vec():
     # define similarity_function
     spec2vec = Spec2Vec(model=model, documents=documents)
 
-    queries = documents[:7]
-    references = documents[6:]
+    references = documents[:70]
+    queries = documents[69:]
 
     # calculate scores on all combinations of references and queries
-    _, _, scores_top3 = \
-        calculate_scores(queries, references, spec2vec).top(3, include_self_comparisons=False)
+    scores = calculate_scores(references, queries, spec2vec)
 
-    assert scores_top3[0][0] > 0.99, "Expected some really good scores."
-
-
-if __name__ == '__main__':
-    test_user_workflow_spec2vec()
+    evaluate_assert_set_1()
+    evaluate_assert_set_2()

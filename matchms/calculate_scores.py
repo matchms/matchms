@@ -1,9 +1,8 @@
 from .Scores import Scores
 
 
-def calculate_scores(queries, references, similarity_function):
-    """An example docstring for a unbound function."""
+def calculate_scores(references, queries, similarity_function):
 
-    return Scores(queries=queries,
-                  references=references,
+    return Scores(references=references,
+                  queries=queries,
                   similarity_function=similarity_function).calculate()

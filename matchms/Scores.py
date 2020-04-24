@@ -1,46 +1,42 @@
-from numpy import empty, argsort, unravel_index, hstack, vstack
+from numpy import empty, unravel_index, asarray
 
 
 class Scores:
-    """An example docstring for a class definition."""
-    def __init__(self, queries, references, similarity_function):
-        """An example docstring for a constructor."""
-        self.queries = hstack(queries)
-        self.references = vstack(references)
+    def __init__(self, references=None, queries=None, similarity_function=None):
+        self.n_rows = asarray(references).flatten().size
+        self.n_cols = asarray(queries).flatten().size
+        self.references = asarray(references).flatten().reshape(self.n_rows, 1)
+        self.queries = asarray(queries).flatten().reshape(1, self.n_cols)
         self.similarity_function = similarity_function
-        self._scores = empty([len(self.references),
-                             len(self.queries)])
+        self._scores = empty([self.n_rows, self.n_cols], dtype="object")
+        self._index = 0
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self._index < self.scores.size:
+            # pylint: disable=unbalanced-tuple-unpacking
+            r, c = unravel_index(self._index, self._scores.shape)
+            self._index += 1
+            result = self._scores[r, c]
+            if not isinstance(result, tuple):
+                result = (result,)
+            return (self.references[r, 0], self.queries[0, c]) + result
+        self._index = 0
+        raise StopIteration
 
     def __str__(self):
         return self._scores.__str__()
 
     def calculate(self):
-        """An example docstring for a method."""
-        for i_ref, reference in enumerate(self.references.flatten()):
-            for i_query, query in enumerate(self.queries.flatten()):
-                self._scores[i_ref][i_query] = self.similarity_function(query, reference)
+        for i_ref, reference in enumerate(self.references[:self.n_rows, 0]):
+            for i_query, query in enumerate(self.queries[0, :self.n_cols]):
+                self._scores[i_ref][i_query] = self.similarity_function(reference, query)
         return self
 
-    def sort(self, kind="quicksort"):
-        """An example docstring for a method."""
-        sortorder = argsort(self._scores.flatten(), kind=kind)[::-1]
-        # pylint: disable=unbalanced-tuple-unpacking
-        r, c = unravel_index(sortorder, self._scores.shape)
-        return vstack(self.queries[c]), self.references[r], vstack(self._scores[r, c])
-
-    def top(self, n, kind="quicksort", include_self_comparisons=False):
-
-        queries_sorted, references_sorted, scores_sorted = self.sort(kind=kind)
-
-        if include_self_comparisons:
-            return queries_sorted[:n], references_sorted[:n], scores_sorted[:n]
-
-        zipped = zip(queries_sorted, references_sorted, scores_sorted)
-        self_comparisons_omitted = [(q, r, s) for q, r, s in zipped if q != r]
-        return \
-            vstack([q for q, _, _ in self_comparisons_omitted[:n]]),\
-            vstack([r for _, r, _ in self_comparisons_omitted[:n]]),\
-            vstack([s for _, _, s in self_comparisons_omitted[:n]])
+    def reset_iterator(self):
+        self._index = 0
 
     @property
     def scores(self):
