@@ -139,6 +139,16 @@ class Spectrum:
         self._metadata = value
 
     @property
+    def losses(self):
+        """getter method for metadata private variable"""
+        return self._losses.clone()
+
+    @losses.setter
+    def losses(self, value):
+        """setter method for metadata private variable"""
+        self._losses = value
+
+    @property
     def peaks(self):
         """getter method for metadata private variable"""
         return self._peaks.clone()
