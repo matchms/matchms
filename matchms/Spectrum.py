@@ -17,10 +17,8 @@ class Spectrum:
 
     def __eq__(self, other):
         return \
-            self.peaks.mz.shape == other.peaks.mz.shape and \
-            numpy.allclose(self.peaks.mz, other.peaks.mz) and \
-            self.peaks.intensities.shape == other.peaks.intensities.shape and \
-            numpy.allclose(self.peaks.intensities, other.peaks.intensities) and \
+            self.peaks == other.peaks and \
+            self.losses == other.losses and \
             self.metadata == other.metadata
 
     def clone(self):
