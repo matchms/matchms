@@ -7,7 +7,7 @@ def test_normalize_intensities():
 
     mz = numpy.array([10, 20, 30, 40], dtype='float')
     intensities = numpy.array([0, 1, 10, 100], dtype='float')
-    spectrum_in = Spectrum(mz=mz, intensities=intensities, metadata=dict())
+    spectrum_in = Spectrum(mz=mz, intensities=intensities)
 
     spectrum = normalize_intensities(spectrum_in)
 

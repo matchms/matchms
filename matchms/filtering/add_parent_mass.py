@@ -7,6 +7,9 @@ def add_parent_mass(spectrum_in):
     Method to calculate the parent mass from given precursor mass
     and charge.
     """
+    if spectrum_in is None:
+        return None
+
     spectrum = spectrum_in.clone()
 
     if spectrum.get("parent_mass", None) is None:
