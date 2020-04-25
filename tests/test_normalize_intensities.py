@@ -25,4 +25,3 @@ def test_normalize_intensities_empty_peaks():
     spectrum = normalize_intensities(spectrum_in)
 
     assert spectrum == spectrum_in, "Spectrum should remain unchanged."
-
