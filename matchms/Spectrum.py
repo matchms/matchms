@@ -23,9 +23,11 @@ class Spectrum:
 
     def clone(self):
         """Return a deepcopy of the spectrum instance."""
-        return Spectrum(mz=self.peaks.mz,
-                        intensities=self.peaks.intensities,
-                        metadata=self.metadata)
+        clone = Spectrum(mz=self.peaks.mz,
+                         intensities=self.peaks.intensities,
+                         metadata=self.metadata)
+        clone.losses = self.losses
+        return clone
 
     def plot(self, intensity_from=0.0, intensity_to=None, with_histogram=False, with_expfit=False):
         """An example docstring for a method."""
