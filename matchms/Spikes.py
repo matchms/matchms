@@ -16,7 +16,9 @@ class Spikes:
 
     def __eq__(self, other):
         return \
+            self.mz.shape == other.mz.shape and \
             numpy.allclose(self.mz, other.mz) and \
+            self.intensities.shape == other.intensities.shape and \
             numpy.allclose(self.intensities, other.intensities)
 
     def __getitem__(self, item):
