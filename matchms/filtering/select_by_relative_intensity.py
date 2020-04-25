@@ -13,12 +13,13 @@ def select_by_relative_intensity(spectrum_in, intensity_from=0.0, intensity_to=1
     assert intensity_to <= 1.0, "'intensity_to' should be smaller than or equal to 1.0."
     assert intensity_from <= intensity_to, "'intensity_from' should be smaller than or equal to 'intensity_to'."
 
-    scale_factor = numpy.max(spectrum.peaks.intensities)
-    intensities = spectrum.peaks.intensities / scale_factor
+    if spectrum.peaks.intensities.size > 0:
+        scale_factor = numpy.max(spectrum.peaks.intensities)
+        normalized_intensities = spectrum.peaks.intensities / scale_factor
 
-    condition = numpy.logical_and(intensity_from <= intensities, intensities <= intensity_to)
+        condition = numpy.logical_and(intensity_from <= normalized_intensities, normalized_intensities <= intensity_to)
 
-    spectrum.peaks = Spikes(mz=spectrum.peaks.mz[condition],
-                            intensities=spectrum.peaks.intensities[condition])
+        spectrum.peaks = Spikes(mz=spectrum.peaks.mz[condition],
+                                intensities=spectrum.peaks.intensities[condition])
 
     return spectrum
