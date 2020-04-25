@@ -17,10 +17,8 @@ class Spectrum:
 
     def __eq__(self, other):
         return \
-            self.peaks.mz.shape == other.peaks.mz.shape and \
-            numpy.allclose(self.peaks.mz, other.peaks.mz) and \
-            self.peaks.intensities.shape == other.peaks.intensities.shape and \
-            numpy.allclose(self.peaks.intensities, other.peaks.intensities) and \
+            self.peaks == other.peaks and \
+            self.losses == other.losses and \
             self.metadata == other.metadata
 
     def clone(self):
@@ -132,30 +130,30 @@ class Spectrum:
 
     @property
     def metadata(self):
-        """getter method for metadata private variable"""
+        """getter method for _metadata private variable"""
         return self._metadata.copy()
 
     @metadata.setter
     def metadata(self, value):
-        """setter method for metadata private variable"""
+        """setter method for _metadata private variable"""
         self._metadata = value
 
     @property
     def losses(self):
-        """getter method for losses private variable"""
+        """getter method for _losses private variable"""
         return self._losses.clone() if self._losses is not None else None
 
     @losses.setter
     def losses(self, value):
-        """setter method for losses private variable"""
+        """setter method for _losses private variable"""
         self._losses = value
 
     @property
     def peaks(self):
-        """getter method for peaks private variable"""
+        """getter method for _peaks private variable"""
         return self._peaks.clone()
 
     @peaks.setter
     def peaks(self, value):
-        """setter method for peaks private variable"""
+        """setter method for _peaks private variable"""
         self._peaks = value
