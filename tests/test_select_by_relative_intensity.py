@@ -78,3 +78,15 @@ def test_select_by_relative_intensity_with_from_and_to_parameters():
     assert spectrum.mz.size == spectrum.intensities.size
     assert numpy.array_equal(spectrum.mz, numpy.array([20, 30], dtype="float"))
     assert numpy.array_equal(spectrum.intensities, numpy.array([10, 100], dtype="float"))
+
+
+def test_select_by_relative_intensity_with_empty_peaks():
+    """Within certain workflows it can happen that spectrums are passed which
+    have empty arrays as peaks. Functions shouldn't break in those cases."""
+    mz = numpy.array([], dtype="float")
+    intensities = numpy.array([], dtype="float")
+    spectrum_in = Spectrum(mz=mz, intensities=intensities)
+
+    spectrum = select_by_relative_intensity(spectrum_in, intensity_from=0.01, intensity_to=0.99)
+
+    assert spectrum == spectrum_in, "Spectrum should remain unchanged."
