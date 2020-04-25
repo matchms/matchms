@@ -141,7 +141,7 @@ class Spectrum:
     @property
     def losses(self):
         """getter method for _losses private variable"""
-        return self._losses.clone()
+        return self._losses.clone() if self._losses is not None else None
 
     @losses.setter
     def losses(self, value):
