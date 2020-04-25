@@ -130,30 +130,30 @@ class Spectrum:
 
     @property
     def metadata(self):
-        """getter method for metadata private variable"""
+        """getter method for _metadata private variable"""
         return self._metadata.copy()
 
     @metadata.setter
     def metadata(self, value):
-        """setter method for metadata private variable"""
+        """setter method for _metadata private variable"""
         self._metadata = value
 
     @property
     def losses(self):
-        """getter method for metadata private variable"""
+        """getter method for _losses private variable"""
         return self._losses.clone()
 
     @losses.setter
     def losses(self, value):
-        """setter method for metadata private variable"""
+        """setter method for _losses private variable"""
         self._losses = value
 
     @property
     def peaks(self):
-        """getter method for metadata private variable"""
+        """getter method for _peaks private variable"""
         return self._peaks.clone()
 
     @peaks.setter
     def peaks(self, value):
-        """setter method for metadata private variable"""
+        """setter method for _peaks private variable"""
         self._peaks = value
