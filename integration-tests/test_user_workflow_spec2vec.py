@@ -3,7 +3,7 @@ import gensim
 from matchms.importing import load_from_mgf
 from matchms.filtering import default_filters, require_minimum_number_of_peaks, add_parent_mass, normalize_intensities
 from matchms.filtering import select_by_relative_intensity, select_by_mz, add_losses
-from matchms.similarity.spec2vec import convert_spectrum_to_document, Spec2Vec
+from matchms.similarity.spec2vec import SpectrumDocument, Spec2Vec
 from matchms import calculate_scores
 
 
@@ -28,7 +28,7 @@ def test_user_workflow_spec2vec():
     # omit spectrums that didn't qualify for analysis
     spectrums = [s for s in spectrums if s is not None]
 
-    documents = [convert_spectrum_to_document(s) for s in spectrums]
+    documents = [SpectrumDocument(s) for s in spectrums]
 
     # create and train model
     model = gensim.models.Word2Vec([d.words for d in documents], size=5, min_count=1)
