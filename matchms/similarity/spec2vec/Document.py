@@ -24,5 +24,5 @@ class Document:
 
     def _make_words(self):
         print("You should override this method in your own subclass.")
-        self.words = None
+        self.words = []
         return self
