@@ -25,9 +25,11 @@ class Spectrum:
 
     def clone(self):
         """Return a deepcopy of the spectrum instance."""
-        return Spectrum(mz=self.peaks.mz,
-                        intensities=self.peaks.intensities,
-                        metadata=self.metadata)
+        clone = Spectrum(mz=self.peaks.mz,
+                         intensities=self.peaks.intensities,
+                         metadata=self.metadata)
+        clone.losses = self.losses
+        return clone
 
     def plot(self, intensity_from=0.0, intensity_to=None, with_histogram=False, with_expfit=False):
         """An example docstring for a method."""
@@ -139,11 +141,21 @@ class Spectrum:
         self._metadata = value
 
     @property
+    def losses(self):
+        """getter method for losses private variable"""
+        return self._losses.clone() if self._losses is not None else None
+
+    @losses.setter
+    def losses(self, value):
+        """setter method for losses private variable"""
+        self._losses = value
+
+    @property
     def peaks(self):
-        """getter method for metadata private variable"""
+        """getter method for peaks private variable"""
         return self._peaks.clone()
 
     @peaks.setter
     def peaks(self, value):
-        """setter method for metadata private variable"""
+        """setter method for peaks private variable"""
         self._peaks = value

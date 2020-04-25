@@ -1,4 +1,5 @@
 from .add_adduct import add_adduct
+from .add_losses import add_losses
 from .add_parent_mass import add_parent_mass
 from .clean_inchis import clean_inchis
 from .correct_charge import correct_charge
@@ -19,6 +20,7 @@ from .select_by_relative_intensity import select_by_relative_intensity
 
 __all__ = [
     "add_adduct",
+    "add_losses",
     "add_parent_mass",
     "clean_inchis",
     "correct_charge",
