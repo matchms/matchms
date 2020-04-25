@@ -22,7 +22,7 @@ class Spikes:
             numpy.allclose(self.intensities, other.intensities)
 
     def __getitem__(self, item):
-        return [self.mz, self.intensities].__getitem__(item)
+        return [self.mz, self.intensities][item]
 
     def _is_sorted(self):
         return numpy.all(self.mz[:-1] < self.mz[1:])
