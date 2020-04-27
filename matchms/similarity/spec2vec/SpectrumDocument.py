@@ -8,6 +8,7 @@ class SpectrumDocument(Document):
         self._add_weights()
 
     def _make_words(self):
+        """Create word from peaks (and losses)."""
         format_string = "{}@{:." + "{}".format(self.n_decimals) + "f}"
         peak_words = [format_string.format("peak", mz) for mz in self._obj.peaks.mz]
         if self._obj.losses is not None:
@@ -18,6 +19,7 @@ class SpectrumDocument(Document):
         return self
 
     def _add_weights(self):
+        """Add peaks (and loss) intensities as weights."""
         assert self._obj.peaks.intensities.max() <= 1, "peak intensities not normalized"
 
         peak_intensities = self._obj.peaks.intensities.tolist()
@@ -27,6 +29,3 @@ class SpectrumDocument(Document):
             loss_intensities = []
         self.weights = peak_intensities + loss_intensities
         return self
-
-
-
