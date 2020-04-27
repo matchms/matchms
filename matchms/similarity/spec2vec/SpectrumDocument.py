@@ -2,7 +2,7 @@ from .Document import Document
 
 
 class SpectrumDocument(Document):
-    def __init__(self, spectrum, weights=None, n_decimals=1):
+    def __init__(self, spectrum, n_decimals=1):
         self.n_decimals = n_decimals
         super().__init__(obj=spectrum)
         self._add_weights()
