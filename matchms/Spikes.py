@@ -25,7 +25,7 @@ class Spikes:
         return [self.mz, self.intensities][item]
 
     def _is_sorted(self):
-        return numpy.all(self.mz[:-1] < self.mz[1:])
+        return numpy.all(self.mz[:-1] <= self.mz[1:])
 
     def clone(self):
         return Spikes(self.mz, self.intensities)
