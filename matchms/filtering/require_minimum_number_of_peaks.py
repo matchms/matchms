@@ -27,7 +27,7 @@ def require_minimum_number_of_peaks(spectrum_in, n_required=10, ratio_required=N
     else:
         threshold = n_required
 
-    if spectrum.intensities.size < threshold:
+    if spectrum.peaks.intensities.size < threshold:
         return None
 
     return spectrum

@@ -1,4 +1,5 @@
 import numpy
+from matchms import Spikes
 
 
 def normalize_intensities(spectrum_in):
@@ -9,8 +10,10 @@ def normalize_intensities(spectrum_in):
 
     spectrum = spectrum_in.clone()
 
-    if spectrum.intensities.size > 0:
-        scale_factor = numpy.max(spectrum.intensities)
-        spectrum.intensities = spectrum.intensities / scale_factor
+    if spectrum.peaks.intensities.size > 0:
+        scale_factor = numpy.max(spectrum.peaks.intensities)
+        mz, intensities = spectrum.peaks
+        normalized_intensities = intensities / scale_factor
+        spectrum.peaks = Spikes(mz=mz, intensities=normalized_intensities)
 
     return spectrum

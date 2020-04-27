@@ -6,8 +6,8 @@ class IntersectMz:
 
     def __call__(self, spectrum, reference_spectrum):
         """call method"""
-        mz = set(spectrum.mz)
-        mz_ref = set(reference_spectrum.mz)
+        mz = set(spectrum.peaks.mz)
+        mz_ref = set(reference_spectrum.peaks.mz)
         intersected = mz.intersection(mz_ref)
         unioned = mz.union(mz_ref)
 
