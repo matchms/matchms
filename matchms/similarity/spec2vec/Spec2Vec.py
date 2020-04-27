@@ -16,10 +16,13 @@ class Spec2Vec:
 
         return 1 - cdist
 
-    def calc_vector(self, document):
+    def calc_vector(self, document, intensity_weighting_power=None):
         """Derive latent space vector for entire document."""
-        bag_of_words = self.dictionary.doc2bow(document.words)
-        words = [self.dictionary[item[0]] for item in bag_of_words]
-        word_vectors = self.model.wv[words]
-
-        return numpy.mean(word_vectors, 0)
+        word_vectors = self.model.wv[document.words]
+        if intensity_weighting_power:
+            vector_size = self.model.wv.vector_size
+            word_weights = numpy.power(document.weights, intensity_weighting_power)
+            # word_weights = word_weights/numpy.sum(word_weights)  # normalize weights? better not
+            return numpy.mean(word_vectors * numpy.tile(word_weights, (vector_size, 1)).T, 0)
+        else:
+            return numpy.mean(word_vectors, 0)
