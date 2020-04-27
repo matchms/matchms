@@ -2,9 +2,10 @@ from .Document import Document
 
 
 class SpectrumDocument(Document):
-    def __init__(self, spectrum, n_decimals=1):
+    def __init__(self, spectrum, weights=None, n_decimals=1):
         self.n_decimals = n_decimals
         super().__init__(obj=spectrum)
+        self._add_weights()
 
     def _make_words(self):
         format_string = "{}@{:." + "{}".format(self.n_decimals) + "f}"
@@ -15,3 +16,17 @@ class SpectrumDocument(Document):
             loss_words = []
         self.words = peak_words + loss_words
         return self
+
+    def _add_weights(self):
+        assert self._obj.peaks.intensities.max() <= 1, "peak intensities not normalized"
+
+        peak_intensities = self._obj.peaks.intensities.tolist()
+        if self._obj.losses is not None:
+            loss_intensities = self._obj.losses.intensities.tolist()
+        else:
+            loss_intensities = []
+        self.weights = peak_intensities + loss_intensities
+        return self
+
+
+
