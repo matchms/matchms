@@ -1,4 +1,4 @@
-from matchms import Spikes
+from ..Spikes import Spikes
 
 
 def add_losses(spectrum_in):
