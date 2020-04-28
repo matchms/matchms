@@ -21,7 +21,7 @@ def test_select_by_mz_no_parameters_2():
 
     mz = numpy.array([998, 999, 1000, 1001, 1002], dtype="float")
     intensities = numpy.array([1, 10, 100, 1000, 10000], dtype="float")
-    spectrum_in = Spectrum(mz=mz, intensities=intensities, metadata=dict())
+    spectrum_in = Spectrum(mz=mz, intensities=intensities)
 
     spectrum = select_by_mz(spectrum_in)
 
@@ -35,7 +35,7 @@ def test_select_by_mz_with_from_parameter():
 
     mz = numpy.array([10, 20, 30, 40], dtype="float")
     intensities = numpy.array([1, 10, 100, 1000], dtype="float")
-    spectrum_in = Spectrum(mz=mz, intensities=intensities, metadata=dict())
+    spectrum_in = Spectrum(mz=mz, intensities=intensities)
 
     spectrum = select_by_mz(spectrum_in, mz_from=15.0)
 
@@ -49,7 +49,7 @@ def test_select_by_mz_with_to_parameter():
 
     mz = numpy.array([10, 20, 30, 40], dtype="float")
     intensities = numpy.array([1, 10, 100, 1000], dtype="float")
-    spectrum_in = Spectrum(mz=mz, intensities=intensities, metadata=dict())
+    spectrum_in = Spectrum(mz=mz, intensities=intensities)
 
     spectrum = select_by_mz(spectrum_in, mz_to=35.0)
 
@@ -63,7 +63,7 @@ def test_select_by_mz_with_from_and_to_parameters():
 
     mz = numpy.array([10, 20, 30, 40], dtype="float")
     intensities = numpy.array([1, 10, 100, 1000], dtype="float")
-    spectrum_in = Spectrum(mz=mz, intensities=intensities, metadata=dict())
+    spectrum_in = Spectrum(mz=mz, intensities=intensities)
 
     spectrum = select_by_mz(spectrum_in, mz_from=15.0, mz_to=35.0)
 

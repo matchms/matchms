@@ -10,10 +10,9 @@ def normalize_intensities(spectrum_in):
 
     spectrum = spectrum_in.clone()
 
-    scale_factor = numpy.max(spectrum.peaks.intensities)
-
-    mz, intensities = spectrum.peaks
-
-    spectrum.peaks = Spikes(mz=mz, intensities=intensities / scale_factor)
+    if len(spectrum.peaks) > 0:
+        scale_factor = numpy.max(spectrum.peaks.intensities)
+        mz, intensities = spectrum.peaks
+        spectrum.peaks = Spikes(mz=mz, intensities=intensities / scale_factor)
 
     return spectrum
