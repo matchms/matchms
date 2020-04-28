@@ -1,7 +1,8 @@
 from matchms.utils import mol_converter
+from matchms.typing import SpectrumType
 
 
-def clean_inchis(spectrum_in, rescue_smiles=True):
+def clean_inchis(spectrum_in: SpectrumType, rescue_smiles=True) -> SpectrumType:
     """Make inchi style more consistent and wrongly given smiles.
 
     Args:
