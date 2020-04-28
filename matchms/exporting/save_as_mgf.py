@@ -18,11 +18,9 @@ def save_as_mgf(spectrums: Union[Spectrum, List[Spectrum]], filename: str):
         spectrums = [spectrums]
 
     # Convert matchms.Spectrum() into dictionaries for pyteomics
-    spectrum_dicts = []
     for spectrum in spectrums:
         spectrum_dict = {"m/z array": spectrum.mz,
                          "intensity array": spectrum.intensities,
                          "params": spectrum.metadata}
-        spectrum_dicts.append(spectrum_dict)
-
-    py_mgf.write(spectrum_dicts, filename)
+        # Append spectrum to file
+        py_mgf.write([spectrum_dict], filename)

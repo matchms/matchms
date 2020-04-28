@@ -25,7 +25,7 @@ matchms
    * - Documentation
      - |ReadTheDocs Badge|
    * - Code Quality
-     - |Sonarcloud Badge|
+     - |Sonarcloud Quality Gate Badge| |Sonarcloud Coverage Badge|
 
 
 (Customize these badges with your own links, and check https://shields.io/ or
@@ -54,8 +54,8 @@ https://badgen.net/ to see which other badges are available.)
    :target: https://bestpractices.coreinfrastructure.org/projects/3792
    :alt: CII Best Practices Badge
 
-.. |GitHub Actions Badge| image:: https://img.shields.io/github/workflow/status/matchms/matchms/matchms
-   :target: https://github.com/matchms/matchms
+.. |GitHub Actions Badge| image:: https://github.com/matchms/matchms/workflows/Build%20matchms/badge.svg
+   :target: https://github.com/matchms/matchms/actions?query=workflow%3A%22Build+matchms%22
    :alt: GitHub Actions Badge
 
 .. |ReadTheDocs Badge| image:: https://readthedocs.org/projects/matchms/badge/?version=latest
@@ -63,9 +63,13 @@ https://badgen.net/ to see which other badges are available.)
     :scale: 100%
     :target: https://matchms.readthedocs.io/en/latest/?badge=latest
 
-.. |Sonarcloud Badge| image:: https://sonarcloud.io/api/project_badges/measure?project=matchms_matchms&metric=alert_status
+.. |Sonarcloud Quality Gate Badge| image:: https://sonarcloud.io/api/project_badges/measure?project=matchms_matchms&metric=alert_status
    :target: https://sonarcloud.io/dashboard?id=matchms_matchms
-   :alt: Sonarcloud Badge
+   :alt: Sonarcloud Quality Gate
+
+.. |Sonarcloud Coverage Badge| image:: https://sonarcloud.io/api/project_badges/measure?project=matchms_matchms&metric=coverage
+   :target: https://sonarcloud.io/component_measures?id=matchms_matchms&metric=Coverage&view=list
+   :alt: Sonarcloud Coverage
 
 Vector representation and similarity measure for mass spectrometry data
 

@@ -15,10 +15,11 @@ def add_parent_mass(spectrum_in: SpectrumType) -> SpectrumType:
 
     if spectrum.get("parent_mass", None) is None:
         try:
-            int_charge = int(spectrum.get("charge"))
-            precursor_mass = spectrum.get("pepmass")[0]
-            parent_mass = precursor_mass * abs(int_charge)
-            parent_mass -= int_charge * PROTON_MASS
+            charge = spectrum.get("charge")
+            protons_mass = PROTON_MASS * charge
+            precursor_mz = spectrum.get("pepmass")[0]
+            precursor_mass = precursor_mz * abs(charge)
+            parent_mass = precursor_mass - protons_mass
             if parent_mass:
                 spectrum.set("parent_mass", parent_mass)
         except KeyError:
