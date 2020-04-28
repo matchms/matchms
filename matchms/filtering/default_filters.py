@@ -1,4 +1,4 @@
-from matchms.typing import SpectrumType
+from ..typing import SpectrumType
 from .add_adduct import add_adduct
 from .correct_charge import correct_charge
 from .derive_ionmode import derive_ionmode

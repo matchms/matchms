@@ -1,5 +1,5 @@
-from matchms.importing import load_adducts
-from matchms.typing import SpectrumType
+from ..importing import load_adducts
+from ..typing import SpectrumType
 
 
 def derive_ionmode(spectrum_in: SpectrumType, adducts_filename=None) -> SpectrumType:

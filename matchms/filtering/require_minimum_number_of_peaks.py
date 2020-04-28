@@ -1,5 +1,5 @@
 from math import ceil
-from matchms.typing import SpectrumType
+from ..typing import SpectrumType
 
 
 def require_minimum_number_of_peaks(spectrum_in: SpectrumType, n_required=10, ratio_required=None) -> SpectrumType:

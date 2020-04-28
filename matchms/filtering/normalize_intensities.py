@@ -1,5 +1,5 @@
 import numpy
-from matchms import Spikes
+from ..Spikes import Spikes
 from matchms.typing import SpectrumType
 
 

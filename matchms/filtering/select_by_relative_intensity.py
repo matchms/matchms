@@ -1,6 +1,6 @@
 import numpy
-from matchms import Spikes
-from matchms.typing import SpectrumType
+from ..Spikes import Spikes
+from ..typing import SpectrumType
 
 
 def select_by_relative_intensity(spectrum_in: SpectrumType, intensity_from=0.0, intensity_to=1.0) -> SpectrumType:

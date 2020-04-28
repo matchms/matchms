@@ -1,6 +1,6 @@
 import numpy
-from matchms import Spikes
-from matchms.typing import SpectrumType
+from ..Spikes import Spikes
+from ..typing import SpectrumType
 
 
 def select_by_mz(spectrum_in: SpectrumType, mz_from=0.0, mz_to=1000.0) -> SpectrumType:
