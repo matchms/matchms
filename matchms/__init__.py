@@ -5,6 +5,7 @@ from .__version__ import __version__
 from .calculate_scores import calculate_scores
 from .Scores import Scores
 from .Spectrum import Spectrum
+from .Spikes import Spikes
 
 from . import exporting
 from . import filtering
@@ -25,5 +26,6 @@ __all__ = [
     "importing",
     "Scores",
     "similarity",
-    "Spectrum"
+    "Spectrum",
+    "Spikes"
 ]

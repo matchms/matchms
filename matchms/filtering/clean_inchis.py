@@ -1,5 +1,5 @@
-from matchms.utils import mol_converter
-from matchms.typing import SpectrumType
+from ..utils import mol_converter
+from ..typing import SpectrumType
 
 
 def clean_inchis(spectrum_in: SpectrumType, rescue_smiles=True) -> SpectrumType:

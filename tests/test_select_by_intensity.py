@@ -11,10 +11,10 @@ def test_select_by_intensity_no_parameters_1():
 
     spectrum = select_by_intensity(spectrum_in)
 
-    assert spectrum.mz.size == 2
-    assert spectrum.mz.size == spectrum.intensities.size
-    assert numpy.array_equal(spectrum.mz, numpy.array([20, 30], dtype="float"))
-    assert numpy.array_equal(spectrum.intensities, numpy.array([10, 100], dtype="float"))
+    assert spectrum.peaks.mz.size == 2
+    assert spectrum.peaks.mz.size == spectrum.peaks.intensities.size
+    assert numpy.array_equal(spectrum.peaks.mz, numpy.array([20, 30], dtype="float"))
+    assert numpy.array_equal(spectrum.peaks.intensities, numpy.array([10, 100], dtype="float"))
 
 
 def test_select_by_intensity_no_parameters_2():
@@ -25,10 +25,10 @@ def test_select_by_intensity_no_parameters_2():
 
     spectrum = select_by_intensity(spectrum_in)
 
-    assert spectrum.mz.size == 3
-    assert spectrum.mz.size == spectrum.intensities.size
-    assert numpy.array_equal(spectrum.mz, numpy.array([998, 999, 1000], dtype="float"))
-    assert numpy.array_equal(spectrum.intensities, numpy.array([198, 199, 200], dtype="float"))
+    assert spectrum.peaks.mz.size == 3
+    assert spectrum.peaks.mz.size == spectrum.peaks.intensities.size
+    assert numpy.array_equal(spectrum.peaks.mz, numpy.array([998, 999, 1000], dtype="float"))
+    assert numpy.array_equal(spectrum.peaks.intensities, numpy.array([198, 199, 200], dtype="float"))
 
 
 def test_select_by_intensity_with_from_parameter():
@@ -39,10 +39,10 @@ def test_select_by_intensity_with_from_parameter():
 
     spectrum = select_by_intensity(spectrum_in, intensity_from=15.0)
 
-    assert spectrum.mz.size == 1
-    assert spectrum.mz.size == spectrum.intensities.size
-    assert numpy.array_equal(spectrum.mz, numpy.array([30], dtype="float"))
-    assert numpy.array_equal(spectrum.intensities, numpy.array([100], dtype="float"))
+    assert spectrum.peaks.mz.size == 1
+    assert spectrum.peaks.mz.size == spectrum.peaks.intensities.size
+    assert numpy.array_equal(spectrum.peaks.mz, numpy.array([30], dtype="float"))
+    assert numpy.array_equal(spectrum.peaks.intensities, numpy.array([100], dtype="float"))
 
 
 def test_select_by_intensity_with_to_parameter():
@@ -53,10 +53,10 @@ def test_select_by_intensity_with_to_parameter():
 
     spectrum = select_by_intensity(spectrum_in, intensity_to=35.0)
 
-    assert spectrum.mz.size == 1
-    assert spectrum.mz.size == spectrum.intensities.size
-    assert numpy.array_equal(spectrum.mz, numpy.array([20], dtype="float"))
-    assert numpy.array_equal(spectrum.intensities, numpy.array([10], dtype="float"))
+    assert spectrum.peaks.mz.size == 1
+    assert spectrum.peaks.mz.size == spectrum.peaks.intensities.size
+    assert numpy.array_equal(spectrum.peaks.mz, numpy.array([20], dtype="float"))
+    assert numpy.array_equal(spectrum.peaks.intensities, numpy.array([10], dtype="float"))
 
 
 def test_select_by_intensity_with_from_and_to_parameters():
@@ -67,7 +67,7 @@ def test_select_by_intensity_with_from_and_to_parameters():
 
     spectrum = select_by_intensity(spectrum_in, intensity_from=15.0, intensity_to=135.0)
 
-    assert spectrum.mz.size == 1
-    assert spectrum.mz.size == spectrum.intensities.size
-    assert numpy.array_equal(spectrum.mz, numpy.array([30], dtype="float"))
-    assert numpy.array_equal(spectrum.intensities, numpy.array([100], dtype="float"))
+    assert spectrum.peaks.mz.size == 1
+    assert spectrum.peaks.mz.size == spectrum.peaks.intensities.size
+    assert numpy.array_equal(spectrum.peaks.mz, numpy.array([30], dtype="float"))
+    assert numpy.array_equal(spectrum.peaks.intensities, numpy.array([100], dtype="float"))

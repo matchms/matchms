@@ -1,5 +1,5 @@
-from matchms.typing import SpectrumType
-from matchms.utils import mol_converter
+from ..typing import SpectrumType
+from ..utils import mol_converter
 from .has_valid_inchi import has_valid_inchi
 from .has_valid_smiles import has_valid_smiles
 

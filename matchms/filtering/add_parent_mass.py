@@ -1,5 +1,5 @@
-from matchms.constants import PROTON_MASS
-from matchms.typing import SpectrumType
+from ..constants import PROTON_MASS
+from ..typing import SpectrumType
 
 
 def add_parent_mass(spectrum_in: SpectrumType) -> SpectrumType:
