@@ -8,12 +8,10 @@ from matchms.filtering import normalize_intensities
 def test_cosine_greedy_without_parameters():
 
     spectrum_1 = Spectrum(mz=numpy.array([100, 150, 200, 300, 500, 510, 1100], dtype="float"),
-                          intensities=numpy.array([700, 200, 100, 1000, 200, 5, 500], dtype="float"),
-                          metadata=dict())
+                          intensities=numpy.array([700, 200, 100, 1000, 200, 5, 500], dtype="float"))
 
     spectrum_2 = Spectrum(mz=numpy.array([100, 140, 190, 300, 490, 510, 1090], dtype="float"),
-                          intensities=numpy.array([700, 200, 100, 1000, 200, 5, 500], dtype="float"),
-                          metadata=dict())
+                          intensities=numpy.array([700, 200, 100, 1000, 200, 5, 500], dtype="float"))
 
     norm_spectrum_1 = normalize_intensities(spectrum_1)
     norm_spectrum_2 = normalize_intensities(spectrum_2)

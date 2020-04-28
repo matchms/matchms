@@ -35,11 +35,11 @@ def test_user_workflow():
 
     def apply_my_filters(s):
         s = default_filters(s)
-        s = require_minimum_number_of_peaks(s, n_required=5)
         s = add_parent_mass(s)
         s = normalize_intensities(s)
         s = select_by_relative_intensity(s, intensity_from=0.0, intensity_to=1.0)
         s = select_by_mz(s, mz_from=0, mz_to=1000)
+        s = require_minimum_number_of_peaks(s, n_required=5)
         return s
 
     module_root = os.path.join(os.path.dirname(__file__), '..')

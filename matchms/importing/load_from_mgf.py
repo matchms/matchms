@@ -1,8 +1,9 @@
+from typing import List
 from pyteomics.mgf import MGF
 from ..Spectrum import Spectrum
 
 
-def load_from_mgf(filename):
+def load_from_mgf(filename: str) -> List[Spectrum]:
     """load from mgf file"""
 
     spectrums = list()

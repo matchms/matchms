@@ -1,8 +1,11 @@
+from typing import List, Callable
 from numpy import empty, unravel_index, asarray
 
 
 class Scores:
-    def __init__(self, references=None, queries=None, similarity_function=None):
+    """An example docstring for a class definition."""
+    def __init__(self, references: List[object], queries: List[object], similarity_function: Callable):
+        """An example docstring for a constructor."""
         self.n_rows = asarray(references).flatten().size
         self.n_cols = asarray(queries).flatten().size
         self.references = asarray(references).flatten().reshape(self.n_rows, 1)
