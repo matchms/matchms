@@ -1,4 +1,7 @@
-def make_charge_scalar(spectrum_in):
+from matchms.typing import SpectrumType
+
+
+def make_charge_scalar(spectrum_in: SpectrumType) -> SpectrumType:
 
     if spectrum_in is None:
         return None

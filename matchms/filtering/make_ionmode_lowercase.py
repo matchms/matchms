@@ -1,4 +1,7 @@
-def make_ionmode_lowercase(spectrum_in):
+from matchms.typing import SpectrumType
+
+
+def make_ionmode_lowercase(spectrum_in: SpectrumType) -> SpectrumType:
 
     if spectrum_in is None:
         return None

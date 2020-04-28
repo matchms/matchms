@@ -6,7 +6,7 @@ from .Spikes import Spikes
 
 class Spectrum:
     """An example docstring for a class."""
-    def __init__(self, mz, intensities, metadata=None):
+    def __init__(self, mz: numpy.array, intensities: numpy.array, metadata=None):
         """An example docstring for a constructor."""
         self.peaks = Spikes(mz=mz, intensities=intensities)
         self.losses = None
@@ -121,10 +121,10 @@ class Spectrum:
 
         return fig
 
-    def get(self, key, default=None):
+    def get(self, key: str, default=None):
         return self._metadata.get(key, default)
 
-    def set(self, key, value):
+    def set(self, key: str, value):
         self._metadata[key] = value
         return self
 
