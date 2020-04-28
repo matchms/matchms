@@ -14,6 +14,7 @@ def normalize_intensities(spectrum_in: SpectrumType) -> SpectrumType:
     if len(spectrum.peaks) > 0:
         scale_factor = numpy.max(spectrum.peaks.intensities)
         mz, intensities = spectrum.peaks
-        spectrum.peaks = Spikes(mz=mz, intensities=intensities / scale_factor)
+        normalized_intensities = intensities / scale_factor
+        spectrum.peaks = Spikes(mz=mz, intensities=normalized_intensities)
 
     return spectrum
