@@ -43,10 +43,12 @@ jobs:
         run: |
           python setup.py build
       - name: Test
+        if: matrix.os == 'ubuntu-latest'
         shell: bash -l {0}
         run: |
           pytest --cov --cov-report term --cov-report xml --junitxml=xunit-result.xml
       - name: Correct coverage paths
+        if: matrix.os == 'ubuntu-latest'
         run: sed -i "s+$PWD/++g" coverage.xml
       - name: SonarCloud Scan
         if: matrix.os == 'ubuntu-latest'
