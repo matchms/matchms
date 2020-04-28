@@ -1,4 +1,4 @@
-from matchms.typing import SpectrumType
+from ..typing import SpectrumType
 
 
 def has_valid_smiles(spectrum_in: SpectrumType) -> SpectrumType:

@@ -21,6 +21,9 @@ class Spikes:
             self.intensities.shape == other.intensities.shape and \
             numpy.allclose(self.intensities, other.intensities)
 
+    def __len__(self):
+        return self._mz.size
+
     def __getitem__(self, item):
         return [self.mz, self.intensities][item]
 

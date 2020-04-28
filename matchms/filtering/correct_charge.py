@@ -1,5 +1,5 @@
 import numpy
-from matchms.typing import SpectrumType
+from ..typing import SpectrumType
 
 
 def correct_charge(spectrum_in: SpectrumType) -> SpectrumType:

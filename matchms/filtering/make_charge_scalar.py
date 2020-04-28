@@ -1,4 +1,4 @@
-from matchms.typing import SpectrumType
+from ..typing import SpectrumType
 
 
 def make_charge_scalar(spectrum_in: SpectrumType) -> SpectrumType:

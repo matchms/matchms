@@ -1,4 +1,4 @@
-from matchms.typing import SpectrumType
+from ..typing import SpectrumType
 
 
 def add_adduct(spectrum_in: SpectrumType) -> SpectrumType:
