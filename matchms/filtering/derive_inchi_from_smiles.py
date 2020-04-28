@@ -1,9 +1,10 @@
+from matchms.typing import SpectrumType
 from matchms.utils import mol_converter
 from .has_valid_inchi import has_valid_inchi
 from .has_valid_smiles import has_valid_smiles
 
 
-def derive_inchi_from_smiles(spectrum_in):
+def derive_inchi_from_smiles(spectrum_in: SpectrumType) -> SpectrumType:
     """Find missing Inchi and derive from smiles where possible."""
 
     spectrum = spectrum_in.clone()

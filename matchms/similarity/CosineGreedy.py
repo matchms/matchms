@@ -1,5 +1,6 @@
 from numpy.matlib import repmat
 from numpy import absolute, reshape, zeros_like, where, power, argsort
+from matchms.typing import SpectrumType
 
 
 class CosineGreedy:
@@ -7,7 +8,7 @@ class CosineGreedy:
     def __init__(self, tolerance=0.3):
         self.tolerance = tolerance
 
-    def __call__(self, spectrum, reference_spectrum):
+    def __call__(self, spectrum: SpectrumType, reference_spectrum: SpectrumType) -> float:
         def calc_mz_distance():
             mz_row_vector = spectrum.mz
             mz_col_vector = reshape(reference_spectrum.mz, (n_rows, 1))

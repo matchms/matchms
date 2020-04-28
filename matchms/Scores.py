@@ -1,9 +1,10 @@
+from typing import List, Callable
 from numpy import empty, argsort, unravel_index, hstack, vstack
 
 
 class Scores:
     """An example docstring for a class definition."""
-    def __init__(self, queries, references, similarity_function):
+    def __init__(self, queries: List[object], references: List[object], similarity_function: Callable):
         """An example docstring for a constructor."""
         self.queries = hstack(queries)
         self.references = vstack(references)

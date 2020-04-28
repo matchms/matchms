@@ -1,10 +1,11 @@
+from typing import Dict
 import os
 import yaml
 from functools import lru_cache
 
 
 @lru_cache(maxsize=4)
-def load_adducts(filename=None):
+def load_adducts(filename=None) -> Dict:
 
     if filename is None:
         known_adducts_file = os.path.join(os.path.dirname(__file__), "..", "data", "known_adducts.yaml")

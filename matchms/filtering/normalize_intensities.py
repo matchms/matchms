@@ -1,7 +1,8 @@
 import numpy
+from matchms.typing import SpectrumType
 
 
-def normalize_intensities(spectrum_in):
+def normalize_intensities(spectrum_in: SpectrumType) -> SpectrumType:
     """Normalize intensities to unit height."""
 
     if spectrum_in is None:
