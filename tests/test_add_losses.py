@@ -30,7 +30,7 @@ def test_add_losses_with_precursor_mz_wrong_type():
                            metadata={"precursor_mz": "445.0"})
 
     with pytest.raises(AssertionError) as msg:
-        spectrum = add_losses(spectrum_in)
+        _ = add_losses(spectrum_in)
 
     assert str(msg.value) == "Expected 'precursor_mz' to be a scalar number."
 
