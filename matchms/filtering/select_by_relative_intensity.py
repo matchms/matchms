@@ -16,8 +16,8 @@ def select_by_relative_intensity(spectrum_in: SpectrumType, intensity_from=0.0, 
 
     if len(spectrum.peaks) > 0:
         scale_factor = numpy.max(spectrum.peaks.intensities)
-        intensities = spectrum.peaks.intensities / scale_factor
-        condition = numpy.logical_and(intensity_from <= intensities, intensities <= intensity_to)
+        normalized_intensities = spectrum.peaks.intensities / scale_factor
+        condition = numpy.logical_and(intensity_from <= normalized_intensities, normalized_intensities <= intensity_to)
         spectrum.peaks = Spikes(mz=spectrum.peaks.mz[condition],
                                 intensities=spectrum.peaks.intensities[condition])
 
