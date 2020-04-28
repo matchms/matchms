@@ -16,7 +16,7 @@ def test_user_workflow_spec2vec():
         assert q == queries[0]
 
     def evaluate_assert_set_2():
-        filtered = [triplet for triplet in scores if triplet[2] > 0.9999]
+        filtered = [triplet for triplet in scores if triplet[2] > 0.999]
         assert len(filtered) > 1, "Expected some really good scores."
 
         sorted_by_score = sorted(scores, key=lambda elem: elem[2], reverse=True)
