@@ -16,15 +16,16 @@ def test_user_workflow_spec2vec():
         assert q == queries[0]
 
     def evaluate_assert_set_2():
-        filtered = [triplet for triplet in scores if triplet[2] > 0.999]
+        filtered = [triplet for triplet in scores if triplet[2] > 0.99]
         assert len(filtered) > 1, "Expected some really good scores."
 
         sorted_by_score = sorted(scores, key=lambda elem: elem[2], reverse=True)
-        rd = sorted_by_score[0][0]
-        qd = sorted_by_score[0][1]
+        reference_document, query_document, score = sorted_by_score[0]
 
-        assert rd == references[-1], "The best match should be between two copies of documents[69]"
-        assert qd == queries[0], "The best match should be between two copies of documents[69]"
+        assert reference_document == references[-1], "The best match should be between two copies of the same document"
+        assert query_document == queries[0], "The best match should be between two copies of the same document"
+        assert reference_document._obj == query_document._obj, "The best match should be between two copies of the " \
+                                                               "same document"
 
     def apply_my_filters(s):
         s = default_filters(s)
@@ -54,8 +55,8 @@ def test_user_workflow_spec2vec():
     # define similarity_function
     spec2vec = Spec2Vec(model=model, documents=documents)
 
-    references = documents[:10]
-    queries = documents[9:]
+    references = documents[:26]
+    queries = documents[25:]
 
     # calculate scores on all combinations of references and queries
     scores = calculate_scores(references, queries, spec2vec)
