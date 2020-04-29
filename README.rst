@@ -1,6 +1,22 @@
 ################################################################################
 matchms
 ################################################################################
+Vector representation and similarity measure for mass spectrometry data.
+
+|
+
+.. list-table:: **Build status**
+   :widths: 30 30 30
+   :header-rows: 1
+
+   * - Python
+     - Anaconda
+     - Pypi
+   * - |Build|
+     - |Anaconda|
+     - |PYPI|
+
+|
 
 .. list-table::
    :widths: 25 25
@@ -27,9 +43,6 @@ matchms
    * - Code Quality
      - |Sonarcloud Quality Gate Badge| |Sonarcloud Coverage Badge|
 
-
-(Customize these badges with your own links, and check https://shields.io/ or
-https://badgen.net/ to see which other badges are available.)
 
 .. |GitHub Badge| image:: https://img.shields.io/badge/github-repo-000.svg?logo=github&labelColor=gray&color=blue
    :target: https://github.com/matchms/matchms
@@ -71,7 +84,18 @@ https://badgen.net/ to see which other badges are available.)
    :target: https://sonarcloud.io/component_measures?id=matchms_matchms&metric=Coverage&view=list
    :alt: Sonarcloud Coverage
 
-Vector representation and similarity measure for mass spectrometry data
+.. |Build| image:: https://github.com/matchms/matchms/workflows/Build/badge.svg
+   :target: https://github.com/matchms/matchms/actions?query=workflow%3A%22Build%22
+   :alt: Build
+
+.. |Anaconda| image:: https://github.com/matchms/matchms/workflows/Anaconda/badge.svg
+   :target: https://github.com/matchms/matchms/actions?query=workflow%3A%22Anaconda%22
+   :alt: Anaconda
+
+.. |PYPI| image:: https://github.com/matchms/matchms/workflows/PYPI/badge.svg
+   :target: https://github.com/matchms/matchms/actions?query=workflow%3A%22PYPI%22
+   :alt: PYPI
+
 
 The project setup is documented in `a separate document <project_setup.rst>`_.
 Feel free to remove this document (and/or the link to this document) if you
@@ -99,8 +123,8 @@ Glossary of terms
    * - Term
      - Description
    * - adduct / addition product
-     - During ionization in a mass spectrometer, the molecules of the injected compound break apart 
-       into fragments. When fragments combine into a new compound, this is known as an addition 
+     - During ionization in a mass spectrometer, the molecules of the injected compound break apart
+       into fragments. When fragments combine into a new compound, this is known as an addition
        product, or adduct.  `Wikipedia <https://en.wikipedia.org/wiki/Adduct>`__
    * - GNPS
      - Knowledge base for sharing of mass spectrometry data (`link <https://gnps.ucsd.edu/ProteoSAFe/static/gnps-splash.jsp>`__).
@@ -113,11 +137,11 @@ Glossary of terms
        dioxide is :code:`InChIKey=CURLTUGMZLYLDI-UHFFFAOYSA-N` (yes, it
        includes the substring :code:`InChIKey=`).
    * - MGF File / Mascot Generic Format
-     - A plan ASCII file format to store peak list data from a mass spectrometry experiment. Links: `matrixscience.com <http://www.matrixscience.com/help/data_file_help.html#GEN>`__, 
+     - A plan ASCII file format to store peak list data from a mass spectrometry experiment. Links: `matrixscience.com <http://www.matrixscience.com/help/data_file_help.html#GEN>`__,
        `fiehnlab.ucdavis.edu <https://fiehnlab.ucdavis.edu/projects/lipidblast/mgf-files>`__.
    * - parent mass / :code:`parent_mass`
-     - Actual mass (in Dalton) of the original compound prior to fragmentation. 
-       It can be recalculated from the precursor m/z by taking      
+     - Actual mass (in Dalton) of the original compound prior to fragmentation.
+       It can be recalculated from the precursor m/z by taking
        into account the charge state and proton/electron masses.
    * - precursor m/z / :code:`precursor_mz`
      - Mass-to-charge ratio of the compound targeted for fragmentation.
