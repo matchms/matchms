@@ -16,9 +16,10 @@ def test_cosine_greedy_without_parameters():
     norm_spectrum_1 = normalize_intensities(spectrum_1)
     norm_spectrum_2 = normalize_intensities(spectrum_2)
     cosine_greedy = CosineGreedy()
-    score, _ = cosine_greedy(norm_spectrum_1, norm_spectrum_2)
+    score, n_matches = cosine_greedy(norm_spectrum_1, norm_spectrum_2)
 
     assert score == pytest.approx(0.81421, 0.0001), "Expected different cosine score."
+    assert n_matches == 3
 
 
 def test_cosine_score_greedy_with_tolerance_0_2():
@@ -33,9 +34,10 @@ def test_cosine_score_greedy_with_tolerance_0_2():
     norm_spectrum_1 = normalize_intensities(spectrum_1)
     norm_spectrum_2 = normalize_intensities(spectrum_2)
     cosine_greedy = CosineGreedy(tolerance=0.2)
-    score, _ = cosine_greedy(norm_spectrum_1, norm_spectrum_2)
+    score, n_matches = cosine_greedy(norm_spectrum_1, norm_spectrum_2)
 
     assert score == pytest.approx(0.081966, 0.0001), "Expected different cosine score."
+    assert n_matches == 2
 
 
 def test_cosine_score_greedy_with_tolerance_2_0():
@@ -51,9 +53,10 @@ def test_cosine_score_greedy_with_tolerance_2_0():
     norm_spectrum_1 = normalize_intensities(spectrum_1)
     norm_spectrum_2 = normalize_intensities(spectrum_2)
     cosine_greedy = CosineGreedy(tolerance=2.0)
-    score, _ = cosine_greedy(norm_spectrum_1, norm_spectrum_2)
+    score, n_matches = cosine_greedy(norm_spectrum_1, norm_spectrum_2)
 
     assert score == pytest.approx(0.903412, 0.0001), "Expected different cosine score."
+    assert n_matches == 6
 
 
 def test_cosine_score_greedy_order_of_arguments():
@@ -70,7 +73,8 @@ def test_cosine_score_greedy_order_of_arguments():
     norm_spectrum_2 = normalize_intensities(spectrum_2)
 
     cosine_greedy = CosineGreedy(tolerance=2.0)
-    score_1_2, _ = cosine_greedy(norm_spectrum_1, norm_spectrum_2)
-    score_2_1, _ = cosine_greedy(norm_spectrum_2, norm_spectrum_1)
+    score_1_2, n_matches_1_2 = cosine_greedy(norm_spectrum_1, norm_spectrum_2)
+    score_2_1, n_matches_2_1 = cosine_greedy(norm_spectrum_2, norm_spectrum_1)
 
     assert score_1_2 == score_2_1, "Expected that the order of the arguments would not matter."
+    assert n_matches_1_2 == n_matches_2_1, "Expected that the order of the arguments would not matter."

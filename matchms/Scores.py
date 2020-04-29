@@ -6,10 +6,13 @@ class Scores:
     """An example docstring for a class definition."""
     def __init__(self, references: List[object], queries: List[object], similarity_function: Callable):
         """An example docstring for a constructor."""
-        self.n_rows = asarray(references).flatten().size
-        self.n_cols = asarray(queries).flatten().size
-        self.references = asarray(references).flatten().reshape(self.n_rows, 1)
-        self.queries = asarray(queries).flatten().reshape(1, self.n_cols)
+
+        Scores._validate_input_arguments(references, queries, similarity_function)
+
+        self.n_rows = len(references)
+        self.n_cols = len(queries)
+        self.references = asarray(references).reshape(self.n_rows, 1)
+        self.queries = asarray(queries).reshape(1, self.n_cols)
         self.similarity_function = similarity_function
         self._scores = empty([self.n_rows, self.n_cols], dtype="object")
         self._index = 0
@@ -32,21 +35,19 @@ class Scores:
     def __str__(self):
         return self._scores.__str__()
 
+    @staticmethod
+    def _validate_input_arguments(references, queries, similarity_function):
+        assert isinstance(references, list), "Expected input argument 'references' to be a list."
+        assert isinstance(queries, list), "Expected input argument 'queries' to be a list."
+        assert callable(similarity_function), "Expected input argument 'similarity_function' to be callable."
+
     def calculate(self):
         for i_ref, reference in enumerate(self.references[:self.n_rows, 0]):
             for i_query, query in enumerate(self.queries[0, :self.n_cols]):
                 self._scores[i_ref][i_query] = self.similarity_function(reference, query)
         return self
 
-    def reset_iterator(self):
-        self._index = 0
-
     @property
     def scores(self):
         """getter method for scores private variable"""
         return self._scores.copy()
-
-    @scores.setter
-    def scores(self, value):
-        """setter method for scores private variable"""
-        self._scores = value

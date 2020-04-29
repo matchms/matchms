@@ -9,30 +9,6 @@ from matchms import calculate_scores
 
 def test_user_workflow():
 
-    def evaluate_assert_set_1():
-        assert scores.scores[0][0][0] == pytest.approx(1, 1e-6), \
-            "Comparison of spectrum with itself should yield a perfect match."
-
-        assert scores.scores.shape == (76, 76), \
-            "Expected a table of 76 rows, 76 columns."
-
-        r, q, _, _ = scores.__next__()
-        scores.reset_iterator()
-        assert r == references[0]
-        assert q == queries[0]
-
-    def evaluate_assert_set_2():
-        # filter out self-comparisons, require at least 20 matching peaks:
-        filtered = [elem for elem in scores if elem[0] != elem[1] and elem[3] > 20]
-        # sort by score
-        sorted_by_score = sorted(filtered, key=lambda elem: elem[2], reverse=True)
-
-        assert sorted_by_score[0][0] != sorted_by_score[0][1], "Self-comparisons should have been filtered out."
-        assert sorted_by_score[0][2] >= sorted_by_score[1][2], "Expected scores to be in order of decreasing score."
-        assert sorted_by_score[0][3] > 20, "Expected number of matches to be larger than 20."
-        assert sorted_by_score[0][0] == sorted_by_score[1][1], "In this symmetrical analysis, the top 2 best results " \
-                                                               "should be between the same objects."
-
     def apply_my_filters(s):
         s = default_filters(s)
         s = add_parent_mass(s)
@@ -59,9 +35,35 @@ def test_user_workflow():
     cosine_greedy = CosineGreedy()
 
     # calculate_scores
-    scores = calculate_scores(references,
-                              queries,
-                              cosine_greedy)
+    scores = list(calculate_scores(references,
+                                   queries,
+                                   cosine_greedy))
 
-    evaluate_assert_set_1()
-    evaluate_assert_set_2()
+    # filter out self-comparisons, require at least 20 matching peaks:
+    filtered = [(reference, query, score, n_matching) for (reference, query, score, n_matching) in scores
+                if reference != query and n_matching > 20]
+
+    sorted_by_score = sorted(filtered, key=lambda elem: elem[2], reverse=True)
+
+    actual_top10 = sorted_by_score[:10]
+
+    actual_scores = [score for (reference, query, score, n_matching) in actual_top10]
+    actual_n_matching = [n_matching for (reference, query, score, n_matching) in actual_top10]
+
+    expected_scores = [
+        0.9994510368270997,
+        0.9994510368270997,
+        0.9981252309590571,
+        0.9981252309590571,
+        0.9979632203390496,
+        0.9979632203390496,
+        0.9956795920716246,
+        0.9956795920716246,
+        0.9886557001269415,
+        0.9886557001269415
+    ]
+
+    expected_n_matching = [25, 25, 27, 27, 22, 22, 23, 23, 46, 46]
+
+    assert actual_scores == pytest.approx(expected_scores, rel=1e-9)
+    assert actual_n_matching == expected_n_matching

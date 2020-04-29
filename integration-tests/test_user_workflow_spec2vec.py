@@ -1,5 +1,6 @@
 import os
 import gensim
+import pytest
 from matchms.importing import load_from_mgf
 from matchms.filtering import default_filters, require_minimum_number_of_peaks, add_parent_mass, normalize_intensities
 from matchms.filtering import select_by_relative_intensity, select_by_mz, add_losses
@@ -8,24 +9,6 @@ from matchms import calculate_scores
 
 
 def test_user_workflow_spec2vec():
-
-    def evaluate_assert_set_1():
-        r, q, _ = scores.__next__()
-        scores.reset_iterator()
-        assert r == references[0]
-        assert q == queries[0]
-
-    def evaluate_assert_set_2():
-        filtered = [triplet for triplet in scores if triplet[2] > 0.99]
-        assert len(filtered) > 1, "Expected some really good scores."
-
-        sorted_by_score = sorted(scores, key=lambda elem: elem[2], reverse=True)
-        reference_document, query_document, score = sorted_by_score[0]
-
-        assert reference_document == references[-1], "The best match should be between two copies of the same document"
-        assert query_document == queries[0], "The best match should be between two copies of the same document"
-        assert reference_document._obj == query_document._obj, "The best match should be between two copies of the " \
-                                                               "same document"
 
     def apply_my_filters(s):
         s = default_filters(s)
@@ -59,7 +42,28 @@ def test_user_workflow_spec2vec():
     queries = documents[25:]
 
     # calculate scores on all combinations of references and queries
-    scores = calculate_scores(references, queries, spec2vec)
+    scores = list(calculate_scores(references, queries, spec2vec))
 
-    evaluate_assert_set_1()
-    evaluate_assert_set_2()
+    # filter out self-comparisons
+    filtered = [(reference, query, score) for (reference, query, score) in scores if reference != query]
+
+    sorted_by_score = sorted(filtered, key=lambda elem: elem[2], reverse=True)
+
+    actual_top10 = sorted_by_score[:10]
+
+    actual_scores = [score for (reference, query, score) in actual_top10]
+
+    expected_scores = [
+        0.9999373555183411,
+        0.9985354542732239,
+        0.9984665513038635,
+        0.9984173774719238,
+        0.9975151419639587,
+        0.9972801208496094,
+        0.9971002936363220,
+        0.9962870478630066,
+        0.9959041476249695,
+        0.9956912994384766
+    ]
+
+    assert actual_scores == pytest.approx(expected_scores, rel=1e-2)
