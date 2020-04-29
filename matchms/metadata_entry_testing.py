@@ -1,4 +1,4 @@
-from ..typing import SpectrumType
+from .typing import SpectrumType
 
 
 def entry_is_empty(spectrum_in: SpectrumType,
@@ -44,3 +44,30 @@ def entry_is_empty(spectrum_in: SpectrumType,
         return True
 
     return False
+
+
+def is_valid_inchikey(inchikey):
+    """Return True if input string has format of inchikey.
+
+    This functions test if string has correct format of:
+    "XXXXXXXXXXXXXXX-XXXXXXXXXX-X",
+    with "X" being a letter of the alphabet.
+
+    Args:
+    ----
+    inchikey: str
+        Input string to test if it has format of inchikey.
+    """
+    if not isinstance(inchikey, str):
+        return False
+
+    # Harmonize string
+    inchikey = inchikey.upper().replace('"', '').replace(' ', '')
+    # Test if string looks like inchikey
+    if not len(inchikey) == 27:
+        return False
+
+    if not inchikey[14] == inchikey[25] == "-":
+        return False
+
+    return sum([char.isalpha() for char in inchikey]) == 25
