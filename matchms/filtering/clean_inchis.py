@@ -52,13 +52,7 @@ def clean_inchis(spectrum_in: SpectrumType, rescue_smiles=True) -> SpectrumType:
         print("Derived inchi from assumed smile:", inchi_core)
 
     # Make inchi string style consistent
-    if inchi.endswith('"'):
-        inchi = '"InChI=' + inchi
-    elif inchi.endswith('\n'):
-        inchi = '"InChI=' + inchi[:-2] + '"'
-    elif inchi.endswith('\n"'):
-        inchi = '"InChI=' + inchi[:-3] + '"'
-    else:
-        inchi = '"InChI=' + inchi + '"'
+    inchi = inchi.strip().split("InChI=")[-1].replace('"', '').replace("\n", "")
+    inchi = '"InChI=' + inchi + '"'
     spectrum.set("inchi", inchi)
     return spectrum

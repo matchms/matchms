@@ -14,6 +14,18 @@ def test_clean_inchis_misplaced_smiles():
     assert spectrum.get("inchi") == '"InChI=1S/C6H12/c1-2-4-6-5-3-1/h1-6H2"', "Expected different InChI"
 
 
+def test_clean_inchis_misplaced_inchikey():
+    """Test if misplaced inchikeys are corrected.
+    """
+    spectrum_in = Spectrum(mz=np.array([], dtype='float'),
+                           intensities=np.array([], dtype='float'),
+                           metadata={"inchi": "InChI=XYLJNLCSTIOKRM-UHFFFAOYSA-N"})
+
+    spectrum = clean_inchis(spectrum_in)
+    assert spectrum.get("inchi") == "N/A", "Expected empty InChI"
+    assert spectrum.get("inchikey") == "XYLJNLCSTIOKRM-UHFFFAOYSA-N"
+
+
 def test_clean_inchis_harmonize_strings():
     """Test if inchi strings are made consistent in style.
     """
