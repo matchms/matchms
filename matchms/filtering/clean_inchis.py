@@ -1,6 +1,6 @@
 from ..utils import mol_converter
 from ..typing import SpectrumType
-from .entry_is_empty import entry_is_empty
+from ..metadata_entry_testing import entry_is_empty
 
 
 def clean_inchis(spectrum_in: SpectrumType, rescue_smiles=True) -> SpectrumType:
