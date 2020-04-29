@@ -28,12 +28,12 @@ def test_user_workflow_spec2vec():
 
     def apply_my_filters(s):
         s = default_filters(s)
-        s = require_minimum_number_of_peaks(s, n_required=5)
         s = add_parent_mass(s)
         s = add_losses(s)
         s = normalize_intensities(s)
-        s = select_by_relative_intensity(s, intensity_from=0.0, intensity_to=1.0)
+        s = select_by_relative_intensity(s, intensity_from=0.01, intensity_to=1.0)
         s = select_by_mz(s, mz_from=0, mz_to=1000)
+        s = require_minimum_number_of_peaks(s, n_required=5)
         return s
 
     module_root = os.path.join(os.path.dirname(__file__), '..')
@@ -54,8 +54,8 @@ def test_user_workflow_spec2vec():
     # define similarity_function
     spec2vec = Spec2Vec(model=model, documents=documents)
 
-    references = documents[:70]
-    queries = documents[69:]
+    references = documents[:10]
+    queries = documents[9:]
 
     # calculate scores on all combinations of references and queries
     scores = calculate_scores(references, queries, spec2vec)
