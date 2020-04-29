@@ -1,15 +1,16 @@
 from ..typing import SpectrumType
 from ..utils import mol_converter
-from .has_valid_inchi import has_valid_inchi
-from .has_valid_smiles import has_valid_smiles
+from ..metadata_entry_testing import entry_is_empty
 
 
 def derive_inchi_from_smiles(spectrum_in: SpectrumType) -> SpectrumType:
     """Find missing Inchi and derive from smiles where possible."""
+    if spectrum_in is None:
+        return None
 
     spectrum = spectrum_in.clone()
 
-    if has_valid_smiles(spectrum) and not has_valid_inchi(spectrum):
+    if entry_is_empty(spectrum, "inchi") and not entry_is_empty(spectrum, "smiles"):
         smiles = spectrum.get("smiles")
         inchi = mol_converter(smiles, "smi", "inchi")
         if not inchi:
