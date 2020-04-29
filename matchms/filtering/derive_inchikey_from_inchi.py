@@ -1,15 +1,19 @@
 from ..utils import mol_converter
 from ..typing import SpectrumType
-from .has_valid_inchikey import has_valid_inchikey
-from .has_valid_inchi import has_valid_inchi
+from ..metadata_entry_testing import entry_is_empty, is_valid_inchikey
 
 
 def derive_inchikey_from_inchi(spectrum_in: SpectrumType) -> SpectrumType:
     """Find missing InchiKey and derive from Inchi where possible."""
 
-    spectrum = spectrum_in.clone()
+    if spectrum_in is None:
+        return None
 
-    if has_valid_inchi(spectrum) and not has_valid_inchikey(spectrum):
+    spectrum = spectrum_in.clone()
+    inchikey = spectrum.get("inchikey")
+
+    # TODO: replace with is_valid_inchi(inchi) if possible
+    if not entry_is_empty(spectrum, "inchi") and not is_valid_inchikey(inchikey):
         inchi = spectrum.get("inchi")
         inchikey = mol_converter(inchi, "inchi", "inchikey")
         if not inchikey:
