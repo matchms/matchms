@@ -1,6 +1,5 @@
 import os
 import gensim
-import pytest
 from matchms.importing import load_from_mgf
 from matchms.filtering import default_filters, require_minimum_number_of_peaks, add_parent_mass, normalize_intensities
 from matchms.filtering import select_by_relative_intensity, select_by_mz, add_losses
