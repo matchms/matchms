@@ -47,23 +47,16 @@ def test_user_workflow():
 
     actual_top10 = sorted_by_score[:10]
 
-    actual_scores = [score for (reference, query, score, n_matching) in actual_top10]
-    actual_n_matching = [n_matching for (reference, query, score, n_matching) in actual_top10]
-
-    expected_scores = [
-        0.9994510368270997,
-        0.9994510368270997,
-        0.9981252309590571,
-        0.9981252309590571,
-        0.9979632203390496,
-        0.9979632203390496,
-        0.9956795920716246,
-        0.9956795920716246,
-        0.9886557001269415,
-        0.9886557001269415
+    expected_top10 = [
+        (references[48], queries[50], pytest.approx(0.9994510368270997, rel=1e-9), 25),
+        (references[50], queries[48], pytest.approx(0.9994510368270997, rel=1e-9), 25),
+        (references[46], queries[48], pytest.approx(0.9981252309590571, rel=1e-9), 27),
+        (references[48], queries[46], pytest.approx(0.9981252309590571, rel=1e-9), 27),
+        (references[46], queries[50], pytest.approx(0.9979632203390496, rel=1e-9), 22),
+        (references[50], queries[46], pytest.approx(0.9979632203390496, rel=1e-9), 22),
+        (references[73], queries[74], pytest.approx(0.9956795920716246, rel=1e-9), 23),
+        (references[74], queries[73], pytest.approx(0.9956795920716246, rel=1e-9), 23),
+        (references[57], queries[59], pytest.approx(0.9886557001269415, rel=1e-9), 46),
+        (references[59], queries[57], pytest.approx(0.9886557001269415, rel=1e-9), 46),
     ]
-
-    expected_n_matching = [25, 25, 27, 27, 22, 22, 23, 23, 46, 46]
-
-    assert actual_scores == pytest.approx(expected_scores, rel=1e-9)
-    assert actual_n_matching == expected_n_matching
+    assert actual_top10 == expected_top10
