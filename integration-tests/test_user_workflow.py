@@ -41,7 +41,7 @@ def test_user_workflow():
 
     # filter out self-comparisons, require at least 20 matching peaks:
     filtered = [(reference, query, score, n_matching) for (reference, query, score, n_matching) in scores
-                if reference != query and n_matching > 20]
+                if reference != query and n_matching >= 20]
 
     sorted_by_score = sorted(filtered, key=lambda elem: elem[2], reverse=True)
 
