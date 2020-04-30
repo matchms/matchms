@@ -1,10 +1,11 @@
-from typing import List, Callable
-from numpy import empty, unravel_index, asarray
+from typing import Callable, Tuple, List
+from numpy import empty, unravel_index, asarray, ndarray
+from matchms.typing import ReferencesType, QueriesType
 
 
 class Scores:
     """An example docstring for a class definition."""
-    def __init__(self, references: List[object], queries: List[object], similarity_function: Callable):
+    def __init__(self, references: ReferencesType, queries: QueriesType, similarity_function: Callable):
         """An example docstring for a constructor."""
 
         Scores._validate_input_arguments(references, queries, similarity_function)
@@ -37,8 +38,12 @@ class Scores:
 
     @staticmethod
     def _validate_input_arguments(references, queries, similarity_function):
-        assert isinstance(references, list), "Expected input argument 'references' to be a list."
-        assert isinstance(queries, list), "Expected input argument 'queries' to be a list."
+        assert isinstance(references, (List, Tuple, ndarray)),\
+            "Expected input argument 'references' to be list or tuple or numpy.ndarray."
+
+        assert isinstance(queries, (List, Tuple, ndarray)),\
+            "Expected input argument 'queries' to be list or tuple or numpy.ndarray."
+
         assert callable(similarity_function), "Expected input argument 'similarity_function' to be callable."
 
     def calculate(self):
