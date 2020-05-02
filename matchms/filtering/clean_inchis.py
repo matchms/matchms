@@ -1,5 +1,6 @@
 from ..utils import mol_converter
 from ..typing import SpectrumType
+from ..metadata_entry_testing import entry_is_empty
 
 
 def clean_inchis(spectrum_in: SpectrumType, rescue_smiles=True) -> SpectrumType:
@@ -16,19 +17,15 @@ def clean_inchis(spectrum_in: SpectrumType, rescue_smiles=True) -> SpectrumType:
     Read spectrum, look for inchi. Then:
     1) Make line with inchi homogeneously looking like: '"InChI=..."'
     2) if rescue_smiles is True then try to detect inchi that are actually smiles
-    and convert to proper inchi (using openbabel based function from MS_functions.py).
+    and convert to proper inchi.
     """
 
     spectrum = spectrum_in.clone()
 
-    # Empirically found list of strings that represent empty entries
-    empty_entry_types = ['N/A', 'n/a', 'n\a', 'NA', 0, '0', '""', '', 'nodata',
-                         '"InChI=n/a"', '"InChI="', 'InChI=1S/N\n', '\t\r\n']
-    inchi = spectrum.get("inchi")
-    if inchi is None or inchi in empty_entry_types:
+    if entry_is_empty(spectrum, "inchi"):
         inchi = 'n/a'
     else:
-        inchi = inchi.replace(" ", "")  # Remove empty spaces
+        inchi = spectrum.get("inchi").replace(" ", "")
         if inchi.split('InChI=')[-1][0] in ['C', 'c', 'O', 'N']:
             if rescue_smiles:
                 # Try to 'rescue' given inchi which are actually smiles!
