@@ -1,6 +1,7 @@
 from .add_adduct import add_adduct
 from .add_losses import add_losses
 from .add_parent_mass import add_parent_mass
+from .clean_inchikeys import clean_inchikeys
 from .clean_inchis import clean_inchis
 from .correct_charge import correct_charge
 from .default_filters import default_filters
@@ -22,6 +23,7 @@ __all__ = [
     "add_adduct",
     "add_losses",
     "add_parent_mass",
+    "clean_inchikeys",
     "clean_inchis",
     "correct_charge",
     "default_filters",
