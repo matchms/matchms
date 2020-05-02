@@ -36,9 +36,3 @@ def test_is_valid_inchikey():
         assert is_valid_inchikey(inchikey), "Expected inchikey is True."
     for inchikey in inchikeys_false:
         assert not is_valid_inchikey(inchikey), "Expected inchikey is False."
-
-
-if __name__ == '__main__':
-    test_entry_is_empty_inchi_key()
-    test_entry_is_empty_smiles()
-    test_is_valid_inchikey()
