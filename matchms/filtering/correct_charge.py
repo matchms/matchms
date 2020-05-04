@@ -1,7 +1,8 @@
 import numpy
+from ..typing import SpectrumType
 
 
-def correct_charge(spectrum_in):
+def correct_charge(spectrum_in: SpectrumType) -> SpectrumType:
 
     if spectrum_in is None:
         return None

@@ -1,7 +1,15 @@
-from matchms import Spikes
+from ..Spikes import Spikes
 
 
 def add_losses(spectrum_in):
+
+    def precursor_mz_is_number():
+        if isinstance(precursor_mz, int):
+            return True
+        if isinstance(precursor_mz, float):
+            return True
+        return False
+
     if spectrum_in is None:
         return None
 
@@ -9,6 +17,7 @@ def add_losses(spectrum_in):
 
     precursor_mz = spectrum.get("precursor_mz")
     if precursor_mz is not None:
+        assert precursor_mz_is_number(), "Expected 'precursor_mz' to be a scalar number."
         peaks_mz, peaks_intensities = spectrum.peaks
         losses_mz = (precursor_mz - peaks_mz)[::-1]
         losses_intensities = peaks_intensities

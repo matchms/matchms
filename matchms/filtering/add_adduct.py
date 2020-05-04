@@ -1,4 +1,7 @@
-def add_adduct(spectrum_in):
+from ..typing import SpectrumType
+
+
+def add_adduct(spectrum_in: SpectrumType) -> SpectrumType:
     """Add adduct to metadata (if not present yet).
 
     Method to interpret the given compound name to find the adduct.

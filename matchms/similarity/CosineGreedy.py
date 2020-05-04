@@ -1,5 +1,6 @@
 from numpy.matlib import repmat
 from numpy import absolute, reshape, zeros_like, where, power, argsort
+from matchms.typing import SpectrumType
 
 
 class CosineGreedy:
@@ -7,7 +8,7 @@ class CosineGreedy:
     def __init__(self, tolerance=0.3):
         self.tolerance = tolerance
 
-    def __call__(self, spectrum, reference_spectrum):
+    def __call__(self, spectrum: SpectrumType, reference_spectrum: SpectrumType) -> float:
         def calc_mz_distance():
             mz_row_vector = spectrum.peaks.mz
             mz_col_vector = reshape(reference_spectrum.peaks.mz, (n_rows, 1))
@@ -43,12 +44,14 @@ class CosineGreedy:
             c_sorted = c_unordered[sortorder]
 
             score = 0
+            n_matches = 0
             for r, c in zip(r_sorted, c_sorted):
                 if intensities_product_within_tolerance[r, c] > 0:
                     score += intensities_product_within_tolerance[r, c]
+                    n_matches += 1
                     intensities_product_within_tolerance[r, :] = 0
                     intensities_product_within_tolerance[:, c] = 0
-            return score
+            return score / max(sum(squared1), sum(squared2)), n_matches
 
         n_rows = reference_spectrum.peaks.mz.size
         n_cols = spectrum.peaks.mz.size
@@ -58,4 +61,4 @@ class CosineGreedy:
         squared1 = power(spectrum.peaks.intensities, 2)
         squared2 = power(reference_spectrum.peaks.intensities, 2)
 
-        return calc_score() / max(sum(squared1), sum(squared2))
+        return calc_score()

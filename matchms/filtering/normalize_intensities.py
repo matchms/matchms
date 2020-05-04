@@ -1,8 +1,9 @@
 import numpy
-from matchms import Spikes
+from ..Spikes import Spikes
+from matchms.typing import SpectrumType
 
 
-def normalize_intensities(spectrum_in):
+def normalize_intensities(spectrum_in: SpectrumType) -> SpectrumType:
     """Normalize intensities to unit height."""
 
     if spectrum_in is None:
@@ -10,7 +11,7 @@ def normalize_intensities(spectrum_in):
 
     spectrum = spectrum_in.clone()
 
-    if spectrum.peaks.intensities.size > 0:
+    if len(spectrum.peaks) > 0:
         scale_factor = numpy.max(spectrum.peaks.intensities)
         mz, intensities = spectrum.peaks
         normalized_intensities = intensities / scale_factor

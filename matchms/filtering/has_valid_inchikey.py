@@ -1,5 +1,13 @@
-def has_valid_inchikey(spectrum):
+from ..typing import SpectrumType
+
+
+def has_valid_inchikey(spectrum_in: SpectrumType) -> SpectrumType:
     """Return True if input spectrum has a valid inchikey string."""
+
+    if spectrum_in is None:
+        return None
+
+    spectrum = spectrum_in.clone()
 
     empty_entry_types = [
         "N/A",

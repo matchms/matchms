@@ -1,6 +1,13 @@
-def has_valid_inchi(spectrum):
+from ..typing import SpectrumType
+
+
+def has_valid_inchi(spectrum_in: SpectrumType) -> SpectrumType:
 
     """Return True if input is a valid inchi string."""
+    if spectrum_in is None:
+        return None
+
+    spectrum = spectrum_in.clone()
 
     empty_entry_types = [
         "N/A",

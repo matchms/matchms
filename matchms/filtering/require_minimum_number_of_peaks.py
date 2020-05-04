@@ -1,7 +1,8 @@
 from math import ceil
+from ..typing import SpectrumType
 
 
-def require_minimum_number_of_peaks(spectrum_in, n_required=10, ratio_required=None):
+def require_minimum_number_of_peaks(spectrum_in: SpectrumType, n_required=10, ratio_required=None) -> SpectrumType:
     """Spectrum will be set to None when it has fewer peaks than required.
 
     Args:

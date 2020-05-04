@@ -35,19 +35,28 @@ def test_user_workflow():
     cosine_greedy = CosineGreedy()
 
     # calculate_scores
-    scores = calculate_scores(queries,
-                              references,
-                              cosine_greedy)
+    scores = list(calculate_scores(references,
+                                   queries,
+                                   cosine_greedy))
 
-    queries_top10, reference_top10, scores_top10, = scores.top(10, include_self_comparisons=True)
+    # filter out self-comparisons, require at least 20 matching peaks:
+    filtered = [(reference, query, score, n_matching) for (reference, query, score, n_matching) in scores
+                if reference != query and n_matching >= 20]
 
-    print(scores_top10)
+    sorted_by_score = sorted(filtered, key=lambda elem: elem[2], reverse=True)
 
-    assert scores.scores[0][0] == pytest.approx(1, 1e-6), \
-        "Comparison of spectrum with itself should yield a perfect match."
+    actual_top10 = sorted_by_score[:10]
 
-    assert scores.scores.shape == (76, 76), \
-        "Expected a table of 76 rows, 76 columns."
-
-    assert queries_top10[0][0] == reference_top10[0][0], \
-        "Expected the best match between two copies of the same spectrum."
+    expected_top10 = [
+        (references[48], queries[50], pytest.approx(0.9994510368270997, rel=1e-9), 25),
+        (references[50], queries[48], pytest.approx(0.9994510368270997, rel=1e-9), 25),
+        (references[46], queries[48], pytest.approx(0.9981252309590571, rel=1e-9), 27),
+        (references[48], queries[46], pytest.approx(0.9981252309590571, rel=1e-9), 27),
+        (references[46], queries[50], pytest.approx(0.9979632203390496, rel=1e-9), 22),
+        (references[50], queries[46], pytest.approx(0.9979632203390496, rel=1e-9), 22),
+        (references[73], queries[74], pytest.approx(0.9956795920716246, rel=1e-9), 23),
+        (references[74], queries[73], pytest.approx(0.9956795920716246, rel=1e-9), 23),
+        (references[57], queries[59], pytest.approx(0.9886557001269415, rel=1e-9), 46),
+        (references[59], queries[57], pytest.approx(0.9886557001269415, rel=1e-9), 46),
+    ]
+    assert actual_top10 == expected_top10

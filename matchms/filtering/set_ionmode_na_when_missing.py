@@ -1,4 +1,7 @@
-def set_ionmode_na_when_missing(spectrum_in):
+from ..typing import SpectrumType
+
+
+def set_ionmode_na_when_missing(spectrum_in: SpectrumType) -> SpectrumType:
 
     if spectrum_in is None:
         return None
