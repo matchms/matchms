@@ -39,7 +39,7 @@ def test_repair_inchi_inchikey_smiles_various_inchi_entered_as_smiles():
         spectrum_in = Spectrum(mz=numpy.array([], dtype="float"),
                                intensities=numpy.array([], dtype="float"),
                                metadata={"smiles": inchi})
-    
+
         spectrum = repair_inchi_inchikey_smiles(spectrum_in)
         assert spectrum is not spectrum_in
         assert spectrum.get("inchi") == inchi
@@ -47,11 +47,11 @@ def test_repair_inchi_inchikey_smiles_various_inchi_entered_as_smiles():
         assert spectrum.get("smiles") == ""
 
 
-def test_repair_inchi_inchikey_smiles_defect_inchi_entered_as_smiles():
+def test_repair_inchi_inchikey_smiles_defect_inchi_entered_as_inchi():
     """Test if incorrect inchi entry is cleaned."""
     spectrum_in = Spectrum(mz=numpy.array([], dtype="float"),
                            intensities=numpy.array([], dtype="float"),
-                           metadata={"smiles": "InChI=1S/C14H8O4/c159513711(9)14(18)128(13(7)17)42610(12)16/h16,1516H"})
+                           metadata={"inchi": "InChI=1S/C14H8O4/c159513711(9)14(18)128(13(7)17)42610(12)16/h16,1516H"})
 
     spectrum = repair_inchi_inchikey_smiles(spectrum_in)
     assert spectrum is not spectrum_in
