@@ -34,7 +34,7 @@ class SpeciesString:
 
     def clean_as_inchi(self):
         """Search for valid inchi and harmonize it."""
-        inchi_found = re.search("(1S\/|1\/)[0-9, A-Z, a-z,\.]{2,}\/(c|h)[0-9].*$",
+        inchi_found = re.search(r"(1S\/|1\/)[0-9, A-Z, a-z,\.]{2,}\/(c|h)[0-9].*$",
                                 self.dirty)
         if not inchi_found:
             self.cleaned = "unable to clean"
@@ -47,7 +47,7 @@ class SpeciesString:
 
     def clean_as_inchikey(self):
         """Search for valid inchikey and harmonize it."""
-        inchikey_found = re.search("[A-Z]{14}-[A-Z]{10}-[A-Z]", self.dirty)
+        inchikey_found = re.search(r"[A-Z]{14}-[A-Z]{10}-[A-Z]", self.dirty)
         if inchikey_found:
             self.cleaned = inchikey_found[0]
         else:
@@ -55,8 +55,8 @@ class SpeciesString:
 
     def clean_as_smiles(self):
         """Search for valid smiles and harmonize it."""
-        smiles_found = re.search("^([^J][0-9BCOHNSOPrIFla@+\-\[\]\(\)\\\/%=#$,.~&!]{6,})$",
-                                self.dirty)
+        smiles_found = re.search(r"^([^J][0-9BCOHNSOPIFKcons@+\-\[\]\(\)\\\/%=#$,.~&!|Si|Se|Br|Mg|Na|Cl|Al]{3,})$",
+                                 self.dirty)
         if not smiles_found:
             self.cleaned = "unable to clean"
         else:
@@ -81,29 +81,29 @@ class SpeciesString:
 
     def looks_like_an_inchi(self):
         """Search for first piece of InChI."""
-        if re.search("(InChI=1|1)(S\/|\/)[0-9, A-Z, a-z,\.]{2,}\/(c|h)[0-9]",
+        if re.search(r"(InChI=1|1)(S\/|\/)[0-9, A-Z, a-z,\.]{2,}\/(c|h)[0-9]",
                      self.dirty):
             return True
         return False
 
     def looks_like_an_inchikey(self):
         """Return True if string has format of inchikey."""
-        if re.search("[A-Z]{14}-[A-Z]{10}-[A-Z]", self.dirty):
+        if re.search(r"[A-Z]{14}-[A-Z]{10}-[A-Z]", self.dirty):
             return True
         return False
 
     def looks_like_a_smiles(self):
         """Return True if string is made of allowed charcters for smiles."""
-        if re.search("^([^J][0-9BCOHNSOPIFKcons@+\-\[\]\(\)\\\/%=#$,.~&!|Si|Se|Br|Mg|Na|Cl|Al]{3,})$",
-                    self.dirty):
+        if re.search(r"^([^J][0-9BCOHNSOPIFKcons@+\-\[\]\(\)\\\/%=#$,.~&!|Si|Se|Br|Mg|Na|Cl|Al]{3,})$",
+                     self.dirty):
             return True
         return False
 
     def is_valid_inchi(self, inchi):
         """Return True if input string is valid InChI.
-    
+
         This functions test if string can be read by rdkit as InChI.
-    
+
         Args:
         ----
         inchi: str
@@ -114,11 +114,11 @@ class SpeciesString:
             return True
         return False
 
-    def is_valid_smiles(smiles):
+    def is_valid_smiles(self, smiles):
         """Return True if input string is valid smiles.
-    
+
         This functions test if string can be read by rdkit as smiles.
-    
+
         Args:
         ----
         inchi: str
