@@ -1,6 +1,5 @@
 import re
-from rdkit import Chem
-
+from ..utils import is_valid_inchi, is_valid_smiles
 
 class SpeciesString:
 
@@ -37,13 +36,13 @@ class SpeciesString:
         inchi_found = re.search(r"(1S\/|1\/)[0-9, A-Z, a-z,\.]{2,}\/(c|h)[0-9].*$",
                                 self.dirty)
         if not inchi_found:
-            self.cleaned = "unable to clean"
+            self.cleaned = "issue detected:" + self.dirty
         else:
             inchi_cleaned = "InChI=" + inchi_found[0].replace('"', "")
-            if self.is_valid_inchi(inchi_cleaned):
+            if is_valid_inchi(inchi_cleaned):
                 self.cleaned = inchi_cleaned
             else:
-                self.cleaned = "unable to clean"
+                self.cleaned = "issue detected:" + self.dirty
 
     def clean_as_inchikey(self):
         """Search for valid inchikey and harmonize it."""
@@ -51,20 +50,20 @@ class SpeciesString:
         if inchikey_found:
             self.cleaned = inchikey_found[0]
         else:
-            self.cleaned = "unable to clean"
+            self.cleaned = "issue detected:" + self.dirty
 
     def clean_as_smiles(self):
         """Search for valid smiles and harmonize it."""
         smiles_found = re.search(r"^([^J][0-9BCOHNSOPIFKcons@+\-\[\]\(\)\\\/%=#$,.~&!|Si|Se|Br|Mg|Na|Cl|Al]{3,})$",
                                  self.dirty)
         if not smiles_found:
-            self.cleaned = "unable to clean"
+            self.cleaned = "issue detected:" + self.dirty
         else:
             smiles_cleaned = smiles_found[0]
-            if self.is_valid_smiles(smiles_cleaned):
+            if is_valid_smiles(smiles_cleaned):
                 self.cleaned = smiles_cleaned
             else:
-                self.cleaned = "unable to clean"
+                self.cleaned = "issue detected:" + self.dirty
 
     def guess_target(self):
 
@@ -96,35 +95,5 @@ class SpeciesString:
         """Return True if string is made of allowed charcters for smiles."""
         if re.search(r"^([^J][0-9BCOHNSOPIFKcons@+\-\[\]\(\)\\\/%=#$,.~&!|Si|Se|Br|Mg|Na|Cl|Al]{3,})$",
                      self.dirty):
-            return True
-        return False
-
-    def is_valid_inchi(self, inchi):
-        """Return True if input string is valid InChI.
-
-        This functions test if string can be read by rdkit as InChI.
-
-        Args:
-        ----
-        inchi: str
-            Input string to test if it has format of InChI.
-        """
-        mol = Chem.MolFromInchi(inchi.replace('"', ""))
-        if mol:
-            return True
-        return False
-
-    def is_valid_smiles(self, smiles):
-        """Return True if input string is valid smiles.
-
-        This functions test if string can be read by rdkit as smiles.
-
-        Args:
-        ----
-        inchi: str
-            Input string to test if it can be imported as smiles.
-        """
-        mol = Chem.MolFromSmiles(smiles)
-        if mol:
             return True
         return False
