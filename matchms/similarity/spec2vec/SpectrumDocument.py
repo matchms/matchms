@@ -4,6 +4,7 @@ from .Document import Document
 class SpectrumDocument(Document):
     def __init__(self, spectrum, n_decimals=1):
         self.n_decimals = n_decimals
+        self.weights = None
         super().__init__(obj=spectrum)
         self._add_weights()
 
