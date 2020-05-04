@@ -42,7 +42,7 @@ def test_repair_inchi_inchikey_smiles_various_inchi_entered_as_smiles():
 
         spectrum = repair_inchi_inchikey_smiles(spectrum_in)
         assert spectrum is not spectrum_in
-        assert spectrum.get("inchi") == inchi
+        assert spectrum.get("inchi") == "InChI=" + inchi.replace("InChI=", "").replace('"', "")
         assert spectrum.get("inchikey") == ""
         assert spectrum.get("smiles") == ""
 
