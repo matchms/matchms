@@ -55,7 +55,7 @@ def test_repair_inchi_inchikey_smiles_defect_inchi_entered_as_inchi():
 
     spectrum = repair_inchi_inchikey_smiles(spectrum_in)
     assert spectrum is not spectrum_in
-    assert spectrum.get("inchi") == 'unable to clean'
+    assert spectrum.get("inchi").startswith('issue detected')
     assert spectrum.get("inchikey") == ""
     assert spectrum.get("smiles") == ""
 
@@ -132,3 +132,16 @@ def test_repair_inchi_inchikey_smiles_clean_smiles_entered_as_smiles():
     assert spectrum.get("inchi") == ""
     assert spectrum.get("inchikey") == ""
     assert spectrum.get("smiles") == "C[C@H](Cc1ccccc1)N(C)CC#C"
+
+
+def test_repair_inchi_inchikey_smiles_correct_and_incorrect_entry():
+    spectrum_in = Spectrum(mz=numpy.array([], dtype="float"),
+                           intensities=numpy.array([], dtype="float"),
+                           metadata={"inchi": "InChI=1S/CH3/h1C14CH3",
+                                     "smiles": "InChI=1S/CH3/h1H3"})
+
+    spectrum = repair_inchi_inchikey_smiles(spectrum_in)
+    assert spectrum is not spectrum_in
+    assert spectrum.get("inchi") == "InChI=1S/CH3/h1H3"
+    assert spectrum.get("inchikey") == ""
+    assert spectrum.get("smiles") == ""
