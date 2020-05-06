@@ -14,7 +14,3 @@ def test_derive_smiles_from_inchi():
 
     spectrum = derive_smiles_from_inchi(spectrum_in)
     assert spectrum.get("smiles") == "C1CCCCC1", "Expected different smiles"
-
-
-if __name__ == '__main__':
-    test_derive_smiles_from_inchi()
