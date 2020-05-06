@@ -27,7 +27,7 @@ def mol_converter(mol_input, input_type, output_type):
     if mol is None:
         return None
 
-    if output_type  == "smiles":
+    if output_type == "smiles":
         smiles = Chem.MolToSmiles(mol)
         if smiles:
             return smiles
