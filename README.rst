@@ -1,5 +1,3 @@
-[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fmatchms%2Fmatchms.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fmatchms%2Fmatchms?ref=badge_shield)
-
 ################################################################################
 matchms
 ################################################################################
@@ -13,7 +11,7 @@ matchms
    * - \1. Code repository
      - |GitHub Badge|
    * - \2. License
-     - |License Badge|
+     - |License Badge||FOSSA Badge|
    * - \3. Community Registry
      - |Conda Badge| |Research Software Directory Badge|
    * - \4. Enable Citation
@@ -40,6 +38,9 @@ https://badgen.net/ to see which other badges are available.)
 .. |License Badge| image:: https://img.shields.io/github/license/citation-file-format/cff-converter-python
    :target: https://github.com/matchms/matchms
    :alt: License Badge
+.. |FOSSA Badge| image:: https://app.fossa.io/api/projects/git%2Bgithub.com%2Fmatchms%2Fmatchms.svg?type=shield
+   :target: https://app.fossa.io/projects/git%2Bgithub.com%2Fmatchms%2Fmatchms?ref=badge_shield
+   :alt: FOSSA Badge
 
 .. |Conda Badge| image:: https://anaconda.org/nlesc/matchms/badges/installer/conda.svg
    :target: https://conda.anaconda.org/nlesc
