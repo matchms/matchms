@@ -1,0 +1,17 @@
+import os
+import re
+from matchms import __version__ as expected_version
+
+
+def test_version_string_consistency():
+
+    module_root = os.path.join(os.path.dirname(__file__), '..')
+    fixture = os.path.join(module_root, "meta.yaml")
+
+    with open(fixture, "r") as f:
+        metayaml_contents = f.read()
+
+    match = re.search(r"^{% set version = \"(?P<semver>.*)\" %}$", metayaml_contents, re.MULTILINE)
+    actual_version = match["semver"]
+
+    assert expected_version == actual_version
