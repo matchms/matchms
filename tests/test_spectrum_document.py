@@ -7,7 +7,7 @@ from matchms import Spectrum
 def test_spectrum_document_init_n_decimals_default_value_no_losses():
 
     mz = numpy.array([10, 20, 30, 40], dtype="float")
-    intensities = numpy.array([0, 1, 10, 100], dtype="float")
+    intensities = numpy.array([0, 0.01, 0.1, 1], dtype="float")
     metadata = dict(precursor_mz=100.0)
     spectrum = Spectrum(mz=mz, intensities=intensities, metadata=metadata)
     spectrum_document = SpectrumDocument(spectrum)
@@ -22,7 +22,7 @@ def test_spectrum_document_init_n_decimals_default_value_no_losses():
 
 def test_spectrum_document_init_n_decimals_2_no_losses():
     mz = numpy.array([10, 20, 30, 40], dtype="float")
-    intensities = numpy.array([0, 1, 10, 100], dtype="float")
+    intensities = numpy.array([0, 0.01, 0.1, 1], dtype="float")
     metadata = dict(precursor_mz=100.0)
     spectrum = Spectrum(mz=mz, intensities=intensities, metadata=metadata)
     spectrum_document = SpectrumDocument(spectrum, n_decimals=2)
@@ -38,7 +38,7 @@ def test_spectrum_document_init_n_decimals_2_no_losses():
 def test_spectrum_document_init_n_decimals_default_value():
 
     mz = numpy.array([10, 20, 30, 40], dtype="float")
-    intensities = numpy.array([0, 1, 10, 100], dtype="float")
+    intensities = numpy.array([0, 0.01, 0.1, 1], dtype="float")
     metadata = dict(precursor_mz=100.0)
     spectrum_in = Spectrum(mz=mz, intensities=intensities, metadata=metadata)
     spectrum = add_losses(spectrum_in)
@@ -55,7 +55,7 @@ def test_spectrum_document_init_n_decimals_default_value():
 
 def test_spectrum_document_init_n_decimals_2():
     mz = numpy.array([10, 20, 30, 40], dtype="float")
-    intensities = numpy.array([0, 1, 10, 100], dtype="float")
+    intensities = numpy.array([0, 0.01, 0.1, 1], dtype="float")
     metadata = dict(precursor_mz=100.0)
     spectrum_in = Spectrum(mz=mz, intensities=intensities, metadata=metadata)
     spectrum = add_losses(spectrum_in)

@@ -35,7 +35,7 @@ def test_user_workflow_spec2vec():
     model.train([d.words for d in documents], total_examples=len(documents), epochs=20)
 
     # define similarity_function
-    spec2vec = Spec2Vec(model=model, documents=documents, weigh_by_intensity=True, intensity_weighting_power=1)
+    spec2vec = Spec2Vec(model=model, documents=documents, intensity_weighting_power=0.5)
 
     references = documents[:26]
     queries = documents[25:]
