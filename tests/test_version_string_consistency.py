@@ -15,4 +15,5 @@ def test_version_string_consistency():
     match = re.search(r"^{% set version = \"(?P<semver>.*)\" %}$", metayaml_contents, re.MULTILINE)
     actual_version = match["semver"]
 
-    assert expected_version == actual_version
+    assert expected_version == actual_version, "Expected version string used in meta.yaml to be consistent with" \
+                                               " that in matchms.__version__"
