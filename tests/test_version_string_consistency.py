@@ -4,6 +4,7 @@ from matchms import __version__ as expected_version
 
 
 def test_version_string_consistency():
+    """Check whether version in meta.yaml is consistent with that in matchms.__version__"""
 
     module_root = os.path.join(os.path.dirname(__file__), '..')
     fixture = os.path.join(module_root, "meta.yaml")
