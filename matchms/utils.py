@@ -40,9 +40,11 @@ def is_valid_inchi(inchi):
         Input string to test if it has format of InChI.
     """
     # First quick test to avoid excess in-depth testing
+    if inchi is None:
+        return False
     inchi = inchi.replace('"', "")
-    if not re.search(r"(InChI=1|1)(S\/|\/)[0-9, A-Z, a-z,\.]{2,}\/(c|h)[0-9]",
-                     inchi):
+    regexp = r"(InChI=1|1)(S\/|\/)[0-9, A-Z, a-z,\.]{2,}\/(c|h)[0-9]"
+    if not re.search(regexp, inchi):
         return False
     # Proper chemical test
     mol = Chem.MolFromInchi(inchi)
@@ -61,8 +63,11 @@ def is_valid_smiles(smiles):
     inchi: str
         Input string to test if it can be imported as smiles.
     """
-    if not re.match(r"^([^J][0-9BCOHNSOPIFKcons@+\-\[\]\(\)\\\/%=#$,.~&!|Si|Se|Br|Mg|Na|Cl|Al]{3,})$",
-                     smiles):
+    if smiles is None:
+        return False
+
+    regexp = r"^([^J][0-9BCOHNSOPIFKcons@+\-\[\]\(\)\\\/%=#$,.~&!|Si|Se|Br|Mg|Na|Cl|Al]{3,})$"
+    if not re.match(regexp, smiles):
         return False
 
     mol = Chem.MolFromSmiles(smiles)
@@ -73,6 +78,10 @@ def is_valid_smiles(smiles):
 
 def is_valid_inchikey(inchikey):
     """Return True if string has format of inchikey."""
-    if re.fullmatch(r"[A-Z]{14}-[A-Z]{10}-[A-Z]", inchikey):
+    if inchikey is None:
+        return False
+
+    regexp = r"[A-Z]{14}-[A-Z]{10}-[A-Z]"
+    if re.fullmatch(regexp, inchikey):
         return True
     return False

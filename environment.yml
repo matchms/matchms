@@ -12,6 +12,7 @@ dependencies:
   - pyteomics==4.2
   - python==3.7
   - pyyaml==5.3.1
+  - rdkit==2020.03.1
   - scipy==1.4.1
   - pip:
     - isort

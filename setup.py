@@ -42,9 +42,11 @@ setup(
         "gensim",
         "matplotlib",
         "numpy",
+        "openbabel",
         "pyteomics",
         "pyyaml",
         "scipy",
+        "rdkit"
     ],
     setup_requires=[
         'pytest-runner'

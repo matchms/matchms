@@ -1,5 +1,5 @@
 import re
-from ..utils import is_valid_inchi, is_valid_smiles
+
 
 class SpeciesString:
 
@@ -33,37 +33,30 @@ class SpeciesString:
 
     def clean_as_inchi(self):
         """Search for valid inchi and harmonize it."""
-        inchi_found = re.search(r"(1S\/|1\/)[0-9, A-Z, a-z,\.]{2,}\/(c|h)[0-9].*$",
-                                self.dirty)
-        if not inchi_found:
-            self.cleaned = "issue detected:" + self.dirty
+        regexp = r"(1S\/|1\/)[0-9, A-Z, a-z,\.]{2,}\/(c|h)[0-9].*$"
+        found = re.search(regexp, self.dirty)
+        if found is None:
+            self.cleaned = ""
         else:
-            inchi_cleaned = "InChI=" + inchi_found[0].replace('"', "")
-            if is_valid_inchi(inchi_cleaned):
-                self.cleaned = inchi_cleaned
-            else:
-                self.cleaned = "issue detected:" + self.dirty
+            self.cleaned = "InChI=" + found[0].replace('"', "")
 
     def clean_as_inchikey(self):
         """Search for valid inchikey and harmonize it."""
-        inchikey_found = re.search(r"[A-Z]{14}-[A-Z]{10}-[A-Z]", self.dirty)
-        if inchikey_found:
-            self.cleaned = inchikey_found[0]
+        regexp = r"[A-Z]{14}-[A-Z]{10}-[A-Z]"
+        found = re.search(regexp, self.dirty)
+        if found is None:
+            self.cleaned = ""
         else:
-            self.cleaned = "issue detected:" + self.dirty
+            self.cleaned = found[0]
 
     def clean_as_smiles(self):
         """Search for valid smiles and harmonize it."""
-        smiles_found = re.search(r"^([^J][0-9BCOHNSOPIFKcons@+\-\[\]\(\)\\\/%=#$,.~&!|Si|Se|Br|Mg|Na|Cl|Al]{3,})$",
-                                 self.dirty)
-        if not smiles_found:
-            self.cleaned = "issue detected:" + self.dirty
+        regexp = r"^([^J][0-9BCOHNSOPIFKcons@+\-\[\]\(\)\\\/%=#$,.~&!|Si|Se|Br|Mg|Na|Cl|Al]{3,})$"
+        found = re.search(regexp, self.dirty)
+        if found is None:
+            self.cleaned = ""
         else:
-            smiles_cleaned = smiles_found[0]
-            if is_valid_smiles(smiles_cleaned):
-                self.cleaned = smiles_cleaned
-            else:
-                self.cleaned = "issue detected:" + self.dirty
+            self.cleaned = found[0]
 
     def guess_target(self):
 
@@ -80,20 +73,15 @@ class SpeciesString:
 
     def looks_like_an_inchi(self):
         """Search for first piece of InChI."""
-        if re.search(r"(InChI=1|1)(S\/|\/)[0-9, A-Z, a-z,\.]{2,}\/(c|h)[0-9]",
-                     self.dirty):
-            return True
-        return False
+        regexp = r"(InChI=1|1)(S\/|\/)[0-9, A-Z, a-z,\.]{2,}\/(c|h)[0-9]"
+        return re.search(regexp, self.dirty) is not None
 
     def looks_like_an_inchikey(self):
         """Return True if string has format of inchikey."""
-        if re.search(r"[A-Z]{14}-[A-Z]{10}-[A-Z]", self.dirty):
-            return True
-        return False
+        regexp = r"[A-Z]{14}-[A-Z]{10}-[A-Z]"
+        return re.search(regexp, self.dirty) is not None
 
     def looks_like_a_smiles(self):
         """Return True if string is made of allowed charcters for smiles."""
-        if re.search(r"^([^J][0-9BCOHNSOPIFKcons@+\-\[\]\(\)\\\/%=#$,.~&!|Si|Se|Br|Mg|Na|Cl|Al]{3,})$",
-                     self.dirty):
-            return True
-        return False
+        regexp = r"^([^J][0-9BCOHNSOPIFKcons@+\-\[\]\(\)\\\/%=#$,.~&!|Si|Se|Br|Mg|Na|Cl|Al]{3,})$"
+        return re.search(regexp, self.dirty) is not None
