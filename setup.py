@@ -39,33 +39,15 @@ setup(
     ],
     test_suite='tests',
     install_requires=[
-        "gensim",
-        "matplotlib",
-        "numpy",
-        "openbabel",
-        "pyteomics",
-        "pyyaml",
-        "scipy",
-        "rdkit"
+        # see environment.yml
     ],
     setup_requires=[
-        'pytest-runner'
+        # see environment.yml
     ],
     tests_require=[
-        'pycodestyle',
-        'pytest',
-        'pytest-cov',
-        'pytest-runner'
+        # see environment.yml
     ],
     extras_require={
-        'dev':  [
-            'isort',
-            'prospector[with_pyroma]',
-            'recommonmark'
-            'pytest-runner',
-            'sphinx',
-            'sphinx_rtd_theme',
-            'yapf'
-        ]
+        # see environment.yml
     }
 )
