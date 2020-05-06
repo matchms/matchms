@@ -198,6 +198,3 @@ Credits
 This package was created with `Cookiecutter
 <https://github.com/audreyr/cookiecutter>`_ and the `NLeSC/python-template
 <https://github.com/NLeSC/python-template>`_.
-
-
-[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fmatchms%2Fmatchms.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fmatchms%2Fmatchms?ref=badge_large)
