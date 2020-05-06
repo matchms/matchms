@@ -20,6 +20,7 @@ def harmonize_undefined_inchikey(spectrum_in: SpectrumType, undefined="", aliase
     inchikey = spectrum.get("inchikey")
     if inchikey is None:
         # spectrum does not have an "inchikey" key in its metadata
+        spectrum.set("inchikey", undefined)
         return spectrum
 
     if inchikey in aliases:

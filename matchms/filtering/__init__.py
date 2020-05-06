@@ -2,8 +2,6 @@ from .add_adduct import add_adduct
 from .add_losses import add_losses
 from .add_parent_mass import add_parent_mass
 from .correct_charge import correct_charge
-from .clean_inchis import clean_inchis
-from .clean_inchikeys import clean_inchikeys
 from .default_filters import default_filters
 from .derive_inchi_from_smiles import derive_inchi_from_smiles
 from .derive_inchikey_from_inchi import derive_inchikey_from_inchi
@@ -29,8 +27,6 @@ __all__ = [
     "add_losses",
     "add_parent_mass",
     "correct_charge",
-    "clean_inchis",
-    "clean_inchikeys",
     "default_filters",
     "derive_inchi_from_smiles",
     "derive_inchikey_from_inchi",
