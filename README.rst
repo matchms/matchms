@@ -11,7 +11,7 @@ matchms
    * - \1. Code repository
      - |GitHub Badge|
    * - \2. License
-     - |License Badge||FOSSA Badge|
+     - |License Badge| |FOSSA Badge|
    * - \3. Community Registry
      - |Conda Badge| |Research Software Directory Badge|
    * - \4. Enable Citation
