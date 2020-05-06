@@ -1,32 +1,48 @@
 import re
-from openbabel import openbabel as ob
 from rdkit import Chem
 
 
 def mol_converter(mol_input, input_type, output_type):
-    """Convert molecular representations using openbabel.
+    """Convert molecular representations using rdkit.
 
-    Convert for instance from smiles to inchi or inchi to inchikey.
+    Convert for from smiles or inchi to inchi, smiles, or inchikey.
 
     Args:
     ----
     mol_input: str
-        Input data, e.g. inchi or smiles.
+        Input data, inchi or smiles.
     input_type: str
-        Define input type (as named in openbabel). E.g. "smi"for smiles and "inchi" for inchi.
+        Define input type: "smiles" for smiles and "inchi" for inchi.
     output_type: str
-        Define input type (as named in openbabel). E.g. "smi"for smiles and "inchi" for inchi.
+        Define output type: "smiles", "inchi", or "inchikey".
     """
-    conv = ob.OBConversion()
-    conv.SetInAndOutFormats(input_type, output_type)
-    mol = ob.OBMol()
-    if conv.ReadString(mol, mol_input):
-        mol_output = conv.WriteString(mol)
+    if input_type == "inchi":
+        mol = Chem.MolFromInchi(mol_input.replace('"', ""))  # rdkit can't handle '"'
+    elif input_type == "smiles":
+        mol = Chem.MolFromSmiles(mol_input)
     else:
-        print("Error when converting", mol_input)
-        mol_output = None
+        print("Unknown input type.")
+        return None
 
-    return mol_output
+    if mol is None:
+        return None
+
+    if output_type  == "smiles":
+        smiles = Chem.MolToSmiles(mol)
+        if smiles:
+            return smiles
+
+    if output_type == "inchi":
+        inchi = Chem.MolToInchi(mol)
+        if inchi:
+            return inchi
+
+    if output_type == "inchikey":
+        inchikey = Chem.MolToInchiKey(mol)
+        if inchikey:
+            return inchikey
+
+    return None
 
 
 def is_valid_inchi(inchi):

@@ -12,7 +12,7 @@ def derive_inchi_from_smiles(spectrum_in: SpectrumType) -> SpectrumType:
     smiles = spectrum.get("smiles")
 
     if not is_valid_inchi(inchi) and is_valid_smiles(smiles):
-        inchi = mol_converter(smiles, "smi", "inchi")
+        inchi = mol_converter(smiles, "smiles", "inchi")
         if not inchi:
             # Second try: use smiley ("smy") parser
             inchi = mol_converter(smiles, "smy", "inchi")

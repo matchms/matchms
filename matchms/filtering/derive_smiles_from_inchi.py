@@ -12,7 +12,7 @@ def derive_smiles_from_inchi(spectrum_in: SpectrumType) -> SpectrumType:
     smiles = spectrum.get("smiles")
 
     if not is_valid_smiles(smiles) and is_valid_inchi(inchi):
-        smiles = mol_converter(inchi, "inchi", "smi")
+        smiles = mol_converter(inchi, "inchi", "smiles")
         if smiles:
             smiles = smiles.replace('\n', '').replace('\t', '').replace('\r', '')
             spectrum.set("smiles", smiles)
