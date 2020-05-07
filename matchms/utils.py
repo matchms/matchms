@@ -16,32 +16,19 @@ def mol_converter(mol_input, input_type, output_type):
     output_type: str
         Define output type: "smiles", "inchi", or "inchikey".
     """
-    if input_type == "inchi":
-        mol = rdkit.Chem.MolFromInchi(mol_input.strip('"'))  # rdkit can't handle '"'
-    elif input_type == "smiles":
-        mol = rdkit.Chem.MolFromSmiles(mol_input)
-    else:
-        print("Unknown input type.")
-        return None
+    input_function = {"inchi": rdkit.Chem.MolFromInchi,
+                      "smiles": rdkit.Chem.MolFromSmiles}
+    output_function = {"inchi": rdkit.Chem.MolToInchi,
+                       "smiles": rdkit.Chem.MolToSmiles,
+                       "inchikey": rdkit.Chem.MolToInchiKey}
 
+    mol = input_function[input_type](mol_input)
     if mol is None:
         return None
 
-    if output_type == "smiles":
-        smiles = rdkit.Chem.MolToSmiles(mol)
-        if smiles:
-            return smiles
-
-    if output_type == "inchi":
-        inchi = rdkit.Chem.MolToInchi(mol)
-        if inchi:
-            return inchi
-
-    if output_type == "inchikey":
-        inchikey = rdkit.Chem.MolToInchiKey(mol)
-        if inchikey:
-            return inchikey
-
+    output = output_function[output_type](mol)
+    if output:
+        return output
     return None
 
 
