@@ -42,6 +42,19 @@ jobs:
         shell: bash -l {0}
         run: |
           python setup.py build
+      - name: Build documentation
+        shell: bash -l {0}
+        run: |
+          make coverage html
+        working-directory: readthedocs/
+        env:
+          SPHINXOPTS: '-n -W'  # enable nit-picky mode and turn warnings into errors
+      - name: Upload documentation coverage
+        if: matrix.os != 'ubuntu-latest'
+        uses: actions/upload-artifact@v1
+        with:
+          name: documentation-coverage
+          path: readthedocs/_build/coverage/python.txt
       - name: Test
         if: matrix.os != 'ubuntu-latest'
         shell: bash -l {0}
