@@ -1,5 +1,5 @@
 from matchms.utils import mol_converter
-from matchms.utils import is_valid_inchi, is_valid_inchikey
+from matchms.utils import is_valid_inchi, is_valid_inchikey, is_valid_smiles
 
 
 def test_mol_converter_smiles_to_inchi():
@@ -55,3 +55,21 @@ def test_is_valid_inchi():
         assert is_valid_inchi(inchi), "Expected inchi is True."
     for inchi in inchi_false:
         assert not is_valid_inchi(inchi), "Expected inchi is False."
+
+
+def test_is_valid_smiles():
+    """Test if strings are correctly classified."""
+    smiles_true = ["CN1COCN(CC2=CN=C(Cl)S2)\C1=N\[N+]([O-])=O",
+                  "CN1N(C(=O)C=C1C)c1ccccc1",
+                  "COC(=O)C1=CN=CC=N1"
+                  ]
+    smiles_false = ["CN1N(C(=O)C=C1C)c1cccccx1",
+                   "CN1COCN(CC2=CN=C(Cl)S2)\C1=N\[N+++]([O-])=O",
+                   "COC(=O[)]C1=CN=CC=N1",
+                   "1S/C2H7N3/c1-5-2(3)4"
+                   ]
+
+    for smiles in smiles_true:
+        assert is_valid_smiles(smiles), "Expected smiles is True."
+    for smiles in smiles_false:
+        assert not is_valid_smiles(smiles), "Expected smiles is False."
