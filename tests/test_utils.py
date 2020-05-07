@@ -33,8 +33,7 @@ def test_is_valid_inchikey():
         "XYLJNLCSTIOKRM-UHFFFAOYSA-NN",
         "Brcc(NC2=NCN2)-ccc3nccnc1-3",
         "2YLJNLCSTIOKRM-UHFFFAOYSA-N",
-        "XYLJNLCSTIOKRM-aaaaaaaaaa-a"
-        ]
+        "XYLJNLCSTIOKRM-aaaaaaaaaa-a"]
 
     for inchikey in inchikeys_true:
         assert is_valid_inchikey(inchikey), "Expected inchikey is True."
@@ -46,14 +45,12 @@ def test_is_valid_inchi():
     """Test if strings are correctly classified."""
     inchi_true = [
         "InChI=1S/C2H7N3/c1-5-2(3)4/h1H3,(H4,3,4,5)",
-        '"InChI=1S/C2H7N3/c1-5-2(3)4/h1H3,(H4,3,4,5)"'
-        ]
+        '"InChI=1S/C2H7N3/c1-5-2(3)4/h1H3,(H4,3,4,5)"']
     inchi_false = [
         "1S/C2H7N3/c1-5-2(3)4/h1H3,(H4,3,4,5)",
         "InChI=1S/C2H7N3/c152(3)4/h1H3,(H4,3,4,5)",
         "InChI=C2H7N3/c1-5-2(3)4/h1H3,(H4,3,4,5)",
-        "InChI=1S/C2H7N3/c1-5-2(3)"
-        ]
+        "InChI=1S/C2H7N3/c1-5-2(3)"]
 
     for inchi in inchi_true:
         assert is_valid_inchi(inchi), "Expected inchi is True."
@@ -66,14 +63,12 @@ def test_is_valid_smiles():
     smiles_true = [
         r"CN1COCN(CC2=CN=C(Cl)S2)\C1=N\[N+]([O-])=O",
         r"CN1N(C(=O)C=C1C)c1ccccc1",
-        r"COC(=O)C1=CN=CC=N1"
-        ]
+        r"COC(=O)C1=CN=CC=N1"]
     smiles_false = [
         r"CN1N(C(=O)C=C1C)c1cccccx1",
         r"CN1COCN(CC2=CN=C(Cl)S2)\C1=N\[N+++]([O-])=O",
         r"COC(=O[)]C1=CN=CC=N1",
-        r"1S/C2H7N3/c1-5-2(3)4"
-        ]
+        r"1S/C2H7N3/c1-5-2(3)4"]
 
     for smiles in smiles_true:
         assert is_valid_smiles(smiles), "Expected smiles is True."
