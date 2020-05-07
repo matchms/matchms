@@ -1,5 +1,5 @@
-from matplotlib import pyplot as plt
 import numpy
+from matplotlib import pyplot as plt
 from scipy.optimize import curve_fit
 from .Spikes import Spikes
 

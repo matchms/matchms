@@ -1,5 +1,7 @@
-from ..utils import mol_converter, is_valid_inchi, is_valid_inchikey
 from ..typing import SpectrumType
+from ..utils import is_valid_inchi
+from ..utils import is_valid_inchikey
+from ..utils import mol_converter
 
 
 def derive_inchikey_from_inchi(spectrum_in: SpectrumType) -> SpectrumType:

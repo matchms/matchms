@@ -1,5 +1,5 @@
-import numpy as np
 from typing import List
+import numpy as np
 from pyteomics.mgf import MGF
 from ..Spectrum import Spectrum
 

@@ -12,13 +12,13 @@ from .harmonize_undefined_inchikey import harmonize_undefined_inchikey
 from .harmonize_undefined_smiles import harmonize_undefined_smiles
 from .make_charge_scalar import make_charge_scalar
 from .make_ionmode_lowercase import make_ionmode_lowercase
-from .set_ionmode_na_when_missing import set_ionmode_na_when_missing
 from .normalize_intensities import normalize_intensities
 from .repair_inchi_inchikey_smiles import repair_inchi_inchikey_smiles
 from .require_minimum_number_of_peaks import require_minimum_number_of_peaks
 from .select_by_intensity import select_by_intensity
 from .select_by_mz import select_by_mz
 from .select_by_relative_intensity import select_by_relative_intensity
+from .set_ionmode_na_when_missing import set_ionmode_na_when_missing
 from .SpeciesString import SpeciesString
 
 

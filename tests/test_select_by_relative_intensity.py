@@ -1,7 +1,7 @@
-from matchms import Spectrum
-from matchms.filtering import select_by_relative_intensity
 import numpy
 import pytest
+from matchms import Spectrum
+from matchms.filtering import select_by_relative_intensity
 
 
 def test_select_by_relative_intensity_no_parameters():

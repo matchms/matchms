@@ -1,10 +1,14 @@
 import os
 import pytest
-from matchms.importing import load_from_mgf
-from matchms.filtering import default_filters, add_parent_mass, normalize_intensities, require_minimum_number_of_peaks
-from matchms.filtering import select_by_relative_intensity, select_by_mz
-from matchms.similarity import CosineGreedy
 from matchms import calculate_scores
+from matchms.filtering import add_parent_mass
+from matchms.filtering import default_filters
+from matchms.filtering import normalize_intensities
+from matchms.filtering import require_minimum_number_of_peaks
+from matchms.filtering import select_by_mz
+from matchms.filtering import select_by_relative_intensity
+from matchms.importing import load_from_mgf
+from matchms.similarity import CosineGreedy
 
 
 def test_user_workflow():

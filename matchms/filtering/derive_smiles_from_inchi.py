@@ -1,5 +1,7 @@
-from ..utils import mol_converter, is_valid_smiles, is_valid_inchi
 from ..typing import SpectrumType
+from ..utils import is_valid_inchi
+from ..utils import is_valid_smiles
+from ..utils import mol_converter
 
 
 def derive_smiles_from_inchi(spectrum_in: SpectrumType) -> SpectrumType:

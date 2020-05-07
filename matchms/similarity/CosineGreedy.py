@@ -1,5 +1,10 @@
+from numpy import absolute
+from numpy import argsort
+from numpy import power
+from numpy import reshape
+from numpy import where
+from numpy import zeros_like
 from numpy.matlib import repmat
-from numpy import absolute, reshape, zeros_like, where, power, argsort
 from matchms.typing import SpectrumType
 
 

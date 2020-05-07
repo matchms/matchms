@@ -1,6 +1,6 @@
 import numpy
-from matchms import Spectrum
 from matplotlib import pyplot as plt
+from matchms import Spectrum
 
 
 def test_spectrum_plot_with_histogram_unspecified():

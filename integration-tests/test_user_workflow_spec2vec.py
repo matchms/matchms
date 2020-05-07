@@ -1,10 +1,16 @@
 import os
 import gensim
-from matchms.importing import load_from_mgf
-from matchms.filtering import default_filters, require_minimum_number_of_peaks, add_parent_mass, normalize_intensities
-from matchms.filtering import select_by_relative_intensity, select_by_mz, add_losses
-from matchms.similarity.spec2vec import SpectrumDocument, Spec2Vec
 from matchms import calculate_scores
+from matchms.filtering import add_losses
+from matchms.filtering import add_parent_mass
+from matchms.filtering import default_filters
+from matchms.filtering import normalize_intensities
+from matchms.filtering import require_minimum_number_of_peaks
+from matchms.filtering import select_by_mz
+from matchms.filtering import select_by_relative_intensity
+from matchms.importing import load_from_mgf
+from matchms.similarity.spec2vec import Spec2Vec
+from matchms.similarity.spec2vec import SpectrumDocument
 
 
 def test_user_workflow_spec2vec():
@@ -52,4 +58,4 @@ def test_user_workflow_spec2vec():
 
     actual_scores = [score for (reference, query, score) in actual_top10]
 
-    assert max(actual_scores) > 0.99
+    assert max(actual_scores) > 0.98

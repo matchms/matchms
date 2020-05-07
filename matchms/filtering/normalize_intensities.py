@@ -1,6 +1,6 @@
 import numpy
-from ..Spikes import Spikes
 from matchms.typing import SpectrumType
+from ..Spikes import Spikes
 
 
 def normalize_intensities(spectrum_in: SpectrumType) -> SpectrumType:

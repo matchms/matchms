@@ -1,6 +1,12 @@
-from typing import Callable, Tuple, List
-from numpy import empty, unravel_index, asarray, ndarray
-from matchms.typing import ReferencesType, QueriesType
+from typing import Callable
+from typing import List
+from typing import Tuple
+from numpy import asarray
+from numpy import empty
+from numpy import ndarray
+from numpy import unravel_index
+from matchms.typing import QueriesType
+from matchms.typing import ReferencesType
 
 
 class Scores:

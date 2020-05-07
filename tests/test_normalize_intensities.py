@@ -1,6 +1,6 @@
+import numpy
 from matchms import Spectrum
 from matchms.filtering import normalize_intensities
-import numpy
 
 
 def test_normalize_intensities():

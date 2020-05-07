@@ -1,7 +1,7 @@
-from matchms import Spectrum
-from matchms.filtering import add_losses
 import numpy
 import pytest
+from matchms import Spectrum
+from matchms.filtering import add_losses
 
 
 def test_add_losses():
