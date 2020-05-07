@@ -80,7 +80,7 @@ Install matchms from PyPI with
 
 .. code-block:: console
 
-  conda install matchms --channel nlesc
+  conda install --channel nlesc matchms
 
 Glossary of terms
 =================
