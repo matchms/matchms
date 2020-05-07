@@ -22,7 +22,7 @@ def mol_converter(mol_input, input_type, output_type):
                        "smiles": Chem.MolToSmiles,
                        "inchikey": Chem.MolToInchiKey}
 
-    mol = input_function[input_type](mol_input)
+    mol = input_function[input_type](mol_input.strip('"'))
     if mol is None:
         return None
 
