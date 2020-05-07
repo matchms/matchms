@@ -1,5 +1,5 @@
 import re
-import rdkit
+from rdkit import Chem
 
 
 def mol_converter(mol_input, input_type, output_type):
@@ -16,11 +16,11 @@ def mol_converter(mol_input, input_type, output_type):
     output_type: str
         Define output type: "smiles", "inchi", or "inchikey".
     """
-    input_function = {"inchi": rdkit.Chem.MolFromInchi,
-                      "smiles": rdkit.Chem.MolFromSmiles}
-    output_function = {"inchi": rdkit.Chem.MolToInchi,
-                       "smiles": rdkit.Chem.MolToSmiles,
-                       "inchikey": rdkit.Chem.MolToInchiKey}
+    input_function = {"inchi": Chem.MolFromInchi,
+                      "smiles": Chem.MolFromSmiles}
+    output_function = {"inchi": Chem.MolToInchi,
+                       "smiles": Chem.MolToSmiles,
+                       "inchikey": Chem.MolToInchiKey}
 
     mol = input_function[input_type](mol_input)
     if mol is None:
@@ -50,7 +50,7 @@ def is_valid_inchi(inchi):
     if not re.search(regexp, inchi):
         return False
     # Proper chemical test
-    mol = rdkit.Chem.MolFromInchi(inchi)
+    mol = Chem.MolFromInchi(inchi)
     if mol:
         return True
     return False
@@ -73,7 +73,7 @@ def is_valid_smiles(smiles):
     if not re.match(regexp, smiles):
         return False
 
-    mol = rdkit.Chem.MolFromSmiles(smiles)
+    mol = Chem.MolFromSmiles(smiles)
     if mol:
         return True
     return False
