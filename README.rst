@@ -134,6 +134,7 @@ To install matchms, do:
   cd matchms
   conda env create
   conda activate matchms
+  pip install --editable .
 
 Run the linter with:
 
