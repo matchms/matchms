@@ -50,7 +50,7 @@ jobs:
         env:
           SPHINXOPTS: '-n'  # enable nit-picky mode
       - name: Upload documentation coverage
-        if: matrix.os != 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-latest'
         uses: actions/upload-artifact@v1
         with:
           name: documentation-coverage
