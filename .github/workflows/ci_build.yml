@@ -38,6 +38,9 @@ jobs:
       - name: Check style against standards using prospector
         shell: bash -l {0}
         run: prospector -o grouped -o pylint:pylint-report.txt
+      - name: Check whether import statements are used consistently
+        shell: bash -l {0}
+        run: isort --recursive --check-only matchms tests integration-tests
       - name: Build
         shell: bash -l {0}
         run: |
