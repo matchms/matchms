@@ -60,14 +60,14 @@ def test_is_valid_inchi():
 def test_is_valid_smiles():
     """Test if strings are correctly classified."""
     smiles_true = ["CN1COCN(CC2=CN=C(Cl)S2)\C1=N\[N+]([O-])=O",
-                  "CN1N(C(=O)C=C1C)c1ccccc1",
-                  "COC(=O)C1=CN=CC=N1"
-                  ]
-    smiles_false = ["CN1N(C(=O)C=C1C)c1cccccx1",
-                   "CN1COCN(CC2=CN=C(Cl)S2)\C1=N\[N+++]([O-])=O",
-                   "COC(=O[)]C1=CN=CC=N1",
-                   "1S/C2H7N3/c1-5-2(3)4"
+                   "CN1N(C(=O)C=C1C)c1ccccc1",
+                   "COC(=O)C1=CN=CC=N1"
                    ]
+    smiles_false = ["CN1N(C(=O)C=C1C)c1cccccx1",
+                    "CN1COCN(CC2=CN=C(Cl)S2)\C1=N\[N+++]([O-])=O",
+                    "COC(=O[)]C1=CN=CC=N1",
+                    "1S/C2H7N3/c1-5-2(3)4"
+                    ]
 
     for smiles in smiles_true:
         assert is_valid_smiles(smiles), "Expected smiles is True."
