@@ -12,8 +12,8 @@ class CosineGreedy:
             mz_row_vector = spectrum.peaks.mz
             mz_col_vector = numpy.reshape(reference_spectrum.peaks.mz, (n_rows, 1))
 
-            mz1 = numpy.matlib.repmat(mz_row_vector, n_rows, 1)
-            mz2 = numpy.matlib.repmat(mz_col_vector, 1, n_cols)
+            mz1 = numpy.tile(mz_row_vector, (n_rows, 1))
+            mz2 = numpy.tile(mz_col_vector, (1, n_cols))
 
             return mz1 - mz2
 
@@ -21,8 +21,8 @@ class CosineGreedy:
             intensities_row_vector = spectrum.peaks.intensities
             intensities_col_vector = numpy.reshape(reference_spectrum.peaks.intensities, (n_rows, 1))
 
-            intensities1 = numpy.matlib.repmat(intensities_row_vector, n_rows, 1)
-            intensities2 = numpy.matlib.repmat(intensities_col_vector, 1, n_cols)
+            intensities1 = numpy.tile(intensities_row_vector, (n_rows, 1))
+            intensities2 = numpy.tile(intensities_col_vector, (1, n_cols))
 
             return intensities1 * intensities2
 
