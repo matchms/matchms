@@ -48,7 +48,7 @@ jobs:
           make coverage html
         working-directory: readthedocs/
         env:
-          SPHINXOPTS: '-n -W'  # enable nit-picky mode and turn warnings into errors
+          SPHINXOPTS: '-n'  # enable nit-picky mode
       - name: Upload documentation coverage
         if: matrix.os != 'ubuntu-latest'
         uses: actions/upload-artifact@v1
