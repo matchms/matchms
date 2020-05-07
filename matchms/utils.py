@@ -1,5 +1,5 @@
 import re
-from rdkit import Chem
+import rdkit
 
 
 def mol_converter(mol_input, input_type, output_type):
@@ -17,9 +17,9 @@ def mol_converter(mol_input, input_type, output_type):
         Define output type: "smiles", "inchi", or "inchikey".
     """
     if input_type == "inchi":
-        mol = Chem.MolFromInchi(mol_input.replace('"', ""))  # rdkit can't handle '"'
+        mol = rdkit.Chem.MolFromInchi(mol_input.strip('"'))  # rdkit can't handle '"'
     elif input_type == "smiles":
-        mol = Chem.MolFromSmiles(mol_input)
+        mol = rdkit.Chem.MolFromSmiles(mol_input)
     else:
         print("Unknown input type.")
         return None
@@ -28,17 +28,17 @@ def mol_converter(mol_input, input_type, output_type):
         return None
 
     if output_type == "smiles":
-        smiles = Chem.MolToSmiles(mol)
+        smiles = rdkit.Chem.MolToSmiles(mol)
         if smiles:
             return smiles
 
     if output_type == "inchi":
-        inchi = Chem.MolToInchi(mol)
+        inchi = rdkit.Chem.MolToInchi(mol)
         if inchi:
             return inchi
 
     if output_type == "inchikey":
-        inchikey = Chem.MolToInchiKey(mol)
+        inchikey = rdkit.Chem.MolToInchiKey(mol)
         if inchikey:
             return inchikey
 
@@ -58,12 +58,12 @@ def is_valid_inchi(inchi):
     # First quick test to avoid excess in-depth testing
     if inchi is None:
         return False
-    inchi = inchi.replace('"', "")
+    inchi = inchi.strip('"')
     regexp = r"(InChI=1|1)(S\/|\/)[0-9, A-Z, a-z,\.]{2,}\/(c|h)[0-9]"
     if not re.search(regexp, inchi):
         return False
     # Proper chemical test
-    mol = Chem.MolFromInchi(inchi)
+    mol = rdkit.Chem.MolFromInchi(inchi)
     if mol:
         return True
     return False
@@ -86,7 +86,7 @@ def is_valid_smiles(smiles):
     if not re.match(regexp, smiles):
         return False
 
-    mol = Chem.MolFromSmiles(smiles)
+    mol = rdkit.Chem.MolFromSmiles(smiles)
     if mol:
         return True
     return False

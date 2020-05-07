@@ -14,7 +14,7 @@ def derive_inchi_from_smiles(spectrum_in: SpectrumType) -> SpectrumType:
     if not is_valid_inchi(inchi) and is_valid_smiles(smiles):
         inchi = mol_converter(smiles, "smiles", "inchi")
         if inchi:
-            inchi = inchi.replace('\n', '').replace('\t', '').replace('\r', '')
+            inchi = inchi.rstrip()
             spectrum.set("inchi", inchi)
         else:
             print("Could not convert smiles", smiles, "to InChI.")
