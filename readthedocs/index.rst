@@ -6,12 +6,13 @@
 Welcome to matchms's documentation!
 ===================================
 
+Vector representation of mass spectral data (e.g. MS-MS) and spectral similarity measure.
+
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Contents:
 
-   matchms
-
+   API <api/matchms.rst>
 
 Indices and tables
 ==================
