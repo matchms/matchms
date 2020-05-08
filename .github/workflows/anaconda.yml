@@ -1,4 +1,4 @@
-name: 'Anaconda'
+name: 'Anaconda Build and Publish'
 
 on:
   release:

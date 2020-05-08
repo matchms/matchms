@@ -5,19 +5,6 @@ Vector representation and similarity measure for mass spectrometry data.
 
 |
 
-.. list-table:: **Build status**
-   :widths: 30 30 30
-   :header-rows: 1
-
-   * - Python
-     - Anaconda
-     - Pypi
-   * - |Build|
-     - |Anaconda|
-     - |PYPI|
-
-|
-
 .. list-table::
    :widths: 25 25
    :header-rows: 1
@@ -37,7 +24,7 @@ Vector representation and similarity measure for mass spectrometry data.
    * - **Other best practices**
      -
    * - Continuous integration
-     - |GitHub Actions Badge|
+     - |Python Build| |Anaconda Build and Publish| |PyPI Publish|
    * - Documentation
      - |ReadTheDocs Badge|
    * - Code Quality
@@ -84,17 +71,17 @@ Vector representation and similarity measure for mass spectrometry data.
    :target: https://sonarcloud.io/component_measures?id=matchms_matchms&metric=Coverage&view=list
    :alt: Sonarcloud Coverage
 
-.. |Build| image:: https://github.com/matchms/matchms/workflows/Build/badge.svg
-   :target: https://github.com/matchms/matchms/actions?query=workflow%3A%22Build%22
-   :alt: Build
+.. |Python Build| image:: https://github.com/matchms/matchms/workflows/Python%20Build/badge.svg
+   :target: https://github.com/matchms/matchms/actions?query=workflow%3A%22Python%20Build%22
+   :alt: Python Build
 
-.. |Anaconda| image:: https://github.com/matchms/matchms/workflows/Anaconda/badge.svg
-   :target: https://github.com/matchms/matchms/actions?query=workflow%3A%22Anaconda%22
-   :alt: Anaconda
+.. |Anaconda Build and Publish| image:: https://github.com/matchms/matchms/workflows/Anaconda%20Build%20and%20Publish/badge.svg
+   :target: https://github.com/matchms/matchms/actions?query=workflow%3A%22Anaconda%20Build%20and%20Publish%22
+   :alt: Anaconda Build and Publish
 
-.. |PYPI| image:: https://github.com/matchms/matchms/workflows/PYPI/badge.svg
-   :target: https://github.com/matchms/matchms/actions?query=workflow%3A%22PYPI%22
-   :alt: PYPI
+.. |PyPI Publish| image:: https://github.com/matchms/matchms/workflows/PyPI%20Publish/badge.svg
+   :target: https://github.com/matchms/matchms/actions?query=workflow%3A%22PyPI%20Publish%22
+   :alt: PyPI Publish
 
 
 The project setup is documented in `a separate document <project_setup.rst>`_.
