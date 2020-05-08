@@ -1,41 +1,81 @@
-from matchms import Scores
 import numpy
+import pytest
+from matchms import Scores
 
 
-def test_scores_init():
+class DummySimilarityFunction:
+    def __init__(self):
+        """constructor"""
 
-    scores = Scores(queries=numpy.asarray(["q0", "q1"]),
-                    references=numpy.asarray(["r0", "r1", "r2"]),
-                    similarity_function=None)
+    def __call__(self, reference, query):
+        """call method"""
+        s = reference + query
+        return s, len(s)
 
+
+def test_scores_init_with_list():
+
+    dummy_similarity_function = DummySimilarityFunction()
+    scores = Scores(references=["r0", "r1", "r2"],
+                    queries=["q0", "q1"],
+                    similarity_function=dummy_similarity_function)
     assert scores.scores.shape == (3, 2)
 
 
-def test_scores_sort():
+def test_scores_init_with_tuple():
 
-    scores = Scores(queries=numpy.asarray(["q0", "q1"]),
-                    references=numpy.asarray(["r0", "r1", "r2"]),
-                    similarity_function=None)
-
-    scores.scores = numpy.asarray([[1, 2], [5, 4], [3, 6]], dtype="float")
-
-    queries_sorted, references_sorted, scores_sorted = scores.sort()
-
-    assert numpy.all(queries_sorted == numpy.asarray([["q1"], ["q0"], ["q1"], ["q0"], ["q1"], ["q0"]]))
-    assert numpy.all(references_sorted == numpy.asarray([["r2"], ["r1"], ["r1"], ["r2"], ["r0"], ["r0"]]))
-    assert numpy.all(scores_sorted == numpy.arange(1, 7)[::-1].reshape(6, 1))
+    dummy_similarity_function = DummySimilarityFunction()
+    scores = Scores(references=("r0", "r1", "r2"),
+                    queries=("q0", "q1"),
+                    similarity_function=dummy_similarity_function)
+    assert scores.scores.shape == (3, 2)
 
 
-def test_scores_top():
+def test_scores_init_with_numpy_array():
 
-    scores = Scores(queries=numpy.asarray(["q0", "q1"]),
-                    references=numpy.asarray(["r0", "q1", "r2"]),
-                    similarity_function=None)
+    dummy_similarity_function = DummySimilarityFunction()
+    scores = Scores(references=numpy.asarray(["r0", "r1", "r2"]),
+                    queries=numpy.asarray(["q0", "q1"]),
+                    similarity_function=dummy_similarity_function)
+    assert scores.scores.shape == (3, 2)
 
-    scores.scores = numpy.asarray([[1, 2], [4, 5], [3, 6]], dtype="float")
 
-    queries_top_2, references_top_2, scores_top_2 = scores.top(2, include_self_comparisons=False)
+def test_scores_init_with_references_dict():
 
-    assert numpy.all(queries_top_2 == numpy.asarray([["q1"], ["q0"]]))
-    assert numpy.all(references_top_2 == numpy.asarray([["r2"], ["q1"]]))
-    assert numpy.all(scores_top_2 == numpy.asarray([[6.], [4.]], dtype="float"))
+    dummy_similarity_function = DummySimilarityFunction()
+    with pytest.raises(AssertionError) as msg:
+        _ = Scores(references=dict(k0="r0", k1="r1", k2="r2"),
+                   queries=["q0", "q1"],
+                   similarity_function=dummy_similarity_function)
+
+    assert str(msg.value) == "Expected input argument 'references' to be list or tuple or numpy.ndarray."
+
+
+def test_scores_init_with_queries_dict():
+
+    dummy_similarity_function = DummySimilarityFunction()
+    with pytest.raises(AssertionError) as msg:
+        _ = Scores(references=["r0", "r1", "r2"],
+                   queries=dict(k0="q0", k1="q1"),
+                   similarity_function=dummy_similarity_function)
+
+    assert str(msg.value) == "Expected input argument 'queries' to be list or tuple or numpy.ndarray."
+
+
+def test_scores_next():
+
+    dummy_similarity_function = DummySimilarityFunction()
+    scores = Scores(references=["r", "rr", "rrr"],
+                    queries=["q", "qq"],
+                    similarity_function=dummy_similarity_function).calculate()
+
+    actual = list(scores)
+    expected = [
+        ("r", "q", "rq", 2),
+        ("r", "qq", "rqq", 3),
+        ("rr", "q", "rrq", 3),
+        ("rr", "qq", "rrqq", 4),
+        ("rrr", "q", "rrrq", 4),
+        ("rrr", "qq", "rrrqq", 5)
+    ]
+    assert actual == expected

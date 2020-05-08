@@ -1,8 +1,8 @@
 name: matchms
 channels:
-  - defaults
-  - conda-forge
   - bioconda
+  - conda-forge
+  - defaults
 dependencies:
   - gensim==3.8.0
   - matplotlib==3.2.1
@@ -12,12 +12,18 @@ dependencies:
   - pyteomics==4.2
   - python==3.7
   - pyyaml==5.3.1
+  - rdkit==2020.03.1
   - scipy==1.4.1
   - pip:
     - isort
     - prospector[with_pyroma]
+    - pycodestyle
     - pytest
     - pytest-cov
-    - pycodestyle
+    - pytest-runner
+    - recommonmark
     - ruamel.yaml
+    - sphinx
+    - sphinx_rtd_theme
+    - sphinxcontrib-apidoc
     - yapf

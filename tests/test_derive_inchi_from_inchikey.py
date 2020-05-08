@@ -13,7 +13,3 @@ def test_derive_inchikey_from_inchi():
 
     spectrum = derive_inchikey_from_inchi(spectrum_in)
     assert spectrum.get("inchikey")[:14] == 'XDTMQSROBMDMFD', "Expected different inchikey"
-
-
-if __name__ == '__main__':
-    test_derive_inchikey_from_inchi()

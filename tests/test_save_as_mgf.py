@@ -53,8 +53,3 @@ def test_save_as_mgf_spectrum_list():
         assert mgf_content[5] == mgf_content[12] == "END IONS\n"
         assert mgf_content[1].split("=")[1] == "test1\n"
         assert mgf_content[8].split("=")[1] == "test2\n"
-
-
-if __name__ == "__main__":
-    test_save_as_mgf_single_spectrum()
-    test_save_as_mgf_spectrum_list()

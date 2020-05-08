@@ -84,10 +84,6 @@ Vector representation and similarity measure for mass spectrometry data.
    :alt: PyPI Publish
 
 
-The project setup is documented in `a separate document <project_setup.rst>`_.
-Feel free to remove this document (and/or the link to this document) if you
-don't need it.
-
 ***********************
 Documentation for users
 ***********************
@@ -99,7 +95,7 @@ Install matchms from PyPI with
 
 .. code-block:: console
 
-  pip install --user matchms
+  conda install --channel nlesc matchms
 
 Glossary of terms
 =================
@@ -151,15 +147,21 @@ To install matchms, do:
 
   git clone https://github.com/matchms/matchms.git
   cd matchms
-  conda env create --name matchms --file=environment.yml
+  conda env create
   conda activate matchms
-  pip install .
+  pip install --editable .
+
+Run the linter with:
+
+.. code-block:: console
+
+  prospector
 
 Run tests (including coverage) with:
 
 .. code-block:: console
 
-  python setup.py test
+  pytest
 
 Flowchart
 =========
