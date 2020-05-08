@@ -2,6 +2,18 @@ import re
 from rdkit import Chem
 
 
+def convert_smiles_to_inchi(smiles):
+    return mol_converter(smiles, "smiles", "inchi")
+
+
+def convert_inchi_to_smiles(inchi):
+    return mol_converter(inchi, "inchi", "smiles")
+
+
+def convert_inchi_to_inchikey(inchi):
+    return mol_converter(inchi, "inchi", "inchikey")
+
+
 def mol_converter(mol_input, input_type, output_type):
     """Convert molecular representations using rdkit.
 

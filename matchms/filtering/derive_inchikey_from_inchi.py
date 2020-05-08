@@ -1,5 +1,5 @@
-from ..utils import mol_converter, is_valid_inchi, is_valid_inchikey
 from ..typing import SpectrumType
+from ..utils import convert_inchi_to_inchikey, is_valid_inchi, is_valid_inchikey
 
 
 def derive_inchikey_from_inchi(spectrum_in: SpectrumType) -> SpectrumType:
@@ -13,7 +13,7 @@ def derive_inchikey_from_inchi(spectrum_in: SpectrumType) -> SpectrumType:
     inchikey = spectrum.get("inchikey")
 
     if is_valid_inchi(inchi) and not is_valid_inchikey(inchikey):
-        inchikey = mol_converter(inchi, "inchi", "inchikey")
+        inchikey = convert_inchi_to_inchikey(inchi)
         if inchikey:
             spectrum.set("inchikey", inchikey)
         else:
