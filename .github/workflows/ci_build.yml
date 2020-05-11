@@ -49,7 +49,7 @@ jobs:
         working-directory: readthedocs/
         env:
           SPHINXOPTS: '-n'  # enable nit-picky mode
-      - name: Show documentation coverage
+      - name: Check documentation coverage threshold
         if: matrix.os == 'ubuntu-latest'
         shell: bash -l {0}
         run: | 
