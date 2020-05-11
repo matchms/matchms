@@ -1,5 +1,4 @@
-from numpy.matlib import repmat
-from numpy import absolute, reshape, zeros_like, where, power, argsort
+import numpy
 from matchms.typing import SpectrumType
 
 
@@ -11,19 +10,19 @@ class CosineGreedy:
     def __call__(self, spectrum: SpectrumType, reference_spectrum: SpectrumType) -> float:
         def calc_mz_distance():
             mz_row_vector = spectrum.peaks.mz
-            mz_col_vector = reshape(reference_spectrum.peaks.mz, (n_rows, 1))
+            mz_col_vector = numpy.reshape(reference_spectrum.peaks.mz, (n_rows, 1))
 
-            mz1 = repmat(mz_row_vector, n_rows, 1)
-            mz2 = repmat(mz_col_vector, 1, n_cols)
+            mz1 = numpy.tile(mz_row_vector, (n_rows, 1))
+            mz2 = numpy.tile(mz_col_vector, (1, n_cols))
 
             return mz1 - mz2
 
         def calc_intensities_product():
             intensities_row_vector = spectrum.peaks.intensities
-            intensities_col_vector = reshape(reference_spectrum.peaks.intensities, (n_rows, 1))
+            intensities_col_vector = numpy.reshape(reference_spectrum.peaks.intensities, (n_rows, 1))
 
-            intensities1 = repmat(intensities_row_vector, n_rows, 1)
-            intensities2 = repmat(intensities_col_vector, 1, n_cols)
+            intensities1 = numpy.tile(intensities_row_vector, (n_rows, 1))
+            intensities2 = numpy.tile(intensities_col_vector, (1, n_cols))
 
             return intensities1 * intensities2
 
@@ -32,14 +31,14 @@ class CosineGreedy:
             mz_distance = calc_mz_distance()
             intensities_product = calc_intensities_product()
 
-            within_tolerance = absolute(mz_distance) <= self.tolerance
+            within_tolerance = numpy.absolute(mz_distance) <= self.tolerance
 
-            return where(within_tolerance, intensities_product, zeros_like(intensities_product))
+            return numpy.where(within_tolerance, intensities_product, numpy.zeros_like(intensities_product))
 
         def calc_score():
             r_unordered, c_unordered = intensities_product_within_tolerance.nonzero()
             v_unordered = intensities_product_within_tolerance[r_unordered, c_unordered]
-            sortorder = argsort(v_unordered)[::-1]
+            sortorder = numpy.argsort(v_unordered)[::-1]
             r_sorted = r_unordered[sortorder]
             c_sorted = c_unordered[sortorder]
 
@@ -58,7 +57,7 @@ class CosineGreedy:
 
         intensities_product_within_tolerance = calc_intensities_product_within_tolerance()
 
-        squared1 = power(spectrum.peaks.intensities, 2)
-        squared2 = power(reference_spectrum.peaks.intensities, 2)
+        squared1 = numpy.power(spectrum.peaks.intensities, 2)
+        squared2 = numpy.power(reference_spectrum.peaks.intensities, 2)
 
         return calc_score()

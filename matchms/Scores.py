@@ -1,5 +1,5 @@
 from typing import Callable, Tuple, List
-from numpy import empty, unravel_index, asarray, ndarray
+import numpy
 from matchms.typing import ReferencesType, QueriesType
 
 
@@ -12,10 +12,10 @@ class Scores:
 
         self.n_rows = len(references)
         self.n_cols = len(queries)
-        self.references = asarray(references).reshape(self.n_rows, 1)
-        self.queries = asarray(queries).reshape(1, self.n_cols)
+        self.references = numpy.asarray(references).reshape(self.n_rows, 1)
+        self.queries = numpy.asarray(queries).reshape(1, self.n_cols)
         self.similarity_function = similarity_function
-        self._scores = empty([self.n_rows, self.n_cols], dtype="object")
+        self._scores = numpy.empty([self.n_rows, self.n_cols], dtype="object")
         self._index = 0
 
     def __iter__(self):
@@ -24,7 +24,7 @@ class Scores:
     def __next__(self):
         if self._index < self.scores.size:
             # pylint: disable=unbalanced-tuple-unpacking
-            r, c = unravel_index(self._index, self._scores.shape)
+            r, c = numpy.unravel_index(self._index, self._scores.shape)
             self._index += 1
             result = self._scores[r, c]
             if not isinstance(result, tuple):
@@ -38,10 +38,10 @@ class Scores:
 
     @staticmethod
     def _validate_input_arguments(references, queries, similarity_function):
-        assert isinstance(references, (List, Tuple, ndarray)),\
+        assert isinstance(references, (List, Tuple, numpy.ndarray)),\
             "Expected input argument 'references' to be list or tuple or numpy.ndarray."
 
-        assert isinstance(queries, (List, Tuple, ndarray)),\
+        assert isinstance(queries, (List, Tuple, numpy.ndarray)),\
             "Expected input argument 'queries' to be list or tuple or numpy.ndarray."
 
         assert callable(similarity_function), "Expected input argument 'similarity_function' to be callable."
