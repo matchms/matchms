@@ -49,12 +49,13 @@ jobs:
         working-directory: readthedocs/
         env:
           SPHINXOPTS: '-n'  # enable nit-picky mode
-      - name: Upload documentation coverage
+      - name: Show documentation coverage
         if: matrix.os == 'ubuntu-latest'
-        uses: actions/upload-artifact@v1
-        with:
-          name: documentation-coverage
-          path: readthedocs/_build/coverage/python.txt
+        shell: bash -l {0}
+        run: | 
+          cat readthedocs/_build/coverage/python.txt
+          UNCOVERED_MEMBERS=$(grep '*' readthedocs/_build/coverage/python.txt | wc -l)
+          echo $UNCOVERED_MEMBERS
       - name: Test
         if: matrix.os != 'ubuntu-latest'
         shell: bash -l {0}
