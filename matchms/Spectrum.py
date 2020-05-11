@@ -1,6 +1,6 @@
 from matplotlib import pyplot as plt
 import numpy
-from scipy.optimize import curve_fit
+from scipy.optimize import curve_fit, OptimizeWarning
 from .Spikes import Spikes
 
 
@@ -61,15 +61,15 @@ class Spectrum:
                 lower_bounds = [counts.max() - 1e-10, 0]
                 upper_bounds = [counts.max() + 1e-10, decay_factor_max]
                 try:
-                    popt, _ = curve_fit(exponential_decay_function,
+                    optimal_parameters, _ = curve_fit(exponential_decay_function,
                                         x_fit_nozero,
                                         y_fit_nozero,
                                         bounds=(lower_bounds, upper_bounds))
-                except Exception as e:
+                except (OptimizeWarning, ValueError, RuntimeError) as e:
                     print(e)
-                    popt = lower_bounds, 0.1
-                ax1_expfit = exponential_decay_function(x_fit, *popt)
-                plt.plot(ax1_expfit, x_fit + offset, color="#F80", marker=".")
+                    optimal_parameters = lower_bounds, 0.1
+                exp_x_fit = exponential_decay_function(x_fit, *optimal_parameters)
+                plt.plot(exp_x_fit, x_fit + offset, color="#F80", marker=".")
 
             bin_edges, bin_middles, bin_widths = calc_bin_edges_intensity()
             counts, _ = numpy.histogram(self.peaks.intensities, bins=bin_edges)
