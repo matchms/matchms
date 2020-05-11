@@ -1,3 +1,4 @@
+# packages dependencies
 gensim
 matplotlib
 numpy
@@ -5,15 +6,17 @@ pyteomics
 pyyaml
 rdkit
 scipy
-isort
-prospector[with_pyroma]
-pycodestyle
-pytest
-pytest-cov
-pytest-runner
-recommonmark
-ruamel.yaml
-sphinx
-sphinx_rtd_theme
-sphinxcontrib-apidoc
-yapf
+
+# # dev dependencies
+# isort
+# prospector[with_pyroma]
+# pycodestyle
+# pytest
+# pytest-cov
+# pytest-runner
+# recommonmark
+# ruamel.yaml
+# sphinx
+# sphinx_rtd_theme
+# sphinxcontrib-apidoc
+# yapf
