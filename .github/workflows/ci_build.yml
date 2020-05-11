@@ -55,7 +55,7 @@ jobs:
         run: | 
           cat readthedocs/_build/coverage/python.txt
           UNCOVERED_MEMBERS=$(grep '*' readthedocs/_build/coverage/python.txt | wc -l)
-          echo $UNCOVERED_MEMBERS
+          if (( $UNCOVERED_MEMBERS > 25 )) ; then exit 1;fi
       - name: Test
         if: matrix.os != 'ubuntu-latest'
         shell: bash -l {0}
