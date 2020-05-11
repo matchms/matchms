@@ -1,4 +1,4 @@
-from matplotlib import pyplot as plt
+from matplotlib import pyplot
 import numpy
 from scipy.optimize import curve_fit, OptimizeWarning
 from .Spikes import Spikes
@@ -69,14 +69,14 @@ class Spectrum:
                     print(e)
                     optimal_parameters = lower_bounds, 0.1
                 exp_x_fit = exponential_decay_function(x_fit, *optimal_parameters)
-                plt.plot(exp_x_fit, x_fit + offset, color="#F80", marker=".")
+                pyplot.plot(exp_x_fit, x_fit + offset, color="#F80", marker=".")
 
             bin_edges, bin_middles, bin_widths = calc_bin_edges_intensity()
             counts, _ = numpy.histogram(self.peaks.intensities, bins=bin_edges)
             histogram_ax.set_ylim(bottom=intensity_from, top=intensity_to)
-            plt.barh(bin_middles, counts, height=bin_widths)
-            plt.title("histogram (n_bins={0})".format(n_bins))
-            plt.xlabel("count")
+            pyplot.barh(bin_middles, counts, height=bin_widths)
+            pyplot.title("histogram (n_bins={0})".format(n_bins))
+            pyplot.xlabel("count")
             if with_expfit:
                 plot_expfit()
 
@@ -93,10 +93,10 @@ class Spectrum:
 
             spectrum_ax.set_ylim(bottom=intensity_from, top=intensity_to)
             x, y = make_stems()
-            plt.plot(x, y, color="#444", linewidth=1.0, marker="")
-            plt.title("Spectrum")
-            plt.xlabel("M/z")
-            plt.ylabel("intensity")
+            pyplot.plot(x, y, color="#444", linewidth=1.0, marker="")
+            pyplot.title("Spectrum")
+            pyplot.xlabel("M/z")
+            pyplot.ylabel("intensity")
 
         if with_expfit:
             assert with_histogram, "When 'with_expfit' is True, 'with_histogram' should also be True."
@@ -106,7 +106,7 @@ class Spectrum:
 
         n_bins = 100
         decay_factor_max = 1.0
-        fig = plt.figure()
+        fig = pyplot.figure()
 
         if with_histogram:
             spectrum_ax = fig.add_axes([0.2, 0.1, 0.5, 0.8])
