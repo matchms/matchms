@@ -49,7 +49,8 @@ class PlotTestSuite(TestSuite):
 
         self.assert_stuff(fig)
 
-    def _asserts_plots_ok(self, fig, n_plots):
+    @staticmethod
+    def _asserts_plots_ok(fig, n_plots):
         assert len(fig.axes) == n_plots
         assert fig is not None
         assert hasattr(fig, "axes")
@@ -65,6 +66,7 @@ class PlotTestSuite(TestSuite):
         intensities = numpy.array([1, 1, 5, 5, 5, 5, 7, 7, 7, 9, 9], dtype="float")
         return self._create_test_spectrum_with_intensities(intensities)
 
-    def _create_test_spectrum_with_intensities(self, intensities):
+    @staticmethod
+    def _create_test_spectrum_with_intensities(intensities):
         mz = numpy.array([10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110], dtype="float")
         return Spectrum(mz=mz, intensities=intensities)
