@@ -6,6 +6,7 @@ from .Spikes import Spikes
 
 class Spectrum:
     """An example docstring for a class."""
+
     def __init__(self, mz: numpy.array, intensities: numpy.array, metadata=None):
         """An example docstring for a constructor."""
         self.peaks = Spikes(mz=mz, intensities=intensities)
@@ -34,6 +35,7 @@ class Spectrum:
 
         def plot_histogram():
             """plot the histogram of intensity values as horizontal bars, aligned with the spectrum axes"""
+
             def calc_bin_edges_intensity():
                 """calculate various properties of the histogram bins, given a range in intensity defined by
                 'intensity_from' and 'intensity_to', assuming a number of bins equal to 100."""
@@ -62,9 +64,9 @@ class Spectrum:
                 upper_bounds = [counts.max() + 1e-10, decay_factor_max]
                 try:
                     optimal_parameters, _ = curve_fit(exponential_decay_function,
-                                        x_fit_nozero,
-                                        y_fit_nozero,
-                                        bounds=(lower_bounds, upper_bounds))
+                                                      x_fit_nozero,
+                                                      y_fit_nozero,
+                                                      bounds=(lower_bounds, upper_bounds))
                 except (OptimizeWarning, ValueError, RuntimeError) as e:
                     print(e)
                     optimal_parameters = lower_bounds, 0.1
@@ -82,6 +84,7 @@ class Spectrum:
 
         def plot_spectrum():
             """plot mz v. intensity"""
+
             def make_stems():
                 """calculate where the stems of the spectrum peaks are going to be"""
                 x = numpy.empty([2, self.peaks.mz.size], dtype="float")
