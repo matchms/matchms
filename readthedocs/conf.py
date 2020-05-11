@@ -97,3 +97,6 @@ intersphinx_mapping = {'https://docs.python.org/3': None,
                        'gensim': ('https://radimrehurek.com/gensim', None),
                        'pyteomics': ('https://pyteomics.readthedocs.io/en/latest/', None),
                        }
+
+
+coverage_skip_undoc_in_source = True
