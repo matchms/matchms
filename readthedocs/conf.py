@@ -31,9 +31,12 @@ author = 'Netherlands eScience Center'
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinx.ext.coverage',
+    'sphinx.ext.intersphinx',
     'sphinx.ext.viewcode',
     'sphinx.ext.todo',
-    'sphinxcontrib.apidoc'
+    'sphinxcontrib.apidoc',
+    'sphinx.ext.napoleon',
 ]
 
 apidoc_module_dir = '../matchms'
@@ -41,6 +44,8 @@ apidoc_output_dir = './api'
 apidoc_excluded_paths = ['tests', 'readthedocs']
 apidoc_separate_modules = True
 apidoc_module_first = True
+# Hide undocumented member by excluding default undoc-members option
+os.environ['SPHINX_APIDOC_OPTIONS'] = 'members,show-inheritance'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -65,11 +70,15 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'readthedocs/conf.rst']
 #
 html_theme = 'alabaster'
 
+html_theme_options = {
+    'github_user': 'matchms',
+    'github_repo': 'matchms',
+}
+
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
-
+html_static_path = []
 
 # -- Extension configuration -------------------------------------------------
 
@@ -77,3 +86,14 @@ html_static_path = ['_static']
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True
+
+# -- Options for intersphinx extension ----------------------------------------------
+
+intersphinx_mapping = {'https://docs.python.org/3': None,
+                       'numpy': ('https://docs.scipy.org/doc/numpy', None),
+                       'scipy': ('https://docs.scipy.org/doc/scipy/reference', None),
+                       'matplotlib': ('https://matplotlib.org', None),
+                       'rdkit': ('http://rdkit.org/docs', None),
+                       'gensim': ('https://radimrehurek.com/gensim', None),
+                       'pyteomics': ('https://pyteomics.readthedocs.io/en/latest/', None),
+                       }

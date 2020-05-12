@@ -45,6 +45,20 @@ jobs:
         shell: bash -l {0}
         run: |
           python setup.py build
+      - name: Build documentation
+        shell: bash -l {0}
+        run: |
+          make coverage html
+        working-directory: readthedocs/
+        env:
+          SPHINXOPTS: '-n'  # enable nit-picky mode
+      - name: Check documentation coverage threshold
+        if: matrix.os == 'ubuntu-latest'
+        shell: bash -l {0}
+        run: | 
+          cat readthedocs/_build/coverage/python.txt
+          UNCOVERED_MEMBERS=$(grep '*' readthedocs/_build/coverage/python.txt | wc -l)
+          if (( $UNCOVERED_MEMBERS > 25 )) ; then exit 1;fi
       - name: Test
         if: matrix.os != 'ubuntu-latest'
         shell: bash -l {0}
