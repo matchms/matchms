@@ -67,7 +67,7 @@ class Spectrum:
                                                       x_fit_nozero,
                                                       y_fit_nozero,
                                                       bounds=(lower_bounds, upper_bounds))
-                except (OptimizeWarning, ValueError, RuntimeError) as e:
+                except (OptimizeWarning, ValueError, RuntimeError):
                     print("Could not fit an exponential decay function to the data.")
                     optimal_parameters = lower_bounds, 0.1
                 exp_x_fit = exponential_decay_function(x_fit, *optimal_parameters)
