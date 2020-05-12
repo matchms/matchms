@@ -1,32 +1,47 @@
 import re
-from openbabel import openbabel as ob
 from rdkit import Chem
 
 
-def mol_converter(mol_input, input_type, output_type):
-    """Convert molecular representations using openbabel.
+def convert_smiles_to_inchi(smiles):
+    return mol_converter(smiles, "smiles", "inchi")
 
-    Convert for instance from smiles to inchi or inchi to inchikey.
+
+def convert_inchi_to_smiles(inchi):
+    return mol_converter(inchi, "inchi", "smiles")
+
+
+def convert_inchi_to_inchikey(inchi):
+    return mol_converter(inchi, "inchi", "inchikey")
+
+
+def mol_converter(mol_input, input_type, output_type):
+    """Convert molecular representations using rdkit.
+
+    Convert for from smiles or inchi to inchi, smiles, or inchikey.
 
     Args:
     ----
     mol_input: str
-        Input data, e.g. inchi or smiles.
+        Input data, inchi or smiles.
     input_type: str
-        Define input type (as named in openbabel). E.g. "smi"for smiles and "inchi" for inchi.
+        Define input type: "smiles" for smiles and "inchi" for inchi.
     output_type: str
-        Define input type (as named in openbabel). E.g. "smi"for smiles and "inchi" for inchi.
+        Define output type: "smiles", "inchi", or "inchikey".
     """
-    conv = ob.OBConversion()
-    conv.SetInAndOutFormats(input_type, output_type)
-    mol = ob.OBMol()
-    if conv.ReadString(mol, mol_input):
-        mol_output = conv.WriteString(mol)
-    else:
-        print("Error when converting", mol_input)
-        mol_output = None
+    input_function = {"inchi": Chem.MolFromInchi,
+                      "smiles": Chem.MolFromSmiles}
+    output_function = {"inchi": Chem.MolToInchi,
+                       "smiles": Chem.MolToSmiles,
+                       "inchikey": Chem.MolToInchiKey}
 
-    return mol_output
+    mol = input_function[input_type](mol_input.strip('"'))
+    if mol is None:
+        return None
+
+    output = output_function[output_type](mol)
+    if output:
+        return output
+    return None
 
 
 def is_valid_inchi(inchi):
@@ -42,7 +57,7 @@ def is_valid_inchi(inchi):
     # First quick test to avoid excess in-depth testing
     if inchi is None:
         return False
-    inchi = inchi.replace('"', "")
+    inchi = inchi.strip('"')
     regexp = r"(InChI=1|1)(S\/|\/)[0-9, A-Z, a-z,\.]{2,}\/(c|h)[0-9]"
     if not re.search(regexp, inchi):
         return False

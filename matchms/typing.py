@@ -1,9 +1,9 @@
 from typing import List
 from typing import Tuple
 from typing import Union
-from numpy import ndarray
+import numpy
 from .Spectrum import Spectrum
 
 
 SpectrumType = Union[Spectrum, None]
-ReferencesType = QueriesType = Union[List[object], Tuple[object], ndarray]
+ReferencesType = QueriesType = Union[List[object], Tuple[object], numpy.ndarray]

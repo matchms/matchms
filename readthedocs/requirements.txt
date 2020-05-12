@@ -1,8 +1,0 @@
-Sphinx==3.*
-sphinxcontrib-apidoc
-numpy
-matplotlib
-pyteomics
-gensim
-pyyaml
-scipy

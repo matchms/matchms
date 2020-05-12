@@ -1,6 +1,9 @@
 ################################################################################
 matchms
 ################################################################################
+Vector representation and similarity measure for mass spectrometry data.
+
+|
 
 .. list-table::
    :widths: 25 25
@@ -11,7 +14,7 @@ matchms
    * - \1. Code repository
      - |GitHub Badge|
    * - \2. License
-     - |License Badge|
+     - |License Badge| |FOSSA Badge|
    * - \3. Community Registry
      - |Conda Badge| |Research Software Directory Badge|
    * - \4. Enable Citation
@@ -21,15 +24,12 @@ matchms
    * - **Other best practices**
      -
    * - Continuous integration
-     - |GitHub Actions Badge|
+     - |Python Build| |Anaconda Build and Publish| |PyPI Publish|
    * - Documentation
      - |ReadTheDocs Badge|
    * - Code Quality
      - |Sonarcloud Quality Gate Badge| |Sonarcloud Coverage Badge|
 
-
-(Customize these badges with your own links, and check https://shields.io/ or
-https://badgen.net/ to see which other badges are available.)
 
 .. |GitHub Badge| image:: https://img.shields.io/badge/github-repo-000.svg?logo=github&labelColor=gray&color=blue
    :target: https://github.com/matchms/matchms
@@ -38,6 +38,9 @@ https://badgen.net/ to see which other badges are available.)
 .. |License Badge| image:: https://img.shields.io/github/license/citation-file-format/cff-converter-python
    :target: https://github.com/matchms/matchms
    :alt: License Badge
+.. |FOSSA Badge| image:: https://app.fossa.io/api/projects/git%2Bgithub.com%2Fmatchms%2Fmatchms.svg?type=shield
+   :target: https://app.fossa.io/projects/git%2Bgithub.com%2Fmatchms%2Fmatchms?ref=badge_shield
+   :alt: FOSSA Badge
 
 .. |Conda Badge| image:: https://anaconda.org/nlesc/matchms/badges/installer/conda.svg
    :target: https://conda.anaconda.org/nlesc
@@ -71,11 +74,18 @@ https://badgen.net/ to see which other badges are available.)
    :target: https://sonarcloud.io/component_measures?id=matchms_matchms&metric=Coverage&view=list
    :alt: Sonarcloud Coverage
 
-Vector representation and similarity measure for mass spectrometry data
+.. |Python Build| image:: https://github.com/matchms/matchms/workflows/Python%20Build/badge.svg
+   :target: https://github.com/matchms/matchms/actions?query=workflow%3A%22Python%20Build%22
+   :alt: Python Build
 
-The project setup is documented in `a separate document <project_setup.rst>`_.
-Feel free to remove this document (and/or the link to this document) if you
-don't need it.
+.. |Anaconda Build and Publish| image:: https://github.com/matchms/matchms/workflows/Anaconda%20Build%20and%20Publish/badge.svg
+   :target: https://github.com/matchms/matchms/actions?query=workflow%3A%22Anaconda%20Build%20and%20Publish%22
+   :alt: Anaconda Build and Publish
+
+.. |PyPI Publish| image:: https://github.com/matchms/matchms/workflows/PyPI%20Publish/badge.svg
+   :target: https://github.com/matchms/matchms/actions?query=workflow%3A%22PyPI%20Publish%22
+   :alt: PyPI Publish
+
 
 ***********************
 Documentation for users
@@ -88,7 +98,7 @@ Install matchms from PyPI with
 
 .. code-block:: console
 
-  pip install --user matchms
+  conda install --channel nlesc matchms
 
 Glossary of terms
 =================
@@ -99,8 +109,8 @@ Glossary of terms
    * - Term
      - Description
    * - adduct / addition product
-     - During ionization in a mass spectrometer, the molecules of the injected compound break apart 
-       into fragments. When fragments combine into a new compound, this is known as an addition 
+     - During ionization in a mass spectrometer, the molecules of the injected compound break apart
+       into fragments. When fragments combine into a new compound, this is known as an addition
        product, or adduct.  `Wikipedia <https://en.wikipedia.org/wiki/Adduct>`__
    * - GNPS
      - Knowledge base for sharing of mass spectrometry data (`link <https://gnps.ucsd.edu/ProteoSAFe/static/gnps-splash.jsp>`__).
@@ -113,11 +123,11 @@ Glossary of terms
        dioxide is :code:`InChIKey=CURLTUGMZLYLDI-UHFFFAOYSA-N` (yes, it
        includes the substring :code:`InChIKey=`).
    * - MGF File / Mascot Generic Format
-     - A plan ASCII file format to store peak list data from a mass spectrometry experiment. Links: `matrixscience.com <http://www.matrixscience.com/help/data_file_help.html#GEN>`__, 
+     - A plan ASCII file format to store peak list data from a mass spectrometry experiment. Links: `matrixscience.com <http://www.matrixscience.com/help/data_file_help.html#GEN>`__,
        `fiehnlab.ucdavis.edu <https://fiehnlab.ucdavis.edu/projects/lipidblast/mgf-files>`__.
    * - parent mass / :code:`parent_mass`
-     - Actual mass (in Dalton) of the original compound prior to fragmentation. 
-       It can be recalculated from the precursor m/z by taking      
+     - Actual mass (in Dalton) of the original compound prior to fragmentation.
+       It can be recalculated from the precursor m/z by taking
        into account the charge state and proton/electron masses.
    * - precursor m/z / :code:`precursor_mz`
      - Mass-to-charge ratio of the compound targeted for fragmentation.
@@ -140,15 +150,21 @@ To install matchms, do:
 
   git clone https://github.com/matchms/matchms.git
   cd matchms
-  conda env create --name matchms --file=environment.yml
+  conda env create
   conda activate matchms
-  pip install .
+  pip install --editable .
+
+Run the linter with:
+
+.. code-block:: console
+
+  prospector
 
 Run tests (including coverage) with:
 
 .. code-block:: console
 
-  python setup.py test
+  pytest
 
 Flowchart
 =========
@@ -185,8 +201,6 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-
-
 
 *******
 Credits
