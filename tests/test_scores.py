@@ -67,8 +67,8 @@ def test_scores_calculate_parallel():
 def test_scores_init_with_list():
 
     dummy_similarity_function = DummySimilarityFunction()
-    scores = Scores(references=("r0", "r1", "r2"),
-                    queries=("q0", "q1"),
+    scores = Scores(references=["r0", "r1", "r2"],
+                    queries=["q0", "q1"],
                     similarity_function=dummy_similarity_function)
     assert scores.scores.shape == (3, 2)
 
@@ -82,6 +82,17 @@ def test_scores_init_with_numpy_array():
     assert scores.scores.shape == (3, 2)
 
 
+def test_scores_init_with_queries_dict():
+
+    dummy_similarity_function = DummySimilarityFunction()
+    with pytest.raises(AssertionError) as msg:
+        _ = Scores(references=["r0", "r1", "r2"],
+                   queries=dict(k0="q0", k1="q1"),
+                   similarity_function=dummy_similarity_function)
+
+    assert str(msg.value) == "Expected input argument 'queries' to be list or tuple or numpy.ndarray."
+
+
 def test_scores_init_with_references_dict():
 
     dummy_similarity_function = DummySimilarityFunction()
@@ -93,15 +104,13 @@ def test_scores_init_with_references_dict():
     assert str(msg.value) == "Expected input argument 'references' to be list or tuple or numpy.ndarray."
 
 
-def test_scores_init_with_queries_dict():
+def test_scores_init_with_tuple():
 
     dummy_similarity_function = DummySimilarityFunction()
-    with pytest.raises(AssertionError) as msg:
-        _ = Scores(references=["r0", "r1", "r2"],
-                   queries=dict(k0="q0", k1="q1"),
-                   similarity_function=dummy_similarity_function)
-
-    assert str(msg.value) == "Expected input argument 'queries' to be list or tuple or numpy.ndarray."
+    scores = Scores(references=("r0", "r1", "r2"),
+                    queries=("q0", "q1"),
+                    similarity_function=dummy_similarity_function)
+    assert scores.scores.shape == (3, 2)
 
 
 def test_scores_next():
