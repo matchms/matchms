@@ -56,7 +56,7 @@ class Scores:
         return self
 
     def calculate_parallel(self):
-        self._scores = self.similarity_function(self.references, self.queries)
+        self._scores = self.similarity_function(self.references[:, 0], self.queries[0, :])
         return self
 
     @property

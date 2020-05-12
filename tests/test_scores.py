@@ -19,10 +19,10 @@ class DummySimilarityFunctionParallel:
 
     def __call__(self, references, queries):
         """call method"""
-        shape = references.shape[0], queries.shape[1]
+        shape = len(references), len(queries)
         s = numpy.empty(shape, dtype="object")
-        for index_reference, reference in enumerate(references[:, 0]):
-            for index_query, query in enumerate(queries[0, :]):
+        for index_reference, reference in enumerate(references):
+            for index_query, query in enumerate(queries):
                 rq = reference + query
                 s[index_reference, index_query] = rq, len(rq)
         return s
