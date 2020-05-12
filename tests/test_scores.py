@@ -13,16 +13,58 @@ class DummySimilarityFunction:
         return s, len(s)
 
 
-def test_scores_init_with_list():
+class DummySimilarityFunctionParallel:
+    def __init__(self):
+        """constructor"""
 
+    def __call__(self, references, queries):
+        """call method"""
+        shape = references.shape[0], queries.shape[1]
+        s = numpy.empty(shape, dtype="object")
+        for index_reference, reference in enumerate(references[:, 0]):
+            for index_query, query in enumerate(queries[0, :]):
+                rq = reference + query
+                s[index_reference, index_query] = rq, len(rq)
+        return s
+
+
+def test_scores_calculate():
     dummy_similarity_function = DummySimilarityFunction()
     scores = Scores(references=["r0", "r1", "r2"],
                     queries=["q0", "q1"],
                     similarity_function=dummy_similarity_function)
-    assert scores.scores.shape == (3, 2)
+    scores.calculate()
+    actual = [elem for elem in scores]
+    expected = [
+        ("r0", "q0", "r0q0", 4),
+        ("r0", "q1", "r0q1", 4),
+        ("r1", "q0", "r1q0", 4),
+        ("r1", "q1", "r1q1", 4),
+        ("r2", "q0", "r2q0", 4),
+        ("r2", "q1", "r2q1", 4)
+    ]
+    assert actual == expected
 
 
-def test_scores_init_with_tuple():
+def test_scores_calculate_parallel():
+    dummy_similarity_function = DummySimilarityFunctionParallel()
+    scores = Scores(references=["r0", "r1", "r2"],
+                    queries=["q0", "q1"],
+                    similarity_function=dummy_similarity_function)
+    scores.calculate_parallel()
+    actual = [elem for elem in scores]
+    expected = [
+        ("r0", "q0", "r0q0", 4),
+        ("r0", "q1", "r0q1", 4),
+        ("r1", "q0", "r1q0", 4),
+        ("r1", "q1", "r1q1", 4),
+        ("r2", "q0", "r2q0", 4),
+        ("r2", "q1", "r2q1", 4)
+    ]
+    assert actual == expected
+
+
+def test_scores_init_with_list():
 
     dummy_similarity_function = DummySimilarityFunction()
     scores = Scores(references=("r0", "r1", "r2"),
