@@ -1,12 +1,12 @@
 from matchms import Spectrum
 from matchms.filtering import add_parent_mass
-import numpy as np
+import numpy
 
 
 def test_add_parent_mass():
     """Test if parent mass is correctly derived."""
-    mz = np.array([], dtype='float')
-    intensities = np.array([], dtype='float')
+    mz = numpy.array([], dtype='float')
+    intensities = numpy.array([], dtype='float')
     metadata = {"pepmass": (444.0, 10),
                 "charge": -1}
     spectrum_in = Spectrum(mz=mz,
@@ -15,4 +15,4 @@ def test_add_parent_mass():
 
     spectrum = add_parent_mass(spectrum_in)
 
-    assert np.abs(spectrum.get("parent_mass") - 445.0) < .01, "Expected parent mass of about 445.0."
+    assert numpy.abs(spectrum.get("parent_mass") - 445.0) < .01, "Expected parent mass of about 445.0."

@@ -1,5 +1,5 @@
 import os
-import numpy as np
+import numpy
 from matchms import Spectrum
 from matchms.exporting import save_as_mgf
 import tempfile
@@ -7,8 +7,8 @@ import tempfile
 
 def test_save_as_mgf_single_spectrum():
     """Test saving spectrum to .mgf file"""
-    spectrum = Spectrum(mz=np.array([100, 200, 300], dtype="float"),
-                        intensities=np.array([10, 10, 500], dtype="float"),
+    spectrum = Spectrum(mz=numpy.array([100, 200, 300], dtype="float"),
+                        intensities=numpy.array([10, 10, 500], dtype="float"),
                         metadata={"charge": -1,
                                   "inchi": '"InChI=1S/C6H12"',
                                   "pepmass": (100, 10.0),
@@ -32,12 +32,12 @@ def test_save_as_mgf_single_spectrum():
 
 def test_save_as_mgf_spectrum_list():
     """Test saving spectrum list to .mgf file"""
-    spectrum1 = Spectrum(mz=np.array([100, 200, 300], dtype="float"),
-                         intensities=np.array([10, 10, 500], dtype="float"),
+    spectrum1 = Spectrum(mz=numpy.array([100, 200, 300], dtype="float"),
+                         intensities=numpy.array([10, 10, 500], dtype="float"),
                          metadata={"test_field": "test1"})
 
-    spectrum2 = Spectrum(mz=np.array([100, 200, 300], dtype="float"),
-                         intensities=np.array([10, 10, 500], dtype="float"),
+    spectrum2 = Spectrum(mz=numpy.array([100, 200, 300], dtype="float"),
+                         intensities=numpy.array([10, 10, 500], dtype="float"),
                          metadata={"test_field": "test2"})
     # Write to test file
     with tempfile.TemporaryDirectory() as d:

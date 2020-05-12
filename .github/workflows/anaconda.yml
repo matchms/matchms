@@ -1,4 +1,4 @@
-name: 'Publish conda package'
+name: 'Anaconda Build and Publish'
 
 on:
   release:
