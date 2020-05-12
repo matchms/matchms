@@ -24,10 +24,11 @@ def load_from_json(filename):
     spectrums = []
     for spectrum_dict in spectrum_dicts:
 
-        metadata_dict = {parse_fieldname(key): spectrum_dict[key] for key in spectrum_dict if not key in not_metadata_fields}
+        metadata_dict = {parse_fieldname(key): spectrum_dict[key]
+                         for key in spectrum_dict if not key in not_metadata_fields}
         peaks_array = np.array(spectrum_dict.get("peaks_json"))
-        spectrum = Spectrum(mz=peaks_array[:,0],
-                            intensities=peaks_array[:,1],
+        spectrum = Spectrum(mz=peaks_array[:, 0],
+                            intensities=peaks_array[:, 1],
                             metadata=metadata_dict)
         spectrums.append(spectrum)
 
