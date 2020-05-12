@@ -1,4 +1,5 @@
-from typing import List, Callable
+from typing import Callable
+from typing import List
 from .Scores import Scores
 
 

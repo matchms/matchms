@@ -1,4 +1,6 @@
-from typing import Union, List, Tuple
+from typing import List
+from typing import Tuple
+from typing import Union
 import numpy
 from .Spectrum import Spectrum
 

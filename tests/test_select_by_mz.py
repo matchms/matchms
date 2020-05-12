@@ -1,6 +1,6 @@
+import numpy
 from matchms import Spectrum
 from matchms.filtering import select_by_mz
-import numpy
 
 
 def test_select_by_mz_no_parameters_1():

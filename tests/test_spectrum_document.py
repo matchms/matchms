@@ -1,7 +1,7 @@
 import numpy
-from matchms.similarity.spec2vec import SpectrumDocument
-from matchms.filtering import add_losses
 from matchms import Spectrum
+from matchms.filtering import add_losses
+from matchms.similarity.spec2vec import SpectrumDocument
 
 
 def test_spectrum_document_init_n_decimals_default_value_no_losses():

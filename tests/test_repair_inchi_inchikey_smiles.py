@@ -1,6 +1,6 @@
-from matchms.filtering import repair_inchi_inchikey_smiles
-from matchms import Spectrum
 import numpy
+from matchms import Spectrum
+from matchms.filtering import repair_inchi_inchikey_smiles
 
 
 def test_repair_inchi_inchikey_smiles_clean_inchi_entered_as_inchi():

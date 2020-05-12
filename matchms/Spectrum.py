@@ -1,6 +1,7 @@
-from matplotlib import pyplot
 import numpy
-from scipy.optimize import curve_fit, OptimizeWarning
+from matplotlib import pyplot
+from scipy.optimize import OptimizeWarning
+from scipy.optimize import curve_fit
 from .Spikes import Spikes
 
 
@@ -67,16 +68,16 @@ class Spectrum:
                                                       x_fit_nozero,
                                                       y_fit_nozero,
                                                       bounds=(lower_bounds, upper_bounds))
-                except (OptimizeWarning, ValueError, RuntimeError) as e:
-                    print(e)
+                except (OptimizeWarning, ValueError, RuntimeError):
+                    print("Could not fit an exponential decay function to the data.")
                     optimal_parameters = lower_bounds, 0.1
                 exp_x_fit = exponential_decay_function(x_fit, *optimal_parameters)
-                pyplot.plot(exp_x_fit, x_fit + offset, color="#F80", marker=".")
+                pyplot.plot(exp_x_fit, x_fit + offset, color="#f10c45", marker=".")
 
             bin_edges, bin_middles, bin_widths = calc_bin_edges_intensity()
             counts, _ = numpy.histogram(self.peaks.intensities, bins=bin_edges)
             histogram_ax.set_ylim(bottom=intensity_from, top=intensity_to)
-            pyplot.barh(bin_middles, counts, height=bin_widths)
+            pyplot.barh(bin_middles, counts, height=bin_widths, color="#047495")
             pyplot.title("histogram (n_bins={0})".format(n_bins))
             pyplot.xlabel("count")
             if with_expfit:
@@ -96,7 +97,7 @@ class Spectrum:
 
             spectrum_ax.set_ylim(bottom=intensity_from, top=intensity_to)
             x, y = make_stems()
-            pyplot.plot(x, y, color="#444", linewidth=1.0, marker="")
+            pyplot.plot(x, y, color="#0f0f0f", linewidth=1.0, marker="")
             pyplot.title("Spectrum")
             pyplot.xlabel("M/z")
             pyplot.ylabel("intensity")

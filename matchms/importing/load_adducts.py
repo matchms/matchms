@@ -1,7 +1,7 @@
-from typing import Dict
 import os
-import yaml
 from functools import lru_cache
+from typing import Dict
+import yaml
 
 
 @lru_cache(maxsize=4)

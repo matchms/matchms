@@ -1,6 +1,6 @@
+import numpy
 from matchms import Spectrum
 from matchms.filtering import require_minimum_number_of_peaks
-import numpy
 
 
 def test_require_minimum_number_of_peaks_no_params():

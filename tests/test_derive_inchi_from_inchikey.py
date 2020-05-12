@@ -1,5 +1,4 @@
 import numpy
-
 from matchms import Spectrum
 from matchms.filtering import derive_inchikey_from_inchi
 

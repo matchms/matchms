@@ -1,5 +1,7 @@
+from matchms.utils import is_valid_inchi
+from matchms.utils import is_valid_inchikey
+from matchms.utils import is_valid_smiles
 from matchms.utils import mol_converter
-from matchms.utils import is_valid_inchi, is_valid_inchikey, is_valid_smiles
 
 
 def test_mol_converter_smiles_to_inchi():
