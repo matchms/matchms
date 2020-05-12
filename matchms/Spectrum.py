@@ -1,11 +1,12 @@
-from matplotlib import pyplot as plt
+from matplotlib import pyplot
 import numpy
-from scipy.optimize import curve_fit
+from scipy.optimize import curve_fit, OptimizeWarning
 from .Spikes import Spikes
 
 
 class Spectrum:
     """An example docstring for a class."""
+
     def __init__(self, mz: numpy.array, intensities: numpy.array, metadata=None):
         """An example docstring for a constructor."""
         self.peaks = Spikes(mz=mz, intensities=intensities)
@@ -34,6 +35,7 @@ class Spectrum:
 
         def plot_histogram():
             """plot the histogram of intensity values as horizontal bars, aligned with the spectrum axes"""
+
             def calc_bin_edges_intensity():
                 """calculate various properties of the histogram bins, given a range in intensity defined by
                 'intensity_from' and 'intensity_to', assuming a number of bins equal to 100."""
@@ -61,27 +63,28 @@ class Spectrum:
                 lower_bounds = [counts.max() - 1e-10, 0]
                 upper_bounds = [counts.max() + 1e-10, decay_factor_max]
                 try:
-                    popt, _ = curve_fit(exponential_decay_function,
-                                        x_fit_nozero,
-                                        y_fit_nozero,
-                                        bounds=(lower_bounds, upper_bounds))
-                except Exception as e:
-                    print(e)
-                    popt = lower_bounds, 0.1
-                ax1_expfit = exponential_decay_function(x_fit, *popt)
-                plt.plot(ax1_expfit, x_fit + offset, color="#f10c45", marker=".")
+                    optimal_parameters, _ = curve_fit(exponential_decay_function,
+                                                      x_fit_nozero,
+                                                      y_fit_nozero,
+                                                      bounds=(lower_bounds, upper_bounds))
+                except (OptimizeWarning, ValueError, RuntimeError):
+                    print("Could not fit an exponential decay function to the data.")
+                    optimal_parameters = lower_bounds, 0.1
+                exp_x_fit = exponential_decay_function(x_fit, *optimal_parameters)
+                pyplot.plot(exp_x_fit, x_fit + offset, color="#f10c45", marker=".")
 
             bin_edges, bin_middles, bin_widths = calc_bin_edges_intensity()
             counts, _ = numpy.histogram(self.peaks.intensities, bins=bin_edges)
             histogram_ax.set_ylim(bottom=intensity_from, top=intensity_to)
-            plt.barh(bin_middles, counts, height=bin_widths, color="#047495")
-            plt.title("histogram (n_bins={0})".format(n_bins))
-            plt.xlabel("count")
+            pyplot.barh(bin_middles, counts, height=bin_widths, color="#047495")
+            pyplot.title("histogram (n_bins={0})".format(n_bins))
+            pyplot.xlabel("count")
             if with_expfit:
                 plot_expfit()
 
         def plot_spectrum():
             """plot mz v. intensity"""
+
             def make_stems():
                 """calculate where the stems of the spectrum peaks are going to be"""
                 x = numpy.empty([2, self.peaks.mz.size], dtype="float")
@@ -93,10 +96,10 @@ class Spectrum:
 
             spectrum_ax.set_ylim(bottom=intensity_from, top=intensity_to)
             x, y = make_stems()
-            plt.plot(x, y, color="#0f0f0f", linewidth=1.0, marker="")
-            plt.title("Spectrum")
-            plt.xlabel("M/z")
-            plt.ylabel("intensity")
+            pyplot.plot(x, y, color="#0f0f0f", linewidth=1.0, marker="")
+            pyplot.title("Spectrum")
+            pyplot.xlabel("M/z")
+            pyplot.ylabel("intensity")
 
         if with_expfit:
             assert with_histogram, "When 'with_expfit' is True, 'with_histogram' should also be True."
@@ -106,7 +109,7 @@ class Spectrum:
 
         n_bins = 100
         decay_factor_max = 1.0
-        fig = plt.figure()
+        fig = pyplot.figure()
 
         if with_histogram:
             spectrum_ax = fig.add_axes([0.2, 0.1, 0.5, 0.8])
