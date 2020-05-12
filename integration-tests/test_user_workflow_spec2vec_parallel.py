@@ -26,7 +26,7 @@ def test_user_workflow_spec2vec_parallel():
         s = require_minimum_number_of_peaks(s, n_required=5)
         return s
 
-    repository_root = os.path.join(os.path.dirname(__file__), '..')
+    repository_root = os.path.join(os.path.dirname(__file__), "..")
     spectrums_file = os.path.join(repository_root, "tests", "pesticides.mgf")
 
     # apply my filters to the data
