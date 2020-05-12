@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-"""Documentation about matchms"""
-
 import logging
 from . import exporting
 from . import filtering
@@ -22,7 +19,6 @@ __all__ = [
     "__version__",
     "calculate_scores",
     "calculate_scores_parallel",
-    "data",
     "exporting",
     "filtering",
     "importing",
