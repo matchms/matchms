@@ -1,5 +1,4 @@
 import numpy
-
 from matchms import Spectrum
 from matchms.filtering import derive_smiles_from_inchi
 

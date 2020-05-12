@@ -1,6 +1,6 @@
+import numpy
 from matchms import Spectrum
 from matchms.filtering import add_parent_mass
-import numpy
 
 
 def test_add_parent_mass():

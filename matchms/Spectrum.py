@@ -1,6 +1,7 @@
-from matplotlib import pyplot
 import numpy
-from scipy.optimize import curve_fit, OptimizeWarning
+from matplotlib import pyplot
+from scipy.optimize import OptimizeWarning
+from scipy.optimize import curve_fit
 from .Spikes import Spikes
 
 

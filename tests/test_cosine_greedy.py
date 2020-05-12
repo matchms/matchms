@@ -1,8 +1,8 @@
 import numpy
 import pytest
 from matchms import Spectrum
-from matchms.similarity import CosineGreedy
 from matchms.filtering import normalize_intensities
+from matchms.similarity import CosineGreedy
 
 
 def test_cosine_greedy_without_parameters():

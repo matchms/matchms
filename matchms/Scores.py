@@ -1,6 +1,9 @@
-from typing import Callable, Tuple, List
+from typing import Callable
+from typing import List
+from typing import Tuple
 import numpy
-from matchms.typing import ReferencesType, QueriesType
+from matchms.typing import QueriesType
+from matchms.typing import ReferencesType
 
 
 class Scores:

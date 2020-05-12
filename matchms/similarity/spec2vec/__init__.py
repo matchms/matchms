@@ -1,6 +1,6 @@
 from .Document import Document
-from .SpectrumDocument import SpectrumDocument
 from .Spec2Vec import Spec2Vec
+from .SpectrumDocument import SpectrumDocument
 
 
 __all__ = [

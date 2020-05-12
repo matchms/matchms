@@ -1,6 +1,6 @@
 import numpy
-from matchms import Spectrum
 from matplotlib import pyplot as plt
+from matchms import Spectrum
 
 
 def _assert_plots_ok(fig, n_plots):

@@ -1,8 +1,8 @@
 import os
+import tempfile
 import numpy
 from matchms import Spectrum
 from matchms.exporting import save_as_mgf
-import tempfile
 
 
 def test_save_as_mgf_single_spectrum():

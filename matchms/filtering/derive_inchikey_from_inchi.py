@@ -1,5 +1,7 @@
 from ..typing import SpectrumType
-from ..utils import convert_inchi_to_inchikey, is_valid_inchi, is_valid_inchikey
+from ..utils import convert_inchi_to_inchikey
+from ..utils import is_valid_inchi
+from ..utils import is_valid_inchikey
 
 
 def derive_inchikey_from_inchi(spectrum_in: SpectrumType) -> SpectrumType:

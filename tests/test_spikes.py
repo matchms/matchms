@@ -1,6 +1,6 @@
-from matchms import Spikes
 import numpy
 import pytest
+from matchms import Spikes
 
 
 def test_spikes_init():

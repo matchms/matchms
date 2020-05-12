@@ -1,6 +1,6 @@
+import numpy
 from matchms import Spectrum
 from matchms.filtering import select_by_intensity
-import numpy
 
 
 def test_select_by_intensity_no_parameters_1():
