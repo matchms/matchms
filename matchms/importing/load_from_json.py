@@ -12,6 +12,7 @@ def load_from_json(filename):
         Provide filename for json file containing spectrum(s).
     """
     not_metadata_fields = ["peaks_json"]
+
     def parse_fieldname(key):
         """Add options to read GNPS style json files."""
         key_parsed = key.lower()
@@ -25,7 +26,7 @@ def load_from_json(filename):
     for spectrum_dict in spectrum_dicts:
 
         metadata_dict = {parse_fieldname(key): spectrum_dict[key]
-                         for key in spectrum_dict if not key in not_metadata_fields}
+                         for key in spectrum_dict if key not in not_metadata_fields}
         peaks_array = np.array(spectrum_dict.get("peaks_json"))
         spectrum = Spectrum(mz=peaks_array[:, 0],
                             intensities=peaks_array[:, 1],
