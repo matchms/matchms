@@ -68,7 +68,7 @@ class Spectrum:
                                                       y_fit_nozero,
                                                       bounds=(lower_bounds, upper_bounds))
                 except (OptimizeWarning, ValueError, RuntimeError) as e:
-                    print(e)
+                    print("Could not fit an exponential decay function to the data.")
                     optimal_parameters = lower_bounds, 0.1
                 exp_x_fit = exponential_decay_function(x_fit, *optimal_parameters)
                 pyplot.plot(exp_x_fit, x_fit + offset, color="#F80", marker=".")
