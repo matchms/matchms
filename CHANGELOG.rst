@@ -22,20 +22,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - cosine greedy similarity function https://github.com/matchms/matchms/pull/112
 - parent mass filter https://github.com/matchms/matchms/pull/116 https://github.com/matchms/matchms/pull/122 https://github.com/matchms/matchms/pull/158
 - require_minimum_number_of_peaks filter https://github.com/matchms/matchms/pull/131 https://github.com/matchms/matchms/pull/155
+- reduce_to_number_of_peaks filter https://github.com/matchms/matchms/pull/209
 - inchi filters https://github.com/matchms/matchms/pull/145 https://github.com/matchms/matchms/pull/127 https://github.com/matchms/matchms/pull/181
 - losses https://github.com/matchms/matchms/pull/160
 - vesion string checks https://github.com/matchms/matchms/pull/185
 - Spec2Vec https://github.com/matchms/matchms/pull/183 https://github.com/matchms/matchms/pull/165 
-- functions to verify inchies https://github.com/matchms/matchms/pull/181
-- documentation using radthedocs https://github.com/matchms/matchms/pull/196
+- functions to verify inchies https://github.com/matchms/matchms/pull/181 https://github.com/matchms/matchms/pull/180
+- documentation using radthedocs https://github.com/matchms/matchms/pull/196 https://github.com/matchms/matchms/pull/197
 - build status badges https://github.com/matchms/matchms/pull/174
+- vectorize spec2vec https://github.com/matchms/matchms/pull/206
 
 ### Changed
 - Seperate filters https://github.com/matchms/matchms/pull/97
 - Translate filter steps to new structure (interpret charge and ionmode) https://github.com/matchms/matchms/pull/73
 - filters returning a new spectrum https://github.com/matchms/matchms/pull/100
 - Flowchart diagram https://github.com/matchms/matchms/pull/135
-
+- numpy usage https://github.com/matchms/matchms/pull/191
+- consistency of the import statements https://github.com/matchms/matchms/pull/189
 
 ### Fixed
 - XX
