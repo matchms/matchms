@@ -1,6 +1,6 @@
 # YAML 1.2
 ---
-abstract: "Vector representation and similarity measure for mass spectrometry data."
+abstract: "Python library for fuzzy comparison of mass spectrum data and other Python objects."
 authors:
   -
     affiliation: "Netherlands eScience Center"
