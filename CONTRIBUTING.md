@@ -50,7 +50,7 @@ You want to make a new release of the code base
 
 To create release you need write permission on the repository.
 
-1. Check author list in citation.cff and .zenodo.json
+1. Check author list in `citation.cff` and `.zenodo.json` files
 2. Bump the version using `bump2version <major|minor|patch>`
 3. Update the `CHANGELOG.rst` to include changes made
 4. Goto [GitHub release page](https://github.com/matchms/matchms/releases)
@@ -58,5 +58,5 @@ To create release you need write permission on the repository.
 6. Fill version, title and description field
 7. Press the Publish Release button
 
-A GitHub action will run which will publish the new version to anaconda.
-Also a Zenodo entry will be made for the release with it's own DOI.
+A GitHub action will run which will publish the new version to [anaconda](https://anaconda.org/nlesc/matchms).
+Also a Zenodo entry will be made for the release with its own DOI.
