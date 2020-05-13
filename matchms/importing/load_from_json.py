@@ -1,7 +1,7 @@
 import ast
 import json
 import numpy
-from matchms import Spectrum
+from ..Spectrum import Spectrum
 
 
 def load_from_json(filename):
