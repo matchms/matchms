@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-"""Documentation about matchms"""
-
 import logging
 from . import exporting
 from . import filtering
@@ -8,6 +5,7 @@ from . import importing
 from . import similarity
 from .__version__ import __version__
 from .calculate_scores import calculate_scores
+from .calculate_scores_parallel import calculate_scores_parallel
 from .Scores import Scores
 from .Spectrum import Spectrum
 from .Spikes import Spikes
@@ -20,6 +18,7 @@ __email__ = 'generalization@esciencecenter.nl'
 __all__ = [
     "__version__",
     "calculate_scores",
+    "calculate_scores_parallel",
     "exporting",
     "filtering",
     "importing",
