@@ -179,11 +179,6 @@ Contributing
 If you want to contribute to the development of matchms,
 have a look at the `contribution guidelines <CONTRIBUTING.md>`_.
 
-*****************************
-Documentation for maintainers
-*****************************
-
-
 *******
 License
 *******
