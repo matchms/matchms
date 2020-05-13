@@ -56,9 +56,11 @@ authors:
 
 cff-version: "1.1.0"
 keywords:
-  - "mass spectrometry"
-  - word2vec
+  - python
   - "similarity measures"
+  - "mass spectrometry"
+  - "fuzzy matching"
+  - "fuzzy search"
 license: "Apache-2.0"
 message: "If you use this software, please cite it using these metadata."
 repository-code: "https://github.com/matchms/matchms"

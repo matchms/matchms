@@ -53,9 +53,11 @@
    ], 
    "description": "Vector representation and similarity measure for mass spectrometry data.", 
    "keywords": [
+      "python", 
+      "similarity measures", 
       "mass spectrometry", 
-      "word2vec", 
-      "similarity measures"
+      "fuzzy matching", 
+      "fuzzy search"
    ], 
    "license": {
       "id": "Apache-2.0"
