@@ -41,10 +41,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - consistency of the import statements https://github.com/matchms/matchms/pull/189
 
 ### Fixed
-- XX
+-
 
 ### Removed
-- XX
+-
 
 
 ## [0.2.0] - 2020-04-03
