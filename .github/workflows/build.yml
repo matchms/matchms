@@ -55,10 +55,12 @@ jobs:
       - name: Check documentation coverage threshold
         if: matrix.os == 'ubuntu-latest'
         shell: bash -l {0}
-        run: | 
+        run: |
           cat readthedocs/_build/coverage/python.txt
           UNCOVERED_MEMBERS=$(grep '*' readthedocs/_build/coverage/python.txt | wc -l)
-          if (( $UNCOVERED_MEMBERS > 25 )) ; then exit 1;fi
+          UNCOVERED_MEMBERS_ALLOWED=25
+          if (( $UNCOVERED_MEMBERS > $UNCOVERED_MEMBERS_ALLOWED )) ; then echo "There are currently ${UNCOVERED_MEMBERS} uncovered members in the documentation, which is more than the ${UNCOVERED_MEMBERS_ALLOWED} allowed."; exit 1;fi
+          echo "The code is sufficiently documented with ${UNCOVERED_MEMBERS} uncovered members out of ${UNCOVERED_MEMBERS_ALLOWED} allowed.";
       - name: Test
         if: matrix.os != 'ubuntu-latest'
         shell: bash -l {0}

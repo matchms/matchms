@@ -3,6 +3,10 @@ from ..typing import SpectrumType
 
 
 def correct_charge(spectrum_in: SpectrumType) -> SpectrumType:
+    """
+    For some spectrums, the charge value is either undefined or inconsistent with its
+    ionmode, which is corrected by this filter.
+    """
 
     if spectrum_in is None:
         return None

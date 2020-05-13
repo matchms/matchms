@@ -50,9 +50,24 @@ class Scores:
         assert callable(similarity_function), "Expected input argument 'similarity_function' to be callable."
 
     def calculate(self):
+        """
+        Calculate the similarity between all reference objects v all query objects using a
+        naive implementation (i.e. a double for-loop). Similarity functions should expect
+        one reference and one query object as its input arguments.
+        """
         for i_ref, reference in enumerate(self.references[:self.n_rows, 0]):
             for i_query, query in enumerate(self.queries[0, :self.n_cols]):
                 self._scores[i_ref][i_query] = self.similarity_function(reference, query)
+        return self
+
+    def calculate_parallel(self):
+        """
+        Calculate the similarity between all reference objects v all query objects using a
+        vectorized implementation.  Similarity functions should expect a Numpy array of
+        all reference objects and a Numpy array of all query objects as its input arguments.
+        """
+
+        self._scores = self.similarity_function(self.references[:, 0], self.queries[0, :])
         return self
 
     @property
