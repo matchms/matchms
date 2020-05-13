@@ -17,7 +17,7 @@ def add_parent_mass(spectrum_in: SpectrumType) -> SpectrumType:
         try:
             charge = spectrum.get("charge")
             protons_mass = PROTON_MASS * charge
-            precursor_mz = spectrum.get("pepmass")[0]
+            precursor_mz = spectrum.get("precursor_mz")
             precursor_mass = precursor_mz * abs(charge)
             parent_mass = precursor_mass - protons_mass
             if parent_mass:
