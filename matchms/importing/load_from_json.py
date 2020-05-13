@@ -1,6 +1,6 @@
 import ast
 import json
-import numpy as np
+import numpy
 from matchms import Spectrum
 
 
@@ -41,9 +41,17 @@ def load_from_json(filename):
         metadata_dict = {parse_fieldname(key): spectrum_dict[key]
                          for key in spectrum_dict if key not in not_metadata_fields}
         peaks_list = get_peaks_list(spectrum_dict, "peaks_json")
-        if len(peaks_list) > 0:
-            spectrum = Spectrum(mz=np.array(peaks_list)[:, 0],
-                                intensities=np.array(peaks_list)[:, 1],
+        if len(peaks_list) > 0 and metadata_dict:
+            mz = numpy.array(peaks_list)[:, 0]
+            intensities = numpy.array(peaks_list)[:, 1]
+
+            # Sort by mz (if not sorted already)
+            if not numpy.all(mz[:-1] <= mz[1:]):
+                idx_sorted = numpy.argsort(mz)
+                mz = mz[idx_sorted]
+                intensities = intensities[idx_sorted]
+            spectrum = Spectrum(mz=mz,
+                                intensities=intensities,
                                 metadata=metadata_dict)
             spectrums.append(spectrum)
         else:
