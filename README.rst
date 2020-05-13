@@ -1,4 +1,4 @@
-.. image:: matchms.png
+.. image:: readthedocs/_static/matchms.png
   :width: 600
   :alt: matchms logo
 
