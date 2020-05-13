@@ -34,7 +34,7 @@ The sections below outline the steps in each case.
 1. make sure the existing tests still work by running ``python setup.py test``;
 1. add your own tests (if necessary);
 1. update or expand the documentation;
-1. update the `CHANGELOG.rst` file with change;
+1. update the `CHANGELOG.md` file with change;
 1. [push](http://rogerdudler.github.io/git-guide/>) your feature branch to (your fork of) the matchms repository on GitHub;
 1. create the pull request, e.g. following the instructions [here](https://help.github.com/articles/creating-a-pull-request/).
 
@@ -46,7 +46,7 @@ To create release you need write permission on the repository.
 
 1. Check author list in `citation.cff` and `.zenodo.json` files
 1. Bump the version using `bump2version <major|minor|patch>`
-1. Update the `CHANGELOG.rst` to include changes made
+1. Update the `CHANGELOG.md` to include changes made
 1. Goto [GitHub release page](https://github.com/matchms/matchms/releases)
 1. Press draft a new release button
 1. Fill version, title and description field
