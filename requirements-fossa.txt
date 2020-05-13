@@ -20,3 +20,4 @@ scipy
 # sphinx_rtd_theme
 # sphinxcontrib-apidoc
 # yapf
+# bump2version

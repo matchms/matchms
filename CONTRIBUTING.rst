@@ -42,3 +42,8 @@ You want to make some kind of change to the code base
 #. create the pull request, e.g. following the instructions `here <https://help.github.com/articles/creating-a-pull-request/>`__.
 
 In case you feel like you've made a valuable contribution, but you don't know how to write or run tests for it, or how to generate the documentation: don't let this discourage you from making the pull request; we can help you! Just go ahead and submit the pull request, but keep in mind that you might be asked to append additional commits to your pull request.
+
+You want to increase the version of the code
+********************************************
+
+#. run "bump2version <part>" in project root, where <part> is one of [major, minor, patch]. This will increase version numbers everywhere its needed (code, meta, etc.) in the repo. 
