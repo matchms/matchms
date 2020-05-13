@@ -14,7 +14,7 @@ Vector representation and similarity measure for mass spectrometry data.
    * - \1. Code repository
      - |GitHub Badge|
    * - \2. License
-     - |License Badge| |FOSSA Badge|
+     - |License Badge|
    * - \3. Community Registry
      - |Conda Badge| |Research Software Directory Badge|
    * - \4. Enable Citation
@@ -24,7 +24,7 @@ Vector representation and similarity measure for mass spectrometry data.
    * - **Other best practices**
      -
    * - Continuous integration
-     - |Python Build| |Anaconda Build and Publish| |PyPI Publish|
+     - |Python Build| |Anaconda Build and Publish|
    * - Documentation
      - |ReadTheDocs Badge|
    * - Code Quality
@@ -38,9 +38,6 @@ Vector representation and similarity measure for mass spectrometry data.
 .. |License Badge| image:: https://img.shields.io/github/license/citation-file-format/cff-converter-python
    :target: https://github.com/matchms/matchms
    :alt: License Badge
-.. |FOSSA Badge| image:: https://app.fossa.io/api/projects/git%2Bgithub.com%2Fmatchms%2Fmatchms.svg?type=shield
-   :target: https://app.fossa.io/projects/git%2Bgithub.com%2Fmatchms%2Fmatchms?ref=badge_shield
-   :alt: FOSSA Badge
 
 .. |Conda Badge| image:: https://anaconda.org/nlesc/matchms/badges/installer/conda.svg
    :target: https://conda.anaconda.org/nlesc
@@ -82,10 +79,6 @@ Vector representation and similarity measure for mass spectrometry data.
    :target: https://github.com/matchms/matchms/actions?query=workflow%3A%22Anaconda%20Build%20and%20Publish%22
    :alt: Anaconda Build and Publish
 
-.. |PyPI Publish| image:: https://github.com/matchms/matchms/workflows/PyPI%20Publish/badge.svg
-   :target: https://github.com/matchms/matchms/actions?query=workflow%3A%22PyPI%20Publish%22
-   :alt: PyPI Publish
-
 
 ***********************
 Documentation for users
@@ -94,7 +87,7 @@ Documentation for users
 Installation
 ============
 
-Install matchms from PyPI with
+Install matchms from Anaconda Cloud with
 
 .. code-block:: console
 
