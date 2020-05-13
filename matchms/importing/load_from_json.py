@@ -47,6 +47,7 @@ def load_from_json(filename):
                                 metadata=metadata_dict)
             spectrums.append(spectrum)
         else:
-            print("Empty spectrum found (no peaks in 'peaks_json').")
+            print("Empty spectrum found (no peaks in 'peaks_json').",
+                  "Will not be imported.")
 
     return spectrums
