@@ -6,8 +6,43 @@
          "orcid": "0000-0002-3535-9406"
       }, 
       {
+         "affiliation": "Wageningen University and Research", 
+         "name": "van der Hooft, Justin J. J.", 
+         "orcid": "0000-0002-9340-5511"
+      }, 
+      {
+         "affiliation": "Netherlands eScience Center", 
+         "name": "Spaaks, Jurriaan H.", 
+         "orcid": "0000-0002-7064-4069"
+      }, 
+      {
+         "affiliation": "Netherlands eScience Center", 
+         "name": "Diblen, Faruk", 
+         "orcid": "0000-0002-0989-929X"
+      }, 
+      {
+         "affiliation": "Netherlands eScience Center", 
+         "name": "Verhoeven, Stefan", 
+         "orcid": "0000-0002-5821-2060"
+      }, 
+      {
+         "affiliation": "Netherlands eScience Center", 
+         "name": "Geng, Cunliang", 
+         "orcid": "0000-0002-1409-8358"
+      }, 
+      {
+         "affiliation": "Netherlands eScience Center", 
+         "name": "Meijer, Christiaan", 
+         "orcid": "0000-0002-5529-5761"
+      }, 
+      {
          "affiliation": "University of Glasgow", 
          "name": "Rogers, Simon"
+      }, 
+      {
+         "affiliation": "Netherlands eScience Center", 
+         "name": "Belloum, Adam", 
+         "orcid": "0000-0001-6306-6937"
       }
    ], 
    "description": "Vector representation and similarity measure for mass spectrometry data.", 
