@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.3.0] - 2020-05-13
 ### Added
-- Spectrum, Scores class, save_to_mgf, load_from_mgf calculate_scores https://github.com/matchms/matchms/pull/66 and https://github.com/matchms/matchms/pull/67 https://github.com/matchms/matchms/pull/103 https://github.com/matchms/matchms/pull/108 https://github.com/matchms/matchms/pull/113 https://github.com/matchms/matchms/pull/115 https://github.com/matchms/matchms/pull/151 https://github.com/matchms/matchms/pull/152 https://github.com/matchms/matchms/pull/121 https://github.com/matchms/matchms/pull/154
+- Spectrum, Scores class, save_to_mgf, load_from_mgf, normalize_intensities, calculate_scores https://github.com/matchms/matchms/pull/66 and https://github.com/matchms/matchms/pull/67 https://github.com/matchms/matchms/pull/103 https://github.com/matchms/matchms/pull/108 https://github.com/matchms/matchms/pull/113 https://github.com/matchms/matchms/pull/115 https://github.com/matchms/matchms/pull/151 https://github.com/matchms/matchms/pull/152 https://github.com/matchms/matchms/pull/121 https://github.com/matchms/matchms/pull/154 https://github.com/matchms/matchms/pull/134 https://github.com/matchms/matchms/pull/159 https://github.com/matchms/matchms/pull/161
 - Spikes class https://github.com/matchms/matchms/pull/150 https://github.com/matchms/matchms/pull/167
 - Anaconda badges https://github.com/matchms/matchms/pull/70 https://github.com/matchms/matchms/pull/68
 - Sonarcloud https://github.com/matchms/matchms/pull/80 https://github.com/matchms/matchms/pull/79 https://github.com/matchms/matchms/pull/149 https://github.com/matchms/matchms/pull/169
@@ -23,7 +23,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - require_minimum_number_of_peaks filter https://github.com/matchms/matchms/pull/131 https://github.com/matchms/matchms/pull/155
 - inchi filters https://github.com/matchms/matchms/pull/145 https://github.com/matchms/matchms/pull/127
 - losses https://github.com/matchms/matchms/pull/160
-
+- vesion string checks https://github.com/matchms/matchms/pull/185
+- Spec2Vec https://github.com/matchms/matchms/pull/183 https://github.com/matchms/matchms/pull/165
 
 ### Changed
 - Seperate filters https://github.com/matchms/matchms/pull/97
