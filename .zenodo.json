@@ -44,6 +44,11 @@
          "affiliation": "Netherlands eScience Center", 
          "name": "Belloum, Adam", 
          "orcid": "0000-0001-6306-6937"
+      }, 
+      {
+         "affiliation": "Netherlands eScience Center", 
+         "name": "Spreeuw, Hanno", 
+         "orcid": "0000-0002-5057-0322"
       }
    ], 
    "description": "Vector representation and similarity measure for mass spectrometry data.", 

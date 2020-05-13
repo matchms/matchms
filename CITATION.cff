@@ -48,6 +48,11 @@ authors:
     family-names: Belloum
     given-names: Adam
     orcid: "https://orcid.org/0000-0001-6306-6937"
+  -
+    affiliation: "Netherlands eScience Center"
+    family-names: Spreeuw
+    given-names: Hanno
+    orcid: "https://orcid.org/0000-0002-5057-0322"
 
 cff-version: "1.1.0"
 keywords:
