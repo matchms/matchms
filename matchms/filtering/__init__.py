@@ -13,6 +13,7 @@ from .harmonize_undefined_smiles import harmonize_undefined_smiles
 from .make_charge_scalar import make_charge_scalar
 from .make_ionmode_lowercase import make_ionmode_lowercase
 from .normalize_intensities import normalize_intensities
+from .reduce_to_number_of_peaks import reduce_to_number_of_peaks
 from .repair_inchi_inchikey_smiles import repair_inchi_inchikey_smiles
 from .require_minimum_number_of_peaks import require_minimum_number_of_peaks
 from .select_by_intensity import select_by_intensity
@@ -38,6 +39,7 @@ __all__ = [
     "make_charge_scalar",
     "make_ionmode_lowercase",
     "normalize_intensities",
+    "reduce_to_number_of_peaks",
     "repair_inchi_inchikey_smiles",
     "require_minimum_number_of_peaks",
     "select_by_intensity",
