@@ -1,6 +1,6 @@
 from math import ceil
-from ..typing import SpectrumType
 from ..Spikes import Spikes
+from ..typing import SpectrumType
 
 
 def reduce_to_number_of_peaks(spectrum_in: SpectrumType, n_required=1, n_max=100,

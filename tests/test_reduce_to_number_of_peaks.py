@@ -1,6 +1,6 @@
+import numpy
 from matchms import Spectrum
 from matchms.filtering import reduce_to_number_of_peaks
-import numpy
 
 
 def test_reduce_to_number_of_peaks_no_params():
@@ -52,6 +52,7 @@ def test_reduce_to_number_of_peaks_required_2_desired_2():
 
 
 def test_reduce_to_number_of_peaks_required_2_desired_3():
+
     mz = numpy.array([10, 20, 30, 40], dtype="float")
     intensities = numpy.array([0, 1, 10, 100], dtype="float")
     spectrum_in = Spectrum(mz=mz, intensities=intensities,
@@ -61,3 +62,15 @@ def test_reduce_to_number_of_peaks_required_2_desired_3():
 
     assert len(spectrum.peaks) == 3, "Expected that only 3 peaks remain."
     assert spectrum.peaks.mz.tolist() == [20., 30., 40.], "Expected different peaks to remain."
+
+
+def test_reduce_to_number_of_peaks_desired_5_check_sorting():
+    """Check if mz and intensities order is sorted correctly """
+    mz = numpy.array([10, 20, 30, 40, 50, 60], dtype="float")
+    intensities = numpy.array([5, 1, 4, 3, 100, 2], dtype="float")
+    spectrum_in = Spectrum(mz=mz, intensities=intensities)
+
+    spectrum = reduce_to_number_of_peaks(spectrum_in, n_max=5)
+
+    assert spectrum.peaks.intensities.tolist() == [5., 4., 3., 100., 2.], "Expected different intensities."
+    assert spectrum.peaks.mz.tolist() == [10., 30., 40., 50., 60.], "Expected different peaks to remain."
