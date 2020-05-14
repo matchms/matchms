@@ -3,7 +3,7 @@ from ..typing import SpectrumType
 
 def harmonize_precursor_mz(spectrum_in: SpectrumType) -> SpectrumType:
     """Harmonize precursor_mz field.
-    
+
     For missing precursor_mz field: check if there is "pepmass"" entry instead.
     For string parsed as precursor_mz: convert to float.
     """
