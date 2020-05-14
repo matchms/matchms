@@ -23,6 +23,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           activate-environment: matchms
           auto-activate-base: false
+          environment-file: conda/environment.yml
           channels: conda-forge,bioconda,nlesc
       - name: Install required packages
         shell: bash -l {0}
@@ -48,3 +49,22 @@ jobs:
         run: |
           export BUILD_FOLDER=./output
           anaconda -t ${{ secrets.ANACONDA_TOKEN }} upload -u nlesc --force $BUILD_FOLDER/noarch/*.tar.bz2
+      - uses: goanpeca/setup-miniconda@v1
+        with:
+          miniconda-version: 'latest'
+          auto-update-conda: true
+          python-version: ${{ matrix.python-version }}
+          activate-environment: matchms_test
+          auto-activate-base: false
+          channels: conda-forge,bioconda,nlesc
+      - name: Install the conda package from anaconda repository
+        shell: bash -l {0}
+        run: |
+          conda install conda build -c bioconda -c conda-forge -c nlesc matchms
+      - name: Show conda config
+        shell: bash -l {0}
+        run: |
+          conda info
+          conda list
+          conda config --show-sources
+          conda config --show
