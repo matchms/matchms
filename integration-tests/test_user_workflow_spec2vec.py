@@ -26,7 +26,7 @@ def test_user_workflow_spec2vec():
         s = require_minimum_number_of_peaks(s, n_required=5)
         return s
 
-    repository_root = os.path.join(os.path.dirname(__file__), '..')
+    repository_root = os.path.join(os.path.dirname(__file__), "..")
     spectrums_file = os.path.join(repository_root, "tests", "pesticides.mgf")
 
     # apply my filters to the data
@@ -45,9 +45,6 @@ def test_user_workflow_spec2vec():
         model = gensim.models.Word2Vec([d.words for d in documents], size=5, min_count=1)
         model.train([d.words for d in documents], total_examples=len(documents), epochs=20)
         model.save(model_file)
-
-    assert "loss@66.1" in model.wv.vocab, 'Word should be in corpus and model.'
-    assert "loss@66.6" not in model.wv.vocab, 'Word should not be in corpus and model.'
 
     # define similarity_function
     spec2vec = Spec2Vec(model=model, documents=documents, intensity_weighting_power=0.5)
