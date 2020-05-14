@@ -7,6 +7,7 @@ from .derive_inchi_from_smiles import derive_inchi_from_smiles
 from .derive_inchikey_from_inchi import derive_inchikey_from_inchi
 from .derive_ionmode import derive_ionmode
 from .derive_smiles_from_inchi import derive_smiles_from_inchi
+from .harmonize_precursor_mz import harmonize_precursor_mz
 from .harmonize_undefined_inchi import harmonize_undefined_inchi
 from .harmonize_undefined_inchikey import harmonize_undefined_inchikey
 from .harmonize_undefined_smiles import harmonize_undefined_smiles
@@ -32,6 +33,7 @@ __all__ = [
     "derive_inchikey_from_inchi",
     "derive_ionmode",
     "derive_smiles_from_inchi",
+    "harmonize_precursor_mz",
     "harmonize_undefined_inchi",
     "harmonize_undefined_inchikey",
     "harmonize_undefined_smiles",
