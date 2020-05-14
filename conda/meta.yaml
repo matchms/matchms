@@ -1,0 +1,83 @@
+# Build commmand:
+# conda build -c conda-forge -c bioconda -c nlesc .
+
+{% set name = "matchms" %}
+{% set version = "0.3.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  # git_rev: master
+  # git_url: https://github.com/matchms/matchms.git
+  path: ..
+
+extra:
+  channels:
+    - conda-forge
+    - bioconda
+    - nlesc
+
+build:
+  noarch: python
+  preserve_egg_dir: True
+  number: 0
+  skip: True # [py2k]
+  script: {{PYTHON}} -m pip install --no-deps --ignore-installed . -vv
+
+requirements:
+  build:
+    - conda-build
+    - conda-verify
+    - pytest-runner
+    - python
+    - setuptools
+  host:
+    - python >=3.7,<3.8
+    - pip
+    - pytest-runner
+    - setuptools
+  run:
+    - gensim >=3.8.0
+    - matplotlib
+    - numpy
+    - pip
+    - pyteomics >=4.2
+    - python >=3.7,<3.8
+    - pyyaml
+    - rdkit >=2020.03.1
+    - scipy
+
+test:
+  imports:
+    - matchms
+    - matchms.exporting
+    - matchms.filtering
+    - matchms.importing
+    - matchms.similarity
+    - matchms.__version__
+    - matchms.calculate_scores
+    - matchms.calculate_scores_parallel
+    - matchms.Scores
+    - matchms.Spectrum
+    - matchms.Spikes
+
+about:
+  home: https://github.com/matchms/matchms
+  license: Apache-2.0
+  license_family: APACHE
+  license_file: LICENSE
+  summary: 'Python library for fuzzy comparison of mass spectrum data and other Python objects'
+  description: |
+    Python library for fuzzy comparison of mass spectrum data and other Python objects
+  doc_url: https://matchms.readthedocs.io/
+  dev_url: https://github.com/matchms/matchms
+
+extra:
+  deploy:
+    - anaconda-client
+    - setuptools >=0.39
+    - twine >=1.12
+  recipe-maintainers:
+    - fdiblen
