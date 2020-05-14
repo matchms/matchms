@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- conda package fixes
+- conda package fixes https://github.com/matchms/matchms/pull/223
   - move conda receipe to conda folder
   - fix conda package installation issue
   - add extra import tests for conda package
