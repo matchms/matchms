@@ -72,6 +72,5 @@ extra:
   deploy:
     - anaconda-client
     - setuptools >=0.39
-    - twine >=1.12
   recipe-maintainers:
     - fdiblen
