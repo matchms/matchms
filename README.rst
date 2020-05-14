@@ -39,7 +39,7 @@ Vector representation and similarity measure for mass spectrometry data.
    :target: https://github.com/matchms/matchms
    :alt: GitHub Badge
 
-.. |License Badge| image:: https://img.shields.io/github/license/citation-file-format/cff-converter-python
+.. |License Badge| image:: https://img.shields.io/github/license/matchms/matchms
    :target: https://github.com/matchms/matchms
    :alt: License Badge
 
@@ -147,8 +147,9 @@ To install matchms, do:
 
   git clone https://github.com/matchms/matchms.git
   cd matchms
-  conda env create
+  conda env create --file conda/environment.yml
   conda activate matchms
+  pip install -r conda/requirements-dev.txt
   pip install --editable .
 
 Run the linter with:
@@ -171,24 +172,24 @@ To build anaconda package locally, do:
 
 .. code-block:: console
 
-  conda env create -n test_build python=3.7 conda-build conda-verify anaconda-client -y
-  conda activate test_build
+  conda deactivate
+  conda env create --file conda/environment-build.yml
+  conda activate matchms-build
   rm -rfv output;mkdir ./output
-  conda build --numpy 1.18.1 --no-include-recipe -c bioconda -c conda-forge --output-folder ./output ./conda
-
+  conda build --numpy 1.18.1 --no-include-recipe -c bioconda -c conda-forge \
+  --croot /tmp/matchms/_build --output-folder ./output ./conda
 
 To remove matchms package:
 
 .. code-block:: console
 
-  conda remove matchms -y
-
+  conda remove matchms
 
 To remove environment:
 
 .. code-block:: console
 
-  conda env remove -n test_build
+  conda env remove --name matchms-build
 
 
 Flowchart
