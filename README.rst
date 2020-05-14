@@ -39,7 +39,7 @@ Vector representation and similarity measure for mass spectrometry data.
    :target: https://github.com/matchms/matchms
    :alt: GitHub Badge
 
-.. |License Badge| image:: https://img.shields.io/github/license/citation-file-format/cff-converter-python
+.. |License Badge| image:: https://img.shields.io/github/license/matchms/matchms
    :target: https://github.com/matchms/matchms
    :alt: License Badge
 
@@ -183,7 +183,7 @@ To remove matchms package:
 
 .. code-block:: console
 
-  conda remove matchms -y
+  conda remove matchms
 
 To remove environment:
 
