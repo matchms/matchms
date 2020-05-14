@@ -95,7 +95,7 @@ Install matchms from Anaconda Cloud with
 
 .. code-block:: console
 
-  conda install --channel nlesc matchms
+  conda install -c nlesc -c bioconda -c conda-forge matchms
 
 Glossary of terms
 =================
@@ -162,6 +162,34 @@ Run tests (including coverage) with:
 .. code-block:: console
 
   pytest
+
+
+Conda package
+=============
+
+To build anaconda package locally, do:
+
+.. code-block:: console
+
+  conda env create -n test_build python=3.7 conda-build conda-verify anaconda-client -y
+  conda activate test_build
+  rm -rfv output;mkdir ./output
+  conda build --numpy 1.18.1 --no-include-recipe -c bioconda -c conda-forge --output-folder ./output ./conda
+
+
+To remove matchms package:
+
+.. code-block:: console
+
+  conda remove matchms -y
+
+
+To remove environment:
+
+.. code-block:: console
+
+  conda env remove -n test_build
+
 
 Flowchart
 =========
