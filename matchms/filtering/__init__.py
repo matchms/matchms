@@ -1,13 +1,13 @@
 from .add_adduct import add_adduct
 from .add_losses import add_losses
 from .add_parent_mass import add_parent_mass
+from .add_precursor_mz import add_precursor_mz
 from .correct_charge import correct_charge
 from .default_filters import default_filters
 from .derive_inchi_from_smiles import derive_inchi_from_smiles
 from .derive_inchikey_from_inchi import derive_inchikey_from_inchi
 from .derive_ionmode import derive_ionmode
 from .derive_smiles_from_inchi import derive_smiles_from_inchi
-from .harmonize_precursor_mz import harmonize_precursor_mz
 from .harmonize_undefined_inchi import harmonize_undefined_inchi
 from .harmonize_undefined_inchikey import harmonize_undefined_inchikey
 from .harmonize_undefined_smiles import harmonize_undefined_smiles
@@ -27,13 +27,13 @@ __all__ = [
     "add_adduct",
     "add_losses",
     "add_parent_mass",
+    "add_precursor_mz",
     "correct_charge",
     "default_filters",
     "derive_inchi_from_smiles",
     "derive_inchikey_from_inchi",
     "derive_ionmode",
     "derive_smiles_from_inchi",
-    "harmonize_precursor_mz",
     "harmonize_undefined_inchi",
     "harmonize_undefined_inchikey",
     "harmonize_undefined_smiles",
