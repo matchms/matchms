@@ -9,6 +9,9 @@ from .set_ionmode_na_when_missing import set_ionmode_na_when_missing
 
 
 def default_filters(spectrum: SpectrumType) -> SpectrumType:
+    """
+    Collection of filters that are considered default and that do no require any parameterization.
+    """
     spectrum = make_charge_scalar(spectrum)
     spectrum = make_ionmode_lowercase(spectrum)
     spectrum = set_ionmode_na_when_missing(spectrum)
