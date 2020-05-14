@@ -20,6 +20,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - skip builds for Python 2.X
   - more flexible package versions
   - add deployment requirements to meta.yml
+- verify conda package
+  - verify conda package after uploading to anaconda repository
+  - use conda/environment.yml when building the package
 
 ## [0.3.0] - 2020-05-13
 
