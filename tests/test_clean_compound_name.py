@@ -44,8 +44,8 @@ def test_clean_compound_name_removing_known_non_name_parts():
          "SOPHOCARPINE"],
         ["0072_2-Mercaptobenzothiaz",
          "2-Mercaptobenzothiaz"],
-        ["MassbankEU:ET110206 NPE_327.1704_12.2|N-succinylnorpheniramine",
-         "N-succinylnorpheniramine"]
+        [r"MassbankEU:ET110206 NPE_327.1704_12.2|N-succinylnorpheniramine",
+         "N-succinylnorpheniramine"],
         ["Massbank:CE000307 Trans-Zeatin-[d5]",
          "Trans-Zeatin-[d5]"],
         ["HMDB:HMDB00500-718 4-Hydroxybenzoic acid",
