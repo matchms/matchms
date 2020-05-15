@@ -45,7 +45,7 @@ setup(
     ],
     test_suite="tests",
     install_requires=[
-        # see environment.yml
+        # see conda/environment.yml
     ],
     setup_requires=[
         # see environment.yml
