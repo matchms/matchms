@@ -43,7 +43,15 @@ def test_clean_compound_name_removing_known_non_name_parts():
         ["NCGC00160217-01!SOPHOCARPINE",
          "SOPHOCARPINE"],
         ["0072_2-Mercaptobenzothiaz",
-         "2-Mercaptobenzothiaz"]
+         "2-Mercaptobenzothiaz"],
+        ["MassbankEU:ET110206 NPE_327.1704_12.2|N-succinylnorpheniramine",
+         "N-succinylnorpheniramine"]
+        ["Massbank:CE000307 Trans-Zeatin-[d5]",
+         "Trans-Zeatin-[d5]"],
+        ["HMDB:HMDB00500-718 4-Hydroxybenzoic acid",
+         "4-Hydroxybenzoic acid"],
+        ["MoNA:2346734 Piroxicam (Feldene) [M+H]",
+         "Piroxicam (Feldene)"]
     ]
     for name_strings in test_name_strings:
         spectrum_in = Spectrum(mz=numpy.array([], dtype="float"),
