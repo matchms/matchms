@@ -11,7 +11,10 @@ def test_add_losses():
 
     spectrum = add_losses(spectrum_in)
 
-    assert numpy.allclose(spectrum.losses.mz, numpy.array([145, 245, 295, 345], "float"))
+    aim_mz = numpy.array([145, 245, 295, 345], "float")
+    assert numpy.allclose(spectrum.losses.mz, aim_mz), "Expected different loss m/z."
+    aim_intensities = numpy.array([1000, 100, 200, 700], "float")
+    assert numpy.allclose(spectrum.losses.intensities, aim_intensities), "Expected different intensities."
 
 
 def test_add_losses_without_precursor_mz():
@@ -48,3 +51,29 @@ def test_add_losses_with_input_none():
     spectrum_in = None
     spectrum = add_losses(spectrum_in)
     assert spectrum is None
+
+
+def test_add_losses_with_peakmz_larger_precursormz():
+    spectrum_in = Spectrum(mz=numpy.array([100, 150, 200, 450], dtype="float"),
+                           intensities=numpy.array([700, 200, 100, 1000], dtype="float"),
+                           metadata={"precursor_mz": 445.0})
+
+    spectrum = add_losses(spectrum_in)
+
+    aim_mz = numpy.array([245, 295, 345], "float")
+    assert numpy.allclose(spectrum.losses.mz, aim_mz), "Expected different loss m/z."
+    aim_intensities = numpy.array([100, 200, 700], "float")
+    assert numpy.allclose(spectrum.losses.intensities, aim_intensities), "Expected different intensities."
+
+
+def test_add_losses_with_max_loss_mz_250():
+    spectrum_in = Spectrum(mz=numpy.array([100, 150, 200, 300], dtype="float"),
+                           intensities=numpy.array([700, 200, 100, 1000], dtype="float"),
+                           metadata={"precursor_mz": 445.0})
+
+    spectrum = add_losses(spectrum_in, loss_mz_to=250)
+
+    aim_mz = numpy.array([145, 245], "float")
+    assert numpy.allclose(spectrum.losses.mz, aim_mz), "Expected different loss m/z."
+    aim_intensities = numpy.array([1000, 100], "float")
+    assert numpy.allclose(spectrum.losses.intensities, aim_intensities), "Expected different intensities."
