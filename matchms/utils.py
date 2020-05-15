@@ -100,3 +100,12 @@ def is_valid_inchikey(inchikey):
     if re.fullmatch(regexp, inchikey):
         return True
     return False
+
+
+def looks_like_adduct(adduct):
+    """Return True if input string has expected format of an adduct."""
+    # Format 1, e.g. "[2M-H]" or "[2M+Na]+"
+    regexp1 = r"^\[(([0-9]M)|(M[0-9])|(M)|(MBr)|(MCl))[+-0-9][A-Z0-9\+\-\(\)|(Na)|(Ca)|(Mg)|(Cl)|(Li)|(Br)|(Ser)]{1,}[\]0-9+-]{1,4}"
+    # Format 2, e.g. "M+Na+K" or "M+H-H20"
+    regexp2 = r"^(([0-9]M)|(M[0-9])|(M)|(MBr)|(MCl))[+-0-9][A-Z0-9\+\-\(\)|(Na)|(Ca)|(Mg)|(Cl)|(Li)|(Br)|(Ser)]{1,}"
+    return re.search(regexp1, adduct) is not None or re.search(regexp2, adduct) is not None
