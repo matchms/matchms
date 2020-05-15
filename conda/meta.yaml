@@ -46,16 +46,6 @@ requirements:
 test:
   imports:
     - matchms
-    - matchms.exporting
-    - matchms.filtering
-    - matchms.importing
-    - matchms.similarity
-    - matchms.__version__
-    - matchms.calculate_scores
-    - matchms.calculate_scores_parallel
-    - matchms.Scores
-    - matchms.Spectrum
-    - matchms.Spikes
 
 about:
   home: https://github.com/matchms/matchms
