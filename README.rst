@@ -95,7 +95,7 @@ Install matchms from Anaconda Cloud with
 
 .. code-block:: console
 
-  conda install -c nlesc -c bioconda -c conda-forge matchms
+  conda install --channel nlesc --channel bioconda --channel conda-forge matchms
 
 Glossary of terms
 =================
