@@ -20,6 +20,8 @@ def correct_charge(spectrum_in: SpectrumType) -> SpectrumType:
                                             "Apply 'make_ionmode_lowercase' filter first.")
 
     charge = spectrum.get("charge", None)
+    assert not isinstance(charge, str), ("Charge is given as string.",
+                                        "Apply 'make_charge_scalar' filter first.")
 
     if charge is None:
         charge = 0
