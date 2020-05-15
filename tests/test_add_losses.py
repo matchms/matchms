@@ -35,7 +35,7 @@ def test_add_losses_with_precursor_mz_wrong_type():
     with pytest.raises(AssertionError) as msg:
         _ = add_losses(spectrum_in)
 
-    assert str(msg.value) == "Expected 'precursor_mz' to be a scalar number."
+    assert "Expected 'precursor_mz' to be a scalar number." in str(msg.value)
 
 
 def test_add_losses_returns_new_spectrum_instance():
