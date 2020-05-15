@@ -11,7 +11,7 @@ def test_correct_charge_no_ionmode():
 
     spectrum = correct_charge(spectrum_in)
 
-    assert spectrum.get("charge") is None, "Expected no charge value."
+    assert spectrum.get("charge") == 0, "Expected zero charge value."
 
 
 def test_correct_charge_add_charge():

@@ -23,7 +23,8 @@ def correct_charge(spectrum_in: SpectrumType) -> SpectrumType:
 
     if charge is None:
         charge = 0
-    elif charge == 0 and ionmode == 'positive':
+
+    if charge == 0 and ionmode == 'positive':
         charge = 1
     elif charge == 0 and ionmode == 'negative':
         charge = -1
