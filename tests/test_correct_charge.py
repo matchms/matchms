@@ -41,7 +41,7 @@ def test_correct_charge_correct_charge_sign_min_to_plus():
     """Test if charge is corrected as expected."""
     spectrum_in = Spectrum(mz=numpy.array([], dtype='float'),
                            intensities=numpy.array([], dtype='float'),
-                           metadata={"ionmode": "negative",
+                           metadata={"ionmode": "positive",
                                      "charge": -2})
 
     spectrum = correct_charge(spectrum_in)
