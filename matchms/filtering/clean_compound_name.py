@@ -13,6 +13,8 @@ def clean_compound_name(spectrum_in: SpectrumType) -> SpectrumType:
         """Find and remove adduct string."""
         potential_adduct = name.split(' ')[-1].strip().replace('*', '')
         if looks_like_adduct(potential_adduct):
+            assert spectrum.get("adduct", None) is not None, ("Adduct found in compound name but not in metadata.",
+                                                              "Apply 'add_adduct' filter first.")
             name_split = name.split(" ")
             name = " ".join(name_split[:-1])
         return name
