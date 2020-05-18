@@ -10,8 +10,8 @@ def derive_formula_from_name(spectrum_in: SpectrumType, remove_formula_from_name
     ----
     spectrum_in: SpectrumType
         Input spectrum.
-    remove_adduct_from_name: bool
-        Remove found adducts from compound name if set to True. Default is True.
+    remove_formula_from_name: bool
+        Remove found formula from compound name if set to True. Default is True.
     """
     if spectrum_in is None:
         return None

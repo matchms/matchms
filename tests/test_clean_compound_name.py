@@ -24,7 +24,7 @@ def test_clean_compound_name_removing_known_non_name_parts():
     for name_strings in test_name_strings:
         spectrum_in = Spectrum(mz=numpy.array([], dtype="float"),
                                intensities=numpy.array([], dtype="float"),
-                               metadata={"name": name_strings[0]})
+                               metadata={"compound_name": name_strings[0]})
 
         spectrum = clean_compound_name(spectrum_in)
 
