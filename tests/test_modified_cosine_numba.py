@@ -5,7 +5,7 @@ from matchms.filtering import normalize_intensities
 from matchms.similarity import ModifiedCosineNumba
 
 
-def test_cosine_greedy_without_parameters():
+def test_modified_cosine_numba_without_parameters():
     """Test without parameters and precursor-m/z. Should be default cosine."""
     spectrum_1 = Spectrum(mz=numpy.array([100, 150, 200, 300, 500, 510, 1100], dtype="float"),
                           intensities=numpy.array([700, 200, 100, 1000, 200, 5, 500], dtype="float"))
@@ -22,7 +22,7 @@ def test_cosine_greedy_without_parameters():
     assert n_matches == 3, "Expected 3 matching peaks."
 
 
-def test_cosine_score_greedy_with_mass_shift_5():
+def test_modified_cosine_numba_with_mass_shift_5():
     spectrum_1 = Spectrum(mz=numpy.array([100, 150, 200, 300, 500, 510, 1100], dtype="float"),
                           intensities=numpy.array([700, 200, 100, 1000, 200, 5, 500], dtype="float"),
                           metadata={"precursor_mz": 1000.0})
@@ -37,10 +37,10 @@ def test_cosine_score_greedy_with_mass_shift_5():
     score, n_matches = modified_cosine(norm_spectrum_1, norm_spectrum_2)
 
     assert score == pytest.approx(0.081966, 0.0001), "Expected different cosine score."
-    assert n_matches == 2
+    assert n_matches == 2, "Expected 2 matching peaks."
 
 
-def test_cosine_score_greedy_with_mass_shift_5_tolerance_2():
+def test_modified_cosine_numba_with_mass_shift_5_tolerance_2():
     spectrum_1 = Spectrum(mz=numpy.array([100, 200, 299, 300, 301, 500, 510], dtype="float"),
                           intensities=numpy.array([10, 10, 500, 100, 200, 20, 100], dtype="float"),
                           metadata={"precursor_mz": 1000.0})
@@ -58,7 +58,7 @@ def test_cosine_score_greedy_with_mass_shift_5_tolerance_2():
     assert n_matches == 6, "Expected 6 matching peaks."
 
 
-def test_cosine_score_greedy_order_of_input_spectrums():
+def test_cmodified_cosine_numba_order_of_input_spectrums():
     spectrum_1 = Spectrum(mz=numpy.array([100, 150, 200, 300, 500, 510, 1100], dtype="float"),
                           intensities=numpy.array([700, 200, 100, 1000, 200, 5, 500], dtype="float"),
                           metadata={"precursor_mz": 1000.0})
