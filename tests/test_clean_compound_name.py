@@ -18,7 +18,7 @@ def test_clean_compound_name_removing_known_non_name_parts():
          "Trans-Zeatin-[d5]"],
         ["HMDB:HMDB00500-718 4-Hydroxybenzoic acid",
          "4-Hydroxybenzoic acid"],
-        ["MoNA:2346734 Piroxicam (Feldene) [M+H]",
+        ["MoNA:2346734 Piroxicam (Feldene)",
          "Piroxicam (Feldene)"]
     ]
     for name_strings in test_name_strings:
