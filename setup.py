@@ -17,7 +17,7 @@ with open("README.rst") as readme_file:
 setup(
     name="matchms",
     version=version["__version__"],
-    description="Vector representation and similarity measure for mass spectrometry data",
+    description="Python library for fuzzy comparison of mass spectrum data and other Python objects",
     long_description=readme + "\n\n",
     author="Netherlands eScience Center",
     author_email="generalization@esciencecenter.nl",
@@ -28,7 +28,12 @@ setup(
     include_package_data=True,
     license="Apache Software License 2.0",
     zip_safe=False,
-    keywords="matchms",
+    keywords=[
+        "similarity measures",
+        "mass spectrometry",
+        "fuzzy matching",
+        "fuzzy search"
+    ],
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
         "Intended Audience :: Developers",
