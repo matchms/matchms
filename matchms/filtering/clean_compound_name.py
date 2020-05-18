@@ -1,6 +1,5 @@
 import re
 from ..typing import SpectrumType
-from ..utils import looks_like_adduct
 
 
 def clean_compound_name(spectrum_in: SpectrumType) -> SpectrumType:
@@ -8,7 +7,6 @@ def clean_compound_name(spectrum_in: SpectrumType) -> SpectrumType:
 
     A list of frequently seen name additions that do not belong to the compound
     name will be removed."""
-
 
     def remove_non_compound_name_parts(name):
         """Clean "name string by removing known parts that don't belong there."""
@@ -52,7 +50,8 @@ def clean_compound_name(spectrum_in: SpectrumType) -> SpectrumType:
         print("No compound name found in metadata.")
         return spectrum
 
-    name_cleaned = remove_non_compound_name_parts(name_cleaned)
+    # Clean compound name
+    name_cleaned = remove_non_compound_name_parts(name)
     if name_cleaned != name:
         spectrum.set("compound_name", name_cleaned)
         print("Added cleaned compound name:", name_cleaned)
