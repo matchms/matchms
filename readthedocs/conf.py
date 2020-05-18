@@ -95,6 +95,5 @@ intersphinx_mapping = {"https://docs.python.org/3": None,
                        "scipy": ("https://docs.scipy.org/doc/scipy/reference", None),
                        "matplotlib": ("https://matplotlib.org", None),
                        "rdkit": ("http://rdkit.org/docs", None),
-                       "gensim": ("https://radimrehurek.com/gensim", None),
                        "pyteomics": ("https://pyteomics.readthedocs.io/en/latest/", None),
                        }
