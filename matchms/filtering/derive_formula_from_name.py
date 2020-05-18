@@ -34,7 +34,7 @@ def derive_formula_from_name(spectrum_in: SpectrumType, remove_formula_from_name
 
     # Remove found formula from compound name (if remove_formula_from_name=True)
     if formula_from_name and remove_formula_from_name:
-        name_formula_removed = " ".join(name.split(" ")[-1][:-1])
+        name_formula_removed = " ".join(name.split(" ")[:-1])
         spectrum.set("compound_name", name_formula_removed)
         print("Removed formula {} from compound name.".format(formula_from_name))
 
