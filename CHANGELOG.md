@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- ...
+
+### Changed
+
+- ...
+
+### Fixed
+
+- ...
+
+### Removed
+
+- Moved ``spec2vec`` similarity related functionality from ``matchms`` to https://github.com/iomega/spec2vec   
+
 ## [0.3.0] - 2020-05-13
 
 ### Added
