@@ -157,6 +157,14 @@ Run the linter with:
 
   prospector
 
+Automatically fix incorrectly sorted imports:
+
+.. code-block:: console
+
+  isort --recursive .
+
+Files will be changed in place and need to be committed manually.
+
 Run tests (including coverage) with:
 
 .. code-block:: console

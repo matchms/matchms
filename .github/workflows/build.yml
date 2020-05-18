@@ -40,7 +40,7 @@ jobs:
         run: prospector -o grouped -o pylint:pylint-report.txt
       - name: Check whether import statements are used consistently
         shell: bash -l {0}
-        run: isort --check-only --diff --conda-env matchms --recursive --wrap-length 79 --lines-after-imports 2 --force-single-line --no-lines-before FUTURE --no-lines-before STDLIB --no-lines-before THIRDPARTY --no-lines-before FIRSTPARTY --no-lines-before LOCALFOLDER matchms/ tests/ integration-tests/
+        run: isort --check-only --recursive .
       - name: Build
         shell: bash -l {0}
         run: |
