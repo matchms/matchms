@@ -13,7 +13,7 @@
 import os
 import sys
 d = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0, os.path.join(d,".."))
+sys.path.insert(0, os.path.join(d, ".."))
 
 import matchms
 
@@ -73,7 +73,7 @@ html_theme = "alabaster"
 html_theme_options = {
     "logo": "matchms.png",
     "github_user": "matchms",
-    "github_repo": "matchms",
+    "github_repo": "matchms"
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
