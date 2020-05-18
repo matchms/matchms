@@ -1,6 +1,7 @@
 from .add_compound_name import add_compound_name
 from .add_losses import add_losses
 from .add_parent_mass import add_parent_mass
+from .clean_compound_name import clean_compound_name
 from .correct_charge import correct_charge
 from .default_filters import default_filters
 from .derive_adduct_from_name import derive_adduct_from_name
@@ -28,6 +29,7 @@ __all__ = [
     "add_compound_name",
     "add_losses",
     "add_parent_mass",
+    "clean_compound_name",
     "correct_charge",
     "default_filters",
     "derive_adduct_from_name",

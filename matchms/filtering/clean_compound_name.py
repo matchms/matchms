@@ -4,20 +4,11 @@ from ..utils import looks_like_adduct
 
 
 def clean_compound_name(spectrum_in: SpectrumType) -> SpectrumType:
-    """Clean compound name. Includes removing potential adduct.
+    """Clean compound name.
 
-    This function will look for an adduct string and remove it.
     A list of frequently seen name additions that do not belong to the compound
     name will be removed."""
-    def remove_adduct(name):
-        """Find and remove adduct string."""
-        potential_adduct = name.split(' ')[-1].strip().replace('*', '')
-        if looks_like_adduct(potential_adduct):
-            assert spectrum.get("adduct", None) is not None, ("Adduct found in compound name but not in metadata.",
-                                                              "Apply 'add_adduct' filter first.")
-            name_split = name.split(" ")
-            name = " ".join(name_split[:-1])
-        return name
+
 
     def remove_non_compound_name_parts(name):
         """Clean "name string by removing known parts that don't belong there."""
@@ -52,17 +43,18 @@ def clean_compound_name(spectrum_in: SpectrumType) -> SpectrumType:
 
     spectrum = spectrum_in.clone()
 
+    # Get compound name
     if spectrum.get("compound_name", None):
         name = spectrum.get("compound_name")
     else:
-        name = spectrum.get("name", None)
+        assert spectrum.get("name", None) is not None, ("Found 'name' but not 'compound_name' in metadata",
+                                                        "Apply 'add_compound_name' filter first.")
+        print("No compound name found in metadata.")
+        return spectrum
 
-    if name:
-        # Clean found name string
-        name_cleaned = remove_adduct(name)
-        name_cleaned = remove_non_compound_name_parts(name_cleaned)
-        if name_cleaned != name:
-            spectrum.set("compound_name", name_cleaned)
-            print("Added cleaned compound name:", name_cleaned)
+    name_cleaned = remove_non_compound_name_parts(name_cleaned)
+    if name_cleaned != name:
+        spectrum.set("compound_name", name_cleaned)
+        print("Added cleaned compound name:", name_cleaned)
 
     return spectrum

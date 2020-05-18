@@ -1,6 +1,6 @@
 from ..typing import SpectrumType
-from .add_adduct import add_adduct
 from .correct_charge import correct_charge
+from .derive_adduct_from_name import derive_adduct_from_name
 from .derive_ionmode import derive_ionmode
 from .make_charge_scalar import make_charge_scalar
 from .make_ionmode_lowercase import make_ionmode_lowercase
