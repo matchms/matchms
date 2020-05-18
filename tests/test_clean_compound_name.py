@@ -19,7 +19,11 @@ def test_clean_compound_name_removing_known_non_name_parts():
         ["HMDB:HMDB00500-718 4-Hydroxybenzoic acid",
          "4-Hydroxybenzoic acid"],
         ["MoNA:2346734 Piroxicam (Feldene)",
-         "Piroxicam (Feldene)"]
+         "Piroxicam (Feldene)"],
+        ["ReSpect:PS013405 option1|option2|option3",
+         "option3"],
+        ["ReSpect:PS013405 option1name",
+         "option1name"]
     ]
     for name_strings in test_name_strings:
         spectrum_in = Spectrum(mz=numpy.array([], dtype="float"),

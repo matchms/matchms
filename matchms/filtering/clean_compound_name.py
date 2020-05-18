@@ -14,19 +14,23 @@ def clean_compound_name(spectrum_in: SpectrumType) -> SpectrumType:
         # remove type NCGC00180417-03_C31H40O16_
         name = re.split(r"[A-Z]{3,}[0-9]{8,}-[0-9]{2,}_[A-Z,0-9]{4,}_", name)[-1]
         # remove type NCGC00160232-01! or MLS001142816-01!
-        name = re.split(r"[A-Z]{3,}[0-9]{8,}-[0-9]{2,}\!", name)[-1]
+        name = re.split(r"[A-Z]{3,}[0-9]{8,}-[0-9]{2,3}\!", name)[-1]
         # remove type Massbank:EA008813 option1|option2|option3
-        name = re.split(r"((Massbank:)|(MassbankEU:))[A-Z]{2,}[0-9]{5,}.*\|", name)[-1]
+        name = re.split(r"((Massbank:)|(MassbankEU:))[A-Z]{2}[0-9]{5,6}.*\|", name)[-1]
         # remove type Massbank:EA008813 or MassbankEU:EA008813
-        name = re.split(r"((Massbank:)|(MassbankEU:))[A-Z]{2,}[0-9]{5,}", name)[-1]
+        name = re.split(r"((Massbank:)|(MassbankEU:))[A-Z]{2}[0-9]{5,6}", name)[-1]
         # remove type HMDB:HMDB00943-1336
         name = re.split(r"HMDB:HMDB[0-9]{4,}-[0-9]{1,}", name)[-1]
         # remove type MoNA:662599
         name = re.split(r"MoNA:[0-9]{5,}", name)[-1]
         # ReSpect:PS013405 option1|option2|option3...
-        name = re.split(r"ReSpect:[A-Z]{2,}[0-9]{5,}.*\|", name)[-1]
+        name = re.split(r"ReSpect:[A-Z]{2,}[0-9]{6}.*\|", name)[-1]
+        # ReSpect:PS013405 option1
+        name = re.split(r"[A-Z]{2,}[0-9]{6}( )", name)[-1]
         # remove type 0072_2-Mercaptobenzothiaz
         name = re.split(r"^[0-9]{4}_", name)[-1]
+        # remove type nameofcompound_CID20_170920 or Spiraeoside_HCD30_170919
+        name = re.split(r"_((HCD)|(CID))[0-9]{2}_[0-9]{5,6}$", name)[0]
 
         # Remove further non compound-name parts
         parts_remove = ["Spectral Match to",
@@ -52,6 +56,7 @@ def clean_compound_name(spectrum_in: SpectrumType) -> SpectrumType:
 
     # Clean compound name
     name_cleaned = remove_non_compound_name_parts(name)
+    name_cleaned = name_cleaned.strip("; ")
     if name_cleaned != name:
         spectrum.set("compound_name", name_cleaned)
         print("Added cleaned compound name:", name_cleaned)
