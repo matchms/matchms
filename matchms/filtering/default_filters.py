@@ -14,7 +14,7 @@ def default_filters(spectrum: SpectrumType) -> SpectrumType:
     spectrum = make_charge_scalar(spectrum)
     spectrum = make_ionmode_lowercase(spectrum)
     spectrum = set_ionmode_na_when_missing(spectrum)
-    spectrum = add_adduct(spectrum)
+    spectrum = derive_adduct_from_name(spectrum)
     spectrum = derive_ionmode(spectrum)
     spectrum = correct_charge(spectrum)
     return spectrum
