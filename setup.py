@@ -1,12 +1,10 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 import os
 
 from setuptools import setup
 
 here = os.path.abspath(os.path.dirname(__file__))
 
-# To update the package version number, edit matchms/__version__.py
 version = {}
 with open(os.path.join(here, "matchms", "__version__.py")) as f:
     exec(f.read(), version)
