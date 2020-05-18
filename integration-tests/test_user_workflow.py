@@ -22,8 +22,8 @@ def test_user_workflow():
         s = require_minimum_number_of_peaks(s, n_required=5)
         return s
 
-    module_root = os.path.join(os.path.dirname(__file__), '..')
-    spectrums_file = os.path.join(module_root, 'tests', 'pesticides.mgf')
+    module_root = os.path.join(os.path.dirname(__file__), "..")
+    spectrums_file = os.path.join(module_root, "tests", "pesticides.mgf")
 
     # apply my filters to the data
     spectrums = [apply_my_filters(s) for s in load_from_mgf(spectrums_file)]

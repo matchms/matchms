@@ -6,15 +6,58 @@
          "orcid": "0000-0002-3535-9406"
       }, 
       {
+         "affiliation": "Wageningen University and Research", 
+         "name": "van der Hooft, Justin J. J.", 
+         "orcid": "0000-0002-9340-5511"
+      }, 
+      {
+         "affiliation": "Netherlands eScience Center", 
+         "name": "Spaaks, Jurriaan H.", 
+         "orcid": "0000-0002-7064-4069"
+      }, 
+      {
+         "affiliation": "Netherlands eScience Center", 
+         "name": "Diblen, Faruk", 
+         "orcid": "0000-0002-0989-929X"
+      }, 
+      {
+         "affiliation": "Netherlands eScience Center", 
+         "name": "Verhoeven, Stefan", 
+         "orcid": "0000-0002-5821-2060"
+      }, 
+      {
+         "affiliation": "Netherlands eScience Center", 
+         "name": "Geng, Cunliang", 
+         "orcid": "0000-0002-1409-8358"
+      }, 
+      {
+         "affiliation": "Netherlands eScience Center", 
+         "name": "Meijer, Christiaan", 
+         "orcid": "0000-0002-5529-5761"
+      }, 
+      {
          "affiliation": "University of Glasgow", 
-         "name": "Rogers, Simon"
+         "name": "Rogers, Simon", 
+         "orcid": "0000-0003-3578-4477"
+      }, 
+      {
+         "affiliation": "Netherlands eScience Center", 
+         "name": "Belloum, Adam", 
+         "orcid": "0000-0001-6306-6937"
+      }, 
+      {
+         "affiliation": "Netherlands eScience Center", 
+         "name": "Spreeuw, Hanno", 
+         "orcid": "0000-0002-5057-0322"
       }
    ], 
-   "description": "Vector representation and similarity measure for mass spectrometry data.", 
+   "description": "Python library for fuzzy comparison of mass spectrum data and other Python objects", 
    "keywords": [
+      "python", 
+      "similarity measures", 
       "mass spectrometry", 
-      "word2vec", 
-      "similarity measures"
+      "fuzzy matching", 
+      "fuzzy search"
    ], 
    "license": {
       "id": "Apache-2.0"

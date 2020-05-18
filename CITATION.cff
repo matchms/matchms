@@ -1,6 +1,6 @@
 # YAML 1.2
 ---
-abstract: "Vector representation and similarity measure for mass spectrometry data."
+abstract: "Python library for fuzzy comparison of mass spectrum data and other Python objects."
 authors:
   -
     affiliation: "Netherlands eScience Center"
@@ -8,16 +8,61 @@ authors:
     given-names: Florian
     orcid: "https://orcid.org/0000-0002-3535-9406"
   -
+    affiliation: "Wageningen University and Research"
+    family-names: Hooft
+    name-particle: van der
+    given-names: Justin J. J.
+    orcid: "https://orcid.org/0000-0002-9340-5511"
+  -
+    affiliation: "Netherlands eScience Center"
+    family-names: Spaaks
+    given-names: Jurriaan H.
+    orcid: "https://orcid.org/0000-0002-7064-4069"
+  -
+    affiliation: "Netherlands eScience Center"
+    family-names: Diblen
+    given-names: Faruk
+    orcid: "https://orcid.org/0000-0002-0989-929X"
+  -
+    affiliation: "Netherlands eScience Center"
+    family-names: Verhoeven
+    given-names: Stefan
+    orcid: "https://orcid.org/0000-0002-5821-2060"
+  -
+    affiliation: "Netherlands eScience Center"
+    family-names: Geng
+    given-names: Cunliang
+    orcid: "https://orcid.org/0000-0002-1409-8358"
+  -
+    affiliation: "Netherlands eScience Center"
+    family-names: Meijer
+    given-names: Christiaan
+    orcid: "https://orcid.org/0000-0002-5529-5761"
+  -
     affiliation: "University of Glasgow"
     family-names: Rogers
     given-names: Simon
+    orcid: "https://orcid.org/0000-0003-3578-4477"
+  -
+    affiliation: "Netherlands eScience Center"
+    family-names: Belloum
+    given-names: Adam
+    orcid: "https://orcid.org/0000-0001-6306-6937"
+  -
+    affiliation: "Netherlands eScience Center"
+    family-names: Spreeuw
+    given-names: Hanno
+    orcid: "https://orcid.org/0000-0002-5057-0322"
+
 cff-version: "1.1.0"
 keywords:
-  - "mass spectrometry"
-  - word2vec
+  - python
   - "similarity measures"
+  - "mass spectrometry"
+  - "fuzzy matching"
+  - "fuzzy search"
 license: "Apache-2.0"
 message: "If you use this software, please cite it using these metadata."
-repository-code: "https://github.com/NLeSC/spec2vec"
+repository-code: "https://github.com/matchms/matchms"
 title: matchms
 ...
