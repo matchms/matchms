@@ -33,3 +33,14 @@ def test_clean_compound_name_removing_known_non_name_parts():
         spectrum = clean_compound_name(spectrum_in)
 
         assert spectrum.get("compound_name") == name_strings[1], "Expected different cleaned name."
+
+
+def test_clean_compound_name_empty_name_given():
+    """Test cleaning on spectrum with empty name."""
+    spectrum_in = Spectrum(mz=numpy.array([], dtype="float"),
+                           intensities=numpy.array([], dtype="float"),
+                           metadata={"compound_name": ""})
+
+    spectrum = clean_compound_name(spectrum_in)
+
+    assert spectrum.get("compound_name", None) == "", "Expected empty name."

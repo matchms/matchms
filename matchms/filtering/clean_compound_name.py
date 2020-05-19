@@ -49,8 +49,8 @@ def clean_compound_name(spectrum_in: SpectrumType) -> SpectrumType:
     if spectrum.get("compound_name", None):
         name = spectrum.get("compound_name")
     else:
-        assert spectrum.get("name", None) is not None, ("Found 'name' but not 'compound_name' in metadata",
-                                                        "Apply 'add_compound_name' filter first.")
+        assert spectrum.get("name", None) in [None, ""], ("Found 'name' but not 'compound_name' in metadata",
+                                                          "Apply 'add_compound_name' filter first.")
         print("No compound name found in metadata.")
         return spectrum
 

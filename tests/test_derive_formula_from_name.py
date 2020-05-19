@@ -35,3 +35,14 @@ def test_derive_formula_from_name_remove_formula_false():
 
     assert spectrum.get("formula") == "C5H12NO2", "Expected different formula."
     assert spectrum.get("compound_name") == spectrum_in.get("compound_name"), "Expected no name change."
+
+
+def test_derive_formula_from_name_no_name_given():
+    spectrum_in = Spectrum(mz=numpy.array([], dtype="float"),
+                           intensities=numpy.array([], dtype="float"),
+                           metadata={})
+
+    spectrum = derive_adduct_from_name(spectrum_in)
+
+    assert spectrum.get("formula", None) is None, "Expected None for adduct."
+    assert spectrum.get("compound_name", None) is None, "Expected None for name."

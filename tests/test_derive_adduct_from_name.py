@@ -37,7 +37,7 @@ def test_derive_adduct_from_name_dont_remove_from_name():
     assert spectrum.get("compound_name") == spectrum_in.get("compound_name"), "Expected no change to name."
 
 
-def test_derive_adduct_no_compound_name_empty_name():
+def test_derive_adduct_from_name_no_compound_name_empty_name():
     spectrum_in = Spectrum(mz=numpy.array([], dtype="float"),
                            intensities=numpy.array([], dtype="float"),
                            metadata={"name": ""})
