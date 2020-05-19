@@ -183,7 +183,7 @@ To build anaconda package locally, do:
   conda build --numpy 1.18.1 --no-include-recipe -c bioconda -c conda-forge \
   --croot $BUILD_FOLDER ./conda
 
-  The package will saved in ``/tmp/matchms/_build`` folder.
+The package will saved in ``/tmp/matchms/_build`` folder.
 
 To install local anaconda package, do:
 
