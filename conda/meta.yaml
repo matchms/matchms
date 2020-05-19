@@ -18,7 +18,6 @@ build:
   preserve_egg_dir: True
   number: 0
   skip: True # [py2k]
-  script: {{PYTHON}} -m pip install --no-deps --ignore-installed . -vv
 
 requirements:
   build:
@@ -46,16 +45,6 @@ requirements:
 test:
   imports:
     - matchms
-    - matchms.exporting
-    - matchms.filtering
-    - matchms.importing
-    - matchms.similarity
-    - matchms.__version__
-    - matchms.calculate_scores
-    - matchms.calculate_scores_parallel
-    - matchms.Scores
-    - matchms.Spectrum
-    - matchms.Spikes
 
 about:
   home: https://github.com/matchms/matchms
@@ -69,8 +58,5 @@ about:
   dev_url: https://github.com/matchms/matchms
 
 extra:
-  deploy:
-    - anaconda-client
-    - setuptools >=0.39
   recipe-maintainers:
     - fdiblen
