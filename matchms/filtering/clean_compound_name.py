@@ -46,7 +46,7 @@ def clean_compound_name(spectrum_in: SpectrumType) -> SpectrumType:
     spectrum = spectrum_in.clone()
 
     # Get compound name
-    if spectrum.get("compound_name", None) is None:
+    if spectrum.get("compound_name", None) is not None:
         name = spectrum.get("compound_name")
     else:
         assert spectrum.get("name", None) in [None, ""], ("Found 'name' but not 'compound_name' in metadata",
