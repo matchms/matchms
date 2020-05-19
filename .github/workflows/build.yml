@@ -36,7 +36,7 @@ jobs:
         shell: bash -l {0}
         run: python -m pip install -r conda/requirements-dev.txt
       - name: Conda list
-        shell: pwsh
+        shell: bash -l {0}
         run: conda list
       - name: Check style against standards using prospector
         shell: bash -l {0}

@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.1] - 2020-05-19
+
+### Added
+
+- improve conda package https://github.com/matchms/matchms/pull/225
+  - Build scripts for Windows and Unix(MacOS and Linux) systems
+  - verify conda package after uploading to anaconda repository by installing it
+  - conda package also includes `matchms/data` folder
+
 ### Changed
 
 - conda package fixes [#223](https://github.com/matchms/matchms/pull/223)
@@ -20,6 +29,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - skip builds for Python 2.X
   - more flexible package versions
   - add deployment requirements to meta.yml
+- verify conda package https://github.com/matchms/matchms/pull/225
+  - use conda/environment.yml when building the package
+- split anaconda workflow https://github.com/matchms/matchms/pull/225
+  - conda build: tests conda packages on every push and pull request
+  - conda publish: publish and test conda package on release
+  - update the developer instructions
+  - move conda receipe to conda folder
 
 ## [0.3.0] - 2020-05-13
 

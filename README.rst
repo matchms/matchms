@@ -28,7 +28,7 @@ Vector representation and similarity measure for mass spectrometry data.
    * - **Other best practices**
      -
    * - Continuous integration
-     - |Python Build| |Anaconda Build and Publish|
+     - |Python Build| |Anaconda Build| |Anaconda Publish|
    * - Documentation
      - |ReadTheDocs Badge|
    * - Code Quality
@@ -79,10 +79,13 @@ Vector representation and similarity measure for mass spectrometry data.
    :target: https://github.com/matchms/matchms/actions?query=workflow%3A%22Python%20Build%22
    :alt: Python Build
 
-.. |Anaconda Build and Publish| image:: https://github.com/matchms/matchms/workflows/Anaconda%20Build%20and%20Publish/badge.svg
-   :target: https://github.com/matchms/matchms/actions?query=workflow%3A%22Anaconda%20Build%20and%20Publish%22
-   :alt: Anaconda Build and Publish
+.. |Anaconda Build| image:: https://github.com/matchms/matchms/workflows/Anaconda%20Build/badge.svg
+   :target: https://github.com/matchms/matchms/actions?query=workflow%3A%22Anaconda%20Build%22
+   :alt: Anaconda Build
 
+.. |Anaconda Publish| image:: https://github.com/matchms/matchms/workflows/Anaconda%20Publish/badge.svg
+   :target: https://github.com/matchms/matchms/actions?query=workflow%3A%22Anaconda%20Publish%22
+   :alt: Anaconda Publish
 
 ***********************
 Documentation for users
@@ -175,9 +178,33 @@ To build anaconda package locally, do:
   conda deactivate
   conda env create --file conda/environment-build.yml
   conda activate matchms-build
-  rm -rfv output;mkdir ./output
+  BUILD_FOLDER=/tmp/matchms/_build
+  rm -rfv $BUILD_FOLDER;mkdir -p $BUILD_FOLDER
   conda build --numpy 1.18.1 --no-include-recipe -c bioconda -c conda-forge \
-  --croot /tmp/matchms/_build --output-folder ./output ./conda
+  --croot $BUILD_FOLDER ./conda
+
+The package will saved in ``/tmp/matchms/_build`` folder.
+
+To install local anaconda package, do:
+
+.. code-block:: console
+
+  conda install \
+    --channel bioconda \
+    --channel conda-forge \
+    --channel file://${CONDA_PREFIX}/output/noarch/ \
+    matchms
+
+where ``$PATH_TO_TARBALL`` is the path to local conda package with ``tar.bz2`` extension.
+
+To publish the package on anaconda cloud, do:
+
+.. code-block:: console
+
+  anaconda --token ${{ secrets.ANACONDA_TOKEN }} upload --user nlesc --force $BUILD_FOLDER/noarch/*.tar.bz2
+
+where secrets.ANACONDA_TOKEN is a token to be gererated on anaconda cloud website. This secret should be added to repository.
+
 
 To remove matchms package:
 
@@ -185,7 +212,8 @@ To remove matchms package:
 
   conda remove matchms
 
-To remove environment:
+
+To remove matchms-build environment:
 
 .. code-block:: console
 
