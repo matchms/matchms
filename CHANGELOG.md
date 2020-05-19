@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- conda package fixes [#223](https://github.com/matchms/matchms/pull/223)
+  - move conda receipe to conda folder
+  - fix conda package installation issue
+  - add extra import tests for conda package
+  - add instructions to build conda package locally
+  - automatically find matchms package in setup.py
+  - update developer instructions
+  - increase verbosity while packaging
+  - skip builds for Python 2.X
+  - more flexible package versions
+  - add deployment requirements to meta.yml
+
 ## [0.3.0] - 2020-05-13
 
 ### Added
@@ -28,7 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - inchi filters [#145](https://github.com/matchms/matchms/pull/145) [#127](https://github.com/matchms/matchms/pull/127) [#181](https://github.com/matchms/matchms/pull/181)
 - losses [#160](https://github.com/matchms/matchms/pull/160)
 - vesion string checks [#185](https://github.com/matchms/matchms/pull/185)
-- Spec2Vec [#183](https://github.com/matchms/matchms/pull/183) [#165](https://github.com/matchms/matchms/pull/165) 
+- Spec2Vec [#183](https://github.com/matchms/matchms/pull/183) [#165](https://github.com/matchms/matchms/pull/165)
 - functions to verify inchies [#181](https://github.com/matchms/matchms/pull/181) [#180](https://github.com/matchms/matchms/pull/180)
 - documentation using radthedocs [#196](https://github.com/matchms/matchms/pull/196) [#197](https://github.com/matchms/matchms/pull/197)
 - build status badges [#174](https://github.com/matchms/matchms/pull/174)

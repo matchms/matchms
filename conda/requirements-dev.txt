@@ -1,0 +1,13 @@
+isort
+prospector[with_pyroma]
+pycodestyle>=2.0.0,<=2.4.0
+pytest
+pytest-cov
+pytest-runner
+recommonmark
+ruamel.yaml
+sphinx
+sphinx_rtd_theme
+sphinxcontrib-apidoc
+yapf
+bump2version

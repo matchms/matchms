@@ -2,7 +2,7 @@ from ..Spikes import Spikes
 
 
 def add_losses(spectrum_in):
-
+    """Derive losses based on precursor mass."""
     def precursor_mz_is_number():
         if isinstance(precursor_mz, int):
             return True
