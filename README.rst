@@ -179,13 +179,25 @@ To build anaconda package locally, do:
   conda build --numpy 1.18.1 --no-include-recipe -c bioconda -c conda-forge \
   --croot /tmp/matchms/_build --output-folder ./output ./conda
 
+To install local anaconda package, do:
+
+.. code-block:: console
+
+  conda install --channel nlesc --channel bioconda --channel conda-forge --channel local $PATH_TO_TARBALL
+
+  conda install --channel file://${CONDA_PREFIX}/output/noarch/ matchms
+
+where `$PATH_TO_TARBALL` is the path to local conda package with `tar.bz2` extension.
+
+
 To remove matchms package:
 
 .. code-block:: console
 
   conda remove matchms
 
-To remove environment:
+
+To remove matchms-build environment:
 
 .. code-block:: console
 
