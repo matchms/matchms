@@ -42,7 +42,7 @@ def test_derive_formula_from_name_no_name_given():
                            intensities=numpy.array([], dtype="float"),
                            metadata={})
 
-    spectrum = derive_adduct_from_name(spectrum_in)
+    spectrum = derive_formula_from_name(spectrum_in)
 
     assert spectrum.get("formula", None) is None, "Expected None for adduct."
     assert spectrum.get("compound_name", None) is None, "Expected None for name."
