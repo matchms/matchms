@@ -197,6 +197,14 @@ To install local anaconda package, do:
 
 where ``$PATH_TO_TARBALL`` is the path to local conda package with ``tar.bz2`` extension.
 
+To publish the package on anaconda cloud, do:
+
+.. code-block:: console
+
+  anaconda --token ${{ secrets.ANACONDA_TOKEN }} upload --user nlesc --force $BUILD_FOLDER/noarch/*.tar.bz2
+
+where secrets.ANACONDA_TOKEN is a token to be gererated on anaconda cloud website. This secret should be added to repository.
+
 
 To remove matchms package:
 
