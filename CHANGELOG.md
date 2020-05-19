@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - improve conda package https://github.com/matchms/matchms/pull/225
   - Build scripts for Windows and Unix(MacOS and Linux) systems
   - verify conda package after uploading to anaconda repository by installing it
+  - conda package also includes `matchms/data` folder
 
 ### Changed
 

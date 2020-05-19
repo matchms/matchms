@@ -18,9 +18,6 @@ build:
   preserve_egg_dir: True
   number: 0
   skip: True # [py2k]
-  script:
-    - bash conda/build-matchms.sh   # [unix]
-    - cmd.exe conda/build-matchms.bat # [win]
 
 requirements:
   build:
