@@ -7,11 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.2] - 2020-05-20
+
+### Changed
+
+- improve conda workflow [#244](https://github.com/matchms/matchms/pull/244)
+  - merge anaconda and python build workflows
+  - fix conda package install command in build workflow
+  - publish only on ubuntu machine
+
+### Removed
+
+- remove python build badge [#244](https://github.com/matchms/matchms/pull/244)
+
 ## [0.3.1] - 2020-05-19
 
 ### Added
 
-- improve conda package https://github.com/matchms/matchms/pull/225
+- improve conda package [#225](https://github.com/matchms/matchms/pull/225)
   - Build scripts for Windows and Unix(MacOS and Linux) systems
   - verify conda package after uploading to anaconda repository by installing it
   - conda package also includes `matchms/data` folder
@@ -29,9 +42,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - skip builds for Python 2.X
   - more flexible package versions
   - add deployment requirements to meta.yml
-- verify conda package https://github.com/matchms/matchms/pull/225
+- verify conda package [#225](https://github.com/matchms/matchms/pull/225)
   - use conda/environment.yml when building the package
-- split anaconda workflow https://github.com/matchms/matchms/pull/225
+- split anaconda workflow [#225](https://github.com/matchms/matchms/pull/225)
   - conda build: tests conda packages on every push and pull request
   - conda publish: publish and test conda package on release
   - update the developer instructions
