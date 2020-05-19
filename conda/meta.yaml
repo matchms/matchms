@@ -18,6 +18,9 @@ build:
   preserve_egg_dir: True
   number: 0
   skip: True # [py2k]
+  script:
+    - bash build.sh   # [unix]
+    - cmd.exe bld.bat # [win]
 
 requirements:
   build:
