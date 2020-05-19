@@ -183,9 +183,11 @@ To install local anaconda package, do:
 
 .. code-block:: console
 
-  conda install --channel nlesc --channel bioconda --channel conda-forge --channel local $PATH_TO_TARBALL
-
-  conda install --channel file://${CONDA_PREFIX}/output/noarch/ matchms
+  conda install \
+    --channel bioconda \
+    --channel conda-forge \
+    --channel file://${CONDA_PREFIX}/output/noarch/ \
+    matchms
 
 where `$PATH_TO_TARBALL` is the path to local conda package with `tar.bz2` extension.
 
