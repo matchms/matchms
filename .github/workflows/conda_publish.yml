@@ -1,4 +1,4 @@
-name: 'Anaconda Build and Publish'
+name: Anaconda Publish
 
 on:
   release:
@@ -7,7 +7,7 @@ on:
 jobs:
 
   publish:
-    name: Publish conda (${{ matrix.python-version }}, ${{ matrix.os }})
+    name: Publish conda package for (${{ matrix.python-version }}, ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -18,17 +18,12 @@ jobs:
       - uses: actions/checkout@v2
       - uses: goanpeca/setup-miniconda@v1
         with:
-          miniconda-version: 'latest'
-          auto-update-conda: true
-          python-version: ${{ matrix.python-version }}
-          activate-environment: matchms
+          activate-environment: matchms-build
           auto-activate-base: false
-          environment-file: conda/environment.yml
-          channels: conda-forge,bioconda,nlesc
-      - name: Install required packages
-        shell: bash -l {0}
-        run: |
-          conda install conda-build conda-verify anaconda
+          auto-update-conda: true
+          environment-file: conda/environment-build.yml
+          miniconda-version: 'latest'
+          python-version: ${{ matrix.python-version }}
       - name: Show conda config
         shell: bash -l {0}
         run: |
@@ -36,27 +31,41 @@ jobs:
           conda list
           conda config --show-sources
           conda config --show
+      - name: Python info
+        shell: bash -l {0}
+        run: |
+          which python
+          python --version
       - name: Build the conda package
         shell: bash -l {0}
         run: |
           conda config --set anaconda_upload no
-          export BUILD_FOLDER=./output
-          export BUILD_DATE=`date +%Y.%m.%d`
+          export BUILD_FOLDER=/tmp/matchms/_build
           mkdir -p $BUILD_FOLDER
-          conda build -c bioconda -c conda-forge -c nlesc --output-folder $BUILD_FOLDER .
+          conda build --numpy 1.18.1 --no-include-recipe \
+            --channel bioconda --channel conda-forge \
+            --croot $BUILD_FOLDER \
+            ./conda
       - name: Push the package to anaconda cloud
         shell: bash -l {0}
         run: |
-          export BUILD_FOLDER=./output
-          anaconda -t ${{ secrets.ANACONDA_TOKEN }} upload -u nlesc --force $BUILD_FOLDER/noarch/*.tar.bz2
+          export BUILD_FOLDER=/tmp/matchms/_build
+          anaconda --token ${{ secrets.ANACONDA_TOKEN }} upload --user nlesc --force $BUILD_FOLDER/noarch/*.tar.bz2
       - uses: goanpeca/setup-miniconda@v1
         with:
-          miniconda-version: 'latest'
-          auto-update-conda: true
-          python-version: ${{ matrix.python-version }}
-          activate-environment: matchms_test
+          activate-environment: matchms-test
           auto-activate-base: false
+          auto-update-conda: true
           channels: conda-forge,bioconda,nlesc
+          miniconda-version: 'latest'
+          python-version: ${{ matrix.python-version }}
+      - name: Show conda config
+        shell: bash -l {0}
+        run: |
+          conda info
+          conda list
+          conda config --show-sources
+          conda config --show
       - name: Install the conda package from anaconda repository
         shell: bash -l {0}
         run: |
@@ -69,10 +78,3 @@ jobs:
         run: |
           cd ${CONDA_PREFIX}/pkgs/matchms-*/site-packages/tests
           pytest --ignore-glob='test_version_string_consistency.py'
-      - name: Show conda config
-        shell: bash -l {0}
-        run: |
-          conda info
-          conda list
-          conda config --show-sources
-          conda config --show
