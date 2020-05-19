@@ -48,12 +48,12 @@ setup(
         # see conda/environment.yml
     ],
     setup_requires=[
-        # see environment.yml
+        # see conda/environment.yml
     ],
     tests_require=[
-        # see environment.yml
+        # see conda/environment.yml
     ],
     extras_require={
-        # see environment.yml
+        # see conda/environment.yml
     }
 )

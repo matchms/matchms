@@ -25,6 +25,7 @@ requirements:
     - conda-verify
     - pytest-runner
     - python
+    - numpy {{ numpy }}
     - setuptools
   host:
     - python >=3.7,<3.8
