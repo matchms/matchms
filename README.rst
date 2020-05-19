@@ -28,7 +28,7 @@ Vector representation and similarity measure for mass spectrometry data.
    * - **Other best practices**
      -
    * - Continuous integration
-     - |Python Build| |Anaconda Build| |Anaconda Publish|
+     - |Anaconda Build| |Anaconda Publish|
    * - Documentation
      - |ReadTheDocs Badge|
    * - Code Quality
@@ -74,10 +74,6 @@ Vector representation and similarity measure for mass spectrometry data.
 .. |Sonarcloud Coverage Badge| image:: https://sonarcloud.io/api/project_badges/measure?project=matchms_matchms&metric=coverage
    :target: https://sonarcloud.io/component_measures?id=matchms_matchms&metric=Coverage&view=list
    :alt: Sonarcloud Coverage
-
-.. |Python Build| image:: https://github.com/matchms/matchms/workflows/Python%20Build/badge.svg
-   :target: https://github.com/matchms/matchms/actions?query=workflow%3A%22Python%20Build%22
-   :alt: Python Build
 
 .. |Anaconda Build| image:: https://github.com/matchms/matchms/workflows/Anaconda%20Build/badge.svg
    :target: https://github.com/matchms/matchms/actions?query=workflow%3A%22Anaconda%20Build%22
