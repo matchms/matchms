@@ -19,8 +19,9 @@ build:
   number: 0
   skip: True # [py2k]
   script:
-    - bash build.sh   # [unix]
-    - cmd.exe bld.bat # [win]
+    # - bash build-matchms.sh   # [unix]
+    # - cmd.exe build-matchms.bat # [win]
+    - build-matchms.sh
 
 requirements:
   build:
