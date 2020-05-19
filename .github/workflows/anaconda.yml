@@ -67,8 +67,6 @@ jobs:
       - name: Test the installed conda package
         shell: bash -l {0}
         run: |
-          cd # to avoid import of package from the current directory
-          python -c "import os; import inspect; import matchms; print(os.path.dirname(inspect.getfile(matchms)))"
           cd ${CONDA_PREFIX}/pkgs/matchms-*/site-packages/tests
           pytest
       - name: Show conda config
