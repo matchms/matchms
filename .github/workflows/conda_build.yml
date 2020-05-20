@@ -89,18 +89,17 @@ jobs:
           environment-file: conda/environment-build.yml
           miniconda-version: 'latest'
           python-version: ${{ matrix.python-version }}
-      - name: Show conda config
+      - name: Conda info
         shell: bash -l {0}
-        run: |
-          conda info
-          conda list
-          conda config --show-sources
-          conda config --show
+        run: conda info
       - name: Python info
         shell: bash -l {0}
         run: |
           which python
           python --version
+      - name: Conda list
+        shell: bash -l {0}
+        run: conda list
       - name: Build the conda package
         shell: bash -l {0}
         run: |
