@@ -74,6 +74,18 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ['ubuntu-latest', 'macos-latest', 'windows-latest']
+        python-version: ['3.7']
+    runs-on: ${{ matrix.os }}
+    needs: analysis
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: '0'
       - name: Create matchms-build environment
         uses: goanpeca/setup-miniconda@v1
         with:
@@ -107,6 +119,18 @@ jobs:
             --croot $BUILD_FOLDER \
             ./conda
 
+  testbuilt:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ['ubuntu-latest', 'macos-latest', 'windows-latest']
+        python-version: ['3.7']
+    runs-on: ${{ matrix.os }}
+    needs: build
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: '0'
       - name: Create a test environment to test the package
         uses: goanpeca/setup-miniconda@v1
         with:

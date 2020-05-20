@@ -50,14 +50,13 @@ jobs:
           anaconda --token ${{ secrets.ANACONDA_TOKEN }} upload --user nlesc --force $BUILD_FOLDER/noarch/*.tar.bz2
 
   testpublished:
-    name: Test Published-Python ${{ matrix.python-version }} / ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    needs: publish
     strategy:
       fail-fast: false
       matrix:
         os: ['ubuntu-latest']
         python-version: ['3.7']
+    runs-on: ${{ matrix.os }}
+    needs: publish
     steps:
       - uses: actions/checkout@v2
         with:
