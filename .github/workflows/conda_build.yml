@@ -78,7 +78,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ['ubuntu-latest', 'macos-latest', 'windows-latest']
+        os: ['ubuntu-latest']
         python-version: ['3.7']
     runs-on: ${{ matrix.os }}
     needs: analysis
@@ -122,7 +122,7 @@ jobs:
             --channel bioconda --channel conda-forge \
             --croot $BUILD_FOLDER \
             ./conda
-      - name: Test local conda package
+      - name: Test local conda package on unix
         if: matrix.os != 'windows-latest'
         shell: bash -l {0}
         run: |
@@ -132,7 +132,7 @@ jobs:
             --channel conda-forge \
             --channel file://${BUILD_FOLDER}/noarch/ \
             matchms
-      - name: Test local conda package
+      - name: Test local conda package on windows
         if: matrix.os == 'windows-latest'
         shell: bash -l {0}
         run: |
