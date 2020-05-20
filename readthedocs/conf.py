@@ -73,7 +73,7 @@ html_theme = "alabaster"
 html_theme_options = {
     "logo": "matchms.png",
     "github_user": "matchms",
-    "github_repo": "matchms",
+    "github_repo": "matchms"
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
@@ -91,11 +91,11 @@ todo_include_todos = True
 # -- Options for intersphinx extension ----------------------------------------------
 
 intersphinx_mapping = {
-    "https://docs.python.org/3": None,
-    "numpy": ("https://docs.scipy.org/doc/numpy", None),
-    "scipy": ("https://docs.scipy.org/doc/scipy/reference", None),
-    "matplotlib": ("https://matplotlib.org", None),
-    "rdkit": ("http://rdkit.org/docs", None),
     "gensim": ("https://radimrehurek.com/gensim", None),
-    "pyteomics": ("https://pyteomics.readthedocs.io/en/latest/", None)
+    "https://docs.python.org/3": None,
+    "matplotlib": ("https://matplotlib.org", None),
+    "numpy": ("https://docs.scipy.org/doc/numpy", None),
+    "pyteomics": ("https://pyteomics.readthedocs.io/en/latest/", None),
+    "rdkit": ("http://rdkit.org/docs", None),
+    "scipy": ("https://docs.scipy.org/doc/scipy/reference", None)
 }
