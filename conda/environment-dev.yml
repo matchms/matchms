@@ -1,0 +1,29 @@
+name: matchms-dev
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - gensim >=3.8.0
+  - matplotlib
+  - numpy
+  - pip
+  - pyteomics >=4.2
+  - python >=3.7,<3.8
+  - pyyaml
+  - rdkit >=2020.03.1
+  - scipy
+  - pip:
+    - bump2version
+    - isort
+    - prospector[with_pyroma]
+    - pycodestyle>=2.0.0,<=2.4.0
+    - pytest
+    - pytest-cov
+    - pytest-runner
+    - recommonmark
+    - ruamel.yaml
+    - sphinx
+    - sphinx_rtd_theme
+    - sphinxcontrib-apidoc
+    - yapf
