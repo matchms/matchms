@@ -5,7 +5,7 @@ on: [push, pull_request]
 jobs:
 
   analysis:
-    name: Python ${{ matrix.python-version }} / ${{ matrix.os }}
+    name: Analysis-Python ${{ matrix.python-version }} / ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -75,7 +75,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   build:
-    name: Python ${{ matrix.python-version }} / ${{ matrix.os }}
+    name: Build - Python ${{ matrix.python-version }} / ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     needs: analysis
     strategy:

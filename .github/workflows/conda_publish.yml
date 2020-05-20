@@ -7,7 +7,7 @@ on:
 jobs:
 
   publish:
-    name: Python ${{ matrix.python-version }} / ${{ matrix.os }}
+    name: Publish-Python ${{ matrix.python-version }} / ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -50,7 +50,7 @@ jobs:
           anaconda --token ${{ secrets.ANACONDA_TOKEN }} upload --user nlesc --force $BUILD_FOLDER/noarch/*.tar.bz2
 
   testpublished:
-    name: Python ${{ matrix.python-version }} / ${{ matrix.os }}
+    name: Test Published-Python ${{ matrix.python-version }} / ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     needs: publish
     strategy:
