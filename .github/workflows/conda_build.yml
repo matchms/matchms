@@ -76,6 +76,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      - name: Deactivate matchms-dev environment
+        shell: bash -l {0}
+        run: |
+          conda deactivate
       - name: Create matchms-build environment
         uses: goanpeca/setup-miniconda@v1
         with:
