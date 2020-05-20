@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 import os
 
 from setuptools import setup
@@ -17,7 +16,7 @@ with open("README.rst") as readme_file:
 setup(
     name="matchms",
     version=version["__version__"],
-    description="Vector representation and similarity measure for mass spectrometry data",
+    description="Python library for fuzzy comparison of mass spectrum data and other Python objects",
     long_description=readme + "\n\n",
     author="Netherlands eScience Center",
     author_email="generalization@esciencecenter.nl",
@@ -27,11 +26,10 @@ setup(
     license="Apache Software License 2.0",
     zip_safe=False,
     keywords=[
-        "python",
         "similarity measures",
         "mass spectrometry",
         "fuzzy matching",
-        "fuzzy searching",
+        "fuzzy search"
     ],
     classifiers=[
         "Development Status :: 4 - Beta",
@@ -48,12 +46,10 @@ setup(
         # see conda/environment.yml
     ],
     setup_requires=[
-        # see conda/environment.yml
     ],
     tests_require=[
-        # see conda/environment.yml
+        # see conda/environment-dev.yml
     ],
     extras_require={
-        # see conda/environment.yml
     }
 )
