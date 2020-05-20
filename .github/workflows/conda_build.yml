@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
 
-  build:
+  analysis:
     name: Python ${{ matrix.python-version }} / ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -73,6 +73,15 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  build:
+    name: Python ${{ matrix.python-version }} / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    needs: analysis
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: '0'
       - name: Deactivate matchms-dev environment
         shell: bash -l {0}
         run: |
@@ -106,6 +115,7 @@ jobs:
             --croot $BUILD_FOLDER \
             ./conda
       - name: Test local conda package
+        if: matrix.os != 'windows-latest'
         shell: bash -l {0}
         run: |
           export BUILD_FOLDER=/tmp/matchms/_build
@@ -113,4 +123,14 @@ jobs:
             --channel bioconda \
             --channel conda-forge \
             --channel file://${BUILD_FOLDER}/noarch/ \
+            matchms
+      - name: Test local conda package
+        if: matrix.os == 'windows-latest'
+        shell: bash -l {0}
+        run: |
+          export BUILD_FOLDER=%TMPDIR%\matchms\_build
+          conda install \
+            --channel bioconda \
+            --channel conda-forge \
+            --channel file:\\${BUILD_FOLDER}\noarch\ \
             matchms
