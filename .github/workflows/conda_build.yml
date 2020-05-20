@@ -74,15 +74,15 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-  build:
-    strategy:
-      fail-fast: false
-      matrix:
-        os: ['ubuntu-latest']
-        python-version: ['3.7']
-    runs-on: ${{ matrix.os }}
-    needs: analysis
-    steps:
+  # build:
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       os: ['ubuntu-latest']
+  #       python-version: ['3.7']
+  #   runs-on: ${{ matrix.os }}
+  #   needs: analysis
+  #   steps:
       - uses: actions/checkout@v2
         with:
           fetch-depth: '0'
@@ -118,6 +118,40 @@ jobs:
             --channel bioconda --channel conda-forge \
             --croot $BUILD_FOLDER \
             ./conda
+
+  # testpackage:
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       os: ['ubuntu-latest']
+  #       python-version: ['3.7']
+  #   runs-on: ${{ matrix.os }}
+  #   needs: build
+  #   steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: '0'
+      - name: Create a test environment to test the package
+        uses: goanpeca/setup-miniconda@v1
+        with:
+          activate-environment: matchms-test
+          python-version: ${{ matrix.python-version }}
+      - name: Show conda config
+        shell: bash -l {0}
+        run: |
+          conda info
+          conda list
+          conda config --show-sources
+          conda config --show
+          conda env list
+      - name: Python info
+        shell: bash -l {0}
+        run: |
+          which python
+          python --version
+      - name: Conda list
+        shell: bash -l {0}
+        run: conda list
       - name: Test local conda package on unix
         if: matrix.os != 'windows-latest'
         shell: bash -l {0}
