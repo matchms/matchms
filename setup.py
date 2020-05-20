@@ -55,5 +55,6 @@ setup(
     ],
     extras_require={
         # see conda/environment.yml
-    }
+    },
+    package_data={'data': ['matchms/data/*.yaml']},
 )
