@@ -110,3 +110,11 @@ jobs:
             --channel bioconda --channel conda-forge \
             --croot $BUILD_FOLDER \
             ./conda
+      - name: Test local conda package
+        shell: bash -l {0}
+        run: |
+          conda install \
+            --channel bioconda \
+            --channel conda-forge \
+            --channel file://${BUILD_FOLDER}/noarch/ \
+            matchms
