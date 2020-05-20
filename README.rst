@@ -58,10 +58,6 @@ Vector representation and similarity measure for mass spectrometry data.
    :target: https://bestpractices.coreinfrastructure.org/projects/3792
    :alt: CII Best Practices Badge
 
-.. |GitHub Actions Badge| image:: https://github.com/matchms/matchms/workflows/Build%20matchms/badge.svg
-   :target: https://github.com/matchms/matchms/actions?query=workflow%3A%22Build+matchms%22
-   :alt: GitHub Actions Badge
-
 .. |ReadTheDocs Badge| image:: https://readthedocs.org/projects/matchms/badge/?version=latest
     :alt: Documentation Status
     :scale: 100%
@@ -184,6 +180,12 @@ installation of this conda package works with:
 
 .. code-block:: console
 
+  # make a clean environment
+  conda deactivate
+  cd $(mktemp -d)
+  conda env create --name test python=3.7
+  conda activate test
+
   conda install \
     --channel bioconda \
     --channel conda-forge \
@@ -199,7 +201,7 @@ To publish the package on anaconda cloud, do:
 where ``secrets.ANACONDA_TOKEN`` is a token to be generated on the Anaconda Cloud website. This secret should be added to GitHub repository.
 
 
-To remove matchms package:
+To remove matchms package from the active environment:
 
 .. code-block:: console
 
