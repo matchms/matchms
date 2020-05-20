@@ -86,10 +86,6 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: '0'
-      - name: Deactivate matchms-dev environment
-        shell: bash -l {0}
-        run: |
-          conda deactivate
       - name: Create matchms-build environment
         uses: goanpeca/setup-miniconda@v1
         with:
