@@ -32,9 +32,10 @@ class CosineHungarian:
             # Get peaks mz and intensities
             spec1 = numpy.vstack((spectrum1.peaks.mz, spectrum1.peaks.intensities)).T
             spec2 = numpy.vstack((spectrum2.peaks.mz, spectrum2.peaks.intensities)).T
-            # Normalize intensities
-            spec1[:, 1] = spec1[:, 1]/max(spec1[:, 1])
-            spec2[:, 1] = spec2[:, 1]/max(spec2[:, 1])
+            assert max(spec1[:, 1]) <= 1, ("Input spectrum1 is not normalized. ",
+                                           "Apply 'normalize_intensities' filter first.")
+            assert max(spec2[:, 1]) <= 1, ("Input spectrum2 is not normalized. ",
+                                           "Apply 'normalize_intensities' filter first.")
             return spec1, spec2
 
         def get_matching_pairs():
