@@ -53,6 +53,11 @@ jobs:
     name: Python ${{ matrix.python-version }} / ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     needs: publish
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ['ubuntu-latest']
+        python-version: ['3.7']
     steps:
       - uses: actions/checkout@v2
         with:
