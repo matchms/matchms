@@ -97,9 +97,13 @@ jobs:
           activate-environment: matchms-build
           environment-file: conda/environment-build.yml
           python-version: ${{ matrix.python-version }}
-      - name: Conda info
+      - name: Show conda config
         shell: bash -l {0}
         run: |
+          conda info
+          conda list
+          conda config --show-sources
+          conda config --show
           conda env list
       - name: Python info
         shell: bash -l {0}
