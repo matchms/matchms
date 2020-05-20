@@ -19,10 +19,7 @@ jobs:
       - uses: goanpeca/setup-miniconda@v1
         with:
           activate-environment: matchms-build
-          auto-activate-base: false
-          auto-update-conda: true
           environment-file: conda/environment-build.yml
-          miniconda-version: 'latest'
           python-version: ${{ matrix.python-version }}
       - name: Show conda config
         shell: bash -l {0}
@@ -54,10 +51,7 @@ jobs:
       - uses: goanpeca/setup-miniconda@v1
         with:
           activate-environment: matchms-test
-          auto-activate-base: false
-          auto-update-conda: true
           channels: conda-forge,bioconda,nlesc
-          miniconda-version: 'latest'
           python-version: ${{ matrix.python-version }}
       - name: Show conda config
         shell: bash -l {0}
