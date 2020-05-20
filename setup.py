@@ -2,6 +2,7 @@
 import os
 
 from setuptools import setup
+from setuptools import find_packages
 
 here = os.path.abspath(os.path.dirname(__file__))
 
@@ -20,9 +21,7 @@ setup(
     author="Netherlands eScience Center",
     author_email="generalization@esciencecenter.nl",
     url="https://github.com/matchms/matchms",
-    packages=[
-        "matchms",
-    ],
+    packages=find_packages(),
     include_package_data=True,
     license="Apache Software License 2.0",
     zip_safe=False,
@@ -33,7 +32,9 @@ setup(
         "fuzzy search"
     ],
     classifiers=[
-        "Development Status :: 2 - Pre-Alpha",
+        "Development Status :: 4 - Beta",
+        "Intended Audience :: Education",
+        "Intended Audience :: Science/Research",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: Apache Software License",
         "Natural Language :: English",
@@ -42,15 +43,13 @@ setup(
     ],
     test_suite="tests",
     install_requires=[
-        # see environment.yml
+        # see conda/environment.yml
     ],
     setup_requires=[
-        # see environment.yml
     ],
     tests_require=[
-        # see environment.yml
+        # see conda/environment-dev.yml
     ],
     extras_require={
-        # see environment.yml
     }
 )

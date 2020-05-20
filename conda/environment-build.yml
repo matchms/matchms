@@ -1,0 +1,8 @@
+name: matchms-build
+channels:
+  - defaults
+dependencies:
+  - anaconda-client
+  - conda-build
+  - conda-verify
+  - python >=3.7,<3.8
