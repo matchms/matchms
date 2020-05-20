@@ -113,6 +113,7 @@ jobs:
       - name: Test local conda package
         shell: bash -l {0}
         run: |
+          export BUILD_FOLDER=/tmp/matchms/_build
           conda install \
             --channel bioconda \
             --channel conda-forge \
