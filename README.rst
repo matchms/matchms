@@ -150,9 +150,8 @@ To install matchms, do:
 
   git clone https://github.com/matchms/matchms.git
   cd matchms
-  conda env create --file conda/environment.yml
-  conda activate matchms
-  pip install -r conda/requirements-dev.txt
+  conda env create --file conda/environment-dev.yml
+  conda activate matchms-dev
   pip install --editable .
 
 Run the linter with:
@@ -183,9 +182,9 @@ To build anaconda package locally, do:
   conda build --numpy 1.18.1 --no-include-recipe -c bioconda -c conda-forge \
   --croot $BUILD_FOLDER ./conda
 
-The package will saved in ``/tmp/matchms/_build`` folder.
-
-To install local anaconda package, do:
+If successful, this will yield the built ``matchms`` conda package as
+``matchms-<version>*.tar.bz2`` in ``$BUILD_FOLDER/noarch/``. You can test if
+installation of this conda package works with:
 
 .. code-block:: console
 
@@ -195,15 +194,13 @@ To install local anaconda package, do:
     --channel file://${CONDA_PREFIX}/output/noarch/ \
     matchms
 
-where ``$PATH_TO_TARBALL`` is the path to local conda package with ``tar.bz2`` extension.
-
 To publish the package on anaconda cloud, do:
 
 .. code-block:: console
 
   anaconda --token ${{ secrets.ANACONDA_TOKEN }} upload --user nlesc --force $BUILD_FOLDER/noarch/*.tar.bz2
 
-where secrets.ANACONDA_TOKEN is a token to be gererated on anaconda cloud website. This secret should be added to repository.
+where ``secrets.ANACONDA_TOKEN`` is a token to be generated on the Anaconda Cloud website. This secret should be added to GitHub repository.
 
 
 To remove matchms package:

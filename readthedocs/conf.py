@@ -91,10 +91,11 @@ todo_include_todos = True
 # -- Options for intersphinx extension ----------------------------------------------
 
 intersphinx_mapping = {
+    "gensim": ("https://radimrehurek.com/gensim", None),
     "https://docs.python.org/3": None,
-    "numpy": ("https://docs.scipy.org/doc/numpy", None),
-    "scipy": ("https://docs.scipy.org/doc/scipy/reference", None),
     "matplotlib": ("https://matplotlib.org", None),
+    "numpy": ("https://docs.scipy.org/doc/numpy", None),
+    "pyteomics": ("https://pyteomics.readthedocs.io/en/latest/", None),
     "rdkit": ("http://rdkit.org/docs", None),
-    "pyteomics": ("https://pyteomics.readthedocs.io/en/latest/", None)
+    "scipy": ("https://docs.scipy.org/doc/scipy/reference", None)
 }
