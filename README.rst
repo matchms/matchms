@@ -187,7 +187,7 @@ installation of this conda package works with:
   conda install \
     --channel bioconda \
     --channel conda-forge \
-    --channel file://${CONDA_PREFIX}/output/noarch/ \
+    --channel file://${CONDA_PREFIX}/noarch/ \
     matchms
 
 To publish the package on anaconda cloud, do:

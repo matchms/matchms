@@ -18,12 +18,12 @@ jobs:
           fetch-depth: '0'
       - uses: goanpeca/setup-miniconda@v1
         with:
-          auto-update-conda: true
+          auto-update-conda: false
           python-version: ${{ matrix.python-version }}
           activate-environment: matchms-dev
           environment-file: conda/environment-dev.yml
           condarc-file: conda/condarc.yml
-          auto-activate-base: false
+          auto-activate-base: true
       - name: Conda info
         shell: bash -l {0}
         run: conda info
@@ -84,8 +84,8 @@ jobs:
         uses: goanpeca/setup-miniconda@v1
         with:
           activate-environment: matchms-build
-          auto-activate-base: false
-          auto-update-conda: true
+          auto-activate-base: true
+          auto-update-conda: false
           environment-file: conda/environment-build.yml
           miniconda-version: 'latest'
           python-version: ${{ matrix.python-version }}
