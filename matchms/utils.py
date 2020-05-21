@@ -1,5 +1,7 @@
 import re
+import numpy
 from rdkit import Chem
+from rdkit.Chem import AllChem
 
 
 def convert_smiles_to_inchi(smiles):
@@ -100,3 +102,80 @@ def is_valid_inchikey(inchikey):
     if re.fullmatch(regexp, inchikey):
         return True
     return False
+
+
+def derive_fingerprint_from_smiles(smiles, fingerprint_type="daylight", nbits=1024):
+    """Calculate molecule fingerprint based on given smiles or inchi (using rdkit).
+
+    Args:
+    --------
+    smiles: str
+        Input smiles to derive fingerprint from.
+    fingerprint_type: str
+        Determine method for deriving molecular fingerprints. Supported choices are 'daylight',
+        'morgan1', 'morgan2', 'morgan3'.
+    nbits: int
+        Dimension or number of bits of generated fingerprint. Default is nbits = 1024.
+
+    Returns
+    -------
+    fingerprint: numpy array
+        Molecular fingerprint
+    """
+    mol = Chem.MolFromSmiles(smiles)
+    if mol is None:
+        return None
+    return mol_to_fingerprint(mol, fingerprint_type, nbits)
+
+
+def derive_fingerprint_from_inchi(inchi, fingerprint_type="daylight", nbits=1024):
+    """Calculate molecule fingerprint based on given inchi (using rdkit).
+
+    Args:
+    --------
+    inchi: str
+        Input InChI to derive fingerprint from.
+    fingerprint_type: str
+        Determine method for deriving molecular fingerprints. Supported choices are 'daylight',
+        'morgan1', 'morgan2', 'morgan3'.
+    nbits: int
+        Dimension or number of bits of generated fingerprint. Default is nbits = 1024.
+
+    Returns
+    -------
+    fingerprint: numpy array
+        Molecular fingerprint
+    """
+    mol = Chem.MolFromInchi(inchi)
+    if mol is None:
+        return None
+    return mol_to_fingerprint(mol, fingerprint_type, nbits)
+
+
+def mol_to_fingerprint(mol, fingerprint_type, nbits):
+    """Convert rdkit mol (molecule) to molecular fingerprint.
+
+    Args:
+    ----
+    mol : rdkit molecule
+        Input rdkit molecule.
+    fingerprint_type : str
+        Determine method for deriving molecular fingerprints.
+        Supported choices are 'daylight', 'morgan1', 'morgan2', 'morgan3'.
+    nbits: int
+        Dimension or number of bits of generated fingerprint.
+    """
+    assert fingerprint_type in ["daylight", "morgan1", "morgan2", "morgan3"], "Unkown fingerprint type given."
+
+    if fingerprint_type == "daylight":
+        fp = Chem.RDKFingerprint(mol, fpSize=nbits)
+    elif fingerprint_type == "morgan1":
+        fp = AllChem.GetMorganFingerprintAsBitVect(mol, 1, nBits=nbits)
+    elif fingerprint_type == "morgan2":
+        fp = AllChem.GetMorganFingerprintAsBitVect(mol, 2, nBits=nbits)
+    elif fingerprint_type == "morgan3":
+        fp = AllChem.GetMorganFingerprintAsBitVect(mol, 3, nBits=nbits)
+
+    if fp:
+        return numpy.array(fp)
+    return None
