@@ -122,7 +122,25 @@ jobs:
             --channel bioconda --channel conda-forge \
             --croot $BUILD_FOLDER \
             ./conda
-      - name: Create a virtual environment to test the locally built package
+      - name: Upload package artifact from build
+        uses: actions/upload-artifact@v1
+        with:
+          name: build-artifact
+          path: /tmp/matchms/_build
+
+  testbuilt:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ['ubuntu-latest', 'macos-latest', 'windows-latest']
+        python-version: ['3.7']
+    runs-on: ${{ matrix.os }}
+    needs: build
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: '0'
+      - name: Create a test environment to test the package
         uses: goanpeca/setup-miniconda@v1
         with:
           activate-environment: matchms-test
@@ -141,7 +159,14 @@ jobs:
         run: |
           which python
           python --version
-      - name: Test the locally built conda package on Unix
+      - name: Conda list
+        shell: bash -l {0}
+        run: conda list
+      - name: Download conda package from build job
+        uses: actions/download-artifact@v1
+        with:
+          name: build-artifact
+      - name: Test local conda package on unix
         if: matrix.os != 'windows-latest'
         shell: bash -l {0}
         run: |
