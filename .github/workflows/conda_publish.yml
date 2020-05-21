@@ -1,10 +1,8 @@
 name: Anaconda Publish
 
-# on:
-#   release:
-#     types: [published]
-
-on: [push]
+on:
+  release:
+    types: [published]
 
 jobs:
 
@@ -62,10 +60,8 @@ jobs:
           fetch-depth: "0"
       - uses: goanpeca/setup-miniconda@v1
         with:
-          activate-environment: matchms-dev
+          activate-environment: matchms-test
           auto-update-conda: true
-          environment-file: conda/environment-dev.yml
-          channels: conda-forge,bioconda,nlesc
           python-version: "3.7"
       - name: Show conda config
         shell: bash -l {0}
@@ -78,8 +74,3 @@ jobs:
         shell: bash -l {0}
         run: |
           conda install --channel bioconda --channel conda-forge --channel nlesc matchms
-      - name: Test the installed conda package
-        shell: bash -l {0}
-        run: |
-          cd ${CONDA_PREFIX}/pkgs/matchms-*/site-packages/tests
-          pytest --ignore-glob="test_version_string_consistency.py"
