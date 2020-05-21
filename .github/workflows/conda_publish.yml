@@ -14,6 +14,7 @@ jobs:
       - uses: goanpeca/setup-miniconda@v1
         with:
           activate-environment: matchms-build
+          auto-update-conda: true
           environment-file: conda/environment-build.yml
           python-version: "3.7"
       - name: Show conda config
@@ -60,6 +61,7 @@ jobs:
       - uses: goanpeca/setup-miniconda@v1
         with:
           activate-environment: matchms-dev
+          auto-update-conda: true
           environment-file: conda/environment-dev.yml
           channels: conda-forge,bioconda,nlesc
           python-version: "3.7"
