@@ -8,7 +8,7 @@ jobs:
 
   publish:
     name: publish / python-3.7 / ubuntu-latest
-    runs-on: "ubuntu-latest"
+    runs-on: 'ubuntu-latest'
     steps:
       - uses: actions/checkout@v2
       - uses: goanpeca/setup-miniconda@v1
@@ -45,8 +45,13 @@ jobs:
           anaconda --token ${{ secrets.ANACONDA_TOKEN }} upload --user nlesc --force $BUILD_FOLDER/noarch/*.tar.bz2
 
   verify:
-    name: verify / python-3.7 / ubuntu-latest
-    runs-on: "ubuntu-latest"
+    name: verify / python-${{ matrix.python-version }} / ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ['ubuntu-latest', 'macos-latest', 'windows-latest']
+        python-version: ["3.7"]
+    runs-on: ${{ matrix.os }}
     needs: publish
     steps:
       - uses: actions/checkout@v2
@@ -68,7 +73,7 @@ jobs:
       - name: Install the conda package from anaconda repository
         shell: bash -l {0}
         run: |
-          conda install -c bioconda -c conda-forge -c nlesc matchms
+          conda install --channel bioconda --channel conda-forge --channel nlesc matchms
       - name: Test the installed conda package
         shell: bash -l {0}
         run: |

@@ -22,17 +22,18 @@ jobs:
           auto-update-conda: true
           environment-file: conda/environment-dev.yml
           python-version: ${{ matrix.python-version }}
-      - name: Conda info
+      - name: Show conda config
         shell: bash -l {0}
-        run: conda info
+        run: |
+          conda info
+          conda list
+          conda config --show-sources
+          conda config --show
       - name: Python info
         shell: bash -l {0}
         run: |
           which python
           python --version
-      - name: Conda list
-        shell: bash -l {0}
-        run: conda list
       - name: Check style against standards using prospector
         shell: bash -l {0}
         run: prospector -o grouped -o pylint:pylint-report.txt
