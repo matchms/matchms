@@ -4,18 +4,18 @@ on: [push, pull_request]
 
 jobs:
 
-  analysis:
-    name: analysis / Python ${{ matrix.python-version }} / ${{ matrix.os }}
+  analyze:
+    name: analyze / python-${{ matrix.python-version }} / ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: ['ubuntu-latest', 'macos-latest', 'windows-latest']
-        python-version: ['3.7']
+        os: ["ubuntu-latest", "macos-latest", "windows-latest"]
+        python-version: ["3.7"]
     steps:
       - uses: actions/checkout@v2
         with:
-          fetch-depth: '0'
+          fetch-depth: "0"
       - uses: goanpeca/setup-miniconda@v1
         with:
           activate-environment: matchms-dev
@@ -45,9 +45,9 @@ jobs:
           make coverage html
         working-directory: readthedocs/
         env:
-          SPHINXOPTS: '-n'  # enable nit-picky mode
+          SPHINXOPTS: "-n"  # enable nit-picky mode
       - name: Check documentation coverage threshold
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == "ubuntu-latest"
         shell: bash -l {0}
         run: |
           cat readthedocs/_build/coverage/python.txt
@@ -56,37 +56,38 @@ jobs:
           if (( $UNCOVERED_MEMBERS > $UNCOVERED_MEMBERS_ALLOWED )) ; then echo "There are currently ${UNCOVERED_MEMBERS} uncovered members in the documentation, which is more than the ${UNCOVERED_MEMBERS_ALLOWED} allowed."; exit 1;fi
           echo "The code is sufficiently documented with ${UNCOVERED_MEMBERS} uncovered members out of ${UNCOVERED_MEMBERS_ALLOWED} allowed.";
       - name: Test
-        if: matrix.os != 'ubuntu-latest'
+        if: matrix.os != "ubuntu-latest"
         shell: bash -l {0}
         run: |
           python setup.py test
       - name: Test with coverage
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == "ubuntu-latest"
         shell: bash -l {0}
         run: |
           pytest --cov --cov-report term --cov-report xml --junitxml=xunit-result.xml
       - name: Correct coverage paths
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == "ubuntu-latest"
         run: sed -i "s+$PWD/++g" coverage.xml
       - name: SonarCloud Scan
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == "ubuntu-latest"
         uses: sonarsource/sonarcloud-github-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   build:
+    name: build / python-${{ matrix.python-version }} / ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: ['ubuntu-latest', 'macos-latest', 'windows-latest']
-        python-version: ['3.7']
+        os: ["ubuntu-latest", "macos-latest", "windows-latest"]
+        python-version: ["3.7"]
     runs-on: ${{ matrix.os }}
-    needs: analysis
+    needs: analyze
     steps:
       - uses: actions/checkout@v2
         with:
-          fetch-depth: '0'
+          fetch-depth: "0"
       - name: Create matchms-build environment
         uses: goanpeca/setup-miniconda@v1
         with:
@@ -120,19 +121,6 @@ jobs:
             --channel bioconda --channel conda-forge \
             --croot $BUILD_FOLDER \
             ./conda
-
-  testbuilt:
-    strategy:
-      fail-fast: false
-      matrix:
-        os: ['ubuntu-latest', 'macos-latest', 'windows-latest']
-        python-version: ['3.7']
-    runs-on: ${{ matrix.os }}
-    needs: build
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: '0'
       - name: Create a virtual environment to test the locally built package
         uses: goanpeca/setup-miniconda@v1
         with:
@@ -152,11 +140,8 @@ jobs:
         run: |
           which python
           python --version
-      - name: Conda list
-        shell: bash -l {0}
-        run: conda list
-      - name: Test local conda package on Unix
-        if: matrix.os != 'windows-latest'
+      - name: Test the locally built conda package on Unix
+        if: matrix.os != "windows-latest"
         shell: bash -l {0}
         run: |
           export BUILD_FOLDER=/tmp/matchms/_build
@@ -165,8 +150,8 @@ jobs:
             --channel conda-forge \
             --channel file:/${BUILD_FOLDER}/noarch/ \
             matchms
-      - name: Test local conda package on Windows
-        if: matrix.os == 'windows-latest'
+      - name: Test the locally built conda package on Windows
+        if: matrix.os == "windows-latest"
         shell: bash -l {0}
         run: |
           export BUILD_FOLDER=%TEMP%\matchms\_build

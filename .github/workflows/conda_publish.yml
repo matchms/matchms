@@ -7,20 +7,15 @@ on:
 jobs:
 
   publish:
-    name: Publish-Python ${{ matrix.python-version }} / ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: ['ubuntu-latest']
-        python-version: ['3.7']
+    name: publish / python-3.7 / ubuntu-latest
+    runs-on: "ubuntu-latest"
     steps:
       - uses: actions/checkout@v2
       - uses: goanpeca/setup-miniconda@v1
         with:
           activate-environment: matchms-build
           environment-file: conda/environment-build.yml
-          python-version: ${{ matrix.python-version }}
+          python-version: "3.7"
       - name: Show conda config
         shell: bash -l {0}
         run: |
@@ -49,24 +44,20 @@ jobs:
           export BUILD_FOLDER=/tmp/matchms/_build
           anaconda --token ${{ secrets.ANACONDA_TOKEN }} upload --user nlesc --force $BUILD_FOLDER/noarch/*.tar.bz2
 
-  testpublished:
-    strategy:
-      fail-fast: false
-      matrix:
-        os: ['ubuntu-latest']
-        python-version: ['3.7']
-    runs-on: ${{ matrix.os }}
+  verify:
+    name: verify / python-3.7 / ubuntu-latest
+    runs-on: "ubuntu-latest"
     needs: publish
     steps:
       - uses: actions/checkout@v2
         with:
-          fetch-depth: '0'
+          fetch-depth: "0"
       - uses: goanpeca/setup-miniconda@v1
         with:
           activate-environment: matchms-dev
           environment-file: conda/environment-dev.yml
           channels: conda-forge,bioconda,nlesc
-          python-version: ${{ matrix.python-version }}
+          python-version: "3.7"
       - name: Show conda config
         shell: bash -l {0}
         run: |
@@ -82,4 +73,4 @@ jobs:
         shell: bash -l {0}
         run: |
           cd ${CONDA_PREFIX}/pkgs/matchms-*/site-packages/tests
-          pytest --ignore-glob='test_version_string_consistency.py'
+          pytest --ignore-glob="test_version_string_consistency.py"
