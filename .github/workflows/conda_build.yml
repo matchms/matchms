@@ -175,8 +175,7 @@ jobs:
         uses: actions/download-artifact@v1
         with:
           name: conda-package-artifact
-          path: |
-            %TEMP%\matchms\_build
+          path: "%TEMP%\\matchms\\_build"
       - name: List artifact folder content for Unix
         if: matrix.os != 'windows-latest'
         shell: bash -l {0}
