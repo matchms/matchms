@@ -198,7 +198,7 @@ jobs:
         if: matrix.os == 'windows-latest'
         shell: bash -l {0}
         run: |
-          export BUILD_FOLDER="\%TEMP%\matchms\_build\"
+          export BUILD_FOLDER="%TEMP%\matchms\_build\"
           conda install \
             --channel bioconda \
             --channel conda-forge \
