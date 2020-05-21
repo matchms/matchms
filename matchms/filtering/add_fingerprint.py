@@ -3,7 +3,8 @@ from ..typing import SpectrumType
 from ..utils import derive_fingerprint_from_inchi, derive_fingerprint_from_smiles
 
 
-def add_fingerprint(spectrum_in: SpectrumType, fingerprint_type, nbits) -> SpectrumType:
+def add_fingerprint(spectrum_in: SpectrumType, fingerprint_type="daylight",
+                    nbits=2048) -> SpectrumType:
     """Add molecular finterprint to spectrum.
 
     If inchi or smiles present in metadata, derive a molecular finterprint and
@@ -14,10 +15,10 @@ def add_fingerprint(spectrum_in: SpectrumType, fingerprint_type, nbits) -> Spect
     spectrum_in: matchms.Spectrum
         Input spectrum.
     fingerprint_type : str
-        Determine method for deriving molecular fingerprints.
-        Supported choices are 'daylight', 'morgan1', 'morgan2', 'morgan3'.
+        Determine method for deriving molecular fingerprints. Supported choices
+        are "daylight", "morgan1", "morgan2", "morgan3". Default is "daylight".
     nbits: int
-        Dimension or number of bits of generated fingerprint.
+        Dimension or number of bits of generated fingerprint. Default is 2048.
     """
     if spectrum_in is None:
         return None

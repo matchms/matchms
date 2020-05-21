@@ -104,7 +104,7 @@ def is_valid_inchikey(inchikey):
     return False
 
 
-def derive_fingerprint_from_smiles(smiles, fingerprint_type="daylight", nbits=1024):
+def derive_fingerprint_from_smiles(smiles, fingerprint_type, nbits):
     """Calculate molecule fingerprint based on given smiles or inchi (using rdkit).
 
     Args:
@@ -115,7 +115,7 @@ def derive_fingerprint_from_smiles(smiles, fingerprint_type="daylight", nbits=10
         Determine method for deriving molecular fingerprints. Supported choices are 'daylight',
         'morgan1', 'morgan2', 'morgan3'.
     nbits: int
-        Dimension or number of bits of generated fingerprint. Default is nbits = 1024.
+        Dimension or number of bits of generated fingerprint.
 
     Returns
     -------
@@ -128,7 +128,7 @@ def derive_fingerprint_from_smiles(smiles, fingerprint_type="daylight", nbits=10
     return mol_to_fingerprint(mol, fingerprint_type, nbits)
 
 
-def derive_fingerprint_from_inchi(inchi, fingerprint_type="daylight", nbits=1024):
+def derive_fingerprint_from_inchi(inchi, fingerprint_type, nbits):
     """Calculate molecule fingerprint based on given inchi (using rdkit).
 
     Args:
@@ -139,7 +139,7 @@ def derive_fingerprint_from_inchi(inchi, fingerprint_type="daylight", nbits=1024
         Determine method for deriving molecular fingerprints. Supported choices are 'daylight',
         'morgan1', 'morgan2', 'morgan3'.
     nbits: int
-        Dimension or number of bits of generated fingerprint. Default is nbits = 1024.
+        Dimension or number of bits of generated fingerprint.
 
     Returns
     -------
