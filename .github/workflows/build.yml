@@ -5,7 +5,7 @@ on: [push, pull_request]
 jobs:
 
   build:
-    name: Build (${{ matrix.python-version }}, ${{ matrix.os }})
+    name: ${{ matrix.python-version }} / ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -20,9 +20,9 @@ jobs:
         with:
           auto-update-conda: true
           python-version: ${{ matrix.python-version }}
-          activate-environment: matchms
-          environment-file: environment.yml
-          condarc-file: condarc.yml
+          activate-environment: matchms-dev
+          environment-file: conda/environment-dev.yml
+          condarc-file: conda/condarc.yml
           auto-activate-base: false
       - name: Conda info
         shell: bash -l {0}
@@ -33,14 +33,14 @@ jobs:
           which python
           python --version
       - name: Conda list
-        shell: pwsh
+        shell: bash -l {0}
         run: conda list
       - name: Check style against standards using prospector
         shell: bash -l {0}
         run: prospector -o grouped -o pylint:pylint-report.txt
       - name: Check whether import statements are used consistently
         shell: bash -l {0}
-        run: isort --check-only --diff --conda-env matchms --recursive --wrap-length 79 --lines-after-imports 2 --force-single-line --no-lines-before FUTURE --no-lines-before STDLIB --no-lines-before THIRDPARTY --no-lines-before FIRSTPARTY --no-lines-before LOCALFOLDER matchms/ tests/ integration-tests/
+        run: isort --check-only --diff --conda-env matchms-dev --recursive --wrap-length 79 --lines-after-imports 2 --force-single-line --no-lines-before FUTURE --no-lines-before STDLIB --no-lines-before THIRDPARTY --no-lines-before FIRSTPARTY --no-lines-before LOCALFOLDER matchms/ tests/ integration-tests/
       - name: Build
         shell: bash -l {0}
         run: |

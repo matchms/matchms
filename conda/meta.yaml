@@ -1,0 +1,63 @@
+{% set name = "matchms" %}
+{% set version = "0.3.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  path: ..
+
+extra:
+  channels:
+    - conda-forge
+    - bioconda
+
+build:
+  noarch: python
+  preserve_egg_dir: True
+  number: 0
+  skip: True # [py2k]
+
+requirements:
+  build:
+    - conda-build
+    - conda-verify
+    - pytest-runner
+    - python
+    - numpy {{ numpy }}
+    - setuptools
+  host:
+    - python >=3.7,<3.8
+    - pip
+    - pytest-runner
+    - setuptools
+  run:
+    - gensim >=3.8.0
+    - matplotlib
+    - numpy
+    - pip
+    - pyteomics >=4.2
+    - python >=3.7,<3.8
+    - pyyaml
+    - rdkit >=2020.03.1
+    - scipy
+
+test:
+  imports:
+    - matchms
+
+about:
+  home: https://github.com/matchms/matchms
+  license: Apache-2.0
+  license_family: APACHE
+  license_file: LICENSE
+  summary: 'Python library for fuzzy comparison of mass spectrum data and other Python objects'
+  description: |
+    Python library for fuzzy comparison of mass spectrum data and other Python objects
+  doc_url: https://matchms.readthedocs.io/
+  dev_url: https://github.com/matchms/matchms
+
+extra:
+  recipe-maintainers:
+    - fdiblen

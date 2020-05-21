@@ -1,6 +1,7 @@
 from .add_adduct import add_adduct
 from .add_losses import add_losses
 from .add_parent_mass import add_parent_mass
+from .add_precursor_mz import add_precursor_mz
 from .correct_charge import correct_charge
 from .default_filters import default_filters
 from .derive_inchi_from_smiles import derive_inchi_from_smiles
@@ -26,6 +27,7 @@ __all__ = [
     "add_adduct",
     "add_losses",
     "add_parent_mass",
+    "add_precursor_mz",
     "correct_charge",
     "default_filters",
     "derive_inchi_from_smiles",
