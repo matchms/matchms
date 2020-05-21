@@ -34,7 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Workflow improvements [#244](https://github.com/matchms/matchms/pull/244)
+- Workflow improvements [#244](https://github.com/matchms/matchms-backup/pull/244)
   - merge anaconda and python build workflows
   - fix conda package install command in build workflow
   - publish only on ubuntu machine
@@ -47,7 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
-- remove python build badge [#244](https://github.com/matchms/matchms/pull/244)
+- remove python build badge [#244](https://github.com/matchms/matchms-backup/pull/244)
 - Moved ``spec2vec`` similarity related functionality from ``matchms`` to [iomega/spec2vec](https://github.com/iomega/spec2vec)
 - removed build step in build workflow
 - removed conda build scripts: conda/build.sh and conda/bld.bat
