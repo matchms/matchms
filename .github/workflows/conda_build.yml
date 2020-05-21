@@ -178,9 +178,11 @@ jobs:
           path: |
             %TEMP%\matchms\_build
       - name: List artifact folder content for Unix
+        if: matrix.os != 'windows-latest'
         shell: bash -l {0}
         run: ls -al /tmp/matchms/_build
       - name: List artifact folder content for Windows
+        if: matrix.os == 'windows-latest'
         shell: bash -l {0}
         run: |
           ls -al %TEMP%\matchms\_build
