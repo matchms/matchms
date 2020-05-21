@@ -128,7 +128,8 @@ jobs:
           name: build-artifact
           path: /tmp/matchms/_build
 
-  testbuilt:
+  verify:
+    name: verify / python-${{ matrix.python-version }} / ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
