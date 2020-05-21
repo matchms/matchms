@@ -164,18 +164,26 @@ jobs:
       - name: Conda list
         shell: bash -l {0}
         run: conda list
-      - name: Download conda package from build job
+      - name: Download conda package from build job for Unix
         if: matrix.os != 'windows-latest'
         uses: actions/download-artifact@v1
         with:
           name: conda-package-artifact
-          working-directory: /tmp/matchms/
-      - name: Download conda package from build job
+          path: /tmp/matchms/_build
+      - name: Download conda package from build job for Windows
         if: matrix.os == 'windows-latest'
         uses: actions/download-artifact@v1
         with:
           name: conda-package-artifact
-          working-directory: "%TEMP%\\matchms\\"
+          path: |
+            %TEMP%\matchms\_build
+      - name: List artifact folder content for Unix
+        shell: bash -l {0}
+        run: ls -al /tmp/matchms/_build
+      - name: List artifact folder content for Windows
+        shell: bash -l {0}
+        run: |
+          ls -al %TEMP%\matchms\_build
       - name: Test local conda package on unix
         if: matrix.os != 'windows-latest'
         shell: bash -l {0}
