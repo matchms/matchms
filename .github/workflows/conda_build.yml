@@ -126,7 +126,7 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         uses: actions/upload-artifact@v1
         with:
-          name: build-artifact
+          name: conda-package-artifact
           path: /tmp/matchms/_build
 
   verify:
@@ -165,9 +165,17 @@ jobs:
         shell: bash -l {0}
         run: conda list
       - name: Download conda package from build job
+        if: matrix.os != 'windows-latest'
         uses: actions/download-artifact@v1
         with:
-          name: build-artifact
+          name: conda-package-artifact
+          working-directory: /tmp/matchms/
+      - name: Download conda package from build job
+        if: matrix.os == 'windows-latest'
+        uses: actions/download-artifact@v1
+        with:
+          name: conda-package-artifact
+          working-directory: "%TEMP%\\matchms\\"
       - name: Test local conda package on unix
         if: matrix.os != 'windows-latest'
         shell: bash -l {0}
