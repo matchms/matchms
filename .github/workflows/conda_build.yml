@@ -128,7 +128,7 @@ jobs:
             ./conda
       - name: Upload package artifact from build
         if: matrix.os == 'ubuntu-latest'
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v2
         with:
           name: conda-package-artifact
           path: ${{ env.RUNNER_TEMP }}/matchms/_build
@@ -170,7 +170,7 @@ jobs:
         run: |
           env | sort
       - name: Download conda package from build job
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v2
         with:
           name: conda-package-artifact
           path: ${{ env.RUNNER_TEMP }}/matchms/_build
