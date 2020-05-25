@@ -10,8 +10,10 @@ class FingerprintSimilarityParallel:
     set_empty_scores: "nan" or 0
         Set values to this value if no fingerprint is found.
     """
-    def __init__(self, set_empty_scores="nan"):
+    def __init__(self, similarity_measure="jaccard", set_empty_scores="nan"):
         self.set_empty_scores = set_empty_scores
+        assert similarity_measure in ["jaccard", "cosine"], "Unknown similarity measure."
+        self.similarity_measure = similarity_measure
 
     def __call__(self, references, queries):
         """Calculate matrix of fingerprint based similarity scores."""
@@ -21,30 +23,112 @@ class FingerprintSimilarityParallel:
 
         def collect_fingerprints(spectrums):
             """Collect fingerprints and indices of spectrum with finterprints."""
-            with_fingerprints = []
-            without_fingerprints = []
+            idx_fingerprints = []
             fingerprints = []
             for index, fp in get_fingerprints(spectrums):
                 if fp is not None:
-                    with_fingerprints.append(index)
+                    idx_fingerprints.append(index)
                     fingerprints.append(fp)
-                else:
-                    without_fingerprints.append(index)
             fingerprints = numpy.array(fingerprints)
-            return numpy.array(fingerprints), numpy.array(with_fingerprints), numpy.array(without_fingerprints)
+            return numpy.array(fingerprints), numpy.array(idx_fingerprints)
 
-        fingerprints1, with_fp1, without_fp1 = collect_fingerprints(references)
-        fingerprints2, with_fp2, without_fp2 = collect_fingerprints(queries)
-        assert with_fp1.size > 0 and with_fp2.size > 0, ("Not enouth molecular fingerprints.",
-                                                         "Apply 'add_fingerprint'filter first.")
-        return fingerprint_cosine_score_matrix(fingerprints1, with_fp1, without_fp1,
-                                               fingerprints2, with_fp2, without_fp2,
-                                               set_empty_scores=self.set_empty_scores)
+        def create_full_matrix():
+            """Create matrix for all similarities."""
+            similarity_matrix = numpy.zeros((len(references), len(queries)))
+            if self.set_empty_scores == "nan":
+                similarity_matrix[:] = numpy.nan
+            elif isinstance(self.set_empty_scores, (float, int)):
+                similarity_matrix[:] = self.set_empty_scores
+            return similarity_matrix
+
+        fingerprints1, idx_fingerprints1 = collect_fingerprints(references)
+        fingerprints2, idx_fingerprints2 = collect_fingerprints(queries)
+        assert idx_fingerprints1.size > 0 and idx_fingerprints2.size > 0, ("Not enouth molecular fingerprints.",
+                                                                           "Apply 'add_fingerprint'filter first.")
+        similarity_matrix = create_full_matrix()
+        # Calculate similarity score matrix following specified method
+        if self.similarity_measure == "jaccard":
+            similarity_matrix[numpy.ix_(idx_fingerprints1,
+                                        idx_fingerprints2)] = jaccard_similarity_matrix(fingerprints1,
+                                                                                        fingerprints2)
+        elif self.similarity_measure == "cosine":
+            similarity_matrix[numpy.ix_(idx_fingerprints1,
+                                        idx_fingerprints2)] = cosine_score_matrix(fingerprints1,
+                                                                                  fingerprints2)
+        return similarity_matrix
 
 
 @numba.njit
-def cosine_similarity_numba(u: numpy.ndarray, v: numpy.ndarray):
-    """Calculate cosine similarity."""
+def jaccard_similarity_matrix(references, queries):
+    """Returns matrix of jaccard indices between all-vs-all vectors of references
+    and queries."""
+    size1 = references.shape[0]
+    size2 = queries.shape[0]
+    scores = numpy.zeros((size1, size2))
+    for i in range(size1):
+        for j in range(size2):
+            scores[i, j] = jaccard_index(references[i,:], queries[j,:])
+    return scores
+
+
+@numba.njit
+def cosine_score_matrix(references, queries):
+    """Returns matrix of cosine similarity scores between all-vs-all vectors of
+    references and queries."""
+    size1 = references.shape[0]
+    size2 = queries.shape[0]
+    scores = numpy.zeros((size1, size2))
+    for i in range(size1):
+        for j in range(size2):
+            scores[i, j] = cosine_similarity(references[i,:], queries[j,:])
+    return scores
+
+
+@numba.njit
+def jaccard_index(u, v):
+    """
+    Computes the Jaccard-index (or Jaccard similarity coefficient) of two boolean
+    1-D arrays.
+    The Jaccard index between 1-D boolean arrays `u` and `v`,
+    is defined as
+    .. math::
+       J(u,v) = \\frac{u \cap v}
+                {u \cup v}
+
+    Args:
+    ----
+    u : (N,) array_like, bool
+        Input array.
+    v : (N,) array_like, bool
+        Input array.
+
+    Returns
+    -------
+    jaccard_similarity : double
+        The Jaccard similarity coefficient between vectors `u` and `v`.
+    """
+    u_and_v = numpy.bitwise_or(u != 0, v != 0)
+    u_or_v = numpy.bitwise_and(u != 0, v != 0)
+    jaccard_similarity = numpy.double(u_or_v.sum()) / numpy.double(u_and_v.sum())
+    return jaccard_similarity
+
+
+@numba.njit
+def cosine_similarity(u, v):
+    """Calculate cosine similarity score.
+
+    Args:
+    ----
+    u : numpy array, float
+        Input vector.
+    v : numpy array, float
+        Input vector.
+
+    Returns
+    -------
+    cosine_similarity : double
+        The Jaccard similarity coefficient between vectors `u` and `v`.
+    """
     assert u.shape[0] == v.shape[0], "Input vector must have same shape."
     uv = 0
     uu = 0
@@ -53,30 +137,7 @@ def cosine_similarity_numba(u: numpy.ndarray, v: numpy.ndarray):
         uv += u[i] * v[i]
         uu += u[i] * u[i]
         vv += v[i] * v[i]
-    cos_theta = 1
+    cosine_similarity = 1
     if uu != 0 and vv != 0:
-        cos_theta = uv / numpy.sqrt(uu * vv)
-    return cos_theta
-
-
-@numba.njit
-def fingerprint_cosine_score_matrix(fingerprints1, with_fingerprints1, without_fingerprints1,
-                                    fingerprints2, with_fingerprints2, without_fingerprints2,
-                                    set_empty_scores="nan"):
-    """Calculate cosine scores between fingerprints."""
-    size1 = len(with_fingerprints1) + len(without_fingerprints1)
-    size2 = len(with_fingerprints2) + len(without_fingerprints2)
-    scores = numpy.zeros((size1, size2))
-    for i, index1 in enumerate(with_fingerprints1):
-        for j, index2 in enumerate(with_fingerprints2):
-            scores[index1, index2] = cosine_similarity_numba(fingerprints1[i], fingerprints2[j])
-    if set_empty_scores == "nan":
-        for index1 in without_fingerprints1:
-            scores[index1, :] = numpy.nan
-        for index2 in without_fingerprints2:
-            scores[:, index2] = numpy.nan
-    elif set_empty_scores == 0:
-        pass
-    else:
-        print("Unknown entry for set_empty_scores.")
-    return scores
+        cosine_similarity = uv / numpy.sqrt(uu * vv)
+    return cosine_similarity
