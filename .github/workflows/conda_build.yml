@@ -22,6 +22,12 @@ jobs:
           auto-update-conda: true
           environment-file: conda/environment-dev.yml
           python-version: ${{ matrix.python-version }}
+      - name: Test the locally built conda package on Windows
+        if: matrix.os == 'windows-latest'
+        shell: bash -l {0}
+        run: |
+          set BUILD_FOLDER=file://%TEMP%\\matchms\\_build\\noarch\\
+          echo %BUILD_FOLDER%
       - name: Show conda config
         shell: bash -l {0}
         run: |
