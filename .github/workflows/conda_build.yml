@@ -19,8 +19,8 @@ jobs:
         if: matrix.os == 'windows-latest'
         shell: bash -l {0}
         run: |
-          #export BUILD_FOLDER="file://%TEMP%\\matchms\\_build\\noarch\\"
-          export BUILD_FOLDER="${TMP}"
+          export BUILD_FOLDER="${TMP}/matchms/_build/noarch/"
+          mkdir -p $BUILD_FOLDER
           ls -la ${BUILD_FOLDER}
       - uses: actions/checkout@v2
         with:
