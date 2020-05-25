@@ -6,6 +6,8 @@ on: [push]
 jobs:
 
   analyze:
+    env:
+      MY_BUILD_DIR: ${RUNNER_TEMP}/matchms/_build
     name: analyze / python-${{ matrix.python-version }} / ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -17,12 +19,15 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: "0"
+      - name: test
+        shell: bash -l {0}
+        run: echo ${{ env.MY_BUILD_DIR }}
       - name: Upload package artifact from build
         if: matrix.os == 'ubuntu-latest'
         uses: actions/upload-artifact@v2
         with:
           name: conda-package-artifact
-          path: '${RUNNER_TEMP}/matchms/_build'
+          path: '${{ env.MY_BUILD_DIR }}/matchms/_build'
 
       # - uses: goanpeca/setup-miniconda@v1
       #   with:
