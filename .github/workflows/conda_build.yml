@@ -200,5 +200,5 @@ jobs:
           conda install \
             --channel bioconda \
             --channel conda-forge \
-            --channel file:\\_build \
+            --channel file:\\_build\noarch \
             matchms
