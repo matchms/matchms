@@ -140,7 +140,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: conda-package-artifact
-          path: "${RUNNER_TEMP}/matchms/_build"
+          path: ${{ runner.temp }}/matchms/_build
 
   verify:
     name: verify / python-${{ matrix.python-version }} / ${{ matrix.os }}
