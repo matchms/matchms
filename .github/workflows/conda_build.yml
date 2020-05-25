@@ -20,6 +20,7 @@ jobs:
         shell: bash -l {0}
         run: |
           #export BUILD_FOLDER="file://%TEMP%\\matchms\\_build\\noarch\\"
+          env
           export BUILD_FOLDER="file://%TEMP%"
           ls -la ${BUILD_FOLDER}
       - uses: actions/checkout@v2
