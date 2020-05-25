@@ -17,6 +17,13 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: "0"
+      - name: Upload package artifact from build
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-artifact@v2
+        with:
+          name: conda-package-artifact
+          path: "${{ env.RUNNER_TEMP }}/matchms/_build"
+
       # - uses: goanpeca/setup-miniconda@v1
       #   with:
       #     activate-environment: matchms-dev
@@ -131,7 +138,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: conda-package-artifact
-          path: ${{ env.RUNNER_TEMP }}/matchms/_build
+          path: "${{ env.RUNNER_TEMP }}/matchms/_build"
 
   verify:
     name: verify / python-${{ matrix.python-version }} / ${{ matrix.os }}
