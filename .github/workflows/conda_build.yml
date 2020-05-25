@@ -161,9 +161,6 @@ jobs:
         run: |
           which python
           python --version
-      - name: Conda list
-        shell: bash -l {0}
-        run: conda list
       - name: Download conda package from build job for Unix
         if: matrix.os != 'windows-latest'
         uses: actions/download-artifact@v1
