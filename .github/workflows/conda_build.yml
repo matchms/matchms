@@ -181,7 +181,7 @@ jobs:
         if: matrix.os == 'windows-latest'
         shell: bash -l {0}
         # run: ls -al "%TEMP%\matchms\_build"
-        run: ls -al _build
+        run: ls -al _build\\noarch
       - name: Test local conda package on unix
         if: matrix.os != 'windows-latest'
         shell: bash -l {0}
@@ -200,5 +200,5 @@ jobs:
           conda install \
             --channel bioconda \
             --channel conda-forge \
-            --channel file:\\_build\noarch \
+            --channel file:\\\\_build\\noarch \
             matchms
