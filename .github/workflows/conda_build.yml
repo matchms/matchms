@@ -22,7 +22,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: conda-package-artifact
-          path: "${RUNNER_TEMP}/matchms/_build"
+          path: '${RUNNER_TEMP}/matchms/_build'
 
       # - uses: goanpeca/setup-miniconda@v1
       #   with:
@@ -138,7 +138,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: conda-package-artifact
-          path: "${{ env.RUNNER_TEMP }}/matchms/_build"
+          path: "${RUNNER_TEMP}/matchms/_build"
 
   verify:
     name: verify / python-${{ matrix.python-version }} / ${{ matrix.os }}
