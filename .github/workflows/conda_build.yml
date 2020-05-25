@@ -216,5 +216,5 @@ jobs:
           conda install \
             --channel bioconda \
             --channel conda-forge \
-            --channel ${BUILD_FOLDER/noarch/ \
+            --channel ${BUILD_FOLDER}/noarch/ \
             matchms
