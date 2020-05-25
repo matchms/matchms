@@ -181,14 +181,25 @@ jobs:
         with:
           name: conda-package-artifact
           path: ${{ env.RUNNER_TEMP }}/matchms/_build
+      - name: Artifact folder content
+        shell: bash -l {0}
+        run: |
+          export BUILDDIR=$RUNNER_TEMP/matchms/_build/noarch/
+          [ "$RUNNING_OS" = "Windows"] && export BUILDDIR=$RUNNER_TEMP\\matchms\\_build\\noarch\\
+          echo ${RUNNER_TEMP}/matchms/_build
       - name: List artifact folder content
         shell: bash -l {0}
-        run: ls -al ${RUNNER_TEMP}/matchms/_build
+        run: |
+          export BUILDDIR=$RUNNER_TEMP/matchms/_build/noarch/
+          [ "$RUNNING_OS" = "Windows"] && export BUILDDIR=$RUNNER_TEMP\\matchms\\_build\\noarch\\
+          ls -al ${RUNNER_TEMP}/matchms/_build
       - name: Test locally published conda package
         shell: bash -l {0}
         run: |
+          export BUILDDIR=$RUNNER_TEMP/matchms/_build/noarch/
+          [ "$RUNNING_OS" = "Windows"] && export BUILDDIR=$RUNNER_TEMP\\matchms\\_build\\noarch\\
           conda install \
             --channel bioconda \
             --channel conda-forge \
-            --channel ${RUNNER_TEMP}/matchms/_build/noarch/ \
+            --channel $BUILDDIR \
             matchms
