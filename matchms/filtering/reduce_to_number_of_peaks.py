@@ -20,6 +20,20 @@ def reduce_to_number_of_peaks(spectrum_in: SpectrumType, n_required=1, n_max=100
         Set desired ratio between maximum number of peaks and parent mass.
         Default is None.
     """
+    def _set_maximum_number_of_peaks_to_keep():
+        parent_mass = spectrum.get("parent_mass", None)
+        if parent_mass and ratio_desired:
+            n_desired_by_mass = int(ceil(ratio_desired * parent_mass))
+            return max(n_required, n_desired_by_mass)
+        return n_max
+
+    def _remove_lowest_intensity_peaks():
+        mz, intensities = spectrum.peaks
+        idx = intensities.argsort()[-threshold:]
+        idx_sort_by_mz = mz[idx].argsort()
+        spectrum.peaks = Spikes(mz=mz[idx][idx_sort_by_mz],
+                                intensities=intensities[idx][idx_sort_by_mz])
+
     if spectrum_in is None:
         return None
 
@@ -28,22 +42,10 @@ def reduce_to_number_of_peaks(spectrum_in: SpectrumType, n_required=1, n_max=100
     if spectrum.peaks.intensities.size < n_required:
         return None
 
-    # Set maximum number of peaks to keep
-    parent_mass = spectrum.get("parent_mass", None)
-    if parent_mass and ratio_desired:
-        n_desired_by_mass = int(ceil(ratio_desired * parent_mass))
-        threshold = max(n_required, n_desired_by_mass)
-    else:
-        threshold = n_max
-
+    threshold = _set_maximum_number_of_peaks_to_keep()
     if spectrum.peaks.intensities.size < threshold:
         return spectrum
 
-    # Remove lowest intensity peaks
-    mz, intensities = spectrum.peaks
-    idx = intensities.argsort()[-threshold:]
-    idx_sort_by_mz = mz[idx].argsort()
-    spectrum.peaks = Spikes(mz=mz[idx][idx_sort_by_mz],
-                            intensities=intensities[idx][idx_sort_by_mz])
+    _remove_lowest_intensity_peaks()
 
     return spectrum

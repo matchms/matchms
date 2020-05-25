@@ -26,20 +26,19 @@ def test_reduce_to_number_of_peaks_n_max_4():
     assert spectrum.peaks.mz.tolist() == [20., 30., 40., 50.], "Expected different peaks to remain."
 
 
-def test_reduce_to_number_of_peaks_n_max_4_or_1_no_parent_mass():
-
+def test_reduce_to_number_of_peaks_ratio_given_but_no_parent_mass():
+    """A ratio_desired given without parent_mass should not result in changes."""
     mz = numpy.array([10, 20, 30, 40], dtype="float")
     intensities = numpy.array([0, 1, 10, 100], dtype="float")
     spectrum_in = Spectrum(mz=mz, intensities=intensities)
 
     spectrum = reduce_to_number_of_peaks(spectrum_in, n_required=4, ratio_desired=0.1)
 
-    assert spectrum == spectrum_in, "Expected the spectrum to qualify because the number of peaks (4) is equal to the" \
-                                    "required number (4)."
+    assert spectrum == spectrum_in, "Expected the spectrum to remain unchanged."
 
 
 def test_reduce_to_number_of_peaks_required_2_desired_2():
-
+    """Here: ratio_desired * parent_mass is 2, same as n_required."""
     mz = numpy.array([10, 20, 30, 40], dtype="float")
     intensities = numpy.array([0, 1, 10, 100], dtype="float")
     spectrum_in = Spectrum(mz=mz, intensities=intensities,
@@ -52,7 +51,7 @@ def test_reduce_to_number_of_peaks_required_2_desired_2():
 
 
 def test_reduce_to_number_of_peaks_required_2_desired_3():
-
+    """Here: ratio_desired * parent_mass is 3, more than n_required."""
     mz = numpy.array([10, 20, 30, 40], dtype="float")
     intensities = numpy.array([0, 1, 10, 100], dtype="float")
     spectrum_in = Spectrum(mz=mz, intensities=intensities,
