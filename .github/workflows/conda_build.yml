@@ -13,6 +13,18 @@ jobs:
         os: ['ubuntu-latest', 'macos-latest', 'windows-latest']
         python-version: ["3.7"]
     steps:
+      - name: TODO REMOVE Test the locally built conda package on Windows
+        if: matrix.os == 'windows-latest'
+        shell: bash -l {0}
+        run: |
+          echo on
+          export BUILD_FOLDER="%TEMP%\matchms\_build\"
+          echo %BUILD_FOLDER%
+          conda install \
+            --channel bioconda \
+            --channel conda-forge \
+            --channel file:\\%BUILD_FOLDER%\noarch\ \
+            matchms
       - uses: actions/checkout@v2
         with:
           fetch-depth: "0"
