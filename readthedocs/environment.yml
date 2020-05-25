@@ -1,0 +1,22 @@
+name: matchms-readthedocs
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - gensim >=3.8.0
+  - matplotlib
+  - numpy
+  - pip
+  - pyteomics >=4.2
+  - python >=3.7,<3.8
+  - pyyaml
+  - rdkit >=2020.03.1
+  - scipy
+  - pip:
+    - recommonmark
+    - ruamel.yaml
+    - sphinx
+    - sphinx_rtd_theme
+    - sphinxcontrib-apidoc
+

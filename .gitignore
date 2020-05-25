@@ -35,14 +35,5 @@ notebooks/.ipynb_checkpoints/
 __pycache__/
 
 
-# generated api docs files
-readthedocs/**/matchms.exporting.rst
-readthedocs/**/matchms.filtering.rst
-readthedocs/**/matchms.importing.rst
-readthedocs/**/matchms.rst
-readthedocs/**/matchms.similarity.rst
-readthedocs/**/matchms.similarity.spec2vec.rst
-readthedocs/**/matchms.similarity.spec2vec.similarity.rst
-readthedocs/**/modules.rst
-readthedocs/_build
-readthedocs/api
+# conda build directory
+/_build
