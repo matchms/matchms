@@ -128,10 +128,12 @@ jobs:
       - name: Build the conda package
         shell: bash -l {0}
         run: |
+          export BUILDDIR=$RUNNER_TEMP/matchms/_build
+          [ "$RUNNING_OS" = "Windows"] && export BUILDDIR=$RUNNER_TEMP\\matchms\\_build\\
           conda config --set anaconda_upload no
           conda build --numpy 1.18.1 --no-include-recipe \
             --channel bioconda --channel conda-forge \
-            --croot ${RUNNER_TEMP}/matchms/_build \
+            --croot ${BUILDDIR} \
             ./conda
       - name: Upload package artifact from build
         if: matrix.os == 'ubuntu-latest'
