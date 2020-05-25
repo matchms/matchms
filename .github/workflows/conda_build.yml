@@ -21,7 +21,7 @@ jobs:
         run: |
           #export BUILD_FOLDER="file://%TEMP%\\matchms\\_build\\noarch\\"
           env
-          export BUILD_FOLDER="file://%TEMP%"
+          export BUILD_FOLDER=file://${TMP}
           ls -la ${BUILD_FOLDER}
       - uses: actions/checkout@v2
         with:
