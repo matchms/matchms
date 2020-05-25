@@ -6,28 +6,25 @@ on: [push]
 jobs:
 
   analyze:
-    env:
-      MY_BUILD_DIR: ${{ ${RUNNER_TEMP} }}/matchms/_build
     name: analyze / python-${{ matrix.python-version }} / ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
+#     runs-on: ${{ matrix.os }}
+    runs-on: self-hosted
     strategy:
       fail-fast: false
       matrix:
+#         os: ['ubuntu-latest', 'macos-latest', 'windows-latest']
         os: ['ubuntu-latest', 'macos-latest', 'windows-latest']
         python-version: ["3.7"]
     steps:
       - uses: actions/checkout@v2
         with:
           fetch-depth: "0"
-      - name: test
-        shell: bash -l {0}
-        run: echo ${{ env.MY_BUILD_DIR }}
       - name: Upload package artifact from build
         if: matrix.os == 'ubuntu-latest'
         uses: actions/upload-artifact@v2
         with:
           name: conda-package-artifact
-          path: '${{ env.MY_BUILD_DIR }}/matchms/_build'
+          path: '${RUNNER_TEMP}/matchms/_build'
 
       # - uses: goanpeca/setup-miniconda@v1
       #   with:
