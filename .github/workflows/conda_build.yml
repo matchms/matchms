@@ -15,13 +15,13 @@ jobs:
         os: ['windows-latest']
         python-version: ["3.7"]
     steps:
-      - name: Test the locally built conda package on Windows
-        if: matrix.os == 'windows-latest'
-        shell: bash -l {0}
-        run: |
-          export BUILD_FOLDER="${TMP}/matchms/_build/noarch/"
-          mkdir -p $BUILD_FOLDER
-          ls -la ${BUILD_FOLDER}
+      # - name: Test the locally built conda package on Windows
+      #   if: matrix.os == 'windows-latest'
+      #   shell: bash -l {0}
+      #   run: |
+      #     export BUILD_FOLDER="${TMP}/matchms/_build/noarch/"
+      #     mkdir -p $BUILD_FOLDER
+      #     ls -la ${BUILD_FOLDER}
       - uses: actions/checkout@v2
         with:
           fetch-depth: "0"
@@ -178,7 +178,7 @@ jobs:
         uses: actions/download-artifact@v1
         with:
           name: conda-package-artifact
-          path: _build
+          path: ${TMP}/matchms/_build
       - name: List artifact folder content for Unix
         if: matrix.os != 'windows-latest'
         shell: bash -l {0}
@@ -186,9 +186,8 @@ jobs:
       - name: List artifact folder content for Windows
         if: matrix.os == 'windows-latest'
         shell: bash -l {0}
-        # run: ls -al "%TEMP%\matchms\_build"
-        run: ls -al _build\\noarch
-      - name: Test local conda package on unix
+        run: ls -al ${TMP}/matchms/_build
+      - name: Test local conda package for Unix
         if: matrix.os != 'windows-latest'
         shell: bash -l {0}
         run: |
@@ -202,9 +201,9 @@ jobs:
         if: matrix.os == 'windows-latest'
         shell: bash -l {0}
         run: |
-          # set BUILD_FOLDER=file:\\%TEMP%\\matchms\\_build\\noarch\\
+          export BUILD_FOLDER="${TMP}/matchms/_build"
           conda install \
             --channel bioconda \
             --channel conda-forge \
-            --channel file:\\\\_build\\noarch \
+            --channel ${BUILD_FOLDER/noarch/ \
             matchms
