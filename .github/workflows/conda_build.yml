@@ -7,7 +7,7 @@ jobs:
 
   analyze:
     env:
-      MY_BUILD_DIR: ${RUNNER_TEMP}/matchms/_build
+      MY_BUILD_DIR: ${{ ${RUNNER_TEMP} }}/matchms/_build
     name: analyze / python-${{ matrix.python-version }} / ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
