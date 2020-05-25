@@ -12,7 +12,7 @@ class FingerprintSimilarityParallel:
     """
     def __init__(self, similarity_measure="jaccard", set_empty_scores="nan"):
         self.set_empty_scores = set_empty_scores
-        assert similarity_measure in ["jaccard", "cosine"], "Unknown similarity measure."
+        assert similarity_measure in ["cosine", "dice", "jaccard"], "Unknown similarity measure."
         self.similarity_measure = similarity_measure
 
     def __call__(self, references, queries):
@@ -51,6 +51,10 @@ class FingerprintSimilarityParallel:
             similarity_matrix[numpy.ix_(idx_fingerprints1,
                                         idx_fingerprints2)] = jaccard_similarity_matrix(fingerprints1,
                                                                                         fingerprints2)
+        elif self.similarity_measure == "dice":
+            similarity_matrix[numpy.ix_(idx_fingerprints1,
+                                        idx_fingerprints2)] = dice_similarity_matrix(fingerprints1,
+                                                                                     fingerprints2)
         elif self.similarity_measure == "cosine":
             similarity_matrix[numpy.ix_(idx_fingerprints1,
                                         idx_fingerprints2)] = cosine_score_matrix(fingerprints1,
@@ -68,6 +72,19 @@ def jaccard_similarity_matrix(references, queries):
     for i in range(size1):
         for j in range(size2):
             scores[i, j] = jaccard_index(references[i,:], queries[j,:])
+    return scores
+
+
+@numba.njit
+def dice_similarity_matrix(references, queries):
+    """Returns matrix of dice similarity scores between all-vs-all vectors of references
+    and queries."""
+    size1 = references.shape[0]
+    size2 = queries.shape[0]
+    scores = numpy.zeros((size1, size2))
+    for i in range(size1):
+        for j in range(size2):
+            scores[i, j] = dice_similarity(references[i,:], queries[j,:])
     return scores
 
 
@@ -107,10 +124,38 @@ def jaccard_index(u, v):
     jaccard_similarity : double
         The Jaccard similarity coefficient between vectors `u` and `v`.
     """
-    u_and_v = numpy.bitwise_or(u != 0, v != 0)
-    u_or_v = numpy.bitwise_and(u != 0, v != 0)
-    jaccard_similarity = numpy.double(u_or_v.sum()) / numpy.double(u_and_v.sum())
+    u_or_v = numpy.bitwise_or(u != 0, v != 0)
+    u_and_v = numpy.bitwise_and(u != 0, v != 0)
+    jaccard_similarity = numpy.double(u_and_v.sum()) / numpy.double(u_or_v.sum())
     return jaccard_similarity
+
+
+@numba.njit
+def dice_similarity(u, v):
+    """
+    Computes the Dice similarity coefficient (DSC)between two boolean 1-D arrays.
+    The Dice similarity coefficient between `u` and `v`, is
+    .. math::
+         DSC(u,v) = \\frac{2|u /cap v|}
+                    {|x| + |v|}
+
+    Args:
+    ----
+    u : (N,) array_like, bool
+        Input array.
+    v : (N,) array_like, bool
+        Input array.
+
+    Returns
+    -------
+    dice_similarity : double
+        The Dice similarity coefficient between 1-D arrays `u` and `v`.
+    """
+    u_and_v = numpy.bitwise_and(u != 0, v != 0)
+    u_abs_sum = numpy.abs(u).sum()
+    v_abs_sum = numpy.abs(v).sum()
+    dice_similarity = 2.0 * numpy.double(u_and_v.sum()) / (u_abs_sum + v_abs_sum)
+    return dice_similarity
 
 
 @numba.njit
