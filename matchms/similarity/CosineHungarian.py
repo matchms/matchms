@@ -28,8 +28,8 @@ class CosineHungarian:
         spectrum2: SpectrumType
             Input spectrum 2.
         """
-        def get_normalized_peaks_arrays():
-            # Get peaks mz and intensities
+        def get_peaks_arrays():
+            """Get peaks mz and intensities as numpy array."""
             spec1 = numpy.vstack((spectrum1.peaks.mz, spectrum1.peaks.intensities)).T
             spec2 = numpy.vstack((spectrum2.peaks.mz, spectrum2.peaks.intensities)).T
             assert max(spec1[:, 1]) <= 1, ("Input spectrum1 is not normalized. ",
@@ -39,11 +39,13 @@ class CosineHungarian:
             return spec1, spec2
 
         def get_matching_pairs():
+            """Get pairs of peaks that match within the given tolerance."""
             matching_pairs = find_pairs_numba(spec1, spec2, self.tolerance, shift=0.0)
             matching_pairs = sorted(matching_pairs, key=lambda x: x[2], reverse=True)
             return matching_pairs
 
         def calc_score():
+            """Calculate cosine similarity score."""
             used_matches = []
             list1 = list({x[0] for x in matching_pairs})
             list2 = list({x[1] for x in matching_pairs})
@@ -63,7 +65,7 @@ class CosineHungarian:
                 score = 0.0
             return score, len(used_matches)
 
-        spec1, spec2 = get_normalized_peaks_arrays()
+        spec1, spec2 = get_peaks_arrays()
         matching_pairs = get_matching_pairs()
         return calc_score()
 
