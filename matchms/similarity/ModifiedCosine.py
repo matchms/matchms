@@ -3,7 +3,7 @@ import numpy
 from matchms.typing import SpectrumType
 
 
-class ModifiedCosineNumba:
+class ModifiedCosine:
     """Calculate modified cosine score between spectra.
 
     This score is calculated based on matches between peaks of two spectra and
@@ -26,8 +26,8 @@ class ModifiedCosineNumba:
         spectrum2: SpectrumType
             Input spectrum 2.
         """
-        def get_normalized_peaks_arrays():
-            # Get peaks mz and intensities
+        def get_peaks_arrays():
+            """Get peaks mz and intensities as numpy array."""
             spec1 = numpy.vstack((spectrum1.peaks.mz, spectrum1.peaks.intensities)).T
             spec2 = numpy.vstack((spectrum2.peaks.mz, spectrum2.peaks.intensities)).T
             assert max(spec1[:, 1]) <= 1, ("Input spectrum1 is not normalized. ",
@@ -37,6 +37,7 @@ class ModifiedCosineNumba:
             return spec1, spec2
 
         def get_matching_pairs():
+            """Find all pairs of peaks that match within the given tolerance."""
             zero_pairs = find_pairs_numba(spec1, spec2, self.tolerance, shift=0.0)
             if spectrum1.get("precursor_mz") and spectrum2.get("precursor_mz"):
                 mass_shift = spectrum1.get("precursor_mz") - spectrum2.get("precursor_mz")
@@ -50,6 +51,7 @@ class ModifiedCosineNumba:
             return matching_pairs
 
         def calc_score():
+            """Calculate modified cosine score."""
             used1 = set()
             used2 = set()
             score = 0.0
@@ -64,7 +66,7 @@ class ModifiedCosineNumba:
             score = score/max(numpy.sum(spec1[:, 1]**2), numpy.sum(spec2[:, 1]**2))
             return score, len(used_matches)
 
-        spec1, spec2 = get_normalized_peaks_arrays()
+        spec1, spec2 = get_peaks_arrays()
         matching_pairs = get_matching_pairs()
         return calc_score()
 
