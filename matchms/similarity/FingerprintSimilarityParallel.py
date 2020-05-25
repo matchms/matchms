@@ -7,8 +7,10 @@ class FingerprintSimilarityParallel:
 
     Args:
     ----
-    set_empty_scores: "nan" or 0
-        Set values to this value if no fingerprint is found.
+    set_empty_scores: "nan", int, float
+        Set values to this value if no fingerprint is found. Default is "nan",
+        in which case all similarity values in cases without fingerprint will be
+        set to numpy.nan's.
     """
     def __init__(self, similarity_measure="jaccard", set_empty_scores="nan"):
         self.set_empty_scores = set_empty_scores
@@ -45,8 +47,9 @@ class FingerprintSimilarityParallel:
         fingerprints2, idx_fingerprints2 = collect_fingerprints(queries)
         assert idx_fingerprints1.size > 0 and idx_fingerprints2.size > 0, ("Not enouth molecular fingerprints.",
                                                                            "Apply 'add_fingerprint'filter first.")
-        similarity_matrix = create_full_matrix()
+
         # Calculate similarity score matrix following specified method
+        similarity_matrix = create_full_matrix()
         if self.similarity_measure == "jaccard":
             similarity_matrix[numpy.ix_(idx_fingerprints1,
                                         idx_fingerprints2)] = jaccard_similarity_matrix(fingerprints1,
@@ -71,7 +74,7 @@ def jaccard_similarity_matrix(references, queries):
     scores = numpy.zeros((size1, size2))
     for i in range(size1):
         for j in range(size2):
-            scores[i, j] = jaccard_index(references[i,:], queries[j,:])
+            scores[i, j] = jaccard_index(references[i, :], queries[j, :])
     return scores
 
 
@@ -84,7 +87,7 @@ def dice_similarity_matrix(references, queries):
     scores = numpy.zeros((size1, size2))
     for i in range(size1):
         for j in range(size2):
-            scores[i, j] = dice_similarity(references[i,:], queries[j,:])
+            scores[i, j] = dice_similarity(references[i, :], queries[j, :])
     return scores
 
 
@@ -97,14 +100,13 @@ def cosine_score_matrix(references, queries):
     scores = numpy.zeros((size1, size2))
     for i in range(size1):
         for j in range(size2):
-            scores[i, j] = cosine_similarity(references[i,:], queries[j,:])
+            scores[i, j] = cosine_similarity(references[i, :], queries[j, :])
     return scores
 
 
 @numba.njit
 def jaccard_index(u, v):
-    """
-    Computes the Jaccard-index (or Jaccard similarity coefficient) of two boolean
+    r"""Computes the Jaccard-index (or Jaccard similarity coefficient) of two boolean
     1-D arrays.
     The Jaccard index between 1-D boolean arrays `u` and `v`,
     is defined as
@@ -126,18 +128,18 @@ def jaccard_index(u, v):
     """
     u_or_v = numpy.bitwise_or(u != 0, v != 0)
     u_and_v = numpy.bitwise_and(u != 0, v != 0)
-    jaccard_similarity = numpy.double(u_and_v.sum()) / numpy.double(u_or_v.sum())
-    return jaccard_similarity
+    jaccard_score = numpy.double(u_and_v.sum()) / numpy.double(u_or_v.sum())
+    return jaccard_score
 
 
 @numba.njit
 def dice_similarity(u, v):
-    """
-    Computes the Dice similarity coefficient (DSC)between two boolean 1-D arrays.
+    r"""Computes the Dice similarity coefficient (DSC) between two boolean 1-D arrays.
+
     The Dice similarity coefficient between `u` and `v`, is
     .. math::
-         DSC(u,v) = \\frac{2|u /cap v|}
-                    {|x| + |v|}
+         DSC(u,v) = \\frac{2|u \cap v|}
+                    {|u| + |v|}
 
     Args:
     ----
@@ -154,8 +156,8 @@ def dice_similarity(u, v):
     u_and_v = numpy.bitwise_and(u != 0, v != 0)
     u_abs_sum = numpy.abs(u).sum()
     v_abs_sum = numpy.abs(v).sum()
-    dice_similarity = 2.0 * numpy.double(u_and_v.sum()) / (u_abs_sum + v_abs_sum)
-    return dice_similarity
+    dice_score = 2.0 * numpy.double(u_and_v.sum()) / (u_abs_sum + v_abs_sum)
+    return dice_score
 
 
 @numba.njit
@@ -182,7 +184,7 @@ def cosine_similarity(u, v):
         uv += u[i] * v[i]
         uu += u[i] * u[i]
         vv += v[i] * v[i]
-    cosine_similarity = 1
+    cosine_score = 1
     if uu != 0 and vv != 0:
-        cosine_similarity = uv / numpy.sqrt(uu * vv)
-    return cosine_similarity
+        cosine_score = uv / numpy.sqrt(uu * vv)
+    return cosine_score
