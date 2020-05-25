@@ -17,69 +17,69 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: "0"
-      - uses: goanpeca/setup-miniconda@v1
-        with:
-          activate-environment: matchms-dev
-          auto-update-conda: true
-          environment-file: conda/environment-dev.yml
-          python-version: ${{ matrix.python-version }}
-      - name: Show conda config
-        shell: bash -l {0}
-        run: |
-          conda info
-          conda list
-          conda config --show-sources
-          conda config --show
-      - name: Python info
-        shell: bash -l {0}
-        run: |
-          which python
-          python --version
-      - name: Show environment variables
-        shell: bash -l {0}
-        run: |
-          env | sort
-      - name: Check style against standards using prospector
-        shell: bash -l {0}
-        run: prospector -o grouped -o pylint:pylint-report.txt
-      - name: Check whether import statements are used consistently
-        shell: bash -l {0}
-        run: isort --check-only --diff --conda-env matchms-dev --recursive --wrap-length 79 --lines-after-imports 2 --force-single-line --no-lines-before FUTURE --no-lines-before STDLIB --no-lines-before THIRDPARTY --no-lines-before FIRSTPARTY --no-lines-before LOCALFOLDER matchms/ tests/ integration-tests/
-      - name: Build documentation
-        shell: bash -l {0}
-        run: |
-          make coverage html
-        working-directory: readthedocs/
-        env:
-          SPHINXOPTS: "-n"  # enable nit-picky mode
-      - name: Check documentation coverage threshold
-        if: matrix.os == 'ubuntu-latest'
-        shell: bash -l {0}
-        run: |
-          cat readthedocs/_build/coverage/python.txt
-          UNCOVERED_MEMBERS=$(grep '*' readthedocs/_build/coverage/python.txt | wc -l)
-          UNCOVERED_MEMBERS_ALLOWED=25
-          if (( $UNCOVERED_MEMBERS > $UNCOVERED_MEMBERS_ALLOWED )) ; then echo "There are currently ${UNCOVERED_MEMBERS} uncovered members in the documentation, which is more than the ${UNCOVERED_MEMBERS_ALLOWED} allowed."; exit 1;fi
-          echo "The code is sufficiently documented with ${UNCOVERED_MEMBERS} uncovered members out of ${UNCOVERED_MEMBERS_ALLOWED} allowed.";
-      - name: Test
-        if: matrix.os != 'ubuntu-latest'
-        shell: bash -l {0}
-        run: |
-          python setup.py test
-      - name: Test with coverage
-        if: matrix.os == 'ubuntu-latest'
-        shell: bash -l {0}
-        run: |
-          pytest --cov --cov-report term --cov-report xml --junitxml=xunit-result.xml
-      - name: Correct coverage paths
-        if: matrix.os == 'ubuntu-latest'
-        run: sed -i "s+$PWD/++g" coverage.xml
-      - name: SonarCloud Scan
-        if: matrix.os == 'ubuntu-latest'
-        uses: sonarsource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      # - uses: goanpeca/setup-miniconda@v1
+      #   with:
+      #     activate-environment: matchms-dev
+      #     auto-update-conda: true
+      #     environment-file: conda/environment-dev.yml
+      #     python-version: ${{ matrix.python-version }}
+      # - name: Show conda config
+      #   shell: bash -l {0}
+      #   run: |
+      #     conda info
+      #     conda list
+      #     conda config --show-sources
+      #     conda config --show
+      # - name: Python info
+      #   shell: bash -l {0}
+      #   run: |
+      #     which python
+      #     python --version
+      # - name: Show environment variables
+      #   shell: bash -l {0}
+      #   run: |
+      #     env | sort
+      # - name: Check style against standards using prospector
+      #   shell: bash -l {0}
+      #   run: prospector -o grouped -o pylint:pylint-report.txt
+      # - name: Check whether import statements are used consistently
+      #   shell: bash -l {0}
+      #   run: isort --check-only --diff --conda-env matchms-dev --recursive --wrap-length 79 --lines-after-imports 2 --force-single-line --no-lines-before FUTURE --no-lines-before STDLIB --no-lines-before THIRDPARTY --no-lines-before FIRSTPARTY --no-lines-before LOCALFOLDER matchms/ tests/ integration-tests/
+      # - name: Build documentation
+      #   shell: bash -l {0}
+      #   run: |
+      #     make coverage html
+      #   working-directory: readthedocs/
+      #   env:
+      #     SPHINXOPTS: "-n"  # enable nit-picky mode
+      # - name: Check documentation coverage threshold
+      #   if: matrix.os == 'ubuntu-latest'
+      #   shell: bash -l {0}
+      #   run: |
+      #     cat readthedocs/_build/coverage/python.txt
+      #     UNCOVERED_MEMBERS=$(grep '*' readthedocs/_build/coverage/python.txt | wc -l)
+      #     UNCOVERED_MEMBERS_ALLOWED=25
+      #     if (( $UNCOVERED_MEMBERS > $UNCOVERED_MEMBERS_ALLOWED )) ; then echo "There are currently ${UNCOVERED_MEMBERS} uncovered members in the documentation, which is more than the ${UNCOVERED_MEMBERS_ALLOWED} allowed."; exit 1;fi
+      #     echo "The code is sufficiently documented with ${UNCOVERED_MEMBERS} uncovered members out of ${UNCOVERED_MEMBERS_ALLOWED} allowed.";
+      # - name: Test
+      #   if: matrix.os != 'ubuntu-latest'
+      #   shell: bash -l {0}
+      #   run: |
+      #     python setup.py test
+      # - name: Test with coverage
+      #   if: matrix.os == 'ubuntu-latest'
+      #   shell: bash -l {0}
+      #   run: |
+      #     pytest --cov --cov-report term --cov-report xml --junitxml=xunit-result.xml
+      # - name: Correct coverage paths
+      #   if: matrix.os == 'ubuntu-latest'
+      #   run: sed -i "s+$PWD/++g" coverage.xml
+      # - name: SonarCloud Scan
+      #   if: matrix.os == 'ubuntu-latest'
+      #   uses: sonarsource/sonarcloud-github-action@master
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   build:
     name: build / python-${{ matrix.python-version }} / ${{ matrix.os }}
