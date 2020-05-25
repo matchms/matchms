@@ -131,7 +131,7 @@ jobs:
         uses: actions/upload-artifact@v1
         with:
           name: conda-package-artifact
-          path: ${RUNNER_TEMP}/matchms/_build
+          path: ${{ env.RUNNER_TEMP }}/matchms/_build
 
   verify:
     name: verify / python-${{ matrix.python-version }} / ${{ matrix.os }}
@@ -173,7 +173,7 @@ jobs:
         uses: actions/download-artifact@v1
         with:
           name: conda-package-artifact
-          path: ${RUNNER_TEMP}/matchms/_build/
+          path: ${{ env.RUNNER_TEMP }}/matchms/_build
       - name: List artifact folder content
         shell: bash -l {0}
         run: ls -al ${RUNNER_TEMP}/matchms/_build
