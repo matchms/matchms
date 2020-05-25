@@ -28,7 +28,7 @@ Vector representation and similarity measure for mass spectrometry data.
    * - **Other best practices**
      -
    * - Continuous integration
-     - |Python Build| |Anaconda Build and Publish|
+     - |Python Build| |Anaconda Build| |Anaconda Publish|
    * - Documentation
      - |ReadTheDocs Badge|
    * - Code Quality
@@ -39,7 +39,7 @@ Vector representation and similarity measure for mass spectrometry data.
    :target: https://github.com/matchms/matchms
    :alt: GitHub Badge
 
-.. |License Badge| image:: https://img.shields.io/github/license/citation-file-format/cff-converter-python
+.. |License Badge| image:: https://img.shields.io/github/license/matchms/matchms
    :target: https://github.com/matchms/matchms
    :alt: License Badge
 
@@ -79,10 +79,13 @@ Vector representation and similarity measure for mass spectrometry data.
    :target: https://github.com/matchms/matchms/actions?query=workflow%3A%22Python%20Build%22
    :alt: Python Build
 
-.. |Anaconda Build and Publish| image:: https://github.com/matchms/matchms/workflows/Anaconda%20Build%20and%20Publish/badge.svg
-   :target: https://github.com/matchms/matchms/actions?query=workflow%3A%22Anaconda%20Build%20and%20Publish%22
-   :alt: Anaconda Build and Publish
+.. |Anaconda Build| image:: https://github.com/matchms/matchms/workflows/Anaconda%20Build/badge.svg
+   :target: https://github.com/matchms/matchms/actions?query=workflow%3A%22Anaconda%20Build%22
+   :alt: Anaconda Build
 
+.. |Anaconda Publish| image:: https://github.com/matchms/matchms/workflows/Anaconda%20Publish/badge.svg
+   :target: https://github.com/matchms/matchms/actions?query=workflow%3A%22Anaconda%20Publish%22
+   :alt: Anaconda Publish
 
 ***********************
 Documentation for users
@@ -95,7 +98,7 @@ Install matchms from Anaconda Cloud with
 
 .. code-block:: console
 
-  conda install --channel nlesc matchms
+  conda install --channel nlesc --channel bioconda --channel conda-forge matchms
 
 Glossary of terms
 =================
@@ -147,8 +150,8 @@ To install matchms, do:
 
   git clone https://github.com/matchms/matchms.git
   cd matchms
-  conda env create
-  conda activate matchms
+  conda env create --file conda/environment-dev.yml
+  conda activate matchms-dev
   pip install --editable .
 
 Run the linter with:
@@ -162,6 +165,57 @@ Run tests (including coverage) with:
 .. code-block:: console
 
   pytest
+
+
+Conda package
+=============
+
+To build anaconda package locally, do:
+
+.. code-block:: console
+
+  conda deactivate
+  conda env create --file conda/environment-build.yml
+  conda activate matchms-build
+  BUILD_FOLDER=/tmp/matchms/_build
+  rm -rfv $BUILD_FOLDER;mkdir -p $BUILD_FOLDER
+  conda build --numpy 1.18.1 --no-include-recipe -c bioconda -c conda-forge \
+  --croot $BUILD_FOLDER ./conda
+
+If successful, this will yield the built ``matchms`` conda package as
+``matchms-<version>*.tar.bz2`` in ``$BUILD_FOLDER/noarch/``. You can test if
+installation of this conda package works with:
+
+.. code-block:: console
+
+  conda install \
+    --channel bioconda \
+    --channel conda-forge \
+    --channel file://${CONDA_PREFIX}/output/noarch/ \
+    matchms
+
+To publish the package on anaconda cloud, do:
+
+.. code-block:: console
+
+  anaconda --token ${{ secrets.ANACONDA_TOKEN }} upload --user nlesc --force $BUILD_FOLDER/noarch/*.tar.bz2
+
+where ``secrets.ANACONDA_TOKEN`` is a token to be generated on the Anaconda Cloud website. This secret should be added to GitHub repository.
+
+
+To remove matchms package:
+
+.. code-block:: console
+
+  conda remove matchms
+
+
+To remove matchms-build environment:
+
+.. code-block:: console
+
+  conda env remove --name matchms-build
+
 
 Flowchart
 =========
