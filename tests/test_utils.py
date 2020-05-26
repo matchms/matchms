@@ -1,4 +1,5 @@
 import numpy
+
 from matchms.utils import derive_fingerprint_from_inchi
 from matchms.utils import derive_fingerprint_from_smiles
 from matchms.utils import is_valid_inchi
