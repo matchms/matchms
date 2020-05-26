@@ -197,3 +197,7 @@ jobs:
             --channel conda-forge \
             --channel $BUILDDIR \
             matchms
+      - name: List conda packages
+        shell: bash -l {0}
+        run: |
+          conda list
