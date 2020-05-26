@@ -1,10 +1,7 @@
-.. image:: readthedocs/_static/matchms.png
-  :width: 600
-  :alt: matchms logo
+.. raw:: html
 
-################################################################################
-matchms
-################################################################################
+    <img src="readthedocs/_static/matchms.png" height="60px" width="380px" alt="matchms" />
+
 Vector representation and similarity measure for mass spectrometry data.
 
 |
@@ -151,6 +148,14 @@ Run the linter with:
 .. code-block:: console
 
   prospector
+
+Automatically fix incorrectly sorted imports:
+
+.. code-block:: console
+
+  isort --recursive .
+
+Files will be changed in place and need to be committed manually.
 
 Run tests (including coverage) with:
 
