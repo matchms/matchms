@@ -175,7 +175,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: conda-package-artifact
-          path: ${{ env.RUNNER_TEMP }}/matchms/_build
+          path: ${{ runner.temp }}/matchms/_build
       - name: Artifact folder content
         shell: bash -l {0}
         run: |
