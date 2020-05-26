@@ -21,8 +21,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+## [0.3.3] - 2020-05-26
 
-## [0.3.2] - 2020-05-21
+- [All changes](https://github.com/matchms/matchms/compare/0.3.2...HEAD) since 0.3.2
+
+### Added
+- Build workflow runs the tests after installing the package [#47](https://github.com/matchms/matchms/pull/47)
+
+### Changed
+- tests were removed from the package (see setup.py) [#47](https://github.com/matchms/matchms/pull/47)
+
+## [0.3.2] - 2020-05-26
 
 - [All changes](https://github.com/matchms/matchms/compare/0.3.1...HEAD) since 0.3.1
 
