@@ -74,3 +74,22 @@ jobs:
         shell: bash -l {0}
         run: |
           conda install --channel bioconda --channel conda-forge --channel nlesc matchms
+      - name: List conda packages
+        shell: bash -l {0}
+        run: |
+          conda list
+      - name: Install dev dependencies to run the tests
+        shell: bash -l {0}
+        run: |
+          conda env update --name matchms-test --file conda/environment-dev.yml
+          conda info
+          conda list
+      - name: Run tests after installing the package
+        shell: bash -l {0}
+        run: |
+          export TESTDIR=$RUNNER_TEMP/matchms/_test
+          [ "$RUNNING_OS" = "Windows" ] && export TESTDIR=$RUNNER_TEMP\\matchms\\_test\\
+          mkdir $TESTDIR
+          cp -iRv tests $TESTDIR
+          cd $TESTDIR/tests
+          pytest --ignore-glob="test_version_string_consistency.py"
