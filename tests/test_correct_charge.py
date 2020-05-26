@@ -37,7 +37,7 @@ def test_correct_charge_sign_plus_to_min():
     assert spectrum.get("charge") == -2, "Expected different charge value."
 
 
-def test_correct_charge_correct_charge_sign_min_to_plus():
+def test_correct_charge_sign_min_to_plus():
     """Test if charge is corrected as expected."""
     spectrum_in = Spectrum(mz=numpy.array([], dtype='float'),
                            intensities=numpy.array([], dtype='float'),
