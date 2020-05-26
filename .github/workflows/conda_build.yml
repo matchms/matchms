@@ -1,7 +1,6 @@
 name: Anaconda Build
 
-#on: [push, pull_request]
-on: [push]
+on: [push, pull_request]
 
 jobs:
 
