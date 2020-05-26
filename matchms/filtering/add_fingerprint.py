@@ -1,6 +1,8 @@
 import numpy
+
 from ..typing import SpectrumType
-from ..utils import derive_fingerprint_from_inchi, derive_fingerprint_from_smiles
+from ..utils import (derive_fingerprint_from_inchi,
+                     derive_fingerprint_from_smiles)
 
 
 def add_fingerprint(spectrum_in: SpectrumType, fingerprint_type="daylight",
