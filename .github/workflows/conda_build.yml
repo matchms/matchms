@@ -201,6 +201,13 @@ jobs:
         shell: bash -l {0}
         run: |
           conda list
+      - name: Create matchms-dev environment to run tests
+        uses: goanpeca/setup-miniconda@v1
+        with:
+          activate-environment: matchms-dev
+          auto-update-conda: true
+          environment-file: conda/environment-dev.yml
+          python-version: ${{ matrix.python-version }}
       - name: Run tests after installing the package
         shell: bash -l {0}
         run: |
