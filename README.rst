@@ -1,10 +1,7 @@
-.. image:: readthedocs/_static/matchms.png
-  :width: 600
-  :alt: matchms logo
+.. raw:: html
 
-################################################################################
-matchms
-################################################################################
+    <img src="readthedocs/_static/matchms.png" height="60px" width="380px" alt="matchms" />
+
 Vector representation and similarity measure for mass spectrometry data.
 
 |
@@ -28,7 +25,7 @@ Vector representation and similarity measure for mass spectrometry data.
    * - **Other best practices**
      -
    * - Continuous integration
-     - |Python Build| |Anaconda Build| |Anaconda Publish|
+     - |Anaconda Build| |Anaconda Publish|
    * - Documentation
      - |ReadTheDocs Badge|
    * - Code Quality
@@ -58,10 +55,6 @@ Vector representation and similarity measure for mass spectrometry data.
    :target: https://bestpractices.coreinfrastructure.org/projects/3792
    :alt: CII Best Practices Badge
 
-.. |GitHub Actions Badge| image:: https://github.com/matchms/matchms/workflows/Build%20matchms/badge.svg
-   :target: https://github.com/matchms/matchms/actions?query=workflow%3A%22Build+matchms%22
-   :alt: GitHub Actions Badge
-
 .. |ReadTheDocs Badge| image:: https://readthedocs.org/projects/matchms/badge/?version=latest
     :alt: Documentation Status
     :scale: 100%
@@ -74,10 +67,6 @@ Vector representation and similarity measure for mass spectrometry data.
 .. |Sonarcloud Coverage Badge| image:: https://sonarcloud.io/api/project_badges/measure?project=matchms_matchms&metric=coverage
    :target: https://sonarcloud.io/component_measures?id=matchms_matchms&metric=Coverage&view=list
    :alt: Sonarcloud Coverage
-
-.. |Python Build| image:: https://github.com/matchms/matchms/workflows/Python%20Build/badge.svg
-   :target: https://github.com/matchms/matchms/actions?query=workflow%3A%22Python%20Build%22
-   :alt: Python Build
 
 .. |Anaconda Build| image:: https://github.com/matchms/matchms/workflows/Anaconda%20Build/badge.svg
    :target: https://github.com/matchms/matchms/actions?query=workflow%3A%22Anaconda%20Build%22
@@ -160,6 +149,14 @@ Run the linter with:
 
   prospector
 
+Automatically fix incorrectly sorted imports:
+
+.. code-block:: console
+
+  isort --recursive .
+
+Files will be changed in place and need to be committed manually.
+
 Run tests (including coverage) with:
 
 .. code-block:: console
@@ -188,10 +185,16 @@ installation of this conda package works with:
 
 .. code-block:: console
 
+  # make a clean environment
+  conda deactivate
+  cd $(mktemp -d)
+  conda env create --name test python=3.7
+  conda activate test
+
   conda install \
     --channel bioconda \
     --channel conda-forge \
-    --channel file://${CONDA_PREFIX}/output/noarch/ \
+    --channel file://${CONDA_PREFIX}/noarch/ \
     matchms
 
 To publish the package on anaconda cloud, do:
@@ -203,7 +206,7 @@ To publish the package on anaconda cloud, do:
 where ``secrets.ANACONDA_TOKEN`` is a token to be generated on the Anaconda Cloud website. This secret should be added to GitHub repository.
 
 
-To remove matchms package:
+To remove matchms package from the active environment:
 
 .. code-block:: console
 
