@@ -7,7 +7,7 @@ def test_version_string_consistency_meta_yml():
     """Check whether version in meta.yaml is consistent with that in matchms.__version__"""
 
     repository_root = os.path.join(os.path.dirname(__file__), '..')
-    fixture = os.path.join(repository_root, "meta.yaml")
+    fixture = os.path.join(repository_root, "conda/meta.yaml")
 
     with open(fixture, "r") as f:
         contents = f.read()
@@ -15,7 +15,7 @@ def test_version_string_consistency_meta_yml():
     match = re.search(r"^{% set version = \"(?P<semver>.*)\" %}$", contents, re.MULTILINE)
     actual_version = match["semver"]
 
-    assert expected_version == actual_version, "Expected version string used in meta.yaml to be consistent with" \
+    assert expected_version == actual_version, "Expected version string used in conda/meta.yaml to be consistent with" \
                                                " that in matchms.__version__"
 
 

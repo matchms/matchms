@@ -1,6 +1,7 @@
 from ..typing import SpectrumType
 from .add_compound_name import add_compound_name
 from .clean_compound_name import clean_compound_name
+from .add_precursor_mz import add_precursor_mz
 from .correct_charge import correct_charge
 from .derive_adduct_from_name import derive_adduct_from_name
 from .derive_formula_from_name import derive_formula_from_name
@@ -21,6 +22,7 @@ def default_filters(spectrum: SpectrumType) -> SpectrumType:
     spectrum = derive_adduct_from_name(spectrum)
     spectrum = derive_formula_from_name(spectrum)
     spectrum = clean_compound_name(spectrum)
+    spectrum = add_precursor_mz(spectrum)
     spectrum = derive_ionmode(spectrum)
     spectrum = correct_charge(spectrum)
     return spectrum
