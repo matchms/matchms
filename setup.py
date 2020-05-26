@@ -51,5 +51,6 @@ setup(
         # see conda/environment-dev.yml
     ],
     extras_require={
-    }
+    },
+    package_data={"matchms": ["data/*.yaml"]},
 )
