@@ -66,7 +66,9 @@ def jaccard_index(u, v):
     """
     u_or_v = numpy.bitwise_or(u != 0, v != 0)
     u_and_v = numpy.bitwise_and(u != 0, v != 0)
-    jaccard_score = numpy.double(u_and_v.sum()) / numpy.double(u_or_v.sum())
+    jaccard_score = 0
+    if u_or_v.sum() != 0:
+        jaccard_score = numpy.double(u_and_v.sum()) / numpy.double(u_or_v.sum())
     return jaccard_score
 
 
@@ -92,9 +94,10 @@ def dice_similarity(u, v):
         The Dice similarity coefficient between 1-D arrays `u` and `v`.
     """
     u_and_v = numpy.bitwise_and(u != 0, v != 0)
-    u_abs_sum = numpy.abs(u).sum()
-    v_abs_sum = numpy.abs(v).sum()
-    dice_score = 2.0 * numpy.double(u_and_v.sum()) / (u_abs_sum + v_abs_sum)
+    u_abs_and_v_abs = numpy.abs(u).sum() + numpy.abs(v).sum()
+    dice_score = 0
+    if u_abs_and_v_abs != 0:
+        dice_score = 2.0 * numpy.double(u_and_v.sum()) / u_abs_and_v_abs
     return dice_score
 
 
@@ -122,7 +125,7 @@ def cosine_similarity(u, v):
         uv += u[i] * v[i]
         uu += u[i] * u[i]
         vv += v[i] * v[i]
-    cosine_score = 1
+    cosine_score = 0
     if uu != 0 and vv != 0:
         cosine_score = uv / numpy.sqrt(uu * vv)
     return cosine_score

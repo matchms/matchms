@@ -4,6 +4,63 @@ from matchms import Spectrum
 from matchms.similarity import FingerprintSimilarityParallel
 
 
+def test_fingerprint_similarity_parallel_cosine_empty_fingerprint():
+    """Test cosine score matrix with empty fingerprint."""
+    fingerprint1 = numpy.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+    spectrum1 = Spectrum(mz=numpy.array([], dtype="float"),
+                         intensities=numpy.array([], dtype="float"),
+                         metadata={"fingerprint": fingerprint1})
+
+    fingerprint2 = numpy.array([0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 1])
+    spectrum2 = Spectrum(mz=numpy.array([], dtype="float"),
+                         intensities=numpy.array([], dtype="float"),
+                         metadata={"fingerprint": fingerprint2})
+
+    similarity_measure = FingerprintSimilarityParallel(similarity_measure="cosine")
+    score_matrix = similarity_measure([spectrum1, spectrum2],
+                                      [spectrum1, spectrum2])
+assert score_matrix == pytest.approx(numpy.array([[0, 0],
+                                                  [0, 1.]]), 0.001), "Expected different values."
+
+
+def test_fingerprint_similarity_parallel_jaccard_empty_fingerprint():
+    """Test jaccard score matrix with empty fingerprint."""
+    fingerprint1 = numpy.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+    spectrum1 = Spectrum(mz=numpy.array([], dtype="float"),
+                         intensities=numpy.array([], dtype="float"),
+                         metadata={"fingerprint": fingerprint1})
+
+    fingerprint2 = numpy.array([0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 1])
+    spectrum2 = Spectrum(mz=numpy.array([], dtype="float"),
+                         intensities=numpy.array([], dtype="float"),
+                         metadata={"fingerprint": fingerprint2})
+
+    similarity_measure = FingerprintSimilarityParallel(similarity_measure="jaccard")
+    score_matrix = similarity_measure([spectrum1, spectrum2],
+                                      [spectrum1, spectrum2])
+assert score_matrix == pytest.approx(numpy.array([[0, 0],
+                                                  [0, 1.]]), 0.001), "Expected different values."
+
+
+def test_fingerprint_similarity_parallel_dice_empty_fingerprint():
+    """Test dice score matrix with empty fingerprint."""
+    fingerprint1 = numpy.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+    spectrum1 = Spectrum(mz=numpy.array([], dtype="float"),
+                         intensities=numpy.array([], dtype="float"),
+                         metadata={"fingerprint": fingerprint1})
+
+    fingerprint2 = numpy.array([0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 1])
+    spectrum2 = Spectrum(mz=numpy.array([], dtype="float"),
+                         intensities=numpy.array([], dtype="float"),
+                         metadata={"fingerprint": fingerprint2})
+
+    similarity_measure = FingerprintSimilarityParallel(similarity_measure="dice")
+    score_matrix = similarity_measure([spectrum1, spectrum2],
+                                      [spectrum1, spectrum2])
+assert score_matrix == pytest.approx(numpy.array([[0, 0],
+                                                  [0, 1.]]), 0.001), "Expected different values."
+
+
 def test_fingerprint_similarity_parallel_cosine():
     """Test cosine score matrix with known values."""
     spectrum0 = Spectrum(mz=numpy.array([], dtype="float"),
