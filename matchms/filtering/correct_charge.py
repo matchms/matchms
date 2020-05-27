@@ -30,8 +30,6 @@ def correct_charge(spectrum_in: SpectrumType) -> SpectrumType:
         charge = 1
     elif charge == 0 and ionmode == 'negative':
         charge = -1
-    else:
-        pass
 
     # Correct charge when in conflict with ionmode (trust ionmode more!)
     if numpy.sign(charge) == 1 and ionmode == 'negative':
