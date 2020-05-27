@@ -215,4 +215,4 @@ jobs:
           mkdir $TESTDIR
           cp -iRv tests integration-tests $TESTDIR
           cd $TESTDIR
-          pytest --ignore="test_version_string_consistency.py"
+          pytest --ignore="tests/test_version_string_consistency.py"
