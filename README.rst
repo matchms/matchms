@@ -104,13 +104,14 @@ Below is a small example of using matchms to calculate the Cosine score between 
 
     file = load_from_mgf("tests/pesticides.mgf")
 
-    def my_filter(spectrum):
-        '''Clean and enhance the spectrums with matchms filters'''
+    spectrums = []
+    for spectrum in file:
+        # Apply default filter to standardize ion mode, correct charge and more.
+        # See https://matchms.readthedocs.io/en/latest/api/matchms.filtering.html for what default filter does exactly.
         spectrum = default_filters(spectrum)
+        # Scale peak intensities to maximum of 1
         spectrum = normalize_intensities(spectrum)
-        return spectrum
-
-    spectrums = [my_filter(spectrum) for spectrum in file]
+        spectrums.append(spectrum)
 
     similarity_function = CosineGreedy()
     scores = calculate_scores(spectrums, spectrums, similarity_function)
