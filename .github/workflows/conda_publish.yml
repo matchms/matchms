@@ -76,6 +76,12 @@ jobs:
         shell: bash -l {0}
         run: |
           conda install --channel bioconda --channel conda-forge --channel nlesc matchms
+      - name: Remove the package from Anaconda Cloud due to installation failure
+        if: ${{ failure() }}
+        shell: bash -l {0}
+        run: |
+          export pkg_version=0.3.3
+          anaconda --token ${{ secrets.ANACONDA_TOKEN }} remove nlesc/matchms/$pkg_version
       - name: List conda packages
         shell: bash -l {0}
         run: |
@@ -95,3 +101,9 @@ jobs:
           cp -iRv tests integration-tests $TESTDIR
           cd $TESTDIR
           pytest --ignore="tests/test_version_string_consistency.py"
+      - name: Remove the package from Anaconda Cloud due to test failure
+        if: ${{ failure() }}
+        shell: bash -l {0}
+        run: |
+          export pkg_version=0.3.3
+          anaconda --token ${{ secrets.ANACONDA_TOKEN }} remove nlesc/matchms/$pkg_version
