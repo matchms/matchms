@@ -17,7 +17,7 @@ Python library for fuzzy comparison of mass spectrum data and other Python objec
 Example
 =======
 
-Below is a small example of using matchms to calculate the Cosine score between mass Spectrums.
+Below is a small example of using matchms to calculate the Cosine score between mass Spectrums in the [tests/pesticides.mgf](https://github.com/matchms/matchms/blob/master/tests/pesticides.mgf) file.
 
 .. code-block:: python
 
@@ -29,17 +29,23 @@ Below is a small example of using matchms to calculate the Cosine score between 
 
     file = load_from_mgf("tests/pesticides.mgf")
 
-    def my_filter(spectrum):
-        '''Clean and enhance the spectrums with matchms filters'''
+    # Apply filters to clean and enhance each spectrum read from the file
+    spectrums = []
+    for spectrum in file:
+        # Apply default filter to standardize ion mode, correct charge and more.
+        # See https://matchms.readthedocs.io/en/latest/api/matchms.filtering.html for what default filter does exactly.
         spectrum = default_filters(spectrum)
+        # Scale peak intensities to maximum of 1
         spectrum = normalize_intensities(spectrum)
-        return spectrum
+        spectrums.append(spectrum)
 
-    spectrums = [my_filter(spectrum) for spectrum in file]
+    # Calculate Cosine similarity scores between all spectrums
+    # See https://matchms.readthedocs.io/en/latest/api/matchms.similarity.html for other similarity score methods.
+    scores = calculate_scores(references=spectrums,
+                              queries=spectrums,
+                              similarity_function=CosineGreedy())
 
-    similarity_function = CosineGreedy()
-    scores = calculate_scores(spectrums, spectrums, similarity_function)
-
+    # Print the calculated scores for each spectrum pair
     for score in scores:
         (reference, query, score, n_matching) = score
         # Ignore scores between same spectrum and
