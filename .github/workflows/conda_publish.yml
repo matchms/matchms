@@ -4,7 +4,7 @@ name: Anaconda Publish
 #   release:
 #     types: [published]
 
-on: [push, pull_request]
+on: [push]
 
 jobs:
 
@@ -83,7 +83,7 @@ jobs:
         run: |
           export pkg_version=0.3.3
           conda install anaconda-client -y
-          anaconda --token ${{ secrets.ANACONDA_TOKEN }} remove nlesc/matchms/$pkg_version
+          anaconda --token ${{ secrets.ANACONDA_TOKEN }} remove --force nlesc/matchms/$pkg_version
       - name: List conda packages
         shell: bash -l {0}
         run: |
@@ -109,4 +109,4 @@ jobs:
         run: |
           export pkg_version=0.3.3
           conda install anaconda-client -y
-          anaconda --token ${{ secrets.ANACONDA_TOKEN }} remove nlesc/matchms/$pkg_version
+          anaconda --token ${{ secrets.ANACONDA_TOKEN }} remove --force nlesc/matchms/$pkg_version
