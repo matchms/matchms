@@ -33,14 +33,14 @@ Below is a small example of using matchms to calculate the Cosine score between 
     spectrums = []
     for spectrum in file:
         # Apply default filter to standardize ion mode, correct charge and more.
-        # See https://matchms.readthedocs.io/en/latest/api/matchms.filtering.html for what default filter does exactly.
+        # Default filter is fully explained at https://matchms.readthedocs.io/en/latest/api/matchms.filtering.html .
         spectrum = default_filters(spectrum)
         # Scale peak intensities to maximum of 1
         spectrum = normalize_intensities(spectrum)
         spectrums.append(spectrum)
 
     # Calculate Cosine similarity scores between all spectrums
-    # See https://matchms.readthedocs.io/en/latest/api/matchms.similarity.html for other similarity score methods.
+    # For other similarity score methods see https://matchms.readthedocs.io/en/latest/api/matchms.similarity.html .
     scores = calculate_scores(references=spectrums,
                               queries=spectrums,
                               similarity_function=CosineGreedy())
