@@ -14,7 +14,7 @@ def test_add_losses():
     expected_mz = numpy.array([145, 245, 295, 345], "float")
     assert numpy.allclose(spectrum.losses.mz, expected_mz), "Expected different loss m/z."
     expected_intensities = numpy.array([1000, 100, 200, 700], "float")
-    assert numpy.allclose(spectrum.losses.intensities, aim_intensities), "Expected different intensities."
+    assert numpy.allclose(spectrum.losses.intensities, expected_intensities), "Expected different intensities."
 
 
 def test_add_losses_without_precursor_mz():
