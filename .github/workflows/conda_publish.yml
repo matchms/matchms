@@ -82,6 +82,7 @@ jobs:
         shell: bash -l {0}
         run: |
           export pkg_version=0.3.3
+          conda install anaconda-client -y
           anaconda --token ${{ secrets.ANACONDA_TOKEN }} remove nlesc/matchms/$pkg_version
       - name: List conda packages
         shell: bash -l {0}
@@ -107,4 +108,5 @@ jobs:
         shell: bash -l {0}
         run: |
           export pkg_version=0.3.3
+          conda install anaconda-client -y
           anaconda --token ${{ secrets.ANACONDA_TOKEN }} remove nlesc/matchms/$pkg_version
