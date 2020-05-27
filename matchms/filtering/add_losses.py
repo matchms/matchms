@@ -28,7 +28,7 @@ def add_losses(spectrum_in: SpectrumType, loss_mz_from=0.0, loss_mz_to=1000.0) -
     spectrum = spectrum_in.clone()
 
     precursor_mz = spectrum.get("precursor_mz")
-    if precursor_mz is not None:
+    if precursor_mz:
         assert precursor_mz_is_number(), ("Expected 'precursor_mz' to be a scalar number.",
                                           "Consider applying 'add_precursor_mz' filter first.")
         peaks_mz, peaks_intensities = spectrum.peaks
