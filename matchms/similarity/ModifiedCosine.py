@@ -1,3 +1,4 @@
+from typing import Tuple
 import numba
 import numpy
 from matchms.typing import SpectrumType
@@ -23,7 +24,7 @@ class ModifiedCosine:
     def __init__(self, tolerance=0.1):
         self.tolerance = tolerance
 
-    def __call__(self, spectrum1: SpectrumType, spectrum2: SpectrumType) -> float:
+    def __call__(self, spectrum1: SpectrumType, spectrum2: SpectrumType) -> Tuple[float, int]:
         """Calculate modified cosine score between two spectra.
         Args:
         ----
