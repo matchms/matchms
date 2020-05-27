@@ -1,8 +1,11 @@
 name: Anaconda Publish
 
-on:
-  release:
-    types: [published]
+# on:
+#   release:
+#     types: [published]
+
+on: [push]
+
 
 jobs:
 
