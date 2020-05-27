@@ -46,13 +46,10 @@ class ModifiedCosine:
         def get_matching_pairs():
             """Find all pairs of peaks that match within the given tolerance."""
             zero_pairs = find_pairs_numba(spec1, spec2, self.tolerance, shift=0.0)
-            if spectrum1.get("precursor_mz") and spectrum2.get("precursor_mz"):
-                mass_shift = spectrum1.get("precursor_mz") - spectrum2.get("precursor_mz")
-                nonzero_pairs = find_pairs_numba(spec1, spec2, self.tolerance, shift=mass_shift)
-            else:
-                print("Precursor_mz missing. Calculate cosine score instead.",
-                      "Consider applying 'add_precursor_mz' filter first.")
-                nonzero_pairs = []
+            message = "Precursor_mz missing. Apply 'add_precursor_mz' filter first."
+            assert spectrum1.get("precursor_mz") and spectrum2.get("precursor_mz"), message
+            mass_shift = spectrum1.get("precursor_mz") - spectrum2.get("precursor_mz")
+            nonzero_pairs = find_pairs_numba(spec1, spec2, self.tolerance, shift=mass_shift)
             matching_pairs = zero_pairs + nonzero_pairs
             matching_pairs = sorted(matching_pairs, key=lambda x: x[2], reverse=True)
             return matching_pairs
