@@ -21,7 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
-## [0.3.3] - 2020-05-26
+## [0.3.3] - 2020-05-27
 
 - [All changes](https://github.com/matchms/matchms/compare/0.3.2...HEAD) since 0.3.2
 
