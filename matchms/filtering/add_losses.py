@@ -37,7 +37,7 @@ def add_losses(spectrum_in: SpectrumType, loss_mz_from=0.0, loss_mz_to=1000.0) -
         # Add losses which are within given boundaries
         mask = numpy.where((losses_mz >= loss_mz_from)
                                & (losses_mz <= loss_mz_to))
-        spectrum.losses = Spikes(mz=losses_mz[keep_idx],
+        spectrum.losses = Spikes(mz=losses_mz[mask],
                                  intensities=losses_intensities[keep_idx])
 
     return spectrum
