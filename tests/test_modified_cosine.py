@@ -5,8 +5,8 @@ from matchms.filtering import normalize_intensities
 from matchms.similarity import ModifiedCosine
 
 
-def test_modified_cosine_without_parameters():
-    """Test without parameters and precursor-m/z. Should be default cosine."""
+def test_modified_cosine_without_precursor_mz():
+    """Test without precursor-m/z. Should raise assertion error."""
     spectrum_1 = Spectrum(mz=numpy.array([100, 150, 200, 300, 500, 510, 1100], dtype="float"),
                           intensities=numpy.array([700, 200, 100, 1000, 200, 5, 500], dtype="float"))
 
@@ -16,10 +16,12 @@ def test_modified_cosine_without_parameters():
     norm_spectrum_1 = normalize_intensities(spectrum_1)
     norm_spectrum_2 = normalize_intensities(spectrum_2)
     modified_cosine = ModifiedCosine()
-    score, n_matches = modified_cosine(norm_spectrum_1, norm_spectrum_2)
 
-    assert score == pytest.approx(0.81421, 0.0001), "Expected different modified cosine score."
-    assert n_matches == 3, "Expected 3 matching peaks."
+    with pytest.raises(AssertionError) as msg:
+        _, _ = modified_cosine(norm_spectrum_1, norm_spectrum_2)
+
+    expected_message = "Precursor_mz missing. Apply 'add_precursor_mz' filter first."
+    assert str(msg.value) == expected_message
 
 
 def test_modified_cosine_with_mass_shift_5():
