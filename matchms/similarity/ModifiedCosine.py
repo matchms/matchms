@@ -4,10 +4,16 @@ from matchms.typing import SpectrumType
 
 
 class ModifiedCosine:
-    """Calculate modified cosine score between spectra.
+    """Calculate 'modified cosine score' between mass spectra.
 
-    This score is calculated based on matches between peaks of two spectra and
-    also includes a shift of peak positions by the difference in precursor mass.
+    The modified cosine score aims at quantifying the similarity between two
+    mass spectra. The score is calculated by finding best possible matches between
+    peaks of two spectra. Two peaks are considered a potential match if their
+    m/z ratios lie within the given 'tolerance', or if their m/z ratios
+    lie within the tolerance once a mass-shift is applied. The mass shift is
+    simply the difference in precursor-m/z between the two spectra.
+    See Watrous et al. [PNAS, 2012, https://www.pnas.org/content/109/26/E1743]
+    for further details.
 
     Args:
     ----
