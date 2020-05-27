@@ -12,7 +12,7 @@ def test_add_losses():
     spectrum = add_losses(spectrum_in)
 
     expected_mz = numpy.array([145, 245, 295, 345], "float")
-    assert numpy.allclose(spectrum.losses.mz, aim_mz), "Expected different loss m/z."
+    assert numpy.allclose(spectrum.losses.mz, expected_mz), "Expected different loss m/z."
     aim_intensities = numpy.array([1000, 100, 200, 700], "float")
     assert numpy.allclose(spectrum.losses.intensities, aim_intensities), "Expected different intensities."
 
