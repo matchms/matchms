@@ -1,10 +1,8 @@
 name: Anaconda Publish
 
-# on:
-#   release:
-#     types: [published]
-
-on: [push]
+on:
+  release:
+    types: [published]
 
 jobs:
 
@@ -75,8 +73,7 @@ jobs:
       - name: Install the conda package from anaconda repository
         shell: bash -l {0}
         run: |
-          hello
-          # conda install --channel bioconda --channel conda-forge --channel nlesc matchms
+          conda install --channel bioconda --channel conda-forge --channel nlesc matchms
       - name: Remove the package from Anaconda Cloud due to installation failure
         if: ${{ failure() }}
         shell: bash -l {0}
