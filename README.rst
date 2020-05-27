@@ -92,7 +92,7 @@ Install matchms from Anaconda Cloud with
 Example
 =======
 
-Below is a small example of using matchms to calculate the Cosine score between mass Spectrums.
+Below is a small example of using matchms to calculate the Cosine score between mass Spectrums in the [tests/pesticides.mgf](https://github.com/matchms/matchms/blob/master/tests/pesticides.mgf) dataset.
 
 .. code-block:: python
 
@@ -105,7 +105,7 @@ Below is a small example of using matchms to calculate the Cosine score between 
     file = load_from_mgf("tests/pesticides.mgf")
 
     def my_filter(spectrum):
-        '''Clean and enhance the spectrums with a filter'''
+        '''Clean and enhance the spectrums with matchms filters'''
         spectrum = default_filters(spectrum)
         spectrum = normalize_intensities(spectrum)
         return spectrum

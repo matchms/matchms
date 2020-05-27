@@ -30,7 +30,7 @@ Below is a small example of using matchms to calculate the Cosine score between 
     file = load_from_mgf("tests/pesticides.mgf")
 
     def my_filter(spectrum):
-        '''Clean and enhance the spectrums with a filter'''
+        '''Clean and enhance the spectrums with matchms filters'''
         spectrum = default_filters(spectrum)
         spectrum = normalize_intensities(spectrum)
         return spectrum
