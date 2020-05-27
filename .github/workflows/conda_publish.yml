@@ -80,7 +80,7 @@ jobs:
         if: ${{ failure() }}
         shell: bash -l {0}
         run: |
-          export pkg_version=0.3.3
+          export pkg_version=0.3.4
           anaconda --token ${{ secrets.ANACONDA_TOKEN }} remove nlesc/matchms/$pkg_version
       - name: List conda packages
         shell: bash -l {0}
@@ -105,5 +105,5 @@ jobs:
         if: ${{ failure() }}
         shell: bash -l {0}
         run: |
-          export pkg_version=0.3.3
+          export pkg_version=0.3.4
           anaconda --token ${{ secrets.ANACONDA_TOKEN }} remove nlesc/matchms/$pkg_version
