@@ -1,5 +1,7 @@
 from .Scores import Scores
-from .typing import SimilarityFunction, ReferencesType, QueriesType
+from .typing import QueriesType
+from .typing import ReferencesType
+from .typing import SimilarityFunction
 
 
 def calculate_scores(references: ReferencesType,

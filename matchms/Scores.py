@@ -2,7 +2,9 @@ from __future__ import annotations
 from typing import List
 from typing import Tuple
 import numpy
-from matchms.typing import SimilarityFunction, ReferencesType, QueriesType
+from matchms.typing import QueriesType
+from matchms.typing import ReferencesType
+from matchms.typing import SimilarityFunction
 
 
 class Scores:

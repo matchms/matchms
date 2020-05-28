@@ -1,7 +1,8 @@
-from typing import List, Optional
+from typing import Callable
+from typing import List
+from typing import Optional
 from typing import Tuple
 from typing import Union
-from typing import Callable
 import numpy
 from .Spectrum import Spectrum
 
