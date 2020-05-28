@@ -76,7 +76,8 @@ html_theme = "alabaster"
 html_theme_options = {
     "logo": "matchms.png",
     "github_user": "matchms",
-    "github_repo": "matchms"
+    "github_repo": "matchms",
+    "page_width": '1080px',
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
