@@ -32,6 +32,11 @@ class ModifiedCosine:
             Input spectrum 1.
         spectrum2: SpectrumType
             Input spectrum 2.
+
+Returns:
+--------
+
+Tuple with cosine score and number of matched peaks.
         """
         def get_peaks_arrays():
             """Get peaks mz and intensities as numpy array."""
