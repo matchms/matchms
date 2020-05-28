@@ -1,24 +1,32 @@
+from typing import Tuple
 import numba
 import numpy
 from matchms.typing import SpectrumType
 
 
 class CosineGreedyNumba:
-    """Calculate cosine score between two spectra.
+    """Calculate 'cosine similarity score' between two spectra.
 
-    This score is calculated by summing intensiy products of matching peaks between
-    two spectra (matching within set tolerance).
-    of two spectra.
-
-    Args:
-    ----
-    tolerance: float
-        Peaks will be considered a match when <= tolerance appart. Default is 0.1.
+    The cosine score aims at quantifying the similarity between two mass spectra.
+    The score is calculated by finding best possible matches between peaks
+    of two spectra. Two peaks are considered a potential match if their
+    m/z ratios lie within the given 'tolerance'.
+    The underlying peak assignment problem is here sovled in a 'greedy' way.
+    This can perform notably faster, but does occationally deviate slightly from
+    a fully correct solution (as with the Hungarian algorithm). In practice this
+    will rarely affect similarity scores notably, in particular for smaller
+    tolerances.
     """
     def __init__(self, tolerance=0.3):
+        """
+        Args:
+        ----
+        tolerance: float
+            Peaks will be considered a match when <= tolerance appart. Default is 0.1.
+        """
         self.tolerance = tolerance
 
-    def __call__(self, spectrum1: SpectrumType, spectrum2: SpectrumType) -> float:
+    def __call__(self, spectrum1: SpectrumType, spectrum2: SpectrumType) -> Tuple[float, int]:
         """Calculate cosine score between two spectra.
         Args:
         ----
