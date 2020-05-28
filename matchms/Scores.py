@@ -1,16 +1,57 @@
-from typing import Callable
+from __future__ import annotations
 from typing import List
 from typing import Tuple
 import numpy
-from matchms.typing import QueriesType
-from matchms.typing import ReferencesType
+from matchms.typing import SimilarityFunction, ReferencesType, QueriesType
 
 
 class Scores:
-    """An example docstring for a class definition."""
-    def __init__(self, references: ReferencesType, queries: QueriesType, similarity_function: Callable):
-        """An example docstring for a constructor."""
+    """Scores container
 
+    Example to calculate scores between 2 spectrums and iterate over the scores
+
+    .. testcode::
+
+        import numpy as np
+        from matchms import Scores, Spectrum
+        from matchms.similarity import CosineGreedy
+
+        spectrum_1 = Spectrum(mz=np.array([100, 150, 200.]),
+                              intensities=np.array([0.7, 0.2, 0.1]),
+                              metadata={'id': 'spectrum1'})
+        spectrum_2 = Spectrum(mz=np.array([100, 140, 190.]),
+                              intensities=np.array([0.4, 0.2, 0.1]),
+                              metadata={'id': 'spectrum2'})
+        spectrums = [spectrum_1, spectrum_2]
+
+        scores = Scores(spectrums, spectrums, CosineGreedy()).calculate()
+
+        for (reference, query, score, n_matching) in scores:
+            print(f"Cosine score between {reference.metadata['id']} and {query.metadata['id']}" +
+                  f" is {score:.2f} with {n_matching} matched peaks")
+
+    Should output
+
+    .. testoutput::
+
+        Cosine score between spectrum1 and spectrum1 is 1.00 with 3 matched peaks
+        Cosine score between spectrum1 and spectrum2 is 0.52 with 1 matched peaks
+        Cosine score between spectrum2 and spectrum1 is 0.52 with 1 matched peaks
+        Cosine score between spectrum2 and spectrum2 is 1.00 with 3 matched peaks
+    """
+    def __init__(self, references: ReferencesType, queries: QueriesType, similarity_function: SimilarityFunction):
+        """
+
+        Parameters
+        ----------
+        references
+            List of reference objects
+        queries
+            List of query objects
+        similarity_function
+            Function which accepts a reference + query object and returns a score or tuple of scores
+
+        """
         Scores._validate_input_arguments(references, queries, similarity_function)
 
         self.n_rows = len(references)
@@ -49,7 +90,7 @@ class Scores:
 
         assert callable(similarity_function), "Expected input argument 'similarity_function' to be callable."
 
-    def calculate(self):
+    def calculate(self) -> Scores:
         """
         Calculate the similarity between all reference objects v all query objects using a
         naive implementation (i.e. a double for-loop). Similarity functions should expect
@@ -60,7 +101,7 @@ class Scores:
                 self._scores[i_ref][i_query] = self.similarity_function(reference, query)
         return self
 
-    def calculate_parallel(self):
+    def calculate_parallel(self) -> Scores:
         """
         Calculate the similarity between all reference objects v all query objects using a
         vectorized implementation.  Similarity functions should expect a Numpy array of
@@ -71,6 +112,38 @@ class Scores:
         return self
 
     @property
-    def scores(self):
-        """getter method for scores private variable"""
+    def scores(self) -> numpy.ndarray:
+        """Scores as numpy array
+
+        For example
+
+        .. testcode::
+
+            import numpy as np
+            from matchms import Scores, Spectrum
+            from matchms.similarity import IntersectMz
+
+            spectrum_1 = Spectrum(mz=np.array([100, 150, 200.]),
+                                  intensities=np.array([0.7, 0.2, 0.1]),
+                                  metadata={'id': 'spectrum1'})
+            spectrum_2 = Spectrum(mz=np.array([100, 140, 190.]),
+                                  intensities=np.array([0.4, 0.2, 0.1]),
+                                  metadata={'id': 'spectrum2'})
+            spectrums = [spectrum_1, spectrum_2]
+
+            scores = Scores(spectrums, spectrums, IntersectMz()).calculate().scores
+
+            print(score.dtype)
+            print(scores.shape)
+            print(scores)
+
+        Should output
+
+        .. testoutput::
+
+             float64
+             (2, 2)
+             [[1.0 0.2]
+              [0.2 1.0]]
+        """
         return self._scores.copy()
