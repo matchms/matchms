@@ -23,7 +23,7 @@ class Spectrum:
 
         print(spectrum.peaks.mz[0])
         print(spectrum.peaks.intensities[0])
-        print(spectrum.id)
+        print(spectrum.get('id'))
 
     Should output
 
@@ -179,9 +179,23 @@ class Spectrum:
         return fig
 
     def get(self, key: str, default=None):
+        """Retrieve value from :attr:`metadata` dict. Shorthand for
+
+        .. code-block:: python
+
+            val = self.metadata[key]
+
+        """
         return self._metadata.get(key, default)
 
     def set(self, key: str, value):
+        """Set value in :attr:`metadata` dict. Shorthand for
+
+        .. code-block:: python
+
+            self.metadata[key] = val
+
+        """
         self._metadata[key] = value
         return self
 
