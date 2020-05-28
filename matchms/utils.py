@@ -1,32 +1,38 @@
 import re
+from typing import Optional
 from rdkit import Chem
 
 
-def convert_smiles_to_inchi(smiles):
+def convert_smiles_to_inchi(smiles: str) -> Optional[str]:
     return mol_converter(smiles, "smiles", "inchi")
 
 
-def convert_inchi_to_smiles(inchi):
+def convert_inchi_to_smiles(inchi: str) -> Optional[str]:
     return mol_converter(inchi, "inchi", "smiles")
 
 
-def convert_inchi_to_inchikey(inchi):
+def convert_inchi_to_inchikey(inchi: str) -> Optional[str]:
     return mol_converter(inchi, "inchi", "inchikey")
 
 
-def mol_converter(mol_input, input_type, output_type):
+def mol_converter(mol_input: str, input_type: str, output_type: str) -> Optional[str]:
     """Convert molecular representations using rdkit.
 
     Convert for from smiles or inchi to inchi, smiles, or inchikey.
 
     Args:
-    ----
-    mol_input: str
+    -----
+    mol_input
         Input data, inchi or smiles.
-    input_type: str
+    input_type
         Define input type: "smiles" for smiles and "inchi" for inchi.
-    output_type: str
+    output_type
         Define output type: "smiles", "inchi", or "inchikey".
+
+    Returns:
+    --------
+
+    Mol string in output type or None when conversion failure occurs.
     """
     input_function = {"inchi": Chem.MolFromInchi,
                       "smiles": Chem.MolFromSmiles}
@@ -44,14 +50,14 @@ def mol_converter(mol_input, input_type, output_type):
     return None
 
 
-def is_valid_inchi(inchi):
+def is_valid_inchi(inchi: str) -> bool:
     """Return True if input string is valid InChI.
 
     This functions test if string can be read by rdkit as InChI.
 
     Args:
-    ----
-    inchi: str
+    -----
+    inchi
         Input string to test if it has format of InChI.
     """
     # First quick test to avoid excess in-depth testing
@@ -68,14 +74,14 @@ def is_valid_inchi(inchi):
     return False
 
 
-def is_valid_smiles(smiles):
+def is_valid_smiles(smiles: str) -> bool:
     """Return True if input string is valid smiles.
 
     This functions test if string can be read by rdkit as smiles.
 
     Args:
-    ----
-    inchi: str
+    -----
+    smiles
         Input string to test if it can be imported as smiles.
     """
     if smiles is None:
@@ -91,7 +97,7 @@ def is_valid_smiles(smiles):
     return False
 
 
-def is_valid_inchikey(inchikey):
+def is_valid_inchikey(inchikey: str) -> bool:
     """Return True if string has format of inchikey."""
     if inchikey is None:
         return False

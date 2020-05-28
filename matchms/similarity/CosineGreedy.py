@@ -32,11 +32,12 @@ class CosineGreedy:
 
         Cosine score is 0.52 with 1 matched peaks
 
+
     """
     def __init__(self, tolerance=0.3):
         """
         Args:
-    ￼   ----
+    ￼   -----
     ￼   tolerance: float
     ￼       Peaks will be considered a match when <= tolerance apart.
         """
@@ -46,14 +47,15 @@ class CosineGreedy:
         """Calculate 'greedy cosine score' between mass spectra.
 
         Args:
-        ----
+        -----
         spectrum
             First spectrum
         reference_spectrum
             Second spectrum
 
-        Returns
-        -------
+        Returns:
+        --------
+
         Tuple with cosine score and number of matched peaks.
         """
         def calc_mz_distance():

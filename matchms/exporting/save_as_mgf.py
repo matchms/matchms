@@ -6,7 +6,7 @@ from ..Spectrum import Spectrum
 def save_as_mgf(spectrums: List[Spectrum], filename: str):
     """Save spectrum(s) as mgf file.
 
-    :py:attr:`.Spectrum.losses` will not be saved.
+    :py:attr:`~matchms.Spectrum.losses` of spectrum will not be saved.
 
     Args:
     -----
