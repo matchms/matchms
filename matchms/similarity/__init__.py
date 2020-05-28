@@ -7,5 +7,5 @@ from .ModifiedCosine import ModifiedCosine
 __all__ = [
     "CosineGreedy",
     "IntersectMz",
-    "ModifiedCosine"
+    "ModifiedCosine",
 ]
