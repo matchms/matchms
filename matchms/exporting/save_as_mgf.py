@@ -8,8 +8,8 @@ def save_as_mgf(spectrums: List[Spectrum], filename: str):
 
     :py:attr:`~matchms.Spectrum.losses` of spectrum will not be saved.
 
-    Args:
-    -----
+    Arguments:
+    ----------
     spectrums:
         Expected input are match.Spectrum.Spectrum() objects.
     filename:

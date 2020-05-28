@@ -32,14 +32,14 @@ class CosineGreedy:
 
         Cosine score is 0.52 with 1 matched peaks
 
-
     """
-    def __init__(self, tolerance=0.3):
+    def __init__(self, tolerance: float = 0.3):
         """
-        Args:
-    ￼   -----
-    ￼   tolerance: float
-    ￼       Peaks will be considered a match when <= tolerance apart.
+
+        Parameters
+        ----------
+        tolerance
+            Peaks will be considered a match when <= tolerance apart.
         """
         self.tolerance = tolerance
 
