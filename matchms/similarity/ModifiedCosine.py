@@ -17,7 +17,7 @@ class ModifiedCosine:
     for further details.
 
     Args:
-    ----
+    -----
     tolerance: float
         Peaks will be considered a match when <= tolerance appart. Default is 0.1.
     """
