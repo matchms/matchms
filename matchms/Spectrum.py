@@ -37,7 +37,7 @@ class Spectrum:
     ----------
     peaks: ~matchms.Spikes.Spikes
         Peaks of spectrum
-    losses: ~matchms.Spikes.Spikes
+    losses: ~matchms.Spikes.Spikes or None
         Losses of spectrum, the difference between the precursor and all peaks.
 
         Can be filled with
