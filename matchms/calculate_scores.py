@@ -50,7 +50,7 @@ def calculate_scores(references: ReferencesType,
     Returns
     -------
 
-    Scores
+    ~matchms.Scores.Scores
     """
 
     return Scores(references=references,

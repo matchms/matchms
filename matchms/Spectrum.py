@@ -35,15 +35,16 @@ class Spectrum:
 
     Attributes
     ----------
-    peaks: Spikes
+    peaks: ~matchms.Spikes.Spikes
         Peaks of spectrum
-    losses: Spikes
+    losses: ~matchms.Spikes.Spikes
         Losses of spectrum, the difference between the precursor and all peaks.
 
         Can be filled with
 
         .. code-block ::
 
+            from matchms import Spikes
             spectrum.losess = Spikes(mz=np.array([50.]), intensities=np.array([0.1]))
     metadata: dict
         Dict of metadata with for example the scan number of precursor m/z.
