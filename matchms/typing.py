@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from typing import Tuple
 from typing import Union
 from typing import Callable
@@ -6,7 +6,7 @@ import numpy
 from .Spectrum import Spectrum
 
 
-SpectrumType = Union[Spectrum, None]
+SpectrumType = Optional[Spectrum]
 ReferencesType = QueriesType = Union[List[object], Tuple[object], numpy.ndarray]
 
 """Input for a similarity function"""

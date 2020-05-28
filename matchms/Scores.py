@@ -27,7 +27,7 @@ class Scores:
         scores = Scores(spectrums, spectrums, CosineGreedy()).calculate()
 
         for (reference, query, score, n_matching) in scores:
-            print(f"Cosine score between {reference.metadata['id']} and {query.metadata['id']}" +
+            print(f"Cosine score between {reference.id} and {query.id}" +
                   f" is {score:.2f} with {n_matching} matched peaks")
 
     Should output
@@ -124,11 +124,9 @@ class Scores:
             from matchms.similarity import IntersectMz
 
             spectrum_1 = Spectrum(mz=np.array([100, 150, 200.]),
-                                  intensities=np.array([0.7, 0.2, 0.1]),
-                                  metadata={'id': 'spectrum1'})
+                                  intensities=np.array([0.7, 0.2, 0.1]))
             spectrum_2 = Spectrum(mz=np.array([100, 140, 190.]),
-                                  intensities=np.array([0.4, 0.2, 0.1]),
-                                  metadata={'id': 'spectrum2'})
+                                  intensities=np.array([0.4, 0.2, 0.1]))
             spectrums = [spectrum_1, spectrum_2]
 
             scores = Scores(spectrums, spectrums, IntersectMz()).calculate().scores

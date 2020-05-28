@@ -23,7 +23,7 @@ class Spectrum:
 
         print(spectrum.peaks.mz[0])
         print(spectrum.peaks.intensities[0])
-        print(spectrum.metadata['id'])
+        print(spectrum.id)
 
     Should output
 
