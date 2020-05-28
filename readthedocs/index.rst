@@ -55,7 +55,7 @@ Below is a small example of using matchms to calculate the Cosine score between 
             print(f"Reference scan id: {reference.metadata['scans']}")
             print(f"Query scan id: {query.metadata['scans']}")
             print(f"Score: {score:.4f}")
-            print(f"Number of matching peaks {n_matching}")
+            print(f"Number of matching peaks: {n_matching}")
             print("----------------------------")
 
 Should output
@@ -65,12 +65,12 @@ Should output
     Reference scan id: 675
     Query scan id: 2833
     Score: 0.0293
-    Number of matching peaks 20
+    Number of matching peaks: 20
     ----------------------------
     Reference scan id: 1320
     Query scan id: 2833
     Score: 0.0137
-    Number of matching peaks 24
+    Number of matching peaks: 24
     ...
 
 Indices and tables
