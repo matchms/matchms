@@ -5,7 +5,7 @@ from ..typing import SpectrumType
 
 
 def reduce_to_number_of_peaks(spectrum_in: SpectrumType, n_required: int = 1, n_max: int = 100,
-                              ratio_desired=Optional[float]) -> SpectrumType:
+                              ratio_desired: Optional[float] = None) -> SpectrumType:
     """Lowest intensity peaks will be removed when it has more peaks than desired.
 
     Args:
