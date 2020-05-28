@@ -13,7 +13,7 @@ def collect_peak_pairs(spec1, spec2, tolerance, shift=0):
     spec2: numpy array
         Spectrum peaks and intensities as numpy array.
     tolerance : float
-        Peaks will be considered a match when <= tolerance appart.
+        Peaks will be considered a match when <= tolerance a part.
     shift : float, optional
         Shift spectra peaks by shift. The default is 0.
 
