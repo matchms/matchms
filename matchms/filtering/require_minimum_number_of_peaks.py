@@ -5,7 +5,7 @@ from ..typing import SpectrumType
 
 def require_minimum_number_of_peaks(spectrum_in: SpectrumType,
                                     n_required: int = 10,
-                                    ratio_required=Optional[float]) -> SpectrumType:
+                                    ratio_required: Optional[float] = None) -> SpectrumType:
     """Spectrum will be set to None when it has fewer peaks than required.
 
     Args:

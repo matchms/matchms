@@ -51,7 +51,7 @@ class Spectrum:
 
     """
 
-    def __init__(self, mz: numpy.array, intensities: numpy.array, metadata=Optional[dict]):
+    def __init__(self, mz: numpy.array, intensities: numpy.array, metadata: Optional[dict] = None):
         """
 
         Parameters
