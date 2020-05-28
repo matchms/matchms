@@ -47,7 +47,7 @@ jobs:
       - name: Build documentation
         shell: bash -l {0}
         run: |
-          make coverage html
+          make coverage doctest html
         working-directory: readthedocs/
         env:
           SPHINXOPTS: "-n"  # enable nit-picky mode

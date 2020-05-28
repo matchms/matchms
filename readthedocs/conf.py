@@ -35,6 +35,7 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.viewcode",
     "sphinx.ext.todo",
+    "sphinx.ext.doctest",
     "sphinxcontrib.apidoc",
     "sphinx.ext.napoleon",
 ]
