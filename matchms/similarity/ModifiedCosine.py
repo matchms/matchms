@@ -50,9 +50,8 @@ class ModifiedCosine:
             assert spectrum1.get("precursor_mz") and spectrum2.get("precursor_mz"), message
             mass_shift = spectrum1.get("precursor_mz") - spectrum2.get("precursor_mz")
             nonzero_pairs = collect_peak_pairs(spec1, spec2, self.tolerance, shift=mass_shift)
-            matching_pairs = zero_pairs + nonzero_pairs
-            matching_pairs = sorted(matching_pairs, key=lambda x: x[2], reverse=True)
-            return matching_pairs
+            unsorted_matching_pairs = zero_pairs + nonzero_pairs
+            return sorted(unsorted_matching_pairs, key=lambda x: x[2], reverse=True)
 
         def calc_score():
             """Calculate modified cosine score."""
