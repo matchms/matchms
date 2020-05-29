@@ -1,15 +1,19 @@
+from typing import List
 import json
 import numpy
+from ..Spectrum import Spectrum
 
 
-def save_as_json(spectrums, filename):
+def save_as_json(spectrums: List[Spectrum], filename: str):
     """Save spectrum(s) as json file.
 
-    Args:
-    ----
-    spectrums: list of Spectrum() objects, Spectrum() object
+    :py:attr:`~matchms.Spectrum.losses` of spectrum will not be saved.
+
+    Arguments:
+    ----------
+    spectrums:
         Expected input are match.Spectrum.Spectrum() objects.
-    filename: str
+    filename:
         Provide filename to save spectrum(s).
     """
     if not isinstance(spectrums, list):
