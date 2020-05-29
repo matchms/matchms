@@ -1,5 +1,5 @@
-from typing import List
 import json
+from typing import List
 import numpy
 from ..Spectrum import Spectrum
 
