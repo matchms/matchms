@@ -8,18 +8,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Added
-
 - ...
+### Changed
+- ...
+### Fixed
+- ...
+### Removed
+
+
+## [0.3.4] - 2020-05-29
+
+- [All changes](https://github.com/matchms/matchms/compare/0.3.3...HEAD) since 0.3.3
 
 ### Changed
+- Fix verify step in conda publish workflow
 
-- ...
-
-### Fixed
-
-- ...
-
-### Removed
 
 ## [0.3.3] - 2020-05-27
 
@@ -30,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - tests were removed from the package (see setup.py) [#47](https://github.com/matchms/matchms/pull/47)
+
 
 ## [0.3.2] - 2020-05-26
 
@@ -63,6 +67,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - removed conda/condarc.yml
 - removed conda_build_config.yaml
 - removed testing from publish workflow
+
 
 ## [0.3.1] - 2020-05-19
 
