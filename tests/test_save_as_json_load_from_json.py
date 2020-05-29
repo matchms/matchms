@@ -46,5 +46,5 @@ def test_save_and_load_json_spectrum_list():
 
         # Test if content of json file is correct
         spectrum_imports = load_from_json(filename)
-        assert spectrum_import[0] == spectrum1, "Original and saved+loaded spectrum not identical"
-        assert spectrum_import[1] == spectrum1, "Original and saved+loaded spectrum not identical"
+        assert spectrum_imports[0] == spectrum1, "Original and saved+loaded spectrum not identical"
+        assert spectrum_imports[1] == spectrum1, "Original and saved+loaded spectrum not identical"
