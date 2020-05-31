@@ -1,7 +1,6 @@
 import numpy
 import pytest
 from matchms import Spectrum
-from matchms.filtering import normalize_intensities
 from matchms.similarity import CosineGreedyNumba
 
 
@@ -68,19 +67,16 @@ def test_cosine_score_greedy_with_tolerance_2_0():
 def test_cosine_score_greedy_order_of_arguments():
     """Compare cosine scores for A,B versus B,A, which should give the same score."""
     spectrum_1 = Spectrum(mz=numpy.array([100, 200, 299, 300, 301, 500, 510], dtype="float"),
-                          intensities=numpy.array([10, 10, 500, 100, 200, 20, 100], dtype="float"),
+                          intensities=numpy.array([0.02, 0.02, 1.0, 0.2, 0.4, 0.04, 0.2], dtype="float"),
                           metadata=dict())
 
     spectrum_2 = Spectrum(mz=numpy.array([100, 200, 300, 301, 500, 512], dtype="float"),
-                          intensities=numpy.array([10, 10, 500, 100, 20, 100], dtype="float"),
+                          intensities=numpy.array([0.02, 0.02, 1.0, 0.2, 0.04, 0.2], dtype="float"),
                           metadata=dict())
 
-    norm_spectrum_1 = normalize_intensities(spectrum_1)
-    norm_spectrum_2 = normalize_intensities(spectrum_2)
-
     cosine_greedy_numba = CosineGreedyNumba(tolerance=2.0)
-    score_1_2, n_matches_1_2 = cosine_greedy_numba(norm_spectrum_1, norm_spectrum_2)
-    score_2_1, n_matches_2_1 = cosine_greedy_numba(norm_spectrum_2, norm_spectrum_1)
+    score_1_2, n_matches_1_2 = cosine_greedy_numba(spectrum_1, spectrum_2)
+    score_2_1, n_matches_2_1 = cosine_greedy_numba(spectrum_2, spectrum_1)
 
     assert score_1_2 == score_2_1, "Expected that the order of the arguments would not matter."
     assert n_matches_1_2 == n_matches_2_1, "Expected that the order of the arguments would not matter."
