@@ -17,7 +17,7 @@ class CosineGreedyNumba:
     will rarely affect similarity scores notably, in particular for smaller
     tolerances.
     """
-    def __init__(self, tolerance=0.3):
+    def __init__(self, tolerance=0.1):
         """
         Args:
         ----
