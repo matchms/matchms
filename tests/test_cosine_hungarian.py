@@ -84,15 +84,31 @@ def test_cosine_hungarian_order_of_arguments():
 
 def test_cosine_hungarian_case_where_greedy_would_fail():
     """Test case that would fail for cosine greedy implementations."""
-    spectrum_1 = Spectrum(mz=numpy.array([100.005, 100.016]),
-                          intensities=numpy.array([1.0, 0.9]),
+    spectrum_1 = Spectrum(mz=numpy.array([100.005, 100.016], dtype="float"),
+                          intensities=numpy.array([1.0, 0.9], dtype="float"),
                           metadata={})
 
-    spectrum_2 = Spectrum(mz=numpy.array([100.005, 100.01]),
-                          intensities=numpy.array([0.9, 1.0]),
+    spectrum_2 = Spectrum(mz=numpy.array([100.005, 100.01], dtype="float"),
+                          intensities=numpy.array([0.9, 1.0], dtype="float"),
                           metadata={})
 
     cosine_hungarian = CosineHungarian(tolerance=0.01)
     score, n_matches = cosine_hungarian(spectrum_1, spectrum_2)
     assert score == pytest.approx(0.994475, 0.0001), "Expected different cosine score."
     assert n_matches == 2, "Expected different number of matching peaks."
+
+
+def test_cosine_hungarian_case_without_matches():
+    """Test case for spectrums without any matching peaks."""
+    spectrum_1 = Spectrum(mz=numpy.array([100, 200], dtype="float"),
+                          intensities=numpy.array([1.0, 0.1], dtype="float"),
+                          metadata={})
+
+    spectrum_2 = Spectrum(mz=numpy.array([110, 210], dtype="float"),
+                          intensities=numpy.array([1.0, 0.1], dtype="float"),
+                          metadata={})
+
+    cosine_hungarian = CosineHungarian()
+    score, n_matches = cosine_hungarian(spectrum_1, spectrum_2)
+    assert score == 0.0, "Expected different cosine score."
+    assert n_matches == 0, "Expected different number of matching peaks."
