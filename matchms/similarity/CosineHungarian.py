@@ -63,7 +63,7 @@ class CosineHungarian:
             matching_pairs_matrix:
                 Array of multiplied intensities between all matching peaks.
             """
-            if len(matching_pairs) > 0:
+            if len(matching_pairs) == 0:
                 return None, None, None
             paired_peaks1 = list({x[0] for x in matching_pairs})
             paired_peaks2 = list({x[1] for x in matching_pairs})
@@ -83,7 +83,7 @@ class CosineHungarian:
 
         def calc_score():
             """Calculate cosine similarity score."""
-            if matching_pairs_matrix:
+            if matching_pairs_matrix is not None:
                 score, used_matches = solve_hungarian()
                 # Normalize score:
                 score = score/max(numpy.sum(spec1[:, 1]**2), numpy.sum(spec2[:, 1]**2))
