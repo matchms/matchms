@@ -12,7 +12,7 @@ class CosineHungarian:
     The score is calculated by finding best possible matches between peaks
     of two spectra. Two peaks are considered a potential match if their
     m/z ratios lie within the given 'tolerance'.
-    The underlying peak assignment problem is here sovled using the Hungarian algorithm.
+    The underlying peak assignment problem is here solved using the Hungarian algorithm.
     This can perform notably slower than the 'greedy' implementation in CosineGreedy, but
     does represent a mathematically proper solution to the problem.
 
@@ -50,30 +50,47 @@ class CosineHungarian:
         def get_matching_pairs():
             """Get pairs of peaks that match within the given tolerance."""
             matching_pairs = collect_peak_pairs(spec1, spec2, self.tolerance, shift=0.0)
-            matching_pairs = sorted(matching_pairs, key=lambda x: x[2], reverse=True)
-            return matching_pairs
+            return sorted(matching_pairs, key=lambda x: x[2], reverse=True)
+
+        def get_matching_pairs_matrix():
+            """Create matrix of multiplied intensities of all matching pairs
+            between spectrum1 and spectrum2.
+            Returns
+            paired_peaks1:
+                list of paired peaks of spectrum1
+            paired_peaks2:
+                list of paired peaks of spectrum2
+            matching_pairs_matrix:
+                Array of multiplied intensities between all matching peaks.
+            """
+            if len(matching_pairs) > 0:
+                return None, None, None
+            paired_peaks1 = list({x[0] for x in matching_pairs})
+            paired_peaks2 = list({x[1] for x in matching_pairs})
+            matrix_size = (len(paired_peaks1), len(paired_peaks2))
+            matching_pairs_matrix = numpy.ones(matrix_size)
+            for match in matching_pairs:
+                matching_pairs_matrix[paired_peaks1.index(match[0]),
+                                      paired_peaks2.index(match[1])] = 1 - match[2]
+            return paired_peaks1, paired_peaks2, matching_pairs_matrix
+
+        def solve_hungarian():
+            """Use hungarian agorithm to solve the linear sum assignment problem."""
+            row_ind, col_ind = linear_sum_assignment(matching_pairs_matrix)
+            score = len(row_ind) - matching_pairs_matrix[row_ind, col_ind].sum()
+            used_matches = [(paired_peaks1[x], paired_peaks2[y]) for (x, y) in zip(row_ind, col_ind)]
+            return score, used_matches
 
         def calc_score():
             """Calculate cosine similarity score."""
-            used_matches = []
-            list1 = list({x[0] for x in matching_pairs})
-            list2 = list({x[1] for x in matching_pairs})
-            matrix_size = (len(list1), len(list2))
-            matrix = numpy.ones(matrix_size)
-
-            if len(matching_pairs) > 0:
-                for match in matching_pairs:
-                    matrix[list1.index(match[0]), list2.index(match[1])] = 1 - match[2]
-                # Use hungarian agorithm to solve the linear sum assignment problem
-                row_ind, col_ind = linear_sum_assignment(matrix)
-                score = len(row_ind) - matrix[row_ind, col_ind].sum()
-                used_matches = [(list1[x], list2[y]) for (x, y) in zip(row_ind, col_ind)]
+            if matching_pairs_matrix:
+                score, used_matches = solve_hungarian()
                 # Normalize score:
                 score = score/max(numpy.sum(spec1[:, 1]**2), numpy.sum(spec2[:, 1]**2))
-            else:
-                score = 0.0
-            return score, len(used_matches)
+                return score, len(used_matches)
+            return 0.0, 0
 
         spec1, spec2 = get_peaks_arrays()
         matching_pairs = get_matching_pairs()
+        paired_peaks1, paired_peaks2, matching_pairs_matrix = get_matching_pairs_matrix()
         return calc_score()
