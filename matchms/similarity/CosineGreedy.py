@@ -5,7 +5,7 @@ from matchms.typing import SpectrumType
 
 class CosineGreedy:
     """Factory to calculate 'greedy cosine score' between mass spectra.
-    
+
     The cosine score aims at quantifying the similarity between two mass spectra.
     The score is calculated by finding best possible matches between peaks
     of two spectra. Two peaks are considered a potential match if their
