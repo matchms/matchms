@@ -19,8 +19,8 @@ def test_fingerprint_similarity_parallel_cosine_empty_fingerprint():
     similarity_measure = FingerprintSimilarityParallel(similarity_measure="cosine")
     score_matrix = similarity_measure([spectrum1, spectrum2],
                                       [spectrum1, spectrum2])
-assert score_matrix == pytest.approx(numpy.array([[0, 0],
-                                                  [0, 1.]]), 0.001), "Expected different values."
+    assert score_matrix == pytest.approx(numpy.array([[0, 0],
+                                                      [0, 1.]]), 0.001), "Expected different values."
 
 
 def test_fingerprint_similarity_parallel_jaccard_empty_fingerprint():
@@ -38,8 +38,8 @@ def test_fingerprint_similarity_parallel_jaccard_empty_fingerprint():
     similarity_measure = FingerprintSimilarityParallel(similarity_measure="jaccard")
     score_matrix = similarity_measure([spectrum1, spectrum2],
                                       [spectrum1, spectrum2])
-assert score_matrix == pytest.approx(numpy.array([[0, 0],
-                                                  [0, 1.]]), 0.001), "Expected different values."
+    assert score_matrix == pytest.approx(numpy.array([[0, 0],
+                                                      [0, 1.]]), 0.001), "Expected different values."
 
 
 def test_fingerprint_similarity_parallel_dice_empty_fingerprint():
@@ -57,8 +57,8 @@ def test_fingerprint_similarity_parallel_dice_empty_fingerprint():
     similarity_measure = FingerprintSimilarityParallel(similarity_measure="dice")
     score_matrix = similarity_measure([spectrum1, spectrum2],
                                       [spectrum1, spectrum2])
-assert score_matrix == pytest.approx(numpy.array([[0, 0],
-                                                  [0, 1.]]), 0.001), "Expected different values."
+    assert score_matrix == pytest.approx(numpy.array([[0, 0],
+                                                      [0, 1.]]), 0.001), "Expected different values."
 
 
 def test_fingerprint_similarity_parallel_cosine():
