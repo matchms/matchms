@@ -8,9 +8,7 @@ from matchms.typing import SimilarityFunction
 
 
 class Scores:
-    """Scores container
-
-    Contains reference and query spectrums and the score between them.
+    """Contains reference and query spectrums and the scores between them.
 
     The scores can be retrieved as a matrix with the :py:attr:`Scores.scores` attribute.
     The reference spectrum, query spectrum, score pairs can also be iterated over in query then reference order.
