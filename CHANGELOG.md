@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Modified cosine score [26](https://github.com/matchms/matchms/issues/26)
+- Modified cosine score [#26](https://github.com/matchms/matchms/issues/26)
 - Doc strings for many methods [#49](https://github.com/matchms/matchms/issues/49)
 - Examples in doc string which are tested on CI
 
