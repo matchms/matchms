@@ -10,6 +10,11 @@ from matchms.typing import SimilarityFunction
 class Scores:
     """Scores container
 
+    Contains reference and query spectrums and the score between them.
+
+    The scores can be retrieved as a matrix with the :py:attr:`Scores.scores` attribute.
+    The reference spectrum, query spectrum, score pairs can also be iterated over in query then reference order.
+
     Example to calculate scores between 2 spectrums and iterate over the scores
 
     .. testcode::
@@ -24,9 +29,16 @@ class Scores:
         spectrum_2 = Spectrum(mz=np.array([100, 140, 190.]),
                               intensities=np.array([0.4, 0.2, 0.1]),
                               metadata={'id': 'spectrum2'})
-        spectrums = [spectrum_1, spectrum_2]
+        spectrum_3 = Spectrum(mz=np.array([110, 140, 195.]),
+                              intensities=np.array([0.6, 0.2, 0.1]),
+                              metadata={'id': 'spectrum3'})
+        spectrum_4 = Spectrum(mz=np.array([100, 150, 200.]),
+                              intensities=np.array([0.6, 0.1, 0.6]),
+                              metadata={'id': 'spectrum4'})
+        references = [spectrum_1, spectrum_2]
+        queries = [spectrum_3, spectrum_4]
 
-        scores = Scores(spectrums, spectrums, CosineGreedy()).calculate()
+        scores = Scores(references, queries, CosineGreedy()).calculate()
 
         for (reference, query, score, n_matching) in scores:
             print(f"Cosine score between {reference.get('id')} and {query.get('id')}" +
@@ -36,10 +48,10 @@ class Scores:
 
     .. testoutput::
 
-        Cosine score between spectrum1 and spectrum1 is 1.00 with 3 matched peaks
-        Cosine score between spectrum1 and spectrum2 is 0.52 with 1 matched peaks
-        Cosine score between spectrum2 and spectrum1 is 0.52 with 1 matched peaks
-        Cosine score between spectrum2 and spectrum2 is 1.00 with 3 matched peaks
+        Cosine score between spectrum1 and spectrum3 is 0.00 with 0 matched peaks
+        Cosine score between spectrum1 and spectrum4 is 0.68 with 3 matched peaks
+        Cosine score between spectrum2 and spectrum3 is 0.10 with 1 matched peaks
+        Cosine score between spectrum2 and spectrum4 is 0.33 with 1 matched peaks
     """
     def __init__(self, references: ReferencesType, queries: QueriesType, similarity_function: SimilarityFunction):
         """
