@@ -89,7 +89,7 @@ jobs:
         run: |
           export TESTDIR=$RUNNER_TEMP/matchms/_test
           [ "$RUNNING_OS" = "Windows" ] && export TESTDIR=$RUNNER_TEMP\\matchms\\_test\\
-          mkdir $TESTDIR
+          mkdir -p $TESTDIR
           cp -iRv tests integration-tests $TESTDIR
           cd $TESTDIR
           pytest --ignore="tests/test_version_string_consistency.py"

@@ -43,11 +43,11 @@ jobs:
         run: prospector -o grouped -o pylint:pylint-report.txt
       - name: Check whether import statements are used consistently
         shell: bash -l {0}
-        run: isort --check-only --diff --conda-env matchms-dev --recursive --wrap-length 79 --lines-after-imports 2 --force-single-line --no-lines-before FUTURE --no-lines-before STDLIB --no-lines-before THIRDPARTY --no-lines-before FIRSTPARTY --no-lines-before LOCALFOLDER matchms/ tests/ integration-tests/
-      - name: Build documentation
+        run: isort --check-only --diff --conda-env matchms-dev --recursive --lines-after-imports 2 --force-single-line --no-lines-before FUTURE --no-lines-before STDLIB --no-lines-before THIRDPARTY --no-lines-before FIRSTPARTY --no-lines-before LOCALFOLDER matchms/ tests/ integration-tests/
+      - name: Build & test documentation
         shell: bash -l {0}
         run: |
-          make coverage html
+          make coverage doctest html
         working-directory: readthedocs/
         env:
           SPHINXOPTS: "-n"  # enable nit-picky mode

@@ -7,12 +7,12 @@ def add_losses(spectrum_in: SpectrumType, loss_mz_from=0.0, loss_mz_to=1000.0) -
     """Derive losses based on precursor mass.
 
     Args:
-    ----
-    spectrum_in: matchms.Spectrum
+    -----
+    spectrum_in:
         Input spectrum.
-    loss_mz_from: float
+    loss_mz_from:
         Minimum allowed m/z value for losses. Default is 0.0.
-    loss_mz_to: float
+    loss_mz_to:
         Maximum allowed m/z value for losses. Default is 1000.0.
     """
     def precursor_mz_is_number():
