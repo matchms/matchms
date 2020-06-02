@@ -8,6 +8,6 @@ from .ModifiedCosine import ModifiedCosine
 __all__ = [
     "CosineGreedy",
     "CosineHungarian",
-    "IntersectMz"
+    "IntersectMz",
     "ModifiedCosine",
 ]
