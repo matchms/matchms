@@ -30,18 +30,16 @@ def add_fingerprint(spectrum_in: SpectrumType, fingerprint_type="daylight",
     if spectrum.get("smiles", None):
         fingerprint = derive_fingerprint_from_smiles(spectrum.get("smiles"),
                                                      fingerprint_type, nbits)
-        if isinstance(fingerprint, numpy.ndarray):
-            if fingerprint.sum() > 0:
-                spectrum.set("fingerprint", fingerprint)
-                return spectrum
+        if isinstance(fingerprint, numpy.ndarray) and fingerprint.sum() > 0:
+            spectrum.set("fingerprint", fingerprint)
+            return spectrum
 
     # Second try to get fingerprint from inchi
     if spectrum.get("inchi", None):
         fingerprint = derive_fingerprint_from_inchi(spectrum.get("inchi"),
                                                     fingerprint_type, nbits)
-        if isinstance(fingerprint, numpy.ndarray):
-            if fingerprint.sum() > 0:
-                spectrum.set("fingerprint", fingerprint)
-                return spectrum
+        if isinstance(fingerprint, numpy.ndarray) and fingerprint.sum() > 0:
+            spectrum.set("fingerprint", fingerprint)
+            return spectrum
 
     return spectrum
