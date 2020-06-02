@@ -7,6 +7,8 @@ from ..Spectrum import Spectrum
 def load_from_json(filename):
     """Load spectrum(s) from json file.
 
+    Spectrums with zero peaks will be skipped.
+
     Args:
     ----
     filename: str
