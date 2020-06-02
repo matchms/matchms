@@ -26,7 +26,9 @@ def save_as_json(spectrums: List[Spectrum], filename: str):
 
 
 class SpectrumJSONEncoder(json.JSONEncoder):
-    def default(self, obj):  # pylint: disable=method-hidden
+    # pylint: disable=method-hidden
+    # See https://github.com/PyCQA/pylint/issues/414 for reference
+    def default(self, obj):
         """JSON Encoder which can encode a :py:class:`~matchms.Spectrum.Spectrum` object"""
         if isinstance(obj, Spectrum):
             spec = obj.clone()
