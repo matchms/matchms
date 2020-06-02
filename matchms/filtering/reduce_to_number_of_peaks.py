@@ -1,22 +1,23 @@
 from math import ceil
+from typing import Optional
 from ..Spikes import Spikes
 from ..typing import SpectrumType
 
 
-def reduce_to_number_of_peaks(spectrum_in: SpectrumType, n_required=1, n_max=100,
-                              ratio_desired=None) -> SpectrumType:
+def reduce_to_number_of_peaks(spectrum_in: SpectrumType, n_required: int = 1, n_max: int = 100,
+                              ratio_desired: Optional[float] = None) -> SpectrumType:
     """Lowest intensity peaks will be removed when it has more peaks than desired.
 
     Args:
-    ----
-    spectrum_in: matchms.Spectrum()
+    -----
+    spectrum_in
         Input spectrum.
-    n_required: int
+    n_required:
         Number of minimum required peaks. Spectra with fewer peaks will be set
         to 'None'. Default is 1.
-    n_max: int
+    n_max:
         Maximum number of peaks. Remove peaks if more peaks are found.
-    ratio_desired: float, optional
+    ratio_desired:
         Set desired ratio between maximum number of peaks and parent mass.
         Default is None.
     """

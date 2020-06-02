@@ -1,20 +1,24 @@
 from math import ceil
+from typing import Optional
 from ..typing import SpectrumType
 
 
-def require_minimum_number_of_peaks(spectrum_in: SpectrumType, n_required=10, ratio_required=None) -> SpectrumType:
+def require_minimum_number_of_peaks(spectrum_in: SpectrumType,
+                                    n_required: int = 10,
+                                    ratio_required: Optional[float] = None) -> SpectrumType:
     """Spectrum will be set to None when it has fewer peaks than required.
 
     Args:
-    ----
-    spectrum_in: matchms.Spectrum()
+    -----
+    spectrum_in:
         Input spectrum.
-    n_required: int
+    n_required:
         Number of minimum required peaks. Spectra with fewer peaks will be set
         to 'None'.
-    ratio_required: float, optional
+    ratio_required:
         Set desired ratio between minimum number of peaks and parent mass.
         Default is None.
+
     """
     if spectrum_in is None:
         return None
