@@ -1,14 +1,18 @@
+from typing import List
 import pyteomics.mgf as py_mgf
+from ..Spectrum import Spectrum
 
 
-def save_as_mgf(spectrums, filename: str):
+def save_as_mgf(spectrums: List[Spectrum], filename: str):
     """Save spectrum(s) as mgf file.
 
-    Args:
-    ----
-    spectrums: list of Spectrum() objects, Spectrum() object
+    :py:attr:`~matchms.Spectrum.losses` of spectrum will not be saved.
+
+    Arguments:
+    ----------
+    spectrums:
         Expected input are match.Spectrum.Spectrum() objects.
-    filename: str
+    filename:
         Provide filename to save spectrum(s).
     """
     if not isinstance(spectrums, list):

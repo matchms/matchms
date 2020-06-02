@@ -1,5 +1,5 @@
 {% set name = "matchms" %}
-{% set version = "0.3.3" %}
+{% set version = "0.3.4" %}
 
 package:
   name: {{ name|lower }}
@@ -36,6 +36,7 @@ requirements:
   run:
     - gensim >=3.8.0
     - matplotlib
+    - numba >=0.47
     - numpy
     - pip
     - pyteomics >=4.2

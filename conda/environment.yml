@@ -6,6 +6,7 @@ channels:
 dependencies:
   - gensim >=3.8.0
   - matplotlib
+  - numba >=0.47
   - numpy
   - pyteomics >=4.2
   - python >=3.7,<3.8
