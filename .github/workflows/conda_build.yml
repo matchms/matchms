@@ -44,10 +44,10 @@ jobs:
       - name: Check whether import statements are used consistently
         shell: bash -l {0}
         run: isort --check-only --diff --conda-env matchms-dev --recursive --wrap-length 79 --lines-after-imports 2 --force-single-line --no-lines-before FUTURE --no-lines-before STDLIB --no-lines-before THIRDPARTY --no-lines-before FIRSTPARTY --no-lines-before LOCALFOLDER matchms/ tests/ integration-tests/
-      - name: Build documentation
+      - name: Build & test documentation
         shell: bash -l {0}
         run: |
-          make coverage html
+          make coverage doctest html
         working-directory: readthedocs/
         env:
           SPHINXOPTS: "-n"  # enable nit-picky mode
@@ -201,3 +201,18 @@ jobs:
         shell: bash -l {0}
         run: |
           conda list
+      - name: Install dev dependencies to run the tests
+        shell: bash -l {0}
+        run: |
+          conda env update --name matchms-test --file conda/environment-dev.yml
+          conda info
+          conda list
+      - name: Run tests after installing the package
+        shell: bash -l {0}
+        run: |
+          export TESTDIR=$RUNNER_TEMP/matchms/_test
+          [ "$RUNNING_OS" = "Windows" ] && export TESTDIR=$RUNNER_TEMP\\matchms\\_test\\
+          mkdir $TESTDIR
+          cp -iRv tests integration-tests $TESTDIR
+          cd $TESTDIR
+          pytest --ignore="tests/test_version_string_consistency.py"

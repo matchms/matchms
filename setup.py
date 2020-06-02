@@ -21,7 +21,7 @@ setup(
     author="Netherlands eScience Center",
     author_email="generalization@esciencecenter.nl",
     url="https://github.com/matchms/matchms",
-    packages=find_packages(),
+    packages=find_packages(exclude=['*tests*']),
     include_package_data=True,
     license="Apache Software License 2.0",
     zip_safe=False,
