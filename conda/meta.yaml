@@ -36,6 +36,7 @@ requirements:
   run:
     - gensim >=3.8.0
     - matplotlib
+    - numba >=0.47
     - numpy
     - pip
     - pyteomics >=4.2
