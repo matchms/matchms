@@ -12,7 +12,7 @@ def save_as_json(spectrums: List[Spectrum], filename: str):
     Arguments:
     ----------
     spectrums:
-        Expected input are match.Spectrum.Spectrum() objects.
+        Expected input is a list of  :py:class:`~matchms.Spectrum.Spectrum` objects.
     filename:
         Provide filename to save spectrum(s).
     """
