@@ -19,7 +19,7 @@ Example
 
 Below is a small example of using matchms to calculate the Cosine score between mass Spectrums in the `tests/pesticides.mgf <https://github.com/matchms/matchms/blob/master/tests/pesticides.mgf>`_ file.
 
-.. code-block:: python
+.. testcode::
 
     from matchms.importing import load_from_mgf
     from matchms.filtering import default_filters
@@ -28,7 +28,7 @@ Below is a small example of using matchms to calculate the Cosine score between 
     from matchms.similarity import CosineGreedy
 
     # Read spectrums from a MGF formatted file, for other formats see https://matchms.readthedocs.io/en/latest/api/matchms.importing.html 
-    file = load_from_mgf("tests/pesticides.mgf")
+    file = load_from_mgf("../tests/pesticides.mgf")
 
     # Apply filters to clean and enhance each spectrum
     spectrums = []
@@ -55,8 +55,23 @@ Below is a small example of using matchms to calculate the Cosine score between 
             print(f"Reference scan id: {reference.metadata['scans']}")
             print(f"Query scan id: {query.metadata['scans']}")
             print(f"Score: {score:.4f}")
-            print(f"Number of matching peaks {n_matching}")
+            print(f"Number of matching peaks: {n_matching}")
             print("----------------------------")
+
+Should output
+
+.. testoutput::
+
+    Reference scan id: 675
+    Query scan id: 2833
+    Score: 0.0293
+    Number of matching peaks: 20
+    ----------------------------
+    Reference scan id: 1320
+    Query scan id: 2833
+    Score: 0.0137
+    Number of matching peaks: 24
+    ...
 
 Indices and tables
 ==================

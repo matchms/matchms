@@ -1,3 +1,4 @@
+from typing import Optional
 import numpy
 from matplotlib import pyplot
 from scipy.optimize import OptimizeWarning
@@ -6,10 +7,62 @@ from .Spikes import Spikes
 
 
 class Spectrum:
-    """An example docstring for a class."""
+    """Container for a collection of peaks, losses and metadata
 
-    def __init__(self, mz: numpy.array, intensities: numpy.array, metadata=None):
-        """An example docstring for a constructor."""
+    For example
+
+    .. testcode::
+
+        import numpy as np
+        from matchms import Scores, Spectrum
+        from matchms.similarity import CosineGreedy
+
+        spectrum = Spectrum(mz=np.array([100, 150, 200.]),
+                              intensities=np.array([0.7, 0.2, 0.1]),
+                              metadata={'id': 'spectrum1'})
+
+        print(spectrum.peaks.mz[0])
+        print(spectrum.peaks.intensities[0])
+        print(spectrum.get('id'))
+
+    Should output
+
+    .. testoutput::
+
+        100.0
+        0.7
+        spectrum1
+
+    Attributes
+    ----------
+    peaks: ~matchms.Spikes.Spikes
+        Peaks of spectrum
+    losses: ~matchms.Spikes.Spikes or None
+        Losses of spectrum, the difference between the precursor and all peaks.
+
+        Can be filled with
+
+        .. code-block ::
+
+            from matchms import Spikes
+            spectrum.losess = Spikes(mz=np.array([50.]), intensities=np.array([0.1]))
+    metadata: dict
+        Dict of metadata with for example the scan number of precursor m/z.
+
+    """
+
+    def __init__(self, mz: numpy.array, intensities: numpy.array, metadata: Optional[dict] = None):
+        """
+
+        Parameters
+        ----------
+        mz
+            Array of m/z for the peaks
+        intensities
+            Array of intensities for the peaks
+        metadata
+            Dictionary with for example the scan number of precursor m/z.
+        """
         self.peaks = Spikes(mz=mz, intensities=intensities)
         self.losses = None
         if metadata is None:
@@ -126,38 +179,46 @@ class Spectrum:
         return fig
 
     def get(self, key: str, default=None):
+        """Retrieve value from :attr:`metadata` dict. Shorthand for
+
+        .. code-block:: python
+
+            val = self.metadata[key]
+
+        """
         return self._metadata.get(key, default)
 
     def set(self, key: str, value):
+        """Set value in :attr:`metadata` dict. Shorthand for
+
+        .. code-block:: python
+
+            self.metadata[key] = val
+
+        """
         self._metadata[key] = value
         return self
 
     @property
     def metadata(self):
-        """getter method for _metadata private variable"""
         return self._metadata.copy()
 
     @metadata.setter
     def metadata(self, value):
-        """setter method for _metadata private variable"""
         self._metadata = value
 
     @property
-    def losses(self):
-        """getter method for _losses private variable"""
+    def losses(self) -> Optional[Spikes]:
         return self._losses.clone() if self._losses is not None else None
 
     @losses.setter
-    def losses(self, value):
-        """setter method for _losses private variable"""
+    def losses(self, value: Spikes):
         self._losses = value
 
     @property
-    def peaks(self):
-        """getter method for _peaks private variable"""
+    def peaks(self) -> Spikes:
         return self._peaks.clone()
 
     @peaks.setter
-    def peaks(self, value):
-        """setter method for _peaks private variable"""
+    def peaks(self, value: Spikes):
         self._peaks = value
