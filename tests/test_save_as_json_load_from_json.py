@@ -49,6 +49,7 @@ def test_save_and_load_json_spectrum_list():
         assert spectrum_imports[0] == spectrum1, "Original and saved+loaded spectrum not identical"
         assert spectrum_imports[1] == spectrum2, "Original and saved+loaded spectrum not identical"
 
+
 def test_load_from_json_zero_peaks(tmp_path):
     spectrum1 = Spectrum(mz=numpy.array([], dtype="float"),
                          intensities=numpy.array([], dtype="float"),
@@ -63,4 +64,4 @@ def test_load_from_json_zero_peaks(tmp_path):
 
     # Test if content of json file is correct
     spectrum_imports = load_from_json(filename)
-    assert len(spectrum_imports) == 0, "Spectrum without peaks should be skipped"                
+    assert len(spectrum_imports) == 0, "Spectrum without peaks should be skipped"

@@ -6,6 +6,7 @@ from ..Spectrum import Spectrum
 
 def save_as_json(spectrums: List[Spectrum], filename: str):
     """Save spectrum(s) as json file.
+    # pylint: disable=method-hidden
 
     :py:attr:`~matchms.Spectrum.losses` of spectrum will not be saved.
 
