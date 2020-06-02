@@ -33,3 +33,10 @@ def test_add_fingerprint_no_smiles_no_inchi():
 
     spectrum = add_fingerprint(spectrum_in)
     assert spectrum.get("fingerprint", None) is None, "Expected None."
+
+
+def test_add_fingerprint_empty_spectrum():
+    """Test if empty spectrum is handled correctly."""
+
+    spectrum = add_fingerprint(None)
+    assert spectrum is None, "Expected None."
