@@ -18,7 +18,7 @@ def test_modified_cosine_without_precursor_mz():
     modified_cosine = ModifiedCosine()
 
     with pytest.raises(AssertionError) as msg:
-        _, _ = modified_cosine(norm_spectrum_1, norm_spectrum_2)
+        modified_cosine(norm_spectrum_1, norm_spectrum_2)
 
     expected_message = "Precursor_mz missing. Apply 'add_precursor_mz' filter first."
     assert str(msg.value) == expected_message
