@@ -6,7 +6,6 @@ from ..Spectrum import Spectrum
 
 def save_as_json(spectrums: List[Spectrum], filename: str):
     """Save spectrum(s) as json file.
-    # pylint: disable=method-hidden
 
     :py:attr:`~matchms.Spectrum.losses` of spectrum will not be saved.
 
@@ -27,7 +26,7 @@ def save_as_json(spectrums: List[Spectrum], filename: str):
 
 
 class SpectrumJSONEncoder(json.JSONEncoder):
-    def default(self, obj):
+    def default(self, obj):  # pylint: disable=method-hidden
         """JSON Encoder which can encode a :py:class:`~matchms.Spectrum.Spectrum` object"""
         if isinstance(obj, Spectrum):
             spec = obj.clone()
