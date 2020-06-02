@@ -8,7 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Added
-- ...
+- Cosine score based on Hungarian algorithm [#40](https://github.com/matchms/matchms/pull/40)
+
 ### Changed
 - ...
 ### Fixed
