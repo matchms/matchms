@@ -22,16 +22,18 @@ def save_as_json(spectrums: List[Spectrum], filename: str):
 
     # Write to json file
     with open(filename, 'w') as fout:
-        fout.write("[")
-        for i, spectrum in enumerate(spectrums):
-            spec = spectrum.clone()
+        json.dump(spectrums, fout, cls=SpectrumJSONEncoder)
+
+
+class SpectrumJSONEncoder(json.JSONEncoder):
+    def default(self, obj):
+        """JSON Encoder which can encode a :py:class:`~matchms.Spectrum.Spectrum` object"""
+        if isinstance(obj, Spectrum):
+            spec = obj.clone()
             peaks_list = numpy.vstack((spec.peaks.mz, spec.peaks.intensities)).T.tolist()
 
             # Convert matchms.Spectrum() into dictionaries
             spectrum_dict = {key: spec.metadata[key] for key in spec.metadata}
             spectrum_dict["peaks_json"] = peaks_list
-
-            json.dump(spectrum_dict, fout)
-            if i < len(spectrums) - 1:
-                fout.write(",")
-        fout.write("]")
+            return spectrum_dict
+        return json.JSONEncoder.default(self, obj)
