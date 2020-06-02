@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Faster cosine score implementation using numba [#29](https://github.com/matchms/matchms/issues/29)
 - Cosine score based on Hungarian algorithm [#40](https://github.com/matchms/matchms/pull/40)
 - Modified cosine score [#26](https://github.com/matchms/matchms/issues/26)
 - Doc strings for many methods [#49](https://github.com/matchms/matchms/issues/49)
