@@ -18,12 +18,12 @@ def convert_inchi_to_inchikey(inchi: str) -> Optional[str]:
 def mol_converter(mol_input: str, input_type: str, output_type: str) -> Optional[str]:
     """Convert molecular representations using rdkit.
 
-    Convert for from smiles or inchi to inchi, smiles, or inchikey.
+    Convert from "smiles" or "inchi" to "inchi", "smiles", or "inchikey".
 
     Args:
     -----
     mol_input
-        Input data, inchi or smiles.
+        Input data in "inchi" or "smiles" molecular representation.
     input_type
         Define input type: "smiles" for smiles and "inchi" for inchi.
     output_type
