@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Modified cosine score [#26](https://github.com/matchms/matchms/issues/26)
 - Doc strings for many methods [#49](https://github.com/matchms/matchms/issues/49)
-- Examples in doc string which are tested on CI
+- Examples in doc strings which are tested on CI
 
 ### Changed
 
