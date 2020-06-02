@@ -1,8 +1,10 @@
 import numpy
-
-from matchms.utils import (derive_fingerprint_from_inchi,
-                           derive_fingerprint_from_smiles, is_valid_inchi,
-                           is_valid_inchikey, is_valid_smiles, mol_converter)
+from matchms.utils import derive_fingerprint_from_inchi
+from matchms.utils import derive_fingerprint_from_smiles
+from matchms.utils import is_valid_inchi
+from matchms.utils import is_valid_inchikey
+from matchms.utils import is_valid_smiles
+from matchms.utils import mol_converter
 
 
 def test_mol_converter_smiles_to_inchi():
