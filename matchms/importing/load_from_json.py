@@ -1,5 +1,6 @@
 import ast
 import json
+from typing import Union
 import numpy
 from ..Spectrum import Spectrum
 
@@ -17,7 +18,8 @@ JSON document formatted like the `GNPS Spectra library <https://gnps-external.uc
     """
     with open(filename, 'rb') as fin:
         spectrums = []
-        for spectrum in json.load(fin, object_hook=as_spectrum):
+        for spectrum_dict in json.load(fin):
+            spectrum = as_spectrum(spectrum_dict)
             if spectrum is not None:
                 spectrums.append(spectrum)
 
@@ -88,6 +90,6 @@ def dict2spectrum(spectrum_dict: dict) -> Union[Spectrum, None]:
         return Spectrum(mz=mz,
                         intensities=intensities,
                         metadata=metadata_dict)
-    else:
-        print("Empty spectrum found (no peaks in 'peaks_json').",
-              "Will not be imported.")
+    print("Empty spectrum found (no peaks in 'peaks_json').",
+          "Will not be imported.")
+    return None
