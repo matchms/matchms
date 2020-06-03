@@ -28,14 +28,14 @@ def save_as_json(spectrums: List[Spectrum], filename: str):
 class SpectrumJSONEncoder(json.JSONEncoder):
     # pylint: disable=method-hidden
     # See https://github.com/PyCQA/pylint/issues/414 for reference
-    def default(self, obj):
+    def default(self, o):
         """JSON Encoder which can encode a :py:class:`~matchms.Spectrum.Spectrum` object"""
-        if isinstance(obj, Spectrum):
-            spec = obj.clone()
+        if isinstance(o, Spectrum):
+            spec = o.clone()
             peaks_list = numpy.vstack((spec.peaks.mz, spec.peaks.intensities)).T.tolist()
 
             # Convert matchms.Spectrum() into dictionaries
             spectrum_dict = {key: spec.metadata[key] for key in spec.metadata}
             spectrum_dict["peaks_json"] = peaks_list
             return spectrum_dict
-        return json.JSONEncoder.default(self, obj)
+        return json.JSONEncoder.default(self, o)
