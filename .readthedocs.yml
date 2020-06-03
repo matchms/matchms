@@ -16,4 +16,4 @@ python:
     - method: pip
       path: .
 conda:
-  environment: readthedocs/environment.yml
+  environment: conda/environment-dev.yml
