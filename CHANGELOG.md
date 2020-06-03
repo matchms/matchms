@@ -5,11 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## [Unreleased]
 
 ### Added
-
-- ...
+- Faster cosine score implementation using numba [#29](https://github.com/matchms/matchms/issues/29)
+- Cosine score based on Hungarian algorithm [#40](https://github.com/matchms/matchms/pull/40)
+- Modified cosine score [#26](https://github.com/matchms/matchms/issues/26)
+- Doc strings for many methods [#49](https://github.com/matchms/matchms/issues/49)
+- Examples in doc strings which are tested on CI
 
 ### Changed
 
@@ -21,19 +24,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+## [0.3.4] - 2020-05-29
+
+### Changed
+
+- Fix verify step in conda publish workflow
+
 ## [0.3.3] - 2020-05-27
 
-- [All changes](https://github.com/matchms/matchms/compare/0.3.2...HEAD) since 0.3.2
-
 ### Added
+
 - Build workflow runs the tests after installing the package [#47](https://github.com/matchms/matchms/pull/47)
 
 ### Changed
+
 - tests were removed from the package (see setup.py) [#47](https://github.com/matchms/matchms/pull/47)
 
 ## [0.3.2] - 2020-05-26
-
-- [All changes](https://github.com/matchms/matchms/compare/0.3.1...HEAD) since 0.3.1
 
 ### Added
 
@@ -63,6 +70,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - removed conda/condarc.yml
 - removed conda_build_config.yaml
 - removed testing from publish workflow
+
 
 ## [0.3.1] - 2020-05-19
 
@@ -147,11 +155,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - This is the initial version of Spec2Vec from https://github.com/iomega/Spec2Vec
 
-
-[Unreleased]: https://github.com/matchms/matchms/compare/0.3.0...HEAD
-
+[Unreleased]: https://github.com/matchms/matchms/compare/0.3.4...HEAD
+[0.3.4]: https://github.com/matchms/matchms/compare/0.3.3...0.3.4
+[0.3.3]: https://github.com/matchms/matchms/compare/0.3.2...0.3.3
+[0.3.2]: https://github.com/matchms/matchms/compare/0.3.1...0.3.2
+[0.3.1]: https://github.com/matchms/matchms/compare/0.3.0...0.3.1
 [0.3.0]: https://github.com/matchms/matchms/compare/0.2.0...0.3.0
-
 [0.2.0]: https://github.com/matchms/matchms/compare/0.1.0...0.2.0
-
 [0.1.0]: https://github.com/matchms/matchms/releases/tag/0.1.0
