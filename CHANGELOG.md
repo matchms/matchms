@@ -31,13 +31,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Fix verify step in conda publish workflow
+- Fixed mixed up loss intensity order. [#20](https://github.com/matchms/matchms/issues/20)
 
 ## [0.3.3] - 2020-05-27
 
 ### Added
 
 - Build workflow runs the tests after installing the package [#47](https://github.com/matchms/matchms/pull/47)
-- Fixed mixed up loss intensity order. [#20](https://github.com/matchms/matchms/issues/20)
 
 ### Changed
 
