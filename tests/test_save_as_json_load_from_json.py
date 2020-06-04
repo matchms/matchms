@@ -14,7 +14,6 @@ def test_save_and_load_json_single_spectrum(tmp_path):
                                   "precursor_mz": 222.2,
                                   "test_field": "test"})
     # Write to test file
-    # with tempfile.TemporaryDirectory() as d:
     filename = os.path.join(tmp_path, "test.json")
     save_as_json(spectrum, filename)
 
