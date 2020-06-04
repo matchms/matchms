@@ -49,4 +49,4 @@ def test_normalize_intensities_empty_spectrum():
     """Test running filter with spectrum == None."""
     spectrum = normalize_intensities(None)
 
-    assert spectrum == None, "Expected spectrum to be None."
+    assert spectrum is None, "Expected spectrum to be None."
