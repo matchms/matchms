@@ -1,4 +1,5 @@
 import os
+import json
 import numpy
 from matchms import Spectrum
 from matchms.exporting import save_as_json
