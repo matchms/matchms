@@ -8,7 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Added
-- ...
+
+- Filter add_fingerprint to derive molecular fingerprints.
+- Similarity scores based on molecular fingerprints [#42](https://github.com/matchms/matchms/issues/42)
+
 ### Changed
 - ...
 ### Fixed

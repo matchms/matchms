@@ -1,4 +1,6 @@
+from typing import List, Union
 import numpy
+from matchms.typing import SpectrumType
 from matchms.similarity.vector_similarity_functions import \
     cosine_similarity_matrix
 from matchms.similarity.vector_similarity_functions import \
@@ -10,20 +12,37 @@ from matchms.similarity.vector_similarity_functions import \
 class FingerprintSimilarityParallel:
     """Calculate similarity between molecules based on their fingerprints.
 
-    Args:
-    ----
-    set_empty_scores: "nan", int, float
-        Set values to this value if no fingerprint is found. Default is "nan",
-        in which case all similarity values in cases without fingerprint will be
-        set to numpy.nan's.
+    For this similarity measure to work, fingerprints are expected to be derived
+    by running the "add_fingerprint()" filter function.
     """
-    def __init__(self, similarity_measure="jaccard", set_empty_scores="nan"):
+    def __init__(self, similarity_measure: str = "jaccard",
+                 set_empty_scores: Union[float, int, str] = "nan"):
+        """
+
+        Parameters
+        ----------
+        similarity_measure:
+            Chose similarity measure form "cosine", "dice", "jaccard".
+            The default is "jaccard".
+        set_empty_scores:
+            Define what should be given instead of a similarity score in cases
+            where fingprints are missing. The default is "nan", which will return
+            numpy.nan's in such cases.
+        """
         self.set_empty_scores = set_empty_scores
         assert similarity_measure in ["cosine", "dice", "jaccard"], "Unknown similarity measure."
         self.similarity_measure = similarity_measure
 
-    def __call__(self, references, queries):
-        """Calculate matrix of fingerprint based similarity scores."""
+    def __call__(self, references: List[SpectrumType], queries: List[SpectrumType]) -> numpy.array:
+        """Calculate matrix of fingerprint based similarity scores.
+
+        Parameters
+        ----------
+        references:
+            List of reference spectrums.
+        queries:
+            List of query spectrums.
+        """
         def get_fingerprints(spectrums):
             for index, spectrum in enumerate(spectrums):
                 yield index, spectrum.get("fingerprint")
@@ -36,8 +55,7 @@ class FingerprintSimilarityParallel:
                 if fp is not None:
                     idx_fingerprints.append(index)
                     fingerprints.append(fp)
-            fingerprints = numpy.array(fingerprints)
-            return numpy.array(fingerprints), numpy.array(idx_fingerprints)
+            return numpy.asarray(fingerprints), numpy.asarray(idx_fingerprints)
 
         def create_full_matrix():
             """Create matrix for all similarities."""
