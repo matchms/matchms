@@ -18,7 +18,6 @@ def derive_adduct_from_name(spectrum_in: SpectrumType, remove_adduct_from_name=T
 
     spectrum = spectrum_in.clone()
 
-    # Get compound name
     if spectrum.get("compound_name", None) is not None:
         name = spectrum.get("compound_name")
     else:
@@ -34,7 +33,6 @@ def derive_adduct_from_name(spectrum_in: SpectrumType, remove_adduct_from_name=T
             adduct_from_name = name_part
             break
 
-    # Remove found adduct from compound name (if remove_adduct_from_name=True)
     if adduct_from_name and remove_adduct_from_name:
         name_adduct_removed = " ".join([x for x in name_split if x != adduct_from_name])
         spectrum.set("compound_name", name_adduct_removed)

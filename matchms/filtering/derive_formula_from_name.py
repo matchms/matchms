@@ -18,7 +18,6 @@ def derive_formula_from_name(spectrum_in: SpectrumType, remove_formula_from_name
 
     spectrum = spectrum_in.clone()
 
-    # Get compound name
     if spectrum.get("compound_name", None) is not None:
         name = spectrum.get("compound_name")
     else:
@@ -27,11 +26,9 @@ def derive_formula_from_name(spectrum_in: SpectrumType, remove_formula_from_name
         return spectrum
 
     # Detect formula at end of compound name
-    formula_from_name = None
-    if looks_like_formula(name.split(" ")[-1]):
-        formula_from_name = name.split(" ")[-1]
+    end_of_name = name.split(" ")[-1]
+    formula_from_name = end_of_name if looks_like_formula(end_of_name) else None
 
-    # Remove found formula from compound name (if remove_formula_from_name=True)
     if formula_from_name and remove_formula_from_name:
         name_formula_removed = " ".join(name.split(" ")[:-1])
         spectrum.set("compound_name", name_formula_removed)

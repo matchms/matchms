@@ -9,7 +9,6 @@ def add_compound_name(spectrum_in: SpectrumType) -> SpectrumType:
     spectrum = spectrum_in.clone()
 
     if spectrum.get("compound_name", None) is None:
-        # No compound_name entry found
         if isinstance(spectrum.get("name", None), str):
             spectrum.set("compound_name", spectrum.get("name"))
             return spectrum
