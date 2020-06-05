@@ -8,9 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
 - Faster cosine score implementation using numba [#29](https://github.com/matchms/matchms/issues/29)
 - Cosine score based on Hungarian algorithm [#40](https://github.com/matchms/matchms/pull/40)
 - Modified cosine score [#26](https://github.com/matchms/matchms/issues/26)
+- Import and export of spectrums from json files [#15](https://github.com/matchms/matchms/issues/15)
 - Doc strings for many methods [#49](https://github.com/matchms/matchms/issues/49)
 - Examples in doc strings which are tested on CI
 
@@ -29,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Fix verify step in conda publish workflow
+- Fixed mixed up loss intensity order. [#20](https://github.com/matchms/matchms/issues/20)
 
 ## [0.3.3] - 2020-05-27
 
