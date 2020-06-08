@@ -6,7 +6,6 @@ from matchms.similarity.vector_similarity_functions import dice_similarity
 from matchms.similarity.vector_similarity_functions import dice_similarity_matrix
 
 
-
 def test_cosine_similarity():
     """Test cosine similarity score calculation."""
     vector1 = numpy.array([1, 1, 0, 0])
