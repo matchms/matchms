@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- ...
+- normalize_intensities filter now also normalizes losses [#69](https://github.com/matchms/matchms/issues/69)
 
 ### Fixed
 
