@@ -13,7 +13,19 @@ from .set_ionmode_na_when_missing import set_ionmode_na_when_missing
 
 def default_filters(spectrum: SpectrumType) -> SpectrumType:
     """
-    Collection of filters that are considered default and that do no require any parameterization.
+    Collection of filters that are considered default and that do no require any (factory) arguments.
+
+    Collection is
+
+    1. :meth:`~matchms.filtering.make_charge_scalar.make_charge_scalar`
+    2. :meth:`~matchms.filtering.make_charge_scalar`
+    3. :meth:`~matchms.filtering.make_ionmode_lowercase`
+    4. :meth:`~matchms.filtering.set_ionmode_na_when_missing`
+    5. :meth:`~matchms.filtering.add_precursor_mz`
+    6. :meth:`~matchms.filtering.add_adduct`
+    7. :meth:`~matchms.filtering.derive_ionmode`
+    8. :meth:`~matchms.filtering.correct_charge`
+
     """
     spectrum = make_charge_scalar(spectrum)
     spectrum = make_ionmode_lowercase(spectrum)

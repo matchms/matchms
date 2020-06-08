@@ -10,9 +10,14 @@ def derive_ionmode(spectrum_in: SpectrumType, adducts_filename=None) -> Spectrum
     where missing.
 
     Args:
-    ----
-    spectrum: matchms.Spectrum.Spectrum()
+    -----
+    spectrum:
         Input spectrum.
+
+    Returns:
+    --------
+
+    Returns Spectrum object with `ionmode` attribute set.
     """
 
     if spectrum_in is None:

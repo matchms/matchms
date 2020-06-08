@@ -35,6 +35,7 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.viewcode",
     "sphinx.ext.todo",
+    "sphinx.ext.doctest",
     "sphinxcontrib.apidoc",
     "sphinx.ext.napoleon",
 ]
@@ -44,6 +45,9 @@ apidoc_output_dir = "./api"
 apidoc_excluded_paths = ["tests", "readthedocs"]
 apidoc_separate_modules = True
 apidoc_module_first = True
+autodoc_default_options = {
+    'special-members': '__init__,__call__',
+}
 # Hide undocumented member by excluding default undoc-members option
 os.environ["SPHINX_APIDOC_OPTIONS"] = "members,show-inheritance"
 
@@ -73,7 +77,8 @@ html_theme = "alabaster"
 html_theme_options = {
     "logo": "matchms.png",
     "github_user": "matchms",
-    "github_repo": "matchms"
+    "github_repo": "matchms",
+    "page_width": '1080px',
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
