@@ -163,7 +163,7 @@ def cosine_similarity(u: numpy.array, v: numpy.array) -> numpy.float64:
     Returns
     -------
     cosine_similarity : float
-        The Jaccard similarity coefficient between vectors `u` and `v`.
+        The Cosine similarity score between vectors `u` and `v`.
     """
     assert u.shape[0] == v.shape[0], "Input vector must have same shape."
     uv = 0
