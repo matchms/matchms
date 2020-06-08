@@ -4,22 +4,22 @@ import numpy
 
 
 @numba.njit
-def jaccard_similarity_matrix(references: numpy.array, queries: numpy.array) -> numpy.array:
+def jaccard_similarity_matrix(references: numpy.ndarray, queries: numpy.ndarray) -> numpy.ndarray:
     """Returns matrix of jaccard indices between all-vs-all vectors of references
     and queries.
 
     Parameters
     ----------
-    references : numpy.array
+    references
         Reference vectors as 2D numpy array. Expects that vector_i corresponds to
         references[i, :].
-    queries : numpy.array
+    queries
         Query vectors as 2D numpy array. Expects that vector_i corresponds to
         queries[i, :].
 
     Returns
     -------
-    scores : numpy.array
+    scores
         Matrix of all-vs-all similarity scores. scores[i, j] will contain the score
         between the vectors references[i, :] and queries[j, :].
     """
@@ -33,22 +33,22 @@ def jaccard_similarity_matrix(references: numpy.array, queries: numpy.array) -> 
 
 
 @numba.njit
-def dice_similarity_matrix(references: numpy.array, queries: numpy.array) -> numpy.array:
+def dice_similarity_matrix(references: numpy.ndarray, queries: numpy.ndarray) -> numpy.ndarray:
     """Returns matrix of dice similarity scores between all-vs-all vectors of references
     and queries.
 
     Parameters
     ----------
-    references : numpy.array
+    references
         Reference vectors as 2D numpy array. Expects that vector_i corresponds to
         references[i, :].
-    queries : numpy.array
+    queries
         Query vectors as 2D numpy array. Expects that vector_i corresponds to
         queries[i, :].
 
     Returns
     -------
-    scores : numpy.array
+    scores
         Matrix of all-vs-all similarity scores. scores[i, j] will contain the score
         between the vectors references[i, :] and queries[j, :].
     """
@@ -62,22 +62,22 @@ def dice_similarity_matrix(references: numpy.array, queries: numpy.array) -> num
 
 
 @numba.njit
-def cosine_similarity_matrix(references: numpy.array, queries: numpy.array) -> numpy.array:
+def cosine_similarity_matrix(references: numpy.ndarray, queries: numpy.ndarray) -> numpy.ndarray:
     """Returns matrix of cosine similarity scores between all-vs-all vectors of
     references and queries.
 
     Parameters
     ----------
-    references : numpy.array
+    references
         Reference vectors as 2D numpy array. Expects that vector_i corresponds to
         references[i, :].
-    queries : numpy.array
+    queries
         Query vectors as 2D numpy array. Expects that vector_i corresponds to
         queries[i, :].
 
     Returns
     -------
-    scores : numpy.array
+    scores
         Matrix of all-vs-all similarity scores. scores[i, j] will contain the score
         between the vectors references[i, :] and queries[j, :].
     """
@@ -91,25 +91,27 @@ def cosine_similarity_matrix(references: numpy.array, queries: numpy.array) -> n
 
 
 @numba.njit
-def jaccard_index(u: numpy.array, v: numpy.array) -> numpy.float64:
+def jaccard_index(u: numpy.ndarray, v: numpy.ndarray) -> numpy.float64:
     r"""Computes the Jaccard-index (or Jaccard similarity coefficient) of two boolean
     1-D arrays.
     The Jaccard index between 1-D boolean arrays `u` and `v`,
     is defined as
+
     .. math::
+
        J(u,v) = \\frac{u \cap v}
                 {u \cup v}
 
-    Args:
-    ----
-    u : (N,) numpy.array, bool
-        Input array.
-    v : (N,) numpy.array, bool
-        Input array.
+    Parameters
+    ----------
+    u :
+        Input array. Expects boolean vector.
+    v :
+        Input array. Expects boolean vector.
 
     Returns
     -------
-    jaccard_similarity : float
+    jaccard_similarity
         The Jaccard similarity coefficient between vectors `u` and `v`.
     """
     u_or_v = numpy.bitwise_or(u != 0, v != 0)
@@ -121,24 +123,26 @@ def jaccard_index(u: numpy.array, v: numpy.array) -> numpy.float64:
 
 
 @numba.njit
-def dice_similarity(u: numpy.array, v: numpy.array) -> numpy.float64:
+def dice_similarity(u: numpy.ndarray, v: numpy.ndarray) -> numpy.float64:
     r"""Computes the Dice similarity coefficient (DSC) between two boolean 1-D arrays.
 
     The Dice similarity coefficient between `u` and `v`, is
+
     .. math::
+
          DSC(u,v) = \\frac{2|u \cap v|}
                     {|u| + |v|}
 
-    Args:
-    ----
-    u : (N,) numpy.array, bool
-        Input array.
-    v : (N,) numpy.array, bool
-        Input array.
+    Parameters
+    ----------
+    u
+        Input array. Expects boolean vector.
+    v
+        Input array. Expects boolean vector.
 
     Returns
     -------
-    dice_similarity : float
+    dice_similarity
         The Dice similarity coefficient between 1-D arrays `u` and `v`.
     """
     u_and_v = numpy.bitwise_and(u != 0, v != 0)
@@ -150,19 +154,19 @@ def dice_similarity(u: numpy.array, v: numpy.array) -> numpy.float64:
 
 
 @numba.njit
-def cosine_similarity(u: numpy.array, v: numpy.array) -> numpy.float64:
+def cosine_similarity(u: numpy.ndarray, v: numpy.ndarray) -> numpy.float64:
     """Calculate cosine similarity score.
 
-    Args:
-    ----
-    u : numpy.array
+    Parameters
+    ----------
+    u
         Input vector.
-    v : numpy.array
+    v
         Input vector.
 
     Returns
     -------
-    cosine_similarity : float
+    cosine_similarity
         The Cosine similarity score between vectors `u` and `v`.
     """
     assert u.shape[0] == v.shape[0], "Input vector must have same shape."
