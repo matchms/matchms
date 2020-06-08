@@ -1,9 +1,11 @@
 import numpy
 import pytest
 from matchms.similarity.vector_similarity_functions import cosine_similarity
-from matchms.similarity.vector_similarity_functions import cosine_similarity_matrix
+from matchms.similarity.vector_similarity_functions import \
+    cosine_similarity_matrix
 from matchms.similarity.vector_similarity_functions import dice_similarity
-from matchms.similarity.vector_similarity_functions import dice_similarity_matrix
+from matchms.similarity.vector_similarity_functions import \
+    dice_similarity_matrix
 
 
 def test_cosine_similarity():
