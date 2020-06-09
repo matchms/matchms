@@ -35,9 +35,9 @@ def test_cosine_similarity_all_zeros():
 def test_cosine_similarity_matrix():
     """Test cosine similarity scores calculation."""
     vectors1 = numpy.array([[1, 1, 0, 0],
-                            [0, 0, 1, 1]])
-    vectors2 = numpy.array([[0, 1, 1, 0],
                             [1, 0, 1, 1]])
+    vectors2 = numpy.array([[0, 1, 1, 0],
+                            [0, 0, 1, 1]])
 
     scores = cosine_similarity_matrix(vectors1, vectors2)
     expected_scores = numpy.array([[0.5, 0.],
