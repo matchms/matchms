@@ -28,6 +28,11 @@ def test_mol_converter_smiles_to_inchikey():
     assert output_inchikey == "HULABQRTZQYJBQ-UHFFFAOYSA-N"
 
 
+def test_mol_converter_None_entry():
+    """Test None entry."""
+    assert mol_converter(None, "smiles", "inchikey") is None, "Expected None."
+
+
 def test_is_valid_inchikey():
     """Test if strings are correctly classified."""
     inchikeys_true = ["XYLJNLCSTIOKRM-UHFFFAOYSA-N"]
@@ -45,6 +50,11 @@ def test_is_valid_inchikey():
         assert is_valid_inchikey(inchikey), "Expected inchikey is True."
     for inchikey in inchikeys_false:
         assert not is_valid_inchikey(inchikey), "Expected inchikey is False."
+
+
+def test_is_valid_inchikey_None():
+    """Test None entry."""
+    assert not is_valid_inchikey(None), "Expected None entry to give False."
 
 
 def test_is_valid_inchi():
@@ -66,6 +76,11 @@ def test_is_valid_inchi():
         assert not is_valid_inchi(inchi), "Expected inchi is False."
 
 
+def test_is_valid_inchi_None():
+    """Test None entry."""
+    assert not is_valid_inchi(None), "Expected None entry to give False."
+
+
 def test_is_valid_smiles():
     """Test if strings are correctly classified."""
     smiles_true = [
@@ -84,6 +99,11 @@ def test_is_valid_smiles():
         assert is_valid_smiles(smiles), "Expected smiles is True."
     for smiles in smiles_false:
         assert not is_valid_smiles(smiles), "Expected smiles is False."
+
+
+def test_is_valid_smiles_None():
+    """Test None entry."""
+    assert not is_valid_smiles(None), "Expected None entry to give False."
 
 
 def test_derive_fingerprint_from_smiles():
