@@ -118,3 +118,18 @@ def test_derive_fingerprint_from_inchi():
     fingerprint = derive_fingerprint_from_inchi("InChI=1S/C2O/c1-2-3", "daylight", 16)
     expected_fingerprint = numpy.array([0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0])
     assert numpy.all(fingerprint == expected_fingerprint), "Expected different fingerprint."
+
+
+def test_derive_fingerprint_different_types_from_smiles():
+    """Test if correct fingerprints are derived from given smiles when using different types."""
+    types = ["daylight", "morgan1", "morgan2", "morgan3"]
+    expected_fingerprints = [
+        numpy.array([0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0]),
+        numpy.array([0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1]),
+        numpy.array([0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1]),
+        numpy.array([0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1])
+    ]
+
+    for i, fingerprint_type in enumerate(types):
+        fingerprint = derive_fingerprint_from_smiles("[C+]#C[O-]", fingerprint_type, 16)
+        assert numpy.all(fingerprint == expected_fingerprints[i]), "Expected different fingerprint."
