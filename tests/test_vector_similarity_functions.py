@@ -12,9 +12,9 @@ def test_cosine_similarity():
     """Test cosine similarity score calculation."""
     vector1 = numpy.array([1, 1, 0, 0])
     vector2 = numpy.array([1, 1, 1, 1])
-    score11 = cosine_similarity(vector1, vector1)
-    score12 = cosine_similarity(vector1, vector2)
-    score22 = cosine_similarity(vector2, vector2)
+    score11 = cosine_similarity.py_func(vector1, vector1)
+    score12 = cosine_similarity.py_func(vector1, vector2)
+    score22 = cosine_similarity.py_func(vector2, vector2)
 
     assert score12 == 2 / numpy.sqrt(2 * 4), "Expected different score."
     assert score11 == score22 == 1.0, "Expected different score."
@@ -24,9 +24,9 @@ def test_cosine_similarity_all_zeros():
     """Test cosine similarity score calculation with empty vector."""
     vector1 = numpy.array([0, 0, 0, 0])
     vector2 = numpy.array([1, 1, 1, 1])
-    score11 = cosine_similarity(vector1, vector1)
-    score12 = cosine_similarity(vector1, vector2)
-    score22 = cosine_similarity(vector2, vector2)
+    score11 = cosine_similarity.py_func(vector1, vector1)
+    score12 = cosine_similarity.py_func(vector1, vector2)
+    score22 = cosine_similarity.py_func(vector2, vector2)
 
     assert score11 == score12 == 0.0, "Expected different score."
     assert score22 == 1.0, "Expected different score."
@@ -39,7 +39,7 @@ def test_cosine_similarity_matrix():
     vectors2 = numpy.array([[0, 1, 1, 0],
                             [0, 0, 1, 1]])
 
-    scores = cosine_similarity_matrix(vectors1, vectors2)
+    scores = cosine_similarity_matrix.py_func(vectors1, vectors2)
     expected_scores = numpy.array([[0.5, 0.],
                                    [0.40824829, 0.81649658]])
     assert scores == pytest.approx(expected_scores, 1e-7), "Expected different scores."
