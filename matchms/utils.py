@@ -116,22 +116,22 @@ def is_valid_inchikey(inchikey: str) -> bool:
     return False
 
 
-def derive_fingerprint_from_smiles(smiles: str, fingerprint_type: str, nbits: int) -> numpy.array:
+def derive_fingerprint_from_smiles(smiles: str, fingerprint_type: str, nbits: int) -> numpy.ndarray:
     """Calculate molecule fingerprint based on given smiles or inchi (using rdkit).
 
     Parameters
     ----------
-    smiles: str
+    smiles
         Input smiles to derive fingerprint from.
-    fingerprint_type: str
+    fingerprint_type
         Determine method for deriving molecular fingerprints. Supported choices are 'daylight',
         'morgan1', 'morgan2', 'morgan3'.
-    nbits: int
+    nbits
         Dimension or number of bits of generated fingerprint.
 
     Returns
     -------
-    fingerprint: numpy.array
+    fingerprint
         Molecular fingerprint.
     """
     mol = Chem.MolFromSmiles(smiles)
@@ -140,17 +140,17 @@ def derive_fingerprint_from_smiles(smiles: str, fingerprint_type: str, nbits: in
     return mol_to_fingerprint(mol, fingerprint_type, nbits)
 
 
-def derive_fingerprint_from_inchi(inchi: str, fingerprint_type: str, nbits: int) -> numpy.array:
+def derive_fingerprint_from_inchi(inchi: str, fingerprint_type: str, nbits: int) -> numpy.ndarray:
     """Calculate molecule fingerprint based on given inchi (using rdkit).
 
     Parameters
     ----------
-    inchi: str
+    inchi
         Input InChI to derive fingerprint from.
-    fingerprint_type: str
+    fingerprint_type
         Determine method for deriving molecular fingerprints. Supported choices are 'daylight',
         'morgan1', 'morgan2', 'morgan3'.
-    nbits: int
+    nbits
         Dimension or number of bits of generated fingerprint.
 
     Returns
@@ -164,22 +164,22 @@ def derive_fingerprint_from_inchi(inchi: str, fingerprint_type: str, nbits: int)
     return mol_to_fingerprint(mol, fingerprint_type, nbits)
 
 
-def mol_to_fingerprint(mol, fingerprint_type: str, nbits: int) -> numpy.array:
+def mol_to_fingerprint(mol: Chem.rdchem.Mol, fingerprint_type: str, nbits: int) -> numpy.ndarray:
     """Convert rdkit mol (molecule) to molecular fingerprint.
 
     Parameters
     ----------
-    mol : rdkit molecule
+    mol
         Input rdkit molecule.
-    fingerprint_type : str
+    fingerprint_type
         Determine method for deriving molecular fingerprints.
         Supported choices are 'daylight', 'morgan1', 'morgan2', 'morgan3'.
-    nbits: int
+    nbits
         Dimension or number of bits of generated fingerprint.
 
     Returns
     -------
-    fingerprint: numpy.array
+    fingerprint
         Molecular fingerprint.
     """
     assert fingerprint_type in ["daylight", "morgan1", "morgan2", "morgan3"], "Unkown fingerprint type given."
