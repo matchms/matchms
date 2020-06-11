@@ -1,4 +1,3 @@
-from .add_adduct import add_adduct
 from .add_compound_name import add_compound_name
 from .add_fingerprint import add_fingerprint
 from .add_losses import add_losses
@@ -30,7 +29,6 @@ from .SpeciesString import SpeciesString
 
 
 __all__ = [
-    "add_adduct",
     "add_compound_name",
     "add_fingerprint",
     "add_losses",
