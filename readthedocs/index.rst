@@ -62,6 +62,9 @@ Should output
 
 .. testoutput::
 
+    Removed adduct M-H from compound name.
+    Added adduct M-H to metadata.
+    ...
     Reference scan id: 675
     Query scan id: 2833
     Score: 0.0293

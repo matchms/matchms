@@ -15,13 +15,6 @@ def add_losses(spectrum_in: SpectrumType, loss_mz_from=0.0, loss_mz_to=1000.0) -
     loss_mz_to:
         Maximum allowed m/z value for losses. Default is 1000.0.
     """
-    def precursor_mz_is_number():
-        if isinstance(precursor_mz, int):
-            return True
-        if isinstance(precursor_mz, float):
-            return True
-        return False
-
     if spectrum_in is None:
         return None
 
@@ -29,8 +22,8 @@ def add_losses(spectrum_in: SpectrumType, loss_mz_from=0.0, loss_mz_to=1000.0) -
 
     precursor_mz = spectrum.get("precursor_mz")
     if precursor_mz:
-        assert precursor_mz_is_number(), ("Expected 'precursor_mz' to be a scalar number.",
-                                          "Consider applying 'add_precursor_mz' filter first.")
+        assert isinstance(precursor_mz, (float, int)), ("Expected 'precursor_mz' to be a scalar number.",
+                                                        "Consider applying 'add_precursor_mz' filter first.")
         peaks_mz, peaks_intensities = spectrum.peaks
         losses_mz = (precursor_mz - peaks_mz)[::-1]
         losses_intensities = peaks_intensities[::-1]
