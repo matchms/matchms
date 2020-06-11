@@ -28,9 +28,9 @@ def test_mol_converter_smiles_to_inchikey():
     assert output_inchikey == "HULABQRTZQYJBQ-UHFFFAOYSA-N"
 
 
-def test_mol_converter_none_input():
-    """Test None entry."""
-    assert mol_converter(None, "smiles", "inchikey") is None, "Expected None."
+def test_mol_converter_invalid_input():
+    """Test invalid entry."""
+    assert mol_converter("invalid_test", "smiles", "inchikey") is None, "Expected None."
 
 
 def test_is_valid_inchikey():
