@@ -8,7 +8,7 @@ def add_fingerprint(spectrum_in: SpectrumType, fingerprint_type: str = "daylight
                     nbits: int = 2048) -> SpectrumType:
     """Add molecular finterprint to spectrum.
 
-    If inchi or smiles present in metadata, derive a molecular finterprint and
+    If smiles or inchi present in metadata, derive a molecular finterprint and
     add it to the spectrum.
 
     Parameters
