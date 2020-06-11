@@ -7,9 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2020-06-11
+
 ### Added
 
-- Filter add_fingerprint to derive molecular fingerprints.
+- Filter add_fingerprint to derive molecular fingerprints [#42](https://github.com/matchms/matchms/issues/42)
 - Similarity scores based on molecular fingerprints [#42](https://github.com/matchms/matchms/issues/42)
 - Add extensive compound name cleaning and harmonization [#23](https://github.com/matchms/matchms/issues/23)
 - Faster cosine score implementation using numba [#29](https://github.com/matchms/matchms/issues/29)
@@ -17,15 +19,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Modified cosine score [#26](https://github.com/matchms/matchms/issues/26)
 - Import and export of spectrums from json files [#15](https://github.com/matchms/matchms/issues/15)
 - Doc strings for many methods [#49](https://github.com/matchms/matchms/issues/49)
-- Examples in doc strings which are tested on CI
+- Examples in doc strings which are tested on CI [#49](https://github.com/matchms/matchms/issues/49)
 
 ### Changed
 
 - normalize_intensities filter now also normalizes losses [#69](https://github.com/matchms/matchms/issues/69)
-
-### Fixed
-
-- ...
 
 ### Removed
 
@@ -77,7 +75,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - removed conda_build_config.yaml
 - removed testing from publish workflow
 
-
 ## [0.3.1] - 2020-05-19
 
 ### Added
@@ -107,7 +104,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - conda publish: publish and test conda package on release
   - update the developer instructions
   - move conda receipe to conda folder
-
 
 ## [0.3.0] - 2020-05-13
 
@@ -145,23 +141,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - numpy usage [#191](https://github.com/matchms/matchms/pull/191)
 - consistency of the import statements [#189](https://github.com/matchms/matchms/pull/189)
 
-### Fixed
--
-
-### Removed
--
-
-
 ## [0.2.0] - 2020-04-03
+
 ### Added
+
 - Anaconda actions
 
-
 ## [0.1.0] - 2020-03-19
+
 ### Added
+
 - This is the initial version of Spec2Vec from https://github.com/iomega/Spec2Vec
 
-[Unreleased]: https://github.com/matchms/matchms/compare/0.3.4...HEAD
+[Unreleased]: https://github.com/matchms/matchms/compare/0.4.0...HEAD
+[0.4.0]: https://github.com/matchms/matchms/compare/0.3.4...0.4.0
 [0.3.4]: https://github.com/matchms/matchms/compare/0.3.3...0.3.4
 [0.3.3]: https://github.com/matchms/matchms/compare/0.3.2...0.3.3
 [0.3.2]: https://github.com/matchms/matchms/compare/0.3.1...0.3.2
