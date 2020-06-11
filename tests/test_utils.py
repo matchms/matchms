@@ -28,7 +28,7 @@ def test_mol_converter_smiles_to_inchikey():
     assert output_inchikey == "HULABQRTZQYJBQ-UHFFFAOYSA-N"
 
 
-def test_mol_converter_None_entry():
+def test_mol_converter_none_input():
     """Test None entry."""
     assert mol_converter(None, "smiles", "inchikey") is None, "Expected None."
 
@@ -52,7 +52,7 @@ def test_is_valid_inchikey():
         assert not is_valid_inchikey(inchikey), "Expected inchikey is False."
 
 
-def test_is_valid_inchikey_None():
+def test_is_valid_inchikey_none_input():
     """Test None entry."""
     assert not is_valid_inchikey(None), "Expected None entry to give False."
 
@@ -76,7 +76,7 @@ def test_is_valid_inchi():
         assert not is_valid_inchi(inchi), "Expected inchi is False."
 
 
-def test_is_valid_inchi_None():
+def test_is_valid_inchi_none_input():
     """Test None entry."""
     assert not is_valid_inchi(None), "Expected None entry to give False."
 
@@ -101,7 +101,7 @@ def test_is_valid_smiles():
         assert not is_valid_smiles(smiles), "Expected smiles is False."
 
 
-def test_is_valid_smiles_None():
+def test_is_valid_smiles_none_input():
     """Test None entry."""
     assert not is_valid_smiles(None), "Expected None entry to give False."
 
