@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Filter add_fingerprint to derive molecular fingerprints.
+- Similarity scores based on molecular fingerprints [#42](https://github.com/matchms/matchms/issues/42)
 - Add extensive compound name cleaning and harmonization [#23](https://github.com/matchms/matchms/issues/23)
 - Faster cosine score implementation using numba [#29](https://github.com/matchms/matchms/issues/29)
 - Cosine score based on Hungarian algorithm [#40](https://github.com/matchms/matchms/pull/40)

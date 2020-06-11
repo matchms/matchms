@@ -1,6 +1,8 @@
 import re
 from typing import Optional
+import numpy
 from rdkit import Chem
+from rdkit.Chem import AllChem
 
 
 def convert_smiles_to_inchi(smiles: str) -> Optional[str]:
@@ -20,8 +22,8 @@ def mol_converter(mol_input: str, input_type: str, output_type: str) -> Optional
 
     Convert from "smiles" or "inchi" to "inchi", "smiles", or "inchikey".
 
-    Args:
-    -----
+    Parameters
+    ----------
     mol_input
         Input data in "inchi" or "smiles" molecular representation.
     input_type
@@ -55,8 +57,8 @@ def is_valid_inchi(inchi: str) -> bool:
 
     This functions test if string can be read by rdkit as InChI.
 
-    Args:
-    -----
+    Parameters
+    ----------
     inchi
         Input string to test if it has format of InChI.
     """
@@ -79,8 +81,8 @@ def is_valid_smiles(smiles: str) -> bool:
 
     This functions test if string can be read by rdkit as smiles.
 
-    Args:
-    -----
+    Parameters
+    ----------
     smiles
         Input string to test if it can be imported as smiles.
     """
@@ -98,7 +100,13 @@ def is_valid_smiles(smiles: str) -> bool:
 
 
 def is_valid_inchikey(inchikey: str) -> bool:
-    """Return True if string has format of inchikey."""
+    """Return True if string has format of inchikey.
+
+    Parameters
+    ----------
+    inchikey
+        Input string to test if it format of an inchikey.
+    """
     if inchikey is None:
         return False
 
@@ -106,6 +114,88 @@ def is_valid_inchikey(inchikey: str) -> bool:
     if re.fullmatch(regexp, inchikey):
         return True
     return False
+
+
+def derive_fingerprint_from_smiles(smiles: str, fingerprint_type: str, nbits: int) -> numpy.ndarray:
+    """Calculate molecule fingerprint based on given smiles or inchi (using rdkit).
+
+    Parameters
+    ----------
+    smiles
+        Input smiles to derive fingerprint from.
+    fingerprint_type
+        Determine method for deriving molecular fingerprints. Supported choices are 'daylight',
+        'morgan1', 'morgan2', 'morgan3'.
+    nbits
+        Dimension or number of bits of generated fingerprint.
+
+    Returns
+    -------
+    fingerprint
+        Molecular fingerprint.
+    """
+    mol = Chem.MolFromSmiles(smiles)
+    if mol is None:
+        return None
+    return mol_to_fingerprint(mol, fingerprint_type, nbits)
+
+
+def derive_fingerprint_from_inchi(inchi: str, fingerprint_type: str, nbits: int) -> numpy.ndarray:
+    """Calculate molecule fingerprint based on given inchi (using rdkit).
+
+    Parameters
+    ----------
+    inchi
+        Input InChI to derive fingerprint from.
+    fingerprint_type
+        Determine method for deriving molecular fingerprints. Supported choices are 'daylight',
+        'morgan1', 'morgan2', 'morgan3'.
+    nbits
+        Dimension or number of bits of generated fingerprint.
+
+    Returns
+    -------
+    fingerprint: numpy.array
+        Molecular fingerprint.
+    """
+    mol = Chem.MolFromInchi(inchi)
+    if mol is None:
+        return None
+    return mol_to_fingerprint(mol, fingerprint_type, nbits)
+
+
+def mol_to_fingerprint(mol: Chem.rdchem.Mol, fingerprint_type: str, nbits: int) -> numpy.ndarray:
+    """Convert rdkit mol (molecule) to molecular fingerprint.
+
+    Parameters
+    ----------
+    mol
+        Input rdkit molecule.
+    fingerprint_type
+        Determine method for deriving molecular fingerprints.
+        Supported choices are 'daylight', 'morgan1', 'morgan2', 'morgan3'.
+    nbits
+        Dimension or number of bits of generated fingerprint.
+
+    Returns
+    -------
+    fingerprint
+        Molecular fingerprint.
+    """
+    assert fingerprint_type in ["daylight", "morgan1", "morgan2", "morgan3"], "Unkown fingerprint type given."
+
+    if fingerprint_type == "daylight":
+        fp = Chem.RDKFingerprint(mol, fpSize=nbits)
+    elif fingerprint_type == "morgan1":
+        fp = AllChem.GetMorganFingerprintAsBitVect(mol, 1, nBits=nbits)
+    elif fingerprint_type == "morgan2":
+        fp = AllChem.GetMorganFingerprintAsBitVect(mol, 2, nBits=nbits)
+    elif fingerprint_type == "morgan3":
+        fp = AllChem.GetMorganFingerprintAsBitVect(mol, 3, nBits=nbits)
+
+    if fp:
+        return numpy.array(fp)
+    return None
 
 
 def looks_like_adduct(adduct):
