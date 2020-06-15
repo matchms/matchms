@@ -27,7 +27,7 @@ authors:
     orcid: 0000-0003-3578-4477
     affiliation: 3
   - name: Justin J. J. van der Hooft
-  - orcid: 0000-0002-9340-5511
+    orcid: 0000-0002-9340-5511
     affiliation: 2
   - name: Adam Belloum
     orcid: 0000-0001-6306-6937
@@ -42,9 +42,9 @@ authors:
 affiliations:
  - name: Netherlands eScience Center, Science Park 140, 1098XG Amsterdam, The Netherlands
    index: 1
- - name: Wageningen University and Research,...
+ - name: Bioinformatics Group, Plant Sciences Group, University of Wageningen, Wageningen, the Netherlands
    index: 2
- - name: University of Glasgow
+ - name: School of Computing Science, University of Glasgow, Glasgow, United Kingdom
    index: 3
 date: 16 June 2020
 bibliography: paper.bib
