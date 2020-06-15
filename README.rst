@@ -86,7 +86,9 @@ Installation
 Install matchms from Anaconda Cloud with
 
 .. code-block:: console
-
+  # install matchms in a new virtual environment to avoid dependency clashes
+  conda env create --name matchms
+  conda activate matchms
   conda install --channel nlesc --channel bioconda --channel conda-forge matchms
 
 Example
