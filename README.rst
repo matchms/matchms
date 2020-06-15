@@ -86,6 +86,7 @@ Installation
 Install matchms from Anaconda Cloud with
 
 .. code-block:: console
+
   # install matchms in a new virtual environment to avoid dependency clashes
   conda env create --name matchms python=3.7
   conda activate matchms
