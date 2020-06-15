@@ -65,7 +65,7 @@ Raw data can be imported from commonly used MGF files or more convenient-to-hand
 Matchms contains a large number of metadata cleaning and harmonizing filter functions that can easily be stacked to build a desired pipeline, which can also easily be extend by custom functions wherever needed. Available filters include extensive cleaning, correcting, checking of key metadata fields such as compound name, structure annotations (InChI, Smiles, InchiKey), ionmode, adduct, or charge. 
 
 Matchms further provides functions to derive different similarity scores between spectra. Those include the established spectra-based measures of the cosine score or modified cosine score [@watrous_mass_2012], as well as a number of common similarity measures (Dice, Jaccard, Cosine) between molecular fingerprints (rdkit, morgan1, morgan2, morgan3).
-Matchms easily facilitates deriving similarity measures between large number of spectra at comparably fast speed due to score implementations using the Numba compiler [@LLVM:CGO04]. Addition similarity measures can easily be added using the matchms API. 
+Matchms easily facilitates deriving similarity measures between large number of spectra at comparably fast speed due to score implementations using the Numba compiler [@LLVM:CGO04]. Additional similarity measures can easily be added using the matchms API. 
 The provided API also allows to quickly compare, sort, and inspect query versus reference spectra using either the included similarity scores or added custom measures.
 
 Matchms is freely accessible either as conda package, or in form of source-code on GitHub.
