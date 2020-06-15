@@ -57,16 +57,16 @@ Mass spectrometry data is at the heart of numerable applications in the biomedic
 With growing use of high throughput techniques, but also through joint effort in the research community, fragmentation mass spectrometry datasets are growing in size and number.
 Platforms such as GNPS serve as an open-access hub for sharing of raw, processed, or annotated fragmentation mass spectrometry data (MS/MS) [@Wang2016].
 Without suitable tools, however, full quantitative analysis and exploitation of such datasets remains overly challenging.
-In particular, large collected datasets contain data of wide range of instruments and measurement conditions, and can further contain a significant fraction of inconsistent, or incorrect metadata (annotations).
+In particular, large collected datasets contain data aquired using different instruments and measurement conditions, and can further contain a significant fraction of inconsistent, wrongly labeled, or incorrect metadata (annotations).
 
 Matchms is an open-access Python package to import, process, clean, and compare mass spectrometry data (MS/MS).
 It allows to implement and run an easy-to-follow, easy-to-reproduce workflow from raw mass spectra to pre- and post-processed spectral data. 
 Raw data can be imported from commonly used MGF files or more convenient-to-handle json files. 
-Matchms contains a large number of metadata cleaning and harmonizing filter functions that can easily be stacked to build a desired pipeline, which can also easily be extend by custom functions wherever needed. Available filters include extensive cleaning, correcting, checking of key metadata fields such as compound name, structure annotations (InChI, Smiles, InchiKey), ionmode, adduct, or charge. 
+Matchms contains a large number of metadata cleaning and harmonizing filter functions that can easily be stacked to construct a desired pipeline, which can also easily be extended by custom functions wherever needed. Available filters include extensive cleaning, correcting, checking of key metadata fields such as compound name, structure annotations (InChI, Smiles, InchiKey), ionmode, adduct, or charge. 
 
 Matchms further provides functions to derive different similarity scores between spectra. Those include the established spectra-based measures of the cosine score or modified cosine score [@watrous_mass_2012], as well as a number of common similarity measures (Dice, Jaccard, Cosine) between molecular fingerprints (rdkit, morgan1, morgan2, morgan3).
 Matchms easily facilitates deriving similarity measures between large number of spectra at comparably fast speed due to score implementations using the Numba compiler [@LLVM:CGO04]. Additional similarity measures can easily be added using the matchms API. 
-The provided API also allows to quickly compare, sort, and inspect query versus reference spectra using either the included similarity scores or added custom measures.
+The provided API also allows to quickly compare, sort, and inspect query versus reference spectra using either the included similarity scores or added custom measures (see also \autoref{fig:flowchart}).
 
 Matchms is freely accessible either as conda package (https://anaconda.org/nlesc/matchms), or in form of source-code on GitHub (https://github.com/matchms/matchms).
 All main functions are covered by tests and continuous integration to offer reliable functionality.
