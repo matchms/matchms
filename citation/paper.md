@@ -1,11 +1,11 @@
 ---
-title: “matchm - Processing and similarity measures of mass spectrometry data."
+title: matchms - processing and similarity evaluation of mass spectrometry data.
 tags:
   - Python
   - mass spectrometry
   - metadata cleaning
   - data processing
-  - similarity evaluation
+  - similarity measures
 
 authors:
   - name: Florian Huber
