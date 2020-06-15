@@ -68,7 +68,7 @@ Matchms further provides functions to derive different similarity scores between
 Matchms easily facilitates deriving similarity measures between large number of spectra at comparably fast speed due to score implementations using the Numba compiler [@LLVM:CGO04]. Additional similarity measures can easily be added using the matchms API. 
 The provided API also allows to quickly compare, sort, and inspect query versus reference spectra using either the included similarity scores or added custom measures.
 
-Matchms is freely accessible either as conda package, or in form of source-code on GitHub.
+Matchms is freely accessible either as conda package (https://anaconda.org/nlesc/matchms), or in form of source-code on GitHub (https://github.com/matchms/matchms).
 All main functions are covered by tests and continuous integration to offer reliable functionality.
 We explicitly value future contributions from a mass spectrometry interested community and hope that matchms can serve as a reliable and accessible entry point to handling complex mass spectrometry dataset using Python. 
 
