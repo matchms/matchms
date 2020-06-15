@@ -77,17 +77,45 @@ All main functions are covered by tests and continuous integration to offer reli
 We explicitly value future contributions from a mass spectrometry interested community and hope that matchms can serve as a reliable and accessible entry point to handling complex mass spectrometry dataset using Python. 
 
 
-# Figures
-
-Figures can be included like this:
-![Caption for example figure.\label{fig:example}](figure.png)
-and referenced from text using \autoref{fig:example}.
-
-Fenced code blocks are rendered with syntax highlighting:
+# Example workshop
+A typical workflow with matchms will look as indicated in Fig. \autoref{fig:flowchart}, or as described in the following code example.
 ```python
-for n in range(10):
-    yield f(n)
-```	
+from matchms.importing import load_from_mgf
+from matchms.filtering import default_filters
+from matchms.filtering import normalize_intensities
+from matchms import calculate_scores
+from matchms.similarity import CosineGreedy
+
+# Read spectrums from a MGF formatted file
+file = load_from_mgf("all_your_spectrums.mgf")
+
+# Apply filters to clean and enhance each spectrum
+spectrums = []
+for spectrum in file:
+    spectrum = default_filters(spectrum)
+    spectrum = normalize_intensities(spectrum)
+    spectrums.append(spectrum)
+
+# Calculate Cosine similarity scores between all spectrums
+scores = calculate_scores(references=spectrums,
+                          queries=spectrums,
+                          similarity_function=CosineGreedy())
+
+# Print the calculated scores for each spectrum pair
+for score in scores:
+    (reference, query, score, n_matching) = score
+    # Ignore scores between same spectrum and
+    # pairs which have less than 20 peaks in common
+    if reference != query and n_matching >= 20:
+        print(f"Reference scan id: {reference.metadata['scans']}")
+        print(f"Query scan id: {query.metadata['scans']}")
+        print(f"Score: {score:.4f}")
+        print(f"Number of matching peaks: {n_matching}")
+        print("----------------------------")
+```
+
+
+![Flowchart of matchms workflow. Reference and query spectrums are filtered using the same set of set filters (here: filter A and filter B). Once filtered, every reference spectrum is compared to every query spectrum using the matchms.Scores object. \label{fig:flowchart}](flowchart_matchms.png)
 
 
 # References
