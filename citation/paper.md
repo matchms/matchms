@@ -1,5 +1,5 @@
 ---
-title: “matchms: Processing and similarity measures of mass spectrometry data."
+title: “matchm - Processing and similarity measures of mass spectrometry data."
 tags:
   - Python
   - mass spectrometry
