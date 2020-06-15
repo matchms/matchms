@@ -25,10 +25,10 @@ authors:
     affiliation: 1
   - name: Simon Rogers
     orcid: 0000-0003-3578-4477
-    affiliation: 3
+    affiliation: 2
   - name: Justin J. J. van der Hooft
     orcid: 0000-0002-9340-5511
-    affiliation: 2
+    affiliation: 3
   - name: Adam Belloum
     orcid: 0000-0001-6306-6937
     affiliation: 1
@@ -42,17 +42,13 @@ authors:
 affiliations:
  - name: Netherlands eScience Center, Science Park 140, 1098XG Amsterdam, The Netherlands
    index: 1
- - name: Bioinformatics Group, Plant Sciences Group, University of Wageningen, Wageningen, the Netherlands
-   index: 2
  - name: School of Computing Science, University of Glasgow, Glasgow, United Kingdom
+   index: 2
+ - name: Bioinformatics Group, Plant Sciences Group, University of Wageningen, Wageningen, the Netherlands
    index: 3
 date: 16 June 2020
 bibliography: paper.bib
 
-# Optional fields if submitting to a AAS journal too, see this blog post:
-# https://blog.joss.theoj.org/2018/12/a-new-collaboration-with-aas-publishing
-aas-doi: 10.3847/xxxxx <- update this with the DOI from AAS once you know it.
-aas-journal: Astrophysical Journal <- The name of the AAS journal.
 ---
 
 # Summary
@@ -77,8 +73,8 @@ All main functions are covered by tests and continuous integration to offer reli
 We explicitly value future contributions from a mass spectrometry interested community and hope that matchms can serve as a reliable and accessible entry point to handling complex mass spectrometry dataset using Python. 
 
 
-# Example workshop
-A typical workflow with matchms will look as indicated in Fig. \autoref{fig:flowchart}, or as described in the following code example.
+# Example workflow
+A typical workflow with matchms will look as indicated in \autoref{fig:flowchart}, or as described in the following code example.
 ```python
 from matchms.importing import load_from_mgf
 from matchms.filtering import default_filters
