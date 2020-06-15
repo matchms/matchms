@@ -70,7 +70,7 @@ The provided API also allows to quickly compare, sort, and inspect query versus 
 
 Matchms is freely accessible either as conda package (https://anaconda.org/nlesc/matchms), or in form of source-code on GitHub (https://github.com/matchms/matchms).
 All main functions are covered by tests and continuous integration to offer reliable functionality.
-We explicitly value future contributions from a mass spectrometry interested community and hope that matchms can serve as a reliable and accessible entry point to handling complex mass spectrometry dataset using Python. 
+We explicitly value future contributions from a mass spectrometry interested community and hope that matchms can serve as a reliable and accessible entry point for handling complex mass spectrometry datasets using Python. 
 
 
 # Example workflow
