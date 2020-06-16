@@ -64,7 +64,8 @@ It allows to implement and run an easy-to-follow, easy-to-reproduce workflow fro
 Raw data can be imported from commonly used MGF files (via pyteomics [@levitsky_pyteomics_2019][@goloborodko_pyteomicspython_2013]) or more convenient-to-handle json files. 
 Matchms contains a large number of metadata cleaning and harmonizing filter functions that can easily be stacked to construct a desired pipeline, which can also easily be extended by custom functions wherever needed. Available filters include extensive cleaning, correcting, checking of key metadata fields such as compound name, structure annotations (InChI, Smiles, InchiKey), ionmode, adduct, or charge. 
 
-Matchms further provides functions to derive different similarity scores between spectra. Those include the established spectra-based measures of the cosine score or modified cosine score [@watrous_mass_2012], as well as a number of common similarity measures (Dice, Jaccard, Cosine) between molecular fingerprints (rdkit, morgan1, morgan2, morgan3).
+Matchms further provides functions to derive different similarity scores between spectra. Those include the established spectra-based measures of the cosine score or modified cosine score [@watrous_mass_2012].
+The package also offers fast implementations of common similarity measures (Dice, Jaccard, Cosine) that can be used to compute similarity scores between molecular fingerprints (rdkit, morgan1, morgan2, morgan3, all derived through rdkit [@rdkit]).
 Matchms easily facilitates deriving similarity measures between large number of spectra at comparably fast speed due to score implementations based on Numpy [@van_der_walt_numpy_2011], Scipy [@2020SciPy-NMeth], and Numba [@LLVM:CGO04]. Additional similarity measures can easily be added using the matchms API. 
 The provided API also allows to quickly compare, sort, and inspect query versus reference spectra using either the included similarity scores or added custom measures (see also \autoref{fig:flowchart}).
 
@@ -111,7 +112,7 @@ for score in scores:
 ```
 
 
-![Flowchart of matchms workflow. Reference and query spectrums are filtered using the same set of set filters (here: filter A and filter B). Once filtered, every reference spectrum is compared to every query spectrum using the matchms.Scores object. \label{fig:flowchart}](flowchart_matchms.png)
+![Flowchart of matchms workflow. Reference and query spectrums are filtered using the same set of set filters (here: filter A and filter B). Once filtered, every reference spectrum is compared to every query spectrum using the _matchms.Scores_ object. \label{fig:flowchart}](flowchart_matchms.png)
 
 
 # References
