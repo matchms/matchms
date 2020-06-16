@@ -188,5 +188,8 @@
                 <text x="1401.12px" y="1164.69px" style="font-family:'Calibri', sans-serif;font-size:41.667px;">• <tspan x="1476.12px " y="1164.69px ">A</tspan>dd neutr<tspan x="1645.58px 1665.54px " y="1164.69px 1164.69px ">al</tspan> losses within se<tspan x="1947.97px 1961.92px " y="1164.69px 1164.69px ">t </tspan>m/z r<tspan x="2060.27px 2080.23px 2102.12px 2121.39px 2142.12px " y="1164.69px 1164.69px 1164.69px 1164.69px 1164.69px ">ange.</tspan></text>
             </g>
         </g>
+        <g transform="matrix(0.998267,0,0,1,693.418,472.441)">
+            <rect x="620.477" y="265.811" width="806.695" height="247.461" style="fill:none;stroke:rgb(0,174,239);stroke-width:7.62px;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;stroke-dasharray:0.76,15.24,0,0;"/>
+        </g>
     </g>
 </svg>
