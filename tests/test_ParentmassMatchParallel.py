@@ -1,6 +1,7 @@
 import numpy
 from matchms import Spectrum
 from matchms.similarity import ParentmassMatchParallel
+from matchms.similarity.ParentmassMatchParallel import calculate_parentmass_scores
 
 
 def test_parentmass_match():
@@ -23,7 +24,8 @@ def test_parentmass_match():
 
     similarity_score = ParentmassMatchParallel()
     scores = similarity_score([spectrum_1, spectrum_2], [spectrum_a, spectrum_b])
-    assert numpy.all(scores == numpy.array([[0., 0.], [0., 0.]])), "Expected different score."
+    assert numpy.all(scores == numpy.array([[0., 0.],
+                                            [0., 0.]])), "Expected different scores."
 
 
 def test_parentmass_match_tolerance2():
@@ -46,4 +48,25 @@ def test_parentmass_match_tolerance2():
 
     similarity_score = ParentmassMatchParallel(tolerance=2.0)
     scores = similarity_score([spectrum_1, spectrum_2], [spectrum_a, spectrum_b])
-    assert numpy.all(scores == numpy.array([[1., 1.], [1., 0.]])), "Expected different score."
+    assert numpy.all(scores == numpy.array([[1., 1.],
+                                            [1., 0.]])), "Expected different scores."
+
+
+def test_calculate_parentmass_scores_compiled():
+    """Test the underlying score function (numba compiled)."""
+    parentmasses_ref = numpy.asarray([101, 200, 300])
+    parentmasses_query = numpy.asarray([100, 301])
+    scores = calculate_parentmass_scores(parentmasses_ref, parentmasses_query, tolerance=2.0)
+    assert numpy.all(scores == numpy.array([[1., 0.],
+                                            [0., 0.],
+                                            [0., 1.]])), "Expected different scores."
+
+
+def test_calculate_parentmass_scores():
+    """Test the underlying score function (non-compiled)."""
+    parentmasses_ref = numpy.asarray([101, 200, 300])
+    parentmasses_query = numpy.asarray([100, 301])
+    scores = calculate_parentmass_scores.py_func(parentmasses_ref, parentmasses_query, tolerance=2.0)
+    assert numpy.all(scores == numpy.array([[1., 0.],
+                                            [0., 0.],
+                                            [0., 1.]])), "Expected different scores."
