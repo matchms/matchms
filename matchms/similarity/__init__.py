@@ -5,6 +5,7 @@ from .CosineHungarian import CosineHungarian
 from .FingerprintSimilarityParallel import FingerprintSimilarityParallel
 from .IntersectMz import IntersectMz
 from .ModifiedCosine import ModifiedCosine
+from .ParentmassMatch import ParentmassMatch
 
 
 __all__ = [
@@ -14,4 +15,5 @@ __all__ = [
     "FingerprintSimilarityParallel",
     "IntersectMz",
     "ModifiedCosine",
+    "ParentmassMatch",
 ]
