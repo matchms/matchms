@@ -36,5 +36,5 @@ def calculate_parentmass_scores(parentmasses_ref, parentmasses_query, tolerance)
     scores = numpy.zeros((len(parentmasses_ref), len(parentmasses_query)))
     for i, parentmass_ref in enumerate(parentmasses_ref):
         for j, parentmass_query in enumerate(parentmasses_query):
-            scores[i,j] = 1 if (abs(parentmass_ref-parentmass_query) <= tolerance) else 0
+            scores[i, j] = 1 if (abs(parentmass_ref-parentmass_query) <= tolerance) else 0
     return scores
