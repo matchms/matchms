@@ -1,7 +1,8 @@
 import numpy
 from matchms import Spectrum
 from matchms.similarity import ParentmassMatchParallel
-from matchms.similarity.ParentmassMatchParallel import calculate_parentmass_scores
+from matchms.similarity.ParentmassMatchParallel import \
+    calculate_parentmass_scores
 
 
 def test_parentmass_match():
