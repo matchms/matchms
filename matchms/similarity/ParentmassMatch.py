@@ -4,7 +4,7 @@ from matchms.typing import SpectrumType
 class ParentmassMatch:
     """Return 1 if spectrums match in parent mass (within tolerance), and 0 otherwise."""
 
-    def __init__(self, tolerance: float = 0.1) -> int:
+    def __init__(self, tolerance: float = 0.1):
         """
         Parameters:
         ----------
@@ -13,7 +13,7 @@ class ParentmassMatch:
         """
         self.tolerance = tolerance
 
-    def __call__(self, spectrum: SpectrumType, reference_spectrum: SpectrumType) -> float:
+    def __call__(self, spectrum: SpectrumType, reference_spectrum: SpectrumType) -> int:
         """Compare parent masses"""
         parentmass = spectrum.get("parentmass")
         parentmass_ref = reference_spectrum.get("parentmass")
