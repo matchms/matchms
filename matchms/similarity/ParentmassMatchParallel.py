@@ -23,7 +23,9 @@ class ParentmassMatchParallel:
             """Collect parentmasses."""
             parentmasses = []
             for spectrum in spectrums:
-                parentmasses.append(spectrum.get("parentmass"))
+                parentmass = spectrum.get("parent_mass")
+                assert parentmass is not None, "Missing parent mass."
+                parentmasses.append(parentmass)
             return numpy.asarray(parentmasses)
 
         parentmasses_ref = collect_parentmasses(reference_spectrums)

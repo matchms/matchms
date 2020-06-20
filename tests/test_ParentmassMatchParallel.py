@@ -9,19 +9,19 @@ def test_parentmass_match():
     "Test with default tolerance."
     spectrum_1 = Spectrum(mz=numpy.array([], dtype="float"),
                           intensities=numpy.array([], dtype="float"),
-                          metadata={"parentmass": 100.0})
+                          metadata={"parent_mass": 100.0})
 
     spectrum_2 = Spectrum(mz=numpy.array([], dtype="float"),
                           intensities=numpy.array([], dtype="float"),
-                          metadata={"parentmass": 101.0})
+                          metadata={"parent_mass": 101.0})
 
     spectrum_a = Spectrum(mz=numpy.array([], dtype="float"),
                           intensities=numpy.array([], dtype="float"),
-                          metadata={"parentmass": 99.0})
+                          metadata={"parent_mass": 99.0})
 
     spectrum_b = Spectrum(mz=numpy.array([], dtype="float"),
                           intensities=numpy.array([], dtype="float"),
-                          metadata={"parentmass": 98.0})
+                          metadata={"parent_mass": 98.0})
 
     similarity_score = ParentmassMatchParallel()
     scores = similarity_score([spectrum_1, spectrum_2], [spectrum_a, spectrum_b])
@@ -33,19 +33,19 @@ def test_parentmass_match_tolerance2():
     """Test with tolerance=2."""
     spectrum_1 = Spectrum(mz=numpy.array([], dtype="float"),
                           intensities=numpy.array([], dtype="float"),
-                          metadata={"parentmass": 100.0})
+                          metadata={"parent_mass": 100.0})
 
     spectrum_2 = Spectrum(mz=numpy.array([], dtype="float"),
                           intensities=numpy.array([], dtype="float"),
-                          metadata={"parentmass": 101.0})
+                          metadata={"parent_mass": 101.0})
 
     spectrum_a = Spectrum(mz=numpy.array([], dtype="float"),
                           intensities=numpy.array([], dtype="float"),
-                          metadata={"parentmass": 99.0})
+                          metadata={"parent_mass": 99.0})
 
     spectrum_b = Spectrum(mz=numpy.array([], dtype="float"),
                           intensities=numpy.array([], dtype="float"),
-                          metadata={"parentmass": 98.0})
+                          metadata={"parent_mass": 98.0})
 
     similarity_score = ParentmassMatchParallel(tolerance=2.0)
     scores = similarity_score([spectrum_1, spectrum_2], [spectrum_a, spectrum_b])

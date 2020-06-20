@@ -15,8 +15,8 @@ class ParentmassMatch:
 
     def __call__(self, spectrum: SpectrumType, reference_spectrum: SpectrumType) -> int:
         """Compare parent masses"""
-        parentmass = spectrum.get("parentmass")
-        parentmass_ref = reference_spectrum.get("parentmass")
+        parentmass = spectrum.get("parent_mass")
+        parentmass_ref = reference_spectrum.get("parent_mass")
         assert parentmass is not None and parentmass_ref is not None, "Missing parent mass."
         if abs(parentmass-parentmass_ref) <= self.tolerance:
             return 1

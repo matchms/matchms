@@ -8,11 +8,11 @@ def test_parentmass_match():
     "Test with default tolerance."
     spectrum_1 = Spectrum(mz=numpy.array([], dtype="float"),
                           intensities=numpy.array([], dtype="float"),
-                          metadata={"parentmass": 100.0})
+                          metadata={"parent_mass": 100.0})
 
     spectrum_2 = Spectrum(mz=numpy.array([], dtype="float"),
                           intensities=numpy.array([], dtype="float"),
-                          metadata={"parentmass": 101.0})
+                          metadata={"parent_mass": 101.0})
 
     similarity_score = ParentmassMatch()
     score = similarity_score(spectrum_1, spectrum_2)
@@ -23,11 +23,11 @@ def test_parentmass_match_tolerance2():
     "Test with tolerance > difference."
     spectrum_1 = Spectrum(mz=numpy.array([], dtype="float"),
                           intensities=numpy.array([], dtype="float"),
-                          metadata={"parentmass": 100.0})
+                          metadata={"parent_mass": 100.0})
 
     spectrum_2 = Spectrum(mz=numpy.array([], dtype="float"),
                           intensities=numpy.array([], dtype="float"),
-                          metadata={"parentmass": 101.0})
+                          metadata={"parent_mass": 101.0})
 
     similarity_score = ParentmassMatch(tolerance=2.0)
     score = similarity_score(spectrum_1, spectrum_2)
@@ -38,7 +38,7 @@ def test_parentmass_match_missing_parentmass():
     "Test with missing parentmass."
     spectrum_1 = Spectrum(mz=numpy.array([], dtype="float"),
                           intensities=numpy.array([], dtype="float"),
-                          metadata={"parentmass": 100.0})
+                          metadata={"parent_mass": 100.0})
 
     spectrum_2 = Spectrum(mz=numpy.array([], dtype="float"),
                           intensities=numpy.array([], dtype="float"),
