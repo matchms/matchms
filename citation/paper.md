@@ -115,4 +115,32 @@ for score in scores:
 
 ![Matchms provided a range of filter functions to process spectrum peaks and metadata. Filters can easily be stacked and combined to build a desired pipeline. The API also makes it easy to extend customer pipelines by adding own filter functions. \label{fig:filtering}](filtering_sketch.png)
 
+# Processing spectrum peaks and plotting
+Matchms provides numerous filters to process mass spectra peaks. Below a simple example to remove low intensity peaks from a spectrum (\autoref{fig:peak_filtering}).
+```python
+from matchms.filtering import require_minimum_number_of_peaks
+from matchms.filtering import select_by_mz
+from matchms.filtering import select_by_relative_intensity
+
+def post_process(s):
+    s = select_by_mz(s, mz_from=0, mz_to=1000)
+    s = select_by_relative_intensity(s, intensity_from=0.001)
+    s = require_minimum_number_of_peaks(s, n_required=10)
+    return s
+
+# Apply post processing steps to the data
+spectrum_postprocessed = post_process(spectrum_raw)
+
+# Plot raw spectrum (all and zoomed in)
+spectrum_raw.plot()
+spectrum_raw.plot(intensity_to=0.02)
+
+# Plot processed spectrum (all and zoomed in)
+spectrum_postprocessed.plot()
+spectrum_postprocessed.plot(intensity_to=0.02)
+```
+
+![Example of matchms peak filtering applied to an actual spectrum using ``select_by_relative_intensity`` to remove peaks of low relative intensity. Spectra are plotted using the provided ``spectrum.plot()`` function. \label{fig:peak_filtering}](peak_filtering.png)
+
+
 # References
