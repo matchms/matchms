@@ -31,7 +31,7 @@ def test_parentmass_match_tolerance2():
 
     similarity_score = ParentmassMatch(tolerance=2.0)
     score = similarity_score(spectrum_1, spectrum_2)
-    assert score == 1, "Expected different score."
+    assert score, "Expected different score."
 
 
 def test_parentmass_match_missing_parentmass():
