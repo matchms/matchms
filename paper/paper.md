@@ -71,6 +71,8 @@ Matchms further provides functions to derive different similarity scores between
 The package also offers fast implementations of common similarity measures (Dice, Jaccard, Cosine) that can be used to compute similarity scores between molecular fingerprints (rdkit, morgan1, morgan2, morgan3, all implemented using rdkit [@rdkit]).
 Matchms easily facilitates deriving similarity measures between large number of spectra at comparably fast speed due to score implementations based on Numpy [@van_der_walt_numpy_2011], Scipy [@2020SciPy-NMeth], and Numba [@LLVM:CGO04]. Additional similarity measures can easily be added using the matchms API. 
 The provided API also allows to quickly compare, sort, and inspect query versus reference spectra using either the included similarity scores or added custom measures.
+The API was designed to be easily extensible so that users can add their own filters for spectra preocessing, or their own similarity functions for spectral comparisons.
+The present set of filters and similarity functions was mostly geared towards smaller molecules and natural compounds, but it could easily be extended by functions specific to larger peptides or proteins.
 
 Matchms is freely accessible either as conda package (https://anaconda.org/nlesc/matchms), or in form of source-code on GitHub (https://github.com/matchms/matchms).
 All main functions are covered by tests and continuous integration to offer reliable functionality.
