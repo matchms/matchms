@@ -18,7 +18,4 @@ class ParentmassMatch:
         parentmass = spectrum.get("parent_mass")
         parentmass_ref = reference_spectrum.get("parent_mass")
         assert parentmass is not None and parentmass_ref is not None, "Missing parent mass."
-        if abs(parentmass-parentmass_ref) <= self.tolerance:
-            return 1
-
-        return 0
+        return abs(parentmass-parentmass_ref) <= self.tolerance
