@@ -6,6 +6,7 @@ tags:
   - metadata cleaning
   - data processing
   - similarity measures
+  - metabolomics
 
 authors:
   - name: Florian Huber
