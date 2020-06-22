@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added similarity score based on comparing parent masses [#79](https://github.com/matchms/matchms/pull/79)
+
 ## [0.4.0] - 2020-06-11
 
 ### Added
