@@ -56,7 +56,7 @@ bibliography: paper.bib
 
 Mass spectrometry data is at the heart of numerable applications in the biomedical and life sciences.
 With growing use of high throughput techniques, but also through joint effort in the research community, fragmentation mass spectrometry datasets are growing in size and number.
-Platforms such as GNPS serve as an open-access hub for sharing of raw, processed, or annotated fragmentation mass spectrometry data (MS/MS) [@Wang2016].
+Platforms such as GNPS [@Wang2016] or MetaboLights [@haug_metabolights_2020] serve as an open-access hub for sharing of raw, processed, or annotated fragmentation mass spectrometry data (MS/MS).
 Without suitable tools, however, full quantitative analysis and exploitation of such datasets remains overly challenging.
 In particular, large collected datasets contain data aquired using different instruments and measurement conditions, and can further contain a significant fraction of inconsistent, wrongly labeled, or incorrect metadata (annotations).
 
@@ -123,22 +123,22 @@ from matchms.filtering import require_minimum_number_of_peaks
 from matchms.filtering import select_by_mz
 from matchms.filtering import select_by_relative_intensity
 
-def post_process(s):
+def process_peaks(s):
     s = select_by_mz(s, mz_from=0, mz_to=1000)
     s = select_by_relative_intensity(s, intensity_from=0.001)
     s = require_minimum_number_of_peaks(s, n_required=10)
     return s
 
-# Apply post processing steps to the data
-spectrum_postprocessed = post_process(spectrum_raw)
+# Apply processing steps to spectra (here to a single "spectrum_raw")
+spectrum_processed = process_peaks(spectrum_raw)
 
 # Plot raw spectrum (all and zoomed in)
 spectrum_raw.plot()
 spectrum_raw.plot(intensity_to=0.02)
 
 # Plot processed spectrum (all and zoomed in)
-spectrum_postprocessed.plot()
-spectrum_postprocessed.plot(intensity_to=0.02)
+spectrum_processed.plot()
+spectrum_processed.plot(intensity_to=0.02)
 ```
 
 ![Example of matchms peak filtering applied to an actual spectrum using ``select_by_relative_intensity`` to remove peaks of low relative intensity. Spectra are plotted using the provided ``spectrum.plot()`` function. \label{fig:peak_filtering}](peak_filtering.png)
