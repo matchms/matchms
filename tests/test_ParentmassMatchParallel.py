@@ -25,8 +25,8 @@ def test_parentmass_match():
 
     similarity_score = ParentmassMatchParallel()
     scores = similarity_score([spectrum_1, spectrum_2], [spectrum_a, spectrum_b])
-    assert numpy.all(scores == numpy.array([[0., 0.],
-                                            [0., 0.]])), "Expected different scores."
+    assert numpy.all(scores == numpy.array([[False, False],
+                                            [False, False]])), "Expected different scores."
 
 
 def test_parentmass_match_tolerance2():
