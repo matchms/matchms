@@ -2,7 +2,7 @@ from matchms.typing import SpectrumType
 
 
 class ParentmassMatch:
-    """Return 1 if spectrums match in parent mass (within tolerance), and 0 otherwise."""
+    """Return True if spectrums match in parent mass (within tolerance), and False otherwise."""
 
     def __init__(self, tolerance: float = 0.1):
         """
