@@ -68,6 +68,6 @@ def test_calculate_parentmass_scores():
     parentmasses_ref = numpy.asarray([101, 200, 300])
     parentmasses_query = numpy.asarray([100, 301])
     scores = calculate_parentmass_scores.py_func(parentmasses_ref, parentmasses_query, tolerance=2.0)
-    assert numpy.all(scores == numpy.array([[1., 0.],
-                                            [0., 0.],
-                                            [0., 1.]])), "Expected different scores."
+    assert numpy.all(scores == numpy.array([[True, False],
+                                            [False, False],
+                                            [False, True]])), "Expected different scores."
