@@ -13,7 +13,7 @@ class ParentmassMatch:
         """
         self.tolerance = tolerance
 
-    def __call__(self, spectrum: SpectrumType, reference_spectrum: SpectrumType) -> int:
+    def __call__(self, spectrum: SpectrumType, reference_spectrum: SpectrumType) -> bool:
         """Compare parent masses"""
         parentmass = spectrum.get("parent_mass")
         parentmass_ref = reference_spectrum.get("parent_mass")
