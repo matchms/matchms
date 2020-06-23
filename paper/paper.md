@@ -56,7 +56,7 @@ bibliography: paper.bib
 
 Mass spectrometry data is at the heart of numerable applications in the biomedical and life sciences.
 With growing use of high throughput techniques researchers need to analyse larger and more complex datasets. In particular through joint effort in the research community, fragmentation mass spectrometry datasets are growing in size and number.
-Platforms such as GNPS [@Wang2016] or MetaboLights [@haug_metabolights_2020] serve as an open-access hub for sharing of raw, processed, or annotated fragmentation mass spectrometry data (MS/MS).
+Platforms such as MassBank [@horai_massbank_2010], GNPS [@Wang2016] or MetaboLights [@haug_metabolights_2020] serve as an open-access hub for sharing of raw, processed, or annotated fragmentation mass spectrometry data (MS/MS).
 Without suitable tools, however, full quantitative analysis and exploitation of such datasets remains overly challenging.
 In particular, large collected datasets contain data aquired using different instruments and measurement conditions, and can further contain a significant fraction of inconsistent, wrongly labeled, or incorrect metadata (annotations).
 
