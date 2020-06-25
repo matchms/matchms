@@ -65,7 +65,7 @@ It allows to implement and run an easy-to-follow, easy-to-reproduce workflow fro
 Raw data can be imported from commonly used MGF files (via pyteomics [@levitsky_pyteomics_2019][@goloborodko_pyteomicspython_2013]) or more convenient-to-handle json files. 
 Matchms contains a large number of metadata cleaning and harmonizing filter functions that can easily be stacked to construct a desired pipeline (\autoref{fig:filtering}), which can also easily be extended by custom functions wherever needed. Available filters include extensive cleaning, correcting, checking of key metadata fields such as compound name, structure annotations (InChI, Smiles, InchiKey), ionmode, adduct, or charge. 
 
-![Flowchart of matchms workflow. Reference and query spectrums are filtered using the same set of set filters (here: filter A and filter B). Once filtered, every reference spectrum is compared to every query spectrum using the _matchms.Scores_ object. \label{fig:flowchart}](flowchart_matchms.png)
+![Flowchart of matchms workflow. Reference and query spectrums are filtered using the same set of set filters (here: filter A and filter B). Once filtered, every reference spectrum is compared to every query spectrum using the ``matchms.Scores`` object. \label{fig:flowchart}](flowchart_matchms.png)
 
 Matchms further provides functions to derive different similarity scores between spectra. Those include the established spectra-based measures of the cosine score or modified cosine score [@watrous_mass_2012].
 The package also offers fast implementations of common similarity measures (Dice, Jaccard, Cosine) that can be used to compute similarity scores between molecular fingerprints (rdkit, morgan1, morgan2, morgan3, all implemented using rdkit [@rdkit]).
@@ -74,7 +74,7 @@ The provided API also allows to quickly compare, sort, and inspect query versus 
 The API was designed to be easily extensible so that users can add their own filters for spectra preocessing, or their own similarity functions for spectral comparisons.
 The present set of filters and similarity functions was mostly geared towards smaller molecules and natural compounds, but it could easily be extended by functions specific to larger peptides or proteins.
 
-Matchms is freely accessible either as conda package (https://anaconda.org/nlesc/matchms), or in form of source-code on GitHub (https://github.com/matchms/matchms).
+Matchms is freely accessible either as conda package (https://anaconda.org/nlesc/matchms), or in form of source-code on GitHub (https://github.com/matchms/matchms). For further code examples and documentation see https://matchms.readthedocs.io/en/latest/.
 All main functions are covered by tests and continuous integration to offer reliable functionality.
 We explicitly value future contributions from a mass spectrometry interested community and hope that matchms can serve as a reliable and accessible entry point for handling complex mass spectrometry datasets using Python. 
 
