@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 2126 1536" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;">
+    <g id="Layer1" transform="matrix(1,0,0,1,-690.945,-472.441)">
+        <g transform="matrix(1.31249,0,0,1.31249,547.36,-706.678)">
+            <g id="path11041-2-5-8-1-09-0-8-2-0" transform="matrix(2.37792,0,0,2.37792,32.9465,508.448)">
+                <path d="M90.142,326.037L90.14,306.364" style="fill:none;fill-rule:nonzero;stroke:rgb(49,149,117);stroke-width:1.74px;"/>
+            </g>
+            <g id="path11041-5-2-8-6-5-8-2-9-6-6" transform="matrix(2.37792,0,0,2.37792,32.9465,508.448)">
+                <path d="M69.464,326.143L69.463,321.217" style="fill:none;fill-rule:nonzero;stroke:rgb(49,149,117);stroke-width:1.74px;"/>
+            </g>
+            <g id="path11020-5-5-7-3-3-8-6" transform="matrix(2.37792,0,0,2.37792,32.9465,508.448)">
+                <path d="M117.07,326.582L117.087,289.091" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:1.74px;"/>
+            </g>
+            <g id="path11041-20-3-4-1-6-5-3" transform="matrix(2.37792,0,0,2.37792,32.9465,508.448)">
+                <path d="M109.418,326.509L109.417,307.451" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:1.74px;"/>
+            </g>
+            <g id="path11041-5-5-8-8-6-2-5-6" transform="matrix(2.37792,0,0,2.37792,32.9465,508.448)">
+                <path d="M95.065,326.347L95.064,296.048" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:1.74px;"/>
+            </g>
+            <g id="path11041-2-2-2-9-5-2-0-2" transform="matrix(2.37792,0,0,2.37792,32.9465,508.448)">
+                <path d="M90.142,326.037L90.14,304.575" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:1.74px;"/>
+            </g>
+            <g id="path11041-5-7-45-2-2-3-5-0-6" transform="matrix(2.37792,0,0,2.37792,32.9465,508.448)">
+                <path d="M75.372,326.143L75.371,308.928" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:1.74px;"/>
+            </g>
+            <g id="path11041-5-2-2-1-5-1-5-6-9" transform="matrix(2.37792,0,0,2.37792,32.9465,508.448)">
+                <path d="M69.464,326.143L69.463,321.217" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:1.74px;"/>
+            </g>
+            <g id="path10545-1-1-9-0-1-5-3-2" transform="matrix(2.37792,0,0,2.37792,32.9465,508.448)">
+                <path d="M53.239,286.735L53.239,328.684" style="fill:none;fill-rule:nonzero;stroke:rgb(122,122,122);stroke-width:1.7px;"/>
+            </g>
+            <g id="path10545-2-2-1-2-22-8-7-7-9" transform="matrix(2.37792,0,0,2.37792,32.9465,508.448)">
+                <path d="M51.396,326.841L126.32,326.037" style="fill:none;fill-rule:nonzero;stroke:rgb(122,122,122);stroke-width:1.7px;"/>
+            </g>
+        </g>
+        <g transform="matrix(1.02806,0,0,1.02806,674.381,-668.86)">
+            <text x="128.496px" y="1443.73px" style="font-family:'Calibri-Bold', 'Calibri', sans-serif;font-weight:700;font-size:50px;">spectrum 1 (r<tspan x="404.18px 428.472px 465.728px " y="1443.73px 1443.73px 1443.73px ">aw)</tspan></text>
+        </g>
+        <g transform="matrix(1.02806,0,0,1.02806,1285.6,-548.667)">
+            <text x="128.496px" y="1443.73px" style="font-family:'Calibri-Bold', 'Calibri', sans-serif;font-weight:700;font-size:50px;">ﬁlt<tspan x="185.21px 210.381px " y="1443.73px 1443.73px ">er</tspan> A</text>
+        </g>
+        <g id="path1358-54" transform="matrix(4.37741,0,0,6.65426,440.668,-4060.29)">
+            <g transform="matrix(0.228445,-0,-0,0.15028,57.1746,681.177)">
+                <path d="M678.724,436.82L701.104,448.01L678.724,459.2L678.724,436.82Z"/>
+                <path d="M602.224,448.01L683.2,448.01" style="fill:none;stroke:black;stroke-width:7.46px;"/>
+            </g>
+        </g>
+        <g id="path1358-541" serif:id="path1358-54" transform="matrix(4.32737,0,0,6.65426,745.2,-4060.29)">
+            <g transform="matrix(0.231087,-0,-0,0.15028,-12.5377,681.177)">
+                <path d="M972.458,436.858L994.761,448.01L972.458,459.161L972.458,436.858Z"/>
+                <path d="M897.011,448.01L976.919,448.01" style="fill:none;stroke:black;stroke-width:7.43px;"/>
+            </g>
+        </g>
+        <g transform="matrix(0.701217,0,0,0.506547,954.102,563.115)">
+            <rect x="171.695" y="601.288" width="209.664" height="17.448" style="fill-opacity:0.37;stroke:white;stroke-width:5.81px;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;"/>
+        </g>
+        <g transform="matrix(0.291307,0,0,0.506547,1024.48,580.769)">
+            <rect x="171.695" y="601.288" width="209.664" height="17.448" style="fill:rgb(255,0,0);stroke:white;stroke-width:8.6px;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;"/>
+        </g>
+        <g transform="matrix(0.701217,0,0,0.506547,954.102,616.076)">
+            <rect x="171.695" y="601.288" width="209.664" height="17.448" style="fill-opacity:0.37;stroke:white;stroke-width:5.81px;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;"/>
+        </g>
+        <g transform="matrix(0.114646,0,0,0.506547,1054.81,633.73)">
+            <rect x="171.695" y="601.288" width="209.664" height="17.448" style="fill:rgb(255,0,2);stroke:white;stroke-width:9.67px;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;"/>
+        </g>
+        <g transform="matrix(0.327192,0,0,0.506547,1018.32,651.383)">
+            <rect x="171.695" y="601.288" width="209.664" height="17.448" style="fill-opacity:0.37;stroke:white;stroke-width:8.33px;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;"/>
+        </g>
+        <g transform="matrix(1.02806,0,0,0.88268,642.316,340.278)">
+            <rect x="402.982" y="586.203" width="176.607" height="136.063" style="fill:none;stroke:black;stroke-width:3.71px;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;"/>
+        </g>
+        <g transform="matrix(1.02806,0,0,1.02806,672.373,-450.993)">
+            <text x="128.496px" y="1443.73px" style="font-family:'Calibri', sans-serif;font-size:50px;">peak<tspan x="225.859px " y="1443.73px ">s</tspan></text>
+        </g>
+        <g transform="matrix(1.02806,0,0,1.02806,915.279,-450.993)">
+            <text x="128.496px" y="1443.73px" style="font-family:'Calibri', sans-serif;font-size:50px;">me<tspan x="193.047px 209.185px 233.135px 259.404px 282.891px 299.028px " y="1443.73px 1443.73px 1443.73px 1443.73px 1443.73px 1443.73px ">tadata</tspan></text>
+        </g>
+        <g transform="matrix(1.31249,0,0,1.31249,1988.27,-706.678)">
+            <g id="path11041-2-5-8-1-09-0-8-2-01" serif:id="path11041-2-5-8-1-09-0-8-2-0" transform="matrix(2.37792,0,0,2.37792,32.9465,508.448)">
+                <path d="M90.142,326.037L90.14,306.364" style="fill:none;fill-rule:nonzero;stroke:rgb(49,149,117);stroke-width:1.74px;"/>
+            </g>
+            <g id="path11020-5-5-7-3-3-8-61" serif:id="path11020-5-5-7-3-3-8-6" transform="matrix(2.37792,0,0,2.37792,32.9465,508.448)">
+                <path d="M117.07,326.582L117.087,289.091" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:1.74px;"/>
+            </g>
+            <g id="path11041-20-3-4-1-6-5-31" serif:id="path11041-20-3-4-1-6-5-3" transform="matrix(2.37792,0,0,2.37792,32.9465,508.448)">
+                <path d="M109.418,326.509L109.417,307.451" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:1.74px;"/>
+            </g>
+            <g id="path11041-5-5-8-8-6-2-5-61" serif:id="path11041-5-5-8-8-6-2-5-6" transform="matrix(2.37792,0,0,2.37792,32.9465,508.448)">
+                <path d="M95.065,326.347L95.064,296.048" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:1.74px;"/>
+            </g>
+            <g id="path11041-2-2-2-9-5-2-0-21" serif:id="path11041-2-2-2-9-5-2-0-2" transform="matrix(2.37792,0,0,2.37792,32.9465,508.448)">
+                <path d="M90.142,326.037L90.14,304.575" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:1.74px;"/>
+            </g>
+            <g id="path11041-5-7-45-2-2-3-5-0-61" serif:id="path11041-5-7-45-2-2-3-5-0-6" transform="matrix(2.37792,0,0,2.37792,32.9465,508.448)">
+                <path d="M75.372,326.143L75.371,308.928" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:1.74px;"/>
+            </g>
+            <g id="path10545-1-1-9-0-1-5-3-21" serif:id="path10545-1-1-9-0-1-5-3-2" transform="matrix(2.37792,0,0,2.37792,32.9465,508.448)">
+                <path d="M53.239,286.735L53.239,328.684" style="fill:none;fill-rule:nonzero;stroke:rgb(122,122,122);stroke-width:1.7px;"/>
+            </g>
+            <g id="path10545-2-2-1-2-22-8-7-7-91" serif:id="path10545-2-2-1-2-22-8-7-7-9" transform="matrix(2.37792,0,0,2.37792,32.9465,508.448)">
+                <path d="M51.396,326.841L126.32,326.037" style="fill:none;fill-rule:nonzero;stroke:rgb(122,122,122);stroke-width:1.7px;"/>
+            </g>
+        </g>
+        <g transform="matrix(1.02806,0,0,1.02806,2075.28,-668.86)">
+            <text x="128.496px" y="1443.73px" style="font-family:'Calibri-Bold', 'Calibri', sans-serif;font-weight:700;font-size:50px;">spectrum 1 (ﬁlt<tspan x="444.219px 469.39px 486.602px 511.773px " y="1443.73px 1443.73px 1443.73px 1443.73px ">ered</tspan>)</text>
+        </g>
+        <g transform="matrix(1.02806,0,0,0.88268,1797.88,262.088)">
+            <g transform="matrix(0.682076,0,0,0.573874,580.834,341.038)">
+                <rect x="171.695" y="601.288" width="209.664" height="17.448" style="fill-opacity:0.37;stroke:white;stroke-width:5.81px;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;"/>
+            </g>
+            <g transform="matrix(0.682076,0,0,0.573874,580.834,361.038)">
+                <rect x="171.695" y="601.288" width="209.664" height="17.448" style="fill-opacity:0.37;stroke:white;stroke-width:5.81px;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;"/>
+            </g>
+            <g transform="matrix(0.682076,0,0,0.573874,580.834,381.038)">
+                <rect x="171.695" y="601.288" width="209.664" height="17.448" style="fill-opacity:0.37;stroke:white;stroke-width:5.81px;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;"/>
+            </g>
+            <g transform="matrix(0.682076,0,0,0.573874,580.834,401.038)">
+                <rect x="171.695" y="601.288" width="209.664" height="17.448" style="fill-opacity:0.37;stroke:white;stroke-width:5.81px;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;"/>
+            </g>
+            <g transform="matrix(0.682076,0,0,0.573874,580.834,421.038)">
+                <rect x="171.695" y="601.288" width="209.664" height="17.448" style="fill-opacity:0.37;stroke:white;stroke-width:5.81px;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;"/>
+            </g>
+            <g transform="matrix(0.682076,0,0,0.573874,580.834,441.038)">
+                <rect x="171.695" y="601.288" width="209.664" height="17.448" style="fill-opacity:0.37;stroke:white;stroke-width:5.81px;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;"/>
+            </g>
+            <g transform="matrix(1,0,0,1,277.559,88.5827)">
+                <rect x="402.982" y="586.203" width="176.607" height="136.063" style="fill:none;stroke:black;stroke-width:3.71px;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;"/>
+            </g>
+        </g>
+        <g transform="matrix(1.02806,0,0,1.02806,2113.28,-450.993)">
+            <text x="128.496px" y="1443.73px" style="font-family:'Calibri', sans-serif;font-size:50px;">peak<tspan x="225.859px " y="1443.73px ">s</tspan></text>
+        </g>
+        <g transform="matrix(1.02806,0,0,1.02806,2356.19,-450.993)">
+            <text x="128.496px" y="1443.73px" style="font-family:'Calibri', sans-serif;font-size:50px;">me<tspan x="193.047px 209.185px 233.135px 259.404px 282.891px 299.028px " y="1443.73px 1443.73px 1443.73px 1443.73px 1443.73px 1443.73px ">tadata</tspan></text>
+        </g>
+        <g transform="matrix(1.02806,0,0,1.02806,1573.84,-548.667)">
+            <text x="128.496px" y="1443.73px" style="font-family:'Calibri-Bold', 'Calibri', sans-serif;font-weight:700;font-size:50px;">ﬁlt<tspan x="185.21px 210.381px " y="1443.73px 1443.73px ">er</tspan> B</text>
+        </g>
+        <g id="path1358-542" serif:id="path1358-54" transform="matrix(4.32737,0,0,6.65426,1033.44,-4060.29)">
+            <g transform="matrix(0.231087,-0,-0,0.15028,-79.1463,681.177)">
+                <path d="M1260.7,436.858L1283,448.01L1260.7,459.161L1260.7,436.858Z"/>
+                <path d="M1185.25,448.01L1265.16,448.01" style="fill:none;stroke:black;stroke-width:7.43px;"/>
+            </g>
+        </g>
+        <g transform="matrix(1.02806,0,0,1.02806,1863.88,-548.667)">
+            <text x="128.496px" y="1443.73px" style="font-family:'Calibri-Bold', 'Calibri', sans-serif;font-weight:700;font-size:50px;">...</text>
+        </g>
+        <g id="path1358-543" serif:id="path1358-54" transform="matrix(4.32737,0,0,6.65426,1220.48,-4060.29)">
+            <g transform="matrix(0.231087,-0,-0,0.15028,-122.368,681.177)">
+                <path d="M1447.74,436.858L1470.04,448.01L1447.74,459.161L1447.74,436.858Z"/>
+                <path d="M1372.29,448.01L1452.2,448.01" style="fill:none;stroke:black;stroke-width:7.43px;"/>
+            </g>
+        </g>
+        <g transform="matrix(1.02806,0,0,1.02806,1355.96,-669.412)">
+            <text x="128.496px" y="1443.73px" style="font-family:'Calibri-Bold', 'Calibri', sans-serif;font-weight:700;font-size:50px;fill:rgb(0,174,239);">user<tspan x="217.241px 232.549px 259.38px 284.185px 311.895px " y="1443.73px 1443.73px 1443.73px 1443.73px 1443.73px ">-deﬁn</tspan>ed pipeline</text>
+        </g>
+        <g id="Layer2">
+            <g id="text817-2-3-1-7-8-6">
+            </g>
+            <g transform="matrix(1,0,0,1,-613.843,-258.208)">
+                <text x="1364.99px" y="813.538px" style="font-family:'Calibri-Bold', 'Calibri', sans-serif;font-weight:700;font-size:100px;">Spectrum pr<tspan x="1873.92px 1927.68px " y="813.538px 813.538px ">oc</tspan>essing</text>
+            </g>
+            <g transform="matrix(1,0,0,1,-644.827,-302.557)">
+                <text x="1401.12px" y="910.38px" style="font-family:'Calibri', sans-serif;font-size:41.667px;">ma<tspan x="1453.98px 1467.43px 1485.05px " y="910.38px 910.38px 910.38px ">tch</tspan>ms.<tspan x="1566.22px 1588.28px 1597.84px 1611.35px 1632.08px " y="910.38px 910.38px 910.38px 910.38px 910.38px ">ﬁlter</tspan>ing c<tspan x="1724.36px 1746.34px 1767.84px 1781.29px 1801.25px " y="910.38px 910.38px 910.38px 910.38px 910.38px ">ontai</tspan>ns numer<tspan x="1970.07px 1992.04px " y="910.38px 910.38px ">ou</tspan>s ﬁlt<tspan x="2084.78px 2105.51px 2119.32px 2135.62px " y="910.38px 910.38px 910.38px 910.38px ">ers </tspan>tha<tspan x="2200.46px " y="910.38px ">t</tspan></text>
+                <text x="1401.12px" y="961.243px" style="font-family:'Calibri', sans-serif;font-size:41.667px;">c<tspan x="1418.39px 1438.35px " y="961.243px 961.243px ">an</tspan> be c<tspan x="1538.98px 1560.95px " y="961.243px 961.243px ">om</tspan>bined t<tspan x="1713.17px 1735.15px " y="961.243px 961.243px ">o </tspan>build a desir<tspan x="1950.62px 1971.35px " y="961.243px 961.243px ">ed</tspan> pr<tspan x="2038.53px 2059.26px " y="961.243px 961.243px ">e-</tspan>pr<tspan x="2107.77px 2129.74px " y="961.243px 961.243px ">oc</tspan>essing pipline.</text>
+            </g>
+            <g transform="matrix(1,0,0,1,-627.216,295.731)">
+                <text x="1401.12px" y="910.38px" style="font-family:'Calibri-Bold', 'Calibri', sans-serif;font-weight:700;font-size:75px;">Pr<tspan x="1466.78px 1506.88px 1542.37px " y="910.38px 910.38px 910.38px ">ovi</tspan>ded ﬁlt<tspan x="1781.07px 1818.82px 1844.57px 1874.49px 1891.44px 1916.71px 1957.03px " y="910.38px 910.38px 910.38px 910.38px 910.38px 910.38px 910.38px ">ers to </tspan>clean, c<tspan x="2206.13px 2246.45px 2273.11px 2298.93px 2336.68px " y="910.38px 910.38px 910.38px 910.38px 910.38px ">orrec</tspan>t, harmoniz<tspan x="2722.7px 2760.46px " y="910.38px 910.38px ">e </tspan>me<tspan x="2875.67px 2900.94px 2937.96px 2978.21px 3014.54px 3039.81px 3076.83px " y="910.38px 910.38px 910.38px 910.38px 910.38px 910.38px 910.38px ">tadata </tspan>include:</text>
+                <text x="1401.12px" y="961.243px" style="font-family:'Calibri', sans-serif;font-size:41.667px;">• <tspan x="1476.12px " y="961.243px ">H</tspan>armoniz<tspan x="1638.8px 1659.53px " y="961.243px 961.243px ">e </tspan>ﬁeld en<tspan x="1794.85px 1808.81px " y="961.243px 961.243px ">tr</tspan>ies (ionmode, char<tspan x="2136.52px 2155.79px 2176.52px 2185.94px 2206.45px 2219.9px 2237.51px " y="961.243px 961.243px 961.243px 961.243px 961.243px 961.243px 961.243px ">ge etc.</tspan>).</text>
+                <text x="1401.12px" y="1012.11px" style="font-family:'Calibri', sans-serif;font-size:41.667px;">• <tspan x="1476.12px 1498.01px 1518.75px 1552.03px 1573.82px 1592.23px 1612.96px " y="1012.11px 1012.11px 1012.11px 1012.11px 1012.11px 1012.11px 1012.11px ">Remove </tspan>non-c<tspan x="1718.17px 1740.14px " y="1012.11px 1012.11px ">om</tspan>pound name parts fr<tspan x="2120.29px 2142.26px " y="1012.11px 1012.11px ">om</tspan> name ﬁeld.</text>
+                <text x="1401.12px" y="1062.97px" style="font-family:'Calibri', sans-serif;font-size:41.667px;">• <tspan x="1476.12px 1496.47px 1514.63px 1528.59px 1542.26px 1562.22px " y="1062.97px 1062.97px 1062.97px 1062.97px 1062.97px 1062.97px ">Extrac</tspan>t adduct fr<tspan x="1756.42px 1778.39px " y="1062.97px 1062.97px ">om</tspan> giv<tspan x="1868.68px 1889.41px " y="1062.97px 1062.97px ">en</tspan> name ﬁeld.</text>
+                <text x="1401.12px" y="1113.83px" style="font-family:'Calibri', sans-serif;font-size:41.667px;">• <tspan x="1476.12px 1495.27px 1515.78px 1529.73px " y="1113.83px 1113.83px 1113.83px 1113.83px ">Set </tspan>ionmode if missing.</text>
+                <text x="1401.12px" y="1164.69px" style="font-family:'Calibri', sans-serif;font-size:41.667px;">• <tspan x="1476.12px " y="1164.69px ">C</tspan>heck and c<tspan x="1677.38px 1699.35px 1713.88px 1727.85px 1748.58px " y="1164.69px 1164.69px 1164.69px 1164.69px 1164.69px ">orrec</tspan>t char<tspan x="1863px 1882.27px 1903px " y="1164.69px 1164.69px 1164.69px ">ge </tspan>en<tspan x="1954.66px 1968.62px 1983.35px 2002.21px " y="1164.69px 1164.69px 1164.69px 1164.69px ">try </tspan>(sign).</text>
+                <text x="1401.12px" y="1215.56px" style="font-family:'Calibri', sans-serif;font-size:41.667px;">• <tspan x="1476.12px " y="1215.56px ">A</tspan>dd pr<tspan x="1589.18px 1611.15px " y="1215.56px 1215.56px ">op</tspan>er pr<tspan x="1713.59px 1734.32px " y="1215.56px 1215.56px ">ec</tspan>ur<tspan x="1787.65px 1803.94px 1825.91px 1839.22px 1851.98px " y="1215.56px 1215.56px 1215.56px 1215.56px 1215.56px ">sor-m</tspan>/z and par<tspan x="2056.22px 2076.95px 2098.46px 2112.41px " y="1215.56px 1215.56px 1215.56px 1215.56px ">ent </tspan>mass v<tspan x="2235.3px 2255.26px " y="1215.56px 1215.56px ">al</tspan>ues.</text>
+                <path d="M2078.66,1247.07C2079.07,1247.07 2079.35,1247.16 2079.49,1247.35C2079.64,1247.53 2079.72,1247.8 2079.72,1248.15L2079.72,1265.91C2079.72,1266.02 2079.69,1266.11 2079.64,1266.18C2079.58,1266.26 2079.49,1266.32 2079.36,1266.38C2079.23,1266.43 2079.06,1266.47 2078.84,1266.5C2078.63,1266.53 2078.36,1266.54 2078.05,1266.54C2077.71,1266.54 2077.43,1266.53 2077.22,1266.5C2077,1266.47 2076.83,1266.43 2076.7,1266.38C2076.57,1266.32 2076.48,1266.26 2076.42,1266.18C2076.37,1266.11 2076.34,1266.02 2076.34,1265.91L2076.34,1249.86L2066.88,1249.86L2066.88,1260.07C2066.88,1261.33 2067.07,1262.29 2067.44,1262.93C2067.81,1263.57 2068.48,1263.9 2069.45,1263.9C2069.76,1263.9 2070.03,1263.87 2070.28,1263.8C2070.52,1263.74 2070.74,1263.68 2070.93,1263.61C2071.12,1263.54 2071.28,1263.48 2071.42,1263.42C2071.55,1263.36 2071.68,1263.33 2071.78,1263.33C2071.85,1263.33 2071.92,1263.34 2071.98,1263.38C2072.04,1263.41 2072.09,1263.48 2072.12,1263.57C2072.15,1263.66 2072.18,1263.79 2072.21,1263.96C2072.24,1264.12 2072.25,1264.32 2072.25,1264.57C2072.25,1264.96 2072.22,1265.27 2072.17,1265.49C2072.12,1265.72 2072.04,1265.89 2071.93,1266C2071.82,1266.12 2071.66,1266.22 2071.44,1266.32C2071.22,1266.41 2070.97,1266.49 2070.7,1266.55C2070.42,1266.61 2070.12,1266.66 2069.81,1266.7C2069.5,1266.74 2069.19,1266.76 2068.88,1266.76C2067.93,1266.76 2067.11,1266.64 2066.43,1266.39C2065.76,1266.14 2065.2,1265.76 2064.77,1265.25C2064.33,1264.74 2064.02,1264.1 2063.82,1263.32C2063.62,1262.54 2063.53,1261.62 2063.53,1260.56L2063.53,1249.86L2060.96,1249.86C2060.76,1249.86 2060.6,1249.75 2060.47,1249.53C2060.35,1249.32 2060.29,1248.96 2060.29,1248.47C2060.29,1248.22 2060.31,1248 2060.34,1247.82C2060.37,1247.65 2060.42,1247.5 2060.47,1247.39C2060.53,1247.27 2060.6,1247.19 2060.69,1247.14C2060.78,1247.09 2060.87,1247.07 2060.98,1247.07L2063.53,1247.07L2063.53,1242.72C2063.53,1242.62 2063.55,1242.53 2063.6,1242.45C2063.64,1242.37 2063.73,1242.3 2063.86,1242.24C2063.99,1242.18 2064.16,1242.13 2064.38,1242.11C2064.6,1242.08 2064.87,1242.07 2065.19,1242.07C2065.53,1242.07 2065.81,1242.08 2066.03,1242.11C2066.24,1242.13 2066.41,1242.18 2066.54,1242.24C2066.66,1242.3 2066.75,1242.37 2066.8,1242.45C2066.85,1242.53 2066.88,1242.62 2066.88,1242.72L2066.88,1247.07L2078.66,1247.07ZM2080.11,1241.41C2080.11,1242.2 2079.96,1242.74 2079.66,1243.02C2079.36,1243.31 2078.81,1243.45 2078.01,1243.45C2077.22,1243.45 2076.68,1243.31 2076.39,1243.03C2076.1,1242.75 2075.95,1242.23 2075.95,1241.45C2075.95,1240.67 2076.11,1240.13 2076.4,1239.85C2076.7,1239.56 2077.25,1239.42 2078.05,1239.42C2078.84,1239.42 2079.38,1239.56 2079.67,1239.84C2079.96,1240.12 2080.11,1240.64 2080.11,1241.41Z"/>
+                <text x="1401.12px" y="1266.42px" style="font-family:'Calibri', sans-serif;font-size:41.667px;">• <tspan x="1476.12px " y="1266.42px ">F</tspan>ind and c<tspan x="1648.47px 1670.44px 1684.96px 1698.94px 1719.67px " y="1266.42px 1266.42px 1266.42px 1266.42px 1266.42px ">orrec</tspan>t misplaced annot<tspan x="2040.05px 2082.83px " y="1266.42px 1266.42px ">ao</tspan>ns (InchiK<tspan x="2267.4px 2287.87px 2306.73px " y="1266.42px 1266.42px 1266.42px ">ey </tspan>giv<tspan x="2363.74px 2384.47px " y="1266.42px 1266.42px ">en</tspan> as InChI e<tspan x="2578.38px 2591.83px 2609.44px " y="1266.42px 1266.42px 1266.42px ">tc.</tspan>).</text>
+                <path d="M1868.84,1297.93C1869.25,1297.93 1869.53,1298.03 1869.68,1298.21C1869.83,1298.39 1869.9,1298.66 1869.9,1299.01L1869.9,1316.77C1869.9,1316.88 1869.87,1316.97 1869.82,1317.05C1869.77,1317.12 1869.67,1317.19 1869.55,1317.24C1869.42,1317.3 1869.24,1317.34 1869.03,1317.36C1868.81,1317.39 1868.54,1317.4 1868.23,1317.4C1867.89,1317.4 1867.62,1317.39 1867.4,1317.36C1867.18,1317.34 1867.01,1317.3 1866.88,1317.24C1866.75,1317.19 1866.66,1317.12 1866.61,1317.05C1866.55,1316.97 1866.52,1316.88 1866.52,1316.77L1866.52,1300.72L1857.06,1300.72L1857.06,1310.93C1857.06,1312.19 1857.25,1313.15 1857.62,1313.79C1858,1314.44 1858.66,1314.76 1859.63,1314.76C1859.94,1314.76 1860.22,1314.73 1860.46,1314.67C1860.7,1314.61 1860.92,1314.54 1861.11,1314.47C1861.3,1314.41 1861.46,1314.34 1861.6,1314.28C1861.74,1314.22 1861.86,1314.19 1861.97,1314.19C1862.03,1314.19 1862.1,1314.21 1862.16,1314.24C1862.22,1314.27 1862.27,1314.34 1862.3,1314.43C1862.34,1314.53 1862.37,1314.66 1862.39,1314.82C1862.42,1314.98 1862.43,1315.19 1862.43,1315.43C1862.43,1315.82 1862.41,1316.13 1862.35,1316.36C1862.3,1316.58 1862.22,1316.75 1862.11,1316.86C1862,1316.98 1861.84,1317.09 1861.62,1317.18C1861.4,1317.27 1861.16,1317.35 1860.88,1317.41C1860.6,1317.48 1860.31,1317.53 1859.99,1317.57C1859.68,1317.61 1859.37,1317.63 1859.06,1317.63C1858.11,1317.63 1857.29,1317.5 1856.62,1317.25C1855.94,1317 1855.38,1316.62 1854.95,1316.11C1854.51,1315.6 1854.2,1314.96 1854,1314.18C1853.8,1313.4 1853.71,1312.48 1853.71,1311.42L1853.71,1300.72L1851.14,1300.72C1850.94,1300.72 1850.78,1300.61 1850.65,1300.39C1850.53,1300.18 1850.47,1299.83 1850.47,1299.34C1850.47,1299.08 1850.49,1298.86 1850.52,1298.69C1850.56,1298.51 1850.6,1298.36 1850.65,1298.25C1850.71,1298.13 1850.78,1298.05 1850.87,1298C1850.96,1297.96 1851.05,1297.93 1851.16,1297.93L1853.71,1297.93L1853.71,1293.58C1853.71,1293.48 1853.73,1293.4 1853.78,1293.32C1853.83,1293.23 1853.91,1293.16 1854.04,1293.1C1854.17,1293.04 1854.34,1293 1854.56,1292.97C1854.78,1292.94 1855.05,1292.93 1855.37,1292.93C1855.71,1292.93 1855.99,1292.94 1856.21,1292.97C1856.43,1293 1856.6,1293.04 1856.72,1293.1C1856.84,1293.16 1856.93,1293.23 1856.98,1293.32C1857.04,1293.4 1857.06,1293.48 1857.06,1293.58L1857.06,1297.93L1868.84,1297.93ZM1870.29,1292.28C1870.29,1293.06 1870.14,1293.6 1869.84,1293.88C1869.54,1294.17 1868.99,1294.31 1868.19,1294.31C1867.4,1294.31 1866.87,1294.17 1866.57,1293.89C1866.28,1293.62 1866.14,1293.09 1866.14,1292.32C1866.14,1291.53 1866.29,1291 1866.58,1290.71C1866.88,1290.43 1867.43,1290.28 1868.23,1290.28C1869.02,1290.28 1869.56,1290.42 1869.85,1290.7C1870.14,1290.98 1870.29,1291.5 1870.29,1292.28Z"/>
+                <text x="1401.12px" y="1317.28px" style="font-family:'Calibri', sans-serif;font-size:41.667px;">• <tspan x="1476.12px " y="1317.28px ">D</tspan>eriv<tspan x="1564.99px 1585.72px " y="1317.28px 1317.28px ">e </tspan>missing annot<tspan x="1830.23px 1873.01px " y="1317.28px 1317.28px ">ao</tspan>ns wher<tspan x="2028.98px 2049.71px " y="1317.28px 1317.28px ">e </tspan>possible (c<tspan x="2236.66px 2258.63px 2279.83px 2298.24px 2318.98px " y="1317.28px 1317.28px 1317.28px 1317.28px 1317.28px ">onver</tspan>t be<tspan x="2399.28px 2413.24px 2442.66px 2463.39px " y="1317.28px 1317.28px 1317.28px 1317.28px ">twee</tspan>n Inchi and Smiles and cr<tspan x="2902.23px 2922.96px 2942.53px 2956.04px 2976.77px " y="1317.28px 1317.28px 1317.28px 1317.28px 1317.28px ">eate </tspan>missing InChiK<tspan x="3229.07px 3249.54px 3268.01px 3284.31px " y="1317.28px 1317.28px 1317.28px 1317.28px ">eys)</tspan>.</text>
+            </g>
+            <g transform="matrix(1,0,0,1,-627.216,819.174)">
+                <text x="1401.12px" y="910.38px" style="font-family:'Calibri-Bold', 'Calibri', sans-serif;font-weight:700;font-size:75px;">Pr<tspan x="1466.78px 1506.88px 1542.37px " y="910.38px 910.38px 910.38px ">ovi</tspan>ded ﬁlt<tspan x="1781.07px 1818.82px 1844.57px 1874.49px 1891.44px 1916.71px 1957.03px " y="910.38px 910.38px 910.38px 910.38px 910.38px 910.38px 910.38px ">ers to </tspan>pr<tspan x="2039.98px 2080.3px " y="910.38px 910.38px ">oc</tspan>ess spectrum peak<tspan x="2686.82px 2716.74px " y="910.38px 910.38px ">s </tspan>include:</text>
+                <path d="M1881.38,941.895C1881.78,941.895 1882.06,941.986 1882.21,942.169C1882.36,942.352 1882.43,942.62 1882.43,942.973L1882.43,960.734C1882.43,960.843 1882.41,960.934 1882.35,961.009C1882.3,961.083 1882.21,961.148 1882.08,961.202C1881.95,961.256 1881.78,961.297 1881.56,961.324C1881.34,961.351 1881.08,961.365 1880.77,961.365C1880.43,961.365 1880.15,961.351 1879.93,961.324C1879.71,961.297 1879.54,961.256 1879.41,961.202C1879.28,961.148 1879.19,961.083 1879.14,961.009C1879.08,960.934 1879.06,960.843 1879.06,960.734L1879.06,944.682L1869.6,944.682L1869.6,954.895C1869.6,956.157 1869.78,957.109 1870.15,957.754C1870.53,958.398 1871.2,958.72 1872.16,958.72C1872.47,958.72 1872.75,958.69 1872.99,958.629C1873.24,958.567 1873.45,958.503 1873.64,958.435C1873.83,958.367 1874,958.303 1874.13,958.242C1874.27,958.181 1874.39,958.15 1874.5,958.15C1874.57,958.15 1874.63,958.167 1874.69,958.201C1874.75,958.235 1874.8,958.3 1874.83,958.395C1874.87,958.489 1874.9,958.618 1874.93,958.781C1874.95,958.944 1874.97,959.147 1874.97,959.391C1874.97,959.785 1874.94,960.093 1874.88,960.317C1874.83,960.541 1874.75,960.71 1874.64,960.826C1874.53,960.941 1874.37,961.046 1874.15,961.141C1873.94,961.236 1873.69,961.314 1873.41,961.375C1873.13,961.436 1872.84,961.487 1872.53,961.528C1872.21,961.568 1871.9,961.589 1871.59,961.589C1870.64,961.589 1869.83,961.463 1869.15,961.212C1868.47,960.961 1867.91,960.582 1867.48,960.073C1867.05,959.564 1866.73,958.92 1866.53,958.14C1866.34,957.36 1866.24,956.441 1866.24,955.383L1866.24,944.682L1863.67,944.682C1863.47,944.682 1863.31,944.573 1863.19,944.356C1863.07,944.139 1863,943.787 1863,943.299C1863,943.041 1863.02,942.824 1863.06,942.647C1863.09,942.471 1863.13,942.325 1863.19,942.21C1863.24,942.095 1863.31,942.013 1863.4,941.966C1863.49,941.918 1863.59,941.895 1863.69,941.895L1866.24,941.895L1866.24,937.541C1866.24,937.446 1866.26,937.358 1866.31,937.276C1866.36,937.195 1866.44,937.124 1866.57,937.063C1866.7,937.002 1866.88,936.958 1867.09,936.931C1867.31,936.903 1867.58,936.89 1867.91,936.89C1868.25,936.89 1868.52,936.903 1868.74,936.931C1868.96,936.958 1869.13,937.002 1869.25,937.063C1869.37,937.124 1869.46,937.195 1869.51,937.276C1869.57,937.358 1869.6,937.446 1869.6,937.541L1869.6,941.895L1881.38,941.895ZM1882.82,936.239C1882.82,937.025 1882.67,937.561 1882.37,937.846C1882.07,938.131 1881.53,938.273 1880.72,938.273C1879.94,938.273 1879.4,938.134 1879.11,937.856C1878.82,937.578 1878.67,937.053 1878.67,936.279C1878.67,935.493 1878.82,934.957 1879.12,934.672C1879.41,934.387 1879.97,934.245 1880.77,934.245C1881.55,934.245 1882.09,934.384 1882.38,934.662C1882.67,934.94 1882.82,935.466 1882.82,936.239Z"/>
+                <text x="1401.12px" y="961.243px" style="font-family:'Calibri', sans-serif;font-size:41.667px;">• <tspan x="1476.12px " y="961.243px ">N</tspan>ormalise peak in<tspan x="1780.34px 1793.85px 1814.58px " y="961.243px 961.243px 961.243px ">ten</tspan>si<tspan x="1885.55px " y="961.243px ">e</tspan>s</text>
+                <text x="1401.12px" y="1012.11px" style="font-family:'Calibri', sans-serif;font-size:41.667px;">• <tspan x="1476.12px 1498.01px 1518.75px 1552.03px 1573.82px 1592.23px 1612.96px " y="1012.11px 1012.11px 1012.11px 1012.11px 1012.11px 1012.11px 1012.11px ">Remove </tspan>peak<tspan x="1703.52px 1719.82px " y="1012.11px 1012.11px ">s </tspan>outside se<tspan x="1901.76px 1915.72px " y="1012.11px 1012.11px ">t </tspan>m/z windo<tspan x="2105.33px 2132.45px " y="1012.11px 1012.11px ">w.</tspan></text>
+                <text x="1401.12px" y="1062.97px" style="font-family:'Calibri', sans-serif;font-size:41.667px;">• <tspan x="1476.12px 1498.01px 1518.75px 1552.03px 1573.82px 1592.23px 1612.96px " y="1062.97px 1062.97px 1062.97px 1062.97px 1062.97px 1062.97px 1062.97px ">Remove </tspan>peak<tspan x="1703.52px 1719.82px " y="1062.97px 1062.97px ">s </tspan>outside se<tspan x="1901.76px 1915.72px " y="1062.97px 1062.97px ">t </tspan>in<tspan x="1956.2px 1969.71px 1990.44px " y="1062.97px 1062.97px 1062.97px ">ten</tspan>sity windo<tspan x="2185.37px 2212.49px " y="1062.97px 1062.97px ">w.</tspan></text>
+                <text x="1401.12px" y="1113.83px" style="font-family:'Calibri', sans-serif;font-size:41.667px;">• <tspan x="1476.12px 1498.01px 1518.75px " y="1113.83px 1113.83px 1113.83px ">Red</tspan>uce the number of peak<tspan x="1945.18px 1961.47px 1970.89px 1984.44px 2006.42px " y="1113.83px 1113.83px 1113.83px 1113.83px 1113.83px ">s to </tspan>desir<tspan x="2098.29px 2119.03px " y="1113.83px 1113.83px ">ed</tspan> r<tspan x="2164.01px 2183.97px 2205.86px 2225.13px 2245.86px " y="1113.83px 1113.83px 1113.83px 1113.83px 1113.83px ">ange.</tspan></text>
+                <text x="1401.12px" y="1164.69px" style="font-family:'Calibri', sans-serif;font-size:41.667px;">• <tspan x="1476.12px " y="1164.69px ">A</tspan>dd neutr<tspan x="1645.58px 1665.54px " y="1164.69px 1164.69px ">al</tspan> losses within se<tspan x="1947.97px 1961.92px " y="1164.69px 1164.69px ">t </tspan>m/z r<tspan x="2060.27px 2080.23px 2102.12px 2121.39px 2142.12px " y="1164.69px 1164.69px 1164.69px 1164.69px 1164.69px ">ange.</tspan></text>
+            </g>
+        </g>
+        <g transform="matrix(0.998267,0,0,1,693.418,472.441)">
+            <rect x="620.477" y="265.811" width="806.695" height="247.461" style="fill:none;stroke:rgb(0,174,239);stroke-width:7.62px;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;stroke-dasharray:0.76,15.24,0,0;"/>
+        </g>
+    </g>
+</svg>
