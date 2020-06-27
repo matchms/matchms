@@ -48,9 +48,17 @@ def parse_msp_file(filename: str):
 def load_from_msp(filename: str) -> Generator[Spectrum, None, None]:
     """Load spectrum(s) from msp file."""
 
-    print(parse_msp_file(filename))
-    
-        
+    for pyteomics_spectrum in parse_msp_file(filename):
 
-    
+        metadata = pyteomics_spectrum.get("params", None)
+        mz = pyteomics_spectrum["m/z array"]
+        intensities = pyteomics_spectrum["intensity array"] 
+
+        # Sort by mz (if not sorted already)
+        if not numpy.all(mz[:-1] <= mz[1:]):
+            idx_sorted = numpy.argsort(mz)
+            mz = mz[idx_sorted]
+            intensities = intensities[idx_sorted]
+
+        yield Spectrum(mz=mz, intensities=intensities, metadata=metadata)
 
