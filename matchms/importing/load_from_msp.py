@@ -3,11 +3,17 @@ import numpy
 from ..Spectrum import Spectrum
 
 def parse_msp_file(filename: str):
+    """Read msp file and parse info in numpy arrays."""
+
+    # Array that will contain all the differente "molecules"
     molecules = []
+
+    # Lists that will contain all params, masses and intensities of each molecule
     params = {}
     masses = []
     intensities = []
-    peakNo = None
+    
+    # Peaks counter. Used to track and count the number of peaks
     peaksCount = 0
 
     with open(filename, 'r') as f:
@@ -15,20 +21,22 @@ def parse_msp_file(filename: str):
             rline  = line.rstrip()
             if len(rline) == 0:
                 continue
+
+            # Obtaining the params
             elif rline.lower().startswith("name:") or rline.lower().startswith("synonym:") or rline.lower().startswith("db#:") or rline.lower().startswith("inchikey:") or rline.lower().startswith("mw:") or rline.lower().startswith("formula:") or rline.lower().startswith("comments:") or rline.lower().startswith("num peaks:") or rline.lower().startswith("precursormz:"):
                 splitted_line = rline.split(":", 1)
                 params[splitted_line[0].lower()] = splitted_line[1].strip()
 
-                if 'num peak' == splitted_line[0]:
-                    peakNo = int(splitted_line[1])
-
+            # Obtaining the masses and intensities
             else:  
                 peaksCount += 1
+                
                 splitted_line = rline.split(" ")
                 
                 masses.append(float(splitted_line[0]))
                 intensities.append(float(splitted_line[1]))
 
+                # Obtaining the masses and intensities
                 if int(params['num peaks']) == peaksCount:
                     peaksCount = 0
                     molecules.append(
