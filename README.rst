@@ -270,9 +270,13 @@ To remove matchms-build environment:
 Flowchart
 =========
 
-.. image:: paper/flowchart_matchms.png
+.. figure:: paper/flowchart_matchms.png
   :width: 400
   :alt: Flowchart
+  
+  Flowchart of matchms workflow. Reference and query spectrums are filtered using the same
+  set of set filters (here: filter A and filter B). Once filtered, every reference spectrum is compared to
+  every query spectrum using the matchms.Scores object.
 
 Contributing
 ============
