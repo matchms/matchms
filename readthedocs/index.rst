@@ -6,13 +6,24 @@
 Welcome to matchms's documentation!
 ===================================
 
-Python library for fuzzy comparison of mass spectrum data and other Python objects.
+Matchms is an open-access Python package to import, process, clean, and compare mass spectrometry data (MS/MS).
+It allows to implement and run an easy-to-follow, easy-to-reproduce workflow from raw mass spectra to
+pre- and post-processed spectral data.
 
 .. toctree::
    :maxdepth: 3
    :caption: Contents:
 
    API <api/matchms.rst>
+
+Introduction
+============
+
+Matchms allows to easily build custom spectra processing pipelines and to compute spectra similarities.
+
+.. image:: paper/flowchart_matchms.png
+  :width: 500
+  :alt: matchms workflow illustration
 
 Example
 =======
