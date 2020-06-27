@@ -270,7 +270,7 @@ To remove matchms-build environment:
 Flowchart
 =========
 
-.. image:: flowchart.svg.png
+.. image:: paper/flowchart_matchms.png
   :width: 400
   :alt: Flowchart
 
