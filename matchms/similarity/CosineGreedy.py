@@ -11,8 +11,8 @@ class CosineGreedy:
     The score is calculated by finding best possible matches between peaks
     of two spectra. Two peaks are considered a potential match if their
     m/z ratios lie within the given 'tolerance'.
-    The underlying peak assignment problem is here sovled in a 'greedy' way.
-    This can perform notably faster, but does occationally deviate slightly from
+    The underlying peak assignment problem is here solved in a 'greedy' way.
+    This can perform notably faster, but does occasionally deviate slightly from
     a fully correct solution (as with the Hungarian algorithm). In practice this
     will rarely affect similarity scores notably, in particular for smaller
     tolerances.
