@@ -1,12 +1,13 @@
 from typing import Generator
 import numpy
+import math
 from ..Spectrum import Spectrum
 
 def parse_msp_file(filename: str):
     """Read msp file and parse info in numpy arrays."""
 
-    # Array that will contain all the differente "molecules"
-    molecules = []
+    # Array that will contain all the differente "spectrums"
+    spectrums = []
 
     # Lists that will contain all params, masses and intensities of each molecule
     params = {}
@@ -22,42 +23,41 @@ def parse_msp_file(filename: str):
             if len(rline) == 0:
                 continue
 
-            # Obtaining the params
-            elif rline.lower().startswith("name:") or rline.lower().startswith("synonym:") or rline.lower().startswith("db#:") or rline.lower().startswith("inchikey:") or rline.lower().startswith("mw:") or rline.lower().startswith("formula:") or rline.lower().startswith("comments:") or rline.lower().startswith("num peaks:") or rline.lower().startswith("precursormz:"):
-                splitted_line = rline.split(":", 1)
+            elif ':' in rline:
+                # Obtaining the params
+                splitted_line = rline.split(":", 1) 
                 params[splitted_line[0].lower()] = splitted_line[1].strip()
 
-            # Obtaining the masses and intensities
             else:  
+                # Obtaining the masses and intensities
                 peaksCount += 1
                 
                 splitted_line = rline.split(" ")
-                
+
                 masses.append(float(splitted_line[0]))
                 intensities.append(float(splitted_line[1]))
 
                 # Obtaining the masses and intensities
                 if int(params['num peaks']) == peaksCount:
                     peaksCount = 0
-                    molecules.append(
+                    spectrums.append(
                         {
-                            'params': params,
-                            'm/z array': masses, 
-                            'intensity array': intensities
+                            'params': (params),
+                            'm/z array': (masses), 
+                            'intensity array': (intensities)
                         }
                     )
                     params = {}
                     masses = []
                     intensities = []
 
-    return molecules
+    return spectrums
                 
 
 def load_from_msp(filename: str) -> Generator[Spectrum, None, None]:
     """Load spectrum(s) from msp file."""
 
     for pyteomics_spectrum in parse_msp_file(filename):
-
         metadata = pyteomics_spectrum.get("params", None)
         mz = pyteomics_spectrum["m/z array"]
         intensities = pyteomics_spectrum["intensity array"] 
