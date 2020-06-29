@@ -82,4 +82,4 @@ class ModifiedCosine:
         spec1 = get_peaks_array(spectrum1)
         spec2 = get_peaks_array(spectrum2)
         matching_pairs = get_matching_pairs()
-        return score_best_matches(matching_pairs)
+        return score_best_matches(matching_pairs, spec1, spec2)
