@@ -1,8 +1,8 @@
 import numpy
-from matchms.similarity.collect_peak_pairs import collect_peak_pairs
+from matchms.similarity.spectrum_similarity_functions import collect_peak_pairs
 
 
-def test_cosine_hungarian_tolerance_01():
+def test_collect_peak_pairs_no_shift():
     """Test finding expected peak matches within tolerance=0.2."""
     spec1 = numpy.array([[100, 200, 300, 500],
                          [0.1, 0.1, 1.0, 1.0]], dtype="float").T
@@ -15,7 +15,7 @@ def test_cosine_hungarian_tolerance_01():
     assert matching_pairs == [(2, 2, 1.0), (3, 3, 1.0)], "Expected different matchin pairs."
 
 
-def test_cosine_hungarian_tolerance_01_shift_min5():
+def test_collect_peak_pairs_shift_min5():
     """Test finding expected peak matches when given a mass_shift of -5.0."""
     spec1 = numpy.array([[100, 200, 300, 500],
                          [1.0, 1.0, 0.1, 0.1]], dtype="float").T
