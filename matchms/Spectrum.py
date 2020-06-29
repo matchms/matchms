@@ -33,14 +33,6 @@ class Spectrum:
         0.7
         spectrum1
 
-    To visually inspect a spectrum run ``spectrum.plot()``
-
-    .. figure:: paper/spectrum-plot-example.png
-        :width: 400
-        :alt: spectrum plotting function
-
-        Example of a spectrum plotted using ``spectrum.plot()`` and ``spectrum.plot(intensity_to=0.02)``.
-
     Attributes
     ----------
     peaks: ~matchms.Spikes.Spikes
@@ -93,7 +85,13 @@ class Spectrum:
         return clone
 
     def plot(self, intensity_from=0.0, intensity_to=None, with_histogram=False, with_expfit=False):
-        """An example docstring for a method."""
+        """To visually inspect a spectrum run ``spectrum.plot()``
+
+        .. figure:: _static/spectrum-plot-example.png
+            :width: 400
+            :alt: spectrum plotting function
+    
+            Example of a spectrum plotted using ``spectrum.plot()`` and ``spectrum.plot(intensity_to=0.02)``.."""
 
         def plot_histogram():
             """plot the histogram of intensity values as horizontal bars, aligned with the spectrum axes"""
