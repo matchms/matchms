@@ -21,7 +21,7 @@ Introduction
 
 Matchms allows to easily build custom spectra processing pipelines and to compute spectra similarities.
 
-.. image:: paper/flowchart_matchms.png
+.. image:: ../paper/flowchart_matchms.png
   :width: 500
   :alt: matchms workflow illustration
 
