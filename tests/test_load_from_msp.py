@@ -1,6 +1,6 @@
 import os
-import pytest
 from matchms.importing import load_from_msp
+
 
 def test_load_from_msp():
 

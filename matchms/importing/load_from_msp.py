@@ -1,7 +1,7 @@
 from typing import Generator
 import numpy
-import math
 from ..Spectrum import Spectrum
+
 
 def parse_msp_file(filename: str):
     """Read msp file and parse info in numpy arrays."""
@@ -13,37 +13,38 @@ def parse_msp_file(filename: str):
     params = {}
     masses = []
     intensities = []
-    
+
     # Peaks counter. Used to track and count the number of peaks
-    peaksCount = 0
+    peakscount = 0
 
     with open(filename, 'r') as f:
         for line in f:
-            rline  = line.rstrip()
+            rline = line.rstrip()
+
             if len(rline) == 0:
                 continue
 
-            elif ':' in rline:
+            if ':' in rline:
                 # Obtaining the params
-                splitted_line = rline.split(":", 1) 
+                splitted_line = rline.split(":", 1)
                 params[splitted_line[0].lower()] = splitted_line[1].strip()
 
-            else:  
+            else:
                 # Obtaining the masses and intensities
-                peaksCount += 1
-                
+                peakscount += 1
+
                 splitted_line = rline.split(" ")
 
                 masses.append(float(splitted_line[0]))
                 intensities.append(float(splitted_line[1]))
 
                 # Obtaining the masses and intensities
-                if int(params['num peaks']) == peaksCount:
-                    peaksCount = 0
+                if int(params['num peaks']) == peakscount:
+                    peakscount = 0
                     spectrums.append(
                         {
                             'params': (params),
-                            'm/z array': (masses), 
+                            'm/z array': (masses),
                             'intensity array': (intensities)
                         }
                     )
@@ -52,7 +53,7 @@ def parse_msp_file(filename: str):
                     intensities = []
 
     return spectrums
-                
+
 
 def load_from_msp(filename: str) -> Generator[Spectrum, None, None]:
     """Load spectrum(s) from msp file."""
@@ -60,7 +61,7 @@ def load_from_msp(filename: str) -> Generator[Spectrum, None, None]:
     for pyteomics_spectrum in parse_msp_file(filename):
         metadata = pyteomics_spectrum.get("params", None)
         mz = pyteomics_spectrum["m/z array"]
-        intensities = pyteomics_spectrum["intensity array"] 
+        intensities = pyteomics_spectrum["intensity array"]
 
         # Sort by mz (if not sorted already)
         if not numpy.all(mz[:-1] <= mz[1:]):
@@ -69,4 +70,3 @@ def load_from_msp(filename: str) -> Generator[Spectrum, None, None]:
             intensities = intensities[idx_sorted]
 
         yield Spectrum(mz=mz, intensities=intensities, metadata=metadata)
-
