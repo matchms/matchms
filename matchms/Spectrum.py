@@ -87,7 +87,7 @@ class Spectrum:
     def plot(self, intensity_from=0.0, intensity_to=None, with_histogram=False, with_expfit=False):
         """To visually inspect a spectrum run ``spectrum.plot()``
 
-        .. figure:: _static/spectrum-plot-example.png
+        .. figure:: ../_static/spectrum-plot-example.png
             :width: 400
             :alt: spectrum plotting function
     
