@@ -1,6 +1,7 @@
 from typing import Tuple
-import numpy
-from matchms.similarity.collect_peak_pairs import collect_peak_pairs
+from matchms.similarity.spectrum_similarity_functions import collect_peak_pairs
+from matchms.similarity.spectrum_similarity_functions import get_peaks_array
+from matchms.similarity.spectrum_similarity_functions import score_best_matches
 from matchms.typing import SpectrumType
 
 
@@ -68,38 +69,13 @@ class CosineGreedy:
 
         Tuple with cosine score and number of matched peaks.
         """
-        def get_peaks_arrays():
-            """Get peaks mz and intensities as numpy array."""
-            spec1 = numpy.vstack((spectrum1.peaks.mz, spectrum1.peaks.intensities)).T
-            spec2 = numpy.vstack((spectrum2.peaks.mz, spectrum2.peaks.intensities)).T
-            assert max(spec1[:, 1]) <= 1, ("Input spectrum1 is not normalized. ",
-                                           "Apply 'normalize_intensities' filter first.")
-            assert max(spec2[:, 1]) <= 1, ("Input spectrum2 is not normalized. ",
-                                           "Apply 'normalize_intensities' filter first.")
-            return spec1, spec2
-
         def get_matching_pairs():
             """Get pairs of peaks that match within the given tolerance."""
             matching_pairs = collect_peak_pairs(spec1, spec2, self.tolerance, shift=0.0)
             matching_pairs = sorted(matching_pairs, key=lambda x: x[2], reverse=True)
             return matching_pairs
 
-        def calc_score():
-            """Calculate cosine similarity score."""
-            used1 = set()
-            used2 = set()
-            score = 0.0
-            used_matches = []
-            for match in matching_pairs:
-                if not match[0] in used1 and not match[1] in used2:
-                    score += match[2]
-                    used1.add(match[0])  # Every peak can only be paired once
-                    used2.add(match[1])  # Every peak can only be paired once
-                    used_matches.append(match)
-            # Normalize score:
-            score = score/max(numpy.sum(spec1[:, 1]**2), numpy.sum(spec2[:, 1]**2))
-            return score, len(used_matches)
-
-        spec1, spec2 = get_peaks_arrays()
+        spec1 = get_peaks_array(spectrum1)
+        spec2 = get_peaks_array(spectrum2)
         matching_pairs = get_matching_pairs()
-        return calc_score()
+        return score_best_matches(matching_pairs)
