@@ -44,23 +44,29 @@ class CosineGreedy:
         Cosine score is 0.52 with 1 matched peaks
 
     """
-    def __init__(self, tolerance=0.1):
+    def __init__(self, tolerance: float = 0.1):
         """
-        Args:
-        ----
-        tolerance: float
-            Peaks will be considered a match when <= tolerance appart. Default is 0.1.
+        Parameters
+        ----------
+        tolerance
+            Peaks will be considered a match when <= tolerance apart.
         """
         self.tolerance = tolerance
 
     def __call__(self, spectrum1: SpectrumType, spectrum2: SpectrumType) -> Tuple[float, int]:
         """Calculate cosine score between two spectra.
+
         Args:
         ----
         spectrum1: SpectrumType
             Input spectrum 1.
         spectrum2: SpectrumType
             Input spectrum 2.
+
+        Returns:
+        --------
+
+        Tuple with cosine score and number of matched peaks.
         """
         def get_peaks_arrays():
             """Get peaks mz and intensities as numpy array."""
