@@ -1,7 +1,7 @@
 from typing import Tuple
-from matchms.similarity.spectrum_similarity_functions import collect_peak_pairs
-from matchms.similarity.spectrum_similarity_functions import get_peaks_array
-from matchms.similarity.spectrum_similarity_functions import score_best_matches
+from .spectrum_similarity_functions import collect_peak_pairs
+from .spectrum_similarity_functions import get_peaks_array
+from .spectrum_similarity_functions import score_best_matches
 from matchms.typing import SpectrumType
 
 
