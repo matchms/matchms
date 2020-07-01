@@ -1,15 +1,15 @@
-from typing import Generator
+from typing import Generator, List
 import numpy
 from ..Spectrum import Spectrum
 
 
-def parse_msp_file(filename: str):
-    """Read msp file and parse info in numpy arrays."""
+def parse_msp_file(filename: str) -> List[dict]:
+    """Read msp file and parse info in list of spectrum dictionaries."""
 
-    # Array that will contain all the differente "spectrums"
+    # List that will contain all the differente "spectrums"
     spectrums = []
 
-    # Lists that will contain all params, masses and intensities of each molecule
+    # Lists/dicts that will contain all params, masses and intensities of each molecule
     params = {}
     masses = []
     intensities = []
@@ -44,8 +44,8 @@ def parse_msp_file(filename: str):
                     spectrums.append(
                         {
                             'params': (params),
-                            'm/z array': (masses),
-                            'intensity array': (intensities)
+                            'm/z array': numpy.array(masses),
+                            'intensity array': numpy.array(intensities)
                         }
                     )
                     params = {}
