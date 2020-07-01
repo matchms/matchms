@@ -1,4 +1,5 @@
-from typing import Generator, List
+from typing import Generator
+from typing import List
 import numpy
 from ..Spectrum import Spectrum
 
