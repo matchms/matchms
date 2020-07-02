@@ -23,10 +23,16 @@ USI returns JSON data with keys 'peaks', 'n_peaks' and 'precuror_mz'
     metadata = {'usi': usi, 'server': server}
     response = requests.get(url)
 
+    if response.statuscode == 404:
+        return None
     # Extract data and create Spectrum object
     try:
         spectral_data = response.json()
+        if spectral_data is None or not 'peaks' in spectral_data:
+            return None
         peaks = spectral_data['peaks']
+        if len(peaks) == 0:
+            return None
         mz_list, intensity_list = zip(*peaks)
         mz_array = np.array(mz_list)
         intensity_array = np.array(intensity_list)
