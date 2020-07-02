@@ -93,15 +93,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
-
-MSP file to a Spectrum object
-=============================
-
-Bellow is an example on how to parse a .msp file to a Spectrum object.
-
-import os
-import pytest
-from matchms.importing import load_from_msp
-
-spectrums = load_from_msp("MoNA-export-GC-MS.msp")

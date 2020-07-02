@@ -57,7 +57,26 @@ def parse_msp_file(filename: str) -> List[dict]:
 
 
 def load_from_msp(filename: str) -> Generator[Spectrum, None, None]:
-    """Load spectrum(s) from msp file."""
+    """
+    MSP file to a Spectrum object
+    Function that reads a .msp file and converts the info
+    in Spectrum objects.
+    Parameters
+    ----------
+    filename : str
+        path of the msp file
+    Returns
+    -------
+    Spectrum
+        Yield a spectrum object with the data of the msp file
+
+    Example:
+    .. code-block:: python
+
+    from matchms.importing import load_from_msp
+
+    spectrum = load_from_msp("MoNA-export-GC-MS-first10.msp")
+    """
 
     for pyteomics_spectrum in parse_msp_file(filename):
         metadata = pyteomics_spectrum.get("params", None)

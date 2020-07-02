@@ -4,25 +4,7 @@ from matchms.importing import load_from_msp
 
 
 def test_load_from_msp():
-    """ MSP file to a Spectrum object
-        Bellow is an example on how to parse a .msp file to a Spectrum object.
-
-    .. code-block:: python
-
-        import os
-        import numpy
-        from matchms.importing import load_from_msp
-
-        spectrum = load_from_msp("MoNA-export-GC-MS-first10.msp")
-
-        expected_inchikey = numpy.array(["ALRLPDGCPYIVHP-UHFFFAOYSA-N",
-            "UFBJCMHMOXMLKC-UHFFFAOYSA-N", "WDNBURPWRNALGP-UHFFFAOYSA-N", "RANCECPPZPIPNO-UHFFFAOYSA-N",
-            "HOLHYSJJBXSLMV-UHFFFAOYSA-N", "UMPSXRYVXUPCOS-UHFFFAOYSA-N", "HFZWRUODUSTPEG-UHFFFAOYSA-N",
-            "VPOMSPZBQMDLTM-UHFFFAOYSA-N", "LHJGJYXLEPZJPM-UHFFFAOYSA-N", "LINPIYWFGCPVIE-UHFFFAOYSA-N"])
-        for k, n in enumerate(spectrum):
-            assert n.get("inchikey") == expected_inchikey[k], "Expected different InChIKey."
-
-    """
+    """Test parse of msp file to sprectum objects"""
 
     module_root = os.path.join(os.path.dirname(__file__), "..")
     spectrums_file = os.path.join(module_root, "tests", "MoNA-export-GC-MS-first10.msp")
