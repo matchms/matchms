@@ -40,6 +40,7 @@ requirements:
     - numpy
     - pip
     - pyteomics >=4.2
+    - requests
     - python >=3.7,<3.8
     - pyyaml
     - rdkit >=2020.03.1
