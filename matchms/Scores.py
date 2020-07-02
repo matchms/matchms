@@ -1,6 +1,4 @@
 from __future__ import annotations
-from typing import List
-from typing import Tuple
 import numpy
 from matchms.typing import QueriesType
 from matchms.typing import ReferencesType
@@ -94,10 +92,10 @@ class Scores:
 
     @staticmethod
     def _validate_input_arguments(references, queries, similarity_function):
-        assert isinstance(references, (List, Tuple, numpy.ndarray)),\
+        assert isinstance(references, (list, tuple, numpy.ndarray)),\
             "Expected input argument 'references' to be list or tuple or numpy.ndarray."
 
-        assert isinstance(queries, (List, Tuple, numpy.ndarray)),\
+        assert isinstance(queries, (list, tuple, numpy.ndarray)),\
             "Expected input argument 'queries' to be list or tuple or numpy.ndarray."
 
         assert callable(similarity_function), "Expected input argument 'similarity_function' to be callable."
