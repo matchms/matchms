@@ -36,7 +36,7 @@ def test_user_workflow():
     references = spectrums[:]
 
     # define similarity function
-    cosine_greedy = CosineGreedy()
+    cosine_greedy = CosineGreedy(tolerance=0.3)
 
     # calculate_scores
     scores = list(calculate_scores(references,

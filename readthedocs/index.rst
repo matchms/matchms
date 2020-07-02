@@ -76,15 +76,15 @@ Should output
     Removed adduct M-H from compound name.
     Added adduct M-H to metadata.
     ...
-    Reference scan id: 675
-    Query scan id: 2833
-    Score: 0.0293
-    Number of matching peaks: 20
-    ----------------------------
     Reference scan id: 1320
     Query scan id: 2833
     Score: 0.0137
-    Number of matching peaks: 24
+    Number of matching peaks: 20
+    ----------------------------
+    Reference scan id: 1320
+    Query scan id: 1372
+    Score: 0.8379
+    Number of matching peaks: 25
     ...
 
 Indices and tables
