@@ -28,7 +28,7 @@ USI returns JSON data with keys 'peaks', 'n_peaks' and 'precuror_mz'
     # Extract data and create Spectrum object
     try:
         spectral_data = response.json()
-        if spectral_data is None or not 'peaks' in spectral_data:
+        if spectral_data is None or 'peaks' not in spectral_data:
             return None
         peaks = spectral_data['peaks']
         if len(peaks) == 0:
