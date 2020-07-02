@@ -88,7 +88,7 @@ Install matchms from Anaconda Cloud with
 .. code-block:: console
 
   # install matchms in a new virtual environment to avoid dependency clashes
-  conda env create --name matchms python=3.7
+  conda create --name matchms python=3.7
   conda activate matchms
   conda install --channel nlesc --channel bioconda --channel conda-forge matchms
 
@@ -270,9 +270,13 @@ To remove matchms-build environment:
 Flowchart
 =========
 
-.. image:: flowchart.svg.png
+.. figure:: paper/flowchart_matchms.png
   :width: 400
   :alt: Flowchart
+  
+  Flowchart of matchms workflow. Reference and query spectrums are filtered using the same
+  set of set filters (here: filter A and filter B). Once filtered, every reference spectrum is compared to
+  every query spectrum using the matchms.Scores object.
 
 Contributing
 ============

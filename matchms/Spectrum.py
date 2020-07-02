@@ -1,8 +1,6 @@
 from typing import Optional
 import numpy
 from matplotlib import pyplot
-from scipy.optimize import OptimizeWarning
-from scipy.optimize import curve_fit
 from .Spikes import Spikes
 
 
@@ -84,14 +82,20 @@ class Spectrum:
         clone.losses = self.losses
         return clone
 
-    def plot(self, intensity_from=0.0, intensity_to=None, with_histogram=False, with_expfit=False):
-        """An example docstring for a method."""
+    def plot(self, intensity_from=0.0, intensity_to=None, with_histogram=False):
+        """To visually inspect a spectrum run ``spectrum.plot()``
+
+        .. figure:: ../_static/spectrum-plot-example.png
+            :width: 400
+            :alt: spectrum plotting function
+
+            Example of a spectrum plotted using ``spectrum.plot()`` and ``spectrum.plot(intensity_to=0.02)``.."""
 
         def plot_histogram():
-            """plot the histogram of intensity values as horizontal bars, aligned with the spectrum axes"""
+            """Plot the histogram of intensity values as horizontal bars, aligned with the spectrum axes"""
 
             def calc_bin_edges_intensity():
-                """calculate various properties of the histogram bins, given a range in intensity defined by
+                """Calculate various properties of the histogram bins, given a range in intensity defined by
                 'intensity_from' and 'intensity_to', assuming a number of bins equal to 100."""
                 edges = numpy.linspace(intensity_from, intensity_to, n_bins + 1)
                 lefts = edges[:-1]
@@ -100,41 +104,12 @@ class Spectrum:
                 widths = rights - lefts
                 return edges, middles, widths
 
-            def exponential_decay_function(x, init, decay_factor):
-                """function describing exponential decay"""
-                return init * numpy.power(1 - decay_factor, x)
-
-            def plot_expfit():
-                """fit an exponential decay function to the bars of the histogram and plot the fitted line
-                on top of the histogram bars."""
-                k = numpy.argmax(counts == counts.max())
-                offset = bin_middles[k]
-                x_fit = bin_middles[k:] - offset
-                y_fit = counts[k:]
-                selection = y_fit > 0
-                x_fit_nozero = x_fit[selection]
-                y_fit_nozero = y_fit[selection]
-                lower_bounds = [counts.max() - 1e-10, 0]
-                upper_bounds = [counts.max() + 1e-10, decay_factor_max]
-                try:
-                    optimal_parameters, _ = curve_fit(exponential_decay_function,
-                                                      x_fit_nozero,
-                                                      y_fit_nozero,
-                                                      bounds=(lower_bounds, upper_bounds))
-                except (OptimizeWarning, ValueError, RuntimeError):
-                    print("Could not fit an exponential decay function to the data.")
-                    optimal_parameters = lower_bounds, 0.1
-                exp_x_fit = exponential_decay_function(x_fit, *optimal_parameters)
-                pyplot.plot(exp_x_fit, x_fit + offset, color="#f10c45", marker=".")
-
             bin_edges, bin_middles, bin_widths = calc_bin_edges_intensity()
             counts, _ = numpy.histogram(self.peaks.intensities, bins=bin_edges)
             histogram_ax.set_ylim(bottom=intensity_from, top=intensity_to)
             pyplot.barh(bin_middles, counts, height=bin_widths, color="#047495")
             pyplot.title("histogram (n_bins={0})".format(n_bins))
             pyplot.xlabel("count")
-            if with_expfit:
-                plot_expfit()
 
         def plot_spectrum():
             """plot mz v. intensity"""
@@ -155,14 +130,10 @@ class Spectrum:
             pyplot.xlabel("M/z")
             pyplot.ylabel("intensity")
 
-        if with_expfit:
-            assert with_histogram, "When 'with_expfit' is True, 'with_histogram' should also be True."
-
         if intensity_to is None:
             intensity_to = self.peaks.intensities.max() * 1.05
 
         n_bins = 100
-        decay_factor_max = 1.0
         fig = pyplot.figure()
 
         if with_histogram:

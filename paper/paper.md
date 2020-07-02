@@ -36,7 +36,7 @@ authors:
   - name: Faruk Diblen
     orcid: 0000-0002-0989-929X
     affiliation: 1
-  - name: Juriaan H. Spaaks
+  - name: Jurriaan H. Spaaks
     orcid: 0000-0002-7064-4069
     affiliation: 1
 
