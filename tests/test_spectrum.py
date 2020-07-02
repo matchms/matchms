@@ -29,7 +29,7 @@ def _create_test_spectrum_with_intensities(intensities):
 def test_spectrum_plot_same_peak_height():
     intensities_with_zero_variance = numpy.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], dtype="float")
     spectrum = _create_test_spectrum_with_intensities(intensities_with_zero_variance)
-    fig = spectrum.plot(with_histogram=True, with_expfit=True, intensity_to=10.0)
+    fig = spectrum.plot(with_histogram=True, intensity_to=10.0)
     _assert_plots_ok(fig, n_plots=2)
 
 
@@ -42,12 +42,6 @@ def test_spectrum_plot_with_histogram_false():
 def test_spectrum_plot_with_histogram_true():
     spectrum = _create_test_spectrum()
     fig = spectrum.plot(with_histogram=True)
-    _assert_plots_ok(fig, n_plots=2)
-
-
-def test_spectrum_plot_with_histogram_true_and_expfit_true_and_intensity_limit():
-    spectrum = _create_test_spectrum()
-    fig = spectrum.plot(with_histogram=True, with_expfit=True, intensity_to=10.0)
     _assert_plots_ok(fig, n_plots=2)
 
 
