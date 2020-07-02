@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- CosineGreedy function is now numba based and orignal has been renamed to CosineGreedyVectorial [#86](https://github.com/matchms/matchms/pull/86)
+- CosineGreedy function is now numba based and original has been renamed to CosineGreedyVectorial [#86](https://github.com/matchms/matchms/pull/86)
 - Extended readthedocs documentation [#82](https://github.com/matchms/matchms/issues/82)
 
 ## [0.4.0] - 2020-06-11
