@@ -36,7 +36,7 @@ USI returns JSON data with keys 'peaks', 'n_peaks' and 'precuror_mz'
         s = Spectrum(mz_array, intensity_array, metadata)
 
         return s
-        
+
     except json.decoder.JSONDecodeError:
         # failed to unpack json
         return None
