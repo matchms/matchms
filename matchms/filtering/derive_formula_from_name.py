@@ -44,5 +44,5 @@ def derive_formula_from_name(spectrum_in: SpectrumType, remove_formula_from_name
 
 def looks_like_formula(formula):
     """Return True if input string has expected format of a molecular formula."""
-    regexp = r"^[C][0-9][0-9A-Z]{4,}$"
+    regexp = r"^(?:[A-Z][a-z]?(?:[1-9][0-9]*)?){2,}$"
     return re.search(regexp, formula) is not None
