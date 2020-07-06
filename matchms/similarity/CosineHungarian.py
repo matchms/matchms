@@ -1,7 +1,8 @@
 from typing import Tuple
 import numpy
 from scipy.optimize import linear_sum_assignment
-from matchms.similarity.collect_peak_pairs import collect_peak_pairs
+from matchms.similarity.spectrum_similarity_functions import collect_peak_pairs
+from matchms.similarity.spectrum_similarity_functions import get_peaks_array
 from matchms.typing import SpectrumType
 
 
@@ -37,16 +38,6 @@ class CosineHungarian:
         spectrum2: SpectrumType
             Input spectrum 2.
         """
-        def get_peaks_arrays():
-            """Get peaks mz and intensities as numpy array."""
-            spec1 = numpy.vstack((spectrum1.peaks.mz, spectrum1.peaks.intensities)).T
-            spec2 = numpy.vstack((spectrum2.peaks.mz, spectrum2.peaks.intensities)).T
-            assert max(spec1[:, 1]) <= 1, ("Input spectrum1 is not normalized. ",
-                                           "Apply 'normalize_intensities' filter first.")
-            assert max(spec2[:, 1]) <= 1, ("Input spectrum2 is not normalized. ",
-                                           "Apply 'normalize_intensities' filter first.")
-            return spec1, spec2
-
         def get_matching_pairs():
             """Get pairs of peaks that match within the given tolerance."""
             matching_pairs = collect_peak_pairs(spec1, spec2, self.tolerance, shift=0.0)
@@ -90,7 +81,8 @@ class CosineHungarian:
                 return score, len(used_matches)
             return 0.0, 0
 
-        spec1, spec2 = get_peaks_arrays()
+        spec1 = get_peaks_array(spectrum1)
+        spec2 = get_peaks_array(spectrum2)
         matching_pairs = get_matching_pairs()
         paired_peaks1, paired_peaks2, matching_pairs_matrix = get_matching_pairs_matrix()
         return calc_score()
