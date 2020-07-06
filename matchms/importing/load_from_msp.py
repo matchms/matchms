@@ -28,8 +28,16 @@ def parse_msp_file(filename: str) -> List[dict]:
             if ':' in rline:
                 # Obtaining the params
                 splitted_line = rline.split(":", 1)
-                params[splitted_line[0].lower()] = splitted_line[1].strip()
-
+                if splitted_line[0].lower() == 'comments':
+                    # Obtaining the parameters inside the comments index
+                    for s in splitted_line[1][2:-1].split('" "'):
+                        splitted_line = s.split("=", 1)
+                        if splitted_line[0].lower() in params.keys() and splitted_line[0].lower() == 'smiles':
+                            params[splitted_line[0].lower()+"_2"] = splitted_line[1].strip().lower()
+                        else:
+                            params[splitted_line[0].lower()] = splitted_line[1].strip().lower()
+                else:
+                    params[splitted_line[0].lower()] = splitted_line[1].strip().lower()
             else:
                 # Obtaining the masses and intensities
                 peakscount += 1
