@@ -19,7 +19,7 @@ def test_cosine_greedy_without_parameters():
     multiply_matching_intensities = spectrum_1.peaks.intensities[expected_matches] \
         * spectrum_2.peaks.intensities[expected_matches]
     denominator = numpy.sqrt((spectrum_1.peaks.intensities ** 2).sum()) \
-        + numpy.sqrt((spectrum_2.peaks.intensities ** 2).sum())
+        * numpy.sqrt((spectrum_2.peaks.intensities ** 2).sum())
     expected_score = multiply_matching_intensities.sum() / denominator
 
     assert score == pytest.approx(expected_score, 0.0001), "Expected different cosine score."
@@ -41,7 +41,7 @@ def test_cosine_score_greedy_with_tolerance_0_2():
     multiply_matching_intensities = spectrum_1.peaks.intensities[expected_matches[0]] \
         * spectrum_2.peaks.intensities[expected_matches[1]]
     denominator = numpy.sqrt((spectrum_1.peaks.intensities ** 2).sum()) \
-        + numpy.sqrt((spectrum_2.peaks.intensities ** 2).sum())
+        * numpy.sqrt((spectrum_2.peaks.intensities ** 2).sum())
     expected_score = multiply_matching_intensities.sum() / denominator
 
     assert score == pytest.approx(expected_score, 0.0001), "Expected different cosine score."
@@ -63,7 +63,7 @@ def test_cosine_score_greedy_with_tolerance_2_0():
     multiply_matching_intensities = spectrum_1.peaks.intensities[expected_matches[0]] \
         * spectrum_2.peaks.intensities[expected_matches[1]]
     denominator = numpy.sqrt((spectrum_1.peaks.intensities ** 2).sum()) \
-        + numpy.sqrt((spectrum_2.peaks.intensities ** 2).sum())
+        * numpy.sqrt((spectrum_2.peaks.intensities ** 2).sum())
     expected_score = multiply_matching_intensities.sum() / denominator
 
     assert score == pytest.approx(expected_score, 0.0001), "Expected different cosine score."

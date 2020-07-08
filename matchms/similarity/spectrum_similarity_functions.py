@@ -58,5 +58,5 @@ def score_best_matches(matching_pairs: list, spec1: numpy.ndarray,
             used2.add(match[1])  # Every peak can only be paired once
             used_matches.append(match)
     # Normalize score:
-    score = score/(numpy.sqrt(numpy.sum(spec1[:, 1]**2)) + numpy.sqrt(numpy.sum(spec2[:, 1]**2)))
+    score = score/(numpy.sqrt(numpy.sum(spec1[:, 1]**2)) * numpy.sqrt(numpy.sum(spec2[:, 1]**2)))
     return score, len(used_matches)
