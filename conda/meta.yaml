@@ -24,6 +24,7 @@ requirements:
   build:
     - conda-build
     - conda-verify
+    - pylint==2.4.4
     - pytest-runner
     - python
     - numpy {{ numpy }}
@@ -31,6 +32,7 @@ requirements:
   host:
     - python >=3.7,<3.8
     - pip
+    - pylint==2.4.4
     - pytest-runner
     - setuptools
   run:
