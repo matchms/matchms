@@ -21,7 +21,7 @@ def test_cosine_greedy_without_parameters():
     denominator = numpy.sqrt((spectrum_1.peaks.intensities ** 2).sum()) \
         + numpy.sqrt((spectrum_2.peaks.intensities ** 2).sum())
     expected_score = multiply_matching_intensities.sum() / denominator
-    
+
     assert score == pytest.approx(expected_score, 0.0001), "Expected different cosine score."
     assert n_matches == len(expected_matches), "Expected different number of matching peaks."
 
