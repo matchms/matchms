@@ -5,7 +5,7 @@ from matchms import Spectrum
 from matchms.importing.load_from_usi import load_from_usi
 
 
-@patch('matchms.importing.load_from_usi.requests.get')
+@patch('requests.get')
 def normal_test(mock_get):
     mock_get.return_value = Mock(ok=True)
     mock_get.return_value.json.return_value = {'peaks': [[1., 2.], [3., 4.]]}
@@ -15,7 +15,7 @@ def normal_test(mock_get):
     assert spec == expected
 
 
-@patch('matchms.importing.load_from_usi.requests.get')
+@patch('requests.get')
 def test_404(mock_get):
     mock_get.return_value = Mock(ok=True)
     mock_get.return_value.status_code = 404
@@ -25,7 +25,7 @@ def test_404(mock_get):
     assert spec == expected
 
 
-@patch('matchms.importing.load_from_usi.requests.get')
+@patch('requests.get')
 def test_no_peaks(mock_get):
     mock_get.return_value = Mock(ok=True)
     mock_get.return_value.json.return_value = {'peaks': []}
