@@ -17,7 +17,7 @@ dependencies:
   - scipy
   - pip:
     - bump2version
-    - isort
+    - isort>=4.2.5,<5
     - prospector[with_pyroma]
     - pycodestyle>=2.0.0,<=2.4.0
     - pytest
