@@ -2,7 +2,7 @@ from unittest.mock import Mock
 from unittest.mock import patch
 import numpy as np
 from matchms import Spectrum
-from matchms.importing.load_from_usi import load_from_usi
+from matchms.importing import load_from_usi
 
 
 @patch('requests.get')
