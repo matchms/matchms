@@ -6,8 +6,8 @@ from matchms.typing import SpectrumType
 
 @numba.njit
 def collect_peak_pairs(spec1, spec2, tolerance, shift=0,
-                       mz_power: float=0.0,
-                       intensity_power: float=1.0):
+                       mz_power=0.0,
+                       intensity_power=1.0):
     """Find matching pairs between two spectra.
 
     Args
@@ -20,6 +20,10 @@ def collect_peak_pairs(spec1, spec2, tolerance, shift=0,
         Peaks will be considered a match when <= tolerance appart.
     shift : float, optional
         Shift spectra peaks by shift. The default is 0.
+    mz_power: float, optional
+        The power to raise mz to in the cosine function. The default is 0.
+    intensity_power: floar, optional
+        The power to raise intensity to in the cosine function. The default is 1.
 
     Returns
     -------
@@ -34,7 +38,7 @@ def collect_peak_pairs(spec1, spec2, tolerance, shift=0,
         matches = numpy.where((numpy.abs(spec2[:, 0] - spec1[idx, 0] + shift) <= tolerance))[0]
         for match in matches:
             power_prod = ((mz ** mz_power) * (intensity ** intensity_power))
-            power_prod *= ((spec2[match[0]] ** mz_power) * (spec2[match][1] ** intensity_power))
+            power_prod = power_prod * ((spec2[match][0] ** mz_power) * (spec2[match][1] ** intensity_power))
             matching_pairs.append((idx, match, power_prod))
 
     return matching_pairs
