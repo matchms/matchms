@@ -19,6 +19,3 @@ def test_load_from_msp():
 
     for k, n in enumerate(spectrum):
         assert n.get("inchikey").lower() == expected_inchikey[k].lower(), "Expected different InChIKey."
-
-
-test_load_from_msp()
