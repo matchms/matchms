@@ -24,7 +24,6 @@ requirements:
   build:
     - conda-build
     - conda-verify
-    - pylint==2.4.4
     - pytest-runner
     - python
     - numpy {{ numpy }}
