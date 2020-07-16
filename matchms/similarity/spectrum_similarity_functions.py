@@ -5,7 +5,9 @@ from matchms.typing import SpectrumType
 
 
 @numba.njit
-def collect_peak_pairs(spec1, spec2, tolerance, shift=0):
+def collect_peak_pairs(spec1, spec2, tolerance, shift=0,
+                       mz_power=0.0,
+                       intensity_power=1.0):
     """Find matching pairs between two spectra.
 
     Args
@@ -18,6 +20,10 @@ def collect_peak_pairs(spec1, spec2, tolerance, shift=0):
         Peaks will be considered a match when <= tolerance appart.
     shift : float, optional
         Shift spectra peaks by shift. The default is 0.
+    mz_power: float, optional
+        The power to raise mz to in the cosine function. The default is 0.
+    intensity_power: floar, optional
+        The power to raise intensity to in the cosine function. The default is 1.
 
     Returns
     -------
@@ -28,9 +34,12 @@ def collect_peak_pairs(spec1, spec2, tolerance, shift=0):
 
     for idx in range(len(spec1)):
         intensity = spec1[idx, 1]
+        mz = spec1[idx,0]
         matches = numpy.where((numpy.abs(spec2[:, 0] - spec1[idx, 0] + shift) <= tolerance))[0]
         for match in matches:
-            matching_pairs.append((idx, match, intensity*spec2[match][1]))
+            power_prod = ((mz ** mz_power) * (intensity ** intensity_power))
+            power_prod = power_prod * ((spec2[match][0] ** mz_power) * (spec2[match][1] ** intensity_power))
+            matching_pairs.append((idx, match, power_prod))
 
     return matching_pairs
 
@@ -44,7 +53,8 @@ def get_peaks_array(spectrum: SpectrumType) -> numpy.ndarray:
 
 
 def score_best_matches(matching_pairs: list, spec1: numpy.ndarray,
-                       spec2: numpy.ndarray) -> Tuple[float, int]:
+                       spec2: numpy.ndarray, mz_power: float=0.0,
+                       intensity_power: float=1.0) -> Tuple[float, int]:
     """Calculate cosine-like score by multiplying matches. Does recuire a sorted
     list of matching peaks (sorted by intensity product)."""
     used1 = set()
@@ -58,5 +68,8 @@ def score_best_matches(matching_pairs: list, spec1: numpy.ndarray,
             used2.add(match[1])  # Every peak can only be paired once
             used_matches.append(match)
     # Normalize score:
-    score = score/(numpy.sqrt(numpy.sum(spec1[:, 1]**2)) * numpy.sqrt(numpy.sum(spec2[:, 1]**2)))
+    spec1_power = numpy.power(spec1[:,0], mz_power) * numpy.power(spec1[:,1], intensity_power)
+    spec2_power = numpy.power(spec2[:,0], mz_power) * numpy.power(spec2[:,1], intensity_power)
+
+    score = score/(numpy.sqrt(numpy.sum(spec1_power**2)) * numpy.sqrt(numpy.sum(spec2_power**2)))
     return score, len(used_matches)
