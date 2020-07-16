@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Read msp files and created Spectrum objects from it
 - Added similarity score based on comparing parent masses [#79](https://github.com/matchms/matchms/pull/79)
 
 ### Changed
