@@ -22,7 +22,7 @@ def collect_peak_pairs(spec1, spec2, tolerance, shift=0,
         Shift spectra peaks by shift. The default is 0.
     mz_power: float, optional
         The power to raise mz to in the cosine function. The default is 0.
-    intensity_power: floar, optional
+    intensity_power: float, optional
         The power to raise intensity to in the cosine function. The default is 1.
 
     Returns
@@ -37,9 +37,9 @@ def collect_peak_pairs(spec1, spec2, tolerance, shift=0,
         mz = spec1[idx, 0]
         matches = numpy.where((numpy.abs(spec2[:, 0] - spec1[idx, 0] + shift) <= tolerance))[0]
         for match in matches:
-            power_prod = ((mz ** mz_power) * (intensity ** intensity_power))
-            power_prod = power_prod * ((spec2[match][0] ** mz_power) * (spec2[match][1] ** intensity_power))
-            matching_pairs.append((idx, match, power_prod))
+            power_prod_spec1 = ((mz ** mz_power) * (intensity ** intensity_power))
+            power_prod_spec2 = ((spec2[match][0] ** mz_power) * (spec2[match][1] ** intensity_power))
+            matching_pairs.append((idx, match, power_prod_spec1 * power_prod_spec2))
 
     return matching_pairs
 

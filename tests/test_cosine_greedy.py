@@ -86,3 +86,33 @@ def test_cosine_score_greedy_order_of_arguments():
 
     assert score_1_2 == score_2_1, "Expected that the order of the arguments would not matter."
     assert n_matches_1_2 == n_matches_2_1, "Expected that the order of the arguments would not matter."
+
+
+def test_cosine_greedy_with_peak_powers():
+    """Compare output cosine score with own calculation on simple dummy spectrums.
+    Here testing the options to raise peak intensities to given powers.
+    """
+    mz_power = 0.5
+    intensity_power = 2.0
+    spectrum_1 = Spectrum(mz=numpy.array([100, 200, 300, 500, 510], dtype="float"),
+                          intensities=numpy.array([0.1, 0.2, 1.0, 0.3, 0.4], dtype="float"))
+
+    spectrum_2 = Spectrum(mz=numpy.array([100, 200, 290, 490, 510], dtype="float"),
+                          intensities=numpy.array([0.1, 0.2, 1.0, 0.3, 0.4], dtype="float"))
+    cosine_greedy = CosineGreedy(tolerance=1.0, mz_power=mz_power, intensity_power=intensity_power)
+    score, n_matches = cosine_greedy(spectrum_1, spectrum_2)
+
+    # Derive expected cosine score
+    matches = [0, 1, 4]  # Those peaks have matching mz values (within given tolerance)
+    intensity1 = spectrum_1.peaks.intensities
+    mz1 = spectrum_1.peaks.mz
+    intensity2 = spectrum_2.peaks.intensities
+    mz2 = spectrum_2.peaks.mz
+    multiply_matching_intensities = (mz1[matches] ** mz_power) * (intensity1[matches] ** intensity_power) \
+        * (mz2[matches] ** mz_power) * (intensity2[matches] ** intensity_power)
+    denominator = numpy.sqrt((((mz1 ** mz_power) * (intensity1 ** intensity_power)) ** 2).sum()) \
+        * numpy.sqrt((((mz2 ** mz_power) * (intensity2 ** intensity_power)) ** 2).sum())
+    expected_score = multiply_matching_intensities.sum() / denominator
+
+    assert score == pytest.approx(expected_score, 0.0001), "Expected different cosine score."
+    assert n_matches == len(matches), "Expected different number of matching peaks."
