@@ -6,7 +6,7 @@ from matchms.importing import load_from_usi
 
 
 @patch('requests.get')
-def normal_test(mock_get):
+def test_normal(mock_get):
     mock_get.return_value = Mock(ok=True)
     mock_get.return_value.json.return_value = {'peaks': [[1., 2.], [3., 4.]]}
     spec = load_from_usi('something')
