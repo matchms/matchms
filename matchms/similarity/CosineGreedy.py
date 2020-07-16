@@ -42,7 +42,7 @@ class CosineGreedy:
 
     .. testoutput::
 
-        Cosine score is 0.52 with 1 matched peaks
+        Cosine score is 0.83 with 1 matched peaks
 
     """
     def __init__(self, tolerance: float = 0.1):
