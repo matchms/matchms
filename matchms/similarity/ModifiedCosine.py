@@ -43,7 +43,7 @@ class ModifiedCosine:
 
     .. testoutput::
 
-        Modified cosine score is 0.52 with 1 matched peaks
+        Modified cosine score is 0.83 with 1 matched peaks
 
     """
     def __init__(self, tolerance: float = 0.1):
