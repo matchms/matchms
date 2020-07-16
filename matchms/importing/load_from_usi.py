@@ -1,7 +1,7 @@
 import json
 import numpy as np
 import requests
-from matchms import Spectrum
+from ..Spectrum import Spectrum
 
 
 def load_from_usi(usi: str, server='https://metabolomics-usi.ucsd.edu'):
