@@ -6,7 +6,8 @@ from matchms.typing import SpectrumType
 
 @numba.njit
 def collect_peak_pairs(spec1, spec2, tolerance, shift=0,
-                       mz_power=0.0, intensity_power=1.0):  # pylint: disable=too-many-arguments
+                       mz_power=0.0, intensity_power=1.0):
+    # pylint: disable=too-many-arguments
     """Find matching pairs between two spectra.
 
     Args
