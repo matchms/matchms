@@ -50,18 +50,16 @@ def parse_msp_file(filename: str) -> List[dict]:
                 # Obtaining the masses and intensities
                 if int(params['num peaks']) == peakscount:
                     peakscount = 0
-                    spectrums.append(
-                        {
-                            'params': (params),
-                            'm/z array': numpy.array(masses),
-                            'intensity array': numpy.array(intensities)
-                        }
-                    )
+                    yield {
+                        'params': (params),
+                        'm/z array': numpy.array(masses),
+                        'intensity array': numpy.array(intensities)
+                    }
+                    
                     params = {}
                     masses = []
                     intensities = []
 
-    return spectrums
 
 
 def load_from_msp(filename: str) -> Generator[Spectrum, None, None]:
