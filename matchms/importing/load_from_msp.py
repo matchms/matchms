@@ -86,10 +86,10 @@ def load_from_msp(filename: str) -> Generator[Spectrum, None, None]:
     spectrum = load_from_msp("MoNA-export-GC-MS-first10.msp")
     """
 
-    for pyteomics_spectrum in parse_msp_file(filename):
-        metadata = pyteomics_spectrum.get("params", None)
-        mz = pyteomics_spectrum["m/z array"]
-        intensities = pyteomics_spectrum["intensity array"]
+    for spectrum in parse_msp_file(filename):
+        metadata = spectrum.get("params", None)
+        mz = spectrum["m/z array"]
+        intensities = spectrum["intensity array"]
 
         # Sort by mz (if not sorted already)
         if not numpy.all(mz[:-1] <= mz[1:]):
