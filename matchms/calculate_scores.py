@@ -36,8 +36,8 @@ def calculate_scores(references: ReferencesType,
     .. testoutput::
 
         Cosine score between spectrum1 and spectrum1 is 1.00 with 3 matched peaks
-        Cosine score between spectrum1 and spectrum2 is 0.52 with 1 matched peaks
-        Cosine score between spectrum2 and spectrum1 is 0.52 with 1 matched peaks
+        Cosine score between spectrum1 and spectrum2 is 0.83 with 1 matched peaks
+        Cosine score between spectrum2 and spectrum1 is 0.83 with 1 matched peaks
         Cosine score between spectrum2 and spectrum2 is 1.00 with 3 matched peaks
 
     Parameters

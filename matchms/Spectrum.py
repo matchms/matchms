@@ -117,7 +117,7 @@ class Spectrum:
             def make_stems():
                 """calculate where the stems of the spectrum peaks are going to be"""
                 x = numpy.empty([2, self.peaks.mz.size], dtype="float")
-                y = numpy.empty_like(x)
+                y = numpy.empty(x.shape)
                 for i, mz in enumerate(self.peaks.mz):
                     x[0:2, i] = [mz, mz]
                     y[0:2, i] = [0, self.peaks.intensities[i]]

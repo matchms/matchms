@@ -9,8 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Peak weighting option for cosine score and modified cosine score [#96](https://github.com/matchms/matchms/issues/96)
 - Similarity score based on comparing parent masses [#79](https://github.com/matchms/matchms/pull/79)
-- Method for instantiating a spectrum from the metabolomics USI 
+- Method for instantiating a spectrum from the metabolomics USI [#93](https://github.com/matchms/matchms/pull/93)
+
+### Changed
+
+- CosineGreedy function is now numba based [#86](https://github.com/matchms/matchms/pull/86)
+- Extended readthedocs documentation [#82](https://github.com/matchms/matchms/issues/82)
+
+### Fixed
+
+- Incorrect denominator for cosine score normalization [#98](https://github.com/matchms/matchms/pull/98)
 
 ## [0.4.0] - 2020-06-11
 
