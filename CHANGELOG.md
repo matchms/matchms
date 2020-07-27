@@ -9,8 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added peak weighting option for cosine score and modified cosine score [#96](https://github.com/matchms/matchms/issues/96)
-- Added similarity score based on comparing parent masses [#79](https://github.com/matchms/matchms/pull/79)
+- Peak weighting option for cosine score and modified cosine score [#96](https://github.com/matchms/matchms/issues/96)
+- Similarity score based on comparing parent masses [#79](https://github.com/matchms/matchms/pull/79)
 
 ### Changed
 
