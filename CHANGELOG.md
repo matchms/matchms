@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Fixed incorrect denominator for cosine score normalization [#98](https://github.com/matchms/matchms/pull/98)
+- Incorrect denominator for cosine score normalization [#98](https://github.com/matchms/matchms/pull/98)
 
 ## [0.4.0] - 2020-06-11
 
