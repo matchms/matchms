@@ -4,11 +4,8 @@ import numpy
 from ..Spectrum import Spectrum
 
 
-def parse_msp_file(filename: str) -> List[dict]:
+def parse_msp_file(filename: str) -> Generator[dict, None, None]:
     """Read msp file and parse info in list of spectrum dictionaries."""
-
-    # List that will contain all the differente "spectrums"
-    spectrums = []
 
     # Lists/dicts that will contain all params, masses and intensities of each molecule
     params = {}
