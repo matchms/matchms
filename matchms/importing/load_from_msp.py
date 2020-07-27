@@ -61,24 +61,26 @@ def parse_msp_file(filename: str) -> Generator[dict, None, None]:
 
 def load_from_msp(filename: str) -> Generator[Spectrum, None, None]:
     """
-    MSP file to a Spectrum object
+    MSP file to a :py:class:`~matchms.Spectrum.Spectrum` objects
     Function that reads a .msp file and converts the info
-    in Spectrum objects.
-    Parameters
-    ----------
-    filename : str
-        path of the msp file
-    Returns
-    -------
-    Spectrum
+    in :py:class:`~matchms.Spectrum.Spectrum` objects.
+
+    Args:
+        filename: path of the msp file
+
+    Yields:
         Yield a spectrum object with the data of the msp file
 
+
     Example:
+
     .. code-block:: python
 
-    from matchms.importing import load_from_msp
+        from matchms.importing import load_from_msp
 
-    spectrum = load_from_msp("MoNA-export-GC-MS-first10.msp")
+        # Download msp file from MassBank of North America repository at https://mona.fiehnlab.ucdavis.edu/
+
+        spectrum = next(load_from_msp("MoNA-export-GC-MS-first10.msp"))
     """
 
     for spectrum in parse_msp_file(filename):
