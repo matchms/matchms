@@ -53,7 +53,8 @@ class CosineGreedy:
         tolerance:
             Peaks will be considered a match when <= tolerance apart. Default is 0.1.
         mz_power:
-            The power to raise mz to in the cosine function. The default is 0.
+            The power to raise m/z to in the cosine function. The default is 0, in which
+            case the peak intensity products will not depend on the m/z ratios.
         intensity_power:
             The power to raise intensity to in the cosine function. The default is 1.
         """
