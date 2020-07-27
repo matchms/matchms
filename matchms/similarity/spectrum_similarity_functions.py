@@ -21,7 +21,8 @@ def collect_peak_pairs(spec1, spec2, tolerance, shift=0,
     shift : float, optional
         Shift spectra peaks by shift. The default is 0.
     mz_power: float, optional
-        The power to raise mz to in the cosine function. The default is 0.
+        The power to raise mz to in the cosine function. The default is 0, in which
+        case the peak intensity products will not depend on the m/z ratios.
     intensity_power: float, optional
         The power to raise intensity to in the cosine function. The default is 1.
 
