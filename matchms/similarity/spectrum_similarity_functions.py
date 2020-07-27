@@ -47,16 +47,13 @@ def collect_peak_pairs(spec1, spec2, tolerance, shift=0,
 
 def get_peaks_array(spectrum: SpectrumType) -> numpy.ndarray:
     """Get peaks mz and intensities as numpy array."""
-    peaks_array = numpy.vstack((spectrum.peaks.mz, spectrum.peaks.intensities)).T
-    assert max(peaks_array[:, 1]) <= 1, ("Input spectrum is not normalized. ",
-                                         "Apply 'normalize_intensities' filter first.")
-    return peaks_array
+    return numpy.vstack((spectrum.peaks.mz, spectrum.peaks.intensities)).T
 
 
 def score_best_matches(matching_pairs: list, spec1: numpy.ndarray,
                        spec2: numpy.ndarray, mz_power: float = 0.0,
                        intensity_power: float = 1.0) -> Tuple[float, int]:
-    """Calculate cosine-like score by multiplying matches. Does recuire a sorted
+    """Calculate cosine-like score by multiplying matches. Does require a sorted
     list of matching peaks (sorted by intensity product)."""
     used1 = set()
     used2 = set()
