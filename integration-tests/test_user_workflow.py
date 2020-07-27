@@ -52,15 +52,15 @@ def test_user_workflow():
     actual_top10 = sorted_by_score[:10]
 
     expected_top10 = [
-        (references[48], queries[50], pytest.approx(0.9994510368270997, rel=1e-9), 25),
-        (references[50], queries[48], pytest.approx(0.9994510368270997, rel=1e-9), 25),
-        (references[46], queries[48], pytest.approx(0.9981252309590571, rel=1e-9), 27),
-        (references[48], queries[46], pytest.approx(0.9981252309590571, rel=1e-9), 27),
-        (references[46], queries[50], pytest.approx(0.9979632203390496, rel=1e-9), 22),
-        (references[50], queries[46], pytest.approx(0.9979632203390496, rel=1e-9), 22),
-        (references[73], queries[74], pytest.approx(0.9956795920716246, rel=1e-9), 23),
-        (references[74], queries[73], pytest.approx(0.9956795920716246, rel=1e-9), 23),
-        (references[57], queries[59], pytest.approx(0.9886557001269415, rel=1e-9), 46),
-        (references[59], queries[57], pytest.approx(0.9886557001269415, rel=1e-9), 46),
+        (references[48], queries[50], pytest.approx(0.9994783627790965, rel=1e-9), 25),
+        (references[50], queries[48], pytest.approx(0.9994783627790965, rel=1e-9), 25),
+        (references[46], queries[48], pytest.approx(0.9990141860269471, rel=1e-9), 27),
+        (references[48], queries[46], pytest.approx(0.9990141860269471, rel=1e-9), 27),
+        (references[46], queries[50], pytest.approx(0.9988793406908719, rel=1e-9), 22),
+        (references[50], queries[46], pytest.approx(0.9988793406908719, rel=1e-9), 22),
+        (references[57], queries[59], pytest.approx(0.9982171275552505, rel=1e-9), 46),
+        (references[59], queries[57], pytest.approx(0.9982171275552505, rel=1e-9), 46),
+        (references[73], queries[74], pytest.approx(0.9973823244169199, rel=1e-9), 23),
+        (references[74], queries[73], pytest.approx(0.9973823244169199, rel=1e-9), 23),
     ]
     assert actual_top10 == expected_top10

@@ -45,9 +45,9 @@ class Scores:
     .. testoutput::
 
         Cosine score between spectrum1 and spectrum3 is 0.00 with 0 matched peaks
-        Cosine score between spectrum1 and spectrum4 is 0.68 with 3 matched peaks
-        Cosine score between spectrum2 and spectrum3 is 0.10 with 1 matched peaks
-        Cosine score between spectrum2 and spectrum4 is 0.33 with 1 matched peaks
+        Cosine score between spectrum1 and spectrum4 is 0.80 with 3 matched peaks
+        Cosine score between spectrum2 and spectrum3 is 0.14 with 1 matched peaks
+        Cosine score between spectrum2 and spectrum4 is 0.61 with 1 matched peaks
     """
     def __init__(self, references: ReferencesType, queries: QueriesType, similarity_function: SimilarityFunction):
         """
