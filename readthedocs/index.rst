@@ -77,14 +77,14 @@ Should output
     Added adduct M-H to metadata.
     ...
     Reference scan id: 1320
-    Query scan id: 2833
-    Score: 0.0137
-    Number of matching peaks: 20
-    ----------------------------
-    Reference scan id: 1320
     Query scan id: 1372
-    Score: 0.8379
+    Score: 0.9143
     Number of matching peaks: 25
+    ----------------------------
+    Reference scan id: 2833
+    Query scan id: 1320
+    Score: 0.0144
+    Number of matching peaks: 20
     ...
 
 Indices and tables
