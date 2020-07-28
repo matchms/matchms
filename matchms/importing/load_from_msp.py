@@ -1,5 +1,4 @@
 from typing import Generator
-from typing import List
 import numpy
 from ..Spectrum import Spectrum
 
@@ -52,11 +51,10 @@ def parse_msp_file(filename: str) -> Generator[dict, None, None]:
                         'm/z array': numpy.array(masses),
                         'intensity array': numpy.array(intensities)
                     }
-                    
+
                     params = {}
                     masses = []
                     intensities = []
-
 
 
 def load_from_msp(filename: str) -> Generator[Spectrum, None, None]:
