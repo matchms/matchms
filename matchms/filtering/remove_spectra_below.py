@@ -2,7 +2,7 @@ from ..typing import SpectrumType
 
 def remove_spectra_below(spectrum: SpectrumType, max_mz: float = 1000) -> SpectrumType:
     
-    """Returns none if the precursor_mz of a spectrum is below 
+    """Returns none if the precursor_mz of a spectrum is above 
        max_mz.
     Args:
     -----
