@@ -79,9 +79,15 @@ Vector representation and similarity measure for mass spectrometry data.
 ***********************
 Documentation for users
 ***********************
+For more extensive documentation `see our readthedocs <https://matchms.readthedocs.io/en/latest/>`_.
 
 Installation
 ============
+
+Prerequisites:  
+
+- Python 3.7  
+- Anaconda
 
 Install matchms from Anaconda Cloud with
 
