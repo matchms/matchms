@@ -38,13 +38,14 @@ def parse_mzml_mzxml_metadata(spectrum_dict: dict) -> dict:
         Spectrum dictionary containing metadata fields. Metadata parsing may easily
         break when field key names vary. The following metadata information is considered
         here:
-        precursor_mz, searched for in:
-        -->"precursor"/"precursorMz"--> ... --> "selected ion m/z"/"precursorMz"
-        charge, searched for in:
-        --> "charge state"/"polarity"
-        title, searched for in "spectrum title"
-        scan_start_time, searched for in "scan start time"
-        retention_time, searched for in "retentionTime"
+
+        - precursor_mz, searched for in:
+            -->"precursor"/"precursorMz"--> ... --> "selected ion m/z"/"precursorMz"
+        - charge, searched for in:
+            --> "charge state"/"polarity"
+        - title, searched for in "spectrum title"
+        - scan_start_time, searched for in "scan start time"
+        - retention_time, searched for in "retentionTime"
 
     """
     charge = None
