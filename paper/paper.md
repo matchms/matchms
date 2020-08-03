@@ -21,15 +21,17 @@ authors:
   - name: Hanno Spreeuw
     orcid: 0000-0002-5057-0322
     affiliation: 1
+  - name: Efraín Manuel Villanueva Castilla 
+    affiliation: 2
   - name: Cunliang Geng
     orcid: 0000-0002-1409-8358
     affiliation: 1
-  - name: Simon Rogers
-    orcid: 0000-0003-3578-4477
-    affiliation: 2
   - name: Justin J. J. van der Hooft
     orcid: 0000-0002-9340-5511
     affiliation: 3
+  - name: Simon Rogers
+    orcid: 0000-0003-3578-4477
+    affiliation: 2
   - name: Adam Belloum
     orcid: 0000-0001-6306-6937
     affiliation: 1
@@ -63,20 +65,21 @@ In particular, large collected datasets contain data aquired using different ins
 ``Matchms`` is an open-access Python package to import, process, clean, and compare mass spectrometry data (MS/MS) (see \autoref{fig:flowchart}).
 It allows to implement and run an easy-to-follow, easy-to-reproduce workflow from raw mass spectra to pre- and post-processed spectral data. 
 Raw data can be imported from the commonly used formats mzML, mzXML, and msp, as well as from MGF files (via pyteomics [@levitsky_pyteomics_2019][@goloborodko_pyteomicspython_2013]), more convenient-to-handle json files (as provided by GNPS), but also from via the metabolomics USI [@wang_interactive_2020]. Further data formats or more extensive options regarding metadata parsing can best be handled by using pyteomics [@levitsky_pyteomics_2019] or pymzml [@kosters_pymzml_2018].
-``Matchms`` contains numerous metadata cleaning and harmonizing filter functions that can easily be stacked to construct a desired pipeline (\autoref{fig:filtering}), which can also easily be extended by custom functions wherever needed. Available filters include extensive cleaning, correcting, checking of key metadata fields such as compound name, structure annotations (InChI, Smiles, InchiKey), ionmode, adduct, or charge. 
+``Matchms`` contains numerous metadata cleaning and harmonizing filter functions that can easily be stacked to construct a desired pipeline (\autoref{fig:filtering}), which can also easily be extended by custom functions wherever needed. Available filters include extensive cleaning, correcting, checking of key metadata fields such as compound name, structure annotations (InChI, Smiles, InchiKey), ionmode, adduct, or charge.
+Many of the provided metadata cleaning filters were designed for handling and improving GNPS-style MGF or json datasets. In the future, however, we aim to further extend this to other commonly used public databases.
 
 ![Flowchart of ``matchms`` workflow. Reference and query spectrums are filtered using the same set of set filters (here: filter A and filter B). Once filtered, every reference spectrum is compared to every query spectrum using the ``matchms.Scores`` object. \label{fig:flowchart}](flowchart_matchms.png)
 
 Current Python tools for working with MS/MS data include pyOpenMS [@rost_pyopenms_2014], a wrapper for OpenMS [@rost_openms_2016] with a strong focus on processing and filtering of raw mass spectral data. 
 OpenMS has a wide range of peak processing functions which can be used to further complement a ``Matchms`` filtering pipeline.
-Another, more lightweight and native Python packge with a focus on spectra visualization is spectrum_utils [@bittremieux_spectrum_utils_2020].
+Another, more lightweight and native Python package with a focus on spectra visualization is spectrum_utils [@bittremieux_spectrum_utils_2020].
 ``Matchms`` focuses on comparing and linking large number of mass spectra. Many of its build-in filters are aimed at handling large mass spectra datasets from common public data libraries such as GNPS.
 
 ``Matchms`` provides functions to derive different similarity scores between spectra. Those include the established spectra-based measures of the cosine score or modified cosine score [@watrous_mass_2012].
 The package also offers fast implementations of common similarity measures (Dice, Jaccard, Cosine) that can be used to compute similarity scores between molecular fingerprints (rdkit, morgan1, morgan2, morgan3, all implemented using rdkit [@rdkit]).
 ``Matchms`` easily facilitates deriving similarity measures between large number of spectra at comparably fast speed due to score implementations based on Numpy [@van_der_walt_numpy_2011], Scipy [@2020SciPy-NMeth], and Numba [@lam_numba_2015]. Additional similarity measures can easily be added using the ``matchms`` API. 
 The provided API also allows to quickly compare, sort, and inspect query versus reference spectra using either the included similarity scores or added custom measures.
-The API was designed to be easily extensible so that users can add their own filters for spectra preocessing, or their own similarity functions for spectral comparisons.
+The API was designed to be easily extensible so that users can add their own filters for spectra processing, or their own similarity functions for spectral comparisons.
 The present set of filters and similarity functions was mostly geared towards smaller molecules and natural compounds, but it could easily be extended by functions specific to larger peptides or proteins.
 
 ``Matchms`` is freely accessible either as conda package (https://anaconda.org/nlesc/matchms), or in form of source-code on GitHub (https://github.com/matchms/matchms). For further code examples and documentation see https://matchms.readthedocs.io/en/latest/.
