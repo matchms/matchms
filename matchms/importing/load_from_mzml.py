@@ -3,6 +3,8 @@ from typing import Union
 import numpy
 from pyteomics import mzml
 from matchms.Spectrum import Spectrum
+from matchms.importing.parsing_utils import find_by_key
+from matchms.importing.parsing_utils import parse_mzml_mzxml_metadata
 
 
 def find_by_key(data: Union[list, dict], target: str):
@@ -48,7 +50,7 @@ def load_from_mzml(filename: str, ms_level: int = 2) -> Generator[Spectrum, None
         from matchs.importing import load_from_mzml
 
         file_mzml = "testfile.mzml"
-        spectrums = [spec for spec in load_from_mzml(file_mzml)]
+        spectrums = list(load_from_mzml(file_mzml))
 
     Parameters
     ----------
@@ -57,34 +59,9 @@ def load_from_mzml(filename: str, ms_level: int = 2) -> Generator[Spectrum, None
     ms_level:
         Specify which ms level to import. Default is 2.
     """
-    def parse_mzml_metadata(spec_mzml):
-        """Parse relevant mzml metadata entries."""
-        charge = None
-        title = None
-        precursor_mz = None
-        scan_time = None
-
-        first_search = list(find_by_key(spec_mzml, "precursor"))
-        precursor_mz_search = next(find_by_key(first_search, "selected ion m/z"))
-        if precursor_mz_search:
-            precursor_mz = float(precursor_mz_search)
-        precursor_charge = list(find_by_key(first_search, "charge state"))
-        if precursor_charge:
-            charge = int(precursor_charge[0]) 
-
-        if "spectrum title" in spec_mzml:
-            title = spec_mzml["spectrum title"]
-
-        scan_time = next(find_by_key(spec_mzml, "scan start time"))
-
-        return {"charge": charge,
-                "title": title,
-                "precursor_mz": precursor_mz,
-                "scan start time": scan_time}
-
     for pyteomics_spectrum in list(mzml.read(filename, dtype=dict)):
         if "ms level" in pyteomics_spectrum and pyteomics_spectrum["ms level"] == ms_level:
-            metadata = parse_mzml_metadata(pyteomics_spectrum)
+            metadata = parse_mzml_mzxml_metadata(pyteomics_spectrum)
             mz = numpy.asarray(pyteomics_spectrum["m/z array"], dtype="float")
             intensities = numpy.asarray(pyteomics_spectrum["intensity array"], dtype="float")
 
