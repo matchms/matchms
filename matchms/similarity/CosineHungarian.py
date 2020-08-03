@@ -18,15 +18,22 @@ class CosineHungarian:
     does represent a mathematically proper solution to the problem.
 
     """
-    def __init__(self, tolerance=0.1):
+    def __init__(self, tolerance: float = 0.1, mz_power: float = 0.0,
+                 intensity_power: float = 1.0):
         """
-
-        Args:
-        ----
-        tolerance: float
-            Peaks will be considered a match when <= tolerance appart. Default is 0.1.
+        Parameters
+        ----------
+        tolerance:
+            Peaks will be considered a match when <= tolerance apart. Default is 0.1.
+        mz_power:
+            The power to raise m/z to in the cosine function. The default is 0, in which
+            case the peak intensity products will not depend on the m/z ratios.
+        intensity_power:
+            The power to raise intensity to in the cosine function. The default is 1.
         """
         self.tolerance = tolerance
+        self.mz_power = mz_power
+        self.intensity_power = intensity_power
 
     def __call__(self, spectrum1: SpectrumType, spectrum2: SpectrumType) -> Tuple[float, int]:
         """Calculate cosine score between two spectra.
@@ -37,10 +44,17 @@ class CosineHungarian:
             Input spectrum 1.
         spectrum2: SpectrumType
             Input spectrum 2.
+
+        Returns:
+        --------
+
+        Tuple with cosine score and number of matched peaks.
         """
         def get_matching_pairs():
             """Get pairs of peaks that match within the given tolerance."""
-            matching_pairs = collect_peak_pairs(spec1, spec2, self.tolerance, shift=0.0)
+            matching_pairs = collect_peak_pairs(spec1, spec2, self.tolerance, shift=0.0,
+                                                mz_power=self.mz_power,
+                                                intensity_power=self.intensity_power)
             return sorted(matching_pairs, key=lambda x: x[2], reverse=True)
 
         def get_matching_pairs_matrix():
