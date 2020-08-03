@@ -21,7 +21,8 @@ authors:
   - name: Hanno Spreeuw
     orcid: 0000-0002-5057-0322
     affiliation: 1
-  - name: Efraín Manuel Villanueva Castilla 
+  - name: Efraín Manuel Villanueva Castilla
+    orcid: 0000-0001-7665-3575
     affiliation: 2
   - name: Cunliang Geng
     orcid: 0000-0002-1409-8358
@@ -64,14 +65,14 @@ In particular, large collected datasets contain data aquired using different ins
 
 ``Matchms`` is an open-access Python package to import, process, clean, and compare mass spectrometry data (MS/MS) (see \autoref{fig:flowchart}).
 It allows to implement and run an easy-to-follow, easy-to-reproduce workflow from raw mass spectra to pre- and post-processed spectral data. 
-Raw data can be imported from the commonly used formats mzML, mzXML, and msp, as well as from MGF files (via pyteomics [@levitsky_pyteomics_2019][@goloborodko_pyteomicspython_2013]), more convenient-to-handle json files (as provided by GNPS), but also from via the metabolomics USI [@wang_interactive_2020]. Further data formats or more extensive options regarding metadata parsing can best be handled by using pyteomics [@levitsky_pyteomics_2019] or pymzml [@kosters_pymzml_2018].
+Raw data can be imported from the commonly used formats mzML, mzXML, and msp, as well as from MGF files (via pyteomics [@levitsky_pyteomics_2019][@goloborodko_pyteomicspython_2013]), more convenient-to-handle json files (as provided by GNPS), but also via Universal Spectrum Identifiers (USI) [@wang_interactive_2020]. Further data formats or more extensive options regarding metadata parsing can best be handled by using pyteomics [@levitsky_pyteomics_2019] or pymzml [@kosters_pymzml_2018].
 ``Matchms`` contains numerous metadata cleaning and harmonizing filter functions that can easily be stacked to construct a desired pipeline (\autoref{fig:filtering}), which can also easily be extended by custom functions wherever needed. Available filters include extensive cleaning, correcting, checking of key metadata fields such as compound name, structure annotations (InChI, Smiles, InchiKey), ionmode, adduct, or charge.
-Many of the provided metadata cleaning filters were designed for handling and improving GNPS-style MGF or json datasets. In the future, however, we aim to further extend this to other commonly used public databases.
+Many of the provided metadata cleaning filters were designed for handling and improving GNPS-style MGF or json datasets. For future versions, however, we aim to further extend this to other commonly used public databases.
 
 ![Flowchart of ``matchms`` workflow. Reference and query spectrums are filtered using the same set of set filters (here: filter A and filter B). Once filtered, every reference spectrum is compared to every query spectrum using the ``matchms.Scores`` object. \label{fig:flowchart}](flowchart_matchms.png)
 
 Current Python tools for working with MS/MS data include pyOpenMS [@rost_pyopenms_2014], a wrapper for OpenMS [@rost_openms_2016] with a strong focus on processing and filtering of raw mass spectral data. 
-OpenMS has a wide range of peak processing functions which can be used to further complement a ``Matchms`` filtering pipeline.
+pyOpenMS has a wide range of peak processing functions which can be used to further complement a ``Matchms`` filtering pipeline.
 Another, more lightweight and native Python package with a focus on spectra visualization is spectrum_utils [@bittremieux_spectrum_utils_2020].
 ``Matchms`` focuses on comparing and linking large number of mass spectra. Many of its build-in filters are aimed at handling large mass spectra datasets from common public data libraries such as GNPS.
 
@@ -84,7 +85,7 @@ The present set of filters and similarity functions was mostly geared towards sm
 
 ``Matchms`` is freely accessible either as conda package (https://anaconda.org/nlesc/matchms), or in form of source-code on GitHub (https://github.com/matchms/matchms). For further code examples and documentation see https://matchms.readthedocs.io/en/latest/.
 All main functions are covered by tests and continuous integration to offer reliable functionality.
-We explicitly value future contributions from a mass spectrometry interested community and hope that "matchms" can serve as a reliable and accessible entry point for handling complex mass spectrometry datasets using Python. 
+We explicitly value future contributions from a mass spectrometry interested community and hope that ``matchms`` can serve as a reliable and accessible entry point for handling complex mass spectrometry datasets using Python. 
 
 
 # Example workflow
