@@ -1,9 +1,7 @@
 from typing import Generator
-from typing import Union
 import numpy
 from pyteomics import mzml
 from matchms.Spectrum import Spectrum
-from matchms.importing.parsing_utils import find_by_key
 from matchms.importing.parsing_utils import parse_mzml_mzxml_metadata
 
 
@@ -20,7 +18,7 @@ def load_from_mzml(filename: str, ms_level: int = 2) -> Generator[Spectrum, None
 
         from matchs.importing import load_from_mzml
 
-        file_mzml = "testfile.mzml"
+        file_mzml = "testdata.mzml"
         spectrums = list(load_from_mzml(file_mzml))
 
     Parameters
@@ -30,7 +28,7 @@ def load_from_mzml(filename: str, ms_level: int = 2) -> Generator[Spectrum, None
     ms_level:
         Specify which ms level to import. Default is 2.
     """
-    for pyteomics_spectrum in list(mzml.read(filename, dtype=dict)):
+    for pyteomics_spectrum in mzml.read(filename, dtype=dict):
         if "ms level" in pyteomics_spectrum and pyteomics_spectrum["ms level"] == ms_level:
             metadata = parse_mzml_mzxml_metadata(pyteomics_spectrum)
             mz = numpy.asarray(pyteomics_spectrum["m/z array"], dtype="float")
