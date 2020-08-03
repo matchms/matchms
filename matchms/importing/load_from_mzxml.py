@@ -1,8 +1,8 @@
 from typing import Generator
 import numpy
 from pyteomics import mzxml
-from matchms.Spectrum import Spectrum
 from matchms.importing.parsing_utils import parse_mzml_mzxml_metadata
+from matchms.Spectrum import Spectrum
 
 
 def load_from_mzxml(filename: str, ms_level: int = 2) -> Generator[Spectrum, None, None]:
@@ -30,7 +30,7 @@ def load_from_mzxml(filename: str, ms_level: int = 2) -> Generator[Spectrum, Non
     """
     for pyteomics_spectrum in mzxml.read(filename, dtype=dict):
         if "ms level" in pyteomics_spectrum and pyteomics_spectrum["ms level"] == ms_level \
-            or "msLevel" in pyteomics_spectrum and pyteomics_spectrum["msLevel"] == ms_level:
+        or "msLevel" in pyteomics_spectrum and pyteomics_spectrum["msLevel"] == ms_level:
             metadata = parse_mzml_mzxml_metadata(pyteomics_spectrum)
             mz = numpy.asarray(pyteomics_spectrum["m/z array"], dtype="float")
             intensities = numpy.asarray(pyteomics_spectrum["intensity array"], dtype="float")

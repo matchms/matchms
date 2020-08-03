@@ -1,8 +1,8 @@
 from typing import Generator
 import numpy
 from pyteomics import mzml
-from matchms.Spectrum import Spectrum
 from matchms.importing.parsing_utils import parse_mzml_mzxml_metadata
+from matchms.Spectrum import Spectrum
 
 
 def load_from_mzml(filename: str, ms_level: int = 2) -> Generator[Spectrum, None, None]:
