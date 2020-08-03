@@ -6,8 +6,8 @@ def test_load_from_mzxml():
     """Test parsing of mzxml file to spectrum objects"""
 
     module_root = os.path.dirname(__file__)
-    mzxml_file = os.path.join(module_root, "testdata.mzxml")
-    spectrum = list(load_from_mzxml(mzxml_file))[0]
+    mzxml_file = os.path.join(module_root, "testdata.mzXML")
+    spectrum = next(load_from_mzxml(mzxml_file))
 
     assert int(spectrum.get("precursor_mz")) == 343, "Expected different precursor m/z"
     assert spectrum.get("charge") == -1, "Expected different charge."
