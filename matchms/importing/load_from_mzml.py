@@ -7,35 +7,6 @@ from matchms.importing.parsing_utils import find_by_key
 from matchms.importing.parsing_utils import parse_mzml_mzxml_metadata
 
 
-def find_by_key(data: Union[list, dict], target: str):
-    """Helper function to return entries from nested list/dictionary.
-
-    Parameters
-    ----------
-    data:
-        Nested dictionary or list in which entry should be searched.
-    target:
-        Name of field to search for in data.
-    """
-    if hasattr(data, "items"):
-        for key, value in data.items():
-            if isinstance(value, dict):
-                if key == target:
-                    yield value
-                yield from find_by_key(value, target)
-            elif isinstance(value, list):
-                if key == target:
-                    yield value
-                for val in value:
-                    yield from find_by_key(val, target)
-            elif key == target:
-                yield value
-
-    elif isinstance(data, list):
-        for subdata in data:
-            yield from find_by_key(subdata, target)
-
-
 def load_from_mzml(filename: str, ms_level: int = 2) -> Generator[Spectrum, None, None]:
     """Load spectrum(s) from mzml file.
 
