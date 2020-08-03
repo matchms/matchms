@@ -46,7 +46,6 @@ def parse_mzml_mzxml_metadata(spectrum_dict: dict) -> dict:
         scan_start_time, searched for in "scan start time"
         retention_time, searched for in "retentionTime"
 
-        Please adapt parsing function if needed.
     """
     charge = None
     title = None
