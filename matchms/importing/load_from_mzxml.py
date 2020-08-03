@@ -35,7 +35,7 @@ def load_from_mzxml(filename: str, ms_level: int = 2) -> Generator[Spectrum, Non
             mz = numpy.asarray(pyteomics_spectrum["m/z array"], dtype="float")
             intensities = numpy.asarray(pyteomics_spectrum["intensity array"], dtype="float")
 
-            if isinstance(mz, numpy.ndarray):
+            if mz.shape[0] > 0:
                 # Sort by mz (if not sorted already)
                 if not numpy.all(mz[:-1] <= mz[1:]):
                     idx_sorted = numpy.argsort(mz)
