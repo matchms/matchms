@@ -16,17 +16,13 @@ def find_by_key(data: Union[list, dict], target: str) -> Any:
     """
     if hasattr(data, "items"):
         for key, value in data.items():
+            if key == target:
+                yield value
             if isinstance(value, dict):
-                if key == target:
-                    yield value
                 yield from find_by_key(value, target)
             elif isinstance(value, list):
-                if key == target:
-                    yield value
                 for val in value:
                     yield from find_by_key(val, target)
-            elif key == target:
-                yield value
 
     elif isinstance(data, list):
         for subdata in data:
