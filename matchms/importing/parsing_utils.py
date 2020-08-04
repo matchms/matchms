@@ -79,7 +79,10 @@ def parse_mzml_mzxml_metadata(spectrum_dict: dict) -> dict:
     scan_time = list(find_by_key(spectrum_dict, "scan start time"))
     retention_time = list(find_by_key(spectrum_dict, "retentionTime"))
 
+    scan_number = spectrum_dict["num"]
+
     return {"charge": charge,
+            "scan_number": scan_number,
             "title": title,
             "precursor_mz": precursor_mz,
             "scan_start_time": scan_time,
