@@ -44,12 +44,14 @@ def parse_mzml_mzxml_metadata(spectrum_dict: dict) -> dict:
         - charge, searched for in:
             --> "charge state"/"polarity"
         - title, searched for in "spectrum title"
+        - scan_number, searched for in "num"
         - scan_start_time, searched for in "scan start time"
         - retention_time, searched for in "retentionTime"
 
     """
     charge = None
     title = None
+    scan_number = None
     precursor_mz = None
     scan_time = None
     retention_time = None
@@ -75,11 +77,11 @@ def parse_mzml_mzxml_metadata(spectrum_dict: dict) -> dict:
 
     if "spectrum title" in spectrum_dict:
         title = spectrum_dict["spectrum title"]
+    if "num" in spectrum_dict:
+        scan_number = spectrum_dict["num"]
 
     scan_time = list(find_by_key(spectrum_dict, "scan start time"))
     retention_time = list(find_by_key(spectrum_dict, "retentionTime"))
-
-    scan_number = spectrum_dict["num"]
 
     return {"charge": charge,
             "scan_number": scan_number,
