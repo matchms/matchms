@@ -30,7 +30,24 @@ def find_by_key(data: Union[list, dict], target: str) -> Any:
 
 
 def parse_mzml_mzxml_metadata(spectrum_dict: dict) -> dict:
-    """Parse relevant mzml (ormzxml) metadata entries."""
+    """Parse relevant mzml (or mzxml) metadata entries.
+
+    Parameters:
+    -----------
+    spectrum_dict:
+        Spectrum dictionary containing metadata fields. Metadata parsing may easily
+        break when field key names vary. The following metadata information is considered
+        here:
+
+        - precursor_mz, searched for in:
+            -->"precursor"/"precursorMz"--> ... --> "selected ion m/z"/"precursorMz"
+        - charge, searched for in:
+            --> "charge state"/"polarity"
+        - title, searched for in "spectrum title"
+        - scan_start_time, searched for in "scan start time"
+        - retention_time, searched for in "retentionTime"
+
+    """
     charge = None
     title = None
     precursor_mz = None
@@ -62,7 +79,10 @@ def parse_mzml_mzxml_metadata(spectrum_dict: dict) -> dict:
     scan_time = list(find_by_key(spectrum_dict, "scan start time"))
     retention_time = list(find_by_key(spectrum_dict, "retentionTime"))
 
+    scan_number = spectrum_dict["num"]
+
     return {"charge": charge,
+            "scan_number": scan_number,
             "title": title,
             "precursor_mz": precursor_mz,
             "scan_start_time": scan_time,
