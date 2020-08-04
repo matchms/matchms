@@ -91,7 +91,11 @@ class CosineHungarian:
             if matching_pairs_matrix is not None:
                 score, used_matches = solve_hungarian()
                 # Normalize score:
-                score = score/max(numpy.sum(spec1[:, 1]**2), numpy.sum(spec2[:, 1]**2))
+                spec1_power = numpy.power(spec1[:, 0], self.mz_power) * numpy.power(spec1[:, 1],
+                                         self.intensity_power)
+                spec2_power = numpy.power(spec2[:, 0], self.mz_power) * numpy.power(spec2[:, 1],
+                                         self.intensity_power)
+                score = score/(numpy.sqrt(numpy.sum(spec1_power**2)) * numpy.sqrt(numpy.sum(spec2_power**2)))
                 return score, len(used_matches)
             return 0.0, 0
 
