@@ -18,7 +18,9 @@ def test_cosine_hungarian_without_parameters():
     expected_matches = [0, 1, 4]  # Those peaks have matching mz values (within given tolerance)
     multiply_matching_intensities = spectrum_1.peaks.intensities[expected_matches] \
         * spectrum_2.peaks.intensities[expected_matches]
-    expected_score = multiply_matching_intensities.sum() / (spectrum_1.peaks.intensities ** 2).sum()
+    denominator = numpy.sqrt((spectrum_1.peaks.intensities ** 2).sum()) \
+        * numpy.sqrt((spectrum_2.peaks.intensities ** 2).sum())
+    expected_score = multiply_matching_intensities.sum() / denominator
 
     assert score == pytest.approx(expected_score, 0.0001), "Expected different cosine score."
     assert n_matches == len(expected_matches), "Expected different number of matching peaks."
@@ -38,7 +40,9 @@ def test_cosine_hungarian_with_tolerance_0_2():
     expected_matches = [[0, 2, 3], [0, 1, 2]]  # Those peaks have matching mz values (within given tolerance)
     multiply_matching_intensities = spectrum_1.peaks.intensities[expected_matches[0]] \
         * spectrum_2.peaks.intensities[expected_matches[1]]
-    expected_score = multiply_matching_intensities.sum() / (spectrum_1.peaks.intensities ** 2).sum()
+    denominator = numpy.sqrt((spectrum_1.peaks.intensities ** 2).sum()) \
+        * numpy.sqrt((spectrum_2.peaks.intensities ** 2).sum())
+    expected_score = multiply_matching_intensities.sum() / denominator
 
     assert score == pytest.approx(expected_score, 0.0001), "Expected different cosine score."
     assert n_matches == len(expected_matches[0]), "Expected different number of matching peaks."
@@ -58,7 +62,9 @@ def test_cosine_hungarian_with_tolerance_2_0():
     expected_matches = [[0, 1, 3, 4], [0, 1, 2, 3]]  # Those peaks have matching mz values (within given tolerance)
     multiply_matching_intensities = spectrum_1.peaks.intensities[expected_matches[0]] \
         * spectrum_2.peaks.intensities[expected_matches[1]]
-    expected_score = multiply_matching_intensities.sum() / (spectrum_1.peaks.intensities ** 2).sum()
+    denominator = numpy.sqrt((spectrum_1.peaks.intensities ** 2).sum()) \
+        * numpy.sqrt((spectrum_2.peaks.intensities ** 2).sum())
+    expected_score = multiply_matching_intensities.sum() / denominator
 
     assert score == pytest.approx(expected_score, 0.0001), "Expected different cosine score."
     assert n_matches == len(expected_matches[0]), "Expected different number of matching peaks."
