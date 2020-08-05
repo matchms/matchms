@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2020-08-05
+
 ### Added
 
 - Read mzML and mzXML files to create Spectrum objects from it [#110](https://github.com/matchms/matchms/pull/110)
@@ -171,7 +173,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - This is the initial version of Spec2Vec from https://github.com/iomega/Spec2Vec
 
-[Unreleased]: https://github.com/matchms/matchms/compare/0.4.0...HEAD
+[Unreleased]: https://github.com/matchms/matchms/compare/0.5.0...HEAD
+[0.5.0]: https://github.com/matchms/matchms/compare/0.4.0...0.5.0
 [0.4.0]: https://github.com/matchms/matchms/compare/0.3.4...0.4.0
 [0.3.4]: https://github.com/matchms/matchms/compare/0.3.3...0.3.4
 [0.3.3]: https://github.com/matchms/matchms/compare/0.3.2...0.3.3
