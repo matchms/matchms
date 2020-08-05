@@ -25,6 +25,23 @@ Matchms allows to easily build custom spectra processing pipelines and to comput
   :width: 400
   :alt: matchms workflow illustration
 
+Installation
+============
+
+Prerequisites:  
+
+- Python 3.7  
+- Anaconda
+
+Install matchms from Anaconda Cloud with
+
+.. code-block:: console
+
+  # install matchms in a new virtual environment to avoid dependency clashes
+  conda create --name matchms python=3.7
+  conda activate matchms
+  conda install --channel nlesc --channel bioconda --channel conda-forge matchms
+
 Example
 =======
 
