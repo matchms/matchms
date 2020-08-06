@@ -7,14 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2020-08-05
+
 ### Added
 
-- Added similarity score based on comparing parent masses [#79](https://github.com/matchms/matchms/pull/79)
+- Read mzML and mzXML files to create Spectrum objects from it [#110](https://github.com/matchms/matchms/pull/110)
+- Read msp files to create Spectrum objects from it [#102](https://github.com/matchms/matchms/pull/102)
+- Peak weighting option for CosineGreedy and ModifiedCosine score [#96](https://github.com/matchms/matchms/issues/96)
+- Peak weighting option for CosineHungarian score [#112](https://github.com/matchms/matchms/pull/112)
+- Similarity score based on comparing parent masses [#79](https://github.com/matchms/matchms/pull/79)
+- Method for instantiating a spectrum from the metabolomics USI [#93](https://github.com/matchms/matchms/pull/93)
 
 ### Changed
 
 - CosineGreedy function is now numba based [#86](https://github.com/matchms/matchms/pull/86)
 - Extended readthedocs documentation [#82](https://github.com/matchms/matchms/issues/82)
+
+### Fixed
+
+- Incorrect denominator for cosine score normalization [#98](https://github.com/matchms/matchms/pull/98)
 
 ## [0.4.0] - 2020-06-11
 
@@ -162,7 +173,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - This is the initial version of Spec2Vec from https://github.com/iomega/Spec2Vec
 
-[Unreleased]: https://github.com/matchms/matchms/compare/0.4.0...HEAD
+[Unreleased]: https://github.com/matchms/matchms/compare/0.5.0...HEAD
+[0.5.0]: https://github.com/matchms/matchms/compare/0.4.0...0.5.0
 [0.4.0]: https://github.com/matchms/matchms/compare/0.3.4...0.4.0
 [0.3.4]: https://github.com/matchms/matchms/compare/0.3.3...0.3.4
 [0.3.3]: https://github.com/matchms/matchms/compare/0.3.2...0.3.3

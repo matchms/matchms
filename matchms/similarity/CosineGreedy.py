@@ -42,17 +42,25 @@ class CosineGreedy:
 
     .. testoutput::
 
-        Cosine score is 0.52 with 1 matched peaks
+        Cosine score is 0.83 with 1 matched peaks
 
     """
-    def __init__(self, tolerance: float = 0.1):
+    def __init__(self, tolerance: float = 0.1, mz_power: float = 0.0,
+                 intensity_power: float = 1.0):
         """
         Parameters
         ----------
-        tolerance
-            Peaks will be considered a match when <= tolerance apart.
+        tolerance:
+            Peaks will be considered a match when <= tolerance apart. Default is 0.1.
+        mz_power:
+            The power to raise m/z to in the cosine function. The default is 0, in which
+            case the peak intensity products will not depend on the m/z ratios.
+        intensity_power:
+            The power to raise intensity to in the cosine function. The default is 1.
         """
         self.tolerance = tolerance
+        self.mz_power = mz_power
+        self.intensity_power = intensity_power
 
     def __call__(self, spectrum1: SpectrumType, spectrum2: SpectrumType) -> Tuple[float, int]:
         """Calculate cosine score between two spectra.
@@ -71,11 +79,14 @@ class CosineGreedy:
         """
         def get_matching_pairs():
             """Get pairs of peaks that match within the given tolerance."""
-            matching_pairs = collect_peak_pairs(spec1, spec2, self.tolerance, shift=0.0)
+            matching_pairs = collect_peak_pairs(spec1, spec2, self.tolerance, shift=0.0,
+                                                mz_power=self.mz_power,
+                                                intensity_power=self.intensity_power)
             matching_pairs = sorted(matching_pairs, key=lambda x: x[2], reverse=True)
             return matching_pairs
 
         spec1 = get_peaks_array(spectrum1)
         spec2 = get_peaks_array(spectrum2)
         matching_pairs = get_matching_pairs()
-        return score_best_matches(matching_pairs, spec1, spec2)
+        return score_best_matches(matching_pairs, spec1, spec2,
+                                  self.mz_power, self.intensity_power)

@@ -2,7 +2,7 @@
 
     <img src="readthedocs/_static/matchms.png" height="60px" width="380px" alt="matchms" />
 
-Vector representation and similarity measure for mass spectrometry data.
+Matchms is an open-access Python package to import, process, clean, and compare mass spectrometry data (MS/MS). It allows to implement and run an easy-to-follow, easy-to-reproduce workflow from raw mass spectra to pre- and post-processed spectral data. Spectral data can be imported from common formats such mzML, mzXML, msp, metabolomics-USI, MGF, or json (e.g. GNPS-syle json files). Matchms then provides filters for metadata cleaning and checking, as well as for basic peak filtering. Finally, matchms was build to import and apply different similarity measures to compare large amounts of spectra. This includes common Cosine scores, but can also easily be extended by custom measures.
 
 |
 
@@ -79,9 +79,15 @@ Vector representation and similarity measure for mass spectrometry data.
 ***********************
 Documentation for users
 ***********************
+For more extensive documentation `see our readthedocs <https://matchms.readthedocs.io/en/latest/>`_.
 
 Installation
 ============
+
+Prerequisites:  
+
+- Python 3.7  
+- Anaconda
 
 Install matchms from Anaconda Cloud with
 
@@ -129,7 +135,7 @@ Below is a small example of using matchms to calculate the Cosine score between 
         (reference, query, score, n_matching) = score
         # Ignore scores between same spectrum and
         # pairs which have less than 20 peaks in common
-        if reference != query and n_matching >= 20:
+        if reference is not query and n_matching >= 20:
             print(f"Reference scan id: {reference.metadata['scans']}")
             print(f"Query scan id: {query.metadata['scans']}")
             print(f"Score: {score:.4f}")

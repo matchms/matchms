@@ -58,7 +58,7 @@ def test_modified_cosine_with_mass_shift_5_tolerance_2():
     modified_cosine = ModifiedCosine(tolerance=2.0)
     score, n_matches = modified_cosine(norm_spectrum_1, norm_spectrum_2)
 
-    assert score == pytest.approx(0.903412, 0.0001), "Expected different modified cosine score."
+    assert score == pytest.approx(0.96788, 0.0001), "Expected different modified cosine score."
     assert n_matches == 6, "Expected 6 matching peaks."
 
 

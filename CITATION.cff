@@ -53,6 +53,11 @@ authors:
     family-names: Spreeuw
     given-names: Hanno
     orcid: "https://orcid.org/0000-0002-5057-0322"
+  -
+    affiliation: "University of Glasgow"
+    family-names: Villanueva Castilla
+    given-names: Efrain Manuel
+    orcid: "https://orcid.org/0000-0001-7665-3575"
 
 cff-version: "1.1.0"
 keywords:
