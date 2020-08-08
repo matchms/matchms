@@ -1,6 +1,6 @@
+import numpy
 from ..Spikes import Spikes
 from ..typing import SpectrumType
-import numpy
 
 
 def remove_peaks_within_window(spectrum: SpectrumType, k: int = 6,

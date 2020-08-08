@@ -1,6 +1,6 @@
+import numpy
 from ..Spikes import Spikes
 from ..typing import SpectrumType
-import numpy
 
 
 def remove_spectra_within_tolerance(spectrum: SpectrumType, mz_tolerance: float = 17) -> SpectrumType:
