@@ -3,7 +3,7 @@ from ..Spikes import Spikes
 from ..typing import SpectrumType
 
 
-def remove_peaks_within_window(spectrum: SpectrumType, k: int = 6,
+def remove_peaks_outside_top_k(spectrum: SpectrumType, k: int = 6,
                                mz_window: float = 50) -> SpectrumType:
 
     """Keep peaks only if they are in the top k intense peaks
