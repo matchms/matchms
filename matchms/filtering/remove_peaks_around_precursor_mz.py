@@ -15,7 +15,6 @@ def remove_peaks_around_precursor_mz(spectrum: SpectrumType, mz_tolerance: float
     mz_tolerance:
         Tolerance of mz values that are not allowed to lie
         within the precursor mz. Default is 17 Da.
-
     """
 
     assert mz_tolerance >= 0, "mz_tolerance must be a positive floating point."
