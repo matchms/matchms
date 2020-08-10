@@ -7,6 +7,7 @@ def remove_spectra_few_high_peaks(spectrum: SpectrumType, no_peaks: int = 5,
 
     """Returns none if the number of peaks with relative intensity
        above intensity_percent is less than no_peaks.
+
     Args:
     -----
     spectrum:
@@ -18,7 +19,6 @@ def remove_spectra_few_high_peaks(spectrum: SpectrumType, no_peaks: int = 5,
     intensity_percent:
         Minimum relative intensity (as a percentage between 0-100) for
         peaks that are searched. Default is 2
-
     """
 
     assert no_peaks >= 1, "no_peaks must be a positive nonzero integer."
