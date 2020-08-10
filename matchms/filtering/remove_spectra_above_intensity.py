@@ -2,7 +2,7 @@ from ..typing import SpectrumType
 from . import select_by_relative_intensity
 
 
-def remove_spectra_above_intensity(spectrum: SpectrumType, no_peaks: int = 5,
+def remove_spectra_below_intensity(spectrum: SpectrumType, no_peaks: int = 5,
                                    intensity_percent: float = 2) -> SpectrumType:
 
     """Returns none if the number of peaks with relative intensity
