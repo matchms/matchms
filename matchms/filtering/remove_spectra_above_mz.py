@@ -5,6 +5,7 @@ def remove_spectra_above_mz(spectrum: SpectrumType, max_mz: float = 1000) -> Spe
 
     """Returns none if the precursor_mz of a spectrum is above
        max_mz.
+
     Args:
     -----
     spectrum:
@@ -13,7 +14,6 @@ def remove_spectra_above_mz(spectrum: SpectrumType, max_mz: float = 1000) -> Spe
         Maximum mz value for the precursor mz of a spectrum.
         All precursor mz values greater or equal to this
         will return none. Default is 1000.
-
     """
 
     assert max_mz >= 0, "max_mz must be a positive floating point."
