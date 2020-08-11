@@ -4,6 +4,7 @@ channels:
   - conda-forge
   - defaults
 dependencies:
+  - archspec
   - gensim >=3.8.0
   - matplotlib
   - numba >=0.47
