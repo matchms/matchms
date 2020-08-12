@@ -1,9 +1,9 @@
 from ..typing import SpectrumType
 
 
-def remove_spectra_above_mz(spectrum: SpectrumType, max_mz: float = 1000) -> SpectrumType:
+def require_precursor_below_mz(spectrum: SpectrumType, max_mz: float = 1000) -> SpectrumType:
 
-    """Returns none if the precursor_mz of a spectrum is above
+    """Returns None if the precursor_mz of a spectrum is above
        max_mz.
 
     Args:
