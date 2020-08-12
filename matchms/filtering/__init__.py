@@ -1,3 +1,19 @@
+"""Function to process mass spectra.
+
+Example of how to use the provided filter functions:
+
+.. code-block:: python
+
+    import numpy as np
+    from matchms import Spectrum
+    from matchms.filtering import filter_of_choice
+
+    spectrum = Spectrum(mz=np.array([100, 120, 150, 200.]),
+                          intensities=np.array([0.7, 1.0, 0.2, 0.001]),
+                          metadata={'id': 'spectrum1'})
+    spectrum_filtered = filter_of_choice(spectrum)
+
+"""
 from .add_compound_name import add_compound_name
 from .add_fingerprint import add_fingerprint
 from .add_losses import add_losses
