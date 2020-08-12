@@ -2,15 +2,16 @@ from ..typing import SpectrumType
 from ..utils import looks_like_adduct
 
 
-def derive_adduct_from_name(spectrum_in: SpectrumType, remove_adduct_from_name=True) -> SpectrumType:
+def derive_adduct_from_name(spectrum_in: SpectrumType,
+                            remove_adduct_from_name: bool = True) -> SpectrumType:
     """Find adduct in compound name and add to metadata (if not present yet).
 
     Method to interpret the given compound name to find the adduct.
     Args:
     ----
-    spectrum_in: SpectrumType
+    spectrum_in:
         Input spectrum.
-    remove_adduct_from_name: bool
+    remove_adduct_from_name:
         Remove found adducts from compound name if set to True. Default is True.
     """
     if spectrum_in is None:

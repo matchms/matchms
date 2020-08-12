@@ -1,8 +1,19 @@
+from typing import List
 from ..typing import SpectrumType
 
 
-def harmonize_undefined_smiles(spectrum_in: SpectrumType, undefined="", aliases=None):
-
+def harmonize_undefined_smiles(spectrum_in: SpectrumType, undefined="",
+                              aliases: List[str] = None) -> SpectrumType:
+    """Replace all aliases for empty/undefined smiles entries by ``undefined``.
+    
+    Args:
+    -----
+    undefined:
+        Give desired entry for undefined smiles fields. Default is "".
+    aliases:
+        Enter list of strings that are expected to represent undefined entries.
+        Default is ["", "N/A", "NA", "n/a", "no data"].
+    """
     if spectrum_in is None:
         return None
 
