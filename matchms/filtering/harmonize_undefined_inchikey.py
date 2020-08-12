@@ -3,9 +3,9 @@ from ..typing import SpectrumType
 
 
 def harmonize_undefined_inchikey(spectrum_in: SpectrumType, undefined: str = "",
-                              aliases: List[str] = None) -> SpectrumType:
+                                 aliases: List[str] = None) -> SpectrumType:
     """Replace all aliases for empty/undefined inchikey entries by ``undefined``.
-    
+
     Args:
     -----
     undefined:
