@@ -7,8 +7,8 @@ def derive_adduct_from_name(spectrum_in: SpectrumType,
     """Find adduct in compound name and add to metadata (if not present yet).
 
     Method to interpret the given compound name to find the adduct.
-    Args:
-    ----
+    Parameters
+    ---------------
     spectrum_in:
         Input spectrum.
     remove_adduct_from_name:
