@@ -17,14 +17,16 @@ def default_filters(spectrum: SpectrumType) -> SpectrumType:
 
     Collection is
 
-    1. :meth:`~matchms.filtering.make_charge_scalar.make_charge_scalar`
-    2. :meth:`~matchms.filtering.make_charge_scalar`
-    3. :meth:`~matchms.filtering.make_ionmode_lowercase`
-    4. :meth:`~matchms.filtering.set_ionmode_na_when_missing`
-    5. :meth:`~matchms.filtering.add_precursor_mz`
-    6. :meth:`~matchms.filtering.add_adduct`
-    7. :meth:`~matchms.filtering.derive_ionmode`
-    8. :meth:`~matchms.filtering.correct_charge`
+    1. :meth:`~matchms.filtering.make_charge_scalar`
+    2. :meth:`~matchms.filtering.make_ionmode_lowercase`
+    3. :meth:`~matchms.filtering.set_ionmode_na_when_missing`
+    4. :meth:`~matchms.filtering.add_compound_name`
+    5. :meth:`~matchms.filtering.derive_adduct_from_name`
+    6. :meth:`~matchms.filtering.derive_formula_from_name`
+    7. :meth:`~matchms.filtering.clean_compound_name`
+    8. :meth:`~matchms.filtering.add_precursor_mz`
+    9. :meth:`~matchms.filtering.derive_ionmode`
+    10. :meth:`~matchms.filtering.correct_charge`
 
     """
     spectrum = make_charge_scalar(spectrum)
