@@ -5,9 +5,9 @@ from ..typing import SpectrumType
 def derive_ionmode(spectrum_in: SpectrumType, adducts_filename: str = None) -> SpectrumType:
     """Derive missing ionmode based on adduct.
 
-    MGF files do not always provide a correct ionmode. This function reads
-    the adduct from the metadata and uses this to fill in the correct ionmode
-    where missing.
+    Some input formates (e.g. MGF files) do not always provide a correct ionmode.
+    This function reads the adduct from the metadata and uses this to fill in the
+    correct ionmode where missing.
 
     Args:
     -----
@@ -15,6 +15,7 @@ def derive_ionmode(spectrum_in: SpectrumType, adducts_filename: str = None) -> S
         Input spectrum.
     adducts_filename:
         Load known adducts from file, if filename is given. Default is None.
+        Method makes sure that file loading is cached.
 
     Returns:
     --------
