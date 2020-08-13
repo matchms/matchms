@@ -6,16 +6,25 @@ the provided filters.
 
 Example of how to use a single filter function:
 
-.. code-block:: python
+.. testcode::
 
     import numpy as np
     from matchms import Spectrum
-    from matchms.filtering import filter_of_choice
+    from matchms.filtering import normalize_intensities
 
     spectrum = Spectrum(mz=np.array([100, 120, 150, 200.]),
-                          intensities=np.array([0.7, 1.0, 0.2, 0.001]),
+                          intensities=np.array([200.0, 300.0, 50.0, 1.0]),
                           metadata={'id': 'spectrum1'})
-    spectrum_filtered = filter_of_choice(spectrum)
+    spectrum_filtered = normalize_intensities(spectrum)
+
+    max_intensity = spectrum_filtered.peaks.intensities.max())
+    print(f"Maximum intensity is {max_intensity:.2f}")
+
+    Should output
+
+    .. testoutput::
+
+        Maximum intensity is 1.00
 
 """
 from .add_compound_name import add_compound_name
