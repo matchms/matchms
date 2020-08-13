@@ -20,11 +20,11 @@ Example of how to use a single filter function:
     max_intensity = spectrum_filtered.peaks.intensities.max()
     print(f"Maximum intensity is {max_intensity:.2f}")
 
-    Should output
+Should output
 
-    .. testoutput::
+.. testoutput::
 
-        Maximum intensity is 1.00
+    Maximum intensity is 1.00
 
 """
 from .add_compound_name import add_compound_name
