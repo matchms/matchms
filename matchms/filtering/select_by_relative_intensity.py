@@ -3,8 +3,18 @@ from ..Spikes import Spikes
 from ..typing import SpectrumType
 
 
-def select_by_relative_intensity(spectrum_in: SpectrumType, intensity_from=0.0, intensity_to=1.0) -> SpectrumType:
+def select_by_relative_intensity(spectrum_in: SpectrumType, intensity_from: float = 0.0,
+                                 intensity_to: float = 1.0) -> SpectrumType:
+    """Keep only peaks within set relative intensity range (keep if
+    intensity_from >= intensity >= intensity_to).
 
+    Parameters
+    ----------
+    intensity_from:
+        Set lower threshold for relative peak intensity. Default is 0.0.
+    intensity_to:
+        Set upper threshold for relative peak intensity. Default is 1.0.
+    """
     if spectrum_in is None:
         return None
 

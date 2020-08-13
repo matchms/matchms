@@ -2,7 +2,7 @@ from ..typing import SpectrumType
 
 
 def make_ionmode_lowercase(spectrum_in: SpectrumType) -> SpectrumType:
-
+    """Convert entry in field "ionmode" to lower case."""
     if spectrum_in is None:
         return None
 

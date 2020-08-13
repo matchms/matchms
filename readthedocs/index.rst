@@ -6,9 +6,7 @@
 Welcome to matchms's documentation!
 ===================================
 
-Matchms is an open-access Python package to import, process, clean, and compare mass spectrometry data (MS/MS).
-It allows to implement and run an easy-to-follow, easy-to-reproduce workflow from raw mass spectra to
-pre- and post-processed spectral data.
+Matchms is an open-access Python package to import, process, clean, and compare mass spectrometry data (MS/MS). It allows to implement and run an easy-to-follow, easy-to-reproduce workflow from raw mass spectra to pre- and post-processed spectral data. 
 
 .. toctree::
    :maxdepth: 3
@@ -19,11 +17,28 @@ pre- and post-processed spectral data.
 Introduction
 ============
 
-Matchms allows to easily build custom spectra processing pipelines and to compute spectra similarities.
+Matchms was designed to easily build custom spectra processing pipelines and to compute spectra similarities (see flowchart). Spectral data can be imported from common formats such mzML, mzXML, msp, metabolomics-USI, MGF, or json (e.g. GNPS-syle json files). Matchms then provides filters for metadata cleaning and checking, as well as for basic peak filtering. Finally, matchms was build to import and apply different similarity measures to compare large amounts of spectra. This includes common Cosine scores, but can also easily be extended by custom measures.
 
 .. image:: _static/flowchart_matchms.png
   :width: 400
   :alt: matchms workflow illustration
+
+Installation
+============
+
+Prerequisites:  
+
+- Python 3.7  
+- Anaconda
+
+Install matchms from Anaconda Cloud with
+
+.. code-block:: console
+
+  # install matchms in a new virtual environment to avoid dependency clashes
+  conda create --name matchms python=3.7
+  conda activate matchms
+  conda install --channel nlesc --channel bioconda --channel conda-forge matchms
 
 Example
 =======
@@ -62,7 +77,7 @@ Below is a small example of using matchms to calculate the Cosine score between 
         (reference, query, score, n_matching) = score
         # Ignore scores between same spectrum and
         # pairs which have less than 20 peaks in common
-        if reference != query and n_matching >= 20:
+        if reference is not query and n_matching >= 20:
             print(f"Reference scan id: {reference.metadata['scans']}")
             print(f"Query scan id: {query.metadata['scans']}")
             print(f"Score: {score:.4f}")
