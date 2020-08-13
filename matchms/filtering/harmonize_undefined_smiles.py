@@ -6,8 +6,8 @@ def harmonize_undefined_smiles(spectrum_in: SpectrumType, undefined: str = "",
                                aliases: List[str] = None) -> SpectrumType:
     """Replace all aliases for empty/undefined smiles entries by ``undefined``.
 
-    Args:
-    -----
+    Parameters
+    ----------
     undefined:
         Give desired entry for undefined smiles fields. Default is "".
     aliases:

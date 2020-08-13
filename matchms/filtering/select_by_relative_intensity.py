@@ -8,8 +8,8 @@ def select_by_relative_intensity(spectrum_in: SpectrumType, intensity_from: floa
     """Keep only peaks within set relative intensity range (keep if
     intensity_from >= intensity >= intensity_to).
 
-    Args:
-    -----
+    Parameters
+    ----------
     intensity_from:
         Set lower threshold for relative peak intensity. Default is 0.0.
     intensity_to:

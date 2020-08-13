@@ -6,8 +6,8 @@ def harmonize_undefined_inchi(spectrum_in: SpectrumType, undefined: str = "",
                               aliases: List[str] = None) -> SpectrumType:
     """Replace all aliases for empty/undefined inchi entries by value of ``undefined`` argument.
 
-    Args:
-    -----
+    Parameters
+    ----------
     undefined:
         Give desired entry for undefined inchi fields. Default is "".
     aliases:

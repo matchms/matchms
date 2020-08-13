@@ -7,8 +7,8 @@ def select_by_mz(spectrum_in: SpectrumType, mz_from: float = 0.0,
                  mz_to: float = 1000.0) -> SpectrumType:
     """Keep only peaks between mz_from and mz_to (keep if mz_from >= m/z >= mz_to).
 
-    Args:
-    -----
+    Parameters
+    ----------
     mz_from:
         Set lower threshold for m/z peak positions. Default is 0.0.
     mz_to:

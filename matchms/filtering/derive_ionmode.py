@@ -9,8 +9,8 @@ def derive_ionmode(spectrum_in: SpectrumType, adducts_filename: str = None) -> S
     This function reads the adduct from the metadata and uses this to fill in the
     correct ionmode where missing.
 
-    Args:
-    -----
+    Parameters
+    ----------
     spectrum:
         Input spectrum.
     adducts_filename:

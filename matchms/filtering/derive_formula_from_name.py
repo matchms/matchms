@@ -7,8 +7,9 @@ def derive_formula_from_name(spectrum_in: SpectrumType,
     """Detect and remove misplaced formula in compound name and add to metadata.
 
     Method to find misplaced formulas in compound name based on regular expression.
-    Args:
-    ----
+
+    Parameters
+    ----------
     spectrum_in:
         Input spectrum.
     remove_formula_from_name:

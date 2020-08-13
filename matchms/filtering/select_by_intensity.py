@@ -9,8 +9,8 @@ def select_by_intensity(spectrum_in: SpectrumType, intensity_from: float = 10.0,
     intensity_from >= intensity >= intensity_to). In most cases it is adviced to
     use :py:func:`select_by_relative_intensity` function instead.
 
-    Args:
-    -----
+    Parameters
+    ----------
     intensity_from:
         Set lower threshold for peak intensity. Default is 10.0.
     intensity_to:

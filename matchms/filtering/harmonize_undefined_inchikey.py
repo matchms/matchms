@@ -6,8 +6,8 @@ def harmonize_undefined_inchikey(spectrum_in: SpectrumType, undefined: str = "",
                                  aliases: List[str] = None) -> SpectrumType:
     """Replace all aliases for empty/undefined inchikey entries by ``undefined``.
 
-    Args:
-    -----
+    Parameters
+    ----------
     undefined:
         Give desired entry for undefined inchikey fields. Default is "".
     aliases:

@@ -8,8 +8,8 @@ def reduce_to_number_of_peaks(spectrum_in: SpectrumType, n_required: int = 1, n_
                               ratio_desired: Optional[float] = None) -> SpectrumType:
     """Lowest intensity peaks will be removed when it has more peaks than desired.
 
-    Args:
-    -----
+    Parameters
+    ----------
     spectrum_in
         Input spectrum.
     n_required:
