@@ -8,11 +8,11 @@ from ..Spectrum import Spectrum
 def load_from_json(filename):
     """Load spectrum(s) from json file.
 
-JSON document formatted like the `GNPS Spectra library <https://gnps-external.ucsd.edu/gnpslibrary>`_
+    JSON document formatted like the `GNPS Spectra library <https://gnps-external.ucsd.edu/gnpslibrary>`_
     Spectrums with zero peaks will be skipped.
 
-    Args:
-    ----
+    Parameters
+    ----------
     filename: str
         Provide filename for json file containing spectrum(s).
     """
