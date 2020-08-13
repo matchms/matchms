@@ -8,8 +8,8 @@ def require_minimum_number_of_peaks(spectrum_in: SpectrumType,
                                     ratio_required: Optional[float] = None) -> SpectrumType:
     """Spectrum will be set to None when it has fewer peaks than required.
 
-    Args:
-    -----
+    Parameters
+    ----------
     spectrum_in:
         Input spectrum.
     n_required:

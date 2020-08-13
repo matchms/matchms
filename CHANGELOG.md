@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Extended, updated, and corrected documentation for filter functions [#118](https://github.com/matchms/matchms/pull/118)
+
 ## [0.5.0] - 2020-08-05
 
 ### Added
