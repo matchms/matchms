@@ -1,6 +1,7 @@
 import ast
 import json
-from typing import Union, List
+from typing import List
+from typing import Union
 import numpy
 from ..Spectrum import Spectrum
 
