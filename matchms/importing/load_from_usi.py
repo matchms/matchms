@@ -16,8 +16,8 @@ def load_from_usi(usi: str, server: str = "https://metabolomics-usi.ucsd.edu"):
         spectrum = load_from_usi("mzspec:MASSBANK::accession:SM858102")
         print(f"Found spectrum with precursor m/z of {spectrum.get("precursor_mz"):.2f}.")
 
-    Args:
-    ----
+    Parameters
+    ----------
     usi:
         Provide the usi.
 

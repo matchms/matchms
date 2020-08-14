@@ -6,8 +6,8 @@ from ..typing import SpectrumType
 def add_losses(spectrum_in: SpectrumType, loss_mz_from=0.0, loss_mz_to=1000.0) -> SpectrumType:
     """Derive losses based on precursor mass.
 
-    Args:
-    -----
+    Parameters
+    ----------
     spectrum_in:
         Input spectrum.
     loss_mz_from:
