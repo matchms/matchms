@@ -9,7 +9,7 @@ def save_as_json(spectrums: List[Spectrum], filename: str):
 
     :py:attr:`~matchms.Spectrum.losses` of spectrum will not be saved.
 
-    Arguments:
+    Parameters
     ----------
     spectrums:
         Expected input is a list of  :py:class:`~matchms.Spectrum.Spectrum` objects.

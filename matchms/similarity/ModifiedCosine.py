@@ -65,15 +65,16 @@ class ModifiedCosine:
 
     def __call__(self, spectrum1: SpectrumType, spectrum2: SpectrumType) -> Tuple[float, int]:
         """Calculate modified cosine score between two spectra.
+
         Parameters
         ----------
-        spectrum1: SpectrumType
+        spectrum1:
             Input spectrum 1.
-        spectrum2: SpectrumType
+        spectrum2:
             Input spectrum 2.
 
-        Returns:
-        --------
+        Returns
+        -------
 
         Tuple with cosine score and number of matched peaks.
         """

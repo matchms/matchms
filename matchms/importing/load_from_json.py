@@ -1,11 +1,11 @@
 import ast
 import json
-from typing import Union
+from typing import Union, List
 import numpy
 from ..Spectrum import Spectrum
 
 
-def load_from_json(filename):
+def load_from_json(filename: str) -> List[Spectrum]:
     """Load spectrum(s) from json file.
 
     JSON document formatted like the `GNPS Spectra library <https://gnps-external.ucsd.edu/gnpslibrary>`_
@@ -13,7 +13,7 @@ def load_from_json(filename):
 
     Parameters
     ----------
-    filename: str
+    filename
         Provide filename for json file containing spectrum(s).
     """
     with open(filename, 'rb') as fin:

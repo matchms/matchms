@@ -68,8 +68,8 @@ def load_from_msp(filename: str) -> Generator[Spectrum, None, None]:
     filename:
         Path of the msp file.
 
-    Returns
-    -------
+    Yields
+    ------
     Yield a spectrum object with the data of the msp file
 
 

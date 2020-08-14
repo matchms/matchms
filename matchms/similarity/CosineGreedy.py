@@ -72,8 +72,8 @@ class CosineGreedy:
         spectrum2: SpectrumType
             Input spectrum 2.
 
-        Returns:
-        --------
+        Returns
+        -------
 
         Tuple with cosine score and number of matched peaks.
         """

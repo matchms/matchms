@@ -6,9 +6,9 @@ class ParentmassMatch:
 
     def __init__(self, tolerance: float = 0.1):
         """
-        Parameters:
+        Parameters
         ----------
-        tolerance
+        tolerance:
             Specify tolerance below which two masses are counted as match.
         """
         self.tolerance = tolerance
