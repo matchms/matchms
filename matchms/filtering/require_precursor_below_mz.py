@@ -18,7 +18,9 @@ def require_precursor_below_mz(spectrum: SpectrumType, max_mz: float = 1000) -> 
 
     assert max_mz >= 0, "max_mz must be a positive floating point."
     precursor_mz = spectrum.get("precursor_mz")
-    if precursor_mz >= max_mz:
-        return None
+    if precursor_mz:
+
+        if precursor_mz >= max_mz:
+            return None
 
     return spectrum
