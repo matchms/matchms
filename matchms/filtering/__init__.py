@@ -27,6 +27,11 @@ Should output
 
     Maximum intensity is 1.00
 
+.. image:: _static/filtering_sketch.png
+  :width: 700
+  :alt: matchms filtering sketch
+
+
 """
 from .add_compound_name import add_compound_name
 from .add_fingerprint import add_fingerprint
