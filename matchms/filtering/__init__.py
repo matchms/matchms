@@ -32,6 +32,7 @@ Should output
 .. image:: ../_static/filtering_sketch.png
   :width: 700
   :alt: matchms filtering sketch
+  Sketch of matchms spectrum processing.
 
 
 """
