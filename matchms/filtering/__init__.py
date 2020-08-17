@@ -29,7 +29,7 @@ Should output
 
     Maximum intensity is 1.00
 
-.. image:: ./_static/filtering_sketch.png
+.. image:: ../_static/filtering_sketch.png
   :width: 700
   :alt: matchms filtering sketch
 
