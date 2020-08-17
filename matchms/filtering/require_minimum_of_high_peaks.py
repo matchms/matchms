@@ -1,12 +1,12 @@
 from ..typing import SpectrumType
-from . import select_by_relative_intensity
+from .select_by_relative_intensity import select_by_relative_intensity
 
 
 def require_minimum_of_high_peaks(spectrum: SpectrumType, no_peaks: int = 5,
-                                  intensity_percent: float = 2) -> SpectrumType:
+                                  intensity_percent: float = 2.0) -> SpectrumType:
 
     """Returns None if the number of peaks with relative intensity
-       above intensity_percent is less than no_peaks.
+       above or equal to intensity_percent is less than no_peaks.
 
     Args:
     -----
@@ -22,7 +22,7 @@ def require_minimum_of_high_peaks(spectrum: SpectrumType, no_peaks: int = 5,
     """
 
     assert no_peaks >= 1, "no_peaks must be a positive nonzero integer."
-    assert intensity_percent >= 100, "intensity_percent must be a floating point between 0-100."
+    assert intensity_percent <= 100 and intensity_percent >= 0, "intensity_percent must be a floating point between 0-100."
     intensities_above_p = select_by_relative_intensity(spectrum, intensity_from=intensity_percent/100, intensity_to=1.0)
     if len(intensities_above_p.peaks) < no_peaks:
         return None
