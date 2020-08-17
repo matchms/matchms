@@ -1,4 +1,6 @@
-"""Functions for computing spectra similarities.
+"""
+Functions for computing spectra similarities
+############################################
 
 Matchms provides a number of frequently used similarity scores to compare mass
 spectra. This includes scores based on comparing peak positions and intensities

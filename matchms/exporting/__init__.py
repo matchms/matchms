@@ -1,7 +1,9 @@
-"""Functions for exporting mass spectral data.
+"""
+Functions for exporting mass spectral data
+##########################################
 
-:meth:`~matchms.Spectrum` (individual ones, or lists) can be exported to
-json or mgf files.
+Individual :meth:`~matchms.Spectrum`, or lists of :meth:`~matchms.Spectrum`
+can be exported to json or mgf files.
 """
 from .save_as_json import save_as_json
 from .save_as_mgf import save_as_mgf

@@ -1,4 +1,6 @@
-"""Functions for processing mass spectra.
+"""
+Functions for processing mass spectra
+#####################################
 
 Provided functions will usually only perform a single action to a spectrum.
 This can be changes or corrections of metadata, or peak filtering.
