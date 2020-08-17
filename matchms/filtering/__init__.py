@@ -30,9 +30,10 @@ Should output
     Maximum intensity is 1.00
 
 .. image:: ../_static/filtering_sketch.png
-  :width: 700
-  :alt: matchms filtering sketch
-  Sketch of matchms spectrum processing.
+   :width: 700
+   :alt: matchms filtering sketch
+
+   Sketch of matchms spectrum processing.
 
 
 """
