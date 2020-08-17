@@ -10,7 +10,7 @@ simple scores that only assess parent mass matches
 assess the underlying molecular similarity if structures are given as metadata
 (:meth:`~matchms.similarity.FingerprintSimilarityParallel`). It is also easily
 possible to add own custom similarity measures or import external ones (e.g
-`Spec2Vec <https://github.com/iomega/spec2vec>`.
+`Spec2Vec <https://github.com/iomega/spec2vec>`_.
 """
 from .CosineGreedy import CosineGreedy
 from .CosineHungarian import CosineHungarian
