@@ -20,7 +20,7 @@ Introduction
 Matchms was designed to easily build custom spectra processing pipelines and to compute spectra similarities (see flowchart). Spectral data can be imported from common formats such mzML, mzXML, msp, metabolomics-USI, MGF, or json (e.g. GNPS-syle json files). Matchms then provides filters for metadata cleaning and checking, as well as for basic peak filtering. Finally, matchms was build to import and apply different similarity measures to compare large amounts of spectra. This includes common Cosine scores, but can also easily be extended by custom measures.
 
 .. image:: _static/flowchart_matchms.png
-  :width: 400
+  :width: 800
   :alt: matchms workflow illustration
 
 Installation
