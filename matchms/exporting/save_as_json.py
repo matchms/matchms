@@ -13,6 +13,7 @@ def save_as_json(spectrums: List[Spectrum], filename: str):
 
     .. code-block:: python
 
+        import numpy
         from matchms import Spectrum
         from matchms.exporting import save_as_json
 
