@@ -7,10 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Basic submodule documentation and more code examples [#128](https://github.com/matchms/matchms/pull/128)
+
 ### Changed
 
 - Extended, updated, and corrected documentation for filter functions [#118](https://github.com/matchms/matchms/pull/118)
-- Add basic submodule documentation and more code examples [#128](https://github.com/matchms/matchms/pull/128)
 
 ## [0.5.0] - 2020-08-05
 
