@@ -80,8 +80,8 @@ def load_from_msp(filename: str) -> Generator[Spectrum, None, None]:
         from matchms.importing import load_from_msp
 
         # Download msp file from MassBank of North America repository at https://mona.fiehnlab.ucdavis.edu/
-
-        spectrum = next(load_from_msp("MoNA-export-GC-MS-first10.msp"))
+        file_msp = "MoNA-export-GC-MS-first10.msp"
+        spectrums = list(load_from_msp(file_msp))
     """
 
     for spectrum in parse_msp_file(filename):
