@@ -12,6 +12,7 @@ def save_as_mgf(spectrums: List[Spectrum], filename: str):
 
     .. code-block:: python
 
+        import numpy
         from matchms import Spectrum
         from matchms.exporting import save_as_mgf
 
