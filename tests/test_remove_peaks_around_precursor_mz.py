@@ -33,7 +33,7 @@ def test_remove_peaks_around_precursor_mz_tolerance_20():
     spectrum_in = Spectrum(mz=mz, intensities=intensities)
     spectrum_in.set("precursor_mz", 60.)
 
-    spectrum = remove_peaks_around_precursor_mz(spectrum_in, mz_tolerance = 20)
+    spectrum = remove_peaks_around_precursor_mz(spectrum_in, mz_tolerance=20)
 
     assert len(spectrum.peaks) == 3, "Expected 3 peaks to remain."
     assert spectrum.peaks.mz.tolist() == [10., 20., 30.], "Expected different peaks to remain."

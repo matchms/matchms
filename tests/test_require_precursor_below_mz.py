@@ -33,6 +33,6 @@ def test_require_precursor_below_mz_max_50():
     spectrum_in = Spectrum(mz=mz, intensities=intensities)
     spectrum_in.set("precursor_mz", 60.)
 
-    spectrum = require_precursor_below_mz(spectrum_in, max_mz = 50)
+    spectrum = require_precursor_below_mz(spectrum_in, max_mz=50)
 
     assert spectrum is None, "Expected spectrum to be None."

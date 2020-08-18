@@ -20,7 +20,7 @@ def test_require_minimum_of_high_peaks_no_peaks_2():
     intensities = numpy.array([0, 1, 10, 100], dtype="float")
     spectrum_in = Spectrum(mz=mz, intensities=intensities)
 
-    spectrum = require_minimum_of_high_peaks(spectrum_in, no_peaks = 2)
+    spectrum = require_minimum_of_high_peaks(spectrum_in, no_peaks=2)
 
     assert spectrum == spectrum_in, "Expected no changes."
 
@@ -31,6 +31,6 @@ def test_require_minimum_of_high_peaks_intensity_percent_10():
     intensities = numpy.array([0, 1, 10, 25, 50, 75, 100], dtype="float")
     spectrum_in = Spectrum(mz=mz, intensities=intensities)
 
-    spectrum = require_minimum_of_high_peaks(spectrum_in, intensity_percent = 10)
+    spectrum = require_minimum_of_high_peaks(spectrum_in, intensity_percent=10)
 
     assert spectrum == spectrum_in, "Expected no changes."
