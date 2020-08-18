@@ -6,7 +6,7 @@ Matchms provides a import functions for several commonly used data types, such
 as *.mzML*, *.mzXML*, *.mgf*, or *.msp*. It is also possible to load data from
 *.json* files (tested for json files from GNPS or json files made with matchms).
 Another option is to load spectra based on a unique identifier (USI)
-(:meth:`~matchms.importing.load_from_usi`). 
+(:meth:`~matchms.importing.load_from_usi`).
 
 For more extensive import options we recommend building custom importers using `pyteomics
 <https://github.com/levitsky/pyteomics>`_ or `pymzml <https://github.com/pymzml/pymzML>`_.

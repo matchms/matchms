@@ -35,7 +35,6 @@ Should output
 
    Sketch of matchms spectrum processing.
 
-
 """
 from .add_compound_name import add_compound_name
 from .add_fingerprint import add_fingerprint
