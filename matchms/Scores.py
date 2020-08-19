@@ -120,7 +120,7 @@ class Scores:
         """
         for i_ref, reference in enumerate(self.references[:self.n_rows, 0]):
             if self.is_symmetric:
-                for i_query, query in enumerate(self.queries[i_ref, :self.n_cols]):
+                for i_query, query in enumerate(self.queries[0, i_ref:self.n_cols], start=i_ref):
                     self._scores[i_ref][i_query] = self.similarity_function(reference, query)
                     self._scores[i_query][i_ref] = self._scores[i_ref][i_query]
             else:

@@ -46,6 +46,32 @@ def test_scores_calculate():
     assert actual == expected
 
 
+def test_scores_calculate_symmetric():
+    """Test if is_symmetric=True gives expected results.
+    Important: only makes sense when references=queries AND when
+    similarity score is commutable (score[i][j] = score[j][i]), which
+    the here used dummy score is not!
+    """
+    dummy_similarity_function = DummySimilarityFunction()
+    scores = Scores(references=["r0", "r1", "r2"],
+                    queries=["r0", "r1", "r2"],
+                    similarity_function=dummy_similarity_function,
+                    is_symmetric=True)
+    scores.calculate()
+    actual = list(scores)
+    expected = [
+        ("r0", "r0", "r0r0", 4),
+        ("r0", "r1", "r0r1", 4),
+        ("r0", "r2", "r0r2", 4),
+        ("r1", "r0", "r0r1", 4),
+        ("r1", "r1", "r1r1", 4),
+        ("r1", "r2", "r1r2", 4),
+        ("r2", "r0", "r0r2", 4),
+        ("r2", "r1", "r1r2", 4),
+        ("r2", "r2", "r2r2", 4)
+    ]
+    assert actual == expected
+
 def test_scores_calculate_parallel():
     dummy_similarity_function = DummySimilarityFunctionParallel()
     scores = Scores(references=["r0", "r1", "r2"],
