@@ -49,7 +49,7 @@ def test_scores_calculate():
 def test_scores_calculate_symmetric():
     """Test if is_symmetric=True gives expected results.
     Important: only makes sense when references=queries AND when
-    similarity score is commutable (score[i][j] = score[j][i]), which
+    similarity score is commutative (score[i][j] = score[j][i]), which
     the here used dummy score is not!
     """
     dummy_similarity_function = DummySimilarityFunction()
