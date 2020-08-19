@@ -72,6 +72,7 @@ def test_scores_calculate_symmetric():
     ]
     assert actual == expected
 
+
 def test_scores_calculate_parallel():
     dummy_similarity_function = DummySimilarityFunctionParallel()
     scores = Scores(references=["r0", "r1", "r2"],
