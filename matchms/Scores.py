@@ -49,7 +49,11 @@ class Scores:
         Cosine score between spectrum2 and spectrum3 is 0.14 with 1 matched peaks
         Cosine score between spectrum2 and spectrum4 is 0.61 with 1 matched peaks
     """
-    def __init__(self, references: ReferencesType, queries: QueriesType, similarity_function: SimilarityFunction):
+
+    # pylint: disable=too-many-instance-attributes
+
+    def __init__(self, references: ReferencesType, queries: QueriesType,
+                 similarity_function: SimilarityFunction, is_symmetric: bool = False):
         """
 
         Parameters
@@ -60,15 +64,20 @@ class Scores:
             List of query objects
         similarity_function
             Function which accepts a reference + query object and returns a score or tuple of scores
+        is_symmetric
+            Set to True when references and queries are identical (as for instance for an all-vs-all
+            comparison). By using the fact that score[i,j] = score[j,i] the calculation will be about
+            2x faster.
 
         """
-        Scores._validate_input_arguments(references, queries, similarity_function)
+        Scores._validate_input_arguments(references, queries, similarity_function, is_symmetric)
 
         self.n_rows = len(references)
         self.n_cols = len(queries)
         self.references = numpy.asarray(references).reshape(self.n_rows, 1)
         self.queries = numpy.asarray(queries).reshape(1, self.n_cols)
         self.similarity_function = similarity_function
+        self.is_symmetric = is_symmetric
         self._scores = numpy.empty([self.n_rows, self.n_cols], dtype="object")
         self._index = 0
 
@@ -91,7 +100,7 @@ class Scores:
         return self._scores.__str__()
 
     @staticmethod
-    def _validate_input_arguments(references, queries, similarity_function):
+    def _validate_input_arguments(references, queries, similarity_function, is_symmetric):
         assert isinstance(references, (list, tuple, numpy.ndarray)),\
             "Expected input argument 'references' to be list or tuple or numpy.ndarray."
 
@@ -100,6 +109,10 @@ class Scores:
 
         assert callable(similarity_function), "Expected input argument 'similarity_function' to be callable."
 
+        if is_symmetric:
+            assert len(references) == len(queries), "Expect references and queries to be the same."
+            assert references[0] == queries[0], "Expect references and queries to be the same."
+
     def calculate(self) -> Scores:
         """
         Calculate the similarity between all reference objects v all query objects using a
@@ -107,8 +120,13 @@ class Scores:
         one reference and one query object as its input arguments.
         """
         for i_ref, reference in enumerate(self.references[:self.n_rows, 0]):
-            for i_query, query in enumerate(self.queries[0, :self.n_cols]):
-                self._scores[i_ref][i_query] = self.similarity_function(reference, query)
+            if self.is_symmetric:
+                for i_query, query in enumerate(self.queries[i_ref, :self.n_cols]):
+                    self._scores[i_ref][i_query] = self.similarity_function(reference, query)
+                    self._scores[i_query][i_ref] = self._scores[i_ref][i_query]
+            else:
+                for i_query, query in enumerate(self.queries[0, :self.n_cols]):
+                    self._scores[i_ref][i_query] = self.similarity_function(reference, query)
         return self
 
     def calculate_parallel(self) -> Scores:
@@ -118,7 +136,8 @@ class Scores:
         all reference objects and a Numpy array of all query objects as its input arguments.
         """
 
-        self._scores = self.similarity_function(self.references[:, 0], self.queries[0, :])
+        self._scores = self.similarity_function(self.references[:, 0], self.queries[0, :],
+                                                is_symmetric=self.is_symmetric)
         return self
 
     @property
