@@ -135,12 +135,12 @@ class Scores:
         vectorized implementation.  Similarity functions should expect a Numpy array of
         all reference objects and a Numpy array of all query objects as its input arguments.
         """
-        argspec = inspect.getargspec(self.similarity_function)
-        if "is_symmetric" in argspec:
+        signature = inspect.signature(self.similarity_function)
+        if "is_symmetric" in str(signature):
             self._scores = self.similarity_function(self.references[:, 0], self.queries[0, :],
                                                     is_symmetric=self.is_symmetric)
         else:
-            self._scores = self.similarity_function(self.references[:, 0], self.queries[0, :])   
+            self._scores = self.similarity_function(self.references[:, 0], self.queries[0, :])
         return self
 
     @property
