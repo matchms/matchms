@@ -111,7 +111,6 @@ class Scores:
 
         if is_symmetric:
             assert len(references) == len(queries), "Expect references and queries to be the same."
-            assert references[0] == queries[0], "Expect references and queries to be the same."
 
     def calculate(self) -> Scores:
         """
