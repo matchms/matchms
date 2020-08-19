@@ -1,4 +1,5 @@
 from __future__ import annotations
+import inspect
 import numpy
 from matchms.typing import QueriesType
 from matchms.typing import ReferencesType
@@ -134,9 +135,12 @@ class Scores:
         vectorized implementation.  Similarity functions should expect a Numpy array of
         all reference objects and a Numpy array of all query objects as its input arguments.
         """
-
-        self._scores = self.similarity_function(self.references[:, 0], self.queries[0, :],
-                                                is_symmetric=self.is_symmetric)
+        argspec = inspect.getargspec(self.similarity_function)
+        if "is_symmetric" in argspec:
+            self._scores = self.similarity_function(self.references[:, 0], self.queries[0, :],
+                                                    is_symmetric=self.is_symmetric)
+        else:
+            self._scores = self.similarity_function(self.references[:, 0], self.queries[0, :])   
         return self
 
     @property
