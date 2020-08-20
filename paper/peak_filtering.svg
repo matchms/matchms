@@ -28,40 +28,35 @@
    guidetolerance="10"
    inkscape:pageopacity="0"
    inkscape:pageshadow="2"
-   inkscape:window-width="2560"
-   inkscape:window-height="1377"
+   inkscape:window-width="1920"
+   inkscape:window-height="1017"
    id="namedview14577"
    showgrid="false"
    inkscape:zoom="0.3324247"
-   inkscape:cx="1326.7993"
-   inkscape:cy="1423.7574"
-   inkscape:window-x="9"
-   inkscape:window-y="-8"
+   inkscape:cx="1051.8687"
+   inkscape:cy="1099.2593"
+   inkscape:window-x="-8"
+   inkscape:window-y="2152"
    inkscape:window-maximized="1"
-   inkscape:current-layer="g6166" />
-    <g
-   transform="matrix(1.6609,0,0,1,-811.755,-82.2553)"
-   id="g4">
-        <path
-   d="M1138.91,858.314L1336.86,193.559"
-   style="fill:none;stroke:rgb(0,174,239);stroke-width:2.66px;stroke-dasharray:1.06,1.86,0,0;"
-   id="path2" />
-    </g>
+   inkscape:current-layer="svg14575" />
+    
     <g
    transform="matrix(1.6609,0,0,1,-811.755,-72.7624)"
    id="g8">
         <path
    d="M1138.91,861.314L1336.86,861.314"
-   style="fill:none;stroke:rgb(0,174,239);stroke-width:2.66px;stroke-dasharray:1.06,1.86,0,0;"
+   style="fill:none;stroke:rgb(0, 174, 239);stroke-width:2.66000016;stroke-dasharray:2.66000016,2.66000016;stroke-miterlimit:1.5;stroke-dashoffset:0"
    id="path6" />
     </g>
     <g
-   transform="matrix(1.6609,0,0,1,-811.755,-82.2553)"
+   transform="matrix(1.6609,0,0,1,-865.99653,-80.128181)"
    id="g12">
         <path
-   d="M1138.91,858.314L1336.86,193.559"
-   style="fill:none;stroke:rgb(0,174,239);stroke-width:2.66px;stroke-dasharray:1.06,1.86,0,0;"
-   id="path10" />
+   d="M 1172.8486,860.9729 1230.8408,666.22376 1370.7986,196.2179"
+   style="fill:none;stroke:#00aeef;stroke-width:2.66000016;stroke-miterlimit:1.5;stroke-dasharray:2.66000016,5.32000032;stroke-dashoffset:0"
+   id="path10"
+   inkscape:connector-curvature="0"
+   sodipodi:nodetypes="ccc" />
     </g>
     <g
    id="spectrum_raw"
@@ -12245,6 +12240,7 @@
    y="273.794px 273.794px "
    id="tspan6096">00</tspan></text>
 
+
             <text
    x="126.802px"
    y="273.794px"
@@ -12253,6 +12249,7 @@
    x="133.162px 139.522px "
    y="273.794px 273.794px "
    id="tspan6100">50</tspan></text>
+
 
             <text
    x="167.02px"
@@ -12263,6 +12260,7 @@
    y="273.794px 273.794px "
    id="tspan6104">00</tspan></text>
 
+
             <text
    x="207.238px"
    y="273.794px"
@@ -12271,6 +12269,7 @@
    x="213.598px 219.958px "
    y="273.794px 273.794px "
    id="tspan6108">50</tspan></text>
+
 
             <text
    x="247.456px"
@@ -12281,6 +12280,7 @@
    y="273.794px 273.794px "
    id="tspan6112">00</tspan></text>
 
+
             <text
    x="287.673px"
    y="273.794px"
@@ -12289,6 +12289,7 @@
    x="294.033px 300.393px "
    y="273.794px 273.794px "
    id="tspan6116">50</tspan></text>
+
 
             <text
    x="327.891px"
@@ -12299,6 +12300,7 @@
    y="273.794px 273.794px "
    id="tspan6120">00</tspan></text>
 
+
             <text
    x="368.109px"
    y="273.794px"
@@ -12307,6 +12309,7 @@
    x="374.469px 380.829px "
    y="273.794px 273.794px "
    id="tspan6124">50</tspan></text>
+
 
             
             <text
@@ -12318,6 +12321,7 @@
    y="262.997px 262.997px "
    id="tspan6132">.0</tspan></text>
 
+
             <text
    x="63.494px"
    y="219.111px"
@@ -12326,6 +12330,7 @@
    x="69.655px 73.034px "
    y="219.111px 219.111px "
    id="tspan6136">.2</tspan></text>
+
 
             <text
    x="63.494px"
@@ -12336,6 +12341,7 @@
    y="175.225px 175.225px "
    id="tspan6140">.4</tspan></text>
 
+
             <text
    x="63.494px"
    y="131.34px"
@@ -12344,6 +12350,7 @@
    x="69.655px 73.034px "
    y="131.34px 131.34px "
    id="tspan6144">.6</tspan></text>
+
 
             <text
    x="63.494px"
@@ -12354,6 +12361,7 @@
    y="87.454px 87.454px "
    id="tspan6148">.8</tspan></text>
 
+
             <text
    x="63.494px"
    y="43.568px"
@@ -12362,6 +12370,7 @@
    x="69.655px 73.034px "
    y="43.568px 43.568px "
    id="tspan6152">.0</tspan></text>
+
 
             <g
    transform="matrix(0,-1,1,0,0,0)"
@@ -12375,6 +12384,7 @@
    y="57.416px 57.416px 57.416px 57.416px 57.416px 57.416px 57.416px 57.416px "
    id="tspan6156">ntensity</tspan></text>
 
+
             </g>
             <text
    x="208.514px"
@@ -12385,13 +12395,15 @@
    y="22.8px 22.8px 22.8px 22.8px 22.8px 22.8px 22.8px "
    id="tspan6162">pectrum</tspan></text>
 
+
         <text
    x="227.47697"
    y="285.51593"
-   style="font-size:10px;font-family:ArialMT, Arial, sans-serif;clip-rule:evenodd;fill-rule:evenodd;stroke-width:1;stroke-linejoin:round;stroke-miterlimit:1.5"
+   style="font-size:9.99980653px;font-family:ArialMT, Arial, sans-serif;clip-rule:evenodd;fill-rule:evenodd;stroke-width:1;stroke-linejoin:round;stroke-miterlimit:1.5;-inkscape-font-specification:'ArialMT, Arial, sans-serif, Italic';font-weight:normal;font-style:italic;font-stretch:normal;font-variant:normal;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
    id="text13425-6"><tspan
-     style="stroke-width:1"
+     style="stroke-width:1;-inkscape-font-specification:'ArialMT, Arial, sans-serif, Italic';font-family:ArialMT, Arial, sans-serif;font-weight:normal;font-style:italic;font-stretch:normal;font-variant:normal;font-size:9.99980653px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
      id="tspan13423-6">m/z</tspan></text>
+
 </g>
     </g>
     <g
@@ -24796,6 +24808,7 @@
    y="273.794px 273.794px "
    id="tspan12358">00</tspan></text>
 
+
                 <text
    x="126.802px"
    y="273.794px"
@@ -24804,6 +24817,7 @@
    x="133.162px 139.522px "
    y="273.794px 273.794px "
    id="tspan12362">50</tspan></text>
+
 
                 <text
    x="167.02px"
@@ -24814,6 +24828,7 @@
    y="273.794px 273.794px "
    id="tspan12366">00</tspan></text>
 
+
                 <text
    x="207.238px"
    y="273.794px"
@@ -24822,6 +24837,7 @@
    x="213.598px 219.958px "
    y="273.794px 273.794px "
    id="tspan12370">50</tspan></text>
+
 
                 <text
    x="247.456px"
@@ -24832,6 +24848,7 @@
    y="273.794px 273.794px "
    id="tspan12374">00</tspan></text>
 
+
                 <text
    x="287.673px"
    y="273.794px"
@@ -24840,6 +24857,7 @@
    x="294.033px 300.393px "
    y="273.794px 273.794px "
    id="tspan12378">50</tspan></text>
+
 
                 <text
    x="327.891px"
@@ -24850,6 +24868,7 @@
    y="273.794px 273.794px "
    id="tspan12382">00</tspan></text>
 
+
                 <text
    x="368.109px"
    y="273.794px"
@@ -24858,6 +24877,7 @@
    x="374.469px 380.829px "
    y="273.794px 273.794px "
    id="tspan12386">50</tspan></text>
+
 
                 
                 <text
@@ -24869,6 +24889,7 @@
    y="262.997px 262.997px 262.997px 262.997px 262.997px "
    id="tspan12394">.0000</tspan></text>
 
+
                 <text
    x="44.416px"
    y="234.197px"
@@ -24877,6 +24898,7 @@
    x="50.696px 54.194px 60.474px 66.755px 73.036px "
    y="234.197px 234.197px 234.197px 234.197px 234.197px "
    id="tspan12398">.0025</tspan></text>
+
 
                 <text
    x="44.416px"
@@ -24887,6 +24909,7 @@
    y="205.397px 205.397px 205.397px 205.397px 205.397px "
    id="tspan12402">.0050</tspan></text>
 
+
                 <text
    x="44.416px"
    y="176.597px"
@@ -24895,6 +24918,7 @@
    x="50.696px 54.194px 60.474px 66.755px 73.036px "
    y="176.597px 176.597px 176.597px 176.597px 176.597px "
    id="tspan12406">.0075</tspan></text>
+
 
                 <text
    x="44.416px"
@@ -24905,6 +24929,7 @@
    y="147.797px 147.797px 147.797px 147.797px 147.797px "
    id="tspan12410">.0100</tspan></text>
 
+
                 <text
    x="44.416px"
    y="118.997px"
@@ -24913,6 +24938,7 @@
    x="50.696px 54.194px 60.474px 66.755px 73.036px "
    y="118.997px 118.997px 118.997px 118.997px 118.997px "
    id="tspan12414">.0125</tspan></text>
+
 
                 <text
    x="44.416px"
@@ -24923,6 +24949,7 @@
    y="90.197px 90.197px 90.197px 90.197px 90.197px "
    id="tspan12418">.0150</tspan></text>
 
+
                 <text
    x="44.416px"
    y="61.397px"
@@ -24932,6 +24959,7 @@
    y="61.397px 61.397px 61.397px 61.397px 61.397px "
    id="tspan12422">.0175</tspan></text>
 
+
                 <text
    x="44.416px"
    y="32.597px"
@@ -24940,6 +24968,7 @@
    x="50.696px 54.194px 60.474px 66.755px 73.036px "
    y="32.597px 32.597px 32.597px 32.597px 32.597px "
    id="tspan12426">.0200</tspan></text>
+
 
                 <g
    transform="matrix(0,-1,1,0,0,0)"
@@ -24952,6 +24981,7 @@
    x="-162.754px -156.473px -152.976px -146.695px -140.414px -134.694px -131.753px -128.255px "
    y="38.338px 38.338px 38.338px 38.338px 38.338px 38.338px 38.338px 38.338px "
    id="tspan12430">ntensity</tspan></text>
+
 
                 </g>
                 <g
@@ -24973,6 +25003,7 @@
    x="217.248px 224.651px 232.055px 238.785px 242.849px 247.574px 254.978px "
    y="22.8px 22.8px 22.8px 22.8px 22.8px 22.8px 22.8px "
    id="tspan12440">pectrum</tspan></text>
+
 
                 <g
    transform="matrix(0,-1,-1,0,230.4,230.4)"
@@ -25009,10 +25040,11 @@
             <text
    x="227.51479"
    y="286.56146"
-   style="font-size:10px;font-family:ArialMT, Arial, sans-serif;clip-rule:evenodd;fill-rule:evenodd;stroke-width:1;stroke-linejoin:round;stroke-miterlimit:1.5"
+   style="font-size:9.99980653px;font-family:ArialMT, Arial, sans-serif;clip-rule:evenodd;fill-rule:evenodd;stroke-width:1;stroke-linejoin:round;stroke-miterlimit:1.5;-inkscape-font-specification:'ArialMT, Arial, sans-serif, Italic';font-weight:normal;font-style:italic;font-stretch:normal;font-variant:normal;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
    id="text13425-2"><tspan
-     style="stroke-width:1"
+     style="stroke-width:1;-inkscape-font-specification:'ArialMT, Arial, sans-serif, Italic';font-family:ArialMT, Arial, sans-serif;font-weight:normal;font-style:italic;font-stretch:normal;font-variant:normal;font-size:9.99980653px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
      id="tspan13423-52">m/z</tspan></text>
+
 </g>
         </g>
     </g>
@@ -26902,6 +26934,7 @@
    y="273.794px 273.794px "
    id="tspan13399">50</tspan></text>
 
+
             <text
    x="166.483px"
    y="273.794px"
@@ -26910,6 +26943,7 @@
    x="172.843px 179.203px "
    y="273.794px 273.794px "
    id="tspan13403">00</tspan></text>
+
 
             <text
    x="212.509px"
@@ -26920,6 +26954,7 @@
    y="273.794px 273.794px "
    id="tspan13407">50</tspan></text>
 
+
             <text
    x="258.534px"
    y="273.794px"
@@ -26928,6 +26963,7 @@
    x="264.894px 271.254px "
    y="273.794px 273.794px "
    id="tspan13411">00</tspan></text>
+
 
             <text
    x="304.56px"
@@ -26938,6 +26974,7 @@
    y="273.794px 273.794px "
    id="tspan13415">50</tspan></text>
 
+
             <text
    x="350.586px"
    y="273.794px"
@@ -26947,12 +26984,15 @@
    y="273.794px 273.794px "
    id="tspan13419">00</tspan></text>
 
+
             <text
    x="228.97501"
    y="287.466"
-   style="font-size:10px;font-family:ArialMT, Arial, sans-serif"
+   style="font-size:9.99980653px;font-family:ArialMT, Arial, sans-serif;-inkscape-font-specification:'ArialMT, Arial, sans-serif, Italic';font-weight:normal;font-style:italic;font-stretch:normal;font-variant:normal;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
    id="text13425"><tspan
-     id="tspan13423">m/z</tspan></text>
+     id="tspan13423"
+     style="-inkscape-font-specification:'ArialMT, Arial, sans-serif, Italic';font-family:ArialMT, Arial, sans-serif;font-weight:normal;font-style:italic;font-stretch:normal;font-variant:normal;font-size:9.99980653px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;">m/z</tspan></text>
+
 
             <text
    x="63.494px"
@@ -26963,6 +27003,7 @@
    y="262.997px 262.997px "
    id="tspan13427">.0</tspan></text>
 
+
             <text
    x="63.494px"
    y="219.111px"
@@ -26971,6 +27012,7 @@
    x="69.655px 73.034px "
    y="219.111px 219.111px "
    id="tspan13431">.2</tspan></text>
+
 
             <text
    x="63.494px"
@@ -26981,6 +27023,7 @@
    y="175.225px 175.225px "
    id="tspan13435">.4</tspan></text>
 
+
             <text
    x="63.494px"
    y="131.34px"
@@ -26989,6 +27032,7 @@
    x="69.655px 73.034px "
    y="131.34px 131.34px "
    id="tspan13439">.6</tspan></text>
+
 
             <text
    x="63.494px"
@@ -26999,6 +27043,7 @@
    y="87.454px 87.454px "
    id="tspan13443">.8</tspan></text>
 
+
             <text
    x="63.494px"
    y="43.568px"
@@ -27007,6 +27052,7 @@
    x="69.655px 73.034px "
    y="43.568px 43.568px "
    id="tspan13447">.0</tspan></text>
+
 
             <g
    transform="matrix(0,-1,1,0,0,0)"
@@ -27020,6 +27066,7 @@
    y="57.416px 57.416px 57.416px 57.416px 57.416px 57.416px 57.416px 57.416px "
    id="tspan13451">ntensity</tspan></text>
 
+
             </g>
             <text
    x="208.514px"
@@ -27029,6 +27076,7 @@
    x="217.248px 224.651px 232.055px 238.785px 242.849px 247.574px 254.978px "
    y="22.8px 22.8px 22.8px 22.8px 22.8px 22.8px 22.8px "
    id="tspan13457">pectrum</tspan></text>
+
 
         </g>
     </g>
@@ -28922,6 +28970,7 @@
    y="273.794px 273.794px "
    id="tspan14397">50</tspan></text>
 
+
                 <text
    x="166.483px"
    y="273.794px"
@@ -28930,6 +28979,7 @@
    x="172.843px 179.203px "
    y="273.794px 273.794px "
    id="tspan14401">00</tspan></text>
+
 
                 <text
    x="212.509px"
@@ -28940,6 +28990,7 @@
    y="273.794px 273.794px "
    id="tspan14405">50</tspan></text>
 
+
                 <text
    x="258.534px"
    y="273.794px"
@@ -28948,6 +28999,7 @@
    x="264.894px 271.254px "
    y="273.794px 273.794px "
    id="tspan14409">00</tspan></text>
+
 
                 <text
    x="304.56px"
@@ -28958,6 +29010,7 @@
    y="273.794px 273.794px "
    id="tspan14413">50</tspan></text>
 
+
                 <text
    x="350.586px"
    y="273.794px"
@@ -28966,6 +29019,7 @@
    x="356.946px 363.306px "
    y="273.794px 273.794px "
    id="tspan14417">00</tspan></text>
+
 
                 
                 <text
@@ -28977,6 +29031,7 @@
    y="262.997px 262.997px 262.997px 262.997px 262.997px "
    id="tspan14425">.0000</tspan></text>
 
+
                 <text
    x="44.416px"
    y="234.197px"
@@ -28985,6 +29040,7 @@
    x="50.696px 54.194px 60.474px 66.755px 73.036px "
    y="234.197px 234.197px 234.197px 234.197px 234.197px "
    id="tspan14429">.0025</tspan></text>
+
 
                 <text
    x="44.416px"
@@ -28995,6 +29051,7 @@
    y="205.397px 205.397px 205.397px 205.397px 205.397px "
    id="tspan14433">.0050</tspan></text>
 
+
                 <text
    x="44.416px"
    y="176.597px"
@@ -29003,6 +29060,7 @@
    x="50.696px 54.194px 60.474px 66.755px 73.036px "
    y="176.597px 176.597px 176.597px 176.597px 176.597px "
    id="tspan14437">.0075</tspan></text>
+
 
                 <text
    x="44.416px"
@@ -29013,6 +29071,7 @@
    y="147.797px 147.797px 147.797px 147.797px 147.797px "
    id="tspan14441">.0100</tspan></text>
 
+
                 <text
    x="44.416px"
    y="118.997px"
@@ -29021,6 +29080,7 @@
    x="50.696px 54.194px 60.474px 66.755px 73.036px "
    y="118.997px 118.997px 118.997px 118.997px 118.997px "
    id="tspan14445">.0125</tspan></text>
+
 
                 <text
    x="44.416px"
@@ -29031,6 +29091,7 @@
    y="90.197px 90.197px 90.197px 90.197px 90.197px "
    id="tspan14449">.0150</tspan></text>
 
+
                 <text
    x="44.416px"
    y="61.397px"
@@ -29040,6 +29101,7 @@
    y="61.397px 61.397px 61.397px 61.397px 61.397px "
    id="tspan14453">.0175</tspan></text>
 
+
                 <text
    x="44.416px"
    y="32.597px"
@@ -29048,6 +29110,7 @@
    x="50.696px 54.194px 60.474px 66.755px 73.036px "
    y="32.597px 32.597px 32.597px 32.597px 32.597px "
    id="tspan14457">.0200</tspan></text>
+
 
                 <g
    transform="matrix(0,-1,1,0,0,0)"
@@ -29060,6 +29123,7 @@
    x="-162.754px -156.473px -152.976px -146.695px -140.414px -134.694px -131.753px -128.255px "
    y="38.338px 38.338px 38.338px 38.338px 38.338px 38.338px 38.338px 38.338px "
    id="tspan14461">ntensity</tspan></text>
+
 
                 </g>
                 <g
@@ -29114,13 +29178,15 @@
    y="22.8px 22.8px 22.8px 22.8px 22.8px 22.8px 22.8px "
    id="tspan14487">pectrum</tspan></text>
 
+
             <text
    x="232.23334"
    y="286.26434"
-   style="font-size:10px;font-family:ArialMT, Arial, sans-serif;clip-rule:evenodd;fill-rule:evenodd;stroke-width:1;stroke-linejoin:round;stroke-miterlimit:1.5"
+   style="font-size:9.99980653px;font-family:ArialMT, Arial, sans-serif;clip-rule:evenodd;fill-rule:evenodd;stroke-width:1;stroke-linejoin:round;stroke-miterlimit:1.5;-inkscape-font-specification:'ArialMT, Arial, sans-serif, Italic';font-weight:normal;font-style:italic;font-stretch:normal;font-variant:normal;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
    id="text13425-0"><tspan
-     style="stroke-width:1"
+     style="stroke-width:1;-inkscape-font-specification:'ArialMT, Arial, sans-serif, Italic';font-family:ArialMT, Arial, sans-serif;font-weight:normal;font-style:italic;font-stretch:normal;font-variant:normal;font-size:9.99980653px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
      id="tspan13423-5">m/z</tspan></text>
+
 </g>
         </g>
     </g>
@@ -29128,16 +29194,19 @@
    transform="matrix(1.6609,0,0,1,-811.755,1034.58)"
    id="g14498">
         <path
-   d="M1138.91,861.314L1336.86,861.314"
-   style="fill:none;stroke:rgb(0,174,239);stroke-width:2.66px;stroke-dasharray:1.06,1.86,0,0;"
-   id="path14496" />
+   d="m 1138.91,861.314 h 112.5701 85.3799"
+   style="fill:none;stroke:#00aeef;stroke-width:2.66000016;stroke-dasharray:2.66000016,2.66000016;stroke-miterlimit:1.5;stroke-dashoffset:0"
+   id="path14496"
+   inkscape:connector-curvature="0"
+   sodipodi:nodetypes="ccc" />
     </g>
     <g
    transform="matrix(1.6609,0,0,1,-811.755,1026.58)"
-   id="g14502">
+   id="g14502"
+   style="stroke-width:1.55188042;stroke-miterlimit:4;stroke-dasharray:none">
         <path
    d="M1138.91,858.314L1336.86,193.559"
-   style="fill:none;stroke:rgb(0,174,239);stroke-width:2.66px;stroke-dasharray:1.06,1.86,0,0;"
+   style="fill:none;stroke:rgb(0, 174, 239);stroke-width:2.63819671;stroke-dasharray:2.63819671,5.27639342;stroke-miterlimit:4;stroke-dashoffset:0"
    id="path14500" />
     </g>
     <g
@@ -29156,6 +29225,7 @@
    x="174.674px 191.718px 203.34px "
    y="0px 0px 0px "
    id="tspan14506">ers</tspan></text>
+
 
         </g>
     </g>
@@ -29195,6 +29265,7 @@
    y="240.517px 240.517px "
    id="tspan14525">aw</tspan></text>
 
+
     </g>
     <g
    transform="matrix(1,0,0,1,1224.94,0)"
@@ -29219,6 +29290,7 @@
    y="240.517px 240.517px 240.517px 240.517px 240.517px 240.517px 240.517px "
    id="tspan14535">aw (zoo</tspan>med in)</text>
 
+
     </g>
     <g
    transform="matrix(1,0,0,1,0,1108.16)"
@@ -29242,6 +29314,7 @@
    x="169.535px 177.05px "
    y="240.517px 240.517px "
    id="tspan14545">oc</tspan>essed</text>
+
 
     </g>
     <g
@@ -29270,6 +29343,7 @@
    y="240.517px 240.517px "
    id="tspan14557">oo</tspan>med in)</text>
 
+
     </g>
     <g
    transform="matrix(1.72294,0,0,1.72294,234.317,202.569)"
@@ -29287,11 +29361,13 @@
    y="0px 0px 0px 0px 0px "
    id="tspan14563">eated</tspan> using</text>
 
+
                 <text
    x="191.083px"
    y="0px"
    style="font-family:'CourierNewPSMT', 'Courier New', monospace;font-size:24.184px;"
    id="text14567">spectrum.plot()</text>
+
 
             </g>
         </g>
