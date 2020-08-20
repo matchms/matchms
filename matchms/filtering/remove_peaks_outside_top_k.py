@@ -26,15 +26,15 @@ def remove_peaks_outside_top_k(spectrum: SpectrumType, k: int = 6,
     top_k = intensities.argsort()[::-1][0:k]
     k_ordered_mzs = mzs[top_k]
     indices = [i for i in range(len(mzs)) if i not in top_k]
-    new_mzs, new_intensities = mzs, intensities
+    keep_idx = [i for i in top_k]
     for i in indices:
 
         compare = abs(mzs[i]-k_ordered_mzs) <= mz_window
-        if not numpy.any(compare):
-            new_mzs[i], new_intensities[i] = numpy.nan, numpy.nan
+        if numpy.any(compare):
+            keep_idx.append(i)
 
-    nans = numpy.isnan(new_mzs)
-    new_mzs, new_intensities = new_mzs[~nans], new_intensities[~nans]
+    keep_idx.sort()
+    new_mzs, new_intensities = mzs[keep_idx], intensities[keep_idx]
     spectrum.peaks = Spikes(mz=new_mzs, intensities=new_intensities)
 
     return spectrum
