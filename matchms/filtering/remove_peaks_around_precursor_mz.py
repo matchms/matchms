@@ -20,15 +20,9 @@ def remove_peaks_around_precursor_mz(spectrum: SpectrumType, mz_tolerance: float
     assert mz_tolerance >= 0, "mz_tolerance must be a positive floating point."
     precursor_mz = spectrum.get("precursor_mz")
     mzs, intensities = spectrum.peaks
-    new_mzs, new_intensities = mzs, intensities
     if precursor_mz:
-        for i, mz in enumerate(mzs):
-
-            if abs(precursor_mz-mz) <= mz_tolerance and mz != precursor_mz:
-                new_mzs[i], new_intensities[i] = numpy.nan, numpy.nan
-
-        nans = numpy.isnan(new_mzs)
-        new_mzs, new_intensities = new_mzs[~nans], new_intensities[~nans]
+        peaks_to_remove = ((numpy.abs(precursor_mz-mzs) <= mz_tolerance) & (mzs != precursor_mz))
+        new_mzs, new_intensities = mzs[~peaks_to_remove], intensities[~peaks_to_remove]
         spectrum.peaks = Spikes(mz=new_mzs, intensities=new_intensities)
 
     return spectrum
