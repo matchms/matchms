@@ -38,8 +38,8 @@ class CosineHungarian:
     def __call__(self, spectrum1: SpectrumType, spectrum2: SpectrumType) -> Tuple[float, int]:
         """Calculate cosine score between two spectra.
 
-        Args:
-        ----
+        Parameters
+        ----------
         spectrum1: SpectrumType
             Input spectrum 1.
         spectrum2: SpectrumType

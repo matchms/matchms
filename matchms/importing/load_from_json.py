@@ -1,20 +1,31 @@
 import ast
 import json
+from typing import List
 from typing import Union
 import numpy
 from ..Spectrum import Spectrum
 
 
-def load_from_json(filename):
+def load_from_json(filename: str) -> List[Spectrum]:
     """Load spectrum(s) from json file.
 
-JSON document formatted like the `GNPS Spectra library <https://gnps-external.ucsd.edu/gnpslibrary>`_
+    JSON document formatted like the `GNPS Spectra library <https://gnps-external.ucsd.edu/gnpslibrary>`_.
     Spectrums with zero peaks will be skipped.
 
-    Args:
-    ----
-    filename: str
+    Example:
+
+    .. code-block:: python
+
+        from matchs.importing import load_from_json
+
+        file_json = "gnps_testdata.json"
+        spectrums = load_from_json(file_json)
+
+    Parameters
+    ----------
+    filename
         Provide filename for json file containing spectrum(s).
+
     """
     with open(filename, 'rb') as fin:
         spectrums = []

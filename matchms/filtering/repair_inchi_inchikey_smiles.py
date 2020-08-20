@@ -2,8 +2,11 @@ from ..typing import SpectrumType
 from .SpeciesString import SpeciesString
 
 
-def repair_inchi_inchikey_smiles(spectrum_in: SpectrumType):
-
+def repair_inchi_inchikey_smiles(spectrum_in: SpectrumType) -> SpectrumType:
+    """Check if inchi, inchikey, and smiles entries seem correct. Detect and correct
+    if any of those entries clearly belongs into one of the other two fields (e.g.
+    inchikey found in inchi field).
+    """
     if spectrum_in is None:
         return None
 

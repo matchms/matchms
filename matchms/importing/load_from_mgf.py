@@ -5,7 +5,18 @@ from ..Spectrum import Spectrum
 
 
 def load_from_mgf(filename: str) -> Generator[Spectrum, None, None]:
-    """Load spectrum(s) from mgf file."""
+    """Load spectrum(s) from mgf file.
+
+    Example:
+
+    .. code-block:: python
+
+        from matchs.importing import load_from_mgf
+
+        file_mgf = "pesticides.mgf"
+        spectrums = list(load_from_mgf(file_mgf))
+
+    """
 
     for pyteomics_spectrum in MGF(filename, convert_arrays=1):
 

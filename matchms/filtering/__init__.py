@@ -1,3 +1,41 @@
+"""
+Functions for processing mass spectra
+#####################################
+
+Provided functions will usually only perform a single action to a spectrum.
+This can be changes or corrections of metadata, or peak filtering.
+More complicated processing pipelines can be build by stacking several of
+the provided filters.
+
+Example of how to use a single filter function:
+
+.. testcode::
+
+    import numpy as np
+    from matchms import Spectrum
+    from matchms.filtering import normalize_intensities
+
+    spectrum = Spectrum(mz=np.array([100, 120, 150, 200.]),
+                        intensities=np.array([200.0, 300.0, 50.0, 1.0]),
+                        metadata={'id': 'spectrum1'})
+    spectrum_filtered = normalize_intensities(spectrum)
+
+    max_intensity = spectrum_filtered.peaks.intensities.max()
+    print(f"Maximum intensity is {max_intensity:.2f}")
+
+Should output
+
+.. testoutput::
+
+    Maximum intensity is 1.00
+
+.. figure:: ../_static/filtering_sketch.png
+   :width: 700
+   :alt: matchms filtering sketch
+
+   Sketch of matchms spectrum processing.
+
+"""
 from .add_compound_name import add_compound_name
 from .add_fingerprint import add_fingerprint
 from .add_losses import add_losses

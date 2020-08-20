@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.1] - 2020-08-19
+
+### Added
+
+- Basic submodule documentation and more code examples [#128](https://github.com/matchms/matchms/pull/128)
+
+### Changed
+
+- Extended, updated, and corrected documentation for filter functions [#118](https://github.com/matchms/matchms/pull/118)
+
 ## [0.5.0] - 2020-08-05
 
 ### Added
@@ -173,7 +183,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - This is the initial version of Spec2Vec from https://github.com/iomega/Spec2Vec
 
-[Unreleased]: https://github.com/matchms/matchms/compare/0.5.0...HEAD
+[Unreleased]: https://github.com/matchms/matchms/compare/0.5.1...HEAD
+[0.5.1]: https://github.com/matchms/matchms/compare/0.5.0...0.5.1
 [0.5.0]: https://github.com/matchms/matchms/compare/0.4.0...0.5.0
 [0.4.0]: https://github.com/matchms/matchms/compare/0.3.4...0.4.0
 [0.3.4]: https://github.com/matchms/matchms/compare/0.3.3...0.3.4

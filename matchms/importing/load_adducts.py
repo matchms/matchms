@@ -5,8 +5,14 @@ import yaml
 
 
 @lru_cache(maxsize=4)
-def load_adducts(filename=None) -> Dict:
+def load_adducts(filename: str = None) -> Dict:
+    """Load dictionary of known adducts. Makes sure that file loading is cached.
 
+    Parameters
+    ----------
+    filename:
+        Yaml file containing adducts.
+    """
     if filename is None:
         known_adducts_file = os.path.join(os.path.dirname(__file__), "..", "data", "known_adducts.yaml")
     else:

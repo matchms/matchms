@@ -2,15 +2,17 @@ import re
 from ..typing import SpectrumType
 
 
-def derive_formula_from_name(spectrum_in: SpectrumType, remove_formula_from_name=True) -> SpectrumType:
+def derive_formula_from_name(spectrum_in: SpectrumType,
+                             remove_formula_from_name: bool = True) -> SpectrumType:
     """Detect and remove misplaced formula in compound name and add to metadata.
 
     Method to find misplaced formulas in compound name based on regular expression.
-    Args:
-    ----
-    spectrum_in: SpectrumType
+
+    Parameters
+    ----------
+    spectrum_in:
         Input spectrum.
-    remove_formula_from_name: bool
+    remove_formula_from_name:
         Remove found formula from compound name if set to True. Default is True.
     """
     if spectrum_in is None:
