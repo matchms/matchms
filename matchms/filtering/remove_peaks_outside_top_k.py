@@ -26,7 +26,7 @@ def remove_peaks_outside_top_k(spectrum: SpectrumType, k: int = 6,
     top_k = intensities.argsort()[::-1][0:k]
     k_ordered_mzs = mzs[top_k]
     indices = [i for i in range(len(mzs)) if i not in top_k]
-    keep_idx = [i for i in top_k]
+    keep_idx = top_k.tolist()
     for i in indices:
 
         compare = abs(mzs[i]-k_ordered_mzs) <= mz_window
