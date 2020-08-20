@@ -7,15 +7,15 @@ def remove_peaks_outside_top_k(spectrum: SpectrumType, k: int = 6,
                                mz_window: float = 50) -> SpectrumType:
 
     """Keep peaks only if they are in the top k intense peaks
-       within a desired mz (Da) window
+       within a desired mz (Da) window.
 
-    Args:
-    -----
-    spectrum:
+    Parameters
+    ----------
+    spectrum
         Input spectrum.
-    k:
+    k
         The number of most intense peaks to compare to. Default is 6.
-    mz_window:
+    mz_window
         Window of mz values (in Da) that are allowed to lie within
         the top k peaks. Default is 50 Da.
     """
