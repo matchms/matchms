@@ -36,3 +36,15 @@ def test_require_precursor_below_mz_max_50():
     spectrum = require_precursor_below_mz(spectrum_in, max_mz=50)
 
     assert spectrum is None, "Expected spectrum to be None."
+
+
+def test_if_spectrum_is_cloned():
+    """Test if filter is correctly cloning the input spectrum."""
+    mz = numpy.array([], dtype="float")
+    intensities = numpy.array([], dtype="float")
+    spectrum_in = Spectrum(mz=mz, intensities=intensities)
+
+    spectrum = require_precursor_below_mz(spectrum_in)
+    spectrum.set("testfield", "test")
+
+    assert not spectrum_in.get("testfield"), "Expected input spectrum to remain unchanged."

@@ -72,3 +72,15 @@ def test_remove_peaks_outside_top_k_mz_window_10():
 
     assert len(spectrum.peaks) == 6, "Expected 6 peaks to remain."
     assert spectrum.peaks.mz.tolist() == [30., 40., 50., 60., 70., 80.], "Expected different peaks to remain."
+
+
+def test_if_spectrum_is_cloned():
+    """Test if filter is correctly cloning the input spectrum."""
+    mz = numpy.array([], dtype="float")
+    intensities = numpy.array([], dtype="float")
+    spectrum_in = Spectrum(mz=mz, intensities=intensities)
+
+    spectrum = remove_peaks_outside_top_k(spectrum_in)
+    spectrum.set("testfield", "test")
+
+    assert not spectrum_in.get("testfield"), "Expected input spectrum to remain unchanged."

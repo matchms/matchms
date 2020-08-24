@@ -37,3 +37,15 @@ def test_remove_peaks_around_precursor_mz_tolerance_20():
 
     assert len(spectrum.peaks) == 3, "Expected 3 peaks to remain."
     assert spectrum.peaks.mz.tolist() == [10., 20., 30.], "Expected different peaks to remain."
+
+
+def test_if_spectrum_is_cloned():
+    """Test if filter is correctly cloning the input spectrum."""
+    mz = numpy.array([], dtype="float")
+    intensities = numpy.array([], dtype="float")
+    spectrum_in = Spectrum(mz=mz, intensities=intensities)
+
+    spectrum = remove_peaks_around_precursor_mz(spectrum_in)
+    spectrum.set("testfield", "test")
+
+    assert not spectrum_in.get("testfield"), "Expected input spectrum to remain unchanged."
