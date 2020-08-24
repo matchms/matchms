@@ -38,11 +38,11 @@ def test_require_minimum_of_high_peaks_intensity_percent_10():
 
 def test_if_spectrum_is_cloned():
     """Test if filter is correctly cloning the input spectrum."""
-    mz = numpy.array([], dtype="float")
-    intensities = numpy.array([], dtype="float")
+    mz = numpy.array([10, 20, 30, 40], dtype="float")
+    intensities = numpy.array([0, 1, 10, 100], dtype="float")
     spectrum_in = Spectrum(mz=mz, intensities=intensities)
 
-    spectrum = require_minimum_of_high_peaks(spectrum_in)
+    spectrum = require_minimum_of_high_peaks(spectrum_in, no_peaks=2)
     spectrum.set("testfield", "test")
 
     assert not spectrum_in.get("testfield"), "Expected input spectrum to remain unchanged."

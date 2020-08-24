@@ -40,8 +40,8 @@ def test_require_precursor_below_mz_max_50():
 
 def test_if_spectrum_is_cloned():
     """Test if filter is correctly cloning the input spectrum."""
-    mz = numpy.array([], dtype="float")
-    intensities = numpy.array([], dtype="float")
+    mz = numpy.array([10, 20, 30, 40], dtype="float")
+    intensities = numpy.array([0, 1, 10, 100], dtype="float")
     spectrum_in = Spectrum(mz=mz, intensities=intensities)
 
     spectrum = require_precursor_below_mz(spectrum_in)
