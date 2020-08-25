@@ -35,7 +35,7 @@ class CosineGreedy(SequentialSimilarityFunction):
         # Use factory to construct a similarity function
         cosine_greedy = CosineGreedy(tolerance=0.2)
 
-        score, n_matches = cosine_greedy(spectrum_1, spectrum_2)
+        score, n_matches = cosine_greedy.compute_scores(spectrum_1, spectrum_2)
 
         print(f"Cosine score is {score:.2f} with {n_matches} matched peaks")
 

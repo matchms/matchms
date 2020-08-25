@@ -24,7 +24,7 @@ class IntersectMz(SequentialSimilarityFunction):
         # Construct a similarity function
         similarity_measure = IntersectMz(scaling=1.0)
 
-        score = similarity_measure(spectrum_1, spectrum_2)
+        score = similarity_measure.compute_scores(spectrum_1, spectrum_2)
 
         print(f"IntersectMz score is {score:.2f}")
 
