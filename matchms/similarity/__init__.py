@@ -15,6 +15,8 @@ spectra. This includes
 It is also easily possible to add own custom similarity measures or import external ones
 (such as `Spec2Vec <https://github.com/iomega/spec2vec>`_).
 """
+from .AbstractSimilarityFunction import SequentialSimilarityFunction
+from .AbstractSimilarityFunction import ParallelSimilarityFunction
 from .CosineGreedy import CosineGreedy
 from .CosineHungarian import CosineHungarian
 from .FingerprintSimilarityParallel import FingerprintSimilarityParallel
@@ -25,6 +27,8 @@ from .ParentmassMatchParallel import ParentmassMatchParallel
 
 
 __all__ = [
+    "SequentialSimilarityFunction",
+    "ParallelSimilarityFunction",
     "CosineGreedy",
     "CosineHungarian",
     "FingerprintSimilarityParallel",
