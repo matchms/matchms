@@ -1,11 +1,12 @@
 from typing import Tuple
 from matchms.typing import SpectrumType
+from .AbstractSimilarityFunction import SequentialSimilarityFunction
 from .spectrum_similarity_functions import collect_peak_pairs
 from .spectrum_similarity_functions import get_peaks_array
 from .spectrum_similarity_functions import score_best_matches
 
 
-class CosineGreedy:
+class CosineGreedy(SequentialSimilarityFunction):
     """Calculate 'cosine similarity score' between two spectra.
 
     The cosine score aims at quantifying the similarity between two mass spectra.
@@ -62,15 +63,15 @@ class CosineGreedy:
         self.mz_power = mz_power
         self.intensity_power = intensity_power
 
-    def __call__(self, spectrum1: SpectrumType, spectrum2: SpectrumType) -> Tuple[float, int]:
+    def compute_scores(self, reference: SpectrumType, query: SpectrumType) -> Tuple[float, int]:
         """Calculate cosine score between two spectra.
 
         Parameters
         ----------
-        spectrum1: SpectrumType
-            Input spectrum 1.
-        spectrum2: SpectrumType
-            Input spectrum 2.
+        reference
+            Single reference spectrum.
+        query
+            Single query spectrum.
 
         Returns
         -------
@@ -85,8 +86,8 @@ class CosineGreedy:
             matching_pairs = sorted(matching_pairs, key=lambda x: x[2], reverse=True)
             return matching_pairs
 
-        spec1 = get_peaks_array(spectrum1)
-        spec2 = get_peaks_array(spectrum2)
+        spec1 = get_peaks_array(reference)
+        spec2 = get_peaks_array(query)
         matching_pairs = get_matching_pairs()
         return score_best_matches(matching_pairs, spec1, spec2,
                                   self.mz_power, self.intensity_power)
