@@ -4,7 +4,7 @@ from matchms.filtering import remove_peaks_around_precursor_mz
 
 
 def test_remove_peaks_around_precursor_mz_defaults_no_precursor():
-     """Using defaults and no precursor mz present."""
+    """Using defaults and no precursor mz present."""
     mz = numpy.array([10, 20, 30, 40], dtype="float")
     intensities = numpy.array([0, 1, 10, 100], dtype="float")
     spectrum_in = Spectrum(mz=mz, intensities=intensities)
