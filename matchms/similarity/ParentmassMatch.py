@@ -2,9 +2,9 @@ from typing import List
 import numba
 import numpy
 from matchms.similarity.AbstractSimilarityFunction import \
-    SequentialSimilarityFunction
-from matchms.similarity.AbstractSimilarityFunction import \
     ParallelSimilarityFunction
+from matchms.similarity.AbstractSimilarityFunction import \
+    SequentialSimilarityFunction
 from matchms.typing import SpectrumType
 
 
