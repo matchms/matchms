@@ -8,7 +8,7 @@ def test_intersect_mz_without_parameters():
     """Compare score with expected value."""
     spectrum_1 = Spectrum(mz=numpy.array([100, 200, 300, 500], dtype="float"),
                           intensities=numpy.array([1.0, 1.0, 1.0, 1.0], dtype="float"))
-    
+
     spectrum_2 = Spectrum(mz=numpy.array([100, 200, 290, 499.9], dtype="float"),
                           intensities=numpy.array([1.0, 1.0, 1.0, 1.0], dtype="float"))
     similarity_score = IntersectMz()
