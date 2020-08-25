@@ -32,7 +32,7 @@ class SequentialSimilarityFunction(BaseSimilarityFunction):
             return s
 
     """
-    def compute_scores(self, reference: SpectrumType, query: SpectrumType) -> float:
+    def compute_scores(self, reference: SpectrumType, query: SpectrumType, **kwargs) -> float:
         raise NotImplementedError
 
 
@@ -70,5 +70,5 @@ class ParallelSimilarityFunction(BaseSimilarityFunction):
             return lens1 * lens2.T
 
     """
-    def compute_scores_parallel(self, reference: List[SpectrumType], query: List[SpectrumType]) -> numpy.ndarray:
+    def compute_scores_parallel(self, reference: List[SpectrumType], query: List[SpectrumType], **kwargs) -> numpy.ndarray:
         raise NotImplementedError
