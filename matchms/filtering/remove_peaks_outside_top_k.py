@@ -25,7 +25,7 @@ def remove_peaks_outside_top_k(spectrum_in: SpectrumType, k: int = 6,
     spectrum = spectrum_in.clone()
 
     assert k >= 1, "k must be a positive nonzero integer."
-    assert mz_window >= 0, "mz_window must be a positive floating point."
+    assert mz_window >= 0, "mz_window must be a positive scalar."
     mzs, intensities = spectrum.peaks
     top_k = intensities.argsort()[::-1][0:k]
     k_ordered_mzs = mzs[top_k]

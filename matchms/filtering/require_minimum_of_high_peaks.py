@@ -26,7 +26,7 @@ def require_minimum_of_high_peaks(spectrum_in: SpectrumType, no_peaks: int = 5,
     spectrum = spectrum_in.clone()
 
     assert no_peaks >= 1, "no_peaks must be a positive nonzero integer."
-    assert 0 <= intensity_percent <= 100, "intensity_percent must be a floating point between 0-100."
+    assert 0 <= intensity_percent <= 100, "intensity_percent must be a scalar between 0-100."
     intensities_above_p = select_by_relative_intensity(spectrum, intensity_from=intensity_percent/100, intensity_to=1.0)
     if len(intensities_above_p.peaks) < no_peaks:
         return None

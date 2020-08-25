@@ -20,9 +20,12 @@ def require_precursor_below_mz(spectrum_in: SpectrumType, max_mz: float = 1000) 
 
     spectrum = spectrum_in.clone()
 
-    assert max_mz >= 0, "max_mz must be a positive floating point."
     precursor_mz = spectrum.get("precursor_mz")
-    if precursor_mz and precursor_mz >= max_mz:
+    assert precursor_mz is not None, "Precursor mz absent."
+    assert isinstance(precursor_mz, (float, int)), ("Expected 'precursor_mz' to be a scalar number.",
+                                                    "Consider applying 'add_precursor_mz' filter first.")
+    assert max_mz >= 0, "max_mz must be a positive scalar."
+    if precursor_mz >= max_mz:
         return None
 
     return spectrum
