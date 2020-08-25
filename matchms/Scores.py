@@ -98,7 +98,7 @@ class Scores:
         return self._scores.__str__()
 
     @staticmethod
-    def _validate_input_arguments(references, queries, similarity_function):
+    def _validate_input_arguments(references, queries):
         assert isinstance(references, (list, tuple, numpy.ndarray)),\
             "Expected input argument 'references' to be list or tuple or numpy.ndarray."
 
@@ -114,11 +114,11 @@ class Scores:
         if not isinstance(self.similarity_function, ParallelSimilarityFunction):
             return False
 
-        # Check if input is likely to benefit from parallel implementation 
+        # Check if input is likely to benefit from parallel implementation
         if self.n_rows > 1 and self.n_cols > 1:
             return True
         return False
-    
+
     def calculate(self) -> Scores:
         """
         Calculate the similarity between all reference objects v all query objects using
@@ -127,7 +127,7 @@ class Scores:
         if self._chose_parallel_implementation():
             return self.calculate_parallel()
         return self.calculate_sequential()
-    
+
     def calculate_sequential(self) -> Scores:
         """
         Calculate the similarity between all reference objects v all query objects using a
@@ -143,7 +143,7 @@ class Scores:
                 for i_query, query in enumerate(self.queries[0, :self.n_cols]):
                     self._scores[i_ref][i_query] = self.similarity_function.compute_scores(reference, query)
         return self
-    
+
     def calculate_parallel(self) -> Scores:
         """
         Calculate the similarity between all reference objects v all query objects using a
