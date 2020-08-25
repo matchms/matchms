@@ -1,8 +1,8 @@
 from typing import List
 import numba
 import numpy
-from matchms.similarity import SequentialSimilarityFunction
-from matchms.similarity import ParallelSimilarityFunction
+from matchms.similarity.AbstractSimilarityFunction import SequentialSimilarityFunction
+from matchms.similarity.AbstractSimilarityFunction import ParallelSimilarityFunction
 from matchms.typing import SpectrumType
 
 

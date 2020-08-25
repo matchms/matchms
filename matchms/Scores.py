@@ -1,7 +1,7 @@
 from __future__ import annotations
 import inspect
 import numpy
-from matchms.similarity import ParallelSimilarityFunction
+from matchms.similarity.AbstractSimilarityFunction import ParallelSimilarityFunction
 from matchms.typing import QueriesType
 from matchms.typing import ReferencesType
 from matchms.typing import SimilarityFunction
