@@ -123,7 +123,7 @@ def parentmass_scores(parentmasses_ref, parentmasses_query, tolerance):
 def parentmass_scores_symmetric(parentmasses_ref, parentmasses_query, tolerance):
     scores = numpy.zeros((len(parentmasses_ref), len(parentmasses_query)))
     for i, parentmass_ref in enumerate(parentmasses_ref):
-        for j, parentmass_query in enumerate(parentmasses_query[i:], start=i):
-            scores[i, j] = (abs(parentmass_ref - parentmass_query) <= tolerance)
+        for j in range(i, len(parentmasses_query)):
+            scores[i, j] = (abs(parentmass_ref - parentmasses_query[j]) <= tolerance)
             scores[j, i] = scores[i, j]
     return scores
