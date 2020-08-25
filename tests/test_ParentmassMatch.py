@@ -80,7 +80,7 @@ def test_parentmass_match_array():
                                             [False, False]])), "Expected different scores."
 
 
-def test_parentmass_match_tolerance2():
+def test_parentmass_match_tolerance2_array():
     """Test with array and tolerance=2."""
     spectrum_1 = Spectrum(mz=numpy.array([], dtype="float"),
                           intensities=numpy.array([], dtype="float"),
@@ -104,7 +104,8 @@ def test_parentmass_match_tolerance2():
     assert numpy.all(scores == numpy.array([[True, True],
                                             [True, False]])), "Expected different scores."
 
-def test_parentmass_match_symmetric():
+
+def test_parentmass_match_array_symmetric():
     """Test with array and is_symmetric=True."""
     spectrum_1 = Spectrum(mz=numpy.array([], dtype="float"),
                           intensities=numpy.array([], dtype="float"),
@@ -127,14 +128,14 @@ def test_parentmass_match_symmetric():
     scores = similarity_score.compute_scores_parallel(spectrums, spectrums,
                                                       is_symmetric=True)
     scores2 = similarity_score.compute_scores_parallel(spectrums, spectrums,
-                                                      is_symmetric=False)
+                                                       is_symmetric=False)
 
     assert numpy.all(scores == scores2), "Expected identical scores"
     assert numpy.all(scores == numpy.array(
-        [[ True, False,  True, False],
-         [False,  True, False, False],
-         [ True, False,  True, False],
-         [False, False, False,  True]])), "Expected different scores"
+        [[True, False, True, False],
+         [False, True, False, False],
+         [True, False, True, False],
+         [False, False, False, True]])), "Expected different scores"
 
 
 def test_parentmass_scores_compiled():
