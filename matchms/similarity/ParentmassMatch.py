@@ -7,7 +7,48 @@ from matchms.typing import SpectrumType
 
 
 class ParentmassMatch(SequentialSimilarityFunction, ParallelSimilarityFunction):
-    """Return True if spectrums match in parent mass (within tolerance), and False otherwise."""
+    """Return True if spectrums match in parent mass (within tolerance), and False otherwise.
+
+    Example to calculate scores between 2 spectrums and iterate over the scores
+
+    .. testcode::
+
+        import numpy as np
+        from matchms import Scores, Spectrum
+        from matchms.similarity import ParentmassMatch
+
+        spectrum_1 = Spectrum(mz=np.array([]),
+                              intensities=np.array([]),
+                              metadata={"id": "1", "parent_mass": 100})
+        spectrum_2 = Spectrum(mz=np.array([]),
+                              intensities=np.array([]),
+                              metadata={"id": "2", "parent_mass": 110})
+        spectrum_3 = Spectrum(mz=np.array([]),
+                              intensities=np.array([]),
+                              metadata={"id": "3", "parent_mass": 103})
+        spectrum_4 = Spectrum(mz=np.array([]),
+                              intensities=np.array([]),
+                              metadata={"id": "4", "parent_mass": 111})
+        references = [spectrum_1, spectrum_2]
+        queries = [spectrum_3, spectrum_4]
+
+        similarity_score = ParentmassMatch(tolerance=5.0)
+        scores = Scores(references, queries, similarity_score).calculate()
+
+        for (reference, query, score) in scores:
+            print(f"Parentmass match between {reference.get('id')} and {query.get('id')}" +
+                  f" is {score:.2f}")
+
+    Should output
+
+    .. testoutput::
+
+        Parentmass match between 1 and 3 is 1.00
+        Parentmass match between 1 and 4 is 0.00
+        Parentmass match between 2 and 3 is 0.00
+        Parentmass match between 2 and 4 is 1.00
+
+    """
     # Set key characteristics as class attributes
     is_commutative = True
 
