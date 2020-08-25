@@ -15,7 +15,7 @@ def test_parentmass_match():
                           metadata={"parent_mass": 101.0})
 
     similarity_score = ParentmassMatch()
-    score = similarity_score(spectrum_1, spectrum_2).compute_scores()
+    score = similarity_score.compute_scores(spectrum_1, spectrum_2)
     assert not score, "Expected different score."
 
 
@@ -30,7 +30,7 @@ def test_parentmass_match_tolerance2():
                           metadata={"parent_mass": 101.0})
 
     similarity_score = ParentmassMatch(tolerance=2.0)
-    score = similarity_score(spectrum_1, spectrum_2).compute_scores()
+    score = similarity_score.compute_scores(spectrum_1, spectrum_2)
     assert score, "Expected different score."
 
 
@@ -47,7 +47,7 @@ def test_parentmass_match_missing_parentmass():
     similarity_score = ParentmassMatch(tolerance=2.0)
 
     with pytest.raises(AssertionError) as msg:
-        _ = similarity_score(spectrum_1, spectrum_2).compute_scores()
+        _ = similarity_score.compute_scores(spectrum_1, spectrum_2)
 
     expected_message_part = "Missing parent mass."
     assert expected_message_part in str(msg.value), "Expected particular error message."
