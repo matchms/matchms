@@ -21,11 +21,12 @@ def remove_peaks_around_precursor_mz(spectrum_in: SpectrumType, mz_tolerance: fl
 
     spectrum = spectrum_in.clone()
 
-    precursor_mz = spectrum.get("precursor_mz")
+    precursor_mz = spectrum.get("precursor_mz", None)
     assert precursor_mz is not None, "precursor mz absent."
     assert isinstance(precursor_mz, (float, int)), ("Expected 'precursor_mz' to be a scalar number.",
-                                                        "Consider applying 'add_precursor_mz' filter first.")
+                                                    "Consider applying 'add_precursor_mz' filter first.")
     assert mz_tolerance >= 0, "mz_tolerance must be a positive scalar."
+
     mzs, intensities = spectrum.peaks
     peaks_to_remove = ((numpy.abs(precursor_mz-mzs) <= mz_tolerance) & (mzs != precursor_mz))
     new_mzs, new_intensities = mzs[~peaks_to_remove], intensities[~peaks_to_remove]
