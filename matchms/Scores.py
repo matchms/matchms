@@ -69,7 +69,7 @@ class Scores:
             2x faster.
         """
         # pylint: disable=too-many-arguments
-        Scores._validate_input_arguments(references, queries, similarity_function)
+        Scores._validate_input_arguments(references, queries)
 
         self.n_rows = len(references)
         self.n_cols = len(queries)
