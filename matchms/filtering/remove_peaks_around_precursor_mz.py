@@ -3,7 +3,7 @@ from ..Spikes import Spikes
 from ..typing import SpectrumType
 
 
-def remove_peaks_around_precursor_mz(spectrum: SpectrumType, mz_tolerance: float = 17) -> SpectrumType:
+def remove_peaks_around_precursor_mz(spectrum_in: SpectrumType, mz_tolerance: float = 17) -> SpectrumType:
 
     """Remove peaks that are within mz_tolerance (in Da) of
        the precursor mz, exlcuding the precursor peak.
@@ -16,6 +16,10 @@ def remove_peaks_around_precursor_mz(spectrum: SpectrumType, mz_tolerance: float
         Tolerance of mz values that are not allowed to lie
         within the precursor mz. Default is 17 Da.
     """
+    if spectrum_in is None:
+        return None
+
+    spectrum = spectrum_in.clone()
 
     assert mz_tolerance >= 0, "mz_tolerance must be a positive floating point."
     precursor_mz = spectrum.get("precursor_mz")

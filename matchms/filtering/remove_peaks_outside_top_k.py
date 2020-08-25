@@ -3,7 +3,7 @@ from ..Spikes import Spikes
 from ..typing import SpectrumType
 
 
-def remove_peaks_outside_top_k(spectrum: SpectrumType, k: int = 6,
+def remove_peaks_outside_top_k(spectrum_in: SpectrumType, k: int = 6,
                                mz_window: float = 50) -> SpectrumType:
 
     """Remove all peaks which are not within *mz_window* of at least one
@@ -19,6 +19,10 @@ def remove_peaks_outside_top_k(spectrum: SpectrumType, k: int = 6,
         Window of mz values (in Da) that are allowed to lie within
         the top k peaks. Default is 50 Da.
     """
+    if spectrum_in is None:
+        return None
+
+    spectrum = spectrum_in.clone()
 
     assert k >= 1, "k must be a positive nonzero integer."
     assert mz_window >= 0, "mz_window must be a positive floating point."
