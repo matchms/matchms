@@ -11,7 +11,7 @@ def remove_peaks_outside_top_k(spectrum_in: SpectrumType, k: int = 6,
 
     Parameters
     ----------
-    spectrum
+    spectrum_in
         Input spectrum.
     k
         The number of most intense peaks to compare to. Default is 6.
