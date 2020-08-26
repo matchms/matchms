@@ -3,19 +3,8 @@ from matchms import Spectrum
 from matchms.filtering import remove_peaks_around_precursor_mz
 
 
-def test_remove_peaks_around_precursor_mz_defaults_no_precursor():
-    """Using defaults and no precursor mz present."""
-    mz = numpy.array([10, 20, 30, 40], dtype="float")
-    intensities = numpy.array([0, 1, 10, 100], dtype="float")
-    spectrum_in = Spectrum(mz=mz, intensities=intensities)
-
-    spectrum = remove_peaks_around_precursor_mz(spectrum_in)
-
-    assert spectrum == spectrum_in, "Expected no changes."
-
-
 def test_remove_peaks_around_precursor_mz_no_params():
-    """No parameters provided but precursor mz present."""
+    """Using defaults with precursor mz present."""
     mz = numpy.array([10, 20, 30, 40], dtype="float")
     intensities = numpy.array([0, 1, 10, 100], dtype="float")
     spectrum_in = Spectrum(mz=mz, intensities=intensities)
@@ -44,6 +33,7 @@ def test_if_spectrum_is_cloned():
     mz = numpy.array([], dtype="float")
     intensities = numpy.array([], dtype="float")
     spectrum_in = Spectrum(mz=mz, intensities=intensities)
+    spectrum_in.set("precursor_mz", 1.)
 
     spectrum = remove_peaks_around_precursor_mz(spectrum_in)
     spectrum.set("testfield", "test")
