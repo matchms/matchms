@@ -139,7 +139,7 @@ class Scores:
 
             scores = Scores(spectrums, spectrums, IntersectMz()).calculate().scores
 
-            print(scores[0, 0][0].dtype)
+            print(scores[0, 0].dtype)
             print(scores.shape)
             print(scores)
 

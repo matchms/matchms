@@ -1,3 +1,4 @@
+import numpy
 from matchms.typing import SpectrumType
 from .BaseSimilarityFunction import BaseSimilarityFunction
 
@@ -56,4 +57,4 @@ class IntersectMz(BaseSimilarityFunction):
         if len(unioned) == 0:
             return 0
 
-        return self.scaling * len(intersected) / len(unioned)
+        return numpy.float64(self.scaling * len(intersected) / len(unioned))
