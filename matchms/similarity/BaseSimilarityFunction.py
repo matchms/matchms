@@ -24,7 +24,7 @@ class BaseSimilarityFunction:
         raise NotImplementedError
 
     def compute_score_matrix(self, references: List[SpectrumType], queries: List[SpectrumType],
-                             is_symmetric: bool = None) -> numpy.ndarray:
+                             is_symmetric: bool = False) -> numpy.ndarray:
         """Optional: Provide optimized method to calculate an numpy.array of similarity scores
         for given reference and query spectrums. If no method is added here, the following naive
         implementation (i.e. a double for-loop) is used.
@@ -43,12 +43,12 @@ class BaseSimilarityFunction:
         n_rows = len(references)
         n_cols = len(queries)
         scores = numpy.empty([n_rows, n_cols], dtype="object")
-        for i_ref, reference in enumerate(references[:n_rows, 0]):
+        for i_ref, reference in enumerate(references[:n_rows]):
             if is_symmetric:
-                for i_query, query in enumerate(queries[0, i_ref:n_cols], start=i_ref):
+                for i_query, query in enumerate(queries[i_ref:n_cols], start=i_ref):
                     scores[i_ref][i_query] = self.compute_score(reference, query)
                     scores[i_query][i_ref] = scores[i_ref][i_query]
             else:
-                for i_query, query in enumerate(queries[0, :n_cols]):
+                for i_query, query in enumerate(queries[:n_cols]):
                     scores[i_ref][i_query] = self.compute_score(reference, query)
         return scores

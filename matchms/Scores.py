@@ -1,8 +1,5 @@
 from __future__ import annotations
-import inspect
 import numpy
-from matchms.similarity.AbstractSimilarityFunction import \
-    ParallelSimilarityFunction
 from matchms.typing import QueriesType
 from matchms.typing import ReferencesType
 from matchms.typing import SimilarityFunction
@@ -76,8 +73,8 @@ class Scores:
 
         self.n_rows = len(references)
         self.n_cols = len(queries)
-        self.references = numpy.asarray(references).reshape(self.n_rows, 1)
-        self.queries = numpy.asarray(queries).reshape(1, self.n_cols)
+        self.references = numpy.asarray(references)  # .reshape(self.n_rows, 1)
+        self.queries = numpy.asarray(queries)  # .reshape(1, self.n_cols)
         self.similarity_function = similarity_function
         self.is_symmetric = is_symmetric
         self._scores = numpy.empty([self.n_rows, self.n_cols], dtype="object")
@@ -94,7 +91,7 @@ class Scores:
             result = self._scores[r, c]
             if not isinstance(result, tuple):
                 result = (result,)
-            return (self.references[r, 0], self.queries[0, c]) + result
+            return (self.references[r], self.queries[c]) + result
         self._index = 0
         raise StopIteration
 

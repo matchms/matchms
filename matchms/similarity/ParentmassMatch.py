@@ -78,7 +78,7 @@ class ParentmassMatch(BaseSimilarityFunction):
         return abs(parentmass_ref - parentmass_query) <= self.tolerance
 
     def compute_score_matrix(self, references: List[SpectrumType], queries: List[SpectrumType],
-                                is_symmetric: bool = False) -> numpy.ndarray:
+                             is_symmetric: bool = False) -> numpy.ndarray:
         """Compare parent masses between all references and queries.
 
         Parameters
