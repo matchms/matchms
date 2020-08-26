@@ -21,7 +21,6 @@ from .FingerprintSimilarityParallel import FingerprintSimilarityParallel
 from .IntersectMz import IntersectMz
 from .ModifiedCosine import ModifiedCosine
 from .ParentmassMatch import ParentmassMatch
-from .ParentmassMatchParallel import ParentmassMatchParallel
 
 
 __all__ = [
@@ -31,5 +30,4 @@ __all__ = [
     "IntersectMz",
     "ModifiedCosine",
     "ParentmassMatch",
-    "ParentmassMatchParallel",
 ]
