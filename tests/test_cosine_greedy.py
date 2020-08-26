@@ -133,7 +133,7 @@ def test_cosine_greedy_with_arrays():
     assert scores[0][1][0] == pytest.approx(scores[1][0][0], 0.000001), "Expected different cosine score."
 
 
-def test_cosine_greedy_with_arrays():
+def test_cosine_greedy_with_arrays_symmetric():
     """Test if compute_score_matrix with is_symmetric=True works properly."""
     spectrum_1 = Spectrum(mz=numpy.array([100, 200, 300], dtype="float"),
                           intensities=numpy.array([0.1, 0.2, 1.0], dtype="float"))

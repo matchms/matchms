@@ -1,8 +1,8 @@
 from typing import List
 import numba
 import numpy
-from matchms.similarity.BaseSimilarityFunction import BaseSimilarityFunction
 from matchms.typing import SpectrumType
+from .BaseSimilarityFunction import BaseSimilarityFunction
 
 
 class ParentmassMatch(BaseSimilarityFunction):
