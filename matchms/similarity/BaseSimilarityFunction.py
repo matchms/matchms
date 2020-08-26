@@ -23,7 +23,6 @@ class BaseSimilarityFunction:
         """
         raise NotImplementedError
 
-
     def compute_score_matrix(self, references: List[SpectrumType], queries: List[SpectrumType],
                              is_symmetric: bool = None) -> numpy.ndarray:
         """Optional: Provide optimized method to calculate an numpy.array of similarity scores
