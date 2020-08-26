@@ -20,7 +20,7 @@ def require_precursor_below_mz(spectrum_in: SpectrumType, max_mz: float = 1000) 
 
     spectrum = spectrum_in.clone()
 
-    precursor_mz = spectrum.get("precursor_mz")
+    precursor_mz = spectrum.get("precursor_mz", None)
     assert precursor_mz is not None, "Precursor mz absent."
     assert isinstance(precursor_mz, (float, int)), ("Expected 'precursor_mz' to be a scalar number.",
                                                     "Consider applying 'add_precursor_mz' filter first.")
