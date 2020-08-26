@@ -7,11 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.5.1] - 2020-08-26
+## [0.5.2] - 2020-08-26
 
 ### Changed
 
-- Revision of JOSS manuscript.
+- Revision of JOSS manuscript [#137](https://github.com/matchms/matchms/pull/137)
 
 ## [0.5.1] - 2020-08-19
 
