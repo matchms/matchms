@@ -89,5 +89,5 @@ def test_if_spectrum_is_cloned():
 def test_with_input_none():
     """Test if input spectrum is None."""
     spectrum_in = None
-    spectrum = remove_peaks_outside_top_k_mz(spectrum_in)
+    spectrum = remove_peaks_outside_top_k(spectrum_in)
     assert spectrum is None
