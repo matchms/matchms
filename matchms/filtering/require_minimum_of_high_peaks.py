@@ -10,13 +10,13 @@ def require_minimum_of_high_peaks(spectrum_in: SpectrumType, no_peaks: int = 5,
 
     Parameters
     ----------
-    spectrum_in
+    spectrum_in:
         Input spectrum.
-    no_peaks
+    no_peaks:
         Minimum number of peaks allowed to have relative intensity
         above intensity_percent. Less peaks will return none.
         Default is 5.
-    intensity_percent
+    intensity_percent:
         Minimum relative intensity (as a percentage between 0-100) for
         peaks that are searched. Default is 2
     """
