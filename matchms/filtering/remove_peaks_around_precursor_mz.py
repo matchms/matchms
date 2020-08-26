@@ -10,7 +10,7 @@ def remove_peaks_around_precursor_mz(spectrum_in: SpectrumType, mz_tolerance: fl
 
     Parameters
     ----------
-    spectrum
+    spectrum_in
         Input spectrum.
     mz_tolerance
         Tolerance of mz values that are not allowed to lie
