@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.1] - 2020-08-26
+
+### Changed
+
+- Revision of JOSS manuscript.
+
 ## [0.5.1] - 2020-08-19
 
 ### Added
@@ -183,7 +189,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - This is the initial version of Spec2Vec from https://github.com/iomega/Spec2Vec
 
-[Unreleased]: https://github.com/matchms/matchms/compare/0.5.1...HEAD
+[Unreleased]: https://github.com/matchms/matchms/compare/0.5.2...HEAD
+[0.5.2]: https://github.com/matchms/matchms/compare/0.5.1...0.5.2
 [0.5.1]: https://github.com/matchms/matchms/compare/0.5.0...0.5.1
 [0.5.0]: https://github.com/matchms/matchms/compare/0.4.0...0.5.0
 [0.4.0]: https://github.com/matchms/matchms/compare/0.3.4...0.4.0
