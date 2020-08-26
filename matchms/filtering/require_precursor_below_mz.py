@@ -8,9 +8,9 @@ def require_precursor_below_mz(spectrum_in: SpectrumType, max_mz: float = 1000) 
 
     Parameters
     ----------
-    spectrum_in
+    spectrum_in:
         Input spectrum.
-    max_mz
+    max_mz:
         Maximum mz value for the precursor mz of a spectrum.
         All precursor mz values greater or equal to this
         will return none. Default is 1000.
