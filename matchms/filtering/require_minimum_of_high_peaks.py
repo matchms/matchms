@@ -10,7 +10,7 @@ def require_minimum_of_high_peaks(spectrum_in: SpectrumType, no_peaks: int = 5,
 
     Parameters
     ----------
-    spectrum
+    spectrum_in
         Input spectrum.
     no_peaks
         Minimum number of peaks allowed to have relative intensity
