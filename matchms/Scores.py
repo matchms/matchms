@@ -77,7 +77,7 @@ class Scores:
         self.queries = numpy.asarray(queries)  # .reshape(1, self.n_cols)
         self.similarity_function = similarity_function
         self.is_symmetric = is_symmetric
-        self._scores = numpy.empty([self.n_rows, self.n_cols], dtype="object")
+        self._scores = numpy.empty([self.n_rows, self.n_cols])
         self._index = 0
 
     def __iter__(self):
