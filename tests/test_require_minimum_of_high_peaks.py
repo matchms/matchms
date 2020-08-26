@@ -46,3 +46,10 @@ def test_if_spectrum_is_cloned():
     spectrum.set("testfield", "test")
 
     assert not spectrum_in.get("testfield"), "Expected input spectrum to remain unchanged."
+
+
+def test_with_input_none():
+    """Test if input spectrum is None."""
+    spectrum_in = None
+    spectrum = require_minimum_of_high_peaks(spectrum_in)
+    assert spectrum is None

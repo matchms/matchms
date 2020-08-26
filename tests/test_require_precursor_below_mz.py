@@ -63,3 +63,10 @@ def test_require_precursor_below_with_wrong_precursor_mz():
         _ = require_precursor_below_mz(spectrum_in)
 
     assert "Expected 'precursor_mz' to be a scalar number." in str(msg.value)
+
+
+def test_with_input_none():
+    """Test if input spectrum is None."""
+    spectrum_in = None
+    spectrum = require_precursor_below_mz(spectrum_in)
+    assert spectrum is None

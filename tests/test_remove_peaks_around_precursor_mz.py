@@ -64,3 +64,10 @@ def test_remove_peaks_around_precursor_with_wrong_precursor_mz():
         _ = remove_peaks_around_precursor_mz(spectrum_in)
 
     assert "Expected 'precursor_mz' to be a scalar number." in str(msg.value)
+
+
+def test_with_input_none():
+    """Test if input spectrum is None."""
+    spectrum_in = None
+    spectrum = remove_peaks_around_precursor_mz(spectrum_in)
+    assert spectrum is None
