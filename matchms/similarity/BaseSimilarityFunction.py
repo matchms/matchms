@@ -42,7 +42,7 @@ class BaseSimilarityFunction:
         """
         n_rows = len(references)
         n_cols = len(queries)
-        scores = numpy.empty([n_rows, n_cols], dtype="object")
+        scores = numpy.empty([n_rows, n_cols])
         for i_ref, reference in enumerate(references[:n_rows]):
             if is_symmetric:
                 for i_query, query in enumerate(queries[i_ref:n_cols], start=i_ref):
