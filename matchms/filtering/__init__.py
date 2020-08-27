@@ -57,8 +57,12 @@ from .make_charge_scalar import make_charge_scalar
 from .make_ionmode_lowercase import make_ionmode_lowercase
 from .normalize_intensities import normalize_intensities
 from .reduce_to_number_of_peaks import reduce_to_number_of_peaks
+from .remove_peaks_around_precursor_mz import remove_peaks_around_precursor_mz
+from .remove_peaks_outside_top_k import remove_peaks_outside_top_k
 from .repair_inchi_inchikey_smiles import repair_inchi_inchikey_smiles
 from .require_minimum_number_of_peaks import require_minimum_number_of_peaks
+from .require_minimum_of_high_peaks import require_minimum_of_high_peaks
+from .require_precursor_below_mz import require_precursor_below_mz
 from .select_by_intensity import select_by_intensity
 from .select_by_mz import select_by_mz
 from .select_by_relative_intensity import select_by_relative_intensity
@@ -88,8 +92,12 @@ __all__ = [
     "make_ionmode_lowercase",
     "normalize_intensities",
     "reduce_to_number_of_peaks",
+    "remove_peaks_around_precursor_mz",
+    "remove_peaks_outside_top_k",
     "repair_inchi_inchikey_smiles",
     "require_minimum_number_of_peaks",
+    "require_minimum_of_high_peaks",
+    "require_precursor_below_mz",
     "select_by_intensity",
     "select_by_mz",
     "select_by_relative_intensity",

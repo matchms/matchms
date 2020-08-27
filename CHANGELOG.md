@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Four new peak filtering functions [#119](https://github.com/matchms/matchms/pull/119)
+
 ## [0.5.2] - 2020-08-26
 
 ### Changed
