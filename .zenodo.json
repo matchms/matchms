@@ -54,6 +54,11 @@
          "affiliation": "University of Glasgow", 
          "name": "Villanueva Castilla, Efrain Manuel", 
          "orcid": "0000-0001-7665-3575"
+      },
+      {
+         "affiliation": "University of Glasgow", 
+         "name": "Ashouritaklimi, Kianoosh", 
+         "orcid": ""
       }
    ], 
    "description": "Python library for fuzzy comparison of mass spectrum data and other Python objects", 
