@@ -36,15 +36,15 @@ class CosineHungarian(BaseSimilarityFunction):
         self.mz_power = mz_power
         self.intensity_power = intensity_power
 
-    def pair(self, spectrum1: SpectrumType, spectrum2: SpectrumType) -> Tuple[float, int]:
+    def pair(self, reference: SpectrumType, query: SpectrumType) -> Tuple[float, int]:
         """Calculate cosine score between two spectra.
 
         Parameters
         ----------
-        spectrum1: SpectrumType
-            Input spectrum 1.
-        spectrum2: SpectrumType
-            Input spectrum 2.
+        reference
+            Single reference spectrum.
+        query
+            Single query spectrum.
 
         Returns:
         --------
@@ -100,8 +100,8 @@ class CosineHungarian(BaseSimilarityFunction):
                 return score, len(used_matches)
             return 0.0, 0
 
-        spec1 = get_peaks_array(spectrum1)
-        spec2 = get_peaks_array(spectrum2)
+        spec1 = get_peaks_array(reference)
+        spec2 = get_peaks_array(query)
         matching_pairs = get_matching_pairs()
         paired_peaks1, paired_peaks2, matching_pairs_matrix = get_matching_pairs_matrix()
         return calc_score()
