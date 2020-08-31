@@ -35,7 +35,7 @@ class ModifiedCosine:
         # Use factory to construct a similarity function
         modified_cosine = ModifiedCosine(tolerance=0.2)
 
-        score, n_matches = modified_cosine(spectrum_1, spectrum_2)
+        score, n_matches = modified_cosine.pair(spectrum_1, spectrum_2)
 
         print(f"Modified cosine score is {score:.2f} with {n_matches} matched peaks")
 
@@ -63,15 +63,15 @@ class ModifiedCosine:
         self.mz_power = mz_power
         self.intensity_power = intensity_power
 
-    def __call__(self, spectrum1: SpectrumType, spectrum2: SpectrumType) -> Tuple[float, int]:
+    def pair(self, reference: SpectrumType, query: SpectrumType) -> Tuple[float, int]:
         """Calculate modified cosine score between two spectra.
 
         Parameters
         ----------
-        spectrum1:
-            Input spectrum 1.
-        spectrum2:
-            Input spectrum 2.
+        reference
+            Single reference spectrum.
+        query
+            Single query spectrum.
 
         Returns
         -------
@@ -92,8 +92,8 @@ class ModifiedCosine:
             unsorted_matching_pairs = zero_pairs + nonzero_pairs
             return sorted(unsorted_matching_pairs, key=lambda x: x[2], reverse=True)
 
-        spec1 = get_peaks_array(spectrum1)
-        spec2 = get_peaks_array(spectrum2)
+        spec1 = get_peaks_array(reference)
+        spec2 = get_peaks_array(query)
         matching_pairs = get_matching_pairs()
         return score_best_matches(matching_pairs, spec1, spec2,
                                   self.mz_power, self.intensity_power)
