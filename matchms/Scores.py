@@ -106,7 +106,7 @@ class Scores:
         assert isinstance(queries, (list, tuple, numpy.ndarray)),\
             "Expected input argument 'queries' to be list or tuple or numpy.ndarray."
 
-    def calculate(self) -> Scores:
+    def _calculate(self) -> Scores:
         """
         Calculate the similarity between all reference objects v all query objects using
         the most suitable available implementation of the given similarity_function.
@@ -137,7 +137,7 @@ class Scores:
                                   intensities=np.array([0.4, 0.2, 0.1]))
             spectrums = [spectrum_1, spectrum_2]
 
-            scores = Scores(spectrums, spectrums, IntersectMz()).calculate().scores
+            scores = Scores(spectrums, spectrums, IntersectMz())._calculate().scores
 
             print(scores[0, 0].dtype)
             print(scores.shape)
