@@ -1,20 +1,24 @@
 from typing import List
 from typing import Union
 import numpy
+from matchms.similarity.vector_similarity_functions import cosine_similarity
 from matchms.similarity.vector_similarity_functions import \
     cosine_similarity_matrix
+from matchms.similarity.vector_similarity_functions import dice_similarity
 from matchms.similarity.vector_similarity_functions import \
     dice_similarity_matrix
+from matchms.similarity.vector_similarity_functions import jaccard_index
 from matchms.similarity.vector_similarity_functions import \
     jaccard_similarity_matrix
 from matchms.typing import SpectrumType
+from .BaseSimilarityFunction import BaseSimilarityFunction
 
 
-class FingerprintSimilarityParallel:
+class FingerprintSimilarity(BaseSimilarityFunction):
     """Calculate similarity between molecules based on their fingerprints.
 
     For this similarity measure to work, fingerprints are expected to be derived
-    by running the "add_fingerprint()" filter function.
+    by running :meth:`~matchms.filtering.add_fingerprint`.
     """
     def __init__(self, similarity_measure: str = "jaccard",
                  set_empty_scores: Union[float, int, str] = "nan"):
@@ -34,7 +38,31 @@ class FingerprintSimilarityParallel:
         assert similarity_measure in ["cosine", "dice", "jaccard"], "Unknown similarity measure."
         self.similarity_measure = similarity_measure
 
-    def __call__(self, references: List[SpectrumType], queries: List[SpectrumType]) -> numpy.array:
+    def pair(self, reference: SpectrumType, query: SpectrumType) -> float:
+        """Calculate fingerprint based similarity score between two spectra.
+
+        Parameters
+        ----------
+        reference
+            Single reference spectrum.
+        query
+            Single query spectrum.
+        """
+        fingerprint_ref = reference.get("fingerprint")
+        fingerprint_query = query.get("fingerprint")
+        if self.similarity_measure == "jaccard":
+            return jaccard_index(fingerprint_ref, fingerprint_query)
+
+        if self.similarity_measure == "dice":
+            return dice_similarity(fingerprint_ref, fingerprint_query)
+
+        if self.similarity_measure == "cosine":
+            return cosine_similarity(fingerprint_ref, fingerprint_query)
+
+        raise NotImplementedError
+
+    def matrix(self, references: List[SpectrumType], queries: List[SpectrumType],
+               is_symmetric: bool = False) -> numpy.array:
         """Calculate matrix of fingerprint based similarity scores.
 
         Parameters
