@@ -19,7 +19,7 @@ class FingerprintSimilarity(BaseSimilarityFunction):
 
     For this similarity measure to work, fingerprints are expected to be derived
     by running :meth:`~matchms.filtering.add_fingerprint`.
-    
+
     Code example:
 
    .. testcode::
