@@ -113,7 +113,8 @@ class Scores:
         Advised method to calculate similarity scores is :meth:`~matchms.calculate_scores`.
         """
         if self.n_rows == self.n_cols == 1:
-            self._scores = self.similarity_function.pair(self.references, self.queries)
+            self._scores[0, 0] = self.similarity_function.pair(self.references[0],
+                                                               self.queries[0])
         else:
             self._scores = self.similarity_function.matrix(self.references,
                                                            self.queries,

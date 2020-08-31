@@ -36,6 +36,18 @@ class DummySimilarityFunctionParallel(BaseSimilarityFunction):
         return s
 
 
+def test_scores_single_pair():
+    """Test single pair input."""
+    dummy_similarity_function = DummySimilarityFunction()
+    scores = Scores(references=["A"],
+                    queries=["B"],
+                    similarity_function=dummy_similarity_function)
+    scores.calculate()
+    actual = scores.scores[0][0]
+    expected = ('AB', 2)
+    assert actual == expected, "Expected different scores."
+
+
 def test_scores_calculate():
     dummy_similarity_function = DummySimilarityFunction()
     scores = Scores(references=["r0", "r1", "r2"],
@@ -51,7 +63,7 @@ def test_scores_calculate():
         ("r2", "q0", "r2q0", 4),
         ("r2", "q1", "r2q1", 4)
     ]
-    assert actual == expected
+    assert actual == expected, "Expected different scores."
 
 
 def test_scores_calculate_parallel():
@@ -69,7 +81,7 @@ def test_scores_calculate_parallel():
         ("r2", "q0", "r2q0", 4),
         ("r2", "q1", "r2q1", 4)
     ]
-    assert actual == expected
+    assert actual == expected, "Expected different scores."
 
 
 def test_scores_init_with_list():
@@ -78,7 +90,7 @@ def test_scores_init_with_list():
     scores = Scores(references=["r0", "r1", "r2"],
                     queries=["q0", "q1"],
                     similarity_function=dummy_similarity_function)
-    assert scores.scores.shape == (3, 2)
+    assert scores.scores.shape == (3, 2), "Expected different scores shape."
 
 
 def test_scores_init_with_numpy_array():
@@ -87,7 +99,7 @@ def test_scores_init_with_numpy_array():
     scores = Scores(references=numpy.asarray(["r0", "r1", "r2"]),
                     queries=numpy.asarray(["q0", "q1"]),
                     similarity_function=dummy_similarity_function)
-    assert scores.scores.shape == (3, 2)
+    assert scores.scores.shape == (3, 2), "Expected different scores shape."
 
 
 def test_scores_init_with_queries_dict():
@@ -118,7 +130,7 @@ def test_scores_init_with_tuple():
     scores = Scores(references=("r0", "r1", "r2"),
                     queries=("q0", "q1"),
                     similarity_function=dummy_similarity_function)
-    assert scores.scores.shape == (3, 2)
+    assert scores.scores.shape == (3, 2), "Expected different scores shape."
 
 
 def test_scores_next():
@@ -137,4 +149,4 @@ def test_scores_next():
         ("rrr", "q", "rrrq", 4),
         ("rrr", "qq", "rrrqq", 5)
     ]
-    assert actual == expected
+    assert actual == expected, "Expected different scores."
