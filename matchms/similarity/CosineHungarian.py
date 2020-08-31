@@ -4,9 +4,10 @@ from scipy.optimize import linear_sum_assignment
 from matchms.similarity.spectrum_similarity_functions import collect_peak_pairs
 from matchms.similarity.spectrum_similarity_functions import get_peaks_array
 from matchms.typing import SpectrumType
+from .BaseSimilarityFunction import BaseSimilarityFunction
 
 
-class CosineHungarian:
+class CosineHungarian(BaseSimilarityFunction):
     """Calculate 'cosine similarity score' between two spectra (using Hungarian algorithm).
 
     The cosine score aims at quantifying the similarity between two mass spectra.
@@ -14,9 +15,9 @@ class CosineHungarian:
     of two spectra. Two peaks are considered a potential match if their
     m/z ratios lie within the given 'tolerance'.
     The underlying peak assignment problem is here solved using the Hungarian algorithm.
-    This can perform notably slower than the 'greedy' implementation in CosineGreedy, but
-    does represent a mathematically proper solution to the problem.
-
+    This can perform notably slower than the 'greedy' implementation in
+    :meth:`~matchms.similarity.CosineGreedy`, but does represent a mathematically proper
+    solution to the problem.
     """
     def __init__(self, tolerance: float = 0.1, mz_power: float = 0.0,
                  intensity_power: float = 1.0):
@@ -35,7 +36,7 @@ class CosineHungarian:
         self.mz_power = mz_power
         self.intensity_power = intensity_power
 
-    def __call__(self, spectrum1: SpectrumType, spectrum2: SpectrumType) -> Tuple[float, int]:
+    def pair(self, spectrum1: SpectrumType, spectrum2: SpectrumType) -> Tuple[float, int]:
         """Calculate cosine score between two spectra.
 
         Parameters

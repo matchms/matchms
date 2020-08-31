@@ -73,8 +73,8 @@ class Scores:
 
         self.n_rows = len(references)
         self.n_cols = len(queries)
-        self.references = numpy.asarray(references)  # .reshape(self.n_rows, 1)
-        self.queries = numpy.asarray(queries)  # .reshape(1, self.n_cols)
+        self.references = numpy.asarray(references)
+        self.queries = numpy.asarray(queries)
         self.similarity_function = similarity_function
         self.is_symmetric = is_symmetric
         self._scores = numpy.empty([self.n_rows, self.n_cols], dtype="object")
