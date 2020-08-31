@@ -35,7 +35,7 @@ class CosineGreedy(BaseSimilarityFunction):
         # Use factory to construct a similarity function
         cosine_greedy = CosineGreedy(tolerance=0.2)
 
-        score, n_matches = cosine_greedy.compute_score(spectrum_1, spectrum_2)
+        score, n_matches = cosine_greedy.pair(spectrum_1, spectrum_2)
 
         print(f"Cosine score is {score:.2f} with {n_matches} matched peaks")
 
@@ -63,7 +63,7 @@ class CosineGreedy(BaseSimilarityFunction):
         self.mz_power = mz_power
         self.intensity_power = intensity_power
 
-    def compute_score(self, reference: SpectrumType, query: SpectrumType) -> Tuple[float, int]:
+    def pair(self, reference: SpectrumType, query: SpectrumType) -> Tuple[float, int]:
         """Calculate cosine score between two spectra.
 
         Parameters

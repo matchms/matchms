@@ -25,7 +25,7 @@ class IntersectMz(BaseSimilarityFunction):
         # Construct a similarity function
         similarity_measure = IntersectMz(scaling=1.0)
 
-        score = similarity_measure.compute_score(spectrum_1, spectrum_2)
+        score = similarity_measure.pair(spectrum_1, spectrum_2)
 
         print(f"IntersectMz score is {score:.2f}")
 
@@ -47,7 +47,7 @@ class IntersectMz(BaseSimilarityFunction):
         """
         self.scaling = scaling
 
-    def compute_score(self, reference: SpectrumType, query: SpectrumType) -> float:
+    def pair(self, reference: SpectrumType, query: SpectrumType) -> float:
         """This will calculate the similarity score between two spectra."""
         mz_ref = set(reference.peaks.mz)
         mz_query = set(query.peaks.mz)

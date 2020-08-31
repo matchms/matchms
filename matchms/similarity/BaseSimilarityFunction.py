@@ -11,7 +11,7 @@ class BaseSimilarityFunction:
     # Set key characteristics as class attributes
     is_commutative = True
 
-    def compute_score(self, reference: SpectrumType, query: SpectrumType) -> float:
+    def pair(self, reference: SpectrumType, query: SpectrumType) -> float:
         """Required: Method to calculate the similarity for one input pair.
 
         Parameters
@@ -23,8 +23,8 @@ class BaseSimilarityFunction:
         """
         raise NotImplementedError
 
-    def compute_score_matrix(self, references: List[SpectrumType], queries: List[SpectrumType],
-                             is_symmetric: bool = False) -> numpy.ndarray:
+    def matrix(self, references: List[SpectrumType], queries: List[SpectrumType],
+               is_symmetric: bool = False) -> numpy.ndarray:
         """Optional: Provide optimized method to calculate an numpy.array of similarity scores
         for given reference and query spectrums. If no method is added here, the following naive
         implementation (i.e. a double for-loop) is used.
@@ -46,9 +46,9 @@ class BaseSimilarityFunction:
         for i_ref, reference in enumerate(references[:n_rows]):
             if is_symmetric:
                 for i_query, query in enumerate(queries[i_ref:n_cols], start=i_ref):
-                    scores[i_ref][i_query] = self.compute_score(reference, query)
+                    scores[i_ref][i_query] = self.pair(reference, query)
                     scores[i_query][i_ref] = scores[i_ref][i_query]
             else:
                 for i_query, query in enumerate(queries[:n_cols]):
-                    scores[i_ref][i_query] = self.compute_score(reference, query)
+                    scores[i_ref][i_query] = self.pair(reference, query)
         return scores

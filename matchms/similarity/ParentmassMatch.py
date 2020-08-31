@@ -61,7 +61,7 @@ class ParentmassMatch(BaseSimilarityFunction):
         """
         self.tolerance = tolerance
 
-    def compute_score(self, reference: SpectrumType, query: SpectrumType) -> float:
+    def pair(self, reference: SpectrumType, query: SpectrumType) -> float:
         """Compare parent masses between reference and query spectrum.
 
         Parameters
@@ -77,7 +77,7 @@ class ParentmassMatch(BaseSimilarityFunction):
 
         return abs(parentmass_ref - parentmass_query) <= self.tolerance
 
-    def compute_score_matrix(self, references: List[SpectrumType], queries: List[SpectrumType],
+    def matrix(self, references: List[SpectrumType], queries: List[SpectrumType],
                              is_symmetric: bool = False) -> numpy.ndarray:
         """Compare parent masses between all references and queries.
 

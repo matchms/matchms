@@ -112,9 +112,9 @@ class Scores:
         the most suitable available implementation of the given similarity_function.
         """
         if self.n_rows == self.n_cols == 1:
-            self._scores = self.similarity_function.compute_score(self.references, self.queries)
+            self._scores = self.similarity_function.pair(self.references, self.queries)
         else:
-            self._scores = self.similarity_function.compute_score_matrix(self.references,
+            self._scores = self.similarity_function.matrix(self.references,
                                                                          self.queries,
                                                                          is_symmetric=self.is_symmetric)
         return self
