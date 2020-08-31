@@ -26,7 +26,7 @@ from .ParentmassMatch import ParentmassMatch
 __all__ = [
     "CosineGreedy",
     "CosineHungarian",
-    "FingerprintSimilarityParallel",
+    "FingerprintSimilarity",
     "IntersectMz",
     "ModifiedCosine",
     "ParentmassMatch",
