@@ -115,8 +115,8 @@ class Scores:
             self._scores = self.similarity_function.pair(self.references, self.queries)
         else:
             self._scores = self.similarity_function.matrix(self.references,
-                                                                         self.queries,
-                                                                         is_symmetric=self.is_symmetric)
+                                                           self.queries,
+                                                           is_symmetric=self.is_symmetric)
         return self
 
     @property

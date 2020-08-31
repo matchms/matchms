@@ -1,24 +1,32 @@
 import numpy
 import pytest
 from matchms import Scores
+from matchms.similarity.BaseSimilarityFunction import BaseSimilarityFunction
 
 
-class DummySimilarityFunction:
+class DummySimilarityFunction(BaseSimilarityFunction):
+    """Simple dummy score, only contain pair-wise implementation."""
     def __init__(self):
         """constructor"""
 
-    def __call__(self, reference, query):
-        """call method"""
+    def pair(self, reference, query):
+        """necessary pair computation method"""
         s = reference + query
         return s, len(s)
 
 
-class DummySimilarityFunctionParallel:
+class DummySimilarityFunctionParallel(BaseSimilarityFunction):
+    """Simple dummy score, contains pair-wise and matrix implementation."""
     def __init__(self):
         """constructor"""
 
-    def __call__(self, references, queries):
-        """call method"""
+    def pair(self, reference, query):
+        """necessary pair computation method"""
+        s = reference + query
+        return s, len(s)
+
+    def matrix(self, references, queries, is_symmetric: bool = False):
+        """additional matrix computation method"""
         shape = len(references), len(queries)
         s = numpy.empty(shape, dtype="object")
         for index_reference, reference in enumerate(references):
@@ -51,7 +59,7 @@ def test_scores_calculate_parallel():
     scores = Scores(references=["r0", "r1", "r2"],
                     queries=["q0", "q1"],
                     similarity_function=dummy_similarity_function)
-    scores.calculate_parallel()
+    scores.calculate()
     actual = list(scores)
     expected = [
         ("r0", "q0", "r0q0", 4),
