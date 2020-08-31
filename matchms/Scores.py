@@ -106,10 +106,11 @@ class Scores:
         assert isinstance(queries, (list, tuple, numpy.ndarray)),\
             "Expected input argument 'queries' to be list or tuple or numpy.ndarray."
 
-    def _calculate(self) -> Scores:
+    def calculate(self) -> Scores:
         """
         Calculate the similarity between all reference objects v all query objects using
         the most suitable available implementation of the given similarity_function.
+        Advised method to calculate similarity scores is :meth:`~matchms.calculate_scores`.
         """
         if self.n_rows == self.n_cols == 1:
             self._scores = self.similarity_function.pair(self.references, self.queries)
@@ -137,7 +138,7 @@ class Scores:
                                   intensities=np.array([0.4, 0.2, 0.1]))
             spectrums = [spectrum_1, spectrum_2]
 
-            scores = Scores(spectrums, spectrums, IntersectMz())._calculate().scores
+            scores = Scores(spectrums, spectrums, IntersectMz()).calculate().scores
 
             print(scores[0, 0].dtype)
             print(scores.shape)

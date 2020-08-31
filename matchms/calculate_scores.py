@@ -57,4 +57,4 @@ def calculate_scores(references: ReferencesType,
 
     return Scores(references=references,
                   queries=queries,
-                  similarity_function=similarity_function)._calculate()
+                  similarity_function=similarity_function).calculate()
