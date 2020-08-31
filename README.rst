@@ -21,7 +21,7 @@ F Huber, S. Verhoeven, C. Meijer, H. Spreeuw, E. M. Villanueva Castilla, C. Geng
    * - \3. Community Registry
      - |Conda Badge| |Research Software Directory Badge|
    * - \4. Enable Citation
-     - |Zenodo Badge|
+     - |JOSS Badge| |Zenodo Badge|
    * - \5. Checklist
      - |CII Best Practices Badge|
    * - **Other best practices**
@@ -52,6 +52,10 @@ F Huber, S. Verhoeven, C. Meijer, H. Spreeuw, E. M. Villanueva Castilla, C. Geng
 .. |Zenodo Badge| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.3716378.svg
    :target: https://doi.org/10.5281/zenodo.3716378
    :alt: Zenodo Badge
+
+.. |JOSS Badge| image:: https://joss.theoj.org/papers/10.21105/joss.02411/status.svg
+   :target: https://doi.org/10.21105/joss.02411
+   :alt: JOSS Badge
 
 .. |CII Best Practices Badge| image:: https://bestpractices.coreinfrastructure.org/projects/3792/badge
    :target: https://bestpractices.coreinfrastructure.org/projects/3792
