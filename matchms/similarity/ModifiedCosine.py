@@ -1,11 +1,12 @@
 from typing import Tuple
 from matchms.typing import SpectrumType
+from .BaseSimilarityFunction import BaseSimilarityFunction
 from .spectrum_similarity_functions import collect_peak_pairs
 from .spectrum_similarity_functions import get_peaks_array
 from .spectrum_similarity_functions import score_best_matches
 
 
-class ModifiedCosine:
+class ModifiedCosine(BaseSimilarityFunction):
     """Calculate 'modified cosine score' between mass spectra.
 
     The modified cosine score aims at quantifying the similarity between two
