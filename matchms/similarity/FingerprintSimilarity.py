@@ -19,6 +19,44 @@ class FingerprintSimilarity(BaseSimilarityFunction):
 
     For this similarity measure to work, fingerprints are expected to be derived
     by running :meth:`~matchms.filtering.add_fingerprint`.
+
+   .. testcode::
+
+        import numpy as np
+        from matchms import calculate_scores
+        from matchms import Spectrum
+        from matchms.filtering import add_fingerprint
+        from matchms.similarity import FingerprintSimilarity
+
+        spectrum_1 = Spectrum(mz=numpy.array([], dtype="float"),
+                              intensities=numpy.array([], dtype="float"),
+                              metadata={"smiles": "CCC(C)C(C(=O)O)NC(=O)CCl"})
+
+        spectrum_2 = Spectrum(mz=numpy.array([], dtype="float"),
+                              intensities=numpy.array([], dtype="float"),
+                              metadata={"smiles": "CC(C)C(C(=O)O)NC(=O)CCl"})
+
+        spectrum_3 = Spectrum(mz=numpy.array([], dtype="float"),
+                              intensities=numpy.array([], dtype="float"),
+                              metadata={"smiles": "C(C(=O)O)(NC(=O)O)S"})
+
+        spectrums = [spectrum_1, spectrum_2, spectrum_3]
+        # Add fingerprints
+        spectrums = [add_fingerprint(x, nbits=256) for x in spectrums]
+
+        # Specify type and calculate similarities
+        similarity_measure = FingerprintSimilarity("jaccard")
+        scores = calculate_scores(spectrums, spectrums, similarity_measure)
+        print(scores.scores)
+
+    Should output
+
+    .. testoutput::
+
+        [[1.         0.87765957 0.41545894]
+         [0.87765957 1.         0.44385027]
+         [0.41545894 0.44385027 1.        ]]
+
     """
     def __init__(self, similarity_measure: str = "jaccard",
                  set_empty_scores: Union[float, int, str] = "nan"):
