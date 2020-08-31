@@ -33,19 +33,19 @@ class FingerprintSimilarity(BaseSimilarityFunction):
         spectrum_1 = Spectrum(mz=np.array([], dtype="float"),
                               intensities=np.array([], dtype="float"),
                               metadata={"smiles": "CCC(C)C(C(=O)O)NC(=O)CCl"})
-        
+
         spectrum_2 = Spectrum(mz=np.array([], dtype="float"),
                               intensities=np.array([], dtype="float"),
                               metadata={"smiles": "CC(C)C(C(=O)O)NC(=O)CCl"})
-        
+
         spectrum_3 = Spectrum(mz=np.array([], dtype="float"),
                               intensities=np.array([], dtype="float"),
                               metadata={"smiles": "C(C(=O)O)(NC(=O)O)S"})
-        
+
         spectrums = [spectrum_1, spectrum_2, spectrum_3]
         # Add fingerprints
         spectrums = [add_fingerprint(x, nbits=256) for x in spectrums]
-        
+
         # Specify type and calculate similarities
         similarity_measure = FingerprintSimilarity("jaccard")
         scores = calculate_scores(spectrums, spectrums, similarity_measure)
