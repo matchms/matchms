@@ -46,7 +46,7 @@ class CosineGreedy(BaseSimilarityFunction):
         Cosine score is 0.83 with 1 matched peaks
 
     """
-        # Set key characteristics as class attributes
+    # Set key characteristics as class attributes
     is_commutative = True
     # Set output data type, e.g. ("score", "float") or [("score", "float"), ("likelihood", "float")]
     score_datatype = [("score", "float64"), ("matches", "int")]
