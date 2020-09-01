@@ -1,6 +1,5 @@
 from __future__ import annotations
 import numpy
-from matchms import Spectrum
 from matchms.typing import QueriesType
 from matchms.typing import ReferencesType
 from matchms.typing import SimilarityFunction
@@ -122,7 +121,7 @@ class Scores:
         self._scores = self.similarity_function(self.references[:, 0], self.queries[0, :])
         return self
 
-    def scores_by_reference(self, references):
+    def scores_by_reference(self, references: ReferencesType) -> numpy.ndarray:
         """Return all scores (not sorted) for the given reference spectrums.
 
         Parameters
@@ -130,10 +129,8 @@ class Scores:
         references
             Single Spectrum or list or array of reference objects.
         """
-        if isinstance(references, Spectrum):
+        if not isinstance(references, (list, numpy.ndarray)):
             references = [references]
-        assert isinstance(references, (list, tuple, numpy.ndarray)),\
-            "Expected input 'references' to be single Spectrum, list, tuple or numpy.ndarray."
 
         selected_idx = []
         for ref in references:
@@ -142,7 +139,7 @@ class Scores:
 
         return self._scores[selected_idx, :].copy()
 
-    def scores_by_query(self, queries):
+    def scores_by_query(self, queries: QueriesType) -> numpy.ndarray:
         """Return all scores (not sorted) for the given query spectrums.
 
         Parameters
@@ -177,10 +174,8 @@ class Scores:
             selected_scores = scores.scores_by_query([spectrum_3, spectrum_4])
 
         """
-        if isinstance(queries, Spectrum):
+        if not isinstance(queries, (list, numpy.ndarray)):
             queries = [queries]
-        assert isinstance(queries, (list, tuple, numpy.ndarray)),\
-            "Expected input 'queries' to be single Spectrum, list, tuple or numpy.ndarray."
 
         selected_idx = []
         for query in queries:
