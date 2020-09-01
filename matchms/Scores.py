@@ -149,6 +149,33 @@ class Scores:
         ----------
         queries
             Single Spectrum or list or array of query objects.
+
+        For example
+
+        .. code-block:: python
+
+            import numpy as np
+            from matchms import Scores, Spectrum
+            from matchms.similarity import CosineGreedy
+
+            spectrum_1 = Spectrum(mz=np.array([100, 150, 200.]),
+                                  intensities=np.array([0.7, 0.2, 0.1]),
+                                  metadata={'id': 'spectrum1'})
+            spectrum_2 = Spectrum(mz=np.array([100, 140, 190.]),
+                                  intensities=np.array([0.4, 0.2, 0.1]),
+                                  metadata={'id': 'spectrum2'})
+            spectrum_3 = Spectrum(mz=np.array([110, 140, 195.]),
+                                  intensities=np.array([0.6, 0.2, 0.1]),
+                                  metadata={'id': 'spectrum3'})
+            spectrum_4 = Spectrum(mz=np.array([100, 150, 200.]),
+                                  intensities=np.array([0.6, 0.1, 0.6]),
+                                  metadata={'id': 'spectrum4'})
+            references = [spectrum_1, spectrum_2, spectrum_3]
+            queries = [spectrum_2, spectrum_3, spectrum_4]
+
+            scores = Scores(references, queries, CosineGreedy()).calculate()
+            selected_scores = scores.scores_by_query([spectrum_3, spectrum_4])
+
         """
         if isinstance(queries, Spectrum):
             queries = [queries]
