@@ -10,6 +10,8 @@ class BaseSimilarityFunction:
     """
     # Set key characteristics as class attributes
     is_commutative = True
+    # Set output data type, e.g. ("score", "float") or [("score", "float"), ("matches", "int")]
+    score_datatype = ("score", "float")
 
     def pair(self, reference: SpectrumType, query: SpectrumType) -> float:
         """Required: Method to calculate the similarity for one input pair.
@@ -42,7 +44,7 @@ class BaseSimilarityFunction:
         """
         n_rows = len(references)
         n_cols = len(queries)
-        scores = numpy.empty([n_rows, n_cols], dtype="object")
+        scores = numpy.empty([n_rows, n_cols], dtype=self.score_datatype)
         for i_ref, reference in enumerate(references[:n_rows]):
             if is_symmetric:
                 for i_query, query in enumerate(queries[i_ref:n_cols], start=i_ref):
