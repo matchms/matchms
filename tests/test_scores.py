@@ -5,7 +5,6 @@ from matchms import Spectrum
 from matchms.similarity import CosineGreedy
 
 
-
 class DummySimilarityFunction:
     def __init__(self):
         """constructor"""
@@ -228,4 +227,4 @@ def test_scores_by_query_single_entry():
     all_scores = scores.scores
     selected_scores = scores.scores_by_query(spectrum_4)
 
-    assert numpy.all(all_scores[:, 2].reshape(3,1) == selected_scores), "Expected different scores."
+    assert numpy.all(all_scores[:, 2].reshape(3, 1) == selected_scores), "Expected different scores."
