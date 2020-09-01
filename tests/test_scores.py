@@ -1,6 +1,9 @@
 import numpy
 import pytest
 from matchms import Scores
+from matchms import Spectrum
+from matchms.similarity import CosineGreedy
+
 
 
 class DummySimilarityFunction:
@@ -130,3 +133,99 @@ def test_scores_next():
         ("rrr", "qq", "rrrqq", 5)
     ]
     assert actual == expected
+
+
+def test_scores_by_reference():
+    "Test scores_by_reference method."
+    spectrum_1 = Spectrum(mz=np.array([100, 150, 200.]),
+                          intensities=np.array([0.7, 0.2, 0.1]),
+                          metadata={'id': 'spectrum1'})
+    spectrum_2 = Spectrum(mz=np.array([100, 140, 190.]),
+                          intensities=np.array([0.4, 0.2, 0.1]),
+                          metadata={'id': 'spectrum2'})
+    spectrum_3 = Spectrum(mz=np.array([110, 140, 195.]),
+                          intensities=np.array([0.6, 0.2, 0.1]),
+                          metadata={'id': 'spectrum3'})
+    spectrum_4 = Spectrum(mz=np.array([100, 150, 200.]),
+                          intensities=np.array([0.6, 0.1, 0.6]),
+                          metadata={'id': 'spectrum4'})
+    references = [spectrum_1, spectrum_2, spectrum_3]
+    queries = [spectrum_3, spectrum_4]
+
+    scores = Scores(references, queries, CosineGreedy()).calculate()
+    all_scores = scores.scores
+    selected_scores = scores.scores_by_reference([spectrum_1, spectrum_3])
+
+    assert numpy.all(all_scores[0::2, :] == selected_scores), "Expected different scores."
+
+
+def test_scores_by_reference_single_entry():
+    "Test scores_by_reference method."
+    spectrum_1 = Spectrum(mz=np.array([100, 150, 200.]),
+                          intensities=np.array([0.7, 0.2, 0.1]),
+                          metadata={'id': 'spectrum1'})
+    spectrum_2 = Spectrum(mz=np.array([100, 140, 190.]),
+                          intensities=np.array([0.4, 0.2, 0.1]),
+                          metadata={'id': 'spectrum2'})
+    spectrum_3 = Spectrum(mz=np.array([110, 140, 195.]),
+                          intensities=np.array([0.6, 0.2, 0.1]),
+                          metadata={'id': 'spectrum3'})
+    spectrum_4 = Spectrum(mz=np.array([100, 150, 200.]),
+                          intensities=np.array([0.6, 0.1, 0.6]),
+                          metadata={'id': 'spectrum4'})
+    references = [spectrum_1, spectrum_2, spectrum_3]
+    queries = [spectrum_3, spectrum_4]
+
+    scores = Scores(references, queries, CosineGreedy()).calculate()
+    all_scores = scores.scores
+    selected_scores = scores.scores_by_reference(spectrum_2)
+
+    assert numpy.all(all_scores[1, :] == selected_scores), "Expected different scores."
+
+
+def test_scores_by_query():
+    "Test scores_by_query method."
+    spectrum_1 = Spectrum(mz=np.array([100, 150, 200.]),
+                          intensities=np.array([0.7, 0.2, 0.1]),
+                          metadata={'id': 'spectrum1'})
+    spectrum_2 = Spectrum(mz=np.array([100, 140, 190.]),
+                          intensities=np.array([0.4, 0.2, 0.1]),
+                          metadata={'id': 'spectrum2'})
+    spectrum_3 = Spectrum(mz=np.array([110, 140, 195.]),
+                          intensities=np.array([0.6, 0.2, 0.1]),
+                          metadata={'id': 'spectrum3'})
+    spectrum_4 = Spectrum(mz=np.array([100, 150, 200.]),
+                          intensities=np.array([0.6, 0.1, 0.6]),
+                          metadata={'id': 'spectrum4'})
+    references = [spectrum_1, spectrum_2, spectrum_3]
+    queries = [spectrum_2, spectrum_3, spectrum_4]
+
+    scores = Scores(references, queries, CosineGreedy()).calculate()
+    all_scores = scores.scores
+    selected_scores = scores.scores_by_query([spectrum_3, spectrum_4])
+
+    assert numpy.all(all_scores[:, 1:] == selected_scores), "Expected different scores."
+
+
+def test_scores_by_query_single_entry():
+    "Test scores_by_query method."
+    spectrum_1 = Spectrum(mz=np.array([100, 150, 200.]),
+                          intensities=np.array([0.7, 0.2, 0.1]),
+                          metadata={'id': 'spectrum1'})
+    spectrum_2 = Spectrum(mz=np.array([100, 140, 190.]),
+                          intensities=np.array([0.4, 0.2, 0.1]),
+                          metadata={'id': 'spectrum2'})
+    spectrum_3 = Spectrum(mz=np.array([110, 140, 195.]),
+                          intensities=np.array([0.6, 0.2, 0.1]),
+                          metadata={'id': 'spectrum3'})
+    spectrum_4 = Spectrum(mz=np.array([100, 150, 200.]),
+                          intensities=np.array([0.6, 0.1, 0.6]),
+                          metadata={'id': 'spectrum4'})
+    references = [spectrum_1, spectrum_2, spectrum_3]
+    queries = [spectrum_2, spectrum_3, spectrum_4]
+
+    scores = Scores(references, queries, CosineGreedy()).calculate()
+    all_scores = scores.scores
+    selected_scores = scores.scores_by_query(spectrum_4)
+
+    assert numpy.all(all_scores[:, 2].reshape(3,1) == selected_scores), "Expected different scores."
