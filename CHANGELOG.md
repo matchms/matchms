@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Four new peak filtering functions [#119](https://github.com/matchms/matchms/pull/119)
+- score_by_reference and score_by_query methods to Scores [#142](https://github.com/matchms/matchms/pull/142)
 
 ## [0.5.2] - 2020-08-26
 
