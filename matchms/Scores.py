@@ -121,6 +121,78 @@ class Scores:
         self._scores = self.similarity_function(self.references[:, 0], self.queries[0, :])
         return self
 
+    def scores_by_reference(self, reference: ReferencesType) -> numpy.ndarray:
+        """Return all scores (not sorted) for the given reference spectrum.
+
+        Parameters
+        ----------
+        reference
+            Single reference Spectrum.
+        """
+        assert reference in self.references, "Given input not found in references."
+        selected_idx = int(numpy.where(self.references[:, 0] == reference)[0])
+        selected_scores = []
+        for i, score in enumerate(self._scores[selected_idx, :].copy()):
+            if isinstance(score, tuple):
+                selected_scores.append((self.queries[0, i], *score))
+            else:
+                selected_scores.append((self.queries[0, i], score))
+        return selected_scores
+
+    def scores_by_query(self, query: QueriesType) -> numpy.ndarray:
+        """Return all scores (not sorted) for the given query spectrum.
+
+        Parameters
+        ----------
+        query
+            Single query Spectrum.
+
+
+        For example
+
+        .. testcode::
+
+            import numpy as np
+            from matchms import Scores, Spectrum
+            from matchms.similarity import CosineGreedy
+
+            spectrum_1 = Spectrum(mz=np.array([100, 150, 200.]),
+                                  intensities=np.array([0.7, 0.2, 0.1]),
+                                  metadata={'id': 'spectrum1'})
+            spectrum_2 = Spectrum(mz=np.array([100, 140, 190.]),
+                                  intensities=np.array([0.4, 0.2, 0.1]),
+                                  metadata={'id': 'spectrum2'})
+            spectrum_3 = Spectrum(mz=np.array([110, 140, 195.]),
+                                  intensities=np.array([0.6, 0.2, 0.1]),
+                                  metadata={'id': 'spectrum3'})
+            spectrum_4 = Spectrum(mz=np.array([100, 150, 200.]),
+                                  intensities=np.array([0.6, 0.1, 0.6]),
+                                  metadata={'id': 'spectrum4'})
+            references = [spectrum_1, spectrum_2, spectrum_3]
+            queries = [spectrum_2, spectrum_3, spectrum_4]
+
+            scores = Scores(references, queries, CosineGreedy()).calculate()
+            selected_scores = scores.scores_by_query(spectrum_4)
+            selected_scores.sort(key=lambda s: s[1], reverse=True)
+            print([x[1].round(3) for x in selected_scores])
+
+        Should output
+
+        .. testoutput::
+
+            [0.796, 0.613, 0.0]
+
+        """
+        assert query in self.queries, "Given input not found in queries."
+        selected_idx = int(numpy.where(self.queries[0, :] == query)[0])
+        selected_scores = []
+        for i, score in enumerate(self._scores[:, selected_idx].copy()):
+            if isinstance(score, tuple):
+                selected_scores.append((self.references[i, 0], *score))
+            else:
+                selected_scores.append((self.references[i, 0], score))
+        return selected_scores
+
     @property
     def scores(self) -> numpy.ndarray:
         """Scores as numpy array

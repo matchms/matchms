@@ -1,6 +1,9 @@
 import numpy
 import pytest
 from matchms import Scores
+from matchms import Spectrum
+from matchms.similarity import CosineGreedy
+from matchms.similarity import IntersectMz
 
 
 class DummySimilarityFunction:
@@ -130,3 +133,99 @@ def test_scores_next():
         ("rrr", "qq", "rrrqq", 5)
     ]
     assert actual == expected
+
+
+def test_scores_by_referencey():
+    "Test scores_by_reference method."
+    spectrum_1 = Spectrum(mz=numpy.array([100, 150, 200.]),
+                          intensities=numpy.array([0.7, 0.2, 0.1]),
+                          metadata={'id': 'spectrum1'})
+    spectrum_2 = Spectrum(mz=numpy.array([100, 140, 190.]),
+                          intensities=numpy.array([0.4, 0.2, 0.1]),
+                          metadata={'id': 'spectrum2'})
+    spectrum_3 = Spectrum(mz=numpy.array([110, 140, 195.]),
+                          intensities=numpy.array([0.6, 0.2, 0.1]),
+                          metadata={'id': 'spectrum3'})
+    spectrum_4 = Spectrum(mz=numpy.array([100, 150, 200.]),
+                          intensities=numpy.array([0.6, 0.1, 0.6]),
+                          metadata={'id': 'spectrum4'})
+    references = [spectrum_1, spectrum_2, spectrum_3]
+    queries = [spectrum_3, spectrum_4]
+
+    scores = Scores(references, queries, CosineGreedy()).calculate()
+    selected_scores = scores.scores_by_reference(spectrum_2)
+
+    expected_result = [(scores.queries[:, i][0], *scores.scores[1, i]) for i in range(2)]
+    assert selected_scores == expected_result, "Expected different scores."
+
+
+def test_scores_by_referencey_non_tuple_score():
+    "Test scores_by_reference method."
+    spectrum_1 = Spectrum(mz=numpy.array([100, 150, 200.]),
+                          intensities=numpy.array([0.7, 0.2, 0.1]),
+                          metadata={'id': 'spectrum1'})
+    spectrum_2 = Spectrum(mz=numpy.array([100, 140, 190.]),
+                          intensities=numpy.array([0.4, 0.2, 0.1]),
+                          metadata={'id': 'spectrum2'})
+    spectrum_3 = Spectrum(mz=numpy.array([110, 140, 195.]),
+                          intensities=numpy.array([0.6, 0.2, 0.1]),
+                          metadata={'id': 'spectrum3'})
+    spectrum_4 = Spectrum(mz=numpy.array([100, 150, 200.]),
+                          intensities=numpy.array([0.6, 0.1, 0.6]),
+                          metadata={'id': 'spectrum4'})
+    references = [spectrum_1, spectrum_2, spectrum_3]
+    queries = [spectrum_3, spectrum_4]
+
+    scores = Scores(references, queries, IntersectMz()).calculate()
+    selected_scores = scores.scores_by_reference(spectrum_2)
+
+    expected_result = [(scores.queries[:, i][0], scores.scores[1, i]) for i in range(2)]
+    assert selected_scores == expected_result, "Expected different scores."
+
+
+def test_scores_by_query():
+    "Test scores_by_query method."
+    spectrum_1 = Spectrum(mz=numpy.array([100, 150, 200.]),
+                          intensities=numpy.array([0.7, 0.2, 0.1]),
+                          metadata={'id': 'spectrum1'})
+    spectrum_2 = Spectrum(mz=numpy.array([100, 140, 190.]),
+                          intensities=numpy.array([0.4, 0.2, 0.1]),
+                          metadata={'id': 'spectrum2'})
+    spectrum_3 = Spectrum(mz=numpy.array([110, 140, 195.]),
+                          intensities=numpy.array([0.6, 0.2, 0.1]),
+                          metadata={'id': 'spectrum3'})
+    spectrum_4 = Spectrum(mz=numpy.array([100, 150, 200.]),
+                          intensities=numpy.array([0.6, 0.1, 0.6]),
+                          metadata={'id': 'spectrum4'})
+    references = [spectrum_1, spectrum_2, spectrum_3]
+    queries = [spectrum_2, spectrum_3, spectrum_4]
+
+    scores = Scores(references, queries, CosineGreedy()).calculate()
+    selected_scores = scores.scores_by_query(spectrum_4)
+
+    expected_result = [(scores.references[i][0], *scores.scores[i, 2]) for i in range(3)]
+    assert selected_scores == expected_result, "Expected different scores."
+
+
+def test_scores_by_query_non_tuple_score():
+    "Test scores_by_query method."
+    spectrum_1 = Spectrum(mz=numpy.array([100, 150, 200.]),
+                          intensities=numpy.array([0.7, 0.2, 0.1]),
+                          metadata={'id': 'spectrum1'})
+    spectrum_2 = Spectrum(mz=numpy.array([100, 140, 190.]),
+                          intensities=numpy.array([0.4, 0.2, 0.1]),
+                          metadata={'id': 'spectrum2'})
+    spectrum_3 = Spectrum(mz=numpy.array([110, 140, 195.]),
+                          intensities=numpy.array([0.6, 0.2, 0.1]),
+                          metadata={'id': 'spectrum3'})
+    spectrum_4 = Spectrum(mz=numpy.array([100, 150, 200.]),
+                          intensities=numpy.array([0.6, 0.1, 0.6]),
+                          metadata={'id': 'spectrum4'})
+    references = [spectrum_1, spectrum_2, spectrum_3]
+    queries = [spectrum_2, spectrum_3, spectrum_4]
+
+    scores = Scores(references, queries, IntersectMz()).calculate()
+    selected_scores = scores.scores_by_query(spectrum_4)
+
+    expected_result = [(scores.references[i][0], scores.scores[i, 2]) for i in range(3)]
+    assert selected_scores == expected_result, "Expected different scores."
