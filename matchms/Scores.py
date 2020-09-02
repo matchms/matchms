@@ -135,7 +135,7 @@ class Scores:
         return list(zip(self.queries[0], self._scores[selected_idx, :].copy()))
 
     def scores_by_query(self, query: QueriesType) -> numpy.ndarray:
-        """Return all scores (not sorted) for the given query spectrums.
+        """Return all scores (not sorted) for the given query spectrum.
 
         Parameters
         ----------
@@ -144,7 +144,7 @@ class Scores:
 
         For example
 
-        .. code-block:: python
+        .. testcode::
 
             import numpy as np
             from matchms import Scores, Spectrum
@@ -166,7 +166,15 @@ class Scores:
             queries = [spectrum_2, spectrum_3, spectrum_4]
 
             scores = Scores(references, queries, CosineGreedy()).calculate()
-            selected_scores = scores.scores_by_query(spectrum_3)
+            selected_scores = scores.scores_by_query(spectrum_4)
+            selected_scores.sort(key=lambda s: s[1][0], reverse=True)
+            print([x[1][0].round(3) for x in selected_scores])
+
+        Should output
+
+        .. testoutput::
+
+            [0.796, 0.613, 0.0]
 
         """
         assert query in self.queries, "Given input not found in queries."
