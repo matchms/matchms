@@ -147,6 +147,7 @@ class Scores:
         query
             Single query Spectrum.
 
+
         For example
 
         .. testcode::
