@@ -131,8 +131,13 @@ class Scores:
         """
         assert reference in self.references, "Given input not found in references."
         selected_idx = int(numpy.where(self.references[:, 0] == reference)[0])
-
-        return list(zip(self.queries[0], self._scores[selected_idx, :].copy()))
+        selected_scores = []
+        for i, score in enumerate(self._scores[selected_idx, :].copy()):
+            if isinstance(score, tuple):
+                selected_scores.append((self.queries[0, i], *score))
+            else:
+                selected_scores.append((self.queries[0, i], score))
+        return selected_scores
 
     def scores_by_query(self, query: QueriesType) -> numpy.ndarray:
         """Return all scores (not sorted) for the given query spectrum.
@@ -167,8 +172,8 @@ class Scores:
 
             scores = Scores(references, queries, CosineGreedy()).calculate()
             selected_scores = scores.scores_by_query(spectrum_4)
-            selected_scores.sort(key=lambda s: s[1][0], reverse=True)
-            print([x[1][0].round(3) for x in selected_scores])
+            selected_scores.sort(key=lambda s: s[1], reverse=True)
+            print([x[1].round(3) for x in selected_scores])
 
         Should output
 
@@ -179,8 +184,13 @@ class Scores:
         """
         assert query in self.queries, "Given input not found in queries."
         selected_idx = int(numpy.where(self.queries[0, :] == query)[0])
-
-        return list(zip(self.references[:, 0], self._scores[:, selected_idx].copy()))
+        selected_scores = []
+        for i, score in enumerate(self._scores[:, selected_idx].copy()):
+            if isinstance(score, tuple):
+                selected_scores.append((self.references[i, 0], *score))
+            else:
+                selected_scores.append((self.references[i, 0], score))
+        return selected_scores
 
     @property
     def scores(self) -> numpy.ndarray:
