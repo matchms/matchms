@@ -121,31 +121,26 @@ class Scores:
         self._scores = self.similarity_function(self.references[:, 0], self.queries[0, :])
         return self
 
-    def scores_by_reference(self, references: ReferencesType) -> numpy.ndarray:
-        """Return all scores (not sorted) for the given reference spectrums.
+    def scores_by_reference(self, reference: ReferencesType) -> numpy.ndarray:
+        """Return all scores (not sorted) for the given reference spectrum.
 
         Parameters
         ----------
-        references
-            Single Spectrum or list or array of reference objects.
+        reference
+            Single reference Spectrum.
         """
-        if not isinstance(references, (list, numpy.ndarray)):
-            references = [references]
+        assert reference in self.references, "Given input not found in references."
+        selected_idx = int(numpy.where(self.references[:, 0] == reference)[0])
 
-        selected_idx = []
-        for ref in references:
-            assert ref in self.references, "Given input not found in references."
-            selected_idx.append(int(numpy.where(self.references[:, 0] == ref)[0]))
+        return list(zip(self.queries[0], self._scores[selected_idx, :].copy()))
 
-        return self._scores[selected_idx, :].copy()
-
-    def scores_by_query(self, queries: QueriesType) -> numpy.ndarray:
+    def scores_by_query(self, query: QueriesType) -> numpy.ndarray:
         """Return all scores (not sorted) for the given query spectrums.
 
         Parameters
         ----------
-        queries
-            Single Spectrum or list or array of query objects.
+        query
+            Single query Spectrum.
 
         For example
 
@@ -171,18 +166,13 @@ class Scores:
             queries = [spectrum_2, spectrum_3, spectrum_4]
 
             scores = Scores(references, queries, CosineGreedy()).calculate()
-            selected_scores = scores.scores_by_query([spectrum_3, spectrum_4])
+            selected_scores = scores.scores_by_query(spectrum_3)
 
         """
-        if not isinstance(queries, (list, numpy.ndarray)):
-            queries = [queries]
+        assert query in self.queries, "Given input not found in queries."
+        selected_idx = int(numpy.where(self.queries[0, :] == query)[0])
 
-        selected_idx = []
-        for query in queries:
-            assert query in self.queries, "Given input not found in queries."
-            selected_idx.append(int(numpy.where(self.queries[0, :] == query)[0]))
-
-        return self._scores[:, selected_idx].copy()
+        return list(zip(self.references[:, 0], self._scores[:, selected_idx].copy()))
 
     @property
     def scores(self) -> numpy.ndarray:
