@@ -49,8 +49,6 @@ class ModifiedCosine(BaseSimilarityFunction):
     """
     # Set key characteristics as class attributes
     is_commutative = True
-    # Set output data type, e.g. ("score", "float") or [("score", "float"), ("matches", "int")]
-    score_datatype = [("score", "float"), ("matches", "int")]
 
     def __init__(self, tolerance: float = 0.1, mz_power: float = 0.0,
                  intensity_power: float = 1.0):
