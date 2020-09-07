@@ -107,8 +107,8 @@ class Scores:
         assert isinstance(queries, (list, tuple, numpy.ndarray)),\
             "Expected input argument 'queries' to be list or tuple or numpy.ndarray."
 
-    @deprecated(version='0.6.0', reason=("Function will be removed in future versions." \
-                "Calculate scores via calculate_scores() function."))
+    @deprecated(version='0.6.0', reason=("Function will be removed in future versions.",
+                                         "Calculate scores via calculate_scores() function."))
     def calculate(self) -> Scores:
         """
         Calculate the similarity between all reference objects v all query objects using
