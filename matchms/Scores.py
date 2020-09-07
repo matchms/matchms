@@ -1,5 +1,6 @@
 from __future__ import annotations
 import numpy
+from deprecated import deprecated
 from matchms.typing import QueriesType
 from matchms.typing import ReferencesType
 from matchms.typing import SimilarityFunction
@@ -106,6 +107,7 @@ class Scores:
         assert isinstance(queries, (list, tuple, numpy.ndarray)),\
             "Expected input argument 'queries' to be list or tuple or numpy.ndarray."
 
+    @deprecated(version='0.5.2', reason="Calculate scores via calculate_scores() function.")
     def calculate(self) -> Scores:
         """
         Calculate the similarity between all reference objects v all query objects using
