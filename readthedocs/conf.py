@@ -47,6 +47,7 @@ apidoc_separate_modules = True
 apidoc_module_first = True
 autodoc_default_options = {
     'special-members': '__init__,__call__',
+    'inherited-members': True,
 }
 # Hide undocumented member by excluding default undoc-members option
 os.environ["SPHINX_APIDOC_OPTIONS"] = "members,show-inheritance"
