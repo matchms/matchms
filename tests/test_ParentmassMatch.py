@@ -157,7 +157,7 @@ def test_parentmass_scores():
 
 
 def test_parentmass_scores_symmetric_compliled():
-    """Test the underlying score function (non-compiled)."""
+    """Test the underlying score function (numba-compiled)."""
     parentmasses = numpy.asarray([101, 100, 200])
     scores = parentmass_scores_symmetric(parentmasses, parentmasses, tolerance=2.0)
     assert numpy.all(scores == numpy.array([[1., 1., 0.],
