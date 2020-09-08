@@ -1,9 +1,10 @@
+import abc
 from typing import List
 import numpy
 from matchms.typing import SpectrumType
 
 
-class BaseSimilarityFunction:
+class BaseSimilarity:
     """Similarity function base class.
     When building a custom similarity measure, inherit from this class and implement
     the desired methods.
@@ -11,7 +12,7 @@ class BaseSimilarityFunction:
     # Set key characteristics as class attributes
     is_commutative = True
 
-    @abstractmethod
+    @abc.abstractmethod
     def pair(self, reference: SpectrumType, query: SpectrumType) -> float:
         """Method to calculate the similarity for one input pair.
 
