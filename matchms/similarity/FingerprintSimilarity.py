@@ -1,15 +1,12 @@
 from typing import List
 from typing import Union
 import numpy
-from matchms.similarity.vector_similarity_functions import cosine_similarity
-from matchms.similarity.vector_similarity_functions import \
-    cosine_similarity_matrix
-from matchms.similarity.vector_similarity_functions import dice_similarity
-from matchms.similarity.vector_similarity_functions import \
-    dice_similarity_matrix
-from matchms.similarity.vector_similarity_functions import jaccard_index
-from matchms.similarity.vector_similarity_functions import \
-    jaccard_similarity_matrix
+from .vector_similarity_functions import cosine_similarity
+from .vector_similarity_functions import cosine_similarity_matrix
+from .vector_similarity_functions import dice_similarity
+from .vector_similarity_functions import dice_similarity_matrix
+from .vector_similarity_functions import jaccard_index
+from .vector_similarity_functions import jaccard_similarity_matrix
 from matchms.typing import SpectrumType
 from .BaseSimilarityFunction import BaseSimilarityFunction
 
