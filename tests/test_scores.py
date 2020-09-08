@@ -175,7 +175,7 @@ def test_scores_by_referencey():
     scores = Scores(references, queries, CosineGreedy()).calculate()
     selected_scores = scores.scores_by_reference(spectrum_2)
 
-    expected_result = [(scores.queries[:, i][0], *scores.scores[1, i]) for i in range(2)]
+    expected_result = [(scores.queries[i], *scores.scores[1, i]) for i in range(2)]
     assert selected_scores == expected_result, "Expected different scores."
 
 
@@ -199,7 +199,7 @@ def test_scores_by_referencey_non_tuple_score():
     scores = Scores(references, queries, IntersectMz()).calculate()
     selected_scores = scores.scores_by_reference(spectrum_2)
 
-    expected_result = [(scores.queries[:, i][0], scores.scores[1, i]) for i in range(2)]
+    expected_result = [(scores.queries[i], scores.scores[1, i]) for i in range(2)]
     assert selected_scores == expected_result, "Expected different scores."
 
 
@@ -223,7 +223,7 @@ def test_scores_by_query():
     scores = Scores(references, queries, CosineGreedy()).calculate()
     selected_scores = scores.scores_by_query(spectrum_4)
 
-    expected_result = [(scores.references[i][0], *scores.scores[i, 2]) for i in range(3)]
+    expected_result = [(scores.references[i], *scores.scores[i, 2]) for i in range(3)]
     assert selected_scores == expected_result, "Expected different scores."
 
 
@@ -247,5 +247,5 @@ def test_scores_by_query_non_tuple_score():
     scores = Scores(references, queries, IntersectMz()).calculate()
     selected_scores = scores.scores_by_query(spectrum_4)
 
-    expected_result = [(scores.references[i][0], scores.scores[i, 2]) for i in range(3)]
+    expected_result = [(scores.references[i], scores.scores[i, 2]) for i in range(3)]
     assert selected_scores == expected_result, "Expected different scores."
