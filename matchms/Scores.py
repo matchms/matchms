@@ -132,13 +132,13 @@ class Scores:
             Single reference Spectrum.
         """
         assert reference in self.references, "Given input not found in references."
-        selected_idx = int(numpy.where(self.references[:, 0] == reference)[0])
+        selected_idx = int(numpy.where(self.references == reference)[0])
         selected_scores = []
         for i, score in enumerate(self._scores[selected_idx, :].copy()):
             if isinstance(score, tuple):
-                selected_scores.append((self.queries[0, i], *score))
+                selected_scores.append((self.queries[i], *score))
             else:
-                selected_scores.append((self.queries[0, i], score))
+                selected_scores.append((self.queries[i], score))
         return selected_scores
 
     def scores_by_query(self, query: QueriesType) -> numpy.ndarray:
@@ -186,13 +186,13 @@ class Scores:
 
         """
         assert query in self.queries, "Given input not found in queries."
-        selected_idx = int(numpy.where(self.queries[0, :] == query)[0])
+        selected_idx = int(numpy.where(self.queries == query)[0])
         selected_scores = []
         for i, score in enumerate(self._scores[:, selected_idx].copy()):
             if isinstance(score, tuple):
-                selected_scores.append((self.references[i, 0], *score))
+                selected_scores.append((self.references[i], *score))
             else:
-                selected_scores.append((self.references[i, 0], score))
+                selected_scores.append((self.references[i], score))
         return selected_scores
 
     @property
