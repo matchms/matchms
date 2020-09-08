@@ -2,10 +2,10 @@ from typing import List
 import numba
 import numpy
 from matchms.typing import SpectrumType
-from .BaseSimilarityFunction import BaseSimilarityFunction
+from .BaseSimilarity import BaseSimilarity
 
 
-class ParentmassMatch(BaseSimilarityFunction):
+class ParentmassMatch(BaseSimilarity):
     """Return True if spectrums match in parent mass (within tolerance), and False otherwise.
 
     Example to calculate scores between 2 spectrums and iterate over the scores

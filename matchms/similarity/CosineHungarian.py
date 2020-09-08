@@ -4,10 +4,10 @@ from scipy.optimize import linear_sum_assignment
 from matchms.similarity.spectrum_similarity_functions import collect_peak_pairs
 from matchms.similarity.spectrum_similarity_functions import get_peaks_array
 from matchms.typing import SpectrumType
-from .BaseSimilarityFunction import BaseSimilarityFunction
+from .BaseSimilarity import BaseSimilarity
 
 
-class CosineHungarian(BaseSimilarityFunction):
+class CosineHungarian(BaseSimilarity):
     """Calculate 'cosine similarity score' between two spectra (using Hungarian algorithm).
 
     The cosine score aims at quantifying the similarity between two mass spectra.

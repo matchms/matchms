@@ -1,9 +1,9 @@
 import numpy
 from matchms.typing import SpectrumType
-from .BaseSimilarityFunction import BaseSimilarityFunction
+from .BaseSimilarity import BaseSimilarity
 
 
-class IntersectMz(BaseSimilarityFunction):
+class IntersectMz(BaseSimilarity):
     """Example score for illustrating how to build custom spectra similarity score.
 
     IntersectMz will count all exact matches of peaks and divide it by all unique

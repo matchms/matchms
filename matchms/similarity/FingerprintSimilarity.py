@@ -2,7 +2,7 @@ from typing import List
 from typing import Union
 import numpy
 from matchms.typing import SpectrumType
-from .BaseSimilarityFunction import BaseSimilarityFunction
+from .BaseSimilarity import BaseSimilarity
 from .vector_similarity_functions import cosine_similarity
 from .vector_similarity_functions import cosine_similarity_matrix
 from .vector_similarity_functions import dice_similarity
@@ -11,7 +11,7 @@ from .vector_similarity_functions import jaccard_index
 from .vector_similarity_functions import jaccard_similarity_matrix
 
 
-class FingerprintSimilarity(BaseSimilarityFunction):
+class FingerprintSimilarity(BaseSimilarity):
     """Calculate similarity between molecules based on their fingerprints.
 
     For this similarity measure to work, fingerprints are expected to be derived

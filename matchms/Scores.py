@@ -1,9 +1,9 @@
 from __future__ import annotations
 import numpy
 from deprecated.sphinx import deprecated
+from matchms.similarity import BaseSimilarity
 from matchms.typing import QueriesType
 from matchms.typing import ReferencesType
-from matchms.typing import SimilarityFunction
 
 
 class Scores:
@@ -53,7 +53,7 @@ class Scores:
         Cosine score between spectrum2 and spectrum4 is 0.61 with 1 matched peaks
     """
     def __init__(self, references: ReferencesType, queries: QueriesType,
-                 similarity_function: BaseSimilarityFunction, is_symmetric: bool = False):
+                 similarity_function: BaseSimilarity, is_symmetric: bool = False):
         """
 
         Parameters
