@@ -27,15 +27,15 @@ class CosineGreedy(BaseSimilarityFunction):
         from matchms import Spectrum
         from matchms.similarity import CosineGreedy
 
-        spectrum_1 = Spectrum(mz=np.array([100, 150, 200.]),
-                              intensities=np.array([0.7, 0.2, 0.1]))
-        spectrum_2 = Spectrum(mz=np.array([100, 140, 190.]),
-                              intensities=np.array([0.4, 0.2, 0.1]))
+        reference = Spectrum(mz=np.array([100, 150, 200.]),
+                             intensities=np.array([0.7, 0.2, 0.1]))
+        query = Spectrum(mz=np.array([100, 140, 190.]),
+                         intensities=np.array([0.4, 0.2, 0.1]))
 
         # Use factory to construct a similarity function
         cosine_greedy = CosineGreedy(tolerance=0.2)
 
-        score, n_matches = cosine_greedy.pair(spectrum_1, spectrum_2)
+        score, n_matches = cosine_greedy.pair(reference, query)
 
         print(f"Cosine score is {score:.2f} with {n_matches} matched peaks")
 
