@@ -53,7 +53,7 @@ class Scores:
         Cosine score between spectrum2 and spectrum4 is 0.61 with 1 matched peaks
     """
     def __init__(self, references: ReferencesType, queries: QueriesType,
-                 similarity_function: SimilarityFunction, is_symmetric: bool = False):
+                 similarity_function: BaseSimilarityFunction, is_symmetric: bool = False):
         """
 
         Parameters
