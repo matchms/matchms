@@ -4,10 +4,9 @@
 
 Matchms is an open-source Python package to import, process, clean, and compare mass spectrometry data (MS/MS). It allows to implement and run an easy-to-follow, easy-to-reproduce workflow from raw mass spectra to pre- and post-processed spectral data. Spectral data can be imported from common formats such mzML, mzXML, msp, metabolomics-USI, MGF, or json (e.g. GNPS-syle json files). Matchms then provides filters for metadata cleaning and checking, as well as for basic peak filtering. Finally, matchms was build to import and apply different similarity measures to compare large amounts of spectra. This includes common Cosine scores, but can also easily be extended by custom measures.
 
-If you use matchms in your research, please cite the following software paper:
+If you use matchms in your research, please cite the following software paper:  
 
-F. Huber, S. Verhoeven, C. Meijer, H. Spreeuw, E. M. Villanueva Castilla, C. Geng, J.J.J. van der Hooft, S. Rogers, A. Belloum, F. Diblen, J.H. Spaaks,
-"matchms - processing and similarity evaluation of mass spectrometry data", bioRxiv, https://doi.org/10.1101/2020.08.06.239244 
+F Huber, S. Verhoeven, C. Meijer, H. Spreeuw, E. M. Villanueva Castilla, C. Geng, J.J.J. van der Hooft, S. Rogers, A. Belloum, F. Diblen, J.H. Spaaks, (2020). matchms - processing and similarity evaluation of mass spectrometry data. Journal of Open Source Software, 5(52), 2411, https://doi.org/10.21105/joss.02411
 
 .. list-table::
    :widths: 25 25
@@ -22,7 +21,7 @@ F. Huber, S. Verhoeven, C. Meijer, H. Spreeuw, E. M. Villanueva Castilla, C. Gen
    * - \3. Community Registry
      - |Conda Badge| |Research Software Directory Badge|
    * - \4. Enable Citation
-     - |Zenodo Badge|
+     - |JOSS Badge| |Zenodo Badge|
    * - \5. Checklist
      - |CII Best Practices Badge|
    * - **Other best practices**
@@ -50,9 +49,13 @@ F. Huber, S. Verhoeven, C. Meijer, H. Spreeuw, E. M. Villanueva Castilla, C. Gen
    :target: https://www.research-software.nl/software/matchms
    :alt: Research Software Directory Badge
 
-.. |Zenodo Badge| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.3716378.svg
-   :target: https://doi.org/10.5281/zenodo.3716378
+.. |Zenodo Badge| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.3859772..svg
+   :target: https://doi.org/10.5281/zenodo.3859772
    :alt: Zenodo Badge
+
+.. |JOSS Badge| image:: https://joss.theoj.org/papers/10.21105/joss.02411/status.svg
+   :target: https://doi.org/10.21105/joss.02411
+   :alt: JOSS Badge
 
 .. |CII Best Practices Badge| image:: https://bestpractices.coreinfrastructure.org/projects/3792/badge
    :target: https://bestpractices.coreinfrastructure.org/projects/3792
