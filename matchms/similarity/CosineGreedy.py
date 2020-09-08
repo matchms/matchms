@@ -16,7 +16,7 @@ class CosineGreedy(BaseSimilarity):
     The underlying peak assignment problem is here solved in a 'greedy' way.
     This can perform notably faster, but does occasionally deviate slightly from
     a fully correct solution (as with the Hungarian algorithm, see
-    :meth:`~matchms.similarity.CosineHungarian`). In practice this will rarely
+    :class:`~matchms.similarity.CosineHungarian`). In practice this will rarely
     affect similarity scores notably, in particular for smaller tolerances.
 
     For example

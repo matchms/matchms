@@ -16,7 +16,7 @@ class CosineHungarian(BaseSimilarity):
     m/z ratios lie within the given 'tolerance'.
     The underlying peak assignment problem is here solved using the Hungarian algorithm.
     This can perform notably slower than the 'greedy' implementation in
-    :meth:`~matchms.similarity.CosineGreedy`, but does represent a mathematically proper
+    :class:`~matchms.similarity.CosineGreedy`, but does represent a mathematically proper
     solution to the problem.
     """
     def __init__(self, tolerance: float = 0.1, mz_power: float = 0.0,
