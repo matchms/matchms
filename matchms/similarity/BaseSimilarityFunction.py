@@ -11,8 +11,9 @@ class BaseSimilarityFunction:
     # Set key characteristics as class attributes
     is_commutative = True
 
+    @abstractmethod
     def pair(self, reference: SpectrumType, query: SpectrumType) -> float:
-        """Required: Method to calculate the similarity for one input pair.
+        """Method to calculate the similarity for one input pair.
 
         Parameters
         ----------
