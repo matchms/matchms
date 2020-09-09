@@ -12,6 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Four new peak filtering functions [#119](https://github.com/matchms/matchms/pull/119)
 - score_by_reference and score_by_query methods to Scores [#142](https://github.com/matchms/matchms/pull/142)
 
+### Changed
+
+- Refactor similarity scores to be instances of BaseSimilarity class [#135](https://github.com/matchms/matchms/issues/135)
+- Marked Scores.calculate() method as deprecated [#135](https://github.com/matchms/matchms/issues/135)
+
 ## [0.5.2] - 2020-08-26
 
 ### Changed
