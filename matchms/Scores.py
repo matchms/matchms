@@ -63,14 +63,16 @@ class Scores:
         queries
             List of query objects
         similarity_function
-            Function which accepts a reference + query object and returns a score or tuple of scores
+            Expected input is an object based on :class:`~matchms.similarity.BaseSimilarity`. It is
+            expected to provide a *.pair()* and *.matrix()* method for computing similarity scores between
+            references and queries.
         is_symmetric
             Set to True when *references* and *queries* are identical (as for instance for an all-vs-all
             comparison). By using the fact that score[i,j] = score[j,i] the calculation will be about
             2x faster.
         """
         # pylint: disable=too-many-arguments
-        Scores._validate_input_arguments(references, queries)
+        Scores._validate_input_arguments(references, queries, similarity_function)
 
         self.n_rows = len(references)
         self.n_cols = len(queries)
@@ -100,12 +102,15 @@ class Scores:
         return self._scores.__str__()
 
     @staticmethod
-    def _validate_input_arguments(references, queries):
+    def _validate_input_arguments(references, queries, similarity_function):
         assert isinstance(references, (list, tuple, numpy.ndarray)),\
             "Expected input argument 'references' to be list or tuple or numpy.ndarray."
 
         assert isinstance(queries, (list, tuple, numpy.ndarray)),\
             "Expected input argument 'queries' to be list or tuple or numpy.ndarray."
+
+        assert isinstance(similarity_function, BaseSimilarity),\
+            "Expected input argument 'similarity_function' to have BaseSimilarity as super-class."
 
     @deprecated(version='0.6.0', reason="Calculate scores via calculate_scores() function.")
     def calculate(self) -> Scores:
