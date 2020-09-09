@@ -4,10 +4,10 @@ from matchms import Scores
 from matchms import Spectrum
 from matchms.similarity import CosineGreedy
 from matchms.similarity import IntersectMz
-from matchms.similarity.BaseSimilarityFunction import BaseSimilarityFunction
+from matchms.similarity.BaseSimilarity import BaseSimilarity
 
 
-class DummySimilarityFunction(BaseSimilarityFunction):
+class DummySimilarityFunction(BaseSimilarity):
     """Simple dummy score, only contain pair-wise implementation."""
     def __init__(self):
         """constructor"""
@@ -18,7 +18,7 @@ class DummySimilarityFunction(BaseSimilarityFunction):
         return s, len(s)
 
 
-class DummySimilarityFunctionParallel(BaseSimilarityFunction):
+class DummySimilarityFunctionParallel(BaseSimilarity):
     """Simple dummy score, contains pair-wise and matrix implementation."""
     def __init__(self):
         """constructor"""
