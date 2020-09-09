@@ -1,7 +1,7 @@
 from __future__ import annotations
 import numpy
 from deprecated.sphinx import deprecated
-from matchms.similarity import BaseSimilarity
+from matchms.similarity.BaseSimilarity import BaseSimilarity
 from matchms.typing import QueriesType
 from matchms.typing import ReferencesType
 
