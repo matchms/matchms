@@ -34,6 +34,7 @@ requirements:
     - pytest-runner
     - setuptools
   run:
+    - deprecated
     - gensim >=3.8.0
     - matplotlib
     - numba >=0.47

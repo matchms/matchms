@@ -4,6 +4,7 @@ channels:
   - conda-forge
   - defaults
 dependencies:
+  - deprecated
   - gensim >=3.8.0
   - matplotlib
   - numba >=0.47

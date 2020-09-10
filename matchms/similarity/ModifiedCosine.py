@@ -1,11 +1,12 @@
 from typing import Tuple
 from matchms.typing import SpectrumType
+from .BaseSimilarity import BaseSimilarity
 from .spectrum_similarity_functions import collect_peak_pairs
 from .spectrum_similarity_functions import get_peaks_array
 from .spectrum_similarity_functions import score_best_matches
 
 
-class ModifiedCosine:
+class ModifiedCosine(BaseSimilarity):
     """Calculate 'modified cosine score' between mass spectra.
 
     The modified cosine score aims at quantifying the similarity between two
@@ -35,7 +36,7 @@ class ModifiedCosine:
         # Use factory to construct a similarity function
         modified_cosine = ModifiedCosine(tolerance=0.2)
 
-        score, n_matches = modified_cosine(spectrum_1, spectrum_2)
+        score, n_matches = modified_cosine.pair(spectrum_1, spectrum_2)
 
         print(f"Modified cosine score is {score:.2f} with {n_matches} matched peaks")
 
@@ -46,6 +47,9 @@ class ModifiedCosine:
         Modified cosine score is 0.83 with 1 matched peaks
 
     """
+    # Set key characteristics as class attributes
+    is_commutative = True
+
     def __init__(self, tolerance: float = 0.1, mz_power: float = 0.0,
                  intensity_power: float = 1.0):
         """
@@ -63,15 +67,15 @@ class ModifiedCosine:
         self.mz_power = mz_power
         self.intensity_power = intensity_power
 
-    def __call__(self, spectrum1: SpectrumType, spectrum2: SpectrumType) -> Tuple[float, int]:
+    def pair(self, reference: SpectrumType, query: SpectrumType) -> Tuple[float, int]:
         """Calculate modified cosine score between two spectra.
 
         Parameters
         ----------
-        spectrum1:
-            Input spectrum 1.
-        spectrum2:
-            Input spectrum 2.
+        reference
+            Single reference spectrum.
+        query
+            Single query spectrum.
 
         Returns
         -------
@@ -84,16 +88,16 @@ class ModifiedCosine:
                                             mz_power=self.mz_power,
                                             intensity_power=self.intensity_power)
             message = "Precursor_mz missing. Apply 'add_precursor_mz' filter first."
-            assert spectrum1.get("precursor_mz") and spectrum2.get("precursor_mz"), message
-            mass_shift = spectrum1.get("precursor_mz") - spectrum2.get("precursor_mz")
+            assert reference.get("precursor_mz") and query.get("precursor_mz"), message
+            mass_shift = reference.get("precursor_mz") - query.get("precursor_mz")
             nonzero_pairs = collect_peak_pairs(spec1, spec2, self.tolerance, shift=mass_shift,
                                                mz_power=self.mz_power,
                                                intensity_power=self.intensity_power)
             unsorted_matching_pairs = zero_pairs + nonzero_pairs
             return sorted(unsorted_matching_pairs, key=lambda x: x[2], reverse=True)
 
-        spec1 = get_peaks_array(spectrum1)
-        spec2 = get_peaks_array(spectrum2)
+        spec1 = get_peaks_array(reference)
+        spec2 = get_peaks_array(query)
         matching_pairs = get_matching_pairs()
         return score_best_matches(matching_pairs, spec1, spec2,
                                   self.mz_power, self.intensity_power)

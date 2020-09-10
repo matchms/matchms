@@ -1,12 +1,12 @@
 from .Scores import Scores
+from .similarity.BaseSimilarity import BaseSimilarity
 from .typing import QueriesType
 from .typing import ReferencesType
-from .typing import SimilarityFunction
 
 
-def calculate_scores(references: ReferencesType,
-                     queries: QueriesType,
-                     similarity_function: SimilarityFunction) -> Scores:
+def calculate_scores(references: ReferencesType, queries: QueriesType,
+                     similarity_function: BaseSimilarity,
+                     is_symmetric: bool = False) -> Scores:
     """Calculate the similarity between all reference objects versus all query objects.
 
     Example to calculate scores between 2 spectrums and iterate over the scores
@@ -48,6 +48,10 @@ def calculate_scores(references: ReferencesType,
         List of query objects
     similarity_function
         Function which accepts a reference + query object and returns a score or tuple of scores
+    is_symmetric
+        Set to True when *references* and *queries* are identical (as for instance for an all-vs-all
+        comparison). By using the fact that score[i,j] = score[j,i] the calculation will be about
+        2x faster. Default is False.
 
     Returns
     -------
@@ -55,6 +59,6 @@ def calculate_scores(references: ReferencesType,
     ~matchms.Scores.Scores
     """
 
-    return Scores(references=references,
-                  queries=queries,
-                  similarity_function=similarity_function).calculate()
+    return Scores(references=references, queries=queries,
+                  similarity_function=similarity_function,
+                  is_symmetric=is_symmetric).calculate()
