@@ -3,9 +3,7 @@ name: Anaconda Build
 on:
   push:
   pull_request:
-    types: [closed]
-    branches:
-      - master
+    types: [opened, reopened]
 
 jobs:
 
