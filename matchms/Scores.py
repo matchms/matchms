@@ -69,7 +69,7 @@ class Scores:
         is_symmetric
             Set to True when *references* and *queries* are identical (as for instance for an all-vs-all
             comparison). By using the fact that score[i,j] = score[j,i] the calculation will be about
-            2x faster.
+            2x faster. Default is False.
         """
         # pylint: disable=too-many-arguments
         Scores._validate_input_arguments(references, queries, similarity_function)
