@@ -34,6 +34,7 @@ requirements:
     - pytest-runner
     - setuptools
   run:
+    - deprecated
     - matplotlib
     - numba >=0.47
     - numpy

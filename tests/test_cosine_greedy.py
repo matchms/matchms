@@ -12,7 +12,7 @@ def test_cosine_greedy_without_parameters():
     spectrum_2 = Spectrum(mz=numpy.array([100, 200, 290, 490, 510], dtype="float"),
                           intensities=numpy.array([0.1, 0.2, 1.0, 0.3, 0.4], dtype="float"))
     cosine_greedy = CosineGreedy()
-    score, n_matches = cosine_greedy(spectrum_1, spectrum_2)
+    score, n_matches = cosine_greedy.pair(spectrum_1, spectrum_2)
 
     # Derive expected cosine score
     expected_matches = [0, 1, 4]  # Those peaks have matching mz values (within given tolerance)
@@ -34,7 +34,7 @@ def test_cosine_score_greedy_with_tolerance_0_2():
     spectrum_2 = Spectrum(mz=numpy.array([100, 300, 301, 511], dtype="float"),
                           intensities=numpy.array([0.1, 1.0, 0.3, 0.4], dtype="float"))
     cosine_greedy = CosineGreedy(tolerance=0.2)
-    score, n_matches = cosine_greedy(spectrum_1, spectrum_2)
+    score, n_matches = cosine_greedy.pair(spectrum_1, spectrum_2)
 
     # Derive expected cosine score
     expected_matches = [[0, 2, 3], [0, 1, 2]]  # Those peaks have matching mz values (within given tolerance)
@@ -56,7 +56,7 @@ def test_cosine_score_greedy_with_tolerance_2_0():
     spectrum_2 = Spectrum(mz=numpy.array([100, 300, 301, 511], dtype="float"),
                           intensities=numpy.array([0.1, 1.0, 0.3, 0.4], dtype="float"))
     cosine_greedy = CosineGreedy(tolerance=2.0)
-    score, n_matches = cosine_greedy(spectrum_1, spectrum_2)
+    score, n_matches = cosine_greedy.pair(spectrum_1, spectrum_2)
 
     # Derive expected cosine score
     expected_matches = [[0, 1, 3, 4], [0, 1, 2, 3]]  # Those peaks have matching mz values (within given tolerance)
@@ -81,8 +81,8 @@ def test_cosine_score_greedy_order_of_arguments():
                           metadata=dict())
 
     cosine_greedy = CosineGreedy(tolerance=2.0)
-    score_1_2, n_matches_1_2 = cosine_greedy(spectrum_1, spectrum_2)
-    score_2_1, n_matches_2_1 = cosine_greedy(spectrum_2, spectrum_1)
+    score_1_2, n_matches_1_2 = cosine_greedy.pair(spectrum_1, spectrum_2)
+    score_2_1, n_matches_2_1 = cosine_greedy.pair(spectrum_2, spectrum_1)
 
     assert score_1_2 == score_2_1, "Expected that the order of the arguments would not matter."
     assert n_matches_1_2 == n_matches_2_1, "Expected that the order of the arguments would not matter."
@@ -100,7 +100,7 @@ def test_cosine_greedy_with_peak_powers():
     spectrum_2 = Spectrum(mz=numpy.array([100, 200, 290, 490, 510], dtype="float"),
                           intensities=numpy.array([0.1, 0.2, 1.0, 0.3, 0.4], dtype="float"))
     cosine_greedy = CosineGreedy(tolerance=1.0, mz_power=mz_power, intensity_power=intensity_power)
-    score, n_matches = cosine_greedy(spectrum_1, spectrum_2)
+    score, n_matches = cosine_greedy.pair(spectrum_1, spectrum_2)
 
     # Derive expected cosine score
     matches = [0, 1, 4]  # Those peaks have matching mz values (within given tolerance)
@@ -116,3 +116,33 @@ def test_cosine_greedy_with_peak_powers():
 
     assert score == pytest.approx(expected_score, 0.0001), "Expected different cosine score."
     assert n_matches == len(matches), "Expected different number of matching peaks."
+
+
+def test_cosine_greedy_with_arrays():
+    """Test if matrix works properly."""
+    spectrum_1 = Spectrum(mz=numpy.array([100, 200, 300], dtype="float"),
+                          intensities=numpy.array([0.1, 0.2, 1.0], dtype="float"))
+
+    spectrum_2 = Spectrum(mz=numpy.array([110, 190, 290], dtype="float"),
+                          intensities=numpy.array([0.5, 0.2, 1.0], dtype="float"))
+    spectrums = [spectrum_1, spectrum_2]
+    cosine_greedy = CosineGreedy()
+    scores = cosine_greedy.matrix(spectrums, spectrums)
+
+    assert scores[0][0][0] == pytest.approx(scores[1][1][0], 0.000001), "Expected different cosine score."
+    assert scores[0][1][0] == pytest.approx(scores[1][0][0], 0.000001), "Expected different cosine score."
+
+
+def test_cosine_greedy_with_arrays_symmetric():
+    """Test if matrix with is_symmetric=True works properly."""
+    spectrum_1 = Spectrum(mz=numpy.array([100, 200, 300], dtype="float"),
+                          intensities=numpy.array([0.1, 0.2, 1.0], dtype="float"))
+
+    spectrum_2 = Spectrum(mz=numpy.array([110, 190, 290], dtype="float"),
+                          intensities=numpy.array([0.5, 0.2, 1.0], dtype="float"))
+    spectrums = [spectrum_1, spectrum_2]
+    cosine_greedy = CosineGreedy()
+    scores = cosine_greedy.matrix(spectrums, spectrums, is_symmetric=True)
+
+    assert scores[0][0][0] == pytest.approx(scores[1][1][0], 0.000001), "Expected different cosine score."
+    assert scores[0][1][0] == pytest.approx(scores[1][0][0], 0.000001), "Expected different cosine score."

@@ -1,20 +1,61 @@
 from typing import List
 from typing import Union
 import numpy
-from matchms.similarity.vector_similarity_functions import \
-    cosine_similarity_matrix
-from matchms.similarity.vector_similarity_functions import \
-    dice_similarity_matrix
-from matchms.similarity.vector_similarity_functions import \
-    jaccard_similarity_matrix
 from matchms.typing import SpectrumType
+from .BaseSimilarity import BaseSimilarity
+from .vector_similarity_functions import cosine_similarity
+from .vector_similarity_functions import cosine_similarity_matrix
+from .vector_similarity_functions import dice_similarity
+from .vector_similarity_functions import dice_similarity_matrix
+from .vector_similarity_functions import jaccard_index
+from .vector_similarity_functions import jaccard_similarity_matrix
 
 
-class FingerprintSimilarityParallel:
+class FingerprintSimilarity(BaseSimilarity):
     """Calculate similarity between molecules based on their fingerprints.
 
     For this similarity measure to work, fingerprints are expected to be derived
-    by running the "add_fingerprint()" filter function.
+    by running :meth:`~matchms.filtering.add_fingerprint`.
+
+    Code example:
+
+    .. testcode::
+
+        import numpy as np
+        from matchms import calculate_scores
+        from matchms import Spectrum
+        from matchms.filtering import add_fingerprint
+        from matchms.similarity import FingerprintSimilarity
+
+        spectrum_1 = Spectrum(mz=np.array([], dtype="float"),
+                              intensities=np.array([], dtype="float"),
+                              metadata={"smiles": "CCC(C)C(C(=O)O)NC(=O)CCl"})
+
+        spectrum_2 = Spectrum(mz=np.array([], dtype="float"),
+                              intensities=np.array([], dtype="float"),
+                              metadata={"smiles": "CC(C)C(C(=O)O)NC(=O)CCl"})
+
+        spectrum_3 = Spectrum(mz=np.array([], dtype="float"),
+                              intensities=np.array([], dtype="float"),
+                              metadata={"smiles": "C(C(=O)O)(NC(=O)O)S"})
+
+        spectrums = [spectrum_1, spectrum_2, spectrum_3]
+        # Add fingerprints
+        spectrums = [add_fingerprint(x, nbits=256) for x in spectrums]
+
+        # Specify type and calculate similarities
+        similarity_measure = FingerprintSimilarity("jaccard")
+        scores = calculate_scores(spectrums, spectrums, similarity_measure)
+        print(np.round(scores.scores, 3))
+
+    Should output
+
+    .. testoutput::
+
+        [[1.    0.878 0.415]
+         [0.878 1.    0.444]
+         [0.415 0.444 1.   ]]
+
     """
     def __init__(self, similarity_measure: str = "jaccard",
                  set_empty_scores: Union[float, int, str] = "nan"):
@@ -34,7 +75,31 @@ class FingerprintSimilarityParallel:
         assert similarity_measure in ["cosine", "dice", "jaccard"], "Unknown similarity measure."
         self.similarity_measure = similarity_measure
 
-    def __call__(self, references: List[SpectrumType], queries: List[SpectrumType]) -> numpy.array:
+    def pair(self, reference: SpectrumType, query: SpectrumType) -> float:
+        """Calculate fingerprint based similarity score between two spectra.
+
+        Parameters
+        ----------
+        reference
+            Single reference spectrum.
+        query
+            Single query spectrum.
+        """
+        fingerprint_ref = reference.get("fingerprint")
+        fingerprint_query = query.get("fingerprint")
+        if self.similarity_measure == "jaccard":
+            return jaccard_index(fingerprint_ref, fingerprint_query)
+
+        if self.similarity_measure == "dice":
+            return dice_similarity(fingerprint_ref, fingerprint_query)
+
+        if self.similarity_measure == "cosine":
+            return cosine_similarity(fingerprint_ref, fingerprint_query)
+
+        raise NotImplementedError
+
+    def matrix(self, references: List[SpectrumType], queries: List[SpectrumType],
+               is_symmetric: bool = False) -> numpy.array:
         """Calculate matrix of fingerprint based similarity scores.
 
         Parameters

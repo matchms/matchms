@@ -1,4 +1,3 @@
-from typing import Callable
 from typing import List
 from typing import Optional
 from typing import Tuple
@@ -15,6 +14,3 @@ Sample = Union[Spectrum, None, object]
 
 """Result of a similarity function"""
 Score = Union[float, Tuple[float, int]]
-
-"""Signature of a similarity function"""
-SimilarityFunction = Callable[[Sample, Sample], Score]
