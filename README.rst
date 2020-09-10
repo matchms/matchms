@@ -92,7 +92,7 @@ Installation
 
 Prerequisites:  
 
-- Python 3.7  
+- Python 3.7 or 3.8 
 - Anaconda
 
 Install matchms from Anaconda Cloud with
