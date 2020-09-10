@@ -14,7 +14,10 @@ jobs:
       fail-fast: false
       matrix:
         os: ['ubuntu-latest', 'macos-latest', 'windows-latest']
-        python-version: ["3.7", "3.8"]
+        python-version: ["3.8"]
+        include:
+          - os: 'ubuntu-latest'
+            python-version: ["3.7"]
     steps:
       - uses: actions/checkout@v2
         with:
@@ -58,7 +61,7 @@ jobs:
         env:
           SPHINXOPTS: "-n"  # enable nit-picky mode
       - name: Check documentation coverage threshold
-        if: ${{ matrix.os == 'ubuntu-latest' && matrix.python-version == '3.7' }}
+        if: matrix.python-version == '3.7'
         shell: bash -l {0}
         run: |
           cat readthedocs/_build/coverage/python.txt
@@ -80,7 +83,7 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: sed -i "s+$PWD/++g" coverage.xml
       - name: SonarCloud Scan
-        if: matrix.os == 'ubuntu-latest'
+        if: ${{ matrix.os == 'ubuntu-latest' && matrix.python-version == '3.7' }}
         uses: sonarsource/sonarcloud-github-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
