@@ -1,7 +1,9 @@
+import numpy
 from matchms.typing import SpectrumType
+from .BaseSimilarity import BaseSimilarity
 
 
-class IntersectMz:
+class IntersectMz(BaseSimilarity):
     """Example score for illustrating how to build custom spectra similarity score.
 
     IntersectMz will count all exact matches of peaks and divide it by all unique
@@ -23,7 +25,7 @@ class IntersectMz:
         # Construct a similarity function
         similarity_measure = IntersectMz(scaling=1.0)
 
-        score = similarity_measure(spectrum_1, spectrum_2)
+        score = similarity_measure.pair(spectrum_1, spectrum_2)
 
         print(f"IntersectMz score is {score:.2f}")
 
@@ -45,14 +47,14 @@ class IntersectMz:
         """
         self.scaling = scaling
 
-    def __call__(self, spectrum: SpectrumType, reference_spectrum: SpectrumType) -> float:
-        """Call method. This will calculate the similarity score between two spectra."""
-        mz = set(spectrum.peaks.mz)
-        mz_ref = set(reference_spectrum.peaks.mz)
-        intersected = mz.intersection(mz_ref)
-        unioned = mz.union(mz_ref)
+    def pair(self, reference: SpectrumType, query: SpectrumType) -> float:
+        """This will calculate the similarity score between two spectra."""
+        mz_ref = set(reference.peaks.mz)
+        mz_query = set(query.peaks.mz)
+        intersected = mz_query.intersection(mz_ref)
+        unioned = mz_query.union(mz_ref)
 
         if len(unioned) == 0:
             return 0
 
-        return self.scaling * len(intersected) / len(unioned)
+        return numpy.float64(self.scaling * len(intersected) / len(unioned))

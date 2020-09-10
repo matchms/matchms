@@ -4,6 +4,7 @@ channels:
   - conda-forge
   - defaults
 dependencies:
+  - deprecated
   - matplotlib
   - numba >=0.47
   - numpy
