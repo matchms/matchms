@@ -55,7 +55,7 @@ jobs:
         env:
           SPHINXOPTS: "-n"  # enable nit-picky mode
       - name: Check documentation coverage threshold
-        if: matrix.os == 'ubuntu-latest' && matrix.python-version == "3.7"
+        if: ${{ matrix.os == 'ubuntu-latest' && matrix.python-version == "3.7" }}
         shell: bash -l {0}
         run: |
           cat readthedocs/_build/coverage/python.txt
