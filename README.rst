@@ -49,7 +49,7 @@ F Huber, S. Verhoeven, C. Meijer, H. Spreeuw, E. M. Villanueva Castilla, C. Geng
    :target: https://www.research-software.nl/software/matchms
    :alt: Research Software Directory Badge
 
-.. |Zenodo Badge| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.3859772..svg
+.. |Zenodo Badge| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.3859772.svg
    :target: https://doi.org/10.5281/zenodo.3859772
    :alt: Zenodo Badge
 
