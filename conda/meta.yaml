@@ -29,20 +29,19 @@ requirements:
     - numpy {{ numpy }}
     - setuptools
   host:
-    - python >=3.7,<3.8
+    - python >=3.7,<3.9
     - pip
     - pytest-runner
     - setuptools
   run:
     - deprecated
-    - gensim >=3.8.0
     - matplotlib
     - numba >=0.47
     - numpy
     - pip
     - pyteomics >=4.2
     - requests
-    - python >=3.7,<3.8
+    - python >=3.7,<3.9
     - pyyaml
     - rdkit >=2020.03.1
     - scipy

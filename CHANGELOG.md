@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Four new peak filtering functions [#119](https://github.com/matchms/matchms/pull/119)
 - score_by_reference and score_by_query methods to Scores [#142](https://github.com/matchms/matchms/pull/142)
 - is_symmetric option to speed up all-vs-all type score calculation [#59](https://github.com/matchms/matchms/issues/59)
+- Support for Python 3.8 [#145](https://github.com/matchms/matchms/pull/145)
 
 ### Changed
 
