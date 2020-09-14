@@ -72,7 +72,7 @@ keywords:
   - "fuzzy matching"
   - "fuzzy search"
 license: "Apache-2.0"
-message: "If you use this software, please cite the following paper."
+message: "If you use this software, please cite the referenced paper."
 references:
   - type: article
     authors:
