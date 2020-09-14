@@ -25,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - calculate_parallel function [#135](https://github.com/matchms/matchms/issues/135)
 - Scores.calculate_parallel method [#135](https://github.com/matchms/matchms/issues/135)
+- similarity.FingerprintSimilarityParallel class (now part of similarity.FingerprintSimilarity) [#135](https://github.com/matchms/matchms/issues/135)
+- similarity.ParentmassMatchParallel class (now part of similarity.ParentmassMatch) [#135](https://github.com/matchms/matchms/issues/135)
 
 ## [0.5.2] - 2020-08-26
 
