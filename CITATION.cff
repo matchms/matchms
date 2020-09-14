@@ -78,37 +78,48 @@ references:
     authors:
       - name: Florian Huber
         orcid: 0000-0002-3535-9406
-        affiliation: Netherlands eScience Center, Science Park 140, 1098XG Amsterdam, The Netherlands
+        affiliation: Netherlands eScience Center
+        address: Science Park 140, 1098XG Amsterdam, The Netherlands
       - name: Stefan Verhoeven
         orcid: 0000-0002-5821-2060
-        affiliation: Netherlands eScience Center, Science Park 140, 1098XG Amsterdam, The Netherlands
+        affiliation: Netherlands eScience Center
+        address: Science Park 140, 1098XG Amsterdam, The Netherlands
       - name: Christiaan Meijer
         orcid: 0000-0002-5529-5761
-        affiliation: Netherlands eScience Center, Science Park 140, 1098XG Amsterdam, The Netherlands
+        affiliation: Netherlands eScience Center
+        address: Science Park 140, 1098XG Amsterdam, The Netherlands
       - name: Hanno Spreeuw
         orcid: 0000-0002-5057-0322
-        affiliation: Netherlands eScience Center, Science Park 140, 1098XG Amsterdam, The Netherlands
+        affiliation: Netherlands eScience Center
+        address: Science Park 140, 1098XG Amsterdam, The Netherlands
       - name: Efraín Manuel Villanueva Castilla
         orcid: 0000-0001-7665-3575
-        affiliation: School of Computing Science, University of Glasgow, Glasgow, United Kingdom
+        affiliation: School of Computing Science, University of Glasgow
+        address: Glasgow, United Kingdom
       - name: Cunliang Geng
         orcid: 0000-0002-1409-8358
-        affiliation: Netherlands eScience Center, Science Park 140, 1098XG Amsterdam, The Netherlands
+        affiliation: Netherlands eScience Center
+        address: Science Park 140, 1098XG Amsterdam, The Netherlands
       - name: Justin J. J. van der Hooft
         orcid: 0000-0002-9340-5511
-        affiliation: Bioinformatics Group, Plant Sciences Group, University of Wageningen, Wageningen, the Netherlands
+        affiliation: Bioinformatics Group, Plant Sciences Group, University of Wageningen
+        address: Wageningen, the Netherlands
       - name: Simon Rogers
         orcid: 0000-0003-3578-4477
-        affiliation: School of Computing Science, University of Glasgow, Glasgow, United Kingdom
+        affiliation: School of Computing Science, University of Glasgow
+        address: Glasgow, United Kingdom
       - name: Adam Belloum
         orcid: 0000-0001-6306-6937
-        affiliation: Netherlands eScience Center, Science Park 140, 1098XG Amsterdam, The Netherlands
+        affiliation: Netherlands eScience Center
+        address: Science Park 140, 1098XG Amsterdam, The Netherlands
       - name: Faruk Diblen
         orcid: 0000-0002-0989-929X
-        affiliation: Netherlands eScience Center, Science Park 140, 1098XG Amsterdam, The Netherlands
+        affiliation: Netherlands eScience Center
+        address: Science Park 140, 1098XG Amsterdam, The Netherlands
       - name: Jurriaan H. Spaaks
         orcid: 0000-0002-7064-4069
-        affiliation: Netherlands eScience Center, Science Park 140, 1098XG Amsterdam, The Netherlands
+        affiliation: Netherlands eScience Center
+        address: Science Park 140, 1098XG Amsterdam, The Netherlands
     title: "matchms - processing and similarity evaluation of mass spectrometry data."
     journal: "Journal of Open Source Software"
     year: 2020
