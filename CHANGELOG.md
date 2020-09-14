@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2020-09-14
+
 ### Added
 
 - Four new peak filtering functions [#119](https://github.com/matchms/matchms/pull/119)
@@ -206,7 +208,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - This is the initial version of Spec2Vec from https://github.com/iomega/Spec2Vec
 
-[Unreleased]: https://github.com/matchms/matchms/compare/0.5.2...HEAD
+[Unreleased]: https://github.com/matchms/matchms/compare/0.6.0...HEAD
+[0.6.0]: https://github.com/matchms/matchms/compare/0.5.2...0.6.0
 [0.5.2]: https://github.com/matchms/matchms/compare/0.5.1...0.5.2
 [0.5.1]: https://github.com/matchms/matchms/compare/0.5.0...0.5.1
 [0.5.0]: https://github.com/matchms/matchms/compare/0.4.0...0.5.0
