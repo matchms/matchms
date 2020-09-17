@@ -22,8 +22,8 @@ F Huber, S. Verhoeven, C. Meijer, H. Spreeuw, E. M. Villanueva Castilla, C. Geng
      - |Conda Badge| |Research Software Directory Badge|
    * - \4. Enable Citation
      - |JOSS Badge| |Zenodo Badge|
-   * - \5. Checklist
-     - |CII Best Practices Badge|
+   * - \5. Checklists
+     - |CII Best Practices Badge| |Howfairis Badge|
    * - **Other best practices**
      -
    * - Continuous integration
@@ -60,6 +60,10 @@ F Huber, S. Verhoeven, C. Meijer, H. Spreeuw, E. M. Villanueva Castilla, C. Geng
 .. |CII Best Practices Badge| image:: https://bestpractices.coreinfrastructure.org/projects/3792/badge
    :target: https://bestpractices.coreinfrastructure.org/projects/3792
    :alt: CII Best Practices Badge
+
+.. |Howfairis Badge| image:: https://img.shields.io/badge/fair--software.eu-%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F-green
+   :target: https://fair-software.eu
+   :alt: Howfairis badge
 
 .. |ReadTheDocs Badge| image:: https://readthedocs.org/projects/matchms/badge/?version=latest
     :alt: Documentation Status
