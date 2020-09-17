@@ -12,8 +12,10 @@ F Huber, S. Verhoeven, C. Meijer, H. Spreeuw, E. M. Villanueva Castilla, C. Geng
    :widths: 25 25
    :header-rows: 1
 
-   * - fair-software.nl recommendations
+   * - 
      - Badges
+   * - **fair-software.nl recommendations**
+     - 
    * - \1. Code repository
      - |GitHub Badge|
    * - \2. License
@@ -24,7 +26,7 @@ F Huber, S. Verhoeven, C. Meijer, H. Spreeuw, E. M. Villanueva Castilla, C. Geng
      - |JOSS Badge| |Zenodo Badge|
    * - \5. Checklists
      - |CII Best Practices Badge| |Howfairis Badge|
-   * - **Other best practices**
+   * - **Code quality checks**
      -
    * - Continuous integration
      - |Anaconda Build| |Anaconda Publish|
