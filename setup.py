@@ -44,14 +44,37 @@ setup(
     ],
     test_suite="tests",
     install_requires=[
-        # see conda/environment.yml
+        "deprecated",
+        "matplotlib",
+        "numba >=0.47",
+        "numpy",
+        "pyteomics >=4.2",
+        "requests",
+        "pyyaml",
     ],
     setup_requires=[
     ],
     tests_require=[
-        # see conda/environment-dev.yml
+        "bump2version",
+        "deprecated",
+        "isort>=4.2.5,<5",
+        "matplotlib",
+        "numba >=0.47",
+        "numpy",
+        "prospector[with_pyroma]",
+        "pyteomics >=4.2",
+        "pytest",
+        "pytest-cov",
+        "pytest-runner",
+        "pyyaml",
+        "recommonmark",
+        "requests",
+        "sphinx>=3.0.0,!=3.2.0,<4.0.0",
+        "sphinx_rtd_theme",
+        "sphinxcontrib-apidoc",
+        "yapf",
     ],
-    extras_require={
-    },
+    extras_require={"cosine_hungarian": ["scipy"],
+                    "chemistry": ["rdkit >=2020.03.1"]},
     package_data={"matchms": ["data/*.yaml"]},
 )
