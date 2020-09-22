@@ -10,6 +10,7 @@ except ImportError:
     _has_rdkit = False
 else:
     _has_rdkit = True
+rdkit_missing_message = "Conda package 'rdkit' is required for this functionality."
 
 
 def convert_smiles_to_inchi(smiles: str) -> Optional[str]:
@@ -45,7 +46,7 @@ def mol_converter(mol_input: str, input_type: str, output_type: str) -> Optional
     Mol string in output type or None when conversion failure occurs.
     """
     if not _has_rdkit:
-        raise ImportError("Conda package 'rdkit' is required for this functionality.")
+        raise ImportError(rdkit_missing_message)
     input_function = {"inchi": Chem.MolFromInchi,
                       "smiles": Chem.MolFromSmiles}
     output_function = {"inchi": Chem.MolToInchi,
@@ -74,7 +75,7 @@ def is_valid_inchi(inchi: str) -> bool:
         Input string to test if it has format of InChI.
     """
     if not _has_rdkit:
-        raise ImportError("Conda package 'rdkit' is required for this functionality.")
+        raise ImportError(rdkit_missing_message)
 
     # First quick test to avoid excess in-depth testing
     if inchi is None:
@@ -102,7 +103,7 @@ def is_valid_smiles(smiles: str) -> bool:
         Input string to test if it can be imported as smiles.
     """
     if not _has_rdkit:
-        raise ImportError("Conda package 'rdkit' is required for this functionality.")
+        raise ImportError(rdkit_missing_message)
 
     if smiles is None:
         return False
@@ -154,7 +155,7 @@ def derive_fingerprint_from_smiles(smiles: str, fingerprint_type: str, nbits: in
         Molecular fingerprint.
     """
     if not _has_rdkit:
-        raise ImportError("Conda package 'rdkit' is required for this functionality.")
+        raise ImportError(rdkit_missing_message)
 
     mol = Chem.MolFromSmiles(smiles)
     if mol is None:
@@ -182,7 +183,7 @@ def derive_fingerprint_from_inchi(inchi: str, fingerprint_type: str, nbits: int)
         Molecular fingerprint.
     """
     if not _has_rdkit:
-        raise ImportError("Conda package 'rdkit' is required for this functionality.")
+        raise ImportError(rdkit_missing_message)
 
     mol = Chem.MolFromInchi(inchi)
     if mol is None:
@@ -210,7 +211,7 @@ def mol_to_fingerprint(mol: Chem.rdchem.Mol, fingerprint_type: str, nbits: int) 
         Molecular fingerprint.
     """
     if not _has_rdkit:
-        raise ImportError("Conda package 'rdkit' is required for this functionality.")
+        raise ImportError(rdkit_missing_message)
 
     assert fingerprint_type in ["daylight", "morgan1", "morgan2", "morgan3"], "Unkown fingerprint type given."
 
