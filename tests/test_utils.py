@@ -9,6 +9,8 @@ from matchms.utils import mol_converter
 
 def test_mol_converter_smiles_to_inchi():
     """Test if smiles is correctly converted to inchi."""
+    rdkit = pytest.importorskip("rdkit")
+
     mol_input = "C[Si](Cn1cncn1)(c1ccc(F)cc1)"
     output_inchi = mol_converter(mol_input, "smiles", "inchi")
     assert output_inchi == "InChI=1S/C10H11FN3Si/c1-15(8-14-7-12-6-13-14)10-4-2-9(11)3-5-10/h2-7H,8H2,1H3"
@@ -16,6 +18,8 @@ def test_mol_converter_smiles_to_inchi():
 
 def test_mol_converter_inchi_to_smiles():
     """Test if inchi is correctly converted to smiles."""
+    rdkit = pytest.importorskip("rdkit")
+
     mol_input = "InChI=1S/C10H11FN3Si/c1-15(8-14-7-12-6-13-14)10-4-2-9(11)3-5-10/h2-7H,8H2,1H3"
     output_smiles = mol_converter(mol_input, "inchi", "smiles")
     assert output_smiles == "C[Si](Cn1cncn1)=C1C=C[C](F)C=C1"
@@ -23,6 +27,8 @@ def test_mol_converter_inchi_to_smiles():
 
 def test_mol_converter_smiles_to_inchikey():
     """Test if smiles is correctly converted to inchikey."""
+    rdkit = pytest.importorskip("rdkit")
+
     mol_input = "C[Si](Cn1cncn1)(c1ccc(F)cc1)"
     output_inchikey = mol_converter(mol_input, "smiles", "inchikey")
     assert output_inchikey == "HULABQRTZQYJBQ-UHFFFAOYSA-N"
@@ -30,6 +36,8 @@ def test_mol_converter_smiles_to_inchikey():
 
 def test_mol_converter_invalid_input():
     """Test invalid entry."""
+    rdkit = pytest.importorskip("rdkit")
+
     assert mol_converter("invalid_test", "smiles", "inchikey") is None, "Expected None."
 
 
@@ -59,6 +67,8 @@ def test_is_valid_inchikey_none_input():
 
 def test_is_valid_inchi():
     """Test if strings are correctly classified."""
+    rdkit = pytest.importorskip("rdkit")
+
     inchi_true = [
         "InChI=1S/C2H7N3/c1-5-2(3)4/h1H3,(H4,3,4,5)",
         '"InChI=1S/C2H7N3/c1-5-2(3)4/h1H3,(H4,3,4,5)"'
@@ -78,11 +88,15 @@ def test_is_valid_inchi():
 
 def test_is_valid_inchi_none_input():
     """Test None entry."""
+    rdkit = pytest.importorskip("rdkit")
+
     assert not is_valid_inchi(None), "Expected None entry to give False."
 
 
 def test_is_valid_smiles():
     """Test if strings are correctly classified."""
+    rdkit = pytest.importorskip("rdkit")
+
     smiles_true = [
         r"CN1COCN(CC2=CN=C(Cl)S2)\C1=N\[N+]([O-])=O",
         r"CN1N(C(=O)C=C1C)c1ccccc1",
@@ -103,11 +117,15 @@ def test_is_valid_smiles():
 
 def test_is_valid_smiles_none_input():
     """Test None entry."""
+    rdkit = pytest.importorskip("rdkit")
+
     assert not is_valid_smiles(None), "Expected None entry to give False."
 
 
 def test_derive_fingerprint_from_smiles():
     """Test if correct fingerprint is derived from given smiles."""
+    rdkit = pytest.importorskip("rdkit")
+
     fingerprint = derive_fingerprint_from_smiles("[C+]#C[O-]", "daylight", 16)
     expected_fingerprint = numpy.array([0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0])
     assert numpy.all(fingerprint == expected_fingerprint), "Expected different fingerprint."
@@ -115,6 +133,8 @@ def test_derive_fingerprint_from_smiles():
 
 def test_derive_fingerprint_from_inchi():
     """Test if correct fingerprint is derived from given inchi."""
+    rdkit = pytest.importorskip("rdkit")
+
     fingerprint = derive_fingerprint_from_inchi("InChI=1S/C2O/c1-2-3", "daylight", 16)
     expected_fingerprint = numpy.array([0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0])
     assert numpy.all(fingerprint == expected_fingerprint), "Expected different fingerprint."
@@ -122,6 +142,8 @@ def test_derive_fingerprint_from_inchi():
 
 def test_derive_fingerprint_different_types_from_smiles():
     """Test if correct fingerprints are derived from given smiles when using different types."""
+    rdkit = pytest.importorskip("rdkit")
+
     types = ["daylight", "morgan1", "morgan2", "morgan3"]
     expected_fingerprints = [
         numpy.array([0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0]),
