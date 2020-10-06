@@ -13,6 +13,7 @@ except ImportError:
     class ChemMock(UserString):
         def __call__(self, *args, **kwargs):
             return self
+
         def __getattr__(self, key):
             return self
 

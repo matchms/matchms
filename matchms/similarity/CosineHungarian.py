@@ -15,7 +15,6 @@ else:
 scipy_missing_message = "Package 'scipy' is required for this functionality."
 
 
-
 class CosineHungarian(BaseSimilarity):
     """Calculate 'cosine similarity score' between two spectra (using Hungarian algorithm).
 
