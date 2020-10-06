@@ -52,7 +52,7 @@ setup(
         "requests",
         "pyyaml",
     ],
-    setup_requires=[
+    setup_requires=["pytest-runner",
     ],
     tests_require=[
         "bump2version",
@@ -65,7 +65,6 @@ setup(
         "pyteomics >=4.2",
         "pytest",
         "pytest-cov",
-        "pytest-runner",
         "pyyaml",
         "recommonmark",
         "requests",
