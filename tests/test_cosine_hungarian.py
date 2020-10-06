@@ -4,7 +4,7 @@ from matchms import Spectrum
 from matchms.similarity import CosineHungarian
 
 
-_ = pytest.importorskip("scipy")
+pytest.importorskip("scipy")
 
 
 def test_cosine_hungarian_without_parameters():

@@ -7,7 +7,7 @@ from matchms.filtering import derive_inchi_from_smiles
 def test_derive_inchi_from_smiles():
     """Test if conversion to inchi works when only smiles is given.
     """
-    _ = pytest.importorskip("rdkit")
+    pytest.importorskip("rdkit")
     spectrum_in = Spectrum(mz=numpy.array([], dtype='float'),
                            intensities=numpy.array([], dtype='float'),
                            metadata={"smiles": "C1CCCCC1"})

@@ -6,7 +6,7 @@ from matchms.filtering import add_fingerprint
 
 def test_add_fingerprint_from_smiles():
     """Test if fingerprint it generated correctly."""
-    _ = pytest.importorskip("rdkit")
+    pytest.importorskip("rdkit")
     spectrum_in = Spectrum(mz=numpy.array([], dtype="float"),
                            intensities=numpy.array([], dtype="float"),
                            metadata={"smiles": "[C+]#C[O-]"})
@@ -18,7 +18,7 @@ def test_add_fingerprint_from_smiles():
 
 def test_add_fingerprint_from_inchi():
     """Test if fingerprint it generated correctly."""
-    _ = pytest.importorskip("rdkit")
+    pytest.importorskip("rdkit")
     spectrum_in = Spectrum(mz=numpy.array([], dtype="float"),
                            intensities=numpy.array([], dtype="float"),
                            metadata={"inchi": "InChI=1S/C2O/c1-2-3"})
