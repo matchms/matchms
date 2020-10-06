@@ -46,6 +46,7 @@ setup(
     python_requires='>=3.7',
     install_requires=[
         "deprecated",
+        "lxml",
         "matplotlib",
         "numba >=0.47",
         "numpy",
@@ -59,6 +60,7 @@ setup(
         "bump2version",
         "deprecated",
         "isort>=4.2.5,<5",
+        "lxml",
         "matplotlib",
         "numba >=0.47",
         "numpy",
