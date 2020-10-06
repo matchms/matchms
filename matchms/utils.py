@@ -8,6 +8,15 @@ try:  # rdkit is not included in pip package
     from rdkit.Chem import AllChem
 except ImportError:
     _has_rdkit = False
+    from collections import UserString
+
+    class ChemMock(UserString):
+        def __call__(self, *args, **kwargs):
+            return self
+        def __getattr__(self, key):
+            return self
+
+    Chem = AllChem = ChemMock("")
 else:
     _has_rdkit = True
 rdkit_missing_message = "Conda package 'rdkit' is required for this functionality."
