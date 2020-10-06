@@ -1,10 +1,19 @@
 from typing import Tuple
 import numpy
-from scipy.optimize import linear_sum_assignment
 from matchms.similarity.spectrum_similarity_functions import collect_peak_pairs
 from matchms.similarity.spectrum_similarity_functions import get_peaks_array
 from matchms.typing import SpectrumType
 from .BaseSimilarity import BaseSimilarity
+
+
+try:  # scipy is not included in pip package (only matchs["cosine_hungarian"])
+    from scipy.optimize import linear_sum_assignment
+except ImportError:
+    _has_scipy = False
+else:
+    _has_scipy = True
+scipy_missing_message = "Package 'scipy' is required for this functionality."
+
 
 
 class CosineHungarian(BaseSimilarity):
@@ -32,6 +41,9 @@ class CosineHungarian(BaseSimilarity):
         intensity_power:
             The power to raise intensity to in the cosine function. The default is 1.
         """
+        if not _has_scipy:
+            raise ImportError(scipy_missing_message)
+
         self.tolerance = tolerance
         self.mz_power = mz_power
         self.intensity_power = intensity_power
