@@ -43,6 +43,7 @@ setup(
         "Programming Language :: Python :: 3.8"
     ],
     test_suite="tests",
+    python_requires='>=3.7',
     install_requires=[
         "deprecated",
         "matplotlib",
