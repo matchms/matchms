@@ -1,8 +1,8 @@
-import numpy
-import pytest
 import sys
 from importlib import reload
 from unittest import mock
+import numpy
+import pytest
 import matchms.utils
 from matchms.utils import derive_fingerprint_from_inchi
 from matchms.utils import derive_fingerprint_from_smiles
