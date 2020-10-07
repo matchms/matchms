@@ -1,5 +1,8 @@
 import numpy
 import pytest
+import sys
+from importlib import reload
+from unittest import mock
 from matchms.utils import derive_fingerprint_from_inchi
 from matchms.utils import derive_fingerprint_from_smiles
 from matchms.utils import is_valid_inchi
@@ -156,3 +159,16 @@ def test_derive_fingerprint_different_types_from_smiles():
     for i, fingerprint_type in enumerate(types):
         fingerprint = derive_fingerprint_from_smiles("[C+]#C[O-]", fingerprint_type, 16)
         assert numpy.all(fingerprint == expected_fingerprints[i]), "Expected different fingerprint."
+
+
+def test_missing_rdkit_module_error():
+    """Test if correct error is returned when *rdkit* is not available"""
+    import matchms.utils
+
+    with mock.patch.dict(sys.modules, {"rdkit": None}):
+        reload(matchms.utils)
+        mol_input = "C[Si](Cn1cncn1)(c1ccc(F)cc1)"
+        with pytest.raises(ImportError) as msg:
+            _ = matchms.utils.mol_converter(mol_input, "smiles", "inchikey")
+
+    assert "Conda package 'rdkit' is required for this functionality." in str(msg.value)
