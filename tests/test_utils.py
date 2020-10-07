@@ -3,6 +3,7 @@ import pytest
 import sys
 from importlib import reload
 from unittest import mock
+import matchms.utils
 from matchms.utils import derive_fingerprint_from_inchi
 from matchms.utils import derive_fingerprint_from_smiles
 from matchms.utils import is_valid_inchi
@@ -163,7 +164,7 @@ def test_derive_fingerprint_different_types_from_smiles():
 
 def test_missing_rdkit_module_error():
     """Test if correct error is returned when *rdkit* is not available"""
-    import matchms.utils
+    pytest.importorskip("rdkit")
 
     with mock.patch.dict(sys.modules, {"rdkit": None}):
         reload(matchms.utils)
