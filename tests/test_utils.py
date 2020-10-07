@@ -163,13 +163,33 @@ def test_derive_fingerprint_different_types_from_smiles():
 
 
 def test_missing_rdkit_module_error():
-    """Test if correct error is returned when *rdkit* is not available"""
+    """Test if different functions return correct error when *rdkit* is not available"""
     pytest.importorskip("rdkit")
+    expected_msg = "Conda package 'rdkit' is required for this functionality."
 
     with mock.patch.dict(sys.modules, {"rdkit": None}):
         reload(matchms.utils)
         mol_input = "C[Si](Cn1cncn1)(c1ccc(F)cc1)"
         with pytest.raises(ImportError) as msg:
             _ = matchms.utils.mol_converter(mol_input, "smiles", "inchikey")
+        assert expected_msg in str(msg.value), "Expected different ImportError."
 
-    assert "Conda package 'rdkit' is required for this functionality." in str(msg.value)
+        with pytest.raises(ImportError) as msg:
+            _ = matchms.utils.is_valid_inchi("test")
+        assert expected_msg in str(msg.value), "Expected different ImportError."
+
+        with pytest.raises(ImportError) as msg:
+            _ = matchms.utils.is_valid_smiles("test")
+        assert expected_msg in str(msg.value), "Expected different ImportError."
+
+        with pytest.raises(ImportError) as msg:
+            _ = matchms.utils.derive_fingerprint_from_inchi(mol_input, "test", 0)
+        assert expected_msg in str(msg.value), "Expected different ImportError."
+
+        with pytest.raises(ImportError) as msg:
+            _ = matchms.utils.derive_fingerprint_from_smiles(mol_input, "test", 0)
+        assert expected_msg in str(msg.value), "Expected different ImportError."
+
+        with pytest.raises(ImportError) as msg:
+            _ = matchms.utils.mol_to_fingerprint(mol_input, "test", 0)
+        assert expected_msg in str(msg.value), "Expected different ImportError."
