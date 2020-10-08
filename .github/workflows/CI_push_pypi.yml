@@ -19,7 +19,6 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Python info
-        shell: bash -l {0}
         run: |
           which python
           python --version
@@ -27,15 +26,12 @@ jobs:
         run: |
           python -m pip install --upgrade pip
       - name: Build
-        shell: bash -l {0}
         run: |
           python setup.py build
       - name: Show pip list
-        shell: bash -l {0}
         run: |
           pip list
       - name: Test
-        shell: bash -l {0}
         run: |
           pip install -e .[dev]
           pytest
