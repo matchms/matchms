@@ -13,6 +13,7 @@ from matchms.utils import is_valid_smiles
 from matchms.utils import mol_converter
 
 
+# pylint: disable=unused-wildcard-import
 try:
     from rdkit import Chem
     _has_rdkit = True
