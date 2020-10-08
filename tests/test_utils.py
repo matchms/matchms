@@ -164,10 +164,15 @@ def test_derive_fingerprint_different_types_from_smiles():
 
 def test_missing_rdkit_module_error():
     """Test if different functions return correct error when *rdkit* is not available"""
-    pytest.importorskip("rdkit")
-    expected_msg = "Conda package 'rdkit' is required for this functionality."
+    try:
+        from rdkit import Chem
+        context = mock.patch.dict(sys.modules, {"rdkit": None})
+    except ImportError:
+        from contextlib import nullcontext
+        context = nullcontext()
 
-    with mock.patch.dict(sys.modules, {"rdkit": None}):
+    expected_msg = "Conda package 'rdkit' is required for this functionality."
+    with context:
         reload(matchms.utils)
         mol_input = "C[Si](Cn1cncn1)(c1ccc(F)cc1)"
         with pytest.raises(ImportError) as msg:
