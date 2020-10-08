@@ -37,4 +37,5 @@ jobs:
       - name: Test
         shell: bash -l {0}
         run: |
+          pip install matchms[dev]
           pytest
