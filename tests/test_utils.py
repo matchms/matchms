@@ -1,4 +1,5 @@
 import sys
+from contextlib import nullcontext
 from importlib import reload
 from unittest import mock
 import numpy
@@ -10,6 +11,13 @@ from matchms.utils import is_valid_inchi
 from matchms.utils import is_valid_inchikey
 from matchms.utils import is_valid_smiles
 from matchms.utils import mol_converter
+
+
+try:
+    from rdkit import Chem
+    _has_rdkit = True
+except ImportError:
+    _has_rdkit = False
 
 
 def test_mol_converter_smiles_to_inchi():
@@ -164,11 +172,9 @@ def test_derive_fingerprint_different_types_from_smiles():
 
 def test_missing_rdkit_module_error():
     """Test if different functions return correct error when *rdkit* is not available"""
-    try:
-        from rdkit import Chem
+    if _has_rdkit:
         context = mock.patch.dict(sys.modules, {"rdkit": None})
-    except ImportError:
-        from contextlib import nullcontext
+    else:
         context = nullcontext()
 
     expected_msg = "Conda package 'rdkit' is required for this functionality."
