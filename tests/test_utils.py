@@ -167,7 +167,7 @@ def test_derive_fingerprint_different_types_from_smiles():
 
 def test_missing_rdkit_module_error():
     """Test if different functions return correct error when *rdkit* is not available"""
-    if find_spec("rdkit") is None
+    if find_spec("rdkit") is None:
         context = mock.patch.dict(sys.modules, {"rdkit": None})
     else:
         context = nullcontext()
