@@ -73,7 +73,7 @@ jobs:
         if: matrix.os != 'ubuntu-latest'
         shell: bash -l {0}
         run: |
-          python setup.py test
+          pytest
       - name: Test with coverage
         if: matrix.os == 'ubuntu-latest'
         shell: bash -l {0}
