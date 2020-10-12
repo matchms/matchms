@@ -1,6 +1,8 @@
-.. raw:: html
-
-    <img src="readthedocs/_static/matchms.png" height="60px" width="380px" alt="matchms" />
+.. image:: readthedocs/_static/matchms.png
+   :target: readthedocs/_static/matchms.png
+   :align: center
+   :alt: matchms
+   :width: 380px
 
 Matchms is an open-source Python package to import, process, clean, and compare mass spectrometry data (MS/MS). It allows to implement and run an easy-to-follow, easy-to-reproduce workflow from raw mass spectra to pre- and post-processed spectral data. Spectral data can be imported from common formats such mzML, mzXML, msp, metabolomics-USI, MGF, or json (e.g. GNPS-syle json files). Matchms then provides filters for metadata cleaning and checking, as well as for basic peak filtering. Finally, matchms was build to import and apply different similarity measures to compare large amounts of spectra. This includes common Cosine scores, but can also easily be extended by custom measures.
 
