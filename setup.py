@@ -43,15 +43,27 @@ setup(
         "Programming Language :: Python :: 3.8"
     ],
     test_suite="tests",
+    python_requires='>=3.7',
     install_requires=[
-        # see conda/environment.yml
+        "deprecated",
+        "lxml",
+        "matplotlib",
+        "numba >=0.47",
+        "numpy",
+        "pyteomics >=4.2",
+        "pyyaml",
+        "requests",
+        "scipy",
     ],
-    setup_requires=[
-    ],
-    tests_require=[
-        # see conda/environment-dev.yml
-    ],
-    extras_require={
-    },
+    extras_require={"dev": ["bump2version",
+                            "isort>=4.2.5,<5",
+                            "prospector[with_pyroma]",
+                            "pytest",
+                            "pytest-cov",
+                            "sphinx>=3.0.0,!=3.2.0,<4.0.0",
+                            "sphinx_rtd_theme",
+                            "sphinxcontrib-apidoc",
+                            "yapf",],
+                    "chemistry": ["rdkit >=2020.03.1"]},
     package_data={"matchms": ["data/*.yaml"]},
 )

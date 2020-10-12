@@ -99,9 +99,9 @@ Installation
 Prerequisites:  
 
 - Python 3.7 or 3.8 
-- Anaconda
+- Anaconda (recommended)
 
-Install matchms from Anaconda Cloud with
+We recommend installing matchms from Anaconda Cloud with
 
 .. code-block:: console
 
@@ -109,6 +109,13 @@ Install matchms from Anaconda Cloud with
   conda create --name matchms python=3.8
   conda activate matchms
   conda install --channel nlesc --channel bioconda --channel conda-forge matchms
+
+Alternatively, matchms can also be installed using ``pip`` but users will then either have to install ``rdkit`` on their own or won't be able to use the entire functionality. Without ``rdkit`` installed several filter functions related to processing and cleaning chemical metadata will not run.
+To install matchms with ``pip`` simply run
+
+.. code-block:: console
+
+  pip install matchms
 
 Example
 =======
