@@ -22,7 +22,7 @@ F Huber, S. Verhoeven, C. Meijer, H. Spreeuw, E. M. Villanueva Castilla, C. Geng
    * - \2. License
      - |License Badge|
    * - \3. Community Registry
-     - |Conda Badge| |Research Software Directory Badge|
+     - |Conda Badge| |Pypi Badge| |Research Software Directory Badge|
    * - \4. Enable Citation
      - |JOSS Badge| |Zenodo Badge|
    * - \5. Checklists
@@ -48,6 +48,11 @@ F Huber, S. Verhoeven, C. Meijer, H. Spreeuw, E. M. Villanueva Castilla, C. Geng
 .. |Conda Badge| image:: https://anaconda.org/nlesc/matchms/badges/installer/conda.svg
    :target: https://conda.anaconda.org/nlesc
    :alt: Conda Badge
+
+.. |Pypi Badge| image:: https://img.shields.io/pypi/v/matchms?color=blue
+   :target: https://pypi.org/project/matchms/
+   :alt: Pypi Badge
+
 .. |Research Software Directory Badge| image:: https://img.shields.io/badge/rsd-matchms-00a3e3.svg
    :target: https://www.research-software.nl/software/matchms
    :alt: Research Software Directory Badge
