@@ -4,9 +4,6 @@ from matchms import Spectrum
 from matchms.similarity import CosineHungarian
 
 
-pytest.importorskip("scipy")
-
-
 def test_cosine_hungarian_without_parameters():
     """Compare output cosine score with own calculation on simple dummy spectrums."""
     spectrum_1 = Spectrum(mz=numpy.array([100, 200, 300, 500, 510], dtype="float"),
