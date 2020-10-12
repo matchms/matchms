@@ -15,15 +15,4 @@ dependencies:
   - rdkit >=2020.03.1
   - scipy
   - pip:
-    - bump2version
-    - deprecated
-    - isort>=4.2.5,<5
-    - prospector[with_pyroma]
-    - pycodestyle>=2.0.0,<=2.4.0
-    - pytest
-    - pytest-cov
-    - pytest-runner
-    - sphinx>=3.0.0,!=3.2.0,<4.0.0
-    - sphinx_rtd_theme
-    - sphinxcontrib-apidoc
-    - yapf
+    - -e .[dev]
