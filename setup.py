@@ -64,7 +64,6 @@ setup(
                             "sphinx_rtd_theme",
                             "sphinxcontrib-apidoc",
                             "yapf",],
-                    "cosine_hungarian": ["scipy"],
                     "chemistry": ["rdkit >=2020.03.1"]},
     package_data={"matchms": ["data/*.yaml"]},
 )
