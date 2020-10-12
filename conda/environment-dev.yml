@@ -15,4 +15,4 @@ dependencies:
   - rdkit >=2020.03.1
   - scipy
   - pip:
-    - -e .[dev]
+    - -e ..[dev]
