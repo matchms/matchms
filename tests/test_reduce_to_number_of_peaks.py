@@ -37,7 +37,7 @@ def test_reduce_to_number_of_peaks_ratio_given_but_no_parent_mass():
         _ = reduce_to_number_of_peaks(spectrum_in, n_required=4, ratio_desired=0.1)
 
     expected_msg = "Cannot use ratio_desired for spectrum without parent_mass."
-    assert expected_msg in msg, "Expected specific exception message."
+    assert expected_msg in str(msg.value), "Expected specific exception message."
 
 
 def test_reduce_to_number_of_peaks_required_2_desired_2():
