@@ -28,7 +28,7 @@ def reduce_to_number_of_peaks(spectrum_in: SpectrumType, n_required: int = 1, n_
         if parent_mass and ratio_desired:
             n_desired_by_mass = int(ceil(ratio_desired * parent_mass))
             return max(n_required, n_desired_by_mass)
-        elif not ratio_desired:
+        if not ratio_desired:
             return n_max
         raise ValueError("Cannot use ratio_desired for spectrum without parent_mass.")
 

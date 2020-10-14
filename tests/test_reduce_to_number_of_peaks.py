@@ -34,7 +34,7 @@ def test_reduce_to_number_of_peaks_ratio_given_but_no_parent_mass():
     spectrum_in = Spectrum(mz=mz, intensities=intensities)
 
     with pytest.raises(Exception) as msg:
-        spectrum = reduce_to_number_of_peaks(spectrum_in, n_required=4, ratio_desired=0.1)
+        _ = reduce_to_number_of_peaks(spectrum_in, n_required=4, ratio_desired=0.1)
 
     expected_msg = "Cannot use ratio_desired for spectrum without parent_mass."
     assert expected_msg in msg, "Expected specific exception message."
