@@ -5,7 +5,7 @@ from matchms.filtering import reduce_to_number_of_peaks
 
 
 def test_reduce_to_number_of_peaks_no_params():
-
+    """Use default parameters."""
     mz = numpy.array([10, 20, 30, 40], dtype="float")
     intensities = numpy.array([0, 1, 10, 100], dtype="float")
     spectrum_in = Spectrum(mz=mz, intensities=intensities)
@@ -15,8 +15,20 @@ def test_reduce_to_number_of_peaks_no_params():
     assert spectrum == spectrum_in, "Expected no changes."
 
 
-def test_reduce_to_number_of_peaks_n_max_4():
+def test_reduce_to_number_of_peaks_no_params_w_parent_mass():
+    """Use default parameters with present parent mass."""
+    mz = numpy.array([10, 20, 30, 40], dtype="float")
+    intensities = numpy.array([0, 1, 10, 100], dtype="float")
+    spectrum_in = Spectrum(mz=mz, intensities=intensities,
+                           metadata={"parent_mass": 50})
 
+    spectrum = reduce_to_number_of_peaks(spectrum_in)
+
+    assert spectrum == spectrum_in, "Expected no changes."
+
+
+def test_reduce_to_number_of_peaks_n_max_4():
+    """Test setting n_max parameter."""
     mz = numpy.array([10, 20, 30, 40, 50], dtype="float")
     intensities = numpy.array([1, 1, 10, 20, 100], dtype="float")
     spectrum_in = Spectrum(mz=mz, intensities=intensities)
