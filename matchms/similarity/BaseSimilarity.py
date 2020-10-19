@@ -15,7 +15,10 @@ class BaseSimilarity:
        Whether similarity function is commutative, which means that the order of spectrums
        does not matter (similarity(A, B) == similarity(B, A)). Default is True.
     """
+    # Set key characteristics as class attributes
     is_commutative = True
+    # Set output data type, e.g. ("score", "float") or [("score", "float"), ("matches", "int")]
+    score_datatype = ("score", "float")
 
     @abstractmethod
     def pair(self, reference: SpectrumType, query: SpectrumType) -> float:
@@ -49,7 +52,7 @@ class BaseSimilarity:
         """
         n_rows = len(references)
         n_cols = len(queries)
-        scores = numpy.empty([n_rows, n_cols], dtype="object")
+        scores = numpy.empty([n_rows, n_cols], dtype=self.score_datatype)
         for i_ref, reference in enumerate(references[:n_rows]):
             if is_symmetric and self.is_commutative:
                 for i_query, query in enumerate(queries[i_ref:n_cols], start=i_ref):

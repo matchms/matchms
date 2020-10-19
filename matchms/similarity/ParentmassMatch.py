@@ -51,6 +51,8 @@ class ParentmassMatch(BaseSimilarity):
     """
     # Set key characteristics as class attributes
     is_commutative = True
+    # Set output data type, e.g. ("score", "float") or [("score", "float"), ("matches", "int")]
+    score_datatype = ("score", "bool")
 
     def __init__(self, tolerance: float = 0.1):
         """
