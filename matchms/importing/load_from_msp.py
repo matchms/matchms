@@ -14,7 +14,7 @@ def parse_msp_file(filename: str) -> Generator[dict, None, None]:
     # Peaks counter. Used to track and count the number of peaks
     peakscount = 0
 
-    with open(filename, 'r', errors='replace') as f:
+    with open(filename, 'r', encoding='utf-8') as f:
         for line in f:
             rline = line.rstrip()
 
