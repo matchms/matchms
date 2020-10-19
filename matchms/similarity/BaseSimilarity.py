@@ -18,7 +18,7 @@ class BaseSimilarity:
     # Set key characteristics as class attributes
     is_commutative = True
     # Set output data type, e.g. ("score", "float") or [("score", "float"), ("matches", "int")]
-    score_datatype = ("score", "float")
+    score_datatype = {'names':['score'], 'formats':[float]}
 
     @abstractmethod
     def pair(self, reference: SpectrumType, query: SpectrumType) -> float:
