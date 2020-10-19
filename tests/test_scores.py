@@ -10,7 +10,7 @@ from matchms.similarity.BaseSimilarity import BaseSimilarity
 class DummySimilarityFunction(BaseSimilarity):
     """Simple dummy score, only contain pair-wise implementation."""
     score_datatype = [("score", "float"), ("len", "int")]
-    
+
     def __init__(self):
         """constructor"""
 
