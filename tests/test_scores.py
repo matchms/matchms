@@ -9,7 +9,7 @@ from matchms.similarity.BaseSimilarity import BaseSimilarity
 
 class DummySimilarityFunction(BaseSimilarity):
     """Simple dummy score, only contain pair-wise implementation."""
-    score_datatype = [("score", "str"), ("len", "int")]
+    score_datatype = [("score", numpy.unicode_, 16), ("len", numpy.int32)]
 
     def __init__(self):
         """constructor"""
@@ -17,23 +17,24 @@ class DummySimilarityFunction(BaseSimilarity):
     def pair(self, reference, query):
         """necessary pair computation method"""
         s = reference + query
-        return s, len(s)
+        return numpy.array([(s, len(s))], dtype=self.score_datatype)
 
 
 class DummySimilarityFunctionParallel(BaseSimilarity):
     """Simple dummy score, contains pair-wise and matrix implementation."""
+    score_datatype = [("score", numpy.unicode_, 16), ("len", "int")]
     def __init__(self):
         """constructor"""
 
     def pair(self, reference, query):
         """necessary pair computation method"""
         s = reference + query
-        return s, len(s)
+        return numpy.array([(s, len(s))], dtype=self.score_datatype)
 
     def matrix(self, references, queries, is_symmetric: bool = False):
         """additional matrix computation method"""
         shape = len(references), len(queries)
-        s = numpy.empty(shape, dtype="object")
+        s = numpy.empty(shape, dtype=self.score_datatype)
         for index_reference, reference in enumerate(references):
             for index_query, query in enumerate(queries):
                 rq = reference + query
@@ -49,7 +50,7 @@ def test_scores_single_pair():
                     similarity_function=dummy_similarity_function)
     scores.calculate()
     actual = scores.scores[0][0]
-    expected = ('AB', 2)
+    expected = numpy.array([('AB', 2)], dtype=dummy_similarity_function.score_datatype)
     assert actual == expected, "Expected different scores."
 
 
@@ -61,12 +62,12 @@ def test_scores_calculate():
     scores.calculate()
     actual = list(scores)
     expected = [
-        ("r0", "q0", "r0q0", 4),
-        ("r0", "q1", "r0q1", 4),
-        ("r1", "q0", "r1q0", 4),
-        ("r1", "q1", "r1q1", 4),
-        ("r2", "q0", "r2q0", 4),
-        ("r2", "q1", "r2q1", 4)
+        ("r0", "q0", numpy.array([("r0q0", 4)], dtype=dummy_similarity_function.score_datatype)),
+        ("r0", "q1", numpy.array([("r0q1", 4)], dtype=dummy_similarity_function.score_datatype)),
+        ("r1", "q0", numpy.array([("r1q0", 4)], dtype=dummy_similarity_function.score_datatype)),
+        ("r1", "q1", numpy.array([("r1q1", 4)], dtype=dummy_similarity_function.score_datatype)),
+        ("r2", "q0", numpy.array([("r2q0", 4)], dtype=dummy_similarity_function.score_datatype)),
+        ("r2", "q1", numpy.array([("r2q1", 4)], dtype=dummy_similarity_function.score_datatype))
     ]
     assert actual == expected, "Expected different scores."
 
@@ -79,12 +80,12 @@ def test_scores_calculate_parallel():
     scores.calculate()
     actual = list(scores)
     expected = [
-        ("r0", "q0", "r0q0", 4),
-        ("r0", "q1", "r0q1", 4),
-        ("r1", "q0", "r1q0", 4),
-        ("r1", "q1", "r1q1", 4),
-        ("r2", "q0", "r2q0", 4),
-        ("r2", "q1", "r2q1", 4)
+        ("r0", "q0", numpy.array([("r0q0", 4)], dtype=dummy_similarity_function.score_datatype)),
+        ("r0", "q1", numpy.array([("r0q1", 4)], dtype=dummy_similarity_function.score_datatype)),
+        ("r1", "q0", numpy.array([("r1q0", 4)], dtype=dummy_similarity_function.score_datatype)),
+        ("r1", "q1", numpy.array([("r1q1", 4)], dtype=dummy_similarity_function.score_datatype)),
+        ("r2", "q0", numpy.array([("r2q0", 4)], dtype=dummy_similarity_function.score_datatype)),
+        ("r2", "q1", numpy.array([("r2q1", 4)], dtype=dummy_similarity_function.score_datatype))
     ]
     assert actual == expected, "Expected different scores."
 
@@ -147,12 +148,12 @@ def test_scores_next():
 
     actual = list(scores)
     expected = [
-        ("r", "q", "rq", 2),
-        ("r", "qq", "rqq", 3),
-        ("rr", "q", "rrq", 3),
-        ("rr", "qq", "rrqq", 4),
-        ("rrr", "q", "rrrq", 4),
-        ("rrr", "qq", "rrrqq", 5)
+        ("r", "q", numpy.array([("rq", 2)], dtype=dummy_similarity_function.score_datatype)),
+        ("r", "qq", numpy.array([("rqq", 3)], dtype=dummy_similarity_function.score_datatype)),
+        ("rr", "q", numpy.array([("rrq", 3)], dtype=dummy_similarity_function.score_datatype)),
+        ("rr", "qq", numpy.array([("rrqq", 4)], dtype=dummy_similarity_function.score_datatype)),
+        ("rrr", "q", numpy.array([("rrrq", 4)], dtype=dummy_similarity_function.score_datatype)),
+        ("rrr", "qq", numpy.array([("rrrqq", 5)], dtype=dummy_similarity_function.score_datatype))
     ]
     assert actual == expected, "Expected different scores."
 
@@ -177,7 +178,7 @@ def test_scores_by_referencey():
     scores = Scores(references, queries, CosineGreedy()).calculate()
     selected_scores = scores.scores_by_reference(spectrum_2)
 
-    expected_result = [(scores.queries[i], *scores.scores[1, i]) for i in range(2)]
+    expected_result = [(scores.queries[i], scores.scores[1, i]) for i in range(2)]
     assert selected_scores == expected_result, "Expected different scores."
 
 
@@ -225,7 +226,7 @@ def test_scores_by_query():
     scores = Scores(references, queries, CosineGreedy()).calculate()
     selected_scores = scores.scores_by_query(spectrum_4)
 
-    expected_result = [(scores.references[i], *scores.scores[i, 2]) for i in range(3)]
+    expected_result = [(scores.references[i], scores.scores[i, 2]) for i in range(3)]
     assert selected_scores == expected_result, "Expected different scores."
 
 
