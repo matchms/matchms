@@ -23,6 +23,7 @@ class DummySimilarityFunction(BaseSimilarity):
 class DummySimilarityFunctionParallel(BaseSimilarity):
     """Simple dummy score, contains pair-wise and matrix implementation."""
     score_datatype = [("score", numpy.unicode_, 16), ("len", "int")]
+
     def __init__(self):
         """constructor"""
 
