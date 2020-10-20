@@ -36,7 +36,7 @@ def test_cosine_hungarian_matrix_without_parameters():
     cosine_hungarian = CosineHungarian()
     scores = cosine_hungarian.matrix([spectrum_1, spectrum_2], [spectrum_1, spectrum_2])
 
-    assert scores[0, 0] == scores[1, 1] == (1.0, 5), "Expected different cosine score."
+    assert scores[0, 0] == scores[1, 1] == (1., 5), "Expected different cosine score."
     assert scores[0, 1] == scores[1, 0] == pytest.approx((0.1615384, 3), 1e-6), "Expected different cosine score."
 
 
