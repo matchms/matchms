@@ -70,4 +70,4 @@ def score_best_matches(matching_pairs: list, spec1: numpy.ndarray,
     spec2_power = numpy.power(spec2[:, 0], mz_power) * numpy.power(spec2[:, 1], intensity_power)
 
     score = score/(numpy.sqrt(numpy.sum(spec1_power**2)) * numpy.sqrt(numpy.sum(spec2_power**2)))
-    return score, len(used_matches)
+    return (score, len(used_matches))
