@@ -1,4 +1,5 @@
 import os
+import numpy
 import pytest
 from matchms import calculate_scores
 from matchms.filtering import add_parent_mass
