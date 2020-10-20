@@ -46,12 +46,12 @@ def test_user_workflow():
     # filter out self-comparisons, require at least 20 matching peaks:
     filtered = [(reference, query, score) for (reference, query, score) in scores
                 if reference != query and score["matches"] >= 20]
-    
+
     sorted_by_score = sorted(filtered, key=lambda elem: elem[2]["score"], reverse=True)
-    
+
     actual_top10 = sorted_by_score[:10]
-    
-    score_datatype = [("score", numpy.float64), ("matches", "int")]
+
+    score_datatype = cosine_greedy.score_datatype
     expected_top10 = [
         (references[48], queries[50], numpy.array((0.9994783627790965, 25), dtype=score_datatype)),
         (references[50], queries[48], numpy.array((0.9994783627790965, 25), dtype=score_datatype)),
