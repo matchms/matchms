@@ -19,6 +19,8 @@ def reduce_to_number_of_peaks(spectrum_in: SpectrumType, n_required: int = 1, n_
         Maximum number of peaks. Remove peaks if more peaks are found.
     ratio_desired:
         Set desired ratio between maximum number of peaks and parent mass.
+        For spectra without parent mass (e.g. GCMS spectra) this will raise an
+        error when ratio_desired is used.
         Default is None.
     """
     def _set_maximum_number_of_peaks_to_keep():
@@ -26,7 +28,9 @@ def reduce_to_number_of_peaks(spectrum_in: SpectrumType, n_required: int = 1, n_
         if parent_mass and ratio_desired:
             n_desired_by_mass = int(ceil(ratio_desired * parent_mass))
             return max(n_required, n_desired_by_mass)
-        return n_max
+        if not ratio_desired:
+            return n_max
+        raise ValueError("Cannot use ratio_desired for spectrum without parent_mass.")
 
     def _remove_lowest_intensity_peaks():
         mz, intensities = spectrum.peaks
