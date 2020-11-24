@@ -5,8 +5,9 @@ from ..typing import SpectrumType
 def add_parent_mass(spectrum_in: SpectrumType) -> SpectrumType:
     """Add parentmass to metadata (if not present yet).
 
-    Method to calculate the parent mass from given precursor mass
-    and charge.
+    Method to calculate the parent mass from given precursor m/z
+    and charge. Will take precursor m/z from either "precursor_mz"
+    or "pepmass" field.
     """
     if spectrum_in is None:
         return None
@@ -17,7 +18,9 @@ def add_parent_mass(spectrum_in: SpectrumType) -> SpectrumType:
         try:
             charge = spectrum.get("charge")
             protons_mass = PROTON_MASS * charge
-            precursor_mz = spectrum.get("pepmass")[0]
+            precursor_mz = spectrum.get("precursor_mz", None)
+            if precursormz is None:
+                precursor_mz = spectrum.get("pepmass")[0]
             precursor_mass = precursor_mz * abs(charge)
             parent_mass = precursor_mass - protons_mass
             if parent_mass:
