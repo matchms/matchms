@@ -22,7 +22,7 @@ def test_add_parent_mass_no_pepmass():
     """Test if parent mass is correctly derived if "pepmass" is not present."""
     mz = numpy.array([], dtype='float')
     intensities = numpy.array([], dtype='float')
-    metadata = {"precursor_mz": (444.0, 10),
+    metadata = {"precursor_mz": 444.0,
                 "charge": -1}
     spectrum_in = Spectrum(mz=mz,
                            intensities=intensities,
