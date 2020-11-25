@@ -51,7 +51,7 @@ def test_precursormz_match_missing_precursormz():
     with pytest.raises(AssertionError) as msg:
         _ = similarity_score.pair(spectrum_1, spectrum_2)
 
-    expected_message_part = "Missing parent mass."
+    expected_message_part = "Missing precursor m/z."
     assert expected_message_part in str(msg.value), "Expected particular error message."
 
 
@@ -75,7 +75,7 @@ def test_precursormz_match_array():
 
     similarity_score = PrecursormzMatch()
     scores = similarity_score.matrix([spectrum_1, spectrum_2],
-                                     [spectrum_a, spectrum_b])
+                                      [spectrum_a, spectrum_b])
     assert numpy.all(scores == numpy.array([[False, False],
                                             [False, False]])), "Expected different scores."
 
@@ -100,7 +100,7 @@ def test_precursormz_match_tolerance2_array():
 
     similarity_score = PrecursormzMatch(tolerance=2.0)
     scores = similarity_score.matrix([spectrum_1, spectrum_2],
-                                     [spectrum_a, spectrum_b])
+                                      [spectrum_a, spectrum_b])
     assert numpy.all(scores == numpy.array([[True, True],
                                             [True, False]])), "Expected different scores."
 
@@ -131,9 +131,9 @@ def test_precursormz_match_array_symmetric():
     assert numpy.all(scores == scores2), "Expected identical scores"
     assert numpy.all(scores == numpy.array(
         [[True, False, True, False],
-         [False, True, False, False],
-         [True, False, True, False],
-         [False, False, False, True]])), "Expected different scores"
+          [False, True, False, False],
+          [True, False, True, False],
+          [False, False, False, True]])), "Expected different scores"
 
 
 def test_precursormz_scores_compiled():

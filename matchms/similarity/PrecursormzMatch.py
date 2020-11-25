@@ -97,22 +97,22 @@ class PrecursormzMatch(BaseSimilarity):
             precursors = []
             for spectrum in spectrums:
                 precursormz = spectrum.get("precursor_mz")
-                assert parentmass is not None, "Missing precursor m/z."
+                assert precursormz is not None, "Missing precursor m/z."
                 precursors.append(precursormz)
             return numpy.asarray(precursors)
 
         precursors_ref = collect_precursormz(references)
         precursors_query = collect_precursormz(queries)
         if is_symmetric:
-            return precursormz_scores_symmetric(precursormz_ref, precursormz_query, self.tolerance).astype(bool)
-        return precursormz_scores(precursors_ref, precursormz_query, self.tolerance).astype(bool)
+            return precursormz_scores_symmetric(precursors_ref, precursors_query, self.tolerance).astype(bool)
+        return precursormz_scores(precursors_ref, precursors_query, self.tolerance).astype(bool)
 
 
 @numba.njit
-def precursormz_scores(precursormz_ref, precursormz_query, tolerance):
-    scores = numpy.zeros((len(precursormz_ref), len(precursormz_query)))
-    for i, precursormz_ref in enumerate(precursormz_ref):
-        for j, precursormz_query in enumerate(precursormz_query):
+def precursormz_scores(precursors_ref, precursors_query, tolerance):
+    scores = numpy.zeros((len(precursors_ref), len(precursors_query)))
+    for i, precursormz_ref in enumerate(precursors_ref):
+        for j, precursormz_query in enumerate(precursors_query):
             scores[i, j] = (abs(precursormz_ref - precursormz_query) <= tolerance)
     return scores
 
