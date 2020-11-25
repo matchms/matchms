@@ -122,6 +122,6 @@ def precursormz_scores_symmetric(precursors_ref, precursors_query, tolerance):
     scores = numpy.zeros((len(precursors_ref), len(precursors_query)))
     for i, precursormz_ref in enumerate(precursors_ref):
         for j in range(i, len(precursors_query)):
-            scores[i, j] = (abs(precursormz_ref - precursormz_query[j]) <= tolerance)
+            scores[i, j] = (abs(precursormz_ref - precursors_query[j]) <= tolerance)
             scores[j, i] = scores[i, j]
     return scores
