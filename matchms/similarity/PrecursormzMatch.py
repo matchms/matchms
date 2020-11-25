@@ -10,7 +10,7 @@ class PrecursormzMatch(BaseSimilarity):
     The match within tolerance can be calculated based on an absolute m/z difference
     (tolerance_type="Dalton") or based on a relative difference in ppm (tolerance_type="ppm").
 
-    Example to calculate scores between 2 spectrums and iterate over the scores
+    Example to calculate scores between 2 pairs of spectrums and iterate over the scores
 
     .. testcode::
 
