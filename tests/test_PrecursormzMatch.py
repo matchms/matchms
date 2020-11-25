@@ -3,7 +3,9 @@ import pytest
 from matchms import Spectrum
 from matchms.similarity import PrecursormzMatch
 from matchms.similarity.PrecursormzMatch import precursormz_scores
+from matchms.similarity.PrecursormzMatch import precursormz_scores_ppm
 from matchms.similarity.PrecursormzMatch import precursormz_scores_symmetric
+from matchms.similarity.PrecursormzMatch import precursormz_scores_symmetric_ppm
 
 
 def test_precursormz_match():
@@ -176,39 +178,55 @@ def test_precursormz_match_array_symmetric():
          [False, False, False, True]])), "Expected different scores"
 
 
-def test_precursormz_scores_compiled():
-    """Test the underlying score function (numba compiled)."""
+@pytest.mark.parametrize("numba_compiled", [True, False])
+def test_precursormz_scores(numba_compiled):
+    """Test the underlying score function (pure Python and numba compiled)."""
     precursors_ref = numpy.asarray([101, 200, 300])
     precursors_query = numpy.asarray([100, 301])
-    scores = precursormz_scores(precursors_ref, precursors_query, tolerance=2.0)
+    if numba_compiled:
+        scores = precursormz_scores(precursors_ref, precursors_query, tolerance=2.0)
+    else:
+        scores = precursormz_scores.py_func(precursors_ref, precursors_query, tolerance=2.0)
     assert numpy.all(scores == numpy.array([[1., 0.],
                                             [0., 0.],
                                             [0., 1.]])), "Expected different scores."
 
 
-def test_precursormz_scores():
+@pytest.mark.parametrize("numba_compiled", [True, False])
+def test_precursormz_scores_symmetric(numba_compiled):
     """Test the underlying score function (non-compiled)."""
-    precursors_ref = numpy.asarray([101, 200, 300])
-    precursors_query = numpy.asarray([100, 301])
-    scores = precursormz_scores.py_func(precursors_ref, precursors_query, tolerance=2.0)
-    assert numpy.all(scores == numpy.array([[True, False],
-                                            [False, False],
-                                            [False, True]])), "Expected different scores."
-
-
-def test_precursormz_scores_symmetric_compliled():
-    """Test the underlying score function (numba-compiled)."""
     precursors = numpy.asarray([101, 100, 200])
-    scores = precursormz_scores_symmetric(precursors, precursors, tolerance=2.0)
+    if numba_compiled:
+        scores = precursormz_scores_symmetric(precursors, precursors, tolerance=2.0)
+    else:
+        scores = precursormz_scores_symmetric.py_func(precursors, precursors, tolerance=2.0)
     assert numpy.all(scores == numpy.array([[1., 1., 0.],
                                             [1., 1., 0.],
                                             [0., 0., 1.]])), "Expected different scores."
 
 
-def test_precursormz_scores_symmetric():
+@pytest.mark.parametrize("numba_compiled", [True, False])
+def test_precursormz_scores_ppm(numba_compiled):
+    """Test the underlying score function (pure Python and numba compiled)."""
+    precursors_ref = numpy.asarray([100.00001, 200, 300])
+    precursors_query = numpy.asarray([100, 300.00001])
+    if numba_compiled:
+        scores = precursormz_scores_ppm(precursors_ref, precursors_query, tolerance=2.0)
+    else:
+        scores = precursormz_scores_ppm.py_func(precursors_ref, precursors_query, tolerance=2.0)
+    assert numpy.all(scores == numpy.array([[1., 0.],
+                                            [0., 0.],
+                                            [0., 1.]])), "Expected different scores."
+
+
+@pytest.mark.parametrize("numba_compiled", [True, False])
+def test_precursormz_scores_symmetric_ppm(numba_compiled):
     """Test the underlying score function (non-compiled)."""
-    precursors = numpy.asarray([101, 100, 200])
-    scores = precursormz_scores_symmetric.py_func(precursors, precursors, tolerance=2.0)
+    precursors = numpy.asarray([100.00001, 100, 200])
+    if numba_compiled:
+        scores = precursormz_scores_symmetric_ppm(precursors, precursors, tolerance=2.0)
+    else:
+        scores = precursormz_scores_symmetric_ppm.py_func(precursors, precursors, tolerance=2.0)
     assert numpy.all(scores == numpy.array([[1., 1., 0.],
                                             [1., 1., 0.],
                                             [0., 0., 1.]])), "Expected different scores."
