@@ -22,13 +22,13 @@ class PrecursormzMatch(BaseSimilarity):
                               metadata={"id": "1", "precursor_mz": 100})
         spectrum_2 = Spectrum(mz=np.array([]),
                               intensities=np.array([]),
-                              metadata={"id": "2", "parent_mass": 110})
+                              metadata={"id": "2", "precursor_mz": 110})
         spectrum_3 = Spectrum(mz=np.array([]),
                               intensities=np.array([]),
-                              metadata={"id": "3", "parent_mass": 103})
+                              metadata={"id": "3", "precursor_mz": 103})
         spectrum_4 = Spectrum(mz=np.array([]),
                               intensities=np.array([]),
-                              metadata={"id": "4", "parent_mass": 111})
+                              metadata={"id": "4", "precursor_mz": 111})
         references = [spectrum_1, spectrum_2]
         queries = [spectrum_3, spectrum_4]
 
