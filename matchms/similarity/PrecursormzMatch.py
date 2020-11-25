@@ -85,7 +85,7 @@ class PrecursormzMatch(BaseSimilarity):
         if self.type == "Dalton":
             return abs(precursormz_ref - precursormz_query) <= self.tolerance
 
-        mean_mz = numpy.mean([precursormz_ref, precursormz_query])
+        mean_mz = (precursormz_ref + precursormz_query) / 2
         return abs(precursormz_ref - precursormz_query)/mean_mz <= self.tolerance
 
     def matrix(self, references: List[SpectrumType], queries: List[SpectrumType],
@@ -155,7 +155,7 @@ def precursormz_scores_symmetric_ppm(precursors_ref, precursors_query, tolerance
     scores = numpy.zeros((len(precursors_ref), len(precursors_query)))
     for i, precursormz_ref in enumerate(precursors_ref):
         for j in range(i, len(precursors_query)):
-            mean_mz = (precursormz_ref + precursormz_query)/2
+            mean_mz = (precursormz_ref + precursors_query[j])/2
             diff_ppm = abs(precursormz_ref - precursors_query[j])/mean_mz * 1e6
             scores[i, j] = (diff_ppm <= tolerance_ppm)
             scores[j, i] = scores[i, j]

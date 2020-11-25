@@ -7,7 +7,7 @@ from matchms.similarity.PrecursormzMatch import precursormz_scores_symmetric
 
 
 def test_precursormz_match():
-    "Test with default tolerance."
+    """Test with default tolerance."""
     spectrum_1 = Spectrum(mz=numpy.array([], dtype="float"),
                           intensities=numpy.array([], dtype="float"),
                           metadata={"precursor_mz": 100.0})
@@ -22,7 +22,7 @@ def test_precursormz_match():
 
 
 def test_precursormz_match_tolerance2():
-    "Test with tolerance > difference."
+    """Test with tolerance > difference."""
     spectrum_1 = Spectrum(mz=numpy.array([], dtype="float"),
                           intensities=numpy.array([], dtype="float"),
                           metadata={"precursor_mz": 100.0})
@@ -36,8 +36,8 @@ def test_precursormz_match_tolerance2():
     assert score, "Expected different score."
 
 
-    def test_precursormz_match_tolerance_ppm():
-    "Test with tolerance > difference in ppm."
+def test_precursormz_match_tolerance_ppm():
+    """Test with tolerance > difference in ppm."""
     spectrum_1 = Spectrum(mz=numpy.array([], dtype="float"),
                           intensities=numpy.array([], dtype="float"),
                           metadata={"precursor_mz": 600.0})
@@ -52,7 +52,7 @@ def test_precursormz_match_tolerance2():
 
 
 def test_precursormz_match_missing_precursormz():
-    "Test with missing precursormz."
+    """Test with missing precursormz."""
     spectrum_1 = Spectrum(mz=numpy.array([], dtype="float"),
                           intensities=numpy.array([], dtype="float"),
                           metadata={"precursor_mz": 100.0})
@@ -71,7 +71,7 @@ def test_precursormz_match_missing_precursormz():
 
 
 def test_precursormz_match_array():
-    "Test with array and default tolerance."
+    """Test with array and default tolerance."""
     spectrum_1 = Spectrum(mz=numpy.array([], dtype="float"),
                           intensities=numpy.array([], dtype="float"),
                           metadata={"precursor_mz": 100.0})
@@ -120,7 +120,7 @@ def test_precursormz_match_tolerance2_array():
                                             [True, False]])), "Expected different scores."
 
 
-    def test_precursormz_match_tolerance2_array_ppm():
+def test_precursormz_match_tolerance2_array_ppm():
     """Test with array and tolerance=2 and type=ppm."""
     spectrum_1 = Spectrum(mz=numpy.array([], dtype="float"),
                           intensities=numpy.array([], dtype="float"),
@@ -140,9 +140,9 @@ def test_precursormz_match_tolerance2_array():
 
     similarity_score = PrecursormzMatch(tolerance=101.0, tolerance_type="ppm")
     scores = similarity_score.matrix([spectrum_1, spectrum_2],
-                                      [spectrum_a, spectrum_b])
+                                     [spectrum_a, spectrum_b])
     assert numpy.all(scores == numpy.array([[True, False],
-                                            [False, False]])), "Expected different scores.
+                                            [False, False]])), "Expected different scores."
 
 
 def test_precursormz_match_array_symmetric():
