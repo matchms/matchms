@@ -211,9 +211,9 @@ def test_precursormz_scores_ppm(numba_compiled):
     precursors_ref = numpy.asarray([100.00001, 200, 300])
     precursors_query = numpy.asarray([100, 300.00001])
     if numba_compiled:
-        scores = precursormz_scores_ppm(precursors_ref, precursors_query, tolerance=2.0)
+        scores = precursormz_scores_ppm(precursors_ref, precursors_query, tolerance_ppm=2.0)
     else:
-        scores = precursormz_scores_ppm.py_func(precursors_ref, precursors_query, tolerance=2.0)
+        scores = precursormz_scores_ppm.py_func(precursors_ref, precursors_query, tolerance_ppm=2.0)
     assert numpy.all(scores == numpy.array([[1., 0.],
                                             [0., 0.],
                                             [0., 1.]])), "Expected different scores."
@@ -224,9 +224,9 @@ def test_precursormz_scores_symmetric_ppm(numba_compiled):
     """Test the underlying score function (non-compiled)."""
     precursors = numpy.asarray([100.00001, 100, 200])
     if numba_compiled:
-        scores = precursormz_scores_symmetric_ppm(precursors, precursors, tolerance=2.0)
+        scores = precursormz_scores_symmetric_ppm(precursors, precursors, tolerance_ppm=2.0)
     else:
-        scores = precursormz_scores_symmetric_ppm.py_func(precursors, precursors, tolerance=2.0)
+        scores = precursormz_scores_symmetric_ppm.py_func(precursors, precursors, tolerance_ppm=2.0)
     assert numpy.all(scores == numpy.array([[1., 1., 0.],
                                             [1., 1., 0.],
                                             [0., 0., 1.]])), "Expected different scores."
