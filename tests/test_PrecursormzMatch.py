@@ -5,7 +5,8 @@ from matchms.similarity import PrecursormzMatch
 from matchms.similarity.PrecursormzMatch import precursormz_scores
 from matchms.similarity.PrecursormzMatch import precursormz_scores_ppm
 from matchms.similarity.PrecursormzMatch import precursormz_scores_symmetric
-from matchms.similarity.PrecursormzMatch import precursormz_scores_symmetric_ppm
+from matchms.similarity.PrecursormzMatch import \
+    precursormz_scores_symmetric_ppm
 
 
 def test_precursormz_match():
