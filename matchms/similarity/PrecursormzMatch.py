@@ -7,6 +7,8 @@ from .BaseSimilarity import BaseSimilarity
 
 class PrecursormzMatch(BaseSimilarity):
     """Return True if spectrums match in precursor m/z (within tolerance), and False otherwise.
+    The match within tolerance can be calculated based on an absolute m/z difference
+    (tolerance_type="Dalton") or based on a relateive difference in ppm (tolerance_type="ppm").
 
     Example to calculate scores between 2 spectrums and iterate over the scores
 
@@ -32,7 +34,7 @@ class PrecursormzMatch(BaseSimilarity):
         references = [spectrum_1, spectrum_2]
         queries = [spectrum_3, spectrum_4]
 
-        similarity_score = PrecursormzMatch(tolerance=5.0)
+        similarity_score = PrecursormzMatch(tolerance=5.0, tolerance_type="Dalton")
         scores = calculate_scores(references, queries, similarity_score)
 
         for (reference, query, score) in scores:
@@ -52,14 +54,19 @@ class PrecursormzMatch(BaseSimilarity):
     # Set key characteristics as class attributes
     is_commutative = True
 
-    def __init__(self, tolerance: float = 0.1):
+    def __init__(self, tolerance: float = 0.1, tolerance_type: str = "Dalton"):
         """
         Parameters
         ----------
         tolerance
             Specify tolerance below which two m/z are counted as match.
+        tolerance_type
+            Chose between fixed tolerance in Dalten (="Dalton") or a relative difference
+            in ppm (="ppm").
         """
         self.tolerance = tolerance
+        assert tolerance_type in ["Dalton", "ppm"], "Expected type from ['Dalton', 'ppm']"
+        self.type = tolerance_type
 
     def pair(self, reference: SpectrumType, query: SpectrumType) -> float:
         """Compare precursor m/z between reference and query spectrum.
@@ -74,8 +81,12 @@ class PrecursormzMatch(BaseSimilarity):
         precursormz_ref = reference.get("precursor_mz")
         precursormz_query = query.get("precursor_mz")
         assert precursormz_ref is not None and precursormz_query is not None, "Missing precursor m/z."
+        
+        if self.type == "Dalton":
+            return abs(precursormz_ref - precursormz_query) <= self.tolerance
 
-        return abs(precursormz_ref - precursormz_query) <= self.tolerance
+        mean_mz = numpy.mean([precursormz_ref, precursormz_query])
+        return abs(precursormz_ref - precursormz_query)/mean_mz <= self.tolerance
 
     def matrix(self, references: List[SpectrumType], queries: List[SpectrumType],
                is_symmetric: bool = False) -> numpy.ndarray:
@@ -103,9 +114,13 @@ class PrecursormzMatch(BaseSimilarity):
 
         precursors_ref = collect_precursormz(references)
         precursors_query = collect_precursormz(queries)
-        if is_symmetric:
+        if is_symmetric and self.type == "Dalton":
             return precursormz_scores_symmetric(precursors_ref, precursors_query, self.tolerance).astype(bool)
-        return precursormz_scores(precursors_ref, precursors_query, self.tolerance).astype(bool)
+        if is_symmetric and self.type == "ppm":
+            return precursormz_scores_symmetric_ppm(precursors_ref, precursors_query, self.tolerance).astype(bool)
+        if self.type == "Dalton":
+            return precursormz_scores(precursors_ref, precursors_query, self.tolerance).astype(bool)
+        return precursormz_scores_ppm(precursors_ref, precursors_query, self.tolerance).astype(bool)
 
 
 @numba.njit
@@ -123,5 +138,25 @@ def precursormz_scores_symmetric(precursors_ref, precursors_query, tolerance):
     for i, precursormz_ref in enumerate(precursors_ref):
         for j in range(i, len(precursors_query)):
             scores[i, j] = (abs(precursormz_ref - precursors_query[j]) <= tolerance)
+            scores[j, i] = scores[i, j]
+    return scores
+
+@numba.njit
+def precursormz_scores_ppm(precursors_ref, precursors_query, tolerance_ppm):
+    scores = numpy.zeros((len(precursors_ref), len(precursors_query)))
+    for i, precursormz_ref in enumerate(precursors_ref):
+        for j, precursormz_query in enumerate(precursors_query):
+            mean_mz = (precursormz_ref + precursormz_query)/2
+            scores[i, j] = (abs(precursormz_ref - precursormz_query)/mean_mz * 1e6 <= tolerance_ppm)
+    return scores
+
+@numba.njit
+def precursormz_scores_symmetric_ppm(precursors_ref, precursors_query, tolerance_ppm):
+    scores = numpy.zeros((len(precursors_ref), len(precursors_query)))
+    for i, precursormz_ref in enumerate(precursors_ref):
+        for j in range(i, len(precursors_query)):
+            mean_mz = (precursormz_ref + precursormz_query)/2
+            diff_ppm = abs(precursormz_ref - precursors_query[j])/mean_mz * 1e6
+            scores[i, j] = (diff_ppm <= tolerance_ppm)
             scores[j, i] = scores[i, j]
     return scores
