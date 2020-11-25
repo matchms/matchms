@@ -5,7 +5,7 @@ from matchms.typing import SpectrumType
 from .BaseSimilarity import BaseSimilarity
 
 
-class ParentmassMatch(BaseSimilarity):
+class PrecursormzMatch(BaseSimilarity):
     """Return True if spectrums match in precursor m/z (within tolerance), and False otherwise.
 
     Example to calculate scores between 2 spectrums and iterate over the scores
