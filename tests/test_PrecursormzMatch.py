@@ -179,6 +179,37 @@ def test_precursormz_match_array_symmetric():
          [False, False, False, True]])), "Expected different scores"
 
 
+def test_precursormz_match_array_symmetric_pmm():
+    """Test with array and is_symmetric=True for type="ppm"."""
+    spectrum_1 = Spectrum(mz=numpy.array([], dtype="float"),
+                          intensities=numpy.array([], dtype="float"),
+                          metadata={"precursor_mz": 100.0})
+
+    spectrum_2 = Spectrum(mz=numpy.array([], dtype="float"),
+                          intensities=numpy.array([], dtype="float"),
+                          metadata={"precursor_mz": 100.01})
+
+    spectrum_3 = Spectrum(mz=numpy.array([], dtype="float"),
+                          intensities=numpy.array([], dtype="float"),
+                          metadata={"precursor_mz": 99.99999})
+
+    spectrum_4 = Spectrum(mz=numpy.array([], dtype="float"),
+                          intensities=numpy.array([], dtype="float"),
+                          metadata={"precursor_mz": 99.9})
+
+    spectrums = [spectrum_1, spectrum_2, spectrum_3, spectrum_4]
+    similarity_score = PrecursormzMatch(tolerance=5.0, tolerance_type="ppm")
+    scores = similarity_score.matrix(spectrums, spectrums, is_symmetric=True)
+    scores2 = similarity_score.matrix(spectrums, spectrums, is_symmetric=False)
+
+    assert numpy.all(scores == scores2), "Expected identical scores"
+    assert numpy.all(scores == numpy.array(
+        [[True, False, True, False],
+         [False, True, False, False],
+         [True, False, True, False],
+         [False, False, False, True]])), "Expected different scores"
+
+
 @pytest.mark.parametrize("numba_compiled", [True, False])
 def test_precursormz_scores(numba_compiled):
     """Test the underlying score function (pure Python and numba compiled)."""
