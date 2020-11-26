@@ -1,11 +1,11 @@
 import numpy
 import pytest
 from matchms import Spectrum
-from matchms.similarity import PrecursormzMatch
-from matchms.similarity.PrecursormzMatch import precursormz_scores
-from matchms.similarity.PrecursormzMatch import precursormz_scores_ppm
-from matchms.similarity.PrecursormzMatch import precursormz_scores_symmetric
-from matchms.similarity.PrecursormzMatch import \
+from matchms.similarity import PrecursorMzMatch
+from matchms.similarity.PrecursorMzMatch import precursormz_scores
+from matchms.similarity.PrecursorMzMatch import precursormz_scores_ppm
+from matchms.similarity.PrecursorMzMatch import precursormz_scores_symmetric
+from matchms.similarity.PrecursorMzMatch import \
     precursormz_scores_symmetric_ppm
 
 
@@ -19,7 +19,7 @@ def test_precursormz_match():
                           intensities=numpy.array([], dtype="float"),
                           metadata={"precursor_mz": 101.0})
 
-    similarity_score = PrecursormzMatch()
+    similarity_score = PrecursorMzMatch()
     score = similarity_score.pair(spectrum_1, spectrum_2)
     assert not score, "Expected different score."
 
@@ -34,7 +34,7 @@ def test_precursormz_match_tolerance2():
                           intensities=numpy.array([], dtype="float"),
                           metadata={"precursor_mz": 101.0})
 
-    similarity_score = PrecursormzMatch(tolerance=2.0)
+    similarity_score = PrecursorMzMatch(tolerance=2.0)
     score = similarity_score.pair(spectrum_1, spectrum_2)
     assert score, "Expected different score."
 
@@ -49,7 +49,7 @@ def test_precursormz_match_tolerance_ppm():
                           intensities=numpy.array([], dtype="float"),
                           metadata={"precursor_mz": 600.001})
 
-    similarity_score = PrecursormzMatch(tolerance=2.0, tolerance_type="ppm")
+    similarity_score = PrecursorMzMatch(tolerance=2.0, tolerance_type="ppm")
     score = similarity_score.pair(spectrum_1, spectrum_2)
     assert score, "Expected different score."
 
@@ -64,7 +64,7 @@ def test_precursormz_match_missing_precursormz():
                           intensities=numpy.array([], dtype="float"),
                           metadata={})
 
-    similarity_score = PrecursormzMatch(tolerance=2.0)
+    similarity_score = PrecursorMzMatch(tolerance=2.0)
 
     with pytest.raises(AssertionError) as msg:
         _ = similarity_score.pair(spectrum_1, spectrum_2)
@@ -91,7 +91,7 @@ def test_precursormz_match_array():
                           intensities=numpy.array([], dtype="float"),
                           metadata={"precursor_mz": 98.0})
 
-    similarity_score = PrecursormzMatch()
+    similarity_score = PrecursorMzMatch()
     scores = similarity_score.matrix([spectrum_1, spectrum_2],
                                      [spectrum_a, spectrum_b])
     assert numpy.all(scores == numpy.array([[False, False],
@@ -116,7 +116,7 @@ def test_precursormz_match_tolerance2_array():
                           intensities=numpy.array([], dtype="float"),
                           metadata={"precursor_mz": 98.0})
 
-    similarity_score = PrecursormzMatch(tolerance=2.0)
+    similarity_score = PrecursorMzMatch(tolerance=2.0)
     scores = similarity_score.matrix([spectrum_1, spectrum_2],
                                      [spectrum_a, spectrum_b])
     assert numpy.all(scores == numpy.array([[True, True],
@@ -141,7 +141,7 @@ def test_precursormz_match_tolerance2_array_ppm():
                           intensities=numpy.array([], dtype="float"),
                           metadata={"precursor_mz": 98.0})
 
-    similarity_score = PrecursormzMatch(tolerance=101.0, tolerance_type="ppm")
+    similarity_score = PrecursorMzMatch(tolerance=101.0, tolerance_type="ppm")
     scores = similarity_score.matrix([spectrum_1, spectrum_2],
                                      [spectrum_a, spectrum_b])
     assert numpy.all(scores == numpy.array([[True, False],
@@ -167,7 +167,7 @@ def test_precursormz_match_array_symmetric():
                           metadata={"precursor_mz": 98.0})
 
     spectrums = [spectrum_1, spectrum_2, spectrum_3, spectrum_4]
-    similarity_score = PrecursormzMatch()
+    similarity_score = PrecursorMzMatch()
     scores = similarity_score.matrix(spectrums, spectrums, is_symmetric=True)
     scores2 = similarity_score.matrix(spectrums, spectrums, is_symmetric=False)
 
@@ -198,7 +198,7 @@ def test_precursormz_match_array_symmetric_pmm():
                           metadata={"precursor_mz": 99.9})
 
     spectrums = [spectrum_1, spectrum_2, spectrum_3, spectrum_4]
-    similarity_score = PrecursormzMatch(tolerance=5.0, tolerance_type="ppm")
+    similarity_score = PrecursorMzMatch(tolerance=5.0, tolerance_type="ppm")
     scores = similarity_score.matrix(spectrums, spectrums, is_symmetric=True)
     scores2 = similarity_score.matrix(spectrums, spectrums, is_symmetric=False)
 
