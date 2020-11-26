@@ -5,7 +5,7 @@ from matchms.typing import SpectrumType
 from .BaseSimilarity import BaseSimilarity
 
 
-class PrecursormzMatch(BaseSimilarity):
+class PrecursorMzMatch(BaseSimilarity):
     """Return True if spectrums match in precursor m/z (within tolerance), and False otherwise.
     The match within tolerance can be calculated based on an absolute m/z difference
     (tolerance_type="Dalton") or based on a relative difference in ppm (tolerance_type="ppm").
@@ -17,7 +17,7 @@ class PrecursormzMatch(BaseSimilarity):
         import numpy as np
         from matchms import calculate_scores
         from matchms import Spectrum
-        from matchms.similarity import PrecursormzMatch
+        from matchms.similarity import PrecursorMzMatch
 
         spectrum_1 = Spectrum(mz=np.array([]),
                               intensities=np.array([]),
@@ -34,7 +34,7 @@ class PrecursormzMatch(BaseSimilarity):
         references = [spectrum_1, spectrum_2]
         queries = [spectrum_3, spectrum_4]
 
-        similarity_score = PrecursormzMatch(tolerance=5.0, tolerance_type="Dalton")
+        similarity_score = PrecursorMzMatch(tolerance=5.0, tolerance_type="Dalton")
         scores = calculate_scores(references, queries, similarity_score)
 
         for (reference, query, score) in scores:

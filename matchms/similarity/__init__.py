@@ -8,7 +8,7 @@ spectra. This includes
 * scores based on comparing peak positions and intensities
   (:class:`~matchms.similarity.CosineGreedy` or :class:`~matchms.similarity.ModifiedCosine`)
 * simple scores that only assess precursor m/z or parent mass matches
-  (:class:`~matchms.similarity.PrecursormzMatch` or: :class:`~matchms.similarity.ParentmassMatch`)
+  (:class:`~matchms.similarity.PrecursorMzMatch` or: :class:`~matchms.similarity.ParentMassMatch`)
 * scores assessing molecular similarity if structures (SMILES, InchiKey) are given as metadata
   (:class:`~matchms.similarity.FingerprintSimilarity`)
 
@@ -20,8 +20,8 @@ from .CosineHungarian import CosineHungarian
 from .FingerprintSimilarity import FingerprintSimilarity
 from .IntersectMz import IntersectMz
 from .ModifiedCosine import ModifiedCosine
-from .ParentmassMatch import ParentmassMatch
-from .PrecursormzMatch import PrecursormzMatch
+from .ParentMassMatch import ParentMassMatch
+from .PrecursorMzMatch import PrecursorMzMatch
 
 
 __all__ = [
@@ -30,6 +30,6 @@ __all__ = [
     "FingerprintSimilarity",
     "IntersectMz",
     "ModifiedCosine",
-    "ParentmassMatch",
-    "PrecursormzMatch",
+    "ParentMassMatch",
+    "PrecursorMzMatch",
 ]
