@@ -1,9 +1,9 @@
 import numpy
 import pytest
 from matchms import Spectrum
-from matchms.similarity import ParentmassMatch
-from matchms.similarity.ParentmassMatch import parentmass_scores
-from matchms.similarity.ParentmassMatch import parentmass_scores_symmetric
+from matchms.similarity import ParentMassMatch
+from matchms.similarity.ParentMassMatch import parentmass_scores
+from matchms.similarity.ParentMassMatch import parentmass_scores_symmetric
 
 
 def test_parentmass_match():
@@ -16,7 +16,7 @@ def test_parentmass_match():
                           intensities=numpy.array([], dtype="float"),
                           metadata={"parent_mass": 101.0})
 
-    similarity_score = ParentmassMatch()
+    similarity_score = ParentMassMatch()
     score = similarity_score.pair(spectrum_1, spectrum_2)
     assert not score, "Expected different score."
 
@@ -31,7 +31,7 @@ def test_parentmass_match_tolerance2():
                           intensities=numpy.array([], dtype="float"),
                           metadata={"parent_mass": 101.0})
 
-    similarity_score = ParentmassMatch(tolerance=2.0)
+    similarity_score = ParentMassMatch(tolerance=2.0)
     score = similarity_score.pair(spectrum_1, spectrum_2)
     assert score, "Expected different score."
 
@@ -46,7 +46,7 @@ def test_parentmass_match_missing_parentmass():
                           intensities=numpy.array([], dtype="float"),
                           metadata={})
 
-    similarity_score = ParentmassMatch(tolerance=2.0)
+    similarity_score = ParentMassMatch(tolerance=2.0)
 
     with pytest.raises(AssertionError) as msg:
         _ = similarity_score.pair(spectrum_1, spectrum_2)
@@ -73,7 +73,7 @@ def test_parentmass_match_array():
                           intensities=numpy.array([], dtype="float"),
                           metadata={"parent_mass": 98.0})
 
-    similarity_score = ParentmassMatch()
+    similarity_score = ParentMassMatch()
     scores = similarity_score.matrix([spectrum_1, spectrum_2],
                                      [spectrum_a, spectrum_b])
     assert numpy.all(scores == numpy.array([[False, False],
@@ -98,7 +98,7 @@ def test_parentmass_match_tolerance2_array():
                           intensities=numpy.array([], dtype="float"),
                           metadata={"parent_mass": 98.0})
 
-    similarity_score = ParentmassMatch(tolerance=2.0)
+    similarity_score = ParentMassMatch(tolerance=2.0)
     scores = similarity_score.matrix([spectrum_1, spectrum_2],
                                      [spectrum_a, spectrum_b])
     assert numpy.all(scores == numpy.array([[True, True],
@@ -124,7 +124,7 @@ def test_parentmass_match_array_symmetric():
                           metadata={"parent_mass": 98.0})
 
     spectrums = [spectrum_1, spectrum_2, spectrum_3, spectrum_4]
-    similarity_score = ParentmassMatch()
+    similarity_score = ParentMassMatch()
     scores = similarity_score.matrix(spectrums, spectrums, is_symmetric=True)
     scores2 = similarity_score.matrix(spectrums, spectrums, is_symmetric=False)
 
