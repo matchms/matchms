@@ -61,7 +61,7 @@ class PrecursormzMatch(BaseSimilarity):
         tolerance
             Specify tolerance below which two m/z are counted as match.
         tolerance_type
-            Chose between fixed tolerance in Dalten (="Dalton") or a relative difference
+            Chose between fixed tolerance in Dalton (="Dalton") or a relative difference
             in ppm (="ppm").
         """
         self.tolerance = tolerance
