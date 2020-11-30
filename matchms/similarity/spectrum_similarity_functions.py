@@ -45,7 +45,7 @@ def collect_peak_pairs(spec1: numpy.ndarray, spec2: numpy.ndarray,
 
     if len(matching_pairs) > 0:
         return numpy.array(matching_pairs)
-    return numpy.empty((0, 3))
+    return numpy.empty((0, 0))
 
 
 def get_peaks_array(spectrum: SpectrumType) -> numpy.ndarray:
