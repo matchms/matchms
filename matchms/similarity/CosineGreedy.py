@@ -86,7 +86,8 @@ class CosineGreedy(BaseSimilarity):
             matching_pairs = collect_peak_pairs(spec1, spec2, self.tolerance, shift=0.0,
                                                 mz_power=self.mz_power,
                                                 intensity_power=self.intensity_power)
-            matching_pairs = sorted(matching_pairs, key=lambda x: x[2], reverse=True)
+            if matching_pairs.shape[0] > 0:
+                matching_pairs = matching_pairs[np.argsort(matching_pairs[:,2])[::-1], :]
             return matching_pairs
 
         spec1 = get_peaks_array(reference)
