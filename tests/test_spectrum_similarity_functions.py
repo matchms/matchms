@@ -41,8 +41,8 @@ def test_collect_peak_pairs(shift, expected_pairs):
 
 
 @pytest.mark.parametrize("matching_pairs, expected_score",
-                         [([[2., 2., 1.], [3., 3., 1.]], (0.9900990099, 2)),
-                          ([[0., 0., 0.01], [1., 1., 0.01]], (0.0099009900, 2))])
+                         [([[2., 2., 1.], [3., 3., 1.]], (0.990099009900, 2)),
+                          ([[0., 0., 0.01], [1., 1., 0.01]], (0.009900990099, 2))])
 def test_score_best_matches_compiled(matching_pairs, expected_score):
     """Test finding expected peak matches for given tolerance."""
     matching_pairs = numpy.array(matching_pairs)
@@ -53,13 +53,13 @@ def test_score_best_matches_compiled(matching_pairs, expected_score):
                          [0.1, 0.1, 1.0, 1.0]], dtype="float").T
 
     score, matches = score_best_matches(matching_pairs, spec1, spec2)
-    assert score == pytest.approx(expected_score[0], 1e-8), "Expected different score"
+    assert score == pytest.approx(expected_score[0], 1e-6), "Expected different score"
     assert matches == expected_score[1], "Expected different matches."
 
 
 @pytest.mark.parametrize("matching_pairs, expected_score",
-                         [([[2., 2., 1.], [3., 3., 1.]], (0.9900990099, 2)),
-                          ([[0., 0., 0.01], [1., 1., 0.01]], (0.0099009900, 2))])
+                         [([[2., 2., 1.], [3., 3., 1.]], (0.990099009900, 2)),
+                          ([[0., 0., 0.01], [1., 1., 0.01]], (0.009900990099, 2))])
 def test_score_best_matches(matching_pairs, expected_score):
     """Test finding expected peak matches for given tolerance."""
     matching_pairs = numpy.array(matching_pairs)
@@ -70,5 +70,5 @@ def test_score_best_matches(matching_pairs, expected_score):
                          [0.1, 0.1, 1.0, 1.0]], dtype="float").T
 
     score, matches = score_best_matches.py_func(matching_pairs, spec1, spec2)
-    assert score == pytest.approx(expected_score[0], 1e-8), "Expected different score"
+    assert score == pytest.approx(expected_score[0], 1e-6), "Expected different score"
     assert matches == expected_score[1], "Expected different matches."
