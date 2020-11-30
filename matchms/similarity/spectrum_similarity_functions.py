@@ -45,7 +45,7 @@ def collect_peak_pairs(spec1: numpy.ndarray, spec2: numpy.ndarray,
 
     if len(matching_pairs) > 0:
         return numpy.array(matching_pairs)
-    return numpy.empty((0, 0))
+    return numpy.empty((0, 3))
 
 
 def get_peaks_array(spectrum: SpectrumType) -> numpy.ndarray:
@@ -59,12 +59,11 @@ def score_best_matches(matching_pairs: numpy.ndarray, spec1: numpy.ndarray,
                        intensity_power: float = 1.0) -> Tuple[float, int]:
     """Calculate cosine-like score by multiplying matches. Does require a sorted
     list of matching peaks (sorted by intensity product)."""
-    if matching_pairs.shape[0] == 0:
-        return 0.0, 0
+    score  = float(0.0)
+    used_matches = int(0)
+    # if len(matching_pairs) > 0:
     used1 = set()
     used2 = set()
-    score = 0.0
-    used_matches = 0
     for i in range(matching_pairs.shape[0]):
         if not matching_pairs[i, 0] in used1 and not matching_pairs[i, 1] in used2:
             score += matching_pairs[i, 2]
