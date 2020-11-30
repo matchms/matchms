@@ -24,8 +24,8 @@ def test_collect_peak_pairs_compiled(shift, expected_pairs, expected_matches):
 
 
 @pytest.mark.parametrize("shift, expected_pairs",
-                         [(0.0, [[2., 2., 1.], [3., 3., 1.]] (2, 3)),
-                          (-5.0, [[0., 0., 0.01], [1., 1., 0.01]] (2, 3)),
+                         [(0.0, [[2., 2., 1.], [3., 3., 1.]], (2, 3)),
+                          (-5.0, [[0., 0., 0.01], [1., 1., 0.01]], (2, 3)),
                           (-20.0, [], (0, 0))])
 def test_collect_peak_pairs(shift, expected_pairs):
     """Test finding expected peak matches for tolerance=0.2 and given shift."""
