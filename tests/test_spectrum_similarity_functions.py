@@ -45,6 +45,7 @@ def test_collect_peak_pairs(shift, expected_pairs):
                           ([[0., 0., 0.01], [1., 1., 0.01]], (0.0099009900, 2))])
 def test_score_best_matches_compiled(matching_pairs, expected_score):
     """Test finding expected peak matches for given tolerance."""
+    matching_pairs = numpy.array(matching_pairs)
     spec1 = numpy.array([[100, 200, 300, 500],
                          [0.1, 0.1, 1.0, 1.0]], dtype="float").T
 
@@ -61,6 +62,7 @@ def test_score_best_matches_compiled(matching_pairs, expected_score):
                           ([[0., 0., 0.01], [1., 1., 0.01]], (0.0099009900, 2))])
 def test_score_best_matches(matching_pairs, expected_score):
     """Test finding expected peak matches for given tolerance."""
+    matching_pairs = numpy.array(matching_pairs)
     spec1 = numpy.array([[100, 200, 300, 500],
                          [0.1, 0.1, 1.0, 1.0]], dtype="float").T
 
