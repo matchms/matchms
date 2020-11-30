@@ -71,6 +71,6 @@ def test_score_best_matches(shift, matching_pairs, expected_score):
     spec2 = numpy.array([[105, 205.1, 300, 500.1],
                          [0.1, 0.1, 1.0, 1.0]], dtype="float").T
 
-    score, matches = .py_funcscore_best_matches(matching_pairs, spec1, spec2)
+    score, matches = score_best_matches.py_func(matching_pairs, spec1, spec2)
     assert score == pytest.approx(expected_score[0], 1e-8), "Expected different score"
     assert matches == expected_score[1], "Expected different matches."
