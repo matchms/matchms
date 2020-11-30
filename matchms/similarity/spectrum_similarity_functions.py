@@ -59,9 +59,8 @@ def score_best_matches(matching_pairs: numpy.ndarray, spec1: numpy.ndarray,
                        intensity_power: float = 1.0) -> Tuple[float, int]:
     """Calculate cosine-like score by multiplying matches. Does require a sorted
     list of matching peaks (sorted by intensity product)."""
-    score  = float(0.0)
+    score = float(0.0)
     used_matches = int(0)
-    # if len(matching_pairs) > 0:
     used1 = set()
     used2 = set()
     for i in range(matching_pairs.shape[0]):
