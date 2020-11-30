@@ -93,8 +93,15 @@ class ModifiedCosine(BaseSimilarity):
             nonzero_pairs = collect_peak_pairs(spec1, spec2, self.tolerance, shift=mass_shift,
                                                mz_power=self.mz_power,
                                                intensity_power=self.intensity_power)
-            unsorted_matching_pairs = zero_pairs + nonzero_pairs
-            return sorted(unsorted_matching_pairs, key=lambda x: x[2], reverse=True)
+
+            if zero_pairs.shape[1] != 3:
+                zero_pairs = np.zeros((0,3))
+            if nonzero_pairs.shape[1] != 3:
+                nonzero_pairs = np.zeros((0,3))
+            matching_pairs = np.concatenate((zero_pairs, npnzero_pairs), axis=0)
+            if matching_pairs.shape[0] > 0:
+                matching_pairs = matching_pairs[numpy.argsort(matching_pairs[:, 2])[::-1], :]
+            return matching_pairs
 
         spec1 = get_peaks_array(reference)
         spec2 = get_peaks_array(query)
