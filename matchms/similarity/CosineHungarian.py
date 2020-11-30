@@ -73,8 +73,8 @@ class CosineHungarian(BaseSimilarity):
             """
             if matching_pairs.shape[0] == 0:
                 return None, None, None
-            paired_peaks1 = list({x for x in matching_pairs[:, 0]})
-            paired_peaks2 = list({x for x in matching_pairs[:, 1]})
+            paired_peaks1 = list(set(matching_pairs[:, 0]))
+            paired_peaks2 = list(set(matching_pairs[:, 1]))
             matrix_size = (len(paired_peaks1), len(paired_peaks2))
             matching_pairs_matrix = numpy.ones(matrix_size)
             for i in range(matching_pairs.shape[0]):
