@@ -42,7 +42,7 @@ def test_collect_peak_pairs(shift, expected_pairs):
 
 @pytest.mark.parametrize("shift, matching_pairs", "expected_score",
                           [(0.0, [[2., 2., 1.], [3., 3., 1.]], (0.9900990099, 2)),
-                           (-5.0, [[0., 0., 0.01], [1., 1., 0.01]], (0.0099009900, 2)])
+                           (-5.0, [[0., 0., 0.01], [1., 1., 0.01]], (0.0099009900, 2))])
 def test_score_best_matches_compiled(shift, matching_pairs, expected_score)
     """Test finding expected peak matches for given tolerance."""
     shift = -5.0
@@ -60,7 +60,7 @@ def test_score_best_matches_compiled(shift, matching_pairs, expected_score)
 
 @pytest.mark.parametrize("shift, matching_pairs", "expected_score",
                           [(0.0, [[2., 2., 1.], [3., 3., 1.]], (0.9900990099, 2)),
-                           (-5.0, [[0., 0., 0.01], [1., 1., 0.01]], (0.0099009900, 2)])
+                           (-5.0, [[0., 0., 0.01], [1., 1., 0.01]], (0.0099009900, 2))])
 def test_score_best_matches(shift, matching_pairs, expected_score)
     """Test finding expected peak matches for given tolerance."""
     shift = -5.0
