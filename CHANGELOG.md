@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Small performance improvement in  CosineGreedy [#159](https://github.com/matchms/matchms/pull/159)
+
 ## [0.6.1] - 2020-11-26
 
 ### Added
