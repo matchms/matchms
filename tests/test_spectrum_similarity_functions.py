@@ -40,7 +40,7 @@ def test_collect_peak_pairs(shift, expected_pairs):
     assert numpy.allclose(matching_pairs, numpy.array(expected_pairs), atol=1e-8), "Expected different values."
 
 
-@pytest.mark.parametrize("matching_pairs", "expected_score",
+@pytest.mark.parametrize("matching_pairs, expected_score",
                          [([[2., 2., 1.], [3., 3., 1.]], (0.9900990099, 2)),
                           ([[0., 0., 0.01], [1., 1., 0.01]], (0.0099009900, 2))])
 def test_score_best_matches_compiled(matching_pairs, expected_score):
@@ -56,7 +56,7 @@ def test_score_best_matches_compiled(matching_pairs, expected_score):
     assert matches == expected_score[1], "Expected different matches."
 
 
-@pytest.mark.parametrize("matching_pairs", "expected_score",
+@pytest.mark.parametrize("matching_pairs, expected_score",
                          [([[2., 2., 1.], [3., 3., 1.]], (0.9900990099, 2)),
                           ([[0., 0., 0.01], [1., 1., 0.01]], (0.0099009900, 2))])
 def test_score_best_matches(matching_pairs, expected_score):
