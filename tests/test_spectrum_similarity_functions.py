@@ -7,12 +7,11 @@ from matchms.similarity.spectrum_similarity_functions import score_best_matches
 
 
 @pytest.mark.parametrize("shift, expected_pairs",
-                         [(0.0, [(2, 2, 1.0), (3, 3, 1.0)]),
-                          (-5.0, [(0, 0, 0.01), (1, 1, 0.01)])])
+                         [(0.0, [[2., 2., 1.], [3., 3., 1.]]),
+                          (-5.0, [[0., 0., 0.01], [1., 1., 0.01]]),
+                          (-20.0, [])])
 def test_collect_peak_pairs_compiled(shift, expected_pairs):
     """Test finding expected peak matches for given tolerance."""
-    shift = 0.0
-    expected_pairs = [[2., 2., 1.], [3., 3., 1.]]
     spec1 = numpy.array([[100, 200, 300, 500],
                          [0.1, 0.1, 1.0, 1.0]], dtype="float").T
 
@@ -26,7 +25,8 @@ def test_collect_peak_pairs_compiled(shift, expected_pairs):
 
 @pytest.mark.parametrize("shift, expected_pairs",
                          [(0.0, [[2., 2., 1.], [3., 3., 1.]]),
-                          (-5.0, [[0., 0., 0.01], [1., 1., 0.01]])])
+                          (-5.0, [[0., 0., 0.01], [1., 1., 0.01]]),
+                          (-20.0, [])])
 def test_collect_peak_pairs(shift, expected_pairs):
     """Test finding expected peak matches for tolerance=0.2 and given shift."""
     spec1 = numpy.array([[100, 200, 300, 500],
@@ -42,7 +42,8 @@ def test_collect_peak_pairs(shift, expected_pairs):
 
 @pytest.mark.parametrize("matching_pairs, expected_score",
                          [([[2., 2., 1.], [3., 3., 1.]], (0.990099009900, 2)),
-                          ([[0., 0., 0.01], [1., 1., 0.01]], (0.009900990099, 2))])
+                          ([[0., 0., 0.01], [1., 1., 0.01]], (0.009900990099, 2),
+                          ([], (0.0, 0))])
 def test_score_best_matches_compiled(matching_pairs, expected_score):
     """Test finding expected peak matches for given tolerance."""
     matching_pairs = numpy.array(matching_pairs)
@@ -59,7 +60,8 @@ def test_score_best_matches_compiled(matching_pairs, expected_score):
 
 @pytest.mark.parametrize("matching_pairs, expected_score",
                          [([[2., 2., 1.], [3., 3., 1.]], (0.990099009900, 2)),
-                          ([[0., 0., 0.01], [1., 1., 0.01]], (0.009900990099, 2))])
+                          ([[0., 0., 0.01], [1., 1., 0.01]], (0.009900990099, 2),
+                          ([], (0.0, 0))])
 def test_score_best_matches(matching_pairs, expected_score):
     """Test finding expected peak matches for given tolerance."""
     matching_pairs = numpy.array(matching_pairs)
