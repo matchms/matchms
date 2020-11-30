@@ -5,25 +5,26 @@ from matchms.typing import SpectrumType
 
 
 @numba.njit
-def collect_peak_pairs(spec1, spec2, tolerance, shift=0,
-                       mz_power=0.0, intensity_power=1.0):
+def collect_peak_pairs(spec1: numpy.ndarray, spec2: numpy.ndarray,
+                       tolerance: float, shift: float = 0, mz_power: float = 0.0,
+                       intensity_power: float = 1.0):
     # pylint: disable=too-many-arguments
     """Find matching pairs between two spectra.
 
     Args
     ----
-    spec1: numpy array
+    spec1:
         Spectrum peaks and intensities as numpy array.
-    spec2: numpy array
+    spec2:
         Spectrum peaks and intensities as numpy array.
-    tolerance : float
+    tolerance
         Peaks will be considered a match when <= tolerance appart.
-    shift : float, optional
+    shift
         Shift spectra peaks by shift. The default is 0.
-    mz_power: float, optional
+    mz_power:
         The power to raise mz to in the cosine function. The default is 0, in which
         case the peak intensity products will not depend on the m/z ratios.
-    intensity_power: float, optional
+    intensity_power:
         The power to raise intensity to in the cosine function. The default is 1.
 
     Returns
@@ -33,7 +34,7 @@ def collect_peak_pairs(spec1, spec2, tolerance, shift=0,
     """
     matching_pairs = []
 
-    for idx in range(len(spec1)):
+    for idx in range(spec1.shape[0]):
         intensity = spec1[idx, 1]
         mz = spec1[idx, 0]
         matches = numpy.where((numpy.abs(spec2[:, 0] - spec1[idx, 0] + shift) <= tolerance))[0]
@@ -43,8 +44,8 @@ def collect_peak_pairs(spec1, spec2, tolerance, shift=0,
             matching_pairs.append((idx, match, power_prod_spec1 * power_prod_spec2))
 
     if len(matching_pairs) > 0:
-        return np.array(matching_pairs)
-    return np.empty((0, 0))
+        return numpy.array(matching_pairs)
+    return numpy.empty((0, 0))
 
 
 def get_peaks_array(spectrum: SpectrumType) -> numpy.ndarray:
@@ -73,5 +74,5 @@ def score_best_matches(matching_pairs: numpy.ndarray, spec1: numpy.ndarray,
     spec1_power = spec1[:, 0] ** mz_power * spec1[:, 1] ** intensity_power
     spec2_power = spec2[:, 0] ** mz_power * spec2[:, 1] ** intensity_power
 
-    score = score/(np.sum(spec1_power ** 2) ** 0.5 * np.sum(spec2_power ** 2) ** 0.5)
+    score = score/(numpy.sum(spec1_power ** 2) ** 0.5 * numpy.sum(spec2_power ** 2) ** 0.5)
     return score, used_matches
