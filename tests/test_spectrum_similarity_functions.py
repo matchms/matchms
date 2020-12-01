@@ -42,7 +42,7 @@ def test_collect_peak_pairs(shift, expected_pairs, expected_matches):
 @pytest.mark.parametrize("numba_compiled", [True, False])
 def test_collect_peak_pairs_no_matches(numba_compiled):
     """Test function for no matching peaks."""
-    shift = -5.0
+    shift = -20.0
     spec1 = numpy.array([[100, 200, 300, 500],
                          [0.1, 0.1, 1.0, 1.0]], dtype="float").T
 
@@ -86,7 +86,7 @@ def test_find_matches_no_matches(numba_compiled):
         matches = find_matches(spec1, spec2, tolerance=0.2, shift=shift)
     else:
         matches = find_matches.py_func(spec1, spec2, tolerance=0.2, shift=shift)
-    assert matches is None, "Expected pairs to be None."
+    assert matches == [], "Expected empty list of matches."
 
 
 @pytest.mark.parametrize("matching_pairs, expected_score",
