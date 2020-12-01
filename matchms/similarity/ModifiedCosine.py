@@ -95,9 +95,9 @@ class ModifiedCosine(BaseSimilarity):
                                                mz_power=self.mz_power,
                                                intensity_power=self.intensity_power)
 
-            if zero_pairs.shape[1] != 3:
+            if zero_pairs is None:
                 zero_pairs = numpy.zeros((0, 3))
-            if nonzero_pairs.shape[1] != 3:
+            if nonzero_pairs is None:
                 nonzero_pairs = numpy.zeros((0, 3))
             matching_pairs = numpy.concatenate((zero_pairs, nonzero_pairs), axis=0)
             if matching_pairs.shape[0] > 0:

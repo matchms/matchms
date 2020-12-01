@@ -17,7 +17,7 @@ def test_collect_peak_pairs_compiled(shift, expected_pairs, expected_matches):
     spec2 = numpy.array([[105, 205.1, 300, 500.1],
                          [0.1, 0.1, 1.0, 1.0]], dtype="float").T
 
-    matching_pairs = collect_peak_pairs(spec1, spec2, tolerance=0.2, shift=shift)
+    matching_pairs = numpy.array(collect_peak_pairs(spec1, spec2, tolerance=0.2, shift=shift))
     assert matching_pairs.shape == expected_matches, "Expected different number of matching peaks"
     assert numpy.allclose(matching_pairs, numpy.array(expected_pairs), atol=1e-8), "Expected different values."
 
@@ -33,7 +33,7 @@ def test_collect_peak_pairs(shift, expected_pairs, expected_matches):
     spec2 = numpy.array([[105, 205.1, 300, 500.1],
                          [0.1, 0.1, 1.0, 1.0]], dtype="float").T
 
-    matching_pairs = collect_peak_pairs.py_func(spec1, spec2, tolerance=0.2, shift=shift)
+    matching_pairs = numpy.array(collect_peak_pairs.py_func(spec1, spec2, tolerance=0.2, shift=shift))
     assert matching_pairs.shape == expected_matches, "Expected different number of matching peaks"
     assert numpy.allclose(matching_pairs, numpy.array(expected_pairs), atol=1e-8), "Expected different values."
 

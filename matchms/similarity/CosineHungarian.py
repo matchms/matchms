@@ -56,9 +56,11 @@ class CosineHungarian(BaseSimilarity):
             matching_pairs = collect_peak_pairs(spec1, spec2, self.tolerance, shift=0.0,
                                                 mz_power=self.mz_power,
                                                 intensity_power=self.intensity_power)
-            if matching_pairs.shape[0] > 0:
-                matching_pairs = matching_pairs[numpy.argsort(matching_pairs[:, 2])[::-1], :]
-            return matching_pairs
+            if matching_pairs is not None:
+                matching_pairs = numpy.array(matching_pairs)
+                matching_pairs = matching_pairs[numpy.argsort(matching_pairs[:,2])[::-1], :]
+                return matching_pairs
+            return None
 
         def get_matching_pairs_matrix():
             """Create matrix of multiplied intensities of all matching pairs
@@ -71,7 +73,7 @@ class CosineHungarian(BaseSimilarity):
             matching_pairs_matrix:
                 Array of multiplied intensities between all matching peaks.
             """
-            if matching_pairs.shape[0] == 0:
+            if matching_pairs is None:
                 return None, None, None
             paired_peaks1 = list(set(matching_pairs[:, 0]))
             paired_peaks2 = list(set(matching_pairs[:, 1]))
