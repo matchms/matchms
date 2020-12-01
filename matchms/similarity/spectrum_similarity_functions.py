@@ -54,9 +54,9 @@ def find_matches(spec1, spec2, tolerance, shift):
     Parameters
     ----------
     spec1:
-        Spectrum peaks and intensities as numpy array.
+        Spectrum peaks and intensities as numpy array. Peak mz values must be ordered.
     spec2:
-        Spectrum peaks and intensities as numpy array.
+        Spectrum peaks and intensities as numpy array. Peak mz values must be ordered.
     tolerance
         Peaks will be considered a match when <= tolerance appart.
     shift
