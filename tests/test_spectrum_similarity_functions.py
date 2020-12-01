@@ -3,6 +3,7 @@ pure Python version."""
 import numpy
 import pytest
 from matchms.similarity.spectrum_similarity_functions import collect_peak_pairs
+from matchms.similarity.spectrum_similarity_functions import find_matches
 from matchms.similarity.spectrum_similarity_functions import score_best_matches
 
 
@@ -41,7 +42,7 @@ def test_collect_peak_pairs(shift, expected_pairs, expected_matches):
 @pytest.mark.parametrize("numba_compiled", [True, False])
 def test_collect_peak_pairs_no_matches(numba_compiled):
     """Test function for no matching peaks."""
-    shift = -20.0
+    shift = -5.0
     spec1 = numpy.array([[100, 200, 300, 500],
                          [0.1, 0.1, 1.0, 1.0]], dtype="float").T
 
@@ -52,6 +53,40 @@ def test_collect_peak_pairs_no_matches(numba_compiled):
     else:
         matching_pairs = collect_peak_pairs.py_func(spec1, spec2, tolerance=0.2, shift=shift)
     assert matching_pairs is None, "Expected pairs to be None."
+
+
+@pytest.mark.parametrize("numba_compiled", [True, False])
+def test_find_matches_shifted(numba_compiled):
+    """Test finding matches with shifted peaks."""
+    shift = -5.0
+    spec1 = numpy.array([[100, 200, 300, 500],
+                         [0.1, 0.1, 1.0, 1.0]], dtype="float").T
+
+    spec2 = numpy.array([[105, 205.1, 300, 304.99, 500.1],
+                         [0.1, 0.1, 1.0, 0.8, 1.0]], dtype="float").T
+
+    expected_matches = [(0, 0), (1, 1), (2, 3)]
+    if numba_compiled:
+        matches = find_matches(spec1, spec2, tolerance=0.2, shift=shift)
+    else:
+        matches = find_matches.py_func(spec1, spec2, tolerance=0.2, shift=shift)
+    assert expected_matches == matches, "Expected different matches."
+
+
+@pytest.mark.parametrize("numba_compiled", [True, False])
+def test_find_matches_no_matches(numba_compiled):
+    """Test function for no matching peaks."""
+    shift = -20.0
+    spec1 = numpy.array([[100, 200, 300, 500],
+                         [0.1, 0.1, 1.0, 1.0]], dtype="float").T
+
+    spec2 = numpy.array([[105, 205.1, 300, 500.1],
+                         [0.1, 0.1, 1.0, 1.0]], dtype="float").T
+    if numba_compiled:
+        matches = find_matches(spec1, spec2, tolerance=0.2, shift=shift)
+    else:
+        matches = find_matches.py_func(spec1, spec2, tolerance=0.2, shift=shift)
+    assert matches is None, "Expected pairs to be None."
 
 
 @pytest.mark.parametrize("matching_pairs, expected_score",
