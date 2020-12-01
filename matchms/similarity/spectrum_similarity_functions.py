@@ -32,20 +32,57 @@ def collect_peak_pairs(spec1: numpy.ndarray, spec2: numpy.ndarray,
     matching_pairs : numpy array
         Array of found matching peaks.
     """
+    matches = find_matches(spec1, spec2, tolerance, shift)
+    idx1 = [x[0] for x in matches]
+    idx2 = [x[1] for x in matches]
+    if len(idx1) == 0:
+        return None
     matching_pairs = []
+    for i in range(len(idx1)):
+        power_prod_spec1 = (spec1[idx1[i], 0] ** mz_power) * (spec1[idx1[i], 1] ** intensity_power)
+        power_prod_spec2 = (spec2[idx2[i], 0] ** mz_power) * (spec2[idx2[i], 1] ** intensity_power)
+        matching_pairs.append([idx1[i], idx2[i], power_prod_spec1 * power_prod_spec2])
+    return matching_pairs
 
-    for idx in range(spec1.shape[0]):
-        intensity = spec1[idx, 1]
-        mz = spec1[idx, 0]
-        matches = numpy.where((numpy.abs(spec2[:, 0] - spec1[idx, 0] + shift) <= tolerance))[0]
-        for match in matches:
-            power_prod_spec1 = ((mz ** mz_power) * (intensity ** intensity_power))
-            power_prod_spec2 = ((spec2[match][0] ** mz_power) * (spec2[match][1] ** intensity_power))
-            matching_pairs.append((idx, match, power_prod_spec1 * power_prod_spec2))
 
-    if len(matching_pairs) > 0:
-        return numpy.array(matching_pairs)
-    return numpy.empty((0, 0))
+@numba.njit
+def find_matches(spec1, spec2, tolerance, shift):
+    """Faster search for matching peaks.
+    Makes use of the fact that spec1 and spec2 contain ordered peak m/z (from
+    low to high m/z).
+
+    Parameters
+    ----------
+    spec1:
+        Spectrum peaks and intensities as numpy array.
+    spec2:
+        Spectrum peaks and intensities as numpy array.
+    tolerance
+        Peaks will be considered a match when <= tolerance appart.
+    shift
+        Shift spectra peaks by shift. The default is 0.
+
+    Returns
+    -------
+    matches
+        List containing entries of type (idx1, idx2).
+
+    """
+    lowest_idx = 0
+    matches = []
+    for peak1_idx in range(spec1.shape[0]):
+        mz = spec1[peak1_idx, 0]
+        low_bound = mz - tolerance
+        high_bound = mz + tolerance
+        for peak2_idx in range(lowest_idx, spec2.shape[0]):
+            mz2 = spec2[peak2_idx, 0] + shift
+            if mz2 > high_bound:
+                break
+            if mz2 < low_bound:
+                lowest_idx = peak2_idx
+            else:
+                matches.append((peak1_idx, peak2_idx))
+    return matches
 
 
 def get_peaks_array(spectrum: SpectrumType) -> numpy.ndarray:
