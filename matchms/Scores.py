@@ -226,9 +226,9 @@ class Scores:
 
             scores = calculate_scores(spectrums, spectrums, IntersectMz()).scores
 
-            print(scores[0]["score"].dtype)
+            print(scores[0].dtype)
             print(scores.shape)
-            print(scores["score"])
+            print(scores)
 
         Should output
 
