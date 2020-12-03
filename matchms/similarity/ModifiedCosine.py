@@ -1,4 +1,5 @@
 from typing import Tuple
+import numpy
 from matchms.typing import SpectrumType
 from .BaseSimilarity import BaseSimilarity
 from .spectrum_similarity_functions import collect_peak_pairs
@@ -93,11 +94,20 @@ class ModifiedCosine(BaseSimilarity):
             nonzero_pairs = collect_peak_pairs(spec1, spec2, self.tolerance, shift=mass_shift,
                                                mz_power=self.mz_power,
                                                intensity_power=self.intensity_power)
-            unsorted_matching_pairs = zero_pairs + nonzero_pairs
-            return sorted(unsorted_matching_pairs, key=lambda x: x[2], reverse=True)
+
+            if zero_pairs is None:
+                zero_pairs = numpy.zeros((0, 3))
+            if nonzero_pairs is None:
+                nonzero_pairs = numpy.zeros((0, 3))
+            matching_pairs = numpy.concatenate((zero_pairs, nonzero_pairs), axis=0)
+            if matching_pairs.shape[0] > 0:
+                matching_pairs = matching_pairs[numpy.argsort(matching_pairs[:, 2])[::-1], :]
+            return matching_pairs
 
         spec1 = get_peaks_array(reference)
         spec2 = get_peaks_array(query)
         matching_pairs = get_matching_pairs()
+        if matching_pairs.shape[0] == 0:
+            return float(0), 0
         return score_best_matches(matching_pairs, spec1, spec2,
                                   self.mz_power, self.intensity_power)

@@ -80,3 +80,22 @@ def test_modified_cosine_order_of_input_spectrums():
 
     assert score_1_2 == score_2_1, "Expected that the order of the arguments would not matter."
     assert n_matches_1_2 == n_matches_2_1, "Expected that the order of the arguments would not matter."
+
+
+def test_modified_cosine_with_mass_shift_5_no_matches_expected():
+    """Test modified cosine on two spectra with no expected matches."""
+    spectrum_1 = Spectrum(mz=numpy.array([100, 200, 300], dtype="float"),
+                          intensities=numpy.array([10, 10, 500], dtype="float"),
+                          metadata={"precursor_mz": 1000.0})
+
+    spectrum_2 = Spectrum(mz=numpy.array([120, 220, 320], dtype="float"),
+                          intensities=numpy.array([10, 10, 500], dtype="float"),
+                          metadata={"precursor_mz": 1005})
+
+    norm_spectrum_1 = normalize_intensities(spectrum_1)
+    norm_spectrum_2 = normalize_intensities(spectrum_2)
+    modified_cosine = ModifiedCosine(tolerance=1.0)
+    score, n_matches = modified_cosine.pair(norm_spectrum_1, norm_spectrum_2)
+
+    assert score == pytest.approx(0.0, 1e-5), "Expected different modified cosine score."
+    assert n_matches == 0, "Expected 0 matching peaks."

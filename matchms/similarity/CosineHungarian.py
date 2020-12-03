@@ -56,7 +56,10 @@ class CosineHungarian(BaseSimilarity):
             matching_pairs = collect_peak_pairs(spec1, spec2, self.tolerance, shift=0.0,
                                                 mz_power=self.mz_power,
                                                 intensity_power=self.intensity_power)
-            return sorted(matching_pairs, key=lambda x: x[2], reverse=True)
+            if matching_pairs is None:
+                return None
+            matching_pairs = matching_pairs[numpy.argsort(matching_pairs[:, 2])[::-1], :]
+            return matching_pairs
 
         def get_matching_pairs_matrix():
             """Create matrix of multiplied intensities of all matching pairs
@@ -69,19 +72,19 @@ class CosineHungarian(BaseSimilarity):
             matching_pairs_matrix:
                 Array of multiplied intensities between all matching peaks.
             """
-            if len(matching_pairs) == 0:
+            if matching_pairs is None:
                 return None, None, None
-            paired_peaks1 = list({x[0] for x in matching_pairs})
-            paired_peaks2 = list({x[1] for x in matching_pairs})
+            paired_peaks1 = list(set(matching_pairs[:, 0]))
+            paired_peaks2 = list(set(matching_pairs[:, 1]))
             matrix_size = (len(paired_peaks1), len(paired_peaks2))
             matching_pairs_matrix = numpy.ones(matrix_size)
-            for match in matching_pairs:
-                matching_pairs_matrix[paired_peaks1.index(match[0]),
-                                      paired_peaks2.index(match[1])] = 1 - match[2]
+            for i in range(matching_pairs.shape[0]):
+                matching_pairs_matrix[paired_peaks1.index(matching_pairs[i, 0]),
+                                      paired_peaks2.index(matching_pairs[i, 1])] = 1 - matching_pairs[i, 2]
             return paired_peaks1, paired_peaks2, matching_pairs_matrix
 
         def solve_hungarian():
-            """Use hungarian agorithm to solve the linear sum assignment problem."""
+            """Use hungarian algorithm to solve the linear sum assignment problem."""
             row_ind, col_ind = linear_sum_assignment(matching_pairs_matrix)
             score = len(row_ind) - matching_pairs_matrix[row_ind, col_ind].sum()
             used_matches = [(paired_peaks1[x], paired_peaks2[y]) for (x, y) in zip(row_ind, col_ind)]
@@ -89,16 +92,16 @@ class CosineHungarian(BaseSimilarity):
 
         def calc_score():
             """Calculate cosine similarity score."""
-            if matching_pairs_matrix is not None:
-                score, used_matches = solve_hungarian()
-                # Normalize score:
-                spec1_power = numpy.power(spec1[:, 0], self.mz_power) \
-                    * numpy.power(spec1[:, 1], self.intensity_power)
-                spec2_power = numpy.power(spec2[:, 0], self.mz_power) \
-                    * numpy.power(spec2[:, 1], self.intensity_power)
-                score = score/(numpy.sqrt(numpy.sum(spec1_power**2)) * numpy.sqrt(numpy.sum(spec2_power**2)))
-                return score, len(used_matches)
-            return 0.0, 0
+            if matching_pairs_matrix is None:
+                return 0.0, 0
+            score, used_matches = solve_hungarian()
+            # Normalize score:
+            spec1_power = numpy.power(spec1[:, 0], self.mz_power) \
+                * numpy.power(spec1[:, 1], self.intensity_power)
+            spec2_power = numpy.power(spec2[:, 0], self.mz_power) \
+                * numpy.power(spec2[:, 1], self.intensity_power)
+            score = score/(numpy.sqrt(numpy.sum(spec1_power**2)) * numpy.sqrt(numpy.sum(spec2_power**2)))
+            return score, len(used_matches)
 
         spec1 = get_peaks_array(reference)
         spec2 = get_peaks_array(query)
