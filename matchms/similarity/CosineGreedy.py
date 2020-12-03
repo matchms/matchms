@@ -89,7 +89,6 @@ class CosineGreedy(BaseSimilarity):
                                                 intensity_power=self.intensity_power)
             if matching_pairs is None:
                 return None
-            matching_pairs = numpy.array(matching_pairs)
             matching_pairs = matching_pairs[numpy.argsort(matching_pairs[:, 2])[::-1], :]
             return matching_pairs
 

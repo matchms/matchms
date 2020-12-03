@@ -43,7 +43,7 @@ def collect_peak_pairs(spec1: numpy.ndarray, spec2: numpy.ndarray,
         power_prod_spec1 = (spec1[idx, 0] ** mz_power) * (spec1[idx, 1] ** intensity_power)
         power_prod_spec2 = (spec2[idx2[i], 0] ** mz_power) * (spec2[idx2[i], 1] ** intensity_power)
         matching_pairs.append([idx1[i], idx2[i], power_prod_spec1 * power_prod_spec2])
-    return matching_pairs
+    return numpy.array(matching_pairs.copy())
 
 
 @numba.njit
