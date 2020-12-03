@@ -26,6 +26,37 @@ def _create_test_spectrum_with_intensities(intensities):
     return Spectrum(mz=mz, intensities=intensities)
 
 
+def test_spectrum_getters_return_copies():
+    """Test if getters return (deep)copies so that edits won't change the original entries."""
+    spectrum = Spectrum(mz=numpy.array([100.0, 101.0], dtype="float"),
+                        intensities=numpy.array([0.4, 0.5], dtype="float"),
+                        metadata={"testdata": 1})
+    # Get entries and modify
+    testdata = spectrum.get("testdata")
+    testdata += 1
+    assert spectrum.get("testdata") == 1, "Expected different entry"
+    peaks_mz = spectrum.peaks.mz
+    peaks_mz += 100.0
+    assert numpy.all(spectrum.peaks.mz == numpy.array([100.0, 101.0])), "Expected different peaks.mz"
+    metadata = spectrum.metadata
+    metadata["added_info"] = "this"
+    assert spectrum.metadata == {'testdata': 1}, "Expected metadata to remain unchanged"
+
+
+def test_comparing_spectra_with_arrays():
+    """Test if spectra can be compared that contain numpy.arrays in the metadata.
+    (Failed in an earlier version)"""
+    spectrum0 = Spectrum(mz=numpy.array([], dtype="float"),
+                         intensities=numpy.array([], dtype="float"),
+                         metadata={})
+
+    fingerprint1 = numpy.array([0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0])
+    spectrum1 = Spectrum(mz=numpy.array([], dtype="float"),
+                         intensities=numpy.array([], dtype="float"),
+                         metadata={"fingerprint": fingerprint1})
+    assert spectrum0 != spectrum1, "Expected spectra to not be equal"
+
+
 def test_spectrum_plot_same_peak_height():
     intensities_with_zero_variance = numpy.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], dtype="float")
     spectrum = _create_test_spectrum_with_intensities(intensities_with_zero_variance)
