@@ -77,7 +77,7 @@ Below is a small example of using matchms to calculate the Cosine score between 
         (reference, query, score) = score
         # Ignore scores between same spectrum and
         # pairs which have less than 20 peaks in common
-        if reference is not query and n_matching >= 20:
+        if reference is not query and score['matches'] >= 20:
             print(f"Reference scan id: {reference.metadata['scans']}")
             print(f"Query scan id: {query.metadata['scans']}")
             print(f"Score: {score['score']:.4f}")
