@@ -93,3 +93,31 @@ def test_fingerprint_similarity_parallel_cosine_set_empty_to_0():
     assert score_matrix == pytest.approx(numpy.array([[0, 0, 0],
                                                       [0, 1., 0.84515425],
                                                       [0, 0.84515425, 1.]]), 0.001), "Expected different values."
+
+
+def test_fingerprint_similarity_with_scores_sorting():
+    """Test if score works with Scores.scores_by_query and sorting."""
+    spectrum0 = Spectrum(mz=numpy.array([100.0, 101.0], dtype="float"),
+                         intensities=numpy.array([0.4, 0.5], dtype="float"),
+                         metadata={})
+
+    fingerprint1 = numpy.array([0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0])
+    spectrum1 = Spectrum(mz=numpy.array([100.0, 101.0], dtype="float"),
+                         intensities=numpy.array([0.4, 0.5], dtype="float"),
+                         metadata={"fingerprint": fingerprint1})
+
+    fingerprint2 = numpy.array([0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 1])
+    spectrum2 = Spectrum(mz=numpy.array([100.0, 101.0], dtype="float"),
+                         intensities=numpy.array([0.4, 0.5], dtype="float"),
+                         metadata={"fingerprint": fingerprint2})
+
+    similarity_measure = FingerprintSimilarity(set_empty_scores=0, similarity_measure="cosine")
+
+    scores = calculate_scores([spectrum0, spectrum1, spectrum2],
+                              [spectrum0, spectrum1, spectrum2],
+                              similarity_measure)
+
+    scores_by_ref_sorted = scores.scores_by_query(spectrum1, sort=True)
+    expected_scores = numpy.array([1.0, 0.84515425, 0.0])
+    assert numpy.allclose(numpy.array([x[1] for x in scores_by_ref_sorted]), expected_scores, atol=1e-6), \
+        "Expected different scores and/or order."
