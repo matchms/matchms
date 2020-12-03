@@ -208,7 +208,7 @@ def test_scores_by_reference_sorted():
     assert selected_scores == expected_result, "Expected different scores."
     scores_only = numpy.array([x[1]["score"] for x in selected_scores])
     scores_expected = numpy.array([1.0, 0.6129713330865563, 0.1363196353181994])
-    assert numpy.allclose(score_only, scores_expected, atol=1e-8), \
+    assert numpy.allclose(scores_only, scores_expected, atol=1e-8), \
         "Expected different sorted scores."
 
 
