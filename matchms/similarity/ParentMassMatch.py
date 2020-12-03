@@ -51,8 +51,8 @@ class ParentMassMatch(BaseSimilarity):
     """
     # Set key characteristics as class attributes
     is_commutative = True
-    # Set output data type, e.g. ("score", "float") or [("score", "float"), ("matches", "int")]
-    score_datatype = ("score", "bool")
+    # Set output data type, e.g.  "float" or [("score", "float"), ("matches", "int")]
+    score_datatype = numpy.bool
 
     def __init__(self, tolerance: float = 0.1):
         """
@@ -106,8 +106,10 @@ class ParentMassMatch(BaseSimilarity):
         parentmasses_ref = collect_parentmasses(references)
         parentmasses_query = collect_parentmasses(queries)
         if is_symmetric:
-            return parentmass_scores_symmetric(parentmasses_ref, parentmasses_query, self.tolerance).astype(bool)
-        return parentmass_scores(parentmasses_ref, parentmasses_query, self.tolerance).astype(bool)
+            return parentmass_scores_symmetric(parentmasses_ref, parentmasses_query,
+                                               self.tolerance).astype(self.score_datatype)
+        return parentmass_scores(parentmasses_ref, parentmasses_query,
+                                 self.tolerance).astype(self.score_datatype)
 
 
 @numba.njit

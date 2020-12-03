@@ -17,8 +17,8 @@ class BaseSimilarity:
     """
     # Set key characteristics as class attributes
     is_commutative = True
-    # Set output data type, e.g. ("score", "float") or [("score", "float"), ("matches", "int")]
-    score_datatype = {'names': ['score'], 'formats': [numpy.float64]}
+    # Set output data type, e.g. "float" or [("score", "float"), ("matches", "int")]
+    score_datatype = numpy.float64
 
     @abstractmethod
     def pair(self, reference: SpectrumType, query: SpectrumType) -> float:
@@ -77,5 +77,6 @@ class BaseSimilarity:
         idx_sorted
             Indexes of sorted scores.
         """
-        idx_sorted = scores["score"].argsort()
-        return idx_sorted[::-1]
+        if scores.dtype.names is None:
+            return scores.argsort()[::-1]
+        return scores["score"].argsort()[::-1]

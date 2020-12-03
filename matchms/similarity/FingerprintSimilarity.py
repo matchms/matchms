@@ -57,6 +57,11 @@ class FingerprintSimilarity(BaseSimilarity):
          [0.415 0.444 1.   ]]
 
     """
+    # Set key characteristics as class attributes
+    is_commutative = True
+    # Set output data type, e.g.  "float" or [("score", "float"), ("matches", "int")]
+    score_datatype = numpy.float64
+
     def __init__(self, similarity_measure: str = "jaccard",
                  set_empty_scores: Union[float, int, str] = "nan"):
         """
@@ -151,4 +156,4 @@ class FingerprintSimilarity(BaseSimilarity):
             similarity_matrix[numpy.ix_(idx_fingerprints1,
                                         idx_fingerprints2)] = cosine_similarity_matrix(fingerprints1,
                                                                                        fingerprints2)
-        return similarity_matrix
+        return similarity_matrix.astype(self.score_datatype)
