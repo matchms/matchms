@@ -129,7 +129,7 @@ class Scores:
         return self
 
     def scores_by_reference(self, reference: ReferencesType,
-                            sort : bool = False) -> numpy.ndarray:
+                            sort: bool = False) -> numpy.ndarray:
         """Return all scores (not sorted) for the given reference spectrum.
 
         Parameters
@@ -151,7 +151,7 @@ class Scores:
 
         return selected_scores
 
-    def scores_by_query(self, query: QueriesType, sort : bool = False) -> numpy.ndarray:
+    def scores_by_query(self, query: QueriesType, sort: bool = False) -> numpy.ndarray:
         """Return all scores (not sorted) for the given query spectrum.
 
         Parameters

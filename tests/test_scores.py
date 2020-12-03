@@ -204,7 +204,7 @@ def test_scores_by_reference_sorted():
     scores = calculate_scores(references, queries, CosineGreedy())
     selected_scores = scores.scores_by_reference(spectrum_2, sort=True)
 
-    expected_result = [(scores.queries[i], scores.scores[1, i]) for i in [2, 1,0]]
+    expected_result = [(scores.queries[i], scores.scores[1, i]) for i in [2, 1, 0]]
     assert selected_scores == expected_result, "Expected different scores."
     scores_only = numpy.array([x[1]["score"] for x in selected_scores])
     scores_expected = numpy.array([1.0, 0.6129713330865563, 0.1363196353181994])
