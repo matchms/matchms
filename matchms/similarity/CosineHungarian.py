@@ -104,7 +104,6 @@ class CosineHungarian(BaseSimilarity):
             score = score/(numpy.sqrt(numpy.sum(spec1_power**2)) * numpy.sqrt(numpy.sum(spec2_power**2)))
             return score, len(used_matches)
 
-
         spec1 = get_peaks_array(reference)
         spec2 = get_peaks_array(query)
         matching_pairs = get_matching_pairs()
