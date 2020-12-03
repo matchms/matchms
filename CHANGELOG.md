@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- scores_by_query and scores_by reference now accept sort=True to return sorted scores [#153](https://github.com/matchms/matchms/pull/153)
+
+### Changed
+
+- Scores.scores is now returning a structured array [#153](https://github.com/matchms/matchms/pull/153)
+
 ## [0.6.1] - 2020-11-26
 
 ### Added
