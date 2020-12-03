@@ -1,3 +1,4 @@
+from typing import List
 from typing import Tuple
 import numba
 import numpy
@@ -46,7 +47,8 @@ def collect_peak_pairs(spec1: numpy.ndarray, spec2: numpy.ndarray,
 
 
 @numba.njit
-def find_matches(spec1: numpy.ndarray, spec2: numpy.ndarray, tolerance: float, shift: float = 0) -> List[Tuple[int, int]]:
+def find_matches(spec1: numpy.ndarray, spec2: numpy.ndarray,
+                 tolerance: float, shift: float = 0) -> List[Tuple[int, int]]:
     """Faster search for matching peaks.
     Makes use of the fact that spec1 and spec2 contain ordered peak m/z (from
     low to high m/z).
@@ -60,7 +62,7 @@ def find_matches(spec1: numpy.ndarray, spec2: numpy.ndarray, tolerance: float, s
     tolerance
         Peaks will be considered a match when <= tolerance appart.
     shift
-        Shift spectra peaks by shift. The default is 0.
+        Shift peaks of second spectra by shift. The default is 0.
 
     Returns
     -------
