@@ -62,3 +62,20 @@ class BaseSimilarity:
                 for i_query, query in enumerate(queries[:n_cols]):
                     scores[i_ref][i_query] = self.pair(reference, query)
         return scores
+
+    def sort(self, scores: numpy.ndarray):
+        """Return array of indexes for sorted list of scores.
+        This method can be adapted for different styles of scores.
+
+        Parameters
+        ----------
+        scores
+            1D Array of scores.
+
+        Returns
+        -------
+        idx_sorted
+            Indexes of sorted scores.
+        """
+        idx_sorted = scores["score"].argsort()
+        return idx_sorted[::-1]

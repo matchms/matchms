@@ -128,17 +128,27 @@ class Scores:
                                                            is_symmetric=self.is_symmetric)
         return self
 
-    def scores_by_reference(self, reference: ReferencesType) -> numpy.ndarray:
+    def scores_by_reference(self, reference: ReferencesType,
+                            sort : bool = False) -> numpy.ndarray:
         """Return all scores (not sorted) for the given reference spectrum.
 
         Parameters
         ----------
         reference
             Single reference Spectrum.
+        sort
+            Set to True to obtain the scores in a sorted way (relying on the
+            sorting function from the given similarity_function).
         """
         assert reference in self.references, "Given input not found in references."
         selected_idx = int(numpy.where(self.references == reference)[0])
-        selected_scores = list(zip(self.queries, self._scores[selected_idx, :].copy()))
+        if sort:
+            query_idx_sorted = self.similarity_function.sort(self._scores[selected_idx, :])
+            selected_scores = list(zip(self.queries[query_idx_sorted],
+                                       self._scores[selected_idx, query_idx_sorted].copy()))
+        else:
+            selected_scores = list(zip(self.queries, self._scores[selected_idx, :].copy()))
+        
         return selected_scores
 
     def scores_by_query(self, query: QueriesType) -> numpy.ndarray:
