@@ -46,7 +46,7 @@ def collect_peak_pairs(spec1: numpy.ndarray, spec2: numpy.ndarray,
 
 
 @numba.njit
-def find_matches(spec1, spec2, tolerance, shift):
+def find_matches(spec1: numpy.ndarray, spec2: numpy.ndarray, tolerance: float, shift: float = 0) -> List[Tuple[int, int]]:
     """Faster search for matching peaks.
     Makes use of the fact that spec1 and spec2 contain ordered peak m/z (from
     low to high m/z).
