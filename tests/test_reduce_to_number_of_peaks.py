@@ -1,10 +1,11 @@
 import numpy
+import pytest
 from matchms import Spectrum
 from matchms.filtering import reduce_to_number_of_peaks
 
 
 def test_reduce_to_number_of_peaks_no_params():
-
+    """Use default parameters."""
     mz = numpy.array([10, 20, 30, 40], dtype="float")
     intensities = numpy.array([0, 1, 10, 100], dtype="float")
     spectrum_in = Spectrum(mz=mz, intensities=intensities)
@@ -14,8 +15,20 @@ def test_reduce_to_number_of_peaks_no_params():
     assert spectrum == spectrum_in, "Expected no changes."
 
 
-def test_reduce_to_number_of_peaks_n_max_4():
+def test_reduce_to_number_of_peaks_no_params_w_parent_mass():
+    """Use default parameters with present parent mass."""
+    mz = numpy.array([10, 20, 30, 40], dtype="float")
+    intensities = numpy.array([0, 1, 10, 100], dtype="float")
+    spectrum_in = Spectrum(mz=mz, intensities=intensities,
+                           metadata={"parent_mass": 50})
 
+    spectrum = reduce_to_number_of_peaks(spectrum_in)
+
+    assert spectrum == spectrum_in, "Expected no changes."
+
+
+def test_reduce_to_number_of_peaks_n_max_4():
+    """Test setting n_max parameter."""
     mz = numpy.array([10, 20, 30, 40, 50], dtype="float")
     intensities = numpy.array([1, 1, 10, 20, 100], dtype="float")
     spectrum_in = Spectrum(mz=mz, intensities=intensities)
@@ -27,14 +40,16 @@ def test_reduce_to_number_of_peaks_n_max_4():
 
 
 def test_reduce_to_number_of_peaks_ratio_given_but_no_parent_mass():
-    """A ratio_desired given without parent_mass should not result in changes."""
+    """A ratio_desired given without parent_mass should raise an exception."""
     mz = numpy.array([10, 20, 30, 40], dtype="float")
     intensities = numpy.array([0, 1, 10, 100], dtype="float")
     spectrum_in = Spectrum(mz=mz, intensities=intensities)
 
-    spectrum = reduce_to_number_of_peaks(spectrum_in, n_required=4, ratio_desired=0.1)
+    with pytest.raises(Exception) as msg:
+        _ = reduce_to_number_of_peaks(spectrum_in, n_required=4, ratio_desired=0.1)
 
-    assert spectrum == spectrum_in, "Expected the spectrum to remain unchanged."
+    expected_msg = "Cannot use ratio_desired for spectrum without parent_mass."
+    assert expected_msg in str(msg.value), "Expected specific exception message."
 
 
 def test_reduce_to_number_of_peaks_required_2_desired_2():
@@ -67,7 +82,8 @@ def test_reduce_to_number_of_peaks_desired_5_check_sorting():
     """Check if mz and intensities order is sorted correctly """
     mz = numpy.array([10, 20, 30, 40, 50, 60], dtype="float")
     intensities = numpy.array([5, 1, 4, 3, 100, 2], dtype="float")
-    spectrum_in = Spectrum(mz=mz, intensities=intensities)
+    spectrum_in = Spectrum(mz=mz, intensities=intensities,
+                           metadata={"parent_mass": 20})
 
     spectrum = reduce_to_number_of_peaks(spectrum_in, n_max=5)
 

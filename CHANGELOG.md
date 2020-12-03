@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.1] - 2020-11-26
+
+### Added
+
+- PrecursorMzMatch for deriving precursor m/z matches within a given tolerance [#156](https://github.com/matchms/matchms/pull/156)
+
+### Changed
+
+- Raise error for improper use of reduce_to_number_of_peaks filter [#151](https://github.com/matchms/matchms/pull/151)
+- Renamed ParentmassMatch to ParentMassMatch [#156](https://github.com/matchms/matchms/pull/156)
+
+### Fixed
+
+- Fix minor issue with msp importer to avoid failing with unknown characters [#151](https://github.com/matchms/matchms/pull/151)
+
 ## [0.6.0] - 2020-09-14
 
 ### Added
@@ -210,7 +225,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - This is the initial version of Spec2Vec from https://github.com/iomega/Spec2Vec
 
-[Unreleased]: https://github.com/matchms/matchms/compare/0.6.0...HEAD
+[Unreleased]: https://github.com/matchms/matchms/compare/0.6.1...HEAD
+[0.6.1]: https://github.com/matchms/matchms/compare/0.6.0...0.6.1
 [0.6.0]: https://github.com/matchms/matchms/compare/0.5.2...0.6.0
 [0.5.2]: https://github.com/matchms/matchms/compare/0.5.1...0.5.2
 [0.5.1]: https://github.com/matchms/matchms/compare/0.5.0...0.5.1

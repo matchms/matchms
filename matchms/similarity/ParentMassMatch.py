@@ -5,7 +5,7 @@ from matchms.typing import SpectrumType
 from .BaseSimilarity import BaseSimilarity
 
 
-class ParentmassMatch(BaseSimilarity):
+class ParentMassMatch(BaseSimilarity):
     """Return True if spectrums match in parent mass (within tolerance), and False otherwise.
 
     Example to calculate scores between 2 spectrums and iterate over the scores
@@ -15,7 +15,7 @@ class ParentmassMatch(BaseSimilarity):
         import numpy as np
         from matchms import calculate_scores
         from matchms import Spectrum
-        from matchms.similarity import ParentmassMatch
+        from matchms.similarity import ParentMassMatch
 
         spectrum_1 = Spectrum(mz=np.array([]),
                               intensities=np.array([]),
@@ -32,7 +32,7 @@ class ParentmassMatch(BaseSimilarity):
         references = [spectrum_1, spectrum_2]
         queries = [spectrum_3, spectrum_4]
 
-        similarity_score = ParentmassMatch(tolerance=5.0)
+        similarity_score = ParentMassMatch(tolerance=5.0)
         scores = calculate_scores(references, queries, similarity_score)
 
         for (reference, query, score) in scores:
