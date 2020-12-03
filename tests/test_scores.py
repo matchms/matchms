@@ -1,8 +1,8 @@
 import numpy
 import pytest
-from matchms import calculate_scores
 from matchms import Scores
 from matchms import Spectrum
+from matchms import calculate_scores
 from matchms.similarity import CosineGreedy
 from matchms.similarity import IntersectMz
 from matchms.similarity.BaseSimilarity import BaseSimilarity
