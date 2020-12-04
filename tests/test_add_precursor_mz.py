@@ -17,7 +17,7 @@ def test_add_precursor_mz():
     assert spectrum.get("precursor_mz") == 444.0, "Expected different precursor_mz."
 
 
-def test_add_precursor_mz():
+def test_add_precursor_mz_no_masses():
     """Test if no precursor_mz is handled correctly. Here nothing should change."""
     mz = numpy.array([], dtype='float')
     intensities = numpy.array([], dtype='float')
