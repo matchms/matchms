@@ -58,6 +58,7 @@ def test_add_precursor_mz_no_precursor_mz():
 
     assert spectrum.get("precursor_mz") == 444.0, "Expected different precursor_mz."
 
+
 def test_empty_spectrum():
     spectrum_in = None
     spectrum = add_precursor_mz(spectrum_in)
