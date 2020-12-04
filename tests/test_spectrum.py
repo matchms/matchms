@@ -43,6 +43,38 @@ def test_spectrum_getters_return_copies():
     assert spectrum.metadata == {'testdata': 1}, "Expected metadata to remain unchanged"
 
 
+def test_comparing_spectra_with_metadata():
+    """Test if spectra can be compared that contain numpy.arrays in the metadata.
+    (Failed in an earlier version)"""
+    spectrum0 = Spectrum(mz=numpy.array([100.0, 101.0], dtype="float"),
+                         intensities=numpy.array([0.4, 0.5], dtype="float"),
+                         metadata={"float_example": 400.768,
+                                   "str_example": "whatever",
+                                   "list_example": [3, 4, "abc"]})
+
+    spectrum1 = Spectrum(mz=numpy.array([100.0, 101.0], dtype="float"),
+                         intensities=numpy.array([0.4, 0.5], dtype="float"),
+                         metadata={"float_example": 400.768,
+                                   "str_example": "whatever",
+                                   "list_example": [3, 4, "abc"]})
+
+    spectrum2 = Spectrum(mz=numpy.array([100.0, 101.0], dtype="float"),
+                         intensities=numpy.array([0.4, 0.5], dtype="float"),
+                         metadata={"float_example": 400.768,
+                                   "str_example": "whatever",
+                                   "list_example": [3, 4, "abc"],
+                                   "more_stuff": 15})
+
+    spectrum3 = Spectrum(mz=numpy.array([100.0, 101.0], dtype="float"),
+                         intensities=numpy.array([0.4, 0.5], dtype="float"),
+                         metadata={"float_example": 400.768,
+                                   "str_example": "whatever",
+                                   "list_example": [3, 4, "abc", "extra"]})
+    assert spectrum0 == spectrum1, "Expected spectra to be equal"
+    assert spectrum0 != spectrum2, "Expected spectra to not be equal"
+    assert spectrum0 != spectrum3, "Expected spectra to not be equal"
+
+
 def test_comparing_spectra_with_arrays():
     """Test if spectra can be compared that contain numpy.arrays in the metadata.
     (Failed in an earlier version)"""
