@@ -19,6 +19,6 @@ def test_derive_smiles_from_inchi():
 
 def test_empty_spectrum():
     spectrum_in = None
-    spectrum = derive_smiles_from_inchie(spectrum_in)
+    spectrum = derive_smiles_from_inchi(spectrum_in)
 
     assert spectrum is None, "Expected differnt handling of None spectrum."
