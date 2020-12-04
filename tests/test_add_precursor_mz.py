@@ -17,6 +17,20 @@ def test_add_precursor_mz():
     assert spectrum.get("precursor_mz") == 444.0, "Expected different precursor_mz."
 
 
+def test_add_precursor_mz():
+    """Test if no precursor_mz is handled correctly. Here nothing should change."""
+    mz = numpy.array([], dtype='float')
+    intensities = numpy.array([], dtype='float')
+    metadata = {}
+    spectrum_in = Spectrum(mz=mz,
+                           intensities=intensities,
+                           metadata=metadata)
+
+    spectrum = add_precursor_mz(spectrum_in)
+
+    assert spectrum.get("precursor_mz") is None, "Outcome should be None."
+
+
 def test_add_precursor_mz_only_pepmass_present():
     """Test if precursor_mz is correctly derived if only pepmass is present."""
     mz = numpy.array([], dtype='float')
