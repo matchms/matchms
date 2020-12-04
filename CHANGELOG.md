@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Minor bug in add_precursor_mz [#161](https://github.com/matchms/matchms/pull/161)
+
 ## [0.6.2] - 2020-12-03
 
 ### Changed
