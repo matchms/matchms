@@ -89,3 +89,10 @@ def test_reduce_to_number_of_peaks_desired_5_check_sorting():
 
     assert spectrum.peaks.intensities.tolist() == [5., 4., 3., 100., 2.], "Expected different intensities."
     assert spectrum.peaks.mz.tolist() == [10., 30., 40., 50., 60.], "Expected different peaks to remain."
+
+
+def test_empty_spectrum():
+    spectrum_in = None
+    spectrum = reduce_to_number_of_peaks(spectrum_in)
+
+    assert spectrum is None, "Expected differnt handling of None spectrum."
