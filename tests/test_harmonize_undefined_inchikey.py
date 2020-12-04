@@ -71,3 +71,10 @@ def test_harmonize_undefined_inchikey_alias_nan_undefined_is_na():
 
     spectrum = harmonize_undefined_inchikey(spectrum_in, aliases=["nodata", "NaN", "Nan", "nan"], undefined="n/a")
     assert spectrum.get("inchikey") == "n/a"
+
+
+def test_empty_spectrum():
+    spectrum_in = None
+    spectrum = harmonize_undefined_inchikey(spectrum_in)
+
+    assert spectrum is None, "Expected different handling of None spectrum."
