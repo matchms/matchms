@@ -14,3 +14,10 @@ def test_derive_inchikey_from_inchi():
 
     spectrum = derive_inchikey_from_inchi(spectrum_in)
     assert spectrum.get("inchikey")[:14] == 'XDTMQSROBMDMFD', "Expected different inchikey"
+
+
+def test_empty_spectrum():
+    spectrum_in = None
+    spectrum = derive_inchikey_from_inchi(spectrum_in)
+
+    assert spectrum is None, "Expected different handling of None spectrum."

@@ -1,5 +1,5 @@
 {% set name = "matchms" %}
-{% set version = "0.6.1" %}
+{% set version = "0.6.2" %}
 
 package:
   name: {{ name|lower }}
@@ -44,7 +44,7 @@ requirements:
     - python >=3.7,<3.9
     - pyyaml
     - rdkit >=2020.03.1
-    - scipy
+    - scipy >=1.4.0
 
 test:
   imports:

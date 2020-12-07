@@ -86,14 +86,18 @@ class CosineGreedy(BaseSimilarity):
         """
         def get_matching_pairs():
             """Get pairs of peaks that match within the given tolerance."""
-            matching_pairs = collect_peak_pairs(spec1, spec2, self.tolerance, shift=0.0,
-                                                mz_power=self.mz_power,
+            matching_pairs = collect_peak_pairs(spec1, spec2, self.tolerance,
+                                                shift=0.0, mz_power=self.mz_power,
                                                 intensity_power=self.intensity_power)
-            matching_pairs = sorted(matching_pairs, key=lambda x: x[2], reverse=True)
+            if matching_pairs is None:
+                return None
+            matching_pairs = matching_pairs[numpy.argsort(matching_pairs[:, 2])[::-1], :]
             return matching_pairs
 
         spec1 = get_peaks_array(reference)
         spec2 = get_peaks_array(query)
         matching_pairs = get_matching_pairs()
-        return score_best_matches(matching_pairs, spec1, spec2,
-                                  self.mz_power, self.intensity_power)
+        if matching_pairs is not None:
+            return score_best_matches(matching_pairs, spec1, spec2,
+                                      self.mz_power, self.intensity_power)
+        return float(0), 0

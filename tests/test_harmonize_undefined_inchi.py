@@ -61,3 +61,10 @@ def test_harmonize_undefined_inchi_alias_nan_undefined_is_na():
 
     spectrum = harmonize_undefined_inchi(spectrum_in, aliases=["nodata", "NaN", "Nan", "nan"], undefined="n/a")
     assert spectrum.get("inchi") == "n/a"
+
+
+def test_empty_spectrum():
+    spectrum_in = None
+    spectrum = harmonize_undefined_inchi(spectrum_in)
+
+    assert spectrum is None, "Expected different handling of None spectrum."

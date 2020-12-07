@@ -13,4 +13,4 @@ dependencies:
   - python >=3.7,<3.9
   - pyyaml
   - rdkit >=2020.03.1
-  - scipy
+  - scipy >=1.4.0

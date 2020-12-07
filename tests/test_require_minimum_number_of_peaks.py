@@ -101,3 +101,10 @@ def test_require_minimum_number_of_peaks_required_5_or_10():
 
     assert spectrum is None, "Did not expect the spectrum to qualify because the number of peaks (4) is less " \
                              "than the required number (10)."
+
+
+def test_empty_spectrum():
+    spectrum_in = None
+    spectrum = require_minimum_number_of_peaks(spectrum_in)
+
+    assert spectrum is None, "Expected different handling of None spectrum."

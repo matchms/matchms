@@ -31,3 +31,10 @@ def test_add_parent_mass_no_pepmass():
     spectrum = add_parent_mass(spectrum_in)
 
     assert numpy.abs(spectrum.get("parent_mass") - 445.0) < .01, "Expected parent mass of about 445.0."
+
+
+def test_empty_spectrum():
+    spectrum_in = None
+    spectrum = add_parent_mass(spectrum_in)
+
+    assert spectrum is None, "Expected different handling of None spectrum."
