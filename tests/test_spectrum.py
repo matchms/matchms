@@ -44,8 +44,7 @@ def test_spectrum_getters_return_copies():
 
 
 def test_comparing_spectra_with_metadata():
-    """Test if spectra can be compared that contain numpy.arrays in the metadata.
-    (Failed in an earlier version)"""
+    """Test if spectra with (slightly) different metadata are correctly compared."""
     spectrum0 = Spectrum(mz=numpy.array([100.0, 101.0], dtype="float"),
                          intensities=numpy.array([0.4, 0.5], dtype="float"),
                          metadata={"float_example": 400.768,
