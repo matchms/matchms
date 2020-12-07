@@ -53,15 +53,15 @@ def test_user_workflow():
 
     score_datatype = cosine_greedy.score_datatype
     expected_top10 = [
-        (references[48], queries[50], numpy.array((0.9994783627790965, 25), dtype=score_datatype)),
-        (references[50], queries[48], numpy.array((0.9994783627790965, 25), dtype=score_datatype)),
-        (references[46], queries[48], numpy.array((0.9990141860269471, 27), dtype=score_datatype)),
-        (references[48], queries[46], numpy.array((0.9990141860269471, 27), dtype=score_datatype)),
-        (references[46], queries[50], numpy.array((0.9988793406908719, 22), dtype=score_datatype)),
-        (references[50], queries[46], numpy.array((0.9988793406908719, 22), dtype=score_datatype)),
-        (references[57], queries[59], numpy.array((0.9982171275552505, 46), dtype=score_datatype)),
-        (references[59], queries[57], numpy.array((0.9982171275552505, 46), dtype=score_datatype)),
-        (references[73], queries[74], numpy.array((0.9973823244169199, 23), dtype=score_datatype)),
-        (references[74], queries[73], numpy.array((0.9973823244169199, 23), dtype=score_datatype)),
+        (references[48], queries[50], numpy.array([(0.9994783627790967, 25)], dtype=score_datatype)[0]),
+        (references[50], queries[48], numpy.array([(0.9994783627790967, 25)], dtype=score_datatype)[0]),
+        (references[46], queries[48], numpy.array([(0.9990141860269471, 27)], dtype=score_datatype)[0]),
+        (references[48], queries[46], numpy.array([(0.9990141860269471, 27)], dtype=score_datatype)[0]),
+        (references[46], queries[50], numpy.array([(0.9988793406908721, 22)], dtype=score_datatype)[0]),
+        (references[50], queries[46], numpy.array([(0.9988793406908721, 22)], dtype=score_datatype)[0]),
+        (references[57], queries[59], numpy.array([(0.9982171275552503, 46)], dtype=score_datatype)[0]),
+        (references[59], queries[57], numpy.array([(0.9982171275552503, 46)], dtype=score_datatype)[0]),
+        (references[73], queries[74], numpy.array([(0.9973823244169199, 23)], dtype=score_datatype)[0]),
+        (references[74], queries[73], numpy.array([(0.9973823244169199, 23)], dtype=score_datatype)[0]),
     ]
     assert actual_top10 == expected_top10
