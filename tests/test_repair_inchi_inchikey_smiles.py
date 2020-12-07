@@ -138,4 +138,4 @@ def test_empty_spectrum():
     spectrum_in = None
     spectrum = repair_inchi_inchikey_smiles(spectrum_in)
 
-    assert spectrum is None, "Expected differnt handling of None spectrum."
+    assert spectrum is None, "Expected different handling of None spectrum."

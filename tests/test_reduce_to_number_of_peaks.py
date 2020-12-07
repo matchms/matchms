@@ -95,4 +95,4 @@ def test_empty_spectrum():
     spectrum_in = None
     spectrum = reduce_to_number_of_peaks(spectrum_in)
 
-    assert spectrum is None, "Expected differnt handling of None spectrum."
+    assert spectrum is None, "Expected different handling of None spectrum."
