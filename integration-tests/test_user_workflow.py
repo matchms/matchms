@@ -1,5 +1,6 @@
 import os
 import numpy
+import pytest
 from matchms import calculate_scores
 from matchms.filtering import add_parent_mass
 from matchms.filtering import default_filters
@@ -64,7 +65,7 @@ def test_user_workflow():
         (references[73], queries[74], numpy.array([(0.9973823244169199, 23)], dtype=score_datatype)[0]),
         (references[74], queries[73], numpy.array([(0.9973823244169199, 23)], dtype=score_datatype)[0]),
     ]
-    assert [x[2][0] for x in actual_top10] == [x[2][0] for x in expected_top10], \
+    assert [x[2][0] for x in actual_top10] == pytest.approx([x[2][0] for x in expected_top10], 1e-8), \
         "Expected different scores."
     assert [x[2][1] for x in actual_top10] == [x[2][1] for x in expected_top10], \
         "Expected different matches."
