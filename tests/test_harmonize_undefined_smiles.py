@@ -71,3 +71,10 @@ def test_harmonize_undefined_smiles_alias_nan_undefined_is_na():
 
     spectrum = harmonize_undefined_smiles(spectrum_in, aliases=["nodata", "NaN", "Nan", "nan"], undefined="n/a")
     assert spectrum.get("smiles") == "n/a"
+
+
+def test_empty_spectrum():
+    spectrum_in = None
+    spectrum = harmonize_undefined_smiles(spectrum_in)
+
+    assert spectrum is None, "Expected different handling of None spectrum."
