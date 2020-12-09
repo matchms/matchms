@@ -97,7 +97,8 @@ class CosineGreedy(BaseSimilarity):
         spec1 = get_peaks_array(reference)
         spec2 = get_peaks_array(query)
         matching_pairs = get_matching_pairs()
-        if matching_pairs is not None:
-            return score_best_matches(matching_pairs, spec1, spec2,
-                                      self.mz_power, self.intensity_power)
-        return float(0), 0
+        if matching_pairs is None:
+            return numpy.asarray((float(0), 0), dtype=self.score_datatype)
+        score = score_best_matches(matching_pairs, spec1, spec2,
+                                   self.mz_power, self.intensity_power)
+        return numpy.asarray(score, dtype=self.score_datatype)

@@ -106,7 +106,7 @@ class CosineHungarian(BaseSimilarity):
             spec2_power = numpy.power(spec2[:, 0], self.mz_power) \
                 * numpy.power(spec2[:, 1], self.intensity_power)
             score = score/(numpy.sqrt(numpy.sum(spec1_power**2)) * numpy.sqrt(numpy.sum(spec2_power**2)))
-            return score, len(used_matches)
+            return numpy.asarray((score, len(used_matches)), dtype=self.score_datatype)
 
         spec1 = get_peaks_array(reference)
         spec2 = get_peaks_array(query)

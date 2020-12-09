@@ -30,6 +30,10 @@ class BaseSimilarity:
             Single reference spectrum.
         query
             Single query spectrum.
+        
+        Returns
+            score as numpy array (using self.score_datatype). For instance returning
+            numpy.asarray(score, dtype=self.score_datatype)
         """
         raise NotImplementedError
 

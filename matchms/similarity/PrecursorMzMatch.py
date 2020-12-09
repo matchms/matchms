@@ -87,7 +87,8 @@ class PrecursorMzMatch(BaseSimilarity):
             return abs(precursormz_ref - precursormz_query) <= self.tolerance
 
         mean_mz = (precursormz_ref + precursormz_query) / 2
-        return abs(precursormz_ref - precursormz_query)/mean_mz <= self.tolerance
+        score = abs(precursormz_ref - precursormz_query)/mean_mz <= self.tolerance
+        return numpy.asarray(score, dtype=self.score_datatype)
 
     def matrix(self, references: List[SpectrumType], queries: List[SpectrumType],
                is_symmetric: bool = False) -> numpy.ndarray:

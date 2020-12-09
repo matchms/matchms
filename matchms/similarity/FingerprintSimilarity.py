@@ -99,7 +99,8 @@ class FingerprintSimilarity(BaseSimilarity):
             return dice_similarity(fingerprint_ref, fingerprint_query)
 
         if self.similarity_measure == "cosine":
-            return cosine_similarity(fingerprint_ref, fingerprint_query)
+            score = cosine_similarity(fingerprint_ref, fingerprint_query)
+            return numpy.asarray(score, dtype=self.score_datatype)
 
         raise NotImplementedError
 

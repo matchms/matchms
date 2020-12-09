@@ -110,6 +110,7 @@ class ModifiedCosine(BaseSimilarity):
         spec2 = get_peaks_array(query)
         matching_pairs = get_matching_pairs()
         if matching_pairs.shape[0] == 0:
-            return float(0), 0
-        return score_best_matches(matching_pairs, spec1, spec2,
-                                  self.mz_power, self.intensity_power)
+            return numpy.asarray((float(0), 0), dtype=self.score_datatype)
+        score = score_best_matches(matching_pairs, spec1, spec2,
+                                   self.mz_power, self.intensity_power)
+        return numpy.asarray(score, dtype=self.score_datatype)
