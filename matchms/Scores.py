@@ -130,7 +130,7 @@ class Scores:
 
     def scores_by_reference(self, reference: ReferencesType,
                             sort: bool = False) -> numpy.ndarray:
-        """Return all scores (not sorted) for the given reference spectrum.
+        """Return all scores for the given reference spectrum.
 
         Parameters
         ----------
@@ -138,21 +138,18 @@ class Scores:
             Single reference Spectrum.
         sort
             Set to True to obtain the scores in a sorted way (relying on the
-            sorting function from the given similarity_function).
+            :meth:`~.BaseSimilarity.sort` function from the given similarity_function).
         """
         assert reference in self.references, "Given input not found in references."
         selected_idx = int(numpy.where(self.references == reference)[0])
         if sort:
             query_idx_sorted = self.similarity_function.sort(self._scores[selected_idx, :])
-            selected_scores = list(zip(self.queries[query_idx_sorted],
+            return list(zip(self.queries[query_idx_sorted],
                                        self._scores[selected_idx, query_idx_sorted].copy()))
-        else:
-            selected_scores = list(zip(self.queries, self._scores[selected_idx, :].copy()))
-
-        return selected_scores
+        return list(zip(self.queries, self._scores[selected_idx, :].copy()))
 
     def scores_by_query(self, query: QueriesType, sort: bool = False) -> numpy.ndarray:
-        """Return all scores (not sorted) for the given query spectrum.
+        """Return all scores for the given query spectrum.
 
         Parameters
         ----------
@@ -160,7 +157,7 @@ class Scores:
             Single query Spectrum.
         sort
             Set to True to obtain the scores in a sorted way (relying on the
-            sorting function from the given similarity_function).
+            :meth:`~.BaseSimilarity.sort` function from the given similarity_function).
 
         For example
 
@@ -200,11 +197,9 @@ class Scores:
         selected_idx = int(numpy.where(self.queries == query)[0])
         if sort:
             references_idx_sorted = self.similarity_function.sort(self._scores[:, selected_idx])
-            selected_scores = list(zip(self.references[references_idx_sorted],
+            return list(zip(self.references[references_idx_sorted],
                                        self._scores[references_idx_sorted, selected_idx].copy()))
-        else:
-            selected_scores = list(zip(self.references, self._scores[:, selected_idx].copy()))
-        return selected_scores
+        return list(zip(self.references, self._scores[:, selected_idx].copy()))
 
     @property
     def scores(self) -> numpy.ndarray:
