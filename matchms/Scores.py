@@ -145,7 +145,7 @@ class Scores:
         if sort:
             query_idx_sorted = self.similarity_function.sort(self._scores[selected_idx, :])
             return list(zip(self.queries[query_idx_sorted],
-                                       self._scores[selected_idx, query_idx_sorted].copy()))
+                            self._scores[selected_idx, query_idx_sorted].copy()))
         return list(zip(self.queries, self._scores[selected_idx, :].copy()))
 
     def scores_by_query(self, query: QueriesType, sort: bool = False) -> numpy.ndarray:
@@ -198,7 +198,7 @@ class Scores:
         if sort:
             references_idx_sorted = self.similarity_function.sort(self._scores[:, selected_idx])
             return list(zip(self.references[references_idx_sorted],
-                                       self._scores[references_idx_sorted, selected_idx].copy()))
+                            self._scores[references_idx_sorted, selected_idx].copy()))
         return list(zip(self.references, self._scores[:, selected_idx].copy()))
 
     @property
