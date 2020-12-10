@@ -81,6 +81,4 @@ class BaseSimilarity:
         idx_sorted
             Indexes of sorted scores.
         """
-        if scores.dtype.names is None:
-            return scores.argsort()[::-1]
-        return scores["score"].argsort()[::-1]
+        return scores.argsort()[::-1]
