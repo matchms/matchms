@@ -37,9 +37,9 @@ class ModifiedCosine(BaseSimilarity):
         # Use factory to construct a similarity function
         modified_cosine = ModifiedCosine(tolerance=0.2)
 
-        score, n_matches = modified_cosine.pair(spectrum_1, spectrum_2)
+        score = modified_cosine.pair(spectrum_1, spectrum_2)
 
-        print(f"Modified cosine score is {score:.2f} with {n_matches} matched peaks")
+        print(f"Modified cosine score is {score["score"]:.2f} with {score["matches"]} matched peaks")
 
     Should output
 

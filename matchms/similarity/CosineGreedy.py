@@ -36,9 +36,9 @@ class CosineGreedy(BaseSimilarity):
         # Use factory to construct a similarity function
         cosine_greedy = CosineGreedy(tolerance=0.2)
 
-        score, n_matches = cosine_greedy.pair(reference, query)
+        score = cosine_greedy.pair(reference, query)
 
-        print(f"Cosine score is {score:.2f} with {n_matches} matched peaks")
+        print(f"Cosine score is {score["score"]:.2f} with {score["matches"]} matched peaks")
 
     Should output
 
