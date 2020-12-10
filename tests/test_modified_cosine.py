@@ -96,6 +96,6 @@ def test_modified_cosine_with_mass_shift_5_no_matches_expected():
     norm_spectrum_2 = normalize_intensities(spectrum_2)
     modified_cosine = ModifiedCosine(tolerance=1.0)
     score = modified_cosine.pair(norm_spectrum_1, norm_spectrum_2)
-    
+
     assert score["score"] == pytest.approx(0.0, 1e-5), "Expected different modified cosine score."
     assert score["matches"] == 0, "Expected 0 matching peaks."
