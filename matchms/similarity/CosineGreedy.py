@@ -38,7 +38,7 @@ class CosineGreedy(BaseSimilarity):
 
         score = cosine_greedy.pair(reference, query)
 
-        print(f"Cosine score is {score["score"]:.2f} with {score["matches"]} matched peaks")
+        print(f"Cosine score is {score['score']:.2f} with {score['matches']} matched peaks")
 
     Should output
 

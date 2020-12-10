@@ -39,7 +39,7 @@ class ModifiedCosine(BaseSimilarity):
 
         score = modified_cosine.pair(spectrum_1, spectrum_2)
 
-        print(f"Modified cosine score is {score["score"]:.2f} with {score["matches"]} matched peaks")
+        print(f"Modified cosine score is {score['score']:.2f} with {score['matches']} matched peaks")
 
     Should output
 
