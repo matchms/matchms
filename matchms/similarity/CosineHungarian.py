@@ -98,7 +98,7 @@ class CosineHungarian(BaseSimilarity):
         def calc_score():
             """Calculate cosine similarity score."""
             if matching_pairs_matrix is None:
-                return 0.0, 0
+                return numpy.asarray((0.0, 0), dtype=self.score_datatype)
             score, used_matches = solve_hungarian()
             # Normalize score:
             spec1_power = numpy.power(spec1[:, 0], self.mz_power) \
