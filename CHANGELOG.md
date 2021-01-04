@@ -7,17 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] - 2021-01-04
+
 ### Added
 
-- scores_by_query and scores_by reference now accept sort=True to return sorted scores [#153](https://github.com/matchms/matchms/pull/153)
+- `scores_by_query` and `scores_by reference` now accept sort=True to return sorted scores [#153](https://github.com/matchms/matchms/pull/153)
 
 ### Changed
 
-- Scores.scores is now returning a structured array [#153](https://github.com/matchms/matchms/pull/153)
+- `Scores.scores` is now returning a structured array [#153](https://github.com/matchms/matchms/pull/153)
 
 ### Fixed
 
-- Minor bug in add_precursor_mz [#161](https://github.com/matchms/matchms/pull/161)
+- Minor bug in `add_precursor_mz` [#161](https://github.com/matchms/matchms/pull/161)
 
 ## [0.6.2] - 2020-12-03
 
@@ -243,7 +245,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - This is the initial version of Spec2Vec from https://github.com/iomega/Spec2Vec
 
-[Unreleased]: https://github.com/matchms/matchms/compare/0.6.2...HEAD
+[Unreleased]: https://github.com/matchms/matchms/compare/0.7.0...HEAD
+[0.7.0]: https://github.com/matchms/matchms/compare/0.6.2...0.7.0
 [0.6.2]: https://github.com/matchms/matchms/compare/0.6.1...0.6.2
 [0.6.1]: https://github.com/matchms/matchms/compare/0.6.0...0.6.1
 [0.6.0]: https://github.com/matchms/matchms/compare/0.5.2...0.6.0
