@@ -88,8 +88,8 @@ jobs:
         shell: bash -l {0}
         run: |
           env | sort
-  anaconda_build:
-    name: Anaconda build / python-3.7 / ubuntu-latest
+  anaconda_dev:
+    name: Anaconda build and test documentation / python-3.8 / ubuntu-latest
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -137,7 +137,42 @@ jobs:
           UNCOVERED_MEMBERS_ALLOWED=10
           if (( $UNCOVERED_MEMBERS > $UNCOVERED_MEMBERS_ALLOWED )) ; then echo "There are currently ${UNCOVERED_MEMBERS} uncovered members in the documentation, which is more than the ${UNCOVERED_MEMBERS_ALLOWED} allowed." && exit 1;fi
           echo "The code is sufficiently documented with ${UNCOVERED_MEMBERS} uncovered members out of ${UNCOVERED_MEMBERS_ALLOWED} allowed.";
-      - name: Build the conda package
+
+  anaconda_build:
+    name: Anaconda build / python-3.8 / ubuntu-latest
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    needs: first_check
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: "0"
+      - name: Create matchms-build environment
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          activate-environment: matchms-build
+          auto-update-conda: true
+          environment-file: conda/environment-build.yml
+          python-version: 3.8
+      - name: Show conda config
+        shell: bash -l {0}
+        run: |
+          conda info
+          conda list
+          conda config --show-sources
+          conda config --show
+          conda env list
+      - name: Python info
+        shell: bash -l {0}
+        run: |
+          which python
+          python --version
+      - name: Show environment variables
+        shell: bash -l {0}
+        run: |
+          env | sort
+    - name: Build the conda package
         shell: bash -l {0}
         run: |
           export BUILDDIR=$RUNNER_TEMP/matchms/_build
