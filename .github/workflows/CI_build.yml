@@ -1,4 +1,4 @@
-name: Anaconda Build
+name: CI Build
 
 on:
   push:
@@ -7,53 +7,88 @@ on:
 
 jobs:
 
-  analyze:
-    name: analyze / python-${{ matrix.python-version }} / ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: ['ubuntu-latest', 'macos-latest', 'windows-latest']
-        python-version: ["3.8"]
-        include:
-          - os: 'ubuntu-latest'
-            python-version: "3.7"
+  first_check:
+    name: first code check / python-3.8 / ubuntu-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v1
         with:
-          fetch-depth: "0"
-      - uses: conda-incubator/setup-miniconda@v2
-        with:
-          miniconda-version: "latest"
-          activate-environment: matchms-dev
-          auto-update-conda: true
-          environment-file: conda/environment-dev.yml
-          python-version: ${{ matrix.python-version }}
-      - name: Show conda config
-        shell: bash -l {0}
-        run: |
-          conda info
-          conda list
-          conda config --show-sources
-          conda config --show
+          python-version: 3.8
       - name: Python info
-        shell: bash -l {0}
         run: |
           which python
           python --version
-      - name: Show environment variables
-        shell: bash -l {0}
+      - name: Build package and create dev environment
         run: |
-          env | sort
+          python -m pip install --upgrade pip
+          pip install -e .[dev]
+      - name: Test with coverage
+        run: |
+          pytest --cov --cov-report term --cov-report xml --junitxml=xunit-result.xml
+      - name: Correct coverage paths
+        run: sed -i "s+$PWD/++g" coverage.xml
       - name: Check style against standards using prospector
         shell: bash -l {0}
         run: prospector -o grouped -o pylint:pylint-report.txt
       - name: Check whether import statements are used consistently
-        if: matrix.python-version == '3.7'
         shell: bash -l {0}
-        run: isort --check-only --diff --conda-env matchms-dev --recursive --lines-after-imports 2 --force-single-line --no-lines-before FUTURE --no-lines-before STDLIB --no-lines-before THIRDPARTY --no-lines-before FIRSTPARTY --no-lines-before LOCALFOLDER matchms/ tests/ integration-tests/
-      - name: Build & test documentation
-        if: matrix.python-version == '3.7'
+        run: isort --check-only --diff --conda-env matchms-dev --recursive --wrap-length 79 --lines-after-imports 2 --force-single-line --no-lines-before FUTURE --no-lines-before STDLIB --no-lines-before THIRDPARTY --no-lines-before FIRSTPARTY --no-lines-before LOCALFOLDER matchms/ tests/ integration-tests/
+      - name: SonarCloud Scan
+        if: github.repository == 'iomega/matchms'
+        uses: sonarsource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  build_pypi:
+    name: Pypi and documentation build / python-${{ matrix.python-version }} / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    needs: first_check
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ['ubuntu-latest', 'macos-latest', 'windows-latest']
+        python-version: ['3.7', '3.8']
+        exclude:
+          # already tested in first_check job
+          - python-version: 3.8
+            os: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Python info
+        run: |
+          which python
+          python --version
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+      - name: Build package
+        run: |
+          pip install wheel twine
+          python setup.py sdist bdist_wheel
+      - name: Test package
+        run: |
+          python -m twine check dist/*
+      - name: Show pip list
+        run: |
+          pip list
+      - name: Install development dependencies
+        run: |
+          pip install -e .[dev]
+      - name: Test
+        run: |
+          pytest
+      - name: Show environment variables
+        shell: bash -l {0}
+        run: |
+          env | sort
+      - name: Build documentation
         shell: bash -l {0}
         run: |
           make coverage doctest html
@@ -61,43 +96,19 @@ jobs:
         env:
           SPHINXOPTS: "-n"  # enable nit-picky mode
       - name: Check documentation coverage threshold
-        if: matrix.python-version == '3.7'
-        shell: bash -l {0}
+        if: matrix.os == 'ubuntu-latest'
         run: |
           cat readthedocs/_build/coverage/python.txt
           UNCOVERED_MEMBERS=$(grep '*' readthedocs/_build/coverage/python.txt | wc -l)
-          UNCOVERED_MEMBERS_ALLOWED=20
-          if (( $UNCOVERED_MEMBERS > $UNCOVERED_MEMBERS_ALLOWED )) ; then echo "There are currently ${UNCOVERED_MEMBERS} uncovered members in the documentation, which is more than the ${UNCOVERED_MEMBERS_ALLOWED} allowed."; exit 1;fi
+          UNCOVERED_MEMBERS_ALLOWED=5
+          if (( $UNCOVERED_MEMBERS > $UNCOVERED_MEMBERS_ALLOWED )) ; then echo "There are currently ${UNCOVERED_MEMBERS} uncovered members in the documentation, which is more than the ${UNCOVERED_MEMBERS_ALLOWED} allowed." && exit 1;fi
           echo "The code is sufficiently documented with ${UNCOVERED_MEMBERS} uncovered members out of ${UNCOVERED_MEMBERS_ALLOWED} allowed.";
-      - name: Test
-        if: matrix.os != 'ubuntu-latest'
-        shell: bash -l {0}
-        run: |
-          pytest
-      - name: Test with coverage
-        if: matrix.os == 'ubuntu-latest'
-        shell: bash -l {0}
-        run: |
-          pytest --cov --cov-report term --cov-report xml --junitxml=xunit-result.xml
-      - name: Correct coverage paths
-        if: matrix.os == 'ubuntu-latest'
-        run: sed -i "s+$PWD/++g" coverage.xml
-      - name: SonarCloud Scan
-        if: ${{ matrix.os == 'ubuntu-latest' && matrix.python-version == '3.7' }}
-        uses: sonarsource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
-  build:
-    name: build / python-${{ matrix.python-version }} / ${{ matrix.os }}
+  anaconda_build:
+    name: Anaconda build / python-3.7 / ubuntu-latest
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      matrix:
-        os: ['ubuntu-latest', 'macos-latest', 'windows-latest']
-        python-version: ["3.7"]
-    runs-on: ${{ matrix.os }}
-    needs: analyze
+    needs: first_check
     steps:
       - uses: actions/checkout@v2
         with:
@@ -105,11 +116,10 @@ jobs:
       - name: Create matchms-build environment
         uses: conda-incubator/setup-miniconda@v2
         with:
-          miniconda-version: "latest"
           activate-environment: matchms-build
           auto-update-conda: true
           environment-file: conda/environment-build.yml
-          python-version: ${{ matrix.python-version }}
+          python-version: 3.8
       - name: Show conda config
         shell: bash -l {0}
         run: |
@@ -134,25 +144,24 @@ jobs:
           [ "$RUNNING_OS" = "Windows" ] && export BUILDDIR=$RUNNER_TEMP\\matchms\\_build\\
           conda config --set anaconda_upload no
           conda build --numpy 1.18.1 --no-include-recipe \
-            --channel bioconda --channel conda-forge \
+            --channel nlesc --channel bioconda --channel conda-forge \
             --croot ${BUILDDIR} \
             ./conda
       - name: Upload package artifact from build
-        if: matrix.os == 'ubuntu-latest'
         uses: actions/upload-artifact@v2
         with:
           name: conda-package-artifact
           path: ${{ runner.temp }}/matchms/_build
 
-  verify:
-    name: verify / python-${{ matrix.python-version }} / ${{ matrix.os }}
+  anaconda_verify:
+    name: Anaconda verify / python-${{ matrix.python-version }} / ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: ['ubuntu-latest', 'macos-latest', 'windows-latest']
-        python-version: ["3.7", "3.8"]
+        python-version: ['3.7', '3.8']
     runs-on: ${{ matrix.os }}
-    needs: build
+    needs: anaconda_build
     steps:
       - uses: actions/checkout@v2
         with:
@@ -160,7 +169,6 @@ jobs:
       - name: Create an environment to test the locally published package
         uses: conda-incubator/setup-miniconda@v2
         with:
-          miniconda-version: "latest"
           activate-environment: matchms-test
           auto-update-conda: true
           python-version: ${{ matrix.python-version }}
@@ -206,7 +214,13 @@ jobs:
           conda install \
             --channel bioconda \
             --channel conda-forge \
-            --channel $BUILDDIR \
+            --channel nlesc \
+            matchms
+          # Install matchms without nlesc channel to prevent package to be installed from nlesc channel instead of wanted $BUILDDIR channel
+          conda install \
+            --channel bioconda \
+            --channel conda-forge \
+            --channel $BUILDDIR -v \
             matchms
       - name: List conda packages
         shell: bash -l {0}
