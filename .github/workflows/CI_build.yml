@@ -101,9 +101,9 @@ jobs:
       - name: Create matchms-build environment
         uses: conda-incubator/setup-miniconda@v2
         with:
-          activate-environment: matchms-build
+          activate-environment: matchms-dev
           auto-update-conda: true
-          environment-file: conda/environment-build.yml
+          environment-file: conda/environment-dev.yml
           python-version: 3.8
       - name: Show conda config
         shell: bash -l {0}
