@@ -39,9 +39,9 @@ class Scores:
         similarity_measure = CosineGreedy()
         scores = calculate_scores(references, queries, similarity_measure)
 
-        for (reference, query, score, n_matching) in scores:
+        for (reference, query, score) in scores:
             print(f"Cosine score between {reference.get('id')} and {query.get('id')}" +
-                  f" is {score:.2f} with {n_matching} matched peaks")
+                  f" is {score['score']:.2f} with {score['matches']} matched peaks")
 
     Should output
 
@@ -128,39 +128,43 @@ class Scores:
                                                            is_symmetric=self.is_symmetric)
         return self
 
-    def scores_by_reference(self, reference: ReferencesType) -> numpy.ndarray:
-        """Return all scores (not sorted) for the given reference spectrum.
+    def scores_by_reference(self, reference: ReferencesType,
+                            sort: bool = False) -> numpy.ndarray:
+        """Return all scores for the given reference spectrum.
 
         Parameters
         ----------
         reference
             Single reference Spectrum.
+        sort
+            Set to True to obtain the scores in a sorted way (relying on the
+            :meth:`~.BaseSimilarity.sort` function from the given similarity_function).
         """
         assert reference in self.references, "Given input not found in references."
         selected_idx = int(numpy.where(self.references == reference)[0])
-        selected_scores = []
-        for i, score in enumerate(self._scores[selected_idx, :].copy()):
-            if isinstance(score, tuple):
-                selected_scores.append((self.queries[i], *score))
-            else:
-                selected_scores.append((self.queries[i], score))
-        return selected_scores
+        if sort:
+            query_idx_sorted = self.similarity_function.sort(self._scores[selected_idx, :])
+            return list(zip(self.queries[query_idx_sorted],
+                            self._scores[selected_idx, query_idx_sorted].copy()))
+        return list(zip(self.queries, self._scores[selected_idx, :].copy()))
 
-    def scores_by_query(self, query: QueriesType) -> numpy.ndarray:
-        """Return all scores (not sorted) for the given query spectrum.
+    def scores_by_query(self, query: QueriesType, sort: bool = False) -> numpy.ndarray:
+        """Return all scores for the given query spectrum.
 
         Parameters
         ----------
         query
             Single query Spectrum.
-
+        sort
+            Set to True to obtain the scores in a sorted way (relying on the
+            :meth:`~.BaseSimilarity.sort` function from the given similarity_function).
 
         For example
 
         .. testcode::
 
             import numpy as np
-            from matchms import Scores, Spectrum
+            from matchms import calculate_scores, Scores, Spectrum
             from matchms.similarity import CosineGreedy
 
             spectrum_1 = Spectrum(mz=np.array([100, 150, 200.]),
@@ -178,10 +182,9 @@ class Scores:
             references = [spectrum_1, spectrum_2, spectrum_3]
             queries = [spectrum_2, spectrum_3, spectrum_4]
 
-            scores = Scores(references, queries, CosineGreedy()).calculate()
-            selected_scores = scores.scores_by_query(spectrum_4)
-            selected_scores.sort(key=lambda s: s[1], reverse=True)
-            print([np.round(x[1], 3) for x in selected_scores])
+            scores = calculate_scores(references, queries, CosineGreedy())
+            selected_scores = scores.scores_by_query(spectrum_4, sort=True)
+            print([x[1]["score"].round(3) for x in selected_scores])
 
         Should output
 
@@ -192,13 +195,11 @@ class Scores:
         """
         assert query in self.queries, "Given input not found in queries."
         selected_idx = int(numpy.where(self.queries == query)[0])
-        selected_scores = []
-        for i, score in enumerate(self._scores[:, selected_idx].copy()):
-            if isinstance(score, tuple):
-                selected_scores.append((self.references[i], *score))
-            else:
-                selected_scores.append((self.references[i], score))
-        return selected_scores
+        if sort:
+            references_idx_sorted = self.similarity_function.sort(self._scores[:, selected_idx])
+            return list(zip(self.references[references_idx_sorted],
+                            self._scores[references_idx_sorted, selected_idx].copy()))
+        return list(zip(self.references, self._scores[:, selected_idx].copy()))
 
     @property
     def scores(self) -> numpy.ndarray:
@@ -209,7 +210,7 @@ class Scores:
         .. testcode::
 
             import numpy as np
-            from matchms import Scores, Spectrum
+            from matchms import calculate_scores, Scores, Spectrum
             from matchms.similarity import IntersectMz
 
             spectrum_1 = Spectrum(mz=np.array([100, 150, 200.]),
@@ -218,9 +219,9 @@ class Scores:
                                   intensities=np.array([0.4, 0.2, 0.1]))
             spectrums = [spectrum_1, spectrum_2]
 
-            scores = Scores(spectrums, spectrums, IntersectMz()).calculate().scores
+            scores = calculate_scores(spectrums, spectrums, IntersectMz()).scores
 
-            print(scores[0, 0].dtype)
+            print(scores[0].dtype)
             print(scores.shape)
             print(scores)
 
@@ -230,7 +231,7 @@ class Scores:
 
              float64
              (2, 2)
-             [[1.0 0.2]
-              [0.2 1.0]]
+             [[1.  0.2]
+              [0.2 1. ]]
         """
         return self._scores.copy()

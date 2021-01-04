@@ -36,9 +36,9 @@ class CosineGreedy(BaseSimilarity):
         # Use factory to construct a similarity function
         cosine_greedy = CosineGreedy(tolerance=0.2)
 
-        score, n_matches = cosine_greedy.pair(reference, query)
+        score = cosine_greedy.pair(reference, query)
 
-        print(f"Cosine score is {score:.2f} with {n_matches} matched peaks")
+        print(f"Cosine score is {score['score']:.2f} with {score['matches']} matched peaks")
 
     Should output
 
@@ -49,6 +49,8 @@ class CosineGreedy(BaseSimilarity):
     """
     # Set key characteristics as class attributes
     is_commutative = True
+    # Set output data type, e.g. ("score", "float") or [("score", "float"), ("matches", "int")]
+    score_datatype = [("score", numpy.float64), ("matches", "int")]
 
     def __init__(self, tolerance: float = 0.1, mz_power: float = 0.0,
                  intensity_power: float = 1.0):
@@ -95,7 +97,8 @@ class CosineGreedy(BaseSimilarity):
         spec1 = get_peaks_array(reference)
         spec2 = get_peaks_array(query)
         matching_pairs = get_matching_pairs()
-        if matching_pairs is not None:
-            return score_best_matches(matching_pairs, spec1, spec2,
-                                      self.mz_power, self.intensity_power)
-        return float(0), 0
+        if matching_pairs is None:
+            return numpy.asarray((float(0), 0), dtype=self.score_datatype)
+        score = score_best_matches(matching_pairs, spec1, spec2,
+                                   self.mz_power, self.intensity_power)
+        return numpy.asarray(score, dtype=self.score_datatype)

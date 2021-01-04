@@ -2,6 +2,7 @@ import numpy
 import pytest
 from matchms import Scores
 from matchms import Spectrum
+from matchms import calculate_scores
 from matchms.similarity import CosineGreedy
 from matchms.similarity import IntersectMz
 from matchms.similarity.BaseSimilarity import BaseSimilarity
@@ -9,29 +10,33 @@ from matchms.similarity.BaseSimilarity import BaseSimilarity
 
 class DummySimilarityFunction(BaseSimilarity):
     """Simple dummy score, only contain pair-wise implementation."""
+    score_datatype = [("score", numpy.unicode_, 16), ("len", numpy.int32)]
+
     def __init__(self):
         """constructor"""
 
     def pair(self, reference, query):
         """necessary pair computation method"""
         s = reference + query
-        return s, len(s)
+        return numpy.array([(s, len(s))], dtype=self.score_datatype)
 
 
 class DummySimilarityFunctionParallel(BaseSimilarity):
     """Simple dummy score, contains pair-wise and matrix implementation."""
+    score_datatype = [("score", numpy.unicode_, 16), ("len", "int")]
+
     def __init__(self):
         """constructor"""
 
     def pair(self, reference, query):
         """necessary pair computation method"""
         s = reference + query
-        return s, len(s)
+        return numpy.array([(s, len(s))], dtype=self.score_datatype)
 
     def matrix(self, references, queries, is_symmetric: bool = False):
         """additional matrix computation method"""
         shape = len(references), len(queries)
-        s = numpy.empty(shape, dtype="object")
+        s = numpy.empty(shape, dtype=self.score_datatype)
         for index_reference, reference in enumerate(references):
             for index_query, query in enumerate(queries):
                 rq = reference + query
@@ -47,7 +52,7 @@ def test_scores_single_pair():
                     similarity_function=dummy_similarity_function)
     scores.calculate()
     actual = scores.scores[0][0]
-    expected = ('AB', 2)
+    expected = numpy.array([('AB', 2)], dtype=dummy_similarity_function.score_datatype)
     assert actual == expected, "Expected different scores."
 
 
@@ -59,12 +64,12 @@ def test_scores_calculate():
     scores.calculate()
     actual = list(scores)
     expected = [
-        ("r0", "q0", "r0q0", 4),
-        ("r0", "q1", "r0q1", 4),
-        ("r1", "q0", "r1q0", 4),
-        ("r1", "q1", "r1q1", 4),
-        ("r2", "q0", "r2q0", 4),
-        ("r2", "q1", "r2q1", 4)
+        ("r0", "q0", numpy.array([("r0q0", 4)], dtype=dummy_similarity_function.score_datatype)),
+        ("r0", "q1", numpy.array([("r0q1", 4)], dtype=dummy_similarity_function.score_datatype)),
+        ("r1", "q0", numpy.array([("r1q0", 4)], dtype=dummy_similarity_function.score_datatype)),
+        ("r1", "q1", numpy.array([("r1q1", 4)], dtype=dummy_similarity_function.score_datatype)),
+        ("r2", "q0", numpy.array([("r2q0", 4)], dtype=dummy_similarity_function.score_datatype)),
+        ("r2", "q1", numpy.array([("r2q1", 4)], dtype=dummy_similarity_function.score_datatype))
     ]
     assert actual == expected, "Expected different scores."
 
@@ -77,12 +82,12 @@ def test_scores_calculate_parallel():
     scores.calculate()
     actual = list(scores)
     expected = [
-        ("r0", "q0", "r0q0", 4),
-        ("r0", "q1", "r0q1", 4),
-        ("r1", "q0", "r1q0", 4),
-        ("r1", "q1", "r1q1", 4),
-        ("r2", "q0", "r2q0", 4),
-        ("r2", "q1", "r2q1", 4)
+        ("r0", "q0", numpy.array([("r0q0", 4)], dtype=dummy_similarity_function.score_datatype)),
+        ("r0", "q1", numpy.array([("r0q1", 4)], dtype=dummy_similarity_function.score_datatype)),
+        ("r1", "q0", numpy.array([("r1q0", 4)], dtype=dummy_similarity_function.score_datatype)),
+        ("r1", "q1", numpy.array([("r1q1", 4)], dtype=dummy_similarity_function.score_datatype)),
+        ("r2", "q0", numpy.array([("r2q0", 4)], dtype=dummy_similarity_function.score_datatype)),
+        ("r2", "q1", numpy.array([("r2q1", 4)], dtype=dummy_similarity_function.score_datatype))
     ]
     assert actual == expected, "Expected different scores."
 
@@ -145,12 +150,12 @@ def test_scores_next():
 
     actual = list(scores)
     expected = [
-        ("r", "q", "rq", 2),
-        ("r", "qq", "rqq", 3),
-        ("rr", "q", "rrq", 3),
-        ("rr", "qq", "rrqq", 4),
-        ("rrr", "q", "rrrq", 4),
-        ("rrr", "qq", "rrrqq", 5)
+        ("r", "q", numpy.array([("rq", 2)], dtype=dummy_similarity_function.score_datatype)),
+        ("r", "qq", numpy.array([("rqq", 3)], dtype=dummy_similarity_function.score_datatype)),
+        ("rr", "q", numpy.array([("rrq", 3)], dtype=dummy_similarity_function.score_datatype)),
+        ("rr", "qq", numpy.array([("rrqq", 4)], dtype=dummy_similarity_function.score_datatype)),
+        ("rrr", "q", numpy.array([("rrrq", 4)], dtype=dummy_similarity_function.score_datatype)),
+        ("rrr", "qq", numpy.array([("rrrqq", 5)], dtype=dummy_similarity_function.score_datatype))
     ]
     assert actual == expected, "Expected different scores."
 
@@ -172,11 +177,39 @@ def test_scores_by_referencey():
     references = [spectrum_1, spectrum_2, spectrum_3]
     queries = [spectrum_3, spectrum_4]
 
-    scores = Scores(references, queries, CosineGreedy()).calculate()
+    scores = calculate_scores(references, queries, CosineGreedy())
     selected_scores = scores.scores_by_reference(spectrum_2)
 
-    expected_result = [(scores.queries[i], *scores.scores[1, i]) for i in range(2)]
+    expected_result = [(scores.queries[i], scores.scores[1, i]) for i in range(2)]
     assert selected_scores == expected_result, "Expected different scores."
+
+
+def test_scores_by_reference_sorted():
+    "Test scores_by_reference method with sort=True."
+    spectrum_1 = Spectrum(mz=numpy.array([100, 150, 200.]),
+                          intensities=numpy.array([0.7, 0.2, 0.1]),
+                          metadata={'id': 'spectrum1'})
+    spectrum_2 = Spectrum(mz=numpy.array([100, 140, 190.]),
+                          intensities=numpy.array([0.4, 0.2, 0.1]),
+                          metadata={'id': 'spectrum2'})
+    spectrum_3 = Spectrum(mz=numpy.array([110, 140, 195.]),
+                          intensities=numpy.array([0.6, 0.2, 0.1]),
+                          metadata={'id': 'spectrum3'})
+    spectrum_4 = Spectrum(mz=numpy.array([100, 150, 200.]),
+                          intensities=numpy.array([0.6, 0.1, 0.6]),
+                          metadata={'id': 'spectrum4'})
+    references = [spectrum_1, spectrum_2, spectrum_3]
+    queries = [spectrum_3, spectrum_4, spectrum_2]
+
+    scores = calculate_scores(references, queries, CosineGreedy())
+    selected_scores = scores.scores_by_reference(spectrum_2, sort=True)
+
+    expected_result = [(scores.queries[i], scores.scores[1, i]) for i in [2, 1, 0]]
+    assert selected_scores == expected_result, "Expected different scores."
+    scores_only = numpy.array([x[1]["score"] for x in selected_scores])
+    scores_expected = numpy.array([1.0, 0.6129713330865563, 0.1363196353181994])
+    assert numpy.allclose(scores_only, scores_expected, atol=1e-8), \
+        "Expected different sorted scores."
 
 
 def test_scores_by_referencey_non_tuple_score():
@@ -196,7 +229,7 @@ def test_scores_by_referencey_non_tuple_score():
     references = [spectrum_1, spectrum_2, spectrum_3]
     queries = [spectrum_3, spectrum_4]
 
-    scores = Scores(references, queries, IntersectMz()).calculate()
+    scores = calculate_scores(references, queries, IntersectMz())
     selected_scores = scores.scores_by_reference(spectrum_2)
 
     expected_result = [(scores.queries[i], scores.scores[1, i]) for i in range(2)]
@@ -220,10 +253,34 @@ def test_scores_by_query():
     references = [spectrum_1, spectrum_2, spectrum_3]
     queries = [spectrum_2, spectrum_3, spectrum_4]
 
-    scores = Scores(references, queries, CosineGreedy()).calculate()
+    scores = calculate_scores(references, queries, CosineGreedy())
     selected_scores = scores.scores_by_query(spectrum_4)
 
-    expected_result = [(scores.references[i], *scores.scores[i, 2]) for i in range(3)]
+    expected_result = [(scores.references[i], scores.scores[i, 2]) for i in range(3)]
+    assert selected_scores == expected_result, "Expected different scores."
+
+
+def test_scores_by_query_sorted():
+    "Test scores_by_query method with sort=True."
+    spectrum_1 = Spectrum(mz=numpy.array([100, 150, 200.]),
+                          intensities=numpy.array([0.7, 0.2, 0.1]),
+                          metadata={'id': 'spectrum1'})
+    spectrum_2 = Spectrum(mz=numpy.array([100, 140, 190.]),
+                          intensities=numpy.array([0.4, 0.2, 0.1]),
+                          metadata={'id': 'spectrum2'})
+    spectrum_3 = Spectrum(mz=numpy.array([100, 140, 195.]),
+                          intensities=numpy.array([0.6, 0.2, 0.1]),
+                          metadata={'id': 'spectrum3'})
+    spectrum_4 = Spectrum(mz=numpy.array([100, 150, 200.]),
+                          intensities=numpy.array([0.6, 0.1, 0.6]),
+                          metadata={'id': 'spectrum4'})
+    references = [spectrum_1, spectrum_2, spectrum_3]
+    queries = [spectrum_2, spectrum_3, spectrum_4]
+
+    scores = calculate_scores(references, queries, CosineGreedy())
+    selected_scores = scores.scores_by_query(spectrum_4, sort=True)
+
+    expected_result = [(scores.references[i], scores.scores[i, 2]) for i in [0, 2, 1]]
     assert selected_scores == expected_result, "Expected different scores."
 
 
@@ -244,7 +301,7 @@ def test_scores_by_query_non_tuple_score():
     references = [spectrum_1, spectrum_2, spectrum_3]
     queries = [spectrum_2, spectrum_3, spectrum_4]
 
-    scores = Scores(references, queries, IntersectMz()).calculate()
+    scores = calculate_scores(references, queries, IntersectMz())
     selected_scores = scores.scores_by_query(spectrum_4)
 
     expected_result = [(scores.references[i], scores.scores[i, 2]) for i in range(3)]

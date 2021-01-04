@@ -51,6 +51,8 @@ class ParentMassMatch(BaseSimilarity):
     """
     # Set key characteristics as class attributes
     is_commutative = True
+    # Set output data type, e.g.  "float" or [("score", "float"), ("matches", "int")]
+    score_datatype = numpy.bool
 
     def __init__(self, tolerance: float = 0.1):
         """
@@ -75,7 +77,8 @@ class ParentMassMatch(BaseSimilarity):
         parentmass_query = query.get("parent_mass")
         assert parentmass_ref is not None and parentmass_query is not None, "Missing parent mass."
 
-        return abs(parentmass_ref - parentmass_query) <= self.tolerance
+        score = abs(parentmass_ref - parentmass_query) <= self.tolerance
+        return numpy.asarray(score, dtype=self.score_datatype)
 
     def matrix(self, references: List[SpectrumType], queries: List[SpectrumType],
                is_symmetric: bool = False) -> numpy.ndarray:
@@ -104,8 +107,10 @@ class ParentMassMatch(BaseSimilarity):
         parentmasses_ref = collect_parentmasses(references)
         parentmasses_query = collect_parentmasses(queries)
         if is_symmetric:
-            return parentmass_scores_symmetric(parentmasses_ref, parentmasses_query, self.tolerance).astype(bool)
-        return parentmass_scores(parentmasses_ref, parentmasses_query, self.tolerance).astype(bool)
+            return parentmass_scores_symmetric(parentmasses_ref, parentmasses_query,
+                                               self.tolerance).astype(self.score_datatype)
+        return parentmass_scores(parentmasses_ref, parentmasses_query,
+                                 self.tolerance).astype(self.score_datatype)
 
 
 @numba.njit

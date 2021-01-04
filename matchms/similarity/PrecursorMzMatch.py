@@ -53,6 +53,7 @@ class PrecursorMzMatch(BaseSimilarity):
     """
     # Set key characteristics as class attributes
     is_commutative = True
+    score_datatype = numpy.bool
 
     def __init__(self, tolerance: float = 0.1, tolerance_type: str = "Dalton"):
         """
@@ -86,7 +87,8 @@ class PrecursorMzMatch(BaseSimilarity):
             return abs(precursormz_ref - precursormz_query) <= self.tolerance
 
         mean_mz = (precursormz_ref + precursormz_query) / 2
-        return abs(precursormz_ref - precursormz_query)/mean_mz <= self.tolerance
+        score = abs(precursormz_ref - precursormz_query)/mean_mz <= self.tolerance
+        return numpy.asarray(score, dtype=self.score_datatype)
 
     def matrix(self, references: List[SpectrumType], queries: List[SpectrumType],
                is_symmetric: bool = False) -> numpy.ndarray:
@@ -115,12 +117,16 @@ class PrecursorMzMatch(BaseSimilarity):
         precursors_ref = collect_precursormz(references)
         precursors_query = collect_precursormz(queries)
         if is_symmetric and self.type == "Dalton":
-            return precursormz_scores_symmetric(precursors_ref, precursors_query, self.tolerance).astype(bool)
+            return precursormz_scores_symmetric(precursors_ref, precursors_query,
+                                                self.tolerance).astype(self.score_datatype)
         if is_symmetric and self.type == "ppm":
-            return precursormz_scores_symmetric_ppm(precursors_ref, precursors_query, self.tolerance).astype(bool)
+            return precursormz_scores_symmetric_ppm(precursors_ref, precursors_query,
+                                                    self.tolerance).astype(self.score_datatype)
         if self.type == "Dalton":
-            return precursormz_scores(precursors_ref, precursors_query, self.tolerance).astype(bool)
-        return precursormz_scores_ppm(precursors_ref, precursors_query, self.tolerance).astype(bool)
+            return precursormz_scores(precursors_ref, precursors_query,
+                                      self.tolerance).astype(self.score_datatype)
+        return precursormz_scores_ppm(precursors_ref, precursors_query,
+                                      self.tolerance).astype(self.score_datatype)
 
 
 @numba.njit

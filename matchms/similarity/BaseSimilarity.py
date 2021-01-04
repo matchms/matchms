@@ -15,7 +15,10 @@ class BaseSimilarity:
        Whether similarity function is commutative, which means that the order of spectrums
        does not matter (similarity(A, B) == similarity(B, A)). Default is True.
     """
+    # Set key characteristics as class attributes
     is_commutative = True
+    # Set output data type, e.g. "float" or [("score", "float"), ("matches", "int")]
+    score_datatype = numpy.float64
 
     @abstractmethod
     def pair(self, reference: SpectrumType, query: SpectrumType) -> float:
@@ -27,6 +30,10 @@ class BaseSimilarity:
             Single reference spectrum.
         query
             Single query spectrum.
+
+        Returns
+            score as numpy array (using self.score_datatype). For instance returning
+            numpy.asarray(score, dtype=self.score_datatype)
         """
         raise NotImplementedError
 
@@ -49,7 +56,7 @@ class BaseSimilarity:
         """
         n_rows = len(references)
         n_cols = len(queries)
-        scores = numpy.empty([n_rows, n_cols], dtype="object")
+        scores = numpy.empty([n_rows, n_cols], dtype=self.score_datatype)
         for i_ref, reference in enumerate(references[:n_rows]):
             if is_symmetric and self.is_commutative:
                 for i_query, query in enumerate(queries[i_ref:n_cols], start=i_ref):
@@ -59,3 +66,19 @@ class BaseSimilarity:
                 for i_query, query in enumerate(queries[:n_cols]):
                     scores[i_ref][i_query] = self.pair(reference, query)
         return scores
+
+    def sort(self, scores: numpy.ndarray):
+        """Return array of indexes for sorted list of scores.
+        This method can be adapted for different styles of scores.
+
+        Parameters
+        ----------
+        scores
+            1D Array of scores.
+
+        Returns
+        -------
+        idx_sorted
+            Indexes of sorted scores.
+        """
+        return scores.argsort()[::-1]

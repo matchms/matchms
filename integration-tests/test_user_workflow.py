@@ -1,4 +1,5 @@
 import os
+import numpy
 import pytest
 from matchms import calculate_scores
 from matchms.filtering import add_parent_mass
@@ -44,23 +45,31 @@ def test_user_workflow():
                                    cosine_greedy))
 
     # filter out self-comparisons, require at least 20 matching peaks:
-    filtered = [(reference, query, score, n_matching) for (reference, query, score, n_matching) in scores
-                if reference != query and n_matching >= 20]
+    filtered = [(reference, query, score) for (reference, query, score) in scores
+                if reference != query and score["matches"] >= 20]
 
-    sorted_by_score = sorted(filtered, key=lambda elem: elem[2], reverse=True)
+    sorted_by_score = sorted(filtered, key=lambda elem: elem[2]["score"], reverse=True)
 
     actual_top10 = sorted_by_score[:10]
 
+    score_datatype = cosine_greedy.score_datatype
     expected_top10 = [
-        (references[48], queries[50], pytest.approx(0.9994783627790965, rel=1e-9), 25),
-        (references[50], queries[48], pytest.approx(0.9994783627790965, rel=1e-9), 25),
-        (references[46], queries[48], pytest.approx(0.9990141860269471, rel=1e-9), 27),
-        (references[48], queries[46], pytest.approx(0.9990141860269471, rel=1e-9), 27),
-        (references[46], queries[50], pytest.approx(0.9988793406908719, rel=1e-9), 22),
-        (references[50], queries[46], pytest.approx(0.9988793406908719, rel=1e-9), 22),
-        (references[57], queries[59], pytest.approx(0.9982171275552505, rel=1e-9), 46),
-        (references[59], queries[57], pytest.approx(0.9982171275552505, rel=1e-9), 46),
-        (references[73], queries[74], pytest.approx(0.9973823244169199, rel=1e-9), 23),
-        (references[74], queries[73], pytest.approx(0.9973823244169199, rel=1e-9), 23),
+        (references[48], queries[50], numpy.array([(0.9994783627790967, 25)], dtype=score_datatype)[0]),
+        (references[50], queries[48], numpy.array([(0.9994783627790967, 25)], dtype=score_datatype)[0]),
+        (references[46], queries[48], numpy.array([(0.9990141860269471, 27)], dtype=score_datatype)[0]),
+        (references[48], queries[46], numpy.array([(0.9990141860269471, 27)], dtype=score_datatype)[0]),
+        (references[46], queries[50], numpy.array([(0.9988793406908721, 22)], dtype=score_datatype)[0]),
+        (references[50], queries[46], numpy.array([(0.9988793406908721, 22)], dtype=score_datatype)[0]),
+        (references[57], queries[59], numpy.array([(0.9982171275552503, 46)], dtype=score_datatype)[0]),
+        (references[59], queries[57], numpy.array([(0.9982171275552503, 46)], dtype=score_datatype)[0]),
+        (references[73], queries[74], numpy.array([(0.9973823244169199, 23)], dtype=score_datatype)[0]),
+        (references[74], queries[73], numpy.array([(0.9973823244169199, 23)], dtype=score_datatype)[0]),
     ]
-    assert actual_top10 == expected_top10
+    assert [x[2][0] for x in actual_top10] == pytest.approx([x[2][0] for x in expected_top10], 1e-8), \
+        "Expected different scores."
+    assert [x[2][1] for x in actual_top10] == [x[2][1] for x in expected_top10], \
+        "Expected different matches."
+    assert [x[0] for x in actual_top10] == [x[0] for x in expected_top10], \
+        "Expected different references."
+    assert [x[1] for x in actual_top10] == [x[1] for x in expected_top10], \
+        "Expected different queries."

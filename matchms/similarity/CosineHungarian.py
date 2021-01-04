@@ -19,6 +19,11 @@ class CosineHungarian(BaseSimilarity):
     :class:`~matchms.similarity.CosineGreedy`, but does represent a mathematically proper
     solution to the problem.
     """
+    # Set key characteristics as class attributes
+    is_commutative = True
+    # Set output data type, e.g. ("score", "float") or [("score", "float"), ("matches", "int")]
+    score_datatype = [("score", numpy.float64), ("matches", "int")]
+
     def __init__(self, tolerance: float = 0.1, mz_power: float = 0.0,
                  intensity_power: float = 1.0):
         """
@@ -93,7 +98,7 @@ class CosineHungarian(BaseSimilarity):
         def calc_score():
             """Calculate cosine similarity score."""
             if matching_pairs_matrix is None:
-                return 0.0, 0
+                return numpy.asarray((0.0, 0), dtype=self.score_datatype)
             score, used_matches = solve_hungarian()
             # Normalize score:
             spec1_power = numpy.power(spec1[:, 0], self.mz_power) \
@@ -101,7 +106,7 @@ class CosineHungarian(BaseSimilarity):
             spec2_power = numpy.power(spec2[:, 0], self.mz_power) \
                 * numpy.power(spec2[:, 1], self.intensity_power)
             score = score/(numpy.sqrt(numpy.sum(spec1_power**2)) * numpy.sqrt(numpy.sum(spec2_power**2)))
-            return score, len(used_matches)
+            return numpy.asarray((score, len(used_matches)), dtype=self.score_datatype)
 
         spec1 = get_peaks_array(reference)
         spec2 = get_peaks_array(query)

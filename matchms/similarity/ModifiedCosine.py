@@ -37,9 +37,9 @@ class ModifiedCosine(BaseSimilarity):
         # Use factory to construct a similarity function
         modified_cosine = ModifiedCosine(tolerance=0.2)
 
-        score, n_matches = modified_cosine.pair(spectrum_1, spectrum_2)
+        score = modified_cosine.pair(spectrum_1, spectrum_2)
 
-        print(f"Modified cosine score is {score:.2f} with {n_matches} matched peaks")
+        print(f"Modified cosine score is {score['score']:.2f} with {score['matches']} matched peaks")
 
     Should output
 
@@ -50,6 +50,8 @@ class ModifiedCosine(BaseSimilarity):
     """
     # Set key characteristics as class attributes
     is_commutative = True
+    # Set output data type, e.g. ("score", "float") or [("score", "float"), ("matches", "int")]
+    score_datatype = [("score", numpy.float64), ("matches", "int")]
 
     def __init__(self, tolerance: float = 0.1, mz_power: float = 0.0,
                  intensity_power: float = 1.0):
@@ -108,6 +110,7 @@ class ModifiedCosine(BaseSimilarity):
         spec2 = get_peaks_array(query)
         matching_pairs = get_matching_pairs()
         if matching_pairs.shape[0] == 0:
-            return float(0), 0
-        return score_best_matches(matching_pairs, spec1, spec2,
-                                  self.mz_power, self.intensity_power)
+            return numpy.asarray((float(0), 0), dtype=self.score_datatype)
+        score = score_best_matches(matching_pairs, spec1, spec2,
+                                   self.mz_power, self.intensity_power)
+        return numpy.asarray(score, dtype=self.score_datatype)

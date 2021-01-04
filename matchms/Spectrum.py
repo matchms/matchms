@@ -72,7 +72,18 @@ class Spectrum:
         return \
             self.peaks == other.peaks and \
             self.losses == other.losses and \
-            self.metadata == other.metadata
+            self.__metadata_eq(other.metadata)
+
+    def __metadata_eq(self, other_metadata):
+        if self.metadata.keys() != other_metadata.keys():
+            return False
+        for i, value in enumerate(list(self.metadata.values())):
+            if isinstance(value, numpy.ndarray):
+                if not numpy.all(value == list(other_metadata.values())[i]):
+                    return False
+            elif value != list(other_metadata.values())[i]:
+                return False
+        return True
 
     def clone(self):
         """Return a deepcopy of the spectrum instance."""
@@ -157,7 +168,7 @@ class Spectrum:
             val = self.metadata[key]
 
         """
-        return self._metadata.get(key, default)
+        return self._metadata.copy().get(key, default)
 
     def set(self, key: str, value):
         """Set value in :attr:`metadata` dict. Shorthand for

@@ -37,10 +37,10 @@ def test_modified_cosine_with_mass_shift_5():
     norm_spectrum_1 = normalize_intensities(spectrum_1)
     norm_spectrum_2 = normalize_intensities(spectrum_2)
     modified_cosine = ModifiedCosine()
-    score, n_matches = modified_cosine.pair(norm_spectrum_1, norm_spectrum_2)
+    score = modified_cosine.pair(norm_spectrum_1, norm_spectrum_2)
 
-    assert score == pytest.approx(0.081966, 0.0001), "Expected different cosine score."
-    assert n_matches == 2, "Expected 2 matching peaks."
+    assert score["score"] == pytest.approx(0.081966, 0.0001), "Expected different cosine score."
+    assert score["matches"] == 2, "Expected 2 matching peaks."
 
 
 def test_modified_cosine_with_mass_shift_5_tolerance_2():
@@ -56,10 +56,10 @@ def test_modified_cosine_with_mass_shift_5_tolerance_2():
     norm_spectrum_1 = normalize_intensities(spectrum_1)
     norm_spectrum_2 = normalize_intensities(spectrum_2)
     modified_cosine = ModifiedCosine(tolerance=2.0)
-    score, n_matches = modified_cosine.pair(norm_spectrum_1, norm_spectrum_2)
+    score = modified_cosine.pair(norm_spectrum_1, norm_spectrum_2)
 
-    assert score == pytest.approx(0.96788, 0.0001), "Expected different modified cosine score."
-    assert n_matches == 6, "Expected 6 matching peaks."
+    assert score["score"] == pytest.approx(0.96788, 0.0001), "Expected different modified cosine score."
+    assert score["matches"] == 6, "Expected 6 matching peaks."
 
 
 def test_modified_cosine_order_of_input_spectrums():
@@ -75,11 +75,11 @@ def test_modified_cosine_order_of_input_spectrums():
     norm_spectrum_1 = normalize_intensities(spectrum_1)
     norm_spectrum_2 = normalize_intensities(spectrum_2)
     modified_cosine = ModifiedCosine(tolerance=2.0)
-    score_1_2, n_matches_1_2 = modified_cosine.pair(norm_spectrum_1, norm_spectrum_2)
-    score_2_1, n_matches_2_1 = modified_cosine.pair(norm_spectrum_2, norm_spectrum_1)
+    score_1_2 = modified_cosine.pair(norm_spectrum_1, norm_spectrum_2)
+    score_2_1 = modified_cosine.pair(norm_spectrum_2, norm_spectrum_1)
 
+    assert score_1_2["score"] == score_2_1["score"], "Expected that the order of the arguments would not matter."
     assert score_1_2 == score_2_1, "Expected that the order of the arguments would not matter."
-    assert n_matches_1_2 == n_matches_2_1, "Expected that the order of the arguments would not matter."
 
 
 def test_modified_cosine_with_mass_shift_5_no_matches_expected():
@@ -95,7 +95,7 @@ def test_modified_cosine_with_mass_shift_5_no_matches_expected():
     norm_spectrum_1 = normalize_intensities(spectrum_1)
     norm_spectrum_2 = normalize_intensities(spectrum_2)
     modified_cosine = ModifiedCosine(tolerance=1.0)
-    score, n_matches = modified_cosine.pair(norm_spectrum_1, norm_spectrum_2)
+    score = modified_cosine.pair(norm_spectrum_1, norm_spectrum_2)
 
-    assert score == pytest.approx(0.0, 1e-5), "Expected different modified cosine score."
-    assert n_matches == 0, "Expected 0 matching peaks."
+    assert score["score"] == pytest.approx(0.0, 1e-5), "Expected different modified cosine score."
+    assert score["matches"] == 0, "Expected 0 matching peaks."
