@@ -88,6 +88,7 @@ jobs:
         shell: bash -l {0}
         run: |
           env | sort
+
   anaconda_dev:
     name: Anaconda build and test documentation / python-3.8 / ubuntu-latest
     runs-on: ubuntu-latest
@@ -172,7 +173,7 @@ jobs:
         shell: bash -l {0}
         run: |
           env | sort
-    - name: Build the conda package
+      - name: Build the conda package
         shell: bash -l {0}
         run: |
           export BUILDDIR=$RUNNER_TEMP/matchms/_build
