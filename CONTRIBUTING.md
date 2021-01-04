@@ -52,5 +52,5 @@ To create release you need write permission on the repository.
 1. Fill version, title and description field
 1. Press the Publish Release button
 
-A GitHub action will run which will publish the new version to [anaconda](https://anaconda.org/nlesc/matchms).
+A GitHub action will run which will publish the new version to [anaconda](https://anaconda.org/nlesc/matchms) as well as to [pypi](https://pypi.org/project/matchms).
 Also a Zenodo entry will be made for the release with its own DOI.
