@@ -151,14 +151,6 @@ class Scores:
     def scores_by_query(self, query: QueriesType, sort: bool = False) -> numpy.ndarray:
         """Return all scores for the given query spectrum.
 
-        Parameters
-        ----------
-        query
-            Single query Spectrum.
-        sort
-            Set to True to obtain the scores in a sorted way (relying on the
-            :meth:`~.BaseSimilarity.sort` function from the given similarity_function).
-
         For example
 
         .. testcode::
@@ -191,6 +183,14 @@ class Scores:
         .. testoutput::
 
             [0.796, 0.613, 0.0]
+
+        Parameters
+        ----------
+        query
+            Single query Spectrum.
+        sort
+            Set to True to obtain the scores in a sorted way (relying on the
+            :meth:`~.BaseSimilarity.sort` function from the given similarity_function).
 
         """
         assert query in self.queries, "Given input not found in queries."
