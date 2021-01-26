@@ -1,6 +1,7 @@
 import re
 from typing import Optional
 import numpy
+from ..importing import load_adducts
 
 
 try:  # rdkit is not included in pip package
