@@ -42,7 +42,8 @@ def derive_adduct_from_name(spectrum_in: SpectrumType,
 
     # Add found adduct to metadata (if not present yet)
     if adduct_from_name and not looks_like_adduct(spectrum.get("adduct")):
-        spectrum.set("adduct", adduct_from_name.strip().replace("*", ""))
-        print("Added adduct {} to metadata.".format(adduct_from_name))
+        adduct_cleaned = adduct_from_name.strip().replace("*", "").replace("[", "").replace("]", "")
+        spectrum.set("adduct", adduct_cleaned)
+        print(f"Added adduct {adduct_cleaned} to metadata.")
 
     return spectrum
