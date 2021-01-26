@@ -243,7 +243,12 @@ def looks_like_adduct(adduct):
     """Return True if input string has expected format of an adduct."""
     if not isinstance(adduct, str):
         return False
-    adduct = adduct.strip().replace("*", "")
+    # Clean adduct
+    adduct = adduct.strip().replace("*", "").replace("[", "").replace("]", "")
+    # Load lists of known adducts
+    known_adducts = load_adducts(filename=adducts_filename)
+    if adduct in known_adducts["adducts_positive"] or adduct in known_adducts["adducts_negative"]:
+        return True
 
     # Format 1, e.g. "[2M-H]" or "[2M+Na]+"
     regexp1 = r"^\[(([0-9]M)|(M[0-9])|(M)|(MBr)|(MCl))[+-0-9][A-Z0-9\+\-\(\)|(Na)|(Ca)|(Mg)|(Cl)|(Li)|(Br)|(Ser)]{1,}[\]0-9+-]{1,4}"
