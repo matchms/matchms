@@ -29,21 +29,19 @@ adducts_positive:
 - M+ACN+H
 - M+H-NH3
 - M-H2O+H
-- M+
 - M+Na+
-- M+
 - M+2H
 - M+H-H2O
 - M-2H2O+H+
-- M+
 - M+NH4+
 - Cat
-- M+
 - M+Na
 - 2M+H
 - M+H-2H2O
 - M+2H
 - M+2H
+- M+*
+- M*+
 
 # Known adducts for negative ionization mode.
 adducts_negative:
@@ -53,7 +51,6 @@ adducts_negative:
 - M-
 - 2M-H
 - M-H-/M-Ser-
-- M-
 - M-H-
 - M-2H-
 - M-H2O-H
