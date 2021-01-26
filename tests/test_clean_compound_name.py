@@ -23,7 +23,9 @@ def test_clean_compound_name_removing_known_non_name_parts():
         ["ReSpect:PS013405 option1|option2|option3",
          "option3"],
         ["ReSpect:PS013405 option1name",
-         "option1name"]
+         "option1name"],
+        ["4,4-Dimethylcholest-8(9),24-dien-3.beta.-ol  231.2",
+         "4,4-Dimethylcholest-8(9),24-dien-3.beta.-ol"],
     ]
     for name_strings in test_name_strings:
         spectrum_in = Spectrum(mz=numpy.array([], dtype="float"),
