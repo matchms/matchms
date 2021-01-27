@@ -1,7 +1,7 @@
 import re
 from typing import Optional
 import numpy
-from ..importing import load_adducts
+from .importing import load_adducts
 
 
 try:  # rdkit is not included in pip package
@@ -246,8 +246,8 @@ def looks_like_adduct(adduct):
         return False
     # Clean adduct
     adduct = adduct.strip().replace("*", "").replace("[", "").replace("]", "")
-    # Load lists of known adducts
-    known_adducts = load_adducts(filename=adducts_filename)
+    # Load lists of default known adducts
+    known_adducts = load_adducts()
     if adduct in known_adducts["adducts_positive"] or adduct in known_adducts["adducts_negative"]:
         return True
 
