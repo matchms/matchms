@@ -1,5 +1,6 @@
 from ..importing import load_adducts
 from ..typing import SpectrumType
+from ..utils import clean_adduct
 
 
 def derive_ionmode(spectrum_in: SpectrumType, adducts_filename: str = None) -> SpectrumType:
@@ -34,11 +35,8 @@ def derive_ionmode(spectrum_in: SpectrumType, adducts_filename: str = None) -> S
     adduct = spectrum.get("adduct", None)
     # Harmonize adduct string
     if adduct:
-        adduct = adduct.replace("\n", "") \
-                       .replace(" ", "") \
-                       .replace("[", "") \
-                       .replace("]", "") \
-                       .replace("*", "")
+        adduct = adduct.replace("\n", "")
+        adduct = clean_adduct(adduct)
 
     ionmode = spectrum.get("ionmode")
     if ionmode:

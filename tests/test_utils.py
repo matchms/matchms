@@ -7,6 +7,7 @@ from unittest import mock
 import numpy
 import pytest
 import matchms.utils
+from matchms.utils import clean_adduct
 from matchms.utils import derive_fingerprint_from_inchi
 from matchms.utils import derive_fingerprint_from_smiles
 from matchms.utils import is_valid_inchi
@@ -204,7 +205,21 @@ def test_missing_rdkit_module_error():
 
 def test_looks_like_adduct():
     """Test if adducts are correctly identified"""
-    for adduct in ["M+", "M*+", "M+Cl", "[M+H]", "[2M+Na]+", "M+H+K", "Cat"]:
+    for adduct in ["M+", "M*+", "M+Cl", "[M+H]", "[2M+Na]+", "M+H+K", "Cat",
+                   "MS+Na", "MS+H"]:
         assert looks_like_adduct(adduct), "Expected this to be identified as adduct"
     for adduct in ["N+", "B*+", "++", "--", "[--]", "H+M+K"]:
         assert not looks_like_adduct(adduct), "Expected this not to be identified as adduct"
+
+
+def test_clean_adduct_examples():
+    """Test if typical examples are correctly edited."""
+    test_adducts = [("M+", "[M]+"),
+                    ("M+CH3COO-", "[M+CH3COO]-"),
+                    ("M-CH3-", "[M-CH3]-"),
+                    ("M+2H++", "[M+2H]2+"),
+                    ("M+NH3+", "[M+NH3]+"),
+                    ("M-H2O+2H2+", "[M-H2O+2H]2+")]
+
+    for adduct, expected_adduct in test_adducts:
+        assert clean_adduct(adduct) == expected_adduct, "Expected different cleaned adduct"

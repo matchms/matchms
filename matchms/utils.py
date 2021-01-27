@@ -245,14 +245,48 @@ def looks_like_adduct(adduct):
     if not isinstance(adduct, str):
         return False
     # Clean adduct
-    adduct = adduct.strip().replace("*", "").replace("[", "").replace("]", "")
+    adduct = clean_adduct(adduct)
     # Load lists of default known adducts
     known_adducts = load_adducts()
     if adduct in known_adducts["adducts_positive"] or adduct in known_adducts["adducts_negative"]:
         return True
 
-    # Format 1, e.g. "[2M-H]" or "[2M+Na]+"
-    regexp1 = r"^\[(([0-9]M)|(M[0-9])|(M)|(MBr)|(MCl))[+-0-9][A-Z0-9\+\-\(\)|(Na)|(Ca)|(Mg)|(Cl)|(Li)|(Br)|(Ser)]{1,}[\]0-9+-]{1,4}"
-    # Format 2, e.g. "M+Na+K" or "M+H-H20"
-    regexp2 = r"^(([0-9]M)|(M[0-9])|(M)|(MBr)|(MCl))[+-0-9][A-Z0-9\+\-\(\)|(Na)|(Ca)|(Mg)|(Cl)|(Li)|(Br)|(Ser)]{1,}"
+    # Expect format like: "[2M-H]" or "[2M+Na]+"
+    regexp1 = r"^\[(([0-4]M)|(M[0-9])|(M)|(MBr)|(MCl)|(MS))[+-0-9][A-Z0-9\+\-\(\)|(Na)|(Ca)|(Mg)|(Cl)|(Li)|(Br)|(Ser)]{1,}[\]0-4+-]{1,4}"
     return re.search(regexp1, adduct) is not None or re.search(regexp2, adduct) is not None
+
+
+def clean_adduct(adduct: str) -> str:
+    """Clean adduct and make it consistent in style.
+    Will transform adduct strings of type 'M+H+' to '[M+H]+'.
+
+    Parameters
+    ----------
+    adduct
+        Input adduct string to be cleaned/edited.
+    """
+    def get_adduct_charge(adduct):
+        regex_charges = r"[1-3]{0,1}[+,-]{1,2}$"
+        match = re.search(regex_charges, adduct)
+        if match:
+            return match.group(0)
+        return match
+
+    adduct = adduct.strip().replace("*", "").replace("++", "2+").replace("--", "2-")
+    if adduct.startswith("["):
+        return adduct
+
+    if adduct.endswith("]"):
+        return "[" + adduct
+
+    adduct_core = "[" + adduct
+    # Remove parts that can confuse the charge extraction
+    for mol_part in ["CH2", "CH3", "NH3", "NH4", "O2"]:
+        if mol_part in adduct:
+            adduct = adduct.split(mol_part)[-1]
+    adduct_charge = get_adduct_charge(adduct)
+
+    if adduct_charge is None:
+        return adduct_core + "]"
+    adduct_core = adduct_core[:-len(adduct_charge)]
+    return adduct_core + "]" + adduct_charge
