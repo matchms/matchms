@@ -89,7 +89,7 @@ Should output
 .. testoutput::
 
     Removed adduct M-H from compound name.
-    Added adduct M-H to metadata.
+    Added adduct [M-H] to metadata.
     ...
     Reference scan id: 1320
     Query scan id: 1372
