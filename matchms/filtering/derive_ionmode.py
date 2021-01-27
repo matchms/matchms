@@ -1,4 +1,4 @@
-from ..importing import load_adducts
+from ..importing import load_adducts_dict
 from ..typing import SpectrumType
 from ..utils import clean_adduct
 
@@ -30,7 +30,7 @@ def derive_ionmode(spectrum_in: SpectrumType, adducts_filename: str = None) -> S
     spectrum = spectrum_in.clone()
 
     # Load lists of known adducts
-    known_adducts = load_adducts(filename=adducts_filename)
+    known_adducts = load_adducts_dict(filename=adducts_filename)
 
     adduct = spectrum.get("adduct", None)
     # Harmonize adduct string
