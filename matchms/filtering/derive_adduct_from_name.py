@@ -1,4 +1,5 @@
 from ..typing import SpectrumType
+from ..utils import clean_adduct
 from ..utils import looks_like_adduct
 
 
@@ -42,7 +43,7 @@ def derive_adduct_from_name(spectrum_in: SpectrumType,
 
     # Add found adduct to metadata (if not present yet)
     if adduct_from_name and not looks_like_adduct(spectrum.get("adduct")):
-        adduct_cleaned = adduct_from_name.strip().replace("*", "").replace("[", "").replace("]", "")
+        adduct_cleaned = clean_adduct(adduct_from_name)
         spectrum.set("adduct", adduct_cleaned)
         print(f"Added adduct {adduct_cleaned} to metadata.")
 
