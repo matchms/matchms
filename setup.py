@@ -51,6 +51,7 @@ setup(
         "matplotlib",
         "numba >=0.47",
         "numpy",
+        "pandas",
         "pyteomics >=4.2",
         "pyyaml",
         "requests",
