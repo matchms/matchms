@@ -1,8 +1,8 @@
 import os
 from functools import lru_cache
 from typing import Dict
-import yaml
 import pandas as pd
+import yaml
 
 
 @lru_cache(maxsize=4)
