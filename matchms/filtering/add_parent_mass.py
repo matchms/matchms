@@ -50,7 +50,7 @@ def add_parent_mass(spectrum_in: SpectrumType, estimate_from_adduct: bool = True
                 correction_mass = adduct_data.correction_mass.values
                 parent_mass = precursor_mz * multiplier - correction_mass
                 print(parent_mass)
-        
+
         if parent_mass is None:
             # Otherwise assume adduct of shape M+xH or M-xH
             protons_mass = PROTON_MASS * charge

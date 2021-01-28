@@ -35,8 +35,8 @@ def test_add_parent_mass_no_pepmass():
 
 
 @pytest.mark.parametrize("adduct, expected", [("[M+2Na-H]+", 399.02884),
-                                               ("[M+H+NH4]2+", 212.47945),
-                                               ("[2M+FA-H]-", 843.001799)])
+                                              ("[M+H+NH4]2+", 212.47945),
+                                              ("[2M+FA-H]-", 843.001799)])
 def test_add_parent_mass_using_adduct(adduct, expected):
     """Test if parent mass is correctly derived from adduct information."""
     mz = numpy.array([], dtype='float')
