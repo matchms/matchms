@@ -1,6 +1,7 @@
 import os
 from functools import lru_cache
 from typing import Dict
+import json
 import pandas as pd
 import yaml
 
@@ -28,6 +29,29 @@ def load_adducts_dict(filename: str = None) -> Dict:
                          'adducts_negative': []}
 
     return known_adducts
+
+
+@lru_cache(maxsize=4)
+def load_known_adduct_conversions(filename: str = None) -> Dict:
+    """Load dictionary of known adduct conversions. Makes sure that file loading is cached.
+
+    Parameters
+    ----------
+    filename:
+        Json file containing adducts.
+    """
+    if filename is None:
+        adduct_conversions_file = os.path.join(os.path.dirname(__file__), "..", "data", "known_adduct_conversions.json")
+    else:
+        adduct_conversions_file = filename
+
+    if os.path.isfile(adduct_conversions_file):
+        known_adduct_conversions = json.load(open(adduct_conversions_file, "r"))
+    else:
+        print("Could not find json file with known adduct conversions.")
+        known_adduct_conversions = None
+
+    return known_adduct_conversions
 
 
 @lru_cache(maxsize=4)

@@ -13,6 +13,7 @@ For more extensive import options we recommend building custom importers using `
 """
 from .load_adducts import load_adducts_dict
 from .load_adducts import load_adducts_table
+from .load_adducts import load_known_adduct_conversions
 from .load_from_json import load_from_json
 from .load_from_mgf import load_from_mgf
 from .load_from_msp import load_from_msp
@@ -30,4 +31,5 @@ __all__ = [
     "load_from_usi",
     "load_adducts_dict",
     "load_adducts_table",
+    "load_known_adduct_conversions",
 ]

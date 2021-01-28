@@ -2,6 +2,7 @@ import re
 from typing import Optional
 import numpy
 from .importing import load_adducts_dict
+from .importing import load_known_adduct_conversions
 
 
 try:  # rdkit is not included in pip package
@@ -272,12 +273,19 @@ def clean_adduct(adduct: str) -> str:
             return match.group(0)
         return match
 
-    adduct = adduct.strip().replace("*", "").replace("++", "2+").replace("--", "2-")
-    if adduct.startswith("["):
+    def adduct_conversion(adduct):
+        """Convert adduct if conversion rule is known"""
+        adduct_conversions = load_known_adduct_conversions()
+        if adduct in adduct_conversions:
+            return adduct_conversions[adduct]
         return adduct
 
+    adduct = adduct.strip().replace("*", "").replace("++", "2+").replace("--", "2-")
+    if adduct.startswith("["):
+        return adduct_conversion(adduct)
+
     if adduct.endswith("]"):
-        return "[" + adduct
+        return adduct_conversion("[" + adduct)
 
     adduct_core = "[" + adduct
     # Remove parts that can confuse the charge extraction
@@ -287,6 +295,7 @@ def clean_adduct(adduct: str) -> str:
     adduct_charge = get_adduct_charge(adduct)
 
     if adduct_charge is None:
-        return adduct_core + "]"
-    adduct_core = adduct_core[:-len(adduct_charge)]
-    return adduct_core + "]" + adduct_charge
+        return adduct_conversion(adduct_core + "]")
+
+    adduct_cleaned = adduct_core[:-len(adduct_charge)] + "]" + adduct_charge
+    return adduct_conversion(adduct_cleaned)

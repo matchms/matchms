@@ -216,8 +216,11 @@ def test_clean_adduct_examples():
     """Test if typical examples are correctly edited."""
     test_adducts = [("M+", "[M]+"),
                     ("M+CH3COO-", "[M+CH3COO]-"),
+                    ("M+CH3COO", "[M+CH3COO]-"),
                     ("M-CH3-", "[M-CH3]-"),
                     ("M+2H++", "[M+2H]2+"),
+                    ("[2M+Na]", "[2M+Na]+"),
+                    ("2M+Na", "[2M+Na]+"),
                     ("M+NH3+", "[M+NH3]+"),
                     ("M-H2O+2H2+", "[M-H2O+2H]2+")]
 

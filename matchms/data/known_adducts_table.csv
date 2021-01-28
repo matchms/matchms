@@ -12,6 +12,8 @@
 [M+2ACN+2H]2+,positive,2,0.5,42.033823
 [M+3ACN+2H]2+,positive,2,0.5,62.547097
 [M+H]+,positive,1,1,1.007276
+[M-H2O+H]+,positive,1,1,-17.003289
+[M-2H2O+H]+,positive,1,1,-35.013854
 [M+NH4]+,positive,1,1,18.033823
 [M+Na]+,positive,1,1,22.989218
 [M+CH3OH+H]+,positive,1,1,33.033489
