@@ -4,11 +4,14 @@ from ..typing import SpectrumType
 
 
 def add_parent_mass(spectrum_in: SpectrumType, estimate_from_adduct: bool = True) -> SpectrumType:
-    """Add parentmass to metadata (if not present yet).
+    """Add estimated parent mass to metadata (if not present yet).
 
     Method to calculate the parent mass from given precursor m/z together
     with charge and/or adduct. Will take precursor m/z from either "precursor_mz"
     or "pepmass" field.
+    For estimate_from_adduct=True this function will estimate the parent mass based on
+    the mass and charge of known adducts. The table of known adduct properties can be
+    found under matchms/data/known_adducts_table.csv.
 
     Parameters
     ----------
@@ -29,12 +32,7 @@ def add_parent_mass(spectrum_in: SpectrumType, estimate_from_adduct: bool = True
         parent_mass = None
         charge = spectrum.get("charge")
         adduct = spectrum.get("adduct")
-        print(charge, adduct)
-        # Assert if sufficent metadata is present
-        # TODO: maybe also accept charge=0 ?
-        assert charge != 0 or adduct is not None, "Not sufficient spectrum metadata to derive parent mass."
-        if not estimate_from_adduct:
-            assert charge != 0, "Not sufficient spectrum metadata to derive parent mass."
+        # Get precursor m/z
         try:
             precursor_mz = spectrum.get("precursor_mz", None)
             if precursor_mz is None:
@@ -43,16 +41,14 @@ def add_parent_mass(spectrum_in: SpectrumType, estimate_from_adduct: bool = True
             print("Not sufficient spectrum metadata to derive parent mass.")
 
         spectrum = spectrum_in.clone()
-        if estimate_from_adduct and adduct is not None:
-            if adduct in adducts_table.adduct.to_list():
-                adduct_data = adducts_table[adducts_table.adduct == adduct]
-                multiplier = adduct_data.mass_multiplier.values
-                correction_mass = adduct_data.correction_mass.values
-                parent_mass = precursor_mz * multiplier - correction_mass
-                print(parent_mass)
+        if estimate_from_adduct and adduct in adducts_table.adduct.to_list():
+            adduct_data = adducts_table[adducts_table.adduct == adduct]
+            multiplier = adduct_data.mass_multiplier.values
+            correction_mass = adduct_data.correction_mass.values
+            parent_mass = precursor_mz * multiplier - correction_mass
 
         if parent_mass is None:
-            # Otherwise assume adduct of shape M+xH or M-xH
+            # Otherwise assume adduct of shape [M+xH] or [M-xH]
             protons_mass = PROTON_MASS * charge
             precursor_mass = precursor_mz * abs(charge)
             parent_mass = precursor_mass - protons_mass
