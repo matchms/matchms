@@ -280,7 +280,8 @@ def clean_adduct(adduct: str) -> str:
             return adduct_conversions[adduct]
         return adduct
 
-    adduct = adduct.strip().replace("*", "").replace("++", "2+").replace("--", "2-")
+    adduct = adduct.strip().replace("\n", "").replace("*", "")
+    adduct = adduct.replace("++", "2+").replace("--", "2-")
     if adduct.startswith("["):
         return adduct_conversion(adduct)
 

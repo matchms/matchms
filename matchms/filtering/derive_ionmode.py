@@ -35,7 +35,6 @@ def derive_ionmode(spectrum_in: SpectrumType, adducts_filename: str = None) -> S
     adduct = spectrum.get("adduct", None)
     # Harmonize adduct string
     if adduct:
-        adduct = adduct.replace("\n", "")
         adduct = clean_adduct(adduct)
 
     ionmode = spectrum.get("ionmode")
