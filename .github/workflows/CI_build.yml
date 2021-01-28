@@ -43,7 +43,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   build_pypi:
-    name: Pypi and documentation build / python-${{ matrix.python-version }} / ${{ matrix.os }}
+    name: Pypi / python-${{ matrix.python-version }} / ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     needs: first_check
     strategy:
@@ -131,7 +131,6 @@ jobs:
         env:
           SPHINXOPTS: "-n"  # enable nit-picky mode
       - name: Check documentation coverage threshold
-        if: matrix.os == 'ubuntu-latest'
         run: |
           cat readthedocs/_build/coverage/python.txt
           UNCOVERED_MEMBERS=$(grep '*' readthedocs/_build/coverage/python.txt | wc -l)
