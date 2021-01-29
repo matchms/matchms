@@ -45,4 +45,4 @@ def test_load_known_adduct_conversions():
 def test_load_known_adduct_conversions_no_file():
     """Test if None is returned if file is missing."""
     adduct_conversions = load_known_adduct_conversions(filename="nonexist.json")
-    assert adduct_conversions is None, "Expected result to be None"onversions is None, "Expected result to be None"
+    assert adduct_conversions is None, "Expected result to be None"
