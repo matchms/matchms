@@ -11,7 +11,7 @@ def add_parent_mass(spectrum_in: SpectrumType, estimate_from_adduct: bool = True
     or "pepmass" field.
     For estimate_from_adduct=True this function will estimate the parent mass based on
     the mass and charge of known adducts. The table of known adduct properties can be
-    found under matchms/data/known_adducts_table.csv.
+    found under :download:`matchms/data/known_adducts_table.csv </../matchms/data/known_adducts_table.csv>`.
 
     Parameters
     ----------

@@ -50,7 +50,7 @@ def test_add_parent_mass_using_adduct(adduct, expected):
 
     spectrum = add_parent_mass(spectrum_in)
 
-    assert numpy.allclose(spectrum.get("parent_mass"), expected, atol=1e-4), "Expected parent mass of about 339.0."
+    assert numpy.allclose(spectrum.get("parent_mass"), expected, atol=1e-4), f"Expected parent mass of about {expected}."
 
 
 def test_empty_spectrum():
