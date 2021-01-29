@@ -6,8 +6,6 @@ description: >
     notation is often not sufficiently standardized.
     This document will list known adducts which can then be used to better
     interpret mass spectra metadata.
-last_updated_by: Florian Huber
-last_updated: 27-01-2021
 
 # Known adducts for positive ionization mode.
 adducts_positive:

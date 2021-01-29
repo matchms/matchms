@@ -55,7 +55,7 @@ def load_known_adduct_conversions(filename: str = None) -> Dict:
 
 
 @lru_cache(maxsize=4)
-def load_adducts_table(filename: str = None) -> Dict:
+def load_adducts_table(filename: str = None) -> pd.DataFrame:
     """Load table of known adducts and their charges and masses.
     Makes sure that file loading is cached.
 
