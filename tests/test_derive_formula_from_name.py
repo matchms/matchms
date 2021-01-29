@@ -22,7 +22,10 @@ def test_derive_formula_from_name_default():
                                                                ("NIST14", None),
                                                                ("HCl", None),
                                                                ("ACID", None),
-                                                               ("B12A13", None)])
+                                                               ("B12A13", None),
+                                                               ("(12)", None),
+                                                               ("6432", None),
+                                                               ("C15", None)])
 def test_derive_formula_from_name_examples(string_addition, expected_formula):
     spectrum_in = Spectrum(mz=numpy.array([], dtype="float"),
                            intensities=numpy.array([], dtype="float"),
