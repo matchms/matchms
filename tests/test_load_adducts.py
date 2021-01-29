@@ -1,4 +1,3 @@
-import pytest
 import pandas as pd
 from matchms.importing import load_adducts_dict
 from matchms.importing import load_adducts_table
@@ -29,10 +28,11 @@ def test_load_adducts_table():
                                               'mass_multiplier', 'correction_mass'], \
         "Expected different columns in adduct table"
 
+
 def test_load_adducts_table_no_file():
     """Test if correct data is imported."""
     adduct_table = load_adducts_table(filename="nonexist.csv")
-    assert adduct_table  is None, "Expected result to be None"
+    assert adduct_table is None, "Expected result to be None"
 
 
 def test_load_known_adduct_conversions():
