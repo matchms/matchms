@@ -20,7 +20,8 @@ def test_derive_formula_from_name_default():
                                                                ("HYPOTAURINE", None),
                                                                ("CITRATE", None),
                                                                ("NIST14", None),
-                                                               ("HCl", None)])
+                                                               ("HCl", None),
+                                                               ("ACID", None)])
 def test_derive_formula_from_name_examples(string_addition, expected_formula):
     spectrum_in = Spectrum(mz=numpy.array([], dtype="float"),
                            intensities=numpy.array([], dtype="float"),
