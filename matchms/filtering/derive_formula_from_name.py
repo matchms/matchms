@@ -45,6 +45,8 @@ def derive_formula_from_name(spectrum_in: SpectrumType,
 
 
 def looks_like_formula(formula):
-    """Return True if input string has expected format of a molecular formula."""
-    regexp = r"^^(Ar|Al|Be|B|Ca|Cl|C|Fe|F|He|H|Li|K|Ne|Na|N|Mg|O|P|Si|S|[1-9]|\(|\)){3,}$"
+    """Return True if input string has expected format of a molecular formula.
+    Does only consider most frequent atoms found in many name strings.
+    """
+    regexp = r"^^(B|C|F|H|N|O|P|S|[1-9]|\(|\)){3,}$"
     return re.search(regexp, formula) is not None

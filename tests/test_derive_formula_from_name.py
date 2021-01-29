@@ -21,7 +21,8 @@ def test_derive_formula_from_name_default():
                                                                ("CITRATE", None),
                                                                ("NIST14", None),
                                                                ("HCl", None),
-                                                               ("ACID", None)])
+                                                               ("ACID", None),
+                                                               ("B12A13", None)])
 def test_derive_formula_from_name_examples(string_addition, expected_formula):
     spectrum_in = Spectrum(mz=numpy.array([], dtype="float"),
                            intensities=numpy.array([], dtype="float"),
