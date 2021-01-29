@@ -1,5 +1,5 @@
-import pytest
 import numpy
+import pytest
 from matchms import Spectrum
 from matchms.filtering import derive_formula_from_name
 
