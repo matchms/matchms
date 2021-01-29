@@ -50,5 +50,7 @@ def looks_like_formula(formula):
     """Return True if input string has expected format of a molecular formula.
     Does only consider most frequent atoms found in many name strings.
     """
-    regexp = r"^(B|C|F|H|N|O|P|S|[1-9]|\(|\)){3,}$"
-    return re.search(regexp, formula) is not None
+    regex_atoms = r"(C|F|H|N|O|P|S)"
+    atom_count = len(re.findall(regex_atoms, formula))
+    regexp = r"^(C|F|H|N|O|P|S|[0-9]|\(|\)){3,}$"
+    return (atom_count > 2) and (re.search(regexp, formula) is not None)
