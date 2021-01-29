@@ -37,3 +37,5 @@ __pycache__/
 
 # conda build directory
 /_build
+
+*.afdesign

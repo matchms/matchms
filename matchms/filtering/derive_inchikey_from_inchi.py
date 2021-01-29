@@ -1,3 +1,4 @@
+import logging
 from ..typing import SpectrumType
 from ..utils import convert_inchi_to_inchikey
 from ..utils import is_valid_inchi
@@ -19,6 +20,6 @@ def derive_inchikey_from_inchi(spectrum_in: SpectrumType) -> SpectrumType:
         if inchikey:
             spectrum.set("inchikey", inchikey)
         else:
-            print("Could not convert InChI", inchi, "to inchikey.")
+            logging.warn("Could not convert InChI", inchi, "to inchikey.")
 
     return spectrum

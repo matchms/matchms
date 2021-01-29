@@ -1,3 +1,4 @@
+import logging
 from ..typing import SpectrumType
 
 
@@ -17,6 +18,6 @@ def add_compound_name(spectrum_in: SpectrumType) -> SpectrumType:
             spectrum.set("compound_name", spectrum.get("title"))
             return spectrum
 
-        print("No compound name found in metadata.")
+        logging.warning("No compound name found in metadata.")
 
     return spectrum

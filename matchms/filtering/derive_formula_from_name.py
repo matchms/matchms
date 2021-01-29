@@ -1,4 +1,5 @@
 import re
+import logging
 from ..typing import SpectrumType
 
 
@@ -36,12 +37,12 @@ def derive_formula_from_name(spectrum_in: SpectrumType,
     if formula_from_name and remove_formula_from_name:
         name_formula_removed = " ".join(name.split(" ")[:-1])
         spectrum.set("compound_name", name_formula_removed)
-        print("Removed formula {} from compound name.".format(formula_from_name))
+        logging.info("Removed formula {} from compound name.".format(formula_from_name))
 
     # Add found formula to metadata (if not present yet)
     if formula_from_name and spectrum.get("formula", None) is None:
         spectrum.set("formula", formula_from_name)
-        print("Added formula {} to metadata.".format(formula_from_name))
+        logging.info("Added formula {} to metadata.".format(formula_from_name))
 
     return spectrum
 
