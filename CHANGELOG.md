@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - more thorough adduct cleaning effecting `derive_adduct_from_name()` and `derive_ionmode()` [#170](https://github.com/matchms/matchms/pull/170)
 - significant expansion of `add_parent_mass()` filter to take known adduct properties into account [#170](https://github.com/matchms/matchms/pull/170)
 
+## Fixed
+
+- too unspecific formula detection (and removal) from given compound names in `derive_formula_from_name` [#172](https://github.com/matchms/matchms/issues/172)
+
 ## [0.7.0] - 2021-01-04
 
 ### Added
