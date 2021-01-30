@@ -20,6 +20,6 @@ def derive_smiles_from_inchi(spectrum_in: SpectrumType) -> SpectrumType:
             smiles = smiles.rstrip()
             spectrum.set("smiles", smiles)
         else:
-            logging.warn("Could not convert InChI", inchi, "to smiles.")
+            logging.warning("Could not convert InChI %s to smiles.", inchi)
 
     return spectrum

@@ -20,6 +20,6 @@ def derive_inchikey_from_inchi(spectrum_in: SpectrumType) -> SpectrumType:
         if inchikey:
             spectrum.set("inchikey", inchikey)
         else:
-            logging.warn("Could not convert InChI", inchi, "to inchikey.")
+            logging.warning("Could not convert InChI %s to inchikey.", inchi)
 
     return spectrum

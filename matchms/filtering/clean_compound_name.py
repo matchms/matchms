@@ -69,6 +69,6 @@ def clean_compound_name(spectrum_in: SpectrumType) -> SpectrumType:
     name_cleaned = remove_misplaced_mass(name_cleaned)
     if name_cleaned != name:
         spectrum.set("compound_name", name_cleaned)
-        logging.info("Added cleaned compound name:", name_cleaned)
+        logging.info("Added cleaned compound name: %s", name_cleaned)
 
     return spectrum

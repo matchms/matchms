@@ -47,10 +47,10 @@ def derive_ionmode(spectrum_in: SpectrumType, adducts_filename: str = None) -> S
     if ionmode not in ["positive", "negative"]:
         if adduct in known_adducts["adducts_positive"]:
             ionmode = "positive"
-            logging.info(f"Added ionmode '{ionmode}' based on adduct: {adduct}")
+            logging.info("Added ionmode %s based on adduct: %s", ionmode, adduct)
         elif adduct in known_adducts["adducts_negative"]:
             ionmode = "negative"
-            logging.info("Added ionmode '{ionmode}' based on adduct: {adduct}")
+            logging.info("Added ionmode %s based on adduct: %s", ionmode, adduct)
         else:
             ionmode = "n/a"
     spectrum.set("ionmode", ionmode)

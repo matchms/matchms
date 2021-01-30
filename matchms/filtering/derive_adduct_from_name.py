@@ -40,12 +40,12 @@ def derive_adduct_from_name(spectrum_in: SpectrumType,
     if adduct_from_name and remove_adduct_from_name:
         name_adduct_removed = " ".join([x for x in name_split if x != adduct_from_name])
         spectrum.set("compound_name", name_adduct_removed)
-        logging.info("Removed adduct {} from compound name.".format(adduct_from_name))
+        logging.info("Removed adduct %s from compound name.", adduct_from_name)
 
     # Add found adduct to metadata (if not present yet)
     if adduct_from_name and not looks_like_adduct(spectrum.get("adduct")):
         adduct_cleaned = clean_adduct(adduct_from_name)
         spectrum.set("adduct", adduct_cleaned)
-        logging.info(f"Added adduct {adduct_cleaned} to metadata.")
+        logging.info("Added adduct %s to metadata.", adduct_cleaned)
 
     return spectrum
