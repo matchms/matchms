@@ -19,7 +19,7 @@ def add_parent_mass(spectrum_in: SpectrumType, estimate_from_adduct: bool = True
         Input spectrum.
     estimate_from_adduct
         When set to True, use adduct to estimate actual molecular mass ("parent mass").
-        Default is True. Still switches back to charge-based estimate if adduct does not match
+        Default is True. Switches back to charge-based estimate if adduct does not match
         known adduct.
     """
     if spectrum_in is None:
