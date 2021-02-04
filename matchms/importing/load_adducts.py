@@ -9,6 +9,7 @@ import yaml
 @lru_cache(maxsize=4)
 def load_adducts_dict(filename: str = None) -> Dict:
     """Load dictionary of known adducts. Makes sure that file loading is cached.
+    If no argument is given or None is given then the `data/known_adducts.yaml` file from the `matchms` package is loaded.
 
     Parameters
     ----------
