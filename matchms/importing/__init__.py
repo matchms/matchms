@@ -15,7 +15,6 @@ To process spectrum metadata, matchms can also make use of known adduct informat
 which is imported via :meth:`~matchms.importing.load_adducts`.
 """
 from .load_adducts import load_adducts_dict
-from .load_adducts import load_adducts_table
 from .load_adducts import load_known_adduct_conversions
 from .load_from_json import load_from_json
 from .load_from_mgf import load_from_mgf
@@ -33,6 +32,5 @@ __all__ = [
     "load_from_mzxml",
     "load_from_usi",
     "load_adducts_dict",
-    "load_adducts_table",
     "load_known_adduct_conversions",
 ]
