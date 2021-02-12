@@ -1,5 +1,5 @@
 from ..constants import PROTON_MASS
-from ..importing import load_adducts_table
+from ..importing import load_adducts_dict
 from ..typing import SpectrumType
 
 
@@ -26,7 +26,7 @@ def add_parent_mass(spectrum_in: SpectrumType, estimate_from_adduct: bool = True
         return None
 
     spectrum = spectrum_in.clone()
-    adducts_table = load_adducts_table()
+    adducts_dict = load_adducts_dict()
 
     if spectrum.get("parent_mass", None) is None:
         parent_mass = None
@@ -41,10 +41,9 @@ def add_parent_mass(spectrum_in: SpectrumType, estimate_from_adduct: bool = True
             print("Not sufficient spectrum metadata to derive parent mass.")
 
         spectrum = spectrum_in.clone()
-        if estimate_from_adduct and adduct in adducts_table.adduct.to_list():
-            adduct_data = adducts_table[adducts_table.adduct == adduct]
-            multiplier = adduct_data.mass_multiplier.values
-            correction_mass = adduct_data.correction_mass.values
+        if estimate_from_adduct and adduct in adducts_dict:
+            multiplier = adducts_dict[adduct]["mass_multiplier"]
+            correction_mass = adducts_dict[adduct]["correction_mass"]
             parent_mass = precursor_mz * multiplier - correction_mass
 
         if parent_mass is None:

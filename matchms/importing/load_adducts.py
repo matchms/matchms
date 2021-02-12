@@ -1,79 +1,45 @@
+import csv
 import json
 import os
 from functools import lru_cache
 from typing import Dict
-import pandas as pd
-import yaml
 
 
 @lru_cache(maxsize=4)
-def load_adducts_dict(filename: str = None) -> Dict:
-    """Load dictionary of known adducts. Makes sure that file loading is cached.
-    If no argument is given or None is given then the `data/known_adducts.yaml` file from the `matchms` package is loaded.
-
-    Parameters
-    ----------
-    filename:
-        Yaml file containing adducts.
-    """
-    if filename is None:
-        known_adducts_file = os.path.join(os.path.dirname(__file__), "..", "data", "known_adducts.yaml")
-    else:
-        known_adducts_file = filename
-
-    if os.path.isfile(known_adducts_file):
-        with open(known_adducts_file, 'r') as f:
-            known_adducts = yaml.safe_load(f)
-    else:
-        print("Could not find yaml file with known adducts.")
-        known_adducts = {'adducts_positive': [],
-                         'adducts_negative': []}
-
-    return known_adducts
-
-
-@lru_cache(maxsize=4)
-def load_known_adduct_conversions(filename: str = None) -> Dict:
-    """Load dictionary of known adduct conversions. Makes sure that file loading is cached.
-
-    Parameters
-    ----------
-    filename:
-        Json file containing adducts.
-    """
-    if filename is None:
-        adduct_conversions_file = os.path.join(os.path.dirname(__file__), "..", "data", "known_adduct_conversions.json")
-    else:
-        adduct_conversions_file = filename
-
-    if os.path.isfile(adduct_conversions_file):
-        known_adduct_conversions = json.load(open(adduct_conversions_file, "r"))
-    else:
-        print("Could not find json file with known adduct conversions.")
-        known_adduct_conversions = None
-
-    return known_adduct_conversions
-
-
-@lru_cache(maxsize=4)
-def load_adducts_table(filename: str = None) -> pd.DataFrame:
-    """Load table of known adducts and their charges and masses.
+def load_adducts_dict() -> Dict:
+    """Load dictionary of known adducts containing the adduct mass and charge.
     Makes sure that file loading is cached.
 
-    Parameters
-    ----------
-    filename:
-        .csv file containing adducts.
+    Adduct information is based on information from
+    https://fiehnlab.ucdavis.edu/staff/kind/metabolomics/ms-adduct-calculator/
+    and was extended by F.Huber and JJJ.v.d.Hooft.
     """
-    if filename is None:
-        adducts_file = os.path.join(os.path.dirname(__file__), "..", "data", "known_adducts_table.csv")
-    else:
-        adducts_file = filename
+    known_adducts_file = os.path.join(os.path.dirname(__file__), "..", "data", "known_adducts_table.csv")
 
-    if os.path.isfile(adducts_file):
-        adducts_table = pd.read_csv(adducts_file)
-    else:
-        print("Could not find csv file with adducts table.")
-        adducts_table = None
+    if not os.path.isfile(known_adducts_file):
+        print("Could not find .csv file with known adducts.")
+        return None
 
-    return adducts_table
+    with open(known_adducts_file, newline='', encoding='utf-8-sig') as csvfile:
+        reader = csv.DictReader(csvfile)
+        adducts_dict = dict()
+        for row in reader:
+            assert "adduct" in row
+            adducts_dict[row["adduct"]] = {x[0]: x[1] for x in row.items() if x[0] != "adduct"}
+
+    return adducts_dict
+
+
+@lru_cache(maxsize=4)
+def load_known_adduct_conversions() -> Dict:
+    """Load dictionary of known adduct conversions. Makes sure that file loading is cached.
+    """
+    adduct_conversions_file = os.path.join(os.path.dirname(__file__), "..", "data", "known_adduct_conversions.json")
+
+    if not os.path.isfile(adduct_conversions_file):
+        print("Could not find json file with known adduct conversions.")
+        return None
+
+    known_adduct_conversions = json.load(open(adduct_conversions_file, "r"))
+
+    return known_adduct_conversions
