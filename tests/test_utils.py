@@ -212,17 +212,17 @@ def test_looks_like_adduct():
         assert not looks_like_adduct(adduct), "Expected this not to be identified as adduct"
 
 
-def test_clean_adduct_examples():
+@pytest.mark.parametrize("input_adduct, expected_adduct",
+                         [("M+", "[M]+"),
+                          ("M+CH3COO-", "[M+CH3COO]-"),
+                          ("M+CH3COO", "[M+CH3COO]-"),
+                          ("M-CH3-", "[M-CH3]-"),
+                          ("M+2H++", "[M+2H]2+"),
+                          ("[2M+Na]", "[2M+Na]+"),
+                          ("2M+Na", "[2M+Na]+"),
+                          ("M+NH3+", "[M+NH3]+"),
+                          ("M-H2O+2H2+", "[M-H2O+2H]2+")])
+def test_clean_adduct_examples(input_adduct, expected_adduct):
     """Test if typical examples are correctly edited."""
-    test_adducts = [("M+", "[M]+"),
-                    ("M+CH3COO-", "[M+CH3COO]-"),
-                    ("M+CH3COO", "[M+CH3COO]-"),
-                    ("M-CH3-", "[M-CH3]-"),
-                    ("M+2H++", "[M+2H]2+"),
-                    ("[2M+Na]", "[2M+Na]+"),
-                    ("2M+Na", "[2M+Na]+"),
-                    ("M+NH3+", "[M+NH3]+"),
-                    ("M-H2O+2H2+", "[M-H2O+2H]2+")]
-
-    for adduct, expected_adduct in test_adducts:
-        assert clean_adduct(adduct) == expected_adduct, "Expected different cleaned adduct"
+    assert clean_adduct(input_adduct) == expected_adduct, \
+        "Expected different cleaned adduct"
