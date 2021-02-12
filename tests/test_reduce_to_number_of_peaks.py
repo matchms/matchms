@@ -65,8 +65,8 @@ def test_reduce_to_number_of_peaks_required_2_desired_2():
     assert spectrum.peaks.mz.tolist() == [30., 40.], "Expected different peaks to remain."
 
 
-def test_reduce_to_number_of_peaks_required_2_desired_3():
-    """Here: ratio_desired * parent_mass is 3, more than n_required."""
+def test_reduce_to_number_of_peaks_required_3_desired_2():
+    """Here: ratio_desired * parent_mass is 2, less than n_required."""
     mz = numpy.array([10, 20, 30, 40], dtype="float")
     intensities = numpy.array([0, 1, 10, 100], dtype="float")
     spectrum_in = Spectrum(mz=mz, intensities=intensities,
@@ -83,7 +83,7 @@ def test_reduce_to_number_of_peaks_required_2_desired_6_max_4():
     mz = numpy.array([10, 20, 30, 40, 50, 60], dtype="float")
     intensities = numpy.array([1, 1, 10, 100, 50, 20], dtype="float")
     spectrum_in = Spectrum(mz=mz, intensities=intensities,
-                           metadata={"parent_mass": 40})
+                           metadata={"parent_mass": 60})
 
     spectrum = reduce_to_number_of_peaks(spectrum_in, n_required=3, n_max=4, ratio_desired=0.1)
 
