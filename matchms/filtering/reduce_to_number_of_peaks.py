@@ -1,6 +1,6 @@
-import numpy
 from math import ceil
 from typing import Optional
+import numpy
 from ..Spikes import Spikes
 from ..typing import SpectrumType
 
