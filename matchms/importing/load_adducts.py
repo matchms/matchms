@@ -1,6 +1,7 @@
 import csv
 import json
 import os
+import numpy
 from functools import lru_cache
 from typing import Dict
 
@@ -14,6 +15,38 @@ def load_adducts_dict() -> Dict:
     https://fiehnlab.ucdavis.edu/staff/kind/metabolomics/ms-adduct-calculator/
     and was extended by F.Huber and JJJ.v.d.Hooft.
     """
+    def convert_if_possible(entry, expected_type=float):
+        try:
+            entry = expected_type(entry)
+        except:
+            pass
+        return entry
+
+    def convert_and_fill_dict(adduct_dict):
+        """Convert string entries to int/float and fill missing entries ('n/a')
+        with best basic guesses."""
+        filled_dict = dict()
+        for adduct, values in adduct_dict.items():
+            ionmode = values["ionmode"]
+            charge = convert_if_possible(values["charge"], int)
+            mass_multiplier = convert_if_possible(values["mass_multiplier"], float)
+            correction_mass = convert_if_possible(values["correction_mass"], float)
+
+            if not isinstance(charge, int):
+                charge = 1 * (ionmode == "positive") - 1 * (ionmode == "negative")
+            values["charge"] = charge
+
+            if not isinstance(mass_multiplier, float):
+                mass_multiplier = 1.0
+            values["mass_multiplier"] = mass_multiplier
+
+            if not isinstance(correction_mass, float):
+                correction_mass = 1.007276 * numpy.sign(charge)
+            values["correction_mass"] = correction_mass
+
+            filled_dict[adduct] = values
+        return filled_dict
+
     known_adducts_file = os.path.join(os.path.dirname(__file__), "..", "data", "known_adducts_table.csv")
 
     if not os.path.isfile(known_adducts_file):
@@ -27,7 +60,7 @@ def load_adducts_dict() -> Dict:
             assert "adduct" in row
             adducts_dict[row["adduct"]] = {x[0]: x[1] for x in row.items() if x[0] != "adduct"}
 
-    return adducts_dict
+    return convert_and_fill_dict(adducts_dict)
 
 
 @lru_cache(maxsize=4)

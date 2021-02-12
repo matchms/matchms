@@ -249,7 +249,7 @@ def looks_like_adduct(adduct):
     adduct = clean_adduct(adduct)
     # Load lists of default known adducts
     known_adducts = load_adducts_dict()
-    if adduct in known_adducts["adducts_positive"] or adduct in known_adducts["adducts_negative"]:
+    if adduct in known_adducts:
         return True
 
     # Expect format like: "[2M-H]" or "[2M+Na]+"
