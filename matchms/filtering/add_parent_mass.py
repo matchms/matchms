@@ -20,7 +20,7 @@ def add_parent_mass(spectrum_in: SpectrumType, estimate_from_adduct: bool = True
     estimate_from_adduct
         When set to True, use adduct to estimate actual molecular mass ("parent mass").
         Default is True. Switches back to charge-based estimate if adduct does not match
-        known adduct.
+        a known adduct.
     """
     if spectrum_in is None:
         return None
@@ -46,11 +46,13 @@ def add_parent_mass(spectrum_in: SpectrumType, estimate_from_adduct: bool = True
             correction_mass = adducts_dict[adduct]["correction_mass"]
             parent_mass = precursor_mz * multiplier - correction_mass
 
-        if parent_mass is None:
+        if parent_mass is None and charge is not None:
             # Otherwise assume adduct of shape [M+xH] or [M-xH]
             protons_mass = PROTON_MASS * charge
             precursor_mass = precursor_mz * abs(charge)
             parent_mass = precursor_mass - protons_mass
+        else:
+            print("Not sufficient spectrum metadata to derive parent mass.")
 
         if parent_mass is not None:
             spectrum.set("parent_mass", parent_mass)

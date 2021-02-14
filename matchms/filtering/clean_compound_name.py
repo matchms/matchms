@@ -43,7 +43,7 @@ def clean_compound_name(spectrum_in: SpectrumType) -> SpectrumType:
         return name.strip("; ")
 
     def remove_misplaced_mass(name):
-        """Remove occationally occuring parent mass addition to name."""
+        """Remove occasionally occurring parent mass addition to name."""
         regex_mass = r"^[0-9]{2,4}\.[0-9]$"
         end_part = name.split(" ")[-1]
         if re.search(regex_mass, end_part) is not None:
