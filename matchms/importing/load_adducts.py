@@ -1,9 +1,9 @@
 import csv
 import json
 import os
-import numpy
 from functools import lru_cache
 from typing import Dict
+import numpy
 
 
 @lru_cache(maxsize=4)
