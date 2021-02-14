@@ -7,7 +7,7 @@ import numpy
 
 
 @lru_cache(maxsize=4)
-def load_adducts_dict() -> Dict:
+def load_adducts_dict() -> Dict[str, dict]:
     """Load dictionary of known adducts containing the adduct mass and charge.
     Makes sure that file loading is cached.
 
@@ -15,9 +15,10 @@ def load_adducts_dict() -> Dict:
     https://fiehnlab.ucdavis.edu/staff/kind/metabolomics/ms-adduct-calculator/
     and was extended by F.Huber and JJJ.v.d.Hooft.
 
-    .. raw:: html
+    The full table can be found at
+    https://github.com/matchms/matchms/blob/expand_adducts/matchms/data/known_adducts_table.csv
 
-    <iframe src=".data/known_adducts_table.csv"></iframe>
+    TODO: change to relative path link or update link
 
     """
     known_adducts_file = os.path.join(os.path.dirname(__file__), "..", "data", "known_adducts_table.csv")
@@ -34,7 +35,7 @@ def load_adducts_dict() -> Dict:
 
 
 @lru_cache(maxsize=4)
-def load_known_adduct_conversions() -> Dict:
+def load_known_adduct_conversions() -> Dict[str, dict]:
     """Load dictionary of known adduct conversions. Makes sure that file loading is cached.
     """
     adduct_conversions_file = os.path.join(os.path.dirname(__file__), "..", "data", "known_adduct_conversions.json")
@@ -45,35 +46,45 @@ def load_known_adduct_conversions() -> Dict:
     return known_adduct_conversions
 
 
-def _convert_and_fill_dict(adduct_dict: Dict) -> Dict:
+def _convert_and_fill_dict(adduct_dict: Dict[str, dict]) -> Dict[str, dict]:
     """Convert string entries to int/float and fill missing entries ('n/a')
     with best basic guesses."""
-    def _convert_if_possible(entry, expected_type=float):
-        """Convert *entry* to expected_type if possible.
-        If not returns unchanged entry.
-        """
+    def is_float(value):
         try:
-            entry = expected_type(entry)
+            float(value)
+            return True
         except ValueError:
-            pass
-        return entry
+            return False
+
+    def is_int(value):
+        try:
+            int(value)
+            return True
+        except ValueError:
+            return False
 
     filled_dict = dict()
     for adduct, values in adduct_dict.items():
         ionmode = values["ionmode"]
-        charge = _convert_if_possible(values["charge"], int)
-        mass_multiplier = _convert_if_possible(values["mass_multiplier"], float)
-        correction_mass = _convert_if_possible(values["correction_mass"], float)
+        charge = values["charge"]
+        mass_multiplier = values["mass_multiplier"]
+        correction_mass = values["correction_mass"]
 
-        if not isinstance(charge, int):
+        if is_int(charge):
+            charge = int(charge)
+        else:
             charge = 1 * (ionmode == "positive") - 1 * (ionmode == "negative")
         values["charge"] = charge
 
-        if not isinstance(mass_multiplier, float):
+        if is_float(mass_multiplier):
+            mass_multiplier = float(mass_multiplier)
+        else:
             mass_multiplier = 1.0
         values["mass_multiplier"] = mass_multiplier
 
-        if not isinstance(correction_mass, float):
+        if is_float(correction_mass):
+            correction_mass = float(correction_mass)
+        else:
             correction_mass = 1.007276 * numpy.sign(charge)
         values["correction_mass"] = correction_mass
 
