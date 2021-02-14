@@ -61,7 +61,7 @@ setup(
                             "prospector[with_pyroma]",
                             "pytest",
                             "pytest-cov",
-                            "sphinx>=3.0.0,!=3.2.0,<4.0.0",
+                            "sphinx>=3.0.0,!=3.2.0,!=3.5.0,<4.0.0",
                             "sphinx_rtd_theme",
                             "sphinxcontrib-apidoc",
                             "yapf",],
