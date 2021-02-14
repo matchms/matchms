@@ -7,13 +7,18 @@ import numpy
 
 
 @lru_cache(maxsize=4)
-def load_adducts_dict() -> Dict[dict]:
+def load_adducts_dict() -> Dict:
     """Load dictionary of known adducts containing the adduct mass and charge.
     Makes sure that file loading is cached.
 
     Adduct information is based on information from
     https://fiehnlab.ucdavis.edu/staff/kind/metabolomics/ms-adduct-calculator/
     and was extended by F.Huber and JJJ.v.d.Hooft.
+
+    .. raw:: html
+
+    <iframe src=".data/known_adducts_table.csv"></iframe>
+
     """
     known_adducts_file = os.path.join(os.path.dirname(__file__), "..", "data", "known_adducts_table.csv")
     assert os.path.isfile(known_adducts_file), "Could not find known_adducts_table.csv."
@@ -29,7 +34,7 @@ def load_adducts_dict() -> Dict[dict]:
 
 
 @lru_cache(maxsize=4)
-def load_known_adduct_conversions() -> Dict[dict]:
+def load_known_adduct_conversions() -> Dict:
     """Load dictionary of known adduct conversions. Makes sure that file loading is cached.
     """
     adduct_conversions_file = os.path.join(os.path.dirname(__file__), "..", "data", "known_adduct_conversions.json")
@@ -40,7 +45,7 @@ def load_known_adduct_conversions() -> Dict[dict]:
     return known_adduct_conversions
 
 
-def _convert_and_fill_dict(adduct_dict: Dict[dict]) -> Dict[dict]:
+def _convert_and_fill_dict(adduct_dict: Dict) -> Dict:
     """Convert string entries to int/float and fill missing entries ('n/a')
     with best basic guesses."""
     def _convert_if_possible(entry, expected_type=float):
