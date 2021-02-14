@@ -18,7 +18,7 @@ def load_adducts_dict() -> Dict:
     def convert_if_possible(entry, expected_type=float):
         try:
             entry = expected_type(entry)
-        except:
+        except ValueError:
             pass
         return entry
 

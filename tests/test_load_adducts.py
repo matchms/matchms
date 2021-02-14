@@ -10,7 +10,7 @@ def test_load_adducts_dict():
     assert "[M+2H+Na]3+" in known_adducts, "Expected adduct to be in dictionary"
     assert "[M+CH3COO]-" in known_adducts, "Expected adduct to be in dictionary"
     assert known_adducts["[M+2H+Na]3+"]["charge"] == 3, "Expected different entry"
-    assert numpy.all([(x[0] == "[") for x in known_adducts.keys()]), \
+    assert numpy.all([(key[0] == "[") for key in known_adducts]), \
         "Expected all keys to start with '['."
     assert known_adducts["[M]+"]["charge"] == 1, "Expected different added entry"
     assert numpy.allclose(known_adducts["[M]-"]["correction_mass"], -1.007276, atol=1e-5), \
