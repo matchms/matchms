@@ -65,5 +65,5 @@ setup(
                             "sphinxcontrib-apidoc",
                             "yapf",],
                     "chemistry": ["rdkit >=2020.03.1"]},
-    package_data={"matchms": ["data/*.csv", "data/*.json"]},
+    package_data={"matchms": ["data/*.csv"]},
 )
