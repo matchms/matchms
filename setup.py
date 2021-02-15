@@ -52,7 +52,6 @@ setup(
         "numba >=0.47",
         "numpy",
         "pyteomics >=4.2",
-        "pyyaml",
         "requests",
         "scipy",
     ],
