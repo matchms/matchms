@@ -7,6 +7,11 @@ def correct_charge(spectrum_in: SpectrumType) -> SpectrumType:
 
     For some spectrums, the charge value is either undefined or inconsistent with its
     ionmode, which is corrected by this filter.
+
+    Parameters
+    ----------
+    spectrum_in
+        Input spectrum.
     """
 
     if spectrum_in is None:

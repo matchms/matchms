@@ -32,8 +32,8 @@ def find_by_key(data: Union[list, dict], target: str) -> Any:
 def parse_mzml_mzxml_metadata(spectrum_dict: dict) -> dict:
     """Parse relevant mzml (or mzxml) metadata entries.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     spectrum_dict:
         Spectrum dictionary containing metadata fields. Metadata parsing may easily
         break when field key names vary. The following metadata information is considered

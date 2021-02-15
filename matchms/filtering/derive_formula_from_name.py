@@ -7,6 +7,8 @@ def derive_formula_from_name(spectrum_in: SpectrumType,
     """Detect and remove misplaced formula in compound name and add to metadata.
 
     Method to find misplaced formulas in compound name based on regular expression.
+    This will not chemically test the detected formula, so the search is limited
+    to frequently occuring types of shape 'C47H83N1O8P1'.
 
     Parameters
     ----------
@@ -45,6 +47,10 @@ def derive_formula_from_name(spectrum_in: SpectrumType,
 
 
 def looks_like_formula(formula):
-    """Return True if input string has expected format of a molecular formula."""
-    regexp = r"^(?:[A-Z][a-z]?(?:[1-9][0-9]*)?){2,}$"
-    return re.search(regexp, formula) is not None
+    """Return True if input string has expected format of a molecular formula.
+    Does only consider most frequent atoms found in many name strings.
+    """
+    regex_atoms = r"(C|F|H|N|O|P|S)"
+    atom_count = len(re.findall(regex_atoms, formula))
+    regexp = r"^(C|F|H|N|O|P|S|[0-9]|\(|\)){3,}$"
+    return (atom_count > 2) and (re.search(regexp, formula) is not None)

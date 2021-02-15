@@ -1,9 +1,10 @@
 import numpy
+import pytest
 from matchms import Spectrum
 from matchms.filtering import derive_formula_from_name
 
 
-def test_derive_formula_from_name():
+def test_derive_formula_from_name_default():
     spectrum_in = Spectrum(mz=numpy.array([], dtype="float"),
                            intensities=numpy.array([], dtype="float"),
                            metadata={"compound_name": "peptideXYZ [M+H+K] C5H12NO2"})
@@ -12,6 +13,27 @@ def test_derive_formula_from_name():
 
     assert spectrum.get("formula") == "C5H12NO2", "Expected different formula."
     assert spectrum.get("compound_name") == "peptideXYZ [M+H+K]", "Expected different cleaned name."
+
+
+@pytest.mark.parametrize("string_addition, expected_formula", [("C6H14NO2", "C6H14NO2"),
+                                                               ("C47H83N1O8P1", "C47H83N1O8P1"),
+                                                               ("HYPOTAURINE", None),
+                                                               ("CITRATE", None),
+                                                               ("NIST14", None),
+                                                               ("HCl", None),
+                                                               ("ACID", None),
+                                                               ("B12A13", None),
+                                                               ("(12)", None),
+                                                               ("6432", None),
+                                                               ("C15", None)])
+def test_derive_formula_from_name_examples(string_addition, expected_formula):
+    spectrum_in = Spectrum(mz=numpy.array([], dtype="float"),
+                           intensities=numpy.array([], dtype="float"),
+                           metadata={"compound_name": "peptideXYZ [M+H+K] "+string_addition})
+
+    spectrum = derive_formula_from_name(spectrum_in)
+
+    assert spectrum.get("formula") == expected_formula, "Expected different formula."
 
 
 def test_derive_formula_from_name_dont_overwrite_present_adduct():

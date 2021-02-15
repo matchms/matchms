@@ -1,8 +1,9 @@
-from ..importing import load_adducts
+from ..importing import load_adducts_dict
 from ..typing import SpectrumType
+from ..utils import clean_adduct
 
 
-def derive_ionmode(spectrum_in: SpectrumType, adducts_filename: str = None) -> SpectrumType:
+def derive_ionmode(spectrum_in: SpectrumType) -> SpectrumType:
     """Derive missing ionmode based on adduct.
 
     Some input formates (e.g. MGF files) do not always provide a correct ionmode.
@@ -13,13 +14,9 @@ def derive_ionmode(spectrum_in: SpectrumType, adducts_filename: str = None) -> S
     ----------
     spectrum:
         Input spectrum.
-    adducts_filename:
-        Load known adducts from file, if filename is given. Default is None.
-        Method makes sure that file loading is cached.
 
     Returns:
     --------
-
     Returns Spectrum object with `ionmode` attribute set.
     """
 
@@ -29,32 +26,26 @@ def derive_ionmode(spectrum_in: SpectrumType, adducts_filename: str = None) -> S
     spectrum = spectrum_in.clone()
 
     # Load lists of known adducts
-    known_adducts = load_adducts(filename=adducts_filename)
+    known_adducts = load_adducts_dict()
 
     adduct = spectrum.get("adduct", None)
     # Harmonize adduct string
     if adduct:
-        adduct = adduct.replace("\n", "") \
-                       .replace(" ", "") \
-                       .replace("[", "") \
-                       .replace("]", "") \
-                       .replace("*", "")
+        adduct = clean_adduct(adduct)
 
     ionmode = spectrum.get("ionmode")
     if ionmode:
         assert ionmode == ionmode.lower(), ("Ionmode field not harmonized.",
                                             "Apply 'make_ionmode_lowercase' filter first.")
+    if ionmode in ["positive", "negative"]:
+        return spectrum
 
     # Try completing missing or incorrect ionmodes
-    if ionmode not in ["positive", "negative"]:
-        if adduct in known_adducts["adducts_positive"]:
-            ionmode = "positive"
-            print("Added ionmode '" + ionmode + "' based on adduct: ", adduct)
-        elif adduct in known_adducts["adducts_negative"]:
-            ionmode = "negative"
-            print("Added ionmode '" + ionmode + "' based on adduct: ", adduct)
-        else:
-            ionmode = "n/a"
+    if adduct in known_adducts:
+        ionmode = known_adducts[adduct]["ionmode"]
+    else:
+        ionmode = "n/a"
+
     spectrum.set("ionmode", ionmode)
 
     return spectrum

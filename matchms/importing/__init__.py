@@ -10,8 +10,12 @@ Another option is to load spectra based on a unique identifier (USI)
 
 For more extensive import options we recommend building custom importers using `pyteomics
 <https://github.com/levitsky/pyteomics>`_ or `pymzml <https://github.com/pymzml/pymzML>`_.
+
+To process spectrum metadata, matchms can also make use of known adduct information
+which is imported via :mod:`~matchms.importing.load_adducts`.
 """
-from .load_adducts import load_adducts
+from .load_adducts import load_adducts_dict
+from .load_adducts import load_known_adduct_conversions
 from .load_from_json import load_from_json
 from .load_from_mgf import load_from_mgf
 from .load_from_msp import load_from_msp
@@ -27,5 +31,6 @@ __all__ = [
     "load_from_mzml",
     "load_from_mzxml",
     "load_from_usi",
-    "load_adducts"
+    "load_adducts_dict",
+    "load_known_adduct_conversions",
 ]

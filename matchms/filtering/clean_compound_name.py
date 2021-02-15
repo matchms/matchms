@@ -42,6 +42,14 @@ def clean_compound_name(spectrum_in: SpectrumType) -> SpectrumType:
             name = name.replace(part, "")
         return name.strip("; ")
 
+    def remove_misplaced_mass(name):
+        """Remove occasionally occurring parent mass addition to name."""
+        regex_mass = r"^[0-9]{2,4}\.[0-9]$"
+        end_part = name.split(" ")[-1]
+        if re.search(regex_mass, end_part) is not None:
+            return name.replace(end_part, "").strip()
+        return name
+
     if spectrum_in is None:
         return None
 
@@ -57,6 +65,7 @@ def clean_compound_name(spectrum_in: SpectrumType) -> SpectrumType:
     # Clean compound name
     name_cleaned = remove_parts_by_regular_expression(name)
     name_cleaned = remove_known_non_compound_parts(name_cleaned)
+    name_cleaned = remove_misplaced_mass(name_cleaned)
     if name_cleaned != name:
         spectrum.set("compound_name", name_cleaned)
         print("Added cleaned compound name:", name_cleaned)
