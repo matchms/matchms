@@ -12,7 +12,7 @@ For more extensive import options we recommend building custom importers using `
 <https://github.com/levitsky/pyteomics>`_ or `pymzml <https://github.com/pymzml/pymzML>`_.
 
 To process spectrum metadata, matchms can also make use of known adduct information
-which is imported via :meth:`~matchms.importing.load_adducts`.
+which is imported via :mod:`~matchms.importing.load_adducts`.
 """
 from .load_adducts import load_adducts_dict
 from .load_adducts import load_known_adduct_conversions
