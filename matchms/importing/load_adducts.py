@@ -40,10 +40,9 @@ def load_known_adduct_conversions() -> Dict[str, dict]:
     adduct_conversions_file = os.path.join(os.path.dirname(__file__), "..", "data", "known_adduct_conversions.csv")
     assert os.path.isfile(adduct_conversions_file), "Could not find known_adduct_conversions.csv."
 
-    adduct_conversions_file = 'known_adduct_conversions.csv'
     with open(adduct_conversions_file, newline='', encoding='utf-8-sig') as csvfile:
         reader = csv.DictReader(csvfile)
-        adducts_conversions = dict()
+        known_adduct_conversions = dict()
         for row in reader:
             known_adduct_conversions[row['input_adduct']] = row['corrected_adduct']
 
