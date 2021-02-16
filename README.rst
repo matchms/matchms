@@ -256,7 +256,7 @@ To build anaconda package locally, do:
   conda activate matchms-build
   BUILD_FOLDER=/tmp/matchms/_build
   rm -rfv $BUILD_FOLDER;mkdir -p $BUILD_FOLDER
-  conda build --numpy 1.18.1 --no-include-recipe -c bioconda -c conda-forge \
+  conda build --no-include-recipe -c bioconda -c conda-forge \
   --croot $BUILD_FOLDER ./conda
 
 If successful, this will yield the built ``matchms`` conda package as
