@@ -23,7 +23,7 @@ setup(
     author_email="generalization@esciencecenter.nl",
     url="https://github.com/matchms/matchms",
     packages=find_packages(exclude=['*tests*']),
-    include_package_data=True,
+    package_data={"matchms": ["data/*.csv"]},
     license="Apache Software License 2.0",
     zip_safe=False,
     keywords=[
@@ -65,5 +65,4 @@ setup(
                             "sphinxcontrib-apidoc",
                             "yapf",],
                     "chemistry": ["rdkit >=2020.03.1"]},
-    package_data={"matchms": ["data/*.csv"]},
 )
