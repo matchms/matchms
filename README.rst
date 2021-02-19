@@ -3,7 +3,7 @@
    :align: left
    :alt: matchms
 
-Matchms is an open-source Python package to import, process, clean, and compare mass spectrometry data (MS/MS). It allows to implement and run an easy-to-follow, easy-to-reproduce workflow from raw mass spectra to pre- and post-processed spectral data. Spectral data can be imported from common formats such mzML, mzXML, msp, metabolomics-USI, MGF, or json (e.g. GNPS-syle json files). Matchms then provides filters for metadata cleaning and checking, as well as for basic peak filtering. Finally, matchms was build to import and apply different similarity measures to compare large amounts of spectra. This includes common Cosine scores, but can also easily be extended by custom measures.
+Matchms is an open-source Python package to import, process, clean, and compare mass spectrometry data (MS/MS). It allows to implement and run an easy-to-follow, easy-to-reproduce workflow from raw mass spectra to pre- and post-processed spectral data. Spectral data can be imported from common formats such mzML, mzXML, msp, metabolomics-USI, MGF, or json (e.g. GNPS-syle json files). Matchms then provides filters for metadata cleaning and checking, as well as for basic peak filtering. Finally, matchms was build to import and apply different similarity measures to compare large amounts of spectra. This includes common Cosine scores, but can also easily be extended by custom measures. One example for a spectrum similarity measure that was designed to work in matchms is `Spec2Vec <https://github.com/iomega/spec2vec>`_.
 
 If you use matchms in your research, please cite the following software paper:  
 
@@ -114,7 +114,7 @@ We recommend installing matchms from Anaconda Cloud with
   # install matchms in a new virtual environment to avoid dependency clashes
   conda create --name matchms python=3.8
   conda activate matchms
-  conda install --channel nlesc --channel bioconda --channel conda-forge matchms
+  conda install --channel bioconda --channel conda-forge matchms
 
 Alternatively, matchms can also be installed using ``pip`` but users will then either have to install ``rdkit`` on their own or won't be able to use the entire functionality. Without ``rdkit`` installed several filter functions related to processing and cleaning chemical metadata will not run.
 To install matchms with ``pip`` simply run
