@@ -12,4 +12,8 @@ def make_charge_scalar(spectrum_in: SpectrumType) -> SpectrumType:
     if isinstance(spectrum.get("charge", None), list):
         spectrum.set("charge", int(spectrum.get("charge")[0]))
 
+    # convert string charges to int
+    elif isinstance(spectrum.get("charge", None), str):
+        spectrum.set("charge", int(spectrum.get('charge')))
+
     return spectrum
