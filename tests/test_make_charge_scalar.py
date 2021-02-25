@@ -1,4 +1,5 @@
 import pytest
+import numpy
 from matchms import Spectrum
 from matchms.filtering import make_charge_scalar
 
