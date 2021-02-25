@@ -8,7 +8,7 @@ from matchms.filtering import make_charge_scalar
                                                             ('1', 1),
                                                             (' 1 ', 1),
                                                             ('-1', -1),
-                                                            ([-1, stuff], -1)])
+                                                            ([-1, "stuff"], -1)])
 def test_make_charge_scalar(input_charge, corrected_charge):
     """Test if example inputs are correctly converted"""
     spectrum_in = Spectrum(mz=numpy.array([100, 200.]),
