@@ -16,7 +16,7 @@ def make_charge_int(spectrum_in: SpectrumType) -> SpectrumType:
     if isinstance(spectrum.get("charge", None), str):
         try:
             charge_int = int(spectrum.get('charge'))
-            spectrum.set("charge", int(spectrum.get('charge')))
+            spectrum.set("charge", charge_int)
         except ValueError:
             print(f"Found charge ({spectrum.get('charge')}) cannot be converted to integer.")
 
