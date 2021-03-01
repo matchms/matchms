@@ -64,14 +64,14 @@ def test_modified_cosine_with_mass_shift_5_tolerance_2():
 
 def test_modified_cosine_with_mass_shifted_and_unshifted_matches():
     """Test modified cosine on two spectra with mass set shift.
-    Here 5 possible peak pairs are possible, but only 3 should be selected (every peak
+    In this example 5 peak pairs are possible, but only 3 should be selected (every peak
     can only be counted once!)"""
     spectrum_1 = Spectrum(mz=numpy.array([100, 110, 200, 300, 400, 500, 600], dtype="float"),
-                          intensities=numpy.array([100, 50, 1, 100, 1, 1, 50], dtype="float"),
+                          intensities=numpy.array([100, 50, 1, 80, 1, 1, 50], dtype="float"),
                           metadata={"precursor_mz": 1000.0})
 
     spectrum_2 = Spectrum(mz=numpy.array([110, 200, 300, 310, 700, 800], dtype="float"),
-                          intensities=numpy.array([100, 1, 100, 100, 1, 100], dtype="float"),
+                          intensities=numpy.array([100, 1, 90, 90, 1, 100], dtype="float"),
                           metadata={"precursor_mz": 1010.0})
 
     modified_cosine = ModifiedCosine()
