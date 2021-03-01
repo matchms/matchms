@@ -13,7 +13,7 @@ def make_charge_int(spectrum_in: SpectrumType) -> SpectrumType:
         spectrum.set("charge", int(spectrum.get("charge")[0]))
 
     # convert string charges to int
-    elif isinstance(spectrum.get("charge", None), str):
+    if isinstance(spectrum.get("charge", None), str):
         try:
             charge_int = int(spectrum.get('charge'))
             spectrum.set("charge", int(spectrum.get('charge')))
