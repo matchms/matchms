@@ -62,6 +62,28 @@ def test_modified_cosine_with_mass_shift_5_tolerance_2():
     assert score["matches"] == 6, "Expected 6 matching peaks."
 
 
+def test_modified_cosine_with_mass_shifted_and_unshifted_matches():
+    """Test modified cosine on two spectra with mass set shift.
+    Here 5 possible peak pairs are possible, but only 3 should be selected (every peak
+    can only be counted once!)"""
+    spectrum_1 = Spectrum(mz=numpy.array([100, 110, 200, 300, 400, 500, 600], dtype="float"),
+                          intensities=numpy.array([100, 50, 1, 100, 1, 1, 50], dtype="float"),
+                          metadata={"precursor_mz": 1000.0})
+
+    spectrum_2 = Spectrum(mz=numpy.array([110, 200, 300, 310, 700, 800], dtype="float"),
+                          intensities=numpy.array([100, 1, 100, 100, 1, 100], dtype="float"),
+                          metadata={"precursor_mz": 1010.0})
+
+    modified_cosine = ModifiedCosine()
+    score = modified_cosine.pair(spectrum_1, spectrum_2)
+    spec1 = spectrum_1.peaks.intensities
+    spec2 = spectrum_2.peaks.intensities
+    peak_pairs_multiplied = spec1[0] * spec2[0] + spec1[3] * spec2[3] + spec1[2] * spec2[1]
+    expected_score = peak_pairs_multiplied / numpy.sqrt(numpy.sum(spec1 ** 2) * numpy.sum(spec2 ** 2))
+    assert score["score"] == pytest.approx(expected_score, 0.00001), "Expected different cosine score."
+    assert score["matches"] == 3, "Expected 3 matching peaks."
+
+
 def test_modified_cosine_order_of_input_spectrums():
     """Test modified cosine on two spectra in changing order."""
     spectrum_1 = Spectrum(mz=numpy.array([100, 150, 200, 300, 500, 510, 1100], dtype="float"),
