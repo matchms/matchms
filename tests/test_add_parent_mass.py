@@ -88,7 +88,6 @@ def test_add_parent_mass_not_sufficient_data(capsys):
     assert "Not sufficient spectrum metadata to derive parent mass." in capsys.readouterr().out
 
 
-
 def test_empty_spectrum():
     spectrum_in = None
     spectrum = add_parent_mass(spectrum_in)
