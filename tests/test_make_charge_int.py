@@ -10,6 +10,7 @@ from matchms.filtering import make_charge_int
                                                             ('-2', -2),
                                                             ([-1, "stuff"], -1),
                                                             (['-3'], -3),
+                                                            ('0', 0),
                                                             ('n/a', 'n/a')])
 def test_make_charge_int(input_charge, corrected_charge):
     """Test if example inputs are correctly converted"""
