@@ -4,7 +4,7 @@ from matchms import Spectrum
 from matchms.filtering import add_parent_mass
 
 
-def test_add_parent_mass():
+def test_add_parent_mass(capsys):
     """Test if parent mass is correctly derived."""
     mz = numpy.array([], dtype='float')
     intensities = numpy.array([], dtype='float')
@@ -18,6 +18,7 @@ def test_add_parent_mass():
 
     assert numpy.abs(spectrum.get("parent_mass") - 445.0) < .01, "Expected parent mass of about 445.0."
     assert isinstance(spectrum.get("parent_mass"), float), "Expected parent mass to be float."
+    assert "Not sufficient spectrum metadata to derive parent mass." not in capsys.readouterr().out
 
 
 def test_add_parent_mass_no_pepmass(capsys):
@@ -35,7 +36,7 @@ def test_add_parent_mass_no_pepmass(capsys):
     assert "Not sufficient spectrum metadata to derive parent mass." in capsys.readouterr().out
 
 
-def test_add_parent_mass_no_pepmass_but_precursormz():
+def test_add_parent_mass_no_pepmass_but_precursormz(capsys):
     """Test if parent mass is correctly derived if "pepmass" is not present."""
     mz = numpy.array([], dtype='float')
     intensities = numpy.array([], dtype='float')
@@ -49,6 +50,7 @@ def test_add_parent_mass_no_pepmass_but_precursormz():
 
     assert numpy.abs(spectrum.get("parent_mass") - 445.0) < .01, "Expected parent mass of about 445.0."
     assert isinstance(spectrum.get("parent_mass"), float), "Expected parent mass to be float."
+    assert "Not sufficient spectrum metadata to derive parent mass." not in capsys.readouterr().out
 
 
 @pytest.mark.parametrize("adduct, expected", [("[M+2Na-H]+", 399.02884),
@@ -71,7 +73,7 @@ def test_add_parent_mass_using_adduct(adduct, expected):
     assert isinstance(spectrum.get("parent_mass"), float), "Expected parent mass to be float."
 
 
-def test_add_parent_mass_not_sufficient_data():
+def test_add_parent_mass_not_sufficient_data(capsys):
     """Test when there is not enough information to derive parent_mass."""
     mz = numpy.array([], dtype='float')
     intensities = numpy.array([], dtype='float')
@@ -83,6 +85,8 @@ def test_add_parent_mass_not_sufficient_data():
     spectrum = add_parent_mass(spectrum_in)
 
     assert spectrum.get("parent_mass") is None, "Expected no parent mass"
+    assert "Not sufficient spectrum metadata to derive parent mass." in capsys.readouterr().out
+
 
 
 def test_empty_spectrum():
