@@ -92,6 +92,9 @@ class ModifiedCosine(BaseSimilarity):
                                             intensity_power=self.intensity_power)
             message = "Precursor_mz missing. Apply 'add_precursor_mz' filter first."
             assert reference.get("precursor_mz") and query.get("precursor_mz"), message
+            assert reference.get("precursor_mz") > 0 \
+                   and query.get("precursor_mz") > 0, \
+                "Precursor_mz has to be higher than 0, apply require_precursor_mz first"
             mass_shift = reference.get("precursor_mz") - query.get("precursor_mz")
             nonzero_pairs = collect_peak_pairs(spec1, spec2, self.tolerance, shift=mass_shift,
                                                mz_power=self.mz_power,
