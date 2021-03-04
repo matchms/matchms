@@ -1,4 +1,5 @@
-from ..typing import SpectrumType, Union
+from ..typing import SpectrumType
+from ..typing import Union
 
 
 def require_precursor_mz_above_0(spectrum_in: SpectrumType

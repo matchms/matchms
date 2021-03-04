@@ -1,8 +1,8 @@
 import numpy
 import pytest
 from matchms import Spectrum
-from matchms.filtering.require_precursor_mz_above_0 \
-    import require_precursor_mz_above_0
+from matchms.filtering.require_precursor_mz_above_0 import \
+    require_precursor_mz_above_0
 
 
 def test_require_precursor_mz_above_0_pass():
