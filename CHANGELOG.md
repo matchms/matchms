@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added filter function 'require_precursor_mz' and added 1 assert function in 'ModifiedCosine' [#191](https://github.com/matchms/matchms/pull/191)
 
+- `make_charge_int()` to convert charge field to integer [#184](https://github.com/matchms/matchms/issues/184)
+
+### Changed
+
+- now deprecated: `make_charge_scalar()`, use `make_charge_int()` instead [#183](https://github.com/matchms/matchms/pull/183)
+
 ### Fixed
 
 - Very minor bugs in `add_parent_mass` [#188](https://github.com/matchms/matchms/pull/188)
