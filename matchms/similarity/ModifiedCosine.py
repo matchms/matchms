@@ -90,8 +90,15 @@ class ModifiedCosine(BaseSimilarity):
             zero_pairs = collect_peak_pairs(spec1, spec2, self.tolerance, shift=0.0,
                                             mz_power=self.mz_power,
                                             intensity_power=self.intensity_power)
-            message = "Precursor_mz missing. Apply 'add_precursor_mz' filter first."
-            assert reference.get("precursor_mz") and query.get("precursor_mz"), message
+            message_precursor_missing = \
+                "Precursor_mz missing. Apply 'add_precursor_mz' filter first."
+            assert reference.get("precursor_mz") \
+                   and query.get("precursor_mz"), message_precursor_missing
+            message_precursor_below_0 = "Expect precursor to be positive number." \
+                                        "Apply 'require_precursor_mz' first"
+            assert reference.get("precursor_mz") > 0 \
+                   and query.get("precursor_mz") > 0, message_precursor_below_0
+
             mass_shift = reference.get("precursor_mz") - query.get("precursor_mz")
             nonzero_pairs = collect_peak_pairs(spec1, spec2, self.tolerance, shift=mass_shift,
                                                mz_power=self.mz_power,

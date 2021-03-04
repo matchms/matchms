@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added filter function 'require_precursor_mz' and added 1 assert function in 'ModifiedCosine' [#191](https://github.com/matchms/matchms/pull/191)
+
 - `make_charge_int()` to convert charge field to integer [#184](https://github.com/matchms/matchms/issues/184)
 
 ### Changed
