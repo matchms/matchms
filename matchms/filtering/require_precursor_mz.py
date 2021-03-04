@@ -3,7 +3,7 @@ from ..typing import Union
 
 
 def require_precursor_mz(spectrum_in: SpectrumType
-                                 ) -> Union[SpectrumType, None]:
+                         ) -> Union[SpectrumType, None]:
 
     """Returns None if there is no precursor_mz or if <=0
 
