@@ -1,49 +1,10 @@
-name: Anaconda Publish
+name: Verify Bioconda Publish
 
 on:
-  release:
-    types: [published]
+  schedule:
+    -cron: '23 23 * * 0,4'
 
 jobs:
-
-  publish:
-    name: publish / python-3.7 / ubuntu-latest
-    runs-on: 'ubuntu-latest'
-    steps:
-      - uses: actions/checkout@v2
-      - uses: conda-incubator/setup-miniconda@v2
-        with:
-          activate-environment: matchms-build
-          auto-update-conda: true
-          environment-file: conda/environment-build.yml
-          python-version: "3.7"
-      - name: Show conda config
-        shell: bash -l {0}
-        run: |
-          conda info
-          conda list
-          conda config --show-sources
-          conda config --show
-      - name: Python info
-        shell: bash -l {0}
-        run: |
-          which python
-          python --version
-      - name: Build the conda package
-        shell: bash -l {0}
-        run: |
-          conda config --set anaconda_upload no
-          export BUILD_FOLDER=/tmp/matchms/_build
-          mkdir -p $BUILD_FOLDER
-          conda build --numpy 1.18.1 --no-include-recipe \
-            --channel bioconda --channel conda-forge \
-            --croot $BUILD_FOLDER \
-            ./conda
-      - name: Push the package to anaconda cloud
-        shell: bash -l {0}
-        run: |
-          export BUILD_FOLDER=/tmp/matchms/_build
-          anaconda --token ${{ secrets.ANACONDA_TOKEN }} upload --user nlesc --force $BUILD_FOLDER/noarch/*.tar.bz2
 
   verify:
     name: verify / python-${{ matrix.python-version }} / ${{ matrix.os }}
@@ -73,7 +34,7 @@ jobs:
       - name: Install the conda package from anaconda repository
         shell: bash -l {0}
         run: |
-          conda install --channel bioconda --channel conda-forge --channel nlesc matchms
+          conda install --channel bioconda --channel conda-forge matchms
       - name: List conda packages
         shell: bash -l {0}
         run: |
