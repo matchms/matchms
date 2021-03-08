@@ -68,6 +68,11 @@ authors:
     family-names: de Jonge
     given-names: Niek
     orcid: "https://orcid.org/0000-0002-3054-6210"
+  -
+    affiliation: "Research Centre for Toxic Compounds in the Environment"
+    family-names: Hecht
+    given-names: Helge
+    orcid: "https://orcid.org/0000-0001-6744-996X"
 
 cff-version: "1.1.0"
 keywords:
@@ -125,6 +130,10 @@ references:
         orcid: 0000-0002-7064-4069
         affiliation: Netherlands eScience Center
         address: Science Park 140, 1098XG Amsterdam, The Netherlands
+      - name: Helge Hecht
+        orcid: 0000-0001-6744-996X
+        affiliation: Research Centre for Toxic Compounds in the Environment
+        address: Kamenice 753/5, 625 00 Brno, Czech Republic
     title: "matchms - processing and similarity evaluation of mass spectrometry data."
     journal: "Journal of Open Source Software"
     year: 2020
