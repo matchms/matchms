@@ -45,8 +45,8 @@ F Huber, S. Verhoeven, C. Meijer, H. Spreeuw, E. M. Villanueva Castilla, C. Geng
    :target: https://github.com/matchms/matchms
    :alt: License Badge
 
-.. |Conda Badge| image:: https://anaconda.org/nlesc/matchms/badges/installer/conda.svg
-   :target: https://conda.anaconda.org/nlesc
+.. |Conda Badge| image:: https://anaconda.org/bioconda/matchms/badges/version.svg
+   :target: https://anaconda.org/bioconda/matchms
    :alt: Conda Badge
 
 .. |Pypi Badge| image:: https://img.shields.io/pypi/v/matchms?color=blue
@@ -122,6 +122,18 @@ To install matchms with ``pip`` simply run
 .. code-block:: console
 
   pip install matchms
+
+matchms universe -> additional functionalities
+==============================================
+
+Matchms functionalities can be complemented by additional packages.  
+To date we are aware of:
+
++ `Spec2Vec <https://github.com/iomega/spec2vec>`_ an alternative machine-learning spectral similarity score that can simply be installed by `pip install spec2vec` and be imported as `from spec2vec import Spec2Vec` following the same API as the scores in `matchms.similarity`.
+
++ `matchmsextras <https://github.com/matchms/matchmsextras>`_ which contains additional functions to create networks based on spectral similarities, to run spectrum searchers against `PubChem`, or additional plotting methods.
+
+*(if you know of any other packages that are fully compatible with matchms, let us know!)*
 
 Introduction
 ============
