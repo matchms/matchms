@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Make `load_from_msp` work with different whitespaces [#192](https://github.com/matchms/matchms/issues/192)
 - Very minor bugs in `add_parent_mass` [#188](https://github.com/matchms/matchms/pull/188)
 
 ## [0.8.1] - 2021-02-19
