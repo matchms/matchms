@@ -1,8 +1,7 @@
 name: Verify Bioconda Publish
 
 on:
-  schedule:
-    -cron: '23 23 * * 0,4'
+  workflow_dispatch:
 
 jobs:
 
