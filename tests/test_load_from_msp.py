@@ -2,8 +2,10 @@ import os
 import numpy
 from matchms.importing import load_from_msp
 
+
 def assert_matching_inchikey(molecule, expected_inchikey):
     assert molecule.get("inchikey").lower() == expected_inchikey.lower(), "Expected different InChIKey."
+
 
 def test_load_from_msp_spaces_1():
     """
@@ -24,6 +26,7 @@ def test_load_from_msp_spaces_1():
 
     for k, n in enumerate(spectrum):
         assert_matching_inchikey(n, expected_inchikey[k])
+
 
 def test_load_from_msp_spaces_2():
     """
@@ -66,18 +69,18 @@ def test_load_from_msp_tabs():
         "CSHWQDPOILHKBI-UHFFFAOYSA-N"
     ])
 
-    expected_mz = numpy.array([
-        [112.03071, 113.03854, 124.03076, 124.53242, 125.03855, 125.54019,
+    expected_mz = numpy.array([[
+        112.03071, 113.03854, 124.03076, 124.53242, 125.03855, 125.54019,
         126.04636, 126.54804, 222.04645, 224.06192, 226.04175, 246.04646,
         248.06204, 249.07072, 250.07765, 251.07967, 252.09323, 253.09656,
-        254.09985]
-    ])
+        254.09985
+    ]])
 
-    expected_intensities = numpy.array([
-        [49892, 87510, 100146, 24923, 179254, 49039, 131679, 36313, 28905,
+    expected_intensities = numpy.array([[
+        49892, 87510, 100146, 24923, 179254, 49039, 131679, 36313, 28905,
         55632, 37413, 23286, 140007, 62236, 641789, 137600, 1955166, 402252,
-        39987]
-    ])
+        39987
+    ]])
 
     for idx, spectrum in enumerate(spectra):
         assert_matching_inchikey(spectrum, expected_inchikey[idx])
