@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.2] - 2021-03-08
+
 ### Added
 
 - Added filter function 'require_precursor_mz' and added 1 assert function in 'ModifiedCosine' [#191](https://github.com/matchms/matchms/pull/191)
@@ -284,7 +286,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - This is the initial version of Spec2Vec from https://github.com/iomega/Spec2Vec
 
-[Unreleased]: https://github.com/matchms/matchms/compare/0.8.1...HEAD
+[Unreleased]: https://github.com/matchms/matchms/compare/0.8.2...HEAD
+[0.8.2]: https://github.com/matchms/matchms/compare/0.8.1...0.8.2
 [0.8.1]: https://github.com/matchms/matchms/compare/0.8.0...0.8.1
 [0.8.0]: https://github.com/matchms/matchms/compare/0.7.0...0.8.0
 [0.7.0]: https://github.com/matchms/matchms/compare/0.6.2...0.7.0
