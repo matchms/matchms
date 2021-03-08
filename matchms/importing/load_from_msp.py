@@ -1,5 +1,6 @@
 from typing import Generator
 import numpy
+import re
 from ..Spectrum import Spectrum
 
 
@@ -38,7 +39,7 @@ def parse_msp_file(filename: str) -> Generator[dict, None, None]:
                 # Obtaining the masses and intensities
                 peakscount += 1
 
-                splitted_line = rline.split(" ")
+                splitted_line = re.split(' |\t', rline)
 
                 masses.append(float(splitted_line[0]))
                 intensities.append(float(splitted_line[1]))
