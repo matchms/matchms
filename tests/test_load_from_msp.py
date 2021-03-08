@@ -7,7 +7,7 @@ def assert_matching_inchikey(molecule, expected_inchikey):
 
 def test_load_from_msp_spaces_1():
     """
-    Test parse of msp file to specrtum objects.
+    Test parse of msp file to spectrum objects.
     Check if InChiKey is loaded correctly.
     """
 
@@ -27,7 +27,7 @@ def test_load_from_msp_spaces_1():
 
 def test_load_from_msp_spaces_2():
     """
-    Test parse of msp file to specrtum objects.
+    Test parse of msp file to spectrum objects.
     Check if peak m/z and intensity are loaded correctly if separated by spaces.
     """
     module_root = os.path.join(os.path.dirname(__file__), "..")
