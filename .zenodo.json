@@ -64,6 +64,11 @@
          "affiliation": "Netherlands eScience Center",
          "name": "de Jonge, Niek",
          "orcid": "0000-0002-3054-6210"
+      },
+      {
+         "affiliation": "Research Centre for Toxic Compounds in the Environment",
+         "name": "Hecht, Helge",
+         "orcid": "0000-0001-6744-996X"
       }
    ],
    "description": "Python library for fuzzy comparison of mass spectrum data and other Python objects",

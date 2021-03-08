@@ -38,7 +38,7 @@ def parse_msp_file(filename: str) -> Generator[dict, None, None]:
                 # Obtaining the masses and intensities
                 peakscount += 1
 
-                splitted_line = rline.split(" ")
+                splitted_line = rline.split()
 
                 masses.append(float(splitted_line[0]))
                 intensities.append(float(splitted_line[1]))
