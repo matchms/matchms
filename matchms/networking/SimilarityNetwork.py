@@ -43,7 +43,8 @@ class SimilarityNetwork:
     def __init__(self, identifier: str = "spectrumid",
                  top_n: int = 20,
                  max_links: int = 10,
-                 score_cutoff: float = 0.7):
+                 score_cutoff: float = 0.7,
+                 link_method: str = 'single'):
         """
         Parameters
         ----------
@@ -61,11 +62,17 @@ class SimilarityNetwork:
         score_cutoff
             Threshold for given similarities. Edges/Links will only be made for
             similarities > score_cutoff. Default = 0.7.
+        link_method
+            Chose between 'single' and 'mutual'. 'single will add all links based
+            on individual nodes. 'mutual' will only add links if that link appears
+            in the given top-n list for both nodes.
         """
+        # pylint: disable=too-many-arguments
         self.identifier = identifier
         self.top_n = top_n
         self.max_links = max_links
         self.score_cutoff = score_cutoff
+        self.link_method = link_method
         self.graph = None
 
     def create_network(self, scores: Scores) -> nx.Graph:
