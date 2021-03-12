@@ -106,7 +106,7 @@ class SimilarityNetwork:
 
             ref_candidates = numpy.array([scores.references[x].get(self.identifier)
                                           for x in similars_idx[query_id]])
-            idx = numpy.where((similars_scores[query_id] >= self.cutoff) &
+            idx = numpy.where((similars_scores[query_id] >= self.score_cutoff) &
                               (ref_candidates != query_id))[0][:self.max_links]
             if self.link_method == "single":
                 new_edges = [(query_id, str(ref_candidates[x]),
