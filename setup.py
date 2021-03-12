@@ -49,6 +49,7 @@ setup(
         "deprecated",
         "lxml",
         "matplotlib",
+        "networkx",
         "numba >=0.47",
         "numpy",
         "pyteomics >=4.2",
