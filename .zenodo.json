@@ -71,11 +71,12 @@
          "orcid": "0000-0001-6744-996X"
       }
    ],
-   "description": "Python library for fuzzy comparison of mass spectrum data and other Python objects",
+   "description": "Python library for processing (tandem) mass spectrometry data and for computing spectral similarities.",
    "keywords": [
       "python",
       "similarity measures",
       "mass spectrometry",
+      "metabolomics",
       "fuzzy matching",
       "fuzzy search"
    ],
