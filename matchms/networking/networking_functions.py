@@ -27,16 +27,16 @@ def get_top_hits(scores: Scores, identifier: str = "spectrumid",
     if top_n < 2:
         top_n = 2
         print("Set top_n to minimum value of 2")
-    
+
     similars_idx = dict()
     similars_scores = dict()
 
-    if search_by=="queries":
+    if search_by == "queries":
         for i, spec in enumerate(scores.queries):
             spec_id = spec.get(identifier)
             similars_idx[spec_id] = scores.scores[:, i].argsort()[::-1][:top_n]
             similars_scores[spec_id] = scores.scores[similars_idx[spec_id], i]
-    elif search_by=="references":
+    elif search_by == "references":
         for i, spec in enumerate(scores.references):
             spec_id = spec.get(identifier)
             similars_idx[spec_id] = scores.scores[i, :].argsort()[::-1][:top_n]

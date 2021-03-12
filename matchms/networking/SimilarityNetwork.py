@@ -1,8 +1,8 @@
-from typing import List
 import networkx as nx
 import numpy
 from matchms import Scores
 from .networking_functions import get_top_hits
+
 
 class SimilarityNetwork:
     """Create a spectal network from spectrum similarities.
@@ -41,10 +41,9 @@ class SimilarityNetwork:
 
     """
     def __init__(self, identifier: str = "spectrumid",
-                       top_n: int = 20,
-                       max_links: int = 10,
-                       score_cutoff: float = 0.7,
-                       link_method: str = 'single'):
+                 top_n: int = 20,
+                 max_links: int = 10,
+                 score_cutoff: float = 0.7):
         """
         Parameters
         ----------
@@ -62,17 +61,12 @@ class SimilarityNetwork:
         score_cutoff
             Threshold for given similarities. Edges/Links will only be made for
             similarities > score_cutoff. Default = 0.7.
-        link_method
-            Chose between 'single' and 'mutual'. 'single will add all links based
-            on individual nodes. 'mutual' will only add links if that link appears
-            in the given top-n list for both nodes.
         """
         self.identifier = identifier
         self.top_n = top_n
         self.max_links = max_links
         self.score_cutoff = score_cutoff
         self.graph = None
-
 
     def create_network(self, scores: Scores) -> nx.Graph:
         """
@@ -105,7 +99,7 @@ class SimilarityNetwork:
 
             ref_candidates = numpy.array([scores.references[x].get(self.identifier)
                                           for x in similars_idx[query_id]])
-            idx = numpy.where((similars_scores[query_id] >= self.cutoff) & \
+            idx = numpy.where((similars_scores[query_id] >= self.cutoff) &
                               (ref_candidates != query_id))[0][:self.max_links]
             if self.link_method == "single":
                 new_edges = [(query_id, str(ref_candidates[x]),
