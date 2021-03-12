@@ -53,7 +53,7 @@ def test_create_network_symmetric_wrong_input():
     scores = create_dummy_scores()
     msnet = SimilarityNetwork()
     with pytest.raises(AssertionError) as msg:
-        _ = msnet.create_network(scores)
+        msnet.create_network(scores)
 
     expected_msg = "Expected symmetric scores object with queries==references"
     assert expected_msg in str(msg), "Expected different exception"
@@ -61,7 +61,7 @@ def test_create_network_symmetric_wrong_input():
 
 def test_create_network_symmetric():
     """Test creating a graph from a symmetric Scores object"""
-    cutoff=0.7
+    cutoff = 0.7
     scores = create_dummy_scores_symmetric()
     msnet = SimilarityNetwork(score_cutoff=cutoff)
     msnet.create_network(scores)
@@ -79,7 +79,7 @@ def test_create_network_symmetric():
 
 
 def test_create_network_symmetric_higher_cutoff():
-    cutoff=0.9
+    cutoff = 0.9
     scores = create_dummy_scores_symmetric()
     msnet = SimilarityNetwork(score_cutoff=cutoff)
     msnet.create_network(scores)
@@ -95,12 +95,12 @@ def test_create_network_symmetric_higher_cutoff():
 
 def test_create_network_symmetric_mutual_method():
     """Test creating a graph from a Scores object"""
-    cutoff=0.7
+    cutoff = 0.7
     scores = create_dummy_scores_symmetric()
     # change some scores
-    scores._scores[7, 6] = scores._scores[6, 7] = 0.85
-    scores._scores[7, 5] = scores._scores[5, 7] = 0.75
-    scores._scores[7, 3] = scores._scores[3, 7] = 0.7
+    scores.scores[7, 6] = scores.scores[6, 7] = 0.85
+    scores.scores[7, 5] = scores.scores[5, 7] = 0.75
+    scores.scores[7, 3] = scores.scores[3, 7] = 0.7
 
     msnet = SimilarityNetwork(score_cutoff=cutoff, top_n=3,
                               max_links=3, link_method="mutual")
@@ -115,7 +115,7 @@ def test_create_network_symmetric_mutual_method():
 
 def test_create_network_symmetric_max_links_1():
     """Test creating a graph from a Scores object using max_links=1"""
-    cutoff=0.7
+    cutoff = 0.7
     scores = create_dummy_scores_symmetric()
     msnet = SimilarityNetwork(score_cutoff=cutoff, max_links=1, link_method="single")
     msnet.create_network(scores)
@@ -124,7 +124,7 @@ def test_create_network_symmetric_max_links_1():
     edges_list.sort()
     nodes_without_edges = ['ref_spec_0',
                            'ref_spec_1',
-                           'ref_spec_2',]
+                           'ref_spec_2']
     assert len(edges_list) == 3, "Expected different number of edges"
     assert np.all([(x[0] not in nodes_without_edges) for x in edges_list]), \
         "Expected this node to have no edges"
