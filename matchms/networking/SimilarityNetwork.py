@@ -30,14 +30,15 @@ class SimilarityNetwork:
         spectrums = [spectrum_1, spectrum_2]
         scores = calculate_scores(spectrums, spectrums, modified_cosine)
         ms_network = SimilarityNetwork(identifier="testID")
+        ms_network.create_network(scores)
 
-        print(f"Modified cosine score is {score['score']:.2f} with {score['matches']} matched peaks")
+        print("Edges", ms_network.graph.edges())
 
     Should output
 
     .. testoutput::
 
-        Modified cosine score is 0.83 with 1 matched peaks
+        Edges [('one', 'two')]
 
     """
     def __init__(self, identifier: str = "spectrumid",
