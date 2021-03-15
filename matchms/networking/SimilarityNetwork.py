@@ -97,7 +97,8 @@ class SimilarityNetwork:
         msnet.add_nodes_from(unique_ids)
 
         # Collect location and score of highest scoring candidates for queries and references
-        similars_idx, similars_scores = get_top_hits(scores, top_n=self.top_n,
+        similars_idx, similars_scores = get_top_hits(scores, identifier=self.identifier,
+                                                     top_n=self.top_n,
                                                      search_by="queries")
 
         # Add edges based on global threshold (cutoff) for weights
