@@ -1,7 +1,7 @@
 import numpy as np
 from matchms import calculate_scores
-from matchms.similarity import FingerprintSimilarity
 from matchms.networking.networking_functions import get_top_hits
+from matchms.similarity import FingerprintSimilarity
 from .test_SimilarityNetwork import create_dummy_spectrums
 
 

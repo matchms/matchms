@@ -1,8 +1,9 @@
-import pytest
 import numpy as np
-from matchms import Spectrum, calculate_scores
-from matchms.similarity import FingerprintSimilarity
+import pytest
+from matchms import Spectrum
+from matchms import calculate_scores
 from matchms.networking import SimilarityNetwork
+from matchms.similarity import FingerprintSimilarity
 
 
 def create_dummy_spectrums():
