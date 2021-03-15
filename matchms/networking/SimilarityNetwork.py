@@ -75,6 +75,15 @@ class SimilarityNetwork:
         self.link_method = link_method
         self.graph = None
 
+    @staticmethod
+    def _select_edge_score(similars_scores: dict, scores_type: numpy.dtype):
+        """Chose one value if score contains multiple values (e.g. "score" and "matches")"""
+        if len(scores_type) > 1 and "score" in scores_type.names:
+            return {key: value["score"] for key, value in similars_scores.items()}
+        if len(scores_type) > 1:  # Assume that first entry is desired score
+            return {key: value[0] for key, value in similars_scores.items()}
+        return similars_scores
+
     def create_network(self, scores: Scores) -> nx.Graph:
         """
         Function to create network from given top-n similarity values. Expects that
@@ -100,6 +109,7 @@ class SimilarityNetwork:
         similars_idx, similars_scores = get_top_hits(scores, identifier=self.identifier,
                                                      top_n=self.top_n,
                                                      search_by="queries")
+        similars_scores = self._select_edge_score(similars_scores, scores.scores.dtype)
 
         # Add edges based on global threshold (cutoff) for weights
         for i, spec in enumerate(scores.queries):

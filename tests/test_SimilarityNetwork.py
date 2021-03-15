@@ -4,6 +4,7 @@ from matchms import Spectrum
 from matchms import calculate_scores
 from matchms.networking import SimilarityNetwork
 from matchms.similarity import FingerprintSimilarity
+from matchms.similarity import ModifiedCosine
 
 
 def create_dummy_spectrums():
@@ -13,18 +14,18 @@ def create_dummy_spectrums():
     spectrums = []
     for i, fp in enumerate(fingerprints1):
         spectrums.append(Spectrum(mz=np.array([100, 200.]),
-                                  intensities=np.array([0.7, 0.2]),
+                                  intensities=np.array([0.7, 0.1 * i]),
                                   metadata={"spectrumid": 'ref_spec_'+str(i),
                                             "fingerprint": np.array(fp),
                                             "smiles": 'C1=CC=C2C(=C1)NC(=N2)C3=CC=CO3',
-                                            "parent_mass": 100+50*i}))
+                                            "precursor_mz": 100+50*i}))
     for i, fp in enumerate(fingerprints2):
         spectrums.append(Spectrum(mz=np.array([100, 200.]),
-                                  intensities=np.array([0.7, 0.2]),
+                                  intensities=np.array([0.5, 0.1 * i]),
                                   metadata={"spectrumid": 'query_spec_'+str(i),
                                             "fingerprint": np.array(fp),
                                             "smiles": 'CC1=C(C=C(C=C1)NC(=O)N(C)C)Cl',
-                                            "parent_mass": 110+50*i}))
+                                            "precursor_mz": 110+50*i}))
     return spectrums
 
 
@@ -45,6 +46,15 @@ def create_dummy_scores_symmetric():
 
     # Create Scores object by calculating dice scores
     similarity_measure = FingerprintSimilarity("dice")
+    scores = calculate_scores(spectrums, spectrums, similarity_measure)
+    return scores
+
+
+def create_dummy_scores_symmetric_modified_cosine():
+    spectrums = create_dummy_spectrums()
+
+    # Create Scores object by calculating dice scores
+    similarity_measure = ModifiedCosine()
     scores = calculate_scores(spectrums, spectrums, similarity_measure)
     return scores
 
@@ -77,6 +87,18 @@ def test_create_network_symmetric():
         "Expected this node to have no edges"
     assert np.all([(x[1] not in nodes_without_edges) for x in edges_list]), \
         "Expected this node to have no edges"
+
+
+def test_create_network_symmetric_modified_cosine():
+    """Test creating a graph from a symmetric Scores object using ModifiedCosine"""
+    cutoff = 0.7
+    scores = create_dummy_scores_symmetric_modified_cosine()
+    msnet = SimilarityNetwork(score_cutoff=cutoff)
+    msnet.create_network(scores)
+
+    edges_list = list(msnet.graph.edges())
+    edges_list.sort()
+    assert len(edges_list) == 28, "Expected different number of edges"
 
 
 def test_create_network_symmetric_higher_cutoff():
