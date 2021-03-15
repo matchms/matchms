@@ -18,3 +18,6 @@ Do you know of any alternative solutions or do you have some helping code/links 
 
 **Additional context**
 Add any other context or screenshots about the feature request here.
+
+**Scientific reference**
+If this request is about adding a method to matchms (new similarity measure, new filter etc.), please point us to a scientific reference (if possible).
