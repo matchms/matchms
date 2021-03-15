@@ -24,7 +24,7 @@ def test_get_top_hits_by_references():
                            'ref_spec_1': np.array([0.66666667, 0.5, 0.]),
                            'ref_spec_2': np.array([0.66666667, 0.66666667, 0.5]),
                            'ref_spec_3': np.array([0.8, 0.5, 0.5]),
-                           'ref_spec_4': np.array([1. , 0.8, 0.5])}
+                           'ref_spec_4': np.array([1., 0.8, 0.5])}
     expected_idx_ref = {'ref_spec_0': np.array([0, 2, 1], dtype=np.int64),
                         'ref_spec_1': np.array([1, 2, 0], dtype=np.int64),
                         'ref_spec_2': np.array([1, 0, 2], dtype=np.int64),
