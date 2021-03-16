@@ -16,7 +16,7 @@ def load_from_mzxml(filename: str, ms_level: int = 2) -> Generator[Spectrum, Non
 
     .. code-block:: python
 
-        from matchs.importing import load_from_mzxml
+        from matchms.importing import load_from_mzxml
 
         file_mzxml = "testdata.mzxml"
         spectrums = list(load_from_mzml(file_mzxml))
