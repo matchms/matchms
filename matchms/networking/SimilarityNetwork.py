@@ -32,13 +32,13 @@ class SimilarityNetwork:
         ms_network = SimilarityNetwork(identifier="testID")
         ms_network.create_network(scores)
 
-        print("Edges", ms_network.graph.edges())
+        print("Nodes:", ms_network.graph.nodes())
 
     Should output
 
     .. testoutput::
 
-        Edges [('one', 'two')]
+        Nodes: ['one', 'two']
 
     """
     def __init__(self, identifier: str = "spectrumid",
