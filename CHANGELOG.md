@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Expand list of known negative ionmode adducts [#213](https://github.com/matchms/matchms/pull/213)
+
 ## [0.8.2] - 2021-03-08
 
 ### Added
