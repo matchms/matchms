@@ -20,12 +20,6 @@ def spectrum():
                     intensities=numpy.array([0.1, 0.2, 1.0, 0.3, 0.4], dtype="float"))
 
 
-@pytest.fixture
-def empty_spectrum():
-    return Spectrum(mz=numpy.array([], dtype="float"),
-                    intensities=numpy.array([], dtype="float"))
-
-
 @pytest.fixture(params=["rcx_gc-ei_ms_20201028_perylene.msp", "MoNA-export-GC-MS-first10.msp"])
 def data(request):
     module_root = os.path.join(os.path.dirname(__file__), "..")
