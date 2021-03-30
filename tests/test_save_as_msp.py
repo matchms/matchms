@@ -3,8 +3,6 @@ import tempfile
 import numpy
 import pytest
 from typing import List
-from typing import Optional
-from typing import AnyStr
 
 from matchms import Spectrum
 from matchms.importing import load_from_msp
