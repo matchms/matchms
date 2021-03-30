@@ -1,3 +1,4 @@
+import os
 from typing import List
 from ..Spectrum import Spectrum
 
@@ -39,8 +40,13 @@ def save_as_msp(spectra: List[Spectrum], filename: str):
 
     with open(filename, 'w') as outfile:
         for spectrum in spectra:
-            for key, value in spectrum.metadata:
-                outfile.write('%s:%s\n' % (key, value))
+            for key, value in spectrum.metadata.items():
+                outfile.write('%s: %s\n' % (key.upper(), str(value)))
+
+            for mz, intensity in zip(spectrum.peaks.mz, spectrum.peaks.intensities):
+                outfile.write('%s\t%s\n' % (str(mz), str(intensity)))
+
+            outfile.write(os.linesep)
 
 
 def ensure_list(spectra) -> List[Spectrum]:
