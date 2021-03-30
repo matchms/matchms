@@ -1,6 +1,6 @@
 import os
-from typing import List
 from typing import IO
+from typing import List
 from ..Spectrum import Spectrum
 from ..Spikes import Spikes
 

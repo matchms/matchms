@@ -1,12 +1,12 @@
 import os
 import tempfile
+from typing import List
 import numpy
 import pytest
-from typing import List
 
 from matchms import Spectrum
-from matchms.importing import load_from_msp
 from matchms.exporting import save_as_msp
+from matchms.importing import load_from_msp
 
 
 @pytest.fixture
