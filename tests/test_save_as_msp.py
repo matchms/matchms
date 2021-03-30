@@ -3,6 +3,8 @@ import tempfile
 import numpy
 import pytest
 from typing import List
+from typing import Optional
+from typing import AnyStr
 
 from matchms import Spectrum
 from matchms.importing import load_from_msp
@@ -34,9 +36,13 @@ def data(request):
     return list(spectra)
 
 
-def test_spectrum_none_exception(none_spectrum, tmp_path):
+def get_temp_filename(suffix: Optional[AnyStr]):
+    return tempfile.TemporaryFile(suffix=suffix).name
+
+
+def test_spectrum_none_exception(none_spectrum):
     """ Test for exception being thrown if the spectrum to be saved. """
-    filename = tempfile.TemporaryFile(dir=tmp_path, suffix=".msp").name
+    filename = get_temp_filename(".msp")
 
     with pytest.raises(AttributeError) as exception:
         save_as_msp(none_spectrum, filename)
@@ -45,9 +51,9 @@ def test_spectrum_none_exception(none_spectrum, tmp_path):
     assert message == "'NoneType' object has no attribute 'metadata'"
 
 
-def test_wrong_filename_exception(tmp_path):
+def test_wrong_filename_exception():
     """ Test for exception being thrown if output file doesn't end with .msp. """
-    filename = tempfile.TemporaryFile(dir=tmp_path, suffix=".mzml").name
+    filename = get_temp_filename(".mzml")
 
     with pytest.raises(AssertionError) as exception:
         save_as_msp(None, filename)
@@ -57,24 +63,25 @@ def test_wrong_filename_exception(tmp_path):
 
 
 # Using tmp_path fixture from pytest: https://docs.pytest.org/en/stable/tmpdir.html#the-tmp-path-fixture
-def test_file_exists_single_spectrum(spectrum, tmp_path):
+def test_file_exists_single_spectrum(spectrum):
     """ Test checking if the file is created. """
-    filename = tempfile.TemporaryFile(dir=tmp_path, suffix=".msp").name
+    filename = get_temp_filename(".msp")
     save_as_msp(spectrum, filename)
+
     assert os.path.isfile(filename)
 
 
-def test_stores_all_spectra(data, tmp_path):
+def test_stores_all_spectra(data):
     """ Test checking if all spectra contained in the original file are stored
     and loaded back in properly. """
-    _, spectra = save_and_reload_spectra(tmp_path, data)
+    _, spectra = save_and_reload_spectra(data)
 
     assert len(spectra) == len(data)
 
 
-def test_have_metadata(data, tmp_path):
+def test_have_metadata(data):
     """ Test checking of all metadate is stored correctly. """
-    _, spectra = save_and_reload_spectra(tmp_path, data)
+    _, spectra = save_and_reload_spectra(data)
 
     assert len(spectra) == len(data)
 
@@ -82,9 +89,9 @@ def test_have_metadata(data, tmp_path):
         assert actual.metadata == expected.metadata
 
 
-def test_have_peaks(data, tmp_path):
+def test_have_peaks(data):
     """ Test checking if all peaks are stored correctly. """
-    _, spectra = save_and_reload_spectra(tmp_path, data)
+    _, spectra = save_and_reload_spectra(data)
 
     assert len(spectra) == len(data)
 
@@ -92,7 +99,7 @@ def test_have_peaks(data, tmp_path):
         assert actual.peaks == expected.peaks
 
 
-def save_and_reload_spectra(tmp_path, spectra: List[Spectrum]):
+def save_and_reload_spectra(spectra: List[Spectrum]):
     """ Utility function to save spectra to msp and load them again.
 
     Params:
@@ -102,11 +109,10 @@ def save_and_reload_spectra(tmp_path, spectra: List[Spectrum]):
 
     Returns:
     --------
-    filename: Filename of msp file containing the stored spectra.
     reloaded_spectra: Spectra loaded from saved msp file.
     """
 
-    filename = tempfile.TemporaryFile(dir=tmp_path, suffix=".msp").name
+    filename = get_temp_filename(".msp")
     save_as_msp(spectra, filename)
     reloaded_spectra = list(load_from_msp(filename))
     return filename, reloaded_spectra
