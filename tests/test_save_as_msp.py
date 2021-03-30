@@ -95,13 +95,18 @@ def test_have_peaks(data, tmp_path):
 def save_and_reload_spectra(tmp_path, spectra: List[Spectrum]):
     """ Utility function to save spectra to msp and load them again.
 
-    Params
-    ------
-    tmp_path : temporary directory where to store the msp file.
-    spectra: spectra
+    Params:
+    -------
+    tmp_path : Temporary directory where to store the msp file.
+    spectra: Spectra objects to store
+
+    Returns:
+    --------
+    filename: Filename of msp file containing the stored spectra.
+    reloaded_spectra: Spectra loaded from saved msp file.
     """
 
     filename = tempfile.TemporaryFile(dir=tmp_path, suffix=".msp").name
     save_as_msp(spectra, filename)
-    spectra = list(load_from_msp(filename))
-    return filename, spectra
+    reloaded_spectra = list(load_from_msp(filename))
+    return filename, reloaded_spectra
