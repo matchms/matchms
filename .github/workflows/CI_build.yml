@@ -257,16 +257,11 @@ jobs:
         run: |
           export BUILDDIR=$RUNNER_TEMP/matchms/_build/noarch/
           [ "$RUNNING_OS" = "Windows" ] && export BUILDDIR=$RUNNER_TEMP\\matchms\\_build\\noarch\\
-          conda install \
-            --channel bioconda \
-            --channel conda-forge \
-            --channel nlesc \
-            matchms
           # Install matchms without nlesc channel to prevent package to be installed from nlesc channel instead of wanted $BUILDDIR channel
           conda install \
-            --channel bioconda \
+            --channel $BUILDDIR \
             --channel conda-forge \
-            --channel $BUILDDIR -v \
+            --channel bioconda -v \
             matchms
       - name: List conda packages
         shell: bash -l {0}
