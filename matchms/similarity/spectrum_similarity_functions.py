@@ -2,7 +2,6 @@ from typing import List
 from typing import Tuple
 import numba
 import numpy
-from matchms.typing import SpectrumType
 
 
 @numba.njit
