@@ -94,3 +94,15 @@ def test_spikes_unpack():
 
     assert numpy.allclose(mz, mz_unpacked)
     assert numpy.allclose(intensities, intensities_unpacked)
+
+
+def test_spikes_to_numpy():
+    """Test conversion to stacked numpy array"""
+    mz = numpy.array([10, 20, 30], dtype="float")
+    intensities = numpy.array([100, 99.9, 300], dtype="float")
+
+    peaks = Spikes(mz=mz, intensities=intensities)
+
+    assert numpy.allclose(peaks.to_numpy, numpy.array([[10., 100.],
+                                                       [20., 99.9],
+                                                       [30., 300.]]))
