@@ -3,7 +3,6 @@ import numpy
 from matchms.typing import SpectrumType
 from .BaseSimilarity import BaseSimilarity
 from .spectrum_similarity_functions import collect_peak_pairs
-from .spectrum_similarity_functions import get_peaks_array
 from .spectrum_similarity_functions import score_best_matches
 
 
@@ -94,8 +93,8 @@ class CosineGreedy(BaseSimilarity):
             matching_pairs = matching_pairs[numpy.argsort(matching_pairs[:, 2])[::-1], :]
             return matching_pairs
 
-        spec1 = get_peaks_array(reference)
-        spec2 = get_peaks_array(query)
+        spec1 = reference.peaks.to_numpy
+        spec2 = query.peaks.to_numpy
         matching_pairs = get_matching_pairs()
         if matching_pairs is None:
             return numpy.asarray((float(0), 0), dtype=self.score_datatype)

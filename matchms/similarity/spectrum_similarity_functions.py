@@ -87,11 +87,6 @@ def find_matches(spec1_mz: numpy.ndarray, spec2_mz: numpy.ndarray,
     return matches
 
 
-def get_peaks_array(spectrum: SpectrumType) -> numpy.ndarray:
-    """Get peaks mz and intensities as numpy array."""
-    return numpy.vstack((spectrum.peaks.mz, spectrum.peaks.intensities)).T
-
-
 @numba.njit(fastmath=True)
 def score_best_matches(matching_pairs: numpy.ndarray, spec1: numpy.ndarray,
                        spec2: numpy.ndarray, mz_power: float = 0.0,
