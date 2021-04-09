@@ -2,7 +2,6 @@ from typing import List
 from typing import Tuple
 import numba
 import numpy
-from matchms.typing import SpectrumType
 
 
 @numba.njit
@@ -85,11 +84,6 @@ def find_matches(spec1_mz: numpy.ndarray, spec2_mz: numpy.ndarray,
             else:
                 matches.append((peak1_idx, peak2_idx))
     return matches
-
-
-def get_peaks_array(spectrum: SpectrumType) -> numpy.ndarray:
-    """Get peaks mz and intensities as numpy array."""
-    return numpy.vstack((spectrum.peaks.mz, spectrum.peaks.intensities)).T
 
 
 @numba.njit(fastmath=True)

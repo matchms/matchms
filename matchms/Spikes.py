@@ -45,3 +45,9 @@ class Spikes:
     def intensities(self):
         """getter method for intensities private variable"""
         return self._intensities.copy()
+
+    @property
+    def to_numpy(self):
+        """getter method to return stacked numpy array of both peak mz and
+        intensities"""
+        return numpy.vstack((self.mz, self.intensities)).T
