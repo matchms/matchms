@@ -1,5 +1,6 @@
 from typing import Generator
 from typing import Iterator
+from typing import Tuple
 import numpy
 from ..Spectrum import Spectrum
 
@@ -49,7 +50,7 @@ def parse_msp_file(filename: str) -> Generator[dict, None, None]:
                     intensities = []
 
 
-def get_peak_values(peak):
+def get_peak_values(peak: str) -> Tuple[float, float]:
     """ Get the m/z and intensity value from the line containing the peak information. """
     splitted_line = peak.split(maxsplit=2)
     mz = float(splitted_line[0].strip())
