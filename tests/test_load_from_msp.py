@@ -1,7 +1,7 @@
 import os
 import numpy
-from matchms.importing import load_from_msp
 from matchms import Spectrum
+from matchms.importing import load_from_msp
 
 
 def assert_matching_inchikey(molecule, expected_inchikey):
