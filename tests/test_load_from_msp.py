@@ -86,3 +86,16 @@ def test_load_from_msp_tabs():
         assert_matching_inchikey(spectrum, expected_inchikey[idx])
         numpy.testing.assert_array_almost_equal(spectrum.peaks.mz, expected_mz[idx])
         numpy.testing.assert_array_almost_equal(spectrum.peaks.intensities, expected_intensities[idx])
+
+
+def test_load_from_msp_multiline():
+    """Test parse of msp file to spectrum objects with ';' separator and multiple peaks in one line."""
+
+    module_root = os.path.join(os.path.dirname(__file__), "..")
+    spectrums_file = os.path.join(module_root, "tests", "multiline_semicolon.msp")
+
+    spectra = list(load_from_msp(spectrums_file))
+    expected_num_peaks = [90, 331]
+
+    for actual, expected in zip(spectra, expected_num_peaks):
+        assert len(actual.peaks) == expected
