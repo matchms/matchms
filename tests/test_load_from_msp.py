@@ -1,6 +1,7 @@
 import os
 import numpy
 from matchms.importing import load_from_msp
+from matchms import Spectrum
 
 
 def assert_matching_inchikey(molecule, expected_inchikey):
@@ -94,8 +95,30 @@ def test_load_from_msp_multiline():
     module_root = os.path.join(os.path.dirname(__file__), "..")
     spectrums_file = os.path.join(module_root, "tests", "multiline_semicolon.msp")
 
-    spectra = list(load_from_msp(spectrums_file))
-    expected_num_peaks = [90, 331]
+    actual = list(load_from_msp(spectrums_file))
+    expected = [
+        Spectrum(
+            mz=numpy.array([
+                12, 24, 25, 26, 27, 35, 36, 37, 38, 39, 47, 48, 49, 50, 51
+            ]).astype(float),
+            intensities=numpy.array([
+                0, 0, 2, 4, 0, 19, 26, 120, 49, 5, 25, 11, 60, 104, 13
+            ]).astype(float),
+            metadata={
+                "name": "Compound A",
+                "num peaks": '15'
+            }),
+        Spectrum(
+            mz=numpy.array([
+                40, 41, 42, 43, 44, 46, 50, 51, 52, 53
+            ]).astype(float),
+            intensities=numpy.array([
+                147, 57, 13, 52, 30, 1, 1, 8, 6, 1
+            ]).astype(float),
+            metadata={
+                "name": "JWH 081",
+                "num peaks": '10'
+            })
+    ]
 
-    for actual, expected in zip(spectra, expected_num_peaks):
-        assert len(actual.peaks) == expected
+    assert actual == expected
