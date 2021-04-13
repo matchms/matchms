@@ -31,6 +31,8 @@ def add_precursor_mz(spectrum_in: SpectrumType) -> SpectrumType:
     if isinstance(precursor_mz, str):
         precursor_mz = float(precursor_mz.strip())
         spectrum.set("precursor_mz", precursor_mz)
+    elif isinstance(precursor_mz, float):
+        spectrum.set("precursor_mz", precursor_mz)
     elif precursor_mz is None:
         pepmass = spectrum.get("pepmass")
         if pepmass is not None and isinstance(pepmass[0], float):
