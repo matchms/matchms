@@ -49,6 +49,7 @@ def parse_msp_file(filename: str) -> Generator[dict, None, None]:
 
 
 def get_peak_values(peak):
+    """ Get the m/z and intensity value from the line containing the peak information. """
     splitted_line = peak.split(maxsplit=2)
     mz = float(splitted_line[0].strip())
     intensity = float(splitted_line[1].strip())
