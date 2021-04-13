@@ -1,6 +1,7 @@
 import numpy
 from matchms import Spectrum
 from matchms.filtering import add_precursor_mz
+import pytest
 
 
 def test_add_precursor_mz():
@@ -45,18 +46,21 @@ def test_add_precursor_mz_only_pepmass_present():
     assert spectrum.get("precursor_mz") == 444.0, "Expected different precursor_mz."
 
 
-def test_add_precursor_mz_no_precursor_mz():
+@pytest.mark.parametrize("key, value, expected", [
+    ["precursor_mz", "444.0", 444.0],
+    ["precursormz", "15.0", 15.0]])
+def test_add_precursor_mz_no_precursor_mz(key, value, expected):
     """Test if precursor_mz is correctly derived if "precursor_mz" is str."""
     mz = numpy.array([], dtype='float')
     intensities = numpy.array([], dtype='float')
-    metadata = {"precursor_mz": "444.0"}
+    metadata = {key: value}
     spectrum_in = Spectrum(mz=mz,
                            intensities=intensities,
                            metadata=metadata)
 
     spectrum = add_precursor_mz(spectrum_in)
 
-    assert spectrum.get("precursor_mz") == 444.0, "Expected different precursor_mz."
+    assert spectrum.get("precursor_mz") == expected, "Expected different precursor_mz."
 
 
 def test_empty_spectrum():
