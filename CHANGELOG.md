@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `.to_numpy` method for Spikes class which allows to run `spectrum.peaks.to_numpy` [#214](https://github.com/matchms/matchms/issues/214)
 - `save_as_msp()` function to export spectrums to .msp file [#215](https://github.com/matchms/matchms/pull/215)
 
+### Changed
+
+- `load_from_msp()` now handles .msp files containing multiple peaks per line separated by `;` [#221](https://github.com/matchms/matchms/pull/221)
+
 ## [0.8.2] - 2021-03-08
 
 ### Added
