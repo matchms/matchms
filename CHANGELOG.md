@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- `add_parent_mass()` filter now makes more consitent use of cleaned adducts [#225](https://github.com/matchms/matchms/pull/225)
+- `add_parent_mass()` filter now makes consistent use of cleaned adducts [#225](https://github.com/matchms/matchms/pull/225)
 
 ## [0.8.2] - 2021-03-08
 
