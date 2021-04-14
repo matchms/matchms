@@ -1,4 +1,6 @@
 from typing import Generator
+from typing import Iterator
+from typing import Tuple
 import numpy
 from ..Spectrum import Spectrum
 
@@ -21,27 +23,18 @@ def parse_msp_file(filename: str) -> Generator[dict, None, None]:
             if len(rline) == 0:
                 continue
 
-            if ':' in rline:
-                # Obtaining the params
-                splitted_line = rline.split(":", 1)
-                if splitted_line[0].lower() == 'comments':
-                    # Obtaining the parameters inside the comments index
-                    for s in splitted_line[1][2:-1].split('" "'):
-                        splitted_line = s.split("=", 1)
-                        if splitted_line[0].lower() in params.keys() and splitted_line[0].lower() == 'smiles':
-                            params[splitted_line[0].lower()+"_2"] = splitted_line[1].strip()
-                        else:
-                            params[splitted_line[0].lower()] = splitted_line[1].strip()
-                else:
-                    params[splitted_line[0].lower()] = splitted_line[1].strip()
+            if contains_metadata(rline):
+                parse_metadata(rline, params)
             else:
                 # Obtaining the masses and intensities
-                peakscount += 1
+                peak_pairs = get_peak_tuples(rline)
 
-                splitted_line = rline.split()
+                for peak in peak_pairs:
+                    mz, intensity = get_peak_values(peak)
 
-                masses.append(float(splitted_line[0]))
-                intensities.append(float(splitted_line[1]))
+                    peakscount += 1
+                    masses.append(mz)
+                    intensities.append(intensity)
 
                 # Obtaining the masses and intensities
                 if int(params['num peaks']) == peakscount:
@@ -55,6 +48,41 @@ def parse_msp_file(filename: str) -> Generator[dict, None, None]:
                     params = {}
                     masses = []
                     intensities = []
+
+
+def get_peak_values(peak: str) -> Tuple[float, float]:
+    """ Get the m/z and intensity value from the line containing the peak information. """
+    splitted_line = peak.split(maxsplit=2)
+    mz = float(splitted_line[0].strip())
+    intensity = float(splitted_line[1].strip())
+    return mz, intensity
+
+
+def get_peak_tuples(rline: str) -> Iterator[str]:
+    """ Splits line at ';' and performs additional string cleaning. """
+    tokens = filter(None, rline.split(";"))
+    peak_pairs = map(lambda x: x.lstrip().rstrip(), tokens)
+    return peak_pairs
+
+
+def parse_metadata(rline: str, params: dict):
+    """ Reads metadata contained in line into params dict. """
+    splitted_line = rline.split(":", 1)
+    if splitted_line[0].lower() == 'comments':
+        # Obtaining the parameters inside the comments index
+        for s in splitted_line[1][2:-1].split('" "'):
+            splitted_line = s.split("=", 1)
+            if splitted_line[0].lower() in params.keys() and splitted_line[0].lower() == 'smiles':
+                params[splitted_line[0].lower()+"_2"] = splitted_line[1].strip()
+            else:
+                params[splitted_line[0].lower()] = splitted_line[1].strip()
+    else:
+        params[splitted_line[0].lower()] = splitted_line[1].strip()
+
+
+def contains_metadata(rline: str) -> bool:
+    """ Check if line contains Spectrum metadata."""
+    return ':' in rline
 
 
 def load_from_msp(filename: str) -> Generator[Spectrum, None, None]:
