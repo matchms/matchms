@@ -51,6 +51,8 @@ def test_add_precursor_mz_only_pepmass_present():
     ["precursormz", "15.6", 15.6],
     ["precursormz", 15.0, 15.0],
     ["precursor_mass", "17.887654", 17.887654],
+    ["precursor_mass", "N/A", None],
+    ["precursor_mass", "test", None],
     ["pepmass", (33.89, 50), 33.89],
     ["pepmass", "None", None],
     ["pepmass", None, None]])
