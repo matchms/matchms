@@ -1,6 +1,7 @@
 from ..constants import PROTON_MASS
 from ..importing import load_adducts_dict
 from ..typing import SpectrumType
+from ..utils import clean_adduct
 
 
 def add_parent_mass(spectrum_in: SpectrumType, estimate_from_adduct: bool = True) -> SpectrumType:
@@ -31,7 +32,7 @@ def add_parent_mass(spectrum_in: SpectrumType, estimate_from_adduct: bool = True
     if spectrum.get("parent_mass", None) is None:
         parent_mass = None
         charge = spectrum.get("charge")
-        adduct = spectrum.get("adduct")
+        adduct = clean_adduct(spectrum.get("adduct"))
         # Get precursor m/z
         try:
             precursor_mz = spectrum.get("precursor_mz", None)

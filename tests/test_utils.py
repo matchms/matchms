@@ -221,7 +221,8 @@ def test_looks_like_adduct():
                           ("[2M+Na]", "[2M+Na]+"),
                           ("2M+Na", "[2M+Na]+"),
                           ("M+NH3+", "[M+NH3]+"),
-                          ("M-H2O+2H2+", "[M-H2O+2H]2+")])
+                          ("M-H2O+2H2+", "[M-H2O+2H]2+"),
+                          (None, None)])
 def test_clean_adduct_examples(input_adduct, expected_adduct):
     """Test if typical examples are correctly edited."""
     assert clean_adduct(input_adduct) == expected_adduct, \
