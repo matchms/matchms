@@ -9,8 +9,8 @@ def add_parent_mass(spectrum_in: SpectrumType, estimate_from_adduct: bool = True
     """Add estimated parent mass to metadata (if not present yet).
 
     Method to calculate the parent mass from given precursor m/z together
-    with charge and/or adduct. Will take precursor m/z from either "precursor_mz"
-    or "pepmass" field.
+    with charge and/or adduct. Will take precursor m/z from "precursor_mz"
+    as provided by running `add_precursor_mz`.
     For estimate_from_adduct=True this function will estimate the parent mass based on
     the mass and charge of known adducts. The table of known adduct properties can be
     found under :download:`matchms/data/known_adducts_table.csv </../matchms/data/known_adducts_table.csv>`.
@@ -36,13 +36,9 @@ def add_parent_mass(spectrum_in: SpectrumType, estimate_from_adduct: bool = True
         parent_mass = None
         charge = spectrum.get("charge")
         adduct = clean_adduct(spectrum.get("adduct"))
-        # Get precursor m/z
-        try:
-            precursor_mz = spectrum.get("precursor_mz", None)
-            if precursor_mz is None:
-                precursor_mz = spectrum.get("pepmass", None)[0]
-        except TypeError:
-            print("Not sufficient spectrum metadata to derive parent mass.")
+        precursor_mz = spectrum.get("precursor_mz", None)
+        if precursor_mz is None:
+            print("Missing precursor m/z to derive parent mass.")
             return spectrum
 
         if estimate_from_adduct and adduct in adducts_dict:
