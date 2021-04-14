@@ -48,9 +48,12 @@ def test_add_precursor_mz_only_pepmass_present():
 
 @pytest.mark.parametrize("key, value, expected", [
     ["precursor_mz", "444.0", 444.0],
-    ["precursormz", "15.0", 15.0],
+    ["precursormz", "15.6", 15.6],
     ["precursormz", 15.0, 15.0],
-    ["precursor_mass", "17.0", 17.0]])
+    ["precursor_mass", "17.887654", 17.887654],
+    ["pepmass", (33.89, 50), 33.89],
+    ["pepmass", "None", None],
+    ["pepmass", None, None]])
 def test_add_precursor_mz_no_precursor_mz(key, value, expected):
     """Test if precursor_mz is correctly derived if "precursor_mz" is str."""
     mz = numpy.array([], dtype='float')
