@@ -129,7 +129,7 @@ class Spectrum:
                 """calculate where the stems of the spectrum peaks are going to be"""
                 x = numpy.zeros([2, self.peaks.mz.size], dtype="float")
                 y = numpy.zeros(x.shape)
-                x[:, :] = numpy.tile(self.peaks.mz, (2,1))
+                x[:, :] = numpy.tile(self.peaks.mz, (2, 1))
                 y[1, :] = self.peaks.intensities
                 return x, y
 
