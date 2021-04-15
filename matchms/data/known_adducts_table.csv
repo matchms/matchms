@@ -50,10 +50,11 @@
 [3M-H]-,negative,-1,3,-1.007276
 [M]-,negative,-1,n/a,n/a
 [M-H-CO2-2HF]-,negative,-1,n/a,n/a
-[M-H-/M-Ser]-,negative,-1,n/a,n/a
 [M-2H]-,negative,-1,n/a,n/a
 [M+CH3COO]-,negative,-1,n/a,n/a
 [M+CH3COO-/M-CH3]-,negative,-1,n/a,n/a
+[M+CH3COO]-/[M-CH3]-,negative,-1,n/a,n/a
+[M-CH3]-,negative,-1,n/a,n/a
 [M+OAc]-,negative,-1,n/a,n/a
 [M]+,positive,1,n/a,n/a
 [M+H-CH3NH2]+,positive,1,n/a,n/a
