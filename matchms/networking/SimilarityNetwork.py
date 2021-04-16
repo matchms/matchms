@@ -32,13 +32,13 @@ class SimilarityNetwork:
         ms_network = SimilarityNetwork(identifier="testID")
         ms_network.create_network(scores)
 
-        print("Nodes:", ms_network.graph.nodes())
+        sort(ms_network.graph.nodes())
 
     Should output
 
     .. testoutput::
 
-        Nodes: ['one', 'two']
+        ['one', 'two']
 
     """
     def __init__(self, identifier: str = "spectrumid",
@@ -59,7 +59,7 @@ class SimilarityNetwork:
             potential links, only max_links will be kept, so top_n must be >= max_links.
         max_links
             Maximum number of links to add per node. Default = 10.
-            Due to incoming links, total number of links per node can be higher.
+            Due to incoming links, total number of links per node can be higher. The links are populated by looping over the query spectrums.
         score_cutoff
             Threshold for given similarities. Edges/Links will only be made for
             similarities > score_cutoff. Default = 0.7.
@@ -74,7 +74,8 @@ class SimilarityNetwork:
         self.max_links = max_links
         self.score_cutoff = score_cutoff
         self.link_method = link_method
-        self.graph = None
+        self.graph: Optional[nx.Graph] = None
+        """NetworkX graph. Set after calling create_network()"""
 
     @staticmethod
     def _select_edge_score(similars_scores: dict, scores_type: numpy.dtype):

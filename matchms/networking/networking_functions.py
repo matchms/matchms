@@ -8,10 +8,10 @@ def get_top_hits(scores: Scores, identifier: str = "spectrumid",
                  top_n: int = 25, search_by: str = "queries") -> Tuple[dict, dict]:
     """Get top_n highest scores (and indices) for every entry.
 
-    Args:
-    --------
+    Parameters
+    ----------
     scores
-        Matchms Scores object containing all Spec2Vec similarities.
+        Matchms Scores object containing all similarities.
     identifier
         Unique intentifier for each spectrum in scores. Will also be used for
         node names.
