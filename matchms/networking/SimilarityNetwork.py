@@ -33,7 +33,9 @@ class SimilarityNetwork:
         ms_network = SimilarityNetwork(identifier_key="testID")
         ms_network.create_network(scores)
 
-        sort(ms_network.graph.nodes())
+        nodes = list(ms_network.graph.nodes())
+        nodes.sort()
+        print(nodes)
 
     Should output
 
