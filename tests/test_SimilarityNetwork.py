@@ -1,10 +1,19 @@
 import numpy as np
+import os
 import pytest
+import tempfile
 from matchms import Spectrum
 from matchms import calculate_scores
 from matchms.networking import SimilarityNetwork
 from matchms.similarity import FingerprintSimilarity
 from matchms.similarity import ModifiedCosine
+
+
+@pytest.yield_fixture
+def filename():
+    with tempfile.TemporaryDirectory() as temp_dir:
+        filename = os.path.join(temp_dir, "test.graphml")
+        yield filename
 
 
 def create_dummy_spectrums():
@@ -118,6 +127,17 @@ def test_create_network_symmetric_modified_cosine():
     edges_list = list(msnet.graph.edges())
     edges_list.sort()
     assert len(edges_list) == 28, "Expected different number of edges"
+
+
+def test_create_network_export_to_graphml(filename):
+    """Test creating a graph from a symmetric Scores object using ModifiedCosine"""
+    cutoff = 0.7
+    scores = create_dummy_scores_symmetric_modified_cosine()
+    msnet = SimilarityNetwork(score_cutoff=cutoff)
+    msnet.create_network(scores)
+    msnet.export_to_graphml(filename)
+
+    assert os.path.isfile(filename), "graphml file not found"
 
 
 def test_create_network_symmetric_higher_cutoff():
