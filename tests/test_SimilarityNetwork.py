@@ -1,7 +1,7 @@
-import numpy as np
 import os
-import pytest
 import tempfile
+import numpy as np
+import pytest
 from matchms import Spectrum
 from matchms import calculate_scores
 from matchms.networking import SimilarityNetwork
