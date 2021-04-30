@@ -59,17 +59,15 @@ def test_collect_peak_pairs_no_matches(numba_compiled):
 def test_find_matches_shifted(numba_compiled):
     """Test finding matches with shifted peaks."""
     shift = -5.0
-    spec1 = numpy.array([[100, 200, 300, 500],
-                         [0.1, 0.1, 1.0, 1.0]], dtype="float").T
+    spec1_mz = numpy.array([100, 200, 300, 500], dtype="float")
 
-    spec2 = numpy.array([[105, 205.1, 300, 304.99, 500.1],
-                         [0.1, 0.1, 1.0, 0.8, 1.0]], dtype="float").T
+    spec2_mz = numpy.array([105, 205.1, 300, 304.99, 500.1], dtype="float")
 
     expected_matches = [(0, 0), (1, 1), (2, 3)]
     if numba_compiled:
-        matches = find_matches(spec1, spec2, tolerance=0.2, shift=shift)
+        matches = find_matches(spec1_mz, spec2_mz, tolerance=0.2, shift=shift)
     else:
-        matches = find_matches.py_func(spec1, spec2, tolerance=0.2, shift=shift)
+        matches = find_matches.py_func(spec1_mz, spec2_mz, tolerance=0.2, shift=shift)
     assert expected_matches == matches, "Expected different matches."
 
 
@@ -77,15 +75,13 @@ def test_find_matches_shifted(numba_compiled):
 def test_find_matches_no_matches(numba_compiled):
     """Test function for no matching peaks."""
     shift = -20.0
-    spec1 = numpy.array([[100, 200, 300, 500],
-                         [0.1, 0.1, 1.0, 1.0]], dtype="float").T
+    spec1_mz = numpy.array([100, 200, 300, 500], dtype="float")
 
-    spec2 = numpy.array([[105, 205.1, 300, 500.1],
-                         [0.1, 0.1, 1.0, 1.0]], dtype="float").T
+    spec2_mz = numpy.array([105, 205.1, 300, 500.1], dtype="float")
     if numba_compiled:
-        matches = find_matches(spec1, spec2, tolerance=0.2, shift=shift)
+        matches = find_matches(spec1_mz, spec2_mz, tolerance=0.2, shift=shift)
     else:
-        matches = find_matches.py_func(spec1, spec2, tolerance=0.2, shift=shift)
+        matches = find_matches.py_func(spec1_mz, spec2_mz, tolerance=0.2, shift=shift)
     assert matches == [], "Expected empty list of matches."
 
 

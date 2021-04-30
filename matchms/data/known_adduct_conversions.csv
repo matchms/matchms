@@ -32,3 +32,7 @@ input_adduct,corrected_adduct
 [M+OAc],[M+OAc]-
 [M+Oac],[M+OAc]-
 [M+Oac]-,[M+OAc]-
+[M-H-/M-Ser]-,[M-H]-
+[M-H-/M-Ser],[M-H]-
+[M-H]-/[M-Ser]-,[M-H]-
+[M-H]-/[M-Ser],[M-H]-

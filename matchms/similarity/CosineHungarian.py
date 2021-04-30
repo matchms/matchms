@@ -2,7 +2,6 @@ from typing import Tuple
 import numpy
 from scipy.optimize import linear_sum_assignment
 from matchms.similarity.spectrum_similarity_functions import collect_peak_pairs
-from matchms.similarity.spectrum_similarity_functions import get_peaks_array
 from matchms.typing import SpectrumType
 from .BaseSimilarity import BaseSimilarity
 
@@ -108,8 +107,8 @@ class CosineHungarian(BaseSimilarity):
             score = score/(numpy.sqrt(numpy.sum(spec1_power**2)) * numpy.sqrt(numpy.sum(spec2_power**2)))
             return numpy.asarray((score, len(used_matches)), dtype=self.score_datatype)
 
-        spec1 = get_peaks_array(reference)
-        spec2 = get_peaks_array(query)
+        spec1 = reference.peaks.to_numpy
+        spec2 = query.peaks.to_numpy
         matching_pairs = get_matching_pairs()
         paired_peaks1, paired_peaks2, matching_pairs_matrix = get_matching_pairs_matrix()
         return calc_score()
