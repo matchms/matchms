@@ -1,3 +1,4 @@
+from typing import Optional
 import networkx as nx
 import numpy
 from matchms import Scores
