@@ -61,7 +61,12 @@ class SimilarityNetwork:
             potential links, only max_links will be kept, so top_n must be >= max_links.
         max_links
             Maximum number of links to add per node. Default = 10.
-            Due to incoming links, total number of links per node can be higher. The links are populated by looping over the query spectrums.
+            Due to incoming links, total number of links per node can be higher.
+            The links are populated by looping over the query spectrums.
+            Important side note: The max_links restriction is strict which means that
+            if scores around max_links are equal still only max_links will be added
+            which can results in some random variations (sorting spectra with equal
+            scores restuls in a random order of such elements).
         score_cutoff
             Threshold for given similarities. Edges/Links will only be made for
             similarities > score_cutoff. Default = 0.7.
@@ -117,7 +122,8 @@ class SimilarityNetwork:
         # Collect location and score of highest scoring candidates for queries and references
         similars_idx, similars_scores = get_top_hits(scores, identifier_key=self.identifier_key,
                                                      top_n=self.top_n,
-                                                     search_by="queries")
+                                                     search_by="queries",
+                                                     ignore_diagonal=True)
         similars_scores = self._select_edge_score(similars_scores, scores.scores.dtype)
 
         # Add edges based on global threshold (cutoff) for weights

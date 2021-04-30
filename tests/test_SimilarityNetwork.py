@@ -150,7 +150,7 @@ def test_create_network_symmetric_mutual_method():
     nodes_with_edges = ['query_spec_0', 'query_spec_1', 'query_spec_2', 'ref_spec_4']
     edges_list = list(msnet.graph.edges())
     edges_list.sort()
-    assert len(edges_list) == 3, "Expected only four link"
+    assert len(edges_list) == 4, "Expected four links"
     assert np.all([(x[0] in nodes_with_edges) for x in edges_list]), "Expected different edges in graph"
     assert np.all([(x[1] in nodes_with_edges) for x in edges_list]), "Expected different edges in graph"
 
