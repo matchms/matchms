@@ -90,7 +90,7 @@ def test_create_network_symmetric():
     assert np.all([(x[1] not in nodes_without_edges) for x in edges_list]), \
         "Expected this node to have no edges"
 
-#%%
+
 def test_create_network_symmetric_remove_unconnected_nodes():
     """Test if unconnected nodes are removed"""
     cutoff = 0.7
