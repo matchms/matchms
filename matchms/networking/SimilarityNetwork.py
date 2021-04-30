@@ -29,7 +29,7 @@ class SimilarityNetwork:
         modified_cosine = ModifiedCosine(tolerance=0.2)
         spectrums = [spectrum_1, spectrum_2]
         scores = calculate_scores(spectrums, spectrums, modified_cosine)
-        ms_network = SimilarityNetwork(identifier="testID")
+        ms_network = SimilarityNetwork(identifier_key="testID")
         ms_network.create_network(scores)
 
         sort(ms_network.graph.nodes())
@@ -41,7 +41,7 @@ class SimilarityNetwork:
         ['one', 'two']
 
     """
-    def __init__(self, identifier: str = "spectrumid",
+    def __init__(self, identifier_key: str = "spectrumid",
                  top_n: int = 20,
                  max_links: int = 10,
                  score_cutoff: float = 0.7,
@@ -49,9 +49,9 @@ class SimilarityNetwork:
         """
         Parameters
         ----------
-        identifier
-            Unique intentifier for each spectrum in scores. Will also be used for
-            node names.
+        identifier_key
+            Metadata key for unique intentifier for each spectrum in scores.
+            Will also be used for the naming the network nodes. Default is 'spectrumid'.
         top_n
             Consider edge between spectrumA and spectrumB if score falls into
             top_n for spectrumA or spectrumB (link_method="single"), or into
@@ -69,7 +69,7 @@ class SimilarityNetwork:
             in the given top-n list for both nodes.
         """
         # pylint: disable=too-many-arguments
-        self.identifier = identifier
+        self.identifier_key = identifier_key
         self.top_n = top_n
         self.max_links = max_links
         self.score_cutoff = score_cutoff
@@ -86,14 +86,14 @@ class SimilarityNetwork:
             return {key: value[0] for key, value in similars_scores.items()}
         return similars_scores
 
-    def create_network(self, scores: Scores) -> nx.Graph:
+    def create_network(self, scores: Scores):
         """
         Function to create network from given top-n similarity values. Expects that
         similarities given in scores are from an all-vs-all comparison including all
         possible pairs.
 
-        Args:
-        --------
+        Parameters
+        ----------
         scores
             Matchms Scores object containing all spectrums and pair similarities for
             generating a network.
@@ -101,23 +101,23 @@ class SimilarityNetwork:
         assert self.top_n >= self.max_links, "top_n must be >= max_links"
         assert numpy.all(scores.queries == scores.references), \
             "Expected symmetric scores object with queries==references"
-        unique_ids = list({s.get(self.identifier) for s in scores.queries})
+        unique_ids = list({s.get(self.identifier_key) for s in scores.queries})
 
         # Initialize network graph, add nodes
         msnet = nx.Graph()
         msnet.add_nodes_from(unique_ids)
 
         # Collect location and score of highest scoring candidates for queries and references
-        similars_idx, similars_scores = get_top_hits(scores, identifier=self.identifier,
+        similars_idx, similars_scores = get_top_hits(scores, identifier_key=self.identifier_key,
                                                      top_n=self.top_n,
                                                      search_by="queries")
         similars_scores = self._select_edge_score(similars_scores, scores.scores.dtype)
 
         # Add edges based on global threshold (cutoff) for weights
         for i, spec in enumerate(scores.queries):
-            query_id = spec.get(self.identifier)
+            query_id = spec.get(self.identifier_key)
 
-            ref_candidates = numpy.array([scores.references[x].get(self.identifier)
+            ref_candidates = numpy.array([scores.references[x].get(self.identifier_key)
                                           for x in similars_idx[query_id]])
             idx = numpy.where((similars_scores[query_id] >= self.score_cutoff) &
                               (ref_candidates != query_id))[0][:self.max_links]
@@ -134,3 +134,16 @@ class SimilarityNetwork:
             msnet.add_weighted_edges_from(new_edges)
 
         self.graph = msnet
+
+    def export_to_graphml(filename: str):
+        """Save the network as .graphml file.
+
+        Parameters
+        ----------
+        filename
+            Specify filename for exporting the graph.
+
+        """
+        if not self.graph:
+            raise ValueError("No network found. Make sure to first run .create_network() step")
+        nx.write_graphml_lxml(self.graph, filename)

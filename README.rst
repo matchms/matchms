@@ -200,7 +200,7 @@ Glossary of terms
        in retrieving information associated with a certain molecule from a
        database.
    * - InChIKey / InChI key / :code:`INCHIKEY`
-     - An indentifier for molecules. For example, the InChI key for carbon
+     - An identifier for molecules. For example, the InChI key for carbon
        dioxide is :code:`InChIKey=CURLTUGMZLYLDI-UHFFFAOYSA-N` (yes, it
        includes the substring :code:`InChIKey=`).
    * - MGF File / Mascot Generic Format
