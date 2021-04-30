@@ -46,7 +46,8 @@ class SimilarityNetwork:
                  top_n: int = 20,
                  max_links: int = 10,
                  score_cutoff: float = 0.7,
-                 link_method: str = 'single'):
+                 link_method: str = 'single',
+                 keep_unconnected_nodes: bool = True):
         """
         Parameters
         ----------
@@ -68,6 +69,10 @@ class SimilarityNetwork:
             Chose between 'single' and 'mutual'. 'single will add all links based
             on individual nodes. 'mutual' will only add links if that link appears
             in the given top-n list for both nodes.
+        keep_unconnected_nodes
+            If set to True (default) all spectra will be included as nodes even
+            if they have no connections/edges of other spectra. If set to False
+            all nodes without connections will be removed.
         """
         # pylint: disable=too-many-arguments
         self.identifier_key = identifier_key
@@ -75,6 +80,7 @@ class SimilarityNetwork:
         self.max_links = max_links
         self.score_cutoff = score_cutoff
         self.link_method = link_method
+        self.keep_unconnected_nodes = keep_unconnected_nodes
         self.graph: Optional[nx.Graph] = None
         """NetworkX graph. Set after calling create_network()"""
 
@@ -134,9 +140,11 @@ class SimilarityNetwork:
 
             msnet.add_weighted_edges_from(new_edges)
 
+        if not self.keep_unconnected_nodes:
+            msnet.remove_nodes_from(list(nx.isolates(msnet)))
         self.graph = msnet
 
-    def export_to_graphml(filename: str):
+    def export_to_graphml(self, filename: str):
         """Save the network as .graphml file.
 
         Parameters

@@ -77,16 +77,35 @@ def test_create_network_symmetric():
     msnet = SimilarityNetwork(score_cutoff=cutoff)
     msnet.create_network(scores)
 
+    nodes_list = list(msnet.graph.nodes())
     edges_list = list(msnet.graph.edges())
     edges_list.sort()
     nodes_without_edges = ['ref_spec_0',
                            'ref_spec_1',
                            'ref_spec_2']
+    assert len(nodes_list) == 8, "Expected different number of nodes"
     assert len(edges_list) == 5, "Expected different number of edges"
     assert np.all([(x[0] not in nodes_without_edges) for x in edges_list]), \
         "Expected this node to have no edges"
     assert np.all([(x[1] not in nodes_without_edges) for x in edges_list]), \
         "Expected this node to have no edges"
+
+#%%
+def test_create_network_symmetric_remove_unconnected_nodes():
+    """Test if unconnected nodes are removed"""
+    cutoff = 0.7
+    scores = create_dummy_scores_symmetric()
+    msnet = SimilarityNetwork(score_cutoff=cutoff, keep_unconnected_nodes=False)
+    msnet.create_network(scores)
+
+    nodes_list = list(msnet.graph.nodes())
+    edges_list = list(msnet.graph.edges())
+    edges_list.sort()
+    nodes_with_edges = ['query_spec_0', 'ref_spec_4',
+                        'query_spec_2', 'ref_spec_3', 'query_spec_1']
+    assert len(nodes_list) == 5, "Expected different number of nodes"
+    assert np.all([(x in nodes_with_edges) for x in nodes_list]), \
+        "Expected this node to have edges"
 
 
 def test_create_network_symmetric_modified_cosine():
