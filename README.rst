@@ -179,8 +179,8 @@ Alternatively, here below is a small example of using matchms to calculate the C
         if reference is not query and score["matches"] >= 20:
             print(f"Reference scan id: {reference.metadata['scans']}")
             print(f"Query scan id: {query.metadata['scans']}")
-            print(f"Score: {score["score"]:.4f}")
-            print(f"Number of matching peaks: {score["matches"]}")
+            print(f"Score: {score['score']:.4f}")
+            print(f"Number of matching peaks: {score['matches']}")
             print("----------------------------")
 
 Glossary of terms
