@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Update README.rst to fix fstring-quote python example [#226](https://github.com/matchms/matchms/pull/226)
+- Reordered written metadata in MSP export for compatability with MS-FINDER & MS-DIAL
 
 ## [0.9.0] - 2021-05-06
 
