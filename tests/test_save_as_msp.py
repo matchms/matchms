@@ -113,7 +113,15 @@ def test_num_peaks_last_metadata_field(filename, data):
     save_as_msp(data, filename)
 
     with open(filename, mode='r') as file:
-        lines = file.readlines()
-        
+        content = file.readlines()
+        for idx, line in enumerate(content):
+            if line.startswith('NUM PEAKS: '):
+                num_peaks = int(line.split()[2])
+                peaks = content[idx + 1: idx + num_peaks + 1]
+                for peak in peaks:
+                    mz, intensity = peak.split()
+                    mz = float(mz)
+                    intensity = float(intensity)
 
-    assert lines is not None
+                    assert isinstance(mz, float)
+                    assert isinstance(intensity, float)

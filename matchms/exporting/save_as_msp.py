@@ -52,13 +52,19 @@ def write_spectrum(spectrum: Spectrum, outfile: IO):
 
 
 def write_peaks(peaks: Spikes, outfile: IO):
+    outfile.write('NUM PEAKS: %d\n' % len(peaks))
     for mz, intensity in zip(peaks.mz, peaks.intensities):
         outfile.write('%s\t%s\n' % (str(mz), str(intensity)))
 
 
 def write_metadata(metadata: dict, outfile: IO):
     for key, value in metadata.items():
-        outfile.write('%s: %s\n' % (key.upper(), str(value)))
+        if not is_num_peaks(key):
+            outfile.write('%s: %s\n' % (key.upper(), str(value)))
+
+
+def is_num_peaks(key: str) -> bool:
+    return key.lower().startswith("num peaks")
 
 
 def ensure_list(spectra) -> List[Spectrum]:
