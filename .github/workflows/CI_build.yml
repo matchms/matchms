@@ -260,8 +260,7 @@ jobs:
           # Install matchms without nlesc channel to prevent package to be installed from nlesc channel instead of wanted $BUILDDIR channel
           conda install \
             --channel $BUILDDIR \
-            --channel conda-forge \
-            --channel bioconda -v \
+            --channel conda-forge -v \
             matchms
       - name: List conda packages
         shell: bash -l {0}
