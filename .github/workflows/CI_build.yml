@@ -258,6 +258,7 @@ jobs:
           export BUILDDIR=$RUNNER_TEMP/matchms/_build/noarch/
           [ "$RUNNING_OS" = "Windows" ] && export BUILDDIR=$RUNNER_TEMP\\matchms\\_build\\noarch\\
           # Install matchms without nlesc channel to prevent package to be installed from nlesc channel instead of wanted $BUILDDIR channel
+          conda config --set channel_priority strict
           conda install \
             --channel $BUILDDIR \
             --channel conda-forge \
