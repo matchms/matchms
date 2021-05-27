@@ -262,7 +262,7 @@ jobs:
             --channel $BUILDDIR \
             --channel conda-forge \
             --channel bioconda \
-            --channel-priority -v \
+            --use-local -v \
             matchms
       - name: List conda packages
         shell: bash -l {0}
