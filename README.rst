@@ -30,7 +30,7 @@ F Huber, S. Verhoeven, C. Meijer, H. Spreeuw, E. M. Villanueva Castilla, C. Geng
    * - **Code quality checks**
      -
    * - Continuous integration
-     - |Anaconda Build| |Anaconda Publish|
+     - |CI Build|
    * - Documentation
      - |ReadTheDocs Badge|
    * - Code Quality
@@ -73,6 +73,10 @@ F Huber, S. Verhoeven, C. Meijer, H. Spreeuw, E. M. Villanueva Castilla, C. Geng
    :target: https://fair-software.eu
    :alt: Howfairis badge
 
+.. |CI Build| image:: https://github.com/matchms/matchms/actions/workflows/CI_build.yml/badge.svg
+    :alt: Continuous integration workflow
+    :target: https://github.com/matchms/matchms/actions/workflows/CI_build.yml
+
 .. |ReadTheDocs Badge| image:: https://readthedocs.org/projects/matchms/badge/?version=latest
     :alt: Documentation Status
     :scale: 100%
@@ -85,14 +89,6 @@ F Huber, S. Verhoeven, C. Meijer, H. Spreeuw, E. M. Villanueva Castilla, C. Geng
 .. |Sonarcloud Coverage Badge| image:: https://sonarcloud.io/api/project_badges/measure?project=matchms_matchms&metric=coverage
    :target: https://sonarcloud.io/component_measures?id=matchms_matchms&metric=Coverage&view=list
    :alt: Sonarcloud Coverage
-
-.. |Anaconda Build| image:: https://github.com/matchms/matchms/workflows/Anaconda%20Build/badge.svg
-   :target: https://github.com/matchms/matchms/actions?query=workflow%3A%22Anaconda%20Build%22
-   :alt: Anaconda Build
-
-.. |Anaconda Publish| image:: https://github.com/matchms/matchms/workflows/Anaconda%20Publish/badge.svg
-   :target: https://github.com/matchms/matchms/actions?query=workflow%3A%22Anaconda%20Publish%22
-   :alt: Anaconda Publish
 
 ***********************
 Documentation for users
@@ -233,9 +229,11 @@ To install matchms, do:
 
   git clone https://github.com/matchms/matchms.git
   cd matchms
-  conda env create --file conda/environment-dev.yml
+  conda env create matchms-dev
   conda activate matchms-dev
-  pip install --editable .
+  # Install rdkit using conda, rest of dependencies can be installed with pip
+  conda install -c conda-forge rdkit
+  pip install --editable .[dev]
 
 Run the linter with:
 
@@ -261,58 +259,10 @@ Run tests (including coverage) with:
 Conda package
 =============
 
-To build anaconda package locally, do:
+The conda packaging is handled by a [recipe at Bioconda](https://github.com/bioconda/bioconda-recipes/blob/master/recipes/matchms/meta.yaml).
 
-.. code-block:: console
-
-  conda deactivate
-  conda env create --file conda/environment-build.yml
-  conda activate matchms-build
-  BUILD_FOLDER=/tmp/matchms/_build
-  rm -rfv $BUILD_FOLDER;mkdir -p $BUILD_FOLDER
-  conda build --no-include-recipe -c bioconda -c conda-forge \
-  --croot $BUILD_FOLDER ./conda
-
-If successful, this will yield the built ``matchms`` conda package as
-``matchms-<version>*.tar.bz2`` in ``$BUILD_FOLDER/noarch/``. You can test if
-installation of this conda package works with:
-
-.. code-block:: console
-
-  # make a clean environment
-  conda deactivate
-  cd $(mktemp -d)
-  conda env create --name test python=3.7
-  conda activate test
-
-  conda install \
-    --channel bioconda \
-    --channel conda-forge \
-    --channel file://${CONDA_PREFIX}/noarch/ \
-    matchms
-
-To publish the package on anaconda cloud, do:
-
-.. code-block:: console
-
-  anaconda --token ${{ secrets.ANACONDA_TOKEN }} upload --user nlesc --force $BUILD_FOLDER/noarch/*.tar.bz2
-
-where ``secrets.ANACONDA_TOKEN`` is a token to be generated on the Anaconda Cloud website. This secret should be added to GitHub repository.
-
-
-To remove matchms package from the active environment:
-
-.. code-block:: console
-
-  conda remove matchms
-
-
-To remove matchms-build environment:
-
-.. code-block:: console
-
-  conda env remove --name matchms-build
-
+Publishing to PyPI will trigger the creation of a `pull request on the bioconda recipes repository <https://github.com/bioconda/bioconda-recipes/pulls>`_
+Once the PR is merged the new version of matchms will appear on `https://anaconda.org/bioconda/matchms <https://anaconda.org/bioconda/matchms>`_
 
 Flowchart
 =========
