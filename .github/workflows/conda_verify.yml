@@ -1,12 +1,16 @@
-name: Verify Bioconda Publish
+name: Conda verify
 
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        description: Matchms version to install, leave empty for latest
+        required: True
+        default: ''
 
 jobs:
-
   verify:
-    name: verify / python-${{ matrix.python-version }} / ${{ matrix.os }}
+    name: Verify matchms bioconda package on ${{ matrix.os }} / python-${{ matrix.python-version }}
     strategy:
       fail-fast: false
       matrix:
@@ -17,11 +21,12 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: "0"
-      - uses: conda-incubator/setup-miniconda@v2
+      - name: Create conda environment
+        uses: conda-incubator/setup-miniconda@v2
         with:
-          activate-environment: matchms-test
+          activate-environment: matchms-dev
           auto-update-conda: true
-          python-version: "3.7"
+          python-version: ${{ matrix.python-version }}
       - name: Show conda config
         shell: bash -l {0}
         run: |
@@ -29,21 +34,19 @@ jobs:
           conda list
           conda config --show-sources
           conda config --show
-      - name: Install the conda package from anaconda repository
+      - name: Install matchms from bioconda repository
         shell: bash -l {0}
         run: |
-          conda install --channel bioconda --channel conda-forge matchms
+          conda install --channel bioconda --channel conda-forge matchms ${{ github.event.inputs.version }}
       - name: List conda packages
         shell: bash -l {0}
         run: |
-          conda list
-      - name: Install dev dependencies to run the tests
+          conda list matchms
+      - name: Install test dependencies
         shell: bash -l {0}
         run: |
-          conda env update --name matchms-test --file conda/environment-dev.yml
-          conda info
-          conda list
-      - name: Run tests after installing the package
+          pip install pytest
+      - name: Run tests
         shell: bash -l {0}
         run: |
           export TESTDIR=$RUNNER_TEMP/matchms/_test
