@@ -19,7 +19,7 @@ def spectrum():
                     intensities=numpy.array([0.1, 0.2, 1.0, 0.3, 0.4], dtype="float"))
 
 
-@pytest.fixture(params=["rcx_gc-ei_ms_20201028_perylene.msp", "MoNA-export-GC-MS-first10.msp"])
+@pytest.fixture(params=["rcx_gc-ei_ms_20201028_perylene.msp", "MoNA-export-GC-MS-first10.msp", "Hydrogen_chloride.msp"])
 def data(request):
     module_root = os.path.join(os.path.dirname(__file__), "..")
     spectrums_file = os.path.join(module_root, "tests", request.param)
@@ -106,3 +106,22 @@ def save_and_reload_spectra(filename, spectra: List[Spectrum]):
     save_as_msp(spectra, filename)
     reloaded_spectra = list(load_from_msp(filename))
     return reloaded_spectra
+
+
+def test_num_peaks_last_metadata_field(filename, data):
+    """ Test to check whether the last line before the peaks is NUM PEAKS: ... """
+    save_as_msp(data, filename)
+
+    with open(filename, mode='r') as file:
+        content = file.readlines()
+        for idx, line in enumerate(content):
+            if line.startswith('NUM PEAKS: '):
+                num_peaks = int(line.split()[2])
+                peaks = content[idx + 1: idx + num_peaks + 1]
+                for peak in peaks:
+                    mz, intensity = peak.split()
+                    mz = float(mz)
+                    intensity = float(intensity)
+
+                    assert isinstance(mz, float)
+                    assert isinstance(intensity, float)
