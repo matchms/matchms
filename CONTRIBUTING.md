@@ -51,7 +51,9 @@ To create release you need write permission on the repository.
 1. Press draft a new release button
 1. Fill version, title and description field
 1. Press the Publish Release button
-1. Wait until new release is also on Bioconda (https://anaconda.org/bioconda/matchms) and then trigger `conda publish` workflow.
+1. Wait until [PyPi publish workflow](https://github.com/matchms/matchms/actions/workflows/CI_publish_pypi.yml) has completed
+1. Verify new release is on [PyPi](https://pypi.org/project/matchms/#history)
+1. Wait until new release is also on Bioconda (https://anaconda.org/bioconda/matchms) via a automaticly created PR on [bioconda recipes repo](https://github.com/bioconda/bioconda-recipes/pulls?q=is%3Apr+is%3Aopen+matchms)
+1. Test matchms from bioconda by manually running [Conda verify](https://github.com/matchms/matchms/actions/workflows/conda_verify.yml) workflow
 
-A GitHub action will run which will publish the new version to [anaconda](https://anaconda.org/nlesc/matchms) as well as to [pypi](https://pypi.org/project/matchms).
 Also a Zenodo entry will be made for the release with its own DOI.
