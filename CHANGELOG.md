@@ -9,8 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Correctly handle charge=0 entries in `add_parent_mass` filter [#236](https://github.com/matchms/matchms/pull/236)
+- Reordered written metadata in MSP export for compatability with MS-FINDER & MS-DIAL [#230](https://github.com/matchms/matchms/pull/230)
 - Update README.rst to fix fstring-quote python example [#226](https://github.com/matchms/matchms/pull/226)
-- Reordered written metadata in MSP export for compatability with MS-FINDER & MS-DIAL
 
 ## [0.9.0] - 2021-05-06
 

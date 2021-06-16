@@ -5,7 +5,7 @@ from matchms.filtering import add_parent_mass
 
 
 def test_add_parent_mass_pepmass_no_precursormz(capsys):
-    """Test if correct expection is returned."""
+    """Test if correct exception is returned."""
     mz = numpy.array([], dtype='float')
     intensities = numpy.array([], dtype='float')
     metadata = {"pepmass": (444.0, 10),
@@ -21,7 +21,7 @@ def test_add_parent_mass_pepmass_no_precursormz(capsys):
 
 
 def test_add_parent_mass_no_precursormz(capsys):
-    """Test if correct expection is returned."""
+    """Test if correct exception is returned."""
     mz = numpy.array([], dtype='float')
     intensities = numpy.array([], dtype='float')
     metadata = {"charge": -1}
@@ -33,6 +33,22 @@ def test_add_parent_mass_no_precursormz(capsys):
 
     assert spectrum.get("parent_mass") is None, "Expected no parent mass"
     assert "Missing precursor m/z to derive parent mass." in capsys.readouterr().out
+
+
+def test_add_parent_mass_precursormz_zero_charge(capsys):
+    """Test if correct exception is returned."""
+    mz = numpy.array([], dtype='float')
+    intensities = numpy.array([], dtype='float')
+    metadata = {"precursor_mz": 444.0,
+                "charge": 0}
+    spectrum_in = Spectrum(mz=mz,
+                           intensities=intensities,
+                           metadata=metadata)
+
+    spectrum = add_parent_mass(spectrum_in)
+
+    assert spectrum.get("parent_mass") is None, "Expected no parent mass"
+    assert "Not sufficient spectrum metadata to derive parent mass." in capsys.readouterr().out
 
 
 def test_add_parent_mass_precursormz(capsys):
