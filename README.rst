@@ -229,10 +229,11 @@ To install matchms, do:
 
   git clone https://github.com/matchms/matchms.git
   cd matchms
-  conda env create matchms-dev
+  conda create --name matchms-dev python=3.8
   conda activate matchms-dev
   # Install rdkit using conda, rest of dependencies can be installed with pip
   conda install -c conda-forge rdkit
+  python -m pip install --upgrade pip
   pip install --editable .[dev]
 
 Run the linter with:
