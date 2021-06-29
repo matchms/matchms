@@ -10,7 +10,6 @@ jobs:
   test_dev:
     name: test dev environment / python-${{ matrix.python-version }} / ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-    needs: first_check
     strategy:
       fail-fast: false
       matrix:
