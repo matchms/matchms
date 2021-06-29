@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Support for Python 3.9 [#240](https://github.com/matchms/matchms/issues/240)
+
 ## [0.9.1] - 2021-06-16
 
 ### Fixed
