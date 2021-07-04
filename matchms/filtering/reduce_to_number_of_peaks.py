@@ -26,6 +26,8 @@ def reduce_to_number_of_peaks(spectrum_in: SpectrumType, n_required: int = 1, n_
     """
     def _set_maximum_number_of_peaks_to_keep():
         parent_mass = spectrum.get("parent_mass", None)
+        if parent_mass is None:
+            parent_mass = spectrum.get("mz_precursor", None)
         if parent_mass and ratio_desired:
             n_desired_by_mass = int(ceil(ratio_desired * parent_mass))
             return min(max(n_required, n_desired_by_mass), n_max)
