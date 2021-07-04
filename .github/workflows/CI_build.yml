@@ -131,8 +131,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e .[dev]
       - name: Show pip list
+        shell: bash -l {0}
         run: pip list
       - name: Run tests
+        shell: bash -l {0}
         run: pytest
 
 
