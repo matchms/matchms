@@ -15,7 +15,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v1
         with:
-          python-version: 3.9
+          python-version: 3.8
       - name: Python info
         run: |
           which python
@@ -101,7 +101,7 @@ jobs:
         uses: conda-incubator/setup-miniconda@v2
         with:
           auto-update-conda: true
-          python-version: 3.9
+          python-version: 3.8
       - name: Show conda config
         shell: bash -l {0}
         run: |
