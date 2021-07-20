@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.2] - 2021-07-20
+
 ### Added
 
 - Support for Python 3.9 [#240](https://github.com/matchms/matchms/issues/240)
@@ -321,7 +323,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - This is the initial version of Spec2Vec from https://github.com/iomega/Spec2Vec
 
-[Unreleased]: https://github.com/matchms/matchms/compare/0.9.1...HEAD
+[Unreleased]: https://github.com/matchms/matchms/compare/0.9.2...HEAD
+[0.9.2]: https://github.com/matchms/matchms/compare/0.9.0...0.9.2
 [0.9.1]: https://github.com/matchms/matchms/compare/0.9.0...0.9.1
 [0.9.0]: https://github.com/matchms/matchms/compare/0.8.2...0.9.0
 [0.8.2]: https://github.com/matchms/matchms/compare/0.8.1...0.8.2
