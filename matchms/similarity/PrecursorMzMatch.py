@@ -53,7 +53,7 @@ class PrecursorMzMatch(BaseSimilarity):
     """
     # Set key characteristics as class attributes
     is_commutative = True
-    score_datatype = numpy.bool
+    score_datatype = bool
 
     def __init__(self, tolerance: float = 0.1, tolerance_type: str = "Dalton"):
         """
