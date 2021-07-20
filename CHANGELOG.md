@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Support for Python 3.9 [#240](https://github.com/matchms/matchms/issues/240)
 
+### Changed
+
+- Use `bool` instead of `numpy.bool` [#245](https://github.com/matchms/matchms/pull/245)
+
 ## [0.9.1] - 2021-06-16
 
 ### Fixed
