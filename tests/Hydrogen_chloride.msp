@@ -1,0 +1,11 @@
+NAME: Hydrogen chloride
+FORMULA: ClH
+MW: 36
+ID: 49
+NUM PEAKS: 4
+STDINCHI: InChI=1S/ClH/h1H
+SMILES: [H+].[Cl-]
+35.0	169.85
+36.0	999.0
+37.0	53.95
+38.0	323.71

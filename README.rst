@@ -3,7 +3,7 @@
    :align: left
    :alt: matchms
 
-Matchms is an open-source Python package to import, process, clean, and compare mass spectrometry data (MS/MS). It allows to implement and run an easy-to-follow, easy-to-reproduce workflow from raw mass spectra to pre- and post-processed spectral data. Spectral data can be imported from common formats such mzML, mzXML, msp, metabolomics-USI, MGF, or json (e.g. GNPS-syle json files). Matchms then provides filters for metadata cleaning and checking, as well as for basic peak filtering. Finally, matchms was build to import and apply different similarity measures to compare large amounts of spectra. This includes common Cosine scores, but can also easily be extended by custom measures.
+Matchms is an open-source Python package to import, process, clean, and compare mass spectrometry data (MS/MS). It allows to implement and run an easy-to-follow, easy-to-reproduce workflow from raw mass spectra to pre- and post-processed spectral data. Spectral data can be imported from common formats such mzML, mzXML, msp, metabolomics-USI, MGF, or json (e.g. GNPS-syle json files). Matchms then provides filters for metadata cleaning and checking, as well as for basic peak filtering. Finally, matchms was build to import and apply different similarity measures to compare large amounts of spectra. This includes common Cosine scores, but can also easily be extended by custom measures. One example for a spectrum similarity measure that was designed to work in matchms is `Spec2Vec <https://github.com/iomega/spec2vec>`_.
 
 If you use matchms in your research, please cite the following software paper:  
 
@@ -30,7 +30,7 @@ F Huber, S. Verhoeven, C. Meijer, H. Spreeuw, E. M. Villanueva Castilla, C. Geng
    * - **Code quality checks**
      -
    * - Continuous integration
-     - |Anaconda Build| |Anaconda Publish|
+     - |CI Build|
    * - Documentation
      - |ReadTheDocs Badge|
    * - Code Quality
@@ -45,8 +45,8 @@ F Huber, S. Verhoeven, C. Meijer, H. Spreeuw, E. M. Villanueva Castilla, C. Geng
    :target: https://github.com/matchms/matchms
    :alt: License Badge
 
-.. |Conda Badge| image:: https://anaconda.org/nlesc/matchms/badges/installer/conda.svg
-   :target: https://conda.anaconda.org/nlesc
+.. |Conda Badge| image:: https://anaconda.org/bioconda/matchms/badges/version.svg
+   :target: https://anaconda.org/bioconda/matchms
    :alt: Conda Badge
 
 .. |Pypi Badge| image:: https://img.shields.io/pypi/v/matchms?color=blue
@@ -73,6 +73,10 @@ F Huber, S. Verhoeven, C. Meijer, H. Spreeuw, E. M. Villanueva Castilla, C. Geng
    :target: https://fair-software.eu
    :alt: Howfairis badge
 
+.. |CI Build| image:: https://github.com/matchms/matchms/actions/workflows/CI_build.yml/badge.svg
+    :alt: Continuous integration workflow
+    :target: https://github.com/matchms/matchms/actions/workflows/CI_build.yml
+
 .. |ReadTheDocs Badge| image:: https://readthedocs.org/projects/matchms/badge/?version=latest
     :alt: Documentation Status
     :scale: 100%
@@ -86,14 +90,6 @@ F Huber, S. Verhoeven, C. Meijer, H. Spreeuw, E. M. Villanueva Castilla, C. Geng
    :target: https://sonarcloud.io/component_measures?id=matchms_matchms&metric=Coverage&view=list
    :alt: Sonarcloud Coverage
 
-.. |Anaconda Build| image:: https://github.com/matchms/matchms/workflows/Anaconda%20Build/badge.svg
-   :target: https://github.com/matchms/matchms/actions?query=workflow%3A%22Anaconda%20Build%22
-   :alt: Anaconda Build
-
-.. |Anaconda Publish| image:: https://github.com/matchms/matchms/workflows/Anaconda%20Publish/badge.svg
-   :target: https://github.com/matchms/matchms/actions?query=workflow%3A%22Anaconda%20Publish%22
-   :alt: Anaconda Publish
-
 ***********************
 Documentation for users
 ***********************
@@ -104,7 +100,7 @@ Installation
 
 Prerequisites:  
 
-- Python 3.7 or 3.8 
+- Python 3.7, 3.8 or 3.9
 - Anaconda (recommended)
 
 We recommend installing matchms from Anaconda Cloud with
@@ -114,7 +110,7 @@ We recommend installing matchms from Anaconda Cloud with
   # install matchms in a new virtual environment to avoid dependency clashes
   conda create --name matchms python=3.8
   conda activate matchms
-  conda install --channel nlesc --channel bioconda --channel conda-forge matchms
+  conda install --channel bioconda --channel conda-forge matchms
 
 Alternatively, matchms can also be installed using ``pip`` but users will then either have to install ``rdkit`` on their own or won't be able to use the entire functionality. Without ``rdkit`` installed several filter functions related to processing and cleaning chemical metadata will not run.
 To install matchms with ``pip`` simply run
@@ -122,6 +118,20 @@ To install matchms with ``pip`` simply run
 .. code-block:: console
 
   pip install matchms
+
+matchms universe -> additional functionalities
+==============================================
+
+Matchms functionalities can be complemented by additional packages.  
+To date we are aware of:
+
++ `Spec2Vec <https://github.com/iomega/spec2vec>`_ an alternative machine-learning spectral similarity score that can simply be installed by `pip install spec2vec` and be imported as `from spec2vec import Spec2Vec` following the same API as the scores in `matchms.similarity`.
+
++ `MS2DeepScore <https://github.com/matchms/ms2deepscore>`_ a supervised, deep-learning based spectral similarity score that can simply be installed by `pip install ms2deepscore` and be imported as `from ms2deepscore import MS2DeepScore` following the same API as the scores in `matchms.similarity`.
+
++ `matchmsextras <https://github.com/matchms/matchmsextras>`_ which contains additional functions to create networks based on spectral similarities, to run spectrum searchers against `PubChem`, or additional plotting methods.
+
+*(if you know of any other packages that are fully compatible with matchms, let us know!)*
 
 Introduction
 ============
@@ -165,8 +175,8 @@ Alternatively, here below is a small example of using matchms to calculate the C
         if reference is not query and score["matches"] >= 20:
             print(f"Reference scan id: {reference.metadata['scans']}")
             print(f"Query scan id: {query.metadata['scans']}")
-            print(f"Score: {score["score"]:.4f}")
-            print(f"Number of matching peaks: {score["matches"]}")
+            print(f"Score: {score['score']:.4f}")
+            print(f"Number of matching peaks: {score['matches']}")
             print("----------------------------")
 
 Glossary of terms
@@ -188,7 +198,7 @@ Glossary of terms
        in retrieving information associated with a certain molecule from a
        database.
    * - InChIKey / InChI key / :code:`INCHIKEY`
-     - An indentifier for molecules. For example, the InChI key for carbon
+     - An identifier for molecules. For example, the InChI key for carbon
        dioxide is :code:`InChIKey=CURLTUGMZLYLDI-UHFFFAOYSA-N` (yes, it
        includes the substring :code:`InChIKey=`).
    * - MGF File / Mascot Generic Format
@@ -219,9 +229,12 @@ To install matchms, do:
 
   git clone https://github.com/matchms/matchms.git
   cd matchms
-  conda env create --file conda/environment-dev.yml
+  conda create --name matchms-dev python=3.8
   conda activate matchms-dev
-  pip install --editable .
+  # Install rdkit using conda, rest of dependencies can be installed with pip
+  conda install -c conda-forge rdkit
+  python -m pip install --upgrade pip
+  pip install --editable .[dev]
 
 Run the linter with:
 
@@ -247,58 +260,10 @@ Run tests (including coverage) with:
 Conda package
 =============
 
-To build anaconda package locally, do:
+The conda packaging is handled by a `recipe at Bioconda <https://github.com/bioconda/bioconda-recipes/blob/master/recipes/matchms/meta.yaml>`_.
 
-.. code-block:: console
-
-  conda deactivate
-  conda env create --file conda/environment-build.yml
-  conda activate matchms-build
-  BUILD_FOLDER=/tmp/matchms/_build
-  rm -rfv $BUILD_FOLDER;mkdir -p $BUILD_FOLDER
-  conda build --numpy 1.18.1 --no-include-recipe -c bioconda -c conda-forge \
-  --croot $BUILD_FOLDER ./conda
-
-If successful, this will yield the built ``matchms`` conda package as
-``matchms-<version>*.tar.bz2`` in ``$BUILD_FOLDER/noarch/``. You can test if
-installation of this conda package works with:
-
-.. code-block:: console
-
-  # make a clean environment
-  conda deactivate
-  cd $(mktemp -d)
-  conda env create --name test python=3.7
-  conda activate test
-
-  conda install \
-    --channel bioconda \
-    --channel conda-forge \
-    --channel file://${CONDA_PREFIX}/noarch/ \
-    matchms
-
-To publish the package on anaconda cloud, do:
-
-.. code-block:: console
-
-  anaconda --token ${{ secrets.ANACONDA_TOKEN }} upload --user nlesc --force $BUILD_FOLDER/noarch/*.tar.bz2
-
-where ``secrets.ANACONDA_TOKEN`` is a token to be generated on the Anaconda Cloud website. This secret should be added to GitHub repository.
-
-
-To remove matchms package from the active environment:
-
-.. code-block:: console
-
-  conda remove matchms
-
-
-To remove matchms-build environment:
-
-.. code-block:: console
-
-  conda env remove --name matchms-build
-
+Publishing to PyPI will trigger the creation of a `pull request on the bioconda recipes repository <https://github.com/bioconda/bioconda-recipes/pulls?q=is%3Apr+is%3Aopen+matchms>`_
+Once the PR is merged the new version of matchms will appear on `https://anaconda.org/bioconda/matchms <https://anaconda.org/bioconda/matchms>`_
 
 Flowchart
 =========

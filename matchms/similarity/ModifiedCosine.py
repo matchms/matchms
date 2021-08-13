@@ -3,7 +3,6 @@ import numpy
 from matchms.typing import SpectrumType
 from .BaseSimilarity import BaseSimilarity
 from .spectrum_similarity_functions import collect_peak_pairs
-from .spectrum_similarity_functions import get_peaks_array
 from .spectrum_similarity_functions import score_best_matches
 
 
@@ -90,8 +89,15 @@ class ModifiedCosine(BaseSimilarity):
             zero_pairs = collect_peak_pairs(spec1, spec2, self.tolerance, shift=0.0,
                                             mz_power=self.mz_power,
                                             intensity_power=self.intensity_power)
-            message = "Precursor_mz missing. Apply 'add_precursor_mz' filter first."
-            assert reference.get("precursor_mz") and query.get("precursor_mz"), message
+            message_precursor_missing = \
+                "Precursor_mz missing. Apply 'add_precursor_mz' filter first."
+            assert reference.get("precursor_mz") \
+                   and query.get("precursor_mz"), message_precursor_missing
+            message_precursor_below_0 = "Expect precursor to be positive number." \
+                                        "Apply 'require_precursor_mz' first"
+            assert reference.get("precursor_mz") > 0 \
+                   and query.get("precursor_mz") > 0, message_precursor_below_0
+
             mass_shift = reference.get("precursor_mz") - query.get("precursor_mz")
             nonzero_pairs = collect_peak_pairs(spec1, spec2, self.tolerance, shift=mass_shift,
                                                mz_power=self.mz_power,
@@ -106,8 +112,8 @@ class ModifiedCosine(BaseSimilarity):
                 matching_pairs = matching_pairs[numpy.argsort(matching_pairs[:, 2])[::-1], :]
             return matching_pairs
 
-        spec1 = get_peaks_array(reference)
-        spec2 = get_peaks_array(query)
+        spec1 = reference.peaks.to_numpy
+        spec2 = query.peaks.to_numpy
         matching_pairs = get_matching_pairs()
         if matching_pairs.shape[0] == 0:
             return numpy.asarray((float(0), 0), dtype=self.score_datatype)

@@ -1,0 +1,57 @@
+name: Conda verify
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Matchms version to install, leave empty for latest
+        required: True
+        default: ''
+
+jobs:
+  verify:
+    name: Verify matchms bioconda package on ${{ matrix.os }} / python-${{ matrix.python-version }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ['ubuntu-latest', 'macos-latest', 'windows-latest']
+        python-version: ["3.7"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: "0"
+      - name: Create conda environment
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          activate-environment: matchms-dev
+          auto-update-conda: true
+          python-version: ${{ matrix.python-version }}
+      - name: Show conda config
+        shell: bash -l {0}
+        run: |
+          conda info
+          conda list
+          conda config --show-sources
+          conda config --show
+      - name: Install matchms from bioconda repository
+        shell: bash -l {0}
+        run: |
+          conda install --channel bioconda --channel conda-forge matchms ${{ github.event.inputs.version }}
+      - name: List conda packages
+        shell: bash -l {0}
+        run: |
+          conda list matchms
+      - name: Install test dependencies
+        shell: bash -l {0}
+        run: |
+          pip install pytest
+      - name: Run tests
+        shell: bash -l {0}
+        run: |
+          export TESTDIR=$RUNNER_TEMP/matchms/_test
+          [ "$RUNNING_OS" = "Windows" ] && export TESTDIR=$RUNNER_TEMP\\matchms\\_test\\
+          mkdir -p $TESTDIR
+          cp -iRv tests integration-tests $TESTDIR
+          cd $TESTDIR
+          pytest --ignore="tests/test_version_string_consistency.py"

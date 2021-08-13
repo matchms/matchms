@@ -127,11 +127,10 @@ class Spectrum:
 
             def make_stems():
                 """calculate where the stems of the spectrum peaks are going to be"""
-                x = numpy.empty([2, self.peaks.mz.size], dtype="float")
-                y = numpy.empty(x.shape)
-                for i, mz in enumerate(self.peaks.mz):
-                    x[0:2, i] = [mz, mz]
-                    y[0:2, i] = [0, self.peaks.intensities[i]]
+                x = numpy.zeros([2, self.peaks.mz.size], dtype="float")
+                y = numpy.zeros(x.shape)
+                x[:, :] = numpy.tile(self.peaks.mz, (2, 1))
+                y[1, :] = self.peaks.intensities
                 return x, y
 
             spectrum_ax.set_ylim(bottom=intensity_from, top=intensity_to)

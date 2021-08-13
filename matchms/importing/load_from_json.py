@@ -16,7 +16,7 @@ def load_from_json(filename: str) -> List[Spectrum]:
 
     .. code-block:: python
 
-        from matchs.importing import load_from_json
+        from matchms.importing import load_from_json
 
         file_json = "gnps_testdata.json"
         spectrums = load_from_json(file_json)

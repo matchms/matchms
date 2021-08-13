@@ -23,7 +23,7 @@ setup(
     author_email="generalization@esciencecenter.nl",
     url="https://github.com/matchms/matchms",
     packages=find_packages(exclude=['*tests*']),
-    include_package_data=True,
+    package_data={"matchms": ["data/*.csv"]},
     license="Apache Software License 2.0",
     zip_safe=False,
     keywords=[
@@ -41,7 +41,8 @@ setup(
         "Natural Language :: English",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8"
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9"
     ],
     test_suite="tests",
     python_requires='>=3.7',
@@ -49,6 +50,7 @@ setup(
         "deprecated",
         "lxml",
         "matplotlib",
+        "networkx",
         "numba >=0.47",
         "numpy",
         "pyteomics >=4.2",
@@ -65,5 +67,4 @@ setup(
                             "sphinxcontrib-apidoc",
                             "yapf",],
                     "chemistry": ["rdkit >=2020.03.1"]},
-    package_data={"matchms": ["data/*.csv"]},
 )
