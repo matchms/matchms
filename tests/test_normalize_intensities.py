@@ -1,48 +1,37 @@
 import numpy
-from matchms import Spectrum
-from matchms.filtering import add_losses
 from matchms.filtering import normalize_intensities
 
 
-def test_normalize_intensities():
-    """Test if peak intensities are normalized correctly."""
-    mz = numpy.array([10, 20, 30, 40], dtype='float')
-    intensities = numpy.array([0, 1, 10, 100], dtype='float')
-    spectrum_in = Spectrum(mz=mz, intensities=intensities)
+def test_square_root_intensities(spectrum_without_losses, mz, intensities):
+    """Test if peak intensities are square root correctly."""
 
-    spectrum = normalize_intensities(spectrum_in)
+    spectrum = normalize_intensities(spectrum_without_losses)
 
     assert max(spectrum.peaks.intensities) == 1.0, "Expected the spectrum to be scaled to 1.0."
     assert numpy.array_equal(spectrum.peaks.intensities, intensities/100), "Expected different intensities"
     assert numpy.array_equal(spectrum.peaks.mz, mz), "Expected different peak mz."
 
 
-def test_normalize_intensities_losses_present():
-    """Test if also losses (if present) are normalized correctly."""
-    mz = numpy.array([10, 20, 30, 40], dtype='float')
-    intensities = numpy.array([0, 1, 10, 100], dtype='float')
-    spectrum_in = Spectrum(mz=mz, intensities=intensities,
-                           metadata={"precursor_mz": 45.0})
+def test_square_root_intensities_losses_present(spectrum_with_losses, mz, intensities):
+    """Test if also losses (if present) are square root correctly."""
 
-    spectrum = add_losses(spectrum_in)
-    spectrum = normalize_intensities(spectrum)
+    spectrum = normalize_intensities(spectrum_with_losses)
+
     expected_loss_intensities = numpy.array([1., 0.1, 0.01, 0.], dtype='float')
 
     assert max(spectrum.peaks.intensities) == 1.0, "Expected the spectrum to be scaled to 1.0."
     assert numpy.array_equal(spectrum.peaks.intensities, intensities/100), "Expected different intensities"
     assert max(spectrum.losses.intensities) == 1.0, "Expected the losses to be scaled to 1.0."
-    assert numpy.all(spectrum.losses.intensities == expected_loss_intensities), "Expected different loss intensities"
+    assert numpy.array_equal(spectrum.losses.intensities, expected_loss_intensities), "Expected different loss intensities"
+    assert numpy.array_equal(spectrum.peaks.mz, mz), "Expected different peak mz."
 
 
-def test_normalize_intensities_empty_peaks():
+def test_normalize_intensities_empty_peaks(spectrum_without_peaks):
     """Test running filter with empty peaks spectrum."""
-    mz = numpy.array([], dtype='float')
-    intensities = numpy.array([], dtype='float')
-    spectrum_in = Spectrum(mz=mz, intensities=intensities)
 
-    spectrum = normalize_intensities(spectrum_in)
+    spectrum = normalize_intensities(spectrum_without_peaks)
 
-    assert spectrum == spectrum_in, "Spectrum should remain unchanged."
+    assert spectrum == spectrum_without_peaks, "Spectrum should remain unchanged."
 
 
 def test_normalize_intensities_empty_spectrum():

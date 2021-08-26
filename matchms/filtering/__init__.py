@@ -69,6 +69,7 @@ from .select_by_mz import select_by_mz
 from .select_by_relative_intensity import select_by_relative_intensity
 from .set_ionmode_na_when_missing import set_ionmode_na_when_missing
 from .SpeciesString import SpeciesString
+from .square_root_intensities import square_root_intensities
 
 
 __all__ = [
@@ -104,5 +105,6 @@ __all__ = [
     "select_by_mz",
     "select_by_relative_intensity",
     "set_ionmode_na_when_missing",
-    "SpeciesString"
+    "SpeciesString",
+    "square_root_intensities"
 ]
