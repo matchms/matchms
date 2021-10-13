@@ -55,7 +55,7 @@ def add_parent_mass(spectrum_in: SpectrumType, estimate_from_adduct: bool = True
         if parent_mass is None:
             print("Warning: charge is unknown, so assumed to be 1")
             precursor_mass = precursor_mz
-            parent_mass = precursor_mass - PROTONS_MASS
+            parent_mass = precursor_mass - PROTON_MASS
         
         spectrum.set("parent_mass", float(parent_mass))
     return spectrum
