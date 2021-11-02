@@ -36,11 +36,11 @@ def save_as_msp(spectra: List[Spectrum], filename: str):
         Provide filename to save spectrum(s).
     """
 
-    assert filename.endswith('.msp'), "File extension must be 'msp'."
+    assert filename.endswith(".msp"), "File extension must be 'msp'."
 
     spectra = ensure_list(spectra)
 
-    with open(filename, 'w') as outfile:
+    with open(filename, "w", encoding="utf-8") as outfile:
         for spectrum in spectra:
             write_spectrum(spectrum, outfile)
 
@@ -52,15 +52,15 @@ def write_spectrum(spectrum: Spectrum, outfile: IO):
 
 
 def write_peaks(peaks: Spikes, outfile: IO):
-    outfile.write('NUM PEAKS: %d\n' % len(peaks))
+    outfile.write(f"NUM PEAKS: {len(peaks)}\n")
     for mz, intensity in zip(peaks.mz, peaks.intensities):
-        outfile.write('%s\t%s\n' % (str(mz), str(intensity)))
+        outfile.write(f"{mz}\t{intensity}\n")
 
 
 def write_metadata(metadata: dict, outfile: IO):
     for key, value in metadata.items():
         if not is_num_peaks(key):
-            outfile.write('%s: %s\n' % (key.upper(), str(value)))
+            outfile.write(f"{key.upper()}: {value}\n")
 
 
 def is_num_peaks(key: str) -> bool:
