@@ -91,11 +91,11 @@ def test_cosine_hungarian_order_of_arguments():
     """Compare cosine scores for A,B versus B,A, which should give the same score."""
     spectrum_1 = Spectrum(mz=numpy.array([100, 200, 299, 300, 301, 500, 510], dtype="float"),
                           intensities=numpy.array([0.02, 0.02, 1.0, 0.2, 0.4, 0.04, 0.2], dtype="float"),
-                          metadata = {})
+                          metadata={})
 
     spectrum_2 = Spectrum(mz=numpy.array([100, 200, 300, 301, 500, 512], dtype="float"),
                           intensities=numpy.array([0.02, 0.02, 1.0, 0.2, 0.04, 0.2], dtype="float"),
-                          metadata = {})
+                          metadata={})
 
     cosine_hungarian = CosineHungarian(tolerance=2.0)
     score_1_2 = cosine_hungarian.pair(spectrum_1, spectrum_2)

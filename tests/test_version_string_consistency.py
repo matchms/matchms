@@ -9,7 +9,7 @@ def test_version_string_consistency_setup_cfg():
     repository_root = os.path.join(os.path.dirname(__file__), '..')
     fixture = os.path.join(repository_root, "setup.cfg")
 
-    with open(fixture, "r") as f:
+    with open(fixture, "r", encoding="utf-8") as f:
         contents = f.read()
 
     match = re.search(r"^current_version = (?P<semver>.*)$", contents, re.MULTILINE)
