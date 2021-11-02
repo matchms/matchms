@@ -7,7 +7,7 @@ def test_select_by_mz_no_parameters_1():
 
     mz = numpy.array([10, 20, 30, 40], dtype="float")
     intensities = numpy.array([1, 10, 100, 1000], dtype="float")
-    spectrum_in = Spectrum(mz=mz, intensities=intensities, metadata=dict())
+    spectrum_in = Spectrum(mz=mz, intensities=intensities, metadata = {})
 
     spectrum = select_by_mz(spectrum_in)
 

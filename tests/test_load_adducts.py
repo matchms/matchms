@@ -20,7 +20,7 @@ def test_load_adducts_dict():
 
 def test_convert_and_fill_dict():
     """Test if conversion is done right."""
-    test_dict = dict()
+    test_dict = {}
     test_dict["[M]+"] = {'ionmode': 'negative',
                          'charge': "n/a",
                          'mass_multiplier': "n/a",
