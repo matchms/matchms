@@ -1,11 +1,14 @@
-from typing import Generator
+from io import BytesIO
+from typing import Generator, Union
 import numpy
 from pyteomics.mgf import MGF
 from ..Spectrum import Spectrum
 
 
-def load_from_mgf(filename: str) -> Generator[Spectrum, None, None]:
+def load_from_mgf(source: Union[str, BytesIO]) -> Generator[Spectrum, None, None]:
     """Load spectrum(s) from mgf file.
+
+    source param accepts both a path to a mgf file or a bytesIO object from a preloaded MGF file
 
     Example:
 
@@ -18,7 +21,10 @@ def load_from_mgf(filename: str) -> Generator[Spectrum, None, None]:
 
     """
 
-    for pyteomics_spectrum in MGF(filename, convert_arrays=1):
+
+    mgf = MGF(source, convert_arrays=1)
+
+    for pyteomics_spectrum in mgf:
 
         metadata = pyteomics_spectrum.get("params", None)
         mz = pyteomics_spectrum["m/z array"]
