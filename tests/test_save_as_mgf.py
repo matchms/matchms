@@ -22,7 +22,7 @@ def test_save_as_mgf_single_spectrum():
         assert os.path.isfile(filename)
 
         # Test if content of mgf file is correct
-        with open(filename, "r") as f:
+        with open(filename, "r", encoding="utf-8") as f:
             mgf_content = f.readlines()
         assert mgf_content[0] == "BEGIN IONS\n"
         assert mgf_content[2] == "CHARGE=1-\n"
@@ -48,7 +48,7 @@ def test_save_as_mgf_spectrum_list():
         assert os.path.isfile(filename)
 
         # Test if content of mgf file is correct
-        with open(filename, "r") as f:
+        with open(filename, "r", encoding="utf-8") as f:
             mgf_content = f.readlines()
         assert mgf_content[5] == mgf_content[12] == "END IONS\n"
         assert mgf_content[1].split("=")[1] == "test1\n"
