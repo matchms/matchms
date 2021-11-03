@@ -88,6 +88,13 @@ def test_comparing_spectra_with_arrays():
     assert spectrum0 != spectrum1, "Expected spectra to not be equal"
 
 
+def test_spectrum_hash():
+    spectrum = Spectrum(mz=numpy.array([100.0, 101.0], dtype="float"),
+                        intensities=numpy.array([0.5, 1.0], dtype="float"),
+                        metadata={})
+    assert hash(spectrum) == 1636203104417195933, "Expected different spectrum hash."
+
+
 def test_spectrum_plot_same_peak_height():
     intensities_with_zero_variance = numpy.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], dtype="float")
     spectrum = _create_test_spectrum_with_intensities(intensities_with_zero_variance)
