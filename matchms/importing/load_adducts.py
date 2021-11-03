@@ -25,7 +25,7 @@ def load_adducts_dict() -> Dict[str, dict]:
 
     with open(known_adducts_file, newline='', encoding='utf-8-sig') as csvfile:
         reader = csv.DictReader(csvfile)
-        adducts_dict = dict()
+        adducts_dict = {}
         for row in reader:
             assert "adduct" in row
             adducts_dict[row["adduct"]] = {x[0]: x[1] for x in row.items() if x[0] != "adduct"}
@@ -42,7 +42,7 @@ def load_known_adduct_conversions() -> Dict[str, dict]:
 
     with open(adduct_conversions_file, newline='', encoding='utf-8-sig') as csvfile:
         reader = csv.DictReader(csvfile)
-        known_adduct_conversions = dict()
+        known_adduct_conversions = {}
         for row in reader:
             known_adduct_conversions[row['input_adduct']] = row['corrected_adduct']
 
@@ -66,7 +66,7 @@ def _convert_and_fill_dict(adduct_dict: Dict[str, dict]) -> Dict[str, dict]:
         except ValueError:
             return False
 
-    filled_dict = dict()
+    filled_dict = {}
     for adduct, values in adduct_dict.items():
         ionmode = values["ionmode"]
         charge = values["charge"]
