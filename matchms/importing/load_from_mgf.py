@@ -18,7 +18,7 @@ def load_from_mgf(source: Union[str, TextIO]) -> Generator[Spectrum, None, None]
         file_mgf = "pesticides.mgf"
         spectra_from_path = list(load_from_mgf(file_mgf))
 
-        // or you can read the file in your application
+        # Or you can read the file in your application
         with open(file_mgf, 'r') as spectra_file:
             spectra_from_file = list(load_from_mgf(spectra_file))
 
