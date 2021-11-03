@@ -32,8 +32,8 @@ def get_top_hits(scores: Scores, identifier_key: str = "spectrumid",
     assert search_by in ["queries", "references"], \
         "search_by must be 'queries' or 'references"
 
-    similars_idx = dict()
-    similars_scores = dict()
+    similars_idx = {}
+    similars_scores = {}
 
     if search_by == "queries":
         for i, spec in enumerate(scores.queries):

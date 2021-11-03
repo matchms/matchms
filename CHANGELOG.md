@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Code linting triggered by pylint update [#257](https://github.com/matchms/matchms/pull/257)
+
 ## [0.9.2] - 2021-07-20
 
 ### Added

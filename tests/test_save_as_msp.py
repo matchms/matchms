@@ -112,7 +112,7 @@ def test_num_peaks_last_metadata_field(filename, data):
     """ Test to check whether the last line before the peaks is NUM PEAKS: ... """
     save_as_msp(data, filename)
 
-    with open(filename, mode='r') as file:
+    with open(filename, mode='r', encoding="utf-8") as file:
         content = file.readlines()
         for idx, line in enumerate(content):
             if line.startswith('NUM PEAKS: '):

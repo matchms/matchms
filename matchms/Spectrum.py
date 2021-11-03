@@ -64,7 +64,7 @@ class Spectrum:
         self.peaks = Spikes(mz=mz, intensities=intensities)
         self.losses = None
         if metadata is None:
-            self.metadata = dict()
+            self.metadata = {}
         else:
             self.metadata = metadata
 
@@ -119,7 +119,7 @@ class Spectrum:
             counts, _ = numpy.histogram(self.peaks.intensities, bins=bin_edges)
             histogram_ax.set_ylim(bottom=intensity_from, top=intensity_to)
             pyplot.barh(bin_middles, counts, height=bin_widths, color="#047495")
-            pyplot.title("histogram (n_bins={0})".format(n_bins))
+            pyplot.title(f"histogram (n_bins={n_bins})")
             pyplot.xlabel("count")
 
         def plot_spectrum():

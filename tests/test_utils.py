@@ -1,4 +1,3 @@
-# pylint: disable=wildcard-import, method-hidden
 import sys
 from contextlib import nullcontext
 from importlib import reload

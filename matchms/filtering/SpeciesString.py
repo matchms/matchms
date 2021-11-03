@@ -13,7 +13,7 @@ class SpeciesString:
     def __str__(self):
         if self.cleaned == "":
             return ""
-        return "({0}): {1}".format(self.target, self.cleaned)
+        return f"({self.target}): {self.cleaned}"
 
     def clean(self):
 
