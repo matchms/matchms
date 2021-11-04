@@ -88,13 +88,22 @@ class Spectrum:
         return True
 
     def __hash__(self):
+        """Return a integer hash which is computed from both
+        metadata (see .metadata_hash() method) and spectrum peaks
+        (see .spectrum_hash() method)."""
         combined_hash = self.metadata_hash() + self.spectrum_hash()
         return int.from_bytes(bytearray(combined_hash, 'utf-8'), 'big')
 
     def spectrum_hash(self):
+        """Return a (truncated) sha256-based hash which is generated
+        based on the spectrum peaks (mz:intensity pairs).
+        Spectra with same peaks will results in same spectrum_hash."""
         return spectrum_hash(self.peaks)
 
     def metadata_hash(self):
+        """Return a (truncated) sha256-based hash which is generated
+        based on the spectrum metadata.
+        Spectra with same metadata results in same metadata_hash."""
         return metadata_hash(self.metadata)
 
     def clone(self):
