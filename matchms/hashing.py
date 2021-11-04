@@ -4,8 +4,8 @@ import hashlib
 import json
 
 
-def spectrum_hash(peaks, hash_length:int = 20,
-                  mz_precision:int = 5, intensity_precision:int = 2):
+def spectrum_hash(peaks, hash_length: int = 20,
+                  mz_precision: int = 5, intensity_precision: int = 2):
     """Compute hash from mz-intensity pairs of all peaks in spectrum.
     """
     mz_precision_factor = 10 ** mz_precision
@@ -19,13 +19,13 @@ def spectrum_hash(peaks, hash_length:int = 20,
 
     peak_list = [(format_mz(peak[0]), format_intensity(peak[1])) for peak in peaks.to_numpy]
     # Sort by increasing m/z and then by decreasing intensity
-    peak_list.sort(key = lambda x: (x[0], -x[1]))
+    peak_list.sort(key = lambda x: (x[0], - x[1]))
 
     encoded = " ".join(":".join(map(str, x)) for x in peak_list).encode("utf-8")
     return hashlib.sha256(encoded).hexdigest()[:hash_length]
 
 
-def metadata_hash(metadata:dict, hash_length:int = 20):
+def metadata_hash(metadata: dict, hash_length:int = 20):
     """Compute hash from metadata dictionary.
     """
     encoded = json.dumps(metadata, sort_keys=True).encode()
