@@ -109,13 +109,13 @@ def test_spectrum_hash_mz_sensitivity():
     spectrum1 = Spectrum(mz=mz,
                          intensities=intensities,
                          metadata={"pepmass": (444.0, 11),
-                                  "charge": -1})
+                                   "charge": -1})
     mz2 = mz.copy()
     mz2[0] += 0.00001
     spectrum2 = Spectrum(mz=mz2,
                          intensities=intensities,
                          metadata={"pepmass": (444.0, 11),
-                                  "charge": -1})
+                                   "charge": -1})
     assert hash(spectrum1) != hash(spectrum2), "Expected hashes to be different."
     assert spectrum1.metadata_hash() == spectrum2.metadata_hash(), \
         "Expected metadata hashes to be unchanged."
@@ -130,13 +130,13 @@ def test_spectrum_hash_intensity_sensitivity():
     spectrum1 = Spectrum(mz=mz,
                          intensities=intensities,
                          metadata={"pepmass": (444.0, 11),
-                                  "charge": -1})
+                                   "charge": -1})
     intensities2 = intensities.copy()
     intensities2[0] += 0.01
     spectrum2 = Spectrum(mz=mz,
                          intensities=intensities2,
                          metadata={"pepmass": (444.0, 11),
-                                  "charge": -1})
+                                   "charge": -1})
     assert hash(spectrum1) != hash(spectrum2), "Expected hashes to be different."
     assert spectrum1.metadata_hash() == spectrum2.metadata_hash(), \
         "Expected metadata hashes to be unchanged."
@@ -151,7 +151,7 @@ def test_spectrum_hash_metadata_sensitivity():
     spectrum1 = Spectrum(mz=mz,
                          intensities=intensities,
                          metadata={"pepmass": (444.0, 11),
-                                  "charge": -1})
+                                   "charge": -1})
     spectrum2 = spectrum1.clone()
     spectrum2.set("pepmass", (444.1, 11))
 
