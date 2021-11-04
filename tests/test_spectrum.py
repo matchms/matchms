@@ -89,10 +89,15 @@ def test_comparing_spectra_with_arrays():
 
 
 def test_spectrum_hash():
-    spectrum = Spectrum(mz=numpy.array([100.0, 101.0], dtype="float"),
-                        intensities=numpy.array([0.5, 1.0], dtype="float"),
-                        metadata={})
-    assert hash(spectrum) == 1636203104417195933, "Expected different spectrum hash."
+    mz = numpy.array([100.00003, 110.2, 200.581], dtype='float')
+    intensities = numpy.array([0.51, 1.0, 0.011], dtype='float')
+    spectrum = Spectrum(mz=mz,
+                        intensities=intensities,
+                        metadata={"pepmass": (444.0, 11),
+                                  "charge": -1})
+    assert hash(spectrum) == 1516465757675504211, "Expected different hash."
+    assert spectrum.metadata_hash() == "92c0464af949ae56627f", "Expected different metadata hash."
+    assert spectrum.spectrum_hash() == "c79de5a8b333f780c206", "Expected different metadata hash."
 
 
 def test_spectrum_plot_same_peak_height():

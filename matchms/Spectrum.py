@@ -1,7 +1,8 @@
 from typing import Optional
-import hashlib
 import numpy
 from matplotlib import pyplot
+from .hashing import metadata_hash
+from .hashing import spectrum_hash
 from .Spikes import Spikes
 
 
@@ -87,7 +88,14 @@ class Spectrum:
         return True
 
     def __hash__(self):
+        combined_hash = self.metadata_hash() + self.spectrum_hash()
+        return int.from_bytes(bytearray(combined_hash, 'utf-8'), 'big')
+
+    def spectrum_hash(self):
         return spectrum_hash(self.peaks)
+
+    def metadata_hash(self):
+        return metadata_hash(self.metadata)
 
     def clone(self):
         """Return a deepcopy of the spectrum instance."""
@@ -207,31 +215,3 @@ class Spectrum:
     @peaks.setter
     def peaks(self, value: Spikes):
         self._peaks = value
-
-
-def spectrum_hash(peaks, hash_length:int = 20):
-    """Compute hash from mz-intensity pairs of all peaks in spectrum.
-    """
-    EPS_CORRECTION = 1.0e-7
-
-    MZ_PRECISION = 5
-    MZ_PRECISION_FACTOR = 10**MZ_PRECISION
-
-    INTENSITY_PRECISION = 2
-    INTENSITY_PRECISION_FACTOR = 10**INTENSITY_PRECISION
-
-    def format_mz(mz):
-        return int((mz + EPS_CORRECTION) * MZ_PRECISION_FACTOR)
-
-    def format_intensity(intensity):
-        return int((intensity + EPS_CORRECTION) * INTENSITY_PRECISION_FACTOR)
-
-    # Format m/z and intensity
-    s = [(format_mz(peak[0]), format_intensity(peak[1])) for peak in peaks.to_numpy]
-
-    # Sort by increasing m/z and then by decreasing intensity
-    s.sort(key = lambda x: (x[0], -x[1]))
-
-    s = " ".join(":".join(map(str, x)) for x in s).encode("utf-8")
-    hash_sha256_truncated = hashlib.sha256(s).hexdigest()[:hash_length]
-    return int.from_bytes(bytearray(hash_sha256_truncated, 'utf-8'), 'big')
