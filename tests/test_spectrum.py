@@ -96,8 +96,10 @@ def test_spectrum_hash():
                         metadata={"pepmass": (444.0, 11),
                                   "charge": -1})
     assert hash(spectrum) == 1516465757675504211, "Expected different hash."
-    assert spectrum.metadata_hash() == "92c0464af949ae56627f", "Expected different metadata hash."
-    assert spectrum.spectrum_hash() == "c79de5a8b333f780c206", "Expected different metadata hash."
+    assert spectrum.metadata_hash() == "92c0464af949ae56627f", \
+        "Expected different metadata hash."
+    assert spectrum.spectrum_hash() == "c79de5a8b333f780c206", \
+        "Expected different spectrum hash."
 
 
 def test_spectrum_hash_mz_sensitivity():
@@ -118,7 +120,7 @@ def test_spectrum_hash_mz_sensitivity():
     assert spectrum1.metadata_hash() == spectrum2.metadata_hash(), \
         "Expected metadata hashes to be unchanged."
     assert spectrum1.spectrum_hash() != spectrum2.spectrum_hash(), \
-        "Expected hashes to be different."
+        "Expected spectrum hashes to be different."
 
 
 def test_spectrum_hash_intensity_sensitivity():
