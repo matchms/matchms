@@ -7,6 +7,7 @@ import json
 def spectrum_hash(peaks, hash_length: int = 20,
                   mz_precision: int = 5, intensity_precision: int = 2):
     """Compute hash from mz-intensity pairs of all peaks in spectrum.
+    Method is inspired by SPLASH (doi:10.1038/nbt.3689).
     """
     mz_precision_factor = 10 ** mz_precision
     intensity_precision_factor = 10 ** intensity_precision
