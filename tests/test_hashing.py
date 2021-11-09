@@ -12,7 +12,6 @@ def spectrum():
                     metadata={"precursor_mz": 505.0})
 
 
-
 def test_spectrum_hash(spectrum):
     generated_hash = spectrum_hash(spectrum.peaks)
     assert len(generated_hash) == 20, "Expected hash of length 20."
@@ -34,7 +33,7 @@ def test_spectrum_hash_changed_mz_precision(spectrum):
                          metadata={"precursor_mz": 505.0})
     generated_hash_1a = spectrum_hash(spectrum.peaks,
                                       mz_precision=1)
-    
+
     generated_hash_1b = spectrum_hash(spectrum2.peaks,
                                       mz_precision=1)
     assert generated_hash_1a == generated_hash_1b, \
@@ -42,7 +41,7 @@ def test_spectrum_hash_changed_mz_precision(spectrum):
     # mz_precision = 2
     generated_hash_1a = spectrum_hash(spectrum.peaks,
                                       mz_precision=2)
-    
+
     generated_hash_1b = spectrum_hash(spectrum2.peaks,
                                       mz_precision=2)
     assert generated_hash_1a != generated_hash_1b, \
