@@ -2,9 +2,10 @@
 """
 import hashlib
 import json
+from .Spikes import Spikes
 
 
-def spectrum_hash(peaks, hash_length: int = 20,
+def spectrum_hash(peaks: Spikes, hash_length: int = 20,
                   mz_precision: int = 5, intensity_precision: int = 2):
     """Compute hash from mz-intensity pairs of all peaks in spectrum.
     Method is inspired by SPLASH (doi:10.1038/nbt.3689).
@@ -13,10 +14,10 @@ def spectrum_hash(peaks, hash_length: int = 20,
     intensity_precision_factor = 10 ** intensity_precision
 
     def format_mz(mz):
-        return int((mz) * mz_precision_factor)
+        return int(mz * mz_precision_factor)
 
     def format_intensity(intensity):
-        return int((intensity) * intensity_precision_factor)
+        return int(intensity * intensity_precision_factor)
 
     peak_list = [(format_mz(peak[0]), format_intensity(peak[1])) for peak in peaks.to_numpy]
     # Sort by increasing m/z and then by decreasing intensity
