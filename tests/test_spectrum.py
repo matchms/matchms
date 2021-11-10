@@ -88,6 +88,80 @@ def test_comparing_spectra_with_arrays():
     assert spectrum0 != spectrum1, "Expected spectra to not be equal"
 
 
+def test_spectrum_hash():
+    mz = numpy.array([100.00003, 110.2, 200.581], dtype='float')
+    intensities = numpy.array([0.51, 1.0, 0.011], dtype='float')
+    spectrum = Spectrum(mz=mz,
+                        intensities=intensities,
+                        metadata={"pepmass": (444.0, 11),
+                                  "charge": -1})
+    assert hash(spectrum) == 1516465757675504211, "Expected different hash."
+    assert spectrum.metadata_hash() == "92c0464af949ae56627f", \
+        "Expected different metadata hash."
+    assert spectrum.spectrum_hash() == "c79de5a8b333f780c206", \
+        "Expected different spectrum hash."
+
+
+def test_spectrum_hash_mz_sensitivity():
+    """Test is changes indeed lead to different hashes as expected."""
+    mz = numpy.array([100.00003, 110.2, 200.581], dtype='float')
+    intensities = numpy.array([0.51, 1.0, 0.011], dtype='float')
+    spectrum1 = Spectrum(mz=mz,
+                         intensities=intensities,
+                         metadata={"pepmass": (444.0, 11),
+                                   "charge": -1})
+    mz2 = mz.copy()
+    mz2[0] += 0.00001
+    spectrum2 = Spectrum(mz=mz2,
+                         intensities=intensities,
+                         metadata={"pepmass": (444.0, 11),
+                                   "charge": -1})
+    assert hash(spectrum1) != hash(spectrum2), "Expected hashes to be different."
+    assert spectrum1.metadata_hash() == spectrum2.metadata_hash(), \
+        "Expected metadata hashes to be unchanged."
+    assert spectrum1.spectrum_hash() != spectrum2.spectrum_hash(), \
+        "Expected spectrum hashes to be different."
+
+
+def test_spectrum_hash_intensity_sensitivity():
+    """Test is changes indeed lead to different hashes as expected."""
+    mz = numpy.array([100.00003, 110.2, 200.581], dtype='float')
+    intensities = numpy.array([0.51, 1.0, 0.011], dtype='float')
+    spectrum1 = Spectrum(mz=mz,
+                         intensities=intensities,
+                         metadata={"pepmass": (444.0, 11),
+                                   "charge": -1})
+    intensities2 = intensities.copy()
+    intensities2[0] += 0.01
+    spectrum2 = Spectrum(mz=mz,
+                         intensities=intensities2,
+                         metadata={"pepmass": (444.0, 11),
+                                   "charge": -1})
+    assert hash(spectrum1) != hash(spectrum2), "Expected hashes to be different."
+    assert spectrum1.metadata_hash() == spectrum2.metadata_hash(), \
+        "Expected metadata hashes to be unchanged."
+    assert spectrum1.spectrum_hash() != spectrum2.spectrum_hash(), \
+        "Expected hashes to be different."
+
+
+def test_spectrum_hash_metadata_sensitivity():
+    """Test is changes indeed lead to different hashes as expected."""
+    mz = numpy.array([100.00003, 110.2, 200.581], dtype='float')
+    intensities = numpy.array([0.51, 1.0, 0.011], dtype='float')
+    spectrum1 = Spectrum(mz=mz,
+                         intensities=intensities,
+                         metadata={"pepmass": (444.0, 11),
+                                   "charge": -1})
+    spectrum2 = spectrum1.clone()
+    spectrum2.set("pepmass", (444.1, 11))
+
+    assert hash(spectrum1) != hash(spectrum2), "Expected hashes to be different."
+    assert spectrum1.metadata_hash() != spectrum2.metadata_hash(), \
+        "Expected metadata hashes to be different."
+    assert spectrum1.spectrum_hash() == spectrum2.spectrum_hash(), \
+        "Expected hashes to be unchanged."
+
+
 def test_spectrum_plot_same_peak_height():
     intensities_with_zero_variance = numpy.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], dtype="float")
     spectrum = _create_test_spectrum_with_intensities(intensities_with_zero_variance)
