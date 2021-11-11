@@ -9,7 +9,8 @@ from ..Spectrum import Spectrum
 def load_from_mgf(source: Union[str, TextIO]) -> Generator[Spectrum, None, None]:
     """Load spectrum(s) from mgf file.
 
-    source param accepts both a path to a mgf file or a file-like object from a preloaded MGF file
+    This function will create ~matchms.Spectrum for every spectrum in the given
+    .mgf file (or the file-like object).
 
     Examples:
 
@@ -24,6 +25,11 @@ def load_from_mgf(source: Union[str, TextIO]) -> Generator[Spectrum, None, None]
         with open(file_mgf, 'r') as spectra_file:
             spectra_from_file = list(load_from_mgf(spectra_file))
 
+    Parameters
+    ----------
+    source:
+        Accepts both filename (with path) for .mgf file or a file-like
+        object from a preloaded MGF file.
     """
 
     for pyteomics_spectrum in MGF(source, convert_arrays=1):
