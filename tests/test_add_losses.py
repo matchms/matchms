@@ -1,6 +1,5 @@
 import numpy
 import pytest
-from matchms import Spectrum
 from matchms.filtering import add_losses
 from .builder_Spectrum import SpectrumBuilder
 
@@ -35,7 +34,7 @@ def test_add_losses_without_precursor_mz_parameterized(mz, intensities):
 
 def test_add_losses_with_precursor_mz_wrong_type():
     """Test if correct assert error is raised for precursor-mz as string."""
-    mz=numpy.array([100, 150, 200, 300], dtype="float")
+    mz = numpy.array([100, 150, 200, 300], dtype="float")
     intensities = numpy.array([700, 200, 100, 1000], "float")
     metadata = {"precursor_mz": "445.0"}
     spectrum_in = SpectrumBuilder().with_mz(mz).with_intensities(
@@ -47,14 +46,8 @@ def test_add_losses_with_precursor_mz_wrong_type():
     assert "Expected 'precursor_mz' to be a scalar number." in str(msg.value)
 
 
-
 def test_add_losses_with_input_none():
     """Test if input spectrum is None."""
     spectrum_in = None
     spectrum = add_losses(spectrum_in)
     assert spectrum is None
-
-
-
-
-

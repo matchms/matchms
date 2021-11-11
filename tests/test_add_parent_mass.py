@@ -1,6 +1,5 @@
 import numpy
 import pytest
-from matchms import Spectrum
 from matchms.filtering import add_parent_mass
 from .builder_Spectrum import SpectrumBuilder
 

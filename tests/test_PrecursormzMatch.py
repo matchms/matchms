@@ -1,6 +1,5 @@
 import numpy
 import pytest
-from matchms import Spectrum
 from matchms.similarity import PrecursorMzMatch
 from matchms.similarity.PrecursorMzMatch import precursormz_scores
 from matchms.similarity.PrecursorMzMatch import precursormz_scores_ppm

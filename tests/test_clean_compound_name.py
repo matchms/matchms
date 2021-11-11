@@ -1,6 +1,4 @@
-import numpy
 import pytest
-from matchms import Spectrum
 from matchms.filtering import clean_compound_name
 from .builder_Spectrum import SpectrumBuilder
 
