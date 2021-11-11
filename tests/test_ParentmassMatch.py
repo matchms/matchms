@@ -1,6 +1,5 @@
 import numpy
 import pytest
-from matchms import Spectrum
 from matchms.similarity import ParentMassMatch
 from matchms.similarity.ParentMassMatch import parentmass_scores
 from matchms.similarity.ParentMassMatch import parentmass_scores_symmetric
