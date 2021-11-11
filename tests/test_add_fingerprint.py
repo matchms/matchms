@@ -2,40 +2,19 @@ import numpy
 import pytest
 from matchms import Spectrum
 from matchms.filtering import add_fingerprint
+from .builder_Spectrum import SpectrumBuilder
 
 
-def test_add_fingerprint_from_smiles():
-    """Test if fingerprint it generated correctly."""
+@pytest.mark.parametrize('metadata, expected', [
+    [{"smiles": "[C+]#C[O-]"}, numpy.array([0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0])],
+    [{"inchi": "InChI=1S/C2O/c1-2-3"}, numpy.array([0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0])],
+    [{}, None]
+])
+def test_add_fingerprint(metadata, expected):
     pytest.importorskip("rdkit")
-    spectrum_in = Spectrum(mz=numpy.array([], dtype="float"),
-                           intensities=numpy.array([], dtype="float"),
-                           metadata={"smiles": "[C+]#C[O-]"})
-
+    spectrum_in = SpectrumBuilder().with_metadata(metadata).build()
     spectrum = add_fingerprint(spectrum_in, nbits=16)
-    expected_fingerprint = numpy.array([0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0])
-    assert numpy.all(spectrum.get("fingerprint") == expected_fingerprint), "Expected different fingerprint."
-
-
-def test_add_fingerprint_from_inchi():
-    """Test if fingerprint it generated correctly."""
-    pytest.importorskip("rdkit")
-    spectrum_in = Spectrum(mz=numpy.array([], dtype="float"),
-                           intensities=numpy.array([], dtype="float"),
-                           metadata={"inchi": "InChI=1S/C2O/c1-2-3"})
-
-    spectrum = add_fingerprint(spectrum_in, nbits=16)
-    expected_fingerprint = numpy.array([0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0])
-    assert numpy.all(spectrum.get("fingerprint") == expected_fingerprint), "Expected different fingerprint."
-
-
-def test_add_fingerprint_no_smiles_no_inchi():
-    """Test if fingerprint it generated correctly."""
-    spectrum_in = Spectrum(mz=numpy.array([], dtype="float"),
-                           intensities=numpy.array([], dtype="float"),
-                           metadata={})
-
-    spectrum = add_fingerprint(spectrum_in)
-    assert spectrum.get("fingerprint", None) is None, "Expected None."
+    assert numpy.all(spectrum.get("fingerprint") == expected), "Expected different fingerprint."
 
 
 def test_add_fingerprint_empty_spectrum():

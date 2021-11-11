@@ -4,47 +4,25 @@ from matchms import Spectrum
 from matchms.similarity import ParentMassMatch
 from matchms.similarity.ParentMassMatch import parentmass_scores
 from matchms.similarity.ParentMassMatch import parentmass_scores_symmetric
+from .builder_Spectrum import SpectrumBuilder, spectra_factory
 
 
-def test_parentmass_match():
-    "Test with default tolerance."
-    spectrum_1 = Spectrum(mz=numpy.array([], dtype="float"),
-                          intensities=numpy.array([], dtype="float"),
-                          metadata={"parent_mass": 100.0})
-
-    spectrum_2 = Spectrum(mz=numpy.array([], dtype="float"),
-                          intensities=numpy.array([], dtype="float"),
-                          metadata={"parent_mass": 101.0})
-
-    similarity_score = ParentMassMatch()
-    score = similarity_score.pair(spectrum_1, spectrum_2)
-    assert not score, "Expected different score."
-
-
-def test_parentmass_match_tolerance2():
-    "Test with tolerance > difference."
-    spectrum_1 = Spectrum(mz=numpy.array([], dtype="float"),
-                          intensities=numpy.array([], dtype="float"),
-                          metadata={"parent_mass": 100.0})
-
-    spectrum_2 = Spectrum(mz=numpy.array([], dtype="float"),
-                          intensities=numpy.array([], dtype="float"),
-                          metadata={"parent_mass": 101.0})
-
-    similarity_score = ParentMassMatch(tolerance=2.0)
-    score = similarity_score.pair(spectrum_1, spectrum_2)
-    assert score, "Expected different score."
+@pytest.mark.parametrize('parent_mass, tolerance, expected', [
+    [[100.0, 101.0], 0.1, False],
+    [[100.0, 101.0], 2.0, True]
+])
+def test_parentmass_match_parameterized(parent_mass, tolerance, expected):
+    s0, s1 = spectra_factory('parent_mass', parent_mass)
+    similarity_score = ParentMassMatch(tolerance=tolerance)
+    scores = similarity_score.pair(s0, s1)
+    assert numpy.all(scores == numpy.array(expected)), "Expected different scores."
 
 
 def test_parentmass_match_missing_parentmass():
     "Test with missing parentmass."
-    spectrum_1 = Spectrum(mz=numpy.array([], dtype="float"),
-                          intensities=numpy.array([], dtype="float"),
-                          metadata={"parent_mass": 100.0})
-
-    spectrum_2 = Spectrum(mz=numpy.array([], dtype="float"),
-                          intensities=numpy.array([], dtype="float"),
-                          metadata={})
+    builder = SpectrumBuilder()
+    spectrum_1 = builder.with_metadata({"parent_mass": 100.0}).build()
+    spectrum_2 = builder.with_metadata({}).build()
 
     similarity_score = ParentMassMatch(tolerance=2.0)
 
@@ -55,73 +33,24 @@ def test_parentmass_match_missing_parentmass():
     assert expected_message_part in str(msg.value), "Expected particular error message."
 
 
-def test_parentmass_match_array():
-    "Test with array and default tolerance."
-    spectrum_1 = Spectrum(mz=numpy.array([], dtype="float"),
-                          intensities=numpy.array([], dtype="float"),
-                          metadata={"parent_mass": 100.0})
-
-    spectrum_2 = Spectrum(mz=numpy.array([], dtype="float"),
-                          intensities=numpy.array([], dtype="float"),
-                          metadata={"parent_mass": 101.0})
-
-    spectrum_a = Spectrum(mz=numpy.array([], dtype="float"),
-                          intensities=numpy.array([], dtype="float"),
-                          metadata={"parent_mass": 99.0})
-
-    spectrum_b = Spectrum(mz=numpy.array([], dtype="float"),
-                          intensities=numpy.array([], dtype="float"),
-                          metadata={"parent_mass": 98.0})
-
-    similarity_score = ParentMassMatch()
-    scores = similarity_score.matrix([spectrum_1, spectrum_2],
-                                     [spectrum_a, spectrum_b])
-    assert numpy.all(scores == numpy.array([[False, False],
-                                            [False, False]])), "Expected different scores."
-
-
-def test_parentmass_match_tolerance2_array():
-    """Test with array and tolerance=2."""
-    spectrum_1 = Spectrum(mz=numpy.array([], dtype="float"),
-                          intensities=numpy.array([], dtype="float"),
-                          metadata={"parent_mass": 100.0})
-
-    spectrum_2 = Spectrum(mz=numpy.array([], dtype="float"),
-                          intensities=numpy.array([], dtype="float"),
-                          metadata={"parent_mass": 101.0})
-
-    spectrum_a = Spectrum(mz=numpy.array([], dtype="float"),
-                          intensities=numpy.array([], dtype="float"),
-                          metadata={"parent_mass": 99.0})
-
-    spectrum_b = Spectrum(mz=numpy.array([], dtype="float"),
-                          intensities=numpy.array([], dtype="float"),
-                          metadata={"parent_mass": 98.0})
-
-    similarity_score = ParentMassMatch(tolerance=2.0)
-    scores = similarity_score.matrix([spectrum_1, spectrum_2],
-                                     [spectrum_a, spectrum_b])
-    assert numpy.all(scores == numpy.array([[True, True],
-                                            [True, False]])), "Expected different scores."
+@pytest.mark.parametrize('parent_mass, tolerance, expected', [
+    [[100.0, 101.0, 99.0, 98.0], 0.1, [[False, False], [False, False]]],
+    [[100.0, 101.0, 99.0, 98.0], 2.0, [[True, True], [True, False]]]
+])
+def test_parentmass_match_array_parameterized(parent_mass, tolerance, expected):
+    s0, s1, s2, s3 = spectra_factory('parent_mass', parent_mass)
+    similarity_score = ParentMassMatch(tolerance=tolerance)
+    scores = similarity_score.matrix([s0, s1], [s2, s3])
+    assert numpy.all(scores == numpy.array(expected)), "Expected different scores."
 
 
 def test_parentmass_match_array_symmetric():
     """Test with array and is_symmetric=True."""
-    spectrum_1 = Spectrum(mz=numpy.array([], dtype="float"),
-                          intensities=numpy.array([], dtype="float"),
-                          metadata={"parent_mass": 100.0})
-
-    spectrum_2 = Spectrum(mz=numpy.array([], dtype="float"),
-                          intensities=numpy.array([], dtype="float"),
-                          metadata={"parent_mass": 101.0})
-
-    spectrum_3 = Spectrum(mz=numpy.array([], dtype="float"),
-                          intensities=numpy.array([], dtype="float"),
-                          metadata={"parent_mass": 99.95})
-
-    spectrum_4 = Spectrum(mz=numpy.array([], dtype="float"),
-                          intensities=numpy.array([], dtype="float"),
-                          metadata={"parent_mass": 98.0})
+    builder = SpectrumBuilder()
+    spectrum_1 = builder.with_metadata({"parent_mass": 100.0}).build()
+    spectrum_2 = builder.with_metadata({"parent_mass": 101.0}).build()
+    spectrum_3 = builder.with_metadata({"parent_mass": 99.95}).build()
+    spectrum_4 = builder.with_metadata({"parent_mass": 98.0}).build()
 
     spectrums = [spectrum_1, spectrum_2, spectrum_3, spectrum_4]
     similarity_score = ParentMassMatch()

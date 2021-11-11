@@ -3,13 +3,17 @@ import pytest
 from matchms import Spectrum
 from matchms.hashing import metadata_hash
 from matchms.hashing import spectrum_hash
+from .builder_Spectrum import SpectrumBuilder
 
 
 @pytest.fixture
-def spectrum():
-    return Spectrum(mz=numpy.array([100, 200, 290, 490, 490.5], dtype="float"),
-                    intensities=numpy.array([0.1, 0.11, 1.0, 0.3, 0.4], dtype="float"),
-                    metadata={"precursor_mz": 505.0})
+def spectrum() -> Spectrum:
+    mz = numpy.array([100, 200, 290, 490, 490.5], dtype="float")
+    intensities = numpy.array([0.1, 0.11, 1.0, 0.3, 0.4], dtype="float")
+    metadata = {"precursor_mz": 505.0}
+    builder = SpectrumBuilder().with_mz(mz).with_intensities(
+        intensities).with_metadata(metadata)
+    return builder.build()
 
 
 def test_spectrum_hash(spectrum):
@@ -27,10 +31,11 @@ def test_spectrum_hash_changed_length(spectrum):
         "Expected different hash"
 
 
-def test_spectrum_hash_changed_mz_precision(spectrum):
-    spectrum2 = Spectrum(mz=numpy.array([100.01, 200, 290, 490, 490.5], dtype="float"),
-                         intensities=numpy.array([0.1, 0.11, 1.0, 0.3, 0.4], dtype="float"),
-                         metadata={"precursor_mz": 505.0})
+def test_spectrum_hash_changed_mz_precision(spectrum: Spectrum):
+    mz2 = spectrum.peaks.mz
+    mz2[0] += 0.01
+    spectrum2 = SpectrumBuilder().from_spectrum(spectrum).with_mz(mz2).build()
+
     generated_hash_1a = spectrum_hash(spectrum.peaks,
                                       mz_precision=1)
 
