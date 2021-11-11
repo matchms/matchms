@@ -3,7 +3,8 @@ import pytest
 from matchms.similarity import ParentMassMatch
 from matchms.similarity.ParentMassMatch import parentmass_scores
 from matchms.similarity.ParentMassMatch import parentmass_scores_symmetric
-from .builder_Spectrum import SpectrumBuilder, spectra_factory
+from .builder_Spectrum import SpectrumBuilder
+from .builder_Spectrum import spectra_factory
 
 
 @pytest.mark.parametrize('parent_mass, tolerance, expected', [

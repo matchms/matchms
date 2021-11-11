@@ -6,7 +6,8 @@ from matchms.similarity.PrecursorMzMatch import precursormz_scores_ppm
 from matchms.similarity.PrecursorMzMatch import precursormz_scores_symmetric
 from matchms.similarity.PrecursorMzMatch import \
     precursormz_scores_symmetric_ppm
-from .builder_Spectrum import SpectrumBuilder, spectra_factory
+from .builder_Spectrum import SpectrumBuilder
+from .builder_Spectrum import spectra_factory
 
 
 @pytest.mark.parametrize('precursor_mz, tolerance, tolerance_type, expected', [
