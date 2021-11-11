@@ -1,5 +1,4 @@
 import os
-
 from matchms import Spectrum
 from matchms.importing import load_from_mgf
 
