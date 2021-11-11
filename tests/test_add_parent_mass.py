@@ -5,7 +5,7 @@ from .builder_Spectrum import SpectrumBuilder
 
 
 @pytest.mark.parametrize('metadata, expected', [
-    [{"pepmass": (444.0, 10), "charge": -1}, "Not sufficient spectrum metadata to derive parent mass."],
+    [{"pepmass": (444.0, 10), "charge": -1}, "Missing precursor m/z to derive parent mass."],
     [{"charge": -1}, "Missing precursor m/z to derive parent mass."],
     [{"precursor_mz": 444.0, "charge": 0}, "Not sufficient spectrum metadata to derive parent mass."]
 ])
@@ -14,7 +14,7 @@ def test_add_parent_mass_exceptions(metadata, expected, capsys):
     spectrum = add_parent_mass(spectrum_in)
 
     assert spectrum.get("parent_mass") is None, "Expected no parent mass"
-    assert expected not in capsys.readouterr().out
+    assert expected in capsys.readouterr().out
 
 
 def test_add_parent_mass_precursormz(capsys):
