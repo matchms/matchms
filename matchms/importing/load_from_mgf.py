@@ -1,4 +1,6 @@
-from typing import Generator, Union, TextIO
+from typing import Generator
+from typing import TextIO
+from typing import Union
 import numpy
 from pyteomics.mgf import MGF
 from ..Spectrum import Spectrum
