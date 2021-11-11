@@ -1,49 +1,20 @@
 import numpy
 import pytest
-from matchms import Spectrum
 from matchms.filtering import add_precursor_mz
+from .builder_Spectrum import SpectrumBuilder
 
 
-def test_add_precursor_mz():
-    """Test if precursor_mz is correctly derived. Here nothing should change."""
-    mz = numpy.array([], dtype='float')
-    intensities = numpy.array([], dtype='float')
-    metadata = {"precursor_mz": 444.0}
-    spectrum_in = Spectrum(mz=mz,
-                           intensities=intensities,
-                           metadata=metadata)
-
-    spectrum = add_precursor_mz(spectrum_in)
-
-    assert spectrum.get("precursor_mz") == 444.0, "Expected different precursor_mz."
-
-
-def test_add_precursor_mz_no_masses():
-    """Test if no precursor_mz is handled correctly. Here nothing should change."""
-    mz = numpy.array([], dtype='float')
-    intensities = numpy.array([], dtype='float')
-    metadata = {}
-    spectrum_in = Spectrum(mz=mz,
-                           intensities=intensities,
-                           metadata=metadata)
+@pytest.mark.parametrize("metadata, expected", [
+    [{"precursor_mz": 444.0}, 444.0],
+    [{}, None],
+    [{"pepmass": (444.0, 10)}, 444.0]
+])
+def test_add_precursor_mz(metadata, expected):
+    spectrum_in = SpectrumBuilder().with_metadata(metadata).build()
 
     spectrum = add_precursor_mz(spectrum_in)
 
-    assert spectrum.get("precursor_mz") is None, "Outcome should be None."
-
-
-def test_add_precursor_mz_only_pepmass_present():
-    """Test if precursor_mz is correctly derived if only pepmass is present."""
-    mz = numpy.array([], dtype='float')
-    intensities = numpy.array([], dtype='float')
-    metadata = {"pepmass": (444.0, 10)}
-    spectrum_in = Spectrum(mz=mz,
-                           intensities=intensities,
-                           metadata=metadata)
-
-    spectrum = add_precursor_mz(spectrum_in)
-
-    assert spectrum.get("precursor_mz") == 444.0, "Expected different precursor_mz."
+    assert spectrum.get("precursor_mz") == expected, "Expected different precursor_mz."
 
 
 @pytest.mark.parametrize("key, value, expected", [
@@ -61,9 +32,8 @@ def test_add_precursor_mz_no_precursor_mz(key, value, expected):
     mz = numpy.array([], dtype='float')
     intensities = numpy.array([], dtype='float')
     metadata = {key: value}
-    spectrum_in = Spectrum(mz=mz,
-                           intensities=intensities,
-                           metadata=metadata)
+    spectrum_in = SpectrumBuilder().with_metadata(
+        metadata).with_mz(mz).with_intensities(intensities).build()
 
     spectrum = add_precursor_mz(spectrum_in)
 
