@@ -1,19 +1,10 @@
-from typing import Iterable
-from typing import TypeVar
 from ..typing import SpectrumType
+from matchms.utils import get_first_common_element
 
 
-_T = TypeVar('_T')
 _accepted_keys = ["precursor_mz", "precursormz", "precursor_mass"]
 _accepted_types = (float, str, int)
 _convertible_types = (str, int)
-
-
-def get_first_common_element(first: Iterable[_T], second: Iterable[_T]) -> _T:
-    """ Get first common element from two lists.
-    Returns 'None' if there are no common elements.
-    """
-    return next((item for item in first if item in second), None)
 
 
 def add_precursor_mz(spectrum_in: SpectrumType) -> SpectrumType:

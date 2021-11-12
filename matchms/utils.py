@@ -1,8 +1,13 @@
 import re
+from typing import Iterable
 from typing import Optional
+from typing import TypeVar
 import numpy
 from .importing import load_adducts_dict
 from .importing import load_known_adduct_conversions
+
+
+_T = TypeVar('_T')
 
 
 try:  # rdkit is not included in pip package
@@ -303,3 +308,10 @@ def clean_adduct(adduct: str) -> str:
 
     adduct_cleaned = adduct_core[:-len(adduct_charge)] + "]" + adduct_charge
     return adduct_conversion(adduct_cleaned)
+
+
+def get_first_common_element(first: Iterable[_T], second: Iterable[_T]) -> _T:
+    """ Get first common element from two lists.
+    Returns 'None' if there are no common elements.
+    """
+    return next((item for item in first if item in second), None)
