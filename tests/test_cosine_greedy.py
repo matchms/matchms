@@ -17,29 +17,37 @@ def compute_expected_score(mz_power, intensity_power, spectrum_1, spectrum_2, ma
     return expected_score
 
 
-@pytest.mark.parametrize("mz1, intensities1, mz2, intensities2, tolerance, mz_power, intensity_power, expected_matches", [
+@pytest.mark.parametrize("peaks, tolerance, mz_power, intensity_power, expected_matches", [
     [
-        numpy.array([100, 200, 300, 500, 510], dtype="float"), numpy.array([0.1, 0.2, 1.0, 0.3, 0.4], dtype="float"),
-        numpy.array([100, 200, 290, 490, 510], dtype="float"), numpy.array([0.1, 0.2, 1.0, 0.3, 0.4], dtype="float"),
+        [
+            [numpy.array([100, 200, 300, 500, 510], dtype="float"), numpy.array([0.1, 0.2, 1.0, 0.3, 0.4], dtype="float")],
+            [numpy.array([100, 200, 290, 490, 510], dtype="float"), numpy.array([0.1, 0.2, 1.0, 0.3, 0.4], dtype="float")]
+        ],
         0.1, 0.0, 1.0, [[0, 1, 4], [0, 1, 4]]
     ], [
-        numpy.array([100, 299, 300, 301, 510], dtype="float"), numpy.array([0.1, 1.0, 0.2, 0.3, 0.4], dtype="float"),
-        numpy.array([100, 300, 301, 511], dtype="float"), numpy.array([0.1, 1.0, 0.3, 0.4], dtype="float"),
+        [
+            [numpy.array([100, 299, 300, 301, 510], dtype="float"), numpy.array([0.1, 1.0, 0.2, 0.3, 0.4], dtype="float")],
+            [numpy.array([100, 300, 301, 511], dtype="float"), numpy.array([0.1, 1.0, 0.3, 0.4], dtype="float")],
+        ],
         0.2, 0.0, 1.0, [[0, 2, 3], [0, 1, 2]]
     ], [
-        numpy.array([100, 299, 300, 301, 510], dtype="float"), numpy.array([0.1, 1.0, 0.2, 0.3, 0.4], dtype="float"),
-        numpy.array([100, 300, 301, 511], dtype="float"), numpy.array([0.1, 1.0, 0.3, 0.4], dtype="float"),
+        [
+            [numpy.array([100, 299, 300, 301, 510], dtype="float"), numpy.array([0.1, 1.0, 0.2, 0.3, 0.4], dtype="float")],
+            [numpy.array([100, 300, 301, 511], dtype="float"), numpy.array([0.1, 1.0, 0.3, 0.4], dtype="float")],
+        ],
         2.0, 0.0, 1.0, [[0, 1, 3, 4], [0, 1, 2, 3]]
     ], [
-        numpy.array([100, 200, 300, 500, 510], dtype="float"), numpy.array([0.1, 0.2, 1.0, 0.3, 0.4], dtype="float"),
-        numpy.array([100, 200, 290, 490, 510], dtype="float"), numpy.array([0.1, 0.2, 1.0, 0.3, 0.4], dtype="float"),
+        [
+            [numpy.array([100, 200, 300, 500, 510], dtype="float"), numpy.array([0.1, 0.2, 1.0, 0.3, 0.4], dtype="float")],
+            [numpy.array([100, 200, 290, 490, 510], dtype="float"), numpy.array([0.1, 0.2, 1.0, 0.3, 0.4], dtype="float")],
+        ],
         1.0, 0.5, 2.0, [[0, 1, 4], [0, 1, 4]]
     ]
 ])
-def test_cosine_greedy_simple(mz1, intensities1, mz2, intensities2, tolerance, mz_power, intensity_power, expected_matches):
+def test_cosine_greedy_pair(peaks, tolerance, mz_power, intensity_power, expected_matches):
     builder = SpectrumBuilder()
-    spectrum_1 = builder.with_mz(mz1).with_intensities(intensities1).build()
-    spectrum_2 = builder.with_mz(mz2).with_intensities(intensities2).build()
+    spectrum_1 = builder.with_mz(peaks[0][0]).with_intensities(peaks[0][1]).build()
+    spectrum_2 = builder.with_mz(peaks[1][0]).with_intensities(peaks[1][1]).build()
 
     cosine_greedy = CosineGreedy(tolerance=tolerance, mz_power=mz_power, intensity_power=intensity_power)
     score = cosine_greedy.pair(spectrum_1, spectrum_2)
