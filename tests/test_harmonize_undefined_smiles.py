@@ -1,6 +1,4 @@
-import numpy
 import pytest
-from matchms import Spectrum
 from matchms.filtering import harmonize_undefined_smiles
 from .builder_Spectrum import SpectrumBuilder
 
