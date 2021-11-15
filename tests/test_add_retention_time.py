@@ -9,6 +9,8 @@ from matchms.filtering import add_retention_time
     [{"retention_time": "NA"}, None],
     [{"retention_time": "100.0"}, 100.0],
     [{"retentiontime": 200}, 200.0],
+    [{"retentiontime": -1}, None],
+    [{"retentiontime": "-1"}, None],
     [{"rt": 200}, 200.0],
     [{"RT": 200}, 200.0],
     [{"nothing": "200"}, None],

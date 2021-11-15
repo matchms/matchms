@@ -7,6 +7,8 @@ _accepted_keys = ["retention_time", "retentiontime", "rt", "scan_start_time"]
 
 def add_retention_time(spectrum_in: SpectrumType) -> SpectrumType:
     """Add retention time information to the 'retention_time' key as float.
+    Negative values and those not convertible to a float result in 'retention_time'
+    being 'None'.
 
     Args:
         spectrum_in (SpectrumType): Spectrum with retention time information.
@@ -21,7 +23,8 @@ def add_retention_time(spectrum_in: SpectrumType) -> SpectrumType:
 
     if value is not None:
         try:
-            rt = float(value)
+            value = float(value)
+            rt = value if value >= 0 else None
         except ValueError:
             print("%s can't be converted to float.", value)
             rt = None
