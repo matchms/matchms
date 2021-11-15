@@ -17,9 +17,14 @@ def add_retention_time(spectrum_in: SpectrumType) -> SpectrumType:
     spectrum = spectrum_in.clone()
 
     rt_key = get_first_common_element(spectrum.metadata.keys(), _accepted_keys)
-    rt = spectrum.get(rt_key)
+    value = spectrum.get(rt_key)
 
-    if rt is not None:
-        spectrum.set("retention_time", float(rt))
+    if value is not None:
+        try:
+            rt = float(value)
+        except ValueError:
+            print("%s can't be converted to float.", value)
+            rt = None
+        spectrum.set("retention_time", rt)
 
     return spectrum
