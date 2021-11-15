@@ -21,10 +21,10 @@ def add_retention_time(spectrum_in: SpectrumType) -> SpectrumType:
     rt_key = get_first_common_element(spectrum.metadata.keys(), _accepted_keys)
     value = spectrum.get(rt_key)
 
-    if value is not None:
+    if value is not None:   # one of accepted keys is present
         try:
             value = float(value)
-            rt = value if value >= 0 else None
+            rt = value if value >= 0 else None  # discard negative RT values
         except ValueError:
             print("%s can't be converted to float.", value)
             rt = None
