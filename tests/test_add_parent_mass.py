@@ -131,7 +131,7 @@ def test_empty_spectrum():
     assert spectrum is None, "Expected different handling of None spectrum."
     
 
-def test_use_ionmode():
+def test_use_positive_ionmode():
     """Test when there is no charge given, that the ionmode is used to derive parent mass."""
     mz = numpy.array([], dtype='float')
     intensities = numpy.array([], dtype='float')
@@ -143,4 +143,18 @@ def test_use_ionmode():
     spectrum = add_parent_mass(spectrum_in)
 
     assert spectrum.get("parent_mass") == 444.0 - PROTON_MASS, "Expected a different parent_mass"
+    
+    
+def test_use_negative_ionmode():
+    """Test when there is no charge given, that the ionmode is used to derive parent mass."""
+    mz = numpy.array([], dtype='float')
+    intensities = numpy.array([], dtype='float')
+    metadata = {"precursor_mz": 444.0, "ionmode": "negative"}
+    spectrum_in = Spectrum(mz=mz,
+                           intensities=intensities,
+                           metadata=metadata)
+
+    spectrum = add_parent_mass(spectrum_in)
+
+    assert spectrum.get("parent_mass") == 444.0 + PROTON_MASS, "Expected a different parent_mass"
   
