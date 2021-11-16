@@ -2,6 +2,7 @@ import numpy
 import pytest
 from matchms import Spectrum
 from matchms.filtering import add_parent_mass
+from matchms.constants import PROTON_MASS
 
 
 def test_add_parent_mass_pepmass_no_precursormz(capsys):
@@ -128,3 +129,18 @@ def test_empty_spectrum():
     spectrum = add_parent_mass(spectrum_in)
 
     assert spectrum is None, "Expected different handling of None spectrum."
+    
+
+def test_use_ionmode():
+    """Test when there is no charge given, that the ionmode is used to derive parent mass."""
+    mz = numpy.array([], dtype='float')
+    intensities = numpy.array([], dtype='float')
+    metadata = {"precursor_mz": 444.0, "ionmode": "positive"}
+    spectrum_in = Spectrum(mz=mz,
+                           intensities=intensities,
+                           metadata=metadata)
+
+    spectrum = add_parent_mass(spectrum_in)
+
+    assert spectrum.get("parent_mass") == 444.0 - PROTON_MASS, "Expected a different parent_mass"
+  
