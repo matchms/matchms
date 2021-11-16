@@ -10,7 +10,7 @@ def _assert_plots_ok(fig, n_plots):
     assert isinstance(fig.axes, list)
     assert isinstance(fig.axes[0], plt.Axes)
     assert hasattr(fig.axes[0], "lines")
-    assert isinstance(fig.axes[0].lines, list)
+    # assert isinstance(fig.axes[0].lines, list)  # breakes for new matplotlib versions
     assert len(fig.axes[0].lines) == 11
     assert isinstance(fig.axes[0].lines[0], plt.Line2D)
     assert hasattr(fig.axes[0].lines[0], "_x")
