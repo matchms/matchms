@@ -60,5 +60,8 @@ def add_parent_mass(spectrum_in: SpectrumType, estimate_from_adduct: bool = True
             if spectrum.get('ionmode') == "negative":
                 parent_mass = precursor_mz + PROTON_MASS
         
-        spectrum.set("parent_mass", float(parent_mass))
+        if parent_mass is None:
+            print("Not sufficient spectrum metadata to derive parent mass.")
+        else:
+            spectrum.set("parent_mass", float(parent_mass))
     return spectrum
