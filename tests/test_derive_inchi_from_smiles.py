@@ -1,16 +1,13 @@
-import numpy
 import pytest
-from matchms import Spectrum
 from matchms.filtering import derive_inchi_from_smiles
+from .builder_Spectrum import SpectrumBuilder
 
 
 def test_derive_inchi_from_smiles():
     """Test if conversion to inchi works when only smiles is given.
     """
     pytest.importorskip("rdkit")
-    spectrum_in = Spectrum(mz=numpy.array([], dtype='float'),
-                           intensities=numpy.array([], dtype='float'),
-                           metadata={"smiles": "C1CCCCC1"})
+    spectrum_in = SpectrumBuilder().with_metadata({"smiles": "C1CCCCC1"}).build()
 
     spectrum = derive_inchi_from_smiles(spectrum_in)
     inchi = spectrum.get("inchi").replace('"', '')
