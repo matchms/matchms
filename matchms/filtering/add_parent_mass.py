@@ -53,9 +53,12 @@ def add_parent_mass(spectrum_in: SpectrumType, estimate_from_adduct: bool = True
             parent_mass = precursor_mass - protons_mass
         
         if parent_mass is None:
-            print("Warning: charge is unknown, so assumed to be 1")
-            precursor_mass = precursor_mz
-            parent_mass = precursor_mass - PROTON_MASS
+            # If charge and adduct is not given the ionmode is checked to assume a charge of -1 or +1
+            # Alternatively, you can run derive_ion mode followed by correct charge, before running add_parent_mass to use the metadata to set the ionmode and charge. 
+            if spectrum.get('ionmode') == "positive":
+               parent_mass = precursor_mz - PROTON_MASS
+            if spectrum.get('ionmode') == "negative":
+                parent_mass = precursor_mz + PROTON_MASS
         
         spectrum.set("parent_mass", float(parent_mass))
     return spectrum
