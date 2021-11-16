@@ -119,7 +119,7 @@ To install matchms with ``pip`` simply run
 
   pip install matchms
 
-matchms universe -> additional functionalities
+matchms ecosystem -> additional functionalities
 ==============================================
 
 Matchms functionalities can be complemented by additional packages.  
