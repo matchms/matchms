@@ -71,7 +71,6 @@ class Scores:
             comparison). By using the fact that score[i,j] = score[j,i] the calculation will be about
             2x faster. Default is False.
         """
-        # pylint: disable=too-many-arguments
         Scores._validate_input_arguments(references, queries, similarity_function)
 
         self.n_rows = len(references)

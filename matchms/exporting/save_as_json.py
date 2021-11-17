@@ -39,12 +39,11 @@ def save_as_json(spectrums: List[Spectrum], filename: str):
         spectrums = [spectrums]
 
     # Write to json file
-    with open(filename, 'w') as fout:
+    with open(filename, 'w', encoding="utf-8") as fout:
         json.dump(spectrums, fout, cls=SpectrumJSONEncoder)
 
 
 class SpectrumJSONEncoder(json.JSONEncoder):
-    # pylint: disable=method-hidden
     # See https://github.com/PyCQA/pylint/issues/414 for reference
     def default(self, o):
         """JSON Encoder which can encode a :py:class:`~matchms.Spectrum.Spectrum` object"""
