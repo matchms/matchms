@@ -1,8 +1,8 @@
 import numpy
 import pytest
 from matchms import Spectrum
-from matchms.filtering import add_parent_mass
 from matchms.constants import PROTON_MASS
+from matchms.filtering import add_parent_mass
 
 
 def test_add_parent_mass_pepmass_no_precursormz(capsys):
@@ -142,7 +142,8 @@ def test_use_positive_ionmode():
 
     spectrum = add_parent_mass(spectrum_in)
 
-    assert spectrum.get("parent_mass") == 444.0 - PROTON_MASS, "Expected a different parent_mass"
+    assert spectrum.get("parent_mass") == (444.0 - PROTON_MASS), \
+        "Expected a different parent_mass"
 
 
 def test_use_negative_ionmode():
@@ -156,5 +157,5 @@ def test_use_negative_ionmode():
 
     spectrum = add_parent_mass(spectrum_in)
 
-    assert spectrum.get("parent_mass") == 444.0 + PROTON_MASS, "Expected a different parent_mass"
-
+    assert spectrum.get("parent_mass") == (444.0 + PROTON_MASS), \
+        "Expected a different parent_mass"
