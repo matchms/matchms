@@ -51,9 +51,9 @@ def add_parent_mass(spectrum_in: SpectrumType, estimate_from_adduct: bool = True
     if parent_mass is None:
         # Handle missing charge if ionmode is given
         ionmode = spectrum.get('ionmode')
-        if (charge in[None, 0]) and ionmode in ["positive", "negative"]:
+        if (charge in [None, 0]) and ionmode in ["positive", "negative"]:
             charge = 1 if ionmode == "positive" else -1
-            print(f"Missing charge entry, but {ionmode} ionmode detected. " \
+            print(f"Missing charge entry, but {ionmode} ionmode detected. "
                   "Consider prior run of `correct_charge()` filter.")
 
         if charge not in [None, 0]:
