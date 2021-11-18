@@ -1,10 +1,9 @@
-from ..typing import SpectrumType
 from matchms.utils import get_first_common_element
+from ..typing import SpectrumType
 
 
 _accepted_keys = ["precursor_mz", "precursormz", "precursor_mass"]
 _accepted_types = (float, str, int)
-_convertible_types = (str, int)
 
 
 def add_precursor_mz(spectrum_in: SpectrumType) -> SpectrumType:
