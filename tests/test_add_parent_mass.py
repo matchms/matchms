@@ -1,6 +1,7 @@
 import numpy
 import pytest
 from matchms import Spectrum
+from matchms.constants import PROTON_MASS
 from matchms.filtering import add_parent_mass
 
 
@@ -90,7 +91,9 @@ def test_add_parent_mass_using_adduct(adduct, expected):
     assert isinstance(spectrum.get("parent_mass"), float), "Expected parent mass to be float."
 
 
-def test_add_parent_mass_overwrite():
+@pytest.mark.parametrize("overwrite, expected", [(True, 442.992724),
+                                                 (False, 443.0)])
+def test_add_parent_mass_overwrite(overwrite, expected):
     """Test if parent mass is replaced by newly calculated value."""
     mz = numpy.array([], dtype='float')
     intensities = numpy.array([], dtype='float')
@@ -102,9 +105,9 @@ def test_add_parent_mass_overwrite():
                            intensities=intensities,
                            metadata=metadata)
 
-    spectrum = add_parent_mass(spectrum_in, overwrite_existing_entry=True)
+    spectrum = add_parent_mass(spectrum_in, overwrite_existing_entry=overwrite)
 
-    assert numpy.allclose(spectrum.get("parent_mass"), 442.992724, atol=1e-4), \
+    assert numpy.allclose(spectrum.get("parent_mass"), expected, atol=1e-4), \
         "Expected parent mass to be replaced by new value."
 
 
@@ -128,3 +131,21 @@ def test_empty_spectrum():
     spectrum = add_parent_mass(spectrum_in)
 
     assert spectrum is None, "Expected different handling of None spectrum."
+
+
+@pytest.mark.parametrize("ionmode, expected", [("positive", 444.0 - PROTON_MASS),
+                                               ("negative", 444.0 + PROTON_MASS)])
+def test_use_of_ionmode(ionmode, expected):
+    """Test when there is no charge given, than the ionmode
+    is used to derive parent mass."""
+    mz = numpy.array([], dtype='float')
+    intensities = numpy.array([], dtype='float')
+    metadata = {"precursor_mz": 444.0, "ionmode": ionmode}
+    spectrum_in = Spectrum(mz=mz,
+                           intensities=intensities,
+                           metadata=metadata)
+
+    spectrum = add_parent_mass(spectrum_in)
+
+    assert spectrum.get("parent_mass") == expected, \
+        "Expected a different parent_mass"
