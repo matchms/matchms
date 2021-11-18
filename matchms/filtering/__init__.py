@@ -77,7 +77,6 @@ __all__ = [
     "add_losses",
     "add_parent_mass",
     "add_precursor_mz",
-    "add_retention_time",
     "clean_compound_name",
     "correct_charge",
     "default_filters",
