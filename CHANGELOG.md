@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Code linting triggered by pylint update [#257](https://github.com/matchms/matchms/pull/257)
+- Refactored `add_parent_mass()` filter can now also handle missing charge entries (if ionmode is known) [#252](https://github.com/matchms/matchms/pull/252)
 
 ## [0.9.2] - 2021-07-20
 
