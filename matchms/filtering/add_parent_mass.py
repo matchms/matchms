@@ -81,4 +81,7 @@ def _get_charge(spectrum):
         print("Missing charge entry, but negative ionmode detected. "
               "Consider prior run of `correct_charge()` filter.")
         return -1
+
+    print("Missing charge and ionmode entries. "
+          "Consider prior run of `derive_ionmode()` and `correct_charge()` filters.")
     return 0
