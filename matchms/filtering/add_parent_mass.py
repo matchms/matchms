@@ -26,6 +26,16 @@ def add_parent_mass(spectrum_in: SpectrumType, estimate_from_adduct: bool = True
     overwrite_existing_entry
         Default is False. If set to True, a newly computed value will replace existing ones.
     """
+    def is_valid_charge(charge):
+        return (charge is not None) and (charge != 0)
+
+    def guess_charge_from_ionmode(spectrum):
+        ionmode = spectrum.get('ionmode')
+        if ionmode == "positive":
+            return 1
+        if ionmode == "negative":
+            return -1
+
     if spectrum_in is None:
         return None
 
@@ -50,13 +60,13 @@ def add_parent_mass(spectrum_in: SpectrumType, estimate_from_adduct: bool = True
 
     if parent_mass is None:
         # Handle missing charge if ionmode is given
-        ionmode = spectrum.get('ionmode')
-        if (charge in [None, 0]) and ionmode in ["positive", "negative"]:
-            charge = 1 if ionmode == "positive" else -1
-            print(f"Missing charge entry, but {ionmode} ionmode detected. "
+        charge_guess = guess_charge_from_ionmode(spectrum)
+        if not is_valid_charge(charge) and is_valid_charge(charge_guess):
+            charge = charge_guess
+            print("Missing charge entry, but ionmode detected. "
                   "Consider prior run of `correct_charge()` filter.")
 
-        if charge not in [None, 0]:
+        if is_valid_charge(charge):
             # Assume adduct of shape [M+xH] or [M-xH]
             protons_mass = PROTON_MASS * charge
             precursor_mass = precursor_mz * abs(charge)
