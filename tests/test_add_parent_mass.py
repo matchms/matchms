@@ -84,7 +84,6 @@ def test_use_of_ionmode(ionmode, expected):
     metadata = {"precursor_mz": 444.0, "ionmode": ionmode}
     spectrum_in = SpectrumBuilder().with_metadata(metadata).build()
 
-
     spectrum = add_parent_mass(spectrum_in)
 
     assert spectrum.get("parent_mass") == expected, \
