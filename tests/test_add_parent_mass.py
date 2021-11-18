@@ -91,7 +91,9 @@ def test_add_parent_mass_using_adduct(adduct, expected):
     assert isinstance(spectrum.get("parent_mass"), float), "Expected parent mass to be float."
 
 
-def test_add_parent_mass_overwrite():
+@pytest.mark.parametrize("overwrite, expected", [(True, 442.992724),
+                                                 (False, 443.0)])
+def test_add_parent_mass_overwrite(overwrite, expected):
     """Test if parent mass is replaced by newly calculated value."""
     mz = numpy.array([], dtype='float')
     intensities = numpy.array([], dtype='float')
@@ -103,9 +105,9 @@ def test_add_parent_mass_overwrite():
                            intensities=intensities,
                            metadata=metadata)
 
-    spectrum = add_parent_mass(spectrum_in, overwrite_existing_entry=True)
+    spectrum = add_parent_mass(spectrum_in, overwrite_existing_entry=overwrite)
 
-    assert numpy.allclose(spectrum.get("parent_mass"), 442.992724, atol=1e-4), \
+    assert numpy.allclose(spectrum.get("parent_mass"), expected, atol=1e-4), \
         "Expected parent mass to be replaced by new value."
 
 

@@ -30,11 +30,11 @@ def add_parent_mass(spectrum_in: SpectrumType, estimate_from_adduct: bool = True
         return (charge is not None) and (charge != 0)
 
     def guess_charge_from_ionmode(spectrum):
-        ionmode = spectrum.get('ionmode')
-        if ionmode == "positive":
+        if spectrum.get('ionmode') == "positive":
             return 1
-        if ionmode == "negative":
+        if spectrum.get('ionmode') == "negative":
             return -1
+        return 0
 
     if spectrum_in is None:
         return None
