@@ -1,7 +1,7 @@
 from typing import Any
 from typing import List
-from matchms.utils import get_common_keys
 from matchms.utils import filter_none
+from matchms.utils import get_common_keys
 from ..typing import SpectrumType
 
 
