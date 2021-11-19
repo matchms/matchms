@@ -1,5 +1,6 @@
 from typing import Any
 from typing import List
+from typing import Optional
 from matchms.utils import filter_none
 from matchms.utils import get_common_keys
 from ..typing import SpectrumType
@@ -26,7 +27,15 @@ def safe_store_value(spectrum: SpectrumType, value: Any, target_key: str) -> Spe
     return spectrum
 
 
-def safe_convert_to_float(value):
+def safe_convert_to_float(value: Any) -> Optional[float]:
+    """Safely convert value to float. Return 'None' on failure.
+
+    Args:
+        value (Any): Object to convert to float.
+
+    Returns:
+        Optional[float]: Converted float value or 'None' if conversion is not possible.
+    """
     if isinstance(value, list) and len(value) == 1:
         value = value[0]
     try:
