@@ -56,6 +56,7 @@ def test_add_retention_index(metadata, expected):
     else:
         assert actual == expected and isinstance(actual, float)
 
+
 def test_empty_spectrum():
     spectrum_in = None
     spectrum = add_retention_time(spectrum_in)

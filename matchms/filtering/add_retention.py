@@ -58,7 +58,6 @@ def _add_retention(spectrum: SpectrumType, target_key: str, accepted_keys: List[
     return spectrum
 
 
-
 def add_retention_time(spectrum_in: SpectrumType) -> SpectrumType:
     """Add retention time information to the 'retention_time' key as float.
     Negative values and those not convertible to a float result in 'retention_time'
