@@ -15,7 +15,8 @@ from matchms.filtering import add_retention_time
     [{"rt": 200}, 200.0],
     [{"RT": 200}, 200.0],
     [{"nothing": "200"}, None],
-    [{'scan_start_time': 0.629566}, 0.629566]
+    [{'scan_start_time': 0.629566}, 0.629566],
+    [{'scan_start_time': [0.629566]}, 0.629566]
 ])
 def test_add_retention_time(metadata, expected):
     spectrum_in = Spectrum(mz=numpy.array(
