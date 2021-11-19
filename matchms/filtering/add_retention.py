@@ -76,7 +76,11 @@ def add_retention_index(spectrum_in: SpectrumType) -> SpectrumType:
     Returns:
         SpectrumType: Spectrum with RI info stored under 'retention_index'.
     """
+    if spectrum_in is None:
+        return None
+
     spectrum = spectrum_in.clone()
+
 
     target_key = "retention_index"
     spectrum = _add_retention(spectrum, target_key, _retention_index_keys)
