@@ -30,7 +30,7 @@ def safe_store_value(spectrum: SpectrumType, value: Any, target_key: str) -> Spe
     return spectrum
 
 
-def add_retention(spectrum: SpectrumType, target_key: str, accepted_keys: List[str]) -> SpectrumType:
+def _add_retention(spectrum: SpectrumType, target_key: str, accepted_keys: List[str]) -> SpectrumType:
     """Add value from one of accepted keys to target key.
 
     Args:
@@ -41,7 +41,8 @@ def add_retention(spectrum: SpectrumType, target_key: str, accepted_keys: List[s
     Returns:
         SpectrumType: Spectrum with value from first accepted key stored under target_key.
     """
-    rt_key = get_first_common_element(spectrum.metadata.keys(), accepted_keys)
+    present_keys = spectrum.metadata.keys()
+    rt_key = get_first_common_element(present_keys, accepted_keys)
     value = spectrum.get(rt_key)
     spectrum = safe_store_value(spectrum, value, target_key)
     return spectrum
@@ -61,7 +62,7 @@ def add_retention_time(spectrum_in: SpectrumType) -> SpectrumType:
     spectrum = spectrum_in.clone()
 
     target_key = "retention_time"
-    spectrum = add_retention(spectrum, target_key, _retention_time_keys)
+    spectrum = _add_retention(spectrum, target_key, _retention_time_keys)
 
     return spectrum
 
@@ -78,6 +79,6 @@ def add_retention_index(spectrum_in: SpectrumType) -> SpectrumType:
     spectrum = spectrum_in.clone()
 
     target_key = "retention_index"
-    spectrum = add_retention(spectrum, target_key, _retention_index_keys)
+    spectrum = _add_retention(spectrum, target_key, _retention_index_keys)
 
     return spectrum
