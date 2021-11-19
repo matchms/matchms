@@ -24,7 +24,8 @@ def safe_store_value(spectrum: SpectrumType, value: Any, target_key: str) -> Spe
             value = float(value)
             rt = value if value >= 0 else None  # discard negative RT values
         except ValueError:
-            print("%s can't be converted to float.", value)
+            print(f"{value} can't be converted to float.")
+
             rt = None
         spectrum.set(target_key, rt)
     return spectrum
