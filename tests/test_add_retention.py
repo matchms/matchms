@@ -53,3 +53,11 @@ def test_add_retention_index(metadata, expected):
         assert actual is None
     else:
         assert actual == expected and isinstance(actual, float)
+
+def test_empty_spectrum():
+    spectrum_in = None
+    spectrum = add_retention_time(spectrum_in)
+    assert spectrum is None, "Expected different handling of None spectrum."
+
+    spectrum = add_retention_index(spectrum_in)
+    assert spectrum is None, "Expected different handling of None spectrum."
