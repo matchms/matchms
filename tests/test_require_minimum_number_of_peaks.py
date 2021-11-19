@@ -1,8 +1,8 @@
 import numpy
 import pytest
-from matchms import Spectrum
 from matchms.filtering import require_minimum_number_of_peaks
 from matchms.typing import SpectrumType
+from .builder_Spectrum import SpectrumBuilder
 
 
 @pytest.fixture
@@ -10,7 +10,7 @@ def spectrum_in():
     mz = numpy.array([10, 20, 30, 40], dtype="float")
     intensities = numpy.array([0, 1, 10, 100], dtype="float")
     metadata = dict(parent_mass=10)
-    return Spectrum(mz=mz, intensities=intensities, metadata=metadata)
+    return SpectrumBuilder().with_mz(mz).with_intensities(intensities).with_metadata(metadata).build()
 
 
 def test_require_minimum_number_of_peaks_no_params(spectrum_in: SpectrumType):
