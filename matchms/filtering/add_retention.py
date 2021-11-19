@@ -59,7 +59,11 @@ def add_retention_time(spectrum_in: SpectrumType) -> SpectrumType:
     Returns:
         SpectrumType: Spectrum with harmonized retention time information.
     """
+    if spectrum_in is None:
+        return None
+
     spectrum = spectrum_in.clone()
+
 
     target_key = "retention_time"
     spectrum = _add_retention(spectrum, target_key, _retention_time_keys)
