@@ -72,7 +72,8 @@ def add_retention_time(spectrum_in: SpectrumType) -> SpectrumType:
 
 
 def add_retention_index(spectrum_in: SpectrumType) -> SpectrumType:
-    """Add retention idnex into 'retention_index' key if present.
+    """Add retention index into 'retention_index' key if present.
+
 
     Args:
         spectrum_in (SpectrumType): Spectrum with RI information.
