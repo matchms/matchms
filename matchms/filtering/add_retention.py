@@ -22,8 +22,9 @@ def safe_store_value(spectrum: SpectrumType, value: Any, target_key: str) -> Spe
     target_key
         Name of the key in which to store the value.
 
-    Returns:
-        SpectrumType: Spectrum with added key.
+    Returns
+    -------
+    Spectrum with added key.
     """
     if value is not None:   # one of accepted keys is present
         value = safe_convert_to_float(value)
@@ -39,8 +40,9 @@ def safe_convert_to_float(value: Any) -> Optional[float]:
     value
         Object to convert to float.
 
-    Returns:
-        Optional[float]: Converted float value or 'None' if conversion is not possible.
+    Returns
+    -------
+    Converted float value or 'None' if conversion is not possible.
     """
     if isinstance(value, list) and len(value) == 1:
         value = value[0]
@@ -65,8 +67,9 @@ def _add_retention(spectrum: SpectrumType, target_key: str, accepted_keys: List[
     accepted_keys
         List of accepted keys from which a value will be read (in order).
 
-    Returns:
-        SpectrumType: Spectrum with value from first accepted key stored under target_key.
+    Returns
+    -------
+    Spectrum with value from first accepted key stored under target_key.
     """
     common_keys = get_common_keys(spectrum.metadata.keys(), accepted_keys)
     values_for_keys = filter_none([spectrum.get(key) for key in common_keys])
@@ -87,8 +90,9 @@ def add_retention_time(spectrum_in: SpectrumType) -> SpectrumType:
     spectrum
         Spectrum with retention time information.
 
-    Returns:
-        SpectrumType: Spectrum with harmonized retention time information.
+    Returns
+    -------
+    Spectrum with harmonized retention time information.
     """
     if spectrum_in is None:
         return None
@@ -108,9 +112,9 @@ def add_retention_index(spectrum_in: SpectrumType) -> SpectrumType:
     ----------
     spectrum
         Spectrum with RI information.
-
-    Returns:
-        SpectrumType: Spectrum with RI info stored under 'retention_index'.
+    Returns
+    -------
+    Spectrum with RI info stored under 'retention_index'.
     """
     if spectrum_in is None:
         return None
