@@ -15,8 +15,9 @@ def derive_ionmode(spectrum_in: SpectrumType) -> SpectrumType:
     spectrum
         Input spectrum.
 
-    Returns:
-        Spectrum object with `ionmode` attribute set.
+    Returns
+    -------
+    Spectrum object with `ionmode` attribute set.
     """
 
     if spectrum_in is None:
