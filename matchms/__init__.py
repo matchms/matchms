@@ -1,4 +1,4 @@
-import logging
+
 from . import exporting
 from . import filtering
 from . import importing
@@ -10,8 +10,6 @@ from .Scores import Scores
 from .Spectrum import Spectrum
 from .Spikes import Spikes
 
-
-logging.getLogger(__name__).addHandler(logging.NullHandler())
 
 __author__ = "Netherlands eScience Center"
 __email__ = 'generalization@esciencecenter.nl'
