@@ -65,6 +65,7 @@ setup(
                             "sphinx>=3.0.0,!=3.2.0,!=3.5.0,<4.0.0",
                             "sphinx_rtd_theme",
                             "sphinxcontrib-apidoc",
+                            "testfixtures",
                             "yapf",],
                     "chemistry": ["rdkit >=2020.03.1"]},
 )
