@@ -19,7 +19,6 @@ def make_charge_int(spectrum_in: SpectrumType) -> SpectrumType:
             charge_int = int(spectrum.get('charge'))
             spectrum.set("charge", charge_int)
         except ValueError:
-            logger.warning("Found charge (%s) cannot be converted to integer.",
-            str(spectrum.get('charge')))
+            logger.warning("Found charge (%s) cannot be converted to integer.", str(spectrum.get('charge')))
 
     return spectrum
