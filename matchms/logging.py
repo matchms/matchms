@@ -10,4 +10,4 @@ with open(os.path.join(here, 'logging.yml'), 'r') as f:
     logging.config.dictConfig(config)
 
 logger = logging.getLogger(__name__)
-logger.info('Completed configuring logger()!') 
+logger.info('Completed configuring logger()!')

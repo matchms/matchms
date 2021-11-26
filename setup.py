@@ -59,6 +59,7 @@ setup(
     ],
     extras_require={"dev": ["bump2version",
                             "isort>=4.2.5,<5",
+                            "pylint<2.12",
                             "prospector[with_pyroma]",
                             "pytest",
                             "pytest-cov",
