@@ -5,7 +5,7 @@ from matchms.constants import PROTON_MASS
 from matchms.filtering import add_parent_mass
 
 
-def test_add_parent_mass_pepmass_no_precursormz(capsys):
+def test_add_parent_mass_pepmass_no_precursormz(caplog):
     """Test if correct exception is returned."""
     mz = numpy.array([], dtype='float')
     intensities = numpy.array([], dtype='float')
@@ -18,10 +18,10 @@ def test_add_parent_mass_pepmass_no_precursormz(capsys):
     spectrum = add_parent_mass(spectrum_in)
 
     assert spectrum.get("parent_mass") is None, "Expected no parent mass"
-    assert "Not sufficient spectrum metadata to derive parent mass." not in capsys.readouterr().out
+    assert "Not sufficient spectrum metadata to derive parent mass." not in caplog.text
 
 
-def test_add_parent_mass_no_precursormz(capsys):
+def test_add_parent_mass_no_precursormz(caplog):
     """Test if correct exception is returned."""
     mz = numpy.array([], dtype='float')
     intensities = numpy.array([], dtype='float')
@@ -33,10 +33,10 @@ def test_add_parent_mass_no_precursormz(capsys):
     spectrum = add_parent_mass(spectrum_in)
 
     assert spectrum.get("parent_mass") is None, "Expected no parent mass"
-    assert "Missing precursor m/z to derive parent mass." in capsys.readouterr().out
+    assert "Missing precursor m/z to derive parent mass." in caplog.text
 
 
-def test_add_parent_mass_precursormz_zero_charge(capsys):
+def test_add_parent_mass_precursormz_zero_charge(caplog):
     """Test if correct exception is returned."""
     mz = numpy.array([], dtype='float')
     intensities = numpy.array([], dtype='float')
@@ -49,10 +49,10 @@ def test_add_parent_mass_precursormz_zero_charge(capsys):
     spectrum = add_parent_mass(spectrum_in)
 
     assert spectrum.get("parent_mass") is None, "Expected no parent mass"
-    assert "Not sufficient spectrum metadata to derive parent mass." in capsys.readouterr().out
+    assert "Not sufficient spectrum metadata to derive parent mass." in caplog.text
 
 
-def test_add_parent_mass_precursormz(capsys):
+def test_add_parent_mass_precursormz(caplog):
     """Test if parent mass is correctly derived if "pepmass" is not present."""
     mz = numpy.array([], dtype='float')
     intensities = numpy.array([], dtype='float')
@@ -66,7 +66,7 @@ def test_add_parent_mass_precursormz(capsys):
 
     assert numpy.abs(spectrum.get("parent_mass") - 445.0) < .01, "Expected parent mass of about 445.0."
     assert isinstance(spectrum.get("parent_mass"), float), "Expected parent mass to be float."
-    assert "Not sufficient spectrum metadata to derive parent mass." not in capsys.readouterr().out
+    assert "Not sufficient spectrum metadata to derive parent mass." not in caplog.text
 
 
 @pytest.mark.parametrize("adduct, expected", [("[M+2Na-H]+", 399.02884),
@@ -111,7 +111,7 @@ def test_add_parent_mass_overwrite(overwrite, expected):
         "Expected parent mass to be replaced by new value."
 
 
-def test_add_parent_mass_not_sufficient_data(capsys):
+def test_add_parent_mass_not_sufficient_data(caplog):
     """Test when there is not enough information to derive parent_mass."""
     mz = numpy.array([], dtype='float')
     intensities = numpy.array([], dtype='float')
@@ -123,7 +123,7 @@ def test_add_parent_mass_not_sufficient_data(capsys):
     spectrum = add_parent_mass(spectrum_in)
 
     assert spectrum.get("parent_mass") is None, "Expected no parent mass"
-    assert "Not sufficient spectrum metadata to derive parent mass." in capsys.readouterr().out
+    assert "Not sufficient spectrum metadata to derive parent mass." in caplog.text
 
 
 def test_empty_spectrum():
