@@ -3,6 +3,7 @@ from typing import List
 from typing import Optional
 from matchms.utils import filter_none
 from matchms.utils import get_common_keys
+from ..logging import logger
 from ..typing import SpectrumType
 
 
@@ -50,7 +51,7 @@ def safe_convert_to_float(value: Any) -> Optional[float]:
         value = float(value)
         rt = value if value >= 0 else None  # discard negative RT values
     except ValueError:
-        print(f"{value} can't be converted to float.")
+        logger.warning("%s can't be converted to float.", str(value))
         rt = None
     return rt
 

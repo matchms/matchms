@@ -1,3 +1,4 @@
+from ..logging import logger
 from ..typing import SpectrumType
 
 
