@@ -1,6 +1,7 @@
 import json
 import numpy as np
 import requests
+from ..logging import logger
 from ..Spectrum import Spectrum
 
 
@@ -36,9 +37,11 @@ def load_from_usi(usi: str, server: str = "https://metabolomics-usi.ucsd.edu"):
     try:
         spectral_data = response.json()
         if spectral_data is None or "peaks" not in spectral_data:
+            logger.info("Empty spectrum found (no data found). Will not be imported.")
             return None
         peaks = spectral_data["peaks"]
         if len(peaks) == 0:
+            logger.info("Empty spectrum found (no peaks in 'peaks_json'). Will not be imported.")
             return None
         mz_list, intensity_list = zip(*peaks)
         mz_array = np.array(mz_list)
@@ -51,5 +54,5 @@ def load_from_usi(usi: str, server: str = "https://metabolomics-usi.ucsd.edu"):
         return s
 
     except json.decoder.JSONDecodeError:
-        # failed to unpack json
+        logger.warn("Failed to unpack json (JSONDecodeError).")
         return None

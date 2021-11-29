@@ -102,5 +102,5 @@ def dict2spectrum(spectrum_dict: dict) -> Union[Spectrum, None]:
         return Spectrum(mz=mz,
                         intensities=intensities,
                         metadata=metadata_dict)
-    logger.warning("Empty spectrum found (no peaks in 'peaks_json'). Will not be imported.")
+    logger.info("Empty spectrum found (no peaks in 'peaks_json'). Will not be imported.")
     return None
