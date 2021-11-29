@@ -1,6 +1,7 @@
 from math import ceil
 from typing import Optional
 import numpy
+from ..logging import logger
 from ..Spikes import Spikes
 from ..typing import SpectrumType
 
@@ -46,6 +47,8 @@ def reduce_to_number_of_peaks(spectrum_in: SpectrumType, n_required: int = 1, n_
     spectrum = spectrum_in.clone()
 
     if spectrum.peaks.intensities.size < n_required:
+        logger.info("Spectrum with %s (<%s) peaks was set to None.",
+                    str(spectrum.peaks.intensities.size), str(n_required))
         return None
 
     threshold = _set_maximum_number_of_peaks_to_keep()
