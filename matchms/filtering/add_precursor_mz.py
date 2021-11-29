@@ -1,5 +1,5 @@
-from ..logging import logger
 from matchms.utils import get_first_common_element
+from ..logging import logger
 from ..typing import SpectrumType
 
 

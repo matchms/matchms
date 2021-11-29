@@ -1,3 +1,4 @@
+from ..logging import logger
 from ..typing import SpectrumType
 from ..utils import convert_smiles_to_inchi
 from ..utils import is_valid_inchi
@@ -19,6 +20,6 @@ def derive_inchi_from_smiles(spectrum_in: SpectrumType) -> SpectrumType:
             inchi = inchi.rstrip()
             spectrum.set("inchi", inchi)
         else:
-            print("Could not convert smiles", smiles, "to InChI.")
+            logger.warning("Could not convert smiles %s to InChI.", smiles)
 
     return spectrum

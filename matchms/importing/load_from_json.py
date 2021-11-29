@@ -3,6 +3,7 @@ import json
 from typing import List
 from typing import Union
 import numpy
+from ..logging import logger
 from ..Spectrum import Spectrum
 
 
@@ -101,6 +102,5 @@ def dict2spectrum(spectrum_dict: dict) -> Union[Spectrum, None]:
         return Spectrum(mz=mz,
                         intensities=intensities,
                         metadata=metadata_dict)
-    print("Empty spectrum found (no peaks in 'peaks_json').",
-          "Will not be imported.")
+    logger.warning("Empty spectrum found (no peaks in 'peaks_json'). Will not be imported.")
     return None
