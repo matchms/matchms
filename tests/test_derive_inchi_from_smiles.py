@@ -1,6 +1,5 @@
 import numpy
 import pytest
-from testfixtures import LogCapture
 from matchms import Spectrum
 from matchms.filtering import derive_inchi_from_smiles
 

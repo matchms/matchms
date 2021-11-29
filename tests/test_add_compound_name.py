@@ -1,5 +1,4 @@
 import numpy
-import pytest
 from testfixtures import LogCapture
 from matchms import Spectrum
 from matchms.filtering import add_compound_name
