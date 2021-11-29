@@ -26,13 +26,9 @@ def test_derive_inchi_from_defect_smiles():
                            intensities=numpy.array([], dtype='float'),
                            metadata={"smiles": "CX1CCCCC1"})
 
-    with LogCapture() as log:
-        spectrum = derive_inchi_from_smiles(spectrum_in)
+    spectrum = derive_inchi_from_smiles(spectrum_in)
     inchi = spectrum.get("inchi", None)
     assert inchi is None, "Expected no InChI"
-    log.check(
-        ('matchms', 'WARNING', "Could not convert smiles CX1CCCCC1 to InChI.")
-    )
 
 
 def test_empty_spectrum():

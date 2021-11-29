@@ -1,6 +1,5 @@
 import numpy
 import pytest
-from testfixtures import LogCapture
 from matchms import Spectrum
 from matchms.filtering import derive_smiles_from_inchi
 
@@ -27,12 +26,8 @@ def test_derive_smiles_from_defect_inchi():
                            metadata={"inchi": '"InChI=1S/C6H12/c1-2-XA4-6-5-3-1/h1-6H2"',
                                      "smiles": ""})
 
-    with LogCapture() as log:
-        spectrum = derive_smiles_from_inchi(spectrum_in)
+    spectrum = derive_smiles_from_inchi(spectrum_in)
     assert spectrum.get("smiles", None) == "", "Expected no smiles"
-    log.check(
-        ('matchms', 'WARNING', "Could not convert InChI InChI=1S/C6H12/c1-2-XA4-6-5-3-1/h1-6H2 to smiles.")
-    )
 
 
 def test_empty_spectrum():
