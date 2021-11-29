@@ -28,7 +28,7 @@ Installation
 
 Prerequisites:  
 
-- Python 3.7 or 3.8
+- Python 3.7, 3.8, or 3.9
 - Anaconda
 
 Install matchms from Anaconda Cloud with
@@ -36,7 +36,7 @@ Install matchms from Anaconda Cloud with
 .. code-block:: console
 
   # install matchms in a new virtual environment to avoid dependency clashes
-  conda create --name matchms python=3.7
+  conda create --name matchms python=3.8
   conda activate matchms
   conda install --channel nlesc --channel bioconda --channel conda-forge matchms
 
@@ -88,9 +88,6 @@ Should output
 
 .. testoutput::
 
-    Removed adduct M-H from compound name.
-    Added adduct [M-H]- to metadata.
-    ...
     Reference scan id: 1320
     Query scan id: 1372
     Score: 0.9143
