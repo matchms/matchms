@@ -1,4 +1,5 @@
 import numpy
+from ..logging import logger
 from ..Spikes import Spikes
 from ..typing import SpectrumType
 
@@ -20,7 +21,7 @@ def add_losses(spectrum_in: SpectrumType, loss_mz_from=0.0, loss_mz_to=1000.0) -
 
     spectrum = spectrum_in.clone()
 
-    precursor_mz = spectrum.get("precursor_mz")
+    precursor_mz = spectrum.get("precursor_mz", None)
     if precursor_mz:
         assert isinstance(precursor_mz, (float, int)), ("Expected 'precursor_mz' to be a scalar number.",
                                                         "Consider applying 'add_precursor_mz' filter first.")
@@ -32,5 +33,7 @@ def add_losses(spectrum_in: SpectrumType, loss_mz_from=0.0, loss_mz_to=1000.0) -
                            & (losses_mz <= loss_mz_to))
         spectrum.losses = Spikes(mz=losses_mz[mask],
                                  intensities=losses_intensities[mask])
+    else:
+        logger.warning("No precursor_mz found. Consider applying 'add_precursor_mz' filter first.")
 
     return spectrum

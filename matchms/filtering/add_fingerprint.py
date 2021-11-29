@@ -1,4 +1,5 @@
 import numpy
+from ..logging import logger
 from ..typing import SpectrumType
 from ..utils import derive_fingerprint_from_inchi
 from ..utils import derive_fingerprint_from_smiles
@@ -42,4 +43,5 @@ def add_fingerprint(spectrum_in: SpectrumType, fingerprint_type: str = "daylight
             spectrum.set("fingerprint", fingerprint)
             return spectrum
 
+    logger.info("No fingerprint was added (name: %s).", spectrum.get("compound_name"))
     return spectrum

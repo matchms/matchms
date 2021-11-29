@@ -1,5 +1,6 @@
 import numpy
 import pytest
+from testfixtures import LogCapture
 from matchms import Spectrum
 from matchms.filtering import add_losses
 
@@ -23,9 +24,14 @@ def test_add_losses_without_precursor_mz():
     spectrum_in = Spectrum(mz=numpy.array([100, 150, 200, 300], dtype="float"),
                            intensities=numpy.array([700, 200, 100, 1000], dtype="float"))
 
-    spectrum = add_losses(spectrum_in)
+    with LogCapture() as log:
+        spectrum = add_losses(spectrum_in)
 
     assert spectrum == spectrum_in and spectrum is not spectrum_in
+    log.check(
+        ("matchms", "WARNING",
+         "No precursor_mz found. Consider applying 'add_precursor_mz' filter first.")
+    )
 
 
 def test_add_losses_with_precursor_mz_wrong_type():

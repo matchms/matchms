@@ -1,5 +1,6 @@
 import numpy
 import pytest
+from testfixtures import LogCapture
 from matchms import Spectrum
 from matchms.filtering import add_fingerprint
 
@@ -32,10 +33,14 @@ def test_add_fingerprint_no_smiles_no_inchi():
     """Test if fingerprint it generated correctly."""
     spectrum_in = Spectrum(mz=numpy.array([], dtype="float"),
                            intensities=numpy.array([], dtype="float"),
-                           metadata={})
+                           metadata={"compound_name": "test name"})
 
-    spectrum = add_fingerprint(spectrum_in)
+    with LogCapture() as log:
+        spectrum = add_fingerprint(spectrum_in)
     assert spectrum.get("fingerprint", None) is None, "Expected None."
+    log.check(
+        ("matchms", "INFO", "No fingerprint was added (name: test name).")
+    )
 
 
 def test_add_fingerprint_empty_spectrum():
