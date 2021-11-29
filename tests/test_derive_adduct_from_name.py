@@ -15,8 +15,8 @@ def test_derive_adduct_from_name():
     assert spectrum.get("compound_name") == "peptideXYZ", "Expected different cleaned name."
 
     log.check(
-        ('matchms.logging', 'INFO', 'Removed adduct [M+H+K] from compound name.'),
-        ('matchms.logging', 'INFO', 'Added adduct [M+H+K] to metadata.')
+        ('matchms', 'INFO', 'Removed adduct [M+H+K] from compound name.'),
+        ('matchms', 'INFO', 'Added adduct [M+H+K] to metadata.')
     )
 
 

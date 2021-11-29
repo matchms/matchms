@@ -9,5 +9,5 @@ with open(os.path.join(here, 'logging.yml'), 'r', encoding="utf-8") as f:
     config = yaml.safe_load(f.read())
     logging.config.dictConfig(config)
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("matchms")
 logger.info('Completed configuring logger()!')

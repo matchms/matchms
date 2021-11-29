@@ -54,5 +54,5 @@ def load_from_usi(usi: str, server: str = "https://metabolomics-usi.ucsd.edu"):
         return s
 
     except json.decoder.JSONDecodeError:
-        logger.warn("Failed to unpack json (JSONDecodeError).")
+        logger.warning("Failed to unpack json (JSONDecodeError).")
         return None
