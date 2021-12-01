@@ -36,8 +36,7 @@ import sys
 
 
 _formatter = logging.Formatter(
-    '%(asctime)s:%(levelname)s:%(name)s:%(module)s:%(message)s'
-    )
+    '%(asctime)s:%(levelname)s:%(name)s:%(module)s:%(message)s')
 
 
 def _init_logger():

@@ -15,9 +15,11 @@ def test_initial_logging(caplog):
     assert "warning test" in caplog.text, "Warning log should have been shown."
 
 
-def test_set_matchms_logger_level(caplog):
+def test_set_and_reset_matchms_logger_level(caplog):
     """Test logging functionality."""
     logger = logging.getLogger("matchms")
+    assert logger.getEffectiveLevel() == 30, "Expected different logging level"
+
     set_matchms_logger_level("INFO")
     logger.debug("debug test")
     logger.info("info test")
@@ -26,3 +28,6 @@ def test_set_matchms_logger_level(caplog):
     assert logger.getEffectiveLevel() == 20, "Expected different logging level"
     assert "debug test" not in caplog.text, "Debug log should not be shown."
     assert "info test" in caplog.text, "Info log should have been shown."
+
+    reset_matchms_logger()
+    assert logger.getEffectiveLevel() == 30, "Expected different logging level"
