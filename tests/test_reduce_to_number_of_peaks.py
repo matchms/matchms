@@ -3,6 +3,8 @@ import pytest
 from testfixtures import LogCapture
 from matchms import Spectrum
 from matchms.filtering import reduce_to_number_of_peaks
+from matchms.logging_functions import reset_matchms_logger
+from matchms.logging_functions import set_matchms_logger_level
 
 
 def test_reduce_to_number_of_peaks_no_params():
@@ -30,6 +32,7 @@ def test_reduce_to_number_of_peaks_no_params_w_parent_mass():
 
 def test_reduce_to_number_of_peaks_set_to_none():
     """Test is spectrum is set to None if not enough peaks."""
+    set_matchms_logger_level("INFO")
     mz = numpy.array([10, 20], dtype="float")
     intensities = numpy.array([0.5, 1], dtype="float")
     spectrum_in = Spectrum(mz=mz, intensities=intensities,
@@ -42,6 +45,7 @@ def test_reduce_to_number_of_peaks_set_to_none():
     log.check(
         ('matchms', 'INFO', "Spectrum with 2 (<5) peaks was set to None.")
     )
+    reset_matchms_logger()
 
 
 def test_reduce_to_number_of_peaks_n_max_4():
