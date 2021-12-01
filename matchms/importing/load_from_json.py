@@ -1,9 +1,9 @@
 import ast
 import json
+import logging
 from typing import List
 from typing import Union
 import numpy
-import logging
 from ..Spectrum import Spectrum
 
 

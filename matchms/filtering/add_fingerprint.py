@@ -1,5 +1,5 @@
-import numpy
 import logging
+import numpy
 from ..typing import SpectrumType
 from ..utils import derive_fingerprint_from_inchi
 from ..utils import derive_fingerprint_from_smiles

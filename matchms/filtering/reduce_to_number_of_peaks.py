@@ -1,7 +1,7 @@
+import logging
 from math import ceil
 from typing import Optional
 import numpy
-import logging
 from ..Spikes import Spikes
 from ..typing import SpectrumType
 

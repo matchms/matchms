@@ -1,7 +1,7 @@
 import json
+import logging
 import numpy as np
 import requests
-import logging
 from ..Spectrum import Spectrum
 
 

@@ -1,5 +1,5 @@
-import numpy
 import logging
+import numpy
 from ..Spikes import Spikes
 from ..typing import SpectrumType
 

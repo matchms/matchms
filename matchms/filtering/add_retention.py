@@ -1,9 +1,9 @@
+import logging
 from typing import Any
 from typing import List
 from typing import Optional
 from matchms.utils import filter_none
 from matchms.utils import get_common_keys
-import logging
 from ..typing import SpectrumType
 
 
