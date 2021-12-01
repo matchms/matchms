@@ -27,7 +27,7 @@ def data(request):
     return list(spectra)
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def filename():
     with tempfile.TemporaryDirectory() as temp_dir:
         filename = os.path.join(temp_dir, "test.msp")
