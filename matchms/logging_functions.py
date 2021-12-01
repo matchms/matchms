@@ -95,6 +95,11 @@ def add_logging_to_file(filename: str, loglevel: str = "INFO",
 
 
 def reset_matchms_logger():
+    """Reset matchms logger to initial state.
+
+    This will remove all logging Handlers and initialize a new matchms logger.
+    Use this function to reset previous changes made to the default matchms logger.
+    """
     logger = logging.getLogger("matchms")
     logger.handlers.clear()
     _init_logger()
