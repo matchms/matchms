@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
+import os
+from matchms.logging_functions import add_logging_to_file
 from matchms.logging_functions import reset_matchms_logger
 from matchms.logging_functions import set_matchms_logger_level
 
@@ -31,3 +33,17 @@ def test_set_and_reset_matchms_logger_level(caplog):
 
     reset_matchms_logger()
     assert logger.getEffectiveLevel() == 30, "Expected different logging level"
+
+
+def test_add_logging_to_file(tmp_path, caplog):
+    """Test writing logs to file."""
+    logger = logging.getLogger("matchms")
+    set_matchms_logger_level("INFO")
+    filename = os.path.join(tmp_path, "test.log")
+    add_logging_to_file(filename)
+    logger.info("test message no.1")
+    assert os.path.isfile(filename), "Log file not found."
+    with open(filename, "r", encoding="utf-8") as file:
+        logs = file.read()
+    expected_log_entry = "INFO:matchms:test_logging:test message no.1"
+    assert expected_log_entry in logs, "Expected different log file content"
