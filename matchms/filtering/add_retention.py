@@ -3,8 +3,11 @@ from typing import List
 from typing import Optional
 from matchms.utils import filter_none
 from matchms.utils import get_common_keys
-from ..logging import logger
+import logging
 from ..typing import SpectrumType
+
+
+logger = logging.getLogger("matchms")
 
 
 _retention_time_keys = ["retention_time", "retentiontime", "rt", "scan_start_time", "RT_Query"]

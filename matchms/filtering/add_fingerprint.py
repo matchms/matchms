@@ -1,8 +1,11 @@
 import numpy
-from ..logging import logger
+import logging
 from ..typing import SpectrumType
 from ..utils import derive_fingerprint_from_inchi
 from ..utils import derive_fingerprint_from_smiles
+
+
+logger = logging.getLogger("matchms")
 
 
 def add_fingerprint(spectrum_in: SpectrumType, fingerprint_type: str = "daylight",

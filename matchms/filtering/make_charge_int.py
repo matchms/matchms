@@ -1,5 +1,8 @@
-from ..logging import logger
+import logging
 from ..typing import SpectrumType
+
+
+logger = logging.getLogger("matchms")
 
 
 def make_charge_int(spectrum_in: SpectrumType) -> SpectrumType:

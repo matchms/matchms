@@ -1,8 +1,11 @@
 import json
 import numpy as np
 import requests
-from ..logging import logger
+import logging
 from ..Spectrum import Spectrum
+
+
+logger = logging.getLogger("matchms")
 
 
 def load_from_usi(usi: str, server: str = "https://metabolomics-usi.ucsd.edu"):

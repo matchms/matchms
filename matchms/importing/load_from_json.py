@@ -3,8 +3,11 @@ import json
 from typing import List
 from typing import Union
 import numpy
-from ..logging import logger
+import logging
 from ..Spectrum import Spectrum
+
+
+logger = logging.getLogger("matchms")
 
 
 def load_from_json(filename: str) -> List[Spectrum]:

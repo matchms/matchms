@@ -1,8 +1,11 @@
-from ..logging import logger
+import logging
 from ..typing import SpectrumType
 from ..utils import convert_inchi_to_inchikey
 from ..utils import is_valid_inchi
 from ..utils import is_valid_inchikey
+
+
+logger = logging.getLogger("matchms")
 
 
 def derive_inchikey_from_inchi(spectrum_in: SpectrumType) -> SpectrumType:

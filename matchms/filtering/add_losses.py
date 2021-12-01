@@ -1,7 +1,10 @@
 import numpy
-from ..logging import logger
+import logging
 from ..Spikes import Spikes
 from ..typing import SpectrumType
+
+
+logger = logging.getLogger("matchms")
 
 
 def add_losses(spectrum_in: SpectrumType, loss_mz_from=0.0, loss_mz_to=1000.0) -> SpectrumType:

@@ -1,9 +1,12 @@
 from math import ceil
 from typing import Optional
 import numpy
-from ..logging import logger
+import logging
 from ..Spikes import Spikes
 from ..typing import SpectrumType
+
+
+logger = logging.getLogger("matchms")
 
 
 def reduce_to_number_of_peaks(spectrum_in: SpectrumType, n_required: int = 1, n_max: int = numpy.inf,

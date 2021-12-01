@@ -1,8 +1,11 @@
 from ..constants import PROTON_MASS
 from ..importing import load_adducts_dict
-from ..logging import logger
+import logging
 from ..typing import SpectrumType
 from ..utils import clean_adduct
+
+
+logger = logging.getLogger("matchms")
 
 
 def add_parent_mass(spectrum_in: SpectrumType, estimate_from_adduct: bool = True,

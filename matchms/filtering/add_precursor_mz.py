@@ -1,6 +1,9 @@
 from matchms.utils import get_first_common_element
-from ..logging import logger
+import logging
 from ..typing import SpectrumType
+
+
+logger = logging.getLogger("matchms")
 
 
 _accepted_keys = ["precursor_mz", "precursormz", "precursor_mass"]

@@ -1,7 +1,10 @@
-from ..logging import logger
+import logging
 from ..typing import SpectrumType
 from ..utils import clean_adduct
 from ..utils import looks_like_adduct
+
+
+logger = logging.getLogger("matchms")
 
 
 def derive_adduct_from_name(spectrum_in: SpectrumType,

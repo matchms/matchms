@@ -1,5 +1,8 @@
-from ..logging import logger
+import logging
 from ..typing import SpectrumType
+
+
+logger = logging.getLogger("matchms")
 
 
 def add_compound_name(spectrum_in: SpectrumType) -> SpectrumType:

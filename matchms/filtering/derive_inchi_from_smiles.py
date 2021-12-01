@@ -1,8 +1,11 @@
-from ..logging import logger
+import logging
 from ..typing import SpectrumType
 from ..utils import convert_smiles_to_inchi
 from ..utils import is_valid_inchi
 from ..utils import is_valid_smiles
+
+
+logger = logging.getLogger("matchms")
 
 
 def derive_inchi_from_smiles(spectrum_in: SpectrumType) -> SpectrumType:
