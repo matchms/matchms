@@ -42,8 +42,32 @@ def test_add_logging_to_file(tmp_path, caplog):
     filename = os.path.join(tmp_path, "test.log")
     add_logging_to_file(filename)
     logger.info("test message no.1")
+
+    expected_log_entry = "test message no.1"
+    # Test streamed logs
+    assert expected_log_entry in caplog.text, "Expected different log message"
+
+    # Test log file
     assert os.path.isfile(filename), "Log file not found."
     with open(filename, "r", encoding="utf-8") as file:
         logs = file.read()
+    assert expected_log_entry in logs, "Expected different log file content"
+
+
+def test_add_logging_to_file_only_file(tmp_path, caplog):
+    """Test writing logs to file."""
+    logger = logging.getLogger("matchms")
+    set_matchms_logger_level("INFO")
+    filename = os.path.join(tmp_path, "test.log")
+    add_logging_to_file(filename, remove_stream_handlers=True)
+    logger.info("test message no.1")
+
     expected_log_entry = "INFO:matchms:test_logging:test message no.1"
+    # Test streamed logs
+    assert expected_log_entry not in caplog.text, "Expected different log message"
+
+    # Test log file
+    assert os.path.isfile(filename), "Log file not found."
+    with open(filename, "r", encoding="utf-8") as file:
+        logs = file.read()
     assert expected_log_entry in logs, "Expected different log file content"
