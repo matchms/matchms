@@ -2,9 +2,11 @@ import numpy
 from testfixtures import LogCapture
 from matchms import Spectrum
 from matchms.filtering import derive_adduct_from_name
+from matchms.logging_functions import set_matchms_logger_level
 
 
 def test_derive_adduct_from_name():
+    set_matchms_logger_level("INFO")
     spectrum_in = Spectrum(mz=numpy.array([], dtype="float"),
                            intensities=numpy.array([], dtype="float"),
                            metadata={"compound_name": "peptideXYZ [M+H+K]"})

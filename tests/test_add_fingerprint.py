@@ -3,6 +3,7 @@ import pytest
 from testfixtures import LogCapture
 from matchms import Spectrum
 from matchms.filtering import add_fingerprint
+from matchms.logging_functions import set_matchms_logger_level
 
 
 def test_add_fingerprint_from_smiles():
@@ -31,6 +32,7 @@ def test_add_fingerprint_from_inchi():
 
 def test_add_fingerprint_no_smiles_no_inchi():
     """Test if fingerprint it generated correctly."""
+    set_matchms_logger_level("INFO")
     spectrum_in = Spectrum(mz=numpy.array([], dtype="float"),
                            intensities=numpy.array([], dtype="float"),
                            metadata={"compound_name": "test name"})

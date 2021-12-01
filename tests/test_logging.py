@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 import logging
-from matchms.logging import logger
+from matchms.logging_functions import set_matchms_logger_level
 
 
-def test_logger_settings(caplog):
+def test_initial_logging(caplog):
     """Test logging functionality."""
+    logger = logging.getLogger("matchms")
     logger.info("info test")
     logger.warning("warning test")
     assert logger.name == "matchms", "Expected different logger name"
@@ -13,9 +14,10 @@ def test_logger_settings(caplog):
     assert "warning test" in caplog.text, "Warning log should have been shown."
 
 
-def test_logger_change_of_output_level(caplog):
+def test_set_matchms_logger_level(caplog):
     """Test logging functionality."""
-    logging.getLogger("matchms").setLevel(logging.INFO)
+    logger = logging.getLogger("matchms")
+    set_matchms_logger_level("INFO")
     logger.debug("debug test")
     logger.info("info test")
 

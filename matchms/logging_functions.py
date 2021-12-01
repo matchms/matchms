@@ -20,6 +20,15 @@ to ERROR by:
 
     set_matchms_logger_level("ERROR")
 
+To write logging entries to a local file, you can do the following:
+
+.. code-block:: python
+
+    from matchms import add_logging_to_file
+    from matchms import calculate_scores, Spectrum
+
+    add_logging_to_file("sample.log")
+
 """
 import logging
 import logging.config
@@ -34,9 +43,9 @@ _formatter = logging.Formatter(
 def _init_logger():
     """Initialize matchms logger."""
     logger = logging.getLogger('matchms')
-    logger.setLevel(logging.INFO)
+    logger.setLevel(logging.WARNING)
     handler = logging.StreamHandler(sys.stdout)
-    handler.setLevel(logging.INFO)
+    handler.setLevel(logging.WARNING)
     handler.setFormatter(_formatter)
     logger.addHandler(handler)
     logger.info('Completed configuring matchms logger.')
