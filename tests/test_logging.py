@@ -53,6 +53,7 @@ def test_add_logging_to_file(tmp_path, caplog):
     with open(filename, "r", encoding="utf-8") as file:
         logs = file.read()
     assert expected_log_entry in logs, "Expected different log file content"
+    reset_matchms_logger()
 
 
 def test_add_logging_to_file_only_file(tmp_path, caplog):
@@ -64,8 +65,8 @@ def test_add_logging_to_file_only_file(tmp_path, caplog):
     logger.info("test message no.1")
 
     # Test streamed logs
-    expected_log_entry = "test message no.1"
-    assert expected_log_entry not in caplog.text, "Expected different log message"
+    not_expected_log_entry = "test message no.1"
+    assert not_expected_log_entry not in caplog.text, "Did not expect log message"
 
     # Test log file
     expected_log_entry = "INFO:matchms:test_logging:test message no.1"
@@ -73,3 +74,4 @@ def test_add_logging_to_file_only_file(tmp_path, caplog):
     with open(filename, "r", encoding="utf-8") as file:
         logs = file.read()
     assert expected_log_entry in logs, "Expected different log file content"
+    reset_matchms_logger()
