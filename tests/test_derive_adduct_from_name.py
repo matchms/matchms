@@ -2,6 +2,7 @@ import numpy
 from testfixtures import LogCapture
 from matchms import Spectrum
 from matchms.filtering import derive_adduct_from_name
+from matchms.logging_functions import reset_matchms_logger
 from matchms.logging_functions import set_matchms_logger_level
 
 
@@ -20,6 +21,7 @@ def test_derive_adduct_from_name():
         ('matchms', 'INFO', 'Removed adduct [M+H+K] from compound name.'),
         ('matchms', 'INFO', 'Added adduct [M+H+K] to metadata.')
     )
+    reset_matchms_logger()
 
 
 def test_derive_adduct_from_name_dont_overwrite_present_adduct():

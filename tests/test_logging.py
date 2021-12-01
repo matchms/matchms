@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
+from matchms.logging_functions import reset_matchms_logger
 from matchms.logging_functions import set_matchms_logger_level
 
 

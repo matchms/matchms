@@ -3,6 +3,7 @@ import pytest
 from testfixtures import LogCapture
 from matchms import Spectrum
 from matchms.filtering import add_fingerprint
+from matchms.logging_functions import reset_matchms_logger
 from matchms.logging_functions import set_matchms_logger_level
 
 
@@ -43,6 +44,7 @@ def test_add_fingerprint_no_smiles_no_inchi():
     log.check(
         ("matchms", "INFO", "No fingerprint was added (name: test name).")
     )
+    reset_matchms_logger()
 
 
 def test_add_fingerprint_empty_spectrum():
