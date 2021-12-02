@@ -61,7 +61,7 @@ def set_matchms_logger_level(loglevel: str, logger_name="matchms"):
         Default is "matchms". Change if logger name should be different.
     """
     level = logging.getLevelName(loglevel)
-    logger = logging.getLogger("matchms")
+    logger = logging.getLogger(logger_name)
     logger.setLevel(level)
     for handler in logger.handlers:
         handler.setLevel(level)
