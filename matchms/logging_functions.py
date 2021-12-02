@@ -87,6 +87,7 @@ def add_logging_to_file(filename: str, loglevel: str = "INFO",
     file_handler.setLevel(level)
     file_handler.setFormatter(_formatter)
     logger.addHandler(file_handler)
+
     # Remove the existing handlers if they are not of type FileHandler
     if remove_stream_handlers is True:
         for handler in logger.handlers:

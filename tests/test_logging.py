@@ -6,7 +6,8 @@ from matchms.logging_functions import reset_matchms_logger
 from matchms.logging_functions import set_matchms_logger_level
 
 
-def test_initial_logging(caplog):
+def test_initial_logging(caplog, capsys):
+    reset_matchms_logger()
     """Test logging functionality."""
     logger = logging.getLogger("matchms")
     logger.info("info test")
@@ -15,6 +16,9 @@ def test_initial_logging(caplog):
     assert logger.getEffectiveLevel() == 30, "Expected different logging level"
     assert "info test" not in caplog.text, "Info log should not be shown."
     assert "warning test" in caplog.text, "Warning log should have been shown."
+    assert "warning test" in capsys.readouterr().out, \
+        "Warning log should have been shown to stderr/stdout."
+    reset_matchms_logger()
 
 
 def test_set_and_reset_matchms_logger_level(caplog):
@@ -33,22 +37,27 @@ def test_set_and_reset_matchms_logger_level(caplog):
 
     reset_matchms_logger()
     assert logger.getEffectiveLevel() == 30, "Expected different logging level"
+    reset_matchms_logger()
 
 
-def test_add_logging_to_file(tmp_path, caplog):
+def test_add_logging_to_file(tmp_path, caplog, capsys):
     """Test writing logs to file."""
-    logger = logging.getLogger("matchms")
+    reset_matchms_logger()
     set_matchms_logger_level("INFO")
     filename = os.path.join(tmp_path, "test.log")
     add_logging_to_file(filename)
+    logger = logging.getLogger("matchms")
     logger.info("test message no.1")
 
     expected_log_entry = "test message no.1"
     # Test streamed logs
-    assert expected_log_entry in caplog.text, "Expected different log message"
+    assert expected_log_entry in caplog.text, "Expected different log message."
+    assert expected_log_entry in capsys.readouterr().out, \
+        "Expected different log message in output (stdout/stderr)."
 
     # Test log file
     expected_log_entry = "INFO:matchms:test_logging:test message no.1"
+    assert len(logger.handlers) == 2, "Expected two Handler"
     assert os.path.isfile(filename), "Log file not found."
     with open(filename, "r", encoding="utf-8") as file:
         logs = file.read()
@@ -56,17 +65,19 @@ def test_add_logging_to_file(tmp_path, caplog):
     reset_matchms_logger()
 
 
-def test_add_logging_to_file_only_file(tmp_path, caplog):
+def test_add_logging_to_file_only_file(tmp_path, capsys):
     """Test writing logs to file."""
-    logger = logging.getLogger("matchms")
+    reset_matchms_logger()
     set_matchms_logger_level("INFO")
     filename = os.path.join(tmp_path, "test.log")
     add_logging_to_file(filename, remove_stream_handlers=True)
+    logger = logging.getLogger("matchms")
     logger.info("test message no.1")
 
     # Test streamed logs
     not_expected_log_entry = "test message no.1"
-    assert not_expected_log_entry not in caplog.text, "Did not expect log message"
+    assert len(logger.handlers) == 1, "Expected only one Handler"
+    assert not_expected_log_entry not in capsys.readouterr().out, "Did not expect log message"
 
     # Test log file
     expected_log_entry = "INFO:matchms:test_logging:test message no.1"
