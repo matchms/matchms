@@ -7,8 +7,8 @@ from matchms.logging_functions import set_matchms_logger_level
 
 
 def test_initial_logging(caplog, capsys):
-    reset_matchms_logger()
     """Test logging functionality."""
+    reset_matchms_logger()
     logger = logging.getLogger("matchms")
     logger.info("info test")
     logger.warning("warning test")
