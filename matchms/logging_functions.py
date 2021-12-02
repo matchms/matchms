@@ -3,7 +3,7 @@
 Matchms functions and method report unexpected or undesired behavior as
 logging WARNING, and additional information as INFO.
 The default logging level is set to WARNING. If you want to output additional
-logging messages, you can lower the logging level to INFO using setLevel:
+logging messages, you can lower the logging level to INFO using set_matchms_logger_level:
 
 .. code-block:: python
 
@@ -24,10 +24,10 @@ To write logging entries to a local file, you can do the following:
 
 .. code-block:: python
 
-    from matchms import add_logging_to_file
     from matchms import calculate_scores, Spectrum
+    from matchms.logging_functions import add_logging_to_file
 
-    add_logging_to_file("sample.log")
+    add_logging_to_file("sample.log", loglevel="INFO")
 
 """
 import logging
@@ -39,9 +39,9 @@ _formatter = logging.Formatter(
     '%(asctime)s:%(levelname)s:%(name)s:%(module)s:%(message)s')
 
 
-def _init_logger():
+def _init_logger(logger_name="matchms"):
     """Initialize matchms logger."""
-    logger = logging.getLogger('matchms')
+    logger = logging.getLogger(logger_name)
     logger.setLevel(logging.WARNING)
     handler = logging.StreamHandler(sys.stdout)
     handler.setLevel(logging.WARNING)
@@ -50,13 +50,15 @@ def _init_logger():
     logger.info('Completed configuring matchms logger.')
 
 
-def set_matchms_logger_level(loglevel: str):
+def set_matchms_logger_level(loglevel: str, logger_name="matchms"):
     """Update logging level to given loglevel.
 
     Parameters
     ----------
     loglevels
         Can be 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'.
+    logger_name
+        Default is "matchms". Change if logger name should be different.
     """
     level = logging.getLevelName(loglevel)
     logger = logging.getLogger("matchms")
@@ -66,7 +68,8 @@ def set_matchms_logger_level(loglevel: str):
 
 
 def add_logging_to_file(filename: str, loglevel: str = "INFO",
-                        remove_stream_handlers: bool = False):
+                        remove_stream_handlers: bool = False,
+                        logger_name="matchms"):
     """Add logging to file.
 
     Current implementation does not change the initial logging stream,
@@ -80,9 +83,11 @@ def add_logging_to_file(filename: str, loglevel: str = "INFO",
         Can be 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'.
     remove_stream_handlers
         Set to True if only logging to file is desired.
+    logger_name
+        Default is "matchms". Change if logger name should be different.
     """
     level = logging.getLevelName(loglevel)
-    logger = logging.getLogger("matchms")
+    logger = logging.getLogger(logger_name)
     file_handler = logging.FileHandler(filename)
     file_handler.setLevel(level)
     file_handler.setFormatter(_formatter)
@@ -95,12 +100,17 @@ def add_logging_to_file(filename: str, loglevel: str = "INFO",
                 logger.removeHandler(handler)
 
 
-def reset_matchms_logger():
+def reset_matchms_logger(logger_name="matchms"):
     """Reset matchms logger to initial state.
 
     This will remove all logging Handlers and initialize a new matchms logger.
     Use this function to reset previous changes made to the default matchms logger.
+
+    Parameters
+    ----------
+    logger_name
+        Default is "matchms". Change if logger name should be different.
     """
-    logger = logging.getLogger("matchms")
+    logger = logging.getLogger(logger_name)
     logger.handlers.clear()
     _init_logger()
