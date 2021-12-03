@@ -45,7 +45,7 @@ def derive_formula_from_name(spectrum_in: SpectrumType,
     # Add found formula to metadata (if not present yet)
     if formula_from_name and spectrum.get("formula", None) is None:
         spectrum.set("formula", formula_from_name)
-        logger.info("Added formula to metadata.", formula_from_name)
+        logger.info("Added formula %s to metadata.", formula_from_name)
 
     return spectrum
 

@@ -1,7 +1,10 @@
 import numpy
 import pytest
+from testfixtures import LogCapture
 from matchms import Spectrum
 from matchms.filtering.require_precursor_mz import require_precursor_mz
+from matchms.logging_functions import reset_matchms_logger
+from matchms.logging_functions import set_matchms_logger_level
 
 
 def test_require_precursor_mz_pass():
@@ -18,14 +21,20 @@ def test_require_precursor_mz_pass():
 
 def test_require_precursor_mz_fail_because_zero():
     """Test if spectrum is None when precursor_mz == 0"""
+    set_matchms_logger_level("INFO")
     mz = numpy.array([10, 20, 30, 40], dtype="float")
     intensities = numpy.array([0, 1, 10, 100], dtype="float")
     spectrum_in = Spectrum(mz=mz, intensities=intensities)
     spectrum_in.set("precursor_mz", 0.0)
 
-    spectrum = require_precursor_mz(spectrum_in)
+    with LogCapture() as log:
+        spectrum = require_precursor_mz(spectrum_in)
 
     assert spectrum is None, "Expected spectrum to be None."
+    log.check(
+        ('matchms', 'INFO', 'Spectrum without precursor_mz was set to None.')
+    )
+    reset_matchms_logger()
 
 
 def test_require_precursor_mz_fail_because_below_zero():
