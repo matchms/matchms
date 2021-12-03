@@ -21,6 +21,7 @@ def derive_inchikey_from_inchi(spectrum_in: SpectrumType) -> SpectrumType:
         inchikey = convert_inchi_to_inchikey(inchi)
         if inchikey:
             spectrum.set("inchikey", inchikey)
+            logger.info("Added InChIKey %s to metadata (was converted from inchi)", inchikey)
         else:
             logger.warning("Could not convert InChI %s to inchikey.", inchi)
 

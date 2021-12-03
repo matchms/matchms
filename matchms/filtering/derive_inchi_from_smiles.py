@@ -22,6 +22,7 @@ def derive_inchi_from_smiles(spectrum_in: SpectrumType) -> SpectrumType:
         if inchi:
             inchi = inchi.rstrip()
             spectrum.set("inchi", inchi)
+            logger.info("Added InChI (%s) to metadata (was converted from smiles).", inchi)
         else:
             logger.warning("Could not convert smiles %s to InChI.", smiles)
 
