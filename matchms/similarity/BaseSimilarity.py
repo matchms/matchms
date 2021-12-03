@@ -67,8 +67,18 @@ class BaseSimilarity:
                     scores[i_ref][i_query] = self.pair(reference, query)
         return scores
 
+    def sparse_matrix(self, references: List[SpectrumType], queries: List[SpectrumType],
+                      idx_row, idx_col, is_symmetric: bool = False):
+        assert idx_row.shape == idx_col.shape, "col and row indices must be of same shape"
+        scores = numpy.zeros((len(idx_row)), dtype=self.score_datatype)
+        for i, row in enumerate(idx_row):
+            col = idx_col[i]
+            scores[i] = self.pair(references[row], queries[col])
+        return scores
+
     def sort(self, scores: numpy.ndarray):
         """Return array of indexes for sorted list of scores.
+
         This method can be adapted for different styles of scores.
 
         Parameters
