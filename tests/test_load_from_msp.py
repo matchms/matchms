@@ -83,11 +83,19 @@ def test_load_from_msp_tabs():
         39987
     ]])
 
+    expected_peak_comments = {113.03854: "Theoretical m/z 113.039125, Mass diff 0 (0 ppm), Formula C9H5",
+                              125.03855: "Theoretical m/z 125.039125, Mass diff 0 (0 ppm), Formula C10H5",
+                              249.07072: "Theoretical m/z 249.070425, Mass diff -0.001 (0 ppm), Formula C20H9",
+                              252.09323: "Theoretical m/z 252.093354, Mass diff 0 (0.49 ppm), SMILES "
+                                         "C1=CC=2C=CC=C3C4=CC=CC5=CC=CC(C(=C1)C23)=C54, Annotation [C20H12]+, "
+                                         "Rule of HR False"}
+
     for idx, spectrum in enumerate(spectra):
         assert_matching_inchikey(spectrum, expected_inchikey[idx])
         numpy.testing.assert_array_almost_equal(spectrum.peaks.mz, expected_mz[idx])
         numpy.testing.assert_array_almost_equal(spectrum.peaks.intensities, expected_intensities[idx])
-
+        # comment out until 'peak_comments' is implemented in Spectrum
+        # assert spectrum.peak_comments == expected_peak_comments
 
 def test_load_from_msp_multiline():
     """Test parse of msp file to spectrum objects with ';' separator and multiple peaks in one line."""
