@@ -6,6 +6,7 @@ import pytest
 from matchms import Spectrum
 from matchms.exporting import save_as_msp
 from matchms.importing import load_from_msp
+from .builder_Spectrum import SpectrumBuilder
 
 
 @pytest.fixture
@@ -15,8 +16,9 @@ def none_spectrum():
 
 @pytest.fixture
 def spectrum():
-    return Spectrum(mz=numpy.array([100, 200, 290, 490, 510], dtype="float"),
-                    intensities=numpy.array([0.1, 0.2, 1.0, 0.3, 0.4], dtype="float"))
+    mz = numpy.array([100, 200, 290, 490, 510], dtype="float")
+    intensities = numpy.array([0.1, 0.2, 1.0, 0.3, 0.4], dtype="float")
+    return SpectrumBuilder().with_mz(mz).with_intensities(intensities).build()
 
 
 @pytest.fixture(params=["rcx_gc-ei_ms_20201028_perylene.msp", "MoNA-export-GC-MS-first10.msp", "Hydrogen_chloride.msp"])
