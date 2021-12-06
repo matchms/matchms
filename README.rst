@@ -90,6 +90,31 @@ F Huber, S. Verhoeven, C. Meijer, H. Spreeuw, E. M. Villanueva Castilla, C. Geng
    :target: https://sonarcloud.io/component_measures?id=matchms_matchms&metric=Coverage&view=list
    :alt: Sonarcloud Coverage
 
+
+**********************************
+Latest changes (matchms >= 0.10.0)
+**********************************
+
+- 2 new filters in ``matchms.filtering``: ``add_retention_time()`` and ``add_retention_index()``, to consistently add retention time/index to the spectrum metadata
+- Hashes! ``Spectrum``-objects now allow to compute different hashes:
+
+.. code-block:: python
+
+    from matchms.importing import load_from_mgf
+
+    # Read spectrums from a MGF formatted file, for other formats see https://matchms.readthedocs.io/en/latest/api/matchms.importing.html 
+    spectrums = list(load_from_mgf("tests/pesticides.mgf"))
+    
+    # Spectrum hashes are generated based on MS/MS peak m/z and intensities
+    # Those will change if any processing step affects the peaks.
+    spectrum_hashes = [s.spectrum_hash() for s in spectrums]
+    # Metadata hashes are generated based on the spectrum metadata
+    # Those will change if any processing step affects the metadata.
+    metadata_hashes = [s.metadata_hash() for s in spectrums]
+    # `hash(spectrum)` will return a hash that is a combination of spectrum and metadata hash
+    # Those will hence change if any processing step affects the peaks and/or the metadata.
+    hashes = [hash(s) for s in spectrums]
+
 ***********************
 Documentation for users
 ***********************

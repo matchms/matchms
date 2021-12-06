@@ -41,6 +41,8 @@ from .add_fingerprint import add_fingerprint
 from .add_losses import add_losses
 from .add_parent_mass import add_parent_mass
 from .add_precursor_mz import add_precursor_mz
+from .add_retention import add_retention_index
+from .add_retention import add_retention_time
 from .clean_compound_name import clean_compound_name
 from .correct_charge import correct_charge
 from .default_filters import default_filters
@@ -77,6 +79,8 @@ __all__ = [
     "add_losses",
     "add_parent_mass",
     "add_precursor_mz",
+    "add_retention_index",
+    "add_retention_time",
     "clean_compound_name",
     "correct_charge",
     "default_filters",
