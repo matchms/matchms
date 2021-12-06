@@ -1,11 +1,11 @@
 import numpy
 import pytest
 from matchms import Scores
-from matchms import Spectrum
 from matchms import calculate_scores
 from matchms.similarity import CosineGreedy
 from matchms.similarity import IntersectMz
 from matchms.similarity.BaseSimilarity import BaseSimilarity
+from .builder_Spectrum import SpectrumBuilder
 
 
 class DummySimilarityFunction(BaseSimilarity):
@@ -42,6 +42,20 @@ class DummySimilarityFunctionParallel(BaseSimilarity):
                 rq = reference + query
                 s[index_reference, index_query] = rq, len(rq)
         return s
+
+
+def spectra():
+    builder = SpectrumBuilder()
+    spectrum_1 = builder.with_mz(numpy.array([100, 150, 200.])).with_intensities(
+        numpy.array([0.7, 0.2, 0.1])).with_metadata({'id': 'spectrum1'}).build()
+    spectrum_2 = builder.with_mz(numpy.array([100, 140, 190.])).with_intensities(
+        numpy.array([0.4, 0.2, 0.1])).with_metadata({'id': 'spectrum2'}).build()
+    spectrum_3 = builder.with_mz(numpy.array([110, 140, 195.])).with_intensities(
+        numpy.array([0.6, 0.2, 0.1])).with_metadata({'id': 'spectrum3'}).build()
+    spectrum_4 = builder.with_mz(numpy.array([100, 150, 200.])).with_intensities(
+        numpy.array([0.6, 0.1, 0.6])).with_metadata({'id': 'spectrum4'}).build()
+
+    return spectrum_1, spectrum_2, spectrum_3, spectrum_4
 
 
 def test_scores_single_pair():
@@ -162,18 +176,7 @@ def test_scores_next():
 
 def test_scores_by_referencey():
     "Test scores_by_reference method."
-    spectrum_1 = Spectrum(mz=numpy.array([100, 150, 200.]),
-                          intensities=numpy.array([0.7, 0.2, 0.1]),
-                          metadata={'id': 'spectrum1'})
-    spectrum_2 = Spectrum(mz=numpy.array([100, 140, 190.]),
-                          intensities=numpy.array([0.4, 0.2, 0.1]),
-                          metadata={'id': 'spectrum2'})
-    spectrum_3 = Spectrum(mz=numpy.array([110, 140, 195.]),
-                          intensities=numpy.array([0.6, 0.2, 0.1]),
-                          metadata={'id': 'spectrum3'})
-    spectrum_4 = Spectrum(mz=numpy.array([100, 150, 200.]),
-                          intensities=numpy.array([0.6, 0.1, 0.6]),
-                          metadata={'id': 'spectrum4'})
+    spectrum_1, spectrum_2, spectrum_3, spectrum_4 = spectra()
     references = [spectrum_1, spectrum_2, spectrum_3]
     queries = [spectrum_3, spectrum_4]
 
@@ -186,18 +189,7 @@ def test_scores_by_referencey():
 
 def test_scores_by_reference_sorted():
     "Test scores_by_reference method with sort=True."
-    spectrum_1 = Spectrum(mz=numpy.array([100, 150, 200.]),
-                          intensities=numpy.array([0.7, 0.2, 0.1]),
-                          metadata={'id': 'spectrum1'})
-    spectrum_2 = Spectrum(mz=numpy.array([100, 140, 190.]),
-                          intensities=numpy.array([0.4, 0.2, 0.1]),
-                          metadata={'id': 'spectrum2'})
-    spectrum_3 = Spectrum(mz=numpy.array([110, 140, 195.]),
-                          intensities=numpy.array([0.6, 0.2, 0.1]),
-                          metadata={'id': 'spectrum3'})
-    spectrum_4 = Spectrum(mz=numpy.array([100, 150, 200.]),
-                          intensities=numpy.array([0.6, 0.1, 0.6]),
-                          metadata={'id': 'spectrum4'})
+    spectrum_1, spectrum_2, spectrum_3, spectrum_4 = spectra()
     references = [spectrum_1, spectrum_2, spectrum_3]
     queries = [spectrum_3, spectrum_4, spectrum_2]
 
@@ -214,18 +206,7 @@ def test_scores_by_reference_sorted():
 
 def test_scores_by_referencey_non_tuple_score():
     "Test scores_by_reference method."
-    spectrum_1 = Spectrum(mz=numpy.array([100, 150, 200.]),
-                          intensities=numpy.array([0.7, 0.2, 0.1]),
-                          metadata={'id': 'spectrum1'})
-    spectrum_2 = Spectrum(mz=numpy.array([100, 140, 190.]),
-                          intensities=numpy.array([0.4, 0.2, 0.1]),
-                          metadata={'id': 'spectrum2'})
-    spectrum_3 = Spectrum(mz=numpy.array([110, 140, 195.]),
-                          intensities=numpy.array([0.6, 0.2, 0.1]),
-                          metadata={'id': 'spectrum3'})
-    spectrum_4 = Spectrum(mz=numpy.array([100, 150, 200.]),
-                          intensities=numpy.array([0.6, 0.1, 0.6]),
-                          metadata={'id': 'spectrum4'})
+    spectrum_1, spectrum_2, spectrum_3, spectrum_4 = spectra()
     references = [spectrum_1, spectrum_2, spectrum_3]
     queries = [spectrum_3, spectrum_4]
 
@@ -238,18 +219,7 @@ def test_scores_by_referencey_non_tuple_score():
 
 def test_scores_by_query():
     "Test scores_by_query method."
-    spectrum_1 = Spectrum(mz=numpy.array([100, 150, 200.]),
-                          intensities=numpy.array([0.7, 0.2, 0.1]),
-                          metadata={'id': 'spectrum1'})
-    spectrum_2 = Spectrum(mz=numpy.array([100, 140, 190.]),
-                          intensities=numpy.array([0.4, 0.2, 0.1]),
-                          metadata={'id': 'spectrum2'})
-    spectrum_3 = Spectrum(mz=numpy.array([110, 140, 195.]),
-                          intensities=numpy.array([0.6, 0.2, 0.1]),
-                          metadata={'id': 'spectrum3'})
-    spectrum_4 = Spectrum(mz=numpy.array([100, 150, 200.]),
-                          intensities=numpy.array([0.6, 0.1, 0.6]),
-                          metadata={'id': 'spectrum4'})
+    spectrum_1, spectrum_2, spectrum_3, spectrum_4 = spectra()
     references = [spectrum_1, spectrum_2, spectrum_3]
     queries = [spectrum_2, spectrum_3, spectrum_4]
 
@@ -262,18 +232,16 @@ def test_scores_by_query():
 
 def test_scores_by_query_sorted():
     "Test scores_by_query method with sort=True."
-    spectrum_1 = Spectrum(mz=numpy.array([100, 150, 200.]),
-                          intensities=numpy.array([0.7, 0.2, 0.1]),
-                          metadata={'id': 'spectrum1'})
-    spectrum_2 = Spectrum(mz=numpy.array([100, 140, 190.]),
-                          intensities=numpy.array([0.4, 0.2, 0.1]),
-                          metadata={'id': 'spectrum2'})
-    spectrum_3 = Spectrum(mz=numpy.array([100, 140, 195.]),
-                          intensities=numpy.array([0.6, 0.2, 0.1]),
-                          metadata={'id': 'spectrum3'})
-    spectrum_4 = Spectrum(mz=numpy.array([100, 150, 200.]),
-                          intensities=numpy.array([0.6, 0.1, 0.6]),
-                          metadata={'id': 'spectrum4'})
+    builder = SpectrumBuilder()
+    spectrum_1 = builder.with_mz(numpy.array([100, 150, 200.])).with_intensities(
+        numpy.array([0.7, 0.2, 0.1])).with_metadata({'id': 'spectrum1'}).build()
+    spectrum_2 = builder.with_mz(numpy.array([100, 140, 190.])).with_intensities(
+        numpy.array([0.4, 0.2, 0.1])).with_metadata({'id': 'spectrum2'}).build()
+    spectrum_3 = builder.with_mz(numpy.array([100, 140, 195.])).with_intensities(
+        numpy.array([0.6, 0.2, 0.1])).with_metadata({'id': 'spectrum3'}).build()
+    spectrum_4 = builder.with_mz(numpy.array([100, 150, 200.])).with_intensities(
+        numpy.array([0.6, 0.1, 0.6])).with_metadata({'id': 'spectrum4'}).build()
+
     references = [spectrum_1, spectrum_2, spectrum_3]
     queries = [spectrum_2, spectrum_3, spectrum_4]
 
@@ -286,18 +254,7 @@ def test_scores_by_query_sorted():
 
 def test_scores_by_query_non_tuple_score():
     "Test scores_by_query method."
-    spectrum_1 = Spectrum(mz=numpy.array([100, 150, 200.]),
-                          intensities=numpy.array([0.7, 0.2, 0.1]),
-                          metadata={'id': 'spectrum1'})
-    spectrum_2 = Spectrum(mz=numpy.array([100, 140, 190.]),
-                          intensities=numpy.array([0.4, 0.2, 0.1]),
-                          metadata={'id': 'spectrum2'})
-    spectrum_3 = Spectrum(mz=numpy.array([110, 140, 195.]),
-                          intensities=numpy.array([0.6, 0.2, 0.1]),
-                          metadata={'id': 'spectrum3'})
-    spectrum_4 = Spectrum(mz=numpy.array([100, 150, 200.]),
-                          intensities=numpy.array([0.6, 0.1, 0.6]),
-                          metadata={'id': 'spectrum4'})
+    spectrum_1, spectrum_2, spectrum_3, spectrum_4 = spectra()
     references = [spectrum_1, spectrum_2, spectrum_3]
     queries = [spectrum_2, spectrum_3, spectrum_4]
 
