@@ -28,14 +28,17 @@ rdkit_missing_message = "Conda package 'rdkit' is required for this functionalit
 
 
 def convert_smiles_to_inchi(smiles: str) -> Optional[str]:
+    """Convert smiles to inchi using rdkit."""
     return mol_converter(smiles, "smiles", "inchi")
 
 
 def convert_inchi_to_smiles(inchi: str) -> Optional[str]:
+    """Convert inchi to smiles using rdkit."""
     return mol_converter(inchi, "inchi", "smiles")
 
 
 def convert_inchi_to_inchikey(inchi: str) -> Optional[str]:
+    """Convert inchi to inchikey using rdkit."""
     return mol_converter(inchi, "inchi", "inchikey")
 
 

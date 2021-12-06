@@ -1,4 +1,8 @@
+import logging
 from ..typing import SpectrumType
+
+
+logger = logging.getLogger("matchms")
 
 
 def make_charge_int(spectrum_in: SpectrumType) -> SpectrumType:
@@ -18,6 +22,6 @@ def make_charge_int(spectrum_in: SpectrumType) -> SpectrumType:
             charge_int = int(spectrum.get('charge'))
             spectrum.set("charge", charge_int)
         except ValueError:
-            print(f"Found charge ({spectrum.get('charge')}) cannot be converted to integer.")
+            logger.warning("Found charge (%s) cannot be converted to integer.", str(spectrum.get('charge')))
 
     return spectrum

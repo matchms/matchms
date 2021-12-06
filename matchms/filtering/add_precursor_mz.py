@@ -1,5 +1,9 @@
+import logging
 from matchms.utils import get_first_common_element
 from ..typing import SpectrumType
+
+
+logger = logging.getLogger("matchms")
 
 
 _accepted_keys = ["precursor_mz", "precursormz", "precursor_mass"]
@@ -25,7 +29,7 @@ def add_precursor_mz(spectrum_in: SpectrumType) -> SpectrumType:
             try:
                 precursor_mz = float(precursor_mz.strip())
             except ValueError:
-                print("%s can't be converted to float.", precursor_mz)
+                logger.warning("%s can't be converted to float.", precursor_mz)
                 return spectrum
         spectrum.set("precursor_mz", float(precursor_mz))
     elif precursor_mz is None:
@@ -33,6 +37,6 @@ def add_precursor_mz(spectrum_in: SpectrumType) -> SpectrumType:
         if pepmass is not None and isinstance(pepmass[0], float):
             spectrum.set("precursor_mz", pepmass[0])
         else:
-            print("No precursor_mz found in metadata.")
+            logger.warning("No precursor_mz found in metadata.")
 
     return spectrum

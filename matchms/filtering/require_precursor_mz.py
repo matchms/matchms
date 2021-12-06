@@ -1,5 +1,9 @@
+import logging
 from typing import Union
 from ..typing import SpectrumType
+
+
+logger = logging.getLogger("matchms")
 
 
 def require_precursor_mz(spectrum_in: SpectrumType
@@ -29,6 +33,7 @@ def require_precursor_mz(spectrum_in: SpectrumType
         ("Expected 'precursor_mz' to be a scalar number.",
          "Consider applying 'add_precursor_mz' filter first.")
     if precursor_mz <= 0:
+        logger.info("Spectrum without precursor_mz was set to None.")
         return None
 
     return spectrum

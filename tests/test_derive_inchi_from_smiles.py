@@ -17,6 +17,19 @@ def test_derive_inchi_from_smiles():
     assert inchi == 'InChI=1S/C6H12/c1-2-4-6-5-3-1/h1-6H2', "Expected different InChI"
 
 
+def test_derive_inchi_from_defect_smiles():
+    """Test if conversion to inchi works when only smiles is given.
+    """
+    pytest.importorskip("rdkit")
+    spectrum_in = Spectrum(mz=numpy.array([], dtype='float'),
+                           intensities=numpy.array([], dtype='float'),
+                           metadata={"smiles": "CX1CCCCC1"})
+
+    spectrum = derive_inchi_from_smiles(spectrum_in)
+    inchi = spectrum.get("inchi", None)
+    assert inchi is None, "Expected no InChI"
+
+
 def test_empty_spectrum():
     spectrum_in = None
     spectrum = derive_inchi_from_smiles(spectrum_in)
