@@ -1,6 +1,5 @@
 import numpy
 import pytest
-from matchms import Spectrum
 from matchms.filtering import remove_peaks_around_precursor_mz
 from .builder_Spectrum import SpectrumBuilder
 
@@ -10,7 +9,8 @@ def spectrum_in():
     mz = numpy.array([10, 20, 30, 40], dtype="float")
     intensities = numpy.array([0, 1, 10, 100], dtype="float")
     metadata = {"precursor_mz": 60.}
-    spectrum_in = Spectrum(mz=mz, intensities=intensities, metadata=metadata)
+    spectrum_in = SpectrumBuilder().with_mz(mz).with_intensities(
+        intensities).with_metadata(metadata).build()
     return spectrum_in
 
 
