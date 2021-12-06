@@ -2,38 +2,23 @@ import numpy
 import pytest
 from matchms import Spectrum
 from matchms.filtering import require_precursor_below_mz
+from .builder_Spectrum import SpectrumBuilder
 
 
-def test_require_precursor_below_mz_no_params():
-    """Using default parameterse with precursor mz present."""
-    mz = numpy.array([10, 20, 30, 40], dtype="float")
-    intensities = numpy.array([0, 1, 10, 100], dtype="float")
-    spectrum_in = Spectrum(mz=mz, intensities=intensities)
-    spectrum_in.set("precursor_mz", 60.)
-
-    spectrum = require_precursor_below_mz(spectrum_in)
-
-    assert spectrum == spectrum_in, "Expected no changes."
-
-
-def test_require_precursor_below_mz_max_50():
-    """Set max_mz to 50."""
-    mz = numpy.array([10, 20, 30, 40], dtype="float")
-    intensities = numpy.array([0, 1, 10, 100], dtype="float")
-    spectrum_in = Spectrum(mz=mz, intensities=intensities)
-    spectrum_in.set("precursor_mz", 60.)
-
-    spectrum = require_precursor_below_mz(spectrum_in, max_mz=50)
-
-    assert spectrum is None, "Expected spectrum to be None."
+@pytest.mark.parametrize("metadata, max_mz, expected", [
+    [{"precursor_mz": 60.}, 1000, SpectrumBuilder().with_metadata(
+        {"precursor_mz": 60}).build()],
+    [{"precursor_mz": 60.}, 50, None]
+])
+def test_require_precursor_below_mz(metadata, max_mz, expected):
+    spectrum_in = SpectrumBuilder().with_metadata(metadata).build()
+    spectrum = require_precursor_below_mz(spectrum_in, max_mz=max_mz)
+    assert spectrum == expected
 
 
 def test_if_spectrum_is_cloned():
     """Test if filter is correctly cloning the input spectrum."""
-    mz = numpy.array([10, 20, 30, 40], dtype="float")
-    intensities = numpy.array([0, 1, 10, 100], dtype="float")
-    spectrum_in = Spectrum(mz=mz, intensities=intensities)
-    spectrum_in.set("precursor_mz", 1.)
+    spectrum_in = SpectrumBuilder().with_metadata({"precursor_mz": 1.}).build()
 
     spectrum = require_precursor_below_mz(spectrum_in)
     spectrum.set("testfield", "test")
@@ -43,9 +28,7 @@ def test_if_spectrum_is_cloned():
 
 def test_require_precursor_below_without_precursor_mz():
     """Test if correct assert error is raised for missing precursor-mz."""
-    spectrum_in = Spectrum(mz=numpy.array([10, 20, 30, 40], dtype="float"),
-                           intensities=numpy.array([0, 1, 10, 100], dtype="float"),
-                           metadata={})
+    spectrum_in = SpectrumBuilder().build()
 
     with pytest.raises(AssertionError) as msg:
         _ = require_precursor_below_mz(spectrum_in)
@@ -55,9 +38,7 @@ def test_require_precursor_below_without_precursor_mz():
 
 def test_require_precursor_below_with_wrong_precursor_mz():
     """Test if correct assert error is raised for precursor-mz as string."""
-    spectrum_in = Spectrum(mz=numpy.array([10, 20, 30, 40], dtype="float"),
-                           intensities=numpy.array([0, 1, 10, 100], dtype="float"),
-                           metadata={"precursor_mz": "445.0"})
+    spectrum_in = SpectrumBuilder().with_metadata({"precursor_mz": "445.0"}).build()
 
     with pytest.raises(AssertionError) as msg:
         _ = require_precursor_below_mz(spectrum_in)
