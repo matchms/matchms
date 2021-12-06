@@ -1,6 +1,4 @@
-import numpy
 import pytest
-from matchms import Spectrum
 from matchms.filtering import require_precursor_below_mz
 from .builder_Spectrum import SpectrumBuilder
 
