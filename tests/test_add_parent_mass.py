@@ -17,6 +17,7 @@ def test_add_parent_mass_exceptions(metadata, expected, caplog):
     assert spectrum.get("parent_mass") is None, "Expected no parent mass"
     assert expected in caplog.text
 
+
 def test_add_parent_mass_precursormz(caplog):
     """Test if parent mass is correctly derived if "pepmass" is not present."""
     metadata = {"precursor_mz": 444.0, "charge": -1}
