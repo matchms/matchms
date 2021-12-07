@@ -77,7 +77,7 @@ def test_add_precursor_mz_no_precursor_mz(key, value, expected):
 
 
 @pytest.mark.parametrize("key, value, expected_log", [
-    ["precursor_mz", "N/A", "N/A can't be converted to float."],
+    ["precursor_mz", "N/A", "No precursor_mz found in metadata."],
     ["precursor_mass", "test", "test can't be converted to float."],
     ["precursor_mz", None, "No precursor_mz found in metadata."],
     ["pepmass", None, "No precursor_mz found in metadata."],
