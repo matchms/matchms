@@ -97,6 +97,15 @@ class ModifiedCosine(BaseSimilarity):
                                         "Apply 'require_precursor_mz' first"
             assert reference.get("precursor_mz") > 0 \
                    and query.get("precursor_mz") > 0, message_precursor_below_0
+            # check if precursor_mz is a string convert to float
+            if isinstance(reference.get("precursor_mz"), str):
+                reference_precursor_mz = float(reference.get("precursor_mz"))
+            elif isinstance(reference.get("precursor_mz"), float):
+                reference_precursor_mz = reference.get("precursor_mz")
+            elif isinstance(reference.get("precursor_mz"), int):
+                reference_precursor_mz = reference.get("precursor_mz")
+            else:
+                print("Error: precursor_mz is not a float or int")
 
             mass_shift = reference.get("precursor_mz") - query.get("precursor_mz")
             nonzero_pairs = collect_peak_pairs(spec1, spec2, self.tolerance, shift=mass_shift,
