@@ -1,9 +1,13 @@
+import logging
 from typing import Any
 from typing import List
 from typing import Optional
 from matchms.utils import filter_none
 from matchms.utils import get_common_keys
 from ..typing import SpectrumType
+
+
+logger = logging.getLogger("matchms")
 
 
 _retention_time_keys = ["retention_time", "retentiontime", "rt", "scan_start_time", "RT_Query"]
@@ -50,7 +54,7 @@ def safe_convert_to_float(value: Any) -> Optional[float]:
         value = float(value)
         rt = value if value >= 0 else None  # discard negative RT values
     except ValueError:
-        print(f"{value} can't be converted to float.")
+        logger.warning("%s can't be converted to float.", str(value))
         rt = None
     return rt
 

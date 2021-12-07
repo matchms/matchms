@@ -1,5 +1,9 @@
+import numpy
 import pytest
+from testfixtures import LogCapture
 from matchms.filtering.require_precursor_mz import require_precursor_mz
+from matchms.logging_functions import reset_matchms_logger
+from matchms.logging_functions import set_matchms_logger_level
 from .builder_Spectrum import SpectrumBuilder
 
 
@@ -44,3 +48,33 @@ def test_require_precursor_mz_with_input_none():
     spectrum_in = None
     spectrum = require_precursor_mz(spectrum_in)
     assert spectrum is None
+
+
+def test_require_precursor_mz_fail_because_zero():
+    """Test if spectrum is None when precursor_mz == 0"""
+    set_matchms_logger_level("INFO")
+    mz = numpy.array([10, 20, 30, 40], dtype="float")
+    intensities = numpy.array([0, 1, 10, 100], dtype="float")
+    spectrum_in = SpectrumBuilder().with_mz(mz).with_intensities(intensities).build()
+    spectrum_in.set("precursor_mz", 0.0)
+
+    with LogCapture() as log:
+        spectrum = require_precursor_mz(spectrum_in)
+
+    assert spectrum is None, "Expected spectrum to be None."
+    log.check(
+        ('matchms', 'INFO', 'Spectrum without precursor_mz was set to None.')
+    )
+    reset_matchms_logger()
+
+
+def test_require_precursor_mz_fail_because_below_zero():
+    """Test if spectrum is None when precursor_mz < 0"""
+    mz = numpy.array([10, 20, 30, 40], dtype="float")
+    intensities = numpy.array([0, 1, 10, 100], dtype="float")
+    spectrum_in = SpectrumBuilder().with_mz(mz).with_intensities(intensities).build()
+    spectrum_in.set("precursor_mz", -3.5)
+
+    spectrum = require_precursor_mz(spectrum_in)
+
+    assert spectrum is None, "Expected spectrum to be None."

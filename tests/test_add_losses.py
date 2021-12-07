@@ -1,5 +1,6 @@
 import numpy
 import pytest
+from testfixtures import LogCapture
 from matchms.filtering import add_losses
 from .builder_Spectrum import SpectrumBuilder
 
@@ -29,7 +30,14 @@ def test_add_losses_without_precursor_mz_parameterized(mz, intensities):
     spectrum_in = SpectrumBuilder().with_mz(mz).with_intensities(intensities).build()
     spectrum = add_losses(spectrum_in)
 
+    with LogCapture() as log:
+        spectrum = add_losses(spectrum_in)
+
     assert spectrum == spectrum_in and spectrum is not spectrum_in
+    log.check(
+        ("matchms", "WARNING",
+         "No precursor_mz found. Consider applying 'add_precursor_mz' filter first.")
+    )
 
 
 def test_add_losses_with_precursor_mz_wrong_type():

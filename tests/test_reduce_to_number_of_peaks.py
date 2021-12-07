@@ -1,6 +1,9 @@
 import numpy
 import pytest
+from testfixtures import LogCapture
 from matchms.filtering import reduce_to_number_of_peaks
+from matchms.logging_functions import reset_matchms_logger
+from matchms.logging_functions import set_matchms_logger_level
 from .builder_Spectrum import SpectrumBuilder
 
 
@@ -33,10 +36,40 @@ def test_reduce_to_number_of_peaks(mz, intensities, metadata, params, expected):
 
     spectrum = reduce_to_number_of_peaks(
         spectrum_in, n_required=n_required, n_max=n_max, ratio_desired=ratio_desired)
-
-    assert len(spectrum.peaks) == len(
-        expected), "Expected that only 4 peaks remain."
+    
+    assert len(spectrum.peaks) == len(expected), "Expected that only 4 peaks remain."
     assert spectrum.peaks.mz.tolist() == expected, "Expected different peaks to remain."
+
+
+def test_reduce_to_number_of_peaks_set_to_none():
+    """Test is spectrum is set to None if not enough peaks."""
+    set_matchms_logger_level("INFO")
+    mz = numpy.array([10, 20], dtype="float")
+    intensities = numpy.array([0.5, 1], dtype="float")
+    spectrum_in = SpectrumBuilder().with_mz(mz).with_intensities(intensities).with_metadata({"parent_mass": 50}).build()
+
+    with LogCapture() as log:
+        spectrum = reduce_to_number_of_peaks(spectrum_in, n_required=5)
+
+    assert spectrum is None, "Expected spectrum to be set to None."
+    log.check(
+        ('matchms', 'INFO', "Spectrum with 2 (<5) peaks was set to None.")
+    )
+    reset_matchms_logger()
+
+
+def test_reduce_to_number_of_peaks_n_max_4():
+    """Test setting n_max parameter."""
+    mz = numpy.array([10, 20, 30, 40, 50], dtype="float")
+    intensities = numpy.array([1, 1, 10, 20, 100], dtype="float")
+    spectrum_in = SpectrumBuilder().with_mz(mz).with_intensities(intensities).build()
+
+    spectrum = reduce_to_number_of_peaks(spectrum_in, n_max=4)
+
+    expected = numpy.array([20, 30, 40, 50], dtype="float")
+
+    assert len(spectrum.peaks) == len(expected), "Expected that only 4 peaks remain."
+    numpy.testing.assert_array_equal(spectrum.peaks.mz, expected, err_msg="Expected different peaks to remain.")
 
 
 def test_reduce_to_number_of_peaks_ratio_given_but_no_parent_mass():

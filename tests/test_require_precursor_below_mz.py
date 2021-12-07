@@ -1,5 +1,9 @@
+import numpy
 import pytest
+from testfixtures import LogCapture
 from matchms.filtering import require_precursor_below_mz
+from matchms.logging_functions import reset_matchms_logger
+from matchms.logging_functions import set_matchms_logger_level
 from .builder_Spectrum import SpectrumBuilder
 
 
@@ -49,3 +53,33 @@ def test_with_input_none():
     spectrum_in = None
     spectrum = require_precursor_below_mz(spectrum_in)
     assert spectrum is None
+
+
+def test_require_precursor_below_mz_no_params():
+    """Using default parameterse with precursor mz present."""
+    mz = numpy.array([10, 20, 30, 40], dtype="float")
+    intensities = numpy.array([0, 1, 10, 100], dtype="float")
+    spectrum_in = SpectrumBuilder().with_mz(mz).with_intensities(intensities).build()
+    spectrum_in.set("precursor_mz", 60.)
+
+    spectrum = require_precursor_below_mz(spectrum_in)
+
+    assert spectrum == spectrum_in, "Expected no changes."
+
+
+def test_require_precursor_below_mz_max_50():
+    """Set max_mz to 50."""
+    set_matchms_logger_level("INFO")
+    mz = numpy.array([10, 20, 30, 40], dtype="float")
+    intensities = numpy.array([0, 1, 10, 100], dtype="float")
+    spectrum_in = SpectrumBuilder().with_mz(mz).with_intensities(intensities).build()
+    spectrum_in.set("precursor_mz", 60.)
+
+    with LogCapture() as log:
+        spectrum = require_precursor_below_mz(spectrum_in, max_mz=50)
+
+    assert spectrum is None, "Expected spectrum to be None."
+    log.check(
+        ('matchms', 'INFO', 'Spectrum with precursor_mz 60.0 (>50) was set to None.')
+    )
+    reset_matchms_logger()
