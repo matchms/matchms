@@ -18,9 +18,7 @@ def test_derive_inchi_from_defect_smiles():
     """Test if conversion to inchi works when only smiles is given.
     """
     pytest.importorskip("rdkit")
-    spectrum_in = Spectrum(mz=numpy.array([], dtype='float'),
-                           intensities=numpy.array([], dtype='float'),
-                           metadata={"smiles": "CX1CCCCC1"})
+    spectrum_in = SpectrumBuilder().with_metadata({"smiles": "CX1CCCCC1"}).build()
 
     spectrum = derive_inchi_from_smiles(spectrum_in)
     inchi = spectrum.get("inchi", None)
