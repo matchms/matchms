@@ -36,7 +36,10 @@ def add_precursor_mz(spectrum_in: SpectrumType) -> SpectrumType:
         pepmass = spectrum.get("pepmass")
         if pepmass is not None and isinstance(pepmass[0], float):
             spectrum.set("precursor_mz", pepmass[0])
+            logger.info("Added precursor_mz entry based on field 'pepmass'.")
         else:
             logger.warning("No precursor_mz found in metadata.")
+    else:
+        logger.warning("Found precursor_mz of undefined type.")
 
     return spectrum

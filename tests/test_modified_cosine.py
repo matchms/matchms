@@ -121,3 +121,23 @@ def test_modified_cosine_with_mass_shift_5_no_matches_expected():
 
     assert score["score"] == pytest.approx(0.0, 1e-5), "Expected different modified cosine score."
     assert score["matches"] == 0, "Expected 0 matching peaks."
+
+
+def test_modified_cosine_precursor_mz_as_string():
+    """Test modified cosine on two spectra with precursor_mz given as string."""
+    spectrum_1 = Spectrum(mz=numpy.array([100, 200, 300], dtype="float"),
+                          intensities=numpy.array([10, 10, 500], dtype="float"),
+                          metadata={"precursor_mz": 1000.0})
+
+    spectrum_2 = Spectrum(mz=numpy.array([120, 220, 320], dtype="float"),
+                          intensities=numpy.array([10, 10, 500], dtype="float"),
+                          metadata={"precursor_mz": "1005.0"})
+
+    norm_spectrum_1 = normalize_intensities(spectrum_1)
+    norm_spectrum_2 = normalize_intensities(spectrum_2)
+    modified_cosine = ModifiedCosine(tolerance=1.0)
+    with pytest.raises(AssertionError) as msg:
+        _ = modified_cosine.pair(norm_spectrum_1, norm_spectrum_2)
+
+    expected_message = "Precursor_mz must be of type int or float. Apply 'add_precursor_mz' filter first."
+    assert str(msg.value) == expected_message
