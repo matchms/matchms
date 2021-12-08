@@ -91,6 +91,16 @@ def test_have_peaks(filename, data):
         assert actual.peaks == expected.peaks
 
 
+def test_have_peak_comments(filename, data):
+    """ Test checking if all peak comments are stored correctly. """
+    spectra = save_and_reload_spectra(filename, data)
+
+    assert len(spectra) == len(data)
+
+    for actual, expected in zip(spectra, data):
+        assert actual.peak_comments == expected.peak_comments
+
+
 def save_and_reload_spectra(filename, spectra: List[Spectrum]):
     """ Utility function to save spectra to msp and load them again.
 

@@ -47,20 +47,30 @@ def save_as_msp(spectra: List[Spectrum], filename: str):
 
 def write_spectrum(spectrum: Spectrum, outfile: IO):
     write_metadata(spectrum.metadata, outfile)
-    write_peaks(spectrum.peaks, outfile)
+    write_peaks(spectrum.peaks, spectrum.peak_comments, outfile)
     outfile.write(os.linesep)
 
 
-def write_peaks(peaks: Spikes, outfile: IO):
+def write_peaks(peaks: Spikes, peak_comments: Spectrum.peak_comments, outfile: IO):
     outfile.write(f"NUM PEAKS: {len(peaks)}\n")
     for mz, intensity in zip(peaks.mz, peaks.intensities):
-        outfile.write(f"{mz}\t{intensity}\n")
+        peak_comment = format_peak_comment(mz, peak_comments)
+        outfile.write(f"{mz}\t{intensity}\t{peak_comment}\n")
 
 
 def write_metadata(metadata: dict, outfile: IO):
     for key, value in metadata.items():
         if not is_num_peaks(key):
             outfile.write(f"{key.upper()}: {value}\n")
+
+
+def format_peak_comment(mz, peak_comments):
+    """Format peak comment for given mz to return the quoted comment or empty string if no peak comment is present."""
+    peak_comment = peak_comments.get(mz, None)
+    if peak_comment is None:
+        return ""
+    else:
+        return repr(peak_comment)
 
 
 def is_num_peaks(key: str) -> bool:
