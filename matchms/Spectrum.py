@@ -51,7 +51,11 @@ class Spectrum:
 
     """
 
-    def __init__(self, mz: numpy.array, intensities: numpy.array, metadata: Optional[dict] = None):
+    def __init__(self,
+                 mz: numpy.array,
+                 intensities: numpy.array,
+                 metadata: Optional[dict] = None,
+                 peak_comments: Optional[dict] = None):
         """
 
         Parameters
@@ -62,6 +66,8 @@ class Spectrum:
             Array of intensities for the peaks
         metadata
             Dictionary with for example the scan number of precursor m/z.
+        peak_comments
+            Dictionary with comments assigned to their m/z peaks.
         """
         self.peaks = Spikes(mz=mz, intensities=intensities)
         self.losses = None
@@ -69,6 +75,10 @@ class Spectrum:
             self.metadata = {}
         else:
             self.metadata = metadata
+        if peak_comments:
+            self.peak_comments = peak_comments
+        else:
+            self.peak_comments = {}
 
     def __eq__(self, other):
         return \
@@ -224,3 +234,11 @@ class Spectrum:
     @peaks.setter
     def peaks(self, value: Spikes):
         self._peaks = value
+
+    @property
+    def peak_comments(self):
+        return self._peak_comments
+
+    @peak_comments.setter
+    def peak_comments(self, value):
+        self._peak_comments = value

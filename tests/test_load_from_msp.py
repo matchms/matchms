@@ -94,8 +94,7 @@ def test_load_from_msp_tabs():
         assert_matching_inchikey(spectrum, expected_inchikey[idx])
         numpy.testing.assert_array_almost_equal(spectrum.peaks.mz, expected_mz[idx])
         numpy.testing.assert_array_almost_equal(spectrum.peaks.intensities, expected_intensities[idx])
-        # comment out until 'peak_comments' is implemented in Spectrum
-        # assert spectrum.peak_comments == expected_peak_comments
+        assert spectrum.peak_comments == expected_peak_comments
 
 def test_load_from_msp_multiline():
     """Test parse of msp file to spectrum objects with ';' separator and multiple peaks in one line."""

@@ -140,4 +140,4 @@ def load_from_msp(filename: str) -> Generator[Spectrum, None, None]:
             mz = mz[idx_sorted]
             intensities = intensities[idx_sorted]
 
-        yield Spectrum(mz=mz, intensities=intensities, metadata=metadata)
+        yield Spectrum(mz=mz, intensities=intensities, metadata=metadata, peak_comments=peak_comments)
