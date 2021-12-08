@@ -129,7 +129,7 @@ def test_num_peaks_last_metadata_field(filename, data):
                 num_peaks = int(line.split()[2])
                 peaks = content[idx + 1: idx + num_peaks + 1]
                 for peak in peaks:
-                    mz, intensity = peak.split()
+                    mz, intensity = peak.split()[:2]
                     mz = float(mz)
                     intensity = float(intensity)
 
