@@ -19,11 +19,13 @@ class Spectrum:
 
         spectrum = Spectrum(mz=np.array([100, 150, 200.]),
                               intensities=np.array([0.7, 0.2, 0.1]),
-                              metadata={'id': 'spectrum1'})
+                              metadata={'id': 'spectrum1'},
+                              peak_comments={200.: "the peak at 200 m/z"})
 
         print(spectrum.peaks.mz[0])
         print(spectrum.peaks.intensities[0])
         print(spectrum.get('id'))
+        print(spectrum.peak_comments.get(200))
 
     Should output
 
@@ -32,6 +34,7 @@ class Spectrum:
         100.0
         0.7
         spectrum1
+        'the peak at 200 m/z'
 
     Attributes
     ----------
@@ -48,6 +51,8 @@ class Spectrum:
             spectrum.losess = Spikes(mz=np.array([50.]), intensities=np.array([0.1]))
     metadata: dict
         Dict of metadata with for example the scan number of precursor m/z.
+    peak_comments: dict
+        Dict of comments for each m/z peak.
 
     """
 
