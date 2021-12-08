@@ -35,9 +35,6 @@ def save_as_msp(spectra: List[Spectrum], filename: str):
     filename:
         Provide filename to save spectrum(s).
     """
-
-    assert filename.endswith(".msp"), "File extension must be 'msp'."
-
     spectra = ensure_list(spectra)
 
     with open(filename, "w", encoding="utf-8") as outfile:
