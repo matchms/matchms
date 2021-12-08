@@ -55,7 +55,7 @@ def write_peaks(peaks: Spikes, peak_comments: Spectrum.peak_comments, outfile: I
     outfile.write(f"NUM PEAKS: {len(peaks)}\n")
     for mz, intensity in zip(peaks.mz, peaks.intensities):
         peak_comment = format_peak_comment(mz, peak_comments)
-        outfile.write(f"{mz}\t{intensity}\t{peak_comment}\n")
+        outfile.write(f"{mz}\t{intensity}\t{peak_comment}\n".expandtabs(12))
 
 
 def write_metadata(metadata: dict, outfile: IO):
@@ -70,7 +70,7 @@ def format_peak_comment(mz, peak_comments):
     if peak_comment is None:
         return ""
     else:
-        return repr(peak_comment)
+        return f"\"{peak_comment}\""
 
 
 def is_num_peaks(key: str) -> bool:
