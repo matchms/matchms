@@ -3,9 +3,9 @@ name: Conda verify
 on:
   workflow_dispatch:
     inputs:
-      version:
-        description: Matchms version to install, leave empty for latest
-        required: True
+      tag:
+        description: Tag for running test of matchms conda package
+        required: False
         default: ''
 
 jobs:
@@ -37,7 +37,7 @@ jobs:
       - name: Install matchms from bioconda repository
         shell: bash -l {0}
         run: |
-          conda install --channel bioconda --channel conda-forge matchms ${{ github.event.inputs.version }}
+          conda install --channel bioconda --channel conda-forge matchms
       - name: List conda packages
         shell: bash -l {0}
         run: |

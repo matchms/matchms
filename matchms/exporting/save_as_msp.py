@@ -1,3 +1,4 @@
+import logging
 import os
 from typing import IO
 from typing import Dict
@@ -5,6 +6,12 @@ from typing import List
 from typing import Union
 from ..Spectrum import Spectrum
 from ..Spikes import Spikes
+
+
+logger = logging.getLogger("matchms")
+
+
+_extentions_not_allowed = ["mzml", "mzxml", "json", "mgf"]
 
 
 def save_as_msp(spectra: List[Spectrum], filename: str):
@@ -37,36 +44,39 @@ def save_as_msp(spectra: List[Spectrum], filename: str):
     filename:
         Provide filename to save spectrum(s).
     """
-
-    assert filename.endswith(".msp"), "File extension must be 'msp'."
-
-    spectra = ensure_list(spectra)
+    file_extension = filename.split(".")[-1]
+    assert file_extension.lower() not in _extentions_not_allowed, \
+        f"File extension '.{file_extension}' not allowed."
+    if not filename.endswith(".msp"):
+        logger.warning("Spectra will be stored as msp file with extension .%s",
+                       filename.split(".")[-1])
+    spectra = _ensure_list(spectra)
 
     with open(filename, "w", encoding="utf-8") as outfile:
         for spectrum in spectra:
-            write_spectrum(spectrum, outfile)
+            _write_spectrum(spectrum, outfile)
 
 
-def write_spectrum(spectrum: Spectrum, outfile: IO):
-    write_metadata(spectrum.metadata, outfile)
-    write_peaks(spectrum.peaks, spectrum.peak_comments, outfile)
+def _write_spectrum(spectrum: Spectrum, outfile: IO):
+    _write_metadata(spectrum.metadata, outfile)
+    _write_peaks(spectrum.peaks, spectrum.peak_comments, outfile)
     outfile.write(os.linesep)
 
 
-def write_peaks(peaks: Spikes, peak_comments: Spectrum.peak_comments, outfile: IO):
+def _write_peaks(peaks: Spikes, peak_comments: Spectrum.peak_comments, outfile: IO):
     outfile.write(f"NUM PEAKS: {len(peaks)}\n")
     for mz, intensity in zip(peaks.mz, peaks.intensities):
-        peak_comment = format_peak_comment(mz, peak_comments)
+        peak_comment = _format_peak_comment(mz, peak_comments)
         outfile.write(f"{mz}\t{intensity}\t{peak_comment}\n".expandtabs(12))
 
 
-def write_metadata(metadata: dict, outfile: IO):
+def _write_metadata(metadata: dict, outfile: IO):
     for key, value in metadata.items():
-        if not is_num_peaks(key):
+        if not _is_num_peaks(key):
             outfile.write(f"{key.upper()}: {value}\n")
 
 
-def format_peak_comment(mz: Union[int, float], peak_comments: Dict):
+def _format_peak_comment(mz: Union[int, float], peak_comments: Dict):
     """Format peak comment for given mz to return the quoted comment or empty string if no peak comment is present."""
     peak_comment = peak_comments.get(mz, None)
     if peak_comment is None:
@@ -74,11 +84,11 @@ def format_peak_comment(mz: Union[int, float], peak_comments: Dict):
     return f"\"{peak_comment}\""
 
 
-def is_num_peaks(key: str) -> bool:
+def _is_num_peaks(key: str) -> bool:
     return key.lower().startswith("num peaks")
 
 
-def ensure_list(spectra) -> List[Spectrum]:
+def _ensure_list(spectra) -> List[Spectrum]:
     if not isinstance(spectra, list):
         # Assume that input was single Spectrum
         spectra = [spectra]

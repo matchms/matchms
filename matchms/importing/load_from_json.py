@@ -1,9 +1,13 @@
 import ast
 import json
+import logging
 from typing import List
 from typing import Union
 import numpy
 from ..Spectrum import Spectrum
+
+
+logger = logging.getLogger("matchms")
 
 
 def load_from_json(filename: str) -> List[Spectrum]:
@@ -101,6 +105,5 @@ def dict2spectrum(spectrum_dict: dict) -> Union[Spectrum, None]:
         return Spectrum(mz=mz,
                         intensities=intensities,
                         metadata=metadata_dict)
-    print("Empty spectrum found (no peaks in 'peaks_json').",
-          "Will not be imported.")
+    logger.info("Empty spectrum found (no peaks in 'peaks_json'). Will not be imported.")
     return None

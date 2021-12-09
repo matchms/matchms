@@ -1,13 +1,17 @@
+import logging
 import re
 from ..typing import SpectrumType
+
+
+logger = logging.getLogger("matchms")
 
 
 def clean_compound_name(spectrum_in: SpectrumType) -> SpectrumType:
     """Clean compound name.
 
     A list of frequently seen name additions that do not belong to the compound
-    name will be removed."""
-
+    name will be removed.
+    """
     def remove_parts_by_regular_expression(name):
         """Clean name string by removing known parts that don't belong there."""
         name = name.strip()
@@ -68,6 +72,6 @@ def clean_compound_name(spectrum_in: SpectrumType) -> SpectrumType:
     name_cleaned = remove_misplaced_mass(name_cleaned)
     if name_cleaned != name:
         spectrum.set("compound_name", name_cleaned)
-        print("Added cleaned compound name:", name_cleaned)
+        logger.info("Added cleaned compound name: %s", name_cleaned)
 
     return spectrum

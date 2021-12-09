@@ -27,7 +27,7 @@ def data(request):
     return list(spectra)
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def filename():
     with tempfile.TemporaryDirectory() as temp_dir:
         filename = os.path.join(temp_dir, "test.msp")
@@ -43,8 +43,8 @@ def test_spectrum_none_exception(none_spectrum, filename):
     assert message == "'NoneType' object has no attribute 'metadata'"
 
 
-def test_wrong_filename_exception():
-    """ Test for exception being thrown if output file doesn't end with .msp. """
+def test_not_allowed_filename_extension():
+    """ Test for exception if output file ends with not allowed extension."""
     with tempfile.TemporaryDirectory() as temp_dir:
         filename = os.path.join(temp_dir, "test.mzml")
 
@@ -52,10 +52,20 @@ def test_wrong_filename_exception():
             save_as_msp(None, filename)
 
         message = exception.value.args[0]
-        assert message == "File extension must be 'msp'."
+        assert message == "File extension '.mzml' not allowed."
 
 
-# Using tmp_path fixture from pytest: https://docs.pytest.org/en/stable/tmpdir.html#the-tmp-path-fixture
+def test_non_msp_filename_extension(spectrum, caplog):
+    """ Test for log message if output file doesn't end with .msp. """
+    with tempfile.TemporaryDirectory() as temp_dir:
+        filename = os.path.join(temp_dir, "test.dat")
+
+        save_as_msp(spectrum, filename)
+
+        expected_log = "Spectra will be stored as msp file with extension .dat"
+        assert expected_log in caplog.text
+
+
 def test_file_exists_single_spectrum(spectrum, filename):
     """ Test checking if the file is created. """
     save_as_msp(spectrum, filename)

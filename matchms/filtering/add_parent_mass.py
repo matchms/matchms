@@ -1,7 +1,11 @@
+import logging
 from ..constants import PROTON_MASS
 from ..importing import load_adducts_dict
 from ..typing import SpectrumType
 from ..utils import clean_adduct
+
+
+logger = logging.getLogger("matchms")
 
 
 def add_parent_mass(spectrum_in: SpectrumType, estimate_from_adduct: bool = True,
@@ -40,7 +44,7 @@ def add_parent_mass(spectrum_in: SpectrumType, estimate_from_adduct: bool = True
     adduct = clean_adduct(spectrum.get("adduct"))
     precursor_mz = spectrum.get("precursor_mz", None)
     if precursor_mz is None:
-        print("Missing precursor m/z to derive parent mass.")
+        logger.warning("Missing precursor m/z to derive parent mass.")
         return spectrum
 
     if estimate_from_adduct and (adduct in adducts_dict):
@@ -55,7 +59,7 @@ def add_parent_mass(spectrum_in: SpectrumType, estimate_from_adduct: bool = True
         parent_mass = precursor_mass - protons_mass
 
     if parent_mass is None:
-        print("Not sufficient spectrum metadata to derive parent mass.")
+        logger.warning("Not sufficient spectrum metadata to derive parent mass.")
     else:
         spectrum.set("parent_mass", float(parent_mass))
     return spectrum
@@ -74,14 +78,17 @@ def _get_charge(spectrum):
     if _is_valid_charge(charge):
         return charge
     if spectrum.get('ionmode') == "positive":
-        print("Missing charge entry, but positive ionmode detected. "
-              "Consider prior run of `correct_charge()` filter.")
+        logger.info(
+            "Missing charge entry, but positive ionmode detected. "
+            "Consider prior run of `correct_charge()` filter.")
         return 1
     if spectrum.get('ionmode') == "negative":
-        print("Missing charge entry, but negative ionmode detected. "
-              "Consider prior run of `correct_charge()` filter.")
+        logger.info(
+            "Missing charge entry, but negative ionmode detected. "
+            "Consider prior run of `correct_charge()` filter.")
         return -1
 
-    print("Missing charge and ionmode entries. "
-          "Consider prior run of `derive_ionmode()` and `correct_charge()` filters.")
+    logger.warning(
+        "Missing charge and ionmode entries. "
+        "Consider prior run of `derive_ionmode()` and `correct_charge()` filters.")
     return 0

@@ -9,7 +9,7 @@ from matchms.similarity import FingerprintSimilarity
 from matchms.similarity import ModifiedCosine
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def filename():
     with tempfile.TemporaryDirectory() as temp_dir:
         filename = os.path.join(temp_dir, "test.graphml")
