@@ -1,6 +1,8 @@
 import os
 from typing import IO
+from typing import Dict
 from typing import List
+from typing import Union
 from ..Spectrum import Spectrum
 from ..Spikes import Spikes
 
@@ -64,7 +66,7 @@ def write_metadata(metadata: dict, outfile: IO):
             outfile.write(f"{key.upper()}: {value}\n")
 
 
-def format_peak_comment(mz, peak_comments):
+def format_peak_comment(mz: Union[int, float], peak_comments: Dict):
     """Format peak comment for given mz to return the quoted comment or empty string if no peak comment is present."""
     peak_comment = peak_comments.get(mz, None)
     if peak_comment is None:
