@@ -69,8 +69,7 @@ def format_peak_comment(mz, peak_comments):
     peak_comment = peak_comments.get(mz, None)
     if peak_comment is None:
         return ""
-    else:
-        return f"\"{peak_comment}\""
+    return f"\"{peak_comment}\""
 
 
 def is_num_peaks(key: str) -> bool:
