@@ -96,6 +96,7 @@ def test_load_from_msp_tabs():
         numpy.testing.assert_array_almost_equal(spectrum.peaks.intensities, expected_intensities[idx])
         assert spectrum.peak_comments == expected_peak_comments
 
+
 def test_load_from_msp_multiline():
     """Test parse of msp file to spectrum objects with ';' separator and multiple peaks in one line."""
 
