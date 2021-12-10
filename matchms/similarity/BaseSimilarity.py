@@ -91,7 +91,7 @@ class BaseSimilarity:
             2x faster.
         """
         assert idx_row.shape == idx_col.shape, "col and row indices must be of same shape"
-        scores = numpy.zeros((len(idx_row)), dtype=self.score_datatype)
+        scores = numpy.zeros((len(idx_row)), dtype=self.score_datatype)  # TODO: switch to sparse matrix
         for i, row in enumerate(idx_row):
             col = idx_col[i]
             scores[i] = self.pair(references[row], queries[col])
