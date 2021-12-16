@@ -42,6 +42,7 @@ def derive_adduct_from_name(spectrum_in: SpectrumType,
 
     if adduct_from_name and remove_adduct_from_name:
         name_adduct_removed = " ".join([x for x in name_split if x != adduct_from_name])
+        name_adduct_removed = name_adduct_removed.strip("; ")
         spectrum.set("compound_name", name_adduct_removed)
         logger.info("Removed adduct %s from compound name.", adduct_from_name)
 
