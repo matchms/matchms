@@ -9,13 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Added
 
-- better, more flexible string handling of `ModifiedCosine` [275](https://github.com/matchms/matchms/pull/275)
+- better, more flexible string handling of `ModifiedCosine` [#275](https://github.com/matchms/matchms/pull/275)
 - matchms logger, replacing all former `print` statments to better control logging output [#271](https://github.com/matchms/matchms/pull/271)
 - `add_logging_to_file()`, `set_matchms_logger_level()`, `reset_matchms_logger()` functions to adapt logging output to user needs [#271](https://github.com/matchms/matchms/pull/271) 
 
 ## Changed
 
-- refactored `add_precursor_mz`, including better logging [275](https://github.com/matchms/matchms/pull/275)
+- refactored `add_precursor_mz`, including better logging [#275](https://github.com/matchms/matchms/pull/275)
 
 ## [0.10.0] - 2021-11-21
 
