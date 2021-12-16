@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.11.0] - 2021-12-16
+
 ## Added
 
 - matchms logger, replacing all former `print` statments to better control logging output [#271](https://github.com/matchms/matchms/pull/271)
@@ -345,8 +347,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - This is the initial version of Spec2Vec from https://github.com/iomega/Spec2Vec
+- (later splitted into matchms + spec2vec)
 
-[Unreleased]: https://github.com/matchms/matchms/compare/0.10.0...HEAD
+[Unreleased]: https://github.com/matchms/matchms/compare/0.11.0...HEAD
+[0.11.0]: https://github.com/matchms/matchms/compare/0.10.0...0.11.0
 [0.10.0]: https://github.com/matchms/matchms/compare/0.9.2...0.10.0
 [0.9.2]: https://github.com/matchms/matchms/compare/0.9.0...0.9.2
 [0.9.1]: https://github.com/matchms/matchms/compare/0.9.0...0.9.1
