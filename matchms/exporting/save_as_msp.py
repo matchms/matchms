@@ -81,7 +81,7 @@ def _format_peak_comment(mz: Union[int, float], peak_comments: Dict):
     peak_comment = peak_comments.get(mz, None)
     if peak_comment is None:
         return ""
-    return f"\"\t{peak_comment}\""
+    return f"\t\"{peak_comment}\""
 
 
 def _is_num_peaks(key: str) -> bool:
