@@ -7,8 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- minor improvement of compound name cleaning in `derive_adduct_from_name()` filter [#280](https://github.com/matchms/matchms/pull/280)
+
+## [0.11.0] - 2021-12-16
+
 ## Added
 
+- better, more flexible string handling of `ModifiedCosine` [#275](https://github.com/matchms/matchms/pull/275)
 - matchms logger, replacing all former `print` statments to better control logging output [#271](https://github.com/matchms/matchms/pull/271)
 - `add_logging_to_file()`, `set_matchms_logger_level()`, `reset_matchms_logger()` functions to adapt logging output to user needs [#271](https://github.com/matchms/matchms/pull/271)
 - `Spectrum()` objects can now store peak comments as an `mz: comment` dictionary in `peak_comments` property [#277](https://github.com/matchms/matchms/pull/277)
@@ -18,6 +25,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `save_as_msp()` can now also write to files with other than ".msp" extensions such as ".dat" [#276](https://github.com/matchms/matchms/pull/276)
 - `save_as_msp()` now writes peak comments (if present) to the output file [#277](https://github.com/matchms/matchms/pull/277)
 - `load_from_msp()` now also reads peak comments [#277](https://github.com/matchms/matchms/pull/277)
+
+## Changed
+
+- refactored `add_precursor_mz`, including better logging [#275](https://github.com/matchms/matchms/pull/275)
 
 ## [0.10.0] - 2021-11-21
 
@@ -348,8 +359,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - This is the initial version of Spec2Vec from https://github.com/iomega/Spec2Vec
+- (later splitted into matchms + spec2vec)
 
-[Unreleased]: https://github.com/matchms/matchms/compare/0.10.0...HEAD
+[Unreleased]: https://github.com/matchms/matchms/compare/0.11.0...HEAD
+[0.11.0]: https://github.com/matchms/matchms/compare/0.10.0...0.11.0
 [0.10.0]: https://github.com/matchms/matchms/compare/0.9.2...0.10.0
 [0.9.2]: https://github.com/matchms/matchms/compare/0.9.0...0.9.2
 [0.9.1]: https://github.com/matchms/matchms/compare/0.9.0...0.9.1

@@ -8,8 +8,6 @@ logging messages, you can lower the logging level to INFO using set_matchms_logg
 .. code-block:: python
 
     from matchms import set_matchms_logger_level
-    from matchms import calculate_scores, Spectrum
-
 
     set_matchms_logger_level("INFO")
 
@@ -24,10 +22,19 @@ To write logging entries to a local file, you can do the following:
 
 .. code-block:: python
 
-    from matchms import calculate_scores, Spectrum
     from matchms.logging_functions import add_logging_to_file
 
     add_logging_to_file("sample.log", loglevel="INFO")
+
+If you want to write the logging messages to a local file while silencing the
+stream of such messages, you can do the following:
+
+.. code-block:: python
+
+    from matchms.logging_functions import add_logging_to_file
+
+    add_logging_to_file("sample.log", loglevel="INFO",
+                        remove_stream_handlers=True)
 
 """
 import logging
