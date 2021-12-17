@@ -238,6 +238,8 @@ class Spectrum:
 
     @peaks.setter
     def peaks(self, value: Spikes):
+        if hasattr(self, "_peak_comments"):
+            self._reiterate_peak_comments(value)
         self._peaks = value
 
     @property
@@ -247,3 +249,22 @@ class Spectrum:
     @peak_comments.setter
     def peak_comments(self, value):
         self._peak_comments = value
+
+    def _reiterate_peak_comments(self, peaks: Spikes, mz_tolerance=1e-5):
+        """Update the peak comments to reflect the new peaks."""
+
+        def _append_new_comment():
+            if new_key_comment is not None:
+                comment = "; ".join([new_key_comment, self.peak_comments[key]])
+            else:
+                comment = self.peak_comments[key]
+            return comment
+
+        for key in list(self.peak_comments.keys()):
+            if key not in peaks.mz:
+                if numpy.isclose(key, peaks.mz, rtol=mz_tolerance).any():
+                    new_key = peaks.mz[numpy.isclose(key, peaks.mz, rtol=mz_tolerance).argmax()]
+                    new_key_comment = self.peak_comments.get(new_key, None)
+                    new_key_comment = _append_new_comment()
+                    self.peak_comments[new_key] = new_key_comment
+                self.peak_comments.pop(key)
