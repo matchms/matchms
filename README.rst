@@ -92,6 +92,47 @@ F Huber, S. Verhoeven, C. Meijer, H. Spreeuw, E. M. Villanueva Castilla, C. Geng
 
 
 **********************************
+Latest changes (matchms >= 0.11.0)
+**********************************
+
+Matchms now allows proper logging. Matchms functions and method report unexpected or 
+undesired behavior as logging WARNING, and additional information as INFO.
+The default logging level is set to WARNING. If you want to output additional
+logging messages, you can lower the logging level to INFO using set_matchms_logger_level:
+
+.. code-block:: python
+
+    from matchms import set_matchms_logger_level
+
+    set_matchms_logger_level("INFO")
+
+If you want to suppress logging warnings, you can also raise the logging level
+to ERROR by:
+
+.. code-block:: python
+
+    set_matchms_logger_level("ERROR")
+
+To write logging entries to a local file, you can do the following:
+
+.. code-block:: python
+
+    from matchms.logging_functions import add_logging_to_file
+
+    add_logging_to_file("sample.log", loglevel="INFO")
+
+If you want to write the logging messages to a local file while silencing the
+stream of such messages, you can do the following:
+
+.. code-block:: python
+
+    from matchms.logging_functions import add_logging_to_file
+
+    add_logging_to_file("sample.log", loglevel="INFO",
+                        remove_stream_handlers=True)
+
+
+**********************************
 Latest changes (matchms >= 0.10.0)
 **********************************
 

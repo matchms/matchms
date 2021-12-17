@@ -1,9 +1,14 @@
+import logging
 from typing import Tuple
 import numpy
+from matchms.filtering.add_precursor_mz import _convert_precursor_mz
 from matchms.typing import SpectrumType
 from .BaseSimilarity import BaseSimilarity
 from .spectrum_similarity_functions import collect_peak_pairs
 from .spectrum_similarity_functions import score_best_matches
+
+
+logger = logging.getLogger("matchms")
 
 
 class ModifiedCosine(BaseSimilarity):
@@ -84,21 +89,32 @@ class ModifiedCosine(BaseSimilarity):
 
         Tuple with cosine score and number of matched peaks.
         """
+        def get_valid_precursor_mz(spectrum):
+            """Extract valid precursor_mz from spectrum if possible. If not raise exception."""
+            message_precursor_missing = \
+                "Precursor_mz missing. Apply 'add_precursor_mz' filter first."
+            message_precursor_no_number = \
+                "Precursor_mz must be of type int or float. Apply 'add_precursor_mz' filter first."
+            message_precursor_below_0 = "Expect precursor to be positive number." \
+                                        "Apply 'require_precursor_mz' first"
+
+            precursor_mz = spectrum.get("precursor_mz", None)
+            if not isinstance(precursor_mz, (int, float)):
+                logger.warning(message_precursor_no_number)
+            precursor_mz = _convert_precursor_mz(precursor_mz)
+            assert precursor_mz is not None, message_precursor_missing
+            assert precursor_mz > 0, message_precursor_below_0
+            return precursor_mz
+
         def get_matching_pairs():
             """Find all pairs of peaks that match within the given tolerance."""
             zero_pairs = collect_peak_pairs(spec1, spec2, self.tolerance, shift=0.0,
                                             mz_power=self.mz_power,
                                             intensity_power=self.intensity_power)
-            message_precursor_missing = \
-                "Precursor_mz missing. Apply 'add_precursor_mz' filter first."
-            assert reference.get("precursor_mz") \
-                   and query.get("precursor_mz"), message_precursor_missing
-            message_precursor_below_0 = "Expect precursor to be positive number." \
-                                        "Apply 'require_precursor_mz' first"
-            assert reference.get("precursor_mz") > 0 \
-                   and query.get("precursor_mz") > 0, message_precursor_below_0
+            precursor_mz_ref = get_valid_precursor_mz(reference)
+            precursor_mz_query = get_valid_precursor_mz(query)
 
-            mass_shift = reference.get("precursor_mz") - query.get("precursor_mz")
+            mass_shift = precursor_mz_ref - precursor_mz_query
             nonzero_pairs = collect_peak_pairs(spec1, spec2, self.tolerance, shift=mass_shift,
                                                mz_power=self.mz_power,
                                                intensity_power=self.intensity_power)

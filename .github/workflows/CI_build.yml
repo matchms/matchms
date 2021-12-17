@@ -4,6 +4,12 @@ on:
   push:
   pull_request:
     types: [opened, reopened]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Tag for manually running CI Build workflow
+        required: False
+        default: ''
 
 jobs:
 

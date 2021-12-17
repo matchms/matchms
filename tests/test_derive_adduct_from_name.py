@@ -1,4 +1,5 @@
 import numpy
+import pytest
 from testfixtures import LogCapture
 from matchms import Spectrum
 from matchms.filtering import derive_adduct_from_name
@@ -6,7 +7,20 @@ from matchms.logging_functions import reset_matchms_logger
 from matchms.logging_functions import set_matchms_logger_level
 
 
-def test_derive_adduct_from_name():
+@pytest.mark.parametrize("input_name, expected_adduct, expected_name", [
+    ("peptideXYZ [M+H+K]", "[M+H+K]", "peptideXYZ"),
+    ("GalCer(d18:2/16:1); [M+H]+", "[M+H]+", "GalCer(d18:2/16:1)")])
+def test_derive_adduct_from_name(input_name, expected_adduct, expected_name):
+    spectrum_in = Spectrum(mz=numpy.array([], dtype="float"),
+                           intensities=numpy.array([], dtype="float"),
+                           metadata={"compound_name": input_name})
+    spectrum = derive_adduct_from_name(spectrum_in)
+
+    assert spectrum.get("adduct") == expected_adduct, "Expected different adduct."
+    assert spectrum.get("compound_name") == expected_name, "Expected different cleaned name."
+
+
+def test_derive_adduct_from_name_logging():
     set_matchms_logger_level("INFO")
     spectrum_in = Spectrum(mz=numpy.array([], dtype="float"),
                            intensities=numpy.array([], dtype="float"),
