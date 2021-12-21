@@ -56,6 +56,8 @@ class Spectrum:
 
     """
 
+    _peak_comments_mz_tolerance = 1e-05
+
     def __init__(self,
                  mz: numpy.array,
                  intensities: numpy.array,
@@ -250,8 +252,13 @@ class Spectrum:
     def peak_comments(self, value):
         self._peak_comments = value
 
-    def _reiterate_peak_comments(self, peaks: Spikes, mz_tolerance=1e-5):
+    @classmethod
+    def update_peak_comments_mz_tolerance(cls, mz_tolerance: float):
+        cls._peak_comments_mz_tolerance = mz_tolerance
+
+    def _reiterate_peak_comments(self, peaks: Spikes):
         """Update the peak comments to reflect the new peaks."""
+        mz_tolerance = self._peak_comments_mz_tolerance
 
         def _append_new_comment():
             if new_key_comment is not None:
