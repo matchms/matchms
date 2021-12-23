@@ -51,7 +51,9 @@ class Spectrum:
 
     """
 
-    def __init__(self, mz: numpy.array, intensities: numpy.array, metadata: Optional[dict] = None):
+    def __init__(self, mz: numpy.array, intensities: numpy.array,
+                 metadata: Optional[dict] = None,
+                 harmonize_defaults: bool = False):
         """
 
         Parameters
@@ -62,30 +64,19 @@ class Spectrum:
             Array of intensities for the peaks
         metadata
             Dictionary with for example the scan number of precursor m/z.
+        harmonize_defaults : bool, optional
+            Set to False if metadata harmonization to default keys is not desired.
+            The default is True.  #TODO: temporarily set to False
         """
         self.peaks = Fragments(mz=mz, intensities=intensities)
         self.losses = None
-        if metadata is None:
-            self.metadata = {}
-        else:
-            self.metadata = metadata
+        self._metadata = Metadata(metadata, harmonize_defaults=harmonize_defaults)
 
     def __eq__(self, other):
         return \
             self.peaks == other.peaks and \
             self.losses == other.losses and \
-            self.__metadata_eq(other.metadata)
-
-    def __metadata_eq(self, other_metadata):
-        if self.metadata.keys() != other_metadata.keys():
-            return False
-        for i, value in enumerate(list(self.metadata.values())):
-            if isinstance(value, numpy.ndarray):
-                if not numpy.all(value == list(other_metadata.values())[i]):
-                    return False
-            elif value != list(other_metadata.values())[i]:
-                return False
-        return True
+            self._metadata  == other._metadata
 
     def __hash__(self):
         """Return a integer hash which is computed from both
@@ -104,13 +95,13 @@ class Spectrum:
         """Return a (truncated) sha256-based hash which is generated
         based on the spectrum metadata.
         Spectra with same metadata results in same metadata_hash."""
-        return metadata_hash(self.metadata)
+        return metadata_hash(self._metadata.data)
 
     def clone(self):
         """Return a deepcopy of the spectrum instance."""
         clone = Spectrum(mz=self.peaks.mz,
                          intensities=self.peaks.intensities,
-                         metadata=self.metadata)
+                         metadata=self._metadata.data)
         clone.losses = self.losses
         return clone
 
@@ -188,7 +179,7 @@ class Spectrum:
             val = self.metadata[key]
 
         """
-        return self._metadata.copy().get(key, default)
+        return self._metadata.get(key, default)
 
     def set(self, key: str, value):
         """Set value in :attr:`metadata` dict. Shorthand for
@@ -198,16 +189,16 @@ class Spectrum:
             self.metadata[key] = val
 
         """
-        self._metadata[key] = value
+        self._metadata.set(key, value)
         return self
 
     @property
     def metadata(self):
-        return self._metadata.copy()
+        return self._metadata.data.copy()
 
     @metadata.setter
     def metadata(self, value):
-        self._metadata = value
+        self._metadata.data = value
 
     @property
     def losses(self) -> Optional[Fragments]:
@@ -224,3 +215,96 @@ class Spectrum:
     @peaks.setter
     def peaks(self, value: Fragments):
         self._peaks = value
+
+
+"""Defines matchms Metadata class."""
+import numpy as np
+from matchms.filtering.add_precursor_mz import _add_precursor_mz_metadata
+
+
+class Metadata:
+    """Class to handle spectrum metadata in matchms."""
+    def __init__(self, metadata: dict = None, harmonize_defaults: bool = True):
+        """
+
+        Parameters
+        ----------
+        metadata : dict
+            Spectrum metadata as a dictionary.
+        harmonize_defaults : bool, optional
+            Set to False if metadata harmonization to default keys is not desired.
+            The default is True.
+
+        """
+        if metadata is None:
+            self._data = {}
+        elif isinstance(metadata, dict):
+            self._data = metadata
+        else:
+            raise ValueError("Unexpected data type for metadata (should be dictionary, or None).")
+
+        self.harmonize_defaults = harmonize_defaults
+        if harmonize_defaults is True:
+            self.harmonize_metadata()
+
+    def __eq__(self, other_metadata):
+        if self.keys() != other_metadata.keys():
+            return False
+        for key, value in self.items():
+
+            if isinstance(value, np.ndarray):
+                if not np.all(value == other_metadata.get(key)):
+                    return False
+            elif value != other_metadata.get(key):
+                return False
+        return True
+
+    def harmonize_metadata(self):
+        if self.get("ionmode") is not None:
+            self._data["ionmode"] = self.get("ionmode").lower()
+        self._data = _add_precursor_mz_metadata(self._data)
+
+    #------------------------------
+    # Getters and Setters 
+    # ------------------------------
+    def get(self, key: str, default=None):
+        """Retrieve value from :attr:`metadata` dict.
+        """
+        return self._data.copy().get(key, default)
+
+    def set(self, key: str, value):
+        """Set value in :attr:`metadata` dict.
+        """
+        self._data[key] = value
+        if self.harmonize_defaults is True:
+            self.harmonize_metadata()
+        return self
+
+    def keys(self):
+        """Retrieve all keys of :attr:`.metadata` dict.
+        """
+        return self._data.keys()
+
+    def values(self):
+        """Retrieve all values of :attr:`.metadata` dict.
+        """
+        return self._data.values()
+
+    def items(self):
+        """Retrieve all items (key, value pairs) of :attr:`.metadata` dict.
+        """
+        return self._data.items()
+
+    def __getitem__(self, key=None):
+        return self.get(key)
+
+    def __setitem__(self, key, newvalue):
+        self.set(key, newvalue)
+
+    @property
+    def data(self):
+        return self._data.copy()
+
+    @data.setter
+    def data(self, value):
+        self._data = value

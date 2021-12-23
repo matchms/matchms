@@ -1,10 +1,6 @@
 """Defines matchms Metadata class."""
-import logging
 import numpy as np
 from matchms.filtering.add_precursor_mz import _add_precursor_mz_metadata
-
-
-logger = logging.getLogger("matchms")
 
 
 class Metadata:
