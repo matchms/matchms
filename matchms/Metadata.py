@@ -27,8 +27,9 @@ class Metadata:
         else:
             raise ValueError("Unexpected data type for metadata (should be dictionary, or None).")
 
+        self.harmonize_defaults = harmonize_defaults
         if harmonize_defaults is True:
-            self.harmonize_defaults()
+            self.harmonize_metadata()
 
     def get(self, key: str, default=None):
         """Retrieve value from :attr:`metadata` dict.
@@ -39,11 +40,13 @@ class Metadata:
         """Set value in :attr:`metadata` dict.
         """
         self._metadata[key] = value
+        if self.harmonize_defaults is True:
+            self.harmonize_metadata()
         return self
 
-    def harmonize_defaults(self):
+    def harmonize_metadata(self):
         if self.get("ionmode") is not None:
-            self.set("ionmode", self.get("ionmode").lower())
+            self._metadata["ionmode"] = self.get("ionmode").lower()
         self._metadata = _add_precursor_mz_metadata(self._metadata)
 
     @property
