@@ -1,5 +1,6 @@
 """Defines matchms Metadata class."""
 import logging
+import numpy as np
 from matchms.filtering.add_precursor_mz import _add_precursor_mz_metadata
 
 
@@ -31,6 +32,18 @@ class Metadata:
         if harmonize_defaults is True:
             self.harmonize_metadata()
 
+    def __eq__(self, other_metadata):
+        if self.keys() != other_metadata.keys():
+            return False
+        for key, value in self.items():
+            
+            if isinstance(value, np.ndarray):
+                if not np.all(value == other_metadata.get(key)):
+                    return False
+            elif value != other_metadata.get(key):
+                return False
+        return True
+
     def get(self, key: str, default=None):
         """Retrieve value from :attr:`metadata` dict.
         """
@@ -43,6 +56,21 @@ class Metadata:
         if self.harmonize_defaults is True:
             self.harmonize_metadata()
         return self
+
+    def keys(self):
+        """Retrieve all keys of :attr:`.metadata` dict.
+        """
+        return self._metadata.keys()
+
+    def values(self):
+        """Retrieve all values of :attr:`.metadata` dict.
+        """
+        return self._metadata.values()
+
+    def items(self):
+        """Retrieve all items (key, value pairs) of :attr:`.metadata` dict.
+        """
+        return self._metadata.items()
 
     def harmonize_metadata(self):
         if self.get("ionmode") is not None:
