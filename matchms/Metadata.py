@@ -13,19 +13,11 @@ class Metadata:
 
         Parameters
         ----------
-        metadata : dict, optional
-            DESCRIPTION. The default is None.
+        metadata : dict
+            Spectrum metadata as a dictionary.
         harmonize_defaults : bool, optional
-            DESCRIPTION. The default is True.
-
-        Raises
-        ------
-        ValueError
-            DESCRIPTION.
-
-        Returns
-        -------
-        None.
+            Set to False if metadata harmonization to default keys is not desired.
+            The default is True.
 
         """
         if metadata is None:
@@ -48,7 +40,7 @@ class Metadata:
         """
         self._metadata[key] = value
         return self
-          
+
     def harmonize_defaults(self):
         if self.get("ionmode") is not None:
             self.set("ionmode", self.get("ionmode").lower())
@@ -61,4 +53,3 @@ class Metadata:
     @metadata.setter
     def metadata(self, value):
         self._metadata = value
-        
