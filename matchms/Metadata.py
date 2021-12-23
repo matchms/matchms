@@ -22,9 +22,9 @@ class Metadata:
 
         """
         if metadata is None:
-            self._metadata = {}
+            self._data = {}
         elif isinstance(metadata, dict):
-            self._metadata = metadata
+            self._data = metadata
         else:
             raise ValueError("Unexpected data type for metadata (should be dictionary, or None).")
 
@@ -36,7 +36,7 @@ class Metadata:
         if self.keys() != other_metadata.keys():
             return False
         for key, value in self.items():
-            
+
             if isinstance(value, np.ndarray):
                 if not np.all(value == other_metadata.get(key)):
                     return False
@@ -44,15 +44,23 @@ class Metadata:
                 return False
         return True
 
+    def harmonize_metadata(self):
+        if self.get("ionmode") is not None:
+            self._data["ionmode"] = self.get("ionmode").lower()
+        self._data = _add_precursor_mz_metadata(self._data)
+
+    #------------------------------
+    # Getters and Setters 
+    # ------------------------------
     def get(self, key: str, default=None):
         """Retrieve value from :attr:`metadata` dict.
         """
-        return self._metadata.copy().get(key, default)
+        return self._data.copy().get(key, default)
 
     def set(self, key: str, value):
         """Set value in :attr:`metadata` dict.
         """
-        self._metadata[key] = value
+        self._data[key] = value
         if self.harmonize_defaults is True:
             self.harmonize_metadata()
         return self
@@ -60,27 +68,28 @@ class Metadata:
     def keys(self):
         """Retrieve all keys of :attr:`.metadata` dict.
         """
-        return self._metadata.keys()
+        return self._data.keys()
 
     def values(self):
         """Retrieve all values of :attr:`.metadata` dict.
         """
-        return self._metadata.values()
+        return self._data.values()
 
     def items(self):
         """Retrieve all items (key, value pairs) of :attr:`.metadata` dict.
         """
-        return self._metadata.items()
+        return self._data.items()
 
-    def harmonize_metadata(self):
-        if self.get("ionmode") is not None:
-            self._metadata["ionmode"] = self.get("ionmode").lower()
-        self._metadata = _add_precursor_mz_metadata(self._metadata)
+    def __getitem__(self, key=None):
+        return self.get(key)
+
+    def __setitem__(self, key, newvalue):
+        self.set(key, newvalue)
 
     @property
-    def metadata(self):
-        return self._metadata.copy()
+    def data(self):
+        return self._data.copy()
 
-    @metadata.setter
-    def metadata(self, value):
-        self._metadata = value
+    @data.setter
+    def data(self, value):
+        self._data = value

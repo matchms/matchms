@@ -3,7 +3,7 @@ import os
 from typing import IO
 from typing import List
 from ..Spectrum import Spectrum
-from ..Spikes import Spikes
+from ..Fragments import Fragments
 
 
 logger = logging.getLogger("matchms")
@@ -61,7 +61,7 @@ def _write_spectrum(spectrum: Spectrum, outfile: IO):
     outfile.write(os.linesep)
 
 
-def _write_peaks(peaks: Spikes, outfile: IO):
+def _write_peaks(peaks: Fragments, outfile: IO):
     outfile.write(f"NUM PEAKS: {len(peaks)}\n")
     for mz, intensity in zip(peaks.mz, peaks.intensities):
         outfile.write(f"{mz}\t{intensity}\n")

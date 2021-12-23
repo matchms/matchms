@@ -3,7 +3,7 @@ import numpy
 from matplotlib import pyplot
 from .hashing import metadata_hash
 from .hashing import spectrum_hash
-from .Spikes import Spikes
+from .Fragments import Fragments
 
 
 class Spectrum:
@@ -35,17 +35,17 @@ class Spectrum:
 
     Attributes
     ----------
-    peaks: ~matchms.Spikes.Spikes
+    peaks: ~matchms.Fragments.Fragments
         Peaks of spectrum
-    losses: ~matchms.Spikes.Spikes or None
+    losses: ~matchms.Fragments.Fragments or None
         Losses of spectrum, the difference between the precursor and all peaks.
 
         Can be filled with
 
         .. code-block ::
 
-            from matchms import Spikes
-            spectrum.losess = Spikes(mz=np.array([50.]), intensities=np.array([0.1]))
+            from matchms import Fragments
+            spectrum.losess = Fragments(mz=np.array([50.]), intensities=np.array([0.1]))
     metadata: dict
         Dict of metadata with for example the scan number of precursor m/z.
 
@@ -63,7 +63,7 @@ class Spectrum:
         metadata
             Dictionary with for example the scan number of precursor m/z.
         """
-        self.peaks = Spikes(mz=mz, intensities=intensities)
+        self.peaks = Fragments(mz=mz, intensities=intensities)
         self.losses = None
         if metadata is None:
             self.metadata = {}
@@ -210,17 +210,17 @@ class Spectrum:
         self._metadata = value
 
     @property
-    def losses(self) -> Optional[Spikes]:
+    def losses(self) -> Optional[Fragments]:
         return self._losses.clone() if self._losses is not None else None
 
     @losses.setter
-    def losses(self, value: Spikes):
+    def losses(self, value: Fragments):
         self._losses = value
 
     @property
-    def peaks(self) -> Spikes:
+    def peaks(self) -> Fragments:
         return self._peaks.clone()
 
     @peaks.setter
-    def peaks(self, value: Spikes):
+    def peaks(self, value: Fragments):
         self._peaks = value

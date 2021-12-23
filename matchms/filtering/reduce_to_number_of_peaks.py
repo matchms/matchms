@@ -2,7 +2,7 @@ import logging
 from math import ceil
 from typing import Optional
 import numpy
-from ..Spikes import Spikes
+from ..Fragments import Fragments
 from ..typing import SpectrumType
 
 
@@ -41,7 +41,7 @@ def reduce_to_number_of_peaks(spectrum_in: SpectrumType, n_required: int = 1, n_
         mz, intensities = spectrum.peaks
         idx = intensities.argsort()[-threshold:]
         idx_sort_by_mz = mz[idx].argsort()
-        spectrum.peaks = Spikes(mz=mz[idx][idx_sort_by_mz],
+        spectrum.peaks = Fragments(mz=mz[idx][idx_sort_by_mz],
                                 intensities=intensities[idx][idx_sort_by_mz])
 
     if spectrum_in is None:

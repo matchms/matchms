@@ -10,7 +10,7 @@ from .logging_functions import set_matchms_logger_level
 from .Metadata import Metadata
 from .Scores import Scores
 from .Spectrum import Spectrum
-from .Spikes import Spikes
+from .Fragments import Fragments
 
 
 _init_logger()
@@ -30,5 +30,5 @@ __all__ = [
     "set_matchms_logger_level",
     "similarity",
     "Spectrum",
-    "Spikes"
+    "Fragments"
 ]

@@ -1,7 +1,7 @@
 import numpy
 
 
-class Spikes:
+class Fragments:
     """
     Stores arrays of intensities and M/z values, with some checks on their internal consistency.
     """
@@ -34,7 +34,7 @@ class Spikes:
         return numpy.all(self.mz[:-1] <= self.mz[1:])
 
     def clone(self):
-        return Spikes(self.mz, self.intensities)
+        return Fragments(self.mz, self.intensities)
 
     @property
     def mz(self):

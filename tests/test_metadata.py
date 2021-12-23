@@ -12,7 +12,7 @@ from matchms import Metadata
     [{"ionmode": "Negative"}, True, {"ionmode": "negative"}]])
 def test_metadata_init(input_dict, harmonize, expected):
     metadata = Metadata(input_dict, harmonize_defaults=harmonize)
-    assert metadata.metadata == expected, \
+    assert metadata.data == expected, \
         "Expected different _metadata dictionary."
 
 
@@ -24,7 +24,7 @@ def test_metadata_init(input_dict, harmonize, expected):
 def test_metadata_setter(harmonize, set_key, set_value, expected):
     metadata = Metadata(harmonize_defaults=harmonize)
     metadata.set(set_key, set_value)
-    assert metadata.metadata == expected, \
+    assert metadata.data == expected, \
         "Expected different _metadata dictionary."
 
 
@@ -37,6 +37,18 @@ def test_metadata_setter_getter(harmonize, set_key, set_value, get_key, get_valu
     metadata = Metadata(harmonize_defaults=harmonize)
     metadata.set(set_key, set_value)
     assert metadata.get(get_key) == get_value, \
+        "Expected different _metadata dictionary."
+
+
+@pytest.mark.parametrize("harmonize, set_key, set_value, get_key, get_value", [
+    [True, "precursor_mz", 101.01, "precursor_mz", 101.01],
+    [True, "precursormz", 101.01, "precursor_mz", 101.01],
+    [False, "precursormz", 101.01, "precursormz", 101.01],
+    [True, "ionmode", "NEGATIVE", "ionmode", "negative"]])
+def test_metadata_setitem_getitem(harmonize, set_key, set_value, get_key, get_value):
+    metadata = Metadata(harmonize_defaults=harmonize)
+    metadata[set_key] = set_value
+    assert metadata[get_key] == metadata.get(get_key) == get_value, \
         "Expected different _metadata dictionary."
 
 
