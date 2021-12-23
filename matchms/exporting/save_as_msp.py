@@ -1,7 +1,9 @@
 import logging
 import os
 from typing import IO
+from typing import Dict
 from typing import List
+from typing import Union
 from ..Spectrum import Spectrum
 from ..Spikes import Spikes
 
@@ -57,20 +59,29 @@ def save_as_msp(spectra: List[Spectrum], filename: str):
 
 def _write_spectrum(spectrum: Spectrum, outfile: IO):
     _write_metadata(spectrum.metadata, outfile)
-    _write_peaks(spectrum.peaks, outfile)
+    _write_peaks(spectrum.peaks, spectrum.peak_comments, outfile)
     outfile.write(os.linesep)
 
 
-def _write_peaks(peaks: Spikes, outfile: IO):
+def _write_peaks(peaks: Spikes, peak_comments: Spectrum.peak_comments, outfile: IO):
     outfile.write(f"NUM PEAKS: {len(peaks)}\n")
     for mz, intensity in zip(peaks.mz, peaks.intensities):
-        outfile.write(f"{mz}\t{intensity}\n")
+        peak_comment = _format_peak_comment(mz, peak_comments)
+        outfile.write(f"{mz}\t{intensity}{peak_comment}\n".expandtabs(12))
 
 
 def _write_metadata(metadata: dict, outfile: IO):
     for key, value in metadata.items():
         if not _is_num_peaks(key):
             outfile.write(f"{key.upper()}: {value}\n")
+
+
+def _format_peak_comment(mz: Union[int, float], peak_comments: Dict):
+    """Format peak comment for given mz to return the quoted comment or empty string if no peak comment is present."""
+    peak_comment = peak_comments.get(mz, None)
+    if peak_comment is None:
+        return ""
+    return f"\t\"{peak_comment}\""
 
 
 def _is_num_peaks(key: str) -> bool:

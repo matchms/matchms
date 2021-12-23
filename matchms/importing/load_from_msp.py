@@ -1,3 +1,4 @@
+import re
 from typing import Generator
 from typing import Iterator
 from typing import Tuple
@@ -12,6 +13,7 @@ def parse_msp_file(filename: str) -> Generator[dict, None, None]:
     params = {}
     masses = []
     intensities = []
+    peak_comments = {}
 
     # Peaks counter. Used to track and count the number of peaks
     peakscount = 0
@@ -31,6 +33,9 @@ def parse_msp_file(filename: str) -> Generator[dict, None, None]:
 
                 for peak in peak_pairs:
                     mz, intensity = get_peak_values(peak)
+                    comment = get_peak_comment(peak)
+                    if comment is not None:
+                        peak_comments.update({mz: comment})
 
                     peakscount += 1
                     masses.append(mz)
@@ -42,12 +47,14 @@ def parse_msp_file(filename: str) -> Generator[dict, None, None]:
                     yield {
                         'params': (params),
                         'm/z array': numpy.array(masses),
-                        'intensity array': numpy.array(intensities)
+                        'intensity array': numpy.array(intensities),
+                        'peak comments': peak_comments
                     }
 
                     params = {}
                     masses = []
                     intensities = []
+                    peak_comments = {}
 
 
 def get_peak_values(peak: str) -> Tuple[float, float]:
@@ -63,6 +70,15 @@ def get_peak_tuples(rline: str) -> Iterator[str]:
     tokens = filter(None, rline.split(";"))
     peak_pairs = map(lambda x: x.lstrip().rstrip(), tokens)
     return peak_pairs
+
+
+def get_peak_comment(rline: str) -> str:
+    """ Get the peak comment from the line containing the peak information. """
+    try:
+        comment = re.findall(r'[\"\'](.*)[\"\']', rline)[0]
+    except IndexError:
+        comment = None
+    return comment
 
 
 def parse_metadata(rline: str, params: dict):
@@ -116,6 +132,7 @@ def load_from_msp(filename: str) -> Generator[Spectrum, None, None]:
         metadata = spectrum.get("params", None)
         mz = spectrum["m/z array"]
         intensities = spectrum["intensity array"]
+        peak_comments = spectrum["peak comments"]
 
         # Sort by mz (if not sorted already)
         if not numpy.all(mz[:-1] <= mz[1:]):
@@ -123,4 +140,4 @@ def load_from_msp(filename: str) -> Generator[Spectrum, None, None]:
             mz = mz[idx_sorted]
             intensities = intensities[idx_sorted]
 
-        yield Spectrum(mz=mz, intensities=intensities, metadata=metadata)
+        yield Spectrum(mz=mz, intensities=intensities, metadata=metadata, peak_comments=peak_comments)
