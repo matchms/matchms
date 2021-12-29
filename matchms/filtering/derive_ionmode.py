@@ -1,7 +1,7 @@
 import logging
 from ..importing import load_adducts_dict
 from ..typing import SpectrumType
-from ..utils import clean_adduct
+from ..metadata_utils import clean_adduct
 
 
 logger = logging.getLogger("matchms")
