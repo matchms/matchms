@@ -267,7 +267,7 @@ class Metadata:
         self._data = _add_precursor_mz_metadata(self._data)
 
     #------------------------------
-    # Getters and Setters 
+    # Getters and Setters
     # ------------------------------
     def get(self, key: str, default=None):
         """Retrieve value from :attr:`metadata` dict.
