@@ -262,6 +262,8 @@ class Metadata:
     def harmonize_metadata(self):
         if self.get("ionmode") is not None:
             self._data["ionmode"] = self.get("ionmode").lower()
+        if self.get("ionmode") is None:
+            self.set("ionmode", "n/a")
         self._data = _add_precursor_mz_metadata(self._data)
 
     #------------------------------
