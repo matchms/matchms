@@ -51,7 +51,7 @@ def _add_precursor_mz_metadata(metadata):
     return metadata
 
 
-def add_precursor_mz(spectrum_in: SpectrumType) -> SpectrumType:
+def add_precursor_mz(spectrum_in):
     """Add precursor_mz to correct field and make it a float.
 
     For missing precursor_mz field: check if there is "pepmass"" entry instead.

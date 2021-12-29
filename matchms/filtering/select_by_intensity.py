@@ -27,6 +27,6 @@ def select_by_intensity(spectrum_in: SpectrumType, intensity_from: float = 10.0,
                                   spectrum.peaks.intensities <= intensity_to)
 
     spectrum.peaks = Fragments(mz=spectrum.peaks.mz[condition],
-                            intensities=spectrum.peaks.intensities[condition])
+                               intensities=spectrum.peaks.intensities[condition])
 
     return spectrum

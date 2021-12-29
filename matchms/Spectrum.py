@@ -1,9 +1,10 @@
 from typing import Optional
-import numpy
+import numpy as np
 from matplotlib import pyplot
 from .hashing import metadata_hash
 from .hashing import spectrum_hash
 from .Fragments import Fragments
+from .filtering.add_precursor_mz import _add_precursor_mz_metadata
 
 
 class Spectrum:
@@ -51,7 +52,7 @@ class Spectrum:
 
     """
 
-    def __init__(self, mz: numpy.array, intensities: numpy.array,
+    def __init__(self, mz: np.array, intensities: np.array,
                  metadata: Optional[dict] = None,
                  harmonize_defaults: bool = False):
         """
@@ -76,7 +77,7 @@ class Spectrum:
         return \
             self.peaks == other.peaks and \
             self.losses == other.losses and \
-            self._metadata  == other._metadata
+            self._metadata == other._metadata
 
     def __hash__(self):
         """Return a integer hash which is computed from both
@@ -120,7 +121,7 @@ class Spectrum:
             def calc_bin_edges_intensity():
                 """Calculate various properties of the histogram bins, given a range in intensity defined by
                 'intensity_from' and 'intensity_to', assuming a number of bins equal to 100."""
-                edges = numpy.linspace(intensity_from, intensity_to, n_bins + 1)
+                edges = np.linspace(intensity_from, intensity_to, n_bins + 1)
                 lefts = edges[:-1]
                 rights = edges[1:]
                 middles = (lefts + rights) / 2
@@ -128,7 +129,7 @@ class Spectrum:
                 return edges, middles, widths
 
             bin_edges, bin_middles, bin_widths = calc_bin_edges_intensity()
-            counts, _ = numpy.histogram(self.peaks.intensities, bins=bin_edges)
+            counts, _ = np.histogram(self.peaks.intensities, bins=bin_edges)
             histogram_ax.set_ylim(bottom=intensity_from, top=intensity_to)
             pyplot.barh(bin_middles, counts, height=bin_widths, color="#047495")
             pyplot.title(f"histogram (n_bins={n_bins})")
@@ -139,9 +140,9 @@ class Spectrum:
 
             def make_stems():
                 """calculate where the stems of the spectrum peaks are going to be"""
-                x = numpy.zeros([2, self.peaks.mz.size], dtype="float")
-                y = numpy.zeros(x.shape)
-                x[:, :] = numpy.tile(self.peaks.mz, (2, 1))
+                x = np.zeros([2, self.peaks.mz.size], dtype="float")
+                y = np.zeros(x.shape)
+                x[:, :] = np.tile(self.peaks.mz, (2, 1))
                 y[1, :] = self.peaks.intensities
                 return x, y
 
@@ -215,11 +216,6 @@ class Spectrum:
     @peaks.setter
     def peaks(self, value: Fragments):
         self._peaks = value
-
-
-"""Defines matchms Metadata class."""
-import numpy as np
-from matchms.filtering.add_precursor_mz import _add_precursor_mz_metadata
 
 
 class Metadata:

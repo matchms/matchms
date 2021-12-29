@@ -29,6 +29,6 @@ def select_by_relative_intensity(spectrum_in: SpectrumType, intensity_from: floa
         normalized_intensities = spectrum.peaks.intensities / scale_factor
         condition = numpy.logical_and(intensity_from <= normalized_intensities, normalized_intensities <= intensity_to)
         spectrum.peaks = Fragments(mz=spectrum.peaks.mz[condition],
-                                intensities=spectrum.peaks.intensities[condition])
+                                   intensities=spectrum.peaks.intensities[condition])
 
     return spectrum

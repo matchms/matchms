@@ -35,7 +35,7 @@ def add_losses(spectrum_in: SpectrumType, loss_mz_from=0.0, loss_mz_to=1000.0) -
         mask = numpy.where((losses_mz >= loss_mz_from)
                            & (losses_mz <= loss_mz_to))
         spectrum.losses = Fragments(mz=losses_mz[mask],
-                                 intensities=losses_intensities[mask])
+                                    intensities=losses_intensities[mask])
     else:
         logger.warning("No precursor_mz found. Consider applying 'add_precursor_mz' filter first.")
 
