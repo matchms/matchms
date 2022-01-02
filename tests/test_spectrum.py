@@ -1,6 +1,7 @@
 import numpy
 from matplotlib import pyplot as plt
-from matchms import Spectrum, Spikes
+from matchms import Spectrum
+from matchms import Spikes
 
 
 def _assert_plots_ok(fig, n_plots):
@@ -204,4 +205,3 @@ def test_reiterating_peak_comments():
                             intensities=numpy.array([5, 4, 7], dtype='float'))
 
     assert spectrum.peak_comments == {100.0004: "m/z 100.0003; m/z 100.0005", 110.: "m/z 110.", 400.018: "m/z 400.0176"}
-

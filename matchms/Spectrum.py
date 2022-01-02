@@ -260,7 +260,7 @@ class Spectrum:
         """Update the peak comments to reflect the new peaks."""
         mz_tolerance = self._peak_comments_mz_tolerance
 
-        def _append_new_comment():
+        def _append_new_comment(key):
             if new_key_comment is not None:
                 comment = "; ".join([new_key_comment, self.peak_comments[key]])
             else:
@@ -272,6 +272,6 @@ class Spectrum:
                 if numpy.isclose(key, peaks.mz, rtol=mz_tolerance).any():
                     new_key = peaks.mz[numpy.isclose(key, peaks.mz, rtol=mz_tolerance).argmax()]
                     new_key_comment = self.peak_comments.get(new_key, None)
-                    new_key_comment = _append_new_comment()
+                    new_key_comment = _append_new_comment(key)
                     self.peak_comments[new_key] = new_key_comment
                 self.peak_comments.pop(key)
