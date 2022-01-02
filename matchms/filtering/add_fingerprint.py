@@ -1,8 +1,8 @@
 import logging
 import numpy
-from ..typing import SpectrumType
 from ..metadata_utils import derive_fingerprint_from_inchi
 from ..metadata_utils import derive_fingerprint_from_smiles
+from ..typing import SpectrumType
 
 
 logger = logging.getLogger("matchms")

@@ -1,9 +1,9 @@
 from typing import Optional
 import numpy as np
 from matplotlib import pyplot
+from .Fragments import Fragments
 from .hashing import metadata_hash
 from .hashing import spectrum_hash
-from .Fragments import Fragments
 from .Metadata import Metadata
 
 

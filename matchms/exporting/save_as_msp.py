@@ -2,8 +2,8 @@ import logging
 import os
 from typing import IO
 from typing import List
-from ..Spectrum import Spectrum
 from ..Fragments import Fragments
+from ..Spectrum import Spectrum
 
 
 logger = logging.getLogger("matchms")

@@ -5,12 +5,12 @@ from . import networking
 from . import similarity
 from .__version__ import __version__
 from .calculate_scores import calculate_scores
+from .Fragments import Fragments
 from .logging_functions import _init_logger
 from .logging_functions import set_matchms_logger_level
 from .Metadata import Metadata
 from .Scores import Scores
 from .Spectrum import Spectrum
-from .Fragments import Fragments
 
 
 _init_logger()
