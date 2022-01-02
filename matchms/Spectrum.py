@@ -34,7 +34,7 @@ class Spectrum:
         100.0
         0.7
         spectrum1
-        'the peak at 200 m/z'
+        the peak at 200 m/z
 
     Attributes
     ----------
