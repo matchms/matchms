@@ -1,6 +1,6 @@
 import logging
 from ..constants import PROTON_MASS
-from ..importing import load_adducts_dict
+from matchms.filtering.load_adducts import load_adducts_dict
 from ..typing import SpectrumType
 from ..metadata_utils import clean_adduct
 

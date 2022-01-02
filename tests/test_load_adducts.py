@@ -1,7 +1,7 @@
 import numpy
-from matchms.importing import load_adducts_dict
-from matchms.importing import load_known_adduct_conversions
-from matchms.importing.load_adducts import _convert_and_fill_dict
+from matchms.filtering import load_adducts_dict
+from matchms.filtering import load_known_adduct_conversions
+from matchms.filtering.load_adducts import _convert_and_fill_dict
 
 
 def test_load_adducts_dict():

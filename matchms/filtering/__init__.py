@@ -55,6 +55,8 @@ from .derive_smiles_from_inchi import derive_smiles_from_inchi
 from .harmonize_undefined_inchi import harmonize_undefined_inchi
 from .harmonize_undefined_inchikey import harmonize_undefined_inchikey
 from .harmonize_undefined_smiles import harmonize_undefined_smiles
+from .load_adducts import load_adducts_dict
+from .load_adducts import load_known_adduct_conversions
 from .make_charge_int import make_charge_int
 from .make_charge_scalar import make_charge_scalar
 from .make_ionmode_lowercase import make_ionmode_lowercase
@@ -94,6 +96,8 @@ __all__ = [
     "harmonize_undefined_inchi",
     "harmonize_undefined_inchikey",
     "harmonize_undefined_smiles",
+    "load_adducts_dict",
+    "load_known_adduct_conversions",
     "make_charge_int",
     "make_charge_scalar",
     "make_ionmode_lowercase",
@@ -110,5 +114,5 @@ __all__ = [
     "select_by_mz",
     "select_by_relative_intensity",
     "set_ionmode_na_when_missing",
-    "SpeciesString"
+    "SpeciesString",
 ]

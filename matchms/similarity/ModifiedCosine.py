@@ -1,7 +1,7 @@
 import logging
 from typing import Tuple
 import numpy
-from matchms.filtering.add_precursor_mz import _convert_precursor_mz
+from matchms.filtering.metadata_filters import _convert_precursor_mz
 from matchms.typing import SpectrumType
 from .BaseSimilarity import BaseSimilarity
 from .spectrum_similarity_functions import collect_peak_pairs

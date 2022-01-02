@@ -1,8 +1,8 @@
 import re
 from typing import Optional
 import numpy
-from .importing import load_adducts_dict
-from .importing import load_known_adduct_conversions
+from matchms.filtering.load_adducts import load_adducts_dict
+from matchms.filtering.load_adducts import load_known_adduct_conversions
 
 
 try:  # rdkit is not included in pip package
