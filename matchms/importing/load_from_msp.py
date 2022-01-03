@@ -133,6 +133,8 @@ def load_from_msp(filename: str) -> Generator[Spectrum, None, None]:
         mz = spectrum["m/z array"]
         intensities = spectrum["intensity array"]
         peak_comments = spectrum["peak comments"]
+        if peak_comments != {}:
+            metadata["peak_comments"] = peak_comments
 
         # Sort by mz (if not sorted already)
         if not numpy.all(mz[:-1] <= mz[1:]):
@@ -140,4 +142,4 @@ def load_from_msp(filename: str) -> Generator[Spectrum, None, None]:
             mz = mz[idx_sorted]
             intensities = intensities[idx_sorted]
 
-        yield Spectrum(mz=mz, intensities=intensities, metadata=metadata, peak_comments=peak_comments)
+        yield Spectrum(mz=mz, intensities=intensities, metadata=metadata)
