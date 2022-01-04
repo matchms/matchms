@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - minor improvement of compound name cleaning in `derive_adduct_from_name()` filter [#280](https://github.com/matchms/matchms/pull/280)
 
+### Fixed
+
+- able to handle spectra containg empty/zero intensities [#289](https://github.com/matchms/matchms/pull/289)
+
 ## [0.11.0] - 2021-12-16
 
 ## Added

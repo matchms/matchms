@@ -1,6 +1,10 @@
+import logging
 import numpy
 from matchms.typing import SpectrumType
 from ..Spikes import Spikes
+
+
+logger = logging.getLogger("matchms")
 
 
 def normalize_intensities(spectrum_in: SpectrumType) -> SpectrumType:
@@ -15,6 +19,10 @@ def normalize_intensities(spectrum_in: SpectrumType) -> SpectrumType:
         return spectrum
 
     max_intensity = numpy.max(spectrum.peaks.intensities)
+
+    if max_intensity <= 0:
+        logger.warning("Spectrum with all peak intensities <= 0 was set to None.")
+        return None
 
     # Normalize peak intensities
     mz, intensities = spectrum.peaks
