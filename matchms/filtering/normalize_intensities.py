@@ -15,7 +15,7 @@ def normalize_intensities(spectrum_in: SpectrumType) -> SpectrumType:
         return spectrum
 
     max_intensity = numpy.max(spectrum.peaks.intensities)
-    
+
     if max_intensity <= 0:
         return None
     
