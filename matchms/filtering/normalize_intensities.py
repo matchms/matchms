@@ -21,7 +21,7 @@ def normalize_intensities(spectrum_in: SpectrumType) -> SpectrumType:
     max_intensity = numpy.max(spectrum.peaks.intensities)
 
     if max_intensity <= 0:
-        logger.warn("Spectrum with all peak intensities <= 0 was set to None.")
+        logger.warning("Spectrum with all peak intensities <= 0 was set to None.")
         return None
 
     # Normalize peak intensities
