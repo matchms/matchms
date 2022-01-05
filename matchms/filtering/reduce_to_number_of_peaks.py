@@ -38,7 +38,7 @@ def reduce_to_number_of_peaks(spectrum_in: SpectrumType, n_required: int = 1, n_
         raise ValueError("Cannot use ratio_desired for spectrum without parent_mass.")
 
     def _remove_lowest_intensity_peaks():
-        mz, intensities = spectrum.peaks
+        mz, intensities = spectrum.peaks.mz, spectrum.peaks.intensities
         idx = intensities.argsort()[-threshold:]
         idx_sort_by_mz = mz[idx].argsort()
         spectrum.peaks = Fragments(mz=mz[idx][idx_sort_by_mz],

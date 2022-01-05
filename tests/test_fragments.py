@@ -83,17 +83,16 @@ def test_fragments_dot_clone():
     assert peaks is not peaks_cloned
 
 
-def test_fragments_unpack():
+def test_fragments_getitem():
 
     mz = numpy.array([10, 20, 30], dtype="float")
     intensities = numpy.array([100, 20, 300], dtype="float")
 
     peaks = Fragments(mz=mz, intensities=intensities)
 
-    mz_unpacked, intensities_unpacked = peaks
-
-    assert numpy.allclose(mz, mz_unpacked)
-    assert numpy.allclose(intensities, intensities_unpacked)
+    assert numpy.allclose(peaks[1], numpy.array(mz[1], intensities[1]))
+    assert numpy.allclose(peaks[:],
+                          numpy.stack((peaks.mz, peaks.intensities)))
 
 
 def test_fragments_to_numpy():
