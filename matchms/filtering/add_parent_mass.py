@@ -76,11 +76,12 @@ def add_parent_mass(spectrum_in: SpectrumType, estimate_from_adduct: bool = True
 
 def _get_parent_mass(metadata):
     parent_mass_key = get_first_common_element([_default_key] + _accepted_keys,
-                                                metadata.keys())
+                                               metadata.keys())
     parent_mass = metadata.get(parent_mass_key)
     parent_mass = _convert_entry_to_num(parent_mass)
     if parent_mass not in _accepted_missing_entries:
         return parent_mass
+    return None
 
 
 def _convert_entry_to_num(entry):
