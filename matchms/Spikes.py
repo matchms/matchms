@@ -28,7 +28,7 @@ class Spikes:
         return self._mz.size
 
     def __getitem__(self, item):
-        return [self.mz, self.intensities][item]
+        return numpy.asarray([self.mz[item], self.intensities[item]])
 
     def _is_sorted(self):
         return numpy.all(self.mz[:-1] <= self.mz[1:])

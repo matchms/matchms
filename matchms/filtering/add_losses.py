@@ -28,7 +28,7 @@ def add_losses(spectrum_in: SpectrumType, loss_mz_from=0.0, loss_mz_to=1000.0) -
     if precursor_mz:
         assert isinstance(precursor_mz, (float, int)), ("Expected 'precursor_mz' to be a scalar number.",
                                                         "Consider applying 'add_precursor_mz' filter first.")
-        peaks_mz, peaks_intensities = spectrum.peaks
+        peaks_mz, peaks_intensities = spectrum.peaks.mz, spectrum.peaks.intensities
         losses_mz = (precursor_mz - peaks_mz)[::-1]
         losses_intensities = peaks_intensities[::-1]
         # Add losses which are within given boundaries
