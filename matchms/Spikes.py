@@ -4,6 +4,33 @@ import numpy
 class Spikes:
     """
     Stores arrays of intensities and M/z values, with some checks on their internal consistency.
+
+    For example
+
+    .. testcode::
+
+        import numpy as np
+        from matchms import Spikes
+
+        mz = numpy.array([10, 20, 30], dtype="float")
+        intensities = numpy.array([100, 20, 300], dtype="float")
+
+        peaks = Spikes(mz=mz, intensities=intensities)
+        print(peaks[2])
+
+    Should output
+
+    .. testoutput::
+
+       [ 30. 300.]
+
+    Attributes
+    ----------
+    mz:
+        Numpy array of m/z values.
+    intensities:
+        Numpy array of peak intensity values.
+
     """
     def __init__(self, mz=None, intensities=None):
         assert isinstance(mz, numpy.ndarray), "Input argument 'mz' should be a numpy.array."
