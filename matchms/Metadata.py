@@ -1,5 +1,5 @@
 import numpy as np
-from .filtering.metadata_filters import _add_precursor_mz_metadata
+from .filtering.add_precursor_mz import _add_precursor_mz_metadata
 
 
 class Metadata:
