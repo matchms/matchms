@@ -25,13 +25,13 @@ def normalize_intensities(spectrum_in: SpectrumType) -> SpectrumType:
         return None
 
     # Normalize peak intensities
-    mz, intensities = spectrum.peaks
+    mz, intensities = spectrum.peaks.mz, spectrum.peaks.intensities
     normalized_intensities = intensities / max_intensity
     spectrum.peaks = Spikes(mz=mz, intensities=normalized_intensities)
 
     # Normalize loss intensities
     if spectrum.losses is not None and len(spectrum.losses) > 0:
-        mz, intensities = spectrum.losses
+        mz, intensities = spectrum.losses.mz, spectrum.losses.intensities
         normalized_intensities = intensities / max_intensity
         spectrum.losses = Spikes(mz=mz, intensities=normalized_intensities)
 
