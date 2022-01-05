@@ -12,8 +12,8 @@ class Spikes:
         import numpy as np
         from matchms import Spikes
 
-        mz = numpy.array([10, 20, 30], dtype="float")
-        intensities = numpy.array([100, 20, 300], dtype="float")
+        mz = np.array([10, 20, 30], dtype="float")
+        intensities = np.array([100, 20, 300], dtype="float")
 
         peaks = Spikes(mz=mz, intensities=intensities)
         print(peaks[2])
