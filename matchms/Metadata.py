@@ -1,15 +1,17 @@
+from collections.abc import Mapping
 import numpy as np
+from pickydict import PickyDict
 from .filtering.add_precursor_mz import _add_precursor_mz_metadata
 
 
 class Metadata:
     """Class to handle spectrum metadata in matchms."""
-    def __init__(self, metadata: dict = None, harmonize_defaults: bool = True):
+    def __init__(self, metadata: PickyDict = None, harmonize_defaults: bool = True):
         """
 
         Parameters
         ----------
-        metadata : dict
+        metadata : PickyDict
             Spectrum metadata as a dictionary.
         harmonize_defaults : bool, optional
             Set to False if metadata harmonization to default keys is not desired.
@@ -17,9 +19,9 @@ class Metadata:
 
         """
         if metadata is None:
-            self._data = {}
-        elif isinstance(metadata, dict):
-            self._data = metadata
+            self._data = PickyDict({})
+        elif isinstance(metadata, Mapping):
+            self._data = PickyDict(metadata)
         else:
             raise ValueError("Unexpected data type for metadata (should be dictionary, or None).")
 
