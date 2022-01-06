@@ -256,7 +256,7 @@ def looks_like_adduct(adduct):
         return True
 
     # Expect format like: "[2M-H]" or "[2M+Na]+"
-    regexp1 = r"^\[(([0-4]M)|(M[0-9])|(M))((Br)|(Br81)|(Cl)|(Cl37)|(S)){0,}[+-0-9][A-Z0-9\+\-\(\)NaCMglLiBrSe]{1,}[\]0-4+-]{1,4}"
+    regexp1 = r"^\[(([0-4]M)|(M[0-9])|(M))((Br)|(Br81)|(Cl)|(Cl37)|(S)){0,}[+-][A-Z0-9\+\-\(\)aglire]{1,}[\]0-4+-]{1,4}"
     return re.search(regexp1, adduct) is not None
 
 
