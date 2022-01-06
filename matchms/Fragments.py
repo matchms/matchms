@@ -10,12 +10,12 @@ class Fragments:
     .. testcode::
 
         import numpy as np
-        from matchms import Spikes
+        from matchms import Fragments
 
         mz = np.array([10, 20, 30], dtype="float")
         intensities = np.array([100, 20, 300], dtype="float")
 
-        peaks = Spikes(mz=mz, intensities=intensities)
+        peaks = Fragments(mz=mz, intensities=intensities)
         print(peaks[2])
 
     Should output

@@ -57,6 +57,7 @@ class Metadata:
     def set(self, key: str, value):
         """Set value in :attr:`metadata` dict.
         """
+        # TODO: define allowed keys or even merge some
         self._data[key] = value
         if self.harmonize_defaults is True:
             self.harmonize_metadata()
