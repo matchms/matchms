@@ -20,17 +20,17 @@ class SimilarityNetwork:
         spectrum_1 = Spectrum(mz=np.array([100, 150, 200.]),
                               intensities=np.array([0.7, 0.2, 0.1]),
                               metadata={"precursor_mz": 100.0,
-                                        "testID": "one"})
+                                        "test_id": "one"})
         spectrum_2 = Spectrum(mz=np.array([104.9, 140, 190.]),
                               intensities=np.array([0.4, 0.2, 0.1]),
                               metadata={"precursor_mz": 105.0,
-                                        "testID": "two"})
+                                        "test_id": "two"})
 
         # Use factory to construct a similarity function
         modified_cosine = ModifiedCosine(tolerance=0.2)
         spectrums = [spectrum_1, spectrum_2]
         scores = calculate_scores(spectrums, spectrums, modified_cosine)
-        ms_network = SimilarityNetwork(identifier_key="testID")
+        ms_network = SimilarityNetwork(identifier_key="test_id")
         ms_network.create_network(scores)
 
         nodes = list(ms_network.graph.nodes())
