@@ -199,7 +199,8 @@ def test_reiterating_peak_comments():
     intensities = numpy.array([1, 2, 3, 4, 5, 6, 7], dtype='float')
     peak_comments = ["m/z 100.0003", None, "m/z 100.0005", "m/z 110.", "m/z 200.", "m/z 300.", "m/z 400.0176"]
     peak_comments = {mz[i]: peak_comments[i] for i in range(len(mz))}
-    spectrum = Spectrum(mz=mz, intensities=intensities, peak_comments=peak_comments)
+    spectrum = Spectrum(mz=mz, intensities=intensities,
+                        metadata={"peak_comments": peak_comments})
 
     spectrum.peaks = Spikes(mz=numpy.array([100.0004, 110., 400.018], dtype='float'),
                             intensities=numpy.array([5, 4, 7], dtype='float'))

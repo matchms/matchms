@@ -19,8 +19,8 @@ class Spectrum:
 
         spectrum = Spectrum(mz=np.array([100, 150, 200.]),
                               intensities=np.array([0.7, 0.2, 0.1]),
-                              metadata={'id': 'spectrum1'},
-                              peak_comments={200.: "the peak at 200 m/z"})
+                              metadata={'id': 'spectrum1',
+                                        "peak_comments": {200.: "the peak at 200 m/z"}})
 
         print(spectrum.peaks.mz[0])
         print(spectrum.peaks.intensities[0])
@@ -51,8 +51,6 @@ class Spectrum:
             spectrum.losess = Spikes(mz=np.array([50.]), intensities=np.array([0.1]))
     metadata: dict
         Dict of metadata with for example the scan number of precursor m/z.
-    peak_comments: dict
-        Dict of comments for each m/z peak.
 
     """
 
@@ -61,8 +59,7 @@ class Spectrum:
     def __init__(self,
                  mz: numpy.array,
                  intensities: numpy.array,
-                 metadata: Optional[dict] = None,
-                 peak_comments: Optional[dict] = None):
+                 metadata: Optional[dict] = None):
         """
 
         Parameters
@@ -73,19 +70,13 @@ class Spectrum:
             Array of intensities for the peaks
         metadata
             Dictionary with for example the scan number of precursor m/z.
-        peak_comments
-            Dictionary with comments assigned to their m/z peaks.
         """
+        if metadata is None:
+            self._metadata = {}
+        else:
+            self._metadata = metadata
         self.peaks = Spikes(mz=mz, intensities=intensities)
         self.losses = None
-        if metadata is None:
-            self.metadata = {}
-        else:
-            self.metadata = metadata
-        if peak_comments:
-            self.peak_comments = peak_comments
-        else:
-            self.peak_comments = {}
 
     def __eq__(self, other):
         return \
@@ -240,17 +231,17 @@ class Spectrum:
 
     @peaks.setter
     def peaks(self, value: Spikes):
-        if hasattr(self, "_peak_comments"):
+        if isinstance(self.get("peak_comments"), dict):
             self._reiterate_peak_comments(value)
         self._peaks = value
 
     @property
     def peak_comments(self):
-        return self._peak_comments
+        return self.get("peak_comments")
 
     @peak_comments.setter
     def peak_comments(self, value):
-        self._peak_comments = value
+        self.set("peak_comments", value)
 
     @classmethod
     def update_peak_comments_mz_tolerance(cls, mz_tolerance: float):
@@ -258,20 +249,23 @@ class Spectrum:
 
     def _reiterate_peak_comments(self, peaks: Spikes):
         """Update the peak comments to reflect the new peaks."""
+        if not isinstance(self.get("peak_comments", None), dict):
+            return None
+
         mz_tolerance = self._peak_comments_mz_tolerance
 
         def _append_new_comment(key):
             if new_key_comment is not None:
-                comment = "; ".join([new_key_comment, self.peak_comments[key]])
+                comment = "; ".join([new_key_comment, self.metadata["peak_comments"].get(key)])
             else:
-                comment = self.peak_comments[key]
+                comment = self.metadata["peak_comments"].get(key)
             return comment
 
-        for key in list(self.peak_comments.keys()):
+        for key in list(self.metadata["peak_comments"].keys()):
             if key not in peaks.mz:
                 if numpy.isclose(key, peaks.mz, rtol=mz_tolerance).any():
                     new_key = peaks.mz[numpy.isclose(key, peaks.mz, rtol=mz_tolerance).argmax()]
-                    new_key_comment = self.peak_comments.get(new_key, None)
+                    new_key_comment = self.metadata["peak_comments"].get(new_key, None)
                     new_key_comment = _append_new_comment(key)
-                    self.peak_comments[new_key] = new_key_comment
-                self.peak_comments.pop(key)
+                    self._metadata["peak_comments"][new_key] = new_key_comment
+                self._metadata["peak_comments"].pop(key)
