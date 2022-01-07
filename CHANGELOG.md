@@ -18,7 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - better, more flexible string handling of `ModifiedCosine` [#275](https://github.com/matchms/matchms/pull/275)
 - matchms logger, replacing all former `print` statments to better control logging output [#271](https://github.com/matchms/matchms/pull/271)
 - `add_logging_to_file()`, `set_matchms_logger_level()`, `reset_matchms_logger()` functions to adapt logging output to user needs [#271](https://github.com/matchms/matchms/pull/271)
-- `Spectrum()` objects can now store peak comments as an `mz: comment` dictionary in `peak_comments` property [#277](https://github.com/matchms/matchms/pull/277)
+- peak comments (as an `mz: comment` dictionary) are now part of metadata and can be addressed via a `Spectrum()` object `peak_comments` property [#284](https://github.com/matchms/matchms/pull/284)
+- peak comments are dynamically updated whenever the respective peaks are changed [#277](https://github.com/matchms/matchms/pull/277)
 
 ## Changed
 
