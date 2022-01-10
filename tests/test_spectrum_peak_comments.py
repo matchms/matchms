@@ -1,5 +1,4 @@
 import numpy
-from matplotlib import pyplot as plt
 from matchms import Spectrum
 from matchms import Spikes
 from matchms.filtering import normalize_intensities
