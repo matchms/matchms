@@ -72,7 +72,7 @@ def _write_peaks(peaks: Spikes, peak_comments: Spectrum.peak_comments, outfile: 
 
 def _write_metadata(metadata: dict, outfile: IO):
     for key, value in metadata.items():
-        if not _is_num_peaks(key):
+        if not (_is_num_peaks(key) or _is_peak_comments(key)):
             outfile.write(f"{key.upper()}: {value}\n")
 
 
@@ -88,6 +88,10 @@ def _format_peak_comment(mz: Union[int, float], peak_comments: Dict):
 
 def _is_num_peaks(key: str) -> bool:
     return key.lower().startswith("num peaks")
+
+
+def _is_peak_comments(key: str) -> bool:
+    return key.lower().startswith("peak_comments")
 
 
 def _ensure_list(spectra) -> List[Spectrum]:
