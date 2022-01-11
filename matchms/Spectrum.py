@@ -20,11 +20,13 @@ class Spectrum:
 
         spectrum = Spectrum(mz=np.array([100, 150, 200.]),
                               intensities=np.array([0.7, 0.2, 0.1]),
-                              metadata={'id': 'spectrum1'})
+                              metadata={'id': 'spectrum1',
+                                        "peak_comments": {200.: "the peak at 200 m/z"}})
 
         print(spectrum.peaks.mz[0])
         print(spectrum.peaks.intensities[0])
         print(spectrum.get('id'))
+        print(spectrum.peak_comments.get(200))
 
     Should output
 
@@ -33,6 +35,7 @@ class Spectrum:
         100.0
         0.7
         spectrum1
+        the peak at 200 m/z
 
     Attributes
     ----------
@@ -52,7 +55,10 @@ class Spectrum:
 
     """
 
-    def __init__(self, mz: np.array, intensities: np.array,
+    _peak_comments_mz_tolerance = 1e-05
+
+    def __init__(self, mz: np.array,
+                 intensities: np.array,
                  metadata: Optional[dict] = None,
                  harmonize_defaults: bool = False):
         """
@@ -69,9 +75,10 @@ class Spectrum:
             Set to False if metadata harmonization to default keys is not desired.
             The default is True.  #TODO: temporarily set to False
         """
+        self._metadata = Metadata(metadata, harmonize_defaults=harmonize_defaults)
         self.peaks = Fragments(mz=mz, intensities=intensities)
         self.losses = None
-        self._metadata = Metadata(metadata, harmonize_defaults=harmonize_defaults)
+
 
     def __eq__(self, other):
         return \
@@ -215,4 +222,41 @@ class Spectrum:
 
     @peaks.setter
     def peaks(self, value: Fragments):
+        if isinstance(self.get("peak_comments"), dict):
+            self._reiterate_peak_comments(value)
         self._peaks = value
+
+    @property
+    def peak_comments(self):
+        return self.get("peak_comments")
+
+    @peak_comments.setter
+    def peak_comments(self, value):
+        self.set("peak_comments", value)
+
+    @classmethod
+    def update_peak_comments_mz_tolerance(cls, mz_tolerance: float):
+        cls._peak_comments_mz_tolerance = mz_tolerance
+
+    def _reiterate_peak_comments(self, peaks: Fragments):
+        """Update the peak comments to reflect the new peaks."""
+        if not isinstance(self.get("peak_comments", None), dict):
+            return None
+
+        mz_tolerance = self._peak_comments_mz_tolerance
+
+        def _append_new_comment(key):
+            if new_key_comment is not None:
+                comment = "; ".join([new_key_comment, self.metadata["peak_comments"].get(key)])
+            else:
+                comment = self.metadata["peak_comments"].get(key)
+            return comment
+
+        for key in list(self.metadata["peak_comments"].keys()):
+            if key not in peaks.mz:
+                if np.isclose(key, peaks.mz, rtol=mz_tolerance).any():
+                    new_key = peaks.mz[np.isclose(key, peaks.mz, rtol=mz_tolerance).argmax()]
+                    new_key_comment = self.metadata["peak_comments"].get(new_key, None)
+                    new_key_comment = _append_new_comment(key)
+                    self._metadata["peak_comments"][new_key] = new_key_comment
+                self._metadata["peak_comments"].pop(key)

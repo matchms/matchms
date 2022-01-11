@@ -101,7 +101,29 @@ def test_have_peaks(filename, data):
         assert actual.peaks == expected.peaks
 
 
-def save_and_reload_spectra(filename, spectra: List[Spectrum]):
+def test_have_peak_comments(filename, data):
+    """ Test checking if all peak comments are stored correctly. """
+    spectra = save_and_reload_spectra(filename, data)
+
+    assert len(spectra) == len(data)
+
+    for actual, expected in zip(spectra, data):
+        assert actual.peak_comments == expected.peak_comments, \
+            "Expected different peak comments"
+
+
+def test_dont_write_peak_comments(filename, data):
+    """ Test checking if no peak comments are written to file. """
+    spectra = save_and_reload_spectra(filename, data, write_peak_comments=False)
+
+    assert len(spectra) == len(data)
+
+    for actual, _ in zip(spectra, data):
+        assert actual.peak_comments is None, \
+            "Expected that no peak comments are written to file"
+
+
+def save_and_reload_spectra(filename, spectra: List[Spectrum], write_peak_comments=True):
     """ Utility function to save spectra to msp and load them again.
 
     Params:
@@ -113,7 +135,7 @@ def save_and_reload_spectra(filename, spectra: List[Spectrum]):
     reloaded_spectra: Spectra loaded from saved msp file.
     """
 
-    save_as_msp(spectra, filename)
+    save_as_msp(spectra, filename, write_peak_comments)
     reloaded_spectra = list(load_from_msp(filename))
     return reloaded_spectra
 
@@ -129,7 +151,7 @@ def test_num_peaks_last_metadata_field(filename, data):
                 num_peaks = int(line.split()[2])
                 peaks = content[idx + 1: idx + num_peaks + 1]
                 for peak in peaks:
-                    mz, intensity = peak.split()
+                    mz, intensity = peak.split()[:2]
                     mz = float(mz)
                     intensity = float(intensity)
 
