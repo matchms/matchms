@@ -21,7 +21,8 @@ def test_make_charge_int(input_charge, corrected_charge):
                            metadata={'charge': input_charge})
 
     spectrum = make_charge_int(spectrum_in)
-    assert(spectrum.get("charge") == corrected_charge), "Expected different charge integer"
+    assert spectrum.get("charge") == corrected_charge, \
+        "Expected different charge integer"
 
 
 def test_empty_spectrum():

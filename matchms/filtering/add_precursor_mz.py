@@ -59,7 +59,8 @@ def _add_precursor_mz_metadata(metadata):
     pepmass = metadata.get("pepmass", None)
     if pepmass is not None and _convert_precursor_mz(pepmass[0]) is not None:
         metadata["precursor_mz"] = pepmass[0]
-        logger.info("Added precursor_mz entry based on field 'pepmass'.")
+        logger.warning("Added precursor_mz entry based on field 'pepmass'."
+                       "Consider running 'interpret_pepmass() filter first.")
         return metadata
 
     logger.warning("No precursor_mz found in metadata.")
