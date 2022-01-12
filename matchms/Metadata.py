@@ -51,6 +51,7 @@ class Metadata:
         return True
 
     def harmonize_metadata(self):
+        self._data.key_regex_replacements = _key_regex_replacements
         self._data = _interpret_pepmass_metadata(self._data)
         if self.get("ionmode") is not None:
             self._data["ionmode"] = self.get("ionmode").lower()
