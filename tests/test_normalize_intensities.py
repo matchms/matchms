@@ -50,7 +50,7 @@ def test_normalize_intensities_all_zeros(caplog):
     """Test if non-sense intensities are handled correctly."""
     mz = numpy.array([10, 20, 30], dtype='float')
     intensities = numpy.array([0, 0, 0], dtype='float')
-    spectrum_in = Spectrum(mz=mz, intensities=intensities)
+    spectrum_in = SpectrumBuilder().with_mz(mz).with_intensities(intensities).build()
 
     spectrum = normalize_intensities(spectrum_in)
 

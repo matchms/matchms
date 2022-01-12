@@ -70,9 +70,8 @@ def test_add_precursor_mz_logging(key, value, expected_log, caplog):
     mz = numpy.array([], dtype='float')
     intensities = numpy.array([], dtype='float')
     metadata = {key: value}
-    spectrum_in = Spectrum(mz=mz,
-                           intensities=intensities,
-                           metadata=metadata)
+    spectrum_in = SpectrumBuilder().with_metadata(
+        metadata).with_mz(mz).with_intensities(intensities).build()
 
     _ = add_precursor_mz(spectrum_in)
 

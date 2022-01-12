@@ -67,15 +67,10 @@ def test_add_parent_mass_overwrite(overwrite, expected):
                           ("parent_mass", "n/a", 442.992724)])
 def test_add_parent_mass_already_present(parent_mass_field, parent_mass, expected):
     """Test if parent mass is correctly derived from adduct information."""
-    mz = numpy.array([], dtype='float')
-    intensities = numpy.array([], dtype='float')
     metadata = {"precursor_mz": 444.0,
                 parent_mass_field: parent_mass,
                 "charge": +1}
-    spectrum_in = Spectrum(mz=mz,
-                           intensities=intensities,
-                           metadata=metadata)
-
+    spectrum_in = SpectrumBuilder().with_metadata(metadata).build()
     spectrum = add_parent_mass(spectrum_in)
 
     assert numpy.allclose(spectrum.get("parent_mass"), expected, atol=1e-4), f"Expected parent mass of about {expected}."

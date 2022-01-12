@@ -54,7 +54,7 @@ def test_wrong_filename_exception():
             save_as_msp(None, filename)
 
         message = exception.value.args[0]
-        assert message == "File extension must be 'msp'."
+        assert message == "File extension '.mzml' not allowed."
 
 
 # Using tmp_path fixture from pytest: https://docs.pytest.org/en/stable/tmpdir.html#the-tmp-path-fixture
@@ -132,7 +132,7 @@ def test_num_peaks_last_metadata_field(filename, data):
                 num_peaks = int(line.split()[2])
                 peaks = content[idx + 1: idx + num_peaks + 1]
                 for peak in peaks:
-                    mz, intensity = peak.split()
+                    mz, intensity = peak.split()[:2]
                     mz = float(mz)
                     intensity = float(intensity)
 

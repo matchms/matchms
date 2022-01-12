@@ -36,7 +36,7 @@ def test_reduce_to_number_of_peaks(mz, intensities, metadata, params, expected):
 
     spectrum = reduce_to_number_of_peaks(
         spectrum_in, n_required=n_required, n_max=n_max, ratio_desired=ratio_desired)
-    
+
     assert len(spectrum.peaks) == len(expected), "Expected that only 4 peaks remain."
     assert spectrum.peaks.mz.tolist() == expected, "Expected different peaks to remain."
 
