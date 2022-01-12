@@ -79,7 +79,6 @@ class Spectrum:
         self.peaks = Fragments(mz=mz, intensities=intensities)
         self.losses = None
 
-
     def __eq__(self, other):
         return \
             self.peaks == other.peaks and \

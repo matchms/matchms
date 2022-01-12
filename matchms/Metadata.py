@@ -2,6 +2,15 @@ from collections.abc import Mapping
 import numpy as np
 from pickydict import PickyDict
 from .filtering.add_precursor_mz import _add_precursor_mz_metadata
+from .filtering.interpret_pepmass import _interpret_pepmass_metadata
+
+
+_key_regex_replacements = {r"\s": "_",
+                           r"[!?.,;:]": ""}
+_key_replacements = {"precursor_mass": "precursor_mz",
+                     "precursormass": "precursor_mz",
+                     "precursormz": "precursor_mz",
+                     "precursor": "precursor_mz"}
 
 
 class Metadata:
@@ -42,6 +51,7 @@ class Metadata:
         return True
 
     def harmonize_metadata(self):
+        self._data = _interpret_pepmass_metadata(self._data)
         if self.get("ionmode") is not None:
             self._data["ionmode"] = self.get("ionmode").lower()
         if self.get("ionmode") is None:
