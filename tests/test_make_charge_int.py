@@ -11,7 +11,9 @@ from matchms.filtering import make_charge_int
                                                             ([-1, "stuff"], -1),
                                                             (['-3'], -3),
                                                             ('0', 0),
-                                                            ('n/a', 'n/a')])
+                                                            ('n/a', 'n/a'),
+                                                            ('2+', 2),
+                                                            ('2-', -2)])
 def test_make_charge_int(input_charge, corrected_charge):
     """Test if example inputs are correctly converted"""
     spectrum_in = Spectrum(mz=numpy.array([100, 200.]),
