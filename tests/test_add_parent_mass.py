@@ -59,6 +59,29 @@ def test_add_parent_mass_overwrite(overwrite, expected):
         "Expected parent mass to be replaced by new value."
 
 
+@pytest.mark.parametrize("parent_mass_field, parent_mass, expected",
+                         [("parent_mass", 400., 400.),
+                          ("parent_mass", "400.", 400.),
+                          ("exact_mass", 200, 200.),
+                          ("parentmass", 200, 200.),
+                          ("parent_mass", "n/a", 442.992724)])
+def test_add_parent_mass_already_present(parent_mass_field, parent_mass, expected):
+    """Test if parent mass is correctly derived from adduct information."""
+    mz = numpy.array([], dtype='float')
+    intensities = numpy.array([], dtype='float')
+    metadata = {"precursor_mz": 444.0,
+                parent_mass_field: parent_mass,
+                "charge": +1}
+    spectrum_in = Spectrum(mz=mz,
+                           intensities=intensities,
+                           metadata=metadata)
+
+    spectrum = add_parent_mass(spectrum_in)
+
+    assert numpy.allclose(spectrum.get("parent_mass"), expected, atol=1e-4), f"Expected parent mass of about {expected}."
+    assert isinstance(spectrum.get("parent_mass"), (float, int)), "Expected parent mass to be float."
+
+
 def test_add_parent_mass_not_sufficient_data(caplog):
     """Test when there is not enough information to derive parent_mass."""
     metadata = {"precursor_mz": 444.0}

@@ -93,7 +93,18 @@ def test_have_peaks(filename, data):
         assert actual.peaks == expected.peaks
 
 
-def save_and_reload_spectra(filename, spectra: List[Spectrum]):
+def test_dont_write_peak_comments(filename, data):
+    """ Test checking if no peak comments are written to file. """
+    spectra = save_and_reload_spectra(filename, data, write_peak_comments=False)
+
+    assert len(spectra) == len(data)
+
+    for actual, _ in zip(spectra, data):
+        assert actual.peak_comments is None, \
+            "Expected that no peak comments are written to file"
+
+
+def save_and_reload_spectra(filename, spectra: List[Spectrum], write_peak_comments=True):
     """ Utility function to save spectra to msp and load them again.
 
     Params:
@@ -105,7 +116,7 @@ def save_and_reload_spectra(filename, spectra: List[Spectrum]):
     reloaded_spectra: Spectra loaded from saved msp file.
     """
 
-    save_as_msp(spectra, filename)
+    save_as_msp(spectra, filename, write_peak_comments)
     reloaded_spectra = list(load_from_msp(filename))
     return reloaded_spectra
 

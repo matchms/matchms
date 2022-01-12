@@ -46,6 +46,19 @@ def test_normalize_intensities_empty_peaks():
     assert spectrum == spectrum_in, "Spectrum should remain unchanged."
 
 
+def test_normalize_intensities_all_zeros(caplog):
+    """Test if non-sense intensities are handled correctly."""
+    mz = numpy.array([10, 20, 30], dtype='float')
+    intensities = numpy.array([0, 0, 0], dtype='float')
+    spectrum_in = Spectrum(mz=mz, intensities=intensities)
+
+    spectrum = normalize_intensities(spectrum_in)
+
+    assert spectrum is None, "Expected spectrum to be set to None."
+    msg = "Spectrum with all peak intensities <= 0 was set to None."
+    assert msg in caplog.text, "Expected log message."
+
+
 def test_normalize_intensities_empty_spectrum():
     """Test running filter with spectrum == None."""
     spectrum = normalize_intensities(None)

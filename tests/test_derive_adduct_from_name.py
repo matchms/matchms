@@ -8,6 +8,7 @@ from .builder_Spectrum import SpectrumBuilder
 
 @pytest.mark.parametrize("metadata, remove_adduct_from_name, expected_adduct, expected_name, removed_adduct", [
     [{"compound_name": "peptideXYZ [M+H+K]"}, True, "[M+H+K]", "peptideXYZ", "[M+H+K]"],
+    [{"compound_name": "GalCer(d18:2/16:1); [M+H]+"}, True, "[M+H]+", "GalCer(d18:2/16:1)", "[M+H]+"],
     [{"compound_name": "peptideXYZ [M+H+K]", "adduct": "M+H"}, True, "M+H", "peptideXYZ", "[M+H+K]"],
     [{"compound_name": "peptideXYZ [M+H+K]"}, False, "[M+H+K]", "peptideXYZ [M+H+K]", None],
     [{"name": ""}, True, None, None, None]
