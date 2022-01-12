@@ -94,7 +94,7 @@ def _format_peak_comment(mz: Union[int, float], peak_comments: Dict):
 
 
 def _is_num_peaks(key: str) -> bool:
-    return key.lower().startswith("num peaks")
+    return key.lower().startswith("num peaks") or key.lower().startswith("num_peaks")
 
 
 def _is_peak_comments(key: str) -> bool:
