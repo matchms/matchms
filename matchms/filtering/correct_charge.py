@@ -26,7 +26,7 @@ def correct_charge(spectrum_in: SpectrumType) -> SpectrumType:
 
     charge = spectrum.get("charge", None)
     assert not isinstance(charge, str), ("Charge is given as string.",
-                                         "Apply 'make_charge_scalar' filter first.")
+                                         "Apply 'make_charge_int' filter first.")
 
     if charge is None:
         charge = 0

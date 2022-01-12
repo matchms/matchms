@@ -12,16 +12,27 @@ def make_charge_int(spectrum_in: SpectrumType) -> SpectrumType:
 
     spectrum = spectrum_in.clone()
 
-    # Avoid pyteomics ChargeList
-    if isinstance(spectrum.get("charge", None), list):
-        spectrum.set("charge", int(spectrum.get("charge")[0]))
-
-    # convert string charges to int
-    if isinstance(spectrum.get("charge", None), str):
-        try:
-            charge_int = int(spectrum.get('charge'))
-            spectrum.set("charge", charge_int)
-        except ValueError:
-            logger.warning("Found charge (%s) cannot be converted to integer.", str(spectrum.get('charge')))
+    charge = spectrum.get("charge", None)
+    charge_int = _convert_to_int(charge)
+    if isinstance(charge_int, int):
+        spectrum.set("charge", charge_int)
 
     return spectrum
+
+
+def _convert_to_int(charge):
+    def try_conversion(charge):
+        try:
+            return int(charge)
+        except ValueError:
+            logger.warning("Found charge (%s) cannot be converted to integer.",
+                           str(charge))
+
+    # Avoid pyteomics ChargeList
+
+    if isinstance(charge, list):
+        return try_conversion(charge[0])
+
+    # convert string charges to int
+    if isinstance(charge, str):
+        return try_conversion(charge)
