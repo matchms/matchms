@@ -23,7 +23,7 @@ def test_derive_adduct_from_name_parametrized(metadata, remove_adduct_from_name,
     assert spectrum.get("adduct") == expected_adduct, "Expected different adduct."
     assert spectrum.get("compound_name") == expected_name, "Expected different cleaned name."
 
-    expected_log = list()
+    expected_log = []
     if spectrum.get("compound_name") != spectrum_in.get("compound_name"):
         expected_log.append(('matchms', 'INFO', f'Removed adduct {removed_adduct} from compound name.'))
     if spectrum.get("adduct") != spectrum_in.get("adduct"):
