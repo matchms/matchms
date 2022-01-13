@@ -1,19 +1,20 @@
 import json
 import os
 import numpy
-from matchms import Spectrum
 from matchms.exporting import save_as_json
 from matchms.importing import load_from_json
+from .builder_Spectrum import SpectrumBuilder
 
 
 def test_save_and_load_json_single_spectrum(tmp_path):
     """Test saving spectrum to .json file"""
-    spectrum = Spectrum(mz=numpy.array([100, 200, 300], dtype="float"),
-                        intensities=numpy.array([10, 10, 500], dtype="float"),
-                        metadata={"charge": -1,
-                                  "inchi": '"InChI=1S/C6H12"',
-                                  "precursor_mz": 222.2,
-                                  "test_field": "test"})
+    mz = numpy.array([100, 200, 300], dtype="float")
+    intensities = numpy.array([10, 10, 500], dtype="float")
+    builder = SpectrumBuilder().with_mz(mz).with_intensities(intensities)
+    spectrum = builder.with_metadata({"charge": -1,
+                                      "inchi": '"InChI=1S/C6H12"',
+                                      "precursor_mz": 222.2,
+                                      "test_field": "test"}).build()
     # Write to test file
     filename = os.path.join(tmp_path, "test.json")
     save_as_json(spectrum, filename)
@@ -28,13 +29,12 @@ def test_save_and_load_json_single_spectrum(tmp_path):
 
 def test_save_and_load_json_spectrum_list(tmp_path):
     """Test saving spectrum list to .json file"""
-    spectrum1 = Spectrum(mz=numpy.array([100, 200, 300], dtype="float"),
-                         intensities=numpy.array([10, 10, 500], dtype="float"),
-                         metadata={"test_field": "test1"})
+    mz = numpy.array([100, 200, 300], dtype="float")
+    intensities = numpy.array([10, 10, 500], dtype="float")
+    builder = SpectrumBuilder().with_mz(mz).with_intensities(intensities)
+    spectrum1 = builder.with_metadata({"test_field": "test1"}).build()
+    spectrum2 = builder.with_metadata({"test_field": "test2"}).build()
 
-    spectrum2 = Spectrum(mz=numpy.array([100, 200, 300], dtype="float"),
-                         intensities=numpy.array([10, 10, 500], dtype="float"),
-                         metadata={"test_field": "test2"})
     # Write to test file
     filename = os.path.join(tmp_path, "test.json")
     save_as_json([spectrum1, spectrum2], filename)
@@ -49,9 +49,8 @@ def test_save_and_load_json_spectrum_list(tmp_path):
 
 
 def test_load_from_json_zero_peaks(tmp_path):
-    spectrum1 = Spectrum(mz=numpy.array([], dtype="float"),
-                         intensities=numpy.array([], dtype="float"),
-                         metadata={"test_field": "test1"})
+    spectrum1 = SpectrumBuilder().with_metadata(
+        {"test_field": "test1"}).build()
 
     filename = tmp_path / "test.json"
 
@@ -74,22 +73,28 @@ def test_load_from_json_with_minimal_json(tmp_path):
 
     spectrum_imports = load_from_json(filename)
 
-    expected = Spectrum(mz=numpy.array([100, 200, 300], dtype="float"),
-                        intensities=numpy.array([10, 10, 500], dtype="float"),
-                        metadata={"test_field": "test1"})
-    assert spectrum_imports == [expected], "Loaded JSON document not identical to expected Spectrum"
+    mz = numpy.array([100, 200, 300], dtype="float")
+    intensities = numpy.array([10, 10, 500], dtype="float")
+    builder = SpectrumBuilder().with_mz(mz).with_intensities(intensities)
+    expected = builder.with_metadata({"test_field": "test1"}).build()
+
+    assert spectrum_imports == [
+        expected], "Loaded JSON document not identical to expected Spectrum"
 
 
 def test_save_as_json_with_minimal_json(tmp_path):
     filename = tmp_path / "test.json"
-    spectrum1 = Spectrum(mz=numpy.array([100, 200, 300], dtype="float"),
-                         intensities=numpy.array([10, 10, 500], dtype="float"),
-                         metadata={"test_field": "test1"})
+
+    mz = numpy.array([100, 200, 300], dtype="float")
+    intensities = numpy.array([10, 10, 500], dtype="float")
+    builder = SpectrumBuilder().with_mz(mz).with_intensities(intensities)
+    spectrum1 = builder.with_metadata({"test_field": "test1"}).build()
 
     save_as_json([spectrum1], filename)
 
     with open(filename, encoding="utf-8") as f:
         spectrum_imports = json.load(f)
 
-    expected = [{"test_field": "test1", "peaks_json": [[100.0, 10.0], [200.0, 10.0], [300.0, 500.0]]}]
+    expected = [{"test_field": "test1", "peaks_json": [
+        [100.0, 10.0], [200.0, 10.0], [300.0, 500.0]]}]
     assert spectrum_imports == expected, "Saved Spectrum not identical to expected JSON Document"
