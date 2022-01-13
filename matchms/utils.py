@@ -1,3 +1,6 @@
+import csv
+import os
+from functools import lru_cache
 from typing import Iterable
 from typing import List
 
@@ -32,3 +35,19 @@ def filter_none(iterable: Iterable) -> Iterable:
         Iterable: Filtered iterable.
     """
     return filter(lambda x: x is not None, iterable)
+
+
+@lru_cache(maxsize=4)
+def load_known_key_conversions() -> dict:
+    """Load dictionary of known key conversions. Makes sure that file loading is cached.
+    """
+    key_conversions_file = os.path.join(os.path.dirname(__file__), "data", "known_key_conversions.csv")
+    assert os.path.isfile(key_conversions_file), "Could not find known_key_conversions.csv"
+
+    with open(key_conversions_file, newline='', encoding='utf-8-sig') as csvfile:
+        reader = csv.DictReader(csvfile)
+        key_conversions = {}
+        for row in reader:
+            key_conversions[row['known_synonym']] = row['matchms_default']
+
+    return key_conversions

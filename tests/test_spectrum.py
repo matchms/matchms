@@ -34,7 +34,7 @@ def spectrum() -> Spectrum:
     intensities = numpy.array([0.51, 1.0, 0.011], dtype='float')
     metadata = {"pepmass": (444.0, 11), "charge": -1}
     builder = SpectrumBuilder().with_mz(mz).with_intensities(intensities).with_metadata(metadata)
-    return builder.build(harmonize_defaults=False)
+    return builder.build()
 
 
 def test_spectrum_getters_return_copies():
@@ -52,6 +52,22 @@ def test_spectrum_getters_return_copies():
     metadata = spectrum.metadata
     metadata["added_info"] = "this"
     assert spectrum.metadata == {'testdata': 1}, "Expected metadata to remain unchanged"
+
+
+@pytest.mark.parametrize("harmonize, expected_dict", [
+    [False, {"precursor mass": 400.768, "some key": "Whatever.", "new stuff": "XYZ"}],
+    [True, {'ionmode': 'n/a', "precursor_mz": 400.768, "some_key": "Whatever.", "new_stuff": "XYZ"}]
+])
+def test_spectrum_metadata_harmonization(harmonize, expected_dict):
+    metadata = {
+        "Precursor Mass": 400.768,
+        "Some Key": "Whatever."
+    }
+
+    builder = SpectrumBuilder().with_metadata(metadata)
+    spectrum = builder.build(harmonize_defaults=harmonize)
+    spectrum.set("New Stuff", "XYZ")
+    assert spectrum.metadata == expected_dict, "Expected different metadata dict"
 
 
 def test_comparing_spectra_with_metadata():
@@ -137,6 +153,19 @@ def test_spectrum_hash_metadata_sensitivity(spectrum: Spectrum):
         "Expected metadata hashes to be different."
     assert spectrum.spectrum_hash() == spectrum2.spectrum_hash(), \
         "Expected hashes to be unchanged."
+
+
+@pytest.mark.parametrize("harmonize", [True, False])
+def test_spectrum_clone(spectrum, harmonize):
+    spectrum = SpectrumBuilder().from_spectrum(spectrum).with_metadata(
+        {"pepmass": (444.1, 11), "TEST FIELD": "Some Text"}).build(harmonize_defaults=harmonize)
+    spectrum_clone = spectrum.clone()
+
+    assert spectrum_clone == spectrum.clone(), "Spectra should be equal"
+
+    # Check if no shallow copy was made
+    spectrum_clone.metadata = {"pepmass": (424.1, 11), "TEST FIELD": "Some Text"}
+    assert spectrum_clone != spectrum.clone(), "Only cloned spectrum should have changed"
 
 
 def test_spectrum_plot_same_peak_height():

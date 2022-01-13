@@ -44,7 +44,7 @@ class SimilarityNetwork:
         ['one', 'two']
 
     """
-    def __init__(self, identifier_key: str = "spectrumid",
+    def __init__(self, identifier_key: str = "spectrum_id",
                  top_n: int = 20,
                  max_links: int = 10,
                  score_cutoff: float = 0.7,
@@ -55,7 +55,7 @@ class SimilarityNetwork:
         ----------
         identifier_key
             Metadata key for unique intentifier for each spectrum in scores.
-            Will also be used for the naming the network nodes. Default is 'spectrumid'.
+            Will also be used for the naming the network nodes. Default is 'spectrum_id'.
         top_n
             Consider edge between spectrumA and spectrumB if score falls into
             top_n for spectrumA or spectrumB (link_method="single"), or into
