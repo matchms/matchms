@@ -38,11 +38,12 @@ def filter_none(iterable: Iterable) -> Iterable:
 
 
 @lru_cache(maxsize=4)
-def load_known_key_conversions() -> dict:
+def load_known_key_conversions(key_conversions_file: str = None) -> dict:
     """Load dictionary of known key conversions. Makes sure that file loading is cached.
     """
-    key_conversions_file = os.path.join(os.path.dirname(__file__), "data", "known_key_conversions.csv")
-    assert os.path.isfile(key_conversions_file), "Could not find known_key_conversions.csv"
+    if key_conversions_file is None:
+        key_conversions_file = os.path.join(os.path.dirname(__file__), "data", "known_key_conversions.csv")
+    assert os.path.isfile(key_conversions_file), f"Could not find {key_conversions_file}"
 
     with open(key_conversions_file, newline='', encoding='utf-8-sig') as csvfile:
         reader = csv.DictReader(csvfile)

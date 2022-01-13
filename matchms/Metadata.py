@@ -3,6 +3,7 @@ import numpy as np
 from pickydict import PickyDict
 from .filtering.add_precursor_mz import _add_precursor_mz_metadata
 from .filtering.interpret_pepmass import _interpret_pepmass_metadata
+from .filtering.make_charge_int import _convert_charge_to_int
 from .utils import load_known_key_conversions
 
 
@@ -13,7 +14,8 @@ _key_replacements = load_known_key_conversions()
 
 class Metadata:
     """Class to handle spectrum metadata in matchms."""
-    def __init__(self, metadata: PickyDict = None, harmonize_defaults: bool = True):
+    def __init__(self, metadata: PickyDict = None,
+                 harmonize_defaults: bool = True):
         """
 
         Parameters
@@ -55,8 +57,12 @@ class Metadata:
         if self.get("ionmode") is not None:
             self._data["ionmode"] = self.get("ionmode").lower()
         if self.get("ionmode") is None:
-            self.set("ionmode", "n/a")
+            self._data["ionmode"] = "n/a"
         self._data = _add_precursor_mz_metadata(self._data)
+        charge = self.get("charge")
+        if not isinstance(charge, int):
+            if not _convert_charge_to_int(charge) is None:
+                self._data["charge"] = charge
 
     # ------------------------------
     # Getters and Setters
@@ -69,7 +75,6 @@ class Metadata:
     def set(self, key: str, value):
         """Set value in :attr:`metadata` dict.
         """
-        # TODO: define allowed keys or even merge some
         self._data[key] = value
         if self.harmonize_defaults is True:
             self.harmonize_metadata()
