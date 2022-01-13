@@ -10,7 +10,8 @@ from ..Spectrum import Spectrum
 logger = logging.getLogger("matchms")
 
 
-def load_from_json(filename: str) -> List[Spectrum]:
+def load_from_json(filename: str,
+                   harmonize_defaults: bool = True) -> List[Spectrum]:
     """Load spectrum(s) from json file.
 
     JSON document formatted like the `GNPS Spectra library <https://gnps-external.ucsd.edu/gnpslibrary>`_.
@@ -29,19 +30,22 @@ def load_from_json(filename: str) -> List[Spectrum]:
     ----------
     filename
         Provide filename for json file containing spectrum(s).
-
+    harmonize_defaults : bool, optional
+        Set to False if metadata harmonization to default keys is not desired.
+        The default is True.
     """
     with open(filename, 'rb') as fin:
         spectrums = []
         for spectrum_dict in json.load(fin):
-            spectrum = as_spectrum(spectrum_dict)
+            spectrum = as_spectrum(spectrum_dict, harmonize_defaults=harmonize_defaults)
             if spectrum is not None:
                 spectrums.append(spectrum)
 
     return spectrums
 
 
-def as_spectrum(dct: dict) -> Union[dict, Spectrum, None]:
+def as_spectrum(dct: dict,
+                harmonize_defaults: bool = True) -> Union[dict, Spectrum, None]:
     """A :py:func:`json.load` object_hook to convert dictionary shaped like
     spectrum into :py:class:`~matchms.Spectrum.Spectrum` object.
 
@@ -55,11 +59,12 @@ def as_spectrum(dct: dict) -> Union[dict, Spectrum, None]:
     """
     # Recognize Spectrum by peaks_json key
     if 'peaks_json' in dct:
-        return dict2spectrum(dct)
+        return dict2spectrum(dct, harmonize_defaults=harmonize_defaults)
     return None
 
 
-def dict2spectrum(spectrum_dict: dict) -> Union[Spectrum, None]:
+def dict2spectrum(spectrum_dict: dict,
+                  harmonize_defaults: bool) -> Union[Spectrum, None]:
     """Convert dictionary to a :py:class:`~matchms.Spectrum.Spectrum` object.
 
     Parameters
@@ -104,6 +109,7 @@ def dict2spectrum(spectrum_dict: dict) -> Union[Spectrum, None]:
             intensities = intensities[idx_sorted]
         return Spectrum(mz=mz,
                         intensities=intensities,
-                        metadata=metadata_dict)
+                        metadata=metadata_dict,
+                        harmonize_defaults=harmonize_defaults)
     logger.info("Empty spectrum found (no peaks in 'peaks_json'). Will not be imported.")
     return None

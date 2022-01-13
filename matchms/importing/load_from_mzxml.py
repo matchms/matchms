@@ -5,7 +5,8 @@ from matchms.importing.parsing_utils import parse_mzml_mzxml_metadata
 from matchms.Spectrum import Spectrum
 
 
-def load_from_mzxml(filename: str, ms_level: int = 2) -> Generator[Spectrum, None, None]:
+def load_from_mzxml(filename: str, ms_level: int = 2,
+                    harmonize_defaults: bool = True) -> Generator[Spectrum, None, None]:
     """Load spectrum(s) from mzml file.
 
     This function will create ~matchms.Spectrum for every spectrum of desired
@@ -27,6 +28,9 @@ def load_from_mzxml(filename: str, ms_level: int = 2) -> Generator[Spectrum, Non
         Filename for mzXML file to import.
     ms_level:
         Specify which ms level to import. Default is 2.
+    harmonize_defaults : bool, optional
+        Set to False if metadata harmonization to default keys is not desired.
+        The default is True.
     """
     for pyteomics_spectrum in mzxml.read(filename, dtype=dict):
         if ("ms level" in pyteomics_spectrum and pyteomics_spectrum["ms level"] == ms_level
@@ -42,4 +46,5 @@ def load_from_mzxml(filename: str, ms_level: int = 2) -> Generator[Spectrum, Non
                     mz = mz[idx_sorted]
                     intensities = intensities[idx_sorted]
 
-                yield Spectrum(mz=mz, intensities=intensities, metadata=metadata)
+                yield Spectrum(mz=mz, intensities=intensities, metadata=metadata,
+                               harmonize_defaults=harmonize_defaults)

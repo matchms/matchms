@@ -34,14 +34,14 @@ def spectrum() -> Spectrum:
     intensities = numpy.array([0.51, 1.0, 0.011], dtype='float')
     metadata = {"pepmass": (444.0, 11), "charge": -1}
     builder = SpectrumBuilder().with_mz(mz).with_intensities(intensities).with_metadata(metadata)
-    return builder.build()
+    return builder.build(harmonize_defaults=False)
 
 
 def test_spectrum_getters_return_copies():
     """Test if getters return (deep)copies so that edits won't change the original entries."""
     spectrum = Spectrum(mz=numpy.array([100.0, 101.0], dtype="float"),
                         intensities=numpy.array([0.4, 0.5], dtype="float"),
-                        metadata={"testdata": 1})
+                        metadata={"testdata": 1}, harmonize_defaults=False)
     # Get entries and modify
     testdata = spectrum.get("testdata")
     testdata += 1
@@ -105,7 +105,7 @@ def test_spectrum_hash_mz_sensitivity(spectrum: Spectrum):
     """Test is changes indeed lead to different hashes as expected."""
     mz2 = spectrum.peaks.mz.copy()
     mz2[0] += 0.00001
-    spectrum2 = SpectrumBuilder().from_spectrum(spectrum).with_mz(mz2).build()
+    spectrum2 = SpectrumBuilder().from_spectrum(spectrum).with_mz(mz2).build(harmonize_defaults=False)
 
     assert hash(spectrum) != hash(spectrum2), "Expected hashes to be different."
     assert spectrum.metadata_hash() == spectrum2.metadata_hash(), \
@@ -118,7 +118,7 @@ def test_spectrum_hash_intensity_sensitivity(spectrum: Spectrum):
     """Test is changes indeed lead to different hashes as expected."""
     intensities2 = spectrum.peaks.intensities.copy()
     intensities2[0] += 0.01
-    spectrum2 = SpectrumBuilder().from_spectrum(spectrum).with_intensities(intensities2).build()
+    spectrum2 = SpectrumBuilder().from_spectrum(spectrum).with_intensities(intensities2).build(harmonize_defaults=False)
 
     assert hash(spectrum) != hash(spectrum2), "Expected hashes to be different."
     assert spectrum.metadata_hash() == spectrum2.metadata_hash(), \

@@ -132,7 +132,7 @@ def test_load_from_msp_multiline():
     module_root = os.path.join(os.path.dirname(__file__), "..")
     spectrums_file = os.path.join(module_root, "tests", "multiline_semicolon.msp")
 
-    actual = list(load_from_msp(spectrums_file, harmonize_defaults=False))
+    actual = list(load_from_msp(spectrums_file))
     expected = [
         Spectrum(
             mz=np.array([

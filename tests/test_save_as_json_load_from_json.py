@@ -1,6 +1,7 @@
 import json
 import os
 import numpy
+import pytest
 from matchms.exporting import save_as_json
 from matchms.importing import load_from_json
 from .builder_Spectrum import SpectrumBuilder
@@ -23,17 +24,18 @@ def test_save_and_load_json_single_spectrum(tmp_path):
     assert os.path.isfile(filename)
 
     # Test if content of json file is correct
-    spectrum_import = load_from_json(filename)[0]
+    spectrum_import = load_from_json(filename, harmonize_defaults=False)[0]
     assert spectrum_import == spectrum, "Original and saved+loaded spectrum not identical"
 
 
-def test_save_and_load_json_spectrum_list(tmp_path):
+@pytest.mark.parametrize("harmonize_defaults", [True, False])
+def test_save_and_load_json_spectrum_list(harmonize_defaults, tmp_path):
     """Test saving spectrum list to .json file"""
     mz = numpy.array([100, 200, 300], dtype="float")
     intensities = numpy.array([10, 10, 500], dtype="float")
     builder = SpectrumBuilder().with_mz(mz).with_intensities(intensities)
-    spectrum1 = builder.with_metadata({"test_field": "test1"}).build()
-    spectrum2 = builder.with_metadata({"test_field": "test2"}).build()
+    spectrum1 = builder.with_metadata({"test_field": "test1"}).build(harmonize_defaults=harmonize_defaults)
+    spectrum2 = builder.with_metadata({"test_field": "test2"}).build(harmonize_defaults=harmonize_defaults)
 
     # Write to test file
     filename = os.path.join(tmp_path, "test.json")
@@ -43,7 +45,7 @@ def test_save_and_load_json_spectrum_list(tmp_path):
     assert os.path.isfile(filename)
 
     # Test if content of json file is correct
-    spectrum_imports = load_from_json(filename)
+    spectrum_imports = load_from_json(filename, harmonize_defaults=harmonize_defaults)
     assert spectrum_imports[0] == spectrum1, "Original and saved+loaded spectrum not identical"
     assert spectrum_imports[1] == spectrum2, "Original and saved+loaded spectrum not identical"
 
@@ -71,12 +73,12 @@ def test_load_from_json_with_minimal_json(tmp_path):
     with open(filename, 'w', encoding="utf-8") as f:
         f.write(body)
 
-    spectrum_imports = load_from_json(filename)
+    spectrum_imports = load_from_json(filename, harmonize_defaults=False)
 
     mz = numpy.array([100, 200, 300], dtype="float")
     intensities = numpy.array([10, 10, 500], dtype="float")
     builder = SpectrumBuilder().with_mz(mz).with_intensities(intensities)
-    expected = builder.with_metadata({"test_field": "test1"}).build()
+    expected = builder.with_metadata({"test_field": "test1"}).build(harmonize_defaults=False)
 
     assert spectrum_imports == [
         expected], "Loaded JSON document not identical to expected Spectrum"
@@ -88,7 +90,7 @@ def test_save_as_json_with_minimal_json(tmp_path):
     mz = numpy.array([100, 200, 300], dtype="float")
     intensities = numpy.array([10, 10, 500], dtype="float")
     builder = SpectrumBuilder().with_mz(mz).with_intensities(intensities)
-    spectrum1 = builder.with_metadata({"test_field": "test1"}).build()
+    spectrum1 = builder.with_metadata({"test_field": "test1"}).build(harmonize_defaults=False)
 
     save_as_json([spectrum1], filename)
 

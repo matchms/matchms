@@ -60,7 +60,7 @@ class Spectrum:
     def __init__(self, mz: np.array,
                  intensities: np.array,
                  metadata: Optional[dict] = None,
-                 harmonize_defaults: bool = False):
+                 harmonize_defaults: bool = True):
         """
 
         Parameters
@@ -73,7 +73,7 @@ class Spectrum:
             Dictionary with for example the scan number of precursor m/z.
         harmonize_defaults : bool, optional
             Set to False if metadata harmonization to default keys is not desired.
-            The default is True.  #TODO: temporarily set to False
+            The default is True.
         """
         self._metadata = Metadata(metadata, harmonize_defaults=harmonize_defaults)
         self.peaks = Fragments(mz=mz, intensities=intensities)
@@ -108,7 +108,8 @@ class Spectrum:
         """Return a deepcopy of the spectrum instance."""
         clone = Spectrum(mz=self.peaks.mz,
                          intensities=self.peaks.intensities,
-                         metadata=self._metadata.data)
+                         metadata=self._metadata.data,
+                         harmonize_defaults=self._metadata.harmonize_defaults)
         clone.losses = self.losses
         return clone
 

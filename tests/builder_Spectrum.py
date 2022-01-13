@@ -24,10 +24,11 @@ class SpectrumBuilder:
         self._metadata = metadata.copy()
         return self
 
-    def build(self) -> Spectrum:
+    def build(self, harmonize_defaults: bool = False) -> Spectrum:
         spectrum = Spectrum(mz=self._mz,
                             intensities=self._intensities,
-                            metadata=self._metadata)
+                            metadata=self._metadata,
+                            harmonize_defaults=harmonize_defaults)
         return spectrum
 
 
