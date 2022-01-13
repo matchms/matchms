@@ -3,6 +3,7 @@ from matchms import Spectrum
 
 
 class SpectrumBuilder:
+    """Builder class to better handle Spectrum creation throughout all matchms unit tests."""
     def __init__(self):
         self._mz = numpy.array([], dtype="float")
         self._intensities = numpy.array([], dtype="float")
