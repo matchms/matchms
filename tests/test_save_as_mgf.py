@@ -1,18 +1,20 @@
 import os
 import tempfile
 import numpy
-from matchms import Spectrum
 from matchms.exporting import save_as_mgf
+from .builder_Spectrum import SpectrumBuilder
 
 
 def test_save_as_mgf_single_spectrum():
     """Test saving spectrum to .mgf file"""
-    spectrum = Spectrum(mz=numpy.array([100, 200, 300], dtype="float"),
-                        intensities=numpy.array([10, 10, 500], dtype="float"),
-                        metadata={"charge": -1,
-                                  "inchi": '"InChI=1S/C6H12"',
-                                  "pepmass": (100, 10.0),
-                                  "test_field": "test"})
+    spectrum = SpectrumBuilder().with_mz(
+        numpy.array([100, 200, 300], dtype="float")).with_intensities(
+            numpy.array([10, 10, 500], dtype="float")).with_metadata(
+                {"charge": -1,
+                 "inchi": '"InChI=1S/C6H12"',
+                 "pepmass": (100, 10.0),
+                 "test_field": "test"}).build()
+
     # Write to test file
     with tempfile.TemporaryDirectory() as d:
         filename = os.path.join(d, "test.mgf")
@@ -32,13 +34,12 @@ def test_save_as_mgf_single_spectrum():
 
 def test_save_as_mgf_spectrum_list():
     """Test saving spectrum list to .mgf file"""
-    spectrum1 = Spectrum(mz=numpy.array([100, 200, 300], dtype="float"),
-                         intensities=numpy.array([10, 10, 500], dtype="float"),
-                         metadata={"test_field": "test1"})
+    mz = numpy.array([100, 200, 300], dtype="float")
+    intensities = numpy.array([10, 10, 500], dtype="float")
+    builder = SpectrumBuilder().with_mz(mz).with_intensities(intensities)
+    spectrum1 = builder.with_metadata({"test_field": "test1"}).build()
+    spectrum2 = builder.with_metadata({"test_field": "test2"}).build()
 
-    spectrum2 = Spectrum(mz=numpy.array([100, 200, 300], dtype="float"),
-                         intensities=numpy.array([10, 10, 500], dtype="float"),
-                         metadata={"test_field": "test2"})
     # Write to test file
     with tempfile.TemporaryDirectory() as d:
         filename = os.path.join(d, "test.mgf")

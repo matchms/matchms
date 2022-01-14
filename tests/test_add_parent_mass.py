@@ -1,67 +1,27 @@
 import numpy
 import pytest
-from matchms import Spectrum
 from matchms.constants import PROTON_MASS
 from matchms.filtering import add_parent_mass
+from .builder_Spectrum import SpectrumBuilder
 
 
-def test_add_parent_mass_pepmass_no_precursormz(caplog):
-    """Test if correct exception is returned."""
-    mz = numpy.array([], dtype='float')
-    intensities = numpy.array([], dtype='float')
-    metadata = {"pepmass": (444.0, 10),
-                "charge": -1}
-    spectrum_in = Spectrum(mz=mz,
-                           intensities=intensities,
-                           metadata=metadata)
-
+@pytest.mark.parametrize('metadata, expected', [
+    [{"pepmass": (444.0, 10), "charge": -1}, "Missing precursor m/z to derive parent mass."],
+    [{"charge": -1}, "Missing precursor m/z to derive parent mass."],
+    [{"precursor_mz": 444.0, "charge": 0}, "Not sufficient spectrum metadata to derive parent mass."]
+])
+def test_add_parent_mass_exceptions(metadata, expected, caplog):
+    spectrum_in = SpectrumBuilder().with_metadata(metadata).build()
     spectrum = add_parent_mass(spectrum_in)
 
     assert spectrum.get("parent_mass") is None, "Expected no parent mass"
-    assert "Not sufficient spectrum metadata to derive parent mass." not in caplog.text
-
-
-def test_add_parent_mass_no_precursormz(caplog):
-    """Test if correct exception is returned."""
-    mz = numpy.array([], dtype='float')
-    intensities = numpy.array([], dtype='float')
-    metadata = {"charge": -1}
-    spectrum_in = Spectrum(mz=mz,
-                           intensities=intensities,
-                           metadata=metadata)
-
-    spectrum = add_parent_mass(spectrum_in)
-
-    assert spectrum.get("parent_mass") is None, "Expected no parent mass"
-    assert "Missing precursor m/z to derive parent mass." in caplog.text
-
-
-def test_add_parent_mass_precursormz_zero_charge(caplog):
-    """Test if correct exception is returned."""
-    mz = numpy.array([], dtype='float')
-    intensities = numpy.array([], dtype='float')
-    metadata = {"precursor_mz": 444.0,
-                "charge": 0}
-    spectrum_in = Spectrum(mz=mz,
-                           intensities=intensities,
-                           metadata=metadata)
-
-    spectrum = add_parent_mass(spectrum_in)
-
-    assert spectrum.get("parent_mass") is None, "Expected no parent mass"
-    assert "Not sufficient spectrum metadata to derive parent mass." in caplog.text
+    assert expected in caplog.text
 
 
 def test_add_parent_mass_precursormz(caplog):
     """Test if parent mass is correctly derived if "pepmass" is not present."""
-    mz = numpy.array([], dtype='float')
-    intensities = numpy.array([], dtype='float')
-    metadata = {"precursor_mz": 444.0,
-                "charge": -1}
-    spectrum_in = Spectrum(mz=mz,
-                           intensities=intensities,
-                           metadata=metadata)
-
+    metadata = {"precursor_mz": 444.0, "charge": -1}
+    spectrum_in = SpectrumBuilder().with_metadata(metadata).build()
     spectrum = add_parent_mass(spectrum_in)
 
     assert numpy.abs(spectrum.get("parent_mass") - 445.0) < .01, "Expected parent mass of about 445.0."
@@ -76,15 +36,8 @@ def test_add_parent_mass_precursormz(caplog):
                                               ("M+H-H2O", 461.003289)])
 def test_add_parent_mass_using_adduct(adduct, expected):
     """Test if parent mass is correctly derived from adduct information."""
-    mz = numpy.array([], dtype='float')
-    intensities = numpy.array([], dtype='float')
-    metadata = {"precursor_mz": 444.0,
-                "adduct": adduct,
-                "charge": +1}
-    spectrum_in = Spectrum(mz=mz,
-                           intensities=intensities,
-                           metadata=metadata)
-
+    metadata = {"precursor_mz": 444.0, "adduct": adduct, "charge": +1}
+    spectrum_in = SpectrumBuilder().with_metadata(metadata).build()
     spectrum = add_parent_mass(spectrum_in)
 
     assert numpy.allclose(spectrum.get("parent_mass"), expected, atol=1e-4), f"Expected parent mass of about {expected}."
@@ -95,16 +48,11 @@ def test_add_parent_mass_using_adduct(adduct, expected):
                                                  (False, 443.0)])
 def test_add_parent_mass_overwrite(overwrite, expected):
     """Test if parent mass is replaced by newly calculated value."""
-    mz = numpy.array([], dtype='float')
-    intensities = numpy.array([], dtype='float')
     metadata = {"precursor_mz": 444.0,
                 "parent_mass": 443.0,
                 "adduct": "[M+H]+",
                 "charge": +1}
-    spectrum_in = Spectrum(mz=mz,
-                           intensities=intensities,
-                           metadata=metadata)
-
+    spectrum_in = SpectrumBuilder().with_metadata(metadata).build()
     spectrum = add_parent_mass(spectrum_in, overwrite_existing_entry=overwrite)
 
     assert numpy.allclose(spectrum.get("parent_mass"), expected, atol=1e-4), \
@@ -119,15 +67,10 @@ def test_add_parent_mass_overwrite(overwrite, expected):
                           ("parent_mass", "n/a", 442.992724)])
 def test_add_parent_mass_already_present(parent_mass_field, parent_mass, expected):
     """Test if parent mass is correctly derived from adduct information."""
-    mz = numpy.array([], dtype='float')
-    intensities = numpy.array([], dtype='float')
     metadata = {"precursor_mz": 444.0,
                 parent_mass_field: parent_mass,
                 "charge": +1}
-    spectrum_in = Spectrum(mz=mz,
-                           intensities=intensities,
-                           metadata=metadata)
-
+    spectrum_in = SpectrumBuilder().with_metadata(metadata).build()
     spectrum = add_parent_mass(spectrum_in)
 
     assert numpy.allclose(spectrum.get("parent_mass"), expected, atol=1e-4), f"Expected parent mass of about {expected}."
@@ -136,13 +79,8 @@ def test_add_parent_mass_already_present(parent_mass_field, parent_mass, expecte
 
 def test_add_parent_mass_not_sufficient_data(caplog):
     """Test when there is not enough information to derive parent_mass."""
-    mz = numpy.array([], dtype='float')
-    intensities = numpy.array([], dtype='float')
     metadata = {"precursor_mz": 444.0}
-    spectrum_in = Spectrum(mz=mz,
-                           intensities=intensities,
-                           metadata=metadata)
-
+    spectrum_in = SpectrumBuilder().with_metadata(metadata).build()
     spectrum = add_parent_mass(spectrum_in)
 
     assert spectrum.get("parent_mass") is None, "Expected no parent mass"
@@ -161,12 +99,8 @@ def test_empty_spectrum():
 def test_use_of_ionmode(ionmode, expected):
     """Test when there is no charge given, than the ionmode
     is used to derive parent mass."""
-    mz = numpy.array([], dtype='float')
-    intensities = numpy.array([], dtype='float')
     metadata = {"precursor_mz": 444.0, "ionmode": ionmode}
-    spectrum_in = Spectrum(mz=mz,
-                           intensities=intensities,
-                           metadata=metadata)
+    spectrum_in = SpectrumBuilder().with_metadata(metadata).build()
 
     spectrum = add_parent_mass(spectrum_in)
 

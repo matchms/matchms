@@ -1,28 +1,34 @@
 import numpy
 import pytest
 from testfixtures import LogCapture
-from matchms import Spectrum
 from matchms.filtering import add_losses
+from .builder_Spectrum import SpectrumBuilder
 
 
-def test_add_losses():
-    """Test if all losses are correctly generated form mz values and precursor-m/z."""
-    spectrum_in = Spectrum(mz=numpy.array([100, 150, 200, 300], dtype="float"),
-                           intensities=numpy.array([700, 200, 100, 1000], dtype="float"),
-                           metadata={"precursor_mz": 445.0})
+@pytest.mark.parametrize("mz, loss_mz_to, expected_mz, expected_intensities", [
+    [numpy.array([100, 150, 200, 300], dtype="float"), 1000, numpy.array([145, 245, 295, 345], "float"), numpy.array([1000, 100, 200, 700], "float")],
+    [numpy.array([100, 150, 200, 450], dtype="float"), 1000, numpy.array([245, 295, 345], "float"), numpy.array([100, 200, 700], "float")],
+    [numpy.array([100, 150, 200, 300], dtype="float"), 250, numpy.array([145, 245], "float"), numpy.array([1000, 100], "float")]
+])
+def test_add_losses_parameterized(mz, loss_mz_to, expected_mz, expected_intensities):
+    intensities = numpy.array([700, 200, 100, 1000], "float")
+    metadata = {"precursor_mz": 445.0}
+    spectrum_in = SpectrumBuilder().with_mz(mz).with_intensities(
+        intensities).with_metadata(metadata).build()
 
-    spectrum = add_losses(spectrum_in)
+    spectrum = add_losses(spectrum_in, loss_mz_to=loss_mz_to)
 
-    expected_mz = numpy.array([145, 245, 295, 345], "float")
-    expected_intensities = numpy.array([1000, 100, 200, 700], "float")
     assert numpy.allclose(spectrum.losses.mz, expected_mz), "Expected different loss m/z."
     assert numpy.allclose(spectrum.losses.intensities, expected_intensities), "Expected different intensities."
 
 
-def test_add_losses_without_precursor_mz():
-    """Test if no changes are done without having a precursor-m/z."""
-    spectrum_in = Spectrum(mz=numpy.array([100, 150, 200, 300], dtype="float"),
-                           intensities=numpy.array([700, 200, 100, 1000], dtype="float"))
+@pytest.mark.parametrize("mz, intensities", [
+    [numpy.array([100, 150, 200, 300], dtype="float"), numpy.array([700, 200, 100, 1000], dtype="float")],
+    [[], []]
+])
+def test_add_losses_without_precursor_mz_parameterized(mz, intensities):
+    spectrum_in = SpectrumBuilder().with_mz(mz).with_intensities(intensities).build()
+    spectrum = add_losses(spectrum_in)
 
     with LogCapture() as log:
         spectrum = add_losses(spectrum_in)
@@ -36,9 +42,11 @@ def test_add_losses_without_precursor_mz():
 
 def test_add_losses_with_precursor_mz_wrong_type():
     """Test if correct assert error is raised for precursor-mz as string."""
-    spectrum_in = Spectrum(mz=numpy.array([100, 150, 200, 300], dtype="float"),
-                           intensities=numpy.array([700, 200, 100, 1000], dtype="float"),
-                           metadata={"precursor_mz": "445.0"})
+    mz = numpy.array([100, 150, 200, 300], dtype="float")
+    intensities = numpy.array([700, 200, 100, 1000], "float")
+    metadata = {"precursor_mz": "445.0"}
+    spectrum_in = SpectrumBuilder().with_mz(mz).with_intensities(
+        intensities).with_metadata(metadata).build()
 
     with pytest.raises(AssertionError) as msg:
         _ = add_losses(spectrum_in)
@@ -46,46 +54,8 @@ def test_add_losses_with_precursor_mz_wrong_type():
     assert "Expected 'precursor_mz' to be a scalar number." in str(msg.value)
 
 
-def test_add_losses_returns_new_spectrum_instance():
-    """Test if no change is done to empty spectrum."""
-    spectrum_in = Spectrum(mz=numpy.array([], dtype="float"),
-                           intensities=numpy.array([], dtype="float"))
-
-    spectrum = add_losses(spectrum_in)
-
-    assert spectrum == spectrum_in and spectrum is not spectrum_in
-
-
 def test_add_losses_with_input_none():
     """Test if input spectrum is None."""
     spectrum_in = None
     spectrum = add_losses(spectrum_in)
     assert spectrum is None
-
-
-def test_add_losses_with_peakmz_larger_precursormz():
-    """Test if losses are correctly generated and loss < 0 is discarded."""
-    spectrum_in = Spectrum(mz=numpy.array([100, 150, 200, 450], dtype="float"),
-                           intensities=numpy.array([700, 200, 100, 1000], dtype="float"),
-                           metadata={"precursor_mz": 445.0})
-
-    spectrum = add_losses(spectrum_in)
-
-    expected_mz = numpy.array([245, 295, 345], "float")
-    expected_intensities = numpy.array([100, 200, 700], "float")
-    assert numpy.allclose(spectrum.losses.mz, expected_mz), "Expected different loss m/z."
-    assert numpy.allclose(spectrum.losses.intensities, expected_intensities), "Expected different intensities."
-
-
-def test_add_losses_with_max_loss_mz_250():
-    """Test if losses are correctly generated and losses with mz > 250 are discarded."""
-    spectrum_in = Spectrum(mz=numpy.array([100, 150, 200, 300], dtype="float"),
-                           intensities=numpy.array([700, 200, 100, 1000], dtype="float"),
-                           metadata={"precursor_mz": 445.0})
-
-    spectrum = add_losses(spectrum_in, loss_mz_to=250)
-
-    expected_mz = numpy.array([145, 245], "float")
-    expected_intensities = numpy.array([1000, 100], "float")
-    assert numpy.allclose(spectrum.losses.mz, expected_mz), "Expected different loss m/z."
-    assert numpy.allclose(spectrum.losses.intensities, expected_intensities), "Expected different intensities."

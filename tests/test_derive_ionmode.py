@@ -1,12 +1,9 @@
-import numpy
-from matchms import Spectrum
 from matchms.filtering import derive_ionmode
+from .builder_Spectrum import SpectrumBuilder
 
 
 def test_derive_ionmode_positive_adduct():
-    spectrum_in = Spectrum(mz=numpy.array([], dtype="float"),
-                           intensities=numpy.array([], dtype="float"),
-                           metadata={"adduct": "[M+H]"})
+    spectrum_in = SpectrumBuilder().with_metadata({"adduct": "[M+H]"}).build()
 
     spectrum = derive_ionmode(spectrum_in)
 
@@ -14,9 +11,7 @@ def test_derive_ionmode_positive_adduct():
 
 
 def test_derive_ionmode_negative_adduct():
-    spectrum_in = Spectrum(mz=numpy.array([], dtype="float"),
-                           intensities=numpy.array([], dtype="float"),
-                           metadata={"adduct": "M-H-"})
+    spectrum_in = SpectrumBuilder().with_metadata({"adduct": "M-H-"}).build()
 
     spectrum = derive_ionmode(spectrum_in)
 

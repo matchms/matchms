@@ -6,6 +6,7 @@ import pytest
 from matchms import Spectrum
 from matchms.exporting import save_as_msp
 from matchms.importing import load_from_msp
+from .builder_Spectrum import SpectrumBuilder
 
 
 @pytest.fixture
@@ -15,8 +16,9 @@ def none_spectrum():
 
 @pytest.fixture
 def spectrum():
-    return Spectrum(mz=numpy.array([100, 200, 290, 490, 510], dtype="float"),
-                    intensities=numpy.array([0.1, 0.2, 1.0, 0.3, 0.4], dtype="float"))
+    mz = numpy.array([100, 200, 290, 490, 510], dtype="float")
+    intensities = numpy.array([0.1, 0.2, 1.0, 0.3, 0.4], dtype="float")
+    return SpectrumBuilder().with_mz(mz).with_intensities(intensities).build()
 
 
 @pytest.fixture(params=["rcx_gc-ei_ms_20201028_perylene.msp", "MoNA-export-GC-MS-first10.msp", "Hydrogen_chloride.msp"])
@@ -43,8 +45,8 @@ def test_spectrum_none_exception(none_spectrum, filename):
     assert message == "'NoneType' object has no attribute 'metadata'"
 
 
-def test_not_allowed_filename_extension():
-    """ Test for exception if output file ends with not allowed extension."""
+def test_wrong_filename_exception():
+    """ Test for exception being thrown if output file doesn't end with .msp. """
     with tempfile.TemporaryDirectory() as temp_dir:
         filename = os.path.join(temp_dir, "test.mzml")
 
@@ -55,17 +57,7 @@ def test_not_allowed_filename_extension():
         assert message == "File extension '.mzml' not allowed."
 
 
-def test_non_msp_filename_extension(spectrum, caplog):
-    """ Test for log message if output file doesn't end with .msp. """
-    with tempfile.TemporaryDirectory() as temp_dir:
-        filename = os.path.join(temp_dir, "test.dat")
-
-        save_as_msp(spectrum, filename)
-
-        expected_log = "Spectra will be stored as msp file with extension .dat"
-        assert expected_log in caplog.text
-
-
+# Using tmp_path fixture from pytest: https://docs.pytest.org/en/stable/tmpdir.html#the-tmp-path-fixture
 def test_file_exists_single_spectrum(spectrum, filename):
     """ Test checking if the file is created. """
     save_as_msp(spectrum, filename)
@@ -99,17 +91,6 @@ def test_have_peaks(filename, data):
 
     for actual, expected in zip(spectra, data):
         assert actual.peaks == expected.peaks
-
-
-def test_have_peak_comments(filename, data):
-    """ Test checking if all peak comments are stored correctly. """
-    spectra = save_and_reload_spectra(filename, data)
-
-    assert len(spectra) == len(data)
-
-    for actual, expected in zip(spectra, data):
-        assert actual.peak_comments == expected.peak_comments, \
-            "Expected different peak comments"
 
 
 def test_dont_write_peak_comments(filename, data):
