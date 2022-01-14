@@ -141,6 +141,11 @@ class Spectrum:
     def plot_against(self, other_spectrum,
                      figsize=(8, 6), dpi=200,
                      **spectrum_kws):
+        """Compare two spectra in a mirror plot.
+
+        To visually compare the peaks of two spectra run
+        ``spectrum.plot_against(other_spectrum)``.
+        """
         fig, ax = plt.subplots(1, 1, figsize=figsize, dpi=dpi)
         plot_spectra_mirror(self, other_spectrum, ax=ax, **spectrum_kws)
         return fig, ax

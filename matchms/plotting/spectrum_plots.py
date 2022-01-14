@@ -48,7 +48,7 @@ def plot_spectrum(spectrum,
     plt.Axes
         The matplotlib Axes instance on which the spectrum is plotted.
     """
-    # pylint: disable=too-many-arguments, too-many-arguments
+    # pylint: disable=too-many-locals, too-many-arguments
     if ax is None:
         ax = plt.gca()
 
