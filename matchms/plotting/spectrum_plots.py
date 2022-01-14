@@ -5,7 +5,7 @@ import numpy as np
 
 
 _annotation_kws = {
-    "horizontalalignment": "left",# if not mirror_intensity else "right",
+    "horizontalalignment": "left",  # if not mirror_intensity else "right",
     "verticalalignment": "center",
     "fontsize": 7,
     "rotation": 90,
@@ -19,7 +19,7 @@ def plot_spectrum(spectrum,
                   mirror_intensity: bool = False,
                   grid: Union[bool, str] = True,
                   ax: plt.Axes = None,
-                  peak_color = "teal",
+                  peak_color="teal",
                   **plt_kwargs) -> plt.Axes:
     """
     Plot a single MS/MS spectrum.
@@ -48,6 +48,7 @@ def plot_spectrum(spectrum,
     plt.Axes
         The matplotlib Axes instance on which the spectrum is plotted.
     """
+    # pylint: disable=too-many-arguments, too-many-arguments
     if ax is None:
         ax = plt.gca()
 
@@ -94,7 +95,6 @@ def plot_spectrum(spectrum,
     ax.tick_params(axis="both", which="both", labelsize="small")
     y_ticks = ax.get_yticks()
     ax.set_yticks(y_ticks[y_ticks <= 1.0])
-
 
     ax.set_xlabel("m/z", style="italic")
     ax.set_ylabel("Intensity")

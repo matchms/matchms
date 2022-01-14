@@ -142,17 +142,17 @@ def test_spectrum_hash_metadata_sensitivity(spectrum: Spectrum):
 def test_spectrum_plot_same_peak_height():
     intensities_with_zero_variance = numpy.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], dtype="float")
     spectrum = _create_test_spectrum_with_intensities(intensities_with_zero_variance)
-    fig, ax = spectrum.plot()
+    fig, _ = spectrum.plot()
     _assert_plots_ok(fig, n_plots=1, n_lines=11)
 
 
 def test_spectrum_plot():
     spectrum = _create_test_spectrum()
-    fig, ax = spectrum.plot()
+    fig, _ = spectrum.plot()
     _assert_plots_ok(fig, n_plots=1, n_lines=11)
 
 
 def test_spectrum_mirror_plot():
     spectrum = _create_test_spectrum()
-    fig, ax = spectrum.plot_against(spectrum)
+    fig, _ = spectrum.plot_against(spectrum)
     _assert_plots_ok(fig, n_plots=1, n_lines=23)
