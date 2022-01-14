@@ -1,10 +1,10 @@
 from typing import Optional
-import numpy
 import matplotlib.pyplot as plt
+import numpy
+from matchms.plotting.spectrum_plots import plot_spectra_mirror
+from matchms.plotting.spectrum_plots import plot_spectrum
 from .hashing import metadata_hash
 from .hashing import spectrum_hash
-from matchms.plotting.spectrum_plots import (plot_spectrum,
-                                             plot_spectra_mirror)
 from .Spikes import Spikes
 
 

@@ -3,8 +3,8 @@ Functions for plotting one or multiple spectra
 ##############################################
 
 """
-from .spectrum_plots import plot_spectrum
 from .spectrum_plots import plot_spectra_mirror
+from .spectrum_plots import plot_spectrum
 
 
 __all__ = [
