@@ -9,6 +9,9 @@ from matchms import Metadata
     [{"precursor_mz": 101.01}, True, {"ionmode": "n/a", "precursor_mz": 101.01}],
     [{"precursormz": 101.01}, True, {"ionmode": "n/a", "precursor_mz": 101.01}],
     [{"precursormz": 101.01}, False, {"precursormz": 101.01}],
+    [{"charge": "2+"}, True, {"charge": 2, "ionmode": "n/a"}],
+    [{"charge": -1}, True, {"charge": -1, "ionmode": "n/a"}],
+    [{"charge": [-1, 0]}, True, {"charge": -1, "ionmode": "n/a"}],
     [{"ionmode": "Negative"}, True, {"ionmode": "negative"}]])
 def test_metadata_init(input_dict, harmonize, expected):
     metadata = Metadata(input_dict, harmonize_defaults=harmonize)
