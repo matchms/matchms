@@ -62,7 +62,7 @@ class Metadata:
         charge = self.get("charge")
         if not isinstance(charge, int):
             if not _convert_charge_to_int(charge) is None:
-                self._data["charge"] = charge
+                self._data["charge"] = _convert_charge_to_int(charge)
 
     # ------------------------------
     # Getters and Setters
