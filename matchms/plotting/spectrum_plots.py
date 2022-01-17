@@ -76,7 +76,6 @@ def plot_spectrum(spectrum,
             idx = (-abs(spectrum.peaks.mz - mz)).argmax()
             ax.text(mz, intensities[idx], f"m/z: {mz} \n {comment}",
                     _annotation_kws)
-    ax.set_title("Spectrum")
 
     ax.set_xlim(min_mz, max_mz)
     ax.yaxis.set_major_formatter(mticker.PercentFormatter(xmax=1.0))
@@ -99,6 +98,8 @@ def plot_spectrum(spectrum,
 
     ax.set_xlabel("m/z", style="italic")
     ax.set_ylabel("Intensity")
+    title = "Spectrum" if spectrum.get("compound_name") is None else spectrum.get("compound_name")
+    ax.set_title(title)
     return ax
 
 
@@ -164,4 +165,11 @@ def plot_spectra_mirror(spec_top,
         mticker.FuncFormatter(lambda x, pos: f"{abs(x):.0%}")
     )
 
+    name1 = "Spectrum 1" if spec_top.get("compound_name") is None else spec_top.get("compound_name")
+    name2 = "Spectrum 2" if spec_bottom.get("compound_name") is None else spec_bottom.get("compound_name")
+
+    x_text = 0.04 * (max_mz - min_mz)
+    ax.text(x_text, y_max - 0.1, name1, ha="left", backgroundcolor="white")
+    ax.text(x_text, y_min + 0.1, name2, ha="left", backgroundcolor="white")
+    ax.set_title("Spectrum comparison")
     return ax
