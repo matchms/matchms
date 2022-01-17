@@ -60,9 +60,8 @@ class Metadata:
             self._data["ionmode"] = "n/a"
         self._data = _add_precursor_mz_metadata(self._data)
         charge = self.get("charge")
-        if not isinstance(charge, int):
-            if not _convert_charge_to_int(charge) is None:
-                self._data["charge"] = _convert_charge_to_int(charge)
+        if not isinstance(charge, int) and not _convert_charge_to_int(charge) is None:
+            self._data["charge"] = _convert_charge_to_int(charge)
 
     # ------------------------------
     # Getters and Setters
