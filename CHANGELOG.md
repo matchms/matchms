@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.12.0] - 2022-01-18
+
 ### Added
 
 - peak comments (as an `mz: comment` dictionary) are now part of metadata and can be addressed via a `Spectrum()` object `peak_comments` property [#284](https://github.com/matchms/matchms/pull/284)
@@ -369,7 +371,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - This is the initial version of Spec2Vec from https://github.com/iomega/Spec2Vec
 - (later splitted into matchms + spec2vec)
 
-[Unreleased]: https://github.com/matchms/matchms/compare/0.11.0...HEAD
+[Unreleased]: https://github.com/matchms/matchms/compare/0.12.0...HEAD
+[0.12.0]: https://github.com/matchms/matchms/compare/0.11.0...0.12.0
 [0.11.0]: https://github.com/matchms/matchms/compare/0.10.0...0.11.0
 [0.10.0]: https://github.com/matchms/matchms/compare/0.9.2...0.10.0
 [0.9.2]: https://github.com/matchms/matchms/compare/0.9.0...0.9.2
