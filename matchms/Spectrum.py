@@ -75,7 +75,7 @@ class Spectrum:
             self._metadata = {}
         else:
             self._metadata = metadata
-        self.peaks = Spikes(mz=mz, intensities=intensities)
+        self.spectrum_peaks = Spikes(mz=mz, intensities=intensities)
         self.losses = None
 
     def __eq__(self, other):
