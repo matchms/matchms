@@ -70,7 +70,7 @@ def plot_spectrum(spectrum,
     x, y = make_stems()
     if mirror_intensity is True:
         y = -y
-    ax.plot(x, y, color=peak_color, linewidth=1.0, marker="", **plt_kwargs)
+    ax.plot(x, y, color=peak_color, linewidth=1.0, marker="", zorder=5, **plt_kwargs)
     if annotate_ions and isinstance(spectrum.get("peak_comments"), dict):
         for mz, comment in spectrum.get("peak_comments").items():
             idx = (-abs(spectrum.peaks.mz - mz)).argmax()
@@ -79,7 +79,7 @@ def plot_spectrum(spectrum,
 
     ax.set_xlim(min_mz, max_mz)
     ax.yaxis.set_major_formatter(mticker.PercentFormatter(xmax=1.0))
-    y_max = 1.25 if annotate_ions else 1.05
+    y_max = 1.25 if annotate_ions else 1.10
     ax.set_ylim(*(0, y_max) if not mirror_intensity else (-y_max, 0))
 
     ax.xaxis.set_minor_locator(mticker.AutoLocator())
@@ -169,7 +169,57 @@ def plot_spectra_mirror(spec_top,
     name2 = "Spectrum 2" if spec_bottom.get("compound_name") is None else spec_bottom.get("compound_name")
 
     x_text = 0.04 * (max_mz - min_mz)
-    ax.text(x_text, y_max - 0.1, name1, ha="left", backgroundcolor="white")
-    ax.text(x_text, y_min + 0.1, name2, ha="left", backgroundcolor="white")
+    ax.text(x_text, y_max, name1, ha="left", va="top", zorder=2, backgroundcolor="white")
+    ax.text(x_text, y_min, name2, ha="left", va="bottom", zorder=2, backgroundcolor="white")
     ax.set_title("Spectrum comparison")
     return ax
+
+
+def plot_spectra_array(spectrums,
+                       n_cols: int = 2,
+                       peak_color="darkblue",
+                       dpi: int = 200,
+                       **spectrum_kws) -> plt.Axes:
+    """Mirror plot two MS/MS spectra.
+
+    Code is largely taken from package "spectrum_utils".
+
+    Parameters
+    ----------
+    spectrums: list of matchms.Spectrum
+        List of spectra to be plotted in a single figure.
+    n_cols:
+        Number of spectra to be plotted per row. Default is 4.
+    spectrum_kws:
+        Keyword arguments for `plot_spectrum()`.
+
+    """
+    assert isinstance(spectrums, list), "Expected list of Spectrum objects as input."
+    n_spectra = len(spectrums)
+    n_rows = int(np.ceil(n_spectra / n_cols))
+    fig, axes = plt.subplots(n_rows, n_cols, figsize=(7 * n_cols, 3 * n_rows), dpi=dpi)
+
+    if spectrum_kws is None:
+        spectrum_kws = {}
+
+    for i in range(n_rows):
+        for j in range(n_cols):
+            counter = i * n_cols + j
+            if counter >= n_spectra:
+                break
+
+            plot_spectrum(spectrums[counter],
+                          mirror_intensity=False, ax=axes[i, j],
+                          peak_color=peak_color, **spectrum_kws)
+            axes[i, j].set_title("")
+            if spectrums[counter].get("compound_name") is None:
+                name = f"Spectrum {i * n_cols + j}"
+            else:
+                name = spectrums[counter].get("compound_name")
+
+            y_max = axes[i, j].get_ylim()[1]
+            x_min = axes[i, j].get_xlim()[0]
+            axes[i, j].text(x_min, y_max, name, va="bottom", zorder=2)
+
+    plt.title("Spectrum comparison")
+    return fig, axes
