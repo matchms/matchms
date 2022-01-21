@@ -135,7 +135,7 @@ class Spectrum:
             ``spectrum.plot(intensity_to=0.02)``..
         """
         fig, ax = plt.subplots(1, 1, figsize=figsize, dpi=dpi)
-        plot_spectrum(self, ax=ax, **kwargs)
+        ax = plot_spectrum(self, ax=ax, **kwargs)
         return fig, ax
 
     def plot_against(self, other_spectrum,

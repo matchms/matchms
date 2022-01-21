@@ -2,6 +2,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from matchms import Spectrum
 from matchms.plotting import plot_spectra_array
+from matchms.plotting import plot_spectrum
 
 
 def _assert_fig_ok(fig, n_plots, dpi, height):
@@ -20,6 +21,37 @@ def _assert_ax_ok(ax, n_lines, ylim, xlabel, ylabel):
     assert ax.get_ylim() == (0.0, ylim)
     assert ax.get_xlabel() == xlabel
     assert ax.get_ylabel() == ylabel
+
+
+def test_plot_spectrum_default():
+    n_peaks = 100
+    mz = np.random.randint(0, 1000, n_peaks).astype("float")
+    mz.sort()
+
+    spectrum = Spectrum(mz=mz,
+                        intensities=np.random.random(n_peaks),
+                        metadata={"compound_name": "SuperSubstance"})
+
+    _, ax = plt.subplots()
+    ax = plot_spectrum(spectrum)
+    _assert_ax_ok(ax, n_lines=n_peaks, ylim=1.1,
+                  xlabel="m/z", ylabel="Intensity")
+
+
+def test_plot_spectrum_peak_comments():
+    n_peaks = 51
+    mz = np.linspace(0, 500, n_peaks).astype("float")
+    mz.sort()
+
+    spectrum = Spectrum(mz=mz,
+                        intensities=np.random.random(n_peaks),
+                        metadata={"compound_name": "SuperSubstance",
+                                  "peak_comments": {100: "known peak"}})
+
+    _, ax = plt.subplots()
+    ax = plot_spectrum(spectrum, annotate_ions=True)
+    _assert_ax_ok(ax, n_lines=n_peaks, ylim=1.25,
+                  xlabel="m/z", ylabel="Intensity")
 
 
 def test_plot_spectra_array_default():
