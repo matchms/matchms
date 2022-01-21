@@ -7,9 +7,9 @@ spectra from :class:`~matchms.Spectrum` objects.
 
 Currently this includes 3 different plot types:
 
-* `plot_spectrum(spectrum)` or `spectrum.plot()` 
+* `plot_spectrum(spectrum)` or `spectrum.plot()`
   This will create a plot of an individual spectrum.
-* `plot_spectra_mirror(spectrum1, spectrum2)` or `spectrum1.plot_against(spectrum2)` 
+* `plot_spectra_mirror(spectrum1, spectrum2)` or `spectrum1.plot_against(spectrum2)`
   This will create a mirro plot comparing two spectra.
 * `plot_spectra_array([spec1, spec2, ...])`
   This will create a plot with an array of all spectra in the given list.
