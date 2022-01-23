@@ -5,7 +5,7 @@ from matchms import Spectrum
 from .builder_Spectrum import SpectrumBuilder
 
 
-def _assert_plots_ok(fig, n_plots):
+def _assert_plots_ok(fig, n_plots, n_lines):
     assert len(fig.axes) == n_plots
     assert fig is not None
     assert hasattr(fig, "axes")
@@ -13,7 +13,7 @@ def _assert_plots_ok(fig, n_plots):
     assert isinstance(fig.axes[0], plt.Axes)
     assert hasattr(fig.axes[0], "lines")
     assert isinstance(fig.axes[0].get_lines(), list)  # .lines breakes for new matplotlib versions
-    assert len(fig.axes[0].lines) == 11
+    assert len(fig.axes[0].lines) == n_lines
     assert isinstance(fig.axes[0].lines[0], plt.Line2D)
     assert hasattr(fig.axes[0].lines[0], "_x")
 
@@ -142,29 +142,17 @@ def test_spectrum_hash_metadata_sensitivity(spectrum: Spectrum):
 def test_spectrum_plot_same_peak_height():
     intensities_with_zero_variance = numpy.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], dtype="float")
     spectrum = _create_test_spectrum_with_intensities(intensities_with_zero_variance)
-    fig = spectrum.plot(with_histogram=True, intensity_to=10.0)
-    _assert_plots_ok(fig, n_plots=2)
+    fig, _ = spectrum.plot()
+    _assert_plots_ok(fig, n_plots=1, n_lines=11)
 
 
-def test_spectrum_plot_with_histogram_false():
+def test_spectrum_plot():
     spectrum = _create_test_spectrum()
-    fig = spectrum.plot(with_histogram=False)
-    _assert_plots_ok(fig, n_plots=1)
+    fig, _ = spectrum.plot()
+    _assert_plots_ok(fig, n_plots=1, n_lines=11)
 
 
-def test_spectrum_plot_with_histogram_true():
+def test_spectrum_mirror_plot():
     spectrum = _create_test_spectrum()
-    fig = spectrum.plot(with_histogram=True)
-    _assert_plots_ok(fig, n_plots=2)
-
-
-def test_spectrum_plot_with_histogram_true_and_intensity_limit():
-    spectrum = _create_test_spectrum()
-    fig = spectrum.plot(with_histogram=True, intensity_to=10.0)
-    _assert_plots_ok(fig, n_plots=2)
-
-
-def test_spectrum_plot_with_histogram_unspecified():
-    spectrum = _create_test_spectrum()
-    fig = spectrum.plot()
-    _assert_plots_ok(fig, n_plots=1)
+    fig, _ = spectrum.plot_against(spectrum)
+    _assert_plots_ok(fig, n_plots=1, n_lines=23)
