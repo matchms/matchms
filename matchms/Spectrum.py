@@ -128,11 +128,10 @@ class Spectrum:
         """Plot to visually inspect a spectrum run ``spectrum.plot()``
 
         .. figure:: ../_static/spectrum-plot-example.png
-            :width: 400
+            :width: 450
             :alt: spectrum plotting function
 
-            Example of a spectrum plotted using ``spectrum.plot()`` and
-            ``spectrum.plot(intensity_to=0.02)``..
+            Example of a spectrum plotted using ``spectrum.plot()`` ..
         """
         fig, ax = plt.subplots(1, 1, figsize=figsize, dpi=dpi)
         ax = plot_spectrum(self, ax=ax, **kwargs)
@@ -141,13 +140,19 @@ class Spectrum:
     def plot_against(self, other_spectrum,
                      figsize=(8, 6), dpi=200,
                      **spectrum_kws):
-        """Compare two spectra in a mirror plot.
+        """Compare two spectra visually in a mirror plot.
 
         To visually compare the peaks of two spectra run
-        ``spectrum.plot_against(other_spectrum)``.
+        ``spectrum.plot_against(other_spectrum)``
+
+        .. figure:: ../_static/spectrum-mirror-plot-example.png
+            :width: 450
+            :alt: spectrum mirror plot function
+
+            Example of a mirror plot comparing two spectra ``spectrum.plot_against()`` ..
         """
         fig, ax = plt.subplots(1, 1, figsize=figsize, dpi=dpi)
-        plot_spectra_mirror(self, other_spectrum, ax=ax, **spectrum_kws)
+        ax = plot_spectra_mirror(self, other_spectrum, ax=ax, **spectrum_kws)
         return fig, ax
 
     def get(self, key: str, default=None):
