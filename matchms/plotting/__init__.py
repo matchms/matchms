@@ -16,25 +16,52 @@ Currently this includes 3 different plot types:
 
 Example of how to visually compare two spectra:
 
-.. testcode::
+.. code-block:: python
 
-    import numpy as np
-    from matchms import Spectrum
+    import os
+    from matplotlib import pyplot as plt
+    import matchms.filtering as msfilters
+    from matchms.importing import load_from_msp
 
-    spectrum = Spectrum(mz=np.array([100, 120, 150, 200.]),
-                        intensities=np.array([200.0, 300.0, 50.0, 45.0]),
-                        metadata={'compound_name': 'spectrum1'})
-    spectrum2 = Spectrum(mz=np.array([110, 130, 150, 200.]),
-                        intensities=np.array([180.0, 250.0, 80.0, 30.0]),
-                        metadata={'compound_name': 'spectrum2'})
+    module_root = os.getcwd()
+    spectrums_file = os.path.join(module_root, "matchms", "tests", "MoNA-export-GC-MS-first10.msp")
+    spectrums = list(load_from_msp(spectrums_file))
+    spectrums = [msfilters.default_filters(s) for s in spectrums]
 
-    spectrum.plot_against(spectrum2)
+    spectrums[1].plot()
+    # plt.savefig("spectrum-plot-example_1.png", dpi=300)  # If you want to save a plot
 
 .. figure:: ../_static/spectrum-plot-example.png
    :width: 700
-   :alt: matchms spctrum plot
+   :alt: matchms spectrum plot
 
    Plot of individual spectrum.
+
+Another example is to compare two spectra visually using a mirror plot:
+
+.. code-block:: python
+
+    spectrums[2].plot_against(spectrums[3])
+    plt.xlim(0, 200)
+
+.. figure:: ../_static/spectrum-mirror-plot-example.png
+   :width: 700
+   :alt: matchms spectrum mirror plot
+
+   Compare two spectra visually using a mirror plot.
+
+Finally, it is also possible to plot many spectra at once using `plot_spectra_array()`:
+
+.. code-block:: python
+
+    from matchms.plotting import plot_spectra_array
+    plot_spectra_array(spectrums[:4])
+
+.. figure:: ../_static/spectra-array-plot-example.png
+   :width: 700
+   :alt: matchms spectra array plot
+
+   Compare many spectra visually using an array plot.
 
 """
 from .spectrum_plots import plot_spectra_array
