@@ -7,16 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Changed
-
-- `require_precursor_mz()` filter will now also discard nonsensical m/z values < 10.0 (value can be adapted by user) [#309](https://github.com/matchms/matchms/pull/309)
-
-### Fixed
-
-- Updated to new url for `load_from_usi` function (old link was broken) [#310](https://github.com/matchms/matchms/pull/310)
-
-## [0.12.0] - 2022-01-18
-
 ### Added
 
 - Updated and extended plotting functionality, now located in `matchms.plotting`.
@@ -25,6 +15,13 @@ Contains three plot types: `plot_spectrum()` or `spectrum.plot()`, `plot_spectra
 ### Changed
 
 - `Spectrum` objects got an update of the basic spectrum plots `spectrum.plot()` [#303](https://github.com/matchms/matchms/pull/303)
+- `require_precursor_mz()` filter will now also discard nonsensical m/z values < 10.0 (value can be adapted by user) [#309](https://github.com/matchms/matchms/pull/309)
+
+### Fixed
+
+- Updated to new url for `load_from_usi` function (old link was broken) [#310](https://github.com/matchms/matchms/pull/310)
+
+## [0.12.0] - 2022-01-18
 
 ### Added
 
