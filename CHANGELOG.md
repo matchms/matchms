@@ -9,6 +9,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Updated and extended plotting functionality, now located in `matchms.plotting`.
+Contains three plot types: `plot_spectrum()` or `spectrum.plot()`, `plot_spectra_mirror()` or `spectrum.plot_against()` and `plot_spectra_array()` [#303](https://github.com/matchms/matchms/pull/303)
+
+### Changed
+
+- `Spectrum` objects got an update of the basic spectrum plots `spectrum.plot()` [#303](https://github.com/matchms/matchms/pull/303)
+- `require_precursor_mz()` filter will now also discard nonsensical m/z values < 10.0 (value can be adapted by user) [#309](https://github.com/matchms/matchms/pull/309)
+
+### Fixed
+
+- Updated to new url for `load_from_usi` function (old link was broken) [#310](https://github.com/matchms/matchms/pull/310)
+
+## [0.12.0] - 2022-01-18
+
+### Added
+
 - peak comments (as an `mz: comment` dictionary) are now part of metadata and can be addressed via a `Spectrum()` object `peak_comments` property [#284](https://github.com/matchms/matchms/pull/284)
 - peak comments are dynamically updated whenever the respective peaks are changed [#277](https://github.com/matchms/matchms/pull/277)
 
@@ -369,7 +385,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - This is the initial version of Spec2Vec from https://github.com/iomega/Spec2Vec
 - (later splitted into matchms + spec2vec)
 
-[Unreleased]: https://github.com/matchms/matchms/compare/0.11.0...HEAD
+[Unreleased]: https://github.com/matchms/matchms/compare/0.12.0...HEAD
+[0.12.0]: https://github.com/matchms/matchms/compare/0.11.0...0.12.0
 [0.11.0]: https://github.com/matchms/matchms/compare/0.10.0...0.11.0
 [0.10.0]: https://github.com/matchms/matchms/compare/0.9.2...0.10.0
 [0.9.2]: https://github.com/matchms/matchms/compare/0.9.0...0.9.2

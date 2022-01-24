@@ -1,6 +1,8 @@
 from typing import Optional
 import numpy as np
-from matplotlib import pyplot
+import matplotlib.pyplot as plt
+from matchms.plotting.spectrum_plots import plot_spectra_mirror
+from matchms.plotting.spectrum_plots import plot_spectrum
 from .Fragments import Fragments
 from .hashing import metadata_hash
 from .hashing import spectrum_hash
@@ -113,71 +115,36 @@ class Spectrum:
         clone.losses = self.losses
         return clone
 
-    def plot(self, intensity_from=0.0, intensity_to=None, with_histogram=False):
-        """To visually inspect a spectrum run ``spectrum.plot()``
+    def plot(self, figsize=(8, 6), dpi=200, **kwargs):
+        """Plot to visually inspect a spectrum run ``spectrum.plot()``
 
         .. figure:: ../_static/spectrum-plot-example.png
-            :width: 400
+            :width: 450
             :alt: spectrum plotting function
 
-            Example of a spectrum plotted using ``spectrum.plot()`` and ``spectrum.plot(intensity_to=0.02)``.."""
+            Example of a spectrum plotted using ``spectrum.plot()`` ..
+        """
+        fig, ax = plt.subplots(1, 1, figsize=figsize, dpi=dpi)
+        ax = plot_spectrum(self, ax=ax, **kwargs)
+        return fig, ax
 
-        def plot_histogram():
-            """Plot the histogram of intensity values as horizontal bars, aligned with the spectrum axes"""
+    def plot_against(self, other_spectrum,
+                     figsize=(8, 6), dpi=200,
+                     **spectrum_kws):
+        """Compare two spectra visually in a mirror plot.
 
-            def calc_bin_edges_intensity():
-                """Calculate various properties of the histogram bins, given a range in intensity defined by
-                'intensity_from' and 'intensity_to', assuming a number of bins equal to 100."""
-                edges = np.linspace(intensity_from, intensity_to, n_bins + 1)
-                lefts = edges[:-1]
-                rights = edges[1:]
-                middles = (lefts + rights) / 2
-                widths = rights - lefts
-                return edges, middles, widths
+        To visually compare the peaks of two spectra run
+        ``spectrum.plot_against(other_spectrum)``
 
-            bin_edges, bin_middles, bin_widths = calc_bin_edges_intensity()
-            counts, _ = np.histogram(self.peaks.intensities, bins=bin_edges)
-            histogram_ax.set_ylim(bottom=intensity_from, top=intensity_to)
-            pyplot.barh(bin_middles, counts, height=bin_widths, color="#047495")
-            pyplot.title(f"histogram (n_bins={n_bins})")
-            pyplot.xlabel("count")
+        .. figure:: ../_static/spectrum-mirror-plot-example.png
+            :width: 450
+            :alt: spectrum mirror plot function
 
-        def plot_spectrum():
-            """plot mz v. intensity"""
-
-            def make_stems():
-                """calculate where the stems of the spectrum peaks are going to be"""
-                x = np.zeros([2, self.peaks.mz.size], dtype="float")
-                y = np.zeros(x.shape)
-                x[:, :] = np.tile(self.peaks.mz, (2, 1))
-                y[1, :] = self.peaks.intensities
-                return x, y
-
-            spectrum_ax.set_ylim(bottom=intensity_from, top=intensity_to)
-            x, y = make_stems()
-            pyplot.plot(x, y, color="#0f0f0f", linewidth=1.0, marker="")
-            pyplot.title("Spectrum")
-            pyplot.xlabel("M/z")
-            pyplot.ylabel("intensity")
-
-        if intensity_to is None:
-            intensity_to = self.peaks.intensities.max() * 1.05
-
-        n_bins = 100
-        fig = pyplot.figure()
-
-        if with_histogram:
-            spectrum_ax = fig.add_axes([0.2, 0.1, 0.5, 0.8])
-            plot_spectrum()
-            histogram_ax = fig.add_axes([0.72, 0.1, 0.2, 0.8])
-            plot_histogram()
-            histogram_ax.set_yticklabels([])
-        else:
-            spectrum_ax = fig.add_axes([0.2, 0.1, 0.7, 0.8])
-            plot_spectrum()
-            histogram_ax = None
-
-        return fig
+            Example of a mirror plot comparing two spectra ``spectrum.plot_against()`` ..
+        """
+        fig, ax = plt.subplots(1, 1, figsize=figsize, dpi=dpi)
+        ax = plot_spectra_mirror(self, other_spectrum, ax=ax, **spectrum_kws)
+        return fig, ax
 
     def get(self, key: str, default=None):
         """Retrieve value from :attr:`metadata` dict. Shorthand for

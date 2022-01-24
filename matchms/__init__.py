@@ -2,6 +2,7 @@ from . import exporting
 from . import filtering
 from . import importing
 from . import networking
+from . import plotting
 from . import similarity
 from .__version__ import __version__
 from .calculate_scores import calculate_scores
@@ -24,8 +25,9 @@ __all__ = [
     "exporting",
     "filtering",
     "importing",
-    "networking",
     "Metadata",
+    "networking",
+    "plotting",
     "Scores",
     "set_matchms_logger_level",
     "similarity",

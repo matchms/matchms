@@ -33,7 +33,7 @@ def load_from_usi(usi: str, server: str = "https://metabolomics-usi.ucsd.edu",
     """
 
     # Create the url
-    url = server + "/json/?usi=" + usi
+    url = server + "/json/?usi1=" + usi
     metadata = {"usi": usi, "server": server}
     response = requests.get(url)
 
