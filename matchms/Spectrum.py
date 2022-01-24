@@ -1,6 +1,6 @@
 from typing import Optional
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 from matchms.plotting.spectrum_plots import plot_spectra_mirror
 from matchms.plotting.spectrum_plots import plot_spectrum
 from .Fragments import Fragments
