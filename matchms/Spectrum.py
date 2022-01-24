@@ -10,9 +10,16 @@ from .Metadata import Metadata
 
 
 class Spectrum:
-    """Container for a collection of peaks, losses and metadata
+    """Container for a collection of peaks, losses and metadata.
 
-    For example
+    Spectrum peaks are stored as :class:`~matchms.Fragments` object which can be
+    addressed calling `spectrum.peaks` and contains m/z values and the respective
+    peak intensities.
+
+    Spectrum metadata is stored as :class:`~matchms.Metadata` object which can be
+    addressed by `spectrum.metadata`.
+
+    Code example
 
     .. testcode::
 

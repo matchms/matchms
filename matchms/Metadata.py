@@ -13,7 +13,10 @@ _key_replacements = load_known_key_conversions()
 
 
 class Metadata:
-    """Class to handle spectrum metadata in matchms."""
+    """Class to handle spectrum metadata in matchms.
+
+
+    """
     def __init__(self, metadata: PickyDict = None,
                  harmonize_defaults: bool = True):
         """
@@ -51,6 +54,13 @@ class Metadata:
         return True
 
     def harmonize_metadata(self):
+        """Runs default harmonization of metadata.
+
+        Method harmonized metadata field names which includes setting them to lower-case
+        and runing a series of regex replacements followed by default field name
+        replacements (such as precursor_mass --> precursor_mz).
+
+        """
         self._data.key_regex_replacements = _key_regex_replacements
         self._data.key_replacements = _key_replacements
         self._data = _interpret_pepmass_metadata(self._data)
@@ -62,6 +72,29 @@ class Metadata:
         charge = self.get("charge")
         if not isinstance(charge, int) and not _convert_charge_to_int(charge) is None:
             self._data["charge"] = _convert_charge_to_int(charge)
+
+    def set_pickyness(self, key_replacements: dict = None,
+                      key_regex_replacements: dict = None,
+                      force_lower_case: bool = True):
+        """Function to set the pickyness of the underlying metadata dictionary.
+
+        Will automatically also run the new replacements if the dictionary already exists.
+
+        Parameters
+        ----------
+        key_replacements : dict, optional
+            This is second dictionary within PickyDict containing mappings of all
+            keys which the user wants to force into a specific form (see code example).
+        key_regex_replacements : dict, optional
+            This additional dictionary contains pairs of regex (regular expression) strings
+            and replacement strings to clean and harmonize the main dictionary keys.
+            An example would be {r"\\s": "_"} which will replace all spaces with underscores.
+        force_lower_case : bool, optional
+            If set to True (default) all dictionary keys will be forced to be lower case.
+        """
+        self._data.set_pickyness(key_replacements=key_replacements,
+                                 key_regex_replacements=key_regex_replacements,
+                                 force_lower_case=force_lower_case)
 
     # ------------------------------
     # Getters and Setters

@@ -72,3 +72,15 @@ def test_metadata_equal(dict1, dict2, expected):
         assert metadata1 == metadata2, "Expected metadata to be equal."
     else:
         assert metadata1 != metadata2, "Expected metadata NOT to be equal."
+
+
+def test_pickydict_set_pickyness_update():
+    """Test call of pickydict underlying method."""
+    metadata = Metadata({"First Name": "Peter", "Last Name": "Petersson"},
+                        harmonize_defaults=False)
+    assert metadata.data == {'first name': 'Peter', 'last name': 'Petersson'}, \
+        "Expected different dictionary"
+    metadata.set_pickyness(key_replacements={"last_name": "surname"},
+                           key_regex_replacements={r"\s": "_"})
+    assert metadata.data == {'first_name': 'Peter', 'surname': 'Petersson'}, \
+        "Expected different dictionary"
