@@ -5,13 +5,13 @@ from matchms import Metadata
 
 
 @pytest.mark.parametrize("input_dict, harmonize, expected", [
-    [None, True, {"ionmode": "n/a"}],
-    [{"precursor_mz": 101.01}, True, {"ionmode": "n/a", "precursor_mz": 101.01}],
-    [{"precursormz": 101.01}, True, {"ionmode": "n/a", "precursor_mz": 101.01}],
+    [None, True, {}],
+    [{"precursor_mz": 101.01}, True, {"precursor_mz": 101.01}],
+    [{"precursormz": 101.01}, True, {"precursor_mz": 101.01}],
     [{"precursormz": 101.01}, False, {"precursormz": 101.01}],
-    [{"charge": "2+"}, True, {"charge": 2, "ionmode": "n/a"}],
-    [{"charge": -1}, True, {"charge": -1, "ionmode": "n/a"}],
-    [{"charge": [-1, 0]}, True, {"charge": -1, "ionmode": "n/a"}],
+    [{"charge": "2+"}, True, {"charge": 2}],
+    [{"charge": -1}, True, {"charge": -1}],
+    [{"charge": [-1, 0]}, True, {"charge": -1}],
     [{"ionmode": "Negative"}, True, {"ionmode": "negative"}]])
 def test_metadata_init(input_dict, harmonize, expected):
     metadata = Metadata(input_dict, harmonize_defaults=harmonize)
@@ -20,8 +20,8 @@ def test_metadata_init(input_dict, harmonize, expected):
 
 
 @pytest.mark.parametrize("harmonize, set_key, set_value, expected", [
-    [True, "precursor_mz", 101.01, {"ionmode": "n/a", "precursor_mz": 101.01}],
-    [True, "precursormz", 101.01, {"ionmode": "n/a", "precursor_mz": 101.01}],
+    [True, "precursor_mz", 101.01, {"precursor_mz": 101.01}],
+    [True, "precursormz", 101.01, {"precursor_mz": 101.01}],
     [False, "precursormz", 101.01, {"precursormz": 101.01}],
     [True, "ionmode", "NEGATIVE", {"ionmode": "negative"}]])
 def test_metadata_setter(harmonize, set_key, set_value, expected):
@@ -72,15 +72,3 @@ def test_metadata_equal(dict1, dict2, expected):
         assert metadata1 == metadata2, "Expected metadata to be equal."
     else:
         assert metadata1 != metadata2, "Expected metadata NOT to be equal."
-
-
-def test_pickydict_set_pickyness_update():
-    """Test call of pickydict underlying method."""
-    metadata = Metadata({"First Name": "Peter", "Last Name": "Petersson"},
-                        harmonize_defaults=False)
-    assert metadata.data == {'first name': 'Peter', 'last name': 'Petersson'}, \
-        "Expected different dictionary"
-    metadata.set_pickyness(key_replacements={"last_name": "surname"},
-                           key_regex_replacements={r"\s": "_"})
-    assert metadata.data == {'first_name': 'Peter', 'surname': 'Petersson'}, \
-        "Expected different dictionary"

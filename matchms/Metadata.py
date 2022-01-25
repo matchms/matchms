@@ -15,17 +15,42 @@ _key_replacements = load_known_key_conversions()
 class Metadata:
     """Class to handle spectrum metadata in matchms.
 
+    Metadata entries will be stored as PickyDict dictionary in `metadata.data`.
+    Unlike normal Python dictionaries, not all key names will be acceped.
+    Key names will be forced to be lower-case to avoid confusions between key such
+    as "Precursor_MZ" and "precursor_mz".
+
+    To avoid the default harmonization of the metadata dictionary use the option
+    `harmonize_defaults=False`.
+
+
+    Code example:
+
+    .. code-block:: python
+
+        metadata = Metadata({"Precursor_MZ": 201.5, "Compound Name": "SuperStuff"})
+        print(metadata["precursor_mz"])  # => 201.5
+        print(metadata["compound_name"])  # => SuperStuff
+
+    Or if the matchms default metadata harmonization should not take place:
+
+    .. code-block:: python
+
+        metadata = Metadata({"Precursor_MZ": 201.5, "Compound Name": "SuperStuff"},
+                            harmonize_defaults=False)
+        print(metadata["precursor_mz"])  # => 201.5
+        print(metadata["compound_name"])  # => None (now you need to use "compound name")
 
     """
-    def __init__(self, metadata: PickyDict = None,
+    def __init__(self, metadata: dict = None,
                  harmonize_defaults: bool = True):
         """
 
         Parameters
         ----------
-        metadata : PickyDict
+        metadata:
             Spectrum metadata as a dictionary.
-        harmonize_defaults : bool, optional
+        harmonize_defaults:
             Set to False if metadata harmonization to default keys is not desired.
             The default is True.
 
@@ -66,35 +91,10 @@ class Metadata:
         self._data = _interpret_pepmass_metadata(self._data)
         if self.get("ionmode") is not None:
             self._data["ionmode"] = self.get("ionmode").lower()
-        if self.get("ionmode") is None:
-            self._data["ionmode"] = "n/a"
         self._data = _add_precursor_mz_metadata(self._data)
         charge = self.get("charge")
         if not isinstance(charge, int) and not _convert_charge_to_int(charge) is None:
             self._data["charge"] = _convert_charge_to_int(charge)
-
-    def set_pickyness(self, key_replacements: dict = None,
-                      key_regex_replacements: dict = None,
-                      force_lower_case: bool = True):
-        """Function to set the pickyness of the underlying metadata dictionary.
-
-        Will automatically also run the new replacements if the dictionary already exists.
-
-        Parameters
-        ----------
-        key_replacements : dict, optional
-            This is second dictionary within PickyDict containing mappings of all
-            keys which the user wants to force into a specific form (see code example).
-        key_regex_replacements : dict, optional
-            This additional dictionary contains pairs of regex (regular expression) strings
-            and replacement strings to clean and harmonize the main dictionary keys.
-            An example would be {r"\\s": "_"} which will replace all spaces with underscores.
-        force_lower_case : bool, optional
-            If set to True (default) all dictionary keys will be forced to be lower case.
-        """
-        self._data.set_pickyness(key_replacements=key_replacements,
-                                 key_regex_replacements=key_regex_replacements,
-                                 force_lower_case=force_lower_case)
 
     # ------------------------------
     # Getters and Setters

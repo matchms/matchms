@@ -1,7 +1,7 @@
 import numpy
 import pytest
-from .builder_Spectrum import SpectrumBuilder
 from matchms.filtering import interpret_pepmass
+from .builder_Spectrum import SpectrumBuilder
 
 
 @pytest.mark.parametrize("input_pepmass, expected_results",

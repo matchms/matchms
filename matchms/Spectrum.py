@@ -28,9 +28,9 @@ class Spectrum:
         from matchms.similarity import CosineGreedy
 
         spectrum = Spectrum(mz=np.array([100, 150, 200.]),
-                              intensities=np.array([0.7, 0.2, 0.1]),
-                              metadata={'id': 'spectrum1',
-                                        "peak_comments": {200.: "the peak at 200 m/z"}})
+                            intensities=np.array([0.7, 0.2, 0.1]),
+                            metadata={'id': 'spectrum1',
+                                      "peak_comments": {200.: "the peak at 200 m/z"}})
 
         print(spectrum.peaks.mz[0])
         print(spectrum.peaks.intensities[0])

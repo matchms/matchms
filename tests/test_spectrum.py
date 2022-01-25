@@ -56,7 +56,7 @@ def test_spectrum_getters_return_copies():
 
 @pytest.mark.parametrize("harmonize, expected_dict", [
     [False, {"precursor mass": 400.768, "some key": "Whatever.", "new stuff": "XYZ"}],
-    [True, {'ionmode': 'n/a', "precursor_mz": 400.768, "some_key": "Whatever.", "new_stuff": "XYZ"}]
+    [True, {"precursor_mz": 400.768, "some_key": "Whatever.", "new_stuff": "XYZ"}]
 ])
 def test_spectrum_metadata_harmonization(harmonize, expected_dict):
     metadata = {
