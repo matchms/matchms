@@ -1,6 +1,6 @@
 import numpy
 import pytest
-from .builder_spectrum import SpectrumBuilder
+from .builder_Spectrum import SpectrumBuilder
 from matchms.filtering import interpret_pepmass
 
 
@@ -13,9 +13,10 @@ from matchms.filtering import interpret_pepmass
                           ((896.05, 1111.2, -1), (896.05, 1111.2, -1))])
 def test_interpret_pepmass(input_pepmass, expected_results):
     """Test if example inputs are correctly converted"""
-    spectrum_in = Spectrum(mz=numpy.array([100, 200.]),
-                           intensities=numpy.array([0.7, 0.1]),
-                           metadata={'pepmass': input_pepmass})
+    mz = numpy.array([100, 200.])
+    intensities = numpy.array([0.7, 0.1])
+    metadata = {'pepmass': input_pepmass}
+    spectrum_in = SpectrumBuilder().with_mz(mz).with_intensities(intensities).with_metadata(metadata).build()
 
     spectrum = interpret_pepmass(spectrum_in)
     mz = spectrum.get("precursor_mz")
@@ -27,10 +28,11 @@ def test_interpret_pepmass(input_pepmass, expected_results):
 
 def test_interpret_pepmass_charge_present(caplog):
     """Test if example inputs are correctly converted when entries already exist"""
-    spectrum_in = Spectrum(mz=numpy.array([100, 200.]),
-                           intensities=numpy.array([0.7, 0.1]),
-                           metadata={'pepmass': (896.05, 1111.2, "2-"),
-                                     'charge': -1})
+    mz = numpy.array([100, 200.])
+    intensities = numpy.array([0.7, 0.1])
+    metadata = {'pepmass': (896.05, 1111.2, "2-"),
+                'charge': -1}
+    spectrum_in = SpectrumBuilder().with_mz(mz).with_intensities(intensities).with_metadata(metadata).build()
 
     spectrum = interpret_pepmass(spectrum_in)
     mz = spectrum.get("precursor_mz")
@@ -44,10 +46,11 @@ def test_interpret_pepmass_charge_present(caplog):
 
 def test_interpret_pepmass_mz_present(caplog):
     """Test if example inputs are correctly converted when entries already exist"""
-    spectrum_in = Spectrum(mz=numpy.array([100, 200.]),
-                           intensities=numpy.array([0.7, 0.1]),
-                           metadata={'pepmass': (203, 44, "2-"),
-                                     'precursor_mz': 202})
+    mz = numpy.array([100, 200.])
+    intensities = numpy.array([0.7, 0.1])
+    metadata = {'pepmass': (203, 44, "2-"),
+                'precursor_mz': 202}
+    spectrum_in = SpectrumBuilder().with_mz(mz).with_intensities(intensities).with_metadata(metadata).build()
 
     spectrum = interpret_pepmass(spectrum_in)
     mz = spectrum.get("precursor_mz")
@@ -61,9 +64,9 @@ def test_interpret_pepmass_mz_present(caplog):
 
 def test_interpret_pepmass_intensity_present(caplog):
     """Test if example inputs are correctly converted when entries already exist"""
-    mz=numpy.array([100, 200.])
-    intensities=numpy.array([0.7, 0.1])
-    metadata={'pepmass': (203, 44, "2-"), 'precursor_intensity': 100}
+    mz = numpy.array([100, 200.])
+    intensities = numpy.array([0.7, 0.1])
+    metadata = {'pepmass': (203, 44, "2-"), 'precursor_intensity': 100}
     spectrum_in = SpectrumBuilder().with_mz(mz).with_intensities(intensities).with_metadata(metadata).build()
 
     spectrum = interpret_pepmass(spectrum_in)
