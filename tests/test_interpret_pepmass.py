@@ -1,6 +1,6 @@
 import numpy
 import pytest
-from matchms import Spectrum
+from .builder_spectrum import SpectrumBuilder
 from matchms.filtering import interpret_pepmass
 
 
@@ -61,10 +61,10 @@ def test_interpret_pepmass_mz_present(caplog):
 
 def test_interpret_pepmass_intensity_present(caplog):
     """Test if example inputs are correctly converted when entries already exist"""
-    spectrum_in = Spectrum(mz=numpy.array([100, 200.]),
-                           intensities=numpy.array([0.7, 0.1]),
-                           metadata={'pepmass': (203, 44, "2-"),
-                                     'precursor_intensity': 100})
+    mz=numpy.array([100, 200.])
+    intensities=numpy.array([0.7, 0.1])
+    metadata={'pepmass': (203, 44, "2-"), 'precursor_intensity': 100}
+    spectrum_in = SpectrumBuilder().with_mz(mz).with_intensities(intensities).with_metadata(metadata).build()
 
     spectrum = interpret_pepmass(spectrum_in)
     mz = spectrum.get("precursor_mz")
