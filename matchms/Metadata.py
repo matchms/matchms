@@ -16,7 +16,7 @@ class Metadata:
     """Class to handle spectrum metadata in matchms.
 
     Metadata entries will be stored as PickyDict dictionary in `metadata.data`.
-    Unlike normal Python dictionaries, not all key names will be acceped.
+    Unlike normal Python dictionaries, not all key names will be accepted.
     Key names will be forced to be lower-case to avoid confusions between key such
     as "Precursor_MZ" and "precursor_mz".
 
