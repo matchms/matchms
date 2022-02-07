@@ -53,7 +53,7 @@ def safe_convert_to_float(value: Any) -> Optional[float]:
     try:
         value = float(value)
         rt = value if value >= 0 else None  # discard negative RT values
-    except ValueError:
+    except (ValueError, TypeError):
         logger.warning("%s can't be converted to float.", str(value))
         rt = None
     return rt
