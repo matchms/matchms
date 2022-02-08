@@ -148,12 +148,12 @@ def test_modified_cosine_precursor_mz_as_string(caplog):
     spectrum_1 = Spectrum(mz=numpy.array([100, 200, 300], dtype="float"),
                           intensities=numpy.array([10, 10, 500], dtype="float"),
                           metadata={"precursor_mz": 1000.0},
-                          harmonize_defaults=False)
+                          default_metadata_filtering=False)
 
     spectrum_2 = Spectrum(mz=numpy.array([120, 220, 320], dtype="float"),
                           intensities=numpy.array([10, 10, 500], dtype="float"),
                           metadata={"precursor_mz": "1005.0"},
-                          harmonize_defaults=False)
+                          default_metadata_filtering=False)
 
     norm_spectrum_1 = normalize_intensities(spectrum_1)
     norm_spectrum_2 = normalize_intensities(spectrum_2)

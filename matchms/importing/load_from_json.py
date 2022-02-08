@@ -11,7 +11,7 @@ logger = logging.getLogger("matchms")
 
 
 def load_from_json(filename: str,
-                   harmonize_defaults: bool = True) -> List[Spectrum]:
+                   default_metadata_filtering: bool = True) -> List[Spectrum]:
     """Load spectrum(s) from json file.
 
     JSON document formatted like the `GNPS Spectra library <https://gnps-external.ucsd.edu/gnpslibrary>`_.
@@ -30,14 +30,14 @@ def load_from_json(filename: str,
     ----------
     filename
         Provide filename for json file containing spectrum(s).
-    harmonize_defaults : bool, optional
+    default_metadata_filtering : bool, optional
         Set to False if metadata harmonization to default keys is not desired.
         The default is True.
     """
     with open(filename, 'rb') as fin:
         spectrums = []
         for spectrum_dict in json.load(fin):
-            spectrum = as_spectrum(spectrum_dict, harmonize_defaults=harmonize_defaults)
+            spectrum = as_spectrum(spectrum_dict, default_metadata_filtering=default_metadata_filtering)
             if spectrum is not None:
                 spectrums.append(spectrum)
 
@@ -45,7 +45,7 @@ def load_from_json(filename: str,
 
 
 def as_spectrum(dct: dict,
-                harmonize_defaults: bool = True) -> Union[dict, Spectrum, None]:
+                default_metadata_filtering: bool = True) -> Union[dict, Spectrum, None]:
     """A :py:func:`json.load` object_hook to convert dictionary shaped like
     spectrum into :py:class:`~matchms.Spectrum.Spectrum` object.
 
@@ -59,12 +59,12 @@ def as_spectrum(dct: dict,
     """
     # Recognize Spectrum by peaks_json key
     if 'peaks_json' in dct:
-        return dict2spectrum(dct, harmonize_defaults=harmonize_defaults)
+        return dict2spectrum(dct, default_metadata_filtering=default_metadata_filtering)
     return None
 
 
 def dict2spectrum(spectrum_dict: dict,
-                  harmonize_defaults: bool) -> Union[Spectrum, None]:
+                  default_metadata_filtering: bool) -> Union[Spectrum, None]:
     """Convert dictionary to a :py:class:`~matchms.Spectrum.Spectrum` object.
 
     Parameters
@@ -110,6 +110,6 @@ def dict2spectrum(spectrum_dict: dict,
         return Spectrum(mz=mz,
                         intensities=intensities,
                         metadata=metadata_dict,
-                        harmonize_defaults=harmonize_defaults)
+                        default_metadata_filtering=default_metadata_filtering)
     logger.info("Empty spectrum found (no peaks in 'peaks_json'). Will not be imported.")
     return None

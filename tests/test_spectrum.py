@@ -41,7 +41,7 @@ def test_spectrum_getters_return_copies():
     """Test if getters return (deep)copies so that edits won't change the original entries."""
     spectrum = Spectrum(mz=numpy.array([100.0, 101.0], dtype="float"),
                         intensities=numpy.array([0.4, 0.5], dtype="float"),
-                        metadata={"testdata": 1}, harmonize_defaults=False)
+                        metadata={"testdata": 1}, default_metadata_filtering=False)
     # Get entries and modify
     testdata = spectrum.get("testdata")
     testdata += 1
@@ -54,19 +54,15 @@ def test_spectrum_getters_return_copies():
     assert spectrum.metadata == {'testdata': 1}, "Expected metadata to remain unchanged"
 
 
-@pytest.mark.parametrize("harmonize, expected_dict", [
-    [False, {"precursor mass": 400.768, "some key": "Whatever.", "new stuff": "XYZ"}],
-    [True, {"precursor_mz": 400.768, "some_key": "Whatever.", "new_stuff": "XYZ"}]
+@pytest.mark.parametrize("input_dict, expected_dict", [
+    [{"precursor mass": 400.768, "Some Key": "Whatever.", "NEW\tSTUFF": "XYZ"},
+     {"precursor_mz": 400.768, "some_key": "Whatever.", "new_stuff": "XYZ"}],
+    [{"Name": "Whatever123", "ION MODE": "XYZ"},
+     {"compound_name": "Whatever123", "ion_mode": "XYZ"}]
 ])
-def test_spectrum_metadata_harmonization(harmonize, expected_dict):
-    metadata = {
-        "Precursor Mass": 400.768,
-        "Some Key": "Whatever."
-    }
-
-    builder = SpectrumBuilder().with_metadata(metadata)
-    spectrum = builder.build(harmonize_defaults=harmonize)
-    spectrum.set("New Stuff", "XYZ")
+def test_spectrum_metadata_harmonization(input_dict, expected_dict):
+    builder = SpectrumBuilder().with_metadata(input_dict, default_metadata_filtering=False)
+    spectrum = builder.build()
     assert spectrum.metadata == expected_dict, "Expected different metadata dict"
 
 
@@ -121,7 +117,7 @@ def test_spectrum_hash_mz_sensitivity(spectrum: Spectrum):
     """Test is changes indeed lead to different hashes as expected."""
     mz2 = spectrum.peaks.mz.copy()
     mz2[0] += 0.00001
-    spectrum2 = SpectrumBuilder().from_spectrum(spectrum).with_mz(mz2).build(harmonize_defaults=False)
+    spectrum2 = SpectrumBuilder().from_spectrum(spectrum).with_mz(mz2).build()
 
     assert hash(spectrum) != hash(spectrum2), "Expected hashes to be different."
     assert spectrum.metadata_hash() == spectrum2.metadata_hash(), \
@@ -134,7 +130,7 @@ def test_spectrum_hash_intensity_sensitivity(spectrum: Spectrum):
     """Test is changes indeed lead to different hashes as expected."""
     intensities2 = spectrum.peaks.intensities.copy()
     intensities2[0] += 0.01
-    spectrum2 = SpectrumBuilder().from_spectrum(spectrum).with_intensities(intensities2).build(harmonize_defaults=False)
+    spectrum2 = SpectrumBuilder().from_spectrum(spectrum).with_intensities(intensities2).build()
 
     assert hash(spectrum) != hash(spectrum2), "Expected hashes to be different."
     assert spectrum.metadata_hash() == spectrum2.metadata_hash(), \
@@ -155,10 +151,11 @@ def test_spectrum_hash_metadata_sensitivity(spectrum: Spectrum):
         "Expected hashes to be unchanged."
 
 
-@pytest.mark.parametrize("harmonize", [True, False])
-def test_spectrum_clone(spectrum, harmonize):
+@pytest.mark.parametrize("default_filtering", [True, False])
+def test_spectrum_clone(spectrum, default_filtering):
     spectrum = SpectrumBuilder().from_spectrum(spectrum).with_metadata(
-        {"pepmass": (444.1, 11), "TEST FIELD": "Some Text"}).build(harmonize_defaults=harmonize)
+        {"pepmass": (444.1, 11), "TEST FIELD": "Some Text"},
+        default_metadata_filtering=default_filtering).build()
     spectrum_clone = spectrum.clone()
 
     assert spectrum_clone == spectrum.clone(), "Spectra should be equal"
@@ -166,6 +163,23 @@ def test_spectrum_clone(spectrum, harmonize):
     # Check if no shallow copy was made
     spectrum_clone.metadata = {"pepmass": (424.1, 11), "TEST FIELD": "Some Text"}
     assert spectrum_clone != spectrum.clone(), "Only cloned spectrum should have changed"
+
+
+@pytest.mark.parametrize("input_dict, default_filtering, expected", [
+    [{}, True, {}],
+    [{"precursor_mz": 101.01}, True, {"precursor_mz": 101.01}],
+    [{"precursormz": 101.01}, True, {"precursor_mz": 101.01}],
+    [{"precursormz": 101.01}, False, {"precursor_mz": 101.01}],
+    [{"charge": "2+"}, True, {"charge": 2}],
+    [{"charge": -1}, True, {"charge": -1}],
+    [{"charge": [-1, 0]}, True, {"charge": -1}],
+    [{"ionmode": "Negative"}, True, {"ionmode": "negative"}]])
+def test_metadata_default_filtering(spectrum, input_dict, default_filtering, expected):
+    spectrum = SpectrumBuilder().from_spectrum(spectrum).with_metadata(
+        input_dict,
+        default_metadata_filtering=default_filtering).build()
+    assert spectrum.metadata == expected, \
+        "Expected different _metadata dictionary."
 
 
 def test_spectrum_plot_same_peak_height():

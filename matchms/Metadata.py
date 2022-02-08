@@ -1,9 +1,6 @@
 from collections.abc import Mapping
 import numpy as np
 from pickydict import PickyDict
-from .filtering.add_precursor_mz import _add_precursor_mz_metadata
-from .filtering.interpret_pepmass import _interpret_pepmass_metadata
-from .filtering.make_charge_int import _convert_charge_to_int
 from .utils import load_known_key_conversions
 
 
@@ -63,7 +60,7 @@ class Metadata:
             raise ValueError("Unexpected data type for metadata (should be dictionary, or None).")
 
         self.harmonize_defaults = harmonize_defaults
-        if harmonize_defaults is True:
+        if self.harmonize_defaults is True:
             self.harmonize_metadata()
 
     def __eq__(self, other_metadata):
@@ -88,13 +85,6 @@ class Metadata:
         """
         self._data.key_regex_replacements = _key_regex_replacements
         self._data.key_replacements = _key_replacements
-        self._data = _interpret_pepmass_metadata(self._data)
-        if self.get("ionmode") is not None:
-            self._data["ionmode"] = self.get("ionmode").lower()
-        self._data = _add_precursor_mz_metadata(self._data)
-        charge = self.get("charge")
-        if not isinstance(charge, int) and not _convert_charge_to_int(charge) is None:
-            self._data["charge"] = _convert_charge_to_int(charge)
 
     # ------------------------------
     # Getters and Setters
@@ -138,5 +128,12 @@ class Metadata:
         return self._data.copy()
 
     @data.setter
-    def data(self, value):
-        self._data = value
+    def data(self, new_dict):
+        if isinstance(new_dict, PickyDict):
+            self._data = new_dict
+        elif isinstance(new_dict, Mapping):
+            self._data = PickyDict(new_dict)
+            if self.harmonize_defaults is True:
+                self.harmonize_metadata()
+        else:
+            raise TypeError("Expected input of type dict or PickyDict.")

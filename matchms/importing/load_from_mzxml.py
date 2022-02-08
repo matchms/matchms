@@ -6,7 +6,7 @@ from matchms.Spectrum import Spectrum
 
 
 def load_from_mzxml(filename: str, ms_level: int = 2,
-                    harmonize_defaults: bool = True) -> Generator[Spectrum, None, None]:
+                    default_metadata_filtering: bool = True) -> Generator[Spectrum, None, None]:
     """Load spectrum(s) from mzml file.
 
     This function will create ~matchms.Spectrum for every spectrum of desired
@@ -28,7 +28,7 @@ def load_from_mzxml(filename: str, ms_level: int = 2,
         Filename for mzXML file to import.
     ms_level:
         Specify which ms level to import. Default is 2.
-    harmonize_defaults : bool, optional
+    default_metadata_filtering : bool, optional
         Set to False if metadata harmonization to default keys is not desired.
         The default is True.
     """
@@ -47,4 +47,4 @@ def load_from_mzxml(filename: str, ms_level: int = 2,
                     intensities = intensities[idx_sorted]
 
                 yield Spectrum(mz=mz, intensities=intensities, metadata=metadata,
-                               harmonize_defaults=harmonize_defaults)
+                               default_metadata_filtering=default_metadata_filtering)

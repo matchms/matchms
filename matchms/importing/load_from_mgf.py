@@ -7,7 +7,7 @@ from ..Spectrum import Spectrum
 
 
 def load_from_mgf(source: Union[str, TextIO],
-                  harmonize_defaults: bool = True) -> Generator[Spectrum, None, None]:
+                  default_metadata_filtering: bool = True) -> Generator[Spectrum, None, None]:
     """Load spectrum(s) from mgf file.
 
     This function will create ~matchms.Spectrum for every spectrum in the given
@@ -31,7 +31,7 @@ def load_from_mgf(source: Union[str, TextIO],
     source:
         Accepts both filename (with path) for .mgf file or a file-like
         object from a preloaded MGF file.
-    harmonize_defaults : bool, optional
+    default_metadata_filtering : bool, optional
         Set to False if metadata harmonization to default keys is not desired.
         The default is True.
     """
@@ -51,4 +51,4 @@ def load_from_mgf(source: Union[str, TextIO],
         yield Spectrum(mz=mz,
                        intensities=intensities,
                        metadata=metadata,
-                       harmonize_defaults=harmonize_defaults)
+                       default_metadata_filtering=default_metadata_filtering)

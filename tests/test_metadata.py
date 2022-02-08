@@ -1,5 +1,6 @@
 """Tests for Metadata class."""
 import numpy as np
+from pickydict import PickyDict
 import pytest
 from matchms import Metadata
 
@@ -9,10 +10,9 @@ from matchms import Metadata
     [{"precursor_mz": 101.01}, True, {"precursor_mz": 101.01}],
     [{"precursormz": 101.01}, True, {"precursor_mz": 101.01}],
     [{"precursormz": 101.01}, False, {"precursormz": 101.01}],
-    [{"charge": "2+"}, True, {"charge": 2}],
+    [{"charge": "2+"}, True, {"charge": "2+"}],
     [{"charge": -1}, True, {"charge": -1}],
-    [{"charge": [-1, 0]}, True, {"charge": -1}],
-    [{"ionmode": "Negative"}, True, {"ionmode": "negative"}]])
+    [{"ionmode": "Negative"}, True, {"ionmode": "Negative"}]])
 def test_metadata_init(input_dict, harmonize, expected):
     metadata = Metadata(input_dict, harmonize_defaults=harmonize)
     assert metadata.data == expected, \
@@ -23,7 +23,7 @@ def test_metadata_init(input_dict, harmonize, expected):
     [True, "precursor_mz", 101.01, {"precursor_mz": 101.01}],
     [True, "precursormz", 101.01, {"precursor_mz": 101.01}],
     [False, "precursormz", 101.01, {"precursormz": 101.01}],
-    [True, "ionmode", "NEGATIVE", {"ionmode": "negative"}]])
+    [True, "ionmode", "NEGATIVE", {"ionmode": "NEGATIVE"}]])
 def test_metadata_setter(harmonize, set_key, set_value, expected):
     metadata = Metadata(harmonize_defaults=harmonize)
     metadata.set(set_key, set_value)
@@ -35,7 +35,7 @@ def test_metadata_setter(harmonize, set_key, set_value, expected):
     [True, "precursor_mz", 101.01, "precursor_mz", 101.01],
     [True, "precursormz", 101.01, "precursor_mz", 101.01],
     [False, "precursormz", 101.01, "precursormz", 101.01],
-    [True, "ionmode", "NEGATIVE", "ionmode", "negative"]])
+    [True, "ionmode", "NEGATIVE", "ionmode", "NEGATIVE"]])
 def test_metadata_setter_getter(harmonize, set_key, set_value, get_key, get_value):
     metadata = Metadata(harmonize_defaults=harmonize)
     metadata.set(set_key, set_value)
@@ -47,7 +47,7 @@ def test_metadata_setter_getter(harmonize, set_key, set_value, get_key, get_valu
     [True, "precursor_mz", 101.01, "precursor_mz", 101.01],
     [True, "precursormz", 101.01, "precursor_mz", 101.01],
     [False, "precursormz", 101.01, "precursormz", 101.01],
-    [True, "ionmode", "NEGATIVE", "ionmode", "negative"]])
+    [True, "ionmode", "NEGATIVE", "ionmode", "NEGATIVE"]])
 def test_metadata_setitem_getitem(harmonize, set_key, set_value, get_key, get_value):
     metadata = Metadata(harmonize_defaults=harmonize)
     metadata[set_key] = set_value
@@ -72,3 +72,10 @@ def test_metadata_equal(dict1, dict2, expected):
         assert metadata1 == metadata2, "Expected metadata to be equal."
     else:
         assert metadata1 != metadata2, "Expected metadata NOT to be equal."
+
+
+def test_metadata_full_setter():
+    metadata = Metadata()
+    metadata.data = {"Precursor Mz": 101.01}
+    assert isinstance(metadata._data, PickyDict), "Expected PickyDict"
+    assert metadata["precursor_mz"] == 101.01, "Expected differnt entry"

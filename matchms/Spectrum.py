@@ -3,6 +3,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matchms.plotting.spectrum_plots import plot_spectra_mirror
 from matchms.plotting.spectrum_plots import plot_spectrum
+from .filtering.add_precursor_mz import _add_precursor_mz_metadata
+from .filtering.interpret_pepmass import _interpret_pepmass_metadata
+from .filtering.make_charge_int import _convert_charge_to_int
 from .Fragments import Fragments
 from .hashing import metadata_hash
 from .hashing import spectrum_hash
@@ -69,7 +72,7 @@ class Spectrum:
     def __init__(self, mz: np.array,
                  intensities: np.array,
                  metadata: Optional[dict] = None,
-                 harmonize_defaults: bool = True):
+                 default_metadata_filtering: bool = True):
         """
 
         Parameters
@@ -80,11 +83,13 @@ class Spectrum:
             Array of intensities for the peaks
         metadata
             Dictionary with for example the scan number of precursor m/z.
-        harmonize_defaults : bool, optional
-            Set to False if metadata harmonization to default keys is not desired.
+        default_metadata_filtering : bool, optional
+            Set to False if default metadata filters should not be applied.
             The default is True.
         """
-        self._metadata = Metadata(metadata, harmonize_defaults=harmonize_defaults)
+        self._metadata = Metadata(metadata)
+        if default_metadata_filtering is True:
+           self._apply_metadata_default_filters()
         self.peaks = Fragments(mz=mz, intensities=intensities)
         self.losses = None
 
@@ -93,6 +98,16 @@ class Spectrum:
             self.peaks == other.peaks and \
             self.losses == other.losses and \
             self._metadata == other._metadata
+
+    def _apply_metadata_default_filters(self):
+        metadata_filtered = _interpret_pepmass_metadata(self.metadata)
+        if metadata_filtered.get("ionmode") is not None:
+            metadata_filtered["ionmode"] = self.metadata.get("ionmode").lower()
+        metadata_filtered = _add_precursor_mz_metadata(metadata_filtered)
+        charge = metadata_filtered.get("charge")
+        if not isinstance(charge, int) and not _convert_charge_to_int(charge) is None:
+            metadata_filtered["charge"] = _convert_charge_to_int(charge)
+        self._metadata = Metadata(metadata_filtered)
 
     def __hash__(self):
         """Return a integer hash which is computed from both
@@ -118,7 +133,7 @@ class Spectrum:
         clone = Spectrum(mz=self.peaks.mz,
                          intensities=self.peaks.intensities,
                          metadata=self._metadata.data,
-                         harmonize_defaults=self._metadata.harmonize_defaults)
+                         default_metadata_filtering=False)
         clone.losses = self.losses
         return clone
 
