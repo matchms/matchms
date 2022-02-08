@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.13.0] - 2022-02-08
+
 ### Added
 
 - Updated and extended plotting functionality, now located in `matchms.plotting`.
@@ -20,6 +22,7 @@ Contains three plot types: `plot_spectrum()` or `spectrum.plot()`, `plot_spectra
 ### Fixed
 
 - Updated to new url for `load_from_usi` function (old link was broken) [#310](https://github.com/matchms/matchms/pull/310)
+- Small bug fix: `add_retention` filters can now properly handle TypeError for empty list. [#314](https://github.com/matchms/matchms/pull/314)
 
 ## [0.12.0] - 2022-01-18
 
@@ -385,7 +388,8 @@ Contains three plot types: `plot_spectrum()` or `spectrum.plot()`, `plot_spectra
 - This is the initial version of Spec2Vec from https://github.com/iomega/Spec2Vec
 - (later splitted into matchms + spec2vec)
 
-[Unreleased]: https://github.com/matchms/matchms/compare/0.12.0...HEAD
+[Unreleased]: https://github.com/matchms/matchms/compare/0.13.0...HEAD
+[0.13.0]: https://github.com/matchms/matchms/compare/0.12.0...0.13.0
 [0.12.0]: https://github.com/matchms/matchms/compare/0.11.0...0.12.0
 [0.11.0]: https://github.com/matchms/matchms/compare/0.10.0...0.11.0
 [0.10.0]: https://github.com/matchms/matchms/compare/0.9.2...0.10.0
