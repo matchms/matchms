@@ -58,7 +58,8 @@ def test_spectrum_getters_return_copies():
     [{"precursor mass": 400.768, "Some Key": "Whatever.", "NEW\tSTUFF": "XYZ"},
      {"precursor_mz": 400.768, "some_key": "Whatever.", "new_stuff": "XYZ"}],
     [{"Name": "Whatever123", "ION MODE": "XYZ"},
-     {"compound_name": "Whatever123", "ionmode": "XYZ"}]
+     {"compound_name": "Whatever123", "ionmode": "XYZ"}],
+    [{"ri": "200"}, {"retention_index": "200"}]
 ])
 def test_spectrum_metadata_harmonization(input_dict, expected_dict):
     builder = SpectrumBuilder().with_metadata(input_dict, metadata_harmonization=False)

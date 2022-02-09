@@ -6,6 +6,7 @@ from matchms.plotting.spectrum_plots import plot_spectrum
 from .filtering.add_precursor_mz import _add_precursor_mz_metadata
 from .filtering.interpret_pepmass import _interpret_pepmass_metadata
 from .filtering.make_charge_int import _convert_charge_to_int
+from .filtering.add_retention import _add_retention
 from .Fragments import Fragments
 from .hashing import metadata_hash
 from .hashing import spectrum_hash
@@ -104,6 +105,11 @@ class Spectrum:
         if metadata_filtered.get("ionmode") is not None:
             metadata_filtered["ionmode"] = self.metadata.get("ionmode").lower()
         metadata_filtered = _add_precursor_mz_metadata(metadata_filtered)
+
+        if metadata_filtered.get("retention_time") is not None:
+            metadata_filtered = _add_retention(metadata_filtered, "retention_time", "retention_time")
+        if metadata_filtered.get("retention_index") is not None:
+            metadata_filtered = _add_retention(metadata_filtered, "retention_index", "retention_index")
         charge = metadata_filtered.get("charge")
         if not isinstance(charge, int) and not _convert_charge_to_int(charge) is None:
             metadata_filtered["charge"] = _convert_charge_to_int(charge)
