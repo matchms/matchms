@@ -89,7 +89,7 @@ class Spectrum:
         """
         self._metadata = Metadata(metadata)
         if default_metadata_filtering is True:
-           self._apply_metadata_default_filters()
+            self._apply_metadata_default_filters()
         self.peaks = Fragments(mz=mz, intensities=intensities)
         self.losses = None
 

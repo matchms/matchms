@@ -35,9 +35,9 @@ def test_save_and_load_json_spectrum_list(default_metadata_filtering, tmp_path):
     intensities = numpy.array([10, 10, 500], dtype="float")
     builder = SpectrumBuilder().with_mz(mz).with_intensities(intensities)
     spectrum1 = builder.with_metadata({"test_field": "test1"},
-    default_metadata_filtering=default_metadata_filtering).build()
+                                      default_metadata_filtering=default_metadata_filtering).build()
     spectrum2 = builder.with_metadata({"test_field": "test2"},
-    default_metadata_filtering=default_metadata_filtering).build()
+                                      default_metadata_filtering=default_metadata_filtering).build()
 
     # Write to test file
     filename = os.path.join(tmp_path, "test.json")

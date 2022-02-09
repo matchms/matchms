@@ -77,5 +77,5 @@ def test_metadata_equal(dict1, dict2, expected):
 def test_metadata_full_setter():
     metadata = Metadata()
     metadata.data = {"Precursor Mz": 101.01}
-    assert isinstance(metadata._data, PickyDict), "Expected PickyDict"
+    assert isinstance(metadata.data, PickyDict), "Expected PickyDict"
     assert metadata["precursor_mz"] == 101.01, "Expected differnt entry"
