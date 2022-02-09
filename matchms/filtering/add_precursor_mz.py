@@ -64,4 +64,5 @@ def _add_precursor_mz_metadata(metadata):
         return metadata
 
     logger.warning("No precursor_mz found in metadata.")
+    metadata.pop("precursor_mz", None)
     return metadata

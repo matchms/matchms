@@ -11,7 +11,8 @@ from .builder_Spectrum import SpectrumBuilder
     [{"compound_name": "GalCer(d18:2/16:1); [M+H]+"}, True, "[M+H]+", "GalCer(d18:2/16:1)", "[M+H]+"],
     [{"compound_name": "peptideXYZ [M+H+K]", "adduct": "M+H"}, True, "M+H", "peptideXYZ", "[M+H+K]"],
     [{"compound_name": "peptideXYZ [M+H+K]"}, False, "[M+H+K]", "peptideXYZ [M+H+K]", None],
-    [{"name": ""}, True, None, None, None]
+    [{"Name": "peptideXYZ [M+H+K]", "adduct": "M+H"}, True, "M+H", "peptideXYZ", "[M+H+K]"],
+    [{"name": ""}, True, None, "", None]
 ])
 def test_derive_adduct_from_name_parametrized(metadata, remove_adduct_from_name, expected_adduct, expected_name, removed_adduct):
     set_matchms_logger_level("INFO")

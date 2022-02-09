@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 import pytest
 from matplotlib import pyplot as plt
 from matchms import Spectrum
@@ -19,19 +19,19 @@ def _assert_plots_ok(fig, n_plots, n_lines):
 
 
 def _create_test_spectrum():
-    intensities = numpy.array([1, 1, 5, 5, 5, 5, 7, 7, 7, 9, 9], dtype="float")
+    intensities = np.array([1, 1, 5, 5, 5, 5, 7, 7, 7, 9, 9], dtype="float")
     return _create_test_spectrum_with_intensities(intensities)
 
 
 def _create_test_spectrum_with_intensities(intensities):
-    mz = numpy.array([10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110], dtype="float")
+    mz = np.array([10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110], dtype="float")
     return Spectrum(mz=mz, intensities=intensities)
 
 
 @pytest.fixture
 def spectrum() -> Spectrum:
-    mz = numpy.array([100.00003, 110.2, 200.581], dtype='float')
-    intensities = numpy.array([0.51, 1.0, 0.011], dtype='float')
+    mz = np.array([100.00003, 110.2, 200.581], dtype='float')
+    intensities = np.array([0.51, 1.0, 0.011], dtype='float')
     metadata = {"pepmass": (444.0, 11), "charge": -1}
     builder = SpectrumBuilder().with_mz(mz).with_intensities(intensities).with_metadata(metadata)
     return builder.build()
@@ -39,8 +39,8 @@ def spectrum() -> Spectrum:
 
 def test_spectrum_getters_return_copies():
     """Test if getters return (deep)copies so that edits won't change the original entries."""
-    spectrum = Spectrum(mz=numpy.array([100.0, 101.0], dtype="float"),
-                        intensities=numpy.array([0.4, 0.5], dtype="float"),
+    spectrum = Spectrum(mz=np.array([100.0, 101.0], dtype="float"),
+                        intensities=np.array([0.4, 0.5], dtype="float"),
                         metadata={"testdata": 1}, default_metadata_filtering=False)
     # Get entries and modify
     testdata = spectrum.get("testdata")
@@ -48,7 +48,7 @@ def test_spectrum_getters_return_copies():
     assert spectrum.get("testdata") == 1, "Expected different entry"
     peaks_mz = spectrum.peaks.mz
     peaks_mz += 100.0
-    assert numpy.all(spectrum.peaks.mz == numpy.array([100.0, 101.0])), "Expected different peaks.mz"
+    assert np.all(spectrum.peaks.mz == np.array([100.0, 101.0])), "Expected different peaks.mz"
     metadata = spectrum.metadata
     metadata["added_info"] = "this"
     assert spectrum.metadata == {'testdata': 1}, "Expected metadata to remain unchanged"
@@ -58,7 +58,7 @@ def test_spectrum_getters_return_copies():
     [{"precursor mass": 400.768, "Some Key": "Whatever.", "NEW\tSTUFF": "XYZ"},
      {"precursor_mz": 400.768, "some_key": "Whatever.", "new_stuff": "XYZ"}],
     [{"Name": "Whatever123", "ION MODE": "XYZ"},
-     {"compound_name": "Whatever123", "ion_mode": "XYZ"}]
+     {"compound_name": "Whatever123", "ionmode": "XYZ"}]
 ])
 def test_spectrum_metadata_harmonization(input_dict, expected_dict):
     builder = SpectrumBuilder().with_metadata(input_dict, default_metadata_filtering=False)
@@ -71,11 +71,12 @@ def test_comparing_spectra_with_metadata():
     metadata: dict = {
         "float_example": 400.768,
         "str_example": "whatever",
-        "list_example": [3, 4, "abc"]
+        "list_example": [3, 4, "abc"],
+        "fingerprint": np.array([0.1, 5, 1.1])
     }
 
-    builder = SpectrumBuilder().with_mz(numpy.array([100.0, 101.0], dtype="float")).with_intensities(
-        numpy.array([0.4, 0.5], dtype="float")).with_metadata(metadata)
+    builder = SpectrumBuilder().with_mz(np.array([100.0, 101.0], dtype="float")).with_intensities(
+        np.array([0.4, 0.5], dtype="float")).with_metadata(metadata)
 
     spectrum0 = builder.build()
     spectrum1 = builder.build()
@@ -88,18 +89,23 @@ def test_comparing_spectra_with_metadata():
     metadata3.update({"list_example": [3, 4, "abc", "extra"]})
     spectrum3 = builder.with_metadata(metadata3).build()
 
+    metadata4 = metadata.copy()
+    metadata4["fingerprint"] = np.array([0.1, 5, 1.10001])
+    spectrum4 = builder.with_metadata(metadata3).build()
+
     assert spectrum0 == spectrum1, "Expected spectra to be equal"
     assert spectrum0 != spectrum2, "Expected spectra to not be equal"
     assert spectrum0 != spectrum3, "Expected spectra to not be equal"
+    assert spectrum0 != spectrum4, "Expected spectra to not be equal"
 
 
 def test_comparing_spectra_with_arrays():
-    """Test if spectra can be compared that contain numpy.arrays in the metadata.
+    """Test if spectra can be compared that contain numpy arrays in the metadata.
     (Failed in an earlier version)"""
     builder = SpectrumBuilder()
     spectrum0 = builder.build()
 
-    fingerprint1 = numpy.array([0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0])
+    fingerprint1 = np.array([0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0])
     spectrum1 = builder.with_metadata({"fingerprint": fingerprint1}).build()
 
     assert spectrum0 != spectrum1, "Expected spectra to not be equal"
@@ -183,7 +189,7 @@ def test_metadata_default_filtering(spectrum, input_dict, default_filtering, exp
 
 
 def test_spectrum_plot_same_peak_height():
-    intensities_with_zero_variance = numpy.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], dtype="float")
+    intensities_with_zero_variance = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], dtype="float")
     spectrum = _create_test_spectrum_with_intensities(intensities_with_zero_variance)
     fig, _ = spectrum.plot()
     _assert_plots_ok(fig, n_plots=1, n_lines=11)
