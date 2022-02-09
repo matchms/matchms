@@ -11,7 +11,7 @@ logger = logging.getLogger("matchms")
 
 
 _retention_time_keys = ["retention_time", "retentiontime", "rt", "scan_start_time",
-                        "RT_Query", "rt_query"]
+                        "rt_query"]
 _retention_index_keys = ["retention_index", "retentionindex", "ri"]
 
 
