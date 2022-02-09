@@ -24,20 +24,20 @@ def test_save_and_load_json_single_spectrum(tmp_path):
     assert os.path.isfile(filename)
 
     # Test if content of json file is correct
-    spectrum_import = load_from_json(filename, default_metadata_filtering=False)[0]
+    spectrum_import = load_from_json(filename, metadata_harmonization=False)[0]
     assert spectrum_import == spectrum, "Original and saved+loaded spectrum not identical"
 
 
-@pytest.mark.parametrize("default_metadata_filtering", [True, False])
-def test_save_and_load_json_spectrum_list(default_metadata_filtering, tmp_path):
+@pytest.mark.parametrize("metadata_harmonization", [True, False])
+def test_save_and_load_json_spectrum_list(metadata_harmonization, tmp_path):
     """Test saving spectrum list to .json file"""
     mz = numpy.array([100, 200, 300], dtype="float")
     intensities = numpy.array([10, 10, 500], dtype="float")
     builder = SpectrumBuilder().with_mz(mz).with_intensities(intensities)
     spectrum1 = builder.with_metadata({"test_field": "test1"},
-                                      default_metadata_filtering=default_metadata_filtering).build()
+                                      metadata_harmonization=metadata_harmonization).build()
     spectrum2 = builder.with_metadata({"test_field": "test2"},
-                                      default_metadata_filtering=default_metadata_filtering).build()
+                                      metadata_harmonization=metadata_harmonization).build()
 
     # Write to test file
     filename = os.path.join(tmp_path, "test.json")
@@ -47,7 +47,7 @@ def test_save_and_load_json_spectrum_list(default_metadata_filtering, tmp_path):
     assert os.path.isfile(filename)
 
     # Test if content of json file is correct
-    spectrum_imports = load_from_json(filename, default_metadata_filtering=default_metadata_filtering)
+    spectrum_imports = load_from_json(filename, metadata_harmonization=metadata_harmonization)
     assert spectrum_imports[0] == spectrum1, "Original and saved+loaded spectrum not identical"
     assert spectrum_imports[1] == spectrum2, "Original and saved+loaded spectrum not identical"
 
@@ -75,13 +75,13 @@ def test_load_from_json_with_minimal_json(tmp_path):
     with open(filename, 'w', encoding="utf-8") as f:
         f.write(body)
 
-    spectrum_imports = load_from_json(filename, default_metadata_filtering=False)
+    spectrum_imports = load_from_json(filename, metadata_harmonization=False)
 
     mz = numpy.array([100, 200, 300], dtype="float")
     intensities = numpy.array([10, 10, 500], dtype="float")
     builder = SpectrumBuilder().with_mz(mz).with_intensities(intensities)
     expected = builder.with_metadata({"test_field": "test1"},
-                                     default_metadata_filtering=False).build()
+                                     metadata_harmonization=False).build()
 
     assert spectrum_imports == [
         expected], "Loaded JSON document not identical to expected Spectrum"
@@ -94,7 +94,7 @@ def test_save_as_json_with_minimal_json(tmp_path):
     intensities = numpy.array([10, 10, 500], dtype="float")
     builder = SpectrumBuilder().with_mz(mz).with_intensities(intensities)
     spectrum1 = builder.with_metadata({"test_field": "test1"},
-                                      default_metadata_filtering=False).build()
+                                      metadata_harmonization=False).build()
 
     save_as_json([spectrum1], filename)
 

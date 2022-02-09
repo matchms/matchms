@@ -15,7 +15,7 @@ def test_spectrum_builder_only_metadata(metadata):
     spectrum_2 = Spectrum(numpy.array([], dtype="float"),
                           numpy.array([], dtype="float"),
                           metadata,
-                          default_metadata_filtering=False)
+                          metadata_harmonization=False)
     assert spectrum_1 == spectrum_2, "Spectra should be identical!"
 
 
@@ -29,5 +29,5 @@ def test_spectrum_builder_all(mz, intensities, metadata):
     spectrum_2 = Spectrum(numpy.array(mz, dtype="float"),
                           numpy.array(intensities, dtype="float"),
                           metadata,
-                          default_metadata_filtering=False)
+                          metadata_harmonization=False)
     assert spectrum_1 == spectrum_2, "Spectra should be identical!"

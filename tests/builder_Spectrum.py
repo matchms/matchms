@@ -8,7 +8,7 @@ class SpectrumBuilder:
         self._mz = numpy.array([], dtype="float")
         self._intensities = numpy.array([], dtype="float")
         self._metadata = {}
-        self._default_metadata_filtering = False
+        self._metadata_harmonization = False
 
     def from_spectrum(self, spectrum: Spectrum):
         return self.with_mz(spectrum.peaks.mz).with_intensities(spectrum.peaks.intensities).with_metadata(spectrum.metadata)
@@ -22,16 +22,16 @@ class SpectrumBuilder:
         return self
 
     def with_metadata(self, metadata: dict,
-                      default_metadata_filtering: bool = False):
+                      metadata_harmonization: bool = False):
         self._metadata = metadata.copy()
-        self._default_metadata_filtering = default_metadata_filtering
+        self._metadata_harmonization = metadata_harmonization
         return self
 
     def build(self) -> Spectrum:
         spectrum = Spectrum(mz=self._mz,
                             intensities=self._intensities,
                             metadata=self._metadata,
-                            default_metadata_filtering=self._default_metadata_filtering)
+                            metadata_harmonization=self._metadata_harmonization)
         return spectrum
 
 

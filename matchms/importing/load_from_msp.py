@@ -7,7 +7,7 @@ from ..Spectrum import Spectrum
 
 
 def load_from_msp(filename: str,
-                  default_metadata_filtering: bool = True) -> Generator[Spectrum, None, None]:
+                  metadata_harmonization: bool = True) -> Generator[Spectrum, None, None]:
     """
     MSP file to a :py:class:`~matchms.Spectrum.Spectrum` objects
     Function that reads a .msp file and converts the info
@@ -17,7 +17,7 @@ def load_from_msp(filename: str,
     ----------
     filename:
         Path of the msp file.
-    default_metadata_filtering : bool, optional
+    metadata_harmonization : bool, optional
         Set to False if metadata harmonization to default keys is not desired.
         The default is True.
 
@@ -54,7 +54,7 @@ def load_from_msp(filename: str,
         yield Spectrum(mz=mz,
                        intensities=intensities,
                        metadata=metadata,
-                       default_metadata_filtering=default_metadata_filtering)
+                       metadata_harmonization=metadata_harmonization)
 
 
 def parse_msp_file(filename: str) -> Generator[dict, None, None]:

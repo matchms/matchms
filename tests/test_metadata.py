@@ -14,7 +14,7 @@ from matchms import Metadata
     [{"charge": -1}, True, {"charge": -1}],
     [{"ionmode": "Negative"}, True, {"ionmode": "Negative"}]])
 def test_metadata_init(input_dict, harmonize, expected):
-    metadata = Metadata(input_dict, harmonize_defaults=harmonize)
+    metadata = Metadata(input_dict, matchms_key_style=harmonize)
     assert metadata.data == expected, \
         "Expected different _metadata dictionary."
 
@@ -25,7 +25,7 @@ def test_metadata_init(input_dict, harmonize, expected):
     [False, "precursormz", 101.01, {"precursormz": 101.01}],
     [True, "ionmode", "NEGATIVE", {"ionmode": "NEGATIVE"}]])
 def test_metadata_setter(harmonize, set_key, set_value, expected):
-    metadata = Metadata(harmonize_defaults=harmonize)
+    metadata = Metadata(matchms_key_style=harmonize)
     metadata.set(set_key, set_value)
     assert metadata.data == expected, \
         "Expected different _metadata dictionary."
@@ -37,7 +37,7 @@ def test_metadata_setter(harmonize, set_key, set_value, expected):
     [False, "precursormz", 101.01, "precursormz", 101.01],
     [True, "ionmode", "NEGATIVE", "ionmode", "NEGATIVE"]])
 def test_metadata_setter_getter(harmonize, set_key, set_value, get_key, get_value):
-    metadata = Metadata(harmonize_defaults=harmonize)
+    metadata = Metadata(matchms_key_style=harmonize)
     metadata.set(set_key, set_value)
     assert metadata.get(get_key) == get_value, \
         "Expected different _metadata dictionary."
@@ -49,7 +49,7 @@ def test_metadata_setter_getter(harmonize, set_key, set_value, get_key, get_valu
     [False, "precursormz", 101.01, "precursormz", 101.01],
     [True, "ionmode", "NEGATIVE", "ionmode", "NEGATIVE"]])
 def test_metadata_setitem_getitem(harmonize, set_key, set_value, get_key, get_value):
-    metadata = Metadata(harmonize_defaults=harmonize)
+    metadata = Metadata(matchms_key_style=harmonize)
     metadata[set_key] = set_value
     assert metadata[get_key] == metadata.get(get_key) == get_value, \
         "Expected different _metadata dictionary."

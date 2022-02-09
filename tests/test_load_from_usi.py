@@ -13,7 +13,7 @@ def test_normal(mock_get):
     expected_metadata = {"usi": "something", "server": "https://metabolomics-usi.ucsd.edu", "precursor_mz": None}
     expected = SpectrumBuilder().with_mz(np.array([1., 3.])).with_intensities(
         np.array([2., 4.])).with_metadata(expected_metadata,
-                                          default_metadata_filtering=True).build()
+                                          metadata_harmonization=True).build()
     assert spec == expected
 
 

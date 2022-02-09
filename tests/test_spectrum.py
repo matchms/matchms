@@ -41,7 +41,7 @@ def test_spectrum_getters_return_copies():
     """Test if getters return (deep)copies so that edits won't change the original entries."""
     spectrum = Spectrum(mz=np.array([100.0, 101.0], dtype="float"),
                         intensities=np.array([0.4, 0.5], dtype="float"),
-                        metadata={"testdata": 1}, default_metadata_filtering=False)
+                        metadata={"testdata": 1}, metadata_harmonization=False)
     # Get entries and modify
     testdata = spectrum.get("testdata")
     testdata += 1
@@ -61,7 +61,7 @@ def test_spectrum_getters_return_copies():
      {"compound_name": "Whatever123", "ionmode": "XYZ"}]
 ])
 def test_spectrum_metadata_harmonization(input_dict, expected_dict):
-    builder = SpectrumBuilder().with_metadata(input_dict, default_metadata_filtering=False)
+    builder = SpectrumBuilder().with_metadata(input_dict, metadata_harmonization=False)
     spectrum = builder.build()
     assert spectrum.metadata == expected_dict, "Expected different metadata dict"
 
@@ -161,7 +161,7 @@ def test_spectrum_hash_metadata_sensitivity(spectrum: Spectrum):
 def test_spectrum_clone(spectrum, default_filtering):
     spectrum = SpectrumBuilder().from_spectrum(spectrum).with_metadata(
         {"pepmass": (444.1, 11), "TEST FIELD": "Some Text"},
-        default_metadata_filtering=default_filtering).build()
+        metadata_harmonization=default_filtering).build()
     spectrum_clone = spectrum.clone()
 
     assert spectrum_clone == spectrum.clone(), "Spectra should be equal"
@@ -183,7 +183,7 @@ def test_spectrum_clone(spectrum, default_filtering):
 def test_metadata_default_filtering(spectrum, input_dict, default_filtering, expected):
     spectrum = SpectrumBuilder().from_spectrum(spectrum).with_metadata(
         input_dict,
-        default_metadata_filtering=default_filtering).build()
+        metadata_harmonization=default_filtering).build()
     assert spectrum.metadata == expected, \
         "Expected different _metadata dictionary."
 

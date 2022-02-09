@@ -72,7 +72,7 @@ class Spectrum:
     def __init__(self, mz: np.array,
                  intensities: np.array,
                  metadata: Optional[dict] = None,
-                 default_metadata_filtering: bool = True):
+                 metadata_harmonization: bool = True):
         """
 
         Parameters
@@ -83,13 +83,13 @@ class Spectrum:
             Array of intensities for the peaks
         metadata
             Dictionary with for example the scan number of precursor m/z.
-        default_metadata_filtering : bool, optional
+        metadata_harmonization : bool, optional
             Set to False if default metadata filters should not be applied.
             The default is True.
         """
         self._metadata = Metadata(metadata)
-        if default_metadata_filtering is True:
-            self._apply_metadata_default_filters()
+        if metadata_harmonization is True:
+            self._apply_metadata_harmonization()
         self.peaks = Fragments(mz=mz, intensities=intensities)
         self.losses = None
 
@@ -99,7 +99,7 @@ class Spectrum:
             self.losses == other.losses and \
             self._metadata == other._metadata
 
-    def _apply_metadata_default_filters(self):
+    def _apply_metadata_harmonization(self):
         metadata_filtered = _interpret_pepmass_metadata(self.metadata)
         if metadata_filtered.get("ionmode") is not None:
             metadata_filtered["ionmode"] = self.metadata.get("ionmode").lower()
@@ -133,7 +133,7 @@ class Spectrum:
         clone = Spectrum(mz=self.peaks.mz,
                          intensities=self.peaks.intensities,
                          metadata=self._metadata.data,
-                         default_metadata_filtering=False)
+                         metadata_harmonization=False)
         clone.losses = self.losses
         return clone
 

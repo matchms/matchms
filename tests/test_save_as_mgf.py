@@ -16,7 +16,7 @@ def test_save_as_mgf_single_spectrum():
                  "inchi": '"InChI=1S/C6H12"',
                  "pepmass": (100, 10.0),
                  "test_field": "test"},
-                default_metadata_filtering=False).build()
+                metadata_harmonization=False).build()
 
     # Write to test file
     with tempfile.TemporaryDirectory() as d:
@@ -41,9 +41,9 @@ def test_save_as_mgf_spectrum_list():
     intensities = numpy.array([10, 10, 500], dtype="float")
     builder = SpectrumBuilder().with_mz(mz).with_intensities(intensities)
     spectrum1 = builder.with_metadata({"test_field": "test1"},
-                                      default_metadata_filtering=False).build()
+                                      metadata_harmonization=False).build()
     spectrum2 = builder.with_metadata({"test_field": "test2"},
-                                      default_metadata_filtering=False).build()
+                                      metadata_harmonization=False).build()
 
     # Write to test file
     with tempfile.TemporaryDirectory() as d:
@@ -75,9 +75,9 @@ def test_save_load_mgf_consistency(tmpdir, charge, ionmode, parent_mass):
                 "parent_mass": parent_mass}
     builder = SpectrumBuilder().with_mz(mz).with_intensities(intensities)
     spectrum1 = builder.with_metadata(metadata,
-                                      default_metadata_filtering=True).build()
+                                      metadata_harmonization=True).build()
     spectrum2 = builder.with_metadata(metadata,
-                                      default_metadata_filtering=True).build()
+                                      metadata_harmonization=True).build()
 
     # Write to test file
     filename = os.path.join(tmpdir, "test.mgf")

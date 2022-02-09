@@ -18,7 +18,7 @@ class Metadata:
     as "Precursor_MZ" and "precursor_mz".
 
     To avoid the default harmonization of the metadata dictionary use the option
-    `harmonize_defaults=False`.
+    `matchms_key_style=False`.
 
 
     Code example:
@@ -34,20 +34,20 @@ class Metadata:
     .. code-block:: python
 
         metadata = Metadata({"Precursor_MZ": 201.5, "Compound Name": "SuperStuff"},
-                            harmonize_defaults=False)
+                            matchms_key_style=False)
         print(metadata["precursor_mz"])  # => 201.5
         print(metadata["compound_name"])  # => None (now you need to use "compound name")
 
     """
     def __init__(self, metadata: dict = None,
-                 harmonize_defaults: bool = True):
+                 matchms_key_style: bool = True):
         """
 
         Parameters
         ----------
         metadata:
             Spectrum metadata as a dictionary.
-        harmonize_defaults:
+        matchms_key_style:
             Set to False if metadata harmonization to default keys is not desired.
             The default is True.
 
@@ -59,8 +59,8 @@ class Metadata:
         else:
             raise ValueError("Unexpected data type for metadata (should be dictionary, or None).")
 
-        self.harmonize_defaults = harmonize_defaults
-        if self.harmonize_defaults is True:
+        self.matchms_key_style = matchms_key_style
+        if self.matchms_key_style is True:
             self.harmonize_metadata()
 
     def __eq__(self, other_metadata):
@@ -98,7 +98,7 @@ class Metadata:
         """Set value in :attr:`metadata` dict.
         """
         self._data[key] = value
-        if self.harmonize_defaults is True:
+        if self.matchms_key_style is True:
             self.harmonize_metadata()
         return self
 
@@ -133,7 +133,7 @@ class Metadata:
             self._data = new_dict
         elif isinstance(new_dict, Mapping):
             self._data = PickyDict(new_dict)
-            if self.harmonize_defaults is True:
+            if self.matchms_key_style is True:
                 self.harmonize_metadata()
         else:
             raise TypeError("Expected input of type dict or PickyDict.")

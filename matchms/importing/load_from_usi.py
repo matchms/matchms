@@ -9,7 +9,7 @@ logger = logging.getLogger("matchms")
 
 
 def load_from_usi(usi: str, server: str = "https://metabolomics-usi.ucsd.edu",
-                  default_metadata_filtering: bool = True):
+                  metadata_harmonization: bool = True):
     """Load spectrum from metabolomics USI.
 
     USI returns JSON data with keys "peaks", "n_peaks" and "precuror_mz"
@@ -27,7 +27,7 @@ def load_from_usi(usi: str, server: str = "https://metabolomics-usi.ucsd.edu",
         Provide the usi.
     server: string
         USI server
-    default_metadata_filtering : bool, optional
+    metadata_harmonization : bool, optional
         Set to False if metadata harmonization to default keys is not desired.
         The default is True.
     """
@@ -56,7 +56,7 @@ def load_from_usi(usi: str, server: str = "https://metabolomics-usi.ucsd.edu",
         metadata["precursor_mz"] = spectral_data.get("precursor_mz", None)
 
         s = Spectrum(mz_array, intensity_array, metadata,
-                     default_metadata_filtering=default_metadata_filtering)
+                     metadata_harmonization=metadata_harmonization)
 
         return s
 
