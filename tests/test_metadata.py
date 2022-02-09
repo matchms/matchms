@@ -1,7 +1,7 @@
 """Tests for Metadata class."""
 import numpy as np
-from pickydict import PickyDict
 import pytest
+from pickydict import PickyDict
 from matchms import Metadata
 
 
