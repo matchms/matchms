@@ -4,9 +4,9 @@ import numpy as np
 from matchms.plotting.spectrum_plots import plot_spectra_mirror
 from matchms.plotting.spectrum_plots import plot_spectrum
 from .filtering.add_precursor_mz import _add_precursor_mz_metadata
+from .filtering.add_retention import _add_retention
 from .filtering.interpret_pepmass import _interpret_pepmass_metadata
 from .filtering.make_charge_int import _convert_charge_to_int
-from .filtering.add_retention import _add_retention
 from .Fragments import Fragments
 from .hashing import metadata_hash
 from .hashing import spectrum_hash
