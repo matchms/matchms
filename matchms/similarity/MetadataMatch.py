@@ -1,5 +1,7 @@
 import logging
+from typing import List
 import numpy as np
+import numba
 from matchms.typing import SpectrumType
 from .BaseSimilarity import BaseSimilarity
 
@@ -102,6 +104,71 @@ class MetadataMatch(BaseSimilarity):
             score = abs(entry_ref - entry_query) <= self.tolerance
             return np.asarray(score, dtype=self.score_datatype)
 
-        msg = f"Matching_type was set to 'difference' but no difference could be computed between {entry_ref} and {entry_query}"
-        logger.warning(msg)
+        logger.warning("Non-numerical entry not compatible with 'difference' method")
         return np.asarray(False, dtype=self.score_datatype)
+
+    def matrix(self, references: List[SpectrumType], queries: List[SpectrumType],
+               is_symmetric: bool = False) -> np.ndarray:
+        """Compare parent masses between all references and queries.
+
+        Parameters
+        ----------
+        references
+            List/array of reference spectrums.
+        queries
+            List/array of Single query spectrums.
+        is_symmetric
+            Set to True when *references* and *queries* are identical (as for instance for an all-vs-all
+            comparison). By using the fact that score[i,j] = score[j,i] the calculation will be about
+            2x faster.
+        """
+        def collect_entries(spectrums):
+            """Collect metadata entries."""
+            entries = []
+            for spectrum in spectrums:
+                entry = spectrum.get(self.field)
+                if entry is None:
+                    msg = f"No {self.field} entry found for spectrum."
+                    logger.warning(msg)
+                    entry = np.nan
+                elif self.matching_type == "difference" and not isinstance(entry, (int, float)):
+                    msg = f"Non-numerical entry ({entry}) not compatible with 'difference' method."
+                    logger.warning(msg)
+                    entry = np.nan
+                entries.append(entry)
+            return np.asarray(entries)
+
+        entries_ref = collect_entries(references)
+        entries_query = collect_entries(queries)
+
+        if self.matching_type == "equal_match":
+            scores = np.zeros((len(entries_ref), len(entries_query)))
+            for i, entry in enumerate(entries_query):
+                idx = np.where(entries_ref == entry)
+                scores[idx, i] = 1
+            return scores.astype(self.score_datatype)
+
+        if is_symmetric:
+            return entries_scores_symmetric(entries_ref, entries_query,
+                                            self.tolerance).astype(self.score_datatype)
+        return entries_scores(entries_ref, entries_query,
+                              self.tolerance).astype(self.score_datatype)
+
+
+@numba.njit
+def entries_scores(entries_ref, entries_query, tolerance):
+    scores = np.zeros((len(entries_ref), len(entries_query)))
+    for i, entry_ref in enumerate(entries_ref):
+        for j, entry_query in enumerate(entries_query):
+            scores[i, j] = (abs(entry_ref - entry_query) <= tolerance)
+    return scores
+
+
+@numba.njit
+def entries_scores_symmetric(entries_ref, entries_query, tolerance):
+    scores = np.zeros((len(entries_ref), len(entries_query)))
+    for i, entry_ref in enumerate(entries_ref):
+        for j in range(i, len(entries_query)):
+            scores[i, j] = (abs(entry_ref - entries_query[j]) <= tolerance)
+            scores[j, i] = scores[i, j]
+    return scores

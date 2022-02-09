@@ -13,8 +13,7 @@ def spectrums():
                  "retention_time": 100.5}
     metadata3 = {"instrument_type": "orbitrap",
                  "retention_time": 105.}
-    metadata4 = {"instrument_type": "unknown",
-                 "retention_time": 99.1}
+    metadata4 = {"retention_time": 99.1}
 
     s1 = SpectrumBuilder().with_metadata(metadata1).build()
     s2 = SpectrumBuilder().with_metadata(metadata2).build()
@@ -41,7 +40,7 @@ def test_metadata_match_strings_wrong_method(spectrums, caplog):
     similarity_score = MetadataMatch(field="instrument_type", matching_type="difference")
     scores = calculate_scores(references, queries, similarity_score)
     assert np.all(scores.scores == [[0, 0], [0, 0]]), "Expected different scores."
-    msg = "Matching_type was set to 'difference' but no difference could be computed between"
+    msg = "not compatible with 'difference' method"
     assert msg in caplog.text
 
 
