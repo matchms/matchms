@@ -90,6 +90,10 @@ class BaseSimilarity:
             comparison). By using the fact that score[i,j] = score[j,i] the calculation will be about
             2x faster.
         """
+        # pylint: disable=too-many-arguments
+        if is_symmetric is True:
+            pass  # TODO: consider implementing faster method for symmetric cases
+
         assert idx_row.shape == idx_col.shape, "col and row indices must be of same shape"
         scores = numpy.zeros((len(idx_row)), dtype=self.score_datatype)  # TODO: switch to sparse matrix
         for i, row in enumerate(idx_row):
