@@ -8,6 +8,33 @@ class StackedSparseScores:
     """ 2.5D sparse matrix in COO-style with multiple possible entries per i-j-position.
 
     Add description...
+
+    Parameters
+    ----------
+    n_row
+        Number of rows of sparse array.
+    n_cols
+        Number of colums of sparse array.
+
+    Code example:
+
+    .. code-block:: python
+        import numpy as np
+        from matchms import StackedSparseScores
+
+        scores1 = np.random.random((12, 10))
+        scores2 = np.random.random((12, 10))
+
+        matrix = StackedSparseScores(12, 10)
+        matrix.add_dense_matrix(scores1, "scores_1")
+        matrix.filter_by_range("scores_1", low=0.5)
+
+        # Add second scores and filter
+        matrix.add_dense_matrix(scores2, "scores_2")
+        matrix.filter_by_range("scores_2", low=0.1, high=0.4)
+
+        scores2_after_filtering = matrix.toarray("scores_2")
+
     """
     def __init__(self, n_row, n_col):
         self.__n_row = n_row
@@ -137,7 +164,31 @@ class StackedSparseScores:
         self.row = self.row[mask]
         self.col = self.col[mask]
 
-    def add_dense_matrix(self, matrix, name, low=None, high=None):
+    def add_dense_matrix(self, matrix: np.ndarray,
+                         name: str,
+                         low: float = None, high: float = None):
+        """Add dense array (numpy array) to stacked sparse scores.
+
+        If the StackedSparseScores is still empty, the full dense matrix will
+        be added, unless threshold are set by `low` and `high` values.
+        If the StackedSparseScores already contains one or more scores, than only
+        those values of the input matrix will be added which have the same position
+        as already existing entries!
+
+        Parameters
+        ----------
+        matrix
+            Input (dense) array, such as numpy array to be added to the stacked sparse
+            scores.
+        name
+            Name of the score which is added. Will later be used to access and address
+            the added scores, for instance via `sss_array.toarray("my_score_name")`.
+        low
+            Set to numerical value if a lower threshold should be applied. The default is None.
+        high
+            Set to numerical value if an upper threshold should be applied. The default is None.
+
+        """
         if self.shape[2] == 0:
             # Add first (sparse) array of scores
             if low is None:
@@ -180,7 +231,7 @@ class StackedSparseScores:
         self._data[name] = np.zeros((len(self.row)))
         self._data[name][new_entries] = coo_matrix.data
 
-    def filter_by_range(self, name=None,
+    def filter_by_range(self, name: str = None,
                         low=-np.inf, high=np.inf,
                         above_operator='>',
                         below_operator='<'):
@@ -190,6 +241,7 @@ class StackedSparseScores:
 
         Parameters
         ----------
+
         """
         if name is None:
             name = self._guess_name()
