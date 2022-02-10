@@ -1,7 +1,11 @@
+import logging
+from ..metadata_utils import convert_inchi_to_smiles
+from ..metadata_utils import is_valid_inchi
+from ..metadata_utils import is_valid_smiles
 from ..typing import SpectrumType
-from ..utils import convert_inchi_to_smiles
-from ..utils import is_valid_inchi
-from ..utils import is_valid_smiles
+
+
+logger = logging.getLogger("matchms")
 
 
 def derive_smiles_from_inchi(spectrum_in: SpectrumType) -> SpectrumType:
@@ -18,7 +22,8 @@ def derive_smiles_from_inchi(spectrum_in: SpectrumType) -> SpectrumType:
         if smiles:
             smiles = smiles.rstrip()
             spectrum.set("smiles", smiles)
+            logger.info("Added smiles %s to metadata (was converted from InChI)", smiles)
         else:
-            print("Could not convert InChI", inchi, "to smiles.")
+            logger.warning("Could not convert InChI %s to smiles.", inchi)
 
     return spectrum

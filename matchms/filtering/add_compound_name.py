@@ -1,4 +1,8 @@
+import logging
 from ..typing import SpectrumType
+
+
+logger = logging.getLogger("matchms")
 
 
 def add_compound_name(spectrum_in: SpectrumType) -> SpectrumType:
@@ -17,6 +21,6 @@ def add_compound_name(spectrum_in: SpectrumType) -> SpectrumType:
             spectrum.set("compound_name", spectrum.get("title"))
             return spectrum
 
-        print("No compound name found in metadata.")
+        logger.warning("No compound name found in metadata.")
 
     return spectrum

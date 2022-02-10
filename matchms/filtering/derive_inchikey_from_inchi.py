@@ -1,12 +1,15 @@
+import logging
+from ..metadata_utils import convert_inchi_to_inchikey
+from ..metadata_utils import is_valid_inchi
+from ..metadata_utils import is_valid_inchikey
 from ..typing import SpectrumType
-from ..utils import convert_inchi_to_inchikey
-from ..utils import is_valid_inchi
-from ..utils import is_valid_inchikey
+
+
+logger = logging.getLogger("matchms")
 
 
 def derive_inchikey_from_inchi(spectrum_in: SpectrumType) -> SpectrumType:
     """Find missing InchiKey and derive from Inchi where possible."""
-
     if spectrum_in is None:
         return None
 
@@ -18,7 +21,8 @@ def derive_inchikey_from_inchi(spectrum_in: SpectrumType) -> SpectrumType:
         inchikey = convert_inchi_to_inchikey(inchi)
         if inchikey:
             spectrum.set("inchikey", inchikey)
+            logger.info("Added InChIKey %s to metadata (was converted from inchi)", inchikey)
         else:
-            print("Could not convert InChI", inchi, "to inchikey.")
+            logger.warning("Could not convert InChI %s to inchikey.", inchi)
 
     return spectrum

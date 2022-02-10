@@ -1,0 +1,139 @@
+Name: ADP
+Synon: Adenosine-5'-diphosphate Di(monocyclohexylammonium)salt
+DB#: PS010904
+InChIKey: XTWYTFMLZFPYCI-UHFFFAOYSA-N
+InChI: InChI=1S/C10H15N5O10P2/c11-8-5-9(13-2-12-8)15(3-14-5)10-7(17)6(16)4(24-10)1-23-27(21,22)25-26(18,19)20/h2-4,6-7,10,16-17H,1H2,(H,21,22)(H2,11,12,13)(H2,18,19,20)
+SMILES: C1=NC2=C(C(=N1)N)N=CN2C3C(C(C(O3)COP(=O)(O)OP(=O)(O)O)O)O
+Spectrum_type: MS2
+PrecursorMZ: 428.31
+Instrument_type: LC-ESI-QQ
+Instrument: TQD, Waters
+Ion_mode: POSITIVE
+Collision_energy: 40
+Formula: C10H15N5O10P2
+MW: 427
+ExactMass: 427.207
+Comments: Parent=428.31
+Splash: splash10-000i-0900000000-49c12af0e867a5a1e51e
+Num Peaks: 2
+135.0 83
+136.0 999
+
+Name: Kojic acid
+Synon: 5-hydroxy-2-(hydroxymethyl)pyran-4-one
+DB#: HB003316
+InChIKey: BEJNERDRQOWKJM-UHFFFAOYSA-N
+InChI: InChI=1S/C6H6O4/c7-2-4-1-5(8)6(9)3-10-4/h1,3,7,9H,2H2
+SMILES: C1=C(OC=C(C1=O)O)CO
+Precursor_type: [M-H]-
+Spectrum_type: MS2
+PrecursorMZ: 141.0193
+Instrument_type: LC-ESI-ITFT
+Instrument: LTQ Orbitrap XL Thermo Scientific
+Ion_mode: NEGATIVE
+Collision_energy: 60 % (nominal)
+Formula: C6H6O4
+MW: 142
+ExactMass: 142.0266
+Comments: Parent=141.0193
+Splash: splash10-0006-0900000000-e4cab40bfe2e4dacd27f
+Num Peaks: 1
+141.0194 999
+
+Name: Cyclizine
+Synon: 1-benzhydryl-4-methylpiperazine
+DB#: HB000434
+InChIKey: UVKZSORBKUEBAZ-UHFFFAOYSA-N
+InChI: InChI=1S/C18H22N2/c1-19-12-14-20(15-13-19)18(16-8-4-2-5-9-16)17-10-6-3-7-11-17/h2-11,18H,12-15H2,1H3
+SMILES: CN1CCN(CC1)C(C2=CC=CC=C2)C3=CC=CC=C3
+Precursor_type: [M+H]+
+Spectrum_type: MS2
+PrecursorMZ: 267.1856
+Instrument_type: LC-ESI-ITFT
+Instrument: LTQ Orbitrap XL Thermo Scientific
+Ion_mode: POSITIVE
+Collision_energy: 85% (nominal)
+Formula: C18H22N2
+MW: 266
+ExactMass: 266.1783
+Comments: Parent=267.1856
+Splash: splash10-014i-0900000000-6ab53bbaa27f6755ab24
+Num Peaks: 3
+99.0917 6
+165.0698 2
+167.0856 999
+
+Name: Metoclopramide
+Synon: 4-amino-5-chloro-N-[2-(diethylamino)ethyl]-2-methoxybenzamide
+DB#: HB001203
+InChIKey: TTWJBBZEZQICBI-UHFFFAOYSA-N
+InChI: InChI=1S/C14H22ClN3O2/c1-4-18(5-2)7-6-17-14(19)10-8-11(15)12(16)9-13(10)20-3/h8-9H,4-7,16H2,1-3H3,(H,17,19)
+SMILES: CCN(CC)CCNC(=O)C1=CC(=C(C=C1OC)N)Cl
+Precursor_type: [M+H]+
+Spectrum_type: MS2
+PrecursorMZ: 300.1473
+Instrument_type: LC-ESI-ITFT
+Instrument: LTQ Orbitrap XL Thermo Scientific
+Ion_mode: POSITIVE
+Collision_energy: 20% (nominal)
+Formula: C14H22ClN3O2
+MW: 299
+ExactMass: 299.1401
+Comments: Parent=300.1473
+Splash: splash10-0udi-0029000000-a1c598a0805f35a8908c
+Num Peaks: 3
+184.0162 11
+227.0582 290
+300.1473 999
+
+Name: Tentotoxin
+Synon: 12-benzylidene-1,6,7-trimethyl-3-(2-methylpropyl)-1,4,7,10-tetrazacyclododecane-2,5,8,11-tetrone
+DB#: HB003619
+InChIKey: SIIRBDOFKDACOK-UHFFFAOYSA-N
+InChI: InChI=1S/C22H30N4O4/c1-14(2)11-17-22(30)26(5)18(12-16-9-7-6-8-10-16)21(29)23-13-19(27)25(4)15(3)20(28)24-17/h6-10,12,14-15,17H,11,13H2,1-5H3,(H,23,29)(H,24,28)
+SMILES: CC1C(=O)NC(C(=O)N(C(=CC2=CC=CC=C2)C(=O)NCC(=O)N1C)C)CC(C)C
+Precursor_type: [M+H]+
+Spectrum_type: MS2
+PrecursorMZ: 415.234
+Instrument_type: LC-ESI-ITFT
+Instrument: LTQ Orbitrap XL Thermo Scientific
+Ion_mode: POSITIVE
+Collision_energy: 30 % (nominal)
+Formula: C22H30N4O4
+MW: 414
+ExactMass: 414.2267
+Comments: Parent=415.234
+Splash: splash10-07p0-0729100000-dab5bdba6e51dbc61bf7
+Num Peaks: 32
+58.065 198
+86.0962 22
+114.0909 10
+115.0867 30
+132.0806 33
+143.0815 19
+146.0966 12
+169.134 17
+171.1491 999
+173.1077 11
+181.1338 32
+188.0706 42
+189.1023 362
+199.1442 191
+210.1598 16
+217.0971 345
+238.1551 201
+256.1804 37
+257.1652 8
+273.1592 27
+274.1575 13
+284.1766 13
+286.1904 7
+301.1547 67
+302.15 389
+312.1704 703
+327.1697 48
+330.1812 380
+358.2127 453
+384.1917 17
+397.2236 17
+415.2338 231

@@ -1,5 +1,9 @@
+import logging
 from ..typing import SpectrumType
 from .select_by_relative_intensity import select_by_relative_intensity
+
+
+logger = logging.getLogger("matchms")
 
 
 def require_minimum_of_high_peaks(spectrum_in: SpectrumType, no_peaks: int = 5,
@@ -29,6 +33,8 @@ def require_minimum_of_high_peaks(spectrum_in: SpectrumType, no_peaks: int = 5,
     assert 0 <= intensity_percent <= 100, "intensity_percent must be a scalar between 0-100."
     intensities_above_p = select_by_relative_intensity(spectrum, intensity_from=intensity_percent/100, intensity_to=1.0)
     if len(intensities_above_p.peaks) < no_peaks:
+        logger.info("Spectrum with %s (<%s) peaks was set to None.",
+                    str(len(intensities_above_p.peaks)), str(no_peaks))
         return None
 
     return spectrum

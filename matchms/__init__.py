@@ -1,17 +1,21 @@
-import logging
 from . import exporting
 from . import filtering
 from . import importing
 from . import networking
+from . import plotting
 from . import similarity
 from .__version__ import __version__
 from .calculate_scores import calculate_scores
+from .Fragments import Fragments
+from .logging_functions import _init_logger
+from .logging_functions import set_matchms_logger_level
+from .Metadata import Metadata
 from .Scores import Scores
 from .Spectrum import Spectrum
-from .Spikes import Spikes
 
 
-logging.getLogger(__name__).addHandler(logging.NullHandler())
+_init_logger()
+
 
 __author__ = "Netherlands eScience Center"
 __email__ = 'generalization@esciencecenter.nl'
@@ -21,9 +25,12 @@ __all__ = [
     "exporting",
     "filtering",
     "importing",
+    "Metadata",
     "networking",
+    "plotting",
     "Scores",
+    "set_matchms_logger_level",
     "similarity",
     "Spectrum",
-    "Spikes"
+    "Fragments"
 ]

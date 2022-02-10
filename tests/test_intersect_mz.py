@@ -1,16 +1,17 @@
 import numpy
 import pytest
-from matchms import Spectrum
 from matchms.similarity import IntersectMz
+from .builder_Spectrum import SpectrumBuilder
 
 
 def test_intersect_mz_without_parameters():
     """Compare score with expected value."""
-    spectrum_1 = Spectrum(mz=numpy.array([100, 200, 300, 500], dtype="float"),
-                          intensities=numpy.array([1.0, 1.0, 1.0, 1.0], dtype="float"))
+    intensities = numpy.array([1.0, 1.0, 1.0, 1.0], dtype="float")
+    builder = SpectrumBuilder().with_intensities(intensities)
 
-    spectrum_2 = Spectrum(mz=numpy.array([100, 200, 290, 499.9], dtype="float"),
-                          intensities=numpy.array([1.0, 1.0, 1.0, 1.0], dtype="float"))
+    spectrum_1 = builder.with_mz(numpy.array([100, 200, 300, 500], dtype="float")).build()
+    spectrum_2 = builder.with_mz(numpy.array([100, 200, 290, 499.9], dtype="float")).build()
+
     similarity_score = IntersectMz()
     score = similarity_score.pair(spectrum_1, spectrum_2)
 

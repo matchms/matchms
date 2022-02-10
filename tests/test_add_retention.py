@@ -1,8 +1,7 @@
-import numpy
 import pytest
-from matchms import Spectrum
 from matchms.filtering import add_retention_index
 from matchms.filtering import add_retention_time
+from .builder_Spectrum import SpectrumBuilder
 
 
 @pytest.mark.parametrize("metadata, expected", [
@@ -18,11 +17,10 @@ from matchms.filtering import add_retention_time
     [{"nothing": "200"}, None],
     [{'scan_start_time': 0.629566}, 0.629566],
     [{'scan_start_time': [0.629566]}, 0.629566],
-    [{"rt": "None", "retentiontime": 12.17}, 12.17]
+    [{"rt": None, "retentiontime": 12.17}, 12.17]
 ])
 def test_add_retention_time(metadata, expected):
-    spectrum_in = Spectrum(mz=numpy.array(
-        [], "float"), intensities=numpy.array([], "float"), metadata=metadata)
+    spectrum_in = SpectrumBuilder().with_metadata(metadata).build()
 
     spectrum = add_retention_time(spectrum_in)
     actual = spectrum.get("retention_time")
@@ -45,8 +43,7 @@ def test_add_retention_time(metadata, expected):
     [{"nothing": "200"}, None]
 ])
 def test_add_retention_index(metadata, expected):
-    spectrum_in = Spectrum(mz=numpy.array(
-        [], "float"), intensities=numpy.array([], "float"), metadata=metadata)
+    spectrum_in = SpectrumBuilder().with_metadata(metadata).build()
 
     spectrum = add_retention_index(spectrum_in)
     actual = spectrum.get("retention_index")

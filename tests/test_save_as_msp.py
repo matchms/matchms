@@ -6,6 +6,7 @@ import pytest
 from matchms import Spectrum
 from matchms.exporting import save_as_msp
 from matchms.importing import load_from_msp
+from .builder_Spectrum import SpectrumBuilder
 
 
 @pytest.fixture
@@ -15,8 +16,9 @@ def none_spectrum():
 
 @pytest.fixture
 def spectrum():
-    return Spectrum(mz=numpy.array([100, 200, 290, 490, 510], dtype="float"),
-                    intensities=numpy.array([0.1, 0.2, 1.0, 0.3, 0.4], dtype="float"))
+    mz = numpy.array([100, 200, 290, 490, 510], dtype="float")
+    intensities = numpy.array([0.1, 0.2, 1.0, 0.3, 0.4], dtype="float")
+    return SpectrumBuilder().with_mz(mz).with_intensities(intensities).build()
 
 
 @pytest.fixture(params=["rcx_gc-ei_ms_20201028_perylene.msp", "MoNA-export-GC-MS-first10.msp", "Hydrogen_chloride.msp"])
@@ -27,7 +29,7 @@ def data(request):
     return list(spectra)
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def filename():
     with tempfile.TemporaryDirectory() as temp_dir:
         filename = os.path.join(temp_dir, "test.msp")
@@ -52,7 +54,7 @@ def test_wrong_filename_exception():
             save_as_msp(None, filename)
 
         message = exception.value.args[0]
-        assert message == "File extension must be 'msp'."
+        assert message == "File extension '.mzml' not allowed."
 
 
 # Using tmp_path fixture from pytest: https://docs.pytest.org/en/stable/tmpdir.html#the-tmp-path-fixture
@@ -91,7 +93,18 @@ def test_have_peaks(filename, data):
         assert actual.peaks == expected.peaks
 
 
-def save_and_reload_spectra(filename, spectra: List[Spectrum]):
+def test_dont_write_peak_comments(filename, data):
+    """ Test checking if no peak comments are written to file. """
+    spectra = save_and_reload_spectra(filename, data, write_peak_comments=False)
+
+    assert len(spectra) == len(data)
+
+    for actual, _ in zip(spectra, data):
+        assert actual.peak_comments is None, \
+            "Expected that no peak comments are written to file"
+
+
+def save_and_reload_spectra(filename, spectra: List[Spectrum], write_peak_comments=True):
     """ Utility function to save spectra to msp and load them again.
 
     Params:
@@ -103,7 +116,7 @@ def save_and_reload_spectra(filename, spectra: List[Spectrum]):
     reloaded_spectra: Spectra loaded from saved msp file.
     """
 
-    save_as_msp(spectra, filename)
+    save_as_msp(spectra, filename, write_peak_comments)
     reloaded_spectra = list(load_from_msp(filename))
     return reloaded_spectra
 
@@ -119,7 +132,7 @@ def test_num_peaks_last_metadata_field(filename, data):
                 num_peaks = int(line.split()[2])
                 peaks = content[idx + 1: idx + num_peaks + 1]
                 for peak in peaks:
-                    mz, intensity = peak.split()
+                    mz, intensity = peak.split()[:2]
                     mz = float(mz)
                     intensity = float(intensity)
 

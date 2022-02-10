@@ -1,5 +1,5 @@
 import numpy
-from ..Spikes import Spikes
+from ..Fragments import Fragments
 from ..typing import SpectrumType
 
 
@@ -28,7 +28,7 @@ def select_by_relative_intensity(spectrum_in: SpectrumType, intensity_from: floa
         scale_factor = numpy.max(spectrum.peaks.intensities)
         normalized_intensities = spectrum.peaks.intensities / scale_factor
         condition = numpy.logical_and(intensity_from <= normalized_intensities, normalized_intensities <= intensity_to)
-        spectrum.peaks = Spikes(mz=spectrum.peaks.mz[condition],
-                                intensities=spectrum.peaks.intensities[condition])
+        spectrum.peaks = Fragments(mz=spectrum.peaks.mz[condition],
+                                   intensities=spectrum.peaks.intensities[condition])
 
     return spectrum

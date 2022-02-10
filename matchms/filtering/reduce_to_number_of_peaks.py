@@ -1,8 +1,12 @@
+import logging
 from math import ceil
 from typing import Optional
 import numpy
-from ..Spikes import Spikes
+from ..Fragments import Fragments
 from ..typing import SpectrumType
+
+
+logger = logging.getLogger("matchms")
 
 
 def reduce_to_number_of_peaks(spectrum_in: SpectrumType, n_required: int = 1, n_max: int = numpy.inf,
@@ -34,11 +38,11 @@ def reduce_to_number_of_peaks(spectrum_in: SpectrumType, n_required: int = 1, n_
         raise ValueError("Cannot use ratio_desired for spectrum without parent_mass.")
 
     def _remove_lowest_intensity_peaks():
-        mz, intensities = spectrum.peaks
+        mz, intensities = spectrum.peaks.mz, spectrum.peaks.intensities
         idx = intensities.argsort()[-threshold:]
         idx_sort_by_mz = mz[idx].argsort()
-        spectrum.peaks = Spikes(mz=mz[idx][idx_sort_by_mz],
-                                intensities=intensities[idx][idx_sort_by_mz])
+        spectrum.peaks = Fragments(mz=mz[idx][idx_sort_by_mz],
+                                   intensities=intensities[idx][idx_sort_by_mz])
 
     if spectrum_in is None:
         return None
@@ -46,6 +50,8 @@ def reduce_to_number_of_peaks(spectrum_in: SpectrumType, n_required: int = 1, n_
     spectrum = spectrum_in.clone()
 
     if spectrum.peaks.intensities.size < n_required:
+        logger.info("Spectrum with %s (<%s) peaks was set to None.",
+                    str(spectrum.peaks.intensities.size), str(n_required))
         return None
 
     threshold = _set_maximum_number_of_peaks_to_keep()

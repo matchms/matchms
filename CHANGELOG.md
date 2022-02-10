@@ -9,10 +9,60 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Updated and extended plotting functionality, now located in `matchms.plotting`.
+Contains three plot types: `plot_spectrum()` or `spectrum.plot()`, `plot_spectra_mirror()` or `spectrum.plot_against()` and `plot_spectra_array()` [#303](https://github.com/matchms/matchms/pull/303)
+
+### Changed
+
+- `Spectrum` objects got an update of the basic spectrum plots `spectrum.plot()` [#303](https://github.com/matchms/matchms/pull/303)
+- `require_precursor_mz()` filter will now also discard nonsensical m/z values < 10.0 (value can be adapted by user) [#309](https://github.com/matchms/matchms/pull/309)
+
+### Fixed
+
+- Updated to new url for `load_from_usi` function (old link was broken) [#310](https://github.com/matchms/matchms/pull/310)
+
+## [0.12.0] - 2022-01-18
+
+### Added
+
+- peak comments (as an `mz: comment` dictionary) are now part of metadata and can be addressed via a `Spectrum()` object `peak_comments` property [#284](https://github.com/matchms/matchms/pull/284)
+- peak comments are dynamically updated whenever the respective peaks are changed [#277](https://github.com/matchms/matchms/pull/277)
+
+### Changed
+
+- Major refactoring of unit test layout now using a spectrum builder pattern [#261](https://github.com/matchms/matchms/pull/261)
+- Spikes object now has different getitem method that allows to extract specific peaks as mz/intensity pair (or array) [#291](https://github.com/matchms/matchms/pull/291)
+- `add_parent_mass()` filter now better handles existing entries (including fields "parent_mass", "exact_mass" and "parentmass") [#292](https://github.com/matchms/matchms/pull/292)
+- minor improvement of compound name cleaning in `derive_adduct_from_name()` filter [#280](https://github.com/matchms/matchms/pull/280)
+- `save_as_msp()` now writes peak comments (if present) to the output file [#277](https://github.com/matchms/matchms/pull/277)
+- `load_from_msp()` now also reads peak comments [#277](https://github.com/matchms/matchms/pull/277)
+
+### Fixed
+
+- able to handle spectra containg empty/zero intensities [#289](https://github.com/matchms/matchms/pull/289)
+
+## [0.11.0] - 2021-12-16
+
+## Added
+
+- better, more flexible string handling of `ModifiedCosine` [#275](https://github.com/matchms/matchms/pull/275)
+- matchms logger, replacing all former `print` statments to better control logging output [#271](https://github.com/matchms/matchms/pull/271)
+- `add_logging_to_file()`, `set_matchms_logger_level()`, `reset_matchms_logger()` functions to adapt logging output to user needs [#271](https://github.com/matchms/matchms/pull/271)
+
+## Changed
+
+- `save_as_msp()` can now also write to files with other than ".msp" extensions such as ".dat" [#276](https://github.com/matchms/matchms/pull/276)
+- refactored `add_precursor_mz`, including better logging [#275](https://github.com/matchms/matchms/pull/275)
+
+## [0.10.0] - 2021-11-21
+
+### Added
+
 - `Spectrum()` objects now also allows generating hashes, e.g. `hash(spectrum)` [#259](https://github.com/matchms/matchms/pull/259)
 - `Spectrum()` objects can generate `.spectrum_hash()` and `.metadata_hash()` to track changes to peaks or metadata [#259](https://github.com/matchms/matchms/pull/259)
 - `load_from_mgf()` now accepts both a path to a mgf file or a file-like object from a preloaded MGF file [#258](https://github.com/matchms/matchms/pull/258)
-- Added `add_retention` filters with function `add_retention_time()` and `add_retention_index()` [#265](https://github.com/matchms/matchms/pull/265)
+- `add_retention` filters with function `add_retention_time()` and `add_retention_index()` [#265](https://github.com/matchms/matchms/pull/265)
+
 ### Changed
 
 - Code linting triggered by pylint update [#257](https://github.com/matchms/matchms/pull/257)
@@ -42,7 +92,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - new `matchms.networking` module which allows to build and export graphs from `scores` objects [#198](https://github.com/matchms/matchms/pull/198)
 - Expand list of known negative ionmode adducts and conversion rules [#213](https://github.com/matchms/matchms/pull/213)
-- `.to_numpy` method for Spikes class which allows to run `spectrum.peaks.to_numpy` [#214](https://github.com/matchms/matchms/issues/214)
+- `.to_numpy` method for Fragments class which allows to run `spectrum.peaks.to_numpy` [#214](https://github.com/matchms/matchms/issues/214)
 - `save_as_msp()` function to export spectrums to .msp file [#215](https://github.com/matchms/matchms/pull/215)
 
 ### Changed
@@ -291,7 +341,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Spectrum, Scores class, save_to_mgf, load_from_mgf, normalize_intensities, calculate_scores [#66](https://github.com/matchms/matchms/pull/66) [#67](https://github.com/matchms/matchms/pull/67) [#103](https://github.com/matchms/matchms/pull/103) [#108](https://github.com/matchms/matchms/pull/108) [#113](https://github.com/matchms/matchms/pull/113) [#115](https://github.com/matchms/matchms/pull/115) [#151](https://github.com/matchms/matchms/pull/151) [#152](https://github.com/matchms/matchms/pull/152) [#121](https://github.com/matchms/matchms/pull/121) [#154](https://github.com/matchms/matchms/pull/154) [#134](https://github.com/matchms/matchms/pull/134) [#159](https://github.com/matchms/matchms/pull/159) [#161](https://github.com/matchms/matchms/pull/161) [#198](https://github.com/matchms/matchms/pull/198)
-- Spikes class [#150](https://github.com/matchms/matchms/pull/150) [#167](https://github.com/matchms/matchms/pull/167)
+- Fragments class [#150](https://github.com/matchms/matchms/pull/150) [#167](https://github.com/matchms/matchms/pull/167)
 - Anaconda package [#70](https://github.com/matchms/matchms/pull/70) [#68](https://github.com/matchms/matchms/pull/68) [#181](https://github.com/matchms/matchms/pull/181)
 - Sonarcloud [#80](https://github.com/matchms/matchms/pull/80) [#79](https://github.com/matchms/matchms/pull/79) [#149](https://github.com/matchms/matchms/pull/149) [#169](https://github.com/matchms/matchms/pull/169)
 - Normalization filter [#83](https://github.com/matchms/matchms/pull/83)
@@ -333,8 +383,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - This is the initial version of Spec2Vec from https://github.com/iomega/Spec2Vec
+- (later splitted into matchms + spec2vec)
 
-[Unreleased]: https://github.com/matchms/matchms/compare/0.9.2...HEAD
+[Unreleased]: https://github.com/matchms/matchms/compare/0.12.0...HEAD
+[0.12.0]: https://github.com/matchms/matchms/compare/0.11.0...0.12.0
+[0.11.0]: https://github.com/matchms/matchms/compare/0.10.0...0.11.0
+[0.10.0]: https://github.com/matchms/matchms/compare/0.9.2...0.10.0
 [0.9.2]: https://github.com/matchms/matchms/compare/0.9.0...0.9.2
 [0.9.1]: https://github.com/matchms/matchms/compare/0.9.0...0.9.1
 [0.9.0]: https://github.com/matchms/matchms/compare/0.8.2...0.9.0
