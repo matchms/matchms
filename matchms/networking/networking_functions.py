@@ -46,20 +46,18 @@ def get_top_hits(scores: Scores, identifier_key: str = "spectrum_id",
         for i, spec in enumerate(scores.queries):
             spec_id = spec.get(identifier_key)
             r, _, v = scores.scores[:, i, score_name]
-            idx = np.argsort(v)[::-1]
+            idx = np.argsort(v)[::-1][:top_n]
             if ignore_diagonal:
-                similars_idx[spec_id] = idx[r[idx] != i][:top_n]
-            else:
-                similars_idx[spec_id] = r[idx[:top_n]]
-            similars_scores[spec_id] = v[idx[:top_n]]
+                idx = idx[r[idx] != i]
+            similars_idx[spec_id] = r[idx]
+            similars_scores[spec_id] = v[idx]
     elif search_by == "references":
         for i, spec in enumerate(scores.references):
             spec_id = spec.get(identifier_key)
             _, c, v = scores.scores[i, :, score_name]
-            idx = np.argsort(v)[::-1]
+            idx = np.argsort(v)[::-1][:top_n]
             if ignore_diagonal:
-                similars_idx[spec_id] = idx[c[idx] != i][:top_n]
-            else:
-                similars_idx[spec_id] = c[idx[:top_n]]
-            similars_scores[spec_id] = v[idx[:top_n]]
+                idx = idx[c[idx] != i]
+            similars_idx[spec_id] = c[idx]
+            similars_scores[spec_id] = v[idx]
     return similars_idx, similars_scores

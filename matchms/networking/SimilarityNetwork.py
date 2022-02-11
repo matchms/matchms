@@ -131,7 +131,6 @@ class SimilarityNetwork:
         # Add edges based on global threshold (cutoff) for weights
         for i, spec in enumerate(scores.queries):
             query_id = spec.get(self.identifier_key)
-
             ref_candidates = numpy.array([scores.references[x].get(self.identifier_key)
                                           for x in similars_idx[query_id]])
             idx = numpy.where((similars_scores[query_id] >= self.score_cutoff) &
