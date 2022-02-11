@@ -157,6 +157,7 @@ def test_create_network_symmetric_higher_cutoff():
 
 def test_create_network_symmetric_mutual_method():
     """Test creating a graph from a Scores object"""
+    # pylint: disable=protected-access
     cutoff = 0.7
     scores = create_dummy_scores_symmetric()
     scores_arr = scores.get_scores_array()

@@ -243,6 +243,7 @@ class StackedSparseScores:
         ----------
 
         """
+        # pylint: disable=too-many-arguments
         if name is None:
             name = self.guess_score_name()
         above_operator = _get_operator(above_operator)
@@ -256,7 +257,7 @@ class StackedSparseScores:
 
     def to_array(self, name):
         array = np.zeros((self.__n_row, self.__n_col),
-                         dtype = self._data[name].dtype)
+                         dtype=self._data[name].dtype)
         array[self.row, self.col] = self._data[name]
         return array
 
@@ -292,4 +293,4 @@ def _get_operator(relation: str):
            '<=': np.less_equal}
     if relation in ops.keys():
         return ops[relation]
-    raise ValueError("Unknown relation %s", relation)
+    raise ValueError(f"Unknown relation {relation}")

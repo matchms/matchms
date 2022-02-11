@@ -258,7 +258,6 @@ class Scores:
             name = self._scores.guess_score_name()
         if array_type == "numpy":
             return self._scores.to_array(name)
-        elif array_type in ["coo", "sparse"]:
+        if array_type in ["coo", "sparse"]:
             self._scores.to_coo(name)
-        else:
-            raise TypeError("Unknown type for output matrix")
+        raise TypeError("Unknown type for output matrix")
