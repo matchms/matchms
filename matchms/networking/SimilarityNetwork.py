@@ -91,14 +91,14 @@ class SimilarityNetwork:
         self.graph: Optional[nx.Graph] = None
         """NetworkX graph. Set after calling create_network()"""
 
-    @staticmethod
-    def _select_edge_score(similars_scores: dict, scores_type: numpy.dtype):
-        """Chose one value if score contains multiple values (e.g. "score" and "matches")"""
-        if len(scores_type) > 1 and "score" in scores_type.names:
-            return {key: value["score"] for key, value in similars_scores.items()}
-        if len(scores_type) > 1:  # Assume that first entry is desired score
-            return {key: value[0] for key, value in similars_scores.items()}
-        return similars_scores
+    # @staticmethod
+    # def _select_edge_score(similars_scores: dict, scores_type: numpy.dtype):
+    #     """Chose one value if score contains multiple values (e.g. "score" and "matches")"""
+    #     if len(scores_type) > 1 and "score" in scores_type.names:
+    #         return {key: value["score"] for key, value in similars_scores.items()}
+    #     if len(scores_type) > 1:  # Assume that first entry is desired score
+    #         return {key: value[0] for key, value in similars_scores.items()}
+    #     return similars_scores
 
     def create_network(self, scores: Scores):
         """
@@ -126,7 +126,7 @@ class SimilarityNetwork:
                                                      top_n=self.top_n,
                                                      search_by="queries",
                                                      ignore_diagonal=True)
-        similars_scores = self._select_edge_score(similars_scores, scores.scores.dtype)
+        # similars_scores = self._select_edge_score(similars_scores, scores.scores.dtype)
 
         # Add edges based on global threshold (cutoff) for weights
         for i, spec in enumerate(scores.queries):
