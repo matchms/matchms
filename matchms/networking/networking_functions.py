@@ -1,11 +1,13 @@
 """ Helper functions to build and handle spectral networks
 """
 from typing import Tuple
+import numpy as np
 from matchms import Scores
 
 
 def get_top_hits(scores: Scores, identifier_key: str = "spectrum_id",
                  top_n: int = 25, search_by: str = "queries",
+                 score_name: str = None,
                  ignore_diagonal: bool = False) -> Tuple[dict, dict]:
     """Get top_n highest scores (and indices) for every entry.
 
@@ -23,7 +25,10 @@ def get_top_hits(scores: Scores, identifier_key: str = "spectrum_id",
     search_by
         Chose between 'queries' or 'references' which decides if the top_n matches
         for every spectrum in scores.queries or in scores.references will be
-        collected and returned
+        collected and returned.
+    score_name
+        Name of the score that should be used (if scores contains multiple different
+        scores).
     ignore_diagonal
         Set to True if scores.scores is symmetric (i.e. if references and queries
         were the same) and if scores between spectra with themselves should be
@@ -31,6 +36,8 @@ def get_top_hits(scores: Scores, identifier_key: str = "spectrum_id",
     """
     assert search_by in ["queries", "references"], \
         "search_by must be 'queries' or 'references"
+    if score_name is None:
+        score_name = scores._scores._guess_name()
 
     similars_idx = {}
     similars_scores = {}
@@ -38,19 +45,21 @@ def get_top_hits(scores: Scores, identifier_key: str = "spectrum_id",
     if search_by == "queries":
         for i, spec in enumerate(scores.queries):
             spec_id = spec.get(identifier_key)
-            idx = scores.similarity_function.sort(scores.scores[:, i])
+            r, _, v = scores.scores[:, i, score_name]
+            idx = np.argsort(v)[::-1]
             if ignore_diagonal:
-                similars_idx[spec_id] = idx[idx != i][:top_n]
+                similars_idx[spec_id] = idx[r[idx] != i][:top_n]
             else:
-                similars_idx[spec_id] = idx[:top_n]
-            similars_scores[spec_id] = scores.scores[similars_idx[spec_id], i]
+                similars_idx[spec_id] = r[idx[:top_n]]
+            similars_scores[spec_id] = v[idx[:top_n]]
     elif search_by == "references":
         for i, spec in enumerate(scores.references):
             spec_id = spec.get(identifier_key)
-            idx = scores.similarity_function.sort(scores.scores[i, :])
+            _, c, v = scores.scores[:, i, score_name]
+            idx = np.argsort(v)[::-1]
             if ignore_diagonal:
-                similars_idx[spec_id] = idx[idx != i][:top_n]
+                similars_idx[spec_id] = idx[c[idx] != i][:top_n]
             else:
-                similars_idx[spec_id] = idx[:top_n]
-            similars_scores[spec_id] = scores.scores[i, similars_idx[spec_id]]
+                similars_idx[spec_id] = c[idx[:top_n]]
+            similars_scores[spec_id] = v[idx[:top_n]]
     return similars_idx, similars_scores
