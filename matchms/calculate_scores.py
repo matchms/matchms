@@ -60,5 +60,4 @@ def calculate_scores(references: ReferencesType, queries: QueriesType,
     """
 
     return Scores(references=references, queries=queries,
-                  similarity_function=similarity_function,
-                  is_symmetric=is_symmetric).calculate()
+                  is_symmetric=is_symmetric).calculate(similarity_function)
