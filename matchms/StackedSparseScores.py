@@ -36,13 +36,16 @@ class StackedSparseScores:
         scores2_after_filtering = matrix.toarray("scores_2")
 
     """
-    def __init__(self, n_row, n_col):
+    def __init__(self, n_row, n_col, name=None):
         self.__n_row = n_row
         self.__n_col = n_col
         idx_dtype = get_index_dtype(maxval=max(n_row, n_col))
         self.row = np.array([], dtype=idx_dtype)
         self.col = np.array([], dtype=idx_dtype)
-        self._data = {}
+        if name is None:
+            self._data = {}
+        else:
+            self._data = {name: np.empty(0)}
         self.metadata = {0: {"name": None}}
 
     def _guess_name(self):
@@ -50,13 +53,13 @@ class StackedSparseScores:
             return list(self._data.keys())[0]
         raise KeyError("Name of score is required.")
 
-    def __setitem__(self, dim_name, d):
-        r, c, name = dim_name
-        assert name in self._data, "Name must exist..."
-        # assert len(r) == len(c) == len(d), "Elements must be of same length."
-        self.row = np.append(self.row, r)
-        self.col = np.append(self.col, c)
-        self._data[name] = np.append(self._data[name], d)
+    def __setitem__(self, key, d):
+        # Typical COO method (e.g. below) would not be safe for stacked array.
+        raise NotImplementedError
+        # row, col, name = self._validate_indices(key)
+        # self.row = np.append(self.row, row)
+        # self.col = np.append(self.col, col)
+        # self._data[name] = np.append(self._data[name], d)
 
     def __getitem__(self, key):
         row, col, name = self._validate_indices(key)
@@ -68,19 +71,23 @@ class StackedSparseScores:
         return r, c, d
 
     def _getitem_method(self, row, col, name):
+        # e.g.: matrix[3, 7, "score_1"]
         if isinstance(row, int) and isinstance(col, int):
             idx = np.where((self.row == row) & (self.col == col))
             return self.row[idx], self.col[idx], self._data[name][idx]
+        # e.g.: matrix[3, :, "score_1"]
         elif isinstance(row, int) and isinstance(col, slice):
             if not col.start == col.stop == col.step is None:
                 raise IndexError("This slicing option is not yet implemented")
             idx = np.where(self.row == row)
             return self.row[idx], self.col[idx], self._data[name][idx]
+        # e.g.: matrix[:, 7, "score_1"]
         elif isinstance(row, slice) and isinstance(col, int):
             if not row.start == row.stop == row.step is None:
                 raise IndexError("This slicing option is not yet implemented")
             idx = np.where(self.col == col)
             return self.row[idx], self.col[idx], self._data[name][idx]
+        # matrix[:, :, "score_1"]
         elif isinstance(row, slice) and isinstance(col, slice):
             if not row.start == row.stop == row.step is None:
                 raise IndexError("This slicing option is not yet implemented")
@@ -150,21 +157,14 @@ class StackedSparseScores:
     def shape(self):
         return tuple((self.__n_row, self.__n_col, len(self._data)))
 
-    def eliminate_zeros(self):
-        """Remove zero entries from the matrix
-        This is an *in place* operation
-        """
-        mask = self._data != 0
-        self._data = self._data[mask]
-        self.row = self.row[mask]
-        self.col = self.col[mask]
-
-    def eliminate_below_threshold(self, threshold):
-        """Remove entries below threshold from the matrix."""
-        mask = self._data < threshold
-        self._data = self._data[mask]
-        self.row = self.row[mask]
-        self.col = self.col[mask]
+    # def eliminate_zeros(self):
+    #     """Remove zero entries from the matrix
+    #     This is an *in place* operation
+    #     """
+    #     mask = self._data != 0
+    #     self._data = self._data[mask]
+    #     self.row = self.row[mask]
+    #     self.col = self.col[mask]
 
     def add_dense_matrix(self, matrix: np.ndarray,
                          name: str,
@@ -191,7 +191,7 @@ class StackedSparseScores:
             Set to numerical value if an upper threshold should be applied. The default is None.
 
         """
-        if self.shape[2] == 0:
+        if self.shape[2] == 0 or (self.shape[2] == 1 and name in self._data.keys()):
             # Add first (sparse) array of scores
             if low is None:
                 low = -np.inf
@@ -213,7 +213,7 @@ class StackedSparseScores:
             self.filter_by_range(name, low=low, high=high)
 
     def add_coo_matrix(self, coo_matrix, name):
-        if self.shape[2] == 0:
+        if self.shape[2] == 0 or (self.shape[2] == 1 and name in self._data.keys()):
             # Add first (sparse) array of scores
             self._data = {name: coo_matrix.data}
             self.row = coo_matrix.row

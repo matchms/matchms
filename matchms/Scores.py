@@ -2,6 +2,7 @@ from __future__ import annotations
 import numpy
 from deprecated.sphinx import deprecated
 from matchms.similarity.BaseSimilarity import BaseSimilarity
+from matchms.StackedSparseScores import StackedSparseScores
 from matchms.typing import QueriesType
 from matchms.typing import ReferencesType
 
@@ -79,7 +80,7 @@ class Scores:
         self.queries = numpy.asarray(queries)
         self.similarity_function = similarity_function
         self.is_symmetric = is_symmetric
-        self._scores = numpy.empty([self.n_rows, self.n_cols], dtype="object")
+        self._scores = StackedSparseScores(self.n_rows, self.n_cols) #, dtype="object")
         self._index = 0
 
     def __iter__(self):
