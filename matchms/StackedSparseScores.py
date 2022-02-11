@@ -51,6 +51,8 @@ class StackedSparseScores:
     def _guess_name(self):
         if len(self._data.keys()) == 1:
             return list(self._data.keys())[0]
+        if len(self._data.keys()) == 0:
+            raise ValueError("Array is empty.")
         raise KeyError("Name of score is required.")
 
     def __setitem__(self, key, d):
@@ -157,6 +159,10 @@ class StackedSparseScores:
     def shape(self):
         return tuple((self.__n_row, self.__n_col, len(self._data)))
 
+    @property
+    def score_names(self):
+        return list(self._data.keys())    
+
     # def eliminate_zeros(self):
     #     """Remove zero entries from the matrix
     #     This is an *in place* operation
@@ -167,8 +173,7 @@ class StackedSparseScores:
     #     self.col = self.col[mask]
 
     def add_dense_matrix(self, matrix: np.ndarray,
-                         name: str,
-                         low: float = None, high: float = None):
+                         name: str):
         """Add dense array (numpy array) to stacked sparse scores.
 
         If the StackedSparseScores is still empty, the full dense matrix will
@@ -185,32 +190,24 @@ class StackedSparseScores:
         name
             Name of the score which is added. Will later be used to access and address
             the added scores, for instance via `sss_array.toarray("my_score_name")`.
-        low
-            Set to numerical value if a lower threshold should be applied. The default is None.
-        high
-            Set to numerical value if an upper threshold should be applied. The default is None.
 
         """
+        if len(matrix.dtype) > 1:  # if structured array
+            for dtype_name in matrix.dtype.names:
+                self._add_dense_matrix(matrix[dtype_name], name + "_" + dtype_name)
+        else:
+            self._add_dense_matrix(matrix, name)
+
+    def _add_dense_matrix(self, matrix, name):             
         if self.shape[2] == 0 or (self.shape[2] == 1 and name in self._data.keys()):
             # Add first (sparse) array of scores
-            if low is None:
-                low = -np.inf
-            if high is None:
-                high = np.inf
-            (idx_row, idx_col) = np.where((matrix > low) & (matrix < high))
+            (idx_row, idx_col) = np.where(matrix)
             self.row = idx_row
             self.col = idx_col
             self._data = {name: matrix[idx_row, idx_col]}
-        elif low is None and high is None:
+        else:
             # Add new stack of scores
             self._data[name] = matrix[self.row, self.col]
-        else:
-            if low is None:
-                low = -np.inf
-            elif high is None:
-                high = np.inf
-            self._data[name] = matrix[self.row, self.col]
-            self.filter_by_range(name, low=low, high=high)
 
     def add_coo_matrix(self, coo_matrix, name):
         if self.shape[2] == 0 or (self.shape[2] == 1 and name in self._data.keys()):
@@ -256,9 +253,15 @@ class StackedSparseScores:
         for key, value in self._data.items():
             self._data[key] = value[idx]
 
-    def toarray(self, name):
+    def to_array(self, name):
+        array = np.zeros((self.__n_row, self.__n_col),
+                         dtype = self._data[name].dtype)
+        array[self.row, self.col] = self._data[name]
+        return array
+
+    def to_coo(self, name):
         return coo_matrix((self._data[name], (self.row, self.col)),
-                          shape=(self.__n_row, self.__n_col)).toarray()
+                          shape=(self.__n_row, self.__n_col))
 
     def get_indices(self, name=None, threshold=-np.Inf):
         if name is None:
