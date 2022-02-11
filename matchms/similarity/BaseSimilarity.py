@@ -68,7 +68,7 @@ class BaseSimilarity:
         return scores
 
     def sparse_array(self, references: List[SpectrumType], queries: List[SpectrumType],
-                      idx_row, idx_col, is_symmetric: bool = False):
+                     idx_row, idx_col, is_symmetric: bool = False):
         """Optional: Provide optimized method to calculate an sparse matrix of similarity scores.
 
         Compute similarity scores for pairs of reference and query spectrums as given by the indices

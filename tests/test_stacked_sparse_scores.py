@@ -46,13 +46,13 @@ def test_sss_matrix_filter_by_range_stacked():
     scores2 = np.arange(0, 120).reshape(12, 10).astype(float)
     scores2[scores2 < 80] = 0
     scores2[scores2 > 0] = 0.9
-    
+
     matrix = StackedSparseScores(12, 10)
     matrix.add_dense_matrix(scores1, "scores1")
     matrix.filter_by_range(low=70, high=85)
     assert matrix.shape == (12, 10, 1)
     assert np.all(matrix.data["scores1"] == np.arange(71, 85))
-    
+
     matrix.add_dense_matrix(scores2, "scores2")
     matrix.filter_by_range("scores2", low=0.5)
     assert matrix.shape == (12, 10, 2)

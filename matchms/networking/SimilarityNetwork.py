@@ -113,7 +113,7 @@ class SimilarityNetwork:
             generating a network.
         """
         if score_name is None:
-            score_name = scores._scores._guess_name()
+            score_name = scores._scores.guess_score_name()
         assert self.top_n >= self.max_links, "top_n must be >= max_links"
         assert numpy.all(scores.queries == scores.references), \
             "Expected symmetric scores object with queries==references"

@@ -37,7 +37,7 @@ def get_top_hits(scores: Scores, identifier_key: str = "spectrum_id",
     assert search_by in ["queries", "references"], \
         "search_by must be 'queries' or 'references"
     if score_name is None:
-        score_name = scores._scores._guess_name()
+        score_name = scores._scores.guess_score_name()
 
     similars_idx = {}
     similars_scores = {}

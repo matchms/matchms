@@ -75,7 +75,7 @@ class Scores:
         self.references = np.asarray(references)
         self.queries = np.asarray(queries)
         self.is_symmetric = is_symmetric
-        self._scores = StackedSparseScores(self.n_rows, self.n_cols) #, dtype="object")
+        self._scores = StackedSparseScores(self.n_rows, self.n_cols)
         self._index = 0
         self.similarity_functions = {}
 
@@ -84,7 +84,6 @@ class Scores:
 
     def __next__(self):
         if self._index < len(self._scores.col):
-            # pylint: disable=unbalanced-tuple-unpacking
             i = self._index
             result = [self._scores.data[name][i] for name in self._scores.score_names]
             if not isinstance(result, tuple):
@@ -107,7 +106,8 @@ class Scores:
             "Expected input argument 'queries' to be list or tuple or numpy.ndarray."
 
     @deprecated(version='0.6.0', reason="Calculate scores via calculate_scores() function.")
-    def calculate(self, similarity_function, name=None) -> Scores:
+    def calculate(self, similarity_function: BaseSimilarity,
+                  name: str = None) -> Scores:
         """
         Calculate the similarity between all reference objects v all query objects using
         the most suitable available implementation of the given similarity_function.
@@ -142,7 +142,7 @@ class Scores:
             :meth:`~.BaseSimilarity.sort` function from the given similarity_function).
         """
         if name is None:
-            name = self._scores._guess_name()
+            name = self._scores.guess_score_name()
         assert reference in self.references, "Given input not found in references."
         selected_idx = int(np.where(self.references == reference)[0])
         _, r, scores_for_ref = self._scores[selected_idx, :, name]
@@ -216,12 +216,12 @@ class Scores:
 
     @property
     def score_names(self):
-        return self._scores.score_names    
+        return self._scores.score_names
 
     @property
     def scores(self):
         return self._scores
-        
+
     def get_scores_array(self, name=None, array_type="numpy") -> np.ndarray:
         """Scores as numpy array
 
@@ -255,7 +255,7 @@ class Scores:
               [0.2 1. ]]
         """
         if name is None:
-            name = self._scores._guess_name()
+            name = self._scores.guess_score_name()
         if array_type == "numpy":
             return self._scores.to_array(name)
         elif array_type in ["coo", "sparse"]:
