@@ -50,7 +50,7 @@ def test_sss_matrix_filter_by_range():
 
 
 def test_sss_matrix_filter_by_range_stacked():
-    """Apply tresholds to really make the data sparse."""
+    """Apply 2 sequential addition and filtering steps."""
     scores1 = np.arange(0, 120).reshape(12, 10)
     scores2 = np.arange(0, 120).reshape(12, 10).astype(float)
     scores2[scores2 < 80] = 0
@@ -68,3 +68,4 @@ def test_sss_matrix_filter_by_range_stacked():
     assert np.all(matrix.data["scores1"] == np.arange(80, 85))
     assert np.all(matrix.col == np.arange(0, 5))
     assert np.all(matrix.row == 8)
+

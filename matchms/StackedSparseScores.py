@@ -59,32 +59,34 @@ class StackedSparseScores:
         self._data[name] = np.append(self._data[name], d)
 
     def __getitem__(self, key):
-        print(key)
-        print(self._validate_indices(key))
         row, col, name = self._validate_indices(key)
-
-        if isinstance(row, int):
-            idx_row = np.where(self.row == row)
-        elif isinstance(row, slice):
-            if row.start == row.stop == row.step is None:
-                idx_row = np.arange(0, len(self.row))
-            else:
-                raise IndexError("This slicing option is not yet implemented")
-        if isinstance(col, int):
-            idx_col = np.where(self.col == col)
-        elif isinstance(col, slice):
-            if col.start == col.stop == col.step is None:
-                idx_col = np.arange(0, len(self.col))
-            else:
-                raise IndexError("This slicing option is not yet implemented")
-        print(idx_row, idx_col)
-        idx = np.intersect1d(idx_row, idx_col)
-        print(idx)
-        if idx.shape[0] > 1:
-            return self.row[idx], self.col[idx], self._data[name][idx]
-        if idx.shape[0] == 0:
+        r, c, d = self._getitem_method(row, col, name)
+        if len(d) == 0:
             return 0
-        return self._data[name][idx][0]
+        elif d.shape[0] == 1:
+            return d[0]
+        return r, c, d
+
+    def _getitem_method(self, row, col, name):
+        if isinstance(row, int) and isinstance(col, int):
+            idx = np.where((self.row == row) & (self.col == col))
+            return self.row[idx], self.col[idx], self._data[name][idx]
+        elif isinstance(row, int) and isinstance(col, slice):
+            if not col.start == col.stop == col.step is None:
+                raise IndexError("This slicing option is not yet implemented")
+            idx = np.where(self.row == row)
+            return self.row[idx], self.col[idx], self._data[name][idx]
+        elif isinstance(row, slice) and isinstance(col, int):
+            if not row.start == row.stop == row.step is None:
+                raise IndexError("This slicing option is not yet implemented")
+            idx = np.where(self.col == col)
+            return self.row[idx], self.col[idx], self._data[name][idx]
+        elif isinstance(row, slice) and isinstance(col, slice):
+            if not row.start == row.stop == row.step is None:
+                raise IndexError("This slicing option is not yet implemented")
+            if not col.start == col.stop == col.step is None:
+                raise IndexError("This slicing option is not yet implemented")
+            return self.row, self.col, self._data[name]
 
     def _validate_indices(self, key):
         m, n, _ = self.shape
@@ -216,7 +218,7 @@ class StackedSparseScores:
             self._data = {name: coo_matrix.data}
             self.row = coo_matrix.row
             self.col = coo_matrix.col
-            self.__n_row, self.__n_col = coo_matrix.shap_data
+            self.__n_row, self.__n_col = coo_matrix.shape
         else:
             # TODO move into logger warning rather than assert
             assert len(np.setdiff1d(coo_matrix.row, self.row)) == 0, "New, unknown row indices"
@@ -228,8 +230,8 @@ class StackedSparseScores:
                                & (self.col == coo_matrix.col[i]))[0][0]
                 new_entries.append(idx)
 
-        self._data[name] = np.zeros((len(self.row)))
-        self._data[name][new_entries] = coo_matrix.data
+            self._data[name] = np.zeros((len(self.row)))
+            self._data[name][new_entries] = coo_matrix.data
 
     def filter_by_range(self, name: str = None,
                         low=-np.inf, high=np.inf,
