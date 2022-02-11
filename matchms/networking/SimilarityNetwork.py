@@ -100,7 +100,7 @@ class SimilarityNetwork:
     #         return {key: value[0] for key, value in similars_scores.items()}
     #     return similars_scores
 
-    def create_network(self, scores: Scores):
+    def create_network(self, scores: Scores, score_name: str = None):
         """
         Function to create network from given top-n similarity values. Expects that
         similarities given in scores are from an all-vs-all comparison including all
@@ -112,6 +112,8 @@ class SimilarityNetwork:
             Matchms Scores object containing all spectrums and pair similarities for
             generating a network.
         """
+        if score_name is None:
+            score_name = scores._scores._guess_name()
         assert self.top_n >= self.max_links, "top_n must be >= max_links"
         assert numpy.all(scores.queries == scores.references), \
             "Expected symmetric scores object with queries==references"
@@ -125,6 +127,7 @@ class SimilarityNetwork:
         similars_idx, similars_scores = get_top_hits(scores, identifier_key=self.identifier_key,
                                                      top_n=self.top_n,
                                                      search_by="queries",
+                                                     score_name=score_name,
                                                      ignore_diagonal=True)
         # similars_scores = self._select_edge_score(similars_scores, scores.scores.dtype)
 

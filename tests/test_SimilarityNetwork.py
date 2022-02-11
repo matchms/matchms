@@ -122,7 +122,7 @@ def test_create_network_symmetric_modified_cosine():
     cutoff = 0.7
     scores = create_dummy_scores_symmetric_modified_cosine()
     msnet = SimilarityNetwork(score_cutoff=cutoff)
-    msnet.create_network(scores)
+    msnet.create_network(scores, score_name="ModifiedCosine_score")
 
     edges_list = list(msnet.graph.edges())
     edges_list.sort()
@@ -134,7 +134,7 @@ def test_create_network_export_to_graphml(filename):
     cutoff = 0.7
     scores = create_dummy_scores_symmetric_modified_cosine()
     msnet = SimilarityNetwork(score_cutoff=cutoff)
-    msnet.create_network(scores)
+    msnet.create_network(scores, score_name="ModifiedCosine_score")
     msnet.export_to_graphml(filename)
 
     assert os.path.isfile(filename), "graphml file not found"
@@ -159,14 +159,16 @@ def test_create_network_symmetric_mutual_method():
     """Test creating a graph from a Scores object"""
     cutoff = 0.7
     scores = create_dummy_scores_symmetric()
+    scores_arr = scores.get_scores_array()
     # change some scores
-    scores.scores[7, 6] = scores.scores[6, 7] = 0.85
-    scores.scores[7, 5] = scores.scores[5, 7] = 0.75
-    scores.scores[7, 3] = scores.scores[3, 7] = 0.7
+    scores_arr[7, 6] = scores_arr[6, 7] = 0.85
+    scores_arr[7, 5] = scores_arr[5, 7] = 0.75
+    scores_arr[7, 3] = scores_arr[3, 7] = 0.7
+    scores._scores.add_dense_matrix(scores_arr, "modified_score")
 
     msnet = SimilarityNetwork(score_cutoff=cutoff, top_n=3,
                               max_links=3, link_method="mutual")
-    msnet.create_network(scores)
+    msnet.create_network(scores, score_name="modified_score")
     nodes_with_edges = ['query_spec_0', 'query_spec_1', 'query_spec_2', 'ref_spec_4']
     edges_list = list(msnet.graph.edges())
     edges_list.sort()
