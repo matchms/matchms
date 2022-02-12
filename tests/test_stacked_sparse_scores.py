@@ -15,8 +15,8 @@ def test_sss_matrix_add_dense():
 
 def test_sss_matrix_add_sparse():
     arr = np.arange(0, 120).reshape(12, 10)
-    arr[arr%2 == 1] = 0
-    arr[arr%4 == 0] = 0
+    arr[arr % 2 == 1] = 0
+    arr[arr % 4 == 0] = 0
     arr_sparse = coo_matrix(arr)
 
     matrix = StackedSparseScores(12, 10)
@@ -26,9 +26,9 @@ def test_sss_matrix_add_sparse():
     assert np.all(matrix.data["test_score"] == np.arange(2, 120, 4))
     r, c, v = matrix["test_score"]
     assert np.all(v == np.arange(2, 120, 4))
-    expected = np.array([ 0,  0,  1,  1,  1,  2,  2,  3,  3,  3,
-                         4,  4,  5,  5,  5,  6,  6, 7,  7,  7,
-                         8,  8,  9,  9,  9, 10, 10, 11, 11, 11])
+    expected = np.array([0, 0, 1, 1, 1, 2, 2, 3, 3, 3,
+                         4, 4, 5, 5, 5, 6, 6, 7, 7, 7,
+                         8, 8, 9, 9, 9, 10, 10, 11, 11, 11])
     assert np.all(r == expected)
     assert np.all(c[:6] == np.array([2, 6, 0, 4, 8, 2]))
     assert matrix.data.get("other_name") is None

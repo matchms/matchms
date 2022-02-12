@@ -54,6 +54,11 @@ class StackedSparseScores:
             raise ValueError("Array is empty.")
         raise KeyError("Name of score is required.")
 
+    def __str__(self):
+        msg = f"StackedSparseScores array of shape {self.shape}" \
+            f" containing scores for {self.score_names}."
+        return msg
+
     def __setitem__(self, key, d):
         # Typical COO method (e.g. below) would not be safe for stacked array.
         raise NotImplementedError
