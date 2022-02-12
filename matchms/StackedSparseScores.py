@@ -26,15 +26,15 @@ class StackedSparseScores:
         scores1 = np.random.random((12, 10))
         scores2 = np.random.random((12, 10))
 
-        matrix = StackedSparseScores(12, 10)
-        matrix.add_dense_matrix(scores1, "scores_1")
-        matrix.filter_by_range("scores_1", low=0.5)
+        scores_array = StackedSparseScores(12, 10)
+        scores_array.add_dense_matrix(scores1, "scores_1")
+        scores_array.filter_by_range("scores_1", low=0.5)
 
         # Add second scores and filter
-        matrix.add_dense_matrix(scores2, "scores_2")
-        matrix.filter_by_range("scores_2", low=0.1, high=0.4)
+        scores_array.add_dense_matrix(scores2, "scores_2")
+        scores_array.filter_by_range("scores_2", low=0.1, high=0.4)
 
-        scores2_after_filtering = matrix.toarray("scores_2")
+        scores2_after_filtering = scores_array.toarray("scores_2")
 
     """
     def __init__(self, n_row, n_col, name=None):
