@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from collections import OrderedDict
 import numpy as np
 from scipy.sparse import coo_matrix
 from scipy.sparse.sputils import get_index_dtype
@@ -42,11 +43,9 @@ class StackedSparseScores:
         idx_dtype = get_index_dtype(maxval=max(n_row, n_col))
         self.row = np.array([], dtype=idx_dtype)
         self.col = np.array([], dtype=idx_dtype)
-        if name is None:
-            self._data = {}
-        else:
-            self._data = {name: np.empty(0)}
-        self.metadata = {0: {"name": None}}
+        self._data = OrderedDict()
+        if name is not None:
+            self._data[name] = np.empty(0)
 
     def guess_score_name(self):
         if len(self._data.keys()) == 1:
@@ -67,9 +66,9 @@ class StackedSparseScores:
         row, col, name = self._validate_indices(key)
         r, c, d = self._getitem_method(row, col, name)
         if len(d) == 0:
-            return 0
+            return np.array([0])
         if d.shape[0] == 1:
-            return d[0]
+            return d
         return r, c, d
 
     def _getitem_method(self, row, col, name):
@@ -96,14 +95,20 @@ class StackedSparseScores:
             if not col.start == col.stop == col.step is None:
                 raise IndexError("This slicing option is not yet implemented")
             return self.row, self.col, self._data[name]
+        if row == col is None and isinstance(name, str):
+            return self.row, self.col, self._data[name]
         raise IndexError("This slicing option is not yet implemented")
 
     def _validate_indices(self, key):
         m, n, _ = self.shape
         row, col, name = _unpack_index(key)
+        if row == col is None and isinstance(name, str):
+            return row, col, name
 
         if name is None:
             name = self.guess_score_name()
+        if isinstance(name, int):
+            name = self.score_names[name]
 
         if isinstance(row, int):
             if row < -m or row >= m:
@@ -282,6 +287,8 @@ def _unpack_index(index):
             row, col, name = index[0], slice(None), None
         else:
             raise IndexError('invalid number of indices')
+    elif isinstance(index, str):
+        row, col, name = None, None, index
     return row, col, name
 
 

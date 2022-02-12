@@ -20,6 +20,7 @@ def test_sss_matrix_slicing():
     # Test slicing
     assert matrix[0, 0] == 0
     assert matrix[2, 2] == 22
+    assert matrix[2, 2, 0] == 22
     assert matrix[-1, -1] == 119
 
     # Slicing with [:]
@@ -29,6 +30,12 @@ def test_sss_matrix_slicing():
     r, c, v = matrix[2, :]
     assert np.all(v == np.arange(20, 30))
     assert np.all(r == 2)
+    r, c, v = matrix["test_score"]
+    r2, c2, v2 = matrix[:, :]
+    assert len(c) == len(c2) == 119
+    assert len(r) == len(r2) == 119
+    assert np.all(v == np.arange(1, 120))
+    assert np.all(v2 == np.arange(1, 120))
 
 
 def test_sss_matrix_filter_by_range():
@@ -56,6 +63,8 @@ def test_sss_matrix_filter_by_range_stacked():
     matrix.add_dense_matrix(scores2, "scores2")
     matrix.filter_by_range("scores2", low=0.5)
     assert matrix.shape == (12, 10, 2)
+    assert matrix[8, 1, 0] == np.array([81])
+    assert matrix[8, 1, 1] == np.array([0.9])
     assert np.all(matrix.data["scores1"] == np.arange(80, 85))
     assert np.all(matrix.col == np.arange(0, 5))
     assert np.all(matrix.row == 8)
