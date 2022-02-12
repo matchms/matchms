@@ -112,7 +112,7 @@ class StackedSparseScores:
 
         if isinstance(row, int):
             if row < -m or row >= m:
-                raise IndexError('row index (%d) out of range' % row)
+                raise IndexError(f"row index ({row}) out of range")
             if row < 0:
                 row += m
         elif not isinstance(row, slice):
@@ -120,7 +120,7 @@ class StackedSparseScores:
 
         if isinstance(col, int):
             if col < -n or col >= n:
-                raise IndexError('column index (%d) out of range' % col)
+                raise IndexError(f"column index ({col}) out of range")
             if col < 0:
                 col += n
         elif not isinstance(col, slice):
@@ -146,12 +146,12 @@ class StackedSparseScores:
         # Check bounds
         max_indx = x.max()
         if max_indx >= length:
-            raise IndexError('index (%d) out of range' % max_indx)
+            raise IndexError(f"Index ({max_indx}) out of range")
 
         min_indx = x.min()
         if min_indx < 0:
             if min_indx < -length:
-                raise IndexError('index (%d) out of range' % min_indx)
+                raise IndexError(f"Index ({min_indx}) out of range")
             if x is idx or not x.flags.owndata:
                 x = x.copy()
             x[x < 0] += length
@@ -286,7 +286,7 @@ def _unpack_index(index):
         elif len(index) == 1:
             row, col, name = index[0], slice(None), None
         else:
-            raise IndexError('invalid number of indices')
+            raise IndexError("Invalid number of indices")
     elif isinstance(index, str):
         row, col, name = None, None, index
     return row, col, name
@@ -298,6 +298,6 @@ def _get_operator(relation: str):
            '<': np.less,
            '>=': np.greater_equal,
            '<=': np.less_equal}
-    if relation in ops.keys():
+    if relation in ops:
         return ops[relation]
     raise ValueError(f"Unknown relation {relation}")
