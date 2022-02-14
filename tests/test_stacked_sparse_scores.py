@@ -79,7 +79,7 @@ def test_sss_matrix_add_sparse_data(sparse_array):
     # Add sparse scores
     new_scores = np.array([0.2, 0.5, 0.2, 0.1, 0.8, 1, 1])
     matrix.add_sparse_data(new_scores, "scoreB")
-    assert np.all(matrix.to_array("scoreB")[:,2] == np.array([0.2, 0., 0.1, 0., 1.]))
+    assert np.all(matrix.to_array("scoreB")[:, 2] == np.array([0.2, 0., 0.1, 0., 1.]))
 
 
 def test_sss_matrix_slicing():
