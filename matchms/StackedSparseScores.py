@@ -41,8 +41,8 @@ class StackedSparseScores:
         self.__n_row = n_row
         self.__n_col = n_col
         idx_dtype = get_index_dtype(maxval=max(n_row, n_col))
-        self.row = np.array([], dtype=idx_dtype)
-        self.col = np.array([], dtype=idx_dtype)
+        self._row = np.array([], dtype=idx_dtype)
+        self._col = np.array([], dtype=idx_dtype)
         self._data = OrderedDict()
         if name is not None:
             self._data[name] = np.empty(0)
@@ -53,6 +53,12 @@ class StackedSparseScores:
         if len(self._data.keys()) == 0:
             raise ValueError("Array is empty.")
         raise KeyError("Name of score is required.")
+
+    def __repr__(self):
+        msg = f"<{self.shape[0]}x{self.shape[1]}x{self.shape[2]} stacked sparse array" \
+            f" containing scores for {self.score_names}" \
+            f" with {len(self._data)} stored elements in COOrdinate format>"
+        return msg
 
     def __str__(self):
         msg = f"StackedSparseScores array of shape {self.shape}" \
@@ -70,9 +76,9 @@ class StackedSparseScores:
     def __getitem__(self, key):
         row, col, name = self._validate_indices(key)
         r, c, d = self._getitem_method(row, col, name)
-        if len(d) == 0:
+        if len(r) == 0:
             return np.array([0])
-        if d.shape[0] == 1:
+        if r.shape[0] == 1:
             return d
         return r, c, d
 
@@ -80,29 +86,42 @@ class StackedSparseScores:
         # e.g.: matrix[3, 7, "score_1"]
         if isinstance(row, int) and isinstance(col, int):
             idx = np.where((self.row == row) & (self.col == col))
-            return self.row[idx], self.col[idx], self._data[name][idx]
+            return self.row[idx], self.col[idx], self._slicing_data(name, idx)
         # e.g.: matrix[3, :, "score_1"]
         if isinstance(row, int) and isinstance(col, slice):
             if not col.start == col.stop == col.step is None:
                 raise IndexError("This slicing option is not yet implemented")
             idx = np.where(self.row == row)
-            return self.row[idx], self.col[idx], self._data[name][idx]
+            return self.row[idx], self.col[idx], self._slicing_data(name, idx)
         # e.g.: matrix[:, 7, "score_1"]
         if isinstance(row, slice) and isinstance(col, int):
             if not row.start == row.stop == row.step is None:
                 raise IndexError("This slicing option is not yet implemented")
             idx = np.where(self.col == col)
-            return self.row[idx], self.col[idx], self._data[name][idx]
+            return self.row[idx], self.col[idx], self._slicing_data(name, idx)
         # matrix[:, :, "score_1"]
         if isinstance(row, slice) and isinstance(col, slice):
             if not row.start == row.stop == row.step is None:
                 raise IndexError("This slicing option is not yet implemented")
             if not col.start == col.stop == col.step is None:
                 raise IndexError("This slicing option is not yet implemented")
-            return self.row, self.col, self._data[name]
+            return self.row, self.col, self._slicing_data(name)
         if row == col is None and isinstance(name, str):
-            return self.row, self.col, self._data[name]
+            return self.row, self.col, self._slicing_data(name)
         raise IndexError("This slicing option is not yet implemented")
+
+    def _slicing_data(self, name, idx=None):
+        if isinstance(name, slice) and len(self.score_names) == 1:
+            name = self.score_names[0]
+        if isinstance(name, str):
+            if idx is None:
+                return self.data[name]
+            return self.data[name][idx]
+        if isinstance(name, slice) and name.start == name.stop == name.step is None:
+            if idx is None:
+                return [value.copy() for _, value in self._data.items()]
+            return [value[idx].copy() for _, value in self._data.items()]
+        raise IndexError("Wrong slicing, or option not yet implemented")
 
     def _validate_indices(self, key):
         m, n, _ = self.shape
@@ -110,8 +129,6 @@ class StackedSparseScores:
         if row == col is None and isinstance(name, str):
             return row, col, name
 
-        if name is None:
-            name = self.guess_score_name()
         if isinstance(name, int):
             name = self.score_names[name]
 
@@ -161,6 +178,14 @@ class StackedSparseScores:
                 x = x.copy()
             x[x < 0] += length
         return x
+
+    @property
+    def row(self):
+        return self._row.copy()
+
+    @property
+    def col(self):
+        return self._col.copy()
 
     @property
     def data(self):
@@ -213,8 +238,8 @@ class StackedSparseScores:
         if self.shape[2] == 0 or (self.shape[2] == 1 and name in self._data.keys()):
             # Add first (sparse) array of scores
             (idx_row, idx_col) = np.where(matrix)
-            self.row = idx_row
-            self.col = idx_col
+            self._row = idx_row
+            self._col = idx_col
             self._data = {name: matrix[idx_row, idx_col]}
         else:
             # Add new stack of scores
@@ -224,8 +249,8 @@ class StackedSparseScores:
         if self.shape[2] == 0 or (self.shape[2] == 1 and name in self._data.keys()):
             # Add first (sparse) array of scores
             self._data = {name: coo_matrix.data}
-            self.row = coo_matrix.row
-            self.col = coo_matrix.col
+            self._row = coo_matrix.row
+            self._col = coo_matrix.col
             self.__n_row, self.__n_col = coo_matrix.shape
         else:
             # TODO move into logger warning rather than assert
@@ -238,7 +263,7 @@ class StackedSparseScores:
                                & (self.col == coo_matrix.col[i]))[0][0]
                 new_entries.append(idx)
 
-            self._data[name] = np.zeros((len(self.row)))
+            self._data[name] = np.zeros((len(self.row)), dtype=coo_matrix.dtype)
             self._data[name][new_entries] = coo_matrix.data
 
     def filter_by_range(self, name: str = None,
@@ -260,8 +285,8 @@ class StackedSparseScores:
         below_operator = _get_operator(below_operator)
         idx = np.where(above_operator(self._data[name], low)
                        & below_operator(self._data[name], high))
-        self.col = self.col[idx]
-        self.row = self.row[idx]
+        self._col = self.col[idx]
+        self._row = self.row[idx]
         for key, value in self._data.items():
             self._data[key] = value[idx]
 
@@ -286,10 +311,12 @@ def _unpack_index(index):
     if isinstance(index, tuple):
         if len(index) == 3:
             row, col, name = index
+            if name is None:
+                name = slice(None)
         elif len(index) == 2:
-            row, col, name = index[0], index[1], None
+            row, col, name = index[0], index[1], slice(None)
         elif len(index) == 1:
-            row, col, name = index[0], slice(None), None
+            row, col, name = index[0], slice(None), slice(None)
         else:
             raise IndexError("Invalid number of indices")
     elif isinstance(index, str):
