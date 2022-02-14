@@ -8,7 +8,6 @@ from scipy.sparse.sputils import get_index_dtype
 _slicing_not_implemented_msg = "Wrong slicing, or option not yet implemented"
 
 
-
 class StackedSparseScores:
     """ 2.5D sparse matrix in COO-style with multiple possible entries per i-j-position.
 
@@ -202,15 +201,6 @@ class StackedSparseScores:
     @property
     def score_names(self):
         return list(self._data.keys())
-
-    # def eliminate_zeros(self):
-    #     """Remove zero entries from the matrix
-    #     This is an *in place* operation
-    #     """
-    #     mask = self._data != 0
-    #     self._data = self._data[mask]
-    #     self.row = self.row[mask]
-    #     self.col = self.col[mask]
 
     def add_dense_matrix(self, matrix: np.ndarray,
                          name: str):
