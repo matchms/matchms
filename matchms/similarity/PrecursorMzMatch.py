@@ -39,7 +39,7 @@ class PrecursorMzMatch(BaseSimilarity):
 
         for (reference, query, score) in scores:
             print(f"Precursor m/z match between {reference.get('id')} and {query.get('id')}" +
-                  f" is {score:.2f}")
+                  f" is {score}")
 
     Should output
 

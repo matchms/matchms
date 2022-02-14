@@ -49,7 +49,6 @@ class Scores:
 
     .. testoutput::
 
-        Cosine score between spectrum1 and spectrum3 is 0.00 with 0 matched peaks
         Cosine score between spectrum1 and spectrum4 is 0.80 with 3 matched peaks
         Cosine score between spectrum2 and spectrum3 is 0.14 with 1 matched peaks
         Cosine score between spectrum2 and spectrum4 is 0.61 with 1 matched peaks
@@ -182,13 +181,13 @@ class Scores:
 
             scores = calculate_scores(references, queries, CosineGreedy())
             selected_scores = scores.scores_by_query(spectrum_4, 'CosineGreedy_score', sort=True)
-            print([x[1][0].round(3) for x in selected_scores])
+            print([x[1].round(3) for x in selected_scores])
 
         Should output
 
         .. testoutput::
 
-            [0.796, 0.613, 0.0]
+            [0.796, 0.613]
 
         Parameters
         ----------
