@@ -60,7 +60,7 @@ class StackedSparseScores:
     def __repr__(self):
         msg = f"<{self.shape[0]}x{self.shape[1]}x{self.shape[2]} stacked sparse array" \
             f" containing scores for {self.score_names}" \
-            f" with {len(self._data)} stored elements in COOrdinate format>"
+            f" with {len(self._row)} stored elements in COOrdinate format>"
         return msg
 
     def __str__(self):
@@ -207,7 +207,7 @@ class StackedSparseScores:
         """Add dense array (numpy array) to stacked sparse scores.
 
         If the StackedSparseScores is still empty, the full dense matrix will
-        be added, unless threshold are set by `low` and `high` values.
+        be added.
         If the StackedSparseScores already contains one or more scores, than only
         those values of the input matrix will be added which have the same position
         as already existing entries!
@@ -240,6 +240,24 @@ class StackedSparseScores:
             self._data[name] = matrix[self.row, self.col]
 
     def add_coo_matrix(self, coo_matrix, name):
+        """Add sparse matrix (scipy COO-matrix) to stacked sparse scores.
+
+        If the StackedSparseScores is still empty, the full sparse matrix will
+        be added.
+        If the StackedSparseScores already contains one or more scores, than only
+        those values of the input matrix will be added which have the same position
+        as already existing entries!
+
+        Parameters
+        ----------
+        matrix
+            Input sparse matrix (COO-style containing .row, .col, .data) to be
+            added to the stacked sparse scores.
+        name
+            Name of the score which is added. Will later be used to access and address
+            the added scores, for instance via `sss_array.toarray("my_score_name")`.
+
+        """
         if self.shape[2] == 0 or (self.shape[2] == 1 and name in self._data.keys()):
             # Add first (sparse) array of scores
             self._data = {name: coo_matrix.data}
@@ -259,6 +277,24 @@ class StackedSparseScores:
 
             self._data[name] = np.zeros((len(self.row)), dtype=coo_matrix.dtype)
             self._data[name][new_entries] = coo_matrix.data
+
+    def add_sparse_data(self, data: np.ndarray, name: str):
+        """Add sparse data to stacked sparse scores.
+
+        The given data must be of the same dimension as the current row/col values.
+
+        Parameters
+        ----------
+        data
+            Input data (1D array).
+        name
+            Name of the score which is added. Will later be used to access and address
+            the added scores, for instance via `sss_array.toarray("my_score_name")`.
+        """
+        assert data.shape[0] == self._row.shape[0], \
+            "Data must be of same size as number of sparse values in the array"
+        assert name not in self._data, "Scores of 'name' are already found in array"
+        self._data[name] = data
 
     def filter_by_range(self, name: str = None,
                         low=-np.inf, high=np.inf,

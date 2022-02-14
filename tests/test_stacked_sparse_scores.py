@@ -22,7 +22,7 @@ def test_sss_matrix_add_dense():
     assert matrix.data.get("other_name") is None
 
 
-def test_sss_matrix_add_sparse(sparse_array):
+def test_sss_matrix_add_coo(sparse_array):
     sparse_array = coo_matrix(sparse_array)
     matrix = StackedSparseScores(12, 10)
     assert matrix.shape == (12, 10, 0)
@@ -39,7 +39,7 @@ def test_sss_matrix_add_sparse(sparse_array):
     assert matrix.data.get("other_name") is None
 
 
-def test_sss_matrix_add_sparse_2_times(sparse_array):
+def test_sss_matrix_add_coo_2_times(sparse_array):
     sparse_array1 = coo_matrix(sparse_array.astype(np.int32))
     sparse_array[sparse_array % 10 == 0] = 0
     sparse_array = sparse_array/2
@@ -65,6 +65,21 @@ def test_sss_matrix_add_sparse_2_times(sparse_array):
     expected = np.array([1, 3, 7, 9, 11, 13, 17, 19, 21,
                          23, 27, 29, 31, 33, 37, 39])
     assert np.all(matrix.data["scores2"] == expected)
+
+
+def test_sss_matrix_add_sparse_data(sparse_array):
+    sparse_array = sparse_array[:5, :6]
+
+    matrix = StackedSparseScores(5, 6)
+    assert matrix.shape == (5, 6, 0)
+    matrix.add_dense_matrix(sparse_array, "scoreA")
+    assert matrix.shape == (5, 6, 1)
+    assert np.all(matrix.data["scoreA"] == np.array([2, 10, 14, 22, 30, 34, 42]))
+
+    # Add sparse scores
+    new_scores = np.array([0.2, 0.5, 0.2, 0.1, 0.8, 1, 1])
+    matrix.add_sparse_data(new_scores, "scoreB")
+    assert np.all(matrix.to_array("scoreB")[:,2] == np.array([0.2, 0., 0.1, 0., 1.]))
 
 
 def test_sss_matrix_slicing():
