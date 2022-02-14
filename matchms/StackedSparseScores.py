@@ -266,11 +266,21 @@ class StackedSparseScores:
                         below_operator='<'):
         """Remove all scores for which the score `name` is outside the given range.
 
-        Add description
-
         Parameters
         ----------
-
+        name
+            Name of the score which is used for filtering. Run `.score_names` to
+            see all scores scored in the sparse array.
+        low
+            Lower threshold below which all scores will be removed.
+        high
+            Upper threshold above of which all scores will be removed.
+        above_operator
+            Define operator to be used to compare against `low`. Default is '>'.
+            Possible choices are '>', '<', '>=', '<='.
+        below_operator
+            Define operator to be used to compare against `high`. Default is '<'.
+            Possible choices are '>', '<', '>=', '<='.
         """
         # pylint: disable=too-many-arguments
         if name is None:
@@ -293,13 +303,6 @@ class StackedSparseScores:
     def to_coo(self, name):
         return coo_matrix((self._data[name], (self.row, self.col)),
                           shape=(self.__n_row, self.__n_col))
-
-    def get_indices(self, name=None, threshold=-np.Inf):
-        # TODO: refactor or remove this method
-        if name is None:
-            name = self.guess_score_name()
-        idx = np.where(self._data[name] > threshold)
-        return self.row[idx], self.col[idx]
 
 
 def _unpack_index(index):
