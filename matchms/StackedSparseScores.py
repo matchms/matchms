@@ -330,10 +330,19 @@ class StackedSparseScores:
         for key, value in self._data.items():
             self._data[key] = value[idx]
 
-    def to_array(self, name):
+    def to_array(self, name=None):
+        if name is None and len(self._data) == 1:
+            name = self.score_names[0]
+        if isinstance(name, str):
+            array = np.zeros((self.__n_row, self.__n_col),
+                             dtype=self._data[name].dtype)
+            array[self.row, self.col] = self._data[name]
+            return array
+        dtypes = [(key, value.dtype) for key, value in self._data.items()]
         array = np.zeros((self.__n_row, self.__n_col),
-                         dtype=self._data[name].dtype)
-        array[self.row, self.col] = self._data[name]
+                         dtype=dtypes)
+        for key, value in self._data.items():
+            array[key][self.row, self.col] = value
         return array
 
     def to_coo(self, name):
