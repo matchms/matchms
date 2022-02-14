@@ -1,5 +1,6 @@
 from __future__ import annotations
 import numpy as np
+from scipy.sparse import coo_matrix
 from deprecated.sphinx import deprecated
 from matchms.similarity.BaseSimilarity import BaseSimilarity
 from matchms.StackedSparseScores import StackedSparseScores
@@ -180,7 +181,7 @@ class Scores:
             queries = [spectrum_2, spectrum_3, spectrum_4]
 
             scores = calculate_scores(references, queries, CosineGreedy())
-            selected_scores = scores.scores_by_query(spectrum_4, sort=True)
+            selected_scores = scores.scores_by_query(spectrum_4, 'CosineGreedy_score', sort=True)
             print([x[1]["score"].round(3) for x in selected_scores])
 
         Should output
@@ -200,6 +201,8 @@ class Scores:
             :meth:`~.BaseSimilarity.sort` function from the given similarity_function).
 
         """
+        if name is None:
+            name = self._scores.guess_score_name()
         assert query in self.queries, "Given input not found in queries."
         selected_idx = int(np.where(self.queries == query)[0])
         c, _, scores_for_query = self._scores[:, selected_idx, name]
@@ -222,7 +225,7 @@ class Scores:
     def scores(self):
         return self._scores
 
-    def get_scores_array(self, name=None, array_type="numpy") -> np.ndarray:
+    def to_array(self, name=None) -> np.ndarray:
         """Scores as numpy array
 
         For example
@@ -239,9 +242,8 @@ class Scores:
                                   intensities=np.array([0.4, 0.2, 0.1]))
             spectrums = [spectrum_1, spectrum_2]
 
-            scores = calculate_scores(spectrums, spectrums, IntersectMz()).scores
+            scores = calculate_scores(spectrums, spectrums, IntersectMz()).to_array()
 
-            print(scores[0].dtype)
             print(scores.shape)
             print(scores)
 
@@ -249,15 +251,23 @@ class Scores:
 
         .. testoutput::
 
-             float64
              (2, 2)
              [[1.  0.2]
               [0.2 1. ]]
+
+        Parameters
+        ----------
+        name
+            Name of the score that should be returned (if multiple scores are stored).
         """
-        if name is None:
-            name = self._scores.guess_score_name()
-        if array_type == "numpy":
-            return self._scores.to_array(name)
-        if array_type in ["coo", "sparse"]:
-            self._scores.to_coo(name)
-        raise TypeError("Unknown type for output matrix")
+        return self._scores.to_array(name)
+
+    def to_coo(self, name=None) -> coo_matrix:
+        """Scores as scipy sparse COO matrix
+
+        Parameters
+        ----------
+        name
+            Name of the score that should be returned (if multiple scores are stored).
+        """
+        return self._scores.to_coo(name)

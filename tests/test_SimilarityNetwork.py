@@ -160,7 +160,7 @@ def test_create_network_symmetric_mutual_method():
     # pylint: disable=protected-access
     cutoff = 0.7
     scores = create_dummy_scores_symmetric()
-    scores_arr = scores.get_scores_array()
+    scores_arr = scores.to_array()
     # change some scores
     scores_arr[7, 6] = scores_arr[6, 7] = 0.85
     scores_arr[7, 5] = scores_arr[5, 7] = 0.75

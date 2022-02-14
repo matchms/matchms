@@ -46,7 +46,7 @@ class FingerprintSimilarity(BaseSimilarity):
         # Specify type and calculate similarities
         similarity_measure = FingerprintSimilarity("jaccard")
         scores = calculate_scores(spectrums, spectrums, similarity_measure)
-        print(np.round(scores.scores, 3))
+        print(np.round(scores.scores.to_array(), 3))
 
     Should output
 

@@ -364,6 +364,10 @@ def _unpack_index(index):
             raise IndexError("Invalid number of indices")
     elif isinstance(index, str):
         row, col, name = None, None, index
+    elif isinstance(index, int):
+        row, col, name = index, slice(None), slice(None)
+    else:
+        raise IndexError(_slicing_not_implemented_msg)
     return row, col, name
 
 

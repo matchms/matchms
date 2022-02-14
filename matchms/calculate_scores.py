@@ -29,7 +29,7 @@ def calculate_scores(references: ReferencesType, queries: QueriesType,
 
         for (reference, query, score) in scores:
             print(f"Cosine score between {reference.get('id')} and {query.get('id')}" +
-                  f" is {score['score']:.2f} with {score['matches']} matched peaks")
+                  f" is {score[0]:.2f} with {score[1]} matched peaks")
 
     Should output
 

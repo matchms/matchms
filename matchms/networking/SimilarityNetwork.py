@@ -31,7 +31,7 @@ class SimilarityNetwork:
         spectrums = [spectrum_1, spectrum_2]
         scores = calculate_scores(spectrums, spectrums, modified_cosine)
         ms_network = SimilarityNetwork(identifier_key="test_id")
-        ms_network.create_network(scores)
+        ms_network.create_network(scores, score_name="ModifiedCosine_score")
 
         nodes = list(ms_network.graph.nodes())
         nodes.sort()
