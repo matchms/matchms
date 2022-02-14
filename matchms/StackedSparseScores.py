@@ -5,6 +5,10 @@ from scipy.sparse import coo_matrix
 from scipy.sparse.sputils import get_index_dtype
 
 
+_slicing_not_implemented_msg = "Wrong slicing, or option not yet implemented"
+
+
+
 class StackedSparseScores:
     """ 2.5D sparse matrix in COO-style with multiple possible entries per i-j-position.
 
@@ -90,25 +94,25 @@ class StackedSparseScores:
         # e.g.: matrix[3, :, "score_1"]
         if isinstance(row, int) and isinstance(col, slice):
             if not col.start == col.stop == col.step is None:
-                raise IndexError("This slicing option is not yet implemented")
+                raise IndexError(_slicing_not_implemented_msg)
             idx = np.where(self.row == row)
             return self.row[idx], self.col[idx], self._slicing_data(name, idx)
         # e.g.: matrix[:, 7, "score_1"]
         if isinstance(row, slice) and isinstance(col, int):
             if not row.start == row.stop == row.step is None:
-                raise IndexError("This slicing option is not yet implemented")
+                raise IndexError(_slicing_not_implemented_msg)
             idx = np.where(self.col == col)
             return self.row[idx], self.col[idx], self._slicing_data(name, idx)
         # matrix[:, :, "score_1"]
         if isinstance(row, slice) and isinstance(col, slice):
             if not row.start == row.stop == row.step is None:
-                raise IndexError("This slicing option is not yet implemented")
+                raise IndexError(_slicing_not_implemented_msg)
             if not col.start == col.stop == col.step is None:
-                raise IndexError("This slicing option is not yet implemented")
+                raise IndexError(_slicing_not_implemented_msg)
             return self.row, self.col, self._slicing_data(name)
         if row == col is None and isinstance(name, str):
             return self.row, self.col, self._slicing_data(name)
-        raise IndexError("This slicing option is not yet implemented")
+        raise IndexError(_slicing_not_implemented_msg)
 
     def _slicing_data(self, name, idx=None):
         if isinstance(name, slice) and len(self.score_names) == 1:
@@ -121,7 +125,7 @@ class StackedSparseScores:
             if idx is None:
                 return [value.copy() for _, value in self._data.items()]
             return [value[idx].copy() for _, value in self._data.items()]
-        raise IndexError("Wrong slicing, or option not yet implemented")
+        raise IndexError(_slicing_not_implemented_msg)
 
     def _validate_indices(self, key):
         m, n, _ = self.shape
@@ -301,6 +305,7 @@ class StackedSparseScores:
                           shape=(self.__n_row, self.__n_col))
 
     def get_indices(self, name=None, threshold=-np.Inf):
+        # TODO: refactor or remove this method
         if name is None:
             name = self.guess_score_name()
         idx = np.where(self._data[name] > threshold)

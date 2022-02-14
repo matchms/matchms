@@ -87,10 +87,30 @@ def test_sss_matrix_slicing():
     assert np.all(r == 2)
     r, c, v = matrix["test_score"]
     r2, c2, v2 = matrix[:, :]
-    assert len(c) == len(c2) == 119
-    assert len(r) == len(r2) == 119
+    r3, c3, v3 = matrix[:, :, 0]
+    assert len(c) == len(c2) == len(c3) == 119
+    assert len(r) == len(r2) == len(r3) == 119
     assert np.all(v == np.arange(1, 120))
     assert np.all(v2 == np.arange(1, 120))
+    assert np.all(v3 == np.arange(1, 120))
+
+
+def test_sss_matrix_slicing_exceptions(sparse_array):
+    msg = "Wrong slicing, or option not yet implemented"
+    matrix = StackedSparseScores(12, 10)
+    matrix.add_dense_matrix(sparse_array, "scores1")
+    matrix.add_dense_matrix(sparse_array, "scores2")
+    with pytest.raises(IndexError) as exception:
+        _ = matrix[0, 1:3, "scores1"]
+    assert msg in exception.value.args[0]
+
+    with pytest.raises(IndexError) as exception:
+        _ = matrix[:2, :, 0]
+    assert msg in exception.value.args[0]
+
+    with pytest.raises(IndexError) as exception:
+        _ = matrix[1, 1, :1]
+    assert msg in exception.value.args[0]
 
 
 def test_sss_matrix_filter_by_range():
