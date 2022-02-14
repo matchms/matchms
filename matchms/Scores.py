@@ -43,7 +43,7 @@ class Scores:
 
         for (reference, query, score) in scores:
             print(f"Cosine score between {reference.get('id')} and {query.get('id')}" +
-                  f" is {score['score']:.2f} with {score['matches']} matched peaks")
+                  f" is {score[0]:.2f} with {score[1]} matched peaks")
 
     Should output
 
@@ -182,7 +182,7 @@ class Scores:
 
             scores = calculate_scores(references, queries, CosineGreedy())
             selected_scores = scores.scores_by_query(spectrum_4, 'CosineGreedy_score', sort=True)
-            print([x[1]["score"].round(3) for x in selected_scores])
+            print([x[1][0].round(3) for x in selected_scores])
 
         Should output
 

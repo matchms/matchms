@@ -22,6 +22,17 @@ def test_sss_matrix_add_dense():
     assert matrix.data.get("other_name") is None
 
 
+def test_sss_matrix_class_name(sparse_array):
+    matrix = StackedSparseScores(12, 10)
+    matrix.add_dense_matrix(sparse_array, "test_score")
+    msg = "<12x10x1 stacked sparse array containing scores for ['test_score']" \
+        " with 30 stored elements in COOrdinate format>"
+    assert matrix.__repr__() == msg
+    msg2 = "StackedSparseScores array of shape (12, 10, 1) containing scores for" \
+        " ['test_score']."
+    assert str(matrix) == msg2
+
+
 def test_sss_matrix_add_coo(sparse_array):
     sparse_array = coo_matrix(sparse_array)
     matrix = StackedSparseScores(12, 10)

@@ -45,10 +45,8 @@ class PrecursorMzMatch(BaseSimilarity):
 
     .. testoutput::
 
-        Precursor m/z match between 1 and 3 is 1.00
-        Precursor m/z match between 1 and 4 is 0.00
-        Precursor m/z match between 2 and 3 is 0.00
-        Precursor m/z match between 2 and 4 is 1.00
+        Precursor m/z match between 1 and 3 is [True]
+        Precursor m/z match between 2 and 4 is [True]
 
     """
     # Set key characteristics as class attributes

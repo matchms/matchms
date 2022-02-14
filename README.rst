@@ -235,16 +235,18 @@ Alternatively, here below is a small example of using matchms to calculate the C
                               queries=spectrums,
                               similarity_function=CosineGreedy())
 
+    # Matchms allows to get the best matches for any query using scores_by_query
+    query = spectrums[15]  # just an example
+    best_matches = scores.scores_by_query(query, 'CosineGreedy_score', sort=True)
+
     # Print the calculated scores for each spectrum pair
-    for score in scores:
-        (reference, query, score) = score
-        # Ignore scores between same spectrum and
-        # pairs which have less than 20 peaks in common
-        if reference is not query and score["matches"] >= 20:
+    for (reference, score) in best_matches[:10]
+        # Ignore scores between same spectrum
+        if reference is not query:
             print(f"Reference scan id: {reference.metadata['scans']}")
             print(f"Query scan id: {query.metadata['scans']}")
-            print(f"Score: {score['score']:.4f}")
-            print(f"Number of matching peaks: {score['matches']}")
+            print(f"Score: {score[0]:.4f}")
+            print(f"Number of matching peaks: {score[1]}")
             print("----------------------------")
 
 Glossary of terms

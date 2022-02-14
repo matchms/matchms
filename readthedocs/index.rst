@@ -79,7 +79,7 @@ Below is a small example of using matchms to calculate the Cosine score between 
 
     # Matchms allows to get the best matches for any query using scores_by_query
     query = spectrums[15]  # just an example
-    best_matches = scores.scores_by_query(query, sort=True)
+    best_matches = scores.scores_by_query(query, 'CosineGreedy_score', sort=True)
 
     # Print the calculated scores for each spectrum pair
     for (reference, score) in best_matches[:10]:
@@ -87,8 +87,8 @@ Below is a small example of using matchms to calculate the Cosine score between 
         if reference is not query:
             print(f"Reference scan id: {reference.metadata['scans']}")
             print(f"Query scan id: {query.metadata['scans']}")
-            print(f"Score: {score['score']:.4f}")
-            print(f"Number of matching peaks: {score['matches']}")
+            print(f"Score: {score[0]:.4f}")
+            print(f"Number of matching peaks: {score[1]}")
             print("----------------------------")
 
 Should output
