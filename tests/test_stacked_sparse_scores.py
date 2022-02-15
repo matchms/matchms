@@ -12,6 +12,12 @@ def sparse_array():
     return arr
 
 
+def test_sss_matrix_empty():
+    matrix = StackedSparseScores(200, 100)
+    assert matrix.shape == (200, 100, 0)
+    assert matrix.score_names == []
+
+
 def test_sss_matrix_add_dense():
     arr = np.arange(0, 120).reshape(12, 10)
     matrix = StackedSparseScores(12, 10)
@@ -19,6 +25,14 @@ def test_sss_matrix_add_dense():
     matrix.add_dense_matrix(arr, "test_score")
     assert matrix.shape == (12, 10, 1)
     assert np.all(matrix.data["test_score"] == np.arange(1, 120))
+
+
+def test_sss_matrix_no_setter():
+    arr = np.arange(0, 120).reshape(12, 10)
+    matrix = StackedSparseScores(12, 10)
+    matrix.add_dense_matrix(arr, "test_score")
+    with pytest.raises(NotImplementedError):
+        matrix[1, 2] = 5
 
 
 def test_sss_matrix_class_name(sparse_array):
@@ -111,17 +125,22 @@ def test_sss_matrix_slicing():
     r, c, v = matrix[:, -1]
     assert np.all(v == np.arange(9, 120, 10))
     assert np.all(c == 9)
-    r, c, v = matrix[2, :]
+    r, _, v = matrix[2, :]
+    r2, _, v2 = matrix[2]
     assert np.all(v == np.arange(20, 30))
     assert np.all(r == 2)
+    assert np.all(v2 == np.arange(20, 30))
+    assert np.all(r2 == 2)
     r, c, v = matrix["test_score"]
     r2, c2, v2 = matrix[:, :]
     r3, c3, v3 = matrix[:, :, 0]
+    r4, c4, v4 = matrix[:, :, :]
     assert len(c) == len(c2) == len(c3) == 119
     assert len(r) == len(r2) == len(r3) == 119
     assert np.all(v == np.arange(1, 120))
     assert np.all(v2 == np.arange(1, 120))
     assert np.all(v3 == np.arange(1, 120))
+    assert np.all(v4 == np.arange(1, 120))
 
 
 def test_sss_matrix_slicing_exceptions(sparse_array):
@@ -135,6 +154,10 @@ def test_sss_matrix_slicing_exceptions(sparse_array):
 
     with pytest.raises(IndexError) as exception:
         _ = matrix[:2, :, 0]
+    assert msg in exception.value.args[0]
+
+    with pytest.raises(IndexError) as exception:
+        _ = matrix[:, 1:, 0]
     assert msg in exception.value.args[0]
 
     with pytest.raises(IndexError) as exception:
@@ -181,3 +204,15 @@ def test_sss_matrix_filter_by_range_stacked():
     assert np.all(matrix.row == 8)
     assert matrix.shape == (12, 10, 2)
     assert matrix.score_names == ('scores1', 'scores2')
+
+
+@pytest.mark.parametrize("input_index, msg", [
+    [[5], "out of range"],
+    [[-5], "out of range"],
+    [5, "Index dimension must be 1 or 2"],
+])
+def test_asindices(input_index, msg):
+    array = StackedSparseScores(1, 1)
+    with pytest.raises(IndexError) as exception:
+        _ = array._asindices(input_index, 4)
+    assert msg in exception.value.args[0]

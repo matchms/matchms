@@ -40,15 +40,13 @@ class StackedSparseScores:
         scores2_after_filtering = scores_array.toarray("scores_2")
 
     """
-    def __init__(self, n_row, n_col, name=None):
+    def __init__(self, n_row, n_col):
         self.__n_row = n_row
         self.__n_col = n_col
         idx_dtype = get_index_dtype(maxval=max(n_row, n_col))
         self._row = np.array([], dtype=idx_dtype)
         self._col = np.array([], dtype=idx_dtype)
         self._data = []
-        if name is not None:
-            self._data = np.zeros(0, dtype=[(name, float)])
 
     def guess_score_name(self):
         if len(self.score_names) == 1:
