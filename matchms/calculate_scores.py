@@ -58,6 +58,5 @@ def calculate_scores(references: ReferencesType, queries: QueriesType,
 
     ~matchms.Scores.Scores
     """
-
     return Scores(references=references, queries=queries,
                   is_symmetric=is_symmetric).calculate(similarity_function)

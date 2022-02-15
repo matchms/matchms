@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import numpy as np
-import numpy.lib.recfunctions as recfunctions
+from numpy.lib import recfunctions
 from scipy.sparse import coo_matrix
 from scipy.sparse.sputils import get_index_dtype
 
@@ -46,9 +46,9 @@ class StackedSparseScores:
         idx_dtype = get_index_dtype(maxval=max(n_row, n_col))
         self._row = np.array([], dtype=idx_dtype)
         self._col = np.array([], dtype=idx_dtype)
-        self._data = [] # OrderedDict()
+        self._data = []
         if name is not None:
-            self._data = np.zeros(0, dtype=[(name, float)])  # np.empty(0)
+            self._data = np.zeros(0, dtype=[(name, float)])
 
     def guess_score_name(self):
         if len(self.score_names) == 1:
@@ -233,16 +233,20 @@ class StackedSparseScores:
             self._add_dense_matrix(matrix, name)
 
     def _add_dense_matrix(self, matrix, name):
+        if matrix.dtype.type == np.void:
+            input_dtype = matrix.dtype[0]
+        else:
+            input_dtype = matrix.dtype
         if self.shape[2] == 0 or (self.shape[2] == 1 and name in self.score_names):
             # Add first (sparse) array of scores
             (idx_row, idx_col) = np.where(matrix)
             self._row = idx_row
             self._col = idx_col
-            self._data = np.array(matrix[idx_row, idx_col], dtype=[(name, matrix.dtype)])
+            self._data = np.array(matrix[idx_row, idx_col], dtype=[(name, input_dtype)])
         else:
             # Add new stack of scores
             self._data = recfunctions.append_fields(self._data, name, matrix[self.row, self.col],
-                                                    dtypes=matrix.dtype, fill_value=0).data
+                                                    dtypes=input_dtype, fill_value=0).data
 
     def add_coo_matrix(self, coo_matrix, name):
         """Add sparse matrix (scipy COO-matrix) to stacked sparse scores.
@@ -284,7 +288,6 @@ class StackedSparseScores:
                                                     np.zeros((len(self.row)), dtype=coo_matrix.dtype),
                                                     fill_value=0).data
             self._data[name][new_entries] = coo_matrix.data
-            
 
     def add_sparse_data(self, data: np.ndarray, name: str):
         """Add sparse data to stacked sparse scores.
@@ -340,7 +343,7 @@ class StackedSparseScores:
 
     def to_array(self, name=None):
         """Return scores as (non-sparse) numpy array.
-         
+
         Parameters
         ----------
         name

@@ -149,8 +149,10 @@ class Scores:
         if sort:
             if name is None:
                 name = self._scores.guess_score_name()
-            name_idx = self.score_names.index(name)
-            query_idx_sorted = np.argsort(scores_for_ref[name_idx])[::-1]
+            if scores_for_ref.dtype.type == np.void:
+                query_idx_sorted = np.argsort(scores_for_ref[name])[::-1]
+            else:
+                query_idx_sorted = np.argsort(scores_for_ref)[::-1]
             return list(zip(self.queries[r[query_idx_sorted]],
                             scores_for_ref[query_idx_sorted].copy()))
         return list(zip(self.queries[r], scores_for_ref.copy()))
@@ -211,9 +213,11 @@ class Scores:
         if sort:
             if name is None:
                 name = self._scores.guess_score_name()
-            name_idx = self.score_names.index(name)
             # TODO: add option to use other sorting algorithm
-            references_idx_sorted = np.argsort(scores_for_query[name_idx])[::-1]
+            if scores_for_query.dtype.type == np.void:
+                references_idx_sorted = np.argsort(scores_for_query[name])[::-1]
+            else:
+                references_idx_sorted = np.argsort(scores_for_query)[::-1]
             return list(zip(self.references[c[references_idx_sorted]],
                             scores_for_query[references_idx_sorted].copy()))
         return list(zip(self.references[c], scores_for_query.copy()))

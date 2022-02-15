@@ -170,7 +170,7 @@ def test_sss_matrix_filter_by_range_stacked():
     assert matrix[8, 1, 0] == np.array([81])
     assert matrix[8, 1, 1] == np.array([0.9])
     assert np.all(matrix[8, 3] == np.array([(83, 0.9)],
-                                           dtype = [('scores1', '<i4'), ('scores2', '<f8')]))
+                                           dtype=[('scores1', '<i4'), ('scores2', '<f8')]))
     assert np.all(matrix[8, :][2]["scores1"] == np.array([80, 81, 82, 83, 84], dtype=np.int64))
     assert np.all(matrix[8, :][2]["scores2"] == np.array([0.9, 0.9, 0.9, 0.9, 0.9], dtype=np.float64))
     assert np.all(matrix[8, :, "scores2"][2] == np.array([0.9, 0.9, 0.9, 0.9, 0.9], dtype=np.float64))
