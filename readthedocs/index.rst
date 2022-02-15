@@ -95,7 +95,7 @@ Should output
 
 .. testoutput::
 
-    Size of matrix of computed similarities: (76, 76)
+    Size of matrix of computed similarities: (76, 76, 2)
     Reference scan id: 613
     Query scan id: 2161
     Score: 0.8646

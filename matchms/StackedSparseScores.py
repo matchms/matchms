@@ -350,7 +350,7 @@ class StackedSparseScores:
             Name of the score that should be returned (if multiple scores are stored).
             If set to None (default) a 3D array with all scores will be returned.
         """
-        if name is None and len(self._data) == 1:
+        if name is None and self.shape[2] == 1:
             name = self.score_names[0]
         if isinstance(name, str):
             array = np.zeros((self.__n_row, self.__n_col),
