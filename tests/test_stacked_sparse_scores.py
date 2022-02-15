@@ -159,7 +159,7 @@ def test_sss_matrix_filter_by_range_stacked():
     scores2[scores2 > 0] = 0.9
 
     matrix = StackedSparseScores(12, 10)
-    matrix.add_dense_matrix(scores1, "scores1")
+    matrix.add_dense_matrix(scores1.astype(np.int64), "scores1")
     matrix.filter_by_range(low=70, high=85)
     assert matrix.shape == (12, 10, 1)
     assert np.all(matrix.data["scores1"] == np.arange(71, 85))
@@ -170,7 +170,7 @@ def test_sss_matrix_filter_by_range_stacked():
     assert matrix[8, 1, 0] == np.array([81])
     assert matrix[8, 1, 1] == np.array([0.9])
     assert np.all(matrix[8, 3] == np.array([(83, 0.9)],
-                                           dtype=[('scores1', '<i4'), ('scores2', '<f8')]))
+                                           dtype=[('scores1', '<i8'), ('scores2', '<f8')]))
     assert np.all(matrix[8, :][2]["scores1"] == np.array([80, 81, 82, 83, 84], dtype=np.int64))
     assert np.all(matrix[8, :][2]["scores2"] == np.array([0.9, 0.9, 0.9, 0.9, 0.9], dtype=np.float64))
     assert np.all(matrix[8, :, "scores2"][2] == np.array([0.9, 0.9, 0.9, 0.9, 0.9], dtype=np.float64))
