@@ -141,13 +141,16 @@ class Scores:
             Set to True to obtain the scores in a sorted way (relying on the
             :meth:`~.BaseSimilarity.sort` function from the given similarity_function).
         """
-        if name is None:
-            name = self._scores.guess_score_name()
+        if name is None and len(self.score_names) > 1 and sort is True:
+            raise IndexError("For sorting, score must be specified")
         assert reference in self.references, "Given input not found in references."
         selected_idx = int(np.where(self.references == reference)[0])
-        _, r, scores_for_ref = self._scores[selected_idx, :, name]
+        _, r, scores_for_ref = self._scores[selected_idx, :]
         if sort:
-            query_idx_sorted = np.argsort(scores_for_ref)[::-1]
+            if name is None:
+                name = self._scores.guess_score_name()
+            name_idx = self.score_names.index(name)
+            query_idx_sorted = np.argsort(scores_for_ref[name_idx])[::-1]
             return list(zip(self.queries[r[query_idx_sorted]],
                             scores_for_ref[query_idx_sorted].copy()))
         return list(zip(self.queries[r], scores_for_ref.copy()))
@@ -200,14 +203,17 @@ class Scores:
             :meth:`~.BaseSimilarity.sort` function from the given similarity_function).
 
         """
-        if name is None:
-            name = self._scores.guess_score_name()
+        if name is None and len(self.score_names) > 1 and sort is True:
+            raise IndexError("For sorting, score must be specified")
         assert query in self.queries, "Given input not found in queries."
         selected_idx = int(np.where(self.queries == query)[0])
-        c, _, scores_for_query = self._scores[:, selected_idx, name]
+        c, _, scores_for_query = self._scores[:, selected_idx]
         if sort:
+            if name is None:
+                name = self._scores.guess_score_name()
+            name_idx = self.score_names.index(name)
             # TODO: add option to use other sorting algorithm
-            references_idx_sorted = np.argsort(scores_for_query)[::-1]
+            references_idx_sorted = np.argsort(scores_for_query[name_idx])[::-1]
             return list(zip(self.references[c[references_idx_sorted]],
                             scores_for_query[references_idx_sorted].copy()))
         return list(zip(self.references[c], scores_for_query.copy()))
