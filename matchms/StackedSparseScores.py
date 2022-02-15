@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from collections import OrderedDict
 import numpy as np
+import numpy.lib.recfunctions as recfunctions
 from scipy.sparse import coo_matrix
 from scipy.sparse.sputils import get_index_dtype
 
@@ -46,14 +46,14 @@ class StackedSparseScores:
         idx_dtype = get_index_dtype(maxval=max(n_row, n_col))
         self._row = np.array([], dtype=idx_dtype)
         self._col = np.array([], dtype=idx_dtype)
-        self._data = OrderedDict()
+        self._data = [] # OrderedDict()
         if name is not None:
-            self._data[name] = np.empty(0)
+            self._data = np.zeros(0, dtype=[(name, float)])  # np.empty(0)
 
     def guess_score_name(self):
-        if len(self._data.keys()) == 1:
-            return list(self._data.keys())[0]
-        if len(self._data.keys()) == 0:
+        if len(self.score_names) == 1:
+            return self.score_names[0]
+        if len(self.score_names) == 0:
             raise ValueError("Array is empty.")
         raise KeyError("Name of score is required.")
 
@@ -122,8 +122,8 @@ class StackedSparseScores:
             return self.data[name][idx]
         if isinstance(name, slice) and name.start == name.stop == name.step is None:
             if idx is None:
-                return [value.copy() for _, value in self._data.items()]
-            return [value[idx].copy() for _, value in self._data.items()]
+                return self._data
+            return self._data[idx]
         raise IndexError(_slicing_not_implemented_msg)
 
     def _validate_indices(self, key):
@@ -196,11 +196,15 @@ class StackedSparseScores:
 
     @property
     def shape(self):
-        return tuple((self.__n_row, self.__n_col, len(self._data)))
+        if len(self._data) == 0:
+            return self.__n_row, self.__n_col, 0
+        return self.__n_row, self.__n_col, len(self.score_names)
 
     @property
     def score_names(self):
-        return list(self._data.keys())
+        if len(self._data) == 0:
+            return []
+        return self._data.dtype.names
 
     def add_dense_matrix(self, matrix: np.ndarray,
                          name: str):
@@ -229,15 +233,16 @@ class StackedSparseScores:
             self._add_dense_matrix(matrix, name)
 
     def _add_dense_matrix(self, matrix, name):
-        if self.shape[2] == 0 or (self.shape[2] == 1 and name in self._data.keys()):
+        if self.shape[2] == 0 or (self.shape[2] == 1 and name in self.score_names):
             # Add first (sparse) array of scores
             (idx_row, idx_col) = np.where(matrix)
             self._row = idx_row
             self._col = idx_col
-            self._data = {name: matrix[idx_row, idx_col]}
+            self._data = np.array(matrix[idx_row, idx_col], dtype=[(name, matrix.dtype)])
         else:
             # Add new stack of scores
-            self._data[name] = matrix[self.row, self.col]
+            self._data = recfunctions.append_fields(self._data, name, matrix[self.row, self.col],
+                                                    dtypes=matrix.dtype, fill_value=0).data
 
     def add_coo_matrix(self, coo_matrix, name):
         """Add sparse matrix (scipy COO-matrix) to stacked sparse scores.
@@ -258,9 +263,9 @@ class StackedSparseScores:
             the added scores, for instance via `sss_array.toarray("my_score_name")`.
 
         """
-        if self.shape[2] == 0 or (self.shape[2] == 1 and name in self._data.keys()):
+        if self.shape[2] == 0 or (self.shape[2] == 1 and name in self.score_names):
             # Add first (sparse) array of scores
-            self._data = {name: coo_matrix.data}
+            self._data = np.array(coo_matrix.data, dtype=[(name, coo_matrix.dtype)])
             self._row = coo_matrix.row
             self._col = coo_matrix.col
             self.__n_row, self.__n_col = coo_matrix.shape
@@ -275,8 +280,11 @@ class StackedSparseScores:
                                & (self.col == coo_matrix.col[i]))[0][0]
                 new_entries.append(idx)
 
-            self._data[name] = np.zeros((len(self.row)), dtype=coo_matrix.dtype)
+            self._data = recfunctions.append_fields(self._data, name,
+                                                    np.zeros((len(self.row)), dtype=coo_matrix.dtype),
+                                                    fill_value=0).data
             self._data[name][new_entries] = coo_matrix.data
+            
 
     def add_sparse_data(self, data: np.ndarray, name: str):
         """Add sparse data to stacked sparse scores.
@@ -294,7 +302,8 @@ class StackedSparseScores:
         assert data.shape[0] == self._row.shape[0], \
             "Data must be of same size as number of sparse values in the array"
         assert name not in self._data, "Scores of 'name' are already found in array"
-        self._data[name] = data
+        self._data = recfunctions.append_fields(self._data, name, data,
+                                                dtypes=data.dtype, fill_value=0).data
 
     def filter_by_range(self, name: str = None,
                         low=-np.inf, high=np.inf,
@@ -327,10 +336,17 @@ class StackedSparseScores:
                        & below_operator(self._data[name], high))
         self._col = self.col[idx]
         self._row = self.row[idx]
-        for key, value in self._data.items():
-            self._data[key] = value[idx]
+        self._data = self._data[idx]
 
     def to_array(self, name=None):
+        """Return scores as (non-sparse) numpy array.
+         
+        Parameters
+        ----------
+        name
+            Name of the score that should be returned (if multiple scores are stored).
+            If set to None (default) a 3D array with all scores will be returned.
+        """
         if name is None and len(self._data) == 1:
             name = self.score_names[0]
         if isinstance(name, str):
@@ -338,11 +354,9 @@ class StackedSparseScores:
                              dtype=self._data[name].dtype)
             array[self.row, self.col] = self._data[name]
             return array
-        dtypes = [(key, value.dtype) for key, value in self._data.items()]
         array = np.zeros((self.__n_row, self.__n_col),
-                         dtype=dtypes)
-        for key, value in self._data.items():
-            array[key][self.row, self.col] = value
+                         dtype=self._data.dtype)
+        array[self.row, self.col] = self._data
         return array
 
     def to_coo(self, name):

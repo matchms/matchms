@@ -19,17 +19,16 @@ def test_sss_matrix_add_dense():
     matrix.add_dense_matrix(arr, "test_score")
     assert matrix.shape == (12, 10, 1)
     assert np.all(matrix.data["test_score"] == np.arange(1, 120))
-    assert matrix.data.get("other_name") is None
 
 
 def test_sss_matrix_class_name(sparse_array):
     matrix = StackedSparseScores(12, 10)
     matrix.add_dense_matrix(sparse_array, "test_score")
-    msg = "<12x10x1 stacked sparse array containing scores for ['test_score']" \
+    msg = "<12x10x1 stacked sparse array containing scores for ('test_score',)" \
         " with 30 stored elements in COOrdinate format>"
     assert matrix.__repr__() == msg
     msg2 = "StackedSparseScores array of shape (12, 10, 1) containing scores for" \
-        " ['test_score']."
+        " ('test_score',)."
     assert str(matrix) == msg2
 
 
@@ -47,7 +46,6 @@ def test_sss_matrix_add_coo(sparse_array):
                          8, 8, 9, 9, 9, 10, 10, 11, 11, 11])
     assert np.all(r == expected)
     assert np.all(c[:6] == np.array([2, 6, 0, 4, 8, 2]))
-    assert matrix.data.get("other_name") is None
 
 
 def test_sss_matrix_add_coo_2_times(sparse_array):
@@ -171,9 +169,10 @@ def test_sss_matrix_filter_by_range_stacked():
     # Test slicing
     assert matrix[8, 1, 0] == np.array([81])
     assert matrix[8, 1, 1] == np.array([0.9])
-    assert matrix[8, 3] == [np.array([83]), np.array([0.9])]
-    assert np.all(matrix[8, :][2][0] == np.array([80, 81, 82, 83, 84], dtype=np.int64))
-    assert np.all(matrix[8, :][2][1] == np.array([0.9, 0.9, 0.9, 0.9, 0.9], dtype=np.float64))
+    assert np.all(matrix[8, 3] == np.array([(83, 0.9)],
+                                           dtype = [('scores1', '<i4'), ('scores2', '<f8')]))
+    assert np.all(matrix[8, :][2]["scores1"] == np.array([80, 81, 82, 83, 84], dtype=np.int64))
+    assert np.all(matrix[8, :][2]["scores2"] == np.array([0.9, 0.9, 0.9, 0.9, 0.9], dtype=np.float64))
     assert np.all(matrix[8, :, "scores2"][2] == np.array([0.9, 0.9, 0.9, 0.9, 0.9], dtype=np.float64))
 
     # Test more properties
@@ -181,4 +180,4 @@ def test_sss_matrix_filter_by_range_stacked():
     assert np.all(matrix.col == np.arange(0, 5))
     assert np.all(matrix.row == 8)
     assert matrix.shape == (12, 10, 2)
-    assert matrix.score_names == ['scores1', 'scores2']
+    assert matrix.score_names == ('scores1', 'scores2')
