@@ -196,8 +196,7 @@ def test_scores_by_referencey_non_tuple_score():
     queries = [spectrum_3, spectrum_4]
 
     scores = calculate_scores(references, queries, IntersectMz())
-    name_score = scores.score_names[0]
-    selected_scores = scores.scores_by_reference(spectrum_2, name_score)
+    selected_scores = scores.scores_by_reference(spectrum_2)
 
     expected_result = [(scores.queries[i], scores.scores[1, i]) for i in range(2)]
     assert selected_scores == expected_result, "Expected different scores."
@@ -254,3 +253,18 @@ def test_scores_by_query_non_tuple_score():
 
     expected_result = [(scores.references[i], scores.scores[i, 2]) for i in range(2)]
     assert selected_scores == expected_result, "Expected different scores."
+
+
+def test_sort_without_name_exception():
+    spectrum_1, spectrum_2, spectrum_3, spectrum_4 = spectra()
+    references = [spectrum_1, spectrum_2, spectrum_3]
+    queries = [spectrum_2, spectrum_3, spectrum_4]
+
+    scores = calculate_scores(references, queries, CosineGreedy())
+    with pytest.raises(IndexError) as exception:
+        _ = scores.scores_by_query(spectrum_4, sort=True)
+    assert "For sorting, score must be specified" in exception.value.args[0]
+
+    with pytest.raises(IndexError) as exception:
+        _ = scores.scores_by_reference(spectrum_3, sort=True)
+    assert "For sorting, score must be specified" in exception.value.args[0]
