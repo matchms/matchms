@@ -201,6 +201,7 @@ def test_sss_matrix_filter_by_range_stacked():
     assert np.all(matrix[8, :][2]["scores1"] == np.array([80, 81, 82, 83, 84], dtype=np.int64))
     assert np.all(matrix[8, :][2]["scores2"] == np.array([0.9, 0.9, 0.9, 0.9, 0.9], dtype=np.float64))
     assert np.all(matrix[8, :, "scores2"][2] == np.array([0.9, 0.9, 0.9, 0.9, 0.9], dtype=np.float64))
+    assert np.all(matrix[8, :, 1][2] == np.array([0.9, 0.9, 0.9, 0.9, 0.9], dtype=np.float64))
 
     # Test more properties
     assert np.all(matrix.data["scores1"] == np.arange(80, 85))
