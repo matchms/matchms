@@ -1,6 +1,5 @@
 import numpy
 import pytest
-from matchms.filtering import add_losses
 from matchms.filtering import normalize_intensities
 from .builder_Spectrum import SpectrumBuilder
 
