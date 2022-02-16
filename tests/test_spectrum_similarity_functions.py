@@ -21,7 +21,8 @@ def spectra():
 @pytest.mark.parametrize("numba_compiled", [True, False])
 @pytest.mark.parametrize("shift, expected_pairs, expected_matches", [
     (0.0, [[2., 2., 1.], [3., 3., 1.]], (2, 3)),
-    (-5.0, [[0., 0., 0.01], [1., 1., 0.01]], (2, 3))
+    (-5.0, [[0., 0., 0.01], [1., 1., 0.01]], (2, 3)),
+    (-20.0, None, None)
 ])
 def test_collect_peak_pairs(numba_compiled, shift, expected_pairs, expected_matches, spectra):
     """Test finding expected peak matches for given tolerance."""
@@ -32,52 +33,30 @@ def test_collect_peak_pairs(numba_compiled, shift, expected_pairs, expected_matc
     else:
         func = collect_peak_pairs.py_func
 
-    matching_pairs = numpy.array(func(spec1, spec2, tolerance=0.2, shift=shift))
-    assert matching_pairs.shape == expected_matches, "Expected different number of matching peaks"
-    assert numpy.allclose(matching_pairs, numpy.array(expected_pairs), atol=1e-8), "Expected different values."
-
-
-@pytest.mark.parametrize("numba_compiled", [True, False])
-def test_collect_peak_pairs_no_matches(numba_compiled, spectra):
-    """Test function for no matching peaks."""
-    shift = -20.0
-    spec1, spec2 = spectra
-
-    if numba_compiled:
-        matching_pairs = collect_peak_pairs(spec1, spec2, tolerance=0.2, shift=shift)
+    matching_pairs = func(spec1, spec2, tolerance=0.2, shift=shift)
+    if expected_matches is not None:
+        matching_pairs = numpy.array(matching_pairs)
+        assert matching_pairs.shape == expected_matches, "Expected different number of matching peaks"
+        assert numpy.allclose(matching_pairs, numpy.array(expected_pairs), atol=1e-8), "Expected different values."
     else:
-        matching_pairs = collect_peak_pairs.py_func(spec1, spec2, tolerance=0.2, shift=shift)
-    assert matching_pairs is None, "Expected pairs to be None."
+        assert matching_pairs is None, "Expected pairs to be None."
 
 
 @pytest.mark.parametrize("numba_compiled", [True, False])
-def test_find_matches_shifted(numba_compiled):
+@pytest.mark.parametrize("shift, expected_matches", [
+    (-5.0, [(0, 0), (1, 1), (2, 3)]),
+    (-20.0, [])
+])
+def test_find_matches(numba_compiled, shift, expected_matches):
     """Test finding matches with shifted peaks."""
-    shift = -5.0
     spec1_mz = numpy.array([100, 200, 300, 500], dtype="float")
-
     spec2_mz = numpy.array([105, 205.1, 300, 304.99, 500.1], dtype="float")
 
-    expected_matches = [(0, 0), (1, 1), (2, 3)]
     if numba_compiled:
         matches = find_matches(spec1_mz, spec2_mz, tolerance=0.2, shift=shift)
     else:
         matches = find_matches.py_func(spec1_mz, spec2_mz, tolerance=0.2, shift=shift)
     assert expected_matches == matches, "Expected different matches."
-
-
-@pytest.mark.parametrize("numba_compiled", [True, False])
-def test_find_matches_no_matches(numba_compiled):
-    """Test function for no matching peaks."""
-    shift = -20.0
-    spec1_mz = numpy.array([100, 200, 300, 500], dtype="float")
-
-    spec2_mz = numpy.array([105, 205.1, 300, 500.1], dtype="float")
-    if numba_compiled:
-        matches = find_matches(spec1_mz, spec2_mz, tolerance=0.2, shift=shift)
-    else:
-        matches = find_matches.py_func(spec1_mz, spec2_mz, tolerance=0.2, shift=shift)
-    assert matches == [], "Expected empty list of matches."
 
 
 @pytest.mark.parametrize("numba_compiled", [True, False])
