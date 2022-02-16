@@ -112,6 +112,28 @@ def test_comparing_spectra_with_arrays():
     assert spectrum0 != spectrum1, "Expected spectra to not be equal"
 
 
+@pytest.mark.parametrize("mz, intensities, loss_from, loss_to, loss_mz, loss_int", [
+    [np.array([10, 20, 30, 40], dtype='float'),
+     np.array([0, 1, 10, 100], dtype='float'), 0, 100,
+     np.array([8., 18., 28., 38.], dtype='float'),
+     np.array([100, 10, 1, 0], dtype='float')],
+    [np.array([10, 20, 30, 100], dtype='float'),
+     np.array([0, 1, 100, 10], dtype='float'), 0, 100,
+     np.array([18., 28., 38.], dtype='float'),
+     np.array([100, 1, 0], dtype='float')]
+])
+def test_spectrum_losses(mz, intensities, loss_from, loss_to, loss_mz, loss_int):
+    """Test if also losses (if present) are normalized correctly."""
+    metadata = {"precursor_mz": 48.0}
+    spectrum = SpectrumBuilder().with_mz(mz).with_intensities(
+        intensities).with_metadata(metadata).build()
+
+    losses = spectrum.losses(loss_from, loss_to)
+
+    assert np.all(losses.intensities == loss_int), "Expected different loss intensities"
+    assert np.all(losses.mz == loss_mz), "Expected different loss mz"
+
+
 def test_spectrum_hash(spectrum: Spectrum):
     assert hash(spectrum) == 1516465757675504211, "Expected different hash."
     assert spectrum.metadata_hash() == "92c0464af949ae56627f", \

@@ -8,7 +8,7 @@ logger = logging.getLogger("matchms")
 
 
 def normalize_intensities(spectrum_in: SpectrumType) -> SpectrumType:
-    """Normalize intensities of peaks (and losses) to unit height."""
+    """Normalize intensities of peaks to unit height."""
 
     if spectrum_in is None:
         return None
@@ -28,11 +28,5 @@ def normalize_intensities(spectrum_in: SpectrumType) -> SpectrumType:
     mz, intensities = spectrum.peaks.mz, spectrum.peaks.intensities
     normalized_intensities = intensities / max_intensity
     spectrum.peaks = Fragments(mz=mz, intensities=normalized_intensities)
-
-    # Normalize loss intensities
-    if spectrum.losses is not None and len(spectrum.losses) > 0:
-        mz, intensities = spectrum.losses.mz, spectrum.losses.intensities
-        normalized_intensities = intensities / max_intensity
-        spectrum.losses = Fragments(mz=mz, intensities=normalized_intensities)
 
     return spectrum

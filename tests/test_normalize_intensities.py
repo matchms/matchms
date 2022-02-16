@@ -19,24 +19,6 @@ def test_normalize_intensities(mz, intensities):
     assert numpy.array_equal(spectrum.peaks.mz, mz), "Expected different peak mz."
 
 
-@pytest.mark.parametrize("mz, intensities, metadata, expected_losses", [
-    [numpy.array([10, 20, 30, 40], dtype='float'), numpy.array([0, 1, 10, 100], dtype='float'),
-     {"precursor_mz": 45.0}, numpy.array([1., 0.1, 0.01, 0.], dtype='float')]
-])
-def test_normalize_intensities_losses_present(mz, intensities, metadata, expected_losses):
-    """Test if also losses (if present) are normalized correctly."""
-    spectrum_in = SpectrumBuilder().with_mz(mz).with_intensities(
-        intensities).with_metadata(metadata).build()
-
-    spectrum = add_losses(spectrum_in)
-    spectrum = normalize_intensities(spectrum)
-
-    assert max(spectrum.peaks.intensities) == 1.0, "Expected the spectrum to be scaled to 1.0."
-    assert numpy.array_equal(spectrum.peaks.intensities, intensities/100), "Expected different intensities"
-    assert max(spectrum.losses.intensities) == 1.0, "Expected the losses to be scaled to 1.0."
-    assert numpy.all(spectrum.losses.intensities == expected_losses), "Expected different loss intensities"
-
-
 def test_normalize_intensities_empty_peaks():
     """Test running filter with empty peaks spectrum."""
     spectrum_in = SpectrumBuilder().build()
