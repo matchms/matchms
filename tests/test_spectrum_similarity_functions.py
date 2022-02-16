@@ -14,8 +14,14 @@ def spectra():
 
     spec2 = numpy.array([[105, 205.1, 300, 500.1],
                          [0.1, 0.1, 1.0, 1.0]], dtype="float").T
-                   
+
     return spec1, spec2
+
+
+def get_function(numba_compiled, f):
+    if numba_compiled:
+        return f
+    return f.py_func
 
 
 @pytest.mark.parametrize("numba_compiled", [True, False])
@@ -28,12 +34,9 @@ def test_collect_peak_pairs(numba_compiled, shift, expected_pairs, expected_matc
     """Test finding expected peak matches for given tolerance."""
     spec1, spec2 = spectra
 
-    if numba_compiled:
-        func = collect_peak_pairs
-    else:
-        func = collect_peak_pairs.py_func
-
+    func = get_function(numba_compiled, collect_peak_pairs)
     matching_pairs = func(spec1, spec2, tolerance=0.2, shift=shift)
+
     if expected_matches is not None:
         matching_pairs = numpy.array(matching_pairs)
         assert matching_pairs.shape == expected_matches, "Expected different number of matching peaks"
@@ -52,10 +55,9 @@ def test_find_matches(numba_compiled, shift, expected_matches):
     spec1_mz = numpy.array([100, 200, 300, 500], dtype="float")
     spec2_mz = numpy.array([105, 205.1, 300, 304.99, 500.1], dtype="float")
 
-    if numba_compiled:
-        matches = find_matches(spec1_mz, spec2_mz, tolerance=0.2, shift=shift)
-    else:
-        matches = find_matches.py_func(spec1_mz, spec2_mz, tolerance=0.2, shift=shift)
+    func = get_function(numba_compiled, find_matches)
+    matches = func(spec1_mz, spec2_mz, tolerance=0.2, shift=shift)
+
     assert expected_matches == matches, "Expected different matches."
 
 
@@ -68,10 +70,8 @@ def test_score_best_matches(numba_compiled, matching_pairs, expected_score, spec
     matching_pairs = numpy.array(matching_pairs)
     spec1, spec2 = spectra
 
-    if numba_compiled:
-        func = score_best_matches
-    else:
-        func = score_best_matches.py_func
+    func = get_function(numba_compiled, score_best_matches)
+
     score, matches = func(matching_pairs, spec1, spec2)
     assert score == pytest.approx(expected_score[0], 1e-6), "Expected different score"
     assert matches == expected_score[1], "Expected different matches."
