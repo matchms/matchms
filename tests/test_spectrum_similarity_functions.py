@@ -6,16 +6,23 @@ from matchms.similarity.spectrum_similarity_functions import collect_peak_pairs
 from matchms.similarity.spectrum_similarity_functions import find_matches
 from matchms.similarity.spectrum_similarity_functions import score_best_matches
 
+from .builder_Spectrum import SpectrumBuilder
+
 
 @pytest.fixture
 def spectra():
-    spec1 = numpy.array([[100, 200, 300, 500],
-                         [0.1, 0.1, 1.0, 1.0]], dtype="float").T
+    builder = SpectrumBuilder()
+    spec1 = builder.with_mz([100, 200, 300, 500]).with_intensities([0.1, 0.1, 1.0, 1.0]).build()
+    spec2 = builder.with_mz([105, 205.1, 300, 500.1]).with_intensities([0.1, 0.1, 1.0, 1.0]).build()
+    return spec1.peaks.to_numpy, spec2.peaks.to_numpy
 
-    spec2 = numpy.array([[105, 205.1, 300, 500.1],
-                         [0.1, 0.1, 1.0, 1.0]], dtype="float").T
+    # spec1 = numpy.array([[100, 200, 300, 500],
+    #                      [0.1, 0.1, 1.0, 1.0]], dtype="float").T
 
-    return spec1, spec2
+    # spec2 = numpy.array([[105, 205.1, 300, 500.1],
+    #                      [0.1, 0.1, 1.0, 1.0]], dtype="float").T
+
+    # return spec1, spec2
 
 
 def get_function(numba_compiled, f):
