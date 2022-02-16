@@ -217,10 +217,9 @@ class Spectrum:
                                & (losses_mz <= loss_mz_to))
             losses = Fragments(mz=losses_mz[mask],
                                intensities=losses_intensities[mask])
-        else:
-            logger.warning("No precursor_mz found. Consider applying 'add_precursor_mz' filter first.")
-
-        return losses
+            return losses
+        logger.warning("No precursor_mz found. Consider applying 'add_precursor_mz' filter first.")
+        return None
 
     @property
     def peaks(self) -> Fragments:

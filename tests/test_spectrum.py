@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 from matplotlib import pyplot as plt
+from testfixtures import LogCapture
 from matchms import Spectrum
 from .builder_Spectrum import SpectrumBuilder
 
@@ -132,6 +133,37 @@ def test_spectrum_losses(mz, intensities, loss_from, loss_to, loss_mz, loss_int)
 
     assert np.all(losses.intensities == loss_int), "Expected different loss intensities"
     assert np.all(losses.mz == loss_mz), "Expected different loss mz"
+
+
+@pytest.mark.parametrize("mz, intensities", [
+    [np.array([100, 150, 200, 300], dtype="float"),
+     np.array([700, 200, 100, 1000], dtype="float")],
+    [[], []]
+])
+def test_spectrum_losses_without_precursor_mz(mz, intensities):
+    spectrum = SpectrumBuilder().with_mz(mz).with_intensities(intensities).build()
+
+    with LogCapture() as log:
+        _ = spectrum.losses(0, 200)
+
+    log.check(
+        ("matchms", "WARNING",
+         "No precursor_mz found. Consider applying 'add_precursor_mz' filter first.")
+    )
+
+
+def test_spectrum_losses_with_precursor_mz_wrong_type():
+    """Test if correct assert error is raised for precursor-mz as string."""
+    mz = np.array([100, 150], dtype="float")
+    intensities = np.array([700, 200], "float")
+    metadata = {"precursor_mz": "445.0"}
+    spectrum = SpectrumBuilder().with_mz(mz).with_intensities(
+        intensities).with_metadata(metadata).build()
+
+    with pytest.raises(AssertionError) as msg:
+        _ = spectrum.losses(0, 200)
+
+    assert "Expected 'precursor_mz' to be a scalar number." in str(msg.value)
 
 
 def test_spectrum_hash(spectrum: Spectrum):
