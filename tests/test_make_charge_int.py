@@ -11,7 +11,9 @@ from .builder_Spectrum import SpectrumBuilder
                                                             ([-1, "stuff"], -1),
                                                             (['-3'], -3),
                                                             ('0', 0),
-                                                            ('n/a', 'n/a')])
+                                                            ('n/a', 'n/a'),
+                                                            ('2+', 2),
+                                                            ('2-', -2)])
 def test_make_charge_int(input_charge, corrected_charge):
     """Test if example inputs are correctly converted"""
     mz = numpy.array([100, 200.])
@@ -21,7 +23,8 @@ def test_make_charge_int(input_charge, corrected_charge):
         intensities).with_metadata(metadata).build()
 
     spectrum = make_charge_int(spectrum_in)
-    assert(spectrum.get("charge") == corrected_charge), "Expected different charge integer"
+    assert spectrum.get("charge") == corrected_charge, \
+        "Expected different charge integer"
 
 
 def test_empty_spectrum():

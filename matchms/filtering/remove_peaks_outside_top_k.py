@@ -1,5 +1,5 @@
 import numpy
-from ..Spikes import Spikes
+from ..Fragments import Fragments
 from ..typing import SpectrumType
 
 
@@ -39,6 +39,6 @@ def remove_peaks_outside_top_k(spectrum_in: SpectrumType, k: int = 6,
 
     keep_idx.sort()
     new_mzs, new_intensities = mzs[keep_idx], intensities[keep_idx]
-    spectrum.peaks = Spikes(mz=new_mzs, intensities=new_intensities)
+    spectrum.peaks = Fragments(mz=new_mzs, intensities=new_intensities)
 
     return spectrum

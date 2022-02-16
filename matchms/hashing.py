@@ -2,10 +2,10 @@
 """
 import hashlib
 import json
-from .Spikes import Spikes
+from .Fragments import Fragments
 
 
-def spectrum_hash(peaks: Spikes, hash_length: int = 20,
+def spectrum_hash(peaks: Fragments, hash_length: int = 20,
                   mz_precision: int = 5, intensity_precision: int = 2):
     """Compute hash from mz-intensity pairs of all peaks in spectrum.
     Method is inspired by SPLASH (doi:10.1038/nbt.3689).

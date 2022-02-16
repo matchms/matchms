@@ -4,8 +4,8 @@ from typing import IO
 from typing import Dict
 from typing import List
 from typing import Union
+from ..Fragments import Fragments
 from ..Spectrum import Spectrum
-from ..Spikes import Spikes
 
 
 logger = logging.getLogger("matchms")
@@ -70,7 +70,7 @@ def _write_spectrum(spectrum: Spectrum, outfile: IO, write_peak_comments: bool):
     outfile.write(os.linesep)
 
 
-def _write_peaks(peaks: Spikes, peak_comments: Spectrum.peak_comments, outfile: IO):
+def _write_peaks(peaks: Fragments, peak_comments: Spectrum.peak_comments, outfile: IO):
     outfile.write(f"NUM PEAKS: {len(peaks)}\n")
     for mz, intensity in zip(peaks.mz, peaks.intensities):
         peak_comment = _format_peak_comment(mz, peak_comments)
@@ -94,7 +94,7 @@ def _format_peak_comment(mz: Union[int, float], peak_comments: Dict):
 
 
 def _is_num_peaks(key: str) -> bool:
-    return key.lower().startswith("num peaks")
+    return key.lower().startswith("num peaks") or key.lower().startswith("num_peaks")
 
 
 def _is_peak_comments(key: str) -> bool:

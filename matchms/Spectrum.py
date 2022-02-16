@@ -1,17 +1,29 @@
 from typing import Optional
 import matplotlib.pyplot as plt
-import numpy
+import numpy as np
 from matchms.plotting.spectrum_plots import plot_spectra_mirror
 from matchms.plotting.spectrum_plots import plot_spectrum
+from .filtering.add_precursor_mz import _add_precursor_mz_metadata
+from .filtering.add_retention import _add_retention
+from .filtering.interpret_pepmass import _interpret_pepmass_metadata
+from .filtering.make_charge_int import _convert_charge_to_int
+from .Fragments import Fragments
 from .hashing import metadata_hash
 from .hashing import spectrum_hash
-from .Spikes import Spikes
+from .Metadata import Metadata
 
 
 class Spectrum:
-    """Container for a collection of peaks, losses and metadata
+    """Container for a collection of peaks, losses and metadata.
 
-    For example
+    Spectrum peaks are stored as :class:`~matchms.Fragments` object which can be
+    addressed calling `spectrum.peaks` and contains m/z values and the respective
+    peak intensities.
+
+    Spectrum metadata is stored as :class:`~matchms.Metadata` object which can be
+    addressed by `spectrum.metadata`.
+
+    Code example
 
     .. testcode::
 
@@ -20,9 +32,9 @@ class Spectrum:
         from matchms.similarity import CosineGreedy
 
         spectrum = Spectrum(mz=np.array([100, 150, 200.]),
-                              intensities=np.array([0.7, 0.2, 0.1]),
-                              metadata={'id': 'spectrum1',
-                                        "peak_comments": {200.: "the peak at 200 m/z"}})
+                            intensities=np.array([0.7, 0.2, 0.1]),
+                            metadata={'id': 'spectrum1',
+                                      "peak_comments": {200.: "the peak at 200 m/z"}})
 
         print(spectrum.peaks.mz[0])
         print(spectrum.peaks.intensities[0])
@@ -40,17 +52,17 @@ class Spectrum:
 
     Attributes
     ----------
-    peaks: ~matchms.Spikes.Spikes
+    peaks: ~matchms.Fragments.Fragments
         Peaks of spectrum
-    losses: ~matchms.Spikes.Spikes or None
+    losses: ~matchms.Fragments.Fragments or None
         Losses of spectrum, the difference between the precursor and all peaks.
 
         Can be filled with
 
         .. code-block ::
 
-            from matchms import Spikes
-            spectrum.losess = Spikes(mz=np.array([50.]), intensities=np.array([0.1]))
+            from matchms import Fragments
+            spectrum.losess = Fragments(mz=np.array([50.]), intensities=np.array([0.1]))
     metadata: dict
         Dict of metadata with for example the scan number of precursor m/z.
 
@@ -58,10 +70,10 @@ class Spectrum:
 
     _peak_comments_mz_tolerance = 1e-05
 
-    def __init__(self,
-                 mz: numpy.array,
-                 intensities: numpy.array,
-                 metadata: Optional[dict] = None):
+    def __init__(self, mz: np.array,
+                 intensities: np.array,
+                 metadata: Optional[dict] = None,
+                 metadata_harmonization: bool = True):
         """
 
         Parameters
@@ -72,30 +84,36 @@ class Spectrum:
             Array of intensities for the peaks
         metadata
             Dictionary with for example the scan number of precursor m/z.
+        metadata_harmonization : bool, optional
+            Set to False if default metadata filters should not be applied.
+            The default is True.
         """
-        if metadata is None:
-            self._metadata = {}
-        else:
-            self._metadata = metadata
-        self.peaks = Spikes(mz=mz, intensities=intensities)
+        self._metadata = Metadata(metadata)
+        if metadata_harmonization is True:
+            self._apply_metadata_harmonization()
+        self.peaks = Fragments(mz=mz, intensities=intensities)
         self.losses = None
 
     def __eq__(self, other):
         return \
             self.peaks == other.peaks and \
             self.losses == other.losses and \
-            self.__metadata_eq(other.metadata)
+            self._metadata == other._metadata
 
-    def __metadata_eq(self, other_metadata):
-        if self.metadata.keys() != other_metadata.keys():
-            return False
-        for i, value in enumerate(list(self.metadata.values())):
-            if isinstance(value, numpy.ndarray):
-                if not numpy.all(value == list(other_metadata.values())[i]):
-                    return False
-            elif value != list(other_metadata.values())[i]:
-                return False
-        return True
+    def _apply_metadata_harmonization(self):
+        metadata_filtered = _interpret_pepmass_metadata(self.metadata)
+        if metadata_filtered.get("ionmode") is not None:
+            metadata_filtered["ionmode"] = self.metadata.get("ionmode").lower()
+        metadata_filtered = _add_precursor_mz_metadata(metadata_filtered)
+
+        if metadata_filtered.get("retention_time") is not None:
+            metadata_filtered = _add_retention(metadata_filtered, "retention_time", "retention_time")
+        if metadata_filtered.get("retention_index") is not None:
+            metadata_filtered = _add_retention(metadata_filtered, "retention_index", "retention_index")
+        charge = metadata_filtered.get("charge")
+        if not isinstance(charge, int) and not _convert_charge_to_int(charge) is None:
+            metadata_filtered["charge"] = _convert_charge_to_int(charge)
+        self._metadata = Metadata(metadata_filtered)
 
     def __hash__(self):
         """Return a integer hash which is computed from both
@@ -114,13 +132,14 @@ class Spectrum:
         """Return a (truncated) sha256-based hash which is generated
         based on the spectrum metadata.
         Spectra with same metadata results in same metadata_hash."""
-        return metadata_hash(self.metadata)
+        return metadata_hash(self._metadata.data)
 
     def clone(self):
         """Return a deepcopy of the spectrum instance."""
         clone = Spectrum(mz=self.peaks.mz,
                          intensities=self.peaks.intensities,
-                         metadata=self.metadata)
+                         metadata=self._metadata.data,
+                         metadata_harmonization=False)
         clone.losses = self.losses
         return clone
 
@@ -163,7 +182,7 @@ class Spectrum:
             val = self.metadata[key]
 
         """
-        return self._metadata.copy().get(key, default)
+        return self._metadata.get(key, default)
 
     def set(self, key: str, value):
         """Set value in :attr:`metadata` dict. Shorthand for
@@ -173,31 +192,31 @@ class Spectrum:
             self.metadata[key] = val
 
         """
-        self._metadata[key] = value
+        self._metadata.set(key, value)
         return self
 
     @property
     def metadata(self):
-        return self._metadata.copy()
+        return self._metadata.data.copy()
 
     @metadata.setter
     def metadata(self, value):
-        self._metadata = value
+        self._metadata.data = value
 
     @property
-    def losses(self) -> Optional[Spikes]:
+    def losses(self) -> Optional[Fragments]:
         return self._losses.clone() if self._losses is not None else None
 
     @losses.setter
-    def losses(self, value: Spikes):
+    def losses(self, value: Fragments):
         self._losses = value
 
     @property
-    def peaks(self) -> Spikes:
+    def peaks(self) -> Fragments:
         return self._peaks.clone()
 
     @peaks.setter
-    def peaks(self, value: Spikes):
+    def peaks(self, value: Fragments):
         if isinstance(self.get("peak_comments"), dict):
             self._reiterate_peak_comments(value)
         self._peaks = value
@@ -214,7 +233,7 @@ class Spectrum:
     def update_peak_comments_mz_tolerance(cls, mz_tolerance: float):
         cls._peak_comments_mz_tolerance = mz_tolerance
 
-    def _reiterate_peak_comments(self, peaks: Spikes):
+    def _reiterate_peak_comments(self, peaks: Fragments):
         """Update the peak comments to reflect the new peaks."""
         if not isinstance(self.get("peak_comments", None), dict):
             return None
@@ -230,8 +249,8 @@ class Spectrum:
 
         for key in list(self.metadata["peak_comments"].keys()):
             if key not in peaks.mz:
-                if numpy.isclose(key, peaks.mz, rtol=mz_tolerance).any():
-                    new_key = peaks.mz[numpy.isclose(key, peaks.mz, rtol=mz_tolerance).argmax()]
+                if np.isclose(key, peaks.mz, rtol=mz_tolerance).any():
+                    new_key = peaks.mz[np.isclose(key, peaks.mz, rtol=mz_tolerance).argmax()]
                     new_key_comment = self.metadata["peak_comments"].get(new_key, None)
                     new_key_comment = _append_new_comment(key)
                     self._metadata["peak_comments"][new_key] = new_key_comment

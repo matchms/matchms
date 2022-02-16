@@ -1,8 +1,8 @@
 import logging
+from ..metadata_utils import convert_smiles_to_inchi
+from ..metadata_utils import is_valid_inchi
+from ..metadata_utils import is_valid_smiles
 from ..typing import SpectrumType
-from ..utils import convert_smiles_to_inchi
-from ..utils import is_valid_inchi
-from ..utils import is_valid_smiles
 
 
 logger = logging.getLogger("matchms")

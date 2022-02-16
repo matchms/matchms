@@ -20,17 +20,17 @@ class SimilarityNetwork:
         spectrum_1 = Spectrum(mz=np.array([100, 150, 200.]),
                               intensities=np.array([0.7, 0.2, 0.1]),
                               metadata={"precursor_mz": 100.0,
-                                        "testID": "one"})
+                                        "test_id": "one"})
         spectrum_2 = Spectrum(mz=np.array([104.9, 140, 190.]),
                               intensities=np.array([0.4, 0.2, 0.1]),
                               metadata={"precursor_mz": 105.0,
-                                        "testID": "two"})
+                                        "test_id": "two"})
 
         # Use factory to construct a similarity function
         modified_cosine = ModifiedCosine(tolerance=0.2)
         spectrums = [spectrum_1, spectrum_2]
         scores = calculate_scores(spectrums, spectrums, modified_cosine)
-        ms_network = SimilarityNetwork(identifier_key="testID")
+        ms_network = SimilarityNetwork(identifier_key="test_id")
         ms_network.create_network(scores)
 
         nodes = list(ms_network.graph.nodes())
@@ -44,7 +44,7 @@ class SimilarityNetwork:
         ['one', 'two']
 
     """
-    def __init__(self, identifier_key: str = "spectrumid",
+    def __init__(self, identifier_key: str = "spectrum_id",
                  top_n: int = 20,
                  max_links: int = 10,
                  score_cutoff: float = 0.7,
@@ -55,7 +55,7 @@ class SimilarityNetwork:
         ----------
         identifier_key
             Metadata key for unique intentifier for each spectrum in scores.
-            Will also be used for the naming the network nodes. Default is 'spectrumid'.
+            Will also be used for the naming the network nodes. Default is 'spectrum_id'.
         top_n
             Consider edge between spectrumA and spectrumB if score falls into
             top_n for spectrumA or spectrumB (link_method="single"), or into

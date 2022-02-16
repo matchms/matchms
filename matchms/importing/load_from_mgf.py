@@ -6,7 +6,8 @@ from pyteomics.mgf import MGF
 from ..Spectrum import Spectrum
 
 
-def load_from_mgf(source: Union[str, TextIO]) -> Generator[Spectrum, None, None]:
+def load_from_mgf(source: Union[str, TextIO],
+                  metadata_harmonization: bool = True) -> Generator[Spectrum, None, None]:
     """Load spectrum(s) from mgf file.
 
     This function will create ~matchms.Spectrum for every spectrum in the given
@@ -30,6 +31,9 @@ def load_from_mgf(source: Union[str, TextIO]) -> Generator[Spectrum, None, None]
     source:
         Accepts both filename (with path) for .mgf file or a file-like
         object from a preloaded MGF file.
+    metadata_harmonization : bool, optional
+        Set to False if metadata harmonization to default keys is not desired.
+        The default is True.
     """
 
     for pyteomics_spectrum in MGF(source, convert_arrays=1):
@@ -44,4 +48,7 @@ def load_from_mgf(source: Union[str, TextIO]) -> Generator[Spectrum, None, None]
             mz = mz[idx_sorted]
             intensities = intensities[idx_sorted]
 
-        yield Spectrum(mz=mz, intensities=intensities, metadata=metadata)
+        yield Spectrum(mz=mz,
+                       intensities=intensities,
+                       metadata=metadata,
+                       metadata_harmonization=metadata_harmonization)

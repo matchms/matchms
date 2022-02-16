@@ -4,7 +4,7 @@ from typing import Tuple
 from matchms import Scores
 
 
-def get_top_hits(scores: Scores, identifier_key: str = "spectrumid",
+def get_top_hits(scores: Scores, identifier_key: str = "spectrum_id",
                  top_n: int = 25, search_by: str = "queries",
                  ignore_diagonal: bool = False) -> Tuple[dict, dict]:
     """Get top_n highest scores (and indices) for every entry.
@@ -15,7 +15,7 @@ def get_top_hits(scores: Scores, identifier_key: str = "spectrumid",
         Matchms Scores object containing all similarities.
     identifier_key
         Metadata key for unique intentifier for each spectrum in scores.
-        Will also be used for the naming the network nodes. Default is 'spectrumid'.
+        Will also be used for the naming the network nodes. Default is 'spectrum_id'.
     top_n
         Return the indexes and scores for the top_n highest scores. Scores between
         a spectrum with itself (diagonal of scores.scores) will not be taken into

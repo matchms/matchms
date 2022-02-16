@@ -53,6 +53,7 @@ setup(
         "networkx",
         "numba >=0.47",
         "numpy",
+        "pickydict >= 0.3.0",
         "pyteomics >=4.2",
         "requests",
         "scipy",

@@ -1,7 +1,7 @@
 import logging
 import numpy
 from matchms.typing import SpectrumType
-from ..Spikes import Spikes
+from ..Fragments import Fragments
 
 
 logger = logging.getLogger("matchms")
@@ -27,12 +27,12 @@ def normalize_intensities(spectrum_in: SpectrumType) -> SpectrumType:
     # Normalize peak intensities
     mz, intensities = spectrum.peaks.mz, spectrum.peaks.intensities
     normalized_intensities = intensities / max_intensity
-    spectrum.peaks = Spikes(mz=mz, intensities=normalized_intensities)
+    spectrum.peaks = Fragments(mz=mz, intensities=normalized_intensities)
 
     # Normalize loss intensities
     if spectrum.losses is not None and len(spectrum.losses) > 0:
         mz, intensities = spectrum.losses.mz, spectrum.losses.intensities
         normalized_intensities = intensities / max_intensity
-        spectrum.losses = Spikes(mz=mz, intensities=normalized_intensities)
+        spectrum.losses = Fragments(mz=mz, intensities=normalized_intensities)
 
     return spectrum

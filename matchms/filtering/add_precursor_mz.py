@@ -1,14 +1,30 @@
 import logging
 from matchms.utils import get_first_common_element
-from ..typing import SpectrumType
 
 
 logger = logging.getLogger("matchms")
 
 
-_accepted_keys = ["precursor_mz", "precursormz", "precursor_mass"]
+_default_key = "precursor_mz"
+_accepted_keys = ["precursormz", "precursor_mass"]
 _accepted_types = (float, str, int)
 _accepted_missing_entries = ["", "N/A", "NA", "n/a"]
+
+
+def add_precursor_mz(spectrum_in):
+    """Add precursor_mz to correct field and make it a float.
+
+    For missing precursor_mz field: check if there is "pepmass"" entry instead.
+    For string parsed as precursor_mz: convert to float.
+    """
+    if spectrum_in is None:
+        return None
+
+    spectrum = spectrum_in.clone()
+
+    metadata_updated = _add_precursor_mz_metadata(spectrum.metadata)
+    spectrum.metadata = metadata_updated
+    return spectrum
 
 
 def _convert_precursor_mz(precursor_mz):
@@ -29,29 +45,24 @@ def _convert_precursor_mz(precursor_mz):
     return precursor_mz
 
 
-def add_precursor_mz(spectrum_in: SpectrumType) -> SpectrumType:
-    """Add precursor_mz to correct field and make it a float.
-
-    For missing precursor_mz field: check if there is "pepmass"" entry instead.
-    For string parsed as precursor_mz: convert to float.
-    """
-    if spectrum_in is None:
-        return None
-
-    spectrum = spectrum_in.clone()
-
-    precursor_mz_key = get_first_common_element(spectrum.metadata.keys(), _accepted_keys)
-    precursor_mz = spectrum.get(precursor_mz_key)
+def _add_precursor_mz_metadata(metadata):
+    precursor_mz_key = get_first_common_element([_default_key] + _accepted_keys,
+                                                metadata.keys())
+    precursor_mz = metadata.get(precursor_mz_key)
     precursor_mz = _convert_precursor_mz(precursor_mz)
     if isinstance(precursor_mz, (float, int)):
-        spectrum.set("precursor_mz", float(precursor_mz))
-        return spectrum
+        metadata["precursor_mz"] = float(precursor_mz)
+        for key in _accepted_keys:
+            metadata.pop(key, None)
+        return metadata
 
-    pepmass = spectrum.get("pepmass", None)
+    pepmass = metadata.get("pepmass", None)
     if pepmass is not None and _convert_precursor_mz(pepmass[0]) is not None:
-        spectrum.set("precursor_mz", pepmass[0])
-        logger.info("Added precursor_mz entry based on field 'pepmass'.")
-        return spectrum
+        metadata["precursor_mz"] = pepmass[0]
+        logger.warning("Added precursor_mz entry based on field 'pepmass'."
+                       "Consider running 'interpret_pepmass() filter first.")
+        return metadata
 
     logger.warning("No precursor_mz found in metadata.")
-    return spectrum
+    metadata.pop("precursor_mz", None)
+    return metadata

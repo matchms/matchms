@@ -1,6 +1,6 @@
 import numpy
+from matchms import Fragments
 from matchms import Spectrum
-from matchms import Spikes
 from matchms.filtering import normalize_intensities
 
 
@@ -30,7 +30,7 @@ def test_reiterating_peak_comments():
     spectrum = Spectrum(mz=mz, intensities=intensities,
                         metadata={"peak_comments": peak_comments})
 
-    spectrum.peaks = Spikes(mz=numpy.array([100.0004, 110., 400.018], dtype='float'),
-                            intensities=numpy.array([5, 4, 7], dtype='float'))
+    spectrum.peaks = Fragments(mz=numpy.array([100.0004, 110., 400.018], dtype='float'),
+                               intensities=numpy.array([5, 4, 7], dtype='float'))
 
     assert spectrum.peak_comments == {100.0004: "m/z 100.0003; m/z 100.0005", 110.: "m/z 110.", 400.018: "m/z 400.0176"}
