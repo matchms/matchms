@@ -35,8 +35,10 @@ def test_metadata_match_strings(spectrums):
 def test_metadata_match_strings_pair(spectrums):
     """Test basic metadata matching between string entries."""
     similarity_score = MetadataMatch(field="instrument_type")
-    score = similarity_score.pair(spectrums[0], spectrums[3])
-    assert score == False, "Expected different score."
+    score = similarity_score.pair(spectrums[0], spectrums[1])
+    assert score == np.array(False, dtype=bool), "Expected different score."
+    score = similarity_score.pair(spectrums[0], spectrums[2])
+    assert score == np.array(True, dtype=bool), "Expected different score."
 
 
 def test_metadata_match_strings_wrong_method(spectrums, caplog):
