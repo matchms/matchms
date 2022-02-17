@@ -17,7 +17,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Metadata harmonization will now happen by default! This includes changing field name style and applying known key conversions. To avoid the key conversions user have to make this explicit by setting `metadata_harmonization=False` [#293](https://github.com/matchms/matchms/pull/293)
+- Losses will no longer be stored as part of a `Spectrum` object, but will be computed on the fly (using `losses = spectrum.losses(from, to)`)[#321](https://github.com/matchms/matchms/pull/321)
 - `Spikes` class has become `Fragments` class [#293](https://github.com/matchms/matchms/pull/293)
+
+### Removed
+
+- `add_losses()` filter was removed. Losses will no longer be stored as part of a `Spectrum` object, but will be computed on the fly (using `losses = spectrum.losses(from, to)`)[#321](https://github.com/matchms/matchms/pull/321)
 
 ### Fixed
 
