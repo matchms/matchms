@@ -32,6 +32,13 @@ def test_metadata_match_strings(spectrums):
     assert np.all(scores.scores == [[1, 0], [0, 0]]), "Expected different scores."
 
 
+def test_metadata_match_strings_pair(spectrums):
+    """Test basic metadata matching between string entries."""
+    similarity_score = MetadataMatch(field="instrument_type")
+    score = similarity_score.pair(spectrums[0], spectrums[3])
+    assert score == False, "Expected different score."
+
+
 def test_metadata_match_strings_wrong_method(spectrums, caplog):
     """Test basic metadata matching between string entries."""
     references = spectrums[:2]
@@ -42,6 +49,15 @@ def test_metadata_match_strings_wrong_method(spectrums, caplog):
     assert np.all(scores.scores == [[0, 0], [0, 0]]), "Expected different scores."
     msg = "not compatible with 'difference' method"
     assert msg in caplog.text
+
+
+def test_metadata_match_numerical_pair(spectrums):
+    """Test basic metadata matching between string entries."""
+    similarity_score = MetadataMatch(field="retention_time",
+                                     matching_type="difference",
+                                     tolerance=0.6)
+    score = similarity_score.pair(spectrums[0], spectrums[1])
+    assert score == 1, "Expected different score."
 
 
 @pytest.mark.parametrize("tolerance, expected", [

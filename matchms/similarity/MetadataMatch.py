@@ -26,16 +26,20 @@ class MetadataMatch(BaseSimilarity):
 
         spectrum_1 = Spectrum(mz=np.array([]),
                               intensities=np.array([]),
-                              metadata={"instrument_type": "orbitrap"})
+                              metadata={"instrument_type": "orbitrap",
+                                        "id": 1})
         spectrum_2 = Spectrum(mz=np.array([]),
                               intensities=np.array([]),
-                              metadata={"instrument_type": "qtof"})
+                              metadata={"instrument_type": "qtof",
+                                        "id": 2})
         spectrum_3 = Spectrum(mz=np.array([]),
                               intensities=np.array([]),
-                              metadata={"instrument_type": "qtof"})
+                              metadata={"instrument_type": "qtof",
+                                        "id": 3})
         spectrum_4 = Spectrum(mz=np.array([]),
                               intensities=np.array([]),
-                              metadata={"instrument_type": "orbitrap"})
+                              metadata={"instrument_type": "orbitrap",
+                                        "id": 4})
         references = [spectrum_1, spectrum_2]
         queries = [spectrum_3, spectrum_4]
 
