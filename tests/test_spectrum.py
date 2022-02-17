@@ -58,7 +58,8 @@ def test_spectrum_getters_return_copies():
     [{"precursor mass": 400.768, "Some Key": "Whatever.", "NEW\tSTUFF": "XYZ"},
      {"precursor_mz": 400.768, "some_key": "Whatever.", "new_stuff": "XYZ"}],
     [{"Name": "Whatever123", "ION MODE": "XYZ"},
-     {"compound_name": "Whatever123", "ionmode": "XYZ"}]
+     {"compound_name": "Whatever123", "ionmode": "XYZ"}],
+    [{"ri": "200"}, {"retention_index": "200"}]
 ])
 def test_spectrum_metadata_harmonization(input_dict, expected_dict):
     builder = SpectrumBuilder().with_metadata(input_dict, metadata_harmonization=False)
@@ -179,7 +180,9 @@ def test_spectrum_clone(spectrum, default_filtering):
     [{"charge": "2+"}, True, {"charge": 2}],
     [{"charge": -1}, True, {"charge": -1}],
     [{"charge": [-1, 0]}, True, {"charge": -1}],
-    [{"ionmode": "Negative"}, True, {"ionmode": "negative"}]])
+    [{"ionmode": "Negative"}, True, {"ionmode": "negative"}],
+    [{"ri": "200"}, True, {"retention_index": 200.0}],
+    [{"rt": "200"}, True, {"retention_time": 200.0}]])
 def test_metadata_default_filtering(spectrum, input_dict, default_filtering, expected):
     spectrum = SpectrumBuilder().from_spectrum(spectrum).with_metadata(
         input_dict,

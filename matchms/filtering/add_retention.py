@@ -15,7 +15,7 @@ _retention_time_keys = ["retention_time", "retentiontime", "rt", "scan_start_tim
 _retention_index_keys = ["retention_index", "retentionindex", "ri"]
 
 
-def safe_store_value(spectrum: SpectrumType, value: Any, target_key: str) -> SpectrumType:
+def safe_store_value(metadata: dict, value: Any, target_key: str) -> dict:
     """Helper function to safely store a value in the target key without throwing an exception, but storing 'None' instead.
 
     Parameters
@@ -33,8 +33,8 @@ def safe_store_value(spectrum: SpectrumType, value: Any, target_key: str) -> Spe
     """
     if value is not None:   # one of accepted keys is present
         value = safe_convert_to_float(value)
-    spectrum.set(target_key, value)
-    return spectrum
+    metadata[target_key] = value
+    return metadata
 
 
 def safe_convert_to_float(value: Any) -> Optional[float]:
@@ -49,18 +49,21 @@ def safe_convert_to_float(value: Any) -> Optional[float]:
     -------
     Converted float value or 'None' if conversion is not possible.
     """
-    if isinstance(value, list) and len(value) == 1:
-        value = value[0]
+    if isinstance(value, list):
+        if len(value) == 1:
+            value = value[0]
+        else:
+            return None
     try:
         value = float(value)
         rt = value if value >= 0 else None  # discard negative RT values
-    except ValueError:
+    except (ValueError, TypeError):
         logger.warning("%s can't be converted to float.", str(value))
         rt = None
     return rt
 
 
-def _add_retention(spectrum: SpectrumType, target_key: str, accepted_keys: List[str]) -> SpectrumType:
+def _add_retention(metadata: dict, target_key: str, accepted_keys: List[str]) -> dict:
     """Add value from one of accepted keys to target key.
 
     Parameters
@@ -76,13 +79,13 @@ def _add_retention(spectrum: SpectrumType, target_key: str, accepted_keys: List[
     -------
     Spectrum with value from first accepted key stored under target_key.
     """
-    common_keys = get_common_keys(spectrum.metadata.keys(), accepted_keys)
-    values_for_keys = filter_none([spectrum.get(key) for key in common_keys])
+    common_keys = get_common_keys(metadata.keys(), accepted_keys)
+    values_for_keys = filter_none([metadata[key] for key in common_keys])
     values = list(map(safe_convert_to_float, values_for_keys))
     value = next(filter_none(values), None)
 
-    spectrum = safe_store_value(spectrum, value, target_key)
-    return spectrum
+    metadata = safe_store_value(metadata, value, target_key)
+    return metadata
 
 
 def add_retention_time(spectrum_in: SpectrumType) -> SpectrumType:
@@ -105,7 +108,7 @@ def add_retention_time(spectrum_in: SpectrumType) -> SpectrumType:
     spectrum = spectrum_in.clone()
 
     target_key = "retention_time"
-    spectrum = _add_retention(spectrum, target_key, _retention_time_keys)
+    spectrum.metadata = _add_retention(spectrum.metadata, target_key, _retention_time_keys)
     return spectrum
 
 
@@ -127,5 +130,5 @@ def add_retention_index(spectrum_in: SpectrumType) -> SpectrumType:
     spectrum = spectrum_in.clone()
 
     target_key = "retention_index"
-    spectrum = _add_retention(spectrum, target_key, _retention_index_keys)
+    spectrum.metadata = _add_retention(spectrum.metadata, target_key, _retention_index_keys)
     return spectrum
