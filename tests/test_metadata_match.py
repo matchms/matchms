@@ -67,6 +67,8 @@ def test_metadata_match_strings_pair(spectrums):
     similarity_score = MetadataMatch(field="instrument_type")
     score = similarity_score.pair(spectrums[0], spectrums[1])
     assert score == np.array(False, dtype=bool), "Expected different score."
+    score = similarity_score.pair(spectrums[0], spectrums[3])
+    assert score == np.array(False, dtype=bool), "Expected different score."
     score = similarity_score.pair(spectrums[0], spectrums[2])
     assert score == np.array(True, dtype=bool), "Expected different score."
 
