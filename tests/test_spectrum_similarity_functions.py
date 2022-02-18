@@ -8,7 +8,6 @@ from matchms.similarity.spectrum_similarity_functions import (
 from .builder_Spectrum import SpectrumBuilder
 
 
-
 @pytest.fixture
 def spectra():
     builder = SpectrumBuilder()
