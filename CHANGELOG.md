@@ -7,8 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.14.0] - 2022-02-18
+
+This is the first of a few releases to work our way towards matchms 1.0.0, which also means that a few things in the API will likely change. Here the main change is that `Spectrum.metadata` is no longer a simple Python dictionary but became a `Metadata` object. In this context metadata field-names/keys will now be harmonized by default (e.g. "Precursor Mass" will become "precursor_mz). For list of conversions see [matchms key conversion table](https://github.com/matchms/matchms/blob/development/matchms/data/known_key_conversions.csv).
+
 ### Added
 
+- new `MetadataMatch`similarity measure in matchms.similarity. This can be used to find matches between metadata entries and currently supports either full string matches or matches of numerical entries within a specified tolerance [#315](https://github.com/matchms/matchms/pull/315)
 - metadata is now stored using new `Metadata` class which automatically applied restrictions to used field names/keys to avoid confusion between different format styles [#293](https://github.com/matchms/matchms/pull/293)
 - all metadata keys must be lower-case, spaces will be changed to underscores.
 - Known key conversions are applied to metadata entries using a [matchms key conversion table](https://github.com/matchms/matchms/blob/development/matchms/data/known_key_conversions.csv)
@@ -405,7 +410,8 @@ Contains three plot types: `plot_spectrum()` or `spectrum.plot()`, `plot_spectra
 - This is the initial version of Spec2Vec from https://github.com/iomega/Spec2Vec
 - (later splitted into matchms + spec2vec)
 
-[Unreleased]: https://github.com/matchms/matchms/compare/0.13.0...HEAD
+[Unreleased]: https://github.com/matchms/matchms/compare/0.14.0...HEAD
+[0.14.0]: https://github.com/matchms/matchms/compare/0.13.0...0.14.0
 [0.13.0]: https://github.com/matchms/matchms/compare/0.12.0...0.13.0
 [0.12.0]: https://github.com/matchms/matchms/compare/0.11.0...0.12.0
 [0.11.0]: https://github.com/matchms/matchms/compare/0.10.0...0.11.0
