@@ -21,6 +21,7 @@ class Pipeline:
         self.is_symmetric = False
 
     def run(self):
+        self.check_pipeline()
         self.import_data()
         
         # Processing
@@ -32,6 +33,11 @@ class Pipeline:
         # Score computation and masking
         pass
 
+    def check_pipeline(self):
+        # check if files exist
+        # check if all steps exist
+        pass
+        
     def import_data(self, query_data, reference_data=None):
         if isinstance(query_data, str):
             query_data = [query_data]
