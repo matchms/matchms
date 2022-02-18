@@ -40,7 +40,7 @@ jobs:
         run: prospector -o grouped -o pylint:pylint-report.txt
       - name: Check whether import statements are used consistently
         shell: bash -l {0}
-        run: isort --check-only --diff --conda-env matchms-dev
+        run: isort --check-only --diff --conda-env matchms-dev --recursive
       - name: SonarCloud Scan
         if: github.repository == 'matchms/matchms'
         uses: sonarsource/sonarcloud-github-action@master
