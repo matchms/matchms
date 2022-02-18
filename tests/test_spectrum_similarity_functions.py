@@ -2,7 +2,6 @@
 pure Python version."""
 import numpy
 import pytest
-
 from matchms.similarity.spectrum_similarity_functions import (
     collect_peak_pairs, find_matches, score_best_matches)
 from .builder_Spectrum import SpectrumBuilder
