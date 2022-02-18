@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 from matplotlib import pyplot as plt
+from testfixtures import LogCapture
 from matchms import Spectrum
 from .builder_Spectrum import SpectrumBuilder
 
@@ -110,6 +111,63 @@ def test_comparing_spectra_with_arrays():
     spectrum1 = builder.with_metadata({"fingerprint": fingerprint1}).build()
 
     assert spectrum0 != spectrum1, "Expected spectra to not be equal"
+
+
+@pytest.mark.parametrize("mz, intensities, loss_range, loss_mz, loss_int", [
+    [np.array([10, 20, 30, 40], dtype='float'),
+     np.array([0, 1, 10, 100], dtype='float'), (0, 100),
+     np.array([8., 18., 28., 38.], dtype='float'),
+     np.array([100, 10, 1, 0], dtype='float')],
+    [np.array([10, 20, 30, 100], dtype='float'),
+     np.array([0, 1, 100, 10], dtype='float'), (0, 100),
+     np.array([18., 28., 38.], dtype='float'),
+     np.array([100, 1, 0], dtype='float')],
+    [np.array([10, 20, 30, 100], dtype='float'),
+     np.array([0, 1, 100, 10], dtype='float'), (0, 20),
+     np.array([18.], dtype='float'),
+     np.array([100], dtype='float')]
+])
+def test_spectrum_losses(mz, intensities, loss_range, loss_mz, loss_int):
+    """Test if also losses (if present) are normalized correctly."""
+    metadata = {"precursor_mz": 48.0}
+    spectrum = SpectrumBuilder().with_mz(mz).with_intensities(
+        intensities).with_metadata(metadata).build()
+
+    losses = spectrum.losses(loss_range[0], loss_range[1])
+
+    assert np.all(losses.intensities == loss_int), "Expected different loss intensities"
+    assert np.all(losses.mz == loss_mz), "Expected different loss mz"
+
+
+@pytest.mark.parametrize("mz, intensities", [
+    [np.array([100, 150, 200, 300], dtype="float"),
+     np.array([700, 200, 100, 1000], dtype="float")],
+    [[], []]
+])
+def test_spectrum_losses_without_precursor_mz(mz, intensities):
+    spectrum = SpectrumBuilder().with_mz(mz).with_intensities(intensities).build()
+
+    with LogCapture() as log:
+        _ = spectrum.losses(0, 200)
+
+    log.check(
+        ("matchms", "WARNING",
+         "No precursor_mz found. Consider applying 'add_precursor_mz' filter first.")
+    )
+
+
+def test_spectrum_losses_with_precursor_mz_wrong_type():
+    """Test if correct assert error is raised for precursor-mz as string."""
+    mz = np.array([100, 150], dtype="float")
+    intensities = np.array([700, 200], "float")
+    metadata = {"precursor_mz": "445.0"}
+    spectrum = SpectrumBuilder().with_mz(mz).with_intensities(
+        intensities).with_metadata(metadata).build()
+
+    with pytest.raises(AssertionError) as msg:
+        _ = spectrum.losses(0, 200)
+
+    assert "Expected 'precursor_mz' to be a scalar number." in str(msg.value)
 
 
 def test_spectrum_hash(spectrum: Spectrum):
