@@ -1,8 +1,8 @@
 import pytest
 from testfixtures import LogCapture
 from matchms.filtering import derive_adduct_from_name
-from matchms.logging_functions import reset_matchms_logger
-from matchms.logging_functions import set_matchms_logger_level
+from matchms.logging_functions import (reset_matchms_logger,
+                                       set_matchms_logger_level)
 from .builder_Spectrum import SpectrumBuilder
 
 

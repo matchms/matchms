@@ -1,5 +1,4 @@
-from typing import Optional
-from typing import Union
+from typing import Optional, Union
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 import numpy as np

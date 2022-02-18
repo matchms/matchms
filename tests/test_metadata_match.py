@@ -1,9 +1,8 @@
 import numpy as np
 import pytest
 from matchms import calculate_scores
-from matchms.similarity.MetadataMatch import MetadataMatch
-from matchms.similarity.MetadataMatch import entries_scores
-from matchms.similarity.MetadataMatch import entries_scores_symmetric
+from matchms.similarity.MetadataMatch import (MetadataMatch, entries_scores,
+                                              entries_scores_symmetric)
 from .builder_Spectrum import SpectrumBuilder
 
 

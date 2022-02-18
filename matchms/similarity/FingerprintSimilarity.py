@@ -1,14 +1,13 @@
-from typing import List
-from typing import Union
+from typing import List, Union
 import numpy
 from matchms.typing import SpectrumType
 from .BaseSimilarity import BaseSimilarity
-from .vector_similarity_functions import cosine_similarity
-from .vector_similarity_functions import cosine_similarity_matrix
-from .vector_similarity_functions import dice_similarity
-from .vector_similarity_functions import dice_similarity_matrix
-from .vector_similarity_functions import jaccard_index
-from .vector_similarity_functions import jaccard_similarity_matrix
+from .vector_similarity_functions import (cosine_similarity,
+                                          cosine_similarity_matrix,
+                                          dice_similarity,
+                                          dice_similarity_matrix,
+                                          jaccard_index,
+                                          jaccard_similarity_matrix)
 
 
 class FingerprintSimilarity(BaseSimilarity):

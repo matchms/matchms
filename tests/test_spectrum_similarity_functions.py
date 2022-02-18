@@ -2,9 +2,8 @@
 pure Python version."""
 import numpy
 import pytest
-from matchms.similarity.spectrum_similarity_functions import collect_peak_pairs
-from matchms.similarity.spectrum_similarity_functions import find_matches
-from matchms.similarity.spectrum_similarity_functions import score_best_matches
+from matchms.similarity.spectrum_similarity_functions import (
+    collect_peak_pairs, find_matches, score_best_matches)
 
 
 @pytest.mark.parametrize("shift, expected_pairs, expected_matches",

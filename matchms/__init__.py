@@ -1,14 +1,8 @@
-from . import exporting
-from . import filtering
-from . import importing
-from . import networking
-from . import plotting
-from . import similarity
+from . import exporting, filtering, importing, networking, plotting, similarity
 from .__version__ import __version__
 from .calculate_scores import calculate_scores
 from .Fragments import Fragments
-from .logging_functions import _init_logger
-from .logging_functions import set_matchms_logger_level
+from .logging_functions import _init_logger, set_matchms_logger_level
 from .Metadata import Metadata
 from .Scores import Scores
 from .Spectrum import Spectrum

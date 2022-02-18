@@ -1,7 +1,4 @@
-from typing import List
-from typing import NewType
-from typing import Tuple
-from typing import Union
+from typing import List, NewType, Tuple, Union
 import numpy
 
 
