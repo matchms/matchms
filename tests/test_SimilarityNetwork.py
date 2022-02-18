@@ -2,11 +2,9 @@ import os
 import tempfile
 import numpy as np
 import pytest
-from matchms import Spectrum
-from matchms import calculate_scores
+from matchms import Spectrum, calculate_scores
 from matchms.networking import SimilarityNetwork
-from matchms.similarity import FingerprintSimilarity
-from matchms.similarity import ModifiedCosine
+from matchms.similarity import FingerprintSimilarity, ModifiedCosine
 
 
 @pytest.fixture

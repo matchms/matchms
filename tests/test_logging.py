@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 import logging
 import os
-from matchms.logging_functions import add_logging_to_file
-from matchms.logging_functions import reset_matchms_logger
-from matchms.logging_functions import set_matchms_logger_level
+from matchms.logging_functions import (add_logging_to_file,
+                                       reset_matchms_logger,
+                                       set_matchms_logger_level)
 
 
 def test_initial_logging(caplog, capsys):

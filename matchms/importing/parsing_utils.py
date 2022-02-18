@@ -1,7 +1,6 @@
 """Helper functions for parsing metadata.
 """
-from typing import Any
-from typing import Union
+from typing import Any, Union
 
 
 def find_by_key(data: Union[list, dict], target: str) -> Any:

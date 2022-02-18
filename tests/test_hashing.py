@@ -1,8 +1,7 @@
 import numpy
 import pytest
 from matchms import Spectrum
-from matchms.hashing import metadata_hash
-from matchms.hashing import spectrum_hash
+from matchms.hashing import metadata_hash, spectrum_hash
 from .builder_Spectrum import SpectrumBuilder
 
 

@@ -1,6 +1,5 @@
 import pytest
-from matchms.filtering import add_retention_index
-from matchms.filtering import add_retention_time
+from matchms.filtering import add_retention_index, add_retention_time
 from .builder_Spectrum import SpectrumBuilder
 
 
