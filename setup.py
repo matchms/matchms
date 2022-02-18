@@ -60,7 +60,7 @@ setup(
     ],
     extras_require={"dev": ["bump2version",
                             "decorator",
-                            "isort>=4.2.5,<5",
+                            "isort>=5.1.0",
                             "pylint<2.12",
                             "prospector[with_pyroma]",
                             "pytest",
