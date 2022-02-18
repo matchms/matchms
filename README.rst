@@ -211,8 +211,7 @@ Alternatively, here below is a small example of using matchms to calculate the C
 .. code-block:: python
 
     from matchms.importing import load_from_mgf
-    from matchms.filtering import default_filters
-    from matchms.filtering import normalize_intensities
+    from matchms.filtering import default_filters, normalize_intensities
     from matchms import calculate_scores
     from matchms.similarity import CosineGreedy
 
