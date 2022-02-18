@@ -23,6 +23,7 @@ This is the first of a few releases to work our way towards matchms 1.0.0, which
 
 - Metadata harmonization will now happen by default! This includes changing field name style and applying known key conversions. To avoid the key conversions user have to make this explicit by setting `metadata_harmonization=False` [#293](https://github.com/matchms/matchms/pull/293)
 - `Spikes` class has become `Fragments` class [#293](https://github.com/matchms/matchms/pull/293)
+- Change import style (now: isort 5 and slightly different style) [#323](https://github.com/matchms/matchms/pull/323)
 
 ### Fixed
 
