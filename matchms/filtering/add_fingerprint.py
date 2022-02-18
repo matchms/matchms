@@ -1,7 +1,7 @@
 import logging
 import numpy
-from ..metadata_utils import derive_fingerprint_from_inchi
-from ..metadata_utils import derive_fingerprint_from_smiles
+from ..metadata_utils import (derive_fingerprint_from_inchi,
+                              derive_fingerprint_from_smiles)
 from ..typing import SpectrumType
 
 

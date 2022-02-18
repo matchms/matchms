@@ -1,8 +1,7 @@
 import csv
 import os
 from functools import lru_cache
-from typing import Iterable
-from typing import List
+from typing import Iterable, List
 
 
 def get_first_common_element(first: Iterable[str], second: Iterable[str]) -> str:

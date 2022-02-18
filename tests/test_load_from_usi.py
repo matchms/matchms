@@ -1,5 +1,4 @@
-from unittest.mock import Mock
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 import numpy as np
 from matchms.importing import load_from_usi
 from .builder_Spectrum import SpectrumBuilder

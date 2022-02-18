@@ -2,15 +2,9 @@
 and fully python-based versions of functions."""
 import numpy
 import pytest
-from matchms.similarity.vector_similarity_functions import cosine_similarity
-from matchms.similarity.vector_similarity_functions import \
-    cosine_similarity_matrix
-from matchms.similarity.vector_similarity_functions import dice_similarity
-from matchms.similarity.vector_similarity_functions import \
-    dice_similarity_matrix
-from matchms.similarity.vector_similarity_functions import jaccard_index
-from matchms.similarity.vector_similarity_functions import \
-    jaccard_similarity_matrix
+from matchms.similarity.vector_similarity_functions import (
+    cosine_similarity, cosine_similarity_matrix, dice_similarity,
+    dice_similarity_matrix, jaccard_index, jaccard_similarity_matrix)
 
 
 def test_cosine_similarity_compiled():

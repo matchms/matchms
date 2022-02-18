@@ -1,13 +1,10 @@
 import numpy
 import pytest
 from matchms.similarity import PrecursorMzMatch
-from matchms.similarity.PrecursorMzMatch import precursormz_scores
-from matchms.similarity.PrecursorMzMatch import precursormz_scores_ppm
-from matchms.similarity.PrecursorMzMatch import precursormz_scores_symmetric
-from matchms.similarity.PrecursorMzMatch import \
-    precursormz_scores_symmetric_ppm
-from .builder_Spectrum import SpectrumBuilder
-from .builder_Spectrum import spectra_factory
+from matchms.similarity.PrecursorMzMatch import (
+    precursormz_scores, precursormz_scores_ppm, precursormz_scores_symmetric,
+    precursormz_scores_symmetric_ppm)
+from .builder_Spectrum import SpectrumBuilder, spectra_factory
 
 
 @pytest.mark.parametrize('precursor_mz, tolerance, tolerance_type, expected', [

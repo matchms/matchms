@@ -1,9 +1,6 @@
 import logging
 import os
-from typing import IO
-from typing import Dict
-from typing import List
-from typing import Union
+from typing import IO, Dict, List, Union
 from ..Fragments import Fragments
 from ..Spectrum import Spectrum
 
