@@ -314,9 +314,14 @@ Automatically fix incorrectly sorted imports:
 
 .. code-block:: console
 
-  isort --recursive .
+  isort .
 
-Files will be changed in place and need to be committed manually.
+Files will be changed in place and need to be committed manually. If you only want to inspect the isort suggestions then simply run:
+
+.. code-block:: console
+
+  isort --check-only --diff .
+
 
 Run tests (including coverage) with:
 
