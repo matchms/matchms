@@ -77,9 +77,10 @@ class StackedSparseScores:
     def __getitem__(self, key):
         row, col, name = self._validate_indices(key)
         r, c, d = self._getitem_method(row, col, name)
-        if len(r) == 0:
-            return np.array([0])
-        if r.shape[0] == 1:
+        print(r, c, d)
+        if isinstance(row, int) and isinstance(col, int):
+            if len(r) == 0:
+                return np.array([0])
             return d
         return r, c, d
 
@@ -300,7 +301,7 @@ class StackedSparseScores:
         """
         assert data.shape[0] == self._row.shape[0], \
             "Data must be of same size as number of sparse values in the array"
-        assert name not in self._data, "Scores of 'name' are already found in array"
+        assert name not in self.score_names, "Scores of 'name' are already found in array"
         self._data = recfunctions.append_fields(self._data, name, data,
                                                 dtypes=data.dtype, fill_value=0).data
 

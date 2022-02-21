@@ -153,6 +153,20 @@ def test_sss_matrix_slicing():
     assert np.all(v4 == np.arange(1, 120))
 
 
+def test_sss_matrix_slicing_mostly_empty_array():
+    arr = np.zeros((4,6))
+    arr[3, 4] = 1.5
+    matrix = StackedSparseScores(4, 6)
+    matrix.add_dense_matrix(arr, "test_score")
+
+    assert matrix[3, 3] == np.array([0])
+    assert matrix[3, 4] == np.array([1.5])
+    r, c, v = matrix[2, :]
+    assert len(r) == len(c) == len(v) == 0
+    r, c, v = matrix[3, :]
+    assert (r, c, v) == (3, 4, 1.5)
+
+
 def test_sss_matrix_slicing_exceptions(sparse_array):
     msg = "Wrong slicing, or option not yet implemented"
     matrix = StackedSparseScores(12, 10)
