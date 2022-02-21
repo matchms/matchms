@@ -37,16 +37,14 @@ class ParentMassMatch(BaseSimilarity):
 
         for (reference, query, score) in scores:
             print(f"Parentmass match between {reference.get('id')} and {query.get('id')}" +
-                  f" is {score:.2f}")
+                  f" is {score}")
 
     Should output
 
     .. testoutput::
 
-        Parentmass match between 1 and 3 is 1.00
-        Parentmass match between 1 and 4 is 0.00
-        Parentmass match between 2 and 3 is 0.00
-        Parentmass match between 2 and 4 is 1.00
+        Parentmass match between 1 and 3 is [True]
+        Parentmass match between 2 and 4 is [True]
 
     """
     # Set key characteristics as class attributes

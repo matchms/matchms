@@ -1,7 +1,9 @@
 from __future__ import annotations
-import numpy
+import numpy as np
 from deprecated.sphinx import deprecated
+from scipy.sparse import coo_matrix
 from matchms.similarity.BaseSimilarity import BaseSimilarity
+from matchms.StackedSparseScores import StackedSparseScores
 from matchms.typing import QueriesType, ReferencesType
 
 
@@ -40,19 +42,18 @@ class Scores:
 
         for (reference, query, score) in scores:
             print(f"Cosine score between {reference.get('id')} and {query.get('id')}" +
-                  f" is {score['score']:.2f} with {score['matches']} matched peaks")
+                  f" is {score[0]:.2f} with {score[1]} matched peaks")
 
     Should output
 
     .. testoutput::
 
-        Cosine score between spectrum1 and spectrum3 is 0.00 with 0 matched peaks
         Cosine score between spectrum1 and spectrum4 is 0.80 with 3 matched peaks
         Cosine score between spectrum2 and spectrum3 is 0.14 with 1 matched peaks
         Cosine score between spectrum2 and spectrum4 is 0.61 with 1 matched peaks
     """
     def __init__(self, references: ReferencesType, queries: QueriesType,
-                 similarity_function: BaseSimilarity, is_symmetric: bool = False):
+                 is_symmetric: bool = False):
         """
 
         Parameters
@@ -61,38 +62,34 @@ class Scores:
             List of reference objects
         queries
             List of query objects
-        similarity_function
-            Expected input is an object based on :class:`~matchms.similarity.BaseSimilarity`. It is
-            expected to provide a *.pair()* and *.matrix()* method for computing similarity scores between
-            references and queries.
         is_symmetric
             Set to True when *references* and *queries* are identical (as for instance for an all-vs-all
             comparison). By using the fact that score[i,j] = score[j,i] the calculation will be about
             2x faster. Default is False.
         """
-        Scores._validate_input_arguments(references, queries, similarity_function)
+        Scores._validate_input_arguments(references, queries)
 
         self.n_rows = len(references)
         self.n_cols = len(queries)
-        self.references = numpy.asarray(references)
-        self.queries = numpy.asarray(queries)
-        self.similarity_function = similarity_function
+        self.references = np.asarray(references)
+        self.queries = np.asarray(queries)
         self.is_symmetric = is_symmetric
-        self._scores = numpy.empty([self.n_rows, self.n_cols], dtype="object")
+        self._scores = StackedSparseScores(self.n_rows, self.n_cols)
         self._index = 0
+        self.similarity_functions = {}
 
     def __iter__(self):
         return self
 
     def __next__(self):
-        if self._index < self.scores.size:
-            # pylint: disable=unbalanced-tuple-unpacking
-            r, c = numpy.unravel_index(self._index, self._scores.shape)
-            self._index += 1
-            result = self._scores[r, c]
+        if self._index < len(self._scores.col):
+            i = self._index
+            result = [self._scores.data[name][i] for name in self._scores.score_names]
             if not isinstance(result, tuple):
                 result = (result,)
-            return (self.references[r], self.queries[c]) + result
+            self._index += 1
+            return (self.references[self._scores.row[i]],
+                    self.queries[self._scores.col[i]]) + result
         self._index = 0
         raise StopIteration
 
@@ -100,53 +97,67 @@ class Scores:
         return self._scores.__str__()
 
     @staticmethod
-    def _validate_input_arguments(references, queries, similarity_function):
-        assert isinstance(references, (list, tuple, numpy.ndarray)),\
+    def _validate_input_arguments(references, queries):
+        assert isinstance(references, (list, tuple, np.ndarray)),\
             "Expected input argument 'references' to be list or tuple or numpy.ndarray."
 
-        assert isinstance(queries, (list, tuple, numpy.ndarray)),\
+        assert isinstance(queries, (list, tuple, np.ndarray)),\
             "Expected input argument 'queries' to be list or tuple or numpy.ndarray."
 
-        assert isinstance(similarity_function, BaseSimilarity),\
-            "Expected input argument 'similarity_function' to have BaseSimilarity as super-class."
-
     @deprecated(version='0.6.0', reason="Calculate scores via calculate_scores() function.")
-    def calculate(self) -> Scores:
+    def calculate(self, similarity_function: BaseSimilarity,
+                  name: str = None) -> Scores:
         """
         Calculate the similarity between all reference objects v all query objects using
         the most suitable available implementation of the given similarity_function.
         Advised method to calculate similarity scores is :meth:`~matchms.calculate_scores`.
         """
+        if name is None:
+            name = similarity_function.__class__.__name__
+        self.similarity_functions[name] = similarity_function
         if self.n_rows == self.n_cols == 1:
-            self._scores[0, 0] = self.similarity_function.pair(self.references[0],
-                                                               self.queries[0])
+            score = similarity_function.pair(self.references[0],
+                                             self.queries[0])
+            self._scores.add_dense_matrix(np.array([score]), name)
         else:
-            self._scores = self.similarity_function.matrix(self.references,
-                                                           self.queries,
-                                                           is_symmetric=self.is_symmetric)
+            scores_matrix = similarity_function.matrix(self.references,
+                                                       self.queries,
+                                                       is_symmetric=self.is_symmetric)
+            self._scores.add_dense_matrix(scores_matrix, name)
         return self
 
     def scores_by_reference(self, reference: ReferencesType,
-                            sort: bool = False) -> numpy.ndarray:
-        """Return all scores for the given reference spectrum.
+                            name: str = None, sort: bool = False) -> np.ndarray:
+        """Return all scores of given name for the given reference spectrum.
 
         Parameters
         ----------
         reference
             Single reference Spectrum.
+        name
+            Name of the score that should be returned (if multiple scores are stored).
         sort
             Set to True to obtain the scores in a sorted way (relying on the
             :meth:`~.BaseSimilarity.sort` function from the given similarity_function).
         """
+        if name is None and len(self.score_names) > 1 and sort is True:
+            raise IndexError("For sorting, score must be specified")
         assert reference in self.references, "Given input not found in references."
-        selected_idx = int(numpy.where(self.references == reference)[0])
+        selected_idx = int(np.where(self.references == reference)[0])
+        _, r, scores_for_ref = self._scores[selected_idx, :]
         if sort:
-            query_idx_sorted = self.similarity_function.sort(self._scores[selected_idx, :])
-            return list(zip(self.queries[query_idx_sorted],
-                            self._scores[selected_idx, query_idx_sorted].copy()))
-        return list(zip(self.queries, self._scores[selected_idx, :].copy()))
+            if name is None:
+                name = self._scores.guess_score_name()
+            if scores_for_ref.dtype.type == np.void:
+                query_idx_sorted = np.argsort(scores_for_ref[name])[::-1]
+            else:
+                query_idx_sorted = np.argsort(scores_for_ref)[::-1]
+            return list(zip(self.queries[r[query_idx_sorted]],
+                            scores_for_ref[query_idx_sorted].copy()))
+        return list(zip(self.queries[r], scores_for_ref.copy()))
 
-    def scores_by_query(self, query: QueriesType, sort: bool = False) -> numpy.ndarray:
+    def scores_by_query(self, query: QueriesType,
+                        name: str = None, sort: bool = False) -> np.ndarray:
         """Return all scores for the given query spectrum.
 
         For example
@@ -173,34 +184,56 @@ class Scores:
             queries = [spectrum_2, spectrum_3, spectrum_4]
 
             scores = calculate_scores(references, queries, CosineGreedy())
-            selected_scores = scores.scores_by_query(spectrum_4, sort=True)
-            print([x[1]["score"].round(3) for x in selected_scores])
+            selected_scores = scores.scores_by_query(spectrum_4, 'CosineGreedy_score', sort=True)
+            print([x[1][0].round(3) for x in selected_scores])
 
         Should output
 
         .. testoutput::
 
-            [0.796, 0.613, 0.0]
+            [0.796, 0.613]
 
         Parameters
         ----------
         query
             Single query Spectrum.
+        name
+            Name of the score that should be returned (if multiple scores are stored).
         sort
             Set to True to obtain the scores in a sorted way (relying on the
             :meth:`~.BaseSimilarity.sort` function from the given similarity_function).
 
         """
+        if name is None and len(self.score_names) > 1 and sort is True:
+            raise IndexError("For sorting, score must be specified")
         assert query in self.queries, "Given input not found in queries."
-        selected_idx = int(numpy.where(self.queries == query)[0])
+        selected_idx = int(np.where(self.queries == query)[0])
+        c, _, scores_for_query = self._scores[:, selected_idx]
         if sort:
-            references_idx_sorted = self.similarity_function.sort(self._scores[:, selected_idx])
-            return list(zip(self.references[references_idx_sorted],
-                            self._scores[references_idx_sorted, selected_idx].copy()))
-        return list(zip(self.references, self._scores[:, selected_idx].copy()))
+            if name is None:
+                name = self._scores.guess_score_name()
+            # TODO: add option to use other sorting algorithm
+            if scores_for_query.dtype.type == np.void:
+                references_idx_sorted = np.argsort(scores_for_query[name])[::-1]
+            else:
+                references_idx_sorted = np.argsort(scores_for_query)[::-1]
+            return list(zip(self.references[c[references_idx_sorted]],
+                            scores_for_query[references_idx_sorted].copy()))
+        return list(zip(self.references[c], scores_for_query.copy()))
 
     @property
-    def scores(self) -> numpy.ndarray:
+    def shape(self):
+        return self._scores.shape
+
+    @property
+    def score_names(self):
+        return self._scores.score_names
+
+    @property
+    def scores(self):
+        return self._scores
+
+    def to_array(self, name=None) -> np.ndarray:
         """Scores as numpy array
 
         For example
@@ -217,9 +250,8 @@ class Scores:
                                   intensities=np.array([0.4, 0.2, 0.1]))
             spectrums = [spectrum_1, spectrum_2]
 
-            scores = calculate_scores(spectrums, spectrums, IntersectMz()).scores
+            scores = calculate_scores(spectrums, spectrums, IntersectMz()).to_array()
 
-            print(scores[0].dtype)
             print(scores.shape)
             print(scores)
 
@@ -227,9 +259,23 @@ class Scores:
 
         .. testoutput::
 
-             float64
              (2, 2)
              [[1.  0.2]
               [0.2 1. ]]
+
+        Parameters
+        ----------
+        name
+            Name of the score that should be returned (if multiple scores are stored).
         """
-        return self._scores.copy()
+        return self._scores.to_array(name)
+
+    def to_coo(self, name=None) -> coo_matrix:
+        """Scores as scipy sparse COO matrix
+
+        Parameters
+        ----------
+        name
+            Name of the score that should be returned (if multiple scores are stored).
+        """
+        return self._scores.to_coo(name)
