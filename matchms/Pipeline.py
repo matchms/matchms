@@ -1,9 +1,9 @@
-import yaml
 from collections import OrderedDict
-from matchms import calculate_scores
+import yaml
 import matchms.filtering as msfilters
 import matchms.importing as msimport
 import matchms.similarity as mssimilarity
+from matchms import calculate_scores
 
 
 _importing_functions = {"json": msimport.load_from_json,
