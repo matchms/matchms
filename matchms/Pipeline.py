@@ -43,12 +43,19 @@ class Pipeline:
         # Score computation and masking
         for i, computation in enumerate(self.score_computations):
             if i == 0:
-                print(computation[1])
                 similarity_function = _score_functions[computation[0]](**computation[1])
                 self.scores = calculate_scores(self.spectrums_1,
                                                self.spectrums_2,
                                                similarity_function,
                                                is_symmetric=self.is_symmetric)
+            else:
+                similarity_func = _score_functions[computation[0]](**computation[1])
+                new_scores = similarity_func.sparse_array(references=self.spectrums_1,
+                                                          queries=self.spectrums_2,
+                                                          idx_row=self.scores.scores.row,
+                                                          idx_col=self.scores.scores.col,
+                                                          is_symmetric=self.is_symmetric)
+                self.scores._scores.add_sparse_data(new_scores, similarity_func.__class__.__name__)
 
     def check_pipeline(self):
         # check if files exist
@@ -63,15 +70,15 @@ class Pipeline:
         spectrums_1 = []
         for query_file in query_data:
            spectrums_1 += _spectrum_importer(query_file)
-        self.spectrums_1 = spectrums_1
+        self.spectrums_1 += spectrums_1
         if reference_data is None:
             self.is_symmetric = True
             self.spectrums_2 = self.spectrums_1
         else:
             spectrums_2 = []
             for reference_file in reference_data:
-               spectrums_2 = _spectrum_importer(reference_file)
-            self.spectrums_2 = spectrums_2
+               spectrums_2 += _spectrum_importer(reference_file)
+            self.spectrums_2 += spectrums_2
 
     def apply_filter(self, spectrum, filter_step):
         filter_name = filter_step[0]

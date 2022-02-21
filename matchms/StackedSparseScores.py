@@ -299,6 +299,13 @@ class StackedSparseScores:
             Name of the score which is added. Will later be used to access and address
             the added scores, for instance via `sss_array.toarray("my_score_name")`.
         """
+        if len(data.dtype) > 1:  # if structured array
+            for dtype_name in data.dtype.names:
+                self._add_sparse_data(data[dtype_name], name + "_" + dtype_name)
+        else:
+            self._add_dense_matrix(data, name)
+
+    def _add_sparse_data(self, data, name):
         assert data.shape[0] == self._row.shape[0], \
             "Data must be of same size as number of sparse values in the array"
         assert name not in self.score_names, "Scores of 'name' are already found in array"
