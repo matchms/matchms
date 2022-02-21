@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from tqdm import tqdm 
 import yaml
 import matchms.filtering as msfilters
 import matchms.importing as msimport
@@ -16,7 +17,7 @@ class Pipeline:
     """Central pipeline class.
 
     """
-    def __init__(self, config_file=None):
+    def __init__(self, config_file=None, progress_bar=True):
         """
         """
         self.spectrums_queries = []
@@ -24,6 +25,7 @@ class Pipeline:
         self.is_symmetric = False
         self._initialize_workflow_dict(config_file)
         self.scores = None
+        self.progress_bar = progress_bar
 
     def _initialize_workflow_dict(self, config_file):
         if config_file is None:
@@ -46,12 +48,16 @@ class Pipeline:
                          self.reference_files)
 
         # Processing
-        for spectrum in self.spectrums_queries:
+        for spectrum in tqdm(self.spectrums_queries,
+                             disable=(not self.progress_bar),
+                             desc="Processing query spectrums"):
             for step in self.filter_steps_1:
                 if step[0] in _filter_functions:
                     self.apply_filter(spectrum, step)
         if self.is_symmetric is False:
-            for spectrum in self.spectrums_references:
+            for spectrum in tqdm(self.spectrums_references,
+                                 disable=(not self.progress_bar),
+                                 desc="Processing reference spectrums"):
                 for step in self.filter_steps_2:
                     if step[0] in _filter_functions:
                         self.apply_filter(spectrum, step)
@@ -103,8 +109,13 @@ class Pipeline:
         else:
             spectrum = _filter_functions[filter_name](spectrum)
 
-    def apply_score_operation(self):
-        pass
+    def create_workflow_config_file(self, filename, pipeline_dict):                   
+        with open(filename, 'w') as file:
+            file.write("# Matchms pipeline config file \n")
+            file.write("# Change and adapt fields where necessary \n")
+            file.write("# " + 20 * "=" + " \n")
+            ordered_dump(self.workflow, file, Dumper=yaml.SafeDumper)
+
 
     # Getter & Setters
     @property
