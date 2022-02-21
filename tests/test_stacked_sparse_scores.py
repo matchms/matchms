@@ -27,6 +27,16 @@ def test_sss_matrix_add_dense():
     assert np.all(matrix.data["test_score"] == np.arange(1, 120))
 
 
+def test_sss_matrix_add_empty_array():
+    arr = np.array([[False, False], [False, False]])
+    matrix = StackedSparseScores(2, 2)
+    assert matrix.shape == (2, 2, 0)
+    matrix.add_dense_matrix(arr, "test_score")
+    assert matrix.shape == (2, 2, 1)
+    assert len(matrix.data) == 0
+    assert np.all(matrix.to_array().tolist() == arr)
+
+
 def test_sss_matrix_no_setter():
     arr = np.arange(0, 120).reshape(12, 10)
     matrix = StackedSparseScores(12, 10)
