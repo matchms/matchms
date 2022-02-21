@@ -165,7 +165,7 @@ def test_scores_by_referencey():
     name_score = scores.score_names[0]
     selected_scores = scores.scores_by_reference(spectrum_2, name_score)
 
-    expected_result = [(scores.queries[i], scores.scores[1, i]) for i in range(2)]
+    expected_result = [(scores.queries[i], scores.scores[1, i, name_score]) for i in range(2)]
     assert selected_scores == expected_result, "Expected different scores."
 
 
@@ -179,7 +179,7 @@ def test_scores_by_reference_sorted():
     name_score = scores.score_names[0]
     selected_scores = scores.scores_by_reference(spectrum_2, name_score, sort=True)
 
-    expected_result = [(scores.queries[i], scores.scores[1, i]) for i in [2, 1, 0]]
+    expected_result = [(scores.queries[i], scores.scores[1, i, name_score]) for i in [2, 1, 0]]
     assert selected_scores == expected_result, "Expected different scores."
     scores_only = np.array([x[1] for x in selected_scores]).tolist()
     scores_expected = [(1.0, 3), (0.61297133, 1), (0.13631964, 1)]
@@ -194,9 +194,10 @@ def test_scores_by_referencey_non_tuple_score():
     queries = [spectrum_3, spectrum_4]
 
     scores = calculate_scores(references, queries, IntersectMz())
-    selected_scores = scores.scores_by_reference(spectrum_2)
+    name_score = scores.score_names[0]
+    selected_scores = scores.scores_by_reference(spectrum_2, name_score)
 
-    expected_result = [(scores.queries[i], scores.scores[1, i]) for i in range(2)]
+    expected_result = [(scores.queries[i], scores.scores[1, i, name_score]) for i in range(2)]
     assert selected_scores == expected_result, "Expected different scores."
 
 
@@ -233,7 +234,7 @@ def test_scores_by_query_sorted():
     name_score = scores.score_names[0]
     selected_scores = scores.scores_by_query(spectrum_4, name_score, sort=True)
 
-    expected_result = [(scores.references[i], scores.scores[i, 2]) for i in [0, 2, 1]]
+    expected_result = [(scores.references[i], scores.scores[i, 2, name_score]) for i in [0, 2, 1]]
     assert selected_scores == expected_result, "Expected different scores."
     assert np.allclose(np.array([x[1] for x in selected_scores]).tolist(),
                        [(0.79636414, 3), (0.65803523, 1), (0.61297133, 1)])
