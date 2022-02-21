@@ -154,7 +154,7 @@ def test_sss_matrix_slicing():
 
 
 def test_sss_matrix_slicing_mostly_empty_array():
-    arr = np.zeros((4,6))
+    arr = np.zeros((4, 6))
     arr[3, 4] = 1.5
     matrix = StackedSparseScores(4, 6)
     matrix.add_dense_matrix(arr, "test_score")

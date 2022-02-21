@@ -303,7 +303,7 @@ class StackedSparseScores:
             for dtype_name in data.dtype.names:
                 self._add_sparse_data(data[dtype_name], name + "_" + dtype_name)
         else:
-            self._add_dense_matrix(data, name)
+            self._add_sparse_data(data, name)
 
     def _add_sparse_data(self, data, name):
         assert data.shape[0] == self._row.shape[0], \

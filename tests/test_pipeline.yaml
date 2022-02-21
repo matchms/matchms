@@ -1,0 +1,17 @@
+# Matchms pipeline config file 
+# Change and adapt fields where necessary 
+# ==================== 
+importing:
+  queries: ./tests/massbank_five_spectra.msp
+  references: 
+filtering_queries:
+- - default_filters
+- - normalize_intensities
+- - select_by_intensity
+  - intensity_from: 0.001
+filtering_refs: same as queries
+score_computations:
+- - precursormzmatch
+  - tolerance: 120.0
+- - modifiedcosine
+  - tolerance: 10.0
