@@ -194,13 +194,11 @@ class StackedSparseScores:
 
     @property
     def shape(self):
-        if len(self._data) == 0:
-            return self.__n_row, self.__n_col, 0
         return self.__n_row, self.__n_col, len(self.score_names)
 
     @property
     def score_names(self):
-        if len(self._data) == 0:
+        if isinstance(self._data, list):
             return []
         return self._data.dtype.names
 
