@@ -2,8 +2,8 @@ from typing import Tuple
 import numpy
 from matchms.typing import SpectrumType
 from .BaseSimilarity import BaseSimilarity
-from .spectrum_similarity_functions import collect_peak_pairs
-from .spectrum_similarity_functions import score_best_matches
+from .spectrum_similarity_functions import (collect_peak_pairs,
+                                            score_best_matches)
 
 
 class CosineGreedy(BaseSimilarity):

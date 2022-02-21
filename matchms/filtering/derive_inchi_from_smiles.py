@@ -1,7 +1,6 @@
 import logging
-from ..metadata_utils import convert_smiles_to_inchi
-from ..metadata_utils import is_valid_inchi
-from ..metadata_utils import is_valid_smiles
+from ..metadata_utils import (convert_smiles_to_inchi, is_valid_inchi,
+                              is_valid_smiles)
 from ..typing import SpectrumType
 
 

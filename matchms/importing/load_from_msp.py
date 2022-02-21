@@ -1,7 +1,5 @@
 import re
-from typing import Generator
-from typing import Iterator
-from typing import Tuple
+from typing import Generator, Iterator, Tuple
 import numpy
 from ..Spectrum import Spectrum
 

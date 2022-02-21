@@ -4,8 +4,7 @@ from deprecated.sphinx import deprecated
 from scipy.sparse import coo_matrix
 from matchms.similarity.BaseSimilarity import BaseSimilarity
 from matchms.StackedSparseScores import StackedSparseScores
-from matchms.typing import QueriesType
-from matchms.typing import ReferencesType
+from matchms.typing import QueriesType, ReferencesType
 
 
 class Scores:

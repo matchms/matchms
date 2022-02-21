@@ -92,69 +92,21 @@ F Huber, S. Verhoeven, C. Meijer, H. Spreeuw, E. M. Villanueva Castilla, C. Geng
 
 
 **********************************
-Latest changes (matchms >= 0.11.0)
+Latest changes (matchms >= 0.14.0)
 **********************************
 
-Matchms now allows proper logging. Matchms functions and method report unexpected or 
-undesired behavior as logging WARNING, and additional information as INFO.
-The default logging level is set to WARNING. If you want to output additional
-logging messages, you can lower the logging level to INFO using set_matchms_logger_level:
+Metadata class
+==============
 
-.. code-block:: python
+This is the first of a few releases to work our way towards matchms 1.0.0, which also means that a few things in the API will likely change. Here the main change is that `Spectrum.metadata` is no longer a simple Python dictionary but became a ``Metadata`` object. In this context metadata field-names/keys will now be harmonized by default (e.g. "Precursor Mass" will become "precursor_mz). For list of conversions see `matchms key conversion table <https://github.com/matchms/matchms/blob/master/matchms/data/known_key_conversions.csv>`_.
 
-    from matchms import set_matchms_logger_level
+- metadata is now stored using new ``Metadata`` class which automatically applied restrictions to used field names/keys to avoid confusion between different format styles
+- all metadata keys must be lower-case, spaces will be changed to underscores.
+- Known key conversions are applied to metadata entries using a `matchms key conversion table <https://github.com/matchms/matchms/blob/master/matchms/data/known_key_conversions.csv>`_.
+- new ``MetadataMatch`` similarity measure in matchms.similarity. This can be used to find matches between metadata entries and currently supports either full string matches or matches of numerical entries within a specified tolerance
+- new ``interpret_pepmass()`` filter to handle different pepmass entries found in data 
+- ``Spikes`` class has become ``Fragments`` class
 
-    set_matchms_logger_level("INFO")
-
-If you want to suppress logging warnings, you can also raise the logging level
-to ERROR by:
-
-.. code-block:: python
-
-    set_matchms_logger_level("ERROR")
-
-To write logging entries to a local file, you can do the following:
-
-.. code-block:: python
-
-    from matchms.logging_functions import add_logging_to_file
-
-    add_logging_to_file("sample.log", loglevel="INFO")
-
-If you want to write the logging messages to a local file while silencing the
-stream of such messages, you can do the following:
-
-.. code-block:: python
-
-    from matchms.logging_functions import add_logging_to_file
-
-    add_logging_to_file("sample.log", loglevel="INFO",
-                        remove_stream_handlers=True)
-
-
-**********************************
-Latest changes (matchms >= 0.10.0)
-**********************************
-
-- 2 new filters in ``matchms.filtering``: ``add_retention_time()`` and ``add_retention_index()``, to consistently add retention time/index to the spectrum metadata
-- Hashes! ``Spectrum``-objects now allow to compute different hashes:
-
-.. code-block:: python
-
-    from matchms.importing import load_from_mgf
-
-    # Read spectrums from a MGF formatted file, for other formats see https://matchms.readthedocs.io/en/latest/api/matchms.importing.html 
-    spectrums = list(load_from_mgf("tests/pesticides.mgf"))
-    
-    # Spectrum hashes are generated based on MS/MS peak m/z and intensities
-    # Those will change if any processing step affects the peaks.
-    spectrum_hashes = [s.spectrum_hash() for s in spectrums]
-    # Metadata hashes are generated based on the spectrum metadata
-    # Those will change if any processing step affects the metadata.
-    metadata_hashes = [s.metadata_hash() for s in spectrums]
-    # `hash(spectrum)` will return a hash that is a combination of spectrum and metadata hash
-    # Those will hence change if any processing step affects the peaks and/or the metadata.
-    hashes = [hash(s) for s in spectrums]
 
 ***********************
 Documentation for users
@@ -211,8 +163,7 @@ Alternatively, here below is a small example of using matchms to calculate the C
 .. code-block:: python
 
     from matchms.importing import load_from_mgf
-    from matchms.filtering import default_filters
-    from matchms.filtering import normalize_intensities
+    from matchms.filtering import default_filters, normalize_intensities
     from matchms import calculate_scores
     from matchms.similarity import CosineGreedy
 
@@ -316,9 +267,14 @@ Automatically fix incorrectly sorted imports:
 
 .. code-block:: console
 
-  isort --recursive .
+  isort .
 
-Files will be changed in place and need to be committed manually.
+Files will be changed in place and need to be committed manually. If you only want to inspect the isort suggestions then simply run:
+
+.. code-block:: console
+
+  isort --check-only --diff .
+
 
 Run tests (including coverage) with:
 

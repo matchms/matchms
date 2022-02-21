@@ -41,8 +41,7 @@ from .add_fingerprint import add_fingerprint
 from .add_losses import add_losses
 from .add_parent_mass import add_parent_mass
 from .add_precursor_mz import add_precursor_mz
-from .add_retention import add_retention_index
-from .add_retention import add_retention_time
+from .add_retention import add_retention_index, add_retention_time
 from .clean_compound_name import clean_compound_name
 from .correct_charge import correct_charge
 from .default_filters import default_filters
@@ -56,8 +55,7 @@ from .harmonize_undefined_inchi import harmonize_undefined_inchi
 from .harmonize_undefined_inchikey import harmonize_undefined_inchikey
 from .harmonize_undefined_smiles import harmonize_undefined_smiles
 from .interpret_pepmass import interpret_pepmass
-from .load_adducts import load_adducts_dict
-from .load_adducts import load_known_adduct_conversions
+from .load_adducts import load_adducts_dict, load_known_adduct_conversions
 from .make_charge_int import make_charge_int
 from .make_charge_scalar import make_charge_scalar
 from .make_ionmode_lowercase import make_ionmode_lowercase

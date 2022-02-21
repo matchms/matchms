@@ -6,14 +6,12 @@ from unittest import mock
 import numpy
 import pytest
 import matchms.metadata_utils
-from matchms.metadata_utils import clean_adduct
-from matchms.metadata_utils import derive_fingerprint_from_inchi
-from matchms.metadata_utils import derive_fingerprint_from_smiles
-from matchms.metadata_utils import is_valid_inchi
-from matchms.metadata_utils import is_valid_inchikey
-from matchms.metadata_utils import is_valid_smiles
-from matchms.metadata_utils import looks_like_adduct
-from matchms.metadata_utils import mol_converter
+from matchms.metadata_utils import (clean_adduct,
+                                    derive_fingerprint_from_inchi,
+                                    derive_fingerprint_from_smiles,
+                                    is_valid_inchi, is_valid_inchikey,
+                                    is_valid_smiles, looks_like_adduct,
+                                    mol_converter)
 
 
 def test_mol_converter_smiles_to_inchi():

@@ -64,9 +64,8 @@ Finally, it is also possible to plot many spectra at once using `plot_spectra_ar
    Compare many spectra visually using an array plot.
 
 """
-from .spectrum_plots import plot_spectra_array
-from .spectrum_plots import plot_spectra_mirror
-from .spectrum_plots import plot_spectrum
+from .spectrum_plots import (plot_spectra_array, plot_spectra_mirror,
+                             plot_spectrum)
 
 
 __all__ = [
