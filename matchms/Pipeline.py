@@ -34,7 +34,7 @@ class Pipeline:
             self.workflow["filtering_refs"] = "same as queries"
             self.workflow["score_computations"] = []
         else:
-            with open(config_file, 'r') as file:
+            with open(config_file, 'r', encoding="utf-8") as file:
                 self.workflow = ordered_load(file, yaml.SafeLoader)
 
     def import_workflow_from_yaml(self, config_file):
