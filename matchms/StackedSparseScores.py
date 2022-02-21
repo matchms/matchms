@@ -77,7 +77,6 @@ class StackedSparseScores:
     def __getitem__(self, key):
         row, col, name = self._validate_indices(key)
         r, c, d = self._getitem_method(row, col, name)
-        print(r, c, d)
         if isinstance(row, int) and isinstance(col, int):
             if len(r) == 0:
                 return np.array([0])
