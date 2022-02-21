@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import os
-from setuptools import find_packages
-from setuptools import setup
+from setuptools import find_packages, setup
 
 
 here = os.path.abspath(os.path.dirname(__file__))
@@ -60,7 +59,7 @@ setup(
     ],
     extras_require={"dev": ["bump2version",
                             "decorator",
-                            "isort>=4.2.5,<5",
+                            "isort>=5.1.0",
                             "pylint<2.12",
                             "prospector[with_pyroma]",
                             "pytest",

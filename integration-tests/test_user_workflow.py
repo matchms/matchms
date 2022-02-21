@@ -2,12 +2,10 @@ import os
 import numpy
 import pytest
 from matchms import calculate_scores
-from matchms.filtering import add_parent_mass
-from matchms.filtering import default_filters
-from matchms.filtering import normalize_intensities
-from matchms.filtering import require_minimum_number_of_peaks
-from matchms.filtering import select_by_mz
-from matchms.filtering import select_by_relative_intensity
+from matchms.filtering import (add_parent_mass, default_filters,
+                               normalize_intensities,
+                               require_minimum_number_of_peaks, select_by_mz,
+                               select_by_relative_intensity)
 from matchms.importing import load_from_mgf
 from matchms.similarity import CosineGreedy
 

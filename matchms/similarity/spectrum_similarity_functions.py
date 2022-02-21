@@ -1,5 +1,4 @@
-from typing import List
-from typing import Tuple
+from typing import List, Tuple
 import numba
 import numpy
 

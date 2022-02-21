@@ -1,7 +1,6 @@
 from .Scores import Scores
 from .similarity.BaseSimilarity import BaseSimilarity
-from .typing import QueriesType
-from .typing import ReferencesType
+from .typing import QueriesType, ReferencesType
 
 
 def calculate_scores(references: ReferencesType, queries: QueriesType,

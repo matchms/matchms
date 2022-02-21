@@ -1,6 +1,5 @@
 import numpy
-from matchms import Fragments
-from matchms import Spectrum
+from matchms import Fragments, Spectrum
 from matchms.filtering import normalize_intensities
 
 

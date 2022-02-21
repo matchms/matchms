@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.14.0] - 2022-02-18
+
+This is the first of a few releases to work our way towards matchms 1.0.0, which also means that a few things in the API will likely change. Here the main change is that `Spectrum.metadata` is no longer a simple Python dictionary but became a `Metadata` object. In this context metadata field-names/keys will now be harmonized by default (e.g. "Precursor Mass" will become "precursor_mz). For list of conversions see [matchms key conversion table](https://github.com/matchms/matchms/blob/development/matchms/data/known_key_conversions.csv).
+
+### Added
+
+- new `MetadataMatch`similarity measure in matchms.similarity. This can be used to find matches between metadata entries and currently supports either full string matches or matches of numerical entries within a specified tolerance [#315](https://github.com/matchms/matchms/pull/315)
+- metadata is now stored using new `Metadata` class which automatically applied restrictions to used field names/keys to avoid confusion between different format styles [#293](https://github.com/matchms/matchms/pull/293)
+- all metadata keys must be lower-case, spaces will be changed to underscores.
+- Known key conversions are applied to metadata entries using a [matchms key conversion table](https://github.com/matchms/matchms/blob/development/matchms/data/known_key_conversions.csv)
+- new `interpret_pepmass()` filter to handle different pepmass entries found in data [#298][https://github.com/matchms/matchms/issues/298] 
+
+### Changed
+
+- Metadata harmonization will now happen by default! This includes changing field name style and applying known key conversions. To avoid the key conversions user have to make this explicit by setting `metadata_harmonization=False` [#293](https://github.com/matchms/matchms/pull/293)
+- `Spikes` class has become `Fragments` class [#293](https://github.com/matchms/matchms/pull/293)
+- Change import style (now: isort 5 and slightly different style) [#323](https://github.com/matchms/matchms/pull/323)
+
+### Fixed
+
+- can now handle charges that come as a string of type "2+" or "1-" [#301](https://github.com/matchms/matchms/issues/301)
+- new `Metadata`class fixes issue of equality check for different entry orders [#285](https://github.com/matchms/matchms/issues/285)
+
+## [0.13.0] - 2022-02-08
+
 ### Added
 
 - Updated and extended plotting functionality, now located in `matchms.plotting`.
@@ -20,6 +45,7 @@ Contains three plot types: `plot_spectrum()` or `spectrum.plot()`, `plot_spectra
 ### Fixed
 
 - Updated to new url for `load_from_usi` function (old link was broken) [#310](https://github.com/matchms/matchms/pull/310)
+- Small bug fix: `add_retention` filters can now properly handle TypeError for empty list. [#314](https://github.com/matchms/matchms/pull/314)
 
 ## [0.12.0] - 2022-01-18
 
@@ -92,7 +118,7 @@ Contains three plot types: `plot_spectrum()` or `spectrum.plot()`, `plot_spectra
 
 - new `matchms.networking` module which allows to build and export graphs from `scores` objects [#198](https://github.com/matchms/matchms/pull/198)
 - Expand list of known negative ionmode adducts and conversion rules [#213](https://github.com/matchms/matchms/pull/213)
-- `.to_numpy` method for Fragments class which allows to run `spectrum.peaks.to_numpy` [#214](https://github.com/matchms/matchms/issues/214)
+- `.to_numpy` method for Spikes class which allows to run `spectrum.peaks.to_numpy` [#214](https://github.com/matchms/matchms/issues/214)
 - `save_as_msp()` function to export spectrums to .msp file [#215](https://github.com/matchms/matchms/pull/215)
 
 ### Changed
@@ -341,7 +367,7 @@ Contains three plot types: `plot_spectrum()` or `spectrum.plot()`, `plot_spectra
 ### Added
 
 - Spectrum, Scores class, save_to_mgf, load_from_mgf, normalize_intensities, calculate_scores [#66](https://github.com/matchms/matchms/pull/66) [#67](https://github.com/matchms/matchms/pull/67) [#103](https://github.com/matchms/matchms/pull/103) [#108](https://github.com/matchms/matchms/pull/108) [#113](https://github.com/matchms/matchms/pull/113) [#115](https://github.com/matchms/matchms/pull/115) [#151](https://github.com/matchms/matchms/pull/151) [#152](https://github.com/matchms/matchms/pull/152) [#121](https://github.com/matchms/matchms/pull/121) [#154](https://github.com/matchms/matchms/pull/154) [#134](https://github.com/matchms/matchms/pull/134) [#159](https://github.com/matchms/matchms/pull/159) [#161](https://github.com/matchms/matchms/pull/161) [#198](https://github.com/matchms/matchms/pull/198)
-- Fragments class [#150](https://github.com/matchms/matchms/pull/150) [#167](https://github.com/matchms/matchms/pull/167)
+- Spikes class [#150](https://github.com/matchms/matchms/pull/150) [#167](https://github.com/matchms/matchms/pull/167)
 - Anaconda package [#70](https://github.com/matchms/matchms/pull/70) [#68](https://github.com/matchms/matchms/pull/68) [#181](https://github.com/matchms/matchms/pull/181)
 - Sonarcloud [#80](https://github.com/matchms/matchms/pull/80) [#79](https://github.com/matchms/matchms/pull/79) [#149](https://github.com/matchms/matchms/pull/149) [#169](https://github.com/matchms/matchms/pull/169)
 - Normalization filter [#83](https://github.com/matchms/matchms/pull/83)
@@ -385,7 +411,9 @@ Contains three plot types: `plot_spectrum()` or `spectrum.plot()`, `plot_spectra
 - This is the initial version of Spec2Vec from https://github.com/iomega/Spec2Vec
 - (later splitted into matchms + spec2vec)
 
-[Unreleased]: https://github.com/matchms/matchms/compare/0.12.0...HEAD
+[Unreleased]: https://github.com/matchms/matchms/compare/0.14.0...HEAD
+[0.14.0]: https://github.com/matchms/matchms/compare/0.13.0...0.14.0
+[0.13.0]: https://github.com/matchms/matchms/compare/0.12.0...0.13.0
 [0.12.0]: https://github.com/matchms/matchms/compare/0.11.0...0.12.0
 [0.11.0]: https://github.com/matchms/matchms/compare/0.10.0...0.11.0
 [0.10.0]: https://github.com/matchms/matchms/compare/0.9.2...0.10.0

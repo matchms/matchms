@@ -1,8 +1,8 @@
 import numpy
 import pytest
 from matchms.filtering import add_precursor_mz
-from matchms.logging_functions import reset_matchms_logger
-from matchms.logging_functions import set_matchms_logger_level
+from matchms.logging_functions import (reset_matchms_logger,
+                                       set_matchms_logger_level)
 from .builder_Spectrum import SpectrumBuilder
 
 
