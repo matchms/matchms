@@ -48,16 +48,14 @@ class MetadataMatch(BaseSimilarity):
 
         for (reference, query, score) in scores:
             print(f"Metadata match between {reference.get('id')} and {query.get('id')}" +
-                  f" is {score:.2f}")
+                  f" is {score}")
 
     Should output
 
     .. testoutput::
 
-        Metadata match between 1 and 3 is 0.00
-        Metadata match between 1 and 4 is 1.00
-        Metadata match between 2 and 3 is 1.00
-        Metadata match between 2 and 4 is 0.00
+        Metadata match between 1 and 4 is [True]
+        Metadata match between 2 and 3 is [True]
 
     """
     # Set key characteristics as class attributes
