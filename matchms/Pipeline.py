@@ -116,7 +116,6 @@ class Pipeline:
             file.write("# " + 20 * "=" + " \n")
             ordered_dump(self.workflow, file, Dumper=yaml.SafeDumper)
 
-
     # Getter & Setters
     @property
     def query_files(self):
