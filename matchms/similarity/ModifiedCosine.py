@@ -1,6 +1,6 @@
 import logging
 from typing import Tuple
-import numpy
+import numpy as np
 from matchms.filtering.add_precursor_mz import _convert_precursor_mz
 from matchms.typing import SpectrumType
 from .BaseSimilarity import BaseSimilarity
@@ -55,7 +55,7 @@ class ModifiedCosine(BaseSimilarity):
     # Set key characteristics as class attributes
     is_commutative = True
     # Set output data type, e.g. ("score", "float") or [("score", "float"), ("matches", "int")]
-    score_datatype = [("score", numpy.float64), ("matches", "int")]
+    score_datatype = [("score", np.float64), ("matches", "int")]
 
     def __init__(self, tolerance: float = 0.1, mz_power: float = 0.0,
                  intensity_power: float = 1.0):
@@ -120,19 +120,19 @@ class ModifiedCosine(BaseSimilarity):
                                                intensity_power=self.intensity_power)
 
             if zero_pairs is None:
-                zero_pairs = numpy.zeros((0, 3))
+                zero_pairs = np.zeros((0, 3))
             if nonzero_pairs is None:
-                nonzero_pairs = numpy.zeros((0, 3))
-            matching_pairs = numpy.concatenate((zero_pairs, nonzero_pairs), axis=0)
+                nonzero_pairs = np.zeros((0, 3))
+            matching_pairs = np.concatenate((zero_pairs, nonzero_pairs), axis=0)
             if matching_pairs.shape[0] > 0:
-                matching_pairs = matching_pairs[numpy.argsort(matching_pairs[:, 2])[::-1], :]
+                matching_pairs = matching_pairs[np.argsort(matching_pairs[:, 2])[::-1], :]
             return matching_pairs
 
         spec1 = reference.peaks.to_numpy
         spec2 = query.peaks.to_numpy
         matching_pairs = get_matching_pairs()
         if matching_pairs.shape[0] == 0:
-            return numpy.asarray((float(0), 0), dtype=self.score_datatype)
+            return np.asarray((float(0), 0), dtype=self.score_datatype)
         score = score_best_matches(matching_pairs, spec1, spec2,
                                    self.mz_power, self.intensity_power)
-        return numpy.asarray(score, dtype=self.score_datatype)
+        return np.asarray(score, dtype=self.score_datatype)
