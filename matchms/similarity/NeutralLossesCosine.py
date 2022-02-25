@@ -85,6 +85,8 @@ class NeutralLossesCosine(BaseSimilarity):
                                                 mz_power=self.mz_power,
                                                 intensity_power=self.intensity_power)
 
+            if matching_pairs is None:
+                return None
             if matching_pairs.shape[0] > 0:
                 matching_pairs = matching_pairs[numpy.argsort(matching_pairs[:, 2])[::-1], :]
             return matching_pairs
@@ -92,7 +94,7 @@ class NeutralLossesCosine(BaseSimilarity):
         spec1 = reference.peaks.to_numpy
         spec2 = query.peaks.to_numpy
         matching_pairs = get_matching_pairs()
-        if matching_pairs.shape[0] == 0:
+        if matching_pairs is None:
             return numpy.asarray((float(0), 0), dtype=self.score_datatype)
         score = score_best_matches(matching_pairs, spec1, spec2,
                                    self.mz_power, self.intensity_power)
