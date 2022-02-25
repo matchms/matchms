@@ -3,15 +3,25 @@ import pytest
 from matchms import Spectrum
 from matchms.filtering import normalize_intensities
 from matchms.similarity import ModifiedCosine
+from .builder_Spectrum import SpectrumBuilder
+
+
+def compute_expected_score(spectrum_1, spectrum_2, matches):
+    spec1 = spectrum_1.peaks.intensities
+    spec2 = spectrum_2.peaks.intensities
+    peak_pairs_multiplied = 0
+    for match in matches:
+        peak_pairs_multiplied += spec1[match[0]] * spec2[match[1]]
+    return peak_pairs_multiplied / numpy.sqrt(numpy.sum(spec1 ** 2) * numpy.sum(spec2 ** 2))
 
 
 def test_modified_cosine_without_precursor_mz():
     """Test without precursor-m/z. Should raise assertion error."""
-    spectrum_1 = Spectrum(mz=numpy.array([100, 150, 200, 300, 500, 510, 1100], dtype="float"),
-                          intensities=numpy.array([700, 200, 100, 1000, 200, 5, 500], dtype="float"))
-
-    spectrum_2 = Spectrum(mz=numpy.array([100, 140, 190, 300, 490, 510, 1090], dtype="float"),
-                          intensities=numpy.array([700, 200, 100, 1000, 200, 5, 500], dtype="float"))
+    mz = numpy.array([100, 150, 200, 300, 500, 510, 1100], dtype="float")
+    intensities = numpy.array([700, 200, 100, 1000, 200, 5, 500], dtype="float")
+    builder = SpectrumBuilder()
+    spectrum_1 = builder.with_mz(mz).with_intensities(intensities).build()
+    spectrum_2 = builder.with_mz(mz).with_intensities(intensities).build()
 
     norm_spectrum_1 = normalize_intensities(spectrum_1)
     norm_spectrum_2 = normalize_intensities(spectrum_2)
@@ -24,64 +34,50 @@ def test_modified_cosine_without_precursor_mz():
     assert str(msg.value) == expected_message
 
 
-def test_modified_cosine_with_mass_shift_5():
-    """Test modified cosine on two spectra with mass set shift."""
-    spectrum_1 = Spectrum(mz=numpy.array([100, 150, 200, 300, 500, 510, 1100], dtype="float"),
-                          intensities=numpy.array([700, 200, 100, 1000, 200, 5, 500], dtype="float"),
-                          metadata={"precursor_mz": 1000.0})
-
-    spectrum_2 = Spectrum(mz=numpy.array([55, 105, 205, 304.5, 494.5, 515.5, 1045], dtype="float"),
-                          intensities=numpy.array([700, 200, 100, 1000, 200, 5, 500], dtype="float"),
-                          metadata={"precursor_mz": 1005.0})
+@pytest.mark.parametrize("peaks, tolerance, masses, expected_matches", [
+    [
+        [
+            [numpy.array([100, 150, 200, 300, 500, 510, 1100], dtype="float"), numpy.array([700, 200, 100, 1000, 200, 5, 500], dtype="float")],
+            [numpy.array([55, 105, 205, 304.5, 494.5, 515.5, 1045], dtype="float"), numpy.array([700, 200, 100, 1000, 200, 5, 500], dtype="float")]
+        ],
+        None, (1000.0, 1005.0), [(0, 1), (2, 2)]
+    ], [
+        [
+            [numpy.array([100, 299, 300, 301, 500, 510], dtype="float"), numpy.array([10, 500, 100, 200, 20, 100], dtype="float")],
+            [numpy.array([105, 305, 306, 505, 517], dtype="float"), numpy.array([10, 500, 100, 20, 100], dtype="float")],
+        ],
+        2.0, (1000.0, 1005.0), [(0, 0), (1, 1), (3, 2), (4, 3), (5, 4)]
+    ], [
+        [
+            [numpy.array([100, 110, 200, 300, 400, 500, 600], dtype="float"), numpy.array([100, 50, 1, 80, 1, 1, 50], dtype="float")],
+            [numpy.array([110, 200, 300, 310, 700, 800], dtype="float"), numpy.array([100, 1, 90, 90, 1, 100], dtype="float")],
+        ],
+        None, (1000.0, 1010.0), [(0, 0), (2, 1), (3, 3)]
+    ], [
+        [
+            [numpy.array([100, 200, 300], dtype="float"), numpy.array([10, 10, 500], dtype="float")],
+            [numpy.array([120, 220, 320], dtype="float"), numpy.array([10, 10, 500], dtype="float")],
+        ],
+        None, (1000.0, 1010.0), []
+    ]
+])
+def test_modified_cosine_with_mass_shift(peaks, tolerance, masses, expected_matches):
+    """Test modified cosine on two spectra with mass shift."""
+    builder = SpectrumBuilder()
+    spectrum_1 = builder.with_mz(peaks[0][0]).with_intensities(peaks[0][1]).with_metadata(metadata={"precursor_mz": masses[0]}).build()
+    spectrum_2 = builder.with_mz(peaks[1][0]).with_intensities(peaks[1][1]).with_metadata(metadata={"precursor_mz": masses[1]}).build()
 
     norm_spectrum_1 = normalize_intensities(spectrum_1)
     norm_spectrum_2 = normalize_intensities(spectrum_2)
-    modified_cosine = ModifiedCosine()
+    if tolerance is None:
+        modified_cosine = ModifiedCosine()
+    else:
+        modified_cosine = ModifiedCosine(tolerance=tolerance)
+
     score = modified_cosine.pair(norm_spectrum_1, norm_spectrum_2)
-
-    assert score["score"] == pytest.approx(0.081966, 0.0001), "Expected different cosine score."
-    assert score["matches"] == 2, "Expected 2 matching peaks."
-
-
-def test_modified_cosine_with_mass_shift_5_tolerance_2():
-    """Test modified cosine on two spectra with mass set shift and tolerance."""
-    spectrum_1 = Spectrum(mz=numpy.array([100, 200, 299, 300, 301, 500, 510], dtype="float"),
-                          intensities=numpy.array([10, 10, 500, 100, 200, 20, 100], dtype="float"),
-                          metadata={"precursor_mz": 1000.0})
-
-    spectrum_2 = Spectrum(mz=numpy.array([105, 205, 305, 306, 505, 517], dtype="float"),
-                          intensities=numpy.array([10, 10, 500, 100, 20, 100], dtype="float"),
-                          metadata={"precursor_mz": 1005})
-
-    norm_spectrum_1 = normalize_intensities(spectrum_1)
-    norm_spectrum_2 = normalize_intensities(spectrum_2)
-    modified_cosine = ModifiedCosine(tolerance=2.0)
-    score = modified_cosine.pair(norm_spectrum_1, norm_spectrum_2)
-
-    assert score["score"] == pytest.approx(0.96788, 0.0001), "Expected different modified cosine score."
-    assert score["matches"] == 6, "Expected 6 matching peaks."
-
-
-def test_modified_cosine_with_mass_shifted_and_unshifted_matches():
-    """Test modified cosine on two spectra with mass set shift.
-    In this example 5 peak pairs are possible, but only 3 should be selected (every peak
-    can only be counted once!)"""
-    spectrum_1 = Spectrum(mz=numpy.array([100, 110, 200, 300, 400, 500, 600], dtype="float"),
-                          intensities=numpy.array([100, 50, 1, 80, 1, 1, 50], dtype="float"),
-                          metadata={"precursor_mz": 1000.0})
-
-    spectrum_2 = Spectrum(mz=numpy.array([110, 200, 300, 310, 700, 800], dtype="float"),
-                          intensities=numpy.array([100, 1, 90, 90, 1, 100], dtype="float"),
-                          metadata={"precursor_mz": 1010.0})
-
-    modified_cosine = ModifiedCosine()
-    score = modified_cosine.pair(spectrum_1, spectrum_2)
-    spec1 = spectrum_1.peaks.intensities
-    spec2 = spectrum_2.peaks.intensities
-    peak_pairs_multiplied = spec1[0] * spec2[0] + spec1[3] * spec2[3] + spec1[2] * spec2[1]
-    expected_score = peak_pairs_multiplied / numpy.sqrt(numpy.sum(spec1 ** 2) * numpy.sum(spec2 ** 2))
-    assert score["score"] == pytest.approx(expected_score, 0.00001), "Expected different cosine score."
-    assert score["matches"] == 3, "Expected 3 matching peaks."
+    expected_score = compute_expected_score(norm_spectrum_1, norm_spectrum_2, expected_matches)
+    assert score["score"] == pytest.approx(expected_score, 0.0001), "Expected different cosine score."
+    assert score["matches"] == len(expected_matches), "Expected differnt number of matching peaks."
 
 
 def test_modified_cosine_order_of_input_spectrums():
@@ -102,25 +98,6 @@ def test_modified_cosine_order_of_input_spectrums():
 
     assert score_1_2["score"] == score_2_1["score"], "Expected that the order of the arguments would not matter."
     assert score_1_2 == score_2_1, "Expected that the order of the arguments would not matter."
-
-
-def test_modified_cosine_with_mass_shift_5_no_matches_expected():
-    """Test modified cosine on two spectra with no expected matches."""
-    spectrum_1 = Spectrum(mz=numpy.array([100, 200, 300], dtype="float"),
-                          intensities=numpy.array([10, 10, 500], dtype="float"),
-                          metadata={"precursor_mz": 1000.0})
-
-    spectrum_2 = Spectrum(mz=numpy.array([120, 220, 320], dtype="float"),
-                          intensities=numpy.array([10, 10, 500], dtype="float"),
-                          metadata={"precursor_mz": 1005})
-
-    norm_spectrum_1 = normalize_intensities(spectrum_1)
-    norm_spectrum_2 = normalize_intensities(spectrum_2)
-    modified_cosine = ModifiedCosine(tolerance=1.0)
-    score = modified_cosine.pair(norm_spectrum_1, norm_spectrum_2)
-
-    assert score["score"] == pytest.approx(0.0, 1e-5), "Expected different modified cosine score."
-    assert score["matches"] == 0, "Expected 0 matching peaks."
 
 
 def test_modified_cosine_precursor_mz_as_invalid_string():
