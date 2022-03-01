@@ -153,29 +153,24 @@ def test_sss_matrix_slicing():
     assert np.all(v4 == np.arange(1, 120))
 
 
-def test_sss_matrix_slicing_exceptions(sparse_array):
+@pytest.mark.parametrize("slicing_option", [
+    "matrix[0, 1:3, 'scores1']",
+    "matrix[:2, :, 0]",
+    "matrix[:2, 1, 0]",
+    "matrix[:, 1:, 0]",
+    "matrix[1, 1:, 0]",
+    "matrix[1, 1, :1]",
+    "matrix[None]",
+    "matrix[:, 1.2, 0]",
+])
+def test_sss_matrix_slicing_exceptions(sparse_array, slicing_option):
     msg = "Wrong slicing, or option not yet implemented"
     matrix = StackedSparseScores(12, 10)
     matrix.add_dense_matrix(sparse_array, "scores1")
     matrix.add_dense_matrix(sparse_array, "scores2")
-    with pytest.raises(IndexError) as exception:
-        _ = matrix[0, 1:3, "scores1"]
-    assert msg in exception.value.args[0]
 
     with pytest.raises(IndexError) as exception:
-        _ = matrix[:2, :, 0]
-    assert msg in exception.value.args[0]
-
-    with pytest.raises(IndexError) as exception:
-        _ = matrix[:, 1:, 0]
-    assert msg in exception.value.args[0]
-
-    with pytest.raises(IndexError) as exception:
-        _ = matrix[1, 1, :1]
-    assert msg in exception.value.args[0]
-
-    with pytest.raises(IndexError) as exception:
-        _ = matrix[None]
+        exec(slicing_option)
     assert msg in exception.value.args[0]
 
 
