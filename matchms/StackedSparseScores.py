@@ -52,7 +52,7 @@ class StackedSparseScores:
         if len(self.score_names) == 1:
             return self.score_names[0]
         if len(self.score_names) == 0:
-            raise ValueError("Array is empty.")
+            raise KeyError("Array is empty.")
         raise KeyError("Name of score is required.")
 
     def __repr__(self):

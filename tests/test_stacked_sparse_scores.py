@@ -99,6 +99,11 @@ def test_sss_matrix_add_coo_2_times(sparse_array):
                          23, 27, 29, 31, 33, 37, 39])
     assert np.all(matrix.data["scores2"] == expected)
 
+    msg = "Name of score is required."
+    with pytest.raises(KeyError) as exception:
+        matrix.filter_by_range()
+    assert msg in exception.value.args[0]
+
 
 def test_sss_matrix_add_sparse_data(sparse_array):
     sparse_array = sparse_array[:5, :6]
@@ -223,4 +228,12 @@ def test_asindices(input_index, msg):
     array = StackedSparseScores(1, 1)
     with pytest.raises(IndexError) as exception:
         _ = array[input_index]
+    assert msg in exception.value.args[0]
+
+
+def test_missing_score_name():
+    matrix = StackedSparseScores(2, 4)
+    msg = "Array is empty."
+    with pytest.raises(KeyError) as exception:
+        _ = matrix.guess_score_name()
     assert msg in exception.value.args[0]
