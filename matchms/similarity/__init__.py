@@ -24,6 +24,7 @@ from .FingerprintSimilarity import FingerprintSimilarity
 from .IntersectMz import IntersectMz
 from .MetadataMatch import MetadataMatch
 from .ModifiedCosine import ModifiedCosine
+from .NeutralLossesCosine import NeutralLossesCosine
 from .ParentMassMatch import ParentMassMatch
 from .PrecursorMzMatch import PrecursorMzMatch
 
@@ -35,6 +36,7 @@ __all__ = [
     "IntersectMz",
     "MetadataMatch",
     "ModifiedCosine",
+    "NeutralLossesCosine",
     "ParentMassMatch",
     "PrecursorMzMatch",
 ]
