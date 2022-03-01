@@ -161,7 +161,6 @@ def test_sss_matrix_slicing():
     "matrix[1, 1:, 0]",
     "matrix[1, 1, :1]",
     "matrix[None]",
-    "matrix[:, 1.2, 0]",
 ])
 def test_sss_matrix_slicing_exceptions(sparse_array, slicing_option):
     msg = "Wrong slicing, or option not yet implemented"
