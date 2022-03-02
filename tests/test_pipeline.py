@@ -47,6 +47,25 @@ def test_pipeline_symmetric_filters():
     assert np.allclose(all_scores["ModifiedCosine_score"][3:, 3:], expected)
 
 
+def test_pipeline_symmetric_masking():
+    pipeline = Pipeline()
+    pipeline.query_files = spectrums_file_msp
+    pipeline.score_computations = [["precursormzmatch",  {"tolerance": 120.0}],
+                                   ["modifiedcosine", {"tolerance": 10.0}],
+                                   ["filter_by_range", {"low": 0.3, "above_operator": '>='}]]
+    pipeline.run()
+
+    assert len(pipeline.spectrums_queries) == 5
+    assert pipeline.spectrums_queries[0] == pipeline.spectrums_references[0]
+    assert pipeline.is_symmetric is True
+    assert pipeline.scores.scores.shape == (5, 5, 3)
+    assert pipeline.scores.score_names == ('PrecursorMzMatch', 'ModifiedCosine_score', 'ModifiedCosine_matches')
+    all_scores = pipeline.scores.to_array()
+    expected = np.array([[1., 0.30384404],
+                         [0.30384404, 1.]])
+    assert np.allclose(all_scores["ModifiedCosine_score"][3:, 3:], expected)
+
+
 def test_pipeline_symmetric_custom_score():
     pipeline = Pipeline()
     pipeline.query_files = spectrums_file_msp

@@ -13,6 +13,7 @@ _importing_functions = {"json": msimport.load_from_json,
                         "mzml": msimport.load_from_mzml,
                         "mzxml": msimport.load_from_mzxml}
 _filter_functions = {key: f for key, f in msfilters.__dict__.items() if callable(f)}
+_masking_functions = ["filter_by_range"]
 _score_functions = {key.lower(): f for key, f in mssimilarity.__dict__.items() if callable(f)}
 
 
@@ -69,32 +70,47 @@ class Pipeline:
 
         # Score computation and masking
         for i, computation in enumerate(self.score_computations):
-            similarity_measure = self._get_similarity_measure(computation)
-            if i == 0:
-                self.scores = calculate_scores(self.spectrums_queries,
-                                               self.spectrums_references,
-                                               similarity_measure,
-                                               is_symmetric=self.is_symmetric)
+            if not isinstance(computation, list):
+                computation = [computation]
+            if isinstance(computation[0], str) and computation[0] in _masking_functions:
+                self._apply_score_masking(computation)
             else:
-                new_scores = similarity_measure.sparse_array(references=self.spectrums_queries,
-                                                             queries=self.spectrums_references,
-                                                             idx_row=self.scores.scores.row,
-                                                             idx_col=self.scores.scores.col,
-                                                             is_symmetric=self.is_symmetric)
-                self.scores.scores.add_sparse_data(new_scores, similarity_measure.__class__.__name__)
+                self._apply_similarity_measure(computation, i)
 
-    def _get_similarity_measure(self, computation):
-        if not isinstance(computation, list):
-            computation = [computation]
-        if isinstance(computation[0], str):
-            if len(computation) > 1:
-                return _score_functions[computation[0]](**computation[1])
-            return _score_functions[computation[0]]()
-        if callable(computation[0]):
-            if len(computation) > 1:
-                return computation[0](**computation[1])
-            return computation[0]()
-        raise TypeError("Unknown similarity measure.")
+    def _apply_score_masking(self, computation):
+        if len(computation) == 1:
+            name = self.scores.score_names[-1]
+            self.scores._scores.filter_by_range(name=name)
+        elif "name" not in computation[1]:
+            name = self.scores.scores.score_names[-1]
+            self.scores._scores.filter_by_range(name=name, **computation[1])
+        else:
+            self.scores._scores.filter_by_range(**computation[1])
+
+    def _apply_similarity_measure(self, computation, i):
+        def get_similarity_measure(computation):
+            if isinstance(computation[0], str):
+                if len(computation) > 1:
+                    return _score_functions[computation[0]](**computation[1])
+                return _score_functions[computation[0]]()
+            if callable(computation[0]):
+                if len(computation) > 1:
+                    return computation[0](**computation[1])
+                return computation[0]()
+            raise TypeError("Unknown similarity measure.")
+        similarity_measure = get_similarity_measure(computation)
+        if i == 0:
+            self.scores = calculate_scores(self.spectrums_queries,
+                                           self.spectrums_references,
+                                           similarity_measure,
+                                           is_symmetric=self.is_symmetric)
+        else:
+            new_scores = similarity_measure.sparse_array(references=self.spectrums_queries,
+                                                         queries=self.spectrums_references,
+                                                         idx_row=self.scores.scores.row,
+                                                         idx_col=self.scores.scores.col,
+                                                         is_symmetric=self.is_symmetric)
+            self.scores.scores.add_sparse_data(new_scores, similarity_measure.__class__.__name__)
 
     def check_pipeline(self):
         # check if files exist
