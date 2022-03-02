@@ -1,6 +1,6 @@
 from collections import OrderedDict
-from tqdm import tqdm 
 import yaml
+from tqdm import tqdm 
 import matchms.filtering as msfilters
 import matchms.importing as msimport
 import matchms.similarity as mssimilarity
@@ -8,7 +8,10 @@ from matchms import calculate_scores
 
 
 _importing_functions = {"json": msimport.load_from_json,
-                        "msp": msimport.load_from_msp}
+                        "mgf": msimport.load_from_mgf,
+                        "msp": msimport.load_from_msp,
+                        "mzml": msimport.load_from_mzml,
+                        "mzxml": msimport.load_from_mzxml}
 _filter_functions = {key: f for key, f in msfilters.__dict__.items() if callable(f)}
 _score_functions = {key.lower(): f for key, f in mssimilarity.__dict__.items() if callable(f)}
 
@@ -51,14 +54,14 @@ class Pipeline:
         for spectrum in tqdm(self.spectrums_queries,
                              disable=(not self.progress_bar),
                              desc="Processing query spectrums"):
-            for step in self.filter_steps_1:
+            for step in self.filter_steps_queries:
                 if step[0] in _filter_functions:
                     self.apply_filter(spectrum, step)
         if self.is_symmetric is False:
             for spectrum in tqdm(self.spectrums_references,
                                  disable=(not self.progress_bar),
                                  desc="Processing reference spectrums"):
-                for step in self.filter_steps_2:
+                for step in self.filter_steps_refs:
                     if step[0] in _filter_functions:
                         self.apply_filter(spectrum, step)
         # Score computation and masking
@@ -134,19 +137,19 @@ class Pipeline:
         self.workflow["importing"]["references"] = files
 
     @property
-    def filter_steps_1(self):
+    def filter_steps_queries(self):
         return self.workflow.get("filtering_queries")
 
-    @filter_steps_1.setter
-    def filter_steps_1(self, files):
+    @filter_steps_queries.setter
+    def filter_steps_queries(self, files):
         self.workflow.set("filtering_queries", files)
 
     @property
-    def filter_steps_2(self):
+    def filter_steps_refs(self):
         return self.workflow.get("filtering_refs")
 
-    @filter_steps_2.setter
-    def filter_steps_2(self, filter_list):
+    @filter_steps_refs.setter
+    def filter_steps_refs(self, filter_list):
         self.workflow["filtering_refs"] = filter_list
 
     @property

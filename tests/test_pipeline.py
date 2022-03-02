@@ -4,12 +4,12 @@ from matchms import Pipeline
 
 
 module_root = os.path.join(os.path.dirname(__file__), "..")
-spectrums_file = os.path.join(module_root, "tests", "massbank_five_spectra.msp")
+spectrums_file_msp = os.path.join(module_root, "tests", "massbank_five_spectra.msp")
 
 
 def test_pipeline():
     pipeline = Pipeline()
-    pipeline.query_files = spectrums_file
+    pipeline.query_files = spectrums_file_msp
     pipeline.score_computations = [["precursormzmatch",  {"tolerance": 120.0}],
                                    ["modifiedcosine", {"tolerance": 10.0}]]
     pipeline.run()
