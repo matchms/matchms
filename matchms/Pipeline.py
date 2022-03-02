@@ -66,6 +66,7 @@ class Pipeline:
                 for step in self.filter_steps_refs:
                     spectrum = self.apply_filter(spectrum, step)
             self.spectrums_references = [s for s in self.spectrums_references if s is not None]
+
         # Score computation and masking
         for i, computation in enumerate(self.score_computations):
             similarity_measure = self._get_similarity_measure(computation)
@@ -88,15 +89,13 @@ class Pipeline:
         if isinstance(computation[0], str):
             if len(computation) > 1:
                 return _score_functions[computation[0]](**computation[1])
-            else: 
-                return _score_functions[computation[0]]()
+            return _score_functions[computation[0]]()
         if callable(computation[0]):
             if len(computation) > 1:
                 return computation[0](**computation[1])
-            else:
-                return computation[0]()
-        raise TypeError("Unknown similarity method.")
-        
+            return computation[0]()
+        raise TypeError("Unknown similarity measure.")
+
     def check_pipeline(self):
         # check if files exist
         # check if all steps exist
@@ -134,7 +133,7 @@ class Pipeline:
             return filter_function(spectrum, **filter_params)
         return filter_function(spectrum)
 
-    def create_workflow_config_file(self, filename):                   
+    def create_workflow_config_file(self, filename):
         with open(filename, 'w', encoding="utf-8") as file:
             file.write("# Matchms pipeline config file \n")
             file.write("# Change and adapt fields where necessary \n")
