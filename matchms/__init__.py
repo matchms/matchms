@@ -7,6 +7,7 @@ from .Metadata import Metadata
 from .Pipeline import Pipeline
 from .Scores import Scores
 from .Spectrum import Spectrum
+from .StackedSparseScores import StackedSparseScores
 
 
 _init_logger()
@@ -19,6 +20,7 @@ __all__ = [
     "calculate_scores",
     "exporting",
     "filtering",
+    "Fragments",
     "importing",
     "Metadata",
     "networking",
@@ -28,5 +30,5 @@ __all__ = [
     "set_matchms_logger_level",
     "similarity",
     "Spectrum",
-    "Fragments"
+    "StackedSparseScores",
 ]
