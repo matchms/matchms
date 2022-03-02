@@ -2,6 +2,7 @@ import os
 import numpy as np
 from matchms import Pipeline
 from matchms.filtering import select_by_mz
+from matchms.similarity import ModifiedCosine
 
 
 module_root = os.path.join(os.path.dirname(__file__), "..")
@@ -33,6 +34,24 @@ def test_pipeline_symmetric_filters():
                                      [select_by_mz, {"mz_from": 0, "mz_to": 1000}]]
     pipeline.score_computations = [["precursormzmatch",  {"tolerance": 120.0}],
                                    ["modifiedcosine", {"tolerance": 10.0}]]
+    pipeline.run()
+
+    assert len(pipeline.spectrums_queries) == 5
+    assert pipeline.spectrums_queries[0] == pipeline.spectrums_references[0]
+    assert pipeline.is_symmetric is True
+    assert pipeline.scores.scores.shape == (5, 5, 3)
+    assert pipeline.scores.score_names == ('PrecursorMzMatch', 'ModifiedCosine_score', 'ModifiedCosine_matches')
+    all_scores = pipeline.scores.to_array()
+    expected = np.array([[1., 0.30384404],
+                         [0.30384404, 1.]])
+    assert np.allclose(all_scores["ModifiedCosine_score"][3:, 3:], expected)
+
+
+def test_pipeline_symmetric_custom_score():
+    pipeline = Pipeline()
+    pipeline.query_files = spectrums_file_msp
+    pipeline.score_computations = [["precursormzmatch",  {"tolerance": 120.0}],
+                                   [ModifiedCosine, {"tolerance": 10.0}]]
     pipeline.run()
 
     assert len(pipeline.spectrums_queries) == 5

@@ -68,21 +68,35 @@ class Pipeline:
             self.spectrums_references = [s for s in self.spectrums_references if s is not None]
         # Score computation and masking
         for i, computation in enumerate(self.score_computations):
+            similarity_measure = self._get_similarity_measure(computation)
             if i == 0:
-                similarity_function = _score_functions[computation[0]](**computation[1])
                 self.scores = calculate_scores(self.spectrums_queries,
                                                self.spectrums_references,
-                                               similarity_function,
+                                               similarity_measure,
                                                is_symmetric=self.is_symmetric)
             else:
-                similarity_func = _score_functions[computation[0]](**computation[1])
-                new_scores = similarity_func.sparse_array(references=self.spectrums_queries,
-                                                          queries=self.spectrums_references,
-                                                          idx_row=self.scores.scores.row,
-                                                          idx_col=self.scores.scores.col,
-                                                          is_symmetric=self.is_symmetric)
-                self.scores.scores.add_sparse_data(new_scores, similarity_func.__class__.__name__)
+                new_scores = similarity_measure.sparse_array(references=self.spectrums_queries,
+                                                             queries=self.spectrums_references,
+                                                             idx_row=self.scores.scores.row,
+                                                             idx_col=self.scores.scores.col,
+                                                             is_symmetric=self.is_symmetric)
+                self.scores.scores.add_sparse_data(new_scores, similarity_measure.__class__.__name__)
 
+    def _get_similarity_measure(self, computation):
+        if not isinstance(computation, list):
+            computation = [computation]
+        if isinstance(computation[0], str):
+            if len(computation) > 1:
+                return _score_functions[computation[0]](**computation[1])
+            else: 
+                return _score_functions[computation[0]]()
+        if callable(computation[0]):
+            if len(computation) > 1:
+                return computation[0](**computation[1])
+            else:
+                return computation[0]()
+        raise TypeError("Unknown similarity method.")
+        
     def check_pipeline(self):
         # check if files exist
         # check if all steps exist
