@@ -74,6 +74,19 @@ class StackedSparseScores:
             f" containing scores for {self.score_names}."
         return msg
 
+    def __eq__(self, other):
+        if self.score_names != other.score_names:
+            return False
+        if self.shape != other.shape:
+            return False
+        if np.any(self._row != other.row):
+            return False
+        if np.any(self._col != other.col):
+            return False
+        if np.any(self._data != other.data):
+            return False
+        return True
+
     def __setitem__(self, key, d):
         # Typical COO method (e.g. below) would not be safe for stacked array.
         raise NotImplementedError

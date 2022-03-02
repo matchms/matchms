@@ -36,11 +36,13 @@ class Pipeline:
             self.workflow["importing"] = {"queries": None,
                                           "references": None}
             self.workflow["filtering_queries"] = ["defaults"]
-            self.workflow["filtering_refs"] = "same as queries"
+            self.workflow["filtering_refs"] = ["defaults"]
             self.workflow["score_computations"] = []
         else:
             with open(config_file, 'r', encoding="utf-8") as file:
                 self.workflow = ordered_load(file, yaml.SafeLoader)
+            if self.workflow["filtering_refs"] == "filtering_queries":
+                self.workflow["filtering_refs"] = self.workflow["filtering_queries"]
 
     def import_workflow_from_yaml(self, config_file):
         self._initialize_workflow_dict(config_file)
@@ -117,7 +119,7 @@ class Pipeline:
             file.write("# Matchms pipeline config file \n")
             file.write("# Change and adapt fields where necessary \n")
             file.write("# " + 20 * "=" + " \n")
-            ordered_dump(self.workflow, file, Dumper=yaml.SafeDumper)
+            ordered_dump(self.workflow, file)
 
     # Getter & Setters
     @property

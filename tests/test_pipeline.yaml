@@ -9,7 +9,7 @@ filtering_queries:
 - - normalize_intensities
 - - select_by_intensity
   - intensity_from: 0.001
-filtering_refs: same as queries
+filtering_refs: filtering_queries
 score_computations:
 - - precursormzmatch
   - tolerance: 120.0
