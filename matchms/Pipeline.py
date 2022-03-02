@@ -80,12 +80,12 @@ class Pipeline:
     def _apply_score_masking(self, computation):
         if len(computation) == 1:
             name = self.scores.score_names[-1]
-            self.scores._scores.filter_by_range(name=name)
+            self.scores.scores.filter_by_range(name=name)
         elif "name" not in computation[1]:
             name = self.scores.scores.score_names[-1]
-            self.scores._scores.filter_by_range(name=name, **computation[1])
+            self.scores.scores.filter_by_range(name=name, **computation[1])
         else:
-            self.scores._scores.filter_by_range(**computation[1])
+            self.scores.scores.filter_by_range(**computation[1])
 
     def _apply_similarity_measure(self, computation, i):
         def get_similarity_measure(computation):
