@@ -109,8 +109,8 @@ class Pipeline:
         else:
             spectrum = _filter_functions[filter_name](spectrum)
 
-    def create_workflow_config_file(self, filename, pipeline_dict):                   
-        with open(filename, 'w') as file:
+    def create_workflow_config_file(self, filename):                   
+        with open(filename, 'w', encoding="utf-8") as file:
             file.write("# Matchms pipeline config file \n")
             file.write("# Change and adapt fields where necessary \n")
             file.write("# " + 20 * "=" + " \n")
