@@ -99,6 +99,11 @@ def test_sss_matrix_add_coo_2_times(sparse_array):
                          23, 27, 29, 31, 33, 37, 39])
     assert np.all(matrix.data["scores2"] == expected)
 
+    msg = "Name of score is required."
+    with pytest.raises(KeyError) as exception:
+        matrix.filter_by_range()
+    assert msg in exception.value.args[0]
+
 
 def test_sss_matrix_add_sparse_data(sparse_array):
     sparse_array = sparse_array[:5, :6]
@@ -167,29 +172,23 @@ def test_sss_matrix_slicing_mostly_empty_array():
     assert (r, c, v) == (3, 4, 1.5)
 
 
-def test_sss_matrix_slicing_exceptions(sparse_array):
+@pytest.mark.parametrize("slicing_option", [
+    "matrix[0, 1:3, 'scores1']",
+    "matrix[:2, :, 0]",
+    "matrix[:2, 1, 0]",
+    "matrix[:, 1:, 0]",
+    "matrix[1, 1:, 0]",
+    "matrix[1, 1, :1]",
+    "matrix[None]",
+])
+def test_sss_matrix_slicing_exceptions(sparse_array, slicing_option):
     msg = "Wrong slicing, or option not yet implemented"
     matrix = StackedSparseScores(12, 10)
     matrix.add_dense_matrix(sparse_array, "scores1")
     matrix.add_dense_matrix(sparse_array, "scores2")
-    with pytest.raises(IndexError) as exception:
-        _ = matrix[0, 1:3, "scores1"]
-    assert msg in exception.value.args[0]
 
     with pytest.raises(IndexError) as exception:
-        _ = matrix[:2, :, 0]
-    assert msg in exception.value.args[0]
-
-    with pytest.raises(IndexError) as exception:
-        _ = matrix[:, 1:, 0]
-    assert msg in exception.value.args[0]
-
-    with pytest.raises(IndexError) as exception:
-        _ = matrix[1, 1, :1]
-    assert msg in exception.value.args[0]
-
-    with pytest.raises(IndexError) as exception:
-        _ = matrix[None]
+        exec(slicing_option)
     assert msg in exception.value.args[0]
 
 
@@ -243,4 +242,12 @@ def test_asindices(input_index, msg):
     array = StackedSparseScores(1, 1)
     with pytest.raises(IndexError) as exception:
         _ = array[input_index]
+    assert msg in exception.value.args[0]
+
+
+def test_missing_score_name():
+    matrix = StackedSparseScores(2, 4)
+    msg = "Array is empty."
+    with pytest.raises(KeyError) as exception:
+        _ = matrix.guess_score_name()
     assert msg in exception.value.args[0]

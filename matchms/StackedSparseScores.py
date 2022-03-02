@@ -52,7 +52,7 @@ class StackedSparseScores:
         if len(self.score_names) == 1:
             return self.score_names[0]
         if len(self.score_names) == 0:
-            raise ValueError("Array is empty.")
+            raise KeyError("Array is empty.")
         raise KeyError("Name of score is required.")
 
     def __repr__(self):
@@ -69,10 +69,6 @@ class StackedSparseScores:
     def __setitem__(self, key, d):
         # Typical COO method (e.g. below) would not be safe for stacked array.
         raise NotImplementedError
-        # row, col, name = self._validate_indices(key)
-        # self.row = np.append(self.row, row)
-        # self.col = np.append(self.col, col)
-        # self._data[name] = np.append(self._data[name], d)
 
     def __getitem__(self, key):
         row, col, name = self._validate_indices(key)
@@ -90,26 +86,27 @@ class StackedSparseScores:
             return self.row[idx], self.col[idx], self._slicing_data(name, idx)
         # e.g.: matrix[3, :, "score_1"]
         if isinstance(row, int) and isinstance(col, slice):
-            if not col.start == col.stop == col.step is None:
-                raise IndexError(_slicing_not_implemented_msg)
+            self._is_implemented_slice(col)
             idx = np.where(self.row == row)
             return self.row[idx], self.col[idx], self._slicing_data(name, idx)
         # e.g.: matrix[:, 7, "score_1"]
         if isinstance(row, slice) and isinstance(col, int):
-            if not row.start == row.stop == row.step is None:
-                raise IndexError(_slicing_not_implemented_msg)
+            self._is_implemented_slice(row)
             idx = np.where(self.col == col)
             return self.row[idx], self.col[idx], self._slicing_data(name, idx)
         # matrix[:, :, "score_1"]
         if isinstance(row, slice) and isinstance(col, slice):
-            if not row.start == row.stop == row.step is None:
-                raise IndexError(_slicing_not_implemented_msg)
-            if not col.start == col.stop == col.step is None:
-                raise IndexError(_slicing_not_implemented_msg)
+            self._is_implemented_slice(row)
+            self._is_implemented_slice(col)
             return self.row, self.col, self._slicing_data(name)
         if row == col is None and isinstance(name, str):
             return self.row, self.col, self._slicing_data(name)
         raise IndexError(_slicing_not_implemented_msg)
+
+    def _is_implemented_slice(self, input_slice):
+        # Currently slices like matrix[2:4, :] or not implemented
+        if not input_slice.start == input_slice.stop == input_slice.step is None:
+            raise IndexError(_slicing_not_implemented_msg)
 
     def _slicing_data(self, name, idx=None):
         if isinstance(name, slice) and len(self.score_names) == 1:
@@ -125,6 +122,16 @@ class StackedSparseScores:
         raise IndexError(_slicing_not_implemented_msg)
 
     def _validate_indices(self, key):
+        def validate_index(index, shape):
+            if isinstance(index, int):
+                if index < -shape or index >= shape:
+                    raise IndexError(f"Index ({index}) out of range")
+                if index < 0:
+                    index += shape
+            elif not isinstance(index, slice):
+                index = self._asindices(index, shape)
+            return index
+
         m, n, _ = self.shape
         row, col, name = _unpack_index(key)
         if row == col is None and isinstance(name, str):
@@ -133,22 +140,8 @@ class StackedSparseScores:
         if isinstance(name, int):
             name = self.score_names[name]
 
-        if isinstance(row, int):
-            if row < -m or row >= m:
-                raise IndexError(f"row index ({row}) out of range")
-            if row < 0:
-                row += m
-        elif not isinstance(row, slice):
-            row = self._asindices(row, m)
-
-        if isinstance(col, int):
-            if col < -n or col >= n:
-                raise IndexError(f"column index ({col}) out of range")
-            if col < 0:
-                col += n
-        elif not isinstance(col, slice):
-            col = self._asindices(col, n)
-
+        row = validate_index(row, m)
+        col = validate_index(col, n)
         return row, col, name
 
     def _asindices(self, idx, length):
