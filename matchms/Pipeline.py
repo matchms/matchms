@@ -1,6 +1,6 @@
 from collections import OrderedDict
 import yaml
-from tqdm import tqdm 
+from tqdm import tqdm
 import matchms.filtering as msfilters
 import matchms.importing as msimport
 import matchms.similarity as mssimilarity
