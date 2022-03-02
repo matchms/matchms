@@ -105,6 +105,37 @@ def test_sss_matrix_add_coo_2_times(sparse_array):
     assert msg in exception.value.args[0]
 
 
+def test_sss_matrix_equality(sparse_array):
+    def _create_array(name1, name2):
+        matrix = StackedSparseScores(12, 10)
+        matrix.add_coo_matrix(sparse_array1, name1)
+        matrix.add_coo_matrix(sparse_array2, name2)
+        return matrix
+        
+    sparse_array1 = coo_matrix(sparse_array.astype(np.int32))
+    sparse_array[sparse_array % 10 == 0] = 0
+    sparse_array = sparse_array/2
+    sparse_array2 = coo_matrix(sparse_array.astype(np.int32))
+
+    matrix = _create_array("scores1", "scores2")
+    matrix_2 = _create_array("scores1", "scores2")
+    assert matrix == matrix_2
+    
+    matrix_2._data[0] = 5
+    assert matrix != matrix_2
+
+    matrix_2 = _create_array("scores1", "scores_2")
+    assert matrix != matrix_2
+
+    matrix_2 = _create_array("scores1", "scores2")
+    matrix_2._row[0] = 99
+    assert matrix != matrix_2
+
+    matrix_2 = _create_array("scores1", "scores2")
+    matrix_2._col[0] = 99
+    assert matrix != matrix_2
+
+
 def test_sss_matrix_add_sparse_data(sparse_array):
     sparse_array = sparse_array[:5, :6]
 

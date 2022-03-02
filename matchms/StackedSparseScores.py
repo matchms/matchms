@@ -280,8 +280,8 @@ class StackedSparseScores:
         if self.shape[2] == 0 or (self.shape[2] == 1 and name in self.score_names):
             # Add first (sparse) array of scores
             self._data = np.array(coo_matrix.data, dtype=[(name, coo_matrix.dtype)])
-            self._row = coo_matrix.row
-            self._col = coo_matrix.col
+            self._row = coo_matrix.row.copy()
+            self._col = coo_matrix.col.copy()
             self.__n_row, self.__n_col = coo_matrix.shape
         else:
             # TODO move into logger warning rather than assert
