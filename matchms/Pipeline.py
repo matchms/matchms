@@ -57,14 +57,14 @@ class Pipeline:
                              disable=(not self.progress_bar),
                              desc="Processing query spectrums"):
             for step in self.filter_steps_queries:
-                self.apply_filter(spectrum, step)
+                spectrum = self.apply_filter(spectrum, step)
             self.spectrums_queries = [s for s in self.spectrums_queries if s is not None]
         if self.is_symmetric is False:
             for spectrum in tqdm(self.spectrums_references,
                                  disable=(not self.progress_bar),
                                  desc="Processing reference spectrums"):
                 for step in self.filter_steps_refs:
-                    self.apply_filter(spectrum, step)
+                    spectrum = self.apply_filter(spectrum, step)
             self.spectrums_references = [s for s in self.spectrums_references if s is not None]
         # Score computation and masking
         for i, computation in enumerate(self.score_computations):
@@ -109,12 +109,16 @@ class Pipeline:
     def apply_filter(self, spectrum, filter_step):
         if not isinstance(filter_step, list):
             filter_step = [filter_step]
-        filter_name = filter_step[0]
+        if isinstance(filter_step[0], str):
+            filter_function = _filter_functions[filter_step[0]]
+        elif callable(filter_step[0]):
+            filter_function = filter_step[0]
+        else:
+            raise TypeError("Unknown filter type. Should be known filter name or function.")
         if len(filter_step) > 1:
             filter_params = filter_step[1]
-            spectrum = _filter_functions[filter_name](spectrum, **filter_params)
-        else:
-            spectrum = _filter_functions[filter_name](spectrum)
+            return filter_function(spectrum, **filter_params)
+        return filter_function(spectrum)
 
     def create_workflow_config_file(self, filename):                   
         with open(filename, 'w', encoding="utf-8") as file:
