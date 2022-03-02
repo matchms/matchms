@@ -52,9 +52,9 @@ class StackedSparseScores:
         self.__n_row = n_row
         self.__n_col = n_col
         idx_dtype = get_index_dtype(maxval=max(n_row, n_col))
-        self._row = np.array([], dtype=idx_dtype)
-        self._col = np.array([], dtype=idx_dtype)
-        self._data = []
+        self.row = np.array([], dtype=idx_dtype)
+        self.col = np.array([], dtype=idx_dtype)
+        self.data = []
 
     def guess_score_name(self):
         if len(self.score_names) == 1:
@@ -66,7 +66,7 @@ class StackedSparseScores:
     def __repr__(self):
         msg = f"<{self.shape[0]}x{self.shape[1]}x{self.shape[2]} stacked sparse array" \
             f" containing scores for {self.score_names}" \
-            f" with {len(self._row)} stored elements in COOrdinate format>"
+            f" with {len(self.row)} stored elements in COOrdinate format>"
         return msg
 
     def __str__(self):
@@ -79,11 +79,11 @@ class StackedSparseScores:
             return False
         if self.shape != other.shape:
             return False
-        if np.any(self._row != other.row):
+        if np.any(self.row != other.row):
             return False
-        if np.any(self._col != other.col):
+        if np.any(self.col != other.col):
             return False
-        if np.any(self._data != other.data):
+        if np.any(self.data != other.data):
             return False
         return True
 
@@ -138,8 +138,8 @@ class StackedSparseScores:
             return self.data[name][idx]
         if isinstance(name, slice) and name.start == name.stop == name.step is None:
             if idx is None:
-                return self._data
-            return self._data[idx]
+                return self.data
+            return self.data[idx]
         raise IndexError(_slicing_not_implemented_msg)
 
     def _validate_indices(self, key):
@@ -195,26 +195,14 @@ class StackedSparseScores:
         return x
 
     @property
-    def row(self):
-        return self._row.copy()
-
-    @property
-    def col(self):
-        return self._col.copy()
-
-    @property
-    def data(self):
-        return self._data.copy()
-
-    @property
     def shape(self):
         return self.__n_row, self.__n_col, len(self.score_names)
 
     @property
     def score_names(self):
-        if isinstance(self._data, list):
+        if isinstance(self.data, list):
             return []
-        return self._data.dtype.names
+        return self.data.dtype.names
 
     def add_dense_matrix(self, matrix: np.ndarray,
                          name: str):
@@ -250,12 +238,12 @@ class StackedSparseScores:
         if self.shape[2] == 0 or (self.shape[2] == 1 and name in self.score_names):
             # Add first (sparse) array of scores
             (idx_row, idx_col) = np.where(matrix)
-            self._row = idx_row
-            self._col = idx_col
-            self._data = np.array(matrix[idx_row, idx_col], dtype=[(name, input_dtype)])
+            self.row = idx_row
+            self.col = idx_col
+            self.data = np.array(matrix[idx_row, idx_col], dtype=[(name, input_dtype)])
         else:
             # Add new stack of scores
-            self._data = recfunctions.append_fields(self._data, name, matrix[self.row, self.col],
+            self.data = recfunctions.append_fields(self.data, name, matrix[self.row, self.col],
                                                     dtypes=input_dtype, fill_value=0).data
 
     def add_coo_matrix(self, coo_matrix, name):
@@ -279,9 +267,9 @@ class StackedSparseScores:
         """
         if self.shape[2] == 0 or (self.shape[2] == 1 and name in self.score_names):
             # Add first (sparse) array of scores
-            self._data = np.array(coo_matrix.data, dtype=[(name, coo_matrix.dtype)])
-            self._row = coo_matrix.row.copy()
-            self._col = coo_matrix.col.copy()
+            self.data = np.array(coo_matrix.data, dtype=[(name, coo_matrix.dtype)])
+            self.row = coo_matrix.row.copy()
+            self.col = coo_matrix.col.copy()
             self.__n_row, self.__n_col = coo_matrix.shape
         else:
             # TODO move into logger warning rather than assert
@@ -294,10 +282,10 @@ class StackedSparseScores:
                                & (self.col == coo_matrix.col[i]))[0][0]
                 new_entries.append(idx)
 
-            self._data = recfunctions.append_fields(self._data, name,
+            self.data = recfunctions.append_fields(self.data, name,
                                                     np.zeros((len(self.row)), dtype=coo_matrix.dtype),
                                                     fill_value=0).data
-            self._data[name][new_entries] = coo_matrix.data
+            self.data[name][new_entries] = coo_matrix.data
 
     def add_sparse_data(self, data: np.ndarray, name: str):
         """Add sparse data to stacked sparse scores.
@@ -319,10 +307,10 @@ class StackedSparseScores:
             self._add_sparse_data(data, name)
 
     def _add_sparse_data(self, data, name):
-        assert data.shape[0] == self._row.shape[0], \
+        assert data.shape[0] == self.row.shape[0], \
             "Data must be of same size as number of sparse values in the array"
         assert name not in self.score_names, "Scores of 'name' are already found in array"
-        self._data = recfunctions.append_fields(self._data, name, data,
+        self.data = recfunctions.append_fields(self.data, name, data,
                                                 dtypes=data.dtype, fill_value=0).data
 
     def filter_by_range(self, name: str = None,
@@ -352,11 +340,11 @@ class StackedSparseScores:
             name = self.guess_score_name()
         above_operator = _get_operator(above_operator)
         below_operator = _get_operator(below_operator)
-        idx = np.where(above_operator(self._data[name], low)
-                       & below_operator(self._data[name], high))
-        self._col = self.col[idx]
-        self._row = self.row[idx]
-        self._data = self._data[idx]
+        idx = np.where(above_operator(self.data[name], low)
+                       & below_operator(self.data[name], high))
+        self.col = self.col[idx]
+        self.row = self.row[idx]
+        self.data = self.data[idx]
 
     def to_array(self, name=None):
         """Return scores as (non-sparse) numpy array.
@@ -371,16 +359,16 @@ class StackedSparseScores:
             name = self.score_names[0]
         if isinstance(name, str):
             array = np.zeros((self.__n_row, self.__n_col),
-                             dtype=self._data[name].dtype)
-            array[self.row, self.col] = self._data[name]
+                             dtype=self.data[name].dtype)
+            array[self.row, self.col] = self.data[name]
             return array
         array = np.zeros((self.__n_row, self.__n_col),
-                         dtype=self._data.dtype)
-        array[self.row, self.col] = self._data
+                         dtype=self.data.dtype)
+        array[self.row, self.col] = self.data
         return array
 
     def to_coo(self, name):
-        return coo_matrix((self._data[name], (self.row, self.col)),
+        return coo_matrix((self.data[name], (self.row, self.col)),
                           shape=(self.__n_row, self.__n_col))
 
 

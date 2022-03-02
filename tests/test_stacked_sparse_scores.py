@@ -121,18 +121,18 @@ def test_sss_matrix_equality(sparse_array):
     matrix_2 = _create_array("scores1", "scores2")
     assert matrix == matrix_2
     
-    matrix_2._data[0] = 5
+    matrix_2.data[0] = 5
     assert matrix != matrix_2
 
     matrix_2 = _create_array("scores1", "scores_2")
     assert matrix != matrix_2
 
     matrix_2 = _create_array("scores1", "scores2")
-    matrix_2._row[0] = 99
+    matrix_2.row[0] = 99
     assert matrix != matrix_2
 
     matrix_2 = _create_array("scores1", "scores2")
-    matrix_2._col[0] = 99
+    matrix_2.col[0] = 99
     assert matrix != matrix_2
 
 
