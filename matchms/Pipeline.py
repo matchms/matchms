@@ -35,8 +35,8 @@ class Pipeline:
             self.workflow = OrderedDict()
             self.workflow["importing"] = {"queries": None,
                                           "references": None}
-            self.workflow["filtering_queries"] = ["defaults"]
-            self.workflow["filtering_refs"] = ["defaults"]
+            self.workflow["filtering_queries"] = ["default_filters"]
+            self.workflow["filtering_refs"] = ["default_filters"]
             self.workflow["score_computations"] = []
         else:
             with open(config_file, 'r', encoding="utf-8") as file:
@@ -57,15 +57,15 @@ class Pipeline:
                              disable=(not self.progress_bar),
                              desc="Processing query spectrums"):
             for step in self.filter_steps_queries:
-                if step[0] in _filter_functions:
-                    self.apply_filter(spectrum, step)
+                self.apply_filter(spectrum, step)
+            self.spectrums_queries = [s for s in self.spectrums_queries if s is not None]
         if self.is_symmetric is False:
             for spectrum in tqdm(self.spectrums_references,
                                  disable=(not self.progress_bar),
                                  desc="Processing reference spectrums"):
                 for step in self.filter_steps_refs:
-                    if step[0] in _filter_functions:
-                        self.apply_filter(spectrum, step)
+                    self.apply_filter(spectrum, step)
+            self.spectrums_references = [s for s in self.spectrums_references if s is not None]
         # Score computation and masking
         for i, computation in enumerate(self.score_computations):
             if i == 0:
@@ -107,6 +107,8 @@ class Pipeline:
             self.spectrums_references += spectrums_references
 
     def apply_filter(self, spectrum, filter_step):
+        if not isinstance(filter_step, list):
+            filter_step = [filter_step]
         filter_name = filter_step[0]
         if len(filter_step) > 1:
             filter_params = filter_step[1]
@@ -144,7 +146,7 @@ class Pipeline:
 
     @filter_steps_queries.setter
     def filter_steps_queries(self, files):
-        self.workflow.set("filtering_queries", files)
+        self.workflow["filtering_queries"] = files
 
     @property
     def filter_steps_refs(self):
