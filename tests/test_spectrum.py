@@ -177,6 +177,8 @@ def test_spectrum_clone(spectrum, default_filtering):
     [{"precursor_mz": 101.01}, True, {"precursor_mz": 101.01}],
     [{"precursormz": 101.01}, True, {"precursor_mz": 101.01}],
     [{"precursormz": 101.01}, False, {"precursor_mz": 101.01}],
+    [{"ExactMass": 105.055}, True, {"parent_mass": 105.055}],
+    [{"ExactMass": 105.055, "parent_mass": 107.077}, True, {"parent_mass": 107.077}],
     [{"charge": "2+"}, True, {"charge": 2}],
     [{"charge": -1}, True, {"charge": -1}],
     [{"charge": [-1, 0]}, True, {"charge": -1}],
