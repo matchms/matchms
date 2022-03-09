@@ -8,6 +8,15 @@ def assert_matching_inchikey(molecule, expected_inchikey):
     assert molecule.get("inchikey").lower() == expected_inchikey.lower(), "Expected different InChIKey."
 
 
+def assert_matching_mass(molecule, expected_mass):
+    assert np.isclose(molecule.get("parent_mass"), expected_mass, rtol=1e-5), \
+                      "Expected different InChIKey."
+
+
+def assert_matching_metadata_string(molecule, expected_entry, field):
+    assert molecule.get(field) == expected_entry, f"Expected different entry for {field}."
+
+
 def test_load_from_msp_spaces_mona_1():
     """
     Test parse of msp file to spectrum objects using MoNA msp file.
@@ -159,3 +168,33 @@ def test_load_from_msp_multiline():
     ]
 
     assert actual == expected
+
+
+def test_load_from_msp_diverse_spectrum_collection():
+    """
+    Test parse of msp file to spectrum objects using msp file containing various
+    spectra. Some will contain duplicate entries (e.g. ExactMass field and exact_mass in comments).
+    Check if InChiKey is loaded correctly.
+    """
+
+    module_root = os.path.join(os.path.dirname(__file__), "..")
+    spectrums_file = os.path.join(module_root, "tests", "test_spectra_collection.msp")
+    spectrum = load_from_msp(spectrums_file)
+
+    expected_inchikey = np.array([
+        "UDOOPSJCRMKSGL-ZHACJKMWSA-N", "QQVDJLLNRSOCEL-UHFFFAOYSA-N"
+    ])
+    for k, n in enumerate(spectrum):
+        assert_matching_inchikey(n, expected_inchikey[k])
+
+    expected_parent_mass = np.array([
+        224.083729624, 125.0241797459999
+    ])
+    for k, n in enumerate(spectrum):
+        assert_matching_mass(n, expected_parent_mass[k])
+
+    expected_adducts = np.array([
+        "M-H", "[M-H]-"
+    ])
+    for k, n in enumerate(spectrum):
+        assert_matching_metadata_string(n, expected_adducts[k], "adduct")

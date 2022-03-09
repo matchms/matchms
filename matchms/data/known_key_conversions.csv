@@ -3,6 +3,7 @@ precursor_mass,precursor_mz
 precursormass,precursor_mz
 precursormz,precursor_mz
 precursor,precursor_mz
+precursor_type,adduct
 precursorintensity,precursor_intensity
 precursor_charge,charge
 precursorcharge,charge
