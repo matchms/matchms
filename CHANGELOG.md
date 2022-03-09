@@ -11,6 +11,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - new spectral similarity score: `NeutralLossesCosine` which is based on matches between neutral losses of two spectra [#329](https://github.com/matchms/matchms/pull/329)
 
+### Changed
+
+- added new key conversion: "precursor_type" to "adduct" [#332](https://github.com/matchms/matchms/pull/332)
+
+### Fixed
+
+- handling of duplicate entries in spectrum files (e.g. as field and again in the comments field in msp files) by ugrade of pickydict to 0.4.0 [#332](https://github.com/matchms/matchms/pull/332)
+
 ## [0.14.0] - 2022-02-18
 
 This is the first of a few releases to work our way towards matchms 1.0.0, which also means that a few things in the API will likely change. Here the main change is that `Spectrum.metadata` is no longer a simple Python dictionary but became a `Metadata` object. In this context metadata field-names/keys will now be harmonized by default (e.g. "Precursor Mass" will become "precursor_mz). For list of conversions see [matchms key conversion table](https://github.com/matchms/matchms/blob/development/matchms/data/known_key_conversions.csv).

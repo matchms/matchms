@@ -1,0 +1,37 @@
+Name: 2-Hydroxychalcone
+Synon: $:00in-source
+DB#: VF-NPL-LTQ000001
+InChIKey: UDOOPSJCRMKSGL-ZHACJKMWSA-N
+Precursor_type: M-H
+Spectrum_type: MS2
+PrecursorMZ: 223.12845079826587
+Instrument_type: Linear Ion Trap
+Instrument: Thermo Finnigan LTQ
+Ion_mode: N
+Collision_energy: 35
+Formula: C15H12O2
+MW: 224
+ExactMass: 224.083729624
+Comments: "InChI=InChI=1S/C15H12O2/c16-14-9-5-4-8-13(14)10-11-15(17)12-6-2-1-3-7-12/h1-11,16H/b11-10+" "computed SMILES=O=C(C=CC=1C=CC=CC1O)C=2C=CC=CC2" "raw filename=120_100_iTree_NEG_08042014_10.raw" "author=Arpana Vaniya" "source introduction=direct infusion" "source voltage=3.50 kV" "capillary temperature=275 C" "ion source=ESI Ion Max" "computed spectral entropy=0.08743674675113056" "computed normalized entropy=0.12614456092932025" "computed mass accuracy=233.03695283966962" "computed mass error=0.05199717426586403" "SPLASH=splash10-0002-0900000000-6fd327c02607c02c0e42" "submitter=Arpana Vaniya (University of California, Davis)" "MoNA Rating=3.846153846153846"
+Num Peaks: 2
+177.06 1.763028
+195.05 100.000000
+
+
+Name: (2-AMINOETHYL)PHOSPHONATE
+Synon: $:00in-source
+DB#: CCMSLIB00000578169
+InChIKey: QQVDJLLNRSOCEL-UHFFFAOYSA-N
+Precursor_type: [M-H]-
+Spectrum_type: MS2
+PrecursorMZ: 124.016
+Instrument: Q-Exactive Plus
+Ion_mode: N
+Formula: C2H8NO3P
+MW: 125
+ExactMass: 125.02417974599999
+Comments: "cas number=2041-14-7" "pubmed id=339" "SMILES=O=P(O)(O)CCN" "computed SMILES=C(CP(=O)(O)O)N" "computed InChI=InChI=1S/C2H8NO3P/c3-1-2-7(4,5)6/h1-3H2,(H2,4,5,6)" "ion source=LC-ESI" "compound source=Commercial standard" "exact mass=125.024" "charge state=0" "source file=IROA_PLATE_neg_2_B.mzXML" "origin=GNPS-EMBL-MCF" "author=Alexandrov Theodore, pphapale, Prasad" "computed mass accuracy=7.287333892219113" "computed mass error=-9.037459999774455E-4" "SPLASH=splash10-00fr-5900000000-71241086c94c831eda97" "submitter=GNPS Team (University of California, San Diego)" "MoNA Rating=4.090909090909091"
+Num Peaks: 3
+55.649189 0.660602
+67.693985 0.748710
+72.791397 1.174059
