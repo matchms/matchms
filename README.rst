@@ -198,41 +198,44 @@ Alternatively, here below is a small example of using matchms to calculate the C
             print(f"Number of matching peaks: {score['matches']}")
             print("----------------------------")
 
-Glossary of terms
-=================
+Different spectrum similarity scores
+====================================
 
-.. list-table::
-   :header-rows: 1
+Matchms comes with numerous different scoring methods in `matchms.similarity` and can furthe seemlessly work with `Spec2Vec` or `MS2DeepScore`.
 
-   * - Term
-     - Description
-   * - adduct / addition product
-     - During ionization in a mass spectrometer, the molecules of the injected compound break apart
-       into fragments. When fragments combine into a new compound, this is known as an addition
-       product, or adduct.  `Wikipedia <https://en.wikipedia.org/wiki/Adduct>`__
-   * - GNPS
-     - Knowledge base for sharing of mass spectrometry data (`link <https://gnps.ucsd.edu/ProteoSAFe/static/gnps-splash.jsp>`__).
-   * - InChI / :code:`INCHI`
-     - InChI is short for International Chemical Identifier. InChIs are useful
-       in retrieving information associated with a certain molecule from a
-       database.
-   * - InChIKey / InChI key / :code:`INCHIKEY`
-     - An identifier for molecules. For example, the InChI key for carbon
-       dioxide is :code:`InChIKey=CURLTUGMZLYLDI-UHFFFAOYSA-N` (yes, it
-       includes the substring :code:`InChIKey=`).
-   * - MGF File / Mascot Generic Format
-     - A plan ASCII file format to store peak list data from a mass spectrometry experiment. Links: `matrixscience.com <http://www.matrixscience.com/help/data_file_help.html#GEN>`__,
-       `fiehnlab.ucdavis.edu <https://fiehnlab.ucdavis.edu/projects/lipidblast/mgf-files>`__.
-   * - parent mass / :code:`parent_mass`
-     - Actual mass (in Dalton) of the original compound prior to fragmentation.
-       It can be recalculated from the precursor m/z by taking
-       into account the charge state and proton/electron masses.
-   * - precursor m/z / :code:`precursor_mz`
-     - Mass-to-charge ratio of the compound targeted for fragmentation.
-   * - SMILES
-     - A line notation for describing the structure of chemical species using
-       short ASCII strings. For example, water is encoded as :code:`O[H]O`,
-       carbon dioxide is encoded as :code:`O=C=O`, etc. SMILES-encoded species may be converted to InChIKey `using a resolver like this one <https://cactus.nci.nih.gov/chemical/structure>`__. The Wikipedia entry for SMILES is `here <https://en.wikipedia.org/wiki/Simplified_molecular-input_line-entry_system>`__.
+Code example: 
+
+.. code-block:: python
+
+    from matchms.importing import load_from_usi
+    import matchms.filtering as msfilters
+    import matchms.similarity as mssim
+
+
+    usi1 = "mzspec:GNPS:GNPS-LIBRARY:accession:CCMSLIB00000424840"
+    usi2 = "mzspec:MSV000086109:BD5_dil2x_BD5_01_57213:scan:760"
+
+    mz_tolerance = 0.1
+
+    spectrum1 = load_from_usi(usi1)
+    spectrum1 = msfilters.select_by_mz(spectrum1, 0, spectrum1.get("precursor_mz"))
+    spectrum1 = msfilters.remove_peaks_around_precursor_mz(spectrum1,
+                                                           mz_tolerance=0.1)
+
+    spectrum2 = load_from_usi(usi2)
+    spectrum2 = msfilters.select_by_mz(spectrum2, 0, spectrum1.get("precursor_mz"))
+    spectrum2 = msfilters.remove_peaks_around_precursor_mz(spectrum2,
+                                                           mz_tolerance=0.1)
+    # Compute scores:
+    similarity_cosine = mssim.CosineGreedy(tolerance=mz_tolerance).pair(spectrum1, spectrum2)
+    similarity_modified_cosine = mssim.ModifiedCosine(tolerance=mz_tolerance).pair(spectrum1, spectrum2)
+    similarity_neutral_losses = mssim.NeutralLossesCosine(tolerance=mz_tolerance).pair(spectrum1, spectrum2)
+
+    print(f"similarity_cosine: {similarity_cosine}")
+    print(f"similarity_modified_cosine: {similarity_modified_cosine}")
+    print(f"similarity_neutral_losses: {similarity_neutral_losses}")
+
+    spectrum1.plot_against(spectrum2)
 
 
 ****************************
