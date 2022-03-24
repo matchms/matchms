@@ -72,54 +72,47 @@ def test_is_valid_inchikey_none_input():
     assert not is_valid_inchikey(None), "Expected None entry to give False."
 
 
-def test_is_valid_inchi():
-    """Test if strings are correctly classified."""
+
+
+@pytest.mark.parametrize("inchi, expected", [
+    ["InChI=1S/C2H7N3/c1-5-2(3)4/h1H3,(H4,3,4,5)", True],
+    ['"InChI=1S/C2H7N3/c1-5-2(3)4/h1H3,(H4,3,4,5)"', True],
+    ["InChI=1S/Ne", True],
+    ["InChI=1S/C14H9Cl5/c15-11-5-1-9(2-6-11)13(14(17,18)19)10-3-7-12(16)8-4-10/h1-8,13H", True],
+    ["1S/C2H7N3/c1-5-2(3)4/h1H3,(H4,3,4,5)", False],
+    ["InChI=1S/C2H7N3/c152(3)4/h1H3,(H4,3,4,5)", False],
+    ["InChI=C2H7N3/c1-5-2(3)4/h1H3,(H4,3,4,5)", False],
+    ["InChI=1S/C2H7N3/c1-5-2(3)", False]
+])
+def test_is_valid_inchi(inchi, expected):
     pytest.importorskip("rdkit")
-
-    inchi_true = [
-        "InChI=1S/C2H7N3/c1-5-2(3)4/h1H3,(H4,3,4,5)",
-        '"InChI=1S/C2H7N3/c1-5-2(3)4/h1H3,(H4,3,4,5)"'
-    ]
-    inchi_false = [
-        "1S/C2H7N3/c1-5-2(3)4/h1H3,(H4,3,4,5)",
-        "InChI=1S/C2H7N3/c152(3)4/h1H3,(H4,3,4,5)",
-        "InChI=C2H7N3/c1-5-2(3)4/h1H3,(H4,3,4,5)",
-        "InChI=1S/C2H7N3/c1-5-2(3)"
-    ]
-
-    for inchi in inchi_true:
-        assert is_valid_inchi(inchi), "Expected inchi is True."
-    for inchi in inchi_false:
-        assert not is_valid_inchi(inchi), "Expected inchi is False."
+    assert is_valid_inchi(inchi) == expected
 
 
 def test_is_valid_inchi_none_input():
     """Test None entry."""
     pytest.importorskip("rdkit")
-
     assert not is_valid_inchi(None), "Expected None entry to give False."
 
 
-def test_is_valid_smiles():
-    """Test if strings are correctly classified."""
+@pytest.mark.parametrize("smiles, expected", [
+    [r"CN1COCN(CC2=CN=C(Cl)S2)\C1=N\[N+]([O-])=O", True],
+    [r"CN1N(C(=O)C=C1C)c1ccccc1", True],
+    [r"COC(=O)C1=CN=CC=N1", True],
+    [r"C", True],
+    [r"CF", True],
+    [r"C#C", True],
+    [r"C1=CC(=CC=C1C(C2=CC=C(C=C2)Cl)C(Cl)(Cl)Cl)Cl", True],
+    [r"[18FH]", True],
+    [r"F", True],
+    [r"CN1N(C(=O)C=C1C)c1cccccx1", False],
+    [r"CN1COCN(CC2=CN=C(Cl)S2)\C1=N\[N+++]([O-])=O", False],
+    [r"COC(=O[)]C1=CN=CC=N1", False],
+    [r"1S/C2H7N3/c1-5-2(3)4", False]
+])
+def test_is_valid_smiles(smiles, expected):
     pytest.importorskip("rdkit")
-
-    smiles_true = [
-        r"CN1COCN(CC2=CN=C(Cl)S2)\C1=N\[N+]([O-])=O",
-        r"CN1N(C(=O)C=C1C)c1ccccc1",
-        r"COC(=O)C1=CN=CC=N1"
-    ]
-    smiles_false = [
-        r"CN1N(C(=O)C=C1C)c1cccccx1",
-        r"CN1COCN(CC2=CN=C(Cl)S2)\C1=N\[N+++]([O-])=O",
-        r"COC(=O[)]C1=CN=CC=N1",
-        r"1S/C2H7N3/c1-5-2(3)4"
-    ]
-
-    for smiles in smiles_true:
-        assert is_valid_smiles(smiles), "Expected smiles is True."
-    for smiles in smiles_false:
-        assert not is_valid_smiles(smiles), "Expected smiles is False."
+    assert is_valid_smiles(smiles) == expected
 
 
 def test_is_valid_smiles_none_input():
