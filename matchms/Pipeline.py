@@ -6,7 +6,8 @@ import matchms.filtering as msfilters
 import matchms.importing as msimport
 import matchms.similarity as mssimilarity
 from matchms import calculate_scores
-from matchms.logging_functions import add_logging_to_file, set_matchms_logger_level
+from matchms.logging_functions import (add_logging_to_file,
+                                       set_matchms_logger_level)
 
 
 _importing_functions = {"json": msimport.load_from_json,
