@@ -128,8 +128,8 @@ class Pipeline:
             self.scores.scores.add_sparse_data(new_scores, similarity_measure.__class__.__name__)
 
     def check_pipeline(self):
-        # check if files exist
-        # check if all steps exist
+        # TODO: check if files exist
+        # TODO: check if all steps exist
         pass
 
     def set_logging(self):
@@ -142,7 +142,7 @@ class Pipeline:
 
     def write_to_logfile(self, line):
         if self.logging_file is not None:
-            with open(self.logging_file, "a") as f:
+            with open(self.logging_file, "a", encoding="utf-8") as f:
                 f.write(line + '\n')
 
     def import_data(self, query_files, reference_files=None):
