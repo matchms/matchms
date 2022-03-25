@@ -24,9 +24,73 @@ logger = logging.getLogger("matchms")
 class Pipeline:
     """Central pipeline class.
 
+    The matchms Pipeline class is meant to make running extensive analysis pipelines
+    fast and easy. I can be used in two different ways. First, a pipeline can be defined
+    using a config file (a yaml file, best to start from the template provided to define
+    your own pipline).
+
+    Once a config file is defined, execution only needs the following code:
+
+    .. code-block:: python
+
+        from matchms import Pipeline
+
+        pipeline = Pipeline("my_config_file.yaml")
+        pipeline.run()
+
+    The second way to define a pipeline is via a Python script. The following code is an
+    example of how this works:
+
+    .. code-block:: python
+
+        from matchms import Pipeline
+
+        pipeline = Pipeline("my_config_file.yaml")
+        pipeline.run()
+
+        An alternative way to use it:
+
+        pipeline = Pipeline()
+        pipeline.query_files = "spectrums_file.msp"
+        pipeline.filter_steps_queries = [
+            ["default_filters"],
+            ["add_parent_mass"],
+            ["normalize_intensities"],
+            ["select_by_relative_intensity", {"intensity_from": 0.0, "intensity_to": 1.0}],
+            ["select_by_mz", {"mz_from": 0, "mz_to": 1000}],
+            ["require_minimum_number_of_peaks", {"n_required": 5}]
+        ]
+        pipeline.score_computations = [["precursormzmatch",  {"tolerance": 120.0}],
+                                       ["cosinegreedy", {"tolerance": 1.0}]
+                                       ["filter_by_range", {"name": "CosineGreedy_score", "low": 0.3}],
+                                       ["modifiedcosine", {"tolerance": 1.0}],
+                                       ["filter_by_range", {"name": "ModifiedCosine_score", "low": 0.3}]]
+
+        pipeline.logging_file = "my_pipeline.log"
+        pipeline.run()
+
+    To combine this with custom made scores or available matchms-compatible scores
+    such as `Spec2Vec` or `MS2DeepScore`, it is also possible to pass objects instead of
+    names to the pipeline:
+
+    .. code-block:: python
+
+        from spec2vec import Spec2Vec
+
+        pipeline.score_computations = [["precursormzmatch",  {"tolerance": 120.0}],
+                                       [Spec2Vec, {"model": "my_spec2vec_model.model"}],
+                                       ["filter_by_range", {"name": "Spec2Vec", "low": 0.3}]]
+
     """
     def __init__(self, config_file=None, progress_bar=True):
         """
+        Parameters
+        ----------
+        config_file
+            Filename of config file (yaml file) to define pipeline. Default is None
+            in which case the pipeline should be defined via a Python script.
+        progress_bar
+            Default is True. Set to False if no progress bar should be displayed.
         """
         self.spectrums_queries = []
         self.spectrums_references = []
