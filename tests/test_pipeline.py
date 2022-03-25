@@ -142,13 +142,13 @@ def test_pipeline_logging(tmp_path):
     pipeline = Pipeline()
     pipeline.query_files = spectrums_file_msp
     pipeline.score_computations = [["precursormzmatch",  {"tolerance": 120.0}],
-                                   ["modifiedcosine", {"tolerance": 10.0}]]
+                                   [ModifiedCosine, {"tolerance": 10.0}]]
     logfile = os.path.join(tmp_path, "testlog.log")
     pipeline.logging_file = logfile
     pipeline.run()
 
     assert os.path.exists(logfile)
-    with open(logfile, "r") as f:
+    with open(logfile, "r", encoding="utf-8") as f:
         firstline = f.readline().rstrip()
     assert "Start running matchms pipeline" in firstline
     
