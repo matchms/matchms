@@ -1,3 +1,4 @@
+import logging
 from collections import OrderedDict
 import yaml
 from tqdm import tqdm
@@ -5,6 +6,7 @@ import matchms.filtering as msfilters
 import matchms.importing as msimport
 import matchms.similarity as mssimilarity
 from matchms import calculate_scores
+from matchms.logging_functions import add_logging_to_file, set_matchms_logger_level
 
 
 _importing_functions = {"json": msimport.load_from_json,
@@ -15,6 +17,7 @@ _importing_functions = {"json": msimport.load_from_json,
 _filter_functions = {key: f for key, f in msfilters.__dict__.items() if callable(f)}
 _masking_functions = ["filter_by_range"]
 _score_functions = {key.lower(): f for key, f in mssimilarity.__dict__.items() if callable(f)}
+logger = logging.getLogger("matchms")
 
 
 class Pipeline:
@@ -44,16 +47,26 @@ class Pipeline:
                 self.workflow = ordered_load(file, yaml.SafeLoader)
             if self.workflow["filtering_refs"] == "filtering_queries":
                 self.workflow["filtering_refs"] = self.workflow["filtering_queries"]
+        if "logging" not in self.workflow:
+            self.workflow["logging"] = {}
+        if self.logging_level is None:
+            self.logging_level = "WARNING"
 
     def import_workflow_from_yaml(self, config_file):
         self._initialize_workflow_dict(config_file)
 
     def run(self):
+        self.set_logging()
+        self.write_to_logfile("--- Start running matchms pipeline. ---")
         self.check_pipeline()
+        self.write_to_logfile("--- Importing data ---")
         self.import_data(self.query_files,
                          self.reference_files)
 
         # Processing
+        self.write_to_logfile("--- Processing spectra ---")
+        for step in self.filter_steps_queries:
+            self.write_to_logfile(f"-- Processing step: {step} --")
         for spectrum in tqdm(self.spectrums_queries,
                              disable=(not self.progress_bar),
                              desc="Processing query spectrums"):
@@ -69,9 +82,11 @@ class Pipeline:
             self.spectrums_references = [s for s in self.spectrums_references if s is not None]
 
         # Score computation and masking
+        self.write_to_logfile("--- Computing scores ---")
         for i, computation in enumerate(self.score_computations):
             if not isinstance(computation, list):
                 computation = [computation]
+            self.write_to_logfile(f"-- Score computation: {computation} --")
             if isinstance(computation[0], str) and computation[0] in _masking_functions:
                 self._apply_score_masking(computation)
             else:
@@ -116,6 +131,19 @@ class Pipeline:
         # check if files exist
         # check if all steps exist
         pass
+
+    def set_logging(self):
+        if self.logging_file is not None:
+            add_logging_to_file(self.logging_file,
+                                loglevel=self.logging_level,
+                                remove_stream_handlers=True)
+        else:
+            set_matchms_logger_level(self.logging_level)
+
+    def write_to_logfile(self, line):
+        if self.logging_file is not None:
+            with open(self.logging_file, "a") as f:
+                f.write(line + '\n')
 
     def import_data(self, query_files, reference_files=None):
         if isinstance(query_files, str):
@@ -172,6 +200,22 @@ class Pipeline:
     @reference_files.setter
     def reference_files(self, files):
         self.workflow["importing"]["references"] = files
+
+    @property
+    def logging_file(self):
+        return self.workflow["logging"].get("logging_file")
+
+    @logging_file.setter
+    def logging_file(self, file):
+        self.workflow["logging"]["logging_file"] = file
+
+    @property
+    def logging_level(self):
+        return self.workflow["logging"].get("logging_level")
+
+    @logging_level.setter
+    def logging_level(self, log_level):
+        self.workflow["logging"]["logging_level"] = log_level
 
     @property
     def filter_steps_queries(self):
