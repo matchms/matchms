@@ -158,10 +158,38 @@ Introduction
 
 To get started with matchms, we recommend following our `matchms introduction tutorial <https://blog.esciencecenter.nl/build-your-own-mass-spectrometry-analysis-pipeline-in-python-using-matchms-part-i-d96c718c68ee>`_.
 
-Alternatively, here below is a small example of using matchms to calculate the Cosine score between mass Spectrums in the `tests/pesticides.mgf <https://github.com/matchms/matchms/blob/master/tests/pesticides.mgf>`_ file.
+Below is a small example of using matchms to calculate the Cosine score between mass Spectrums in the `tests/pesticides.mgf <https://github.com/matchms/matchms/blob/master/tests/pesticides.mgf>`_ file.
 
 .. code-block:: python
 
+    from matchms import Pipeline
+    
+    pipeline = Pipeline()
+    
+    # Read spectrums from a MGF formatted file, for other formats see https://matchms.readthedocs.io/en/latest/api/matchms.importing.html 
+    pipeline.query_files = "tests/pesticides.mgf"
+    pipeline.filter_steps_queries = [
+        ["default_filters"],
+        ["add_parent_mass"],
+        ["normalize_intensities"],
+        ["select_by_intensity", {"intensity_from": 0.001, "intensity_to": 1.0}],
+        ["select_by_mz", {"mz_from": 0, "mz_to": 1000}],
+        ["require_minimum_number_of_peaks", {"n_required": 5}]
+    ]
+    pipeline.score_computations = [["precursormzmatch",  {"tolerance": 100.0}],
+                                   ["cosinegreedy", {"tolerance": 1.0}],
+                                   ["filter_by_range", {"name": "CosineGreedy_score", "low": 0.2}]]
+
+    pipeline.logging_file = "my_pipeline.log"  # for pipeline and logging message
+    pipeline.logging_level = "INFO"
+    pipeline.run()
+
+
+Alternatively, in particular if you need more room to add custom functions and steps, the individual
+steps can run without using the matchms ``Pipeline``:
+
+.. code-block:: python
+    
     from matchms.importing import load_from_mgf
     from matchms.filtering import default_filters, normalize_intensities
     from matchms import calculate_scores
