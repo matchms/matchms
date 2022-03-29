@@ -91,7 +91,7 @@ def test_sss_matrix_add_coo_2_times(sparse_array):
     assert matrix.data["scores2"].dtype == np.int32
 
     # Run filter
-    matrix.filter_by_range("scores2", low=0, high=40)
+    matrix = matrix.filter_by_range("scores2", low=0, high=40)
     expected = np.array([2, 6, 14, 18, 22, 26, 34, 38, 42,
                          46, 54, 58, 62, 66, 74, 78])
     assert np.all(matrix.data["scores1"] == expected)
@@ -228,7 +228,7 @@ def test_sss_matrix_filter_by_range():
     arr = np.arange(0, 120).reshape(12, 10)
     matrix = StackedSparseScores(12, 10)
     matrix.add_dense_matrix(arr, "test_score")
-    matrix.filter_by_range(low=70, high=85)
+    matrix = matrix.filter_by_range(low=70, high=85)
     assert np.all(matrix.data["test_score"] == np.arange(71, 85))
 
 
@@ -241,12 +241,12 @@ def test_sss_matrix_filter_by_range_stacked():
 
     matrix = StackedSparseScores(12, 10)
     matrix.add_dense_matrix(scores1.astype(np.int64), "scores1")
-    matrix.filter_by_range(low=70, high=85)
+    matrix = matrix.filter_by_range(low=70, high=85)
     assert matrix.shape == (12, 10, 1)
     assert np.all(matrix.data["scores1"] == np.arange(71, 85))
 
     matrix.add_dense_matrix(scores2, "scores2")
-    matrix.filter_by_range("scores2", low=0.5)
+    matrix = matrix.filter_by_range("scores2", low=0.5)
     # Test slicing
     assert matrix[8, 1, 0] == np.array([81])
     assert matrix[8, 1, 1] == np.array([0.9])
