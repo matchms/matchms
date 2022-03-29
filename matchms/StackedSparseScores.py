@@ -31,11 +31,11 @@ class StackedSparseScores:
 
         scores_array = StackedSparseScores(12, 10)
         scores_array.add_dense_matrix(scores1, "scores_1")
-        scores_array.filter_by_range("scores_1", low=0.5)
+        scores_array = scores_array.filter_by_range("scores_1", low=0.5)
 
         # Add second scores and filter
         scores_array.add_dense_matrix(scores2, "scores_2")
-        scores_array.filter_by_range("scores_2", low=0.1, high=0.4)
+        scores_array = scores_array.filter_by_range("scores_2", low=0.1, high=0.4)
 
         # Scores can be accessed using (limited) slicing capabilities
         scores_array[3, 4]  # => scores_1 and scores_2 at position row=3, col=4
@@ -54,14 +54,7 @@ class StackedSparseScores:
         idx_dtype = get_index_dtype(maxval=max(n_row, n_col))
         self.row = np.array([], dtype=idx_dtype)
         self.col = np.array([], dtype=idx_dtype)
-        self.data = []
-
-    def guess_score_name(self):
-        if len(self.score_names) == 1:
-            return self.score_names[0]
-        if len(self.score_names) == 0:
-            raise KeyError("Array is empty.")
-        raise KeyError("Name of score is required.")
+        self.data = None
 
     def __repr__(self):
         msg = f"<{self.shape[0]}x{self.shape[1]}x{self.shape[2]} stacked sparse array" \
@@ -200,9 +193,19 @@ class StackedSparseScores:
 
     @property
     def score_names(self):
-        if isinstance(self.data, list):
+        if self.data is None:
             return []
+        if self.data.dtype.names is None:
+            return [self.data.dtype.str]
         return self.data.dtype.names
+
+    def clone(self):
+        """ Returns clone (deepcopy) of StackedSparseScores instance."""
+        cloned_array = StackedSparseScores(self.__n_row, self.__n_col)
+        cloned_array.row = self.row
+        cloned_array.col = self.col
+        cloned_array.data = self.data
+        return cloned_array
 
     def add_dense_matrix(self, matrix: np.ndarray,
                          name: str):
@@ -245,6 +248,13 @@ class StackedSparseScores:
             # Add new stack of scores
             self.data = recfunctions.append_fields(self.data, name, matrix[self.row, self.col],
                                                     dtypes=input_dtype, fill_value=0).data
+
+    def guess_score_name(self):
+        if len(self.score_names) == 1:
+            return self.score_names[0]
+        if len(self.score_names) == 0:
+            raise KeyError("Array is empty.")
+        raise KeyError("Name of score is required.")
 
     def add_coo_matrix(self, coo_matrix, name):
         """Add sparse matrix (scipy COO-matrix) to stacked sparse scores.
@@ -336,15 +346,17 @@ class StackedSparseScores:
             Possible choices are '>', '<', '>=', '<='.
         """
         # pylint: disable=too-many-arguments
-        if name is None:
-            name = self.guess_score_name()
         above_operator = _get_operator(above_operator)
         below_operator = _get_operator(below_operator)
+        if name is None:
+            name = self.guess_score_name()
         idx = np.where(above_operator(self.data[name], low)
                        & below_operator(self.data[name], high))
-        self.col = self.col[idx]
-        self.row = self.row[idx]
-        self.data = self.data[idx]
+        cloned_array = StackedSparseScores(self.__n_row, self.__n_col)
+        cloned_array.col = self.col[idx]
+        cloned_array.row = self.row[idx]
+        cloned_array.data = self.data[idx]
+        return cloned_array
 
     def to_array(self, name=None):
         """Return scores as (non-sparse) numpy array.
