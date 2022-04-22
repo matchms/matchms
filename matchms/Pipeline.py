@@ -199,11 +199,23 @@ class Pipeline:
                 filenames = [filenames]
             for filename in filenames:
                 assert os.path.exists(filename), f"File {filename} not found."
+
+        # Check if all files exist
         check_files_exist(self.query_files)        
         if self.reference_files is not None:
             check_files_exist(self.reference_files)
-        # TODO: check if all steps exist
-        pass
+
+        # Check if all score compuation steps exist
+        for computation in self.score_computations:
+            if not isinstance(computation, list):
+                computation = [computation]
+            if isinstance(computation[0], str) and computation[0] in _masking_functions:
+                continue
+            if isinstance(computation[0], str) and computation[0] in _score_functions:
+                continue
+            if callable(computation[0]):
+                continue
+            raise ValueError(f"Unknown score computation: {computation[0]}.")
 
     def set_logging(self):
         if self.logging_file is not None:

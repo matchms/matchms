@@ -10,13 +10,22 @@ module_root = os.path.join(os.path.dirname(__file__), "..")
 spectrums_file_msp = os.path.join(module_root, "tests", "massbank_five_spectra.msp")
 
 
-def test_pipeline_initial_check():
+def test_pipeline_initial_check_missing_file():
     pipeline = Pipeline()
     pipeline.query_files = "non_existing_file.msp"
     pipeline.score_computations = [["precursormzmatch",  {"tolerance": 120.0}]]
     with pytest.raises(AssertionError) as msg:
         pipeline.run()
     assert "not found" in str(msg.value)
+
+
+def test_pipeline_initial_check_unknown_step():
+    pipeline = Pipeline()
+    pipeline.query_files = spectrums_file_msp
+    pipeline.score_computations = [["precursormzOOPSmatch",  {"tolerance": 120.0}]]
+    with pytest.raises(ValueError) as msg:
+        pipeline.run()
+    assert "Unknown score computation:" in str(msg.value)
 
 
 def test_pipeline_symmetric():
