@@ -57,6 +57,10 @@ def test_spectrum_getters_return_copies():
 def test_spectrum_getters(spectrum: Spectrum):
     assert np.all(spectrum.mz == spectrum.peaks.mz)
     assert np.all(spectrum.intensities == spectrum.peaks.intensities)
+    # Test if true copy
+    mz = spectrum.mz
+    mz[0] = 1111
+    assert np.allclose(spectrum.peaks.mz[0], 100.00003)
 
 
 @pytest.mark.parametrize("input_dict, expected_dict", [
