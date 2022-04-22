@@ -54,6 +54,15 @@ def test_spectrum_getters_return_copies():
     assert spectrum.metadata == {'testdata': 1}, "Expected metadata to remain unchanged"
 
 
+def test_spectrum_getters(spectrum: Spectrum):
+    assert np.all(spectrum.mz == spectrum.peaks.mz)
+    assert np.all(spectrum.intensities == spectrum.peaks.intensities)
+    # Test if true copy
+    mz = spectrum.mz
+    mz[0] = 1111
+    assert np.allclose(spectrum.peaks.mz[0], 100.00003)
+
+
 @pytest.mark.parametrize("input_dict, expected_dict", [
     [{"precursor mass": 400.768, "Some Key": "Whatever.", "NEW\tSTUFF": "XYZ"},
      {"precursor_mz": 400.768, "some_key": "Whatever.", "new_stuff": "XYZ"}],

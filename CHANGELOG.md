@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `Spectrum` objects now also have `.mz` and `.intensities` properties [#339](https://github.com/matchms/matchms/pull/339)
+
 ### Changed
 - metadata filtering: made prefilter check for SMILES and InChI more lenient, eventually resulting in longer runtimes but more accurate checks [#337](https://github.com/matchms/matchms/pull/337)
 

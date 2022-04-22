@@ -194,6 +194,14 @@ class Spectrum:
         return self
 
     @property
+    def mz(self):
+        return self.peaks.mz
+
+    @property
+    def intensities(self):
+        return self.peaks.intensities
+
+    @property
     def metadata(self):
         return self._metadata.data.copy()
 
