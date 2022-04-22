@@ -1,4 +1,5 @@
 import logging
+import os
 from collections import OrderedDict
 import yaml
 from tqdm import tqdm
@@ -193,7 +194,14 @@ class Pipeline:
             self.scores.scores.add_sparse_data(new_scores, similarity_measure.__class__.__name__)
 
     def check_pipeline(self):
-        # TODO: check if files exist
+        def check_files_exist(filenames):
+            if isinstance(filenames, str):
+                filenames = [filenames]
+            for filename in filenames:
+                assert os.path.exists(filename), f"File {filename} not found."
+        check_files_exist(self.query_files)        
+        if self.reference_files is not None:
+            check_files_exist(self.reference_files)
         # TODO: check if all steps exist
         pass
 

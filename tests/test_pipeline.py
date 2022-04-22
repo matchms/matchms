@@ -1,5 +1,6 @@
 import os
 import numpy as np
+import pytest
 from matchms import Pipeline
 from matchms.filtering import select_by_mz
 from matchms.similarity import ModifiedCosine
@@ -7,6 +8,15 @@ from matchms.similarity import ModifiedCosine
 
 module_root = os.path.join(os.path.dirname(__file__), "..")
 spectrums_file_msp = os.path.join(module_root, "tests", "massbank_five_spectra.msp")
+
+
+def test_pipeline_initial_check():
+    pipeline = Pipeline()
+    pipeline.query_files = "non_existing_file.msp"
+    pipeline.score_computations = [["precursormzmatch",  {"tolerance": 120.0}]]
+    with pytest.raises(AssertionError) as msg:
+        pipeline.run()
+    assert "not found" in str(msg.value)
 
 
 def test_pipeline_symmetric():
