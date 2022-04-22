@@ -204,6 +204,8 @@ class Pipeline:
                                 remove_stream_handlers=True)
         else:
             set_matchms_logger_level(self.logging_level)
+            logger.warning("No logging file was defined." \
+                "Logging messages will not be written to file.")
 
     def write_to_logfile(self, line):
         if self.logging_file is not None:
