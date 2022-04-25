@@ -12,7 +12,8 @@ _extentions_not_allowed = ["mzml", "mzxml", "json", "mgf"]
 
 
 def save_as_msp(spectra: List[Spectrum], filename: str,
-                write_peak_comments: bool = True):
+                write_peak_comments: bool = True,
+                mode: str = "w"):
     """Save spectrum(s) as msp file.
 
     :py:attr:`~matchms.Spectrum.losses` of spectrum will not be saved.
@@ -44,6 +45,8 @@ def save_as_msp(spectra: List[Spectrum], filename: str,
     write_peak_comments:
         Writes peak comments to individual peaks after the respective mz/intensity pair
         when set to True. Default is True.
+    mode:
+        Mode on how to write to file. One of ["w", "a"] (write/append).
     """
     file_extension = filename.split(".")[-1]
     assert file_extension.lower() not in _extentions_not_allowed, \
@@ -53,7 +56,7 @@ def save_as_msp(spectra: List[Spectrum], filename: str,
                        filename.split(".")[-1])
     spectra = _ensure_list(spectra)
 
-    with open(filename, "w", encoding="utf-8") as outfile:
+    with open(filename, mode, encoding="utf-8") as outfile:
         for spectrum in spectra:
             _write_spectrum(spectrum, outfile, write_peak_comments)
 
