@@ -4,7 +4,7 @@ import numpy
 import pytest
 from matchms.exporting import save_as_json
 from matchms.importing import load_from_json
-from .builder_Spectrum import SpectrumBuilder
+from tests.builder_Spectrum import SpectrumBuilder
 
 
 @pytest.fixture
@@ -14,6 +14,12 @@ def builder() -> SpectrumBuilder:
     builder = SpectrumBuilder().with_mz(mz).with_intensities(intensities)
     return builder
 
+
+def load_test_spectra_file(test_filename):
+    module_root = os.path.join(os.path.dirname(__file__), "..")
+    spectrums_file = os.path.join(module_root, "tests", test_filename)
+    spectra = list(load_from_json(spectrums_file))
+    return spectra
 
 def test_save_and_load_json_single_spectrum(tmp_path, builder):
     """Test saving spectrum to .json file"""
@@ -102,3 +108,24 @@ def test_save_as_json_with_minimal_json(tmp_path, builder):
     expected = [{"test_field": "test1", "peaks_json": [
         [100.0, 10.0], [200.0, 10.0], [300.0, 500.0]]}]
     assert spectrum_imports == expected, "Saved Spectrum not identical to expected JSON Document"
+
+
+@pytest.mark.parametrize("filename, expected_length", [
+    ["gnps_spectra.json", 5]
+])
+def test_read_gnps_spectra(filename, expected_length):
+    actual = load_test_spectra_file(filename)
+
+    assert len(actual) == expected_length
+
+
+@pytest.mark.parametrize("filename", ["gnps_spectra.json"])
+def test_write_append(filename, tmp_path):
+    expected = load_test_spectra_file(filename)
+    tmp_file = os.path.join(tmp_path, "test.json")
+    save_as_json(expected[:2], tmp_file, mode = "a")
+    save_as_json(expected[2:], tmp_file, mode = "a")
+
+    actual = list(load_from_json(tmp_file))
+
+    assert expected == actual
