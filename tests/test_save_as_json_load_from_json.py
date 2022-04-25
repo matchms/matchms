@@ -7,11 +7,16 @@ from matchms.importing import load_from_json
 from .builder_Spectrum import SpectrumBuilder
 
 
-def test_save_and_load_json_single_spectrum(tmp_path):
-    """Test saving spectrum to .json file"""
+@pytest.fixture
+def builder() -> SpectrumBuilder:
     mz = numpy.array([100, 200, 300], dtype="float")
     intensities = numpy.array([10, 10, 500], dtype="float")
     builder = SpectrumBuilder().with_mz(mz).with_intensities(intensities)
+    return builder
+
+
+def test_save_and_load_json_single_spectrum(tmp_path, builder):
+    """Test saving spectrum to .json file"""
     spectrum = builder.with_metadata({"charge": -1,
                                       "inchi": '"InChI=1S/C6H12"',
                                       "precursor_mz": 222.2,
@@ -29,11 +34,8 @@ def test_save_and_load_json_single_spectrum(tmp_path):
 
 
 @pytest.mark.parametrize("metadata_harmonization", [True, False])
-def test_save_and_load_json_spectrum_list(metadata_harmonization, tmp_path):
+def test_save_and_load_json_spectrum_list(metadata_harmonization, tmp_path, builder):
     """Test saving spectrum list to .json file"""
-    mz = numpy.array([100, 200, 300], dtype="float")
-    intensities = numpy.array([10, 10, 500], dtype="float")
-    builder = SpectrumBuilder().with_mz(mz).with_intensities(intensities)
     spectrum1 = builder.with_metadata({"test_field": "test1"},
                                       metadata_harmonization=metadata_harmonization).build()
     spectrum2 = builder.with_metadata({"test_field": "test2"},
@@ -52,6 +54,8 @@ def test_save_and_load_json_spectrum_list(metadata_harmonization, tmp_path):
     assert spectrum_imports[1] == spectrum2, "Original and saved+loaded spectrum not identical"
 
 
+
+
 def test_load_from_json_zero_peaks(tmp_path):
     spectrum1 = SpectrumBuilder().with_metadata(
         {"test_field": "test1"}).build()
@@ -68,7 +72,7 @@ def test_load_from_json_zero_peaks(tmp_path):
     assert len(spectrum_imports) == 0, "Spectrum without peaks should be skipped"
 
 
-def test_load_from_json_with_minimal_json(tmp_path):
+def test_load_from_json_with_minimal_json(tmp_path, builder):
     filename = tmp_path / "test.json"
     body = '[{"test_field": "test1", "peaks_json": [[100.0, 10.0], [200.0, 10.0], [300.0, 500.0]]}]'
 
@@ -77,9 +81,6 @@ def test_load_from_json_with_minimal_json(tmp_path):
 
     spectrum_imports = load_from_json(filename, metadata_harmonization=False)
 
-    mz = numpy.array([100, 200, 300], dtype="float")
-    intensities = numpy.array([10, 10, 500], dtype="float")
-    builder = SpectrumBuilder().with_mz(mz).with_intensities(intensities)
     expected = builder.with_metadata({"test_field": "test1"},
                                      metadata_harmonization=False).build()
 
@@ -87,12 +88,9 @@ def test_load_from_json_with_minimal_json(tmp_path):
         expected], "Loaded JSON document not identical to expected Spectrum"
 
 
-def test_save_as_json_with_minimal_json(tmp_path):
+def test_save_as_json_with_minimal_json(tmp_path, builder):
     filename = tmp_path / "test.json"
 
-    mz = numpy.array([100, 200, 300], dtype="float")
-    intensities = numpy.array([10, 10, 500], dtype="float")
-    builder = SpectrumBuilder().with_mz(mz).with_intensities(intensities)
     spectrum1 = builder.with_metadata({"test_field": "test1"},
                                       metadata_harmonization=False).build()
 
