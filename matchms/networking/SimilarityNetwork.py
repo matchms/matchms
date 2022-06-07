@@ -195,15 +195,15 @@ class SimilarityNetwork:
     def _export_to_cyjs(self, filename: str):
         """Save the network in cyjs format."""
         graph = nx.cytoscape_data(self.graph)
-        return self._export_to_json(graph, filename)
+        return self._write_to_json(graph, filename)
 
     def _export_to_node_link_json(self, filename: str):
         """Save the network in node-link format."""
         graph = nx.node_link_data(self.graph)
-        return self._export_to_json(graph, filename)
+        return self._write_to_json(graph, filename)
 
     @staticmethod
-    def _export_to_json(graph: dict, filename: str):
+    def _write_to_json(graph: dict, filename: str):
         """Save the network as JSON file.
 
         Parameters
