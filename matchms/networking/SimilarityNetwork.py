@@ -190,26 +190,12 @@ class SimilarityNetwork:
         nx.write_graphml_lxml(self.graph, filename)
 
     def _export_to_cyjs(self, filename: str):
-        """Save the network in cyjs format.
-
-        Parameters
-        ----------
-        filename
-            Specify filename for exporting the graph.
-
-        """
+        """Save the network in cyjs format."""
         graph = nx.cytoscape_data(self.graph)
         return self._export_to_json(graph, filename)
 
     def _export_to_node_link_json(self, filename: str):
-        """Save the network in node-link format.
-
-        Parameters
-        ----------
-        filename
-            Specify filename for exporting the graph.
-
-        """
+        """Save the network in node-link format."""
         graph = nx.node_link_data(self.graph)
         return self._export_to_json(graph, filename)
 
@@ -229,23 +215,9 @@ class SimilarityNetwork:
             json.dump(graph, file)
 
     def _export_to_gexf(self, filename: str):
-        """Save the network as .gexf file.
-
-        Parameters
-        ----------
-        filename
-            Specify filename for exporting the graph.
-
-        """
+        """Save the network as .gexf file."""
         nx.write_gexf(self.graph, filename)
 
     def _export_to_gml(self, filename: str):
-        """Save the network as .gml file.
-
-        Parameters
-        ----------
-        filename
-            Specify filename for exporting the graph.
-
-        """
+        """Save the network as .gml file."""
         nx.write_gml(self.graph, filename)
