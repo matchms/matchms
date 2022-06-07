@@ -215,7 +215,7 @@ class SimilarityNetwork:
             Specify filename for exporting the graph.
 
         """
-        with open(filename, "w") as file:
+        with open(filename, "w", encoding="utf-8") as file:
             json.dump(graph, file)
 
     def _export_to_gexf(self, filename: str):
