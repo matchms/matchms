@@ -165,8 +165,8 @@ class SimilarityNetwork:
             Format of file to write to. Supported formats are: "cyjs", "gexf", "gml", "graphml", "json"
         """
         writer = {"cyjs": self._export_to_cyjs,
-                  "gexf": nx.write_gexf,
-                  "gml": nx.write_gml,
+                  "gexf": self._export_to_gexf,
+                  "gml": self._export_to_gml,
                   "graphml": self.export_to_graphml,
                   "json": self._export_to_node_link_json}
 
@@ -227,3 +227,25 @@ class SimilarityNetwork:
         """
         with open(filename, "w") as file:
             json.dump(graph, file)
+
+    def _export_to_gexf(self, filename: str):
+        """Save the network as .gexf file.
+
+        Parameters
+        ----------
+        filename
+            Specify filename for exporting the graph.
+
+        """
+        nx.write_gexf(self.graph, filename)
+
+    def _export_to_gml(self, filename: str):
+        """Save the network as .gml file.
+
+        Parameters
+        ----------
+        filename
+            Specify filename for exporting the graph.
+
+        """
+        nx.write_gml(self.graph, filename)
