@@ -152,6 +152,19 @@ class SimilarityNetwork:
             msnet.remove_nodes_from(list(nx.isolates(msnet)))
         self.graph = msnet
 
+    def export_to_file(self, filename: str, format: str = "graphml"):
+        """
+        Save the network to a file with chosen format.
+
+        Parameters
+        ----------
+        filename
+            Path to file to write to.
+        format
+            Format of file to write to. Supported formats are: "cyjs", "gexf", "gml", "graphml", "json"
+        """
+        pass
+
     def export_to_graphml(self, filename: str):
         """Save the network as .graphml file.
 
