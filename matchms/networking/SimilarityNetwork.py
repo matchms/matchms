@@ -163,7 +163,19 @@ class SimilarityNetwork:
         format
             Format of file to write to. Supported formats are: "cyjs", "gexf", "gml", "graphml", "json"
         """
-        pass
+        writer = {"cyjs": self._export_to_cyjs,
+                  "gexf": nx.write_gexf,
+                  "gml": nx.write_gml,
+                  "graphml": self.export_to_graphml,
+                  "json": self._export_to_json}
+
+        assert format in writer, "Format not supported.\n" \
+                                 "Please use one of supported formats: 'cyjs', 'gexf', 'gml', 'graphml', 'json'"
+
+        if not self.graph:
+            raise ValueError("No network found. Make sure to first run .create_network() step")
+
+        writer[format](filename)
 
     def export_to_graphml(self, filename: str):
         """Save the network as .graphml file.
@@ -174,6 +186,10 @@ class SimilarityNetwork:
             Specify filename for exporting the graph.
 
         """
-        if not self.graph:
-            raise ValueError("No network found. Make sure to first run .create_network() step")
         nx.write_graphml_lxml(self.graph, filename)
+
+    def _export_to_cyjs(self, filename: str):
+        pass
+
+    def _export_to_json(self, filename: str):
+        pass
