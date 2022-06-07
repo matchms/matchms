@@ -1,3 +1,4 @@
+import json
 from typing import Optional
 import networkx as nx
 import numpy
@@ -189,7 +190,28 @@ class SimilarityNetwork:
         nx.write_graphml_lxml(self.graph, filename)
 
     def _export_to_cyjs(self, filename: str):
-        pass
+        """Save the network as .cyjs file.
 
-    def _export_to_json(self, filename: str):
-        pass
+        Parameters
+        ----------
+        filename
+            Specify filename for exporting the graph.
+
+        """
+        graph = nx.cytoscape_data(self.graph)
+        return self._export_to_json(graph, filename)
+
+    @staticmethod
+    def _export_to_json(graph: dict, filename: str):
+        """Save the network as JSON file.
+
+        Parameters
+        ----------
+        graph
+            JSON-dictionary type graph to save.
+        filename
+            Specify filename for exporting the graph.
+
+        """
+        with open(filename, "w") as file:
+            json.dump(graph, file)
