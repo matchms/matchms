@@ -168,7 +168,7 @@ class SimilarityNetwork:
                   "gexf": nx.write_gexf,
                   "gml": nx.write_gml,
                   "graphml": self.export_to_graphml,
-                  "json": self._export_to_json}
+                  "json": self._export_to_node_link_json}
 
         assert format in writer, "Format not supported.\n" \
                                  "Please use one of supported formats: 'cyjs', 'gexf', 'gml', 'graphml', 'json'"
@@ -190,7 +190,7 @@ class SimilarityNetwork:
         nx.write_graphml_lxml(self.graph, filename)
 
     def _export_to_cyjs(self, filename: str):
-        """Save the network as .cyjs file.
+        """Save the network in cyjs format.
 
         Parameters
         ----------
@@ -199,6 +199,18 @@ class SimilarityNetwork:
 
         """
         graph = nx.cytoscape_data(self.graph)
+        return self._export_to_json(graph, filename)
+
+    def _export_to_node_link_json(self, filename: str):
+        """Save the network in node-link format.
+
+        Parameters
+        ----------
+        filename
+            Specify filename for exporting the graph.
+
+        """
+        graph = nx.node_link_data(self.graph)
         return self._export_to_json(graph, filename)
 
     @staticmethod
