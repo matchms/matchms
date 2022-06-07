@@ -7,7 +7,7 @@ from .networking_functions import get_top_hits
 
 
 class SimilarityNetwork:
-    """Create a spectal network from spectrum similarities.
+    """Create a spectral network from spectrum similarities.
 
     For example
 
@@ -55,7 +55,7 @@ class SimilarityNetwork:
         Parameters
         ----------
         identifier_key
-            Metadata key for unique intentifier for each spectrum in scores.
+            Metadata key for unique identifier for each spectrum in scores.
             Will also be used for the naming the network nodes. Default is 'spectrum_id'.
         top_n
             Consider edge between spectrumA and spectrumB if score falls into
@@ -69,7 +69,7 @@ class SimilarityNetwork:
             Important side note: The max_links restriction is strict which means that
             if scores around max_links are equal still only max_links will be added
             which can results in some random variations (sorting spectra with equal
-            scores restuls in a random order of such elements).
+            scores results in a random order of such elements).
         score_cutoff
             Threshold for given similarities. Edges/Links will only be made for
             similarities > score_cutoff. Default = 0.7.
