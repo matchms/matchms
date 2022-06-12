@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.16.0] - 2022-06-12
+
 ### Added
 - `Spectrum` objects now also have `.mz` and `.intensities` properties [#339](https://github.com/matchms/matchms/pull/339)
 - `SimilarityNetwork`: similarity-network graphs can now be exported to [cyjs](http://manual.cytoscape.org/en/stable/index.html),
@@ -437,7 +439,8 @@ Contains three plot types: `plot_spectrum()` or `spectrum.plot()`, `plot_spectra
 - This is the initial version of Spec2Vec from https://github.com/iomega/Spec2Vec
 - (later splitted into matchms + spec2vec)
 
-[Unreleased]: https://github.com/matchms/matchms/compare/0.15.0...HEAD
+[Unreleased]: https://github.com/matchms/matchms/compare/0.16.0...HEAD
+[0.16.0]: https://github.com/matchms/matchms/compare/0.15.0...0.16.0
 [0.15.0]: https://github.com/matchms/matchms/compare/0.14.0...0.15.0
 [0.14.0]: https://github.com/matchms/matchms/compare/0.13.0...0.14.0
 [0.13.0]: https://github.com/matchms/matchms/compare/0.12.0...0.13.0
