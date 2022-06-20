@@ -199,6 +199,30 @@ class Scores:
                             self._scores[references_idx_sorted, selected_idx].copy()))
         return list(zip(self.references, self._scores[:, selected_idx].copy()))
 
+    @classmethod
+    def import_from_file(cls, file_path: str) -> Scores:
+        """Import scores from a file.
+
+        Parameters
+        ----------
+        file_path
+            Path to the scores file.
+        """
+        raise NotImplementedError("Import from file is not implemented yet.")
+
+    def export_to_file(self, filename: str, file_format: str = "json"):
+        """Export the scores to a file.
+
+        Parameters
+        ----------
+        filename
+            Path to file to write to
+        file_format
+            File format to write to.
+            Default is "json".
+        """
+        raise NotImplementedError("Not implemented yet.")
+
     @property
     def scores(self) -> numpy.ndarray:
         """Scores as numpy array

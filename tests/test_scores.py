@@ -1,3 +1,6 @@
+import os
+import tempfile
+
 import numpy
 import pytest
 from matchms import Scores, calculate_scores
@@ -40,6 +43,12 @@ class DummySimilarityFunctionParallel(BaseSimilarity):
                 rq = reference + query
                 s[index_reference, index_query] = rq, len(rq)
         return s
+
+
+@pytest.fixture()
+def filename():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        yield os.path.join(tmpdir, "test_scores.json")
 
 
 def spectra():
@@ -105,7 +114,6 @@ def test_scores_calculate_parallel():
 
 
 def test_scores_init_with_list():
-
     dummy_similarity_function = DummySimilarityFunction()
     scores = Scores(references=["r0", "r1", "r2"],
                     queries=["q0", "q1"],
@@ -114,7 +122,6 @@ def test_scores_init_with_list():
 
 
 def test_scores_init_with_numpy_array():
-
     dummy_similarity_function = DummySimilarityFunction()
     scores = Scores(references=numpy.asarray(["r0", "r1", "r2"]),
                     queries=numpy.asarray(["q0", "q1"]),
@@ -123,7 +130,6 @@ def test_scores_init_with_numpy_array():
 
 
 def test_scores_init_with_queries_dict():
-
     dummy_similarity_function = DummySimilarityFunction()
     with pytest.raises(AssertionError) as msg:
         _ = Scores(references=["r0", "r1", "r2"],
@@ -134,7 +140,6 @@ def test_scores_init_with_queries_dict():
 
 
 def test_scores_init_with_references_dict():
-
     dummy_similarity_function = DummySimilarityFunction()
     with pytest.raises(AssertionError) as msg:
         _ = Scores(references=dict(k0="r0", k1="r1", k2="r2"),
@@ -145,7 +150,6 @@ def test_scores_init_with_references_dict():
 
 
 def test_scores_init_with_tuple():
-
     dummy_similarity_function = DummySimilarityFunction()
     scores = Scores(references=("r0", "r1", "r2"),
                     queries=("q0", "q1"),
@@ -154,7 +158,6 @@ def test_scores_init_with_tuple():
 
 
 def test_scores_next():
-
     dummy_similarity_function = DummySimilarityFunction()
     scores = Scores(references=["r", "rr", "rrr"],
                     queries=["q", "qq"],
@@ -261,3 +264,17 @@ def test_scores_by_query_non_tuple_score():
 
     expected_result = [(scores.references[i], scores.scores[i, 2]) for i in range(3)]
     assert selected_scores == expected_result, "Expected different scores."
+
+
+def test_export_to_file_import_from_file(filename):
+    "Test export_to_file method."
+    spectrum_1, spectrum_2, spectrum_3, spectrum_4 = spectra()
+    references = [spectrum_1, spectrum_2, spectrum_3]
+    queries = [spectrum_2, spectrum_3, spectrum_4]
+
+    scores = calculate_scores(references, queries, CosineGreedy())
+    scores.export_to_file(filename)
+
+    scores_loaded = Scores.import_from_file(filename)
+
+    assert scores == scores_loaded
