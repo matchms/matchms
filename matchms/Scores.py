@@ -81,6 +81,17 @@ class Scores:
         self._scores = numpy.empty([self.n_rows, self.n_cols], dtype="object")
         self._index = 0
 
+    def __eq__(self, other):
+        if isinstance(other, Scores):
+            return self._scores == other._scores and\
+                self.similarity_function == other.similarity_function and\
+                self.is_symmetric == other.is_symmetric and\
+                self.n_rows == other.n_rows and\
+                self.n_cols == other.n_cols and\
+                self.references == other.references and\
+                self.queries == other.queries
+        return False
+
     def __iter__(self):
         return self
 
