@@ -112,3 +112,7 @@ def dict2spectrum(spectrum_dict: dict,
                         metadata_harmonization=metadata_harmonization)
     logger.info("Empty spectrum found (no peaks in 'peaks_json'). Will not be imported.")
     return None
+
+
+def scores_json_decoder(dct):
+    pass

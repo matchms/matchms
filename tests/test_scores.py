@@ -275,6 +275,6 @@ def test_export_to_file_import_from_file(filename):
     scores = calculate_scores(references, queries, CosineGreedy())
     scores.export_to_file(filename)
 
-    scores_loaded = Scores.import_from_file(filename)
+    scores_loaded = Scores.import_from_json(filename)
 
     assert scores == scores_loaded

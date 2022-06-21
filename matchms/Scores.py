@@ -2,6 +2,7 @@ from __future__ import annotations
 import json
 import numpy
 from deprecated.sphinx import deprecated
+from matchms.importing.load_from_json import scores_json_decoder
 from matchms.exporting.save_as_json import ScoresJSONEncoder
 from matchms.similarity.BaseSimilarity import BaseSimilarity
 from matchms.typing import QueriesType, ReferencesType
@@ -213,14 +214,17 @@ class Scores:
         return list(zip(self.references, self._scores[:, selected_idx].copy()))
 
     @classmethod
-    def import_from_file(cls, file_path: str) -> Scores:
-        """Import scores from a file.
+    def import_from_json(cls, file_path: str) -> Scores:
+        """Import scores from a JSON file.
 
         Parameters
         ----------
         file_path
             Path to the scores file.
         """
+        with open(file_path, 'r') as f:
+            scores_dict = json.load(f, object_hook=scores_json_decoder)
+
         raise NotImplementedError("Import from file is not implemented yet.")
 
     def export_to_file(self, filename: str, file_format: str = "json"):
