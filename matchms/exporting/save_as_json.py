@@ -74,7 +74,7 @@ class ScoresJSONEncoder(json.JSONEncoder):
                            "similarity_function": str(scores.similarity_function.__class__.__name__),
                            "is_symmetric": scores.is_symmetric,
                            "references": [_convert_spectrum_into_dict(reference) for reference in scores.references],
-                           "queries": [_convert_spectrum_into_dict(query) for query in scores.queries] if scores.is_symmetric else None,
+                           "queries": [_convert_spectrum_into_dict(query) for query in scores.queries] if not scores.is_symmetric else None,
                            "scores": scores.scores.tolist()}
 
             return scores_dict
