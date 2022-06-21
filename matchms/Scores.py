@@ -1,6 +1,8 @@
 from __future__ import annotations
+import json
 import numpy
 from deprecated.sphinx import deprecated
+from matchms.exporting.save_as_json import ScoresJSONEncoder
 from matchms.similarity.BaseSimilarity import BaseSimilarity
 from matchms.typing import QueriesType, ReferencesType
 
@@ -232,7 +234,9 @@ class Scores:
             File format to write to.
             Default is "json".
         """
-        raise NotImplementedError("Not implemented yet.")
+        with open(filename, "w") as f:
+            if file_format == "json":
+                json.dump(self, f, cls=ScoresJSONEncoder)
 
     @property
     def scores(self) -> numpy.ndarray:
