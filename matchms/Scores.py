@@ -225,7 +225,18 @@ class Scores:
         with open(file_path, 'rb') as f:
             scores_dict = json.load(f, object_hook=scores_json_decoder)
 
-        return scores_dict
+        if scores_dict["is_symmetric"] and scores_dict["queries"] is None:
+            scores_dict["queries"] = scores_dict["references"]
+
+        cls._validate_json_input(scores_dict)
+
+        scores = cls(references=numpy.array(scores_dict['references']),
+                     queries=numpy.array(scores_dict['queries']),
+                     similarity_function=BaseSimilarity(),
+                     is_symmetric=scores_dict['is_symmetric'])
+        scores._scores = scores_dict['scores']
+
+        return scores
 
     def export_to_file(self, filename: str, file_format: str = "json"):
         """Export the scores to a file.
@@ -276,3 +287,10 @@ class Scores:
               [0.2 1. ]]
         """
         return self._scores.copy()
+
+    @staticmethod
+    def _validate_json_input(scores_dict: dict):
+        if {"__Scores__", "similarity_function", "is_symmetric", "references", "queries", "scores"} != scores_dict.keys():
+            raise ValueError("Scores JSON file does not match against the schema.\n\
+                             Make sure JSON file contains the following keys:\n\
+                             ['__Scores__', 'similarity_function', 'is_symmetric', 'references', 'queries', 'scores']")
