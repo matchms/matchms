@@ -115,4 +115,6 @@ def dict2spectrum(spectrum_dict: dict,
 
 
 def scores_json_decoder(dct):
-    pass
+    if not "__Scores__" in dct:
+        return dict2spectrum(dct, metadata_harmonization=False)
+    return dct

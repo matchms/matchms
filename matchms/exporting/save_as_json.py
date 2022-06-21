@@ -65,11 +65,13 @@ class SpectrumJSONEncoder(json.JSONEncoder):
 class ScoresJSONEncoder(json.JSONEncoder):
     def default(self, o):
         """JSON Encoder which can encode a :py:class:`~matchms.Scores.Scores` object"""
+        class_name = o.__class__.__name__
         # do isinstance(o, Scores) without importing matchms.Scores
-        if o.__class__.__name__ == "Scores":
+        if class_name == "Scores":
             scores = copy.deepcopy(o)
 
-            scores_dict = {"similarity_function": str(scores.similarity_function.__class__.__name__),
+            scores_dict = {"__Scores__": True,
+                           "similarity_function": str(scores.similarity_function.__class__.__name__),
                            "is_symmetric": scores.is_symmetric,
                            "references": [_convert_spectrum_into_dict(reference) for reference in scores.references],
                            "queries": [_convert_spectrum_into_dict(query) for query in scores.queries] if scores.is_symmetric else None,

@@ -222,10 +222,10 @@ class Scores:
         file_path
             Path to the scores file.
         """
-        with open(file_path, 'r') as f:
+        with open(file_path, 'rb') as f:
             scores_dict = json.load(f, object_hook=scores_json_decoder)
 
-        raise NotImplementedError("Import from file is not implemented yet.")
+        return scores_dict
 
     def export_to_file(self, filename: str, file_format: str = "json"):
         """Export the scores to a file.
