@@ -222,7 +222,7 @@ class Scores:
         file_path
             Path to the scores file.
         """
-        return ScoresBuilder.from_json(file_path)
+        return ScoresBuilder.from_json(file_path).build()
 
     def export_to_file(self, filename: str, file_format: str = "json"):
         """Export the scores to a file.
@@ -281,11 +281,23 @@ class ScoresBuilder:
     """
 
     def __init__(self):
-        pass
+        self.references = None
+        self.queries = None
+        self.similarity_function = None
+        self.is_symmetric = None
 
-    def from_json(self, file_path: str) -> Scores:
+    def build(self) -> Scores:
         """
-        Import scores object from a JSON file.
+        Builds scores object
+        """
+        return Scores(references=self.references,
+                      queries=self.queries,
+                      similarity_function=self.similarity_function,
+                      is_symmetric=self.is_symmetric)
+
+    def from_json(self, file_path: str):
+        """
+        Import scores data from a JSON file.
 
         Parameters
         ----------
@@ -296,6 +308,13 @@ class ScoresBuilder:
             scores_dict = json.load(f, object_hook=scores_json_decoder)
 
         self._validate_json_input(scores_dict)
+
+        self.is_symmetric = scores_dict['is_symmetric']
+        self.similarity_function = scores_dict['similarity_function']
+        self.references = scores_dict['references']
+        self.queries = scores_dict['queries'] if not self.is_symmetric else self.references
+
+        return self
 
     @staticmethod
     def _validate_json_input(scores_dict: dict):
