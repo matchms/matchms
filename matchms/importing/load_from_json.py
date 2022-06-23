@@ -115,6 +115,6 @@ def dict2spectrum(spectrum_dict: dict,
 
 
 def scores_json_decoder(dct):
-    if not "__Scores__" in dct:
+    if "__Scores__" not in dct and "__Similarity__" not in dct:
         return dict2spectrum(dct, metadata_harmonization=False)
     return dct

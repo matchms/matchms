@@ -71,7 +71,7 @@ class ScoresJSONEncoder(json.JSONEncoder):
             scores = copy.deepcopy(o)
 
             scores_dict = {"__Scores__": True,
-                           "similarity_function": str(scores.similarity_function.__class__.__name__),
+                           "similarity_function": self._encode_similarity_function(scores.similarity_function),
                            "is_symmetric": scores.is_symmetric,
                            "references": [_convert_spectrum_into_dict(reference) for reference in scores.references],
                            "queries": [_convert_spectrum_into_dict(query) for query in scores.queries] if not scores.is_symmetric else None,
@@ -79,3 +79,8 @@ class ScoresJSONEncoder(json.JSONEncoder):
 
             return scores_dict
         return json.JSONEncoder.default(self, o)
+
+    @staticmethod
+    def _encode_similarity_function(similarity_function) -> dict:
+        similarity_function_dict = {"__Similarity__": similarity_function.__class__.__name__, **similarity_function.__dict__}
+        return similarity_function_dict

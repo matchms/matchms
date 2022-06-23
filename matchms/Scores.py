@@ -322,7 +322,7 @@ class ScoresBuilder:
         """
         Constructs similarity function from its serialized representation
         """
-        similarity_function_class = _get_similarity_function_by_name(similarity_function_dict.pop("name"))
+        similarity_function_class = _get_similarity_function_by_name(similarity_function_dict.pop("__Similarity__"))
         return similarity_function_class(**similarity_function_dict)
 
     @staticmethod
