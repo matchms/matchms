@@ -286,15 +286,18 @@ class ScoresBuilder:
         self.queries = None
         self.similarity_function = None
         self.is_symmetric = None
+        self.scores = None
 
     def build(self) -> Scores:
         """
         Builds scores object
         """
-        return Scores(references=self.references,
-                      queries=self.queries,
-                      similarity_function=self.similarity_function,
-                      is_symmetric=self.is_symmetric)
+        scores = Scores(references=self.references,
+                        queries=self.queries,
+                        similarity_function=self.similarity_function,
+                        is_symmetric=self.is_symmetric)
+        scores._scores = self.scores
+        return scores
 
     def from_json(self, file_path: str):
         """
@@ -314,6 +317,7 @@ class ScoresBuilder:
         self.similarity_function = self._construct_similarity_function(scores_dict['similarity_function'])
         self.references = scores_dict['references']
         self.queries = scores_dict['queries'] if not self.is_symmetric else self.references
+        self.scores = scores_dict['scores']
 
         return self
 
