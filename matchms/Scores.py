@@ -317,6 +317,7 @@ class ScoresBuilder:
 
         return self
 
+    @staticmethod
     def _construct_similarity_function(similarity_function_dict: dict) -> BaseSimilarity:
         """
         Constructs similarity function from its serialized representation
