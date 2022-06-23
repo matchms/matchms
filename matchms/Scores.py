@@ -88,14 +88,14 @@ class Scores:
 
     def __eq__(self, other):
         if isinstance(other, Scores):
-            return self._scores == other._scores and\
-                self.similarity_function == other.similarity_function and\
-                self.is_symmetric == other.is_symmetric and\
-                self.n_rows == other.n_rows and\
-                self.n_cols == other.n_cols and\
-                self.references == other.references and\
-                self.queries == other.queries
-        return False
+            return numpy.array_equal(self._scores, other._scores) and \
+                self.similarity_function.__class__ == other.similarity_function.__class__ and \
+                self.is_symmetric == other.is_symmetric and \
+                self.n_rows == other.n_rows and \
+                self.n_cols == other.n_cols and \
+                numpy.array_equal(self.references, other.references) and \
+                numpy.array_equal(self.queries, other.queries)
+        return NotImplemented
 
     def __iter__(self):
         return self
