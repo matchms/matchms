@@ -40,3 +40,23 @@ __all__ = [
     "ParentMassMatch",
     "PrecursorMzMatch",
 ]
+
+
+def _get_similarity_function_by_name(similarity_function_name: str):
+    """
+    Get a similarity function by name.
+
+    Parameters
+    ----------
+    similarity_function_name : str
+        Name of the similarity function.
+    """
+    names = __all__
+    functions = [CosineGreedy, CosineHungarian, FingerprintSimilarity, IntersectMz, MetadataMatch, ModifiedCosine,
+                 NeutralLossesCosine, ParentMassMatch, PrecursorMzMatch]
+
+    assert similarity_function_name in names, f"Unknown similarity function: {similarity_function_name}"
+    assert len(names) == len(functions), "Number of similarity functions and names do not match"
+
+    mapper = dict(zip(names, functions))
+    return mapper[similarity_function_name]

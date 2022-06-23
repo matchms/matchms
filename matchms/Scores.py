@@ -5,6 +5,7 @@ from deprecated.sphinx import deprecated
 from matchms.importing.load_from_json import scores_json_decoder
 from matchms.exporting.save_as_json import ScoresJSONEncoder
 from matchms.similarity.BaseSimilarity import BaseSimilarity
+from matchms.similarity import _get_similarity_function_by_name
 from matchms.typing import QueriesType, ReferencesType
 
 
@@ -310,11 +311,18 @@ class ScoresBuilder:
         self._validate_json_input(scores_dict)
 
         self.is_symmetric = scores_dict['is_symmetric']
-        self.similarity_function = scores_dict['similarity_function']
+        self.similarity_function = self._construct_similarity_function(scores_dict['similarity_function'])
         self.references = scores_dict['references']
         self.queries = scores_dict['queries'] if not self.is_symmetric else self.references
 
         return self
+
+    def _construct_similarity_function(similarity_function_dict: dict) -> BaseSimilarity:
+        """
+        Constructs similarity function from its serialized representation
+        """
+        similarity_function_class = _get_similarity_function_by_name(similarity_function_dict.pop("name"))
+        return similarity_function_class(**similarity_function_dict)
 
     @staticmethod
     def _validate_json_input(scores_dict: dict):
