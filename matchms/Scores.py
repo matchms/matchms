@@ -1,6 +1,7 @@
 from __future__ import annotations
 import json
 import numpy
+import numpy.lib.recfunctions
 from deprecated.sphinx import deprecated
 from matchms.importing.load_from_json import scores_json_decoder
 from matchms.exporting.save_as_json import ScoresJSONEncoder
@@ -317,9 +318,21 @@ class ScoresBuilder:
         self.similarity_function = self._construct_similarity_function(scores_dict['similarity_function'])
         self.references = scores_dict['references']
         self.queries = scores_dict['queries'] if not self.is_symmetric else self.references
-        self.scores = scores_dict['scores']
+        self.scores = self._restructure_scores(scores_dict['scores'])
 
         return self
+
+    def _restructure_scores(self, scores: dict) -> numpy.ndarray:
+        """
+        Restructure scores from nested list to a numpy array. If scores were stored as a matrix of tuples, restores
+        their original form.
+        """
+        scores = numpy.array(scores)
+
+        if len(scores.shape) > 2:
+            dt = numpy.dtype(self.similarity_function.score_datatype)
+            return numpy.lib.recfunctions.unstructured_to_structured(scores, dtype=dt)
+        return scores
 
     @staticmethod
     def _construct_similarity_function(similarity_function_dict: dict) -> BaseSimilarity:
