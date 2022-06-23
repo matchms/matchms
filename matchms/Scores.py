@@ -223,7 +223,7 @@ class Scores:
         file_path
             Path to the scores file.
         """
-        return ScoresBuilder.from_json(file_path).build()
+        return ScoresBuilder().from_json(file_path).build()
 
     def export_to_file(self, filename: str, file_format: str = "json"):
         """Export the scores to a file.
