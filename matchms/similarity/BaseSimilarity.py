@@ -130,6 +130,10 @@ class BaseSimilarity:
         return scores
 
     def keep_score(self, score):
+        """In the `.matrix` method scores will be collected in a sparse way.
+        Overwrite this method here if values other than `False` or `0` should
+        not be stored in the final collection.
+        """
         if len(score.dtype) > 1:  # if structured array
             valuelike = True
             for dtype_name in score.dtype.names:
