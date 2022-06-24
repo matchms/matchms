@@ -230,7 +230,11 @@ class Scores:
 
     @classmethod
     def import_from_pickle(cls, file_path: str) -> Scores:
-        """Import scores from a pickle file."""
+        """Import scores from a pickle file.
+
+        WARNING: Pickle files are not secure and may execute malicious code. Make sure that you are importing a pickle
+        file from a trusted source.
+        """
         with open(file_path, "rb") as f:
             return pickle.load(f)
 
