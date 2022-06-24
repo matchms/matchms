@@ -1,6 +1,7 @@
 from abc import abstractmethod
 from typing import List
-import numpy
+import numpy as np
+from matchms.StackedSparseScores import StackedSparseScores
 from matchms.typing import SpectrumType
 
 
@@ -18,7 +19,7 @@ class BaseSimilarity:
     # Set key characteristics as class attributes
     is_commutative = True
     # Set output data type, e.g. "float" or [("score", "float"), ("matches", "int")]
-    score_datatype = numpy.float64
+    score_datatype = np.float64
 
     @abstractmethod
     def pair(self, reference: SpectrumType, query: SpectrumType) -> float:
@@ -38,6 +39,7 @@ class BaseSimilarity:
         raise NotImplementedError
 
     def matrix(self, references: List[SpectrumType], queries: List[SpectrumType],
+               array_type: str = "numpy",
                is_symmetric: bool = False) -> numpy.ndarray:
         """Optional: Provide optimized method to calculate an numpy.array of similarity scores
         for given reference and query spectrums. If no method is added here, the following naive
@@ -49,6 +51,9 @@ class BaseSimilarity:
             List of reference objects
         queries
             List of query objects
+        array_type
+            Specify the output array type. Can be "numpy" or "sparse".
+            Default is "numpy" and will return a numpy array. "sparse" will return a COO-sparse array.
         is_symmetric
             Set to True when *references* and *queries* are identical (as for instance for an all-vs-all
             comparison). By using the fact that score[i,j] = score[j,i] the calculation will be about
@@ -56,16 +61,39 @@ class BaseSimilarity:
         """
         n_rows = len(references)
         n_cols = len(queries)
-        scores = numpy.empty([n_rows, n_cols], dtype=self.score_datatype)
+        #scores = np.empty([n_rows, n_cols], dtype=self.score_datatype)
+        idx_row = []
+        idx_col = []
+        scores = []
         for i_ref, reference in enumerate(references[:n_rows]):
             if is_symmetric and self.is_commutative:
                 for i_query, query in enumerate(queries[i_ref:n_cols], start=i_ref):
-                    scores[i_ref][i_query] = self.pair(reference, query)
-                    scores[i_query][i_ref] = scores[i_ref][i_query]
+                    score = self.pair(reference, query)
+                    if self.keep_score(score):
+                        idx_row += [i_ref, i_iquery]
+                        idx_col += [i_query, i_ref]
+                        scores += [score, score]
+                    # scores[i_ref][i_query] = self.pair(reference, query)
+                    # scores[i_query][i_ref] = scores[i_ref][i_query]
             else:
                 for i_query, query in enumerate(queries[:n_cols]):
-                    scores[i_ref][i_query] = self.pair(reference, query)
-        return scores
+                    score = self.pair(reference, query)
+                    if self.keep_score(score):
+                        idx_row.append(i_ref)
+                        idx_col.append(i_query)
+                        scores.append(score)
+                    #scores[i_ref][i_query] = self.pair(reference, query)
+
+        scores_array = StackedSparseScores(n_rows, n_cols)
+
+        if len(scores) > 0 and len(scores[0].dtype) > 1:  # if structured array
+            for dtype_name in scores[0].dtype.names:
+                scores_array.add_sparse_data(scores, row, col, dtype_name)
+        else:
+            scores_array.add_sparse_data(scores, row, col, score_datatype)
+        if array_type == "numpy":
+            return scores_array.to_array() 
+        return scores_array
 
     def sparse_array(self, references: List[SpectrumType], queries: List[SpectrumType],
                      idx_row, idx_col, is_symmetric: bool = False):
@@ -95,8 +123,17 @@ class BaseSimilarity:
             pass  # TODO: consider implementing faster method for symmetric cases
 
         assert idx_row.shape == idx_col.shape, "col and row indices must be of same shape"
-        scores = numpy.zeros((len(idx_row)), dtype=self.score_datatype)  # TODO: switch to sparse matrix
+        scores = np.zeros((len(idx_row)), dtype=self.score_datatype)  # TODO: switch to sparse matrix
         for i, row in enumerate(idx_row):
             col = idx_col[i]
             scores[i] = self.pair(references[row], queries[col])
         return scores
+
+    def keep_score(self, score):
+        if len(score.dtype) > 1:  # if structured array
+            valuelike = True
+            for dtype_name in score.dtype.names:
+                valuelike = valuelike and score[dtype_name] == True
+            return valuelike
+        else:
+            return score == True
