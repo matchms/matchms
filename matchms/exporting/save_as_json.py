@@ -45,7 +45,7 @@ def save_as_json(spectrums: List[Spectrum], filename: str):
 
 
 def _convert_spectrum_into_dict(spectrum: Spectrum):
-    """Convert matchms.Spectrum() into dictionaries"""
+    """Convert :py:class:`~matchms.Spectrum.Spectrum` into a dictionary"""
     peaks_list = numpy.vstack((spectrum.peaks.mz, spectrum.peaks.intensities)).T.tolist()
     spectrum_dict = {key: spectrum.metadata[key] for key in spectrum.metadata}
     spectrum_dict["peaks_json"] = peaks_list

@@ -115,6 +115,9 @@ def dict2spectrum(spectrum_dict: dict,
 
 
 def scores_json_decoder(dct):
+    """
+    Object_hook function to convert JSON dictionary with :py:class:`~matchms.Score.Score` object into a python dictionary.
+    """
     if "__Scores__" not in dct and "__Similarity__" not in dct:
         return dict2spectrum(dct, metadata_harmonization=False)
     return dct

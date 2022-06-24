@@ -279,7 +279,7 @@ class Scores:
 
 class ScoresBuilder:
     """
-    Builds scores object from its serialized representation
+    Builder class for :class:`~matchms.Scores`.
     """
 
     def __init__(self):
@@ -291,7 +291,7 @@ class ScoresBuilder:
 
     def build(self) -> Scores:
         """
-        Builds scores object
+        Build scores object
         """
         scores = Scores(references=self.references,
                         queries=self.queries,
@@ -324,7 +324,7 @@ class ScoresBuilder:
 
     def _restructure_scores(self, scores: dict) -> numpy.ndarray:
         """
-        Restructure scores from nested list to a numpy array. If scores were stored as a matrix of tuples, restores
+        Restructure scores from a nested list to a numpy array. If scores were stored as an array of tuples, restores
         their original form.
         """
         scores = numpy.array(scores)
@@ -337,7 +337,7 @@ class ScoresBuilder:
     @staticmethod
     def _construct_similarity_function(similarity_function_dict: dict) -> BaseSimilarity:
         """
-        Constructs similarity function from its serialized representation
+        Construct similarity function from its serialized form.
         """
         similarity_function_class = _get_similarity_function_by_name(similarity_function_dict.pop("__Similarity__"))
         return similarity_function_class(**similarity_function_dict)
@@ -345,6 +345,6 @@ class ScoresBuilder:
     @staticmethod
     def _validate_json_input(scores_dict: dict):
         if {"__Scores__", "similarity_function", "is_symmetric", "references", "queries", "scores"} != scores_dict.keys():
-            raise ValueError("Scores JSON file does not match against the schema.\n\
+            raise ValueError("Scores JSON file does not match the expected schema.\n\
                              Make sure the file contains the following keys:\n\
                              ['__Scores__', 'similarity_function', 'is_symmetric', 'references', 'queries', 'scores']")
