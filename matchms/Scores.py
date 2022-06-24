@@ -8,6 +8,7 @@ from matchms.exporting.save_as_json import ScoresJSONEncoder
 from matchms.similarity.BaseSimilarity import BaseSimilarity
 from matchms.similarity import _get_similarity_function_by_name
 from matchms.typing import QueriesType, ReferencesType
+import pickle
 
 
 class Scores:
@@ -226,6 +227,12 @@ class Scores:
         """
         return ScoresBuilder().from_json(file_path).build()
 
+    @classmethod
+    def import_from_pickle(cls, file_path: str) -> Scores:
+        """Import scores from a pickle file."""
+        with open(file_path, 'rb') as f:
+            return pickle.load(f)
+
     def export_to_file(self, filename: str, file_format: str = "json"):
         """Export the scores to a file.
 
@@ -234,12 +241,16 @@ class Scores:
         filename
             Path to file to write to
         file_format
-            File format to write to.
-            Default is "json".
+            File format to write to. Supported formats are: "json", "pkl". Default is "json".
         """
-        with open(filename, "w") as f:
-            if file_format == "json":
+        if file_format == "json":
+            with open(filename, "w", encoding="utf-8") as f:
                 json.dump(self, f, cls=ScoresJSONEncoder)
+        elif file_format == "pkl":
+            with open(filename, "wb") as f:
+                pickle.dump(self, f)
+        else:
+            raise ValueError(f"File format '{file_format}' is not supported.")
 
     @property
     def scores(self) -> numpy.ndarray:
