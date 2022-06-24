@@ -6,7 +6,7 @@ import numpy.lib.recfunctions
 from deprecated.sphinx import deprecated
 from matchms.exporting.save_as_json import ScoresJSONEncoder
 from matchms.importing.load_from_json import scores_json_decoder
-from matchms.similarity import _get_similarity_function_by_name
+from matchms.similarity import get_similarity_function_by_name
 from matchms.similarity.BaseSimilarity import BaseSimilarity
 from matchms.typing import QueriesType, ReferencesType
 
@@ -351,7 +351,7 @@ class ScoresBuilder:
         """
         Construct similarity function from its serialized form.
         """
-        similarity_function_class = _get_similarity_function_by_name(similarity_function_dict.pop("__Similarity__"))
+        similarity_function_class = get_similarity_function_by_name(similarity_function_dict.pop("__Similarity__"))
         return similarity_function_class(**similarity_function_dict)
 
     @staticmethod

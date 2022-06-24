@@ -42,7 +42,7 @@ __all__ = [
 ]
 
 
-def _get_similarity_function_by_name(similarity_function_name: str):
+def get_similarity_function_by_name(similarity_function_name: str):
     """
     Get a similarity function by the name of its class.
 
