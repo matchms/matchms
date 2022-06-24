@@ -297,10 +297,12 @@ class StackedSparseScores:
                                                     fill_value=0).data
             self.data[name][new_entries] = coo_matrix.data
 
-    def add_sparse_data(self, data: np.ndarray, name: str):
+    def add_sparse_data(self, data: np.ndarray, name: str,
+                        row=None, col=None):
         """Add sparse data to stacked sparse scores.
 
         The given data must be of the same dimension as the current row/col values.
+        Or (if no data is present yet) row and col indices must be provided as well.
 
         Parameters
         ----------
@@ -312,11 +314,22 @@ class StackedSparseScores:
         """
         if len(data.dtype) > 1:  # if structured array
             for dtype_name in data.dtype.names:
-                self._add_sparse_data(data[dtype_name], name + "_" + dtype_name)
+                if self.data is None:
+                    self._add_sparse_data()
+                else:
+                    self._add_sparse_data_to_existing(data[dtype_name], name + "_" + dtype_name)
+        elif self.data is None:
+            self._add_sparse_data(data, row, col, name)
         else:
-            self._add_sparse_data(data, name)
+            self._add_sparse_data_to_existing(data, name)
 
-    def _add_sparse_data(self, data, name):
+    def _add_sparse_data(self, data, row, col, name):
+        assert name not in self.score_names, "Scores of 'name' are already found in array"
+        self.row = row
+        self.col = col
+        self.data = np.array(data, dtype=[(name, data.dtype)])
+
+    def _add_sparse_data_to_existing(self, data, name):
         assert data.shape[0] == self.row.shape[0], \
             "Data must be of same size as number of sparse values in the array"
         assert name not in self.score_names, "Scores of 'name' are already found in array"
