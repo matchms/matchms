@@ -57,6 +57,7 @@ class Scores:
         Cosine score between spectrum2 and spectrum3 is 0.14 with 1 matched peaks
         Cosine score between spectrum2 and spectrum4 is 0.61 with 1 matched peaks
     """
+
     def __init__(self, references: ReferencesType, queries: QueriesType,
                  similarity_function: BaseSimilarity, is_symmetric: bool = False):
         """
@@ -90,12 +91,12 @@ class Scores:
     def __eq__(self, other):
         if isinstance(other, Scores):
             return numpy.array_equal(self._scores, other._scores) and \
-                self.similarity_function.__class__ == other.similarity_function.__class__ and \
-                self.is_symmetric == other.is_symmetric and \
-                self.n_rows == other.n_rows and \
-                self.n_cols == other.n_cols and \
-                numpy.array_equal(self.references, other.references) and \
-                numpy.array_equal(self.queries, other.queries)
+                   self.similarity_function.__class__ == other.similarity_function.__class__ and \
+                   self.is_symmetric == other.is_symmetric and \
+                   self.n_rows == other.n_rows and \
+                   self.n_cols == other.n_cols and \
+                   numpy.array_equal(self.references, other.references) and \
+                   numpy.array_equal(self.queries, other.queries)
         return NotImplemented
 
     def __iter__(self):
@@ -118,13 +119,13 @@ class Scores:
 
     @staticmethod
     def _validate_input_arguments(references, queries, similarity_function):
-        assert isinstance(references, (list, tuple, numpy.ndarray)),\
+        assert isinstance(references, (list, tuple, numpy.ndarray)), \
             "Expected input argument 'references' to be list or tuple or numpy.ndarray."
 
-        assert isinstance(queries, (list, tuple, numpy.ndarray)),\
+        assert isinstance(queries, (list, tuple, numpy.ndarray)), \
             "Expected input argument 'queries' to be list or tuple or numpy.ndarray."
 
-        assert isinstance(similarity_function, BaseSimilarity),\
+        assert isinstance(similarity_function, BaseSimilarity), \
             "Expected input argument 'similarity_function' to have BaseSimilarity as super-class."
 
     @deprecated(version='0.6.0', reason="Calculate scores via calculate_scores() function.")
@@ -308,7 +309,7 @@ class ScoresBuilder:
                         queries=self.queries,
                         similarity_function=self.similarity_function,
                         is_symmetric=self.is_symmetric)
-        scores._scores = self.scores
+        scores._scores = self.scores  # pylint: disable=protected-access
         return scores
 
     def from_json(self, file_path: str):
