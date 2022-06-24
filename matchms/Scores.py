@@ -230,7 +230,7 @@ class Scores:
     @classmethod
     def import_from_pickle(cls, file_path: str) -> Scores:
         """Import scores from a pickle file."""
-        with open(file_path, 'rb') as f:
+        with open(file_path, "rb") as f:
             return pickle.load(f)
 
     def export_to_file(self, filename: str, file_format: str = "json"):
@@ -320,16 +320,16 @@ class ScoresBuilder:
         file_path
             Path to the scores file.
         """
-        with open(file_path, 'rb') as f:
+        with open(file_path, "rb") as f:
             scores_dict = json.load(f, object_hook=scores_json_decoder)
 
         self._validate_json_input(scores_dict)
 
-        self.is_symmetric = scores_dict['is_symmetric']
-        self.similarity_function = self._construct_similarity_function(scores_dict['similarity_function'])
-        self.references = scores_dict['references']
-        self.queries = scores_dict['queries'] if not self.is_symmetric else self.references
-        self.scores = self._restructure_scores(scores_dict['scores'])
+        self.is_symmetric = scores_dict["is_symmetric"]
+        self.similarity_function = self._construct_similarity_function(scores_dict["similarity_function"])
+        self.references = scores_dict["references"]
+        self.queries = scores_dict["queries"] if not self.is_symmetric else self.references
+        self.scores = self._restructure_scores(scores_dict["scores"])
 
         return self
 

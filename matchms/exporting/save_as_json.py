@@ -40,7 +40,7 @@ def save_as_json(spectrums: List[Spectrum], filename: str):
         spectrums = [spectrums]
 
     # Write to json file
-    with open(filename, 'w', encoding="utf-8") as fout:
+    with open(filename, "w", encoding="utf-8") as fout:
         json.dump(spectrums, fout, cls=SpectrumJSONEncoder)
 
 
