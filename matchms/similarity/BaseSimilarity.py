@@ -88,9 +88,9 @@ class BaseSimilarity:
 
         if len(scores) > 0 and len(scores[0].dtype) > 1:  # if structured array
             for dtype_name in scores[0].dtype.names:
-                scores_array.add_sparse_data(scores, row, col, dtype_name)
-        else:
-            scores_array.add_sparse_data(scores, row, col, score_datatype)
+                scores_array.add_sparse_data(scores, idx_row, idx_col, dtype_name)
+        elif len(scores) > 0:
+            scores_array.add_sparse_data(scores, idx_row, idx_col, score_datatype)
         if array_type == "numpy":
             return scores_array.to_array() 
         return scores_array
