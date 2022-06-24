@@ -45,10 +45,15 @@ class DummySimilarityFunctionParallel(BaseSimilarity):
         return s
 
 
+@pytest.fixture(params=["json", "pkl"])
+def file_format(request):
+    yield request.param
+
+
 @pytest.fixture()
-def filename():
+def filename(file_format):
     with tempfile.TemporaryDirectory() as tmpdir:
-        yield os.path.join(tmpdir, "test_scores.json")
+        yield os.path.join(tmpdir, f"test_scores.{file_format}")
 
 
 def spectra():
@@ -267,15 +272,20 @@ def test_scores_by_query_non_tuple_score():
 
 
 @pytest.mark.parametrize("similarity_function", [CosineGreedy(), IntersectMz(), MetadataMatch(field="id")])
-def test_export_to_file_import_from_file(filename, similarity_function):
+def test_export_to_file_import_from_file(filename, file_format, similarity_function):
     "Test export_to_file method."
     spectrum_1, spectrum_2, spectrum_3, spectrum_4 = spectra()
     references = [spectrum_1, spectrum_2, spectrum_3]
     queries = [spectrum_2, spectrum_3, spectrum_4]
 
     scores = calculate_scores(references, queries, similarity_function)
-    scores.export_to_file(filename)
+    scores.export_to_file(filename, file_format)
 
-    scores_loaded = Scores.import_from_json(filename)
+    if file_format == "json":
+        scores_loaded = Scores.import_from_json(filename)
+    elif file_format == "pkl":
+        scores_loaded = Scores.import_from_pickle(filename)
+    else:
+        NotImplementedError(f"Unknown file format: {file_format}. Doublecheck the file_format fixture.")
 
     assert scores == scores_loaded
