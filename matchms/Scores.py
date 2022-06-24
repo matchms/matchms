@@ -1,14 +1,14 @@
 from __future__ import annotations
 import json
+import pickle
 import numpy
 import numpy.lib.recfunctions
 from deprecated.sphinx import deprecated
-from matchms.importing.load_from_json import scores_json_decoder
 from matchms.exporting.save_as_json import ScoresJSONEncoder
-from matchms.similarity.BaseSimilarity import BaseSimilarity
+from matchms.importing.load_from_json import scores_json_decoder
 from matchms.similarity import _get_similarity_function_by_name
+from matchms.similarity.BaseSimilarity import BaseSimilarity
 from matchms.typing import QueriesType, ReferencesType
-import pickle
 
 
 class Scores:

@@ -1,6 +1,5 @@
 import os
 import tempfile
-
 import numpy
 import pytest
 from matchms import Scores, calculate_scores
