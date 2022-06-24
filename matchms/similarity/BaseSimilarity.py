@@ -34,14 +34,14 @@ class BaseSimilarity:
 
         Returns
             score as numpy array (using self.score_datatype). For instance returning
-            numpy.asarray(score, dtype=self.score_datatype)
+            np.asarray(score, dtype=self.score_datatype)
         """
         raise NotImplementedError
 
     def matrix(self, references: List[SpectrumType], queries: List[SpectrumType],
                array_type: str = "numpy",
-               is_symmetric: bool = False) -> numpy.ndarray:
-        """Optional: Provide optimized method to calculate an numpy.array of similarity scores
+               is_symmetric: bool = False) -> np.ndarray:
+        """Optional: Provide optimized method to calculate an np.array of similarity scores
         for given reference and query spectrums. If no method is added here, the following naive
         implementation (i.e. a double for-loop) is used.
 
