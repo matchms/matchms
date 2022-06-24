@@ -288,3 +288,29 @@ def test_export_to_file_import_from_file(filename, file_format, similarity_funct
         NotImplementedError(f"Unknown file format: {file_format}. Doublecheck the file_format fixture.")
 
     assert scores == scores_loaded
+
+
+def test_comparing_scores():
+    "Test comparing scores objects."
+    spectrum_1, spectrum_2, spectrum_3, spectrum_4 = spectra()
+    spectrums = [spectrum_1, spectrum_2, spectrum_3, spectrum_4]
+
+    scores_symmetric_cosine = calculate_scores(spectrums[0:3], spectrums[0:3], CosineGreedy())
+    scores_symmetric_cosine_copy = calculate_scores(spectrums[0:3], spectrums[0:3], CosineGreedy())
+    scores_symmetric_intersect = calculate_scores(spectrums[0:3], spectrums[0:3], IntersectMz())
+
+    assert scores_symmetric_cosine == scores_symmetric_cosine
+    assert scores_symmetric_intersect == scores_symmetric_intersect
+    assert scores_symmetric_cosine == scores_symmetric_cosine_copy
+    assert scores_symmetric_cosine != scores_symmetric_intersect
+
+    scores_asymmetric_cosine = calculate_scores(spectrums[0:3], spectrums, CosineGreedy())
+    scores_asymmetric_cosine_mirrored = calculate_scores(spectrums, spectrums[0:3], CosineGreedy())
+
+    assert scores_asymmetric_cosine == scores_asymmetric_cosine
+    assert scores_asymmetric_cosine != scores_asymmetric_cosine_mirrored
+
+    scores_parametrized = calculate_scores(spectrums, spectrums, CosineGreedy(tolerance=0.1, mz_power=0.5))
+    scores_parametrized_mirrored = calculate_scores(spectrums, spectrums, CosineGreedy(tolerance=0.5, mz_power=0.1))
+
+    assert scores_parametrized != scores_parametrized_mirrored
