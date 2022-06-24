@@ -4,7 +4,7 @@ import tempfile
 import numpy
 import pytest
 from matchms import Scores, calculate_scores
-from matchms.similarity import CosineGreedy, IntersectMz
+from matchms.similarity import CosineGreedy, IntersectMz, MetadataMatch
 from matchms.similarity.BaseSimilarity import BaseSimilarity
 from .builder_Spectrum import SpectrumBuilder
 
@@ -266,13 +266,14 @@ def test_scores_by_query_non_tuple_score():
     assert selected_scores == expected_result, "Expected different scores."
 
 
-def test_export_to_file_import_from_file(filename):
+@pytest.mark.parametrize("similarity_function", [CosineGreedy(), IntersectMz(), MetadataMatch(field="id")])
+def test_export_to_file_import_from_file(filename, similarity_function):
     "Test export_to_file method."
     spectrum_1, spectrum_2, spectrum_3, spectrum_4 = spectra()
     references = [spectrum_1, spectrum_2, spectrum_3]
     queries = [spectrum_2, spectrum_3, spectrum_4]
 
-    scores = calculate_scores(references, queries, CosineGreedy())
+    scores = calculate_scores(references, queries, similarity_function)
     scores.export_to_file(filename)
 
     scores_loaded = Scores.import_from_json(filename)
