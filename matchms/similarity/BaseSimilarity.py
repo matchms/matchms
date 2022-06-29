@@ -82,3 +82,8 @@ class BaseSimilarity:
             Indexes of sorted scores.
         """
         return scores.argsort()[::-1]
+
+    def to_dict(self) -> dict:
+        """Return a dictionary representation of a similarity function."""
+        return {"__Similarity__": self.__class__.__name__,
+                **self.__dict__}
