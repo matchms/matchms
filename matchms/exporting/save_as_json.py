@@ -1,7 +1,6 @@
 import copy
 import json
 from typing import List
-import numpy
 from ..Spectrum import Spectrum
 
 
@@ -44,21 +43,13 @@ def save_as_json(spectrums: List[Spectrum], filename: str):
         json.dump(spectrums, fout, cls=SpectrumJSONEncoder)
 
 
-def _convert_spectrum_into_dict(spectrum: Spectrum):
-    """Convert :py:class:`~matchms.Spectrum.Spectrum` into a dictionary"""
-    peaks_list = numpy.vstack((spectrum.peaks.mz, spectrum.peaks.intensities)).T.tolist()
-    spectrum_dict = {key: spectrum.metadata[key] for key in spectrum.metadata}
-    spectrum_dict["peaks_json"] = peaks_list
-    return spectrum_dict
-
-
 class SpectrumJSONEncoder(json.JSONEncoder):
     # See https://github.com/PyCQA/pylint/issues/414 for reference
     def default(self, o):
         """JSON Encoder which can encode a :py:class:`~matchms.Spectrum.Spectrum` object"""
         if isinstance(o, Spectrum):
             spec = o.clone()
-            return _convert_spectrum_into_dict(spec)
+            return spec.to_dict()
         return json.JSONEncoder.default(self, o)
 
 
@@ -73,8 +64,8 @@ class ScoresJSONEncoder(json.JSONEncoder):
             scores_dict = {"__Scores__": True,
                            "similarity_function": self._encode_similarity_function(scores.similarity_function),
                            "is_symmetric": scores.is_symmetric,
-                           "references": [_convert_spectrum_into_dict(reference) for reference in scores.references],
-                           "queries": [_convert_spectrum_into_dict(query) for query in scores.queries] if not scores.is_symmetric else None,
+                           "references": [reference.to_dict() for reference in scores.references],
+                           "queries": [query.to_dict() for query in scores.queries] if not scores.is_symmetric else None,
                            "scores": scores.scores.tolist()}
 
             return scores_dict
