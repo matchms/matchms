@@ -60,18 +60,5 @@ class ScoresJSONEncoder(json.JSONEncoder):
         # do isinstance(o, Scores) without importing matchms.Scores
         if class_name == "Scores":
             scores = copy.deepcopy(o)
-
-            scores_dict = {"__Scores__": True,
-                           "similarity_function": self._encode_similarity_function(scores.similarity_function),
-                           "is_symmetric": scores.is_symmetric,
-                           "references": [reference.to_dict() for reference in scores.references],
-                           "queries": [query.to_dict() for query in scores.queries] if not scores.is_symmetric else None,
-                           "scores": scores.scores.tolist()}
-
-            return scores_dict
+            return scores.to_dict()
         return json.JSONEncoder.default(self, o)
-
-    @staticmethod
-    def _encode_similarity_function(similarity_function) -> dict:
-        similarity_function_dict = {"__Similarity__": similarity_function.__class__.__name__, **similarity_function.__dict__}
-        return similarity_function_dict

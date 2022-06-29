@@ -257,6 +257,15 @@ class Scores:
         else:
             raise ValueError(f"File format '{file_format}' is not supported.")
 
+    def to_dict(self) -> dict:
+        """Return a dictionary representation of scores."""
+        return {"__Scores__": True,
+                "similarity_function": self._encode_similarity_function(self.similarity_function),
+                "is_symmetric": self.is_symmetric,
+                "references": [reference.to_dict() for reference in self.references],
+                "queries": [query.to_dict() for query in self.queries] if not self.is_symmetric else None,
+                "scores": self.scores.tolist()}
+
     @property
     def scores(self) -> numpy.ndarray:
         """Scores as numpy array
