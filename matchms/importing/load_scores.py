@@ -1,5 +1,4 @@
 import pickle
-
 from matchms.Scores import ScoresBuilder
 
 

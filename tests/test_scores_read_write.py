@@ -2,12 +2,11 @@ import os
 import tempfile
 import numpy
 import pytest
-
-from .builder_Spectrum import SpectrumBuilder
+import matchms.similarity
 from matchms import calculate_scores
 from matchms.filtering import add_fingerprint
 from matchms.importing.load_scores import scores_from_json, scores_from_pickle
-import matchms.similarity
+from .builder_Spectrum import SpectrumBuilder
 
 
 @pytest.fixture(params=["json", "pkl"])
