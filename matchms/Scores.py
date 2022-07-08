@@ -217,27 +217,6 @@ class Scores:
                             self._scores[references_idx_sorted, selected_idx].copy()))
         return list(zip(self.references, self._scores[:, selected_idx].copy()))
 
-    @classmethod
-    def import_from_json(cls, file_path: str) -> Scores:
-        """Import scores from a JSON file.
-
-        Parameters
-        ----------
-        file_path
-            Path to the scores file.
-        """
-        return ScoresBuilder().from_json(file_path).build()
-
-    @classmethod
-    def import_from_pickle(cls, file_path: str) -> Scores:
-        """Import scores from a pickle file.
-
-        WARNING: Pickle files are not secure and may execute malicious code. Make sure that you are importing a pickle
-        file from a trusted source.
-        """
-        with open(file_path, "rb") as f:
-            return pickle.load(f)
-
     def export_to_file(self, filename: str, file_format: str = "json"):
         """Export the scores to a file.
 
