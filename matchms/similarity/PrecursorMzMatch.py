@@ -128,6 +128,11 @@ class PrecursorMzMatch(BaseSimilarity):
         return precursormz_scores_ppm(precursors_ref, precursors_query,
                                       self.tolerance).astype(self.score_datatype)
 
+    def to_dict(self) -> dict:
+        dct = super().to_dict()
+        dct["tolerance_type"] = dct.pop("type")
+        return dct
+
 
 @numba.njit
 def precursormz_scores(precursors_ref, precursors_query, tolerance):
