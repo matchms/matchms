@@ -218,7 +218,7 @@ class Scores:
         return list(zip(self.references, self._scores[:, selected_idx].copy()))
 
     def to_json(self, filename: str):
-        """Export the scores to a file.
+        """Export :py:class:`~matchms.Scores.Scores` to a JSON file.
 
         Parameters
         ----------
@@ -229,7 +229,7 @@ class Scores:
             json.dump(self, f, cls=ScoresJSONEncoder)
 
     def to_pickle(self, filename: str):
-        """Export the scores to a file.
+        """Export :py:class:`~matchms.Scores.Scores` to a Pickle file.
 
         Parameters
         ----------
