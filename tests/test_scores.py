@@ -270,26 +270,6 @@ def test_scores_by_query_non_tuple_score():
     assert selected_scores == expected_result, "Expected different scores."
 
 
-@pytest.mark.parametrize("similarity_function", [CosineGreedy(), IntersectMz(), MetadataMatch(field="id")])
-def test_export_to_file_import_from_file(filename, file_format, similarity_function):
-    "Test export_to_file method."
-    spectrum_1, spectrum_2, spectrum_3, spectrum_4 = spectra()
-    references = [spectrum_1, spectrum_2, spectrum_3]
-    queries = [spectrum_2, spectrum_3, spectrum_4]
-
-    scores = calculate_scores(references, queries, similarity_function)
-    scores.export_to_file(filename, file_format)
-
-    if file_format == "json":
-        scores_loaded = Scores.import_from_json(filename)
-    elif file_format == "pkl":
-        scores_loaded = Scores.import_from_pickle(filename)
-    else:
-        NotImplementedError(f"Unknown file format: {file_format}. Doublecheck the file_format fixture.")
-
-    assert scores == scores_loaded
-
-
 def test_comparing_scores():
     "Test comparing scores objects."
     spectrum_1, spectrum_2, spectrum_3, spectrum_4 = spectra()
