@@ -299,15 +299,14 @@ def test_comparing_scores():
     scores_symmetric_cosine_copy = calculate_scores(spectrums[0:3], spectrums[0:3], CosineGreedy())
     scores_symmetric_intersect = calculate_scores(spectrums[0:3], spectrums[0:3], IntersectMz())
 
-    assert scores_symmetric_cosine == scores_symmetric_cosine
-    assert scores_symmetric_intersect == scores_symmetric_intersect
     assert scores_symmetric_cosine == scores_symmetric_cosine_copy
     assert scores_symmetric_cosine != scores_symmetric_intersect
 
     scores_asymmetric_cosine = calculate_scores(spectrums[0:3], spectrums, CosineGreedy())
+    scores_asymmetric_cosine_copy = calculate_scores(spectrums[0:3], spectrums, CosineGreedy())
     scores_asymmetric_cosine_mirrored = calculate_scores(spectrums, spectrums[0:3], CosineGreedy())
 
-    assert scores_asymmetric_cosine == scores_asymmetric_cosine
+    assert scores_asymmetric_cosine == scores_asymmetric_cosine_copy
     assert scores_asymmetric_cosine != scores_asymmetric_cosine_mirrored
 
     scores_parametrized = calculate_scores(spectrums, spectrums, CosineGreedy(tolerance=0.1, mz_power=0.5))
