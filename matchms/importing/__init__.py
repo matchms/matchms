@@ -32,4 +32,3 @@ __all__ = [
     "scores_from_json",
     "scores_from_pickle",
 ]
-
