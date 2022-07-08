@@ -5,7 +5,7 @@ import pytest
 import matchms.similarity
 from matchms import calculate_scores
 from matchms.filtering import add_fingerprint
-from matchms.importing.load_scores import scores_from_json, scores_from_pickle
+from matchms.importing import scores_from_json, scores_from_pickle
 from .builder_Spectrum import SpectrumBuilder
 
 
