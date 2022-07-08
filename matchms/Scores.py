@@ -217,7 +217,7 @@ class Scores:
                             self._scores[references_idx_sorted, selected_idx].copy()))
         return list(zip(self.references, self._scores[:, selected_idx].copy()))
 
-    def export_to_json(self, filename: str):
+    def to_json(self, filename: str):
         """Export the scores to a file.
 
         Parameters
@@ -228,7 +228,7 @@ class Scores:
         with open(filename, "w", encoding="utf-8") as f:
             json.dump(self, f, cls=ScoresJSONEncoder)
 
-    def export_to_pickle(self, filename: str):
+    def to_pickle(self, filename: str):
         """Export the scores to a file.
 
         Parameters

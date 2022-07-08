@@ -80,19 +80,29 @@ def asymmetrical_scores(similarity_function, spectra):
     yield scores
 
 
-def test_writing_scores_to_file(filename, file_format, symmetrical_scores):
+def test_writing_scores_to_json(symmetrical_scores):
     """Test if writing scores to file works."""
-    symmetrical_scores.export_to_file(filename, file_format=file_format)
-    assert os.path.isfile(filename)
+    with tempfile.TemporaryDirectory() as tmpdir:
+        filename = os.path.join(tmpdir, "test_scores.json")
+        symmetrical_scores.to_json(filename)
+        assert os.path.isfile(filename)
+
+
+def test_writing_scores_to_pickle(symmetrical_scores):
+    """Test if writing scores to file works."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        filename = os.path.join(tmpdir, "test_scores.pkl")
+        symmetrical_scores.to_pickle(filename)
+        assert os.path.isfile(filename)
 
 
 def test_scores_write_read_symmetrical(filename, file_format, symmetrical_scores):
     """Test if writing and reading symmetrical scores does not change the scores."""
-    symmetrical_scores.export_to_file(filename, file_format=file_format)
-
     if file_format == "json":
+        symmetrical_scores.to_json(filename)
         scores = scores_from_json(filename)
     elif file_format == "pkl":
+        symmetrical_scores.to_pickle(filename)
         scores = scores_from_pickle(filename)
     else:
         raise ValueError(f"Unsupported file format: {file_format}. Check 'file_format' fixture.")
@@ -102,11 +112,11 @@ def test_scores_write_read_symmetrical(filename, file_format, symmetrical_scores
 
 def test_scores_write_read_asymmetrical(filename, file_format, asymmetrical_scores):
     """Test if writing and reading symmetrical scores does not change the scores."""
-    asymmetrical_scores.export_to_file(filename, file_format=file_format)
-
     if file_format == "json":
+        asymmetrical_scores.to_json(filename)
         scores = scores_from_json(filename)
     elif file_format == "pkl":
+        asymmetrical_scores.to_pickle(filename)
         scores = scores_from_pickle(filename)
     else:
         raise ValueError(f"Unsupported file format: {file_format}. Check 'file_format' fixture.")
