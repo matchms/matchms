@@ -217,24 +217,27 @@ class Scores:
                             self._scores[references_idx_sorted, selected_idx].copy()))
         return list(zip(self.references, self._scores[:, selected_idx].copy()))
 
-    def export_to_file(self, filename: str, file_format: str = "json"):
+    def export_to_json(self, filename: str):
         """Export the scores to a file.
 
         Parameters
         ----------
         filename
             Path to file to write to
-        file_format
-            File format to write to. Supported formats are: "json", "pkl". Default is "json".
         """
-        if file_format == "json":
-            with open(filename, "w", encoding="utf-8") as f:
-                json.dump(self, f, cls=ScoresJSONEncoder)
-        elif file_format == "pkl":
-            with open(filename, "wb") as f:
-                pickle.dump(self, f)
-        else:
-            raise ValueError(f"File format '{file_format}' is not supported.")
+        with open(filename, "w", encoding="utf-8") as f:
+            json.dump(self, f, cls=ScoresJSONEncoder)
+
+    def export_to_pickle(self, filename: str):
+        """Export the scores to a file.
+
+        Parameters
+        ----------
+        filename
+            Path to file to write to
+        """
+        with open(filename, "wb") as f:
+            pickle.dump(self, f)
 
     def to_dict(self) -> dict:
         """Return a dictionary representation of scores."""
