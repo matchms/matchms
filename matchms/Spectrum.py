@@ -198,6 +198,8 @@ class Spectrum:
         peaks_list = np.vstack((self.peaks.mz, self.peaks.intensities)).T.tolist()
         spectrum_dict = {key: self.metadata[key] for key in self.metadata}
         spectrum_dict["peaks_json"] = peaks_list
+        if "fingerprint" in spectrum_dict:
+            spectrum_dict["fingerprint"] = spectrum_dict["fingerprint"].tolist()
         return spectrum_dict
 
     @property
