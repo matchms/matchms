@@ -95,7 +95,7 @@ def test_scores_write_read_symmetrical(filename, file_format, symmetrical_scores
     elif file_format == "pkl":
         scores = scores_from_pickle(filename)
     else:
-        raise ValueError(f"Unknown file format: {file_format}. Check 'file_format' fixture.")
+        raise ValueError(f"Unsupported file format: {file_format}. Check 'file_format' fixture.")
 
     assert symmetrical_scores == scores
 
@@ -109,6 +109,6 @@ def test_scores_write_read_asymmetrical(filename, file_format, asymmetrical_scor
     elif file_format == "pkl":
         scores = scores_from_pickle(filename)
     else:
-        raise ValueError(f"Unknown file format: {file_format}. Check 'file_format' fixture.")
+        raise ValueError(f"Unsupported file format: {file_format}. Check 'file_format' fixture.")
 
     assert asymmetrical_scores == scores
