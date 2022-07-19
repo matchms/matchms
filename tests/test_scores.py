@@ -270,30 +270,36 @@ def test_scores_by_query_non_tuple_score():
     assert selected_scores == expected_result, "Expected different scores."
 
 
-def test_comparing_symmetric_scores():
+@pytest.mark.parametrize(
+    "similarity_function_a,similarity_function_b",
+    [(CosineGreedy(), IntersectMz()), (IntersectMz(), CosineGreedy())])
+def test_comparing_symmetric_scores(similarity_function_a, similarity_function_b):
     "Test comparing symmetric scores objects."
     spectrum_1, spectrum_2, spectrum_3, spectrum_4 = spectra()
     spectrums = [spectrum_1, spectrum_2, spectrum_3, spectrum_4]
 
-    scores_symmetric_cosine = calculate_scores(spectrums[0:3], spectrums[0:3], CosineGreedy())
-    scores_symmetric_cosine_copy = calculate_scores(spectrums[0:3], spectrums[0:3], CosineGreedy())
-    scores_symmetric_intersect = calculate_scores(spectrums[0:3], spectrums[0:3], IntersectMz())
+    scores_similarity_a = calculate_scores(spectrums, spectrums, similarity_function_a)
+    scores_similarity_a_copy = calculate_scores(spectrums, spectrums, similarity_function_a)
+    scores_similarity_b = calculate_scores(spectrums, spectrums, similarity_function_b)
 
-    assert scores_symmetric_cosine == scores_symmetric_cosine_copy
-    assert scores_symmetric_cosine != scores_symmetric_intersect
+    assert scores_similarity_a == scores_similarity_a_copy
+    assert scores_similarity_a != scores_similarity_b
 
 
-def test_comparing_asymmetric_scores():
+@pytest.mark.parametrize(
+    "similarity_function_a,similarity_function_b",
+    [(CosineGreedy(), IntersectMz()), (IntersectMz(), CosineGreedy())])
+def test_comparing_asymmetric_scores(similarity_function_a, similarity_function_b):
     "Test comparing asymmetric scores objects."
     spectrum_1, spectrum_2, spectrum_3, spectrum_4 = spectra()
     spectrums = [spectrum_1, spectrum_2, spectrum_3, spectrum_4]
 
-    scores_asymmetric_cosine = calculate_scores(spectrums[0:3], spectrums, CosineGreedy())
-    scores_asymmetric_cosine_copy = calculate_scores(spectrums[0:3], spectrums, CosineGreedy())
-    scores_asymmetric_cosine_mirrored = calculate_scores(spectrums, spectrums[0:3], CosineGreedy())
+    scores_similarity_a = calculate_scores(spectrums[0:3], spectrums, similarity_function_a)
+    scores_similarity_a_copy = calculate_scores(spectrums[0:3], spectrums, similarity_function_a)
+    scores_similarity_b = calculate_scores(spectrums, spectrums[0:3], similarity_function_b)
 
-    assert scores_asymmetric_cosine == scores_asymmetric_cosine_copy
-    assert scores_asymmetric_cosine != scores_asymmetric_cosine_mirrored
+    assert scores_similarity_a == scores_similarity_a_copy
+    assert scores_similarity_a != scores_similarity_b
 
 
 def test_comparing_scores_with_parametrized_similarity_funcs():
