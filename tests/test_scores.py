@@ -315,3 +315,13 @@ def test_comparing_scores_with_same_shape_different_scores_values(similarity_fun
     scores_parametrized_mirrored = calculate_scores(spectrums, spectrums, similarity_function_b)
 
     assert scores_parametrized != scores_parametrized_mirrored
+
+
+def test_compare_same_scores_with_different_similarity_funcs():
+    "Test comparing same (empty) scores objects with different similarity functions."
+    scores_cosine = calculate_scores([], [], CosineGreedy())
+    scores_cosine_copy = calculate_scores([], [], CosineGreedy())
+    scores_intersect = calculate_scores([], [], IntersectMz())
+
+    assert scores_cosine == scores_cosine_copy
+    assert scores_cosine != scores_intersect
