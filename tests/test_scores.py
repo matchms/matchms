@@ -270,8 +270,8 @@ def test_scores_by_query_non_tuple_score():
     assert selected_scores == expected_result, "Expected different scores."
 
 
-def test_comparing_scores():
-    "Test comparing scores objects."
+def test_comparing_symmetric_scores():
+    "Test comparing symmetric scores objects."
     spectrum_1, spectrum_2, spectrum_3, spectrum_4 = spectra()
     spectrums = [spectrum_1, spectrum_2, spectrum_3, spectrum_4]
 
@@ -282,12 +282,24 @@ def test_comparing_scores():
     assert scores_symmetric_cosine == scores_symmetric_cosine_copy
     assert scores_symmetric_cosine != scores_symmetric_intersect
 
+
+def test_comparing_asymmetric_scores():
+    "Test comparing asymmetric scores objects."
+    spectrum_1, spectrum_2, spectrum_3, spectrum_4 = spectra()
+    spectrums = [spectrum_1, spectrum_2, spectrum_3, spectrum_4]
+
     scores_asymmetric_cosine = calculate_scores(spectrums[0:3], spectrums, CosineGreedy())
     scores_asymmetric_cosine_copy = calculate_scores(spectrums[0:3], spectrums, CosineGreedy())
     scores_asymmetric_cosine_mirrored = calculate_scores(spectrums, spectrums[0:3], CosineGreedy())
 
     assert scores_asymmetric_cosine == scores_asymmetric_cosine_copy
     assert scores_asymmetric_cosine != scores_asymmetric_cosine_mirrored
+
+
+def test_comparing_scores_with_parametrized_similarity_funcs():
+    "Test comparing scores objects with parametrized similarity function."
+    spectrum_1, spectrum_2, spectrum_3, spectrum_4 = spectra()
+    spectrums = [spectrum_1, spectrum_2, spectrum_3, spectrum_4]
 
     scores_parametrized = calculate_scores(spectrums, spectrums, CosineGreedy(tolerance=0.1, mz_power=0.5))
     scores_parametrized_mirrored = calculate_scores(spectrums, spectrums, CosineGreedy(tolerance=0.5, mz_power=0.1))
