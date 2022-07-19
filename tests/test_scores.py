@@ -302,12 +302,16 @@ def test_comparing_asymmetric_scores(similarity_function_a, similarity_function_
     assert scores_similarity_a != scores_similarity_b
 
 
-def test_comparing_scores_with_parametrized_similarity_funcs():
-    "Test comparing scores objects with parametrized similarity function."
+@pytest.mark.parametrize(
+    "similarity_function_a,similarity_function_b",
+    [(CosineGreedy(tolerance=0.5, mz_power=0.5), CosineGreedy(tolerance=0.1, mz_power=0.1)),
+     (IntersectMz(scaling=1.0), IntersectMz(scaling=2.0))])
+def test_comparing_scores_with_same_shape_different_scores_values(similarity_function_a, similarity_function_b):
+    "Test comparing scores objects with same similarity functions but different values of scores."
     spectrum_1, spectrum_2, spectrum_3, spectrum_4 = spectra()
     spectrums = [spectrum_1, spectrum_2, spectrum_3, spectrum_4]
 
-    scores_parametrized = calculate_scores(spectrums, spectrums, CosineGreedy(tolerance=0.1, mz_power=0.5))
-    scores_parametrized_mirrored = calculate_scores(spectrums, spectrums, CosineGreedy(tolerance=0.5, mz_power=0.1))
+    scores_parametrized = calculate_scores(spectrums, spectrums, similarity_function_a)
+    scores_parametrized_mirrored = calculate_scores(spectrums, spectrums, similarity_function_b)
 
     assert scores_parametrized != scores_parametrized_mirrored
