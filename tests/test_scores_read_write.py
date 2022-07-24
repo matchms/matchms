@@ -1,10 +1,9 @@
 import os
 import tempfile
-from importlib import reload
 import numpy
 import pytest
 import matchms.similarity
-from matchms import calculate_scores, metadata_utils
+from matchms import calculate_scores
 from matchms.filtering import add_fingerprint
 from matchms.importing import scores_from_json, scores_from_pickle
 from .builder_Spectrum import SpectrumBuilder
@@ -55,7 +54,6 @@ def spectra(similarity_function):
 
     spectra = [spectrum_1, spectrum_2, spectrum_3, spectrum_4]
     if similarity_function.__class__.__name__ == "FingerprintSimilarity":
-        reload(metadata_utils)
         yield [add_fingerprint(spectrum, nbits=256) for spectrum in spectra]
     else:
         yield spectra
