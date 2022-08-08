@@ -14,6 +14,13 @@ from matchms.metadata_utils import (clean_adduct,
                                     mol_converter)
 
 
+@pytest.fixture()
+def reload_metadata_utils():
+    """Reload metadata_utils module after test has finished."""
+    yield
+    reload(matchms.metadata_utils)
+
+
 def test_mol_converter_smiles_to_inchi():
     """Test if smiles is correctly converted to inchi."""
     pytest.importorskip("rdkit")
@@ -157,7 +164,7 @@ def test_derive_fingerprint_different_types_from_smiles():
         assert numpy.all(fingerprint == expected_fingerprints[i]), "Expected different fingerprint."
 
 
-def test_missing_rdkit_module_error():
+def test_missing_rdkit_module_error(reload_metadata_utils):
     """Test if different functions return correct error when *rdkit* is not available"""
     if find_spec("rdkit") is not None:
         context = mock.patch.dict(sys.modules, {"rdkit": None})

@@ -1,6 +1,12 @@
 from __future__ import annotations
+import json
+import pickle
 import numpy
+import numpy.lib.recfunctions
 from deprecated.sphinx import deprecated
+from matchms.exporting.save_as_json import ScoresJSONEncoder
+from matchms.importing.load_from_json import scores_json_decoder
+from matchms.similarity import get_similarity_function_by_name
 from matchms.similarity.BaseSimilarity import BaseSimilarity
 from matchms.typing import QueriesType, ReferencesType
 
@@ -51,6 +57,7 @@ class Scores:
         Cosine score between spectrum2 and spectrum3 is 0.14 with 1 matched peaks
         Cosine score between spectrum2 and spectrum4 is 0.61 with 1 matched peaks
     """
+
     def __init__(self, references: ReferencesType, queries: QueriesType,
                  similarity_function: BaseSimilarity, is_symmetric: bool = False):
         """
@@ -81,6 +88,17 @@ class Scores:
         self._scores = numpy.empty([self.n_rows, self.n_cols], dtype="object")
         self._index = 0
 
+    def __eq__(self, other):
+        if isinstance(other, Scores):
+            return numpy.array_equal(self._scores, other._scores) and \
+                   self.similarity_function.__class__ == other.similarity_function.__class__ and \
+                   self.is_symmetric == other.is_symmetric and \
+                   self.n_rows == other.n_rows and \
+                   self.n_cols == other.n_cols and \
+                   numpy.array_equal(self.references, other.references) and \
+                   numpy.array_equal(self.queries, other.queries)
+        return NotImplemented
+
     def __iter__(self):
         return self
 
@@ -101,13 +119,13 @@ class Scores:
 
     @staticmethod
     def _validate_input_arguments(references, queries, similarity_function):
-        assert isinstance(references, (list, tuple, numpy.ndarray)),\
+        assert isinstance(references, (list, tuple, numpy.ndarray)), \
             "Expected input argument 'references' to be list or tuple or numpy.ndarray."
 
-        assert isinstance(queries, (list, tuple, numpy.ndarray)),\
+        assert isinstance(queries, (list, tuple, numpy.ndarray)), \
             "Expected input argument 'queries' to be list or tuple or numpy.ndarray."
 
-        assert isinstance(similarity_function, BaseSimilarity),\
+        assert isinstance(similarity_function, BaseSimilarity), \
             "Expected input argument 'similarity_function' to have BaseSimilarity as super-class."
 
     @deprecated(version='0.6.0', reason="Calculate scores via calculate_scores() function.")
@@ -199,6 +217,37 @@ class Scores:
                             self._scores[references_idx_sorted, selected_idx].copy()))
         return list(zip(self.references, self._scores[:, selected_idx].copy()))
 
+    def to_json(self, filename: str):
+        """Export :py:class:`~matchms.Scores.Scores` to a JSON file.
+
+        Parameters
+        ----------
+        filename
+            Path to file to write to
+        """
+        with open(filename, "w", encoding="utf-8") as f:
+            json.dump(self, f, cls=ScoresJSONEncoder)
+
+    def to_pickle(self, filename: str):
+        """Export :py:class:`~matchms.Scores.Scores` to a Pickle file.
+
+        Parameters
+        ----------
+        filename
+            Path to file to write to
+        """
+        with open(filename, "wb") as f:
+            pickle.dump(self, f)
+
+    def to_dict(self) -> dict:
+        """Return a dictionary representation of scores."""
+        return {"__Scores__": True,
+                "similarity_function": self.similarity_function.to_dict(),
+                "is_symmetric": self.is_symmetric,
+                "references": [reference.to_dict() for reference in self.references],
+                "queries": [query.to_dict() for query in self.queries] if not self.is_symmetric else None,
+                "scores": self.scores.tolist()}
+
     @property
     def scores(self) -> numpy.ndarray:
         """Scores as numpy array
@@ -233,3 +282,76 @@ class Scores:
               [0.2 1. ]]
         """
         return self._scores.copy()
+
+
+class ScoresBuilder:
+    """
+    Builder class for :class:`~matchms.Scores`.
+    """
+
+    def __init__(self):
+        self.references = None
+        self.queries = None
+        self.similarity_function = None
+        self.is_symmetric = None
+        self.scores = None
+
+    def build(self) -> Scores:
+        """
+        Build scores object
+        """
+        scores = Scores(references=self.references,
+                        queries=self.queries,
+                        similarity_function=self.similarity_function,
+                        is_symmetric=self.is_symmetric)
+        scores._scores = self.scores  # pylint: disable=protected-access
+        return scores
+
+    def from_json(self, file_path: str):
+        """
+        Import scores data from a JSON file.
+
+        Parameters
+        ----------
+        file_path
+            Path to the scores file.
+        """
+        with open(file_path, "rb") as f:
+            scores_dict = json.load(f, object_hook=scores_json_decoder)
+
+        self._validate_json_input(scores_dict)
+
+        self.is_symmetric = scores_dict["is_symmetric"]
+        self.similarity_function = self._construct_similarity_function(scores_dict["similarity_function"])
+        self.references = scores_dict["references"]
+        self.queries = scores_dict["queries"] if not self.is_symmetric else self.references
+        self.scores = self._restructure_scores(scores_dict["scores"])
+
+        return self
+
+    def _restructure_scores(self, scores: dict) -> numpy.ndarray:
+        """
+        Restructure scores from a nested list to a numpy array. If scores were stored as an array of tuples, restores
+        their original form.
+        """
+        scores = numpy.array(scores)
+
+        if len(scores.shape) > 2:
+            dt = numpy.dtype(self.similarity_function.score_datatype)
+            return numpy.lib.recfunctions.unstructured_to_structured(scores, dtype=dt)
+        return scores
+
+    @staticmethod
+    def _construct_similarity_function(similarity_function_dict: dict) -> BaseSimilarity:
+        """
+        Construct similarity function from its serialized form.
+        """
+        similarity_function_class = get_similarity_function_by_name(similarity_function_dict.pop("__Similarity__"))
+        return similarity_function_class(**similarity_function_dict)
+
+    @staticmethod
+    def _validate_json_input(scores_dict: dict):
+        if {"__Scores__", "similarity_function", "is_symmetric", "references", "queries", "scores"} != scores_dict.keys():
+            raise ValueError("Scores JSON file does not match the expected schema.\n\
+                             Make sure the file contains the following keys:\n\
+                             ['__Scores__', 'similarity_function', 'is_symmetric', 'references', 'queries', 'scores']")
