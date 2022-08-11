@@ -81,6 +81,7 @@ def asymmetrical_scores(similarity_function, spectra):
 
 def test_writing_scores_to_json(symmetrical_scores):
     """Test if writing scores to file works."""
+    pytest.importorskip("rdkit")
     with tempfile.TemporaryDirectory() as tmpdir:
         filename = os.path.join(tmpdir, "test_scores.json")
         symmetrical_scores.to_json(filename)
@@ -89,6 +90,7 @@ def test_writing_scores_to_json(symmetrical_scores):
 
 def test_writing_scores_to_pickle(symmetrical_scores):
     """Test if writing scores to file works."""
+    pytest.importorskip("rdkit")
     with tempfile.TemporaryDirectory() as tmpdir:
         filename = os.path.join(tmpdir, "test_scores.pkl")
         symmetrical_scores.to_pickle(filename)
@@ -97,6 +99,7 @@ def test_writing_scores_to_pickle(symmetrical_scores):
 
 def test_scores_write_read_symmetrical(filename, file_format, symmetrical_scores):
     """Test if writing and reading symmetrical scores does not change the scores."""
+    pytest.importorskip("rdkit")
     if file_format == "json":
         symmetrical_scores.to_json(filename)
         scores = scores_from_json(filename)
@@ -111,6 +114,7 @@ def test_scores_write_read_symmetrical(filename, file_format, symmetrical_scores
 
 def test_scores_write_read_asymmetrical(filename, file_format, asymmetrical_scores):
     """Test if writing and reading symmetrical scores does not change the scores."""
+    pytest.importorskip("rdkit")
     if file_format == "json":
         asymmetrical_scores.to_json(filename)
         scores = scores_from_json(filename)
