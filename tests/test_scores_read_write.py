@@ -9,6 +9,9 @@ from matchms.importing import scores_from_json, scores_from_pickle
 from .builder_Spectrum import SpectrumBuilder
 
 
+pytest.importorskip("rdkit")
+
+
 @pytest.fixture(params=["json", "pkl"])
 def file_format(request):
     yield request.param
