@@ -11,7 +11,7 @@ logger = logging.getLogger("matchms")
 _extentions_not_allowed = ["mzml", "mzxml", "json", "mgf"]
 
 
-def save_as_msp(spectra: List[Spectrum], filename: str,
+def save_as_msp(spectrums: List[Spectrum], filename: str,
                 write_peak_comments: bool = True):
     """Save spectrum(s) as msp file.
 
@@ -37,7 +37,7 @@ def save_as_msp(spectra: List[Spectrum], filename: str,
 
     Parameters
     ----------
-    spectra:
+    spectrums:
         Expected input are match.Spectrum.Spectrum() objects.
     filename:
         Provide filename to save spectrum(s).
@@ -49,12 +49,12 @@ def save_as_msp(spectra: List[Spectrum], filename: str,
     assert file_extension.lower() not in _extentions_not_allowed, \
         f"File extension '.{file_extension}' not allowed."
     if not filename.endswith(".msp"):
-        logger.warning("Spectra will be stored as msp file with extension .%s",
+        logger.warning("Spectrum(s) will be stored as msp file with extension .%s",
                        filename.split(".")[-1])
-    spectra = _ensure_list(spectra)
+    spectrums = _ensure_list(spectrums)
 
     with open(filename, "w", encoding="utf-8") as outfile:
-        for spectrum in spectra:
+        for spectrum in spectrums:
             _write_spectrum(spectrum, outfile, write_peak_comments)
 
 
@@ -98,8 +98,8 @@ def _is_peak_comments(key: str) -> bool:
     return key.lower().startswith("peak_comments")
 
 
-def _ensure_list(spectra) -> List[Spectrum]:
-    if not isinstance(spectra, list):
+def _ensure_list(spectrums) -> List[Spectrum]:
+    if not isinstance(spectrums, list):
         # Assume that input was single Spectrum
-        spectra = [spectra]
-    return spectra
+        spectrums = [spectrums]
+    return spectrums
