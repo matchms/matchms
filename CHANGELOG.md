@@ -7,8 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.17.0] - 2022-08-23
+
 ### Added
 - `Scores`: added functionality for writing and reading `Scores` objects to/from disk as JSON and Pickle files [#353](https://github.com/matchms/matchms/pull/353)
+- `save_as_msp()` now has a `mode` option (write/append) [#346](https://github.com/matchms/matchms/pull/346)
 
 ## [0.16.0] - 2022-06-12
 
@@ -442,8 +445,9 @@ Contains three plot types: `plot_spectrum()` or `spectrum.plot()`, `plot_spectra
 - This is the initial version of Spec2Vec from https://github.com/iomega/Spec2Vec
 - (later splitted into matchms + spec2vec)
 
-[Unreleased]: https://github.com/matchms/matchms/compare/0.16.0...HEAD
-[0.16.0]: https://github.com/matchms/matchms/compare/0.15.0...0.16.0
+[Unreleased]: https://github.com/matchms/matchms/compare/0.17.0...HEAD
+[0.16.0]: https://github.com/matchms/matchms/compare/0.16.0...0.17.0
+[0.17.0]: https://github.com/matchms/matchms/compare/0.15.0...0.16.0
 [0.15.0]: https://github.com/matchms/matchms/compare/0.14.0...0.15.0
 [0.14.0]: https://github.com/matchms/matchms/compare/0.13.0...0.14.0
 [0.13.0]: https://github.com/matchms/matchms/compare/0.12.0...0.13.0
