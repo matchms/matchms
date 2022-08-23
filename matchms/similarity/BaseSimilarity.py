@@ -86,7 +86,7 @@ class BaseSimilarity:
 
         scores_array = StackedSparseScores(n_rows, n_cols)
 
-        if len(scores) > 0 and len(scores[0].dtype) > 1:  # if structured array
+        if len(scores) > 0 and isinstance(scores[0], np.ndarray) and len(scores[0].dtype) > 1:  # if structured array
             for dtype_name in scores[0].dtype.names:
                 scores_array.add_sparse_data(scores, idx_row, idx_col, dtype_name)
         elif len(scores) > 0:

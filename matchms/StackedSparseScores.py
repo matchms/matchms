@@ -227,6 +227,8 @@ class StackedSparseScores:
             the added scores, for instance via `sss_array.toarray("my_score_name")`.
 
         """
+        if matrix is None:
+            return None
         if len(matrix.dtype) > 1:  # if structured array
             for dtype_name in matrix.dtype.names:
                 self._add_dense_matrix(matrix[dtype_name], name + "_" + dtype_name)
@@ -312,6 +314,8 @@ class StackedSparseScores:
             Name of the score which is added. Will later be used to access and address
             the added scores, for instance via `sss_array.toarray("my_score_name")`.
         """
+        if data is None:
+            return None
         if len(data.dtype) > 1:  # if structured array
             for dtype_name in data.dtype.names:
                 if self.data is None:
@@ -380,6 +384,8 @@ class StackedSparseScores:
             Name of the score that should be returned (if multiple scores are stored).
             If set to None (default) a 3D array with all scores will be returned.
         """
+        if self.data is None:
+            return None
         if name is None and self.shape[2] == 1:
             name = self.score_names[0]
         if isinstance(name, str):
