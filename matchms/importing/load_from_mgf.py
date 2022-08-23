@@ -1,5 +1,5 @@
 from typing import Generator, TextIO, Union
-import numpy
+import numpy as np
 from pyteomics.mgf import MGF
 from ..Spectrum import Spectrum
 
@@ -41,8 +41,8 @@ def load_from_mgf(source: Union[str, TextIO],
         intensities = pyteomics_spectrum["intensity array"]
 
         # Sort by mz (if not sorted already)
-        if not numpy.all(mz[:-1] <= mz[1:]):
-            idx_sorted = numpy.argsort(mz)
+        if not np.all(mz[:-1] <= mz[1:]):
+            idx_sorted = np.argsort(mz)
             mz = mz[idx_sorted]
             intensities = intensities[idx_sorted]
 

@@ -1,5 +1,5 @@
 import logging
-import numpy
+import numpy as np
 from ..metadata_utils import (derive_fingerprint_from_inchi,
                               derive_fingerprint_from_smiles)
 from ..typing import SpectrumType
@@ -34,7 +34,7 @@ def add_fingerprint(spectrum_in: SpectrumType, fingerprint_type: str = "daylight
     if spectrum.get("smiles", None):
         fingerprint = derive_fingerprint_from_smiles(spectrum.get("smiles"),
                                                      fingerprint_type, nbits)
-        if isinstance(fingerprint, numpy.ndarray) and fingerprint.sum() > 0:
+        if isinstance(fingerprint, np.ndarray) and fingerprint.sum() > 0:
             spectrum.set("fingerprint", fingerprint)
             return spectrum
 
@@ -42,7 +42,7 @@ def add_fingerprint(spectrum_in: SpectrumType, fingerprint_type: str = "daylight
     if spectrum.get("inchi", None):
         fingerprint = derive_fingerprint_from_inchi(spectrum.get("inchi"),
                                                     fingerprint_type, nbits)
-        if isinstance(fingerprint, numpy.ndarray) and fingerprint.sum() > 0:
+        if isinstance(fingerprint, np.ndarray) and fingerprint.sum() > 0:
             spectrum.set("fingerprint", fingerprint)
             return spectrum
 

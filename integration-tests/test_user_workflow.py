@@ -1,5 +1,5 @@
 import os
-import numpy
+import numpy as np
 import pytest
 from matchms import calculate_scores
 from matchms.filtering import (add_parent_mass, default_filters,
@@ -52,16 +52,16 @@ def test_user_workflow():
 
     score_datatype = cosine_greedy.score_datatype
     expected_top10 = [
-        (references[48], queries[50], numpy.array([(0.9994783627790967, 25)], dtype=score_datatype)[0]),
-        (references[50], queries[48], numpy.array([(0.9994783627790967, 25)], dtype=score_datatype)[0]),
-        (references[46], queries[48], numpy.array([(0.9990141860269471, 27)], dtype=score_datatype)[0]),
-        (references[48], queries[46], numpy.array([(0.9990141860269471, 27)], dtype=score_datatype)[0]),
-        (references[46], queries[50], numpy.array([(0.9988793406908721, 22)], dtype=score_datatype)[0]),
-        (references[50], queries[46], numpy.array([(0.9988793406908721, 22)], dtype=score_datatype)[0]),
-        (references[57], queries[59], numpy.array([(0.9982171275552503, 46)], dtype=score_datatype)[0]),
-        (references[59], queries[57], numpy.array([(0.9982171275552503, 46)], dtype=score_datatype)[0]),
-        (references[73], queries[74], numpy.array([(0.9973823244169199, 23)], dtype=score_datatype)[0]),
-        (references[74], queries[73], numpy.array([(0.9973823244169199, 23)], dtype=score_datatype)[0]),
+        (references[48], queries[50], np.array([(0.9994783627790967, 25)], dtype=score_datatype)[0]),
+        (references[50], queries[48], np.array([(0.9994783627790967, 25)], dtype=score_datatype)[0]),
+        (references[46], queries[48], np.array([(0.9990141860269471, 27)], dtype=score_datatype)[0]),
+        (references[48], queries[46], np.array([(0.9990141860269471, 27)], dtype=score_datatype)[0]),
+        (references[46], queries[50], np.array([(0.9988793406908721, 22)], dtype=score_datatype)[0]),
+        (references[50], queries[46], np.array([(0.9988793406908721, 22)], dtype=score_datatype)[0]),
+        (references[57], queries[59], np.array([(0.9982171275552503, 46)], dtype=score_datatype)[0]),
+        (references[59], queries[57], np.array([(0.9982171275552503, 46)], dtype=score_datatype)[0]),
+        (references[73], queries[74], np.array([(0.9973823244169199, 23)], dtype=score_datatype)[0]),
+        (references[74], queries[73], np.array([(0.9973823244169199, 23)], dtype=score_datatype)[0]),
     ]
     assert [x[2][0] for x in actual_top10] == pytest.approx([x[2][0] for x in expected_top10], 1e-8), \
         "Expected different scores."

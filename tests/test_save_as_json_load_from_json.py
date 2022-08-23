@@ -1,6 +1,6 @@
 import json
 import os
-import numpy
+import numpy as np
 import pytest
 from matchms.exporting import save_as_json
 from matchms.importing import load_from_json
@@ -9,8 +9,8 @@ from tests.builder_Spectrum import SpectrumBuilder
 
 @pytest.fixture
 def builder() -> SpectrumBuilder:
-    mz = numpy.array([100, 200, 300], dtype="float")
-    intensities = numpy.array([10, 10, 500], dtype="float")
+    mz = np.array([100, 200, 300], dtype="float")
+    intensities = np.array([10, 10, 500], dtype="float")
     builder = SpectrumBuilder().with_mz(mz).with_intensities(intensities)
     return builder
 

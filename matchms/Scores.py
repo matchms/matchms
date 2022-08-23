@@ -1,7 +1,7 @@
 from __future__ import annotations
 import json
 import pickle
-import numpy
+import numpy as np
 import numpy.lib.recfunctions
 from deprecated.sphinx import deprecated
 from matchms.exporting.save_as_json import ScoresJSONEncoder
@@ -81,22 +81,22 @@ class Scores:
 
         self.n_rows = len(references)
         self.n_cols = len(queries)
-        self.references = numpy.asarray(references)
-        self.queries = numpy.asarray(queries)
+        self.references = np.asarray(references)
+        self.queries = np.asarray(queries)
         self.similarity_function = similarity_function
         self.is_symmetric = is_symmetric
-        self._scores = numpy.empty([self.n_rows, self.n_cols], dtype="object")
+        self._scores = np.empty([self.n_rows, self.n_cols], dtype="object")
         self._index = 0
 
     def __eq__(self, other):
         if isinstance(other, Scores):
-            return numpy.array_equal(self._scores, other._scores) and \
+            return np.array_equal(self._scores, other._scores) and \
                    self.similarity_function.__class__ == other.similarity_function.__class__ and \
                    self.is_symmetric == other.is_symmetric and \
                    self.n_rows == other.n_rows and \
                    self.n_cols == other.n_cols and \
-                   numpy.array_equal(self.references, other.references) and \
-                   numpy.array_equal(self.queries, other.queries)
+                   np.array_equal(self.references, other.references) and \
+                   np.array_equal(self.queries, other.queries)
         return NotImplemented
 
     def __iter__(self):
@@ -105,7 +105,7 @@ class Scores:
     def __next__(self):
         if self._index < self.scores.size:
             # pylint: disable=unbalanced-tuple-unpacking
-            r, c = numpy.unravel_index(self._index, self._scores.shape)
+            r, c = np.unravel_index(self._index, self._scores.shape)
             self._index += 1
             result = self._scores[r, c]
             if not isinstance(result, tuple):
@@ -119,11 +119,11 @@ class Scores:
 
     @staticmethod
     def _validate_input_arguments(references, queries, similarity_function):
-        assert isinstance(references, (list, tuple, numpy.ndarray)), \
-            "Expected input argument 'references' to be list or tuple or numpy.ndarray."
+        assert isinstance(references, (list, tuple, np.ndarray)), \
+            "Expected input argument 'references' to be list or tuple or np.ndarray."
 
-        assert isinstance(queries, (list, tuple, numpy.ndarray)), \
-            "Expected input argument 'queries' to be list or tuple or numpy.ndarray."
+        assert isinstance(queries, (list, tuple, np.ndarray)), \
+            "Expected input argument 'queries' to be list or tuple or np.ndarray."
 
         assert isinstance(similarity_function, BaseSimilarity), \
             "Expected input argument 'similarity_function' to have BaseSimilarity as super-class."
@@ -145,7 +145,7 @@ class Scores:
         return self
 
     def scores_by_reference(self, reference: ReferencesType,
-                            sort: bool = False) -> numpy.ndarray:
+                            sort: bool = False) -> np.ndarray:
         """Return all scores for the given reference spectrum.
 
         Parameters
@@ -157,14 +157,14 @@ class Scores:
             :meth:`~.BaseSimilarity.sort` function from the given similarity_function).
         """
         assert reference in self.references, "Given input not found in references."
-        selected_idx = int(numpy.where(self.references == reference)[0])
+        selected_idx = int(np.where(self.references == reference)[0])
         if sort:
             query_idx_sorted = self.similarity_function.sort(self._scores[selected_idx, :])
             return list(zip(self.queries[query_idx_sorted],
                             self._scores[selected_idx, query_idx_sorted].copy()))
         return list(zip(self.queries, self._scores[selected_idx, :].copy()))
 
-    def scores_by_query(self, query: QueriesType, sort: bool = False) -> numpy.ndarray:
+    def scores_by_query(self, query: QueriesType, sort: bool = False) -> np.ndarray:
         """Return all scores for the given query spectrum.
 
         For example
@@ -210,7 +210,7 @@ class Scores:
 
         """
         assert query in self.queries, "Given input not found in queries."
-        selected_idx = int(numpy.where(self.queries == query)[0])
+        selected_idx = int(np.where(self.queries == query)[0])
         if sort:
             references_idx_sorted = self.similarity_function.sort(self._scores[:, selected_idx])
             return list(zip(self.references[references_idx_sorted],
@@ -249,7 +249,7 @@ class Scores:
                 "scores": self.scores.tolist()}
 
     @property
-    def scores(self) -> numpy.ndarray:
+    def scores(self) -> np.ndarray:
         """Scores as numpy array
 
         For example
@@ -329,15 +329,15 @@ class ScoresBuilder:
 
         return self
 
-    def _restructure_scores(self, scores: dict) -> numpy.ndarray:
+    def _restructure_scores(self, scores: dict) -> np.ndarray:
         """
         Restructure scores from a nested list to a numpy array. If scores were stored as an array of tuples, restores
         their original form.
         """
-        scores = numpy.array(scores)
+        scores = np.array(scores)
 
         if len(scores.shape) > 2:
-            dt = numpy.dtype(self.similarity_function.score_datatype)
+            dt = np.dtype(self.similarity_function.score_datatype)
             return numpy.lib.recfunctions.unstructured_to_structured(scores, dtype=dt)
         return scores
 

@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 import pytest
 from matchms.constants import PROTON_MASS
 from matchms.filtering import add_parent_mass
@@ -24,7 +24,7 @@ def test_add_parent_mass_precursormz(caplog):
     spectrum_in = SpectrumBuilder().with_metadata(metadata).build()
     spectrum = add_parent_mass(spectrum_in)
 
-    assert numpy.abs(spectrum.get("parent_mass") - 445.0) < .01, "Expected parent mass of about 445.0."
+    assert np.abs(spectrum.get("parent_mass") - 445.0) < .01, "Expected parent mass of about 445.0."
     assert isinstance(spectrum.get("parent_mass"), float), "Expected parent mass to be float."
     assert "Not sufficient spectrum metadata to derive parent mass." not in caplog.text
 
@@ -40,7 +40,7 @@ def test_add_parent_mass_using_adduct(adduct, expected):
     spectrum_in = SpectrumBuilder().with_metadata(metadata).build()
     spectrum = add_parent_mass(spectrum_in)
 
-    assert numpy.allclose(spectrum.get("parent_mass"), expected, atol=1e-4), f"Expected parent mass of about {expected}."
+    assert np.allclose(spectrum.get("parent_mass"), expected, atol=1e-4), f"Expected parent mass of about {expected}."
     assert isinstance(spectrum.get("parent_mass"), float), "Expected parent mass to be float."
 
 
@@ -55,7 +55,7 @@ def test_add_parent_mass_overwrite(overwrite, expected):
     spectrum_in = SpectrumBuilder().with_metadata(metadata).build()
     spectrum = add_parent_mass(spectrum_in, overwrite_existing_entry=overwrite)
 
-    assert numpy.allclose(spectrum.get("parent_mass"), expected, atol=1e-4), \
+    assert np.allclose(spectrum.get("parent_mass"), expected, atol=1e-4), \
         "Expected parent mass to be replaced by new value."
 
 
@@ -73,7 +73,7 @@ def test_add_parent_mass_already_present(parent_mass_field, parent_mass, expecte
     spectrum_in = SpectrumBuilder().with_metadata(metadata).build()
     spectrum = add_parent_mass(spectrum_in)
 
-    assert numpy.allclose(spectrum.get("parent_mass"), expected, atol=1e-4), f"Expected parent mass of about {expected}."
+    assert np.allclose(spectrum.get("parent_mass"), expected, atol=1e-4), f"Expected parent mass of about {expected}."
     assert isinstance(spectrum.get("parent_mass"), (float, int)), "Expected parent mass to be float."
 
 

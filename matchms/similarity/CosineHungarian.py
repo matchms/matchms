@@ -1,5 +1,5 @@
 from typing import Tuple
-import numpy
+import numpy as np
 from scipy.optimize import linear_sum_assignment
 from matchms.similarity.spectrum_similarity_functions import collect_peak_pairs
 from matchms.typing import SpectrumType
@@ -21,7 +21,7 @@ class CosineHungarian(BaseSimilarity):
     # Set key characteristics as class attributes
     is_commutative = True
     # Set output data type, e.g. ("score", "float") or [("score", "float"), ("matches", "int")]
-    score_datatype = [("score", numpy.float64), ("matches", "int")]
+    score_datatype = [("score", np.float64), ("matches", "int")]
 
     def __init__(self, tolerance: float = 0.1, mz_power: float = 0.0,
                  intensity_power: float = 1.0):
@@ -62,7 +62,7 @@ class CosineHungarian(BaseSimilarity):
                                                 intensity_power=self.intensity_power)
             if matching_pairs is None:
                 return None
-            matching_pairs = matching_pairs[numpy.argsort(matching_pairs[:, 2])[::-1], :]
+            matching_pairs = matching_pairs[np.argsort(matching_pairs[:, 2])[::-1], :]
             return matching_pairs
 
         def get_matching_pairs_matrix():
@@ -81,7 +81,7 @@ class CosineHungarian(BaseSimilarity):
             paired_peaks1 = list(set(matching_pairs[:, 0]))
             paired_peaks2 = list(set(matching_pairs[:, 1]))
             matrix_size = (len(paired_peaks1), len(paired_peaks2))
-            matching_pairs_matrix = numpy.ones(matrix_size)
+            matching_pairs_matrix = np.ones(matrix_size)
             for i in range(matching_pairs.shape[0]):
                 matching_pairs_matrix[paired_peaks1.index(matching_pairs[i, 0]),
                                       paired_peaks2.index(matching_pairs[i, 1])] = 1 - matching_pairs[i, 2]
@@ -97,15 +97,15 @@ class CosineHungarian(BaseSimilarity):
         def calc_score():
             """Calculate cosine similarity score."""
             if matching_pairs_matrix is None:
-                return numpy.asarray((0.0, 0), dtype=self.score_datatype)
+                return np.asarray((0.0, 0), dtype=self.score_datatype)
             score, used_matches = solve_hungarian()
             # Normalize score:
-            spec1_power = numpy.power(spec1[:, 0], self.mz_power) \
-                * numpy.power(spec1[:, 1], self.intensity_power)
-            spec2_power = numpy.power(spec2[:, 0], self.mz_power) \
-                * numpy.power(spec2[:, 1], self.intensity_power)
-            score = score/(numpy.sqrt(numpy.sum(spec1_power**2)) * numpy.sqrt(numpy.sum(spec2_power**2)))
-            return numpy.asarray((score, len(used_matches)), dtype=self.score_datatype)
+            spec1_power = np.power(spec1[:, 0], self.mz_power) \
+                * np.power(spec1[:, 1], self.intensity_power)
+            spec2_power = np.power(spec2[:, 0], self.mz_power) \
+                * np.power(spec2[:, 1], self.intensity_power)
+            score = score/(np.sqrt(np.sum(spec1_power**2)) * np.sqrt(np.sum(spec2_power**2)))
+            return np.asarray((score, len(used_matches)), dtype=self.score_datatype)
 
         spec1 = reference.peaks.to_numpy
         spec2 = query.peaks.to_numpy

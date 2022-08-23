@@ -1,7 +1,7 @@
 import json
 from typing import Optional
 import networkx as nx
-import numpy
+import numpy as np
 from matchms import Scores
 from .networking_functions import get_top_hits
 
@@ -93,7 +93,7 @@ class SimilarityNetwork:
         """NetworkX graph. Set after calling create_network()"""
 
     @staticmethod
-    def _select_edge_score(similars_scores: dict, scores_type: numpy.dtype):
+    def _select_edge_score(similars_scores: dict, scores_type: np.dtype):
         """Chose one value if score contains multiple values (e.g. "score" and "matches")"""
         if len(scores_type) > 1 and "score" in scores_type.names:
             return {key: value["score"] for key, value in similars_scores.items()}
@@ -114,7 +114,7 @@ class SimilarityNetwork:
             generating a network.
         """
         assert self.top_n >= self.max_links, "top_n must be >= max_links"
-        assert numpy.all(scores.queries == scores.references), \
+        assert np.all(scores.queries == scores.references), \
             "Expected symmetric scores object with queries==references"
         unique_ids = list({s.get(self.identifier_key) for s in scores.queries})
 
@@ -133,9 +133,9 @@ class SimilarityNetwork:
         for i, spec in enumerate(scores.queries):
             query_id = spec.get(self.identifier_key)
 
-            ref_candidates = numpy.array([scores.references[x].get(self.identifier_key)
+            ref_candidates = np.array([scores.references[x].get(self.identifier_key)
                                           for x in similars_idx[query_id]])
-            idx = numpy.where((similars_scores[query_id] >= self.score_cutoff) &
+            idx = np.where((similars_scores[query_id] >= self.score_cutoff) &
                               (ref_candidates != query_id))[0][:self.max_links]
             if self.link_method == "single":
                 new_edges = [(query_id, str(ref_candidates[x]),

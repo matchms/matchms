@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 import pytest
 from matchms.similarity import ParentMassMatch
 from matchms.similarity.ParentMassMatch import (parentmass_scores,
@@ -14,7 +14,7 @@ def test_parentmass_match_parameterized(parent_mass, tolerance, expected):
     s0, s1 = spectra_factory('parent_mass', parent_mass)
     similarity_score = ParentMassMatch(tolerance=tolerance)
     scores = similarity_score.pair(s0, s1)
-    assert numpy.all(scores == numpy.array(expected)), "Expected different scores."
+    assert np.all(scores == np.array(expected)), "Expected different scores."
 
 
 def test_parentmass_match_missing_parentmass():
@@ -40,7 +40,7 @@ def test_parentmass_match_array_parameterized(parent_mass, tolerance, expected):
     s0, s1, s2, s3 = spectra_factory('parent_mass', parent_mass)
     similarity_score = ParentMassMatch(tolerance=tolerance)
     scores = similarity_score.matrix([s0, s1], [s2, s3])
-    assert numpy.all(scores == numpy.array(expected)), "Expected different scores."
+    assert np.all(scores == np.array(expected)), "Expected different scores."
 
 
 def test_parentmass_match_array_symmetric():
@@ -56,8 +56,8 @@ def test_parentmass_match_array_symmetric():
     scores = similarity_score.matrix(spectrums, spectrums, is_symmetric=True)
     scores2 = similarity_score.matrix(spectrums, spectrums, is_symmetric=False)
 
-    assert numpy.all(scores == scores2), "Expected identical scores"
-    assert numpy.all(scores == numpy.array(
+    assert np.all(scores == scores2), "Expected identical scores"
+    assert np.all(scores == np.array(
         [[True, False, True, False],
          [False, True, False, False],
          [True, False, True, False],
@@ -66,37 +66,37 @@ def test_parentmass_match_array_symmetric():
 
 def test_parentmass_scores_compiled():
     """Test the underlying score function (numba compiled)."""
-    parentmasses_ref = numpy.asarray([101, 200, 300])
-    parentmasses_query = numpy.asarray([100, 301])
+    parentmasses_ref = np.asarray([101, 200, 300])
+    parentmasses_query = np.asarray([100, 301])
     scores = parentmass_scores(parentmasses_ref, parentmasses_query, tolerance=2.0)
-    assert numpy.all(scores == numpy.array([[1., 0.],
+    assert np.all(scores == np.array([[1., 0.],
                                             [0., 0.],
                                             [0., 1.]])), "Expected different scores."
 
 
 def test_parentmass_scores():
     """Test the underlying score function (non-compiled)."""
-    parentmasses_ref = numpy.asarray([101, 200, 300])
-    parentmasses_query = numpy.asarray([100, 301])
+    parentmasses_ref = np.asarray([101, 200, 300])
+    parentmasses_query = np.asarray([100, 301])
     scores = parentmass_scores.py_func(parentmasses_ref, parentmasses_query, tolerance=2.0)
-    assert numpy.all(scores == numpy.array([[True, False],
+    assert np.all(scores == np.array([[True, False],
                                             [False, False],
                                             [False, True]])), "Expected different scores."
 
 
 def test_parentmass_scores_symmetric_compliled():
     """Test the underlying score function (numba-compiled)."""
-    parentmasses = numpy.asarray([101, 100, 200])
+    parentmasses = np.asarray([101, 100, 200])
     scores = parentmass_scores_symmetric(parentmasses, parentmasses, tolerance=2.0)
-    assert numpy.all(scores == numpy.array([[1., 1., 0.],
+    assert np.all(scores == np.array([[1., 1., 0.],
                                             [1., 1., 0.],
                                             [0., 0., 1.]])), "Expected different scores."
 
 
 def test_parentmass_scores_symmetric():
     """Test the underlying score function (non-compiled)."""
-    parentmasses = numpy.asarray([101, 100, 200])
+    parentmasses = np.asarray([101, 100, 200])
     scores = parentmass_scores_symmetric.py_func(parentmasses, parentmasses, tolerance=2.0)
-    assert numpy.all(scores == numpy.array([[1., 1., 0.],
+    assert np.all(scores == np.array([[1., 1., 0.],
                                             [1., 1., 0.],
                                             [0., 0., 1.]])), "Expected different scores."

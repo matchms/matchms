@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 import pytest
 from matchms import Spectrum
 from matchms.filtering import select_by_relative_intensity
@@ -7,24 +7,24 @@ from .builder_Spectrum import SpectrumBuilder
 
 @pytest.fixture
 def spectrum_in() -> Spectrum:
-    mz = numpy.array([10, 20, 30, 40], dtype="float")
-    intensities = numpy.array([1, 10, 100, 1000], dtype="float")
+    mz = np.array([10, 20, 30, 40], dtype="float")
+    intensities = np.array([1, 10, 100, 1000], dtype="float")
     return SpectrumBuilder().with_mz(mz).with_intensities(intensities).build()
 
 
 @pytest.mark.parametrize("intensity_from, intensity_to, expected_mz, expected_intensities", [
-    [0, 1, numpy.array([10, 20, 30, 40], dtype="float"), numpy.array([1, 10, 100, 1000], dtype="float")],
-    [0.01, 1, numpy.array([20, 30, 40], dtype="float"), numpy.array([10, 100, 1000], dtype="float")],
-    [0, 0.99, numpy.array([10, 20, 30], dtype="float"), numpy.array([1, 10, 100], dtype="float")],
-    [0.01, 0.99, numpy.array([20, 30], dtype="float"), numpy.array([10, 100], dtype="float")]
+    [0, 1, np.array([10, 20, 30, 40], dtype="float"), np.array([1, 10, 100, 1000], dtype="float")],
+    [0.01, 1, np.array([20, 30, 40], dtype="float"), np.array([10, 100, 1000], dtype="float")],
+    [0, 0.99, np.array([10, 20, 30], dtype="float"), np.array([1, 10, 100], dtype="float")],
+    [0.01, 0.99, np.array([20, 30], dtype="float"), np.array([10, 100], dtype="float")]
 ])
 def test_select_by_relative_intensity(spectrum_in, intensity_from, intensity_to, expected_mz, expected_intensities):
     spectrum = select_by_relative_intensity(spectrum_in, intensity_from=intensity_from, intensity_to=intensity_to)
 
     assert spectrum.peaks.mz.size == len(expected_mz)
     assert spectrum.peaks.mz.size == spectrum.peaks.intensities.size
-    assert numpy.array_equal(spectrum.peaks.mz, expected_mz)
-    assert numpy.array_equal(spectrum.peaks.intensities, expected_intensities)
+    assert np.array_equal(spectrum.peaks.mz, expected_mz)
+    assert np.array_equal(spectrum.peaks.intensities, expected_intensities)
 
 
 def test_select_by_relative_intensity_with_from_parameter_too_small(spectrum_in: Spectrum):

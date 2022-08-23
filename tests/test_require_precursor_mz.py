@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 import pytest
 from testfixtures import LogCapture
 from matchms.filtering.require_precursor_mz import require_precursor_mz
@@ -54,8 +54,8 @@ def test_require_precursor_mz_with_input_none():
 def test_require_precursor_mz_fail_when_mz_too_small(precursor_mz):
     """Test if spectrum is None when precursor_mz <= minimum_accepted_mz"""
     set_matchms_logger_level("INFO")
-    mz = numpy.array([10, 20, 30, 40], dtype="float")
-    intensities = numpy.array([0, 1, 10, 100], dtype="float")
+    mz = np.array([10, 20, 30, 40], dtype="float")
+    intensities = np.array([0, 1, 10, 100], dtype="float")
     spectrum_in = SpectrumBuilder().with_mz(mz).with_intensities(intensities).build()
     spectrum_in.set("precursor_mz", precursor_mz)
 
@@ -71,8 +71,8 @@ def test_require_precursor_mz_fail_when_mz_too_small(precursor_mz):
 
 def test_require_precursor_mz_fail_because_below_zero():
     """Test if spectrum is None when precursor_mz < 0"""
-    mz = numpy.array([10, 20, 30, 40], dtype="float")
-    intensities = numpy.array([0, 1, 10, 100], dtype="float")
+    mz = np.array([10, 20, 30, 40], dtype="float")
+    intensities = np.array([0, 1, 10, 100], dtype="float")
     spectrum_in = SpectrumBuilder().with_mz(mz).with_intensities(intensities).build()
     spectrum_in.set("precursor_mz", -3.5)
 
