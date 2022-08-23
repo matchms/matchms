@@ -21,7 +21,7 @@ def save_as_msp(spectra: List[Spectrum], filename: str,
 
     .. code-block:: python
 
-        import numpy
+        import numpy as np
         from matchms import Spectrum
         from matchms.exporting import save_as_msp
 

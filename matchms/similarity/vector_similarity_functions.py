@@ -1,6 +1,6 @@
 """Collection of functions for calculating vector-vector similarities."""
 import numba
-import numpy
+import numpy as np
 
 
 @numba.njit

@@ -1,6 +1,6 @@
 from typing import List
 import numba
-import numpy
+import numpy as np
 from matchms.typing import SpectrumType
 from .BaseSimilarity import BaseSimilarity
 

@@ -1,6 +1,6 @@
 from typing import Optional
 import networkx as nx
-import numpy
+import numpy as np
 from matchms import Scores
 from .networking_functions import get_top_hits
 

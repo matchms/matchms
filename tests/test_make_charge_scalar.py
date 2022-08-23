@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 import pytest
 from matchms.filtering import make_charge_scalar
 from .builder_Spectrum import SpectrumBuilder

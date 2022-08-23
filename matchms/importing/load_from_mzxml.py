@@ -1,5 +1,5 @@
 from typing import Generator
-import numpy
+import numpy as np
 from pyteomics import mzxml
 from matchms.importing.parsing_utils import parse_mzml_mzxml_metadata
 from matchms.Spectrum import Spectrum

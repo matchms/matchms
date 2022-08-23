@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 import pytest
 from matchms import Spectrum
 from matchms.hashing import metadata_hash, spectrum_hash

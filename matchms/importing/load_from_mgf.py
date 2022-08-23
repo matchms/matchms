@@ -1,5 +1,5 @@
 from typing import Generator, TextIO, Union
-import numpy
+import numpy as np
 from pyteomics.mgf import MGF
 from ..Spectrum import Spectrum
 

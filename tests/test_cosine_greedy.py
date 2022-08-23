@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 import pytest
 from matchms.similarity import CosineGreedy
 from .builder_Spectrum import SpectrumBuilder

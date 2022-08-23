@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 import pytest
 from matchms.filtering import remove_peaks_around_precursor_mz
 from .builder_Spectrum import SpectrumBuilder

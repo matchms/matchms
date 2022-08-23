@@ -1,6 +1,6 @@
 """Test for vector similarity functions. Will run test on both numba compiled
 and fully python-based versions of functions."""
-import numpy
+import numpy as np
 import pytest
 from matchms.similarity.vector_similarity_functions import (
     cosine_similarity, cosine_similarity_matrix, dice_similarity,

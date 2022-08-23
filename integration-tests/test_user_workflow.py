@@ -1,5 +1,5 @@
 import os
-import numpy
+import numpy as np
 import pytest
 from matchms import Pipeline
 from matchms.similarity import CosineGreedy

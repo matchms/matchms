@@ -1,7 +1,7 @@
 import logging
 from math import ceil
 from typing import Optional
-import numpy
+import numpy as np
 from ..Fragments import Fragments
 from ..typing import SpectrumType
 

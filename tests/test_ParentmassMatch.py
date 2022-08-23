@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 import pytest
 from matchms.similarity import ParentMassMatch
 from matchms.similarity.ParentMassMatch import (parentmass_scores,

@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 import pytest
 from testfixtures import LogCapture
 from matchms.filtering import add_losses

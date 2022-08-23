@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 from matchms.filtering import load_adducts_dict, load_known_adduct_conversions
 from matchms.filtering.load_adducts import _convert_and_fill_dict
 

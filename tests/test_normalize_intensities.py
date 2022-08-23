@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 import pytest
 from matchms.filtering import add_losses, normalize_intensities
 from .builder_Spectrum import SpectrumBuilder

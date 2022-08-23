@@ -1,6 +1,6 @@
 """Test function to collect matching peaks. Run tests both on numba compiled and
 pure Python version."""
-import numpy
+import numpy as np
 import pytest
 from matchms.similarity.spectrum_similarity_functions import (
     collect_peak_pairs, find_matches, score_best_matches)

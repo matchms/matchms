@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 import pytest
 from matchms.filtering import require_minimum_number_of_peaks
 from matchms.typing import SpectrumType

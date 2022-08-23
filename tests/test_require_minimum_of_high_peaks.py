@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 import pytest
 from matchms.filtering import require_minimum_of_high_peaks
 from .builder_Spectrum import SpectrumBuilder

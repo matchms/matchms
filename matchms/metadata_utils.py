@@ -1,6 +1,6 @@
 import re
 from typing import Optional
-import numpy
+import numpy as np
 from matchms.filtering.load_adducts import (load_adducts_dict,
                                             load_known_adduct_conversions)
 

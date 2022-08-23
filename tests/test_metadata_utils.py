@@ -3,7 +3,7 @@ from contextlib import nullcontext
 from importlib import reload
 from importlib.util import find_spec
 from unittest import mock
-import numpy
+import numpy as np
 import pytest
 import matchms.metadata_utils
 from matchms.metadata_utils import (clean_adduct,

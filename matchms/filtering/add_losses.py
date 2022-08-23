@@ -1,5 +1,5 @@
 import logging
-import numpy
+import numpy as np
 from ..Fragments import Fragments
 from ..typing import SpectrumType
 

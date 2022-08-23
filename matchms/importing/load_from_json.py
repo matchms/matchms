@@ -2,7 +2,7 @@ import ast
 import json
 import logging
 from typing import List, Union
-import numpy
+import numpy as np
 from ..Spectrum import Spectrum
 
 

@@ -1,5 +1,5 @@
 from typing import Tuple
-import numpy
+import numpy as np
 from matchms.typing import SpectrumType
 from .BaseSimilarity import BaseSimilarity
 from .spectrum_similarity_functions import (collect_peak_pairs,

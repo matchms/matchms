@@ -1,6 +1,6 @@
 import re
 from typing import Generator, Iterator, Tuple
-import numpy
+import numpy as np
 from ..Spectrum import Spectrum
 
 

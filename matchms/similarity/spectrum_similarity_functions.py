@@ -1,6 +1,6 @@
 from typing import List, Tuple
 import numba
-import numpy
+import numpy as np
 
 
 @numba.njit

@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 import pytest
 from matchms.filtering import add_precursor_mz
 from matchms.logging_functions import (reset_matchms_logger,

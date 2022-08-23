@@ -1,5 +1,5 @@
 from typing import List, Union
-import numpy
+import numpy as np
 from matchms.typing import SpectrumType
 from .BaseSimilarity import BaseSimilarity
 from .vector_similarity_functions import (cosine_similarity,

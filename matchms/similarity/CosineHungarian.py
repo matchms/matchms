@@ -1,5 +1,5 @@
 from typing import Tuple
-import numpy
+import numpy as np
 from scipy.optimize import linear_sum_assignment
 from matchms.similarity.spectrum_similarity_functions import collect_peak_pairs
 from matchms.typing import SpectrumType

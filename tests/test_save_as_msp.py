@@ -1,7 +1,7 @@
 import os
 import tempfile
 from typing import List
-import numpy
+import numpy as np
 import pytest
 from matchms import Spectrum
 from matchms.exporting import save_as_msp

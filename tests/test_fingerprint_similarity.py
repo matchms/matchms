@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 import pytest
 from matchms import Spectrum, calculate_scores
 from matchms.similarity import FingerprintSimilarity

@@ -2,7 +2,7 @@ import csv
 import os
 from functools import lru_cache
 from typing import Dict
-import numpy
+import numpy as np
 
 
 @lru_cache(maxsize=4)

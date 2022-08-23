@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 import pytest
 from matchms.similarity import IntersectMz
 from .builder_Spectrum import SpectrumBuilder

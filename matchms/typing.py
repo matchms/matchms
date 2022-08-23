@@ -1,5 +1,5 @@
 from typing import List, NewType, Tuple, Union
-import numpy
+import numpy as np
 
 
 SpectrumType = NewType("Spectrum", object)

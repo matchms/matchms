@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 import pytest
 from matchms.filtering import remove_peaks_outside_top_k
 from .builder_Spectrum import SpectrumBuilder

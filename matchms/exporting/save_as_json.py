@@ -1,6 +1,6 @@
 import json
 from typing import List
-import numpy
+import numpy as np
 from ..Spectrum import Spectrum
 
 
@@ -13,7 +13,7 @@ def save_as_json(spectrums: List[Spectrum], filename: str):
 
     .. code-block:: python
 
-        import numpy
+        import numpy as np
         from matchms import Spectrum
         from matchms.exporting import save_as_json
 

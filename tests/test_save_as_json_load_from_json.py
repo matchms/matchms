@@ -1,6 +1,6 @@
 import json
 import os
-import numpy
+import numpy as np
 import pytest
 from matchms.exporting import save_as_json
 from matchms.importing import load_from_json

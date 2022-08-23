@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 import pytest
 from matchms.constants import PROTON_MASS
 from matchms.filtering import add_parent_mass
