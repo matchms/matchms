@@ -446,8 +446,8 @@ Contains three plot types: `plot_spectrum()` or `spectrum.plot()`, `plot_spectra
 - (later splitted into matchms + spec2vec)
 
 [Unreleased]: https://github.com/matchms/matchms/compare/0.17.0...HEAD
-[0.16.0]: https://github.com/matchms/matchms/compare/0.16.0...0.17.0
-[0.17.0]: https://github.com/matchms/matchms/compare/0.15.0...0.16.0
+[0.17.0]: https://github.com/matchms/matchms/compare/0.16.0...0.17.0
+[0.16.0]: https://github.com/matchms/matchms/compare/0.15.0...0.16.0
 [0.15.0]: https://github.com/matchms/matchms/compare/0.14.0...0.15.0
 [0.14.0]: https://github.com/matchms/matchms/compare/0.13.0...0.14.0
 [0.13.0]: https://github.com/matchms/matchms/compare/0.12.0...0.13.0
