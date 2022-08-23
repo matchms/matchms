@@ -117,15 +117,3 @@ def test_read_gnps_spectra(filename, expected_length):
     actual = load_test_spectra_file(filename)
 
     assert len(actual) == expected_length
-
-
-@pytest.mark.parametrize("filename", ["gnps_spectra.json"])
-def test_write_append(filename, tmp_path):
-    expected = load_test_spectra_file(filename)
-    tmp_file = os.path.join(tmp_path, "test.json")
-    save_as_json(expected[:2], tmp_file, mode = "a")
-    save_as_json(expected[2:], tmp_file, mode = "a")
-
-    actual = list(load_from_json(tmp_file))
-
-    assert expected == actual
