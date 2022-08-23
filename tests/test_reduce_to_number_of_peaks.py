@@ -9,8 +9,8 @@ from .builder_Spectrum import SpectrumBuilder
 
 @pytest.mark.parametrize("metadata", [{}, {"parent_mass": 50}])
 def test_reduce_to_number_of_peaks_no_changes(metadata):
-    mz = numpy.array([10, 20, 30, 40], dtype="float")
-    intensities = numpy.array([0, 1, 10, 100], dtype="float")
+    mz = np.array([10, 20, 30, 40], dtype="float")
+    intensities = np.array([0, 1, 10, 100], dtype="float")
     spectrum_in = SpectrumBuilder().with_mz(mz).with_intensities(
         intensities).with_metadata(metadata).build()
 
@@ -20,13 +20,13 @@ def test_reduce_to_number_of_peaks_no_changes(metadata):
 
 
 @pytest.mark.parametrize("mz, intensities, metadata, params, expected", [
-    [numpy.array([10, 20, 30, 40, 50], dtype="float"), numpy.array([1, 1, 10, 20, 100], dtype="float"), {},
+    [np.array([10, 20, 30, 40, 50], dtype="float"), np.array([1, 1, 10, 20, 100], dtype="float"), {},
         [1, 4, None], [20., 30., 40., 50.]],
-    [numpy.array([10, 20, 30, 40], dtype="float"), numpy.array([0, 1, 10, 100], dtype="float"), {"parent_mass": 20},
+    [np.array([10, 20, 30, 40], dtype="float"), np.array([0, 1, 10, 100], dtype="float"), {"parent_mass": 20},
         [2, 4, 0.1], [30., 40.]],
-    [numpy.array([10, 20, 30, 40], dtype="float"), numpy.array([0, 1, 10, 100], dtype="float"), {"parent_mass": 20},
+    [np.array([10, 20, 30, 40], dtype="float"), np.array([0, 1, 10, 100], dtype="float"), {"parent_mass": 20},
         [3, 4, 0.1], [20., 30., 40.]],
-    [numpy.array([10, 20, 30, 40, 50, 60], dtype="float"), numpy.array([1, 1, 10, 100, 50, 20], dtype="float"), {"parent_mass": 60},
+    [np.array([10, 20, 30, 40, 50, 60], dtype="float"), np.array([1, 1, 10, 100, 50, 20], dtype="float"), {"parent_mass": 60},
         [3, 4, 0.1], [30., 40., 50., 60.]]
 ])
 def test_reduce_to_number_of_peaks(mz, intensities, metadata, params, expected):
@@ -44,8 +44,8 @@ def test_reduce_to_number_of_peaks(mz, intensities, metadata, params, expected):
 def test_reduce_to_number_of_peaks_set_to_none():
     """Test is spectrum is set to None if not enough peaks."""
     set_matchms_logger_level("INFO")
-    mz = numpy.array([10, 20], dtype="float")
-    intensities = numpy.array([0.5, 1], dtype="float")
+    mz = np.array([10, 20], dtype="float")
+    intensities = np.array([0.5, 1], dtype="float")
     spectrum_in = SpectrumBuilder().with_mz(mz).with_intensities(intensities).with_metadata({"parent_mass": 50}).build()
 
     with LogCapture() as log:
@@ -60,22 +60,22 @@ def test_reduce_to_number_of_peaks_set_to_none():
 
 def test_reduce_to_number_of_peaks_n_max_4():
     """Test setting n_max parameter."""
-    mz = numpy.array([10, 20, 30, 40, 50], dtype="float")
-    intensities = numpy.array([1, 1, 10, 20, 100], dtype="float")
+    mz = np.array([10, 20, 30, 40, 50], dtype="float")
+    intensities = np.array([1, 1, 10, 20, 100], dtype="float")
     spectrum_in = SpectrumBuilder().with_mz(mz).with_intensities(intensities).build()
 
     spectrum = reduce_to_number_of_peaks(spectrum_in, n_max=4)
 
-    expected = numpy.array([20, 30, 40, 50], dtype="float")
+    expected = np.array([20, 30, 40, 50], dtype="float")
 
     assert len(spectrum.peaks) == len(expected), "Expected that only 4 peaks remain."
-    numpy.testing.assert_array_equal(spectrum.peaks.mz, expected, err_msg="Expected different peaks to remain.")
+    np.testing.assert_array_equal(spectrum.peaks.mz, expected, err_msg="Expected different peaks to remain.")
 
 
 def test_reduce_to_number_of_peaks_ratio_given_but_no_parent_mass():
     """A ratio_desired given without parent_mass should raise an exception."""
-    mz = numpy.array([10, 20, 30, 40], dtype="float")
-    intensities = numpy.array([0, 1, 10, 100], dtype="float")
+    mz = np.array([10, 20, 30, 40], dtype="float")
+    intensities = np.array([0, 1, 10, 100], dtype="float")
     spectrum_in = SpectrumBuilder().with_mz(mz).with_intensities(
         intensities).build()
     with pytest.raises(Exception) as msg:
@@ -87,8 +87,8 @@ def test_reduce_to_number_of_peaks_ratio_given_but_no_parent_mass():
 
 def test_reduce_to_number_of_peaks_desired_5_check_sorting():
     """Check if mz and intensities order is sorted correctly """
-    mz = numpy.array([10, 20, 30, 40, 50, 60], dtype="float")
-    intensities = numpy.array([5, 1, 4, 3, 100, 2], dtype="float")
+    mz = np.array([10, 20, 30, 40, 50, 60], dtype="float")
+    intensities = np.array([5, 1, 4, 3, 100, 2], dtype="float")
     metadata = {"parent_mass": 20}
     spectrum_in = SpectrumBuilder().with_mz(mz).with_intensities(
         intensities).with_metadata(metadata).build()

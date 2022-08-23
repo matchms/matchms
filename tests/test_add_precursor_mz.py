@@ -22,8 +22,8 @@ def test_add_precursor_mz(metadata, expected):
 def test_add_precursor_mz_only_pepmass_present(caplog):
     """Test if precursor_mz is correctly derived if only pepmass is present."""
     set_matchms_logger_level("INFO")
-    mz = numpy.array([], dtype='float')
-    intensities = numpy.array([], dtype='float')
+    mz = np.array([], dtype='float')
+    intensities = np.array([], dtype='float')
     metadata = {"pepmass": (444.0, 10)}
     spectrum_in = SpectrumBuilder().with_metadata(
         metadata).with_mz(mz).with_intensities(intensities).build()
@@ -48,8 +48,8 @@ def test_add_precursor_mz_only_pepmass_present(caplog):
     ["pepmass", None, None]])
 def test_add_precursor_mz_no_precursor_mz(key, value, expected):
     """Test if precursor_mz is correctly derived if "precursor_mz" is str."""
-    mz = numpy.array([], dtype='float')
-    intensities = numpy.array([], dtype='float')
+    mz = np.array([], dtype='float')
+    intensities = np.array([], dtype='float')
     metadata = {key: value}
     spectrum_in = SpectrumBuilder().with_metadata(
         metadata).with_mz(mz).with_intensities(intensities).build()
@@ -67,8 +67,8 @@ def test_add_precursor_mz_no_precursor_mz(key, value, expected):
     ["precursor_mz", [], "Found precursor_mz of undefined type."]])
 def test_add_precursor_mz_logging(key, value, expected_log, caplog):
     """Test if precursor_mz is correctly derived if "precursor_mz" is str."""
-    mz = numpy.array([], dtype='float')
-    intensities = numpy.array([], dtype='float')
+    mz = np.array([], dtype='float')
+    intensities = np.array([], dtype='float')
     metadata = {key: value}
     spectrum_in = SpectrumBuilder().with_metadata(
         metadata).with_mz(mz).with_intensities(intensities).build()

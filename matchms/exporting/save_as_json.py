@@ -18,8 +18,8 @@ def save_as_json(spectrums: List[Spectrum], filename: str):
         from matchms.exporting import save_as_json
 
         # Create dummy spectrum
-        spectrum = Spectrum(mz=numpy.array([100, 200, 300], dtype="float"),
-                            intensities=numpy.array([10, 10, 500], dtype="float"),
+        spectrum = Spectrum(mz=np.array([100, 200, 300], dtype="float"),
+                            intensities=np.array([10, 10, 500], dtype="float"),
                             metadata={"charge": -1,
                                       "inchi": '"InChI=1S/C6H12"',
                                       "precursor_mz": 222.2})
@@ -49,7 +49,7 @@ class SpectrumJSONEncoder(json.JSONEncoder):
         """JSON Encoder which can encode a :py:class:`~matchms.Spectrum.Spectrum` object"""
         if isinstance(o, Spectrum):
             spec = o.clone()
-            peaks_list = numpy.vstack((spec.peaks.mz, spec.peaks.intensities)).T.tolist()
+            peaks_list = np.vstack((spec.peaks.mz, spec.peaks.intensities)).T.tolist()
 
             # Convert matchms.Spectrum() into dictionaries
             spectrum_dict = {key: spec.metadata[key] for key in spec.metadata}

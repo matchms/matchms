@@ -26,8 +26,8 @@ def save_as_msp(spectra: List[Spectrum], filename: str,
         from matchms.exporting import save_as_msp
 
         # Create dummy spectrum
-        spectrum = Spectrum(mz=numpy.array([100, 200, 300], dtype="float"),
-                            intensities=numpy.array([10, 10, 500], dtype="float"),
+        spectrum = Spectrum(mz=np.array([100, 200, 300], dtype="float"),
+                            intensities=np.array([10, 10, 500], dtype="float"),
                             metadata={"charge": -1,
                                       "inchi": '"InChI=1S/C6H12"',
                                       "precursor_mz": 222.2})

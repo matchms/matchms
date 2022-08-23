@@ -86,10 +86,10 @@ class PrecursorMzMatch(BaseSimilarity):
 
         mean_mz = (precursormz_ref + precursormz_query) / 2
         score = abs(precursormz_ref - precursormz_query)/mean_mz <= self.tolerance
-        return numpy.asarray(score, dtype=self.score_datatype)
+        return np.asarray(score, dtype=self.score_datatype)
 
     def matrix(self, references: List[SpectrumType], queries: List[SpectrumType],
-               is_symmetric: bool = False) -> numpy.ndarray:
+               is_symmetric: bool = False) -> np.ndarray:
         """Compare parent masses between all references and queries.
 
         Parameters
@@ -110,7 +110,7 @@ class PrecursorMzMatch(BaseSimilarity):
                 precursormz = spectrum.get("precursor_mz")
                 assert precursormz is not None, "Missing precursor m/z."
                 precursors.append(precursormz)
-            return numpy.asarray(precursors)
+            return np.asarray(precursors)
 
         precursors_ref = collect_precursormz(references)
         precursors_query = collect_precursormz(queries)
@@ -129,7 +129,7 @@ class PrecursorMzMatch(BaseSimilarity):
 
 @numba.njit
 def precursormz_scores(precursors_ref, precursors_query, tolerance):
-    scores = numpy.zeros((len(precursors_ref), len(precursors_query)))
+    scores = np.zeros((len(precursors_ref), len(precursors_query)))
     for i, precursormz_ref in enumerate(precursors_ref):
         for j, precursormz_query in enumerate(precursors_query):
             scores[i, j] = (abs(precursormz_ref - precursormz_query) <= tolerance)
@@ -138,7 +138,7 @@ def precursormz_scores(precursors_ref, precursors_query, tolerance):
 
 @numba.njit
 def precursormz_scores_symmetric(precursors_ref, precursors_query, tolerance):
-    scores = numpy.zeros((len(precursors_ref), len(precursors_query)))
+    scores = np.zeros((len(precursors_ref), len(precursors_query)))
     for i, precursormz_ref in enumerate(precursors_ref):
         for j in range(i, len(precursors_query)):
             scores[i, j] = (abs(precursormz_ref - precursors_query[j]) <= tolerance)
@@ -148,7 +148,7 @@ def precursormz_scores_symmetric(precursors_ref, precursors_query, tolerance):
 
 @numba.njit
 def precursormz_scores_ppm(precursors_ref, precursors_query, tolerance_ppm):
-    scores = numpy.zeros((len(precursors_ref), len(precursors_query)))
+    scores = np.zeros((len(precursors_ref), len(precursors_query)))
     for i, precursormz_ref in enumerate(precursors_ref):
         for j, precursormz_query in enumerate(precursors_query):
             mean_mz = (precursormz_ref + precursormz_query)/2
@@ -158,7 +158,7 @@ def precursormz_scores_ppm(precursors_ref, precursors_query, tolerance_ppm):
 
 @numba.njit
 def precursormz_scores_symmetric_ppm(precursors_ref, precursors_query, tolerance_ppm):
-    scores = numpy.zeros((len(precursors_ref), len(precursors_query)))
+    scores = np.zeros((len(precursors_ref), len(precursors_query)))
     for i, precursormz_ref in enumerate(precursors_ref):
         for j in range(i, len(precursors_query)):
             mean_mz = (precursormz_ref + precursors_query[j])/2

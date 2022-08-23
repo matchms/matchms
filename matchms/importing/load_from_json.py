@@ -98,12 +98,12 @@ def dict2spectrum(spectrum_dict: dict,
                      for key in spectrum_dict if key not in not_metadata_fields}
     peaks_list = get_peaks_list(spectrum_dict, "peaks_json")
     if len(peaks_list) > 0 and metadata_dict:
-        mz = numpy.array(peaks_list)[:, 0]
-        intensities = numpy.array(peaks_list)[:, 1]
+        mz = np.array(peaks_list)[:, 0]
+        intensities = np.array(peaks_list)[:, 1]
 
         # Sort by mz (if not sorted already)
-        if not numpy.all(mz[:-1] <= mz[1:]):
-            idx_sorted = numpy.argsort(mz)
+        if not np.all(mz[:-1] <= mz[1:]):
+            idx_sorted = np.argsort(mz)
             mz = mz[idx_sorted]
             intensities = intensities[idx_sorted]
         return Spectrum(mz=mz,

@@ -16,8 +16,8 @@ def none_spectrum():
 
 @pytest.fixture
 def spectrum():
-    mz = numpy.array([100, 200, 290, 490, 510], dtype="float")
-    intensities = numpy.array([0.1, 0.2, 1.0, 0.3, 0.4], dtype="float")
+    mz = np.array([100, 200, 290, 490, 510], dtype="float")
+    intensities = np.array([0.1, 0.2, 1.0, 0.3, 0.4], dtype="float")
     return SpectrumBuilder().with_mz(mz).with_intensities(intensities).build()
 
 

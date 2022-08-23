@@ -57,8 +57,8 @@ def test_with_input_none():
 
 def test_require_precursor_below_mz_no_params():
     """Using default parameterse with precursor mz present."""
-    mz = numpy.array([10, 20, 30, 40], dtype="float")
-    intensities = numpy.array([0, 1, 10, 100], dtype="float")
+    mz = np.array([10, 20, 30, 40], dtype="float")
+    intensities = np.array([0, 1, 10, 100], dtype="float")
     spectrum_in = SpectrumBuilder().with_mz(mz).with_intensities(intensities).build()
     spectrum_in.set("precursor_mz", 60.)
 
@@ -70,8 +70,8 @@ def test_require_precursor_below_mz_no_params():
 def test_require_precursor_below_mz_max_50():
     """Set max_mz to 50."""
     set_matchms_logger_level("INFO")
-    mz = numpy.array([10, 20, 30, 40], dtype="float")
-    intensities = numpy.array([0, 1, 10, 100], dtype="float")
+    mz = np.array([10, 20, 30, 40], dtype="float")
+    intensities = np.array([0, 1, 10, 100], dtype="float")
     spectrum_in = SpectrumBuilder().with_mz(mz).with_intensities(intensities).build()
     spectrum_in.set("precursor_mz", 60.)
 

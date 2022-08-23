@@ -33,8 +33,8 @@ class Fragments:
 
     """
     def __init__(self, mz=None, intensities=None):
-        assert isinstance(mz, numpy.ndarray), "Input argument 'mz' should be a numpy.array."
-        assert isinstance(intensities, numpy.ndarray), "Input argument 'intensities' should be a numpy.array."
+        assert isinstance(mz, np.ndarray), "Input argument 'mz' should be a np.array."
+        assert isinstance(intensities, np.ndarray), "Input argument 'intensities' should be a np.array."
         assert mz.shape == intensities.shape, "Input arguments 'mz' and 'intensities' should be the same shape."
         assert mz.dtype == "float", "Input argument 'mz' should be an array of type float."
         assert intensities.dtype == "float", "Input argument 'intensities' should be an array of type float."
@@ -47,18 +47,18 @@ class Fragments:
     def __eq__(self, other):
         return \
             self.mz.shape == other.mz.shape and \
-            numpy.allclose(self.mz, other.mz) and \
+            np.allclose(self.mz, other.mz) and \
             self.intensities.shape == other.intensities.shape and \
-            numpy.allclose(self.intensities, other.intensities)
+            np.allclose(self.intensities, other.intensities)
 
     def __len__(self):
         return self._mz.size
 
     def __getitem__(self, item):
-        return numpy.asarray([self.mz[item], self.intensities[item]])
+        return np.asarray([self.mz[item], self.intensities[item]])
 
     def _is_sorted(self):
-        return numpy.all(self.mz[:-1] <= self.mz[1:])
+        return np.all(self.mz[:-1] <= self.mz[1:])
 
     def clone(self):
         return Fragments(self.mz, self.intensities)
@@ -77,4 +77,4 @@ class Fragments:
     def to_numpy(self):
         """getter method to return stacked numpy array of both peak mz and
         intensities"""
-        return numpy.vstack((self.mz, self.intensities)).T
+        return np.vstack((self.mz, self.intensities)).T

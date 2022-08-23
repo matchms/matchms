@@ -34,7 +34,7 @@ def remove_peaks_outside_top_k(spectrum_in: SpectrumType, k: int = 6,
     for i in indices:
 
         compare = abs(mzs[i]-k_ordered_mzs) <= mz_window
-        if numpy.any(compare):
+        if np.any(compare):
             keep_idx.append(i)
 
     keep_idx.sort()

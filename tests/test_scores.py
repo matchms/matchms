@@ -119,7 +119,7 @@ def test_scores_init_with_queries_dict():
         _ = Scores(references=["r0", "r1", "r2"],
                    queries=dict(k0="q0", k1="q1"))
 
-    assert str(msg.value) == "Expected input argument 'queries' to be list or tuple or numpy.ndarray."
+    assert str(msg.value) == "Expected input argument 'queries' to be list or tuple or np.ndarray."
 
 
 def test_scores_init_with_references_dict():
@@ -127,7 +127,7 @@ def test_scores_init_with_references_dict():
         _ = Scores(references=dict(k0="r0", k1="r1", k2="r2"),
                    queries=["q0", "q1"])
 
-    assert str(msg.value) == "Expected input argument 'references' to be list or tuple or numpy.ndarray."
+    assert str(msg.value) == "Expected input argument 'references' to be list or tuple or np.ndarray."
 
 
 def test_scores_init_with_tuple():

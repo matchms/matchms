@@ -11,8 +11,8 @@ def compute_expected_score(mz_power, intensity_power, spectrum_1, spectrum_2, ma
     mz2 = spectrum_2.peaks.mz
     multiply_matching_intensities = (mz1[matches[0]] ** mz_power) * (intensity1[matches[0]] ** intensity_power) \
         * (mz2[matches[1]] ** mz_power) * (intensity2[matches[1]] ** intensity_power)
-    denominator = numpy.sqrt((((mz1 ** mz_power) * (intensity1 ** intensity_power)) ** 2).sum()) \
-        * numpy.sqrt((((mz2 ** mz_power) * (intensity2 ** intensity_power)) ** 2).sum())
+    denominator = np.sqrt((((mz1 ** mz_power) * (intensity1 ** intensity_power)) ** 2).sum()) \
+        * np.sqrt((((mz2 ** mz_power) * (intensity2 ** intensity_power)) ** 2).sum())
     expected_score = multiply_matching_intensities.sum() / denominator
     return expected_score
 
@@ -20,26 +20,26 @@ def compute_expected_score(mz_power, intensity_power, spectrum_1, spectrum_2, ma
 @pytest.mark.parametrize("peaks, tolerance, mz_power, intensity_power, expected_matches", [
     [
         [
-            [numpy.array([100, 200, 300, 500, 510], dtype="float"), numpy.array([0.1, 0.2, 1.0, 0.3, 0.4], dtype="float")],
-            [numpy.array([100, 200, 290, 490, 510], dtype="float"), numpy.array([0.1, 0.2, 1.0, 0.3, 0.4], dtype="float")]
+            [np.array([100, 200, 300, 500, 510], dtype="float"), np.array([0.1, 0.2, 1.0, 0.3, 0.4], dtype="float")],
+            [np.array([100, 200, 290, 490, 510], dtype="float"), np.array([0.1, 0.2, 1.0, 0.3, 0.4], dtype="float")]
         ],
         0.1, 0.0, 1.0, [[0, 1, 4], [0, 1, 4]]
     ], [
         [
-            [numpy.array([100, 299, 300, 301, 510], dtype="float"), numpy.array([0.1, 1.0, 0.2, 0.3, 0.4], dtype="float")],
-            [numpy.array([100, 300, 301, 511], dtype="float"), numpy.array([0.1, 1.0, 0.3, 0.4], dtype="float")],
+            [np.array([100, 299, 300, 301, 510], dtype="float"), np.array([0.1, 1.0, 0.2, 0.3, 0.4], dtype="float")],
+            [np.array([100, 300, 301, 511], dtype="float"), np.array([0.1, 1.0, 0.3, 0.4], dtype="float")],
         ],
         0.2, 0.0, 1.0, [[0, 2, 3], [0, 1, 2]]
     ], [
         [
-            [numpy.array([100, 299, 300, 301, 510], dtype="float"), numpy.array([0.1, 1.0, 0.2, 0.3, 0.4], dtype="float")],
-            [numpy.array([100, 300, 301, 511], dtype="float"), numpy.array([0.1, 1.0, 0.3, 0.4], dtype="float")],
+            [np.array([100, 299, 300, 301, 510], dtype="float"), np.array([0.1, 1.0, 0.2, 0.3, 0.4], dtype="float")],
+            [np.array([100, 300, 301, 511], dtype="float"), np.array([0.1, 1.0, 0.3, 0.4], dtype="float")],
         ],
         2.0, 0.0, 1.0, [[0, 1, 3, 4], [0, 1, 2, 3]]
     ], [
         [
-            [numpy.array([100, 200, 300, 500, 510], dtype="float"), numpy.array([0.1, 0.2, 1.0, 0.3, 0.4], dtype="float")],
-            [numpy.array([100, 200, 290, 490, 510], dtype="float"), numpy.array([0.1, 0.2, 1.0, 0.3, 0.4], dtype="float")],
+            [np.array([100, 200, 300, 500, 510], dtype="float"), np.array([0.1, 0.2, 1.0, 0.3, 0.4], dtype="float")],
+            [np.array([100, 200, 290, 490, 510], dtype="float"), np.array([0.1, 0.2, 1.0, 0.3, 0.4], dtype="float")],
         ],
         1.0, 0.5, 2.0, [[0, 1, 4], [0, 1, 4]]
     ]
@@ -61,11 +61,11 @@ def test_cosine_greedy_pair(peaks, tolerance, mz_power, intensity_power, expecte
 @pytest.mark.parametrize("symmetric", [[True], [False]])
 def test_cosine_greedy_matrix(symmetric):
     builder = SpectrumBuilder()
-    spectrum_1 = builder.with_mz(numpy.array([100, 200, 300], dtype="float")).with_intensities(
-        numpy.array([0.1, 0.2, 1.0], dtype="float")).build()
+    spectrum_1 = builder.with_mz(np.array([100, 200, 300], dtype="float")).with_intensities(
+        np.array([0.1, 0.2, 1.0], dtype="float")).build()
 
-    spectrum_2 = builder.with_mz(numpy.array([110, 190, 290], dtype="float")).with_intensities(
-        numpy.array([0.5, 0.2, 1.0], dtype="float")).build()
+    spectrum_2 = builder.with_mz(np.array([110, 190, 290], dtype="float")).with_intensities(
+        np.array([0.5, 0.2, 1.0], dtype="float")).build()
 
     spectrums = [spectrum_1, spectrum_2]
     cosine_greedy = CosineGreedy()

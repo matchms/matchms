@@ -99,10 +99,10 @@ class Scores:
     @staticmethod
     def _validate_input_arguments(references, queries):
         assert isinstance(references, (list, tuple, np.ndarray)),\
-            "Expected input argument 'references' to be list or tuple or numpy.ndarray."
+            "Expected input argument 'references' to be list or tuple or np.ndarray."
 
         assert isinstance(queries, (list, tuple, np.ndarray)),\
-            "Expected input argument 'queries' to be list or tuple or numpy.ndarray."
+            "Expected input argument 'queries' to be list or tuple or np.ndarray."
 
     @deprecated(version='0.6.0', reason="Calculate scores via calculate_scores() function.")
     def calculate(self, similarity_function: BaseSimilarity,

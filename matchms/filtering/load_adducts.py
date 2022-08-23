@@ -88,7 +88,7 @@ def _convert_and_fill_dict(adduct_dict: Dict[str, dict]) -> Dict[str, dict]:
         if is_float(correction_mass):
             correction_mass = float(correction_mass)
         else:
-            correction_mass = 1.007276 * numpy.sign(charge)
+            correction_mass = 1.007276 * np.sign(charge)
         values["correction_mass"] = correction_mass
 
         filled_dict[adduct] = values

@@ -32,7 +32,7 @@ def add_losses(spectrum_in: SpectrumType, loss_mz_from=0.0, loss_mz_to=1000.0) -
         losses_mz = (precursor_mz - peaks_mz)[::-1]
         losses_intensities = peaks_intensities[::-1]
         # Add losses which are within given boundaries
-        mask = numpy.where((losses_mz >= loss_mz_from)
+        mask = np.where((losses_mz >= loss_mz_from)
                            & (losses_mz <= loss_mz_to))
         spectrum.losses = Fragments(mz=losses_mz[mask],
                                     intensities=losses_intensities[mask])

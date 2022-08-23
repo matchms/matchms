@@ -57,4 +57,4 @@ class IntersectMz(BaseSimilarity):
         if len(unioned) == 0:
             return 0
 
-        return numpy.float64(self.scaling * len(intersected) / len(unioned))
+        return np.float64(self.scaling * len(intersected) / len(unioned))

@@ -3,7 +3,7 @@ import numpy as np
 
 
 SpectrumType = NewType("Spectrum", object)
-ReferencesType = QueriesType = Union[List[object], Tuple[object], numpy.ndarray]
+ReferencesType = QueriesType = Union[List[object], Tuple[object], np.ndarray]
 
 
 """Result of a similarity function"""

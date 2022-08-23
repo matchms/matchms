@@ -106,7 +106,7 @@ Contains three plot types: `plot_spectrum()` or `spectrum.plot()`, `plot_spectra
 
 ### Changed
 
-- Use `bool` instead of `numpy.bool` [#245](https://github.com/matchms/matchms/pull/245)
+- Use `bool` instead of `np.bool` [#245](https://github.com/matchms/matchms/pull/245)
 
 ## [0.9.1] - 2021-06-16
 

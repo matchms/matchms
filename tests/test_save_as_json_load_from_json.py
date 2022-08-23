@@ -9,8 +9,8 @@ from .builder_Spectrum import SpectrumBuilder
 
 def test_save_and_load_json_single_spectrum(tmp_path):
     """Test saving spectrum to .json file"""
-    mz = numpy.array([100, 200, 300], dtype="float")
-    intensities = numpy.array([10, 10, 500], dtype="float")
+    mz = np.array([100, 200, 300], dtype="float")
+    intensities = np.array([10, 10, 500], dtype="float")
     builder = SpectrumBuilder().with_mz(mz).with_intensities(intensities)
     spectrum = builder.with_metadata({"charge": -1,
                                       "inchi": '"InChI=1S/C6H12"',
@@ -31,8 +31,8 @@ def test_save_and_load_json_single_spectrum(tmp_path):
 @pytest.mark.parametrize("metadata_harmonization", [True, False])
 def test_save_and_load_json_spectrum_list(metadata_harmonization, tmp_path):
     """Test saving spectrum list to .json file"""
-    mz = numpy.array([100, 200, 300], dtype="float")
-    intensities = numpy.array([10, 10, 500], dtype="float")
+    mz = np.array([100, 200, 300], dtype="float")
+    intensities = np.array([10, 10, 500], dtype="float")
     builder = SpectrumBuilder().with_mz(mz).with_intensities(intensities)
     spectrum1 = builder.with_metadata({"test_field": "test1"},
                                       metadata_harmonization=metadata_harmonization).build()
@@ -77,8 +77,8 @@ def test_load_from_json_with_minimal_json(tmp_path):
 
     spectrum_imports = load_from_json(filename, metadata_harmonization=False)
 
-    mz = numpy.array([100, 200, 300], dtype="float")
-    intensities = numpy.array([10, 10, 500], dtype="float")
+    mz = np.array([100, 200, 300], dtype="float")
+    intensities = np.array([10, 10, 500], dtype="float")
     builder = SpectrumBuilder().with_mz(mz).with_intensities(intensities)
     expected = builder.with_metadata({"test_field": "test1"},
                                      metadata_harmonization=False).build()
@@ -90,8 +90,8 @@ def test_load_from_json_with_minimal_json(tmp_path):
 def test_save_as_json_with_minimal_json(tmp_path):
     filename = tmp_path / "test.json"
 
-    mz = numpy.array([100, 200, 300], dtype="float")
-    intensities = numpy.array([10, 10, 500], dtype="float")
+    mz = np.array([100, 200, 300], dtype="float")
+    intensities = np.array([10, 10, 500], dtype="float")
     builder = SpectrumBuilder().with_mz(mz).with_intensities(intensities)
     spectrum1 = builder.with_metadata({"test_field": "test1"},
                                       metadata_harmonization=False).build()

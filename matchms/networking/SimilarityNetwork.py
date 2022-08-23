@@ -106,7 +106,7 @@ class SimilarityNetwork:
         if score_name is None:
             score_name = scores.scores.guess_score_name()
         assert self.top_n >= self.max_links, "top_n must be >= max_links"
-        assert numpy.all(scores.queries == scores.references), \
+        assert np.all(scores.queries == scores.references), \
             "Expected symmetric scores object with queries==references"
         unique_ids = list({s.get(self.identifier_key) for s in scores.queries})
 
@@ -124,9 +124,9 @@ class SimilarityNetwork:
         # Add edges based on global threshold (cutoff) for weights
         for i, spec in enumerate(scores.queries):
             query_id = spec.get(self.identifier_key)
-            ref_candidates = numpy.array([scores.references[x].get(self.identifier_key)
+            ref_candidates = np.array([scores.references[x].get(self.identifier_key)
                                           for x in similars_idx[query_id]])
-            idx = numpy.where((similars_scores[query_id] >= self.score_cutoff) &
+            idx = np.where((similars_scores[query_id] >= self.score_cutoff) &
                               (ref_candidates != query_id))[0][:self.max_links]
             if self.link_method == "single":
                 new_edges = [(query_id, str(ref_candidates[x]),

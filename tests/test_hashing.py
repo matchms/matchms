@@ -7,8 +7,8 @@ from .builder_Spectrum import SpectrumBuilder
 
 @pytest.fixture
 def spectrum() -> Spectrum:
-    mz = numpy.array([100, 200, 290, 490, 490.5], dtype="float")
-    intensities = numpy.array([0.1, 0.11, 1.0, 0.3, 0.4], dtype="float")
+    mz = np.array([100, 200, 290, 490, 490.5], dtype="float")
+    intensities = np.array([0.1, 0.11, 1.0, 0.3, 0.4], dtype="float")
     metadata = {"precursor_mz": 505.0}
     builder = SpectrumBuilder().with_mz(mz).with_intensities(
         intensities).with_metadata(metadata)
