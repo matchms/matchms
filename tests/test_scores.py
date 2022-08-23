@@ -1,3 +1,5 @@
+import os
+import tempfile
 import numpy
 import pytest
 from matchms import Scores, calculate_scores
@@ -40,6 +42,17 @@ class DummySimilarityFunctionParallel(BaseSimilarity):
                 rq = reference + query
                 s[index_reference, index_query] = rq, len(rq)
         return s
+
+
+@pytest.fixture(params=["json", "pkl"])
+def file_format(request):
+    yield request.param
+
+
+@pytest.fixture()
+def filename(file_format):
+    with tempfile.TemporaryDirectory() as tmpdir:
+        yield os.path.join(tmpdir, f"test_scores.{file_format}")
 
 
 def spectra():
@@ -105,7 +118,6 @@ def test_scores_calculate_parallel():
 
 
 def test_scores_init_with_list():
-
     dummy_similarity_function = DummySimilarityFunction()
     scores = Scores(references=["r0", "r1", "r2"],
                     queries=["q0", "q1"],
@@ -114,7 +126,6 @@ def test_scores_init_with_list():
 
 
 def test_scores_init_with_numpy_array():
-
     dummy_similarity_function = DummySimilarityFunction()
     scores = Scores(references=numpy.asarray(["r0", "r1", "r2"]),
                     queries=numpy.asarray(["q0", "q1"]),
@@ -123,7 +134,6 @@ def test_scores_init_with_numpy_array():
 
 
 def test_scores_init_with_queries_dict():
-
     dummy_similarity_function = DummySimilarityFunction()
     with pytest.raises(AssertionError) as msg:
         _ = Scores(references=["r0", "r1", "r2"],
@@ -134,7 +144,6 @@ def test_scores_init_with_queries_dict():
 
 
 def test_scores_init_with_references_dict():
-
     dummy_similarity_function = DummySimilarityFunction()
     with pytest.raises(AssertionError) as msg:
         _ = Scores(references=dict(k0="r0", k1="r1", k2="r2"),
@@ -145,7 +154,6 @@ def test_scores_init_with_references_dict():
 
 
 def test_scores_init_with_tuple():
-
     dummy_similarity_function = DummySimilarityFunction()
     scores = Scores(references=("r0", "r1", "r2"),
                     queries=("q0", "q1"),
@@ -154,7 +162,6 @@ def test_scores_init_with_tuple():
 
 
 def test_scores_next():
-
     dummy_similarity_function = DummySimilarityFunction()
     scores = Scores(references=["r", "rr", "rrr"],
                     queries=["q", "qq"],
@@ -261,3 +268,60 @@ def test_scores_by_query_non_tuple_score():
 
     expected_result = [(scores.references[i], scores.scores[i, 2]) for i in range(3)]
     assert selected_scores == expected_result, "Expected different scores."
+
+
+@pytest.mark.parametrize(
+    "similarity_function_a,similarity_function_b",
+    [(CosineGreedy(), IntersectMz()), (IntersectMz(), CosineGreedy())])
+def test_comparing_symmetric_scores(similarity_function_a, similarity_function_b):
+    "Test comparing symmetric scores objects."
+    spectrum_1, spectrum_2, spectrum_3, spectrum_4 = spectra()
+    spectrums = [spectrum_1, spectrum_2, spectrum_3, spectrum_4]
+
+    scores_similarity_a = calculate_scores(spectrums, spectrums, similarity_function_a)
+    scores_similarity_a_copy = calculate_scores(spectrums, spectrums, similarity_function_a)
+    scores_similarity_b = calculate_scores(spectrums, spectrums, similarity_function_b)
+
+    assert scores_similarity_a == scores_similarity_a_copy
+    assert scores_similarity_a != scores_similarity_b
+
+
+@pytest.mark.parametrize(
+    "similarity_function_a,similarity_function_b",
+    [(CosineGreedy(), IntersectMz()), (IntersectMz(), CosineGreedy())])
+def test_comparing_asymmetric_scores(similarity_function_a, similarity_function_b):
+    "Test comparing asymmetric scores objects."
+    spectrum_1, spectrum_2, spectrum_3, spectrum_4 = spectra()
+    spectrums = [spectrum_1, spectrum_2, spectrum_3, spectrum_4]
+
+    scores_similarity_a = calculate_scores(spectrums[0:3], spectrums, similarity_function_a)
+    scores_similarity_a_copy = calculate_scores(spectrums[0:3], spectrums, similarity_function_a)
+    scores_similarity_b = calculate_scores(spectrums, spectrums[0:3], similarity_function_b)
+
+    assert scores_similarity_a == scores_similarity_a_copy
+    assert scores_similarity_a != scores_similarity_b
+
+
+@pytest.mark.parametrize(
+    "similarity_function_a,similarity_function_b",
+    [(CosineGreedy(tolerance=0.5, mz_power=0.5), CosineGreedy(tolerance=0.1, mz_power=0.1)),
+     (IntersectMz(scaling=1.0), IntersectMz(scaling=2.0))])
+def test_comparing_scores_with_same_shape_different_scores_values(similarity_function_a, similarity_function_b):
+    "Test comparing scores objects with same similarity functions but different values of scores."
+    spectrum_1, spectrum_2, spectrum_3, spectrum_4 = spectra()
+    spectrums = [spectrum_1, spectrum_2, spectrum_3, spectrum_4]
+
+    scores_parametrized = calculate_scores(spectrums, spectrums, similarity_function_a)
+    scores_parametrized_mirrored = calculate_scores(spectrums, spectrums, similarity_function_b)
+
+    assert scores_parametrized != scores_parametrized_mirrored
+
+
+def test_compare_same_scores_with_different_similarity_funcs():
+    "Test comparing same (empty) scores objects with different similarity functions."
+    scores_cosine = calculate_scores([], [], CosineGreedy())
+    scores_cosine_copy = calculate_scores([], [], CosineGreedy())
+    scores_intersect = calculate_scores([], [], IntersectMz())
+
+    assert scores_cosine == scores_cosine_copy
+    assert scores_cosine != scores_intersect

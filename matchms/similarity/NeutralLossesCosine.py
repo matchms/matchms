@@ -19,6 +19,8 @@ class NeutralLossesCosine(BaseSimilarity):
     peaks of two spectra. Two peaks are considered a potential match if their
     m/z ratios lie within the given 'tolerance' once a mass-shift is applied.
     The mass shift is the difference in precursor-m/z between the two spectra.
+    In general, `ModifiedCosine` is recommended over `NeutralLossesCosine` because
+    it will on average deliver more reliable results.
 
     """
     # Set key characteristics as class attributes
