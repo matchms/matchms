@@ -228,8 +228,8 @@ class StackedSparseScores:
 
         """
         if matrix is None:
-            return None
-        if len(matrix.dtype) > 1:  # if structured array
+            self.data = np.array([])
+        elif len(matrix.dtype) > 1:  # if structured array
             for dtype_name in matrix.dtype.names:
                 self._add_dense_matrix(matrix[dtype_name], name + "_" + dtype_name)
         else:
@@ -315,11 +315,11 @@ class StackedSparseScores:
             the added scores, for instance via `sss_array.toarray("my_score_name")`.
         """
         if data is None:
-            return None
-        if len(data.dtype) > 1:  # if structured array
+            self.data = np.array([])
+        elif len(data.dtype) > 1:  # if structured array
             for dtype_name in data.dtype.names:
                 if self.data is None:
-                    self._add_sparse_data()
+                    self._add_sparse_data(data[dtype_name], row, col, name + "_" + dtype_name)
                 else:
                     self._add_sparse_data_to_existing(data[dtype_name], name + "_" + dtype_name)
         elif self.data is None:

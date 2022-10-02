@@ -73,7 +73,7 @@ def test_scores_calculate():
     scores = Scores(references=["r0", "r1", "r2"],
                     queries=["q0", "q1"])
     scores.calculate(dummy_similarity_function)
-    actual = list(scores)
+    actual_data = scores.data
     expected = [
         ("r0", "q0", ["r0q0", 4]),
         ("r0", "q1", ["r0q1", 4]),
@@ -82,7 +82,7 @@ def test_scores_calculate():
         ("r2", "q0", ["r2q0", 4]),
         ("r2", "q1", ["r2q1", 4])
     ]
-    assert actual == expected, "Expected different scores."
+    assert actual_data == expected, "Expected different scores."
 
 
 def test_scores_calculate_parallel():
@@ -90,7 +90,7 @@ def test_scores_calculate_parallel():
     scores = Scores(references=["r0", "r1", "r2"],
                     queries=["q0", "q1"])
     scores.calculate(dummy_similarity_function)
-    actual = list(scores)
+    actual = scores
     expected = [
         ("r0", "q0", ["r0q0", 4]),
         ("r0", "q1", ["r0q1", 4]),
