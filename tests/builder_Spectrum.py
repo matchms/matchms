@@ -1,30 +1,30 @@
-import numpy
+import numpy as np
 from matchms import Spectrum
 
 
 class SpectrumBuilder:
     """Builder class to better handle Spectrum creation throughout all matchms unit tests."""
     def __init__(self):
-        self._mz = numpy.array([], dtype="float")
-        self._intensities = numpy.array([], dtype="float")
+        self._mz = np.array([], dtype="float")
+        self._intensities = np.array([], dtype="float")
         self._metadata = {}
         self._metadata_harmonization = False
 
     def from_spectrum(self, spectrum: Spectrum):
         return self.with_mz(spectrum.peaks.mz).with_intensities(spectrum.peaks.intensities).with_metadata(spectrum.metadata)
 
-    def with_mz(self, mz: numpy.ndarray):
-        if isinstance(mz, numpy.ndarray):
-            self._mz = numpy.copy(mz)
+    def with_mz(self, mz: np.ndarray):
+        if isinstance(mz, np.ndarray):
+            self._mz = np.copy(mz)
         else:
-            self._mz = numpy.array(mz, dtype="float")
+            self._mz = np.array(mz, dtype="float")
         return self
 
-    def with_intensities(self, intensities: numpy.ndarray):
-        if isinstance(intensities, numpy.ndarray):
-            self._intensities = numpy.copy(intensities)
+    def with_intensities(self, intensities: np.ndarray):
+        if isinstance(intensities, np.ndarray):
+            self._intensities = np.copy(intensities)
         else:
-            self._intensities = numpy.array(intensities, dtype="float")
+            self._intensities = np.array(intensities, dtype="float")
         return self
 
     def with_metadata(self, metadata: dict,

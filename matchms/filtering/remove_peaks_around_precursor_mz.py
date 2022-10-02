@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 from ..Fragments import Fragments
 from ..typing import SpectrumType
 
@@ -28,7 +28,7 @@ def remove_peaks_around_precursor_mz(spectrum_in: SpectrumType, mz_tolerance: fl
     assert mz_tolerance >= 0, "mz_tolerance must be a positive scalar."
 
     mzs, intensities = spectrum.peaks.mz, spectrum.peaks.intensities
-    peaks_to_remove = ((numpy.abs(precursor_mz-mzs) <= mz_tolerance) & (mzs != precursor_mz))
+    peaks_to_remove = ((np.abs(precursor_mz-mzs) <= mz_tolerance) & (mzs != precursor_mz))
     new_mzs, new_intensities = mzs[~peaks_to_remove], intensities[~peaks_to_remove]
     spectrum.peaks = Fragments(mz=new_mzs, intensities=new_intensities)
 

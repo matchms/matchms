@@ -1,6 +1,6 @@
 from abc import abstractmethod
 from typing import List
-import numpy
+import numpy as np
 from matchms.typing import SpectrumType
 
 
@@ -18,7 +18,7 @@ class BaseSimilarity:
     # Set key characteristics as class attributes
     is_commutative = True
     # Set output data type, e.g. "float" or [("score", "float"), ("matches", "int")]
-    score_datatype = numpy.float64
+    score_datatype = np.float64
 
     @abstractmethod
     def pair(self, reference: SpectrumType, query: SpectrumType) -> float:
@@ -33,13 +33,13 @@ class BaseSimilarity:
 
         Returns
             score as numpy array (using self.score_datatype). For instance returning
-            numpy.asarray(score, dtype=self.score_datatype)
+            np.asarray(score, dtype=self.score_datatype)
         """
         raise NotImplementedError
 
     def matrix(self, references: List[SpectrumType], queries: List[SpectrumType],
-               is_symmetric: bool = False) -> numpy.ndarray:
-        """Optional: Provide optimized method to calculate an numpy.array of similarity scores
+               is_symmetric: bool = False) -> np.ndarray:
+        """Optional: Provide optimized method to calculate an np.array of similarity scores
         for given reference and query spectrums. If no method is added here, the following naive
         implementation (i.e. a double for-loop) is used.
 
@@ -56,7 +56,7 @@ class BaseSimilarity:
         """
         n_rows = len(references)
         n_cols = len(queries)
-        scores = numpy.empty([n_rows, n_cols], dtype=self.score_datatype)
+        scores = np.empty([n_rows, n_cols], dtype=self.score_datatype)
         for i_ref, reference in enumerate(references[:n_rows]):
             if is_symmetric and self.is_commutative:
                 for i_query, query in enumerate(queries[i_ref:n_cols], start=i_ref):
@@ -67,7 +67,7 @@ class BaseSimilarity:
                     scores[i_ref][i_query] = self.pair(reference, query)
         return scores
 
-    def sort(self, scores: numpy.ndarray):
+    def sort(self, scores: np.ndarray):
         """Return array of indexes for sorted list of scores.
         This method can be adapted for different styles of scores.
 

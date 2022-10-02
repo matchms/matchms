@@ -1,6 +1,6 @@
 import re
 from typing import Optional
-import numpy
+import numpy as np
 from matchms.filtering.load_adducts import (load_adducts_dict,
                                             load_known_adduct_conversions)
 
@@ -150,7 +150,7 @@ def is_valid_inchikey(inchikey: str) -> bool:
     return False
 
 
-def derive_fingerprint_from_smiles(smiles: str, fingerprint_type: str, nbits: int) -> numpy.ndarray:
+def derive_fingerprint_from_smiles(smiles: str, fingerprint_type: str, nbits: int) -> np.ndarray:
     """Calculate molecule fingerprint based on given smiles or inchi (using rdkit).
     Requires conda package *rdkit* to be installed.
 
@@ -178,7 +178,7 @@ def derive_fingerprint_from_smiles(smiles: str, fingerprint_type: str, nbits: in
     return mol_to_fingerprint(mol, fingerprint_type, nbits)
 
 
-def derive_fingerprint_from_inchi(inchi: str, fingerprint_type: str, nbits: int) -> numpy.ndarray:
+def derive_fingerprint_from_inchi(inchi: str, fingerprint_type: str, nbits: int) -> np.ndarray:
     """Calculate molecule fingerprint based on given inchi (using rdkit).
     Requires conda package *rdkit* to be installed.
 
@@ -194,7 +194,7 @@ def derive_fingerprint_from_inchi(inchi: str, fingerprint_type: str, nbits: int)
 
     Returns
     -------
-    fingerprint: numpy.array
+    fingerprint: np.array
         Molecular fingerprint.
     """
     if not _has_rdkit:
@@ -206,7 +206,7 @@ def derive_fingerprint_from_inchi(inchi: str, fingerprint_type: str, nbits: int)
     return mol_to_fingerprint(mol, fingerprint_type, nbits)
 
 
-def mol_to_fingerprint(mol: Chem.rdchem.Mol, fingerprint_type: str, nbits: int) -> numpy.ndarray:
+def mol_to_fingerprint(mol: Chem.rdchem.Mol, fingerprint_type: str, nbits: int) -> np.ndarray:
     """Convert rdkit mol (molecule) to molecular fingerprint.
     Requires conda package *rdkit* to be installed.
 
@@ -240,7 +240,7 @@ def mol_to_fingerprint(mol: Chem.rdchem.Mol, fingerprint_type: str, nbits: int) 
         fp = AllChem.GetMorganFingerprintAsBitVect(mol, 3, nBits=nbits)
 
     if fp:
-        return numpy.array(fp)
+        return np.array(fp)
     return None
 
 

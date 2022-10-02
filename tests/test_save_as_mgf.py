@@ -1,6 +1,6 @@
 import os
 import tempfile
-import numpy
+import numpy as np
 import pytest
 from matchms.exporting import save_as_mgf
 from matchms.importing import load_from_mgf
@@ -17,8 +17,8 @@ def load_test_spectra_file(test_filename):
 def test_save_as_mgf_single_spectrum():
     """Test saving spectrum to .mgf file"""
     spectrum = SpectrumBuilder().with_mz(
-        numpy.array([100, 200, 300], dtype="float")).with_intensities(
-            numpy.array([10, 10, 500], dtype="float")).with_metadata(
+        np.array([100, 200, 300], dtype="float")).with_intensities(
+            np.array([10, 10, 500], dtype="float")).with_metadata(
                 {"charge": -1,
                  "inchi": '"InChI=1S/C6H12"',
                  "pepmass": (100, 10.0),
@@ -44,8 +44,8 @@ def test_save_as_mgf_single_spectrum():
 
 def test_save_as_mgf_spectrum_list():
     """Test saving spectrum list to .mgf file"""
-    mz = numpy.array([100, 200, 300], dtype="float")
-    intensities = numpy.array([10, 10, 500], dtype="float")
+    mz = np.array([100, 200, 300], dtype="float")
+    intensities = np.array([10, 10, 500], dtype="float")
     builder = SpectrumBuilder().with_mz(mz).with_intensities(intensities)
     spectrum1 = builder.with_metadata({"test_field": "test1"},
                                       metadata_harmonization=False).build()
@@ -74,8 +74,8 @@ def test_save_as_mgf_spectrum_list():
                           (None, "n/a", 250)])
 def test_save_load_mgf_consistency(tmpdir, charge, ionmode, parent_mass):
     """Test saving and loading spectrum to .mgf file"""
-    mz = numpy.array([100.1, 200.02, 300.003], dtype="float")
-    intensities = numpy.array([0.01, 0.02, 1.0], dtype="float")
+    mz = np.array([100.1, 200.02, 300.003], dtype="float")
+    intensities = np.array([0.01, 0.02, 1.0], dtype="float")
     metadata = {"precursor_mz": 200.5,
                 "charge": charge,
                 "ionmode": ionmode,

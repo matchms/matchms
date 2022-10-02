@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 import pytest
 from matchms.filtering import require_minimum_of_high_peaks
 from .builder_Spectrum import SpectrumBuilder
@@ -6,18 +6,18 @@ from .builder_Spectrum import SpectrumBuilder
 
 @pytest.mark.parametrize("peaks, no_peaks, intensity_percent, expected", [
     [
-        [numpy.array([10, 20, 30, 40], dtype="float"), numpy.array(
+        [np.array([10, 20, 30, 40], dtype="float"), np.array(
             [0, 1, 10, 100], dtype="float")], 2, 2,
-        SpectrumBuilder().with_mz(numpy.array([10, 20, 30, 40], dtype="float")).with_intensities(
-            numpy.array([0, 1, 10, 100], dtype="float")).build()
+        SpectrumBuilder().with_mz(np.array([10, 20, 30, 40], dtype="float")).with_intensities(
+            np.array([0, 1, 10, 100], dtype="float")).build()
     ], [
-        [numpy.array([10, 20, 30, 40], dtype="float"), numpy.array(
+        [np.array([10, 20, 30, 40], dtype="float"), np.array(
             [0, 1, 10, 100], dtype="float")], 5, 2, None
     ], [
-        [numpy.array([10, 20, 30, 40, 50, 60, 70], dtype="float"),
-         numpy.array([0, 1, 10, 25, 50, 75, 100], dtype="float")],
-        2, 10, SpectrumBuilder().with_mz(numpy.array([10, 20, 30, 40, 50, 60, 70], dtype="float")).with_intensities(
-            numpy.array([0, 1, 10, 25, 50, 75, 100], dtype="float")).build()
+        [np.array([10, 20, 30, 40, 50, 60, 70], dtype="float"),
+         np.array([0, 1, 10, 25, 50, 75, 100], dtype="float")],
+        2, 10, SpectrumBuilder().with_mz(np.array([10, 20, 30, 40, 50, 60, 70], dtype="float")).with_intensities(
+            np.array([0, 1, 10, 25, 50, 75, 100], dtype="float")).build()
     ]
 ])
 def test_require_mininum_of_high_peaks(peaks, no_peaks, intensity_percent, expected):
@@ -32,8 +32,8 @@ def test_require_mininum_of_high_peaks(peaks, no_peaks, intensity_percent, expec
 
 def test_if_spectrum_is_cloned():
     """Test if filter is correctly cloning the input spectrum."""
-    mz = numpy.array([10, 20, 30, 40], dtype="float")
-    intensities = numpy.array([0, 1, 10, 100], dtype="float")
+    mz = np.array([10, 20, 30, 40], dtype="float")
+    intensities = np.array([0, 1, 10, 100], dtype="float")
     spectrum_in = SpectrumBuilder().with_mz(mz).with_intensities(intensities).build()
 
     spectrum = require_minimum_of_high_peaks(spectrum_in, no_peaks=2)

@@ -1,7 +1,7 @@
 import logging
 from math import ceil
 from typing import Optional
-import numpy
+import numpy as np
 from ..Fragments import Fragments
 from ..typing import SpectrumType
 
@@ -9,7 +9,7 @@ from ..typing import SpectrumType
 logger = logging.getLogger("matchms")
 
 
-def reduce_to_number_of_peaks(spectrum_in: SpectrumType, n_required: int = 1, n_max: int = numpy.inf,
+def reduce_to_number_of_peaks(spectrum_in: SpectrumType, n_required: int = 1, n_max: int = np.inf,
                               ratio_desired: Optional[float] = None) -> SpectrumType:
     """Lowest intensity peaks will be removed when it has more peaks than desired.
 

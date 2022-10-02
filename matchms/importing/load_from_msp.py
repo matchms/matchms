@@ -1,6 +1,6 @@
 import re
 from typing import Generator, Iterator, Tuple
-import numpy
+import numpy as np
 from ..Spectrum import Spectrum
 
 
@@ -44,8 +44,8 @@ def load_from_msp(filename: str,
             metadata["peak_comments"] = peak_comments
 
         # Sort by mz (if not sorted already)
-        if not numpy.all(mz[:-1] <= mz[1:]):
-            idx_sorted = numpy.argsort(mz)
+        if not np.all(mz[:-1] <= mz[1:]):
+            idx_sorted = np.argsort(mz)
             mz = mz[idx_sorted]
             intensities = intensities[idx_sorted]
 
@@ -95,8 +95,8 @@ def parse_msp_file(filename: str) -> Generator[dict, None, None]:
                     peakscount = 0
                     yield {
                         'params': (params),
-                        'm/z array': numpy.array(masses),
-                        'intensity array': numpy.array(intensities),
+                        'm/z array': np.array(masses),
+                        'intensity array': np.array(intensities),
                         'peak comments': peak_comments
                     }
 
