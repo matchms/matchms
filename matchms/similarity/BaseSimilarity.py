@@ -1,7 +1,7 @@
 from abc import abstractmethod
 from typing import List
 import numpy as np
-from matchms.StackedSparseScores import StackedSparseScores
+from sparsestack import StackedSparseArray
 from matchms.typing import SpectrumType
 
 
@@ -84,19 +84,19 @@ class BaseSimilarity:
                         scores.append(score)
                     #scores[i_ref][i_query] = self.pair(reference, query)
 
-        scores_array = StackedSparseScores(n_rows, n_cols)
+        scores_array = StackedSparseArray(n_rows, n_cols)
         scores = np.array(scores, dtype=self.score_datatype)
         idx_row = np.array(idx_row)
         idx_col = np.array(idx_col)
-
+        # TODO add different join modes
         if len(scores) > 0 and isinstance(scores[0], np.ndarray) and len(scores[0].dtype) > 1:  # if structured array
             for dtype_name in scores[0].dtype.names:
-                scores_array.add_sparse_data(scores, dtype_name, idx_row, idx_col)
+                scores_array.add_sparse_data(idx_row, idx_col, scores, dtype_name)
         elif len(scores) > 0:
-            scores_array.add_sparse_data(scores, self.score_datatype, idx_row, idx_col)
-        # TODO: make StackedSpareseScores the default and add fixed function to output different formats (with code below)
+            scores_array.add_sparse_data(idx_row, idx_col, scores, "")
+        # TODO: make StackedSpareseArray the default and add fixed function to output different formats (with code below)
         if array_type == "numpy":
-            return scores_array.to_array() 
+            return scores_array.to_array()
         return scores_array
 
     def sparse_array(self, references: List[SpectrumType], queries: List[SpectrumType],

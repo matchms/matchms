@@ -3,7 +3,7 @@ import numpy as np
 from deprecated.sphinx import deprecated
 from scipy.sparse import coo_matrix
 from matchms.similarity.BaseSimilarity import BaseSimilarity
-from matchms.StackedSparseScores import StackedSparseScores
+from sparsestack import StackedSparseArray
 from matchms.typing import QueriesType, ReferencesType
 
 
@@ -74,7 +74,7 @@ class Scores:
         self.references = np.asarray(references)
         self.queries = np.asarray(queries)
         self.is_symmetric = is_symmetric
-        self._scores = StackedSparseScores(self.n_rows, self.n_cols)
+        self._scores = StackedSparseArray(self.n_rows, self.n_cols)
         self._index = 0
         self.similarity_functions = {}
 

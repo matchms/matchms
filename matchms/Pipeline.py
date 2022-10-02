@@ -191,7 +191,10 @@ class Pipeline:
                                                          idx_row=self.scores.scores.row,
                                                          idx_col=self.scores.scores.col,
                                                          is_symmetric=self.is_symmetric)
-            self.scores.scores.add_sparse_data(new_scores, similarity_measure.__class__.__name__)
+            self.scores.scores.add_sparse_data(self.scores.scores.row,
+                                               self.scores.scores.col,
+                                               new_scores,
+                                               similarity_measure.__class__.__name__)
 
     def check_pipeline(self):
         def check_files_exist(filenames):
