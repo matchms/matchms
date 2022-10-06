@@ -89,11 +89,7 @@ class BaseSimilarity:
         idx_row = np.array(idx_row)
         idx_col = np.array(idx_col)
         # TODO add different join modes
-        if len(scores) > 0 and isinstance(scores[0], np.ndarray) and len(scores[0].dtype) > 1:  # if structured array
-            for dtype_name in scores[0].dtype.names:
-                scores_array.add_sparse_data(idx_row, idx_col, scores, dtype_name)
-        elif len(scores) > 0:
-            scores_array.add_sparse_data(idx_row, idx_col, scores, "")
+        scores_array.add_sparse_data(idx_row, idx_col, scores, "")
         # TODO: make StackedSpareseArray the default and add fixed function to output different formats (with code below)
         if array_type == "numpy":
             return scores_array.to_array()
