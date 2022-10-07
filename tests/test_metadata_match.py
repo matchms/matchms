@@ -25,9 +25,9 @@ def spectrums():
 
 @pytest.mark.parametrize("entries1, entries2, result", [
     [np.array([100, 101, 102]), np.array([102, 104]),
-     np.array([[1., 0.], [1., 0.], [1., 1.]])],
+     (np.array([0, 1, 2, 2]), np.array([0, 0, 0, 1]), np.array([True, True, True, True]))],
     [np.array([98, 105.5]), np.array([102, 104]),
-     np.array([[0., 0.], [0., 1.]])]
+     (np.array([1]), np.array([1]), np.array([True]))]
 ])
 def test_entries_scores(entries1, entries2, result):
     scores = entries_scores(entries1, entries2, 2)
@@ -39,9 +39,10 @@ def test_entries_scores(entries1, entries2, result):
 
 @pytest.mark.parametrize("entries, tolerance, result", [
     [np.array([100, 101, 102]), 0.9,
-     np.array([[1., 0., 0.], [0., 1., 0.], [0., 0., 1.]])],
+     (np.array([0, 1, 2]), np.array([0, 1, 2]), np.array([True, True, True]))],
     [np.array([100, 101, 102]), 1.0,
-     np.array([[1., 1., 0.], [1., 1., 1.], [0., 1., 1.]])]
+     (np.array([0, 0, 1, 1, 1, 2, 2]), np.array([0, 1, 0, 1, 2, 1, 2]),
+      np.array([True, True, True, True, True, True, True]))]
 ])
 def test_entries_scores_symmetric(entries, tolerance, result):
     scores = entries_scores_symmetric(entries, entries, tolerance)
