@@ -2,8 +2,8 @@ from __future__ import annotations
 import numpy as np
 from deprecated.sphinx import deprecated
 from scipy.sparse import coo_matrix
-from matchms.similarity.BaseSimilarity import BaseSimilarity
 from sparsestack import StackedSparseArray
+from matchms.similarity.BaseSimilarity import BaseSimilarity
 from matchms.typing import QueriesType, ReferencesType
 
 
