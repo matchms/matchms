@@ -104,6 +104,7 @@ class FingerprintSimilarity(BaseSimilarity):
         raise NotImplementedError
 
     def matrix(self, references: List[SpectrumType], queries: List[SpectrumType],
+               array_type: str = "numpy",
                is_symmetric: bool = False) -> np.array:
         """Calculate matrix of fingerprint based similarity scores.
 
@@ -113,6 +114,9 @@ class FingerprintSimilarity(BaseSimilarity):
             List of reference spectrums.
         queries:
             List of query spectrums.
+        array_type
+            Specify the output array type. Can be "numpy" or "sparse".
+            Default is "numpy" and will return a numpy array. "sparse" will return a COO-sparse array
         """
         def get_fingerprints(spectrums):
             for index, spectrum in enumerate(spectrums):
@@ -137,6 +141,8 @@ class FingerprintSimilarity(BaseSimilarity):
                 similarity_matrix[:] = self.set_empty_scores
             return similarity_matrix
 
+        if array_type != "numpy":
+            raise NotImplementedError("Output array type other than numpy is not yet implemented.")
         fingerprints1, idx_fingerprints1 = collect_fingerprints(references)
         fingerprints2, idx_fingerprints2 = collect_fingerprints(queries)
         assert idx_fingerprints1.size > 0 and idx_fingerprints2.size > 0, ("Not enouth molecular fingerprints.",
