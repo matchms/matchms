@@ -178,7 +178,7 @@ def entries_scores(entries_ref, entries_query, tolerance):
     data = []
     for i, entry_ref in enumerate(entries_ref):
         for j, entry_query in enumerate(entries_query):
-            value = (abs(entry_ref - entries_query[j]) <= tolerance)
+            value = (abs(entry_ref - entry_query) <= tolerance)
             if value:
                 data.append(value)
                 rows.append(i)

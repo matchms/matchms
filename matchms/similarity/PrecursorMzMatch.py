@@ -89,6 +89,7 @@ class PrecursorMzMatch(BaseSimilarity):
         return np.asarray(score, dtype=self.score_datatype)
 
     def matrix(self, references: List[SpectrumType], queries: List[SpectrumType],
+               array_type: str = "numpy",
                is_symmetric: bool = False) -> np.ndarray:
         """Compare parent masses between all references and queries.
 

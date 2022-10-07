@@ -31,7 +31,7 @@ class DummySimilarityFunctionParallel(BaseSimilarity):
         s = reference + query
         return np.array([(s, len(s))], dtype=self.score_datatype)
 
-    def matrix(self, references, queries, data_type: str = "numpy",
+    def matrix(self, references, queries, array_type: str = "numpy",
                is_symmetric: bool = False):
         """additional matrix computation method"""
         shape = len(references), len(queries)
