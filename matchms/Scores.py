@@ -90,13 +90,19 @@ class Scores:
 
     def __eq__(self, other):
         if isinstance(other, Scores):
-            return np.array_equal(self._scores, other._scores) and \
-                   self.similarity_function.__class__ == other.similarity_function.__class__ and \
-                   self.is_symmetric == other.is_symmetric and \
-                   self.n_rows == other.n_rows and \
-                   self.n_cols == other.n_cols and \
-                   np.array_equal(self.references, other.references) and \
-                   np.array_equal(self.queries, other.queries)
+            if self.n_rows != other.n_rows or self.n_cols != other.n_cols:
+                return False
+            if not np.array_equal(self.references, other.references):
+                return False
+            if not np.array_equal(self.queries, other.queries):
+                return False
+            if self.similarity_function.__class__ != other.similarity_function.__class__:
+                return False
+            if self._scores.dtype != other._scores.dtype:
+                return False
+            if not np.array_equal(self._scores, other._scores):
+                return False
+            return True
         return NotImplemented
 
     def __iter__(self):
