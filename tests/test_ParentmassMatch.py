@@ -68,35 +68,31 @@ def test_parentmass_scores_compiled():
     """Test the underlying score function (numba compiled)."""
     parentmasses_ref = np.asarray([101, 200, 300])
     parentmasses_query = np.asarray([100, 301])
-    scores = parentmass_scores(parentmasses_ref, parentmasses_query, tolerance=2.0)
-    assert np.all(scores == np.array([[1., 0.],
-                                            [0., 0.],
-                                            [0., 1.]])), "Expected different scores."
+    row, col, scores = parentmass_scores(parentmasses_ref, parentmasses_query, tolerance=2.0)
+    assert np.all(scores == np.array([True, True])), "Expected different scores."
+    assert np.all(row == np.array([0, 2]))
 
 
 def test_parentmass_scores():
     """Test the underlying score function (non-compiled)."""
     parentmasses_ref = np.asarray([101, 200, 300])
     parentmasses_query = np.asarray([100, 301])
-    scores = parentmass_scores.py_func(parentmasses_ref, parentmasses_query, tolerance=2.0)
-    assert np.all(scores == np.array([[True, False],
-                                            [False, False],
-                                            [False, True]])), "Expected different scores."
+    row, col, scores = parentmass_scores.py_func(parentmasses_ref, parentmasses_query, tolerance=2.0)
+    assert np.all(scores == np.array([True, True])), "Expected different scores."
+    assert np.all(row == np.array([0, 2]))
 
 
 def test_parentmass_scores_symmetric_compliled():
     """Test the underlying score function (numba-compiled)."""
     parentmasses = np.asarray([101, 100, 200])
-    scores = parentmass_scores_symmetric(parentmasses, parentmasses, tolerance=2.0)
-    assert np.all(scores == np.array([[1., 1., 0.],
-                                            [1., 1., 0.],
-                                            [0., 0., 1.]])), "Expected different scores."
+    row, col, scores = parentmass_scores_symmetric(parentmasses, parentmasses, tolerance=2.0)
+    assert np.all(scores == np.array([True, True, True, True, True])), "Expected different scores."
+    assert np.all(row == np.array([0, 0, 1, 1, 2]))
 
 
 def test_parentmass_scores_symmetric():
     """Test the underlying score function (non-compiled)."""
     parentmasses = np.asarray([101, 100, 200])
-    scores = parentmass_scores_symmetric.py_func(parentmasses, parentmasses, tolerance=2.0)
-    assert np.all(scores == np.array([[1., 1., 0.],
-                                            [1., 1., 0.],
-                                            [0., 0., 1.]])), "Expected different scores."
+    row, col, scores = parentmass_scores_symmetric.py_func(parentmasses, parentmasses, tolerance=2.0)
+    assert np.all(scores == np.array([True, True, True, True, True])), "Expected different scores."
+    assert np.all(row == np.array([0, 0, 1, 1, 2]))
