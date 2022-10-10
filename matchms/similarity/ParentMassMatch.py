@@ -119,7 +119,7 @@ class ParentMassMatch(BaseSimilarity):
             scores_array = np.zeros((len(parentmasses_ref), len(parentmasses_query)))
             scores_array[rows, cols] = scores.astype(self.score_datatype)
             return scores_array
-        elif array_type == "sparse":
+        if array_type == "sparse":
             scores_array = StackedSparseArray(len(parentmasses_ref), len(parentmasses_query))
             scores_array.add_sparse_data(rows, cols, scores.astype(self.score_datatype), "")
             return scores_array
