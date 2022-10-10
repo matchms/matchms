@@ -44,8 +44,8 @@ class ParentMassMatch(BaseSimilarity):
 
     .. testoutput::
 
-        Parentmass match between 1 and 3 is [True]
-        Parentmass match between 2 and 4 is [True]
+        Parentmass match between 1 and 3 is [1.0]
+        Parentmass match between 2 and 4 is [1.0]
 
     """
     # Set key characteristics as class attributes
@@ -90,6 +90,9 @@ class ParentMassMatch(BaseSimilarity):
             List/array of reference spectrums.
         queries
             List/array of Single query spectrums.
+        array_type
+            Specify the output array type. Can be "numpy" or "sparse".
+            Default is "numpy" and will return a numpy array. "sparse" will return a COO-sparse array.
         is_symmetric
             Set to True when *references* and *queries* are identical (as for instance for an all-vs-all
             comparison). By using the fact that score[i,j] = score[j,i] the calculation will be about
