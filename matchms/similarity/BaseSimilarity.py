@@ -141,3 +141,8 @@ class BaseSimilarity:
                 valuelike = valuelike and (score[dtype_name] != 0)
             return valuelike
         return score != 0
+
+    def to_dict(self) -> dict:
+        """Return a dictionary representation of a similarity function."""
+        return {"__Similarity__": self.__class__.__name__,
+                **self.__dict__}
