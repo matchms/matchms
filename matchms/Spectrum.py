@@ -193,6 +193,23 @@ class Spectrum:
         self._metadata.set(key, value)
         return self
 
+    def to_dict(self) -> dict:
+        """Return a dictionary representation of a spectrum."""
+        peaks_list = np.vstack((self.peaks.mz, self.peaks.intensities)).T.tolist()
+        spectrum_dict = dict(self.metadata.items())
+        spectrum_dict["peaks_json"] = peaks_list
+        if "fingerprint" in spectrum_dict:
+            spectrum_dict["fingerprint"] = spectrum_dict["fingerprint"].tolist()
+        return spectrum_dict
+
+    @property
+    def mz(self):
+        return self.peaks.mz
+
+    @property
+    def intensities(self):
+        return self.peaks.intensities
+
     @property
     def metadata(self):
         return self._metadata.data.copy()
