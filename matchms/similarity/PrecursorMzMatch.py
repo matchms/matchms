@@ -1,7 +1,9 @@
 from typing import List
-import numba
 import numpy as np
+from sparsestack import StackedSparseArray
 from matchms.typing import SpectrumType
+from matchms.similarity.spectrum_similarity_functions import (number_matching,
+    number_matching_symmetric, number_matching_ppm, number_matching_symmetric_ppm)
 from .BaseSimilarity import BaseSimilarity
 
 
@@ -99,6 +101,9 @@ class PrecursorMzMatch(BaseSimilarity):
             List/array of reference spectrums.
         queries
             List/array of Single query spectrums.
+        array_type
+            Specify the output array type. Can be "numpy" or "sparse".
+            Default is "numpy" and will return a numpy array. "sparse" will return a COO-sparse array.
         is_symmetric
             Set to True when *references* and *queries* are identical (as for instance for an all-vs-all
             comparison). By using the fact that score[i,j] = score[j,i] the calculation will be about
@@ -116,54 +121,23 @@ class PrecursorMzMatch(BaseSimilarity):
         precursors_ref = collect_precursormz(references)
         precursors_query = collect_precursormz(queries)
         if is_symmetric and self.type == "Dalton":
-            return precursormz_scores_symmetric(precursors_ref, precursors_query,
-                                                self.tolerance).astype(self.score_datatype)
-        if is_symmetric and self.type == "ppm":
-            return precursormz_scores_symmetric_ppm(precursors_ref, precursors_query,
-                                                    self.tolerance).astype(self.score_datatype)
-        if self.type == "Dalton":
-            return precursormz_scores(precursors_ref, precursors_query,
-                                      self.tolerance).astype(self.score_datatype)
-        return precursormz_scores_ppm(precursors_ref, precursors_query,
-                                      self.tolerance).astype(self.score_datatype)
-
-
-@numba.njit
-def precursormz_scores(precursors_ref, precursors_query, tolerance):
-    scores = np.zeros((len(precursors_ref), len(precursors_query)))
-    for i, precursormz_ref in enumerate(precursors_ref):
-        for j, precursormz_query in enumerate(precursors_query):
-            scores[i, j] = (abs(precursormz_ref - precursormz_query) <= tolerance)
-    return scores
-
-
-@numba.njit
-def precursormz_scores_symmetric(precursors_ref, precursors_query, tolerance):
-    scores = np.zeros((len(precursors_ref), len(precursors_query)))
-    for i, precursormz_ref in enumerate(precursors_ref):
-        for j in range(i, len(precursors_query)):
-            scores[i, j] = (abs(precursormz_ref - precursors_query[j]) <= tolerance)
-            scores[j, i] = scores[i, j]
-    return scores
-
-
-@numba.njit
-def precursormz_scores_ppm(precursors_ref, precursors_query, tolerance_ppm):
-    scores = np.zeros((len(precursors_ref), len(precursors_query)))
-    for i, precursormz_ref in enumerate(precursors_ref):
-        for j, precursormz_query in enumerate(precursors_query):
-            mean_mz = (precursormz_ref + precursormz_query)/2
-            scores[i, j] = (abs(precursormz_ref - precursormz_query)/mean_mz * 1e6 <= tolerance_ppm)
-    return scores
-
-
-@numba.njit
-def precursormz_scores_symmetric_ppm(precursors_ref, precursors_query, tolerance_ppm):
-    scores = np.zeros((len(precursors_ref), len(precursors_query)))
-    for i, precursormz_ref in enumerate(precursors_ref):
-        for j in range(i, len(precursors_query)):
-            mean_mz = (precursormz_ref + precursors_query[j])/2
-            diff_ppm = abs(precursormz_ref - precursors_query[j])/mean_mz * 1e6
-            scores[i, j] = (diff_ppm <= tolerance_ppm)
-            scores[j, i] = scores[i, j]
-    return scores
+            rows, cols, scores =  number_matching_symmetric(precursors_ref,
+                                                            self.tolerance)
+        elif is_symmetric and self.type == "ppm":
+            rows, cols, scores = number_matching_symmetric_ppm(precursors_ref,
+                                                               self.tolerance)
+        elif self.type == "Dalton":
+            rows, cols, scores = number_matching(precursors_ref, precursors_query,
+                                                 self.tolerance)
+        else:
+            rows, cols, scores = number_matching_ppm(precursors_ref, precursors_query,
+                                                     self.tolerance)
+        if array_type == "numpy":
+            scores_array = np.zeros((len(precursors_ref), len(precursors_query)))
+            scores_array[rows, cols] = scores.astype(self.score_datatype)
+            return scores_array
+        if array_type == "sparse":
+            scores_array = StackedSparseArray(len(precursors_ref), len(precursors_query))
+            scores_array.add_sparse_data(rows, cols, scores.astype(self.score_datatype), "")
+            return scores_array
+        return ValueError("`array_type` can only be 'numpy' or 'sparse'.")

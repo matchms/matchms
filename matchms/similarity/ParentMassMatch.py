@@ -1,8 +1,9 @@
 from typing import List
-import numba
 import numpy as np
 from sparsestack import StackedSparseArray
 from matchms.typing import SpectrumType
+from matchms.similarity.spectrum_similarity_functions import (number_matching,
+    number_matching_symmetric)
 from .BaseSimilarity import BaseSimilarity
 
 
@@ -110,13 +111,12 @@ class ParentMassMatch(BaseSimilarity):
         parentmasses_ref = collect_parentmasses(references)
         parentmasses_query = collect_parentmasses(queries)
 
-        if is_symmetric:
-            rows, cols, scores = parentmass_scores_symmetric(parentmasses_ref,
-                                                             parentmasses_query,
-                                                             self.tolerance)
+        if is_symmetric:  # assuming ref and query are identical
+            rows, cols, scores = number_matching_symmetric(parentmasses_ref,
+                                                           self.tolerance)
         else:
-            rows, cols, scores = parentmass_scores(parentmasses_ref, parentmasses_query,
-                                                   self.tolerance)
+            rows, cols, scores = number_matching(parentmasses_ref, parentmasses_query,
+                                                 self.tolerance)
 
         if array_type == "numpy":
             scores_array = np.zeros((len(parentmasses_ref), len(parentmasses_query)))
@@ -127,37 +127,3 @@ class ParentMassMatch(BaseSimilarity):
             scores_array.add_sparse_data(rows, cols, scores.astype(self.score_datatype), "")
             return scores_array
         return ValueError("`array_type` can only be 'numpy' or 'sparse'.")
-
-
-@numba.njit
-def parentmass_scores(parentmasses_ref, parentmasses_query, tolerance):
-    rows = []
-    cols = []
-    data = []
-    for i, parentmass_ref in enumerate(parentmasses_ref):
-        for j, parentmass_query in enumerate(parentmasses_query):
-            value = (abs(parentmass_ref - parentmass_query) <= tolerance)
-            if value:
-                data.append(value)
-                rows.append(i)
-                cols.append(j)
-    return np.array(rows), np.array(cols), np.array(data)
-
-
-@numba.njit
-def parentmass_scores_symmetric(parentmasses_ref, parentmasses_query, tolerance):
-    rows = []
-    cols = []
-    data = []
-    for i, parentmass_ref in enumerate(parentmasses_ref):
-        for j in range(i, len(parentmasses_query)):
-            value = (abs(parentmass_ref - parentmasses_query[j]) <= tolerance)
-            if value:
-                data.append(value)
-                rows.append(i)
-                cols.append(j)
-                if i != j:
-                    data.append(value)
-                    rows.append(j)
-                    cols.append(i)
-    return np.array(rows), np.array(cols), np.array(data)
