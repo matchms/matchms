@@ -135,6 +135,8 @@ class Scores:
         if name is None:
             name = similarity_function.__class__.__name__
         self.similarity_functions[name] = similarity_function
+        if (self.n_rows == 0) or (self.n_cols == 0):
+            raise ValueError("Number of elements must be >= 1")
         if self.n_rows == self.n_cols == 1:
             score = similarity_function.pair(self.references[0],
                                              self.queries[0])
@@ -270,7 +272,9 @@ class Scores:
                 "is_symmetric": self.is_symmetric,
                 "references": [reference.to_dict() for reference in self.references],
                 "queries": [query.to_dict() for query in self.queries] if not self.is_symmetric else None,
-                "scores": self.scores.tolist()}
+                "scores": {"row": self.scores.row.tolist(),
+                    "col": self.scores.col.tolist(),
+                    "data": self.scores.data.tolist()}}
 
     @property
     def shape(self):
