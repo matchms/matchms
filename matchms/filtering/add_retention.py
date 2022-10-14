@@ -8,7 +8,7 @@ logger = logging.getLogger("matchms")
 
 
 _retention_time_keys = ["retention_time", "retentiontime", "rt", "scan_start_time",
-                        "rt_query"]
+                        "rt_query", "rtinseconds"]
 _retention_index_keys = ["retention_index", "retentionindex", "ri"]
 
 

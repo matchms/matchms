@@ -1,3 +1,4 @@
+import json
 from typing import Optional
 import networkx as nx
 import numpy as np
@@ -6,7 +7,7 @@ from .networking_functions import get_top_hits
 
 
 class SimilarityNetwork:
-    """Create a spectal network from spectrum similarities.
+    """Create a spectral network from spectrum similarities.
 
     For example
 
@@ -54,7 +55,7 @@ class SimilarityNetwork:
         Parameters
         ----------
         identifier_key
-            Metadata key for unique intentifier for each spectrum in scores.
+            Metadata key for unique identifier for each spectrum in scores.
             Will also be used for the naming the network nodes. Default is 'spectrum_id'.
         top_n
             Consider edge between spectrumA and spectrumB if score falls into
@@ -68,7 +69,7 @@ class SimilarityNetwork:
             Important side note: The max_links restriction is strict which means that
             if scores around max_links are equal still only max_links will be added
             which can results in some random variations (sorting spectra with equal
-            scores restuls in a random order of such elements).
+            scores results in a random order of such elements).
         score_cutoff
             Threshold for given similarities. Edges/Links will only be made for
             similarities > score_cutoff. Default = 0.7.
@@ -144,6 +145,35 @@ class SimilarityNetwork:
             msnet.remove_nodes_from(list(nx.isolates(msnet)))
         self.graph = msnet
 
+    def export_to_file(self, filename: str, graph_format: str = "graphml"):
+        """
+        Save the network to a file with chosen format.
+
+        Parameters
+        ----------
+        filename
+            Path to file to write to.
+        graph_format
+            Format, in which to store the network graph. Supported formats are: "cyjs", "gexf", "gml", "graphml", "json".
+            Default is "graphml".
+        """
+        if not self.graph:
+            raise ValueError("No network found. Make sure to first run .create_network() step")
+
+        writer = self._generate_writer(graph_format)
+        writer(filename)
+
+    def _generate_writer(self, graph_format: str):
+        writer = {"cyjs": self._export_to_cyjs,
+                  "gexf": self._export_to_gexf,
+                  "gml": self._export_to_gml,
+                  "graphml": self.export_to_graphml,
+                  "json": self._export_to_node_link_json}
+
+        assert graph_format in writer, "Format not supported.\n" \
+                                       "Please use one of supported formats: 'cyjs', 'gexf', 'gml', 'graphml', 'json'"
+        return writer[graph_format]
+
     def export_to_graphml(self, filename: str):
         """Save the network as .graphml file.
 
@@ -153,6 +183,37 @@ class SimilarityNetwork:
             Specify filename for exporting the graph.
 
         """
-        if not self.graph:
-            raise ValueError("No network found. Make sure to first run .create_network() step")
         nx.write_graphml_lxml(self.graph, filename)
+
+    def _export_to_cyjs(self, filename: str):
+        """Save the network in cyjs format."""
+        graph = nx.cytoscape_data(self.graph)
+        return self._write_to_json(graph, filename)
+
+    def _export_to_node_link_json(self, filename: str):
+        """Save the network in node-link format."""
+        graph = nx.node_link_data(self.graph)
+        return self._write_to_json(graph, filename)
+
+    @staticmethod
+    def _write_to_json(graph: dict, filename: str):
+        """Save the network as JSON file.
+
+        Parameters
+        ----------
+        graph
+            JSON-dictionary type graph to save.
+        filename
+            Specify filename for exporting the graph.
+
+        """
+        with open(filename, "w", encoding="utf-8") as file:
+            json.dump(graph, file)
+
+    def _export_to_gexf(self, filename: str):
+        """Save the network as .gexf file."""
+        nx.write_gexf(self.graph, filename)
+
+    def _export_to_gml(self, filename: str):
+        """Save the network as .gml file."""
+        nx.write_gml(self.graph, filename)

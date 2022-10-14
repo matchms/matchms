@@ -7,11 +7,17 @@ from matchms.networking import SimilarityNetwork
 from matchms.similarity import FingerprintSimilarity, ModifiedCosine
 
 
-@pytest.fixture
-def filename():
+@pytest.fixture(params=["cyjs", "gexf", "gml", "graphml", "json"])
+def graph_format(request):
+    yield request.param
+
+
+@pytest.fixture()
+def filename(graph_format):
+    filename = f"test.{graph_format}"
     with tempfile.TemporaryDirectory() as temp_dir:
-        filename = os.path.join(temp_dir, "test.graphml")
-        yield filename
+        filepath = os.path.join(temp_dir, filename)
+        yield filepath
 
 
 def create_dummy_spectrums():
@@ -127,15 +133,15 @@ def test_create_network_symmetric_modified_cosine():
     assert len(edges_list) == 28, "Expected different number of edges"
 
 
-def test_create_network_export_to_graphml(filename):
-    """Test creating a graph from a symmetric Scores object using ModifiedCosine"""
+def test_create_network_export_to_file(filename, graph_format):
+    """Test creating a graph file from a symmetric Scores object using ModifiedCosine"""
     cutoff = 0.7
     scores = create_dummy_scores_symmetric_modified_cosine()
     msnet = SimilarityNetwork(score_cutoff=cutoff)
     msnet.create_network(scores, score_name="ModifiedCosine_score")
-    msnet.export_to_graphml(filename)
+    msnet.export_to_file(filename, graph_format)
 
-    assert os.path.isfile(filename), "graphml file not found"
+    assert os.path.isfile(filename), "network file not found"
 
 
 def test_create_network_symmetric_higher_cutoff():

@@ -3,6 +3,7 @@ precursor_mass,precursor_mz
 precursormass,precursor_mz
 precursormz,precursor_mz
 precursor,precursor_mz
+precursor_type,adduct
 precursorintensity,precursor_intensity
 precursor_charge,charge
 precursorcharge,charge
@@ -18,6 +19,7 @@ retentiontime,retention_time
 rt,retention_time
 rt_query,retention_time
 rettime,retention_time
+rtinseconds,retention_time
 retentionindex,retention_index
 ri,retention_index
 collisionenergy,collision_energy

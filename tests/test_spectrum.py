@@ -54,6 +54,15 @@ def test_spectrum_getters_return_copies():
     assert spectrum.metadata == {'testdata': 1}, "Expected metadata to remain unchanged"
 
 
+def test_spectrum_getters(spectrum: Spectrum):
+    assert np.all(spectrum.mz == spectrum.peaks.mz)
+    assert np.all(spectrum.intensities == spectrum.peaks.intensities)
+    # Test if true copy
+    mz = spectrum.mz
+    mz[0] = 1111
+    assert np.allclose(spectrum.peaks.mz[0], 100.00003)
+
+
 @pytest.mark.parametrize("input_dict, expected_dict", [
     [{"precursor mass": 400.768, "Some Key": "Whatever.", "NEW\tSTUFF": "XYZ"},
      {"precursor_mz": 400.768, "some_key": "Whatever.", "new_stuff": "XYZ"}],
@@ -177,6 +186,8 @@ def test_spectrum_clone(spectrum, default_filtering):
     [{"precursor_mz": 101.01}, True, {"precursor_mz": 101.01}],
     [{"precursormz": 101.01}, True, {"precursor_mz": 101.01}],
     [{"precursormz": 101.01}, False, {"precursor_mz": 101.01}],
+    [{"ExactMass": 105.055}, True, {"parent_mass": 105.055}],
+    [{"ExactMass": 105.055, "parent_mass": 107.077}, True, {"parent_mass": 107.077}],
     [{"charge": "2+"}, True, {"charge": 2}],
     [{"charge": -1}, True, {"charge": -1}],
     [{"charge": [-1, 0]}, True, {"charge": -1}],

@@ -7,9 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.17.0] - 2022-08-23
+
+### Added
+- `Scores`: added functionality for writing and reading `Scores` objects to/from disk as JSON and Pickle files [#353](https://github.com/matchms/matchms/pull/353)
+- `save_as_msp()` now has a `mode` option (write/append) [#346](https://github.com/matchms/matchms/pull/346)
+
+## [0.16.0] - 2022-06-12
+
+### Added
+- `Spectrum` objects now also have `.mz` and `.intensities` properties [#339](https://github.com/matchms/matchms/pull/339)
+- `SimilarityNetwork`: similarity-network graphs can now be exported to [cyjs](http://manual.cytoscape.org/en/stable/index.html),
+[gexf](http://gexf.net/schema.html), [gml](https://web.archive.org/web/20190207140002/http://www.fim.uni-passau.de/index.php?id=17297&L=1),
+and node-link JSON formats [#349](https://github.com/matchms/matchms/pull/349)
+
+### Changed
+- metadata filtering: made prefilter check for SMILES and InChI more lenient, eventually resulting in longer runtimes but more accurate checks [#337](https://github.com/matchms/matchms/pull/337)
+
+## [0.15.0] - 2022-03-09
+
+Added neutral losses similarity score (cosine-type score) and a few small fixes.
+
 ### Added
 
 - new spectral similarity score: `NeutralLossesCosine` which is based on matches between neutral losses of two spectra [#329](https://github.com/matchms/matchms/pull/329)
+
+### Changed
+
+- added key conversion: "precursor_type" to "adduct" [#332](https://github.com/matchms/matchms/pull/332)
+- added key conversion: "rtinseconds" to "retention_time" [#331](https://github.com/matchms/matchms/pull/331)
+
+### Fixed
+
+- handling of duplicate entries in spectrum files (e.g. as field and again in the comments field in msp files) by ugrade of pickydict to 0.4.0 [#332](https://github.com/matchms/matchms/pull/332)
 
 ## [0.14.0] - 2022-02-18
 
@@ -415,7 +445,10 @@ Contains three plot types: `plot_spectrum()` or `spectrum.plot()`, `plot_spectra
 - This is the initial version of Spec2Vec from https://github.com/iomega/Spec2Vec
 - (later splitted into matchms + spec2vec)
 
-[Unreleased]: https://github.com/matchms/matchms/compare/0.14.0...HEAD
+[Unreleased]: https://github.com/matchms/matchms/compare/0.17.0...HEAD
+[0.17.0]: https://github.com/matchms/matchms/compare/0.16.0...0.17.0
+[0.16.0]: https://github.com/matchms/matchms/compare/0.15.0...0.16.0
+[0.15.0]: https://github.com/matchms/matchms/compare/0.14.0...0.15.0
 [0.14.0]: https://github.com/matchms/matchms/compare/0.13.0...0.14.0
 [0.13.0]: https://github.com/matchms/matchms/compare/0.12.0...0.13.0
 [0.12.0]: https://github.com/matchms/matchms/compare/0.11.0...0.12.0

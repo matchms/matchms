@@ -1,8 +1,14 @@
 from __future__ import annotations
+import json
+import pickle
 import numpy as np
+import numpy.lib.recfunctions
 from deprecated.sphinx import deprecated
 from scipy.sparse import coo_matrix
 from sparsestack import StackedSparseArray
+from matchms.exporting.save_as_json import ScoresJSONEncoder
+from matchms.importing.load_from_json import scores_json_decoder
+from matchms.similarity import get_similarity_function_by_name
 from matchms.similarity.BaseSimilarity import BaseSimilarity
 from matchms.typing import QueriesType, ReferencesType
 
@@ -52,6 +58,7 @@ class Scores:
         Cosine score between spectrum2 and spectrum3 is 0.14 with 1 matched peaks
         Cosine score between spectrum2 and spectrum4 is 0.61 with 1 matched peaks
     """
+
     def __init__(self, references: ReferencesType, queries: QueriesType,
                  is_symmetric: bool = False):
         """
@@ -86,7 +93,7 @@ class Scores:
                 return False
             if not np.array_equal(self.queries, other.queries):
                 return False
-            if  np.self._scores != other._scores:
+            if  self._scores != other._scores:
                 return False
             return True
         return NotImplemented
@@ -233,6 +240,37 @@ class Scores:
             return list(zip(self.references[c[references_idx_sorted]],
                             scores_for_query[references_idx_sorted].copy()))
         return list(zip(self.references[c], scores_for_query.copy()))
+
+    def to_json(self, filename: str):
+        """Export :py:class:`~matchms.Scores.Scores` to a JSON file.
+
+        Parameters
+        ----------
+        filename
+            Path to file to write to
+        """
+        with open(filename, "w", encoding="utf-8") as f:
+            json.dump(self, f, cls=ScoresJSONEncoder)
+
+    def to_pickle(self, filename: str):
+        """Export :py:class:`~matchms.Scores.Scores` to a Pickle file.
+
+        Parameters
+        ----------
+        filename
+            Path to file to write to
+        """
+        with open(filename, "wb") as f:
+            pickle.dump(self, f)
+
+    def to_dict(self) -> dict:
+        """Return a dictionary representation of scores."""
+        return {"__Scores__": True,
+                "similarity_functions": {key: value.to_dict() for (key, value) in self.similarity_functions.items()},
+                "is_symmetric": self.is_symmetric,
+                "references": [reference.to_dict() for reference in self.references],
+                "queries": [query.to_dict() for query in self.queries] if not self.is_symmetric else None,
+                "scores": self.scores.tolist()}
 
     @property
     def shape(self):

@@ -23,10 +23,14 @@ def spectrum():
 
 @pytest.fixture(params=["rcx_gc-ei_ms_20201028_perylene.msp", "MoNA-export-GC-MS-first10.msp", "Hydrogen_chloride.msp"])
 def data(request):
+    spectra = load_test_spectra_file(request.param)
+    return spectra
+
+def load_test_spectra_file(test_filename):
     module_root = os.path.join(os.path.dirname(__file__), "..")
-    spectrums_file = os.path.join(module_root, "tests", request.param)
-    spectra = load_from_msp(spectrums_file)
-    return list(spectra)
+    spectrums_file = os.path.join(module_root, "tests", test_filename)
+    spectra = list(load_from_msp(spectrums_file))
+    return spectra
 
 
 @pytest.fixture
@@ -34,6 +38,23 @@ def filename():
     with tempfile.TemporaryDirectory() as temp_dir:
         filename = os.path.join(temp_dir, "test.msp")
         yield filename
+
+
+def save_and_reload_spectra(filename, spectra: List[Spectrum], write_peak_comments=True):
+    """ Utility function to save spectra to msp and load them again.
+
+    Params:
+    -------
+    spectra: Spectra objects to store
+
+    Returns:
+    --------
+    reloaded_spectra: Spectra loaded from saved msp file.
+    """
+
+    save_as_msp(spectra, filename, write_peak_comments)
+    reloaded_spectra = list(load_from_msp(filename))
+    return reloaded_spectra
 
 
 def test_spectrum_none_exception(none_spectrum, filename):
@@ -104,23 +125,6 @@ def test_dont_write_peak_comments(filename, data):
             "Expected that no peak comments are written to file"
 
 
-def save_and_reload_spectra(filename, spectra: List[Spectrum], write_peak_comments=True):
-    """ Utility function to save spectra to msp and load them again.
-
-    Params:
-    -------
-    spectra: Spectra objects to store
-
-    Returns:
-    --------
-    reloaded_spectra: Spectra loaded from saved msp file.
-    """
-
-    save_as_msp(spectra, filename, write_peak_comments)
-    reloaded_spectra = list(load_from_msp(filename))
-    return reloaded_spectra
-
-
 def test_num_peaks_last_metadata_field(filename, data):
     """ Test to check whether the last line before the peaks is NUM PEAKS: ... """
     save_as_msp(data, filename)
@@ -138,3 +142,14 @@ def test_num_peaks_last_metadata_field(filename, data):
 
                     assert isinstance(mz, float)
                     assert isinstance(intensity, float)
+
+
+@pytest.mark.parametrize("test_file", ["MoNA-export-GC-MS-first10.msp", "massbank_five_spectra.msp"])
+def test_write_append(test_file, filename):
+    expected = load_test_spectra_file(test_file)
+    save_as_msp(expected[:2], filename, mode = "a")
+    save_as_msp(expected[2:], filename, mode = "a")
+
+    actual = list(load_from_msp(filename))
+
+    assert expected == actual

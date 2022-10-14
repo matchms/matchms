@@ -7,6 +7,13 @@ from matchms.importing import load_from_mgf
 from .builder_Spectrum import SpectrumBuilder
 
 
+def load_test_spectra_file(test_filename):
+    module_root = os.path.join(os.path.dirname(__file__), "..")
+    spectrums_file = os.path.join(module_root, "tests", test_filename)
+    spectra = list(load_from_mgf(spectrums_file))
+    return spectra
+
+
 def test_save_as_mgf_single_spectrum():
     """Test saving spectrum to .mgf file"""
     spectrum = SpectrumBuilder().with_mz(
@@ -92,3 +99,15 @@ def test_save_load_mgf_consistency(tmpdir, charge, ionmode, parent_mass):
     assert spectrum_imports[0].get("charge") == charge
     assert spectrum_imports[0].get("ionmode") == ionmode
     assert spectrum_imports[0].get("parent_mass") == str(parent_mass)
+
+
+@pytest.mark.parametrize("test_file", ["testdata.mgf", "pesticides.mgf"])
+def test_write_append(test_file, tmpdir):
+    expected = load_test_spectra_file(test_file)
+    tmp_file = os.path.join(tmpdir, "testfile.mgf")
+    save_as_mgf(expected[:2], tmp_file)
+    save_as_mgf(expected[2:], tmp_file)
+
+    actual = list(load_from_mgf(tmp_file))
+
+    assert expected == actual

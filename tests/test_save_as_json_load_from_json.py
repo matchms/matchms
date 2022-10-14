@@ -4,14 +4,25 @@ import numpy as np
 import pytest
 from matchms.exporting import save_as_json
 from matchms.importing import load_from_json
-from .builder_Spectrum import SpectrumBuilder
+from tests.builder_Spectrum import SpectrumBuilder
 
 
-def test_save_and_load_json_single_spectrum(tmp_path):
-    """Test saving spectrum to .json file"""
+@pytest.fixture
+def builder() -> SpectrumBuilder:
     mz = np.array([100, 200, 300], dtype="float")
     intensities = np.array([10, 10, 500], dtype="float")
     builder = SpectrumBuilder().with_mz(mz).with_intensities(intensities)
+    return builder
+
+
+def load_test_spectra_file(test_filename):
+    module_root = os.path.join(os.path.dirname(__file__), "..")
+    spectrums_file = os.path.join(module_root, "tests", test_filename)
+    spectra = list(load_from_json(spectrums_file))
+    return spectra
+
+def test_save_and_load_json_single_spectrum(tmp_path, builder):
+    """Test saving spectrum to .json file"""
     spectrum = builder.with_metadata({"charge": -1,
                                       "inchi": '"InChI=1S/C6H12"',
                                       "precursor_mz": 222.2,
@@ -29,11 +40,8 @@ def test_save_and_load_json_single_spectrum(tmp_path):
 
 
 @pytest.mark.parametrize("metadata_harmonization", [True, False])
-def test_save_and_load_json_spectrum_list(metadata_harmonization, tmp_path):
+def test_save_and_load_json_spectrum_list(metadata_harmonization, tmp_path, builder):
     """Test saving spectrum list to .json file"""
-    mz = np.array([100, 200, 300], dtype="float")
-    intensities = np.array([10, 10, 500], dtype="float")
-    builder = SpectrumBuilder().with_mz(mz).with_intensities(intensities)
     spectrum1 = builder.with_metadata({"test_field": "test1"},
                                       metadata_harmonization=metadata_harmonization).build()
     spectrum2 = builder.with_metadata({"test_field": "test2"},
@@ -52,6 +60,8 @@ def test_save_and_load_json_spectrum_list(metadata_harmonization, tmp_path):
     assert spectrum_imports[1] == spectrum2, "Original and saved+loaded spectrum not identical"
 
 
+
+
 def test_load_from_json_zero_peaks(tmp_path):
     spectrum1 = SpectrumBuilder().with_metadata(
         {"test_field": "test1"}).build()
@@ -68,7 +78,7 @@ def test_load_from_json_zero_peaks(tmp_path):
     assert len(spectrum_imports) == 0, "Spectrum without peaks should be skipped"
 
 
-def test_load_from_json_with_minimal_json(tmp_path):
+def test_load_from_json_with_minimal_json(tmp_path, builder):
     filename = tmp_path / "test.json"
     body = '[{"test_field": "test1", "peaks_json": [[100.0, 10.0], [200.0, 10.0], [300.0, 500.0]]}]'
 
@@ -77,9 +87,6 @@ def test_load_from_json_with_minimal_json(tmp_path):
 
     spectrum_imports = load_from_json(filename, metadata_harmonization=False)
 
-    mz = np.array([100, 200, 300], dtype="float")
-    intensities = np.array([10, 10, 500], dtype="float")
-    builder = SpectrumBuilder().with_mz(mz).with_intensities(intensities)
     expected = builder.with_metadata({"test_field": "test1"},
                                      metadata_harmonization=False).build()
 
@@ -87,12 +94,9 @@ def test_load_from_json_with_minimal_json(tmp_path):
         expected], "Loaded JSON document not identical to expected Spectrum"
 
 
-def test_save_as_json_with_minimal_json(tmp_path):
+def test_save_as_json_with_minimal_json(tmp_path, builder):
     filename = tmp_path / "test.json"
 
-    mz = np.array([100, 200, 300], dtype="float")
-    intensities = np.array([10, 10, 500], dtype="float")
-    builder = SpectrumBuilder().with_mz(mz).with_intensities(intensities)
     spectrum1 = builder.with_metadata({"test_field": "test1"},
                                       metadata_harmonization=False).build()
 
@@ -104,3 +108,12 @@ def test_save_as_json_with_minimal_json(tmp_path):
     expected = [{"test_field": "test1", "peaks_json": [
         [100.0, 10.0], [200.0, 10.0], [300.0, 500.0]]}]
     assert spectrum_imports == expected, "Saved Spectrum not identical to expected JSON Document"
+
+
+@pytest.mark.parametrize("filename, expected_length", [
+    ["gnps_spectra.json", 5]
+])
+def test_read_gnps_spectra(filename, expected_length):
+    actual = load_test_spectra_file(filename)
+
+    assert len(actual) == expected_length

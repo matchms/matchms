@@ -96,7 +96,7 @@ def is_valid_inchi(inchi: str) -> bool:
     if inchi is None:
         return False
     inchi = inchi.strip('"')
-    regexp = r"(InChI=1|1)(S\/|\/)[0-9a-zA-Z\.]{2,}\/[ch]{1}[0-9]"
+    regexp = r"(InChI=1|1)(S\/|\/)[0-9a-zA-Z\.]{2,}"
     if not re.search(regexp, inchi):
         return False
     # Proper chemical test
@@ -123,7 +123,7 @@ def is_valid_smiles(smiles: str) -> bool:
     if smiles is None:
         return False
 
-    regexp = r"^([^J][0-9ABCOHNMSPIFKiergalcons@+\-\[\]\(\)\\\/%=#$,.~&!]{3,})$"
+    regexp = r"^([^J][0-9ABCOHNMSPIFKiergalcons@+\-\[\]\(\)\\\/%=#$,.~&!]*)$"
     if not re.match(regexp, smiles):
         return False
 
