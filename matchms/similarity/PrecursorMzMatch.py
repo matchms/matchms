@@ -1,9 +1,10 @@
 from typing import List
 import numpy as np
 from sparsestack import StackedSparseArray
+from matchms.similarity.spectrum_similarity_functions import (
+    number_matching, number_matching_ppm, number_matching_symmetric,
+    number_matching_symmetric_ppm)
 from matchms.typing import SpectrumType
-from matchms.similarity.spectrum_similarity_functions import (number_matching,
-    number_matching_symmetric, number_matching_ppm, number_matching_symmetric_ppm)
 from .BaseSimilarity import BaseSimilarity
 
 

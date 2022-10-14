@@ -3,9 +3,9 @@ pure Python version."""
 import numpy as np
 import pytest
 from matchms.similarity.spectrum_similarity_functions import (
-    collect_peak_pairs, find_matches, score_best_matches,
-    number_matching, number_matching_symmetric,
-    number_matching_ppm, number_matching_symmetric_ppm)
+    collect_peak_pairs, find_matches, number_matching, number_matching_ppm,
+    number_matching_symmetric, number_matching_symmetric_ppm,
+    score_best_matches)
 from .builder_Spectrum import SpectrumBuilder
 
 
