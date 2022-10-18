@@ -65,7 +65,7 @@ class Metadata:
 
         self.matchms_key_style = matchms_key_style
         if self.matchms_key_style is True:
-            self.harmonize_metadata_keys()
+            self.harmonize_keys()
 
     def __eq__(self, other_metadata):
         if self.keys() != other_metadata.keys():
@@ -79,7 +79,7 @@ class Metadata:
                 return False
         return True
 
-    def harmonize_metadata_keys(self):
+    def harmonize_keys(self):
         """Runs default harmonization of metadata.
 
         Method harmonized metadata field names which includes setting them to lower-case
@@ -90,7 +90,7 @@ class Metadata:
         self._data.key_regex_replacements = _key_regex_replacements
         self._data.key_replacements = _key_replacements
 
-    def harmonize_metadata_values(self):
+    def harmonize_values(self):
         metadata_filtered = _interpret_pepmass_metadata(self.data)
         metadata_filtered = _add_precursor_mz_metadata(metadata_filtered)
 
@@ -122,7 +122,7 @@ class Metadata:
         """
         self._data[key] = value
         if self.matchms_key_style is True:
-            self.harmonize_metadata_keys()
+            self.harmonize_keys()
         return self
 
     def keys(self):
@@ -157,6 +157,6 @@ class Metadata:
         elif isinstance(new_dict, Mapping):
             self._data = PickyDict(new_dict)
             if self.matchms_key_style is True:
-                self.harmonize_metadata_keys()
+                self.harmonize_keys()
         else:
             raise TypeError("Expected input of type dict or PickyDict.")

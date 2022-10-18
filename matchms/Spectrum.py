@@ -84,7 +84,7 @@ class Spectrum:
         """
         self._metadata = Metadata(metadata)
         if metadata_harmonization is True:
-            self._metadata.harmonize_metadata_values()
+            self._metadata.harmonize_values()
         self.peaks = Fragments(mz=mz, intensities=intensities)
         self.losses = None
 
