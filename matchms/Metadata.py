@@ -104,8 +104,9 @@ class Metadata:
             metadata_filtered = _add_retention(metadata_filtered, "retention_index", "retention_index")
 
         charge = metadata_filtered.get("charge")
-        if not isinstance(charge, int) and not _convert_charge_to_int(charge) is None:
-            metadata_filtered["charge"] = _convert_charge_to_int(charge)
+        if not isinstance(charge, int) and (charge_int := _convert_charge_to_int(charge)) is not None:
+            metadata_filtered["charge"] = charge_int
+
         self.data = metadata_filtered
 
     # ------------------------------
