@@ -1,10 +1,10 @@
 from collections.abc import Mapping
+import numpy as np
+from pickydict import PickyDict
 from .filtering.add_precursor_mz import _add_precursor_mz_metadata
 from .filtering.add_retention import _add_retention
 from .filtering.interpret_pepmass import _interpret_pepmass_metadata
 from .filtering.make_charge_int import _convert_charge_to_int
-import numpy as np
-from pickydict import PickyDict
 from .utils import load_known_key_conversions
 
 
