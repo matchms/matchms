@@ -1,8 +1,7 @@
 import numpy as np
 import pytest
 from matchms import calculate_scores
-from matchms.similarity.MetadataMatch import (MetadataMatch, entries_scores,
-                                              entries_scores_symmetric)
+from matchms.similarity.MetadataMatch import MetadataMatch
 from .builder_Spectrum import SpectrumBuilder
 
 
@@ -21,35 +20,6 @@ def spectrums():
     s3 = SpectrumBuilder().with_metadata(metadata3).build()
     s4 = SpectrumBuilder().with_metadata(metadata4).build()
     return [s1, s2, s3, s4]
-
-
-@pytest.mark.parametrize("entries1, entries2, result", [
-    [np.array([100, 101, 102]), np.array([102, 104]),
-     (np.array([0, 1, 2, 2]), np.array([0, 0, 0, 1]), np.array([True, True, True, True]))],
-    [np.array([98, 105.5]), np.array([102, 104]),
-     (np.array([1]), np.array([1]), np.array([True]))]
-])
-def test_entries_scores(entries1, entries2, result):
-    scores = entries_scores(entries1, entries2, 2)
-    assert np.array_equal(scores, result)
-    # non-compiled run
-    scores = entries_scores.py_func(entries1, entries2, 2)
-    assert np.array_equal(scores, result)
-
-
-@pytest.mark.parametrize("entries, tolerance, result", [
-    [np.array([100, 101, 102]), 0.9,
-     (np.array([0, 1, 2]), np.array([0, 1, 2]), np.array([True, True, True]))],
-    [np.array([100, 101, 102]), 1.0,
-     (np.array([0, 0, 1, 1, 1, 2, 2]), np.array([0, 1, 0, 1, 2, 1, 2]),
-      np.array([True, True, True, True, True, True, True]))]
-])
-def test_entries_scores_symmetric(entries, tolerance, result):
-    scores = entries_scores_symmetric(entries, entries, tolerance)
-    assert np.array_equal(scores, result)
-    # non-compiled run
-    scores = entries_scores_symmetric.py_func(entries, entries, tolerance)
-    assert np.array_equal(scores, result)
 
 
 def test_metadata_match_strings(spectrums):

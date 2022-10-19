@@ -1,8 +1,9 @@
 import logging
 from typing import List
-import numba
 import numpy as np
 from sparsestack import StackedSparseArray
+from matchms.similarity.spectrum_similarity_functions import (
+    number_matching, number_matching_symmetric)
 from matchms.typing import SpectrumType
 from .BaseSimilarity import BaseSimilarity
 
@@ -156,51 +157,18 @@ class MetadataMatch(BaseSimilarity):
             return scores.astype(self.score_datatype)
 
         if is_symmetric:
-            rows, cols, scores = entries_scores_symmetric(entries_ref, entries_query,
-                                                          self.tolerance)
+            rows, cols, scores = number_matching_symmetric(entries_ref,
+                                                           self.tolerance)
         else:
-            rows, cols, scores = entries_scores(entries_ref, entries_query,
-                                                self.tolerance)
+            rows, cols, scores = number_matching(entries_ref, entries_query,
+                                                 self.tolerance)
 
         if array_type == "numpy":
             scores_array = np.zeros((len(entries_ref), len(entries_query)))
             scores_array[rows, cols] = scores.astype(self.score_datatype)
             return scores_array
-        scores_array = StackedSparseArray(len(entries_ref), len(entries_query))
-        scores_array.add_sparse_data(rows, cols, scores.astype(self.score_datatype), "")
-        return scores_array
-
-
-@numba.njit
-def entries_scores(entries_ref, entries_query, tolerance):
-    rows = []
-    cols = []
-    data = []
-    for i, entry_ref in enumerate(entries_ref):
-        for j, entry_query in enumerate(entries_query):
-            value = (abs(entry_ref - entry_query) <= tolerance)
-            if value:
-                data.append(value)
-                rows.append(i)
-                cols.append(j)
-    return np.array(rows), np.array(cols), np.array(data)
-
-
-@numba.njit
-def entries_scores_symmetric(entries_ref, entries_query, tolerance):
-    #scores = np.zeros((len(entries_ref), len(entries_query)))
-    rows = []
-    cols = []
-    data = []
-    for i, entry_ref in enumerate(entries_ref):
-        for j in range(i, len(entries_query)):
-            value = (abs(entry_ref - entries_query[j]) <= tolerance)
-            if value:
-                data.append(value)
-                rows.append(i)
-                cols.append(j)
-                if i != j:
-                    data.append(value)
-                    rows.append(j)
-                    cols.append(i)
-    return np.array(rows), np.array(cols), np.array(data)
+        if array_type == "sparse":
+            scores_array = StackedSparseArray(len(entries_ref), len(entries_query))
+            scores_array.add_sparse_data(rows, cols, scores.astype(self.score_datatype), "")
+            return scores_array
+        raise ValueError("")
