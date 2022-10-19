@@ -94,8 +94,8 @@ class Metadata:
         metadata_filtered = _interpret_pepmass_metadata(self.data)
         metadata_filtered = _add_precursor_mz_metadata(metadata_filtered)
 
-        if ion_mode := metadata_filtered.get("ionmode"):
-            metadata_filtered["ionmode"] = ion_mode.lower()
+        if metadata_filtered.get("ionmode"):
+            metadata_filtered["ionmode"] = self.get("ionmode").lower()
 
         if metadata_filtered.get("retention_time"):
             metadata_filtered = _add_retention(metadata_filtered, "retention_time", "retention_time")
@@ -104,7 +104,8 @@ class Metadata:
             metadata_filtered = _add_retention(metadata_filtered, "retention_index", "retention_index")
 
         charge = metadata_filtered.get("charge")
-        if not isinstance(charge, int) and (charge_int := _convert_charge_to_int(charge)) is not None:
+        charge_int = _convert_charge_to_int(charge)
+        if not isinstance(charge, int) and charge_int is not None:
             metadata_filtered["charge"] = charge_int
 
         self.data = metadata_filtered
