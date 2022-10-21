@@ -49,7 +49,9 @@ class Pipeline:
         pipeline = Pipeline("my_config_file.yaml")
         pipeline.run()
 
-        An alternative way to use it:
+    An alternative way to use it:
+
+    .. code-block:: python
 
         pipeline = Pipeline()
         pipeline.query_files = "spectrums_file.msp"
