@@ -2,7 +2,7 @@ from __future__ import annotations
 import json
 import pickle
 import numpy as np
-import numpy.lib.recfunctions as recfunctions
+from numpy.lib.recfunctions import unstructured_to_structured
 from deprecated.sphinx import deprecated
 from scipy.sparse import coo_matrix
 from sparsestack import StackedSparseArray
@@ -411,8 +411,8 @@ class ScoresBuilder:
         dtype = scores_dict.get("dtype")
         if len(dtype[0]) > 1:
             dtype = [(x[0], x[1]) for x in dtype]
-        sparsestack.data = recfunctions.unstructured_to_structured(np.array(scores_dict.get("data")),
-                                                                   dtype=np.dtype(dtype))
+        sparsestack.data = unstructured_to_structured(np.array(scores_dict.get("data")),
+                                                      dtype=np.dtype(dtype))
         return sparsestack
 
     @staticmethod
