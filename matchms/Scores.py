@@ -2,7 +2,7 @@ from __future__ import annotations
 import json
 import pickle
 import numpy as np
-import numpy.lib.recfunctions
+import numpy.lib.recfunctions as recfunctions
 from deprecated.sphinx import deprecated
 from scipy.sparse import coo_matrix
 from sparsestack import StackedSparseArray
@@ -83,7 +83,6 @@ class Scores:
         self.is_symmetric = is_symmetric
         self._scores = StackedSparseArray(self.n_rows, self.n_cols)
         self._index = 0
-        self.similarity_functions = {}
 
     def __eq__(self, other):
         if isinstance(other, Scores):
@@ -134,7 +133,6 @@ class Scores:
         """
         if name is None:
             name = similarity_function.__class__.__name__
-        self.similarity_functions[name] = similarity_function
         if (self.n_rows == 0) or (self.n_cols == 0):
             raise ValueError("Number of elements must be >= 1")
         if self.n_rows == self.n_cols == 1:
@@ -267,14 +265,12 @@ class Scores:
 
     def to_dict(self) -> dict:
         """Return a dictionary representation of scores."""
-        return {"__Scores__": True,
-                "similarity_functions": {key: value.to_dict() for (key, value) in self.similarity_functions.items()},
-                "is_symmetric": self.is_symmetric,
-                "references": [reference.to_dict() for reference in self.references],
-                "queries": [query.to_dict() for query in self.queries] if not self.is_symmetric else None,
-                "scores": {"row": self.scores.row.tolist(),
-                    "col": self.scores.col.tolist(),
-                    "data": self.scores.data.tolist()}}
+        scores_dict = {"__Scores__": True,
+                       "is_symmetric": self.is_symmetric,
+                       "references": [reference.to_dict() for reference in self.references],
+                       "queries": [query.to_dict() for query in self.queries] if not self.is_symmetric else None}
+        scores_dict.update(self.scores.to_dict())
+        return scores_dict
 
     @property
     def shape(self):
@@ -371,7 +367,6 @@ class ScoresBuilder:
     def __init__(self):
         self.references = None
         self.queries = None
-        self.similarity_functions = None
         self.is_symmetric = None
         self.scores = None
 
@@ -399,24 +394,26 @@ class ScoresBuilder:
         self._validate_json_input(scores_dict)
 
         self.is_symmetric = scores_dict["is_symmetric"]
-        self.similarity_functions = self._construct_similarity_functions(scores_dict["similarity_function"])
         self.references = scores_dict["references"]
         self.queries = scores_dict["queries"] if not self.is_symmetric else self.references
-        self.scores = self._restructure_scores(scores_dict["scores"])
+        self.scores = self._restructure_scores(scores_dict)
 
         return self
 
-    def _restructure_scores(self, scores: dict) -> np.ndarray:
+    def _restructure_scores(self, scores_dict: dict) -> np.ndarray:
         """
         Restructure scores from a nested list to a numpy array. If scores were stored as an array of tuples, restores
         their original form.
         """
-        scores = np.array(scores)
-
-        if len(scores.shape) > 2:
-            dt = np.dtype(self.similarity_function.score_datatype)
-            return numpy.lib.recfunctions.unstructured_to_structured(scores, dtype=dt)
-        return scores
+        sparsestack = StackedSparseArray(scores_dict.get("n_row"), scores_dict.get("n_col"))
+        sparsestack.row = np.array(scores_dict.get("row"))
+        sparsestack.col = np.array(scores_dict.get("col"))
+        dtype = scores_dict.get("dtype")
+        if len(dtype[0]) > 1:
+            dtype = [(x[0], x[1]) for x in dtype]
+        sparsestack.data = recfunctions.unstructured_to_structured(np.array(scores_dict.get("data")),
+                                                                   dtype=np.dtype(dtype))
+        return sparsestack
 
     @staticmethod
     def _construct_similarity_functions(similarity_function_dict: dict) -> BaseSimilarity:
@@ -428,7 +425,9 @@ class ScoresBuilder:
 
     @staticmethod
     def _validate_json_input(scores_dict: dict):
-        if {"__Scores__", "similarity_function", "is_symmetric", "references", "queries", "scores"} != scores_dict.keys():
+        if {"__Scores__", "is_symmetric", "references", "queries", "row",
+                "col", "data", "dtype", "n_row", "n_col"} != scores_dict.keys():
             raise ValueError("Scores JSON file does not match the expected schema.\n\
                              Make sure the file contains the following keys:\n\
-                             ['__Scores__', 'similarity_functions', 'is_symmetric', 'references', 'queries', 'scores']")
+                             ['__Scores__', 'is_symmetric', 'references', 'queries', 'scores_row',\
+                             'scores_col', 'scores_data', 'scores_dtype']")
