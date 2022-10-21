@@ -2,8 +2,8 @@ from __future__ import annotations
 import json
 import pickle
 import numpy as np
-from numpy.lib.recfunctions import unstructured_to_structured
 from deprecated.sphinx import deprecated
+from numpy.lib.recfunctions import unstructured_to_structured
 from scipy.sparse import coo_matrix
 from sparsestack import StackedSparseArray
 from matchms.exporting.save_as_json import ScoresJSONEncoder
