@@ -14,7 +14,7 @@ on:
 jobs:
 
   first_check:
-    name: first code check / python-3.8 / ubuntu-latest
+    name: first code check / python-3.9 / ubuntu-latest
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -102,7 +102,7 @@ jobs:
         python-version: ['3.7', '3.8', '3.9']
         exclude:
           - os: ubuntu-latest
-            python-version: 3.8 # or 3.9 when #240 is fully solved 
+            python-version: 3.9
     steps:
       - uses: actions/checkout@v2
         with:
