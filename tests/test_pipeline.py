@@ -116,13 +116,13 @@ def test_pipeline_non_symmetric():
     assert len(pipeline.spectrums_references) == 10
     assert pipeline.spectrums_queries[0] == pipeline.spectrums_references[5]
     assert pipeline.is_symmetric is False
-    assert pipeline.scores.scores.shape == (5, 10, 3)
+    assert pipeline.scores.scores.shape == (10, 5, 3)
     assert pipeline.scores.score_names == ('PrecursorMzMatch', 'ModifiedCosine_score', 'ModifiedCosine_matches')
     all_scores = pipeline.scores.to_array()
-    assert np.all(all_scores[:, :5] == all_scores[:, 5:])
+    assert np.all(all_scores[:5, :] == all_scores[5:, :])
     expected = np.array([[1., 0.30384404],
                          [0.30384404, 1.]])
-    assert np.allclose(all_scores["ModifiedCosine_score"][3:, 8:], expected)
+    assert np.allclose(all_scores["ModifiedCosine_score"][8:, 3:], expected)
 
 
 def test_pipeline_from_yaml():

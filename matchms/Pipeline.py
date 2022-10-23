@@ -183,13 +183,13 @@ class Pipeline:
             raise TypeError("Unknown similarity measure.")
         similarity_measure = get_similarity_measure(computation)
         if i == 0:
-            self.scores = calculate_scores(self.spectrums_queries,
-                                           self.spectrums_references,
+            self.scores = calculate_scores(self.spectrums_references,
+                                           self.spectrums_queries,
                                            similarity_measure,
                                            is_symmetric=self.is_symmetric)
         else:
-            new_scores = similarity_measure.sparse_array(references=self.spectrums_queries,
-                                                         queries=self.spectrums_references,
+            new_scores = similarity_measure.sparse_array(references=self.spectrums_references,
+                                                         queries=self.spectrums_queries,
                                                          idx_row=self.scores.scores.row,
                                                          idx_col=self.scores.scores.col,
                                                          is_symmetric=self.is_symmetric)

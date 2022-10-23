@@ -123,7 +123,6 @@ class Scores:
         assert isinstance(queries, (list, tuple, np.ndarray)),\
             "Expected input argument 'queries' to be list or tuple or np.ndarray."
 
-    @deprecated(version='0.6.0', reason="Calculate scores via calculate_scores() function.")
     def calculate(self, similarity_function: BaseSimilarity,
                   name: str = None) -> Scores:
         """
