@@ -2,7 +2,6 @@ from __future__ import annotations
 import json
 import pickle
 import numpy as np
-from deprecated.sphinx import deprecated
 from numpy.lib.recfunctions import unstructured_to_structured
 from scipy.sparse import coo_matrix
 from sparsestack import StackedSparseArray
@@ -124,12 +123,33 @@ class Scores:
             "Expected input argument 'queries' to be list or tuple or np.ndarray."
 
     def calculate(self, similarity_function: BaseSimilarity,
-                  name: str = None) -> Scores:
+                   name: str = None,
+                   join_type="left") -> Scores:
         """
-        Calculate the similarity between all reference objects v all query objects using
+        Calculate the similarity between all reference objects vs all query objects using
         the most suitable available implementation of the given similarity_function.
-        Advised method to calculate similarity scores is :meth:`~matchms.calculate_scores`.
+        If Scores object already contains similarity scores, the newly computed measures
+        will be added to a new layer (name --> layer name).
+        Additional scores will be added as specified with join_type, the default being 'left'.
+
+        Parameters
+        ----------
+        similarity_function
+            Function which accepts a reference + query object and returns a score or tuple of scores
+        is_symmetric
+            Set to True when *references* and *queries* are identical (as for instance for an all-vs-all
+            comparison). By using the fact that score[i,j] = score[j,i] the calculation will be about
+            2x faster. Default is False.
+        join_mode
+            Choose from left, right, outer, inner to specify the merge type.
         """
+        def is_sparse_advisable():
+            return (
+                (len(self._scores.score_names) > 0)  # already scores in Scores
+                and (join_type in ["inner", "left"])  # inner/left join
+                and (len(self._scores.row) < (self.n_rows * self.n_cols)/2)  # fewer than half of scores have entries
+                )
+
         if name is None:
             name = similarity_function.__class__.__name__
         if (self.n_rows == 0) or (self.n_cols == 0):
@@ -138,11 +158,21 @@ class Scores:
             score = similarity_function.pair(self.references[0],
                                              self.queries[0])
             self._scores.add_dense_matrix(np.array([score]), name)
+        elif is_sparse_advisable():
+            new_scores = similarity_function.sparse_array(references=self.references,
+                                                            queries=self.queries,
+                                                            idx_row=self._scores.row,
+                                                            idx_col=self._scores.col,
+                                                            is_symmetric=self.is_symmetric)
+            self._scores.add_sparse_data(self._scores.row,
+                                        self._scores.col,
+                                        new_scores,
+                                        name)
         else:
             scores_matrix = similarity_function.matrix(self.references,
                                                        self.queries,
                                                        is_symmetric=self.is_symmetric)
-            self._scores.add_dense_matrix(scores_matrix, name)
+            self._scores.add_dense_matrix(scores_matrix, name, join_type=join_type)
         return self
 
     def scores_by_reference(self, reference: ReferencesType,
