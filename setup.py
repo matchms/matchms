@@ -55,7 +55,7 @@ setup(
         "pyteomics >=4.2",
         "requests",
         "scipy",
-        "sparsestack >= 0.3.0",
+        "sparsestack >= 0.4.0",
         "tqdm",
     ],
     extras_require={"dev": ["bump2version",
