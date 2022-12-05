@@ -44,15 +44,6 @@ class Pipeline:
 
     .. code-block:: python
 
-        from matchms import Pipeline
-
-        pipeline = Pipeline("my_config_file.yaml")
-        pipeline.run()
-
-    An alternative way to use it:
-
-    .. code-block:: python
-
         pipeline = Pipeline()
         pipeline.query_files = "spectrums_file.msp"
         pipeline.filter_steps_queries = [
