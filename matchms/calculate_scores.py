@@ -5,6 +5,7 @@ from .typing import QueriesType, ReferencesType
 
 def calculate_scores(references: ReferencesType, queries: QueriesType,
                      similarity_function: BaseSimilarity,
+                     array_type: str = "numpy",
                      is_symmetric: bool = False) -> Scores:
     """Calculate the similarity between all reference objects versus all query objects.
 
@@ -47,6 +48,8 @@ def calculate_scores(references: ReferencesType, queries: QueriesType,
         List of query objects
     similarity_function
         Function which accepts a reference + query object and returns a score or tuple of scores
+    array_type
+        Specify the type of array to store and compute the scores. Choose from "numpy" or "sparse".
     is_symmetric
         Set to True when *references* and *queries* are identical (as for instance for an all-vs-all
         comparison). By using the fact that score[i,j] = score[j,i] the calculation will be about
@@ -58,4 +61,4 @@ def calculate_scores(references: ReferencesType, queries: QueriesType,
     ~matchms.Scores.Scores
     """
     return Scores(references=references, queries=queries,
-                  is_symmetric=is_symmetric).calculate(similarity_function)
+                  is_symmetric=is_symmetric).calculate(similarity_function, array_type=array_type)

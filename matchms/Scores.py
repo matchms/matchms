@@ -123,8 +123,9 @@ class Scores:
             "Expected input argument 'queries' to be list or tuple or np.ndarray."
 
     def calculate(self, similarity_function: BaseSimilarity,
-                   name: str = None,
-                   join_type="left") -> Scores:
+                  name: str = None,
+                  array_type: str = "numpy",
+                  join_type="left") -> Scores:
         """
         Calculate the similarity between all reference objects vs all query objects using
         the most suitable available implementation of the given similarity_function.
@@ -140,6 +141,8 @@ class Scores:
             Set to True when *references* and *queries* are identical (as for instance for an all-vs-all
             comparison). By using the fact that score[i,j] = score[j,i] the calculation will be about
             2x faster. Default is False.
+        array_type
+            Specify the type of array to store and compute the scores. Choose from "numpy" or "sparse".
         join_mode
             Choose from left, right, outer, inner to specify the merge type.
         """
@@ -160,19 +163,30 @@ class Scores:
             self._scores.add_dense_matrix(np.array([score]), name)
         elif is_sparse_advisable():
             new_scores = similarity_function.sparse_array(references=self.references,
-                                                            queries=self.queries,
-                                                            idx_row=self._scores.row,
-                                                            idx_col=self._scores.col,
-                                                            is_symmetric=self.is_symmetric)
+                                                          queries=self.queries,
+                                                          idx_row=self._scores.row,
+                                                          idx_col=self._scores.col,
+                                                          is_symmetric=self.is_symmetric)
             self._scores.add_sparse_data(self._scores.row,
-                                        self._scores.col,
-                                        new_scores,
-                                        name)
+                                         self._scores.col,
+                                         new_scores,
+                                         name)
         else:
-            scores_matrix = similarity_function.matrix(self.references,
-                                                       self.queries,
-                                                       is_symmetric=self.is_symmetric)
-            self._scores.add_dense_matrix(scores_matrix, name, join_type=join_type)
+            new_scores = similarity_function.matrix(self.references,
+                                                    self.queries,
+                                                    array_type=array_type,
+                                                    is_symmetric=self.is_symmetric)
+            if isinstance(new_scores, np.ndarray):
+                self._scores.add_dense_matrix(new_scores, name, join_type=join_type)
+            elif len(new_scores.score_names) == 1:
+                new_scores.data.dtype.names = [name]
+                self._scores.add_sparse_data(new_scores.row,
+                                             new_scores.col,
+                                             new_scores.data, "", join_type=join_type)
+            else:
+                self._scores.add_sparse_data(new_scores.row,
+                                             new_scores.col,
+                                             new_scores.data, name, join_type=join_type)
         return self
 
     def scores_by_reference(self, reference: ReferencesType,

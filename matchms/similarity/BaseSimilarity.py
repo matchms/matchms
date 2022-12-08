@@ -85,16 +85,25 @@ class BaseSimilarity:
                         scores.append(score)
                     #scores[i_ref][i_query] = self.pair(reference, query)
 
-        scores_array = StackedSparseArray(n_rows, n_cols)
-        scores = np.array(scores, dtype=self.score_datatype)
+        # scores_array = StackedSparseArray(n_rows, n_cols)
+        # scores = np.array(scores, dtype=self.score_datatype)
         idx_row = np.array(idx_row)
         idx_col = np.array(idx_col)
         # TODO add different join modes
-        scores_array.add_sparse_data(idx_row, idx_col, scores, "")
+        #scores_array.add_sparse_data(idx_row, idx_col, scores, "")
+        scores_data = np.array(scores, dtype=self.score_datatype)
         # TODO: make StackedSpareseArray the default and add fixed function to output different formats (with code below)
         if array_type == "numpy":
-            return scores_array.to_array()
-        return scores_array
+            scores_array = np.zeros(shape=(n_rows, n_cols), dtype=self.score_datatype)
+            scores_array[idx_row, idx_col] = scores_data.reshape(-1)
+            return scores_array
+            #return scores_array.to_array()
+        elif array_type == "sparse":
+            # return idx_row, idx_col, scores_data
+            scores_array = StackedSparseArray(n_rows, n_cols)
+            scores_array.add_sparse_data(idx_row, idx_col, scores_data, "")
+            return scores_array
+        raise ValueError("array_type must be 'numpy' or 'sparse'.")
 
     def sparse_array(self, references: List[SpectrumType], queries: List[SpectrumType],
                      idx_row, idx_col, is_symmetric: bool = False):

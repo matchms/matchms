@@ -177,6 +177,7 @@ class Pipeline:
             self.scores = calculate_scores(self.spectrums_references,
                                            self.spectrums_queries,
                                            similarity_measure,
+                                           array_type="sparse",
                                            is_symmetric=self.is_symmetric)
         else:
             new_scores = similarity_measure.sparse_array(references=self.spectrums_references,
