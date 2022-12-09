@@ -211,6 +211,12 @@ jobs:
           pytest --cov --cov-report term --cov-report xml --junitxml=xunit-result.xml
       - name: Correct coverage paths
         run: sed -i "s+$PWD/++g" coverage.xml
+      - uses: actions/upload-artifact@v2
+        with:
+          name: coverage-report-conda
+          path: |
+            coverage.xml
+            xunit-result.xml
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
         env:
