@@ -62,7 +62,6 @@ class BaseSimilarity:
         #pylint: disable=too-many-locals
         n_rows = len(references)
         n_cols = len(queries)
-        #scores = np.empty([n_rows, n_cols], dtype=self.score_datatype)
         idx_row = []
         idx_col = []
         scores = []
@@ -74,8 +73,6 @@ class BaseSimilarity:
                         idx_row += [i_ref, i_query]
                         idx_col += [i_query, i_ref]
                         scores += [score, score]
-                    # scores[i_ref][i_query] = self.pair(reference, query)
-                    # scores[i_query][i_ref] = scores[i_ref][i_query]
             else:
                 for i_query, query in enumerate(queries[:n_cols]):
                     score = self.pair(reference, query)
@@ -83,23 +80,16 @@ class BaseSimilarity:
                         idx_row.append(i_ref)
                         idx_col.append(i_query)
                         scores.append(score)
-                    #scores[i_ref][i_query] = self.pair(reference, query)
 
-        # scores_array = StackedSparseArray(n_rows, n_cols)
-        # scores = np.array(scores, dtype=self.score_datatype)
         idx_row = np.array(idx_row)
         idx_col = np.array(idx_col)
-        # TODO add different join modes
-        #scores_array.add_sparse_data(idx_row, idx_col, scores, "")
         scores_data = np.array(scores, dtype=self.score_datatype)
         # TODO: make StackedSpareseArray the default and add fixed function to output different formats (with code below)
         if array_type == "numpy":
             scores_array = np.zeros(shape=(n_rows, n_cols), dtype=self.score_datatype)
             scores_array[idx_row, idx_col] = scores_data.reshape(-1)
             return scores_array
-            #return scores_array.to_array()
-        elif array_type == "sparse":
-            # return idx_row, idx_col, scores_data
+        if array_type == "sparse":
             scores_array = StackedSparseArray(n_rows, n_cols)
             scores_array.add_sparse_data(idx_row, idx_col, scores_data, "")
             return scores_array
