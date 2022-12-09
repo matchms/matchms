@@ -1,6 +1,7 @@
 import logging
 import os
 from collections import OrderedDict
+import datetime
 import yaml
 from tqdm import tqdm
 import matchms.filtering as msfilters
@@ -117,6 +118,7 @@ class Pipeline:
     def run(self):
         self.set_logging()
         self.write_to_logfile("--- Start running matchms pipeline. ---")
+        self.write_to_logfile(str(datetime.datetime.now()))
         self.check_pipeline()
         self.write_to_logfile("--- Importing data ---")
         self.import_data(self.query_files,
@@ -124,6 +126,7 @@ class Pipeline:
 
         # Processing
         self.write_to_logfile("--- Processing spectra ---")
+        self.write_to_logfile(str(datetime.datetime.now()))
         for step in self.filter_steps_queries:
             self.write_to_logfile(f"-- Processing step: {step} --")
         for spectrum in tqdm(self.spectrums_queries,
@@ -143,6 +146,7 @@ class Pipeline:
         # Score computation and masking
         self.write_to_logfile("--- Computing scores ---")
         for i, computation in enumerate(self.score_computations):
+            self.write_to_logfile(str(datetime.datetime.now()))
             if not isinstance(computation, list):
                 computation = [computation]
             self.write_to_logfile(f"-- Score computation: {computation} --")
