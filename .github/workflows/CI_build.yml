@@ -41,6 +41,12 @@ jobs:
       - name: Check style against standards using prospector
         shell: bash -l {0}
         run: prospector -o grouped -o pylint:pylint-report.txt
+      - uses: actions/upload-artifact@v2
+        with:
+          name: coverage-report-pip
+          path: |
+            coverage.xml
+            xunit-result.xml
       - name: Check whether import statements are used consistently
         run: isort . --check-only --diff
       - name: SonarCloud Scan
@@ -102,7 +108,7 @@ jobs:
         python-version: ['3.7', '3.8', '3.9']
         exclude:
           - os: ubuntu-latest
-            python-version: 3.8 # or 3.9 when #240 is fully solved 
+            python-version: 3.8 # or 3.9 when #240 is fully solved
     steps:
       - uses: actions/checkout@v2
         with:
