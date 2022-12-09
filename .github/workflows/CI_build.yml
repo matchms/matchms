@@ -41,12 +41,23 @@ jobs:
       - name: Check style against standards using prospector
         shell: bash -l {0}
         run: prospector -o grouped -o pylint:pylint-report.txt
+      - name: Store PR metadata in json file
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+        run: |
+          jq -n --arg pr_number "$PR_NUMBER"\
+                --arg head_ref "$HEAD_REF"\
+                --arg base_ref "$BASE_REF"\
+            '{"pr_number": $pr_number, "head_ref": $head_ref, "base_ref": $base_ref}' > pr_metadata.json
       - uses: actions/upload-artifact@v2
         with:
-          name: coverage-report-pip
+          name: sonarcloud-data-pip
           path: |
             coverage.xml
             xunit-result.xml
+            pr_metadata.json
       - name: Check whether import statements are used consistently
         run: isort . --check-only --diff
 
