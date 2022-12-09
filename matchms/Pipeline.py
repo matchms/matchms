@@ -1,7 +1,7 @@
+import datetime
 import logging
 import os
 from collections import OrderedDict
-import datetime
 import yaml
 from tqdm import tqdm
 import matchms.filtering as msfilters
@@ -154,6 +154,8 @@ class Pipeline:
                 self._apply_score_masking(computation)
             else:
                 self._apply_similarity_measure(computation, i)
+        self.write_to_logfile("--- Pipeline run finised ---")
+        self.write_to_logfile(str(datetime.datetime.now()))
 
     def _apply_score_masking(self, computation):
         if len(computation) == 1:
