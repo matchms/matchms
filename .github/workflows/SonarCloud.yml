@@ -17,9 +17,12 @@ jobs:
           repository: ${{ github.event.workflow_run.head_repository.full_name }}
           ref: ${{ github.event.workflow_run.head_branch }}
           fetch-depth: 0
-      - name: Fetch coverage report
-        uses: actions/download-artifact@v2
-        # TODO: download coverage.xml from artifacts
+      - name: Fetch coverage report from artifact
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow: CI_build.yml
+          name: coverage-report
+          path: ${{ github.workspace }}
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
         env:
