@@ -44,6 +44,7 @@ def test_pipeline_symmetric():
     expected = np.array([[1., 0.30384404],
                          [0.30384404, 1.]])
     assert np.allclose(all_scores["ModifiedCosine_score"][3:, 3:], expected)
+    assert np.all(all_scores["ModifiedCosine_score"].diagonal() == 1), "Diagonal should all be 1.0"
 
 
 def test_pipeline_symmetric_filters():
@@ -64,6 +65,7 @@ def test_pipeline_symmetric_filters():
     expected = np.array([[1., 0.30384404],
                          [0.30384404, 1.]])
     assert np.allclose(all_scores["ModifiedCosine_score"][3:, 3:], expected)
+    assert np.all(all_scores["ModifiedCosine_score"].diagonal() == 1), "Diagonal should all be 1.0"
 
 
 def test_pipeline_symmetric_masking():
@@ -83,6 +85,7 @@ def test_pipeline_symmetric_masking():
     expected = np.array([[1., 0.30384404],
                          [0.30384404, 1.]])
     assert np.allclose(all_scores["ModifiedCosine_score"][3:, 3:], expected)
+    assert np.all(all_scores["ModifiedCosine_score"].diagonal() == 1), "Diagonal should all be 1.0"
 
 
 def test_pipeline_symmetric_custom_score():
@@ -101,6 +104,7 @@ def test_pipeline_symmetric_custom_score():
     expected = np.array([[1., 0.30384404],
                          [0.30384404, 1.]])
     assert np.allclose(all_scores["ModifiedCosine_score"][3:, 3:], expected)
+    assert np.all(all_scores["ModifiedCosine_score"].diagonal() == 1), "Diagonal should all be 1.0"
 
 
 def test_pipeline_non_symmetric():
