@@ -75,8 +75,8 @@ def test_all_scores_and_methods(spectrums, name, similarity_measure):
             computed_scores_matrix[idx_row, idx_col])
 
 
-@pytest.mark.parametrize("name, similarity_measure", list(_score_functions.items()))
-def test_consistency_scoring_and_pipeline(spectrums, name, similarity_measure):
+@pytest.mark.parametrize("similarity_measure", list(_score_functions.values()))
+def test_consistency_scoring_and_pipeline(spectrums, similarity_measure):
     scoring_method = similarity_measure[0](**similarity_measure[1])
     # Run matrix() method
     computed_scores_matrix = scoring_method.matrix(spectrums, spectrums)
