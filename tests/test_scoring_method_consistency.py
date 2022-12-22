@@ -7,12 +7,13 @@ Some scoring methods will be omitted because they would require additional proce
 or depencendies (e.g. fingerprint similarity).
 """
 import os
-import pytest
 import numpy as np
-from matchms import Pipeline
-import matchms.similarity as mssimilarity
+import pytest
 import matchms.filtering as msfilter
+import matchms.similarity as mssimilarity
+from matchms import Pipeline
 from matchms.importing import load_from_json
+
 
 module_root = os.path.dirname(__file__)
 json_file = os.path.join(module_root, "gnps_spectra.json")
