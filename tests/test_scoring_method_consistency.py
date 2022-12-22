@@ -41,8 +41,8 @@ def spectrums():
     return spectrums
 
 
-@pytest.mark.parametrize("name, similarity_measure", list(_score_functions.items()))
-def test_all_scores_and_methods(spectrums, name, similarity_measure):
+@pytest.mark.parametrize("similarity_measure", list(_score_functions.values()))
+def test_all_scores_and_methods(spectrums, similarity_measure):
     """Compute similarites between all spectrums and compare across different method calls.
     .pair() will be compared to .matrix() results
     .matrix() results will be compared to .sparse_array() results
