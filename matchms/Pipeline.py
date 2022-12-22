@@ -20,7 +20,12 @@ _importing_functions = {"json": msimport.load_from_json,
 _filter_functions = {key: f for key, f in msfilters.__dict__.items() if callable(f)}
 _masking_functions = ["filter_by_range"]
 _score_functions = {key.lower(): f for key, f in mssimilarity.__dict__.items() if callable(f)}
+
+# Set logger
 logger = logging.getLogger("matchms")
+formatter = logging.Formatter('%(asctime)s %(levelname)-8s %(message)s')
+for handler in logger.handlers:
+    handler.setFormatter(formatter)
 
 
 class Pipeline:
@@ -118,7 +123,7 @@ class Pipeline:
     def run(self):
         self.set_logging()
         self.write_to_logfile("--- Start running matchms pipeline. ---")
-        self.write_to_logfile(str(datetime.datetime.now()))
+        self.write_to_logfile(f"Start time: {str(datetime.datetime.now())}")
         self.check_pipeline()
         self.write_to_logfile("--- Importing data ---")
         self.import_data(self.query_files,
