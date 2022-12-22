@@ -81,11 +81,6 @@ def test_consistency_scoring_and_pipeline(spectrums, name, similarity_measure):
     # Run matrix() method
     computed_scores_matrix = scoring_method.matrix(spectrums, spectrums)
 
-    # Run sparse_array() method
-    idx_row, idx_col = np.where(computed_scores_matrix)
-    computed_scores_sparse = scoring_method.sparse_array(spectrums, spectrums,
-                                                         idx_row, idx_col)
-
     # Run pipeline
     pipeline = Pipeline()
     pipeline.query_files = json_file
@@ -95,11 +90,8 @@ def test_consistency_scoring_and_pipeline(spectrums, name, similarity_measure):
     pipeline.score_computations = [similarity_measure]
     pipeline.run()
 
-    assert pipeline.scores.scores.data == computed_scores_sparse
-
-
     if computed_scores_matrix.dtype.names is None:
         assert np.allclose(pipeline.scores.to_array(), computed_scores_matrix)
     else:
-        assert np.allclose(pipeline.scores.to_array(computed_scores_matrix.dtype.names[0]),
+        assert np.allclose(pipeline.scores.to_array(pipeline.scores.score_names[0]),
             computed_scores_matrix[computed_scores_matrix.dtype.names[0]])
