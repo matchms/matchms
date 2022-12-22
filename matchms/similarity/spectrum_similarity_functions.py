@@ -126,46 +126,6 @@ def number_matching(numbers_1, numbers_2, tolerance):
                 cols.append(j)
     return np.array(rows), np.array(cols), np.array(data)
 
-def number_matching2(numbers_1, numbers_2, tolerance):
-    idx1 = np.argsort(numbers_1)
-    idx2 = np.argsort(numbers_2)
-
-
-@numba.jit(nopython=True)
-def get_idx_inner(left_row, left_col, right_row, right_col,
-                  idx1, idx2):
-    """Get current and new indices for inner merge.
-
-    idx1, idx2
-        Numpy array of pre-sorted (np.lexsort) indices for left/right arrays.
-    """
-    #pylint: disable=too-many-arguments
-    #pylint: disable=too-many-locals
-
-    idx_left = []
-    idx_left_new = []
-    idx_right = []
-    idx_right_new = []
-    row_new = []
-    col_new = []
-    low = 0
-    counter = 0
-    for i in idx1:
-        for j in idx2[low:]:
-            if (left_row[i] == right_row[j]) and (left_col[i] == right_col[j]):
-                idx_left.append(i)
-                idx_left_new.append(counter)
-                idx_right.append(j)
-                idx_right_new.append(counter)
-                row_new.append(left_row[i])
-                col_new.append(left_col[i])
-                counter += 1
-            if left_row[i] > right_row[j]:
-                low = j
-            if left_row[i] < right_row[j]:
-                break
-    return idx_left, idx_right, idx_left_new, idx_right_new, row_new, col_new
-
 
 @numba.njit
 def number_matching_symmetric(numbers_1, tolerance):
