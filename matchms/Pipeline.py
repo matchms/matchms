@@ -118,9 +118,18 @@ class Pipeline:
             self.logging_level = "WARNING"
 
     def import_workflow_from_yaml(self, config_file):
+        """Define Pipeline workflow based on config file.
+        """
         self._initialize_workflow_dict(config_file)
 
     def run(self):
+        """Execute the defined Pipeline workflow.
+
+        This method will execute all steps of the workflow.
+        1) Initializing the log file and importing the spectrums
+        2) Spectrum processing (using matchms filters)
+        3) Score Computations
+        """
         self.set_logging()
         self.write_to_logfile("--- Start running matchms pipeline. ---")
         self.write_to_logfile(f"Start time: {str(datetime.datetime.now())}")
@@ -163,6 +172,8 @@ class Pipeline:
         self.write_to_logfile(str(datetime.datetime.now()))
 
     def _apply_score_masking(self, computation):
+        """Apply filter to remove scores which are out of the set range.
+        """
         if len(computation) == 1:
             name = self.scores.score_names[-1]
             self.scores.filter_by_range(inplace=True, name=name)
@@ -173,6 +184,8 @@ class Pipeline:
             self.scores.filter_by_range(inplace=True, **computation[1])
 
     def _apply_similarity_measure(self, computation, i):
+        """Apply score computation on all loaded and processed spectra.
+        """
         def get_similarity_measure(computation):
             if isinstance(computation[0], str):
                 if len(computation) > 1:
@@ -202,6 +215,9 @@ class Pipeline:
                                                similarity_measure.__class__.__name__)
 
     def check_pipeline(self):
+        """Check if pipeline seems OK before running.
+        Aim is to avoid pipeline crashing after long computation.
+        """
         def check_files_exist(filenames):
             if isinstance(filenames, str):
                 filenames = [filenames]
@@ -226,6 +242,8 @@ class Pipeline:
             raise ValueError(f"Unknown score computation: {computation[0]}.")
 
     def set_logging(self):
+        """Set the matchms logger to write messages to file (if defined).
+        """
         if self.logging_file is not None:
             add_logging_to_file(self.logging_file,
                                 loglevel=self.logging_level,
@@ -236,11 +254,23 @@ class Pipeline:
                 "Logging messages will not be written to file.")
 
     def write_to_logfile(self, line):
+        """Write message to log file.
+        """
         if self.logging_file is not None:
             with open(self.logging_file, "a", encoding="utf-8") as f:
                 f.write(line + '\n')
 
     def import_data(self, query_files, reference_files=None):
+        """Import spectra from file(s).
+
+        Parameters
+        ----------
+        query_files
+            List of files, or single filename, containing the query spectra.
+        reference_files
+            List of files, or single filename, containing the reference spectra.
+            If set to None (default) then all query spectra will be compared to each other.
+        """
         if isinstance(query_files, str):
             query_files = [query_files]
         if isinstance(reference_files, str):
@@ -259,6 +289,8 @@ class Pipeline:
             self.spectrums_references += spectrums_references
 
     def apply_filter(self, spectrum, filter_step):
+        """Apply the given matchms filter to a spectrum.
+        """
         if not isinstance(filter_step, list):
             filter_step = [filter_step]
         if isinstance(filter_step[0], str):
@@ -273,6 +305,9 @@ class Pipeline:
         return filter_function(spectrum)
 
     def create_workflow_config_file(self, filename):
+        """Save the current pipeline workflow as a yaml file.
+        This file allows to reconstruct the current workflow or can be adapted as desired.
+        """
         with open(filename, 'w', encoding="utf-8") as file:
             file.write("# Matchms pipeline config file \n")
             file.write("# Change and adapt fields where necessary \n")
