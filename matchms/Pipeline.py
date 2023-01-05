@@ -1,14 +1,15 @@
-import datetime
 import logging
 import os
 from collections import OrderedDict
 import yaml
+from datetime import datetime
 from tqdm import tqdm
 import matchms.filtering as msfilters
 import matchms.importing as msimport
 import matchms.similarity as mssimilarity
 from matchms import calculate_scores
 from matchms.logging_functions import (add_logging_to_file,
+                                       reset_matchms_logger,
                                        set_matchms_logger_level)
 
 
@@ -20,12 +21,7 @@ _importing_functions = {"json": msimport.load_from_json,
 _filter_functions = {key: f for key, f in msfilters.__dict__.items() if callable(f)}
 _masking_functions = ["filter_by_range"]
 _score_functions = {key.lower(): f for key, f in mssimilarity.__dict__.items() if callable(f)}
-
-# Set logger
 logger = logging.getLogger("matchms")
-formatter = logging.Formatter('%(asctime)s %(levelname)-8s %(message)s')
-for handler in logger.handlers:
-    handler.setFormatter(formatter)
 
 
 class Pipeline:
@@ -132,7 +128,7 @@ class Pipeline:
         """
         self.set_logging()
         self.write_to_logfile("--- Start running matchms pipeline. ---")
-        self.write_to_logfile(f"Start time: {str(datetime.datetime.now())}")
+        self.write_to_logfile(f"Start time: {str(datetime.now())}")
         self.check_pipeline()
         self.write_to_logfile("--- Importing data ---")
         self.import_data(self.query_files,
@@ -140,7 +136,7 @@ class Pipeline:
 
         # Processing
         self.write_to_logfile("--- Processing spectra ---")
-        self.write_to_logfile(str(datetime.datetime.now()))
+        self.write_to_logfile(f"Time: {str(datetime.now())}")
         for step in self.filter_steps_queries:
             self.write_to_logfile(f"-- Processing step: {step} --")
         for spectrum in tqdm(self.spectrums_queries,
@@ -160,16 +156,16 @@ class Pipeline:
         # Score computation and masking
         self.write_to_logfile("--- Computing scores ---")
         for i, computation in enumerate(self.score_computations):
-            self.write_to_logfile(str(datetime.datetime.now()))
+            self.write_to_logfile(f"Time: {str(datetime.now())}")
             if not isinstance(computation, list):
                 computation = [computation]
-            self.write_to_logfile(f"-- Score computation: {computation} --")
             if isinstance(computation[0], str) and computation[0] in _masking_functions:
+                self.write_to_logfile(f"-- Score masking: {computation} --")
                 self._apply_score_masking(computation)
             else:
+                self.write_to_logfile(f"-- Score computation: {computation} --")
                 self._apply_similarity_measure(computation, i)
-        self.write_to_logfile("--- Pipeline run finised ---")
-        self.write_to_logfile(str(datetime.datetime.now()))
+        self.write_to_logfile(f"--- Pipeline run finised ({str(datetime.now())}) ---")
 
     def _apply_score_masking(self, computation):
         """Apply filter to remove scores which are out of the set range.
@@ -184,7 +180,7 @@ class Pipeline:
             self.scores.filter_by_range(inplace=True, **computation[1])
 
     def _apply_similarity_measure(self, computation, i):
-        """Apply score computation on all loaded and processed spectra.
+        """Run score computations for all listed methods and on all loaded and processed spectra.
         """
         def get_similarity_measure(computation):
             if isinstance(computation[0], str):
@@ -197,6 +193,7 @@ class Pipeline:
                 return computation[0]()
             raise TypeError("Unknown similarity measure.")
         similarity_measure = get_similarity_measure(computation)
+        # If this is the first score computation:
         if i == 0:
             self.scores = calculate_scores(self.spectrums_references,
                                            self.spectrums_queries,
@@ -244,6 +241,8 @@ class Pipeline:
     def set_logging(self):
         """Set the matchms logger to write messages to file (if defined).
         """
+        reset_matchms_logger()
+        set_matchms_logger_level(self.logging_level)
         if self.logging_file is not None:
             add_logging_to_file(self.logging_file,
                                 loglevel=self.logging_level,
