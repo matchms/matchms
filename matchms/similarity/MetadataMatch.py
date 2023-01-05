@@ -1,7 +1,9 @@
 import logging
 from typing import List
-import numba
 import numpy as np
+from sparsestack import StackedSparseArray
+from matchms.similarity.spectrum_similarity_functions import (
+    number_matching, number_matching_symmetric)
 from matchms.typing import SpectrumType
 from .BaseSimilarity import BaseSimilarity
 
@@ -48,16 +50,14 @@ class MetadataMatch(BaseSimilarity):
 
         for (reference, query, score) in scores:
             print(f"Metadata match between {reference.get('id')} and {query.get('id')}" +
-                  f" is {score:.2f}")
+                  f" is {score}")
 
     Should output
 
     .. testoutput::
 
-        Metadata match between 1 and 3 is 0.00
-        Metadata match between 1 and 4 is 1.00
-        Metadata match between 2 and 3 is 1.00
-        Metadata match between 2 and 4 is 0.00
+        Metadata match between 1 and 4 is [True]
+        Metadata match between 2 and 3 is [True]
 
     """
     # Set key characteristics as class attributes
@@ -112,6 +112,7 @@ class MetadataMatch(BaseSimilarity):
         return np.asarray(False, dtype=self.score_datatype)
 
     def matrix(self, references: List[SpectrumType], queries: List[SpectrumType],
+               array_type: str = "numpy",
                is_symmetric: bool = False) -> np.ndarray:
         """Compare parent masses between all references and queries.
 
@@ -121,6 +122,9 @@ class MetadataMatch(BaseSimilarity):
             List/array of reference spectrums.
         queries
             List/array of Single query spectrums.
+        array_type
+            Specify the output array type. Can be "numpy" or "sparse".
+            Default is "numpy" and will return a numpy array. "sparse" will return a COO-sparse array.
         is_symmetric
             Set to True when *references* and *queries* are identical (as for instance for an all-vs-all
             comparison). By using the fact that score[i,j] = score[j,i] the calculation will be about
@@ -153,26 +157,18 @@ class MetadataMatch(BaseSimilarity):
             return scores.astype(self.score_datatype)
 
         if is_symmetric:
-            return entries_scores_symmetric(entries_ref, entries_query,
-                                            self.tolerance).astype(self.score_datatype)
-        return entries_scores(entries_ref, entries_query,
-                              self.tolerance).astype(self.score_datatype)
+            rows, cols, scores = number_matching_symmetric(entries_ref,
+                                                           self.tolerance)
+        else:
+            rows, cols, scores = number_matching(entries_ref, entries_query,
+                                                 self.tolerance)
 
-
-@numba.njit
-def entries_scores(entries_ref, entries_query, tolerance):
-    scores = np.zeros((len(entries_ref), len(entries_query)))
-    for i, entry_ref in enumerate(entries_ref):
-        for j, entry_query in enumerate(entries_query):
-            scores[i, j] = (abs(entry_ref - entry_query) <= tolerance)
-    return scores
-
-
-@numba.njit
-def entries_scores_symmetric(entries_ref, entries_query, tolerance):
-    scores = np.zeros((len(entries_ref), len(entries_query)))
-    for i, entry_ref in enumerate(entries_ref):
-        for j in range(i, len(entries_query)):
-            scores[i, j] = (abs(entry_ref - entries_query[j]) <= tolerance)
-            scores[j, i] = scores[i, j]
-    return scores
+        if array_type == "numpy":
+            scores_array = np.zeros((len(entries_ref), len(entries_query)))
+            scores_array[rows, cols] = scores.astype(self.score_datatype)
+            return scores_array
+        if array_type == "sparse":
+            scores_array = StackedSparseArray(len(entries_ref), len(entries_query))
+            scores_array.add_sparse_data(rows, cols, scores.astype(self.score_datatype), "")
+            return scores_array
+        raise ValueError("")

@@ -1,8 +1,7 @@
 import numpy as np
 import pytest
 from matchms import calculate_scores
-from matchms.similarity.MetadataMatch import (MetadataMatch, entries_scores,
-                                              entries_scores_symmetric)
+from matchms.similarity.MetadataMatch import MetadataMatch
 from .builder_Spectrum import SpectrumBuilder
 
 
@@ -23,34 +22,6 @@ def spectrums():
     return [s1, s2, s3, s4]
 
 
-@pytest.mark.parametrize("entries1, entries2, result", [
-    [np.array([100, 101, 102]), np.array([102, 104]),
-     np.array([[1., 0.], [1., 0.], [1., 1.]])],
-    [np.array([98, 105.5]), np.array([102, 104]),
-     np.array([[0., 0.], [0., 1.]])]
-])
-def test_entries_scores(entries1, entries2, result):
-    scores = entries_scores(entries1, entries2, 2)
-    assert np.array_equal(scores, result)
-    # non-compiled run
-    scores = entries_scores.py_func(entries1, entries2, 2)
-    assert np.array_equal(scores, result)
-
-
-@pytest.mark.parametrize("entries, tolerance, result", [
-    [np.array([100, 101, 102]), 0.9,
-     np.array([[1., 0., 0.], [0., 1., 0.], [0., 0., 1.]])],
-    [np.array([100, 101, 102]), 1.0,
-     np.array([[1., 1., 0.], [1., 1., 1.], [0., 1., 1.]])]
-])
-def test_entries_scores_symmetric(entries, tolerance, result):
-    scores = entries_scores_symmetric(entries, entries, tolerance)
-    assert np.array_equal(scores, result)
-    # non-compiled run
-    scores = entries_scores_symmetric.py_func(entries, entries, tolerance)
-    assert np.array_equal(scores, result)
-
-
 def test_metadata_match_strings(spectrums):
     """Test basic metadata matching between string entries."""
     references = spectrums[:2]
@@ -58,7 +29,7 @@ def test_metadata_match_strings(spectrums):
 
     similarity_score = MetadataMatch(field="instrument_type")
     scores = calculate_scores(references, queries, similarity_score)
-    assert np.all(scores.scores == [[1, 0], [0, 0]]), "Expected different scores."
+    assert np.all(scores.scores.to_array() == [[1, 0], [0, 0]]), "Expected different scores."
 
 
 def test_metadata_match_strings_pair(spectrums):
@@ -79,7 +50,7 @@ def test_metadata_match_strings_wrong_method(spectrums, caplog):
 
     similarity_score = MetadataMatch(field="instrument_type", matching_type="difference")
     scores = calculate_scores(references, queries, similarity_score)
-    assert np.all(scores.scores == [[0, 0], [0, 0]]), "Expected different scores."
+    assert np.all(scores.scores.to_array() == [[0, 0], [0, 0]]), "Expected different scores."
     msg = "not compatible with 'difference' method"
     assert msg in caplog.text
 
@@ -107,4 +78,4 @@ def test_metadata_match_numerical(spectrums, tolerance, expected):
     similarity_score = MetadataMatch(field="retention_time",
                                      matching_type="difference", tolerance=tolerance)
     scores = calculate_scores(references, queries, similarity_score)
-    assert np.all(scores.scores == expected), "Expected different scores."
+    assert np.all(scores.scores.to_array().tolist() == expected), "Expected different scores."

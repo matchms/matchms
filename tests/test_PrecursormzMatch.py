@@ -1,9 +1,6 @@
 import numpy as np
 import pytest
 from matchms.similarity import PrecursorMzMatch
-from matchms.similarity.PrecursorMzMatch import (
-    precursormz_scores, precursormz_scores_ppm, precursormz_scores_symmetric,
-    precursormz_scores_symmetric_ppm)
 from .builder_Spectrum import SpectrumBuilder, spectra_factory
 
 
@@ -60,57 +57,3 @@ def test_precursormz_match_array_symmetric_parameterized(precursor_mz, tolerance
 
     assert np.all(scores == scores2), "Expected identical scores"
     assert np.all(scores == np.array(expected)), "Expected different scores"
-
-
-@pytest.mark.parametrize("numba_compiled", [True, False])
-def test_precursormz_scores(numba_compiled):
-    """Test the underlying score function (pure Python and numba compiled)."""
-    precursors_ref = np.asarray([101, 200, 300])
-    precursors_query = np.asarray([100, 301])
-    if numba_compiled:
-        scores = precursormz_scores(precursors_ref, precursors_query, tolerance=2.0)
-    else:
-        scores = precursormz_scores.py_func(precursors_ref, precursors_query, tolerance=2.0)
-    assert np.all(scores == np.array([[1., 0.],
-                                            [0., 0.],
-                                            [0., 1.]])), "Expected different scores."
-
-
-@pytest.mark.parametrize("numba_compiled", [True, False])
-def test_precursormz_scores_symmetric(numba_compiled):
-    """Test the underlying score function (non-compiled)."""
-    precursors = np.asarray([101, 100, 200])
-    if numba_compiled:
-        scores = precursormz_scores_symmetric(precursors, precursors, tolerance=2.0)
-    else:
-        scores = precursormz_scores_symmetric.py_func(precursors, precursors, tolerance=2.0)
-    assert np.all(scores == np.array([[1., 1., 0.],
-                                            [1., 1., 0.],
-                                            [0., 0., 1.]])), "Expected different scores."
-
-
-@pytest.mark.parametrize("numba_compiled", [True, False])
-def test_precursormz_scores_ppm(numba_compiled):
-    """Test the underlying score function (pure Python and numba compiled)."""
-    precursors_ref = np.asarray([100.00001, 200, 300])
-    precursors_query = np.asarray([100, 300.00001])
-    if numba_compiled:
-        scores = precursormz_scores_ppm(precursors_ref, precursors_query, tolerance_ppm=2.0)
-    else:
-        scores = precursormz_scores_ppm.py_func(precursors_ref, precursors_query, tolerance_ppm=2.0)
-    assert np.all(scores == np.array([[1., 0.],
-                                            [0., 0.],
-                                            [0., 1.]])), "Expected different scores."
-
-
-@pytest.mark.parametrize("numba_compiled", [True, False])
-def test_precursormz_scores_symmetric_ppm(numba_compiled):
-    """Test the underlying score function (non-compiled)."""
-    precursors = np.asarray([100.00001, 100, 200])
-    if numba_compiled:
-        scores = precursormz_scores_symmetric_ppm(precursors, precursors, tolerance_ppm=2.0)
-    else:
-        scores = precursormz_scores_symmetric_ppm.py_func(precursors, precursors, tolerance_ppm=2.0)
-    assert np.all(scores == np.array([[1., 1., 0.],
-                                            [1., 1., 0.],
-                                            [0., 0., 1.]])), "Expected different scores."
