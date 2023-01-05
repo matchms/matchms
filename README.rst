@@ -90,6 +90,19 @@ F Huber, S. Verhoeven, C. Meijer, H. Spreeuw, E. M. Villanueva Castilla, C. Geng
    :target: https://sonarcloud.io/component_measures?id=matchms_matchms&metric=Coverage&view=list
    :alt: Sonarcloud Coverage
 
+**********************************
+Latest changes (matchms >= 0.18.0)
+**********************************
+
+Pipeline class
+==============
+
+To make typical matchms workflows (data import, processing, score computations) more accessible to users, matchms now offers a `Pipeline` class to handle complex workflows. This also allows to define, import, export, or modify workflows using yaml files. See code examples below (and soon: updated tutorial).
+
+Sparse scores array
+===================
+
+We realized that many matchms-based workflows aim to compare many-to-many spectra whereby not all pairs and scores are equally important. Often, for instance, it will be about searching similar or related spectra/compounds. This also means that often not all scores need to be stored (or computed). For this reason we now shifted to a sparse handling of scores in matchms (that means: only storing actuallly computed, non-null values).
 
 **********************************
 Latest changes (matchms >= 0.14.0)
