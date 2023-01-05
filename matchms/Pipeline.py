@@ -1,8 +1,8 @@
 import logging
 import os
 from collections import OrderedDict
-import yaml
 from datetime import datetime
+import yaml
 from tqdm import tqdm
 import matchms.filtering as msfilters
 import matchms.importing as msimport
