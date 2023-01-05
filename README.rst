@@ -131,15 +131,14 @@ Installation
 
 Prerequisites:  
 
-- Python 3.7, 3.8 or 3.9
+- Python 3.7, 3.8 or 3.9, (3.10 and 3.11 should work as well, but are not yet tested systematically)
 - Anaconda (recommended)
 
-We recommend installing matchms from Anaconda Cloud with
+We recommend installing matchms in a new virtual environment to avoid dependency clashes
 
 .. code-block:: console
 
-  # install matchms in a new virtual environment to avoid dependency clashes
-  conda create --name matchms python=3.8
+  conda create --name matchms python=3.9
   conda activate matchms
   conda install --channel bioconda --channel conda-forge matchms
 
