@@ -118,6 +118,6 @@ def test_fingerprint_similarity_with_scores_sorting():
                               similarity_measure)
 
     scores_by_ref_sorted = scores.scores_by_query(spectrum1, sort=True)
-    expected_scores = np.array([1.0, 0.84515425, 0.0])
+    expected_scores = np.array([1.0, 0.84515425])
     assert np.allclose(np.array([x[1] for x in scores_by_ref_sorted]), expected_scores, atol=1e-6), \
         "Expected different scores and/or order."

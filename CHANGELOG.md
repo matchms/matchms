@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.18.0] - 2023-01-05
+
+### Added
+
+- new `Pipeline` class to define entire matchms workflows. This includes importing one or several datasets, processing using matchms filtering/processing functions as well as similartiy computations. Also allows to import/export workflows as yaml files.
+
+### Changed
+
+- major change of `Scores` class. Internally, scores are now stored as a stacked sparse array. This allows to store several different scores for spectrum-spectrums pairs in an efficient way. Also makes it possible to run large-scale comparisons in particular when pipelines start with rapid selective similarity scoring methods such as MetadataMatch or PrecursorMzMatch.
+- Scoring/similarity methods now also get a `.sparse_array()` method (next to the previous `.pair()` and `.matrix()` methods).
+
+### Fixed
+
+- minor fix in `interpret_pepmass` function.
+
 ## [0.17.0] - 2022-08-23
 
 ### Added
@@ -445,7 +460,8 @@ Contains three plot types: `plot_spectrum()` or `spectrum.plot()`, `plot_spectra
 - This is the initial version of Spec2Vec from https://github.com/iomega/Spec2Vec
 - (later splitted into matchms + spec2vec)
 
-[Unreleased]: https://github.com/matchms/matchms/compare/0.17.0...HEAD
+[Unreleased]: https://github.com/matchms/matchms/compare/0.18.0...HEAD
+[0.18.0]: https://github.com/matchms/matchms/compare/0.17.0...0.18.0
 [0.17.0]: https://github.com/matchms/matchms/compare/0.16.0...0.17.0
 [0.16.0]: https://github.com/matchms/matchms/compare/0.15.0...0.16.0
 [0.15.0]: https://github.com/matchms/matchms/compare/0.14.0...0.15.0

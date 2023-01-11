@@ -32,7 +32,7 @@ class SimilarityNetwork:
         spectrums = [spectrum_1, spectrum_2]
         scores = calculate_scores(spectrums, spectrums, modified_cosine)
         ms_network = SimilarityNetwork(identifier_key="test_id")
-        ms_network.create_network(scores)
+        ms_network.create_network(scores, score_name="ModifiedCosine_score")
 
         nodes = list(ms_network.graph.nodes())
         nodes.sort()
@@ -92,16 +92,7 @@ class SimilarityNetwork:
         self.graph: Optional[nx.Graph] = None
         """NetworkX graph. Set after calling create_network()"""
 
-    @staticmethod
-    def _select_edge_score(similars_scores: dict, scores_type: np.dtype):
-        """Chose one value if score contains multiple values (e.g. "score" and "matches")"""
-        if len(scores_type) > 1 and "score" in scores_type.names:
-            return {key: value["score"] for key, value in similars_scores.items()}
-        if len(scores_type) > 1:  # Assume that first entry is desired score
-            return {key: value[0] for key, value in similars_scores.items()}
-        return similars_scores
-
-    def create_network(self, scores: Scores):
+    def create_network(self, scores: Scores, score_name: str = None):
         """
         Function to create network from given top-n similarity values. Expects that
         similarities given in scores are from an all-vs-all comparison including all
@@ -113,6 +104,8 @@ class SimilarityNetwork:
             Matchms Scores object containing all spectrums and pair similarities for
             generating a network.
         """
+        if score_name is None:
+            score_name = scores.scores.guess_score_name()
         assert self.top_n >= self.max_links, "top_n must be >= max_links"
         assert np.all(scores.queries == scores.references), \
             "Expected symmetric scores object with queries==references"
@@ -126,13 +119,12 @@ class SimilarityNetwork:
         similars_idx, similars_scores = get_top_hits(scores, identifier_key=self.identifier_key,
                                                      top_n=self.top_n,
                                                      search_by="queries",
+                                                     score_name=score_name,
                                                      ignore_diagonal=True)
-        similars_scores = self._select_edge_score(similars_scores, scores.scores.dtype)
 
         # Add edges based on global threshold (cutoff) for weights
         for i, spec in enumerate(scores.queries):
             query_id = spec.get(self.identifier_key)
-
             ref_candidates = np.array([scores.references[x].get(self.identifier_key)
                                           for x in similars_idx[query_id]])
             idx = np.where((similars_scores[query_id] >= self.score_cutoff) &

@@ -90,6 +90,19 @@ F Huber, S. Verhoeven, C. Meijer, H. Spreeuw, E. M. Villanueva Castilla, C. Geng
    :target: https://sonarcloud.io/component_measures?id=matchms_matchms&metric=Coverage&view=list
    :alt: Sonarcloud Coverage
 
+**********************************
+Latest changes (matchms >= 0.18.0)
+**********************************
+
+Pipeline class
+==============
+
+To make typical matchms workflows (data import, processing, score computations) more accessible to users, matchms now offers a `Pipeline` class to handle complex workflows. This also allows to define, import, export, or modify workflows using yaml files. See code examples below (and soon: updated tutorial).
+
+Sparse scores array
+===================
+
+We realized that many matchms-based workflows aim to compare many-to-many spectra whereby not all pairs and scores are equally important. Often, for instance, it will be about searching similar or related spectra/compounds. This also means that often not all scores need to be stored (or computed). For this reason we now shifted to a sparse handling of scores in matchms (that means: only storing actuallly computed, non-null values).
 
 **********************************
 Latest changes (matchms >= 0.14.0)
@@ -118,15 +131,14 @@ Installation
 
 Prerequisites:  
 
-- Python 3.7, 3.8 or 3.9
+- Python 3.7, 3.8 or 3.9, (3.10 and 3.11 should work as well, but are not yet tested systematically)
 - Anaconda (recommended)
 
-We recommend installing matchms from Anaconda Cloud with
+We recommend installing matchms in a new virtual environment to avoid dependency clashes
 
 .. code-block:: console
 
-  # install matchms in a new virtual environment to avoid dependency clashes
-  conda create --name matchms python=3.8
+  conda create --name matchms python=3.9
   conda activate matchms
   conda install --channel bioconda --channel conda-forge matchms
 
@@ -158,10 +170,38 @@ Introduction
 
 To get started with matchms, we recommend following our `matchms introduction tutorial <https://blog.esciencecenter.nl/build-your-own-mass-spectrometry-analysis-pipeline-in-python-using-matchms-part-i-d96c718c68ee>`_.
 
-Alternatively, here below is a small example of using matchms to calculate the Cosine score between mass Spectrums in the `tests/pesticides.mgf <https://github.com/matchms/matchms/blob/master/tests/pesticides.mgf>`_ file.
+Below is a small example of using matchms to calculate the Cosine score between mass Spectrums in the `tests/pesticides.mgf <https://github.com/matchms/matchms/blob/master/tests/pesticides.mgf>`_ file.
 
 .. code-block:: python
 
+    from matchms import Pipeline
+    
+    pipeline = Pipeline()
+    
+    # Read spectrums from a MGF formatted file, for other formats see https://matchms.readthedocs.io/en/latest/api/matchms.importing.html 
+    pipeline.query_files = "tests/pesticides.mgf"
+    pipeline.filter_steps_queries = [
+        ["default_filters"],
+        ["add_parent_mass"],
+        ["normalize_intensities"],
+        ["select_by_intensity", {"intensity_from": 0.001, "intensity_to": 1.0}],
+        ["select_by_mz", {"mz_from": 0, "mz_to": 1000}],
+        ["require_minimum_number_of_peaks", {"n_required": 5}]
+    ]
+    pipeline.score_computations = [["precursormzmatch",  {"tolerance": 100.0}],
+                                   ["cosinegreedy", {"tolerance": 1.0}],
+                                   ["filter_by_range", {"name": "CosineGreedy_score", "low": 0.2}]]
+
+    pipeline.logging_file = "my_pipeline.log"  # for pipeline and logging message
+    pipeline.logging_level = "INFO"
+    pipeline.run()
+
+
+Alternatively, in particular if you need more room to add custom functions and steps, the individual
+steps can run without using the matchms ``Pipeline``:
+
+.. code-block:: python
+    
     from matchms.importing import load_from_mgf
     from matchms.filtering import default_filters, normalize_intensities
     from matchms import calculate_scores
@@ -186,16 +226,18 @@ Alternatively, here below is a small example of using matchms to calculate the C
                               queries=spectrums,
                               similarity_function=CosineGreedy())
 
+    # Matchms allows to get the best matches for any query using scores_by_query
+    query = spectrums[15]  # just an example
+    best_matches = scores.scores_by_query(query, 'CosineGreedy_score', sort=True)
+
     # Print the calculated scores for each spectrum pair
-    for score in scores:
-        (reference, query, score) = score
-        # Ignore scores between same spectrum and
-        # pairs which have less than 20 peaks in common
-        if reference is not query and score["matches"] >= 20:
+    for (reference, score) in best_matches[:10]
+        # Ignore scores between same spectrum
+        if reference is not query:
             print(f"Reference scan id: {reference.metadata['scans']}")
             print(f"Query scan id: {query.metadata['scans']}")
-            print(f"Score: {score['score']:.4f}")
-            print(f"Number of matching peaks: {score['matches']}")
+            print(f"Score: {score[0]:.4f}")
+            print(f"Number of matching peaks: {score[1]}")
             print("----------------------------")
 
 Different spectrum similarity scores

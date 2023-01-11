@@ -4,6 +4,7 @@ from .calculate_scores import calculate_scores
 from .Fragments import Fragments
 from .logging_functions import _init_logger, set_matchms_logger_level
 from .Metadata import Metadata
+from .Pipeline import Pipeline
 from .Scores import Scores
 from .Spectrum import Spectrum
 
@@ -18,13 +19,14 @@ __all__ = [
     "calculate_scores",
     "exporting",
     "filtering",
+    "Fragments",
     "importing",
     "Metadata",
     "networking",
+    "Pipeline",
     "plotting",
     "Scores",
     "set_matchms_logger_level",
     "similarity",
     "Spectrum",
-    "Fragments"
 ]

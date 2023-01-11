@@ -3,7 +3,9 @@ pure Python version."""
 import numpy as np
 import pytest
 from matchms.similarity.spectrum_similarity_functions import (
-    collect_peak_pairs, find_matches, score_best_matches)
+    collect_peak_pairs, find_matches, number_matching, number_matching_ppm,
+    number_matching_symmetric, number_matching_symmetric_ppm,
+    score_best_matches)
 from .builder_Spectrum import SpectrumBuilder
 
 
@@ -13,14 +15,6 @@ def spectra():
     spec1 = builder.with_mz([100, 200, 300, 500]).with_intensities([0.1, 0.1, 1.0, 1.0]).build()
     spec2 = builder.with_mz([105, 205.1, 300, 500.1]).with_intensities([0.1, 0.1, 1.0, 1.0]).build()
     return spec1.peaks.to_numpy, spec2.peaks.to_numpy
-
-    # spec1 = np.array([[100, 200, 300, 500],
-    #                      [0.1, 0.1, 1.0, 1.0]], dtype="float").T
-
-    # spec2 = np.array([[105, 205.1, 300, 500.1],
-    #                      [0.1, 0.1, 1.0, 1.0]], dtype="float").T
-
-    # return spec1, spec2
 
 
 def get_function(numba_compiled, f):
@@ -80,3 +74,57 @@ def test_score_best_matches(numba_compiled, matching_pairs, expected_score, spec
     score, matches = func(matching_pairs, spec1, spec2)
     assert score == pytest.approx(expected_score[0], 1e-6), "Expected different score"
     assert matches == expected_score[1], "Expected different matches."
+
+
+@pytest.mark.parametrize("numba_compiled", [True, False])
+def test_number_matching(numba_compiled):
+    """Test the underlying score function (pure Python and numba compiled)."""
+    precursors_ref = np.asarray([101, 200, 300])
+    precursors_query = np.asarray([100, 301])
+    if numba_compiled:
+        row, col, scores = number_matching(precursors_ref, precursors_query, tolerance=2.0)
+    else:
+        row, col, scores = number_matching.py_func(precursors_ref, precursors_query, tolerance=2.0)
+    assert np.all(scores == np.array([True, True])), "Expected different scores."
+    assert np.all(row == np.array([0, 2]))
+    assert np.all(col == np.array([0, 1]))
+
+
+@pytest.mark.parametrize("numba_compiled", [True, False])
+def test_number_matching_symmetric(numba_compiled):
+    """Test the underlying score function (non-compiled)."""
+    precursors = np.asarray([101, 100, 200])
+    if numba_compiled:
+        row, col, scores = number_matching_symmetric(precursors, tolerance=2.0)
+    else:
+        row, col, scores = number_matching_symmetric.py_func(precursors, tolerance=2.0)
+    assert np.all(scores == np.array([True, True, True, True, True])), "Expected different scores."
+    assert np.all(row == np.array([0, 0, 1, 1, 2]))
+    assert np.all(col == np.array([0, 1, 0, 1, 2]))
+
+
+@pytest.mark.parametrize("numba_compiled", [True, False])
+def test_number_matching_ppm(numba_compiled):
+    """Test the underlying score function (pure Python and numba compiled)."""
+    precursors_ref = np.asarray([100.00001, 200, 300])
+    precursors_query = np.asarray([100, 300.00001])
+    if numba_compiled:
+        row, col, scores = number_matching_ppm(precursors_ref, precursors_query, tolerance_ppm=2.0)
+    else:
+        row, col, scores = number_matching_ppm.py_func(precursors_ref, precursors_query, tolerance_ppm=2.0)
+    assert np.all(scores == np.array([True, True])), "Expected different scores."
+    assert np.all(row == np.array([0, 2]))
+    assert np.all(col == np.array([0, 1]))
+
+
+@pytest.mark.parametrize("numba_compiled", [True, False])
+def test_number_matching_symmetric_ppm(numba_compiled):
+    """Test the underlying score function (non-compiled)."""
+    precursors = np.asarray([100.00001, 100, 200])
+    if numba_compiled:
+        row, col, scores = number_matching_symmetric_ppm(precursors, tolerance_ppm=2.0)
+    else:
+        row, col, scores = number_matching_symmetric_ppm.py_func(precursors,  tolerance_ppm=2.0)
+    assert np.all(scores == np.array([True, True, True, True, True])), "Expected different scores."
+    assert np.all(row == np.array([0, 0, 1, 1, 2]))
+    assert np.all(col == np.array([0, 1, 0, 1, 2]))

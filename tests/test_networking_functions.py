@@ -20,13 +20,13 @@ def test_get_top_hits_by_references():
     scores = create_dummy_scores()
     idx_ref, scores_ref = get_top_hits(scores, top_n=10, search_by="references")
 
-    expected_scores_ref = {'ref_spec_0': np.array([0.66666667, 0.5, 0.]),
-                           'ref_spec_1': np.array([0.66666667, 0.5, 0.]),
+    expected_scores_ref = {'ref_spec_0': np.array([0.66666667, 0.5]),
+                           'ref_spec_1': np.array([0.66666667, 0.5]),
                            'ref_spec_2': np.array([0.66666667, 0.66666667, 0.5]),
                            'ref_spec_3': np.array([0.8, 0.5, 0.5]),
                            'ref_spec_4': np.array([1., 0.8, 0.5])}
-    expected_idx_ref = {'ref_spec_0': np.array([0, 2, 1], dtype=np.int64),
-                        'ref_spec_1': np.array([1, 2, 0], dtype=np.int64),
+    expected_idx_ref = {'ref_spec_0': np.array([0, 2], dtype=np.int64),
+                        'ref_spec_1': np.array([1, 2], dtype=np.int64),
                         'ref_spec_2': np.array([1, 0, 2], dtype=np.int64),
                         'ref_spec_3': np.array([2, 1, 0], dtype=np.int64),
                         'ref_spec_4': np.array([0, 2, 1], dtype=np.int64)}
@@ -51,11 +51,11 @@ def test_get_top_hits_by_queries():
     scores = create_dummy_scores()
     idx_query, scores_query = get_top_hits(scores, top_n=10, search_by="queries")
 
-    expected_scores_query = {'query_spec_0': np.array([1., 0.66666667, 0.66666667, 0.5, 0.]),
-                             'query_spec_1': np.array([0.66666667, 0.66666667, 0.5, 0.5, 0.]),
+    expected_scores_query = {'query_spec_0': np.array([1., 0.66666667, 0.66666667, 0.5]),
+                             'query_spec_1': np.array([0.66666667, 0.66666667, 0.5, 0.5]),
                              'query_spec_2': np.array([0.8, 0.8, 0.5, 0.5, 0.5])}
-    expected_idx_query = {'query_spec_0': np.array([4, 2, 0, 3, 1], dtype=np.int64),
-                          'query_spec_1': np.array([2, 1, 4, 3, 0], dtype=np.int64),
+    expected_idx_query = {'query_spec_0': np.array([4, 2, 0, 3], dtype=np.int64),
+                          'query_spec_1': np.array([2, 1, 4, 3], dtype=np.int64),
                           'query_spec_2': np.array([4, 3, 2, 1, 0], dtype=np.int64)}
     for key, value in scores_query.items():
         assert np.allclose(value, expected_scores_query[key], atol=1e-5), \
