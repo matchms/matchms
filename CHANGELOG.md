@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+### Changed
+
+- light refactoring of `Metadata` constructor to reduce spectra reading time [#371](https://github.com/matchms/matchms/pull/371/files#)
+
+### Fixed
+
 ## [0.18.0] - 2023-01-05
 
 ### Added
