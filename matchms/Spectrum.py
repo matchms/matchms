@@ -2,10 +2,6 @@ from typing import Optional
 import matplotlib.pyplot as plt
 import numpy as np
 from matchms.plotting.spectrum_plots import plot_spectra_mirror, plot_spectrum
-from .filtering.add_precursor_mz import _add_precursor_mz_metadata
-from .filtering.add_retention import _add_retention
-from .filtering.interpret_pepmass import _interpret_pepmass_metadata
-from .filtering.make_charge_int import _convert_charge_to_int
 from .Fragments import Fragments
 from .hashing import metadata_hash, spectrum_hash
 from .Metadata import Metadata
@@ -88,7 +84,7 @@ class Spectrum:
         """
         self._metadata = Metadata(metadata)
         if metadata_harmonization is True:
-            self._apply_metadata_harmonization()
+            self._metadata.harmonize_values()
         self.peaks = Fragments(mz=mz, intensities=intensities)
         self.losses = None
 
@@ -97,21 +93,6 @@ class Spectrum:
             self.peaks == other.peaks and \
             self.losses == other.losses and \
             self._metadata == other._metadata
-
-    def _apply_metadata_harmonization(self):
-        metadata_filtered = _interpret_pepmass_metadata(self.metadata)
-        if metadata_filtered.get("ionmode") is not None:
-            metadata_filtered["ionmode"] = self.metadata.get("ionmode").lower()
-        metadata_filtered = _add_precursor_mz_metadata(metadata_filtered)
-
-        if metadata_filtered.get("retention_time") is not None:
-            metadata_filtered = _add_retention(metadata_filtered, "retention_time", "retention_time")
-        if metadata_filtered.get("retention_index") is not None:
-            metadata_filtered = _add_retention(metadata_filtered, "retention_index", "retention_index")
-        charge = metadata_filtered.get("charge")
-        if not isinstance(charge, int) and not _convert_charge_to_int(charge) is None:
-            metadata_filtered["charge"] = _convert_charge_to_int(charge)
-        self._metadata = Metadata(metadata_filtered)
 
     def __hash__(self):
         """Return a integer hash which is computed from both
