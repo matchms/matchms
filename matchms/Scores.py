@@ -138,7 +138,7 @@ class Scores:
         similarity_function
             Function which accepts a reference + query object and returns a score or tuple of scores
         name
-            Label of the new scores layer. If None, the name of the similarity_function will be used.
+            Label of the new scores layer. If None, the name of the similarity_function class will be used.
         array_type
             Specify the type of array to store and compute the scores. Choose from "numpy" or "sparse".
         join_type
