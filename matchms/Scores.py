@@ -91,7 +91,7 @@ class Scores:
                 return False
             if not np.array_equal(self.queries, other.queries):
                 return False
-            if  self._scores != other._scores:
+            if self._scores != other._scores:
                 return False
             return True
         return NotImplemented
@@ -137,13 +137,11 @@ class Scores:
         ----------
         similarity_function
             Function which accepts a reference + query object and returns a score or tuple of scores
-        is_symmetric
-            Set to True when *references* and *queries* are identical (as for instance for an all-vs-all
-            comparison). By using the fact that score[i,j] = score[j,i] the calculation will be about
-            2x faster. Default is False.
+        name
+            Label of the new scores layer. If None, the name of the similarity_function class will be used.
         array_type
             Specify the type of array to store and compute the scores. Choose from "numpy" or "sparse".
-        join_mode
+        join_type
             Choose from left, right, outer, inner to specify the merge type.
         """
         def is_sparse_advisable():
@@ -335,9 +333,14 @@ class Scores:
         inplace
             Default is False in which case a filtered scores object will be returned.
             Set to True to change the scores array in-place.
+        kwargs
+            See "Keyword arguments" section below.
+
+        Keyword arguments
+        -----------------
         name
             Name of the score which is used for filtering. Run `.score_names` to
-            see all scores scored in the sparse array.
+            see all scores stored in the sparse array.
         low
             Lower threshold below which all scores will be removed.
         high
@@ -443,7 +446,8 @@ class ScoresBuilder:
 
         return self
 
-    def _restructure_scores(self, scores_dict: dict) -> np.ndarray:
+    @staticmethod
+    def _restructure_scores(scores_dict: dict) -> StackedSparseArray:
         """
         Restructure scores from a nested list to a numpy array. If scores were stored as an array of tuples, restores
         their original form.
