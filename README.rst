@@ -104,6 +104,13 @@ Sparse scores array
 
 We realized that many matchms-based workflows aim to compare many-to-many spectra whereby not all pairs and scores are equally important. Often, for instance, it will be about searching similar or related spectra/compounds. This also means that often not all scores need to be stored (or computed). For this reason we now shifted to a sparse handling of scores in matchms (that means: only storing actuallly computed, non-null values).
 
+.. image:: readthedocs/_static/matchms_sketch.png
+   :target: readthedocs/_static/matchms_sketch.png
+   :align: left
+   :alt: matchms code design
+
+
+
 **********************************
 Latest changes (matchms >= 0.14.0)
 **********************************
