@@ -1,17 +1,3 @@
-`fair-software.nl <https://fair-software.nl/>`_ recommendations:
-
-|GitHub Badge|
-|License Badge|
-|Conda Badge| |Pypi Badge| |Research Software Directory Badge|
-|Zenodo Badge|
-|CII Best Practices Badge| |Howfairis Badge|
-
-Code quality checks:
-
-|CI Build|
-|ReadTheDocs Badge|
-|Sonarcloud Quality Gate Badge| |Sonarcloud Coverage Badge|
-
 .. image:: readthedocs/_static/matchms_header.png
    :target: readthedocs/_static/matchms.png
    :align: left
@@ -22,6 +8,33 @@ Matchms is an open-source Python package to import, process, clean, and compare 
 If you use matchms in your research, please cite the following software paper:  
 
 F Huber, S. Verhoeven, C. Meijer, H. Spreeuw, E. M. Villanueva Castilla, C. Geng, J.J.J. van der Hooft, S. Rogers, A. Belloum, F. Diblen, J.H. Spaaks, (2020). matchms - processing and similarity evaluation of mass spectrometry data. Journal of Open Source Software, 5(52), 2411, https://doi.org/10.21105/joss.02411
+
+.. list-table::
+   :widths: 25 25
+   :header-rows: 1
+
+   * - 
+     - Badges
+   * - **fair-software.nl recommendations**
+     - 
+   * - \1. Code repository
+     - |GitHub Badge|
+   * - \2. License
+     - |License Badge|
+   * - \3. Community Registry
+     - |Conda Badge| |Pypi Badge| |Research Software Directory Badge|
+   * - \4. Enable Citation
+     - |JOSS Badge| |Zenodo Badge|
+   * - \5. Checklists
+     - |CII Best Practices Badge| |Howfairis Badge|
+   * - **Code quality checks**
+     -
+   * - Continuous integration
+     - |CI Build|
+   * - Documentation
+     - |ReadTheDocs Badge|
+   * - Code Quality
+     - |Sonarcloud Quality Gate Badge| |Sonarcloud Coverage Badge|
 
 
 .. |GitHub Badge| image:: https://img.shields.io/badge/github-repo-000.svg?logo=github&labelColor=gray&color=blue
