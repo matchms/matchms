@@ -1,7 +1,7 @@
 ﻿adduct,ionmode,charge,mass_multiplier,correction_mass
 [M+3H]3+,positive,3,0.33,1.007276
 [M+2H+Na]3+,positive,3,0.33,8.33459
-[M+H+2Na]3+,positive,3,0.33,15.662453
+[M+H+2Na]3+,positive,3,0.33,15.661906
 [M+3Na]3+,positive,3,0.33,22.989218
 [M+2H]2+,positive,2,0.5,1.007276
 [M+H+NH4]2+,positive,2,0.5,9.52055
