@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - light refactoring of `Metadata` constructor to reduce spectra reading time [#371](https://github.com/matchms/matchms/pull/371/files#)
+- two minor corrections of adduct masses (missing electron mass) [#374](https://github.com/matchms/matchms/issues/374)
 
 ### Fixed
 
