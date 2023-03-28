@@ -1,7 +1,6 @@
 import os
 import numpy as np
 from matchms import Spectrum
-from matchms.exporting import save_as_msp
 from matchms.importing import load_from_msp
 from tests.builder_Spectrum import SpectrumBuilder
 
