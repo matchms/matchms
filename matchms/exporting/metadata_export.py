@@ -74,11 +74,29 @@ def export_metadata_as_csv(spectra: List[Spectrum], filename: str,
         for data in metadata:
             writer.writerow(data)
 
-def _subset_metadata(include_fields, metadata, columns):
+def _subset_metadata(include_fields: List[str], metadata: np.array, columns: set[str]) -> Tuple[np.array, set[str]]:
+    """Subset metadata to 'include_fields' and return intersection of columns.
+
+    Args:
+        include_fields (List[str]): Columns to include.
+        metadata (np.array): Data to subset.
+        columns (set[str]): Set of columns present in data
+
+    Returns:
+        Tuple[np.array, set[str]]: Subset data and columns.
+    """
     return metadata[include_fields], columns.intersection(include_fields)
 
 
 def get_metadata_as_array(spectra: List[Spectrum]) -> Tuple[np.array, List[str]]:
+    """Extract union of all metadata as numpy array from all spectra.
+
+    Args:
+        spectra (List[Spectrum]): Spectra from which to collect metadata.
+
+    Returns:
+        Tuple[np.array, List[str]]: Metadata and union of all columns detected in all spectra.
+    """
     keys = spectra[0].metadata.keys()
     for s in spectra:
         keys |= s.metadata.keys()
