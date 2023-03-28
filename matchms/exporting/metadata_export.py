@@ -1,6 +1,6 @@
 import csv
 import json
-from typing import Any, List, Tuple
+from typing import Any, List, Optional, Tuple
 from typing import Union
 
 import numpy as np
@@ -51,7 +51,7 @@ def export_metadata_as_json(spectrums: List[Spectrum], filename: str,
 
 
 def export_metadata_as_csv(spectra: List[Spectrum], filename: str,
-                           include_fields: List[str] | None = None):
+                           include_fields: Optional[List[str]] = None):
     """Export metadata to csv file.
 
     Parameters
