@@ -1,6 +1,6 @@
 import csv
 import json
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 import numpy as np
 from ..Spectrum import Spectrum
 
@@ -72,7 +72,7 @@ def export_metadata_as_csv(spectra: List[Spectrum], filename: str,
         for data in metadata:
             writer.writerow(data)
 
-def _subset_metadata(include_fields: List[str], metadata: np.array, columns: set[str]) -> Tuple[np.array, set[str]]:
+def _subset_metadata(include_fields: List[str], metadata: np.array, columns: Set[str]) -> Tuple[np.array, Set[str]]:
     """Subset metadata to 'include_fields' and return intersection of columns.
 
     Args:
