@@ -1,16 +1,16 @@
 import csv
 import json
-from typing import Any, List, Optional, Tuple, Union
+from typing import Any, List, Optional, Tuple
 import numpy as np
 from ..Spectrum import Spectrum
 
 
-def _get_metadata_dict(spectrum: Spectrum, include_fields: Union[List, str]) -> dict[str, Any]:
+def _get_metadata_dict(spectrum: Spectrum, include_fields: List[str] | str) -> dict[str, Any]:
     """Extract keys from spectrum metadata. Will silently continue if a key is not found.
 
     Args:
         spectrum (Spectrum): Spectrum with metadata to extract.
-        include_fields (Union[List, str]): "all" or set of metadata keys to extract.
+        include_fields (List[str] | str): "all" or set of metadata keys to extract.
 
     Returns:
         dict[str, Any]: Dictionary containing the specified keys.
