@@ -60,8 +60,8 @@ def parse_msp_file(filename: str) -> Generator[dict, None, None]:
 
     # Lists/dicts that will contain all params, masses and intensities of each molecule
     params = {}
-    masses = []
-    intensities = []
+    masses = np.array([])
+    intensities = np.array([])
     peak_comments = {}
 
     # Peaks counter. Used to track and count the number of peaks
@@ -76,35 +76,52 @@ def parse_msp_file(filename: str) -> Generator[dict, None, None]:
 
             if contains_metadata(rline):
                 parse_metadata(rline, params)
-            else:
-                # Obtaining the masses and intensities
-                peak_pairs = get_peak_tuples(rline)
+                continue
 
-                for peak in peak_pairs:
-                    mz, intensity = get_peak_values(peak)
-                    comment = get_peak_comment(peak)
-                    if comment is not None:
-                        peak_comments.update({mz: comment})
+            mz, ints, comment = _parse_line(rline)
 
-                    peakscount += 1
-                    masses.append(mz)
-                    intensities.append(intensity)
+            masses = np.append(masses, mz)
+            intensities = np.append(intensities, ints)
+            
+            if comment is not None:
+                peak_comments.update({masses[-1]: comment})
 
-                # Obtaining the masses and intensities
-                if int(params['num peaks']) == peakscount:
-                    peakscount = 0
-                    yield {
-                        'params': (params),
-                        'm/z array': np.array(masses),
-                        'intensity array': np.array(intensities),
-                        'peak comments': peak_comments
-                    }
+            peakscount += len(mz)
 
-                    params = {}
-                    masses = []
-                    intensities = []
-                    peak_comments = {}
 
+            # Obtaining the masses and intensities
+            if int(params['num peaks']) == peakscount:
+                peakscount = 0
+                yield {
+                    'params': (params),
+                    'm/z array': masses,
+                    'intensity array': intensities,
+                    'peak comments': peak_comments
+                }
+
+                params = {}
+                masses = []
+                intensities = []
+                peak_comments = {}
+
+
+def _parse_line(rline: str):
+    comment = re.findall(r'[\"\'](.*)[\"\']', rline)
+
+    if len(comment) > 0:
+        comment = comment[0]
+        rline = rline[:rline.index("\"")]
+    else:
+        comment = None
+    
+    tokens = re.findall(r'\d+[\.]?\d*', rline)
+    if len(tokens) % 2 != 0:
+        raise RuntimeError("Wrong peak format detected!")
+    
+    tokens = list(map(float, tokens))
+    mz = tokens[0::2]
+    intensities = tokens[1::2]
+    return mz, intensities, comment
 
 def get_peak_values(peak: str) -> Tuple[float, float]:
     """ Get the m/z and intensity value from the line containing the peak information. """
@@ -140,11 +157,14 @@ def parse_metadata(rline: str, params: dict):
             if splitted_line[0].lower().strip() in params.keys() and splitted_line[0].lower().strip() == 'smiles':
                 params[splitted_line[0].lower()+"_2"] = splitted_line[1].strip()
             else:
-                params[splitted_line[0].lower().strip()] = splitted_line[1].strip()
+                params[splitted_line[0].lower().strip()
+                       ] = splitted_line[1].strip()
     else:
         params[splitted_line[0].lower()] = splitted_line[1].strip()
 
 
 def contains_metadata(rline: str) -> bool:
     """ Check if line contains Spectrum metadata."""
-    return ':' in rline
+    has_colon = ':' in rline
+    is_golm_peaks = re.match(r"(\d+:{1}\d+)", rline) is not None
+    return has_colon and not is_golm_peaks
