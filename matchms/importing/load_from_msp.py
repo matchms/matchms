@@ -103,48 +103,37 @@ def parse_msp_file(filename: str) -> Generator[dict, None, None]:
                 masses = []
                 intensities = []
                 peak_comments = {}
+            
+
 
 
 def _parse_line(rline: str):
-    comment = re.findall(r'[\"\'](.*)[\"\']', rline)
-
-    if len(comment) > 0:
-        comment = comment[0]
-        rline = rline[:rline.index("\"")]
-    else:
-        comment = None
+    comment, rline = get_peak_comment(rline)   
+    mz, intensities = get_peak_values(rline)
     
-    tokens = re.findall(r'\d+[\.]?\d*', rline)
+    return mz, intensities, comment
+
+
+def get_peak_values(peak: str) -> Tuple[float, float]:
+    """ Get the m/z and intensity value from the line containing the peak information. """
+    tokens = re.findall(r'\d+[\.]?\d*', peak)
     if len(tokens) % 2 != 0:
         raise RuntimeError("Wrong peak format detected!")
     
     tokens = list(map(float, tokens))
     mz = tokens[0::2]
     intensities = tokens[1::2]
-    return mz, intensities, comment
-
-def get_peak_values(peak: str) -> Tuple[float, float]:
-    """ Get the m/z and intensity value from the line containing the peak information. """
-    splitted_line = peak.split(maxsplit=2)
-    mz = float(splitted_line[0].strip())
-    intensity = float(splitted_line[1].strip())
-    return mz, intensity
+    return mz, intensities
 
 
-def get_peak_tuples(rline: str) -> Iterator[str]:
-    """ Splits line at ';' and performs additional string cleaning. """
-    tokens = filter(None, rline.split(";"))
-    peak_pairs = map(lambda x: x.lstrip().rstrip(), tokens)
-    return peak_pairs
-
-
-def get_peak_comment(rline: str) -> str:
+def get_peak_comment(rline: str) -> Tuple[str, str]:
     """ Get the peak comment from the line containing the peak information. """
     try:
         comment = re.findall(r'[\"\'](.*)[\"\']', rline)[0]
+        rline = rline[:rline.index("\"")]
     except IndexError:
         comment = None
-    return comment
+    return comment, rline
 
 
 def parse_metadata(rline: str, params: dict):
