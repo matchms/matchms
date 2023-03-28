@@ -26,7 +26,7 @@ def _get_metadata_dict(spectrum: Spectrum, include_fields: List[str] | str) -> d
 
 
 def export_metadata_as_json(spectrums: List[Spectrum], filename: str,
-                            include_fields: Union[List, str] = "all"):
+                            include_fields: List[str] | str = "all"):
     """Export metadata to json file.
 
     Parameters
