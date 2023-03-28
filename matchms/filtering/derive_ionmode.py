@@ -1,6 +1,10 @@
-from ..importing import load_adducts_dict
+import logging
+from matchms.filtering.load_adducts import load_adducts_dict
+from ..metadata_utils import clean_adduct
 from ..typing import SpectrumType
-from ..utils import clean_adduct
+
+
+logger = logging.getLogger("matchms")
 
 
 def derive_ionmode(spectrum_in: SpectrumType) -> SpectrumType:
@@ -12,12 +16,12 @@ def derive_ionmode(spectrum_in: SpectrumType) -> SpectrumType:
 
     Parameters
     ----------
-    spectrum:
+    spectrum
         Input spectrum.
 
-    Returns:
-    --------
-    Returns Spectrum object with `ionmode` attribute set.
+    Returns
+    -------
+    Spectrum object with `ionmode` attribute set.
     """
 
     if spectrum_in is None:
@@ -47,5 +51,6 @@ def derive_ionmode(spectrum_in: SpectrumType) -> SpectrumType:
         ionmode = "n/a"
 
     spectrum.set("ionmode", ionmode)
+    logger.info("Set ionmode to %s.", ionmode)
 
     return spectrum

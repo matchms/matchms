@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import os
-from setuptools import find_packages
-from setuptools import setup
+from setuptools import find_packages, setup
 
 
 here = os.path.abspath(os.path.dirname(__file__))
@@ -16,11 +15,11 @@ with open("README.rst") as readme_file:
 setup(
     name="matchms",
     version=version["__version__"],
-    description="Python library for fuzzy comparison of mass spectrum data and other Python objects",
+    description="Python library for large-scale comparisons and processing of tandem mass spectral data",
     long_description=readme,
     long_description_content_type="text/x-rst",
-    author="Netherlands eScience Center",
-    author_email="generalization@esciencecenter.nl",
+    author="matchms developer team",
+    author_email="florian.huber@hs-duesseldorf.de",
     url="https://github.com/matchms/matchms",
     packages=find_packages(exclude=['*tests*']),
     package_data={"matchms": ["data/*.csv"]},
@@ -44,7 +43,6 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9"
     ],
-    test_suite="tests",
     python_requires='>=3.7',
     install_requires=[
         "deprecated",
@@ -53,18 +51,24 @@ setup(
         "networkx",
         "numba >=0.47",
         "numpy",
+        "pickydict >= 0.4.0",
         "pyteomics >=4.2",
         "requests",
         "scipy",
+        "sparsestack >= 0.4.1",
+        "tqdm",
     ],
     extras_require={"dev": ["bump2version",
-                            "isort>=4.2.5,<5",
+                            "decorator",
+                            "isort>=5.1.0",
+                            "pylint<2.12",
                             "prospector[with_pyroma]",
                             "pytest",
                             "pytest-cov",
-                            "sphinx>=3.0.0,!=3.2.0,!=3.5.0,<4.0.0",
+                            "sphinx>=4.0.0",
                             "sphinx_rtd_theme",
                             "sphinxcontrib-apidoc",
+                            "testfixtures",
                             "yapf",],
                     "chemistry": ["rdkit >=2020.03.1"]},
 )

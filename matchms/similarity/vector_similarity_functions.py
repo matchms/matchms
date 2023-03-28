@@ -1,10 +1,10 @@
 """Collection of functions for calculating vector-vector similarities."""
 import numba
-import numpy
+import numpy as np
 
 
 @numba.njit
-def jaccard_similarity_matrix(references: numpy.ndarray, queries: numpy.ndarray) -> numpy.ndarray:
+def jaccard_similarity_matrix(references: np.ndarray, queries: np.ndarray) -> np.ndarray:
     """Returns matrix of jaccard indices between all-vs-all vectors of references
     and queries.
 
@@ -25,7 +25,7 @@ def jaccard_similarity_matrix(references: numpy.ndarray, queries: numpy.ndarray)
     """
     size1 = references.shape[0]
     size2 = queries.shape[0]
-    scores = numpy.zeros((size1, size2))
+    scores = np.zeros((size1, size2))
     for i in range(size1):
         for j in range(size2):
             scores[i, j] = jaccard_index(references[i, :], queries[j, :])
@@ -33,7 +33,7 @@ def jaccard_similarity_matrix(references: numpy.ndarray, queries: numpy.ndarray)
 
 
 @numba.njit
-def dice_similarity_matrix(references: numpy.ndarray, queries: numpy.ndarray) -> numpy.ndarray:
+def dice_similarity_matrix(references: np.ndarray, queries: np.ndarray) -> np.ndarray:
     """Returns matrix of dice similarity scores between all-vs-all vectors of references
     and queries.
 
@@ -54,7 +54,7 @@ def dice_similarity_matrix(references: numpy.ndarray, queries: numpy.ndarray) ->
     """
     size1 = references.shape[0]
     size2 = queries.shape[0]
-    scores = numpy.zeros((size1, size2))
+    scores = np.zeros((size1, size2))
     for i in range(size1):
         for j in range(size2):
             scores[i, j] = dice_similarity(references[i, :], queries[j, :])
@@ -62,7 +62,7 @@ def dice_similarity_matrix(references: numpy.ndarray, queries: numpy.ndarray) ->
 
 
 @numba.njit
-def cosine_similarity_matrix(references: numpy.ndarray, queries: numpy.ndarray) -> numpy.ndarray:
+def cosine_similarity_matrix(references: np.ndarray, queries: np.ndarray) -> np.ndarray:
     """Returns matrix of cosine similarity scores between all-vs-all vectors of
     references and queries.
 
@@ -83,7 +83,7 @@ def cosine_similarity_matrix(references: numpy.ndarray, queries: numpy.ndarray) 
     """
     size1 = references.shape[0]
     size2 = queries.shape[0]
-    scores = numpy.zeros((size1, size2))
+    scores = np.zeros((size1, size2))
     for i in range(size1):
         for j in range(size2):
             scores[i, j] = cosine_similarity(references[i, :], queries[j, :])
@@ -91,7 +91,7 @@ def cosine_similarity_matrix(references: numpy.ndarray, queries: numpy.ndarray) 
 
 
 @numba.njit
-def jaccard_index(u: numpy.ndarray, v: numpy.ndarray) -> numpy.float64:
+def jaccard_index(u: np.ndarray, v: np.ndarray) -> np.float64:
     r"""Computes the Jaccard-index (or Jaccard similarity coefficient) of two boolean
     1-D arrays.
     The Jaccard index between 1-D boolean arrays `u` and `v`,
@@ -114,16 +114,16 @@ def jaccard_index(u: numpy.ndarray, v: numpy.ndarray) -> numpy.float64:
     jaccard_similarity
         The Jaccard similarity coefficient between vectors `u` and `v`.
     """
-    u_or_v = numpy.bitwise_or(u != 0, v != 0)
-    u_and_v = numpy.bitwise_and(u != 0, v != 0)
+    u_or_v = np.bitwise_or(u != 0, v != 0)
+    u_and_v = np.bitwise_and(u != 0, v != 0)
     jaccard_score = 0
     if u_or_v.sum() != 0:
-        jaccard_score = numpy.float64(u_and_v.sum()) / numpy.float64(u_or_v.sum())
+        jaccard_score = np.float64(u_and_v.sum()) / np.float64(u_or_v.sum())
     return jaccard_score
 
 
 @numba.njit
-def dice_similarity(u: numpy.ndarray, v: numpy.ndarray) -> numpy.float64:
+def dice_similarity(u: np.ndarray, v: np.ndarray) -> np.float64:
     r"""Computes the Dice similarity coefficient (DSC) between two boolean 1-D arrays.
 
     The Dice similarity coefficient between `u` and `v`, is
@@ -145,16 +145,16 @@ def dice_similarity(u: numpy.ndarray, v: numpy.ndarray) -> numpy.float64:
     dice_similarity
         The Dice similarity coefficient between 1-D arrays `u` and `v`.
     """
-    u_and_v = numpy.bitwise_and(u != 0, v != 0)
-    u_abs_and_v_abs = numpy.abs(u).sum() + numpy.abs(v).sum()
+    u_and_v = np.bitwise_and(u != 0, v != 0)
+    u_abs_and_v_abs = np.abs(u).sum() + np.abs(v).sum()
     dice_score = 0
     if u_abs_and_v_abs != 0:
-        dice_score = 2.0 * numpy.float64(u_and_v.sum()) / numpy.float64(u_abs_and_v_abs)
+        dice_score = 2.0 * np.float64(u_and_v.sum()) / np.float64(u_abs_and_v_abs)
     return dice_score
 
 
 @numba.njit
-def cosine_similarity(u: numpy.ndarray, v: numpy.ndarray) -> numpy.float64:
+def cosine_similarity(u: np.ndarray, v: np.ndarray) -> np.float64:
     """Calculate cosine similarity score.
 
     Parameters
@@ -179,5 +179,5 @@ def cosine_similarity(u: numpy.ndarray, v: numpy.ndarray) -> numpy.float64:
         vv += v[i] * v[i]
     cosine_score = 0
     if uu != 0 and vv != 0:
-        cosine_score = uv / numpy.sqrt(uu * vv)
-    return numpy.float64(cosine_score)
+        cosine_score = uv / np.sqrt(uu * vv)
+    return np.float64(cosine_score)

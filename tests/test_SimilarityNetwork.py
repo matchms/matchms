@@ -2,18 +2,22 @@ import os
 import tempfile
 import numpy as np
 import pytest
-from matchms import Spectrum
-from matchms import calculate_scores
+from matchms import Spectrum, calculate_scores
 from matchms.networking import SimilarityNetwork
-from matchms.similarity import FingerprintSimilarity
-from matchms.similarity import ModifiedCosine
+from matchms.similarity import FingerprintSimilarity, ModifiedCosine
 
 
-@pytest.yield_fixture
-def filename():
+@pytest.fixture(params=["cyjs", "gexf", "gml", "graphml", "json"])
+def graph_format(request):
+    yield request.param
+
+
+@pytest.fixture()
+def filename(graph_format):
+    filename = f"test.{graph_format}"
     with tempfile.TemporaryDirectory() as temp_dir:
-        filename = os.path.join(temp_dir, "test.graphml")
-        yield filename
+        filepath = os.path.join(temp_dir, filename)
+        yield filepath
 
 
 def create_dummy_spectrums():
@@ -24,14 +28,14 @@ def create_dummy_spectrums():
     for i, fp in enumerate(fingerprints1):
         spectrums.append(Spectrum(mz=np.array([100, 200.]),
                                   intensities=np.array([0.7, 0.1 * i]),
-                                  metadata={"spectrumid": 'ref_spec_'+str(i),
+                                  metadata={"spectrum_id": 'ref_spec_'+str(i),
                                             "fingerprint": np.array(fp),
                                             "smiles": 'C1=CC=C2C(=C1)NC(=N2)C3=CC=CO3',
                                             "precursor_mz": 100+50*i}))
     for i, fp in enumerate(fingerprints2):
         spectrums.append(Spectrum(mz=np.array([100, 200.]),
                                   intensities=np.array([0.5, 0.1 * i]),
-                                  metadata={"spectrumid": 'query_spec_'+str(i),
+                                  metadata={"spectrum_id": 'query_spec_'+str(i),
                                             "fingerprint": np.array(fp),
                                             "smiles": 'CC1=C(C=C(C=C1)NC(=O)N(C)C)Cl',
                                             "precursor_mz": 110+50*i}))
@@ -122,22 +126,22 @@ def test_create_network_symmetric_modified_cosine():
     cutoff = 0.7
     scores = create_dummy_scores_symmetric_modified_cosine()
     msnet = SimilarityNetwork(score_cutoff=cutoff)
-    msnet.create_network(scores)
+    msnet.create_network(scores, score_name="ModifiedCosine_score")
 
     edges_list = list(msnet.graph.edges())
     edges_list.sort()
     assert len(edges_list) == 28, "Expected different number of edges"
 
 
-def test_create_network_export_to_graphml(filename):
-    """Test creating a graph from a symmetric Scores object using ModifiedCosine"""
+def test_create_network_export_to_file(filename, graph_format):
+    """Test creating a graph file from a symmetric Scores object using ModifiedCosine"""
     cutoff = 0.7
     scores = create_dummy_scores_symmetric_modified_cosine()
     msnet = SimilarityNetwork(score_cutoff=cutoff)
-    msnet.create_network(scores)
-    msnet.export_to_graphml(filename)
+    msnet.create_network(scores, score_name="ModifiedCosine_score")
+    msnet.export_to_file(filename, graph_format)
 
-    assert os.path.isfile(filename), "graphml file not found"
+    assert os.path.isfile(filename), "network file not found"
 
 
 def test_create_network_symmetric_higher_cutoff():
@@ -157,16 +161,19 @@ def test_create_network_symmetric_higher_cutoff():
 
 def test_create_network_symmetric_mutual_method():
     """Test creating a graph from a Scores object"""
+    # pylint: disable=protected-access
     cutoff = 0.7
     scores = create_dummy_scores_symmetric()
+    scores_arr = scores.to_array()
     # change some scores
-    scores.scores[7, 6] = scores.scores[6, 7] = 0.85
-    scores.scores[7, 5] = scores.scores[5, 7] = 0.75
-    scores.scores[7, 3] = scores.scores[3, 7] = 0.7
+    scores_arr[7, 6] = scores_arr[6, 7] = 0.85
+    scores_arr[7, 5] = scores_arr[5, 7] = 0.75
+    scores_arr[7, 3] = scores_arr[3, 7] = 0.7
+    scores._scores.add_dense_matrix(scores_arr, "modified_score")
 
     msnet = SimilarityNetwork(score_cutoff=cutoff, top_n=3,
                               max_links=3, link_method="mutual")
-    msnet.create_network(scores)
+    msnet.create_network(scores, score_name="modified_score")
     nodes_with_edges = ['query_spec_0', 'query_spec_1', 'query_spec_2', 'ref_spec_4']
     edges_list = list(msnet.graph.edges())
     edges_list.sort()

@@ -7,9 +7,150 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+### Changed
+
+- light refactoring of `Metadata` constructor to reduce spectra reading time [#371](https://github.com/matchms/matchms/pull/371/files#)
+- two minor corrections of adduct masses (missing electron mass) [#374](https://github.com/matchms/matchms/issues/374)
+
+### Fixed
+
+## [0.18.0] - 2023-01-05
+
+### Added
+
+- new `Pipeline` class to define entire matchms workflows. This includes importing one or several datasets, processing using matchms filtering/processing functions as well as similartiy computations. Also allows to import/export workflows as yaml files.
+
+### Changed
+
+- major change of `Scores` class. Internally, scores are now stored as a stacked sparse array. This allows to store several different scores for spectrum-spectrums pairs in an efficient way. Also makes it possible to run large-scale comparisons in particular when pipelines start with rapid selective similarity scoring methods such as MetadataMatch or PrecursorMzMatch.
+- Scoring/similarity methods now also get a `.sparse_array()` method (next to the previous `.pair()` and `.matrix()` methods).
+
+### Fixed
+
+- minor fix in `interpret_pepmass` function.
+
+## [0.17.0] - 2022-08-23
+
+### Added
+- `Scores`: added functionality for writing and reading `Scores` objects to/from disk as JSON and Pickle files [#353](https://github.com/matchms/matchms/pull/353)
+- `save_as_msp()` now has a `mode` option (write/append) [#346](https://github.com/matchms/matchms/pull/346)
+
+## [0.16.0] - 2022-06-12
+
+### Added
+- `Spectrum` objects now also have `.mz` and `.intensities` properties [#339](https://github.com/matchms/matchms/pull/339)
+- `SimilarityNetwork`: similarity-network graphs can now be exported to [cyjs](http://manual.cytoscape.org/en/stable/index.html),
+[gexf](http://gexf.net/schema.html), [gml](https://web.archive.org/web/20190207140002/http://www.fim.uni-passau.de/index.php?id=17297&L=1),
+and node-link JSON formats [#349](https://github.com/matchms/matchms/pull/349)
+
+### Changed
+- metadata filtering: made prefilter check for SMILES and InChI more lenient, eventually resulting in longer runtimes but more accurate checks [#337](https://github.com/matchms/matchms/pull/337)
+
+## [0.15.0] - 2022-03-09
+
+Added neutral losses similarity score (cosine-type score) and a few small fixes.
+
+### Added
+
+- new spectral similarity score: `NeutralLossesCosine` which is based on matches between neutral losses of two spectra [#329](https://github.com/matchms/matchms/pull/329)
+
+### Changed
+
+- added key conversion: "precursor_type" to "adduct" [#332](https://github.com/matchms/matchms/pull/332)
+- added key conversion: "rtinseconds" to "retention_time" [#331](https://github.com/matchms/matchms/pull/331)
+
+### Fixed
+
+- handling of duplicate entries in spectrum files (e.g. as field and again in the comments field in msp files) by ugrade of pickydict to 0.4.0 [#332](https://github.com/matchms/matchms/pull/332)
+
+## [0.14.0] - 2022-02-18
+
+This is the first of a few releases to work our way towards matchms 1.0.0, which also means that a few things in the API will likely change. Here the main change is that `Spectrum.metadata` is no longer a simple Python dictionary but became a `Metadata` object. In this context metadata field-names/keys will now be harmonized by default (e.g. "Precursor Mass" will become "precursor_mz). For list of conversions see [matchms key conversion table](https://github.com/matchms/matchms/blob/development/matchms/data/known_key_conversions.csv).
+
+### Added
+
+- new `MetadataMatch`similarity measure in matchms.similarity. This can be used to find matches between metadata entries and currently supports either full string matches or matches of numerical entries within a specified tolerance [#315](https://github.com/matchms/matchms/pull/315)
+- metadata is now stored using new `Metadata` class which automatically applied restrictions to used field names/keys to avoid confusion between different format styles [#293](https://github.com/matchms/matchms/pull/293)
+- all metadata keys must be lower-case, spaces will be changed to underscores.
+- Known key conversions are applied to metadata entries using a [matchms key conversion table](https://github.com/matchms/matchms/blob/development/matchms/data/known_key_conversions.csv)
+- new `interpret_pepmass()` filter to handle different pepmass entries found in data [#298][https://github.com/matchms/matchms/issues/298] 
+
+### Changed
+
+- Metadata harmonization will now happen by default! This includes changing field name style and applying known key conversions. To avoid the key conversions user have to make this explicit by setting `metadata_harmonization=False` [#293](https://github.com/matchms/matchms/pull/293)
+- `Spikes` class has become `Fragments` class [#293](https://github.com/matchms/matchms/pull/293)
+- Change import style (now: isort 5 and slightly different style) [#323](https://github.com/matchms/matchms/pull/323)
+
+### Fixed
+
+- can now handle charges that come as a string of type "2+" or "1-" [#301](https://github.com/matchms/matchms/issues/301)
+- new `Metadata`class fixes issue of equality check for different entry orders [#285](https://github.com/matchms/matchms/issues/285)
+
+## [0.13.0] - 2022-02-08
+
+### Added
+
+- Updated and extended plotting functionality, now located in `matchms.plotting`.
+Contains three plot types: `plot_spectrum()` or `spectrum.plot()`, `plot_spectra_mirror()` or `spectrum.plot_against()` and `plot_spectra_array()` [#303](https://github.com/matchms/matchms/pull/303)
+
+### Changed
+
+- `Spectrum` objects got an update of the basic spectrum plots `spectrum.plot()` [#303](https://github.com/matchms/matchms/pull/303)
+- `require_precursor_mz()` filter will now also discard nonsensical m/z values < 10.0 (value can be adapted by user) [#309](https://github.com/matchms/matchms/pull/309)
+
+### Fixed
+
+- Updated to new url for `load_from_usi` function (old link was broken) [#310](https://github.com/matchms/matchms/pull/310)
+- Small bug fix: `add_retention` filters can now properly handle TypeError for empty list. [#314](https://github.com/matchms/matchms/pull/314)
+
+## [0.12.0] - 2022-01-18
+
+### Added
+
+- peak comments (as an `mz: comment` dictionary) are now part of metadata and can be addressed via a `Spectrum()` object `peak_comments` property [#284](https://github.com/matchms/matchms/pull/284)
+- peak comments are dynamically updated whenever the respective peaks are changed [#277](https://github.com/matchms/matchms/pull/277)
+
+### Changed
+
+- Major refactoring of unit test layout now using a spectrum builder pattern [#261](https://github.com/matchms/matchms/pull/261)
+- Spikes object now has different getitem method that allows to extract specific peaks as mz/intensity pair (or array) [#291](https://github.com/matchms/matchms/pull/291)
+- `add_parent_mass()` filter now better handles existing entries (including fields "parent_mass", "exact_mass" and "parentmass") [#292](https://github.com/matchms/matchms/pull/292)
+- minor improvement of compound name cleaning in `derive_adduct_from_name()` filter [#280](https://github.com/matchms/matchms/pull/280)
+- `save_as_msp()` now writes peak comments (if present) to the output file [#277](https://github.com/matchms/matchms/pull/277)
+- `load_from_msp()` now also reads peak comments [#277](https://github.com/matchms/matchms/pull/277)
+
+### Fixed
+
+- able to handle spectra containg empty/zero intensities [#289](https://github.com/matchms/matchms/pull/289)
+
+## [0.11.0] - 2021-12-16
+
+## Added
+
+- better, more flexible string handling of `ModifiedCosine` [#275](https://github.com/matchms/matchms/pull/275)
+- matchms logger, replacing all former `print` statments to better control logging output [#271](https://github.com/matchms/matchms/pull/271)
+- `add_logging_to_file()`, `set_matchms_logger_level()`, `reset_matchms_logger()` functions to adapt logging output to user needs [#271](https://github.com/matchms/matchms/pull/271)
+
+## Changed
+
+- `save_as_msp()` can now also write to files with other than ".msp" extensions such as ".dat" [#276](https://github.com/matchms/matchms/pull/276)
+- refactored `add_precursor_mz`, including better logging [#275](https://github.com/matchms/matchms/pull/275)
+
+## [0.10.0] - 2021-11-21
+
+### Added
+
+- `Spectrum()` objects now also allows generating hashes, e.g. `hash(spectrum)` [#259](https://github.com/matchms/matchms/pull/259)
+- `Spectrum()` objects can generate `.spectrum_hash()` and `.metadata_hash()` to track changes to peaks or metadata [#259](https://github.com/matchms/matchms/pull/259)
+- `load_from_mgf()` now accepts both a path to a mgf file or a file-like object from a preloaded MGF file [#258](https://github.com/matchms/matchms/pull/258)
+- `add_retention` filters with function `add_retention_time()` and `add_retention_index()` [#265](https://github.com/matchms/matchms/pull/265)
+
 ### Changed
 
 - Code linting triggered by pylint update [#257](https://github.com/matchms/matchms/pull/257)
+- Refactored `add_parent_mass()` filter can now also handle missing charge entries (if ionmode is known) [#252](https://github.com/matchms/matchms/pull/252)
 
 ## [0.9.2] - 2021-07-20
 
@@ -19,7 +160,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Use `bool` instead of `numpy.bool` [#245](https://github.com/matchms/matchms/pull/245)
+- Use `bool` instead of `np.bool` [#245](https://github.com/matchms/matchms/pull/245)
 
 ## [0.9.1] - 2021-06-16
 
@@ -326,8 +467,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - This is the initial version of Spec2Vec from https://github.com/iomega/Spec2Vec
+- (later splitted into matchms + spec2vec)
 
-[Unreleased]: https://github.com/matchms/matchms/compare/0.9.2...HEAD
+[Unreleased]: https://github.com/matchms/matchms/compare/0.18.0...HEAD
+[0.18.0]: https://github.com/matchms/matchms/compare/0.17.0...0.18.0
+[0.17.0]: https://github.com/matchms/matchms/compare/0.16.0...0.17.0
+[0.16.0]: https://github.com/matchms/matchms/compare/0.15.0...0.16.0
+[0.15.0]: https://github.com/matchms/matchms/compare/0.14.0...0.15.0
+[0.14.0]: https://github.com/matchms/matchms/compare/0.13.0...0.14.0
+[0.13.0]: https://github.com/matchms/matchms/compare/0.12.0...0.13.0
+[0.12.0]: https://github.com/matchms/matchms/compare/0.11.0...0.12.0
+[0.11.0]: https://github.com/matchms/matchms/compare/0.10.0...0.11.0
+[0.10.0]: https://github.com/matchms/matchms/compare/0.9.2...0.10.0
 [0.9.2]: https://github.com/matchms/matchms/compare/0.9.0...0.9.2
 [0.9.1]: https://github.com/matchms/matchms/compare/0.9.0...0.9.1
 [0.9.0]: https://github.com/matchms/matchms/compare/0.8.2...0.9.0

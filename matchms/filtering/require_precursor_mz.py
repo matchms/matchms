@@ -1,16 +1,23 @@
+import logging
 from typing import Union
 from ..typing import SpectrumType
 
 
-def require_precursor_mz(spectrum_in: SpectrumType
+logger = logging.getLogger("matchms")
+
+
+def require_precursor_mz(spectrum_in: SpectrumType,
+                         minimum_accepted_mz: float = 10.0
                          ) -> Union[SpectrumType, None]:
 
-    """Returns None if there is no precursor_mz or if <=0
+    """Returns None if there is no precursor_mz or if <= minimum_accepted_mz
 
     Parameters
     ----------
     spectrum_in:
         Input spectrum.
+    minimum_accepted_mz:
+        Set to minimum acceptable value for precursor m/z. Default is set to 10.0.
     """
     if spectrum_in is None:
         return None
@@ -28,7 +35,8 @@ def require_precursor_mz(spectrum_in: SpectrumType
     assert isinstance(precursor_mz, (float, int)), \
         ("Expected 'precursor_mz' to be a scalar number.",
          "Consider applying 'add_precursor_mz' filter first.")
-    if precursor_mz <= 0:
+    if precursor_mz <= minimum_accepted_mz:
+        logger.info("Spectrum without precursor_mz was set to None.")
         return None
 
     return spectrum

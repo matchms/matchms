@@ -1,11 +1,12 @@
 from typing import Generator
-import numpy
+import numpy as np
 from pyteomics import mzxml
 from matchms.importing.parsing_utils import parse_mzml_mzxml_metadata
 from matchms.Spectrum import Spectrum
 
 
-def load_from_mzxml(filename: str, ms_level: int = 2) -> Generator[Spectrum, None, None]:
+def load_from_mzxml(filename: str, ms_level: int = 2,
+                    metadata_harmonization: bool = True) -> Generator[Spectrum, None, None]:
     """Load spectrum(s) from mzml file.
 
     This function will create ~matchms.Spectrum for every spectrum of desired
@@ -27,19 +28,23 @@ def load_from_mzxml(filename: str, ms_level: int = 2) -> Generator[Spectrum, Non
         Filename for mzXML file to import.
     ms_level:
         Specify which ms level to import. Default is 2.
+    metadata_harmonization : bool, optional
+        Set to False if metadata harmonization to default keys is not desired.
+        The default is True.
     """
     for pyteomics_spectrum in mzxml.read(filename, dtype=dict):
         if ("ms level" in pyteomics_spectrum and pyteomics_spectrum["ms level"] == ms_level
                 or "msLevel" in pyteomics_spectrum and pyteomics_spectrum["msLevel"] == ms_level):
             metadata = parse_mzml_mzxml_metadata(pyteomics_spectrum)
-            mz = numpy.asarray(pyteomics_spectrum["m/z array"], dtype="float")
-            intensities = numpy.asarray(pyteomics_spectrum["intensity array"], dtype="float")
+            mz = np.asarray(pyteomics_spectrum["m/z array"], dtype="float")
+            intensities = np.asarray(pyteomics_spectrum["intensity array"], dtype="float")
 
             if mz.shape[0] > 0:
                 # Sort by mz (if not sorted already)
-                if not numpy.all(mz[:-1] <= mz[1:]):
-                    idx_sorted = numpy.argsort(mz)
+                if not np.all(mz[:-1] <= mz[1:]):
+                    idx_sorted = np.argsort(mz)
                     mz = mz[idx_sorted]
                     intensities = intensities[idx_sorted]
 
-                yield Spectrum(mz=mz, intensities=intensities, metadata=metadata)
+                yield Spectrum(mz=mz, intensities=intensities, metadata=metadata,
+                               metadata_harmonization=metadata_harmonization)

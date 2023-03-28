@@ -1,6 +1,8 @@
 from typing import List
-import numba
-import numpy
+import numpy as np
+from sparsestack import StackedSparseArray
+from matchms.similarity.spectrum_similarity_functions import (
+    number_matching, number_matching_symmetric)
 from matchms.typing import SpectrumType
 from .BaseSimilarity import BaseSimilarity
 
@@ -37,16 +39,14 @@ class ParentMassMatch(BaseSimilarity):
 
         for (reference, query, score) in scores:
             print(f"Parentmass match between {reference.get('id')} and {query.get('id')}" +
-                  f" is {score:.2f}")
+                  f" is {score}")
 
     Should output
 
     .. testoutput::
 
-        Parentmass match between 1 and 3 is 1.00
-        Parentmass match between 1 and 4 is 0.00
-        Parentmass match between 2 and 3 is 0.00
-        Parentmass match between 2 and 4 is 1.00
+        Parentmass match between 1 and 3 is [1.0]
+        Parentmass match between 2 and 4 is [1.0]
 
     """
     # Set key characteristics as class attributes
@@ -78,10 +78,11 @@ class ParentMassMatch(BaseSimilarity):
         assert parentmass_ref is not None and parentmass_query is not None, "Missing parent mass."
 
         score = abs(parentmass_ref - parentmass_query) <= self.tolerance
-        return numpy.asarray(score, dtype=self.score_datatype)
+        return np.asarray(score, dtype=self.score_datatype)
 
     def matrix(self, references: List[SpectrumType], queries: List[SpectrumType],
-               is_symmetric: bool = False) -> numpy.ndarray:
+               array_type: str = "numpy",
+               is_symmetric: bool = False) -> np.ndarray:
         """Compare parent masses between all references and queries.
 
         Parameters
@@ -90,6 +91,9 @@ class ParentMassMatch(BaseSimilarity):
             List/array of reference spectrums.
         queries
             List/array of Single query spectrums.
+        array_type
+            Specify the output array type. Can be "numpy" or "sparse".
+            Default is "numpy" and will return a numpy array. "sparse" will return a COO-sparse array.
         is_symmetric
             Set to True when *references* and *queries* are identical (as for instance for an all-vs-all
             comparison). By using the fact that score[i,j] = score[j,i] the calculation will be about
@@ -102,31 +106,24 @@ class ParentMassMatch(BaseSimilarity):
                 parentmass = spectrum.get("parent_mass")
                 assert parentmass is not None, "Missing parent mass."
                 parentmasses.append(parentmass)
-            return numpy.asarray(parentmasses)
+            return np.asarray(parentmasses)
 
         parentmasses_ref = collect_parentmasses(references)
         parentmasses_query = collect_parentmasses(queries)
-        if is_symmetric:
-            return parentmass_scores_symmetric(parentmasses_ref, parentmasses_query,
-                                               self.tolerance).astype(self.score_datatype)
-        return parentmass_scores(parentmasses_ref, parentmasses_query,
-                                 self.tolerance).astype(self.score_datatype)
 
+        if is_symmetric:  # assuming ref and query are identical
+            rows, cols, scores = number_matching_symmetric(parentmasses_ref,
+                                                           self.tolerance)
+        else:
+            rows, cols, scores = number_matching(parentmasses_ref, parentmasses_query,
+                                                 self.tolerance)
 
-@numba.njit
-def parentmass_scores(parentmasses_ref, parentmasses_query, tolerance):
-    scores = numpy.zeros((len(parentmasses_ref), len(parentmasses_query)))
-    for i, parentmass_ref in enumerate(parentmasses_ref):
-        for j, parentmass_query in enumerate(parentmasses_query):
-            scores[i, j] = (abs(parentmass_ref - parentmass_query) <= tolerance)
-    return scores
-
-
-@numba.njit
-def parentmass_scores_symmetric(parentmasses_ref, parentmasses_query, tolerance):
-    scores = numpy.zeros((len(parentmasses_ref), len(parentmasses_query)))
-    for i, parentmass_ref in enumerate(parentmasses_ref):
-        for j in range(i, len(parentmasses_query)):
-            scores[i, j] = (abs(parentmass_ref - parentmasses_query[j]) <= tolerance)
-            scores[j, i] = scores[i, j]
-    return scores
+        if array_type == "numpy":
+            scores_array = np.zeros((len(parentmasses_ref), len(parentmasses_query)))
+            scores_array[rows, cols] = scores.astype(self.score_datatype)
+            return scores_array
+        if array_type == "sparse":
+            scores_array = StackedSparseArray(len(parentmasses_ref), len(parentmasses_query))
+            scores_array.add_sparse_data(rows, cols, scores.astype(self.score_datatype), "")
+            return scores_array
+        return ValueError("`array_type` can only be 'numpy' or 'sparse'.")

@@ -1,0 +1,74 @@
+name: SonarCloud Scan
+
+on:
+  workflow_run:
+    workflows: ["CI Build"]
+    types:
+      - completed
+
+jobs:
+  sonarcloud-pip:
+    name: SonarCloud Scan on pip build
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success'
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          repository: ${{ github.event.workflow_run.head_repository.full_name }}
+          ref: ${{ github.event.workflow_run.head_branch }}
+          fetch-depth: 0
+      - name: Fetch coverage report from artifact
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow: CI_build.yml
+          name: sonarcloud-data-pip
+          path: ${{ github.workspace }}
+      - name: Get PR metadata from json
+        run: |
+            echo "PR_NUMBER=$(jq -r '.pr_number' pr_metadata.json)" >> $GITHUB_ENV
+            echo "HEAD_REF=$(jq -r '.head_ref' pr_metadata.json)" >> $GITHUB_ENV
+            echo "BASE_REF=$(jq -r '.base_ref' pr_metadata.json)" >> $GITHUB_ENV
+      - name: SonarCloud Scan
+        uses: sonarsource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.scm.revision=${{ github.event.workflow_run.head_sha }}
+            -Dsonar.pullrequest.key=${{ env.PR_NUMBER }}
+            -Dsonar.pullrequest.branch=${{ env.HEAD_REF }}
+            -Dsonar.pullrequest.base=${{ env.BASE_REF }}
+
+  sonarcloud-conda:
+    name: SonarCloud Scan on conda build
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success'
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          repository: ${{ github.event.workflow_run.head_repository.full_name }}
+          ref: ${{ github.event.workflow_run.head_branch }}
+          fetch-depth: 0
+      - name: Fetch coverage report from artifact
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow: CI_build.yml
+          name: sonarcloud-data-conda
+          path: ${{ github.workspace }}
+      - name: Get PR metadata from json
+        run: |
+            echo "PR_NUMBER=$(jq -r '.pr_number' pr_metadata.json)" >> $GITHUB_ENV
+            echo "HEAD_REF=$(jq -r '.head_ref' pr_metadata.json)" >> $GITHUB_ENV
+            echo "BASE_REF=$(jq -r '.base_ref' pr_metadata.json)" >> $GITHUB_ENV
+      - name: SonarCloud Scan
+        uses: sonarsource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.scm.revision=${{ github.event.workflow_run.head_sha }}
+            -Dsonar.pullrequest.key=${{ env.PR_NUMBER }}
+            -Dsonar.pullrequest.branch=${{ env.HEAD_REF }}
+            -Dsonar.pullrequest.base=${{ env.BASE_REF }}

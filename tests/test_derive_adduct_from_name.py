@@ -1,51 +1,37 @@
-import numpy
-from matchms import Spectrum
+import pytest
+from testfixtures import LogCapture
 from matchms.filtering import derive_adduct_from_name
+from matchms.logging_functions import (reset_matchms_logger,
+                                       set_matchms_logger_level)
+from .builder_Spectrum import SpectrumBuilder
 
 
-def test_derive_adduct_from_name():
-    spectrum_in = Spectrum(mz=numpy.array([], dtype="float"),
-                           intensities=numpy.array([], dtype="float"),
-                           metadata={"compound_name": "peptideXYZ [M+H+K]"})
+@pytest.mark.parametrize("metadata, remove_adduct_from_name, expected_adduct, expected_name, removed_adduct", [
+    [{"compound_name": "peptideXYZ [M+H+K]"}, True, "[M+H+K]", "peptideXYZ", "[M+H+K]"],
+    [{"compound_name": "GalCer(d18:2/16:1); [M+H]+"}, True, "[M+H]+", "GalCer(d18:2/16:1)", "[M+H]+"],
+    [{"compound_name": "peptideXYZ [M+H+K]", "adduct": "M+H"}, True, "M+H", "peptideXYZ", "[M+H+K]"],
+    [{"compound_name": "peptideXYZ [M+H+K]"}, False, "[M+H+K]", "peptideXYZ [M+H+K]", None],
+    [{"Name": "peptideXYZ [M+H+K]", "adduct": "M+H"}, True, "M+H", "peptideXYZ", "[M+H+K]"],
+    [{"name": ""}, True, None, "", None]
+])
+def test_derive_adduct_from_name_parametrized(metadata, remove_adduct_from_name, expected_adduct, expected_name, removed_adduct):
+    set_matchms_logger_level("INFO")
+    spectrum_in = SpectrumBuilder().with_metadata(metadata).build()
 
-    spectrum = derive_adduct_from_name(spectrum_in)
+    with LogCapture() as log:
+        spectrum = derive_adduct_from_name(spectrum_in, remove_adduct_from_name=remove_adduct_from_name)
 
-    assert spectrum.get("adduct") == "[M+H+K]", "Expected different adduct."
-    assert spectrum.get("compound_name") == "peptideXYZ", "Expected different cleaned name."
+    assert spectrum.get("adduct") == expected_adduct, "Expected different adduct."
+    assert spectrum.get("compound_name") == expected_name, "Expected different cleaned name."
 
+    expected_log = []
+    if spectrum.get("compound_name") != spectrum_in.get("compound_name"):
+        expected_log.append(('matchms', 'INFO', f'Removed adduct {removed_adduct} from compound name.'))
+    if spectrum.get("adduct") != spectrum_in.get("adduct"):
+        expected_log.append(('matchms', 'INFO', f'Added adduct {expected_adduct} to metadata.'))
 
-def test_derive_adduct_from_name_dont_overwrite_present_adduct():
-    spectrum_in = Spectrum(mz=numpy.array([], dtype="float"),
-                           intensities=numpy.array([], dtype="float"),
-                           metadata={"compound_name": "peptideXYZ [M+H+K]",
-                                     "adduct": "M+H"})
-
-    spectrum = derive_adduct_from_name(spectrum_in)
-
-    assert spectrum.get("adduct") == "M+H", "Expected different adduct."
-    assert spectrum.get("compound_name") == "peptideXYZ", "Expected different cleaned name."
-
-
-def test_derive_adduct_from_name_dont_remove_from_name():
-    spectrum_in = Spectrum(mz=numpy.array([], dtype="float"),
-                           intensities=numpy.array([], dtype="float"),
-                           metadata={"compound_name": "peptideXYZ [M+H+K]"})
-
-    spectrum = derive_adduct_from_name(spectrum_in, remove_adduct_from_name=False)
-
-    assert spectrum.get("adduct") == "[M+H+K]", "Expected different adduct."
-    assert spectrum.get("compound_name") == spectrum_in.get("compound_name"), "Expected no change to name."
-
-
-def test_derive_adduct_from_name_no_compound_name_empty_name():
-    spectrum_in = Spectrum(mz=numpy.array([], dtype="float"),
-                           intensities=numpy.array([], dtype="float"),
-                           metadata={"name": ""})
-
-    spectrum = derive_adduct_from_name(spectrum_in)
-
-    assert spectrum.get("adduct", None) is None, "Expected None for adduct."
-    assert spectrum.get("compound_name", None) is None, "Expected None for name."
+    log.check(*expected_log)
+    reset_matchms_logger()
 
 
 def test_empty_spectrum():

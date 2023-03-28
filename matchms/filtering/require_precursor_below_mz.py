@@ -1,4 +1,8 @@
+import logging
 from ..typing import SpectrumType
+
+
+logger = logging.getLogger("matchms")
 
 
 def require_precursor_below_mz(spectrum_in: SpectrumType, max_mz: float = 1000) -> SpectrumType:
@@ -26,6 +30,8 @@ def require_precursor_below_mz(spectrum_in: SpectrumType, max_mz: float = 1000) 
                                                     "Consider applying 'add_precursor_mz' filter first.")
     assert max_mz >= 0, "max_mz must be a positive scalar."
     if precursor_mz >= max_mz:
+        logger.info("Spectrum with precursor_mz %s (>%s) was set to None.",
+                    str(precursor_mz), str(max_mz))
         return None
 
     return spectrum

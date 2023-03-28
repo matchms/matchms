@@ -1,5 +1,5 @@
-import numpy
-from ..Spikes import Spikes
+import numpy as np
+from ..Fragments import Fragments
 from ..typing import SpectrumType
 
 
@@ -23,10 +23,10 @@ def select_by_intensity(spectrum_in: SpectrumType, intensity_from: float = 10.0,
 
     assert intensity_from <= intensity_to, "'intensity_from' should be smaller than or equal to 'intensity_to'."
 
-    condition = numpy.logical_and(intensity_from <= spectrum.peaks.intensities,
+    condition = np.logical_and(intensity_from <= spectrum.peaks.intensities,
                                   spectrum.peaks.intensities <= intensity_to)
 
-    spectrum.peaks = Spikes(mz=spectrum.peaks.mz[condition],
-                            intensities=spectrum.peaks.intensities[condition])
+    spectrum.peaks = Fragments(mz=spectrum.peaks.mz[condition],
+                               intensities=spectrum.peaks.intensities[condition])
 
     return spectrum

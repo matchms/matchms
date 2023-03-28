@@ -1,8 +1,7 @@
-from unittest.mock import Mock
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 import numpy as np
-from matchms import Spectrum
 from matchms.importing import load_from_usi
+from .builder_Spectrum import SpectrumBuilder
 
 
 @patch("requests.get")
@@ -11,7 +10,9 @@ def test_normal(mock_get):
     mock_get.return_value.json.return_value = {"peaks": [[1., 2.], [3., 4.]]}
     spec = load_from_usi("something")
     expected_metadata = {"usi": "something", "server": "https://metabolomics-usi.ucsd.edu", "precursor_mz": None}
-    expected = Spectrum(np.array([1., 3.]), np.array([2., 4.]), expected_metadata)
+    expected = SpectrumBuilder().with_mz(np.array([1., 3.])).with_intensities(
+        np.array([2., 4.])).with_metadata(expected_metadata,
+                                          metadata_harmonization=True).build()
     assert spec == expected
 
 

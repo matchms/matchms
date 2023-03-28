@@ -1,119 +1,130 @@
 """Test function to collect matching peaks. Run tests both on numba compiled and
 pure Python version."""
-import numpy
+import numpy as np
 import pytest
-from matchms.similarity.spectrum_similarity_functions import collect_peak_pairs
-from matchms.similarity.spectrum_similarity_functions import find_matches
-from matchms.similarity.spectrum_similarity_functions import score_best_matches
+from matchms.similarity.spectrum_similarity_functions import (
+    collect_peak_pairs, find_matches, number_matching, number_matching_ppm,
+    number_matching_symmetric, number_matching_symmetric_ppm,
+    score_best_matches)
+from .builder_Spectrum import SpectrumBuilder
 
 
-@pytest.mark.parametrize("shift, expected_pairs, expected_matches",
-                         [(0.0, [[2., 2., 1.], [3., 3., 1.]], (2, 3)),
-                          (-5.0, [[0., 0., 0.01], [1., 1., 0.01]], (2, 3))])
-def test_collect_peak_pairs_compiled(shift, expected_pairs, expected_matches):
+@pytest.fixture
+def spectra():
+    builder = SpectrumBuilder()
+    spec1 = builder.with_mz([100, 200, 300, 500]).with_intensities([0.1, 0.1, 1.0, 1.0]).build()
+    spec2 = builder.with_mz([105, 205.1, 300, 500.1]).with_intensities([0.1, 0.1, 1.0, 1.0]).build()
+    return spec1.peaks.to_numpy, spec2.peaks.to_numpy
+
+
+def get_function(numba_compiled, f):
+    if numba_compiled:
+        return f
+    return f.py_func
+
+
+@pytest.mark.parametrize("numba_compiled", [True, False])
+@pytest.mark.parametrize("shift, expected_pairs, expected_matches", [
+    (0.0, [[2., 2., 1.], [3., 3., 1.]], (2, 3)),
+    (-5.0, [[0., 0., 0.01], [1., 1., 0.01]], (2, 3)),
+    (-20.0, None, None)
+])
+def test_collect_peak_pairs(numba_compiled, shift, expected_pairs, expected_matches, spectra):
     """Test finding expected peak matches for given tolerance."""
-    spec1 = numpy.array([[100, 200, 300, 500],
-                         [0.1, 0.1, 1.0, 1.0]], dtype="float").T
+    spec1, spec2 = spectra
 
-    spec2 = numpy.array([[105, 205.1, 300, 500.1],
-                         [0.1, 0.1, 1.0, 1.0]], dtype="float").T
+    func = get_function(numba_compiled, collect_peak_pairs)
+    matching_pairs = func(spec1, spec2, tolerance=0.2, shift=shift)
 
-    matching_pairs = numpy.array(collect_peak_pairs(spec1, spec2, tolerance=0.2, shift=shift))
-    assert matching_pairs.shape == expected_matches, "Expected different number of matching peaks"
-    assert numpy.allclose(matching_pairs, numpy.array(expected_pairs), atol=1e-8), "Expected different values."
-
-
-@pytest.mark.parametrize("shift, expected_pairs, expected_matches",
-                         [(0.0, [[2., 2., 1.], [3., 3., 1.]], (2, 3)),
-                          (-5.0, [[0., 0., 0.01], [1., 1., 0.01]], (2, 3))])
-def test_collect_peak_pairs(shift, expected_pairs, expected_matches):
-    """Test finding expected peak matches for tolerance=0.2 and given shift."""
-    spec1 = numpy.array([[100, 200, 300, 500],
-                         [0.1, 0.1, 1.0, 1.0]], dtype="float").T
-
-    spec2 = numpy.array([[105, 205.1, 300, 500.1],
-                         [0.1, 0.1, 1.0, 1.0]], dtype="float").T
-
-    matching_pairs = numpy.array(collect_peak_pairs.py_func(spec1, spec2, tolerance=0.2, shift=shift))
-    assert matching_pairs.shape == expected_matches, "Expected different number of matching peaks"
-    assert numpy.allclose(matching_pairs, numpy.array(expected_pairs), atol=1e-8), "Expected different values."
-
-
-@pytest.mark.parametrize("numba_compiled", [True, False])
-def test_collect_peak_pairs_no_matches(numba_compiled):
-    """Test function for no matching peaks."""
-    shift = -20.0
-    spec1 = numpy.array([[100, 200, 300, 500],
-                         [0.1, 0.1, 1.0, 1.0]], dtype="float").T
-
-    spec2 = numpy.array([[105, 205.1, 300, 500.1],
-                         [0.1, 0.1, 1.0, 1.0]], dtype="float").T
-    if numba_compiled:
-        matching_pairs = collect_peak_pairs(spec1, spec2, tolerance=0.2, shift=shift)
+    if expected_matches is not None:
+        matching_pairs = np.array(matching_pairs)
+        assert matching_pairs.shape == expected_matches, "Expected different number of matching peaks"
+        assert np.allclose(matching_pairs, np.array(expected_pairs), atol=1e-8), "Expected different values."
     else:
-        matching_pairs = collect_peak_pairs.py_func(spec1, spec2, tolerance=0.2, shift=shift)
-    assert matching_pairs is None, "Expected pairs to be None."
+        assert matching_pairs is None, "Expected pairs to be None."
 
 
 @pytest.mark.parametrize("numba_compiled", [True, False])
-def test_find_matches_shifted(numba_compiled):
+@pytest.mark.parametrize("shift, expected_matches", [
+    (-5.0, [(0, 0), (1, 1), (2, 3)]),
+    (-20.0, [])
+])
+def test_find_matches(numba_compiled, shift, expected_matches):
     """Test finding matches with shifted peaks."""
-    shift = -5.0
-    spec1_mz = numpy.array([100, 200, 300, 500], dtype="float")
+    spec1_mz = np.array([100, 200, 300, 500], dtype="float")
+    spec2_mz = np.array([105, 205.1, 300, 304.99, 500.1], dtype="float")
 
-    spec2_mz = numpy.array([105, 205.1, 300, 304.99, 500.1], dtype="float")
+    func = get_function(numba_compiled, find_matches)
+    matches = func(spec1_mz, spec2_mz, tolerance=0.2, shift=shift)
 
-    expected_matches = [(0, 0), (1, 1), (2, 3)]
-    if numba_compiled:
-        matches = find_matches(spec1_mz, spec2_mz, tolerance=0.2, shift=shift)
-    else:
-        matches = find_matches.py_func(spec1_mz, spec2_mz, tolerance=0.2, shift=shift)
     assert expected_matches == matches, "Expected different matches."
 
 
 @pytest.mark.parametrize("numba_compiled", [True, False])
-def test_find_matches_no_matches(numba_compiled):
-    """Test function for no matching peaks."""
-    shift = -20.0
-    spec1_mz = numpy.array([100, 200, 300, 500], dtype="float")
+@pytest.mark.parametrize("matching_pairs, expected_score",
+                         [([[2., 2., 1.], [3., 3., 1.]], (0.990099009900, 2)),
+                          ([[0., 0., 0.01], [1., 1., 0.01]], (0.009900990099, 2))])
+def test_score_best_matches(numba_compiled, matching_pairs, expected_score, spectra):
+    """Test finding expected peak matches for given tolerance."""
+    matching_pairs = np.array(matching_pairs)
+    spec1, spec2 = spectra
 
-    spec2_mz = numpy.array([105, 205.1, 300, 500.1], dtype="float")
+    func = get_function(numba_compiled, score_best_matches)
+
+    score, matches = func(matching_pairs, spec1, spec2)
+    assert score == pytest.approx(expected_score[0], 1e-6), "Expected different score"
+    assert matches == expected_score[1], "Expected different matches."
+
+
+@pytest.mark.parametrize("numba_compiled", [True, False])
+def test_number_matching(numba_compiled):
+    """Test the underlying score function (pure Python and numba compiled)."""
+    precursors_ref = np.asarray([101, 200, 300])
+    precursors_query = np.asarray([100, 301])
     if numba_compiled:
-        matches = find_matches(spec1_mz, spec2_mz, tolerance=0.2, shift=shift)
+        row, col, scores = number_matching(precursors_ref, precursors_query, tolerance=2.0)
     else:
-        matches = find_matches.py_func(spec1_mz, spec2_mz, tolerance=0.2, shift=shift)
-    assert matches == [], "Expected empty list of matches."
+        row, col, scores = number_matching.py_func(precursors_ref, precursors_query, tolerance=2.0)
+    assert np.all(scores == np.array([True, True])), "Expected different scores."
+    assert np.all(row == np.array([0, 2]))
+    assert np.all(col == np.array([0, 1]))
 
 
-@pytest.mark.parametrize("matching_pairs, expected_score",
-                         [([[2., 2., 1.], [3., 3., 1.]], (0.990099009900, 2)),
-                          ([[0., 0., 0.01], [1., 1., 0.01]], (0.009900990099, 2))])
-def test_score_best_matches_compiled(matching_pairs, expected_score):
-    """Test finding expected peak matches for given tolerance."""
-    matching_pairs = numpy.array(matching_pairs)
-    spec1 = numpy.array([[100, 200, 300, 500],
-                         [0.1, 0.1, 1.0, 1.0]], dtype="float").T
-
-    spec2 = numpy.array([[105, 205.1, 300, 500.1],
-                         [0.1, 0.1, 1.0, 1.0]], dtype="float").T
-
-    score, matches = score_best_matches(matching_pairs, spec1, spec2)
-    assert score == pytest.approx(expected_score[0], 1e-6), "Expected different score"
-    assert matches == expected_score[1], "Expected different matches."
+@pytest.mark.parametrize("numba_compiled", [True, False])
+def test_number_matching_symmetric(numba_compiled):
+    """Test the underlying score function (non-compiled)."""
+    precursors = np.asarray([101, 100, 200])
+    if numba_compiled:
+        row, col, scores = number_matching_symmetric(precursors, tolerance=2.0)
+    else:
+        row, col, scores = number_matching_symmetric.py_func(precursors, tolerance=2.0)
+    assert np.all(scores == np.array([True, True, True, True, True])), "Expected different scores."
+    assert np.all(row == np.array([0, 0, 1, 1, 2]))
+    assert np.all(col == np.array([0, 1, 0, 1, 2]))
 
 
-@pytest.mark.parametrize("matching_pairs, expected_score",
-                         [([[2., 2., 1.], [3., 3., 1.]], (0.990099009900, 2)),
-                          ([[0., 0., 0.01], [1., 1., 0.01]], (0.009900990099, 2))])
-def test_score_best_matches(matching_pairs, expected_score):
-    """Test finding expected peak matches for given tolerance."""
-    matching_pairs = numpy.array(matching_pairs)
-    spec1 = numpy.array([[100, 200, 300, 500],
-                         [0.1, 0.1, 1.0, 1.0]], dtype="float").T
+@pytest.mark.parametrize("numba_compiled", [True, False])
+def test_number_matching_ppm(numba_compiled):
+    """Test the underlying score function (pure Python and numba compiled)."""
+    precursors_ref = np.asarray([100.00001, 200, 300])
+    precursors_query = np.asarray([100, 300.00001])
+    if numba_compiled:
+        row, col, scores = number_matching_ppm(precursors_ref, precursors_query, tolerance_ppm=2.0)
+    else:
+        row, col, scores = number_matching_ppm.py_func(precursors_ref, precursors_query, tolerance_ppm=2.0)
+    assert np.all(scores == np.array([True, True])), "Expected different scores."
+    assert np.all(row == np.array([0, 2]))
+    assert np.all(col == np.array([0, 1]))
 
-    spec2 = numpy.array([[105, 205.1, 300, 500.1],
-                         [0.1, 0.1, 1.0, 1.0]], dtype="float").T
 
-    score, matches = score_best_matches.py_func(matching_pairs, spec1, spec2)
-    assert score == pytest.approx(expected_score[0], 1e-6), "Expected different score"
-    assert matches == expected_score[1], "Expected different matches."
+@pytest.mark.parametrize("numba_compiled", [True, False])
+def test_number_matching_symmetric_ppm(numba_compiled):
+    """Test the underlying score function (non-compiled)."""
+    precursors = np.asarray([100.00001, 100, 200])
+    if numba_compiled:
+        row, col, scores = number_matching_symmetric_ppm(precursors, tolerance_ppm=2.0)
+    else:
+        row, col, scores = number_matching_symmetric_ppm.py_func(precursors,  tolerance_ppm=2.0)
+    assert np.all(scores == np.array([True, True, True, True, True])), "Expected different scores."
+    assert np.all(row == np.array([0, 0, 1, 1, 2]))
+    assert np.all(col == np.array([0, 1, 0, 1, 2]))

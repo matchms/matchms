@@ -1,52 +1,21 @@
-import numpy
-from matchms import Spectrum
+import pytest
 from matchms.filtering import correct_charge
+from .builder_Spectrum import SpectrumBuilder
 
 
-def test_correct_charge_no_ionmode():
-    """Test if no charge is added for empty ionmode."""
-    spectrum_in = Spectrum(mz=numpy.array([], dtype='float'),
-                           intensities=numpy.array([], dtype='float'),
-                           metadata={})
+@pytest.mark.parametrize("metadata, expected", [
+    [{}, 0],
+    [{"ionmode": "positive"}, 1],
+    [{"ionmode": "positive", "charge": -2}, 2],
+    [{"ionmode": "negative", "charge": 2}, -2]
 
-    spectrum = correct_charge(spectrum_in)
-
-    assert spectrum.get("charge") == 0, "Expected zero charge value."
-
-
-def test_correct_charge_add_charge():
-    """Test if charge is corrected as expected."""
-    spectrum_in = Spectrum(mz=numpy.array([], dtype='float'),
-                           intensities=numpy.array([], dtype='float'),
-                           metadata={"ionmode": "positive"})
+])
+def test_correct_charge(metadata, expected):
+    spectrum_in = SpectrumBuilder().with_metadata(metadata).build()
 
     spectrum = correct_charge(spectrum_in)
 
-    assert spectrum.get("charge") == 1, "Expected different charge value."
-
-
-def test_correct_charge_sign_plus_to_min():
-    """Test if charge is corrected as expected."""
-    spectrum_in = Spectrum(mz=numpy.array([], dtype='float'),
-                           intensities=numpy.array([], dtype='float'),
-                           metadata={"ionmode": "negative",
-                                     "charge": 2})
-
-    spectrum = correct_charge(spectrum_in)
-
-    assert spectrum.get("charge") == -2, "Expected different charge value."
-
-
-def test_correct_charge_sign_min_to_plus():
-    """Test if charge is corrected as expected."""
-    spectrum_in = Spectrum(mz=numpy.array([], dtype='float'),
-                           intensities=numpy.array([], dtype='float'),
-                           metadata={"ionmode": "positive",
-                                     "charge": -2})
-
-    spectrum = correct_charge(spectrum_in)
-
-    assert spectrum.get("charge") == 2, "Expected different charge value."
+    assert spectrum.get("charge") == expected
 
 
 def test_correct_charge_empty_spectrum():

@@ -41,6 +41,7 @@ from .add_fingerprint import add_fingerprint
 from .add_losses import add_losses
 from .add_parent_mass import add_parent_mass
 from .add_precursor_mz import add_precursor_mz
+from .add_retention import add_retention_index, add_retention_time
 from .clean_compound_name import clean_compound_name
 from .correct_charge import correct_charge
 from .default_filters import default_filters
@@ -53,6 +54,8 @@ from .derive_smiles_from_inchi import derive_smiles_from_inchi
 from .harmonize_undefined_inchi import harmonize_undefined_inchi
 from .harmonize_undefined_inchikey import harmonize_undefined_inchikey
 from .harmonize_undefined_smiles import harmonize_undefined_smiles
+from .interpret_pepmass import interpret_pepmass
+from .load_adducts import load_adducts_dict, load_known_adduct_conversions
 from .make_charge_int import make_charge_int
 from .make_charge_scalar import make_charge_scalar
 from .make_ionmode_lowercase import make_ionmode_lowercase
@@ -64,6 +67,7 @@ from .repair_inchi_inchikey_smiles import repair_inchi_inchikey_smiles
 from .require_minimum_number_of_peaks import require_minimum_number_of_peaks
 from .require_minimum_of_high_peaks import require_minimum_of_high_peaks
 from .require_precursor_below_mz import require_precursor_below_mz
+from .require_precursor_mz import require_precursor_mz
 from .select_by_intensity import select_by_intensity
 from .select_by_mz import select_by_mz
 from .select_by_relative_intensity import select_by_relative_intensity
@@ -77,6 +81,8 @@ __all__ = [
     "add_losses",
     "add_parent_mass",
     "add_precursor_mz",
+    "add_retention_index",
+    "add_retention_time",
     "clean_compound_name",
     "correct_charge",
     "default_filters",
@@ -89,6 +95,9 @@ __all__ = [
     "harmonize_undefined_inchi",
     "harmonize_undefined_inchikey",
     "harmonize_undefined_smiles",
+    "interpret_pepmass",
+    "load_adducts_dict",
+    "load_known_adduct_conversions",
     "make_charge_int",
     "make_charge_scalar",
     "make_ionmode_lowercase",
@@ -100,9 +109,10 @@ __all__ = [
     "require_minimum_number_of_peaks",
     "require_minimum_of_high_peaks",
     "require_precursor_below_mz",
+    "require_precursor_mz",
     "select_by_intensity",
     "select_by_mz",
     "select_by_relative_intensity",
     "set_ionmode_na_when_missing",
-    "SpeciesString"
+    "SpeciesString",
 ]

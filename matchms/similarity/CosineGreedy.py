@@ -1,9 +1,9 @@
 from typing import Tuple
-import numpy
+import numpy as np
 from matchms.typing import SpectrumType
 from .BaseSimilarity import BaseSimilarity
-from .spectrum_similarity_functions import collect_peak_pairs
-from .spectrum_similarity_functions import score_best_matches
+from .spectrum_similarity_functions import (collect_peak_pairs,
+                                            score_best_matches)
 
 
 class CosineGreedy(BaseSimilarity):
@@ -49,7 +49,7 @@ class CosineGreedy(BaseSimilarity):
     # Set key characteristics as class attributes
     is_commutative = True
     # Set output data type, e.g. ("score", "float") or [("score", "float"), ("matches", "int")]
-    score_datatype = [("score", numpy.float64), ("matches", "int")]
+    score_datatype = [("score", np.float64), ("matches", "int")]
 
     def __init__(self, tolerance: float = 0.1, mz_power: float = 0.0,
                  intensity_power: float = 1.0):
@@ -90,14 +90,14 @@ class CosineGreedy(BaseSimilarity):
                                                 intensity_power=self.intensity_power)
             if matching_pairs is None:
                 return None
-            matching_pairs = matching_pairs[numpy.argsort(matching_pairs[:, 2])[::-1], :]
+            matching_pairs = matching_pairs[np.argsort(matching_pairs[:, 2])[::-1], :]
             return matching_pairs
 
         spec1 = reference.peaks.to_numpy
         spec2 = query.peaks.to_numpy
         matching_pairs = get_matching_pairs()
         if matching_pairs is None:
-            return numpy.asarray((float(0), 0), dtype=self.score_datatype)
+            return np.asarray((float(0), 0), dtype=self.score_datatype)
         score = score_best_matches(matching_pairs, spec1, spec2,
                                    self.mz_power, self.intensity_power)
-        return numpy.asarray(score, dtype=self.score_datatype)
+        return np.asarray(score, dtype=self.score_datatype)

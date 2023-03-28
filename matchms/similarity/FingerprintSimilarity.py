@@ -1,14 +1,13 @@
-from typing import List
-from typing import Union
-import numpy
+from typing import List, Union
+import numpy as np
 from matchms.typing import SpectrumType
 from .BaseSimilarity import BaseSimilarity
-from .vector_similarity_functions import cosine_similarity
-from .vector_similarity_functions import cosine_similarity_matrix
-from .vector_similarity_functions import dice_similarity
-from .vector_similarity_functions import dice_similarity_matrix
-from .vector_similarity_functions import jaccard_index
-from .vector_similarity_functions import jaccard_similarity_matrix
+from .vector_similarity_functions import (cosine_similarity,
+                                          cosine_similarity_matrix,
+                                          dice_similarity,
+                                          dice_similarity_matrix,
+                                          jaccard_index,
+                                          jaccard_similarity_matrix)
 
 
 class FingerprintSimilarity(BaseSimilarity):
@@ -46,7 +45,7 @@ class FingerprintSimilarity(BaseSimilarity):
         # Specify type and calculate similarities
         similarity_measure = FingerprintSimilarity("jaccard")
         scores = calculate_scores(spectrums, spectrums, similarity_measure)
-        print(np.round(scores.scores, 3))
+        print(np.round(scores.scores.to_array(), 3))
 
     Should output
 
@@ -60,7 +59,7 @@ class FingerprintSimilarity(BaseSimilarity):
     # Set key characteristics as class attributes
     is_commutative = True
     # Set output data type, e.g.  "float" or [("score", "float"), ("matches", "int")]
-    score_datatype = numpy.float64
+    score_datatype = np.float64
 
     def __init__(self, similarity_measure: str = "jaccard",
                  set_empty_scores: Union[float, int, str] = "nan"):
@@ -74,7 +73,7 @@ class FingerprintSimilarity(BaseSimilarity):
         set_empty_scores:
             Define what should be given instead of a similarity score in cases
             where fingprints are missing. The default is "nan", which will return
-            numpy.nan's in such cases.
+            np.nan's in such cases.
         """
         self.set_empty_scores = set_empty_scores
         assert similarity_measure in ["cosine", "dice", "jaccard"], "Unknown similarity measure."
@@ -100,12 +99,13 @@ class FingerprintSimilarity(BaseSimilarity):
 
         if self.similarity_measure == "cosine":
             score = cosine_similarity(fingerprint_ref, fingerprint_query)
-            return numpy.asarray(score, dtype=self.score_datatype)
+            return np.asarray(score, dtype=self.score_datatype)
 
         raise NotImplementedError
 
     def matrix(self, references: List[SpectrumType], queries: List[SpectrumType],
-               is_symmetric: bool = False) -> numpy.array:
+               array_type: str = "numpy",
+               is_symmetric: bool = False) -> np.array:
         """Calculate matrix of fingerprint based similarity scores.
 
         Parameters
@@ -114,6 +114,9 @@ class FingerprintSimilarity(BaseSimilarity):
             List of reference spectrums.
         queries:
             List of query spectrums.
+        array_type
+            Specify the output array type. Can be "numpy" or "sparse".
+            Default is "numpy" and will return a numpy array. "sparse" will return a COO-sparse array
         """
         def get_fingerprints(spectrums):
             for index, spectrum in enumerate(spectrums):
@@ -127,17 +130,19 @@ class FingerprintSimilarity(BaseSimilarity):
                 if fp is not None:
                     idx_fingerprints.append(index)
                     fingerprints.append(fp)
-            return numpy.asarray(fingerprints), numpy.asarray(idx_fingerprints)
+            return np.asarray(fingerprints), np.asarray(idx_fingerprints)
 
         def create_full_matrix():
             """Create matrix for all similarities."""
-            similarity_matrix = numpy.zeros((len(references), len(queries)))
+            similarity_matrix = np.zeros((len(references), len(queries)))
             if self.set_empty_scores == "nan":
-                similarity_matrix[:] = numpy.nan
+                similarity_matrix[:] = np.nan
             elif isinstance(self.set_empty_scores, (float, int)):
                 similarity_matrix[:] = self.set_empty_scores
             return similarity_matrix
 
+        if array_type != "numpy":
+            raise NotImplementedError("Output array type other than numpy is not yet implemented.")
         fingerprints1, idx_fingerprints1 = collect_fingerprints(references)
         fingerprints2, idx_fingerprints2 = collect_fingerprints(queries)
         assert idx_fingerprints1.size > 0 and idx_fingerprints2.size > 0, ("Not enouth molecular fingerprints.",
@@ -146,15 +151,15 @@ class FingerprintSimilarity(BaseSimilarity):
         # Calculate similarity score matrix following specified method
         similarity_matrix = create_full_matrix()
         if self.similarity_measure == "jaccard":
-            similarity_matrix[numpy.ix_(idx_fingerprints1,
+            similarity_matrix[np.ix_(idx_fingerprints1,
                                         idx_fingerprints2)] = jaccard_similarity_matrix(fingerprints1,
                                                                                         fingerprints2)
         elif self.similarity_measure == "dice":
-            similarity_matrix[numpy.ix_(idx_fingerprints1,
+            similarity_matrix[np.ix_(idx_fingerprints1,
                                         idx_fingerprints2)] = dice_similarity_matrix(fingerprints1,
                                                                                      fingerprints2)
         elif self.similarity_measure == "cosine":
-            similarity_matrix[numpy.ix_(idx_fingerprints1,
+            similarity_matrix[np.ix_(idx_fingerprints1,
                                         idx_fingerprints2)] = cosine_similarity_matrix(fingerprints1,
                                                                                        fingerprints2)
         return similarity_matrix.astype(self.score_datatype)

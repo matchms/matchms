@@ -1,40 +1,27 @@
+`fair-software.nl <https://fair-software.nl/>`_ recommendations:
+
+|GitHub Badge|
+|License Badge|
+|Conda Badge| |Pypi Badge| |Research Software Directory Badge|
+|Zenodo Badge|
+|CII Best Practices Badge| |Howfairis Badge|
+
+Code quality checks:
+
+|CI Build|
+|ReadTheDocs Badge|
+|Sonarcloud Quality Gate Badge| |Sonarcloud Coverage Badge|
+
 .. image:: readthedocs/_static/matchms_header.png
    :target: readthedocs/_static/matchms.png
    :align: left
    :alt: matchms
 
-Matchms is an open-source Python package to import, process, clean, and compare mass spectrometry data (MS/MS). It allows to implement and run an easy-to-follow, easy-to-reproduce workflow from raw mass spectra to pre- and post-processed spectral data. Spectral data can be imported from common formats such mzML, mzXML, msp, metabolomics-USI, MGF, or json (e.g. GNPS-syle json files). Matchms then provides filters for metadata cleaning and checking, as well as for basic peak filtering. Finally, matchms was build to import and apply different similarity measures to compare large amounts of spectra. This includes common Cosine scores, but can also easily be extended by custom measures. One example for a spectrum similarity measure that was designed to work in matchms is `Spec2Vec <https://github.com/iomega/spec2vec>`_.
+Matchms is an open-source Python package to import, process, clean, and compare mass spectrometry data (MS/MS). It allows to implement and run an easy-to-follow, easy-to-reproduce workflow from raw mass spectra to pre- and post-processed spectral data. Spectral data can be imported from common formats such mzML, mzXML, msp, metabolomics-USI, MGF, or json (e.g. GNPS-syle json files). Matchms then provides filters for metadata cleaning and checking, as well as for basic peak filtering. Finally, matchms was build to import and apply different similarity measures to compare large amounts of spectra. This includes common Cosine scores, but can also easily be extended by custom measures. Example for spectrum similarity measures that were designed to work in matchms are `Spec2Vec <https://github.com/iomega/spec2vec>`_ and `MS2DeepScore <https://github.com/matchms/ms2deepscore>`_.
 
 If you use matchms in your research, please cite the following software paper:  
 
 F Huber, S. Verhoeven, C. Meijer, H. Spreeuw, E. M. Villanueva Castilla, C. Geng, J.J.J. van der Hooft, S. Rogers, A. Belloum, F. Diblen, J.H. Spaaks, (2020). matchms - processing and similarity evaluation of mass spectrometry data. Journal of Open Source Software, 5(52), 2411, https://doi.org/10.21105/joss.02411
-
-.. list-table::
-   :widths: 25 25
-   :header-rows: 1
-
-   * - 
-     - Badges
-   * - **fair-software.nl recommendations**
-     - 
-   * - \1. Code repository
-     - |GitHub Badge|
-   * - \2. License
-     - |License Badge|
-   * - \3. Community Registry
-     - |Conda Badge| |Pypi Badge| |Research Software Directory Badge|
-   * - \4. Enable Citation
-     - |JOSS Badge| |Zenodo Badge|
-   * - \5. Checklists
-     - |CII Best Practices Badge| |Howfairis Badge|
-   * - **Code quality checks**
-     -
-   * - Continuous integration
-     - |CI Build|
-   * - Documentation
-     - |ReadTheDocs Badge|
-   * - Code Quality
-     - |Sonarcloud Quality Gate Badge| |Sonarcloud Coverage Badge|
 
 
 .. |GitHub Badge| image:: https://img.shields.io/badge/github-repo-000.svg?logo=github&labelColor=gray&color=blue
@@ -90,6 +77,44 @@ F Huber, S. Verhoeven, C. Meijer, H. Spreeuw, E. M. Villanueva Castilla, C. Geng
    :target: https://sonarcloud.io/component_measures?id=matchms_matchms&metric=Coverage&view=list
    :alt: Sonarcloud Coverage
 
+**********************************
+Latest changes (matchms >= 0.18.0)
+**********************************
+
+Pipeline class
+==============
+
+To make typical matchms workflows (data import, processing, score computations) more accessible to users, matchms now offers a `Pipeline` class to handle complex workflows. This also allows to define, import, export, or modify workflows using yaml files. See code examples below (and soon: updated tutorial).
+
+Sparse scores array
+===================
+
+We realized that many matchms-based workflows aim to compare many-to-many spectra whereby not all pairs and scores are equally important. Often, for instance, it will be about searching similar or related spectra/compounds. This also means that often not all scores need to be stored (or computed). For this reason we now shifted to a sparse handling of scores in matchms (that means: only storing actuallly computed, non-null values).
+
+.. image:: readthedocs/_static/matchms_sketch.png
+   :target: readthedocs/_static/matchms_sketch.png
+   :align: left
+   :alt: matchms code design
+
+
+
+**********************************
+Latest changes (matchms >= 0.14.0)
+**********************************
+
+Metadata class
+==============
+
+This is the first of a few releases to work our way towards matchms 1.0.0, which also means that a few things in the API will likely change. Here the main change is that `Spectrum.metadata` is no longer a simple Python dictionary but became a ``Metadata`` object. In this context metadata field-names/keys will now be harmonized by default (e.g. "Precursor Mass" will become "precursor_mz). For list of conversions see `matchms key conversion table <https://github.com/matchms/matchms/blob/master/matchms/data/known_key_conversions.csv>`_.
+
+- metadata is now stored using new ``Metadata`` class which automatically applied restrictions to used field names/keys to avoid confusion between different format styles
+- all metadata keys must be lower-case, spaces will be changed to underscores.
+- Known key conversions are applied to metadata entries using a `matchms key conversion table <https://github.com/matchms/matchms/blob/master/matchms/data/known_key_conversions.csv>`_.
+- new ``MetadataMatch`` similarity measure in matchms.similarity. This can be used to find matches between metadata entries and currently supports either full string matches or matches of numerical entries within a specified tolerance
+- new ``interpret_pepmass()`` filter to handle different pepmass entries found in data 
+- ``Spikes`` class has become ``Fragments`` class
+
+
 ***********************
 Documentation for users
 ***********************
@@ -100,15 +125,14 @@ Installation
 
 Prerequisites:  
 
-- Python 3.7, 3.8 or 3.9
+- Python 3.7, 3.8 or 3.9, (3.10 and 3.11 should work as well, but are not yet tested systematically)
 - Anaconda (recommended)
 
-We recommend installing matchms from Anaconda Cloud with
+We recommend installing matchms in a new virtual environment to avoid dependency clashes
 
 .. code-block:: console
 
-  # install matchms in a new virtual environment to avoid dependency clashes
-  conda create --name matchms python=3.8
+  conda create --name matchms python=3.9
   conda activate matchms
   conda install --channel bioconda --channel conda-forge matchms
 
@@ -119,8 +143,8 @@ To install matchms with ``pip`` simply run
 
   pip install matchms
 
-matchms universe -> additional functionalities
-==============================================
+matchms ecosystem -> additional functionalities
+===============================================
 
 Matchms functionalities can be complemented by additional packages.  
 To date we are aware of:
@@ -131,6 +155,8 @@ To date we are aware of:
 
 + `matchmsextras <https://github.com/matchms/matchmsextras>`_ which contains additional functions to create networks based on spectral similarities, to run spectrum searchers against `PubChem`, or additional plotting methods.
 
++ `memo <https://github.com/mandelbrot-project/memo>`_ a method allowing a Retention Time (RT) agnostic alignment of metabolomics samples using the fragmentation spectra (MS2) of their consituents.
+
 *(if you know of any other packages that are fully compatible with matchms, let us know!)*
 
 Introduction
@@ -138,13 +164,40 @@ Introduction
 
 To get started with matchms, we recommend following our `matchms introduction tutorial <https://blog.esciencecenter.nl/build-your-own-mass-spectrometry-analysis-pipeline-in-python-using-matchms-part-i-d96c718c68ee>`_.
 
-Alternatively, here below is a small example of using matchms to calculate the Cosine score between mass Spectrums in the `tests/pesticides.mgf <https://github.com/matchms/matchms/blob/master/tests/pesticides.mgf>`_ file.
+Below is a small example of using matchms to calculate the Cosine score between mass Spectrums in the `tests/pesticides.mgf <https://github.com/matchms/matchms/blob/master/tests/pesticides.mgf>`_ file.
 
 .. code-block:: python
 
+    from matchms import Pipeline
+    
+    pipeline = Pipeline()
+    
+    # Read spectrums from a MGF formatted file, for other formats see https://matchms.readthedocs.io/en/latest/api/matchms.importing.html 
+    pipeline.query_files = "tests/pesticides.mgf"
+    pipeline.filter_steps_queries = [
+        ["default_filters"],
+        ["add_parent_mass"],
+        ["normalize_intensities"],
+        ["select_by_intensity", {"intensity_from": 0.001, "intensity_to": 1.0}],
+        ["select_by_mz", {"mz_from": 0, "mz_to": 1000}],
+        ["require_minimum_number_of_peaks", {"n_required": 5}]
+    ]
+    pipeline.score_computations = [["precursormzmatch",  {"tolerance": 100.0}],
+                                   ["cosinegreedy", {"tolerance": 1.0}],
+                                   ["filter_by_range", {"name": "CosineGreedy_score", "low": 0.2}]]
+
+    pipeline.logging_file = "my_pipeline.log"  # for pipeline and logging message
+    pipeline.logging_level = "INFO"
+    pipeline.run()
+
+
+Alternatively, in particular if you need more room to add custom functions and steps, the individual
+steps can run without using the matchms ``Pipeline``:
+
+.. code-block:: python
+    
     from matchms.importing import load_from_mgf
-    from matchms.filtering import default_filters
-    from matchms.filtering import normalize_intensities
+    from matchms.filtering import default_filters, normalize_intensities
     from matchms import calculate_scores
     from matchms.similarity import CosineGreedy
 
@@ -167,53 +220,58 @@ Alternatively, here below is a small example of using matchms to calculate the C
                               queries=spectrums,
                               similarity_function=CosineGreedy())
 
+    # Matchms allows to get the best matches for any query using scores_by_query
+    query = spectrums[15]  # just an example
+    best_matches = scores.scores_by_query(query, 'CosineGreedy_score', sort=True)
+
     # Print the calculated scores for each spectrum pair
-    for score in scores:
-        (reference, query, score) = score
-        # Ignore scores between same spectrum and
-        # pairs which have less than 20 peaks in common
-        if reference is not query and score["matches"] >= 20:
+    for (reference, score) in best_matches[:10]
+        # Ignore scores between same spectrum
+        if reference is not query:
             print(f"Reference scan id: {reference.metadata['scans']}")
             print(f"Query scan id: {query.metadata['scans']}")
-            print(f"Score: {score['score']:.4f}")
-            print(f"Number of matching peaks: {score['matches']}")
+            print(f"Score: {score[0]:.4f}")
+            print(f"Number of matching peaks: {score[1]}")
             print("----------------------------")
 
-Glossary of terms
-=================
+Different spectrum similarity scores
+====================================
 
-.. list-table::
-   :header-rows: 1
+Matchms comes with numerous different scoring methods in `matchms.similarity` and can furthe seemlessly work with `Spec2Vec` or `MS2DeepScore`.
 
-   * - Term
-     - Description
-   * - adduct / addition product
-     - During ionization in a mass spectrometer, the molecules of the injected compound break apart
-       into fragments. When fragments combine into a new compound, this is known as an addition
-       product, or adduct.  `Wikipedia <https://en.wikipedia.org/wiki/Adduct>`__
-   * - GNPS
-     - Knowledge base for sharing of mass spectrometry data (`link <https://gnps.ucsd.edu/ProteoSAFe/static/gnps-splash.jsp>`__).
-   * - InChI / :code:`INCHI`
-     - InChI is short for International Chemical Identifier. InChIs are useful
-       in retrieving information associated with a certain molecule from a
-       database.
-   * - InChIKey / InChI key / :code:`INCHIKEY`
-     - An identifier for molecules. For example, the InChI key for carbon
-       dioxide is :code:`InChIKey=CURLTUGMZLYLDI-UHFFFAOYSA-N` (yes, it
-       includes the substring :code:`InChIKey=`).
-   * - MGF File / Mascot Generic Format
-     - A plan ASCII file format to store peak list data from a mass spectrometry experiment. Links: `matrixscience.com <http://www.matrixscience.com/help/data_file_help.html#GEN>`__,
-       `fiehnlab.ucdavis.edu <https://fiehnlab.ucdavis.edu/projects/lipidblast/mgf-files>`__.
-   * - parent mass / :code:`parent_mass`
-     - Actual mass (in Dalton) of the original compound prior to fragmentation.
-       It can be recalculated from the precursor m/z by taking
-       into account the charge state and proton/electron masses.
-   * - precursor m/z / :code:`precursor_mz`
-     - Mass-to-charge ratio of the compound targeted for fragmentation.
-   * - SMILES
-     - A line notation for describing the structure of chemical species using
-       short ASCII strings. For example, water is encoded as :code:`O[H]O`,
-       carbon dioxide is encoded as :code:`O=C=O`, etc. SMILES-encoded species may be converted to InChIKey `using a resolver like this one <https://cactus.nci.nih.gov/chemical/structure>`__. The Wikipedia entry for SMILES is `here <https://en.wikipedia.org/wiki/Simplified_molecular-input_line-entry_system>`__.
+Code example: 
+
+.. code-block:: python
+
+    from matchms.importing import load_from_usi
+    import matchms.filtering as msfilters
+    import matchms.similarity as mssim
+
+
+    usi1 = "mzspec:GNPS:GNPS-LIBRARY:accession:CCMSLIB00000424840"
+    usi2 = "mzspec:MSV000086109:BD5_dil2x_BD5_01_57213:scan:760"
+
+    mz_tolerance = 0.1
+
+    spectrum1 = load_from_usi(usi1)
+    spectrum1 = msfilters.select_by_mz(spectrum1, 0, spectrum1.get("precursor_mz"))
+    spectrum1 = msfilters.remove_peaks_around_precursor_mz(spectrum1,
+                                                           mz_tolerance=0.1)
+
+    spectrum2 = load_from_usi(usi2)
+    spectrum2 = msfilters.select_by_mz(spectrum2, 0, spectrum1.get("precursor_mz"))
+    spectrum2 = msfilters.remove_peaks_around_precursor_mz(spectrum2,
+                                                           mz_tolerance=0.1)
+    # Compute scores:
+    similarity_cosine = mssim.CosineGreedy(tolerance=mz_tolerance).pair(spectrum1, spectrum2)
+    similarity_modified_cosine = mssim.ModifiedCosine(tolerance=mz_tolerance).pair(spectrum1, spectrum2)
+    similarity_neutral_losses = mssim.NeutralLossesCosine(tolerance=mz_tolerance).pair(spectrum1, spectrum2)
+
+    print(f"similarity_cosine: {similarity_cosine}")
+    print(f"similarity_modified_cosine: {similarity_modified_cosine}")
+    print(f"similarity_neutral_losses: {similarity_neutral_losses}")
+
+    spectrum1.plot_against(spectrum2)
 
 
 ****************************
@@ -246,9 +304,14 @@ Automatically fix incorrectly sorted imports:
 
 .. code-block:: console
 
-  isort --recursive .
+  isort .
 
-Files will be changed in place and need to be committed manually.
+Files will be changed in place and need to be committed manually. If you only want to inspect the isort suggestions then simply run:
+
+.. code-block:: console
+
+  isort --check-only --diff .
+
 
 Run tests (including coverage) with:
 
@@ -286,7 +349,7 @@ have a look at the `contribution guidelines <CONTRIBUTING.md>`_.
 License
 *******
 
-Copyright (c) 2020, Netherlands eScience Center
+Copyright (c) 2021, Netherlands eScience Center
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

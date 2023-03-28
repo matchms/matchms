@@ -1,6 +1,10 @@
+import logging
 from math import ceil
 from typing import Optional
 from ..typing import SpectrumType
+
+
+logger = logging.getLogger("matchms")
 
 
 def require_minimum_number_of_peaks(spectrum_in: SpectrumType,
@@ -33,6 +37,8 @@ def require_minimum_number_of_peaks(spectrum_in: SpectrumType,
         threshold = n_required
 
     if spectrum.peaks.intensities.size < threshold:
+        logger.info("Spectrum with %s (<%s) peaks was set to None.",
+                    str(spectrum.peaks.intensities.size), str(threshold))
         return None
 
     return spectrum

@@ -1,6 +1,6 @@
+import copy
 import json
 from typing import List
-import numpy
 from ..Spectrum import Spectrum
 
 
@@ -13,13 +13,13 @@ def save_as_json(spectrums: List[Spectrum], filename: str):
 
     .. code-block:: python
 
-        import numpy
+        import numpy as np
         from matchms import Spectrum
         from matchms.exporting import save_as_json
 
         # Create dummy spectrum
-        spectrum = Spectrum(mz=numpy.array([100, 200, 300], dtype="float"),
-                            intensities=numpy.array([10, 10, 500], dtype="float"),
+        spectrum = Spectrum(mz=np.array([100, 200, 300], dtype="float"),
+                            intensities=np.array([10, 10, 500], dtype="float"),
                             metadata={"charge": -1,
                                       "inchi": '"InChI=1S/C6H12"',
                                       "precursor_mz": 222.2})
@@ -39,7 +39,7 @@ def save_as_json(spectrums: List[Spectrum], filename: str):
         spectrums = [spectrums]
 
     # Write to json file
-    with open(filename, 'w', encoding="utf-8") as fout:
+    with open(filename, "w", encoding="utf-8") as fout:
         json.dump(spectrums, fout, cls=SpectrumJSONEncoder)
 
 
@@ -49,10 +49,16 @@ class SpectrumJSONEncoder(json.JSONEncoder):
         """JSON Encoder which can encode a :py:class:`~matchms.Spectrum.Spectrum` object"""
         if isinstance(o, Spectrum):
             spec = o.clone()
-            peaks_list = numpy.vstack((spec.peaks.mz, spec.peaks.intensities)).T.tolist()
+            return spec.to_dict()
+        return json.JSONEncoder.default(self, o)
 
-            # Convert matchms.Spectrum() into dictionaries
-            spectrum_dict = {key: spec.metadata[key] for key in spec.metadata}
-            spectrum_dict["peaks_json"] = peaks_list
-            return spectrum_dict
+
+class ScoresJSONEncoder(json.JSONEncoder):
+    def default(self, o):
+        """JSON Encoder which can encode a :py:class:`~matchms.Scores.Scores` object"""
+        class_name = o.__class__.__name__
+        # do isinstance(o, Scores) without importing matchms.Scores
+        if class_name == "Scores":
+            scores = copy.deepcopy(o)
+            return scores.to_dict()
         return json.JSONEncoder.default(self, o)
