@@ -5,7 +5,7 @@ import numpy as np
 from ..Spectrum import Spectrum
 
 
-def _get_metadata_dict(spectrum: Spectrum, include_fields: List[str] | str) -> dict[str, Any]:
+def _get_metadata_dict(spectrum: Spectrum, include_fields: Optional[List[str]] = None) -> dict[str, Any]:
     """Extract keys from spectrum metadata. Will silently continue if a key is not found.
 
     Args:
@@ -15,9 +15,9 @@ def _get_metadata_dict(spectrum: Spectrum, include_fields: List[str] | str) -> d
     Returns:
         dict[str, Any]: Dictionary containing the specified keys.
     """
-    if include_fields == "all":
+    if include_fields is None or include_fields[0] == "all":
         return spectrum.metadata
-    if not isinstance(include_fields, list):
+    elif not isinstance(include_fields, list):
         print("'Include_fields' must be 'all' or list of keys.")
         return None
         
@@ -26,7 +26,7 @@ def _get_metadata_dict(spectrum: Spectrum, include_fields: List[str] | str) -> d
 
 
 def export_metadata_as_json(spectrums: List[Spectrum], filename: str,
-                            include_fields: List[str] | str = "all"):
+                            include_fields: Optional[List[str]] = None):
     """Export metadata to json file.
 
     Parameters

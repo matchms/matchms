@@ -21,7 +21,8 @@ def spectra():
 
 def test_get_metadata_dict():
     spectrum = SpectrumBuilder().with_metadata({"test": "peter", "inchi": "16583"}).build()
-    assert _get_metadata_dict(spectrum, "all") == {"test": "peter", "inchi": "16583"}
+    assert _get_metadata_dict(spectrum, ["all"]) == {"test": "peter", "inchi": "16583"}
+    assert _get_metadata_dict(spectrum) == {"test": "peter", "inchi": "16583"}
     assert _get_metadata_dict(spectrum, ["inchi"]) == {"inchi": "16583"}
     assert _get_metadata_dict(spectrum, ["smiles"]) == {}
 
