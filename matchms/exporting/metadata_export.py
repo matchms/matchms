@@ -17,7 +17,7 @@ def _get_metadata_dict(spectrum: Spectrum, include_fields: Optional[List[str]] =
     """
     if include_fields is None or include_fields[0] == "all":
         return spectrum.metadata
-    elif not isinstance(include_fields, list):
+    if not isinstance(include_fields, list):
         print("'Include_fields' must be 'all' or list of keys.")
         return None
         
