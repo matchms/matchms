@@ -1,8 +1,6 @@
 import csv
 import json
-from typing import Any, List, Optional, Tuple
-from typing import Union
-
+from typing import Any, List, Optional, Tuple, Union
 import numpy as np
 from ..Spectrum import Spectrum
 
