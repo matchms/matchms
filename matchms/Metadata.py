@@ -102,6 +102,9 @@ class Metadata:
 
         if metadata_filtered.get("retention_index"):
             metadata_filtered = _add_retention(metadata_filtered, "retention_index", "retention_index")
+        
+        if metadata_filtered.get("parent"):
+            metadata_filtered["parent"] = float(metadata_filtered.get("parent"))
 
         charge = metadata_filtered.get("charge")
         charge_int = _convert_charge_to_int(charge)
