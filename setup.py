@@ -47,7 +47,7 @@ setup(
     install_requires=[
         "deprecated",
         "lxml",
-        "matplotlib",
+        "matplotlib >= 3.5",
         "networkx",
         "numba >=0.47",
         "numpy",
