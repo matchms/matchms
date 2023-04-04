@@ -51,3 +51,19 @@ def load_known_key_conversions(key_conversions_file: str = None) -> dict:
             key_conversions[row['known_synonym']] = row['matchms_default']
 
     return key_conversions
+
+
+def load_export_key_conversions(export_key_conversions_file: str = None, export_style: str = None) -> dict:
+    """Load dictionary of export key conversions. Makes sure that file loading is cached.
+    """
+    if export_key_conversions_file is None:
+        export_key_conversions_file = os.path.join(os.path.dirname(__file__), "data", "export_key_conversions.csv")
+    assert os.path.isfile(export_key_conversions_file), f"Could not find {export_key_conversions_file}"
+
+    with open(export_key_conversions_file, newline='', encoding='utf-8-sig') as csvfile:
+        reader = csv.DictReader(csvfile)
+        key_conversions = {}
+        for row in reader:
+            key_conversions[row['matchms']] = row[export_style]
+
+    return key_conversions
