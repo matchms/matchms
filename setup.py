@@ -52,6 +52,7 @@ setup(
         "numba >=0.47",
         "numpy",
         "pickydict >= 0.4.0",
+        "pillow != 9.4.0",
         "pyteomics >=4.2",
         "requests",
         "scipy",
