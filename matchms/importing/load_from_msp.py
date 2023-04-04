@@ -78,7 +78,7 @@ def parse_msp_file(filename: str) -> Generator[dict, None, None]:
                 parse_metadata(rline, params)
                 continue
 
-            mz, ints, comment = _parse_line(rline)
+            mz, ints, comment = _parse_line_with_peaks(rline)
 
             masses = np.append(masses, mz)
             intensities = np.append(intensities, ints)
@@ -107,14 +107,22 @@ def parse_msp_file(filename: str) -> Generator[dict, None, None]:
 
 
 
-def _parse_line(rline: str):
+def _parse_line_with_peaks(rline: str) -> Tuple[list[float], list[float], str]:
+    """Parse a line containing peaks consisting of mz and intensity values with optional comments.
+
+    Args:
+        rline (str): Line with peaks read from the MSP.
+
+    Returns:
+        Tuple[list[float], list[float], str]: mz, intensity and peak comments obtained from the line.
+    """
     comment, rline = get_peak_comment(rline)   
     mz, intensities = get_peak_values(rline)
     
     return mz, intensities, comment
 
 
-def get_peak_values(peak: str) -> Tuple[float, float]:
+def get_peak_values(peak: str) -> Tuple[list[float], list[float]]:
     """ Get the m/z and intensity value from the line containing the peak information. """
     tokens = re.findall(r'\d+[\.]?\d*', peak)
     if len(tokens) % 2 != 0:
@@ -155,5 +163,18 @@ def parse_metadata(rline: str, params: dict):
 def contains_metadata(rline: str) -> bool:
     """ Check if line contains Spectrum metadata."""
     has_colon = ':' in rline
-    is_golm_peaks = re.match(r"(\d+:{1}\d+)", rline) is not None
-    return has_colon and not is_golm_peaks
+    return has_colon and not _is_golm_peak_format(rline)
+
+def _is_golm_peak_format(rline: str) -> bool:
+    """This function detects whether a line is a line containing peaks in the GOLM MSP format.
+
+    The GOLM MSP format encodes peaks as mz:intensity - this resembles a metadata line, but actually contains peaks.
+    It is therefore necessary to explicitly check this corner case when determining whether a line is peaks or metadata.
+
+    Args:
+        rline (str): Line to check whether it contains peaks from GOLM
+
+    Returns:
+        bool: Whether the line is a line with peaks from GOLM or not.
+    """
+    return re.match(r"(\d+:{1}\d+)", rline) is not None
