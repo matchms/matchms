@@ -5,7 +5,7 @@ from .filtering.add_precursor_mz import _add_precursor_mz_metadata
 from .filtering.add_retention import _add_retention
 from .filtering.interpret_pepmass import _interpret_pepmass_metadata
 from .filtering.make_charge_int import _convert_charge_to_int
-from .utils import load_known_key_conversions
+from .utils import load_known_key_conversions, load_export_key_conversions
 
 
 _key_regex_replacements = {r"\s": "_",
@@ -109,6 +109,14 @@ class Metadata:
             metadata_filtered["charge"] = charge_int
 
         self.data = metadata_filtered
+
+    def update_keys(self, export_style: str):
+        _export_key_replacements = load_export_key_conversions(export_style = export_style)
+        
+        self._data.force_lower_case = False
+        self._data.key_regex_replacements = None
+
+        self._data.key_replacements = _export_key_replacements
 
     # ------------------------------
     # Getters and Setters

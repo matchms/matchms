@@ -182,6 +182,9 @@ class Spectrum:
         if "fingerprint" in spectrum_dict:
             spectrum_dict["fingerprint"] = spectrum_dict["fingerprint"].tolist()
         return spectrum_dict
+    
+    def update_keys(self, export_style: str):
+        self._metadata.update_keys(export_style)
 
     @property
     def mz(self):
