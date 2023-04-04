@@ -1,5 +1,5 @@
 import re
-from typing import Generator, Tuple
+from typing import Generator, List, Tuple
 import numpy as np
 from ..Spectrum import Spectrum
 
@@ -32,7 +32,7 @@ def load_from_msp(filename: str,
 
         # Download msp file from MassBank of North America repository at https://mona.fiehnlab.ucdavis.edu/
         file_msp = "MoNA-export-GC-MS-first10.msp"
-        spectrums = list(load_from_msp(file_msp))
+        spectrums = List(load_from_msp(file_msp))
     """
 
     for spectrum in parse_msp_file(filename):
@@ -56,7 +56,7 @@ def load_from_msp(filename: str,
 
 
 def parse_msp_file(filename: str) -> Generator[dict, None, None]:
-    """Read msp file and parse info in list of spectrum dictionaries."""
+    """Read msp file and parse info in List of spectrum dictionaries."""
 
     # Lists/dicts that will contain all params, masses and intensities of each molecule
     params = {}
@@ -107,14 +107,14 @@ def parse_msp_file(filename: str) -> Generator[dict, None, None]:
 
 
 
-def _parse_line_with_peaks(rline: str) -> Tuple[list[float], list[float], str]:
+def _parse_line_with_peaks(rline: str) -> Tuple[List[float], List[float], str]:
     """Parse a line containing peaks consisting of mz and intensity values with optional comments.
 
     Args:
         rline (str): Line with peaks read from the MSP.
 
     Returns:
-        Tuple[list[float], list[float], str]: mz, intensity and peak comments obtained from the line.
+        Tuple[List[float], List[float], str]: mz, intensity and peak comments obtained from the line.
     """
     comment, rline = get_peak_comment(rline)   
     mz, intensities = get_peak_values(rline)
@@ -122,13 +122,13 @@ def _parse_line_with_peaks(rline: str) -> Tuple[list[float], list[float], str]:
     return mz, intensities, comment
 
 
-def get_peak_values(peak: str) -> Tuple[list[float], list[float]]:
+def get_peak_values(peak: str) -> Tuple[List[float], List[float]]:
     """ Get the m/z and intensity value from the line containing the peak information. """
     tokens = re.findall(r'\d+[\.]?\d*', peak)
     if len(tokens) % 2 != 0:
         raise RuntimeError("Wrong peak format detected!")
     
-    tokens = list(map(float, tokens))
+    tokens = List(map(float, tokens))
     mz = tokens[0::2]
     intensities = tokens[1::2]
     return mz, intensities
