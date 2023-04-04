@@ -128,7 +128,7 @@ def get_peak_values(peak: str) -> Tuple[List[float], List[float]]:
     if len(tokens) % 2 != 0:
         raise RuntimeError("Wrong peak format detected!")
     
-    tokens = List(map(float, tokens))
+    tokens = list(map(float, tokens))
     mz = tokens[0::2]
     intensities = tokens[1::2]
     return mz, intensities
