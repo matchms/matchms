@@ -2,19 +2,22 @@ import os
 import numpy as np
 from matchms import Spectrum
 from matchms.importing import load_from_msp
+from tests.builder_Spectrum import SpectrumBuilder
 
 
 def assert_matching_inchikey(molecule, expected_inchikey):
-    assert molecule.get("inchikey").lower() == expected_inchikey.lower(), "Expected different InChIKey."
+    assert molecule.get("inchikey").lower(
+    ) == expected_inchikey.lower(), "Expected different InChIKey."
 
 
 def assert_matching_mass(molecule, expected_mass):
     assert np.isclose(molecule.get("parent_mass"), expected_mass, rtol=1e-5), \
-                      "Expected different InChIKey."
+        "Expected different InChIKey."
 
 
 def assert_matching_metadata_string(molecule, expected_entry, field):
-    assert molecule.get(field) == expected_entry, f"Expected different entry for {field}."
+    assert molecule.get(
+        field) == expected_entry, f"Expected different entry for {field}."
 
 
 def test_load_from_msp_spaces_mona_1():
@@ -24,8 +27,9 @@ def test_load_from_msp_spaces_mona_1():
     """
 
     module_root = os.path.join(os.path.dirname(__file__), "..")
-    spectrums_file = os.path.join(module_root, "tests", "MoNA-export-GC-MS-first10.msp")
-    spectrum = load_from_msp(spectrums_file)
+    spectrums_file = os.path.join(
+        module_root, "tests", "MoNA-export-GC-MS-first10.msp")
+    spectrum = list(load_from_msp(spectrums_file))
 
     expected_inchikey = np.array([
         "ALRLPDGCPYIVHP-UHFFFAOYSA-N", "UFBJCMHMOXMLKC-UHFFFAOYSA-N", "WDNBURPWRNALGP-UHFFFAOYSA-N",
@@ -34,6 +38,7 @@ def test_load_from_msp_spaces_mona_1():
         "LINPIYWFGCPVIE-UHFFFAOYSA-N"
     ])
 
+    assert len(spectrum) > 0
     for k, n in enumerate(spectrum):
         assert_matching_inchikey(n, expected_inchikey[k])
 
@@ -44,7 +49,8 @@ def test_load_from_msp_spaces_mona_2():
     Check if peak m/z and intensity are loaded correctly if separated by spaces.
     """
     module_root = os.path.join(os.path.dirname(__file__), "..")
-    spectrums_file = os.path.join(module_root, "tests", "MoNA-export-GC-MS-first10.msp")
+    spectrums_file = os.path.join(
+        module_root, "tests", "MoNA-export-GC-MS-first10.msp")
     spectrum = next(iter(load_from_msp(spectrums_file)))
 
     expected_mz = np.array([
@@ -65,7 +71,8 @@ def test_load_from_msp_spaces_mona_2():
     ])
 
     np.testing.assert_array_almost_equal(spectrum.peaks.mz, expected_mz)
-    np.testing.assert_array_almost_equal(spectrum.peaks.intensities, expected_intensities)
+    np.testing.assert_array_almost_equal(
+        spectrum.peaks.intensities, expected_intensities)
 
 
 def test_load_from_msp_spaces_massbank_1():
@@ -75,8 +82,9 @@ def test_load_from_msp_spaces_massbank_1():
     """
 
     module_root = os.path.join(os.path.dirname(__file__), "..")
-    spectrums_file = os.path.join(module_root, "tests", "massbank_five_spectra.msp")
-    spectrum = load_from_msp(spectrums_file)
+    spectrums_file = os.path.join(
+        module_root, "tests", "massbank_five_spectra.msp")
+    spectrum = list(load_from_msp(spectrums_file))
 
     expected_inchikey = [
         "XTWYTFMLZFPYCI-UHFFFAOYSA-N",
@@ -93,6 +101,7 @@ def test_load_from_msp_spaces_massbank_1():
         428.31, 141.0193, 267.1856, 300.1473, 415.234
     ]
 
+    assert len(spectrum) > 0
     for k, n in enumerate(spectrum):
         assert np.isclose(n.get("parent"), expected_parent_comment[k])
 
@@ -101,8 +110,9 @@ def test_load_from_msp_tabs():
     """Test parse of msp file to spectrum objects with tabstop separator."""
 
     module_root = os.path.join(os.path.dirname(__file__), "..")
-    spectrums_file = os.path.join(module_root, "tests", "rcx_gc-ei_ms_20201028_perylene.msp")
-    spectra = load_from_msp(spectrums_file)
+    spectrums_file = os.path.join(
+        module_root, "tests", "rcx_gc-ei_ms_20201028_perylene.msp")
+    spectra = list(load_from_msp(spectrums_file))
 
     expected_inchikey = np.array([
         "CSHWQDPOILHKBI-UHFFFAOYSA-N"
@@ -128,10 +138,14 @@ def test_load_from_msp_tabs():
                                          "C1=CC=2C=CC=C3C4=CC=CC5=CC=CC(C(=C1)C23)=C54, Annotation [C20H12]+, "
                                          "Rule of HR False"}
 
+    assert len(spectra) > 0
+
     for idx, spectrum in enumerate(spectra):
         assert_matching_inchikey(spectrum, expected_inchikey[idx])
-        np.testing.assert_array_almost_equal(spectrum.peaks.mz, expected_mz[idx])
-        np.testing.assert_array_almost_equal(spectrum.peaks.intensities, expected_intensities[idx])
+        np.testing.assert_array_almost_equal(
+            spectrum.peaks.mz, expected_mz[idx])
+        np.testing.assert_array_almost_equal(
+            spectrum.peaks.intensities, expected_intensities[idx])
         assert spectrum.peak_comments == expected_peak_comments
 
 
@@ -139,7 +153,8 @@ def test_load_from_msp_multiline():
     """Test parse of msp file to spectrum objects with ';' separator and multiple peaks in one line."""
 
     module_root = os.path.join(os.path.dirname(__file__), "..")
-    spectrums_file = os.path.join(module_root, "tests", "multiline_semicolon.msp")
+    spectrums_file = os.path.join(
+        module_root, "tests", "multiline_semicolon.msp")
 
     actual = list(load_from_msp(spectrums_file))
     expected = [
@@ -178,7 +193,8 @@ def test_load_from_msp_diverse_spectrum_collection():
     """
 
     module_root = os.path.join(os.path.dirname(__file__), "..")
-    spectrums_file = os.path.join(module_root, "tests", "test_spectra_collection.msp")
+    spectrums_file = os.path.join(
+        module_root, "tests", "test_spectra_collection.msp")
     spectrum = load_from_msp(spectrums_file)
 
     expected_inchikey = np.array([
@@ -198,3 +214,35 @@ def test_load_from_msp_diverse_spectrum_collection():
     ])
     for k, n in enumerate(spectrum):
         assert_matching_metadata_string(n, expected_adducts[k], "adduct")
+
+
+def test_load_msl():
+    module_root = os.path.join(os.path.dirname(__file__), "..")
+    spectrums_file = os.path.join(module_root, "tests", "JL_2021_V2.msl")
+    actual = list(load_from_msp(spectrums_file))[0]
+
+    metadata = {
+        "COMPOUND_NAME": "G3P",
+        "CASNO": "TUBE2_~1-N1010",
+        "RETENTION_INDEX": 1586.2,
+        "RW": '',
+        "RETENTION_TIME": 9.648,
+        "COMMENT": "RI=1586.2,   9.6481 min TUBE2_28-01-2020_18-48-00|RI:1586.2",
+        "SOURCE": "C:\\USERS\\UTILISATEUR\\DESKTOP\\METABOLOME\\calib\\standard.msl",
+        "NUM PEAKS": '30'
+    }
+
+    mz = [52,55,56,59,61,62,63,66,68,70,73,75,76,77,80,82,84,85,86,87,89,90,91,92,95,96,98,100,101,102 ]
+    intensities = [3, 136, 14, 96, 31, 2,1,1,4,11,1000,303,22,12,4,19,31,7,7,3,84,8,8,1,1,1,4,6,4,4]
+    expected = SpectrumBuilder().with_metadata(metadata).with_mz(mz).with_intensities(intensities).build()
+
+    assert actual == expected
+
+
+def test_load_golm_style_msp():
+    module_root = os.path.join(os.path.dirname(__file__), "..")
+    spectrums_file = os.path.join(module_root, "tests", "golm.msp")
+    actual = list(load_from_msp(spectrums_file))
+
+    assert len(actual) == 3
+    assert len(actual[0].mz) == 50
