@@ -1,6 +1,6 @@
 import os
-from typing import List, Optional
 import pickle
+from typing import List, Optional
 from matchms import importing
 from matchms.typing import SpectrumType
 

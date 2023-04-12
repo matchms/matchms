@@ -1,7 +1,7 @@
-import pytest
 import os
-from matchms.importing.load_infer_filetype import load_spectra
+import pytest
 from matchms import Spectrum
+from matchms.importing.load_infer_filetype import load_spectra
 
 
 def test_load_spectra_unknown_file(tmp_path):
