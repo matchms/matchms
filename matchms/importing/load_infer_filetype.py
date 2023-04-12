@@ -4,8 +4,8 @@ import pickle
 from matchms import importing, Spectrum
 
 
-def load_spectra_infer_file_type(file_name
-                                 ) -> Union[List[Spectrum], None]:
+def load_spectra(file_name
+                 ) -> Union[List[Spectrum], None]:
     """Loads spectra from your spectrum file into memory as matchms Spectrum object
 
     The following file extensions can be loaded in with this function:
