@@ -1,6 +1,6 @@
 import pytest
 import os
-from matchms.importing import load_spectra
+from matchms.importing.load_infer_filetype import load_spectra
 from matchms import Spectrum
 
 

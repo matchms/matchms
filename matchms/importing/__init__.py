@@ -21,7 +21,6 @@ from .load_from_mzml import load_from_mzml
 from .load_from_mzxml import load_from_mzxml
 from .load_from_usi import load_from_usi
 from .load_scores import scores_from_json, scores_from_pickle
-from .load_infer_filetype import load_spectra
 
 __all__ = [
     "load_from_json",
@@ -32,5 +31,4 @@ __all__ = [
     "load_from_usi",
     "scores_from_json",
     "scores_from_pickle",
-    "load_spectra"
 ]
