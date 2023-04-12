@@ -1,11 +1,12 @@
 import os
-from typing import List, Union
+from typing import List, Optional
 import pickle
-from matchms import importing, Spectrum
+from matchms import importing
+from matchms.typing import SpectrumType
 
 
 def load_spectra(file_name
-                 ) -> Union[List[Spectrum], None]:
+                 ) -> Optional[List[SpectrumType]]:
     """Loads spectra from your spectrum file into memory as matchms Spectrum object
 
     The following file extensions can be loaded in with this function:
@@ -36,7 +37,7 @@ def load_spectra(file_name
     if file_extension == ".pickle":
         spectra = load_pickled_file(file_name)
         assert isinstance(spectra, list), "Expected list of spectra"
-        assert isinstance(spectra[0], Spectrum), "Expected list of spectra"
+        assert isinstance(spectra[0], SpectrumType), "Expected list of spectra"
         return spectra
     assert False, f"File extension of file: {file_name} is not recognized"
 
