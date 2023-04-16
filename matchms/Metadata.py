@@ -117,6 +117,8 @@ class Metadata:
         self._data.key_regex_replacements = None
 
         self._data.key_replacements = _export_key_replacements
+        if '' in self._data.keys():
+            del self._data['']
 
     # ------------------------------
     # Getters and Setters
