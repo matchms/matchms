@@ -13,7 +13,7 @@ _extentions_not_allowed = ["mzml", "mzxml", "json", "mgf"]
 
 def save_as_msp(spectrums: List[Spectrum], filename: str,
                 write_peak_comments: bool = True,
-                mode: str = "a"):
+                mode: str = "a", style: str = "matchms"):
     """Save spectrum(s) as msp file.
 
     :py:attr:`~matchms.Spectrum.losses` of spectrum will not be saved.
@@ -47,6 +47,9 @@ def save_as_msp(spectrums: List[Spectrum], filename: str,
         when set to True. Default is True.
     mode:
         Mode on how to write to file. One of ["w", "a"] (write/append). Default is append.
+    style:
+        Converts the keys to required Export style. One of ["massbank", "nist", "riken", "gnps"].
+        Default is "matchms"
     """
     file_extension = filename.split(".")[-1]
     assert file_extension.lower() not in _extentions_not_allowed, \
@@ -55,6 +58,9 @@ def save_as_msp(spectrums: List[Spectrum], filename: str,
         logger.warning("Spectrum(s) will be stored as msp file with extension .%s",
                        filename.split(".")[-1])
     spectrums = _ensure_list(spectrums)
+
+    if style != "matchms":
+        list(map(lambda x: x.clone().update_keys(style), spectrums))
 
     with open(filename, mode, encoding="utf-8") as outfile:
         for spectrum in spectrums:
