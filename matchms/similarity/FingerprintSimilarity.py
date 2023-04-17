@@ -1,5 +1,6 @@
 from typing import List, Union
 import numpy as np
+from sparsestack import StackedSparseArray
 from matchms.typing import SpectrumType
 from .BaseSimilarity import BaseSimilarity
 from .vector_similarity_functions import (cosine_similarity,
@@ -141,8 +142,7 @@ class FingerprintSimilarity(BaseSimilarity):
                 similarity_matrix[:] = self.set_empty_scores
             return similarity_matrix
 
-        if array_type != "numpy":
-            raise NotImplementedError("Output array type other than numpy is not yet implemented.")
+
         fingerprints1, idx_fingerprints1 = collect_fingerprints(references)
         fingerprints2, idx_fingerprints2 = collect_fingerprints(queries)
         assert idx_fingerprints1.size > 0 and idx_fingerprints2.size > 0, ("Not enouth molecular fingerprints.",
@@ -162,4 +162,11 @@ class FingerprintSimilarity(BaseSimilarity):
             similarity_matrix[np.ix_(idx_fingerprints1,
                                         idx_fingerprints2)] = cosine_similarity_matrix(fingerprints1,
                                                                                        fingerprints2)
-        return similarity_matrix.astype(self.score_datatype)
+        if array_type == "sparse":
+            scores_array = StackedSparseArray(len(references), len(queries))
+            scores_array.add_dense_matrix(similarity_matrix.astype(self.score_datatype), "")
+            return scores_array
+        elif array_type == "numpy":
+            return similarity_matrix.astype(self.score_datatype)
+        else:
+            raise NotImplementedError("Output array type is not yet implemented.")
