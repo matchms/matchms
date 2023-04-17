@@ -165,7 +165,6 @@ class FingerprintSimilarity(BaseSimilarity):
             scores_array = StackedSparseArray(len(references), len(queries))
             scores_array.add_dense_matrix(similarity_matrix.astype(self.score_datatype), "")
             return scores_array
-        elif array_type == "numpy":
+        if array_type == "numpy":
             return similarity_matrix.astype(self.score_datatype)
-        else:
-            raise NotImplementedError("Output array type is not yet implemented.")
+        raise NotImplementedError("Output array type is not yet implemented.")
