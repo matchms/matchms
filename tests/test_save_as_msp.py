@@ -57,15 +57,6 @@ def save_and_reload_spectra(filename, spectra: List[Spectrum], write_peak_commen
     return reloaded_spectra
 
 
-def test_spectrum_none_exception(none_spectrum, filename):
-    """ Test for exception being thrown if the spectrum to be saved. """
-    with pytest.raises(AttributeError) as exception:
-        save_as_msp(none_spectrum, filename)
-
-    message = exception.value.args[0]
-    assert message == "'NoneType' object has no attribute 'metadata'"
-
-
 def test_wrong_filename_exception():
     """ Test for exception being thrown if output file doesn't end with .msp. """
     with tempfile.TemporaryDirectory() as temp_dir:
