@@ -118,7 +118,7 @@ class Metadata:
         rem_list = [x for x in self._data.keys() if x not in key_conversions]
         for key in rem_list:
             del self._data[key]
-        
+
         self._data.force_lower_case = False
         self._data.key_regex_replacements = None
         self._data.key_replacements = key_conversions
@@ -156,6 +156,26 @@ class Metadata:
         """Retrieve all items (key, value pairs) of :attr:`.metadata` dict.
         """
         return self._data.items()
+
+    def to_dict(self, export_style: str = "matchms"):
+        """Returns a regular Python dictionary containing the metadata entries.
+
+        Parameters
+        ----------
+        export_style:
+            Specifies the naming style of the metadata fields.
+            Default is "matchms".
+        """
+        if export_style == "matchms":
+            return dict(self._data)
+        key_conversions = load_export_key_conversions(export_style)
+        keep_list = [x for x in self._data.keys() if x in key_conversions]
+        converted_dict = dict()
+        for key in keep_list:
+            value = self._data[key]
+            if value != "":
+                converted_dict[key_conversions[key]] = self._data[key]
+        return converted_dict
 
     def __getitem__(self, key=None):
         return self.get(key)

@@ -55,6 +55,17 @@ def test_metadata_setitem_getitem(harmonize, set_key, set_value, get_key, get_va
         "Expected different _metadata dictionary."
 
 
+@pytest.mark.parametrize("input_dict, export_style, expected", [
+    [None, True, {}],
+    [{"precursor_mz": 101.01}, "matchms", {"precursor_mz": 101.01}],
+    [{"precursormz": 101.01}, "matchms", {"precursor_mz": 101.01}],
+    [{"ionmode": "Negative"}, "matchms", {"ionmode": "Negative"}]])
+def test_metadata_to_dict(input_dict, export_style, expected):
+    metadata = Metadata(input_dict)
+    assert metadata.to_dict(export_style) == expected, \
+        "Expected different metadata dictionary."
+
+
 @pytest.mark.parametrize("dict1, dict2, expected", [
     [{"precursor_mz": 101.01}, {"precursor_mz": 101.01}, True],
     [{"abc": ["a", 5, 7.01]}, {"abc": ["a", 7.01, 5]}, False],
