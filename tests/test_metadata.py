@@ -56,10 +56,14 @@ def test_metadata_setitem_getitem(harmonize, set_key, set_value, get_key, get_va
 
 
 @pytest.mark.parametrize("input_dict, export_style, expected", [
-    [None, True, {}],
+    [None, "matchms", {}],
     [{"precursor_mz": 101.01}, "matchms", {"precursor_mz": 101.01}],
-    [{"precursormz": 101.01}, "matchms", {"precursor_mz": 101.01}],
-    [{"ionmode": "Negative"}, "matchms", {"ionmode": "Negative"}]])
+    [{"peptide_modifications": 1}, "massbank", {"COMMENT:PEPTIDE_MODIFICATIONS": 1}],
+    [{"ionmode": "Negative"}, "massbank", {"AC$MASS_SPECTROMETRY:ION_MODE": "Negative"}],
+    [{"compound_name": "Dummy"}, "nist", {"Name": "Dummy"}],
+    [{"compound_name": "Dummy"}, "riken", {"NAME": "Dummy"}],
+    [{"compound_name": "Dummy"}, "gnps", {"NAME": "Dummy"}],
+    ])
 def test_metadata_to_dict(input_dict, export_style, expected):
     metadata = Metadata(input_dict)
     assert metadata.to_dict(export_style) == expected, \
