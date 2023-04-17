@@ -1,8 +1,6 @@
 import logging
 import os
 from typing import IO, Dict, List, Union
-
-from matchms.utils import load_export_key_conversions
 from ..Fragments import Fragments
 from ..Spectrum import Spectrum
 

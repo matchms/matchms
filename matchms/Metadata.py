@@ -170,7 +170,7 @@ class Metadata:
             return dict(self._data)
         key_conversions = load_export_key_conversions(export_style=export_style)
         keep_list = [x for x in self._data.keys() if x in key_conversions]
-        converted_dict = dict()
+        converted_dict = {}
         for key in keep_list:
             value = self._data[key]
             if value != "":
