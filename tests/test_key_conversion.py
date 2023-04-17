@@ -1,7 +1,7 @@
 import pytest
-
 from matchms.utils import load_export_key_conversions
 from .builder_Spectrum import SpectrumBuilder
+
 
 @pytest.mark.parametrize("input_dict, expected, export_style", [
     [{"precursor_mz": 101.01}, {"PrecursorMZ": 101.01}, "nist"],

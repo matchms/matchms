@@ -5,7 +5,7 @@ from .filtering.add_precursor_mz import _add_precursor_mz_metadata
 from .filtering.add_retention import _add_retention
 from .filtering.interpret_pepmass import _interpret_pepmass_metadata
 from .filtering.make_charge_int import _convert_charge_to_int
-from .utils import load_known_key_conversions, load_export_key_conversions
+from .utils import load_export_key_conversions, load_known_key_conversions
 
 
 _key_regex_replacements = {r"\s": "_",
