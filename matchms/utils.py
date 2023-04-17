@@ -36,21 +36,13 @@ def filter_none(iterable: Iterable) -> Iterable:
     return filter(lambda x: x is not None, iterable)
 
 
-@lru_cache(maxsize=4)
 def load_known_key_conversions(key_conversions_file: str = None) -> dict:
     """Load dictionary of known key conversions. Makes sure that file loading is cached.
     """
     if key_conversions_file is None:
         key_conversions_file = os.path.join(os.path.dirname(__file__), "data", "known_key_conversions.csv")
     assert os.path.isfile(key_conversions_file), f"Could not find {key_conversions_file}"
-
-    with open(key_conversions_file, newline='', encoding='utf-8-sig') as csvfile:
-        reader = csv.DictReader(csvfile)
-        key_conversions = {}
-        for row in reader:
-            key_conversions[row['known_synonym']] = row['matchms_default']
-
-    return key_conversions
+    return _load_key_conversions(key_conversions_file, 'known_synonym', 'matchms_default')
 
 
 def load_export_key_conversions(export_key_conversions_file: str = None, export_style: str = None) -> dict:
@@ -59,11 +51,15 @@ def load_export_key_conversions(export_key_conversions_file: str = None, export_
     if export_key_conversions_file is None:
         export_key_conversions_file = os.path.join(os.path.dirname(__file__), "data", "export_key_conversions.csv")
     assert os.path.isfile(export_key_conversions_file), f"Could not find {export_key_conversions_file}"
+    return _load_key_conversions(export_key_conversions_file, 'matchms', export_style)
 
-    with open(export_key_conversions_file, newline='', encoding='utf-8-sig') as csvfile:
+
+@lru_cache(maxsize=4)
+def _load_key_conversions(file: str, source: str, target: str) -> dict:
+    with open(file, newline='', encoding='utf-8-sig') as csvfile:
         reader = csv.DictReader(csvfile)
         key_conversions = {}
         for row in reader:
-            key_conversions[row['matchms']] = row[export_style]
+            key_conversions[row[source]] = row[target]
 
     return key_conversions

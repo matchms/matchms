@@ -157,7 +157,7 @@ def test_write_append(test_file, filename):
 
 @pytest.mark.parametrize("test_file, expected_file, style", [
     ["Hydrogen_chloride.msp", "massbank_style_Hydrogen_chloride.msp", "massbank"]])
-def test_save_as_msp_export_style(test_file, expected_file, filename, style):
+def test_save_as_msp_export_style(test_file, expected_file, style, filename):
     expected = load_test_spectra_file(expected_file)
     data = load_test_spectra_file(test_file)
     save_as_msp(data, filename, mode="w", style=style)

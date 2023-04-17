@@ -1,6 +1,8 @@
 import logging
 import os
 from typing import IO, Dict, List, Union
+
+from matchms.utils import load_export_key_conversions
 from ..Fragments import Fragments
 from ..Spectrum import Spectrum
 
@@ -60,7 +62,8 @@ def save_as_msp(spectrums: List[Spectrum], filename: str,
     spectrums = _ensure_list(spectrums)
 
     if style != "matchms":
-        list(map(lambda x: x.clone().update_keys(style), spectrums))
+        conversions = load_export_key_conversions(export_style = style)
+        spectrums = list(map(lambda x: x.clone().update_keys(conversions), spectrums))
 
     with open(filename, mode, encoding="utf-8") as outfile:
         for spectrum in spectrums:

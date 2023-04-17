@@ -1,4 +1,6 @@
 import pytest
+
+from matchms.utils import load_export_key_conversions
 from .builder_Spectrum import SpectrumBuilder
 
 @pytest.mark.parametrize("input_dict, expected, export_style", [
@@ -10,6 +12,6 @@ from .builder_Spectrum import SpectrumBuilder
     [{"ionmode": "Negative"}, {"IONMODE": "Negative"}, "riken"]])
 def test_key_conversion(input_dict, expected, export_style):
     spectrum = SpectrumBuilder().with_metadata(input_dict).build()
-    spectrum.update_keys(export_style)
+    spectrum.update_keys(load_export_key_conversions(export_style = export_style))
 
     assert spectrum.metadata == expected
