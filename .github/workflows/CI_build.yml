@@ -123,6 +123,7 @@ jobs:
         with:
           auto-update-conda: true
           python-version: ${{ matrix.python-version }}
+          mamba-version: "*"
       - name: Show conda config
         shell: bash -l {0}
         run: |
