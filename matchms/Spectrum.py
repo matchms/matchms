@@ -186,10 +186,6 @@ class Spectrum:
     def metadata_dict(self, export_style: str = "matchms") -> dict:
         return self._metadata.to_dict(export_style)
 
-    def update_keys(self, key_conversions: dict):
-        self._metadata.update_keys(key_conversions)
-        return self
-
     @property
     def mz(self):
         return self.peaks.mz

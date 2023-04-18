@@ -113,19 +113,6 @@ class Metadata:
 
         self.data = metadata_filtered
 
-    def update_keys(self, key_conversions: dict):
-
-        rem_list = [x for x in self._data.keys() if x not in key_conversions]
-        for key in rem_list:
-            del self._data[key]
-
-        self._data.force_lower_case = False
-        self._data.key_regex_replacements = None
-        self._data.key_replacements = key_conversions
-
-        if '' in self._data.keys():
-            del self._data['']
-
     # ------------------------------
     # Getters and Setters
     # ------------------------------
