@@ -122,6 +122,7 @@ jobs:
         uses: conda-incubator/setup-miniconda@v2
         with:
           auto-update-conda: true
+          channels: conda-forge,defaults
           python-version: ${{ matrix.python-version }}
           mamba-version: "*"
       - name: Show conda config
