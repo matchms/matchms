@@ -140,10 +140,10 @@ jobs:
         shell: bash -l {0}
         run: |
           env | sort
-      - name: Install conda dependencies
+      - name: Install rdkit
         shell: bash -l {0}
         run: |
-          conda install -c conda-forge rdkit
+          mamba install -c conda-forge rdkit
       - name: Install dev dependencies
         shell: bash -l {0}
         run: |
