@@ -1,5 +1,4 @@
 import pytest
-from matchms.utils import load_export_key_conversions
 from .builder_Spectrum import SpectrumBuilder
 
 
