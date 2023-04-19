@@ -8,10 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
 - Added function to infer filetype when loading spectra
+- CI test runs now include Python 3.10
 
 ### Changed
 
+- Support reading old NIST and GOLM MSP formats [#392](https://github.com/matchms/matchms/issues/392)
+- expanded options to handle different metadata key styles for (msp) file export [#300](https://github.com/matchms/matchms/issues/300)
 - light refactoring of `Metadata` constructor to reduce spectra reading time [#371](https://github.com/matchms/matchms/pull/371/files#)
 - two minor corrections of adduct masses (missing electron mass) [#374](https://github.com/matchms/matchms/issues/374)
 
