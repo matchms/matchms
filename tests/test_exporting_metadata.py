@@ -30,8 +30,8 @@ def test_get_metadata_dict():
 def test_get_metadata_as_array(spectra):
     actual, colnames = get_metadata_as_array(spectra)
     assert len(actual) == 10
-    assert len(colnames) == 24
-    
+    assert len(colnames) == 23
+
 
 def test_export_as_csv(tmp_path, spectra):
     expected = os.path.join(os.path.dirname(__file__), "expected_metadata.csv")    

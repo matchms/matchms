@@ -20,7 +20,7 @@ def _get_metadata_dict(spectrum: Spectrum, include_fields: Optional[List[str]] =
     if not isinstance(include_fields, list):
         print("'Include_fields' must be 'all' or list of keys.")
         return None
-        
+
     return {key: spectrum.metadata[key] for key in spectrum.metadata.keys()
             & include_fields}
 
@@ -72,13 +72,18 @@ def export_metadata_as_csv(spectra: List[Spectrum], filename: str,
         for data in metadata:
             writer.writerow(data)
 
+
 def _subset_metadata(include_fields: List[str], metadata: np.array, columns: Set[str]) -> Tuple[np.array, Set[str]]:
     """Subset metadata to 'include_fields' and return intersection of columns.
 
-    Args:
-        include_fields (List[str]): Columns to include.
-        metadata (np.array): Data to subset.
-        columns (set[str]): Set of columns present in data
+    Parameters
+    ----------
+    include_fields:
+        Columns to include.
+    metadata:
+        Data to subset.
+    columns:
+        Set of columns present in data
 
     Returns:
         Tuple[np.array, set[str]]: Subset data and columns.
@@ -89,8 +94,10 @@ def _subset_metadata(include_fields: List[str], metadata: np.array, columns: Set
 def get_metadata_as_array(spectra: List[Spectrum]) -> Tuple[np.array, List[str]]:
     """Extract union of all metadata as numpy array from all spectra.
 
-    Args:
-        spectra (List[Spectrum]): Spectra from which to collect metadata.
+    Parameters
+    ----------
+    spectra:
+        Spectra from which to collect metadata.
 
     Returns:
         Tuple[np.array, List[str]]: Metadata and union of all columns detected in all spectra.
@@ -102,8 +109,8 @@ def get_metadata_as_array(spectra: List[Spectrum]) -> Tuple[np.array, List[str]]
     values = []
 
     for s in spectra:
-        v = tuple((s.get(k) for k in keys))
-        values.append(v)
-    
-    d = np.array(values, dtype=[(k, np.chararray) for k in keys])
-    return d, keys
+        value = tuple((s.get(k) for k in keys))
+        values.append(value)
+
+    values_array = np.array(values, dtype=[(k, np.chararray) for k in keys])
+    return values_array, keys
