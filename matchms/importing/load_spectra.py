@@ -1,7 +1,8 @@
 import os
 import pickle
 from typing import Any, Generator, Optional
-from matchms import importing
+from matchms.importing import (load_from_json, load_from_mgf, load_from_msp,
+                               load_from_mzml, load_from_mzxml, load_from_usi)
 from matchms.typing import SpectrumType
 
 
@@ -26,17 +27,17 @@ def load_spectra(file: str, ftype: Optional[str] = None) -> Generator[SpectrumTy
         ftype = os.path.splitext(file)[1].lower()[1:]
 
     if ftype == "mzml":
-        return importing.load_from_mzml(file)
+        return load_from_mzml(file)
     if ftype == "json":
-        return importing.load_from_json(file)
+        return load_from_json(file)
     if ftype == "mgf":
-        return importing.load_from_mgf(file)
+        return load_from_mgf(file)
     if ftype == "msp":
-        return importing.load_from_msp(file)
+        return load_from_msp(file)
     if ftype == "mzxml":
-        return importing.load_from_mzxml(file)
+        return load_from_mzxml(file)
     if ftype == "usi":
-        return importing.load_from_usi(file)
+        return load_from_usi(file)
     if ftype == "pickle":
         spectra = load_from_pickle(file)
         assert isinstance(spectra, list), "Expected list of spectra"
