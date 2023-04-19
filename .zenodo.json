@@ -74,6 +74,11 @@
          "affiliation": "ICS, Masaryk University",
          "name": "Skoryk, Maksym",
          "orcid": "0000-0003-2056-8018"
+      },
+      {
+         "affiliation": "Research Centre for Toxic Compounds in the Environment",
+         "name": "Ahmad, Zargham",
+         "orcid": "0000-0002-6096-224X"
       }
    ],
    "description": "Python library for processing (tandem) mass spectrometry data and for computing spectral similarities.",

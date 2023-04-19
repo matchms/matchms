@@ -57,15 +57,6 @@ def save_and_reload_spectra(filename, spectra: List[Spectrum], write_peak_commen
     return reloaded_spectra
 
 
-def test_spectrum_none_exception(none_spectrum, filename):
-    """ Test for exception being thrown if the spectrum to be saved. """
-    with pytest.raises(AttributeError) as exception:
-        save_as_msp(none_spectrum, filename)
-
-    message = exception.value.args[0]
-    assert message == "'NoneType' object has no attribute 'metadata'"
-
-
 def test_wrong_filename_exception():
     """ Test for exception being thrown if output file doesn't end with .msp. """
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -152,4 +143,14 @@ def test_write_append(test_file, filename):
 
     actual = list(load_from_msp(filename))
 
+    assert expected == actual
+
+
+@pytest.mark.parametrize("test_file, expected_file, style", [
+    ["Hydrogen_chloride.msp", "massbank_style_Hydrogen_chloride.msp", "massbank"]])
+def test_save_as_msp_export_style(test_file, expected_file, style, filename):
+    expected = load_test_spectra_file(expected_file)
+    data = load_test_spectra_file(test_file)
+    save_as_msp(data, filename, mode="w", style=style)
+    actual = list(load_from_msp(filename))
     assert expected == actual

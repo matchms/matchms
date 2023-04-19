@@ -5,7 +5,7 @@ from .filtering.add_precursor_mz import _add_precursor_mz_metadata
 from .filtering.add_retention import _add_retention
 from .filtering.interpret_pepmass import _interpret_pepmass_metadata
 from .filtering.make_charge_int import _convert_charge_to_int
-from .utils import load_known_key_conversions
+from .utils import load_export_key_conversions, load_known_key_conversions
 
 
 _key_regex_replacements = {r"\s": "_",
@@ -143,6 +143,26 @@ class Metadata:
         """Retrieve all items (key, value pairs) of :attr:`.metadata` dict.
         """
         return self._data.items()
+
+    def to_dict(self, export_style: str = "matchms"):
+        """Returns a regular Python dictionary containing the metadata entries.
+
+        Parameters
+        ----------
+        export_style:
+            Specifies the naming style of the metadata fields.
+            Default is "matchms".
+        """
+        if export_style == "matchms":
+            return dict(self._data)
+        key_conversions = load_export_key_conversions(export_style=export_style)
+        keep_list = [x for x in self._data.keys() if x in key_conversions]
+        converted_dict = {}
+        for key in keep_list:
+            value = self._data[key]
+            if value != "":
+                converted_dict[key_conversions[key]] = self._data[key]
+        return converted_dict
 
     def __getitem__(self, key=None):
         return self.get(key)

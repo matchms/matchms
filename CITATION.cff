@@ -78,6 +78,11 @@ authors:
     family-names: Skoryk
     given-names: Maksym
     orcid: "https://orcid.org/0000-0003-2056-8018"
+  -
+    affiliation: "Research Centre for Toxic Compounds in the Environment"
+    family-names: Ahmad
+    given-names: Zargham
+    orcid: "https://orcid.org/0000-0002-6096-224X"
 
 cff-version: "1.1.0"
 keywords:
