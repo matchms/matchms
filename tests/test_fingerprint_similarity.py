@@ -1,6 +1,6 @@
 import numpy as np
-from sparsestack import StackedSparseArray
 import pytest
+from sparsestack import StackedSparseArray
 from matchms import Spectrum, calculate_scores
 from matchms.similarity import FingerprintSimilarity
 
