@@ -21,6 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Support sparse score arrays also for FingerprintSimilarity scores [#389](https://github.com/matchms/matchms/issues/389)
+
 ## [0.18.0] - 2023-01-05
 
 ### Added
