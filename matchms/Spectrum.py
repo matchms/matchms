@@ -183,6 +183,9 @@ class Spectrum:
             spectrum_dict["fingerprint"] = spectrum_dict["fingerprint"].tolist()
         return spectrum_dict
 
+    def metadata_dict(self, export_style: str = "matchms") -> dict:
+        return self._metadata.to_dict(export_style)
+
     @property
     def mz(self):
         return self.peaks.mz

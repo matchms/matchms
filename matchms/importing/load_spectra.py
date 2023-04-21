@@ -25,6 +25,8 @@ def load_spectra(file: str, ftype: Optional[str] = None) -> Generator[SpectrumTy
 
     if ftype is None:
         ftype = os.path.splitext(file)[1].lower()[1:]
+    else:
+        ftype = ftype.lower()
 
     if ftype == "mzml":
         return load_from_mzml(file)
