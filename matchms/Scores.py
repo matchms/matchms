@@ -176,11 +176,6 @@ class Scores:
                                                     is_symmetric=self.is_symmetric)
             if isinstance(new_scores, np.ndarray):
                 self._scores.add_dense_matrix(new_scores, name, join_type=join_type)
-            elif len(new_scores.score_names) == 1:
-                new_scores.data.dtype.names = [name]
-                self._scores.add_sparse_data(new_scores.row,
-                                             new_scores.col,
-                                             new_scores.data, "", join_type=join_type)
             else:
                 self._scores.add_sparse_data(new_scores.row,
                                              new_scores.col,
