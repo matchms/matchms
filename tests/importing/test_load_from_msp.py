@@ -28,7 +28,7 @@ def test_load_from_msp_spaces_mona_1():
 
     module_root = os.path.join(os.path.dirname(__file__), "..")
     spectrums_file = os.path.join(
-        module_root, "tests", "MoNA-export-GC-MS-first10.msp")
+        module_root, "testdata", "MoNA-export-GC-MS-first10.msp")
     spectrum = list(load_from_msp(spectrums_file))
 
     expected_inchikey = np.array([
@@ -50,7 +50,7 @@ def test_load_from_msp_spaces_mona_2():
     """
     module_root = os.path.join(os.path.dirname(__file__), "..")
     spectrums_file = os.path.join(
-        module_root, "tests", "MoNA-export-GC-MS-first10.msp")
+        module_root, "testdata", "MoNA-export-GC-MS-first10.msp")
     spectrum = next(iter(load_from_msp(spectrums_file)))
 
     expected_mz = np.array([
@@ -83,7 +83,7 @@ def test_load_from_msp_spaces_massbank_1():
 
     module_root = os.path.join(os.path.dirname(__file__), "..")
     spectrums_file = os.path.join(
-        module_root, "tests", "massbank_five_spectra.msp")
+        module_root, "testdata", "massbank_five_spectra.msp")
     spectrum = list(load_from_msp(spectrums_file))
 
     expected_inchikey = [
@@ -111,7 +111,7 @@ def test_load_from_msp_tabs():
 
     module_root = os.path.join(os.path.dirname(__file__), "..")
     spectrums_file = os.path.join(
-        module_root, "tests", "rcx_gc-ei_ms_20201028_perylene.msp")
+        module_root, "testdata", "rcx_gc-ei_ms_20201028_perylene.msp")
     spectra = list(load_from_msp(spectrums_file))
 
     expected_inchikey = np.array([
@@ -154,7 +154,7 @@ def test_load_from_msp_multiline():
 
     module_root = os.path.join(os.path.dirname(__file__), "..")
     spectrums_file = os.path.join(
-        module_root, "tests", "multiline_semicolon.msp")
+        module_root, "testdata", "multiline_semicolon.msp")
 
     actual = list(load_from_msp(spectrums_file))
     expected = [
@@ -194,7 +194,7 @@ def test_load_from_msp_diverse_spectrum_collection():
 
     module_root = os.path.join(os.path.dirname(__file__), "..")
     spectrums_file = os.path.join(
-        module_root, "tests", "test_spectra_collection.msp")
+        module_root, "testdata", "test_spectra_collection.msp")
     spectrum = load_from_msp(spectrums_file)
 
     expected_inchikey = np.array([
@@ -218,7 +218,7 @@ def test_load_from_msp_diverse_spectrum_collection():
 
 def test_load_msl():
     module_root = os.path.join(os.path.dirname(__file__), "..")
-    spectrums_file = os.path.join(module_root, "tests", "JL_2021_V2.msl")
+    spectrums_file = os.path.join(module_root, "testdata", "JL_2021_V2.msl")
     actual = list(load_from_msp(spectrums_file))[0]
 
     metadata = {
@@ -241,7 +241,7 @@ def test_load_msl():
 
 def test_load_golm_style_msp():
     module_root = os.path.join(os.path.dirname(__file__), "..")
-    spectrums_file = os.path.join(module_root, "tests", "golm.msp")
+    spectrums_file = os.path.join(module_root, "testdata", "golm.msp")
     actual = list(load_from_msp(spectrums_file))
 
     assert len(actual) == 3

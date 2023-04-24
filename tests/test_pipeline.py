@@ -7,7 +7,7 @@ from matchms.similarity import ModifiedCosine
 
 
 module_root = os.path.join(os.path.dirname(__file__), "..")
-spectrums_file_msp = os.path.join(module_root, "tests", "massbank_five_spectra.msp")
+spectrums_file_msp = os.path.join(module_root, "tests", "testdata", "massbank_five_spectra.msp")
 
 
 def test_pipeline_initial_check_missing_file():

@@ -7,7 +7,7 @@ from matchms.similarity import CosineGreedy
 
 def test_user_workflow():
     module_root = os.path.join(os.path.dirname(__file__), "..")
-    spectrums_file = os.path.join(module_root, "tests", "pesticides.mgf")
+    spectrums_file = os.path.join(module_root, "tests", "testdata", "pesticides.mgf")
 
     pipeline = Pipeline()
     pipeline.query_files = spectrums_file

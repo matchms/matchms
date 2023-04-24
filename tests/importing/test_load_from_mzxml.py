@@ -5,8 +5,8 @@ from matchms.importing import load_from_mzxml
 def test_load_from_mzxml():
     """Test parsing of mzxml file to spectrum objects"""
 
-    module_root = os.path.dirname(__file__)
-    mzxml_file = os.path.join(module_root, "testdata.mzXML")
+    module_root = os.path.join(os.path.dirname(__file__), "..")
+    mzxml_file = os.path.join(module_root, "testdata", "testdata.mzXML")
     spectrum = next(load_from_mzxml(mzxml_file))
 
     assert len(list(load_from_mzxml(mzxml_file))) == 1, "Expected single spectrum"
@@ -18,8 +18,8 @@ def test_load_from_mzxml():
 def test_load_from_mzxml_ms_levels():
     """Test parsing of mzxml file to spectrum objects using different ms levels."""
 
-    module_root = os.path.dirname(__file__)
-    mzxml_file = os.path.join(module_root, "testdata.mzXML")
+    module_root = os.path.join(os.path.dirname(__file__), "..")
+    mzxml_file = os.path.join(module_root, "testdata", "testdata.mzXML")
 
     expected_num_spectra = [1, 1, 3, 0]
     for i in range(4):

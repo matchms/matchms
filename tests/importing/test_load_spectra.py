@@ -19,7 +19,7 @@ def test_load_spectra_unknown_file(tmp_path):
 ])
 def test_load_spectra(filename, ftype, expected_num_spectra):
     """Test if pickled file is loaded in correctly"""
-    tests_root = os.path.join(os.path.dirname(__file__), "../tests")
+    tests_root = os.path.join(os.path.dirname(__file__), "../testdata")
     file = os.path.join(tests_root, filename)
     actual = list(load_spectra(file, ftype=ftype))
    

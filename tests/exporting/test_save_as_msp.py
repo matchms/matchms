@@ -28,7 +28,7 @@ def data(request):
 
 def load_test_spectra_file(test_filename):
     module_root = os.path.join(os.path.dirname(__file__), "..")
-    spectrums_file = os.path.join(module_root, "tests", test_filename)
+    spectrums_file = os.path.join(module_root, "testdata", test_filename)
     spectra = list(load_from_msp(spectrums_file))
     return spectra
 

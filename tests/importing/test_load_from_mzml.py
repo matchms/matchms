@@ -5,8 +5,8 @@ from matchms.importing import load_from_mzml
 def test_load_from_mzml():
     """Test parsing of mzml file to spectrum objects"""
 
-    module_root = os.path.dirname(__file__)
-    mzml_file = os.path.join(module_root, "testdata.mzml")
+    module_root = os.path.join(os.path.dirname(__file__), "..")
+    mzml_file = os.path.join(module_root, "testdata", "testdata.mzml")
     spectrums = list(load_from_mzml(mzml_file))
 
     assert len(spectrums) == 10, "Expected 10 spectrums."
