@@ -43,4 +43,4 @@ def save_as_mgf(spectrums: List[Spectrum], filename: str):
                          "intensity array": spectrum.peaks.intensities,
                          "params": spectrum.metadata}
         # Append spectrum to file
-        py_mgf.write([spectrum_dict], filename)
+        py_mgf.write([spectrum_dict], filename, file_mode = "a")
