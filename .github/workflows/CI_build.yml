@@ -3,7 +3,7 @@ name: CI Build
 on:
   push:
   pull_request:
-    types: [opened, reopened]
+    branches: [ master ]
   workflow_dispatch:
     inputs:
       tag:
