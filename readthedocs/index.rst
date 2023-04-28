@@ -43,7 +43,7 @@ Install matchms from Anaconda Cloud with
 Example
 =======
 
-Below is a small example of using matchms to calculate the Cosine score between mass Spectrums in the `tests/pesticides.mgf <https://github.com/matchms/matchms/blob/master/tests/pesticides.mgf>`_ file.
+Below is a small example of using matchms to calculate the Cosine score between mass Spectrums in the `tests/testdata/pesticides.mgf <https://github.com/matchms/matchms/blob/master/tests/testdata/pesticides.mgf>`_ file.
 
 .. testcode::
 
@@ -54,7 +54,7 @@ Below is a small example of using matchms to calculate the Cosine score between 
     from matchms.similarity import CosineGreedy
 
     # Read spectrums from a MGF formatted file, for other formats see https://matchms.readthedocs.io/en/latest/api/matchms.importing.html
-    file = load_from_mgf("../tests/pesticides.mgf")
+    file = load_from_mgf("../tests/testdata/pesticides.mgf")
 
     # Apply filters to clean and enhance each spectrum
     spectrums = []

@@ -16,7 +16,7 @@ from matchms.importing import load_from_json
 
 
 module_root = os.path.dirname(__file__)
-json_file = os.path.join(module_root, "gnps_spectra.json")
+json_file = os.path.join(module_root, "testdata", "gnps_spectra.json")
 # Get similarity measures available in matchms
 _score_functions = {
     "cosinegreedy": [mssimilarity.CosineGreedy, {}],
