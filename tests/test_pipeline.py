@@ -205,6 +205,6 @@ def test_pipeline_dedicated_score_names():
 
     new_scores_v3 = new_scores_v2.calculate(similarity, name=name, array_type="sparse", join_type="inner")
 
-    expected = np.load(os.path.join(module_root, "tests", "test.npy"))
+    expected = np.load(os.path.join(module_root, "tests", "testdata", "test.npy"))
 
     assert np.array_equal(new_scores_v3.to_array() , expected)
