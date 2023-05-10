@@ -2,7 +2,7 @@ from typing import Generator, TextIO, Union
 import numpy as np
 from pyteomics.mgf import MGF
 from ..Spectrum import Spectrum
-
+import ast
 
 def load_from_mgf(source: Union[str, TextIO],
                   metadata_harmonization: bool = True) -> Generator[Spectrum, None, None]:
@@ -39,6 +39,8 @@ def load_from_mgf(source: Union[str, TextIO],
         metadata = pyteomics_spectrum.get("params", None)
         mz = pyteomics_spectrum["m/z array"]
         intensities = pyteomics_spectrum["intensity array"]
+        if "peak_comments" in metadata.keys():
+            metadata["peak_comments"] = ast.literal_eval(str(metadata["peak_comments"]))
 
         # Sort by mz (if not sorted already)
         if not np.all(mz[:-1] <= mz[1:]):
