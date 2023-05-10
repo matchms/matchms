@@ -156,7 +156,7 @@ def test_save_as_msp_export_style(test_file, expected_file, style, filename):
     assert expected == actual
 
 @pytest.mark.parametrize("test_file, expected_file", [
-    ["matchms_convert_from_msp_to_mgf.mgf", "matchms_convert_from_msp_to_mgf.msp"]])
+    ["save_as_msp_from_mgf.mgf", "save_as_msp_from_mgf.msp"]])
 def test_save_as_msp_from_mgf(test_file, expected_file, filename):
     module_root = os.path.join(os.path.dirname(__file__), "..")
     spectrums_file = os.path.join(module_root, "testdata", test_file)
