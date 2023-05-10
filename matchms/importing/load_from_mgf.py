@@ -1,8 +1,9 @@
+import ast
 from typing import Generator, TextIO, Union
 import numpy as np
 from pyteomics.mgf import MGF
 from ..Spectrum import Spectrum
-import ast
+
 
 def load_from_mgf(source: Union[str, TextIO],
                   metadata_harmonization: bool = True) -> Generator[Spectrum, None, None]:
