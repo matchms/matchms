@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - expanded options to handle different metadata key styles for (msp) file export [#300](https://github.com/matchms/matchms/issues/300)
 - light refactoring of `Metadata` constructor to reduce spectra reading time [#371](https://github.com/matchms/matchms/pull/371/files#)
 - two minor corrections of adduct masses (missing electron mass) [#374](https://github.com/matchms/matchms/issues/374)
+- Arranged test in folders [#408](https://github.com/matchms/matchms/pull/408)
+- Updated datatype of peak_comments returned by load_from_mgf reader [#410](https://github.com/matchms/matchms/pull/410)
 
 ### Fixed
 

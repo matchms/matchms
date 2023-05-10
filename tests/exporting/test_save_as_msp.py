@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 from matchms import Spectrum
 from matchms.exporting import save_as_msp
-from matchms.importing import load_from_msp
+from matchms.importing import load_from_mgf, load_from_msp
 from ..builder_Spectrum import SpectrumBuilder
 
 
@@ -152,5 +152,16 @@ def test_save_as_msp_export_style(test_file, expected_file, style, filename):
     expected = load_test_spectra_file(expected_file)
     data = load_test_spectra_file(test_file)
     save_as_msp(data, filename, mode="w", style=style)
+    actual = list(load_from_msp(filename))
+    assert expected == actual
+
+@pytest.mark.parametrize("test_file, expected_file", [
+    ["save_as_msp_from_mgf.mgf", "save_as_msp_from_mgf.msp"]])
+def test_save_as_msp_from_mgf(test_file, expected_file, filename):
+    module_root = os.path.join(os.path.dirname(__file__), "..")
+    spectrums_file = os.path.join(module_root, "testdata", test_file)
+    actual = list(load_from_mgf(spectrums_file))
+    expected = load_test_spectra_file(expected_file)
+    save_as_msp(actual, filename, mode="w", write_peak_comments=True)
     actual = list(load_from_msp(filename))
     assert expected == actual
