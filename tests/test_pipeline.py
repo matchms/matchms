@@ -1,10 +1,11 @@
 import os
 import numpy as np
 import pytest
-from matchms import Pipeline
+from matchms import Pipeline, Scores
 from matchms.filtering import select_by_mz
-from matchms.similarity import ModifiedCosine
-
+from matchms.similarity import ModifiedCosine, MetadataMatch, FingerprintSimilarity
+from matchms.importing import load_from_msp
+from matchms.filtering import add_fingerprint
 
 module_root = os.path.join(os.path.dirname(__file__), "..")
 spectrums_file_msp = os.path.join(module_root, "tests", "testdata", "massbank_five_spectra.msp")
@@ -39,7 +40,7 @@ def test_pipeline_symmetric():
     assert pipeline.spectrums_queries[0] == pipeline.spectrums_references[0]
     assert pipeline.is_symmetric is True
     assert pipeline.scores.scores.shape == (5, 5, 3)
-    assert pipeline.scores.score_names == ('PrecursorMzMatch', 'ModifiedCosine_score', 'ModifiedCosine_matches')
+    assert pipeline.scores.score_names == ('PrecursorMzMatch_f0', 'ModifiedCosine_score', 'ModifiedCosine_matches')
     all_scores = pipeline.scores.to_array()
     expected = np.array([[1., 0.30384404],
                          [0.30384404, 1.]])
@@ -60,7 +61,7 @@ def test_pipeline_symmetric_filters():
     assert pipeline.spectrums_queries[0] == pipeline.spectrums_references[0]
     assert pipeline.is_symmetric is True
     assert pipeline.scores.scores.shape == (5, 5, 3)
-    assert pipeline.scores.score_names == ('PrecursorMzMatch', 'ModifiedCosine_score', 'ModifiedCosine_matches')
+    assert pipeline.scores.score_names == ('PrecursorMzMatch_f0', 'ModifiedCosine_score', 'ModifiedCosine_matches')
     all_scores = pipeline.scores.to_array()
     expected = np.array([[1., 0.30384404],
                          [0.30384404, 1.]])
@@ -80,7 +81,7 @@ def test_pipeline_symmetric_masking():
     assert pipeline.spectrums_queries[0] == pipeline.spectrums_references[0]
     assert pipeline.is_symmetric is True
     assert pipeline.scores.scores.shape == (5, 5, 3)
-    assert pipeline.scores.score_names == ('PrecursorMzMatch', 'ModifiedCosine_score', 'ModifiedCosine_matches')
+    assert pipeline.scores.score_names == ('PrecursorMzMatch_f0', 'ModifiedCosine_score', 'ModifiedCosine_matches')
     all_scores = pipeline.scores.to_array()
     expected = np.array([[1., 0.30384404],
                          [0.30384404, 1.]])
@@ -99,7 +100,7 @@ def test_pipeline_symmetric_custom_score():
     assert pipeline.spectrums_queries[0] == pipeline.spectrums_references[0]
     assert pipeline.is_symmetric is True
     assert pipeline.scores.scores.shape == (5, 5, 3)
-    assert pipeline.scores.score_names == ('PrecursorMzMatch', 'ModifiedCosine_score', 'ModifiedCosine_matches')
+    assert pipeline.scores.score_names == ('PrecursorMzMatch_f0', 'ModifiedCosine_score', 'ModifiedCosine_matches')
     all_scores = pipeline.scores.to_array()
     expected = np.array([[1., 0.30384404],
                          [0.30384404, 1.]])
@@ -121,7 +122,7 @@ def test_pipeline_non_symmetric():
     assert pipeline.spectrums_queries[0] == pipeline.spectrums_references[5]
     assert pipeline.is_symmetric is False
     assert pipeline.scores.scores.shape == (10, 5, 3)
-    assert pipeline.scores.score_names == ('PrecursorMzMatch', 'ModifiedCosine_score', 'ModifiedCosine_matches')
+    assert pipeline.scores.score_names == ('PrecursorMzMatch_f0', 'ModifiedCosine_score', 'ModifiedCosine_matches')
     all_scores = pipeline.scores.to_array()
     assert np.all(all_scores[:5, :] == all_scores[5:, :])
     expected = np.array([[1., 0.30384404],
@@ -137,7 +138,7 @@ def test_pipeline_from_yaml():
     assert pipeline.spectrums_queries[0] == pipeline.spectrums_references[0]
     assert pipeline.is_symmetric is True
     assert pipeline.scores.scores.shape == (5, 5, 3)
-    assert pipeline.scores.score_names == ('PrecursorMzMatch', 'ModifiedCosine_score', 'ModifiedCosine_matches')
+    assert pipeline.scores.score_names == ('PrecursorMzMatch_f0', 'ModifiedCosine_score', 'ModifiedCosine_matches')
     all_scores = pipeline.scores.to_array()
     expected = np.array([[1., 0.30384404],
                          [0.30384404, 1.]])
@@ -175,3 +176,35 @@ def test_pipeline_logging(tmp_path):
         firstline = f.readline().rstrip()
     assert "Start running matchms pipeline" in firstline
     
+
+def test_pipeline_dedicated_score_names():
+    # use case with multiple steps in the pipeline causing a bug
+    module_root = os.path.join(os.path.dirname(__file__), "..")
+    var_references = list(load_from_msp(spectrums_file_msp))
+    var_queries = list(load_from_msp(spectrums_file_msp))
+
+    # f)ingerprint similarity
+    var_queries = list(map(add_fingerprint, var_queries))
+    var_references = list(map(add_fingerprint, var_references))
+    scores = Scores(references=var_references, queries=var_queries, is_symmetric=False)
+
+    similarity = FingerprintSimilarity(similarity_measure="jaccard")
+    new_scores = scores.calculate(similarity, name="test", array_type="numpy")
+
+    var_field = "precursor_mz"
+    var_tolerance = 100
+    similarity = MetadataMatch(field = var_field, matching_type="difference", tolerance=var_tolerance)
+    name = "MetadataMatch_" + var_field + str(var_tolerance)
+
+    new_scores_v2 = new_scores.calculate(similarity, name=name, array_type="sparse", join_type="inner")
+
+    var_field = "precursor_mz"
+    var_tolerance = 0.08
+    similarity = MetadataMatch(field = var_field, matching_type="difference", tolerance=var_tolerance)
+    name = "MetadataMatch_" + var_field + str(var_tolerance)
+
+    new_scores_v3 = new_scores_v2.calculate(similarity, name=name, array_type="sparse", join_type="inner")
+
+    expected = np.load(os.path.join(module_root, "tests", "testdata", "test.npy"))
+
+    assert np.array_equal(new_scores_v3.to_array() , expected)
