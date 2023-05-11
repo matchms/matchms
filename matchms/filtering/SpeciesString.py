@@ -33,7 +33,7 @@ class SpeciesString:
 
     def clean_as_inchi(self):
         """Search for valid inchi and harmonize it."""
-        regexp = r"(1S\/|1\/)[0-9, A-Z, a-z,\.]{2,}\/(c|h)[0-9].*$"
+        regexp = r"(1S\/|1\/)[0-9A-Za-z\.]{2,}\/([ch])[0-9].*$"
         found = re.search(regexp, self.dirty)
         if found is None:
             self.cleaned = ""
@@ -73,7 +73,7 @@ class SpeciesString:
 
     def looks_like_an_inchi(self):
         """Search for first piece of InChI."""
-        regexp = r"(InChI=1|1)(S\/|\/)[0-9, A-Z, a-z,\.]{2,}\/(c|h)[0-9]"
+        regexp = r"(InChI=1|1)(S\/|\/)[0-9, A-Z, a-z,\.]{2,}\/([ch])[0-9]"
         return re.search(regexp, self.dirty) is not None
 
     def looks_like_an_inchikey(self):

@@ -91,7 +91,7 @@ def _write_metadata(metadata: dict, outfile: IO):
 
 def _format_peak_comment(mz: Union[int, float], peak_comments: Dict):
     """Format peak comment for given mz to return the quoted comment or empty string if no peak comment is present."""
-    if peak_comments is None:
+    if not isinstance(peak_comments, dict):
         return ""
     peak_comment = peak_comments.get(mz, None)
     if peak_comment is None:

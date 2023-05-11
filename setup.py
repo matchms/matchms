@@ -53,7 +53,7 @@ setup(
         "numpy",
         "pickydict >= 0.4.0",
         "pillow != 9.4.0",
-        "pyteomics >=4.2",
+        "pyteomics >=4.6",
         "requests",
         "scipy",
         "sparsestack >= 0.4.1",
