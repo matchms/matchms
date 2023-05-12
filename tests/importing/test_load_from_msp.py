@@ -246,3 +246,14 @@ def test_load_golm_style_msp():
 
     assert len(actual) == 3
     assert len(actual[0].mz) == 50
+
+
+def test_load_msp_with_comments_including_quotes():
+    module_root = os.path.join(os.path.dirname(__file__), "..")
+    spectrums_file = os.path.join(module_root, "testdata", "comments_with_quotes.msp")
+    actual = next(load_from_msp(spectrums_file))
+
+    assert len(actual.mz) == 248
+    assert actual.get("columntype") == "Semi-standard non-polar, TG-5SILMSwith10mGuard, 30mx0.25mmx0.25um"
+    assert actual.get("carriergasflowrate") == "1.0 mL/min"
+    assert actual.get("category") == "Amino Acid"
