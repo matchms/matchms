@@ -175,3 +175,22 @@ def test_pipeline_logging(tmp_path):
         firstline = f.readline().rstrip()
     assert "Start running matchms pipeline" in firstline
     
+
+def test_FingerprintSimilarity_pipeline():
+    pipeline = Pipeline()
+    pipeline.query_files = spectrums_file_msp
+    pipeline.reference_files = spectrums_file_msp
+    filter_steps = [
+        ["default_filters"],
+        ["add_fingerprint"]
+    ]
+    pipeline.filter_steps_queries = filter_steps
+    pipeline.filter_steps_refs = filter_steps
+    pipeline.score_computations = [
+        ["metadatamatch", {"field": "precursor_mz", "matching_type": "difference", "tolerance": 50}],
+        ["fingerprintsimilarity", {"similarity_measure": "jaccard"}]
+    ]    
+    pipeline.run()
+
+    assert pipeline.scores.scores.shape == (5, 5, 2)
+    assert pipeline.scores.score_names == ('MetadataMatch', 'FingerprintSimilarity')
