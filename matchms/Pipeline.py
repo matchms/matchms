@@ -139,18 +139,22 @@ class Pipeline:
         self.write_to_logfile(f"Time: {str(datetime.now())}")
         for step in self.filter_steps_queries:
             self.write_to_logfile(f"-- Processing step: {step} --")
-        for spectrum in tqdm(self.spectrums_queries,
+        for i in tqdm(range(len(self.spectrums_queries)),
                              disable=(not self.progress_bar),
                              desc="Processing query spectrums"):
+            spectrum = self.spectrums_queries[i]
             for step in self.filter_steps_queries:
                 spectrum = self.apply_filter(spectrum, step)
-            self.spectrums_queries = [s for s in self.spectrums_queries if s is not None]
+            self.spectrums_queries[i] = spectrum
+        self.spectrums_queries = [s for s in self.spectrums_queries if s is not None]
         if self.is_symmetric is False:
-            for spectrum in tqdm(self.spectrums_references,
+            for i in tqdm(range(len(self.spectrums_references)),
                                  disable=(not self.progress_bar),
                                  desc="Processing reference spectrums"):
+                spectrum = self.spectrums_references[i]
                 for step in self.filter_steps_refs:
                     spectrum = self.apply_filter(spectrum, step)
+                self.spectrums_references[i] = spectrum
             self.spectrums_references = [s for s in self.spectrums_references if s is not None]
 
         # Score computation and masking
