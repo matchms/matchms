@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+### Changed
+
+- Fixed pipeline filter [#414](https://github.com/matchms/matchms/pull/414)
+
+### Fixed
+
 ## [0.19.0] - 2023-05-10
 
 ### Added
