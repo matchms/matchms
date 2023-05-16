@@ -177,6 +177,7 @@ def test_pipeline_logging(tmp_path):
     
 
 def test_FingerprintSimilarity_pipeline():
+    pytest.importorskip("rdkit")
     pipeline = Pipeline()
     pipeline.query_files = spectrums_file_msp
     pipeline.reference_files = spectrums_file_msp
