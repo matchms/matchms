@@ -48,6 +48,7 @@ def test_add_fingerprint_empty_spectrum():
                                                          (save_as_mgf, "test_remove_fingerprint.mgf", load_from_mgf),
                                                          (save_as_json, "test_remove_fingerprint.json", load_from_json)])
 def test_remove_fingerprint_from_metadata(export_function, expected_filename, load_function):
+    pytest.importorskip("rdkit")
     module_root = os.path.join(os.path.dirname(__file__), "..")
     expected = list(load_function(os.path.join(module_root, "testdata", expected_filename)))
     spectrum = list(load_from_msp(os.path.join(module_root, "testdata", "massbank_five_spectra.msp")))
