@@ -2,6 +2,7 @@ import copy
 import json
 from typing import List
 from ..Spectrum import Spectrum
+from ..utils import fingerprint_export_warning
 
 
 def save_as_json(spectrums: List[Spectrum], filename: str):
@@ -38,6 +39,8 @@ def save_as_json(spectrums: List[Spectrum], filename: str):
         # Assume that input was single Spectrum
         spectrums = [spectrums]
 
+    fingerprint_export_warning(spectrums)
+
     # Write to json file
     with open(filename, "w", encoding="utf-8") as fout:
         json.dump(spectrums, fout, cls=SpectrumJSONEncoder)
@@ -48,8 +51,10 @@ class SpectrumJSONEncoder(json.JSONEncoder):
     def default(self, o):
         """JSON Encoder which can encode a :py:class:`~matchms.Spectrum.Spectrum` object"""
         if isinstance(o, Spectrum):
-            spec = o.clone()
-            return spec.to_dict()
+            spec = o.clone().to_dict()
+            if "fingerprint" in spec.keys():
+                del spec["fingerprint"]
+            return spec
         return json.JSONEncoder.default(self, o)
 
 
