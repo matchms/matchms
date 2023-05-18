@@ -54,8 +54,7 @@ def test_remove_fingerprint_from_metadata(export_function, expected_filename, lo
     spectrum = list(load_from_msp(os.path.join(module_root, "testdata", "massbank_five_spectra.msp")))
     spectrum = list(map(add_fingerprint, spectrum))
 
-    with tempfile.TemporaryDirectory() as temp_dir:
-        filename = os.path.join(temp_dir, f"test{Path(expected_filename).suffix}")
-        export_function(spectrum, filename)
-        actual = list(load_function(filename))
-        assert expected == actual
+    filename = os.path.join(tempfile.mkdtemp(), f"test{Path(expected_filename).suffix}")
+    export_function(spectrum, filename)
+    actual = list(load_function(filename))
+    assert expected == actual
