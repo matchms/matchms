@@ -204,6 +204,7 @@ def plot_spectra_array(spectrums,
         Keyword arguments for `plot_spectrum()`.
 
     """
+    # pylint: disable=too-many-locals
     assert isinstance(spectrums, list), "Expected list of Spectrum objects as input."
     n_spectra = len(spectrums)
     n_rows = int(np.ceil(n_spectra / n_cols))
