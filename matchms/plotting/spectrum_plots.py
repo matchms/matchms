@@ -188,6 +188,7 @@ def plot_spectra_array(spectrums,
                        n_cols: int = 2,
                        peak_color="darkblue",
                        dpi: int = 200,
+                       title: str = None,
                        **spectrum_kws) -> plt.Axes:
     """Mirror plot two MS/MS spectra.
 
@@ -230,5 +231,8 @@ def plot_spectra_array(spectrums,
             x_min = axes[i, j].get_xlim()[0]
             axes[i, j].text(x_min, y_max, name, va="bottom", zorder=2)
 
-    plt.title("Spectrum comparison")
+    if title is None:
+        fig.suptitle("Spectrum array plot")
+    else:
+        fig.suptitle(title)
     return fig, axes
