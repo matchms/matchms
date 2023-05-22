@@ -20,6 +20,8 @@ def plot_spectrum(spectrum,
                   grid: Union[bool, str] = True,
                   ax: plt.Axes = None,
                   peak_color="teal",
+                  min_mz: float = None,
+                  max_mz: float = None,
                   **plt_kwargs) -> plt.Axes:
     """
     Plot a single MS/MS spectrum.
@@ -42,6 +44,12 @@ def plot_spectrum(spectrum,
     ax:
         Axes instance on which to plot the spectrum. If None the current Axes
         instance is used.
+    peak_color:
+        Set color of peaks in plot.
+    min_mz:
+        Set lower limit of the plots x-axis to min_mz. Default is None.
+    max_mz:
+        Set upper limit of the plots x-axis to min_mz. Default is None.
 
     Returns
     -------
@@ -52,8 +60,10 @@ def plot_spectrum(spectrum,
     if ax is None:
         ax = plt.gca()
 
-    min_mz = max(0, np.floor(spectrum.peaks.mz[0] / 100 - 1) * 100)
-    max_mz = np.ceil(spectrum.peaks.mz[-1] / 100 + 1) * 100
+    if min_mz is None:
+        min_mz = max(0, np.floor(spectrum.peaks.mz[0] / 100 - 1) * 100)
+    if max_mz is None:
+        max_mz = np.ceil(spectrum.peaks.mz[-1] / 100 + 1) * 100
     max_intensity = spectrum.peaks.intensities.max()
 
     intensities = spectrum.peaks.intensities / max_intensity
