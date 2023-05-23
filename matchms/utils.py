@@ -1,7 +1,12 @@
 import csv
+import logging
 import os
 from functools import lru_cache
 from typing import Iterable, List
+from .typing import SpectrumType
+
+
+logger = logging.getLogger("matchms")
 
 
 def get_first_common_element(first: Iterable[str], second: Iterable[str]) -> str:
@@ -63,3 +68,8 @@ def _load_key_conversions(file: str, source: str, target: str) -> dict:
             key_conversions[row[source]] = row[target]
 
     return key_conversions
+
+
+def fingerprint_export_warning(spectrums: List[SpectrumType]):
+    if any(x.get("fingerprint") is not None for x in spectrums):
+        logger.warning("fingerprint found but will not be written to file.")
