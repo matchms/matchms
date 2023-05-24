@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Fixed pipeline filter [#414](https://github.com/matchms/matchms/pull/414)
+- Updated harmonize_values function to remove invalid metadata [#418](https://github.com/matchms/matchms/pull/418)
 
 ### Fixed
 
