@@ -104,6 +104,5 @@ def test_metadata_full_setter():
 def test_remove_invalid_metadata(input_dict, expected):
     metadata = Metadata(input_dict)
     metadata.harmonize_values()
-    print(metadata.to_dict())
 
     assert metadata == expected, "Expected metadata to be equal."
