@@ -1,7 +1,12 @@
+import os
+import tempfile
+from pathlib import Path
 import numpy as np
 import pytest
 from testfixtures import LogCapture
+from matchms.exporting import save_as_json, save_as_mgf, save_as_msp
 from matchms.filtering import add_fingerprint
+from matchms.importing import load_from_json, load_from_mgf, load_from_msp
 from matchms.logging_functions import (reset_matchms_logger,
                                        set_matchms_logger_level)
 from ..builder_Spectrum import SpectrumBuilder
@@ -37,3 +42,19 @@ def test_add_fingerprint_empty_spectrum():
 
     spectrum = add_fingerprint(None)
     assert spectrum is None, "Expected None."
+
+
+@pytest.mark.parametrize("export_function, expected_filename, load_function", [(save_as_msp, "massbank_five_spectra.msp", load_from_msp),
+                                                         (save_as_mgf, "test_remove_fingerprint.mgf", load_from_mgf),
+                                                         (save_as_json, "test_remove_fingerprint.json", load_from_json)])
+def test_remove_fingerprint_from_metadata(export_function, expected_filename, load_function):
+    pytest.importorskip("rdkit")
+    module_root = os.path.join(os.path.dirname(__file__), "..")
+    expected = list(load_function(os.path.join(module_root, "testdata", expected_filename)))
+    spectrum = list(load_from_msp(os.path.join(module_root, "testdata", "massbank_five_spectra.msp")))
+    spectrum = list(map(add_fingerprint, spectrum))
+
+    filename = os.path.join(tempfile.mkdtemp(), f"test{Path(expected_filename).suffix}")
+    export_function(spectrum, filename)
+    actual = list(load_function(filename))
+    assert expected == actual

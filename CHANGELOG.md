@@ -9,9 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- min_mz, max_mz and title parameters to spectrum plot (mostly array plot) [#419](https://github.com/matchms/matchms/pull/419)
+
 ### Changed
 
 - Fixed pipeline filter [#414](https://github.com/matchms/matchms/pull/414)
+- Removed fingerprint writing to file [#416](https://github.com/matchms/matchms/pull/416)
 - Updated harmonize_values function to remove invalid metadata [#418](https://github.com/matchms/matchms/pull/418)
 
 ### Fixed

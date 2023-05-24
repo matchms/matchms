@@ -20,6 +20,8 @@ def plot_spectrum(spectrum,
                   grid: Union[bool, str] = True,
                   ax: plt.Axes = None,
                   peak_color="teal",
+                  min_mz: float = None,
+                  max_mz: float = None,
                   **plt_kwargs) -> plt.Axes:
     """
     Plot a single MS/MS spectrum.
@@ -42,6 +44,12 @@ def plot_spectrum(spectrum,
     ax:
         Axes instance on which to plot the spectrum. If None the current Axes
         instance is used.
+    peak_color:
+        Set color of peaks in plot.
+    min_mz:
+        Set lower limit of the plots x-axis to min_mz. Default is None.
+    max_mz:
+        Set upper limit of the plots x-axis to min_mz. Default is None.
 
     Returns
     -------
@@ -52,8 +60,10 @@ def plot_spectrum(spectrum,
     if ax is None:
         ax = plt.gca()
 
-    min_mz = max(0, np.floor(spectrum.peaks.mz[0] / 100 - 1) * 100)
-    max_mz = np.ceil(spectrum.peaks.mz[-1] / 100 + 1) * 100
+    if min_mz is None:
+        min_mz = max(0, np.floor(spectrum.peaks.mz[0] / 100 - 1) * 100)
+    if max_mz is None:
+        max_mz = np.ceil(spectrum.peaks.mz[-1] / 100 + 1) * 100
     max_intensity = spectrum.peaks.intensities.max()
 
     intensities = spectrum.peaks.intensities / max_intensity
@@ -178,6 +188,7 @@ def plot_spectra_array(spectrums,
                        n_cols: int = 2,
                        peak_color="darkblue",
                        dpi: int = 200,
+                       title: str = None,
                        **spectrum_kws) -> plt.Axes:
     """Mirror plot two MS/MS spectra.
 
@@ -193,6 +204,7 @@ def plot_spectra_array(spectrums,
         Keyword arguments for `plot_spectrum()`.
 
     """
+    # pylint: disable=too-many-locals
     assert isinstance(spectrums, list), "Expected list of Spectrum objects as input."
     n_spectra = len(spectrums)
     n_rows = int(np.ceil(n_spectra / n_cols))
@@ -220,5 +232,8 @@ def plot_spectra_array(spectrums,
             x_min = axes[i, j].get_xlim()[0]
             axes[i, j].text(x_min, y_max, name, va="bottom", zorder=2)
 
-    plt.title("Spectrum comparison")
+    if title is None:
+        fig.suptitle("Spectrum array plot")
+    else:
+        fig.suptitle(title)
     return fig, axes
