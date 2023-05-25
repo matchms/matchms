@@ -111,6 +111,9 @@ class Metadata:
         if not isinstance(charge, int) and charge_int is not None:
             metadata_filtered["charge"] = charge_int
 
+        invalid_entries = ["", "NA", "N/A", "NaN"]
+        metadata_filtered = {k:v for k,v in metadata_filtered.items() if v not in invalid_entries}
+        
         self.data = metadata_filtered
 
     # ------------------------------
