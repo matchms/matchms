@@ -94,3 +94,15 @@ def test_metadata_full_setter():
     metadata.data = {"Precursor Mz": 101.01}
     assert isinstance(metadata.data, PickyDict), "Expected PickyDict"
     assert metadata["precursor_mz"] == 101.01, "Expected differnt entry"
+
+
+@pytest.mark.parametrize("input_dict, expected", [
+    [{'scannumber': '1516', 'spectrumtype': 'N/A', 'formula': 'C8H16NO5P', 'ionization': 'NA', 
+      'compound_name': 'Dicrotophos', 'comment': '', 'precursor_mz': 238.0844}, 
+      {'scannumber': '1516', 'formula': 'C8H16NO5P', 'compound_name': 'Dicrotophos',
+       'precursor_mz': 238.0844}]])
+def test_remove_invalid_metadata(input_dict, expected):
+    metadata = Metadata(input_dict)
+    metadata.harmonize_values()
+
+    assert metadata == expected, "Expected metadata to be equal."

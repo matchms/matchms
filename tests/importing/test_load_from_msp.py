@@ -225,7 +225,6 @@ def test_load_msl():
         "COMPOUND_NAME": "G3P",
         "CASNO": "TUBE2_~1-N1010",
         "RETENTION_INDEX": 1586.2,
-        "RW": '',
         "RETENTION_TIME": 9.648,
         "COMMENT": "RI=1586.2,   9.6481 min TUBE2_28-01-2020_18-48-00|RI:1586.2",
         "SOURCE": "C:\\USERS\\UTILISATEUR\\DESKTOP\\METABOLOME\\calib\\standard.msl",
