@@ -3,6 +3,7 @@ import os
 from typing import IO, Dict, List, Union
 from ..Fragments import Fragments
 from ..Spectrum import Spectrum
+from ..utils import fingerprint_export_warning
 
 
 logger = logging.getLogger("matchms")
@@ -59,6 +60,8 @@ def save_as_msp(spectrums: List[Spectrum], filename: str,
                        filename.split(".")[-1])
     spectrums = _ensure_list(spectrums)
 
+    fingerprint_export_warning(spectrums)
+
     with open(filename, mode, encoding="utf-8") as outfile:
         for spectrum in spectrums:
             _write_spectrum(spectrum, outfile, write_peak_comments, style)
@@ -85,7 +88,7 @@ def _write_peaks(peaks: Fragments, peak_comments: Spectrum.peak_comments, outfil
 
 def _write_metadata(metadata: dict, outfile: IO):
     for key, value in metadata.items():
-        if not (_is_num_peaks(key) or _is_peak_comments(key)):
+        if not (_is_num_peaks(key) or _is_peak_comments(key) or _is_fingerprint(key)):
             outfile.write(f"{key.upper()}: {value}\n")
 
 
@@ -105,6 +108,10 @@ def _is_num_peaks(key: str) -> bool:
 
 def _is_peak_comments(key: str) -> bool:
     return key.lower().startswith("peak_comments")
+
+
+def _is_fingerprint(key: str) -> bool:
+    return key.lower().startswith("fingerprint")
 
 
 def _ensure_list(spectrums) -> List[Spectrum]:

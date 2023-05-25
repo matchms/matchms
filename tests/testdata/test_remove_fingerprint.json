@@ -1,0 +1,280 @@
+[
+    {
+        "synon": "Adenosine-5'-diphosphate Di(monocyclohexylammonium)salt",
+        "inchikey": "XTWYTFMLZFPYCI-UHFFFAOYSA-N",
+        "inchi": "InChI=1S/C10H15N5O10P2/c11-8-5-9(13-2-12-8)15(3-14-5)10-7(17)6(16)4(24-10)1-23-27(21,22)25-26(18,19)20/h2-4,6-7,10,16-17H,1H2,(H,21,22)(H2,11,12,13)(H2,18,19,20)",
+        "smiles": "C1=NC2=C(C(=N1)N)N=CN2C3C(C(C(O3)COP(=O)(O)OP(=O)(O)O)O)O",
+        "instrument_type": "LC-ESI-QQ",
+        "instrument": "TQD, Waters",
+        "collision_energy": "40",
+        "formula": "C10H15N5O10P2",
+        "parent": 428.31,
+        "splash": "splash10-000i-0900000000-49c12af0e867a5a1e51e",
+        "num_peaks": "2",
+        "compound_name": "ADP",
+        "spectrum_id": "PS010904",
+        "ms_level": "MS2",
+        "precursor_mz": 428.31,
+        "ionmode": "positive",
+        "nominal_mass": "427",
+        "parent_mass": "427.207",
+        "peaks_json": [
+            [
+                135.0,
+                83.0
+            ],
+            [
+                136.0,
+                999.0
+            ]
+        ]
+    },
+    {
+        "synon": "5-hydroxy-2-(hydroxymethyl)pyran-4-one",
+        "inchikey": "BEJNERDRQOWKJM-UHFFFAOYSA-N",
+        "inchi": "InChI=1S/C6H6O4/c7-2-4-1-5(8)6(9)3-10-4/h1,3,7,9H,2H2",
+        "smiles": "C1=C(OC=C(C1=O)O)CO",
+        "instrument_type": "LC-ESI-ITFT",
+        "instrument": "LTQ Orbitrap XL Thermo Scientific",
+        "collision_energy": "60 % (nominal)",
+        "formula": "C6H6O4",
+        "parent": 141.0193,
+        "splash": "splash10-0006-0900000000-e4cab40bfe2e4dacd27f",
+        "num_peaks": "1",
+        "compound_name": "Kojic acid",
+        "spectrum_id": "HB003316",
+        "adduct": "[M-H]-",
+        "ms_level": "MS2",
+        "precursor_mz": 141.0193,
+        "ionmode": "negative",
+        "nominal_mass": "142",
+        "parent_mass": "142.0266",
+        "peaks_json": [
+            [
+                141.0194,
+                999.0
+            ]
+        ]
+    },
+    {
+        "synon": "1-benzhydryl-4-methylpiperazine",
+        "inchikey": "UVKZSORBKUEBAZ-UHFFFAOYSA-N",
+        "inchi": "InChI=1S/C18H22N2/c1-19-12-14-20(15-13-19)18(16-8-4-2-5-9-16)17-10-6-3-7-11-17/h2-11,18H,12-15H2,1H3",
+        "smiles": "CN1CCN(CC1)C(C2=CC=CC=C2)C3=CC=CC=C3",
+        "instrument_type": "LC-ESI-ITFT",
+        "instrument": "LTQ Orbitrap XL Thermo Scientific",
+        "collision_energy": "85% (nominal)",
+        "formula": "C18H22N2",
+        "parent": 267.1856,
+        "splash": "splash10-014i-0900000000-6ab53bbaa27f6755ab24",
+        "num_peaks": "3",
+        "compound_name": "Cyclizine",
+        "spectrum_id": "HB000434",
+        "adduct": "[M+H]+",
+        "ms_level": "MS2",
+        "precursor_mz": 267.1856,
+        "ionmode": "positive",
+        "nominal_mass": "266",
+        "parent_mass": "266.1783",
+        "peaks_json": [
+            [
+                99.0917,
+                6.0
+            ],
+            [
+                165.0698,
+                2.0
+            ],
+            [
+                167.0856,
+                999.0
+            ]
+        ]
+    },
+    {
+        "synon": "4-amino-5-chloro-N-[2-(diethylamino)ethyl]-2-methoxybenzamide",
+        "inchikey": "TTWJBBZEZQICBI-UHFFFAOYSA-N",
+        "inchi": "InChI=1S/C14H22ClN3O2/c1-4-18(5-2)7-6-17-14(19)10-8-11(15)12(16)9-13(10)20-3/h8-9H,4-7,16H2,1-3H3,(H,17,19)",
+        "smiles": "CCN(CC)CCNC(=O)C1=CC(=C(C=C1OC)N)Cl",
+        "instrument_type": "LC-ESI-ITFT",
+        "instrument": "LTQ Orbitrap XL Thermo Scientific",
+        "collision_energy": "20% (nominal)",
+        "formula": "C14H22ClN3O2",
+        "parent": 300.1473,
+        "splash": "splash10-0udi-0029000000-a1c598a0805f35a8908c",
+        "num_peaks": "3",
+        "compound_name": "Metoclopramide",
+        "spectrum_id": "HB001203",
+        "adduct": "[M+H]+",
+        "ms_level": "MS2",
+        "precursor_mz": 300.1473,
+        "ionmode": "positive",
+        "nominal_mass": "299",
+        "parent_mass": "299.1401",
+        "peaks_json": [
+            [
+                184.0162,
+                11.0
+            ],
+            [
+                227.0582,
+                290.0
+            ],
+            [
+                300.1473,
+                999.0
+            ]
+        ]
+    },
+    {
+        "synon": "12-benzylidene-1,6,7-trimethyl-3-(2-methylpropyl)-1,4,7,10-tetrazacyclododecane-2,5,8,11-tetrone",
+        "inchikey": "SIIRBDOFKDACOK-UHFFFAOYSA-N",
+        "inchi": "InChI=1S/C22H30N4O4/c1-14(2)11-17-22(30)26(5)18(12-16-9-7-6-8-10-16)21(29)23-13-19(27)25(4)15(3)20(28)24-17/h6-10,12,14-15,17H,11,13H2,1-5H3,(H,23,29)(H,24,28)",
+        "smiles": "CC1C(=O)NC(C(=O)N(C(=CC2=CC=CC=C2)C(=O)NCC(=O)N1C)C)CC(C)C",
+        "instrument_type": "LC-ESI-ITFT",
+        "instrument": "LTQ Orbitrap XL Thermo Scientific",
+        "collision_energy": "30 % (nominal)",
+        "formula": "C22H30N4O4",
+        "parent": 415.234,
+        "splash": "splash10-07p0-0729100000-dab5bdba6e51dbc61bf7",
+        "num_peaks": "32",
+        "compound_name": "Tentotoxin",
+        "spectrum_id": "HB003619",
+        "adduct": "[M+H]+",
+        "ms_level": "MS2",
+        "precursor_mz": 415.234,
+        "ionmode": "positive",
+        "nominal_mass": "414",
+        "parent_mass": "414.2267",
+        "peaks_json": [
+            [
+                58.065,
+                198.0
+            ],
+            [
+                86.0962,
+                22.0
+            ],
+            [
+                114.0909,
+                10.0
+            ],
+            [
+                115.0867,
+                30.0
+            ],
+            [
+                132.0806,
+                33.0
+            ],
+            [
+                143.0815,
+                19.0
+            ],
+            [
+                146.0966,
+                12.0
+            ],
+            [
+                169.134,
+                17.0
+            ],
+            [
+                171.1491,
+                999.0
+            ],
+            [
+                173.1077,
+                11.0
+            ],
+            [
+                181.1338,
+                32.0
+            ],
+            [
+                188.0706,
+                42.0
+            ],
+            [
+                189.1023,
+                362.0
+            ],
+            [
+                199.1442,
+                191.0
+            ],
+            [
+                210.1598,
+                16.0
+            ],
+            [
+                217.0971,
+                345.0
+            ],
+            [
+                238.1551,
+                201.0
+            ],
+            [
+                256.1804,
+                37.0
+            ],
+            [
+                257.1652,
+                8.0
+            ],
+            [
+                273.1592,
+                27.0
+            ],
+            [
+                274.1575,
+                13.0
+            ],
+            [
+                284.1766,
+                13.0
+            ],
+            [
+                286.1904,
+                7.0
+            ],
+            [
+                301.1547,
+                67.0
+            ],
+            [
+                302.15,
+                389.0
+            ],
+            [
+                312.1704,
+                703.0
+            ],
+            [
+                327.1697,
+                48.0
+            ],
+            [
+                330.1812,
+                380.0
+            ],
+            [
+                358.2127,
+                453.0
+            ],
+            [
+                384.1917,
+                17.0
+            ],
+            [
+                397.2236,
+                17.0
+            ],
+            [
+                415.2338,
+                231.0
+            ]
+        ]
+    }
+]

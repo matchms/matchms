@@ -1,6 +1,7 @@
 from typing import List
 import pyteomics.mgf as py_mgf
 from ..Spectrum import Spectrum
+from ..utils import fingerprint_export_warning
 
 
 def save_as_mgf(spectrums: List[Spectrum], filename: str):
@@ -37,11 +38,15 @@ def save_as_mgf(spectrums: List[Spectrum], filename: str):
         # Assume that input was single Spectrum
         spectrums = [spectrums]
 
+    fingerprint_export_warning(spectrums)
+
     # Convert matchms.Spectrum() into dictionaries for pyteomics
     for spectrum in spectrums:
         spectrum_dict = {"m/z array": spectrum.peaks.mz,
                          "intensity array": spectrum.peaks.intensities,
                          "params": spectrum.metadata}
+        if 'fingerprint' in spectrum_dict["params"]:
+            del spectrum_dict["params"]["fingerprint"]
         # Append spectrum to file
         with open(filename, 'a', encoding="utf-8") as out:
             py_mgf.write(spectrum_dict, out)
