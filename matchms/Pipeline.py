@@ -5,9 +5,9 @@ from datetime import datetime
 import yaml
 from tqdm import tqdm
 import matchms.filtering as msfilters
-from matchms.importing.load_spectra import load_spectra
 import matchms.similarity as mssimilarity
 from matchms import calculate_scores
+from matchms.importing.load_spectra import load_spectra
 from matchms.logging_functions import (add_logging_to_file,
                                        reset_matchms_logger,
                                        set_matchms_logger_level)
