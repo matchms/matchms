@@ -146,17 +146,20 @@ def get_peak_comment(rline: str) -> Tuple[str, str]:
 
 def parse_metadata(rline: str, params: dict):
     """ Reads metadata contained in line into params dict. """
+    matches = []
     splitted_line = rline.split(":", 1)
     if splitted_line[0].lower() == 'comments' and "=" in splitted_line[1]:
-        # Obtaining the parameters inside the comments index
-        for s in splitted_line[1].split('" "'):
-            splitted_line = s.replace('"', '').replace("'", "").split("=", 1)
-            if splitted_line[0].lower().strip() in params.keys() and splitted_line[0].lower().strip() == 'smiles':
-                params[splitted_line[0].lower()+"_2"] = splitted_line[1].strip()
+        pattern = r'(\S+)="([^"]*)"|"(\w+)=([^"]*)"|"([^"]*)=([^"]*)"|(\S+)=(\d+(?:\.\d*)?)'
+        matches = re.findall(pattern, splitted_line[1].replace("'", '"'))
+        for match in matches:
+            match = [i for i in match if i]
+            key = match[0]
+            value = match[1]
+            if key.lower().strip() in params.keys() and key.lower().strip() == 'smiles':
+                params[key.lower()+"_2"] = value.strip()
             else:
-                params[splitted_line[0].lower().strip()
-                       ] = splitted_line[1].strip()
-    else:
+                params[key.lower().strip()] = value.strip()
+    if len(matches) == 0:
         params[splitted_line[0].lower()] = splitted_line[1].strip()
 
 

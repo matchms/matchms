@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed fingerprint writing to file [#416](https://github.com/matchms/matchms/pull/416)
 - Updated harmonize_values function to remove invalid metadata [#418](https://github.com/matchms/matchms/pull/418)
 - Fixed metadata export style bug [#423](https://github.com/matchms/matchms/pull/423)
+- Updated comment parsing logic in load_from_msp [#420](https://github.com/matchms/matchms/pull/420)
 
 ### Fixed
 
