@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.20.0] - 2023-05-30
+
 ### Added
 
 - min_mz, max_mz and title parameters to spectrum plot (mostly array plot) [#419](https://github.com/matchms/matchms/pull/419)
@@ -495,7 +497,8 @@ Contains three plot types: `plot_spectrum()` or `spectrum.plot()`, `plot_spectra
 - This is the initial version of Spec2Vec from https://github.com/iomega/Spec2Vec
 - (later splitted into matchms + spec2vec)
 
-[Unreleased]: https://github.com/matchms/matchms/compare/0.19.0...HEAD
+[Unreleased]: https://github.com/matchms/matchms/compare/0.20.0...HEAD
+[0.20.0]: https://github.com/matchms/matchms/compare/0.19.0...0.20.0
 [0.19.0]: https://github.com/matchms/matchms/compare/0.18.0...0.19.0
 [0.18.0]: https://github.com/matchms/matchms/compare/0.17.0...0.18.0
 [0.17.0]: https://github.com/matchms/matchms/compare/0.16.0...0.17.0
