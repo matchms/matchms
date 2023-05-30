@@ -149,7 +149,7 @@ def parse_metadata(rline: str, params: dict):
     matches = []
     splitted_line = rline.split(":", 1)
     if splitted_line[0].lower() == 'comments' and "=" in splitted_line[1]:
-        pattern = r'(\S+)=("[^"]*"|\d+(?:\.\d*)?)|"(.*?)=(.*?)"'
+        pattern = r'((\S+)="([^"]*)"|(\w+)=[^"]*|"([^"]*)[^"]*|(\S+)=(\d+(?:\.\d*)?))'
         matches = re.findall(pattern, splitted_line[1].replace("'", '"'))
         for match in matches:
             match = [i for i in match if i]
