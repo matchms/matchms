@@ -1,12 +1,12 @@
 import os
-import pubchempy
-from tqdm import tqdm
 from typing import List
-import pubchempy as pcp
-from matchms.metadata_utils import is_valid_inchi, is_valid_inchikey, is_valid_smiles
-from matchms import Spectrum
-import pandas as pd
 import numpy as np
+import pandas as pd
+import pubchempy as pcp
+from tqdm import tqdm
+from matchms import Spectrum
+from matchms.metadata_utils import (is_valid_inchi, is_valid_inchikey,
+                                    is_valid_smiles)
 
 
 def pubchem_name_search(compound_name: str, name_search_depth=10,):
@@ -21,7 +21,7 @@ def pubchem_name_search(compound_name: str, name_search_depth=10,):
                                                 listkey_count=name_search_depth)
         if len(results_pubchem) == 0:
             return []
-    except (pubchempy.ServerError, ConnectionError, ConnectionAbortedError):
+    except (pcp.ServerError, ConnectionError, ConnectionAbortedError):
         print("Connection error, trying again")
         return pubchem_name_search(compound_name, name_search_depth=name_search_depth)
     return results_pubchem

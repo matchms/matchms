@@ -2,10 +2,9 @@ import os
 import numpy as np
 import pandas as pd
 import pytest
-
-from matchms.filtering.list_of_spectra_filters.get_comound_from_pubchem import (write_compound_names_to_file,
-                                                                                annotate_with_pubchem_wrapper)
 from matchms import Spectrum
+from matchms.filtering.list_of_spectra_filters.get_comound_from_pubchem import (
+    annotate_with_pubchem_wrapper, write_compound_names_to_file)
 
 
 @pytest.fixture()
