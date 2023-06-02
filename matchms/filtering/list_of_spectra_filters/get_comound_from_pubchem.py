@@ -1,4 +1,5 @@
 import os
+import csv
 from typing import List
 import numpy as np
 import pandas as pd
@@ -21,7 +22,7 @@ def pubchem_name_search(compound_name: str, name_search_depth=10,):
                                                 listkey_count=name_search_depth)
         if len(results_pubchem) == 0:
             return []
-    except (pcp.ServerError, ConnectionError, ConnectionAbortedError):
+    except (pubchempy.ServerError, ConnectionError, ConnectionAbortedError):
         print("Connection error, trying again")
         return pubchem_name_search(compound_name, name_search_depth=name_search_depth)
     return results_pubchem
@@ -71,6 +72,7 @@ def write_compound_names_to_file(compound_names: list,
             f.write("compound_name,smiles,inchi,inchikey,monoisotopic_mass\n")
     unique_compound_names = select_unique_compound_names(compound_names)
     with open(csv_file, "a", encoding="utf8") as f:
+        writer = csv.writer(f)
         for compound_name in tqdm(unique_compound_names, "Retrieving compounds from pubchem"):
             if compound_name not in already_annotated_compound_names and is_plausible_name(compound_name):
                 already_annotated_compound_names.add(compound_name)
@@ -82,9 +84,9 @@ def write_compound_names_to_file(compound_names: list,
                     if smiles_pubchem is None:
                         smiles_pubchem = result.canonical_smiles
                     monoisotopic_mass = result.monoisotopic_mass
-                    f.write(f"{compound_name},{smiles_pubchem},{inchi_pubchem},{inchikey_pubchem},{monoisotopic_mass}\n")
+                    writer.writerow([compound_name, smiles_pubchem, inchikey_pubchem, inchi_pubchem, monoisotopic_mass])
                 if len(results) == 0:
-                    f.write(f"{compound_name},,,,\n")
+                    writer.writerow([compound_name, None, None, None, None])
     return pd.read_csv(csv_file)
 
 
