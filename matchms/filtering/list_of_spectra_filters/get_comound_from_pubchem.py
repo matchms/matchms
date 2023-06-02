@@ -78,7 +78,7 @@ def write_compound_names_to_file(compound_names: list,
                 already_annotated_compound_names.add(compound_name)
                 results = pubchem_name_search(compound_name)
                 for result in results:
-                    inchi_pubchem = '"' + result.inchi + '"'
+                    inchi_pubchem = result.inchi
                     inchikey_pubchem = result.inchikey
                     smiles_pubchem = result.isomeric_smiles
                     if smiles_pubchem is None:
