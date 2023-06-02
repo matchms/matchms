@@ -1,7 +1,7 @@
 import os
 import pubchempy
 from tqdm import tqdm
-from typing import Set, List
+from typing import List
 import pubchempy as pcp
 from matchms.metadata_utils import is_valid_inchi, is_valid_inchikey, is_valid_smiles
 from matchms import Spectrum
