@@ -55,6 +55,7 @@ def two_test_spectra():
 
 
 def test_annotate_with_pubchem_wrapper(csv_file_with_compound_names):
+    pytest.importorskip("rdkit")
     test_spectra = two_test_spectra()
     annotated_spectra, newly_annotated_spectra, not_annotated_spectra = annotate_with_pubchem_wrapper(test_spectra,
                                                                                                       csv_file_with_compound_names)
