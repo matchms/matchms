@@ -4,7 +4,7 @@ from ..constants import PROTON_MASS
 from ..metadata_utils import clean_adduct
 from ..typing import SpectrumType
 from ..utils import get_first_common_element
-from matchms.filtering.filter_utils.compare_precursor_mz_and_parent_mass import derive_parent_mass_from_precursor_mz
+
 
 logger = logging.getLogger("matchms")
 
@@ -41,13 +41,31 @@ def add_parent_mass(spectrum_in: SpectrumType, estimate_from_adduct: bool = True
         return None
 
     spectrum = spectrum_in.clone()
+    adducts_dict = load_adducts_dict()
 
     parent_mass = _get_parent_mass(spectrum.metadata)
     if parent_mass is not None and not overwrite_existing_entry:
         spectrum.set("parent_mass", parent_mass)
         return spectrum
 
-    parent_mass = derive_parent_mass_from_precursor_mz(spectrum)
+    parent_mass = None
+    charge = _get_charge(spectrum)
+    adduct = clean_adduct(spectrum.get("adduct"))
+    precursor_mz = spectrum.get("precursor_mz", None)
+    if precursor_mz is None:
+        logger.warning("Missing precursor m/z to derive parent mass.")
+        return spectrum
+
+    if estimate_from_adduct and (adduct in adducts_dict):
+        multiplier = adducts_dict[adduct]["mass_multiplier"]
+        correction_mass = adducts_dict[adduct]["correction_mass"]
+        parent_mass = precursor_mz * multiplier - correction_mass
+
+    if (parent_mass is None) and _is_valid_charge(charge):
+        # Assume adduct of shape [M+xH] or [M-xH]
+        protons_mass = PROTON_MASS * charge
+        precursor_mass = precursor_mz * abs(charge)
+        parent_mass = precursor_mass - protons_mass
 
     if parent_mass is None:
         logger.warning("Not sufficient spectrum metadata to derive parent mass.")
@@ -82,3 +100,32 @@ def _convert_entry_to_num(entry):
             logger.warning("%s can't be converted to float.", entry)
             return None
     return entry
+
+
+def _is_valid_charge(charge):
+    return (charge is not None) and (charge != 0)
+
+
+def _get_charge(spectrum):
+    """Get charge from `Spectrum()` object.
+    In case no valid charge is found, guess +1 or -1 based on ionmode.
+    Else return 0.
+    """
+    charge = spectrum.get("charge")
+    if _is_valid_charge(charge):
+        return charge
+    if spectrum.get('ionmode') == "positive":
+        logger.info(
+            "Missing charge entry, but positive ionmode detected. "
+            "Consider prior run of `correct_charge()` filter.")
+        return 1
+    if spectrum.get('ionmode') == "negative":
+        logger.info(
+            "Missing charge entry, but negative ionmode detected. "
+            "Consider prior run of `correct_charge()` filter.")
+        return -1
+
+    logger.warning(
+        "Missing charge and ionmode entries. "
+        "Consider prior run of `derive_ionmode()` and `correct_charge()` filters.")
+    return 0
