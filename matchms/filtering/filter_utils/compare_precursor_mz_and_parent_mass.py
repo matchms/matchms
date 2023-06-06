@@ -62,8 +62,6 @@ def derive_precursor_mz_from_parent_mass(spectrum_in):
         precursor_mz = precursor_mass / abs(charge)
         return precursor_mz
 
-    logger.warning("Not sufficient spectrum metadata to derive precursor_mz from parent_mass")
-
 
 def _is_valid_charge(charge):
     return (charge is not None) and (charge != 0)
