@@ -44,7 +44,7 @@ def add_parent_mass(spectrum_in: SpectrumType, estimate_from_adduct: bool = True
         spectrum.set("parent_mass", parent_mass)
         return spectrum
 
-    parent_mass = derive_parent_mass_from_precursor_mz(spectrum)
+    parent_mass = derive_parent_mass_from_precursor_mz(spectrum, estimate_from_adduct)
 
     if parent_mass is None:
         logger.warning("Not sufficient spectrum metadata to derive parent mass.")

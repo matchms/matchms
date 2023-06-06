@@ -7,8 +7,7 @@ from matchms.metadata_utils import clean_adduct
 logger = logging.getLogger("matchms")
 
 
-def derive_parent_mass_from_precursor_mz(spectrum_in):
-    estimate_from_adduct = True
+def derive_parent_mass_from_precursor_mz(spectrum_in, estimate_from_adduct):
     if spectrum_in is None:
         return None
 
