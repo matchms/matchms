@@ -26,5 +26,3 @@ def repair_precursor_is_parent_mass(spectrum_in: Spectrum,
         if precursor_mz is not None:
             spectrum.set("precursor_mz", precursor_mz)
     return spectrum
-
-
