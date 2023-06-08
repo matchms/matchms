@@ -1,6 +1,6 @@
 import itertools
 import logging
-from matchms.filtering.repair_precursor_is_parent_mass import _mass_diff_within_tolerance
+from matchms.filtering.repair_parent_mass_from_smiles.repair_precursor_is_parent_mass import _mass_diff_within_tolerance
 
 
 logger = logging.getLogger("matchms")

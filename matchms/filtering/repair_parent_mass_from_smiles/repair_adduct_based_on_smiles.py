@@ -1,6 +1,6 @@
 import logging
 from matchms import Spectrum
-from matchms.filtering.require_parent_mass_match_smiles import _mass_diff_within_tolerance
+from matchms.filtering.repair_parent_mass_from_smiles.require_parent_mass_match_smiles import _mass_diff_within_tolerance
 from matchms.filtering.load_adducts import load_adducts_dict
 
 logger = logging.getLogger("matchms")
