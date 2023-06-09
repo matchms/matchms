@@ -1,6 +1,6 @@
 import itertools
 import logging
-from matchms.filtering.repair_parent_mass_from_smiles.repair_precursor_is_parent_mass import _mass_diff_within_tolerance
+from matchms.filtering.repair_parent_mass_from_smiles.repair_precursor_is_parent_mass import _get_monoisotopic_neutral_mass
 from matchms.filtering.repair_parent_mass_from_smiles.repair_parent_mass_is_mol_wt import repair_parent_mass_is_mol_wt
 
 logger = logging.getLogger("matchms")
@@ -24,7 +24,8 @@ def repair_smiles_salt_ions(spectrum_in,
         spectrum_with_ions.set("salt_ions", not_used_ions)
         if accept_parent_mass_is_mol_wt:
             spectrum_with_ions = repair_parent_mass_is_mol_wt(spectrum_with_ions, mass_tolerance)
-        if _mass_diff_within_tolerance(parent_mass, ion, mass_tolerance):
+        smiles_mass = _get_monoisotopic_neutral_mass(smiles)
+        if abs(parent_mass - smiles_mass) < mass_tolerance:
             logger.info(f"Removed salt ions: {not_used_ions} from {smiles} to match parent mass")
             return spectrum_with_ions
     return spectrum

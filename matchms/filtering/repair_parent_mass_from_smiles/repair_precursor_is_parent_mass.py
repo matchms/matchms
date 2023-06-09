@@ -1,8 +1,7 @@
 import logging
 from matchms import Spectrum
-from matchms.filtering.repair_parent_mass_from_smiles.require_parent_mass_match_smiles import _mass_diff_within_tolerance
+from matchms.filtering.repair_parent_mass_from_smiles.require_parent_mass_match_smiles import _get_monoisotopic_neutral_mass, require_parent_mass_match_smiles
 from matchms.filtering.filter_utils.derive_precursor_mz_and_parent_mass import derive_precursor_mz_from_parent_mass
-
 logger = logging.getLogger("matchms")
 
 
@@ -15,12 +14,14 @@ def repair_precursor_is_parent_mass(spectrum_in: Spectrum,
     spectrum = spectrum_in.clone()
 
     # Check if parent mass already matches smiles
-    if _mass_diff_within_tolerance(spectrum.get("parent_mass"), spectrum.get("smiles"), mass_tolerance):
+    if require_parent_mass_match_smiles(spectrum, mass_tolerance) is not None:
         return spectrum
 
     precursor_mz = spectrum.get("precursor_mz")
     smiles = spectrum.get("smiles")
-    if _mass_diff_within_tolerance(precursor_mz, smiles, mass_tolerance):
+    smiles_mass = _get_monoisotopic_neutral_mass(smiles)
+    mass_difference = precursor_mz - smiles_mass
+    if abs(mass_difference) < mass_tolerance:
         spectrum.set("parent_mass", precursor_mz)
         precursor_mz = derive_precursor_mz_from_parent_mass(spectrum)
         if precursor_mz is not None:
