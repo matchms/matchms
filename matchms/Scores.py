@@ -350,7 +350,6 @@ class Scores:
             Possible choices are '>', '<', '>=', '<='.
         """
         self._scores = self._scores.filter_by_range(**kwargs)
-        return None
 
     def to_array(self, name=None) -> np.ndarray:
         """Scores as numpy array
