@@ -82,13 +82,13 @@ def _convert_and_fill_dict(adduct_dict: Dict[str, dict]) -> Dict[str, dict]:
         if is_float(mass_multiplier):
             mass_multiplier = float(mass_multiplier)
         else:
-            mass_multiplier = 1.0
+            mass_multiplier = None
         values["mass_multiplier"] = mass_multiplier
 
         if is_float(correction_mass):
             correction_mass = float(correction_mass)
         else:
-            correction_mass = 1.007276 * np.sign(charge)
+            correction_mass = None
         values["correction_mass"] = correction_mass
 
         filled_dict[adduct] = values
