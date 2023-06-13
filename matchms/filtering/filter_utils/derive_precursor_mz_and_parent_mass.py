@@ -23,8 +23,9 @@ def derive_parent_mass_from_precursor_mz(spectrum_in, estimate_from_adduct):
     if estimate_from_adduct and (adduct in adducts_dict):
         multiplier = adducts_dict[adduct]["mass_multiplier"]
         correction_mass = adducts_dict[adduct]["correction_mass"]
-        parent_mass = (precursor_mz - correction_mass) / multiplier
-        return parent_mass
+        if correction_mass is not None and multiplier is not None:
+            parent_mass = (precursor_mz - correction_mass) / multiplier
+            return parent_mass
 
     if _is_valid_charge(charge):
         # Assume adduct of shape [M+xH] or [M-xH]
@@ -50,8 +51,9 @@ def derive_precursor_mz_from_parent_mass(spectrum_in):
     if estimate_from_adduct and (adduct in adducts_dict):
         multiplier = adducts_dict[adduct]["mass_multiplier"]
         correction_mass = adducts_dict[adduct]["correction_mass"]
-        precursor_mz = parent_mass * multiplier + correction_mass
-        return precursor_mz
+        if correction_mass is not None and multiplier is not None:
+            precursor_mz = parent_mass * multiplier + correction_mass
+            return precursor_mz
 
     charge = _get_charge(spectrum)
     if _is_valid_charge(charge):
