@@ -25,10 +25,12 @@ def repair_adduct_based_on_smiles(spectrum_in: Spectrum,
 
     for adduct_name in adducts_dict:
         adduct_info = adducts_dict[adduct_name]
-        if adduct_info['ionmode'] == ion_mode:
+        if adduct_info['ionmode'] == ion_mode and \
+            adduct_info["correction_mass"] is not None and \
+            adduct_info["mass_multiplier"] is not None:
             multiplier = adduct_info["mass_multiplier"]
             correction_mass = adduct_info["correction_mass"]
-            parent_mass = precursor_mz * multiplier - correction_mass
+            parent_mass = (precursor_mz - correction_mass) / multiplier
             if abs(parent_mass - smiles_mass) < 1:
                 spectrum_with_corrected_adduct = spectrum.clone()
                 spectrum_with_corrected_adduct.set("parent_mass", parent_mass)
