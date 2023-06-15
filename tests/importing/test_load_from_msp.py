@@ -262,6 +262,5 @@ def test_load_msp_with_scientific_notation():
     module_root = os.path.join(os.path.dirname(__file__), "..")
     spectrums_file = os.path.join(module_root, "testdata", "test_spectra_collection.msp")
     actual = list(load_from_msp(spectrums_file))
-    for s in actual:
-        print(s.to_dict())
+    
     assert len(actual) == 3
