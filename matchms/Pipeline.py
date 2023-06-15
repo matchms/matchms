@@ -5,19 +5,14 @@ from datetime import datetime
 import yaml
 from tqdm import tqdm
 import matchms.filtering as msfilters
-import matchms.importing as msimport
 import matchms.similarity as mssimilarity
 from matchms import calculate_scores
+from matchms.importing.load_spectra import load_spectra
 from matchms.logging_functions import (add_logging_to_file,
                                        reset_matchms_logger,
                                        set_matchms_logger_level)
 
 
-_importing_functions = {"json": msimport.load_from_json,
-                        "mgf": msimport.load_from_mgf,
-                        "msp": msimport.load_from_msp,
-                        "mzml": msimport.load_from_mzml,
-                        "mzxml": msimport.load_from_mzxml}
 _filter_functions = {key: f for key, f in msfilters.__dict__.items() if callable(f)}
 _masking_functions = ["filter_by_range"]
 _score_functions = {key.lower(): f for key, f in mssimilarity.__dict__.items() if callable(f)}
@@ -226,7 +221,7 @@ class Pipeline:
                 assert os.path.exists(filename), f"File {filename} not found."
 
         # Check if all files exist
-        check_files_exist(self.query_files)        
+        check_files_exist(self.query_files)
         if self.reference_files is not None:
             check_files_exist(self.reference_files)
 
@@ -280,7 +275,7 @@ class Pipeline:
             reference_files = [reference_files]
         spectrums_queries = []
         for query_file in query_files:
-            spectrums_queries += _spectrum_importer(query_file)
+            spectrums_queries += list(load_spectra(query_file))
         self.spectrums_queries += spectrums_queries
         if reference_files is None:
             self.is_symmetric = True
@@ -288,7 +283,7 @@ class Pipeline:
         else:
             spectrums_references = []
             for reference_file in reference_files:
-                spectrums_references += _spectrum_importer(reference_file)
+                spectrums_references += list(load_spectra(reference_file))
             self.spectrums_references += spectrums_references
 
     def apply_filter(self, spectrum, filter_step):
@@ -373,12 +368,6 @@ class Pipeline:
     @score_computations.setter
     def score_computations(self, computations_list):
         self.workflow["score_computations"] = computations_list
-
-
-def _spectrum_importer(filename):
-    file_ending = filename.split(".")[-1]
-    importer_function = _importing_functions.get(file_ending)
-    return list(importer_function(filename))
 
 
 def ordered_load(stream, loader=yaml.SafeLoader, object_pairs_hook=OrderedDict):

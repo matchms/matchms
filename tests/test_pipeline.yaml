@@ -1,9 +1,9 @@
-# Matchms pipeline config file 
-# Change and adapt fields where necessary 
-# ==================== 
+# Matchms pipeline config file
+# Change and adapt fields where necessary
+# ====================
 importing:
   queries: ./tests/testdata/massbank_five_spectra.msp
-  references: 
+  references:
 filtering_queries:
 - - default_filters
 - - normalize_intensities
