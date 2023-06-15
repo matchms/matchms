@@ -35,6 +35,8 @@ def clean_compound_name(spectrum_in: SpectrumType) -> SpectrumType:
         name = re.split(r"^[0-9]{4}_", name)[-1]
         # remove type nameofcompound_CID20_170920 or Spiraeoside_HCD30_170919
         name = re.split(r"_((HCD)|(CID))[0-9]{2}_[0-9]{5,6}$", name)[0]
+        # Removes the collision energy from the compound name. Also allows for occurances of - 40.0 eV Unknown
+        name = re.split(r"(?: - )?[0-9]+(?:\.[0-9]+)? ?[eE][Vv](?: Unknown)?$", name)[0]
         return name
 
     def remove_known_non_compound_parts(name):
