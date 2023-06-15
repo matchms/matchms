@@ -176,12 +176,12 @@ class Pipeline:
         """
         if len(computation) == 1:
             name = self.scores.score_names[-1]
-            self.scores.filter_by_range(inplace=True, name=name)
+            self.scores.filter_by_range(name=name)
         elif "name" not in computation[1]:
             name = self.scores.scores.score_names[-1]
-            self.scores.filter_by_range(inplace=True, name=name, **computation[1])
+            self.scores.filter_by_range(name=name, **computation[1])
         else:
-            self.scores.filter_by_range(inplace=True, **computation[1])
+            self.scores.filter_by_range(**computation[1])
 
     def _apply_similarity_measure(self, computation, i):
         """Run score computations for all listed methods and on all loaded and processed spectra.
