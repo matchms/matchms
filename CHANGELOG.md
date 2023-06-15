@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+### Changed
+
+- Updated reiterate_peak_comments function to convert the peak_comments keys to float [#437](https://github.com/matchms/matchms/pull/437)
+
+### Fixed
+
 ## [0.20.0] - 2023-05-30
 
 ### Added
