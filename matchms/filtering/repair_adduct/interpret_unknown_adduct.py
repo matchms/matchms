@@ -1,14 +1,29 @@
-from molmass import Formula
+"""Calculates the multiplier and correction mass for an adduct"""
+
+from typing import Optional, Tuple
+import logging
 import re
+from molmass import Formula
+from molmass import FormulaError
 from matchms.constants import ELECTRTON_MASS
 
+logger = logging.getLogger("matchms")
 
-def get_multiplier_and_mass(adduct):
+
+def get_multiplier_and_mass_from_adduct(adduct) -> Tuple[Optional[float], Optional[float]]:
     charge = get_charge_of_adduct(adduct)
+    if charge is None:
+        return None, None
 
     parent_mass, ions = get_ions_from_adduct(adduct)
 
-    added_mass = get_mass_of_ion(ions) + ELECTRTON_MASS * -charge
+    if parent_mass is None or ions is None:
+        return None, None
+
+    mass_of_ions = get_mass_of_ion(ions)
+    if mass_of_ions is None:
+        return None, None
+    added_mass = mass_of_ions + ELECTRTON_MASS * -charge
 
     multiplier = 1/abs(charge)*parent_mass
     correction_mass = added_mass/(abs(charge))
@@ -24,14 +39,15 @@ def get_ions_from_adduct(adduct):
     # Get adduct from brackets
     if "[" in adduct:
         ions_part = re.findall((r"\[(.*)\]"), adduct)
-        assert len(ions_part) == 1, f"Expected to find brackets [] once, not the case in {adduct}"
+        if len(ions_part) != 1:
+            logger.warning(f"Expected to find brackets [] once, not the case in {adduct}")
+            return None, None
         adduct = ions_part[0]
     # Finds the pattern M or 2M in adduct it makes sure it is in between
     parent_mass = re.findall(r'(?:^|[+-])([0-9]?M)(?:$|[+-])', adduct)
-    assert len(parent_mass)!=0, f"The parent mass (e.g. 2M or M) was not found in {adduct}"
-    assert len(parent_mass) ==1, f"The parent mass (e.g. 2M or M) was found multiple times in {adduct}"
+    if len(parent_mass) != 1:
+        logger.warning(f"The parent mass (e.g. 2M or M) was found {len(parent_mass)} times in {adduct}")
     parent_mass = parent_mass[0]
-    assert len(parent_mass) < 3, "expected the parent ion of form M, 2M or 3M"
     if parent_mass == "M":
         parent_mass = 1
     else:
@@ -72,8 +88,12 @@ def get_mass_of_ion(ions):
     added_mass = 0
     for ion in ions:
         sign, number, ion = split_ion(ion)
-        formula = Formula(ion)
-        atom_mass = formula.isotope.mass
+        try:
+            formula = Formula(ion)
+            atom_mass = formula.isotope.mass
+        except FormulaError:
+            logger.warning(f"The formula {ion} in the adduct is not recognized")
+            return None
         if sign == "-":
             number = -int(number)
         else:
@@ -82,16 +102,12 @@ def get_mass_of_ion(ions):
     return added_mass
 
 
-def get_charge_of_adduct(adduct):
+def get_charge_of_adduct(adduct)->Optional[int]:
     charge = re.findall((r"\]([0-9]?[+-])"), adduct)
-    if len(charge) == 0:
+    if len(charge) != 1:
+        logger.warning(f'Charge was found {len(charge)} times in adduct {adduct}')
         return None
-    if len(charge) == 1:
-        return parse_charge(charge[0])
-    print(f'Warning: Charge was found multiple times in adduct {adduct}')
-
-
-def parse_charge(charge):
+    charge = charge[0]
     if len(charge) == 1:
         charge_size = "1"
         charge_sign = charge
@@ -99,6 +115,6 @@ def parse_charge(charge):
         charge_size = charge[0]
         charge_sign = charge[1]
     else:
-        assert False, f"Charge is expected of length 1 or 2 {charge} was given"
-
+        logger.warning(f"Charge is expected of length 1 or 2 {charge} was given")
+        return None
     return int(charge_sign+charge_size)
