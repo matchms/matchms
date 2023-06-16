@@ -1,5 +1,7 @@
 import logging
-from .repair_adduct.clean_adduct import looks_like_adduct, clean_adduct
+import re
+
+from .repair_adduct.clean_adduct import clean_adduct, load_adducts_dict
 from ..typing import SpectrumType
 
 
@@ -52,3 +54,19 @@ def derive_adduct_from_name(spectrum_in: SpectrumType,
         logger.info("Added adduct %s to metadata.", adduct_cleaned)
 
     return spectrum
+
+
+def looks_like_adduct(adduct):
+    """Return True if input string has expected format of an adduct."""
+    if not isinstance(adduct, str):
+        return False
+    # Clean adduct
+    adduct = clean_adduct(adduct)
+    # Load lists of default known adducts
+    known_adducts = load_adducts_dict()
+    if adduct in known_adducts:
+        return True
+
+    # Expect format like: "[2M-H]" or "[2M+Na]+"
+    regexp1 = r"^\[(([0-4]M)|(M[0-9])|(M))((Br)|(Br81)|(Cl)|(Cl37)|(S)){0,}[+-][A-Z0-9\+\-\(\)aglire]{1,}[\]0-4+-]{1,4}"
+    return re.search(regexp1, adduct) is not None
