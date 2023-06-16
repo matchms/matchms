@@ -2,7 +2,7 @@ import logging
 
 from matchms.filtering.load_adducts import load_adducts_dict
 from matchms.constants import PROTON_MASS
-from matchms.metadata_utils import clean_adduct
+from matchms.filtering.repair_adduct.clean_adduct import clean_adduct
 
 logger = logging.getLogger("matchms")
 

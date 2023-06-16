@@ -1,5 +1,5 @@
 import logging
-from ..metadata_utils import clean_adduct, looks_like_adduct
+from .repair_adduct.clean_adduct import looks_like_adduct, clean_adduct
 from ..typing import SpectrumType
 
 

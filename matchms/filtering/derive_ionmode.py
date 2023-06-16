@@ -1,6 +1,6 @@
 import logging
 from matchms.filtering.load_adducts import load_adducts_dict
-from ..metadata_utils import clean_adduct
+from .repair_adduct.clean_adduct import clean_adduct
 from ..typing import SpectrumType
 
 
