@@ -7,8 +7,8 @@ from ..builder_Spectrum import SpectrumBuilder
 
 
 @pytest.mark.parametrize("adduct, expected", [("[M+2Na-H]+", 399.02884),
-                                              ("[M+H+NH4]2+", 212.47945),
-                                              ("[2M+FA-H]-", 843.001799),
+                                              ("[M+H+NH4]2+", 868.9589),
+                                              ("[2M+FA-H]-", 199.5008995),
                                               ("M+H", 442.992724),
                                               ("M+H-H2O", 461.003289)])
 def test_add_parent_mass_using_adduct(adduct, expected):
@@ -16,6 +16,7 @@ def test_add_parent_mass_using_adduct(adduct, expected):
     metadata = {"precursor_mz": 444.0, "adduct": adduct, "charge": +1}
     spectrum_in = SpectrumBuilder().with_metadata(metadata).build()
     parent_mass = derive_parent_mass_from_precursor_mz(spectrum_in, True)
+    print(parent_mass)
 
     assert np.allclose(parent_mass, expected, atol=1e-4), f"Expected parent mass of about {expected}."
     assert isinstance(parent_mass, float), "Expected parent mass to be float."
@@ -34,7 +35,7 @@ def test_use_of_ionmode(ionmode, expected):
     metadata = {"precursor_mz": 444.0, "ionmode": ionmode}
     spectrum_in = SpectrumBuilder().with_metadata(metadata).build()
 
-    parent_mass = derive_parent_mass_from_precursor_mz(spectrum_in)
+    parent_mass = derive_parent_mass_from_precursor_mz(spectrum_in, True)
 
     assert parent_mass == expected, \
         "Expected a different parent_mass"
