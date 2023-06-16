@@ -18,14 +18,7 @@ def derive_parent_mass_from_precursor_mz(spectrum_in, estimate_from_adduct):
     charge = _get_charge(spectrum)
 
     if estimate_from_adduct:
-        adduct = clean_adduct(spectrum.get("adduct"))
-        adducts_dict = load_adducts_dict()
-
-        if adduct in adducts_dict:
-            multiplier = adducts_dict[adduct]["mass_multiplier"]
-            correction_mass = adducts_dict[adduct]["correction_mass"]
-        else:
-            multiplier, correction_mass = get_multiplier_and_mass_from_adduct("adduct")
+        multiplier, correction_mass = _get_multiplier_and_correction_mass_from_adduct(spectrum.get("adduct"))
         if correction_mass is not None and multiplier is not None:
             parent_mass = (precursor_mz - correction_mass) / multiplier
             return parent_mass
@@ -49,11 +42,8 @@ def derive_precursor_mz_from_parent_mass(spectrum_in):
     if parent_mass is None:
         logger.warning("Missing parent mass to derive precursor mz.")
         return None
-    adduct = clean_adduct(spectrum.get("adduct"))
-    adducts_dict = load_adducts_dict()
-    if estimate_from_adduct and (adduct in adducts_dict):
-        multiplier = adducts_dict[adduct]["mass_multiplier"]
-        correction_mass = adducts_dict[adduct]["correction_mass"]
+    if estimate_from_adduct:
+        multiplier, correction_mass = _get_multiplier_and_correction_mass_from_adduct(spectrum.get("adduct"))
         if correction_mass is not None and multiplier is not None:
             precursor_mz = parent_mass * multiplier + correction_mass
             return precursor_mz
@@ -65,6 +55,18 @@ def derive_precursor_mz_from_parent_mass(spectrum_in):
         precursor_mass = parent_mass + protons_mass
         precursor_mz = precursor_mass / abs(charge)
         return precursor_mz
+
+
+def _get_multiplier_and_correction_mass_from_adduct(adduct):
+    adduct = clean_adduct(adduct)
+    adducts_dict = load_adducts_dict()
+
+    if adduct in adducts_dict:
+        multiplier = adducts_dict[adduct]["mass_multiplier"]
+        correction_mass = adducts_dict[adduct]["correction_mass"]
+    else:
+        multiplier, correction_mass = get_multiplier_and_mass_from_adduct("adduct")
+    return multiplier, correction_mass
 
 
 def _is_valid_charge(charge):
