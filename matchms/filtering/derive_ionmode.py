@@ -1,6 +1,5 @@
 import logging
-from matchms.filtering.load_adducts import load_adducts_dict
-from .repair_adduct.clean_adduct import clean_adduct
+from .repair_adduct.clean_adduct import clean_adduct, load_adducts_dict
 from ..typing import SpectrumType
 
 

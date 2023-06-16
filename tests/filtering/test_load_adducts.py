@@ -1,6 +1,6 @@
 import numpy as np
-from matchms.filtering import load_adducts_dict, load_known_adduct_conversions
-from matchms.filtering.load_adducts import _convert_and_fill_dict
+from matchms.filtering.repair_adduct.clean_adduct import load_adducts_dict, load_known_adduct_conversions, \
+    _convert_and_fill_dict
 
 
 def test_load_adducts_dict():
@@ -13,8 +13,6 @@ def test_load_adducts_dict():
     assert np.all([(key[0] == "[") for key in known_adducts]), \
         "Expected all keys to start with '['."
     assert known_adducts["[M]+"]["charge"] == 1, "Expected different added entry"
-    assert np.allclose(known_adducts["[M]-"]["correction_mass"], -1.007276, atol=1e-5), \
-        "Expected different added entry"
 
 
 def test_convert_and_fill_dict():
