@@ -202,7 +202,7 @@ def test_missing_rdkit_module_error(reload_metadata_utils):
 
 def test_looks_like_adduct():
     """Test if adducts are correctly identified"""
-    for adduct in ["M+", "M*+", "M+Cl", "[M+H]", "[2M+Na]+", "M+H+K", "Cat",
+    for adduct in ["M+", "M*+", "M+Cl", "[M+H]", "[2M+Na]+", "M+H+K", "[2M+ACN+H]+",
                    "MS+Na", "MS+H", "M3Cl37+Na", "[M+H+H2O]"]:
         assert looks_like_adduct(adduct), "Expected this to be identified as adduct"
     for adduct in ["N+", "B*+", "++", "--", "[--]", "H+M+K"]:
