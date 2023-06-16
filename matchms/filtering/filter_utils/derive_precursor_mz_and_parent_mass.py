@@ -2,7 +2,7 @@ import logging
 
 from matchms.constants import PROTON_MASS
 from matchms.filtering.repair_adduct.clean_adduct import clean_adduct, load_adducts_dict
-
+from matchms.filtering.repair_adduct.interpret_unknown_adduct import get_multiplier_and_mass_from_adduct
 logger = logging.getLogger("matchms")
 
 
@@ -15,13 +15,17 @@ def derive_parent_mass_from_precursor_mz(spectrum_in, estimate_from_adduct):
     if precursor_mz is None:
         logger.warning("Missing precursor m/z to derive parent mass.")
         return None
-    adducts_dict = load_adducts_dict()
     charge = _get_charge(spectrum)
-    adduct = clean_adduct(spectrum.get("adduct"))
 
-    if estimate_from_adduct and (adduct in adducts_dict):
-        multiplier = adducts_dict[adduct]["mass_multiplier"]
-        correction_mass = adducts_dict[adduct]["correction_mass"]
+    if estimate_from_adduct:
+        adduct = clean_adduct(spectrum.get("adduct"))
+        adducts_dict = load_adducts_dict()
+
+        if adduct in adducts_dict:
+            multiplier = adducts_dict[adduct]["mass_multiplier"]
+            correction_mass = adducts_dict[adduct]["correction_mass"]
+        else:
+            multiplier, correction_mass = get_multiplier_and_mass_from_adduct("adduct")
         if correction_mass is not None and multiplier is not None:
             parent_mass = (precursor_mz - correction_mass) / multiplier
             return parent_mass
