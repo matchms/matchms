@@ -145,7 +145,7 @@ jobs:
         with:
           fetch-depth: "0"
       - name: Create conda environment
-        uses: conda-incubator/setup-miniconda@v3
+        uses: conda-incubator/setup-miniconda@v2
         with:
           auto-update-conda: true
           python-version: 3.8
