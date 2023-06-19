@@ -57,10 +57,10 @@ def load_from_pickle(filename: str, metadata_harmonization: bool) -> SpectrumTyp
     """
     with open(filename, 'rb') as file:
         loaded_object = pickle.load(file)
+
     if not isinstance(loaded_object, list) or not isinstance(loaded_object[0], SpectrumType):
         raise TypeError("Expected list of spectra")
-        
+
     if metadata_harmonization:
-        for x in loaded_object:
-            x._metadata.harmonize_values()
+       loaded_object = [SpectrumType(x.peaks.mz, x.peaks.intensisites, x.metadata, metadata_harmonization) for x in loaded_object] 
     return loaded_object
