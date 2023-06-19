@@ -1,6 +1,6 @@
 import os
 import pickle
-from typing import Any, Generator, Optional
+from typing import Generator, Optional
 from matchms.importing import (load_from_json, load_from_mgf, load_from_msp,
                                load_from_mzml, load_from_mzxml, load_from_usi)
 from matchms.typing import SpectrumType
