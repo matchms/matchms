@@ -1,11 +1,27 @@
 import csv
+import logging
 import os
 import re
 from functools import lru_cache
 from typing import Dict
 
+logger = logging.getLogger("matchms")
 
-def clean_adduct(adduct: str) -> str:
+
+def clean_adduct(spectrum_in):
+    if spectrum_in is None:
+        return None
+    spectrum = spectrum_in.clone()
+    adduct = spectrum.get("adduct")
+
+    cleaned_adduct = _clean_adduct(adduct)
+    if adduct != cleaned_adduct:
+        spectrum.set("adduct", cleaned_adduct)
+        logger.info(f"The adduct {adduct} was set to {cleaned_adduct}")
+    return spectrum
+
+
+def _clean_adduct(adduct: str) -> str:
     """Clean adduct and make it consistent in style.
     Will transform adduct strings of type 'M+H+' to '[M+H]+'.
 
@@ -91,7 +107,8 @@ def load_adducts_dict() -> Dict[str, dict]:
 def load_known_adduct_conversions() -> Dict[str, dict]:
     """Load dictionary of known adduct conversions. Makes sure that file loading is cached.
     """
-    adduct_conversions_file = os.path.join(os.path.dirname(__file__), "..", "..", "data", "known_adduct_conversions.csv")
+    adduct_conversions_file = os.path.join(os.path.dirname(__file__), "..", "..", "data",
+                                           "known_adduct_conversions.csv")
     assert os.path.isfile(adduct_conversions_file), "Could not find known_adduct_conversions.csv."
 
     with open(adduct_conversions_file, newline='', encoding='utf-8-sig') as csvfile:
@@ -101,4 +118,3 @@ def load_known_adduct_conversions() -> Dict[str, dict]:
             known_adduct_conversions[row['input_adduct']] = row['corrected_adduct']
 
     return known_adduct_conversions
-

@@ -1,7 +1,7 @@
 import logging
 import re
 
-from .repair_adduct.clean_adduct import clean_adduct, load_adducts_dict
+from .repair_adduct.clean_adduct import _clean_adduct, load_adducts_dict
 from ..typing import SpectrumType
 
 
@@ -49,9 +49,9 @@ def derive_adduct_from_name(spectrum_in: SpectrumType,
 
     # Add found adduct to metadata (if not present yet)
     if adduct_from_name and not looks_like_adduct(spectrum.get("adduct")):
-        adduct_cleaned = clean_adduct(adduct_from_name)
+        adduct_cleaned = _clean_adduct(adduct_from_name)
         spectrum.set("adduct", adduct_cleaned)
-        logger.info("Added adduct %s to metadata.", adduct_cleaned)
+        logger.info(f"Added adduct {spectrum.get('adduct')} from the compound name to metadata.")
 
     return spectrum
 
@@ -61,7 +61,7 @@ def looks_like_adduct(adduct):
     if not isinstance(adduct, str):
         return False
     # Clean adduct
-    adduct = clean_adduct(adduct)
+    adduct = _clean_adduct(adduct)
     # Load lists of default known adducts
     known_adducts = load_adducts_dict()
     if adduct in known_adducts:
