@@ -6,8 +6,6 @@ from unittest import mock
 import numpy as np
 import pytest
 import matchms.metadata_utils
-from matchms.filtering.derive_adduct_from_name import looks_like_adduct
-from matchms.filtering.repair_adduct.clean_adduct import _clean_adduct
 from matchms.metadata_utils import (derive_fingerprint_from_inchi,
                                     derive_fingerprint_from_smiles,
                                     is_valid_inchi, is_valid_inchikey,
@@ -199,29 +197,3 @@ def test_missing_rdkit_module_error(reload_metadata_utils):
         with pytest.raises(ImportError) as msg:
             _ = matchms.metadata_utils.mol_to_fingerprint(mol_input, "test", 0)
         assert expected_msg in str(msg.value), "Expected different ImportError."
-
-
-def test_looks_like_adduct():
-    """Test if adducts are correctly identified"""
-    for adduct in ["M+", "M*+", "M+Cl", "[M+H]", "[2M+Na]+", "M+H+K", "[2M+ACN+H]+",
-                   "MS+Na", "MS+H", "M3Cl37+Na", "[M+H+H2O]"]:
-        assert looks_like_adduct(adduct), "Expected this to be identified as adduct"
-    for adduct in ["N+", "B*+", "++", "--", "[--]", "H+M+K"]:
-        assert not looks_like_adduct(adduct), "Expected this not to be identified as adduct"
-
-
-@pytest.mark.parametrize("input_adduct, expected_adduct",
-                         [("M+", "[M]+"),
-                          ("M+CH3COO-", "[M+CH3COO]-"),
-                          ("M+CH3COO", "[M+CH3COO]-"),
-                          ("M-CH3-", "[M-CH3]-"),
-                          ("M+2H++", "[M+2H]2+"),
-                          ("[2M+Na]", "[2M+Na]+"),
-                          ("2M+Na", "[2M+Na]+"),
-                          ("M+NH3+", "[M+NH3]+"),
-                          ("M-H2O+2H2+", "[M-H2O+2H]2+"),
-                          (None, None)])
-def test_clean_adduct_examples(input_adduct, expected_adduct):
-    """Test if typical examples are correctly edited."""
-    assert _clean_adduct(input_adduct) == expected_adduct, \
-        "Expected different cleaned adduct"
