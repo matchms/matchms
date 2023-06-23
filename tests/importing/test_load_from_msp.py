@@ -198,7 +198,7 @@ def test_load_from_msp_diverse_spectrum_collection():
     spectrum = load_from_msp(spectrums_file)
 
     expected_inchikey = np.array([
-        "UDOOPSJCRMKSGL-ZHACJKMWSA-N", "QQVDJLLNRSOCEL-UHFFFAOYSA-N"
+        "UDOOPSJCRMKSGL-ZHACJKMWSA-N", "QQVDJLLNRSOCEL-UHFFFAOYSA-N", "KPZYYKDXZKFBQU-UHFFFAOYSA-N"
     ])
     for k, n in enumerate(spectrum):
         assert_matching_inchikey(n, expected_inchikey[k])
@@ -210,7 +210,7 @@ def test_load_from_msp_diverse_spectrum_collection():
         assert_matching_mass(n, expected_parent_mass[k])
 
     expected_adducts = np.array([
-        "M-H", "[M-H]-"
+        "M-H", "[M-H]-", "M+H"
     ])
     for k, n in enumerate(spectrum):
         assert_matching_metadata_string(n, expected_adducts[k], "adduct")
@@ -256,3 +256,11 @@ def test_load_msp_with_comments_including_quotes():
     assert actual.get("columntype") == "Semi-standard non-polar, TG-5SILMSwith10mGuard, 30mx0.25mmx0.25um"
     assert actual.get("carriergasflowrate") == "1.0 mL/min"
     assert actual.get("category") == "Amino Acid"
+
+
+def test_load_msp_with_scientific_notation():
+    module_root = os.path.join(os.path.dirname(__file__), "..")
+    spectrums_file = os.path.join(module_root, "testdata", "test_spectra_collection.msp")
+    actual = list(load_from_msp(spectrums_file))
+    
+    assert len(actual) == 3

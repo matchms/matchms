@@ -237,6 +237,11 @@ class Spectrum:
         if not isinstance(self.get("peak_comments", None), dict):
             return None
 
+        self._metadata["peak_comments"] = {
+            float(key) if isinstance(key, str) else key: value
+            for key, value in self.metadata["peak_comments"].items()
+        }
+
         mz_tolerance = self._peak_comments_mz_tolerance
 
         def _append_new_comment(key):
