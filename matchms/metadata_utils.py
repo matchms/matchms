@@ -2,6 +2,7 @@ import re
 from typing import Optional
 import numpy as np
 
+
 try:  # rdkit is not included in pip package
     from rdkit import Chem
     from rdkit.Chem import AllChem

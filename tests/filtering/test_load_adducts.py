@@ -1,5 +1,7 @@
 import numpy as np
-from matchms.filtering.repair_adduct.clean_adduct import load_adducts_dict, load_known_adduct_conversions
+from matchms.filtering.repair_adduct.clean_adduct import (
+    load_adducts_dict, load_known_adduct_conversions)
+
 
 def test_load_adducts_dict():
     """Test if correct dict is imported."""

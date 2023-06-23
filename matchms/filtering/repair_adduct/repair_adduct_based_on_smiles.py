@@ -1,9 +1,11 @@
 import logging
 from matchms import Spectrum
-from matchms.filtering.repair_parent_mass_from_smiles.require_parent_mass_match_smiles import _get_monoisotopic_neutral_mass
-from matchms.filtering.repair_parent_mass_from_smiles.repair_parent_mass_is_mol_wt import repair_parent_mass_is_mol_wt
-
 from matchms.filtering.repair_adduct.clean_adduct import load_adducts_dict
+from matchms.filtering.repair_parent_mass_from_smiles.repair_parent_mass_is_mol_wt import \
+    repair_parent_mass_is_mol_wt
+from matchms.filtering.repair_parent_mass_from_smiles.require_parent_mass_match_smiles import \
+    _get_monoisotopic_neutral_mass
+
 
 logger = logging.getLogger("matchms")
 

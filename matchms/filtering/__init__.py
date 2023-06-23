@@ -55,7 +55,6 @@ from .harmonize_undefined_inchi import harmonize_undefined_inchi
 from .harmonize_undefined_inchikey import harmonize_undefined_inchikey
 from .harmonize_undefined_smiles import harmonize_undefined_smiles
 from .interpret_pepmass import interpret_pepmass
-from .repair_adduct.clean_adduct import clean_adduct
 from .make_charge_int import make_charge_int
 from .make_charge_scalar import make_charge_scalar
 from .make_ionmode_lowercase import make_ionmode_lowercase
@@ -63,6 +62,7 @@ from .normalize_intensities import normalize_intensities
 from .reduce_to_number_of_peaks import reduce_to_number_of_peaks
 from .remove_peaks_around_precursor_mz import remove_peaks_around_precursor_mz
 from .remove_peaks_outside_top_k import remove_peaks_outside_top_k
+from .repair_adduct.clean_adduct import clean_adduct
 from .repair_inchi_inchikey_smiles import repair_inchi_inchikey_smiles
 from .require_minimum_number_of_peaks import require_minimum_number_of_peaks
 from .require_minimum_of_high_peaks import require_minimum_of_high_peaks

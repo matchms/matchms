@@ -6,12 +6,12 @@ from unittest import mock
 import numpy as np
 import pytest
 import matchms.metadata_utils
+from matchms.filtering.derive_adduct_from_name import looks_like_adduct
+from matchms.filtering.repair_adduct.clean_adduct import _clean_adduct
 from matchms.metadata_utils import (derive_fingerprint_from_inchi,
                                     derive_fingerprint_from_smiles,
                                     is_valid_inchi, is_valid_inchikey,
                                     is_valid_smiles, mol_converter)
-from matchms.filtering.repair_adduct.clean_adduct import _clean_adduct
-from matchms.filtering.derive_adduct_from_name import looks_like_adduct
 
 
 @pytest.fixture()

@@ -1,11 +1,11 @@
 """Calculates the multiplier and correction mass for an adduct"""
 
-from typing import Optional, Tuple
 import logging
 import re
-from molmass import Formula
-from molmass import FormulaError
+from typing import Optional, Tuple
+from molmass import Formula, FormulaError
 from matchms.constants import ELECTRTON_MASS
+
 
 logger = logging.getLogger("matchms")
 
