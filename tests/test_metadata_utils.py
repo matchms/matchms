@@ -11,7 +11,7 @@ from matchms.metadata_utils import (clean_adduct,
                                     derive_fingerprint_from_smiles,
                                     is_valid_inchi, is_valid_inchikey,
                                     is_valid_smiles, looks_like_adduct,
-                                    mol_converter)
+                                    mol_converter, set_rdkit_log_level)
 
 
 @pytest.fixture()
@@ -20,6 +20,40 @@ def reload_metadata_utils():
     yield
     reload(matchms.metadata_utils)
 
+def test_set_rdkit_log_level(capfd):
+    """Test if rdkit log level is set correctly."""
+    pytest.importorskip("rdkit")
+
+    # Note: capfd is a built-in pytest fixture that captures all output to stdout and stderr
+    # capfd is used to check what log messages are printed
+
+    # try to import RDLogger from rdkit
+    try:
+        from rdkit import RDLogger
+    except ImportError:
+        pytest.skip("Skipping test as rdkit is not installed and RDLogger could not be imported.")
+
+    # get all valid log levels
+    log_levels = RDLogger._levels
+
+    # create a dummy logger
+    logger = RDLogger.logger()
+
+    # test all log levels settings
+    for set_level in range(len(log_levels)):
+        # set current log level, only logs with this level or higher severity should be printed
+        set_rdkit_log_level(log_levels[set_level])
+
+        # try to logg with all log levels
+        for logged_level in range(len(log_levels)):
+            logger.logIt(log_levels[logged_level], "test")
+            captured = capfd.readouterr()
+            if set_level <= logged_level:
+                # if set log level severety is lower or equal to logged level, log should be printed
+                assert captured.out + captured.err != ""
+            else:
+                # if set log level severety is higher than logged level, log should not be printed
+                assert captured.out + captured.err == ""
 
 def test_mol_converter_smiles_to_inchi():
     """Test if smiles is correctly converted to inchi."""
