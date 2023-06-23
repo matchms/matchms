@@ -51,7 +51,7 @@ def derive_adduct_from_name(spectrum_in: SpectrumType,
     if adduct_from_name and not looks_like_adduct(spectrum.get("adduct")):
         adduct_cleaned = _clean_adduct(adduct_from_name)
         spectrum.set("adduct", adduct_cleaned)
-        logger.info(f"Added adduct {spectrum.get('adduct')} from the compound name to metadata.")
+        logger.info("Added adduct %s from the compound name to metadata.", spectrum.get('adduct'))
 
     return spectrum
 

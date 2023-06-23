@@ -23,8 +23,8 @@ def test_add_parent_mass_using_adduct(adduct, expected):
 
     spectrum_in.set("parent_mass", parent_mass)
     precursor_mz = derive_precursor_mz_from_parent_mass(spectrum_in)
-    assert np.allclose(precursor_mz, 444.0, atol=1e-4), f"Expected derive_precursor_mz_from_parent_mass " \
-                                                       f"to be the opposite of derive_parent_mass_from_precursor_mz"
+    assert np.allclose(precursor_mz, 444.0, atol=1e-4), "Expected derive_precursor_mz_from_parent_mass " \
+                                                        "to be the opposite of derive_parent_mass_from_precursor_mz"
 
 
 @pytest.mark.parametrize("ionmode, expected", [("positive", 444.0 - PROTON_MASS),

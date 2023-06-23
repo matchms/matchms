@@ -30,7 +30,7 @@ def repair_parent_mass_is_mol_wt(spectrum_in: Spectrum, mass_tolerance: float):
         spectrum.set("parent_mass", correct_mass)
         logger.info(f"Parent mass was mol_wt corrected from {parent_mass} to {correct_mass}")
         precursor_mz = derive_precursor_mz_from_parent_mass(spectrum)
-        logger.info(f"Precursor mz was derived from parent mass")
+        logger.info("Precursor mz was derived from parent mass")
         spectrum.set("precursor_mz", precursor_mz)
     return spectrum
 

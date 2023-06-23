@@ -55,7 +55,7 @@ from .harmonize_undefined_inchi import harmonize_undefined_inchi
 from .harmonize_undefined_inchikey import harmonize_undefined_inchikey
 from .harmonize_undefined_smiles import harmonize_undefined_smiles
 from .interpret_pepmass import interpret_pepmass
-from .repair_adduct.clean_adduct import load_adducts_dict, load_known_adduct_conversions
+from .repair_adduct.clean_adduct import clean_adduct
 from .make_charge_int import make_charge_int
 from .make_charge_scalar import make_charge_scalar
 from .make_ionmode_lowercase import make_ionmode_lowercase
@@ -84,6 +84,7 @@ __all__ = [
     "add_retention_index",
     "add_retention_time",
     "clean_compound_name",
+    "clean_adduct",
     "correct_charge",
     "default_filters",
     "derive_adduct_from_name",
