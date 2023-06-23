@@ -10,7 +10,7 @@ from matchms.metadata_utils import (derive_fingerprint_from_inchi,
                                     derive_fingerprint_from_smiles,
                                     is_valid_inchi, is_valid_inchikey,
                                     is_valid_smiles, mol_converter)
-from matchms.filtering.repair_adduct.clean_adduct import clean_adduct
+from matchms.filtering.repair_adduct.clean_adduct import _clean_adduct
 from matchms.filtering.derive_adduct_from_name import looks_like_adduct
 
 
@@ -223,5 +223,5 @@ def test_looks_like_adduct():
                           (None, None)])
 def test_clean_adduct_examples(input_adduct, expected_adduct):
     """Test if typical examples are correctly edited."""
-    assert clean_adduct(input_adduct) == expected_adduct, \
+    assert _clean_adduct(input_adduct) == expected_adduct, \
         "Expected different cleaned adduct"

@@ -1,7 +1,7 @@
 import logging
 
 from matchms.constants import PROTON_MASS
-from matchms.filtering.repair_adduct.clean_adduct import clean_adduct, load_adducts_dict
+from matchms.filtering.repair_adduct.clean_adduct import _clean_adduct, load_adducts_dict
 from matchms.filtering.repair_adduct.interpret_unknown_adduct import get_multiplier_and_mass_from_adduct
 logger = logging.getLogger("matchms")
 
@@ -58,7 +58,7 @@ def derive_precursor_mz_from_parent_mass(spectrum_in):
 
 
 def _get_multiplier_and_correction_mass_from_adduct(adduct):
-    adduct = clean_adduct(adduct)
+    adduct = _clean_adduct(adduct)
     adducts_dict = load_adducts_dict()
 
     if adduct in adducts_dict:

@@ -1,5 +1,5 @@
 import logging
-from .repair_adduct.clean_adduct import clean_adduct, load_adducts_dict
+from .repair_adduct.clean_adduct import _clean_adduct, load_adducts_dict
 from ..typing import SpectrumType
 
 
@@ -34,7 +34,7 @@ def derive_ionmode(spectrum_in: SpectrumType) -> SpectrumType:
     adduct = spectrum.get("adduct", None)
     # Harmonize adduct string
     if adduct:
-        adduct = clean_adduct(adduct)
+        adduct = _clean_adduct(adduct)
 
     ionmode = spectrum.get("ionmode")
     if ionmode:
