@@ -13,7 +13,10 @@ def repair_adduct_based_on_smiles(spectrum_in: Spectrum,
                                   accept_parent_mass_is_mol_wt):
     """If the parent mass is wrong due to a wrong of is derived from the precursor mz
     To do this the charge and adduct are used"""
+    if spectrum_in is None:
+        return None
     spectrum = spectrum_in.clone()
+
     precursor_mz = spectrum.get("precursor_mz")
     ion_mode = spectrum.get("ionmode")
     adducts_dict = load_adducts_dict()
