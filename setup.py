@@ -21,7 +21,7 @@ setup(
     author="matchms developer team",
     author_email="florian.huber@hs-duesseldorf.de",
     url="https://github.com/matchms/matchms",
-    packages=find_packages(exclude=['*tests*']),
+    packages=find_packages(exclude=['*tests*', '*tutorial*']),
     package_data={"matchms": ["data/*.csv"]},
     license="Apache Software License 2.0",
     zip_safe=False,
