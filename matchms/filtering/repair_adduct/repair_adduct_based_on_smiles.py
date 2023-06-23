@@ -25,9 +25,11 @@ def repair_adduct_based_on_smiles(spectrum_in: Spectrum,
     if ion_mode not in ("positive", "negative"):
         logger.warning(f"Ionmode: {ion_mode} not positive or negative, first run derive_ionmode")
         return spectrum
+    if precursor_mz is None:
+        logger.warning("Precursor_mz is None, first run add_precursor_mz")
+        return spectrum
 
     smiles_mass = _get_monoisotopic_neutral_mass(spectrum.get("smiles"))
-
     for adduct_name in adducts_dict:
         adduct_info = adducts_dict[adduct_name]
         if adduct_info['ionmode'] == ion_mode and \
