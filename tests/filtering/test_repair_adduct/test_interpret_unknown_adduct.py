@@ -1,6 +1,6 @@
 import numpy as np
 from matchms.filtering.repair_adduct.clean_adduct import load_adducts_dict
-from matchms.filtering.repair_adduct.interpret_unknown_adduct import \
+from matchms.filtering.filter_utils.interpret_unknown_adduct import \
     get_multiplier_and_mass_from_adduct
 
 

@@ -4,6 +4,7 @@ from typing import Any, Generator, Optional
 from matchms.importing import (load_from_json, load_from_mgf, load_from_msp,
                                load_from_mzml, load_from_mzxml, load_from_usi)
 from matchms.typing import SpectrumType
+from matchms.Spectrum import Spectrum
 
 
 def load_spectra(file: str, ftype: Optional[str] = None) -> Generator[SpectrumType, None, None]:
@@ -43,7 +44,7 @@ def load_spectra(file: str, ftype: Optional[str] = None) -> Generator[SpectrumTy
     if ftype == "pickle":
         spectra = load_from_pickle(file)
         assert isinstance(spectra, list), "Expected list of spectra"
-        assert isinstance(spectra[0], SpectrumType), "Expected list of spectra"
+        assert isinstance(spectra[0], Spectrum), "Expected list of spectra"
         return spectra
     assert False, f"File extension of file: {file} is not recognized"
 
