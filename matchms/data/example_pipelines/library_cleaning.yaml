@@ -1,0 +1,50 @@
+# Matchms pipeline config file
+# This file is build for cleaning libraries before machine learning training.
+# The methods are optimized for the GNPS library in may 2023
+# Change and adapt fields where necessary
+# ====================
+importing:
+  queries: null
+  references: null
+filtering_queries:
+# Cleaning metadata
+- - default_filters
+- - require_precursor_mz
+- - clean_adduct
+# Cleaning peaks
+- - normalize_intensities
+- - select_by_relative_intensity
+  - intensity_from: 0.001
+    intensity_to: 1.0
+- - select_by_mz
+  - mz_from: 0
+    mz_to: 1000
+- - require_minimum_number_of_peaks
+  - n_required: 5
+- - require_minimum_of_high_peaks
+  - no_peaks: 5
+    intensity_percent: 5.0
+# cleaning annotation
+- - harmonize_undefined_inchikey
+- - harmonize_undefined_inchi
+- - harmonize_undefined_smiles
+- - repair_inchi_inchikey_smiles
+- - derive_inchi_from_smiles
+- - derive_smiles_from_inchi
+# Correcting parent mass
+- - repair_smiles_salt_ions
+  - mass_tolerance: 0.2
+- - repair_precursor_is_parent_mass
+  - mass_tolerance: 0.2
+- - repair_parent_mass_is_mol_wt
+  - mass_tolerance: 0.2
+- - repair_adduct_based_on_smiles
+  - mass_tolerance: 0.2
+    accept_parent_mass_is_mol_wt: True
+- - require_parent_mass_match_smiles
+  - mass_tolerance: 0.2
+filtering_refs:
+- default_filters
+score_computations: []
+logging:
+  logging_level: WARNING
