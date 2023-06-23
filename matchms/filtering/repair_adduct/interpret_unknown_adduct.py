@@ -72,6 +72,7 @@ def split_ion(ion):
 
 
 def replace_abbreviations(ions_split):
+    """Derived from https://github.com/pnnl/MSAC"""
     abbrev_to_formula = {'ACN': 'CH3CN', 'DMSO': 'C2H6OS', 'FA': 'CH2O2',
                          'HAc': 'CH3COOH', 'Hac': 'CH3COOH', 'TFA': 'C2HF3O2',
                          'IsoProp': 'CH3CHOHCH3', 'MeOH': 'CH3OH'}
@@ -85,6 +86,7 @@ def replace_abbreviations(ions_split):
 
 
 def get_mass_of_ion(ions):
+    """Derived from https://github.com/pnnl/MSAC"""
     added_mass = 0
     for ion in ions:
         sign, number, ion = split_ion(ion)
