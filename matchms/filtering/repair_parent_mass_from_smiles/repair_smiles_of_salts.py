@@ -1,8 +1,6 @@
 import itertools
 import logging
-from matchms.filtering.repair_parent_mass_from_smiles.repair_precursor_is_parent_mass import \
-    _get_monoisotopic_neutral_mass
-
+from matchms.filtering.filter_utils.get_monoisotopic_neutral_mass import get_monoisotopic_neutral_mass
 
 logger = logging.getLogger("matchms")
 
@@ -23,7 +21,7 @@ def repair_smiles_of_salts(spectrum_in,
         # It is not a salt
         return spectrum
     for ion, not_used_ions in possible_ion_combinations:
-        ion_mass = _get_monoisotopic_neutral_mass(ion)
+        ion_mass = get_monoisotopic_neutral_mass(ion)
         mass_diff = abs(parent_mass - ion_mass)
         # Check for Repair parent mass is mol wt did only return 1 spectrum. So not added as option for simplicity.
         if mass_diff < mass_tolerance:

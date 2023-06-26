@@ -6,8 +6,8 @@ from matchms.constants import PROTON_MASS
 from matchms.filtering.filter_utils.derive_precursor_mz_and_parent_mass import \
     derive_precursor_mz_from_parent_mass
 from matchms.filtering.repair_parent_mass_from_smiles.require_parent_mass_match_smiles import (
-    _get_monoisotopic_neutral_mass, require_parent_mass_match_smiles)
-
+    require_parent_mass_match_smiles)
+from matchms.filtering.filter_utils.get_monoisotopic_neutral_mass import get_monoisotopic_neutral_mass
 
 logger = logging.getLogger("matchms")
 
@@ -29,7 +29,7 @@ def repair_parent_mass_is_mol_wt(spectrum_in: Spectrum, mass_tolerance: float):
     smiles_mass = _get_molecular_weight_neutral_mass(smiles)
     mass_difference = parent_mass - smiles_mass
     if abs(mass_difference) < mass_tolerance:
-        correct_mass = _get_monoisotopic_neutral_mass(smiles)
+        correct_mass = get_monoisotopic_neutral_mass(smiles)
         spectrum.set("parent_mass", correct_mass)
         logger.info(f"Parent mass was mol_wt corrected from {parent_mass} to {correct_mass}")
         precursor_mz = derive_precursor_mz_from_parent_mass(spectrum)

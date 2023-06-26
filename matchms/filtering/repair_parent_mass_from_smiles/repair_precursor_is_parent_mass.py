@@ -3,8 +3,8 @@ from matchms import Spectrum
 from matchms.filtering.filter_utils.derive_precursor_mz_and_parent_mass import \
     derive_precursor_mz_from_parent_mass
 from matchms.filtering.repair_parent_mass_from_smiles.require_parent_mass_match_smiles import (
-    _get_monoisotopic_neutral_mass, require_parent_mass_match_smiles)
-
+    require_parent_mass_match_smiles)
+from matchms.filtering.filter_utils.get_monoisotopic_neutral_mass import get_monoisotopic_neutral_mass
 
 logger = logging.getLogger("matchms")
 
@@ -23,7 +23,7 @@ def repair_precursor_is_parent_mass(spectrum_in: Spectrum,
 
     precursor_mz = spectrum.get("precursor_mz")
     smiles = spectrum.get("smiles")
-    smiles_mass = _get_monoisotopic_neutral_mass(smiles)
+    smiles_mass = get_monoisotopic_neutral_mass(smiles)
     mass_difference = precursor_mz - smiles_mass
     if abs(mass_difference) < mass_tolerance:
         spectrum.set("parent_mass", precursor_mz)
