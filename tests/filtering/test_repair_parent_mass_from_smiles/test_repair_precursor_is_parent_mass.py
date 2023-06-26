@@ -12,7 +12,8 @@ from tests.builder_Spectrum import SpectrumBuilder
                           ("CN1CCCC1C2=CN=CC=C2", "[M-H]-", 162.115698455, 161.108422448, 162.115698455),
                           ])
 def test_repair_precursor_is_parent_mass(smiles, adduct, precursor_mz, expected_precursor_mz, expected_parent_mass):
-    # CH4 is used as smiles, this has a mass of 16
+    pytest.importorskip("rdkit")
+
     spectrum_in = SpectrumBuilder().with_metadata({"smiles": smiles,
                                                    "adduct": adduct,
                                                    "precursor_mz": precursor_mz,

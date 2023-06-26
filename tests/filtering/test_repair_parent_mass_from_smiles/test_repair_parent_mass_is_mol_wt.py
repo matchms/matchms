@@ -13,6 +13,7 @@ from tests.builder_Spectrum import SpectrumBuilder
                           ])
 def test_repair_parent_mass_is_mol_wt(smiles, adduct, parent_mass, expected_precursor_mz, expected_parent_mass):
     # CH4 is used as smiles, this has a mass of 16
+    pytest.importorskip("rdkit")
     spectrum_in = SpectrumBuilder().with_metadata({"smiles": smiles,
                                                    "adduct": adduct,
                                                    "precursor_mz": 10.0,

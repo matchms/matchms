@@ -22,6 +22,8 @@ from tests.builder_Spectrum import SpectrumBuilder
                            "C(C(=O)O)"),
                           ])
 def test_repair_precursor_is_parent_mass(smiles, parent_mass, expected_smiles, expected_salt_ions):
+    pytest.importorskip("rdkit")
+
     spectrum_in = SpectrumBuilder().with_metadata({"smiles": smiles,
                                                    "parent_mass": parent_mass}).build()
     spectrum_out = repair_smiles_of_salts(spectrum_in, mass_tolerance=0.1)
