@@ -16,7 +16,6 @@ def test_add_parent_mass_using_adduct(adduct, expected):
     metadata = {"precursor_mz": 444.0, "adduct": adduct, "charge": +1}
     spectrum_in = SpectrumBuilder().with_metadata(metadata).build()
     parent_mass = derive_parent_mass_from_precursor_mz(spectrum_in, True)
-    print(parent_mass)
 
     assert np.allclose(parent_mass, expected, atol=1e-4), f"Expected parent mass of about {expected}."
     assert isinstance(parent_mass, float), "Expected parent mass to be float."
