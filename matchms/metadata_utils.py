@@ -24,24 +24,25 @@ else:
     _has_rdkit = True
 rdkit_missing_message = "Conda package 'rdkit' is required for this functionality."
 
+# Copy of rdkit's log levels
+RDKIT_LOG_LEVELS = ['rdApp.debug', 'rdApp.info', 'rdApp.warning', 'rdApp.error']
+
 # function recreates the functionality of the rdkit function 
 # https://github.com/rdkit/rdkit/blob/master/rdkit/RDLogger.py setLevel()
 def set_rdkit_log_level(level):
-    # ['rdApp.debug', 'rdApp.info', 'rdApp.warning', 'rdApp.error'] sorted by severity
-    rdkit_levels = RDLogger._levels
-    if level not in rdkit_levels:
-        raise ValueError(f"Invalid log level. Allowed values are: {rdkit_levels}")
+    if level not in RDKIT_LOG_LEVELS:
+        raise ValueError(f"Invalid log level. Allowed values are: {RDKIT_LOG_LEVELS}")
     
     # convert string level to index
-    level_index = rdkit_levels.index(level) 
+    level_index = RDKIT_LOG_LEVELS.index(level) 
 
     # enable all levels with higher severity
-    for i in range(level_index, len(rdkit_levels)):
-        RDLogger.EnableLog(rdkit_levels[i])
+    for i in range(level_index, len(RDKIT_LOG_LEVELS)):
+        RDLogger.EnableLog(RDKIT_LOG_LEVELS[i])
 
     # disable all levels with lower severity
     for i in range(0, level_index):
-        RDLogger.DisableLog(rdkit_levels[i])
+        RDLogger.DisableLog(RDKIT_LOG_LEVELS[i])
 
 def convert_smiles_to_inchi(smiles: str) -> Optional[str]:
     """Convert smiles to inchi using rdkit."""

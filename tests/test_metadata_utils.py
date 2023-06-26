@@ -6,7 +6,7 @@ from unittest import mock
 import numpy as np
 import pytest
 import matchms.metadata_utils
-from matchms.metadata_utils import (clean_adduct,
+from matchms.metadata_utils import (RDKIT_LOG_LEVELS, clean_adduct,
                                     derive_fingerprint_from_inchi,
                                     derive_fingerprint_from_smiles,
                                     is_valid_inchi, is_valid_inchikey,
@@ -22,31 +22,19 @@ def reload_metadata_utils():
 
 def test_set_rdkit_log_level(capfd):
     """Test if rdkit log level is set correctly."""
-    pytest.importorskip("rdkit")
-
-    # Note: capfd is a built-in pytest fixture that captures all output to stdout and stderr
-    # capfd is used to check what log messages are printed
-
-    # try to import RDLogger from rdkit
-    try:
-        from rdkit import RDLogger
-    except ImportError:
-        pytest.skip("Skipping test as rdkit is not installed and RDLogger could not be imported.")
-
-    # get all valid log levels
-    log_levels = RDLogger._levels
+    RDLogger = pytest.importorskip("rdkit.RDLogger")
 
     # create a dummy logger
     logger = RDLogger.logger()
 
     # test all log levels settings
-    for set_level in range(len(log_levels)):
+    for set_level, set_level_name in enumerate(RDKIT_LOG_LEVELS):
         # set current log level, only logs with this level or higher severity should be printed
-        set_rdkit_log_level(log_levels[set_level])
+        set_rdkit_log_level(set_level_name)
 
         # try to logg with all log levels
-        for logged_level in range(len(log_levels)):
-            logger.logIt(log_levels[logged_level], "test")
+        for logged_level, logged_level_name in enumerate(RDKIT_LOG_LEVELS):
+            logger.logIt(logged_level_name, "test")
             captured = capfd.readouterr()
             if set_level <= logged_level:
                 # if set log level severety is lower or equal to logged level, log should be printed
