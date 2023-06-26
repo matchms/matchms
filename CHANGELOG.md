@@ -8,9 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- New filter functions to repair a smiles that mismatches parent mass
 
 ### Changed
-
+- Moved functions related to adducts and parent mass
 - Updated reiterate_peak_comments function to convert the peak_comments keys to float [#437](https://github.com/matchms/matchms/pull/437)
 - Removed filter_by_range non-inplace version [#438](https://github.com/matchms/matchms/pull/438)
 - Updated regex in get_peak_values function [#439](https://github.com/matchms/matchms/pull/439)
