@@ -1,5 +1,6 @@
 import pytest
-from matchms.filtering.repair_adduct.repair_adduct_based_on_smiles import repair_adduct_based_on_smiles
+from matchms.filtering.repair_adduct.repair_adduct_based_on_smiles import \
+    repair_adduct_based_on_smiles
 from tests.builder_Spectrum import SpectrumBuilder
 
 

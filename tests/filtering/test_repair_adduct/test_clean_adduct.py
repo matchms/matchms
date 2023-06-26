@@ -1,6 +1,7 @@
 import pytest
 from matchms.filtering.derive_adduct_from_name import looks_like_adduct
-from matchms.filtering.repair_adduct.clean_adduct import _clean_adduct, clean_adduct
+from matchms.filtering.repair_adduct.clean_adduct import (_clean_adduct,
+                                                          clean_adduct)
 from tests.builder_Spectrum import SpectrumBuilder
 
 
