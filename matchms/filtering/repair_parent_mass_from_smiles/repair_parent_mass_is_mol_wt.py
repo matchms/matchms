@@ -12,8 +12,8 @@ from matchms.filtering.repair_parent_mass_from_smiles.require_parent_mass_match_
 logger = logging.getLogger("matchms")
 
 
-def repair_precursor_mz_is_mol_wt(spectrum_in: Spectrum, mass_tolerance: float):
-    """Changes the precursor mz from molecular mass into monoistopic mass
+def repair_parent_mass_is_mol_wt(spectrum_in: Spectrum, mass_tolerance: float):
+    """Changes the parent mass from molecular mass into monoistopic mass
 
     Manual entered precursor mz is sometimes wrongly added as Molar weight instead of monoisotopic mass
     """
