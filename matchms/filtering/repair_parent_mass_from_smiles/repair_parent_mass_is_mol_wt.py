@@ -5,8 +5,7 @@ from matchms import Spectrum
 from matchms.constants import PROTON_MASS
 from matchms.filtering.filter_utils.derive_precursor_mz_and_parent_mass import \
     derive_precursor_mz_from_parent_mass
-from matchms.filtering.repair_parent_mass_from_smiles.require_parent_mass_match_smiles import (
-    require_parent_mass_match_smiles)
+from matchms.filtering.repair_parent_mass_from_smiles.require_parent_mass_match_smiles import require_parent_mass_match_smiles
 from matchms.filtering.filter_utils.get_monoisotopic_neutral_mass import get_monoisotopic_neutral_mass
 
 logger = logging.getLogger("matchms")
