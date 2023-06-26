@@ -1,6 +1,6 @@
 import logging
 from matchms import Spectrum
-from matchms.filtering.filter_utils.get_monoisotopic_neutral_mass import \
+from matchms.filtering.filter_utils.get_neutral_mass_from_smiles import \
     get_monoisotopic_neutral_mass
 from matchms.filtering.repair_adduct.clean_adduct import load_adducts_dict
 from matchms.filtering.repair_parent_mass_from_smiles.repair_parent_mass_is_mol_wt import \

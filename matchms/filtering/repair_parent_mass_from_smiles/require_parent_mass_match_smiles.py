@@ -1,5 +1,5 @@
 from matchms import Spectrum
-from matchms.filtering.filter_utils.get_monoisotopic_neutral_mass import \
+from matchms.filtering.filter_utils.get_neutral_mass_from_smiles import \
     get_monoisotopic_neutral_mass
 
 
