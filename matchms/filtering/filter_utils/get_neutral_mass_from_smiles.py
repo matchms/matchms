@@ -29,3 +29,13 @@ def get_monoisotopic_neutral_mass(smiles):
     charge = sum(atom.GetFormalCharge() for atom in mol.GetAtoms())
     neutral_mass = mass + -charge * PROTON_MASS
     return neutral_mass
+
+
+def get_molecular_weight_neutral_mass(smiles):
+    if not _has_rdkit:
+        raise ImportError(rdkit_missing_message)
+    mol = Chem.MolFromSmiles(smiles)
+    mass = Descriptors.MolWt(mol)
+    charge = sum(atom.GetFormalCharge() for atom in mol.GetAtoms())
+    neutral_mass = mass + -charge * PROTON_MASS
+    return neutral_mass

@@ -1,12 +1,9 @@
 import logging
-from rdkit import Chem
-from rdkit.Chem import Descriptors
 from matchms import Spectrum
-from matchms.constants import PROTON_MASS
 from matchms.filtering.filter_utils.derive_precursor_mz_and_parent_mass import \
     derive_precursor_mz_from_parent_mass
 from matchms.filtering.filter_utils.get_monoisotopic_neutral_mass import \
-    get_monoisotopic_neutral_mass
+    get_monoisotopic_neutral_mass, get_molecular_weight_neutral_mass
 from matchms.filtering.repair_parent_mass_from_smiles.require_parent_mass_match_smiles import \
     require_parent_mass_match_smiles
 
@@ -28,7 +25,7 @@ def repair_parent_mass_is_mol_wt(spectrum_in: Spectrum, mass_tolerance: float):
     # Check if parent mass matches the smiles mass
     parent_mass = spectrum.get("parent_mass")
     smiles = spectrum.get("smiles")
-    smiles_mass = _get_molecular_weight_neutral_mass(smiles)
+    smiles_mass = get_molecular_weight_neutral_mass(smiles)
     mass_difference = parent_mass - smiles_mass
     if abs(mass_difference) < mass_tolerance:
         correct_mass = get_monoisotopic_neutral_mass(smiles)
@@ -38,11 +35,3 @@ def repair_parent_mass_is_mol_wt(spectrum_in: Spectrum, mass_tolerance: float):
         logger.info("Precursor mz was derived from parent mass")
         spectrum.set("precursor_mz", precursor_mz)
     return spectrum
-
-
-def _get_molecular_weight_neutral_mass(smiles):
-    mol = Chem.MolFromSmiles(smiles)
-    mass = Descriptors.MolWt(mol)
-    charge = sum(atom.GetFormalCharge() for atom in mol.GetAtoms())
-    neutral_mass = mass + -charge * PROTON_MASS
-    return neutral_mass
