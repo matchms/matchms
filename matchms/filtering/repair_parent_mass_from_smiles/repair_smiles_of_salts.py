@@ -1,6 +1,8 @@
 import itertools
 import logging
-from matchms.filtering.filter_utils.get_monoisotopic_neutral_mass import get_monoisotopic_neutral_mass
+from matchms.filtering.filter_utils.get_monoisotopic_neutral_mass import \
+    get_monoisotopic_neutral_mass
+
 
 logger = logging.getLogger("matchms")
 

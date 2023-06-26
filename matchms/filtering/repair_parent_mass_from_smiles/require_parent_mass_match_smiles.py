@@ -1,5 +1,6 @@
 from matchms import Spectrum
-from matchms.filtering.filter_utils.get_monoisotopic_neutral_mass import get_monoisotopic_neutral_mass
+from matchms.filtering.filter_utils.get_monoisotopic_neutral_mass import \
+    get_monoisotopic_neutral_mass
 
 
 def require_parent_mass_match_smiles(spectrum_in: Spectrum,
