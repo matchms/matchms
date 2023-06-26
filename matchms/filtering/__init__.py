@@ -74,7 +74,7 @@ from .set_ionmode_na_when_missing import set_ionmode_na_when_missing
 from .SpeciesString import SpeciesString
 from .repair_parent_mass_from_smiles.require_parent_mass_match_smiles import require_parent_mass_match_smiles
 from .repair_parent_mass_from_smiles.repair_parent_mass_is_mol_wt import repair_parent_mass_is_mol_wt
-from .repair_parent_mass_from_smiles.repair_smiles_salt_ions import repair_smiles_salt_ions
+from .repair_parent_mass_from_smiles.repair_smiles_of_salts import repair_smiles_of_salts
 from .repair_parent_mass_from_smiles.repair_precursor_is_parent_mass import repair_precursor_is_parent_mass
 from .repair_adduct.clean_adduct import clean_adduct
 from .repair_adduct.repair_adduct_based_on_smiles import repair_adduct_based_on_smiles
@@ -113,7 +113,7 @@ __all__ = [
     "repair_inchi_inchikey_smiles",
     "repair_parent_mass_is_mol_wt",
     "repair_precursor_is_parent_mass",
-    "repair_smiles_salt_ions",
+    "repair_smiles_of_salts",
     "require_parent_mass_match_smiles",
     "require_minimum_number_of_peaks",
     "require_minimum_of_high_peaks",
