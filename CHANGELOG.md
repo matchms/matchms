@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - New filter functions to repair a smiles that mismatches parent mass
 - Added repair_smiles_from_compound_name
+- Added require_correct_ionmode
+
 ### Changed
 - Moved functions related to adducts and parent mass
 - Updated reiterate_peak_comments function to convert the peak_comments keys to float [#437](https://github.com/matchms/matchms/pull/437)
