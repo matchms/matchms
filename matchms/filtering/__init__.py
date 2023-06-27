@@ -76,6 +76,7 @@ from .repair_parent_mass_from_smiles.repair_smiles_of_salts import \
     repair_smiles_of_salts
 from .repair_parent_mass_from_smiles.require_parent_mass_match_smiles import \
     require_parent_mass_match_smiles
+from .repair_smiles_from_compound_name import repair_smiles_from_compound_name
 from .require_minimum_number_of_peaks import require_minimum_number_of_peaks
 from .require_minimum_of_high_peaks import require_minimum_of_high_peaks
 from .require_precursor_below_mz import require_precursor_below_mz
@@ -122,6 +123,7 @@ __all__ = [
     "repair_parent_mass_match_smiles_wrapper",
     "repair_precursor_is_parent_mass",
     "repair_smiles_of_salts",
+    "repair_smiles_from_compound_name",
     "require_parent_mass_match_smiles",
     "require_minimum_number_of_peaks",
     "require_minimum_of_high_peaks",
