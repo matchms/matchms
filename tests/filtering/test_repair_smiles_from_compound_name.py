@@ -12,7 +12,7 @@ def csv_file_annotated_compound_names(tmp_path):
         ["compound_1", "smile_1", "inchi_1", 'inchikey_1', 100],
         ["compound_2", None, None, None, None]]
     csv_file_name = os.path.join(tmp_path, "annotated_compounds.csv")
-    with open(csv_file_name, "w") as csv_file:
+    with open(csv_file_name, "w", encoding="utf-8") as csv_file:
         csv.writer(csv_file).writerows(data)
     return csv_file_name
 
@@ -33,6 +33,7 @@ def csv_file_annotated_compound_names(tmp_path):
 def test_clean_compound_name(compound_name, parent_mass, smile, inchi, inchikey,
                              expected_smiles,
                              csv_file_annotated_compound_names):
+    # pylint: disable=too-many-arguments
     builder = SpectrumBuilder()
     spectrum_in = builder.with_metadata({"compound_name": compound_name,
                                          "parent_mass": parent_mass,
