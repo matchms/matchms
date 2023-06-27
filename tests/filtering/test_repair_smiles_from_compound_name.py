@@ -33,6 +33,7 @@ def csv_file_annotated_compound_names(tmp_path):
 def test_clean_compound_name(compound_name, parent_mass, smile, inchi, inchikey,
                              expected_smiles,
                              csv_file_annotated_compound_names):
+    pytest.importorskip("rdkit")
     # pylint: disable=too-many-arguments
     builder = SpectrumBuilder()
     spectrum_in = builder.with_metadata({"compound_name": compound_name,
