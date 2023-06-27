@@ -18,11 +18,10 @@ def require_correct_ionmode(spectrum_in: Spectrum,
     if ion_mode_to_keep == "both":
         if ion_mode in ("positive", "negative"):
             return spectrum
-        else:
-            logger.info("Spectrum was removed since ionmode was: %s which does not match positive or negative", ion_mode)
-            return None
+
+        logger.info("Spectrum was removed since ionmode was: %s which does not match positive or negative", ion_mode)
+        return None
     if ion_mode == ion_mode_to_keep:
         return spectrum
-    else:
-        logger.info("Spectrum was removed since ionmode was: %s which does not match %s", ion_mode, ion_mode_to_keep)
-        return None
+    logger.info("Spectrum was removed since ionmode was: %s which does not match %s", ion_mode, ion_mode_to_keep)
+    return None
