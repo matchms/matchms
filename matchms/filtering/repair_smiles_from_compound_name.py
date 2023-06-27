@@ -1,14 +1,10 @@
-import csv
-import os
-from typing import List
 import logging
 import numpy as np
 import pandas as pd
-import pubchempy as pcp
-from tqdm import tqdm
 from matchms import Spectrum
 from matchms.metadata_utils import (is_valid_inchi, is_valid_inchikey,
                                     is_valid_smiles)
+
 
 logger = logging.getLogger("matchms")
 

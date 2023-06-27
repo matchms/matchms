@@ -1,5 +1,5 @@
-import os
 import csv
+import os
 import pytest
 from matchms.filtering import repair_smiles_from_compound_name
 from ..builder_Spectrum import SpectrumBuilder
