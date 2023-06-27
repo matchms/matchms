@@ -77,6 +77,7 @@ from .repair_parent_mass_from_smiles.repair_smiles_of_salts import \
 from .repair_parent_mass_from_smiles.require_parent_mass_match_smiles import \
     require_parent_mass_match_smiles
 from .repair_smiles_from_compound_name import repair_smiles_from_compound_name
+from .require_correct_ionmode import require_correct_ionmode
 from .require_minimum_number_of_peaks import require_minimum_number_of_peaks
 from .require_minimum_of_high_peaks import require_minimum_of_high_peaks
 from .require_precursor_below_mz import require_precursor_below_mz
@@ -118,6 +119,7 @@ __all__ = [
     "remove_peaks_around_precursor_mz",
     "remove_peaks_outside_top_k",
     "repair_adduct_based_on_smiles",
+    "require_correct_ionmode",
     "repair_inchi_inchikey_smiles",
     "repair_parent_mass_is_mol_wt",
     "repair_parent_mass_match_smiles_wrapper",
