@@ -13,7 +13,6 @@ from ..builder_Spectrum import SpectrumBuilder
 ])
 def test_clean_compound_name(smile, inchi, inchikey, correct):
     pytest.importorskip("rdkit")
-    # pylint: disable=too-many-arguments
     builder = SpectrumBuilder()
     spectrum_in = builder.with_metadata({"smiles": smile,
                                          "inchi": inchi,
