@@ -59,6 +59,7 @@ setup(
         "sparsestack >= 0.4.1",
         "tqdm",
         "molmass",
+        "pandas"
     ],
     extras_require={"dev": ["bump2version",
                             "decorator",
