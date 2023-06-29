@@ -6,12 +6,12 @@ from unittest import mock
 import numpy as np
 import pytest
 import matchms.metadata_utils
-from matchms.metadata_utils import (RDKIT_LOG_LEVELS, clean_adduct,
+from matchms.metadata_utils import (clean_adduct,
                                     derive_fingerprint_from_inchi,
                                     derive_fingerprint_from_smiles,
                                     is_valid_inchi, is_valid_inchikey,
                                     is_valid_smiles, looks_like_adduct,
-                                    mol_converter, set_rdkit_log_level)
+                                    mol_converter)
 
 
 @pytest.fixture()
@@ -19,29 +19,6 @@ def reload_metadata_utils():
     """Reload metadata_utils module after test has finished."""
     yield
     reload(matchms.metadata_utils)
-
-def test_set_rdkit_log_level(capfd):
-    """Test if rdkit log level is set correctly."""
-    RDLogger = pytest.importorskip("rdkit.RDLogger")
-
-    # create a dummy logger
-    logger = RDLogger.logger()
-
-    # test all log levels settings
-    for set_level, set_level_name in enumerate(RDKIT_LOG_LEVELS):
-        # set current log level, only logs with this level or higher severity should be printed
-        set_rdkit_log_level(set_level_name)
-
-        # try to logg with all log levels
-        for logged_level, logged_level_name in enumerate(RDKIT_LOG_LEVELS):
-            logger.logIt(logged_level_name, "test")
-            captured = capfd.readouterr()
-            if set_level <= logged_level:
-                # if set log level severety is lower or equal to logged level, log should be printed
-                assert captured.out + captured.err != ""
-            else:
-                # if set log level severety is higher than logged level, log should not be printed
-                assert captured.out + captured.err == ""
 
 def test_mol_converter_smiles_to_inchi():
     """Test if smiles is correctly converted to inchi."""

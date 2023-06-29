@@ -42,6 +42,15 @@ import logging.config
 import sys
 
 
+try:
+    from rdkit import RDLogger
+except ImportError:
+    _has_rdkit = False
+else:
+    _has_rdkit = True
+rdkit_missing_message = "Conda package 'rdkit' is required for this functionality."
+
+
 _formatter = logging.Formatter(
     '%(asctime)s:%(levelname)s:%(name)s:%(module)s:%(message)s')
 
@@ -121,3 +130,25 @@ def reset_matchms_logger(logger_name="matchms"):
     logger = logging.getLogger(logger_name)
     logger.handlers.clear()
     _init_logger()
+
+# Copy of rdkit's log levels
+RDKIT_LOG_LEVELS = ['rdApp.debug', 'rdApp.info', 'rdApp.warning', 'rdApp.error']
+
+# function recreates the functionality of the rdkit function 
+# https://github.com/rdkit/rdkit/blob/master/rdkit/RDLogger.py setLevel()
+def set_rdkit_logger_level(level):
+    if not _has_rdkit:
+        raise ImportError(rdkit_missing_message)
+
+    if level not in RDKIT_LOG_LEVELS:
+        raise ValueError(f"Invalid log level. Allowed values are: {RDKIT_LOG_LEVELS}")
+    # convert string level to index
+    level_index = RDKIT_LOG_LEVELS.index(level) 
+
+    # enable all levels with higher severity
+    for i in range(level_index, len(RDKIT_LOG_LEVELS)):
+        RDLogger.EnableLog(RDKIT_LOG_LEVELS[i])
+
+    # disable all levels with lower severity
+    for i in range(0, level_index):
+        RDLogger.DisableLog(RDKIT_LOG_LEVELS[i])
