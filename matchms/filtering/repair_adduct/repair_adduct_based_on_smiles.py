@@ -2,7 +2,7 @@ import logging
 from matchms import Spectrum
 from matchms.filtering.filter_utils.get_neutral_mass_from_smiles import \
     get_monoisotopic_neutral_mass
-from matchms.filtering.repair_adduct.clean_adduct import load_adducts_dict
+from matchms.filtering.repair_adduct.clean_adduct import load_known_adducts
 from matchms.filtering.repair_parent_mass_from_smiles.repair_parent_mass_is_mol_wt import \
     repair_parent_mass_is_mol_wt
 
@@ -17,35 +17,35 @@ def repair_adduct_based_on_smiles(spectrum_in: Spectrum,
     To do this the charge and adduct are used"""
     if spectrum_in is None:
         return None
-    spectrum = spectrum_in.clone()
+    changed_spectrum = spectrum_in.clone()
 
-    precursor_mz = spectrum.get("precursor_mz")
-    ion_mode = spectrum.get("ionmode")
-    adducts_dict = load_adducts_dict()
+    precursor_mz = changed_spectrum.get("precursor_mz")
+    ion_mode = changed_spectrum.get("ionmode")
     if ion_mode not in ("positive", "negative"):
         logger.warning(f"Ionmode: {ion_mode} not positive or negative, first run derive_ionmode")
-        return spectrum
+        return changed_spectrum
     if precursor_mz is None:
         logger.warning("Precursor_mz is None, first run add_precursor_mz")
-        return spectrum
+        return changed_spectrum
 
-    smiles_mass = get_monoisotopic_neutral_mass(spectrum.get("smiles"))
-    for adduct_name in adducts_dict:
-        adduct_info = adducts_dict[adduct_name]
-        if adduct_info['ionmode'] == ion_mode and \
-            adduct_info["correction_mass"] is not None and \
-            adduct_info["mass_multiplier"] is not None:
-            multiplier = adduct_info["mass_multiplier"]
-            correction_mass = adduct_info["correction_mass"]
-            parent_mass = (precursor_mz - correction_mass) / multiplier
-            if abs(parent_mass - smiles_mass) < 1:
-                spectrum_with_corrected_adduct = spectrum.clone()
-                spectrum_with_corrected_adduct.set("parent_mass", parent_mass)
-                spectrum_with_corrected_adduct.set("adduct", adduct_name)
-                if accept_parent_mass_is_mol_wt:
-                    spectrum_with_corrected_adduct = repair_parent_mass_is_mol_wt(spectrum_with_corrected_adduct,
-                                                                                  mass_tolerance)
-                if abs(spectrum_with_corrected_adduct.get("parent_mass") - smiles_mass) < mass_tolerance:
-                    logger.info(f"Adduct was set from {spectrum.get('adduct')} to {adduct_name}")
-                    return spectrum_with_corrected_adduct
-    return spectrum
+    adducts_df = load_known_adducts()
+    smiles_mass = get_monoisotopic_neutral_mass(changed_spectrum.get("smiles"))
+    parent_masses = (precursor_mz - adducts_df["correction_mass"]) / adducts_df["mass_multiplier"]
+    mass_differences = abs(parent_masses-smiles_mass)
+
+    # Select the lowest value
+    smalles_mass_index = mass_differences.idxmin()
+    parent_mass = parent_masses[smalles_mass_index]
+    adduct = adducts_df.iloc[smalles_mass_index]["adduct"]
+    # Change spectrum. This spectrum will only be returned if the mass difference is smaller than mass tolerance
+    changed_spectrum.set("parent_mass", parent_mass)
+    changed_spectrum.set("adduct", adduct)
+    if mass_differences[smalles_mass_index] < mass_tolerance:
+        logger.info(f"Adduct was set from {spectrum_in.get('adduct')} to {adduct}")
+        return changed_spectrum
+    elif accept_parent_mass_is_mol_wt:
+        changed_spectrum = repair_parent_mass_is_mol_wt(changed_spectrum, mass_tolerance)
+        if abs(changed_spectrum.get("parent_mass") - smiles_mass) < mass_tolerance:
+            logger.info(f"Adduct was set from {spectrum_in.get('adduct')} to {adduct}")
+            return changed_spectrum
+    return spectrum_in

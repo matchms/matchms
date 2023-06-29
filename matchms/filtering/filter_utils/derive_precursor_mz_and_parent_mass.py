@@ -3,7 +3,7 @@ from matchms.constants import PROTON_MASS
 from matchms.filtering.filter_utils.interpret_unknown_adduct import \
     get_multiplier_and_mass_from_adduct
 from matchms.filtering.repair_adduct.clean_adduct import (_clean_adduct,
-                                                          load_adducts_dict)
+                                                          load_known_adducts)
 
 
 logger = logging.getLogger("matchms")
@@ -58,15 +58,16 @@ def derive_precursor_mz_from_parent_mass(spectrum_in):
         precursor_mass = parent_mass + protons_mass
         precursor_mz = precursor_mass / abs(charge)
         return precursor_mz
+    logger.error("Precursor mz could not be derived from parent mass, since charge and adduct were missing")
 
 
 def _get_multiplier_and_correction_mass_from_adduct(adduct):
     adduct = _clean_adduct(adduct)
-    adducts_dict = load_adducts_dict()
+    known_adducts = load_known_adducts()
 
-    if adduct in adducts_dict:
-        multiplier = adducts_dict[adduct]["mass_multiplier"]
-        correction_mass = adducts_dict[adduct]["correction_mass"]
+    if adduct in list(known_adducts["adduct"]):
+        multiplier = known_adducts.loc[known_adducts["adduct"] == adduct, "mass_multiplier"].values[0]
+        correction_mass = known_adducts.loc[known_adducts["adduct"] == adduct, "correction_mass"].values[0]
     else:
         multiplier, correction_mass = get_multiplier_and_mass_from_adduct("adduct")
     return multiplier, correction_mass

@@ -1,15 +1,19 @@
 import numpy as np
+import pandas as pd
+
 from matchms.filtering.filter_utils.interpret_unknown_adduct import \
     get_multiplier_and_mass_from_adduct
-from matchms.filtering.repair_adduct.clean_adduct import load_adducts_dict
+from matchms.filtering.repair_adduct.clean_adduct import load_known_adducts
 
 
 def test_get_multiplier_and_mass():
     """Test if correct dict is imported."""
-    known_adducts = load_adducts_dict()
-    for adduct, adduct_info in known_adducts.items():
-        exp_multiplier = adduct_info["mass_multiplier"]
-        exp_corr_mass = adduct_info["correction_mass"]
+    known_adducts = load_known_adducts()
+    for adduct in list(known_adducts["adduct"]):
         multiplier, correction_mass = get_multiplier_and_mass_from_adduct(adduct)
-        assert exp_multiplier == multiplier
-        np.testing.assert_almost_equal(exp_corr_mass, correction_mass, decimal=5)
+        exp_multiplier = known_adducts.loc[known_adducts["adduct"] == adduct, "mass_multiplier"].values[0]
+        exp_corr_mass = known_adducts.loc[known_adducts["adduct"] == adduct, "correction_mass"].values[0]
+        assert round(exp_multiplier, 5) == round(multiplier, 5), \
+            f"The calculated multiplier: {multiplier} does not match the multiplier in the table: {exp_multiplier} for the adduct: {adduct}"
+        assert round(correction_mass, 4) == round(exp_corr_mass, 4)
+        f"The calculated correction mass: {correction_mass} does not match the correction mass in the table: {exp_corr_mass} for the adduct: {adduct}"
