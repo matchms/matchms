@@ -5,6 +5,7 @@ import re
 from typing import Optional, Tuple
 from matchms.constants import ELECTRTON_MASS
 
+
 try:  # rdkit is not included in pip package
     from rdkit import Chem
 except ImportError:
