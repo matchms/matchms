@@ -20,6 +20,7 @@ def reload_metadata_utils():
     yield
     reload(matchms.metadata_utils)
 
+
 def test_mol_converter_smiles_to_inchi():
     """Test if smiles is correctly converted to inchi."""
     pytest.importorskip("rdkit")

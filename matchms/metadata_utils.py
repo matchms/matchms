@@ -24,6 +24,7 @@ else:
     _has_rdkit = True
 rdkit_missing_message = "Conda package 'rdkit' is required for this functionality."
 
+
 def convert_smiles_to_inchi(smiles: str) -> Optional[str]:
     """Convert smiles to inchi using rdkit."""
     return mol_converter(smiles, "smiles", "inchi")
