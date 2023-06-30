@@ -1,7 +1,7 @@
 import logging
 import re
 from ..typing import SpectrumType
-from .repair_adduct.clean_adduct import _clean_adduct, load_adducts_dict
+from .repair_adduct.clean_adduct import _clean_adduct, load_known_adducts
 
 
 logger = logging.getLogger("matchms")
@@ -62,8 +62,8 @@ def looks_like_adduct(adduct):
     # Clean adduct
     adduct = _clean_adduct(adduct)
     # Load lists of default known adducts
-    known_adducts = load_adducts_dict()
-    if adduct in known_adducts:
+    known_adducts = load_known_adducts()
+    if adduct in list(known_adducts["adduct"]):
         return True
 
     # Expect format like: "[2M-H]" or "[2M+Na]+"

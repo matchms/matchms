@@ -3,8 +3,26 @@
 import logging
 import re
 from typing import Optional, Tuple
-from molmass import Formula, FormulaError
 from matchms.constants import ELECTRTON_MASS
+
+
+try:  # rdkit is not included in pip package
+    from rdkit import Chem
+except ImportError:
+    _has_rdkit = False
+    from collections import UserString
+
+    class ChemMock(UserString):
+        def __call__(self, *args, **kwargs):
+            return self
+
+        def __getattr__(self, key):
+            return self
+
+    Chem = AllChem = ChemMock("")
+else:
+    _has_rdkit = True
+rdkit_missing_message = "Conda package 'rdkit' is required for this functionality."
 
 
 logger = logging.getLogger("matchms")
@@ -90,12 +108,10 @@ def get_mass_of_ion(ions):
     added_mass = 0
     for ion in ions:
         sign, number, ion = split_ion(ion)
-        try:
-            formula = Formula(ion)
-            atom_mass = formula.isotope.mass
-        except FormulaError:
-            logger.warning(f"The formula {ion} in the adduct is not recognized")
+        atom_mass = get_mass_of_formula(ion)
+        if atom_mass is None:
             return None
+
         if sign == "-":
             number = -int(number)
         else:
@@ -120,3 +136,28 @@ def get_charge_of_adduct(adduct)->Optional[int]:
         logger.warning(f"Charge is expected of length 1 or 2 {charge} was given")
         return None
     return int(charge_sign+charge_size)
+
+
+def get_mass_of_formula(formula):
+    """Calculates the monoisotopic mass of an formula
+
+    e.g. "C" returns 12.011 and "CH2" returns 15.035. This can be used to calculate the mass difference of adducts
+    Was addapted from: https://bioinformatics.stackexchange.com/questions/6852/
+    """
+    if not _has_rdkit:
+        raise ImportError(rdkit_missing_message)
+    parts = re.findall("[A-Z][a-z]?|[0-9]+", formula)
+    mass = 0
+
+    for index in range(len(parts)):
+        if parts[index].isnumeric():
+            continue
+        periodic_table = Chem.GetPeriodicTable()
+        try:
+            atom_mass = periodic_table.GetMostCommonIsotopeMass(parts[index])
+        except RuntimeError:
+            logger.warning("The atom: %s in the formula %s is not known", parts[index], formula)
+            return None
+        multiplier = int(parts[index + 1]) if len(parts) > index + 1 and parts[index + 1].isnumeric() else 1
+        mass += atom_mass * multiplier
+    return mass

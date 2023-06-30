@@ -22,6 +22,9 @@ def repair_parent_mass_is_mol_wt(spectrum_in: Spectrum, mass_tolerance: float):
     # Check if parent mass already matches smiles
     if require_parent_mass_match_smiles(spectrum, mass_tolerance) is not None:
         return spectrum
+    # Check if the precursor_mz can be calculated from the parent mass. If not skip this function
+    if abs(spectrum.get("precursor_mz") - derive_precursor_mz_from_parent_mass(spectrum)) > mass_tolerance:
+        return spectrum
     # Check if parent mass matches the smiles mass
     parent_mass = spectrum.get("parent_mass")
     smiles = spectrum.get("smiles")
