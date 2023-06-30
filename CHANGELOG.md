@@ -8,15 +8,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- New filter functions to repair a smiles that mismatches parent mass
+- New filter functions to repair a smiles that mismatches parent mass [#440](https://github.com/matchms/matchms/pull/440)
+  - Updated adduct coversion and known adducts
+  - added repair_adduct_based_on_smiles
+  - added repair_parent_mass_is_mol_wt
+  - added repair_precursor_is_parent_mass
+  - added repair_smiles_of_salts
+  - added require_parent_mass_match_smiles
+  - added function to combine this in repair_parent_mass_match_smiles_wrapper
 
 ### Changed
-- Moved functions related to adducts and parent mass
+- Use pandas for loading adducts dict
+- Moved functions from add_parent_mass to derive_precursor_mz_and_parent_mass from
 - Updated reiterate_peak_comments function to convert the peak_comments keys to float [#437](https://github.com/matchms/matchms/pull/437)
 - Removed filter_by_range non-inplace version [#438](https://github.com/matchms/matchms/pull/438)
 - Updated regex in get_peak_values function [#439](https://github.com/matchms/matchms/pull/439)
 
 ### Fixed
+- Fixed mistake in calculate parent mass from adduct
+- In load_spectra check for type Spectrum instead of SpectrumType
 
 ## [0.20.0] - 2023-05-30
 
