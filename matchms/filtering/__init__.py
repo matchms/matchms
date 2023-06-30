@@ -77,12 +77,12 @@ from .repair_parent_mass_from_smiles.repair_smiles_of_salts import \
 from .repair_parent_mass_from_smiles.require_parent_mass_match_smiles import \
     require_parent_mass_match_smiles
 from .repair_smiles_from_compound_name import repair_smiles_from_compound_name
-from.require_valid_annotation import require_valid_annotation
 from .require_correct_ionmode import require_correct_ionmode
 from .require_minimum_number_of_peaks import require_minimum_number_of_peaks
 from .require_minimum_of_high_peaks import require_minimum_of_high_peaks
 from .require_precursor_below_mz import require_precursor_below_mz
 from .require_precursor_mz import require_precursor_mz
+from .require_valid_annotation import require_valid_annotation
 from .select_by_intensity import select_by_intensity
 from .select_by_mz import select_by_mz
 from .select_by_relative_intensity import select_by_relative_intensity
