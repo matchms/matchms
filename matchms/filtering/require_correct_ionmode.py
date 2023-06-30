@@ -11,9 +11,8 @@ def require_correct_ionmode(spectrum_in: Spectrum,
     if spectrum_in is None:
         return None
     spectrum = spectrum_in.clone()
-
-    assert ion_mode_to_keep in {"positive", "negative", "both"}, \
-        "ion_mode should be set to 'positive', 'negative' or 'both'"
+    if ion_mode_to_keep not in {"positive", "negative", "both"}:
+        raise ValueError("ion_mode_to_keep should be 'positive', 'negative' or 'both'")
     ion_mode = spectrum.get("ionmode")
     if ion_mode_to_keep == "both":
         if ion_mode in ("positive", "negative"):
