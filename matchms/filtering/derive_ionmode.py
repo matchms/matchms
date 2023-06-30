@@ -1,7 +1,6 @@
 import logging
-from matchms.filtering.load_adducts import load_adducts_dict
-from ..metadata_utils import clean_adduct
 from ..typing import SpectrumType
+from .repair_adduct.clean_adduct import _clean_adduct, load_known_adducts
 
 
 logger = logging.getLogger("matchms")
@@ -30,12 +29,12 @@ def derive_ionmode(spectrum_in: SpectrumType) -> SpectrumType:
     spectrum = spectrum_in.clone()
 
     # Load lists of known adducts
-    known_adducts = load_adducts_dict()
+    known_adducts = load_known_adducts()
 
     adduct = spectrum.get("adduct", None)
     # Harmonize adduct string
     if adduct:
-        adduct = clean_adduct(adduct)
+        adduct = _clean_adduct(adduct)
 
     ionmode = spectrum.get("ionmode")
     if ionmode:
@@ -43,10 +42,9 @@ def derive_ionmode(spectrum_in: SpectrumType) -> SpectrumType:
                                             "Apply 'make_ionmode_lowercase' filter first.")
     if ionmode in ["positive", "negative"]:
         return spectrum
-
     # Try completing missing or incorrect ionmodes
-    if adduct in known_adducts:
-        ionmode = known_adducts[adduct]["ionmode"]
+    if adduct in list(known_adducts["adduct"]):
+        ionmode = known_adducts.loc[known_adducts["adduct"] == adduct, "ionmode"].values[0]
     else:
         ionmode = "n/a"
 

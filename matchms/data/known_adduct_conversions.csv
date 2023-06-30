@@ -36,3 +36,5 @@ input_adduct,corrected_adduct
 [M-H-/M-Ser],[M-H]-
 [M-H]-/[M-Ser]-,[M-H]-
 [M-H]-/[M-Ser],[M-H]-
+[M+CH3COOH-H],[M+CH3COO]-
+[M-H1],[M-H]-

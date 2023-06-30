@@ -55,7 +55,6 @@ from .harmonize_undefined_inchi import harmonize_undefined_inchi
 from .harmonize_undefined_inchikey import harmonize_undefined_inchikey
 from .harmonize_undefined_smiles import harmonize_undefined_smiles
 from .interpret_pepmass import interpret_pepmass
-from .load_adducts import load_adducts_dict, load_known_adduct_conversions
 from .make_charge_int import make_charge_int
 from .make_charge_scalar import make_charge_scalar
 from .make_ionmode_lowercase import make_ionmode_lowercase
@@ -63,7 +62,20 @@ from .normalize_intensities import normalize_intensities
 from .reduce_to_number_of_peaks import reduce_to_number_of_peaks
 from .remove_peaks_around_precursor_mz import remove_peaks_around_precursor_mz
 from .remove_peaks_outside_top_k import remove_peaks_outside_top_k
+from .repair_adduct.clean_adduct import clean_adduct
+from .repair_adduct.repair_adduct_based_on_smiles import \
+    repair_adduct_based_on_smiles
 from .repair_inchi_inchikey_smiles import repair_inchi_inchikey_smiles
+from .repair_parent_mass_from_smiles.repair_parent_mass_is_mol_wt import \
+    repair_parent_mass_is_mol_wt
+from .repair_parent_mass_from_smiles.repair_parent_mass_match_smiles_wrapper import \
+    repair_parent_mass_match_smiles_wrapper
+from .repair_parent_mass_from_smiles.repair_precursor_is_parent_mass import \
+    repair_precursor_is_parent_mass
+from .repair_parent_mass_from_smiles.repair_smiles_of_salts import \
+    repair_smiles_of_salts
+from .repair_parent_mass_from_smiles.require_parent_mass_match_smiles import \
+    require_parent_mass_match_smiles
 from .require_minimum_number_of_peaks import require_minimum_number_of_peaks
 from .require_minimum_of_high_peaks import require_minimum_of_high_peaks
 from .require_precursor_below_mz import require_precursor_below_mz
@@ -84,6 +96,7 @@ __all__ = [
     "add_retention_index",
     "add_retention_time",
     "clean_compound_name",
+    "clean_adduct",
     "correct_charge",
     "default_filters",
     "derive_adduct_from_name",
@@ -96,8 +109,6 @@ __all__ = [
     "harmonize_undefined_inchikey",
     "harmonize_undefined_smiles",
     "interpret_pepmass",
-    "load_adducts_dict",
-    "load_known_adduct_conversions",
     "make_charge_int",
     "make_charge_scalar",
     "make_ionmode_lowercase",
@@ -105,7 +116,13 @@ __all__ = [
     "reduce_to_number_of_peaks",
     "remove_peaks_around_precursor_mz",
     "remove_peaks_outside_top_k",
+    "repair_adduct_based_on_smiles",
     "repair_inchi_inchikey_smiles",
+    "repair_parent_mass_is_mol_wt",
+    "repair_parent_mass_match_smiles_wrapper",
+    "repair_precursor_is_parent_mass",
+    "repair_smiles_of_salts",
+    "require_parent_mass_match_smiles",
     "require_minimum_number_of_peaks",
     "require_minimum_of_high_peaks",
     "require_precursor_below_mz",

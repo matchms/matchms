@@ -1,6 +1,7 @@
 import pytest
 from testfixtures import LogCapture
 from matchms.filtering import derive_adduct_from_name
+from matchms.filtering.derive_adduct_from_name import looks_like_adduct
 from matchms.logging_functions import (reset_matchms_logger,
                                        set_matchms_logger_level)
 from ..builder_Spectrum import SpectrumBuilder
@@ -28,7 +29,7 @@ def test_derive_adduct_from_name_parametrized(metadata, remove_adduct_from_name,
     if spectrum.get("compound_name") != spectrum_in.get("compound_name"):
         expected_log.append(('matchms', 'INFO', f'Removed adduct {removed_adduct} from compound name.'))
     if spectrum.get("adduct") != spectrum_in.get("adduct"):
-        expected_log.append(('matchms', 'INFO', f'Added adduct {expected_adduct} to metadata.'))
+        expected_log.append(('matchms', 'INFO', f'Added adduct {expected_adduct} from the compound name to metadata.'))
 
     log.check(*expected_log)
     reset_matchms_logger()
@@ -39,3 +40,12 @@ def test_empty_spectrum():
     spectrum = derive_adduct_from_name(spectrum_in)
 
     assert spectrum is None, "Expected different handling of None spectrum."
+
+
+def test_looks_like_adduct():
+    """Test if adducts are correctly identified"""
+    for adduct in ["M+", "M*+", "M+Cl", "[M+H]", "[2M+Na]+", "M+H+K", "[2M+ACN+H]+",
+                   "MS+Na", "MS+H", "M3Cl37+Na", "[M+H+H2O]"]:
+        assert looks_like_adduct(adduct), "Expected this to be identified as adduct"
+    for adduct in ["N+", "B*+", "++", "--", "[--]", "H+M+K"]:
+        assert not looks_like_adduct(adduct), "Expected this not to be identified as adduct"

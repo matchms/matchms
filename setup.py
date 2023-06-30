@@ -58,6 +58,7 @@ setup(
         "scipy",
         "sparsestack >= 0.4.1",
         "tqdm",
+        "pandas"
     ],
     extras_require={"dev": ["bump2version",
                             "decorator",
