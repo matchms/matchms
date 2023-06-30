@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from matchms.filtering.repair_adduct.clean_adduct import (
-    load_known_adducts, load_known_adduct_conversions)
+    load_known_adduct_conversions, load_known_adducts)
 
 
 def test_load_adducts_dict():

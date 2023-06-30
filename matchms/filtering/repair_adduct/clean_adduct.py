@@ -2,9 +2,9 @@ import csv
 import logging
 import os
 import re
-import pandas as pd
 from functools import lru_cache
 from typing import Dict
+import pandas as pd
 
 
 logger = logging.getLogger("matchms")

@@ -1,11 +1,17 @@
 import logging
 from typing import Optional
+from matchms.filtering.repair_adduct.repair_adduct_based_on_smiles import \
+    repair_adduct_based_on_smiles
+from matchms.filtering.repair_parent_mass_from_smiles.repair_parent_mass_is_mol_wt import \
+    repair_parent_mass_is_mol_wt
+from matchms.filtering.repair_parent_mass_from_smiles.repair_precursor_is_parent_mass import \
+    repair_precursor_is_parent_mass
+from matchms.filtering.repair_parent_mass_from_smiles.repair_smiles_of_salts import \
+    repair_smiles_of_salts
+from matchms.filtering.repair_parent_mass_from_smiles.require_parent_mass_match_smiles import \
+    require_parent_mass_match_smiles
 from matchms.typing import SpectrumType
-from matchms.filtering.repair_parent_mass_from_smiles.require_parent_mass_match_smiles import require_parent_mass_match_smiles
-from matchms.filtering.repair_parent_mass_from_smiles.repair_parent_mass_is_mol_wt import repair_parent_mass_is_mol_wt
-from matchms.filtering.repair_parent_mass_from_smiles.repair_smiles_of_salts import repair_smiles_of_salts
-from matchms.filtering.repair_parent_mass_from_smiles.repair_precursor_is_parent_mass import repair_precursor_is_parent_mass
-from matchms.filtering.repair_adduct.repair_adduct_based_on_smiles import repair_adduct_based_on_smiles
+
 
 logger = logging.getLogger("matchms")
 

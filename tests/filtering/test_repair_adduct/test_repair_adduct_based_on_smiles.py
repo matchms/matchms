@@ -32,7 +32,7 @@ def test_repair_adduct_based_on_smiles_not_repaired():
                                                    "precursor_mz": 1000.0,
                                                    "ionmode": "negative"}).build()
     spectrum_out = repair_adduct_based_on_smiles(spectrum_in, mass_tolerance=0.1, accept_parent_mass_is_mol_wt=False)
-    assert spectrum_out.get("adduct") == None
+    assert spectrum_out.get("adduct") is None
 
 
 @pytest.mark.parametrize("precursor_mz, expected_adduct, ionmode",
