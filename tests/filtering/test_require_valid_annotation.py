@@ -1,5 +1,5 @@
 import pytest
-from matchms.filtering import require_annotation
+from matchms.filtering import require_valid_annotation
 from ..builder_Spectrum import SpectrumBuilder
 
 
@@ -17,7 +17,7 @@ def test_clean_compound_name(smile, inchi, inchikey, correct):
     spectrum_in = builder.with_metadata({"smiles": smile,
                                          "inchi": inchi,
                                          "inchikey": inchikey}).build()
-    spectrum_out = require_annotation(spectrum_in)
+    spectrum_out = require_valid_annotation(spectrum_in)
     if correct is True:
         assert spectrum_out == spectrum_in
     else:
