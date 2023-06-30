@@ -1,35 +1,20 @@
 import numpy as np
-from matchms.filtering import load_adducts_dict, load_known_adduct_conversions
-from matchms.filtering.load_adducts import _convert_and_fill_dict
+import pandas as pd
+from matchms.filtering.repair_adduct.clean_adduct import (
+    load_known_adduct_conversions, load_known_adducts)
 
 
 def test_load_adducts_dict():
     """Test if correct dict is imported."""
-    known_adducts = load_adducts_dict()
-    assert isinstance(known_adducts, dict), "Expected dictionary"
-    assert "[M+2H+Na]3+" in known_adducts, "Expected adduct to be in dictionary"
-    assert "[M+CH3COO]-" in known_adducts, "Expected adduct to be in dictionary"
-    assert known_adducts["[M+2H+Na]3+"]["charge"] == 3, "Expected different entry"
-    assert np.all([(key[0] == "[") for key in known_adducts]), \
+    known_adducts = load_known_adducts()
+    assert isinstance(known_adducts, pd.DataFrame), "Expected a pandas dataframe"
+    assert "[M+2H+Na]3+" in list(known_adducts["adduct"]), "Expected adduct to be in the dataframe"
+    assert "[M+CH3COO]-" in list(known_adducts["adduct"]), "Expected adduct to be in dictionary"
+    assert known_adducts.loc[known_adducts["adduct"] == "[M+2H+Na]3+", "charge"].values[0] == 3, \
+        "Expected different entry"
+    assert np.all([(key[0] == "[") for key in known_adducts["adduct"]]), \
         "Expected all keys to start with '['."
-    assert known_adducts["[M]+"]["charge"] == 1, "Expected different added entry"
-    assert np.allclose(known_adducts["[M]-"]["correction_mass"], -1.007276, atol=1e-5), \
-        "Expected different added entry"
-
-
-def test_convert_and_fill_dict():
-    """Test if conversion is done right."""
-    test_dict = {}
-    test_dict["[M]+"] = {'ionmode': 'negative',
-                         'charge': "n/a",
-                         'mass_multiplier': "n/a",
-                         'correction_mass': "n/a"}
-    converted_dict = _convert_and_fill_dict(test_dict)
-    assert isinstance(converted_dict["[M]+"], dict), "Expected dictionary"
-    assert converted_dict["[M]+"]["charge"] == -1, "Expected charge of -1"
-    assert converted_dict["[M]+"]["mass_multiplier"] == 1, "Expected mass_multiplier of 1"
-    assert np.allclose(converted_dict["[M]+"]["correction_mass"], -1.007276, atol=1e-5), \
-        "Expected correction_mass to be changed to -1.007276"
+    assert known_adducts.loc[known_adducts["adduct"] == "[M]+", "charge"].values[0] == 1, "Expected different entry"
 
 
 def test_load_known_adduct_conversions():

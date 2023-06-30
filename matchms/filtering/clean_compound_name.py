@@ -16,25 +16,27 @@ def clean_compound_name(spectrum_in: SpectrumType) -> SpectrumType:
         """Clean name string by removing known parts that don't belong there."""
         name = name.strip()
         # remove type NCGC00180417-03_C31H40O16_
-        name = re.split(r"[A-Z]{3,}[0-9]{8,}-[0-9]{2,}_[A-Z,0-9]{4,}_", name)[-1]
+        name = re.split(r"[A-Z]{3,6}[0-9]{8,12}-[0-9]{2,5}_[A-Z,0-9]{4,15}_", name)[-1]
         # remove type NCGC00160232-01! or MLS001142816-01!
-        name = re.split(r"[A-Z]{3,}[0-9]{8,}-[0-9]{2,3}\!", name)[-1]
+        name = re.split(r"[A-Z]{3,6}[0-9]{8,12}-[0-9]{2,3}\!", name)[-1]
         # remove type Massbank:EA008813 option1|option2|option3
         name = re.split(r"((Massbank:)|(MassbankEU:))[A-Z]{2}[0-9]{5,6}.*\|", name)[-1]
         # remove type Massbank:EA008813 or MassbankEU:EA008813
         name = re.split(r"((Massbank:)|(MassbankEU:))[A-Z]{2}[0-9]{5,6}", name)[-1]
         # remove type HMDB:HMDB00943-1336
-        name = re.split(r"HMDB:HMDB[0-9]{4,}-[0-9]{1,}", name)[-1]
+        name = re.split(r"HMDB:HMDB[0-9]{4,7}-[0-9]{1,7}", name)[-1]
         # remove type MoNA:662599
-        name = re.split(r"MoNA:[0-9]{5,}", name)[-1]
+        name = re.split(r"MoNA:[0-9]{5,10}", name)[-1]
         # ReSpect:PS013405 option1|option2|option3...
-        name = re.split(r"ReSpect:[A-Z]{2,}[0-9]{6}.*\|", name)[-1]
+        name = re.split(r"ReSpect:[A-Z]{2,3}[0-9]{6}.*\|", name)[-1]
         # ReSpect:PS013405 option1
-        name = re.split(r"[A-Z]{2,}[0-9]{6}( )", name)[-1]
+        name = re.split(r"[A-Z]{2,3}[0-9]{6}( )", name)[-1]
         # remove type 0072_2-Mercaptobenzothiaz
         name = re.split(r"^[0-9]{4}_", name)[-1]
         # remove type nameofcompound_CID20_170920 or Spiraeoside_HCD30_170919
         name = re.split(r"_((HCD)|(CID))[0-9]{2}_[0-9]{5,6}$", name)[0]
+        # Removes the collision energy from the compound name. Also allows for occurances of - 40.0 eV Unknown
+        name = re.split(r"(?: - )?[0-9]+(?:\.[0-9]+)? ?[eE][Vv](?: Unknown)?$", name)[0]
         return name
 
     def remove_known_non_compound_parts(name):

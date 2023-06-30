@@ -325,14 +325,11 @@ class Scores:
     def scores(self):
         return self._scores
 
-    def filter_by_range(self, inplace=False, **kwargs):
+    def filter_by_range(self, **kwargs):
         """Remove all scores for which the score `name` is outside the given range.
 
         Parameters
         ----------
-        inplace
-            Default is False in which case a filtered scores object will be returned.
-            Set to True to change the scores array in-place.
         kwargs
             See "Keyword arguments" section below.
 
@@ -352,10 +349,7 @@ class Scores:
             Define operator to be used to compare against `high`. Default is '<'.
             Possible choices are '>', '<', '>=', '<='.
         """
-        if inplace is True:
-            self._scores = self._scores.filter_by_range(**kwargs)
-            return None
-        return self._scores.filter_by_range(**kwargs)
+        self._scores = self._scores.filter_by_range(**kwargs)
 
     def to_array(self, name=None) -> np.ndarray:
         """Scores as numpy array
