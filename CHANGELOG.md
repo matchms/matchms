@@ -10,12 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 ### Changed
 ### Fixed
-- Added `metadata_harmonization` parameter to `load_spectra` function [#443](https://github.com/matchms/matchms/pull/443)
-## [0.20.0] - 2023-05-30
+
+## [0.21.0] - 2023-06-30
 
 ### Added
-- New filter functions to repair a smiles that mismatches parent mass [#440](https://github.com/matchms/matchms/pull/440)
-  - Updated adduct coversion and known adducts
+- New filter functions to repair a smiles that do not match parent mass [#440](https://github.com/matchms/matchms/pull/440)
+  - Updated adduct conversion and known adducts
   - added repair_adduct_based_on_smiles
   - added repair_parent_mass_is_mol_wt
   - added repair_precursor_is_parent_mass
@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added repair_smiles_from_compound_name [#448](https://github.com/matchms/matchms/pull/448)
 - Added require_correct_ionmode [#449](https://github.com/matchms/matchms/pull/449)
 - Added require_valid_annotation [#451](https://github.com/matchms/matchms/pull/451)
+- 
 ### Changed
 - Use pandas for loading adducts dict
 - Moved functions from add_parent_mass to derive_precursor_mz_and_parent_mass from
@@ -33,8 +34,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated regex in get_peak_values function [#439](https://github.com/matchms/matchms/pull/439)
 
 ### Fixed
-- Fixed mistake in calculate parent mass from adduct
-- In load_spectra check for type Spectrum instead of SpectrumType
+- Fixed mistake in calculating parent mass from adduct
+- Added `metadata_harmonization` parameter to `load_spectra` function [#443](https://github.com/matchms/matchms/pull/443)
 
 ## [0.20.0] - 2023-05-30
 
@@ -526,7 +527,8 @@ Contains three plot types: `plot_spectrum()` or `spectrum.plot()`, `plot_spectra
 - This is the initial version of Spec2Vec from https://github.com/iomega/Spec2Vec
 - (later splitted into matchms + spec2vec)
 
-[Unreleased]: https://github.com/matchms/matchms/compare/0.20.0...HEAD
+[Unreleased]: https://github.com/matchms/matchms/compare/0.21.0...HEAD
+[0.21.0]: https://github.com/matchms/matchms/compare/0.20.0...0.21.0
 [0.20.0]: https://github.com/matchms/matchms/compare/0.19.0...0.20.0
 [0.19.0]: https://github.com/matchms/matchms/compare/0.18.0...0.19.0
 [0.18.0]: https://github.com/matchms/matchms/compare/0.17.0...0.18.0
