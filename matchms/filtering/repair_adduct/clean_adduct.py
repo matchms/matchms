@@ -4,6 +4,7 @@ import os
 import re
 from functools import lru_cache
 from typing import Dict
+import pandas as pd
 
 
 logger = logging.getLogger("matchms")
@@ -71,7 +72,7 @@ def _clean_adduct(adduct: str) -> str:
 
 
 @lru_cache(maxsize=4)
-def load_adducts_dict() -> Dict[str, dict]:
+def load_known_adducts() -> pd.DataFrame:
     """Load dictionary of known adducts containing the adduct mass and charge.
     Makes sure that file loading is cached.
 
@@ -82,26 +83,14 @@ def load_adducts_dict() -> Dict[str, dict]:
     The full table can be found at
     https://github.com/matchms/matchms/blob/expand_adducts/matchms/data/known_adducts_table.csv
 
-    TODO: change to relative path link or update link
-
     """
     known_adducts_file = os.path.join(os.path.dirname(__file__), "..", "..", "data", "known_adducts_table.csv")
     assert os.path.isfile(known_adducts_file), "Could not find known_adducts_table.csv."
 
     with open(known_adducts_file, newline='', encoding='utf-8-sig') as csvfile:
-        reader = csv.DictReader(csvfile)
-        adducts_dict = {}
-        for row in reader:
-            assert "adduct" in row
-            adducts_dict[row["adduct"]] = {x[0]: x[1] for x in row.items() if x[0] != "adduct"}
-
-    formatted_adduct_dict = {}
-    for adduct, values in adducts_dict.items():
-        values["charge"] = int(values["charge"])
-        values["mass_multiplier"] = float(values["mass_multiplier"])
-        values["correction_mass"] = float(values["correction_mass"])
-        formatted_adduct_dict[adduct] = values
-    return formatted_adduct_dict
+        adducts_dataframe = pd.read_csv(csvfile)
+        assert list(adducts_dataframe.columns) == ["adduct", "ionmode", "charge", "mass_multiplier", "correction_mass"]
+    return adducts_dataframe
 
 
 @lru_cache(maxsize=4)
