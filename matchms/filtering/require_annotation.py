@@ -7,11 +7,10 @@ from matchms.metadata_utils import (is_valid_inchi, is_valid_inchikey,
 logger = logging.getLogger("matchms")
 
 
-def require_annotation(spectrum_in: Spectrum):
+def require_annotation(spectrum: Spectrum):
     """Removes spectra that are not fully annotated (correct and matching, smiles, inchi and inchikey)"""
-    if spectrum_in is None:
+    if spectrum is None:
         return None
-    spectrum = spectrum_in.clone()
     smiles = spectrum.get("smiles")
     inchi = spectrum.get("inchi")
     inchikey = spectrum.get("inchikey")
