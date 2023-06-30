@@ -97,24 +97,6 @@ We realized that many matchms-based workflows aim to compare many-to-many spectr
    :alt: matchms code design
 
 
-
-**********************************
-Latest changes (matchms >= 0.14.0)
-**********************************
-
-Metadata class
-==============
-
-This is the first of a few releases to work our way towards matchms 1.0.0, which also means that a few things in the API will likely change. Here the main change is that `Spectrum.metadata` is no longer a simple Python dictionary but became a ``Metadata`` object. In this context metadata field-names/keys will now be harmonized by default (e.g. "Precursor Mass" will become "precursor_mz). For list of conversions see `matchms key conversion table <https://github.com/matchms/matchms/blob/master/matchms/data/known_key_conversions.csv>`_.
-
-- metadata is now stored using new ``Metadata`` class which automatically applied restrictions to used field names/keys to avoid confusion between different format styles
-- all metadata keys must be lower-case, spaces will be changed to underscores.
-- Known key conversions are applied to metadata entries using a `matchms key conversion table <https://github.com/matchms/matchms/blob/master/matchms/data/known_key_conversions.csv>`_.
-- new ``MetadataMatch`` similarity measure in matchms.similarity. This can be used to find matches between metadata entries and currently supports either full string matches or matches of numerical entries within a specified tolerance
-- new ``interpret_pepmass()`` filter to handle different pepmass entries found in data 
-- ``Spikes`` class has become ``Fragments`` class
-
-
 ***********************
 Documentation for users
 ***********************
