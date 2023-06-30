@@ -7,7 +7,6 @@ from matchms.constants import ELECTRTON_MASS
 
 try:  # rdkit is not included in pip package
     from rdkit import Chem
-    from rdkit.Chem import Descriptors
 except ImportError:
     _has_rdkit = False
     from collections import UserString
