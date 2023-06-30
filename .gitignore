@@ -29,6 +29,7 @@ docs/apidocs
 config.py
 output/
 /data/
+/notebooks/
 models_trained/
 computed_results/
 notebooks/.ipynb_checkpoints/
