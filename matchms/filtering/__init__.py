@@ -66,6 +66,7 @@ from .repair_adduct.clean_adduct import clean_adduct
 from .repair_adduct.repair_adduct_based_on_smiles import \
     repair_adduct_based_on_smiles
 from .repair_inchi_inchikey_smiles import repair_inchi_inchikey_smiles
+from .repair_parent_mass_from_smiles.repair_parent_mass_match_smiles_wrapper import repair_parent_mass_match_smiles_wrapper
 from .repair_parent_mass_from_smiles.repair_parent_mass_is_mol_wt import \
     repair_parent_mass_is_mol_wt
 from .repair_parent_mass_from_smiles.repair_precursor_is_parent_mass import \
@@ -117,6 +118,7 @@ __all__ = [
     "repair_adduct_based_on_smiles",
     "repair_inchi_inchikey_smiles",
     "repair_parent_mass_is_mol_wt",
+    "repair_parent_mass_match_smiles_wrapper",
     "repair_precursor_is_parent_mass",
     "repair_smiles_of_salts",
     "require_parent_mass_match_smiles",
