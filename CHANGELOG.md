@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - added repair_smiles_of_salts
   - added require_parent_mass_match_smiles
   - added function to combine this in repair_parent_mass_match_smiles_wrapper
+- Added repair_smiles_from_compound_name [#449](https://github.com/matchms/matchms/pull/449)
 
 ### Changed
 - Use pandas for loading adducts dict
