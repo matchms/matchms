@@ -109,6 +109,8 @@ def get_mass_of_ion(ions):
     for ion in ions:
         sign, number, ion = split_ion(ion)
         atom_mass = get_mass_of_formula(ion)
+        if atom_mass is None:
+            return None
 
         if sign == "-":
             number = -int(number)
@@ -151,7 +153,11 @@ def get_mass_of_formula(formula):
         if parts[index].isnumeric():
             continue
         periodic_table = Chem.GetPeriodicTable()
-        atom_mass = periodic_table.GetMostCommonIsotopeMass(parts[index])
+        try:
+            atom_mass = periodic_table.GetMostCommonIsotopeMass(parts[index])
+        except RuntimeError:
+            logger.warning("The atom: %s in the formula %s is not known", parts[index], formula)
+            return None
         multiplier = int(parts[index + 1]) if len(parts) > index + 1 and parts[index + 1].isnumeric() else 1
         mass += atom_mass * multiplier
     return mass

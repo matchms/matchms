@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
+- New filter functions to repair a smiles that mismatches parent mass
+=======
 - New filter functions to repair a smiles that mismatches parent mass [#440](https://github.com/matchms/matchms/pull/440)
   - Updated adduct coversion and known adducts
   - added repair_adduct_based_on_smiles
@@ -16,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - added repair_smiles_of_salts
   - added require_parent_mass_match_smiles
   - added function to combine this in repair_parent_mass_match_smiles_wrapper
+- Added repair_smiles_from_compound_name [#448](https://github.com/matchms/matchms/pull/448)
 
 ### Changed
 - Use pandas for loading adducts dict
