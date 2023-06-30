@@ -82,6 +82,7 @@ from .require_minimum_number_of_peaks import require_minimum_number_of_peaks
 from .require_minimum_of_high_peaks import require_minimum_of_high_peaks
 from .require_precursor_below_mz import require_precursor_below_mz
 from .require_precursor_mz import require_precursor_mz
+from .require_valid_annotation import require_valid_annotation
 from .select_by_intensity import select_by_intensity
 from .select_by_mz import select_by_mz
 from .select_by_relative_intensity import select_by_relative_intensity
@@ -126,6 +127,7 @@ __all__ = [
     "repair_precursor_is_parent_mass",
     "repair_smiles_of_salts",
     "repair_smiles_from_compound_name",
+    "require_valid_annotation",
     "require_parent_mass_match_smiles",
     "require_minimum_number_of_peaks",
     "require_minimum_of_high_peaks",

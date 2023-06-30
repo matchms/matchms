@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - added function to combine this in repair_parent_mass_match_smiles_wrapper
 - Added repair_smiles_from_compound_name [#448](https://github.com/matchms/matchms/pull/448)
 - Added require_correct_ionmode [#449](https://github.com/matchms/matchms/pull/449)
-
+- Added require_valid_annotation [#451](https://github.com/matchms/matchms/pull/451)
 ### Changed
 - Use pandas for loading adducts dict
 - Moved functions from add_parent_mass to derive_precursor_mz_and_parent_mass from
