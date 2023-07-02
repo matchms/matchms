@@ -1,5 +1,13 @@
 from matchms.typing import SpectrumType
-import matchms.filtering as ms_filtering
+from .metadata_processing.add_compound_name import add_compound_name
+from .metadata_processing.add_precursor_mz import add_precursor_mz
+from .metadata_processing.clean_compound_name import clean_compound_name
+from .metadata_processing.correct_charge import correct_charge
+from .metadata_processing.derive_adduct_from_name import derive_adduct_from_name
+from .metadata_processing.derive_formula_from_name import derive_formula_from_name
+from .metadata_processing.derive_ionmode import derive_ionmode
+from .metadata_processing.interpret_pepmass import interpret_pepmass
+from .metadata_processing.make_charge_int import make_charge_int
 
 
 def default_filters(spectrum: SpectrumType) -> SpectrumType:
@@ -19,13 +27,13 @@ def default_filters(spectrum: SpectrumType) -> SpectrumType:
     9. :meth:`~matchms.filtering.metadata_processing.correct_charge`
 
     """
-    spectrum = ms_filtering.make_charge_int(spectrum)
-    spectrum = ms_filtering.add_compound_name(spectrum)
-    spectrum = ms_filtering.derive_adduct_from_name(spectrum)
-    spectrum = ms_filtering.derive_formula_from_name(spectrum)
-    spectrum = ms_filtering.clean_compound_name(spectrum)
-    spectrum = ms_filtering.interpret_pepmass(spectrum)
-    spectrum = ms_filtering.add_precursor_mz(spectrum)
-    spectrum = ms_filtering.derive_ionmode(spectrum)
-    spectrum = ms_filtering.correct_charge(spectrum)
+    spectrum = make_charge_int(spectrum)
+    spectrum = add_compound_name(spectrum)
+    spectrum = derive_adduct_from_name(spectrum)
+    spectrum = derive_formula_from_name(spectrum)
+    spectrum = clean_compound_name(spectrum)
+    spectrum = interpret_pepmass(spectrum)
+    spectrum = add_precursor_mz(spectrum)
+    spectrum = derive_ionmode(spectrum)
+    spectrum = correct_charge(spectrum)
     return spectrum
