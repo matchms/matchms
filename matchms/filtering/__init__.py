@@ -56,7 +56,6 @@ from .metadata_processing.harmonize_undefined_smiles import harmonize_undefined_
 from .metadata_processing.interpret_pepmass import interpret_pepmass
 from .metadata_processing.make_charge_int import make_charge_int
 from .metadata_processing.make_charge_scalar import make_charge_scalar
-from .normalize_intensities import normalize_intensities
 from .metadata_processing.clean_adduct import clean_adduct
 from .metadata_processing.repair_adduct_based_on_smiles import \
     repair_adduct_based_on_smiles
@@ -75,6 +74,7 @@ from .metadata_processing.repair_smiles_from_compound_name import repair_smiles_
 from .metadata_processing.require_correct_ionmode import require_correct_ionmode
 from .metadata_processing.require_valid_annotation import require_valid_annotation
 from .peak_processing.add_losses import add_losses
+from .peak_processing.normalize_intensities import normalize_intensities
 from .peak_processing.reduce_to_number_of_peaks import reduce_to_number_of_peaks
 from .peak_processing.remove_peaks_around_precursor_mz import remove_peaks_around_precursor_mz
 from .peak_processing.remove_peaks_outside_top_k import remove_peaks_outside_top_k
