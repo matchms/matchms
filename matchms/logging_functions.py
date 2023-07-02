@@ -143,6 +143,7 @@ def reset_matchms_logger(logger_name="matchms"):
     logger.handlers.clear()
     _init_logger()
 
+
 # function recreates the functionality of the rdkit function 
 # https://github.com/rdkit/rdkit/blob/master/rdkit/RDLogger.py setLevel()
 def set_rdkit_logger_level(level):
