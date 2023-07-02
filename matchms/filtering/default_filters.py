@@ -8,15 +8,15 @@ def default_filters(spectrum: SpectrumType) -> SpectrumType:
 
     Collection is
 
-    1. :meth:`~matchms.filtering.make_charge_int`
-    2. :meth:`~matchms.filtering.add_compound_name`
-    3. :meth:`~matchms.filtering.derive_adduct_from_name`
-    4. :meth:`~matchms.filtering.derive_formula_from_name`
-    5. :meth:`~matchms.filtering.clean_compound_name`
-    6. :meth:`~matchms.filtering.interpret_pepmass`
-    7. :meth:`~matchms.filtering.add_precursor_mz`
-    8. :meth:`~matchms.filtering.derive_ionmode`
-    9. :meth:`~matchms.filtering.correct_charge`
+    1. :meth:`~matchms.filtering.metadata_processing.make_charge_int`
+    2. :meth:`~matchms.filtering.metadata_processing.add_compound_name`
+    3. :meth:`~matchms.filtering.metadata_processing.derive_adduct_from_name`
+    4. :meth:`~matchms.filtering.metadata_processing.derive_formula_from_name`
+    5. :meth:`~matchms.filtering.metadata_processing.clean_compound_name`
+    6. :meth:`~matchms.filtering.metadata_processing.interpret_pepmass`
+    7. :meth:`~matchms.filtering.metadata_processing.add_precursor_mz`
+    8. :meth:`~matchms.filtering.metadata_processing.derive_ionmode`
+    9. :meth:`~matchms.filtering.metadata_processing.correct_charge`
 
     """
     spectrum = ms_filtering.make_charge_int(spectrum)
