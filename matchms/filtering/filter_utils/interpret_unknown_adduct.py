@@ -99,8 +99,7 @@ def replace_abbreviations(ions_split):
     corrected_ions = []
     for ion in ions_split:
         sign, number, ion = split_ion(ion)
-        if ion in abbrev_to_formula:
-            ion = abbrev_to_formula[ion]
+        ion = abbrev_to_formula.get(ion, ion)
         corrected_ions.append(sign + str(number) + ion)
     return corrected_ions
 
