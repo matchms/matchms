@@ -22,7 +22,8 @@ def repair_adduct_based_on_smiles(spectrum_in: Spectrum,
     precursor_mz = changed_spectrum.get("precursor_mz")
     ion_mode = changed_spectrum.get("ionmode")
     if ion_mode not in ("positive", "negative"):
-        logger.warning(f"Ionmode: {ion_mode} not positive or negative, first run derive_ionmode")
+        logger.warning("Ionmode: %s not positive or negative, first run derive_ionmode",
+                        ion_mode)
         return changed_spectrum
     if precursor_mz is None:
         logger.warning("Precursor_mz is None, first run add_precursor_mz")
@@ -41,11 +42,13 @@ def repair_adduct_based_on_smiles(spectrum_in: Spectrum,
     changed_spectrum.set("parent_mass", parent_mass)
     changed_spectrum.set("adduct", adduct)
     if mass_differences[smalles_mass_index] < mass_tolerance:
-        logger.info(f"Adduct was set from {spectrum_in.get('adduct')} to {adduct}")
+        logger.info("Adduct was set from %s to %s",
+                    spectrum_in.get('adduct'), adduct)
         return changed_spectrum
-    elif accept_parent_mass_is_mol_wt:
+    if accept_parent_mass_is_mol_wt:
         changed_spectrum = repair_parent_mass_is_mol_wt(changed_spectrum, mass_tolerance)
         if abs(changed_spectrum.get("parent_mass") - smiles_mass) < mass_tolerance:
-            logger.info(f"Adduct was set from {spectrum_in.get('adduct')} to {adduct}")
+            logger.info("Adduct was set from %s to %s",
+                        spectrum_in.get('adduct'), adduct)
             return changed_spectrum
     return spectrum_in

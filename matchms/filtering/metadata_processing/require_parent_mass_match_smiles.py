@@ -16,3 +16,4 @@ def require_parent_mass_match_smiles(spectrum_in: Spectrum,
     mass_difference = parent_mass - smiles_mass
     if abs(mass_difference) < mass_tolerance:
         return spectrum
+    return None
