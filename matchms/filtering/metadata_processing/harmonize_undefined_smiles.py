@@ -1,5 +1,5 @@
 from typing import List
-from ...typing import SpectrumType
+from matchms.typing import SpectrumType
 
 
 def harmonize_undefined_smiles(spectrum_in: SpectrumType, undefined: str = "",

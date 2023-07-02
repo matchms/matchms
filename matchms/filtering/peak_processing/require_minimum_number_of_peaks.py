@@ -1,7 +1,7 @@
 import logging
 from math import ceil
 from typing import Optional
-from ...typing import SpectrumType
+from matchms.typing import SpectrumType
 
 
 logger = logging.getLogger("matchms")

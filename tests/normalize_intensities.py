@@ -1,7 +1,7 @@
 import logging
 import numpy as np
 from matchms.typing import SpectrumType
-from matchms.Fragments import Fragments
+from ...Fragments import Fragments
 
 
 logger = logging.getLogger("matchms")

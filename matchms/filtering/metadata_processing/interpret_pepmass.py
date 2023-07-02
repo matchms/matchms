@@ -1,5 +1,5 @@
 import logging
-from ..filtering.make_charge_int import _convert_charge_to_int
+from .make_charge_int import _convert_charge_to_int
 
 
 logger = logging.getLogger("matchms")

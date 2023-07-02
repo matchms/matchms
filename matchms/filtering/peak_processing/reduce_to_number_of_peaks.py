@@ -2,8 +2,8 @@ import logging
 from math import ceil
 from typing import Optional
 import numpy as np
-from ..Fragments import Fragments
-from ...typing import SpectrumType
+from matchms.Fragments import Fragments
+from matchms.typing import SpectrumType
 
 
 logger = logging.getLogger("matchms")

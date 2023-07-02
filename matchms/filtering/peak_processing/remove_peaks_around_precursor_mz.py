@@ -1,6 +1,6 @@
 import numpy as np
-from ..Fragments import Fragments
-from ...typing import SpectrumType
+from matchms.Fragments import Fragments
+from matchms.typing import SpectrumType
 
 
 def remove_peaks_around_precursor_mz(spectrum_in: SpectrumType, mz_tolerance: float = 17) -> SpectrumType:

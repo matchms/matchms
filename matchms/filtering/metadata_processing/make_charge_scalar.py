@@ -1,5 +1,5 @@
 from deprecated.sphinx import deprecated
-from ...typing import SpectrumType
+from matchms.typing import SpectrumType
 from .make_charge_int import make_charge_int
 
 

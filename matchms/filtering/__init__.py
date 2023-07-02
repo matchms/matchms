@@ -70,6 +70,7 @@ from .metadata_processing.repair_smiles_of_salts import repair_smiles_of_salts
 from .metadata_processing.require_parent_mass_match_smiles import \
     require_parent_mass_match_smiles
 from .metadata_processing.require_precursor_below_mz import require_precursor_below_mz
+from .metadata_processing.require_precursor_mz import require_precursor_mz
 from .metadata_processing.repair_smiles_from_compound_name import repair_smiles_from_compound_name
 from .metadata_processing.require_correct_ionmode import require_correct_ionmode
 from .metadata_processing.require_valid_annotation import require_valid_annotation
@@ -79,7 +80,6 @@ from .peak_processing.remove_peaks_around_precursor_mz import remove_peaks_aroun
 from .peak_processing.remove_peaks_outside_top_k import remove_peaks_outside_top_k
 from .peak_processing.require_minimum_number_of_peaks import require_minimum_number_of_peaks
 from .peak_processing.require_minimum_of_high_peaks import require_minimum_of_high_peaks
-from .peak_processing.require_precursor_mz import require_precursor_mz
 from .peak_processing.select_by_intensity import select_by_intensity
 from .peak_processing.select_by_mz import select_by_mz
 from .peak_processing.select_by_relative_intensity import select_by_relative_intensity

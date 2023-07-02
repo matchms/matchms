@@ -1,5 +1,5 @@
-from ...typing import SpectrumType
-from .SpeciesString import SpeciesString
+from matchms.typing import SpectrumType
+from matchms.filtering import SpeciesString
 
 
 def repair_inchi_inchikey_smiles(spectrum_in: SpectrumType) -> SpectrumType:

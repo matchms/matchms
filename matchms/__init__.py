@@ -12,8 +12,8 @@ from .Spectrum import Spectrum
 _init_logger()
 
 
-__author__ = "Netherlands eScience Center"
-__email__ = 'generalization@esciencecenter.nl'
+__author__ = "Matchms developers community"
+__email__ = 'florian.huber@hs-duesseldorf.de'
 __all__ = [
     "__version__",
     "calculate_scores",

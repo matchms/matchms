@@ -1,6 +1,6 @@
 import numpy as np
-from ..Fragments import Fragments
-from ...typing import SpectrumType
+from matchms.Fragments import Fragments
+from matchms.typing import SpectrumType
 
 
 def select_by_relative_intensity(spectrum_in: SpectrumType, intensity_from: float = 0.0,

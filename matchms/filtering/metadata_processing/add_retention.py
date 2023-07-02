@@ -1,7 +1,7 @@
 import logging
 from typing import Any, List, Optional
 from matchms.utils import filter_none, get_common_keys
-from ...typing import SpectrumType
+from matchms.typing import SpectrumType
 
 
 logger = logging.getLogger("matchms")
