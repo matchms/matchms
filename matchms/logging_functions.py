@@ -54,6 +54,18 @@ rdkit_missing_message = "Conda package 'rdkit' is required for this functionalit
 _formatter = logging.Formatter(
     '%(asctime)s:%(levelname)s:%(name)s:%(module)s:%(message)s')
 
+# Rdkit debug log level
+RDKIT_DEBUG = 'rdApp.debug'
+# Rdkit info log level
+RDKIT_INFO = 'rdApp.info'
+# Rdkit warning log level
+RDKIT_WARNING = 'rdApp.warning'
+# Rdkit error log level
+RDKIT_ERROR = 'rdApp.error'
+
+# Rdkit log levels severity order
+RDKIT_LOG_LEVELS = [RDKIT_DEBUG, RDKIT_INFO, RDKIT_WARNING, RDKIT_ERROR]
+
 
 def _init_logger(logger_name="matchms"):
     """Initialize matchms logger."""
@@ -130,9 +142,6 @@ def reset_matchms_logger(logger_name="matchms"):
     logger = logging.getLogger(logger_name)
     logger.handlers.clear()
     _init_logger()
-
-# Copy of rdkit's log levels
-RDKIT_LOG_LEVELS = ['rdApp.debug', 'rdApp.info', 'rdApp.warning', 'rdApp.error']
 
 # function recreates the functionality of the rdkit function 
 # https://github.com/rdkit/rdkit/blob/master/rdkit/RDLogger.py setLevel()

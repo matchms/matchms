@@ -2,7 +2,8 @@ from . import exporting, filtering, importing, networking, plotting, similarity
 from .__version__ import __version__
 from .calculate_scores import calculate_scores
 from .Fragments import Fragments
-from .logging_functions import _init_logger, set_matchms_logger_level
+from .logging_functions import (_init_logger, set_matchms_logger_level,
+                                set_rdkit_logger_level)
 from .Metadata import Metadata
 from .Pipeline import Pipeline
 from .Scores import Scores
@@ -10,6 +11,7 @@ from .Spectrum import Spectrum
 
 
 _init_logger()
+set_rdkit_logger_level(logging_functions.RDKIT_ERROR)
 
 
 __author__ = "Netherlands eScience Center"
