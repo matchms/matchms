@@ -11,6 +11,14 @@ logger = logging.getLogger("matchms")
 
 
 def clean_adduct(spectrum_in):
+    """Clean adduct and make it consistent in style.
+    Will transform adduct strings of type 'M+H+' to '[M+H]+'.
+
+    Parameters
+    ----------
+    spectrum_in
+        Matchms Spectrum object.
+    """
     if spectrum_in is None:
         return None
     spectrum = spectrum_in.clone()

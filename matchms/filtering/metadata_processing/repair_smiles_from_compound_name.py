@@ -17,14 +17,17 @@ def repair_smiles_from_compound_name(spectrum_in: Spectrum,
     Based on a table of compound names and smiles matches (stored in a csv file) this function
     adds the new annotations to the input spectrums if the smiles seem consistent with the available
     spectrum metadata (e.g., parent mass).
-    This function can be used with csv files that are returned by the pubchem_lookup.py from matchmextras.
+    This function can be used with csv files that are returned by the pubchem_lookup.py
+    from matchmextras.
+
     Parameters
     ----------
     spectrum_in:
-        The input spectrum
+        The input spectrum.
     annotated_compound_names_file: str
-        A csv file containing the compound names and matching smiles, inchi, inchikey and monoisotopic_mass.
-    mass_tolerance
+        A csv file containing the compound names and matching smiles, inchi, inchikey
+        and monoisotopic_mass.
+    mass_tolerance.
         Acceptable mass difference between query compound and pubchem result.
     """
     annotated_compound_names = load_compond_name_annotations(annotated_compound_names_file)
@@ -61,6 +64,9 @@ def load_compond_name_annotations(annotated_compound_names_file):
 
 
 def check_fully_annotated(spectrum: Spectrum) -> bool:
+    """Combine multiple check functions.
+    Returns False if SMILES, InChIKey, or InChI are missing.
+    """
     if not is_valid_smiles(spectrum.get("smiles")):
         return False
     if not is_valid_inchikey(spectrum.get("inchikey")):
@@ -71,4 +77,5 @@ def check_fully_annotated(spectrum: Spectrum) -> bool:
 
 
 def is_plausible_name(compound_name):
+    """Simple check if it can be a compound name."""
     return isinstance(compound_name, str) and len(compound_name) > 4

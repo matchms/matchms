@@ -94,6 +94,11 @@ class Metadata:
         self._data.key_replacements = _key_replacements
 
     def harmonize_values(self):
+        """Runs default harmonization of metadata.
+
+        This includes harmonizing entries for ionmode, retention time and index,
+        charge, as well as the removal of invalid entried ("", "NA", "N/A", "NaN").
+        """
         metadata_filtered = _interpret_pepmass_metadata(self.data)
         metadata_filtered = _add_precursor_mz_metadata(metadata_filtered)
 
