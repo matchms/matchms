@@ -11,6 +11,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 ### Fixed
 
+## [0.21.1] - 2023-07-03
+
+### Added
+
+- missing code documentations [#454](https://github.com/matchms/matchms/pull/454)
+
+### Changed
+
+- Moved matchms filter functions into new folder structure [#454](https://github.com/matchms/matchms/pull/454).
+- Removed outdated (redundant) filters: `make_ionmode_lowercase` and `set_ionmode_na_when_missing` [#454](https://github.com/matchms/matchms/pull/454).
+
 ## [0.21.0] - 2023-06-30
 
 ### Added
