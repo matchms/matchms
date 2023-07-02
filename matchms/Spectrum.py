@@ -184,6 +184,7 @@ class Spectrum:
         return spectrum_dict
 
     def metadata_dict(self, export_style: str = "matchms") -> dict:
+        """Convert spectrum metadata to Python dictionary."""
         return self._metadata.to_dict(export_style)
 
     @property
@@ -230,6 +231,7 @@ class Spectrum:
 
     @classmethod
     def update_peak_comments_mz_tolerance(cls, mz_tolerance: float):
+        """Change current peak comment m/z tolerance to mz_tolerance."""
         cls._peak_comments_mz_tolerance = mz_tolerance
 
     def _reiterate_peak_comments(self, peaks: Fragments):

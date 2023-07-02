@@ -1,7 +1,7 @@
 from typing import Optional
-from matchms.typing import SpectrumType
 from matchms.filtering.filter_utils.get_neutral_mass_from_smiles import \
     get_monoisotopic_neutral_mass
+from matchms.typing import SpectrumType
 
 
 def require_parent_mass_match_smiles(spectrum_in: SpectrumType,
