@@ -30,9 +30,11 @@ def repair_smiles_of_salts(spectrum_in,
             spectrum_with_ions = spectrum.clone()
             spectrum_with_ions.set("smiles", ion)
             spectrum_with_ions.set("salt_ions", not_used_ions)
-            logger.info(f"Removed salt ions: {not_used_ions} from {smiles} to match parent mass")
+            logger.info("Removed salt ions: %s from %s to match parent mass",
+                        not_used_ions, smiles)
             return spectrum_with_ions
-    logger.warning("None of the parts of the smile %s match the parent mass: %s", smiles, parent_mass)
+    logger.warning("None of the parts of the smile %s match the parent mass: %s",
+                   smiles, parent_mass)
     return spectrum
 
 

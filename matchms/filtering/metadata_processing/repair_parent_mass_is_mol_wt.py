@@ -33,7 +33,8 @@ def repair_parent_mass_is_mol_wt(spectrum_in: Spectrum, mass_tolerance: float):
     if abs(mass_difference) < mass_tolerance:
         correct_mass = get_monoisotopic_neutral_mass(smiles)
         spectrum.set("parent_mass", correct_mass)
-        logger.info(f"Parent mass was mol_wt corrected from {parent_mass} to {correct_mass}")
+        logger.info("Parent mass was mol_wt corrected from %s to %s",
+                    parent_mass, correct_mass)
         precursor_mz = derive_precursor_mz_from_parent_mass(spectrum)
         logger.info("Precursor mz was derived from parent mass")
         spectrum.set("precursor_mz", precursor_mz)

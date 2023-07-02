@@ -13,7 +13,7 @@ def derive_parent_mass_from_precursor_mz(spectrum, estimate_from_adduct):
     if spectrum is None:
         return None
 
-    precursor_mz = spectrum_in.get("precursor_mz", None)
+    precursor_mz = spectrum.get("precursor_mz", None)
     if precursor_mz is None:
         logger.warning("Missing precursor m/z to derive parent mass.")
         return None
