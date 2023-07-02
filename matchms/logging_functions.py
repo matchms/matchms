@@ -144,7 +144,7 @@ def reset_matchms_logger(logger_name="matchms"):
     _init_logger()
 
 
-# function recreates the functionality of the rdkit function 
+# function recreates the functionality of the rdkit function
 # https://github.com/rdkit/rdkit/blob/master/rdkit/RDLogger.py setLevel()
 def set_rdkit_logger_level(level):
     if not _has_rdkit:
@@ -153,7 +153,7 @@ def set_rdkit_logger_level(level):
     if level not in RDKIT_LOG_LEVELS:
         raise ValueError(f"Invalid log level. Allowed values are: {RDKIT_LOG_LEVELS}")
     # convert string level to index
-    level_index = RDKIT_LOG_LEVELS.index(level) 
+    level_index = RDKIT_LOG_LEVELS.index(level)
 
     # enable all levels with higher severity
     for i in range(level_index, len(RDKIT_LOG_LEVELS)):
