@@ -1,7 +1,7 @@
 import logging
 from matchms.filtering.filter_utils.derive_precursor_mz_and_parent_mass import \
     derive_parent_mass_from_precursor_mz
-from ..typing import SpectrumType
+from ...typing import SpectrumType
 from ..utils import get_first_common_element
 
 

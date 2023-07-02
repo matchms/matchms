@@ -1,7 +1,7 @@
 import logging
 from ..metadata_utils import (convert_inchi_to_inchikey, is_valid_inchi,
                               is_valid_inchikey)
-from ..typing import SpectrumType
+from ...typing import SpectrumType
 
 
 logger = logging.getLogger("matchms")

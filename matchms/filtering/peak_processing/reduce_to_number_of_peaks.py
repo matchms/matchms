@@ -3,7 +3,7 @@ from math import ceil
 from typing import Optional
 import numpy as np
 from ..Fragments import Fragments
-from ..typing import SpectrumType
+from ...typing import SpectrumType
 
 
 logger = logging.getLogger("matchms")

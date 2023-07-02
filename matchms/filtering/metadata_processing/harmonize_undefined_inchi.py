@@ -1,5 +1,5 @@
 from typing import List
-from ..typing import SpectrumType
+from ...typing import SpectrumType
 
 
 def harmonize_undefined_inchi(spectrum_in: SpectrumType, undefined: str = "",

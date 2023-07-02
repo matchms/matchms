@@ -1,6 +1,6 @@
 import numpy as np
 from ..Fragments import Fragments
-from ..typing import SpectrumType
+from ...typing import SpectrumType
 
 
 def remove_peaks_outside_top_k(spectrum_in: SpectrumType, k: int = 6,

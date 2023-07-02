@@ -1,6 +1,6 @@
 import numpy as np
 from ..Fragments import Fragments
-from ..typing import SpectrumType
+from ...typing import SpectrumType
 
 
 def select_by_mz(spectrum_in: SpectrumType, mz_from: float = 0.0,

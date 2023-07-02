@@ -1,6 +1,6 @@
 import logging
 from typing import Union
-from ..typing import SpectrumType
+from ...typing import SpectrumType
 
 
 logger = logging.getLogger("matchms")

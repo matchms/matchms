@@ -1,6 +1,6 @@
 import logging
 import re
-from ..typing import SpectrumType
+from ...typing import SpectrumType
 
 
 logger = logging.getLogger("matchms")

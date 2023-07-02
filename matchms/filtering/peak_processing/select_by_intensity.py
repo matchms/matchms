@@ -1,6 +1,6 @@
 import numpy as np
 from ..Fragments import Fragments
-from ..typing import SpectrumType
+from ...typing import SpectrumType
 
 
 def select_by_intensity(spectrum_in: SpectrumType, intensity_from: float = 10.0,

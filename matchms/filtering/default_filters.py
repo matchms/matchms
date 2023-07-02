@@ -1,4 +1,4 @@
-from ..typing import SpectrumType
+from ...typing import SpectrumType
 from .add_compound_name import add_compound_name
 from .add_precursor_mz import add_precursor_mz
 from .clean_compound_name import clean_compound_name

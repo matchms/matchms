@@ -1,4 +1,4 @@
-from ..typing import SpectrumType
+from ...typing import SpectrumType
 from .SpeciesString import SpeciesString
 
 
