@@ -36,53 +36,74 @@ Should output
    Sketch of matchms spectrum processing.
 
 """
+from .default_filters import default_filters
 from .metadata_processing.add_compound_name import add_compound_name
 from .metadata_processing.add_fingerprint import add_fingerprint
 from .metadata_processing.add_parent_mass import add_parent_mass
 from .metadata_processing.add_precursor_mz import add_precursor_mz
-from .metadata_processing.add_retention import add_retention_index, add_retention_time
+from .metadata_processing.add_retention import (add_retention_index,
+                                                add_retention_time)
+from .metadata_processing.clean_adduct import clean_adduct
 from .metadata_processing.clean_compound_name import clean_compound_name
 from .metadata_processing.correct_charge import correct_charge
-from .default_filters import default_filters
-from .metadata_processing.derive_adduct_from_name import derive_adduct_from_name
-from .metadata_processing.derive_formula_from_name import derive_formula_from_name
-from .metadata_processing.derive_inchi_from_smiles import derive_inchi_from_smiles
-from .metadata_processing.derive_inchikey_from_inchi import derive_inchikey_from_inchi
+from .metadata_processing.derive_adduct_from_name import \
+    derive_adduct_from_name
+from .metadata_processing.derive_formula_from_name import \
+    derive_formula_from_name
+from .metadata_processing.derive_inchi_from_smiles import \
+    derive_inchi_from_smiles
+from .metadata_processing.derive_inchikey_from_inchi import \
+    derive_inchikey_from_inchi
 from .metadata_processing.derive_ionmode import derive_ionmode
-from .metadata_processing.derive_smiles_from_inchi import derive_smiles_from_inchi
-from .metadata_processing.harmonize_undefined_inchi import harmonize_undefined_inchi
-from .metadata_processing.harmonize_undefined_inchikey import harmonize_undefined_inchikey
-from .metadata_processing.harmonize_undefined_smiles import harmonize_undefined_smiles
+from .metadata_processing.derive_smiles_from_inchi import \
+    derive_smiles_from_inchi
+from .metadata_processing.harmonize_undefined_inchi import \
+    harmonize_undefined_inchi
+from .metadata_processing.harmonize_undefined_inchikey import \
+    harmonize_undefined_inchikey
+from .metadata_processing.harmonize_undefined_smiles import \
+    harmonize_undefined_smiles
 from .metadata_processing.interpret_pepmass import interpret_pepmass
 from .metadata_processing.make_charge_int import make_charge_int
 from .metadata_processing.make_charge_scalar import make_charge_scalar
-from .metadata_processing.clean_adduct import clean_adduct
 from .metadata_processing.repair_adduct_based_on_smiles import \
     repair_adduct_based_on_smiles
-from .metadata_processing.repair_inchi_inchikey_smiles import repair_inchi_inchikey_smiles
+from .metadata_processing.repair_inchi_inchikey_smiles import \
+    repair_inchi_inchikey_smiles
 from .metadata_processing.repair_parent_mass_is_mol_wt import \
     repair_parent_mass_is_mol_wt
 from .metadata_processing.repair_parent_mass_match_smiles_wrapper import \
     repair_parent_mass_match_smiles_wrapper
-from .metadata_processing.repair_precursor_is_parent_mass import repair_precursor_is_parent_mass
+from .metadata_processing.repair_precursor_is_parent_mass import \
+    repair_precursor_is_parent_mass
+from .metadata_processing.repair_smiles_from_compound_name import \
+    repair_smiles_from_compound_name
 from .metadata_processing.repair_smiles_of_salts import repair_smiles_of_salts
+from .metadata_processing.require_correct_ionmode import \
+    require_correct_ionmode
 from .metadata_processing.require_parent_mass_match_smiles import \
     require_parent_mass_match_smiles
-from .metadata_processing.require_precursor_below_mz import require_precursor_below_mz
+from .metadata_processing.require_precursor_below_mz import \
+    require_precursor_below_mz
 from .metadata_processing.require_precursor_mz import require_precursor_mz
-from .metadata_processing.repair_smiles_from_compound_name import repair_smiles_from_compound_name
-from .metadata_processing.require_correct_ionmode import require_correct_ionmode
-from .metadata_processing.require_valid_annotation import require_valid_annotation
+from .metadata_processing.require_valid_annotation import \
+    require_valid_annotation
 from .peak_processing.add_losses import add_losses
 from .peak_processing.normalize_intensities import normalize_intensities
-from .peak_processing.reduce_to_number_of_peaks import reduce_to_number_of_peaks
-from .peak_processing.remove_peaks_around_precursor_mz import remove_peaks_around_precursor_mz
-from .peak_processing.remove_peaks_outside_top_k import remove_peaks_outside_top_k
-from .peak_processing.require_minimum_number_of_peaks import require_minimum_number_of_peaks
-from .peak_processing.require_minimum_of_high_peaks import require_minimum_of_high_peaks
+from .peak_processing.reduce_to_number_of_peaks import \
+    reduce_to_number_of_peaks
+from .peak_processing.remove_peaks_around_precursor_mz import \
+    remove_peaks_around_precursor_mz
+from .peak_processing.remove_peaks_outside_top_k import \
+    remove_peaks_outside_top_k
+from .peak_processing.require_minimum_number_of_peaks import \
+    require_minimum_number_of_peaks
+from .peak_processing.require_minimum_of_high_peaks import \
+    require_minimum_of_high_peaks
 from .peak_processing.select_by_intensity import select_by_intensity
 from .peak_processing.select_by_mz import select_by_mz
-from .peak_processing.select_by_relative_intensity import select_by_relative_intensity
+from .peak_processing.select_by_relative_intensity import \
+    select_by_relative_intensity
 from .SpeciesString import SpeciesString
 
 

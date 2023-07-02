@@ -2,15 +2,11 @@ import logging
 from typing import Optional
 from matchms.filtering.metadata_processing.repair_adduct_based_on_smiles import \
     repair_adduct_based_on_smiles
-from .repair_parent_mass_is_mol_wt import \
-    repair_parent_mass_is_mol_wt
-from .repair_precursor_is_parent_mass import \
-    repair_precursor_is_parent_mass
-from .repair_smiles_of_salts import \
-    repair_smiles_of_salts
-from .require_parent_mass_match_smiles import \
-    require_parent_mass_match_smiles
 from matchms.typing import SpectrumType
+from .repair_parent_mass_is_mol_wt import repair_parent_mass_is_mol_wt
+from .repair_precursor_is_parent_mass import repair_precursor_is_parent_mass
+from .repair_smiles_of_salts import repair_smiles_of_salts
+from .require_parent_mass_match_smiles import require_parent_mass_match_smiles
 
 
 logger = logging.getLogger("matchms")

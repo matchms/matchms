@@ -1,7 +1,7 @@
 import logging
-from ...metadata_utils import (convert_smiles_to_inchi, is_valid_inchi,
-                              is_valid_smiles)
 from matchms.typing import SpectrumType
+from ...metadata_utils import (convert_smiles_to_inchi, is_valid_inchi,
+                               is_valid_smiles)
 
 
 logger = logging.getLogger("matchms")

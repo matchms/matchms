@@ -4,8 +4,7 @@ from matchms.filtering.filter_utils.derive_precursor_mz_and_parent_mass import \
     derive_precursor_mz_from_parent_mass
 from matchms.filtering.filter_utils.get_neutral_mass_from_smiles import \
     get_monoisotopic_neutral_mass
-from .require_parent_mass_match_smiles import \
-    require_parent_mass_match_smiles
+from .require_parent_mass_match_smiles import require_parent_mass_match_smiles
 
 
 logger = logging.getLogger("matchms")
