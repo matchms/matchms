@@ -39,12 +39,12 @@ class SpectrumProcessor:
         elif isinstance(filter_spec, tuple):
             filter_name, filter_args = filter_spec
             filter_func = FILTER_FUNCTIONS[filter_name]
-            self.filters.append(lambda spectrum: filter_func(spectrum, **filter_args))
+            self.filters.append(filter_func(spectrum, **filter_args))
         else:
             raise TypeError("filter_spec should be a string or a tuple")
 
         # Sort filters according to their order in ALL_FILTERS
-        self.filters.sort(key=lambda f: ALL_FILTERS.index(f))
+        self.filters.sort(key=lambda f: [x.__name__ for x in ALL_FILTERS].index(f.__name__))
         return self
 
     def process_spectrum(self, spectrum):
@@ -113,10 +113,10 @@ MINIMAL_FILTERS = ["make_charge_int",
                    "correct_charge",
                    ]
 BASIC_FILTERS = MINIMAL_FILTERS \
-    + ["derive_adduct_from_name",
+    + ["add_compound_name",
+       "derive_adduct_from_name",
        "derive_formula_from_name",
        "clean_compound_name",
-       "interpret_pepmass",
        "add_precursor_mz",
     ]
 DEFAULT_FILTERS = BASIC_FILTERS \
