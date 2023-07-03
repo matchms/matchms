@@ -1,3 +1,4 @@
+from functools import partial
 import matchms.filtering as msfilters
 
 
@@ -12,13 +13,15 @@ class SpectrumProcessor:
     ----------
     processing_pipeline : str
         Name of a predefined processing pipeline. Options: 'minimal', 'basic', 'default',
-        'fully_annotated'.
+        'fully_annotated', or None. Default is 'default'.
     """
 
     def __init__(self, processing_pipeline='default'):
-        if processing_pipeline not in PREDEFINED_PIPELINES:
+        if processing_pipeline is None:
+            self.filters = []
+        elif processing_pipeline not in PREDEFINED_PIPELINES:
             raise ValueError(f"Unknown processing pipeline '{processing_pipeline}'. Available pipelines: {list(PREDEFINED_PIPELINES.keys())}")
-        
+
         self.filters = []
         for fname in PREDEFINED_PIPELINES[processing_pipeline]:
             self.add_filter(fname)
@@ -35,14 +38,14 @@ class SpectrumProcessor:
         """
         if isinstance(filter_spec, str):
             filter_func = FILTER_FUNCTIONS[filter_spec]
-            self.filters.append(filter_func)
         elif isinstance(filter_spec, tuple):
             filter_name, filter_args = filter_spec
-            filter_func = FILTER_FUNCTIONS[filter_name]
-            self.filters.append(filter_func(spectrum, **filter_args))
+            filter_func = partial(FILTER_FUNCTIONS[filter_name], **filter_args)
+            filter_func.__name__ = FILTER_FUNCTIONS[filter_name].__name__
         else:
             raise TypeError("filter_spec should be a string or a tuple")
 
+        self.filters.append(filter_func)
         # Sort filters according to their order in ALL_FILTERS
         self.filters.sort(key=lambda f: [x.__name__ for x in ALL_FILTERS].index(f.__name__))
         return self

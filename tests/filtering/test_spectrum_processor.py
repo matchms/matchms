@@ -1,7 +1,7 @@
-#%%
 import pytest
 from matchms.filtering.SpectrumProcessor import SpectrumProcessor
-# from ..builder_Spectrum import SpectrumBuilder
+from matchms.filtering import require_correct_ionmode
+from ..builder_Spectrum import SpectrumBuilder
 
 
 def test_filter_sorting():
@@ -29,4 +29,19 @@ def test_filter_sorting():
     actual_filters = [x.__name__ for x in processing.filters]
     assert actual_filters == expected_filters
 
-# %%
+
+@pytest.mark.parametrize("metadata, expected", [
+    [{}, None],
+    [{"ionmode": "positive"}, {"ionmode": "positive", "charge": 1}],
+    [{"ionmode": "positive", "charge": 2}, {"ionmode": "positive", "charge": 2}],
+])
+def test_add_filter(metadata, expected):
+    spectrum_in = SpectrumBuilder().with_metadata(metadata).build()
+    processor = SpectrumProcessor("minimal")
+    processor.add_filter(("require_correct_ionmode",
+                          {"ion_mode_to_keep": "both"}))
+    spectrum = processor.process_spectrum(spectrum_in)
+    if expected is None:
+        assert spectrum is None
+    else:
+        assert dict(spectrum.metadata) == expected
