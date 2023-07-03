@@ -1,6 +1,5 @@
 import pytest
-from matchms.filtering.SpectrumProcessor import SpectrumProcessor
-from matchms.filtering import require_correct_ionmode
+from matchms import SpectrumProcessor
 from ..builder_Spectrum import SpectrumBuilder
 
 

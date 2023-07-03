@@ -104,7 +104,6 @@ from .peak_processing.select_by_mz import select_by_mz
 from .peak_processing.select_by_relative_intensity import \
     select_by_relative_intensity
 from .SpeciesString import SpeciesString
-from .SpectrumProcessor import SpectrumProcessor
 
 
 __all__ = [
@@ -152,5 +151,4 @@ __all__ = [
     "select_by_mz",
     "select_by_relative_intensity",
     "SpeciesString",
-    "SpectrumProcessor",
 ]
