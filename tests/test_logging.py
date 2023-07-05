@@ -89,12 +89,12 @@ def test_add_logging_to_file_only_file(tmp_path, capsys):
     assert expected_log_entry in logs, "Expected different log file content"
     reset_matchms_logger()
 
+
 def test_set_rdkit_logger_level(capfd):
     """Test if rdkit log level is set correctly."""
-    RDLogger = pytest.importorskip("rdkit.RDLogger")
-
+    rdkit = pytest.importorskip("rdkit")
     # create a dummy logger
-    logger = RDLogger.logger()
+    logger = rdkit.RDLogger.logger()
     rdkit_log_levels = ['rdApp.debug', 'rdApp.info', 'rdApp.warning', 'rdApp.error']
 
     # test all log levels settings
