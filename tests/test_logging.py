@@ -2,7 +2,7 @@
 import logging
 import os
 import pytest
-from matchms.logging_functions import (RDKIT_LOG_LEVELS, add_logging_to_file,
+from matchms.logging_functions import (add_logging_to_file,
                                        reset_matchms_logger,
                                        set_matchms_logger_level,
                                        set_rdkit_logger_level)
@@ -95,14 +95,15 @@ def test_set_rdkit_logger_level(capfd):
 
     # create a dummy logger
     logger = RDLogger.logger()
+    rdkit_log_levels = ['rdApp.debug', 'rdApp.info', 'rdApp.warning', 'rdApp.error']
 
     # test all log levels settings
-    for set_level, set_level_name in enumerate(RDKIT_LOG_LEVELS):
+    for set_level, set_level_name in enumerate(rdkit_log_levels):
         # set current log level, only logs with this level or higher severity should be printed
         set_rdkit_logger_level(set_level_name)
 
         # try to logg with all log levels
-        for logged_level, logged_level_name in enumerate(RDKIT_LOG_LEVELS):
+        for logged_level, logged_level_name in enumerate(rdkit_log_levels):
             logger.logIt(logged_level_name, "test")
             captured = capfd.readouterr()
             if set_level <= logged_level:
