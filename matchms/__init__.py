@@ -11,7 +11,7 @@ from .Spectrum import Spectrum
 
 
 _init_logger()
-set_rdkit_logger_level(logging_functions.RDKIT_ERROR)
+set_rdkit_logger_level('rdApp.error')
 
 
 __author__ = "Netherlands eScience Center"
