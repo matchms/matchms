@@ -11,7 +11,22 @@ from .Spectrum import Spectrum
 
 
 _init_logger()
-set_rdkit_logger_level('rdApp.error')
+
+try:  # rdkit is not included in pip package
+    from rdkit import Chem
+    set_rdkit_logger_level('rdApp.error')
+except ImportError:
+    _has_rdkit = False
+    from collections import UserString
+
+    class ChemMock(UserString):
+        def __call__(self, *args, **kwargs):
+            return self
+
+        def __getattr__(self, key):
+            return self
+
+    Chem = AllChem = ChemMock("")
 
 
 __author__ = "Netherlands eScience Center"
