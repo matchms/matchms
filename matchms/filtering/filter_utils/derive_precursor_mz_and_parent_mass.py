@@ -1,5 +1,5 @@
 import logging
-from typing import Tuple
+from typing import Optional, Tuple
 from matchms.constants import PROTON_MASS
 from matchms.filtering.filter_utils.interpret_unknown_adduct import \
     get_multiplier_and_mass_from_adduct
@@ -12,7 +12,7 @@ from matchms.typing import SpectrumType
 logger = logging.getLogger("matchms")
 
 
-def derive_parent_mass_from_precursor_mz(spectrum: SpectrumType, estimate_from_adduct: bool) -> float | None:
+def derive_parent_mass_from_precursor_mz(spectrum: SpectrumType, estimate_from_adduct: bool) -> Optional[float]:
     """Use the precursor mz, charge and adduct information to compute the mass of the case compound.
 
     Args:
