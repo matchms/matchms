@@ -2,8 +2,8 @@
 
 import logging
 import re
-from typing import Optional, Tuple
-from matchms.constants import ELECTRTON_MASS
+from typing import List, Optional, Tuple
+from matchms.constants import ELECTRON_MASS
 
 
 try:  # rdkit is not included in pip package
@@ -28,7 +28,15 @@ rdkit_missing_message = "Conda package 'rdkit' is required for this functionalit
 logger = logging.getLogger("matchms")
 
 
-def get_multiplier_and_mass_from_adduct(adduct) -> Tuple[Optional[float], Optional[float]]:
+def get_multiplier_and_mass_from_adduct(adduct: str) -> Tuple[Optional[float], Optional[float]]:
+    """Get multiplier for charge and the actual mass of an adduct.
+
+    Args:
+        adduct (str): String description of the adduct.
+
+    Returns:
+        Tuple[Optional[float], Optional[float]]: Multiplier and mass of this adduct.
+    """
     charge = get_charge_of_adduct(adduct)
     if charge is None:
         return None, None
@@ -41,14 +49,14 @@ def get_multiplier_and_mass_from_adduct(adduct) -> Tuple[Optional[float], Option
     mass_of_ions = get_mass_of_ion(ions)
     if mass_of_ions is None:
         return None, None
-    added_mass = mass_of_ions - ELECTRTON_MASS * charge
+    added_mass = mass_of_ions - ELECTRON_MASS * charge
 
     multiplier = 1/abs(charge)*parent_mass
     correction_mass = added_mass/(abs(charge))
     return multiplier, correction_mass
 
 
-def get_ions_from_adduct(adduct):
+def get_ions_from_adduct(adduct: str) -> Tuple[float, List[str]]:
     """Returns a list of ions from an adduct.
 
     e.g. '[M+H-H2O]2+' -> ["M", "+H", "-H2O"]
@@ -78,7 +86,15 @@ def get_ions_from_adduct(adduct):
     return parent_mass, ions_split
 
 
-def split_ion(ion):
+def split_ion(ion: str) -> Tuple[str, str, str]:
+    """Separate an ion description string into sign, number and formula.
+
+    Args:
+        ion (str): String representing the ion.
+
+    Returns:
+        Tuple[str, str, str]: Components of the ion descirption.
+    """
     sign = ion[0]
     ion = ion[1:]
     assert sign in ["+", "-"], "Expected ion to start with + or -"
@@ -144,7 +160,7 @@ def get_mass_of_formula(formula):
     """Calculates the monoisotopic mass of an formula
 
     e.g. "C" returns 12.011 and "CH2" returns 15.035. This can be used to calculate the mass difference of adducts
-    Was addapted from: https://bioinformatics.stackexchange.com/questions/6852/
+    Was adapted from: https://bioinformatics.stackexchange.com/questions/6852/
     """
     if not _has_rdkit:
         raise ImportError(rdkit_missing_message)
