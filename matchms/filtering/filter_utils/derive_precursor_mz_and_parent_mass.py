@@ -47,7 +47,7 @@ def derive_parent_mass_from_precursor_mz(spectrum: SpectrumType, estimate_from_a
     return None
 
 
-def derive_precursor_mz_from_parent_mass(spectrum: SpectrumType, estimate_from_adduct: bool = True) -> float | None:
+def derive_precursor_mz_from_parent_mass(spectrum: SpectrumType, estimate_from_adduct: bool = True) -> Optional[float]:
     """Derives the precursor_mz from the parent mass and adduct or charge"""
     if spectrum is None:
         return None
