@@ -1,15 +1,15 @@
-from ..typing import SpectrumType
-from .add_compound_name import add_compound_name
-from .add_precursor_mz import add_precursor_mz
-from .clean_compound_name import clean_compound_name
-from .correct_charge import correct_charge
-from .derive_adduct_from_name import derive_adduct_from_name
-from .derive_formula_from_name import derive_formula_from_name
-from .derive_ionmode import derive_ionmode
-from .interpret_pepmass import interpret_pepmass
-from .make_charge_int import make_charge_int
-from .make_ionmode_lowercase import make_ionmode_lowercase
-from .set_ionmode_na_when_missing import set_ionmode_na_when_missing
+from matchms.typing import SpectrumType
+from .metadata_processing.add_compound_name import add_compound_name
+from .metadata_processing.add_precursor_mz import add_precursor_mz
+from .metadata_processing.clean_compound_name import clean_compound_name
+from .metadata_processing.correct_charge import correct_charge
+from .metadata_processing.derive_adduct_from_name import \
+    derive_adduct_from_name
+from .metadata_processing.derive_formula_from_name import \
+    derive_formula_from_name
+from .metadata_processing.derive_ionmode import derive_ionmode
+from .metadata_processing.interpret_pepmass import interpret_pepmass
+from .metadata_processing.make_charge_int import make_charge_int
 
 
 def default_filters(spectrum: SpectrumType) -> SpectrumType:
@@ -18,22 +18,18 @@ def default_filters(spectrum: SpectrumType) -> SpectrumType:
 
     Collection is
 
-    1. :meth:`~matchms.filtering.make_charge_int`
-    2. :meth:`~matchms.filtering.make_ionmode_lowercase`
-    3. :meth:`~matchms.filtering.set_ionmode_na_when_missing`
-    4. :meth:`~matchms.filtering.add_compound_name`
-    5. :meth:`~matchms.filtering.derive_adduct_from_name`
-    6. :meth:`~matchms.filtering.derive_formula_from_name`
-    7. :meth:`~matchms.filtering.clean_compound_name`
-    8. :meth:`~matchms.filtering.interpret_pepmass`
-    9. :meth:`~matchms.filtering.add_precursor_mz`
-    10. :meth:`~matchms.filtering.derive_ionmode`
-    11. :meth:`~matchms.filtering.correct_charge`
+    1. :meth:`~matchms.filtering.metadata_processing.make_charge_int`
+    2. :meth:`~matchms.filtering.metadata_processing.add_compound_name`
+    3. :meth:`~matchms.filtering.metadata_processing.derive_adduct_from_name`
+    4. :meth:`~matchms.filtering.metadata_processing.derive_formula_from_name`
+    5. :meth:`~matchms.filtering.metadata_processing.clean_compound_name`
+    6. :meth:`~matchms.filtering.metadata_processing.interpret_pepmass`
+    7. :meth:`~matchms.filtering.metadata_processing.add_precursor_mz`
+    8. :meth:`~matchms.filtering.metadata_processing.derive_ionmode`
+    9. :meth:`~matchms.filtering.metadata_processing.correct_charge`
 
     """
     spectrum = make_charge_int(spectrum)
-    spectrum = make_ionmode_lowercase(spectrum)
-    spectrum = set_ionmode_na_when_missing(spectrum)
     spectrum = add_compound_name(spectrum)
     spectrum = derive_adduct_from_name(spectrum)
     spectrum = derive_formula_from_name(spectrum)

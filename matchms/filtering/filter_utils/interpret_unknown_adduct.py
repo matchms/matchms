@@ -41,7 +41,7 @@ def get_multiplier_and_mass_from_adduct(adduct) -> Tuple[Optional[float], Option
     mass_of_ions = get_mass_of_ion(ions)
     if mass_of_ions is None:
         return None, None
-    added_mass = mass_of_ions + ELECTRTON_MASS * -charge
+    added_mass = mass_of_ions - ELECTRTON_MASS * charge
 
     multiplier = 1/abs(charge)*parent_mass
     correction_mass = added_mass/(abs(charge))
@@ -58,13 +58,15 @@ def get_ions_from_adduct(adduct):
     if "[" in adduct:
         ions_part = re.findall((r"\[(.*)\]"), adduct)
         if len(ions_part) != 1:
-            logger.warning(f"Expected to find brackets [] once, not the case in {adduct}")
+            logger.warning("Expected to find brackets [] once, not the case in %s",
+                           adduct)
             return None, None
         adduct = ions_part[0]
     # Finds the pattern M or 2M in adduct it makes sure it is in between
     parent_mass = re.findall(r'(?:^|[+-])([0-9]?M)(?:$|[+-])', adduct)
     if len(parent_mass) != 1:
-        logger.warning(f"The parent mass (e.g. 2M or M) was found {len(parent_mass)} times in {adduct}")
+        logger.warning("The parent mass (e.g. 2M or M) was found %s times in %s",
+                       len(parent_mass), adduct)
     parent_mass = parent_mass[0]
     if parent_mass == "M":
         parent_mass = 1
@@ -97,8 +99,7 @@ def replace_abbreviations(ions_split):
     corrected_ions = []
     for ion in ions_split:
         sign, number, ion = split_ion(ion)
-        if ion in abbrev_to_formula:
-            ion = abbrev_to_formula[ion]
+        ion = abbrev_to_formula.get(ion, ion)
         corrected_ions.append(sign + str(number) + ion)
     return corrected_ions
 
@@ -123,7 +124,8 @@ def get_mass_of_ion(ions):
 def get_charge_of_adduct(adduct)->Optional[int]:
     charge = re.findall((r"\]([0-9]?[+-])"), adduct)
     if len(charge) != 1:
-        logger.warning(f'Charge was found {len(charge)} times in adduct {adduct}')
+        logger.warning("Charge was found %s times in adduct %s",
+                       len(charge), adduct)
         return None
     charge = charge[0]
     if len(charge) == 1:
@@ -133,7 +135,7 @@ def get_charge_of_adduct(adduct)->Optional[int]:
         charge_size = charge[0]
         charge_sign = charge[1]
     else:
-        logger.warning(f"Charge is expected of length 1 or 2 {charge} was given")
+        logger.warning("Charge is expected of length 1 or 2, but %s was given", charge)
         return None
     return int(charge_sign+charge_size)
 
@@ -149,15 +151,15 @@ def get_mass_of_formula(formula):
     parts = re.findall("[A-Z][a-z]?|[0-9]+", formula)
     mass = 0
 
-    for index in range(len(parts)):
-        if parts[index].isnumeric():
+    for i, part in enumerate(parts):
+        if part.isnumeric():
             continue
         periodic_table = Chem.GetPeriodicTable()
         try:
-            atom_mass = periodic_table.GetMostCommonIsotopeMass(parts[index])
+            atom_mass = periodic_table.GetMostCommonIsotopeMass(part)
         except RuntimeError:
-            logger.warning("The atom: %s in the formula %s is not known", parts[index], formula)
+            logger.warning("The atom: %s in the formula %s is not known", part, formula)
             return None
-        multiplier = int(parts[index + 1]) if len(parts) > index + 1 and parts[index + 1].isnumeric() else 1
+        multiplier = int(parts[i + 1]) if len(parts) > i + 1 and parts[i + 1].isnumeric() else 1
         mass += atom_mass * multiplier
     return mass

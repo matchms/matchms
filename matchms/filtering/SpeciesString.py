@@ -2,8 +2,32 @@ import re
 
 
 class SpeciesString:
+    """
+    A class to process and clean different types of chemical structure strings including InChI, 
+    InChIKey, and SMILES.
 
+    The class takes a raw input string, determines the intended structure type, and then cleans 
+    the string based on its type.
+
+    Attributes
+    ----------
+    dirty : str
+        Raw input string representing a chemical structure.
+    target : str
+        The intended structure type determined from the input string. Could be 'inchi', 'inchikey', 
+        'smiles', or None if no valid type was identified.
+    cleaned : str
+        The cleaned structure string. 
+    """
     def __init__(self, dirty: str):
+        """
+        Constructs a new instance of the SpeciesString class.
+
+        Parameters
+        ----------
+        dirty : str
+            The raw input string representing a chemical structure.
+        """
         self.dirty = dirty
         self.target = None
         self.cleaned = None
@@ -16,7 +40,7 @@ class SpeciesString:
         return f"({self.target}): {self.cleaned}"
 
     def clean(self):
-
+        """Clean the input string based on its determined structure type."""
         if self.target is None:
             self.cleaned = ""
 
@@ -59,7 +83,7 @@ class SpeciesString:
             self.cleaned = found[0]
 
     def guess_target(self):
-
+        """Determine the intended structure type of the input string."""
         if self.looks_like_an_inchikey():
             self.target = "inchikey"
         elif self.looks_like_an_inchi():

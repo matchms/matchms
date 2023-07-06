@@ -2,18 +2,17 @@ import logging
 from matchms.constants import PROTON_MASS
 from matchms.filtering.filter_utils.interpret_unknown_adduct import \
     get_multiplier_and_mass_from_adduct
-from matchms.filtering.repair_adduct.clean_adduct import (_clean_adduct,
-                                                          load_known_adducts)
+from matchms.filtering.metadata_processing.clean_adduct import (
+    _clean_adduct, load_known_adducts)
 
 
 logger = logging.getLogger("matchms")
 
 
-def derive_parent_mass_from_precursor_mz(spectrum_in, estimate_from_adduct):
-    if spectrum_in is None:
+def derive_parent_mass_from_precursor_mz(spectrum, estimate_from_adduct):
+    if spectrum is None:
         return None
 
-    spectrum = spectrum_in.clone()
     precursor_mz = spectrum.get("precursor_mz", None)
     if precursor_mz is None:
         logger.warning("Missing precursor m/z to derive parent mass.")
@@ -21,7 +20,8 @@ def derive_parent_mass_from_precursor_mz(spectrum_in, estimate_from_adduct):
     charge = _get_charge(spectrum)
 
     if estimate_from_adduct:
-        multiplier, correction_mass = _get_multiplier_and_correction_mass_from_adduct(spectrum.get("adduct"))
+        multiplier, correction_mass = _get_multiplier_and_correction_mass_from_adduct(
+            spectrum.get("adduct"))
         if correction_mass is not None and multiplier is not None:
             parent_mass = (precursor_mz - correction_mass) / multiplier
             return parent_mass
@@ -32,21 +32,22 @@ def derive_parent_mass_from_precursor_mz(spectrum_in, estimate_from_adduct):
         precursor_mass = precursor_mz * abs(charge)
         parent_mass = precursor_mass - protons_mass
         return parent_mass
+    return None
 
 
-def derive_precursor_mz_from_parent_mass(spectrum_in):
+def derive_precursor_mz_from_parent_mass(spectrum):
     """Derives the precursor_mz from the parent mass and adduct or charge"""
     estimate_from_adduct = True
-    if spectrum_in is None:
+    if spectrum is None:
         return None
 
-    spectrum = spectrum_in.clone()
     parent_mass = spectrum.get("parent_mass")
     if parent_mass is None:
         logger.warning("Missing parent mass to derive precursor mz.")
         return None
     if estimate_from_adduct:
-        multiplier, correction_mass = _get_multiplier_and_correction_mass_from_adduct(spectrum.get("adduct"))
+        multiplier, correction_mass = _get_multiplier_and_correction_mass_from_adduct(
+            spectrum.get("adduct"))
         if correction_mass is not None and multiplier is not None:
             precursor_mz = parent_mass * multiplier + correction_mass
             return precursor_mz
@@ -59,6 +60,7 @@ def derive_precursor_mz_from_parent_mass(spectrum_in):
         precursor_mz = precursor_mass / abs(charge)
         return precursor_mz
     logger.error("Precursor mz could not be derived from parent mass, since charge and adduct were missing")
+    return None
 
 
 def _get_multiplier_and_correction_mass_from_adduct(adduct):

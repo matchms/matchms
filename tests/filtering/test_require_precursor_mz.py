@@ -1,7 +1,8 @@
 import numpy as np
 import pytest
 from testfixtures import LogCapture
-from matchms.filtering.require_precursor_mz import require_precursor_mz
+from matchms.filtering.metadata_processing.require_precursor_mz import \
+    require_precursor_mz
 from matchms.logging_functions import (reset_matchms_logger,
                                        set_matchms_logger_level)
 from ..builder_Spectrum import SpectrumBuilder

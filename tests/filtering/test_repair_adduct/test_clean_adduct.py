@@ -1,5 +1,5 @@
 import pytest
-from matchms.filtering.repair_adduct.clean_adduct import clean_adduct
+from matchms.filtering.metadata_processing.clean_adduct import clean_adduct
 from tests.builder_Spectrum import SpectrumBuilder
 
 

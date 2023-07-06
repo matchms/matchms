@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from matchms import Fragments
+from matchms.Fragments import Fragments
 
 
 def test_fragments_init():
