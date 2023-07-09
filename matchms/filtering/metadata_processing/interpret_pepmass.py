@@ -37,8 +37,7 @@ def _interpret_pepmass_metadata(metadata):
     charge = _convert_charge_to_int(charge)
 
     if mz is not None:
-        if metadata.get("precursor_mz") is not None and np.isclose(
-            metadata.get("precursor_mz"), mz, atol=0.001):
+        if _substantial_difference(metadata.get("precursor_mz"), mz, atol=0.001):
             logger.warning("Overwriting existing precursor_mz %s with new one: %s",
                            metadata.get("precursor_mz"), str(mz))
         metadata["precursor_mz"] = mz
@@ -90,3 +89,16 @@ def _convert_mz_or_intensity(entry):
             logger.warning("%s can't be converted to float.", entry)
             return None
     return entry
+
+
+def _substantial_difference(mz_now, mz_new, atol=0.001):
+    """Returns True if mz_now and mz_new differ by more than atol."""
+    if mz_now is None:
+        return True
+    try:
+        mz_now_float = float(mz_now)
+    except:
+        return True
+    if np.abs(mz_now_float - mz) > atol:
+        return True
+    return False
