@@ -99,6 +99,6 @@ def _substantial_difference(mz_now, mz_new, atol=0.001):
         mz_now_float = float(mz_now)
     except:
         return True
-    if np.abs(mz_now_float - mz) > atol:
+    if np.abs(mz_now_float - mz_new) > atol:
         return True
     return False
