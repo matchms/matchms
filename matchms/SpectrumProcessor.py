@@ -1,4 +1,5 @@
 from functools import partial
+from tqdm import tqdm
 import matchms.filtering as msfilters
 
 
@@ -70,6 +71,25 @@ class SpectrumProcessor:
                 break
         return spectrum
 
+    def process_spectrums(self, spectrums: list, progress_bar=True):
+        """
+        Process a list of spectrums with all filters in the processing pipeline.
+
+        Parameters
+        ----------
+        spectrums : list[Spectrum]
+            The spectrums to process.
+        
+        Returns
+        -------
+        Spectrum
+            The processed spectrum.
+        """
+        spectrums = [self.process_spectrum(s) for s in tqdm(
+            spectrums,
+            disable=(not progress_bar),
+            desc="Processing spectrums")]
+        return spectrums
 
 # List all filters in a functionally working order
 ALL_FILTERS = [msfilters.make_charge_int,

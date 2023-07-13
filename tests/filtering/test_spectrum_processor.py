@@ -3,6 +3,12 @@ from matchms import SpectrumProcessor
 from ..builder_Spectrum import SpectrumBuilder
 
 
+@pytest.fixture
+def spectrums():
+    return [SpectrumBuilder().with_metadata({"pepmass": mass}).build() for mass in [100, 102, 104]
+    ]
+
+
 def test_filter_sorting():
     processing = SpectrumProcessor("default")
     expected_filters = [
@@ -47,8 +53,17 @@ def test_add_filter(metadata, expected):
 
 
 def test_no_filters():
-    spectrum_in = SpectrumBuilder().with_metadata({"ionmode": "positive", "charge": 2}).build()
+    spectrum_in = SpectrumBuilder().with_metadata({}).build()
     processor = SpectrumProcessor(predefined_pipeline=None)
     with pytest.raises(TypeError) as msg:
         spectrum = processor.process_spectrum(spectrum_in)
     assert str(msg.value) == "No filters to process"
+
+
+def test_filter_spectrums(spectrums):
+    processor = SpectrumProcessor("minimal")
+    spectrums = processor.process_spectrums(spectrums)
+    assert len(spectrums) == 3
+    actual_masses = [s.get("precursor_mz") for s in spectrums]
+    expected_masses = [100, 102, 104]
+    assert actual_masses == expected_masses
