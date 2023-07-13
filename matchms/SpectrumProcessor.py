@@ -11,20 +11,18 @@ class SpectrumProcessor:
 
     Parameters
     ----------
-    processing_pipeline : str
+    predefined_pipeline : str
         Name of a predefined processing pipeline. Options: 'minimal', 'basic', 'default',
         'fully_annotated', or None. Default is 'default'.
     """
 
-    def __init__(self, processing_pipeline='default'):
-        if processing_pipeline is None:
-            self.filters = []
-        elif processing_pipeline not in PREDEFINED_PIPELINES:
-            raise ValueError(f"Unknown processing pipeline '{processing_pipeline}'. Available pipelines: {list(PREDEFINED_PIPELINES.keys())}")
-
+    def __init__(self, predefined_pipeline='default'):
         self.filters = []
-        for fname in PREDEFINED_PIPELINES[processing_pipeline]:
-            self.add_filter(fname)
+        if predefined_pipeline is not None :
+            if predefined_pipeline not in PREDEFINED_PIPELINES:
+                raise ValueError(f"Unknown processing pipeline '{predefined_pipeline}'. Available pipelines: {list(PREDEFINED_PIPELINES.keys())}")
+            for fname in PREDEFINED_PIPELINES[predefined_pipeline]:
+                self.add_filter(fname)
 
     def add_filter(self, filter_spec):
         """
@@ -64,6 +62,8 @@ class SpectrumProcessor:
         Spectrum
             The processed spectrum.
         """
+        if self.filters == []:
+            raise TypeError("No filters to process")
         for filter_func in self.filters:
             spectrum = filter_func(spectrum)
             if spectrum is None:

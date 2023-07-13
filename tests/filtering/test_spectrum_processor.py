@@ -44,3 +44,11 @@ def test_add_filter(metadata, expected):
         assert spectrum is None
     else:
         assert dict(spectrum.metadata) == expected
+
+
+def test_no_filters():
+    spectrum_in = SpectrumBuilder().with_metadata({"ionmode": "positive", "charge": 2}).build()
+    processor = SpectrumProcessor(predefined_pipeline=None)
+    with pytest.raises(TypeError) as msg:
+        spectrum = processor.process_spectrum(spectrum_in)
+    assert str(msg.value) == "No filters to process"
