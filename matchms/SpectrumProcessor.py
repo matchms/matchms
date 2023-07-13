@@ -1,5 +1,7 @@
+from collections import defaultdict
 from functools import partial
 from tqdm import tqdm
+import pandas as pd
 import matchms.filtering as msfilters
 
 
@@ -71,7 +73,10 @@ class SpectrumProcessor:
                 break
         return spectrum
 
-    def process_spectrums(self, spectrums: list, progress_bar=True):
+    def process_spectrums(self, spectrums: list,
+                          create_report=False,
+                          progress_bar=True,
+                          ):
         """
         Process a list of spectrums with all filters in the processing pipeline.
 
@@ -79,17 +84,33 @@ class SpectrumProcessor:
         ----------
         spectrums : list[Spectrum]
             The spectrums to process.
-        
+        create_report: book, optional
+            Creates and outputs a report of the main changes during processing.
+            The report will be returned as pandas DataFrame. Default is set to False.
+        progress_bar : bool, optional
+            Displays progress bar if set to True. Default is True.
+
         Returns
         -------
-        Spectrum
-            The processed spectrum.
+        Spectrums
+            List containing the processed spectrums.
         """
-        spectrums = [self.process_spectrum(s) for s in tqdm(
-            spectrums,
-            disable=(not progress_bar),
-            desc="Processing spectrums")]
-        return spectrums
+        change_counter = defaultdict(int)
+        fields = ["precursor_mz", "parent_mass", "ionmode", "charge", "smiles", "inchikey", "inchi"]
+        processed_spectrums = []
+        for s in tqdm(spectrums, disable=(not progress_bar), desc="Processing spectrums"):
+            processed_spectrum = self.process_spectrum(s)
+            for field in fields:
+                if s.get(field) != processed_spectrum.get(field):
+                    change_counter[field] += 1
+            processed_spectrums.append(processed_spectrum)
+
+        if create_report:
+            processing_report = pd.DataFrame(change_counter.items(), columns=["field", "number of changes"])
+            processing_report = processing_report.set_index("field")
+            return processed_spectrums, processing_report
+        else:
+            return processed_spectrums
 
 
 # List all filters in a functionally working order

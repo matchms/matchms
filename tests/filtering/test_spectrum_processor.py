@@ -1,12 +1,22 @@
 import pytest
+import numpy as np
 from matchms import SpectrumProcessor
 from ..builder_Spectrum import SpectrumBuilder
 
 
 @pytest.fixture
 def spectrums():
-    return [SpectrumBuilder().with_metadata({"pepmass": mass}).build() for mass in [100, 102, 104]
-    ]
+    metadata1 = {"charge": "+1",
+                 "pepmass": 100}
+    metadata2 = {"charge": "-1",
+                 "pepmass": 102}
+    metadata3 = {"charge": -1,
+                 "pepmass": 104}
+
+    s1 = SpectrumBuilder().with_metadata(metadata1).build()
+    s2 = SpectrumBuilder().with_metadata(metadata2).build()
+    s3 = SpectrumBuilder().with_metadata(metadata3).build()
+    return [s1, s2, s3]
 
 
 def test_filter_sorting():
@@ -67,3 +77,16 @@ def test_filter_spectrums(spectrums):
     actual_masses = [s.get("precursor_mz") for s in spectrums]
     expected_masses = [100, 102, 104]
     assert actual_masses == expected_masses
+
+
+def test_filter_spectrums_report(spectrums):
+    processor = SpectrumProcessor("minimal")
+    spectrums, report = processor.process_spectrums(spectrums, create_report=True)
+    assert len(spectrums) == 3
+    actual_masses = [s.get("precursor_mz") for s in spectrums]
+    expected_masses = [100, 102, 104]
+    assert actual_masses == expected_masses
+    assert np.all(report.loc[["charge", "ionmode", "precursor_mz"]].values == np.array(
+        [[2],
+        [3],
+        [3]]))
