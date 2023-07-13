@@ -56,7 +56,7 @@ def test_no_filters():
     spectrum_in = SpectrumBuilder().with_metadata({}).build()
     processor = SpectrumProcessor(predefined_pipeline=None)
     with pytest.raises(TypeError) as msg:
-        spectrum = processor.process_spectrum(spectrum_in)
+        _ = processor.process_spectrum(spectrum_in)
     assert str(msg.value) == "No filters to process"
 
 
