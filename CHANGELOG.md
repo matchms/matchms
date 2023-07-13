@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 ### Changed
+
+- no more warning if precursor m/z field is updated but change is < 0.001 in `interpret_pepmass` filter step [#460](https://github.com/matchms/matchms/pull/460).
+
 ### Fixed
 
 ## [0.21.1] - 2023-07-03
