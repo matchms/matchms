@@ -28,14 +28,13 @@ jobs:
           python --version
       - name: Build package and create dev environment
         run: |
-          python -m pip install --upgrade pip
-          pip install -e .[dev,chemistry]
+          python -m pip install --upgrade pip poetry
       - name: Show pip list
         run: |
           pip list
       - name: Test with coverage
         run: |
-          pytest --cov --cov-report term --cov-report xml --junitxml=xunit-result.xml
+          poetry pytest --cov --cov-report term --cov-report xml --junitxml=xunit-result.xml
       - name: Correct coverage paths
         run: sed -i "s+$PWD/++g" coverage.xml
       - name: Check style against standards using prospector
@@ -77,11 +76,10 @@ jobs:
           python --version
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
+          python -m pip install --upgrade pip poetry
       - name: Build package
         run: |
-          pip install wheel twine
-          python setup.py sdist bdist_wheel
+          poetry build
       - name: Test package
         run: |
           python -m twine check dist/*
@@ -90,13 +88,13 @@ jobs:
           pip list
       - name: Install development dependencies
         run: |
-          pip install -e .[dev]
+          poetry install --only dev
       - name: Show pip list again
         run: |
           pip list
       - name: Run tests
         run: |
-          pytest
+          poetry run pytest
       - name: Show environment variables
         shell: bash -l {0}
         run: |
@@ -112,8 +110,8 @@ jobs:
         os: ['ubuntu-latest', 'macos-latest', 'windows-latest']
         python-version: ['3.7', '3.8', '3.9', '3.10']
         exclude:
-          - os: ubuntu-latest
-            python-version: 3.9
+          # - os: ubuntu-latest
+          #   python-version: 3.9
           - os: macos-latest
             python-version: 3.7
     steps:
@@ -128,14 +126,14 @@ jobs:
           python --version
       - name: Install dependencies (includinv dev + chemistry)
         run: |
-          python -m pip install --upgrade pip
-          pip install -e .[dev,chemistry]
+          python -m pip install --upgrade pip poetry
+          poetry install
       - name: Show pip list
         run: |
           pip list
       - name: Run tests
         run: |
-          pytest
+          poetry run pytest
 
 
   test_with_conda:
