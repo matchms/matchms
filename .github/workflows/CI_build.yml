@@ -34,7 +34,7 @@ jobs:
           pip list
       - name: Test with coverage
         run: |
-          poetry pytest --cov --cov-report term --cov-report xml --junitxml=xunit-result.xml
+          poetry run pytest --cov --cov-report term --cov-report xml --junitxml=xunit-result.xml
       - name: Correct coverage paths
         run: sed -i "s+$PWD/++g" coverage.xml
       - name: Check style against standards using prospector
