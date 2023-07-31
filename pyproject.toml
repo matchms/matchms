@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "matchms"
+version = "0.21.1"
+description = "Python library for large-scale comparisons and processing of tandem mass spectral data"
+authors = ["matchms developer team"]
+license = "Apache-2.0"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.9,<3.13"
+numpy = "^1.25.1"
+scipy = "^1.11.1"
+pandas = "^2.0.3"
+pillow = "!=9.4.0"
+
+
+
+[tool.poetry.group.dev.dependencies]
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
