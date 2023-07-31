@@ -40,3 +40,18 @@ testfixtures = "^7.1.0"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+
+[tool.isort]
+sections = "FUTURE,STDLIB,THIRDPARTY,FIRSTPARTY,LOCALFOLDER"
+no_lines_before = "FUTURE,STDLIB,THIRDPARTY,FIRSTPARTY,LOCALFOLDER"
+lines_after_imports = 2
+known_first_party = "matchms"
+skip = "readthedocs/conf.py"
+
+
+[build_sphinx]
+source-dir = "docs"
+build-dir = "docs/_build"
+all_files = 1
+builder = "html"
