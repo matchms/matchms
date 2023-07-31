@@ -37,8 +37,9 @@ yapf = "^0.40.1"
 testfixtures = "^7.1.0"
 
 [tool.poetry.group.docs.dependencies]
-sphinx = "^7.1.1"
 sphinxcontrib-apidoc = "^0.3.0"
+sphinx-rtd-theme = "^1.2.2"
+sphinx = "<7"
 
 
 [build-system]
