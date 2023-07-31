@@ -48,4 +48,3 @@ def test_repair_adduct_based_on_smiles_with_mol_wt(precursor_mz, expected_adduct
                                                    "ionmode": ionmode}).build()
     spectrum_out = repair_adduct_based_on_smiles(spectrum_in, mass_tolerance=0.1, accept_parent_mass_is_mol_wt=True)
     assert spectrum_out.get("adduct") == expected_adduct
-

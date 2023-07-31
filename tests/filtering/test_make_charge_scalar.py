@@ -20,7 +20,7 @@ def test_make_charge_scalar(input_charge, corrected_charge):
         metadata).with_mz(mz).with_intensities(intensities).build()
 
     spectrum = make_charge_scalar(spectrum_in)
-    assert(spectrum.get("charge") == corrected_charge), "Expected different charge integer"
+    assert spectrum.get("charge") == corrected_charge, "Expected different charge integer"
 
 
 def test_empty_spectrum():

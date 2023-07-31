@@ -4,6 +4,7 @@ from matchms.filtering import repair_parent_mass_match_smiles_wrapper
 from tests.builder_Spectrum import SpectrumBuilder
 
 
+# pylint: too-many-arguments
 @pytest.mark.parametrize("smiles, parent_mass, precursor_mz, adduct, "
                          "expected_smiles, expected_parent_mass, expected_precursor_mz, expected_adduct",
                          # Test repair parent mass is mol wt
@@ -19,6 +20,7 @@ from tests.builder_Spectrum import SpectrumBuilder
 def test_repair_parent_mass_match_smiles_wrapper(smiles, parent_mass, precursor_mz, adduct,
                                                  expected_smiles, expected_parent_mass,
                                                  expected_precursor_mz, expected_adduct):
+    # pylint: too-many-arguments
     pytest.importorskip("rdkit")
     spectrum_in = SpectrumBuilder().with_metadata({"smiles": smiles,
                                                    "precursor_mz": precursor_mz,
