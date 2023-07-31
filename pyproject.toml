@@ -5,6 +5,22 @@ description = "Python library for large-scale comparisons and processing of tand
 authors = ["matchms developer team"]
 license = "Apache-2.0"
 readme = "README.rst"
+repository = "https://github.com/matchms/matchms"
+documentation = "https://matchms.readthedocs.io/en/latest/"
+keywords=[ "similarity measures",
+           "mass spectrometry",
+           "fuzzy matching",
+           "fuzzy search" ]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Education",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9"
+]
 
 [tool.poetry.dependencies]
 python = ">=3.9,<3.13"
