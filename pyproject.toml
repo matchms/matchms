@@ -2,7 +2,8 @@
 name = "matchms"
 version = "0.21.1"
 description = "Python library for large-scale comparisons and processing of tandem mass spectral data"
-authors = ["matchms developer team"]
+authors = ["matchms developer team <florian.huber@hs-duesseldorf.de>"]
+
 license = "Apache-2.0"
 readme = "README.rst"
 repository = "https://github.com/matchms/matchms"
@@ -52,6 +53,7 @@ pytest-cov = "^4.1.0"
 yapf = "^0.40.1"
 testfixtures = "^7.1.0"
 twine = "^4.0.2"
+black = "^23.7.0"
 
 [tool.poetry.group.docs.dependencies]
 sphinxcontrib-apidoc = "^0.3.0"
