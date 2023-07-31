@@ -83,6 +83,7 @@ jobs:
           poetry build
       - name: Test package
         run: |
+          poetry install --only dev
           python -m twine check dist/*
       - name: Show pip list
         run: |
