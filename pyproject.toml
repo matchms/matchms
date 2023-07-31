@@ -4,7 +4,7 @@ version = "0.21.1"
 description = "Python library for large-scale comparisons and processing of tandem mass spectral data"
 authors = ["matchms developer team"]
 license = "Apache-2.0"
-readme = "README.md"
+readme = "README.rst"
 
 [tool.poetry.dependencies]
 python = ">=3.9,<3.13"
