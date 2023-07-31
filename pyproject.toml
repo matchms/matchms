@@ -8,14 +8,32 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = ">=3.9,<3.13"
-numpy = "^1.25.1"
+numpy = "<1.25"
 scipy = "^1.11.1"
 pandas = "^2.0.3"
 pillow = "!=9.4.0"
-
+lxml = "^4.9.3"
+matplotlib = "^3.7.2"
+networkx = "^3.1"
+numba = "^0.57.1"
+pickydict = "^0.4.0"
+pyteomics = "^4.6"
+requests = "^2.31.0"
+sparsestack = "^0.4.1"
+tqdm = "^4.65.0"
+rdkit = "^2023.3.2"
+pyyaml = "^6.0.1"
 
 
 [tool.poetry.group.dev.dependencies]
+decorator = "^5.1.1"
+isort = "^5.12.0"
+pylint = "^2.17.5"
+prospector = {extras = ["with-pyroma"], version = "^1.10.2"}
+pytest = "^7.4.0"
+pytest-cov = "^4.1.0"
+yapf = "^0.40.1"
+testfixtures = "^7.1.0"
 
 
 [build-system]
