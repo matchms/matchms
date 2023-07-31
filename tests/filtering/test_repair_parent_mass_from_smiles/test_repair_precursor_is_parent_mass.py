@@ -14,7 +14,7 @@ from tests.builder_Spectrum import SpectrumBuilder
                           ])
 def test_repair_precursor_is_parent_mass(smiles, adduct, parent_mass, precursor_mz,
                                          expected_precursor_mz, expected_parent_mass):
-    # pylint: too-many-arguments
+    # pylint: disable=too-many-arguments
     pytest.importorskip("rdkit")
     spectrum_in = SpectrumBuilder().with_metadata({"smiles": smiles,
                                                    "adduct": adduct,
