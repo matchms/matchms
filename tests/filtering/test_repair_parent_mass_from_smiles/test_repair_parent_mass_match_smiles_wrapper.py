@@ -4,7 +4,6 @@ from matchms.filtering import repair_parent_mass_match_smiles_wrapper
 from tests.builder_Spectrum import SpectrumBuilder
 
 
-# pylint: too-many-arguments
 @pytest.mark.parametrize("smiles, parent_mass, precursor_mz, adduct, "
                          "expected_smiles, expected_parent_mass, expected_precursor_mz, expected_adduct",
                          # Test repair parent mass is mol wt
