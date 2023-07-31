@@ -29,6 +29,7 @@ jobs:
       - name: Build package and create dev environment
         run: |
           python -m pip install --upgrade pip poetry
+          poetry install
       - name: Show pip list
         run: |
           pip list
@@ -88,7 +89,7 @@ jobs:
           pip list
       - name: Install development dependencies
         run: |
-          poetry install --only dev
+          poetry install
       - name: Show pip list again
         run: |
           pip list
