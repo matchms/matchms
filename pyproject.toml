@@ -73,6 +73,11 @@ lines_after_imports = 2
 known_first_party = "matchms"
 skip = "readthedocs/conf.py"
 
+[tool.pytest.ini_options]
+testpaths = [
+    "tests",
+    "integration-tests",
+]
 
 [build_sphinx]
 source-dir = "docs"
