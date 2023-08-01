@@ -51,6 +51,17 @@ def safe_convert_to_float(value: Any) -> Optional[float]:
             value = value[0]
         else:
             return None
+        
+    # logic to read MoNA msp files which specify rt as string with "min" in it
+    if isinstance(value, str):
+        value = value.strip()
+        if "min" in value:
+            try:
+                rt = float(value.split(" ")[0])*60
+            except (ValueError, TypeError):
+                logger.warning("%s can't be converted to float.", str(value))
+                rt = None
+            return rt
     try:
         value = float(value)
         rt = value if value >= 0 else None  # discard negative RT values
