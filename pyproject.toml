@@ -66,6 +66,7 @@ sphinx = "<7"
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
+[tool.poetry_bumpversion.file."matchms/__version__.py"]
 
 [tool.isort]
 sections = "FUTURE,STDLIB,THIRDPARTY,FIRSTPARTY,LOCALFOLDER"
