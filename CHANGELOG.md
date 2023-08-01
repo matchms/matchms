@@ -5,14 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [unreleased]
+## [0.21.2] - 2023-08-01
 
 ### Added
 ### Changed
 
 - no more warning if precursor m/z field is updated but change is < 0.001 in `interpret_pepmass` filter step [#460](https://github.com/matchms/matchms/pull/460).
+- using poetry as a build system [#466](https://github.com/matchms/matchms/pull/466)
 
 ### Fixed
+- reading MoNA msp files which specify RT in minutes [#462](https://github.com/matchms/matchms/issues/462)
+- added missing pyyaml dependency [#463](https://github.com/matchms/matchms/issues/463)
 
 ## [0.21.1] - 2023-07-03
 
