@@ -1,6 +1,7 @@
 import pytest
 import numpy as np
 from matchms import SpectrumProcessor
+from matchms.SpectrumProcessor import FilteringReport
 from ..builder_Spectrum import SpectrumBuilder
 
 
@@ -87,6 +88,18 @@ def test_filter_spectrums_report(spectrums):
     expected_masses = [100, 102, 104]
     assert actual_masses == expected_masses
     assert np.all(report.loc[["charge", "ionmode", "precursor_mz"]].values == np.array(
-        [[2],
-        [3],
-        [3]]))
+        [[2, 0],
+        [0, 3],
+        [0, 3]]))
+
+
+def test_filtering_report_class(spectrums):
+    filtering_report = FilteringReport()
+    processor = SpectrumProcessor("minimal")
+    for s in spectrums:
+        spectrum_processed = processor.process_spectrum(s)
+        spectrum_processed.set("smiles", "test")
+        filtering_report.add_to_report(s, spectrum_processed)
+    assert filtering_report.counter_removed_spectrums == 0
+    assert filtering_report.counter_changed == {'charge': 2}
+    assert filtering_report.counter_added == {"smiles": 3, 'ionmode': 3, 'precursor_mz': 3}
