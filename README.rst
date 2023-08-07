@@ -107,7 +107,7 @@ Installation
 
 Prerequisites:  
 
-- Python 3.7, 3.8, 3.9 or 3.10, (higher versions should work as well, but are not yet tested systematically)
+- Python 3.8 - 3.11, (higher versions should work as well, but are not yet tested systematically)
 - Anaconda (recommended)
 
 We recommend installing matchms in a new virtual environment to avoid dependency clashes
