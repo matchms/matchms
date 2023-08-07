@@ -25,6 +25,7 @@ from .IntersectMz import IntersectMz
 from .MetadataMatch import MetadataMatch
 from .ModifiedCosine import ModifiedCosine
 from .NeutralLossesCosine import NeutralLossesCosine
+from .NISTSimilarity import NISTSimilarity
 from .ParentMassMatch import ParentMassMatch
 from .PrecursorMzMatch import PrecursorMzMatch
 
@@ -37,6 +38,7 @@ __all__ = [
     "MetadataMatch",
     "ModifiedCosine",
     "NeutralLossesCosine",
+    "NISTSimilarity",
     "ParentMassMatch",
     "PrecursorMzMatch",
 ]

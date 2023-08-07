@@ -105,3 +105,13 @@ def test_fragments_to_numpy():
     assert np.allclose(peaks.to_numpy, np.array([[10., 100.],
                                                        [20., 99.9],
                                                        [30., 300.]]))
+
+
+def test_get():
+    mz = np.array([10, 20, 30], dtype="float")
+    intensities = np.array([100, 20, 300], dtype="float")
+
+    peaks = Fragments(mz=mz, intensities=intensities)
+
+    actual = peaks.get(10, 0.1)
+    assert actual == (np.array(10.), np.array(100.))

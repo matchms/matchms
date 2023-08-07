@@ -1,3 +1,4 @@
+from typing import Tuple
 import numpy as np
 
 
@@ -63,6 +64,20 @@ class Fragments:
     def clone(self):
         return Fragments(self.mz, self.intensities)
 
+    def get(self, mz: float, tolerance: float) -> Tuple[np.ndarray, np.ndarray]:
+        """Get peaks at specified mz value with given tolerance
+
+        Args:
+            mz (float): mz value at which to look for a peak
+            tolerance (float): tolerance to use for mz matching
+
+        Returns:
+            Tuple[np.ndarray, np.ndarray]: array of mz values and intensities for this query
+        """
+        # maybe it is smarter to implement this with np.where?
+        indices = np.argwhere(abs(self._mz - mz) <= tolerance)
+        return self._mz[indices], self._intensities[indices]
+
     @property
     def mz(self):
         """getter method for mz private variable"""
@@ -78,3 +93,4 @@ class Fragments:
         """getter method to return stacked numpy array of both peak mz and
         intensities"""
         return np.vstack((self.mz, self.intensities)).T
+    
