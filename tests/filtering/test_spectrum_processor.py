@@ -1,5 +1,5 @@
-import pytest
 import numpy as np
+import pytest
 from matchms import SpectrumProcessor
 from matchms.SpectrumProcessor import FilteringReport
 from ..builder_Spectrum import SpectrumBuilder
