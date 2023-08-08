@@ -83,6 +83,10 @@ authors:
     family-names: Ahmad
     given-names: Zargham
     orcid: "https://orcid.org/0000-0002-6096-224X"
+  -
+    affiliation: "Jožef Stefan Institute"
+    family-names: Piciga
+    given_names: Aleksander
 
 cff-version: "1.1.0"
 keywords:
