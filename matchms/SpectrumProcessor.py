@@ -21,13 +21,14 @@ class SpectrumProcessor:
 
     def __init__(self, predefined_pipeline='default'):
         self.filters = []
+        self.filter_order = [x.__name__ for x in ALL_FILTERS]
         if predefined_pipeline is not None :
             if predefined_pipeline not in PREDEFINED_PIPELINES:
                 raise ValueError(f"Unknown processing pipeline '{predefined_pipeline}'. Available pipelines: {list(PREDEFINED_PIPELINES.keys())}")
             for fname in PREDEFINED_PIPELINES[predefined_pipeline]:
-                self.add_filter(fname)
+                self.add_matchms_filter(fname)
 
-    def add_filter(self, filter_spec):
+    def add_matchms_filter(self, filter_spec):
         """
         Add a filter to the processing pipeline.
 
@@ -47,9 +48,31 @@ class SpectrumProcessor:
             raise TypeError("filter_spec should be a string or a tuple")
 
         self.filters.append(filter_func)
-        # Sort filters according to their order in ALL_FILTERS
-        self.filters.sort(key=lambda f: [x.__name__ for x in ALL_FILTERS].index(f.__name__))
+        # Sort filters according to their order in self.filter_order
+        self.filters.sort(key=lambda f: self.filter_order.index(f.__name__))
         return self
+
+    def add_custom_filter(self, filter_function):
+        """
+        Add a custom filter function to the processing pipeline.
+
+        Parameters
+        ----------
+        filter_function: callable
+            Custom function to add to the processing pipeline.
+            Expects a function that takes a matchms Spectrum object as input and returns a Spectrum object
+            (or None).
+            Regarding the order of execution: the added filter will be executed where it is introduced to the
+            processing pipeline.
+        """
+        if not callable(filter_function):
+            raise TypeError("Expected callable filter function.")
+        filter_position = 0
+        for filter in self.filters[::-1]:
+            if filter.__name__ in self.filter_order:
+                filter_position = self.filter_order.index(filter.__name__)
+        self.filter_order.insert(filter_position + 1, filter_function.__name__)
+        self.filters.append(filter_function)
 
     def process_spectrum(self, spectrum):
         """

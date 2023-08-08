@@ -51,11 +51,11 @@ def test_filter_sorting():
     [{"ionmode": "positive"}, {"ionmode": "positive", "charge": 1}],
     [{"ionmode": "positive", "charge": 2}, {"ionmode": "positive", "charge": 2}],
 ])
-def test_add_filter(metadata, expected):
+def test_add_matchms_filter(metadata, expected):
     spectrum_in = SpectrumBuilder().with_metadata(metadata).build()
     processor = SpectrumProcessor("minimal")
-    processor.add_filter(("require_correct_ionmode",
-                          {"ion_mode_to_keep": "both"}))
+    processor.add_matchms_filter(("require_correct_ionmode",
+                                 {"ion_mode_to_keep": "both"}))
     spectrum = processor.process_spectrum(spectrum_in)
     if expected is None:
         assert spectrum is None
@@ -115,3 +115,19 @@ def test_processing_report_class(spectrums):
     assert processing_report.counter_removed_spectrums == 0
     assert processing_report.counter_changed == {'charge': 2}
     assert processing_report.counter_added == {"smiles": 3, 'ionmode': 3, 'precursor_mz': 3}
+
+
+def test_adding_custom_filter(spectrums):
+    def nonsense_inchikey(s):
+        s.set("inchikey", "NONSENSE")
+        return s
+
+    processor = SpectrumProcessor("minimal")
+    processor.add_custom_filter(nonsense_inchikey)
+    filters = processor.filters
+    assert filters[-1].__name__ == "nonsense_inchikey"
+    spectrums, report = processor.process_spectrums(spectrums, create_report=True)
+    assert report.counter_number_processed == 3
+    assert report.counter_changed == {'charge': 2}
+    assert report.counter_added == {'ionmode': 3, 'precursor_mz': 3, 'inchikey': 3}
+    assert spectrums[0].get("inchikey") == "NONSENSE", "Custom filter not executed properly"
