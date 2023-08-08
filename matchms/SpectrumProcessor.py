@@ -52,7 +52,7 @@ class SpectrumProcessor:
         self.filters.sort(key=lambda f: self.filter_order.index(f.__name__))
         return self
 
-    def add_custom_filter(self, filter_function):
+    def add_custom_filter(self, filter_function, filter_params=None):
         """
         Add a custom filter function to the processing pipeline.
 
@@ -64,6 +64,8 @@ class SpectrumProcessor:
             (or None).
             Regarding the order of execution: the added filter will be executed where it is introduced to the
             processing pipeline.
+        filter_params: dict
+            If needed, add dictionary with all filter parameters. Default is set to None.
         """
         if not callable(filter_function):
             raise TypeError("Expected callable filter function.")
@@ -72,7 +74,12 @@ class SpectrumProcessor:
             if filter.__name__ in self.filter_order:
                 filter_position = self.filter_order.index(filter.__name__)
         self.filter_order.insert(filter_position + 1, filter_function.__name__)
-        self.filters.append(filter_function)
+        if filter_params is None:
+            self.filters.append(filter_function)
+        else:
+            filter_func = partial(filter_function, **filter_params)
+            filter_func.__name__ = filter_function.__name__
+            self.filters.append(filter_func)
 
     def process_spectrum(self, spectrum):
         """
