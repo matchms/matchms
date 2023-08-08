@@ -70,9 +70,9 @@ class SpectrumProcessor:
         if not callable(filter_function):
             raise TypeError("Expected callable filter function.")
         filter_position = 0
-        for filter in self.filters[::-1]:
-            if filter.__name__ in self.filter_order:
-                filter_position = self.filter_order.index(filter.__name__)
+        for filter_func in self.filters[::-1]:
+            if filter_func.__name__ in self.filter_order:
+                filter_position = self.filter_order.index(filter_func.__name__)
         self.filter_order.insert(filter_position + 1, filter_function.__name__)
         if filter_params is None:
             self.filters.append(filter_function)
