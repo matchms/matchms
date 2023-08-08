@@ -79,6 +79,10 @@
          "affiliation": "Research Centre for Toxic Compounds in the Environment",
          "name": "Ahmad, Zargham",
          "orcid": "0000-0002-6096-224X"
+      },
+      {
+         "affiliation": "Jožef Stefan Institute",
+         "name": "Aleksander Piciga"
       }
    ],
    "description": "Python library for processing (tandem) mass spectrometry data and for computing spectral similarities.",
