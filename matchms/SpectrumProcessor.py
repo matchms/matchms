@@ -28,6 +28,17 @@ class SpectrumProcessor:
             for fname in PREDEFINED_PIPELINES[predefined_pipeline]:
                 self.add_matchms_filter(fname)
 
+    def add_filter(self, filter_function):
+        """Add a filter to the processing pipeline. Takes both matchms filter names (and parameters)
+        as wel as custom-made functions.
+        """
+        if isinstance(filter_function, str):
+            self.add_matchms_filter(filter_function)
+        elif isinstance(filter_function, tuple) and isinstance(filter_function[0], str):
+            self.add_matchms_filter(filter_function)
+        else:
+            self.add_custom_filter(filter_function[0], filter_function[1])
+
     def add_matchms_filter(self, filter_spec):
         """
         Add a filter to the processing pipeline.
@@ -50,7 +61,6 @@ class SpectrumProcessor:
         self.filters.append(filter_func)
         # Sort filters according to their order in self.filter_order
         self.filters.sort(key=lambda f: self.filter_order.index(f.__name__))
-        return self
 
     def add_custom_filter(self, filter_function, filter_params=None):
         """
@@ -135,7 +145,8 @@ class SpectrumProcessor:
             processed_spectrum = self.process_spectrum(s)
             if create_report:
                 processing_report.add_to_report(s, processed_spectrum)
-            processed_spectrums.append(processed_spectrum)
+            if processed_spectrum is not None:
+                processed_spectrums.append(processed_spectrum)
 
         if create_report:
             return processed_spectrums, processing_report

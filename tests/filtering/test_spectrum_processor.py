@@ -156,3 +156,26 @@ def test_adding_custom_filter_with_parameters(spectrums):
     assert report.counter_changed == {'charge': 2}
     assert report.counter_added == {'ionmode': 3, 'precursor_mz': 3, 'inchikey': 3}
     assert spectrums[0].get("inchikey") == "NONSENSENONSENSE", "Custom filter not executed properly"
+
+
+def test_add_filter_with_custom(spectrums):
+    def nonsense_inchikey_multiple(s, number):
+        s.set("inchikey", number * "NONSENSE")
+        return s
+
+    processor = SpectrumProcessor("minimal")
+    processor.add_filter((nonsense_inchikey_multiple, {"number": 2}))
+    filters = processor.filters
+    assert filters[-1].__name__ == "nonsense_inchikey_multiple"
+    spectrums, report = processor.process_spectrums(spectrums, create_report=True)
+    assert spectrums[0].get("inchikey") == "NONSENSENONSENSE", "Custom filter not executed properly"
+
+
+def test_add_filter_with_matchms_filter(spectrums):
+    processor = SpectrumProcessor("minimal")
+    processor.add_filter(("require_correct_ionmode",
+                         {"ion_mode_to_keep": "both"}))
+    filters = processor.filters
+    assert filters[-1].__name__ == "require_correct_ionmode"
+    spectrums, report = processor.process_spectrums(spectrums, create_report=True)
+    assert spectrums == []
