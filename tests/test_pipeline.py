@@ -50,7 +50,7 @@ def test_pipeline_symmetric():
 def test_pipeline_symmetric_filters():
     pipeline = Pipeline()
     pipeline.query_files = spectrums_file_msp
-    pipeline.predefined_filters = "basic"
+    pipeline.predefined_processing_queries = "basic"
     pipeline.additional_processing_queries = [[select_by_mz, {"mz_from": 0, "mz_to": 1000}]]
     pipeline.score_computations = [["precursormzmatch",  {"tolerance": 120.0}],
                                    ["modifiedcosine", {"tolerance": 10.0}]]
@@ -183,17 +183,15 @@ def test_FingerprintSimilarity_pipeline():
     pipeline = Pipeline()
     pipeline.query_files = spectrums_file_msp
     pipeline.reference_files = spectrums_file_msp
-    filter_steps = [
-        ["default_filters"],
-        ["add_fingerprint"]
-    ]
-    pipeline.filter_steps_queries = filter_steps
-    pipeline.filter_steps_refs = filter_steps
+    pipeline.predefined_processing_queries = "basic"
+    pipeline.additional_processing_queries = ["add_fingerprint"]
+    pipeline.predefined_processing_refs = "basic"
+    pipeline.additional_processing_refs = ["add_fingerprint"]
     pipeline.score_computations = [
         ["metadatamatch", {"field": "precursor_mz", "matching_type": "difference", "tolerance": 50}],
         ["fingerprintsimilarity", {"similarity_measure": "jaccard"}]
     ]    
     pipeline.run()
-
+    assert len(pipeline.spectrums_queries[0].get("fingerprint")) == 2048
     assert pipeline.scores.scores.shape == (5, 5, 2)
     assert pipeline.scores.score_names == ('MetadataMatch', 'FingerprintSimilarity')
