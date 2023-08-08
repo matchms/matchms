@@ -141,6 +141,14 @@ class SpectrumProcessor:
             return processed_spectrums, processing_report
         return processed_spectrums
 
+    @property
+    def processing_steps(self):
+        return [x.__name__ for x in self.filters]
+
+    def __str__(self):
+        summary_string = "SpectrumProcessor\nProcessing steps:\n - "
+        return summary_string + "\n - ".join(self.processing_steps)
+
 
 # List all filters in a functionally working order
 ALL_FILTERS = [msfilters.make_charge_int,

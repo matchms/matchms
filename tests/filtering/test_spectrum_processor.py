@@ -20,7 +20,7 @@ def spectrums():
     return [s1, s2, s3]
 
 
-def test_filter_sorting():
+def test_filter_sorting_and_output():
     processing = SpectrumProcessor("default")
     expected_filters = [
         'make_charge_int',
@@ -44,6 +44,15 @@ def test_filter_sorting():
         ]
     actual_filters = [x.__name__ for x in processing.filters]
     assert actual_filters == expected_filters
+    # 2nd way to access the filter names via processing_steps attribute:
+    assert processing.processing_steps == expected_filters
+
+
+def test_string_output():
+    processing = SpectrumProcessor("minimal")
+    expected_str = "SpectrumProcessor\nProcessing steps:\n - make_charge_int\n - interpret_pepmass"\
+        "\n - derive_ionmode\n - correct_charge"
+    assert processing.__str__() == expected_str
 
 
 @pytest.mark.parametrize("metadata, expected", [
