@@ -73,7 +73,7 @@ def test_no_filters():
 
 def test_unknown_keyword():
     with pytest.raises(ValueError) as msg:
-        processor = SpectrumProcessor(predefined_pipeline="something_wrong")
+        _ = SpectrumProcessor(predefined_pipeline="something_wrong")
     assert "Unknown processing pipeline" in str(msg.value)
 
 
