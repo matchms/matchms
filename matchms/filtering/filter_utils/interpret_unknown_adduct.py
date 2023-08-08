@@ -29,10 +29,13 @@ logger = logging.getLogger("matchms")
 
 
 def get_multiplier_and_mass_from_adduct(adduct: str) -> Tuple[Optional[float], Optional[float]]:
-    """Get multiplier for charge and the actual mass of an adduct.
+    """Get multiplier for charge and the correction mass of an adduct.
+
+    The multiplier and correction mass can be used to calculate the parent mass based on the precursor mz.
+    Examples can be found in matchms/data/known_adducts_table.csv
 
     Args:
-        adduct (str): String description of the adduct.
+        adduct (str): String description of the adduct. e.g. '[M+H-H2O]2+'
 
     Returns:
         Tuple[Optional[float], Optional[float]]: Multiplier and mass of this adduct.
@@ -41,9 +44,9 @@ def get_multiplier_and_mass_from_adduct(adduct: str) -> Tuple[Optional[float], O
     if charge is None:
         return None, None
 
-    parent_mass, ions = get_ions_from_adduct(adduct)
+    nr_of_parent_masses, ions = get_ions_from_adduct(adduct)
 
-    if parent_mass is None or ions is None:
+    if nr_of_parent_masses is None or ions is None:
         return None, None
 
     mass_of_ions = get_mass_of_ion(ions)
@@ -51,15 +54,15 @@ def get_multiplier_and_mass_from_adduct(adduct: str) -> Tuple[Optional[float], O
         return None, None
     added_mass = mass_of_ions - ELECTRON_MASS * charge
 
-    multiplier = 1/abs(charge)*parent_mass
+    multiplier = 1/abs(charge)*nr_of_parent_masses
     correction_mass = added_mass/(abs(charge))
     return multiplier, correction_mass
 
 
-def get_ions_from_adduct(adduct: str) -> Tuple[float, List[str]]:
-    """Returns a list of ions from an adduct.
+def get_ions_from_adduct(adduct: str) -> Tuple[int, List[str]]:
+    """Returns a list of ions from an adduct and returns the number of parent masses
 
-    e.g. '[M+H-H2O]2+' -> ["M", "+H", "-H2O"]
+    e.g. '[M+H-H2O]2+' -> (1, ["+H", "-H2O"])
     """
 
     # Get adduct from brackets
@@ -77,18 +80,19 @@ def get_ions_from_adduct(adduct: str) -> Tuple[float, List[str]]:
                        len(parent_mass), adduct)
     parent_mass = parent_mass[0]
     if parent_mass == "M":
-        parent_mass = 1
+        nr_of_parent_masses = 1
     else:
-        parent_mass = int(parent_mass[0])
+        nr_of_parent_masses = int(parent_mass[0])
 
     ions_split = re.findall(r'([+-][0-9a-zA-Z]+)', adduct)
     ions_split = replace_abbreviations(ions_split)
-    return parent_mass, ions_split
+    return nr_of_parent_masses, ions_split
 
 
-def split_ion(ion: str) -> Tuple[str, str, str]:
+def split_ion(ion: str) -> Tuple[str, int, str]:
     """Separate an ion description string into sign, number and formula.
 
+    e.g. +2H2O -> ("+", 2, "H2O")
     Args:
         ion (str): String representing the ion.
 
@@ -100,7 +104,7 @@ def split_ion(ion: str) -> Tuple[str, str, str]:
     assert sign in ["+", "-"], "Expected ion to start with + or -"
     match = re.match(r'^([0-9]+)(.*)', ion)
     if match:
-        number = match.group(1)
+        number = int(match.group(1))
         ion = match.group(2)
     else:
         number = 1
@@ -137,7 +141,11 @@ def get_mass_of_ion(ions):
     return added_mass
 
 
-def get_charge_of_adduct(adduct)->Optional[int]:
+def get_charge_of_adduct(adduct) -> Optional[int]:
+    """Returns the charge of an adduct
+
+    e.g. '[M+H-H2O]2+' -> 2
+    """
     charge = re.findall((r"\]([0-9]?[+-])"), adduct)
     if len(charge) != 1:
         logger.warning("Charge was found %s times in adduct %s",
