@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 from matchms import SpectrumProcessor
-from matchms.SpectrumProcessor import FilteringReport
+from matchms.SpectrumProcessor import ProcessingReport
 from ..builder_Spectrum import SpectrumBuilder
 
 
@@ -87,19 +87,25 @@ def test_filter_spectrums_report(spectrums):
     actual_masses = [s.get("precursor_mz") for s in spectrums]
     expected_masses = [100, 102, 104]
     assert actual_masses == expected_masses
-    assert np.all(report.loc[["charge", "ionmode", "precursor_mz"]].values == np.array(
+    assert report.counter_number_processed == 3
+    assert report.counter_changed == {'charge': 2}
+    assert report.counter_added == {'ionmode': 3, 'precursor_mz': 3}
+    report_df = report.to_dataframe()
+    assert np.all(report_df.loc[["charge", "ionmode", "precursor_mz"]].values == np.array(
         [[2, 0],
         [0, 3],
         [0, 3]]))
 
 
-def test_filtering_report_class(spectrums):
-    filtering_report = FilteringReport()
+def test_processing_report_class(spectrums):
+    processing_report = ProcessingReport()
     processor = SpectrumProcessor("minimal")
     for s in spectrums:
         spectrum_processed = processor.process_spectrum(s)
         spectrum_processed.set("smiles", "test")
-        filtering_report.add_to_report(s, spectrum_processed)
-    assert filtering_report.counter_removed_spectrums == 0
-    assert filtering_report.counter_changed == {'charge': 2}
-    assert filtering_report.counter_added == {"smiles": 3, 'ionmode': 3, 'precursor_mz': 3}
+        processing_report.add_to_report(s, spectrum_processed)
+
+    assert processing_report.counter_number_processed == 3
+    assert processing_report.counter_removed_spectrums == 0
+    assert processing_report.counter_changed == {'charge': 2}
+    assert processing_report.counter_added == {"smiles": 3, 'ionmode': 3, 'precursor_mz': 3}

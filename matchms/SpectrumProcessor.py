@@ -96,7 +96,7 @@ class SpectrumProcessor:
             List containing the processed spectrums.
         """
         if create_report:
-            filtering_report = FilteringReport()
+            processing_report = ProcessingReport()
 
         processed_spectrums = []
         for s in tqdm(spectrums, disable=(not progress_bar), desc="Processing spectrums"):
@@ -104,11 +104,10 @@ class SpectrumProcessor:
                 continue  # empty spectra will be discarded
             processed_spectrum = self.process_spectrum(s)
             if create_report:
-                filtering_report.add_to_report(s, processed_spectrum)
+                processing_report.add_to_report(s, processed_spectrum)
             processed_spectrums.append(processed_spectrum)
 
         if create_report:
-            processing_report = filtering_report.to_dataframe()
             return processed_spectrums, processing_report
         return processed_spectrums
 
@@ -188,7 +187,7 @@ PREDEFINED_PIPELINES = {
 }
 
 
-class FilteringReport:
+class ProcessingReport:
     """Class to keep track of spectrum changes during filtering.
     """
     def __init__(self):
@@ -196,18 +195,21 @@ class FilteringReport:
         self.counter_changed = defaultdict(int)
         self.counter_added = defaultdict(int)
         self.counter_removed_spectrums = 0
+        self.counter_number_processed = 0
 
     def add_to_report(self, spectrum_old, spectrum_new):
         """Add changes between spectrum_old and spectrum_new to the report.
         """
+        self.counter_number_processed += 1
         if spectrum_new is None:
             self.counter_removed_spectrums += 1
-        for field in self.fields:
-            if spectrum_old.get(field) != spectrum_new.get(field):
-                if spectrum_old.get(field) is None:
-                    self.counter_added[field] += 1
-                else:
-                    self.counter_changed[field] += 1
+        else:
+            for field in self.fields:
+                if spectrum_old.get(field) != spectrum_new.get(field):
+                    if spectrum_old.get(field) is None:
+                        self.counter_added[field] += 1
+                    else:
+                        self.counter_changed[field] += 1
 
     def to_dataframe(self):
         """Create Pandas DataFrame Report of counted spectrum changes."""
@@ -218,3 +220,19 @@ class FilteringReport:
         processing_report = pd.merge(changes, additions, how="outer", on="field")
         processing_report = processing_report.set_index("field").fillna(0)
         return processing_report.astype(int)
+
+    def __str__(self):
+        report_str = f"""\
+----- Spectrum Processing Report -----
+Number of spectrums processed: {self.counter_number_processed}
+Number of spectrums removed: {self.counter_removed_spectrums}
+Changes during processing:
+{str(self.to_dataframe())}
+"""
+        return report_str
+
+    def __repr__(self):
+        return f"Report({self.counter_number_processed},\
+        {self.counter_removed_spectrums},\
+        {dict(self.counter_changed)},\
+        {dict(self.counter_added)})"
