@@ -22,7 +22,9 @@ class SpectrumProcessor:
     def __init__(self, predefined_pipeline='default'):
         self.filters = []
         self.filter_order = [x.__name__ for x in ALL_FILTERS]
-        if predefined_pipeline is not None :
+        if predefined_pipeline is not None:
+            if not isinstance(predefined_pipeline, str):
+                raise ValueError("Predefined pipeline parameter should be a string")
             if predefined_pipeline not in PREDEFINED_PIPELINES:
                 raise ValueError(f"Unknown processing pipeline '{predefined_pipeline}'. Available pipelines: {list(PREDEFINED_PIPELINES.keys())}")
             for fname in PREDEFINED_PIPELINES[predefined_pipeline]:
@@ -34,7 +36,7 @@ class SpectrumProcessor:
         """
         if isinstance(filter_function, str):
             self.add_matchms_filter(filter_function)
-        elif isinstance(filter_function, tuple) and isinstance(filter_function[0], str):
+        elif isinstance(filter_function, (tuple, list)) and isinstance(filter_function[0], str):
             self.add_matchms_filter(filter_function)
         else:
             self.add_custom_filter(filter_function[0], filter_function[1])
@@ -50,13 +52,17 @@ class SpectrumProcessor:
             filter function and the second element is a dictionary containing additional arguments for the function.
         """
         if isinstance(filter_spec, str):
+            if filter_spec not in FILTER_FUNCTIONS:
+                raise ValueError("Unknown filter type. Should be known filter name or function.")
             filter_func = FILTER_FUNCTIONS[filter_spec]
-        elif isinstance(filter_spec, tuple):
+        elif isinstance(filter_spec, (tuple, list)):
             filter_name, filter_args = filter_spec
+            if filter_name not in FILTER_FUNCTIONS:
+                raise ValueError("Unknown filter type. Should be known filter name or function.")
             filter_func = partial(FILTER_FUNCTIONS[filter_name], **filter_args)
             filter_func.__name__ = FILTER_FUNCTIONS[filter_name].__name__
         else:
-            raise TypeError("filter_spec should be a string or a tuple")
+            raise TypeError("filter_spec should be a string or a tuple/list")
 
         self.filters.append(filter_func)
         # Sort filters according to their order in self.filter_order
@@ -220,11 +226,11 @@ DEFAULT_FILTERS = BASIC_FILTERS \
        "harmonize_undefined_smiles",
        "repair_inchi_inchikey_smiles",
        "repair_parent_mass_match_smiles_wrapper",
-       "require_correct_ionmode",
        "normalize_intensities",
     ]
 FULLY_ANNOTATED_PROCESSING = DEFAULT_FILTERS \
-    + ["require_parent_mass_match_smiles",
+    + [("require_correct_ionmode", {"ion_mode_to_keep": "both"}),
+       "require_parent_mass_match_smiles",
        "require_valid_annotation",
     ]
 

@@ -44,19 +44,20 @@ def test_pipeline_symmetric():
     expected = np.array([[1., 0.30384404],
                          [0.30384404, 1.]])
     assert np.allclose(all_scores["ModifiedCosine_score"][3:, 3:], expected)
-    assert np.all(all_scores["ModifiedCosine_score"].diagonal() == 1), "Diagonal should all be 1.0"
+    assert np.allclose(all_scores["ModifiedCosine_score"].diagonal(), 1), "Diagonal should all be 1.0"
 
 
 def test_pipeline_symmetric_filters():
     pipeline = Pipeline()
     pipeline.query_files = spectrums_file_msp
-    pipeline.filter_steps_queries = [["default_filters"],
-                                     [select_by_mz, {"mz_from": 0, "mz_to": 1000}]]
+    pipeline.predefined_filters = "basic"
+    pipeline.additional_processing_queries = [[select_by_mz, {"mz_from": 0, "mz_to": 1000}]]
     pipeline.score_computations = [["precursormzmatch",  {"tolerance": 120.0}],
                                    ["modifiedcosine", {"tolerance": 10.0}]]
     pipeline.run()
 
     assert len(pipeline.spectrums_queries) == 5
+    assert pipeline.spectrums_queries[0].metadata == pipeline.spectrums_references[0].metadata
     assert pipeline.spectrums_queries[0] == pipeline.spectrums_references[0]
     assert pipeline.is_symmetric is True
     assert pipeline.scores.scores.shape == (5, 5, 3)
@@ -65,7 +66,7 @@ def test_pipeline_symmetric_filters():
     expected = np.array([[1., 0.30384404],
                          [0.30384404, 1.]])
     assert np.allclose(all_scores["ModifiedCosine_score"][3:, 3:], expected)
-    assert np.all(all_scores["ModifiedCosine_score"].diagonal() == 1), "Diagonal should all be 1.0"
+    assert np.allclose(all_scores["ModifiedCosine_score"].diagonal(), 1), "Diagonal should all be 1.0"
 
 
 def test_pipeline_symmetric_masking():
@@ -85,7 +86,7 @@ def test_pipeline_symmetric_masking():
     expected = np.array([[1., 0.30384404],
                          [0.30384404, 1.]])
     assert np.allclose(all_scores["ModifiedCosine_score"][3:, 3:], expected)
-    assert np.all(all_scores["ModifiedCosine_score"].diagonal() == 1), "Diagonal should all be 1.0"
+    assert np.allclose(all_scores["ModifiedCosine_score"].diagonal(), 1), "Diagonal should all be 1.0"
 
 
 def test_pipeline_symmetric_custom_score():
@@ -104,7 +105,7 @@ def test_pipeline_symmetric_custom_score():
     expected = np.array([[1., 0.30384404],
                          [0.30384404, 1.]])
     assert np.allclose(all_scores["ModifiedCosine_score"][3:, 3:], expected)
-    assert np.all(all_scores["ModifiedCosine_score"].diagonal() == 1), "Diagonal should all be 1.0"
+    assert np.allclose(all_scores["ModifiedCosine_score"].diagonal(), 1), "Diagonal should all be 1.0"
 
 
 def test_pipeline_non_symmetric():
@@ -132,6 +133,7 @@ def test_pipeline_non_symmetric():
 def test_pipeline_from_yaml():
     config_file = os.path.join(module_root, "tests", "test_pipeline.yaml")
     pipeline = Pipeline(config_file)
+    assert pipeline.predefined_processing_queries == "default"
     pipeline.run()
     assert len(pipeline.spectrums_queries) == 5
     assert pipeline.spectrums_queries[0] == pipeline.spectrums_references[0]
