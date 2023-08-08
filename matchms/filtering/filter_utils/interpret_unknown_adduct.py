@@ -78,7 +78,8 @@ def get_ions_from_adduct(adduct: str) -> Tuple[int, List[str]]:
     if len(parent_mass) != 1:
         logger.warning("The parent mass (e.g. 2M or M) was found %s times in %s",
                        len(parent_mass), adduct)
-    if parent_mass[0] == "M":
+    parent_mass = parent_mass[0]
+    if parent_mass == "M":
         nr_of_parent_masses = 1
     else:
         nr_of_parent_masses = int(parent_mass[0])
