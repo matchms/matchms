@@ -1,10 +1,11 @@
-from typing import Optional, Tuple, List
 from collections import defaultdict
 from functools import partial
+from typing import List, Optional, Tuple
 import pandas as pd
 from tqdm import tqdm
 import matchms.filtering as msfilters
 from matchms import Spectrum
+
 
 class SpectrumProcessor:
     """
