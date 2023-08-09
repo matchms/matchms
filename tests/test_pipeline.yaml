@@ -4,12 +4,13 @@
 importing:
   queries: ./tests/testdata/massbank_five_spectra.msp
   references:
-filtering_queries:
-- - default_filters
+predefined_processing_queries: default
+predefined_processing_refs: default
+additional_processing_queries:
 - - normalize_intensities
 - - select_by_intensity
   - intensity_from: 0.001
-filtering_refs: filtering_queries
+additional_processing_refs: processing_queries
 score_computations:
 - - precursormzmatch
   - tolerance: 120.0

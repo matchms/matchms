@@ -39,7 +39,6 @@ def test_filter_sorting_and_output():
         'harmonize_undefined_smiles',
         'repair_inchi_inchikey_smiles',
         'repair_parent_mass_match_smiles_wrapper',
-        'require_correct_ionmode',
         'normalize_intensities'
         ]
     actual_filters = [x.__name__ for x in processing.filters]

@@ -85,9 +85,11 @@ def test_consistency_scoring_and_pipeline(spectrums, similarity_measure):
     # Run pipeline
     pipeline = Pipeline()
     pipeline.query_files = json_file
-    pipeline.filter_steps_queries = [["default_filters"],
-                                      ["add_parent_mass"],
-                                      ["normalize_intensities"]]
+    pipeline.predefined_processing_queries = "basic"
+    pipeline.additional_processing_queries = [
+        ["add_parent_mass"],
+        ["normalize_intensities"]
+        ]
     pipeline.score_computations = [similarity_measure]
     pipeline.run()
 

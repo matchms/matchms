@@ -11,8 +11,8 @@ def test_user_workflow():
 
     pipeline = Pipeline()
     pipeline.query_files = spectrums_file
-    pipeline.filter_steps_queries = [
-        ["default_filters"],
+    pipeline.predefined_processing_queries = "basic"
+    pipeline.additional_processing_queries = [
         ["add_parent_mass"],
         ["normalize_intensities"],
         ["select_by_relative_intensity", {"intensity_from": 0.0, "intensity_to": 1.0}],

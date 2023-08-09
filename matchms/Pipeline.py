@@ -3,17 +3,15 @@ import os
 from collections import OrderedDict
 from datetime import datetime
 import yaml
-from tqdm import tqdm
-import matchms.filtering as msfilters
 import matchms.similarity as mssimilarity
 from matchms import calculate_scores
 from matchms.importing.load_spectra import load_spectra
 from matchms.logging_functions import (add_logging_to_file,
                                        reset_matchms_logger,
                                        set_matchms_logger_level)
+from matchms.SpectrumProcessor import SpectrumProcessor
 
 
-_filter_functions = {key: f for key, f in msfilters.__dict__.items() if callable(f)}
 _masking_functions = ["filter_by_range"]
 _score_functions = {key.lower(): f for key, f in mssimilarity.__dict__.items() if callable(f)}
 logger = logging.getLogger("matchms")
@@ -43,8 +41,8 @@ class Pipeline:
 
         pipeline = Pipeline()
         pipeline.query_files = "spectrums_file.msp"
-        pipeline.filter_steps_queries = [
-            ["default_filters"],
+        pipeline.predefined_processing_queries = "basic"
+        pipeline.additional_processing_queries = [
             ["add_parent_mass"],
             ["normalize_intensities"],
             ["select_by_relative_intensity", {"intensity_from": 0.0, "intensity_to": 1.0}],
@@ -95,18 +93,40 @@ class Pipeline:
             self.workflow = OrderedDict()
             self.workflow["importing"] = {"queries": None,
                                           "references": None}
-            self.workflow["filtering_queries"] = ["default_filters"]
-            self.workflow["filtering_refs"] = ["default_filters"]
+            self.workflow["predefined_processing_queries"] = "default"
+            self.workflow["predefined_processing_refs"] = "default"
+            self.workflow["additional_processing_queries"] = []
+            self.workflow["additional_processing_refs"] = []
             self.workflow["score_computations"] = []
         else:
             with open(config_file, 'r', encoding="utf-8") as file:
                 self.workflow = ordered_load(file, yaml.SafeLoader)
-            if self.workflow["filtering_refs"] == "filtering_queries":
-                self.workflow["filtering_refs"] = self.workflow["filtering_queries"]
+            if self.workflow["additional_processing_refs"] == "processing_queries":
+                self.workflow["additional_processing_refs"] = self.workflow["additional_processing_queries"]
         if "logging" not in self.workflow:
             self.workflow["logging"] = {}
         if self.logging_level is None:
             self.logging_level = "WARNING"
+        self.write_to_logfile("--- Processing pipeline: ---")
+        self._initialize_spectrum_processor_queries()
+        if self.is_symmetric is False:
+            self._initialize_spectrum_processor_refs()
+
+    def _initialize_spectrum_processor_queries(self):
+        self.processing_queries = SpectrumProcessor(self.workflow.get("predefined_processing_queries", None))
+        for step in self.additional_processing_queries:
+            if isinstance(step, (tuple, list)) and len(step) == 1:
+                step = step[0]
+            self.processing_queries.add_filter(step)
+        self.write_to_logfile(self.processing_queries.__str__())
+
+    def _initialize_spectrum_processor_refs(self):
+        self.processing_refs = SpectrumProcessor(self.workflow.get("predefined_processing_refs", None))
+        for step in self.additional_processing_refs:
+            if isinstance(step, (tuple, list)) and len(step) == 1:
+                step = step[0]
+            self.processing_refs.add_filter(step)
+        self.write_to_logfile(self.processing_refs.__str__())
 
     def import_workflow_from_yaml(self, config_file):
         """Define Pipeline workflow based on config file.
@@ -132,25 +152,22 @@ class Pipeline:
         # Processing
         self.write_to_logfile("--- Processing spectra ---")
         self.write_to_logfile(f"Time: {str(datetime.now())}")
-        for step in self.filter_steps_queries:
-            self.write_to_logfile(f"-- Processing step: {step} --")
-        for i in tqdm(range(len(self.spectrums_queries)),
-                             disable=(not self.progress_bar),
-                             desc="Processing query spectrums"):
-            spectrum = self.spectrums_queries[i]
-            for step in self.filter_steps_queries:
-                spectrum = self.apply_filter(spectrum, step)
-            self.spectrums_queries[i] = spectrum
-        self.spectrums_queries = [s for s in self.spectrums_queries if s is not None]
+        # Process query spectra
+        spectrums, report = self.processing_queries.process_spectrums(
+            self.spectrums_queries,
+            create_report=True,
+            progress_bar=self.progress_bar)
+        self.spectrums_queries = spectrums
+        self.write_to_logfile(report.__str__())
+        # Process reference spectra (if necessary)
         if self.is_symmetric is False:
-            for i in tqdm(range(len(self.spectrums_references)),
-                                 disable=(not self.progress_bar),
-                                 desc="Processing reference spectrums"):
-                spectrum = self.spectrums_references[i]
-                for step in self.filter_steps_refs:
-                    spectrum = self.apply_filter(spectrum, step)
-                self.spectrums_references[i] = spectrum
-            self.spectrums_references = [s for s in self.spectrums_references if s is not None]
+            self.spectrums_references, report = self.processing_refs.process_spectrums(
+                self.spectrums_references,
+                create_report=True,
+                progress_bar=self.progress_bar)
+            self.write_to_logfile(report.__str__())
+        else:
+            self.spectrums_references = self.spectrums_queries
 
         # Score computation and masking
         self.write_to_logfile("--- Computing scores ---")
@@ -286,22 +303,6 @@ class Pipeline:
                 spectrums_references += list(load_spectra(reference_file))
             self.spectrums_references += spectrums_references
 
-    def apply_filter(self, spectrum, filter_step):
-        """Apply the given matchms filter to a spectrum.
-        """
-        if not isinstance(filter_step, list):
-            filter_step = [filter_step]
-        if isinstance(filter_step[0], str):
-            filter_function = _filter_functions[filter_step[0]]
-        elif callable(filter_step[0]):
-            filter_function = filter_step[0]
-        else:
-            raise TypeError("Unknown filter type. Should be known filter name or function.")
-        if len(filter_step) > 1:
-            filter_params = filter_step[1]
-            return filter_function(spectrum, **filter_params)
-        return filter_function(spectrum)
-
     def create_workflow_config_file(self, filename):
         """Save the current pipeline workflow as a yaml file.
         This file allows to reconstruct the current workflow or can be adapted as desired.
@@ -346,20 +347,40 @@ class Pipeline:
         self.workflow["logging"]["logging_level"] = log_level
 
     @property
-    def filter_steps_queries(self):
-        return self.workflow.get("filtering_queries")
+    def predefined_processing_queries(self):
+        return self.workflow.get("predefined_processing_queries")
 
-    @filter_steps_queries.setter
-    def filter_steps_queries(self, files):
-        self.workflow["filtering_queries"] = files
+    @predefined_processing_queries.setter
+    def predefined_processing_queries(self, files):
+        self.workflow["predefined_processing_queries"] = files
+        self._initialize_spectrum_processor_queries()
 
     @property
-    def filter_steps_refs(self):
-        return self.workflow.get("filtering_refs")
+    def predefined_processing_refs(self):
+        return self.workflow.get("predefined_processing_refs")
 
-    @filter_steps_refs.setter
-    def filter_steps_refs(self, filter_list):
-        self.workflow["filtering_refs"] = filter_list
+    @predefined_processing_refs.setter
+    def predefined_processing_refs(self, files):
+        self.workflow["predefined_processing_refs"] = files
+        self._initialize_spectrum_processor_refs()
+
+    @property
+    def additional_processing_queries(self):
+        return self.workflow.get("additional_processing_queries")
+
+    @additional_processing_queries.setter
+    def additional_processing_queries(self, files):
+        self.workflow["additional_processing_queries"] = files
+        self._initialize_spectrum_processor_queries()
+
+    @property
+    def additional_processing_refs(self):
+        return self.workflow.get("additional_processing_refs")
+
+    @additional_processing_refs.setter
+    def additional_processing_refs(self, files):
+        self.workflow["additional_processing_refs"] = files
+        self._initialize_spectrum_processor_refs()
 
     @property
     def score_computations(self):

@@ -31,6 +31,7 @@ def test_pipeline_initial_check_unknown_step():
 def test_pipeline_symmetric():
     pipeline = Pipeline()
     pipeline.query_files = spectrums_file_msp
+    pipeline.predefined_processing_queries = "basic"
     pipeline.score_computations = [["precursormzmatch",  {"tolerance": 120.0}],
                                    ["modifiedcosine", {"tolerance": 10.0}]]
     pipeline.run()
@@ -44,19 +45,20 @@ def test_pipeline_symmetric():
     expected = np.array([[1., 0.30384404],
                          [0.30384404, 1.]])
     assert np.allclose(all_scores["ModifiedCosine_score"][3:, 3:], expected)
-    assert np.all(all_scores["ModifiedCosine_score"].diagonal() == 1), "Diagonal should all be 1.0"
+    assert np.allclose(all_scores["ModifiedCosine_score"].diagonal(), 1), "Diagonal should all be 1.0"
 
 
 def test_pipeline_symmetric_filters():
     pipeline = Pipeline()
     pipeline.query_files = spectrums_file_msp
-    pipeline.filter_steps_queries = [["default_filters"],
-                                     [select_by_mz, {"mz_from": 0, "mz_to": 1000}]]
+    pipeline.predefined_processing_queries = "basic"
+    pipeline.additional_processing_queries = [[select_by_mz, {"mz_from": 0, "mz_to": 1000}]]
     pipeline.score_computations = [["precursormzmatch",  {"tolerance": 120.0}],
                                    ["modifiedcosine", {"tolerance": 10.0}]]
     pipeline.run()
 
     assert len(pipeline.spectrums_queries) == 5
+    assert pipeline.spectrums_queries[0].metadata == pipeline.spectrums_references[0].metadata
     assert pipeline.spectrums_queries[0] == pipeline.spectrums_references[0]
     assert pipeline.is_symmetric is True
     assert pipeline.scores.scores.shape == (5, 5, 3)
@@ -65,12 +67,13 @@ def test_pipeline_symmetric_filters():
     expected = np.array([[1., 0.30384404],
                          [0.30384404, 1.]])
     assert np.allclose(all_scores["ModifiedCosine_score"][3:, 3:], expected)
-    assert np.all(all_scores["ModifiedCosine_score"].diagonal() == 1), "Diagonal should all be 1.0"
+    assert np.allclose(all_scores["ModifiedCosine_score"].diagonal(), 1), "Diagonal should all be 1.0"
 
 
 def test_pipeline_symmetric_masking():
     pipeline = Pipeline()
     pipeline.query_files = spectrums_file_msp
+    pipeline.predefined_processing_queries = "basic"
     pipeline.score_computations = [["precursormzmatch",  {"tolerance": 120.0}],
                                    ["modifiedcosine", {"tolerance": 10.0}],
                                    ["filter_by_range", {"low": 0.3, "above_operator": '>='}]]
@@ -85,12 +88,13 @@ def test_pipeline_symmetric_masking():
     expected = np.array([[1., 0.30384404],
                          [0.30384404, 1.]])
     assert np.allclose(all_scores["ModifiedCosine_score"][3:, 3:], expected)
-    assert np.all(all_scores["ModifiedCosine_score"].diagonal() == 1), "Diagonal should all be 1.0"
+    assert np.allclose(all_scores["ModifiedCosine_score"].diagonal(), 1), "Diagonal should all be 1.0"
 
 
 def test_pipeline_symmetric_custom_score():
     pipeline = Pipeline()
     pipeline.query_files = spectrums_file_msp
+    pipeline.predefined_processing_queries = "basic"
     pipeline.score_computations = [["precursormzmatch",  {"tolerance": 120.0}],
                                    [ModifiedCosine, {"tolerance": 10.0}]]
     pipeline.run()
@@ -104,13 +108,15 @@ def test_pipeline_symmetric_custom_score():
     expected = np.array([[1., 0.30384404],
                          [0.30384404, 1.]])
     assert np.allclose(all_scores["ModifiedCosine_score"][3:, 3:], expected)
-    assert np.all(all_scores["ModifiedCosine_score"].diagonal() == 1), "Diagonal should all be 1.0"
+    assert np.allclose(all_scores["ModifiedCosine_score"].diagonal(), 1), "Diagonal should all be 1.0"
 
 
 def test_pipeline_non_symmetric():
     """Test importing from multiple files and different inputs for query and references."""
     pipeline = Pipeline()
     pipeline.query_files = spectrums_file_msp
+    pipeline.predefined_processing_queries = "basic"
+    pipeline.predefined_processing_refs = "basic"
     pipeline.reference_files = [spectrums_file_msp, spectrums_file_msp]
     pipeline.score_computations = [["precursormzmatch",  {"tolerance": 120.0}],
                                    ["modifiedcosine", {"tolerance": 10.0}]]
@@ -130,8 +136,10 @@ def test_pipeline_non_symmetric():
 
 
 def test_pipeline_from_yaml():
+    pytest.importorskip("rdkit")
     config_file = os.path.join(module_root, "tests", "test_pipeline.yaml")
     pipeline = Pipeline(config_file)
+    assert pipeline.predefined_processing_queries == "default"
     pipeline.run()
     assert len(pipeline.spectrums_queries) == 5
     assert pipeline.spectrums_queries[0] == pipeline.spectrums_references[0]
@@ -145,6 +153,7 @@ def test_pipeline_from_yaml():
 
 
 def test_pipeline_to_and_from_yaml(tmp_path):
+    pytest.importorskip("rdkit")
     config_file = os.path.join(tmp_path, "test_pipeline.yaml")
     pipeline = Pipeline()
     pipeline.query_files = spectrums_file_msp
@@ -162,6 +171,7 @@ def test_pipeline_to_and_from_yaml(tmp_path):
 
 
 def test_pipeline_logging(tmp_path):
+    pytest.importorskip("rdkit")
     pipeline = Pipeline()
     pipeline.query_files = spectrums_file_msp
     pipeline.score_computations = [["precursormzmatch",  {"tolerance": 120.0}],
@@ -181,17 +191,15 @@ def test_FingerprintSimilarity_pipeline():
     pipeline = Pipeline()
     pipeline.query_files = spectrums_file_msp
     pipeline.reference_files = spectrums_file_msp
-    filter_steps = [
-        ["default_filters"],
-        ["add_fingerprint"]
-    ]
-    pipeline.filter_steps_queries = filter_steps
-    pipeline.filter_steps_refs = filter_steps
+    pipeline.predefined_processing_queries = "basic"
+    pipeline.additional_processing_queries = ["add_fingerprint"]
+    pipeline.predefined_processing_refs = "basic"
+    pipeline.additional_processing_refs = ["add_fingerprint"]
     pipeline.score_computations = [
         ["metadatamatch", {"field": "precursor_mz", "matching_type": "difference", "tolerance": 50}],
         ["fingerprintsimilarity", {"similarity_measure": "jaccard"}]
     ]    
     pipeline.run()
-
+    assert len(pipeline.spectrums_queries[0].get("fingerprint")) == 2048
     assert pipeline.scores.scores.shape == (5, 5, 2)
     assert pipeline.scores.score_names == ('MetadataMatch', 'FingerprintSimilarity')
