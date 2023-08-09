@@ -115,12 +115,13 @@ class SpectrumProcessor:
         if processing_report is not None:
             processing_report.counter_number_processed += 1
         for filter_func in self.filters:
-            spectrum = filter_func(spectrum)
+            spectrum_out = filter_func(spectrum)
             if processing_report is not None:
                 processing_report.add_to_report(spectrum, spectrum_out, filter_func.__name__)
-            if spectrum is None:
+            if spectrum_out is None:
                 break
-        return spectrum
+            spectrum = spectrum_out
+        return spectrum_out
 
     def process_spectrums(self, spectrums: list,
                           create_report=False,
@@ -133,7 +134,7 @@ class SpectrumProcessor:
         ----------
         spectrums : list[Spectrum]
             The spectrums to process.
-        create_report: book, optional
+        create_report: bool, optional
             Creates and outputs a report of the main changes during processing.
             The report will be returned as pandas DataFrame. Default is set to False.
         progress_bar : bool, optional

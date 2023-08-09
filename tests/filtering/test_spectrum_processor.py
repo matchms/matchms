@@ -126,8 +126,9 @@ def test_processing_report_class(spectrums):
 
 def test_adding_custom_filter(spectrums):
     def nonsense_inchikey(s):
-        s.set("inchikey", "NONSENSE")
-        return s
+        s_in = s.clone()
+        s_in.set("inchikey", "NONSENSE")
+        return s_in
 
     processor = SpectrumProcessor("minimal")
     processor.add_custom_filter(nonsense_inchikey)
@@ -142,8 +143,9 @@ def test_adding_custom_filter(spectrums):
 
 def test_adding_custom_filter_with_parameters(spectrums):
     def nonsense_inchikey_multiple(s, number):
-        s.set("inchikey", number * "NONSENSE")
-        return s
+        s_in = s.clone()
+        s_in.set("inchikey", number * "NONSENSE")
+        return s_in
 
     processor = SpectrumProcessor("minimal")
     processor.add_custom_filter(nonsense_inchikey_multiple, {"number": 2})
