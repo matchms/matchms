@@ -51,7 +51,7 @@ def test_string_output():
     processing = SpectrumProcessor("minimal")
     expected_str = "SpectrumProcessor\nProcessing steps:\n - make_charge_int\n - interpret_pepmass"\
         "\n - derive_ionmode\n - correct_charge"
-    assert processing.__str__() == expected_str
+    assert str(processing) == expected_str
 
 
 @pytest.mark.parametrize("metadata, expected", [
@@ -118,8 +118,8 @@ def test_processing_report_class(spectrums):
         spectrum_processed.set("smiles", "test")
         processing_report.add_to_report(s, spectrum_processed, "test_filter")
 
-    assert processing_report.counter_removed_spectrums == {}
-    assert processing_report.counter_changed_field == {}
+    assert not processing_report.counter_removed_spectrums
+    assert not processing_report.counter_changed_field
     assert processing_report.counter_added_field == {"test_filter": 3}
 
 
@@ -177,4 +177,4 @@ def test_add_filter_with_matchms_filter(spectrums):
     filters = processor.filters
     assert filters[-1].__name__ == "require_correct_ionmode"
     spectrums, _ = processor.process_spectrums(spectrums, create_report=True)
-    assert spectrums == []
+    assert not spectrums, "Expected to be empty list"

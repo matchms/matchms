@@ -118,7 +118,7 @@ class Pipeline:
             if isinstance(step, (tuple, list)) and len(step) == 1:
                 step = step[0]
             self.processing_queries.add_filter(step)
-        self.write_to_logfile(self.processing_queries.__str__())
+        self.write_to_logfile(str(self.processing_queries))
 
     def _initialize_spectrum_processor_refs(self):
         self.processing_refs = SpectrumProcessor(self.workflow.get("predefined_processing_refs", None))
@@ -126,7 +126,7 @@ class Pipeline:
             if isinstance(step, (tuple, list)) and len(step) == 1:
                 step = step[0]
             self.processing_refs.add_filter(step)
-        self.write_to_logfile(self.processing_refs.__str__())
+        self.write_to_logfile(str(self.processing_refs))
 
     def import_workflow_from_yaml(self, config_file):
         """Define Pipeline workflow based on config file.
@@ -158,14 +158,14 @@ class Pipeline:
             create_report=True,
             progress_bar=self.progress_bar)
         self.spectrums_queries = spectrums
-        self.write_to_logfile(report.__str__())
+        self.write_to_logfile(str(report))
         # Process reference spectra (if necessary)
         if self.is_symmetric is False:
             self.spectrums_references, report = self.processing_refs.process_spectrums(
                 self.spectrums_references,
                 create_report=True,
                 progress_bar=self.progress_bar)
-            self.write_to_logfile(report.__str__())
+            self.write_to_logfile(str(report))
         else:
             self.spectrums_references = self.spectrums_queries
 

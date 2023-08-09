@@ -117,7 +117,7 @@ class SpectrumProcessor:
         Spectrum
             The processed spectrum.
         """
-        if self.filters == []:
+        if not self.filters:
             raise TypeError("No filters to process")
         if processing_report is not None:
             processing_report.counter_number_processed += 1
