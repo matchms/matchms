@@ -10,6 +10,8 @@ from ..builder_Spectrum import SpectrumBuilder
     [{"retentiontime": 200}, 200.0],
     [{"retentiontime": -1}, None],
     [{"retentiontime": "-1"}, None],
+    [{"rt": "4.810467 min"}, 288.62802],
+    [{"rt": "no retention time in min available"}, None],
     [{"rt": 200}, 200.0],
     [{"RT": 200}, 200.0],
     [{"RT_Query": 200}, 200.0],

@@ -34,7 +34,7 @@ def get_top_hits(scores: Scores, identifier_key: str = "spectrum_id",
         were the same) and if scores between spectra with themselves should be
         excluded.
     """
-    # pylint: disable=protected-access, too-many-arguments, too-many-locals
+    # pylint: disable=protected-access, too-many-arguments
     assert search_by in ["queries", "references"], \
         "search_by must be 'queries' or 'references"
     if score_name is None:

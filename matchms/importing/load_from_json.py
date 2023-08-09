@@ -69,15 +69,18 @@ def dict2spectrum(spectrum_dict: dict,
     Parameters
     ----------
     spectrum_dict
-        Dictionary shaped like a single JSON object from the `GNPS Spectra library <https://gnps-external.ucsd.edu/gnpslibrary>`_
+        Dictionary shaped like a single JSON object from the 
+        `GNPS Spectra library <https://gnps-external.ucsd.edu/gnpslibrary>`_
 
     Returns
     -------
     A Spectrum or None when no peaks where found.
     """
     not_metadata_fields = ["peaks_json"]
-    parse_fieldnames = dict(inchi_aux="inchiaux",
-                            ion_mode="ionmode")
+    parse_fieldnames = {
+        "inchi_aux":"inchiaux",
+        "ion_mode":"ionmode"
+    }
 
     def get_peaks_list(spectrum_dict, fieldname):
         peaks_list = spectrum_dict.get(fieldname)
