@@ -3,7 +3,6 @@ import os
 from collections import OrderedDict
 from datetime import datetime
 import yaml
-import matchms.filtering as msfilters
 import matchms.similarity as mssimilarity
 from matchms import calculate_scores
 from matchms.importing.load_spectra import load_spectra
