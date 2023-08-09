@@ -111,24 +111,26 @@ class Pipeline:
             self.workflow["logging"] = {}
         if self.logging_level is None:
             self.logging_level = "WARNING"
-        self._initialize_spectrum_processors()
+        self.write_to_logfile("--- Processing pipeline: ---")
+        self._initialize_spectrum_processor_queries()
+        if self.is_symmetric is False:
+            self._initialize_spectrum_processor_refs()
 
-    def _initialize_spectrum_processors(self):
+    def _initialize_spectrum_processor_queries(self):
         self.processing_queries = SpectrumProcessor(self.workflow.get("predefined_processing_queries", None))
         for step in self.additional_processing_queries:
             if isinstance(step, (tuple, list)) and len(step) == 1:
                 step = step[0]
             self.processing_queries.add_filter(step)
-        self.write_to_logfile("--- Processing pipeline: ---")
         self.write_to_logfile(self.processing_queries.__str__())
 
-        if self.is_symmetric is False:
-            self.processing_refs = SpectrumProcessor(self.workflow.get("predefined_processing_refs", None))
-            for step in self.additional_processing_refs:
-                if isinstance(step, (tuple, list)) and len(step) == 1:
-                    step = step[0]
-                self.processing_refs.add_filter(step)
-            self.write_to_logfile(self.processing_refs.__str__())
+    def _initialize_spectrum_processor_refs(self):
+        self.processing_refs = SpectrumProcessor(self.workflow.get("predefined_processing_refs", None))
+        for step in self.additional_processing_refs:
+            if isinstance(step, (tuple, list)) and len(step) == 1:
+                step = step[0]
+            self.processing_refs.add_filter(step)
+        self.write_to_logfile(self.processing_refs.__str__())
 
     def import_workflow_from_yaml(self, config_file):
         """Define Pipeline workflow based on config file.
@@ -355,6 +357,7 @@ class Pipeline:
     @predefined_processing_queries.setter
     def predefined_processing_queries(self, files):
         self.workflow["predefined_processing_queries"] = files
+        self._initialize_spectrum_processor_queries()
 
     @property
     def predefined_processing_refs(self):
@@ -363,6 +366,7 @@ class Pipeline:
     @predefined_processing_refs.setter
     def predefined_processing_refs(self, files):
         self.workflow["predefined_processing_refs"] = files
+        self._initialize_spectrum_processor_refs()
 
     @property
     def additional_processing_queries(self):
@@ -371,6 +375,7 @@ class Pipeline:
     @additional_processing_queries.setter
     def additional_processing_queries(self, files):
         self.workflow["additional_processing_queries"] = files
+        self._initialize_spectrum_processor_queries()
 
     @property
     def additional_processing_refs(self):
@@ -379,6 +384,7 @@ class Pipeline:
     @additional_processing_refs.setter
     def additional_processing_refs(self, files):
         self.workflow["additional_processing_refs"] = files
+        self._initialize_spectrum_processor_refs()
 
     @property
     def score_computations(self):
