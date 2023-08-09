@@ -175,5 +175,5 @@ def test_add_filter_with_matchms_filter(spectrums):
                          {"ion_mode_to_keep": "both"}))
     filters = processor.filters
     assert filters[-1].__name__ == "require_correct_ionmode"
-    spectrums, report = processor.process_spectrums(spectrums, create_report=True)
+    spectrums, _ = processor.process_spectrums(spectrums, create_report=True)
     assert spectrums == []
