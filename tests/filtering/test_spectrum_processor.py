@@ -103,33 +103,32 @@ def test_filter_spectrums_report(spectrums):
     expected_masses = [100, 102, 104]
     assert actual_masses == expected_masses
     assert report.counter_number_processed == 3
-    assert report.counter_changed == {'charge': 2}
-    assert report.counter_added == {'ionmode': 3, 'precursor_mz': 3}
+    assert report.counter_changed_field == {'make_charge_int': 2}
+    assert report.counter_added_field == {'interpret_pepmass': 3, 'derive_ionmode': 3}
     report_df = report.to_dataframe()
-    assert np.all(report_df.loc[["charge", "ionmode", "precursor_mz"]].values == np.array(
-        [[2, 0],
-        [0, 3],
-        [0, 3]]))
+    assert np.all(report_df.loc[["make_charge_int", "interpret_pepmass", "derive_ionmode"]].values == np.array(
+        [[0, 2, 0],
+         [0, 0, 3],
+         [0, 0, 3]]))
 
 
 def test_processing_report_class(spectrums):
     processing_report = ProcessingReport()
-    processor = SpectrumProcessor("minimal")
     for s in spectrums:
-        spectrum_processed = processor.process_spectrum(s)
+        spectrum_processed = s.clone()
         spectrum_processed.set("smiles", "test")
-        processing_report.add_to_report(s, spectrum_processed)
+        processing_report.add_to_report(s, spectrum_processed, "test_filter")
 
-    assert processing_report.counter_number_processed == 3
-    assert processing_report.counter_removed_spectrums == 0
-    assert processing_report.counter_changed == {'charge': 2}
-    assert processing_report.counter_added == {"smiles": 3, 'ionmode': 3, 'precursor_mz': 3}
+    assert processing_report.counter_removed_spectrums == {}
+    assert processing_report.counter_changed_field == {}
+    assert processing_report.counter_added_field == {"test_filter": 3}
 
 
 def test_adding_custom_filter(spectrums):
     def nonsense_inchikey(s):
-        s.set("inchikey", "NONSENSE")
-        return s
+        s_in = s.clone()
+        s_in.set("inchikey", "NONSENSE")
+        return s_in
 
     processor = SpectrumProcessor("minimal")
     processor.add_custom_filter(nonsense_inchikey)
@@ -137,15 +136,16 @@ def test_adding_custom_filter(spectrums):
     assert filters[-1].__name__ == "nonsense_inchikey"
     spectrums, report = processor.process_spectrums(spectrums, create_report=True)
     assert report.counter_number_processed == 3
-    assert report.counter_changed == {'charge': 2}
-    assert report.counter_added == {'ionmode': 3, 'precursor_mz': 3, 'inchikey': 3}
+    assert report.counter_changed_field == {'make_charge_int': 2}
+    assert report.counter_added_field == {'interpret_pepmass': 3, 'derive_ionmode': 3, 'nonsense_inchikey': 3}
     assert spectrums[0].get("inchikey") == "NONSENSE", "Custom filter not executed properly"
 
 
 def test_adding_custom_filter_with_parameters(spectrums):
     def nonsense_inchikey_multiple(s, number):
-        s.set("inchikey", number * "NONSENSE")
-        return s
+        s_in = s.clone()
+        s_in.set("inchikey", number * "NONSENSE")
+        return s_in
 
     processor = SpectrumProcessor("minimal")
     processor.add_custom_filter(nonsense_inchikey_multiple, {"number": 2})
@@ -153,8 +153,8 @@ def test_adding_custom_filter_with_parameters(spectrums):
     assert filters[-1].__name__ == "nonsense_inchikey_multiple"
     spectrums, report = processor.process_spectrums(spectrums, create_report=True)
     assert report.counter_number_processed == 3
-    assert report.counter_changed == {'charge': 2}
-    assert report.counter_added == {'ionmode': 3, 'precursor_mz': 3, 'inchikey': 3}
+    assert report.counter_changed_field == {'make_charge_int': 2}
+    assert report.counter_added_field == {'interpret_pepmass': 3, 'derive_ionmode': 3, 'nonsense_inchikey_multiple': 3}
     assert spectrums[0].get("inchikey") == "NONSENSENONSENSE", "Custom filter not executed properly"
 
 
@@ -167,7 +167,7 @@ def test_add_filter_with_custom(spectrums):
     processor.add_filter((nonsense_inchikey_multiple, {"number": 2}))
     filters = processor.filters
     assert filters[-1].__name__ == "nonsense_inchikey_multiple"
-    spectrums, report = processor.process_spectrums(spectrums, create_report=True)
+    spectrums, _ = processor.process_spectrums(spectrums, create_report=True)
     assert spectrums[0].get("inchikey") == "NONSENSENONSENSE", "Custom filter not executed properly"
 
 
@@ -177,5 +177,5 @@ def test_add_filter_with_matchms_filter(spectrums):
                          {"ion_mode_to_keep": "both"}))
     filters = processor.filters
     assert filters[-1].__name__ == "require_correct_ionmode"
-    spectrums, report = processor.process_spectrums(spectrums, create_report=True)
+    spectrums, _ = processor.process_spectrums(spectrums, create_report=True)
     assert spectrums == []

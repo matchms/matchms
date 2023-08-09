@@ -1,13 +1,15 @@
 from collections import defaultdict
 from functools import partial
+from typing import List, Optional, Tuple
 import pandas as pd
 from tqdm import tqdm
 import matchms.filtering as msfilters
+from matchms import Spectrum
 
 
 class SpectrumProcessor:
     """
-    A class to process spectra using a series of filters. 
+    A class to process spectra using a series of filters.
 
     The class enables a user to define a custom spectrum processing workflow by setting multiple
     flags and parameters.
@@ -30,7 +32,7 @@ class SpectrumProcessor:
 
     def add_filter(self, filter_function):
         """Add a filter to the processing pipeline. Takes both matchms filter names (and parameters)
-        as wel as custom-made functions.
+        as well as custom-made functions.
         """
         if isinstance(filter_function, str):
             self.add_matchms_filter(filter_function)
@@ -46,7 +48,7 @@ class SpectrumProcessor:
         Parameters
         ----------
         filter_spec : str or tuple
-            Name of the filter function to add, or a tuple where the first element is the name of the 
+            Name of the filter function to add, or a tuple where the first element is the name of the
             filter function and the second element is a dictionary containing additional arguments for the function.
         """
         if isinstance(filter_spec, str):
@@ -91,7 +93,8 @@ class SpectrumProcessor:
             filter_func.__name__ = filter_function.__name__
             self.filters.append(filter_func)
 
-    def process_spectrum(self, spectrum):
+    def process_spectrum(self, spectrum,
+                         processing_report: Optional["ProcessingReport"] = None):
         """
         Process the given spectrum with all filters in the processing pipeline.
 
@@ -99,7 +102,9 @@ class SpectrumProcessor:
         ----------
         spectrum : Spectrum
             The spectrum to process.
-        
+        processing_report:
+            A ProcessingReport object When passed the progress will be added to the object.
+
         Returns
         -------
         Spectrum
@@ -107,16 +112,21 @@ class SpectrumProcessor:
         """
         if self.filters == []:
             raise TypeError("No filters to process")
+        if processing_report is not None:
+            processing_report.counter_number_processed += 1
         for filter_func in self.filters:
-            spectrum = filter_func(spectrum)
-            if spectrum is None:
+            spectrum_out = filter_func(spectrum)
+            if processing_report is not None:
+                processing_report.add_to_report(spectrum, spectrum_out, filter_func.__name__)
+            if spectrum_out is None:
                 break
-        return spectrum
+            spectrum = spectrum_out
+        return spectrum_out
 
     def process_spectrums(self, spectrums: list,
                           create_report=False,
                           progress_bar=True,
-                          ):
+                          ) -> List[Spectrum] or Tuple[List[Spectrum], Optional["ProcessingReport"]]:
         """
         Process a list of spectrums with all filters in the processing pipeline.
 
@@ -124,7 +134,7 @@ class SpectrumProcessor:
         ----------
         spectrums : list[Spectrum]
             The spectrums to process.
-        create_report: book, optional
+        create_report: bool, optional
             Creates and outputs a report of the main changes during processing.
             The report will be returned as pandas DataFrame. Default is set to False.
         progress_bar : bool, optional
@@ -137,14 +147,14 @@ class SpectrumProcessor:
         """
         if create_report:
             processing_report = ProcessingReport()
+        else:
+            processing_report = None
 
         processed_spectrums = []
         for s in tqdm(spectrums, disable=(not progress_bar), desc="Processing spectrums"):
             if s is None:
                 continue  # empty spectra will be discarded
-            processed_spectrum = self.process_spectrum(s)
-            if create_report:
-                processing_report.add_to_report(s, processed_spectrum)
+            processed_spectrum = self.process_spectrum(s, processing_report)
             if processed_spectrum is not None:
                 processed_spectrums.append(processed_spectrum)
 
@@ -240,41 +250,44 @@ class ProcessingReport:
     """Class to keep track of spectrum changes during filtering.
     """
     def __init__(self):
-        self.fields = ["precursor_mz", "parent_mass", "ionmode", "charge", "smiles", "inchikey", "inchi"]
-        self.counter_changed = defaultdict(int)
-        self.counter_added = defaultdict(int)
-        self.counter_removed_spectrums = 0
+        self.counter_changed_field = defaultdict(int)
+        self.counter_added_field = defaultdict(int)
+        self.counter_removed_spectrums = defaultdict(int)
         self.counter_number_processed = 0
 
-    def add_to_report(self, spectrum_old, spectrum_new):
+    def add_to_report(self, spectrum_old, spectrum_new: Spectrum,
+                      filter_function_name: str):
         """Add changes between spectrum_old and spectrum_new to the report.
         """
-        self.counter_number_processed += 1
         if spectrum_new is None:
-            self.counter_removed_spectrums += 1
+            self.counter_removed_spectrums[filter_function_name] += 1
         else:
-            for field in self.fields:
+            for field in spectrum_new.metadata.keys():
                 if spectrum_old.get(field) != spectrum_new.get(field):
                     if spectrum_old.get(field) is None:
-                        self.counter_added[field] += 1
+                        self.counter_added_field[filter_function_name] += 1
                     else:
-                        self.counter_changed[field] += 1
+                        self.counter_changed_field[filter_function_name] += 1
 
     def to_dataframe(self):
         """Create Pandas DataFrame Report of counted spectrum changes."""
-        changes = pd.DataFrame(self.counter_changed.items(),
-                               columns=["field", "number of changes"])
-        additions = pd.DataFrame(self.counter_added.items(),
-                                 columns=["field", "number of additions"])
-        processing_report = pd.merge(changes, additions, how="outer", on="field")
-        processing_report = processing_report.set_index("field").fillna(0)
+        changes = pd.DataFrame(self.counter_changed_field.items(),
+                               columns=["filter", "changes"])
+        additions = pd.DataFrame(self.counter_added_field.items(),
+                                 columns=["filter", "additions"])
+        removed = pd.DataFrame(self.counter_removed_spectrums.items(),
+                               columns=["filter", "removed spectra"])
+        processing_report = pd.merge(changes, additions, how="outer", on="filter")
+        processing_report = pd.merge(removed, processing_report, how="outer", on="filter")
+
+        processing_report = processing_report.set_index("filter").fillna(0)
         return processing_report.astype(int)
 
     def __str__(self):
         report_str = f"""\
 ----- Spectrum Processing Report -----
 Number of spectrums processed: {self.counter_number_processed}
-Number of spectrums removed: {self.counter_removed_spectrums}
+Number of spectrums removed: {sum(self.counter_removed_spectrums.values())}
 Changes during processing:
 {str(self.to_dataframe())}
 """
@@ -283,5 +296,5 @@ Changes during processing:
     def __repr__(self):
         return f"Report({self.counter_number_processed},\
         {self.counter_removed_spectrums},\
-        {dict(self.counter_changed)},\
-        {dict(self.counter_added)})"
+        {dict(self.counter_changed_field)},\
+        {dict(self.counter_added_field)})"
