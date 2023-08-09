@@ -32,7 +32,7 @@ class SpectrumProcessor:
 
     def add_filter(self, filter_function):
         """Add a filter to the processing pipeline. Takes both matchms filter names (and parameters)
-        as wel as custom-made functions.
+        as well as custom-made functions.
         """
         if isinstance(filter_function, str):
             self.add_matchms_filter(filter_function)
@@ -115,13 +115,11 @@ class SpectrumProcessor:
         if processing_report is not None:
             processing_report.counter_number_processed += 1
         for filter_func in self.filters:
-            spectrum_out = filter_func(spectrum.clone())
+            spectrum = filter_func(spectrum)
             if processing_report is not None:
                 processing_report.add_to_report(spectrum, spectrum_out, filter_func.__name__)
-            if spectrum_out is None:
-                spectrum = None
+            if spectrum is None:
                 break
-            spectrum = spectrum_out.clone()
         return spectrum
 
     def process_spectrums(self, spectrums: list,
