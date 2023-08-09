@@ -13,7 +13,6 @@ from matchms.logging_functions import (add_logging_to_file,
 from matchms.SpectrumProcessor import SpectrumProcessor
 
 
-_filter_functions = {key: f for key, f in msfilters.__dict__.items() if callable(f)}
 _masking_functions = ["filter_by_range"]
 _score_functions = {key.lower(): f for key, f in mssimilarity.__dict__.items() if callable(f)}
 logger = logging.getLogger("matchms")

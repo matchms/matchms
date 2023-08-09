@@ -1,6 +1,7 @@
 from collections import defaultdict
 from functools import partial
 from typing import List, Optional, Tuple
+import numpy as np
 import pandas as pd
 from tqdm import tqdm
 import matchms.filtering as msfilters
@@ -64,7 +65,7 @@ class SpectrumProcessor:
             filter_func = partial(FILTER_FUNCTIONS[filter_name], **filter_args)
             filter_func.__name__ = FILTER_FUNCTIONS[filter_name].__name__
         else:
-            raise TypeError("filter_spec should be a string or a tuple/list")
+            raise TypeError("filter_spec should be a string or a tuple or list")
 
         self.filters.append(filter_func)
         # Sort filters according to their order in self.filter_order
@@ -132,7 +133,7 @@ class SpectrumProcessor:
     def process_spectrums(self, spectrums: list,
                           create_report=False,
                           progress_bar=True,
-                          ) -> List[Spectrum] or Tuple[List[Spectrum], Optional["ProcessingReport"]]:
+                          ):
         """
         Process a list of spectrums with all filters in the processing pipeline.
 
@@ -268,8 +269,8 @@ class ProcessingReport:
         if spectrum_new is None:
             self.counter_removed_spectrums[filter_function_name] += 1
         else:
-            for field in spectrum_new.metadata.keys():
-                if spectrum_old.get(field) != spectrum_new.get(field):
+            for field, value in spectrum_new.metadata.items():
+                if objects_differ(spectrum_old.get(field), value):
                     if spectrum_old.get(field) is None:
                         self.counter_added_field[filter_function_name] += 1
                     else:
@@ -304,3 +305,12 @@ Changes during processing:
         {self.counter_removed_spectrums},\
         {dict(self.counter_changed_field)},\
         {dict(self.counter_added_field)})"
+
+
+def objects_differ(obj1, obj2):
+    """Test if two objects are different. Supposed to work for standard
+    Python data types as well as numpy arrays.
+    """
+    if isinstance(obj1, np.ndarray) or isinstance(obj2, np.ndarray):
+        return not np.array_equal(obj1, obj2)
+    return obj1 != obj2
