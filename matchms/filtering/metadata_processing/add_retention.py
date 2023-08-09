@@ -1,4 +1,5 @@
 import logging
+import re
 from typing import Any, List, Optional
 from matchms.typing import SpectrumType
 from matchms.utils import filter_none, get_common_keys
@@ -51,6 +52,17 @@ def safe_convert_to_float(value: Any) -> Optional[float]:
             value = value[0]
         else:
             return None
+        
+    # logic to read MoNA msp files which specify rt as string with "min" in it
+    if isinstance(value, str):
+        value = value.strip()
+        pattern = r'^[+-]?(\d*\.)?\d+\s*(min|s|h|ms)'
+        conversion = {"min": 60, "s": 1, "h": 3600, "ms": 1e-3}
+        match = re.search(pattern, value)
+        
+        if match and len(match.groups()) == 2:
+            val, unit = value.split(' ')
+            return float(val) * conversion[unit]
     try:
         value = float(value)
         rt = value if value >= 0 else None  # discard negative RT values

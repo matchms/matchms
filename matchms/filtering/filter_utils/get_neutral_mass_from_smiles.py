@@ -21,21 +21,55 @@ else:
 rdkit_missing_message = "Conda package 'rdkit' is required for this functionality."
 
 
-def get_monoisotopic_neutral_mass(smiles):
+def get_monoisotopic_neutral_mass(smiles: str) -> float:
+    """Get the monoisotopic neutral mass from a SMILES string chemical 
+    identifier for the described molecule.
+
+    Args:
+        smiles (str): SMILES string defining the structure of the molecule.
+
+    Raises:
+        ImportError: If RDkit chem is not installed.
+
+    Returns:
+        float: Computed monoisotopic mass.
+    """
+    return _get_neutral_mass(smiles, True)
+
+
+
+def get_molecular_weight_neutral_mass(smiles: str) -> float:
+    """Get the (average) molecular weight for the isotopic distribution of the SMILES code.
+
+    Args:
+        smiles (str): SMILES string describing the structure of the molecule.
+
+    Raises:
+        ImportError: Raises import error if RDKitChem is not found.
+
+    Returns:
+        float: Average molecular mass.
+    """
+    return _get_neutral_mass(smiles, False)
+
+
+def _get_neutral_mass(smiles:str, monoisotopic: bool) -> float:
+    """Get neutral mass of molecule, either average or most abundant monoisotopic mass.
+
+    Args:
+        smiles (str): SMILES describing the molecule.
+        monoisotopic (bool): whether to compute the monoisotopic mass or average.
+
+    Raises:
+        ImportError: If RDKit Chem is not found
+
+    Returns:
+        float: Neutral mass.
+    """
     if not _has_rdkit:
         raise ImportError(rdkit_missing_message)
     mol = Chem.MolFromSmiles(smiles)
-    mass = Descriptors.ExactMolWt(mol)
-    charge = sum(atom.GetFormalCharge() for atom in mol.GetAtoms())
-    neutral_mass = mass + -charge * PROTON_MASS
-    return neutral_mass
-
-
-def get_molecular_weight_neutral_mass(smiles):
-    if not _has_rdkit:
-        raise ImportError(rdkit_missing_message)
-    mol = Chem.MolFromSmiles(smiles)
-    mass = Descriptors.MolWt(mol)
+    mass = Descriptors.ExactMolWt(mol) if monoisotopic else Descriptors.MolWt(mol)
     charge = sum(atom.GetFormalCharge() for atom in mol.GetAtoms())
     neutral_mass = mass + -charge * PROTON_MASS
     return neutral_mass

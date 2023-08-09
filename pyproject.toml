@@ -1,0 +1,88 @@
+[tool.poetry]
+name = "matchms"
+version = "0.21.2"
+description = "Python library for large-scale comparisons and processing of tandem mass spectral data"
+authors = ["matchms developer team <florian.huber@hs-duesseldorf.de>"]
+
+license = "Apache-2.0"
+readme = "README.rst"
+repository = "https://github.com/matchms/matchms"
+documentation = "https://matchms.readthedocs.io/en/latest/"
+keywords=[ "similarity measures",
+           "mass spectrometry",
+           "fuzzy matching",
+           "fuzzy search" ]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Education",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9"
+]
+
+[tool.poetry.dependencies]
+python = ">=3.8,<3.13"
+numpy = "<1.25"
+scipy = "<1.11"
+pandas = "^2.0.3"
+pillow = "!=9.4.0"
+lxml = "^4.9.3"
+matplotlib = "^3.7.2"
+networkx = "^3.1"
+numba = "^0.57.1"
+pickydict = "^0.4.0"
+pyteomics = "^4.6"
+requests = "^2.31.0"
+sparsestack = "^0.4.1"
+tqdm = "^4.65.0"
+rdkit = "^2023.3.2"
+pyyaml = "^6.0.1"
+deprecated = "^1.2.14"
+
+
+[tool.poetry.group.dev.dependencies]
+decorator = "^5.1.1"
+isort = "^5.12.0"
+pylint = "^2.17.5"
+prospector = {extras = ["with-pyroma"], version = "^1.10.2"}
+pytest = "^7.4.0"
+pytest-cov = "^4.1.0"
+yapf = "^0.40.1"
+testfixtures = "^7.1.0"
+twine = "^4.0.2"
+black = "^23.7.0"
+poetry-bumpversion = "^0.3.1"
+
+[tool.poetry.group.docs.dependencies]
+sphinxcontrib-apidoc = "^0.3.0"
+sphinx-rtd-theme = "^1.2.2"
+sphinx = "<7"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry_bumpversion.file."matchms/__version__.py"]
+
+[tool.isort]
+sections = "FUTURE,STDLIB,THIRDPARTY,FIRSTPARTY,LOCALFOLDER"
+no_lines_before = "FUTURE,STDLIB,THIRDPARTY,FIRSTPARTY,LOCALFOLDER"
+lines_after_imports = 2
+known_first_party = "matchms"
+skip = "readthedocs/conf.py"
+
+[tool.pytest.ini_options]
+testpaths = [
+    "tests",
+    "integration-tests",
+]
+
+[build_sphinx]
+source-dir = "docs"
+build-dir = "docs/_build"
+all_files = 1
+builder = "html"

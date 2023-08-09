@@ -19,7 +19,7 @@ def repair_smiles_of_salts(spectrum_in,
     smiles = spectrum.get("smiles")
     parent_mass = spectrum.get("parent_mass")
     possible_ion_combinations = create_possible_ions(smiles)
-    if possible_ion_combinations == []:
+    if not possible_ion_combinations:
         # It is not a salt
         return spectrum
     for ion, not_used_ions in possible_ion_combinations:
