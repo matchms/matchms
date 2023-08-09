@@ -3,12 +3,10 @@ import os
 from collections import OrderedDict
 from datetime import datetime
 import yaml
-from tqdm import tqdm
 import matchms.filtering as msfilters
 import matchms.similarity as mssimilarity
 from matchms import calculate_scores
 from matchms.SpectrumProcessor import SpectrumProcessor
-from matchms.SpectrumProcessor import PREDEFINED_PIPELINES
 from matchms.importing.load_spectra import load_spectra
 from matchms.logging_functions import (add_logging_to_file,
                                        reset_matchms_logger,
