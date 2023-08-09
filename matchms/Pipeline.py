@@ -6,11 +6,11 @@ import yaml
 import matchms.filtering as msfilters
 import matchms.similarity as mssimilarity
 from matchms import calculate_scores
-from matchms.SpectrumProcessor import SpectrumProcessor
 from matchms.importing.load_spectra import load_spectra
 from matchms.logging_functions import (add_logging_to_file,
                                        reset_matchms_logger,
                                        set_matchms_logger_level)
+from matchms.SpectrumProcessor import SpectrumProcessor
 
 
 _filter_functions = {key: f for key, f in msfilters.__dict__.items() if callable(f)}
