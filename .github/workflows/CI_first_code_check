@@ -1,7 +1,7 @@
 name: CI Build
 
 on:
-  push
+  push:
   workflow_dispatch:
     inputs:
       tag:
