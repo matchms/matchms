@@ -1,14 +1,16 @@
 """
-Functions for processing mass spectra
-#####################################
+Processing (or: filtering) mass spectra
+#######################################
 
 Provided functions will usually only perform a single action to a spectrum.
 This can be changes or corrections of metadata, or peak filtering.
 More complicated processing pipelines can be build by stacking several of
 the provided filters.
 
-The general user workflow is to use the `SpectrumProcessor` class to define a
-spetrum processing pipeline. Here is an example:
+Because there are numerous filter functions in matchms and because they often
+need to be applied in a specific order, the most feasible workflow for users
+is to use the `SpectrumProcessor` class to define a spetrum processing pipeline.
+Here is an example:
 
 .. testcode::
 
@@ -25,7 +27,7 @@ spetrum processing pipeline. Here is an example:
     processing = SpectrumProcessor("basic")
 
     # Additional filters can be added as desired
-    processing.add_matchms_filter("normalize_intensity)
+    processing.add_matchms_filter("normalize_intensity")
 
     # Run the processing pipeline:
     spectrum_filtered = processing.process_spectrum(spectrum)
