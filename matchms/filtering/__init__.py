@@ -7,6 +7,40 @@ This can be changes or corrections of metadata, or peak filtering.
 More complicated processing pipelines can be build by stacking several of
 the provided filters.
 
+The general user workflow is to use the `SpectrumProcessor` class to define a
+spetrum processing pipeline. Here is an example:
+
+.. testcode::
+
+    import numpy as np
+    from matchms import Spectrum
+    from matchms import SpectrumProcessor
+
+    spectrum = Spectrum(mz=np.array([100, 120, 150, 200.]),
+                        intensities=np.array([200.0, 300.0, 50.0, 1.0]),
+                        metadata={'id': 'spectrum1'})
+
+    # Users can pick a predefined pipeline ("basic", "default", "fully_annotated")
+    # Or set to None if no predefined settings are desired.
+    processing = SpectrumProcessor("basic")
+
+    # Additional filters can be added as desired
+    processing.add_matchms_filter("normalize_intensity)
+
+    # Run the processing pipeline:
+    spectrum_filtered = processing.process_spectrum(spectrum)
+    max_intensity = spectrum_filtered.peaks.intensities.max()
+    print(f"Maximum intensity is {max_intensity:.2f}")
+
+Should output
+
+.. testoutput::
+
+    Maximum intensity is 1.00
+
+It is also possible to run each filter function individually. This for instance
+makes sense if users want to develop a highly customized spectrum processing
+routine.
 Example of how to use a single filter function:
 
 .. testcode::
