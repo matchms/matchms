@@ -10,6 +10,7 @@ on:
         default: ''
 
 jobs:
+
   first_check:
     name: first code check / python-3.9 / ubuntu-latest
     runs-on: ubuntu-latest
