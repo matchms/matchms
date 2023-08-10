@@ -1,0 +1,59 @@
+name: CI Build
+
+on:
+  push
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Tag for manually running CI first code check workflow
+        required: False
+        default: ''
+
+jobs:
+  first_check:
+    name: first code check / python-3.9 / ubuntu-latest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Python info
+        run: |
+          which python
+          python --version
+      - name: Build package and create dev environment
+        run: |
+          python -m pip install --upgrade pip poetry
+          poetry install
+      - name: Show pip list
+        run: |
+          pip list
+      - name: Test with coverage
+        run: |
+          poetry run pytest --cov --cov-report term --cov-report xml --junitxml=xunit-result.xml
+      - name: Correct coverage paths
+        run: sed -i "s+$PWD/++g" coverage.xml
+      - name: Check style against standards using prospector
+        shell: bash -l {0}
+        run: prospector -o grouped -o pylint:pylint-report.txt
+      - name: Store PR metadata in json file
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+        run: |
+          jq -n --arg pr_number "$PR_NUMBER"\
+                --arg head_ref "$HEAD_REF"\
+                --arg base_ref "$BASE_REF"\
+            '{"pr_number": $pr_number, "head_ref": $head_ref, "base_ref": $base_ref}' > pr_metadata.json
+      - uses: actions/upload-artifact@v3
+        with:
+          name: sonarcloud-data-pip
+          path: |
+            coverage.xml
+            xunit-result.xml
+            pr_metadata.json
+      - name: Check whether import statements are used consistently
+        run: isort . --check-only --diff
