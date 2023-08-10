@@ -27,7 +27,7 @@ Here is an example:
     processing = SpectrumProcessor("basic")
 
     # Additional filters can be added as desired
-    processing.add_matchms_filter("normalize_intensity")
+    processing.add_matchms_filter("normalize_intensities")
 
     # Run the processing pipeline:
     spectrum_filtered = processing.process_spectrum(spectrum)
