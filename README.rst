@@ -137,6 +137,8 @@ To date we are aware of:
 
 + `matchmsextras <https://github.com/matchms/matchmsextras>`_ which contains additional functions to create networks based on spectral similarities, to run spectrum searchers against `PubChem`, or additional plotting methods.
 
++ `MS2Query <https://github.com/iomega/ms2query>`_ Reliable and fast MS/MS spectral-based analogue search, running on top op matchms.
+
 + `memo <https://github.com/mandelbrot-project/memo>`_ a method allowing a Retention Time (RT) agnostic alignment of metabolomics samples using the fragmentation spectra (MS2) of their consituents.
 
 *(if you know of any other packages that are fully compatible with matchms, let us know!)*
