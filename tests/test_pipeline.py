@@ -116,7 +116,7 @@ def test_pipeline_non_symmetric():
     pipeline = Pipeline()
     pipeline.query_files = spectrums_file_msp
     pipeline.predefined_processing_queries = "basic"
-    pipeline.predefined_processing_refs = "basic"
+    pipeline.predefined_processing_references = "basic"
     pipeline.reference_files = [spectrums_file_msp, spectrums_file_msp]
     pipeline.score_computations = [["precursormzmatch",  {"tolerance": 120.0}],
                                    ["modifiedcosine", {"tolerance": 10.0}]]
@@ -193,8 +193,8 @@ def test_FingerprintSimilarity_pipeline():
     pipeline.reference_files = spectrums_file_msp
     pipeline.predefined_processing_queries = "basic"
     pipeline.additional_processing_queries = ["add_fingerprint"]
-    pipeline.predefined_processing_refs = "basic"
-    pipeline.additional_processing_refs = ["add_fingerprint"]
+    pipeline.predefined_processing_references = "basic"
+    pipeline.additional_processing_references = ["add_fingerprint"]
     pipeline.score_computations = [
         ["metadatamatch", {"field": "precursor_mz", "matching_type": "difference", "tolerance": 50}],
         ["fingerprintsimilarity", {"similarity_measure": "jaccard"}]
