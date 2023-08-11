@@ -26,20 +26,20 @@ def repair_smiles_from_compound_name(spectrum_in: Spectrum,
         The input spectrum.
     annotated_compound_names_file: str
         A csv file containing the compound names and matching smiles, inchi, inchikey
-        and monoisotopic_mass.
+        and monoisotopic_mass. This can be created using the the pubchem_lookup.py from matchmextras.
     mass_tolerance.
         Acceptable mass difference between query compound and pubchem result.
     """
-    annotated_compound_names = load_compond_name_annotations(annotated_compound_names_file)
+    annotated_compound_names = _load_compound_name_annotations(annotated_compound_names_file)
     if spectrum_in is None:
         return None
     spectrum = spectrum_in.clone()
-    if check_fully_annotated(spectrum):
+    if _check_fully_annotated(spectrum):
         return spectrum
     compound_name = spectrum.get("compound_name")
     parent_mass = spectrum.get('parent_mass')
 
-    if is_plausible_name(compound_name) and parent_mass is not None:
+    if _is_plausible_name(compound_name) and parent_mass is not None:
         matching_compound_name = annotated_compound_names[annotated_compound_names["compound_name"] == compound_name]
         mass_differences = np.abs(matching_compound_name["monoisotopic_mass"]-parent_mass)
         within_mass_tolerance = matching_compound_name[mass_differences < mass_tolerance]
@@ -54,7 +54,7 @@ def repair_smiles_from_compound_name(spectrum_in: Spectrum,
     return spectrum
 
 
-def load_compond_name_annotations(annotated_compound_names_file):
+def _load_compound_name_annotations(annotated_compound_names_file):
     """Loads in the annotated compound names and checks format"""
     annotated_compound_names = pd.read_csv(annotated_compound_names_file)
     assert list(annotated_compound_names.columns) == ["compound_name", "smiles", "inchi",
@@ -63,7 +63,7 @@ def load_compond_name_annotations(annotated_compound_names_file):
     return annotated_compound_names
 
 
-def check_fully_annotated(spectrum: Spectrum) -> bool:
+def _check_fully_annotated(spectrum: Spectrum) -> bool:
     """Combine multiple check functions.
     Returns False if SMILES, InChIKey, or InChI are missing.
     """
@@ -76,6 +76,6 @@ def check_fully_annotated(spectrum: Spectrum) -> bool:
     return True
 
 
-def is_plausible_name(compound_name):
+def _is_plausible_name(compound_name):
     """Simple check if it can be a compound name."""
     return isinstance(compound_name, str) and len(compound_name) > 4
