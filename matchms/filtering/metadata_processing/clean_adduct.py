@@ -36,14 +36,14 @@ def _clean_adduct(adduct: str) -> str:
     adduct
         Input adduct string to be cleaned/edited.
     """
-    def get_adduct_charge(adduct):
+    def _get_adduct_charge(adduct):
         regex_charges = r"[1-3]{0,1}[+-]{1,2}$"
         match = re.search(regex_charges, adduct)
         if match:
             return match.group(0)
         return match
 
-    def adduct_conversion(adduct):
+    def _adduct_conversion(adduct):
         """Convert adduct if conversion rule is known"""
         adduct_conversions = load_known_adduct_conversions()
         if adduct in adduct_conversions:
@@ -56,20 +56,20 @@ def _clean_adduct(adduct: str) -> str:
     adduct = adduct.strip().replace("\n", "").replace("*", "")
     adduct = adduct.replace("++", "2+").replace("--", "2-")
     if adduct.startswith("["):
-        return adduct_conversion(adduct)
+        return _adduct_conversion(adduct)
 
     if adduct.endswith("]"):
-        return adduct_conversion("[" + adduct)
+        return _adduct_conversion("[" + adduct)
 
     adduct_core = "[" + adduct
     # Remove parts that can confuse the charge extraction
     for mol_part in ["CH2", "CH3", "NH3", "NH4", "O2"]:
         if mol_part in adduct:
             adduct = adduct.split(mol_part)[-1]
-    adduct_charge = get_adduct_charge(adduct)
+    adduct_charge = _get_adduct_charge(adduct)
 
     if adduct_charge is None:
-        return adduct_conversion(adduct_core + "]")
+        return _adduct_conversion(adduct_core + "]")
 
     adduct_cleaned = adduct_core[:-len(adduct_charge)] + "]" + adduct_charge
-    return adduct_conversion(adduct_cleaned)
+    return _adduct_conversion(adduct_cleaned)
