@@ -35,7 +35,7 @@ def derive_formula_from_name(spectrum_in: SpectrumType,
 
     # Detect formula at end of compound name
     end_of_name = name.split(" ")[-1]
-    formula_from_name = end_of_name if looks_like_formula(end_of_name) else None
+    formula_from_name = end_of_name if _looks_like_formula(end_of_name) else None
 
     if formula_from_name and remove_formula_from_name:
         name_formula_removed = " ".join(name.split(" ")[:-1])
@@ -50,7 +50,7 @@ def derive_formula_from_name(spectrum_in: SpectrumType,
     return spectrum
 
 
-def looks_like_formula(formula):
+def _looks_like_formula(formula):
     """Return True if input string has expected format of a molecular formula.
     Does only consider most frequent atoms found in many name strings.
     """

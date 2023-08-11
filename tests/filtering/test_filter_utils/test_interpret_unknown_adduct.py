@@ -1,7 +1,7 @@
 import pytest
 from matchms.filtering.filter_utils.interpret_unknown_adduct import \
     get_multiplier_and_mass_from_adduct
-from matchms.filtering.metadata_processing.clean_adduct import \
+from matchms.filtering.filter_utils.load_known_adducts import \
     load_known_adducts
 
 
