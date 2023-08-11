@@ -13,7 +13,7 @@ _retention_time_keys = ["retention_time", "retentiontime", "rt", "scan_start_tim
 _retention_index_keys = ["retention_index", "retentionindex", "ri"]
 
 
-def safe_store_value(metadata: dict, value: Any, target_key: str) -> dict:
+def _safe_store_value(metadata: dict, value: Any, target_key: str) -> dict:
     """Helper function to safely store a value in the target key without throwing an exception, but storing 'None' instead.
 
     Parameters
@@ -30,12 +30,12 @@ def safe_store_value(metadata: dict, value: Any, target_key: str) -> dict:
     Spectrum with added key.
     """
     if value is not None:   # one of accepted keys is present
-        value = safe_convert_to_float(value)
+        value = _safe_convert_to_float(value)
     metadata[target_key] = value
     return metadata
 
 
-def safe_convert_to_float(value: Any) -> Optional[float]:
+def _safe_convert_to_float(value: Any) -> Optional[float]:
     """Safely convert value to float. Return 'None' on failure.
 
     Parameters
@@ -52,14 +52,14 @@ def safe_convert_to_float(value: Any) -> Optional[float]:
             value = value[0]
         else:
             return None
-        
+
     # logic to read MoNA msp files which specify rt as string with "min" in it
     if isinstance(value, str):
         value = value.strip()
         pattern = r'^[+-]?(\d*\.)?\d+\s*(min|s|h|ms)'
         conversion = {"min": 60, "s": 1, "h": 3600, "ms": 1e-3}
         match = re.search(pattern, value)
-        
+
         if match and len(match.groups()) == 2:
             val, unit = value.split(' ')
             return float(val) * conversion[unit]
@@ -90,10 +90,10 @@ def _add_retention(metadata: dict, target_key: str, accepted_keys: List[str]) ->
     """
     common_keys = get_common_keys(metadata.keys(), accepted_keys)
     values_for_keys = filter_none([metadata[key] for key in common_keys])
-    values = list(map(safe_convert_to_float, values_for_keys))
+    values = list(map(_safe_convert_to_float, values_for_keys))
     value = next(filter_none(values), None)
 
-    metadata = safe_store_value(metadata, value, target_key)
+    metadata = _safe_store_value(metadata, value, target_key)
     return metadata
 
 
