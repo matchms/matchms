@@ -1,4 +1,5 @@
 import os
+import ast
 import numpy as np
 import pytest
 from matchms import SpectrumProcessor
@@ -181,23 +182,21 @@ def test_add_filter_with_matchms_filter(spectrums):
     assert not spectrums, "Expected to be empty list"
 
 
-def test_ALL_FILTERS_contains_all_filters():
+def test_all_filters_is_complete():
     """Checks that the global varible ALL_FILTERS contains all the available filters
 
     This is important, since performing tests in the wrong order can make some filters useless.
     """
-
-    import ast
     def get_functions_from_file(file_path):
+        """Gets all python functions in a file"""
         with open(file_path, 'r') as file:
             tree = ast.parse(file.read(), filename=file_path)
-
         functions = []
         for node in ast.walk(tree):
             if isinstance(node, ast.FunctionDef):
                 functions.append(node.name)
-
         return functions
+
     current_dir = os.path.dirname(os.path.abspath(__file__))
     filtering_directory = os.path.join(current_dir, "../../matchms/filtering")
     directories_with_filters = ["metadata_processing",
@@ -221,3 +220,8 @@ def test_ALL_FILTERS_contains_all_filters():
         assert filter in all_filters, \
             f"The function {filter} in the script {script} is not given in ALL_FILTERS, this should be added to ensure a correct order of filter functions" \
             f"If this function is not a filter add a _ before the function name"
+
+
+def test_all_filters_no_duplicates():
+    all_filters = [filter.__name__ for filter in ALL_FILTERS]
+    assert len(all_filters) == len(set(all_filters)), "One of the filters appears twice in ALL_FILTERS"
