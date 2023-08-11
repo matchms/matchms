@@ -1,7 +1,8 @@
+import os
 import numpy as np
 import pytest
 from matchms import SpectrumProcessor
-from matchms.SpectrumProcessor import ProcessingReport
+from matchms.SpectrumProcessor import ProcessingReport, ALL_FILTERS
 from ..builder_Spectrum import SpectrumBuilder
 
 
@@ -178,3 +179,45 @@ def test_add_filter_with_matchms_filter(spectrums):
     assert filters[-1].__name__ == "require_correct_ionmode"
     spectrums, _ = processor.process_spectrums(spectrums, create_report=True)
     assert not spectrums, "Expected to be empty list"
+
+
+def test_ALL_FILTERS_contains_all_filters():
+    """Checks that the global varible ALL_FILTERS contains all the available filters
+
+    This is important, since performing tests in the wrong order can make some filters useless.
+    """
+
+    import ast
+    def get_functions_from_file(file_path):
+        with open(file_path, 'r') as file:
+            tree = ast.parse(file.read(), filename=file_path)
+
+        functions = []
+        for node in ast.walk(tree):
+            if isinstance(node, ast.FunctionDef):
+                functions.append(node.name)
+
+        return functions
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    filtering_directory = os.path.join(current_dir, "../../matchms/filtering")
+    directories_with_filters = ["metadata_processing",
+                                "peak_processing"]
+
+    all_filters = [filter.__name__ for filter in ALL_FILTERS]
+    list_of_filter_function_names = []
+    for directory_with_filters in directories_with_filters:
+        directory_with_filters = os.path.join(filtering_directory, directory_with_filters)
+        scripts = os.listdir(directory_with_filters)
+        for script in scripts:
+            # Remove __init__
+            if script[0] == "_":
+                break
+            if script[-3:] == ".py":
+                functions = get_functions_from_file(os.path.join(directory_with_filters, script))
+                for function in functions:
+                    if function[0] != "_":
+                        list_of_filter_function_names.append((script, function))
+    for script, filter in list_of_filter_function_names:
+        assert filter in all_filters, \
+            f"The function {filter} in the script {script} is not given in ALL_FILTERS, this should be added to ensure a correct order of filter functions" \
+            f"If this function is not a filter add a _ before the function name"
