@@ -3,9 +3,9 @@ from typing import Optional, Tuple
 from matchms.constants import PROTON_MASS
 from matchms.filtering.filter_utils.interpret_unknown_adduct import \
     get_multiplier_and_mass_from_adduct
-from matchms.filtering.metadata_processing.clean_adduct import (
-    _clean_adduct)
-from matchms.filtering.filter_utils.load_known_adducts import load_known_adducts
+from matchms.filtering.filter_utils.load_known_adducts import \
+    load_known_adducts
+from matchms.filtering.metadata_processing.clean_adduct import _clean_adduct
 from matchms.typing import SpectrumType
 
 

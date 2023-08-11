@@ -1,7 +1,8 @@
 import logging
 import re
+from matchms.filtering.filter_utils.load_known_adducts import \
+    load_known_adduct_conversions
 
-from matchms.filtering.filter_utils.load_known_adducts import load_known_adduct_conversions
 
 logger = logging.getLogger("matchms")
 

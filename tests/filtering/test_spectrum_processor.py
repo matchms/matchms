@@ -1,9 +1,9 @@
-import os
 import ast
+import os
 import numpy as np
 import pytest
 from matchms import SpectrumProcessor
-from matchms.SpectrumProcessor import ProcessingReport, ALL_FILTERS
+from matchms.SpectrumProcessor import ALL_FILTERS, ProcessingReport
 from ..builder_Spectrum import SpectrumBuilder
 
 
@@ -189,7 +189,7 @@ def test_all_filters_is_complete():
     """
     def get_functions_from_file(file_path):
         """Gets all python functions in a file"""
-        with open(file_path, 'r') as file:
+        with open(file_path, 'r', encoding="utf-8") as file:
             tree = ast.parse(file.read(), filename=file_path)
         functions = []
         for node in ast.walk(tree):
@@ -216,9 +216,9 @@ def test_all_filters_is_complete():
                 for function in functions:
                     if function[0] != "_":
                         list_of_filter_function_names.append((script, function))
-    for script, filter in list_of_filter_function_names:
-        assert filter in all_filters, \
-            f"The function {filter} in the script {script} is not given in ALL_FILTERS, this should be added to ensure a correct order of filter functions" \
+    for script, filter_function in list_of_filter_function_names:
+        assert filter_function in all_filters, \
+            f"The function {filter_function} in the script {script} is not given in ALL_FILTERS, this should be added to ensure a correct order of filter functions" \
             f"If this function is not a filter add a _ before the function name"
 
 
