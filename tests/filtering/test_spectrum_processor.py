@@ -218,7 +218,8 @@ def test_all_filters_is_complete():
                         list_of_filter_function_names.append((script, function))
     for script, filter_function in list_of_filter_function_names:
         assert filter_function in all_filters, \
-            f"The function {filter_function} in the script {script} is not given in ALL_FILTERS, this should be added to ensure a correct order of filter functions" \
+            f"The function {filter_function} in the script {script} is not given in ALL_FILTERS, " \
+            f"this should be added to ensure a correct order of filter functions." \
             f"If this function is not a filter add a _ before the function name"
 
 
