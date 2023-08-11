@@ -24,12 +24,12 @@ def require_valid_annotation(spectrum: Spectrum):
     if not is_valid_inchi(inchi):
         logger.info("Removed spectrum since inchi is not valid. Incorrect inchi = %s", inchi)
         return None
-    if not check_smiles_inchi_inchikey_match(spectrum):
+    if not _check_smiles_inchi_inchikey_match(spectrum):
         return None
     return spectrum
 
 
-def check_smiles_inchi_inchikey_match(spectrum) -> bool:
+def _check_smiles_inchi_inchikey_match(spectrum) -> bool:
     """Checks if a spectrum"""
     if spectrum is None:
         return False
