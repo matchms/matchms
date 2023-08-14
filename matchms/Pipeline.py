@@ -210,7 +210,6 @@ class Pipeline:
         self.write_to_logfile("--- Start running matchms pipeline. ---")
         self.write_to_logfile(f"Start time: {str(datetime.now())}")
         self.check_pipeline()
-        self.write_to_logfile("--- Importing data ---")
         self.import_data(self.query_files,
                          self.reference_files)
 
@@ -356,18 +355,23 @@ class Pipeline:
             query_files = [query_files]
         if isinstance(reference_files, str):
             reference_files = [reference_files]
+        self.write_to_logfile("--- Importing data ---")
         spectrums_queries = []
         for query_file in query_files:
             spectrums_queries += list(load_spectra(query_file))
+        self.write_to_logfile(f"Loaded query spectra from {query_files}")
         self.spectrums_queries += spectrums_queries
         if reference_files is None:
             self.is_symmetric = True
             self.spectrums_references = self.spectrums_queries
+            self.write_to_logfile(f"Reference spectra are equal to the query spectra (is_symmetric = True)")
         else:
             spectrums_references = []
             for reference_file in reference_files:
                 spectrums_references += list(load_spectra(reference_file))
             self.spectrums_references += spectrums_references
+            self.write_to_logfile(f"Loaded reference spectra from {reference_files}")
+
 
     # Getter & Setters
     @property
