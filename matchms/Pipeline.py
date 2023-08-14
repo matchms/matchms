@@ -131,14 +131,13 @@ class Pipeline:
                                        ["filter_by_range", {"name": "Spec2Vec", "low": 0.3}]]
 
     """
-    def __init__(self, workflow, progress_bar=True):
+    def __init__(self, workflow: OrderedDict, progress_bar=True):
         """
         Parameters
         ----------
-        config_file
-            Filename of config file (yaml file) to define pipeline. Default is None
-            in which case the pipeline should be defined via a Python script.
-        progress_bar
+        workflow:
+            Contains an orderedDict containing the workflow settings. Can be created using create_workflow.
+        progress_bar:
             Default is True. Set to False if no progress bar should be displayed.
         """
         self.spectrums_queries = []
