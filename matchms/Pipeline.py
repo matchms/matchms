@@ -149,8 +149,8 @@ class Pipeline:
         """
         self.query_files = None
         self.reference_files = None
-        self.spectrums_queries = []
-        self.spectrums_references = []
+        self._spectrums_queries = None
+        self._spectrums_references = None
         self.is_symmetric = False
         self.scores = None
 
@@ -218,20 +218,20 @@ class Pipeline:
         self.write_to_logfile(f"Time: {str(datetime.now())}")
         # Process query spectra
         spectrums, report = self.processing_queries.process_spectrums(
-            self.spectrums_queries,
+            self._spectrums_queries,
             create_report=True,
             progress_bar=self.progress_bar)
-        self.spectrums_queries = spectrums
+        self._spectrums_queries = spectrums
         self.write_to_logfile(str(report))
         # Process reference spectra (if necessary)
         if self.is_symmetric is False:
-            self.spectrums_references, report = self.processing_references.process_spectrums(
-                self.spectrums_references,
+            self._spectrums_references, report = self.processing_references.process_spectrums(
+                self._spectrums_references,
                 create_report=True,
                 progress_bar=self.progress_bar)
             self.write_to_logfile(str(report))
         else:
-            self.spectrums_references = self.spectrums_queries
+            self._spectrums_references = self._spectrums_queries
 
         # Score computation and masking
         self.write_to_logfile("--- Computing scores ---")
@@ -275,14 +275,14 @@ class Pipeline:
         similarity_measure = get_similarity_measure(computation)
         # If this is the first score computation:
         if i == 0:
-            self.scores = calculate_scores(self.spectrums_references,
-                                           self.spectrums_queries,
+            self.scores = calculate_scores(self._spectrums_references,
+                                           self._spectrums_queries,
                                            similarity_measure,
                                            array_type="sparse",
                                            is_symmetric=self.is_symmetric)
         else:
-            new_scores = similarity_measure.sparse_array(references=self.spectrums_references,
-                                                         queries=self.spectrums_queries,
+            new_scores = similarity_measure.sparse_array(references=self._spectrums_references,
+                                                         queries=self._spectrums_queries,
                                                          idx_row=self.scores.scores.row,
                                                          idx_col=self.scores.scores.col,
                                                          is_symmetric=self.is_symmetric)
@@ -363,13 +363,13 @@ class Pipeline:
         self.spectrums_queries += spectrums_queries
         if reference_files is None:
             self.is_symmetric = True
-            self.spectrums_references = self.spectrums_queries
+            self._spectrums_references = self._spectrums_queries
             self.write_to_logfile(f"Reference spectra are equal to the query spectra (is_symmetric = True)")
         else:
             spectrums_references = []
             for reference_file in reference_files:
                 spectrums_references += list(load_spectra(reference_file))
-            self.spectrums_references += spectrums_references
+            self._spectrums_references += spectrums_references
             self.write_to_logfile(f"Loaded reference spectra from {reference_files}")
 
 
@@ -397,3 +397,12 @@ class Pipeline:
     @score_computations.setter
     def score_computations(self, computations_list):
         self.workflow["score_computations"] = computations_list
+
+    @property
+    def spectrums_queries(self):
+        return self._spectrums_queries
+
+    @property
+    def spectrums_references(self):
+        return self._spectrums_references
+
