@@ -2,7 +2,6 @@ import os
 import numpy as np
 import pytest
 from matchms import Pipeline
-from matchms.Pipeline import load_in_workflow_from_yaml_file
 from matchms.filtering import select_by_mz
 from matchms.Pipeline import create_workflow, load_in_workflow_from_yaml_file
 from matchms.similarity import ModifiedCosine

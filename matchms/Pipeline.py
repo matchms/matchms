@@ -17,7 +17,7 @@ _score_functions = {key.lower(): f for key, f in mssimilarity.__dict__.items() i
 logger = logging.getLogger("matchms")
 
 
-def create_workflow(yaml_file_name = None,
+def create_workflow(yaml_file_name=None,
                     predefined_processing_queries="default",
                     predefined_processing_reference="default",
                     additional_filters_queries=(),
@@ -26,6 +26,7 @@ def create_workflow(yaml_file_name = None,
                     query_file_name=None,
                     reference_file_name=None,
                     ):
+    # pylint: disable=too-many-arguments
     workflow = OrderedDict()
     workflow["importing"] = {"queries": query_file_name,
                              "references": reference_file_name}
