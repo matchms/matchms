@@ -2,14 +2,15 @@ import os
 import numpy as np
 import pytest
 from matchms import Pipeline
+from matchms.Pipeline import create_workflow
 from matchms.similarity import CosineGreedy
 
 
 def test_user_workflow():
     module_root = os.path.join(os.path.dirname(__file__), "..")
     spectrums_file = os.path.join(module_root, "tests", "testdata", "pesticides.mgf")
-
-    pipeline = Pipeline()
+    workflow = create_workflow()
+    pipeline = Pipeline(workflow)
     pipeline.query_files = spectrums_file
     pipeline.predefined_processing_queries = "basic"
     pipeline.additional_processing_queries = [
