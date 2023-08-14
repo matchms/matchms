@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [unreleased]
+
+### Added
+
+- New `SpectrumProcessing` class to be the central hub for all filter functions [#455](https://github.com/matchms/matchms/pull/455). Also takes care that filters are executed in a useful order. This is also integrated into the `Pipeline` class.
+
+### Changed
+
+- Extensive code refactoring and cleaning.
+
 ## [0.21.2] - 2023-08-01
 
 ### Added
