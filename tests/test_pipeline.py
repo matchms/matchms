@@ -148,6 +148,7 @@ def test_pipeline_from_yaml():
     config_file = os.path.join(module_root, "tests", "test_pipeline.yaml")
     workflow = load_in_workflow_from_yaml_file(config_file)
     pipeline = Pipeline(workflow)
+    pipeline.query_files = spectrums_file_msp
     pipeline.run()
     assert len(pipeline.spectrums_queries) == 5
     assert pipeline.spectrums_queries[0] == pipeline.spectrums_references[0]
@@ -165,17 +166,18 @@ def test_pipeline_to_and_from_yaml(tmp_path):
     config_file = os.path.join(tmp_path, "test_pipeline.yaml")
 
     workflow = create_workflow(config_file, score_computations=[["precursormzmatch",  {"tolerance": 120.0}],
-                                                                ["modifiedcosine", {"tolerance": 10.0}]],
-                               query_file_name=spectrums_file_msp)
+                                                                ["modifiedcosine", {"tolerance": 10.0}]])
     assert os.path.exists(config_file)
 
     pipeline = Pipeline(workflow)
+    pipeline.query_files = spectrums_file_msp
     pipeline.run()
     scores_run1 = pipeline.scores
 
     # Load again
     workflow = load_in_workflow_from_yaml_file(config_file)
     pipeline = Pipeline(workflow)
+    pipeline.query_files = spectrums_file_msp
     pipeline.run()
     assert pipeline.scores.scores == scores_run1.scores
 
@@ -203,12 +205,12 @@ def test_FingerprintSimilarity_pipeline():
                                additional_filters_queries=["add_fingerprint"],
                                predefined_processing_reference="basic",
                                additional_filters_references=["add_fingerprint"],
-                               query_file_name=spectrums_file_msp,
-                               reference_file_name=spectrums_file_msp,
                                score_computations=[["metadatamatch", {"field": "precursor_mz", "matching_type": "difference", "tolerance": 50}],
                                                    ["fingerprintsimilarity", {"similarity_measure": "jaccard"}]],
                                )
     pipeline = Pipeline(workflow)
+    pipeline.query_files = spectrums_file_msp
+    pipeline.reference_files = spectrums_file_msp
     pipeline.run()
     assert len(pipeline.spectrums_queries[0].get("fingerprint")) == 2048
     assert pipeline.scores.scores.shape == (5, 5, 2)

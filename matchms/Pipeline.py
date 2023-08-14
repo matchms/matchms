@@ -23,13 +23,9 @@ def create_workflow(yaml_file_name=None,
                     additional_filters_queries=(),
                     additional_filters_references=(),
                     score_computations=(),
-                    query_file_name=None,
-                    reference_file_name=None,
                     ):
     # pylint: disable=too-many-arguments
     workflow = OrderedDict()
-    workflow["importing"] = {"queries": query_file_name,
-                             "references": reference_file_name}
     queries_processor = initialize_spectrum_processor(predefined_processing_queries, additional_filters_queries)
     workflow["query_filters"] = queries_processor.processing_steps
     queries_processor = initialize_spectrum_processor(predefined_processing_reference, additional_filters_references)
@@ -151,17 +147,21 @@ class Pipeline:
         progress_bar
             Default is True. Set to False if no progress bar should be displayed.
         """
+        self.query_files = None
+        self.reference_files = None
         self.spectrums_queries = []
         self.spectrums_references = []
         self.is_symmetric = False
+        self.scores = None
+
+        self.progress_bar = progress_bar
         self.workflow = workflow
         self.complete_workflow()
+
         self.write_to_logfile("--- Processing pipeline: ---")
         self._initialize_spectrum_processor_queries()
         if self.is_symmetric is False:
             self._initialize_spectrum_processor_references()
-        self.scores = None
-        self.progress_bar = progress_bar
 
     def _initialize_spectrum_processor_queries(self):
         """Initialize spectrum processing workflow for the query spectra."""
@@ -297,6 +297,7 @@ class Pipeline:
         Aim is to avoid pipeline crashing after long computation.
         """
         def check_files_exist(filenames):
+            assert filenames is not None
             if isinstance(filenames, str):
                 filenames = [filenames]
             for filename in filenames:
@@ -330,8 +331,8 @@ class Pipeline:
                                 remove_stream_handlers=True)
         else:
             set_matchms_logger_level(self.logging_level)
-            logger.warning("No logging file was defined." \
-                "Logging messages will not be written to file.")
+            logger.warning("No logging file was defined."
+                           "Logging messages will not be written to file.")
 
     def write_to_logfile(self, line):
         """Write message to log file.
@@ -368,24 +369,7 @@ class Pipeline:
                 spectrums_references += list(load_spectra(reference_file))
             self.spectrums_references += spectrums_references
 
-
     # Getter & Setters
-    @property
-    def query_files(self):
-        return self.workflow["importing"].get("queries")
-
-    @query_files.setter
-    def query_files(self, filter_list):
-        self.workflow["importing"]["queries"] = filter_list
-
-    @property
-    def reference_files(self):
-        return self.workflow["importing"].get("references")
-
-    @reference_files.setter
-    def reference_files(self, files):
-        self.workflow["importing"]["references"] = files
-
     @property
     def logging_file(self):
         return self.workflow["logging"].get("logging_file")
