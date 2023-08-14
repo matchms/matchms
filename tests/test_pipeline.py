@@ -3,6 +3,7 @@ import numpy as np
 import pytest
 from matchms import Pipeline
 from matchms.filtering import select_by_mz
+from matchms.Pipeline import create_workflow, load_in_workflow_from_yaml_file
 from matchms.similarity import ModifiedCosine
 
 
@@ -11,7 +12,8 @@ spectrums_file_msp = os.path.join(module_root, "tests", "testdata", "massbank_fi
 
 
 def test_pipeline_initial_check_missing_file():
-    pipeline = Pipeline()
+    workflow = create_workflow()
+    pipeline = Pipeline(workflow)
     pipeline.query_files = "non_existing_file.msp"
     pipeline.score_computations = [["precursormzmatch",  {"tolerance": 120.0}]]
     with pytest.raises(AssertionError) as msg:
@@ -20,7 +22,8 @@ def test_pipeline_initial_check_missing_file():
 
 
 def test_pipeline_initial_check_unknown_step():
-    pipeline = Pipeline()
+    workflow = create_workflow()
+    pipeline = Pipeline(workflow)
     pipeline.query_files = spectrums_file_msp
     pipeline.score_computations = [["precursormzOOPSmatch",  {"tolerance": 120.0}]]
     with pytest.raises(ValueError) as msg:
@@ -29,7 +32,8 @@ def test_pipeline_initial_check_unknown_step():
 
 
 def test_pipeline_symmetric():
-    pipeline = Pipeline()
+    workflow = create_workflow()
+    pipeline = Pipeline(workflow)
     pipeline.query_files = spectrums_file_msp
     pipeline.predefined_processing_queries = "basic"
     pipeline.score_computations = [["precursormzmatch",  {"tolerance": 120.0}],
@@ -49,7 +53,8 @@ def test_pipeline_symmetric():
 
 
 def test_pipeline_symmetric_filters():
-    pipeline = Pipeline()
+    workflow = create_workflow()
+    pipeline = Pipeline(workflow)
     pipeline.query_files = spectrums_file_msp
     pipeline.predefined_processing_queries = "basic"
     pipeline.additional_processing_queries = [[select_by_mz, {"mz_from": 0, "mz_to": 1000}]]
@@ -71,7 +76,8 @@ def test_pipeline_symmetric_filters():
 
 
 def test_pipeline_symmetric_masking():
-    pipeline = Pipeline()
+    workflow = create_workflow()
+    pipeline = Pipeline(workflow)
     pipeline.query_files = spectrums_file_msp
     pipeline.predefined_processing_queries = "basic"
     pipeline.score_computations = [["precursormzmatch",  {"tolerance": 120.0}],
@@ -92,7 +98,8 @@ def test_pipeline_symmetric_masking():
 
 
 def test_pipeline_symmetric_custom_score():
-    pipeline = Pipeline()
+    workflow = create_workflow()
+    pipeline = Pipeline(workflow)
     pipeline.query_files = spectrums_file_msp
     pipeline.predefined_processing_queries = "basic"
     pipeline.score_computations = [["precursormzmatch",  {"tolerance": 120.0}],
@@ -113,7 +120,8 @@ def test_pipeline_symmetric_custom_score():
 
 def test_pipeline_non_symmetric():
     """Test importing from multiple files and different inputs for query and references."""
-    pipeline = Pipeline()
+    workflow = create_workflow()
+    pipeline = Pipeline(workflow)
     pipeline.query_files = spectrums_file_msp
     pipeline.predefined_processing_queries = "basic"
     pipeline.predefined_processing_references = "basic"
@@ -155,24 +163,27 @@ def test_pipeline_from_yaml():
 def test_pipeline_to_and_from_yaml(tmp_path):
     pytest.importorskip("rdkit")
     config_file = os.path.join(tmp_path, "test_pipeline.yaml")
-    pipeline = Pipeline()
-    pipeline.query_files = spectrums_file_msp
-    pipeline.score_computations = [["precursormzmatch",  {"tolerance": 120.0}],
-                                   ["modifiedcosine", {"tolerance": 10.0}]]
-    pipeline.create_workflow_config_file(config_file)
-    pipeline.run()
-    scores_run1 = pipeline.scores
+
+    workflow = create_workflow(config_file, score_computations=[["precursormzmatch",  {"tolerance": 120.0}],
+                                                                ["modifiedcosine", {"tolerance": 10.0}]],
+                               query_file_name=spectrums_file_msp)
     assert os.path.exists(config_file)
 
+    pipeline = Pipeline(workflow)
+    pipeline.run()
+    scores_run1 = pipeline.scores
+
     # Load again
-    pipeline = Pipeline(config_file)
+    workflow = load_in_workflow_from_yaml_file(config_file)
+    pipeline = Pipeline(workflow)
     pipeline.run()
     assert pipeline.scores.scores == scores_run1.scores
 
 
 def test_pipeline_logging(tmp_path):
     pytest.importorskip("rdkit")
-    pipeline = Pipeline()
+    workflow = create_workflow()
+    pipeline = Pipeline(workflow)
     pipeline.query_files = spectrums_file_msp
     pipeline.score_computations = [["precursormzmatch",  {"tolerance": 120.0}],
                                    [ModifiedCosine, {"tolerance": 10.0}]]
@@ -184,11 +195,12 @@ def test_pipeline_logging(tmp_path):
     with open(logfile, "r", encoding="utf-8") as f:
         firstline = f.readline().rstrip()
     assert "Start running matchms pipeline" in firstline
-    
+
 
 def test_FingerprintSimilarity_pipeline():
     pytest.importorskip("rdkit")
-    pipeline = Pipeline()
+    workflow = create_workflow()
+    pipeline = Pipeline(workflow)
     pipeline.query_files = spectrums_file_msp
     pipeline.reference_files = spectrums_file_msp
     pipeline.predefined_processing_queries = "basic"
@@ -198,7 +210,7 @@ def test_FingerprintSimilarity_pipeline():
     pipeline.score_computations = [
         ["metadatamatch", {"field": "precursor_mz", "matching_type": "difference", "tolerance": 50}],
         ["fingerprintsimilarity", {"similarity_measure": "jaccard"}]
-    ]    
+    ]
     pipeline.run()
     assert len(pipeline.spectrums_queries[0].get("fingerprint")) == 2048
     assert pipeline.scores.scores.shape == (5, 5, 2)

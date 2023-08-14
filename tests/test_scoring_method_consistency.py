@@ -13,6 +13,7 @@ import matchms.filtering as msfilter
 import matchms.similarity as mssimilarity
 from matchms import Pipeline
 from matchms.importing import load_from_json
+from matchms.Pipeline import create_workflow
 
 
 module_root = os.path.dirname(__file__)
@@ -83,7 +84,8 @@ def test_consistency_scoring_and_pipeline(spectrums, similarity_measure):
     computed_scores_matrix = scoring_method.matrix(spectrums, spectrums)
 
     # Run pipeline
-    pipeline = Pipeline()
+    workflow = create_workflow()
+    pipeline = Pipeline(workflow)
     pipeline.query_files = json_file
     pipeline.predefined_processing_queries = "basic"
     pipeline.additional_processing_queries = [

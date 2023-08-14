@@ -17,6 +17,65 @@ _score_functions = {key.lower(): f for key, f in mssimilarity.__dict__.items() i
 logger = logging.getLogger("matchms")
 
 
+def create_workflow(yaml_file_name = None,
+                    predefined_processing_queries="default",
+                    predefined_processing_reference="default",
+                    additional_filters_queries=(),
+                    additional_filters_references=(),
+                    score_computations=(),
+                    query_file_name=None,
+                    reference_file_name=None,
+                    ):
+    workflow = OrderedDict()
+    workflow["importing"] = {"queries": query_file_name,
+                             "references": reference_file_name}
+    workflow["predefined_processing_queries"] = predefined_processing_queries
+    workflow["predefined_processing_references"] = predefined_processing_reference
+    workflow["additional_processing_queries"] = additional_filters_queries
+    workflow["additional_processing_references"] = additional_filters_references
+    workflow["score_computations"] = score_computations
+    if yaml_file_name is not None:
+        with open(yaml_file_name, 'w', encoding="utf-8") as file:
+            file.write("# Matchms pipeline config file \n")
+            file.write("# Change and adapt fields where necessary \n")
+            file.write("# " + 20 * "=" + " \n")
+            ordered_dump(workflow, file)
+    return workflow
+
+
+def load_in_workflow_from_yaml_file(yaml_file):
+    with open(yaml_file, 'r', encoding="utf-8") as file:
+        workflow = ordered_load(file, yaml.SafeLoader)
+    return workflow
+
+
+def ordered_load(stream, loader=yaml.SafeLoader, object_pairs_hook=OrderedDict):
+    """ Code from https://stackoverflow.com/questions/5121931/in-python-how-can-you-load-yaml-mappings-as-ordereddicts
+    """
+    class OrderedLoader(loader):
+        pass
+
+    def construct_mapping(loader, node):
+        loader.flatten_mapping(node)
+        return object_pairs_hook(loader.construct_pairs(node))
+    OrderedLoader.add_constructor(
+        yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
+        construct_mapping)
+    return yaml.load(stream, OrderedLoader)
+
+
+def ordered_dump(data, stream=None, dumper=yaml.SafeDumper, **kwds):
+    class OrderedDumper(dumper):
+        pass
+
+    def _dict_representer(dumper, data):
+        return dumper.represent_mapping(
+            yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
+            data.items())
+    OrderedDumper.add_representer(OrderedDict, _dict_representer)
+    return yaml.dump(data, stream, OrderedDumper, **kwds)
+
+
 class Pipeline:
     """Central pipeline class.
 
@@ -71,7 +130,7 @@ class Pipeline:
                                        ["filter_by_range", {"name": "Spec2Vec", "low": 0.3}]]
 
     """
-    def __init__(self, config_file=None, progress_bar=True):
+    def __init__(self, workflow, progress_bar=True):
         """
         Parameters
         ----------
@@ -84,7 +143,12 @@ class Pipeline:
         self.spectrums_queries = []
         self.spectrums_references = []
         self.is_symmetric = False
-        self.import_workflow_from_yaml(config_file)
+        self.workflow = workflow
+        self.complete_workflow()
+        self.write_to_logfile("--- Processing pipeline: ---")
+        self._initialize_spectrum_processor_queries()
+        if self.is_symmetric is False:
+            self._initialize_spectrum_processor_references()
         self.scores = None
         self.progress_bar = progress_bar
 
@@ -104,31 +168,14 @@ class Pipeline:
             )
         self.write_to_logfile(str(self.processing_references))
 
-    def import_workflow_from_yaml(self, config_file):
+    def complete_workflow(self):
         """Define Pipeline workflow based on a yaml file (config_file).
         """
-        if config_file is None:
-            self.workflow = OrderedDict()
-            self.workflow["importing"] = {"queries": None,
-                                          "references": None}
-            self.workflow["predefined_processing_queries"] = "default"
-            self.workflow["predefined_processing_references"] = "default"
-            self.workflow["additional_processing_queries"] = []
-            self.workflow["additional_processing_references"] = []
-            self.workflow["score_computations"] = []
-        else:
-            with open(config_file, 'r', encoding="utf-8") as file:
-                self.workflow = ordered_load(file, yaml.SafeLoader)
-            if self.workflow["additional_processing_references"] == "processing_queries":
-                self.workflow["additional_processing_references"] = self.workflow["additional_processing_queries"]
+        #todo add a check if all the fields are given that are needed.
         if "logging" not in self.workflow:
             self.workflow["logging"] = {}
         if self.logging_level is None:
             self.logging_level = "WARNING"
-        self.write_to_logfile("--- Processing pipeline: ---")
-        self._initialize_spectrum_processor_queries()
-        if self.is_symmetric is False:
-            self._initialize_spectrum_processor_references()
 
     def run(self):
         """Execute the defined Pipeline workflow.
@@ -300,15 +347,6 @@ class Pipeline:
                 spectrums_references += list(load_spectra(reference_file))
             self.spectrums_references += spectrums_references
 
-    def create_workflow_config_file(self, filename):
-        """Save the current pipeline workflow as a yaml file.
-        This file allows to reconstruct the current workflow or can be adapted as desired.
-        """
-        with open(filename, 'w', encoding="utf-8") as file:
-            file.write("# Matchms pipeline config file \n")
-            file.write("# Change and adapt fields where necessary \n")
-            file.write("# " + 20 * "=" + " \n")
-            ordered_dump(self.workflow, file)
 
     # Getter & Setters
     @property
@@ -386,33 +424,6 @@ class Pipeline:
     @score_computations.setter
     def score_computations(self, computations_list):
         self.workflow["score_computations"] = computations_list
-
-
-def ordered_load(stream, loader=yaml.SafeLoader, object_pairs_hook=OrderedDict):
-    """ Code from https://stackoverflow.com/questions/5121931/in-python-how-can-you-load-yaml-mappings-as-ordereddicts
-    """
-    class OrderedLoader(loader):
-        pass
-
-    def construct_mapping(loader, node):
-        loader.flatten_mapping(node)
-        return object_pairs_hook(loader.construct_pairs(node))
-    OrderedLoader.add_constructor(
-        yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
-        construct_mapping)
-    return yaml.load(stream, OrderedLoader)
-
-
-def ordered_dump(data, stream=None, dumper=yaml.SafeDumper, **kwds):
-    class OrderedDumper(dumper):
-        pass
-
-    def _dict_representer(dumper, data):
-        return dumper.represent_mapping(
-            yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
-            data.items())
-    OrderedDumper.add_representer(OrderedDict, _dict_representer)
-    return yaml.dump(data, stream, OrderedDumper, **kwds)
 
 
 def initialize_spectrum_processor(predefined_workflow, additional_filters):
