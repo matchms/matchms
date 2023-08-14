@@ -172,6 +172,8 @@ class Pipeline:
         """Define Pipeline workflow based on a yaml file (config_file).
         """
         #todo add a check if all the fields are given that are needed.
+        if self.workflow["additional_processing_references"] == "processing_queries":
+            self.workflow["additional_processing_references"] = self.workflow["additional_processing_queries"]
         if "logging" not in self.workflow:
             self.workflow["logging"] = {}
         if self.logging_level is None:

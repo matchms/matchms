@@ -2,6 +2,7 @@ import os
 import numpy as np
 import pytest
 from matchms import Pipeline
+from matchms.Pipeline import load_in_workflow_from_yaml_file
 from matchms.filtering import select_by_mz
 from matchms.Pipeline import create_workflow, load_in_workflow_from_yaml_file
 from matchms.similarity import ModifiedCosine
@@ -146,7 +147,8 @@ def test_pipeline_non_symmetric():
 def test_pipeline_from_yaml():
     pytest.importorskip("rdkit")
     config_file = os.path.join(module_root, "tests", "test_pipeline.yaml")
-    pipeline = Pipeline(config_file)
+    workflow = load_in_workflow_from_yaml_file(config_file)
+    pipeline = Pipeline(workflow)
     assert pipeline.predefined_processing_queries == "default"
     pipeline.run()
     assert len(pipeline.spectrums_queries) == 5
