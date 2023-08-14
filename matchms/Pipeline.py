@@ -28,8 +28,8 @@ def create_workflow(yaml_file_name=None,
     workflow = OrderedDict()
     queries_processor = initialize_spectrum_processor(predefined_processing_queries, additional_filters_queries)
     workflow["query_filters"] = queries_processor.processing_steps
-    queries_processor = initialize_spectrum_processor(predefined_processing_reference, additional_filters_references)
-    workflow["reference_filters"] = queries_processor.processing_steps
+    reference_processor = initialize_spectrum_processor(predefined_processing_reference, additional_filters_references)
+    workflow["reference_filters"] = reference_processor.processing_steps
     workflow["score_computations"] = score_computations
     if yaml_file_name is not None:
         with open(yaml_file_name, 'w', encoding="utf-8") as file:
