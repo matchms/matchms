@@ -385,42 +385,6 @@ class Pipeline:
         self.workflow["logging"]["logging_level"] = log_level
 
     @property
-    def predefined_processing_queries(self):
-        return self.workflow.get("predefined_processing_queries")
-
-    @predefined_processing_queries.setter
-    def predefined_processing_queries(self, files):
-        self.workflow["predefined_processing_queries"] = files
-        self._initialize_spectrum_processor_queries()
-
-    @property
-    def predefined_processing_references(self):
-        return self.workflow.get("predefined_processing_references")
-
-    @predefined_processing_references.setter
-    def predefined_processing_references(self, files):
-        self.workflow["predefined_processing_references"] = files
-        self._initialize_spectrum_processor_references()
-
-    @property
-    def additional_processing_queries(self):
-        return self.workflow.get("additional_processing_queries")
-
-    @additional_processing_queries.setter
-    def additional_processing_queries(self, files):
-        self.workflow["additional_processing_queries"] = files
-        self._initialize_spectrum_processor_queries()
-
-    @property
-    def additional_processing_references(self):
-        return self.workflow.get("additional_processing_references")
-
-    @additional_processing_references.setter
-    def additional_processing_references(self, files):
-        self.workflow["additional_processing_references"] = files
-        self._initialize_spectrum_processor_references()
-
-    @property
     def score_computations(self):
         return self.workflow.get("score_computations")
 

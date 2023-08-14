@@ -148,7 +148,6 @@ def test_pipeline_from_yaml():
     config_file = os.path.join(module_root, "tests", "test_pipeline.yaml")
     workflow = load_in_workflow_from_yaml_file(config_file)
     pipeline = Pipeline(workflow)
-    assert pipeline.predefined_processing_queries == "default"
     pipeline.run()
     assert len(pipeline.spectrums_queries) == 5
     assert pipeline.spectrums_queries[0] == pipeline.spectrums_references[0]
@@ -200,18 +199,16 @@ def test_pipeline_logging(tmp_path):
 
 def test_FingerprintSimilarity_pipeline():
     pytest.importorskip("rdkit")
-    workflow = create_workflow()
+    workflow = create_workflow(predefined_processing_queries="basic",
+                               additional_filters_queries=["add_fingerprint"],
+                               predefined_processing_reference="basic",
+                               additional_filters_references=["add_fingerprint"],
+                               query_file_name=spectrums_file_msp,
+                               reference_file_name=spectrums_file_msp,
+                               score_computations=[["metadatamatch", {"field": "precursor_mz", "matching_type": "difference", "tolerance": 50}],
+                                                   ["fingerprintsimilarity", {"similarity_measure": "jaccard"}]],
+                               )
     pipeline = Pipeline(workflow)
-    pipeline.query_files = spectrums_file_msp
-    pipeline.reference_files = spectrums_file_msp
-    pipeline.predefined_processing_queries = "basic"
-    pipeline.additional_processing_queries = ["add_fingerprint"]
-    pipeline.predefined_processing_references = "basic"
-    pipeline.additional_processing_references = ["add_fingerprint"]
-    pipeline.score_computations = [
-        ["metadatamatch", {"field": "precursor_mz", "matching_type": "difference", "tolerance": 50}],
-        ["fingerprintsimilarity", {"similarity_measure": "jaccard"}]
-    ]
     pipeline.run()
     assert len(pipeline.spectrums_queries[0].get("fingerprint")) == 2048
     assert pipeline.scores.scores.shape == (5, 5, 2)
