@@ -30,10 +30,10 @@ def create_workflow(yaml_file_name=None,
     workflow = OrderedDict()
     workflow["importing"] = {"queries": query_file_name,
                              "references": reference_file_name}
-    workflow["predefined_processing_queries"] = predefined_processing_queries
-    workflow["predefined_processing_references"] = predefined_processing_reference
-    workflow["additional_processing_queries"] = additional_filters_queries
-    workflow["additional_processing_references"] = additional_filters_references
+    queries_processor = initialize_spectrum_processor(predefined_processing_queries, additional_filters_queries)
+    workflow["query_filters"] = queries_processor.processing_steps
+    queries_processor = initialize_spectrum_processor(predefined_processing_reference, additional_filters_references)
+    workflow["reference_filters"] = queries_processor.processing_steps
     workflow["score_computations"] = score_computations
     if yaml_file_name is not None:
         with open(yaml_file_name, 'w', encoding="utf-8") as file:
@@ -42,6 +42,16 @@ def create_workflow(yaml_file_name=None,
             file.write("# " + 20 * "=" + " \n")
             ordered_dump(workflow, file)
     return workflow
+
+
+def initialize_spectrum_processor(predefined_workflow, additional_filters):
+    """Initialize spectrum processing workflow."""
+    processor = SpectrumProcessor(predefined_workflow)
+    for step in additional_filters:
+        if isinstance(step, (tuple, list)) and len(step) == 1:
+            step = step[0]
+        processor.add_filter(step)
+    return processor
 
 
 def load_in_workflow_from_yaml_file(yaml_file):
@@ -156,25 +166,33 @@ class Pipeline:
     def _initialize_spectrum_processor_queries(self):
         """Initialize spectrum processing workflow for the query spectra."""
         self.processing_queries = initialize_spectrum_processor(
-            self.predefined_processing_queries,
-            self.additional_processing_queries
+            None,
+            self.workflow["query_filters"]
             )
+
         self.write_to_logfile(str(self.processing_queries))
+        if self.processing_queries.processing_steps != self.workflow["query_filters"]:
+            #todo save the yaml file in a new file
+            logger.warning("The order of the filters has been changed compared to the Yaml file.")
 
     def _initialize_spectrum_processor_references(self):
         """Initialize spectrum processing workflow for the reference spectra."""
         self.processing_references = initialize_spectrum_processor(
-            self.predefined_processing_references,
-            self.additional_processing_references
+            None,
+            self.workflow["reference_filters"]
             )
         self.write_to_logfile(str(self.processing_references))
+        self.write_to_logfile(str(self.processing_queries))
+        if self.processing_queries.processing_steps != self.workflow["query_filters"]:
+            #todo save the yaml file in a new file
+            logger.warning("The order of the filters has been changed compared to the Yaml file.")
 
     def complete_workflow(self):
         """Define Pipeline workflow based on a yaml file (config_file).
         """
         #todo add a check if all the fields are given that are needed.
-        if self.workflow["additional_processing_references"] == "processing_queries":
-            self.workflow["additional_processing_references"] = self.workflow["additional_processing_queries"]
+        if self.workflow["reference_filters"] == "processing_queries":
+            self.workflow["reference_filters"] = self.workflow["query_filters"]
         if "logging" not in self.workflow:
             self.workflow["logging"] = {}
         if self.logging_level is None:
@@ -391,13 +409,3 @@ class Pipeline:
     @score_computations.setter
     def score_computations(self, computations_list):
         self.workflow["score_computations"] = computations_list
-
-
-def initialize_spectrum_processor(predefined_workflow, additional_filters):
-    """Initialize spectrum processing workflow."""
-    processor = SpectrumProcessor(predefined_workflow)
-    for step in additional_filters:
-        if isinstance(step, (tuple, list)) and len(step) == 1:
-            step = step[0]
-        processor.add_filter(step)
-    return processor
