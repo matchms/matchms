@@ -359,8 +359,8 @@ class Pipeline:
         spectrums_queries = []
         for query_file in query_files:
             spectrums_queries += list(load_spectra(query_file))
+        self._spectrums_queries = spectrums_queries
         self.write_to_logfile(f"Loaded query spectra from {query_files}")
-        self.spectrums_queries += spectrums_queries
         if reference_files is None:
             self.is_symmetric = True
             self._spectrums_references = self._spectrums_queries
@@ -369,7 +369,7 @@ class Pipeline:
             spectrums_references = []
             for reference_file in reference_files:
                 spectrums_references += list(load_spectra(reference_file))
-            self._spectrums_references += spectrums_references
+            self._spectrums_references = spectrums_references
             self.write_to_logfile(f"Loaded reference spectra from {reference_files}")
 
 
