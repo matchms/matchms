@@ -156,7 +156,7 @@ class Pipeline:
                                        ["filter_by_range", {"name": "Spec2Vec", "low": 0.3}]]
 
     """
-    def __init__(self, workflow, progress_bar=True):
+    def __init__(self, workflow, progress_bar=True, logging_level="WARNING", logging_file=None):
         """
         Parameters
         ----------
@@ -171,6 +171,8 @@ class Pipeline:
         self.is_symmetric = False
         self.scores = None
 
+        self.logging_level = logging_level
+        self.logging_file = logging_file
         self.progress_bar = progress_bar
         self.workflow = workflow
         self.check_workflow()
@@ -209,8 +211,6 @@ class Pipeline:
             f"Workflow is expectd to be a OrderedDict, instead it was of type {type(self.workflow)}"
         expected_keys = {"query_filters", "reference_filters", "score_computations"}
         assert set(self.workflow.keys()) == expected_keys
-        if "logging" not in self.workflow:
-            self.workflow["logging"] = {"logging_level": "WARNING"}
         check_score_computation(score_computations=self.score_computations)
 
     def run(self, query_files, reference_files = None):
@@ -314,7 +314,6 @@ class Pipeline:
                                 loglevel=self.logging_level,
                                 remove_stream_handlers=True)
         else:
-            set_matchms_logger_level(self.logging_level)
             logger.warning("No logging file was defined."
                            "Logging messages will not be written to file.")
 
@@ -376,22 +375,6 @@ class Pipeline:
             self.write_to_logfile(f"Loaded {len(self._spectrums_references)} reference spectra")
 
     # Getter & Setters
-    @property
-    def logging_file(self):
-        return self.workflow["logging"].get("logging_file")
-
-    @logging_file.setter
-    def logging_file(self, file):
-        self.workflow["logging"]["logging_file"] = file
-
-    @property
-    def logging_level(self):
-        return self.workflow["logging"].get("logging_level")
-
-    @logging_level.setter
-    def logging_level(self, log_level):
-        self.workflow["logging"]["logging_level"] = log_level
-
     @property
     def score_computations(self):
         return self.workflow.get("score_computations")
