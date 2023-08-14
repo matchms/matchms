@@ -156,16 +156,16 @@ class Pipeline:
     def _initialize_spectrum_processor_queries(self):
         """Initialize spectrum processing workflow for the query spectra."""
         self.processing_queries = initialize_spectrum_processor(
-            self.predefined_processing_queries,
-            self.additional_processing_queries
+            self.workflow["predefined_processing_queries"],
+            self.workflow["additional_processing_queries"]
             )
         self.write_to_logfile(str(self.processing_queries))
 
     def _initialize_spectrum_processor_references(self):
         """Initialize spectrum processing workflow for the reference spectra."""
         self.processing_references = initialize_spectrum_processor(
-            self.predefined_processing_references,
-            self.additional_processing_references
+            self.workflow["predefined_processing_references"],
+            self.workflow["additional_processing_references"]
             )
         self.write_to_logfile(str(self.processing_references))
 
