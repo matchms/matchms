@@ -362,7 +362,7 @@ class Pipeline:
         if reference_files is None:
             self.is_symmetric = True
             self._spectrums_references = self._spectrums_queries
-            self.write_to_logfile(f"Reference spectra are equal to the query spectra (is_symmetric = True)")
+            self.write_to_logfile("Reference spectra are equal to the query spectra (is_symmetric = True)")
         else:
             spectrums_references = []
             for reference_file in reference_files:
@@ -403,4 +403,3 @@ class Pipeline:
     @property
     def spectrums_references(self):
         return self._spectrums_references
-
