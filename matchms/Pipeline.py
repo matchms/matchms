@@ -207,7 +207,7 @@ class Pipeline:
         self.set_logging()
         self.write_to_logfile("--- Start running matchms pipeline. ---")
         self.write_to_logfile(f"Start time: {str(datetime.now())}")
-        self.check_pipeline()
+        self.check_score_computation()
         self.import_data(query_files,
                          reference_files)
 
@@ -289,8 +289,8 @@ class Pipeline:
                                                new_scores,
                                                similarity_measure.__class__.__name__)
 
-    def check_pipeline(self):
-        """Check if pipeline seems OK before running.
+    def check_score_computation(self):
+        """Check if the score computations seem OK before running.
         Aim is to avoid pipeline crashing after long computation.
         """
         # Check if all score compuation steps exist
