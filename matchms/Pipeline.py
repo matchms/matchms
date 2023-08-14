@@ -147,8 +147,6 @@ class Pipeline:
         progress_bar
             Default is True. Set to False if no progress bar should be displayed.
         """
-        self.query_files = None
-        self.reference_files = None
         self._spectrums_queries = None
         self._spectrums_references = None
         self.is_symmetric = False
@@ -198,7 +196,7 @@ class Pipeline:
         if self.logging_level is None:
             self.logging_level = "WARNING"
 
-    def run(self):
+    def run(self, query_files, reference_files = None):
         """Execute the defined Pipeline workflow.
 
         This method will execute all steps of the workflow.
@@ -210,8 +208,8 @@ class Pipeline:
         self.write_to_logfile("--- Start running matchms pipeline. ---")
         self.write_to_logfile(f"Start time: {str(datetime.now())}")
         self.check_pipeline()
-        self.import_data(self.query_files,
-                         self.reference_files)
+        self.import_data(query_files,
+                         reference_files)
 
         # Processing
         self.write_to_logfile("--- Processing spectra ---")
@@ -295,18 +293,6 @@ class Pipeline:
         """Check if pipeline seems OK before running.
         Aim is to avoid pipeline crashing after long computation.
         """
-        def check_files_exist(filenames):
-            assert filenames is not None
-            if isinstance(filenames, str):
-                filenames = [filenames]
-            for filename in filenames:
-                assert os.path.exists(filename), f"File {filename} not found."
-
-        # Check if all files exist
-        check_files_exist(self.query_files)
-        if self.reference_files is not None:
-            check_files_exist(self.reference_files)
-
         # Check if all score compuation steps exist
         for computation in self.score_computations:
             if not isinstance(computation, list):
@@ -351,6 +337,18 @@ class Pipeline:
             List of files, or single filename, containing the reference spectra.
             If set to None (default) then all query spectra will be compared to each other.
         """
+        def check_files_exist(filenames):
+            assert filenames is not None
+            if isinstance(filenames, str):
+                filenames = [filenames]
+            for filename in filenames:
+                assert os.path.exists(filename), f"File {filename} not found."
+
+        # Check if all files exist
+        check_files_exist(query_files)
+        if reference_files is not None:
+            check_files_exist(reference_files)
+
         if isinstance(query_files, str):
             query_files = [query_files]
         if isinstance(reference_files, str):

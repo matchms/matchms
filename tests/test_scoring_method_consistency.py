@@ -89,8 +89,7 @@ def test_consistency_scoring_and_pipeline(spectrums, similarity_measure):
                                score_computations=[similarity_measure]
                                )
     pipeline = Pipeline(workflow)
-    pipeline.query_files = json_file
-    pipeline.run()
+    pipeline.run(json_file)
 
     if computed_scores_matrix.dtype.names is None:
         assert np.allclose(pipeline.scores.to_array(), computed_scores_matrix)

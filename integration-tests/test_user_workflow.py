@@ -17,8 +17,7 @@ def test_user_workflow():
                                score_computations=[["cosinegreedy",  {"tolerance": 0.3}]])
     pipeline = Pipeline(workflow)
     spectrums_file = os.path.join(module_root, "tests", "testdata", "pesticides.mgf")
-    pipeline.query_files = spectrums_file
-    pipeline.run()
+    pipeline.run(spectrums_file)
 
     scores = pipeline.scores
 
