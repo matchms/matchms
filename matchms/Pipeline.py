@@ -53,6 +53,8 @@ def initialize_spectrum_processor(predefined_workflow, additional_filters):
 def load_in_workflow_from_yaml_file(yaml_file):
     with open(yaml_file, 'r', encoding="utf-8") as file:
         workflow = ordered_load(file, yaml.SafeLoader)
+    if workflow["reference_filters"] == "processing_queries":
+        workflow["reference_filters"] = workflow["query_filters"]
     return workflow
 
 
@@ -81,6 +83,23 @@ def ordered_dump(data, stream=None, dumper=yaml.SafeDumper, **kwds):
             data.items())
     OrderedDumper.add_representer(OrderedDict, _dict_representer)
     return yaml.dump(data, stream, OrderedDumper, **kwds)
+
+
+def check_score_computation(score_computations):
+    """Check if the score computations seem OK before running.
+    Aim is to avoid pipeline crashing after long computation.
+    """
+    # Check if all score compuation steps exist
+    for computation in score_computations:
+        if not isinstance(computation, list):
+            computation = [computation]
+        if isinstance(computation[0], str) and computation[0] in _masking_functions:
+            continue
+        if isinstance(computation[0], str) and computation[0] in _score_functions:
+            continue
+        if callable(computation[0]):
+            continue
+        raise ValueError(f"Unknown score computation: {computation[0]}.")
 
 
 class Pipeline:
@@ -154,7 +173,7 @@ class Pipeline:
 
         self.progress_bar = progress_bar
         self.workflow = workflow
-        self.complete_workflow()
+        self.check_workflow()
 
         self.write_to_logfile("--- Processing pipeline: ---")
         self._initialize_spectrum_processor_queries()
@@ -170,7 +189,6 @@ class Pipeline:
 
         self.write_to_logfile(str(self.processing_queries))
         if self.processing_queries.processing_steps != self.workflow["query_filters"]:
-            #todo save the yaml file in a new file
             logger.warning("The order of the filters has been changed compared to the Yaml file.")
 
     def _initialize_spectrum_processor_references(self):
@@ -182,19 +200,18 @@ class Pipeline:
         self.write_to_logfile(str(self.processing_references))
         self.write_to_logfile(str(self.processing_queries))
         if self.processing_queries.processing_steps != self.workflow["query_filters"]:
-            #todo save the yaml file in a new file
             logger.warning("The order of the filters has been changed compared to the Yaml file.")
 
-    def complete_workflow(self):
+    def check_workflow(self):
         """Define Pipeline workflow based on a yaml file (config_file).
         """
-        #todo add a check if all the fields are given that are needed.
-        if self.workflow["reference_filters"] == "processing_queries":
-            self.workflow["reference_filters"] = self.workflow["query_filters"]
+        assert isinstance(self.workflow, OrderedDict), \
+            f"Workflow is expectd to be a OrderedDict, instead it was of type {type(self.workflow)}"
+        expected_keys = {"query_filters", "reference_filters", "score_computations"}
+        assert set(self.workflow.keys()) == expected_keys
         if "logging" not in self.workflow:
-            self.workflow["logging"] = {}
-        if self.logging_level is None:
-            self.logging_level = "WARNING"
+            self.workflow["logging"] = {"logging_level": "WARNING"}
+        check_score_computation(score_computations=self.score_computations)
 
     def run(self, query_files, reference_files = None):
         """Execute the defined Pipeline workflow.
@@ -207,7 +224,6 @@ class Pipeline:
         self.set_logging()
         self.write_to_logfile("--- Start running matchms pipeline. ---")
         self.write_to_logfile(f"Start time: {str(datetime.now())}")
-        self.check_score_computation()
         self.import_spectra(query_files, reference_files)
 
         # Processing
@@ -287,22 +303,6 @@ class Pipeline:
                                                self.scores.scores.col,
                                                new_scores,
                                                similarity_measure.__class__.__name__)
-
-    def check_score_computation(self):
-        """Check if the score computations seem OK before running.
-        Aim is to avoid pipeline crashing after long computation.
-        """
-        # Check if all score compuation steps exist
-        for computation in self.score_computations:
-            if not isinstance(computation, list):
-                computation = [computation]
-            if isinstance(computation[0], str) and computation[0] in _masking_functions:
-                continue
-            if isinstance(computation[0], str) and computation[0] in _score_functions:
-                continue
-            if callable(computation[0]):
-                continue
-            raise ValueError(f"Unknown score computation: {computation[0]}.")
 
     def set_logging(self):
         """Set the matchms logger to write messages to file (if defined).
@@ -396,9 +396,13 @@ class Pipeline:
     def score_computations(self):
         return self.workflow.get("score_computations")
 
-    @score_computations.setter
-    def score_computations(self, computations_list):
-        self.workflow["score_computations"] = computations_list
+    @property
+    def query_filters(self):
+        return self.workflow.get("query_filters")
+
+    @property
+    def reference_filters(self):
+        return self.workflow.get("reference_filters")
 
     @property
     def spectrums_queries(self):

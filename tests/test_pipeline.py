@@ -20,11 +20,9 @@ def test_pipeline_initial_check_missing_file():
 
 
 def test_pipeline_initial_check_unknown_step():
-    workflow = create_workflow()
-    pipeline = Pipeline(workflow)
-    pipeline.score_computations = [["precursormzOOPSmatch",  {"tolerance": 120.0}]]
+    workflow = create_workflow(score_computations=[["precursormzOOPSmatch",  {"tolerance": 120.0}]])
     with pytest.raises(ValueError) as msg:
-        pipeline.run(spectrums_file_msp)
+        Pipeline(workflow)
     assert "Unknown score computation:" in str(msg.value)
 
 
