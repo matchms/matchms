@@ -174,7 +174,7 @@ class Pipeline:
         self.logging_level = logging_level
         self.logging_file = logging_file
         self.progress_bar = progress_bar
-        self.workflow = workflow
+        self.__workflow = workflow
         self.check_workflow()
 
         self.write_to_logfile("--- Processing pipeline: ---")
@@ -186,31 +186,31 @@ class Pipeline:
         """Initialize spectrum processing workflow for the query spectra."""
         self.processing_queries = initialize_spectrum_processor(
             None,
-            self.workflow["query_filters"]
+            self.__workflow["query_filters"]
             )
 
         self.write_to_logfile(str(self.processing_queries))
-        if self.processing_queries.processing_steps != self.workflow["query_filters"]:
+        if self.processing_queries.processing_steps != self.__workflow["query_filters"]:
             logger.warning("The order of the filters has been changed compared to the Yaml file.")
 
     def _initialize_spectrum_processor_references(self):
         """Initialize spectrum processing workflow for the reference spectra."""
         self.processing_references = initialize_spectrum_processor(
             None,
-            self.workflow["reference_filters"]
+            self.__workflow["reference_filters"]
             )
         self.write_to_logfile(str(self.processing_references))
         self.write_to_logfile(str(self.processing_queries))
-        if self.processing_queries.processing_steps != self.workflow["query_filters"]:
+        if self.processing_queries.processing_steps != self.__workflow["query_filters"]:
             logger.warning("The order of the filters has been changed compared to the Yaml file.")
 
     def check_workflow(self):
         """Define Pipeline workflow based on a yaml file (config_file).
         """
-        assert isinstance(self.workflow, OrderedDict), \
-            f"Workflow is expectd to be a OrderedDict, instead it was of type {type(self.workflow)}"
+        assert isinstance(self.__workflow, OrderedDict), \
+            f"Workflow is expectd to be a OrderedDict, instead it was of type {type(self.__workflow)}"
         expected_keys = {"query_filters", "reference_filters", "score_computations"}
-        assert set(self.workflow.keys()) == expected_keys
+        assert set(self.__workflow.keys()) == expected_keys
         check_score_computation(score_computations=self.score_computations)
 
     def run(self, query_files, reference_files = None):
@@ -377,15 +377,15 @@ class Pipeline:
     # Getter & Setters
     @property
     def score_computations(self):
-        return self.workflow.get("score_computations")
+        return self.__workflow.get("score_computations")
 
     @property
     def query_filters(self):
-        return self.workflow.get("query_filters")
+        return self.__workflow.get("query_filters")
 
     @property
     def reference_filters(self):
-        return self.workflow.get("reference_filters")
+        return self.__workflow.get("reference_filters")
 
     @property
     def spectrums_queries(self):
