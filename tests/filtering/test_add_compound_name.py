@@ -5,7 +5,7 @@ from matchms.logging_functions import reset_matchms_logger, set_matchms_logger_l
 from ..builder_Spectrum import SpectrumBuilder
 
 
-set_matchms_logger_level("info")
+set_matchms_logger_level("INFO")
 
 
 @pytest.mark.parametrize("metadata, expected, check_log", [
