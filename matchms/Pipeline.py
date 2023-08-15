@@ -200,7 +200,6 @@ class Pipeline:
             self.__workflow["reference_filters"]
             )
         self.write_to_logfile(str(self.processing_references))
-        self.write_to_logfile(str(self.processing_queries))
         if self.processing_queries.processing_steps != self.__workflow["query_filters"]:
             logger.warning("The order of the filters has been changed compared to the Yaml file.")
 
@@ -399,7 +398,7 @@ class Pipeline:
 
     @reference_filters.setter
     def reference_filters(self, filters):
-        self.__workflow["refernece_filters"] = filters
+        self.__workflow["reference_filters"] = filters
         self._initialize_spectrum_processor_references()
 
     @property
