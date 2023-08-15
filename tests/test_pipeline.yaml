@@ -1,9 +1,6 @@
 # Matchms pipeline config file
 # Change and adapt fields where necessary
 # ====================
-importing:
-  queries: ./tests/testdata/massbank_five_spectra.msp
-  references:
 query_filters:
 - - make_charge_int
 - - interpret_pepmass

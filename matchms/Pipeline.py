@@ -23,13 +23,9 @@ def create_workflow(yaml_file_name=None,
                     additional_filters_queries=(),
                     additional_filters_references=(),
                     score_computations=(),
-                    query_file_name=None,
-                    reference_file_name=None,
                     ):
     # pylint: disable=too-many-arguments
     workflow = OrderedDict()
-    workflow["importing"] = {"queries": query_file_name,
-                             "references": reference_file_name}
     queries_processor = initialize_spectrum_processor(predefined_processing_queries, additional_filters_queries)
     workflow["query_filters"] = queries_processor.processing_steps
     queries_processor = initialize_spectrum_processor(predefined_processing_reference, additional_filters_references)
@@ -150,17 +146,19 @@ class Pipeline:
         progress_bar:
             Default is True. Set to False if no progress bar should be displayed.
         """
-        self.spectrums_queries = []
-        self.spectrums_references = []
+        self._spectrums_queries = None
+        self._spectrums_references = None
         self.is_symmetric = False
+        self.scores = None
+
+        self.progress_bar = progress_bar
         self.workflow = workflow
         self.complete_workflow()
+
         self.write_to_logfile("--- Processing pipeline: ---")
         self._initialize_spectrum_processor_queries()
         if self.is_symmetric is False:
             self._initialize_spectrum_processor_references()
-        self.scores = None
-        self.progress_bar = progress_bar
 
     def _initialize_spectrum_processor_queries(self):
         """Initialize spectrum processing workflow for the query spectra."""
@@ -197,7 +195,7 @@ class Pipeline:
         if self.logging_level is None:
             self.logging_level = "WARNING"
 
-    def run(self):
+    def run(self, query_files, reference_files = None):
         """Execute the defined Pipeline workflow.
 
         This method will execute all steps of the workflow.
@@ -209,29 +207,28 @@ class Pipeline:
         self.write_to_logfile("--- Start running matchms pipeline. ---")
         self.write_to_logfile(f"Start time: {str(datetime.now())}")
         self.check_pipeline()
-        self.write_to_logfile("--- Importing data ---")
-        self.import_data(self.query_files,
-                         self.reference_files)
+        self.import_data(query_files,
+                         reference_files)
 
         # Processing
         self.write_to_logfile("--- Processing spectra ---")
         self.write_to_logfile(f"Time: {str(datetime.now())}")
         # Process query spectra
         spectrums, report = self.processing_queries.process_spectrums(
-            self.spectrums_queries,
+            self._spectrums_queries,
             create_report=True,
             progress_bar=self.progress_bar)
-        self.spectrums_queries = spectrums
+        self._spectrums_queries = spectrums
         self.write_to_logfile(str(report))
         # Process reference spectra (if necessary)
         if self.is_symmetric is False:
-            self.spectrums_references, report = self.processing_references.process_spectrums(
-                self.spectrums_references,
+            self._spectrums_references, report = self.processing_references.process_spectrums(
+                self._spectrums_references,
                 create_report=True,
                 progress_bar=self.progress_bar)
             self.write_to_logfile(str(report))
         else:
-            self.spectrums_references = self.spectrums_queries
+            self._spectrums_references = self._spectrums_queries
 
         # Score computation and masking
         self.write_to_logfile("--- Computing scores ---")
@@ -275,14 +272,14 @@ class Pipeline:
         similarity_measure = get_similarity_measure(computation)
         # If this is the first score computation:
         if i == 0:
-            self.scores = calculate_scores(self.spectrums_references,
-                                           self.spectrums_queries,
+            self.scores = calculate_scores(self._spectrums_references,
+                                           self._spectrums_queries,
                                            similarity_measure,
                                            array_type="sparse",
                                            is_symmetric=self.is_symmetric)
         else:
-            new_scores = similarity_measure.sparse_array(references=self.spectrums_references,
-                                                         queries=self.spectrums_queries,
+            new_scores = similarity_measure.sparse_array(references=self._spectrums_references,
+                                                         queries=self._spectrums_queries,
                                                          idx_row=self.scores.scores.row,
                                                          idx_col=self.scores.scores.col,
                                                          is_symmetric=self.is_symmetric)
@@ -295,17 +292,6 @@ class Pipeline:
         """Check if pipeline seems OK before running.
         Aim is to avoid pipeline crashing after long computation.
         """
-        def check_files_exist(filenames):
-            if isinstance(filenames, str):
-                filenames = [filenames]
-            for filename in filenames:
-                assert os.path.exists(filename), f"File {filename} not found."
-
-        # Check if all files exist
-        check_files_exist(self.query_files)
-        if self.reference_files is not None:
-            check_files_exist(self.reference_files)
-
         # Check if all score compuation steps exist
         for computation in self.score_computations:
             if not isinstance(computation, list):
@@ -329,8 +315,8 @@ class Pipeline:
                                 remove_stream_handlers=True)
         else:
             set_matchms_logger_level(self.logging_level)
-            logger.warning("No logging file was defined." \
-                "Logging messages will not be written to file.")
+            logger.warning("No logging file was defined."
+                           "Logging messages will not be written to file.")
 
     def write_to_logfile(self, line):
         """Write message to log file.
@@ -350,41 +336,46 @@ class Pipeline:
             List of files, or single filename, containing the reference spectra.
             If set to None (default) then all query spectra will be compared to each other.
         """
+        def check_files_exist(filenames):
+            assert filenames is not None
+            if isinstance(filenames, str):
+                filenames = [filenames]
+            for filename in filenames:
+                assert os.path.exists(filename), f"File {filename} not found."
+
+        # Check if all files exist
+        check_files_exist(query_files)
+        if reference_files is not None:
+            check_files_exist(reference_files)
+
         if isinstance(query_files, str):
             query_files = [query_files]
         if isinstance(reference_files, str):
             reference_files = [reference_files]
+        self.write_to_logfile("--- Importing data ---")
+
+        # import query spectra
         spectrums_queries = []
         for query_file in query_files:
             spectrums_queries += list(load_spectra(query_file))
-        self.spectrums_queries += spectrums_queries
+        self._spectrums_queries = spectrums_queries
+        self.write_to_logfile(f"Loaded query spectra from {query_files}")
+        self.write_to_logfile(f"Loaded {len(self._spectrums_queries)} query spectra")
+
+        # import reference spectra
         if reference_files is None:
             self.is_symmetric = True
-            self.spectrums_references = self.spectrums_queries
+            self._spectrums_references = self._spectrums_queries
+            self.write_to_logfile("Reference spectra are equal to the query spectra (is_symmetric = True)")
         else:
             spectrums_references = []
             for reference_file in reference_files:
                 spectrums_references += list(load_spectra(reference_file))
-            self.spectrums_references += spectrums_references
-
+            self._spectrums_references = spectrums_references
+            self.write_to_logfile(f"Loaded reference spectra from {reference_files}")
+            self.write_to_logfile(f"Loaded {len(self._spectrums_references)} reference spectra")
 
     # Getter & Setters
-    @property
-    def query_files(self):
-        return self.workflow["importing"].get("queries")
-
-    @query_files.setter
-    def query_files(self, filter_list):
-        self.workflow["importing"]["queries"] = filter_list
-
-    @property
-    def reference_files(self):
-        return self.workflow["importing"].get("references")
-
-    @reference_files.setter
-    def reference_files(self, files):
-        self.workflow["importing"]["references"] = files
-
     @property
     def logging_file(self):
         return self.workflow["logging"].get("logging_file")
@@ -408,3 +399,11 @@ class Pipeline:
     @score_computations.setter
     def score_computations(self, computations_list):
         self.workflow["score_computations"] = computations_list
+
+    @property
+    def spectrums_queries(self):
+        return self._spectrums_queries
+
+    @property
+    def spectrums_references(self):
+        return self._spectrums_references
