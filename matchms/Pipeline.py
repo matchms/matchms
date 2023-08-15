@@ -50,7 +50,7 @@ def initialize_spectrum_processor(predefined_workflow, additional_filters):
     return processor
 
 
-def load_in_workflow_from_yaml_file(yaml_file):
+def load_workflow_from_yaml_file(yaml_file):
     with open(yaml_file, 'r', encoding="utf-8") as file:
         workflow = ordered_load(file, yaml.SafeLoader)
     if workflow["reference_filters"] == "processing_queries":

@@ -3,7 +3,7 @@ import numpy as np
 import pytest
 from matchms import Pipeline
 from matchms.filtering import select_by_mz
-from matchms.Pipeline import create_workflow, load_in_workflow_from_yaml_file
+from matchms.Pipeline import create_workflow, load_workflow_from_yaml_file
 from matchms.similarity import ModifiedCosine
 
 
@@ -130,7 +130,7 @@ def test_pipeline_non_symmetric():
 def test_pipeline_from_yaml():
     pytest.importorskip("rdkit")
     config_file = os.path.join(module_root, "tests", "test_pipeline.yaml")
-    workflow = load_in_workflow_from_yaml_file(config_file)
+    workflow = load_workflow_from_yaml_file(config_file)
     pipeline = Pipeline(workflow)
     pipeline.run(spectrums_file_msp)
     assert len(pipeline.spectrums_queries) == 5
@@ -157,7 +157,7 @@ def test_pipeline_to_and_from_yaml(tmp_path):
     scores_run1 = pipeline.scores
 
     # Load again
-    workflow = load_in_workflow_from_yaml_file(config_file)
+    workflow = load_workflow_from_yaml_file(config_file)
     pipeline = Pipeline(workflow)
     pipeline.run(spectrums_file_msp)
     assert pipeline.scores.scores == scores_run1.scores
