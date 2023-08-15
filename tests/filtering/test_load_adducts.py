@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from matchms.filtering.metadata_processing.clean_adduct import (
+from matchms.filtering.filter_utils.load_known_adducts import (
     load_known_adduct_conversions, load_known_adducts)
 
 

@@ -1,12 +1,48 @@
 """
-Functions for processing mass spectra
-#####################################
+Processing (or: filtering) mass spectra
+#######################################
 
 Provided functions will usually only perform a single action to a spectrum.
 This can be changes or corrections of metadata, or peak filtering.
 More complicated processing pipelines can be build by stacking several of
 the provided filters.
 
+Because there are numerous filter functions in matchms and because they often
+need to be applied in a specific order, the most feasible workflow for users
+is to use the `SpectrumProcessor` class to define a spetrum processing pipeline.
+Here is an example:
+
+.. testcode::
+
+    import numpy as np
+    from matchms import Spectrum
+    from matchms import SpectrumProcessor
+
+    spectrum = Spectrum(mz=np.array([100, 120, 150, 200.]),
+                        intensities=np.array([200.0, 300.0, 50.0, 1.0]),
+                        metadata={'id': 'spectrum1'})
+
+    # Users can pick a predefined pipeline ("basic", "default", "fully_annotated")
+    # Or set to None if no predefined settings are desired.
+    processing = SpectrumProcessor("basic")
+
+    # Additional filters can be added as desired
+    processing.add_matchms_filter("normalize_intensities")
+
+    # Run the processing pipeline:
+    spectrum_filtered = processing.process_spectrum(spectrum)
+    max_intensity = spectrum_filtered.peaks.intensities.max()
+    print(f"Maximum intensity is {max_intensity:.2f}")
+
+Should output
+
+.. testoutput::
+
+    Maximum intensity is 1.00
+
+It is also possible to run each filter function individually. This for instance
+makes sense if users want to develop a highly customized spectrum processing
+routine.
 Example of how to use a single filter function:
 
 .. testcode::
@@ -65,7 +101,6 @@ from .metadata_processing.harmonize_undefined_smiles import \
     harmonize_undefined_smiles
 from .metadata_processing.interpret_pepmass import interpret_pepmass
 from .metadata_processing.make_charge_int import make_charge_int
-from .metadata_processing.make_charge_scalar import make_charge_scalar
 from .metadata_processing.repair_adduct_based_on_smiles import \
     repair_adduct_based_on_smiles
 from .metadata_processing.repair_inchi_inchikey_smiles import \
@@ -130,7 +165,6 @@ __all__ = [
     "harmonize_undefined_smiles",
     "interpret_pepmass",
     "make_charge_int",
-    "make_charge_scalar",
     "normalize_intensities",
     "reduce_to_number_of_peaks",
     "remove_peaks_around_precursor_mz",

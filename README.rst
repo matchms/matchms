@@ -158,8 +158,8 @@ Below is a small example of using matchms to calculate the Cosine score between 
     
     # Read spectrums from a MGF formatted file, for other formats see https://matchms.readthedocs.io/en/latest/api/matchms.importing.html 
     pipeline.query_files = "tests/testdata/pesticides.mgf"
-    pipeline.filter_steps_queries = [
-        ["default_filters"],
+    pipeline.prefedined_processing_queries = "basic"
+    pipeline.additional_processing_queries = [
         ["add_parent_mass"],
         ["normalize_intensities"],
         ["select_by_intensity", {"intensity_from": 0.001, "intensity_to": 1.0}],
@@ -175,7 +175,7 @@ Below is a small example of using matchms to calculate the Cosine score between 
     pipeline.run()
 
 
-Alternatively, in particular if you need more room to add custom functions and steps, the individual
+Alternatively, in particular, if you need more room to add custom functions and steps, the individual
 steps can run without using the matchms ``Pipeline``:
 
 .. code-block:: python
@@ -210,7 +210,7 @@ steps can run without using the matchms ``Pipeline``:
 
     # Print the calculated scores for each spectrum pair
     for (reference, score) in best_matches[:10]
-        # Ignore scores between same spectrum
+        # Ignore scores between same spectra
         if reference is not query:
             print(f"Reference scan id: {reference.metadata['scans']}")
             print(f"Query scan id: {query.metadata['scans']}")
@@ -221,7 +221,7 @@ steps can run without using the matchms ``Pipeline``:
 Different spectrum similarity scores
 ====================================
 
-Matchms comes with numerous different scoring methods in `matchms.similarity` and can furthe seemlessly work with `Spec2Vec` or `MS2DeepScore`.
+Matchms comes with numerous different scoring methods in `matchms.similarity` and can further seamlessly work with `Spec2Vec` or `MS2DeepScore`.
 
 Code example: 
 
@@ -333,7 +333,7 @@ have a look at the `contribution guidelines <CONTRIBUTING.md>`_.
 License
 *******
 
-Copyright (c) 2021, Netherlands eScience Center
+Copyright (c) 2023, Düsseldorf University of Applied Sciences & Netherlands eScience Center
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

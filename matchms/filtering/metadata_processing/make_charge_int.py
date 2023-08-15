@@ -22,7 +22,7 @@ def make_charge_int(spectrum_in: SpectrumType) -> SpectrumType:
 
 def _convert_charge_to_int(charge):
     """Convert charge to integer if possible, else return None."""
-    def try_conversion(charge):
+    def _try_conversion(charge):
         try:
             return int(charge)
         except ValueError:
@@ -38,11 +38,11 @@ def _convert_charge_to_int(charge):
 
     # Avoid pyteomics ChargeList
     if isinstance(charge, list):
-        return try_conversion(charge[0])
+        return _try_conversion(charge[0])
 
     # convert string charges to int
     if isinstance(charge, str):
         charge = charge.strip().replace("+", "")
         if len(charge) > 1 and charge[-1] == "-":
             charge = "-" + charge.replace("-", "")
-        return try_conversion(charge)
+        return _try_conversion(charge)

@@ -43,7 +43,7 @@ filtering_queries:
     accept_parent_mass_is_mol_wt: True
 - - require_parent_mass_match_smiles
   - mass_tolerance: 0.2
-filtering_refs:
+filtering_references:
 - default_filters
 score_computations: []
 logging:
