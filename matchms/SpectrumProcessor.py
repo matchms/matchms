@@ -131,8 +131,8 @@ class SpectrumProcessor:
         return spectrum_out
 
     def process_spectrums(self, spectrums: list,
-                          create_report=False,
-                          progress_bar=True,
+                          create_report: bool = False,
+                          progress_bar: bool = True,
                           ):
         """
         Process a list of spectrums with all filters in the processing pipeline.
