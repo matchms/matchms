@@ -224,7 +224,7 @@ class Pipeline:
         self.set_logging()
         self.write_to_logfile("--- Start running matchms pipeline. ---")
         self.write_to_logfile(f"Start time: {str(datetime.now())}")
-        self.import_spectra(query_files, reference_files)
+        self.import_spectrums(query_files, reference_files)
 
         # Processing
         self.write_to_logfile("--- Processing spectra ---")
@@ -324,7 +324,7 @@ class Pipeline:
             with open(self.logging_file, "a", encoding="utf-8") as f:
                 f.write(line + '\n')
 
-    def import_spectra(self, query_files, reference_files=None):
+    def import_spectrums(self, query_files, reference_files=None):
         """Import spectra from file(s).
 
         Parameters
