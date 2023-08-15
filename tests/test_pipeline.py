@@ -191,3 +191,27 @@ def test_FingerprintSimilarity_pipeline():
     assert len(pipeline.spectrums_queries[0].get("fingerprint")) == 2048
     assert pipeline.scores.scores.shape == (5, 5, 2)
     assert pipeline.scores.score_names == ('MetadataMatch', 'FingerprintSimilarity')
+
+
+def test_pipeline_changing_workflow():
+    """Test if changing workflow after creating Pipeline results in the expected change of the pipeline"""
+    workflow = create_workflow(predefined_processing_queries=None,
+                               additional_filters_queries=["make_charge_int"],
+                               predefined_processing_reference=None,
+                               additional_filters_references=["make_charge_int"],
+                               score_computations=['precursormzmatch'],
+                               )
+    pipeline = Pipeline(workflow)
+    pipeline.query_filters = ["add_fingerprint"]
+    pipeline.reference_filters = ["add_fingerprint"]
+    pipeline.score_computations = [["modifiedcosine", {"tolerance": 10.0}]]
+    pipeline.run(spectrums_file_msp, spectrums_file_msp)
+    assert len(pipeline.spectrums_queries[0].get("fingerprint")) == 2048, \
+        "The query filters were not modified correctly"
+    assert len(pipeline.spectrums_references[0].get("fingerprint")) == 2048, \
+        "The reference filters were not modified correctly"
+    assert pipeline.scores.score_names == ('ModifiedCosine_score', 'ModifiedCosine_matches')
+    all_scores = pipeline.scores.to_array()
+    expected = np.array([[1., 0.30384404],
+                         [0.30384404, 1.]])
+    assert np.allclose(all_scores["ModifiedCosine_score"][3:, 3:], expected)
