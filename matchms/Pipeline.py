@@ -23,7 +23,29 @@ def create_workflow(yaml_file_name=None,
                     additional_filters_queries=(),
                     additional_filters_references=(),
                     score_computations=(),
-                    ):
+                    ) -> OrderedDict:
+    """Creates a workflow that specifies the filters and scores needed to be run by Pipeline
+
+    Example code can be found in the docstring of Pipeline.
+
+    :param yaml_file_name:
+        A yaml file containing the workflow settings will be saved if a file name is specified.
+        If None no yaml file will be saved.
+    :param predefined_processing_queries:
+        Default lists of filters that will be used for processing the query spectra,
+        choose from: "minimal", "basic", "default", "fully_annotated".
+        An up to date list of the filters can be found in SpectrumProcessor.py
+    :param additional_filters_queries:
+        Additional filters that should be applied to the query spectra.
+    :param predefined_processing_reference:
+        Default lists of filters that will be used for processing the reference spectra,
+        choose from: "minimal", "basic", "default", "fully_annotated".
+        An up to date list of the filters can be found in SpectrumProcessor.py
+    :param additional_filters_references:
+        Additional filters that should be applied to the reference spectra
+    :param score_computations:
+        Score computations that should be performed.
+    """
     # pylint: disable=too-many-arguments
     workflow = OrderedDict()
     queries_processor = initialize_spectrum_processor(predefined_processing_queries, additional_filters_queries)
@@ -106,55 +128,64 @@ class Pipeline:
     """Central pipeline class.
 
     The matchms Pipeline class is meant to make running extensive analysis pipelines
-    fast and easy. I can be used in two different ways. First, a pipeline can be defined
+    fast and easy. It can be used in two different ways. First, a pipeline can be defined
     using a config file (a yaml file, best to start from the template provided to define
     your own pipline).
 
-    Once a config file is defined, execution only needs the following code:
+    Once a config file is defined, the pipeline can be executed with the following code:
 
     .. code-block:: python
+        from matchms.Pipeline import Pipeline, load_workflow_from_yaml_file
 
-        from matchms import Pipeline
+        workflow = load_workflow_from_yaml_file("my_config_file.yaml")
+        pipeline = Pipeline(workflow)
 
-        pipeline = Pipeline("my_config_file.yaml")
-        pipeline.run()
+        # Optional steps
+        pipeline.logging_file = "my_pipeline.log"
+        pipeline.logging_level = "ERROR"
+
+        pipeline.run("my_spectrums.mgf")
 
     The second way to define a pipeline is via a Python script. The following code is an
     example of how this works:
 
     .. code-block:: python
+        from matchms.Pipeline import Pipeline, create_workflow
 
-        pipeline = Pipeline()
-        pipeline.query_files = "spectrums_file.msp"
-        pipeline.predefined_processing_queries = "basic"
-        pipeline.additional_processing_queries = [
-            ["add_parent_mass"],
-            ["normalize_intensities"],
-            ["select_by_relative_intensity", {"intensity_from": 0.0, "intensity_to": 1.0}],
-            ["select_by_mz", {"mz_from": 0, "mz_to": 1000}],
-            ["require_minimum_number_of_peaks", {"n_required": 5}]
-        ]
-        pipeline.score_computations = [["precursormzmatch",  {"tolerance": 120.0}],
-                                       ["cosinegreedy", {"tolerance": 1.0}]
-                                       ["filter_by_range", {"name": "CosineGreedy_score", "low": 0.3}],
-                                       ["modifiedcosine", {"tolerance": 1.0}],
-                                       ["filter_by_range", {"name": "ModifiedCosine_score", "low": 0.3}]]
+        workflow = create_workflow(
+            yaml_file_name="my_config_file.yaml", # The workflow will be stored in a yaml file.
+            predefined_processing_queries="basic",
+            additional_filters_queries=[
+               ["add_parent_mass"],
+               ["normalize_intensities"],
+               ["select_by_relative_intensity", {"intensity_from": 0.0, "intensity_to": 1.0}],
+               ["select_by_mz", {"mz_from": 0, "mz_to": 1000}],
+               ["require_minimum_number_of_peaks", {"n_required": 5}]],
+            predefined_processing_reference="basic",
+            additional_filters_references=["add_fingerprint"],
+            score_computations=[["precursormzmatch",  {"tolerance": 120.0}],
+                               ["cosinegreedy", {"tolerance": 1.0}]
+                               ["filter_by_range", {"name": "CosineGreedy_score", "low": 0.3}],
+                               ["modifiedcosine", {"tolerance": 1.0}],
+                               ["filter_by_range", {"name": "ModifiedCosine_score", "low": 0.3}]],
+            )
 
+        pipeline = Pipeline(workflow)
         pipeline.logging_file = "my_pipeline.log"
-        pipeline.run()
+        pipeline.logging_level = "WARNING"
+        pipeline.run("my_query_spectra.mgf", "my_reference_spectra.mgf")
+
 
     To combine this with custom made scores or available matchms-compatible scores
     such as `Spec2Vec` or `MS2DeepScore`, it is also possible to pass objects instead of
-    names to the pipeline:
+    names to create_workflow
 
     .. code-block:: python
 
         from spec2vec import Spec2Vec
-
-        pipeline.score_computations = [["precursormzmatch",  {"tolerance": 120.0}],
-                                       [Spec2Vec, {"model": "my_spec2vec_model.model"}],
-                                       ["filter_by_range", {"name": "Spec2Vec", "low": 0.3}]]
-
+        workflow = create_workflow(score_computations = [["precursormzmatch",  {"tolerance": 120.0}],
+                                               [Spec2Vec, {"model": "my_spec2vec_model.model"}],
+                                       ["filter_by_range", {"name": "Spec2Vec", "low": 0.3}]])
     """
     def __init__(self, workflow, progress_bar=True, logging_level="WARNING", logging_file=None):
         """
