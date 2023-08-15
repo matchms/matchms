@@ -379,13 +379,28 @@ class Pipeline:
     def score_computations(self):
         return self.__workflow.get("score_computations")
 
+    @score_computations.setter
+    def score_computations(self, computations):
+        self.__workflow["score_computations"] = computations
+        check_score_computation(score_computations=self.score_computations)
+
     @property
     def query_filters(self):
         return self.__workflow.get("query_filters")
 
+    @query_filters.setter
+    def query_filters(self, filters):
+        self.__workflow["query_filters"] = filters
+        self._initialize_spectrum_processor_queries()
+
     @property
     def reference_filters(self):
         return self.__workflow.get("reference_filters")
+
+    @reference_filters.setter
+    def reference_filters(self, filters):
+        self.__workflow["refernece_filters"] = filters
+        self._initialize_spectrum_processor_references()
 
     @property
     def spectrums_queries(self):
