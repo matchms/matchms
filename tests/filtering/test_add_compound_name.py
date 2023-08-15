@@ -1,7 +1,8 @@
 import pytest
 from testfixtures import LogCapture
 from matchms.filtering import add_compound_name
-from matchms.logging_functions import reset_matchms_logger, set_matchms_logger_level
+from matchms.logging_functions import (reset_matchms_logger,
+                                       set_matchms_logger_level)
 from ..builder_Spectrum import SpectrumBuilder
 
 
