@@ -37,7 +37,8 @@ def _interpret_pepmass_metadata(metadata):
     charge = _convert_charge_to_int(charge)
 
     if mz is not None:
-        if _substantial_difference(metadata.get("precursor_mz"), mz, atol=0.001):
+        if metadata.get("precursor_mz") is not None\
+            and _substantial_difference(metadata.get("precursor_mz"), mz, atol=0.001):
             logger.warning("Overwriting existing precursor_mz %s with new one: %s",
                            metadata.get("precursor_mz"), str(mz))
         metadata["precursor_mz"] = mz
