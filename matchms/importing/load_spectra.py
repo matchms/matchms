@@ -1,12 +1,14 @@
 import os
 import pickle
-from typing import Generator, Optional
+from typing import Generator, Optional, Union, List
 from matchms.importing import (load_from_json, load_from_mgf, load_from_msp,
                                load_from_mzml, load_from_mzxml, load_from_usi)
 from matchms.typing import SpectrumType
+from matchms import Spectrum
 
 
-def load_spectra(file: str, metadata_harmonization: bool = True, ftype: Optional[str] = None) -> Generator[SpectrumType, None, None]:
+def load_spectra(file: str, metadata_harmonization: bool = True,
+                 ftype: Optional[str] = None) -> Union[List[SpectrumType], Generator[SpectrumType, None, None]]:
     """Loads spectra from your spectrum file into memory as matchms Spectrum object
 
     The following file extensions can be loaded in with this function:
@@ -42,11 +44,11 @@ def load_spectra(file: str, metadata_harmonization: bool = True, ftype: Optional
         return load_from_usi(file, metadata_harmonization=metadata_harmonization)
     if ftype == "pickle":
         return load_from_pickle(file, metadata_harmonization)
-        
+
     raise TypeError(f"File extension of file: {file} is not recognized")
 
 
-def load_from_pickle(filename: str, metadata_harmonization: bool) -> SpectrumType:
+def load_from_pickle(filename: str, metadata_harmonization: bool) -> List[SpectrumType]:
     """Load spectra stored in pickle
 
     Args:
@@ -62,5 +64,5 @@ def load_from_pickle(filename: str, metadata_harmonization: bool) -> SpectrumTyp
         raise TypeError("Expected list of spectra")
 
     if metadata_harmonization:
-        loaded_object = [SpectrumType(x.peaks.mz, x.peaks.intensisites, x.metadata, metadata_harmonization) for x in loaded_object] 
+        loaded_object = [Spectrum(x.peaks.mz, x.peaks.intensisites, x.metadata, metadata_harmonization) for x in loaded_object]
     return loaded_object
