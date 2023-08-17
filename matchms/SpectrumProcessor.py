@@ -1,6 +1,6 @@
 from collections import defaultdict
 from functools import partial
-from typing import Optional
+from typing import Optional, Union, Tuple
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
@@ -22,7 +22,7 @@ class SpectrumProcessor:
         'fully_annotated', or None. Default is 'default'.
     """
 
-    def __init__(self, predefined_pipeline='default'):
+    def __init__(self, predefined_pipeline: Optional[str] = 'default'):
         self.filters = []
         self.filter_order = [x.__name__ for x in ALL_FILTERS]
         if predefined_pipeline is not None:
@@ -33,7 +33,7 @@ class SpectrumProcessor:
             for fname in PREDEFINED_PIPELINES[predefined_pipeline]:
                 self.add_matchms_filter(fname)
 
-    def add_filter(self, filter_function):
+    def add_filter(self, filter_function: Union[Tuple[str], str]):
         """Add a filter to the processing pipeline. Takes both matchms filter names (and parameters)
         as well as custom-made functions.
         """
@@ -44,7 +44,7 @@ class SpectrumProcessor:
         else:
             self.add_custom_filter(filter_function[0], filter_function[1])
 
-    def add_matchms_filter(self, filter_spec):
+    def add_matchms_filter(self, filter_spec: Union[Tuple[str], str]):
         """
         Add a filter to the processing pipeline.
 

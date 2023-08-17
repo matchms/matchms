@@ -1,5 +1,6 @@
 import logging
 import os
+from typing import Optional, Tuple
 from collections import OrderedDict
 from datetime import datetime
 import yaml
@@ -17,12 +18,12 @@ _score_functions = {key.lower(): f for key, f in mssimilarity.__dict__.items() i
 logger = logging.getLogger("matchms")
 
 
-def create_workflow(yaml_file_name=None,
-                    predefined_processing_queries="default",
-                    predefined_processing_reference="default",
-                    additional_filters_queries=(),
-                    additional_filters_references=(),
-                    score_computations=(),
+def create_workflow(yaml_file_name: Optional[str] = None,
+                    predefined_processing_queries: Optional[str] = "default",
+                    predefined_processing_reference: Optional[str] = "default",
+                    additional_filters_queries: Tuple[str] = (),
+                    additional_filters_references: Tuple[str] = (),
+                    score_computations: Tuple[str] = (),
                     ) -> OrderedDict:
     """Creates a workflow that specifies the filters and scores needed to be run by Pipeline
 
@@ -62,9 +63,9 @@ def create_workflow(yaml_file_name=None,
     return workflow
 
 
-def initialize_spectrum_processor(predefined_workflow, additional_filters):
+def initialize_spectrum_processor(predefined_pipeline: Optional[str], additional_filters: Tuple[str]):
     """Initialize spectrum processing workflow."""
-    processor = SpectrumProcessor(predefined_workflow)
+    processor = SpectrumProcessor(predefined_pipeline)
     for step in additional_filters:
         if isinstance(step, (tuple, list)) and len(step) == 1:
             step = step[0]
@@ -72,7 +73,7 @@ def initialize_spectrum_processor(predefined_workflow, additional_filters):
     return processor
 
 
-def load_workflow_from_yaml_file(yaml_file):
+def load_workflow_from_yaml_file(yaml_file: str):
     with open(yaml_file, 'r', encoding="utf-8") as file:
         workflow = ordered_load(file, yaml.SafeLoader)
     if workflow["reference_filters"] == "processing_queries":
@@ -95,7 +96,7 @@ def ordered_load(stream, loader=yaml.SafeLoader, object_pairs_hook=OrderedDict):
     return yaml.load(stream, OrderedLoader)
 
 
-def ordered_dump(data, stream=None, dumper=yaml.SafeDumper, **kwds):
+def ordered_dump(data: OrderedDict, stream=None, dumper=yaml.SafeDumper, **kwds):
     class OrderedDumper(dumper):
         pass
 
@@ -107,7 +108,7 @@ def ordered_dump(data, stream=None, dumper=yaml.SafeDumper, **kwds):
     return yaml.dump(data, stream, OrderedDumper, **kwds)
 
 
-def check_score_computation(score_computations):
+def check_score_computation(score_computations: Tuple[str]):
     """Check if the score computations seem OK before running.
     Aim is to avoid pipeline crashing after long computation.
     """
@@ -187,7 +188,10 @@ class Pipeline:
                                                [Spec2Vec, {"model": "my_spec2vec_model.model"}],
                                        ["filter_by_range", {"name": "Spec2Vec", "low": 0.3}]])
     """
-    def __init__(self, workflow: OrderedDict, progress_bar=True, logging_level="WARNING", logging_file=None):
+    def __init__(self, workflow: OrderedDict,
+                 progress_bar=True,
+                 logging_level: str = "WARNING",
+                 logging_file: Optional[str] = None):
         """
         Parameters
         ----------
