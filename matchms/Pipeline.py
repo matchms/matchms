@@ -63,7 +63,8 @@ def create_workflow(yaml_file_name: Optional[str] = None,
     return workflow
 
 
-def initialize_spectrum_processor(predefined_pipeline: Optional[str], additional_filters: Tuple[str]):
+def initialize_spectrum_processor(predefined_pipeline: Optional[str],
+                                  additional_filters: Tuple[str]) -> SpectrumProcessor:
     """Initialize spectrum processing workflow."""
     processor = SpectrumProcessor(predefined_pipeline)
     for step in additional_filters:
@@ -73,7 +74,7 @@ def initialize_spectrum_processor(predefined_pipeline: Optional[str], additional
     return processor
 
 
-def load_workflow_from_yaml_file(yaml_file: str):
+def load_workflow_from_yaml_file(yaml_file: str) -> OrderedDict:
     with open(yaml_file, 'r', encoding="utf-8") as file:
         workflow = ordered_load(file, yaml.SafeLoader)
     if workflow["reference_filters"] == "processing_queries":
@@ -81,7 +82,7 @@ def load_workflow_from_yaml_file(yaml_file: str):
     return workflow
 
 
-def ordered_load(stream, loader=yaml.SafeLoader, object_pairs_hook=OrderedDict):
+def ordered_load(stream, loader=yaml.SafeLoader, object_pairs_hook=OrderedDict) -> OrderedDict:
     """ Code from https://stackoverflow.com/questions/5121931/in-python-how-can-you-load-yaml-mappings-as-ordereddicts
     """
     class OrderedLoader(loader):
