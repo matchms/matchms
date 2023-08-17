@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Adjustment to logger levels to remove uninformative warnings [#484](https://github.com/matchms/matchms/pull/484) and [#487](https://github.com/matchms/matchms/pull/487).
 - Extensive code refactoring and cleaning.
 
 ## [0.21.2] - 2023-08-01
