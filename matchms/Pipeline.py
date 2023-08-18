@@ -5,6 +5,7 @@ from typing import Iterable, List, Optional, Tuple, Union
 import yaml
 import matchms.similarity as mssimilarity
 from matchms import calculate_scores
+from matchms.typing import SpectrumType
 from matchms.importing.load_spectra import load_list_of_spectrum_files
 from matchms.logging_functions import (add_logging_to_file,
                                        reset_matchms_logger,
@@ -48,9 +49,11 @@ def create_workflow(yaml_file_name: Optional[str] = None,
     """
     # pylint: disable=too-many-arguments
     workflow = OrderedDict()
-    queries_processor = initialize_spectrum_processor(predefined_processing_queries, additional_filters_queries)
+    queries_processor = initialize_spectrum_processor(predefined_processing_queries,
+                                                      additional_filters_queries)
     workflow["query_filters"] = queries_processor.processing_steps
-    reference_processor = initialize_spectrum_processor(predefined_processing_reference, additional_filters_references)
+    reference_processor = initialize_spectrum_processor(predefined_processing_reference,
+                                                        additional_filters_references)
     workflow["reference_filters"] = reference_processor.processing_steps
     workflow["score_computations"] = score_computations
     if yaml_file_name is not None:
@@ -63,7 +66,7 @@ def create_workflow(yaml_file_name: Optional[str] = None,
 
 
 def initialize_spectrum_processor(predefined_pipeline: Optional[str],
-                                  additional_filters: Tuple[str]) -> SpectrumProcessor:
+                                  additional_filters: Iterable[Union[str, List[dict]]]) -> SpectrumProcessor:
     """Initialize spectrum processing workflow."""
     processor = SpectrumProcessor(predefined_pipeline)
     for step in additional_filters:
@@ -108,7 +111,7 @@ def ordered_dump(data: OrderedDict, stream=None, dumper=yaml.SafeDumper, **kwds)
     return yaml.dump(data, stream, OrderedDumper, **kwds)
 
 
-def check_score_computation(score_computations: Tuple[str]):
+def check_score_computation(score_computations: Iterable[Union[str, List[dict]]]):
     """Check if the score computations seem OK before running.
     Aim is to avoid pipeline crashing after long computation.
     """
@@ -389,7 +392,7 @@ class Pipeline:
 
     # Getter & Setters
     @property
-    def score_computations(self):
+    def score_computations(self) -> Iterable[Union[str, List[dict]]]:
         return self.__workflow.get("score_computations")
 
     @score_computations.setter
@@ -398,27 +401,27 @@ class Pipeline:
         check_score_computation(score_computations=self.score_computations)
 
     @property
-    def query_filters(self):
+    def query_filters(self) -> Iterable[Union[str, List[dict]]]:
         return self.__workflow.get("query_filters")
 
     @query_filters.setter
-    def query_filters(self, filters):
+    def query_filters(self, filters: Iterable[Union[str, List[dict]]]):
         self.__workflow["query_filters"] = filters
         self._initialize_spectrum_processor_queries()
 
     @property
-    def reference_filters(self):
+    def reference_filters(self) -> Iterable[Union[str, List[dict]]]:
         return self.__workflow.get("reference_filters")
 
     @reference_filters.setter
-    def reference_filters(self, filters):
+    def reference_filters(self, filters: Iterable[Union[str, List[dict]]]):
         self.__workflow["reference_filters"] = filters
         self._initialize_spectrum_processor_references()
 
     @property
-    def spectrums_queries(self):
+    def spectrums_queries(self) -> List[SpectrumType]:
         return self._spectrums_queries
 
     @property
-    def spectrums_references(self):
+    def spectrums_references(self) -> List[SpectrumType]:
         return self._spectrums_references
