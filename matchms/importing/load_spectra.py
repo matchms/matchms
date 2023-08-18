@@ -66,3 +66,16 @@ def load_from_pickle(filename: str, metadata_harmonization: bool) -> List[Spectr
     if metadata_harmonization:
         loaded_object = [Spectrum(x.peaks.mz, x.peaks.intensisites, x.metadata, metadata_harmonization) for x in loaded_object]
     return loaded_object
+
+
+def load_list_of_spectrum_files(spectrum_files: Union[List[str],str]) -> List[SpectrumType]:
+    """Combines all spectra in multiple files into a list of spectra"""
+    all_spectra = []
+    if isinstance(spectrum_files, str):
+        spectrum_files = [spectrum_files]
+    for spectrum_file in spectrum_files:
+        loaded_spectra = load_spectra(spectrum_file)
+        if isinstance(loaded_spectra, Generator):
+            loaded_spectra = list(loaded_spectra)
+        all_spectra.extend(loaded_spectra)
+    return all_spectra

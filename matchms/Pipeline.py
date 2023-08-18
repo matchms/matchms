@@ -1,12 +1,12 @@
 import logging
 import os
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union, List, Generator
 from collections import OrderedDict
 from datetime import datetime
 import yaml
 import matchms.similarity as mssimilarity
 from matchms import calculate_scores
-from matchms.importing.load_spectra import load_spectra
+from matchms.importing.load_spectra import load_spectra, load_list_of_spectrum_files
 from matchms.logging_functions import (add_logging_to_file,
                                        reset_matchms_logger,
                                        set_matchms_logger_level)
@@ -359,7 +359,9 @@ class Pipeline:
             with open(self.logging_file, "a", encoding="utf-8") as f:
                 f.write(line + '\n')
 
-    def import_spectrums(self, query_files, reference_files=None):
+    def import_spectrums(self,
+                         query_files: Union[List[str], str],
+                         reference_files: Optional[Union[List[str], str]] = None):
         """Import spectra from file(s).
 
         Parameters
@@ -370,29 +372,10 @@ class Pipeline:
             List of files, or single filename, containing the reference spectra.
             If set to None (default) then all query spectra will be compared to each other.
         """
-        def check_files_exist(filenames):
-            assert filenames is not None
-            if isinstance(filenames, str):
-                filenames = [filenames]
-            for filename in filenames:
-                assert os.path.exists(filename), f"File {filename} not found."
-
-        # Check if all files exist
-        check_files_exist(query_files)
-        if reference_files is not None:
-            check_files_exist(reference_files)
-
-        if isinstance(query_files, str):
-            query_files = [query_files]
-        if isinstance(reference_files, str):
-            reference_files = [reference_files]
-        self.write_to_logfile("--- Importing data ---")
-
         # import query spectra
-        spectrums_queries = []
-        for query_file in query_files:
-            spectrums_queries += list(load_spectra(query_file))
-        self._spectrums_queries = spectrums_queries
+        self.write_to_logfile("--- Importing data ---")
+        self._spectrums_queries = load_list_of_spectrum_files(query_files)
+
         self.write_to_logfile(f"Loaded query spectra from {query_files}")
         self.write_to_logfile(f"Loaded {len(self._spectrums_queries)} query spectra")
 
@@ -402,10 +385,7 @@ class Pipeline:
             self._spectrums_references = self._spectrums_queries
             self.write_to_logfile("Reference spectra are equal to the query spectra (is_symmetric = True)")
         else:
-            spectrums_references = []
-            for reference_file in reference_files:
-                spectrums_references += list(load_spectra(reference_file))
-            self._spectrums_references = spectrums_references
+            self._spectrums_references = load_list_of_spectrum_files(reference_files)
             self.write_to_logfile(f"Loaded reference spectra from {reference_files}")
             self.write_to_logfile(f"Loaded {len(self._spectrums_references)} reference spectra")
 
