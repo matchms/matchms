@@ -188,6 +188,8 @@ Below a more advanced code example showing how you can make a specific pipeline 
     pipeline.logging_file = "my_pipeline.log"  # for pipeline and logging message
     pipeline.logging_level = "INFO" #To define the verbosety of the logging
     pipeline.run("tests/testdata/pesticides.mgf", "my_reference_library.mgf")
+
+
 Alternatively, in particular, if you need more room to add custom functions and steps, the individual steps can run without using the matchms ``Pipeline``:
 
 .. code-block:: python
