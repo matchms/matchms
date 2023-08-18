@@ -1,6 +1,5 @@
 import logging
-import os
-from typing import Optional, Tuple, Union, List, Generator
+from typing import Optional, Tuple, Union, List, Iterable
 from collections import OrderedDict
 from datetime import datetime
 import yaml
@@ -21,9 +20,9 @@ logger = logging.getLogger("matchms")
 def create_workflow(yaml_file_name: Optional[str] = None,
                     predefined_processing_queries: Optional[str] = "default",
                     predefined_processing_reference: Optional[str] = "default",
-                    additional_filters_queries: Tuple[str] = (),
-                    additional_filters_references: Tuple[str] = (),
-                    score_computations: Tuple[str] = (),
+                    additional_filters_queries: Iterable[Union[str, List[dict]]] = (),
+                    additional_filters_references: Iterable[Union[str, List[dict]]] = (),
+                    score_computations: Iterable[Union[str, List[dict]]] = (),
                     ) -> OrderedDict:
     """Creates a workflow that specifies the filters and scores needed to be run by Pipeline
 
