@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+## [0.22.0] - 2023-08-18
+
 ### Added
 
 - New `SpectrumProcessing` class to be the central hub for all filter functions [#455](https://github.com/matchms/matchms/pull/455). Also takes care that filters are executed in a useful order. This is also integrated into the `Pipeline` class.
@@ -560,7 +562,10 @@ Contains three plot types: `plot_spectrum()` or `spectrum.plot()`, `plot_spectra
 - This is the initial version of Spec2Vec from https://github.com/iomega/Spec2Vec
 - (later splitted into matchms + spec2vec)
 
-[Unreleased]: https://github.com/matchms/matchms/compare/0.21.0...HEAD
+[Unreleased]: https://github.com/matchms/matchms/compare/0.22.0...HEAD
+[0.22.0]: https://github.com/matchms/matchms/compare/0.21.2...0.22.0
+[0.21.2]: https://github.com/matchms/matchms/compare/0.20.1...0.21.2
+[0.21.1]: https://github.com/matchms/matchms/compare/0.21.0...0.21.1
 [0.21.0]: https://github.com/matchms/matchms/compare/0.20.0...0.21.0
 [0.20.0]: https://github.com/matchms/matchms/compare/0.19.0...0.20.0
 [0.19.0]: https://github.com/matchms/matchms/compare/0.18.0...0.19.0
