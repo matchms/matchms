@@ -8,7 +8,7 @@
 
 Code quality checks:
 
-|CI Build|
+|CI First Code Checks| |CI Build|
 |ReadTheDocs Badge|
 |Sonarcloud Quality Gate Badge| |Sonarcloud Coverage Badge|
 
@@ -59,6 +59,10 @@ F Huber, S. Verhoeven, C. Meijer, H. Spreeuw, E. M. Villanueva Castilla, C. Geng
 .. |Howfairis Badge| image:: https://img.shields.io/badge/fair--software.eu-%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F-green
    :target: https://fair-software.eu
    :alt: Howfairis badge
+
+.. |CI First Code Checks| image:: https://github.com/matchms/matchms/actions/workflows/CI_first_code_check.yml/badge.svg
+    :alt: Continuous integration workflow
+    :target: https://github.com/matchms/matchms/actions/workflows/CI_first_code_check.yml
 
 .. |CI Build| image:: https://github.com/matchms/matchms/actions/workflows/CI_build.yml/badge.svg
     :alt: Continuous integration workflow
