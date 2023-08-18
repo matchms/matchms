@@ -5,6 +5,7 @@ description = "Python library for large-scale comparisons and processing of tand
 authors = ["matchms developer team <florian.huber@hs-duesseldorf.de>"]
 
 license = "Apache-2.0"
+readme = "README.rst"
 repository = "https://github.com/matchms/matchms"
 documentation = "https://matchms.readthedocs.io/en/latest/"
 keywords=[ "similarity measures",
