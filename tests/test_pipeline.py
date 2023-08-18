@@ -3,7 +3,7 @@ import numpy as np
 import pytest
 from matchms import Pipeline
 from matchms.filtering import select_by_mz
-from matchms.Pipeline import create_workflow, load_in_workflow_from_yaml_file
+from matchms.Pipeline import create_workflow, load_workflow_from_yaml_file
 from matchms.similarity import ModifiedCosine
 
 
@@ -12,29 +12,25 @@ spectrums_file_msp = os.path.join(module_root, "tests", "testdata", "massbank_fi
 
 
 def test_pipeline_initial_check_missing_file():
-    workflow = create_workflow()
+    workflow = create_workflow(score_computations=[["precursormzmatch",  {"tolerance": 120.0}]])
     pipeline = Pipeline(workflow)
-    pipeline.score_computations = [["precursormzmatch",  {"tolerance": 120.0}]]
     with pytest.raises(AssertionError) as msg:
         pipeline.run("non_existing_file.msp")
-    assert "not found" in str(msg.value)
+    assert "not exist" in str(msg.value)
 
 
 def test_pipeline_initial_check_unknown_step():
-    workflow = create_workflow()
-    pipeline = Pipeline(workflow)
-    pipeline.score_computations = [["precursormzOOPSmatch",  {"tolerance": 120.0}]]
+    workflow = create_workflow(score_computations=[["precursormzOOPSmatch",  {"tolerance": 120.0}]])
     with pytest.raises(ValueError) as msg:
-        pipeline.run(spectrums_file_msp)
+        Pipeline(workflow)
     assert "Unknown score computation:" in str(msg.value)
 
 
 def test_pipeline_symmetric():
-    workflow = create_workflow()
+    workflow = create_workflow(predefined_processing_queries="basic",
+        score_computations=[["precursormzmatch",  {"tolerance": 120.0}],
+                                                   ["modifiedcosine", {"tolerance": 10.0}]])
     pipeline = Pipeline(workflow)
-    pipeline.predefined_processing_queries = "basic"
-    pipeline.score_computations = [["precursormzmatch",  {"tolerance": 120.0}],
-                                   ["modifiedcosine", {"tolerance": 10.0}]]
     pipeline.run(spectrums_file_msp)
 
     assert len(pipeline.spectrums_queries) == 5
@@ -50,12 +46,11 @@ def test_pipeline_symmetric():
 
 
 def test_pipeline_symmetric_filters():
-    workflow = create_workflow()
+    workflow = create_workflow(predefined_processing_queries="basic",
+                               additional_filters_queries=[[select_by_mz, {"mz_from": 0, "mz_to": 1000}]],
+                               score_computations=[["precursormzmatch",  {"tolerance": 120.0}],
+                                                   ["modifiedcosine", {"tolerance": 10.0}]])
     pipeline = Pipeline(workflow)
-    pipeline.predefined_processing_queries = "basic"
-    pipeline.additional_processing_queries = [[select_by_mz, {"mz_from": 0, "mz_to": 1000}]]
-    pipeline.score_computations = [["precursormzmatch",  {"tolerance": 120.0}],
-                                   ["modifiedcosine", {"tolerance": 10.0}]]
     pipeline.run(spectrums_file_msp)
 
     assert len(pipeline.spectrums_queries) == 5
@@ -72,12 +67,11 @@ def test_pipeline_symmetric_filters():
 
 
 def test_pipeline_symmetric_masking():
-    workflow = create_workflow()
-    pipeline = Pipeline(workflow)
-    pipeline.predefined_processing_queries = "basic"
-    pipeline.score_computations = [["precursormzmatch",  {"tolerance": 120.0}],
+    workflow = create_workflow(predefined_processing_queries="basic",
+                               score_computations=[["precursormzmatch",  {"tolerance": 120.0}],
                                    ["modifiedcosine", {"tolerance": 10.0}],
-                                   ["filter_by_range", {"low": 0.3, "above_operator": '>='}]]
+                                   ["filter_by_range", {"low": 0.3, "above_operator": '>='}]])
+    pipeline = Pipeline(workflow)
     pipeline.run(spectrums_file_msp)
 
     assert len(pipeline.spectrums_queries) == 5
@@ -93,11 +87,10 @@ def test_pipeline_symmetric_masking():
 
 
 def test_pipeline_symmetric_custom_score():
-    workflow = create_workflow()
+    workflow = create_workflow(predefined_processing_queries="basic",
+                               score_computations=[["precursormzmatch",  {"tolerance": 120.0}],
+                                                   [ModifiedCosine, {"tolerance": 10.0}]])
     pipeline = Pipeline(workflow)
-    pipeline.predefined_processing_queries = "basic"
-    pipeline.score_computations = [["precursormzmatch",  {"tolerance": 120.0}],
-                                   [ModifiedCosine, {"tolerance": 10.0}]]
     pipeline.run(spectrums_file_msp)
 
     assert len(pipeline.spectrums_queries) == 5
@@ -114,12 +107,11 @@ def test_pipeline_symmetric_custom_score():
 
 def test_pipeline_non_symmetric():
     """Test importing from multiple files and different inputs for query and references."""
-    workflow = create_workflow()
+    workflow = create_workflow(predefined_processing_queries="basic",
+                               predefined_processing_reference="basic",
+                               score_computations=[["precursormzmatch",  {"tolerance": 120.0}],
+                                                   ["modifiedcosine", {"tolerance": 10.0}]])
     pipeline = Pipeline(workflow)
-    pipeline.predefined_processing_queries = "basic"
-    pipeline.predefined_processing_references = "basic"
-    pipeline.score_computations = [["precursormzmatch",  {"tolerance": 120.0}],
-                                   ["modifiedcosine", {"tolerance": 10.0}]]
     pipeline.run(spectrums_file_msp, [spectrums_file_msp, spectrums_file_msp])
 
     assert len(pipeline.spectrums_queries) == 5
@@ -138,7 +130,7 @@ def test_pipeline_non_symmetric():
 def test_pipeline_from_yaml():
     pytest.importorskip("rdkit")
     config_file = os.path.join(module_root, "tests", "test_pipeline.yaml")
-    workflow = load_in_workflow_from_yaml_file(config_file)
+    workflow = load_workflow_from_yaml_file(config_file)
     pipeline = Pipeline(workflow)
     pipeline.run(spectrums_file_msp)
     assert len(pipeline.spectrums_queries) == 5
@@ -165,7 +157,7 @@ def test_pipeline_to_and_from_yaml(tmp_path):
     scores_run1 = pipeline.scores
 
     # Load again
-    workflow = load_in_workflow_from_yaml_file(config_file)
+    workflow = load_workflow_from_yaml_file(config_file)
     pipeline = Pipeline(workflow)
     pipeline.run(spectrums_file_msp)
     assert pipeline.scores.scores == scores_run1.scores
