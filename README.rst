@@ -223,7 +223,7 @@ Alternatively, in particular, if you need more room to add custom functions and 
     best_matches = scores.scores_by_query(query, 'CosineGreedy_score', sort=True)
 
     # Print the calculated scores for each spectrum pair
-    for (reference, score) in best_matches[:10]
+    for (reference, score) in best_matches[:10]:
         # Ignore scores between same spectra
         if reference is not query:
             print(f"Reference scan id: {reference.metadata['scans']}")
