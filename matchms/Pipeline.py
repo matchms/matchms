@@ -1,11 +1,12 @@
 import logging
-from typing import Optional, Tuple, Union, List, Iterable
 from collections import OrderedDict
 from datetime import datetime
+from typing import Iterable, List, Optional, Tuple, Union
 import yaml
 import matchms.similarity as mssimilarity
 from matchms import calculate_scores
-from matchms.importing.load_spectra import load_spectra, load_list_of_spectrum_files
+from matchms.importing.load_spectra import (load_list_of_spectrum_files,
+                                            load_spectra)
 from matchms.logging_functions import (add_logging_to_file,
                                        reset_matchms_logger,
                                        set_matchms_logger_level)

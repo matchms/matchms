@@ -1,10 +1,10 @@
 import os
 import pickle
-from typing import Generator, Optional, Union, List
+from typing import Generator, List, Optional, Union
+from matchms import Spectrum
 from matchms.importing import (load_from_json, load_from_mgf, load_from_msp,
                                load_from_mzml, load_from_mzxml, load_from_usi)
 from matchms.typing import SpectrumType
-from matchms import Spectrum
 
 
 def load_spectra(file: str, metadata_harmonization: bool = True,
