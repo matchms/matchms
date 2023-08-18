@@ -1,16 +1,16 @@
 import logging
 from collections import OrderedDict
 from datetime import datetime
-from typing import Iterable, List, Optional, Tuple, Union
+from typing import Iterable, List, Optional, Union
 import yaml
 import matchms.similarity as mssimilarity
 from matchms import calculate_scores
-from matchms.typing import SpectrumType
 from matchms.importing.load_spectra import load_list_of_spectrum_files
 from matchms.logging_functions import (add_logging_to_file,
                                        reset_matchms_logger,
                                        set_matchms_logger_level)
 from matchms.SpectrumProcessor import SpectrumProcessor
+from matchms.typing import SpectrumType
 
 
 _masking_functions = ["filter_by_range"]
