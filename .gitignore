@@ -3,6 +3,7 @@
 *.eggs
 .ipynb_checkpoints
 
+poetry.lock
 build
 dist
 .cache
