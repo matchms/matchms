@@ -188,6 +188,8 @@ Below a more advanced code example showing how you can make a specific pipeline 
     pipeline.logging_file = "my_pipeline.log"  # for pipeline and logging message
     pipeline.logging_level = "INFO" #To define the verbosety of the logging
     pipeline.run("tests/testdata/pesticides.mgf", "my_reference_library.mgf")
+
+
 Alternatively, in particular, if you need more room to add custom functions and steps, the individual steps can run without using the matchms ``Pipeline``:
 
 .. code-block:: python
@@ -221,7 +223,7 @@ Alternatively, in particular, if you need more room to add custom functions and 
     best_matches = scores.scores_by_query(query, 'CosineGreedy_score', sort=True)
 
     # Print the calculated scores for each spectrum pair
-    for (reference, score) in best_matches[:10]
+    for (reference, score) in best_matches[:10]:
         # Ignore scores between same spectra
         if reference is not query:
             print(f"Reference scan id: {reference.metadata['scans']}")
