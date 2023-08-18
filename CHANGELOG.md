@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [unreleased]
+
+### Added
+
+- New `SpectrumProcessing` class to be the central hub for all filter functions [#455](https://github.com/matchms/matchms/pull/455). Also takes care that filters are executed in a useful order. This is also integrated into the `Pipeline` class.
+
+### Changed
+
+- Adjustment to logger levels to remove uninformative warnings [#484](https://github.com/matchms/matchms/pull/484) and [#487](https://github.com/matchms/matchms/pull/487).
+- Extensive code refactoring and cleaning.
+- Pipeline class refactoring, Loading of yaml file happens outside Pipeline class [#479](https://github.com/matchms/matchms/pull/479)
+- Yaml file now stores individual filters in the correct order [#480](https://github.com/matchms/matchms/pull/480)
+- File names are not stored in yaml file anymore, they are now supplied when calling run in Pipeline [#481](https://github.com/matchms/matchms/pull/481)
+- Yaml does not store logging information and spectrum files anymore [#481](https://github.com/matchms/matchms/pull/481) and [#482](https://github.com/matchms/matchms/pull/482)
+
+
 ## [0.21.2] - 2023-08-01
 
 ### Added

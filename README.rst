@@ -137,6 +137,8 @@ To date we are aware of:
 
 + `matchmsextras <https://github.com/matchms/matchmsextras>`_ which contains additional functions to create networks based on spectral similarities, to run spectrum searchers against `PubChem`, or additional plotting methods.
 
++ `MS2Query <https://github.com/iomega/ms2query>`_ Reliable and fast MS/MS spectral-based analogue search, running on top op matchms.
+
 + `memo <https://github.com/mandelbrot-project/memo>`_ a method allowing a Retention Time (RT) agnostic alignment of metabolomics samples using the fragmentation spectra (MS2) of their consituents.
 
 *(if you know of any other packages that are fully compatible with matchms, let us know!)*
@@ -146,33 +148,46 @@ Introduction
 
 To get started with matchms, we recommend following our `matchms introduction tutorial <https://blog.esciencecenter.nl/build-your-own-mass-spectrometry-analysis-pipeline-in-python-using-matchms-part-i-d96c718c68ee>`_.
 
-Below is a small example of using matchms to calculate the Cosine score between mass Spectrums in the `tests/testdata/pesticides.mgf <https://github.com/matchms/matchms/blob/master/tests/testdata/pesticides.mgf>`_ file.
+Below is an example of using default filter steps for cleaning spectra, 
+followed by calculating the Cosine score between mass Spectrums in the `tests/testdata/pesticides.mgf <https://github.com/matchms/matchms/blob/master/tests/testdata/pesticides.mgf>`_ file.
 
 .. code-block:: python
 
-    from matchms import Pipeline
-    
-    pipeline = Pipeline()
-    
-    # Read spectrums from a MGF formatted file, for other formats see https://matchms.readthedocs.io/en/latest/api/matchms.importing.html 
-    pipeline.query_files = "tests/testdata/pesticides.mgf"
-    pipeline.prefedined_processing_queries = "basic"
-    pipeline.additional_processing_queries = [
-        ["add_parent_mass"],
-        ["normalize_intensities"],
-        ["select_by_intensity", {"intensity_from": 0.001, "intensity_to": 1.0}],
-        ["select_by_mz", {"mz_from": 0, "mz_to": 1000}],
-        ["require_minimum_number_of_peaks", {"n_required": 5}]
-    ]
-    pipeline.score_computations = [["precursormzmatch",  {"tolerance": 100.0}],
-                                   ["cosinegreedy", {"tolerance": 1.0}],
-                                   ["filter_by_range", {"name": "CosineGreedy_score", "low": 0.2}]]
+    from matchms.Pipeline import Pipeline, create_workflow
 
+    workflow = create_workflow(
+        yaml_file_name="my_config_file.yaml", # The workflow will be stored in a yaml file, this can be used to rerun your workflow or to share it with others.
+        score_computations=[["cosinegreedy", {"tolerance": 1.0}]],
+        )
+    pipeline = Pipeline(workflow)
     pipeline.logging_file = "my_pipeline.log"  # for pipeline and logging message
-    pipeline.logging_level = "INFO"
-    pipeline.run()
+    pipeline.run("tests/testdata/pesticides.mgf")
+    
+Below a more advanced code example showing how you can make a specific pipeline for your needs.
 
+.. code-block:: python
 
+    from matchms.Pipeline import Pipeline, create_workflow
+
+    workflow = create_workflow(
+        yaml_file_name="my_config_file.yaml", # The workflow will be stored in a yaml file.
+        predefined_processing_queries="basic",
+        additional_filters_queries=[
+           ["add_parent_mass"],
+           ["normalize_intensities"],
+           ["select_by_relative_intensity", {"intensity_from": 0.0, "intensity_to": 1.0}],
+           ["select_by_mz", {"mz_from": 0, "mz_to": 1000}],
+           ["require_minimum_number_of_peaks", {"n_required": 5}]],
+        predefined_processing_reference="fully_annotated",
+        additional_filters_references=["add_fingerprint"],
+        score_computations=[["precursormzmatch",  {"tolerance": 100.0}],
+                            ["cosinegreedy", {"tolerance": 1.0}],
+                            ["filter_by_range", {"name": "CosineGreedy_score", "low": 0.2}]],
+        )
+    pipeline = Pipeline(workflow)
+    pipeline.logging_file = "my_pipeline.log"  # for pipeline and logging message
+    pipeline.logging_level = "INFO" #To define the verbosety of the logging
+    pipeline.run("tests/testdata/pesticides.mgf", "my_reference_library.mgf")
 Alternatively, in particular, if you need more room to add custom functions and steps, the individual
 steps can run without using the matchms ``Pipeline``:
 

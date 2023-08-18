@@ -1,11 +1,11 @@
 import logging
-import os
 from collections import OrderedDict
 from datetime import datetime
+from typing import Iterable, List, Optional, Tuple, Union
 import yaml
 import matchms.similarity as mssimilarity
 from matchms import calculate_scores
-from matchms.importing.load_spectra import load_spectra
+from matchms.importing.load_spectra import load_list_of_spectrum_files
 from matchms.logging_functions import (add_logging_to_file,
                                        reset_matchms_logger,
                                        set_matchms_logger_level)
@@ -17,13 +17,35 @@ _score_functions = {key.lower(): f for key, f in mssimilarity.__dict__.items() i
 logger = logging.getLogger("matchms")
 
 
-def create_workflow(yaml_file_name=None,
-                    predefined_processing_queries="default",
-                    predefined_processing_reference="default",
-                    additional_filters_queries=(),
-                    additional_filters_references=(),
-                    score_computations=(),
-                    ):
+def create_workflow(yaml_file_name: Optional[str] = None,
+                    predefined_processing_queries: Optional[str] = "default",
+                    predefined_processing_reference: Optional[str] = "default",
+                    additional_filters_queries: Iterable[Union[str, List[dict]]] = (),
+                    additional_filters_references: Iterable[Union[str, List[dict]]] = (),
+                    score_computations: Iterable[Union[str, List[dict]]] = (),
+                    ) -> OrderedDict:
+    """Creates a workflow that specifies the filters and scores needed to be run by Pipeline
+
+    Example code can be found in the docstring of Pipeline.
+
+    :param yaml_file_name:
+        A yaml file containing the workflow settings will be saved if a file name is specified.
+        If None no yaml file will be saved.
+    :param predefined_processing_queries:
+        Default lists of filters that will be used for processing the query spectra,
+        choose from: "minimal", "basic", "default", "fully_annotated".
+        An up to date list of the filters can be found in SpectrumProcessor.py
+    :param additional_filters_queries:
+        Additional filters that should be applied to the query spectra.
+    :param predefined_processing_reference:
+        Default lists of filters that will be used for processing the reference spectra,
+        choose from: "minimal", "basic", "default", "fully_annotated".
+        An up to date list of the filters can be found in SpectrumProcessor.py
+    :param additional_filters_references:
+        Additional filters that should be applied to the reference spectra
+    :param score_computations:
+        Score computations that should be performed.
+    """
     # pylint: disable=too-many-arguments
     workflow = OrderedDict()
     queries_processor = initialize_spectrum_processor(predefined_processing_queries, additional_filters_queries)
@@ -40,9 +62,10 @@ def create_workflow(yaml_file_name=None,
     return workflow
 
 
-def initialize_spectrum_processor(predefined_workflow, additional_filters):
+def initialize_spectrum_processor(predefined_pipeline: Optional[str],
+                                  additional_filters: Tuple[str]) -> SpectrumProcessor:
     """Initialize spectrum processing workflow."""
-    processor = SpectrumProcessor(predefined_workflow)
+    processor = SpectrumProcessor(predefined_pipeline)
     for step in additional_filters:
         if isinstance(step, (tuple, list)) and len(step) == 1:
             step = step[0]
@@ -50,7 +73,7 @@ def initialize_spectrum_processor(predefined_workflow, additional_filters):
     return processor
 
 
-def load_in_workflow_from_yaml_file(yaml_file):
+def load_workflow_from_yaml_file(yaml_file: str) -> OrderedDict:
     with open(yaml_file, 'r', encoding="utf-8") as file:
         workflow = ordered_load(file, yaml.SafeLoader)
     if workflow["reference_filters"] == "processing_queries":
@@ -58,7 +81,7 @@ def load_in_workflow_from_yaml_file(yaml_file):
     return workflow
 
 
-def ordered_load(stream, loader=yaml.SafeLoader, object_pairs_hook=OrderedDict):
+def ordered_load(stream, loader=yaml.SafeLoader, object_pairs_hook=OrderedDict) -> OrderedDict:
     """ Code from https://stackoverflow.com/questions/5121931/in-python-how-can-you-load-yaml-mappings-as-ordereddicts
     """
     class OrderedLoader(loader):
@@ -73,7 +96,7 @@ def ordered_load(stream, loader=yaml.SafeLoader, object_pairs_hook=OrderedDict):
     return yaml.load(stream, OrderedLoader)
 
 
-def ordered_dump(data, stream=None, dumper=yaml.SafeDumper, **kwds):
+def ordered_dump(data: OrderedDict, stream=None, dumper=yaml.SafeDumper, **kwds):
     class OrderedDumper(dumper):
         pass
 
@@ -85,7 +108,7 @@ def ordered_dump(data, stream=None, dumper=yaml.SafeDumper, **kwds):
     return yaml.dump(data, stream, OrderedDumper, **kwds)
 
 
-def check_score_computation(score_computations):
+def check_score_computation(score_computations: Tuple[str]):
     """Check if the score computations seem OK before running.
     Aim is to avoid pipeline crashing after long computation.
     """
@@ -106,64 +129,75 @@ class Pipeline:
     """Central pipeline class.
 
     The matchms Pipeline class is meant to make running extensive analysis pipelines
-    fast and easy. I can be used in two different ways. First, a pipeline can be defined
+    fast and easy. It can be used in two different ways. First, a pipeline can be defined
     using a config file (a yaml file, best to start from the template provided to define
     your own pipline).
 
-    Once a config file is defined, execution only needs the following code:
+    Once a config file is defined, the pipeline can be executed with the following code:
 
     .. code-block:: python
+        from matchms.Pipeline import Pipeline, load_workflow_from_yaml_file
 
-        from matchms import Pipeline
+        workflow = load_workflow_from_yaml_file("my_config_file.yaml")
+        pipeline = Pipeline(workflow)
 
-        pipeline = Pipeline("my_config_file.yaml")
-        pipeline.run()
+        # Optional steps
+        pipeline.logging_file = "my_pipeline.log"
+        pipeline.logging_level = "ERROR"
+
+        pipeline.run("my_spectrums.mgf")
 
     The second way to define a pipeline is via a Python script. The following code is an
     example of how this works:
 
     .. code-block:: python
+        from matchms.Pipeline import Pipeline, create_workflow
 
-        pipeline = Pipeline()
-        pipeline.query_files = "spectrums_file.msp"
-        pipeline.predefined_processing_queries = "basic"
-        pipeline.additional_processing_queries = [
-            ["add_parent_mass"],
-            ["normalize_intensities"],
-            ["select_by_relative_intensity", {"intensity_from": 0.0, "intensity_to": 1.0}],
-            ["select_by_mz", {"mz_from": 0, "mz_to": 1000}],
-            ["require_minimum_number_of_peaks", {"n_required": 5}]
-        ]
-        pipeline.score_computations = [["precursormzmatch",  {"tolerance": 120.0}],
-                                       ["cosinegreedy", {"tolerance": 1.0}]
-                                       ["filter_by_range", {"name": "CosineGreedy_score", "low": 0.3}],
-                                       ["modifiedcosine", {"tolerance": 1.0}],
-                                       ["filter_by_range", {"name": "ModifiedCosine_score", "low": 0.3}]]
+        workflow = create_workflow(
+            yaml_file_name="my_config_file.yaml", # The workflow will be stored in a yaml file.
+            predefined_processing_queries="basic",
+            additional_filters_queries=[
+               ["add_parent_mass"],
+               ["normalize_intensities"],
+               ["select_by_relative_intensity", {"intensity_from": 0.0, "intensity_to": 1.0}],
+               ["select_by_mz", {"mz_from": 0, "mz_to": 1000}],
+               ["require_minimum_number_of_peaks", {"n_required": 5}]],
+            predefined_processing_reference="basic",
+            additional_filters_references=["add_fingerprint"],
+            score_computations=[["precursormzmatch",  {"tolerance": 120.0}],
+                               ["cosinegreedy", {"tolerance": 1.0}]
+                               ["filter_by_range", {"name": "CosineGreedy_score", "low": 0.3}],
+                               ["modifiedcosine", {"tolerance": 1.0}],
+                               ["filter_by_range", {"name": "ModifiedCosine_score", "low": 0.3}]],
+            )
 
+        pipeline = Pipeline(workflow)
         pipeline.logging_file = "my_pipeline.log"
-        pipeline.run()
+        pipeline.logging_level = "WARNING"
+        pipeline.run("my_query_spectra.mgf", "my_reference_spectra.mgf")
+
 
     To combine this with custom made scores or available matchms-compatible scores
     such as `Spec2Vec` or `MS2DeepScore`, it is also possible to pass objects instead of
-    names to the pipeline:
+    names to create_workflow
 
     .. code-block:: python
 
         from spec2vec import Spec2Vec
-
-        pipeline.score_computations = [["precursormzmatch",  {"tolerance": 120.0}],
-                                       [Spec2Vec, {"model": "my_spec2vec_model.model"}],
-                                       ["filter_by_range", {"name": "Spec2Vec", "low": 0.3}]]
-
+        workflow = create_workflow(score_computations = [["precursormzmatch",  {"tolerance": 120.0}],
+                                               [Spec2Vec, {"model": "my_spec2vec_model.model"}],
+                                       ["filter_by_range", {"name": "Spec2Vec", "low": 0.3}]])
     """
-    def __init__(self, workflow, progress_bar=True, logging_level="WARNING", logging_file=None):
+    def __init__(self, workflow: OrderedDict,
+                 progress_bar=True,
+                 logging_level: str = "WARNING",
+                 logging_file: Optional[str] = None):
         """
         Parameters
         ----------
-        config_file
-            Filename of config file (yaml file) to define pipeline. Default is None
-            in which case the pipeline should be defined via a Python script.
-        progress_bar
+        workflow:
+            Contains an orderedDict containing the workflow settings. Can be created using create_workflow.
+        progress_bar:
             Default is True. Set to False if no progress bar should be displayed.
         """
         self._spectrums_queries = None
@@ -323,7 +357,9 @@ class Pipeline:
             with open(self.logging_file, "a", encoding="utf-8") as f:
                 f.write(line + '\n')
 
-    def import_spectrums(self, query_files, reference_files=None):
+    def import_spectrums(self,
+                         query_files: Union[List[str], str],
+                         reference_files: Optional[Union[List[str], str]] = None):
         """Import spectra from file(s).
 
         Parameters
@@ -334,29 +370,10 @@ class Pipeline:
             List of files, or single filename, containing the reference spectra.
             If set to None (default) then all query spectra will be compared to each other.
         """
-        def check_files_exist(filenames):
-            assert filenames is not None
-            if isinstance(filenames, str):
-                filenames = [filenames]
-            for filename in filenames:
-                assert os.path.exists(filename), f"File {filename} not found."
-
-        # Check if all files exist
-        check_files_exist(query_files)
-        if reference_files is not None:
-            check_files_exist(reference_files)
-
-        if isinstance(query_files, str):
-            query_files = [query_files]
-        if isinstance(reference_files, str):
-            reference_files = [reference_files]
-        self.write_to_logfile("--- Importing data ---")
-
         # import query spectra
-        spectrums_queries = []
-        for query_file in query_files:
-            spectrums_queries += list(load_spectra(query_file))
-        self._spectrums_queries = spectrums_queries
+        self.write_to_logfile("--- Importing data ---")
+        self._spectrums_queries = load_list_of_spectrum_files(query_files)
+
         self.write_to_logfile(f"Loaded query spectra from {query_files}")
         self.write_to_logfile(f"Loaded {len(self._spectrums_queries)} query spectra")
 
@@ -366,10 +383,7 @@ class Pipeline:
             self._spectrums_references = self._spectrums_queries
             self.write_to_logfile("Reference spectra are equal to the query spectra (is_symmetric = True)")
         else:
-            spectrums_references = []
-            for reference_file in reference_files:
-                spectrums_references += list(load_spectra(reference_file))
-            self._spectrums_references = spectrums_references
+            self._spectrums_references = load_list_of_spectrum_files(reference_files)
             self.write_to_logfile(f"Loaded reference spectra from {reference_files}")
             self.write_to_logfile(f"Loaded {len(self._spectrums_references)} reference spectra")
 

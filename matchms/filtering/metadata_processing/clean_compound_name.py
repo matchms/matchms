@@ -35,7 +35,7 @@ def clean_compound_name(spectrum_in: SpectrumType) -> SpectrumType:
     return spectrum
 
 
-def _remove_parts_by_regular_expression(name):
+def _remove_parts_by_regular_expression(name: str):
     """Clean name string by removing known parts that don't belong there."""
     name = name.strip()
     # remove type NCGC00180417-03_C31H40O16_
@@ -63,7 +63,7 @@ def _remove_parts_by_regular_expression(name):
     return name
 
 
-def _remove_known_non_compound_parts(name):
+def _remove_known_non_compound_parts(name: str):
     """Remove known non compound-name strings from name."""
     parts_remove = ["Spectral Match to",
                     "from NIST14",
@@ -73,7 +73,7 @@ def _remove_known_non_compound_parts(name):
     return name.strip("; ")
 
 
-def _remove_misplaced_mass(name):
+def _remove_misplaced_mass(name: str):
     """Remove occasionally occurring parent mass addition to name."""
     regex_mass = r"^[0-9]{2,4}\.[0-9]$"
     end_part = name.split(" ")[-1]

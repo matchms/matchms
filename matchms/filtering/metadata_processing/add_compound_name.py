@@ -21,6 +21,6 @@ def add_compound_name(spectrum_in: SpectrumType) -> SpectrumType:
             spectrum.set("compound_name", spectrum.get("title"))
             return spectrum
 
-        logger.warning("No compound name found in metadata.")
+        logger.info("No compound name found in metadata.")
 
     return spectrum
