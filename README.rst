@@ -17,7 +17,7 @@ Code quality checks:
    :align: left
    :alt: matchms
 
-Matchms is an open-source Python package to import, process, clean, and compare mass spectrometry data (MS/MS). It allows to implement and run an easy-to-follow, easy-to-reproduce workflow from raw mass spectra to pre- and post-processed spectral data. Spectral data can be imported from common formats such mzML, mzXML, msp, metabolomics-USI, MGF, or json (e.g. GNPS-syle json files). Matchms then provides filters for metadata cleaning and checking, as well as for basic peak filtering. Finally, matchms was build to import and apply different similarity measures to compare large amounts of spectra. This includes common Cosine scores, but can also easily be extended by custom measures. Example for spectrum similarity measures that were designed to work in matchms are `Spec2Vec <https://github.com/iomega/spec2vec>`_ and `MS2DeepScore <https://github.com/matchms/ms2deepscore>`_.
+Matchms is an open-source Python package to import, process, clean, and compare mass spectrometry data (MS/MS). It allows to implement and run an easy-to-follow, easy-to-reproduce workflow from raw mass spectra to pre- and post-processed spectral data. Spectral data can be imported from common formats such mzML, mzXML, msp, metabolomics-USI, MGF, or JSON (e.g. GNPS-syle JSON files). Matchms then provides filters for metadata cleaning and checking, as well as for basic peak filtering. Finally, matchms was built to import and apply different similarity measures to compare large amounts of spectra. This includes common Cosine scores, but can also easily be extended by custom measures. Examples of spectrum similarity measures that were designed to work in matchms are `Spec2Vec <https://github.com/iomega/spec2vec>`_ and `MS2DeepScore <https://github.com/matchms/ms2deepscore>`_.
 
 If you use matchms in your research, please cite the following software paper:  
 
@@ -84,12 +84,12 @@ Latest changes (matchms >= 0.18.0)
 Pipeline class
 ==============
 
-To make typical matchms workflows (data import, processing, score computations) more accessible to users, matchms now offers a `Pipeline` class to handle complex workflows. This also allows to define, import, export, or modify workflows using yaml files. See code examples below (and soon: updated tutorial).
+To make typical matchms workflows (data import, processing, score computations) more accessible to users, matchms now offers a `Pipeline` class to handle complex workflows. This also allows to create, import, export, or modify workflows using yaml files. See code examples below (and soon: updated tutorial).
 
 Sparse scores array
 ===================
 
-We realized that many matchms-based workflows aim to compare many-to-many spectra whereby not all pairs and scores are equally important. Often, for instance, it will be about searching similar or related spectra/compounds. This also means that often not all scores need to be stored (or computed). For this reason we now shifted to a sparse handling of scores in matchms (that means: only storing actuallly computed, non-null values).
+We realized that many matchms-based workflows aim to compare many-to-many spectra whereby not all pairs and scores are equally important. Often, for instance, it will be about searching similar or related spectra/compounds. This also means that often not all scores need to be stored (or computed). For this reason, we now shifted to a sparse handling of scores in matchms (that means: only storing actually computed, non-null values).
 
 .. image:: readthedocs/_static/matchms_sketch.png
    :target: readthedocs/_static/matchms_sketch.png
@@ -129,7 +129,7 @@ matchms ecosystem -> additional functionalities
 ===============================================
 
 Matchms functionalities can be complemented by additional packages.  
-To date we are aware of:
+To date, we are aware of:
 
 + `Spec2Vec <https://github.com/iomega/spec2vec>`_ an alternative machine-learning spectral similarity score that can simply be installed by `pip install spec2vec` and be imported as `from spec2vec import Spec2Vec` following the same API as the scores in `matchms.similarity`.
 
@@ -137,9 +137,9 @@ To date we are aware of:
 
 + `matchmsextras <https://github.com/matchms/matchmsextras>`_ which contains additional functions to create networks based on spectral similarities, to run spectrum searchers against `PubChem`, or additional plotting methods.
 
-+ `MS2Query <https://github.com/iomega/ms2query>`_ Reliable and fast MS/MS spectral-based analogue search, running on top op matchms.
++ `MS2Query <https://github.com/iomega/ms2query>`_ Reliable and fast MS/MS spectral-based analogue search, running on top of matchms.
 
-+ `memo <https://github.com/mandelbrot-project/memo>`_ a method allowing a Retention Time (RT) agnostic alignment of metabolomics samples using the fragmentation spectra (MS2) of their consituents.
++ `memo <https://github.com/mandelbrot-project/memo>`_ a method allowing a Retention Time (RT) agnostic alignment of metabolomics samples using the fragmentation spectra (MS2) of their constituents.
 
 *(if you know of any other packages that are fully compatible with matchms, let us know!)*
 
@@ -188,8 +188,7 @@ Below a more advanced code example showing how you can make a specific pipeline 
     pipeline.logging_file = "my_pipeline.log"  # for pipeline and logging message
     pipeline.logging_level = "INFO" #To define the verbosety of the logging
     pipeline.run("tests/testdata/pesticides.mgf", "my_reference_library.mgf")
-Alternatively, in particular, if you need more room to add custom functions and steps, the individual
-steps can run without using the matchms ``Pipeline``:
+Alternatively, in particular, if you need more room to add custom functions and steps, the individual steps can run without using the matchms ``Pipeline``:
 
 .. code-block:: python
     
@@ -230,6 +229,7 @@ steps can run without using the matchms ``Pipeline``:
             print(f"Score: {score[0]:.4f}")
             print(f"Number of matching peaks: {score[1]}")
             print("----------------------------")
+
 
 Different spectrum similarity scores
 ====================================
