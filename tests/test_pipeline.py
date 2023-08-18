@@ -16,7 +16,7 @@ def test_pipeline_initial_check_missing_file():
     pipeline = Pipeline(workflow)
     with pytest.raises(AssertionError) as msg:
         pipeline.run("non_existing_file.msp")
-    assert "not found" in str(msg.value)
+    assert "not exist" in str(msg.value)
 
 
 def test_pipeline_initial_check_unknown_step():
