@@ -1,3 +1,4 @@
+import inspect
 from collections import defaultdict
 from functools import partial
 from typing import Dict, Optional, Tuple, Union
@@ -173,9 +174,9 @@ class SpectrumProcessor:
     def processing_steps(self):
         filter_list = []
         for filter_step in self.filters:
-            if isinstance(filter_step, partial):
-                filter_params = filter_step.keywords
-                filter_list.append((filter_step.__name__, filter_params))
+            parameter_settings = get_parameter_settings(filter_step)
+            if parameter_settings is not None:
+                filter_list.append((filter_step.__name__, parameter_settings))
             else:
                 filter_list.append(filter_step.__name__)
         return filter_list
@@ -193,6 +194,22 @@ class SpectrumProcessor:
                     summary_string += "\n  - " + str(filter_param)
         return summary_string
 
+
+def get_parameter_settings(func):
+    """Returns all parameters and parameter values for a function
+
+    This includes default parameter settings and, but also the settings stored in partial"""
+    signature = inspect.signature(func)
+    parameter_settings = {}
+    for parameter, value in signature.parameters.items():
+        # Skip the spectrum_in parameters
+        if "spectrum" not in parameter:
+            assert value.default is not inspect.Parameter.empty, \
+                f"The parameter {parameter} in the function {func.__name__} was not given"
+            parameter_settings[parameter] = value.default
+    if parameter_settings == {}:
+        return None
+    return parameter_settings
 
 # List all filters in a functionally working order
 ALL_FILTERS = [msfilters.make_charge_int,
