@@ -198,11 +198,11 @@ class SpectrumProcessor:
 def check_all_parameters_given(func):
     """Asserts that all added parameters for a function are given (except spectrum_in)"""
     signature = inspect.signature(func)
+    parameters_without_value = 0
     for parameter, value in signature.parameters.items():
-        # Skip the spectrum_in parameters
-        if "spectrum" not in parameter:
-            assert value.default is not inspect.Parameter.empty, \
-                f"The parameter {parameter} in the function {func.__name__} was not given"
+        if value.default is inspect.Parameter.empty:
+            parameters_without_value += 1
+    assert parameters_without_value == 1, f"More than one parameter of the function {func.__name__} is not specified"
 
 
 def get_parameter_settings(func):
