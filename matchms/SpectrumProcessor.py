@@ -171,11 +171,27 @@ class SpectrumProcessor:
 
     @property
     def processing_steps(self):
-        return [x.__name__ for x in self.filters]
+        filter_list = []
+        for filter in self.filters:
+            if isinstance(filter, partial):
+                filter_params = filter.keywords
+                filter_list.append((filter.__name__, filter_params))
+            else:
+                filter_list.append(filter.__name__)
+        return filter_list
 
     def __str__(self):
-        summary_string = "SpectrumProcessor\nProcessing steps:\n - "
-        return summary_string + "\n - ".join(self.processing_steps)
+        summary_string = "SpectrumProcessor\nProcessing steps:"
+        for processing_step in self.processing_steps:
+            if isinstance(processing_step, str):
+                summary_string += "\n- " + processing_step
+            elif isinstance(processing_step, tuple):
+                filter_name = processing_step[0]
+                summary_string += "\n- - " + filter_name
+                filter_params = processing_step[1]
+                for filter_param in filter_params:
+                    summary_string += "\n  - " + str(filter_param)
+        return summary_string
 
 
 # List all filters in a functionally working order
