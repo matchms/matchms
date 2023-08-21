@@ -262,7 +262,6 @@ DEFAULT_FILTERS = BASIC_FILTERS \
        "harmonize_undefined_inchi",
        "harmonize_undefined_smiles",
        "repair_inchi_inchikey_smiles",
-       "repair_parent_mass_match_smiles_wrapper",
        "normalize_intensities",
     ]
 FULLY_ANNOTATED_PROCESSING = DEFAULT_FILTERS \
