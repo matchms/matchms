@@ -214,24 +214,25 @@ class Pipeline:
         self.__workflow = workflow
         self.check_workflow()
 
-        self.write_to_logfile("--- Processing pipeline: ---")
         self._initialize_spectrum_processor_queries()
         if self.is_symmetric is False:
             self._initialize_spectrum_processor_references()
 
     def _initialize_spectrum_processor_queries(self):
         """Initialize spectrum processing workflow for the query spectra."""
+        self.write_to_logfile("--- Processing pipeline query spectra: ---")
         self.processing_queries = initialize_spectrum_processor(
             None,
             self.__workflow["query_filters"]
             )
-
         self.write_to_logfile(str(self.processing_queries))
         if self.processing_queries.processing_steps != self.__workflow["query_filters"]:
             logger.warning("The order of the filters has been changed compared to the Yaml file.")
 
     def _initialize_spectrum_processor_references(self):
         """Initialize spectrum processing workflow for the reference spectra."""
+        self.write_to_logfile("--- Processing pipeline reference spectra: ---")
+
         self.processing_references = initialize_spectrum_processor(
             None,
             self.__workflow["reference_filters"]

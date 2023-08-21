@@ -1,6 +1,6 @@
 from collections import defaultdict
 from functools import partial
-from typing import Optional, Tuple, Union
+from typing import Dict, Optional, Tuple, Union
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
@@ -30,8 +30,8 @@ class SpectrumProcessor:
                 raise ValueError("Predefined pipeline parameter should be a string")
             if predefined_pipeline not in PREDEFINED_PIPELINES:
                 raise ValueError(f"Unknown processing pipeline '{predefined_pipeline}'. Available pipelines: {list(PREDEFINED_PIPELINES.keys())}")
-            for fname in PREDEFINED_PIPELINES[predefined_pipeline]:
-                self.add_matchms_filter(fname)
+            for filter_name in PREDEFINED_PIPELINES[predefined_pipeline]:
+                self.add_matchms_filter(filter_name)
 
     def add_filter(self, filter_function: Union[Tuple[str], str]):
         """Add a filter to the processing pipeline. Takes both matchms filter names (and parameters)
@@ -44,7 +44,7 @@ class SpectrumProcessor:
         else:
             self.add_custom_filter(filter_function[0], filter_function[1])
 
-    def add_matchms_filter(self, filter_spec: Union[Tuple[str], str]):
+    def add_matchms_filter(self, filter_spec: Union[Tuple[str, Dict[str, any]], str]):
         """
         Add a filter to the processing pipeline.
 
@@ -171,11 +171,27 @@ class SpectrumProcessor:
 
     @property
     def processing_steps(self):
-        return [x.__name__ for x in self.filters]
+        filter_list = []
+        for filter_step in self.filters:
+            if isinstance(filter_step, partial):
+                filter_params = filter_step.keywords
+                filter_list.append((filter_step.__name__, filter_params))
+            else:
+                filter_list.append(filter_step.__name__)
+        return filter_list
 
     def __str__(self):
-        summary_string = "SpectrumProcessor\nProcessing steps:\n - "
-        return summary_string + "\n - ".join(self.processing_steps)
+        summary_string = "SpectrumProcessor\nProcessing steps:"
+        for processing_step in self.processing_steps:
+            if isinstance(processing_step, str):
+                summary_string += "\n- " + processing_step
+            elif isinstance(processing_step, tuple):
+                filter_name = processing_step[0]
+                summary_string += "\n- - " + filter_name
+                filter_params = processing_step[1]
+                for filter_param in filter_params:
+                    summary_string += "\n  - " + str(filter_param)
+        return summary_string
 
 
 # List all filters in a functionally working order
@@ -246,7 +262,6 @@ DEFAULT_FILTERS = BASIC_FILTERS \
        "harmonize_undefined_inchi",
        "harmonize_undefined_smiles",
        "repair_inchi_inchikey_smiles",
-       "repair_parent_mass_match_smiles_wrapper",
        "normalize_intensities",
     ]
 FULLY_ANNOTATED_PROCESSING = DEFAULT_FILTERS \
