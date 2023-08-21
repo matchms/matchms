@@ -44,7 +44,7 @@ class SpectrumProcessor:
         else:
             self.add_custom_filter(filter_function[0], filter_function[1])
 
-    def add_matchms_filter(self, filter_spec: Union[Tuple[str], str]):
+    def add_matchms_filter(self, filter_spec: Union[Tuple[str, Dict[str, any]], str]):
         """
         Add a filter to the processing pipeline.
 
