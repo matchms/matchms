@@ -286,8 +286,7 @@ class ProcessingReport:
     """Class to keep track of spectrum changes during filtering.
     """
     def __init__(self):
-        self.counter_changed_field = defaultdict(int)
-        self.counter_added_field = defaultdict(int)
+        self.counter_changed_spectrum = defaultdict(int)
         self.counter_removed_spectrums = defaultdict(int)
         self.counter_number_processed = 0
 
@@ -300,21 +299,16 @@ class ProcessingReport:
         else:
             for field, value in spectrum_new.metadata.items():
                 if objects_differ(spectrum_old.get(field), value):
-                    if spectrum_old.get(field) is None:
-                        self.counter_added_field[filter_function_name] += 1
-                    else:
-                        self.counter_changed_field[filter_function_name] += 1
+                    self.counter_changed_spectrum[filter_function_name] += 1
+                    break
 
     def to_dataframe(self):
         """Create Pandas DataFrame Report of counted spectrum changes."""
-        changes = pd.DataFrame(self.counter_changed_field.items(),
-                               columns=["filter", "changes"])
-        additions = pd.DataFrame(self.counter_added_field.items(),
-                                 columns=["filter", "additions"])
+        changes = pd.DataFrame(self.counter_changed_spectrum.items(),
+                               columns=["filter", "changed spectra"])
         removed = pd.DataFrame(self.counter_removed_spectrums.items(),
                                columns=["filter", "removed spectra"])
-        processing_report = pd.merge(changes, additions, how="outer", on="filter")
-        processing_report = pd.merge(removed, processing_report, how="outer", on="filter")
+        processing_report = pd.merge(removed, changes, how="outer", on="filter")
 
         processing_report = processing_report.set_index("filter").fillna(0)
         return processing_report.astype(int)
@@ -332,8 +326,7 @@ Changes during processing:
     def __repr__(self):
         return f"Report({self.counter_number_processed},\
         {self.counter_removed_spectrums},\
-        {dict(self.counter_changed_field)},\
-        {dict(self.counter_added_field)})"
+        {dict(self.counter_changed_spectrum)})"
 
 
 def objects_differ(obj1, obj2):
