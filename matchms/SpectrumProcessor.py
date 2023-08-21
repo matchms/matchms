@@ -34,7 +34,7 @@ class SpectrumProcessor:
             for filter_name in PREDEFINED_PIPELINES[predefined_pipeline]:
                 self.add_matchms_filter(filter_name)
 
-    def add_filter(self, filter_function: Union[Tuple[str], str]):
+    def add_filter(self, filter_function: Union[Tuple[str, Dict[str, any]], str]):
         """Add a filter to the processing pipeline. Takes both matchms filter names (and parameters)
         as well as custom-made functions.
         """
@@ -67,7 +67,7 @@ class SpectrumProcessor:
             filter_func.__name__ = FILTER_FUNCTIONS[filter_name].__name__
         else:
             raise TypeError("filter_spec should be a string or a tuple or list")
-
+        check_all_parameters_given(filter_func)
         self.filters.append(filter_func)
         # Sort filters according to their order in self.filter_order
         self.filters.sort(key=lambda f: self.filter_order.index(f.__name__))
@@ -94,12 +94,12 @@ class SpectrumProcessor:
             if filter_func.__name__ in self.filter_order:
                 filter_position = self.filter_order.index(filter_func.__name__)
         self.filter_order.insert(filter_position + 1, filter_function.__name__)
-        if filter_params is None:
-            self.filters.append(filter_function)
-        else:
-            filter_func = partial(filter_function, **filter_params)
-            filter_func.__name__ = filter_function.__name__
-            self.filters.append(filter_func)
+        if filter_params is not None:
+            partial_filter_func = partial(filter_function, **filter_params)
+            partial_filter_func.__name__ = filter_function.__name__
+            filter_function = partial_filter_func
+        check_all_parameters_given(filter_function)
+        self.filters.append(filter_function)
 
     def process_spectrum(self, spectrum,
                          processing_report: Optional["ProcessingReport"] = None):
@@ -195,18 +195,26 @@ class SpectrumProcessor:
         return summary_string
 
 
-def get_parameter_settings(func):
-    """Returns all parameters and parameter values for a function
-
-    This includes default parameter settings and, but also the settings stored in partial"""
+def check_all_parameters_given(func):
+    """Asserts that all added parameters for a function are given (except spectrum_in)"""
     signature = inspect.signature(func)
-    parameter_settings = {}
     for parameter, value in signature.parameters.items():
         # Skip the spectrum_in parameters
         if "spectrum" not in parameter:
             assert value.default is not inspect.Parameter.empty, \
                 f"The parameter {parameter} in the function {func.__name__} was not given"
-            parameter_settings[parameter] = value.default
+
+
+def get_parameter_settings(func):
+    """Returns all parameters and parameter values for a function
+
+    This includes default parameter settings and, but also the settings stored in partial"""
+    signature = inspect.signature(func)
+    parameter_settings = {
+            parameter: value.default
+            for parameter, value in signature.parameters.items()
+            if value.default is not inspect.Parameter.empty
+        }
     if parameter_settings == {}:
         return None
     return parameter_settings
