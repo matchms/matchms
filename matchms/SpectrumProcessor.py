@@ -30,8 +30,8 @@ class SpectrumProcessor:
                 raise ValueError("Predefined pipeline parameter should be a string")
             if predefined_pipeline not in PREDEFINED_PIPELINES:
                 raise ValueError(f"Unknown processing pipeline '{predefined_pipeline}'. Available pipelines: {list(PREDEFINED_PIPELINES.keys())}")
-            for fname in PREDEFINED_PIPELINES[predefined_pipeline]:
-                self.add_matchms_filter(fname)
+            for filter_name in PREDEFINED_PIPELINES[predefined_pipeline]:
+                self.add_matchms_filter(filter_name)
 
     def add_filter(self, filter_function: Union[Tuple[str], str]):
         """Add a filter to the processing pipeline. Takes both matchms filter names (and parameters)
