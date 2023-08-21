@@ -41,10 +41,23 @@ def test_filter_sorting_and_output():
                         ('harmonize_undefined_smiles', {'aliases': None, 'undefined': ''}),
                         'repair_inchi_inchikey_smiles',
                         'normalize_intensities']
-    actual_filters = [x.__name__ for x in processing.filters]
-    assert actual_filters == expected_filters
-    # 2nd way to access the filter names via processing_steps attribute:
     assert processing.processing_steps == expected_filters
+
+
+@pytest.mark.parametrize("filter_step, expected", [
+    [("add_parent_mass", {'estimate_from_adduct': False}),
+     ('add_parent_mass', {'estimate_from_adduct': False, 'overwrite_existing_entry': False})],
+    ["derive_adduct_from_name",
+     ('derive_adduct_from_name', {'remove_adduct_from_name': True})],
+    [("require_correct_ionmode", {"ion_mode_to_keep": "both"}),
+     ("require_correct_ionmode", {"ion_mode_to_keep": "both"})],
+])
+def test_overwrite_default_settings(filter_step, expected):
+    """Test if both default settings and set settings are returned in processing steps"""
+    processor = SpectrumProcessor(None)
+    processor.add_filter(filter_step)
+    expected_filters = [expected]
+    assert processor.processing_steps == expected_filters
 
 
 def test_string_output():
