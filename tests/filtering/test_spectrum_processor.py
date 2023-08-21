@@ -60,6 +60,13 @@ def test_overwrite_default_settings(filter_step, expected):
     assert processor.processing_steps == expected_filters
 
 
+def test_incomplete_parameters():
+    """Test if an error is raised when running an incomplete command"""
+    with pytest.raises(AssertionError):
+        processor = SpectrumProcessor(None)
+        processor.add_filter("require_correct_ionmode")
+
+
 def test_string_output():
     processing = SpectrumProcessor("minimal")
     expected_str = "SpectrumProcessor\nProcessing steps:\n- make_charge_int\n- interpret_pepmass" \
