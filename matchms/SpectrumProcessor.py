@@ -172,12 +172,12 @@ class SpectrumProcessor:
     @property
     def processing_steps(self):
         filter_list = []
-        for filter in self.filters:
-            if isinstance(filter, partial):
-                filter_params = filter.keywords
-                filter_list.append((filter.__name__, filter_params))
+        for filter_step in self.filters:
+            if isinstance(filter_step, partial):
+                filter_params = filter_step.keywords
+                filter_list.append((filter_step.__name__, filter_params))
             else:
-                filter_list.append(filter.__name__)
+                filter_list.append(filter_step.__name__)
         return filter_list
 
     def __str__(self):
