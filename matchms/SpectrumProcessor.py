@@ -268,6 +268,7 @@ FULLY_ANNOTATED_PROCESSING = DEFAULT_FILTERS \
     + ["clean_adduct",
        "derive_inchi_from_smiles",
        "derive_smiles_from_inchi",
+       "derive_inchikey_from_inchi",
        ("require_correct_ionmode", {"ion_mode_to_keep": "both"}),
        ("require_parent_mass_match_smiles", {'mass_tolerance': 0.1}),
        "require_valid_annotation",
