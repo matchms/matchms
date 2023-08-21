@@ -158,6 +158,28 @@ def test_adding_custom_filter_with_parameters(spectrums):
     assert spectrums[0].get("inchikey") == "NONSENSENONSENSE", "Custom filter not executed properly"
 
 
+@pytest.mark.parametrize("filter_position, expected", [
+    [0, 0],
+    [1, 1],
+    [2, 2],
+    [3, 3],
+    [None, 4],
+    [5, 4],
+    [6, 4]
+])
+def test_add_custom_filter_in_position(filter_position, expected):
+    def nonsense_inchikey_multiple(s, number):
+        s.set("inchikey", number * "NONSENSE")
+        return s
+
+    processor = SpectrumProcessor("minimal")
+    processor.add_custom_filter(nonsense_inchikey_multiple, {"number": 2},
+                                filter_position=filter_position)
+    filters = processor.filters
+
+    assert filters[expected].__name__ == "nonsense_inchikey_multiple"
+
+
 def test_add_filter_with_custom(spectrums):
     def nonsense_inchikey_multiple(s, number):
         s.set("inchikey", number * "NONSENSE")
@@ -166,6 +188,7 @@ def test_add_filter_with_custom(spectrums):
     processor = SpectrumProcessor("minimal")
     processor.add_filter((nonsense_inchikey_multiple, {"number": 2}))
     filters = processor.filters
+
     assert filters[-1].__name__ == "nonsense_inchikey_multiple"
     spectrums, _ = processor.process_spectrums(spectrums, create_report=True)
     assert spectrums[0].get("inchikey") == "NONSENSENONSENSE", "Custom filter not executed properly"
