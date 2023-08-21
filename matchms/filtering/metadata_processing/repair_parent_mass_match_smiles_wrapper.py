@@ -36,4 +36,4 @@ def repair_parent_mass_match_smiles_wrapper(spectrum_in: SpectrumType, mass_tole
     spectrum = repair_adduct_based_on_smiles(spectrum, mass_tolerance, accept_parent_mass_is_mol_wt=True)
     if require_parent_mass_match_smiles(spectrum, mass_tolerance) is not None:
         return spectrum
-    return None
+    return spectrum
