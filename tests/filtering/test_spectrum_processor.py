@@ -40,7 +40,6 @@ def test_filter_sorting_and_output():
         'harmonize_undefined_inchi',
         'harmonize_undefined_smiles',
         'repair_inchi_inchikey_smiles',
-        'repair_parent_mass_match_smiles_wrapper',
         'normalize_intensities'
         ]
     actual_filters = [x.__name__ for x in processing.filters]
@@ -51,8 +50,8 @@ def test_filter_sorting_and_output():
 
 def test_string_output():
     processing = SpectrumProcessor("minimal")
-    expected_str = "SpectrumProcessor\nProcessing steps:\n - make_charge_int\n - interpret_pepmass"\
-        "\n - derive_ionmode\n - correct_charge"
+    expected_str = "SpectrumProcessor\nProcessing steps:\n- make_charge_int\n- interpret_pepmass"\
+        "\n- derive_ionmode\n- correct_charge"
     assert str(processing) == expected_str
 
 
