@@ -6,10 +6,11 @@ from unittest import mock
 import numpy as np
 import pytest
 import matchms.filtering.filter_utils.metadata_utils
-from matchms.filtering.filter_utils.metadata_utils import (derive_fingerprint_from_inchi,
-                                                           derive_fingerprint_from_smiles,
-                                                           is_valid_inchi, is_valid_inchikey,
+import matchms.filtering.metadata_processing.add_fingerprint
+from matchms.filtering.filter_utils.metadata_utils import (is_valid_inchi, is_valid_inchikey,
                                                            is_valid_smiles, mol_converter)
+from matchms.filtering.metadata_processing.add_fingerprint import derive_fingerprint_from_smiles, \
+    derive_fingerprint_from_inchi
 
 
 @pytest.fixture()
@@ -187,13 +188,13 @@ def test_missing_rdkit_module_error(reload_metadata_utils):
         assert expected_msg in str(msg.value), "Expected different ImportError."
 
         with pytest.raises(ImportError) as msg:
-            _ = matchms.filtering.filter_utils.metadata_utils.derive_fingerprint_from_inchi(mol_input, "test", 0)
+            _ = matchms.filtering.metadata_processing.add_fingerprint.derive_fingerprint_from_inchi(mol_input, "test", 0)
         assert expected_msg in str(msg.value), "Expected different ImportError."
 
         with pytest.raises(ImportError) as msg:
-            _ = matchms.filtering.filter_utils.metadata_utils.derive_fingerprint_from_smiles(mol_input, "test", 0)
+            _ = matchms.filtering.metadata_processing.add_fingerprint.derive_fingerprint_from_smiles(mol_input, "test", 0)
         assert expected_msg in str(msg.value), "Expected different ImportError."
 
         with pytest.raises(ImportError) as msg:
-            _ = matchms.filtering.filter_utils.metadata_utils.mol_to_fingerprint(mol_input, "test", 0)
+            _ = matchms.filtering.metadata_processing.add_fingerprint.mol_to_fingerprint(mol_input, "test", 0)
         assert expected_msg in str(msg.value), "Expected different ImportError."
