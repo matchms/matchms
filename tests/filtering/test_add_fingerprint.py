@@ -6,8 +6,8 @@ import pytest
 from testfixtures import LogCapture
 from matchms.exporting import save_as_json, save_as_mgf, save_as_msp
 from matchms.filtering import add_fingerprint
-from matchms.filtering.metadata_processing.add_fingerprint import derive_fingerprint_from_smiles, \
-    derive_fingerprint_from_inchi
+from matchms.filtering.metadata_processing.add_fingerprint import (
+    derive_fingerprint_from_inchi, derive_fingerprint_from_smiles)
 from matchms.importing import load_from_json, load_from_mgf, load_from_msp
 from matchms.logging_functions import (reset_matchms_logger,
                                        set_matchms_logger_level)
