@@ -3,14 +3,11 @@ from contextlib import nullcontext
 from importlib import reload
 from importlib.util import find_spec
 from unittest import mock
-import numpy as np
 import pytest
 import matchms.filtering.filter_utils.smile_inchi_inchikey_conversions
 import matchms.filtering.metadata_processing.add_fingerprint
 from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import (is_valid_inchi, is_valid_inchikey,
                                                                              is_valid_smiles, mol_converter)
-from matchms.filtering.metadata_processing.add_fingerprint import derive_fingerprint_from_smiles, \
-    derive_fingerprint_from_inchi
 
 
 @pytest.fixture()
@@ -78,8 +75,6 @@ def test_is_valid_inchikey_none_input():
     assert not is_valid_inchikey(None), "Expected None entry to give False."
 
 
-
-
 @pytest.mark.parametrize("inchi, expected", [
     ["InChI=1S/C2H7N3/c1-5-2(3)4/h1H3,(H4,3,4,5)", True],
     ['"InChI=1S/C2H7N3/c1-5-2(3)4/h1H3,(H4,3,4,5)"', True],
@@ -126,41 +121,6 @@ def test_is_valid_smiles_none_input():
     pytest.importorskip("rdkit")
 
     assert not is_valid_smiles(None), "Expected None entry to give False."
-
-
-def test_derive_fingerprint_from_smiles():
-    """Test if correct fingerprint is derived from given smiles."""
-    pytest.importorskip("rdkit")
-
-    fingerprint = derive_fingerprint_from_smiles("[C+]#C[O-]", "daylight", 16)
-    expected_fingerprint = np.array([0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0])
-    assert np.all(fingerprint == expected_fingerprint), "Expected different fingerprint."
-
-
-def test_derive_fingerprint_from_inchi():
-    """Test if correct fingerprint is derived from given inchi."""
-    pytest.importorskip("rdkit")
-
-    fingerprint = derive_fingerprint_from_inchi("InChI=1S/C2O/c1-2-3", "daylight", 16)
-    expected_fingerprint = np.array([0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0])
-    assert np.all(fingerprint == expected_fingerprint), "Expected different fingerprint."
-
-
-def test_derive_fingerprint_different_types_from_smiles():
-    """Test if correct fingerprints are derived from given smiles when using different types."""
-    pytest.importorskip("rdkit")
-
-    types = ["daylight", "morgan1", "morgan2", "morgan3"]
-    expected_fingerprints = [
-        np.array([0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0]),
-        np.array([0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1]),
-        np.array([0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1]),
-        np.array([0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1])
-    ]
-
-    for i, fingerprint_type in enumerate(types):
-        fingerprint = derive_fingerprint_from_smiles("[C+]#C[O-]", fingerprint_type, 16)
-        assert np.all(fingerprint == expected_fingerprints[i]), "Expected different fingerprint."
 
 
 def test_missing_rdkit_module_error(reload_metadata_utils):
