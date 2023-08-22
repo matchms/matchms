@@ -1,8 +1,7 @@
 import logging
 import numpy as np
 from rdkit import Chem
-from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import (
-    AllChem, Chem, _has_rdkit, rdkit_missing_message)
+from rdkit.Chem import AllChem
 from matchms.typing import SpectrumType
 
 
@@ -70,9 +69,6 @@ def derive_fingerprint_from_smiles(smiles: str, fingerprint_type: str, nbits: in
     fingerprint
         Molecular fingerprint.
     """
-    if not _has_rdkit:
-        raise ImportError(rdkit_missing_message)
-
     mol = Chem.MolFromSmiles(smiles)
     if mol is None:
         return None
@@ -98,9 +94,6 @@ def derive_fingerprint_from_inchi(inchi: str, fingerprint_type: str, nbits: int)
     fingerprint: np.array
         Molecular fingerprint.
     """
-    if not _has_rdkit:
-        raise ImportError(rdkit_missing_message)
-
     mol = Chem.MolFromInchi(inchi)
     if mol is None:
         return None
@@ -126,9 +119,6 @@ def mol_to_fingerprint(mol: Chem.rdchem.Mol, fingerprint_type: str, nbits: int) 
     fingerprint
         Molecular fingerprint.
     """
-    if not _has_rdkit:
-        raise ImportError(rdkit_missing_message)
-
     assert fingerprint_type in ["daylight", "morgan1", "morgan2", "morgan3"], "Unkown fingerprint type given."
 
     if fingerprint_type == "daylight":

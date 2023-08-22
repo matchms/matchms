@@ -4,7 +4,6 @@ from typing import Optional
 
 try:  # rdkit is not included in pip package
     from rdkit import Chem
-    from rdkit.Chem import AllChem
 except ImportError:
     _has_rdkit = False
     from collections import UserString
@@ -16,7 +15,7 @@ except ImportError:
         def __getattr__(self, key):
             return self
 
-    Chem = AllChem = ChemMock("")
+    Chem = ChemMock("")
 else:
     _has_rdkit = True
 rdkit_missing_message = "Conda package 'rdkit' is required for this functionality."
