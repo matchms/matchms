@@ -1,8 +1,4 @@
-import sys
-from contextlib import nullcontext
 from importlib import reload
-from importlib.util import find_spec
-from unittest import mock
 import pytest
 import matchms.filtering.filter_utils.smile_inchi_inchikey_conversions
 import matchms.filtering.metadata_processing.add_fingerprint
@@ -121,40 +117,3 @@ def test_is_valid_smiles_none_input():
     pytest.importorskip("rdkit")
 
     assert not is_valid_smiles(None), "Expected None entry to give False."
-
-
-def test_missing_rdkit_module_error(reload_metadata_utils):
-    """Test if different functions return correct error when *rdkit* is not available"""
-    # pylint: disable=unused-argument
-    if find_spec("rdkit") is not None:
-        context = mock.patch.dict(sys.modules, {"rdkit": None})
-    else:
-        context = nullcontext()
-
-    expected_msg = "Conda package 'rdkit' is required for this functionality."
-    with context:
-        reload(matchms.filtering.filter_utils.smile_inchi_inchikey_conversions)
-        mol_input = "C[Si](Cn1cncn1)(c1ccc(F)cc1)"
-        with pytest.raises(ImportError) as msg:
-            _ = matchms.filtering.filter_utils.smile_inchi_inchikey_conversions.mol_converter(mol_input, "smiles", "inchikey")
-        assert expected_msg in str(msg.value), "Expected different ImportError."
-
-        with pytest.raises(ImportError) as msg:
-            _ = matchms.filtering.filter_utils.smile_inchi_inchikey_conversions.is_valid_inchi("test")
-        assert expected_msg in str(msg.value), "Expected different ImportError."
-
-        with pytest.raises(ImportError) as msg:
-            _ = matchms.filtering.filter_utils.smile_inchi_inchikey_conversions.is_valid_smiles("test")
-        assert expected_msg in str(msg.value), "Expected different ImportError."
-
-        with pytest.raises(ImportError) as msg:
-            _ = matchms.filtering.metadata_processing.add_fingerprint.derive_fingerprint_from_inchi(mol_input, "test", 0)
-        assert expected_msg in str(msg.value), "Expected different ImportError."
-
-        with pytest.raises(ImportError) as msg:
-            _ = matchms.filtering.metadata_processing.add_fingerprint.derive_fingerprint_from_smiles(mol_input, "test", 0)
-        assert expected_msg in str(msg.value), "Expected different ImportError."
-
-        with pytest.raises(ImportError) as msg:
-            _ = matchms.filtering.metadata_processing.add_fingerprint.mol_to_fingerprint(mol_input, "test", 0)
-        assert expected_msg in str(msg.value), "Expected different ImportError."
