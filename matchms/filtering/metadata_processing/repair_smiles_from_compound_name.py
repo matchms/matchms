@@ -2,8 +2,8 @@ import logging
 import numpy as np
 import pandas as pd
 from matchms import Spectrum
-from matchms.filtering.filter_utils.metadata_utils import (is_valid_inchi, is_valid_inchikey,
-                                                           is_valid_smiles)
+from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import (is_valid_inchi, is_valid_inchikey,
+                                                                             is_valid_smiles)
 
 
 logger = logging.getLogger("matchms")

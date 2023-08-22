@@ -5,10 +5,10 @@ from importlib.util import find_spec
 from unittest import mock
 import numpy as np
 import pytest
-import matchms.filtering.filter_utils.metadata_utils
+import matchms.filtering.filter_utils.smile_inchi_inchikey_conversions
 import matchms.filtering.metadata_processing.add_fingerprint
-from matchms.filtering.filter_utils.metadata_utils import (is_valid_inchi, is_valid_inchikey,
-                                                           is_valid_smiles, mol_converter)
+from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import (is_valid_inchi, is_valid_inchikey,
+                                                                             is_valid_smiles, mol_converter)
 from matchms.filtering.metadata_processing.add_fingerprint import derive_fingerprint_from_smiles, \
     derive_fingerprint_from_inchi
 
@@ -17,7 +17,7 @@ from matchms.filtering.metadata_processing.add_fingerprint import derive_fingerp
 def reload_metadata_utils():
     """Reload metadata_utils module after test has finished."""
     yield
-    reload(matchms.filtering.filter_utils.metadata_utils)
+    reload(matchms.filtering.filter_utils.smile_inchi_inchikey_conversions)
 
 
 def test_mol_converter_smiles_to_inchi():
@@ -173,18 +173,18 @@ def test_missing_rdkit_module_error(reload_metadata_utils):
 
     expected_msg = "Conda package 'rdkit' is required for this functionality."
     with context:
-        reload(matchms.filtering.filter_utils.metadata_utils)
+        reload(matchms.filtering.filter_utils.smile_inchi_inchikey_conversions)
         mol_input = "C[Si](Cn1cncn1)(c1ccc(F)cc1)"
         with pytest.raises(ImportError) as msg:
-            _ = matchms.filtering.filter_utils.metadata_utils.mol_converter(mol_input, "smiles", "inchikey")
+            _ = matchms.filtering.filter_utils.smile_inchi_inchikey_conversions.mol_converter(mol_input, "smiles", "inchikey")
         assert expected_msg in str(msg.value), "Expected different ImportError."
 
         with pytest.raises(ImportError) as msg:
-            _ = matchms.filtering.filter_utils.metadata_utils.is_valid_inchi("test")
+            _ = matchms.filtering.filter_utils.smile_inchi_inchikey_conversions.is_valid_inchi("test")
         assert expected_msg in str(msg.value), "Expected different ImportError."
 
         with pytest.raises(ImportError) as msg:
-            _ = matchms.filtering.filter_utils.metadata_utils.is_valid_smiles("test")
+            _ = matchms.filtering.filter_utils.smile_inchi_inchikey_conversions.is_valid_smiles("test")
         assert expected_msg in str(msg.value), "Expected different ImportError."
 
         with pytest.raises(ImportError) as msg:

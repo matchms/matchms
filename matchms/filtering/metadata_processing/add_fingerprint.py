@@ -3,8 +3,8 @@ import numpy as np
 from rdkit import Chem
 
 from matchms.typing import SpectrumType
-from matchms.filtering.filter_utils.metadata_utils import (_has_rdkit,
-                                                           rdkit_missing_message, Chem, AllChem)
+from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import (_has_rdkit,
+                                                                             rdkit_missing_message, Chem, AllChem)
 
 
 logger = logging.getLogger("matchms")
