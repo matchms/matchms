@@ -22,7 +22,7 @@ rdkit_missing_message = "Conda package 'rdkit' is required for this functionalit
 
 
 def get_monoisotopic_neutral_mass(smiles: str) -> float:
-    """Get the monoisotopic neutral mass from a SMILES string chemical 
+    """Get the monoisotopic neutral mass from a SMILES string chemical
     identifier for the described molecule.
 
     Args:
