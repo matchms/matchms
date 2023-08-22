@@ -144,4 +144,3 @@ def is_valid_inchikey(inchikey: str) -> bool:
     if re.fullmatch(regexp, inchikey):
         return True
     return False
-
