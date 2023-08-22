@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from matchms import Spectrum
 from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import (
-    is_valid_inchi, is_valid_inchikey, is_valid_smiles)
+    _check_fully_annotated)
 
 
 logger = logging.getLogger("matchms")
@@ -61,19 +61,6 @@ def _load_compound_name_annotations(annotated_compound_names_file):
                                                       "inchikey", "monoisotopic_mass"], \
         "Choose a different annotated compound names file with columns compound_name, smiles, inchi, inchikey, monoisotopic_mass"
     return annotated_compound_names
-
-
-def _check_fully_annotated(spectrum: Spectrum) -> bool:
-    """Combine multiple check functions.
-    Returns False if SMILES, InChIKey, or InChI are missing.
-    """
-    if not is_valid_smiles(spectrum.get("smiles")):
-        return False
-    if not is_valid_inchikey(spectrum.get("inchikey")):
-        return False
-    if not is_valid_inchi(spectrum.get("inchi")):
-        return False
-    return True
 
 
 def _is_plausible_name(compound_name):
