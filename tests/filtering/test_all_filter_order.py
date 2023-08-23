@@ -2,23 +2,33 @@
 when changing the ALL_FILTERS order in the future"""
 import ast
 import os
-
+from typing import List, Callable
 import pytest
 from matchms.filtering.filter_order_and_default_pipelines import ALL_FILTERS, PREDEFINED_PIPELINES
 from matchms.filtering.SpectrumProcessor import SpectrumProcessor
+from matchms import filtering as msfilters
 
-@pytest.mark.parametrize("early_filter, later_filter", [
-    ["require_valid_annotation", "repair_smiles_of_salts"],
+REPAIR_PARENT_MASS_SMILES_FILTERS = \
+    [msfilters.repair_smiles_of_salts, msfilters.repair_precursor_is_parent_mass,
+     msfilters.repair_parent_mass_is_mol_wt, msfilters.repair_adduct_based_on_smiles,
+     msfilters.repair_parent_mass_match_smiles_wrapper, ]
+
+
+@pytest.mark.parametrize("early_filters, later_filters", [
+    [[msfilters.repair_not_matching_annotation], [msfilters.require_valid_annotation]],
+    [REPAIR_PARENT_MASS_SMILES_FILTERS, [msfilters.require_parent_mass_match_smiles]],
 ])
-def test_all_filter_order(early_filter, later_filter):
+def test_all_filter_order(early_filters: List[Callable], later_filters: List[Callable]):
     """Tests if early_filter is run before later_filter"""
-    for filter_index, filter_function in enumerate(ALL_FILTERS):
-        filter_name = filter_function.__name__
-        if early_filter == filter_name:
-            early_filter_index = filter_index
-        if later_filter == filter_name:
-            later_filter_index = filter_index
-    assert later_filter_index > early_filter_index, f"The filter {early_filter} should be before {later_filter}"
+    for early_filter in early_filters:
+        for later_filter in later_filters:
+            for filter_index, filter_function in enumerate(ALL_FILTERS):
+                if early_filter == filter_function:
+                    early_filter_index = filter_index
+                if later_filter == filter_function:
+                    later_filter_index = filter_index
+            assert later_filter_index > early_filter_index, \
+                f"The filter {early_filter.__name__} should be before {later_filter.__name__}"
 
 
 def test_all_filters_is_complete():
