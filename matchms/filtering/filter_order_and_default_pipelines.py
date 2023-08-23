@@ -46,7 +46,7 @@ ALL_FILTERS = [msfilters.make_charge_int,
                msfilters.require_minimum_of_high_peaks,
                msfilters.add_fingerprint,
                msfilters.add_losses,
-              ]
+               ]
 FILTER_FUNCTIONS = {x.__name__: x for x in ALL_FILTERS}
 MINIMAL_FILTERS = ["make_charge_int",
                    "interpret_pepmass",
@@ -55,30 +55,30 @@ MINIMAL_FILTERS = ["make_charge_int",
                    ]
 BASIC_FILTERS = MINIMAL_FILTERS \
                 + ["add_compound_name",
-       "derive_adduct_from_name",
-       "derive_formula_from_name",
-       "clean_compound_name",
-       "add_precursor_mz",
-    ]
+                   "derive_adduct_from_name",
+                   "derive_formula_from_name",
+                   "clean_compound_name",
+                   "add_precursor_mz",
+                   ]
 DEFAULT_FILTERS = BASIC_FILTERS \
                   + ["require_precursor_mz",
-       "add_parent_mass",
-       "harmonize_undefined_inchikey",
-       "harmonize_undefined_inchi",
-       "harmonize_undefined_smiles",
-       "repair_inchi_inchikey_smiles",
-       "normalize_intensities",
-    ]
+                     "add_parent_mass",
+                     "harmonize_undefined_inchikey",
+                     "harmonize_undefined_inchi",
+                     "harmonize_undefined_smiles",
+                     "repair_inchi_inchikey_smiles",
+                     "normalize_intensities",
+                     ]
 FULLY_ANNOTATED_PROCESSING = DEFAULT_FILTERS \
                              + ["clean_adduct",
-       "derive_inchi_from_smiles",
-       "derive_smiles_from_inchi",
-       "derive_inchikey_from_inchi",
-       ("require_correct_ionmode", {"ion_mode_to_keep": "both"}),
-       ("require_parent_mass_match_smiles", {'mass_tolerance': 0.1}),
-       "repair_not_matching_annotation"
-       "require_valid_annotation",
-    ]
+                                "derive_inchi_from_smiles",
+                                "derive_smiles_from_inchi",
+                                "derive_inchikey_from_inchi",
+                                ("require_correct_ionmode", {"ion_mode_to_keep": "both"}),
+                                ("require_parent_mass_match_smiles", {'mass_tolerance': 0.1}),
+                                "repair_not_matching_annotation"
+                                "require_valid_annotation",
+                                ]
 PREDEFINED_PIPELINES = {
     "minimal": MINIMAL_FILTERS,
     "basic": BASIC_FILTERS,
