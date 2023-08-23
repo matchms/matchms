@@ -2,8 +2,8 @@ import logging
 import numpy as np
 import pandas as pd
 from matchms import Spectrum
-from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import (
-    _check_fully_annotated)
+from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import \
+    _check_fully_annotated
 
 
 logger = logging.getLogger("matchms")

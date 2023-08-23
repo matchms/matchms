@@ -1,5 +1,6 @@
 import pytest
-from matchms.filtering import require_valid_annotation, repair_not_matching_annotation
+from matchms.filtering import (repair_not_matching_annotation,
+                               require_valid_annotation)
 from ..builder_Spectrum import SpectrumBuilder
 
 
