@@ -224,6 +224,7 @@ ALL_FILTERS = [msfilters.make_charge_int,
                msfilters.repair_parent_mass_is_mol_wt,
                msfilters.repair_adduct_based_on_smiles,
                msfilters.repair_parent_mass_match_smiles_wrapper,
+               msfilters.repair_not_matching_annotation,
                msfilters.require_correct_ionmode,
                msfilters.require_precursor_below_mz,
                msfilters.require_valid_annotation,
@@ -271,6 +272,7 @@ FULLY_ANNOTATED_PROCESSING = DEFAULT_FILTERS \
        "derive_inchikey_from_inchi",
        ("require_correct_ionmode", {"ion_mode_to_keep": "both"}),
        ("require_parent_mass_match_smiles", {'mass_tolerance': 0.1}),
+       "repair_not_matching_annotation"
        "require_valid_annotation",
     ]
 
