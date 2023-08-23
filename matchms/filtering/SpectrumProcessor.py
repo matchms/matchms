@@ -56,12 +56,12 @@ class SpectrumProcessor:
         """
         if isinstance(filter_spec, str):
             if filter_spec not in FILTER_FUNCTION_NAMES:
-                raise ValueError("Unknown filter type. Should be known filter name or function.")
+                raise ValueError(f"Unknown filter type: {filter_spec} Should be known filter name or function.")
             filter_func = FILTER_FUNCTION_NAMES[filter_spec]
         elif isinstance(filter_spec, (tuple, list)):
             filter_name, filter_args = filter_spec
             if filter_name not in FILTER_FUNCTION_NAMES:
-                raise ValueError("Unknown filter type. Should be known filter name or function.")
+                raise ValueError(f"Unknown filter type: {filter_name} Should be known filter name or function.")
             filter_func = partial(FILTER_FUNCTION_NAMES[filter_name], **filter_args)
             filter_func.__name__ = FILTER_FUNCTION_NAMES[filter_name].__name__
         else:

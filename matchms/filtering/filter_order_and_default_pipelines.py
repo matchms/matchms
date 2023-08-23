@@ -76,7 +76,7 @@ FULLY_ANNOTATED_PROCESSING = DEFAULT_FILTERS \
                                 "derive_inchikey_from_inchi",
                                 ("require_correct_ionmode", {"ion_mode_to_keep": "both"}),
                                 ("require_parent_mass_match_smiles", {'mass_tolerance': 0.1}),
-                                "repair_not_matching_annotation"
+                                "repair_not_matching_annotation",
                                 "require_valid_annotation",
                                 ]
 PREDEFINED_PIPELINES = {
