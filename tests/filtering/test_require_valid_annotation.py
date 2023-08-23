@@ -1,5 +1,5 @@
 import pytest
-from matchms.filtering import require_valid_annotation, repair_valid_annotation
+from matchms.filtering import require_valid_annotation, repair_not_matching_annotation
 from ..builder_Spectrum import SpectrumBuilder
 
 
@@ -34,7 +34,7 @@ def test_repair_valid_annotation_repair_inchikey(smile, inchi, inchikey, correct
     spectrum_in = builder.with_metadata({"smiles": smile,
                                          "inchi": inchi,
                                          "inchikey": inchikey}).build()
-    spectrum_out = repair_valid_annotation(spectrum_in)
+    spectrum_out = repair_not_matching_annotation(spectrum_in)
     assert spectrum_out.get("inchikey") == correct_inchikey
     assert spectrum_out.get("smiles") == spectrum_in.get("smiles")
     assert spectrum_out.get("inchi") == spectrum_in.get("inchi")
@@ -57,7 +57,7 @@ def test_repair_valid_annotation_repair_smiles_inchi(smile, inchi, inchikey, par
                                          "inchi": inchi,
                                          "inchikey": inchikey,
                                          "parent_mass": parent_mass}).build()
-    spectrum_out = repair_valid_annotation(spectrum_in)
+    spectrum_out = repair_not_matching_annotation(spectrum_in)
     assert spectrum_out.get("inchikey") == correct_inchikey
     assert spectrum_out.get("smiles") == correct_smiles
     assert spectrum_out.get("inchi") == correct_inchi

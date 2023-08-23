@@ -9,7 +9,7 @@ from matchms.filtering.metadata_processing.require_parent_mass_match_smiles impo
 logger = logging.getLogger("matchms")
 
 
-def repair_valid_annotation(spectrum_in: Spectrum):
+def repair_not_matching_annotation(spectrum_in: Spectrum):
     """When smiles and inchi do not match the annotation that matches parent mass will be kept"""
     if spectrum_in is None:
         return None
