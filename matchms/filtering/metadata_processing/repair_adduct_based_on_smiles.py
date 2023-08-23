@@ -11,7 +11,7 @@ logger = logging.getLogger("matchms")
 
 def repair_adduct_based_on_smiles(spectrum_in: Spectrum,
                                   mass_tolerance,
-                                  accept_parent_mass_is_mol_wt):
+                                  accept_parent_mass_is_mol_wt = True):
     """If the parent mass is wrong due to a wrong of is derived from the precursor mz
     To do this the charge and adduct are used"""
     if spectrum_in is None:
@@ -30,6 +30,8 @@ def repair_adduct_based_on_smiles(spectrum_in: Spectrum,
 
     adducts_df = load_known_adducts()
     smiles_mass = get_monoisotopic_neutral_mass(changed_spectrum.get("smiles"))
+    if smiles_mass is None:
+        return changed_spectrum
     parent_masses = (precursor_mz - adducts_df["correction_mass"]) / adducts_df["mass_multiplier"]
     mass_differences = abs(parent_masses-smiles_mass)
 

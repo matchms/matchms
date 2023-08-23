@@ -2,6 +2,8 @@ import itertools
 import logging
 from matchms.filtering.filter_utils.get_neutral_mass_from_smiles import \
     get_monoisotopic_neutral_mass
+from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import \
+    is_valid_smiles
 
 
 logger = logging.getLogger("matchms")
@@ -17,6 +19,9 @@ def repair_smiles_of_salts(spectrum_in,
     spectrum = spectrum_in.clone()
 
     smiles = spectrum.get("smiles")
+    if not is_valid_smiles(smiles):
+        logger.warning("No valid smiles, please run require_valid_annotation before")
+        return spectrum
     parent_mass = spectrum.get("parent_mass")
     possible_ion_combinations = _create_possible_ions(smiles)
     if not possible_ion_combinations:

@@ -27,8 +27,10 @@ def repair_parent_mass_is_mol_wt(spectrum_in: Spectrum, mass_tolerance: float):
     # Check if parent mass matches the smiles mass
     parent_mass = spectrum.get("parent_mass")
     smiles = spectrum.get("smiles")
-    smiles_mass = get_molecular_weight_neutral_mass(smiles)
-    mass_difference = parent_mass - smiles_mass
+    smiles_molecular_weight = get_molecular_weight_neutral_mass(smiles)
+    if smiles_molecular_weight is None:
+        return spectrum
+    mass_difference = parent_mass - smiles_molecular_weight
     if abs(mass_difference) < mass_tolerance:
         correct_mass = get_monoisotopic_neutral_mass(smiles)
         spectrum.set("parent_mass", correct_mass)
