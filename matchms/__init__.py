@@ -8,7 +8,7 @@ from .Metadata import Metadata
 from .Pipeline import Pipeline
 from .Scores import Scores
 from .Spectrum import Spectrum
-from .SpectrumProcessor import SpectrumProcessor
+from matchms.filtering.SpectrumProcessor import SpectrumProcessor
 
 
 _init_logger()
