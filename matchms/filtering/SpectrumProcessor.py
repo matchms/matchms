@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 from matchms import Spectrum
-from matchms.filtering.filter_order_and_default_pipelines import ALL_FILTERS, FILTER_FUNCTIONS, PREDEFINED_PIPELINES
+from matchms.filtering.filter_order_and_default_pipelines import ALL_FILTERS, FILTER_FUNCTION_NAMES, PREDEFINED_PIPELINES
 
 
 class SpectrumProcessor:
@@ -55,15 +55,15 @@ class SpectrumProcessor:
             filter function and the second element is a dictionary containing additional arguments for the function.
         """
         if isinstance(filter_spec, str):
-            if filter_spec not in FILTER_FUNCTIONS:
+            if filter_spec not in FILTER_FUNCTION_NAMES:
                 raise ValueError("Unknown filter type. Should be known filter name or function.")
-            filter_func = FILTER_FUNCTIONS[filter_spec]
+            filter_func = FILTER_FUNCTION_NAMES[filter_spec]
         elif isinstance(filter_spec, (tuple, list)):
             filter_name, filter_args = filter_spec
-            if filter_name not in FILTER_FUNCTIONS:
+            if filter_name not in FILTER_FUNCTION_NAMES:
                 raise ValueError("Unknown filter type. Should be known filter name or function.")
-            filter_func = partial(FILTER_FUNCTIONS[filter_name], **filter_args)
-            filter_func.__name__ = FILTER_FUNCTIONS[filter_name].__name__
+            filter_func = partial(FILTER_FUNCTION_NAMES[filter_name], **filter_args)
+            filter_func.__name__ = FILTER_FUNCTION_NAMES[filter_name].__name__
         else:
             raise TypeError("filter_spec should be a string or a tuple or list")
 

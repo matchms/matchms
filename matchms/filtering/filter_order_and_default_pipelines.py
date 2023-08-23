@@ -47,7 +47,7 @@ ALL_FILTERS = [msfilters.make_charge_int,
                msfilters.add_fingerprint,
                msfilters.add_losses,
                ]
-FILTER_FUNCTIONS = {x.__name__: x for x in ALL_FILTERS}
+FILTER_FUNCTION_NAMES = {x.__name__: x for x in ALL_FILTERS}
 MINIMAL_FILTERS = ["make_charge_int",
                    "interpret_pepmass",
                    "derive_ionmode",
