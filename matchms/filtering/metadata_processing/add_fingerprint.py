@@ -100,7 +100,7 @@ def _derive_fingerprint_from_inchi(inchi: str, fingerprint_type: str, nbits: int
     return _mol_to_fingerprint(mol, fingerprint_type, nbits)
 
 
-def _mol_to_fingerprint(mol: Chem.rdchem.Mol, fingerprint_type: str, nbits: int) -> Optional[np.ndarray]:
+def _mol_to_fingerprint(mol: Mol, fingerprint_type: str, nbits: int) -> Optional[np.ndarray]:
     """Convert rdkit mol (molecule) to molecular fingerprint.
     Requires conda package *rdkit* to be installed.
 
