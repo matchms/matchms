@@ -2,7 +2,7 @@
 when changing the ALL_FILTERS order in the future"""
 
 import pytest
-from matchms.filtering.SpectrumProcessor import ALL_FILTERS
+from matchms.filtering.filter_order_and_default_pipelines import ALL_FILTERS
 
 
 @pytest.mark.parametrize("early_filter, later_filter", [

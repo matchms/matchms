@@ -3,7 +3,8 @@ import os
 import numpy as np
 import pytest
 from matchms import SpectrumProcessor
-from matchms.filtering.SpectrumProcessor import ALL_FILTERS, ProcessingReport
+from matchms.filtering.SpectrumProcessor import ProcessingReport
+from matchms.filtering.filter_order_and_default_pipelines import ALL_FILTERS
 from ..builder_Spectrum import SpectrumBuilder
 
 
