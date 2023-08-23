@@ -2,6 +2,7 @@ import logging
 import numpy as np
 from rdkit import Chem
 from rdkit.Chem import AllChem
+from rdkit.Chem.rdchem import Mol
 from matchms.typing import SpectrumType
 
 
