@@ -7,7 +7,7 @@ from testfixtures import LogCapture
 from matchms.exporting import save_as_json, save_as_mgf, save_as_msp
 from matchms.filtering import add_fingerprint
 from matchms.filtering.metadata_processing.add_fingerprint import (
-    derive_fingerprint_from_inchi, derive_fingerprint_from_smiles)
+    _derive_fingerprint_from_inchi, _derive_fingerprint_from_smiles)
 from matchms.importing import load_from_json, load_from_mgf, load_from_msp
 from matchms.logging_functions import (reset_matchms_logger,
                                        set_matchms_logger_level)
@@ -66,7 +66,7 @@ def test_derive_fingerprint_from_smiles():
     """Test if correct fingerprint is derived from given smiles."""
     pytest.importorskip("rdkit")
 
-    fingerprint = derive_fingerprint_from_smiles("[C+]#C[O-]", "daylight", 16)
+    fingerprint = _derive_fingerprint_from_smiles("[C+]#C[O-]", "daylight", 16)
     expected_fingerprint = np.array([0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0])
     assert np.all(fingerprint == expected_fingerprint), "Expected different fingerprint."
 
@@ -75,7 +75,7 @@ def test_derive_fingerprint_from_inchi():
     """Test if correct fingerprint is derived from given inchi."""
     pytest.importorskip("rdkit")
 
-    fingerprint = derive_fingerprint_from_inchi("InChI=1S/C2O/c1-2-3", "daylight", 16)
+    fingerprint = _derive_fingerprint_from_inchi("InChI=1S/C2O/c1-2-3", "daylight", 16)
     expected_fingerprint = np.array([0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0])
     assert np.all(fingerprint == expected_fingerprint), "Expected different fingerprint."
 
@@ -93,5 +93,5 @@ def test_derive_fingerprint_different_types_from_smiles():
     ]
 
     for i, fingerprint_type in enumerate(types):
-        fingerprint = derive_fingerprint_from_smiles("[C+]#C[O-]", fingerprint_type, 16)
+        fingerprint = _derive_fingerprint_from_smiles("[C+]#C[O-]", fingerprint_type, 16)
         assert np.all(fingerprint == expected_fingerprints[i]), "Expected different fingerprint."

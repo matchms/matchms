@@ -32,16 +32,14 @@ def add_fingerprint(spectrum_in: SpectrumType, fingerprint_type: str = "daylight
 
     # First try to get fingerprint from smiles
     if spectrum.get("smiles", None):
-        fingerprint = derive_fingerprint_from_smiles(spectrum.get("smiles"),
-                                                     fingerprint_type, nbits)
+        fingerprint = _derive_fingerprint_from_smiles(spectrum.get("smiles"), fingerprint_type, nbits)
         if isinstance(fingerprint, np.ndarray) and fingerprint.sum() > 0:
             spectrum.set("fingerprint", fingerprint)
             return spectrum
 
     # Second try to get fingerprint from inchi
     if spectrum.get("inchi", None):
-        fingerprint = derive_fingerprint_from_inchi(spectrum.get("inchi"),
-                                                    fingerprint_type, nbits)
+        fingerprint = _derive_fingerprint_from_inchi(spectrum.get("inchi"), fingerprint_type, nbits)
         if isinstance(fingerprint, np.ndarray) and fingerprint.sum() > 0:
             spectrum.set("fingerprint", fingerprint)
             return spectrum
@@ -50,7 +48,7 @@ def add_fingerprint(spectrum_in: SpectrumType, fingerprint_type: str = "daylight
     return spectrum
 
 
-def derive_fingerprint_from_smiles(smiles: str, fingerprint_type: str, nbits: int) -> np.ndarray:
+def _derive_fingerprint_from_smiles(smiles: str, fingerprint_type: str, nbits: int) -> np.ndarray:
     """Calculate molecule fingerprint based on given smiles or inchi (using rdkit).
     Requires conda package *rdkit* to be installed.
 
@@ -72,10 +70,10 @@ def derive_fingerprint_from_smiles(smiles: str, fingerprint_type: str, nbits: in
     mol = Chem.MolFromSmiles(smiles)
     if mol is None:
         return None
-    return mol_to_fingerprint(mol, fingerprint_type, nbits)
+    return _mol_to_fingerprint(mol, fingerprint_type, nbits)
 
 
-def derive_fingerprint_from_inchi(inchi: str, fingerprint_type: str, nbits: int) -> np.ndarray:
+def _derive_fingerprint_from_inchi(inchi: str, fingerprint_type: str, nbits: int) -> np.ndarray:
     """Calculate molecule fingerprint based on given inchi (using rdkit).
     Requires conda package *rdkit* to be installed.
 
@@ -97,10 +95,10 @@ def derive_fingerprint_from_inchi(inchi: str, fingerprint_type: str, nbits: int)
     mol = Chem.MolFromInchi(inchi)
     if mol is None:
         return None
-    return mol_to_fingerprint(mol, fingerprint_type, nbits)
+    return _mol_to_fingerprint(mol, fingerprint_type, nbits)
 
 
-def mol_to_fingerprint(mol: Chem.rdchem.Mol, fingerprint_type: str, nbits: int) -> np.ndarray:
+def _mol_to_fingerprint(mol: Chem.rdchem.Mol, fingerprint_type: str, nbits: int) -> np.ndarray:
     """Convert rdkit mol (molecule) to molecular fingerprint.
     Requires conda package *rdkit* to be installed.
 
