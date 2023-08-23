@@ -6,7 +6,8 @@ from matchms.typing import SpectrumType
 from .repair_parent_mass_is_mol_wt import repair_parent_mass_is_mol_wt
 from .repair_precursor_is_parent_mass import repair_precursor_is_parent_mass
 from .repair_smiles_of_salts import repair_smiles_of_salts
-from .require_parent_mass_match_smiles import _check_smiles_and_parent_mass_match
+from .require_parent_mass_match_smiles import \
+    _check_smiles_and_parent_mass_match
 
 
 logger = logging.getLogger("matchms")

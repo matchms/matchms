@@ -1,3 +1,4 @@
+from matchms.filtering.SpectrumProcessor import SpectrumProcessor
 from . import exporting, filtering, importing, networking, plotting, similarity
 from .__version__ import __version__
 from .calculate_scores import calculate_scores
@@ -8,7 +9,6 @@ from .Metadata import Metadata
 from .Pipeline import Pipeline
 from .Scores import Scores
 from .Spectrum import Spectrum
-from matchms.filtering.SpectrumProcessor import SpectrumProcessor
 
 
 _init_logger()

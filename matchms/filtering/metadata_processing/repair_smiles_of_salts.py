@@ -2,7 +2,8 @@ import itertools
 import logging
 from matchms.filtering.filter_utils.get_neutral_mass_from_smiles import \
     get_monoisotopic_neutral_mass
-from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import is_valid_smiles
+from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import \
+    is_valid_smiles
 
 
 logger = logging.getLogger("matchms")

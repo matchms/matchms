@@ -2,11 +2,13 @@
 when changing the ALL_FILTERS order in the future"""
 import ast
 import os
-from typing import List, Callable
+from typing import Callable, List
 import pytest
-from matchms.filtering.filter_order_and_default_pipelines import ALL_FILTERS, PREDEFINED_PIPELINES
-from matchms.filtering.SpectrumProcessor import SpectrumProcessor
 from matchms import filtering as msfilters
+from matchms.filtering.filter_order_and_default_pipelines import (
+    ALL_FILTERS, PREDEFINED_PIPELINES)
+from matchms.filtering.SpectrumProcessor import SpectrumProcessor
+
 
 REPAIR_PARENT_MASS_SMILES_FILTERS = \
     [msfilters.repair_smiles_of_salts, msfilters.repair_precursor_is_parent_mass,

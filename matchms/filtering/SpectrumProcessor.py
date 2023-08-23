@@ -5,7 +5,8 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 from matchms import Spectrum
-from matchms.filtering.filter_order_and_default_pipelines import ALL_FILTERS, FILTER_FUNCTION_NAMES, PREDEFINED_PIPELINES
+from matchms.filtering.filter_order_and_default_pipelines import (
+    ALL_FILTERS, FILTER_FUNCTION_NAMES, PREDEFINED_PIPELINES)
 
 
 class SpectrumProcessor:

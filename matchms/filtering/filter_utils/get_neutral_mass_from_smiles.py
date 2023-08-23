@@ -1,6 +1,6 @@
+import logging
 from typing import Optional
 from matchms.constants import PROTON_MASS
-import logging
 
 
 logger = logging.getLogger("matchms")

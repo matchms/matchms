@@ -1,5 +1,6 @@
 from matchms import filtering as msfilters
 
+
 # List all filters in a functionally working order
 ALL_FILTERS = [msfilters.make_charge_int,
                msfilters.add_compound_name,
