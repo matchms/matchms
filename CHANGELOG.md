@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+### Changed
+- Repair_smiles_from_compound_name, now works without matchmsextras
+  - pubchempy was added as dependency
+
 ## [0.22.0] - 2023-08-18
 
 ### Added
