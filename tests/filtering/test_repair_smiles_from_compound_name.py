@@ -49,7 +49,7 @@ def test_repair_smiles_from_compound_name_skip_already_correct():
 
 @pytest.mark.parametrize("compound_name, smiles, parent_mass, expected_smiles", [
     ("PC(18:0/20:4)", "wrong_smiles",
-     809.593, "CCCCCCCCCCCCCCCCCC(=O)O[C@H](COC(=O)CCC/C=C\C/C=C\C/C=C\C/C=C\CCCCC)COP(=O)([O-])OCC[N+](C)(C)C"),
+     809.593, r"CCCCCCCCCCCCCCCCCC(=O)O[C@H](COC(=O)CCC/C=C\C/C=C\C/C=C\C/C=C\CCCCC)COP(=O)([O-])OCC[N+](C)(C)C"),
     ("glucose", "input_smile_1", 180.0633881, 'C([C@@H]1[C@H]([C@@H]([C@H](C(O1)O)O)O)O)O'),
     ("this compound does not exist", None, 200.01, None),
     ("also_does_not_exist_and_not_in_csv", None, 100.01, None),
@@ -57,6 +57,7 @@ def test_repair_smiles_from_compound_name_skip_already_correct():
 def test_repair_smiles_from_compound_name(compound_name, parent_mass, smiles,
                                           expected_smiles,
                                           csv_file_with_real_compound_names, tmp_path):
+    #pylint: disable=too-many-arguments
     builder = SpectrumBuilder()
     spectrum_in = builder.with_metadata({"compound_name": compound_name,
                                          "parent_mass": parent_mass,

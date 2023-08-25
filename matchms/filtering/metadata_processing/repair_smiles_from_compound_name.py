@@ -5,7 +5,7 @@ from functools import lru_cache
 from typing import List, Optional
 import numpy as np
 import pandas as pd
-import pubchempy as pubchempy
+import pubchempy
 from matchms import Spectrum
 from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import \
     _check_fully_annotated
@@ -129,7 +129,7 @@ def _write_compound_name_annotations(annotated_compound_names_csv, compound_name
     if not os.path.exists(annotated_compound_names_csv):
         with open(annotated_compound_names_csv, "w", encoding="utf8") as f:
             f.write("compound_name,smiles,inchi,inchikey,monoisotopic_mass\n")
-    with open(annotated_compound_names_csv, "a") as csv_file:
+    with open(annotated_compound_names_csv, "a", encoding="utf-8") as csv_file:
         writer = csv.writer(csv_file)
         for compound_name_annotation in compound_name_annotations:
             writer.writerow([compound_name_annotation["compound_name"],
