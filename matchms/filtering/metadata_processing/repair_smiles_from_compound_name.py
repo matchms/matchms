@@ -92,7 +92,7 @@ def _pubchem_name_search(compound_name: str, name_search_depth=10,) -> List[dict
             results_pubchem = pubchempy.get_compounds(compound_name.replace("_", " "),
                                                       'name',
                                                       listkey_count=name_search_depth)
-    except (pubchempy.ServerError, ConnectionError, ConnectionAbortedError):
+    except (pubchempy.ServerError, ConnectionError, ConnectionAbortedError, pubchempy.PubChemHTTPError):
         print("Connection error, trying again")
         return _pubchem_name_search(compound_name, name_search_depth=name_search_depth)
 
