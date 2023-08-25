@@ -41,8 +41,7 @@ tqdm = "^4.65.0"
 rdkit = "^2023.3.2"
 pyyaml = "^6.0.1"
 deprecated = "^1.2.14"
-PubChemPy = "^1.04"
-
+pubchempy = "*"
 
 [tool.poetry.group.dev.dependencies]
 decorator = "^5.1.1"
