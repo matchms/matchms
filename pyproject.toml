@@ -41,7 +41,7 @@ tqdm = "^4.65.0"
 rdkit = "^2023.3.2"
 pyyaml = "^6.0.1"
 deprecated = "^1.2.14"
-pubchempy = "^1.04"
+pubchempy == "v1.04"
 
 
 [tool.poetry.group.dev.dependencies]
