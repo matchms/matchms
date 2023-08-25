@@ -110,7 +110,7 @@ def test_load_compound_name_annotation(compound_name, expected_output, csv_file_
 @pytest.mark.parametrize("compound_name, expected_output", [
     ("glucose", [{'compound_name': 'glucose', 'smiles': 'C([C@@H]1[C@H]([C@@H]([C@H](C(O1)O)O)O)O)O',
                   'inchi': 'InChI=1S/C6H12O6/c7-1-2-3(8)4(9)5(10)6(11)12-2/h2-11H,1H2/t2-,3-,4+,5-,6?/m1/s1',
-                  'inchikey': 'WQZGKKKJIJFFOK-GASJEMHNSA-N', 'monoisotopic_mass': '180.06338810'}]),
+                  'inchikey': 'WQZGKKKJIJFFOK-GASJEMHNSA-N', 'monoisotopic_mass': 180.06338810}]),
     ("does_not_exist", [])])
 def test_pubchem_name_search(compound_name, expected_output):
     result = _pubchem_name_search(compound_name)
@@ -126,7 +126,7 @@ def test_pubchem_name_search(compound_name, expected_output):
                      'inchikey': None, 'monoisotopic_mass': None}]),
     ("glucose", [{'compound_name': 'glucose', 'smiles': 'C([C@@H]1[C@H]([C@@H]([C@H](C(O1)O)O)O)O)O',
                   'inchi': 'InChI=1S/C6H12O6/c7-1-2-3(8)4(9)5(10)6(11)12-2/h2-11H,1H2/t2-,3-,4+,5-,6?/m1/s1',
-                  'inchikey': 'WQZGKKKJIJFFOK-GASJEMHNSA-N', 'monoisotopic_mass': '180.06338810'}]),
+                  'inchikey': 'WQZGKKKJIJFFOK-GASJEMHNSA-N', 'monoisotopic_mass': 180.06338810}]),
     ("does_not_exist", [])])
 def test_get_compound_name_annotation(compound_name, expected_output, csv_file_annotated_compound_names):
     result = _get_compound_name_annotation(compound_name, csv_file_annotated_compound_names)
