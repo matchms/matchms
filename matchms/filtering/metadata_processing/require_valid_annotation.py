@@ -18,9 +18,9 @@ def repair_not_matching_annotation(spectrum_in: Spectrum):
     spectrum = spectrum_in.clone()
     # Check if smiles, inchi and inchikey are valid
     if not _check_fully_annotated(spectrum):
-        if is_valid_inchi(spectrum.get("inchi")) and \
-           is_valid_smiles(spectrum.get("smiles")) and \
-           is_valid_smiles(spectrum.get("inchikey")):
+        if not is_valid_inchi(spectrum.get("inchi")) and \
+           not is_valid_smiles(spectrum.get("smiles")) and \
+           not is_valid_smiles(spectrum.get("inchikey")):
             logger.info("No valid annotation was available for the spectrum, "
                         "so repair_not_matching_annotation was not run")
         else:
