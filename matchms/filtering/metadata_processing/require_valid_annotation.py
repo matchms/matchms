@@ -47,12 +47,13 @@ def repair_not_matching_annotation(spectrum_in: Spectrum):
                         "The new smiles matches the parent mass, while the old one did not", smiles, new_smiles)
 
     # Check if the inchikey matches the inchi
-    if inchikey[:14] == convert_inchi_to_inchikey(spectrum.get("inchi"))[:14]:
-        # The inchi, smiles and inchikey all already matched
-        return spectrum
+    new_inchikey = convert_inchi_to_inchikey(spectrum.get("inchi"))
+    if is_valid_inchikey(inchikey):
+        if inchikey == new_inchikey:
+            # The inchi, smiles and inchikey all already matched
+            return spectrum
     # The smiles and inchi (now) match, but the inchikey is still wrong
     # Repair inchikey
-    new_inchikey = convert_inchi_to_inchikey(spectrum.get("inchi"))
     logger.info("The inchikey has been changed from %s to %s", inchikey, new_inchikey)
     spectrum.set("inchikey", new_inchikey)
     return spectrum
