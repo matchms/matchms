@@ -90,7 +90,7 @@ def _get_multiplier_and_correction_mass_from_adduct(adduct: str) -> Tuple[int, f
         multiplier = known_adducts.loc[known_adducts["adduct"] == adduct, "mass_multiplier"].values[0]
         correction_mass = known_adducts.loc[known_adducts["adduct"] == adduct, "correction_mass"].values[0]
     else:
-        multiplier, correction_mass = get_multiplier_and_mass_from_adduct("adduct")
+        multiplier, correction_mass = get_multiplier_and_mass_from_adduct(adduct)
     return multiplier, correction_mass
 
 
