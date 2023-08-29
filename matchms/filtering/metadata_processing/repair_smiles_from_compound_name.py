@@ -1,4 +1,5 @@
 import csv
+import json
 import logging
 import os
 from functools import lru_cache
@@ -95,6 +96,8 @@ def _pubchem_name_search(compound_name: str, name_search_depth=10,) -> List[dict
     except (pubchempy.ServerError, ConnectionError, ConnectionAbortedError, pubchempy.PubChemHTTPError):
         print("Connection error, trying again")
         return _pubchem_name_search(compound_name, name_search_depth=name_search_depth)
+    except json.decoder.JSONDecodeError:
+        return []
 
     extracted_results = []
     # extract the needed information:
