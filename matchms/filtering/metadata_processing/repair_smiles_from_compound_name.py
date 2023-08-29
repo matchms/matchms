@@ -1,11 +1,11 @@
 import csv
 import json
 import logging
-import time
 import os
-from urllib.error import URLError
+import time
 from functools import lru_cache
 from typing import List, Optional
+from urllib.error import URLError
 import numpy as np
 import pandas as pd
 import pubchempy
