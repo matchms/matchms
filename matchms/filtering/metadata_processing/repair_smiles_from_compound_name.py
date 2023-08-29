@@ -121,7 +121,6 @@ def _load_compound_name_annotations(annotated_compound_names_csv, compound_name:
         "compound_name, smiles, inchi, inchikey, monoisotopic_mass"
 
     matches = annotated_compound_names[annotated_compound_names["compound_name"] == compound_name]
-    matches.replace(np.nan, None, inplace=True)
     return matches.to_dict("records")
 
 
