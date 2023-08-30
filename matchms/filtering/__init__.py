@@ -105,6 +105,8 @@ from .metadata_processing.repair_adduct_based_on_smiles import \
     repair_adduct_based_on_smiles
 from .metadata_processing.repair_inchi_inchikey_smiles import \
     repair_inchi_inchikey_smiles
+from .metadata_processing.repair_not_matching_annotation import \
+    repair_not_matching_annotation
 from .metadata_processing.repair_parent_mass_is_mol_wt import \
     repair_parent_mass_is_mol_wt
 from .metadata_processing.repair_parent_mass_match_smiles_wrapper import \
@@ -121,8 +123,7 @@ from .metadata_processing.require_parent_mass_match_smiles import \
 from .metadata_processing.require_precursor_below_mz import \
     require_precursor_below_mz
 from .metadata_processing.require_precursor_mz import require_precursor_mz
-from .metadata_processing.require_valid_annotation import (
-    repair_not_matching_annotation, require_valid_annotation)
+from .metadata_processing.require_valid_annotation import require_valid_annotation
 from .peak_processing.add_losses import add_losses
 from .peak_processing.normalize_intensities import normalize_intensities
 from .peak_processing.reduce_to_number_of_peaks import \
