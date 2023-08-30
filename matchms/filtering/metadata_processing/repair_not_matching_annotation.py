@@ -37,7 +37,6 @@ def repair_not_matching_annotation(spectrum_in: Spectrum):
         A cloned version of the input spectrum with corrected annotations. If the input
         spectrum is `None`, it returns `None`.
     """
-    # pylint: disable=too-many-arguments
     if spectrum_in is None:
         return None
 
@@ -71,6 +70,7 @@ def repair_not_matching_annotation(spectrum_in: Spectrum):
 def _handle_smiles_inchi_mismatch(spectrum, smiles, inchi,
                                   smiles_from_inchi, inchi_from_smiles,
                                   parent_mass):
+    # pylint: disable=too-many-arguments
     smiles_correct = _check_smiles_and_parent_mass_match(smiles, parent_mass, 0.1)
     inchi_correct = _check_smiles_and_parent_mass_match(smiles_from_inchi, parent_mass, 0.1)
 
