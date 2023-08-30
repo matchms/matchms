@@ -37,6 +37,7 @@ def repair_not_matching_annotation(spectrum_in: Spectrum):
         A cloned version of the input spectrum with corrected annotations. If the input
         spectrum is `None`, it returns `None`.
     """
+    # pylint: disable=too-many-arguments
     if spectrum_in is None:
         return None
 
