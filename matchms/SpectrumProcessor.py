@@ -93,13 +93,14 @@ class SpectrumProcessor:
             raise TypeError("Expected callable filter function.")
         if filter_position is None:
             self.filter_order.append(filter_function.__name__)
+        elif not isinstance(filter_position, int):
+            raise TypeError("Expected filter_position to be an integer.")
         else:
-            assert isinstance(filter_position, int)
             if filter_position >= len(self.filters):
                 self.filter_order.append(filter_function.__name__)
             else:
-                filter_at_correct_position = self.filters[filter_position].__name__
-                order_index = self.filter_order.index(filter_at_correct_position)
+                current_filter_at_position = self.filters[filter_position].__name__
+                order_index = self.filter_order.index(current_filter_at_position)
                 self.filter_order.insert(order_index, filter_function.__name__)
 
         if filter_params is None:
