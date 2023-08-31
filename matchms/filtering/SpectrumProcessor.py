@@ -202,6 +202,7 @@ class ProcessingReport:
     def __init__(self):
         self.counter_changed_metadata = defaultdict(int)
         self.counter_removed_spectrums = defaultdict(int)
+        self.counter_changed_peaks = defaultdict(int)
         self.counter_number_processed = 0
 
     def add_to_report(self, spectrum_old, spectrum_new: Spectrum,
@@ -211,8 +212,18 @@ class ProcessingReport:
         if spectrum_new is None:
             self.counter_removed_spectrums[filter_function_name] += 1
         else:
+            # Add metadata changes
             if spectrum_new.metadata != spectrum_old.metadata:
                 self.counter_changed_metadata[filter_function_name] += 1
+            if spectrum_new.peaks is None:
+                print("hello")
+                pass
+            if spectrum_old.peaks is None:
+                print("hello")
+                pass
+            # Add peak changes
+            if spectrum_new.peaks != spectrum_old.peaks or spectrum_new.losses != spectrum_old.losses:
+                self.counter_changed_peaks[filter_function_name] += 1
 
     def to_dataframe(self):
         """Create Pandas DataFrame Report of counted spectrum changes."""
@@ -220,7 +231,10 @@ class ProcessingReport:
                                         columns=["filter", "changed metadata"])
         removed = pd.DataFrame(self.counter_removed_spectrums.items(),
                                columns=["filter", "removed spectra"])
+        peaks_changed = pd.DataFrame(self.counter_changed_peaks.items(),
+                                     columns=["filter", "changed mass spectrum"])
         processing_report = pd.merge(removed, metadata_changed, how="outer", on="filter")
+        processing_report = pd.merge(processing_report, peaks_changed, how="outer", on="filter")
 
         processing_report = processing_report.set_index("filter").fillna(0)
         return processing_report.astype(int)
@@ -238,7 +252,9 @@ Changes during processing:
     def __repr__(self):
         return f"Report({self.counter_number_processed},\
         {self.counter_removed_spectrums},\
-        {dict(self.counter_changed_spectrum)})"
+        {dict(self.counter_removed_spectrums)},\
+        {dict(self.counter_changed_metadata)},\
+        {dict(self.counter_changed_peaks)})"
 
 
 def objects_differ(obj1, obj2):

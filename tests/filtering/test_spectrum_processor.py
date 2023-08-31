@@ -7,16 +7,15 @@ from ..builder_Spectrum import SpectrumBuilder
 
 @pytest.fixture
 def spectrums():
-    metadata1 = {"charge": "+1",
-                 "pepmass": 100}
-    metadata2 = {"charge": "-1",
-                 "pepmass": 102}
-    metadata3 = {"charge": -1,
-                 "pepmass": 104}
-
-    s1 = SpectrumBuilder().with_metadata(metadata1).build()
-    s2 = SpectrumBuilder().with_metadata(metadata2).build()
-    s3 = SpectrumBuilder().with_metadata(metadata3).build()
+    s1 = SpectrumBuilder().\
+        with_metadata({"charge": "+1", "pepmass": 100}).\
+        with_mz([10, 20, 30]).with_intensities([0.1, 0.4, 10]).build()
+    s2 = SpectrumBuilder().with_metadata({"charge": "-1",
+                                          "pepmass": 102}).\
+        with_mz([10, 20, 30]).with_intensities([0.1, 0.2, 1]).build()
+    s3 = SpectrumBuilder().with_metadata({"charge": -1,
+                                          "pepmass": 104}).\
+        with_mz([10, ]).with_intensities([0.1, ]).build()
     return [s1, s2, s3]
 
 
@@ -96,18 +95,20 @@ def test_filter_spectrums(spectrums):
 
 def test_filter_spectrums_report(spectrums):
     processor = SpectrumProcessor("minimal")
+    processor.add_filter(filter_function=("require_minimum_number_of_peaks", {"n_required": 2}))
+    processor.add_filter(filter_function="add_losses")
     spectrums, report = processor.process_spectrums(spectrums, create_report=True)
-    assert len(spectrums) == 3
+    assert len(spectrums) == 2
     actual_masses = [s.get("precursor_mz") for s in spectrums]
-    expected_masses = [100, 102, 104]
+    expected_masses = [100, 102]
     assert actual_masses == expected_masses
     assert report.counter_number_processed == 3
     assert report.counter_changed_metadata == {'make_charge_int': 2, 'interpret_pepmass': 3, 'derive_ionmode': 3}
     report_df = report.to_dataframe()
-    assert np.all(report_df.loc[["make_charge_int", "interpret_pepmass", "derive_ionmode"]].values == np.array(
-        [[0, 2],
-         [0, 3],
-         [0, 3]]))
+    assert np.all(report_df.loc[["require_minimum_number_of_peaks", "interpret_pepmass", "add_losses"]].values == np.array(
+        [[1, 0, 0],
+         [0, 3, 0],
+         [0, 0, 2]]))
 
 
 def test_processing_report_class(spectrums):
