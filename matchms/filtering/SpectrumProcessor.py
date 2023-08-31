@@ -199,7 +199,7 @@ class ProcessingReport:
     """Class to keep track of spectrum changes during filtering.
     """
     def __init__(self):
-        self.counter_changed_spectrum = defaultdict(int)
+        self.counter_changed_metadata = defaultdict(int)
         self.counter_removed_spectrums = defaultdict(int)
         self.counter_number_processed = 0
 
@@ -210,18 +210,16 @@ class ProcessingReport:
         if spectrum_new is None:
             self.counter_removed_spectrums[filter_function_name] += 1
         else:
-            for field, value in spectrum_new.metadata.items():
-                if objects_differ(spectrum_old.get(field), value):
-                    self.counter_changed_spectrum[filter_function_name] += 1
-                    break
+            if spectrum_new.metadata != spectrum_old.metadata:
+                self.counter_changed_metadata[filter_function_name] += 1
 
     def to_dataframe(self):
         """Create Pandas DataFrame Report of counted spectrum changes."""
-        changes = pd.DataFrame(self.counter_changed_spectrum.items(),
-                               columns=["filter", "changed spectra"])
+        metadata_changed = pd.DataFrame(self.counter_changed_metadata.items(),
+                                        columns=["filter", "changed metadata"])
         removed = pd.DataFrame(self.counter_removed_spectrums.items(),
                                columns=["filter", "removed spectra"])
-        processing_report = pd.merge(removed, changes, how="outer", on="filter")
+        processing_report = pd.merge(removed, metadata_changed, how="outer", on="filter")
 
         processing_report = processing_report.set_index("filter").fillna(0)
         return processing_report.astype(int)

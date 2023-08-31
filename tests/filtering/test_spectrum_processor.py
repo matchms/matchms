@@ -102,7 +102,7 @@ def test_filter_spectrums_report(spectrums):
     expected_masses = [100, 102, 104]
     assert actual_masses == expected_masses
     assert report.counter_number_processed == 3
-    assert report.counter_changed_spectrum == {'make_charge_int': 2, 'interpret_pepmass': 3, 'derive_ionmode': 3}
+    assert report.counter_changed_metadata == {'make_charge_int': 2, 'interpret_pepmass': 3, 'derive_ionmode': 3}
     report_df = report.to_dataframe()
     assert np.all(report_df.loc[["make_charge_int", "interpret_pepmass", "derive_ionmode"]].values == np.array(
         [[0, 2],
@@ -118,7 +118,7 @@ def test_processing_report_class(spectrums):
         processing_report.add_to_report(s, spectrum_processed, "test_filter")
 
     assert not processing_report.counter_removed_spectrums
-    assert processing_report.counter_changed_spectrum == {"test_filter": 3}
+    assert processing_report.counter_changed_metadata == {"test_filter": 3}
 
 
 def test_adding_custom_filter(spectrums):
@@ -133,7 +133,7 @@ def test_adding_custom_filter(spectrums):
     assert filters[-1].__name__ == "nonsense_inchikey"
     spectrums, report = processor.process_spectrums(spectrums, create_report=True)
     assert report.counter_number_processed == 3
-    assert report.counter_changed_spectrum == {'make_charge_int': 2, 'interpret_pepmass': 3,
+    assert report.counter_changed_metadata == {'make_charge_int': 2, 'interpret_pepmass': 3,
                                                'derive_ionmode': 3, 'nonsense_inchikey': 3}
     assert spectrums[0].get("inchikey") == "NONSENSE", "Custom filter not executed properly"
 
@@ -150,7 +150,7 @@ def test_adding_custom_filter_with_parameters(spectrums):
     assert filters[-1].__name__ == "nonsense_inchikey_multiple"
     spectrums, report = processor.process_spectrums(spectrums, create_report=True)
     assert report.counter_number_processed == 3
-    assert report.counter_changed_spectrum == {'make_charge_int': 2, 'interpret_pepmass': 3,
+    assert report.counter_changed_metadata == {'make_charge_int': 2, 'interpret_pepmass': 3,
                                                'derive_ionmode': 3, 'nonsense_inchikey_multiple': 3}
     assert spectrums[0].get("inchikey") == "NONSENSENONSENSE", "Custom filter not executed properly"
 
