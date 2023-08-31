@@ -7,9 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+### Added
+- Additional tests for filter pipeline order
+- ProcessingReport is added. This adds an overview of the number of spectra changed by each filter step.
+- Added repair_not_matching_annotation
+
 ### Changed
 - Repair_smiles_from_compound_name, now works without matchmsextras
   - pubchempy was added as dependency
+- Default filters are now stored in the yaml file as separate filters
+- Custom filters are added after default filters or at a position specified by the user
+- The file structure of metadata_utils was refactored
 
 ## [0.22.0] - 2023-08-18
 
