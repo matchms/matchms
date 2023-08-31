@@ -215,12 +215,6 @@ class ProcessingReport:
             # Add metadata changes
             if spectrum_new.metadata != spectrum_old.metadata:
                 self.counter_changed_metadata[filter_function_name] += 1
-            if spectrum_new.peaks is None:
-                print("hello")
-                pass
-            if spectrum_old.peaks is None:
-                print("hello")
-                pass
             # Add peak changes
             if spectrum_new.peaks != spectrum_old.peaks or spectrum_new.losses != spectrum_old.losses:
                 self.counter_changed_peaks[filter_function_name] += 1
