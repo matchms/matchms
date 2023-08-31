@@ -1,6 +1,6 @@
 from collections import defaultdict
 from functools import partial
-from typing import Dict, Optional, Tuple, Union, Callable
+from typing import Callable, Dict, Optional, Tuple, Union
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
