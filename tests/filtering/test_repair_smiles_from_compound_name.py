@@ -74,7 +74,7 @@ def test_repair_smiles_from_compound_name(compound_name, parent_mass, smiles,
     empty_csv_file = os.path.join(tmp_path, "test.csv")
     spectrum = derive_smiles_from_pubchem_compound_name_search(spectrum_in, empty_csv_file, mass_tolerance=0.1)
     assert spectrum.get("smiles") == expected_smiles, "Expected different smiles."
-    stored_in_csv_file = _load_compound_name_annotations(empty_csv_file, compound_name)
+    stored_in_csv_file = replace_nan_with_none(_load_compound_name_annotations(empty_csv_file, compound_name))
     assert len(stored_in_csv_file) == 1
     assert stored_in_csv_file[0]["smiles"] == expected_smiles
     assert stored_in_csv_file[0]["compound_name"] == compound_name
