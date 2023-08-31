@@ -17,24 +17,23 @@ from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import \
 logger = logging.getLogger("matchms")
 
 
-def repair_smiles_from_compound_name(spectrum_in: Spectrum,
-                                     annotated_compound_names_file: Optional[str] = None,
-                                     mass_tolerance: float = 0.1):
-    """Adds annotations (smiles, inchi, inchikey) based on compound name
+def derive_smiles_from_pubchem_compound_name_search(spectrum_in: Spectrum,
+                                                    annotated_compound_names_file: Optional[str] = None,
+                                                    mass_tolerance: float = 0.1):
+    """Adds smiles, inchi, inchikey based on compound name by searching pubchem
 
-    Based on a table of compound names and smiles matches (stored in a csv file) this function
-    adds the new annotations to the input spectrums if the smiles seem consistent with the available
-    spectrum metadata (e.g., parent mass).
-    This function can be used with csv files that are returned by the pubchem_lookup.py
-    from matchmextras.
+    The smiles, inchi and inchikey are repaired if the found smiles is close enough to the parent mass.
 
     Parameters
     ----------
     spectrum_in:
         The input spectrum.
-    annotated_compound_names_file: str
-        A csv file containing the compound names and matching smiles, inchi, inchikey
-        and monoisotopic_mass. This can be created using the the pubchem_lookup.py from matchmextras.
+    annotated_compound_names_file: Optional[str]
+        Any compound name that was searched for on pubchem will be added to this file. If a compound name is already
+        in this file it will be used instead of looking up at pubchem. This file can be reused for future runs, speeding
+        up the process.
+        If None. The compound names found will still be cached for this run, but won't be reusable for future runs.
+        The csv file should contain the columns ["compound_name", "smiles", "inchi", "inchikey", "monoisotopic_mass"]
     mass_tolerance:
         Acceptable mass difference between query compound and pubchem result.
     """
@@ -48,7 +47,7 @@ def repair_smiles_from_compound_name(spectrum_in: Spectrum,
 
     if _is_plausible_name(compound_name) and parent_mass is not None:
 
-        compound_name_annotations = _get_compound_name_annotation(compound_name, annotated_compound_names_file)
+        compound_name_annotations = _get_pubchem_compound_name_annotation(compound_name, annotated_compound_names_file)
         if len(compound_name_annotations) > 0:
             compound_name_annotation_df = pd.DataFrame(compound_name_annotations)
             mass_differences = np.abs(compound_name_annotation_df["monoisotopic_mass"] - parent_mass)
@@ -65,7 +64,7 @@ def repair_smiles_from_compound_name(spectrum_in: Spectrum,
 
 
 @lru_cache(maxsize=None)
-def _get_compound_name_annotation(compound_name, csv_file=None) -> List[dict]:
+def _get_pubchem_compound_name_annotation(compound_name, csv_file=None) -> List[dict]:
     """Loads compound name annotation from file or gets it from pubchem any new annotation is added to the file
 
     functools.cache, makes sure that previously loaded or calculated compound names do not have to be reloaded.
