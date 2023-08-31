@@ -111,6 +111,9 @@ class Scores:
         self._index = 0
         raise StopIteration
 
+    def __repr__(self):
+        return self._scores.__repr__()
+
     def __str__(self):
         return self._scores.__str__()
 

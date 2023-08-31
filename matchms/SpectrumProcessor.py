@@ -1,3 +1,4 @@
+import inspect
 from collections import defaultdict
 from functools import partial
 from typing import Dict, Optional, Tuple, Union
@@ -33,7 +34,7 @@ class SpectrumProcessor:
             for filter_name in PREDEFINED_PIPELINES[predefined_pipeline]:
                 self.add_matchms_filter(filter_name)
 
-    def add_filter(self, filter_function: Union[Tuple[str], str]):
+    def add_filter(self, filter_function: Union[Tuple[str, Dict[str, any]], str]):
         """Add a filter to the processing pipeline. Takes both matchms filter names (and parameters)
         as well as custom-made functions.
         """
@@ -66,7 +67,7 @@ class SpectrumProcessor:
             filter_func.__name__ = FILTER_FUNCTIONS[filter_name].__name__
         else:
             raise TypeError("filter_spec should be a string or a tuple or list")
-
+        check_all_parameters_given(filter_func)
         self.filters.append(filter_func)
         # Sort filters according to their order in self.filter_order
         self.filters.sort(key=lambda f: self.filter_order.index(f.__name__))
@@ -103,12 +104,12 @@ class SpectrumProcessor:
                 order_index = self.filter_order.index(current_filter_at_position)
                 self.filter_order.insert(order_index, filter_function.__name__)
 
-        if filter_params is None:
-            self.filters.append(filter_function)
-        else:
-            filter_func = partial(filter_function, **filter_params)
-            filter_func.__name__ = filter_function.__name__
-            self.filters.append(filter_func)
+        if filter_params is not None:
+            partial_filter_func = partial(filter_function, **filter_params)
+            partial_filter_func.__name__ = filter_function.__name__
+            filter_function = partial_filter_func
+        check_all_parameters_given(filter_function)
+        self.filters.append(filter_function)
         self.filters.sort(key=lambda f: self.filter_order.index(f.__name__))
 
     def process_spectrum(self, spectrum,
@@ -184,9 +185,9 @@ class SpectrumProcessor:
     def processing_steps(self):
         filter_list = []
         for filter_step in self.filters:
-            if isinstance(filter_step, partial):
-                filter_params = filter_step.keywords
-                filter_list.append((filter_step.__name__, filter_params))
+            parameter_settings = get_parameter_settings(filter_step)
+            if parameter_settings is not None:
+                filter_list.append((filter_step.__name__, parameter_settings))
             else:
                 filter_list.append(filter_step.__name__)
         return filter_list
@@ -203,6 +204,33 @@ class SpectrumProcessor:
                 for filter_param in filter_params:
                     summary_string += "\n  - " + str(filter_param)
         return summary_string
+
+
+def check_all_parameters_given(func):
+    """Asserts that all added parameters for a function are given (except spectrum_in)"""
+    signature = inspect.signature(func)
+    parameters_without_value = []
+    for parameter, value in signature.parameters.items():
+        if value.default is inspect.Parameter.empty:
+            parameters_without_value.append(parameter)
+    assert len(parameters_without_value) == 1, \
+        f"More than one parameter of the function {func.__name__} is not specified, " \
+        f"the parameters not specified are {parameters_without_value}"
+
+
+def get_parameter_settings(func):
+    """Returns all parameters and parameter values for a function
+
+    This includes default parameter settings and, but also the settings stored in partial"""
+    signature = inspect.signature(func)
+    parameter_settings = {
+            parameter: value.default
+            for parameter, value in signature.parameters.items()
+            if value.default is not inspect.Parameter.empty
+        }
+    if parameter_settings == {}:
+        return None
+    return parameter_settings
 
 
 # List all filters in a functionally working order
