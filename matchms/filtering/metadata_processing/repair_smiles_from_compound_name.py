@@ -14,10 +14,10 @@ from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import \
 logger = logging.getLogger("matchms")
 
 
-def repair_smiles_from_compound_name(spectrum_in: Spectrum,
-                                     annotated_compound_names_file: Optional[str] = None,
-                                     mass_tolerance: float = 0.1):
-    """Adds annotations (smiles, inchi, inchikey) based on compound name
+def derive_smiles_from_pubchem_compound_name_search(spectrum_in: Spectrum,
+                                                    annotated_compound_names_file: Optional[str] = None,
+                                                    mass_tolerance: float = 0.1):
+    """Adds smiles, inchi, inchikey based on compound name by searching pubchem
 
     Based on a table of compound names and smiles matches (stored in a csv file) this function
     adds the new annotations to the input spectrums if the smiles seem consistent with the available
@@ -45,7 +45,7 @@ def repair_smiles_from_compound_name(spectrum_in: Spectrum,
 
     if _is_plausible_name(compound_name) and parent_mass is not None:
 
-        compound_name_annotations = _get_compound_name_annotation(compound_name, annotated_compound_names_file)
+        compound_name_annotations = _get_pubchem_compound_name_annotation(compound_name, annotated_compound_names_file)
         if len(compound_name_annotations) > 0:
             compound_name_annotation_df = pd.DataFrame(compound_name_annotations)
             mass_differences = np.abs(compound_name_annotation_df["monoisotopic_mass"] - parent_mass)
@@ -62,7 +62,7 @@ def repair_smiles_from_compound_name(spectrum_in: Spectrum,
 
 
 @lru_cache(maxsize=None)
-def _get_compound_name_annotation(compound_name, csv_file=None) -> List[dict]:
+def _get_pubchem_compound_name_annotation(compound_name, csv_file=None) -> List[dict]:
     """Loads compound name annotation from file or gets it from pubchem any new annotation is added to the file
 
     functools.cache, makes sure that previously loaded or calculated compound names do not have to be reloaded.

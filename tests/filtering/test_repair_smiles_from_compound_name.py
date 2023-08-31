@@ -1,9 +1,9 @@
 import csv
 import os
 import pytest
-from matchms.filtering import repair_smiles_from_compound_name
+from matchms.filtering import derive_smiles_from_pubchem_compound_name_search
 from matchms.filtering.metadata_processing.repair_smiles_from_compound_name import (
-    _get_compound_name_annotation, _load_compound_name_annotations,
+    _get_pubchem_compound_name_annotation, _load_compound_name_annotations,
     _pubchem_name_search, _write_compound_name_annotations)
 from ..builder_Spectrum import SpectrumBuilder
 
@@ -43,7 +43,7 @@ def test_repair_smiles_from_compound_name_skip_already_correct():
                                          "smiles": "C1CSSC1CCCCC(=O)O",
                                          "inchi": "InChI=1S/C8H14O2S2/c9-8(10)4-2-1-3-7-5-6-11-12-7/h7H,1-6H2,(H,9,10)",
                                          "inchikey": "AGBQKNBQESQNJD-UHFFFAOYSA-N"}).build()
-    spectrum = repair_smiles_from_compound_name(spectrum_in, mass_tolerance=0.1)
+    spectrum = derive_smiles_from_pubchem_compound_name_search(spectrum_in, mass_tolerance=0.1)
     assert spectrum_in == spectrum
 
 
@@ -62,14 +62,15 @@ def test_repair_smiles_from_compound_name(compound_name, parent_mass, smiles,
     spectrum_in = builder.with_metadata({"compound_name": compound_name,
                                          "parent_mass": parent_mass,
                                          "smiles": smiles}).build()
-    spectrum = repair_smiles_from_compound_name(spectrum_in, csv_file_with_real_compound_names, mass_tolerance=0.1)
+    spectrum = derive_smiles_from_pubchem_compound_name_search(spectrum_in, csv_file_with_real_compound_names,
+                                                               mass_tolerance=0.1)
     assert spectrum.get("smiles") == expected_smiles, "Expected different smiles."
     # Run without csv file
-    spectrum = repair_smiles_from_compound_name(spectrum_in, mass_tolerance=0.1)
+    spectrum = derive_smiles_from_pubchem_compound_name_search(spectrum_in, mass_tolerance=0.1)
     assert spectrum.get("smiles") == expected_smiles, "Expected different smiles."
     # Run with empty csv file
     empty_csv_file = os.path.join(tmp_path, "test.csv")
-    spectrum = repair_smiles_from_compound_name(spectrum_in, empty_csv_file, mass_tolerance=0.1)
+    spectrum = derive_smiles_from_pubchem_compound_name_search(spectrum_in, empty_csv_file, mass_tolerance=0.1)
     assert spectrum.get("smiles") == expected_smiles, "Expected different smiles."
     stored_in_csv_file = _load_compound_name_annotations(empty_csv_file, compound_name)
     assert len(stored_in_csv_file) == 1
@@ -130,5 +131,5 @@ def test_pubchem_name_search(compound_name, expected_output):
                   'inchikey': 'WQZGKKKJIJFFOK-GASJEMHNSA-N', 'monoisotopic_mass': 180.06338810}]),
     ("does_not_exist", [])])
 def test_get_compound_name_annotation(compound_name, expected_output, csv_file_annotated_compound_names):
-    result = _get_compound_name_annotation(compound_name, csv_file_annotated_compound_names)
+    result = _get_pubchem_compound_name_annotation(compound_name, csv_file_annotated_compound_names)
     assert result == expected_output

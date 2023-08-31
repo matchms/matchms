@@ -15,7 +15,7 @@ REPAIR_PARENT_MASS_SMILES_FILTERS = \
      msfilters.repair_parent_mass_is_mol_wt, msfilters.repair_adduct_based_on_smiles,
      msfilters.repair_parent_mass_match_smiles_wrapper, ]
 ANNOTATION_REPARATIONS = [msfilters.repair_inchi_inchikey_smiles, msfilters.derive_smiles_from_inchi,
-                          msfilters.repair_smiles_from_compound_name, msfilters.derive_inchi_from_smiles,
+                          msfilters.derive_smiles_from_pubchem_compound_name_search, msfilters.derive_inchi_from_smiles,
                           msfilters.derive_inchikey_from_inchi, ]
 
 
