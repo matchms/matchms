@@ -26,7 +26,7 @@ ANNOTATION_REPARATIONS = [msfilters.repair_inchi_inchikey_smiles, msfilters.deri
     [[msfilters.add_precursor_mz,], [msfilters.require_precursor_mz,]],
     # Since pubchem lookup checks if annotation is complete.
     # So deriving inchi and inchikey from smiles, should happen first.
-    [ANNOTATION_REPARATIONS, [msfilters.derive_smiles_from_pubchem_compound_name_search, ]],
+    [ANNOTATION_REPARATIONS + [msfilters.clean_adduct], [msfilters.derive_smiles_from_pubchem_compound_name_search, ]],
 ])
 def test_all_filter_order(early_filters: List[Callable], later_filters: List[Callable]):
     """Tests if early_filter is run before later_filter"""
