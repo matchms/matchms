@@ -10,14 +10,14 @@ logger = logging.getLogger("matchms")
 
 
 def repair_adduct_based_on_smiles(spectrum_in: Spectrum,
-                                  mass_tolerance,
-                                  accept_parent_mass_is_mol_wt = True):
+                                  mass_tolerance: float,
+                                  accept_parent_mass_is_mol_wt: bool = True):
     """
     Corrects the adduct of a spectrum based on its SMILES representation and the precursor m/z.
 
     Given a spectrum, this function tries to match the spectrum's parent mass, derived from its
     precursor m/z and known adducts, to the neutral monoisotopic mass of the molecule derived
-    from its SMILES representation. If a match is found within a given mass tolerance, the 
+    from its SMILES representation. If a match is found within a given mass tolerance, the
     adduct and parent mass of the spectrum are updated.
 
     Parameters:
@@ -26,12 +26,12 @@ def repair_adduct_based_on_smiles(spectrum_in: Spectrum,
         The input spectrum whose adduct needs to be repaired.
 
     mass_tolerance : float
-        Maximum allowed mass difference between the calculated parent mass and the neutral 
+        Maximum allowed mass difference between the calculated parent mass and the neutral
         monoisotopic mass derived from the SMILES.
 
     accept_parent_mass_is_mol_wt : bool, optional (default=True)
-        Allows the function to attempt repairing the spectrum's parent mass by assuming it 
-        represents the molecule's weight. If True, further checks and corrections are made 
+        Allows the function to attempt repairing the spectrum's parent mass by assuming it
+        represents the molecule's weight. If True, further checks and corrections are made
         using `repair_parent_mass_is_mol_wt`.
     """
     if spectrum_in is None:
