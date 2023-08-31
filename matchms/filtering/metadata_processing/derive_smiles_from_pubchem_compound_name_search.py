@@ -19,19 +19,18 @@ def derive_smiles_from_pubchem_compound_name_search(spectrum_in: Spectrum,
                                                     mass_tolerance: float = 0.1):
     """Adds smiles, inchi, inchikey based on compound name by searching pubchem
 
-    Based on a table of compound names and smiles matches (stored in a csv file) this function
-    adds the new annotations to the input spectrums if the smiles seem consistent with the available
-    spectrum metadata (e.g., parent mass).
-    This function can be used with csv files that are returned by the pubchem_lookup.py
-    from matchmextras.
+    The smiles, inchi and inchikey are repaired if the found smiles is close enough to the parent mass.
 
     Parameters
     ----------
     spectrum_in:
         The input spectrum.
-    annotated_compound_names_file: str
-        A csv file containing the compound names and matching smiles, inchi, inchikey
-        and monoisotopic_mass. This can be created using the the pubchem_lookup.py from matchmextras.
+    annotated_compound_names_file: Optional[str]
+        Any compound name that was searched for on pubchem will be added to this file. If a compound name is already
+        in this file it will be used instead of looking up at pubchem. This file can be reused for future runs, speeding
+        up the process.
+        If None. The compound names found will still be cached for this run, but won't be reusable for future runs.
+        The csv file should contain the columns ["compound_name", "smiles", "inchi", "inchikey", "monoisotopic_mass"]
     mass_tolerance:
         Acceptable mass difference between query compound and pubchem result.
     """
