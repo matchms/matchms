@@ -1,6 +1,6 @@
 from collections import defaultdict
 from functools import partial
-from typing import Dict, Optional, Tuple, Union
+from typing import Dict, Optional, Tuple, Union, Callable
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
@@ -34,7 +34,8 @@ class SpectrumProcessor:
             for filter_name in PREDEFINED_PIPELINES[predefined_pipeline]:
                 self.add_matchms_filter(filter_name)
 
-    def add_filter(self, filter_function: Union[Tuple[str], str]):
+    def add_filter(self,
+                   filter_function: Union[Tuple[str, Dict[str, any]], str, Tuple[Callable, Dict[str, any]], Callable]):
         """Add a filter to the processing pipeline. Takes both matchms filter names (and parameters)
         as well as custom-made functions.
         """
@@ -72,7 +73,7 @@ class SpectrumProcessor:
         # Sort filters according to their order in self.filter_order
         self.filters.sort(key=lambda f: self.filter_order.index(f.__name__))
 
-    def add_custom_filter(self, filter_function, filter_params=None):
+    def add_custom_filter(self, filter_function: Union[Tuple[Callable, Dict[str, any]], Callable], filter_params=None):
         """
         Add a custom filter function to the processing pipeline.
 
