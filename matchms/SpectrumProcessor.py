@@ -72,7 +72,7 @@ class SpectrumProcessor:
         # Sort filters according to their order in self.filter_order
         self.filters.sort(key=lambda f: self.filter_order.index(f.__name__))
 
-    def add_custom_filter(self, filter_function, filter_params=None):
+    def add_custom_filter(self, filter_function, filter_params=None, filter_position: Optional[int] = None):
         """
         Add a custom filter function to the processing pipeline.
 
@@ -86,20 +86,31 @@ class SpectrumProcessor:
             processing pipeline.
         filter_params: dict
             If needed, add dictionary with all filter parameters. Default is set to None.
+        filter_position:
+            The position this filter should be inserted in the filter order.
+            If None, it will be appended at the end of the current list of filters.
         """
         if not callable(filter_function):
             raise TypeError("Expected callable filter function.")
-        filter_position = 0
-        for filter_func in self.filters[::-1]:
-            if filter_func.__name__ in self.filter_order:
-                filter_position = self.filter_order.index(filter_func.__name__)
-        self.filter_order.insert(filter_position + 1, filter_function.__name__)
+        if filter_position is None:
+            self.filter_order.append(filter_function.__name__)
+        elif not isinstance(filter_position, int):
+            raise TypeError("Expected filter_position to be an integer.")
+        else:
+            if filter_position >= len(self.filters):
+                self.filter_order.append(filter_function.__name__)
+            else:
+                current_filter_at_position = self.filters[filter_position].__name__
+                order_index = self.filter_order.index(current_filter_at_position)
+                self.filter_order.insert(order_index, filter_function.__name__)
+
         if filter_params is not None:
             partial_filter_func = partial(filter_function, **filter_params)
             partial_filter_func.__name__ = filter_function.__name__
             filter_function = partial_filter_func
         check_all_parameters_given(filter_function)
         self.filters.append(filter_function)
+        self.filters.sort(key=lambda f: self.filter_order.index(f.__name__))
 
     def process_spectrum(self, spectrum,
                          processing_report: Optional["ProcessingReport"] = None):
