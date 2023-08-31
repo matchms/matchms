@@ -33,13 +33,14 @@ def test_filter_sorting_and_output():
         'derive_ionmode',
         'correct_charge',
         'require_precursor_mz',
-        'add_parent_mass',
         'harmonize_undefined_inchikey',
         'harmonize_undefined_inchi',
         'harmonize_undefined_smiles',
         'repair_inchi_inchikey_smiles',
+        'add_parent_mass',
         'normalize_intensities'
-        ]
+    ]
+
     actual_filters = [x.__name__ for x in processing.filters]
     assert actual_filters == expected_filters
     # 2nd way to access the filter names via processing_steps attribute:
@@ -48,8 +49,8 @@ def test_filter_sorting_and_output():
 
 def test_string_output():
     processing = SpectrumProcessor("minimal")
-    expected_str = "SpectrumProcessor\nProcessing steps:\n- make_charge_int\n- interpret_pepmass"\
-        "\n- derive_ionmode\n- correct_charge"
+    expected_str = "SpectrumProcessor\nProcessing steps:\n- make_charge_int\n- interpret_pepmass" \
+                   "\n- derive_ionmode\n- correct_charge"
     assert str(processing) == expected_str
 
 
@@ -62,7 +63,7 @@ def test_add_matchms_filter(metadata, expected):
     spectrum_in = SpectrumBuilder().with_metadata(metadata).build()
     processor = SpectrumProcessor("minimal")
     processor.add_matchms_filter(("require_correct_ionmode",
-                                 {"ion_mode_to_keep": "both"}))
+                                  {"ion_mode_to_keep": "both"}))
     spectrum = processor.process_spectrum(spectrum_in)
     if expected is None:
         assert spectrum is None
@@ -170,7 +171,7 @@ def test_add_filter_with_custom(spectrums):
 def test_add_filter_with_matchms_filter(spectrums):
     processor = SpectrumProcessor("minimal")
     processor.add_filter(("require_correct_ionmode",
-                         {"ion_mode_to_keep": "both"}))
+                          {"ion_mode_to_keep": "both"}))
     filters = processor.filters
     assert filters[-1].__name__ == "require_correct_ionmode"
     spectrums, _ = processor.process_spectrums(spectrums, create_report=True)
