@@ -111,7 +111,7 @@ from .metadata_processing.repair_parent_mass_match_smiles_wrapper import \
     repair_parent_mass_match_smiles_wrapper
 from .metadata_processing.repair_precursor_is_parent_mass import \
     repair_precursor_is_parent_mass
-from .metadata_processing.repair_smiles_from_compound_name import \
+from .metadata_processing.derive_smiles_from_pubchem_compound_name_search import \
     derive_smiles_from_pubchem_compound_name_search
 from .metadata_processing.repair_smiles_of_salts import repair_smiles_of_salts
 from .metadata_processing.require_correct_ionmode import \

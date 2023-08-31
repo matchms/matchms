@@ -2,7 +2,7 @@ import csv
 import os
 import pytest
 from matchms.filtering import derive_smiles_from_pubchem_compound_name_search
-from matchms.filtering.metadata_processing.repair_smiles_from_compound_name import (
+from matchms.filtering.metadata_processing.derive_smiles_from_pubchem_compound_name_search import (
     _get_pubchem_compound_name_annotation, _load_compound_name_annotations,
     _pubchem_name_search, _write_compound_name_annotations)
 from ..builder_Spectrum import SpectrumBuilder
