@@ -54,12 +54,11 @@ def test_filter_sorting_and_output():
                         'derive_ionmode',
                         'correct_charge',
                         ('require_precursor_mz', {'minimum_accepted_mz': 10.0}),
-                        ('add_parent_mass',
-                         {'estimate_from_adduct': True, 'overwrite_existing_entry': False}),
                         ('harmonize_undefined_inchikey', {'aliases': None, 'undefined': ''}),
                         ('harmonize_undefined_inchi', {'aliases': None, 'undefined': ''}),
                         ('harmonize_undefined_smiles', {'aliases': None, 'undefined': ''}),
                         'repair_inchi_inchikey_smiles',
+                        ('add_parent_mass', {'estimate_from_adduct': True, 'overwrite_existing_entry': False}),
                         'normalize_intensities']
     assert processing.processing_steps == expected_filters
 
