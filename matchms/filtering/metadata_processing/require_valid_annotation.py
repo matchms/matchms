@@ -1,7 +1,8 @@
 import logging
 from matchms import Spectrum
 from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import (
-    convert_inchi_to_inchikey, convert_smiles_to_inchi, is_valid_smiles, is_valid_inchi, is_valid_inchikey)
+    convert_inchi_to_inchikey, convert_smiles_to_inchi, is_valid_inchi,
+    is_valid_inchikey, is_valid_smiles)
 
 
 logger = logging.getLogger("matchms")
