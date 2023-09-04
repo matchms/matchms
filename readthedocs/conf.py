@@ -23,8 +23,8 @@ import matchms
 # -- Project information -----------------------------------------------------
 
 project = "matchms"
-copyright = "2020, Netherlands eScience Center"
-author = "Netherlands eScience Center"
+copyright = "2023, Düsseldorf University of Applied Sciences & Netherlands eScience Center"
+author = "matchms development team"
 
 
 # -- General configuration ---------------------------------------------------

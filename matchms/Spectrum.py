@@ -27,9 +27,11 @@ class Spectrum:
 
         spectrum = Spectrum(mz=np.array([100, 150, 200.]),
                             intensities=np.array([0.7, 0.2, 0.1]),
-                            metadata={'id': 'spectrum1',
+                            metadata={"id": 'spectrum1',
+                                      "precursor_mz": 222.333,
                                       "peak_comments": {200.: "the peak at 200 m/z"}})
 
+        print(spectrum)
         print(spectrum.peaks.mz[0])
         print(spectrum.peaks.intensities[0])
         print(spectrum.get('id'))
@@ -39,6 +41,7 @@ class Spectrum:
 
     .. testoutput::
 
+        Spectrum(precursor m/z=222.33, 3 fragments between 100.0 and 200.0)
         100.0
         0.7
         spectrum1
@@ -100,6 +103,16 @@ class Spectrum:
         (see .spectrum_hash() method)."""
         combined_hash = self.metadata_hash() + self.spectrum_hash()
         return int.from_bytes(bytearray(combined_hash, 'utf-8'), 'big')
+
+    def __repr__(self):
+        num_peaks = len(self.peaks)
+        min_mz = min(self.peaks.mz)
+        max_mz = max(self.peaks.mz)
+        precursor_mz = self.get("precursor_mz")
+        return f"Spectrum(precursor m/z={precursor_mz:.2f}, {num_peaks} fragments between {min_mz:.1f} and {max_mz:.1f})"
+
+    def __str__(self):
+        return self.__repr__()
 
     def spectrum_hash(self):
         """Return a (truncated) sha256-based hash which is generated
