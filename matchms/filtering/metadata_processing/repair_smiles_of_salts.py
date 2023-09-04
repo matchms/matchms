@@ -19,6 +19,9 @@ def repair_smiles_of_salts(spectrum_in,
     spectrum = spectrum_in.clone()
 
     smiles = spectrum.get("smiles")
+    if smiles is None:
+        return spectrum
+
     if not is_valid_smiles(smiles):
         return spectrum
     parent_mass = spectrum.get("parent_mass")

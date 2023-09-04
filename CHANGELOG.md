@@ -9,15 +9,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Additional tests for filter pipeline order
-- ProcessingReport is added. This adds an overview of the number of spectra changed by each filter step.
-- Added repair_not_matching_annotation
+- ProcessingReport. This adds an overview of the number of spectra changed by each filter step.
+- `repair_not_matching_annotation` filter [#505](https://github.com/matchms/matchms/pull/505)
+- Missing docstring documentions [#507](https://github.com/matchms/matchms/pull/507)
 
 ### Changed
-- Repair_smiles_from_compound_name, now works without matchmsextras
+
+- Logger warning for rdkit molecule conversion [#507](https://github.com/matchms/matchms/pull/507)
+- Repair_smiles_from_compound_name, now works without matchmsextras [#509](https://github.com/matchms/matchms/pull/509/)
   - pubchempy was added as dependency
 - Default filters are now stored in the yaml file as separate filters
 - Custom filters are added after default filters or at a position specified by the user
 - The file structure of metadata_utils was refactored
+
+### Fixed
+
+- handle missing weight information in `repair_parent_mass_is_mol_wt` filter [#507](https://github.com/matchms/matchms/pull/507)
+- handle missing smiles in `repair_smiles_of_salts` filter [#507](https://github.com/matchms/matchms/pull/507)
 
 ## [0.22.0] - 2023-08-18
 
