@@ -2,7 +2,7 @@ import logging
 from matchms import Spectrum
 from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import (
     _check_fully_annotated, convert_inchi_to_inchikey, convert_inchi_to_smiles,
-    convert_smiles_to_inchi)
+    convert_smiles_to_inchi, is_valid_inchi, is_valid_smiles)
 from matchms.filtering.metadata_processing.require_parent_mass_match_smiles import \
     _check_smiles_and_parent_mass_match
 
@@ -15,7 +15,7 @@ def repair_not_matching_annotation(spectrum_in: Spectrum):
     Repairs mismatches in a spectrum's annotations related to SMILES, InChI, and InChIKey.
 
     Given a spectrum, this function ensures that the provided SMILES, InChI, and InChIKey
-    annotations are consistent with one another. If there are discrepancies, they are resolved 
+    annotations are consistent with one another. If there are discrepancies, they are resolved
     as follows:
 
     1. If the SMILES and InChI do not match:
