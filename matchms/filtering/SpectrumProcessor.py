@@ -5,8 +5,9 @@ from typing import Dict, Optional, Tuple, Union
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
-import matchms.filtering as msfilters
 from matchms import Spectrum
+from matchms.filtering.filter_order_and_default_pipelines import (
+    ALL_FILTERS, FILTER_FUNCTION_NAMES, PREDEFINED_PIPELINES)
 
 
 class SpectrumProcessor:
@@ -56,15 +57,15 @@ class SpectrumProcessor:
             filter function and the second element is a dictionary containing additional arguments for the function.
         """
         if isinstance(filter_spec, str):
-            if filter_spec not in FILTER_FUNCTIONS:
-                raise ValueError("Unknown filter type. Should be known filter name or function.")
-            filter_func = FILTER_FUNCTIONS[filter_spec]
+            if filter_spec not in FILTER_FUNCTION_NAMES:
+                raise ValueError(f"Unknown filter type: {filter_spec} Should be known filter name or function.")
+            filter_func = FILTER_FUNCTION_NAMES[filter_spec]
         elif isinstance(filter_spec, (tuple, list)):
             filter_name, filter_args = filter_spec
-            if filter_name not in FILTER_FUNCTIONS:
-                raise ValueError("Unknown filter type. Should be known filter name or function.")
-            filter_func = partial(FILTER_FUNCTIONS[filter_name], **filter_args)
-            filter_func.__name__ = FILTER_FUNCTIONS[filter_name].__name__
+            if filter_name not in FILTER_FUNCTION_NAMES:
+                raise ValueError(f"Unknown filter type: {filter_name} Should be known filter name or function.")
+            filter_func = partial(FILTER_FUNCTION_NAMES[filter_name], **filter_args)
+            filter_func.__name__ = FILTER_FUNCTION_NAMES[filter_name].__name__
         else:
             raise TypeError("filter_spec should be a string or a tuple or list")
         check_all_parameters_given(filter_func)
@@ -204,123 +205,6 @@ class SpectrumProcessor:
                 for filter_param in filter_params:
                     summary_string += "\n  - " + str(filter_param)
         return summary_string
-
-
-def check_all_parameters_given(func):
-    """Asserts that all added parameters for a function are given (except spectrum_in)"""
-    signature = inspect.signature(func)
-    parameters_without_value = []
-    for parameter, value in signature.parameters.items():
-        if value.default is inspect.Parameter.empty:
-            parameters_without_value.append(parameter)
-    assert len(parameters_without_value) == 1, \
-        f"More than one parameter of the function {func.__name__} is not specified, " \
-        f"the parameters not specified are {parameters_without_value}"
-
-
-def get_parameter_settings(func):
-    """Returns all parameters and parameter values for a function
-
-    This includes default parameter settings and, but also the settings stored in partial"""
-    signature = inspect.signature(func)
-    parameter_settings = {
-            parameter: value.default
-            for parameter, value in signature.parameters.items()
-            if value.default is not inspect.Parameter.empty
-        }
-    if parameter_settings == {}:
-        return None
-    return parameter_settings
-
-
-# List all filters in a functionally working order
-ALL_FILTERS = [msfilters.make_charge_int,
-               msfilters.add_compound_name,
-               msfilters.derive_adduct_from_name,
-               msfilters.derive_formula_from_name,
-               msfilters.clean_compound_name,
-               msfilters.interpret_pepmass,
-               msfilters.add_precursor_mz,
-               msfilters.add_retention_index,
-               msfilters.add_retention_time,
-               msfilters.derive_ionmode,
-               msfilters.correct_charge,
-               # msfilters.derive_adduct_from_name,  # run again? Or improve those filters?
-               # msfilters.derive_formula_from_name,  # run again? Or improve those filters?
-               msfilters.require_precursor_mz,
-               msfilters.add_parent_mass,
-               msfilters.harmonize_undefined_inchikey,
-               msfilters.harmonize_undefined_inchi,
-               msfilters.harmonize_undefined_smiles,
-               msfilters.repair_inchi_inchikey_smiles,
-               msfilters.derive_smiles_from_inchi,
-               msfilters.repair_smiles_from_compound_name,
-               msfilters.derive_inchi_from_smiles,
-               msfilters.derive_inchikey_from_inchi,
-               msfilters.clean_adduct,
-               msfilters.repair_smiles_of_salts,
-               msfilters.repair_precursor_is_parent_mass,
-               msfilters.repair_parent_mass_is_mol_wt,
-               msfilters.repair_adduct_based_on_smiles,
-               msfilters.repair_parent_mass_match_smiles_wrapper,
-               msfilters.repair_not_matching_annotation,
-               msfilters.require_correct_ionmode,
-               msfilters.require_precursor_below_mz,
-               msfilters.require_valid_annotation,
-               msfilters.require_parent_mass_match_smiles,
-               msfilters.normalize_intensities,
-               msfilters.select_by_intensity,
-               msfilters.select_by_mz,
-               msfilters.select_by_relative_intensity,
-               msfilters.remove_peaks_around_precursor_mz,
-               msfilters.remove_peaks_outside_top_k,
-               msfilters.reduce_to_number_of_peaks,
-               msfilters.require_minimum_number_of_peaks,
-               msfilters.require_minimum_of_high_peaks,
-               msfilters.add_fingerprint,
-               msfilters.add_losses,
-              ]
-
-FILTER_FUNCTIONS = {x.__name__: x for x in ALL_FILTERS}
-
-MINIMAL_FILTERS = ["make_charge_int",
-                   "interpret_pepmass",
-                   "derive_ionmode",
-                   "correct_charge",
-                   ]
-BASIC_FILTERS = MINIMAL_FILTERS \
-    + ["add_compound_name",
-       "derive_adduct_from_name",
-       "derive_formula_from_name",
-       "clean_compound_name",
-       "add_precursor_mz",
-    ]
-DEFAULT_FILTERS = BASIC_FILTERS \
-    + ["require_precursor_mz",
-       "add_parent_mass",
-       "harmonize_undefined_inchikey",
-       "harmonize_undefined_inchi",
-       "harmonize_undefined_smiles",
-       "repair_inchi_inchikey_smiles",
-       "normalize_intensities",
-    ]
-FULLY_ANNOTATED_PROCESSING = DEFAULT_FILTERS \
-    + ["clean_adduct",
-       "derive_inchi_from_smiles",
-       "derive_smiles_from_inchi",
-       "derive_inchikey_from_inchi",
-       ("require_correct_ionmode", {"ion_mode_to_keep": "both"}),
-       ("require_parent_mass_match_smiles", {'mass_tolerance': 0.1}),
-       "repair_not_matching_annotation"
-       "require_valid_annotation",
-    ]
-
-PREDEFINED_PIPELINES = {
-    "minimal": MINIMAL_FILTERS,
-    "basic": BASIC_FILTERS,
-    "default": DEFAULT_FILTERS,
-    "fully_annotated": FULLY_ANNOTATED_PROCESSING,
-}
 
 
 class ProcessingReport:
