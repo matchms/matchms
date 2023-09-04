@@ -1,5 +1,6 @@
 import re
 from typing import Optional
+from matchms import Spectrum
 
 
 try:  # rdkit is not included in pip package
@@ -144,3 +145,16 @@ def is_valid_inchikey(inchikey: str) -> bool:
     if re.fullmatch(regexp, inchikey):
         return True
     return False
+
+
+def _check_fully_annotated(spectrum: Spectrum) -> bool:
+    """Combine multiple check functions.
+    Returns False if SMILES, InChIKey, or InChI are missing.
+    """
+    if not is_valid_smiles(spectrum.get("smiles")):
+        return False
+    if not is_valid_inchikey(spectrum.get("inchikey")):
+        return False
+    if not is_valid_inchi(spectrum.get("inchi")):
+        return False
+    return True

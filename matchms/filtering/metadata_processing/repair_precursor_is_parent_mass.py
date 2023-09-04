@@ -29,6 +29,8 @@ def repair_precursor_is_parent_mass(spectrum_in: Spectrum,
 
     smiles = spectrum.get("smiles")
     smiles_mass = get_monoisotopic_neutral_mass(smiles)
+    if smiles_mass is None:
+        return spectrum
     mass_difference = precursor_mz - smiles_mass
     if abs(mass_difference) < mass_tolerance:
         logger.info("Parent mass was changed from %s to %s", spectrum.get("parent_mass"), smiles_mass)
