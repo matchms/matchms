@@ -10,10 +10,30 @@ logger = logging.getLogger("matchms")
 
 
 def repair_adduct_based_on_smiles(spectrum_in: Spectrum,
-                                  mass_tolerance,
-                                  accept_parent_mass_is_mol_wt):
-    """If the parent mass is wrong due to a wrong of is derived from the precursor mz
-    To do this the charge and adduct are used"""
+                                  mass_tolerance: float,
+                                  accept_parent_mass_is_mol_wt: bool = True):
+    """
+    Corrects the adduct of a spectrum based on its SMILES representation and the precursor m/z.
+
+    Given a spectrum, this function tries to match the spectrum's parent mass, derived from its
+    precursor m/z and known adducts, to the neutral monoisotopic mass of the molecule derived
+    from its SMILES representation. If a match is found within a given mass tolerance, the
+    adduct and parent mass of the spectrum are updated.
+
+    Parameters:
+    ----------
+    spectrum_in : Spectrum
+        The input spectrum whose adduct needs to be repaired.
+
+    mass_tolerance : float
+        Maximum allowed mass difference between the calculated parent mass and the neutral
+        monoisotopic mass derived from the SMILES.
+
+    accept_parent_mass_is_mol_wt : bool, optional (default=True)
+        Allows the function to attempt repairing the spectrum's parent mass by assuming it
+        represents the molecule's weight. If True, further checks and corrections are made
+        using `repair_parent_mass_is_mol_wt`.
+    """
     if spectrum_in is None:
         return None
     changed_spectrum = spectrum_in.clone()
@@ -30,6 +50,8 @@ def repair_adduct_based_on_smiles(spectrum_in: Spectrum,
 
     adducts_df = load_known_adducts()
     smiles_mass = get_monoisotopic_neutral_mass(changed_spectrum.get("smiles"))
+    if smiles_mass is None:
+        return changed_spectrum
     parent_masses = (precursor_mz - adducts_df["correction_mass"]) / adducts_df["mass_multiplier"]
     mass_differences = abs(parent_masses-smiles_mass)
 

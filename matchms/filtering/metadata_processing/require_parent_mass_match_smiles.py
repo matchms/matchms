@@ -30,10 +30,17 @@ def require_parent_mass_match_smiles(spectrum_in: SpectrumType,
 
     spectrum = spectrum_in.clone()
     # Check if parent mass matches the smiles mass
-    parent_mass = spectrum.get("parent_mass")
-    smiles = spectrum.get("smiles")
-    smiles_mass = get_monoisotopic_neutral_mass(smiles)
-    mass_difference = parent_mass - smiles_mass
-    if abs(mass_difference) < mass_tolerance:
+    if _check_smiles_and_parent_mass_match(spectrum.get("smiles"), spectrum.get("parent_mass"), mass_tolerance):
         return spectrum
     return None
+
+
+def _check_smiles_and_parent_mass_match(smiles, parent_mass, mass_tolerance) -> bool:
+    """Returns True if smiles and parent mass are matching"""
+    smiles_mass = get_monoisotopic_neutral_mass(smiles)
+    if smiles_mass is None:
+        return False
+    mass_difference = parent_mass - smiles_mass
+    if abs(mass_difference) < mass_tolerance:
+        return True
+    return False

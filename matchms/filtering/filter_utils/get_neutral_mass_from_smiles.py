@@ -1,4 +1,9 @@
+import logging
+from typing import Optional
 from matchms.constants import PROTON_MASS
+
+
+logger = logging.getLogger("matchms")
 
 
 try:  # rdkit is not included in pip package
@@ -22,7 +27,7 @@ rdkit_missing_message = "Conda package 'rdkit' is required for this functionalit
 
 
 def get_monoisotopic_neutral_mass(smiles: str) -> float:
-    """Get the monoisotopic neutral mass from a SMILES string chemical 
+    """Get the monoisotopic neutral mass from a SMILES string chemical
     identifier for the described molecule.
 
     Args:
@@ -35,7 +40,6 @@ def get_monoisotopic_neutral_mass(smiles: str) -> float:
         float: Computed monoisotopic mass.
     """
     return _get_neutral_mass(smiles, True)
-
 
 
 def get_molecular_weight_neutral_mass(smiles: str) -> float:
@@ -53,7 +57,7 @@ def get_molecular_weight_neutral_mass(smiles: str) -> float:
     return _get_neutral_mass(smiles, False)
 
 
-def _get_neutral_mass(smiles:str, monoisotopic: bool) -> float:
+def _get_neutral_mass(smiles: str, monoisotopic: bool) -> Optional[float]:
     """Get neutral mass of molecule, either average or most abundant monoisotopic mass.
 
     Args:
@@ -69,6 +73,9 @@ def _get_neutral_mass(smiles:str, monoisotopic: bool) -> float:
     if not _has_rdkit:
         raise ImportError(rdkit_missing_message)
     mol = Chem.MolFromSmiles(smiles)
+    if mol is None:
+        logger.warning("No mass could be calculated for smiles: %s, since it is not a valid smiles.", smiles)
+        return None
     mass = Descriptors.ExactMolWt(mol) if monoisotopic else Descriptors.MolWt(mol)
     charge = sum(atom.GetFormalCharge() for atom in mol.GetAtoms())
     neutral_mass = mass + -charge * PROTON_MASS

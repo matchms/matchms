@@ -1,9 +1,7 @@
-import ast
-import os
 import numpy as np
 import pytest
 from matchms import SpectrumProcessor
-from matchms.SpectrumProcessor import ALL_FILTERS, ProcessingReport
+from matchms.filtering.SpectrumProcessor import ProcessingReport
 from ..builder_Spectrum import SpectrumBuilder
 
 
@@ -122,13 +120,12 @@ def test_filter_spectrums_report(spectrums):
     expected_masses = [100, 102, 104]
     assert actual_masses == expected_masses
     assert report.counter_number_processed == 3
-    assert report.counter_changed_field == {'make_charge_int': 2}
-    assert report.counter_added_field == {'interpret_pepmass': 3, 'derive_ionmode': 3}
+    assert report.counter_changed_spectrum == {'make_charge_int': 2, 'interpret_pepmass': 3, 'derive_ionmode': 3}
     report_df = report.to_dataframe()
     assert np.all(report_df.loc[["make_charge_int", "interpret_pepmass", "derive_ionmode"]].values == np.array(
-        [[0, 2, 0],
-         [0, 0, 3],
-         [0, 0, 3]]))
+        [[0, 2],
+         [0, 3],
+         [0, 3]]))
 
 
 def test_processing_report_class(spectrums):
@@ -139,8 +136,7 @@ def test_processing_report_class(spectrums):
         processing_report.add_to_report(s, spectrum_processed, "test_filter")
 
     assert not processing_report.counter_removed_spectrums
-    assert not processing_report.counter_changed_field
-    assert processing_report.counter_added_field == {"test_filter": 3}
+    assert processing_report.counter_changed_spectrum == {"test_filter": 3}
 
 
 def test_adding_custom_filter(spectrums):
@@ -155,8 +151,8 @@ def test_adding_custom_filter(spectrums):
     assert filters[-1].__name__ == "nonsense_inchikey"
     spectrums, report = processor.process_spectrums(spectrums, create_report=True)
     assert report.counter_number_processed == 3
-    assert report.counter_changed_field == {'make_charge_int': 2}
-    assert report.counter_added_field == {'interpret_pepmass': 3, 'derive_ionmode': 3, 'nonsense_inchikey': 3}
+    assert report.counter_changed_spectrum == {'make_charge_int': 2, 'interpret_pepmass': 3,
+                                               'derive_ionmode': 3, 'nonsense_inchikey': 3}
     assert spectrums[0].get("inchikey") == "NONSENSE", "Custom filter not executed properly"
 
 
@@ -172,8 +168,8 @@ def test_adding_custom_filter_with_parameters(spectrums):
     assert filters[-1].__name__ == "nonsense_inchikey_multiple"
     spectrums, report = processor.process_spectrums(spectrums, create_report=True)
     assert report.counter_number_processed == 3
-    assert report.counter_changed_field == {'make_charge_int': 2}
-    assert report.counter_added_field == {'interpret_pepmass': 3, 'derive_ionmode': 3, 'nonsense_inchikey_multiple': 3}
+    assert report.counter_changed_spectrum == {'make_charge_int': 2, 'interpret_pepmass': 3,
+                                               'derive_ionmode': 3, 'nonsense_inchikey_multiple': 3}
     assert spectrums[0].get("inchikey") == "NONSENSENONSENSE", "Custom filter not executed properly"
 
 
@@ -221,50 +217,3 @@ def test_add_filter_with_matchms_filter(spectrums):
     assert filters[-1].__name__ == "require_correct_ionmode"
     spectrums, _ = processor.process_spectrums(spectrums, create_report=True)
     assert not spectrums, "Expected to be empty list"
-
-
-def test_all_filters_is_complete():
-    """Checks that the global varible ALL_FILTERS contains all the available filters
-
-    This is important, since performing tests in the wrong order can make some filters useless.
-    """
-
-    def get_functions_from_file(file_path):
-        """Gets all python functions in a file"""
-        with open(file_path, 'r', encoding="utf-8") as file:
-            tree = ast.parse(file.read(), filename=file_path)
-        functions = []
-        for node in ast.walk(tree):
-            if isinstance(node, ast.FunctionDef):
-                functions.append(node.name)
-        return functions
-
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    filtering_directory = os.path.join(current_dir, "../../matchms/filtering")
-    directories_with_filters = ["metadata_processing",
-                                "peak_processing"]
-
-    all_filters = [filter.__name__ for filter in ALL_FILTERS]
-    list_of_filter_function_names = []
-    for directory_with_filters in directories_with_filters:
-        directory_with_filters = os.path.join(filtering_directory, directory_with_filters)
-        scripts = os.listdir(directory_with_filters)
-        for script in scripts:
-            # Remove __init__
-            if script[0] == "_":
-                break
-            if script[-3:] == ".py":
-                functions = get_functions_from_file(os.path.join(directory_with_filters, script))
-                for function in functions:
-                    if function[0] != "_":
-                        list_of_filter_function_names.append((script, function))
-    for script, filter_function in list_of_filter_function_names:
-        assert filter_function in all_filters, \
-            f"The function {filter_function} in the script {script} is not given in ALL_FILTERS, " \
-            f"this should be added to ensure a correct order of filter functions." \
-            f"If this function is not a filter add a _ before the function name"
-
-
-def test_all_filters_no_duplicates():
-    all_filters = [filter.__name__ for filter in ALL_FILTERS]
-    assert len(all_filters) == len(set(all_filters)), "One of the filters appears twice in ALL_FILTERS"
