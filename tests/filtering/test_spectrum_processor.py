@@ -22,6 +22,28 @@ def spectrums():
 
 def test_filter_sorting_and_output():
     processing = SpectrumProcessor("default")
+    expected_filters = [
+        'make_charge_int',
+        'add_compound_name',
+        'derive_adduct_from_name',
+        'derive_formula_from_name',
+        'clean_compound_name',
+        'interpret_pepmass',
+        'add_precursor_mz',
+        'derive_ionmode',
+        'correct_charge',
+        'require_precursor_mz',
+        'harmonize_undefined_inchikey',
+        'harmonize_undefined_inchi',
+        'harmonize_undefined_smiles',
+        'repair_inchi_inchikey_smiles',
+        'add_parent_mass',
+        'normalize_intensities'
+    ]
+
+    actual_filters = [x.__name__ for x in processing.filters]
+    assert actual_filters == expected_filters
+    # 2nd way to access the filter names via processing_steps attribute:
     expected_filters = ['make_charge_int',
                         'add_compound_name',
                         ('derive_adduct_from_name', {'remove_adduct_from_name': True}),
@@ -32,12 +54,11 @@ def test_filter_sorting_and_output():
                         'derive_ionmode',
                         'correct_charge',
                         ('require_precursor_mz', {'minimum_accepted_mz': 10.0}),
-                        ('add_parent_mass',
-                         {'estimate_from_adduct': True, 'overwrite_existing_entry': False}),
                         ('harmonize_undefined_inchikey', {'aliases': None, 'undefined': ''}),
                         ('harmonize_undefined_inchi', {'aliases': None, 'undefined': ''}),
                         ('harmonize_undefined_smiles', {'aliases': None, 'undefined': ''}),
                         'repair_inchi_inchikey_smiles',
+                        ('add_parent_mass', {'estimate_from_adduct': True, 'overwrite_existing_entry': False}),
                         'normalize_intensities']
     assert processing.processing_steps == expected_filters
 

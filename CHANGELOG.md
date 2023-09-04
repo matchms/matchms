@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Logger warning for rdkit molecule conversion [#507](https://github.com/matchms/matchms/pull/507)
+- Repair_smiles_from_compound_name, now works without matchmsextras [#509](https://github.com/matchms/matchms/pull/509/)
+  - pubchempy was added as dependency
 
 ### Fixed
 
