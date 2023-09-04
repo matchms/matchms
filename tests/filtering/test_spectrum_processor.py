@@ -44,7 +44,47 @@ def test_filter_sorting_and_output():
     actual_filters = [x.__name__ for x in processing.filters]
     assert actual_filters == expected_filters
     # 2nd way to access the filter names via processing_steps attribute:
+    expected_filters = ['make_charge_int',
+                        'add_compound_name',
+                        ('derive_adduct_from_name', {'remove_adduct_from_name': True}),
+                        ('derive_formula_from_name', {'remove_formula_from_name': True}),
+                        'clean_compound_name',
+                        'interpret_pepmass',
+                        'add_precursor_mz',
+                        'derive_ionmode',
+                        'correct_charge',
+                        ('require_precursor_mz', {'minimum_accepted_mz': 10.0}),
+                        ('add_parent_mass',
+                         {'estimate_from_adduct': True, 'overwrite_existing_entry': False}),
+                        ('harmonize_undefined_inchikey', {'aliases': None, 'undefined': ''}),
+                        ('harmonize_undefined_inchi', {'aliases': None, 'undefined': ''}),
+                        ('harmonize_undefined_smiles', {'aliases': None, 'undefined': ''}),
+                        'repair_inchi_inchikey_smiles',
+                        'normalize_intensities']
     assert processing.processing_steps == expected_filters
+
+
+@pytest.mark.parametrize("filter_step, expected", [
+    [("add_parent_mass", {'estimate_from_adduct': False}),
+     ('add_parent_mass', {'estimate_from_adduct': False, 'overwrite_existing_entry': False})],
+    ["derive_adduct_from_name",
+     ('derive_adduct_from_name', {'remove_adduct_from_name': True})],
+    [("require_correct_ionmode", {"ion_mode_to_keep": "both"}),
+     ("require_correct_ionmode", {"ion_mode_to_keep": "both"})],
+])
+def test_overwrite_default_settings(filter_step, expected):
+    """Test if both default settings and set settings are returned in processing steps"""
+    processor = SpectrumProcessor(None)
+    processor.add_filter(filter_step)
+    expected_filters = [expected]
+    assert processor.processing_steps == expected_filters
+
+
+def test_incomplete_parameters():
+    """Test if an error is raised when running an incomplete command"""
+    with pytest.raises(AssertionError):
+        processor = SpectrumProcessor(None)
+        processor.add_filter("require_correct_ionmode")
 
 
 def test_string_output():
@@ -155,6 +195,28 @@ def test_adding_custom_filter_with_parameters(spectrums):
     assert spectrums[0].get("inchikey") == "NONSENSENONSENSE", "Custom filter not executed properly"
 
 
+@pytest.mark.parametrize("filter_position, expected", [
+    [0, 0],
+    [1, 1],
+    [2, 2],
+    [3, 3],
+    [None, 4],
+    [5, 4],
+    [6, 4]
+])
+def test_add_custom_filter_in_position(filter_position, expected):
+    def nonsense_inchikey_multiple(s, number):
+        s.set("inchikey", number * "NONSENSE")
+        return s
+
+    processor = SpectrumProcessor("minimal")
+    processor.add_custom_filter(nonsense_inchikey_multiple, {"number": 2},
+                                filter_position=filter_position)
+    filters = processor.filters
+
+    assert filters[expected].__name__ == "nonsense_inchikey_multiple"
+
+
 def test_add_filter_with_custom(spectrums):
     def nonsense_inchikey_multiple(s, number):
         s.set("inchikey", number * "NONSENSE")
@@ -163,6 +225,7 @@ def test_add_filter_with_custom(spectrums):
     processor = SpectrumProcessor("minimal")
     processor.add_filter((nonsense_inchikey_multiple, {"number": 2}))
     filters = processor.filters
+
     assert filters[-1].__name__ == "nonsense_inchikey_multiple"
     spectrums, _ = processor.process_spectrums(spectrums, create_report=True)
     assert spectrums[0].get("inchikey") == "NONSENSENONSENSE", "Custom filter not executed properly"
