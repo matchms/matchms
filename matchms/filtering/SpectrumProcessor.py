@@ -207,6 +207,33 @@ class SpectrumProcessor:
         return summary_string
 
 
+def check_all_parameters_given(func):
+    """Asserts that all added parameters for a function are given (except spectrum_in)"""
+    signature = inspect.signature(func)
+    parameters_without_value = []
+    for parameter, value in signature.parameters.items():
+        if value.default is inspect.Parameter.empty:
+            parameters_without_value.append(parameter)
+    assert len(parameters_without_value) == 1, \
+        f"More than one parameter of the function {func.__name__} is not specified, " \
+        f"the parameters not specified are {parameters_without_value}"
+
+
+def get_parameter_settings(func):
+    """Returns all parameters and parameter values for a function
+
+    This includes default parameter settings and, but also the settings stored in partial"""
+    signature = inspect.signature(func)
+    parameter_settings = {
+            parameter: value.default
+            for parameter, value in signature.parameters.items()
+            if value.default is not inspect.Parameter.empty
+        }
+    if parameter_settings == {}:
+        return None
+    return parameter_settings
+
+
 class ProcessingReport:
     """Class to keep track of spectrum changes during filtering.
     """
