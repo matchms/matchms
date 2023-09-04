@@ -43,7 +43,16 @@ def repair_not_matching_annotation(spectrum_in: Spectrum):
     spectrum = spectrum_in.clone()
 
     if not _check_fully_annotated(spectrum):
-        logger.warning("First run derive inchi_from_smiles, derive_inchikey_from_inchi, and derive_smiles_from_inchi")
+        if not is_valid_inchi(spectrum.get("inchi")) and \
+           not is_valid_smiles(spectrum.get("smiles")) and \
+           not is_valid_smiles(spectrum.get("inchikey")):
+            logger.info("No valid annotation was available for the spectrum, "
+                        "so repair_not_matching_annotation was not run")
+        else:
+            logger.warning("Please first run repair_inchi_from_smiles, repair_smiles_from_inchi and repair_inchikey. "
+                           "The spectrum had partly valid annotations, "
+                           "this shows that these repair functions were not yet run.")
+        return spectrum
 
     smiles = spectrum.get("smiles")
     inchi = spectrum.get("inchi")
