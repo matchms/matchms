@@ -74,7 +74,7 @@ class SpectrumProcessor:
         # Sort filters according to their order in self.filter_order
         self.filters.sort(key=lambda f: self.filter_order.index(f.__name__))
 
-    def add_custom_filter(self, filter_function: Union[Tuple[Callable, Dict[str, any]], Callable], filter_params=None):
+    def add_custom_filter(self, filter_function: Union[Tuple[Callable, Dict[str, any]], Callable], filter_params=None, filter_position=None):
         """
         Add a custom filter function to the processing pipeline.
 
