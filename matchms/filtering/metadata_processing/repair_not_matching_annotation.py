@@ -48,15 +48,12 @@ def repair_not_matching_annotation(spectrum_in: Spectrum):
         # Repairing is not possible, since not all annotations are valid entries.
         return spectrum
 
-    parent_mass = spectrum.get("parent_mass")
-    inchi_from_smiles = convert_smiles_to_inchi(spectrum.get("smiles"))
+    smiles_from_inchi = convert_inchi_to_smiles(spectrum.get("inchi"))
 
     # Check if SMILES and InChI match
-    if inchi_from_smiles != spectrum.get("inchi"):
-        smiles_from_inchi = convert_inchi_to_smiles(spectrum.get("inchi"))
+    if smiles_from_inchi != spectrum.get("smiles"):
         spectrum = _repair_smiles_inchi(spectrum,
-                                        smiles_from_inchi,
-                                        inchi_from_smiles)
+                                        smiles_from_inchi)
 
     # Check if the InChIKey matches the InChI
     correct_inchikey = convert_inchi_to_inchikey(spectrum.get("inchi"))
@@ -93,11 +90,12 @@ def _check_repairing_is_possible(smiles, inchi, inchikey) -> bool:
     return False
 
 
-def _repair_smiles_inchi(spectrum, smiles_from_inchi, inchi_from_smiles):
+def _repair_smiles_inchi(spectrum, smiles_from_inchi):
     """Repairs mismatching smiles and inchi. The smile or inchi that matches the parent mass is chosen"""
     smiles = spectrum.get("smiles")
     parent_mass = spectrum.get("parent_mass")
     inchi = spectrum.get("inchi")
+
     smiles_correct = _check_smiles_and_parent_mass_match(smiles, parent_mass, 0.1)
     inchi_correct = _check_smiles_and_parent_mass_match(smiles_from_inchi, parent_mass, 0.1)
 
@@ -105,6 +103,7 @@ def _repair_smiles_inchi(spectrum, smiles_from_inchi, inchi_from_smiles):
         logger.warning("The SMILES and InChI are not matching, but both match the parent mass. "
                        "SMILES = %s, InChI = %s", smiles, inchi)
     elif smiles_correct and not inchi_correct:
+        inchi_from_smiles = convert_smiles_to_inchi(spectrum.get("smiles"))
         # Repair by using inchi generated from SMILES
         logger.info("The InChI has been changed from %s to %s. "
                     "The new InChI matches the parent mass, while the old one did not", inchi, inchi_from_smiles)
