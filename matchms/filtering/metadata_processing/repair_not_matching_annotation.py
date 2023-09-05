@@ -2,7 +2,8 @@ import logging
 from matchms import Spectrum
 from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import (
     _check_fully_annotated, convert_inchi_to_inchikey, convert_inchi_to_smiles,
-    convert_smiles_to_inchi, is_valid_inchi, is_valid_inchikey, is_valid_smiles)
+    convert_smiles_to_inchi, is_valid_inchi, is_valid_inchikey,
+    is_valid_smiles)
 from matchms.filtering.metadata_processing.require_parent_mass_match_smiles import \
     _check_smiles_and_parent_mass_match
 
