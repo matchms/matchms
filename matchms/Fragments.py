@@ -45,6 +45,8 @@ class Fragments:
         assert self._is_sorted(), "mz values are out of order."
 
     def __eq__(self, other):
+        if other is None:
+            return False
         return \
             self.mz.shape == other.mz.shape and \
             np.allclose(self.mz, other.mz) and \

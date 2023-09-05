@@ -1,7 +1,7 @@
 import inspect
 from collections import defaultdict
 from functools import partial
-from typing import Dict, Optional, Tuple, Union
+from typing import Callable, Dict, Optional, Tuple, Union
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
@@ -35,7 +35,8 @@ class SpectrumProcessor:
             for filter_name in PREDEFINED_PIPELINES[predefined_pipeline]:
                 self.add_matchms_filter(filter_name)
 
-    def add_filter(self, filter_function: Union[Tuple[str, Dict[str, any]], str]):
+    def add_filter(self,
+                   filter_function: Union[Tuple[str, Dict[str, any]], str, Tuple[Callable, Dict[str, any]], Callable]):
         """Add a filter to the processing pipeline. Takes both matchms filter names (and parameters)
         as well as custom-made functions.
         """
@@ -73,7 +74,7 @@ class SpectrumProcessor:
         # Sort filters according to their order in self.filter_order
         self.filters.sort(key=lambda f: self.filter_order.index(f.__name__))
 
-    def add_custom_filter(self, filter_function, filter_params=None, filter_position: Optional[int] = None):
+    def add_custom_filter(self, filter_function: Union[Tuple[Callable, Dict[str, any]], Callable], filter_params=None, filter_position=None):
         """
         Add a custom filter function to the processing pipeline.
 
@@ -238,8 +239,9 @@ class ProcessingReport:
     """Class to keep track of spectrum changes during filtering.
     """
     def __init__(self):
-        self.counter_changed_spectrum = defaultdict(int)
+        self.counter_changed_metadata = defaultdict(int)
         self.counter_removed_spectrums = defaultdict(int)
+        self.counter_changed_peaks = defaultdict(int)
         self.counter_number_processed = 0
 
     def add_to_report(self, spectrum_old, spectrum_new: Spectrum,
@@ -249,18 +251,23 @@ class ProcessingReport:
         if spectrum_new is None:
             self.counter_removed_spectrums[filter_function_name] += 1
         else:
-            for field, value in spectrum_new.metadata.items():
-                if objects_differ(spectrum_old.get(field), value):
-                    self.counter_changed_spectrum[filter_function_name] += 1
-                    break
+            # Add metadata changes
+            if spectrum_new.metadata != spectrum_old.metadata:
+                self.counter_changed_metadata[filter_function_name] += 1
+            # Add peak changes
+            if spectrum_new.peaks != spectrum_old.peaks or spectrum_new.losses != spectrum_old.losses:
+                self.counter_changed_peaks[filter_function_name] += 1
 
     def to_dataframe(self):
         """Create Pandas DataFrame Report of counted spectrum changes."""
-        changes = pd.DataFrame(self.counter_changed_spectrum.items(),
-                               columns=["filter", "changed spectra"])
+        metadata_changed = pd.DataFrame(self.counter_changed_metadata.items(),
+                                        columns=["filter", "changed metadata"])
         removed = pd.DataFrame(self.counter_removed_spectrums.items(),
                                columns=["filter", "removed spectra"])
-        processing_report = pd.merge(removed, changes, how="outer", on="filter")
+        peaks_changed = pd.DataFrame(self.counter_changed_peaks.items(),
+                                     columns=["filter", "changed mass spectrum"])
+        processing_report = pd.merge(removed, metadata_changed, how="outer", on="filter")
+        processing_report = pd.merge(processing_report, peaks_changed, how="outer", on="filter")
 
         processing_report = processing_report.set_index("filter").fillna(0)
         return processing_report.astype(int)
@@ -278,7 +285,9 @@ Changes during processing:
     def __repr__(self):
         return f"Report({self.counter_number_processed},\
         {self.counter_removed_spectrums},\
-        {dict(self.counter_changed_spectrum)})"
+        {dict(self.counter_removed_spectrums)},\
+        {dict(self.counter_changed_metadata)},\
+        {dict(self.counter_changed_peaks)})"
 
 
 def objects_differ(obj1, obj2):
