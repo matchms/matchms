@@ -20,6 +20,8 @@ def test_repair_not_matching_annotation_repair_inchikey(smile, inchi, inchikey, 
 
 
 @pytest.mark.parametrize("smile, inchi, inchikey, parent_mass, correct_smiles, correct_inchi, correct_inchikey", [
+    (None, "n/a", "wrong information", 100,
+     None, "n/a", "wrong information"),  # no annotation and wrong field entries
     ("CCC", None, None, 100,
      "CCC", None, None),  # missing inchi and inchikey
     ("CCC", "InChI=1S/C3H8/c1-3-2/h3H2,1-2H3", "ATUOYWHBWRKTHZ-UHFFFAOYSA-N", 100,
