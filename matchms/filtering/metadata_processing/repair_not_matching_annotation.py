@@ -42,10 +42,14 @@ def repair_not_matching_annotation(spectrum_in: Spectrum):
 
     spectrum = spectrum_in.clone()
 
+    smiles = spectrum.get("smiles")
+    inchi = spectrum.get("inchi")
+    inchikey = spectrum.get("inchikey")
+
     if not _check_fully_annotated(spectrum):
-        if not is_valid_inchi(spectrum.get("inchi")) and \
-           not is_valid_smiles(spectrum.get("smiles")) and \
-           not is_valid_smiles(spectrum.get("inchikey")):
+        if not is_valid_inchi(inchi) and \
+           not is_valid_smiles(smiles) and \
+           not is_valid_smiles(inchikey):
             logger.info("No valid annotation was available for the spectrum, "
                         "so repair_not_matching_annotation was not run")
         else:
@@ -54,17 +58,18 @@ def repair_not_matching_annotation(spectrum_in: Spectrum):
                            "this shows that these repair functions were not yet run.")
         return spectrum
 
-    smiles = spectrum.get("smiles")
-    inchi = spectrum.get("inchi")
-    inchikey = spectrum.get("inchikey")
     parent_mass = spectrum.get("parent_mass")
-
     inchi_from_smiles = convert_smiles_to_inchi(smiles)
 
     # Check if SMILES and InChI match
     if inchi_from_smiles != inchi:
         smiles_from_inchi = convert_inchi_to_smiles(inchi)
-        spectrum = _handle_smiles_inchi_mismatch(spectrum, smiles, inchi, smiles_from_inchi, inchi_from_smiles, parent_mass)
+        spectrum = _handle_smiles_inchi_mismatch(spectrum,
+                                                 smiles,
+                                                 inchi,
+                                                 smiles_from_inchi,
+                                                 inchi_from_smiles,
+                                                 parent_mass)
 
     # Check if the InChIKey matches the InChI
     correct_inchikey = convert_inchi_to_inchikey(spectrum.get("inchi"))
