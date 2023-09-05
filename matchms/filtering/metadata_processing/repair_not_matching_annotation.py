@@ -48,7 +48,7 @@ def repair_not_matching_annotation(spectrum_in: Spectrum):
     inchikey = spectrum.get("inchikey")
 
     if not _check_fully_annotated(spectrum):
-        if is_valid_inchi(inchi) or is_valid_smiles(smiles) or is_valid_smiles(inchikey):
+        if is_valid_inchi(inchi) or is_valid_smiles(smiles) or is_valid_inchikey(inchikey):
             logger.warning("Please first run repair_inchi_from_smiles, repair_smiles_from_inchi and repair_inchikey. "
                            "The spectrum had partly valid annotations, "
                            "this shows that these repair functions were not yet run.")
