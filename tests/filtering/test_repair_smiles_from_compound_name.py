@@ -1,5 +1,7 @@
 import csv
+import math
 import os
+from typing import List
 import pytest
 from matchms.filtering import derive_smiles_from_pubchem_compound_name_search
 from matchms.filtering.metadata_processing.derive_smiles_from_pubchem_compound_name_search import (
@@ -72,7 +74,7 @@ def test_repair_smiles_from_compound_name(compound_name, parent_mass, smiles,
     empty_csv_file = os.path.join(tmp_path, "test.csv")
     spectrum = derive_smiles_from_pubchem_compound_name_search(spectrum_in, empty_csv_file, mass_tolerance=0.1)
     assert spectrum.get("smiles") == expected_smiles, "Expected different smiles."
-    stored_in_csv_file = _load_compound_name_annotations(empty_csv_file, compound_name)
+    stored_in_csv_file = replace_nan_with_none(_load_compound_name_annotations(empty_csv_file, compound_name))
     assert len(stored_in_csv_file) == 1
     assert stored_in_csv_file[0]["smiles"] == expected_smiles
     assert stored_in_csv_file[0]["compound_name"] == compound_name
@@ -94,7 +96,7 @@ def test_write_compound_names_to_file(tmp_path):
     _write_compound_name_annotations(csv_file_name,
                                      annotation_2)
     assert _load_compound_name_annotations(csv_file_name, "glucose") == annotation_1
-    assert _load_compound_name_annotations(csv_file_name, "compound_2") == annotation_2
+    assert replace_nan_with_none(_load_compound_name_annotations(csv_file_name, "compound_2")) == annotation_2
 
 
 @pytest.mark.parametrize("compound_name, expected_output", [
@@ -106,7 +108,7 @@ def test_write_compound_names_to_file(tmp_path):
                      'inchikey': None, 'monoisotopic_mass': None}]), ])
 def test_load_compound_name_annotation(compound_name, expected_output, csv_file_annotated_compound_names):
     result = _load_compound_name_annotations(csv_file_annotated_compound_names, compound_name)
-    assert result == expected_output
+    assert replace_nan_with_none(result) == expected_output
 
 
 @pytest.mark.parametrize("compound_name, expected_output", [
@@ -132,4 +134,12 @@ def test_pubchem_name_search(compound_name, expected_output):
     ("does_not_exist", [])])
 def test_get_compound_name_annotation(compound_name, expected_output, csv_file_annotated_compound_names):
     result = _get_pubchem_compound_name_annotation(compound_name, csv_file_annotated_compound_names)
-    assert result == expected_output
+    assert replace_nan_with_none(result) == expected_output
+
+
+def replace_nan_with_none(matches_found: List[dict]):
+    for match in matches_found:
+        for key, value in match.items():
+            if isinstance(value, float) and math.isnan(value):
+                match[key] = None
+    return matches_found

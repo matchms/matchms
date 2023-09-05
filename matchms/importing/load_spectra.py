@@ -68,14 +68,20 @@ def load_from_pickle(filename: str, metadata_harmonization: bool) -> List[Spectr
     return loaded_object
 
 
-def load_list_of_spectrum_files(spectrum_files: Union[List[str],str]) -> List[SpectrumType]:
+def load_list_of_spectrum_files(spectrum_files: Union[List[str], str]
+                                ) -> Union[List[SpectrumType], Generator[SpectrumType, None, None]]:
     """Combines all spectra in multiple files into a list of spectra"""
-    all_spectra = []
+    # Just load spectra if it is a single file
     if isinstance(spectrum_files, str):
-        spectrum_files = [spectrum_files]
-    for spectrum_file in spectrum_files:
-        loaded_spectra = load_spectra(spectrum_file)
-        if isinstance(loaded_spectra, Generator):
-            loaded_spectra = list(loaded_spectra)
-        all_spectra.extend(loaded_spectra)
-    return all_spectra
+        return load_spectra(spectrum_files)
+    # If multiple files combine results into one generator
+    spectrum_generators = [load_spectra(spectrum_file) for
+                           spectrum_file in spectrum_files]
+
+    def chain(*iterables):
+        """Combines multiple iterators (and generators) into a single iterator"""
+        # chain('ABC', 'DEF') --> A B C D E F
+        for it in iterables:
+            for element in it:
+                yield element
+    return chain(*spectrum_generators)

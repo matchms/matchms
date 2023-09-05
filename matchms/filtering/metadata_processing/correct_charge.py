@@ -44,11 +44,11 @@ def correct_charge(spectrum_in: SpectrumType) -> SpectrumType:
 
     # Correct charge when in conflict with ionmode (trust ionmode more!)
     if np.sign(charge) == 1 and ionmode == 'negative':
+        logger.warning("Changed sign of given charge: %s to match negative ionmode", charge)
         charge *= -1
-        logger.warning("Changed sign of given charge to match negative ionmode")
     elif np.sign(charge) == -1 and ionmode == 'positive':
+        logger.warning("Changed sign of given charge: %s to match positive ionmode", charge)
         charge *= -1
-        logger.warning("Changed sign of given charge to match positive ionmode")
 
     spectrum.set("charge", charge)
 

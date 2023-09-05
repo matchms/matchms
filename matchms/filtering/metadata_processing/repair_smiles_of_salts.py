@@ -23,7 +23,6 @@ def repair_smiles_of_salts(spectrum_in,
         return spectrum
 
     if not is_valid_smiles(smiles):
-        logger.warning("No valid smiles, please run require_valid_annotation before")
         return spectrum
     parent_mass = spectrum.get("parent_mass")
     possible_ion_combinations = _create_possible_ions(smiles)

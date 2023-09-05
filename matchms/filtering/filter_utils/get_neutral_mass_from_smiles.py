@@ -72,6 +72,8 @@ def _get_neutral_mass(smiles: str, monoisotopic: bool) -> Optional[float]:
     """
     if not _has_rdkit:
         raise ImportError(rdkit_missing_message)
+    if smiles is None:
+        return None
     mol = Chem.MolFromSmiles(smiles)
     if mol is None:
         logger.warning("No mass could be calculated for smiles: %s, since it is not a valid smiles.", smiles)

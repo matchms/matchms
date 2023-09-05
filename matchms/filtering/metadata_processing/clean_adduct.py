@@ -20,7 +20,6 @@ def clean_adduct(spectrum_in):
         return None
     spectrum = spectrum_in.clone()
     adduct = spectrum.get("adduct")
-
     cleaned_adduct = _clean_adduct(adduct)
     if adduct != cleaned_adduct:
         spectrum.set("adduct", cleaned_adduct)

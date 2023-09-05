@@ -379,7 +379,6 @@ class Pipeline:
         self._spectrums_queries = load_list_of_spectrum_files(query_files)
 
         self.write_to_logfile(f"Loaded query spectra from {query_files}")
-        self.write_to_logfile(f"Loaded {len(self._spectrums_queries)} query spectra")
 
         # import reference spectra
         if reference_files is None:
@@ -389,7 +388,6 @@ class Pipeline:
         else:
             self._spectrums_references = load_list_of_spectrum_files(reference_files)
             self.write_to_logfile(f"Loaded reference spectra from {reference_files}")
-            self.write_to_logfile(f"Loaded {len(self._spectrums_references)} reference spectra")
 
     # Getter & Setters
     @property

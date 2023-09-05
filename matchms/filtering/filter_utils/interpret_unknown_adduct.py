@@ -40,6 +40,9 @@ def get_multiplier_and_mass_from_adduct(adduct: str) -> Tuple[Optional[float], O
     Returns:
         Tuple[Optional[float], Optional[float]]: Multiplier and mass of this adduct.
     """
+    if adduct is None or not isinstance(adduct, str):
+        return None, None
+
     charge = get_charge_of_adduct(adduct)
     if charge is None:
         return None, None
@@ -146,6 +149,7 @@ def get_charge_of_adduct(adduct) -> Optional[int]:
 
     e.g. '[M+H-H2O]2+' -> 2
     """
+
     charge = re.findall((r"\]([0-9]?[+-])"), adduct)
     if len(charge) != 1:
         logger.warning("Charge was found %s times in adduct %s",

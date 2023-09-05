@@ -1,8 +1,11 @@
 import csv
+import json
 import logging
 import os
+import time
 from functools import lru_cache
 from typing import List, Optional
+from urllib.error import URLError
 import numpy as np
 import pandas as pd
 import pubchempy
@@ -81,32 +84,46 @@ def _get_pubchem_compound_name_annotation(compound_name, csv_file=None) -> List[
     return annotated_compound_names
 
 
-def _pubchem_name_search(compound_name: str, name_search_depth=10,) -> List[dict]:
+def _pubchem_name_search(compound_name: str,
+                         name_search_depth=10,
+                         max_retries=15) -> List[dict]:
     """Search pubmed for compound name"""
-    try:
-        results_pubchem = pubchempy.get_compounds(compound_name,
-                                                  'name',
-                                                  listkey_count=name_search_depth)
-        if len(results_pubchem) == 0 and "_" in compound_name:
-            results_pubchem = pubchempy.get_compounds(compound_name.replace("_", " "),
+    retries = 0
+    max_delay = 3600
+    while retries < max_retries:
+        try:
+            results_pubchem = pubchempy.get_compounds(compound_name,
                                                       'name',
                                                       listkey_count=name_search_depth)
-    except (pubchempy.ServerError, ConnectionError, ConnectionAbortedError, pubchempy.PubChemHTTPError):
-        print("Connection error, trying again")
-        return _pubchem_name_search(compound_name, name_search_depth=name_search_depth)
-
-    extracted_results = []
-    # extract the needed information:
-    for result in results_pubchem:
-        smiles_pubchem = result.isomeric_smiles
-        if smiles_pubchem is None:
-            smiles_pubchem = result.canonical_smiles
-        extracted_results.append({"compound_name": compound_name,
-                                  "smiles": smiles_pubchem,
-                                  "inchi": result.inchi,
-                                  "inchikey": result.inchikey,
-                                  "monoisotopic_mass": float(result.monoisotopic_mass),})
-    return extracted_results
+            if len(results_pubchem) == 0 and "_" in compound_name:
+                results_pubchem = pubchempy.get_compounds(compound_name.replace("_", " "),
+                                                          'name',
+                                                          listkey_count=name_search_depth)
+            extracted_results = []
+            # extract the needed information:
+            for result in results_pubchem:
+                smiles_pubchem = result.isomeric_smiles
+                if smiles_pubchem is None:
+                    smiles_pubchem = result.canonical_smiles
+                extracted_results.append({"compound_name": compound_name,
+                                          "smiles": smiles_pubchem,
+                                          "inchi": result.inchi,
+                                          "inchikey": result.inchikey,
+                                          "monoisotopic_mass": float(result.monoisotopic_mass), })
+            return extracted_results
+        except (pubchempy.ServerError, ConnectionError, ConnectionAbortedError,
+                pubchempy.PubChemHTTPError, URLError):
+            # keep retrying when an connection error occurs
+            delay = 2 ** retries
+            delay = min(max_delay, delay)
+            print(f"Connection error, trying again, after waiting for {delay} seconds")
+            time.sleep(delay)
+        except json.decoder.JSONDecodeError:
+            logger.warning("Compound name: %s resulted in broken json from pubchem", compound_name)
+            return []
+    logger.error("Compound name: %s could not be loaded due to a connection error after %s tries ",
+                 compound_name, str(max_retries))
+    return []
 
 
 def _load_compound_name_annotations(annotated_compound_names_csv, compound_name: str):
@@ -120,7 +137,6 @@ def _load_compound_name_annotations(annotated_compound_names_csv, compound_name:
         "compound_name, smiles, inchi, inchikey, monoisotopic_mass"
 
     matches = annotated_compound_names[annotated_compound_names["compound_name"] == compound_name]
-    matches.replace(np.nan, None, inplace=True)
     return matches.to_dict("records")
 
 
