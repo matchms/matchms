@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 from matchms import SpectrumProcessor
+from matchms.filtering.filter_order_and_default_pipelines import BASIC_FILTERS
 from matchms.filtering.SpectrumProcessor import ProcessingReport
 from ..builder_Spectrum import SpectrumBuilder
 
@@ -71,7 +72,7 @@ def test_filter_sorting_and_output():
     [("require_correct_ionmode", {"ion_mode_to_keep": "both"}),
      ("require_correct_ionmode", {"ion_mode_to_keep": "both"})],
 ])
-def test_overwrite_default_settings(filter_step, expected):
+def test_overwrite_default_settings(filter_step: str, expected):
     """Test if both default settings and set settings are returned in processing steps"""
     processor = SpectrumProcessor(None)
     processor.add_filter(filter_step)
@@ -238,3 +239,20 @@ def test_add_filter_with_matchms_filter(spectrums):
     assert filters[-1].__name__ == "require_correct_ionmode"
     spectrums, _ = processor.process_spectrums(spectrums, create_report=True)
     assert not spectrums, "Expected to be empty list"
+
+
+def test_add_duplicated_filter_to_existing_pipeline():
+    """Tests if adding a filter that is already in the basic pipeline is overwritten and not duplicated"""
+    processor = SpectrumProcessor("basic")
+    duplicated_filter = ("derive_adduct_from_name", {"remove_adduct_from_name": False})
+    processor.add_filter(duplicated_filter)
+    assert len(processor.processing_steps) == len(BASIC_FILTERS), "The duplicated filter was not replaced"
+    assert duplicated_filter in processor.processing_steps, "The new settings of the duplicated filter were not added"
+
+
+def test_add_filter_twice():
+    """Tests if adding a filter that is already in the basic pipeline is overwritten and not duplicated"""
+    processor = SpectrumProcessor(None)
+    processor.add_filter(("derive_adduct_from_name", {"remove_adduct_from_name": False}))
+    processor.add_filter("derive_adduct_from_name")
+    assert processor.processing_steps == [("derive_adduct_from_name", {"remove_adduct_from_name": True})]
