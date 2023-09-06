@@ -32,7 +32,7 @@ def derive_adduct_from_name(spectrum_in: Spectrum,
     compound_name = spectrum.get("compound_name", None)
     if compound_name is None:
         if spectrum.get("name", None) not in [None, ""]:
-            logger.warning("Found 'name' but not 'compound_name' in metadata",
+            logger.warning("Found 'name' but not 'compound_name' in metadata"
                            "Apply 'add_compound_name' filter first.")
         return spectrum
     # Detect adduct in compound name
@@ -75,10 +75,9 @@ def _select_best_adduct(list_of_adducts: List[str]) -> Optional[str]:
         return None
     if len(completely_correct_adduct) == 1:
         return completely_correct_adduct[0]
-    else:
-        logger.warning("Two potential adducts were found in the compound name that are both valid adducts. "
-                       "The first adduct is used. The adducts found are: %s", completely_correct_adduct)
-        return completely_correct_adduct[0]
+    logger.warning("Two potential adducts were found in the compound name that are both valid adducts. "
+                   "The first adduct is used. The adducts found are: %s", completely_correct_adduct)
+    return completely_correct_adduct[0]
 
 
 def _looks_like_adduct(adduct):
