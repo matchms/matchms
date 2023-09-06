@@ -1,4 +1,5 @@
 import inspect
+import logging
 from collections import defaultdict
 from functools import partial
 from typing import Dict, Optional, Tuple, Union
@@ -8,6 +9,9 @@ from tqdm import tqdm
 from matchms import Spectrum
 from matchms.filtering.filter_order_and_default_pipelines import (
     ALL_FILTERS, FILTER_FUNCTION_NAMES, PREDEFINED_PIPELINES)
+
+
+logger = logging.getLogger("matchms")
 
 
 class SpectrumProcessor:
@@ -59,17 +63,28 @@ class SpectrumProcessor:
         if isinstance(filter_spec, str):
             if filter_spec not in FILTER_FUNCTION_NAMES:
                 raise ValueError(f"Unknown filter type: {filter_spec} Should be known filter name or function.")
-            filter_func = FILTER_FUNCTION_NAMES[filter_spec]
+            new_filter_func = FILTER_FUNCTION_NAMES[filter_spec]
         elif isinstance(filter_spec, (tuple, list)):
             filter_name, filter_args = filter_spec
             if filter_name not in FILTER_FUNCTION_NAMES:
                 raise ValueError(f"Unknown filter type: {filter_name} Should be known filter name or function.")
-            filter_func = partial(FILTER_FUNCTION_NAMES[filter_name], **filter_args)
-            filter_func.__name__ = FILTER_FUNCTION_NAMES[filter_name].__name__
+            new_filter_func = partial(FILTER_FUNCTION_NAMES[filter_name], **filter_args)
+            new_filter_func.__name__ = FILTER_FUNCTION_NAMES[filter_name].__name__
         else:
             raise TypeError("filter_spec should be a string or a tuple or list")
-        check_all_parameters_given(filter_func)
-        self.filters.append(filter_func)
+        check_all_parameters_given(new_filter_func)
+
+        # Replace filters that are already stored.
+        filter_already_added = False
+        for i, filter_function in enumerate(self.filters):
+            if new_filter_func.__name__ == filter_function.__name__:
+                logger.warning("The filter %s was already in the filter list, "
+                               "the last added filter parameters are used, "
+                               "check yaml file for details", new_filter_func)
+                self.filters[i] = new_filter_func
+                filter_already_added = True
+        if not filter_already_added:
+            self.filters.append(new_filter_func)
         # Sort filters according to their order in self.filter_order
         self.filters.sort(key=lambda f: self.filter_order.index(f.__name__))
 
