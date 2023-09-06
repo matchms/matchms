@@ -67,6 +67,7 @@ DEFAULT_FILTERS = BASIC_FILTERS \
                      "harmonize_undefined_smiles",
                      "repair_inchi_inchikey_smiles",
                      "normalize_intensities",
+                     "add_retention_time",
                      ]
 FULLY_ANNOTATED_PROCESSING = DEFAULT_FILTERS \
                              + ["clean_adduct",
@@ -75,12 +76,27 @@ FULLY_ANNOTATED_PROCESSING = DEFAULT_FILTERS \
                                 "derive_inchikey_from_inchi",
                                 ("require_correct_ionmode", {"ion_mode_to_keep": "both"}),
                                 ("require_parent_mass_match_smiles", {'mass_tolerance': 0.1}),
+                                ("repair_smiles_of_salts", {'mass_tolerance': 0.1}),
+                                ("repair_precursor_is_parent_mass", {'mass_tolerance': 0.1}),
+                                ("repair_parent_mass_is_mol_wt", {'mass_tolerance': 0.1}),
+                                ("repair_adduct_based_on_smiles", {'mass_tolerance': 0.1}),
                                 "repair_not_matching_annotation",
                                 "require_valid_annotation",
+                                ("derive_smiles_from_pubchem_compound_name_search", {"mass_tolerance": 0.1}),
                                 ]
+
+
+MS2DEEPSCORE_TRAINING = FULLY_ANNOTATED_PROCESSING + \
+                        [("select_by_mz", {"mz_from": 0, "mz_to": 1000}),
+                         ("select_by_relative_intensity", {"intensity_from": 0.001}),
+                         ("reduce_to_number_of_peaks", {"n_max": 1000}),
+                         ("require_minimum_of_high_peaks", {"no_peaks": 5, "intensity_percent": 2.0}),
+                         ]
+
 PREDEFINED_PIPELINES = {
     "minimal": MINIMAL_FILTERS,
     "basic": BASIC_FILTERS,
     "default": DEFAULT_FILTERS,
     "fully_annotated": FULLY_ANNOTATED_PROCESSING,
+    "ms2deepscore": MS2DEEPSCORE_TRAINING,
 }
