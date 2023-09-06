@@ -11,6 +11,7 @@ from matchms.logging_functions import (add_logging_to_file,
                                        reset_matchms_logger,
                                        set_matchms_logger_level)
 from matchms.typing import SpectrumType
+from matchms.filtering.filter_order_and_default_pipelines import ALL_FILTERS
 
 
 _masking_functions = ["filter_by_range"]
@@ -424,3 +425,14 @@ class Pipeline:
     @property
     def spectrums_references(self) -> List[SpectrumType]:
         return self._spectrums_references
+
+
+def get_unused_filters(yaml_file):
+    """Prints all filter names that are in ALL_FILTERS, but not in the yaml file"""
+    workflow = load_workflow_from_yaml_file(yaml_file)
+    processor = initialize_spectrum_processor(None, workflow["query_filters"])
+
+    filters_used = [filter_function.__name__ for filter_function in processor.filters]
+    for filter_function in ALL_FILTERS:
+        if filter_function.__name__ not in filters_used:
+            print(filter_function.__name__)
