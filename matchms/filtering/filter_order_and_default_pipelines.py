@@ -13,8 +13,6 @@ ALL_FILTERS = [msfilters.make_charge_int,
                msfilters.add_retention_time,
                msfilters.derive_ionmode,
                msfilters.correct_charge,
-               # msfilters.derive_adduct_from_name,  # run again? Or improve those filters?
-               # msfilters.derive_formula_from_name,  # run again? Or improve those filters?
                msfilters.require_precursor_mz,
                msfilters.harmonize_undefined_inchikey,
                msfilters.harmonize_undefined_inchi,
