@@ -48,12 +48,12 @@ def repair_not_matching_annotation(spectrum_in: Spectrum):
         # Repairing is not possible, since not all annotations are valid entries.
         return spectrum
 
-    smiles_from_inchi = convert_inchi_to_smiles(spectrum.get("inchi"))
+    inchikey_from_smiles = convert_inchi_to_inchikey(convert_smiles_to_inchi(spectrum.get("smiles")))
+    inchikey_from_inchi = convert_inchi_to_inchikey(spectrum.get("inchi"))
 
     # Check if SMILES and InChI match
-    if smiles_from_inchi != spectrum.get("smiles"):
-        spectrum = _repair_smiles_inchi(spectrum,
-                                        smiles_from_inchi)
+    if inchikey_from_smiles[:14] != inchikey_from_inchi[:14]:
+        spectrum = _repair_smiles_inchi(spectrum)
 
     # Check if the InChIKey matches the InChI
     correct_inchikey = convert_inchi_to_inchikey(spectrum.get("inchi"))
@@ -90,11 +90,12 @@ def _check_repairing_is_possible(smiles, inchi, inchikey) -> bool:
     return False
 
 
-def _repair_smiles_inchi(spectrum, smiles_from_inchi):
+def _repair_smiles_inchi(spectrum):
     """Repairs mismatching smiles and inchi. The smile or inchi that matches the parent mass is chosen"""
     smiles = spectrum.get("smiles")
     parent_mass = spectrum.get("parent_mass")
     inchi = spectrum.get("inchi")
+    smiles_from_inchi = convert_inchi_to_smiles(inchi)
 
     smiles_correct = _check_smiles_and_parent_mass_match(smiles, parent_mass, 0.1)
     inchi_correct = _check_smiles_and_parent_mass_match(smiles_from_inchi, parent_mass, 0.1)
