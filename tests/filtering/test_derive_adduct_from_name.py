@@ -17,7 +17,7 @@ from ..builder_Spectrum import SpectrumBuilder
     [{"compound_name": "peptideXYZ [M+H+K] C16H12"}, True, "[M+H+K]", "peptideXYZ C16H12", "[M+H+K]"],
     [{"name": ""}, True, None, "", None]
 ])
-def test_derive_adduct_from_name_parametrized(metadata, remove_adduct_from_name,
+def test_derive_adduct_from_name_parametrized(metadata: dict, remove_adduct_from_name: bool,
                                               expected_adduct, expected_name, removed_adduct):
     set_matchms_logger_level("INFO")
     spectrum_in = SpectrumBuilder().with_metadata(metadata).build()
@@ -49,7 +49,6 @@ def test_derive_adduct_from_name_parametrized(metadata, remove_adduct_from_name,
 ])
 def test_derive_adduct_from_name_multiple_adducts_in_name(metadata,
                                                           expected_adduct, expected_name):
-    set_matchms_logger_level("INFO")
     spectrum_in = SpectrumBuilder().with_metadata(metadata).build()
 
     spectrum = derive_adduct_from_name(spectrum_in, remove_adduct_from_name=True)
