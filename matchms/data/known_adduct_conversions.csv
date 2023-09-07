@@ -5,6 +5,7 @@ input_adduct,corrected_adduct
 [M-2H2O+H],[M-2H2O+H]+
 [M+H-2H2O],[M-2H2O+H]+
 [M+H-2H2O]+,[M-2H2O+H]+
+[M-H+2Na],[M-H+2Na]+
 [M+H+Na],[M+H+Na]2+
 [M+H-NH3],[M+H-NH3]+
 [M-H+2Na]+,[M+2Na-H]+
@@ -16,6 +17,7 @@ input_adduct,corrected_adduct
 [M+K],[M+K]+
 [2M+H],[2M+H]+
 [2M+Na],[2M+Na]+
+[M+2Na],[M+2Na]2+
 [2M+K],[2M+K]+
 [M+NH4],[M+NH4]+
 [M-H],[M-H]-
@@ -23,12 +25,15 @@ input_adduct,corrected_adduct
 [M-H-H2O]-,[M-H2O-H]-
 [M-H-H2O],[M-H2O-H]-
 [M+H-CH3NH2],[M+H-CH3NH2]+
+[2M-2H+Na],[2M-2H+Na]-
+[M+HCOO],[M+HCOO]-
 [M+Cl],[M+Cl]-
 [M+Br],[M+Br]-
 [3M-H],[3M-H]-
 [2M-H],[2M-H]-
 [M+CH3COO],[M+CH3COO]-
 [M+FA-H],[M+FA-H]-
+[2M+FA-H],[2M+FA-H]-
 [M+OAc],[M+OAc]-
 [M+Oac],[M+OAc]-
 [M+Oac]-,[M+OAc]-
@@ -38,3 +43,5 @@ input_adduct,corrected_adduct
 [M-H]-/[M-Ser],[M-H]-
 [M+CH3COOH-H],[M+CH3COO]-
 [M-H1],[M-H]-
+[M-e],[M-e]-
+[M-2H],[M-2H]2-
