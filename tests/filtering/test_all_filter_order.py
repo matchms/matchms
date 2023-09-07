@@ -33,6 +33,8 @@ ANNOTATION_REPARATIONS = [msfilters.repair_inchi_inchikey_smiles, msfilters.deri
     # The adduct filter removes all occurances while derive formula from name only removes when it is at the end
     # of compound name. Removing adducts therefore has to happen first.
     [[msfilters.derive_adduct_from_name], [msfilters.derive_formula_from_name]],
+    [[msfilters.make_charge_int, msfilters.correct_charge, ], [msfilters.clean_adduct]],
+    [[msfilters.derive_adduct_from_name, ], [msfilters.clean_adduct]]
 ])
 def test_all_filter_order(early_filters: List[Callable], later_filters: List[Callable]):
     """Tests if early_filter is run before later_filter"""
