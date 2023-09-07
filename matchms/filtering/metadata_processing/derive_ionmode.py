@@ -29,20 +29,21 @@ def derive_ionmode(spectrum_in: SpectrumType) -> SpectrumType:
 
     spectrum = spectrum_in.clone()
 
-    # Load lists of known adducts
-    known_adducts = load_known_adducts()
-
-    adduct = spectrum.get("adduct", None)
-    # Harmonize adduct string
-    if adduct:
-        adduct = _clean_adduct(adduct)
-
     ionmode = spectrum.get("ionmode")
     if ionmode:
         assert ionmode == ionmode.lower(), ("Ionmode field not harmonized.",
                                             "Apply 'make_ionmode_lowercase' filter first.")
     if ionmode in ["positive", "negative"]:
         return spectrum
+
+    adduct = spectrum.get("adduct", None)
+    # Harmonize adduct string
+    if not adduct:
+        return spectrum
+    adduct = _clean_adduct(adduct)
+
+    # Load lists of known adducts
+    known_adducts = load_known_adducts()
     # Try completing missing or incorrect ionmodes
     if adduct in list(known_adducts["adduct"]):
         ionmode = known_adducts.loc[known_adducts["adduct"] == adduct, "ionmode"].values[0]
