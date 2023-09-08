@@ -288,6 +288,8 @@ class ProcessingReport:
         return processing_report.astype(int)
 
     def __str__(self):
+        pd.set_option('display.max_columns', 4)
+        pd.set_option('display.width', 1000)
         report_str = f"""\
 ----- Spectrum Processing Report -----
 Number of spectrums processed: {self.counter_number_processed}
