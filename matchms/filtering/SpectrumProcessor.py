@@ -2,7 +2,7 @@ import inspect
 import logging
 from collections import defaultdict
 from functools import partial
-from typing import Callable, Dict, Optional, Tuple, Union, List
+from typing import Callable, Dict, List, Optional, Tuple, Union
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
