@@ -157,6 +157,7 @@ def get_charge_of_adduct(adduct) -> Optional[int]:
         return None
     charge = charge[0]
     if len(charge) == 1:
+        # The charge is + or -
         charge_size = "1"
         charge_sign = charge
     elif len(charge) == 2:
