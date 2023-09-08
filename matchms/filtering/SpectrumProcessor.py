@@ -291,7 +291,7 @@ class ProcessingReport:
         # Add filters that did not do any changes:
         for filter_name in self.filter_names:
             if filter_name not in processing_report["filter"].values:
-                processing_report.loc[len(processing_report)] = [filter_name, 0, 0, 0]
+                processing_report.loc[len(processing_report)] = {"filter": filter_name}
 
         processing_report = processing_report.set_index("filter").fillna(0)
         return processing_report.astype(int)
