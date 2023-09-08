@@ -31,8 +31,7 @@ def derive_ionmode(spectrum_in: SpectrumType) -> SpectrumType:
 
     ionmode = spectrum.get("ionmode")
     if ionmode:
-        assert ionmode == ionmode.lower(), ("Ionmode field not harmonized.",
-                                            "Apply 'make_ionmode_lowercase' filter first.")
+        assert ionmode == ionmode.lower(), "Ionmode field not harmonized."
     if ionmode in ["positive", "negative"]:
         return spectrum
 
