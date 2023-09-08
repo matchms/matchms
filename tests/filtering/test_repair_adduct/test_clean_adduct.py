@@ -52,7 +52,8 @@ def test_add_missing_brackets_to_adduct(input_adduct, expected_adduct):
                           ("M", -1, "[M]-", -1),
                           ("[M]+", None, "[M]+", 1),
                           ("M+", None, "[M]+", 1),
-                          ("M-H2O+2H2-", None, "[M-H2O+2H]2+", -2),
+                          ("M-H2O+2H2-", None, "[M-H2O+2H]2-", -2),
+                          ("M-H2O+2H2+", None, "[M-H2O+2H]2+", 2),
                           (None, 1, None, 1)])
 def test_clean_adduct_with_charge(input_adduct, charge, expected_adduct, expected_charge):
     spectrum_in = SpectrumBuilder().with_metadata({"adduct": input_adduct,
