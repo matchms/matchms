@@ -44,7 +44,7 @@ def derive_ionmode(spectrum_in: SpectrumType) -> SpectrumType:
     if adduct in list(known_adducts["adduct"]):
         ionmode = known_adducts.loc[known_adducts["adduct"] == adduct, "ionmode"].values[0]
     else:
-        ionmode = "n/a"
+        ionmode = None
 
     spectrum.set("ionmode", ionmode)
     logger.info("Set ionmode to %s.", ionmode)
