@@ -38,9 +38,8 @@ def derive_ionmode(spectrum_in: SpectrumType) -> SpectrumType:
 
     adduct = spectrum.get("adduct", None)
     # Harmonize adduct string
-    if not adduct:
-        return spectrum
-    adduct = _clean_adduct(adduct)
+    if adduct:
+        adduct = _clean_adduct(adduct)
 
     # Load lists of known adducts
     known_adducts = load_known_adducts()
@@ -52,5 +51,4 @@ def derive_ionmode(spectrum_in: SpectrumType) -> SpectrumType:
 
     spectrum.set("ionmode", ionmode)
     logger.info("Set ionmode to %s.", ionmode)
-
     return spectrum
