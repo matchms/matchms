@@ -147,10 +147,12 @@ def test_filter_spectrums_report(spectrums):
     assert report.counter_number_processed == 3
     assert report.counter_changed_metadata == {'make_charge_int': 2, 'interpret_pepmass': 3, 'derive_ionmode': 3}
     report_df = report.to_dataframe()
-    assert np.all(report_df.loc[["require_minimum_number_of_peaks", "interpret_pepmass", "add_losses"]].values == np.array(
+    assert np.all(report_df.loc[["require_minimum_number_of_peaks", "interpret_pepmass",
+                                 "add_losses", "correct_charge"]].values == np.array(
         [[1, 0, 0],
          [0, 3, 0],
-         [0, 0, 2]]))
+         [0, 0, 2],
+         [0, 0, 0]]))
 
 
 def test_processing_report_class(spectrums):

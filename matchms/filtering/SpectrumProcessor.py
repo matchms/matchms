@@ -2,7 +2,7 @@ import inspect
 import logging
 from collections import defaultdict
 from functools import partial
-from typing import Callable, Dict, Optional, Tuple, Union
+from typing import Callable, Dict, Optional, Tuple, Union, List
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
@@ -182,7 +182,7 @@ class SpectrumProcessor:
             List containing the processed spectrums.
         """
         if create_report:
-            processing_report = ProcessingReport()
+            processing_report = ProcessingReport(self.filters)
         else:
             processing_report = None
 
@@ -253,7 +253,11 @@ def get_parameter_settings(func):
 class ProcessingReport:
     """Class to keep track of spectrum changes during filtering.
     """
-    def __init__(self):
+    def __init__(self, filter_functions: Optional[List[Callable]] = None):
+        if filter_functions:
+            self.filter_names = [filter_function.__name__ for filter_function in filter_functions]
+        else:
+            self.filter_names = []
         self.counter_changed_metadata = defaultdict(int)
         self.counter_removed_spectrums = defaultdict(int)
         self.counter_changed_peaks = defaultdict(int)
@@ -283,6 +287,11 @@ class ProcessingReport:
                                      columns=["filter", "changed mass spectrum"])
         processing_report = pd.merge(removed, metadata_changed, how="outer", on="filter")
         processing_report = pd.merge(processing_report, peaks_changed, how="outer", on="filter")
+
+        # Add filters that did not do any changes:
+        for filter_name in self.filter_names:
+            if filter_name not in processing_report["filter"].values:
+                processing_report.loc[len(processing_report)] = [filter_name, 0, 0, 0]
 
         processing_report = processing_report.set_index("filter").fillna(0)
         return processing_report.astype(int)
