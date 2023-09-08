@@ -1,7 +1,7 @@
 import logging
 from matchms import Spectrum
 from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import (
-    _check_fully_annotated, convert_inchi_to_inchikey, convert_inchi_to_smiles,
+    convert_inchi_to_inchikey, convert_inchi_to_smiles,
     convert_smiles_to_inchi, is_valid_inchi, is_valid_inchikey,
     is_valid_smiles)
 from matchms.filtering.metadata_processing.require_parent_mass_match_smiles import \
@@ -44,47 +44,59 @@ def repair_not_matching_annotation(spectrum_in: Spectrum):
 
     spectrum = spectrum_in.clone()
 
-    smiles = spectrum.get("smiles")
-    inchi = spectrum.get("inchi")
-    inchikey = spectrum.get("inchikey")
-
-    if not _check_fully_annotated(spectrum):
-        if is_valid_inchi(inchi) or is_valid_smiles(smiles) or is_valid_inchikey(inchikey):
-            logger.warning("Please first run repair_inchi_from_smiles, repair_smiles_from_inchi and repair_inchikey. "
-                           "The spectrum had partly valid annotations, "
-                           "this shows that these repair functions were not yet run.")
-        else:
-            logger.info("No valid annotation was available for the spectrum, "
-                        "so repair_not_matching_annotation was not run")
+    if not _check_repairing_is_possible(spectrum.get("smiles"), spectrum.get("inchi"), spectrum.get("inchikey")):
+        # Repairing is not possible, since not all annotations are valid entries.
         return spectrum
 
-    parent_mass = spectrum.get("parent_mass")
-    inchi_from_smiles = convert_smiles_to_inchi(smiles)
+    inchikey_from_smiles = convert_inchi_to_inchikey(convert_smiles_to_inchi(spectrum.get("smiles")))
+    inchikey_from_inchi = convert_inchi_to_inchikey(spectrum.get("inchi"))
 
     # Check if SMILES and InChI match
-    if inchi_from_smiles != inchi:
-        smiles_from_inchi = convert_inchi_to_smiles(inchi)
-        spectrum = _repair_smiles_inchi(spectrum,
-                                        smiles,
-                                        inchi,
-                                        smiles_from_inchi,
-                                        inchi_from_smiles,
-                                        parent_mass)
+    if inchikey_from_smiles[:14] != inchikey_from_inchi[:14]:
+        spectrum = _repair_smiles_inchi(spectrum)
 
     # Check if the InChIKey matches the InChI
     correct_inchikey = convert_inchi_to_inchikey(spectrum.get("inchi"))
-    if correct_inchikey and (inchikey[:14] == correct_inchikey[:14]):
+    if correct_inchikey and (spectrum.get("inchikey")[:14] == correct_inchikey[:14]):
         return spectrum
 
-    logger.info("The inchikey has been changed from %s to %s", inchikey, correct_inchikey)
+    logger.info("The inchikey has been changed from %s to %s", spectrum.get("inchikey"), correct_inchikey)
     spectrum.set("inchikey", correct_inchikey)
     return spectrum
 
 
-def _repair_smiles_inchi(spectrum, smiles, inchi,
-                         smiles_from_inchi, inchi_from_smiles,
-                         parent_mass):
-    # pylint: disable=too-many-arguments
+def _check_repairing_is_possible(smiles, inchi, inchikey) -> bool:
+    """Returns True if smiles, inchi and inchikey all are valid.
+
+    If False the appropriate logging message is given.
+    """
+    valid_smiles = is_valid_smiles(smiles)
+    valid_inchi = is_valid_inchi(inchi)
+    valid_inchikey = is_valid_inchikey(inchikey)
+    if valid_smiles and valid_inchi and valid_inchikey:
+        # All annotation is valid, however the different annotations, might not correspond to the same compound.
+        # Therefore repair_not_matching_annotation can be run.
+        return True
+    if not valid_smiles and not valid_inchi and not valid_inchikey:
+        # There is no annotation available
+        logger.info("No valid annotation was available for the spectrum, "
+                    "so repair_not_matching_annotation was not run")
+    elif valid_smiles or valid_inchi or valid_inchikey:
+        # At least one of the annotations, but some are not.
+        # Since if valid_smiles and valid_inchi and valid_inchikey was False
+        logger.warning("Please first run repair_inchi_from_smiles, repair_smiles_from_inchi and repair_inchikey. "
+                       "The spectrum had partly valid annotations, "
+                       "this shows that these repair functions were not yet run.")
+    return False
+
+
+def _repair_smiles_inchi(spectrum):
+    """Repairs mismatching smiles and inchi. The smile or inchi that matches the parent mass is chosen"""
+    smiles = spectrum.get("smiles")
+    parent_mass = spectrum.get("parent_mass")
+    inchi = spectrum.get("inchi")
+    smiles_from_inchi = convert_inchi_to_smiles(inchi)
+
     smiles_correct = _check_smiles_and_parent_mass_match(smiles, parent_mass, 0.1)
     inchi_correct = _check_smiles_and_parent_mass_match(smiles_from_inchi, parent_mass, 0.1)
 
@@ -92,6 +104,7 @@ def _repair_smiles_inchi(spectrum, smiles, inchi,
         logger.warning("The SMILES and InChI are not matching, but both match the parent mass. "
                        "SMILES = %s, InChI = %s", smiles, inchi)
     elif smiles_correct and not inchi_correct:
+        inchi_from_smiles = convert_smiles_to_inchi(spectrum.get("smiles"))
         # Repair by using inchi generated from SMILES
         logger.info("The InChI has been changed from %s to %s. "
                     "The new InChI matches the parent mass, while the old one did not", inchi, inchi_from_smiles)
