@@ -5,7 +5,7 @@ from matchms.filtering.filter_utils.interpret_unknown_adduct import \
     get_multiplier_and_mass_from_adduct
 from matchms.filtering.filter_utils.load_known_adducts import \
     load_known_adducts
-from matchms.filtering.metadata_processing.clean_adduct import _clean_adduct
+from matchms.filtering.filters.clean_adduct import CleanAdduct
 from matchms.typing import SpectrumType
 
 
@@ -83,7 +83,7 @@ def _get_multiplier_and_correction_mass_from_adduct(adduct: str) -> Tuple[int, f
     Returns:
         Tuple[int, float]: Charge multiplier and correction mass needed to calculate the precursor mz from this adduct.
     """
-    adduct = _clean_adduct(adduct)
+    adduct = CleanAdduct._clean_adduct(adduct)
     known_adducts = load_known_adducts()
 
     if adduct in list(known_adducts["adduct"]):

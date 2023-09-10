@@ -1,8 +1,8 @@
 import logging
 from typing import Tuple
 import numpy as np
-from matchms.filtering.metadata_processing.add_precursor_mz import \
-    _convert_precursor_mz
+from matchms.filtering.filters.add_precursor_mz import \
+    AddPrecursorMz
 from matchms.typing import SpectrumType
 from .BaseSimilarity import BaseSimilarity
 from .spectrum_similarity_functions import (collect_peak_pairs,
@@ -102,7 +102,7 @@ class ModifiedCosine(BaseSimilarity):
             precursor_mz = spectrum.get("precursor_mz", None)
             if not isinstance(precursor_mz, (int, float)):
                 logger.warning(message_precursor_no_number)
-            precursor_mz = _convert_precursor_mz(precursor_mz)
+            precursor_mz = AddPrecursorMz._convert_precursor_mz(precursor_mz)
             assert precursor_mz is not None, message_precursor_missing
             assert precursor_mz > 0, message_precursor_below_0
             return precursor_mz

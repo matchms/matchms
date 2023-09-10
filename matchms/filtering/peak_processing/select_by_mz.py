@@ -1,6 +1,5 @@
-import numpy as np
-from matchms.Fragments import Fragments
 from matchms.typing import SpectrumType
+from matchms.filtering.filters.select_by_mz import SelectByMz
 
 
 def select_by_mz(spectrum_in: SpectrumType, mz_from: float = 0.0,
@@ -14,16 +13,6 @@ def select_by_mz(spectrum_in: SpectrumType, mz_from: float = 0.0,
     mz_to:
         Set upper threshold for m/z peak positions. Default is 1000.0.
     """
-    if spectrum_in is None:
-        return None
 
-    spectrum = spectrum_in.clone()
-
-    assert mz_from <= mz_to, "'mz_from' should be smaller than or equal to 'mz_to'."
-
-    condition = np.logical_and(mz_from <= spectrum.peaks.mz, spectrum.peaks.mz <= mz_to)
-
-    spectrum.peaks = Fragments(mz=spectrum.peaks.mz[condition],
-                               intensities=spectrum.peaks.intensities[condition])
-
+    spectrum = SelectByMz(mz_from, mz_to).process(spectrum_in)
     return spectrum

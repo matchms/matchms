@@ -1,5 +1,6 @@
 from typing import List
 from matchms.typing import SpectrumType
+from matchms.filtering.filters.harmonize_undefined_inchi import HarmonizeUndefinedInchi
 
 
 def harmonize_undefined_inchi(spectrum_in: SpectrumType, undefined: str = "",
@@ -14,27 +15,6 @@ def harmonize_undefined_inchi(spectrum_in: SpectrumType, undefined: str = "",
         Enter list of strings that are expected to represent undefined entries.
         Default is ["", "N/A", "NA", "n/a"].
     """
-    if spectrum_in is None:
-        return None
 
-    spectrum = spectrum_in.clone()
-
-    if aliases is None:
-        aliases = [
-            "",
-            "N/A",
-            "NA",
-            "n/a"
-        ]
-
-    inchi = spectrum.get("inchi")
-    if inchi is None:
-        # spectrum does not have an "inchi" key in its metadata
-        spectrum.set("inchi", undefined)
-        return spectrum
-
-    if inchi in aliases:
-        # harmonize aliases for undefined values
-        spectrum.set("inchi", undefined)
-
+    spectrum = HarmonizeUndefinedInchi(undefined, aliases).process(spectrum_in)
     return spectrum

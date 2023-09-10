@@ -1,13 +1,13 @@
 from collections.abc import Mapping
 import numpy as np
 from pickydict import PickyDict
-from .filtering.metadata_processing.add_precursor_mz import \
-    _add_precursor_mz_metadata
+from .filtering.filters.add_precursor_mz import \
+    AddPrecursorMz
 from .filtering.metadata_processing.add_retention import _add_retention
-from .filtering.metadata_processing.interpret_pepmass import \
-    _interpret_pepmass_metadata
-from .filtering.metadata_processing.make_charge_int import \
-    _convert_charge_to_int
+from .filtering.filters.interpret_pepmass import \
+    InterpretPepmass
+from .filtering.filters.make_charge_int import \
+    MakeChargeInt
 from .utils import load_export_key_conversions, load_known_key_conversions
 
 
@@ -99,8 +99,8 @@ class Metadata:
         This includes harmonizing entries for ionmode, retention time and index,
         charge, as well as the removal of invalid entried ("", "NA", "N/A", "NaN").
         """
-        metadata_filtered = _interpret_pepmass_metadata(self.data)
-        metadata_filtered = _add_precursor_mz_metadata(metadata_filtered)
+        metadata_filtered = InterpretPepmass._interpret_pepmass_metadata(self.data)
+        metadata_filtered = AddPrecursorMz._add_precursor_mz_metadata(metadata_filtered)
 
         if metadata_filtered.get("ionmode"):
             metadata_filtered["ionmode"] = self.get("ionmode").lower()
@@ -115,7 +115,7 @@ class Metadata:
             metadata_filtered["parent"] = float(metadata_filtered.get("parent"))
 
         charge = metadata_filtered.get("charge")
-        charge_int = _convert_charge_to_int(charge)
+        charge_int = MakeChargeInt._convert_charge_to_int(charge)
         if not isinstance(charge, int) and charge_int is not None:
             metadata_filtered["charge"] = charge_int
 

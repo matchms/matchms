@@ -1,10 +1,6 @@
-import logging
-from math import ceil
 from typing import Optional
 from matchms.typing import SpectrumType
-
-
-logger = logging.getLogger("matchms")
+from matchms.filtering.filters.require_minimum_number_of_peaks import RequireMinimumNumberOfPeaks
 
 
 def require_minimum_number_of_peaks(spectrum_in: SpectrumType,
@@ -24,21 +20,6 @@ def require_minimum_number_of_peaks(spectrum_in: SpectrumType,
         Default is None.
 
     """
-    if spectrum_in is None:
-        return None
 
-    spectrum = spectrum_in.clone()
-
-    parent_mass = spectrum.get("parent_mass", None)
-    if parent_mass and ratio_required:
-        n_required_by_mass = int(ceil(ratio_required * parent_mass))
-        threshold = max(n_required, n_required_by_mass)
-    else:
-        threshold = n_required
-
-    if spectrum.peaks.intensities.size < threshold:
-        logger.info("Spectrum with %s (<%s) peaks was set to None.",
-                    str(spectrum.peaks.intensities.size), str(threshold))
-        return None
-
+    spectrum = RequireMinimumNumberOfPeaks(n_required, ratio_required).process(spectrum_in)
     return spectrum

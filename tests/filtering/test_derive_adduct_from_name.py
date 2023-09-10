@@ -1,7 +1,7 @@
 import pytest
 from testfixtures import LogCapture
 from matchms.filtering import derive_adduct_from_name
-from matchms.filtering.metadata_processing.derive_adduct_from_name import \
+from matchms.filtering.filters.derive_adduct_from_name import \
     _looks_like_adduct
 from matchms.logging_functions import (reset_matchms_logger,
                                        set_matchms_logger_level)

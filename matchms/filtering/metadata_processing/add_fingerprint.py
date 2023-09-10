@@ -1,8 +1,6 @@
 import logging
-import numpy as np
 from matchms.typing import SpectrumType
-from ...metadata_utils import (derive_fingerprint_from_inchi,
-                               derive_fingerprint_from_smiles)
+from matchms.filtering.filters.add_fingerprint import AddFingerprint
 
 
 logger = logging.getLogger("matchms")
@@ -25,26 +23,6 @@ def add_fingerprint(spectrum_in: SpectrumType, fingerprint_type: str = "daylight
     nbits:
         Dimension or number of bits of generated fingerprint. Default is 2048.
     """
-    if spectrum_in is None:
-        return None
 
-    spectrum = spectrum_in.clone()
-
-    # First try to get fingerprint from smiles
-    if spectrum.get("smiles", None):
-        fingerprint = derive_fingerprint_from_smiles(spectrum.get("smiles"),
-                                                     fingerprint_type, nbits)
-        if isinstance(fingerprint, np.ndarray) and fingerprint.sum() > 0:
-            spectrum.set("fingerprint", fingerprint)
-            return spectrum
-
-    # Second try to get fingerprint from inchi
-    if spectrum.get("inchi", None):
-        fingerprint = derive_fingerprint_from_inchi(spectrum.get("inchi"),
-                                                    fingerprint_type, nbits)
-        if isinstance(fingerprint, np.ndarray) and fingerprint.sum() > 0:
-            spectrum.set("fingerprint", fingerprint)
-            return spectrum
-
-    logger.info("No fingerprint was added (name: %s).", spectrum.get("compound_name"))
+    spectrum = AddFingerprint(fingerprint_type, nbits).process(spectrum_in)
     return spectrum
