@@ -41,7 +41,7 @@ def clean_adduct(spectrum_in):
 
     if adduct != cleaned_adduct:
         spectrum.set("adduct", cleaned_adduct)
-        logger.info("The adduct %d was set to %s", adduct, cleaned_adduct)
+        logger.info("The adduct %s was set to %s", adduct, cleaned_adduct)
     return spectrum
 
 
