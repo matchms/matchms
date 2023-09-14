@@ -58,7 +58,7 @@ def _interpret_pepmass_metadata(metadata):
         metadata["charge"] = charge
         logger.info("Added charge entry based on field 'pepmass'.")
 
-    metadata["pepmass"] = None
+    del metadata["pepmass"]
     logger.info("Removed pepmass, since the information was added to other fields")
     return metadata
 
