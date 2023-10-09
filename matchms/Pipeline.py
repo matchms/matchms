@@ -417,5 +417,3 @@ def ordered_dump(data: OrderedDict, stream=None, dumper=yaml.SafeDumper, **kwds)
             data.items())
     OrderedDumper.add_representer(OrderedDict, _dict_representer)
     return yaml.dump(data, stream, OrderedDumper, **kwds)
-
-
