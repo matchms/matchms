@@ -1,6 +1,6 @@
 import inspect
 import logging
-from collections import defaultdict, OrderedDict
+from collections import OrderedDict, defaultdict
 from functools import partial
 from typing import Callable, Dict, Iterable, List, Optional, Tuple, Union
 import numpy as np

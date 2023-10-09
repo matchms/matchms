@@ -11,7 +11,9 @@ from matchms.logging_functions import (add_logging_to_file,
                                        reset_matchms_logger,
                                        set_matchms_logger_level)
 from matchms.typing import SpectrumType
-from matchms.yaml_file_functions import ordered_dump, load_workflow_from_yaml_file
+from matchms.yaml_file_functions import (load_workflow_from_yaml_file,
+                                         ordered_dump)
+
 
 _masking_functions = ["filter_by_range"]
 _score_functions = {key.lower(): f for key, f in mssimilarity.__dict__.items() if callable(f)}

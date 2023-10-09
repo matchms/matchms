@@ -4,8 +4,8 @@ import pytest
 from matchms import Pipeline
 from matchms.filtering import select_by_mz
 from matchms.Pipeline import create_workflow
-from matchms.yaml_file_functions import load_workflow_from_yaml_file
 from matchms.similarity import ModifiedCosine
+from matchms.yaml_file_functions import load_workflow_from_yaml_file
 
 
 module_root = os.path.join(os.path.dirname(__file__), "..")
