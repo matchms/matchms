@@ -2,7 +2,7 @@ import inspect
 import logging
 from collections import defaultdict
 from functools import partial
-from typing import Callable, Dict, List, Optional, Tuple, Union
+from typing import Callable, Dict, List, Optional, Tuple, Union, Iterable
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
@@ -28,7 +28,8 @@ class SpectrumProcessor:
         'fully_annotated', or None. Default is 'default'.
     """
 
-    def __init__(self, predefined_pipeline: Optional[str] = 'default'):
+    def __init__(self, predefined_pipeline: Optional[str] = 'default',
+                 additional_filters: Iterable[Union[str, List[dict]]] = ()):
         self.filters = []
         self.filter_order = [x.__name__ for x in ALL_FILTERS]
         if predefined_pipeline is not None:
@@ -38,6 +39,10 @@ class SpectrumProcessor:
                 raise ValueError(f"Unknown processing pipeline '{predefined_pipeline}'. Available pipelines: {list(PREDEFINED_PIPELINES.keys())}")
             for filter_name in PREDEFINED_PIPELINES[predefined_pipeline]:
                 self.add_matchms_filter(filter_name)
+        for filter_name in additional_filters:
+            if isinstance(filter_name, (tuple, list)) and len(filter_name) == 1:
+                filter_name = filter_name[0]
+            self.add_filter(filter_name)
 
     def add_filter(self,
                    filter_function: Union[Tuple[str, Dict[str, any]], str, Tuple[Callable, Dict[str, any]], Callable]):
