@@ -383,3 +383,4 @@ def check_score_computation(score_computations: Iterable[Union[str, List[dict]]]
         if callable(computation[0]):
             continue
         raise ValueError(f"Unknown score computation: {computation[0]}.")
+
