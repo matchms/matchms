@@ -297,13 +297,11 @@ class ProcessingReport:
     def __str__(self):
         pd.set_option('display.max_columns', 4)
         pd.set_option('display.width', 1000)
-        report_str = f"""\
-            ----- Spectrum Processing Report -----
-            Number of spectrums processed: {self.counter_number_processed}
-            Number of spectrums removed: {sum(self.counter_removed_spectrums.values())}
-            Changes during processing:
-            {str(self.to_dataframe())}
-            """
+        report_str = ("----- Spectrum Processing Report -----\n"
+                      f"Number of spectrums processed: {self.counter_number_processed}\n"
+                      f"Number of spectrums removed: {sum(self.counter_removed_spectrums.values())}\n"
+                      "Changes during processing:\n"
+                      f"{str(self.to_dataframe())}")
         return report_str
 
     def __repr__(self):
