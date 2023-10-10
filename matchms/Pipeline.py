@@ -50,11 +50,9 @@ def create_workflow(yaml_file_name: Optional[str] = None,
     """
     # pylint: disable=too-many-arguments
     workflow = OrderedDict()
-    queries_processor = initialize_spectrum_processor(predefined_processing_queries,
-                                                      additional_filters_queries)
+    queries_processor = SpectrumProcessor(predefined_processing_queries, additional_filters_queries)
     workflow["query_filters"] = queries_processor.processing_steps
-    reference_processor = initialize_spectrum_processor(predefined_processing_reference,
-                                                        additional_filters_references)
+    reference_processor = SpectrumProcessor(predefined_processing_reference, additional_filters_references)
     workflow["reference_filters"] = reference_processor.processing_steps
     workflow["score_computations"] = score_computations
     if yaml_file_name is not None:
@@ -64,69 +62,6 @@ def create_workflow(yaml_file_name: Optional[str] = None,
             file.write("# " + 20 * "=" + " \n")
             ordered_dump(workflow, file)
     return workflow
-
-
-def initialize_spectrum_processor(predefined_pipeline: Optional[str],
-                                  additional_filters: Iterable[Union[str, List[dict]]]) -> SpectrumProcessor:
-    """Initialize spectrum processing workflow."""
-    processor = SpectrumProcessor(predefined_pipeline)
-    for step in additional_filters:
-        if isinstance(step, (tuple, list)) and len(step) == 1:
-            step = step[0]
-        processor.add_filter(step)
-    return processor
-
-
-def load_workflow_from_yaml_file(yaml_file: str) -> OrderedDict:
-    with open(yaml_file, 'r', encoding="utf-8") as file:
-        workflow = ordered_load(file, yaml.SafeLoader)
-    if workflow["reference_filters"] == "processing_queries":
-        workflow["reference_filters"] = workflow["query_filters"]
-    return workflow
-
-
-def ordered_load(stream, loader=yaml.SafeLoader, object_pairs_hook=OrderedDict) -> OrderedDict:
-    """ Code from https://stackoverflow.com/questions/5121931/in-python-how-can-you-load-yaml-mappings-as-ordereddicts
-    """
-    class OrderedLoader(loader):
-        pass
-
-    def construct_mapping(loader, node):
-        loader.flatten_mapping(node)
-        return object_pairs_hook(loader.construct_pairs(node))
-    OrderedLoader.add_constructor(
-        yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
-        construct_mapping)
-    return yaml.load(stream, OrderedLoader)
-
-
-def ordered_dump(data: OrderedDict, stream=None, dumper=yaml.SafeDumper, **kwds):
-    class OrderedDumper(dumper):
-        pass
-
-    def _dict_representer(dumper, data):
-        return dumper.represent_mapping(
-            yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
-            data.items())
-    OrderedDumper.add_representer(OrderedDict, _dict_representer)
-    return yaml.dump(data, stream, OrderedDumper, **kwds)
-
-
-def check_score_computation(score_computations: Iterable[Union[str, List[dict]]]):
-    """Check if the score computations seem OK before running.
-    Aim is to avoid pipeline crashing after long computation.
-    """
-    # Check if all score compuation steps exist
-    for computation in score_computations:
-        if not isinstance(computation, list):
-            computation = [computation]
-        if isinstance(computation[0], str) and computation[0] in _masking_functions:
-            continue
-        if isinstance(computation[0], str) and computation[0] in _score_functions:
-            continue
-        if callable(computation[0]):
-            continue
-        raise ValueError(f"Unknown score computation: {computation[0]}.")
 
 
 class Pipeline:
@@ -222,10 +157,7 @@ class Pipeline:
     def _initialize_spectrum_processor_queries(self):
         """Initialize spectrum processing workflow for the query spectra."""
         self.write_to_logfile("--- Processing pipeline query spectra: ---")
-        self.processing_queries = initialize_spectrum_processor(
-            None,
-            self.__workflow["query_filters"]
-            )
+        self.processing_queries = SpectrumProcessor(None, self.__workflow["query_filters"])
         self.write_to_logfile(str(self.processing_queries))
         if self.processing_queries.processing_steps != self.__workflow["query_filters"]:
             logger.warning("The order of the filters has been changed compared to the Yaml file.")
@@ -234,10 +166,7 @@ class Pipeline:
         """Initialize spectrum processing workflow for the reference spectra."""
         self.write_to_logfile("--- Processing pipeline reference spectra: ---")
 
-        self.processing_references = initialize_spectrum_processor(
-            None,
-            self.__workflow["reference_filters"]
-            )
+        self.processing_references = SpectrumProcessor(None, self.__workflow["reference_filters"])
         self.write_to_logfile(str(self.processing_references))
         if self.processing_queries.processing_steps != self.__workflow["query_filters"]:
             logger.warning("The order of the filters has been changed compared to the Yaml file.")
@@ -430,9 +359,61 @@ class Pipeline:
 def get_unused_filters(yaml_file):
     """Prints all filter names that are in ALL_FILTERS, but not in the yaml file"""
     workflow = load_workflow_from_yaml_file(yaml_file)
-    processor = initialize_spectrum_processor(None, workflow["query_filters"])
+    processor = SpectrumProcessor(None, workflow["query_filters"])
 
     filters_used = [filter_function.__name__ for filter_function in processor.filters]
     for filter_function in ALL_FILTERS:
         if filter_function.__name__ not in filters_used:
             print(filter_function.__name__)
+
+
+def check_score_computation(score_computations: Iterable[Union[str, List[dict]]]):
+    """Check if the score computations seem OK before running.
+    Aim is to avoid pipeline crashing after long computation.
+    """
+    # Check if all score compuation steps exist
+    for computation in score_computations:
+        if not isinstance(computation, list):
+            computation = [computation]
+        if isinstance(computation[0], str) and computation[0] in _masking_functions:
+            continue
+        if isinstance(computation[0], str) and computation[0] in _score_functions:
+            continue
+        if callable(computation[0]):
+            continue
+        raise ValueError(f"Unknown score computation: {computation[0]}.")
+
+
+def load_workflow_from_yaml_file(yaml_file: str) -> OrderedDict:
+    with open(yaml_file, 'r', encoding="utf-8") as file:
+        workflow = ordered_load(file, yaml.SafeLoader)
+    if workflow["reference_filters"] == "processing_queries":
+        workflow["reference_filters"] = workflow["query_filters"]
+    return workflow
+
+
+def ordered_load(stream, loader=yaml.SafeLoader, object_pairs_hook=OrderedDict) -> OrderedDict:
+    """ Code from https://stackoverflow.com/questions/5121931/in-python-how-can-you-load-yaml-mappings-as-ordereddicts
+    """
+    class OrderedLoader(loader):
+        pass
+
+    def construct_mapping(loader, node):
+        loader.flatten_mapping(node)
+        return object_pairs_hook(loader.construct_pairs(node))
+    OrderedLoader.add_constructor(
+        yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
+        construct_mapping)
+    return yaml.load(stream, OrderedLoader)
+
+
+def ordered_dump(data: OrderedDict, stream=None, dumper=yaml.SafeDumper, **kwds):
+    class OrderedDumper(dumper):
+        pass
+
+    def _dict_representer(dumper, data):
+        return dumper.represent_mapping(
+            yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
+            data.items())
+    OrderedDumper.add_representer(OrderedDict, _dict_representer)
+    return yaml.dump(data, stream, OrderedDumper, **kwds)
