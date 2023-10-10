@@ -90,8 +90,8 @@ def test_incomplete_parameters():
 
 def test_string_output():
     processing = SpectrumProcessor("minimal")
-    expected_str = "SpectrumProcessor\nProcessing steps:\n- make_charge_int\n- interpret_pepmass" \
-                   "\n- derive_ionmode\n- correct_charge"
+    expected_str = "Processing steps:\n- make_charge_int\n- interpret_pepmass" \
+                   "\n- derive_ionmode\n- correct_charge\n"
     assert str(processing) == expected_str
 
 

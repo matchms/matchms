@@ -2,7 +2,6 @@ import logging
 from collections import OrderedDict
 from datetime import datetime
 from typing import Iterable, List, Optional, Union
-import yaml
 import matchms.similarity as mssimilarity
 from matchms import calculate_scores
 from matchms.filtering.filter_order_and_default_pipelines import ALL_FILTERS
@@ -12,6 +11,8 @@ from matchms.logging_functions import (add_logging_to_file,
                                        reset_matchms_logger,
                                        set_matchms_logger_level)
 from matchms.typing import SpectrumType
+from matchms.yaml_file_functions import (load_workflow_from_yaml_file,
+                                         ordered_dump)
 
 
 _masking_functions = ["filter_by_range"]
@@ -382,38 +383,3 @@ def check_score_computation(score_computations: Iterable[Union[str, List[dict]]]
         if callable(computation[0]):
             continue
         raise ValueError(f"Unknown score computation: {computation[0]}.")
-
-
-def load_workflow_from_yaml_file(yaml_file: str) -> OrderedDict:
-    with open(yaml_file, 'r', encoding="utf-8") as file:
-        workflow = ordered_load(file, yaml.SafeLoader)
-    if workflow["reference_filters"] == "processing_queries":
-        workflow["reference_filters"] = workflow["query_filters"]
-    return workflow
-
-
-def ordered_load(stream, loader=yaml.SafeLoader, object_pairs_hook=OrderedDict) -> OrderedDict:
-    """ Code from https://stackoverflow.com/questions/5121931/in-python-how-can-you-load-yaml-mappings-as-ordereddicts
-    """
-    class OrderedLoader(loader):
-        pass
-
-    def construct_mapping(loader, node):
-        loader.flatten_mapping(node)
-        return object_pairs_hook(loader.construct_pairs(node))
-    OrderedLoader.add_constructor(
-        yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
-        construct_mapping)
-    return yaml.load(stream, OrderedLoader)
-
-
-def ordered_dump(data: OrderedDict, stream=None, dumper=yaml.SafeDumper, **kwds):
-    class OrderedDumper(dumper):
-        pass
-
-    def _dict_representer(dumper, data):
-        return dumper.represent_mapping(
-            yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
-            data.items())
-    OrderedDumper.add_representer(OrderedDict, _dict_representer)
-    return yaml.dump(data, stream, OrderedDumper, **kwds)

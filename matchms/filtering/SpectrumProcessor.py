@@ -1,6 +1,6 @@
 import inspect
 import logging
-from collections import defaultdict
+from collections import OrderedDict, defaultdict
 from functools import partial
 from typing import Callable, Dict, Iterable, List, Optional, Tuple, Union
 import numpy as np
@@ -9,6 +9,7 @@ from tqdm import tqdm
 from matchms import Spectrum
 from matchms.filtering.filter_order_and_default_pipelines import (
     ALL_FILTERS, FILTER_FUNCTION_NAMES, PREDEFINED_PIPELINES)
+from matchms.yaml_file_functions import ordered_dump
 
 
 logger = logging.getLogger("matchms")
@@ -215,17 +216,9 @@ class SpectrumProcessor:
         return filter_list
 
     def __str__(self):
-        summary_string = "SpectrumProcessor\nProcessing steps:"
-        for processing_step in self.processing_steps:
-            if isinstance(processing_step, str):
-                summary_string += "\n- " + processing_step
-            elif isinstance(processing_step, tuple):
-                filter_name = processing_step[0]
-                summary_string += "\n- - " + filter_name
-                filter_params = processing_step[1]
-                for filter_param in filter_params:
-                    summary_string += "\n  - " + str(filter_param)
-        return summary_string
+        workflow = OrderedDict()
+        workflow["Processing steps"] = self.processing_steps
+        return ordered_dump(workflow)
 
 
 def check_all_parameters_given(func):
@@ -304,13 +297,11 @@ class ProcessingReport:
     def __str__(self):
         pd.set_option('display.max_columns', 4)
         pd.set_option('display.width', 1000)
-        report_str = f"""\
------ Spectrum Processing Report -----
-Number of spectrums processed: {self.counter_number_processed}
-Number of spectrums removed: {sum(self.counter_removed_spectrums.values())}
-Changes during processing:
-{str(self.to_dataframe())}
-"""
+        report_str = ("----- Spectrum Processing Report -----\n"
+                      f"Number of spectrums processed: {self.counter_number_processed}\n"
+                      f"Number of spectrums removed: {sum(self.counter_removed_spectrums.values())}\n"
+                      "Changes during processing:\n"
+                      f"{str(self.to_dataframe())}")
         return report_str
 
     def __repr__(self):
