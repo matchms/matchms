@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Additional tests for filter pipeline order
-- ProcessingReport. This adds an overview of the number of spectra changed by each filter step.
+- ProcessingReport. This adds an overview of the number of spectra changed by each filter step. (multiple PR's)
 - `repair_not_matching_annotation` filter [#505](https://github.com/matchms/matchms/pull/505)
 - Missing docstring documentions [#507](https://github.com/matchms/matchms/pull/507)
 
@@ -18,14 +18,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Logger warning for rdkit molecule conversion [#507](https://github.com/matchms/matchms/pull/507)
 - Repair_smiles_from_compound_name, now works without matchmsextras [#509](https://github.com/matchms/matchms/pull/509/)
   - pubchempy was added as dependency
-- Default filters are now stored in the yaml file as separate filters
-- Custom filters are added after default filters or at a position specified by the user
-- The file structure of metadata_utils was refactored
+- Default filters are now stored in the yaml file as separate filters [#496](https://github.com/matchms/matchms/pull/496)
+- Duplicated filters are only added once to the pipeline [#524](https://github.com/matchms/matchms/pull/524)
+- Custom filters are added after default filters or at a position specified by the user [#498](https://github.com/matchms/matchms/pull/498)
+- The file structure of metadata_utils was refactored [#503](https://github.com/matchms/matchms/pull/503)
+- interpret_pepmass now removes the pepmass field after entering precursor_mz [#533](https://github.com/matchms/matchms/pull/533)
+- Filters that did not have any effect are also mentioned in processing report [#530](https://github.com/matchms/matchms/pull/530)
+
 
 ### Fixed
 
 - handle missing weight information in `repair_parent_mass_is_mol_wt` filter [#507](https://github.com/matchms/matchms/pull/507)
 - handle missing smiles in `repair_smiles_of_salts` filter [#507](https://github.com/matchms/matchms/pull/507)
+- The filter settings are now stored as well in logging. [#536](https://github.com/matchms/matchms/pull/536)
 
 ## [0.22.0] - 2023-08-18
 
