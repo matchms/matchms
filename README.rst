@@ -145,6 +145,10 @@ To date, we are aware of:
 
 + `memo <https://github.com/mandelbrot-project/memo>`_ a method allowing a Retention Time (RT) agnostic alignment of metabolomics samples using the fragmentation spectra (MS2) of their constituents.
 
++ `RIAssigner <https://github.com/RECETOX/RIAssigner>`_ a tool for retention index calculation for gas chromatography - mass spectrometry (GC-MS) data.
+
++ `MSMetaEnhancer <https://github.com/RECETOX/MSMetaEnhancer>`_ is a python package to collect mass spectral library metadata using various web services and computational chemistry packages.
+
 *(if you know of any other packages that are fully compatible with matchms, let us know!)*
 
 Introduction
