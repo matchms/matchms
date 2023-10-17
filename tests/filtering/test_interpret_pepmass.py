@@ -86,6 +86,13 @@ def test_empty_spectrum():
     assert spectrum is None, "Expected different handling of None spectrum."
 
 
-def test_interpret_pepmass_error_v0_22_0():
-    spectrum = SpectrumBuilder().with_metadata({"PEPMASS": "(981.54, None)"}, metadata_harmonization=True).build()
-    assert spectrum.get("precursor_mz") == 981.54, "Expected different precursor_mz."
+@pytest.mark.parametrize("input_pepmass, expected_results", [
+ ["(981.54, None)", (981.54, None, None)],
+ ["(981.54, 44, -2)", (981.54, 44, -2)],
+])
+def test_interpret_pepmass_error_v0_22_0(input_pepmass, expected_results):
+    spectrum = SpectrumBuilder().with_metadata({"PEPMASS": input_pepmass}, metadata_harmonization=True).build()
+
+    assert spectrum.get("precursor_mz") == expected_results[0], "Expected different precursor_mz."
+    assert spectrum.get("precursor_intensity") == expected_results[1], "Expected different precursor_intensity."
+    assert spectrum.get("charge") == expected_results[2], "Expected different charge."
