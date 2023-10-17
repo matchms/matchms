@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The file structure of metadata_utils was refactored [#503](https://github.com/matchms/matchms/pull/503)
 - interpret_pepmass now removes the pepmass field after entering precursor_mz [#533](https://github.com/matchms/matchms/pull/533)
 - Filters that did not have any effect are also mentioned in processing report [#530](https://github.com/matchms/matchms/pull/530)
+- Added regex to pepmass reading to properly interpret string representations [#539](https://github.com/matchms/matchms/pull/539)
 
 
 ### Fixed
