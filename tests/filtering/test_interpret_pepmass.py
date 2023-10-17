@@ -89,4 +89,3 @@ def test_empty_spectrum():
 def test_interpret_pepmass_error_v0_22_0():
     spectrum = SpectrumBuilder().with_metadata({"PEPMASS": "(981.54, None)"}, metadata_harmonization=True).build()
     assert spectrum.get("precursor_mz") == 981.54, "Expected different precursor_mz."
-
