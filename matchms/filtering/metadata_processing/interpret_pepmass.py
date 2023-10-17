@@ -1,4 +1,5 @@
 import logging
+import re
 import numpy as np
 from .make_charge_int import _convert_charge_to_int
 
@@ -65,6 +66,11 @@ def _interpret_pepmass_metadata(metadata):
 
 def _get_mz_intensity_charge(pepmass):
     try:
+        if isinstance(pepmass, str):
+            matches = re.findall(r'\(([^)]+)\)', pepmass)
+            if len(matches) > 1:
+                raise ValueError("Found more than one tuple in pepmass field.")            
+            pepmass = matches[0].split(",")
         length = len(pepmass)
         values = [None, None, None]
         for i in range(length):
