@@ -170,11 +170,15 @@ followed by calculating the Cosine score between mass Spectrums in the `tests/te
 Below a more advanced code example showing how you can make a specific pipeline for your needs.
 
 .. code-block:: python
-
+    import os
     from matchms.Pipeline import Pipeline, create_workflow
+    from matchms.exporting.save_as_mgf import save_as_mgf
+    from matchms.utils import create_dir_if_missing, return_non_existing_file_name
+    results_folder = "./results"
+    create_dir_if_missing(results_folder)
 
     workflow = create_workflow(
-        yaml_file_name="my_config_file.yaml", # The workflow will be stored in a yaml file.
+        yaml_file_name=os.path.join(results_folder, "my_config_file.yaml"), # The workflow will be stored in a yaml file.
         predefined_processing_queries="basic",
         additional_filters_queries=[
            ["add_parent_mass"],
@@ -189,9 +193,13 @@ Below a more advanced code example showing how you can make a specific pipeline 
                             ["filter_by_range", {"name": "CosineGreedy_score", "low": 0.2}]],
         )
     pipeline = Pipeline(workflow)
-    pipeline.logging_file = "my_pipeline.log"  # for pipeline and logging message
-    pipeline.logging_level = "INFO" #To define the verbosety of the logging
-    pipeline.run("tests/testdata/pesticides.mgf", "my_reference_library.mgf")
+    pipeline.logging_file = os.path.join(results_folder, "my_pipeline.log")  # for pipeline and logging message
+    pipeline.logging_level = "WARNING" #To define the verbosety of the logging
+    pipeline.run("tests/testdata/pesticides.mgf", "my_reference_library.mgf") # choose your own files
+    save_as_mgf(pipeline.spectrums_queries,
+                return_non_existing_file_name(os.path.join(results_folder, "cleaned_query_spectra.mgf")))
+    save_as_mgf(pipeline.spectrums_references,
+                return_non_existing_file_name(os.path.join(results_folder, "cleaned_library_spectra.mgf")))
 
 
 Alternatively, in particular, if you need more room to add custom functions and steps, the individual steps can run without using the matchms ``Pipeline``:
