@@ -2,7 +2,7 @@ import logging
 import os
 from collections import OrderedDict
 from datetime import datetime
-from typing import Iterable, List, Optional, Union
+from typing import Iterable, List, Optional, Union, Tuple, Dict, Any
 import matchms.similarity as mssimilarity
 from matchms import calculate_scores
 from matchms.filtering.filter_order_and_default_pipelines import ALL_FILTERS
@@ -24,8 +24,8 @@ logger = logging.getLogger("matchms")
 def create_workflow(yaml_file_name: Optional[str] = None,
                     predefined_processing_queries: Optional[str] = "default",
                     predefined_processing_reference: Optional[str] = "default",
-                    additional_filters_queries: Iterable[Union[str, List[dict]]] = (),
-                    additional_filters_references: Iterable[Union[str, List[dict]]] = (),
+                    additional_filters_queries: Iterable[Union[str, Tuple[str, Dict[str, Any]]]] = (),
+                    additional_filters_references: Iterable[Union[str, Tuple[str, Dict[str, Any]]]] = (),
                     score_computations: Iterable[Union[str, List[dict]]] = (),
                     ) -> OrderedDict:
     """Creates a workflow that specifies the filters and scores needed to be run by Pipeline
