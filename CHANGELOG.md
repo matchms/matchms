@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## unreleased
+
+- Improved the readme and added some checks and functions that prevent accidental file overwriting. [#543](https://github.com/matchms/matchms/pull/543)
+
+
 ## [0.23.0] - 2023-10-17
 ### Added
 - Additional tests for filter pipeline order
