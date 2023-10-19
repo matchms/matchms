@@ -1,4 +1,5 @@
 import logging
+import os
 from collections import OrderedDict
 from datetime import datetime
 from typing import Iterable, List, Optional, Union
@@ -57,6 +58,10 @@ def create_workflow(yaml_file_name: Optional[str] = None,
     workflow["reference_filters"] = reference_processor.processing_steps
     workflow["score_computations"] = score_computations
     if yaml_file_name is not None:
+        assert not os.path.exists(yaml_file_name), \
+            "This yaml file name already exists. " \
+            "To use the settings in the yaml file, please use the load_workflow_from_yaml_file function " \
+            "in yaml_file_functions.py or check the tutorial."
         with open(yaml_file_name, 'w', encoding="utf-8") as file:
             file.write("# Matchms pipeline config file \n")
             file.write("# Change and adapt fields where necessary \n")
