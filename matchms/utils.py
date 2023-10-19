@@ -73,3 +73,25 @@ def _load_key_conversions(file: str, source: str, target: str) -> dict:
 def fingerprint_export_warning(spectrums: List[SpectrumType]):
     if any(x.get("fingerprint") is not None for x in spectrums):
         logger.warning("fingerprint found but will not be written to file.")
+
+
+def return_non_existing_file_name(file_name):
+    """Checks if a path already exists, otherwise creates a new filename with (1)"""
+    if not os.path.exists(file_name):
+        return file_name
+    print(f"The file name already exists: {file_name}")
+    file_name_base, file_extension = os.path.splitext(file_name)
+    i = 1
+    new_file_name = f"{file_name_base}({i}){file_extension}"
+    while os.path.exists(new_file_name):
+        i += 1
+        new_file_name = f"{file_name_base}({i}){file_extension}"
+    print(f"Instead the file will be stored in {new_file_name}")
+    return new_file_name
+
+
+def create_dir_if_missing(folder):
+    """Checks if the folder already exists otherwise create the folder"""
+    if not os.path.isdir(folder):
+        assert not os.path.isfile(folder), f"{folder} is expected to be a folder but a file was found"
+        os.mkdir(folder)
