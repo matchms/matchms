@@ -3,6 +3,7 @@ import numpy as np
 import pytest
 from pickydict import PickyDict
 from matchms import Metadata
+from matchms.utils import load_known_key_conversions
 
 
 @pytest.mark.parametrize("input_dict, harmonize, expected", [
@@ -106,3 +107,20 @@ def test_remove_invalid_metadata(input_dict, expected):
     metadata.harmonize_values()
 
     assert metadata == expected, "Expected metadata to be equal."
+
+
+@pytest.mark.parametrize("mapping, metadata", [
+    [{"name": "compound_name"}, {"name": "test"}],
+    [{}, {"name": "test"}],
+])
+def test_metadata_key_mapping(mapping: dict, metadata: dict):
+    Metadata.set_key_replacements(mapping)
+
+    sut = Metadata(metadata)
+    if len(mapping) > 0:
+        assert sut[next(iter(mapping.values()))] == next(iter(metadata.values()))
+        assert sut[next(iter(mapping))] is None
+    else:
+        assert sut[next(iter(metadata))] == next(iter(metadata.values()))
+        
+    Metadata.set_key_replacements(load_known_key_conversions())
