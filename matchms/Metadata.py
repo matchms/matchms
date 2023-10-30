@@ -11,11 +11,6 @@ from .filtering.metadata_processing.make_charge_int import \
 from .utils import load_export_key_conversions, load_known_key_conversions
 
 
-_key_regex_replacements = {r"\s": "_",
-                           r"[!?.,;:]": ""}
-_key_replacements = load_known_key_conversions()
-
-
 class Metadata:
     """Class to handle spectrum metadata in matchms.
 
@@ -46,6 +41,11 @@ class Metadata:
         print(metadata["compound_name"])  # => None (now you need to use "compound name")
 
     """
+
+    _key_regex_replacements = {r"\s": "_",
+                           r"[!?.,;:]": ""}
+    _key_replacements = load_known_key_conversions()
+
     def __init__(self, metadata: dict = None,
                  matchms_key_style: bool = True):
         """
@@ -90,8 +90,8 @@ class Metadata:
         replacements (such as precursor_mass --> precursor_mz).
 
         """
-        self._data.key_regex_replacements = _key_regex_replacements
-        self._data.key_replacements = _key_replacements
+        self._data.key_regex_replacements = Metadata._key_regex_replacements
+        self._data.key_replacements = Metadata._key_replacements
 
     def harmonize_values(self):
         """Runs default harmonization of metadata.
@@ -195,3 +195,14 @@ class Metadata:
                 self.harmonize_keys()
         else:
             raise TypeError("Expected input of type dict or PickyDict.")
+    
+    @staticmethod
+    def set_key_replacements(keys: dict):
+        """Set key replacements for metadata harmonization.
+
+        Parameters
+        ----------
+        keys:
+            Dictionary with key replacements.
+        """
+        Metadata._key_replacements = keys
