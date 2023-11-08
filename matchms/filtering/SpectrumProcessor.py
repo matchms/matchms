@@ -156,40 +156,14 @@ class SpectrumProcessor:
             raise TypeError("No filters to process")
         if processing_report is not None:
             processing_report.counter_number_processed += 1
-        list_of_filters = ["derive_smiles_from_pubchem_compound_name_search",
-                           "repair_smiles_of_salts",
-                           "repair_not_matching_annotation",
-                           "repair_precursor_is_parent_mass",
-                           "repair_adduct_based_on_smiles",
-                           "repair_parent_mass_is_mol_wt",
-                           "require_parent_mass_match_smiles",
-                           "require_valid_annotation"]
-        already_run=False
-        filters_that_made_changes = []
         for filter_func in self.filters:
             spectrum_out = filter_func(spectrum)
-            if filter_func.__name__ in list_of_filters:
-                result = self.check_if_changed(spectrum, spectrum_out)
-                if result:
-                    filters_that_made_changes.append(filter_func.__name__)
-                    if already_run:
-                        print("That was not expected")
-                    else:
-                        already_run = True
-
             if processing_report is not None:
                 processing_report.add_to_report(spectrum, spectrum_out, filter_func.__name__)
             if spectrum_out is None:
                 break
             spectrum = spectrum_out
         return spectrum_out
-
-    def check_if_changed(self, spectrum_old, spectrum_new):
-        if spectrum_new is None:
-            return True
-        if spectrum_new.metadata != spectrum_old.metadata:
-            return True
-        return False
 
     def process_spectrums(self, spectrums: list,
                           create_report: bool = False,
