@@ -186,7 +186,7 @@ class Pipeline:
         assert set(self.__workflow.keys()) == expected_keys
         check_score_computation(score_computations=self.score_computations)
 
-    def run(self, query_files, reference_files = None):
+    def run(self, query_files, reference_files = None, cleaned_query_file = None, cleaned_reference_file = None):
         """Execute the defined Pipeline workflow.
 
         This method will execute all steps of the workflow.
@@ -194,6 +194,13 @@ class Pipeline:
         2) Spectrum processing (using matchms filters)
         3) Score Computations
         """
+        if cleaned_reference_file is not None:
+            if os.path.exists(cleaned_reference_file):
+                raise FileExistsError("The specified save references file already exists")
+        if cleaned_query_file is not None:
+            if os.path.exists(cleaned_query_file):
+                raise FileExistsError("The specified save queries file already exists")
+
         self.set_logging()
         self.write_to_logfile("--- Start running matchms pipeline. ---")
         self.write_to_logfile(f"Start time: {str(datetime.now())}")
@@ -206,7 +213,8 @@ class Pipeline:
         spectrums, report = self.processing_queries.process_spectrums(
             self._spectrums_queries,
             create_report=True,
-            progress_bar=self.progress_bar)
+            progress_bar=self.progress_bar,
+            cleaned_spectra_file=cleaned_query_file)
         self._spectrums_queries = spectrums
         self.write_to_logfile(str(report))
         # Process reference spectra (if necessary)
@@ -214,7 +222,8 @@ class Pipeline:
             self._spectrums_references, report = self.processing_references.process_spectrums(
                 self._spectrums_references,
                 create_report=True,
-                progress_bar=self.progress_bar)
+                progress_bar=self.progress_bar,
+                cleaned_spectra_file=cleaned_reference_file)
             self.write_to_logfile(str(report))
         else:
             self._spectrums_references = self._spectrums_queries

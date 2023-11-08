@@ -1,3 +1,4 @@
+import os
 import inspect
 import logging
 from collections import OrderedDict, defaultdict
@@ -10,6 +11,7 @@ from matchms import Spectrum
 from matchms.filtering.filter_order_and_default_pipelines import (
     ALL_FILTERS, FILTER_FUNCTION_NAMES, PREDEFINED_PIPELINES)
 from matchms.yaml_file_functions import ordered_dump
+from matchms.exporting import save_spectra
 
 
 logger = logging.getLogger("matchms")
@@ -168,6 +170,7 @@ class SpectrumProcessor:
     def process_spectrums(self, spectrums: list,
                           create_report: bool = False,
                           progress_bar: bool = True,
+                          cleaned_spectra_file=None
                           ):
         """
         Process a list of spectrums with all filters in the processing pipeline.
@@ -181,12 +184,17 @@ class SpectrumProcessor:
             The report will be returned as pandas DataFrame. Default is set to False.
         progress_bar : bool, optional
             Displays progress bar if set to True. Default is True.
+        cleaned_spectra_file:
+            Path to where the cleaned spectra should be saved.
 
         Returns
         -------
         Spectrums
             List containing the processed spectrums.
         """
+        if cleaned_spectra_file is not None:
+            if os.path.exists(cleaned_spectra_file):
+                raise FileExistsError("The specified save references file already exists")
         if create_report:
             processing_report = ProcessingReport(self.filters)
         else:
@@ -202,6 +210,9 @@ class SpectrumProcessor:
 
         if create_report:
             return processed_spectrums, processing_report
+
+        if cleaned_spectra_file is not None:
+            save_spectra(processed_spectrums, cleaned_spectra_file)
         return processed_spectrums
 
     @property
