@@ -198,11 +198,9 @@ Below a more advanced code example showing how you can make a specific pipeline 
     pipeline = Pipeline(workflow)
     pipeline.logging_file = os.path.join(results_folder, "my_pipeline.log")  # for pipeline and logging message
     pipeline.logging_level = "WARNING" #To define the verbosety of the logging
-    pipeline.run("tests/testdata/pesticides.mgf", "my_reference_library.mgf") # choose your own files
-    save_as_mgf(pipeline.spectrums_queries,
-                os.path.join(results_folder, "cleaned_query_spectra.mgf"))
-    save_as_mgf(pipeline.spectrums_references,
-                os.path.join(results_folder, "cleaned_library_spectra.mgf"))
+    pipeline.run("tests/testdata/pesticides.mgf", "my_reference_library.mgf", 
+    cleaned_query_file=os.path.join(results_folder, "cleaned_query_spectra.mgf"), 
+    cleaned_reference_file=os.path.join(results_folder, "cleaned_library_spectra.mgf")) # choose your own files
 
 
 Alternatively, in particular, if you need more room to add custom functions and steps, the individual steps can run without using the matchms ``Pipeline``:

@@ -186,7 +186,7 @@ class Pipeline:
         assert set(self.__workflow.keys()) == expected_keys
         check_score_computation(score_computations=self.score_computations)
 
-    def run(self, query_files, reference_files = None, cleaned_query_file = None, cleaned_reference_file = None):
+    def run(self, query_files, reference_files = None, cleaned_query_file=None, cleaned_reference_file=None):
         """Execute the defined Pipeline workflow.
 
         This method will execute all steps of the workflow.
