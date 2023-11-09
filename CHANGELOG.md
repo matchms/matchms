@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [unreleased]
 ### Added
 - added option to set custom key replacements [#547](https://github.com/matchms/matchms/pull/547)
+- Fixed retention time harmonization for msp files [#551](https://github.com/matchms/matchms/issues/551)
 ### Fixed
 - handle missing `precursor_mz` in representation and [#452](https://github.com/matchms/matchms/issues/452) introduced by [#514](https://github.com/matchms/matchms/pull/514/files)[#540](https://github.com/matchms/matchms/pull/540)
 
