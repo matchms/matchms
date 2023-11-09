@@ -3,7 +3,8 @@ import numpy as np
 from pickydict import PickyDict
 from .filtering.metadata_processing.add_precursor_mz import \
     _add_precursor_mz_metadata
-from .filtering.metadata_processing.add_retention import _add_retention, _retention_time_keys, _retention_index_keys
+from .filtering.metadata_processing.add_retention import (
+    _add_retention, _retention_index_keys, _retention_time_keys)
 from .filtering.metadata_processing.interpret_pepmass import \
     _interpret_pepmass_metadata
 from .filtering.metadata_processing.make_charge_int import \
