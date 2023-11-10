@@ -82,7 +82,7 @@ def parse_msp_file(filename: str) -> Generator[dict, None, None]:
 
             masses = np.append(masses, mz)
             intensities = np.append(intensities, ints)
-            
+
             if comment is not None:
                 peak_comments.update({masses[-1]: comment})
 
@@ -103,8 +103,6 @@ def parse_msp_file(filename: str) -> Generator[dict, None, None]:
                 masses = []
                 intensities = []
                 peak_comments = {}
-            
-
 
 
 def _parse_line_with_peaks(rline: str) -> Tuple[List[float], List[float], str]:
@@ -116,9 +114,9 @@ def _parse_line_with_peaks(rline: str) -> Tuple[List[float], List[float], str]:
     Returns:
         Tuple[List[float], List[float], str]: mz, intensity and peak comments obtained from the line.
     """
-    comment, rline = get_peak_comment(rline)   
+    comment, rline = get_peak_comment(rline)
     mz, intensities = get_peak_values(rline)
-    
+
     return mz, intensities, comment
 
 
@@ -127,7 +125,7 @@ def get_peak_values(peak: str) -> Tuple[List[float], List[float]]:
     tokens = re.findall(r'(\d+(?:\.\d+)?(?:e[-+]?\d+)?)', peak)
     if len(tokens) % 2 != 0:
         raise RuntimeError("Wrong peak format detected!")
-    
+
     tokens = list(map(float, tokens))
     mz = tokens[0::2]
     intensities = tokens[1::2]
@@ -149,16 +147,20 @@ def parse_metadata(rline: str, params: dict):
     matches = []
     splitted_line = rline.split(":", 1)
     if splitted_line[0].lower() == 'comments' and "=" in splitted_line[1]:
-        pattern = r'(\S+)="([^"]*)"|"(\w+)=([^"]*)"|"([^"]*)=([^"]*)"|(\S+)=(\d+(?:\.\d*)?)'
+        pattern = r'(\S+)="([^"]+)"|' \
+                  r'"(\w+)=([^"]+)"|' \
+                  r'"([^"]+)=([^"]+)"|' \
+                  r'(\S+)=(\d+(?:\.\d*)?)'
         matches = re.findall(pattern, splitted_line[1].replace("'", '"'))
         for match in matches:
             match = [i for i in match if i]
-            key = match[0]
-            value = match[1]
-            if key.lower().strip() in params.keys() and key.lower().strip() == 'smiles':
-                params[key.lower()+"_2"] = value.strip()
-            else:
-                params[key.lower().strip()] = value.strip()
+            if len(match) == 2:
+                key = match[0]
+                value = match[1]
+                if key.lower().strip() in params.keys() and key.lower().strip() == 'smiles':
+                    params[key.lower()+"_2"] = value.strip()
+                else:
+                    params[key.lower().strip()] = value.strip()
     if len(matches) == 0:
         params[splitted_line[0].lower()] = splitted_line[1].strip()
 
