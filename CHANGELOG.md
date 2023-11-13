@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [unreleased]
 ### Added
 - added option to set custom key replacements [#547](https://github.com/matchms/matchms/pull/547)
-- Improved the readme and added some checks and functions that prevent accidental file overwriting. [#543](https://github.com/matchms/matchms/pull/543)
+- Added a save spectra function. To automatically save in the specified file format. [#543](https://github.com/matchms/matchms/pull/543)
+- Add saving function in SpectrumProcessor [#543](https://github.com/matchms/matchms/pull/543)
 ### Fixed
 - handle missing `precursor_mz` in representation and [#452](https://github.com/matchms/matchms/issues/452) introduced by [#514](https://github.com/matchms/matchms/pull/514/files)[#540](https://github.com/matchms/matchms/pull/540)
 
