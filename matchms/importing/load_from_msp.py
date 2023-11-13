@@ -172,7 +172,7 @@ def parse_metadata(rline: str, params: dict):
                     params[key.lower().strip()] = value.strip()
     # msp files can have the format comments: smiles="CC=O" but also the format smiles: CC=O.
     # The latter is captured by these lines.
-    if len(matches) == 0:
+    if len(matches) == 0 and splitted_line[0] != "comments":
         params[splitted_line[0].lower()] = splitted_line[1].strip()
 
 
