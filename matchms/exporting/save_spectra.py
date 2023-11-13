@@ -1,12 +1,12 @@
 import os
 import pickle
 from typing import List
-from matchms import Spectrum
 from matchms.exporting import save_as_mgf, save_as_msp, save_as_json
 from matchms.typing import SpectrumType
+from matchms.Spectrum import Spectrum
 
 
-def save_spectra(spectrums: List[Spectrum],
+def save_spectra(spectrums: List[SpectrumType],
                  file: str) -> None:
     """Saves spectra as the file type specified.
 
@@ -22,20 +22,20 @@ def save_spectra(spectrums: List[Spectrum],
     ftype:
         Optional. Filetype
     """
-    assert os.path.exists(file), f"The specified file: {file} does not exists"
+    assert not os.path.exists(file), f"The specified file: {file} does already exist"
 
     ftype = os.path.splitext(file)[1].lower()[1:]
 
     if ftype == "json":
         save_as_json(spectrums, file)
-    if ftype == "mgf":
+    elif ftype == "mgf":
         save_as_mgf(spectrums, file)
-    if ftype == "msp":
+    elif ftype == "msp":
         save_as_msp(spectrums, file)
-    if ftype == "pickle":
+    elif ftype == "pickle":
         save_as_pickled_file(spectrums, file)
-
-    raise TypeError(f"File extension of file: {file} is not recognized")
+    else:
+        raise TypeError(f"File extension of file: {file} is not recognized")
 
 
 def save_as_pickled_file(spectrums, filename: str) -> None:
@@ -51,7 +51,9 @@ def save_as_pickled_file(spectrums, filename: str) -> None:
     if os.path.exists(filename):
         raise FileExistsError(f"The file '{filename}' already exists.")
 
-    if not isinstance(spectrums, list) or not isinstance(spectrums[0], SpectrumType):
+    if not isinstance(spectrums, list):
+        raise TypeError("Expected list of spectra")
+    if not isinstance(spectrums[0], Spectrum):
         raise TypeError("Expected list of spectra")
 
     with open(filename, "wb") as f:
