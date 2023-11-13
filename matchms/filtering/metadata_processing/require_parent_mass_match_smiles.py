@@ -38,7 +38,7 @@ def require_parent_mass_match_smiles(spectrum_in: SpectrumType,
 def _check_smiles_and_parent_mass_match(smiles, parent_mass, mass_tolerance) -> bool:
     """Returns True if smiles and parent mass are matching"""
     smiles_mass = get_monoisotopic_neutral_mass(smiles)
-    if smiles_mass is None:
+    if smiles_mass is None or parent_mass is None:
         return False
     mass_difference = parent_mass - smiles_mass
     if abs(mass_difference) < mass_tolerance:
