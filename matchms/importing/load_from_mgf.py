@@ -5,7 +5,7 @@ from pyteomics.mgf import MGF
 from ..Spectrum import Spectrum
 
 
-def load_from_mgf(source: Union[str, TextIO],
+def load_from_mgf(filename: Union[str, TextIO],
                   metadata_harmonization: bool = True) -> Generator[Spectrum, None, None]:
     """Load spectrum(s) from mgf file.
 
@@ -27,29 +27,29 @@ def load_from_mgf(source: Union[str, TextIO],
 
     Parameters
     ----------
-    source:
+    filename:
         Accepts both filename (with path) for .mgf file or a file-like
         object from a preloaded MGF file.
     metadata_harmonization : bool, optional
         Set to False if metadata harmonization to default keys is not desired.
         The default is True.
     """
+    with open(filename, 'r', encoding='utf-8') as file:
+        for pyteomics_spectrum in MGF(file, convert_arrays=1):
 
-    for pyteomics_spectrum in MGF(source, convert_arrays=1):
+            metadata = pyteomics_spectrum.get("params", None)
+            mz = pyteomics_spectrum["m/z array"]
+            intensities = pyteomics_spectrum["intensity array"]
+            if "peak_comments" in metadata.keys():
+                metadata["peak_comments"] = ast.literal_eval(str(metadata["peak_comments"]))
 
-        metadata = pyteomics_spectrum.get("params", None)
-        mz = pyteomics_spectrum["m/z array"]
-        intensities = pyteomics_spectrum["intensity array"]
-        if "peak_comments" in metadata.keys():
-            metadata["peak_comments"] = ast.literal_eval(str(metadata["peak_comments"]))
+            # Sort by mz (if not sorted already)
+            if not np.all(mz[:-1] <= mz[1:]):
+                idx_sorted = np.argsort(mz)
+                mz = mz[idx_sorted]
+                intensities = intensities[idx_sorted]
 
-        # Sort by mz (if not sorted already)
-        if not np.all(mz[:-1] <= mz[1:]):
-            idx_sorted = np.argsort(mz)
-            mz = mz[idx_sorted]
-            intensities = intensities[idx_sorted]
-
-        yield Spectrum(mz=mz,
-                       intensities=intensities,
-                       metadata=metadata,
-                       metadata_harmonization=metadata_harmonization)
+            yield Spectrum(mz=mz,
+                           intensities=intensities,
+                           metadata=metadata,
+                           metadata_harmonization=metadata_harmonization)
