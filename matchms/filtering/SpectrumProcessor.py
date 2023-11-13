@@ -1,6 +1,6 @@
-import os
 import inspect
 import logging
+import os
 from collections import OrderedDict, defaultdict
 from functools import partial
 from typing import Callable, Dict, Iterable, List, Optional, Tuple, Union
@@ -8,10 +8,10 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 from matchms import Spectrum
+from matchms.exporting import save_spectra
 from matchms.filtering.filter_order_and_default_pipelines import (
     ALL_FILTERS, FILTER_FUNCTION_NAMES, PREDEFINED_PIPELINES)
 from matchms.yaml_file_functions import ordered_dump
-from matchms.exporting import save_spectra
 
 
 logger = logging.getLogger("matchms")

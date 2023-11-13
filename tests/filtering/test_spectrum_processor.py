@@ -1,11 +1,11 @@
+import os
+import tempfile
 import numpy as np
 import pytest
-import tempfile
-import os
 from matchms import SpectrumProcessor
-from matchms.importing.load_spectra import load_spectra
 from matchms.filtering.filter_order_and_default_pipelines import BASIC_FILTERS
 from matchms.filtering.SpectrumProcessor import ProcessingReport
+from matchms.importing.load_spectra import load_spectra
 from ..builder_Spectrum import SpectrumBuilder
 
 

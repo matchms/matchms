@@ -1,9 +1,9 @@
 import os
 import pickle
 from typing import List
-from matchms.exporting import save_as_mgf, save_as_msp, save_as_json
-from matchms.typing import SpectrumType
+from matchms.exporting import save_as_json, save_as_mgf, save_as_msp
 from matchms.Spectrum import Spectrum
+from matchms.typing import SpectrumType
 
 
 def save_spectra(spectrums: List[SpectrumType],

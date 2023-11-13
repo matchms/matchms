@@ -2,7 +2,7 @@ import os
 import tempfile
 import pytest
 from matchms.exporting import save_spectra
-from matchms.importing import load_spectra, load_from_mgf
+from matchms.importing import load_from_mgf, load_spectra
 
 
 def load_test_spectra_file():

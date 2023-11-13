@@ -1,12 +1,12 @@
 import os
+import tempfile
 import numpy as np
 import pytest
-import tempfile
 from matchms import Pipeline
 from matchms.filtering import select_by_mz
+from matchms.importing.load_spectra import load_spectra
 from matchms.Pipeline import create_workflow
 from matchms.similarity import ModifiedCosine
-from matchms.importing.load_spectra import load_spectra
 from matchms.yaml_file_functions import load_workflow_from_yaml_file
 
 
