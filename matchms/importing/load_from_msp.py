@@ -154,6 +154,7 @@ def parse_metadata(rline: str, params: dict):
         # The first checks for compound="caffeine", the second and third "compound=caffeine and the last for parent_mass=12.1
         # The second and third almost match the same pattern, but the second is there to ensure tha the pattern
         # "SMILES=CC(O)C(O)=O" is recognized as 'smiles': 'CC(O)C(O)=O' instead of 'smiles=cc(o)c(o)': 'O'
+        # The third pattern is needed since some keys like DB# should be stored, which is not recognized by the \w regex
         # Cases like "Smiles=" will not be stores (since len(match) = 1) The reason that we did not change the * to +
         # in the regex, is that we want to still match to these cases, so that the if len(matches) == 0: below is not
         # called in cases like comments: "smiles=".

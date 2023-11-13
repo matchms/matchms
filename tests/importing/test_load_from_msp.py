@@ -273,6 +273,7 @@ def test_load_msp_with_scientific_notation():
     ['comments: mass=12.0', {"mass": '12.0'}],
     ['name: 3,4-DICHLOROPHENOL', {'name': '3,4-DICHLOROPHENOL'}],
     ['comments: "SMILES=CC(O)C(O)=O"', {"smiles": "CC(O)C(O)=O"}],
+    ['comments: "DB#=JP000001"', {"db#":"JP000001"}],
 ])
 def test_parse_metadata(input_line, expected_output):
     """tests if metadata is correctly parsed"""
