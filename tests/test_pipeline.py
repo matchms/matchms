@@ -1,10 +1,12 @@
 import os
 import numpy as np
 import pytest
+import tempfile
 from matchms import Pipeline
 from matchms.filtering import select_by_mz
 from matchms.Pipeline import create_workflow
 from matchms.similarity import ModifiedCosine
+from matchms.importing.load_spectra import load_spectra
 from matchms.yaml_file_functions import load_workflow_from_yaml_file
 
 
@@ -216,3 +218,15 @@ def test_pipeline_changing_workflow():
     expected = np.array([[1., 0.30384404],
                          [0.30384404, 1.]])
     assert np.allclose(all_scores["ModifiedCosine_score"][3:, 3:], expected)
+
+
+def test_save_spectra_spectrum_processor():
+    workflow = create_workflow(predefined_processing_queries="basic")
+    pipeline = Pipeline(workflow)
+    with tempfile.TemporaryDirectory() as temp_dir:
+        filename = os.path.join(temp_dir, "spectra.mgf")
+        pipeline.run(spectrums_file_msp, cleaned_query_file=filename)
+        if not os.path.exists(filename):
+            FileNotFoundError("No file was created")
+        reloaded_spectra = list(load_spectra(filename))
+    assert len(reloaded_spectra) == len(list(load_spectra(spectrums_file_msp)))
