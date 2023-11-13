@@ -154,9 +154,9 @@ def parse_metadata(rline: str, params: dict):
         # The first checks for compound="caffeine", the second and third "compound=caffeine and the last for parent_mass=12.1
         # The second and third almost match the same pattern, but the second is there to ensure tha the pattern
         # "SMILES=CC(O)C(O)=O" is recognized as 'smiles': 'CC(O)C(O)=O' instead of 'smiles=cc(o)c(o)': 'O'
-        pattern = r'(\S+)="([^"]+)"|' \
-                  r'"(\w+)=([^"]+)"|' \
-                  r'"([^"]+)=([^"]+)"|' \
+        pattern = r'(\S+)="([^"]*)"|' \
+                  r'"(\w+)=([^"]*)"|' \
+                  r'"([^"]*)=([^"]*)"|' \
                   r'(\S+)=(\d+(?:\.\d*)?)'
         matches = re.findall(pattern, splitted_line[1].replace("'", '"'))
         for match in matches:
@@ -172,7 +172,7 @@ def parse_metadata(rline: str, params: dict):
                     params[key.lower().strip()] = value.strip()
     # msp files can have the format comments: smiles="CC=O" but also the format smiles: CC=O.
     # The latter is captured by these lines.
-    if len(matches) == 0 and splitted_line[0] != "comments":
+    if len(matches) == 0:
         params[splitted_line[0].lower()] = splitted_line[1].strip()
 
 
