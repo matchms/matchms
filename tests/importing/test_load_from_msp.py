@@ -1,7 +1,8 @@
 import os
 import numpy as np
+import pytest
 from matchms import Spectrum
-from matchms.importing import load_from_msp
+from matchms.importing.load_from_msp import load_from_msp, parse_metadata
 from tests.builder_Spectrum import SpectrumBuilder
 
 
@@ -262,5 +263,18 @@ def test_load_msp_with_scientific_notation():
     module_root = os.path.join(os.path.dirname(__file__), "..")
     spectrums_file = os.path.join(module_root, "testdata", "test_spectra_collection.msp")
     actual = list(load_from_msp(spectrums_file))
-    
+
     assert len(actual) == 3
+
+
+@pytest.mark.parametrize("input, expected_output", [
+    ['comments: "SMILES=CC(O)C(O)=O"', {"smiles": "CC(O)C(O)=O"}],
+    ['comments: SMILES="CC(O)C(O)=O"', {"smiles": "CC(O)C(O)=O"}],
+    ['comments: mass=12.0', {"mass": '12.0'}],
+    ['name: 3,4-DICHLOROPHENOL', {'name': '3,4-DICHLOROPHENOL'}]
+])
+def test_parse_metadata(input, expected_output):
+    """tests if metadata is correctly parsed"""
+    params = {}
+    parse_metadata(input, params)
+    assert params == expected_output
