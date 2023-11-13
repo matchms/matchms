@@ -267,14 +267,15 @@ def test_load_msp_with_scientific_notation():
     assert len(actual) == 3
 
 
-@pytest.mark.parametrize("input, expected_output", [
-    ['comments: "SMILES=CC(O)C(O)=O"', {"smiles": "CC(O)C(O)=O"}],
+@pytest.mark.parametrize("input_line, expected_output", [
+    ['comments: "SMILES="', {}],
     ['comments: SMILES="CC(O)C(O)=O"', {"smiles": "CC(O)C(O)=O"}],
     ['comments: mass=12.0', {"mass": '12.0'}],
-    ['name: 3,4-DICHLOROPHENOL', {'name': '3,4-DICHLOROPHENOL'}]
+    ['name: 3,4-DICHLOROPHENOL', {'name': '3,4-DICHLOROPHENOL'}],
+    ['comments: "SMILES=CC(O)C(O)=O"', {"smiles": "CC(O)C(O)=O"}],
 ])
-def test_parse_metadata(input, expected_output):
+def test_parse_metadata(input_line, expected_output):
     """tests if metadata is correctly parsed"""
     params = {}
-    parse_metadata(input, params)
+    parse_metadata(input_line, params)
     assert params == expected_output
