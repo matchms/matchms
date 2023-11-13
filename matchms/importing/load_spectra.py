@@ -1,14 +1,13 @@
 import os
 import pickle
 from typing import Generator, List, Optional, Union
-from matchms import Spectrum
+from matchms.Spectrum import Spectrum
 from matchms.importing import (load_from_json, load_from_mgf, load_from_msp,
                                load_from_mzml, load_from_mzxml, load_from_usi)
-from matchms.typing import SpectrumType
 
 
 def load_spectra(file: str, metadata_harmonization: bool = True,
-                 ftype: Optional[str] = None) -> Union[List[SpectrumType], Generator[SpectrumType, None, None]]:
+                 ftype: Optional[str] = None) -> Union[List[Spectrum], Generator[Spectrum, None, None]]:
     """Loads spectra from your spectrum file into memory as matchms Spectrum object
 
     The following file extensions can be loaded in with this function:
@@ -48,7 +47,7 @@ def load_spectra(file: str, metadata_harmonization: bool = True,
     raise TypeError(f"File extension of file: {file} is not recognized")
 
 
-def load_from_pickle(filename: str, metadata_harmonization: bool) -> List[SpectrumType]:
+def load_from_pickle(filename: str, metadata_harmonization: bool) -> List[Spectrum]:
     """Load spectra stored in pickle
 
     Args:
@@ -60,16 +59,20 @@ def load_from_pickle(filename: str, metadata_harmonization: bool) -> List[Spectr
     with open(filename, 'rb') as file:
         loaded_object = pickle.load(file)
 
-    if not isinstance(loaded_object, list) or not isinstance(loaded_object[0], SpectrumType):
+    if not isinstance(loaded_object, list):
         raise TypeError("Expected list of spectra")
+    for spectrum in loaded_object:
+        if not isinstance(spectrum, Spectrum):
+            raise TypeError("Expected list of spectra")
 
     if metadata_harmonization:
-        loaded_object = [Spectrum(x.peaks.mz, x.peaks.intensisites, x.metadata, metadata_harmonization) for x in loaded_object]
+        loaded_object = [Spectrum(spectrum.mz, spectrum.intensities,
+                                  spectrum.metadata, metadata_harmonization) for spectrum in loaded_object]
     return loaded_object
 
 
 def load_list_of_spectrum_files(spectrum_files: Union[List[str], str]
-                                ) -> Union[List[SpectrumType], Generator[SpectrumType, None, None]]:
+                                ) -> Union[List[Spectrum], Generator[Spectrum, None, None]]:
     """Combines all spectra in multiple files into a list of spectra"""
     # Just load spectra if it is a single file
     if isinstance(spectrum_files, str):
