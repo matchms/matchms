@@ -210,20 +210,15 @@ class Pipeline:
         self.write_to_logfile("--- Processing spectra ---")
         self.write_to_logfile(f"Time: {str(datetime.now())}")
         # Process query spectra
-        spectrums, report = self.processing_queries.process_spectrums(
-            self._spectrums_queries,
-            create_report=True,
-            progress_bar=self.progress_bar,
-            cleaned_spectra_file=cleaned_query_file)
+        spectrums, report = self.processing_queries.process_spectrums(self._spectrums_queries,
+                                                                      progress_bar=self.progress_bar,
+                                                                      cleaned_spectra_file=cleaned_query_file)
         self._spectrums_queries = spectrums
         self.write_to_logfile(str(report))
         # Process reference spectra (if necessary)
         if self.is_symmetric is False:
             self._spectrums_references, report = self.processing_references.process_spectrums(
-                self._spectrums_references,
-                create_report=True,
-                progress_bar=self.progress_bar,
-                cleaned_spectra_file=cleaned_reference_file)
+                self._spectrums_references, progress_bar=self.progress_bar, cleaned_spectra_file=cleaned_reference_file)
             self.write_to_logfile(str(report))
         else:
             self._spectrums_references = self._spectrums_queries

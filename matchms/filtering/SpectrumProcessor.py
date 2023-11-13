@@ -168,7 +168,6 @@ class SpectrumProcessor:
         return spectrum_out
 
     def process_spectrums(self, spectrums: list,
-                          create_report: bool = False,
                           progress_bar: bool = True,
                           cleaned_spectra_file=None
                           ):
@@ -191,14 +190,13 @@ class SpectrumProcessor:
         -------
         Spectrums
             List containing the processed spectrums.
+        processing_report
+            A ProcessingReport containing the effect of the filters.
         """
         if cleaned_spectra_file is not None:
             if os.path.exists(cleaned_spectra_file):
                 raise FileExistsError("The specified save references file already exists")
-        if create_report:
-            processing_report = ProcessingReport(self.filters)
-        else:
-            processing_report = None
+        processing_report = ProcessingReport(self.filters)
 
         processed_spectrums = []
         for s in tqdm(spectrums, disable=(not progress_bar), desc="Processing spectrums"):
@@ -208,12 +206,10 @@ class SpectrumProcessor:
             if processed_spectrum is not None:
                 processed_spectrums.append(processed_spectrum)
 
-        if create_report:
-            return processed_spectrums, processing_report
-
         if cleaned_spectra_file is not None:
             save_spectra(processed_spectrums, cleaned_spectra_file)
-        return processed_spectrums
+
+        return processed_spectrums, processing_report
 
     @property
     def processing_steps(self):
