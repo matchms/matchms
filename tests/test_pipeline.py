@@ -226,7 +226,6 @@ def test_save_spectra_spectrum_processor():
     with tempfile.TemporaryDirectory() as temp_dir:
         filename = os.path.join(temp_dir, "spectra.mgf")
         pipeline.run(spectrums_file_msp, cleaned_query_file=filename)
-        if not os.path.exists(filename):
-            FileNotFoundError("No file was created")
+        assert os.path.exists(filename)
         reloaded_spectra = list(load_spectra(filename))
     assert len(reloaded_spectra) == len(list(load_spectra(spectrums_file_msp)))

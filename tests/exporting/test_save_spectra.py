@@ -32,8 +32,7 @@ def test_spectra(file_name):
     with tempfile.TemporaryDirectory() as temp_dir:
         filename = os.path.join(temp_dir, file_name)
         save_spectra(spectrum_list, filename)
-        if not os.path.exists(filename):
-            FileNotFoundError("No file was created")
+        assert os.path.exists(filename)
         reloaded_spectra = list(load_spectra(filename))
     assert len(reloaded_spectra) == len(spectrum_list)
     for i, spectrum in enumerate(spectrum_list):
