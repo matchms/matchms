@@ -68,6 +68,34 @@ def test_save_as_mgf_spectrum_list():
         assert mgf_content[8].split("=")[1] == "test2\n"
 
 
+@pytest.mark.parametrize("style, expected",
+                         [("matchms", ["PRECURSOR_MZ=100.1\n", "PRECURSOR_MZ=200.2\n"]),
+                          ("nist", ["PRECURSORMZ=100.1\n", "PRECURSORMZ=200.2\n"]),
+                          ("gnps", ["PEPMASS=100.1\n", "PEPMASS=200.2\n"]),
+                          ])
+def test_save_as_mgf_export_style(style, expected):
+    """Test saving spectrum list to .mgf file using differnt export styles.
+    """
+    mz = np.array([100, 200], dtype="float")
+    intensities = np.array([10, 500], dtype="float")
+    builder = SpectrumBuilder().with_mz(mz).with_intensities(intensities)
+    spectrum1 = builder.with_metadata({"precursor_mz": 100.1},
+                                      metadata_harmonization=False).build()
+    spectrum2 = builder.with_metadata({"precursor_mz": 200.2},
+                                      metadata_harmonization=False).build()
+
+    # Write to test file
+    with tempfile.TemporaryDirectory() as d:
+        filename = os.path.join(d, "test.mgf")
+        save_as_mgf([spectrum1, spectrum2], filename, export_style=style)
+
+        # Test if content of mgf file is correct
+        with open(filename, "r", encoding="utf-8") as f:
+            mgf_content = f.readlines()
+        assert mgf_content[1] == expected[0]
+        assert mgf_content[7] == expected[1]
+
+
 @pytest.mark.parametrize("charge, ionmode, parent_mass",
                          [(-1, "negative", 218.5),
                           (2, "positive", "n/a"),

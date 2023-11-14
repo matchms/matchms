@@ -32,7 +32,7 @@ def _create_test_spectrum_with_intensities(intensities):
 def spectrum() -> Spectrum:
     mz = np.array([100.00003, 110.2, 200.581], dtype='float')
     intensities = np.array([0.51, 1.0, 0.011], dtype='float')
-    metadata = {"pepmass": (444.0, 11), "charge": -1}
+    metadata = {"precursor_mz": 444.0, "charge": -1}
     builder = SpectrumBuilder().with_mz(mz).with_intensities(intensities).with_metadata(metadata)
     return builder.build()
 
@@ -121,9 +121,29 @@ def test_comparing_spectra_with_arrays():
     assert spectrum0 != spectrum1, "Expected spectra to not be equal"
 
 
+def test_spectrum_to_dict(spectrum: Spectrum):
+    """Test if export to Python dictionary works as intended"""
+    spectrum_dict = spectrum.to_dict()
+    expected_dict = {
+        "charge": -1,
+        "peaks_json": [[100.00003, 0.51], [110.2, 1.0], [200.581, 0.011]],
+        "precursor_mz": 444.0}
+    assert spectrum_dict == expected_dict
+
+
+def test_spectrum_to_dict_matchms_style(spectrum: Spectrum):
+    """Test if export to Python dictionary works as intended"""
+    spectrum_dict = spectrum.to_dict(export_style="nist")
+    expected_dict = {
+        "Charge": -1,
+        "peaks_json": [[100.00003, 0.51], [110.2, 1.0], [200.581, 0.011]],
+        "PrecursorMZ": 444.0}
+    assert spectrum_dict == expected_dict
+
+
 def test_spectrum_hash(spectrum: Spectrum):
-    assert hash(spectrum) == 1516465757675504211, "Expected different hash."
-    assert spectrum.metadata_hash() == "92c0464af949ae56627f", \
+    assert hash(spectrum) == 382278160858921722, "Expected different hash."
+    assert spectrum.metadata_hash() == "78c223faa157cc130390", \
         "Expected different metadata hash."
     assert spectrum.spectrum_hash() == "c79de5a8b333f780c206", \
         "Expected different spectrum hash."
@@ -158,7 +178,7 @@ def test_spectrum_hash_intensity_sensitivity(spectrum: Spectrum):
 def test_spectrum_hash_metadata_sensitivity(spectrum: Spectrum):
     """Test is changes indeed lead to different hashes as expected."""
     spectrum2 = SpectrumBuilder().from_spectrum(spectrum).with_metadata(
-        {"pepmass": (444.1, 11), "charge": -1}).build()
+        {"precursor_mz": 444.1, "charge": -1}).build()
 
     assert hash(spectrum) != hash(spectrum2), "Expected hashes to be different."
     assert spectrum.metadata_hash() != spectrum2.metadata_hash(), \
@@ -170,14 +190,14 @@ def test_spectrum_hash_metadata_sensitivity(spectrum: Spectrum):
 @pytest.mark.parametrize("default_filtering", [True, False])
 def test_spectrum_clone(spectrum, default_filtering):
     spectrum = SpectrumBuilder().from_spectrum(spectrum).with_metadata(
-        {"pepmass": (444.1, 11), "TEST FIELD": "Some Text"},
+        {"precursor_mz": 444.1, "TEST FIELD": "Some Text"},
         metadata_harmonization=default_filtering).build()
     spectrum_clone = spectrum.clone()
 
     assert spectrum_clone == spectrum.clone(), "Spectra should be equal"
 
     # Check if no shallow copy was made
-    spectrum_clone.metadata = {"pepmass": (424.1, 11), "TEST FIELD": "Some Text"}
+    spectrum_clone.metadata = {"precursor_mz": 424.1, "TEST FIELD": "Some Text"}
     assert spectrum_clone != spectrum.clone(), "Only cloned spectrum should have changed"
 
 
