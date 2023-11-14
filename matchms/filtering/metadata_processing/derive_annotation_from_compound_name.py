@@ -11,7 +11,7 @@ import pandas as pd
 import pubchempy
 from matchms import Spectrum
 from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import \
-    is_valid_inchi, is_valid_smiles
+    is_valid_inchi, is_valid_smiles, is_valid_inchikey
 
 
 logger = logging.getLogger("matchms")
@@ -55,10 +55,15 @@ def derive_annotation_from_compound_name(spectrum_in: Spectrum,
             if within_mass_tolerance.shape[0] > 0:
                 # Select the match with the most
                 best_match = within_mass_tolerance.loc[within_mass_tolerance["monoisotopic_mass"].idxmin()]
-                spectrum.set("smiles", best_match["smiles"])
-                spectrum.set("inchi", best_match["inchi"])
-                spectrum.set("inchikey", best_match["inchikey"])
-                logger.info("Added smiles %s based on the compound name %s", best_match["smiles"], compound_name)
+                if is_valid_smiles(best_match["smiles"]):
+                    spectrum.set("smiles", best_match["smiles"])
+                    logger.info("Added smiles %s based on the compound name %s", best_match["smiles"], compound_name)
+                if is_valid_inchi(best_match["inchi"]):
+                    spectrum.set("inchi", best_match["inchi"])
+                    logger.info("Added inchi %s based on the compound name %s", best_match["inchi"], compound_name)
+                if is_valid_inchikey(best_match["inchikey"]):
+                    spectrum.set("inchikey", best_match["inchikey"])
+                    logger.info("Added inchikey %s based on the compound name %s", best_match["inchikey"], compound_name)
                 return spectrum
     return spectrum
 
