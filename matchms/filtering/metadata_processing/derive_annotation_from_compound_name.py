@@ -11,15 +11,15 @@ import pandas as pd
 import pubchempy
 from matchms import Spectrum
 from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import \
-    _check_fully_annotated
+    is_valid_inchi, is_valid_smiles
 
 
 logger = logging.getLogger("matchms")
 
 
 def derive_annotation_from_compound_name(spectrum_in: Spectrum,
-                                    annotated_compound_names_file: Optional[str] = None,
-                                    mass_tolerance: float = 0.1):
+                                         annotated_compound_names_file: Optional[str] = None,
+                                         mass_tolerance: float = 0.1):
     """Adds smiles, inchi, inchikey based on compound name by searching pubchem
 
     The smiles, inchi and inchikey are repaired if the found smiles is close enough to the parent mass.
@@ -40,7 +40,8 @@ def derive_annotation_from_compound_name(spectrum_in: Spectrum,
     if spectrum_in is None:
         return None
     spectrum = spectrum_in.clone()
-    if _check_fully_annotated(spectrum):
+    # Only run this function if it does not yet have a useful annotation
+    if is_valid_inchi(spectrum.get("inchi")) or is_valid_smiles(spectrum.get("smiles")):
         return spectrum
     compound_name = spectrum.get("compound_name")
     parent_mass = spectrum.get('parent_mass')
