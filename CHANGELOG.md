@@ -7,9 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 ### Added
-- added option to set custom key replacements [#547](https://github.com/matchms/matchms/pull/547)
+- Option to set custom key replacements [#547](https://github.com/matchms/matchms/pull/547)
+- Option to set the export style in `save_as_mgf` and `save_as_json` to choose other than matchms styles such as `nist`, `riken`, `gnps` [#557](https://github.com/matchms/matchms/pull/557)
+
 ### Fixed
-- handle missing `precursor_mz` in representation and [#452](https://github.com/matchms/matchms/issues/452) introduced by [#514](https://github.com/matchms/matchms/pull/514/files)[#540](https://github.com/matchms/matchms/pull/540)
+- Handle missing `precursor_mz` in representation and [#452](https://github.com/matchms/matchms/issues/452) introduced by [#514](https://github.com/matchms/matchms/pull/514/files)[#540](https://github.com/matchms/matchms/pull/540)
 
 ## [0.23.1] - 2023-10-18
 ### Added
