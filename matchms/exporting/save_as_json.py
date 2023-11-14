@@ -47,23 +47,22 @@ def save_as_json(spectrums: List[Spectrum], filename: str):
 
 
 class SpectrumJSONEncoder(json.JSONEncoder):
-    # See https://github.com/PyCQA/pylint/issues/414 for reference
-    def default(self, o):
-        """JSON Encoder which can encode a :py:class:`~matchms.Spectrum.Spectrum` object"""
-        if isinstance(o, Spectrum):
-            spec = o.clone().to_dict()
+    def default(self, obj):
+        """JSON Encoder for a matchms.Spectrum.Spectrum object"""
+        if isinstance(obj, Spectrum):
+            spec = obj.clone().to_dict()
             if "fingerprint" in spec.keys():
                 del spec["fingerprint"]
             return spec
-        return json.JSONEncoder.default(self, o)
+        return json.JSONEncoder.default(self, obj)
 
 
 class ScoresJSONEncoder(json.JSONEncoder):
-    def default(self, o):
-        """JSON Encoder which can encode a :py:class:`~matchms.Scores.Scores` object"""
-        class_name = o.__class__.__name__
-        # do isinstance(o, Scores) without importing matchms.Scores
+    def default(self, obj):
+        """JSON Encoder for a matchms.Scores.Scores object"""
+        class_name = obj.__class__.__name__
+        # do isinstance(obj, Scores) without importing matchms.Scores
         if class_name == "Scores":
-            scores = copy.deepcopy(o)
+            scores = copy.deepcopy(obj)
             return scores.to_dict()
-        return json.JSONEncoder.default(self, o)
+        return json.JSONEncoder.default(self, obj)
