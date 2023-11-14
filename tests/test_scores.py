@@ -167,6 +167,20 @@ def test_scores_next():
     assert actual == expected, "Expected different scores."
 
 
+def test_scores_to_dict():
+    """Test if export to Python dictionary works as intended"""
+    spectrum_1, spectrum_2, spectrum_3, _ = spectra()
+    spectrum_1.set("precursor_mz", 123.4)
+    references = [spectrum_1, spectrum_2]
+    queries = [spectrum_3]
+    scores = calculate_scores(references, queries, CosineGreedy())
+    scores_dict = scores.to_dict()
+    expected_dict = [{'id': 'spectrum1', 'precursor_mz': 123.4, 'peaks_json': [[100.0, 0.7], [150.0, 0.2], [200.0, 0.1]]},
+                     {'id': 'spectrum2', 'peaks_json': [[100.0, 0.4], [140.0, 0.2], [190.0, 0.1]]}]
+    assert len(scores_dict["references"]) == 2
+    assert scores_dict["references"] == expected_dict
+
+
 def test_scores_by_referencey():
     "Test scores_by_reference method."
     spectrum_1, spectrum_2, spectrum_3, spectrum_4 = spectra()
