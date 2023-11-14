@@ -10,8 +10,8 @@ import numpy as np
 import pandas as pd
 import pubchempy
 from matchms import Spectrum
-from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import \
-    is_valid_inchi, is_valid_smiles, is_valid_inchikey
+from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import (
+    is_valid_inchi, is_valid_inchikey, is_valid_smiles)
 
 
 logger = logging.getLogger("matchms")
