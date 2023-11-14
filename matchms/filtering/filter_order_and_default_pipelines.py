@@ -1,6 +1,5 @@
 from matchms import filtering as msfilters
 
-
 # List all filters in a functionally working order
 ALL_FILTERS = [msfilters.make_charge_int,
                msfilters.add_compound_name,
@@ -72,7 +71,7 @@ HARMONIZE_METADATA_ENTRIES = \
      ]
 DERIVE_MISSING_METADATA = ["correct_charge", "add_parent_mass", ]
 REQUIRE_COMPLETE_METADATA = ["require_precursor_mz",
-                             ("require_correct_ionmode", {"ion_mode_to_keep": "both"}),]
+                             ("require_correct_ionmode", {"ion_mode_to_keep": "both"}), ]
 REPAIR_ANNOTATION = [
     "derive_inchi_from_smiles",
     "derive_smiles_from_inchi",
@@ -91,6 +90,15 @@ CLEAN_PEAKS = [("select_by_mz", {"mz_from": 0, "mz_to": 1000}),
                ("reduce_to_number_of_peaks", {"n_max": 1000}),
                ("require_minimum_of_high_peaks", {"no_peaks": 5, "intensity_percent": 2.0}),
                ]
+# These filters are in None of the above pipelines
+OTHER_FILTERS = ["require_precursor_below_mz",
+                 "select_by_intensity",
+                 "remove_peaks_around_precursor_mz",
+                 "remove_peaks_outside_top_k",
+                 "require_minimum_number_of_peaks",
+                 "add_fingerprint",
+                 "add_losses",
+                 "repair_parent_mass_match_smiles_wrapper"]
 
 BASIC_FILTERS = HARMONIZE_METADATA_FIELD_NAMES + DERIVE_METADATA_IN_WRONG_FIELD + HARMONIZE_METADATA_ENTRIES
 DEFAULT_FILTERS = BASIC_FILTERS + ["normalize_intensities", ] + REQUIRE_COMPLETE_METADATA + DERIVE_MISSING_METADATA
