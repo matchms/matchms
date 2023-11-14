@@ -5,7 +5,9 @@ from ..Spectrum import Spectrum
 from ..utils import fingerprint_export_warning
 
 
-def save_as_json(spectrums: List[Spectrum], filename: str):
+def save_as_json(spectrums: List[Spectrum],
+                 filename: str,
+                 export_style: str = "matchms"):
     """Save spectrum(s) as json file.
 
     :py:attr:`~matchms.Spectrum.losses` of spectrum will not be saved.
@@ -34,6 +36,9 @@ def save_as_json(spectrums: List[Spectrum], filename: str):
         Expected input is a list of  :py:class:`~matchms.Spectrum.Spectrum` objects.
     filename:
         Provide filename to save spectrum(s).
+    export_style:
+        Converts the keys to the required export style. One of ["matchms", "massbank", "nist", "riken", "gnps"].
+        Default is "matchms"
     """
     if not isinstance(spectrums, list):
         # Assume that input was single Spectrum
