@@ -69,7 +69,7 @@ class ScoresJSONEncoder(json.JSONEncoder):
     def default(self, o):
         """JSON Encoder for a matchms.Scores.Scores object"""
         class_name = o.__class__.__name__
-        # do isinstance(obj, Scores) without importing matchms.Scores
+        # do isinstance(o, Scores) without importing matchms.Scores
         if class_name == "Scores":
             scores = copy.deepcopy(o)
             return scores.to_dict()
