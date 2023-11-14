@@ -93,8 +93,8 @@ from .metadata_processing.derive_inchikey_from_inchi import \
 from .metadata_processing.derive_ionmode import derive_ionmode
 from .metadata_processing.derive_smiles_from_inchi import \
     derive_smiles_from_inchi
-from .metadata_processing.derive_smiles_from_pubchem_compound_name_search import \
-    derive_smiles_from_pubchem_compound_name_search
+from .metadata_processing.derive_annotation_from_compound_name import \
+    derive_annotation_from_compound_name
 from .metadata_processing.harmonize_undefined_inchi import \
     harmonize_undefined_inchi
 from .metadata_processing.harmonize_undefined_inchikey import \
@@ -178,7 +178,7 @@ __all__ = [
     "repair_parent_mass_match_smiles_wrapper",
     "repair_precursor_is_parent_mass",
     "repair_smiles_of_salts",
-    "derive_smiles_from_pubchem_compound_name_search",
+    "derive_annotation_from_compound_name",
     "repair_not_matching_annotation",
     "require_valid_annotation",
     "require_parent_mass_match_smiles",

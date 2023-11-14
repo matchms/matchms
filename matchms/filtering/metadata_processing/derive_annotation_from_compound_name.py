@@ -17,9 +17,9 @@ from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import \
 logger = logging.getLogger("matchms")
 
 
-def derive_smiles_from_pubchem_compound_name_search(spectrum_in: Spectrum,
-                                                    annotated_compound_names_file: Optional[str] = None,
-                                                    mass_tolerance: float = 0.1):
+def derive_annotation_from_compound_name(spectrum_in: Spectrum,
+                                    annotated_compound_names_file: Optional[str] = None,
+                                    mass_tolerance: float = 0.1):
     """Adds smiles, inchi, inchikey based on compound name by searching pubchem
 
     The smiles, inchi and inchikey are repaired if the found smiles is close enough to the parent mass.
@@ -46,7 +46,6 @@ def derive_smiles_from_pubchem_compound_name_search(spectrum_in: Spectrum,
     parent_mass = spectrum.get('parent_mass')
 
     if _is_plausible_name(compound_name) and parent_mass is not None:
-
         compound_name_annotations = _get_pubchem_compound_name_annotation(compound_name, annotated_compound_names_file)
         if len(compound_name_annotations) > 0:
             compound_name_annotation_df = pd.DataFrame(compound_name_annotations)

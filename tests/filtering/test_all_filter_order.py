@@ -21,13 +21,13 @@ ANNOTATION_REPARATIONS = [msfilters.repair_inchi_inchikey_smiles, msfilters.deri
 @pytest.mark.parametrize("early_filters, later_filters", [
     [[msfilters.repair_not_matching_annotation], [msfilters.require_valid_annotation]],
     [REPAIR_PARENT_MASS_SMILES_FILTERS, [msfilters.require_parent_mass_match_smiles]],
-    [ANNOTATION_REPARATIONS + [msfilters.clean_adduct, msfilters.derive_smiles_from_pubchem_compound_name_search],
+    [ANNOTATION_REPARATIONS + [msfilters.clean_adduct, msfilters.derive_annotation_from_compound_name],
      REPAIR_PARENT_MASS_SMILES_FILTERS],
     [[msfilters.add_precursor_mz,], [msfilters.require_precursor_mz,]],
     # Since pubchem lookup checks if annotation is complete.
     # So deriving inchi and inchikey from smiles, should happen first.
     [ANNOTATION_REPARATIONS + [msfilters.add_parent_mass],
-     [msfilters.derive_smiles_from_pubchem_compound_name_search, ]],
+     [msfilters.derive_annotation_from_compound_name, ]],
     # The parent mass is based on the adduct, so adduct filters should be performed first
     [[msfilters.clean_adduct, msfilters.derive_adduct_from_name], [msfilters.add_parent_mass]],
     # The adduct filter removes all occurances while derive formula from name only removes when it is at the end

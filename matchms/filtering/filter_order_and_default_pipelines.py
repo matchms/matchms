@@ -23,7 +23,7 @@ ALL_FILTERS = [msfilters.make_charge_int,
                msfilters.derive_inchikey_from_inchi,
                msfilters.clean_adduct,
                msfilters.add_parent_mass,
-               msfilters.derive_smiles_from_pubchem_compound_name_search,
+               msfilters.derive_annotation_from_compound_name,
                msfilters.repair_smiles_of_salts,
                msfilters.repair_precursor_is_parent_mass,
                msfilters.repair_parent_mass_is_mol_wt,
@@ -82,7 +82,7 @@ FULLY_ANNOTATED_PROCESSING = DEFAULT_FILTERS \
                                 ("repair_adduct_based_on_smiles", {'mass_tolerance': 0.1}),
                                 "repair_not_matching_annotation",
                                 "require_valid_annotation",
-                                ("derive_smiles_from_pubchem_compound_name_search", {"mass_tolerance": 0.1}),
+                                ("derive_annotation_from_compound_name", {"mass_tolerance": 0.1}),
                                 ]
 
 
