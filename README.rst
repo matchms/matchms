@@ -178,7 +178,7 @@ Below a more advanced code example showing how you can make a specific pipeline 
     from matchms.Pipeline import Pipeline, create_workflow
     from matchms.exporting.save_as_mgf import save_as_mgf
     results_folder = "./results"
-    os.mkdirs(results_folder, exist_ok=True)
+    os.makedirs(results_folder, exist_ok=True)
 
     workflow = create_workflow(
         yaml_file_name=os.path.join(results_folder, "my_config_file.yaml"), # The workflow will be stored in a yaml file.
