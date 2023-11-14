@@ -10,7 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - added option to set custom key replacements [#547](https://github.com/matchms/matchms/pull/547)
 ### Fixed
 - handle missing `precursor_mz` in representation and [#452](https://github.com/matchms/matchms/issues/452) introduced by [#514](https://github.com/matchms/matchms/pull/514/files)[#540](https://github.com/matchms/matchms/pull/540)
-
+### Changed
+- Renamed derive_smiles_from_pubchem_compound_name_search to derive_annotation_from_compound_name. [#559](https://github.com/matchms/matchms/pull/559)
+- Derive_annotation_from_compound_name does not add smile or inchi when this cannot be interpreted by rdkit. [#559](https://github.com/matchms/matchms/pull/559)
 ## [0.23.1] - 2023-10-18
 ### Added
 - Additional tests for filter pipeline order
