@@ -1,6 +1,5 @@
 import re
 from typing import Optional
-from matchms import Spectrum
 
 
 try:  # rdkit is not included in pip package
