@@ -62,15 +62,3 @@ def create_spectrum_json_encoder(export_style):
                 return spec
             return super().default(o)
     return CustomSpectrumJSONEncoder
-
-
-class ScoresJSONEncoder(json.JSONEncoder):
-    export_style = "matchms"
-    def default(self, o):
-        """JSON Encoder for a matchms.Scores.Scores object"""
-        class_name = o.__class__.__name__
-        # do isinstance(o, Scores) without importing matchms.Scores
-        if class_name == "Scores":
-            scores = copy.deepcopy(o)
-            return scores.to_dict()
-        return json.JSONEncoder.default(self, o)
