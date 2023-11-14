@@ -47,27 +47,30 @@ def save_as_json(spectrums: List[Spectrum],
     fingerprint_export_warning(spectrums)
 
     # Write to json file
+    encoder_class = create_spectrum_json_encoder(export_style)
     with open(filename, "w", encoding="utf-8") as fout:
-        json.dump(spectrums, fout, cls=SpectrumJSONEncoder)
+        json.dump(spectrums, fout, cls=encoder_class)
 
 
-class SpectrumJSONEncoder(json.JSONEncoder):
-    def default(self, obj):
-        """JSON Encoder for a matchms.Spectrum.Spectrum object"""
-        if isinstance(obj, Spectrum):
-            spec = obj.clone().to_dict()
-            if "fingerprint" in spec.keys():
-                del spec["fingerprint"]
-            return spec
-        return json.JSONEncoder.default(self, obj)
+def create_spectrum_json_encoder(export_style):
+    class CustomSpectrumJSONEncoder(json.JSONEncoder):
+        def default(self, o):
+            """JSON Encoder for a matchms.Spectrum.Spectrum object"""
+            if isinstance(o, Spectrum):
+                spec = o.clone().to_dict(export_style)
+                spec.pop("fingerprint", None)
+                return spec
+            return super().default(o)
+    return CustomSpectrumJSONEncoder
 
 
 class ScoresJSONEncoder(json.JSONEncoder):
-    def default(self, obj):
+    export_style = "matchms"
+    def default(self, o):
         """JSON Encoder for a matchms.Scores.Scores object"""
-        class_name = obj.__class__.__name__
+        class_name = o.__class__.__name__
         # do isinstance(obj, Scores) without importing matchms.Scores
         if class_name == "Scores":
-            scores = copy.deepcopy(obj)
+            scores = copy.deepcopy(o)
             return scores.to_dict()
-        return json.JSONEncoder.default(self, obj)
+        return json.JSONEncoder.default(self, o)
