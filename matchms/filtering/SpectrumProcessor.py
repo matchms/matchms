@@ -7,7 +7,6 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 from matchms import Spectrum
-from matchms.filtering.default_pipelines import PREDEFINED_PIPELINES
 from matchms.filtering.filter_order import ALL_FILTERS, FILTER_FUNCTION_NAMES
 from matchms.yaml_file_functions import ordered_dump
 
@@ -29,18 +28,11 @@ class SpectrumProcessor:
         'fully_annotated', or None. Default is 'default'.
     """
 
-    def __init__(self, predefined_pipeline: Optional[str] = 'default',
-                 additional_filters: Iterable[Union[str, List[dict]]] = ()):
+    def __init__(self,
+                 filters: Iterable[Union[str, List[dict]]] = ()):
         self.filters = []
         self.filter_order = [x.__name__ for x in ALL_FILTERS]
-        if predefined_pipeline is not None:
-            if not isinstance(predefined_pipeline, str):
-                raise ValueError("Predefined pipeline parameter should be a string")
-            if predefined_pipeline not in PREDEFINED_PIPELINES:
-                raise ValueError(f"Unknown processing pipeline '{predefined_pipeline}'. Available pipelines: {list(PREDEFINED_PIPELINES.keys())}")
-            for filter_name in PREDEFINED_PIPELINES[predefined_pipeline]:
-                self.add_matchms_filter(filter_name)
-        for filter_name in additional_filters:
+        for filter_name in filters:
             if isinstance(filter_name, (tuple, list)) and len(filter_name) == 1:
                 filter_name = filter_name[0]
             self.add_filter(filter_name)
@@ -152,8 +144,6 @@ class SpectrumProcessor:
         Spectrum
             The processed spectrum.
         """
-        if not self.filters:
-            raise TypeError("No filters to process")
         if processing_report is not None:
             processing_report.counter_number_processed += 1
         for filter_func in self.filters:
@@ -161,9 +151,9 @@ class SpectrumProcessor:
             if processing_report is not None:
                 processing_report.add_to_report(spectrum, spectrum_out, filter_func.__name__)
             if spectrum_out is None:
-                break
+                return None
             spectrum = spectrum_out
-        return spectrum_out
+        return spectrum
 
     def process_spectrums(self, spectrums: list,
                           create_report: bool = False,
@@ -187,6 +177,8 @@ class SpectrumProcessor:
         Spectrums
             List containing the processed spectrums.
         """
+        if not self.filters:
+            logger.warning("No filters have been specified, so spectra were not filtered")
         if create_report:
             processing_report = ProcessingReport(self.filters)
         else:
