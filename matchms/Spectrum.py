@@ -187,17 +187,31 @@ class Spectrum:
         self._metadata.set(key, value)
         return self
 
-    def to_dict(self) -> dict:
-        """Return a dictionary representation of a spectrum."""
+    def to_dict(self, export_style: str = "matchms") -> dict:
+        """Return a dictionary representation of a spectrum.
+
+        Parameters
+        ----------
+        export_style:
+            Converts the keys to the required export style. One of ["matchms", "massbank", "nist", "riken", "gnps"].
+            Default is "matchms"
+        """
         peaks_list = np.vstack((self.peaks.mz, self.peaks.intensities)).T.tolist()
-        spectrum_dict = dict(self.metadata.items())
+        spectrum_dict = self.metadata_dict(export_style)  # dict(self.metadata.items())
         spectrum_dict["peaks_json"] = peaks_list
         if "fingerprint" in spectrum_dict:
             spectrum_dict["fingerprint"] = spectrum_dict["fingerprint"].tolist()
         return spectrum_dict
 
     def metadata_dict(self, export_style: str = "matchms") -> dict:
-        """Convert spectrum metadata to Python dictionary."""
+        """Convert spectrum metadata to Python dictionary.
+
+        Parameters
+        ----------
+        export_style:
+            Converts the keys to the required export style. One of ["matchms", "massbank", "nist", "riken", "gnps"].
+            Default is "matchms"
+        """
         return self._metadata.to_dict(export_style)
 
     @property
