@@ -62,47 +62,49 @@ class SpectrumProcessor:
                                  "the first should be string or callable and the second a dictionary with settings")
             # Handle filters with additional settings
             if isinstance(filter_function[0], str):
-                self.add_matchms_filter(filter_function)
+                self.add_matchms_filter(filter_function[0], filter_function[1])
             if isinstance(filter_function[0], Callable):
                 self.add_custom_filter(filter_function[0], filter_function[1])
         else:
             raise ValueError("The filter function: %s could not be loaded, please check the expected format", filter_function)
 
-    def add_matchms_filter(self, filter_spec: Union[Tuple[str, Dict[str, any]], str]):
+    def add_matchms_filter(self, filter_name: Union[Tuple[str, Dict[str, any]], str],
+                           filter_args: Optional[Dict[str, any]] =None):
         """
         Add a filter to the processing pipeline.
 
         Parameters
         ----------
-        filter_spec : str or tuple
+        filter_name : str or tuple
             Name of the filter function to add, or a tuple where the first element is the name of the
             filter function and the second element is a dictionary containing additional arguments for the function.
+        filter_args:
+            A dictionary with the settings for the matchms filter.
         """
-        if isinstance(filter_spec, str):
-            if filter_spec not in FILTER_FUNCTION_NAMES:
-                raise ValueError(f"Unknown filter type: {filter_spec} Should be known filter name or function.")
-            new_filter_func = FILTER_FUNCTION_NAMES[filter_spec]
-        elif isinstance(filter_spec, (tuple, list)):
-            filter_name, filter_args = filter_spec
-            if filter_name not in FILTER_FUNCTION_NAMES:
-                raise ValueError(f"Unknown filter type: {filter_name} Should be known filter name or function.")
-            new_filter_func = partial(FILTER_FUNCTION_NAMES[filter_name], **filter_args)
-            new_filter_func.__name__ = FILTER_FUNCTION_NAMES[filter_name].__name__
-        else:
-            raise TypeError("filter_spec should be a string or a tuple or list")
-        check_all_parameters_given(new_filter_func)
+        if not isinstance(filter_name, str):
+            raise ValueError("Expected a string")
+        if filter_name not in FILTER_FUNCTION_NAMES:
+            raise ValueError(f"Unknown filter type: {filter_name} Should be known filter name or function.")
+        filter_func = FILTER_FUNCTION_NAMES[filter_name]
+
+        if filter_args is not None:
+            if not isinstance(filter_args, dict):
+                raise ValueError("Expected a dictionary for filter_args got %s", filter_args)
+            filter_func = partial(filter_func, **filter_args)
+            filter_func.__name__ = FILTER_FUNCTION_NAMES[filter_name].__name__
+        check_all_parameters_given(filter_func)
 
         # Replace filters that are already stored.
         filter_already_added = False
         for i, filter_function in enumerate(self.filters):
-            if new_filter_func.__name__ == filter_function.__name__:
+            if filter_func.__name__ == filter_function.__name__:
                 logger.warning("The filter %s was already in the filter list, "
                                "the last added filter parameters are used, "
-                               "check yaml file for details", new_filter_func)
-                self.filters[i] = new_filter_func
+                               "check yaml file for details", filter_func)
+                self.filters[i] = filter_func
                 filter_already_added = True
         if not filter_already_added:
-            self.filters.append(new_filter_func)
+            self.filters.append(filter_func)
         # Sort filters according to their order in self.filter_order
         self.filters.sort(key=lambda f: self.filter_order.index(f.__name__))
 

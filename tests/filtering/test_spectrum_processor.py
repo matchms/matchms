@@ -90,8 +90,8 @@ def test_add_matchms_filter(metadata, expected):
                                            "derive_ionmode",
                                            "correct_charge",
                                            ])
-    processor.add_matchms_filter(("require_correct_ionmode",
-                                  {"ion_mode_to_keep": "both"}))
+    processor.add_matchms_filter("require_correct_ionmode",
+                                 {"ion_mode_to_keep": "both"})
     spectrum = processor.process_spectrum(spectrum_in)
     if expected is None:
         assert spectrum is None
