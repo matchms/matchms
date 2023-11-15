@@ -53,7 +53,7 @@ def test_filter_sorting_and_output():
 ])
 def test_overwrite_default_settings(filter_step: str, expected):
     """Test if both default settings and set settings are returned in processing steps"""
-    processor = SpectrumProcessor()
+    processor = SpectrumProcessor(filters=())
     processor.add_filter(filter_step)
     expected_filters = [expected]
     assert processor.processing_steps == expected_filters
@@ -62,7 +62,7 @@ def test_overwrite_default_settings(filter_step: str, expected):
 def test_incomplete_parameters():
     """Test if an error is raised when running an incomplete command"""
     with pytest.raises(AssertionError):
-        processor = SpectrumProcessor()
+        processor = SpectrumProcessor(filters=())
         processor.add_filter("require_correct_ionmode")
 
 
@@ -100,7 +100,7 @@ def test_add_matchms_filter(metadata, expected):
 
 def test_no_filters():
     spectrum_in = SpectrumBuilder().with_metadata({}).build()
-    processor = SpectrumProcessor()
+    processor = SpectrumProcessor(filters=())
     spectrum_out = processor.process_spectrum(spectrum_in)
     assert spectrum_out == spectrum_in
 
@@ -266,7 +266,7 @@ def test_add_duplicated_filter_to_existing_pipeline():
 
 def test_add_filter_twice():
     """Tests if adding a filter that is already in the basic pipeline is overwritten and not duplicated"""
-    processor = SpectrumProcessor()
+    processor = SpectrumProcessor(filters=())
     processor.add_filter(("derive_adduct_from_name", {"remove_adduct_from_name": False}))
     processor.add_filter("derive_adduct_from_name")
     assert processor.processing_steps == [("derive_adduct_from_name", {"remove_adduct_from_name": True})]
