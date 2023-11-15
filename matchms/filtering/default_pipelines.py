@@ -1,4 +1,4 @@
-
+"""Stores sets of filters for easy pipeline creation."""
 
 HARMONIZE_METADATA_FIELD_NAMES = \
     ["make_charge_int",
