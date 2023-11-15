@@ -285,8 +285,8 @@ def test_add_all_filter_types(spectrums):
 
     processor = SpectrumProcessor(filters=["make_charge_int",
                                            msfilters.interpret_pepmass,
-                                           (msfilters.derive_adduct_from_name, {"remove_adduct_from_name": False}),
                                            nonsense_inchikey,
+                                           (msfilters.derive_adduct_from_name, {"remove_adduct_from_name": False}),
                                            (nonsense_inchikey_multiple, {"number": 2}),
                                            ])
     filters = processor.filters
