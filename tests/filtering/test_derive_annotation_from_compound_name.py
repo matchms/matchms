@@ -142,6 +142,7 @@ def test_get_compound_name_annotation(compound_name, expected_output, csv_file_a
 @pytest.mark.parametrize("compound_name, parent_mass, expected_smiles",
                          [("compound_3", 99.9, "CCCCC"),
                           ("compound_3", 99.4, "C"),
+                          ("compound_3", 97.0, None),  # Check that the mass_tolerance is used
                           ])
 def test_find_closest_match_for_multiple_matches(compound_name, parent_mass, expected_smiles, csv_file_annotated_compound_names):
     """Tests if we find the closest parent mass match, if there are multiple possible entries"""
