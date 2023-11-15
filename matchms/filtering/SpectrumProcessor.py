@@ -23,9 +23,8 @@ class SpectrumProcessor:
 
     Parameters
     ----------
-    predefined_pipeline : str
-        Name of a predefined processing pipeline. Options: 'minimal', 'basic', 'default',
-        'fully_annotated', or None. Default is 'default'.
+    filters:
+        A list of filter functions, see add_filter for all the allowed formats.
     """
 
     def __init__(self,
@@ -36,21 +35,38 @@ class SpectrumProcessor:
         self.filters = []
         self.filter_order = [x.__name__ for x in ALL_FILTERS]
         for filter_name in filters:
-            if isinstance(filter_name, (tuple, list)) and len(filter_name) == 1:
-                filter_name = filter_name[0]
             self.add_filter(filter_name)
 
-    def add_filter(self,
-                   filter_function: Union[Tuple[str, Dict[str, any]], str, Tuple[Callable, Dict[str, any]], Callable]):
-        """Add a filter to the processing pipeline. Takes both matchms filter names (and parameters)
-        as well as custom-made functions.
+    def add_filter(self, filter_function: Union[Tuple[str, Dict[str, any]],
+                                                str,
+                                                Tuple[Callable, Dict[str, any]],
+                                                Callable]):
+        """Adds a filter, by parsing the different allowed inputs.
+
+        filter:
+            Allowed formats:
+            str (has to be a matchms function name)
+            (str, {str, any} (has to be a matchms function name, followed by parameters)
+            Callable (can be matchms filter or custom made filter)
+            Callable, {str, any} (the dict should be parameters.
         """
+        if isinstance(filter_function, (tuple, list)) and len(filter_function) == 1:
+            filter_function = filter_function[0]
         if isinstance(filter_function, str):
             self.add_matchms_filter(filter_function)
-        elif isinstance(filter_function, (tuple, list)) and isinstance(filter_function[0], str):
-            self.add_matchms_filter(filter_function)
+        elif isinstance(filter_function, Callable):
+            self.add_custom_filter(filter_function)
+        elif isinstance(filter_function, (tuple, list)):
+            if len(filter_function) != 2:
+                raise ValueError("The filter_function should contain only two values, "
+                                 "the first should be string or callable and the second a dictionary with settings")
+            # Handle filters with additional settings
+            if isinstance(filter_function[0], str):
+                self.add_matchms_filter(filter_function)
+            if isinstance(filter_function[0], Callable):
+                self.add_custom_filter(filter_function[0], filter_function[1])
         else:
-            self.add_custom_filter(filter_function[0], filter_function[1])
+            raise ValueError("The filter function: %s could not be loaded, please check the expected format", filter_function)
 
     def add_matchms_filter(self, filter_spec: Union[Tuple[str, Dict[str, any]], str]):
         """
@@ -90,7 +106,10 @@ class SpectrumProcessor:
         # Sort filters according to their order in self.filter_order
         self.filters.sort(key=lambda f: self.filter_order.index(f.__name__))
 
-    def add_custom_filter(self, filter_function: Union[Tuple[Callable, Dict[str, any]], Callable], filter_params=None, filter_position=None):
+    def add_custom_filter(self,
+                          filter_function: Callable,
+                          filter_params: Dict[str, any] = None,
+                          filter_position=None):
         """
         Add a custom filter function to the processing pipeline.
 

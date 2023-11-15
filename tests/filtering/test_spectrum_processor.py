@@ -3,6 +3,7 @@ import pytest
 from matchms import SpectrumProcessor
 from matchms.filtering.SpectrumProcessor import ProcessingReport
 from ..builder_Spectrum import SpectrumBuilder
+from matchms import filtering as msfilters
 
 
 @pytest.fixture
@@ -270,3 +271,31 @@ def test_add_filter_twice():
     processor.add_filter(("derive_adduct_from_name", {"remove_adduct_from_name": False}))
     processor.add_filter("derive_adduct_from_name")
     assert processor.processing_steps == [("derive_adduct_from_name", {"remove_adduct_from_name": True})]
+
+
+def test_add_all_filter_types(spectrums):
+    def nonsense_inchikey_multiple(s, number):
+        s.set("inchikey", number * "NONSENSE")
+        return s
+
+    def nonsense_inchikey(s):
+        s_in = s.clone()
+        s_in.set("inchikey", "NONSENSE")
+        return s_in
+
+    processor = SpectrumProcessor(filters=["make_charge_int",
+                                           msfilters.interpret_pepmass,
+                                           (msfilters.derive_adduct_from_name, {"remove_adduct_from_name": False}),
+                                           nonsense_inchikey,
+                                           (nonsense_inchikey_multiple, {"number": 2}),
+                                           ])
+    filters = processor.filters
+    assert [filter_func.__name__ for filter_func in filters] == ["make_charge_int",
+                                                                 "derive_adduct_from_name",
+                                                                 "interpret_pepmass",
+                                                                 "nonsense_inchikey",
+                                                                 "nonsense_inchikey_multiple",
+                                                                 ]
+    processor.process_spectrums(spectrums)
+    spectrums, _ = processor.process_spectrums(spectrums, create_report=True)
+    assert spectrums[0].get("inchikey") == "NONSENSENONSENSE", "Custom filter not executed properly"
