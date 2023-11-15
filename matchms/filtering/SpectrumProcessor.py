@@ -37,10 +37,10 @@ class SpectrumProcessor:
         for filter_name in filters:
             self.add_filter(filter_name)
 
-    def add_filter(self, filter_function: Union[Tuple[str, Dict[str, any]],
-                                                str,
-                                                Tuple[Callable, Dict[str, any]],
-                                                Callable]):
+    def add_filter(self, filter_description: Union[Tuple[str, Dict[str, any]],
+                                                   str,
+                                                   Tuple[Callable, Dict[str, any]],
+                                                   Callable]):
         """Adds a filter, by parsing the different allowed inputs.
 
         filter:
@@ -50,23 +50,24 @@ class SpectrumProcessor:
             Callable (can be matchms filter or custom made filter)
             Callable, {str, any} (the dict should be parameters.
         """
-        if isinstance(filter_function, (tuple, list)) and len(filter_function) == 1:
-            filter_function = filter_function[0]
-        if isinstance(filter_function, str):
-            self.add_matchms_filter(filter_function)
-        elif isinstance(filter_function, Callable):
-            self.add_custom_filter(filter_function)
-        elif isinstance(filter_function, (tuple, list)):
-            if len(filter_function) != 2:
+        filter_args = None
+        if isinstance(filter_description, (tuple, list)):
+            if len(filter_description) == 1:
+                filter_function = filter_description[0]
+            elif len(filter_description) == 2:
+                filter_function = filter_description[0]
+                filter_args = filter_description[1]
+            else:
                 raise ValueError("The filter_function should contain only two values, "
                                  "the first should be string or callable and the second a dictionary with settings")
-            # Handle filters with additional settings
-            if isinstance(filter_function[0], str):
-                self.add_matchms_filter(filter_function[0], filter_function[1])
-            if isinstance(filter_function[0], Callable):
-                self.add_custom_filter(filter_function[0], filter_function[1])
         else:
-            raise ValueError("The filter function: %s could not be loaded, please check the expected format", filter_function)
+            filter_function = filter_description
+        if isinstance(filter_function, str):
+            self.add_matchms_filter(filter_function, filter_args)
+        elif isinstance(filter_function, Callable):
+            self.add_custom_filter(filter_function, filter_args)
+        else:
+            raise ValueError("The filter: %s could not be loaded, please check the expected format", filter_description)
 
     def add_matchms_filter(self, filter_name: Union[Tuple[str, Dict[str, any]], str],
                            filter_args: Optional[Dict[str, any]] =None):

@@ -125,8 +125,8 @@ def test_filter_spectrums_report(spectrums):
                                            "derive_ionmode",
                                            "correct_charge",
                                            ])
-    processor.add_filter(filter_function=("require_minimum_number_of_peaks", {"n_required": 2}))
-    processor.add_filter(filter_function="add_losses")
+    processor.add_filter(filter_description=("require_minimum_number_of_peaks", {"n_required": 2}))
+    processor.add_filter(filter_description="add_losses")
     spectrums, report = processor.process_spectrums(spectrums, create_report=True)
     assert len(spectrums) == 2
     actual_masses = [s.get("precursor_mz") for s in spectrums]
