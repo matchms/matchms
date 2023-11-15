@@ -3,8 +3,8 @@ import math
 import os
 from typing import List
 import pytest
-from matchms.filtering import derive_smiles_from_pubchem_compound_name_search
-from matchms.filtering.metadata_processing.derive_smiles_from_pubchem_compound_name_search import (
+from matchms.filtering import derive_annotation_from_compound_name
+from matchms.filtering.metadata_processing.derive_annotation_from_compound_name import (
     _get_pubchem_compound_name_annotation, _load_compound_name_annotations,
     _pubchem_name_search, _write_compound_name_annotations)
 from ..builder_Spectrum import SpectrumBuilder
@@ -12,10 +12,13 @@ from ..builder_Spectrum import SpectrumBuilder
 
 @pytest.fixture()
 def csv_file_annotated_compound_names(tmp_path):
-    data = [
-        ["compound_name", "smiles", "inchi", "inchikey", "monoisotopic_mass"],
-        ["compound_1", "smile_1", "inchi_1", 'inchikey_1', 100],
-        ["compound_2", None, None, None, None]]
+    data = [["compound_name", "smiles", "inchi", "inchikey", "monoisotopic_mass"],
+            ["compound_1", "smile_1", "inchi_1", 'inchikey_1', 100],
+            ["compound_2", None, None, None, None],
+            ["compound_3", "CCCCC", "inchi_2", 'inchikey_2', 100],
+            ["compound_3", "C", "inchi_3", 'inchikey_3', 99],
+            ]
+
     csv_file_name = os.path.join(tmp_path, "annotated_compounds.csv")
     with open(csv_file_name, "w", encoding="utf-8") as csv_file:
         csv.writer(csv_file).writerows(data)
@@ -43,9 +46,9 @@ def test_repair_smiles_from_compound_name_skip_already_correct():
     spectrum_in = builder.with_metadata({"compound_name": "compound_1",
                                          "parent_mass": 100.01,
                                          "smiles": "C1CSSC1CCCCC(=O)O",
-                                         "inchi": "InChI=1S/C8H14O2S2/c9-8(10)4-2-1-3-7-5-6-11-12-7/h7H,1-6H2,(H,9,10)",
+                                         "inchi": None,
                                          "inchikey": "AGBQKNBQESQNJD-UHFFFAOYSA-N"}).build()
-    spectrum = derive_smiles_from_pubchem_compound_name_search(spectrum_in, mass_tolerance=0.1)
+    spectrum = derive_annotation_from_compound_name(spectrum_in, mass_tolerance=0.1)
     assert spectrum_in == spectrum
 
 
@@ -64,15 +67,14 @@ def test_repair_smiles_from_compound_name(compound_name, parent_mass, smiles,
     spectrum_in = builder.with_metadata({"compound_name": compound_name,
                                          "parent_mass": parent_mass,
                                          "smiles": smiles}).build()
-    spectrum = derive_smiles_from_pubchem_compound_name_search(spectrum_in, csv_file_with_real_compound_names,
-                                                               mass_tolerance=0.1)
+    spectrum = derive_annotation_from_compound_name(spectrum_in, csv_file_with_real_compound_names, mass_tolerance=0.1)
     assert spectrum.get("smiles") == expected_smiles, "Expected different smiles."
     # Run without csv file
-    spectrum = derive_smiles_from_pubchem_compound_name_search(spectrum_in, mass_tolerance=0.1)
+    spectrum = derive_annotation_from_compound_name(spectrum_in, mass_tolerance=0.1)
     assert spectrum.get("smiles") == expected_smiles, "Expected different smiles."
     # Run with empty csv file
     empty_csv_file = os.path.join(tmp_path, "test.csv")
-    spectrum = derive_smiles_from_pubchem_compound_name_search(spectrum_in, empty_csv_file, mass_tolerance=0.1)
+    spectrum = derive_annotation_from_compound_name(spectrum_in, empty_csv_file, mass_tolerance=0.1)
     assert spectrum.get("smiles") == expected_smiles, "Expected different smiles."
     stored_in_csv_file = replace_nan_with_none(_load_compound_name_annotations(empty_csv_file, compound_name))
     assert len(stored_in_csv_file) == 1
@@ -135,6 +137,22 @@ def test_pubchem_name_search(compound_name, expected_output):
 def test_get_compound_name_annotation(compound_name, expected_output, csv_file_annotated_compound_names):
     result = _get_pubchem_compound_name_annotation(compound_name, csv_file_annotated_compound_names)
     assert replace_nan_with_none(result) == expected_output
+
+
+@pytest.mark.parametrize("compound_name, parent_mass, expected_smiles",
+                         [("compound_3", 99.9, "CCCCC"),
+                          ("compound_3", 99.4, "C"),
+                          ("compound_3", 97.0, None),  # Check that the mass_tolerance is used
+                          ])
+def test_find_closest_match_for_multiple_matches(compound_name, parent_mass, expected_smiles, csv_file_annotated_compound_names):
+    """Tests if we find the closest parent mass match, if there are multiple possible entries"""
+    builder = SpectrumBuilder()
+    spectrum_in = builder.with_metadata({"compound_name": compound_name,
+                                         "parent_mass": parent_mass}).build()
+    result = derive_annotation_from_compound_name(spectrum_in,
+                                                  csv_file_annotated_compound_names,
+                                                  mass_tolerance=1)
+    assert result.get("smiles") == expected_smiles
 
 
 def replace_nan_with_none(matches_found: List[dict]):
