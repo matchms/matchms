@@ -66,6 +66,7 @@ def derive_annotation_from_compound_name(spectrum_in: Spectrum,
                     spectrum.set("inchikey", best_match["inchikey"])
                     logger.info("Added inchikey %s based on the compound name %s", best_match["inchikey"], compound_name)
                 return spectrum
+    logger.info("Could not find a matching annotation on PubChem for the compound name: %s, compound_name")
     return spectrum
 
 
