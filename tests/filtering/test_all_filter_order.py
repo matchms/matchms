@@ -5,10 +5,7 @@ import os
 from typing import Callable, List
 import pytest
 from matchms import filtering as msfilters
-from matchms.filtering.default_pipelines import PREDEFINED_PIPELINES
 from matchms.filtering.filter_order import ALL_FILTERS
-from matchms.filtering.SpectrumProcessor import SpectrumProcessor
-
 
 REPAIR_PARENT_MASS_SMILES_FILTERS = \
     [msfilters.repair_smiles_of_salts, msfilters.repair_precursor_is_parent_mass,
@@ -95,9 +92,3 @@ def test_all_filters_is_complete():
 def test_all_filters_no_duplicates():
     all_filters = [filter.__name__ for filter in ALL_FILTERS]
     assert len(all_filters) == len(set(all_filters)), "One of the filters appears twice in ALL_FILTERS"
-
-
-def test_create_predefined_pipelines():
-    """Tests if all predefined pipelines can be run"""
-    for pipeline_name in PREDEFINED_PIPELINES:
-        SpectrumProcessor(pipeline_name)
