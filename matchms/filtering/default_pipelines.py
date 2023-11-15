@@ -57,9 +57,5 @@ DEFAULT_FILTERS = BASIC_FILTERS + ["normalize_intensities", ] + REQUIRE_COMPLETE
 FULLY_ANNOTATED_PROCESSING = DEFAULT_FILTERS + REPAIR_ANNOTATION + REQUIRE_COMPLETE_ANNOTATION
 MS2DEEPSCORE_TRAINING = FULLY_ANNOTATED_PROCESSING + CLEAN_PEAKS
 
-PREDEFINED_PIPELINES = {
-    "basic": BASIC_FILTERS,
-    "default": DEFAULT_FILTERS,
-    "fully_annotated": FULLY_ANNOTATED_PROCESSING,
-    "ms2deepscore": MS2DEEPSCORE_TRAINING,
-}
+ALL_FILTER_SETS = [filter_set for filter_name, filter_set in locals().items()
+                   if not filter_name.startswith("_") and filter_name is not "ALL_FILTER_SETS"]

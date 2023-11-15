@@ -1,7 +1,6 @@
 import numpy as np
 import pytest
 from matchms import SpectrumProcessor
-from matchms.filtering.default_pipelines import BASIC_FILTERS
 from matchms.filtering.SpectrumProcessor import ProcessingReport
 from ..builder_Spectrum import SpectrumBuilder
 
