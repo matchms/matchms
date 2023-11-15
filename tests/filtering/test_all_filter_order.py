@@ -14,27 +14,29 @@ REPAIR_PARENT_MASS_SMILES_FILTERS = \
     [msfilters.repair_smiles_of_salts, msfilters.repair_precursor_is_parent_mass,
      msfilters.repair_parent_mass_is_mol_wt, msfilters.repair_adduct_based_on_smiles,
      msfilters.repair_parent_mass_match_smiles_wrapper, ]
-ANNOTATION_REPARATIONS = [msfilters.repair_inchi_inchikey_smiles, msfilters.derive_smiles_from_inchi,
-                          msfilters.derive_inchi_from_smiles, msfilters.derive_inchikey_from_inchi, ]
+DERIVE_ANNOTATION_FILTERS = [msfilters.derive_smiles_from_inchi, msfilters.derive_inchi_from_smiles,
+                             msfilters.derive_inchikey_from_inchi, ]
 
 
 @pytest.mark.parametrize("early_filters, later_filters", [
     [[msfilters.repair_not_matching_annotation], [msfilters.require_valid_annotation]],
     [REPAIR_PARENT_MASS_SMILES_FILTERS, [msfilters.require_parent_mass_match_smiles]],
-    [ANNOTATION_REPARATIONS + [msfilters.clean_adduct, msfilters.derive_smiles_from_pubchem_compound_name_search],
+    [DERIVE_ANNOTATION_FILTERS + [msfilters.repair_inchi_inchikey_smiles, msfilters.clean_adduct,
+                                  msfilters.derive_annotation_from_compound_name],
      REPAIR_PARENT_MASS_SMILES_FILTERS],
     [[msfilters.add_precursor_mz,], [msfilters.require_precursor_mz,]],
     # Since pubchem lookup checks if annotation is complete.
     # So deriving inchi and inchikey from smiles, should happen first.
-    [ANNOTATION_REPARATIONS + [msfilters.add_parent_mass],
-     [msfilters.derive_smiles_from_pubchem_compound_name_search, ]],
+    [[msfilters.repair_inchi_inchikey_smiles, msfilters.add_parent_mass],
+     [msfilters.derive_annotation_from_compound_name, ]],
     # The parent mass is based on the adduct, so adduct filters should be performed first
     [[msfilters.clean_adduct, msfilters.derive_adduct_from_name], [msfilters.add_parent_mass]],
     # The adduct filter removes all occurances while derive formula from name only removes when it is at the end
     # of compound name. Removing adducts therefore has to happen first.
     [[msfilters.derive_adduct_from_name], [msfilters.derive_formula_from_name]],
     [[msfilters.make_charge_int, msfilters.correct_charge, ], [msfilters.clean_adduct]],
-    [[msfilters.derive_adduct_from_name, ], [msfilters.clean_adduct]]
+    [[msfilters.derive_adduct_from_name, ], [msfilters.clean_adduct]],
+    [[msfilters.derive_annotation_from_compound_name, ], DERIVE_ANNOTATION_FILTERS]
 ])
 def test_all_filter_order(early_filters: List[Callable], later_filters: List[Callable]):
     """Tests if early_filter is run before later_filter"""
