@@ -22,7 +22,7 @@ def derive_annotation_from_compound_name(spectrum_in: Spectrum,
                                          mass_tolerance: float = 0.1):
     """Adds smiles, inchi, inchikey based on compound name by searching pubchem
 
-    This filter is only run, if there is not yet a valid smiles or inchi in the metadata. 
+    This filter is only run, if there is not yet a valid smiles or inchi in the metadata.
     The smiles, inchi and inchikey are only added if the found annotation is close enough to the parent mass.
 
     Parameters
@@ -54,8 +54,8 @@ def derive_annotation_from_compound_name(spectrum_in: Spectrum,
             mass_differences = np.abs(compound_name_annotation_df["monoisotopic_mass"] - parent_mass)
             within_mass_tolerance = compound_name_annotation_df[mass_differences < mass_tolerance]
             if within_mass_tolerance.shape[0] > 0:
-                # Select the match with the most
-                best_match = within_mass_tolerance.loc[within_mass_tolerance["monoisotopic_mass"].idxmin()]
+                # Select the match with the smallest mass difference
+                best_match = compound_name_annotation_df.loc[mass_differences.idxmin()]
                 if is_valid_smiles(best_match["smiles"]):
                     spectrum.set("smiles", best_match["smiles"])
                     logger.info("Added smiles %s based on the compound name %s", best_match["smiles"], compound_name)
