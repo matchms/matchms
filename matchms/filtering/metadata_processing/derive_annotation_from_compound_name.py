@@ -22,7 +22,8 @@ def derive_annotation_from_compound_name(spectrum_in: Spectrum,
                                          mass_tolerance: float = 0.1):
     """Adds smiles, inchi, inchikey based on compound name by searching pubchem
 
-    The smiles, inchi and inchikey are repaired if the found smiles is close enough to the parent mass.
+    This filter is only run, if there is not yet a valid smiles or inchi in the metadata. 
+    The smiles, inchi and inchikey are only added if the found annotation is close enough to the parent mass.
 
     Parameters
     ----------
