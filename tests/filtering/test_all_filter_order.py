@@ -5,8 +5,8 @@ import os
 from typing import Callable, List
 import pytest
 from matchms import filtering as msfilters
-from matchms.filtering.filter_order_and_default_pipelines import (
-    ALL_FILTERS, PREDEFINED_PIPELINES)
+from matchms.filtering.default_pipelines import PREDEFINED_PIPELINES
+from matchms.filtering.filter_order import ALL_FILTERS
 from matchms.filtering.SpectrumProcessor import SpectrumProcessor
 
 
