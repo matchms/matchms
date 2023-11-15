@@ -60,6 +60,17 @@ def test_save_and_load_json_spectrum_list(metadata_harmonization, tmp_path, buil
     assert spectrum_imports[1] == spectrum2, "Original and saved+loaded spectrum not identical"
 
 
+@pytest.mark.parametrize("style, expected",
+                         [("matchms", "precursor_mz"),
+                          ("nist", "PrecursorMZ")])
+def test_save_as_json_different_export_styles(tmp_path, builder, style, expected):
+    spectrum = builder.with_metadata({"precursor_mz": 123}).build()
+    filename = tmp_path / "test_matchms.json"
+    save_as_json([spectrum], str(filename), export_style=style)
+
+    with open(filename, "r", encoding="utf-8") as f:
+        data = json.load(f)
+        assert expected in data[0]
 
 
 def test_load_from_json_zero_peaks(tmp_path):

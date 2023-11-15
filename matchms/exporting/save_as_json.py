@@ -1,11 +1,12 @@
-import copy
 import json
 from typing import List
 from ..Spectrum import Spectrum
 from ..utils import fingerprint_export_warning
 
 
-def save_as_json(spectrums: List[Spectrum], filename: str):
+def save_as_json(spectrums: List[Spectrum],
+                 filename: str,
+                 export_style: str = "matchms"):
     """Save spectrum(s) as json file.
 
     :py:attr:`~matchms.Spectrum.losses` of spectrum will not be saved.
@@ -34,6 +35,9 @@ def save_as_json(spectrums: List[Spectrum], filename: str):
         Expected input is a list of  :py:class:`~matchms.Spectrum.Spectrum` objects.
     filename:
         Provide filename to save spectrum(s).
+    export_style:
+        Converts the keys to the required export style. One of ["matchms", "massbank", "nist", "riken", "gnps"].
+        Default is "matchms"
     """
     if not isinstance(spectrums, list):
         # Assume that input was single Spectrum
@@ -42,28 +46,18 @@ def save_as_json(spectrums: List[Spectrum], filename: str):
     fingerprint_export_warning(spectrums)
 
     # Write to json file
+    encoder_class = create_spectrum_json_encoder(export_style)
     with open(filename, "w", encoding="utf-8") as fout:
-        json.dump(spectrums, fout, cls=SpectrumJSONEncoder)
+        json.dump(spectrums, fout, cls=encoder_class)
 
 
-class SpectrumJSONEncoder(json.JSONEncoder):
-    # See https://github.com/PyCQA/pylint/issues/414 for reference
-    def default(self, o):
-        """JSON Encoder which can encode a :py:class:`~matchms.Spectrum.Spectrum` object"""
-        if isinstance(o, Spectrum):
-            spec = o.clone().to_dict()
-            if "fingerprint" in spec.keys():
-                del spec["fingerprint"]
-            return spec
-        return json.JSONEncoder.default(self, o)
-
-
-class ScoresJSONEncoder(json.JSONEncoder):
-    def default(self, o):
-        """JSON Encoder which can encode a :py:class:`~matchms.Scores.Scores` object"""
-        class_name = o.__class__.__name__
-        # do isinstance(o, Scores) without importing matchms.Scores
-        if class_name == "Scores":
-            scores = copy.deepcopy(o)
-            return scores.to_dict()
-        return json.JSONEncoder.default(self, o)
+def create_spectrum_json_encoder(export_style):
+    class CustomSpectrumJSONEncoder(json.JSONEncoder):
+        def default(self, o):
+            """JSON Encoder for a matchms.Spectrum.Spectrum object"""
+            if isinstance(o, Spectrum):
+                spec = o.clone().to_dict(export_style)
+                spec.pop("fingerprint", None)
+                return spec
+            return super().default(o)
+    return CustomSpectrumJSONEncoder
