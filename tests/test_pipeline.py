@@ -13,7 +13,7 @@ spectrums_file_msp = os.path.join(module_root, "tests", "testdata", "massbank_fi
 
 
 def test_pipeline_initial_check_missing_file():
-    workflow = create_workflow(score_computations=[["precursormzmatch",  {"tolerance": 120.0}]])
+    workflow = create_workflow(score_computations=[["precursormzmatch", {"tolerance": 120.0}]])
     pipeline = Pipeline(workflow)
     with pytest.raises(AssertionError) as msg:
         pipeline.run("non_existing_file.msp")
@@ -21,15 +21,14 @@ def test_pipeline_initial_check_missing_file():
 
 
 def test_pipeline_initial_check_unknown_step():
-    workflow = create_workflow(score_computations=[["precursormzOOPSmatch",  {"tolerance": 120.0}]])
+    workflow = create_workflow(score_computations=[["precursormzOOPSmatch", {"tolerance": 120.0}]])
     with pytest.raises(ValueError) as msg:
         Pipeline(workflow)
     assert "Unknown score computation:" in str(msg.value)
 
 
 def test_pipeline_symmetric():
-    workflow = create_workflow(predefined_processing_queries="basic",
-        score_computations=[["precursormzmatch",  {"tolerance": 120.0}],
+    workflow = create_workflow(score_computations=[["precursormzmatch", {"tolerance": 120.0}],
                                                    ["modifiedcosine", {"tolerance": 10.0}]])
     pipeline = Pipeline(workflow)
     pipeline.run(spectrums_file_msp)
@@ -47,9 +46,8 @@ def test_pipeline_symmetric():
 
 
 def test_pipeline_symmetric_filters():
-    workflow = create_workflow(predefined_processing_queries="basic",
-                               additional_filters_queries=[[select_by_mz, {"mz_from": 0, "mz_to": 1000}]],
-                               score_computations=[["precursormzmatch",  {"tolerance": 120.0}],
+    workflow = create_workflow(query_filters=[[select_by_mz, {"mz_from": 0, "mz_to": 1000}]],
+                               score_computations=[["precursormzmatch", {"tolerance": 120.0}],
                                                    ["modifiedcosine", {"tolerance": 10.0}]])
     pipeline = Pipeline(workflow)
     pipeline.run(spectrums_file_msp)
@@ -68,10 +66,9 @@ def test_pipeline_symmetric_filters():
 
 
 def test_pipeline_symmetric_masking():
-    workflow = create_workflow(predefined_processing_queries="basic",
-                               score_computations=[["precursormzmatch",  {"tolerance": 120.0}],
-                                   ["modifiedcosine", {"tolerance": 10.0}],
-                                   ["filter_by_range", {"low": 0.3, "above_operator": '>='}]])
+    workflow = create_workflow(score_computations=[["precursormzmatch", {"tolerance": 120.0}],
+                                                   ["modifiedcosine", {"tolerance": 10.0}],
+                                                   ["filter_by_range", {"low": 0.3, "above_operator": '>='}]])
     pipeline = Pipeline(workflow)
     pipeline.run(spectrums_file_msp)
 
@@ -88,8 +85,7 @@ def test_pipeline_symmetric_masking():
 
 
 def test_pipeline_symmetric_custom_score():
-    workflow = create_workflow(predefined_processing_queries="basic",
-                               score_computations=[["precursormzmatch",  {"tolerance": 120.0}],
+    workflow = create_workflow(score_computations=[["precursormzmatch", {"tolerance": 120.0}],
                                                    [ModifiedCosine, {"tolerance": 10.0}]])
     pipeline = Pipeline(workflow)
     pipeline.run(spectrums_file_msp)
@@ -108,9 +104,7 @@ def test_pipeline_symmetric_custom_score():
 
 def test_pipeline_non_symmetric():
     """Test importing from multiple files and different inputs for query and references."""
-    workflow = create_workflow(predefined_processing_queries="basic",
-                               predefined_processing_reference="basic",
-                               score_computations=[["precursormzmatch",  {"tolerance": 120.0}],
+    workflow = create_workflow(score_computations=[["precursormzmatch", {"tolerance": 120.0}],
                                                    ["modifiedcosine", {"tolerance": 10.0}]])
     pipeline = Pipeline(workflow)
     pipeline.run(spectrums_file_msp, [spectrums_file_msp, spectrums_file_msp])
@@ -149,7 +143,7 @@ def test_pipeline_to_and_from_yaml(tmp_path):
     pytest.importorskip("rdkit")
     config_file = os.path.join(tmp_path, "test_pipeline.yaml")
 
-    workflow = create_workflow(config_file, score_computations=[["precursormzmatch",  {"tolerance": 120.0}],
+    workflow = create_workflow(config_file, score_computations=[["precursormzmatch", {"tolerance": 120.0}],
                                                                 ["modifiedcosine", {"tolerance": 10.0}]])
     assert os.path.exists(config_file)
 
@@ -180,13 +174,11 @@ def test_pipeline_logging(tmp_path):
 
 def test_FingerprintSimilarity_pipeline():
     pytest.importorskip("rdkit")
-    workflow = create_workflow(predefined_processing_queries="basic",
-                               additional_filters_queries=["add_fingerprint"],
-                               predefined_processing_reference="basic",
-                               additional_filters_references=["add_fingerprint"],
-                               score_computations=[["metadatamatch", {"field": "precursor_mz", "matching_type": "difference", "tolerance": 50}],
-                                                   ["fingerprintsimilarity", {"similarity_measure": "jaccard"}]],
-                               )
+    workflow = create_workflow(query_filters=["add_fingerprint"], reference_filters=["add_fingerprint"],
+                               score_computations=[
+                                   ["metadatamatch",
+                                    {"field": "precursor_mz", "matching_type": "difference", "tolerance": 50}],
+                                   ["fingerprintsimilarity", {"similarity_measure": "jaccard"}]])
     pipeline = Pipeline(workflow)
     pipeline.run(spectrums_file_msp, spectrums_file_msp)
     assert len(pipeline.spectrums_queries[0].get("fingerprint")) == 2048
@@ -196,12 +188,8 @@ def test_FingerprintSimilarity_pipeline():
 
 def test_pipeline_changing_workflow():
     """Test if changing workflow after creating Pipeline results in the expected change of the pipeline"""
-    workflow = create_workflow(predefined_processing_queries=None,
-                               additional_filters_queries=["make_charge_int"],
-                               predefined_processing_reference=None,
-                               additional_filters_references=["make_charge_int"],
-                               score_computations=['precursormzmatch'],
-                               )
+    workflow = create_workflow(query_filters=["make_charge_int"], reference_filters=["make_charge_int"],
+                               score_computations=['precursormzmatch'])
     pipeline = Pipeline(workflow)
     pipeline.query_filters = ["add_fingerprint"]
     pipeline.reference_filters = ["add_fingerprint"]
