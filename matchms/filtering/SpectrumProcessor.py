@@ -223,7 +223,7 @@ def create_partial_function(filter_function: Callable,
     """Adds the filter params to the filter function"""
     if filter_params is not None:
         if not isinstance(filter_params, dict):
-            raise ValueError("Expected a dictionary for filter_args got %s", str(filter_params))
+            raise ValueError(f"Expected a dictionary for filter_args got {filter_params}")
         partial_filter_func = partial(filter_function, **filter_params)
         partial_filter_func.__name__ = filter_function.__name__
         return partial_filter_func
