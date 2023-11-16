@@ -230,4 +230,4 @@ def test_save_spectra_spectrum_processor(tmp_path):
 
     # Reload spectra and compare lengths
     reloaded_spectra = list(load_spectra(str(filename)))
-    assert len(reloaded_spectra) == len(list(load_spectra(spectrums_file_msp))
+    assert len(reloaded_spectra) == len(list(load_spectra(spectrums_file_msp)))
