@@ -55,7 +55,7 @@ def test_filter_sorting_and_output():
 def test_overwrite_default_settings(filter_step: str, expected):
     """Test if both default settings and set settings are returned in processing steps"""
     processor = SpectrumProcessor(filters=())
-    processor.add_filter(filter_step)
+    processor.parse_and_add_filter(filter_step)
     expected_filters = [expected]
     assert processor.processing_steps == expected_filters
 
@@ -64,7 +64,7 @@ def test_incomplete_parameters():
     """Test if an error is raised when running an incomplete command"""
     with pytest.raises(AssertionError):
         processor = SpectrumProcessor(filters=())
-        processor.add_filter("require_correct_ionmode")
+        processor.parse_and_add_filter("require_correct_ionmode")
 
 
 def test_string_output():
@@ -76,27 +76,6 @@ def test_string_output():
     expected_str = "Processing steps:\n- make_charge_int\n- interpret_pepmass" \
                    "\n- derive_ionmode\n- correct_charge\n"
     assert str(processing) == expected_str
-
-
-@pytest.mark.parametrize("metadata, expected", [
-    [{}, None],
-    [{"ionmode": "positive"}, {"ionmode": "positive", "charge": 1}],
-    [{"ionmode": "positive", "charge": 2}, {"ionmode": "positive", "charge": 2}],
-])
-def test_add_matchms_filter(metadata, expected):
-    spectrum_in = SpectrumBuilder().with_metadata(metadata).build()
-    processor = SpectrumProcessor(filters=["make_charge_int",
-                                           "interpret_pepmass",
-                                           "derive_ionmode",
-                                           "correct_charge",
-                                           ])
-    processor.add_matchms_filter("require_correct_ionmode",
-                                 {"ion_mode_to_keep": "both"})
-    spectrum = processor.process_spectrum(spectrum_in)
-    if expected is None:
-        assert spectrum is None
-    else:
-        assert dict(spectrum.metadata) == expected
 
 
 def test_no_filters():
@@ -125,8 +104,8 @@ def test_filter_spectrums_report(spectrums):
                                            "derive_ionmode",
                                            "correct_charge",
                                            ])
-    processor.add_filter(filter_description=("require_minimum_number_of_peaks", {"n_required": 2}))
-    processor.add_filter(filter_description="add_losses")
+    processor.parse_and_add_filter(filter_description=("require_minimum_number_of_peaks", {"n_required": 2}))
+    processor.parse_and_add_filter(filter_description="add_losses")
     spectrums, report = processor.process_spectrums(spectrums, create_report=True)
     assert len(spectrums) == 2
     actual_masses = [s.get("precursor_mz") for s in spectrums]
@@ -165,7 +144,7 @@ def test_adding_custom_filter(spectrums):
                                            "derive_ionmode",
                                            "correct_charge",
                                            ])
-    processor.add_custom_filter(nonsense_inchikey)
+    processor.parse_and_add_filter(nonsense_inchikey)
     filters = processor.filters
     assert filters[-1].__name__ == "nonsense_inchikey"
     spectrums, report = processor.process_spectrums(spectrums, create_report=True)
@@ -186,7 +165,7 @@ def test_adding_custom_filter_with_parameters(spectrums):
                                            "derive_ionmode",
                                            "correct_charge",
                                            ])
-    processor.add_custom_filter(nonsense_inchikey_multiple, {"number": 2})
+    processor.parse_and_add_filter((nonsense_inchikey_multiple, {"number": 2}))
     filters = processor.filters
     assert filters[-1].__name__ == "nonsense_inchikey_multiple"
     spectrums, report = processor.process_spectrums(spectrums, create_report=True)
@@ -205,7 +184,7 @@ def test_adding_custom_filter_with_parameters(spectrums):
     [5, 4],
     [6, 4]
 ])
-def test_add_custom_filter_in_position(filter_position, expected):
+def test_add_custom_filter_in_position(filter_position: int, expected):
     def nonsense_inchikey_multiple(s, number):
         s.set("inchikey", number * "NONSENSE")
         return s
@@ -215,8 +194,8 @@ def test_add_custom_filter_in_position(filter_position, expected):
                                            "derive_ionmode",
                                            "correct_charge",
                                            ])
-    processor.add_custom_filter(nonsense_inchikey_multiple, {"number": 2},
-                                filter_position=filter_position)
+    processor.parse_and_add_filter((nonsense_inchikey_multiple, {"number": 2}),
+                                   filter_position=filter_position)
     filters = processor.filters
 
     assert filters[expected].__name__ == "nonsense_inchikey_multiple"
@@ -232,7 +211,7 @@ def test_add_filter_with_custom(spectrums):
                                            "derive_ionmode",
                                            "correct_charge",
                                            ])
-    processor.add_filter((nonsense_inchikey_multiple, {"number": 2}))
+    processor.parse_and_add_filter((nonsense_inchikey_multiple, {"number": 2}))
     filters = processor.filters
 
     assert filters[-1].__name__ == "nonsense_inchikey_multiple"
@@ -246,8 +225,8 @@ def test_add_filter_with_matchms_filter(spectrums):
                                            "derive_ionmode",
                                            "correct_charge",
                                            ])
-    processor.add_filter(("require_correct_ionmode",
-                          {"ion_mode_to_keep": "both"}))
+    processor.parse_and_add_filter(("require_correct_ionmode",
+                                    {"ion_mode_to_keep": "both"}))
     filters = processor.filters
     assert filters[-1].__name__ == "require_correct_ionmode"
     spectrums, _ = processor.process_spectrums(spectrums, create_report=True)
@@ -260,7 +239,7 @@ def test_add_duplicated_filter_to_existing_pipeline():
                                    "interpret_pepmass",
                                    ])
     duplicated_filter = ("derive_adduct_from_name", {"remove_adduct_from_name": False})
-    processor.add_filter(duplicated_filter)
+    processor.parse_and_add_filter(duplicated_filter)
     assert len(processor.processing_steps) == 2, "The duplicated filter was not replaced"
     assert duplicated_filter in processor.processing_steps, "The new settings of the duplicated filter were not added"
 
@@ -268,8 +247,8 @@ def test_add_duplicated_filter_to_existing_pipeline():
 def test_add_filter_twice():
     """Tests if adding a filter that is already in the basic pipeline is overwritten and not duplicated"""
     processor = SpectrumProcessor(filters=())
-    processor.add_filter(("derive_adduct_from_name", {"remove_adduct_from_name": False}))
-    processor.add_filter("derive_adduct_from_name")
+    processor.parse_and_add_filter(("derive_adduct_from_name", {"remove_adduct_from_name": False}))
+    processor.parse_and_add_filter("derive_adduct_from_name")
     assert processor.processing_steps == [("derive_adduct_from_name", {"remove_adduct_from_name": True})]
 
 

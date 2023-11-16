@@ -35,12 +35,13 @@ class SpectrumProcessor:
         self.filters = []
         self.filter_order = [x.__name__ for x in ALL_FILTERS]
         for filter_name in filters:
-            self.add_filter(filter_name)
+            self.parse_and_add_filter(filter_name)
 
-    def add_filter(self, filter_description: Union[Tuple[str, Dict[str, any]],
-                                                   str,
-                                                   Tuple[Callable, Dict[str, any]],
-                                                   Callable]):
+    def parse_and_add_filter(self, filter_description: Union[Tuple[str, Dict[str, any]],
+                                                             str,
+                                                             Tuple[Callable, Dict[str, any]],
+                                                             Callable],
+                             filter_position: Optional[int] = None):
         """Adds a filter, by parsing the different allowed inputs.
 
         filter:
@@ -49,6 +50,10 @@ class SpectrumProcessor:
             (str, {str, any} (has to be a matchms function name, followed by parameters)
             Callable (can be matchms filter or custom made filter)
             Callable, {str, any} (the dict should be parameters.
+        filter_position:
+            If None: Matchms filters are automatically ordered.
+            Custom filters will be added at the end of the filter list.
+            If not None, the filter will be added to the given position in the filter order list.
         """
         filter_args = None
         if isinstance(filter_description, (tuple, list)):
@@ -63,94 +68,61 @@ class SpectrumProcessor:
         else:
             filter_function = filter_description
         if isinstance(filter_function, str):
-            self.add_matchms_filter(filter_function, filter_args)
-        elif isinstance(filter_function, Callable):
-            self.add_custom_filter(filter_function, filter_args)
-        else:
-            raise ValueError("The filter: %s could not be loaded, please check the expected format", filter_description)
+            filter_function = load_matchms_filter_from_string(filter_function)
+        self._add_filter_to_filter_order(filter_function.__name__,
+                                         filter_position=filter_position)
+        self._store_filter(filter_function, filter_args)
 
-    def add_matchms_filter(self, filter_name: Union[Tuple[str, Dict[str, any]], str],
-                           filter_args: Optional[Dict[str, any]] =None):
-        """
-        Add a filter to the processing pipeline.
-
-        Parameters
-        ----------
-        filter_name : str or tuple
-            Name of the filter function to add, or a tuple where the first element is the name of the
-            filter function and the second element is a dictionary containing additional arguments for the function.
-        filter_args:
-            A dictionary with the settings for the matchms filter.
-        """
-        if not isinstance(filter_name, str):
-            raise ValueError("Expected a string")
-        if filter_name not in FILTER_FUNCTION_NAMES:
-            raise ValueError(f"Unknown filter type: {filter_name} Should be known filter name or function.")
-        filter_func = FILTER_FUNCTION_NAMES[filter_name]
-
-        if filter_args is not None:
-            if not isinstance(filter_args, dict):
-                raise ValueError("Expected a dictionary for filter_args got %s", filter_args)
-            filter_func = partial(filter_func, **filter_args)
-            filter_func.__name__ = FILTER_FUNCTION_NAMES[filter_name].__name__
-        check_all_parameters_given(filter_func)
-
+    def _store_filter(self,
+                      new_filter_function: Callable,
+                      filter_params: Optional[Dict[str, any]]):
+        """Stores filter, removes duplicates and sorts filters"""
+        if not callable(new_filter_function):
+            raise TypeError("Expected callable filter function.")
+        new_filter_function = create_partial_function(new_filter_function, filter_params)
+        check_all_parameters_given(new_filter_function)
         # Replace filters that are already stored.
         filter_already_added = False
         for i, filter_function in enumerate(self.filters):
-            if filter_func.__name__ == filter_function.__name__:
+            if new_filter_function.__name__ == filter_function.__name__:
                 logger.warning("The filter %s was already in the filter list, "
                                "the last added filter parameters are used, "
-                               "check yaml file for details", filter_func)
-                self.filters[i] = filter_func
+                               "check yaml file for details", new_filter_function.__name__)
+                self.filters[i] = new_filter_function
                 filter_already_added = True
         if not filter_already_added:
-            self.filters.append(filter_func)
+            self.filters.append(new_filter_function)
         # Sort filters according to their order in self.filter_order
         self.filters.sort(key=lambda f: self.filter_order.index(f.__name__))
 
-    def add_custom_filter(self,
-                          filter_function: Callable,
-                          filter_params: Dict[str, any] = None,
-                          filter_position=None):
-        """
-        Add a custom filter function to the processing pipeline.
+    def _add_filter_to_filter_order(self,
+                                    filter_function_name,
+                                    filter_position: Optional[int] = None):
+        """Adds the filter name to the filter order list if it is not yet there.
 
-        Parameters
-        ----------
-        filter_function: callable
-            Custom function to add to the processing pipeline.
-            Expects a function that takes a matchms Spectrum object as input and returns a Spectrum object
-            (or None).
-            Regarding the order of execution: the added filter will be executed where it is introduced to the
-            processing pipeline.
-        filter_params: dict
-            If needed, add dictionary with all filter parameters. Default is set to None.
+        filter_function_name:
+            The name of the filter function.
         filter_position:
-            The position this filter should be inserted in the filter order.
-            If None, it will be appended at the end of the current list of filters.
+            The position where the filter should be added.
+            This overrides the position if it is already stored.
+            If None. A filter already in the order list stays at the same position.
+            If None. A new filter name is appended to the end.
         """
-        if not callable(filter_function):
-            raise TypeError("Expected callable filter function.")
-        if filter_position is None:
-            self.filter_order.append(filter_function.__name__)
-        elif not isinstance(filter_position, int):
-            raise TypeError("Expected filter_position to be an integer.")
-        else:
-            if filter_position >= len(self.filters):
-                self.filter_order.append(filter_function.__name__)
+        # Check if already stored. If a filter position is given the order will be adjusted
+        if filter_function_name in self.filter_order:
+            if filter_position is None:
+                return None
             else:
-                current_filter_at_position = self.filters[filter_position].__name__
-                order_index = self.filter_order.index(current_filter_at_position)
-                self.filter_order.insert(order_index, filter_function.__name__)
+                # Remove the filter (so it is not duplicated and can be added again)
+                self.filter_order.remove(filter_function_name)
 
-        if filter_params is not None:
-            partial_filter_func = partial(filter_function, **filter_params)
-            partial_filter_func.__name__ = filter_function.__name__
-            filter_function = partial_filter_func
-        check_all_parameters_given(filter_function)
-        self.filters.append(filter_function)
-        self.filters.sort(key=lambda f: self.filter_order.index(f.__name__))
+        # Add filter position at the end of the list
+        if filter_position is None or filter_position >= len(self.filters):
+            self.filter_order.append(filter_function_name)
+        else:
+            current_filter_at_position = self.filters[filter_position].__name__
+            order_index = self.filter_order.index(current_filter_at_position)
+            self.filter_order.insert(order_index, filter_function_name)
 
     def process_spectrum(self, spectrum,
                          processing_report: Optional["ProcessingReport"] = None):
@@ -238,7 +210,27 @@ class SpectrumProcessor:
         return ordered_dump(workflow)
 
 
-def check_all_parameters_given(func):
+def load_matchms_filter_from_string(filter_name):
+    if not isinstance(filter_name, str):
+        raise ValueError("Expected a string")
+    if filter_name not in FILTER_FUNCTION_NAMES:
+        raise ValueError(f"Unknown filter type: {filter_name} Should be known filter name or function.")
+    return FILTER_FUNCTION_NAMES[filter_name]
+
+
+def create_partial_function(filter_function: Callable,
+                            filter_params: Optional[Dict[str, any]]):
+    """Adds the filter params to the filter function"""
+    if filter_params is not None:
+        if not isinstance(filter_params, dict):
+            raise ValueError("Expected a dictionary for filter_args got %s", filter_params)
+        partial_filter_func = partial(filter_function, **filter_params)
+        partial_filter_func.__name__ = filter_function.__name__
+        return partial_filter_func
+    return filter_function
+
+
+def check_all_parameters_given(func: Callable):
     """Asserts that all added parameters for a function are given (except spectrum_in)"""
     signature = inspect.signature(func)
     parameters_without_value = []
