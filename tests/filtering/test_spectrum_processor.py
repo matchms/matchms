@@ -185,6 +185,7 @@ def test_adding_custom_filter_with_parameters(spectrums):
     [6, 4]
 ])
 def test_add_custom_filter_in_position(filter_position: int, expected):
+    """Tests that a filter is added in the correct position"""
     def nonsense_inchikey_multiple(s, number):
         s.set("inchikey", number * "NONSENSE")
         return s
@@ -199,9 +200,23 @@ def test_add_custom_filter_in_position(filter_position: int, expected):
     filters = processor.filters
 
     assert filters[expected].__name__ == "nonsense_inchikey_multiple"
+    assert len(filters) == 5
 
 
-def test_add_filter_with_custom(spectrums):
+def test_add_matchms_filter_in_position():
+    processor = SpectrumProcessor(filters=["make_charge_int",
+                                           "interpret_pepmass",
+                                           "derive_ionmode",
+                                           ])
+    processor.parse_and_add_filter("correct_charge",
+                                   filter_position=2)
+    filters = processor.filters
+
+    assert filters[2].__name__ == "correct_charge"
+    assert len(filters) == 4
+
+
+def test_add_custom_filter_with_parameters(spectrums):
     def nonsense_inchikey_multiple(s, number):
         s.set("inchikey", number * "NONSENSE")
         return s
@@ -219,29 +234,35 @@ def test_add_filter_with_custom(spectrums):
     assert spectrums[0].get("inchikey") == "NONSENSENONSENSE", "Custom filter not executed properly"
 
 
-def test_add_filter_with_matchms_filter(spectrums):
+@pytest.mark.parametrize("filter_description", [
+    ("require_correct_ionmode", {"ion_mode_to_keep": "both"}),
+    (msfilters.require_correct_ionmode, {"ion_mode_to_keep": "both"})
+
+])
+def test_add_matchms_filter(filter_description, spectrums):
     processor = SpectrumProcessor(filters=["make_charge_int",
                                            "interpret_pepmass",
                                            "derive_ionmode",
                                            "correct_charge",
                                            ])
-    processor.parse_and_add_filter(("require_correct_ionmode",
-                                    {"ion_mode_to_keep": "both"}))
+    processor.parse_and_add_filter(filter_description)
     filters = processor.filters
     assert filters[-1].__name__ == "require_correct_ionmode"
     spectrums, _ = processor.process_spectrums(spectrums, create_report=True)
     assert not spectrums, "Expected to be empty list"
 
 
-def test_add_duplicated_filter_to_existing_pipeline():
+@pytest.mark.parametrize("filter_description", [
+    ("derive_adduct_from_name", {"remove_adduct_from_name": False}),
+])
+def test_add_duplicated_filter_to_existing_pipeline(filter_description):
     """Tests if adding a filter that is already in the basic pipeline is overwritten and not duplicated"""
     processor = SpectrumProcessor(["derive_adduct_from_name",
                                    "interpret_pepmass",
                                    ])
-    duplicated_filter = ("derive_adduct_from_name", {"remove_adduct_from_name": False})
-    processor.parse_and_add_filter(duplicated_filter)
+    processor.parse_and_add_filter(filter_description)
     assert len(processor.processing_steps) == 2, "The duplicated filter was not replaced"
-    assert duplicated_filter in processor.processing_steps, "The new settings of the duplicated filter were not added"
+    assert filter_description in processor.processing_steps, "The new settings of the duplicated filter were not added"
 
 
 def test_add_filter_twice():
