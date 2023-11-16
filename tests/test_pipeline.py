@@ -220,12 +220,14 @@ def test_pipeline_changing_workflow():
     assert np.allclose(all_scores["ModifiedCosine_score"][3:, 3:], expected)
 
 
-def test_save_spectra_spectrum_processor():
+def test_save_spectra_spectrum_processor(tmp_path):
     workflow = create_workflow(predefined_processing_queries="basic")
     pipeline = Pipeline(workflow)
-    with tempfile.TemporaryDirectory() as temp_dir:
-        filename = os.path.join(temp_dir, "spectra.mgf")
-        pipeline.run(spectrums_file_msp, cleaned_query_file=filename)
-        assert os.path.exists(filename)
-        reloaded_spectra = list(load_spectra(filename))
-    assert len(reloaded_spectra) == len(list(load_spectra(spectrums_file_msp)))
+    filename = tmp_path / "spectra.mgf"
+
+    pipeline.run(spectrums_file_msp, cleaned_query_file=str(filename))
+    assert filename.exists()
+
+    # Reload spectra and compare lengths
+    reloaded_spectra = list(load_spectra(str(filename)))
+    assert len(reloaded_spectra) == len(list(load_spectra(spectrums_file_msp))
