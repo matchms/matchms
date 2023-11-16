@@ -176,18 +176,16 @@ Below a more advanced code example showing how you can make a specific pipeline 
 .. code-block:: python
 
     from matchms.Pipeline import Pipeline, create_workflow
-
+    from matchms.filtering.default_pipelines import BASIC_FILTERS, FULLY_ANNOTATED_PROCESSING
     workflow = create_workflow(
         yaml_file_name="my_config_file.yaml", # The workflow will be stored in a yaml file.
-        predefined_processing_queries="basic",
-        additional_filters_queries=[
+        additional_filters_queries=BASIC_FILTERS + [
            ["add_parent_mass"],
            ["normalize_intensities"],
            ["select_by_relative_intensity", {"intensity_from": 0.0, "intensity_to": 1.0}],
            ["select_by_mz", {"mz_from": 0, "mz_to": 1000}],
            ["require_minimum_number_of_peaks", {"n_required": 5}]],
-        predefined_processing_reference="fully_annotated",
-        additional_filters_references=["add_fingerprint"],
+        additional_filters_references=FULLY_ANNOTATED_PROCESSING + ["add_fingerprint"],
         score_computations=[["precursormzmatch",  {"tolerance": 100.0}],
                             ["cosinegreedy", {"tolerance": 1.0}],
                             ["filter_by_range", {"name": "CosineGreedy_score", "low": 0.2}]],
