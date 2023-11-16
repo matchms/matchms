@@ -61,4 +61,4 @@ MS2DEEPSCORE_TRAINING = FULLY_ANNOTATED_PROCESSING + CLEAN_PEAKS
 
 
 ALL_FILTER_SETS = [filter_set for filter_name, filter_set in locals().items()
-                   if not filter_name.startswith("_") and filter_name is not "ALL_FILTER_SETS" and isinstance(filter_set, list)]
+                   if not filter_name.startswith("_") and filter_name != "ALL_FILTER_SETS" and isinstance(filter_set, list)]

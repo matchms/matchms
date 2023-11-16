@@ -112,9 +112,8 @@ class SpectrumProcessor:
         if filter_function_name in self.filter_order:
             if filter_position is None:
                 return None
-            else:
-                # Remove the filter (so it is not duplicated and can be added again)
-                self.filter_order.remove(filter_function_name)
+            # Remove the filter (so it is not duplicated and can be added again)
+            self.filter_order.remove(filter_function_name)
 
         # Add filter position at the end of the list
         if filter_position is None or filter_position >= len(self.filters):
@@ -123,6 +122,7 @@ class SpectrumProcessor:
             current_filter_at_position = self.filters[filter_position].__name__
             order_index = self.filter_order.index(current_filter_at_position)
             self.filter_order.insert(order_index, filter_function_name)
+        return None
 
     def process_spectrum(self, spectrum,
                          processing_report: Optional["ProcessingReport"] = None):
@@ -223,7 +223,7 @@ def create_partial_function(filter_function: Callable,
     """Adds the filter params to the filter function"""
     if filter_params is not None:
         if not isinstance(filter_params, dict):
-            raise ValueError("Expected a dictionary for filter_args got %s", filter_params)
+            raise ValueError("Expected a dictionary for filter_args got %s", str(filter_params))
         partial_filter_func = partial(filter_function, **filter_params)
         partial_filter_func.__name__ = filter_function.__name__
         return partial_filter_func
