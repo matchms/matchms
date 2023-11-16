@@ -1,6 +1,7 @@
 """Stores sets of filters for easy pipeline creation."""
 from matchms import filtering as msfilters
 
+
 HARMONIZE_METADATA_FIELD_NAMES = \
     [msfilters.make_charge_int,
      msfilters.add_compound_name,
