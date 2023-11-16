@@ -1,9 +1,9 @@
 import numpy as np
 import pytest
 from matchms import SpectrumProcessor
+from matchms import filtering as msfilters
 from matchms.filtering.SpectrumProcessor import ProcessingReport
 from ..builder_Spectrum import SpectrumBuilder
-from matchms import filtering as msfilters
 
 
 @pytest.fixture
