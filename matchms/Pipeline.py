@@ -2,7 +2,7 @@ import logging
 import os
 from collections import OrderedDict
 from datetime import datetime
-from typing import Iterable, List, Optional, Union
+from typing import Callable, Dict, Iterable, List, Optional, Tuple, Union
 import matchms.similarity as mssimilarity
 from matchms import calculate_scores
 from matchms.filtering.filter_order import ALL_FILTERS
@@ -22,8 +22,12 @@ logger = logging.getLogger("matchms")
 
 
 def create_workflow(yaml_file_name: Optional[str] = None,
-                    query_filters: Iterable[Union[str, List[dict]]] = (),
-                    reference_filters: Iterable[Union[str, List[dict]]] = (),
+                    query_filters: Iterable[Union[Tuple[Union[str, Callable], Dict[str, any]],
+                                                  str,
+                                                  Callable]] = (),
+                    reference_filters: Iterable[Union[Tuple[Union[str, Callable], Dict[str, any]],
+                                                      str,
+                                                      Callable]] = (),
                     score_computations: Iterable[Union[str, List[dict]]] = (),
                     ) -> OrderedDict:
     """Creates a workflow that specifies the filters and scores needed to be run by Pipeline
@@ -34,9 +38,9 @@ def create_workflow(yaml_file_name: Optional[str] = None,
         A yaml file containing the workflow settings will be saved if a file name is specified.
         If None no yaml file will be saved.
     :param query_filters:
-        Additional filters that should be applied to the query spectra.
+        Filters that should be applied to the query spectra.
     :param reference_filters:
-        Additional filters that should be applied to the reference spectra
+        Filters that should be applied to the reference spectra
     :param score_computations:
         Score computations that should be performed.
     """
