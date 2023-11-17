@@ -42,7 +42,7 @@ def save_spectra(spectrums: List[Spectrum],
         save_as_msp(spectrums, file, style=export_style)
     elif ftype == "pickle":
         if export_style != "matchms":
-            logger.error(f"The only available export style for pickle is 'matchms', your export style: {export_style}")
+            logger.error("The only available export style for pickle is 'matchms', your export style %s", export_style)
         save_as_pickled_file(spectrums, file)
     else:
         raise TypeError(f"File extension of file: {file} is not recognized")
