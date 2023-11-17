@@ -155,7 +155,7 @@ class SpectrumProcessor:
         return spectrum
 
     def process_spectrums(self, spectrums: list,
-                          create_report: bool = False,
+                          create_report: bool = True,
                           progress_bar: bool = True,
                           cleaned_spectra_file=None
                           ):

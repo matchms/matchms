@@ -4,6 +4,7 @@ import pytest
 from matchms import SpectrumProcessor
 from matchms import filtering as msfilters
 from matchms.filtering.SpectrumProcessor import ProcessingReport
+from matchms.filtering.default_pipelines import BASIC_FILTERS
 from matchms.importing.load_spectra import load_spectra
 from ..builder_Spectrum import SpectrumBuilder
 
@@ -276,7 +277,7 @@ def test_add_filter_twice():
 
 
 def test_save_spectra_spectrum_processor(spectrums, tmp_path):
-    processor = SpectrumProcessor("default")
+    processor = SpectrumProcessor(filters=BASIC_FILTERS)
     filename = os.path.join(tmp_path, "spectra.msp")
 
     _, _ = processor.process_spectrums(spectrums, cleaned_spectra_file=str(filename))
