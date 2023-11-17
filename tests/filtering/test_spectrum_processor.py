@@ -266,7 +266,7 @@ def test_add_filter_twice():
 
 def test_save_spectra_spectrum_processor(spectrums, tmp_path):
     processor = SpectrumProcessor("default")
-    filename = tmp_path / "spectra.msp"
+    filename = os.path.join(tmp_path, "spectra.msp")
 
     _, _ = processor.process_spectrums(spectrums, cleaned_spectra_file=str(filename))
     assert filename.exists()
