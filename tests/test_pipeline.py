@@ -222,7 +222,7 @@ def test_pipeline_changing_workflow():
 def test_save_spectra_spectrum_processor(tmp_path):
     workflow = create_workflow(predefined_processing_queries="basic")
     pipeline = Pipeline(workflow)
-    filename = tmp_path / "spectra.mgf"
+    filename = os.path.join(tmp_path, "spectra.mgf")
 
     pipeline.run(spectrums_file_msp, cleaned_query_file=str(filename))
     assert filename.exists()
