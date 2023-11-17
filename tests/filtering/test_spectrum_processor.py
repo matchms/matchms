@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import pytest
 from matchms import SpectrumProcessor
@@ -269,7 +270,7 @@ def test_save_spectra_spectrum_processor(spectrums, tmp_path):
     filename = os.path.join(tmp_path, "spectra.msp")
 
     _, _ = processor.process_spectrums(spectrums, cleaned_spectra_file=str(filename))
-    assert filename.exists()
+    assert os.path.exists(filename)
 
     # Reload spectra and compare lengths
     reloaded_spectra = list(load_spectra(str(filename)))

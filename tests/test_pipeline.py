@@ -225,7 +225,7 @@ def test_save_spectra_spectrum_processor(tmp_path):
     filename = os.path.join(tmp_path, "spectra.mgf")
 
     pipeline.run(spectrums_file_msp, cleaned_query_file=str(filename))
-    assert filename.exists()
+    assert os.path.exists(filename)
 
     # Reload spectra and compare lengths
     reloaded_spectra = list(load_spectra(str(filename)))
