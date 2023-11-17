@@ -30,9 +30,8 @@ class SpectrumProcessor:
     """
 
     def __init__(self,
-                 filters: Iterable[Union[Tuple[str, Dict[str, any]],
+                 filters: Iterable[Union[Tuple[Union[str, Callable], Dict[str, any]],
                                          str,
-                                         Tuple[Callable, Dict[str, any]],
                                          Callable]]):
         self.filters = []
         self.filter_order = [x.__name__ for x in ALL_FILTERS]
