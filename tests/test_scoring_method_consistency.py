@@ -84,10 +84,8 @@ def test_consistency_scoring_and_pipeline(spectrums, similarity_measure):
     computed_scores_matrix = scoring_method.matrix(spectrums, spectrums)
 
     # Run pipeline
-    workflow = create_workflow(predefined_processing_queries="basic",
-                               additional_filters_queries=[["add_parent_mass"], ["normalize_intensities"]],
-                               score_computations=[similarity_measure]
-                               )
+    workflow = create_workflow(query_filters=[["add_parent_mass"], ["normalize_intensities"]],
+                               score_computations=[similarity_measure])
     pipeline = Pipeline(workflow)
     pipeline.run(json_file)
 

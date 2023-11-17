@@ -19,6 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Renamed derive_smiles_from_pubchem_compound_name_search to derive_annotation_from_compound_name. [#559](https://github.com/matchms/matchms/pull/559)
 - Derive_annotation_from_compound_name does not add smile or inchi when this cannot be interpreted by rdkit. [#559](https://github.com/matchms/matchms/pull/559)
+- Refactored SpectrumProcessor. Reduced code repetition and improved modularity. Matchms filters can now be added as functions and in a different position than specified. [#565](https://github.com/matchms/matchms/pull/565)
+- The default pipelines now stores matchms functions instead of string representation. [#565](https://github.com/matchms/matchms/pull/565)
+- The option to add predefined pipelines to SpectrumProcessor has been removed. Predefined pipelines can now just be added by adding the default_pipelines (which is a list) to the filters parameter. [#565](https://github.com/matchms/matchms/pull/565)
 
 ## [0.23.1] - 2023-10-18
 ### Added
