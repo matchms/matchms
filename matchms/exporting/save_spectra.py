@@ -22,7 +22,8 @@ def save_spectra(spectrums: List[SpectrumType],
     ftype:
         Optional. Filetype
     """
-    assert not os.path.exists(file), f"The specified file: {file} does already exist"
+    if os.path.exists(file):
+        raise FileExistsError(f"The specified file: {file} already exists.")
 
     ftype = os.path.splitext(file)[1].lower()[1:]
 
