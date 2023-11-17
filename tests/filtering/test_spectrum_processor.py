@@ -1,5 +1,3 @@
-import os
-import tempfile
 import numpy as np
 import pytest
 from matchms import SpectrumProcessor
@@ -266,14 +264,17 @@ def test_add_filter_twice():
     assert processor.processing_steps == [("derive_adduct_from_name", {"remove_adduct_from_name": True})]
 
 
-def test_save_spectra_spectrum_processor(spectrums):
+def test_save_spectra_spectrum_processor(spectrums, tmp_path):
     processor = SpectrumProcessor("default")
-    with tempfile.TemporaryDirectory() as temp_dir:
-        filename = os.path.join(temp_dir, "spectra.msp")
-        _, _ = processor.process_spectrums(spectrums, cleaned_spectra_file=filename)
-        assert os.path.exists(filename)
-        reloaded_spectra = list(load_spectra(filename))
+    filename = os.path.join(tmp_path, "spectra.msp")
+
+    _, _ = processor.process_spectrums(spectrums, cleaned_spectra_file=str(filename))
+    assert filename.exists()
+
+    # Reload spectra and compare lengths
+    reloaded_spectra = list(load_spectra(str(filename)))
     assert len(reloaded_spectra) == len(spectrums)
+
+    # Check that the processed spectra are stored
     for spectrum in reloaded_spectra:
-        # to check that the processed spectra are stored instead of the unprocessed.
         assert spectrum.get("precursor_mz") is not None
