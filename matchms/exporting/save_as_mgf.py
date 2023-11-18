@@ -4,7 +4,9 @@ from ..Spectrum import Spectrum
 from ..utils import fingerprint_export_warning
 
 
-def save_as_mgf(spectrums: List[Spectrum], filename: str):
+def save_as_mgf(spectrums: List[Spectrum],
+                filename: str,
+                export_style: str = "matchms"):
     """Save spectrum(s) as mgf file.
 
     :py:attr:`~matchms.Spectrum.losses` of spectrum will not be saved.
@@ -33,6 +35,9 @@ def save_as_mgf(spectrums: List[Spectrum], filename: str):
         Expected input are match.Spectrum.Spectrum() objects.
     filename:
         Provide filename to save spectrum(s).
+    export_style:
+        Converts the keys to the required export style. One of ["matchms", "massbank", "nist", "riken", "gnps"].
+        Default is "matchms"
     """
     if not isinstance(spectrums, list):
         # Assume that input was single Spectrum
@@ -44,7 +49,7 @@ def save_as_mgf(spectrums: List[Spectrum], filename: str):
     for spectrum in spectrums:
         spectrum_dict = {"m/z array": spectrum.peaks.mz,
                          "intensity array": spectrum.peaks.intensities,
-                         "params": spectrum.metadata}
+                         "params": spectrum.metadata_dict(export_style)}
         if 'fingerprint' in spectrum_dict["params"]:
             del spectrum_dict["params"]["fingerprint"]
         # Append spectrum to file

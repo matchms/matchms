@@ -1,11 +1,11 @@
 from __future__ import annotations
+import copy
 import json
 import pickle
 import numpy as np
 from numpy.lib.recfunctions import unstructured_to_structured
 from scipy.sparse import coo_matrix
 from sparsestack import StackedSparseArray
-from matchms.exporting.save_as_json import ScoresJSONEncoder
 from matchms.importing.load_from_json import scores_json_decoder
 from matchms.similarity import get_similarity_function_by_name
 from matchms.similarity.BaseSimilarity import BaseSimilarity
@@ -475,3 +475,14 @@ class ScoresBuilder:
                              Make sure the file contains the following keys:\n\
                              ['__Scores__', 'is_symmetric', 'references', 'queries', 'scores_row',\
                              'scores_col', 'scores_data', 'scores_dtype']")
+
+
+class ScoresJSONEncoder(json.JSONEncoder):
+    def default(self, o):
+        """JSON Encoder for a matchms.Scores.Scores object"""
+        class_name = o.__class__.__name__
+        # do isinstance(o, Scores) without importing matchms.Scores
+        if class_name == "Scores":
+            scores = copy.deepcopy(o)
+            return scores.to_dict()
+        return json.JSONEncoder.default(self, o)

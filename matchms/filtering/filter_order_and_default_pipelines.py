@@ -2,6 +2,9 @@ from matchms import filtering as msfilters
 
 
 # List all filters in a functionally working order
+
+# IMPORTANT!! IF YOU CHANGE ANYTHING HERE PLEASE ADD A TEST to test_all_filter_order.py
+# to ensure it is not changed back by accident later.
 ALL_FILTERS = [msfilters.make_charge_int,
                msfilters.add_compound_name,
                msfilters.derive_adduct_from_name,
@@ -18,12 +21,12 @@ ALL_FILTERS = [msfilters.make_charge_int,
                msfilters.harmonize_undefined_inchi,
                msfilters.harmonize_undefined_smiles,
                msfilters.repair_inchi_inchikey_smiles,
+               msfilters.clean_adduct,
+               msfilters.add_parent_mass,
+               msfilters.derive_annotation_from_compound_name,
                msfilters.derive_smiles_from_inchi,
                msfilters.derive_inchi_from_smiles,
                msfilters.derive_inchikey_from_inchi,
-               msfilters.clean_adduct,
-               msfilters.add_parent_mass,
-               msfilters.derive_smiles_from_pubchem_compound_name_search,
                msfilters.repair_smiles_of_salts,
                msfilters.repair_precursor_is_parent_mass,
                msfilters.repair_parent_mass_is_mol_wt,
@@ -82,7 +85,7 @@ FULLY_ANNOTATED_PROCESSING = DEFAULT_FILTERS \
                                 ("repair_adduct_based_on_smiles", {'mass_tolerance': 0.1}),
                                 "repair_not_matching_annotation",
                                 "require_valid_annotation",
-                                ("derive_smiles_from_pubchem_compound_name_search", {"mass_tolerance": 0.1}),
+                                ("derive_annotation_from_compound_name", {"mass_tolerance": 0.1}),
                                 ]
 
 

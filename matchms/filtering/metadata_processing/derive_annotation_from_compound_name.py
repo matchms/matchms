@@ -10,19 +10,20 @@ import numpy as np
 import pandas as pd
 import pubchempy
 from matchms import Spectrum
-from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import \
-    _check_fully_annotated
+from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import (
+    is_valid_inchi, is_valid_inchikey, is_valid_smiles)
 
 
 logger = logging.getLogger("matchms")
 
 
-def derive_smiles_from_pubchem_compound_name_search(spectrum_in: Spectrum,
-                                                    annotated_compound_names_file: Optional[str] = None,
-                                                    mass_tolerance: float = 0.1):
+def derive_annotation_from_compound_name(spectrum_in: Spectrum,
+                                         annotated_compound_names_file: Optional[str] = None,
+                                         mass_tolerance: float = 0.1):
     """Adds smiles, inchi, inchikey based on compound name by searching pubchem
 
-    The smiles, inchi and inchikey are repaired if the found smiles is close enough to the parent mass.
+    This filter is only run, if there is not yet a valid smiles or inchi in the metadata.
+    The smiles, inchi and inchikey are only added if the found annotation is close enough to the parent mass.
 
     Parameters
     ----------
@@ -40,26 +41,32 @@ def derive_smiles_from_pubchem_compound_name_search(spectrum_in: Spectrum,
     if spectrum_in is None:
         return None
     spectrum = spectrum_in.clone()
-    if _check_fully_annotated(spectrum):
+    # Only run this function if it does not yet have a useful annotation
+    if is_valid_inchi(spectrum.get("inchi")) or is_valid_smiles(spectrum.get("smiles")):
         return spectrum
     compound_name = spectrum.get("compound_name")
     parent_mass = spectrum.get('parent_mass')
 
     if _is_plausible_name(compound_name) and parent_mass is not None:
-
         compound_name_annotations = _get_pubchem_compound_name_annotation(compound_name, annotated_compound_names_file)
         if len(compound_name_annotations) > 0:
             compound_name_annotation_df = pd.DataFrame(compound_name_annotations)
             mass_differences = np.abs(compound_name_annotation_df["monoisotopic_mass"] - parent_mass)
             within_mass_tolerance = compound_name_annotation_df[mass_differences < mass_tolerance]
             if within_mass_tolerance.shape[0] > 0:
-                # Select the match with the most
-                best_match = within_mass_tolerance.loc[within_mass_tolerance["monoisotopic_mass"].idxmin()]
-                spectrum.set("smiles", best_match["smiles"])
-                spectrum.set("inchi", best_match["inchi"])
-                spectrum.set("inchikey", best_match["inchikey"])
-                logger.info("Added smiles %s based on the compound name %s", best_match["smiles"], compound_name)
+                # Select the match with the smallest mass difference
+                best_match = compound_name_annotation_df.loc[mass_differences.idxmin()]
+                if is_valid_smiles(best_match["smiles"]):
+                    spectrum.set("smiles", best_match["smiles"])
+                    logger.info("Added smiles %s based on the compound name %s", best_match["smiles"], compound_name)
+                if is_valid_inchi(best_match["inchi"]):
+                    spectrum.set("inchi", best_match["inchi"])
+                    logger.info("Added inchi %s based on the compound name %s", best_match["inchi"], compound_name)
+                if is_valid_inchikey(best_match["inchikey"]):
+                    spectrum.set("inchikey", best_match["inchikey"])
+                    logger.info("Added inchikey %s based on the compound name %s", best_match["inchikey"], compound_name)
                 return spectrum
+    logger.info("Could not find a matching annotation on PubChem for the compound name: %s, compound_name")
     return spectrum
 
 

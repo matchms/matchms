@@ -5,12 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
 ## [unreleased]
 ### Added
-- added option to set custom key replacements [#547](https://github.com/matchms/matchms/pull/547)
+- Option to set custom key replacements [#547](https://github.com/matchms/matchms/pull/547)
+- Option to set the export style in `save_as_mgf` and `save_as_json` to choose other than matchms styles such as `nist`, `riken`, `gnps` [#557](https://github.com/matchms/matchms/pull/557)
+- Added a save spectra function. To automatically save in the specified file format. [#543](https://github.com/matchms/matchms/pull/543)
+- Add saving function in SpectrumProcessor [#543](https://github.com/matchms/matchms/pull/543)
 ### Fixed
-- handle missing `precursor_mz` in representation and [#452](https://github.com/matchms/matchms/issues/452) introduced by [#514](https://github.com/matchms/matchms/pull/514/files)[#540](https://github.com/matchms/matchms/pull/540)
 - Fixed bug when loading empty metadata in msp [#548](https://github.com/matchms/matchms/issues/548)
+- Handle missing `precursor_mz` in representation and [#452](https://github.com/matchms/matchms/issues/452) introduced by [#514](https://github.com/matchms/matchms/pull/514/files)[#540](https://github.com/matchms/matchms/pull/540)
+- Fix closing mgf file after loading and prevent reopening. [#555](https://github.com/matchms/matchms/issues/555)
+
+### Changed
+- Renamed derive_smiles_from_pubchem_compound_name_search to derive_annotation_from_compound_name. [#559](https://github.com/matchms/matchms/pull/559)
+- Derive_annotation_from_compound_name does not add smile or inchi when this cannot be interpreted by rdkit. [#559](https://github.com/matchms/matchms/pull/559)
+
 ## [0.23.1] - 2023-10-18
 ### Added
 - Additional tests for filter pipeline order
