@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add saving function in SpectrumProcessor [#543](https://github.com/matchms/matchms/pull/543)
 ### Fixed
 - Handle missing `precursor_mz` in representation and [#452](https://github.com/matchms/matchms/issues/452) introduced by [#514](https://github.com/matchms/matchms/pull/514/files)[#540](https://github.com/matchms/matchms/pull/540)
+- Fixed retention time harmonization for msp files [#551](https://github.com/matchms/matchms/issues/551)
 - Fix closing mgf file after loading and prevent reopening. [#555](https://github.com/matchms/matchms/issues/555)
 
 ### Changed

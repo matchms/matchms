@@ -35,7 +35,7 @@ def _safe_store_value(metadata: dict, value: Any, target_key: str) -> dict:
     return metadata
 
 
-def _safe_convert_to_float(value: Any) -> Optional[float]:
+def _safe_convert_to_float(retention_time: Any) -> Optional[float]:
     """Safely convert value to float. Return 'None' on failure.
 
     Parameters
@@ -47,27 +47,28 @@ def _safe_convert_to_float(value: Any) -> Optional[float]:
     -------
     Converted float value or 'None' if conversion is not possible.
     """
-    if isinstance(value, list):
-        if len(value) == 1:
-            value = value[0]
+    if isinstance(retention_time, list):
+        if len(retention_time) == 1:
+            retention_time = retention_time[0]
         else:
             return None
 
     # logic to read MoNA msp files which specify rt as string with "min" in it
-    if isinstance(value, str):
-        value = value.strip()
-        pattern = r'^[+-]?(\d*\.)?\d+\s*(min|s|h|ms)'
-        conversion = {"min": 60, "s": 1, "h": 3600, "ms": 1e-3}
-        match = re.search(pattern, value)
+    if isinstance(retention_time, str):
+        retention_time = retention_time.strip()
+        pattern = r'^([+-]?\d*\.?\d+)\s*(min|s|h|ms|sec)$'
+        conversion = {"min": 60, "s": 1, "h": 3600, "ms": 1e-3, "sec": 1}
+        match = re.search(pattern, retention_time)
 
         if match and len(match.groups()) == 2:
-            val, unit = value.split(' ')
-            return float(val) * conversion[unit]
+            value = match.group(1)
+            unit = match.group(2)
+            return float(value) * conversion[unit]
     try:
-        value = float(value)
-        rt = value if value >= 0 else None  # discard negative RT values
+        retention_time = float(retention_time)
+        rt = retention_time if retention_time >= 0 else None  # discard negative RT values
     except (ValueError, TypeError):
-        logger.warning("%s can't be converted to float.", str(value))
+        logger.warning("%s can't be converted to float.", str(retention_time))
         rt = None
     return rt
 
