@@ -82,7 +82,7 @@ def parse_msp_file(filename: str) -> Generator[dict, None, None]:
 
             masses = np.append(masses, mz)
             intensities = np.append(intensities, ints)
-            
+
             if comment is not None:
                 peak_comments.update({masses[-1]: comment})
 
@@ -103,8 +103,6 @@ def parse_msp_file(filename: str) -> Generator[dict, None, None]:
                 masses = []
                 intensities = []
                 peak_comments = {}
-            
-
 
 
 def _parse_line_with_peaks(rline: str) -> Tuple[List[float], List[float], str]:
@@ -116,9 +114,9 @@ def _parse_line_with_peaks(rline: str) -> Tuple[List[float], List[float], str]:
     Returns:
         Tuple[List[float], List[float], str]: mz, intensity and peak comments obtained from the line.
     """
-    comment, rline = get_peak_comment(rline)   
+    comment, rline = get_peak_comment(rline)
     mz, intensities = get_peak_values(rline)
-    
+
     return mz, intensities, comment
 
 
@@ -127,7 +125,7 @@ def get_peak_values(peak: str) -> Tuple[List[float], List[float]]:
     tokens = re.findall(r'(\d+(?:\.\d+)?(?:e[-+]?\d+)?)', peak)
     if len(tokens) % 2 != 0:
         raise RuntimeError("Wrong peak format detected!")
-    
+
     tokens = list(map(float, tokens))
     mz = tokens[0::2]
     intensities = tokens[1::2]
@@ -145,20 +143,39 @@ def get_peak_comment(rline: str) -> Tuple[str, str]:
 
 
 def parse_metadata(rline: str, params: dict):
-    """ Reads metadata contained in line into params dict. """
+    """ Reads metadata contained in line into params dict.
+
+    The complexity of this function stems from the fact that MSP allows for many different formats of metadata.
+    """
     matches = []
     splitted_line = rline.split(":", 1)
     if splitted_line[0].lower() == 'comments' and "=" in splitted_line[1]:
-        pattern = r'(\S+)="([^"]*)"|"(\w+)=([^"]*)"|"([^"]*)=([^"]*)"|(\S+)=(\d+(?:\.\d*)?)'
+        # This pattern check for different formats.
+        # The first checks for compound="caffeine", the second and third "compound=caffeine and the last for parent_mass=12.1
+        # The second and third almost match the same pattern, but the second is there to ensure tha the pattern
+        # "SMILES=CC(O)C(O)=O" is recognized as 'smiles': 'CC(O)C(O)=O' instead of 'smiles=cc(o)c(o)': 'O'
+        # The third pattern is needed since some keys like DB# should be stored, which is not recognized by the \w regex
+        # Cases like "Smiles=" will not be stores (since len(match) = 1) The reason that we did not change the * to +
+        # in the regex, is that we want to still match to these cases, so that the if len(matches) == 0: below is not
+        # called in cases like comments: "smiles=".
+        pattern = r'(\S+)="([^"]*)"|' \
+                  r'"(\w+)=([^"]*)"|' \
+                  r'"([^"]*)=([^"]*)"|' \
+                  r'(\S+)=(\d+(?:\.\d*)?)'
         matches = re.findall(pattern, splitted_line[1].replace("'", '"'))
         for match in matches:
+            # Remove the None parts
             match = [i for i in match if i]
-            key = match[0]
-            value = match[1]
-            if key.lower().strip() in params.keys() and key.lower().strip() == 'smiles':
-                params[key.lower()+"_2"] = value.strip()
-            else:
-                params[key.lower().strip()] = value.strip()
+            # If len is not 2 a pattern was matched like "compound_name="
+            if len(match) == 2:
+                key = match[0]
+                value = match[1]
+                if key.lower().strip() in params.keys() and key.lower().strip() == 'smiles':
+                    params[key.lower()+"_2"] = value.strip()
+                else:
+                    params[key.lower().strip()] = value.strip()
+    # msp files can have the format comments: smiles="CC=O" but also the format smiles: CC=O.
+    # The latter is captured by these lines.
     if len(matches) == 0:
         params[splitted_line[0].lower()] = splitted_line[1].strip()
 
