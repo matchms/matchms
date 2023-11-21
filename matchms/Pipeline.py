@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 import matchms.similarity as mssimilarity
 from matchms import calculate_scores
-from matchms.filtering.filter_order_and_default_pipelines import ALL_FILTERS
+from matchms.filtering.filter_order import ALL_FILTERS
 from matchms.filtering.SpectrumProcessor import SpectrumProcessor
 from matchms.importing.load_spectra import load_list_of_spectrum_files
 from matchms.logging_functions import (add_logging_to_file,
