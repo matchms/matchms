@@ -3,18 +3,18 @@ import logging
 import os
 from collections import OrderedDict, defaultdict
 from functools import partial
-from typing import Callable, Dict, Iterable, List, Optional, Tuple, Union
+from typing import Callable, Dict, Iterable, List, Optional, Union
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
 from matchms import Spectrum
 from matchms.exporting import save_spectra
-from matchms.filtering.filter_order import ALL_FILTERS, FILTER_FUNCTION_NAMES
+from matchms.filtering.filter_order import ALL_FILTERS
 from matchms.yaml_file_functions import ordered_dump
 
 
 logger = logging.getLogger("matchms")
-FunctionWithParametersType = Tuple[Union[Callable, str], Dict[str, any]]
+FilterDescription = Iterable[Callable, Dict[str, any]]
 
 
 class SpectrumProcessor:
@@ -33,54 +33,28 @@ class SpectrumProcessor:
     def __init__(self,
                  filters: Iterable[Union[str,
                                          Callable,
-                                         FunctionWithParametersType]]):
+                                         FilterDescription]]):
         self.filters = []
         self.filter_order = [x.__name__ for x in ALL_FILTERS]
-        for filter_name in filters:
-            self.parse_and_add_filter(filter_name)
-
-    def parse_and_add_filter(self, filter_description: Union[str,
-                                                             Callable,
-                                                             FunctionWithParametersType,
-                                                             ],
-                             filter_position: Optional[int] = None):
-        """Adds a filter, by parsing the different allowed inputs.
-
-        filter:
-            Allowed formats:
-            str (has to be a matchms function name)
-            (str, {str, any} (has to be a matchms function name, followed by parameters)
-            Callable (can be matchms filter or custom made filter)
-            Callable, {str, any} (the dict should be parameters.
-        filter_position:
-            If None: Matchms filters are automatically ordered.
-            Custom filters will be added at the end of the filter list.
-            If not None, the filter will be added to the given position in the filter order list.
-        """
-        filter_args = None
-        if isinstance(filter_description, (tuple, list)):
-            if len(filter_description) == 1:
-                filter_function = filter_description[0]
-            elif len(filter_description) == 2:
-                filter_function = filter_description[0]
-                filter_args = filter_description[1]
-            else:
-                raise ValueError("The filter_function should contain only two values, "
-                                 "the first should be string or callable and the second a dictionary with settings")
-        else:
-            filter_function = filter_description
-        if isinstance(filter_function, str):
-            filter_function = load_matchms_filter_from_string(filter_function)
-        self._add_filter_to_filter_order(filter_function.__name__,
-                                         filter_position=filter_position)
-        self._store_filter(filter_function, filter_args)
+        for filter_description in filters:
+            filter_function, filter_args = filter_description
+            self._store_filter(filter_function, filter_args)
 
     def _store_filter(self,
                       new_filter_function: Callable,
-                      filter_params: Optional[Dict[str, any]]):
-        """Stores filter, removes duplicates and sorts filters"""
+                      filter_params: Optional[Dict[str, any]],
+                      filter_position: Optional[int] = None,
+                      ):
+        """Stores filter, removes duplicates and sorts filters
+
+        filter_position:
+            If None: Matchms filters are automatically ordered.
+            Custom filters will be added at the end of the filter list.
+            If not None, the filter will be added to the given position in the filter order list."""
         if not callable(new_filter_function):
             raise TypeError("Expected callable filter function.")
+        self._add_filter_to_filter_order(new_filter_function.__name__,
+                                         filter_position=filter_position)
         new_filter_function = create_partial_function(new_filter_function, filter_params)
         check_all_parameters_given(new_filter_function)
         self._replace_already_stored_filters(new_filter_function)
@@ -221,14 +195,6 @@ class SpectrumProcessor:
         workflow = OrderedDict()
         workflow["Processing steps"] = self.processing_steps
         return ordered_dump(workflow)
-
-
-def load_matchms_filter_from_string(filter_name):
-    if not isinstance(filter_name, str):
-        raise ValueError("Expected a string")
-    if filter_name not in FILTER_FUNCTION_NAMES:
-        raise ValueError(f"Unknown filter type: {filter_name} Should be known filter name or function.")
-    return FILTER_FUNCTION_NAMES[filter_name]
 
 
 def create_partial_function(filter_function: Callable,
