@@ -3,10 +3,10 @@ import numpy as np
 import pytest
 from matchms import SpectrumProcessor
 from matchms import filtering as msfilters
+from matchms.filtering.default_pipelines import BASIC_FILTERS
 from matchms.filtering.SpectrumProcessor import ProcessingReport
 from matchms.importing.load_spectra import load_spectra
 from ..builder_Spectrum import SpectrumBuilder
-from matchms.filtering.default_pipelines import BASIC_FILTERS
 
 
 @pytest.fixture
