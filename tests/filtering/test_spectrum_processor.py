@@ -6,6 +6,7 @@ from matchms import filtering as msfilters
 from matchms.filtering.SpectrumProcessor import ProcessingReport
 from matchms.importing.load_spectra import load_spectra
 from ..builder_Spectrum import SpectrumBuilder
+from matchms.filtering.default_pipelines import BASIC_FILTERS
 
 
 @pytest.fixture
@@ -109,7 +110,7 @@ def test_filter_spectrums_report(spectrums):
                                            ])
     processor.parse_and_add_filter(filter_description=("require_minimum_number_of_peaks", {"n_required": 2}))
     processor.parse_and_add_filter(filter_description="add_losses")
-    spectrums, report = processor.process_spectrums(spectrums, create_report=True)
+    spectrums, report = processor.process_spectrums(spectrums)
     assert len(spectrums) == 2
     actual_masses = [s.get("precursor_mz") for s in spectrums]
     expected_masses = [100, 102]
@@ -300,10 +301,10 @@ def test_add_all_filter_types(spectrums):
                                                                  "nonsense_inchikey_multiple",
                                                                  ]
     processor.process_spectrums(spectrums)
-    spectrums, _ = processor.process_spectrums(spectrums, create_report=True)
+    spectrums, _ = processor.process_spectrums(spectrums)
     assert spectrums[0].get("inchikey") == "NONSENSENONSENSE", "Custom filter not executed properly"
 
-    
+
 def test_save_spectra_spectrum_processor(spectrums, tmp_path):
     processor = SpectrumProcessor(BASIC_FILTERS)
     filename = os.path.join(tmp_path, "spectra.msp")

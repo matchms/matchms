@@ -208,7 +208,7 @@ def test_pipeline_changing_workflow():
 
 
 def test_save_spectra_spectrum_processor(tmp_path):
-    workflow = create_workflow(predefined_processing_queries="basic")
+    workflow = create_workflow()
     pipeline = Pipeline(workflow)
     filename = os.path.join(tmp_path, "spectra.mgf")
 

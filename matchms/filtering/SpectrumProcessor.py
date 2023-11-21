@@ -9,7 +9,6 @@ import pandas as pd
 from tqdm import tqdm
 from matchms import Spectrum
 from matchms.exporting import save_spectra
-from matchms.filtering.default_pipelines import PREDEFINED_PIPELINES
 from matchms.filtering.filter_order import ALL_FILTERS, FILTER_FUNCTION_NAMES
 from matchms.yaml_file_functions import ordered_dump
 
@@ -186,10 +185,7 @@ class SpectrumProcessor:
                 raise FileExistsError("The specified save references file already exists")
         if not self.filters:
             logger.warning("No filters have been specified, so spectra were not filtered")
-        if create_report:
-            processing_report = ProcessingReport(self.filters)
-        else:
-            processing_report = None
+        processing_report = ProcessingReport(self.filters)
 
         processed_spectrums = []
         for s in tqdm(spectrums, disable=(not progress_bar), desc="Processing spectrums"):
