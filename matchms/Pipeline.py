@@ -22,10 +22,8 @@ logger = logging.getLogger("matchms")
 
 
 def create_workflow(yaml_file_name: Optional[str] = None,
-                    predefined_processing_queries: Optional[str] = "default",
-                    predefined_processing_reference: Optional[str] = "default",
-                    additional_filters_queries: Iterable[Union[str, Tuple[str, Dict[str, Any]]]] = (),
-                    additional_filters_references: Iterable[Union[str, Tuple[str, Dict[str, Any]]]] = (),
+                    query_filters: Iterable[Union[str, Tuple[str, Dict[str, Any]]]] = (),
+                    reference_filters: Iterable[Union[str, Tuple[str, Dict[str, Any]]]] = (),
                     score_computations: Iterable[Union[str, List[dict]]] = (),
                     ) -> OrderedDict:
     """Creates a workflow that specifies the filters and scores needed to be run by Pipeline
@@ -35,26 +33,17 @@ def create_workflow(yaml_file_name: Optional[str] = None,
     :param yaml_file_name:
         A yaml file containing the workflow settings will be saved if a file name is specified.
         If None no yaml file will be saved.
-    :param predefined_processing_queries:
-        Default lists of filters that will be used for processing the query spectra,
-        choose from: "minimal", "basic", "default", "fully_annotated".
-        An up to date list of the filters can be found in SpectrumProcessor.py
-    :param additional_filters_queries:
+    :param query_filters:
         Additional filters that should be applied to the query spectra.
-    :param predefined_processing_reference:
-        Default lists of filters that will be used for processing the reference spectra,
-        choose from: "minimal", "basic", "default", "fully_annotated".
-        An up to date list of the filters can be found in SpectrumProcessor.py
-    :param additional_filters_references:
+    :param reference_filters:
         Additional filters that should be applied to the reference spectra
     :param score_computations:
         Score computations that should be performed.
     """
-    # pylint: disable=too-many-arguments
     workflow = OrderedDict()
-    queries_processor = SpectrumProcessor(predefined_processing_queries, additional_filters_queries)
+    queries_processor = SpectrumProcessor(query_filters)
     workflow["query_filters"] = queries_processor.processing_steps
-    reference_processor = SpectrumProcessor(predefined_processing_reference, additional_filters_references)
+    reference_processor = SpectrumProcessor(reference_filters)
     workflow["reference_filters"] = reference_processor.processing_steps
     workflow["score_computations"] = score_computations
     if yaml_file_name is not None:
@@ -163,7 +152,7 @@ class Pipeline:
     def _initialize_spectrum_processor_queries(self):
         """Initialize spectrum processing workflow for the query spectra."""
         self.write_to_logfile("--- Processing pipeline query spectra: ---")
-        self.processing_queries = SpectrumProcessor(None, self.__workflow["query_filters"])
+        self.processing_queries = SpectrumProcessor(self.__workflow["query_filters"])
         self.write_to_logfile(str(self.processing_queries))
         if self.processing_queries.processing_steps != self.__workflow["query_filters"]:
             logger.warning("The order of the filters has been changed compared to the Yaml file.")
@@ -172,7 +161,7 @@ class Pipeline:
         """Initialize spectrum processing workflow for the reference spectra."""
         self.write_to_logfile("--- Processing pipeline reference spectra: ---")
 
-        self.processing_references = SpectrumProcessor(None, self.__workflow["reference_filters"])
+        self.processing_references = SpectrumProcessor(self.__workflow["reference_filters"])
         self.write_to_logfile(str(self.processing_references))
         if self.processing_queries.processing_steps != self.__workflow["query_filters"]:
             logger.warning("The order of the filters has been changed compared to the Yaml file.")
@@ -369,7 +358,7 @@ class Pipeline:
 def get_unused_filters(yaml_file):
     """Prints all filter names that are in ALL_FILTERS, but not in the yaml file"""
     workflow = load_workflow_from_yaml_file(yaml_file)
-    processor = SpectrumProcessor(None, workflow["query_filters"])
+    processor = SpectrumProcessor(workflow["query_filters"])
 
     filters_used = [filter_function.__name__ for filter_function in processor.filters]
     for filter_function in ALL_FILTERS:
