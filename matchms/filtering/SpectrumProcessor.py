@@ -83,7 +83,15 @@ class SpectrumProcessor:
             raise TypeError("Expected callable filter function.")
         new_filter_function = create_partial_function(new_filter_function, filter_params)
         check_all_parameters_given(new_filter_function)
-        # Replace filters that are already stored.
+        self.replace_already_stored_filters(new_filter_function)
+        # Sort filters according to their order in self.filter_order
+        self.filters.sort(key=lambda f: self.filter_order.index(f.__name__))
+
+    def replace_already_stored_filters(self,
+                                       new_filter_function: Callable):
+        """Replaces filters that are already stored
+
+        This will also overwrite the parameter settings, with the settings that are added last"""
         filter_already_added = False
         for i, filter_function in enumerate(self.filters):
             if new_filter_function.__name__ == filter_function.__name__:
@@ -94,8 +102,6 @@ class SpectrumProcessor:
                 filter_already_added = True
         if not filter_already_added:
             self.filters.append(new_filter_function)
-        # Sort filters according to their order in self.filter_order
-        self.filters.sort(key=lambda f: self.filter_order.index(f.__name__))
 
     def _add_filter_to_filter_order(self,
                                     filter_function_name,
