@@ -119,7 +119,8 @@ def test_unknown_keyword():
 
 
 def test_filter_spectrums(spectrums):
-    processor = SpectrumProcessor(["make_charge_int",
+    processor = SpectrumProcessor(predefined_pipeline=None,
+                                  ["make_charge_int",
                                    "interpret_pepmass",
                                    "derive_ionmode",
                                    "correct_charge",
