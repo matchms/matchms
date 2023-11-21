@@ -135,8 +135,8 @@ from .peak_processing.remove_peaks_outside_top_k import \
     remove_peaks_outside_top_k
 from .peak_processing.require_minimum_number_of_peaks import \
     require_minimum_number_of_peaks
-from .peak_processing.require_minimum_of_high_peaks import \
-    require_minimum_of_high_peaks
+from .peak_processing.require_minimum_number_of_high_peaks import \
+    require_minimum_number_of_high_peaks
 from .peak_processing.select_by_intensity import select_by_intensity
 from .peak_processing.select_by_mz import select_by_mz
 from .peak_processing.select_by_relative_intensity import \
@@ -183,7 +183,7 @@ __all__ = [
     "require_valid_annotation",
     "require_parent_mass_match_smiles",
     "require_minimum_number_of_peaks",
-    "require_minimum_of_high_peaks",
+    "require_minimum_number_of_high_peaks",
     "require_precursor_below_mz",
     "require_precursor_mz",
     "select_by_intensity",
