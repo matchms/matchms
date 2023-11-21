@@ -1,8 +1,10 @@
+import os
 import numpy as np
 import pytest
 from matchms import SpectrumProcessor
 from matchms import filtering as msfilters
 from matchms.filtering.SpectrumProcessor import ProcessingReport
+from matchms.importing.load_spectra import load_spectra
 from ..builder_Spectrum import SpectrumBuilder
 
 
@@ -91,7 +93,8 @@ def test_filter_spectrums(spectrums):
                                            "derive_ionmode",
                                            "correct_charge",
                                            ])
-    spectrums = processor.process_spectrums(spectrums)
+    spectrums, _ = processor.process_spectrums(spectrums)
+
     assert len(spectrums) == 3
     actual_masses = [s.get("precursor_mz") for s in spectrums]
     expected_masses = [100, 102, 104]
@@ -147,7 +150,7 @@ def test_adding_custom_filter(spectrums):
     processor.parse_and_add_filter(nonsense_inchikey)
     filters = processor.filters
     assert filters[-1].__name__ == "nonsense_inchikey"
-    spectrums, report = processor.process_spectrums(spectrums, create_report=True)
+    spectrums, report = processor.process_spectrums(spectrums)
     assert report.counter_number_processed == 3
     assert report.counter_changed_metadata == {'make_charge_int': 2, 'interpret_pepmass': 3,
                                                'derive_ionmode': 3, 'nonsense_inchikey': 3}
@@ -168,7 +171,7 @@ def test_adding_custom_filter_with_parameters(spectrums):
     processor.parse_and_add_filter((nonsense_inchikey_multiple, {"number": 2}))
     filters = processor.filters
     assert filters[-1].__name__ == "nonsense_inchikey_multiple"
-    spectrums, report = processor.process_spectrums(spectrums, create_report=True)
+    spectrums, report = processor.process_spectrums(spectrums)
     assert report.counter_number_processed == 3
     assert report.counter_changed_metadata == {'make_charge_int': 2, 'interpret_pepmass': 3,
                                                'derive_ionmode': 3, 'nonsense_inchikey_multiple': 3}
@@ -230,7 +233,7 @@ def test_add_custom_filter_with_parameters(spectrums):
     filters = processor.filters
 
     assert filters[-1].__name__ == "nonsense_inchikey_multiple"
-    spectrums, _ = processor.process_spectrums(spectrums, create_report=True)
+    spectrums, _ = processor.process_spectrums(spectrums)
     assert spectrums[0].get("inchikey") == "NONSENSENONSENSE", "Custom filter not executed properly"
 
 
@@ -248,7 +251,7 @@ def test_add_matchms_filter(filter_description, spectrums):
     processor.parse_and_add_filter(filter_description)
     filters = processor.filters
     assert filters[-1].__name__ == "require_correct_ionmode"
-    spectrums, _ = processor.process_spectrums(spectrums, create_report=True)
+    spectrums, _ = processor.process_spectrums(spectrums)
     assert not spectrums, "Expected to be empty list"
 
 
@@ -299,3 +302,19 @@ def test_add_all_filter_types(spectrums):
     processor.process_spectrums(spectrums)
     spectrums, _ = processor.process_spectrums(spectrums, create_report=True)
     assert spectrums[0].get("inchikey") == "NONSENSENONSENSE", "Custom filter not executed properly"
+
+    
+def test_save_spectra_spectrum_processor(spectrums, tmp_path):
+    processor = SpectrumProcessor(BASIC_FILTERS)
+    filename = os.path.join(tmp_path, "spectra.msp")
+
+    _, _ = processor.process_spectrums(spectrums, cleaned_spectra_file=str(filename))
+    assert os.path.exists(filename)
+
+    # Reload spectra and compare lengths
+    reloaded_spectra = list(load_spectra(str(filename)))
+    assert len(reloaded_spectra) == len(spectrums)
+
+    # Check that the processed spectra are stored
+    for spectrum in reloaded_spectra:
+        assert spectrum.get("precursor_mz") is not None

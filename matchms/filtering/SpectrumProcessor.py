@@ -1,5 +1,6 @@
 import inspect
 import logging
+import os
 from collections import OrderedDict, defaultdict
 from functools import partial
 from typing import Callable, Dict, Iterable, List, Optional, Tuple, Union
@@ -7,6 +8,8 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 from matchms import Spectrum
+from matchms.exporting import save_spectra
+from matchms.filtering.default_pipelines import PREDEFINED_PIPELINES
 from matchms.filtering.filter_order import ALL_FILTERS, FILTER_FUNCTION_NAMES
 from matchms.yaml_file_functions import ordered_dump
 
@@ -153,8 +156,8 @@ class SpectrumProcessor:
         return spectrum
 
     def process_spectrums(self, spectrums: list,
-                          create_report: bool = False,
                           progress_bar: bool = True,
+                          cleaned_spectra_file=None
                           ):
         """
         Process a list of spectrums with all filters in the processing pipeline.
@@ -168,12 +171,19 @@ class SpectrumProcessor:
             The report will be returned as pandas DataFrame. Default is set to False.
         progress_bar : bool, optional
             Displays progress bar if set to True. Default is True.
+        cleaned_spectra_file:
+            Path to where the cleaned spectra should be saved.
 
         Returns
         -------
         Spectrums
             List containing the processed spectrums.
+        processing_report
+            A ProcessingReport containing the effect of the filters.
         """
+        if cleaned_spectra_file is not None:
+            if os.path.exists(cleaned_spectra_file):
+                raise FileExistsError("The specified save references file already exists")
         if not self.filters:
             logger.warning("No filters have been specified, so spectra were not filtered")
         if create_report:
@@ -189,9 +199,10 @@ class SpectrumProcessor:
             if processed_spectrum is not None:
                 processed_spectrums.append(processed_spectrum)
 
-        if create_report:
-            return processed_spectrums, processing_report
-        return processed_spectrums
+        if cleaned_spectra_file is not None:
+            save_spectra(processed_spectrums, cleaned_spectra_file)
+
+        return processed_spectrums, processing_report
 
     @property
     def processing_steps(self):

@@ -3,7 +3,8 @@ import numpy as np
 from pickydict import PickyDict
 from .filtering.metadata_processing.add_precursor_mz import \
     _add_precursor_mz_metadata
-from .filtering.metadata_processing.add_retention import _add_retention
+from .filtering.metadata_processing.add_retention import (
+    _add_retention, _retention_index_keys, _retention_time_keys)
 from .filtering.metadata_processing.interpret_pepmass import \
     _interpret_pepmass_metadata
 from .filtering.metadata_processing.make_charge_int import \
@@ -106,11 +107,11 @@ class Metadata:
             metadata_filtered["ionmode"] = self.get("ionmode").lower()
 
         if metadata_filtered.get("retention_time"):
-            metadata_filtered = _add_retention(metadata_filtered, "retention_time", "retention_time")
+            metadata_filtered = _add_retention(metadata_filtered, "retention_time", _retention_time_keys)
 
         if metadata_filtered.get("retention_index"):
-            metadata_filtered = _add_retention(metadata_filtered, "retention_index", "retention_index")
-        
+            metadata_filtered = _add_retention(metadata_filtered, "retention_index", _retention_index_keys)
+
         if metadata_filtered.get("parent"):
             metadata_filtered["parent"] = float(metadata_filtered.get("parent"))
 
@@ -121,7 +122,7 @@ class Metadata:
 
         invalid_entries = ["", "NA", "N/A", "NaN"]
         metadata_filtered = {k:v for k,v in metadata_filtered.items() if v not in invalid_entries}
-        
+
         self.data = metadata_filtered
 
     # ------------------------------
@@ -195,7 +196,7 @@ class Metadata:
                 self.harmonize_keys()
         else:
             raise TypeError("Expected input of type dict or PickyDict.")
-    
+
     @staticmethod
     def set_key_replacements(keys: dict):
         """Set key replacements for metadata harmonization.

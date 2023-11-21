@@ -1,7 +1,8 @@
 import logging
+import os
 from collections import OrderedDict
 from datetime import datetime
-from typing import Iterable, List, Optional, Union
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 import matchms.similarity as mssimilarity
 from matchms import calculate_scores
 from matchms.filtering.filter_order import ALL_FILTERS
@@ -21,8 +22,8 @@ logger = logging.getLogger("matchms")
 
 
 def create_workflow(yaml_file_name: Optional[str] = None,
-                    query_filters: Iterable[Union[str, List[dict]]] = (),
-                    reference_filters: Iterable[Union[str, List[dict]]] = (),
+                    query_filters: Iterable[Union[str, Tuple[str, Dict[str, Any]]]] = (),
+                    reference_filters: Iterable[Union[str, Tuple[str, Dict[str, Any]]]] = (),
                     score_computations: Iterable[Union[str, List[dict]]] = (),
                     ) -> OrderedDict:
     """Creates a workflow that specifies the filters and scores needed to be run by Pipeline
@@ -46,6 +47,10 @@ def create_workflow(yaml_file_name: Optional[str] = None,
     workflow["reference_filters"] = reference_processor.processing_steps
     workflow["score_computations"] = score_computations
     if yaml_file_name is not None:
+        assert not os.path.exists(yaml_file_name), \
+            "This yaml file name already exists. " \
+            "To use the settings in the yaml file, please use the load_workflow_from_yaml_file function " \
+            "in yaml_file_functions.py or check the tutorial."
         with open(yaml_file_name, 'w', encoding="utf-8") as file:
             file.write("# Matchms pipeline config file \n")
             file.write("# Change and adapt fields where necessary \n")
@@ -170,7 +175,7 @@ class Pipeline:
         assert set(self.__workflow.keys()) == expected_keys
         check_score_computation(score_computations=self.score_computations)
 
-    def run(self, query_files, reference_files = None):
+    def run(self, query_files, reference_files = None, cleaned_query_file=None, cleaned_reference_file=None):
         """Execute the defined Pipeline workflow.
 
         This method will execute all steps of the workflow.
@@ -178,6 +183,13 @@ class Pipeline:
         2) Spectrum processing (using matchms filters)
         3) Score Computations
         """
+        if cleaned_reference_file is not None:
+            if os.path.exists(cleaned_reference_file):
+                raise FileExistsError("The specified save references file already exists")
+        if cleaned_query_file is not None:
+            if os.path.exists(cleaned_query_file):
+                raise FileExistsError("The specified save queries file already exists")
+
         self.set_logging()
         self.write_to_logfile("--- Start running matchms pipeline. ---")
         self.write_to_logfile(f"Start time: {str(datetime.now())}")
@@ -187,18 +199,15 @@ class Pipeline:
         self.write_to_logfile("--- Processing spectra ---")
         self.write_to_logfile(f"Time: {str(datetime.now())}")
         # Process query spectra
-        spectrums, report = self.processing_queries.process_spectrums(
-            self._spectrums_queries,
-            create_report=True,
-            progress_bar=self.progress_bar)
+        spectrums, report = self.processing_queries.process_spectrums(self._spectrums_queries,
+                                                                      progress_bar=self.progress_bar,
+                                                                      cleaned_spectra_file=cleaned_query_file)
         self._spectrums_queries = spectrums
         self.write_to_logfile(str(report))
         # Process reference spectra (if necessary)
         if self.is_symmetric is False:
             self._spectrums_references, report = self.processing_references.process_spectrums(
-                self._spectrums_references,
-                create_report=True,
-                progress_bar=self.progress_bar)
+                self._spectrums_references, progress_bar=self.progress_bar, cleaned_spectra_file=cleaned_reference_file)
             self.write_to_logfile(str(report))
         else:
             self._spectrums_references = self._spectrums_queries

@@ -32,6 +32,9 @@ def test_repair_not_matching_annotation_repair_inchikey(smile, inchi, inchikey, 
      "CCC", "InChI=1S/C3H8/c1-3-2/h3H2,1-2H3", "ATUOYWHBWRKTHZ-UHFFFAOYSA-N"),
     ("C(=O)=O", "InChI=1S/C3H8/c1-3-2/h3H2,1-2H3", "ATUOYWHBWRKTHZ-UHFFFAOYSA-N", 44,  # Both match the parent mass
      "C(=O)=O", "InChI=1S/C3H8/c1-3-2/h3H2,1-2H3", "ATUOYWHBWRKTHZ-UHFFFAOYSA-N"),  # So nothing should be changed
+    # Both don't match the parent mass, so nothing should be changed
+    ("C(=O)=O", "InChI=1S/C3H8/c1-3-2/h3H2,1-2H3", "ATUOYWHBWRKTHZ-UHFFFAOYSA-N", 50,
+     "C(=O)=O", "InChI=1S/C3H8/c1-3-2/h3H2,1-2H3", "ATUOYWHBWRKTHZ-UHFFFAOYSA-N"),
 ])
 def test_repair_not_matching_annotation_repair_smiles_inchi(smile, inchi, inchikey, parent_mass,
                                                      correct_smiles, correct_inchi, correct_inchikey):

@@ -18,7 +18,8 @@ from ..builder_Spectrum import SpectrumBuilder
     [{"nothing": "200"}, None],
     [{'scan_start_time': 0.629566}, 0.629566],
     [{'scan_start_time': [0.629566]}, 0.629566],
-    [{"rt": None, "retentiontime": 12.17}, 12.17]
+    [{"rt": None, "retentiontime": 12.17}, 12.17],
+    [{"retention_time": "100.0 sec"}, 100.0]
 ])
 def test_add_retention_time(metadata, expected):
     spectrum_in = SpectrumBuilder().with_metadata(metadata).build()

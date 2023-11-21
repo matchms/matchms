@@ -174,26 +174,28 @@ followed by calculating the Cosine score between mass Spectrums in the `tests/te
 Below a more advanced code example showing how you can make a specific pipeline for your needs.
 
 .. code-block:: python
+import os
+from matchms.Pipeline import Pipeline, create_workflow
+from matchms.filtering.default_pipelines import DEFAULT_FILTERS, LIBRARY_CLEANING
 
-    from matchms.Pipeline import Pipeline, create_workflow
-    from matchms.filtering.default_pipelines import BASIC_FILTERS, FULLY_ANNOTATED_PROCESSING
-    workflow = create_workflow(
-        yaml_file_name="my_config_file.yaml", # The workflow will be stored in a yaml file.
-        additional_filters_queries=BASIC_FILTERS + [
-           ["add_parent_mass"],
-           ["normalize_intensities"],
-           ["select_by_relative_intensity", {"intensity_from": 0.0, "intensity_to": 1.0}],
-           ["select_by_mz", {"mz_from": 0, "mz_to": 1000}],
-           ["require_minimum_number_of_peaks", {"n_required": 5}]],
-        additional_filters_references=FULLY_ANNOTATED_PROCESSING + ["add_fingerprint"],
-        score_computations=[["precursormzmatch",  {"tolerance": 100.0}],
-                            ["cosinegreedy", {"tolerance": 1.0}],
-                            ["filter_by_range", {"name": "CosineGreedy_score", "low": 0.2}]],
-        )
-    pipeline = Pipeline(workflow)
-    pipeline.logging_file = "my_pipeline.log"  # for pipeline and logging message
-    pipeline.logging_level = "INFO" #To define the verbosety of the logging
-    pipeline.run("tests/testdata/pesticides.mgf", "my_reference_library.mgf")
+results_folder = "./results"
+os.makedirs(results_folder, exist_ok=True)
+
+workflow = create_workflow(
+    yaml_file_name=os.path.join(results_folder, "my_config_file.yaml"),  # The workflow will be stored in a yaml file.
+    query_filters=DEFAULT_FILTERS,
+    reference_filters=LIBRARY_CLEANING + ["add_fingerprint"],
+    score_computations=[["precursormzmatch", {"tolerance": 100.0}],
+                        ["cosinegreedy", {"tolerance": 1.0}],
+                        ["filter_by_range", {"name": "CosineGreedy_score", "low": 0.2}]],
+)
+pipeline = Pipeline(workflow)
+pipeline.logging_file = os.path.join(results_folder, "my_pipeline.log")  # for pipeline and logging message
+pipeline.logging_level = "WARNING"  # To define the verbosety of the logging
+pipeline.run("tests/testdata/pesticides.mgf", "my_reference_library.mgf",
+             cleaned_query_file=os.path.join(results_folder, "cleaned_query_spectra.mgf"),
+             cleaned_reference_file=os.path.join(results_folder,
+                                                 "cleaned_library_spectra.mgf"))  # choose your own files
 
 
 Alternatively, in particular, if you need more room to add custom functions and steps, the individual steps can run without using the matchms ``Pipeline``:
