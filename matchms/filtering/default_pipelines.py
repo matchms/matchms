@@ -23,13 +23,15 @@ HARMONIZE_METADATA_ENTRIES = \
      msfilters.harmonize_undefined_smiles,
      msfilters.clean_adduct,
      ]
-DERIVE_MISSING_METADATA = [msfilters.correct_charge, msfilters.add_parent_mass, ]
+DERIVE_MISSING_METADATA = [msfilters.correct_charge,
+                           msfilters.add_parent_mass,
+                           msfilters.derive_inchi_from_smiles,
+                           msfilters.derive_smiles_from_inchi,
+                           msfilters.derive_inchikey_from_inchi,
+                           ]
 REQUIRE_COMPLETE_METADATA = [msfilters.require_precursor_mz,
                              (msfilters.require_correct_ionmode, {"ion_mode_to_keep": "both"}), ]
 REPAIR_ANNOTATION = [
-    msfilters.derive_inchi_from_smiles,
-    msfilters.derive_smiles_from_inchi,
-    msfilters.derive_inchikey_from_inchi,
     (msfilters.repair_smiles_of_salts, {'mass_tolerance': 0.1}),
     (msfilters.repair_precursor_is_parent_mass, {'mass_tolerance': 0.1}),
     (msfilters.repair_parent_mass_is_mol_wt, {'mass_tolerance': 0.1}),
