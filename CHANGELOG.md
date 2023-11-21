@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [unreleased]
+## [0.24.0] -2023-11-21
 ### Added
 - Option to set custom key replacements [#547](https://github.com/matchms/matchms/pull/547)
 - Option to set the export style in `save_as_mgf` and `save_as_json` to choose other than matchms styles such as `nist`, `riken`, `gnps` [#557](https://github.com/matchms/matchms/pull/557)
@@ -607,7 +607,8 @@ Contains three plot types: `plot_spectrum()` or `spectrum.plot()`, `plot_spectra
 - This is the initial version of Spec2Vec from https://github.com/iomega/Spec2Vec
 - (later splitted into matchms + spec2vec)
 
-[Unreleased]: https://github.com/matchms/matchms/compare/0.22.0...HEAD
+[Unreleased]: https://github.com/matchms/matchms/compare/0.24.0...HEAD
+[0.24.0]: https://github.com/matchms/matchms/compare/0.23.1...0.24.0
 [0.22.0]: https://github.com/matchms/matchms/compare/0.21.2...0.22.0
 [0.21.2]: https://github.com/matchms/matchms/compare/0.20.1...0.21.2
 [0.21.1]: https://github.com/matchms/matchms/compare/0.21.0...0.21.1
