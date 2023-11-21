@@ -14,6 +14,7 @@ from matchms.yaml_file_functions import ordered_dump
 
 
 logger = logging.getLogger("matchms")
+FunctionWithParametersType = Tuple[Union[Callable, str], Dict[str, any]]
 
 
 class SpectrumProcessor:
@@ -30,19 +31,18 @@ class SpectrumProcessor:
     """
 
     def __init__(self,
-                 filters: Iterable[Union[Tuple[str, Dict[str, any]],
-                                         str,
-                                         Tuple[Callable, Dict[str, any]],
-                                         Callable]]):
+                 filters: Iterable[Union[str,
+                                         Callable,
+                                         FunctionWithParametersType]]):
         self.filters = []
         self.filter_order = [x.__name__ for x in ALL_FILTERS]
         for filter_name in filters:
             self.parse_and_add_filter(filter_name)
 
-    def parse_and_add_filter(self, filter_description: Union[Tuple[str, Dict[str, any]],
-                                                             str,
-                                                             Tuple[Callable, Dict[str, any]],
-                                                             Callable],
+    def parse_and_add_filter(self, filter_description: Union[str,
+                                                             Callable,
+                                                             FunctionWithParametersType,
+                                                             ],
                              filter_position: Optional[int] = None):
         """Adds a filter, by parsing the different allowed inputs.
 
