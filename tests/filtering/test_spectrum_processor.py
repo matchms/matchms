@@ -120,11 +120,11 @@ def test_unknown_keyword():
 
 def test_filter_spectrums(spectrums):
     processor = SpectrumProcessor(predefined_pipeline=None,
-                                  ["make_charge_int",
-                                   "interpret_pepmass",
-                                   "derive_ionmode",
-                                   "correct_charge",
-                                  ])
+                                  additional_filters=["make_charge_int",
+                                                      "interpret_pepmass",
+                                                      "derive_ionmode",
+                                                      "correct_charge",
+                                                     ])
     spectrums, _ = processor.process_spectrums(spectrums)
     assert len(spectrums) == 3
     actual_masses = [s.get("precursor_mz") for s in spectrums]
