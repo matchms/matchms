@@ -31,6 +31,8 @@ def repair_smiles_of_salts(spectrum_in,
         return spectrum
     for ion, not_used_ions in possible_ion_combinations:
         ion_mass = get_monoisotopic_neutral_mass(ion)
+        if ion_mass is None:
+            continue
         mass_diff = abs(parent_mass - ion_mass)
         # Check for Repair parent mass is mol wt did only return 1 spectrum. So not added as option for simplicity.
         if mass_diff < mass_tolerance:
