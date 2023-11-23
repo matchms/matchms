@@ -31,15 +31,16 @@ def repair_smiles_of_salts(spectrum_in,
         return spectrum
     for ion, not_used_ions in possible_ion_combinations:
         ion_mass = get_monoisotopic_neutral_mass(ion)
-        mass_diff = abs(parent_mass - ion_mass)
-        # Check for Repair parent mass is mol wt did only return 1 spectrum. So not added as option for simplicity.
-        if mass_diff < mass_tolerance:
-            spectrum_with_ions = spectrum.clone()
-            spectrum_with_ions.set("smiles", ion)
-            spectrum_with_ions.set("salt_ions", not_used_ions)
-            logger.info("Removed salt ions: %s from %s to match parent mass",
-                        not_used_ions, smiles)
-            return spectrum_with_ions
+        if ion_mass:
+            mass_diff = abs(parent_mass - ion_mass)
+            # Check for Repair parent mass is mol wt did only return 1 spectrum. So not added as option for simplicity.
+            if mass_diff < mass_tolerance:
+                spectrum_with_ions = spectrum.clone()
+                spectrum_with_ions.set("smiles", ion)
+                spectrum_with_ions.set("salt_ions", not_used_ions)
+                logger.info("Removed salt ions: %s from %s to match parent mass",
+                            not_used_ions, smiles)
+                return spectrum_with_ions
     logger.warning("None of the parts of the smile %s match the parent mass: %s",
                    smiles, parent_mass)
     return spectrum
