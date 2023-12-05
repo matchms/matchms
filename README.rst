@@ -23,9 +23,11 @@ The software supports a range of popular spectral data formats, including mzML, 
 
 One of the strengths of matchms is its extensibility, allowing users to integrate custom similarity measures. Notable examples of spectrum similarity measures tailored for Matchms include `Spec2Vec <https://github.com/iomega/spec2vec>`_ and `MS2DeepScore <https://github.com/matchms/ms2deepscore>`_. Additionally, Matchms enhances efficiency by using faster similarity measures for initial pre-selection and supports storing results in sparse data formats, enabling the comparison of several hundred thousands of spectra. This combination of features positions Matchms as a comprehensive tool for mass spectrometry data analysis.
 
-If you use matchms in your research, please cite the following software paper:  
+If you use matchms in your research, please cite the following software papers:  
 
 F Huber, S. Verhoeven, C. Meijer, H. Spreeuw, E. M. Villanueva Castilla, C. Geng, J.J.J. van der Hooft, S. Rogers, A. Belloum, F. Diblen, J.H. Spaaks, (2020). matchms - processing and similarity evaluation of mass spectrometry data. Journal of Open Source Software, 5(52), 2411, https://doi.org/10.21105/joss.02411
+
+de Jonge NF, Hecht H, van der Hooft JJJ, Huber F. (2023). Reproducible MS/MS library cleaning pipeline in matchms. ChemRxiv. Cambridge: Cambridge Open Engage; 2023, https://doi.org/10.26434/chemrxiv-2023-l44cm
 
 
 .. |GitHub Badge| image:: https://img.shields.io/badge/github-repo-000.svg?logo=github&labelColor=gray&color=blue
