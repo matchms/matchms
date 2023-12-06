@@ -53,4 +53,4 @@ def save_as_mgf(spectrums: List[Spectrum],
             if 'fingerprint' in spectrum_dict["params"]:
                 del spectrum_dict["params"]["fingerprint"]
             # Append spectrum to file
-                py_mgf.write(spectrum_dict, out)
+            py_mgf.write(spectrum_dict, out)
