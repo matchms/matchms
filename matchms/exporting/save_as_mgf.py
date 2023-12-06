@@ -44,14 +44,13 @@ def save_as_mgf(spectrums: List[Spectrum],
         spectrums = [spectrums]
 
     fingerprint_export_warning(spectrums)
-
-    # Convert matchms.Spectrum() into dictionaries for pyteomics
-    for spectrum in spectrums:
-        spectrum_dict = {"m/z array": spectrum.peaks.mz,
-                         "intensity array": spectrum.peaks.intensities,
-                         "params": spectrum.metadata_dict(export_style)}
-        if 'fingerprint' in spectrum_dict["params"]:
-            del spectrum_dict["params"]["fingerprint"]
-        # Append spectrum to file
-        with open(filename, 'a', encoding="utf-8") as out:
-            py_mgf.write(spectrum_dict, out)
+    with open(filename, 'a', encoding="utf-8") as out:
+        # Convert matchms.Spectrum() into dictionaries for pyteomics
+        for spectrum in spectrums:
+            spectrum_dict = {"m/z array": spectrum.peaks.mz,
+                             "intensity array": spectrum.peaks.intensities,
+                             "params": spectrum.metadata_dict(export_style)}
+            if 'fingerprint' in spectrum_dict["params"]:
+                del spectrum_dict["params"]["fingerprint"]
+            # Append spectrum to file
+                py_mgf.write(spectrum_dict, out)
