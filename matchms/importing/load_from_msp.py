@@ -1,7 +1,7 @@
 import re
 from typing import Generator, List, Tuple
 import numpy as np
-from matchms.importing.parsing_utils import process_spectrum, sort_spectrum
+from matchms.importing.parsing_utils import process_spectrum
 from matchms.Spectrum import Spectrum
 
 

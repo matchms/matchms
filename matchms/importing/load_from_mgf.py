@@ -1,6 +1,6 @@
 from typing import Generator, TextIO, Union
 from pyteomics.mgf import MGF
-from matchms.importing.parsing_utils import process_spectrum, sort_spectrum
+from matchms.importing.parsing_utils import process_spectrum
 from matchms.Spectrum import Spectrum
 
 

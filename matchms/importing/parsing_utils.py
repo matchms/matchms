@@ -1,7 +1,7 @@
 """Helper functions for parsing metadata.
 """
 import ast
-from numpy import all, argsort
+import numpy as np
 from typing import Any, Union
 from matchms.Spectrum import Spectrum
 
@@ -94,8 +94,8 @@ def parse_mzml_mzxml_metadata(spectrum_dict: dict) -> dict:
 
 
 def sort_spectrum(mz, intensities):
-    if not all(mz[:-1] <= mz[1:]):
-        idx_sorted = argsort(mz)
+    if not np.all(mz[:-1] <= mz[1:]):
+        idx_sorted = np.argsort(mz)
         mz = mz[idx_sorted]
         intensities = intensities[idx_sorted]
     return mz, intensities
