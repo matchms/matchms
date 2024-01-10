@@ -1,8 +1,8 @@
 """Helper functions for parsing metadata.
 """
 import ast
-import numpy as np
 from typing import Any, Union
+import numpy as np
 from matchms.Spectrum import Spectrum
 
 

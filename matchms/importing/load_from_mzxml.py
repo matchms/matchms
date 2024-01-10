@@ -1,7 +1,8 @@
 from typing import Generator
 import numpy as np
 from pyteomics.mzxml import read
-from matchms.importing.parsing_utils import parse_mzml_mzxml_metadata, sort_spectrum
+from matchms.importing.parsing_utils import (parse_mzml_mzxml_metadata,
+                                             sort_spectrum)
 from matchms.Spectrum import Spectrum
 
 
