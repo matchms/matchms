@@ -1,7 +1,8 @@
 import re
 from typing import Generator, List, Tuple
 import numpy as np
-from ..Spectrum import Spectrum
+from matchms.importing.parsing_utils import process_spectrum
+from matchms.Spectrum import Spectrum
 
 
 def load_from_msp(filename: str,
@@ -34,25 +35,11 @@ def load_from_msp(filename: str,
         file_msp = "MoNA-export-GC-MS-first10.msp"
         spectrums = list(load_from_msp(file_msp))
     """
-
     for spectrum in parse_msp_file(filename):
-        metadata = spectrum.get("params", None)
-        mz = spectrum["m/z array"]
-        intensities = spectrum["intensity array"]
-        peak_comments = spectrum["peak comments"]
-        if peak_comments != {}:
-            metadata["peak_comments"] = peak_comments
-
-        # Sort by mz (if not sorted already)
-        if not np.all(mz[:-1] <= mz[1:]):
-            idx_sorted = np.argsort(mz)
-            mz = mz[idx_sorted]
-            intensities = intensities[idx_sorted]
-
-        yield Spectrum(mz=mz,
-                       intensities=intensities,
-                       metadata=metadata,
-                       metadata_harmonization=metadata_harmonization)
+        yield process_spectrum(
+            spectrum=spectrum,
+            metadata_harmonization=metadata_harmonization,
+            spectrum_type = "own")
 
 
 def parse_msp_file(filename: str) -> Generator[dict, None, None]:

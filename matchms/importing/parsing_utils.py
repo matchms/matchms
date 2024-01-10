@@ -1,6 +1,9 @@
 """Helper functions for parsing metadata.
 """
+import ast
+import numpy as np
 from typing import Any, Union
+from matchms.Spectrum import Spectrum
 
 
 def find_by_key(data: Union[list, dict], target: str) -> Any:
@@ -88,3 +91,34 @@ def parse_mzml_mzxml_metadata(spectrum_dict: dict) -> dict:
             "precursor_mz": precursor_mz,
             "scan_start_time": scan_time,
             "retention_time": retention_time}
+
+
+def sort_spectrum(mz, intensities):
+    if not np.all(mz[:-1] <= mz[1:]):
+        idx_sorted = np.argsort(mz)
+        mz = mz[idx_sorted]
+        intensities = intensities[idx_sorted]
+    return mz, intensities
+
+
+def process_spectrum(
+    spectrum,
+    metadata_harmonization,
+    spectrum_type = "pyteomics"):
+    metadata = spectrum.get("params", None)
+    mz = spectrum["m/z array"]
+    intensities = spectrum["intensity array"]
+    if spectrum_type == "pyteomics":
+        if "peak_comments" in metadata.keys():
+            metadata["peak_comments"] = ast.literal_eval(str(metadata["peak_comments"]))
+    else:
+        peak_comments = spectrum["peak comments"]
+        if peak_comments != {}:
+            metadata["peak_comments"] = peak_comments
+
+    mz, intensities = sort_spectrum(mz=mz, intensities=intensities)
+
+    return Spectrum(mz=mz,
+               intensities=intensities,
+               metadata=metadata,
+               metadata_harmonization=metadata_harmonization)
