@@ -76,7 +76,7 @@ def _get_mz_intensity_charge(pepmass):
                 try:
                     pepmass = float(pepmass)
                 except ValueError:
-                    return None, None, None
+                    return None, None, None 
         length = len(pepmass)
         values = [None, None, None]
         for i in range(length):
