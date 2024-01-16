@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## unreleased
 
+### Fixed
+- Fix instability introduced in CosineGreedy by `np.argsort`. [#595](https://github.com/matchms/matchms/issues/595)
+
 ### Changed
 - Speed up save_to_mgf by preventing repetitive file opening
 
@@ -20,7 +23,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Handle missing `precursor_mz` in representation and [#452](https://github.com/matchms/matchms/issues/452) introduced by [#514](https://github.com/matchms/matchms/pull/514/files)[#540](https://github.com/matchms/matchms/pull/540)
 - Fixed retention time harmonization for msp files [#551](https://github.com/matchms/matchms/issues/551)
 - Fix closing mgf file after loading and prevent reopening. [#555](https://github.com/matchms/matchms/issues/555)
-- Fix instability introduced in CosineGreedy by `np.argsort`. [#595](https://github.com/matchms/matchms/issues/595)
 
 ### Changed
 - Renamed derive_smiles_from_pubchem_compound_name_search to derive_annotation_from_compound_name. [#559](https://github.com/matchms/matchms/pull/559)
