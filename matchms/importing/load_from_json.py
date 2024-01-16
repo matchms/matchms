@@ -3,7 +3,7 @@ import json
 import logging
 from typing import List, Union
 import numpy as np
-from matchms.importing.parsing_utils import sort_spectrum
+from matchms.importing.parsing_utils import sort_by_mz
 from matchms.Spectrum import Spectrum
 
 
@@ -105,7 +105,7 @@ def dict2spectrum(spectrum_dict: dict,
         mz = np.array(peaks_list)[:, 0]
         intensities = np.array(peaks_list)[:, 1]
 
-        mz, intensities = sort_spectrum(mz=mz, intensities=intensities)
+        mz, intensities = sort_by_mz(mz=mz, intensities=intensities)
 
         return Spectrum(mz=mz,
                         intensities=intensities,

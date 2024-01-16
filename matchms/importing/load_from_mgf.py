@@ -1,6 +1,6 @@
 from typing import Generator, TextIO, Union
 from pyteomics.mgf import MGF
-from matchms.importing.parsing_utils import process_spectrum
+from matchms.importing.parsing_utils import parse_spectrum_dict
 from matchms.Spectrum import Spectrum
 
 
@@ -35,6 +35,6 @@ def load_from_mgf(filename: Union[str, TextIO],
     """
     with MGF(filename, convert_arrays=1) as reader:
         for pyteomics_spectrum in reader:
-            yield process_spectrum(
+            yield parse_spectrum_dict(
                 spectrum=pyteomics_spectrum,
                 metadata_harmonization=metadata_harmonization)

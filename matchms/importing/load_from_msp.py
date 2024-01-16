@@ -1,7 +1,7 @@
 import re
 from typing import Generator, List, Tuple
 import numpy as np
-from matchms.importing.parsing_utils import process_spectrum
+from matchms.importing.parsing_utils import parse_spectrum_dict
 from matchms.Spectrum import Spectrum
 
 
@@ -36,10 +36,11 @@ def load_from_msp(filename: str,
         spectrums = list(load_from_msp(file_msp))
     """
     for spectrum in parse_msp_file(filename):
-        yield process_spectrum(
+        yield parse_spectrum_dict(
             spectrum=spectrum,
             metadata_harmonization=metadata_harmonization,
-            spectrum_type = "own")
+            spectrum_type = "own"
+            )
 
 
 def parse_msp_file(filename: str) -> Generator[dict, None, None]:

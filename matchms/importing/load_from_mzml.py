@@ -2,7 +2,7 @@ from typing import Generator
 import numpy as np
 from pyteomics.mzml import read
 from matchms.importing.parsing_utils import (parse_mzml_mzxml_metadata,
-                                             sort_spectrum)
+                                             sort_by_mz)
 from matchms.Spectrum import Spectrum
 
 
@@ -40,7 +40,7 @@ def load_from_mzml(filename: str, ms_level: int = 2,
                 mz = np.asarray(pyteomics_spectrum["m/z array"], dtype="float")
                 intensities = np.asarray(pyteomics_spectrum["intensity array"], dtype="float")
 
-                mz, intensities = sort_spectrum(mz=mz, intensities=intensities)
+                mz, intensities = sort_by_mz(mz=mz, intensities=intensities)
 
                 yield Spectrum(mz=mz, intensities=intensities, metadata=metadata,
                                metadata_harmonization=metadata_harmonization)
