@@ -141,12 +141,12 @@ def test_spectrum_to_dict_matchms_style(spectrum: Spectrum):
     assert spectrum_dict == expected_dict
 
 
-def test_spectrum_repr_method():
+def test_spectrum_repr_and_str_method():
     spectrum = Spectrum(mz=np.array([1., 2., 3.]), intensities=np.array([0, 0.5, 1.]))
-    assert spectrum.__repr__() == "Spectrum(precursor m/z=0.00, 3 fragments between 1.0 and 3.0)"
+    assert repr(spectrum) == str(spectrum) == "Spectrum(precursor m/z=0.00, 3 fragments between 1.0 and 3.0)"
 
     spectrum = Spectrum(mz=np.array([]), intensities=np.array([]))
-    assert spectrum.__repr__() == "Spectrum(precursor m/z=0.00, no fragments)"
+    assert repr(spectrum) == str(spectrum) == "Spectrum(precursor m/z=0.00, no fragments)"
 
 def test_spectrum_hash(spectrum: Spectrum):
     assert hash(spectrum) == 382278160858921722, "Expected different hash."
