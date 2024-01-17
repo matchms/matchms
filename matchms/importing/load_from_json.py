@@ -3,7 +3,8 @@ import json
 import logging
 from typing import List, Union
 import numpy as np
-from ..Spectrum import Spectrum
+from matchms.importing.parsing_utils import sort_by_mz
+from matchms.Spectrum import Spectrum
 
 
 logger = logging.getLogger("matchms")
@@ -104,11 +105,8 @@ def dict2spectrum(spectrum_dict: dict,
         mz = np.array(peaks_list)[:, 0]
         intensities = np.array(peaks_list)[:, 1]
 
-        # Sort by mz (if not sorted already)
-        if not np.all(mz[:-1] <= mz[1:]):
-            idx_sorted = np.argsort(mz)
-            mz = mz[idx_sorted]
-            intensities = intensities[idx_sorted]
+        mz, intensities = sort_by_mz(mz=mz, intensities=intensities)
+
         return Spectrum(mz=mz,
                         intensities=intensities,
                         metadata=metadata_dict,
