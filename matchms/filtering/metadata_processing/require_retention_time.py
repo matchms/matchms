@@ -24,5 +24,4 @@ def require_retention_time(spectrum_in: SpectrumType) -> Union[SpectrumType, Non
     retention_time = spectrum.get("retention_time", None)
     if retention_time is None:
         return None
-    else:
-        return spectrum
+    return spectrum

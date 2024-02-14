@@ -24,5 +24,4 @@ def require_retention_index(spectrum_in: SpectrumType) -> Union[SpectrumType, No
     retention_index = spectrum.get("retention_index", None)
     if retention_index is None:
         return None
-    else:
-        return spectrum
+    return spectrum

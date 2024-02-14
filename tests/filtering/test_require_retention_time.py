@@ -1,10 +1,7 @@
-import numpy as np
 import pytest
-from testfixtures import LogCapture
 from matchms.filtering.metadata_processing.require_retention_time import \
     require_retention_time
-from matchms.logging_functions import (reset_matchms_logger,
-                                       set_matchms_logger_level)
+
 from ..builder_Spectrum import SpectrumBuilder
 
 
@@ -39,5 +36,3 @@ def test_require_retention_time_with_input_none(spectrum_in, expected):
     spectrum = require_retention_time(spectrum_in)
 
     assert spectrum is expected, "Expected None when input is None."
-
-
