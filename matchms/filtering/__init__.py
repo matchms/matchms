@@ -73,14 +73,19 @@ Should output
 
 """
 from matchms.filtering.default_filters import default_filters
-from matchms.filtering.metadata_processing.add_compound_name import add_compound_name
-from matchms.filtering.metadata_processing.add_fingerprint import add_fingerprint
-from matchms.filtering.metadata_processing.add_parent_mass import add_parent_mass
-from matchms.filtering.metadata_processing.add_precursor_mz import add_precursor_mz
-from matchms.filtering.metadata_processing.add_retention import (add_retention_index,
-                                                add_retention_time)
+from matchms.filtering.metadata_processing.add_compound_name import \
+    add_compound_name
+from matchms.filtering.metadata_processing.add_fingerprint import \
+    add_fingerprint
+from matchms.filtering.metadata_processing.add_parent_mass import \
+    add_parent_mass
+from matchms.filtering.metadata_processing.add_precursor_mz import \
+    add_precursor_mz
+from matchms.filtering.metadata_processing.add_retention import (
+    add_retention_index, add_retention_time)
 from matchms.filtering.metadata_processing.clean_adduct import clean_adduct
-from matchms.filtering.metadata_processing.clean_compound_name import clean_compound_name
+from matchms.filtering.metadata_processing.clean_compound_name import \
+    clean_compound_name
 from matchms.filtering.metadata_processing.correct_charge import correct_charge
 from matchms.filtering.metadata_processing.derive_adduct_from_name import \
     derive_adduct_from_name
@@ -101,8 +106,10 @@ from matchms.filtering.metadata_processing.harmonize_undefined_inchikey import \
     harmonize_undefined_inchikey
 from matchms.filtering.metadata_processing.harmonize_undefined_smiles import \
     harmonize_undefined_smiles
-from matchms.filtering.metadata_processing.interpret_pepmass import interpret_pepmass
-from matchms.filtering.metadata_processing.make_charge_int import make_charge_int
+from matchms.filtering.metadata_processing.interpret_pepmass import \
+    interpret_pepmass
+from matchms.filtering.metadata_processing.make_charge_int import \
+    make_charge_int
 from matchms.filtering.metadata_processing.repair_adduct_based_on_smiles import \
     repair_adduct_based_on_smiles
 from matchms.filtering.metadata_processing.repair_inchi_inchikey_smiles import \
@@ -115,22 +122,25 @@ from matchms.filtering.metadata_processing.repair_parent_mass_match_smiles_wrapp
     repair_parent_mass_match_smiles_wrapper
 from matchms.filtering.metadata_processing.repair_precursor_is_parent_mass import \
     repair_precursor_is_parent_mass
-from matchms.filtering.metadata_processing.repair_smiles_of_salts import repair_smiles_of_salts
+from matchms.filtering.metadata_processing.repair_smiles_of_salts import \
+    repair_smiles_of_salts
 from matchms.filtering.metadata_processing.require_correct_ionmode import \
     require_correct_ionmode
 from matchms.filtering.metadata_processing.require_parent_mass_match_smiles import \
     require_parent_mass_match_smiles
 from matchms.filtering.metadata_processing.require_precursor_below_mz import \
     require_precursor_below_mz
+from matchms.filtering.metadata_processing.require_precursor_mz import \
+    require_precursor_mz
 from matchms.filtering.metadata_processing.require_retention_index import \
     require_retention_index
 from matchms.filtering.metadata_processing.require_retention_time import \
     require_retention_time
-from matchms.filtering.metadata_processing.require_precursor_mz import require_precursor_mz
 from matchms.filtering.metadata_processing.require_valid_annotation import \
     require_valid_annotation
 from matchms.filtering.peak_processing.add_losses import add_losses
-from matchms.filtering.peak_processing.normalize_intensities import normalize_intensities
+from matchms.filtering.peak_processing.normalize_intensities import \
+    normalize_intensities
 from matchms.filtering.peak_processing.reduce_to_number_of_peaks import \
     reduce_to_number_of_peaks
 from matchms.filtering.peak_processing.remove_peaks_around_precursor_mz import \
@@ -141,7 +151,8 @@ from matchms.filtering.peak_processing.require_minimum_number_of_high_peaks impo
     require_minimum_number_of_high_peaks
 from matchms.filtering.peak_processing.require_minimum_number_of_peaks import \
     require_minimum_number_of_peaks
-from matchms.filtering.peak_processing.select_by_intensity import select_by_intensity
+from matchms.filtering.peak_processing.select_by_intensity import \
+    select_by_intensity
 from matchms.filtering.peak_processing.select_by_mz import select_by_mz
 from matchms.filtering.peak_processing.select_by_relative_intensity import \
     select_by_relative_intensity

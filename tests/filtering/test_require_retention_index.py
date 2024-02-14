@@ -1,7 +1,6 @@
 import pytest
 from matchms.filtering.metadata_processing.require_retention_index import \
     require_retention_index
-
 from ..builder_Spectrum import SpectrumBuilder
 
 

@@ -2,6 +2,7 @@ import logging
 from typing import Union
 from matchms.typing import SpectrumType
 
+
 logger = logging.getLogger("matchms")
 
 def require_retention_index(spectrum_in: SpectrumType) -> Union[SpectrumType, None]:
