@@ -1,8 +1,8 @@
 import os
-import pickle
 from typing import Generator, List, Optional, Union
 from matchms.importing import (load_from_json, load_from_mgf, load_from_msp,
-                               load_from_mzml, load_from_mzxml, load_from_usi)
+                               load_from_mzml, load_from_mzxml,
+                               load_from_pickle, load_from_usi)
 from matchms.Spectrum import Spectrum
 
 
@@ -45,30 +45,6 @@ def load_spectra(file: str, metadata_harmonization: bool = True,
         return load_from_pickle(file, metadata_harmonization)
 
     raise TypeError(f"File extension of file: {file} is not recognized")
-
-
-def load_from_pickle(filename: str, metadata_harmonization: bool) -> List[Spectrum]:
-    """Load spectra stored in pickle
-
-    Args:
-        filename (str): Pickled file with spectra.
-
-    Returns:
-        Any: Unpickled object. Should be a list of Spectra.
-    """
-    with open(filename, 'rb') as file:
-        loaded_object = pickle.load(file)
-
-    if not isinstance(loaded_object, list):
-        raise TypeError("Expected list of spectra")
-    for spectrum in loaded_object:
-        if not isinstance(spectrum, Spectrum):
-            raise TypeError("Expected list of spectra")
-
-    if metadata_harmonization:
-        loaded_object = [Spectrum(spectrum.mz, spectrum.intensities,
-                                  spectrum.metadata, metadata_harmonization) for spectrum in loaded_object]
-    return loaded_object
 
 
 def load_list_of_spectrum_files(spectrum_files: Union[List[str], str]

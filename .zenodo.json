@@ -83,6 +83,11 @@
       {
          "affiliation": "Jožef Stefan Institute",
          "name": "Aleksander Piciga"
+      },
+      {
+         "affiliation": "Institute of Molecular Systems Biology, ETH Zürich",
+         "name": "Rutz, Adriano",
+         "orcid": "0000-0003-0443-9902"
       }
    ],
    "description": "Python library for processing (tandem) mass spectrometry data and for computing spectral similarities.",

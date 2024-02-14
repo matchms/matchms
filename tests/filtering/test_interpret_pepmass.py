@@ -87,8 +87,10 @@ def test_empty_spectrum():
 
 
 @pytest.mark.parametrize("input_pepmass, expected_results", [
- ["(981.54, None)", (981.54, None, None)],
- ["(981.54, 44, -2)", (981.54, 44, -2)],
+    ["(981.54, None)", (981.54, None, None)],
+    ["(981.54, 44, -2)", (981.54, 44, -2)],
+    ["100.2", (100.2, None, None)],
+    ["something_random", (None, None, None)]
 ])
 def test_interpret_pepmass_error_v0_22_0(input_pepmass, expected_results):
     spectrum = SpectrumBuilder().with_metadata({"PEPMASS": input_pepmass}, metadata_harmonization=True).build()
@@ -129,7 +131,7 @@ def test_load_pepmass_error_issue_452():
         "ExactMass": "504.169034944",
         "Comments": comment
     }
-    
+
     mz = np.array([387.3, 387.4, 505, 505.1, 505.2], dtype=np.float64)
     ints = np.array([50, 0, 0, 50, 100], dtype=np.float64)
 

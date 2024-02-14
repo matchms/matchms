@@ -87,6 +87,11 @@ authors:
     affiliation: "Jožef Stefan Institute"
     family-names: Piciga
     given_names: Aleksander
+  -
+    affiliation: "Institute of Molecular Systems Biology, ETH Zürich"
+    family-names: Rutz
+    given-names: Adriano
+    orcid: "https://orcid.org/0000-0003-0443-9902"
 
 cff-version: "1.1.0"
 keywords:

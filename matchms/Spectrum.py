@@ -105,10 +105,12 @@ class Spectrum:
         return int.from_bytes(bytearray(combined_hash, 'utf-8'), 'big')
 
     def __repr__(self):
+        precursor_mz_str = f"{self.get('precursor_mz', 0.0):.2f}"
         num_peaks = len(self.peaks)
+        if num_peaks == 0:
+            return f"Spectrum(precursor m/z={precursor_mz_str}, no fragments)"
         min_mz = min(self.peaks.mz)
         max_mz = max(self.peaks.mz)
-        precursor_mz_str = f"{self.get('precursor_mz', 0.0):.2f}"
         return f"Spectrum(precursor m/z={precursor_mz_str}, {num_peaks} fragments between {min_mz:.1f} and {max_mz:.1f})"
 
     def __str__(self):

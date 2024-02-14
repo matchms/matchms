@@ -1,8 +1,7 @@
-import ast
 from typing import Generator, TextIO, Union
-import numpy as np
 from pyteomics.mgf import MGF
-from ..Spectrum import Spectrum
+from matchms.importing.parsing_utils import parse_spectrum_dict
+from matchms.Spectrum import Spectrum
 
 
 def load_from_mgf(filename: Union[str, TextIO],
@@ -34,22 +33,8 @@ def load_from_mgf(filename: Union[str, TextIO],
         Set to False if metadata harmonization to default keys is not desired.
         The default is True.
     """
-    with open(filename, 'r', encoding='utf-8') as file:
-        for pyteomics_spectrum in MGF(file, convert_arrays=1):
-
-            metadata = pyteomics_spectrum.get("params", None)
-            mz = pyteomics_spectrum["m/z array"]
-            intensities = pyteomics_spectrum["intensity array"]
-            if "peak_comments" in metadata.keys():
-                metadata["peak_comments"] = ast.literal_eval(str(metadata["peak_comments"]))
-
-            # Sort by mz (if not sorted already)
-            if not np.all(mz[:-1] <= mz[1:]):
-                idx_sorted = np.argsort(mz)
-                mz = mz[idx_sorted]
-                intensities = intensities[idx_sorted]
-
-            yield Spectrum(mz=mz,
-                           intensities=intensities,
-                           metadata=metadata,
-                           metadata_harmonization=metadata_harmonization)
+    with MGF(filename, convert_arrays=1) as reader:
+        for pyteomics_spectrum in reader:
+            yield parse_spectrum_dict(
+                spectrum=pyteomics_spectrum,
+                metadata_harmonization=metadata_harmonization)

@@ -69,8 +69,14 @@ def _get_mz_intensity_charge(pepmass):
         if isinstance(pepmass, str):
             matches = re.findall(r'\(([^)]+)\)', pepmass)
             if len(matches) > 1:
-                raise ValueError("Found more than one tuple in pepmass field.")            
-            pepmass = matches[0].split(",")
+                raise ValueError("Found more than one tuple in pepmass field.")
+            if len(matches) == 1:
+                pepmass = matches[0].split(",")
+            if len(matches) == 0:
+                try:
+                    pepmass = float(pepmass)
+                except ValueError:
+                    return None, None, None 
         length = len(pepmass)
         values = [None, None, None]
         for i in range(length):
