@@ -96,12 +96,14 @@ class Pipeline:
                ["select_by_mz", {"mz_from": 0, "mz_to": 1000}],
                ["require_minimum_number_of_peaks", {"n_required": 5}]],
             reference_filters=["add_fingerprint"],
-            score_computations=[["precursormzmatch",  {"tolerance": 120.0}],
-                               ["cosinegreedy", {"tolerance": 1.0}]
-                               ["filter_by_range", {"name": "CosineGreedy_score", "low": 0.3}],
-                               ["modifiedcosine", {"tolerance": 1.0}],
-                               ["filter_by_range", {"name": "ModifiedCosine_score", "low": 0.3}]],
-            )
+            score_computations=[
+                ["precursormzmatch",  {"tolerance": 120.0}],
+                ["cosinegreedy", {"tolerance": 1.0}]
+                ["filter_by_range", {"name": "CosineGreedy_score", "low": 0.3}],
+                ["modifiedcosine", {"tolerance": 1.0}],
+                ["filter_by_range", {"name": "ModifiedCosine_score", "low": 0.3}]
+            ]
+        )
 
         pipeline = Pipeline(workflow)
         pipeline.logging_file = "my_pipeline.log"

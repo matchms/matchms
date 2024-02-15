@@ -22,9 +22,7 @@ Here is an example:
                         intensities=np.array([200.0, 300.0, 50.0, 1.0]),
                         metadata={'id': 'spectrum1'})
 
-    # Users can pick a predefined pipeline ("basic", "default", "fully_annotated")
-    # Or set to None if no predefined settings are desired.
-    processing = SpectrumProcessor("basic")
+    processing = SpectrumProcessor()
 
     # Additional filters can be added as desired
     processing.add_matchms_filter("normalize_intensities")
