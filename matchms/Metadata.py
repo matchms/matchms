@@ -121,9 +121,14 @@ class Metadata:
             metadata_filtered["charge"] = charge_int
 
         invalid_entries = ["", "NA", "N/A", "NaN"]
-        metadata_filtered = {k:v for k,v in metadata_filtered.items() if v not in invalid_entries}
-
-        self.data = metadata_filtered
+        
+        metadata_filtered_ = {}
+        # Necessary to check not isinstance(..., str), since some values are arrays, and `not in`
+        # operator results in iterable, that has an ambiguous truth value
+        for k,v in metadata_filtered.items():
+            if not isinstance(v, str) or v not in invalid_entries:
+                metadata_filtered_[k] = v
+        self.data = metadata_filtered_
 
     # ------------------------------
     # Getters and Setters

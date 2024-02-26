@@ -79,7 +79,7 @@ def find_matches(spec1_mz: np.ndarray, spec2_mz: np.ndarray,
             if mz2 > high_bound:
                 break
             if mz2 < low_bound:
-                lowest_idx = peak2_idx
+                lowest_idx = peak2_idx + 1
             else:
                 matches.append((peak1_idx, peak2_idx))
     return matches
