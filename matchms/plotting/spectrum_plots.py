@@ -167,6 +167,13 @@ def plot_spectra_mirror(spec_top,
             np.ceil(spec_bottom.peaks.mz[-1] / 100 + 1) * 100,
         ]
     )
+    
+    # Enforce min_mz and max_mz if provided 
+    if 'max_mz' in spectrum_kws:
+        max_mz = spectrum_kws['max_mz']
+    if 'min_mz' in spectrum_kws:
+        min_mz = spectrum_kws['min_mz']
+
     ax.set_xlim(min_mz, max_mz)
     ax.yaxis.set_major_locator(mticker.AutoLocator())
     ax.yaxis.set_minor_locator(mticker.AutoMinorLocator())
