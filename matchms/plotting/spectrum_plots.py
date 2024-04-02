@@ -122,9 +122,9 @@ def plot_spectra_mirror(spec_top,
 
     Parameters
     ----------
-    spec_top: matchms.Spectrum
+    spec_top: matchms.Spectrum.Spectrum.Spectrum
         The spectrum to be plotted on the top.
-    spec_bottom: matchms.Spectrum
+    spec_bottom: matchms.Spectrum.Spectrum.Spectrum
         The spectrum to be plotted on the bottom.
     ax:
         Axes instance on which to plot the spectrum. If None the current Axes
@@ -167,6 +167,11 @@ def plot_spectra_mirror(spec_top,
             np.ceil(spec_bottom.peaks.mz[-1] / 100 + 1) * 100,
         ]
     )
+
+    # # Enforce min_mz and max_mz if provided
+    max_mz = spectrum_kws.get("max_mz", max_mz)
+    min_mz = spectrum_kws.get("min_mz", min_mz)
+
     ax.set_xlim(min_mz, max_mz)
     ax.yaxis.set_major_locator(mticker.AutoLocator())
     ax.yaxis.set_minor_locator(mticker.AutoMinorLocator())
