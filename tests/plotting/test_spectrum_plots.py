@@ -1,7 +1,8 @@
 import numpy as np
 from matplotlib import pyplot as plt
 from matchms import Spectrum
-from matchms.plotting import plot_spectra_array, plot_spectrum, plot_spectra_mirror
+from matchms.plotting import (plot_spectra_array, plot_spectra_mirror,
+                              plot_spectrum)
 
 
 def _assert_fig_ok(fig, n_plots, dpi, height):
