@@ -1,7 +1,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
 from matchms import Spectrum
-from matchms.plotting import plot_spectra_array, plot_spectrum
+from matchms.plotting import plot_spectra_array, plot_spectrum, plot_spectra_mirror
 
 
 def _assert_fig_ok(fig, n_plots, dpi, height):
@@ -20,6 +20,19 @@ def _assert_ax_ok(ax, n_lines, ylim, xlabel, ylabel):
     assert ax.get_ylim() == (0.0, ylim)
     assert ax.get_xlabel() == xlabel
     assert ax.get_ylabel() == ylabel
+
+
+def test_plot_mirror_plot():
+    # Create two random spectrums
+    spec_a = Spectrum(mz=np.array([100, 200, 300, 400.2]),
+                      intensities=np.array([0.5, 0.3, 0.1, 0.05]))
+    spec_b = Spectrum(mz=np.array([10.2, 20.2, 30.2, 40.2, 78.2]),
+                      intensities=np.array([0.5, 0.3, 0.1, 0.05, 3.1]))
+    max_mz = 250
+    min_mz = 60
+    # Boundaries were not applied in the previous coce
+    ax = plot_spectra_mirror(spec_a, spec_b, max_mz=max_mz, min_mz=min_mz)
+    assert ax.get_xlim() == (min_mz, max_mz)
 
 
 def test_plot_spectrum_default():
