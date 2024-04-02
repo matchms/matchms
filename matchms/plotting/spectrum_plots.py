@@ -122,9 +122,9 @@ def plot_spectra_mirror(spec_top,
 
     Parameters
     ----------
-    spec_top: matchms.Spectrum.Spectrum
+    spec_top: matchms.Spectrum.Spectrum.Spectrum
         The spectrum to be plotted on the top.
-    spec_bottom: matchms.Spectrum.Spectrum
+    spec_bottom: matchms.Spectrum.Spectrum.Spectrum
         The spectrum to be plotted on the bottom.
     ax:
         Axes instance on which to plot the spectrum. If None the current Axes
