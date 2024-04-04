@@ -201,7 +201,7 @@ def plot_spectra_array(spectrums,
 
     Parameters
     ----------
-    spectrums: list of matchms.Spectrum
+    spectrums: list of matchms.Spectrum.Spectrum
         List of spectra to be plotted in a single figure.
     n_cols:
         Number of spectra to be plotted per row. Default is 4.
