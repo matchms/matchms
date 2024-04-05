@@ -3,7 +3,6 @@ from matchms import Spectrum
 from matchms.filtering.filter_utils.get_neutral_mass_from_smiles import \
     get_monoisotopic_neutral_mass
 from ..filter_utils.load_known_adducts import load_known_adducts
-from .repair_parent_mass_is_mol_wt import repair_parent_mass_is_mol_wt
 
 
 logger = logging.getLogger("matchms")
