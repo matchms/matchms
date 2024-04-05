@@ -239,8 +239,8 @@ def test_add_custom_filter_with_parameters(spectrums):
 
 
 @pytest.mark.parametrize("filter_description", [
-    ("require_correct_ionmode", {"ion_mode_to_keep": "both"}),
-    (msfilters.require_correct_ionmode, {"ion_mode_to_keep": "both"})
+    ("require_correct_ionmode", {"ion_mode_to_keep": "negative"}),
+    (msfilters.require_correct_ionmode, {"ion_mode_to_keep": "negative"})
 
 ])
 def test_add_matchms_filter(filter_description, spectrums):
@@ -253,7 +253,7 @@ def test_add_matchms_filter(filter_description, spectrums):
     filters = processor.filters
     assert filters[-1].__name__ == "require_correct_ionmode"
     spectrums, _ = processor.process_spectrums(spectrums)
-    assert not spectrums, "Expected to be empty list"
+    assert len(spectrums) == 2
 
 
 @pytest.mark.parametrize("filter_description", [
