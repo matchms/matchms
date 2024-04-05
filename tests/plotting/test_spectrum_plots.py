@@ -67,6 +67,19 @@ def test_plot_spectrum_peak_comments():
                   xlabel="m/z", ylabel="Intensity")
 
 
+def test_plot_single_spectrum_plot_spectra_array():
+    """Test that inputing a single spectrum doesn't break plot_spectra_array"""
+    n_peaks = 50
+
+    mz = np.random.randint(0, 1000, n_peaks).astype("float")
+    mz.sort()
+
+    spectrum = Spectrum(mz=mz,
+                        intensities=np.random.random(n_peaks),
+                        metadata={"compound_name": "Spectrum name"})
+    plot_spectra_array([spectrum])
+
+
 def test_plot_spectra_array_default():
     n = 9
     n_peaks = 50

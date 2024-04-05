@@ -201,7 +201,7 @@ def plot_spectra_array(spectrums,
 
     Parameters
     ----------
-    spectrums: list of matchms.Spectrum
+    spectrums: list of matchms.Spectrum.Spectrum
         List of spectra to be plotted in a single figure.
     n_cols:
         Number of spectra to be plotted per row. Default is 4.
@@ -213,7 +213,7 @@ def plot_spectra_array(spectrums,
     assert isinstance(spectrums, list), "Expected list of Spectrum objects as input."
     n_spectra = len(spectrums)
     n_rows = int(np.ceil(n_spectra / n_cols))
-    fig, axes = plt.subplots(n_rows, n_cols, figsize=(7 * n_cols, 3 * n_rows), dpi=dpi)
+    fig, axes = plt.subplots(n_rows, n_cols, figsize=(7 * n_cols, 3 * n_rows), dpi=dpi, squeeze=False)
 
     if spectrum_kws is None:
         spectrum_kws = {}
