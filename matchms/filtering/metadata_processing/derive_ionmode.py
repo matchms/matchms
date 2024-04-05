@@ -64,12 +64,14 @@ def _derive_ionmode_from_charge(spectrum):
     if not isinstance(charge, int):
         logger.warning("Charge is given as string. Apply 'make_charge_int' filter first.")
         return None
-    if charge == 0:
-        return None
+
     if charge > 0:
         return "positive"
     if charge < 0:
         return "negative"
+    # In this case charge is 0
+    return None
+
 
 
 def _derive_ionmode_from_adduct(spectrum):
