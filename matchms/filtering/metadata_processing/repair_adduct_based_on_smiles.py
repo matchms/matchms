@@ -10,8 +10,7 @@ logger = logging.getLogger("matchms")
 
 
 def repair_adduct_based_on_smiles(spectrum_in: Spectrum,
-                                  mass_tolerance: float,
-                                  accept_parent_mass_is_mol_wt: bool = True):
+                                  mass_tolerance: float):
     """
     Corrects the adduct of a spectrum based on its SMILES representation and the precursor m/z.
 
@@ -62,17 +61,12 @@ def repair_adduct_based_on_smiles(spectrum_in: Spectrum,
     smallest_mass_index = mass_differences.idxmin()
     parent_mass = parent_masses[smallest_mass_index]
     adduct = adducts_df.loc[smallest_mass_index]["adduct"]
-    # Change spectrum. This spectrum will only be returned if the mass difference is smaller than mass tolerance
-    changed_spectrum.set("parent_mass", parent_mass)
-    changed_spectrum.set("adduct", adduct)
+
     if mass_differences[smallest_mass_index] < mass_tolerance:
+        # Change spectrum. This spectrum will only be returned if the mass difference is smaller than mass tolerance
+        changed_spectrum.set("parent_mass", parent_mass)
+        changed_spectrum.set("adduct", adduct)
         logger.info("Adduct was set from %s to %s",
                     spectrum_in.get('adduct'), adduct)
         return changed_spectrum
-    if accept_parent_mass_is_mol_wt:
-        changed_spectrum = repair_parent_mass_is_mol_wt(changed_spectrum, mass_tolerance)
-        if abs(changed_spectrum.get("parent_mass") - smiles_mass) < mass_tolerance:
-            logger.info("Adduct was set from %s to %s",
-                        spectrum_in.get('adduct'), adduct)
-            return changed_spectrum
     return spectrum_in
