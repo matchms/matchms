@@ -1,5 +1,5 @@
 import logging
-from matchms.typing import SpectrumType
+from matchms.Spectrum import Spectrum
 from ..filter_utils.load_known_adducts import load_known_adducts
 from .clean_adduct import _clean_adduct
 
@@ -7,7 +7,7 @@ from .clean_adduct import _clean_adduct
 logger = logging.getLogger("matchms")
 
 
-def derive_ionmode(spectrum_in: SpectrumType) -> SpectrumType:
+def derive_ionmode(spectrum_in: Spectrum) -> Spectrum:
     """Derive missing ionmode based on adduct.
 
     Some input formates (e.g. MGF files) do not always provide a correct ionmode.
@@ -33,6 +33,46 @@ def derive_ionmode(spectrum_in: SpectrumType) -> SpectrumType:
     if ionmode in ["positive", "negative"]:
         return spectrum
 
+    ionmode_from_charge = _derive_ionmode_from_charge(spectrum)
+    ionmode_from_adduct = _derive_ionmode_from_adduct(spectrum)
+
+    if ionmode_from_charge is not None and ionmode_from_adduct is not None:
+        if ionmode_from_charge != ionmode_from_adduct:
+            logger.warning("The ionmode based on the charge (%s) does not match the ionmode based on the adduct (%s)",
+                           spectrum.get("charge"), spectrum.get("adduct"))
+            return spectrum
+        spectrum.set("ionmode", ionmode_from_charge)
+        logger.info("Set ionmode to %s based on the charge and adduct", ionmode_from_charge)
+        return spectrum
+    if ionmode_from_charge is not None and ionmode_from_adduct is None:
+        spectrum.set("ionmode", ionmode_from_charge)
+        logger.info("Set ionmode to %s based on the charge", ionmode_from_charge)
+        return spectrum
+    if ionmode_from_charge is None and ionmode_from_adduct is not None:
+        spectrum.set("ionmode", ionmode_from_adduct)
+        logger.info("Set ionmode to %s based on the charge", ionmode_from_adduct)
+        return spectrum
+    logger.info("The ionmode could not be derived from the charge or adduct")
+    return spectrum
+
+
+def _derive_ionmode_from_charge(spectrum):
+    charge = spectrum.get("charge", None)
+
+    if spectrum.get("charge") is None:
+        return None
+    if not isinstance(charge, int):
+        logger.warning("Charge is given as string. Apply 'make_charge_int' filter first.")
+        return None
+    if charge == 0:
+        return None
+    if charge > 0:
+        return "positive"
+    if charge < 0:
+        return "negative"
+
+
+def _derive_ionmode_from_adduct(spectrum):
     adduct = spectrum.get("adduct", None)
     # Harmonize adduct string
     if adduct:
@@ -43,9 +83,5 @@ def derive_ionmode(spectrum_in: SpectrumType) -> SpectrumType:
     # Try completing missing or incorrect ionmodes
     if adduct in list(known_adducts["adduct"]):
         ionmode = known_adducts.loc[known_adducts["adduct"] == adduct, "ionmode"].values[0]
-    else:
-        ionmode = None
-
-    spectrum.set("ionmode", ionmode)
-    logger.info("Set ionmode to %s.", ionmode)
-    return spectrum
+        return ionmode
+    return None
