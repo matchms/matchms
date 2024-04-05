@@ -27,11 +27,6 @@ def repair_adduct_based_on_smiles(spectrum_in: Spectrum,
     mass_tolerance : float
         Maximum allowed mass difference between the calculated parent mass and the neutral
         monoisotopic mass derived from the SMILES.
-
-    accept_parent_mass_is_mol_wt : bool, optional (default=True)
-        Allows the function to attempt repairing the spectrum's parent mass by assuming it
-        represents the molecule's weight. If True, further checks and corrections are made
-        using `repair_parent_mass_is_mol_wt`.
     """
     if spectrum_in is None:
         return None
