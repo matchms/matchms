@@ -1,5 +1,5 @@
 import logging
-from typing import Union
+from typing import Union, Optional
 from matchms.typing import SpectrumType
 
 
@@ -7,7 +7,8 @@ logger = logging.getLogger("matchms")
 
 
 def require_precursor_mz(spectrum_in: SpectrumType,
-                         minimum_accepted_mz: float = 10.0
+                         minimum_accepted_mz: Optional[float] = 10.0,
+                         maximum_mz: Optional[float] = None
                          ) -> Union[SpectrumType, None]:
 
     """Returns None if there is no precursor_mz or if <= minimum_accepted_mz
@@ -18,6 +19,8 @@ def require_precursor_mz(spectrum_in: SpectrumType,
         Input spectrum.
     minimum_accepted_mz:
         Set to minimum acceptable value for precursor m/z. Default is set to 10.0.
+    maximum_mz:
+        Set the maximum value for precursor m/z.
     """
     if spectrum_in is None:
         return None
@@ -32,11 +35,17 @@ def require_precursor_mz(spectrum_in: SpectrumType,
             "Consider applying 'add_precursor_mz' filter first."
         return None
 
-    assert isinstance(precursor_mz, (float, int)), \
-        ("Expected 'precursor_mz' to be a scalar number.",
-         "Consider applying 'add_precursor_mz' filter first.")
-    if precursor_mz <= minimum_accepted_mz:
-        logger.info("Spectrum without precursor_mz was set to None.")
+    if not isinstance(precursor_mz, (float, int)):
+        logger.warning("Precursor mz was not a number (%s) consider applying 'add_precursor_mz' filter first",
+                       precursor_mz)
         return None
-
+    if minimum_accepted_mz is not None:
+        if precursor_mz < minimum_accepted_mz:
+            logger.info("Spectrum is removed since precursor mz (%s) was below minimum mz (%s)",
+                        precursor_mz, minimum_accepted_mz)
+            return None
+    if maximum_mz is not None:
+        if precursor_mz > maximum_mz:
+            logger.info("Spectrum is removed since precursor mz (%s) was above maximum mz (%s)",
+                        precursor_mz, maximum_mz)
     return spectrum
