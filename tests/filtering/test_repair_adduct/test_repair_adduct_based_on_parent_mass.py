@@ -13,7 +13,7 @@ from tests.builder_Spectrum import SpectrumBuilder
                           (4.33333, 16.03, "[M-3H]3-", "negative"),
                           (1000, 16.03, None, "negative"),  # should not be repaired
                           ])
-def test_repair_adduct_based_on_smiles_not_mol_wt(precursor_mz, parent_mass, expected_adduct, ionmode):
+def test_repair_adduct_based_on_parent_mass(precursor_mz, parent_mass, expected_adduct, ionmode):
     pytest.importorskip("rdkit")
 
     # CH4 is used as smiles, this has a mass of 16
