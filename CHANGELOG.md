@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## unreleased
 
 - Removed option accept_parent_mass_is_mol_wt in Repair_adduct_based_on_smiles
+- Added repair_adduct_based_on_parent_mass
+- Changed repair_adduct_and_parent_mass_based_on_smiles to update parent mass to the monoisotopic mass of the smiles, instead of updating based on precursor_mz and new adduct. 
 ## [0.24.1] -2024-01-16
 ### Fixed
 - Fix to handle spectra with empty peak arrays. [#598](https://github.com/matchms/matchms/issues/598)
