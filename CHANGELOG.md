@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## unreleased
 
+### Changed
+- repair_parent_mass_is_molar_weight does only repair parent mass and does not change the precursor mz.
+- Change repair_parent_mass_is_mol_wt to repair_parent_mass_is_molar_weight
+
 ## [0.24.1] -2024-01-16
 ### Fixed
 - Fix to handle spectra with empty peak arrays. [#598](https://github.com/matchms/matchms/issues/598)
