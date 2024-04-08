@@ -8,10 +8,10 @@ from ..filter_utils.load_known_adducts import load_known_adducts
 logger = logging.getLogger("matchms")
 
 
-def repair_adduct_based_on_smiles(spectrum_in: Spectrum,
-                                  mass_tolerance: float):
+def repair_adduct_and_parent_mass_based_on_smiles(spectrum_in: Spectrum,
+                                                  mass_tolerance: float):
     """
-    Corrects the adduct of a spectrum based on its SMILES representation and the precursor m/z.
+    Corrects the adduct and parent mass of a spectrum based on its SMILES representation and the precursor m/z.
 
     Given a spectrum, this function tries to match the spectrum's parent mass, derived from its
     precursor m/z and known adducts, to the neutral monoisotopic mass of the molecule derived

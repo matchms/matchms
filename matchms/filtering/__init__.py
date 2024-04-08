@@ -99,8 +99,8 @@ from .metadata_processing.harmonize_undefined_smiles import \
     harmonize_undefined_smiles
 from .metadata_processing.interpret_pepmass import interpret_pepmass
 from .metadata_processing.make_charge_int import make_charge_int
-from .metadata_processing.repair_adduct_based_on_smiles import \
-    repair_adduct_based_on_smiles
+from .metadata_processing.repair_adduct_and_parent_mass_based_on_smiles import \
+    repair_adduct_and_parent_mass_based_on_smiles
 from .metadata_processing.repair_inchi_inchikey_smiles import \
     repair_inchi_inchikey_smiles
 from .metadata_processing.repair_not_matching_annotation import \
@@ -167,7 +167,7 @@ __all__ = [
     "reduce_to_number_of_peaks",
     "remove_peaks_around_precursor_mz",
     "remove_peaks_outside_top_k",
-    "repair_adduct_based_on_smiles",
+    "repair_adduct_and_parent_mass_based_on_smiles",
     "require_correct_ionmode",
     "repair_inchi_inchikey_smiles",
     "repair_parent_mass_is_mol_wt",
