@@ -3,7 +3,7 @@ from matchms import Spectrum
 from matchms.filtering.filter_utils.get_neutral_mass_from_smiles import \
     get_monoisotopic_neutral_mass
 from .repair_adduct_based_on_parent_mass import _get_matching_adduct
-
+from ..filter_utils.derive_precursor_mz_and_parent_mass import derive_parent_mass_from_precursor_mz
 
 logger = logging.getLogger("matchms")
 
@@ -31,7 +31,19 @@ def repair_adduct_and_parent_mass_based_on_smiles(spectrum_in: Spectrum,
         return None
     changed_spectrum = spectrum_in.clone()
     smiles_mass = get_monoisotopic_neutral_mass(changed_spectrum.get("smiles"))
+    parent_mass = spectrum_in.get("parent_mass")
 
+    # First check if the given adduct and precursor mz already match the monoisotopic mass of the smiles
+    new_parent_mass = derive_parent_mass_from_precursor_mz(changed_spectrum,
+                                                           estimate_from_adduct=True,
+                                                           estimate_from_charge=False)
+    if new_parent_mass is not None:
+        if abs(new_parent_mass-smiles_mass) < mass_tolerance:
+            changed_spectrum.set("parent_mass", smiles_mass)
+            logger.info("Parent mass was updated from %s to %s to match the smiles mass", parent_mass, smiles_mass)
+            return changed_spectrum
+
+    # Otherwise check if any of the common adducts matches the smiles mass
     new_adduct = _get_matching_adduct(precursor_mz=spectrum_in.get("precursor_mz"),
                                       parent_mass=smiles_mass,
                                       ion_mode=spectrum_in.get("ionmode"),
@@ -43,10 +55,11 @@ def repair_adduct_and_parent_mass_based_on_smiles(spectrum_in: Spectrum,
     logger.info("Adduct was set from %s to %s",
                 spectrum_in.get('adduct'), new_adduct)
 
-    parent_mass = spectrum_in.get("parent_mass")
+    # if no parent_mass is set always overwrite
     if parent_mass is None:
         changed_spectrum.set("parent_mass", smiles_mass)
-        logger.info("Parent mass was updated from %s to %s to match the smiles mass", parent_mass, smiles_mass)
+        logger.info("Parent mass was set to match the smiles mass", parent_mass, smiles_mass)
+    # Only overwrite if the mass difference is too large
     elif abs(smiles_mass-parent_mass) > mass_tolerance:
         changed_spectrum.set("parent_mass", smiles_mass)
         logger.info("Parent mass was updated from %s to %s to match the smiles mass", parent_mass, smiles_mass)
