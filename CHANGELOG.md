@@ -9,8 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - repair_parent_mass_is_molar_weight does only repair parent mass and does not change the precursor mz.
 - Change repair_parent_mass_is_mol_wt to repair_parent_mass_is_molar_weight
+- Removed repair_precursor_is_parent_mass
 
 ## [0.24.1] -2024-01-16
+
+- Derive_ionmode now also derives ionmode from charge, before it was only derived from the adduct. 
 ### Fixed
 - Fix to handle spectra with empty peak arrays. [#598](https://github.com/matchms/matchms/issues/598)
 - Fix instability introduced in CosineGreedy by `np.argsort`. [#595](https://github.com/matchms/matchms/issues/595)
