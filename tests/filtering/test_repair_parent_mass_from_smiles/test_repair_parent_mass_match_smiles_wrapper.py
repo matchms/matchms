@@ -8,7 +8,7 @@ from tests.builder_Spectrum import SpectrumBuilder
                          "expected_smiles, expected_parent_mass, expected_precursor_mz, expected_adduct",
                          # Test repair parent mass is mol wt
                          [("CN1CCCC1C2=CN=CC=C2", 162.23, 163.23, "[M+H]+",
-                           "CN1CCCC1C2=CN=CC=C2", 162.115698455, 163.122974447999988, "[M+H]+"),
+                           "CN1CCCC1C2=CN=CC=C2", 162.115698455, 163.23, "[M+H]+"),
                           # Test repair precursor is parent mass
                           ("CN1CCCC1C2=CN=CC=C2",  161.108, 162.115698455, "[M+H]+",
                            "CN1CCCC1C2=CN=CC=C2", 162.115698455, 163.122974447999988, "[M+H]+"),
