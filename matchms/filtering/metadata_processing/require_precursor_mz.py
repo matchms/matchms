@@ -1,6 +1,5 @@
 import logging
-from typing import Union, Optional
-
+from typing import Optional, Union
 from matchms.typing import SpectrumType
 
 
