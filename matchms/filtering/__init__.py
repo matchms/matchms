@@ -109,6 +109,8 @@ from .metadata_processing.repair_parent_mass_is_mol_wt import \
     repair_parent_mass_is_mol_wt
 from .metadata_processing.repair_parent_mass_match_smiles_wrapper import \
     repair_parent_mass_match_smiles_wrapper
+from .metadata_processing.repair_adduct_based_on_parent_mass import \
+    repair_adduct_based_on_parent_mass
 from .metadata_processing.repair_precursor_is_parent_mass import \
     repair_precursor_is_parent_mass
 from .metadata_processing.repair_smiles_of_salts import repair_smiles_of_salts
@@ -168,6 +170,7 @@ __all__ = [
     "remove_peaks_around_precursor_mz",
     "remove_peaks_outside_top_k",
     "repair_adduct_and_parent_mass_based_on_smiles",
+    "repair_adduct_based_on_parent_mass",
     "require_correct_ionmode",
     "repair_inchi_inchikey_smiles",
     "repair_parent_mass_is_mol_wt",
