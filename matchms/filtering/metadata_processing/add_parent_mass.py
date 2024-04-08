@@ -17,7 +17,8 @@ _accepted_missing_entries = ["", "N/A", "NA", "n/a"]
 
 
 def add_parent_mass(spectrum_in: Spectrum, estimate_from_adduct: bool = True,
-                    overwrite_existing_entry: bool = False) -> Optional[Spectrum]:
+                    overwrite_existing_entry: bool = False,
+                    estimate_from_charge: bool = True) -> Optional[Spectrum]:
     """Add estimated parent mass to metadata (if not present yet).
 
     Method to calculate the parent mass from given precursor m/z together
@@ -37,6 +38,9 @@ def add_parent_mass(spectrum_in: Spectrum, estimate_from_adduct: bool = True,
         a known adduct.
     overwrite_existing_entry
         Default is False. If set to True, a newly computed value will replace existing ones.
+    estimate_from_charge
+        Default is True. If set to True, the charge will be used to estimate the parent mass.
+        Adduct of the form [M+H]+, [M+H]2+, [M-H]- etc are assumed.
     """
     if spectrum_in is None:
         return None
@@ -48,7 +52,8 @@ def add_parent_mass(spectrum_in: Spectrum, estimate_from_adduct: bool = True,
         spectrum.set("parent_mass", parent_mass)
         return spectrum
 
-    parent_mass = derive_parent_mass_from_precursor_mz(spectrum, estimate_from_adduct)
+    parent_mass = derive_parent_mass_from_precursor_mz(spectrum, estimate_from_adduct,
+                                                       estimate_from_charge=estimate_from_charge)
 
     if parent_mass is None:
         parent_mass = get_monoisotopic_neutral_mass(spectrum_in.get("smiles"))
