@@ -35,7 +35,7 @@ def repair_adduct_based_on_parent_mass(spectrum_in: Spectrum,
                             ion_mode)
         return spectrum_in
 
-    actual_parent_mass = changed_spectrum.get("paretn_mass")
+    actual_parent_mass = changed_spectrum.get("parent_mass")
     if actual_parent_mass is None:
         return spectrum_in
 
