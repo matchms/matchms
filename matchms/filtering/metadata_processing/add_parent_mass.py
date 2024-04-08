@@ -3,8 +3,9 @@ from typing import Optional
 from matchms.filtering.filter_utils.derive_precursor_mz_and_parent_mass import \
     derive_parent_mass_from_precursor_mz
 from matchms.Spectrum import Spectrum
-from ..filter_utils.get_neutral_mass_from_smiles import get_monoisotopic_neutral_mass
 from ...utils import get_first_common_element
+from ..filter_utils.get_neutral_mass_from_smiles import \
+    get_monoisotopic_neutral_mass
 
 
 logger = logging.getLogger("matchms")
