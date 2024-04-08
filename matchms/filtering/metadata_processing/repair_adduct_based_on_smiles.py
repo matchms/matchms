@@ -39,16 +39,19 @@ def repair_adduct_based_on_smiles(spectrum_in: Spectrum,
     changed_spectrum = spectrum_in.clone()
 
     precursor_mz = changed_spectrum.get("precursor_mz")
-    ion_mode = changed_spectrum.get("ionmode")
-    if ion_mode not in ("positive", "negative"):
-        logger.warning("Ionmode: %s not positive or negative, first run derive_ionmode",
-                        ion_mode)
-        return changed_spectrum
     if precursor_mz is None:
         logger.warning("Precursor_mz is None, first run add_precursor_mz")
         return changed_spectrum
 
+    ion_mode = changed_spectrum.get("ionmode")
+    if ion_mode not in ("positive", "negative"):
+        if ion_mode is not None:
+            logger.warning("Ionmode: %s not positive, negative or None, first run derive_ionmode",
+                            ion_mode)
+        return changed_spectrum
     adducts_df = load_known_adducts()
+    # Only use the adducts matching the ion mode
+    adducts_df = adducts_df[adducts_df["ionmode"] == ion_mode]
     smiles_mass = get_monoisotopic_neutral_mass(changed_spectrum.get("smiles"))
     if smiles_mass is None:
         return changed_spectrum
@@ -56,13 +59,13 @@ def repair_adduct_based_on_smiles(spectrum_in: Spectrum,
     mass_differences = abs(parent_masses-smiles_mass)
 
     # Select the lowest value
-    smalles_mass_index = mass_differences.idxmin()
-    parent_mass = parent_masses[smalles_mass_index]
-    adduct = adducts_df.iloc[smalles_mass_index]["adduct"]
+    smallest_mass_index = mass_differences.idxmin()
+    parent_mass = parent_masses[smallest_mass_index]
+    adduct = adducts_df.loc[smallest_mass_index]["adduct"]
     # Change spectrum. This spectrum will only be returned if the mass difference is smaller than mass tolerance
     changed_spectrum.set("parent_mass", parent_mass)
     changed_spectrum.set("adduct", adduct)
-    if mass_differences[smalles_mass_index] < mass_tolerance:
+    if mass_differences[smallest_mass_index] < mass_tolerance:
         logger.info("Adduct was set from %s to %s",
                     spectrum_in.get('adduct'), adduct)
         return changed_spectrum

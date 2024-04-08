@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## unreleased
 
 ## [0.24.1] -2024-01-16
+
+- Derive_ionmode now also derives ionmode from charge, before it was only derived from the adduct. 
 ### Fixed
 - Fix to handle spectra with empty peak arrays. [#598](https://github.com/matchms/matchms/issues/598)
 - Fix instability introduced in CosineGreedy by `np.argsort`. [#595](https://github.com/matchms/matchms/issues/595)
