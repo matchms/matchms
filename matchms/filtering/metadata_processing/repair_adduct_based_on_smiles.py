@@ -3,7 +3,7 @@ from matchms import Spectrum
 from matchms.filtering.filter_utils.get_neutral_mass_from_smiles import \
     get_monoisotopic_neutral_mass
 from ..filter_utils.load_known_adducts import load_known_adducts
-from .repair_parent_mass_is_mol_wt import repair_parent_mass_is_mol_wt
+from .repair_parent_mass_is_molar_mass import repair_parent_mass_is_molar_mass
 
 
 logger = logging.getLogger("matchms")
@@ -67,7 +67,7 @@ def repair_adduct_based_on_smiles(spectrum_in: Spectrum,
                     spectrum_in.get('adduct'), adduct)
         return changed_spectrum
     if accept_parent_mass_is_mol_wt:
-        changed_spectrum = repair_parent_mass_is_mol_wt(changed_spectrum, mass_tolerance)
+        changed_spectrum = repair_parent_mass_is_molar_mass(changed_spectrum, mass_tolerance)
         if abs(changed_spectrum.get("parent_mass") - smiles_mass) < mass_tolerance:
             logger.info("Adduct was set from %s to %s",
                         spectrum_in.get('adduct'), adduct)

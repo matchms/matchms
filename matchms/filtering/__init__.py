@@ -105,8 +105,8 @@ from .metadata_processing.repair_inchi_inchikey_smiles import \
     repair_inchi_inchikey_smiles
 from .metadata_processing.repair_not_matching_annotation import \
     repair_not_matching_annotation
-from .metadata_processing.repair_parent_mass_is_mol_wt import \
-    repair_parent_mass_is_mol_wt
+from .metadata_processing.repair_parent_mass_is_molar_mass import \
+    repair_parent_mass_is_molar_mass
 from .metadata_processing.repair_parent_mass_match_smiles_wrapper import \
     repair_parent_mass_match_smiles_wrapper
 from .metadata_processing.repair_precursor_is_parent_mass import \
@@ -170,7 +170,7 @@ __all__ = [
     "repair_adduct_based_on_smiles",
     "require_correct_ionmode",
     "repair_inchi_inchikey_smiles",
-    "repair_parent_mass_is_mol_wt",
+    "repair_parent_mass_is_molar_mass",
     "repair_parent_mass_match_smiles_wrapper",
     "repair_precursor_is_parent_mass",
     "repair_smiles_of_salts",
