@@ -4,7 +4,6 @@ from matchms.filtering.metadata_processing.repair_adduct_based_on_smiles import 
     repair_adduct_based_on_smiles
 from matchms.typing import SpectrumType
 from .repair_parent_mass_is_mol_wt import repair_parent_mass_is_mol_wt
-from .repair_precursor_is_parent_mass import repair_precursor_is_parent_mass
 from .repair_smiles_of_salts import repair_smiles_of_salts
 from .require_parent_mass_match_smiles import \
     _check_smiles_and_parent_mass_match
@@ -21,7 +20,6 @@ def repair_parent_mass_match_smiles_wrapper(spectrum_in: SpectrumType,
     spectrum = spectrum_in.clone()
 
     filters_to_apply = [repair_smiles_of_salts,
-                        repair_precursor_is_parent_mass,
                         repair_parent_mass_is_mol_wt,
                         repair_adduct_based_on_smiles,
                         ]
