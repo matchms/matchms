@@ -178,6 +178,7 @@ __all__ = [
     "require_parent_mass_match_smiles",
     "require_minimum_number_of_peaks",
     "require_minimum_number_of_high_peaks",
+    "require_precursor_below_mz",
     "require_precursor_mz",
     "select_by_intensity",
     "select_by_mz",
