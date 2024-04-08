@@ -58,7 +58,7 @@ def repair_adduct_and_parent_mass_based_on_smiles(spectrum_in: Spectrum,
     # if no parent_mass is set always overwrite
     if parent_mass is None:
         changed_spectrum.set("parent_mass", smiles_mass)
-        logger.info("Parent mass was set to match the smiles mass", parent_mass, smiles_mass)
+        logger.info("Parent mass was set to match the smiles mass: %s", smiles_mass)
     # Only overwrite if the mass difference is too large
     elif abs(smiles_mass-parent_mass) > mass_tolerance:
         changed_spectrum.set("parent_mass", smiles_mass)
