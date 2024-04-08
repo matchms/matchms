@@ -1,3 +1,4 @@
+import matchms.filtering.metadata_processing.require_precursor_mz
 from matchms import filtering as msfilters
 
 
@@ -35,7 +36,7 @@ ALL_FILTERS = [msfilters.make_charge_int,
                msfilters.repair_not_matching_annotation,
                msfilters.require_valid_annotation,
                msfilters.require_correct_ionmode,
-               msfilters.require_precursor_below_mz,
+               matchms.filtering.metadata_processing.require_precursor_mz.require_precursor_below_mz,
                msfilters.require_parent_mass_match_smiles,
                msfilters.normalize_intensities,
                msfilters.select_by_intensity,

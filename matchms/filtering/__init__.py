@@ -116,9 +116,7 @@ from .metadata_processing.require_correct_ionmode import \
     require_correct_ionmode
 from .metadata_processing.require_parent_mass_match_smiles import \
     require_parent_mass_match_smiles
-from .metadata_processing.require_precursor_below_mz import \
-    require_precursor_below_mz
-from .metadata_processing.require_precursor_mz import require_precursor_mz
+from .metadata_processing.require_precursor_mz import require_precursor_mz, require_precursor_below_mz
 from .metadata_processing.require_valid_annotation import \
     require_valid_annotation
 from .peak_processing.add_losses import add_losses
@@ -180,7 +178,6 @@ __all__ = [
     "require_parent_mass_match_smiles",
     "require_minimum_number_of_peaks",
     "require_minimum_number_of_high_peaks",
-    "require_precursor_below_mz",
     "require_precursor_mz",
     "select_by_intensity",
     "select_by_mz",
