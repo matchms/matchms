@@ -1,7 +1,9 @@
 import logging
+from typing import Optional
 from matchms.filtering.filter_utils.derive_precursor_mz_and_parent_mass import \
     derive_parent_mass_from_precursor_mz
-from matchms.typing import SpectrumType
+from matchms.Spectrum import Spectrum
+from ..filter_utils.get_neutral_mass_from_smiles import get_monoisotopic_neutral_mass
 from ...utils import get_first_common_element
 
 
@@ -14,8 +16,8 @@ _accepted_types = (float, str, int)
 _accepted_missing_entries = ["", "N/A", "NA", "n/a"]
 
 
-def add_parent_mass(spectrum_in: SpectrumType, estimate_from_adduct: bool = True,
-                    overwrite_existing_entry: bool = False) -> SpectrumType:
+def add_parent_mass(spectrum_in: Spectrum, estimate_from_adduct: bool = True,
+                    overwrite_existing_entry: bool = False) -> Optional[Spectrum]:
     """Add estimated parent mass to metadata (if not present yet).
 
     Method to calculate the parent mass from given precursor m/z together
@@ -47,6 +49,9 @@ def add_parent_mass(spectrum_in: SpectrumType, estimate_from_adduct: bool = True
         return spectrum
 
     parent_mass = derive_parent_mass_from_precursor_mz(spectrum, estimate_from_adduct)
+
+    if parent_mass is None:
+        parent_mass = get_monoisotopic_neutral_mass(spectrum_in.get("smiles"))
 
     if parent_mass is None:
         logger.warning("Not sufficient spectrum metadata to derive parent mass.")
