@@ -101,6 +101,8 @@ from .metadata_processing.interpret_pepmass import interpret_pepmass
 from .metadata_processing.make_charge_int import make_charge_int
 from .metadata_processing.repair_adduct_and_parent_mass_based_on_smiles import \
     repair_adduct_and_parent_mass_based_on_smiles
+from .metadata_processing.repair_adduct_based_on_parent_mass import \
+    repair_adduct_based_on_parent_mass
 from .metadata_processing.repair_inchi_inchikey_smiles import \
     repair_inchi_inchikey_smiles
 from .metadata_processing.repair_not_matching_annotation import \
@@ -109,8 +111,6 @@ from .metadata_processing.repair_parent_mass_is_mol_wt import \
     repair_parent_mass_is_mol_wt
 from .metadata_processing.repair_parent_mass_match_smiles_wrapper import \
     repair_parent_mass_match_smiles_wrapper
-from .metadata_processing.repair_adduct_based_on_parent_mass import \
-    repair_adduct_based_on_parent_mass
 from .metadata_processing.repair_precursor_is_parent_mass import \
     repair_precursor_is_parent_mass
 from .metadata_processing.repair_smiles_of_salts import repair_smiles_of_salts
