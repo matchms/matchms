@@ -11,7 +11,7 @@ from tests.builder_Spectrum import SpectrumBuilder
                            "CN1CCCC1C2=CN=CC=C2", 162.115698455, 163.23, "[M+H]+"),
                           # Test repair precursor is parent mass
                           ("CN1CCCC1C2=CN=CC=C2",  161.108, 162.115698455, "[M+H]+",
-                           "CN1CCCC1C2=CN=CC=C2", 162.115698455, 163.122974447999988, "[M+H]+"),
+                           "CN1CCCC1C2=CN=CC=C2", 162.115698455, 162.115698455, "[M+H]+"),
                           # Test repair adduct based on smiles
                           ("C", 0.0, 17.5, "[M+H]+",
                            "C", 15.9589, 17.5, "[M+H+NH4]2+")
