@@ -9,9 +9,9 @@ from tests.builder_Spectrum import SpectrumBuilder
                          # Test repair parent mass is mol wt
                          [("CN1CCCC1C2=CN=CC=C2", 162.23, 163.23, "[M+H]+",
                            "CN1CCCC1C2=CN=CC=C2", 162.115698455, 163.23, "[M+H]+"),
-                          # Test repair precursor is parent mass
+                          # When the precursor mz could be mistaken with the parent mass it should not be repaired.
                           ("CN1CCCC1C2=CN=CC=C2",  161.108, 162.115698455, "[M+H]+",
-                           "CN1CCCC1C2=CN=CC=C2", 162.115698455, 162.115698455, "[M+H]+"),
+                           "CN1CCCC1C2=CN=CC=C2", 161.108, 162.115698455, "[M+H]+"),
                           # Test repair adduct based on smiles
                           ("C", 0.0, 17.5, "[M+H]+",
                            "C", 15.9589, 17.5, "[M+H+NH4]2+")
