@@ -225,6 +225,7 @@ class Pipeline:
                 self.write_to_logfile(f"-- Score computation: {computation} --")
                 self._apply_similarity_measure(computation, i)
         self.write_to_logfile(f"--- Pipeline run finised ({str(datetime.now())}) ---")
+        return report
 
     def _apply_score_masking(self, computation):
         """Apply filter to remove scores which are out of the set range.
