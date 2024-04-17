@@ -119,8 +119,6 @@ from .metadata_processing.require_parent_mass_match_smiles import \
 from .metadata_processing.require_precursor_below_mz import \
     require_precursor_below_mz
 from .metadata_processing.require_precursor_mz import require_precursor_mz
-from .metadata_processing.require_retention_index import require_retention_index
-from .metadata_processing.require_retention_time import require_retention_time
 from .metadata_processing.require_valid_annotation import \
     require_valid_annotation
 from .peak_processing.add_losses import add_losses
@@ -185,8 +183,6 @@ __all__ = [
     "require_precursor_mz",
     "require_compound_name",
     "require_formula",
-    "require_retention_time",
-    "require_retention_index",
     "select_by_intensity",
     "select_by_mz",
     "select_by_relative_intensity",
