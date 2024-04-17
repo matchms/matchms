@@ -15,6 +15,6 @@ def require_compound_name(spectrum: SpectrumType) -> Optional[SpectrumType]:
 
     if compound_name:
         return spectrum
-    else:
-        logger.info("Spectrum does not contain a compound name.")
-        return None
+    
+    logger.info("Spectrum does not contain a compound name.")
+    return None

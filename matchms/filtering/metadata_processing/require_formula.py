@@ -16,9 +16,9 @@ def require_formula(spectrum: SpectrumType) -> Optional[SpectrumType]:
     formula = spectrum.get('formula', None)
     if formula and _is_valid_formula(formula):
         return spectrum
-    else:
-        logger.info("Spectrum does not contain a valid molecular formula.")
-        return None
+    
+    logger.info("Spectrum does not contain a valid molecular formula.")
+    return None
 
 
 def _is_valid_formula(formula: str) -> bool:
