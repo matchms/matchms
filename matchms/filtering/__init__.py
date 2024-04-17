@@ -110,13 +110,17 @@ from .metadata_processing.repair_parent_mass_is_mol_wt import \
 from .metadata_processing.repair_parent_mass_match_smiles_wrapper import \
     repair_parent_mass_match_smiles_wrapper
 from .metadata_processing.repair_smiles_of_salts import repair_smiles_of_salts
+from .metadata_processing.require_compound_name import require_compound_name
 from .metadata_processing.require_correct_ionmode import \
     require_correct_ionmode
+from .metadata_processing.require_formula import require_formula
 from .metadata_processing.require_parent_mass_match_smiles import \
     require_parent_mass_match_smiles
 from .metadata_processing.require_precursor_below_mz import \
     require_precursor_below_mz
 from .metadata_processing.require_precursor_mz import require_precursor_mz
+from .metadata_processing.require_retention_index import require_retention_index
+from .metadata_processing.require_retention_time import require_retention_time
 from .metadata_processing.require_valid_annotation import \
     require_valid_annotation
 from .peak_processing.add_losses import add_losses
@@ -179,6 +183,10 @@ __all__ = [
     "require_minimum_number_of_high_peaks",
     "require_precursor_below_mz",
     "require_precursor_mz",
+    "require_compound_name",
+    "require_formula",
+    "require_retention_time",
+    "require_retention_index",
     "select_by_intensity",
     "select_by_mz",
     "select_by_relative_intensity",
