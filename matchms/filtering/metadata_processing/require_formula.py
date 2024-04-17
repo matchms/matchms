@@ -2,7 +2,6 @@ import logging
 import re
 from typing import Optional
 from matchms.typing import SpectrumType
-from matchms.filtering.metadata_processing.derive_formula_from_name import _looks_like_formula
 
 
 logger = logging.getLogger("matchms")
