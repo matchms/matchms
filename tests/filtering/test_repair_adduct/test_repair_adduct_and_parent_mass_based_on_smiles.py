@@ -11,7 +11,15 @@ from tests.builder_Spectrum import SpectrumBuilder
                           (15.0, "[M-H]-", "negative"),
                           (51.0, "[M+Cl]-", "negative"),
                           (4.33333, "[M-3H]3-", "negative"),
-                          (1000, None, "negative"),  # should not be fixed
+                          # should not be fixed
+                          (1000, None, "negative"),
+                          # Should not be repaired as [M]+, since this could also be a mistake with the precursor mz
+                          # being the parent mass
+                          (16.04, None, "positive"),
+                           # Should not be repaired as [M]-, since this could also be a mistake with the precursor mz
+                           # being the parent mass
+                           (16.04, None, "negative"),
+                           (1000, None, "positive"),
                           ])
 def test_repair_adduct_and_parent_mass_based_on_smiles(precursor_mz, expected_adduct, ionmode):
     pytest.importorskip("rdkit")

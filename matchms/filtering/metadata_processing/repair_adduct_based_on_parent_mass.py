@@ -54,6 +54,10 @@ def _get_matching_adduct(precursor_mz, parent_mass, ion_mode, mass_tolerance):
     # Only use the adducts matching the ion mode
     adducts_df = adducts_df[adducts_df["ionmode"] == ion_mode]
 
+    # M+ and M- should not be used, since these could accidentally repair cases, where the parent mass is filled in
+    #   instead of the precursor_mz. Since we cannot differentiate between the two options, we won't repair them.
+    adducts_df = adducts_df[~adducts_df["adduct"].isin(("[M]+", "[M]-"))]
+
     parent_masses = (precursor_mz - adducts_df["correction_mass"]) / adducts_df["mass_multiplier"]
     mass_differences = abs(parent_masses - parent_mass)
 
