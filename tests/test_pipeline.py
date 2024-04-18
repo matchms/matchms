@@ -235,3 +235,19 @@ def test_add_custom_filter():
     pipeline.run(spectrums_file_msp)
     cleaned_spectra = pipeline.spectrums_queries
     assert len(cleaned_spectra) == 0
+
+
+def test_add_custom_filter_to_query_filters():
+    def select_spectra_containing_fragment(spectrum_in, fragment_of_interest=103.05, tolerance=0.01):
+        for fragment_mz, intensity in spectrum_in.peaks:
+            # Check if the fragment is close to the fragment_of_interest
+            if fragment_mz > fragment_of_interest - tolerance and fragment_mz < fragment_of_interest + tolerance:
+                return spectrum_in
+        return None
+    workflow = create_workflow(
+        query_filters=[(select_spectra_containing_fragment,
+                                                      {"fragment_of_interest": 103.05, "tolerance": 0.01})],)
+    pipeline = Pipeline(workflow)
+    pipeline.run(spectrums_file_msp)
+    cleaned_spectra = pipeline.spectrums_queries
+    assert len(cleaned_spectra) == 0
