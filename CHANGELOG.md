@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+### Added
+- filters `require_formula` and `require_compound_name`. [#627](https://github.com/matchms/matchms/pull/627)
+- filters `require_retention_time` and `require_retention_index`. [#585](https://github.com/matchms/matchms/pull/602)
+
+### changed
+- Removed repair_precursor_is_parent_mass
+- repair_adduct_based_on_smiles does not repair adducts [M]+ and [M]- anymore, since these cases could also be due to a mistake in filling in the parent mass instead of the precursor mz. 
+- repair_parent_mass_is_molar_weight does only repair parent mass and does not change the precursor mz.
+- Change repair_parent_mass_is_mol_wt to repair_parent_mass_is_molar_mass
+
 ## [0.24.4] -2024-01-16
 ### changed
 - return processing_report by pipeline
@@ -12,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### changed
 - Removed repair_precursor_is_parent_mass
 
+- Removed option accept_parent_mass_is_mol_wt in Repair_adduct_based_on_smiles
 ## [0.24.1] -2024-01-16
 
 - Derive_ionmode now also derives ionmode from charge, before it was only derived from the adduct. 
