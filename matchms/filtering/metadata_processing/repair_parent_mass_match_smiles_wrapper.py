@@ -1,7 +1,7 @@
 import logging
 from typing import Optional
-from matchms.filtering.metadata_processing.repair_adduct_based_on_smiles import \
-    repair_adduct_based_on_smiles
+from matchms.filtering.metadata_processing.repair_adduct_and_parent_mass_based_on_smiles import \
+    repair_adduct_and_parent_mass_based_on_smiles
 from matchms.typing import SpectrumType
 from .repair_parent_mass_is_molar_mass import repair_parent_mass_is_molar_mass
 from .repair_smiles_of_salts import repair_smiles_of_salts
@@ -21,7 +21,7 @@ def repair_parent_mass_match_smiles_wrapper(spectrum_in: SpectrumType,
 
     filters_to_apply = [repair_smiles_of_salts,
                         repair_parent_mass_is_molar_mass,
-                        repair_adduct_based_on_smiles,
+                        repair_adduct_and_parent_mass_based_on_smiles,
                         ]
     for filter_function in filters_to_apply:
         if _check_smiles_and_parent_mass_match(smiles=spectrum.get("smiles"),

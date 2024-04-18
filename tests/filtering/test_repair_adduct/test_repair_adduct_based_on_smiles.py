@@ -1,6 +1,6 @@
 import pytest
-from matchms.filtering.metadata_processing.repair_adduct_based_on_smiles import \
-    repair_adduct_based_on_smiles
+from matchms.filtering.metadata_processing.repair_adduct_and_parent_mass_based_on_smiles import \
+    repair_adduct_and_parent_mass_based_on_smiles
 from tests.builder_Spectrum import SpectrumBuilder
 
 
@@ -19,7 +19,7 @@ def test_repair_adduct_based_on_smiles_not_mol_wt(precursor_mz, expected_adduct,
     spectrum_in = SpectrumBuilder().with_metadata({"smiles": "C",
                                                    "precursor_mz": precursor_mz,
                                                    "ionmode": ionmode}).build()
-    spectrum_out = repair_adduct_based_on_smiles(spectrum_in, mass_tolerance=0.1)
+    spectrum_out = repair_adduct_and_parent_mass_based_on_smiles(spectrum_in, mass_tolerance=0.1)
     assert spectrum_out.get("adduct") == expected_adduct
     assert abs(spectrum_out.get("parent_mass") - 15.9589) < 0.1
 
@@ -40,5 +40,5 @@ def test_repair_adduct_based_on_smiles_not_repaired(precursor_mz, ionmode):
     spectrum_in = SpectrumBuilder().with_metadata({"smiles": "C",
                                                    "precursor_mz": precursor_mz,
                                                    "ionmode": ionmode}).build()
-    spectrum_out = repair_adduct_based_on_smiles(spectrum_in, mass_tolerance=0.1)
+    spectrum_out = repair_adduct_and_parent_mass_based_on_smiles(spectrum_in, mass_tolerance=0.1)
     assert spectrum_out.get("adduct") is None
