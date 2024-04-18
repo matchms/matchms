@@ -157,9 +157,6 @@ from matchms.filtering.peak_processing.select_by_mz import select_by_mz
 from matchms.filtering.peak_processing.select_by_relative_intensity import \
     select_by_relative_intensity
 from matchms.filtering.SpeciesString import SpeciesString
-from .metadata_processing.repair_smiles_of_salts import repair_smiles_of_salts
-from .metadata_processing.require_correct_ionmode import \
-    require_correct_ionmode
 
 
 __all__ = [
