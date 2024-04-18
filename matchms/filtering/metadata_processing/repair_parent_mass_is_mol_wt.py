@@ -13,7 +13,8 @@ logger = logging.getLogger("matchms")
 def repair_parent_mass_is_mol_wt(spectrum_in: Spectrum, mass_tolerance: float):
     """Changes the parent mass from molecular mass into monoistopic mass
 
-    Manual entered precursor mz is sometimes wrongly added as Molar weight instead of monoisotopic mass
+    Manual entered parent mass is sometimes wrongly added as Molar weight instead of monoisotopic mass
+    We check if the given parent mass is equal to the Molar weight (based on the
     """
     if spectrum_in is None:
         return None
