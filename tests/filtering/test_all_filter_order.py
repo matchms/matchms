@@ -9,10 +9,12 @@ from matchms.filtering.filter_order import ALL_FILTERS
 
 
 REPAIR_PARENT_MASS_SMILES_FILTERS = \
-    [msfilters.repair_smiles_of_salts, msfilters.repair_precursor_is_parent_mass,
-     msfilters.repair_parent_mass_is_mol_wt, msfilters.repair_adduct_based_on_smiles,
+    [msfilters.repair_smiles_of_salts,
+     msfilters.repair_parent_mass_is_molar_mass,
+     msfilters.repair_adduct_and_parent_mass_based_on_smiles,
      msfilters.repair_parent_mass_match_smiles_wrapper, ]
-DERIVE_ANNOTATION_FILTERS = [msfilters.derive_smiles_from_inchi, msfilters.derive_inchi_from_smiles,
+DERIVE_ANNOTATION_FILTERS = [msfilters.derive_smiles_from_inchi,
+                             msfilters.derive_inchi_from_smiles,
                              msfilters.derive_inchikey_from_inchi, ]
 
 
@@ -34,7 +36,8 @@ DERIVE_ANNOTATION_FILTERS = [msfilters.derive_smiles_from_inchi, msfilters.deriv
     [[msfilters.derive_adduct_from_name], [msfilters.derive_formula_from_name]],
     [[msfilters.make_charge_int, msfilters.correct_charge, ], [msfilters.clean_adduct]],
     [[msfilters.derive_adduct_from_name, ], [msfilters.clean_adduct]],
-    [[msfilters.derive_annotation_from_compound_name, ], DERIVE_ANNOTATION_FILTERS]
+    [[msfilters.derive_annotation_from_compound_name, ], DERIVE_ANNOTATION_FILTERS],
+    [[msfilters.derive_formula_from_name, ], [msfilters.require_formula]]
 ])
 def test_all_filter_order(early_filters: List[Callable], later_filters: List[Callable]):
     """Tests if early_filter is run before later_filter"""

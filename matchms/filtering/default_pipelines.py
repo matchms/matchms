@@ -34,9 +34,8 @@ REQUIRE_COMPLETE_METADATA = [msfilters.require_precursor_mz,
                              (msfilters.require_correct_ionmode, {"ion_mode_to_keep": "both"}), ]
 REPAIR_ANNOTATION = [
     (msfilters.repair_smiles_of_salts, {'mass_tolerance': 0.1}),
-    (msfilters.repair_precursor_is_parent_mass, {'mass_tolerance': 0.1}),
-    (msfilters.repair_parent_mass_is_mol_wt, {'mass_tolerance': 0.1}),
-    (msfilters.repair_adduct_based_on_smiles, {'mass_tolerance': 0.1}),
+    (msfilters.repair_parent_mass_is_molar_mass, {'mass_tolerance': 0.1}),
+    (msfilters.repair_adduct_and_parent_mass_based_on_smiles, {'mass_tolerance': 0.1}),
     msfilters.repair_not_matching_annotation,
     (msfilters.derive_annotation_from_compound_name, {"mass_tolerance": 0.1}),
 ]

@@ -1,21 +1,22 @@
+import pytest
 from matchms.filtering import derive_ionmode
 from ..builder_Spectrum import SpectrumBuilder
 
 
-def test_derive_ionmode_positive_adduct():
-    spectrum_in = SpectrumBuilder().with_metadata({"adduct": "[M+H]"}).build()
-
+@pytest.mark.parametrize("adduct, charge, ionmode, expected_ionmode", [
+    ["[M+H]", 1, None, "positive"],
+    ["[M+H]", 1, "blabla", "positive"],
+    [None, None, "blabla", "blabla"],
+    ["M-H-", -1, None, "negative"],
+    ["M+H", None, None, "positive"],
+    ["blabla", 3, None, "positive"]
+])
+def test_derive_ionmode(adduct, charge, ionmode, expected_ionmode):
+    spectrum_in = SpectrumBuilder().with_metadata({"adduct": adduct,
+                                                   "charge": charge,
+                                                   "ionmode": ionmode}).build()
     spectrum = derive_ionmode(spectrum_in)
-
-    assert spectrum.get("ionmode") == "positive", "Expected different ionmode."
-
-
-def test_derive_ionmode_negative_adduct():
-    spectrum_in = SpectrumBuilder().with_metadata({"adduct": "M-H-"}).build()
-
-    spectrum = derive_ionmode(spectrum_in)
-
-    assert spectrum.get("ionmode") == "negative", "Expected different ionmode."
+    assert spectrum.get("ionmode") == expected_ionmode, "Expected different ionmode."
 
 
 def test_derive_ionmode_empty_spectrum():
