@@ -45,6 +45,9 @@ def repair_adduct_based_on_smiles(spectrum_in: Spectrum,
     adducts_df = load_known_adducts()
     # Only use the adducts matching the ion mode
     adducts_df = adducts_df[adducts_df["ionmode"] == ion_mode]
+    # M+ and M- should not be used, since these could accidentally repair cases, where the parent mass is filled in
+    #   instead of the precursor_mz. Since we cannot differentiate between the two options, we won't repair them.
+    adducts_df = adducts_df[~adducts_df["adduct"].isin(("[M]+", "[M]-"))]
     smiles_mass = get_monoisotopic_neutral_mass(changed_spectrum.get("smiles"))
     if smiles_mass is None:
         return changed_spectrum
