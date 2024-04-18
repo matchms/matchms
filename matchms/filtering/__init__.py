@@ -116,9 +116,6 @@ from matchms.filtering.metadata_processing.repair_parent_mass_is_molar_mass impo
     repair_parent_mass_is_molar_mass
 from matchms.filtering.metadata_processing.repair_parent_mass_match_smiles_wrapper import \
     repair_parent_mass_match_smiles_wrapper
-from .metadata_processing.repair_smiles_of_salts import repair_smiles_of_salts
-from .metadata_processing.require_correct_ionmode import \
-    require_correct_ionmode
 from matchms.filtering.metadata_processing.require_parent_mass_match_smiles import \
     require_parent_mass_match_smiles
 from matchms.filtering.metadata_processing.require_precursor_below_mz import \
@@ -150,6 +147,9 @@ from matchms.filtering.peak_processing.select_by_mz import select_by_mz
 from matchms.filtering.peak_processing.select_by_relative_intensity import \
     select_by_relative_intensity
 from matchms.filtering.SpeciesString import SpeciesString
+from .metadata_processing.repair_smiles_of_salts import repair_smiles_of_salts
+from .metadata_processing.require_correct_ionmode import \
+    require_correct_ionmode
 
 
 __all__ = [
