@@ -89,21 +89,21 @@ class Pipeline:
 
         workflow = create_workflow(
             yaml_file_name="my_config_file.yaml", # The workflow will be stored in a yaml file.
-            predefined_processing_queries="basic",
-            additional_filters_queries=[
+            query_filters=[
                ["add_parent_mass"],
                ["normalize_intensities"],
                ["select_by_relative_intensity", {"intensity_from": 0.0, "intensity_to": 1.0}],
                ["select_by_mz", {"mz_from": 0, "mz_to": 1000}],
                ["require_minimum_number_of_peaks", {"n_required": 5}]],
-            predefined_processing_reference="basic",
-            additional_filters_references=["add_fingerprint"],
-            score_computations=[["precursormzmatch",  {"tolerance": 120.0}],
-                               ["cosinegreedy", {"tolerance": 1.0}]
-                               ["filter_by_range", {"name": "CosineGreedy_score", "low": 0.3}],
-                               ["modifiedcosine", {"tolerance": 1.0}],
-                               ["filter_by_range", {"name": "ModifiedCosine_score", "low": 0.3}]],
-            )
+            reference_filters=["add_fingerprint"],
+            score_computations=[
+                ["precursormzmatch",  {"tolerance": 120.0}],
+                ["cosinegreedy", {"tolerance": 1.0}]
+                ["filter_by_range", {"name": "CosineGreedy_score", "low": 0.3}],
+                ["modifiedcosine", {"tolerance": 1.0}],
+                ["filter_by_range", {"name": "ModifiedCosine_score", "low": 0.3}]
+            ]
+        )
 
         pipeline = Pipeline(workflow)
         pipeline.logging_file = "my_pipeline.log"
@@ -122,7 +122,8 @@ class Pipeline:
                                                [Spec2Vec, {"model": "my_spec2vec_model.model"}],
                                        ["filter_by_range", {"name": "Spec2Vec", "low": 0.3}]])
     """
-    def __init__(self, workflow: OrderedDict,
+    def __init__(self,
+                 workflow: OrderedDict,
                  progress_bar=True,
                  logging_level: str = "WARNING",
                  logging_file: Optional[str] = None):
@@ -225,6 +226,7 @@ class Pipeline:
                 self.write_to_logfile(f"-- Score computation: {computation} --")
                 self._apply_similarity_measure(computation, i)
         self.write_to_logfile(f"--- Pipeline run finised ({str(datetime.now())}) ---")
+        return report
 
     def _apply_score_masking(self, computation):
         """Apply filter to remove scores which are out of the set range.
