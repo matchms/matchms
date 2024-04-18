@@ -122,7 +122,6 @@ from matchms.filtering.metadata_processing.require_correct_ionmode import \
     require_correct_ionmode
 from matchms.filtering.metadata_processing.require_formula import require_formula
 from matchms.filtering.metadata_processing.require_parent_mass_match_smiles import \
-from matchms.filtering.metadata_processing.require_parent_mass_match_smiles import \
     require_parent_mass_match_smiles
 from .metadata_processing.require_precursor_mz import (
     require_precursor_below_mz, require_precursor_mz)
