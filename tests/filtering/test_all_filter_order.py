@@ -10,9 +10,11 @@ from matchms.filtering.filter_order import ALL_FILTERS
 
 REPAIR_PARENT_MASS_SMILES_FILTERS = \
     [msfilters.repair_smiles_of_salts,
-     msfilters.repair_parent_mass_is_mol_wt, msfilters.repair_adduct_and_parent_mass_based_on_smiles,
+     msfilters.repair_parent_mass_is_molar_mass,
+     msfilters.repair_adduct_and_parent_mass_based_on_smiles,
      msfilters.repair_parent_mass_match_smiles_wrapper, ]
-DERIVE_ANNOTATION_FILTERS = [msfilters.derive_smiles_from_inchi, msfilters.derive_inchi_from_smiles,
+DERIVE_ANNOTATION_FILTERS = [msfilters.derive_smiles_from_inchi,
+                             msfilters.derive_inchi_from_smiles,
                              msfilters.derive_inchikey_from_inchi, ]
 
 
