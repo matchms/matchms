@@ -116,15 +116,16 @@ from matchms.filtering.metadata_processing.repair_parent_mass_is_molar_mass impo
     repair_parent_mass_is_molar_mass
 from matchms.filtering.metadata_processing.repair_parent_mass_match_smiles_wrapper import \
     repair_parent_mass_match_smiles_wrapper
-from matchms.filtering.metadata_processing.repair_smiles_of_salts import repair_smiles_of_salts
-from matchms.filtering.metadata_processing.require_compound_name import require_compound_name
+from matchms.filtering.metadata_processing.repair_smiles_of_salts import \
+    repair_smiles_of_salts
+from matchms.filtering.metadata_processing.require_compound_name import \
+    require_compound_name
 from matchms.filtering.metadata_processing.require_correct_ionmode import \
     require_correct_ionmode
-from matchms.filtering.metadata_processing.require_formula import require_formula
+from matchms.filtering.metadata_processing.require_formula import \
+    require_formula
 from matchms.filtering.metadata_processing.require_parent_mass_match_smiles import \
     require_parent_mass_match_smiles
-from .metadata_processing.require_precursor_mz import (
-    require_precursor_below_mz, require_precursor_mz)
 from matchms.filtering.metadata_processing.require_retention_index import \
     require_retention_index
 from matchms.filtering.metadata_processing.require_retention_time import \
@@ -153,6 +154,8 @@ from matchms.filtering.SpeciesString import SpeciesString
 from .metadata_processing.repair_smiles_of_salts import repair_smiles_of_salts
 from .metadata_processing.require_correct_ionmode import \
     require_correct_ionmode
+from .metadata_processing.require_precursor_mz import (
+    require_precursor_below_mz, require_precursor_mz)
 
 
 __all__ = [
