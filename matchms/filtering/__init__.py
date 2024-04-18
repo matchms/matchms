@@ -116,11 +116,8 @@ from matchms.filtering.metadata_processing.repair_parent_mass_is_mol_wt import \
     repair_parent_mass_is_mol_wt
 from matchms.filtering.metadata_processing.repair_parent_mass_match_smiles_wrapper import \
     repair_parent_mass_match_smiles_wrapper
-from matchms.filtering.metadata_processing.repair_precursor_is_parent_mass import \
-    repair_precursor_is_parent_mass
-from matchms.filtering.metadata_processing.repair_smiles_of_salts import \
-    repair_smiles_of_salts
-from matchms.filtering.metadata_processing.require_correct_ionmode import \
+from .metadata_processing.repair_smiles_of_salts import repair_smiles_of_salts
+from .metadata_processing.require_correct_ionmode import \
     require_correct_ionmode
 from matchms.filtering.metadata_processing.require_parent_mass_match_smiles import \
     require_parent_mass_match_smiles
@@ -187,7 +184,6 @@ __all__ = [
     "repair_inchi_inchikey_smiles",
     "repair_parent_mass_is_mol_wt",
     "repair_parent_mass_match_smiles_wrapper",
-    "repair_precursor_is_parent_mass",
     "repair_smiles_of_salts",
     "derive_annotation_from_compound_name",
     "repair_not_matching_annotation",
