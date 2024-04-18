@@ -2,11 +2,12 @@ import logging
 import os
 from collections import OrderedDict
 from datetime import datetime
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Union, Callable
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 import matchms.similarity as mssimilarity
 from matchms import calculate_scores
 from matchms.filtering.filter_order import ALL_FILTERS
-from matchms.filtering.SpectrumProcessor import SpectrumProcessor, FunctionWithParametersType
+from matchms.filtering.SpectrumProcessor import (FunctionWithParametersType,
+                                                 SpectrumProcessor)
 from matchms.importing.load_spectra import load_list_of_spectrum_files
 from matchms.logging_functions import (add_logging_to_file,
                                        reset_matchms_logger,
@@ -14,6 +15,7 @@ from matchms.logging_functions import (add_logging_to_file,
 from matchms.typing import SpectrumType
 from matchms.yaml_file_functions import (load_workflow_from_yaml_file,
                                          ordered_dump)
+
 
 _masking_functions = ["filter_by_range"]
 _score_functions = {key.lower(): f for key, f in mssimilarity.__dict__.items() if callable(f)}
