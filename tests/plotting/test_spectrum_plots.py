@@ -1,5 +1,5 @@
-import pytest
 import numpy as np
+import pytest
 from matplotlib import pyplot as plt
 from matchms import Spectrum
 from matchms.plotting import (plot_spectra_array, plot_spectra_mirror,
