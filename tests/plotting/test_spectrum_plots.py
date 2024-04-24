@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 from matplotlib import pyplot as plt
 from matchms import Spectrum
 from matchms.plotting import (plot_spectra_array, plot_spectra_mirror,
@@ -34,6 +35,26 @@ def test_plot_mirror_plot():
     # Boundaries were not applied in the previous coce
     ax = plot_spectra_mirror(spec_a, spec_b, max_mz=max_mz, min_mz=min_mz)
     assert ax.get_xlim() == (min_mz, max_mz)
+
+def test_plot_mirror_colors():
+    # Create two random spectrums
+    spec_a = Spectrum(mz=np.array([100., 200.]),
+                      intensities=np.array([0.5, 0.3]))
+    spec_b = Spectrum(mz=np.array([10.2, 20.2, 30.2]),
+                      intensities=np.array([0.5, 0.3, 0.1]))
+
+    # Set specific colors to the top and bottom spectra
+    ax = plot_spectra_mirror(spec_a, spec_b, color_top="red", color_bottom="blue")
+    # Get the color of the lines 
+    all_colors = [line.get_color() for line in ax.get_lines()]
+    assert "red" in all_colors
+    assert "blue" in all_colors
+
+    # Test that it gives proper error if the wrong color argument is given
+    with pytest.raises(ValueError, 
+                       match="'peak_color' should not be set for `plot_spectra_mirror`. "):
+        plot_spectra_mirror(spec_a, spec_b, peak_color="green")
+
 
 
 def test_plot_spectrum_default():
