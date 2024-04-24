@@ -12,7 +12,9 @@ from matchms.typing import SpectrumType
 logger = logging.getLogger("matchms")
 
 
-def derive_parent_mass_from_precursor_mz(spectrum: SpectrumType, estimate_from_adduct: bool) -> Optional[float]:
+def derive_parent_mass_from_precursor_mz(spectrum: SpectrumType,
+                                         estimate_from_adduct: bool = True,
+                                         estimate_from_charge: bool = True) -> Optional[float]:
     """Use the precursor mz, charge and adduct information to compute the mass of the case compound.
 
     Args:
@@ -38,7 +40,7 @@ def derive_parent_mass_from_precursor_mz(spectrum: SpectrumType, estimate_from_a
             parent_mass = (precursor_mz - correction_mass) / multiplier
             return parent_mass
 
-    if _is_valid_charge(charge):
+    if _is_valid_charge(charge) and estimate_from_charge:
         # Assume adduct of shape [M+xH] or [M-xH]
         protons_mass = PROTON_MASS * charge
         precursor_mass = precursor_mz * abs(charge)
