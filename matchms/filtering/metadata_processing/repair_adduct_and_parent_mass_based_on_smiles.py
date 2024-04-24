@@ -40,7 +40,7 @@ def repair_adduct_and_parent_mass_based_on_smiles(spectrum_in: Spectrum,
                                                            estimate_from_adduct=True,
                                                            estimate_from_charge=False)
     if new_parent_mass is not None:
-        if abs(new_parent_mass-smiles_mass) < mass_tolerance:
+        if abs(new_parent_mass - smiles_mass) <= mass_tolerance:
             changed_spectrum.set("parent_mass", smiles_mass)
             logger.info("Parent mass was updated from %s to %s to match the smiles mass", parent_mass, smiles_mass)
             return changed_spectrum
