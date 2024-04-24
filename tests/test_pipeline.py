@@ -222,9 +222,9 @@ def test_save_spectra_spectrum_processor(tmp_path):
 
 def test_add_custom_filter():
     def select_spectra_containing_fragment(spectrum_in, fragment_of_interest=103.05, tolerance=0.01):
-        for fragment_mz, intensity in spectrum_in.peaks:
+        for fragment_mz in spectrum_in.peaks.mz:
             # Check if the fragment is close to the fragment_of_interest
-            if fragment_mz > fragment_of_interest - tolerance and fragment_mz < fragment_of_interest + tolerance:
+            if fragment_of_interest - tolerance < fragment_mz < fragment_of_interest + tolerance:
                 return spectrum_in
         return None
     workflow = create_workflow(
@@ -239,9 +239,9 @@ def test_add_custom_filter():
 
 def test_add_custom_filter_to_query_filters():
     def select_spectra_containing_fragment(spectrum_in, fragment_of_interest=103.05, tolerance=0.01):
-        for fragment_mz, intensity in spectrum_in.peaks:
+        for fragment_mz in spectrum_in.peaks.mz:
             # Check if the fragment is close to the fragment_of_interest
-            if fragment_mz > fragment_of_interest - tolerance and fragment_mz < fragment_of_interest + tolerance:
+            if fragment_of_interest - tolerance < fragment_mz < fragment_of_interest + tolerance:
                 return spectrum_in
         return None
     workflow = create_workflow(
