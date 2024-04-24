@@ -14,7 +14,7 @@ from tests.builder_Spectrum import SpectrumBuilder
                            "CN1CCCC1C2=CN=CC=C2", 161.108, 162.115698455, "[M+H]+"),
                           # Test repair adduct based on smiles
                           ("C", 0.0, 17.5, "[M+H]+",
-                           "C", 15.9589, 17.5, "[M+H+NH4]2+")
+                           "C", 16.031300128, 17.5, "[M+H+NH4]2+")
                           ])
 def test_repair_parent_mass_match_smiles_wrapper(smiles, parent_mass, precursor_mz, adduct,
                                                  expected_smiles, expected_parent_mass,

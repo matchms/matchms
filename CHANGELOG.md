@@ -24,6 +24,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed repair_precursor_is_parent_mass
 
 - Removed option accept_parent_mass_is_mol_wt in Repair_adduct_based_on_smiles
+- Added repair_adduct_based_on_parent_mass
+- Changed repair_adduct_and_parent_mass_based_on_smiles to update parent mass to the monoisotopic mass of the smiles, instead of updating based on precursor_mz and new adduct. 
 ## [0.24.1] -2024-01-16
 
 - Derive_ionmode now also derives ionmode from charge, before it was only derived from the adduct. 

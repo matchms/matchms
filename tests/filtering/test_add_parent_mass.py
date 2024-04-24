@@ -76,3 +76,33 @@ def test_empty_spectrum():
     spectrum = add_parent_mass(spectrum_in)
 
     assert spectrum is None, "Expected different handling of None spectrum."
+
+
+@pytest.mark.parametrize("metadata, expected_parent_mass",[
+    ({"smiles": "C"}, 16.031300),
+    ({"exact_mass": 100, "smiles": "CH4"}, 100),  # Smiles should only be used if other options don't work
+    ({"precursor_mz": 10, "charge": 1, "smiles": "CH4"}, 8.9927235),
+    ({"precursor_mz": 10, "adduct": "[M+H]+", "smiles": "CH4"}, 8.9927235),
+])
+def test_add_parent_mass_from_smiles(metadata, expected_parent_mass):
+    spectrum_in = SpectrumBuilder().with_metadata(metadata).build()
+    spectrum = add_parent_mass(spectrum_in)
+    if expected_parent_mass is not None:
+        assert np.allclose(spectrum.get("parent_mass"), expected_parent_mass, atol=1e-4), \
+            f"Expected parent mass of about {expected_parent_mass}."
+    else:
+        assert spectrum.get("parent_mass") is None
+
+
+@pytest.mark.parametrize("estimate_from_charge, expected", [(True, 442.992724),
+                                                            (False, None)])
+def test_add_parent_mass_not_from_charge(estimate_from_charge, expected):
+    metadata = {"precursor_mz": 444.0,
+                "charge": +1}
+    spectrum_in = SpectrumBuilder().with_metadata(metadata).build()
+    spectrum = add_parent_mass(spectrum_in, estimate_from_charge=estimate_from_charge)
+    if expected is not None:
+        assert np.allclose(spectrum.get("parent_mass"), expected, atol=1e-4), \
+            "Expected parent mass to be replaced by new value."
+    else:
+        assert spectrum.get("parent_mass") is None

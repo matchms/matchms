@@ -49,7 +49,8 @@ def test_filter_sorting_and_output():
 
 @pytest.mark.parametrize("filter_step, expected", [
     [("add_parent_mass", {'estimate_from_adduct': False}),
-     ('add_parent_mass', {'estimate_from_adduct': False, 'overwrite_existing_entry': False})],
+     ('add_parent_mass', {'estimate_from_adduct': False, 'overwrite_existing_entry': False,
+                          'estimate_from_charge': True})],
     ["derive_adduct_from_name",
      ('derive_adduct_from_name', {'remove_adduct_from_name': True})],
     [("require_correct_ionmode", {"ion_mode_to_keep": "both"}),
