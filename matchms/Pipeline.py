@@ -2,11 +2,12 @@ import logging
 import os
 from collections import OrderedDict
 from datetime import datetime
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
+from typing import Callable, Iterable, List, Optional, Union
 import matchms.similarity as mssimilarity
 from matchms import calculate_scores
 from matchms.filtering.filter_order import ALL_FILTERS
-from matchms.filtering.SpectrumProcessor import SpectrumProcessor
+from matchms.filtering.SpectrumProcessor import (FunctionWithParametersType,
+                                                 SpectrumProcessor)
 from matchms.importing.load_spectra import load_list_of_spectrum_files
 from matchms.logging_functions import (add_logging_to_file,
                                        reset_matchms_logger,
@@ -22,8 +23,8 @@ logger = logging.getLogger("matchms")
 
 
 def create_workflow(yaml_file_name: Optional[str] = None,
-                    query_filters: Iterable[Union[str, Tuple[str, Dict[str, Any]]]] = (),
-                    reference_filters: Iterable[Union[str, Tuple[str, Dict[str, Any]]]] = (),
+                    query_filters: Iterable[Union[str, Callable, FunctionWithParametersType]] = (),
+                    reference_filters: Iterable[Union[str, Callable, FunctionWithParametersType]] = (),
                     score_computations: Iterable[Union[str, List[dict]]] = (),
                     ) -> OrderedDict:
     """Creates a workflow that specifies the filters and scores needed to be run by Pipeline
@@ -56,6 +57,8 @@ def create_workflow(yaml_file_name: Optional[str] = None,
             file.write("# Change and adapt fields where necessary \n")
             file.write("# " + 20 * "=" + " \n")
             ordered_dump(workflow, file)
+    workflow["query_filters"] = queries_processor.filters
+    workflow["reference_filters"] = reference_processor.filters
     return workflow
 
 
@@ -122,6 +125,7 @@ class Pipeline:
                                                [Spec2Vec, {"model": "my_spec2vec_model.model"}],
                                        ["filter_by_range", {"name": "Spec2Vec", "low": 0.3}]])
     """
+
     def __init__(self,
                  workflow: OrderedDict,
                  progress_bar=True,
@@ -176,7 +180,7 @@ class Pipeline:
         assert set(self.__workflow.keys()) == expected_keys
         check_score_computation(score_computations=self.score_computations)
 
-    def run(self, query_files, reference_files = None, cleaned_query_file=None, cleaned_reference_file=None):
+    def run(self, query_files, reference_files=None, cleaned_query_file=None, cleaned_reference_file=None):
         """Execute the defined Pipeline workflow.
 
         This method will execute all steps of the workflow.
@@ -243,6 +247,7 @@ class Pipeline:
     def _apply_similarity_measure(self, computation, i):
         """Run score computations for all listed methods and on all loaded and processed spectra.
         """
+
         def get_similarity_measure(computation):
             if isinstance(computation[0], str):
                 if len(computation) > 1:
@@ -253,6 +258,7 @@ class Pipeline:
                     return computation[0](**computation[1])
                 return computation[0]()
             raise TypeError("Unknown similarity measure.")
+
         similarity_measure = get_similarity_measure(computation)
         # If this is the first score computation:
         if i == 0:
