@@ -14,7 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - repair_adduct_based_on_smiles does not repair adducts [M]+ and [M]- anymore, since these cases could also be due to a mistake in filling in the parent mass instead of the precursor mz. 
 - repair_parent_mass_is_molar_weight does only repair parent mass and does not change the precursor mz.
 - Change repair_parent_mass_is_mol_wt to repair_parent_mass_is_molar_mass
-- Require_precursor_below_mz is deprecated, require_precursor_mz now also allows for argument maximum_mz
+- Require_precursor_below_mz is deprecated, require_precursor_mz now also allows for argument maximum_mz 
+
+### removed
+- Require_precursor_mz_below_mz was removed. The same functionality is now available in require_precursor_mz
 
 ## [0.24.4] -2024-01-16
 ### changed
