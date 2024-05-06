@@ -150,11 +150,20 @@ class MetadataMatch(BaseSimilarity):
         entries_query = collect_entries(queries)
 
         if self.matching_type == "equal_match":
-            scores = np.zeros((len(entries_ref), len(entries_query)))
+            rows, cols = [], []
             for i, entry in enumerate(entries_query):
-                idx = np.where(entries_ref == entry)
-                scores[idx, i] = 1
-            return scores.astype(self.score_datatype)
+                idx = np.where(entries_ref == entry)[0]
+                rows.extend(idx)
+                cols.extend([i] * len(idx))
+            
+            if array_type == "sparse":
+                scores_array = StackedSparseArray(len(entries_ref), len(entries_query))
+                scores_array.add_sparse_data(rows, cols, np.ones(len(rows), dtype=self.score_datatype), "")
+                return scores_array
+            else:
+                scores = np.zeros((len(entries_ref), len(entries_query)), dtype=self.score_datatype)
+                scores[rows, cols] = 1
+                return scores
 
         if is_symmetric:
             rows, cols, scores = number_matching_symmetric(entries_ref,
