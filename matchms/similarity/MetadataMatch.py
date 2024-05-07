@@ -156,6 +156,8 @@ class MetadataMatch(BaseSimilarity):
                 rows.extend(idx)
                 cols.extend([i] * len(idx))
             
+            rows = np.array(rows)
+            cols = np.array(cols)
             if array_type == "sparse":
                 scores_array = StackedSparseArray(len(entries_ref), len(entries_query))
                 scores_array.add_sparse_data(rows, cols, np.ones(len(rows), dtype=self.score_datatype), "")
