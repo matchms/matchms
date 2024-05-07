@@ -162,10 +162,11 @@ class MetadataMatch(BaseSimilarity):
                 scores_array = StackedSparseArray(len(entries_ref), len(entries_query))
                 scores_array.add_sparse_data(rows, cols, np.ones(len(rows), dtype=self.score_datatype), "")
                 return scores_array
-            else:
+            if array_type == "numpy":
                 scores = np.zeros((len(entries_ref), len(entries_query)), dtype=self.score_datatype)
                 scores[rows, cols] = 1
                 return scores
+            raise ValueError("array_type must be 'numpy' or 'sparse'.")
 
         if is_symmetric:
             rows, cols, scores = number_matching_symmetric(entries_ref,
@@ -182,4 +183,4 @@ class MetadataMatch(BaseSimilarity):
             scores_array = StackedSparseArray(len(entries_ref), len(entries_query))
             scores_array.add_sparse_data(rows, cols, scores.astype(self.score_datatype), "")
             return scores_array
-        raise ValueError("")
+        raise ValueError("array_type must be 'numpy' or 'sparse'.")
