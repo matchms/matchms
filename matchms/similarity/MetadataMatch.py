@@ -130,6 +130,9 @@ class MetadataMatch(BaseSimilarity):
             comparison). By using the fact that score[i,j] = score[j,i] the calculation will be about
             2x faster.
         """
+        if array_type not in ["numpy", "sparse"]:
+            raise ValueError("array_type must be 'numpy' or 'sparse'.")
+        
         def collect_entries(spectrums):
             """Collect metadata entries."""
             entries = []
@@ -158,29 +161,20 @@ class MetadataMatch(BaseSimilarity):
             
             rows = np.array(rows)
             cols = np.array(cols)
-            if array_type == "sparse":
-                scores_array = StackedSparseArray(len(entries_ref), len(entries_query))
-                scores_array.add_sparse_data(rows, cols, np.ones(len(rows), dtype=self.score_datatype), "")
-                return scores_array
-            if array_type == "numpy":
-                scores = np.zeros((len(entries_ref), len(entries_query)), dtype=self.score_datatype)
-                scores[rows, cols] = 1
-                return scores
-            raise ValueError("array_type must be 'numpy' or 'sparse'.")
-
-        if is_symmetric:
-            rows, cols, scores = number_matching_symmetric(entries_ref,
-                                                           self.tolerance)
+            scores = np.ones(len(rows))
         else:
-            rows, cols, scores = number_matching(entries_ref, entries_query,
-                                                 self.tolerance)
+            if is_symmetric:
+                rows, cols, scores = number_matching_symmetric(entries_ref,
+                                                               self.tolerance)
+            else:
+                rows, cols, scores = number_matching(entries_ref, entries_query,
+                                                     self.tolerance)
 
-        if array_type == "numpy":
-            scores_array = np.zeros((len(entries_ref), len(entries_query)))
-            scores_array[rows, cols] = scores.astype(self.score_datatype)
-            return scores_array
         if array_type == "sparse":
             scores_array = StackedSparseArray(len(entries_ref), len(entries_query))
             scores_array.add_sparse_data(rows, cols, scores.astype(self.score_datatype), "")
-            return scores_array
-        raise ValueError("array_type must be 'numpy' or 'sparse'.")
+        else:
+            scores_array = np.zeros((len(entries_ref), len(entries_query)), dtype=self.score_datatype)
+            scores_array[rows, cols] = scores.astype(self.score_datatype)
+
+        return scores_array
