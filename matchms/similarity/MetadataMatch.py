@@ -73,8 +73,9 @@ class MetadataMatch(BaseSimilarity):
         field
             Specify field name for metadata that should be compared.
         matching_type
-            Specify how field entries should be matched. Can be one of
-            ["equal_match", "difference"].
+            Specify how field entries should be matched. Can be one of ["equal_match", "difference"].
+            "equal_match": Entries must be exactly equal (default). "difference": Entries are considered 
+            a match if their numerical difference is less than or equal to "tolerance".
         tolerance
             Specify tolerance below which two values are counted as match.
             This only applied to numerical values.
@@ -153,6 +154,10 @@ class MetadataMatch(BaseSimilarity):
         entries_query = collect_entries(queries)
 
         if self.matching_type == "equal_match":
+            if self.tolerance != 0:
+                msg = "Tolerance is set but will be ignored because 'equal_match' does not use tolerance."
+                logger.warning(msg)
+
             rows, cols = [], []
             for i, entry in enumerate(entries_query):
                 idx = np.where(entries_ref == entry)[0]
