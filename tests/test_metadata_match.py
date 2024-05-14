@@ -82,7 +82,7 @@ def test_metadata_match_numerical(spectrums, tolerance, expected):
 
 
 def test_metadata_match_invalid_array_type(spectrums):
-    """Test value error if array_type is not 'numpy' or 'sparse in metadata matching."""
+    """Test value error if array_type is not 'numpy' or 'sparse' in metadata matching."""
     references = spectrums[:2]
     queries = spectrums[2:]
 
