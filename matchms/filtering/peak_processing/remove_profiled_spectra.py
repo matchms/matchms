@@ -26,7 +26,7 @@ def remove_profiled_spectra(spectrum: Spectrum, mz_window=0.5):
         return spectrum
     logger.info(
         "Spectrum removed because likely profile data."
-        "the number of high intensity fragments next to the highest peak = %s.",
+        "Number of high intensity fragments next to the highest peak = %s.",
         number_of_high_intensity_surounding_peaks)
     return None
 
