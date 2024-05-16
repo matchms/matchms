@@ -45,6 +45,7 @@ CLEAN_PEAKS = [(msfilters.select_by_mz, {"mz_from": 0, "mz_to": 1000}),
                (msfilters.select_by_relative_intensity, {"intensity_from": 0.001}),
                (msfilters.reduce_to_number_of_peaks, {"n_max": 1000}),
                (msfilters.require_minimum_number_of_high_peaks, {"no_peaks": 5, "intensity_percent": 2.0}),
+               msfilters.remove_profiled_spectra,
                ]
 # These filters are in None of the above pipelines
 OTHER_FILTERS = [msfilters.require_precursor_below_mz,

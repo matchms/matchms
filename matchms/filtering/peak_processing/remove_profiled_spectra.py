@@ -1,6 +1,7 @@
+import logging
 import numpy as np
 from matchms.Spectrum import Spectrum
-import logging
+
 
 logger = logging.getLogger("matchms")
 
