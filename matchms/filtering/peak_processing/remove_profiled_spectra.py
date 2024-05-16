@@ -64,4 +64,3 @@ def _get_peak_intens_neighbourhood(intensities):
     nr_of_peaks_above_threshold_before_base_peak = np.argmin(np.flip(threshold_mask[:base_peak_i + 1]))
     nr_of_peaks_above_threshold_after_base_peak = np.argmin(threshold_mask[base_peak_i + 2:])
     return nr_of_peaks_above_threshold_before_base_peak, nr_of_peaks_above_threshold_after_base_peak
-
