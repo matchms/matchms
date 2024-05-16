@@ -1,7 +1,8 @@
-import re
 import logging
+import re
+from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import \
+    is_valid_inchi
 
-from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import is_valid_inchi
 
 logger = logging.getLogger("matchms")
 

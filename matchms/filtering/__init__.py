@@ -87,6 +87,8 @@ from matchms.filtering.metadata_processing.derive_adduct_from_name import \
     derive_adduct_from_name
 from matchms.filtering.metadata_processing.derive_annotation_from_compound_name import \
     derive_annotation_from_compound_name
+from matchms.filtering.metadata_processing.derive_formula_from_inchi import \
+    derive_formula_from_inchi
 from matchms.filtering.metadata_processing.derive_formula_from_name import \
     derive_formula_from_name
 from matchms.filtering.metadata_processing.derive_inchi_from_smiles import \
@@ -157,7 +159,7 @@ from matchms.filtering.peak_processing.select_by_mz import select_by_mz
 from matchms.filtering.peak_processing.select_by_relative_intensity import \
     select_by_relative_intensity
 from matchms.filtering.SpeciesString import SpeciesString
-from matchms.filtering.metadata_processing.derive_formula_from_inchi import derive_formula_from_inchi
+
 
 __all__ = [
     "add_compound_name",
