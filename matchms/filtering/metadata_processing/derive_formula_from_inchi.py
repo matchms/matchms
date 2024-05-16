@@ -33,6 +33,4 @@ def _get_formula_from_inchi(inchi):
         match = re.search(regexp, inchi)
         if match:
             return match.group(3)
-        else:
-            return None
     return None
