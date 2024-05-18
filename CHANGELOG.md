@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - repair_parent_mass_is_molar_weight does only repair parent mass and does not change the precursor mz.
 - Change repair_parent_mass_is_mol_wt to repair_parent_mass_is_molar_mass
 - Replace some `@njit`ted similarity functions with faster numpy matrix multiplications
+- Use StackedSparseArray for MetadataMatch equal_match when array_type is sparse [#642](https://github.com/matchms/matchms/pull/642)
+- Set RDKIT version to rdkit = ">=2023.3.2,<2023.9.5" to fix installation issues. 
 
 ## [0.24.4] -2024-01-16
 ### changed
