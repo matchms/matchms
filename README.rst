@@ -155,6 +155,8 @@ To date, we are aware of:
 
 + `MSMetaEnhancer <https://github.com/RECETOX/MSMetaEnhancer>`_ is a python package to collect mass spectral library metadata using various web services and computational chemistry packages.
 
++ `cudams <https://github.com/tornikeo/cudams>`_ is a python package for fast similarity calculations, using GPU's to speed up the cosine score calculations by 100-500x compared to the standard matchms implementation. 
+
 *(if you know of any other packages that are fully compatible with matchms, let us know!)*
 
 Introduction
@@ -306,7 +308,7 @@ To install matchms, do:
   # Install rdkit using conda, rest of dependencies can be installed with pip
   conda install -c conda-forge rdkit
   python -m pip install --upgrade pip
-  pip install --editable .[dev]  # if this won't work try "poetry install"
+  pip install --editable .[dev]  # if this won't work try "poetry install --with dev"
 
 Run the linter with:
 

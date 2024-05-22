@@ -115,6 +115,8 @@ def plot_spectrum(spectrum,
 def plot_spectra_mirror(spec_top,
                         spec_bottom,
                         ax: Optional[plt.Axes] = None,
+                        color_top="darkblue",
+                        color_bottom="teal",
                         **spectrum_kws) -> plt.Axes:
     """Mirror plot two MS/MS spectra.
 
@@ -129,6 +131,10 @@ def plot_spectra_mirror(spec_top,
     ax:
         Axes instance on which to plot the spectrum. If None the current Axes
         instance is used.
+    color_top:
+        Set color of peaks in top spectrum.
+    color_bottom:
+        Set color of peaks in bottom spectrum.
     spectrum_kws:
         Keyword arguments for `plot_spectrum()`.
 
@@ -142,12 +148,17 @@ def plot_spectra_mirror(spec_top,
 
     if spectrum_kws is None:
         spectrum_kws = {}
+
+    if 'peak_color' in spectrum_kws:
+        raise ValueError("'peak_color' should not be set for `plot_spectra_mirror`. "
+                         "Use 'color_top' and 'color_bottom' instead.") 
+
     # Top spectrum.
-    plot_spectrum(spec_top, mirror_intensity=False, ax=ax, peak_color="darkblue", **spectrum_kws)
+    plot_spectrum(spec_top, mirror_intensity=False, ax=ax, peak_color=color_top, **spectrum_kws)
     y_max = ax.get_ylim()[1]
 
     # Mirrored bottom spectrum.
-    plot_spectrum(spec_bottom, mirror_intensity=True, ax=ax, peak_color="teal", **spectrum_kws)
+    plot_spectrum(spec_bottom, mirror_intensity=True, ax=ax, peak_color=color_bottom, **spectrum_kws)
     y_min = ax.get_ylim()[0]
     ax.set_ylim(y_min, y_max)
 

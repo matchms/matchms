@@ -218,3 +218,36 @@ def test_save_spectra_spectrum_processor(tmp_path):
     # Reload spectra and compare lengths
     reloaded_spectra = list(load_spectra(str(filename)))
     assert len(reloaded_spectra) == len(list(load_spectra(spectrums_file_msp)))
+
+
+def test_add_custom_filter():
+    def select_spectra_containing_fragment(spectrum_in, fragment_of_interest=103.05, tolerance=0.01):
+        for fragment_mz in spectrum_in.peaks.mz:
+            # Check if the fragment is close to the fragment_of_interest
+            if fragment_of_interest - tolerance < fragment_mz < fragment_of_interest + tolerance:
+                return spectrum_in
+        return None
+    workflow = create_workflow(
+        query_filters=[],)
+    pipeline = Pipeline(workflow)
+    pipeline.processing_queries.parse_and_add_filter((select_spectra_containing_fragment,
+                                                      {"fragment_of_interest": 103.05, "tolerance": 0.01}))
+    pipeline.run(spectrums_file_msp)
+    cleaned_spectra = pipeline.spectrums_queries
+    assert len(cleaned_spectra) == 0
+
+
+def test_add_custom_filter_to_query_filters():
+    def select_spectra_containing_fragment(spectrum_in, fragment_of_interest=103.05, tolerance=0.01):
+        for fragment_mz in spectrum_in.peaks.mz:
+            # Check if the fragment is close to the fragment_of_interest
+            if fragment_of_interest - tolerance < fragment_mz < fragment_of_interest + tolerance:
+                return spectrum_in
+        return None
+    workflow = create_workflow(
+        query_filters=[(select_spectra_containing_fragment,
+                                                      {"fragment_of_interest": 103.05, "tolerance": 0.01})],)
+    pipeline = Pipeline(workflow)
+    pipeline.run(spectrums_file_msp)
+    cleaned_spectra = pipeline.spectrums_queries
+    assert len(cleaned_spectra) == 0
