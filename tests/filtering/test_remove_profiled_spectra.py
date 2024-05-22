@@ -1,7 +1,8 @@
-from matchms.filtering.peak_processing.remove_profiled_spectra import _get_peak_intens_neighbourhood, \
-    _get_number_of_high_intensity_surounding_peaks
 import numpy as np
 import pytest
+from matchms.filtering.peak_processing.remove_profiled_spectra import (
+    _get_number_of_high_intensity_surounding_peaks,
+    _get_peak_intens_neighbourhood)
 
 
 @pytest.mark.parametrize("intensities, expected_no_peaks_before, expected_no_peaks_after", [
