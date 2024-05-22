@@ -23,8 +23,8 @@ def require_matching_adduct_precursor_mz_parent_mass(spectrum,
         return None
     try:
         precursor_mz = float(spectrum.get("precursor_mz"))
-        parent_mass = float(spectrum.get("precursor_mz"))
-    except TypeError:
+        parent_mass = float(spectrum.get("parent_mass"))
+    except (TypeError, ValueError):
         logger.warning("precursor_mz or parent mass could not be converted to float, "
                        "please run add_parent_mass and add_precursor_mz first")
         return spectrum
