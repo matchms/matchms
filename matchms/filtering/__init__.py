@@ -149,6 +149,8 @@ from matchms.filtering.peak_processing.remove_peaks_around_precursor_mz import \
     remove_peaks_around_precursor_mz
 from matchms.filtering.peak_processing.remove_peaks_outside_top_k import \
     remove_peaks_outside_top_k
+from matchms.filtering.peak_processing.remove_profiled_spectra import \
+    remove_profiled_spectra
 from matchms.filtering.peak_processing.require_minimum_number_of_high_peaks import \
     require_minimum_number_of_high_peaks
 from matchms.filtering.peak_processing.require_minimum_number_of_peaks import \
@@ -188,6 +190,7 @@ __all__ = [
     "reduce_to_number_of_peaks",
     "remove_peaks_around_precursor_mz",
     "remove_peaks_outside_top_k",
+    "remove_profiled_spectra",
     "repair_adduct_and_parent_mass_based_on_smiles",
     "repair_adduct_based_on_parent_mass",
     "require_correct_ionmode",
