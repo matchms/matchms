@@ -126,6 +126,8 @@ from matchms.filtering.metadata_processing.require_correct_ionmode import \
     require_correct_ionmode
 from matchms.filtering.metadata_processing.require_formula import \
     require_formula
+from matchms.filtering.metadata_processing.require_matching_adduct_precursor_mz_parent_mass import \
+    require_matching_adduct_precursor_mz_parent_mass
 from matchms.filtering.metadata_processing.require_parent_mass_match_smiles import \
     require_parent_mass_match_smiles
 from matchms.filtering.metadata_processing.require_precursor_mz import (
@@ -197,6 +199,7 @@ __all__ = [
     "derive_annotation_from_compound_name",
     "repair_not_matching_annotation",
     "require_valid_annotation",
+    "require_matching_adduct_precursor_mz_parent_mass",
     "require_parent_mass_match_smiles",
     "require_minimum_number_of_peaks",
     "require_minimum_number_of_high_peaks",
