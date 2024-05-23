@@ -1,7 +1,6 @@
+import pytest
 from matchms.filtering.metadata_processing.require_matching_adduct_precursor_mz_parent_mass import \
     require_matching_adduct_precursor_mz_parent_mass
-
-import pytest
 from ..builder_Spectrum import SpectrumBuilder
 
 
