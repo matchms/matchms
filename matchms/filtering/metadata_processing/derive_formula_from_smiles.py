@@ -1,6 +1,6 @@
 import logging
-from rdkit.Chem.rdMolDescriptors import CalcMolFormula
 from rdkit import Chem
+from rdkit.Chem.rdMolDescriptors import CalcMolFormula
 
 
 logger = logging.getLogger("matchms")

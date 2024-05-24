@@ -1,5 +1,6 @@
 import pytest
-from matchms.filtering.metadata_processing.derive_formula_from_smiles import derive_formula_from_smiles
+from matchms.filtering.metadata_processing.derive_formula_from_smiles import \
+    derive_formula_from_smiles
 from ..builder_Spectrum import SpectrumBuilder
 
 
