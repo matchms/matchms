@@ -39,7 +39,9 @@ DERIVE_ANNOTATION_FILTERS = [msfilters.derive_smiles_from_inchi,
     [[msfilters.derive_adduct_from_name, ], [msfilters.clean_adduct]],
     [[msfilters.derive_annotation_from_compound_name, ], DERIVE_ANNOTATION_FILTERS],
     [[msfilters.derive_formula_from_name, ], [msfilters.require_formula]],
-    [[msfilters.remove_profiled_spectra,], [msfilters.remove_peaks_around_precursor_mz]]
+    [[msfilters.remove_profiled_spectra,], [msfilters.remove_peaks_around_precursor_mz]],
+    [[msfilters.derive_formula_from_smiles], [msfilters.require_formula]],
+    [[msfilters.require_valid_annotation] + REPAIR_PARENT_MASS_SMILES_FILTERS, [msfilters.derive_formula_from_smiles]]
 ])
 def test_all_filter_order(early_filters: List[Callable], later_filters: List[Callable]):
     """Tests if early_filter is run before later_filter"""
