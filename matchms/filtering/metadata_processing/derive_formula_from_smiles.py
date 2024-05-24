@@ -29,6 +29,8 @@ def derive_formula_from_smiles(spectrum_in, overwrite=True):
 
 
 def _get_formula_from_smiles(smiles):
+    if smiles is None:
+        return None
     mol = Chem.MolFromSmiles(smiles)
     if mol is None:
         return None
