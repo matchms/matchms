@@ -157,7 +157,7 @@ from matchms.filtering.peak_processing.select_by_mz import select_by_mz
 from matchms.filtering.peak_processing.select_by_relative_intensity import \
     select_by_relative_intensity
 from matchms.filtering.SpeciesString import SpeciesString
-
+from matchms.filtering.metadata_processing.derive_formula_from_smiles import derive_formula_from_smiles
 
 __all__ = [
     "add_compound_name",
@@ -173,6 +173,7 @@ __all__ = [
     "default_filters",
     "derive_adduct_from_name",
     "derive_formula_from_name",
+    "derive_formula_from_smiles",
     "derive_inchi_from_smiles",
     "derive_inchikey_from_inchi",
     "derive_ionmode",
