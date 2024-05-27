@@ -125,6 +125,8 @@ from matchms.filtering.metadata_processing.require_compound_name import \
     require_compound_name
 from matchms.filtering.metadata_processing.require_correct_ionmode import \
     require_correct_ionmode
+from matchms.filtering.metadata_processing.require_correct_ms_level import \
+    require_correct_ms_level
 from matchms.filtering.metadata_processing.require_formula import \
     require_formula
 from matchms.filtering.metadata_processing.require_parent_mass_match_smiles import \
@@ -204,7 +206,7 @@ __all__ = [
     "require_precursor_below_mz",
     "require_precursor_mz",
     "require_compound_name",
-    "require_correct_ionmode",
+    "require_correct_ms_level",
     "require_formula",
     "require_retention_time",
     "require_retention_index",
