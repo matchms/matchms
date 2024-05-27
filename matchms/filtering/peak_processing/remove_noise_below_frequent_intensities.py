@@ -1,7 +1,7 @@
+import logging
 from collections import Counter
 from matchms import Fragments
 from matchms.Spectrum import Spectrum
-import logging
 
 
 logger = logging.getLogger("matchms")

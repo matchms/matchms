@@ -141,6 +141,8 @@ from matchms.filtering.peak_processing.normalize_intensities import \
     normalize_intensities
 from matchms.filtering.peak_processing.reduce_to_number_of_peaks import \
     reduce_to_number_of_peaks
+from matchms.filtering.peak_processing.remove_noise_below_frequent_intensities import \
+    remove_noise_below_frequent_intensities
 from matchms.filtering.peak_processing.remove_peaks_around_precursor_mz import \
     remove_peaks_around_precursor_mz
 from matchms.filtering.peak_processing.remove_peaks_outside_top_k import \
@@ -190,6 +192,7 @@ __all__ = [
     "repair_adduct_and_parent_mass_based_on_smiles",
     "repair_adduct_based_on_parent_mass",
     "require_correct_ionmode",
+    "remove_noise_below_frequent_intensities",
     "repair_inchi_inchikey_smiles",
     "repair_parent_mass_is_molar_mass",
     "repair_parent_mass_match_smiles_wrapper",
