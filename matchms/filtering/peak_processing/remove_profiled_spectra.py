@@ -45,7 +45,7 @@ def _get_number_of_high_intensity_surounding_peaks(intensities, mz, mz_window):
 
 def _select_intensities_within_mz_window(intensities, mz, mz_span):
     base_peak_i = intensities.argmax()
-    within_mz_window = (mz > mz[base_peak_i] - mz_span) & (mz > mz[base_peak_i] - mz_span)
+    within_mz_window = (mz > mz[base_peak_i] - mz_span) & (mz < mz[base_peak_i] + mz_span)
     intensities_within_mz_window = intensities[within_mz_window]
     return intensities_within_mz_window
 
