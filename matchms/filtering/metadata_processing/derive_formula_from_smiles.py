@@ -7,6 +7,8 @@ logger = logging.getLogger("matchms")
 
 
 def derive_formula_from_smiles(spectrum_in, overwrite=True):
+    if spectrum_in is None:
+        return None
     spectrum = spectrum_in.clone()
     if spectrum.get("formula") is not None:
         if overwrite is False:
