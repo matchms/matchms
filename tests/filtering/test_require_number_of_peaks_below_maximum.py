@@ -16,4 +16,3 @@ def test_require_number_of_peaks_below_maximum_not_removed():
     intensities = np.array([0, 1, 10, 100], dtype="float")
     spectrum = Spectrum(mz, intensities)
     assert require_number_of_peaks_below_maximum(spectrum, 10) == spectrum
-
