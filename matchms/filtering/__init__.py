@@ -151,13 +151,15 @@ from matchms.filtering.peak_processing.require_minimum_number_of_high_peaks impo
     require_minimum_number_of_high_peaks
 from matchms.filtering.peak_processing.require_minimum_number_of_peaks import \
     require_minimum_number_of_peaks
+from matchms.filtering.peak_processing.require_number_of_peaks_below_maximum import \
+    require_number_of_peaks_below_maximum
 from matchms.filtering.peak_processing.select_by_intensity import \
     select_by_intensity
 from matchms.filtering.peak_processing.select_by_mz import select_by_mz
 from matchms.filtering.peak_processing.select_by_relative_intensity import \
     select_by_relative_intensity
 from matchms.filtering.SpeciesString import SpeciesString
-from matchms.filtering.peak_processing.require_number_of_peaks_below_maximum import require_number_of_peaks_below_maximum
+
 
 __all__ = [
     "add_compound_name",

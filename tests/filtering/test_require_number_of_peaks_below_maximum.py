@@ -1,7 +1,7 @@
-from matchms.Spectrum import Spectrum
+import numpy as np
 from matchms.filtering.peak_processing.require_number_of_peaks_below_maximum import \
     require_number_of_peaks_below_maximum
-import numpy as np
+from matchms.Spectrum import Spectrum
 
 
 def test_require_number_of_peaks_below_maximum():
