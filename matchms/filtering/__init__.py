@@ -157,7 +157,7 @@ from matchms.filtering.peak_processing.select_by_mz import select_by_mz
 from matchms.filtering.peak_processing.select_by_relative_intensity import \
     select_by_relative_intensity
 from matchms.filtering.SpeciesString import SpeciesString
-
+from matchms.filtering.peak_processing.require_number_of_peaks_below_maximum import require_number_of_peaks_below_maximum
 
 __all__ = [
     "add_compound_name",
@@ -200,6 +200,7 @@ __all__ = [
     "require_parent_mass_match_smiles",
     "require_minimum_number_of_peaks",
     "require_minimum_number_of_high_peaks",
+    "require_number_of_peaks_below_maximum",
     "require_precursor_below_mz",
     "require_precursor_mz",
     "require_compound_name",
