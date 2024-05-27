@@ -7,6 +7,7 @@ import pytest
 from matchms import filtering as msfilters
 from matchms.filtering.filter_order import ALL_FILTERS
 
+
 REPAIR_PARENT_MASS_SMILES_FILTERS = \
     [msfilters.repair_smiles_of_salts,
      msfilters.repair_parent_mass_is_molar_mass,
