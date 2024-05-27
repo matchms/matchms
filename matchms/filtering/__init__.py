@@ -69,6 +69,7 @@ Should output
 
 """
 from matchms.filtering.default_filters import default_filters
+from matchms.filtering.metadata_processing import require_correct_ionmode
 from matchms.filtering.metadata_processing.add_compound_name import \
     add_compound_name
 from matchms.filtering.metadata_processing.add_fingerprint import \
@@ -157,7 +158,7 @@ from matchms.filtering.peak_processing.select_by_mz import select_by_mz
 from matchms.filtering.peak_processing.select_by_relative_intensity import \
     select_by_relative_intensity
 from matchms.filtering.SpeciesString import SpeciesString
-from matchms.filtering.metadata_processing import require_correct_ionmode
+
 
 __all__ = [
     "add_compound_name",

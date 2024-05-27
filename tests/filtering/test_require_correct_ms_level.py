@@ -1,5 +1,6 @@
 import pytest
-from matchms.filtering.metadata_processing.require_correct_ms_level import require_correct_ms_level
+from matchms.filtering.metadata_processing.require_correct_ms_level import \
+    require_correct_ms_level
 from ..builder_Spectrum import SpectrumBuilder
 
 
