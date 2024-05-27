@@ -1,6 +1,6 @@
 import logging
 from collections import Counter
-from matchms import Fragments
+from matchms.Fragments import Fragments
 from matchms.Spectrum import Spectrum
 
 
@@ -31,9 +31,9 @@ def remove_noise_below_frequent_intensities(spectrum: Spectrum,
     """
     spectrum = spectrum.clone()
 
-    highest_frequent_peak = select_highest_frequent_peak(spectrum.intensities, min_count_of_frequent_intensities)
-    noise_threshold = highest_frequent_peak * noise_level_multiplier
+    highest_frequent_peak = _select_highest_frequent_peak(spectrum.intensities, min_count_of_frequent_intensities)
     if highest_frequent_peak != -1:
+        noise_threshold = highest_frequent_peak * noise_level_multiplier
         peaks_to_keep = spectrum.intensities > noise_threshold
         new_mzs, new_intensities = spectrum.mz[peaks_to_keep], spectrum.intensities[peaks_to_keep]
         spectrum.peaks = Fragments(mz=new_mzs, intensities=new_intensities)
@@ -41,12 +41,12 @@ def remove_noise_below_frequent_intensities(spectrum: Spectrum,
     return spectrum
 
 
-def select_highest_frequent_peak(intensities,
-                                 min_count_of_frequent_intensities=5):
+def _select_highest_frequent_peak(intensities,
+                                  min_count_of_frequent_intensities=5):
     counts = Counter(intensities)
     highest_value_to_remove = -1
     for value, count in counts.items():
-        if count > min_count_of_frequent_intensities:
+        if count >= min_count_of_frequent_intensities:
             if value > highest_value_to_remove:
                 highest_value_to_remove = value
     return highest_value_to_remove
