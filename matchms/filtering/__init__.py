@@ -157,7 +157,7 @@ from matchms.filtering.peak_processing.select_by_mz import select_by_mz
 from matchms.filtering.peak_processing.select_by_relative_intensity import \
     select_by_relative_intensity
 from matchms.filtering.SpeciesString import SpeciesString
-
+from matchms.filtering.metadata_processing import require_correct_ionmode
 
 __all__ = [
     "add_compound_name",
@@ -203,6 +203,7 @@ __all__ = [
     "require_precursor_below_mz",
     "require_precursor_mz",
     "require_compound_name",
+    "require_correct_ionmode",
     "require_formula",
     "require_retention_time",
     "require_retention_index",
