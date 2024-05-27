@@ -74,7 +74,7 @@ class MetadataMatch(BaseSimilarity):
             Specify field name for metadata that should be compared.
         matching_type
             Specify how field entries should be matched. Can be one of ["equal_match", "difference"].
-            "equal_match": Entries must be exactly equal (default). "difference": Entries are considered 
+            "equal_match": Entries must be exactly equal (default). "difference": Entries are considered
             a match if their numerical difference is less than or equal to "tolerance".
         tolerance
             Specify tolerance below which two values are counted as match.
@@ -131,9 +131,10 @@ class MetadataMatch(BaseSimilarity):
             comparison). By using the fact that score[i,j] = score[j,i] the calculation will be about
             2x faster.
         """
+        # pylint: disable=too-many-locals
         if array_type not in ["numpy", "sparse"]:
             raise ValueError("array_type must be 'numpy' or 'sparse'.")
-        
+
         def collect_entries(spectrums):
             """Collect metadata entries."""
             entries = []
@@ -163,7 +164,7 @@ class MetadataMatch(BaseSimilarity):
                 idx = np.where(entries_ref == entry)[0]
                 rows.extend(idx)
                 cols.extend([i] * len(idx))
-            
+
             rows = np.array(rows)
             cols = np.array(cols)
             scores = np.ones(len(rows))

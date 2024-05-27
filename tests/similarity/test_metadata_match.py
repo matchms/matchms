@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from matchms import calculate_scores
 from matchms.similarity.MetadataMatch import MetadataMatch
-from .builder_Spectrum import SpectrumBuilder
+from tests.builder_Spectrum import SpectrumBuilder
 
 
 @pytest.fixture
@@ -88,7 +88,5 @@ def test_metadata_match_invalid_array_type(spectrums):
 
     similarity_score = MetadataMatch(field="instrument_type")
 
-    try:
-        scores = calculate_scores(references, queries, similarity_score, array_type = "scipy")
-    except ValueError as e:
-        assert str(e) == "array_type must be 'numpy' or 'sparse'.", "The error message did not match the expected output"
+    with pytest.raises(ValueError, match="array_type must be 'numpy' or 'sparse'."):
+        calculate_scores(references, queries, similarity_score, array_type = "scipy")
