@@ -88,7 +88,5 @@ def test_metadata_match_invalid_array_type(spectrums):
 
     similarity_score = MetadataMatch(field="instrument_type")
 
-    try:
+    with pytest.raises(ValueError, match="array_type must be 'numpy' or 'sparse'."):
         calculate_scores(references, queries, similarity_score, array_type = "scipy")
-    except ValueError as e:
-        assert str(e) == "array_type must be 'numpy' or 'sparse'.", "The error message did not match the expected output"
