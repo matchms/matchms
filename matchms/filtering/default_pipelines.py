@@ -56,11 +56,12 @@ OTHER_FILTERS = [matchms.filtering.metadata_processing.require_precursor_mz.requ
                  msfilters.require_minimum_number_of_peaks,
                  msfilters.add_fingerprint,
                  msfilters.add_losses,
-                 msfilters.repair_parent_mass_match_smiles_wrapper, ]
+                 msfilters.repair_parent_mass_match_smiles_wrapper,
+                 ]
 
 BASIC_FILTERS = HARMONIZE_METADATA_FIELD_NAMES + DERIVE_METADATA_IN_WRONG_FIELD + HARMONIZE_METADATA_ENTRIES
 DEFAULT_FILTERS = BASIC_FILTERS + [msfilters.normalize_intensities, ] + REQUIRE_COMPLETE_METADATA + DERIVE_MISSING_METADATA
-LIBRARY_CLEANING = DEFAULT_FILTERS + REPAIR_ANNOTATION + REQUIRE_COMPLETE_ANNOTATION
+LIBRARY_CLEANING = DEFAULT_FILTERS + REPAIR_ANNOTATION + REQUIRE_COMPLETE_ANNOTATION + [msfilters.require_correct_ms_level]
 MS2DEEPSCORE_TRAINING = LIBRARY_CLEANING + CLEAN_PEAKS
 
 
