@@ -69,7 +69,6 @@ Should output
 
 """
 from matchms.filtering.default_filters import default_filters
-from matchms.filtering.metadata_processing import require_correct_ionmode
 from matchms.filtering.metadata_processing.add_compound_name import \
     add_compound_name
 from matchms.filtering.metadata_processing.add_fingerprint import \
