@@ -117,6 +117,7 @@ ac$mass_spectrometry:mass_range_m/z,mass_range_mz
 ac$mass_spectrometry:ms_type,ms_level
 spectrum_type,ms_level
 mslevel,ms_level
+ms_type,ms_level
 ac$mass_spectrometry:msn_pathway,msn_pathway
 msn_pathway,msn_pathway
 ch$link:nist,nist_id
