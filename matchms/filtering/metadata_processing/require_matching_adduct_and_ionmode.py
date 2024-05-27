@@ -7,6 +7,8 @@ logger = logging.getLogger("matchms")
 
 
 def require_matching_adduct_and_ionmode(spectrum):
+    if spectrum is None:
+        return None
     ionmode = spectrum.get("ionmode")
     adduct = spectrum.get("adduct")
     charge_of_adduct = get_charge_of_adduct(adduct)
