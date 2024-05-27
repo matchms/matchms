@@ -29,6 +29,8 @@ def remove_noise_below_frequent_intensities(spectrum: Spectrum,
         From all intensities that repeat more than min_count_of_frequent_intensities the highest is selected.
     The noise level is set to this intensity * noise_level_multiplier.
     """
+    if spectrum is None:
+        return None
     spectrum = spectrum.clone()
 
     highest_frequent_peak = _select_highest_frequent_peak(spectrum.intensities, min_count_of_frequent_intensities)
