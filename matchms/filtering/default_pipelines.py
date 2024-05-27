@@ -1,4 +1,5 @@
 """Stores sets of filters for easy pipeline creation."""
+import matchms.filtering.metadata_processing.require_precursor_mz
 from matchms import filtering as msfilters
 
 
@@ -45,16 +46,17 @@ CLEAN_PEAKS = [(msfilters.select_by_mz, {"mz_from": 0, "mz_to": 1000}),
                (msfilters.select_by_relative_intensity, {"intensity_from": 0.001}),
                (msfilters.reduce_to_number_of_peaks, {"n_max": 1000}),
                (msfilters.require_minimum_number_of_high_peaks, {"no_peaks": 5, "intensity_percent": 2.0}),
+               msfilters.remove_profiled_spectra,
                ]
 # These filters are in None of the above pipelines
-OTHER_FILTERS = [msfilters.require_precursor_below_mz,
+OTHER_FILTERS = [matchms.filtering.metadata_processing.require_precursor_mz.require_precursor_below_mz,
                  msfilters.select_by_intensity,
                  msfilters.remove_peaks_around_precursor_mz,
                  msfilters.remove_peaks_outside_top_k,
                  msfilters.require_minimum_number_of_peaks,
                  msfilters.add_fingerprint,
                  msfilters.add_losses,
-                 msfilters.repair_parent_mass_match_smiles_wrapper,]
+                 msfilters.repair_parent_mass_match_smiles_wrapper, ]
 
 BASIC_FILTERS = HARMONIZE_METADATA_FIELD_NAMES + DERIVE_METADATA_IN_WRONG_FIELD + HARMONIZE_METADATA_ENTRIES
 DEFAULT_FILTERS = BASIC_FILTERS + [msfilters.normalize_intensities, ] + REQUIRE_COMPLETE_METADATA + DERIVE_MISSING_METADATA

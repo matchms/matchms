@@ -128,10 +128,8 @@ from matchms.filtering.metadata_processing.require_formula import \
     require_formula
 from matchms.filtering.metadata_processing.require_parent_mass_match_smiles import \
     require_parent_mass_match_smiles
-from matchms.filtering.metadata_processing.require_precursor_below_mz import \
-    require_precursor_below_mz
-from matchms.filtering.metadata_processing.require_precursor_mz import \
-    require_precursor_mz
+from matchms.filtering.metadata_processing.require_precursor_mz import (
+    require_precursor_below_mz, require_precursor_mz)
 from matchms.filtering.metadata_processing.require_retention_index import \
     require_retention_index
 from matchms.filtering.metadata_processing.require_retention_time import \
@@ -147,6 +145,8 @@ from matchms.filtering.peak_processing.remove_peaks_around_precursor_mz import \
     remove_peaks_around_precursor_mz
 from matchms.filtering.peak_processing.remove_peaks_outside_top_k import \
     remove_peaks_outside_top_k
+from matchms.filtering.peak_processing.remove_profiled_spectra import \
+    remove_profiled_spectra
 from matchms.filtering.peak_processing.require_minimum_number_of_high_peaks import \
     require_minimum_number_of_high_peaks
 from matchms.filtering.peak_processing.require_minimum_number_of_peaks import \
@@ -186,6 +186,7 @@ __all__ = [
     "reduce_to_number_of_peaks",
     "remove_peaks_around_precursor_mz",
     "remove_peaks_outside_top_k",
+    "remove_profiled_spectra",
     "repair_adduct_and_parent_mass_based_on_smiles",
     "repair_adduct_based_on_parent_mass",
     "require_correct_ionmode",

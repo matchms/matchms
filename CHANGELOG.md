@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+### Changed
+- Added remove_profile_spectra filter
+
+### Removed:
+- Require_precursor_below_mz is deprecated, require_precursor_mz now also allows for argument maximum_mz 
+
+
+## [0.25.0] -2024-05-21
 ### Added
 - filters `require_formula` and `require_compound_name`. [#627](https://github.com/matchms/matchms/pull/627)
 - filters `require_retention_time` and `require_retention_index`. [#585](https://github.com/matchms/matchms/pull/602)
@@ -27,6 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed repair_precursor_is_parent_mass
 
 - Removed option accept_parent_mass_is_mol_wt in Repair_adduct_based_on_smiles
+- Merged require_precursor_mz and require_precursor_mz_below_mz into require_precursor_mz_below_mz
 - Added repair_adduct_based_on_parent_mass
 - Changed repair_adduct_and_parent_mass_based_on_smiles to update parent mass to the monoisotopic mass of the smiles, instead of updating based on precursor_mz and new adduct. 
 ## [0.24.1] -2024-01-16
