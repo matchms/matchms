@@ -10,6 +10,9 @@ logger = logging.getLogger("matchms")
 def require_matching_adduct_precursor_mz_parent_mass(spectrum,
                                                      tolerance=0.1):
     """Checks if the adduct precursor mz and parent mass match within the tolerance"""
+    if spectrum is None:
+        return None
+
     adduct = spectrum.get("adduct")
 
     if adduct is None:
