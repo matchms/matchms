@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 ### Added
 - Added remove_profile_spectra filter
+- Allowed peaks to have any floating point dtype
 - Added require_matching_ionmode_and_adduct filter
 
 ### Removed:
