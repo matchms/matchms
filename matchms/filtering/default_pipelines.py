@@ -42,6 +42,7 @@ REPAIR_ANNOTATION = [
 ]
 REQUIRE_COMPLETE_ANNOTATION = [(msfilters.require_parent_mass_match_smiles, {'mass_tolerance': 0.1}),
                                msfilters.require_valid_annotation,
+                               msfilters.require_matching_adduct_precursor_mz_parent_mass,
                                msfilters.require_matching_adduct_and_ionmode]
 CLEAN_PEAKS = [(msfilters.select_by_mz, {"mz_from": 0, "mz_to": 1000}),
                (msfilters.select_by_relative_intensity, {"intensity_from": 0.001}),
