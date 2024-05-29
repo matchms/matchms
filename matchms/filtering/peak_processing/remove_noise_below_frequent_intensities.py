@@ -12,7 +12,7 @@ def remove_noise_below_frequent_intensities(spectrum: Spectrum,
                                             noise_level_multiplier: float = 2.0):
     """Removes noise if intensities exactly match frequently
 
-    When no noise filtering has been applied to a spectrum, many spectra with have repeating intensities.
+    When no noise filtering has been applied to a spectrum, many spectra show repeating intensities.
     From all intensities that repeat more than min_count_of_frequent_intensities the highest is selected.
     The noise level is set to this intensity * noise_level_multiplier. All fragments with an intensity below the noise
     level are removed.
