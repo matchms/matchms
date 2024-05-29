@@ -52,5 +52,4 @@ def _select_highest_frequent_peak(intensities,
     # Return the highest value from the filtered values, or -1 if no values meet the criteria
     if filtered_values.size > 0:
         return filtered_values.max()
-    else:
-        return -1
+    return -1
