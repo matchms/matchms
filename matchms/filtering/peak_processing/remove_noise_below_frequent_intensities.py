@@ -1,4 +1,5 @@
 import logging
+import numpy as np
 from matchms.Fragments import Fragments
 from matchms.Spectrum import Spectrum
 
