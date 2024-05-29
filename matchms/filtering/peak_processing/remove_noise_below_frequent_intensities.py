@@ -1,5 +1,4 @@
 import logging
-from collections import Counter
 from matchms.Fragments import Fragments
 from matchms.Spectrum import Spectrum
 
@@ -45,10 +44,12 @@ def remove_noise_below_frequent_intensities(spectrum: Spectrum,
 
 def _select_highest_frequent_peak(intensities,
                                   min_count_of_frequent_intensities=5):
-    counts = Counter(intensities)
-    highest_value_to_remove = -1
-    for value, count in counts.items():
-        if count >= min_count_of_frequent_intensities:
-            if value > highest_value_to_remove:
-                highest_value_to_remove = value
-    return highest_value_to_remove
+    unique_values, counts = np.unique(intensities, return_counts=True)
+    mask = counts >= min_count_of_frequent_intensities
+    filtered_values = unique_values[mask]
+
+    # Return the highest value from the filtered values, or -1 if no values meet the criteria
+    if filtered_values.size > 0:
+        return filtered_values.max()
+    else:
+        return -1
