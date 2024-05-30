@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added remove_profile_spectra filter
 - Allowed peaks to have any floating point dtype
 - Added require_matching_ionmode_and_adduct filter
+- Added remove_noise_below_frequent_intensities
 
 ### Removed:
 - Require_precursor_below_mz is deprecated, require_precursor_mz now also allows for argument maximum_mz 
