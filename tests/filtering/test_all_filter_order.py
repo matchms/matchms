@@ -44,7 +44,17 @@ DERIVE_ANNOTATION_FILTERS = [msfilters.derive_smiles_from_inchi,
      [msfilters.select_by_intensity, msfilters.select_by_mz, msfilters.select_by_relative_intensity,
       msfilters.remove_peaks_around_precursor_mz, msfilters.remove_peaks_outside_top_k,
       msfilters.reduce_to_number_of_peaks, msfilters.require_minimum_number_of_peaks,
-      msfilters.require_minimum_number_of_high_peaks]]
+      msfilters.require_minimum_number_of_high_peaks]],
+    [[msfilters.remove_profiled_spectra,], [msfilters.remove_peaks_around_precursor_mz]],
+    [[msfilters.clean_adduct, msfilters.derive_adduct_from_name, msfilters.repair_adduct_based_on_parent_mass,
+      msfilters.repair_adduct_and_parent_mass_based_on_smiles, msfilters.add_precursor_mz,
+      msfilters.require_precursor_mz, msfilters.add_parent_mass, msfilters.repair_parent_mass_is_molar_mass],
+     [msfilters.require_matching_adduct_precursor_mz_parent_mass]],
+    [[msfilters.repair_adduct_based_on_parent_mass, msfilters.repair_adduct_and_parent_mass_based_on_smiles,
+      msfilters.clean_adduct, msfilters.require_correct_ionmode, msfilters.derive_ionmode,
+      msfilters.derive_adduct_from_name],
+     [msfilters.require_matching_adduct_and_ionmode]],
+    [[msfilters.remove_profiled_spectra,], [msfilters.remove_peaks_around_precursor_mz]]
 ])
 def test_all_filter_order(early_filters: List[Callable], later_filters: List[Callable]):
     """Tests if early_filter is run before later_filter"""
