@@ -41,12 +41,15 @@ REPAIR_ANNOTATION = [
     (msfilters.derive_annotation_from_compound_name, {"mass_tolerance": 0.1}),
 ]
 REQUIRE_COMPLETE_ANNOTATION = [(msfilters.require_parent_mass_match_smiles, {'mass_tolerance': 0.1}),
-                               msfilters.require_valid_annotation, ]
+                               msfilters.require_valid_annotation,
+                               msfilters.require_matching_adduct_precursor_mz_parent_mass,
+                               msfilters.require_matching_adduct_and_ionmode]
 CLEAN_PEAKS = [(msfilters.select_by_mz, {"mz_from": 0, "mz_to": 1000}),
                (msfilters.select_by_relative_intensity, {"intensity_from": 0.001}),
                (msfilters.reduce_to_number_of_peaks, {"n_max": 1000}),
                (msfilters.require_minimum_number_of_high_peaks, {"no_peaks": 5, "intensity_percent": 2.0}),
                msfilters.remove_profiled_spectra,
+               msfilters.remove_noise_below_frequent_intensities
                ]
 # These filters are in None of the above pipelines
 OTHER_FILTERS = [matchms.filtering.metadata_processing.require_precursor_mz.require_precursor_below_mz,

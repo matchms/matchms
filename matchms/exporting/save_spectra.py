@@ -11,7 +11,9 @@ logger = logging.getLogger("matchms")
 
 def save_spectra(spectrums: List[Spectrum],
                  file: str,
-                 export_style: str = "matchms") -> None:
+                 export_style: str = "matchms",
+                 append: bool = False,
+                 ) -> None:
     """Saves spectra as the file type specified.
 
     The following file extensions can be used:
@@ -22,24 +24,27 @@ def save_spectra(spectrums: List[Spectrum],
     spectrums:
         The spectra that are saved.
     file:
-        Path to file containing spectra, with file extension "json", "mgf", "msp"
-    ftype:
-        Optional. Filetype
+        Path to file containing spectra, with file extension ".json", ".mgf", ".msp"
     export_style:
         Converts the keys to the required export style. One of ["matchms", "massbank", "nist", "riken", "gnps"].
         Default is "matchms"
+    append:
+        Only supported for ".mgf", and ".msp" filetypes. If True, will try to append to an existing file, instead of creating 
+        a new file. Default is `False`.
     """
-    if os.path.exists(file):
+    if os.path.exists(file) and not append:
         raise FileExistsError(f"The specified file: {file} already exists.")
-
+    
     ftype = os.path.splitext(file)[1].lower()[1:]
+    if append and ftype not in ('mgf', 'msp'):
+        raise ValueError(f"{ftype} isn't supported for when `append` is True")
 
     if ftype == "json":
         save_as_json(spectrums, file, export_style)
     elif ftype == "mgf":
         save_as_mgf(spectrums, file, export_style)
     elif ftype == "msp":
-        save_as_msp(spectrums, file, style=export_style)
+        save_as_msp(spectrums, file, style=export_style, mode='a')
     elif ftype == "pickle":
         if export_style != "matchms":
             logger.error("The only available export style for pickle is 'matchms', your export style %s", export_style)
