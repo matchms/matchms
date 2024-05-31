@@ -77,3 +77,14 @@ def test_cosine_greedy_matrix(symmetric):
     assert scores[0][1][0] == pytest.approx(scores[1][0][0], 0.000001), "Expected different cosine score."
     assert scores[0][1]["score"] == pytest.approx(scores[1][0]["score"], 0.000001), \
         "Expected different cosine score."
+
+def test_cosine_greedy_matrix_unsymmetric_error():
+    builder = SpectrumBuilder()
+    spectrum_1 = builder.with_mz(np.array([100, 200, 300], dtype="float")).with_intensities(
+        np.array([0.1, 0.2, 1.0], dtype="float")).build()
+
+    spectrum_2 = builder.with_mz(np.array([110, 190, 290], dtype="float")).with_intensities(
+        np.array([0.5, 0.2, 1.0], dtype="float")).build()
+    
+    with pytest.raises(ValueError, match="unequal number of spectra"):
+        CosineGreedy().matrix([spectrum_1, spectrum_2], [spectrum_2], is_symmetric=True)
