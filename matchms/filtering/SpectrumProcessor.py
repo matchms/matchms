@@ -178,7 +178,6 @@ class SpectrumProcessor:
             Displays progress bar if set to True. Default is True.
         cleaned_spectra_file:
             Path to where the cleaned spectra should be saved.
-
         Returns
         -------
         Spectrums
@@ -189,6 +188,9 @@ class SpectrumProcessor:
         if cleaned_spectra_file is not None:
             if os.path.exists(cleaned_spectra_file):
                 raise FileExistsError("The specified save references file already exists")
+            ftype = os.path.splitext(cleaned_spectra_file)[1].lower()[1:]
+            incremental_save = ftype in ('mgf', 'msp')
+
         if not self.filters:
             logger.warning("No filters have been specified, so spectra were not filtered")
         processing_report = ProcessingReport(self.filters)
@@ -201,7 +203,10 @@ class SpectrumProcessor:
             if processed_spectrum is not None:
                 processed_spectrums.append(processed_spectrum)
 
-        if cleaned_spectra_file is not None:
+            if cleaned_spectra_file is not None and incremental_save:
+                save_spectra(processed_spectrum, cleaned_spectra_file, append=True)
+
+        if cleaned_spectra_file is not None and not incremental_save:
             save_spectra(processed_spectrums, cleaned_spectra_file)
 
         return processed_spectrums, processing_report
