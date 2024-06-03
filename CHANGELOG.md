@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.26.0] -2024-06-03
+### Changed
+- Fixed bug. Removing spectra in spectrum processor would break the saving, since trying to save None values.
+
+## [0.26.0] -2024-06-03
+
 ## Unreleased
 ### Added
 - Added remove_profile_spectra filter
