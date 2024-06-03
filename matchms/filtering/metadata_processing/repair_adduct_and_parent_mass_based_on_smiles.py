@@ -33,6 +33,8 @@ def repair_adduct_and_parent_mass_based_on_smiles(spectrum_in: Spectrum,
         return None
     changed_spectrum = spectrum_in.clone()
     smiles_mass = get_monoisotopic_neutral_mass(changed_spectrum.get("smiles"))
+    if smiles_mass is None:
+        return spectrum_in
     parent_mass = spectrum_in.get("parent_mass")
 
     # First check if the given adduct and precursor mz already match the monoisotopic mass of the smiles
