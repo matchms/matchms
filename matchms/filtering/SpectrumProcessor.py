@@ -203,8 +203,8 @@ class SpectrumProcessor:
             if processed_spectrum is not None:
                 processed_spectrums.append(processed_spectrum)
 
-            if cleaned_spectra_file is not None and incremental_save:
-                save_spectra(processed_spectrum, cleaned_spectra_file, append=True)
+                if cleaned_spectra_file is not None and incremental_save:
+                    save_spectra(processed_spectrum, cleaned_spectra_file, append=True)
 
         if cleaned_spectra_file is not None and not incremental_save:
             save_spectra(processed_spectrums, cleaned_spectra_file)
