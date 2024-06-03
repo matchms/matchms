@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.26.2] -2024-06-03
+### Changed
+- Fixed bug in repair_adduct_and_parent_mass_based_on_smiles if mass from smiles is None
+
 ## [0.26.1] -2024-06-03
 ### Changed
 - Fixed bug. Removing spectra in spectrum processor would break the saving, since trying to save None values.
