@@ -5,7 +5,8 @@ from matchms import filtering as msfilters
 
 # IMPORTANT!! IF YOU CHANGE ANYTHING HERE PLEASE ADD A TEST to test_all_filter_order.py
 # to ensure it is not changed back by accident later.
-ALL_FILTERS = [msfilters.make_charge_int,
+ALL_FILTERS = [msfilters.require_correct_ms_level,
+               msfilters.make_charge_int,
                msfilters.add_compound_name,
                msfilters.derive_adduct_from_name,
                msfilters.derive_formula_from_name,
