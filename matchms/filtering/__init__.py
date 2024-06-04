@@ -114,6 +114,8 @@ from matchms.filtering.metadata_processing.repair_inchi_inchikey_smiles import \
     repair_inchi_inchikey_smiles
 from matchms.filtering.metadata_processing.repair_not_matching_annotation import \
     repair_not_matching_annotation
+from matchms.filtering.metadata_processing.repair_parent_mass_from_smiles import \
+    repair_parent_mass_from_smiles
 from matchms.filtering.metadata_processing.repair_parent_mass_is_molar_mass import \
     repair_parent_mass_is_molar_mass
 from matchms.filtering.metadata_processing.repair_parent_mass_match_smiles_wrapper import \
@@ -200,6 +202,7 @@ __all__ = [
     "require_correct_ionmode",
     "remove_noise_below_frequent_intensities",
     "repair_inchi_inchikey_smiles",
+    "repair_parent_mass_from_smiles",
     "repair_parent_mass_is_molar_mass",
     "repair_parent_mass_match_smiles_wrapper",
     "repair_smiles_of_salts",
