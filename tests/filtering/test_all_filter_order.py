@@ -54,7 +54,12 @@ DERIVE_ANNOTATION_FILTERS = [msfilters.derive_smiles_from_inchi,
       msfilters.clean_adduct, msfilters.require_correct_ionmode, msfilters.derive_ionmode,
       msfilters.derive_adduct_from_name],
      [msfilters.require_matching_adduct_and_ionmode]],
-    [[msfilters.remove_profiled_spectra,], [msfilters.remove_peaks_around_precursor_mz]]
+    [[msfilters.remove_profiled_spectra,], [msfilters.remove_peaks_around_precursor_mz]],
+    [[msfilters.repair_parent_mass_from_smiles], [msfilters.repair_adduct_based_on_parent_mass,
+                                                  msfilters.require_parent_mass_match_smiles,
+                                                  msfilters.require_matching_adduct_precursor_mz_parent_mass,
+                                                  ]],
+    [[msfilters.require_valid_annotation], [msfilters.repair_parent_mass_from_smiles]]
 ])
 def test_all_filter_order(early_filters: List[Callable], later_filters: List[Callable]):
     """Tests if early_filter is run before later_filter"""
