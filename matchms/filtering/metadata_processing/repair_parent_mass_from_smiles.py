@@ -21,7 +21,7 @@ def repair_parent_mass_from_smiles(spectrum_in: Spectrum,
     if parent_mass is None:
         changed_spectrum.set("parent_mass", smiles_mass)
         return changed_spectrum
-    elif abs(parent_mass - smiles_mass) > mass_tolerance:
+    if abs(parent_mass - smiles_mass) > mass_tolerance:
         changed_spectrum.set("parent_mass", smiles_mass)
         return changed_spectrum
     return spectrum_in
