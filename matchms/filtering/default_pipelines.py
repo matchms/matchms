@@ -35,8 +35,8 @@ REQUIRE_COMPLETE_METADATA = [msfilters.require_precursor_mz,
 REPAIR_ANNOTATION = [
     (msfilters.repair_smiles_of_salts, {'mass_tolerance': 0.1}),
     (msfilters.repair_parent_mass_is_molar_mass, {'mass_tolerance': 0.1}),
+    (msfilters.repair_parent_mass_from_smiles, {"mass_tolerance": 0.1}),
     (msfilters.repair_adduct_based_on_parent_mass, {'mass_tolerance': 0.1}),
-    (msfilters.repair_adduct_and_parent_mass_based_on_smiles, {'mass_tolerance': 0.1}),
     msfilters.repair_not_matching_annotation,
     (msfilters.derive_annotation_from_compound_name, {"mass_tolerance": 0.1}),
 ]
@@ -60,6 +60,7 @@ OTHER_FILTERS = [matchms.filtering.metadata_processing.require_precursor_mz.requ
                  msfilters.add_fingerprint,
                  msfilters.add_losses,
                  msfilters.repair_parent_mass_match_smiles_wrapper,
+                 (msfilters.repair_adduct_and_parent_mass_based_on_smiles, {'mass_tolerance': 0.1}),
                  ]
 
 BASIC_FILTERS = HARMONIZE_METADATA_FIELD_NAMES + DERIVE_METADATA_IN_WRONG_FIELD + HARMONIZE_METADATA_ENTRIES
