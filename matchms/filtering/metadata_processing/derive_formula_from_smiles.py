@@ -19,7 +19,7 @@ def derive_formula_from_smiles(spectrum_in, overwrite=True):
     if formula is not None:
         if spectrum.get("formula") is not None:
             if spectrum.get("formula") != formula:
-                logger.info("Overwriting formula from inchi. Original formula: %s New formula: %s",
+                logger.info("Overwriting formula. Original formula: %s New formula: %s",
                             spectrum.get('formula'), formula)
                 spectrum.set("formula", formula)
         else:
