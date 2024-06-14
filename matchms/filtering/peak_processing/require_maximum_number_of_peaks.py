@@ -2,12 +2,11 @@ import logging
 from typing import Optional
 from matchms.Spectrum import Spectrum
 
-
 logger = logging.getLogger("matchms")
 
 
-def require_number_of_peaks_below_maximum(spectrum_in: Spectrum,
-                                          maximum_number_of_fragments: int = 1000) -> Optional[Spectrum]:
+def require_maximum_number_of_peaks(spectrum_in: Spectrum,
+                                    maximum_number_of_fragments: int = 1000) -> Optional[Spectrum]:
     """Spectrum will be set to None when it has more peaks than maximum_number_of_fragments.
 
     Parameters

@@ -163,8 +163,8 @@ from matchms.filtering.peak_processing.require_minimum_number_of_high_peaks impo
     require_minimum_number_of_high_peaks
 from matchms.filtering.peak_processing.require_minimum_number_of_peaks import \
     require_minimum_number_of_peaks
-from matchms.filtering.peak_processing.require_number_of_peaks_below_maximum import \
-    require_number_of_peaks_below_maximum
+from matchms.filtering.peak_processing.require_maximum_number_of_peaks import \
+    require_maximum_number_of_peaks
 from matchms.filtering.peak_processing.select_by_intensity import \
     select_by_intensity
 from matchms.filtering.peak_processing.select_by_mz import select_by_mz
@@ -219,7 +219,7 @@ __all__ = [
     "require_matching_adduct_and_ionmode",
     "require_minimum_number_of_peaks",
     "require_minimum_number_of_high_peaks",
-    "require_number_of_peaks_below_maximum",
+    "require_maximum_number_of_peaks",
     "require_precursor_below_mz",
     "require_precursor_mz",
     "require_compound_name",
