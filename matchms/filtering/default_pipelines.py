@@ -61,6 +61,7 @@ OTHER_FILTERS = [matchms.filtering.metadata_processing.require_precursor_mz.requ
                  msfilters.add_fingerprint,
                  msfilters.add_losses,
                  msfilters.repair_parent_mass_match_smiles_wrapper,
+                 msfilters.require_maximum_number_of_peaks,
                  (msfilters.repair_adduct_and_parent_mass_based_on_smiles, {'mass_tolerance': 0.1}),
                  ]
 
