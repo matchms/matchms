@@ -26,7 +26,7 @@ def derive_formula_from_smiles(spectrum_in, overwrite=True):
             logger.info("Added formula from SMILES. New Formula: %s", formula)
             spectrum.set("formula", formula)
     else:
-        logger.warning("The smiles: %s could not be interpreted by rdkit, so no formula was set")
+        logger.warning("SMILES: %s could not be interpreted by rdkit, so no formula was set")
     return spectrum
 
 
