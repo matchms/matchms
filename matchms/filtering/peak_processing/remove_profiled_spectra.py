@@ -15,11 +15,12 @@ def remove_profiled_spectra(spectrum: Spectrum, mz_window=0.5):
     Reproduced from MZmine.
     https://github.com/mzmine/mzmine3/blob/master/src/main/java/io/github/mzmine/util/scans/ScanUtils.java#L609
     """
+    if spectrum is None:
+        return None
     peaks_n = spectrum.mz.shape[0]
     if peaks_n < 3:
         return spectrum
 
-    # mz_window = spectrum.mz[-1] - spectrum.mz[0] / 1000
     number_of_high_intensity_surounding_peaks = _get_number_of_high_intensity_surounding_peaks(spectrum.intensities,
                                                                                                spectrum.mz, mz_window)
     if number_of_high_intensity_surounding_peaks < 3:
