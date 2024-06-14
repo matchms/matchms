@@ -3,10 +3,16 @@ import pytest
 from matchms.Fragments import Fragments
 
 
-def test_fragments_init():
-
-    mz = np.array([10, 20, 30], dtype="float")
-    intensities = np.array([100, 20, 300], dtype="float")
+@pytest.mark.parametrize('dtype', [
+    np.float16,
+    np.float32,
+    np.float64,
+    float,
+    "float",
+])
+def test_fragments_init(dtype):
+    mz = np.array([10, 20, 30], dtype=dtype)
+    intensities = np.array([100, 20, 300], dtype=dtype)
 
     peaks = Fragments(mz=mz, intensities=intensities)
 

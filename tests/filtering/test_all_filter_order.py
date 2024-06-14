@@ -25,7 +25,7 @@ DERIVE_ANNOTATION_FILTERS = [msfilters.derive_smiles_from_inchi,
     [DERIVE_ANNOTATION_FILTERS + [msfilters.repair_inchi_inchikey_smiles, msfilters.clean_adduct,
                                   msfilters.derive_annotation_from_compound_name],
      REPAIR_PARENT_MASS_SMILES_FILTERS],
-    [[msfilters.add_precursor_mz,], [msfilters.require_precursor_mz,]],
+    [[msfilters.add_precursor_mz, ], [msfilters.require_precursor_mz, ]],
     # Since pubchem lookup checks if annotation is complete.
     # So deriving inchi and inchikey from smiles, should happen first.
     [[msfilters.repair_inchi_inchikey_smiles, msfilters.add_parent_mass],
@@ -41,8 +41,28 @@ DERIVE_ANNOTATION_FILTERS = [msfilters.derive_smiles_from_inchi,
     [[msfilters.derive_formula_from_name, ], [msfilters.require_formula]],
     [[msfilters.remove_profiled_spectra,], [msfilters.remove_peaks_around_precursor_mz]],
     [[msfilters.derive_formula_from_smiles], [msfilters.require_formula]],
-    [[msfilters.require_valid_annotation] + REPAIR_PARENT_MASS_SMILES_FILTERS, [msfilters.derive_formula_from_smiles]]
-])
+    [[msfilters.require_valid_annotation] + REPAIR_PARENT_MASS_SMILES_FILTERS, [msfilters.derive_formula_from_smiles]],
+    [[msfilters.remove_profiled_spectra, ], [msfilters.remove_peaks_around_precursor_mz]],
+    [[msfilters.remove_noise_below_frequent_intensities],
+     [msfilters.select_by_intensity, msfilters.select_by_mz, msfilters.select_by_relative_intensity,
+      msfilters.remove_peaks_around_precursor_mz, msfilters.remove_peaks_outside_top_k,
+      msfilters.reduce_to_number_of_peaks, msfilters.require_minimum_number_of_peaks,
+      msfilters.require_minimum_number_of_high_peaks]],
+    [[msfilters.remove_profiled_spectra,], [msfilters.remove_peaks_around_precursor_mz]],
+    [[msfilters.clean_adduct, msfilters.derive_adduct_from_name, msfilters.repair_adduct_based_on_parent_mass,
+      msfilters.repair_adduct_and_parent_mass_based_on_smiles, msfilters.add_precursor_mz,
+      msfilters.require_precursor_mz, msfilters.add_parent_mass, msfilters.repair_parent_mass_is_molar_mass],
+     [msfilters.require_matching_adduct_precursor_mz_parent_mass]],
+    [[msfilters.repair_adduct_based_on_parent_mass, msfilters.repair_adduct_and_parent_mass_based_on_smiles,
+      msfilters.clean_adduct, msfilters.require_correct_ionmode, msfilters.derive_ionmode,
+      msfilters.derive_adduct_from_name],
+     [msfilters.require_matching_adduct_and_ionmode]],
+    [[msfilters.remove_profiled_spectra,], [msfilters.remove_peaks_around_precursor_mz]],
+    [[msfilters.repair_parent_mass_from_smiles], [msfilters.repair_adduct_based_on_parent_mass,
+                                                  msfilters.require_parent_mass_match_smiles,
+                                                  msfilters.require_matching_adduct_precursor_mz_parent_mass,
+                                                  ]],
+    [[msfilters.require_valid_annotation], [msfilters.repair_parent_mass_from_smiles]]
 def test_all_filter_order(early_filters: List[Callable], later_filters: List[Callable]):
     """Tests if early_filter is run before later_filter"""
     for early_filter in early_filters:
@@ -61,6 +81,7 @@ def test_all_filters_is_complete():
 
     This is important, since performing tests in the wrong order can make some filters useless.
     """
+
     def get_functions_from_file(file_path):
         """Gets all python functions in a file"""
         with open(file_path, 'r', encoding="utf-8") as file:
