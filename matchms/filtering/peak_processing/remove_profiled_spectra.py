@@ -21,7 +21,6 @@ def remove_profiled_spectra(spectrum: Spectrum, mz_window=0.5):
     if peaks_n < 3:
         return spectrum
 
-    # mz_window = spectrum.mz[-1] - spectrum.mz[0] / 1000
     number_of_high_intensity_surounding_peaks = _get_number_of_high_intensity_surounding_peaks(spectrum.intensities,
                                                                                                spectrum.mz, mz_window)
     if number_of_high_intensity_surounding_peaks < 3:
