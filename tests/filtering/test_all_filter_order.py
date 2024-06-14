@@ -62,7 +62,7 @@ DERIVE_ANNOTATION_FILTERS = [msfilters.derive_smiles_from_inchi,
                                                   msfilters.require_parent_mass_match_smiles,
                                                   msfilters.require_matching_adduct_precursor_mz_parent_mass,
                                                   ]],
-    [[msfilters.require_valid_annotation], [msfilters.repair_parent_mass_from_smiles]]
+    [[msfilters.require_valid_annotation], [msfilters.repair_parent_mass_from_smiles]]])
 def test_all_filter_order(early_filters: List[Callable], later_filters: List[Callable]):
     """Tests if early_filter is run before later_filter"""
     for early_filter in early_filters:
