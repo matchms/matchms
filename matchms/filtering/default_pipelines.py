@@ -29,6 +29,7 @@ DERIVE_MISSING_METADATA = [msfilters.correct_charge,
                            msfilters.derive_inchi_from_smiles,
                            msfilters.derive_smiles_from_inchi,
                            msfilters.derive_inchikey_from_inchi,
+                           msfilters.derive_formula_from_smiles,
                            ]
 REQUIRE_COMPLETE_METADATA = [msfilters.require_precursor_mz,
                              (msfilters.require_correct_ionmode, {"ion_mode_to_keep": "both"}), ]

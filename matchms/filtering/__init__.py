@@ -89,6 +89,8 @@ from matchms.filtering.metadata_processing.derive_annotation_from_compound_name 
     derive_annotation_from_compound_name
 from matchms.filtering.metadata_processing.derive_formula_from_name import \
     derive_formula_from_name
+from matchms.filtering.metadata_processing.derive_formula_from_smiles import \
+    derive_formula_from_smiles
 from matchms.filtering.metadata_processing.derive_inchi_from_smiles import \
     derive_inchi_from_smiles
 from matchms.filtering.metadata_processing.derive_inchikey_from_inchi import \
@@ -183,6 +185,7 @@ __all__ = [
     "default_filters",
     "derive_adduct_from_name",
     "derive_formula_from_name",
+    "derive_formula_from_smiles",
     "derive_inchi_from_smiles",
     "derive_inchikey_from_inchi",
     "derive_ionmode",
