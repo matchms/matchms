@@ -89,6 +89,8 @@ from matchms.filtering.metadata_processing.derive_annotation_from_compound_name 
     derive_annotation_from_compound_name
 from matchms.filtering.metadata_processing.derive_formula_from_name import \
     derive_formula_from_name
+from matchms.filtering.metadata_processing.derive_formula_from_smiles import \
+    derive_formula_from_smiles
 from matchms.filtering.metadata_processing.derive_inchi_from_smiles import \
     derive_inchi_from_smiles
 from matchms.filtering.metadata_processing.derive_inchikey_from_inchi import \
@@ -114,6 +116,8 @@ from matchms.filtering.metadata_processing.repair_inchi_inchikey_smiles import \
     repair_inchi_inchikey_smiles
 from matchms.filtering.metadata_processing.repair_not_matching_annotation import \
     repair_not_matching_annotation
+from matchms.filtering.metadata_processing.repair_parent_mass_from_smiles import \
+    repair_parent_mass_from_smiles
 from matchms.filtering.metadata_processing.repair_parent_mass_is_molar_mass import \
     repair_parent_mass_is_molar_mass
 from matchms.filtering.metadata_processing.repair_parent_mass_match_smiles_wrapper import \
@@ -124,8 +128,14 @@ from matchms.filtering.metadata_processing.require_compound_name import \
     require_compound_name
 from matchms.filtering.metadata_processing.require_correct_ionmode import \
     require_correct_ionmode
+from matchms.filtering.metadata_processing.require_correct_ms_level import \
+    require_correct_ms_level
 from matchms.filtering.metadata_processing.require_formula import \
     require_formula
+from matchms.filtering.metadata_processing.require_matching_adduct_and_ionmode import \
+    require_matching_adduct_and_ionmode
+from matchms.filtering.metadata_processing.require_matching_adduct_precursor_mz_parent_mass import \
+    require_matching_adduct_precursor_mz_parent_mass
 from matchms.filtering.metadata_processing.require_parent_mass_match_smiles import \
     require_parent_mass_match_smiles
 from matchms.filtering.metadata_processing.require_precursor_mz import (
@@ -141,6 +151,8 @@ from matchms.filtering.peak_processing.normalize_intensities import \
     normalize_intensities
 from matchms.filtering.peak_processing.reduce_to_number_of_peaks import \
     reduce_to_number_of_peaks
+from matchms.filtering.peak_processing.remove_noise_below_frequent_intensities import \
+    remove_noise_below_frequent_intensities
 from matchms.filtering.peak_processing.remove_peaks_around_precursor_mz import \
     remove_peaks_around_precursor_mz
 from matchms.filtering.peak_processing.remove_peaks_outside_top_k import \
@@ -175,6 +187,7 @@ __all__ = [
     "default_filters",
     "derive_adduct_from_name",
     "derive_formula_from_name",
+    "derive_formula_from_smiles",
     "derive_inchi_from_smiles",
     "derive_inchikey_from_inchi",
     "derive_ionmode",
@@ -192,20 +205,25 @@ __all__ = [
     "repair_adduct_and_parent_mass_based_on_smiles",
     "repair_adduct_based_on_parent_mass",
     "require_correct_ionmode",
+    "remove_noise_below_frequent_intensities",
     "repair_inchi_inchikey_smiles",
+    "repair_parent_mass_from_smiles",
     "repair_parent_mass_is_molar_mass",
     "repair_parent_mass_match_smiles_wrapper",
     "repair_smiles_of_salts",
     "derive_annotation_from_compound_name",
     "repair_not_matching_annotation",
     "require_valid_annotation",
+    "require_matching_adduct_precursor_mz_parent_mass",
     "require_parent_mass_match_smiles",
+    "require_matching_adduct_and_ionmode",
     "require_minimum_number_of_peaks",
     "require_minimum_number_of_high_peaks",
     "require_number_of_peaks_below_maximum",
     "require_precursor_below_mz",
     "require_precursor_mz",
     "require_compound_name",
+    "require_correct_ms_level",
     "require_formula",
     "require_retention_time",
     "require_retention_index",

@@ -6,8 +6,35 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+
+### Added
+- Added derive_formula_from_smiles
+
+## [0.26.3] -2024-06-07
+
+### Added
+- repair_adduct_and_parent_mass_based_on_smiles does not repair parent mass anymore if it is already close to the smiles
+- repair_paren_mass_from_smiles was added as a filter
+
+## [0.26.2] -2024-06-03
+### Added
+- Added require correct ms level
+
 ### Changed
+- Fixed bug in repair_adduct_and_parent_mass_based_on_smiles if mass from smiles is None
+
+## [0.26.1] -2024-06-03
+### Changed
+- Fixed bug. Removing spectra in spectrum processor would break the saving, since trying to save None values.
+
+## [0.26.0] -2024-06-03
+
+## Unreleased
+### Added
 - Added remove_profile_spectra filter
+- Allowed peaks to have any floating point dtype
+- Added require_matching_ionmode_and_adduct filter
+- Added remove_noise_below_frequent_intensities
 
 ### Removed:
 - Require_precursor_below_mz is deprecated, require_precursor_mz now also allows for argument maximum_mz 
@@ -24,6 +51,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - repair_parent_mass_is_molar_weight does only repair parent mass and does not change the precursor mz.
 - Change repair_parent_mass_is_mol_wt to repair_parent_mass_is_molar_mass
 - Set RDKIT version to rdkit = ">=2023.3.2,<2023.9.5" to fix installation issues. 
+- `SpectrumProcessor` will try to incrementally save when destination files are of type .msp or .mgf
 - Use StackedSparseArray for MetadataMatch equal_match when array_type is sparse [#642](https://github.com/matchms/matchms/pull/642)
 
 ## [0.24.4] -2024-01-16

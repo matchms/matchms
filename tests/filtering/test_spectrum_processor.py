@@ -11,14 +11,14 @@ from ..builder_Spectrum import SpectrumBuilder
 
 @pytest.fixture
 def spectrums():
-    s1 = SpectrumBuilder().\
-        with_metadata({"charge": "+1", "pepmass": 100}).\
+    s1 = SpectrumBuilder(). \
+        with_metadata({"charge": "+1", "pepmass": 100}). \
         with_mz([10, 20, 30]).with_intensities([0.1, 0.4, 10]).build()
     s2 = SpectrumBuilder().with_metadata({"charge": "-1",
-                                          "pepmass": 102}).\
+                                          "pepmass": 102}). \
         with_mz([10, 20, 30]).with_intensities([0.1, 0.2, 1]).build()
     s3 = SpectrumBuilder().with_metadata({"charge": -1,
-                                          "pepmass": 104}).\
+                                          "pepmass": 104}). \
         with_mz([10, ]).with_intensities([0.1, ]).build()
     return [s1, s2, s3]
 
@@ -191,6 +191,7 @@ def test_adding_custom_filter_with_parameters(spectrums):
 ])
 def test_add_custom_filter_in_position(filter_position: int, expected):
     """Tests that a filter is added in the correct position"""
+
     def nonsense_inchikey_multiple(s, number):
         s.set("inchikey", number * "NONSENSE")
         return s
@@ -320,3 +321,52 @@ def test_save_spectra_spectrum_processor(spectrums, tmp_path):
     # Check that the processed spectra are stored
     for spectrum in reloaded_spectra:
         assert spectrum.get("precursor_mz") is not None
+
+
+def test_save_spectra_spectrum_processor_none_spectra(spectrums, tmp_path):
+    processor = SpectrumProcessor(BASIC_FILTERS +
+                                  [(msfilters.require_correct_ionmode, {"ion_mode_to_keep": "positive"})])
+    filename = os.path.join(tmp_path, "spectra.msp")
+
+    _, _ = processor.process_spectrums(spectrums, cleaned_spectra_file=str(filename))
+    assert os.path.exists(filename)
+
+    # Reload spectra and compare lengths
+    reloaded_spectra = list(load_spectra(str(filename)))
+    assert len(reloaded_spectra) == 1
+
+    # Check that the processed spectra are stored
+    for spectrum in reloaded_spectra:
+        assert spectrum.get("precursor_mz") is not None
+
+
+@pytest.mark.parametrize('ftype, should_work', [
+    ['msp', True],
+    ['mgf', True],
+    ['json', False],
+])
+def test_save_partial_spectra_spectrum_processor(ftype, should_work, spectrums, tmp_path):
+    processor = SpectrumProcessor(BASIC_FILTERS)
+
+    # Deliberately introduce invalid spectrum
+    spectrums[-2] = "Lorem Ipsum"
+
+    filename = os.path.join(tmp_path, f"spectra.{ftype}")
+
+    with pytest.raises(Exception):
+        _, _ = processor.process_spectrums(spectrums, cleaned_spectra_file=str(filename))
+
+    if should_work:
+        assert os.path.exists(filename)
+
+        # Reload spectra and compare lengths
+        reloaded_spectra = list(load_spectra(str(filename)))
+
+        # Make sure we are only missing last two "spectra"
+        assert len(reloaded_spectra) == len(spectrums) - 2
+
+        # Check that the processed spectra are stored
+        for spectrum in reloaded_spectra:
+            assert spectrum.get("precursor_mz") is not None
+    else:
+        assert not os.path.exists(filename)
