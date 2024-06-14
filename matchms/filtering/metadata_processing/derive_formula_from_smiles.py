@@ -23,7 +23,7 @@ def derive_formula_from_smiles(spectrum_in, overwrite=True):
                             spectrum.get('formula'), formula)
                 spectrum.set("formula", formula)
         else:
-            logger.info("Added formula from inchi. New Formula: %s", formula)
+            logger.info("Added formula from SMILES. New Formula: %s", formula)
             spectrum.set("formula", formula)
     else:
         logger.warning("The smiles: %s could not be interpreted by rdkit, so no formula was set")
