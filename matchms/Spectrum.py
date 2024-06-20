@@ -89,12 +89,10 @@ class Spectrum:
         if metadata_harmonization is True:
             self._metadata.harmonize_values()
         self.peaks = Fragments(mz=mz, intensities=intensities)
-        self.losses = None
 
     def __eq__(self, other):
         return \
             self.peaks == other.peaks and \
-            self.losses == other.losses and \
             self._metadata == other._metadata
 
     def __hash__(self):
@@ -134,7 +132,6 @@ class Spectrum:
                          intensities=self.peaks.intensities,
                          metadata=self._metadata.data,
                          metadata_harmonization=False)
-        clone.losses = self.losses
         return clone
 
     def plot(self, figsize=(8, 6), dpi=200, **kwargs):
@@ -234,11 +231,27 @@ class Spectrum:
 
     @property
     def losses(self) -> Optional[Fragments]:
-        return self._losses.clone() if self._losses is not None else None
+        return self.compute_losses()
 
-    @losses.setter
-    def losses(self, value: Fragments):
-        self._losses = value
+    def compute_losses(self, loss_mz_from=0.0, loss_mz_to=None) -> Optional[Fragments]:
+        precursor_mz = self.get("precursor_mz", None)
+        if precursor_mz:
+            if loss_mz_to is None:
+                # Set max to precursor_mz
+                loss_mz_to = precursor_mz
+            assert isinstance(precursor_mz, (float, int)), ("Expected 'precursor_mz' to be a scalar number.",
+                                                            "Consider applying 'add_precursor_mz' filter first.")
+            peaks_mz, peaks_intensities = self.peaks.mz, self.peaks.intensities
+            losses_mz = (precursor_mz - peaks_mz)[::-1]
+            losses_intensities = peaks_intensities[::-1]
+
+            # Add losses that are within given boundaries
+            mask = np.where((losses_mz >= loss_mz_from)
+                            & (losses_mz <= loss_mz_to))
+            losses = Fragments(mz=losses_mz[mask],
+                               intensities=losses_intensities[mask])
+            return losses
+        return None
 
     @property
     def peaks(self) -> Fragments:
