@@ -59,7 +59,6 @@ ALL_FILTERS = [msfilters.require_correct_ms_level,
                msfilters.require_maximum_number_of_peaks,
                msfilters.require_minimum_number_of_high_peaks,
                msfilters.add_fingerprint,
-               msfilters.add_losses,
                ]
 
 FILTER_FUNCTION_NAMES = {x.__name__: x for x in ALL_FILTERS}

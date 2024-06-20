@@ -146,7 +146,6 @@ from matchms.filtering.metadata_processing.require_retention_time import \
     require_retention_time
 from matchms.filtering.metadata_processing.require_valid_annotation import \
     require_valid_annotation
-from matchms.filtering.peak_processing.add_losses import add_losses
 from matchms.filtering.peak_processing.normalize_intensities import \
     normalize_intensities
 from matchms.filtering.peak_processing.reduce_to_number_of_peaks import \
@@ -176,7 +175,6 @@ from matchms.filtering.SpeciesString import SpeciesString
 __all__ = [
     "add_compound_name",
     "add_fingerprint",
-    "add_losses",
     "add_parent_mass",
     "add_precursor_mz",
     "add_retention_index",

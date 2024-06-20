@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from matchms.filtering import add_losses, normalize_intensities
+from matchms.filtering import normalize_intensities
 from ..builder_Spectrum import SpectrumBuilder
 
 
@@ -27,8 +27,7 @@ def test_normalize_intensities_losses_present(mz, intensities, metadata, expecte
     spectrum_in = SpectrumBuilder().with_mz(mz).with_intensities(
         intensities).with_metadata(metadata).build()
 
-    spectrum = add_losses(spectrum_in)
-    spectrum = normalize_intensities(spectrum)
+    spectrum = normalize_intensities(spectrum_in)
 
     assert max(spectrum.peaks.intensities) == 1.0, "Expected the spectrum to be scaled to 1.0."
     assert np.array_equal(spectrum.peaks.intensities, intensities/100), "Expected different intensities"
