@@ -233,7 +233,22 @@ class Spectrum:
     def losses(self) -> Optional[Fragments]:
         return self.compute_losses()
 
-    def compute_losses(self, loss_mz_from=0.0, loss_mz_to=None) -> Optional[Fragments]:
+    def compute_losses(
+            self, loss_mz_from: float = 0.0,
+            loss_mz_to : float = None
+            ) -> Optional[Fragments]:
+        """This will compute the "losses", i.e. the differences between the precursor_mz and 
+        the individual fragment m/z values. Only losses between loss_mz_from and loss_mz_to
+        will be kept.
+
+        Parameters
+        ----------
+        loss_mz_from:
+            Float value to set the minimum acceptable loss value. Default is 0.0.
+        loss_mz_to:
+            Float value to set the maximum acceptable loss value. Default is None which means
+            that the los_mz_to will be set to the spectrum's precursor_mz.
+        """
         precursor_mz = self.get("precursor_mz", None)
         if precursor_mz:
             if loss_mz_to is None:
