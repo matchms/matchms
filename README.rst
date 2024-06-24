@@ -355,6 +355,11 @@ Flowchart
   set of set filters (here: filter A and filter B). Once filtered, every reference spectrum is compared to
   every query spectrum using the matchms.Scores object.
 
+Support
+============
+
+To get support join the public `Slack channel <https://join.slack.com/t/matchms/shared_invite/zt-2l0t61651-Svv0d5hwl~P5jwV4ZCNFXg>`_.
+
 Contributing
 ============
 
