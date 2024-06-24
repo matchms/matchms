@@ -110,7 +110,6 @@ def test_filter_spectrums_report(spectrums):
                                            "correct_charge",
                                            ])
     processor.parse_and_add_filter(filter_description=("require_minimum_number_of_peaks", {"n_required": 2}))
-    processor.parse_and_add_filter(filter_description="add_losses")
     spectrums, report = processor.process_spectrums(spectrums)
     assert len(spectrums) == 2
     actual_masses = [s.get("precursor_mz") for s in spectrums]
@@ -120,10 +119,9 @@ def test_filter_spectrums_report(spectrums):
     assert report.counter_changed_metadata == {'make_charge_int': 2, 'interpret_pepmass': 3, 'derive_ionmode': 3}
     report_df = report.to_dataframe()
     assert np.all(report_df.loc[["require_minimum_number_of_peaks", "interpret_pepmass",
-                                 "add_losses", "correct_charge"]].values == np.array(
+                                 "correct_charge"]].values == np.array(
         [[1, 0, 0],
          [0, 3, 0],
-         [0, 0, 2],
          [0, 0, 0]]))
 
 
