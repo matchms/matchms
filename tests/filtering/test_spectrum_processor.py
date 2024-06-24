@@ -121,7 +121,7 @@ def test_filter_spectrums_report(spectrums):
     assert np.all(report_df.loc[["require_minimum_number_of_peaks", "interpret_pepmass",
                                  "correct_charge"]].values == np.array(
         [[1, 0, 0],
-         [0, 3, 3],
+         [0, 3, 0],
          [0, 0, 0]]))
 
 
