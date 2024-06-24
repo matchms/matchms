@@ -110,7 +110,7 @@ We realized that many matchms-based workflows aim to compare many-to-many spectr
 ***********************
 Documentation for users
 ***********************
-For more extensive documentation `see our readthedocs <https://matchms.readthedocs.io/en/latest/>`_ and our `matchms introduction tutorial <https://blog.esciencecenter.nl/build-your-own-mass-spectrometry-analysis-pipeline-in-python-using-matchms-part-i-d96c718c68ee>`_.
+For more extensive documentation `see our readthedocs <https://matchms.readthedocs.io/en/latest/>`_, our `matchms introduction tutorial <https://blog.esciencecenter.nl/build-your-own-mass-spectrometry-analysis-pipeline-in-python-using-matchms-part-i-d96c718c68ee>`_ or the `user documentation <https://matchms.github.io/matchms-docs/intro.html>`_.
 
 Installation
 ============
