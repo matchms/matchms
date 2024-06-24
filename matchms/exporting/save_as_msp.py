@@ -17,8 +17,6 @@ def save_as_msp(spectrums: List[Spectrum], filename: str,
                 mode: str = "a", style: str = "matchms"):
     """Save spectrum(s) as msp file.
 
-    :py:attr:`~matchms.Spectrum.losses` of spectrum will not be saved.
-
     Example:
 
     .. code-block:: python
