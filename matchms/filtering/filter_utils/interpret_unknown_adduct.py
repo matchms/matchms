@@ -150,7 +150,10 @@ def get_charge_of_adduct(adduct) -> Optional[int]:
 
     e.g. '[M+H-H2O]2+' -> 2
     """
-
+    if adduct is None:
+        return None
+    if not isinstance(adduct, str):
+        return None
     charge = re.findall((r"\]([0-9]?[+-])"), adduct)
     if len(charge) != 1:
         logger.warning("Charge was found %s times in adduct %s",

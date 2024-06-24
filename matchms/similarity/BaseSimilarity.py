@@ -62,6 +62,10 @@ class BaseSimilarity:
         #pylint: disable=too-many-locals
         n_rows = len(references)
         n_cols = len(queries)
+        
+        if is_symmetric and n_rows != n_cols:
+            raise ValueError(f"Found unequal number of spectra {n_rows} and {n_cols} in while `is_symmetric` is True.")
+        
         idx_row = []
         idx_col = []
         scores = []
