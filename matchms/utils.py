@@ -73,3 +73,7 @@ def _load_key_conversions(file: str, source: str, target: str) -> dict:
 def fingerprint_export_warning(spectrums: List[SpectrumType]):
     if any(x.get("fingerprint") is not None for x in spectrums):
         logger.warning("fingerprint found but will not be written to file.")
+
+
+def filter_empty_spectrums(spectrums: List[SpectrumType]) -> List[SpectrumType]:
+    return [x for x in spectrums if x is not None]

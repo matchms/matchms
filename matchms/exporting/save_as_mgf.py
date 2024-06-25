@@ -1,7 +1,7 @@
 from typing import List, Union
 import pyteomics.mgf as py_mgf
 from ..Spectrum import Spectrum
-from ..utils import fingerprint_export_warning
+from ..utils import filter_empty_spectrums, fingerprint_export_warning
 
 
 def save_as_mgf(spectrums: Union[List[Spectrum], Spectrum],
@@ -43,6 +43,7 @@ def save_as_mgf(spectrums: Union[List[Spectrum], Spectrum],
         # Assume that input was single Spectrum
         spectrums = [spectrums]
 
+    spectrums = filter_empty_spectrums(spectrums)
     fingerprint_export_warning(spectrums)
 
     def spectrum_dict_generator(matchms_spectrums):

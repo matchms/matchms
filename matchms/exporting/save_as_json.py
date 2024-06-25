@@ -1,7 +1,7 @@
 import json
 from typing import List
 from ..Spectrum import Spectrum
-from ..utils import fingerprint_export_warning
+from ..utils import filter_empty_spectrums, fingerprint_export_warning
 
 
 def save_as_json(spectrums: List[Spectrum],
@@ -43,6 +43,7 @@ def save_as_json(spectrums: List[Spectrum],
         # Assume that input was single Spectrum
         spectrums = [spectrums]
 
+    spectrums = filter_empty_spectrums(spectrums)
     fingerprint_export_warning(spectrums)
 
     # Write to json file

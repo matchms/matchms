@@ -3,6 +3,7 @@ import json
 from typing import Any, Dict, List, Optional, Set, Tuple
 import numpy as np
 from ..Spectrum import Spectrum
+from ..utils import filter_empty_spectrums
 
 
 def _get_metadata_dict(spectrum: Spectrum, include_fields: Optional[List[str]] = None) -> Dict[str, Any]:
@@ -38,6 +39,7 @@ def export_metadata_as_json(spectrums: List[Spectrum], filename: str,
     identifier:
         Identifier used for naming each spectrum in the output file.
     """
+    spectrums = filter_empty_spectrums(spectrums)
     metadata_dicts = []
     for spec in spectrums:
         metadata_dict = _get_metadata_dict(spec, include_fields)
@@ -61,6 +63,7 @@ def export_metadata_as_csv(spectra: List[Spectrum], filename: str,
     identifier:
         Identifier used for naming each spectrum in the output file.
     """
+    spectra = filter_empty_spectrums(spectra)
     metadata, columns = get_metadata_as_array(spectra)
 
     if include_fields is not None:
@@ -102,6 +105,7 @@ def get_metadata_as_array(spectra: List[Spectrum]) -> Tuple[np.array, List[str]]
     Returns:
         Tuple[np.array, List[str]]: Metadata and union of all columns detected in all spectra.
     """
+    spectra = filter_empty_spectrums(spectra)
     keys = spectra[0].metadata.keys()
     for s in spectra:
         keys |= s.metadata.keys()
