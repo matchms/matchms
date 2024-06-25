@@ -5,11 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
 ### Changed
+- Avoid using unstable sorting while sorting collected matching peaks [#636](https://github.com/matchms/matchms/pull/636).
 - Losses will no longer be stored as part of a `Spectrum` object, but will be computed on the fly (using `spectrum.losses` or `spectrum.compute_losses(loss_mz_from, loss_mz_to)`)[#681](https://github.com/matchms/matchms/pull/681)
 
 ### Removed
 - `add_losses()` filter was removed. Losses will no longer be stored as part of a `Spectrum` object, but will be computed on the fly [#681](https://github.com/matchms/matchms/pull/681).
+
+### Fixed
+- Name position in mirror plots [#678](https://github.com/matchms/matchms/pull/678).
 
 ## [0.26.4] -2024-06-14
 
@@ -57,9 +63,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - repair_adduct_based_on_smiles does not repair adducts [M]+ and [M]- anymore, since these cases could also be due to a mistake in filling in the parent mass instead of the precursor mz. 
 - repair_parent_mass_is_molar_weight does only repair parent mass and does not change the precursor mz.
 - Change repair_parent_mass_is_mol_wt to repair_parent_mass_is_molar_mass
-- Set RDKIT version to rdkit = ">=2023.3.2,<2023.9.5" to fix installation issues. 
 - `SpectrumProcessor` will try to incrementally save when destination files are of type .msp or .mgf
 - Use StackedSparseArray for MetadataMatch equal_match when array_type is sparse [#642](https://github.com/matchms/matchms/pull/642)
+- Set RDKIT version to rdkit = ">=2023.3.2,<2023.9.5" to fix installation issues. 
 
 ## [0.24.4] -2024-01-16
 ### changed
@@ -685,7 +691,16 @@ Contains three plot types: `plot_spectrum()` or `spectrum.plot()`, `plot_spectra
 - This is the initial version of Spec2Vec from https://github.com/iomega/Spec2Vec
 - (later splitted into matchms + spec2vec)
 
-[Unreleased]: https://github.com/matchms/matchms/compare/0.24.1...HEAD
+[Unreleased]: https://github.com/matchms/matchms/compare/0.26.4...HEAD
+[0.26.4]: https://github.com/matchms/matchms/compare/0.26.3...0.26.4
+[0.26.3]: https://github.com/matchms/matchms/compare/0.26.2...0.26.3
+[0.26.2]: https://github.com/matchms/matchms/compare/0.26.1...0.26.2
+[0.26.1]: https://github.com/matchms/matchms/compare/0.26.0...0.26.1
+[0.26.0]: https://github.com/matchms/matchms/compare/0.25.0...0.26.0
+[0.25.0]: https://github.com/matchms/matchms/compare/0.24.4...0.25.0
+[0.24.4]: https://github.com/matchms/matchms/compare/0.24.3...0.24.4
+[0.24.3]: https://github.com/matchms/matchms/compare/0.24.2...0.24.3
+[0.24.2]: https://github.com/matchms/matchms/compare/0.24.1...0.24.2
 [0.24.1]: https://github.com/matchms/matchms/compare/0.24.0...0.24.1
 [0.24.0]: https://github.com/matchms/matchms/compare/0.23.1...0.24.0
 [0.22.0]: https://github.com/matchms/matchms/compare/0.21.2...0.22.0
