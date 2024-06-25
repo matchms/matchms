@@ -9,8 +9,6 @@ def save_as_json(spectrums: List[Spectrum],
                  export_style: str = "matchms"):
     """Save spectrum(s) as json file.
 
-    :py:attr:`~matchms.Spectrum.losses` of spectrum will not be saved.
-
     Example:
 
     .. code-block:: python

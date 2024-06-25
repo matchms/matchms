@@ -9,8 +9,6 @@ def save_as_mgf(spectrums: Union[List[Spectrum], Spectrum],
                 export_style: str = "matchms"):
     """Save spectrum(s) as mgf file.
 
-    :py:attr:`~matchms.Spectrum.losses` of spectrum will not be saved.
-
     Example:
 
     .. code-block:: python
