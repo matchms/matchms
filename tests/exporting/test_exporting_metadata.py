@@ -69,6 +69,6 @@ def test_export_metadata_none_spectra(tmp_path, spectra, file_name):
     spectra.append(None)
     export_metadata_as_json(spectra, outpath)
 
-    with open(outpath, "r") as f:
+    with open(outpath, "r", encoding="utf-8") as f:
         actual = json.load(f)
         assert len(actual) == (len(spectra) - 1)
