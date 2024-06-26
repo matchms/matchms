@@ -3,7 +3,7 @@ import os
 from typing import IO, Dict, List, Union
 from ..Fragments import Fragments
 from ..Spectrum import Spectrum
-from ..utils import filter_empty_spectrums, fingerprint_export_warning
+from ..utils import filter_empty_spectra, fingerprint_export_warning
 
 
 logger = logging.getLogger("matchms")
@@ -58,13 +58,13 @@ def save_as_msp(spectrums: List[Spectrum], filename: str,
     if not filename.endswith(".msp"):
         logger.warning("Spectrum(s) will be stored as msp file with extension .%s",
                        filename.split(".")[-1])
-    spectrums = _ensure_list(spectrums)
-    spectrums = filter_empty_spectrums(spectrums)
+    spectra = _ensure_list(spectrums)
+    spectra = filter_empty_spectra(spectra)
 
-    fingerprint_export_warning(spectrums)
+    fingerprint_export_warning(spectra)
 
     with open(filename, mode, encoding="utf-8") as outfile:
-        for spectrum in spectrums:
+        for spectrum in spectra:
             _write_spectrum(spectrum, outfile, write_peak_comments, style)
 
 

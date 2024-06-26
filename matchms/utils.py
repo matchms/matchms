@@ -75,5 +75,5 @@ def fingerprint_export_warning(spectrums: List[SpectrumType]):
         logger.warning("fingerprint found but will not be written to file.")
 
 
-def filter_empty_spectrums(spectrums: List[SpectrumType]) -> List[SpectrumType]:
+def filter_empty_spectra(spectrums: List[SpectrumType]) -> List[SpectrumType]:
     return [x for x in spectrums if x is not None]

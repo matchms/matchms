@@ -4,7 +4,7 @@ import pickle
 from typing import List
 from matchms.exporting import save_as_json, save_as_mgf, save_as_msp
 from matchms.Spectrum import Spectrum
-from matchms.utils import filter_empty_spectrums
+from matchms.utils import filter_empty_spectra
 
 
 logger = logging.getLogger("matchms")
@@ -72,7 +72,7 @@ def save_as_pickled_file(spectrums, filename: str) -> None:
     if not isinstance(spectrums[0], Spectrum):
         raise TypeError("Expected list of spectra")
 
-    spectrums = filter_empty_spectrums(spectrums)
+    spectrums = filter_empty_spectra(spectrums)
 
     with open(filename, "wb") as f:
         pickle.dump(spectrums, f)
