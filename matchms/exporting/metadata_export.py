@@ -69,7 +69,7 @@ def export_metadata_as_csv(spectra: List[Spectrum], filename: str,
     if include_fields is not None:
         metadata, columns = _subset_metadata(include_fields, metadata, columns)
 
-    with open(filename, 'a', encoding="utf-8") as csvfile:  #TODO: assert if file exists
+    with open(filename, 'a+', encoding="utf-8") as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(columns)
         for data in metadata:
