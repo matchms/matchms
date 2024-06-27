@@ -119,15 +119,15 @@ class FingerprintSimilarity(BaseSimilarity):
             Specify the output array type. Can be "numpy" or "sparse".
             Default is "numpy" and will return a numpy array. "sparse" will return a COO-sparse array
         """
-        def get_fingerprints(spectrums):
-            for index, spectrum in enumerate(spectrums):
+        def get_fingerprints(spectra):
+            for index, spectrum in enumerate(spectra):
                 yield index, spectrum.get("fingerprint")
 
-        def collect_fingerprints(spectrums):
+        def collect_fingerprints(spectra):
             """Collect fingerprints and indices of spectrum with finterprints."""
             idx_fingerprints = []
             fingerprints = []
-            for index, fp in get_fingerprints(spectrums):
+            for index, fp in get_fingerprints(spectra):
                 if fp is not None:
                     idx_fingerprints.append(index)
                     fingerprints.append(fp)

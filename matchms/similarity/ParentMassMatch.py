@@ -99,10 +99,10 @@ class ParentMassMatch(BaseSimilarity):
             comparison). By using the fact that score[i,j] = score[j,i] the calculation will be about
             2x faster.
         """
-        def collect_parentmasses(spectrums):
+        def collect_parentmasses(spectra):
             """Collect parentmasses."""
             parentmasses = []
-            for spectrum in spectrums:
+            for spectrum in spectra:
                 parentmass = spectrum.get("parent_mass")
                 assert parentmass is not None, "Missing parent mass."
                 parentmasses.append(parentmass)

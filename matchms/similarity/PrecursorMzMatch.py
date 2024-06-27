@@ -110,10 +110,10 @@ class PrecursorMzMatch(BaseSimilarity):
             comparison). By using the fact that score[i,j] = score[j,i] the calculation will be about
             2x faster.
         """
-        def collect_precursormz(spectrums):
+        def collect_precursormz(spectra):
             """Collect precursors."""
             precursors = []
-            for spectrum in spectrums:
+            for spectrum in spectra:
                 precursormz = spectrum.get("precursor_mz")
                 assert precursormz is not None, "Missing precursor m/z."
                 precursors.append(precursormz)

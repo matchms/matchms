@@ -26,20 +26,20 @@ def _get_metadata_dict(spectrum: Spectrum, include_fields: Optional[List[str]] =
             & include_fields}
 
 
-def export_metadata_as_json(spectrums: List[Spectrum], filename: str,
+def export_metadata_as_json(spectra: List[Spectrum], filename: str,
                             include_fields: Optional[List[str]] = None):
     """Export metadata to json file.
 
     Parameters
     ----------
-    spectrums:
+    spectra:
         Expected input is a list of  :py:class:`~matchms.Spectrum.Spectrum` objects.
     filename:
         Provide filename to save metadata of spectrum(s) as json file.
     identifier:
         Identifier used for naming each spectrum in the output file.
     """
-    spectra = filter_empty_spectra(spectrums)
+    spectra = filter_empty_spectra(spectra)
     metadata_dicts = []
     for spec in spectra:
         metadata_dict = _get_metadata_dict(spec, include_fields)

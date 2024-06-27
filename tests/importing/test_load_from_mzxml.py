@@ -24,6 +24,6 @@ def test_load_from_mzxml_ms_levels():
     expected_num_spectra = [1, 1, 3, 0]
     for i in range(4):
         ms_level = i + 1
-        spectrums = list(load_from_mzxml(mzxml_file, ms_level))
-        assert len(spectrums) == expected_num_spectra[i], (
+        spectra = list(load_from_mzxml(mzxml_file, ms_level))
+        assert len(spectra) == expected_num_spectra[i], (
             f"Expected different number of spectrums for ms_level={ms_level}")

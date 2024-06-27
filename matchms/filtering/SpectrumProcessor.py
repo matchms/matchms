@@ -160,7 +160,7 @@ class SpectrumProcessor:
             spectrum = spectrum_out
         return spectrum
 
-    def process_spectrums(self, spectrums: list,
+    def process_spectra(self, spectra: list,
                           progress_bar: bool = True,
                           cleaned_spectra_file=None
                           ):
@@ -195,21 +195,21 @@ class SpectrumProcessor:
             logger.warning("No filters have been specified, so spectra were not filtered")
         processing_report = ProcessingReport(self.filters)
 
-        processed_spectrums = []
-        for s in tqdm(spectrums, disable=(not progress_bar), desc="Processing spectrums"):
+        processed_spectra = []
+        for s in tqdm(spectra, disable=(not progress_bar), desc="Processing spectra"):
             if s is None:
                 continue  # empty spectra will be discarded
             processed_spectrum = self.process_spectrum(s, processing_report)
             if processed_spectrum is not None:
-                processed_spectrums.append(processed_spectrum)
+                processed_spectra.append(processed_spectrum)
 
                 if cleaned_spectra_file is not None and incremental_save:
                     save_spectra(processed_spectrum, cleaned_spectra_file, append=True)
 
         if cleaned_spectra_file is not None and not incremental_save:
-            save_spectra(processed_spectrums, cleaned_spectra_file)
+            save_spectra(processed_spectra, cleaned_spectra_file)
 
-        return processed_spectrums, processing_report
+        return processed_spectra, processing_report
 
     @property
     def processing_steps(self):
@@ -284,7 +284,7 @@ class ProcessingReport:
         else:
             self.filter_names = []
         self.counter_changed_metadata = defaultdict(int)
-        self.counter_removed_spectrums = defaultdict(int)
+        self.counter_removed_spectra = defaultdict(int)
         self.counter_changed_peaks = defaultdict(int)
         self.counter_number_processed = 0
 
@@ -293,7 +293,7 @@ class ProcessingReport:
         """Add changes between spectrum_old and spectrum_new to the report.
         """
         if spectrum_new is None:
-            self.counter_removed_spectrums[filter_function_name] += 1
+            self.counter_removed_spectra[filter_function_name] += 1
         else:
             # Add metadata changes
             if spectrum_new.metadata != spectrum_old.metadata:
@@ -306,7 +306,7 @@ class ProcessingReport:
         """Create Pandas DataFrame Report of counted spectrum changes."""
         metadata_changed = pd.DataFrame(self.counter_changed_metadata.items(),
                                         columns=["filter", "changed metadata"])
-        removed = pd.DataFrame(self.counter_removed_spectrums.items(),
+        removed = pd.DataFrame(self.counter_removed_spectra.items(),
                                columns=["filter", "removed spectra"])
         peaks_changed = pd.DataFrame(self.counter_changed_peaks.items(),
                                      columns=["filter", "changed mass spectrum"])
@@ -326,15 +326,15 @@ class ProcessingReport:
         pd.set_option('display.width', 1000)
         report_str = ("----- Spectrum Processing Report -----\n"
                       f"Number of spectrums processed: {self.counter_number_processed}\n"
-                      f"Number of spectrums removed: {sum(self.counter_removed_spectrums.values())}\n"
+                      f"Number of spectrums removed: {sum(self.counter_removed_spectra.values())}\n"
                       "Changes during processing:\n"
                       f"{str(self.to_dataframe())}")
         return report_str
 
     def __repr__(self):
         return f"Report({self.counter_number_processed},\
-        {self.counter_removed_spectrums},\
-        {dict(self.counter_removed_spectrums)},\
+        {self.counter_removed_spectra},\
+        {dict(self.counter_removed_spectra)},\
         {dict(self.counter_changed_metadata)},\
         {dict(self.counter_changed_peaks)})"
 

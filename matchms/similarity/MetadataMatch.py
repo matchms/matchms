@@ -135,10 +135,10 @@ class MetadataMatch(BaseSimilarity):
         if array_type not in ["numpy", "sparse"]:
             raise ValueError("array_type must be 'numpy' or 'sparse'.")
 
-        def collect_entries(spectrums):
+        def collect_entries(spectra):
             """Collect metadata entries."""
             entries = []
-            for spectrum in spectrums:
+            for spectrum in spectra:
                 entry = spectrum.get(self.field)
                 if entry is None:
                     msg = f"No {self.field} entry found for spectrum."
