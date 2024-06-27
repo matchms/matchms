@@ -7,8 +7,8 @@ from matchms.importing import load_from_mgf, load_spectra
 
 def load_test_spectra_file():
     module_root = os.path.join(os.path.dirname(__file__), "..")
-    spectrums_file = os.path.join(module_root, "testdata", "testdata.mgf")
-    spectra = list(load_from_mgf(spectrums_file))
+    spectra_file = os.path.join(module_root, "testdata", "testdata.mgf")
+    spectra = list(load_from_mgf(spectra_file))
     return spectra
 
 

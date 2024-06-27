@@ -4,7 +4,7 @@ from ..Spectrum import Spectrum
 from ..utils import filter_empty_spectra, fingerprint_export_warning
 
 
-def save_as_json(spectrums: List[Spectrum],
+def save_as_json(spectra: List[Spectrum],
                  filename: str,
                  export_style: str = "matchms"):
     """Save spectrum(s) as json file.
@@ -29,7 +29,7 @@ def save_as_json(spectrums: List[Spectrum],
 
     Parameters
     ----------
-    spectrums:
+    spectra:
         Expected input is a list of  :py:class:`~matchms.Spectrum.Spectrum` objects.
     filename:
         Provide filename to save spectrum(s).
@@ -37,11 +37,11 @@ def save_as_json(spectrums: List[Spectrum],
         Converts the keys to the required export style. One of ["matchms", "massbank", "nist", "riken", "gnps"].
         Default is "matchms"
     """
-    if not isinstance(spectrums, list):
+    if not isinstance(spectra, list):
         # Assume that input was single Spectrum
-        spectrums = [spectrums]
+        spectra = [spectra]
 
-    spectra = filter_empty_spectra(spectrums)
+    spectra = filter_empty_spectra(spectra)
     fingerprint_export_warning(spectra)
 
     # Write to json file

@@ -10,7 +10,7 @@ from matchms.utils import filter_empty_spectra
 logger = logging.getLogger("matchms")
 
 
-def save_spectra(spectrums: List[Spectrum],
+def save_spectra(spectra: List[Spectrum],
                  file: str,
                  export_style: str = "matchms",
                  append: bool = False,
@@ -41,20 +41,20 @@ def save_spectra(spectrums: List[Spectrum],
         raise ValueError(f"{ftype} isn't supported for when `append` is True")
 
     if ftype == "json":
-        save_as_json(spectrums, file, export_style)
+        save_as_json(spectra, file, export_style)
     elif ftype == "mgf":
-        save_as_mgf(spectrums, file, export_style)
+        save_as_mgf(spectra, file, export_style)
     elif ftype == "msp":
-        save_as_msp(spectrums, file, style=export_style, mode='a')
+        save_as_msp(spectra, file, style=export_style, mode='a')
     elif ftype == "pickle":
         if export_style != "matchms":
             logger.error("The only available export style for pickle is 'matchms', your export style %s", export_style)
-        save_as_pickled_file(spectrums, file)
+        save_as_pickled_file(spectra, file)
     else:
         raise TypeError(f"File extension of file: {file} is not recognized")
 
 
-def save_as_pickled_file(spectrums, filename: str) -> None:
+def save_as_pickled_file(spectra, filename: str) -> None:
     """Stores spectra as a pickled object
 
     Args:
@@ -67,12 +67,12 @@ def save_as_pickled_file(spectrums, filename: str) -> None:
     if os.path.exists(filename):
         raise FileExistsError(f"The file '{filename}' already exists.")
 
-    if not isinstance(spectrums, list):
+    if not isinstance(spectra, list):
         raise TypeError("Expected list of spectra")
-    if not isinstance(spectrums[0], Spectrum):
+    if not isinstance(spectra[0], Spectrum):
         raise TypeError("Expected list of spectra")
 
-    spectrums = filter_empty_spectra(spectrums)
+    spectra = filter_empty_spectra(spectra)
 
     with open(filename, "wb") as f:
-        pickle.dump(spectrums, f)
+        pickle.dump(spectra, f)
