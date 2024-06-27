@@ -46,10 +46,11 @@ def test_save_and_load_json_spectrum_list(metadata_harmonization, tmp_path, buil
                                       metadata_harmonization=metadata_harmonization).build()
     spectrum2 = builder.with_metadata({"test_field": "test2"},
                                       metadata_harmonization=metadata_harmonization).build()
+    spectrum3 = None
 
     # Write to test file
     filename = os.path.join(tmp_path, "test.json")
-    save_as_json([spectrum1, spectrum2], filename)
+    save_as_json([spectrum1, spectrum2, spectrum3], filename)
 
     # test if file exists
     assert os.path.isfile(filename)
@@ -58,6 +59,7 @@ def test_save_and_load_json_spectrum_list(metadata_harmonization, tmp_path, buil
     spectrum_imports = load_from_json(filename, metadata_harmonization=metadata_harmonization)
     assert spectrum_imports[0] == spectrum1, "Original and saved+loaded spectrum not identical"
     assert spectrum_imports[1] == spectrum2, "Original and saved+loaded spectrum not identical"
+    assert len(spectrum_imports) == 2
 
 
 @pytest.mark.parametrize("style, expected",

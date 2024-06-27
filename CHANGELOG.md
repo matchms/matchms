@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `add_losses()` filter was removed. Losses will no longer be stored as part of a `Spectrum` object, but will be computed on the fly [#681](https://github.com/matchms/matchms/pull/681).
 
 ### Fixed
+- Remove empty spectra before exporting to file [#686](https://github.com/matchms/matchms/pull/686).
 - Name position in mirror plots [#678](https://github.com/matchms/matchms/pull/678).
 
 ## [0.26.4] -2024-06-14

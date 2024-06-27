@@ -165,3 +165,15 @@ def test_save_as_msp_from_mgf(test_file, expected_file, filename):
     save_as_msp(actual, filename, mode="w", write_peak_comments=True)
     actual = list(load_from_msp(filename))
     assert expected == actual
+
+def test_filter_none_spectra(filename, data):
+    """ Test for removal of None valued Spectra
+    """
+
+    spectra = data
+    spectra.append(None)
+
+    save_as_msp(spectra, filename)
+    reloaded_spectra = list(load_from_msp(filename))
+
+    assert len(reloaded_spectra) == (len(spectra) - 1)

@@ -1,4 +1,5 @@
 import filecmp
+import json
 import os
 import numpy as np
 import pytest
@@ -35,7 +36,7 @@ def test_get_metadata_as_array(spectra):
 
 def test_export_as_csv(tmp_path, spectra):
     module_root = os.path.join(os.path.dirname(__file__), "..")
-    expected = os.path.join(module_root, "testdata", "expected_metadata.csv")    
+    expected = os.path.join(module_root, "testdata", "expected_metadata.csv")
     outpath = tmp_path / "metadata.csv"
     export_metadata_as_csv(spectra, outpath)
 
@@ -55,7 +56,19 @@ def test_subset_metadata(spectra):
 def test_export_metadata_as_json(tmp_path, spectra):
     outpath = tmp_path / "metadata.json"
     module_root = os.path.join(os.path.dirname(__file__), "..")
-    expected = os.path.join(module_root, "testdata","expected_metadata.json")    
+    expected = os.path.join(module_root, "testdata", "expected_metadata.json")
 
     export_metadata_as_json(spectra, outpath)
     filecmp.cmp(outpath, expected)
+
+
+@pytest.mark.parametrize("file_name", ["metadata.csv", "metadata.json"])
+def test_export_metadata_none_spectra(tmp_path, spectra, file_name):
+    outpath = os.path.join(tmp_path, file_name)
+
+    spectra.append(None)
+    export_metadata_as_json(spectra, outpath)
+
+    with open(outpath, "r", encoding="utf-8") as f:
+        actual = json.load(f)
+        assert len(actual) == (len(spectra) - 1)
