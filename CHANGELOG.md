@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Avoid using unstable sorting while sorting collected matching peaks [#636](https://github.com/matchms/matchms/pull/636).
 
 ### Fixed
+- Remove empty spectra before exporting to file [#686](https://github.com/matchms/matchms/pull/686).
 - Name position in mirror plots [#678](https://github.com/matchms/matchms/pull/678).
 
 ## [0.26.4] -2024-06-14
