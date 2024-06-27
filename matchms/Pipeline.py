@@ -82,7 +82,7 @@ class Pipeline:
         pipeline.logging_file = "my_pipeline.log"
         pipeline.logging_level = "ERROR"
 
-        pipeline.run("my_spectrums.mgf")
+        pipeline.run("my_spectra.mgf")
 
     The second way to define a pipeline is via a Python script. The following code is an
     example of how this works:
@@ -184,7 +184,7 @@ class Pipeline:
         """Execute the defined Pipeline workflow.
 
         This method will execute all steps of the workflow.
-        1) Initializing the log file and importing the spectrums
+        1) Initializing the log file and importing the spectra
         2) Spectrum processing (using matchms filters)
         3) Score Computations
         """

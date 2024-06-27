@@ -25,7 +25,7 @@ def _assert_ax_ok(ax, n_lines, ylim, xlabel, ylabel):
 
 
 def test_plot_mirror_plot():
-    # Create two random spectrums
+    # Create two random spectra
     spec_a = Spectrum(mz=np.array([100, 200, 300, 400.2]),
                       intensities=np.array([0.5, 0.3, 0.1, 0.05]))
     spec_b = Spectrum(mz=np.array([10.2, 20.2, 30.2, 40.2, 78.2]),
@@ -37,7 +37,7 @@ def test_plot_mirror_plot():
     assert ax.get_xlim() == (min_mz, max_mz)
 
 def test_plot_mirror_colors():
-    # Create two random spectrums
+    # Create two random spectra
     spec_a = Spectrum(mz=np.array([100., 200.]),
                       intensities=np.array([0.5, 0.3]))
     spec_b = Spectrum(mz=np.array([10.2, 20.2, 30.2]),

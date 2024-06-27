@@ -39,13 +39,13 @@ class FingerprintSimilarity(BaseSimilarity):
                               intensities=np.array([], dtype="float"),
                               metadata={"smiles": "C(C(=O)O)(NC(=O)O)S"})
 
-        spectrums = [spectrum_1, spectrum_2, spectrum_3]
+        spectra = [spectrum_1, spectrum_2, spectrum_3]
         # Add fingerprints
-        spectrums = [add_fingerprint(x, nbits=256) for x in spectrums]
+        spectra = [add_fingerprint(x, nbits=256) for x in spectra]
 
         # Specify type and calculate similarities
         similarity_measure = FingerprintSimilarity("jaccard")
-        scores = calculate_scores(spectrums, spectrums, similarity_measure)
+        scores = calculate_scores(spectra, spectra, similarity_measure)
         print(np.round(scores.scores.to_array(), 3))
 
     Should output
@@ -112,9 +112,9 @@ class FingerprintSimilarity(BaseSimilarity):
         Parameters
         ----------
         references:
-            List of reference spectrums.
+            List of reference spectra.
         queries:
-            List of query spectrums.
+            List of query spectra.
         array_type
             Specify the output array type. Can be "numpy" or "sparse".
             Default is "numpy" and will return a numpy array. "sparse" will return a COO-sparse array

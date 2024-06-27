@@ -7,7 +7,7 @@ class IntersectMz(BaseSimilarity):
     """Example score for illustrating how to build custom spectra similarity score.
 
     IntersectMz will count all exact matches of peaks and divide it by all unique
-    peaks found in both spectrums.
+    peaks found in both spectra.
 
     Example of how matchms similarity functions can be used:
 

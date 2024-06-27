@@ -17,7 +17,7 @@ class MetadataMatch(BaseSimilarity):
     This is supposed to be used to compare a wide range of possible metadata entries and
     use this to later select related or similar spectra.
 
-    Example to calculate scores between 2 pairs of spectrums and iterate over the scores
+    Example to calculate scores between 2 pairs of spectra and iterate over the scores
 
     .. testcode::
 
@@ -120,9 +120,9 @@ class MetadataMatch(BaseSimilarity):
         Parameters
         ----------
         references
-            List/array of reference spectrums.
+            List/array of reference spectra.
         queries
-            List/array of Single query spectrums.
+            List/array of Single query spectra.
         array_type
             Specify the output array type. Can be "numpy" or "sparse".
             Default is "numpy" and will return a numpy array. "sparse" will return a COO-sparse array.
