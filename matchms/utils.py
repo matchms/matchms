@@ -76,4 +76,11 @@ def fingerprint_export_warning(spectra: List[SpectrumType]):
 
 
 def filter_empty_spectra(spectra: List[SpectrumType]) -> List[SpectrumType]:
+    """Filter None values in spectra list.
+
+    Parameters
+    ----------
+    spectra
+        List of spectra to filter.
+    """
     return [x for x in spectra if x is not None]
