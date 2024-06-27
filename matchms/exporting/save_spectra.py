@@ -22,7 +22,7 @@ def save_spectra(spectra: List[Spectrum],
 
     Args:
     -----
-    spectrums:
+    spectra:
         The spectra that are saved.
     file:
         Path to file containing spectra, with file extension ".json", ".mgf", ".msp"
@@ -59,7 +59,7 @@ def save_as_pickled_file(spectra, filename: str) -> None:
 
     Args:
     -----
-    spectrums:
+    spectra:
         The spectra that are saved.
     filename:
         Path to file containing spectra, with file extension "json", "mgf", "msp"

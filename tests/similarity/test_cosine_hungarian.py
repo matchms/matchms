@@ -5,7 +5,7 @@ from matchms.similarity import CosineHungarian
 
 
 def test_cosine_hungarian_without_parameters():
-    """Compare output cosine score with own calculation on simple dummy spectrums."""
+    """Compare output cosine score with own calculation on simple dummy spectra."""
     spectrum_1 = Spectrum(mz=np.array([100, 200, 300, 500, 510], dtype="float"),
                           intensities=np.array([0.1, 0.2, 1.0, 0.3, 0.4], dtype="float"))
 
@@ -44,7 +44,7 @@ def test_cosine_hungarian_matrix_without_parameters():
 
 
 def test_cosine_hungarian_with_tolerance_0_2():
-    """Compare output cosine score for tolerance 0.2 with own calculation on simple dummy spectrums."""
+    """Compare output cosine score for tolerance 0.2 with own calculation on simple dummy spectra."""
     spectrum_1 = Spectrum(mz=np.array([100, 299, 300, 301, 510], dtype="float"),
                           intensities=np.array([0.1, 1.0, 0.2, 0.3, 0.4], dtype="float"))
 
@@ -66,7 +66,7 @@ def test_cosine_hungarian_with_tolerance_0_2():
 
 
 def test_cosine_hungarian_with_tolerance_2_0():
-    """Compare output cosine score for tolerance 2.0 with own calculation on simple dummy spectrums."""
+    """Compare output cosine score for tolerance 2.0 with own calculation on simple dummy spectra."""
     spectrum_1 = Spectrum(mz=np.array([100, 299, 300, 301, 510], dtype="float"),
                           intensities=np.array([0.1, 1.0, 0.2, 0.3, 0.4], dtype="float"))
 
@@ -122,7 +122,7 @@ def test_cosine_hungarian_case_where_greedy_would_fail():
 
 
 def test_cosine_hungarian_case_without_matches():
-    """Test case for spectrums without any matching peaks."""
+    """Test case for spectra without any matching peaks."""
     spectrum_1 = Spectrum(mz=np.array([100, 200], dtype="float"),
                           intensities=np.array([1.0, 0.1], dtype="float"),
                           metadata={})
@@ -138,7 +138,7 @@ def test_cosine_hungarian_case_without_matches():
 
 
 def test_cosine_hungarian_with_peak_powers():
-    """Compare output cosine score with own calculation on simple dummy spectrums.
+    """Compare output cosine score with own calculation on simple dummy spectra.
     Here testing the options to raise peak intensities to given powers.
     """
     mz_power = 0.5

@@ -15,7 +15,7 @@ def load_from_json(filename: str,
     """Load spectrum(s) from json file.
 
     JSON document formatted like the `GNPS Spectra library <https://gnps-external.ucsd.edu/gnpslibrary>`_.
-    Spectrums with zero peaks will be skipped.
+    Spectra with zero peaks will be skipped.
 
     Example:
 
@@ -24,7 +24,7 @@ def load_from_json(filename: str,
         from matchms.importing import load_from_json
 
         file_json = "gnps_testdata.json"
-        spectrums = load_from_json(file_json)
+        spectra = load_from_json(file_json)
 
     Parameters
     ----------

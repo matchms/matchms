@@ -165,12 +165,12 @@ class SpectrumProcessor:
                           cleaned_spectra_file=None
                           ):
         """
-        Process a list of spectrums with all filters in the processing pipeline.
+        Process a list of spectra with all filters in the processing pipeline.
 
         Parameters
         ----------
-        spectrums : list[Spectrum]
-            The spectrums to process.
+        spectra : list[Spectrum]
+            The spectra to process.
         create_report: bool, optional
             Creates and outputs a report of the main changes during processing.
             The report will be returned as pandas DataFrame. Default is set to False.
@@ -180,8 +180,8 @@ class SpectrumProcessor:
             Path to where the cleaned spectra should be saved.
         Returns
         -------
-        Spectrums
-            List containing the processed spectrums.
+        spectra
+            List containing the processed spectra.
         processing_report
             A ProcessingReport containing the effect of the filters.
         """
@@ -325,8 +325,8 @@ class ProcessingReport:
         pd.set_option('display.max_columns', 4)
         pd.set_option('display.width', 1000)
         report_str = ("----- Spectrum Processing Report -----\n"
-                      f"Number of spectrums processed: {self.counter_number_processed}\n"
-                      f"Number of spectrums removed: {sum(self.counter_removed_spectra.values())}\n"
+                      f"Number of spectra processed: {self.counter_number_processed}\n"
+                      f"Number of spectra removed: {sum(self.counter_removed_spectra.values())}\n"
                       "Changes during processing:\n"
                       f"{str(self.to_dataframe())}")
         return report_str

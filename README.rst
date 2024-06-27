@@ -165,7 +165,7 @@ Introduction
 To get started with matchms, we recommend following our `matchms introduction tutorial <https://blog.esciencecenter.nl/build-your-own-mass-spectrometry-analysis-pipeline-in-python-using-matchms-part-i-d96c718c68ee>`_.
 
 Below is an example of using default filter steps for cleaning spectra, 
-followed by calculating the Cosine score between mass Spectrums in the `tests/testdata/pesticides.mgf <https://github.com/matchms/matchms/blob/master/tests/testdata/pesticides.mgf>`_ file.
+followed by calculating the Cosine score between mass Spectra in the `tests/testdata/pesticides.mgf <https://github.com/matchms/matchms/blob/master/tests/testdata/pesticides.mgf>`_ file.
 
 .. code-block:: python
 
@@ -216,27 +216,27 @@ Alternatively, in particular, if you need more room to add custom functions and 
     from matchms import calculate_scores
     from matchms.similarity import CosineGreedy
 
-    # Read spectrums from a MGF formatted file, for other formats see https://matchms.readthedocs.io/en/latest/api/matchms.importing.html 
+    # Read spectra from a MGF formatted file, for other formats see https://matchms.readthedocs.io/en/latest/api/matchms.importing.html 
     file = load_from_mgf("tests/testdata/pesticides.mgf")
 
     # Apply filters to clean and enhance each spectrum
-    spectrums = []
+    spectra = []
     for spectrum in file:
         # Apply default filter to standardize ion mode, correct charge and more.
         # Default filter is fully explained at https://matchms.readthedocs.io/en/latest/api/matchms.filtering.html .
         spectrum = default_filters(spectrum)
         # Scale peak intensities to maximum of 1
         spectrum = normalize_intensities(spectrum)
-        spectrums.append(spectrum)
+        spectra.append(spectrum)
 
-    # Calculate Cosine similarity scores between all spectrums
+    # Calculate Cosine similarity scores between all spectra
     # For other similarity score methods see https://matchms.readthedocs.io/en/latest/api/matchms.similarity.html .
-    scores = calculate_scores(references=spectrums,
-                              queries=spectrums,
+    scores = calculate_scores(references=spectra,
+                              queries=spectra,
                               similarity_function=CosineGreedy())
 
     # Matchms allows to get the best matches for any query using scores_by_query
-    query = spectrums[15]  # just an example
+    query = spectra[15]  # just an example
     best_matches = scores.scores_by_query(query, 'CosineGreedy_score', sort=True)
 
     # Print the calculated scores for each spectrum pair
@@ -351,7 +351,7 @@ Flowchart
   :width: 400
   :alt: Flowchart
   
-  Flowchart of matchms workflow. Reference and query spectrums are filtered using the same
+  Flowchart of matchms workflow. Reference and query spectra are filtered using the same
   set of set filters (here: filter A and filter B). Once filtered, every reference spectrum is compared to
   every query spectrum using the matchms.Scores object.
 

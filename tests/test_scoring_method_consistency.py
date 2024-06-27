@@ -30,7 +30,7 @@ _score_functions = {
 
 @pytest.fixture
 def spectra():
-    """Import spectrums and apply basic filters."""
+    """Import spectra and apply basic filters."""
     def processing(s):
         s = msfilter.default_filters(s)
         s = msfilter.add_parent_mass(s)
@@ -45,7 +45,7 @@ def spectra():
 
 @pytest.mark.parametrize("similarity_measure", list(_score_functions.values()))
 def test_all_scores_and_methods(spectra, similarity_measure):
-    """Compute similarites between all spectrums and compare across different method calls.
+    """Compute similarites between all spectra and compare across different method calls.
     .pair() will be compared to .matrix() results
     .matrix() results will be compared to .sparse_array() results
     """

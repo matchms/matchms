@@ -21,7 +21,7 @@ def filename(graph_format):
 
 
 def create_dummy_spectra():
-    """Create dummy spectrums"""
+    """Create dummy spectra"""
     fingerprints1 = [[1, 0, 0], [0, 1, 0], [0, 0, 1], [1, 1, 0], [1, 0, 1]]
     fingerprints2 = [[1, 0, 1], [0, 1, 1], [1, 1, 1]]
     spectra = []
