@@ -110,7 +110,7 @@ We realized that many matchms-based workflows aim to compare many-to-many spectr
 ***********************
 Documentation for users
 ***********************
-For more extensive documentation `see our readthedocs <https://matchms.readthedocs.io/en/latest/>`_ and our `matchms introduction tutorial <https://blog.esciencecenter.nl/build-your-own-mass-spectrometry-analysis-pipeline-in-python-using-matchms-part-i-d96c718c68ee>`_.
+For more extensive documentation `see our readthedocs <https://matchms.readthedocs.io/en/latest/>`_, our `matchms introduction tutorial <https://blog.esciencecenter.nl/build-your-own-mass-spectrometry-analysis-pipeline-in-python-using-matchms-part-i-d96c718c68ee>`_ or the `user documentation <https://matchms.github.io/matchms-docs/intro.html>`_.
 
 Installation
 ============
@@ -354,6 +354,11 @@ Flowchart
   Flowchart of matchms workflow. Reference and query spectrums are filtered using the same
   set of set filters (here: filter A and filter B). Once filtered, every reference spectrum is compared to
   every query spectrum using the matchms.Scores object.
+
+Support
+============
+
+To get support join the public `Slack channel <https://join.slack.com/t/matchms/shared_invite/zt-2l0t61651-Svv0d5hwl~P5jwV4ZCNFXg>`_.
 
 Contributing
 ============

@@ -4,6 +4,7 @@ import pickle
 from typing import List
 from matchms.exporting import save_as_json, save_as_mgf, save_as_msp
 from matchms.Spectrum import Spectrum
+from matchms.utils import filter_empty_spectra
 
 
 logger = logging.getLogger("matchms")
@@ -29,12 +30,12 @@ def save_spectra(spectrums: List[Spectrum],
         Converts the keys to the required export style. One of ["matchms", "massbank", "nist", "riken", "gnps"].
         Default is "matchms"
     append:
-        Only supported for ".mgf", and ".msp" filetypes. If True, will try to append to an existing file, instead of creating 
+        Only supported for ".mgf", and ".msp" filetypes. If True, will try to append to an existing file, instead of creating
         a new file. Default is `False`.
     """
     if os.path.exists(file) and not append:
         raise FileExistsError(f"The specified file: {file} already exists.")
-    
+
     ftype = os.path.splitext(file)[1].lower()[1:]
     if append and ftype not in ('mgf', 'msp'):
         raise ValueError(f"{ftype} isn't supported for when `append` is True")
@@ -70,6 +71,8 @@ def save_as_pickled_file(spectrums, filename: str) -> None:
         raise TypeError("Expected list of spectra")
     if not isinstance(spectrums[0], Spectrum):
         raise TypeError("Expected list of spectra")
+
+    spectrums = filter_empty_spectra(spectrums)
 
     with open(filename, "wb") as f:
         pickle.dump(spectrums, f)

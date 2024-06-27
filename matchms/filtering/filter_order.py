@@ -5,7 +5,8 @@ from matchms import filtering as msfilters
 
 # IMPORTANT!! IF YOU CHANGE ANYTHING HERE PLEASE ADD A TEST to test_all_filter_order.py
 # to ensure it is not changed back by accident later.
-ALL_FILTERS = [msfilters.make_charge_int,
+ALL_FILTERS = [msfilters.require_correct_ms_level,
+               msfilters.make_charge_int,
                msfilters.add_compound_name,
                msfilters.derive_adduct_from_name,
                msfilters.derive_formula_from_name,
@@ -29,13 +30,15 @@ ALL_FILTERS = [msfilters.make_charge_int,
                msfilters.derive_inchikey_from_inchi,
                msfilters.repair_smiles_of_salts,
                msfilters.repair_parent_mass_is_molar_mass,
-               msfilters.repair_adduct_based_on_parent_mass,
-               msfilters.repair_adduct_and_parent_mass_based_on_smiles,
                msfilters.repair_parent_mass_match_smiles_wrapper,
                msfilters.repair_not_matching_annotation,
                msfilters.require_valid_annotation,
+               msfilters.repair_parent_mass_from_smiles,
+               msfilters.repair_adduct_based_on_parent_mass,
+               msfilters.repair_adduct_and_parent_mass_based_on_smiles,
                msfilters.require_correct_ionmode,
                msfilters.require_compound_name,
+               msfilters.derive_formula_from_smiles,
                msfilters.require_formula,
                msfilters.require_precursor_below_mz,
                msfilters.require_parent_mass_match_smiles,
@@ -53,9 +56,9 @@ ALL_FILTERS = [msfilters.make_charge_int,
                msfilters.remove_peaks_outside_top_k,
                msfilters.reduce_to_number_of_peaks,
                msfilters.require_minimum_number_of_peaks,
+               msfilters.require_maximum_number_of_peaks,
                msfilters.require_minimum_number_of_high_peaks,
                msfilters.add_fingerprint,
-               msfilters.add_losses,
                ]
 
 FILTER_FUNCTION_NAMES = {x.__name__: x for x in ALL_FILTERS}

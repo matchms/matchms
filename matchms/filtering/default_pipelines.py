@@ -29,14 +29,15 @@ DERIVE_MISSING_METADATA = [msfilters.correct_charge,
                            msfilters.derive_inchi_from_smiles,
                            msfilters.derive_smiles_from_inchi,
                            msfilters.derive_inchikey_from_inchi,
+                           msfilters.derive_formula_from_smiles,
                            ]
 REQUIRE_COMPLETE_METADATA = [msfilters.require_precursor_mz,
                              (msfilters.require_correct_ionmode, {"ion_mode_to_keep": "both"}), ]
 REPAIR_ANNOTATION = [
     (msfilters.repair_smiles_of_salts, {'mass_tolerance': 0.1}),
     (msfilters.repair_parent_mass_is_molar_mass, {'mass_tolerance': 0.1}),
+    (msfilters.repair_parent_mass_from_smiles, {"mass_tolerance": 0.1}),
     (msfilters.repair_adduct_based_on_parent_mass, {'mass_tolerance': 0.1}),
-    (msfilters.repair_adduct_and_parent_mass_based_on_smiles, {'mass_tolerance': 0.1}),
     msfilters.repair_not_matching_annotation,
     (msfilters.derive_annotation_from_compound_name, {"mass_tolerance": 0.1}),
 ]
@@ -58,12 +59,14 @@ OTHER_FILTERS = [matchms.filtering.metadata_processing.require_precursor_mz.requ
                  msfilters.remove_peaks_outside_top_k,
                  msfilters.require_minimum_number_of_peaks,
                  msfilters.add_fingerprint,
-                 msfilters.add_losses,
-                 msfilters.repair_parent_mass_match_smiles_wrapper, ]
+                 msfilters.repair_parent_mass_match_smiles_wrapper,
+                 msfilters.require_maximum_number_of_peaks,
+                 (msfilters.repair_adduct_and_parent_mass_based_on_smiles, {'mass_tolerance': 0.1}),
+                 ]
 
 BASIC_FILTERS = HARMONIZE_METADATA_FIELD_NAMES + DERIVE_METADATA_IN_WRONG_FIELD + HARMONIZE_METADATA_ENTRIES
 DEFAULT_FILTERS = BASIC_FILTERS + [msfilters.normalize_intensities, ] + REQUIRE_COMPLETE_METADATA + DERIVE_MISSING_METADATA
-LIBRARY_CLEANING = DEFAULT_FILTERS + REPAIR_ANNOTATION + REQUIRE_COMPLETE_ANNOTATION
+LIBRARY_CLEANING = DEFAULT_FILTERS + REPAIR_ANNOTATION + REQUIRE_COMPLETE_ANNOTATION + [msfilters.require_correct_ms_level]
 MS2DEEPSCORE_TRAINING = LIBRARY_CLEANING + CLEAN_PEAKS
 
 

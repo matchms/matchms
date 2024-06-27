@@ -63,6 +63,7 @@ class Fragments:
         return np.all(self.mz[:-1] <= self.mz[1:])
 
     def clone(self):
+        """Return a deepcopy of the Fragments instance."""
         return Fragments(self.mz, self.intensities)
 
     @property

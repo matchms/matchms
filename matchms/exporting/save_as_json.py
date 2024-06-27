@@ -1,15 +1,13 @@
 import json
 from typing import List
 from ..Spectrum import Spectrum
-from ..utils import fingerprint_export_warning
+from ..utils import filter_empty_spectra, fingerprint_export_warning
 
 
 def save_as_json(spectrums: List[Spectrum],
                  filename: str,
                  export_style: str = "matchms"):
     """Save spectrum(s) as json file.
-
-    :py:attr:`~matchms.Spectrum.losses` of spectrum will not be saved.
 
     Example:
 
@@ -43,12 +41,13 @@ def save_as_json(spectrums: List[Spectrum],
         # Assume that input was single Spectrum
         spectrums = [spectrums]
 
-    fingerprint_export_warning(spectrums)
+    spectra = filter_empty_spectra(spectrums)
+    fingerprint_export_warning(spectra)
 
     # Write to json file
     encoder_class = create_spectrum_json_encoder(export_style)
     with open(filename, "w", encoding="utf-8") as fout:
-        json.dump(spectrums, fout, cls=encoder_class)
+        json.dump(spectra, fout, cls=encoder_class)
 
 
 def create_spectrum_json_encoder(export_style):

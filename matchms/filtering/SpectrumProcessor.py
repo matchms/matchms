@@ -203,8 +203,8 @@ class SpectrumProcessor:
             if processed_spectrum is not None:
                 processed_spectrums.append(processed_spectrum)
 
-            if cleaned_spectra_file is not None and incremental_save:
-                save_spectra(processed_spectrum, cleaned_spectra_file, append=True)
+                if cleaned_spectra_file is not None and incremental_save:
+                    save_spectra(processed_spectrum, cleaned_spectra_file, append=True)
 
         if cleaned_spectra_file is not None and not incremental_save:
             save_spectra(processed_spectrums, cleaned_spectra_file)
@@ -299,7 +299,7 @@ class ProcessingReport:
             if spectrum_new.metadata != spectrum_old.metadata:
                 self.counter_changed_metadata[filter_function_name] += 1
             # Add peak changes
-            if spectrum_new.peaks != spectrum_old.peaks or spectrum_new.losses != spectrum_old.losses:
+            if spectrum_new.peaks != spectrum_old.peaks:
                 self.counter_changed_peaks[filter_function_name] += 1
 
     def to_dataframe(self):

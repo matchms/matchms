@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "matchms"
-version = "0.25.0"
+version = "0.26.4"
 description = "Python library for large-scale comparisons and processing of tandem mass spectral data"
 authors = ["matchms developer team <florian.huber@hs-duesseldorf.de>"]
 
@@ -52,7 +52,7 @@ pytest = "^7.4.0"
 pytest-cov = "^4.1.0"
 yapf = "^0.40.1"
 testfixtures = "^7.1.0"
-twine = "^4.0.2"
+twine = "^5.1.0"
 black = "^23.7.0"
 poetry-bumpversion = "^0.3.1"
 
