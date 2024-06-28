@@ -32,7 +32,7 @@ pillow = "!=9.4.0"
 lxml = "^4.9.3"
 matplotlib = "^3.7.2"
 networkx = "^3.1"
-numba = ">=0.57.1,<0.60",
+numba = ">=0.57.1,<0.60"
 pickydict = "^0.4.0"
 pyteomics = "^4.6"
 requests = "^2.31.0"
