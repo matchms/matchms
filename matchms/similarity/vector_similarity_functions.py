@@ -3,7 +3,6 @@ import numba
 import numpy as np
 
 
-@numba.njit
 def jaccard_similarity_matrix(references: np.ndarray, queries: np.ndarray) -> np.ndarray:
     """Returns matrix of jaccard indices between all-vs-all vectors of references
     and queries.
@@ -23,16 +22,16 @@ def jaccard_similarity_matrix(references: np.ndarray, queries: np.ndarray) -> np
         Matrix of all-vs-all similarity scores. scores[i, j] will contain the score
         between the vectors references[i, :] and queries[j, :].
     """
-    size1 = references.shape[0]
-    size2 = queries.shape[0]
-    scores = np.zeros((size1, size2))
-    for i in range(size1):
-        for j in range(size2):
-            scores[i, j] = jaccard_index(references[i, :], queries[j, :])
-    return scores
+    # The trick to fast inference is to use float32 since it allows using BLAS
+    references = np.array(references, dtype=np.float32)  # R,N
+    queries = np.array(queries, dtype=np.float32)  # Q,N
+    intersection = references @ queries.T  # R,N @ N,Q -> R,Q
+    union = np.sum(references, axis=1, keepdims=True) + np.sum(queries,axis=1, keepdims=True).T  # R,1+1,Q -> R,Q
+    union -= intersection
+    jaccard = np.nan_to_num(intersection / union)  # R,Q
+    return jaccard
 
 
-@numba.njit
 def dice_similarity_matrix(references: np.ndarray, queries: np.ndarray) -> np.ndarray:
     """Returns matrix of dice similarity scores between all-vs-all vectors of references
     and queries.
@@ -52,16 +51,13 @@ def dice_similarity_matrix(references: np.ndarray, queries: np.ndarray) -> np.nd
         Matrix of all-vs-all similarity scores. scores[i, j] will contain the score
         between the vectors references[i, :] and queries[j, :].
     """
-    size1 = references.shape[0]
-    size2 = queries.shape[0]
-    scores = np.zeros((size1, size2))
-    for i in range(size1):
-        for j in range(size2):
-            scores[i, j] = dice_similarity(references[i, :], queries[j, :])
-    return scores
+    references = np.array(references, dtype=np.float32)  # R,N
+    queries = np.array(queries, dtype=np.float32)  # Q,N
+    intersection = references @ queries.T  # R,N @ N,Q -> R,Q
+    union = np.sum(references, axis=1, keepdims=True) + np.sum(queries, axis=1, keepdims=True).T  # R,1 + 1,Q -> R, Q
+    dice = 2 * np.nan_to_num(intersection / union)  # R,Q
+    return dice
 
-
-@numba.njit
 def cosine_similarity_matrix(references: np.ndarray, queries: np.ndarray) -> np.ndarray:
     """Returns matrix of cosine similarity scores between all-vs-all vectors of
     references and queries.
@@ -81,13 +77,14 @@ def cosine_similarity_matrix(references: np.ndarray, queries: np.ndarray) -> np.
         Matrix of all-vs-all similarity scores. scores[i, j] will contain the score
         between the vectors references[i, :] and queries[j, :].
     """
-    size1 = references.shape[0]
-    size2 = queries.shape[0]
-    scores = np.zeros((size1, size2))
-    for i in range(size1):
-        for j in range(size2):
-            scores[i, j] = cosine_similarity(references[i, :], queries[j, :])
-    return scores
+    references = np.array(references, dtype=np.float32)  # R,N
+    queries = np.array(queries, dtype=np.float32)  # Q,N
+    cosine = references @ queries.T  # R,N @ N,Q -> R,Q
+    r_norm = np.sum(references ** 2, axis=1, keepdims=True)  # R,N -> R,1
+    q_norm = np.sum(queries**2, axis=1, keepdims=True) #  Q,N -> Q,1
+    norm = r_norm @ q_norm.T  # R,N @ N,Q -> R,Q
+    cosine = np.nan_to_num(cosine * norm ** -.5)  # R,Q
+    return cosine
 
 
 @numba.njit
