@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Avoid using unstable sorting while sorting collected matching peaks [#636](https://github.com/matchms/matchms/pull/636).
 - Losses will no longer be stored as part of a `Spectrum` object, but will be computed on the fly (using `spectrum.losses` or `spectrum.compute_losses(loss_mz_from, loss_mz_to)`)[#681](https://github.com/matchms/matchms/pull/681)
-- Replace some `@njit`ted similarity functions with faster numpy matrix multiplications [#638](https://github.com/matchms/matchms/pull/638).
+- Jaccard/Tanimoto `@njit`/numba-based similarity functions were replaced by 10-50x faster numpy matrix multiplications [#638](https://github.com/matchms/matchms/pull/638).
 
 ### Removed
 - `add_losses()` filter was removed. Losses will no longer be stored as part of a `Spectrum` object, but will be computed on the fly [#681](https://github.com/matchms/matchms/pull/681).
