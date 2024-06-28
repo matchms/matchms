@@ -132,11 +132,19 @@ def reset_matchms_logger(logger_name="matchms"):
     _init_logger()
 
 
-# function recreates the functionality of the rdkit function
-# https://github.com/rdkit/rdkit/blob/master/rdkit/RDLogger.py setLevel()
 def set_rdkit_logger_level(level):
-    # Rdkit log levels severity order
+    """Rdkit log levels severity order.
+
+    This function recreates the functionality of the rdkit function.
+    Created based on https://github.com/rdkit/rdkit/blob/master/rdkit/RDLogger.py setLevel()
+
+    Parameters
+    ----------
+    level
+        Refers to rdkit log levels ('rdApp.debug', 'rdApp.info', 'rdApp.warning', 'rdApp.error').
+    """
     rdkit_log_levels = ['rdApp.debug', 'rdApp.info', 'rdApp.warning', 'rdApp.error']
+    
     if not _has_rdkit:
         raise ImportError(rdkit_missing_message)
 

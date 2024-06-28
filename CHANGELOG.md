@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Avoid using unstable sorting while sorting collected matching peaks [#636](https://github.com/matchms/matchms/pull/636).
 - Losses will no longer be stored as part of a `Spectrum` object, but will be computed on the fly (using `spectrum.losses` or `spectrum.compute_losses(loss_mz_from, loss_mz_to)`)[#681](https://github.com/matchms/matchms/pull/681)
+- Replace some `@njit`ted similarity functions with faster numpy matrix multiplications [#638](https://github.com/matchms/matchms/pull/638).
 
 ### Removed
 - `add_losses()` filter was removed. Losses will no longer be stored as part of a `Spectrum` object, but will be computed on the fly [#681](https://github.com/matchms/matchms/pull/681).
@@ -59,7 +60,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - filters `require_formula` and `require_compound_name`. [#627](https://github.com/matchms/matchms/pull/627)
 - filters `require_retention_time` and `require_retention_index`. [#585](https://github.com/matchms/matchms/pull/602)
 
-### changed
+### Changed
 - Removed repair_precursor_is_parent_mass
 - repair_adduct_based_on_smiles does not repair adducts [M]+ and [M]- anymore, since these cases could also be due to a mistake in filling in the parent mass instead of the precursor mz. 
 - repair_parent_mass_is_molar_weight does only repair parent mass and does not change the precursor mz.
@@ -69,11 +70,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Set RDKIT version to rdkit = ">=2023.3.2,<2023.9.5" to fix installation issues. 
 
 ## [0.24.4] -2024-01-16
-### changed
+### Changed
 - return processing_report by pipeline
 
 ## [0.24.3] -2024-01-16
-### changed
+### Changed
 - Removed repair_precursor_is_parent_mass
 
 - Removed option accept_parent_mass_is_mol_wt in Repair_adduct_based_on_smiles
