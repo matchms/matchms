@@ -62,7 +62,7 @@ class CosineHungarian(BaseSimilarity):
                                                 intensity_power=self.intensity_power)
             if matching_pairs is None:
                 return None
-            matching_pairs = matching_pairs[np.argsort(matching_pairs[:, 2])[::-1], :]
+            matching_pairs = matching_pairs[np.argsort(matching_pairs[:, 2], kind='mergesort')[::-1], :]
             return matching_pairs
 
         def get_matching_pairs_matrix():

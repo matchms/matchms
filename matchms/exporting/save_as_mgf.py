@@ -1,15 +1,13 @@
 from typing import List, Union
 import pyteomics.mgf as py_mgf
 from ..Spectrum import Spectrum
-from ..utils import fingerprint_export_warning
+from ..utils import filter_empty_spectra, fingerprint_export_warning
 
 
 def save_as_mgf(spectrums: Union[List[Spectrum], Spectrum],
                 filename: str,
                 export_style: str = "matchms"):
     """Save spectrum(s) as mgf file.
-
-    :py:attr:`~matchms.Spectrum.losses` of spectrum will not be saved.
 
     Example:
 
@@ -43,7 +41,8 @@ def save_as_mgf(spectrums: Union[List[Spectrum], Spectrum],
         # Assume that input was single Spectrum
         spectrums = [spectrums]
 
-    fingerprint_export_warning(spectrums)
+    spectra = filter_empty_spectra(spectrums)
+    fingerprint_export_warning(spectra)
 
     def spectrum_dict_generator(matchms_spectrums):
         """Generates dictionaries in the format expected by py_mgf"""
@@ -55,4 +54,4 @@ def save_as_mgf(spectrums: Union[List[Spectrum], Spectrum],
                 del spectrum_dict["params"]["fingerprint"]
             yield spectrum_dict
 
-    py_mgf.write(spectrum_dict_generator(spectrums), filename, file_mode="a")
+    py_mgf.write(spectrum_dict_generator(spectra), filename, file_mode="a")

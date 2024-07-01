@@ -110,7 +110,7 @@ We realized that many matchms-based workflows aim to compare many-to-many spectr
 ***********************
 Documentation for users
 ***********************
-For more extensive documentation `see our readthedocs <https://matchms.readthedocs.io/en/latest/>`_ and our `matchms introduction tutorial <https://blog.esciencecenter.nl/build-your-own-mass-spectrometry-analysis-pipeline-in-python-using-matchms-part-i-d96c718c68ee>`_.
+For more extensive documentation `see our readthedocs <https://matchms.readthedocs.io/en/latest/>`_, our `matchms introduction tutorial <https://blog.esciencecenter.nl/build-your-own-mass-spectrometry-analysis-pipeline-in-python-using-matchms-part-i-d96c718c68ee>`_ or the `user documentation <https://matchms.github.io/matchms-docs/intro.html>`_.
 
 Installation
 ============
@@ -155,7 +155,7 @@ To date, we are aware of:
 
 + `MSMetaEnhancer <https://github.com/RECETOX/MSMetaEnhancer>`_ is a python package to collect mass spectral library metadata using various web services and computational chemistry packages.
 
-+ `cudams <https://github.com/tornikeo/cudams>`_ is a python package for fast similarity calculations, using GPU's to speed up the cosine score calculations by 100-500x compared to the standard matchms implementation. 
++ `cudams <https://github.com/PangeAI/cudams>`_ is a python package with fast GPU-based reimplementations of common similarity classes such as `CudaCosineGreedy`, and `CudaModifiedCosine`.
 
 *(if you know of any other packages that are fully compatible with matchms, let us know!)*
 
@@ -308,7 +308,7 @@ To install matchms, do:
   # Install rdkit using conda, rest of dependencies can be installed with pip
   conda install -c conda-forge rdkit
   python -m pip install --upgrade pip
-  pip install --editable .[dev]  # if this won't work try "poetry install"
+  pip install --editable .[dev]  # if this won't work try "poetry install --with dev"
 
 Run the linter with:
 
@@ -354,6 +354,11 @@ Flowchart
   Flowchart of matchms workflow. Reference and query spectrums are filtered using the same
   set of set filters (here: filter A and filter B). Once filtered, every reference spectrum is compared to
   every query spectrum using the matchms.Scores object.
+
+Support
+============
+
+To get support join the public `Slack channel <https://join.slack.com/t/matchms/shared_invite/zt-2l0t61651-Svv0d5hwl~P5jwV4ZCNFXg>`_.
 
 Contributing
 ============
