@@ -3,7 +3,8 @@ import os
 from typing import IO, Dict, List, Union
 from ..Fragments import Fragments
 from ..Spectrum import Spectrum
-from ..utils import filter_empty_spectra, fingerprint_export_warning
+from ..utils import (filter_empty_spectra, fingerprint_export_warning,
+                     rename_deprecated_params)
 
 
 logger = logging.getLogger("matchms")
@@ -12,6 +13,7 @@ logger = logging.getLogger("matchms")
 _extentions_not_allowed = ["mzml", "mzxml", "json", "mgf"]
 
 
+@rename_deprecated_params(param_mapping={"spectrums": "spectra"}, version="0.26.5")
 def save_as_msp(spectra: List[Spectrum], filename: str,
                 write_peak_comments: bool = True,
                 mode: str = "a", style: str = "matchms"):

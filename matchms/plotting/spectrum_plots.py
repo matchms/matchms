@@ -2,6 +2,7 @@ from typing import Optional, Union
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 import numpy as np
+from matchms.utils import rename_deprecated_params
 
 
 _annotation_kws = {
@@ -200,6 +201,7 @@ def plot_spectra_mirror(spec_top,
     return ax
 
 
+@rename_deprecated_params(param_mapping={"spectrums": "spectra"}, version="0.26.5")
 def plot_spectra_array(spectra,
                        n_cols: int = 2,
                        peak_color="darkblue",

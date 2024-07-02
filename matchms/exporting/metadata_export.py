@@ -3,7 +3,7 @@ import json
 from typing import Any, Dict, List, Optional, Set, Tuple
 import numpy as np
 from ..Spectrum import Spectrum
-from ..utils import filter_empty_spectra
+from ..utils import filter_empty_spectra, rename_deprecated_params
 
 
 def _get_metadata_dict(spectrum: Spectrum, include_fields: Optional[List[str]] = None) -> Dict[str, Any]:
@@ -26,6 +26,7 @@ def _get_metadata_dict(spectrum: Spectrum, include_fields: Optional[List[str]] =
             & include_fields}
 
 
+@rename_deprecated_params(param_mapping={"spectrums": "spectra"}, version="0.26.5")
 def export_metadata_as_json(spectra: List[Spectrum], filename: str,
                             include_fields: Optional[List[str]] = None):
     """Export metadata to json file.
