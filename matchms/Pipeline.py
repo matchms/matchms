@@ -304,7 +304,8 @@ class Pipeline:
     def import_spectrums(self,
                          query_files: Union[List[str], str],
                          reference_files: Optional[Union[List[str], str]] = None):
-        self.import_spectra(self, query_files, reference_files)
+        if reference_files is not None:
+            self.import_spectra(query_files, reference_files)
 
     def import_spectra(self,
                        query_files: Union[List[str], str],

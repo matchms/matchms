@@ -5,6 +5,7 @@ from matchms.utils import rename_deprecated_params
 
 @mark.filterwarnings("ignore::DeprecationWarning")
 def test_rename_deprecated_params():
+    #pylint: disable=no-value-for-parameter
     @rename_deprecated_params({"old_param": "new_param"}, version="0.1.0")
     def example_func(new_param, another_param):
         return new_param, another_param

@@ -167,7 +167,7 @@ class SpectrumProcessor:
                           progress_bar: bool = True,
                           cleaned_spectra_file=None
                           ):
-        self.process_spectra(self, spectra, progress_bar, cleaned_spectra_file)
+        self.process_spectra(spectra, progress_bar, cleaned_spectra_file)
 
     def process_spectra(self, spectra: list,
                           progress_bar: bool = True,
