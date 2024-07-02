@@ -9,8 +9,8 @@ from ..builder_Spectrum import SpectrumBuilder
 
 def load_test_spectra_file(test_filename):
     module_root = os.path.join(os.path.dirname(__file__), "..")
-    spectrums_file = os.path.join(module_root, "testdata", test_filename)
-    spectra = list(load_from_mgf(spectrums_file))
+    spectra_file = os.path.join(module_root, "testdata", test_filename)
+    spectra = list(load_from_mgf(spectra_file))
     return spectra
 
 

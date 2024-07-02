@@ -43,7 +43,7 @@ Install matchms from Anaconda Cloud with
 Example
 =======
 
-Below is a small example of using matchms to calculate the Cosine score between mass Spectrums in the `tests/testdata/pesticides.mgf <https://github.com/matchms/matchms/blob/master/tests/testdata/pesticides.mgf>`_ file.
+Below is a small example of using matchms to calculate the Cosine score between mass Spectra in the `tests/testdata/pesticides.mgf <https://github.com/matchms/matchms/blob/master/tests/testdata/pesticides.mgf>`_ file.
 
 .. testcode::
 
@@ -53,24 +53,24 @@ Below is a small example of using matchms to calculate the Cosine score between 
     from matchms import calculate_scores
     from matchms.similarity import CosineGreedy
 
-    # Read spectrums from a MGF formatted file, for other formats see https://matchms.readthedocs.io/en/latest/api/matchms.importing.html
+    # Read spectra from a MGF formatted file, for other formats see https://matchms.readthedocs.io/en/latest/api/matchms.importing.html
     file = load_from_mgf("../tests/testdata/pesticides.mgf")
 
     # Apply filters to clean and enhance each spectrum
-    spectrums = []
+    spectra = []
     for spectrum in file:
         # Apply default filter to standardize ion mode, correct charge and more.
         # Default filter is fully explained at https://matchms.readthedocs.io/en/latest/api/matchms.filtering.html .
         spectrum = default_filters(spectrum)
         # Scale peak intensities to maximum of 1
         spectrum = normalize_intensities(spectrum)
-        spectrums.append(spectrum)
+        spectra.append(spectrum)
 
-    # Calculate Cosine similarity scores between all spectrums
+    # Calculate Cosine similarity scores between all spectra
     # For other similarity score methods see https://matchms.readthedocs.io/en/latest/api/matchms.similarity.html .
     # Because references and queries are here the same spectra, we can set is_symmetric=True
-    scores = calculate_scores(references=spectrums,
-                              queries=spectrums,
+    scores = calculate_scores(references=spectra,
+                              queries=spectra,
                               similarity_function=CosineGreedy(),
                               is_symmetric=True)
 
@@ -78,7 +78,7 @@ Below is a small example of using matchms to calculate the Cosine score between 
     print(f"Size of matrix of computed similarities: {scores.scores.shape}")
 
     # Matchms allows to get the best matches for any query using scores_by_query
-    query = spectrums[15]  # just an example
+    query = spectra[15]  # just an example
     best_matches = scores.scores_by_query(query, 'CosineGreedy_score', sort=True)
 
     # Print the calculated scores for each spectrum pair

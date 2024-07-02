@@ -80,7 +80,7 @@ def test_modified_cosine_with_mass_shift(peaks, tolerance, masses, expected_matc
     assert score["matches"] == len(expected_matches), "Expected differnt number of matching peaks."
 
 
-def test_modified_cosine_order_of_input_spectrums():
+def test_modified_cosine_order_of_input_spectra():
     """Test modified cosine on two spectra in changing order."""
     spectrum_1 = Spectrum(mz=np.array([100, 150, 200, 300, 500, 510, 1100], dtype="float"),
                           intensities=np.array([700, 200, 100, 1000, 200, 5, 500], dtype="float"),

@@ -3,6 +3,7 @@ import os
 from collections import OrderedDict
 from datetime import datetime
 from typing import Callable, Iterable, List, Optional, Union
+from deprecated import deprecated
 import matchms.similarity as mssimilarity
 from matchms import calculate_scores
 from matchms.filtering.filter_order import ALL_FILTERS
@@ -82,7 +83,7 @@ class Pipeline:
         pipeline.logging_file = "my_pipeline.log"
         pipeline.logging_level = "ERROR"
 
-        pipeline.run("my_spectrums.mgf")
+        pipeline.run("my_spectra.mgf")
 
     The second way to define a pipeline is via a Python script. The following code is an
     example of how this works:
@@ -139,8 +140,8 @@ class Pipeline:
         progress_bar:
             Default is True. Set to False if no progress bar should be displayed.
         """
-        self._spectrums_queries = None
-        self._spectrums_references = None
+        self._spectra_queries = None
+        self._spectra_references = None
         self.is_symmetric = False
         self.scores = None
 
@@ -184,7 +185,7 @@ class Pipeline:
         """Execute the defined Pipeline workflow.
 
         This method will execute all steps of the workflow.
-        1) Initializing the log file and importing the spectrums
+        1) Initializing the log file and importing the spectra
         2) Spectrum processing (using matchms filters)
         3) Score Computations
         """
@@ -198,24 +199,24 @@ class Pipeline:
         self.set_logging()
         self.write_to_logfile("--- Start running matchms pipeline. ---")
         self.write_to_logfile(f"Start time: {str(datetime.now())}")
-        self.import_spectrums(query_files, reference_files)
+        self.import_spectra(query_files, reference_files)
 
         # Processing
         self.write_to_logfile("--- Processing spectra ---")
         self.write_to_logfile(f"Time: {str(datetime.now())}")
         # Process query spectra
-        spectrums, report = self.processing_queries.process_spectrums(self._spectrums_queries,
-                                                                      progress_bar=self.progress_bar,
-                                                                      cleaned_spectra_file=cleaned_query_file)
-        self._spectrums_queries = spectrums
+        spectra, report = self.processing_queries.process_spectra(self._spectra_queries,
+                                                                    progress_bar=self.progress_bar,
+                                                                    cleaned_spectra_file=cleaned_query_file)
+        self._spectra_queries = spectra
         self.write_to_logfile(str(report))
         # Process reference spectra (if necessary)
         if self.is_symmetric is False:
-            self._spectrums_references, report = self.processing_references.process_spectrums(
-                self._spectrums_references, progress_bar=self.progress_bar, cleaned_spectra_file=cleaned_reference_file)
+            self._spectra_references, report = self.processing_references.process_spectra(
+                self._spectra_references, progress_bar=self.progress_bar, cleaned_spectra_file=cleaned_reference_file)
             self.write_to_logfile(str(report))
         else:
-            self._spectrums_references = self._spectrums_queries
+            self._spectra_references = self._spectra_queries
 
         # Score computation and masking
         self.write_to_logfile("--- Computing scores ---")
@@ -262,14 +263,14 @@ class Pipeline:
         similarity_measure = get_similarity_measure(computation)
         # If this is the first score computation:
         if i == 0:
-            self.scores = calculate_scores(self._spectrums_references,
-                                           self._spectrums_queries,
+            self.scores = calculate_scores(self._spectra_references,
+                                           self._spectra_queries,
                                            similarity_measure,
                                            array_type="sparse",
                                            is_symmetric=self.is_symmetric)
         else:
-            new_scores = similarity_measure.sparse_array(references=self._spectrums_references,
-                                                         queries=self._spectrums_queries,
+            new_scores = similarity_measure.sparse_array(references=self._spectra_references,
+                                                         queries=self._spectra_queries,
                                                          idx_row=self.scores.scores.row,
                                                          idx_col=self.scores.scores.col,
                                                          is_symmetric=self.is_symmetric)
@@ -298,9 +299,26 @@ class Pipeline:
             with open(self.logging_file, "a", encoding="utf-8") as f:
                 f.write(line + '\n')
 
+    @deprecated(version="0.26.5",
+                reason="This method is deprecated and will be removed in the future. Use import_spectra() instead.")
     def import_spectrums(self,
                          query_files: Union[List[str], str],
                          reference_files: Optional[Union[List[str], str]] = None):
+        """Wrapper method for import_spectra()
+
+        Parameters
+        ----------
+        query_files
+            List of files, or single filename, containing the query spectra.
+        reference_files
+            List of files, or single filename, containing the reference spectra.
+            If set to None (default) then all query spectra will be compared to each other.
+        """
+        return self.import_spectra(query_files, reference_files)
+
+    def import_spectra(self,
+                       query_files: Union[List[str], str],
+                       reference_files: Optional[Union[List[str], str]] = None):
         """Import spectra from file(s).
 
         Parameters
@@ -313,17 +331,17 @@ class Pipeline:
         """
         # import query spectra
         self.write_to_logfile("--- Importing data ---")
-        self._spectrums_queries = load_list_of_spectrum_files(query_files)
+        self._spectra_queries = load_list_of_spectrum_files(query_files)
 
         self.write_to_logfile(f"Loaded query spectra from {query_files}")
 
         # import reference spectra
         if reference_files is None:
             self.is_symmetric = True
-            self._spectrums_references = self._spectrums_queries
+            self._spectra_references = self._spectra_queries
             self.write_to_logfile("Reference spectra are equal to the query spectra (is_symmetric = True)")
         else:
-            self._spectrums_references = load_list_of_spectrum_files(reference_files)
+            self._spectra_references = load_list_of_spectrum_files(reference_files)
             self.write_to_logfile(f"Loaded reference spectra from {reference_files}")
 
     # Getter & Setters
@@ -355,12 +373,24 @@ class Pipeline:
         self._initialize_spectrum_processor_references()
 
     @property
+    @deprecated(version="0.26.5",
+                reason="This property is deprecated and will be removed in the future. Use spectra_queries instead.")
     def spectrums_queries(self) -> List[SpectrumType]:
-        return self._spectrums_queries
+        return self._spectra_queries
 
     @property
+    def spectra_queries(self) -> List[SpectrumType]:
+        return self._spectra_queries
+
+    @property
+    @deprecated(version="0.26.5",
+                reason="This property is deprecated and will be removed in the future. Use spectra_references instead.")
     def spectrums_references(self) -> List[SpectrumType]:
-        return self._spectrums_references
+        return self._spectra_references
+
+    @property
+    def spectra_references(self) -> List[SpectrumType]:
+        return self._spectra_references
 
 
 def get_unused_filters(yaml_file):

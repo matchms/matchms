@@ -21,7 +21,7 @@ def load_from_mzml(filename: str, ms_level: int = 2,
         from matchms.importing import load_from_mzml
 
         file_mzml = "testdata.mzml"
-        spectrums = list(load_from_mzml(file_mzml))
+        spectra = list(load_from_mzml(file_mzml))
 
     Parameters
     ----------

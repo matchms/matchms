@@ -25,7 +25,7 @@ def _assert_ax_ok(ax, n_lines, ylim, xlabel, ylabel):
 
 
 def test_plot_mirror_plot():
-    # Create two random spectrums
+    # Create two random spectra
     spec_a = Spectrum(mz=np.array([100, 200, 300, 400.2]),
                       intensities=np.array([0.5, 0.3, 0.1, 0.05]))
     spec_b = Spectrum(mz=np.array([10.2, 20.2, 30.2, 40.2, 78.2]),
@@ -37,7 +37,7 @@ def test_plot_mirror_plot():
     assert ax.get_xlim() == (min_mz, max_mz)
 
 def test_plot_mirror_colors():
-    # Create two random spectrums
+    # Create two random spectra
     spec_a = Spectrum(mz=np.array([100., 200.]),
                       intensities=np.array([0.5, 0.3]))
     spec_b = Spectrum(mz=np.array([10.2, 20.2, 30.2]),
@@ -45,13 +45,13 @@ def test_plot_mirror_colors():
 
     # Set specific colors to the top and bottom spectra
     ax = plot_spectra_mirror(spec_a, spec_b, color_top="red", color_bottom="blue")
-    # Get the color of the lines 
+    # Get the color of the lines
     all_colors = [line.get_color() for line in ax.get_lines()]
     assert "red" in all_colors
     assert "blue" in all_colors
 
     # Test that it gives proper error if the wrong color argument is given
-    with pytest.raises(ValueError, 
+    with pytest.raises(ValueError,
                        match="'peak_color' should not be set for `plot_spectra_mirror`. "):
         plot_spectra_mirror(spec_a, spec_b, peak_color="green")
 
@@ -105,7 +105,7 @@ def test_plot_spectra_array_default():
     n = 9
     n_peaks = 50
 
-    spectrums = []
+    spectra = []
     for i in range(n):
         mz = np.random.randint(0, 1000, n_peaks).astype("float")
         mz.sort()
@@ -113,9 +113,9 @@ def test_plot_spectra_array_default():
         spectrum = Spectrum(mz=mz,
                             intensities=np.random.random(n_peaks),
                             metadata={"compound_name": f"Spectrum name {i}"})
-        spectrums.append(spectrum)
+        spectra.append(spectrum)
 
-    fig, axes = plot_spectra_array(spectrums)
+    fig, axes = plot_spectra_array(spectra)
 
     assert axes.shape == (5, 2)
     _assert_fig_ok(fig, n_plots=10, dpi=200, height=15)
@@ -132,7 +132,7 @@ def test_plot_spectra_array():
     n = 10
     n_peaks = 50
 
-    spectrums = []
+    spectra = []
     for i in range(n):
         mz = np.random.randint(0, 1000, n_peaks).astype("float")
         mz.sort()
@@ -140,9 +140,9 @@ def test_plot_spectra_array():
         spectrum = Spectrum(mz=mz,
                             intensities=np.random.random(n_peaks),
                             metadata={"compound_name": f"Spectrum name {i}"})
-        spectrums.append(spectrum)
+        spectra.append(spectrum)
 
-    fig, axes = plot_spectra_array(spectrums,
+    fig, axes = plot_spectra_array(spectra,
                                    n_cols=4,
                                    peak_color="darkblue",
                                    dpi=150)
