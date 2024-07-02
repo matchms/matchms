@@ -209,11 +209,16 @@ class Pipeline:
                                                                       cleaned_spectra_file=cleaned_query_file)
         self._spectrums_queries = spectrums
         self.write_to_logfile(str(report))
+        if cleaned_query_file is not None:
+            self.write_to_logfile(f"--- Query spectra written to {cleaned_query_file} ---")
+
         # Process reference spectra (if necessary)
         if self.is_symmetric is False:
             self._spectrums_references, report = self.processing_references.process_spectrums(
                 self._spectrums_references, progress_bar=self.progress_bar, cleaned_spectra_file=cleaned_reference_file)
             self.write_to_logfile(str(report))
+            if cleaned_reference_file is not None:
+                self.write_to_logfile(f"--- Reference spectra written to {cleaned_reference_file} ---")
         else:
             self._spectrums_references = self._spectrums_queries
 
@@ -229,7 +234,7 @@ class Pipeline:
             else:
                 self.write_to_logfile(f"-- Score computation: {computation} --")
                 self._apply_similarity_measure(computation, i)
-        self.write_to_logfile(f"--- Pipeline run finised ({str(datetime.now())}) ---")
+        self.write_to_logfile(f"--- Pipeline run finished ({str(datetime.now())}) ---")
         return report
 
     def _apply_score_masking(self, computation):
