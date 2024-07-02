@@ -3,6 +3,7 @@ import os
 from collections import OrderedDict
 from datetime import datetime
 from typing import Callable, Iterable, List, Optional, Union
+from deprecated import deprecated
 import matchms.similarity as mssimilarity
 from matchms import calculate_scores
 from matchms.filtering.filter_order import ALL_FILTERS
@@ -298,6 +299,13 @@ class Pipeline:
             with open(self.logging_file, "a", encoding="utf-8") as f:
                 f.write(line + '\n')
 
+    @deprecated(version="0.26.5",
+                reason="This method is deprecated and will be removed in future. Use import_spectra() instead.")
+    def import_spectrums(self,
+                         query_files: Union[List[str], str],
+                         reference_files: Optional[Union[List[str], str]] = None):
+        self.import_spectra(self, query_files, reference_files)
+
     def import_spectra(self,
                        query_files: Union[List[str], str],
                        reference_files: Optional[Union[List[str], str]] = None):
@@ -355,8 +363,20 @@ class Pipeline:
         self._initialize_spectrum_processor_references()
 
     @property
+    @deprecated(version="0.26.5",
+                reason="This property is deprecated and will be removed in future. Use spectra_queries instead.")
+    def spectrums_queries(self) -> List[SpectrumType]:
+        return self._spectra_queries
+
+    @property
     def spectra_queries(self) -> List[SpectrumType]:
         return self._spectra_queries
+
+    @property
+    @deprecated(version="0.26.5",
+                reason="This property is deprecated and will be removed in future. Use spectra_references instead.")
+    def spectrums_references(self) -> List[SpectrumType]:
+        return self._spectra_references
 
     @property
     def spectra_references(self) -> List[SpectrumType]:

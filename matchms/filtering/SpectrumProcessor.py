@@ -6,6 +6,7 @@ from functools import partial
 from typing import Callable, Dict, Iterable, List, Optional, Tuple, Union
 import numpy as np
 import pandas as pd
+from deprecated import deprecated
 from tqdm import tqdm
 from matchms import Spectrum
 from matchms.exporting import save_spectra
@@ -159,6 +160,14 @@ class SpectrumProcessor:
                 return None
             spectrum = spectrum_out
         return spectrum
+
+    @deprecated(version="0.26.5",
+                reason="This method is deprecated and will be removed in future. Use 'process_spectra()' instead.")
+    def process_spectrums(self, spectra: list,
+                          progress_bar: bool = True,
+                          cleaned_spectra_file=None
+                          ):
+        self.process_spectra(self, spectra, progress_bar, cleaned_spectra_file)
 
     def process_spectra(self, spectra: list,
                           progress_bar: bool = True,
