@@ -162,7 +162,7 @@ class SpectrumProcessor:
         return spectrum
 
     @deprecated(version="0.26.5",
-                reason="This method is deprecated and will be removed in future. Use 'process_spectra()' instead.")
+                reason="This method is deprecated and will be removed in the future. Use 'process_spectra()' instead.")
     def process_spectrums(self, spectra: list,
                           progress_bar: bool = True,
                           cleaned_spectra_file=None

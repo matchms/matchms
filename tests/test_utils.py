@@ -28,7 +28,7 @@ def test_rename_deprecated_params():
         example_func(old_param="some_value", another_param="another_value")
         assert len(w) == 1
         assert issubclass(w[-1].category, DeprecationWarning)
-        assert ("Parameter 'old_param' is deprecated and will be removed in future. Use 'new_param' instead. -- "
+        assert ("Parameter 'old_param' is deprecated and will be removed in the future. Use 'new_param' instead. -- "
                 "Deprecated since version 0.1.0") in str(w[-1].message)
 
     # Test if old params got removed

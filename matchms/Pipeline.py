@@ -300,7 +300,7 @@ class Pipeline:
                 f.write(line + '\n')
 
     @deprecated(version="0.26.5",
-                reason="This method is deprecated and will be removed in future. Use import_spectra() instead.")
+                reason="This method is deprecated and will be removed in the future. Use import_spectra() instead.")
     def import_spectrums(self,
                          query_files: Union[List[str], str],
                          reference_files: Optional[Union[List[str], str]] = None):
@@ -374,7 +374,7 @@ class Pipeline:
 
     @property
     @deprecated(version="0.26.5",
-                reason="This property is deprecated and will be removed in future. Use spectra_queries instead.")
+                reason="This property is deprecated and will be removed in the future. Use spectra_queries instead.")
     def spectrums_queries(self) -> List[SpectrumType]:
         return self._spectra_queries
 
@@ -384,7 +384,7 @@ class Pipeline:
 
     @property
     @deprecated(version="0.26.5",
-                reason="This property is deprecated and will be removed in future. Use spectra_references instead.")
+                reason="This property is deprecated and will be removed in the future. Use spectra_references instead.")
     def spectrums_references(self) -> List[SpectrumType]:
         return self._spectra_references
 
