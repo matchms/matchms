@@ -167,7 +167,28 @@ class SpectrumProcessor:
                           progress_bar: bool = True,
                           cleaned_spectra_file=None
                           ):
-        self.process_spectra(spectra, progress_bar, cleaned_spectra_file)
+        """
+        Wrapper method for process_spectra()
+
+        Parameters
+        ----------
+        spectra : list[Spectrum]
+            The spectra to process.
+        create_report: bool, optional
+            Creates and outputs a report of the main changes during processing.
+            The report will be returned as pandas DataFrame. Default is set to False.
+        progress_bar : bool, optional
+            Displays progress bar if set to True. Default is True.
+        cleaned_spectra_file:
+            Path to where the cleaned spectra should be saved.
+        Returns
+        -------
+        spectra
+            List containing the processed spectra.
+        processing_report
+            A ProcessingReport containing the effect of the filters.
+        """
+        return self.process_spectra(spectra, progress_bar, cleaned_spectra_file)
 
     def process_spectra(self, spectra: list,
                           progress_bar: bool = True,
