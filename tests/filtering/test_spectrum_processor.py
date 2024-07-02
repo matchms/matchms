@@ -10,7 +10,7 @@ from ..builder_Spectrum import SpectrumBuilder
 
 
 @pytest.fixture
-def spectrums():
+def spectra():
     s1 = SpectrumBuilder(). \
         with_metadata({"charge": "+1", "pepmass": 100}). \
         with_mz([10, 20, 30]).with_intensities([0.1, 0.4, 10]).build()
@@ -89,30 +89,30 @@ def test_no_filters():
     assert spectrum_out == spectrum_in
 
 
-def test_filter_spectrums(spectrums):
+def test_filter_spectra(spectra):
     processor = SpectrumProcessor(filters=["make_charge_int",
                                            "interpret_pepmass",
                                            "derive_ionmode",
                                            "correct_charge",
                                            ])
-    spectrums, _ = processor.process_spectrums(spectrums)
+    spectra, _ = processor.process_spectra(spectra)
 
-    assert len(spectrums) == 3
-    actual_masses = [s.get("precursor_mz") for s in spectrums]
+    assert len(spectra) == 3
+    actual_masses = [s.get("precursor_mz") for s in spectra]
     expected_masses = [100, 102, 104]
     assert actual_masses == expected_masses
 
 
-def test_filter_spectrums_report(spectrums):
+def test_filter_spectra_report(spectra):
     processor = SpectrumProcessor(filters=["make_charge_int",
                                            "interpret_pepmass",
                                            "derive_ionmode",
                                            "correct_charge",
                                            ])
     processor.parse_and_add_filter(filter_description=("require_minimum_number_of_peaks", {"n_required": 2}))
-    spectrums, report = processor.process_spectrums(spectrums)
-    assert len(spectrums) == 2
-    actual_masses = [s.get("precursor_mz") for s in spectrums]
+    spectra, report = processor.process_spectra(spectra)
+    assert len(spectra) == 2
+    actual_masses = [s.get("precursor_mz") for s in spectra]
     expected_masses = [100, 102]
     assert actual_masses == expected_masses
     assert report.counter_number_processed == 3
@@ -125,18 +125,18 @@ def test_filter_spectrums_report(spectrums):
          [0, 0, 0]]))
 
 
-def test_processing_report_class(spectrums):
+def test_processing_report_class(spectra):
     processing_report = ProcessingReport()
-    for s in spectrums:
+    for s in spectra:
         spectrum_processed = s.clone()
         spectrum_processed.set("smiles", "test")
         processing_report.add_to_report(s, spectrum_processed, "test_filter")
 
-    assert not processing_report.counter_removed_spectrums
+    assert not processing_report.counter_removed_spectra
     assert processing_report.counter_changed_metadata == {"test_filter": 3}
 
 
-def test_adding_custom_filter(spectrums):
+def test_adding_custom_filter(spectra):
     def nonsense_inchikey(s):
         s_in = s.clone()
         s_in.set("inchikey", "NONSENSE")
@@ -150,14 +150,14 @@ def test_adding_custom_filter(spectrums):
     processor.parse_and_add_filter(nonsense_inchikey)
     filters = processor.filters
     assert filters[-1].__name__ == "nonsense_inchikey"
-    spectrums, report = processor.process_spectrums(spectrums)
+    spectra, report = processor.process_spectra(spectra)
     assert report.counter_number_processed == 3
     assert report.counter_changed_metadata == {'make_charge_int': 2, 'interpret_pepmass': 3,
                                                'derive_ionmode': 3, 'nonsense_inchikey': 3}
-    assert spectrums[0].get("inchikey") == "NONSENSE", "Custom filter not executed properly"
+    assert spectra[0].get("inchikey") == "NONSENSE", "Custom filter not executed properly"
 
 
-def test_adding_custom_filter_with_parameters(spectrums):
+def test_adding_custom_filter_with_parameters(spectra):
     def nonsense_inchikey_multiple(s, number):
         s_in = s.clone()
         s_in.set("inchikey", number * "NONSENSE")
@@ -171,11 +171,11 @@ def test_adding_custom_filter_with_parameters(spectrums):
     processor.parse_and_add_filter((nonsense_inchikey_multiple, {"number": 2}))
     filters = processor.filters
     assert filters[-1].__name__ == "nonsense_inchikey_multiple"
-    spectrums, report = processor.process_spectrums(spectrums)
+    spectra, report = processor.process_spectra(spectra)
     assert report.counter_number_processed == 3
     assert report.counter_changed_metadata == {'make_charge_int': 2, 'interpret_pepmass': 3,
                                                'derive_ionmode': 3, 'nonsense_inchikey_multiple': 3}
-    assert spectrums[0].get("inchikey") == "NONSENSENONSENSE", "Custom filter not executed properly"
+    assert spectra[0].get("inchikey") == "NONSENSENONSENSE", "Custom filter not executed properly"
 
 
 @pytest.mark.parametrize("filter_position, expected", [
@@ -220,7 +220,7 @@ def test_add_matchms_filter_in_position():
     assert len(filters) == 4
 
 
-def test_add_custom_filter_with_parameters(spectrums):
+def test_add_custom_filter_with_parameters(spectra):
     def nonsense_inchikey_multiple(s, number):
         s.set("inchikey", number * "NONSENSE")
         return s
@@ -234,8 +234,8 @@ def test_add_custom_filter_with_parameters(spectrums):
     filters = processor.filters
 
     assert filters[-1].__name__ == "nonsense_inchikey_multiple"
-    spectrums, _ = processor.process_spectrums(spectrums)
-    assert spectrums[0].get("inchikey") == "NONSENSENONSENSE", "Custom filter not executed properly"
+    spectra, _ = processor.process_spectra(spectra)
+    assert spectra[0].get("inchikey") == "NONSENSENONSENSE", "Custom filter not executed properly"
 
 
 @pytest.mark.parametrize("filter_description", [
@@ -243,7 +243,7 @@ def test_add_custom_filter_with_parameters(spectrums):
     (msfilters.require_correct_ionmode, {"ion_mode_to_keep": "negative"})
 
 ])
-def test_add_matchms_filter(filter_description, spectrums):
+def test_add_matchms_filter(filter_description, spectra):
     processor = SpectrumProcessor(filters=["make_charge_int",
                                            "interpret_pepmass",
                                            "derive_ionmode",
@@ -252,8 +252,8 @@ def test_add_matchms_filter(filter_description, spectrums):
     processor.parse_and_add_filter(filter_description)
     filters = processor.filters
     assert filters[-1].__name__ == "require_correct_ionmode"
-    spectrums, _ = processor.process_spectrums(spectrums)
-    assert len(spectrums) == 2
+    spectra, _ = processor.process_spectra(spectra)
+    assert len(spectra) == 2
 
 
 @pytest.mark.parametrize("filter_description", [
@@ -277,7 +277,7 @@ def test_add_filter_twice():
     assert processor.processing_steps == [("derive_adduct_from_name", {"remove_adduct_from_name": True})]
 
 
-def test_add_all_filter_types(spectrums):
+def test_add_all_filter_types(spectra):
     def nonsense_inchikey_multiple(s, number):
         s.set("inchikey", number * "NONSENSE")
         return s
@@ -300,33 +300,33 @@ def test_add_all_filter_types(spectrums):
                                                                  "nonsense_inchikey",
                                                                  "nonsense_inchikey_multiple",
                                                                  ]
-    processor.process_spectrums(spectrums)
-    spectrums, _ = processor.process_spectrums(spectrums)
-    assert spectrums[0].get("inchikey") == "NONSENSENONSENSE", "Custom filter not executed properly"
+    processor.process_spectra(spectra)
+    spectra, _ = processor.process_spectra(spectra)
+    assert spectra[0].get("inchikey") == "NONSENSENONSENSE", "Custom filter not executed properly"
 
 
-def test_save_spectra_spectrum_processor(spectrums, tmp_path):
+def test_save_spectra_spectrum_processor(spectra, tmp_path):
     processor = SpectrumProcessor(BASIC_FILTERS)
     filename = os.path.join(tmp_path, "spectra.msp")
 
-    _, _ = processor.process_spectrums(spectrums, cleaned_spectra_file=str(filename))
+    _, _ = processor.process_spectra(spectra, cleaned_spectra_file=str(filename))
     assert os.path.exists(filename)
 
     # Reload spectra and compare lengths
     reloaded_spectra = list(load_spectra(str(filename)))
-    assert len(reloaded_spectra) == len(spectrums)
+    assert len(reloaded_spectra) == len(spectra)
 
     # Check that the processed spectra are stored
     for spectrum in reloaded_spectra:
         assert spectrum.get("precursor_mz") is not None
 
 
-def test_save_spectra_spectrum_processor_none_spectra(spectrums, tmp_path):
+def test_save_spectra_spectrum_processor_none_spectra(spectra, tmp_path):
     processor = SpectrumProcessor(BASIC_FILTERS +
                                   [(msfilters.require_correct_ionmode, {"ion_mode_to_keep": "positive"})])
     filename = os.path.join(tmp_path, "spectra.msp")
 
-    _, _ = processor.process_spectrums(spectrums, cleaned_spectra_file=str(filename))
+    _, _ = processor.process_spectra(spectra, cleaned_spectra_file=str(filename))
     assert os.path.exists(filename)
 
     # Reload spectra and compare lengths
@@ -343,16 +343,16 @@ def test_save_spectra_spectrum_processor_none_spectra(spectrums, tmp_path):
     ['mgf', True],
     ['json', False],
 ])
-def test_save_partial_spectra_spectrum_processor(ftype, should_work, spectrums, tmp_path):
+def test_save_partial_spectra_spectrum_processor(ftype, should_work, spectra, tmp_path):
     processor = SpectrumProcessor(BASIC_FILTERS)
 
     # Deliberately introduce invalid spectrum
-    spectrums[-2] = "Lorem Ipsum"
+    spectra[-2] = "Lorem Ipsum"
 
     filename = os.path.join(tmp_path, f"spectra.{ftype}")
 
     with pytest.raises(Exception):
-        _, _ = processor.process_spectrums(spectrums, cleaned_spectra_file=str(filename))
+        _, _ = processor.process_spectra(spectra, cleaned_spectra_file=str(filename))
 
     if should_work:
         assert os.path.exists(filename)
@@ -361,7 +361,7 @@ def test_save_partial_spectra_spectrum_processor(ftype, should_work, spectrums, 
         reloaded_spectra = list(load_spectra(str(filename)))
 
         # Make sure we are only missing last two "spectra"
-        assert len(reloaded_spectra) == len(spectrums) - 2
+        assert len(reloaded_spectra) == len(spectra) - 2
 
         # Check that the processed spectra are stored
         for spectrum in reloaded_spectra:

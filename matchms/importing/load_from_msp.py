@@ -33,7 +33,7 @@ def load_from_msp(filename: str,
 
         # Download msp file from MassBank of North America repository at https://mona.fiehnlab.ucdavis.edu/
         file_msp = "MoNA-export-GC-MS-first10.msp"
-        spectrums = list(load_from_msp(file_msp))
+        spectra = list(load_from_msp(file_msp))
     """
     for spectrum in parse_msp_file(filename):
         yield parse_spectrum_dict(

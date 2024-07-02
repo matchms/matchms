@@ -3,7 +3,8 @@ import os
 from typing import IO, Dict, List, Union
 from ..Fragments import Fragments
 from ..Spectrum import Spectrum
-from ..utils import filter_empty_spectra, fingerprint_export_warning
+from ..utils import (filter_empty_spectra, fingerprint_export_warning,
+                     rename_deprecated_params)
 
 
 logger = logging.getLogger("matchms")
@@ -12,7 +13,8 @@ logger = logging.getLogger("matchms")
 _extentions_not_allowed = ["mzml", "mzxml", "json", "mgf"]
 
 
-def save_as_msp(spectrums: List[Spectrum], filename: str,
+@rename_deprecated_params(param_mapping={"spectrums": "spectra"}, version="0.26.5")
+def save_as_msp(spectra: List[Spectrum], filename: str,
                 write_peak_comments: bool = True,
                 mode: str = "a", style: str = "matchms"):
     """Save spectrum(s) as msp file.
@@ -37,7 +39,7 @@ def save_as_msp(spectrums: List[Spectrum], filename: str,
 
     Parameters
     ----------
-    spectrums:
+    spectra:
         Expected input are match.Spectrum.Spectrum() objects.
     filename:
         Provide filename to save spectrum(s).
@@ -56,7 +58,7 @@ def save_as_msp(spectrums: List[Spectrum], filename: str,
     if not filename.endswith(".msp"):
         logger.warning("Spectrum(s) will be stored as msp file with extension .%s",
                        filename.split(".")[-1])
-    spectra = _ensure_list(spectrums)
+    spectra = _ensure_list(spectra)
     spectra = filter_empty_spectra(spectra)
 
     fingerprint_export_warning(spectra)
@@ -113,8 +115,8 @@ def _is_fingerprint(key: str) -> bool:
     return key.lower().startswith("fingerprint")
 
 
-def _ensure_list(spectrums) -> List[Spectrum]:
-    if not isinstance(spectrums, list):
+def _ensure_list(spectra) -> List[Spectrum]:
+    if not isinstance(spectra, list):
         # Assume that input was single Spectrum
-        spectrums = [spectrums]
-    return spectrums
+        spectra = [spectra]
+    return spectra

@@ -13,7 +13,7 @@ class BaseSimilarity:
     Attributes
     ----------
     is_commutative
-       Whether similarity function is commutative, which means that the order of spectrums
+       Whether similarity function is commutative, which means that the order of spectra
        does not matter (similarity(A, B) == similarity(B, A)). Default is True.
     """
     # Set key characteristics as class attributes
@@ -42,7 +42,7 @@ class BaseSimilarity:
                array_type: str = "numpy",
                is_symmetric: bool = False) -> np.ndarray:
         """Optional: Provide optimized method to calculate an np.array of similarity scores
-        for given reference and query spectrums. If no method is added here, the following naive
+        for given reference and query spectra. If no method is added here, the following naive
         implementation (i.e. a double for-loop) is used.
 
         Parameters
@@ -62,10 +62,10 @@ class BaseSimilarity:
         #pylint: disable=too-many-locals
         n_rows = len(references)
         n_cols = len(queries)
-        
+
         if is_symmetric and n_rows != n_cols:
             raise ValueError(f"Found unequal number of spectra {n_rows} and {n_cols} in while `is_symmetric` is True.")
-        
+
         idx_row = []
         idx_col = []
         scores = []
@@ -103,7 +103,7 @@ class BaseSimilarity:
                      idx_row, idx_col, is_symmetric: bool = False):
         """Optional: Provide optimized method to calculate an sparse matrix of similarity scores.
 
-        Compute similarity scores for pairs of reference and query spectrums as given by the indices
+        Compute similarity scores for pairs of reference and query spectra as given by the indices
         idx_row (references) and idx_col (queries). If no method is added here, the following naive
         implementation (i.e. a for-loop) is used.
 

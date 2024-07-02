@@ -50,10 +50,10 @@ def test_precursormz_match_array_parameterized(precursor_mz, tolerance, toleranc
      [[True, False, True, False], [False, True, False, False], [True, False, True, False], [False, False, False, True]]]
 ])
 def test_precursormz_match_array_symmetric_parameterized(precursor_mz, tolerance, tolerance_type, expected):
-    spectrums = spectra_factory('precursor_mz', precursor_mz)
+    spectra = spectra_factory('precursor_mz', precursor_mz)
     similarity_score = PrecursorMzMatch(tolerance=tolerance, tolerance_type=tolerance_type)
-    scores = similarity_score.matrix(spectrums, spectrums, is_symmetric=True)
-    scores2 = similarity_score.matrix(spectrums, spectrums, is_symmetric=False)
+    scores = similarity_score.matrix(spectra, spectra, is_symmetric=True)
+    scores2 = similarity_score.matrix(spectra, spectra, is_symmetric=False)
 
     assert np.all(scores == scores2), "Expected identical scores"
     assert np.all(scores == np.array(expected)), "Expected different scores"

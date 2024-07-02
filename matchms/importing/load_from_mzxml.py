@@ -21,7 +21,7 @@ def load_from_mzxml(filename: str, ms_level: int = 2,
         from matchms.importing import load_from_mzxml
 
         file_mzxml = "testdata.mzxml"
-        spectrums = list(load_from_mzml(file_mzxml))
+        spectra = list(load_from_mzml(file_mzxml))
 
     Parameters
     ----------
@@ -35,7 +35,7 @@ def load_from_mzxml(filename: str, ms_level: int = 2,
     """
     with read(filename, dtype=dict) as reader:
         for pyteomics_spectrum in reader:
-            if ("ms level" in pyteomics_spectrum and pyteomics_spectrum["ms level"] == ms_level 
+            if ("ms level" in pyteomics_spectrum and pyteomics_spectrum["ms level"] == ms_level
                     or "msLevel" in pyteomics_spectrum and pyteomics_spectrum["msLevel"] == ms_level):
                 metadata = parse_mzml_mzxml_metadata(pyteomics_spectrum)
                 mz = np.asarray(pyteomics_spectrum["m/z array"], dtype="float")

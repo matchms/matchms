@@ -49,10 +49,10 @@ def test_parentmass_match_array_symmetric():
     spectrum_3 = builder.with_metadata({"parent_mass": 99.95}).build()
     spectrum_4 = builder.with_metadata({"parent_mass": 98.0}).build()
 
-    spectrums = [spectrum_1, spectrum_2, spectrum_3, spectrum_4]
+    spectra = [spectrum_1, spectrum_2, spectrum_3, spectrum_4]
     similarity_score = ParentMassMatch()
-    scores = similarity_score.matrix(spectrums, spectrums, is_symmetric=True)
-    scores2 = similarity_score.matrix(spectrums, spectrums, is_symmetric=False)
+    scores = similarity_score.matrix(spectra, spectra, is_symmetric=True)
+    scores2 = similarity_score.matrix(spectra, spectra, is_symmetric=False)
 
     assert np.all(scores == scores2), "Expected identical scores"
     assert np.all(scores == np.array(

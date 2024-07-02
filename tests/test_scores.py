@@ -302,11 +302,11 @@ def test_sort_without_name_exception():
 def test_comparing_symmetric_scores(similarity_function_a, similarity_function_b):
     "Test comparing symmetric scores objects."
     spectrum_1, spectrum_2, spectrum_3, spectrum_4 = spectra()
-    spectrums = [spectrum_1, spectrum_2, spectrum_3, spectrum_4]
+    spectra_list = [spectrum_1, spectrum_2, spectrum_3, spectrum_4]
 
-    scores_similarity_a = calculate_scores(spectrums, spectrums, similarity_function_a)
-    scores_similarity_a_copy = calculate_scores(spectrums, spectrums, similarity_function_a)
-    scores_similarity_b = calculate_scores(spectrums, spectrums, similarity_function_b)
+    scores_similarity_a = calculate_scores(spectra_list, spectra_list, similarity_function_a)
+    scores_similarity_a_copy = calculate_scores(spectra_list, spectra_list, similarity_function_a)
+    scores_similarity_b = calculate_scores(spectra_list, spectra_list, similarity_function_b)
 
     assert scores_similarity_a == scores_similarity_a_copy
     assert scores_similarity_a != scores_similarity_b
@@ -318,11 +318,11 @@ def test_comparing_symmetric_scores(similarity_function_a, similarity_function_b
 def test_comparing_asymmetric_scores(similarity_function_a, similarity_function_b):
     "Test comparing asymmetric scores objects."
     spectrum_1, spectrum_2, spectrum_3, spectrum_4 = spectra()
-    spectrums = [spectrum_1, spectrum_2, spectrum_3, spectrum_4]
+    spectra_list = [spectrum_1, spectrum_2, spectrum_3, spectrum_4]
 
-    scores_similarity_a = calculate_scores(spectrums[0:3], spectrums, similarity_function_a)
-    scores_similarity_a_copy = calculate_scores(spectrums[0:3], spectrums, similarity_function_a)
-    scores_similarity_b = calculate_scores(spectrums, spectrums[0:3], similarity_function_b)
+    scores_similarity_a = calculate_scores(spectra_list[0:3], spectra_list, similarity_function_a)
+    scores_similarity_a_copy = calculate_scores(spectra_list[0:3], spectra_list, similarity_function_a)
+    scores_similarity_b = calculate_scores(spectra_list, spectra_list[0:3], similarity_function_b)
 
     assert scores_similarity_a == scores_similarity_a_copy
     assert scores_similarity_a != scores_similarity_b
@@ -335,9 +335,9 @@ def test_comparing_asymmetric_scores(similarity_function_a, similarity_function_
 def test_comparing_scores_with_same_shape_different_scores_values(similarity_function_a, similarity_function_b):
     "Test comparing scores objects with same similarity functions but different values of scores."
     spectrum_1, spectrum_2, spectrum_3, spectrum_4 = spectra()
-    spectrums = [spectrum_1, spectrum_2, spectrum_3, spectrum_4]
+    spectra_list = [spectrum_1, spectrum_2, spectrum_3, spectrum_4]
 
-    scores_parametrized = calculate_scores(spectrums, spectrums, similarity_function_a)
-    scores_parametrized_mirrored = calculate_scores(spectrums, spectrums, similarity_function_b)
+    scores_parametrized = calculate_scores(spectra_list, spectra_list, similarity_function_a)
+    scores_parametrized_mirrored = calculate_scores(spectra_list, spectra_list, similarity_function_b)
 
     assert scores_parametrized != scores_parametrized_mirrored

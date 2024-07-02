@@ -13,12 +13,12 @@ from matchms.typing import QueriesType, ReferencesType
 
 
 class Scores:
-    """Contains reference and query spectrums and the scores between them.
+    """Contains reference and query spectra and the scores between them.
 
     The scores can be retrieved as a matrix with the :py:attr:`Scores.scores` attribute.
     The reference spectrum, query spectrum, score pairs can also be iterated over in query then reference order.
 
-    Example to calculate scores between 2 spectrums and iterate over the scores
+    Example to calculate scores between 2 spectra and iterate over the scores
 
     .. testcode::
 
@@ -369,9 +369,9 @@ class Scores:
                                   intensities=np.array([0.7, 0.2, 0.1]))
             spectrum_2 = Spectrum(mz=np.array([100, 140, 190.]),
                                   intensities=np.array([0.4, 0.2, 0.1]))
-            spectrums = [spectrum_1, spectrum_2]
+            spectra = [spectrum_1, spectrum_2]
 
-            scores = calculate_scores(spectrums, spectrums, IntersectMz()).to_array()
+            scores = calculate_scores(spectra, spectra, IntersectMz()).to_array()
 
             print(scores.shape)
             print(scores)

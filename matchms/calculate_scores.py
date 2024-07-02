@@ -9,7 +9,7 @@ def calculate_scores(references: ReferencesType, queries: QueriesType,
                      is_symmetric: bool = False) -> Scores:
     """Calculate the similarity between all reference objects versus all query objects.
 
-    Example to calculate scores between 2 spectrums and iterate over the scores
+    Example to calculate scores between 2 spectra and iterate over the scores
 
     .. testcode::
 
@@ -23,9 +23,9 @@ def calculate_scores(references: ReferencesType, queries: QueriesType,
         spectrum_2 = Spectrum(mz=np.array([100, 140, 190.]),
                               intensities=np.array([0.4, 0.2, 0.1]),
                               metadata={'id': 'spectrum2'})
-        spectrums = [spectrum_1, spectrum_2]
+        spectra = [spectrum_1, spectrum_2]
 
-        scores = calculate_scores(spectrums, spectrums, CosineGreedy())
+        scores = calculate_scores(spectra, spectra, CosineGreedy())
 
         for (reference, query, score) in scores:
             print(f"Cosine score between {reference.get('id')} and {query.get('id')}" +

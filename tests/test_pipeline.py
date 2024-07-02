@@ -10,7 +10,7 @@ from matchms.yaml_file_functions import load_workflow_from_yaml_file
 
 
 module_root = os.path.join(os.path.dirname(__file__), "..")
-spectrums_file_msp = os.path.join(module_root, "tests", "testdata", "massbank_five_spectra.msp")
+spectra_file_msp = os.path.join(module_root, "tests", "testdata", "massbank_five_spectra.msp")
 
 
 def test_pipeline_initial_check_missing_file():
@@ -32,10 +32,10 @@ def test_pipeline_symmetric():
     workflow = create_workflow(score_computations=[["precursormzmatch", {"tolerance": 120.0}],
                                                    ["modifiedcosine", {"tolerance": 10.0}]])
     pipeline = Pipeline(workflow)
-    pipeline.run(spectrums_file_msp)
+    pipeline.run(spectra_file_msp)
 
-    assert len(pipeline.spectrums_queries) == 5
-    assert pipeline.spectrums_queries[0] == pipeline.spectrums_references[0]
+    assert len(pipeline.spectra_queries) == 5
+    assert pipeline.spectra_queries[0] == pipeline.spectra_references[0]
     assert pipeline.is_symmetric is True
     assert pipeline.scores.scores.shape == (5, 5, 3)
     assert pipeline.scores.score_names == ('PrecursorMzMatch', 'ModifiedCosine_score', 'ModifiedCosine_matches')
@@ -51,11 +51,11 @@ def test_pipeline_symmetric_filters():
                                score_computations=[["precursormzmatch", {"tolerance": 120.0}],
                                                    ["modifiedcosine", {"tolerance": 10.0}]])
     pipeline = Pipeline(workflow)
-    pipeline.run(spectrums_file_msp)
+    pipeline.run(spectra_file_msp)
 
-    assert len(pipeline.spectrums_queries) == 5
-    assert pipeline.spectrums_queries[0].metadata == pipeline.spectrums_references[0].metadata
-    assert pipeline.spectrums_queries[0] == pipeline.spectrums_references[0]
+    assert len(pipeline.spectra_queries) == 5
+    assert pipeline.spectra_queries[0].metadata == pipeline.spectra_references[0].metadata
+    assert pipeline.spectra_queries[0] == pipeline.spectra_references[0]
     assert pipeline.is_symmetric is True
     assert pipeline.scores.scores.shape == (5, 5, 3)
     assert pipeline.scores.score_names == ('PrecursorMzMatch', 'ModifiedCosine_score', 'ModifiedCosine_matches')
@@ -71,10 +71,10 @@ def test_pipeline_symmetric_masking():
                                                    ["modifiedcosine", {"tolerance": 10.0}],
                                                    ["filter_by_range", {"low": 0.3, "above_operator": '>='}]])
     pipeline = Pipeline(workflow)
-    pipeline.run(spectrums_file_msp)
+    pipeline.run(spectra_file_msp)
 
-    assert len(pipeline.spectrums_queries) == 5
-    assert pipeline.spectrums_queries[0] == pipeline.spectrums_references[0]
+    assert len(pipeline.spectra_queries) == 5
+    assert pipeline.spectra_queries[0] == pipeline.spectra_references[0]
     assert pipeline.is_symmetric is True
     assert pipeline.scores.scores.shape == (5, 5, 3)
     assert pipeline.scores.score_names == ('PrecursorMzMatch', 'ModifiedCosine_score', 'ModifiedCosine_matches')
@@ -89,10 +89,10 @@ def test_pipeline_symmetric_custom_score():
     workflow = create_workflow(score_computations=[["precursormzmatch", {"tolerance": 120.0}],
                                                    [ModifiedCosine, {"tolerance": 10.0}]])
     pipeline = Pipeline(workflow)
-    pipeline.run(spectrums_file_msp)
+    pipeline.run(spectra_file_msp)
 
-    assert len(pipeline.spectrums_queries) == 5
-    assert pipeline.spectrums_queries[0] == pipeline.spectrums_references[0]
+    assert len(pipeline.spectra_queries) == 5
+    assert pipeline.spectra_queries[0] == pipeline.spectra_references[0]
     assert pipeline.is_symmetric is True
     assert pipeline.scores.scores.shape == (5, 5, 3)
     assert pipeline.scores.score_names == ('PrecursorMzMatch', 'ModifiedCosine_score', 'ModifiedCosine_matches')
@@ -108,11 +108,11 @@ def test_pipeline_non_symmetric():
     workflow = create_workflow(score_computations=[["precursormzmatch", {"tolerance": 120.0}],
                                                    ["modifiedcosine", {"tolerance": 10.0}]])
     pipeline = Pipeline(workflow)
-    pipeline.run(spectrums_file_msp, [spectrums_file_msp, spectrums_file_msp])
+    pipeline.run(spectra_file_msp, [spectra_file_msp, spectra_file_msp])
 
-    assert len(pipeline.spectrums_queries) == 5
-    assert len(pipeline.spectrums_references) == 10
-    assert pipeline.spectrums_queries[0] == pipeline.spectrums_references[5]
+    assert len(pipeline.spectra_queries) == 5
+    assert len(pipeline.spectra_references) == 10
+    assert pipeline.spectra_queries[0] == pipeline.spectra_references[5]
     assert pipeline.is_symmetric is False
     assert pipeline.scores.scores.shape == (10, 5, 3)
     assert pipeline.scores.score_names == ('PrecursorMzMatch', 'ModifiedCosine_score', 'ModifiedCosine_matches')
@@ -128,9 +128,9 @@ def test_pipeline_from_yaml():
     config_file = os.path.join(module_root, "tests", "test_pipeline.yaml")
     workflow = load_workflow_from_yaml_file(config_file)
     pipeline = Pipeline(workflow)
-    pipeline.run(spectrums_file_msp)
-    assert len(pipeline.spectrums_queries) == 5
-    assert pipeline.spectrums_queries[0] == pipeline.spectrums_references[0]
+    pipeline.run(spectra_file_msp)
+    assert len(pipeline.spectra_queries) == 5
+    assert pipeline.spectra_queries[0] == pipeline.spectra_references[0]
     assert pipeline.is_symmetric is True
     assert pipeline.scores.scores.shape == (5, 5, 3)
     assert pipeline.scores.score_names == ('PrecursorMzMatch', 'ModifiedCosine_score', 'ModifiedCosine_matches')
@@ -149,13 +149,13 @@ def test_pipeline_to_and_from_yaml(tmp_path):
     assert os.path.exists(config_file)
 
     pipeline = Pipeline(workflow)
-    pipeline.run(spectrums_file_msp)
+    pipeline.run(spectra_file_msp)
     scores_run1 = pipeline.scores
 
     # Load again
     workflow = load_workflow_from_yaml_file(config_file)
     pipeline = Pipeline(workflow)
-    pipeline.run(spectrums_file_msp)
+    pipeline.run(spectra_file_msp)
     assert pipeline.scores.scores == scores_run1.scores
 
 
@@ -165,7 +165,7 @@ def test_pipeline_logging(tmp_path):
     pipeline = Pipeline(workflow)
     logfile = os.path.join(tmp_path, "testlog.log")
     pipeline.logging_file = logfile
-    pipeline.run(spectrums_file_msp)
+    pipeline.run(spectra_file_msp)
 
     assert os.path.exists(logfile)
     with open(logfile, "r", encoding="utf-8") as f:
@@ -181,8 +181,8 @@ def test_FingerprintSimilarity_pipeline():
                                     {"field": "precursor_mz", "matching_type": "difference", "tolerance": 50}],
                                    ["fingerprintsimilarity", {"similarity_measure": "jaccard"}]])
     pipeline = Pipeline(workflow)
-    pipeline.run(spectrums_file_msp, spectrums_file_msp)
-    assert len(pipeline.spectrums_queries[0].get("fingerprint")) == 2048
+    pipeline.run(spectra_file_msp, spectra_file_msp)
+    assert len(pipeline.spectra_queries[0].get("fingerprint")) == 2048
     assert pipeline.scores.scores.shape == (5, 5, 2)
     assert pipeline.scores.score_names == ('MetadataMatch', 'FingerprintSimilarity')
 
@@ -195,10 +195,10 @@ def test_pipeline_changing_workflow():
     pipeline.query_filters = ["add_fingerprint"]
     pipeline.reference_filters = ["add_fingerprint"]
     pipeline.score_computations = [["modifiedcosine", {"tolerance": 10.0}]]
-    pipeline.run(spectrums_file_msp, spectrums_file_msp)
-    assert len(pipeline.spectrums_queries[0].get("fingerprint")) == 2048, \
+    pipeline.run(spectra_file_msp, spectra_file_msp)
+    assert len(pipeline.spectra_queries[0].get("fingerprint")) == 2048, \
         "The query filters were not modified correctly"
-    assert len(pipeline.spectrums_references[0].get("fingerprint")) == 2048, \
+    assert len(pipeline.spectra_references[0].get("fingerprint")) == 2048, \
         "The reference filters were not modified correctly"
     assert pipeline.scores.score_names == ('ModifiedCosine_score', 'ModifiedCosine_matches')
     all_scores = pipeline.scores.to_array()
@@ -212,12 +212,12 @@ def test_save_spectra_spectrum_processor(tmp_path):
     pipeline = Pipeline(workflow)
     filename = os.path.join(tmp_path, "spectra.mgf")
 
-    pipeline.run(spectrums_file_msp, cleaned_query_file=str(filename))
+    pipeline.run(spectra_file_msp, cleaned_query_file=str(filename))
     assert os.path.exists(filename)
 
     # Reload spectra and compare lengths
     reloaded_spectra = list(load_spectra(str(filename)))
-    assert len(reloaded_spectra) == len(list(load_spectra(spectrums_file_msp)))
+    assert len(reloaded_spectra) == len(list(load_spectra(spectra_file_msp)))
 
 
 def test_add_custom_filter():
@@ -232,8 +232,8 @@ def test_add_custom_filter():
     pipeline = Pipeline(workflow)
     pipeline.processing_queries.parse_and_add_filter((select_spectra_containing_fragment,
                                                       {"fragment_of_interest": 103.05, "tolerance": 0.01}))
-    pipeline.run(spectrums_file_msp)
-    cleaned_spectra = pipeline.spectrums_queries
+    pipeline.run(spectra_file_msp)
+    cleaned_spectra = pipeline.spectra_queries
     assert len(cleaned_spectra) == 0
 
 
@@ -248,6 +248,6 @@ def test_add_custom_filter_to_query_filters():
         query_filters=[(select_spectra_containing_fragment,
                                                       {"fragment_of_interest": 103.05, "tolerance": 0.01})],)
     pipeline = Pipeline(workflow)
-    pipeline.run(spectrums_file_msp)
-    cleaned_spectra = pipeline.spectrums_queries
+    pipeline.run(spectra_file_msp)
+    cleaned_spectra = pipeline.spectra_queries
     assert len(cleaned_spectra) == 0

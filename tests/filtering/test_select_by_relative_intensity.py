@@ -38,7 +38,7 @@ def test_select_by_relative_intensity_with_to_parameter_too_large(spectrum_in: S
 
 
 def test_select_by_relative_intensity_with_empty_peaks():
-    """Within certain workflows it can happen that spectrums are passed which
+    """Within certain workflows it can happen that spectra are passed which
     have empty arrays as peaks. Functions shouldn't break in those cases."""
     spectrum_in = SpectrumBuilder().build()
 

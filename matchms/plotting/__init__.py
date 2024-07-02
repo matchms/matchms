@@ -24,11 +24,11 @@ Example of how to visually compare two spectra:
     from matchms.importing import load_from_msp
 
     module_root = os.getcwd()
-    spectrums_file = os.path.join(module_root, "matchms", "tests", "MoNA-export-GC-MS-first10.msp")
-    spectrums = list(load_from_msp(spectrums_file))
-    spectrums = [msfilters.default_filters(s) for s in spectrums]
+    spectra_file = os.path.join(module_root, "matchms", "tests", "MoNA-export-GC-MS-first10.msp")
+    spectra = list(load_from_msp(spectra_file))
+    spectra = [msfilters.default_filters(s) for s in spectra]
 
-    spectrums[1].plot()
+    spectra[1].plot()
     # plt.savefig("spectrum-plot-example_1.png", dpi=300)  # If you want to save a plot
 
 .. figure:: ../_static/spectrum-plot-example.png
@@ -41,7 +41,7 @@ Another example is to compare two spectra visually using a mirror plot:
 
 .. code-block:: python
 
-    spectrums[2].plot_against(spectrums[3])
+    spectra[2].plot_against(spectra[3])
     plt.xlim(0, 200)
 
 .. figure:: ../_static/spectrum-mirror-plot-example.png
@@ -55,7 +55,7 @@ Finally, it is also possible to plot many spectra at once using `plot_spectra_ar
 .. code-block:: python
 
     from matchms.plotting import plot_spectra_array
-    plot_spectra_array(spectrums[:4])
+    plot_spectra_array(spectra[:4])
 
 .. figure:: ../_static/spectra-array-plot-example.png
    :width: 700

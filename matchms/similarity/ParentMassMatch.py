@@ -8,9 +8,9 @@ from .BaseSimilarity import BaseSimilarity
 
 
 class ParentMassMatch(BaseSimilarity):
-    """Return True if spectrums match in parent mass (within tolerance), and False otherwise.
+    """Return True if spectra match in parent mass (within tolerance), and False otherwise.
 
-    Example to calculate scores between 2 spectrums and iterate over the scores
+    Example to calculate scores between 2 spectra and iterate over the scores
 
     .. testcode::
 
@@ -88,9 +88,9 @@ class ParentMassMatch(BaseSimilarity):
         Parameters
         ----------
         references
-            List/array of reference spectrums.
+            List/array of reference spectra.
         queries
-            List/array of Single query spectrums.
+            List/array of Single query spectra.
         array_type
             Specify the output array type. Can be "numpy" or "sparse".
             Default is "numpy" and will return a numpy array. "sparse" will return a COO-sparse array.
@@ -99,10 +99,10 @@ class ParentMassMatch(BaseSimilarity):
             comparison). By using the fact that score[i,j] = score[j,i] the calculation will be about
             2x faster.
         """
-        def collect_parentmasses(spectrums):
+        def collect_parentmasses(spectra):
             """Collect parentmasses."""
             parentmasses = []
-            for spectrum in spectrums:
+            for spectrum in spectra:
                 parentmass = spectrum.get("parent_mass")
                 assert parentmass is not None, "Missing parent mass."
                 parentmasses.append(parentmass)

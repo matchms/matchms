@@ -28,9 +28,9 @@ def test_load_from_msp_spaces_mona_1():
     """
 
     module_root = os.path.join(os.path.dirname(__file__), "..")
-    spectrums_file = os.path.join(
+    spectra_file = os.path.join(
         module_root, "testdata", "MoNA-export-GC-MS-first10.msp")
-    spectrum = list(load_from_msp(spectrums_file))
+    spectrum = list(load_from_msp(spectra_file))
 
     expected_inchikey = np.array([
         "ALRLPDGCPYIVHP-UHFFFAOYSA-N", "UFBJCMHMOXMLKC-UHFFFAOYSA-N", "WDNBURPWRNALGP-UHFFFAOYSA-N",
@@ -50,9 +50,9 @@ def test_load_from_msp_spaces_mona_2():
     Check if peak m/z and intensity are loaded correctly if separated by spaces.
     """
     module_root = os.path.join(os.path.dirname(__file__), "..")
-    spectrums_file = os.path.join(
+    spectra_file = os.path.join(
         module_root, "testdata", "MoNA-export-GC-MS-first10.msp")
-    spectrum = next(iter(load_from_msp(spectrums_file)))
+    spectrum = next(iter(load_from_msp(spectra_file)))
 
     expected_mz = np.array([
         51, 55, 57, 58, 59, 60, 61, 62, 63, 66, 68, 70, 72, 73, 74, 75, 76, 78,
@@ -83,9 +83,9 @@ def test_load_from_msp_spaces_massbank_1():
     """
 
     module_root = os.path.join(os.path.dirname(__file__), "..")
-    spectrums_file = os.path.join(
+    spectra_file = os.path.join(
         module_root, "testdata", "massbank_five_spectra.msp")
-    spectrum = list(load_from_msp(spectrums_file))
+    spectrum = list(load_from_msp(spectra_file))
 
     expected_inchikey = [
         "XTWYTFMLZFPYCI-UHFFFAOYSA-N",
@@ -111,9 +111,9 @@ def test_load_from_msp_tabs():
     """Test parse of msp file to spectrum objects with tabstop separator."""
 
     module_root = os.path.join(os.path.dirname(__file__), "..")
-    spectrums_file = os.path.join(
+    spectra_file = os.path.join(
         module_root, "testdata", "rcx_gc-ei_ms_20201028_perylene.msp")
-    spectra = list(load_from_msp(spectrums_file))
+    spectra = list(load_from_msp(spectra_file))
 
     expected_inchikey = np.array([
         "CSHWQDPOILHKBI-UHFFFAOYSA-N"
@@ -154,10 +154,10 @@ def test_load_from_msp_multiline():
     """Test parse of msp file to spectrum objects with ';' separator and multiple peaks in one line."""
 
     module_root = os.path.join(os.path.dirname(__file__), "..")
-    spectrums_file = os.path.join(
+    spectra_file = os.path.join(
         module_root, "testdata", "multiline_semicolon.msp")
 
-    actual = list(load_from_msp(spectrums_file))
+    actual = list(load_from_msp(spectra_file))
     expected = [
         Spectrum(
             mz=np.array([
@@ -194,9 +194,9 @@ def test_load_from_msp_diverse_spectrum_collection():
     """
 
     module_root = os.path.join(os.path.dirname(__file__), "..")
-    spectrums_file = os.path.join(
+    spectra_file = os.path.join(
         module_root, "testdata", "test_spectra_collection.msp")
-    spectrum = load_from_msp(spectrums_file)
+    spectrum = load_from_msp(spectra_file)
 
     expected_inchikey = np.array([
         "UDOOPSJCRMKSGL-ZHACJKMWSA-N", "QQVDJLLNRSOCEL-UHFFFAOYSA-N", "KPZYYKDXZKFBQU-UHFFFAOYSA-N"
@@ -219,8 +219,8 @@ def test_load_from_msp_diverse_spectrum_collection():
 
 def test_load_msl():
     module_root = os.path.join(os.path.dirname(__file__), "..")
-    spectrums_file = os.path.join(module_root, "testdata", "JL_2021_V2.msl")
-    actual = list(load_from_msp(spectrums_file))[0]
+    spectra_file = os.path.join(module_root, "testdata", "JL_2021_V2.msl")
+    actual = list(load_from_msp(spectra_file))[0]
 
     metadata = {
         "COMPOUND_NAME": "G3P",
@@ -241,8 +241,8 @@ def test_load_msl():
 
 def test_load_golm_style_msp():
     module_root = os.path.join(os.path.dirname(__file__), "..")
-    spectrums_file = os.path.join(module_root, "testdata", "golm.msp")
-    actual = list(load_from_msp(spectrums_file))
+    spectra_file = os.path.join(module_root, "testdata", "golm.msp")
+    actual = list(load_from_msp(spectra_file))
 
     assert len(actual) == 3
     assert len(actual[0].mz) == 50
@@ -250,8 +250,8 @@ def test_load_golm_style_msp():
 
 def test_load_msp_with_comments_including_quotes():
     module_root = os.path.join(os.path.dirname(__file__), "..")
-    spectrums_file = os.path.join(module_root, "testdata", "comments_with_quotes.msp")
-    actual = next(load_from_msp(spectrums_file))
+    spectra_file = os.path.join(module_root, "testdata", "comments_with_quotes.msp")
+    actual = next(load_from_msp(spectra_file))
 
     assert len(actual.mz) == 248
     assert actual.get("columntype") == "Semi-standard non-polar, TG-5SILMSwith10mGuard, 30mx0.25mmx0.25um"
@@ -261,8 +261,8 @@ def test_load_msp_with_comments_including_quotes():
 
 def test_load_msp_with_scientific_notation():
     module_root = os.path.join(os.path.dirname(__file__), "..")
-    spectrums_file = os.path.join(module_root, "testdata", "test_spectra_collection.msp")
-    actual = list(load_from_msp(spectrums_file))
+    spectra_file = os.path.join(module_root, "testdata", "test_spectra_collection.msp")
+    actual = list(load_from_msp(spectra_file))
 
     assert len(actual) == 3
 

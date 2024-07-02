@@ -16,8 +16,8 @@ def test_user_workflow():
                                               ["require_minimum_number_of_peaks", {"n_required": 5}]],
                                score_computations=[["cosinegreedy", {"tolerance": 0.3}]])
     pipeline = Pipeline(workflow)
-    spectrums_file = os.path.join(module_root, "tests", "testdata", "pesticides.mgf")
-    pipeline.run(spectrums_file)
+    spectra_file = os.path.join(module_root, "tests", "testdata", "pesticides.mgf")
+    pipeline.run(spectra_file)
 
     scores = pipeline.scores
 
