@@ -57,4 +57,3 @@ def save_as_mgf(spectra: Union[List[Spectrum], Spectrum],
             yield spectrum_dict
 
     py_mgf.write(spectrum_dict_generator(spectra), filename, file_mode="a", encoding="utf-8")
-
