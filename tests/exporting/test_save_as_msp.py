@@ -28,8 +28,8 @@ def data(request):
 
 def load_test_spectra_file(test_filename):
     module_root = os.path.join(os.path.dirname(__file__), "..")
-    spectrums_file = os.path.join(module_root, "testdata", test_filename)
-    spectra = list(load_from_msp(spectrums_file))
+    spectra_file = os.path.join(module_root, "testdata", test_filename)
+    spectra = list(load_from_msp(spectra_file))
     return spectra
 
 
@@ -159,9 +159,21 @@ def test_save_as_msp_export_style(test_file, expected_file, style, filename):
     ["save_as_msp_from_mgf.mgf", "save_as_msp_from_mgf.msp"]])
 def test_save_as_msp_from_mgf(test_file, expected_file, filename):
     module_root = os.path.join(os.path.dirname(__file__), "..")
-    spectrums_file = os.path.join(module_root, "testdata", test_file)
-    actual = list(load_from_mgf(spectrums_file))
+    spectra_file = os.path.join(module_root, "testdata", test_file)
+    actual = list(load_from_mgf(spectra_file))
     expected = load_test_spectra_file(expected_file)
     save_as_msp(actual, filename, mode="w", write_peak_comments=True)
     actual = list(load_from_msp(filename))
     assert expected == actual
+
+def test_filter_none_spectra(filename, data):
+    """ Test for removal of None valued Spectra
+    """
+
+    spectra = data
+    spectra.append(None)
+
+    save_as_msp(spectra, filename)
+    reloaded_spectra = list(load_from_msp(filename))
+
+    assert len(reloaded_spectra) == (len(spectra) - 1)

@@ -9,7 +9,7 @@ logger = logging.getLogger("matchms")
 def correct_charge(spectrum_in: SpectrumType) -> SpectrumType:
     """Correct charge values based on given ionmode.
 
-    For some spectrums, the charge value is either undefined or inconsistent with its
+    For some spectra, the charge value is either undefined or inconsistent with its
     ionmode, which is corrected by this filter.
 
     Parameters

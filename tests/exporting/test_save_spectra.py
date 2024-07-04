@@ -7,8 +7,8 @@ from matchms.importing import load_from_mgf, load_spectra
 
 def load_test_spectra_file():
     module_root = os.path.join(os.path.dirname(__file__), "..")
-    spectrums_file = os.path.join(module_root, "testdata", "testdata.mgf")
-    spectra = list(load_from_mgf(spectrums_file))
+    spectra_file = os.path.join(module_root, "testdata", "testdata.mgf")
+    spectra = list(load_from_mgf(spectra_file))
     return spectra
 
 
@@ -41,3 +41,25 @@ def test_spectra(file_name):
         spectrum.set("num_peaks", None)
         reloaded_spectrum.set("num_peaks", None)
         assert spectrum == reloaded_spectrum
+
+
+@pytest.mark.parametrize("file_name", ["spectra.pickle"])
+def test_save_as_pickled_file_none_spectra(file_name):
+    """ Tests only pickled file saving with filtered None valued spectra
+
+    Params:
+    -------
+    spectra: Spectra objects to store
+
+    Returns:
+    --------
+    reloaded_spectra: Spectra loaded from saved msp file.
+    """
+    spectrum_list = load_test_spectra_file()
+    spectrum_list.append(None)
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        filename = os.path.join(temp_dir, file_name)
+        save_spectra(spectrum_list, filename)
+        reloaded_spectra = list(load_spectra(filename))
+    assert len(reloaded_spectra) == (len(spectrum_list) - 1)

@@ -29,46 +29,46 @@ _score_functions = {
 
 
 @pytest.fixture
-def spectrums():
-    """Import spectrums and apply basic filters."""
+def spectra():
+    """Import spectra and apply basic filters."""
     def processing(s):
         s = msfilter.default_filters(s)
         s = msfilter.add_parent_mass(s)
         s = msfilter.normalize_intensities(s)
         return s
 
-    spectrums = load_from_json(json_file)
-    spectrums = [processing(s) for s in spectrums]
-    spectrums = [s for s in spectrums if s is not None]
-    return spectrums
+    spectra = load_from_json(json_file)
+    spectra = [processing(s) for s in spectra]
+    spectra = [s for s in spectra if s is not None]
+    return spectra
 
 
 @pytest.mark.parametrize("similarity_measure", list(_score_functions.values()))
-def test_all_scores_and_methods(spectrums, similarity_measure):
-    """Compute similarites between all spectrums and compare across different method calls.
+def test_all_scores_and_methods(spectra, similarity_measure):
+    """Compute similarites between all spectra and compare across different method calls.
     .pair() will be compared to .matrix() results
     .matrix() results will be compared to .sparse_array() results
     """
     similarity_measure = similarity_measure[0](**similarity_measure[1])
 
     # Run pair() method
-    computed_scores_pair = np.zeros((len(spectrums), len(spectrums)))
-    for i, spec1 in enumerate(spectrums):
-        for j, spec2 in enumerate(spectrums):
+    computed_scores_pair = np.zeros((len(spectra), len(spectra)))
+    for i, spec1 in enumerate(spectra):
+        for j, spec2 in enumerate(spectra):
             score = similarity_measure.pair(spec1, spec2)
             if isinstance(score, np.ndarray) and score.dtype.names is not None:
                 score = score[score.dtype.names[0]]
             computed_scores_pair[i, j] = score
 
     # Run matrix() method
-    computed_scores_matrix = similarity_measure.matrix(spectrums, spectrums)
+    computed_scores_matrix = similarity_measure.matrix(spectra, spectra)
     if computed_scores_matrix.dtype.names is not None:
         computed_scores_matrix = computed_scores_matrix[computed_scores_matrix.dtype.names[0]]
     assert np.allclose(computed_scores_pair, computed_scores_matrix)
 
     # Run sparse_array() method
     idx_row, idx_col = np.where(computed_scores_matrix)
-    computed_scores_sparse = similarity_measure.sparse_array(spectrums, spectrums,
+    computed_scores_sparse = similarity_measure.sparse_array(spectra, spectra,
                                                              idx_row, idx_col)
     if computed_scores_sparse.dtype.names is None:
         assert np.allclose(computed_scores_sparse, computed_scores_matrix[idx_row, idx_col])
@@ -78,10 +78,10 @@ def test_all_scores_and_methods(spectrums, similarity_measure):
 
 
 @pytest.mark.parametrize("similarity_measure", list(_score_functions.values()))
-def test_consistency_scoring_and_pipeline(spectrums, similarity_measure):
+def test_consistency_scoring_and_pipeline(spectra, similarity_measure):
     scoring_method = similarity_measure[0](**similarity_measure[1])
     # Run matrix() method
-    computed_scores_matrix = scoring_method.matrix(spectrums, spectrums)
+    computed_scores_matrix = scoring_method.matrix(spectra, spectra)
 
     # Run pipeline
     workflow = create_workflow(query_filters=[["add_parent_mass"], ["normalize_intensities"]],

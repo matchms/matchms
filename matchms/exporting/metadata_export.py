@@ -3,6 +3,7 @@ import json
 from typing import Any, Dict, List, Optional, Set, Tuple
 import numpy as np
 from ..Spectrum import Spectrum
+from ..utils import filter_empty_spectra, rename_deprecated_params
 
 
 def _get_metadata_dict(spectrum: Spectrum, include_fields: Optional[List[str]] = None) -> Dict[str, Any]:
@@ -25,21 +26,23 @@ def _get_metadata_dict(spectrum: Spectrum, include_fields: Optional[List[str]] =
             & include_fields}
 
 
-def export_metadata_as_json(spectrums: List[Spectrum], filename: str,
+@rename_deprecated_params(param_mapping={"spectrums": "spectra"}, version="0.26.5")
+def export_metadata_as_json(spectra: List[Spectrum], filename: str,
                             include_fields: Optional[List[str]] = None):
     """Export metadata to json file.
 
     Parameters
     ----------
-    spectrums:
+    spectra:
         Expected input is a list of  :py:class:`~matchms.Spectrum.Spectrum` objects.
     filename:
         Provide filename to save metadata of spectrum(s) as json file.
     identifier:
         Identifier used for naming each spectrum in the output file.
     """
+    spectra = filter_empty_spectra(spectra)
     metadata_dicts = []
-    for spec in spectrums:
+    for spec in spectra:
         metadata_dict = _get_metadata_dict(spec, include_fields)
         if metadata_dict:
             metadata_dicts.append(metadata_dict)
@@ -61,12 +64,13 @@ def export_metadata_as_csv(spectra: List[Spectrum], filename: str,
     identifier:
         Identifier used for naming each spectrum in the output file.
     """
+    spectra = filter_empty_spectra(spectra)
     metadata, columns = get_metadata_as_array(spectra)
 
     if include_fields is not None:
         metadata, columns = _subset_metadata(include_fields, metadata, columns)
 
-    with open(filename, 'a', encoding="utf-8") as csvfile:  #TODO: assert if file exists
+    with open(filename, 'a+', encoding="utf-8") as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(columns)
         for data in metadata:
@@ -102,6 +106,7 @@ def get_metadata_as_array(spectra: List[Spectrum]) -> Tuple[np.array, List[str]]
     Returns:
         Tuple[np.array, List[str]]: Metadata and union of all columns detected in all spectra.
     """
+    spectra = filter_empty_spectra(spectra)
     keys = spectra[0].metadata.keys()
     for s in spectra:
         keys |= s.metadata.keys()

@@ -2,6 +2,7 @@ from typing import Optional, Union
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 import numpy as np
+from matchms.utils import rename_deprecated_params
 
 
 _annotation_kws = {
@@ -151,7 +152,7 @@ def plot_spectra_mirror(spec_top,
 
     if 'peak_color' in spectrum_kws:
         raise ValueError("'peak_color' should not be set for `plot_spectra_mirror`. "
-                         "Use 'color_top' and 'color_bottom' instead.") 
+                         "Use 'color_top' and 'color_bottom' instead.")
 
     # Top spectrum.
     plot_spectrum(spec_top, mirror_intensity=False, ax=ax, peak_color=color_top, **spectrum_kws)
@@ -193,14 +194,15 @@ def plot_spectra_mirror(spec_top,
     name1 = "Spectrum 1" if spec_top.get("compound_name") is None else spec_top.get("compound_name")
     name2 = "Spectrum 2" if spec_bottom.get("compound_name") is None else spec_bottom.get("compound_name")
 
-    x_text = 0.04 * (max_mz - min_mz)
+    x_text = 0.04 * (max_mz - min_mz) + min_mz
     ax.text(x_text, y_max, name1, ha="left", va="top", zorder=2, backgroundcolor="white")
     ax.text(x_text, y_min, name2, ha="left", va="bottom", zorder=2, backgroundcolor="white")
     ax.set_title("Spectrum comparison")
     return ax
 
 
-def plot_spectra_array(spectrums,
+@rename_deprecated_params(param_mapping={"spectrums": "spectra"}, version="0.26.5")
+def plot_spectra_array(spectra,
                        n_cols: int = 2,
                        peak_color="darkblue",
                        dpi: int = 200,
@@ -212,7 +214,7 @@ def plot_spectra_array(spectrums,
 
     Parameters
     ----------
-    spectrums: list of matchms.Spectrum.Spectrum
+    spectra: list of matchms.Spectrum.Spectrum
         List of spectra to be plotted in a single figure.
     n_cols:
         Number of spectra to be plotted per row. Default is 4.
@@ -221,8 +223,8 @@ def plot_spectra_array(spectrums,
 
     """
     # pylint: disable=too-many-locals
-    assert isinstance(spectrums, list), "Expected list of Spectrum objects as input."
-    n_spectra = len(spectrums)
+    assert isinstance(spectra, list), "Expected list of Spectrum objects as input."
+    n_spectra = len(spectra)
     n_rows = int(np.ceil(n_spectra / n_cols))
     fig, axes = plt.subplots(n_rows, n_cols, figsize=(7 * n_cols, 3 * n_rows), dpi=dpi, squeeze=False)
 
@@ -235,14 +237,14 @@ def plot_spectra_array(spectrums,
             if counter >= n_spectra:
                 break
 
-            plot_spectrum(spectrums[counter],
+            plot_spectrum(spectra[counter],
                           mirror_intensity=False, ax=axes[i, j],
                           peak_color=peak_color, **spectrum_kws)
             axes[i, j].set_title("")
-            if spectrums[counter].get("compound_name") is None:
+            if spectra[counter].get("compound_name") is None:
                 name = f"Spectrum {i * n_cols + j}"
             else:
-                name = spectrums[counter].get("compound_name")
+                name = spectra[counter].get("compound_name")
 
             y_max = axes[i, j].get_ylim()[1]
             x_min = axes[i, j].get_xlim()[0]

@@ -20,33 +20,33 @@ def filename(graph_format):
         yield filepath
 
 
-def create_dummy_spectrums():
-    """Create dummy spectrums"""
+def create_dummy_spectra():
+    """Create dummy spectra"""
     fingerprints1 = [[1, 0, 0], [0, 1, 0], [0, 0, 1], [1, 1, 0], [1, 0, 1]]
     fingerprints2 = [[1, 0, 1], [0, 1, 1], [1, 1, 1]]
-    spectrums = []
+    spectra = []
     for i, fp in enumerate(fingerprints1):
-        spectrums.append(Spectrum(mz=np.array([100, 200.]),
+        spectra.append(Spectrum(mz=np.array([100, 200.]),
                                   intensities=np.array([0.7, 0.1 * i]),
                                   metadata={"spectrum_id": 'ref_spec_'+str(i),
                                             "fingerprint": np.array(fp),
                                             "smiles": 'C1=CC=C2C(=C1)NC(=N2)C3=CC=CO3',
                                             "precursor_mz": 100+50*i}))
     for i, fp in enumerate(fingerprints2):
-        spectrums.append(Spectrum(mz=np.array([100, 200.]),
+        spectra.append(Spectrum(mz=np.array([100, 200.]),
                                   intensities=np.array([0.5, 0.1 * i]),
                                   metadata={"spectrum_id": 'query_spec_'+str(i),
                                             "fingerprint": np.array(fp),
                                             "smiles": 'CC1=C(C=C(C=C1)NC(=O)N(C)C)Cl',
                                             "precursor_mz": 110+50*i}))
-    return spectrums
+    return spectra
 
 
 def create_dummy_scores():
     """Creat asymmetric scores object (references != queries)"""
-    spectrums = create_dummy_spectrums()
-    references = spectrums[:5]
-    queries = spectrums[5:]
+    spectra = create_dummy_spectra()
+    references = spectra[:5]
+    queries = spectra[5:]
 
     # Create Scores object by calculating dice scores
     similarity_measure = FingerprintSimilarity("dice")
@@ -55,20 +55,20 @@ def create_dummy_scores():
 
 
 def create_dummy_scores_symmetric():
-    spectrums = create_dummy_spectrums()
+    spectra = create_dummy_spectra()
 
     # Create Scores object by calculating dice scores
     similarity_measure = FingerprintSimilarity("dice")
-    scores = calculate_scores(spectrums, spectrums, similarity_measure)
+    scores = calculate_scores(spectra, spectra, similarity_measure)
     return scores
 
 
 def create_dummy_scores_symmetric_modified_cosine():
-    spectrums = create_dummy_spectrums()
+    spectra = create_dummy_spectra()
 
     # Create Scores object by calculating dice scores
     similarity_measure = ModifiedCosine()
-    scores = calculate_scores(spectrums, spectrums, similarity_measure)
+    scores = calculate_scores(spectra, spectra, similarity_measure)
     return scores
 
 
