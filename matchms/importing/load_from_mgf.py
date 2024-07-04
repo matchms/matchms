@@ -35,13 +35,13 @@ def load_from_mgf(filename: Union[str, TextIO],
         The default is True.
     """
     if not os.path.isfile(filename):
-        raise FileNotFoundError(f"The specified file: {filename} doesn't exist.") 
-    
+        raise FileNotFoundError(f"The specified file: {filename} doesn't exist.")
+
     def parse_file():
-        with MGF(filename, convert_arrays=1) as reader:
+        with MGF(filename, convert_arrays=1, encoding="utf-8") as reader:
             for pyteomics_spectrum in reader:
                 yield parse_spectrum_dict(
                     spectrum=pyteomics_spectrum,
                     metadata_harmonization=metadata_harmonization)
-    
+
     return parse_file()
