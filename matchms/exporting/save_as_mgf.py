@@ -55,4 +55,4 @@ def save_as_mgf(spectrums: Union[List[Spectrum], Spectrum],
                 del spectrum_dict["params"]["fingerprint"]
             yield spectrum_dict
 
-    py_mgf.write(spectrum_dict_generator(spectrums), filename, file_mode="a")
+    py_mgf.write(spectrum_dict_generator(spectrums), filename, file_mode="a", encoding="utf-8")
