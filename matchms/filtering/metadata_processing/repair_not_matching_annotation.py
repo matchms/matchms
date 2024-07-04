@@ -84,9 +84,9 @@ def _check_repairing_is_possible(smiles, inchi, inchikey) -> bool:
     elif valid_smiles or valid_inchi or valid_inchikey:
         # At least one of the annotations, but some are not.
         # Since if valid_smiles and valid_inchi and valid_inchikey was False
-        logger.warning("Please first run repair_inchi_from_smiles, repair_smiles_from_inchi and repair_inchikey. "
-                       "The spectrum had partly valid annotations, "
-                       "this shows that these repair functions were not yet run.")
+        logger.warning("Please first run derive_inchi_from_smiles, derive_smiles_from_inchi and derive_inchikey. "
+                       "The spectrum has partly valid annotations, "
+                       "either these repair functions were not yet run or conversions between the formats failed.")
     return False
 
 
