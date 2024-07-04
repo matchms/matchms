@@ -143,7 +143,7 @@ jobs:
         uses: conda-incubator/setup-miniconda@v3
         with:
           auto-update-conda: true
-          python-version: 3.8
+          python-version: 3.9
       - name: Show conda config
         shell: bash -l {0}
         run: |
