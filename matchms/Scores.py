@@ -206,8 +206,13 @@ class Scores:
         """
         if name is None and len(self.score_names) > 1 and sort is True:
             raise IndexError("For sorting, score must be specified")
-        assert reference in self.references, "Given input not found in references."
-        selected_idx = int(np.where(self.references == reference)[0])
+
+        idx_array = np.where(self.references == reference)[0]
+        if idx_array.size > 0:
+            selected_idx = int(idx_array[0])
+        else:
+            raise ValueError("Given input not found in references.")
+
         _, r, scores_for_ref = self._scores[selected_idx, :]
         if sort:
             if name is None:
@@ -270,8 +275,13 @@ class Scores:
         """
         if name is None and len(self.score_names) > 1 and sort is True:
             raise IndexError("For sorting, score must be specified")
-        assert query in self.queries, "Given input not found in queries."
-        selected_idx = int(np.where(self.queries == query)[0])
+
+        idx_array = np.where(self.queries == query)[0]
+        if idx_array.size > 0:
+            selected_idx = int(idx_array[0])
+        else:
+            raise ValueError("Given input not found in queries.")
+
         c, _, scores_for_query = self._scores[:, selected_idx]
         if sort:
             if name is None:
