@@ -318,7 +318,9 @@ class ProcessingReport:
             if filter_name not in processing_report["filter"].values:
                 processing_report.loc[len(processing_report)] = {"filter": filter_name}
 
-        processing_report = processing_report.set_index("filter").fillna(0)
+        with pd.option_context("future.no_silent_downcasting", True):
+            processing_report = processing_report.set_index("filter").infer_objects().fillna(0)
+
         return processing_report.astype(int)
 
     def __str__(self):
