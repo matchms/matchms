@@ -124,16 +124,9 @@ We recommend installing matchms in a new virtual environment to avoid dependency
 
 .. code-block:: console
 
-  conda create --name matchms python=3.9
+  conda create --name matchms python=3.11
   conda activate matchms
   conda install --channel bioconda --channel conda-forge matchms
-
-Alternatively, matchms can also be installed using ``pip``. In the most basic version matchms will then come without ``rdkit`` so that several filter functions related to processing and cleaning chemical metadata will not run. To include ``rdkit`` install matchms as ``matchms[chemistry]``:
-
-.. code-block:: console
-
-  pip install matchms  # simple install w/o rdkit
-  pip install matchms[chemistry]  # full install including rdkit
 
 matchms ecosystem -> additional functionalities
 ===============================================
@@ -303,7 +296,7 @@ To install matchms, do:
 
   git clone https://github.com/matchms/matchms.git
   cd matchms
-  conda create --name matchms-dev python=3.8
+  conda create --name matchms-dev python=3.11
   conda activate matchms-dev
   # Install rdkit using conda, rest of dependencies can be installed with pip
   conda install -c conda-forge rdkit
