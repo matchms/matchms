@@ -117,35 +117,28 @@ Installation
 
 Prerequisites:  
 
-- Python 3.8 - 3.11, (higher versions should work as well, but are not yet tested systematically)
+- Python 3.9 - 3.12, (higher versions should work as well, but are not yet tested systematically)
 - Anaconda (recommended)
 
 We recommend installing matchms in a new virtual environment to avoid dependency clashes
 
 .. code-block:: console
 
-  conda create --name matchms python=3.9
+  conda create --name matchms python=3.11
   conda activate matchms
   conda install --channel bioconda --channel conda-forge matchms
-
-Alternatively, matchms can also be installed using ``pip``. In the most basic version matchms will then come without ``rdkit`` so that several filter functions related to processing and cleaning chemical metadata will not run. To include ``rdkit`` install matchms as ``matchms[chemistry]``:
-
-.. code-block:: console
-
-  pip install matchms  # simple install w/o rdkit
-  pip install matchms[chemistry]  # full install including rdkit
 
 matchms ecosystem -> additional functionalities
 ===============================================
 
-Matchms functionalities can be complemented by additional packages.  
+Additional packages can complement Matchms functionalities.  
 To date, we are aware of:
 
-+ `Spec2Vec <https://github.com/iomega/spec2vec>`_ an alternative machine-learning spectral similarity score that can simply be installed by `pip install spec2vec` and be imported as `from spec2vec import Spec2Vec` following the same API as the scores in `matchms.similarity`.
++ `Spec2Vec <https://github.com/iomega/spec2vec>`_ an alternative machine-learning spectral similarity score that can be installed by `pip install spec2vec` and be imported as `from spec2vec import Spec2Vec` following the same API as the scores in `matchms.similarity`.
 
-+ `MS2DeepScore <https://github.com/matchms/ms2deepscore>`_ a supervised, deep-learning based spectral similarity score that can simply be installed by `pip install ms2deepscore` and be imported as `from ms2deepscore import MS2DeepScore` following the same API as the scores in `matchms.similarity`.
++ `MS2DeepScore <https://github.com/matchms/ms2deepscore>`_ a supervised, deep-learning based spectral similarity score that can be installed by `pip install ms2deepscore` and be imported as `from ms2deepscore import MS2DeepScore` following the same API as the scores in `matchms.similarity`.
 
-+ `matchmsextras <https://github.com/matchms/matchmsextras>`_ which contains additional functions to create networks based on spectral similarities, to run spectrum searchers against `PubChem`, or additional plotting methods.
++ `matchmsextras <https://github.com/matchms/matchmsextras>`_ contains additional functions to create networks based on spectral similarities, run spectrum searchers against `PubChem`, or additional plotting methods.
 
 + `MS2Query <https://github.com/iomega/ms2query>`_ Reliable and fast MS/MS spectral-based analogue search, running on top of matchms.
 
@@ -153,7 +146,7 @@ To date, we are aware of:
 
 + `RIAssigner <https://github.com/RECETOX/RIAssigner>`_ a tool for retention index calculation for gas chromatography - mass spectrometry (GC-MS) data.
 
-+ `MSMetaEnhancer <https://github.com/RECETOX/MSMetaEnhancer>`_ is a python package to collect mass spectral library metadata using various web services and computational chemistry packages.
++ `MSMetaEnhancer <https://github.com/RECETOX/MSMetaEnhancer>`_ is a Python package to collect mass spectral library metadata using various web services and computational chemistry packages.
 
 + `cudams <https://github.com/PangeAI/cudams>`_ is a python package with fast GPU-based reimplementations of common similarity classes such as `CudaCosineGreedy`, and `CudaModifiedCosine`.
 
@@ -253,7 +246,7 @@ Alternatively, in particular, if you need more room to add custom functions and 
 Different spectrum similarity scores
 ====================================
 
-Matchms comes with numerous different scoring methods in `matchms.similarity` and can further seamlessly work with `Spec2Vec` or `MS2DeepScore`.
+Matchms comes with numerous different scoring methods in `matchms.similarity` but can also be supplemented by scores from external packages such as `Spec2Vec` or `MS2DeepScore`.
 
 Code example: 
 
@@ -303,7 +296,7 @@ To install matchms, do:
 
   git clone https://github.com/matchms/matchms.git
   cd matchms
-  conda create --name matchms-dev python=3.8
+  conda create --name matchms-dev python=3.11
   conda activate matchms-dev
   # Install rdkit using conda, rest of dependencies can be installed with pip
   conda install -c conda-forge rdkit
@@ -370,7 +363,7 @@ have a look at the `contribution guidelines <CONTRIBUTING.md>`_.
 License
 *******
 
-Copyright (c) 2023, Düsseldorf University of Applied Sciences & Netherlands eScience Center
+Copyright (c) 2024, Düsseldorf University of Applied Sciences & Netherlands eScience Center
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
