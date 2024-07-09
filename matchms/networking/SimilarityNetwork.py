@@ -107,8 +107,13 @@ class SimilarityNetwork:
         if score_name is None:
             score_name = scores.scores.guess_score_name()
         assert self.top_n >= self.max_links, "top_n must be >= max_links"
-        assert np.all(scores.queries == scores.references), \
-            "Expected symmetric scores object with queries==references"
+
+        if scores.queries.shape != scores.references.shape:
+            raise TypeError("Expected symmetric scores")
+
+        if not np.all(scores.queries == scores.references):
+            raise ValueError("Queries and references do not match")
+
         unique_ids = list({s.get(self.identifier_key) for s in scores.queries})
 
         # Initialize network graph, add nodes

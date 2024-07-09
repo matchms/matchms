@@ -228,6 +228,22 @@ def test_scores_by_referencey_non_tuple_score():
     assert selected_scores == expected_result, "Expected different scores."
 
 
+def test_scores_by_references_exception():
+    spectrum_1, spectrum_2, spectrum_3, spectrum_4 = spectra()
+    references = [spectrum_1, spectrum_2, spectrum_3]
+    queries = [spectrum_3, spectrum_4]
+
+    builder = SpectrumBuilder()
+    faulty_spectrum = builder.with_mz(np.array([200, 350, 400.])).with_intensities(
+        np.array([0.7, 0.2, 0.1])).with_metadata({'id': 'spectrum5'}).build()
+
+    scores = calculate_scores(references, queries, CosineGreedy())
+    name_score = scores.score_names[0]
+
+    with pytest.raises(ValueError, match="Given input not found in references."):
+        scores.scores_by_reference(faulty_spectrum, name_score)
+
+
 def test_scores_by_query():
     "Test scores_by_query method."
     spectrum_1, spectrum_2, spectrum_3, spectrum_4 = spectra()
@@ -294,6 +310,22 @@ def test_sort_without_name_exception():
     with pytest.raises(IndexError) as exception:
         _ = scores.scores_by_reference(spectrum_3, sort=True)
     assert "For sorting, score must be specified" in exception.value.args[0]
+
+
+def test_scores_by_query_exception():
+    spectrum_1, spectrum_2, spectrum_3, spectrum_4 = spectra()
+    references = [spectrum_1, spectrum_2, spectrum_3]
+    queries = [spectrum_2, spectrum_3, spectrum_4]
+
+    builder = SpectrumBuilder()
+    faulty_spectrum = builder.with_mz(np.array([200, 350, 400.])).with_intensities(
+        np.array([0.7, 0.2, 0.1])).with_metadata({'id': 'spectrum5'}).build()
+
+    scores = calculate_scores(references, queries, CosineGreedy())
+    name_score = scores.score_names[0]
+
+    with pytest.raises(ValueError, match="Given input not found in queries."):
+        scores.scores_by_query(faulty_spectrum, name_score)
 
 
 @pytest.mark.parametrize(

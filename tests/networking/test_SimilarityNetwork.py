@@ -63,6 +63,18 @@ def create_dummy_scores_symmetric():
     return scores
 
 
+def create_dummy_scores_symmetric_faulty():
+    scores = create_dummy_scores_symmetric()
+    faulty_spec = Spectrum(mz=np.array([100, 400.]),
+                           intensities=np.array([0.5, 0.1 * 4]),
+                           metadata={"spectrum_id": 'query_spec_400',
+                                     "fingerprint": np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1], [1, 1, 0], [1, 0, 1]]),
+                                     "smiles": 'CC1=C(C=C(C=C1)NC(=O)N(C)C)Cl',
+                                     "precursor_mz": 110 + 50 * 4})
+    scores.queries[0] = faulty_spec
+
+    return scores
+
 def create_dummy_scores_symmetric_modified_cosine():
     spectra = create_dummy_spectra()
 
@@ -76,10 +88,17 @@ def test_create_network_symmetric_wrong_input():
     """Test if function is used with non-symmetric scores object"""
     scores = create_dummy_scores()
     msnet = SimilarityNetwork()
-    with pytest.raises(AssertionError) as msg:
+    with pytest.raises(TypeError) as msg:
         msnet.create_network(scores)
 
-    expected_msg = "Expected symmetric scores object with queries==references"
+    expected_msg = "Expected symmetric scores"
+    assert expected_msg in str(msg), "Expected different exception"
+
+    scores = create_dummy_scores_symmetric_faulty()
+    with pytest.raises(ValueError) as msg:
+        msnet.create_network(scores)
+
+    expected_msg = "Queries and references do not match"
     assert expected_msg in str(msg), "Expected different exception"
 
 
