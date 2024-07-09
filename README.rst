@@ -117,7 +117,7 @@ Installation
 
 Prerequisites:  
 
-- Python 3.8 - 3.11, (higher versions should work as well, but are not yet tested systematically)
+- Python 3.9 - 3.12, (higher versions should work as well, but are not yet tested systematically)
 - Anaconda (recommended)
 
 We recommend installing matchms in a new virtual environment to avoid dependency clashes
@@ -363,7 +363,7 @@ have a look at the `contribution guidelines <CONTRIBUTING.md>`_.
 License
 *******
 
-Copyright (c) 2023, Düsseldorf University of Applied Sciences & Netherlands eScience Center
+Copyright (c) 2024, Düsseldorf University of Applied Sciences & Netherlands eScience Center
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
