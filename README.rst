@@ -131,14 +131,14 @@ We recommend installing matchms in a new virtual environment to avoid dependency
 matchms ecosystem -> additional functionalities
 ===============================================
 
-Matchms functionalities can be complemented by additional packages.  
+Additional packages can complement Matchms functionalities.  
 To date, we are aware of:
 
-+ `Spec2Vec <https://github.com/iomega/spec2vec>`_ an alternative machine-learning spectral similarity score that can simply be installed by `pip install spec2vec` and be imported as `from spec2vec import Spec2Vec` following the same API as the scores in `matchms.similarity`.
++ `Spec2Vec <https://github.com/iomega/spec2vec>`_ an alternative machine-learning spectral similarity score that can be installed by `pip install spec2vec` and be imported as `from spec2vec import Spec2Vec` following the same API as the scores in `matchms.similarity`.
 
-+ `MS2DeepScore <https://github.com/matchms/ms2deepscore>`_ a supervised, deep-learning based spectral similarity score that can simply be installed by `pip install ms2deepscore` and be imported as `from ms2deepscore import MS2DeepScore` following the same API as the scores in `matchms.similarity`.
++ `MS2DeepScore <https://github.com/matchms/ms2deepscore>`_ a supervised, deep-learning based spectral similarity score that can be installed by `pip install ms2deepscore` and be imported as `from ms2deepscore import MS2DeepScore` following the same API as the scores in `matchms.similarity`.
 
-+ `matchmsextras <https://github.com/matchms/matchmsextras>`_ which contains additional functions to create networks based on spectral similarities, to run spectrum searchers against `PubChem`, or additional plotting methods.
++ `matchmsextras <https://github.com/matchms/matchmsextras>`_ contains additional functions to create networks based on spectral similarities, run spectrum searchers against `PubChem`, or additional plotting methods.
 
 + `MS2Query <https://github.com/iomega/ms2query>`_ Reliable and fast MS/MS spectral-based analogue search, running on top of matchms.
 
@@ -146,7 +146,7 @@ To date, we are aware of:
 
 + `RIAssigner <https://github.com/RECETOX/RIAssigner>`_ a tool for retention index calculation for gas chromatography - mass spectrometry (GC-MS) data.
 
-+ `MSMetaEnhancer <https://github.com/RECETOX/MSMetaEnhancer>`_ is a python package to collect mass spectral library metadata using various web services and computational chemistry packages.
++ `MSMetaEnhancer <https://github.com/RECETOX/MSMetaEnhancer>`_ is a Python package to collect mass spectral library metadata using various web services and computational chemistry packages.
 
 + `cudams <https://github.com/PangeAI/cudams>`_ is a python package with fast GPU-based reimplementations of common similarity classes such as `CudaCosineGreedy`, and `CudaModifiedCosine`.
 
@@ -246,7 +246,7 @@ Alternatively, in particular, if you need more room to add custom functions and 
 Different spectrum similarity scores
 ====================================
 
-Matchms comes with numerous different scoring methods in `matchms.similarity` and can further seamlessly work with `Spec2Vec` or `MS2DeepScore`.
+Matchms comes with numerous different scoring methods in `matchms.similarity` but can also be supplemented by scores from external packages such as `Spec2Vec` or `MS2DeepScore`.
 
 Code example: 
 
