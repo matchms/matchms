@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Jaccard/Tanimoto `@njit`/numba-based similarity functions were replaced by 10-50x faster numpy matrix multiplications [#638](https://github.com/matchms/matchms/pull/638).
 - Dependencies were updated to allow newer numpy and numba versions [691](https://github.com/matchms/matchms/pull/691).
 - Renamed method names and parameters to align `spectrums` -> `spectra`
+- Python support changed from 3.8 - 3.11 to 3.9 to 3.12, and dependency versions were updated [640](https://github.com/matchms/matchms/pull/640).
 
 ### Removed
 - `add_losses()` filter was removed. Losses will no longer be stored as part of a `Spectrum` object, but will be computed on the fly [#681](https://github.com/matchms/matchms/pull/681).
