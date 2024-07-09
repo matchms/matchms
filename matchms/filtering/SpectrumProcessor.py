@@ -321,7 +321,7 @@ class ProcessingReport:
         try:
             with pd.option_context("future.no_silent_downcasting", True):
                 processing_report = processing_report.set_index("filter").infer_objects().fillna(0)
-        except pd._config.config.OptionError:
+        except pd.errors.OptionError:
             processing_report = processing_report.set_index("filter").fillna(0)
 
         return processing_report.astype(int)
