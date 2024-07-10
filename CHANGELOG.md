@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [0.27.0] -2024-07-10
+
 ### Changed
 - Avoid using unstable sorting while sorting collected matching peaks [#636](https://github.com/matchms/matchms/pull/636).
 - Losses will no longer be stored as part of a `Spectrum` object, but will be computed on the fly (using `spectrum.losses` or `spectrum.compute_losses(loss_mz_from, loss_mz_to)`)[#681](https://github.com/matchms/matchms/pull/681)
@@ -696,7 +698,8 @@ Contains three plot types: `plot_spectrum()` or `spectrum.plot()`, `plot_spectra
 - This is the initial version of Spec2Vec from https://github.com/iomega/Spec2Vec
 - (later splitted into matchms + spec2vec)
 
-[Unreleased]: https://github.com/matchms/matchms/compare/0.26.4...HEAD
+[Unreleased]: https://github.com/matchms/matchms/compare/0.27.0...HEAD
+[0.27.0]: https://github.com/matchms/matchms/compare/0.26.4...0.27.0
 [0.26.4]: https://github.com/matchms/matchms/compare/0.26.3...0.26.4
 [0.26.3]: https://github.com/matchms/matchms/compare/0.26.2...0.26.3
 [0.26.2]: https://github.com/matchms/matchms/compare/0.26.1...0.26.2
