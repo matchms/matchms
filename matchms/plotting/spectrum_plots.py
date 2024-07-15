@@ -193,7 +193,7 @@ def plot_spectra_mirror(spec_top,
     name1 = "Spectrum 1" if spec_top.get("compound_name") is None else spec_top.get("compound_name")
     name2 = "Spectrum 2" if spec_bottom.get("compound_name") is None else spec_bottom.get("compound_name")
 
-    x_text = 0.04 * (max_mz - min_mz)
+    x_text = min_mz + 0.04 * (max_mz - min_mz)
     ax.text(x_text, y_max, name1, ha="left", va="top", zorder=2, backgroundcolor="white")
     ax.text(x_text, y_min, name2, ha="left", va="bottom", zorder=2, backgroundcolor="white")
     ax.set_title("Spectrum comparison")
