@@ -1,10 +1,14 @@
 import os
+import re
 import numpy as np
+import pandas as pd
 import pytest
 from matchms import SpectrumProcessor
 from matchms import filtering as msfilters
 from matchms.filtering.default_pipelines import BASIC_FILTERS
-from matchms.filtering.SpectrumProcessor import ProcessingReport
+from matchms.filtering.SpectrumProcessor import (ProcessingReport,
+                                                 create_partial_function,
+                                                 objects_differ)
 from matchms.importing.load_spectra import load_spectra
 from ..builder_Spectrum import SpectrumBuilder
 
@@ -70,6 +74,10 @@ def test_incomplete_parameters():
         processor = SpectrumProcessor(filters=())
         processor.parse_and_add_filter("require_correct_ionmode")
 
+    with pytest.raises(ValueError):
+        processor = SpectrumProcessor(filters=())
+        processor.parse_and_add_filter(("add_parent_mass", {'estimate_from_adduct': False}, "some_incorrect_param"))
+
 
 def test_string_output():
     processing = SpectrumProcessor(filters=["make_charge_int",
@@ -117,12 +125,22 @@ def test_filter_spectra_report(spectra):
     assert actual_masses == expected_masses
     assert report.counter_number_processed == 3
     assert report.counter_changed_metadata == {'make_charge_int': 2, 'interpret_pepmass': 3, 'derive_ionmode': 3}
-    report_df = report.to_dataframe()
-    assert np.all(report_df.loc[["require_minimum_number_of_peaks", "interpret_pepmass",
-                                 "correct_charge"]].values == np.array(
-        [[1, 0, 0],
-         [0, 3, 0],
-         [0, 0, 0]]))
+    expected_output = np.array([[1, 0, 0], [0, 3, 0], [0, 0, 0]])
+
+    if pd.__version__ >= '2.2.0':
+        # Test without pandas silent downcasting
+        report_df = report.to_dataframe()
+        assert np.all(report_df.loc[["require_minimum_number_of_peaks", "interpret_pepmass",
+                                     "correct_charge"]].values == expected_output)
+
+        # Test with pandas silent downcasting
+        pd.set_option("future.no_silent_downcasting", False)
+        report_df = report.to_dataframe()
+        assert np.all(report_df.loc[["require_minimum_number_of_peaks", "interpret_pepmass",
+                                     "correct_charge"]].values == expected_output)
+    else:
+        with pytest.raises(pd.errors.OptionError):
+            pd.get_option("future.no_silent_downcasting")
 
 
 def test_processing_report_class(spectra):
@@ -134,6 +152,9 @@ def test_processing_report_class(spectra):
 
     assert not processing_report.counter_removed_spectra
     assert processing_report.counter_changed_metadata == {"test_filter": 3}
+
+    expected_repr_parts = r"Report\(\d, *defaultdict\(<class 'int'>, {}\), *{}, *{'test_filter': 3}, *{}\)"
+    assert re.search(expected_repr_parts, repr(processing_report)) is not None
 
 
 def test_adding_custom_filter(spectra):
@@ -368,3 +389,49 @@ def test_save_partial_spectra_spectrum_processor(ftype, should_work, spectra, tm
             assert spectrum.get("precursor_mz") is not None
     else:
         assert not os.path.exists(filename)
+
+
+@pytest.mark.parametrize("first, second, expected", [
+    (1, 1, False),
+    (1, 2, True),
+    ("a", "a", False),
+    ("a", "b", True),
+    ([1, 2, 3], [1, 2, 3], False),
+    ([1, 2, 3], [3, 2, 1], True),
+    (np.array([1, 2, 3]), np.array([1, 2, 3]), False),
+    (np.array([1, 2, 3]), np.array([3, 2, 1]), True),
+    (np.array([1, 2, 3]), np.array([1, 2, 3, 4]), True),
+    (np.array([1, 2, 3]), [1, 2, 3], False),
+    ([1, 2, 3], np.array([1, 2, 3]), False),
+    (np.array([1, 2, 3]), 1, True),
+    (np.array([1, 2, 3]), "a", True),
+    ("a", np.array([1, 2, 3]), True),
+    (1, np.array([1, 2, 3]), True),
+])
+def test_objects_differ(first, second, expected):
+    assert objects_differ(first, second) == expected
+
+
+@pytest.mark.parametrize(
+    "filter_params, expected_result, expected_exception",
+    [
+        ({"a": 2}, 5, None),
+        (None, 5, None),
+        ("invalid_param", None, ValueError),
+    ]
+)
+def test_create_partial_filter(filter_params, expected_result, expected_exception):
+    def sample_filter(a, b):
+        return a + b
+
+    if expected_exception:
+        with pytest.raises(expected_exception, match="Expected a dictionary for filter_args got"):
+            create_partial_function(sample_filter, filter_params)
+    else:
+        partial_func = create_partial_function(sample_filter, filter_params)
+        if filter_params:
+            assert partial_func(b=3) == expected_result
+        else:
+            assert partial_func(a=2, b=3) == expected_result
+
+        assert partial_func.__name__ == "sample_filter"
