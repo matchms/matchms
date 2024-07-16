@@ -1,8 +1,8 @@
+import logging
 import os
 import tempfile
 import pytest
-import logging
-from matchms.exporting.save_spectra import save_spectra, save_as_pickled_file
+from matchms.exporting.save_spectra import save_as_pickled_file, save_spectra
 from matchms.importing import load_from_mgf, load_spectra
 
 
@@ -47,7 +47,7 @@ def test_spectra(file_name, caplog):
     with tempfile.TemporaryDirectory() as temp_dir:
         filename = os.path.join(temp_dir, file_name)
 
-        with open(filename, "w") as file:
+        with open(filename, "w", encoding="utf-8") as file:
             file.write("content")
         assert os.path.exists(filename)
 

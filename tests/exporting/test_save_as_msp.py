@@ -1,9 +1,9 @@
+import logging
 import os
 import tempfile
 from typing import List
 import numpy as np
 import pytest
-import logging
 from matchms import Spectrum
 from matchms.exporting import save_as_msp
 from matchms.importing import load_from_mgf, load_from_msp
