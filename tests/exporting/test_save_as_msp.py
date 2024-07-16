@@ -3,6 +3,7 @@ import tempfile
 from typing import List
 import numpy as np
 import pytest
+import logging
 from matchms import Spectrum
 from matchms.exporting import save_as_msp
 from matchms.importing import load_from_mgf, load_from_msp
@@ -25,6 +26,7 @@ def spectrum():
 def data(request):
     spectra = load_test_spectra_file(request.param)
     return spectra
+
 
 def load_test_spectra_file(test_filename):
     module_root = os.path.join(os.path.dirname(__file__), "..")
@@ -56,8 +58,7 @@ def save_and_reload_spectra(filename, spectra: List[Spectrum], write_peak_commen
     reloaded_spectra = list(load_from_msp(filename))
     return reloaded_spectra
 
-
-def test_wrong_filename_exception():
+def test_wrong_filename_exception(caplog):
     """ Test for exception being thrown if output file doesn't end with .msp. """
     with tempfile.TemporaryDirectory() as temp_dir:
         filename = os.path.join(temp_dir, "test.mzml")
@@ -67,6 +68,14 @@ def test_wrong_filename_exception():
 
         message = exception.value.args[0]
         assert message == "File extension '.mzml' not allowed."
+
+        # Test warning log for filename except extensions not allowed
+        filename = os.path.join(temp_dir, "test.txt")
+
+        with caplog.at_level(logging.WARNING):
+            save_as_msp(None, filename)
+
+        assert "Spectrum(s) will be stored as msp file with extension .txt" in caplog.text
 
 
 # Using tmp_path fixture from pytest: https://docs.pytest.org/en/stable/tmpdir.html#the-tmp-path-fixture
