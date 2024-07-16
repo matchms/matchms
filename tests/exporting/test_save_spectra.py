@@ -102,7 +102,7 @@ def test_save_as_pickled_file_none_spectra(file_name):
     with tempfile.TemporaryDirectory() as temp_dir:
         filename = os.path.join(temp_dir, file_name)
 
-        with open(filename, "w") as file:
+        with open(filename, "w", encoding="utf-8") as file:
             file.write("content")
         assert os.path.exists(filename)
 
