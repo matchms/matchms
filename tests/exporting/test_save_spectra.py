@@ -1,5 +1,6 @@
 import logging
 import os
+import re
 import tempfile
 import pytest
 from matchms.exporting.save_spectra import save_as_pickled_file, save_spectra
@@ -60,7 +61,7 @@ def test_spectra(file_name, caplog):
         with tempfile.TemporaryDirectory() as temp_dir:
             filename = os.path.join(temp_dir, file_name)
 
-            with pytest.raises(ValueError, match=f"{ftype} isn't supported for when `append` is True"):
+            with pytest.raises(ValueError, match=re.escape(f"{ftype} isn't supported for when `append` is True")):
                 save_spectra(spectra=spectrum_list, file=filename, append=True)
 
     # Test logger warning when using pickle
@@ -80,7 +81,7 @@ def test_spectra_invalid_ext():
     with tempfile.TemporaryDirectory() as temp_dir:
         filename = os.path.join(temp_dir, "invalid.txt")
 
-        with pytest.raises(TypeError, match=f"File extension of file: {filename} is not recognized"):
+        with pytest.raises(TypeError, match=re.escape(f"File extension of file: {filename} is not recognized")):
             save_spectra(spectrum_list, filename)
 
 
@@ -106,7 +107,7 @@ def test_save_as_pickled_file_none_spectra(file_name):
             file.write("content")
         assert os.path.exists(filename)
 
-        with pytest.raises(FileExistsError, match=f"The file '{filename}' already exists."):
+        with pytest.raises(FileExistsError, match=re.escape(f"The file '{filename}' already exists.")):
             save_as_pickled_file(spectrum_list, filename)
 
     with tempfile.TemporaryDirectory() as temp_dir:
