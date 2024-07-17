@@ -52,7 +52,7 @@ def test_spectra(file_name, caplog):
             file.write("content")
         assert os.path.exists(filename)
 
-        with pytest.raises(FileExistsError, match=f"The specified file: {filename} already exists."):
+        with pytest.raises(FileExistsError, match=re.escape(f"The specified file: {filename} already exists.")):
             save_spectra(spectrum_list, filename)
 
     # Test append to different filetype not supported error
