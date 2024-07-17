@@ -63,7 +63,7 @@ def test_export_metadata_as_json(tmp_path, spectra):
 
 
 @pytest.mark.parametrize("file_name", ["metadata.csv", "metadata.json"])
-def test_export_metadata_none_spectra(tmp_path, spectra, file_name):
+def test_export_metadata_none_spectra(tmp_path, spectra, file_name, caplog):
     outpath = os.path.join(tmp_path, file_name)
 
     spectra.append(None)
@@ -72,3 +72,10 @@ def test_export_metadata_none_spectra(tmp_path, spectra, file_name):
     with open(outpath, "r", encoding="utf-8") as f:
         actual = json.load(f)
         assert len(actual) == (len(spectra) - 1)
+
+    # Test invalid field export config
+    export_metadata_as_json(spectra, outpath, "invalid")
+    assert "'Include_fields' must be 'all' or list of keys." in caplog.text
+    with open(outpath, "r", encoding="utf-8") as f:
+        actual = json.load(f)
+        assert len(actual) == 0
