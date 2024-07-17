@@ -1,9 +1,13 @@
 import csv
 import json
+import logging
 from typing import Any, Dict, List, Optional, Set, Tuple
 import numpy as np
 from ..Spectrum import Spectrum
 from ..utils import filter_empty_spectra, rename_deprecated_params
+
+
+logger = logging.getLogger("matchms")
 
 
 def _get_metadata_dict(spectrum: Spectrum, include_fields: Optional[List[str]] = None) -> Dict[str, Any]:
@@ -19,7 +23,7 @@ def _get_metadata_dict(spectrum: Spectrum, include_fields: Optional[List[str]] =
     if include_fields is None or include_fields[0] == "all":
         return spectrum.metadata
     if not isinstance(include_fields, list):
-        print("'Include_fields' must be 'all' or list of keys.")
+        logger.warning("'Include_fields' must be 'all' or list of keys.")
         return None
 
     return {key: spectrum.metadata[key] for key in spectrum.metadata.keys()
@@ -61,8 +65,8 @@ def export_metadata_as_csv(spectra: List[Spectrum], filename: str,
         Expected input is a list of  :py:class:`~matchms.Spectrum.Spectrum` objects.
     filename:
         Provide filename to save metadata of spectrum(s) as csv file.
-    identifier:
-        Identifier used for naming each spectrum in the output file.
+    include_fields:
+        Columns to include.
     """
     spectra = filter_empty_spectra(spectra)
     metadata, columns = get_metadata_as_array(spectra)
