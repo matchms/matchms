@@ -85,8 +85,8 @@ class BaseSimilarity:
                         idx_col.append(i_query)
                         scores.append(score)
 
-        idx_row = np.array(idx_row)
-        idx_col = np.array(idx_col)
+        idx_row = np.array(idx_row, dtype=int)
+        idx_col = np.array(idx_col, dtype=int)
         scores_data = np.array(scores, dtype=self.score_datatype)
         # TODO: make StackedSpareseArray the default and add fixed function to output different formats (with code below)
         if array_type == "numpy":
