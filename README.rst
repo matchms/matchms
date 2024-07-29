@@ -148,7 +148,7 @@ To date, we are aware of:
 
 + `MSMetaEnhancer <https://github.com/RECETOX/MSMetaEnhancer>`_ is a Python package to collect mass spectral library metadata using various web services and computational chemistry packages.
 
-+ `cudams <https://github.com/PangeAI/cudams>`_ is a python package with fast GPU-based reimplementations of common similarity classes such as `CudaCosineGreedy`, and `CudaModifiedCosine`.
++ `SimMS <https://github.com/PangeAI/SimMS>`_ is a python package with fast GPU-based implementations of common similarity classes such as `CudaCosineGreedy`, and `CudaModifiedCosine`.
 
 *(if you know of any other packages that are fully compatible with matchms, let us know!)*
 
