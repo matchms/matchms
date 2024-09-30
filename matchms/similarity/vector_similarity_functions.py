@@ -1,4 +1,5 @@
 """Collection of functions for calculating vector-vector similarities."""
+from typing import Optional
 import numba
 import numpy as np
 
@@ -178,3 +179,35 @@ def cosine_similarity(u: np.ndarray, v: np.ndarray) -> np.float64:
     if uu != 0 and vv != 0:
         cosine_score = uv / np.sqrt(uu * vv)
     return np.float64(cosine_score)
+
+
+@numba.njit(fastmath=True)
+def ruzicka_similarity(u: np.ndarray, v: np.ndarray, w: Optional[np.ndarray] = None) -> float:
+    """
+    Calculate the Ruzicka similarity between two count vectors with optional weighting.
+
+    Parameters:
+    u (array-like): First count vector.
+    v (array-like): Second count vector.
+    w (array-like): Optional Weighting vector, will default to 1 if not set.
+
+    Returns:
+    float: Ruzicka similarity.
+    """
+
+    if u.shape != v.shape:
+        raise ValueError("Input vectors must have same shape.")
+
+    if w is None:
+        w = np.ones_like(u)
+
+    min_sum = 0.0
+    max_sum = 0.0
+    for u_i, v_i, w_i in zip(u, v, w):
+        min_sum += min(u_i, v_i) * w_i
+        max_sum += max(u_i, v_i) * w_i
+
+    if max_sum == 0:
+        return 0.0
+
+    return min_sum / max_sum

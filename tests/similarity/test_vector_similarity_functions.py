@@ -4,7 +4,8 @@ import numpy as np
 import pytest
 from matchms.similarity.vector_similarity_functions import (
     cosine_similarity, cosine_similarity_matrix, dice_similarity,
-    dice_similarity_matrix, jaccard_index, jaccard_similarity_matrix)
+    dice_similarity_matrix, jaccard_index, jaccard_similarity_matrix,
+    ruzicka_similarity)
 
 
 def test_cosine_similarity_compiled():
@@ -227,3 +228,31 @@ def test_jaccard_similarity_matrix():
     expected_scores = np.array([[1/3, 1/4],
                                    [1/3, 2/3]])
     assert scores == pytest.approx(expected_scores, 1e-7), "Expected different scores."
+
+
+def test_ruzicka_similarity():
+    """Test ruzicka similarity score calculation."""
+    vector1 = np.array([1.0, 1.0, 0, 0])
+    vector2 = np.array([1.0, 1.0, 1.0, 1.0])
+    vector3 = np.array([0, 0, 0, 0])
+    weights = np.array([0.5, 1.0, 2.0, 0.5], dtype=np.float64)
+
+    score11 = ruzicka_similarity.py_func(vector1, vector1)
+    score12 = ruzicka_similarity.py_func(vector1, vector2)
+    score22 = ruzicka_similarity.py_func(vector2, vector2)
+    score12w = ruzicka_similarity(vector1, vector2, weights)
+    score33 = ruzicka_similarity(vector3, vector3)
+
+    assert score11 == score22 == 1.0, "Expected identity score."
+
+    # Different vectors
+    expected_diff_vectors = (1 + 1 + 0 + 0) / (1 + 1 + 1 + 1)
+    assert pytest.approx(score12) == expected_diff_vectors, "Expected different score."
+
+    # Using weights
+    min_sum = 0.5 * 1 + 1 * 1 + 2 * 0 + 0.5 * 0
+    max_sum = 0.5 * 1 + 1 * 1 + 2 * 1 + 0.5 * 1
+    expected_diff_vectors_weighting = min_sum / max_sum
+    assert pytest.approx(score12w) == expected_diff_vectors_weighting, f"Expected weighted similarity: {expected_diff_vectors_weighting}"
+
+    assert score33 == 0.0, "Zero vectors should return a similarity of 0.0"
