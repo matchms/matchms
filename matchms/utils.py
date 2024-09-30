@@ -118,7 +118,6 @@ def rename_deprecated_params(param_mapping: dict, version: str = None) -> Callab
             for i, (old_param, new_param) in enumerate(param_mapping.items()):
                 if i < len(new_args):
                     new_kwargs[new_param] = new_args[i]
-            print(new_kwargs.keys())
 
             # Handle keyword arguments
             for old_param, new_param in param_mapping.items():
