@@ -37,11 +37,11 @@ def load_from_mzxml(filename: str, ms_level: int = 2,
         for pyteomics_spectrum in reader:
             if ("ms level" in pyteomics_spectrum and pyteomics_spectrum["ms level"] == ms_level
                     or "msLevel" in pyteomics_spectrum and pyteomics_spectrum["msLevel"] == ms_level):
-                metadata = parse_mzml_mzxml_metadata(pyteomics_spectrum)
-                mz = np.asarray(pyteomics_spectrum["m/z array"], dtype="float")
-                intensities = np.asarray(pyteomics_spectrum["intensity array"], dtype="float")
+                mz = np.asarray(pyteomics_spectrum.pop("m/z array"), dtype="float")
+                intensities = np.asarray(pyteomics_spectrum.pop("intensity array"), dtype="float")
 
                 mz, intensities = sort_by_mz(mz=mz, intensities=intensities)
+                metadata = parse_mzml_mzxml_metadata(pyteomics_spectrum)
 
                 yield Spectrum(mz=mz, intensities=intensities, metadata=metadata,
                                metadata_harmonization=metadata_harmonization)
