@@ -5,7 +5,7 @@ import pytest
 from matchms.similarity.vector_similarity_functions import (
     cosine_similarity, cosine_similarity_matrix, dice_similarity,
     dice_similarity_matrix, jaccard_index, jaccard_similarity_matrix,
-    ruzicka_similarity)
+    ruzicka_similarity, ruzicka_similarity_matrix)
 
 
 def test_cosine_similarity_compiled():
@@ -256,3 +256,29 @@ def test_ruzicka_similarity():
     assert pytest.approx(score12w) == expected_diff_vectors_weighting, f"Expected weighted similarity: {expected_diff_vectors_weighting}"
 
     assert score33 == 0.0, "Zero vectors should return a similarity of 0.0"
+
+
+def test_ruzicka_similarity_matrix():
+    """Test ruzicka similarity scores calculation."""
+    reference1 = np.array([[1, 2, 0], [1, 1, 0], [0, 1.5, 2]])
+    reference2 = np.array([[1, 2, 0], [1, 2.1, 0], [1, 1, 0], [0, 1.5, 2]])
+    query = np.array([[4, 1, 1], [4, 1, 0], [0.5, 1, 1]])
+    weights = np.array([0.5, 1.0, 1.0])
+
+    scores_no_weights = ruzicka_similarity_matrix(reference1, query)
+    expected_scores_no_weights = np.array([
+        [0.28571429, 0.33333333, 0.375],
+        [0.33333333, 0.4, 0.5],
+        [0.26666667, 0.13333333, 0.5]
+    ])
+    assert scores_no_weights == pytest.approx(expected_scores_no_weights, 1e-7), "Expected different scores."
+
+    scores = ruzicka_similarity_matrix(reference2, query, weights)
+    expected_scores = np.array([
+        [0.3, 0.375, 0.35714286],
+        [0.29411765, 0.36585366, 0.34722222],
+        [0.375, 0.5, 0.5],
+        [0.36363636, 0.18181818, 0.53333333]
+    ])
+    assert scores.shape == (reference2.shape[0], query.shape[0]), "Expected different score shape"
+    assert scores == pytest.approx(expected_scores, 1e-7), "Expected different scores."

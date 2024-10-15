@@ -2,6 +2,7 @@
 from typing import Optional
 import numba
 import numpy as np
+from numba import prange
 
 
 def jaccard_similarity_matrix(references: np.ndarray, queries: np.ndarray) -> np.ndarray:
@@ -87,6 +88,40 @@ def cosine_similarity_matrix(references: np.ndarray, queries: np.ndarray) -> np.
     cosine = np.nan_to_num(cosine * norm ** -.5)  # R,Q
     return cosine
 
+
+@numba.jit(nopython=True, fastmath=True, parallel=True)
+def ruzicka_similarity_matrix(references: np.ndarray, queries: np.ndarray, weights: Optional[np.ndarray] = None) -> np.ndarray:
+    """Returns matrix of Ruzicka similarity between all-vs-all vectors of references and queries.
+
+    Parameters
+    ----------
+    references
+        Reference vectors as 2D numpy array. Expects that vector_i corresponds to
+        references[i, :].
+    queries
+        Query vectors as 2D numpy array. Expects that vector_i corresponds to
+        queries[i, :].
+    weights
+        Query vectors as 1D numpy array. Expects that weights have shape of vector_i in references/queries.
+
+    Returns
+    -------
+    scores
+        Matrix of all-vs-all similarity scores. scores[i, j] will contain the score
+        between the vectors references[i, :] and queries[j, :].
+    """
+    size1 = references.shape[0]
+    size2 = queries.shape[0]
+    scores = np.zeros((size1, size2))
+
+    if weights is None:
+        weights = np.ones_like(references[0], dtype=np.float64)
+
+    # Disabling pylint warning, see https://github.com/pylint-dev/pylint/issues/2910
+    for i in prange(size1): # pylint: disable=not-an-iterable
+        for j in range(size2):
+            scores[i, j] = ruzicka_similarity(references[i, :], queries[j, :], weights)
+    return scores
 
 @numba.njit
 def jaccard_index(u: np.ndarray, v: np.ndarray) -> np.float64:
@@ -199,10 +234,9 @@ def ruzicka_similarity(u: np.ndarray, v: np.ndarray, w: Optional[np.ndarray] = N
         raise ValueError("Input vectors must have same shape.")
 
     if w is None:
-        w = np.ones_like(u)
+        w = np.ones_like(u, dtype=np.float64)
 
-    min_sum = 0.0
-    max_sum = 0.0
+    min_sum, max_sum = 0.0, 0.0
     for u_i, v_i, w_i in zip(u, v, w):
         min_sum += min(u_i, v_i) * w_i
         max_sum += max(u_i, v_i) * w_i
