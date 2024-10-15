@@ -235,7 +235,8 @@ def test_ruzicka_similarity():
     vector1 = np.array([1.0, 1.0, 0, 0])
     vector2 = np.array([1.0, 1.0, 1.0, 1.0])
     vector3 = np.array([0, 0, 0, 0])
-    weights = np.array([0.5, 1.0, 2.0, 0.5], dtype=np.float64)
+    vector4 = np.array([0, 0])
+    weights = np.array([0.5, 1.0, 2.0, 0.5])
 
     score11 = ruzicka_similarity.py_func(vector1, vector1)
     score12 = ruzicka_similarity.py_func(vector1, vector2)
@@ -256,6 +257,10 @@ def test_ruzicka_similarity():
     assert pytest.approx(score12w) == expected_diff_vectors_weighting, f"Expected weighted similarity: {expected_diff_vectors_weighting}"
 
     assert score33 == 0.0, "Zero vectors should return a similarity of 0.0"
+
+    # Test diff vector sizes
+    with pytest.raises(ValueError):
+        ruzicka_similarity(vector1, vector4)
 
 
 def test_ruzicka_similarity_matrix():
