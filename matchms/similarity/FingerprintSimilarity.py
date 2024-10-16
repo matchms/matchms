@@ -8,7 +8,9 @@ from .vector_similarity_functions import (cosine_similarity,
                                           dice_similarity,
                                           dice_similarity_matrix,
                                           jaccard_index,
-                                          jaccard_similarity_matrix)
+                                          jaccard_similarity_matrix,
+                                          ruzicka_similarity,
+                                          ruzicka_similarity_matrix)
 
 
 class FingerprintSimilarity(BaseSimilarity):
@@ -77,7 +79,7 @@ class FingerprintSimilarity(BaseSimilarity):
             np.nan's in such cases.
         """
         self.set_empty_scores = set_empty_scores
-        assert similarity_measure in ["cosine", "dice", "jaccard"], "Unknown similarity measure."
+        assert similarity_measure in ["cosine", "dice", "jaccard", "ruzicka"], "Unknown similarity measure."
         self.similarity_measure = similarity_measure
 
     def pair(self, reference: SpectrumType, query: SpectrumType) -> float:
@@ -101,6 +103,9 @@ class FingerprintSimilarity(BaseSimilarity):
         if self.similarity_measure == "cosine":
             score = cosine_similarity(fingerprint_ref, fingerprint_query)
             return np.asarray(score, dtype=self.score_datatype)
+
+        if self.similarity_measure == "ruzicka":
+            return ruzicka_similarity(fingerprint_ref, fingerprint_query)
 
         raise NotImplementedError
 
@@ -160,6 +165,10 @@ class FingerprintSimilarity(BaseSimilarity):
         elif self.similarity_measure == "cosine":
             similarity_matrix[np.ix_(idx_fingerprints1,
                                         idx_fingerprints2)] = cosine_similarity_matrix(fingerprints1,
+                                                                                       fingerprints2)
+        elif self.similarity_measure == "ruzicka":
+            similarity_matrix[np.ix_(idx_fingerprints1,
+                                        idx_fingerprints2)] = ruzicka_similarity_matrix(fingerprints1,
                                                                                        fingerprints2)
         if array_type == "sparse":
             scores_array = StackedSparseArray(len(references), len(queries))

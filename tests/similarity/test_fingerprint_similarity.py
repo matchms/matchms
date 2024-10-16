@@ -5,7 +5,12 @@ from matchms import Spectrum, calculate_scores
 from matchms.similarity import FingerprintSimilarity
 
 
-@pytest.mark.parametrize("test_method, expected_score", [("cosine", 0.6761234), ("jaccard", 0.5), ("dice", 2/3)])
+@pytest.mark.parametrize("test_method, expected_score", [
+    ("cosine", 0.6761234),
+    ("jaccard", 0.5),
+    ("dice", 2/3),
+    ("ruzicka", 0.5)
+])
 def test_fingerprint_similarity_pair_calculations(test_method, expected_score):
     """Test cosine score pair with two fingerprint."""
     fingerprint1 = np.array([1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0])
@@ -23,7 +28,7 @@ def test_fingerprint_similarity_pair_calculations(test_method, expected_score):
     assert score_pair == pytest.approx(expected_score, 1e-6), "Expected different score."
 
 
-@pytest.mark.parametrize("test_method", ["cosine", "jaccard", "dice"])
+@pytest.mark.parametrize("test_method", ["cosine", "jaccard", "dice", "ruzicka"])
 def test_fingerprint_similarity_parallel_empty_fingerprint(test_method):
     """Test score matrix with empty fingerprint using the provided methods."""
     fingerprint1 = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
@@ -45,7 +50,8 @@ def test_fingerprint_similarity_parallel_empty_fingerprint(test_method):
 
 @pytest.mark.parametrize("test_method, expected_score, array_type, set_empty", [("cosine", 0.84515425, "numpy", np.nan),
                                                          ("jaccard", 0.71428571, "sparse", np.nan),
-                                                         ("dice", 0.83333333, "numpy", 0)])
+                                                         ("dice", 0.83333333, "numpy", 0),
+                                                         ("ruzicka", 0.71428571, "numpy", 0)])
 def test_fingerprint_similarity_parallel(test_method, expected_score, array_type, set_empty):
     """Test score matrix with known values for the provided methods."""
     spectrum0 = Spectrum(mz=np.array([], dtype="float"),
