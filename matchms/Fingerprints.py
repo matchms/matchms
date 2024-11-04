@@ -27,7 +27,10 @@ class Fingerprints:
         self.kwargs = kwargs
 
     def __str__(self):
-        return json.dumps(self.inchikey_fingerprint_mapping)
+        return json.dumps({
+            "config: ": self.config,
+            "inchikey_fingerprint_mapping": self.inchikey_fingerprint_mapping
+        })
 
     @property
     def config(self):
@@ -37,6 +40,10 @@ class Fingerprints:
             "nbits": self.nbits,
             "additional_keyword_arguments": self.kwargs,
         }
+
+    @property
+    def fingerprints(self):
+        return self.inchikey_fingerprint_mapping
 
     def fingerprints_to_dataframe(self):
         return pd.DataFrame(self.inchikey_fingerprint_mapping)
