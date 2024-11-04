@@ -12,19 +12,18 @@ from matchms.filtering import (derive_inchi_from_smiles,
 from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import (
     is_valid_inchi, is_valid_inchikey)
 from matchms.typing import SpectrumType
-
+from utils import to_camel_case
 
 logger = logging.getLogger("matchms")
 
 
 class Fingerprints:
-    def __init__(self, fingerprint_algorithm: str = "daylight", fingerprint_method: str = "bit", nbits: int = 2048, min_path: int = 1, max_path: int = 7):
+    def __init__(self, fingerprint_algorithm: str = "daylight", fingerprint_method: str = "bit", nbits: int = 2048, **kwargs):
         self.inchikey_fingerprint_mapping = {}
         self.fingerprint_algorithm = fingerprint_algorithm
         self.fingerprint_method = fingerprint_method
         self.nbits = nbits
-        self.minPath = min_path
-        self.maxPath = max_path
+        self.kwargs = kwargs
 
     def __str__(self):
         return json.dumps(self.inchikey_fingerprint_mapping)
@@ -141,7 +140,7 @@ def _derive_fingerprint_from_inchi(inchi: str, fingerprint_algorithm: str, finge
     return _mol_to_fingerprint(mol, fingerprint_algorithm, fingerprint_method, nbits)
 
 
-def _mol_to_fingerprint(mol: Mol, fingerprint_algorithm: str, fingerprint_method: str, nbits: int, minPath: int, maxPath: int) -> Optional[np.ndarray]:
+def _mol_to_fingerprint(mol: Mol, fingerprint_algorithm: str, fingerprint_method: str, nbits: int, **kwargs) -> Optional[np.ndarray]:
     """Convert rdkit mol (molecule) to molecular fingerprint.
     Requires conda package *rdkit* to be installed.
 
@@ -161,32 +160,29 @@ def _mol_to_fingerprint(mol: Mol, fingerprint_algorithm: str, fingerprint_method
         Molecular fingerprint.
     """
     algorithms = {
-        "daylight": lambda nbits, minPath, maxPath: GetRDKitFPGenerator(fpSize=nbits, minPath=minPath, maxPath=maxPath),
-        "morgan1": lambda nbits: GetMorganGenerator(radius=1, fpSize=nbits),
-        "morgan2": lambda nbits: GetMorganGenerator(radius=2, fpSize=nbits),
-        "morgan3": lambda nbits: GetMorganGenerator(radius=3, fpSize=nbits)
+        "daylight": lambda args: GetRDKitFPGenerator(**args),
+        "morgan1": lambda args: GetMorganGenerator(**args, radius=1),
+        "morgan2": lambda args: GetMorganGenerator(**args, radius=2),
+        "morgan3": lambda args: GetMorganGenerator(**args, radius=3)
+    }
+    methods = {
+        "bit": "GetFingerprint",
+        "sparse_bit": "GetSparseFingerprint",
+        "count": "GetCountFingerprint",
+        "sparse_count": "GetSparseCountFingerprint"
     }
 
     if fingerprint_algorithm not in algorithms:
-        raise ValueError(f"Unkown fingerprint algorithm given. Available algorithms: {*algorithms.keys(),}.")
-
-    generator = algorithms[fingerprint_algorithm](nbits=nbits, minPath=minPath, maxPath=maxPath)
-
-    methods = {
-        "bit": lambda mol: generator.GetFingerprint(mol),
-        #"bit": lambda mol: generator.GetFingerprintAsNumPy(mol),
-        "sparse_bit": lambda mol: generator.GetSparseFingerprint(mol),
-        "count": lambda mol: generator.GetCountFingerprint(mol),
-        "sparse_count": lambda mol: generator.GetSparseCountFingerprint(mol)
-    }
+        raise ValueError(f"Unkown fingerprint algorithm given. Available algorithms: {list(algorithms.keys())}.")
     if fingerprint_method not in methods:
-        raise ValueError(f"Unkown fingerprint method given. Available methods: {*methods.keys(),}.")
+        raise ValueError(f"Unkown fingerprint method given. Available methods: {list(methods.keys())}.")
 
-    fingerprint = methods[fingerprint_method](mol)
+    args = {"fpSize": nbits, **{to_camel_case(k): v for k, v in kwargs.items()}}
+    generator = algorithms[fingerprint_algorithm](args)
 
-    if fingerprint:
-        return np.array(fingerprint)
+    fingerprint_func = getattr(generator, methods[fingerprint_method])
+    fingerprint = fingerprint_func(mol)
+
+    return np.array(fingerprint) if fingerprint else None
 
     # TODO: use GetFingerprints to use multithreading
-
-    return None

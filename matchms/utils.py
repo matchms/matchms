@@ -147,3 +147,20 @@ def rename_deprecated_params(param_mapping: dict, version: str = None) -> Callab
             return func(*final_args, **new_kwargs)
         return wrapper
     return decorator
+
+
+def to_camel_case(snake_str: str) -> str:
+    """Converts snake_case to camelCase.
+
+    Used for conversion between snake_case and camelCase to match third party libraries (e.g., RDKit).
+
+    Parameters
+    ----------
+    snake_str
+        The input string in snake_case
+
+    Returns:
+        camelCase string.
+    """
+    components = snake_str.split('_')
+    return components[0] + ''.join(word.capitalize() for word in components[1:])
