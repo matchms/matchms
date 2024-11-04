@@ -12,7 +12,8 @@ from matchms.filtering import (derive_inchi_from_smiles,
 from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import (
     is_valid_inchi, is_valid_inchikey)
 from matchms.typing import SpectrumType
-from utils import to_camel_case
+from .utils import to_camel_case
+
 
 logger = logging.getLogger("matchms")
 
@@ -27,6 +28,15 @@ class Fingerprints:
 
     def __str__(self):
         return json.dumps(self.inchikey_fingerprint_mapping)
+
+    @property
+    def config(self):
+        return {
+            "fingerprint_algorithm": self.fingerprint_algorithm,
+            "fingerprint_method": self.fingerprint_method,
+            "nbits": self.nbits,
+            "additional_keyword_arguments": self.kwargs,
+        }
 
     def fingerprints_to_dataframe(self):
         return pd.DataFrame(self.inchikey_fingerprint_mapping)
@@ -47,11 +57,11 @@ class Fingerprints:
         fingerprint = None
         if spectrum.get("smiles"):
             fingerprint = _derive_fingerprint_from_smiles(spectrum.get("smiles"), self.fingerprint_algorithm,
-                                                          self.fingerprint_method, self.nbits)
+                                                          self.fingerprint_method, self.nbits, **self.kwargs)
 
         if fingerprint is None and spectrum.get("inchi"):
             fingerprint = _derive_fingerprint_from_inchi(spectrum.get("inchi"), self.fingerprint_algorithm,
-                                                         self.fingerprint_method, self.nbits)
+                                                         self.fingerprint_method, self.nbits, **self.kwargs)
 
         return fingerprint
 
@@ -90,7 +100,7 @@ def _require_inchikey(spectrum_in: SpectrumType) -> SpectrumType:
     return spectrum
 
 
-def _derive_fingerprint_from_smiles(smiles: str, fingerprint_algorithm: str, fingerprint_method: str, nbits: int) -> Optional[np.ndarray]:
+def _derive_fingerprint_from_smiles(smiles: str, fingerprint_algorithm: str, fingerprint_method: str, nbits: int, **kwargs) -> Optional[np.ndarray]:
     """Calculate molecule fingerprint based on given smiles or inchi (using rdkit).
     Requires conda package *rdkit* to be installed.
 
@@ -112,10 +122,10 @@ def _derive_fingerprint_from_smiles(smiles: str, fingerprint_algorithm: str, fin
     mol = Chem.MolFromSmiles(smiles)
     if mol is None:
         return None
-    return _mol_to_fingerprint(mol, fingerprint_algorithm, fingerprint_method, nbits)
+    return _mol_to_fingerprint(mol, fingerprint_algorithm, fingerprint_method, nbits, **kwargs)
 
 
-def _derive_fingerprint_from_inchi(inchi: str, fingerprint_algorithm: str, fingerprint_method: str, nbits: int) -> Optional[np.ndarray]:
+def _derive_fingerprint_from_inchi(inchi: str, fingerprint_algorithm: str, fingerprint_method: str, nbits: int, **kwargs) -> Optional[np.ndarray]:
     """Calculate molecule fingerprint based on given inchi (using rdkit).
     Requires conda package *rdkit* to be installed.
 
@@ -137,10 +147,10 @@ def _derive_fingerprint_from_inchi(inchi: str, fingerprint_algorithm: str, finge
     mol = Chem.MolFromInchi(inchi)
     if mol is None:
         return None
-    return _mol_to_fingerprint(mol, fingerprint_algorithm, fingerprint_method, nbits)
+    return _mol_to_fingerprint(mol, fingerprint_algorithm, fingerprint_method, nbits, **kwargs)
 
 
-def _mol_to_fingerprint(mol: Mol, fingerprint_algorithm: str, fingerprint_method: str, nbits: int, **kwargs) -> Optional[np.ndarray]:
+def _mol_to_fingerprint(mol: Mol, fingerprint_algorithm: str, fingerprint_type: str, nbits: int, **kwargs) -> Optional[np.ndarray]:
     """Convert rdkit mol (molecule) to molecular fingerprint.
     Requires conda package *rdkit* to be installed.
 
@@ -148,11 +158,18 @@ def _mol_to_fingerprint(mol: Mol, fingerprint_algorithm: str, fingerprint_method
     ----------
     mol
         Input rdkit molecule.
+    fingerprint_algorithm
+        Determine algorithm for deriving molecular fingerprints.
+        Supported algorithms are 'daylight', 'morgan1', 'morgan2', 'morgan3'.
     fingerprint_type
-        Determine method for deriving molecular fingerprints.
-        Supported choices are 'daylight', 'morgan1', 'morgan2', 'morgan3'.
+        Determine type for deriving molecular fingerprints.
+        Supported types are 'bit', 'sparse_bit', 'count', 'sparse_count'.
     nbits
         Dimension or number of bits of generated fingerprint.
+    **kwargs
+        Keyword arguments to pass additional parameters to FingerprintGenerator.
+        The keywords should match the corresponding RDKit implementation (e.g., min_path/max_path for RDKitFPGenerator).
+        See https://rdkit.org/docs/source/rdkit.Chem.rdFingerprintGenerator.html.
 
     Returns
     -------
@@ -165,7 +182,7 @@ def _mol_to_fingerprint(mol: Mol, fingerprint_algorithm: str, fingerprint_method
         "morgan2": lambda args: GetMorganGenerator(**args, radius=2),
         "morgan3": lambda args: GetMorganGenerator(**args, radius=3)
     }
-    methods = {
+    types = {
         "bit": "GetFingerprint",
         "sparse_bit": "GetSparseFingerprint",
         "count": "GetCountFingerprint",
@@ -174,13 +191,13 @@ def _mol_to_fingerprint(mol: Mol, fingerprint_algorithm: str, fingerprint_method
 
     if fingerprint_algorithm not in algorithms:
         raise ValueError(f"Unkown fingerprint algorithm given. Available algorithms: {list(algorithms.keys())}.")
-    if fingerprint_method not in methods:
-        raise ValueError(f"Unkown fingerprint method given. Available methods: {list(methods.keys())}.")
+    if fingerprint_type not in types:
+        raise ValueError(f"Unkown fingerprint type given. Available types: {list(types.keys())}.")
 
     args = {"fpSize": nbits, **{to_camel_case(k): v for k, v in kwargs.items()}}
     generator = algorithms[fingerprint_algorithm](args)
 
-    fingerprint_func = getattr(generator, methods[fingerprint_method])
+    fingerprint_func = getattr(generator, types[fingerprint_type])
     fingerprint = fingerprint_func(mol)
 
     return np.array(fingerprint) if fingerprint else None
