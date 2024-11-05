@@ -47,7 +47,7 @@ class Fingerprints:
 
     def fingerprints_to_dataframe(self):
         return pd.DataFrame(
-            {'fingerprint': list(self.inchikey_fingerprint_mapping.values())},
+            data={'fingerprint': list(self.inchikey_fingerprint_mapping.values())},
             index=list(self.inchikey_fingerprint_mapping.keys())
         )
 
