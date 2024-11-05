@@ -85,19 +85,23 @@ class Fingerprints:
 
     def compute_fingerprints(self, spectra: List[SpectrumType]):
         for spectrum in spectra:
-            spectrum = _require_inchikey(spectrum) # TODO: Add try catch
+            try:
+                spectrum = _require_inchikey(spectrum)
 
-            # Fingerprint is in mapping dict -> skip iteration
-            if spectrum.get("inchikey") in self.inchikey_fingerprint_mapping and self.inchikey_fingerprint_mapping[spectrum.get("inchikey")] is not None:
-                continue
+                # Fingerprint is in mapping dict -> skip iteration
+                if spectrum.get("inchikey") in self.inchikey_fingerprint_mapping and self.inchikey_fingerprint_mapping[
+                    spectrum.get("inchikey")] is not None:
+                    continue
 
-            fingerprint = self.compute_fingerprint(spectrum)
+                fingerprint = self.compute_fingerprint(spectrum)
 
-            # Incorrect fingerprints will not be added to list
-            if isinstance(fingerprint, np.ndarray) and fingerprint.sum() > 0:
-                self.inchikey_fingerprint_mapping[spectrum.get("inchikey")] = fingerprint
-            else:
-                logger.warning("Computed fingerprint is not a ndarray or invalid.")
+                # Incorrect fingerprints will not be added to list
+                if isinstance(fingerprint, np.ndarray) and fingerprint.sum() > 0:
+                    self.inchikey_fingerprint_mapping[spectrum.get("inchikey")] = fingerprint
+                else:
+                    logger.warning("Computed fingerprint is not a ndarray or invalid.")
+            except ValueError:
+                logger.warning("Error computing fingerprint.")
 
 def _require_inchikey(spectrum_in: SpectrumType) -> SpectrumType:
     spectrum = spectrum_in.clone()
