@@ -52,11 +52,19 @@ class Fingerprints:
         if inchikey in self.inchikey_fingerprint_mapping:
             return self.inchikey_fingerprint_mapping[inchikey]
 
+        if not is_valid_inchikey(inchikey):
+            logger.warning("The provided inchikey is not valid or may be the short form.")
+
         logger.warning("Fingerprint is not present for given Spectrum/InchiKey. Use compute_fingerprint() first.")
         return None
 
     def get_fingerprint_by_spectrum(self, spectrum: SpectrumType) -> Optional[np.ndarray]:
         inchikey = spectrum.get("inchikey")
+
+        # Double check the form of the inchikey
+        if not is_valid_inchikey(inchikey):
+            spectrum = _require_inchikey(spectrum)
+            inchikey = spectrum.get("inchikey")
 
         return self.get_fingerprint_by_inchikey(inchikey)
 
