@@ -46,7 +46,10 @@ class Fingerprints:
         return self.inchikey_fingerprint_mapping
 
     def fingerprints_to_dataframe(self):
-        return pd.DataFrame(self.inchikey_fingerprint_mapping)
+        return pd.DataFrame(
+            {'fingerprint': list(self.inchikey_fingerprint_mapping.values())},
+            index=list(self.inchikey_fingerprint_mapping.keys())
+        )
 
     def get_fingerprint_by_inchikey(self, inchikey: str) -> Optional[np.ndarray]:
         if inchikey in self.inchikey_fingerprint_mapping:
