@@ -121,5 +121,5 @@ def get_metadata_as_array(spectra: List[Spectrum]) -> Tuple[np.array, List[str]]
         value = tuple((s.get(k) for k in keys))
         values.append(value)
 
-    values_array = np.array(values, dtype=[(k, np.chararray) for k in keys])
+    values_array = np.array(values, dtype=[(k, np.str_) for k in keys])
     return values_array, keys
