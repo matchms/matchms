@@ -34,7 +34,7 @@ def test_get_top_hits_by_references():
         assert np.allclose(value, expected_scores_ref[key], atol=1e-5), \
             "Expected different selected scores"
     for key, value in idx_ref.items():
-        assert np.allclose(value, expected_idx_ref[key], atol=1e-5), \
+        assert np.array_equal(value, expected_idx_ref[key]), \
             "Expected different selected indices"
 
     # Test lower top_n
@@ -43,7 +43,7 @@ def test_get_top_hits_by_references():
         assert np.allclose(value, expected_scores_ref[key][:2], atol=1e-5), \
             "Expected different selected scores"
     for key, value in idx_ref.items():
-        assert np.allclose(value, expected_idx_ref[key][:2], atol=1e-5), \
+        assert np.array_equal(value, expected_idx_ref[key][:2]), \
             "Expected different selected indices"
 
 
@@ -61,7 +61,7 @@ def test_get_top_hits_by_queries():
         assert np.allclose(value, expected_scores_query[key], atol=1e-5), \
             "Expected different selected scores"
     for key, value in idx_query.items():
-        assert np.allclose(value, expected_idx_query[key], atol=1e-5), \
+        assert np.array_equal(value, expected_idx_query[key]), \
             "Expected different selected indices"
 
     # Test lower top_n
@@ -70,5 +70,5 @@ def test_get_top_hits_by_queries():
         assert np.allclose(value, expected_scores_query[key][:2], atol=1e-5), \
             "Expected different selected scores"
     for key, value in idx_query.items():
-        assert np.allclose(value, expected_idx_query[key][:2], atol=1e-5), \
+        assert np.array_equal(value, expected_idx_query[key][:2]), \
             "Expected different selected indices"
