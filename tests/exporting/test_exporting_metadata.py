@@ -34,11 +34,14 @@ def test_get_metadata_as_array(spectra):
     assert len(colnames) == 23
 
 
-def test_export_as_csv(tmp_path, spectra):
+@pytest.mark.parametrize("delimiter", [',', '\t'])
+def test_export_as_csv(tmp_path, spectra, delimiter):
+    extension = {',':'csv', '\t': 'tsv'}
     module_root = os.path.join(os.path.dirname(__file__), "..")
-    expected = os.path.join(module_root, "testdata", "expected_metadata.csv")
-    outpath = tmp_path / "metadata.csv"
-    export_metadata_as_csv(spectra, outpath)
+    outpath = tmp_path / f"metadata.{extension[delimiter]}"
+
+    export_metadata_as_csv(spectra, outpath, delimiter=delimiter)
+    expected = os.path.join(module_root, "testdata", f"expected_metadata.{extension[delimiter]}")
 
     filecmp.cmp(outpath, expected)
 

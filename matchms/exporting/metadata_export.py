@@ -56,7 +56,8 @@ def export_metadata_as_json(spectra: List[Spectrum], filename: str,
 
 
 def export_metadata_as_csv(spectra: List[Spectrum], filename: str,
-                           include_fields: Optional[List[str]] = None):
+                           include_fields: Optional[List[str]] = None,
+                           delimiter: str = ','):
     """Export metadata to csv file.
 
     Parameters
@@ -75,7 +76,7 @@ def export_metadata_as_csv(spectra: List[Spectrum], filename: str,
         metadata, columns = _subset_metadata(include_fields, metadata, columns)
 
     with open(filename, 'a+', encoding="utf-8") as csvfile:
-        writer = csv.writer(csvfile)
+        writer = csv.writer(csvfile, delimiter=delimiter)
         writer.writerow(columns)
         for data in metadata:
             writer.writerow(data)
