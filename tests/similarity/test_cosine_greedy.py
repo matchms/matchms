@@ -88,3 +88,14 @@ def test_cosine_greedy_matrix_unsymmetric_error():
 
     with pytest.raises(ValueError, match="unequal number of spectra"):
         CosineGreedy().matrix([spectrum_1, spectrum_2], [spectrum_2], is_symmetric=True)
+
+def test_cosine_greedy_matrix_none_matching():
+    builder = SpectrumBuilder()
+    spectrum_1 = builder.with_mz(np.array([100, 200, 300], dtype="float")).with_intensities(
+        np.array([0.1, 0.2, 1.0], dtype="float")).build()
+
+    spectrum_2 = builder.with_mz(np.array([50, 60, 70], dtype="float")).with_intensities(
+        np.array([0.5, 0.2, 1.0], dtype="float")).build()
+    
+    scores = CosineGreedy().matrix([spectrum_1], [spectrum_2])
+    assert scores['score'][0][0] == 0.0, "Expected a single score of exactly 0.0."
