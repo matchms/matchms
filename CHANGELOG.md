@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [0.28.0] - 2024-11-06
+
+### Added
+- Increased Test Coverage by @julianpollmann in [#701](https://github.com/matchms/matchms/pull/701)
+- Enable metadata exporting with tab separators by @hechth in [#712](https://github.com/matchms/matchms/pull/712)
+- add logging for writing spectra to file by @florian-huber in [#645](https://github.com/matchms/matchms/pull/645)
+
+### Changed
+- Rename CudaMS -> SimMS, tweak description a bit by @tornikeo in [#703](https://github.com/matchms/matchms/pull/703)
+- Update utils.py by @niekdejonge in [#705](https://github.com/matchms/matchms/pull/705)
+- Updated matchms dependencies by @hechth in [#709](https://github.com/matchms/matchms/pull/709)
+- IndexError in `.matrix` when all scores are 0 by @tornikeo in [#702](https://github.com/matchms/matchms/pull/702)
+
 ## [0.27.0] -2024-07-10
 
 ### Changed
