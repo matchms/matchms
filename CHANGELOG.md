@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
-## [0.28.0] - 2024-11-06
+## [0.28.1] - 2024-11-06
 
 ### Added
 - Increased Test Coverage by @julianpollmann in [#701](https://github.com/matchms/matchms/pull/701)
