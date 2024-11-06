@@ -12,14 +12,14 @@ on:
 jobs:
 
   first_check:
-    name: first code check / python-3.9 / ubuntu-latest
+    name: first code check / python-3.10 / ubuntu-latest
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: 3.9
+          python-version: '3.10'
       - name: Python info
         run: |
           which python
