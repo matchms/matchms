@@ -45,8 +45,8 @@ class ParentMassMatch(BaseSimilarity):
 
     .. testoutput::
 
-        Parentmass match between 1 and 3 is [1.0]
-        Parentmass match between 2 and 4 is [1.0]
+        Parentmass match between 1 and 3 is [np.float64(1.0)]
+        Parentmass match between 2 and 4 is [np.float64(1.0)]
 
     """
     # Set key characteristics as class attributes

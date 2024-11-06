@@ -254,7 +254,7 @@ class Scores:
 
             scores = calculate_scores(references, queries, CosineGreedy())
             selected_scores = scores.scores_by_query(spectrum_4, 'CosineGreedy_score', sort=True)
-            print([x[1][0].round(3) for x in selected_scores])
+            print([float(x[1][0].round(3)) for x in selected_scores])
 
         Should output
 

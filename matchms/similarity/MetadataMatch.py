@@ -56,8 +56,8 @@ class MetadataMatch(BaseSimilarity):
 
     .. testoutput::
 
-        Metadata match between 1 and 4 is [True]
-        Metadata match between 2 and 3 is [True]
+        Metadata match between 1 and 4 is [np.True_]
+        Metadata match between 2 and 3 is [np.True_]
 
     """
     # Set key characteristics as class attributes
