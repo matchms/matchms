@@ -197,7 +197,7 @@ class SimilarityNetwork:
 
     def _export_to_node_link_json(self, filename: str):
         """Save the network in node-link format."""
-        graph = nx.node_link_data(self.graph)
+        graph = nx.node_link_data(self.graph, edges="links")
         return self._write_to_json(graph, filename)
 
     @staticmethod
