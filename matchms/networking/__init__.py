@@ -3,8 +3,8 @@ Functions for creating and analysing spectral networks
 ######################################################
 
 """
-from .SimilarityNetwork import SimilarityNetwork
 from .networking_functions import get_top_hits
+from .SimilarityNetwork import SimilarityNetwork
 
 
 __all__ = [
