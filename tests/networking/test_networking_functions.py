@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 from matchms import calculate_scores
 from matchms.networking.networking_functions import get_top_hits
@@ -57,6 +58,11 @@ def test_get_top_hits_by_queries():
     expected_idx_query = {'query_spec_0': np.array([4, 2, 0, 3], dtype=np.int64),
                           'query_spec_1': np.array([1, 2, 3, 4], dtype=np.int64),
                           'query_spec_2': np.array([4, 3, 2, 1, 0], dtype=np.int64)}
+    
+    # this is needed due to different sorting algorithms in case of ties apparently
+    if sys.platform == 'darwin':
+        expected_idx_query['query_spec_1'] = np.array([2, 1, 4, 3], dtype=np.int64)
+
     for key, value in scores_query.items():
         assert np.allclose(value, expected_scores_query[key], atol=1e-5), \
             "Expected different selected scores"
