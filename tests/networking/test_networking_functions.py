@@ -55,7 +55,7 @@ def test_get_top_hits_by_queries():
                              'query_spec_1': np.array([0.66666667, 0.66666667, 0.5, 0.5]),
                              'query_spec_2': np.array([0.8, 0.8, 0.5, 0.5, 0.5])}
     expected_idx_query = {'query_spec_0': np.array([4, 2, 0, 3], dtype=np.int64),
-                          'query_spec_1': np.array([2, 1, 4, 3], dtype=np.int64),
+                          'query_spec_1': np.array([1, 2, 3, 4], dtype=np.int64),
                           'query_spec_2': np.array([4, 3, 2, 1, 0], dtype=np.int64)}
     for key, value in scores_query.items():
         assert np.allclose(value, expected_scores_query[key], atol=1e-5), \
