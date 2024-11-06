@@ -86,8 +86,8 @@ class Metadata:
     def harmonize_keys(self):
         """Runs default harmonization of metadata.
 
-        Method harmonized metadata field names which includes setting them to lower-case
-        and runing a series of regex replacements followed by default field name
+        Method harmonized metadata field names which include setting them to lower-case
+        and running a series of regex replacements followed by the default field name
         replacements (such as precursor_mass --> precursor_mz).
 
         """
@@ -98,7 +98,7 @@ class Metadata:
         """Runs default harmonization of metadata.
 
         This includes harmonizing entries for ionmode, retention time and index,
-        charge, as well as the removal of invalid entried ("", "NA", "N/A", "NaN").
+        charge, as well as the removal of invalid entries ("", "NA", "N/A", "NaN").
         """
         metadata_filtered = _interpret_pepmass_metadata(self.data)
         metadata_filtered = _add_precursor_mz_metadata(metadata_filtered)
@@ -121,7 +121,7 @@ class Metadata:
             metadata_filtered["charge"] = charge_int
 
         invalid_entries = ["", "NA", "N/A", "NaN"]
-        metadata_filtered = {k:v for k,v in metadata_filtered.items() if v not in invalid_entries}
+        metadata_filtered = {k: v for k, v in metadata_filtered.items() if not (isinstance(v, str) and v in invalid_entries)}
 
         self.data = metadata_filtered
 

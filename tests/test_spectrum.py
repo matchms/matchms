@@ -232,6 +232,36 @@ def test_metadata_default_filtering(spectrum, input_dict, default_filtering, exp
         "Expected different _metadata dictionary."
 
 
+@pytest.mark.parametrize("mz, loss_mz_to, expected_mz, expected_intensities", [
+    [np.array([100, 150, 200, 300], dtype="float"), 1000, np.array([145, 245, 295, 345], "float"), np.array([1000, 100, 200, 700], "float")],
+    [np.array([100, 150, 200, 450], dtype="float"), 1000, np.array([245, 295, 345], "float"), np.array([100, 200, 700], "float")],
+    [np.array([100, 150, 200, 300], dtype="float"), 250, np.array([145, 245], "float"), np.array([1000, 100], "float")]
+])
+def test_compute_losses_parameterized(mz, loss_mz_to, expected_mz, expected_intensities):
+    intensities = np.array([700, 200, 100, 1000], "float")
+    metadata = {"precursor_mz": 445.0}
+    spectrum = SpectrumBuilder().with_mz(mz).with_intensities(
+        intensities).with_metadata(metadata).build()
+
+    losses = spectrum.compute_losses(loss_mz_to=loss_mz_to)
+
+    assert np.allclose(losses.mz, expected_mz), "Expected different loss m/z."
+    assert np.allclose(losses.intensities, expected_intensities), "Expected different intensities."
+
+
+def test_losses_property():
+    mz = np.array([100, 150, 200, 300.0])
+    intensities = np.array([700, 200, 100, 1000], "float")
+    metadata = {"precursor_mz": 445.0}
+    spectrum = SpectrumBuilder().with_mz(mz).with_intensities(
+        intensities).with_metadata(metadata).build()
+
+    # Check if class property "losses" works
+    losses_default = spectrum.compute_losses()
+    assert np.allclose(spectrum.losses.mz, losses_default.mz)
+    assert np.allclose(spectrum.losses.intensities, losses_default.intensities)
+
+
 def test_spectrum_plot_same_peak_height():
     intensities_with_zero_variance = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], dtype="float")
     spectrum = _create_test_spectrum_with_intensities(intensities_with_zero_variance)

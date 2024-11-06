@@ -126,7 +126,7 @@ class ModifiedCosine(BaseSimilarity):
                 nonzero_pairs = np.zeros((0, 3))
             matching_pairs = np.concatenate((zero_pairs, nonzero_pairs), axis=0)
             if matching_pairs.shape[0] > 0:
-                matching_pairs = matching_pairs[np.argsort(matching_pairs[:, 2])[::-1], :]
+                matching_pairs = matching_pairs[np.argsort(matching_pairs[:, 2], kind='mergesort')[::-1], :]
             return matching_pairs
 
         spec1 = reference.peaks.to_numpy

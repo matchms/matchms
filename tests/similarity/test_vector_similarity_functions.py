@@ -75,7 +75,7 @@ def test_cosine_similarity_matrix():
     vectors2 = np.array([[0, 1, 1, 0],
                             [0, 0, 1, 1]])
 
-    scores = cosine_similarity_matrix.py_func(vectors1, vectors2)
+    scores = cosine_similarity_matrix(vectors1, vectors2)
     expected_scores = np.array([[0.5, 0.],
                                    [0.40824829, 0.81649658]])
     assert scores == pytest.approx(expected_scores, 1e-7), "Expected different scores."
@@ -149,7 +149,7 @@ def test_dice_similarity_matrix():
     vectors2 = np.array([[0, 1, 1, 0],
                             [1, 0, 1, 1]])
 
-    scores = dice_similarity_matrix.py_func(vectors1, vectors2)
+    scores = dice_similarity_matrix(vectors1, vectors2)
     expected_scores = np.array([[0.5, 0.4],
                                    [0.5, 0.8]])
     assert scores == pytest.approx(expected_scores, 1e-7), "Expected different scores."
@@ -223,7 +223,7 @@ def test_jaccard_similarity_matrix():
     vectors2 = np.array([[0, 1, 1, 0],
                             [1, 0, 1, 1]])
 
-    scores = jaccard_similarity_matrix.py_func(vectors1, vectors2)
+    scores = jaccard_similarity_matrix(vectors1, vectors2)
     expected_scores = np.array([[1/3, 1/4],
                                    [1/3, 2/3]])
     assert scores == pytest.approx(expected_scores, 1e-7), "Expected different scores."

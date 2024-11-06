@@ -36,8 +36,8 @@ class Fragments:
         assert isinstance(mz, np.ndarray), "Input argument 'mz' should be a np.array."
         assert isinstance(intensities, np.ndarray), "Input argument 'intensities' should be a np.array."
         assert mz.shape == intensities.shape, "Input arguments 'mz' and 'intensities' should be the same shape."
-        assert mz.dtype == "float", "Input argument 'mz' should be an array of type float."
-        assert intensities.dtype == "float", "Input argument 'intensities' should be an array of type float."
+        assert mz.dtype.kind == "f", "Input argument 'mz' should be an array of type float."
+        assert intensities.dtype.kind == "f", "Input argument 'intensities' should be an array of type float."
 
         self._mz = mz
         self._intensities = intensities
@@ -63,6 +63,7 @@ class Fragments:
         return np.all(self.mz[:-1] <= self.mz[1:])
 
     def clone(self):
+        """Return a deepcopy of the Fragments instance."""
         return Fragments(self.mz, self.intensities)
 
     @property

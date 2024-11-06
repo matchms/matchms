@@ -27,7 +27,7 @@ If you use matchms in your research, please cite the following software papers:
 
 F Huber, S. Verhoeven, C. Meijer, H. Spreeuw, E. M. Villanueva Castilla, C. Geng, J.J.J. van der Hooft, S. Rogers, A. Belloum, F. Diblen, J.H. Spaaks, (2020). matchms - processing and similarity evaluation of mass spectrometry data. Journal of Open Source Software, 5(52), 2411, https://doi.org/10.21105/joss.02411
 
-de Jonge NF, Hecht H, van der Hooft JJJ, Huber F. (2023). Reproducible MS/MS library cleaning pipeline in matchms. ChemRxiv. Cambridge: Cambridge Open Engage; 2023, https://doi.org/10.26434/chemrxiv-2023-l44cm
+de Jonge NF, Hecht H, Michael Strobel, Mingxun Wang, van der Hooft JJJ, Huber F. (2024). Reproducible MS/MS library cleaning pipeline in matchms. Journal of Cheminformatics, 2024, https://jcheminf.biomedcentral.com/articles/10.1186/s13321-024-00878-1
 
 
 .. |GitHub Badge| image:: https://img.shields.io/badge/github-repo-000.svg?logo=github&labelColor=gray&color=blue
@@ -110,42 +110,35 @@ We realized that many matchms-based workflows aim to compare many-to-many spectr
 ***********************
 Documentation for users
 ***********************
-For more extensive documentation `see our readthedocs <https://matchms.readthedocs.io/en/latest/>`_ and our `matchms introduction tutorial <https://blog.esciencecenter.nl/build-your-own-mass-spectrometry-analysis-pipeline-in-python-using-matchms-part-i-d96c718c68ee>`_.
+For more extensive documentation `see our readthedocs <https://matchms.readthedocs.io/en/latest/>`_, our `matchms introduction tutorial <https://blog.esciencecenter.nl/build-your-own-mass-spectrometry-analysis-pipeline-in-python-using-matchms-part-i-d96c718c68ee>`_ or the `user documentation <https://matchms.github.io/matchms-docs/intro.html>`_.
 
 Installation
 ============
 
 Prerequisites:  
 
-- Python 3.8 - 3.11, (higher versions should work as well, but are not yet tested systematically)
+- Python 3.9 - 3.12, (higher versions should work as well, but are not yet tested systematically)
 - Anaconda (recommended)
 
 We recommend installing matchms in a new virtual environment to avoid dependency clashes
 
 .. code-block:: console
 
-  conda create --name matchms python=3.9
+  conda create --name matchms python=3.11
   conda activate matchms
   conda install --channel bioconda --channel conda-forge matchms
-
-Alternatively, matchms can also be installed using ``pip``. In the most basic version matchms will then come without ``rdkit`` so that several filter functions related to processing and cleaning chemical metadata will not run. To include ``rdkit`` install matchms as ``matchms[chemistry]``:
-
-.. code-block:: console
-
-  pip install matchms  # simple install w/o rdkit
-  pip install matchms[chemistry]  # full install including rdkit
 
 matchms ecosystem -> additional functionalities
 ===============================================
 
-Matchms functionalities can be complemented by additional packages.  
+Additional packages can complement Matchms functionalities.  
 To date, we are aware of:
 
-+ `Spec2Vec <https://github.com/iomega/spec2vec>`_ an alternative machine-learning spectral similarity score that can simply be installed by `pip install spec2vec` and be imported as `from spec2vec import Spec2Vec` following the same API as the scores in `matchms.similarity`.
++ `Spec2Vec <https://github.com/iomega/spec2vec>`_ an alternative machine-learning spectral similarity score that can be installed by `pip install spec2vec` and be imported as `from spec2vec import Spec2Vec` following the same API as the scores in `matchms.similarity`.
 
-+ `MS2DeepScore <https://github.com/matchms/ms2deepscore>`_ a supervised, deep-learning based spectral similarity score that can simply be installed by `pip install ms2deepscore` and be imported as `from ms2deepscore import MS2DeepScore` following the same API as the scores in `matchms.similarity`.
++ `MS2DeepScore <https://github.com/matchms/ms2deepscore>`_ a supervised, deep-learning based spectral similarity score that can be installed by `pip install ms2deepscore` and be imported as `from ms2deepscore import MS2DeepScore` following the same API as the scores in `matchms.similarity`.
 
-+ `matchmsextras <https://github.com/matchms/matchmsextras>`_ which contains additional functions to create networks based on spectral similarities, to run spectrum searchers against `PubChem`, or additional plotting methods.
++ `matchmsextras <https://github.com/matchms/matchmsextras>`_ contains additional functions to create networks based on spectral similarities, run spectrum searchers against `PubChem`, or additional plotting methods.
 
 + `MS2Query <https://github.com/iomega/ms2query>`_ Reliable and fast MS/MS spectral-based analogue search, running on top of matchms.
 
@@ -153,9 +146,9 @@ To date, we are aware of:
 
 + `RIAssigner <https://github.com/RECETOX/RIAssigner>`_ a tool for retention index calculation for gas chromatography - mass spectrometry (GC-MS) data.
 
-+ `MSMetaEnhancer <https://github.com/RECETOX/MSMetaEnhancer>`_ is a python package to collect mass spectral library metadata using various web services and computational chemistry packages.
++ `MSMetaEnhancer <https://github.com/RECETOX/MSMetaEnhancer>`_ is a Python package to collect mass spectral library metadata using various web services and computational chemistry packages.
 
-+ `cudams <https://github.com/tornikeo/cudams>`_ is a python package for fast similarity calculations, using GPU's to speed up the cosine score calculations by 100-500x compared to the standard matchms implementation. 
++ `SimMS <https://github.com/PangeAI/SimMS>`_ is a python package with fast GPU-based implementations of common similarity classes such as `CudaCosineGreedy`, and `CudaModifiedCosine`.
 
 *(if you know of any other packages that are fully compatible with matchms, let us know!)*
 
@@ -165,7 +158,7 @@ Introduction
 To get started with matchms, we recommend following our `matchms introduction tutorial <https://blog.esciencecenter.nl/build-your-own-mass-spectrometry-analysis-pipeline-in-python-using-matchms-part-i-d96c718c68ee>`_.
 
 Below is an example of using default filter steps for cleaning spectra, 
-followed by calculating the Cosine score between mass Spectrums in the `tests/testdata/pesticides.mgf <https://github.com/matchms/matchms/blob/master/tests/testdata/pesticides.mgf>`_ file.
+followed by calculating the Cosine score between mass Spectra in the `tests/testdata/pesticides.mgf <https://github.com/matchms/matchms/blob/master/tests/testdata/pesticides.mgf>`_ file.
 
 .. code-block:: python
 
@@ -216,27 +209,27 @@ Alternatively, in particular, if you need more room to add custom functions and 
     from matchms import calculate_scores
     from matchms.similarity import CosineGreedy
 
-    # Read spectrums from a MGF formatted file, for other formats see https://matchms.readthedocs.io/en/latest/api/matchms.importing.html 
+    # Read spectra from a MGF formatted file, for other formats see https://matchms.readthedocs.io/en/latest/api/matchms.importing.html 
     file = load_from_mgf("tests/testdata/pesticides.mgf")
 
     # Apply filters to clean and enhance each spectrum
-    spectrums = []
+    spectra = []
     for spectrum in file:
         # Apply default filter to standardize ion mode, correct charge and more.
         # Default filter is fully explained at https://matchms.readthedocs.io/en/latest/api/matchms.filtering.html .
         spectrum = default_filters(spectrum)
         # Scale peak intensities to maximum of 1
         spectrum = normalize_intensities(spectrum)
-        spectrums.append(spectrum)
+        spectra.append(spectrum)
 
-    # Calculate Cosine similarity scores between all spectrums
+    # Calculate Cosine similarity scores between all spectra
     # For other similarity score methods see https://matchms.readthedocs.io/en/latest/api/matchms.similarity.html .
-    scores = calculate_scores(references=spectrums,
-                              queries=spectrums,
+    scores = calculate_scores(references=spectra,
+                              queries=spectra,
                               similarity_function=CosineGreedy())
 
     # Matchms allows to get the best matches for any query using scores_by_query
-    query = spectrums[15]  # just an example
+    query = spectra[15]  # just an example
     best_matches = scores.scores_by_query(query, 'CosineGreedy_score', sort=True)
 
     # Print the calculated scores for each spectrum pair
@@ -253,7 +246,7 @@ Alternatively, in particular, if you need more room to add custom functions and 
 Different spectrum similarity scores
 ====================================
 
-Matchms comes with numerous different scoring methods in `matchms.similarity` and can further seamlessly work with `Spec2Vec` or `MS2DeepScore`.
+Matchms comes with numerous different scoring methods in `matchms.similarity` but can also be supplemented by scores from external packages such as `Spec2Vec` or `MS2DeepScore`.
 
 Code example: 
 
@@ -303,12 +296,12 @@ To install matchms, do:
 
   git clone https://github.com/matchms/matchms.git
   cd matchms
-  conda create --name matchms-dev python=3.8
+  conda create --name matchms-dev python=3.11
   conda activate matchms-dev
   # Install rdkit using conda, rest of dependencies can be installed with pip
   conda install -c conda-forge rdkit
   python -m pip install --upgrade pip
-  pip install --editable .[dev]  # if this won't work try "poetry install"
+  pip install --editable .[dev]  # if this won't work try "poetry install --with dev"
 
 Run the linter with:
 
@@ -351,9 +344,14 @@ Flowchart
   :width: 400
   :alt: Flowchart
   
-  Flowchart of matchms workflow. Reference and query spectrums are filtered using the same
+  Flowchart of matchms workflow. Reference and query spectra are filtered using the same
   set of set filters (here: filter A and filter B). Once filtered, every reference spectrum is compared to
   every query spectrum using the matchms.Scores object.
+
+Support
+============
+
+To get support join the public `Slack channel <https://join.slack.com/t/matchms/shared_invite/zt-2l0t61651-Svv0d5hwl~P5jwV4ZCNFXg>`_.
 
 Contributing
 ============
@@ -365,7 +363,7 @@ have a look at the `contribution guidelines <CONTRIBUTING.md>`_.
 License
 *******
 
-Copyright (c) 2023, Düsseldorf University of Applied Sciences & Netherlands eScience Center
+Copyright (c) 2024, Düsseldorf University of Applied Sciences & Netherlands eScience Center
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

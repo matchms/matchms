@@ -17,7 +17,7 @@ class MetadataMatch(BaseSimilarity):
     This is supposed to be used to compare a wide range of possible metadata entries and
     use this to later select related or similar spectra.
 
-    Example to calculate scores between 2 pairs of spectrums and iterate over the scores
+    Example to calculate scores between 2 pairs of spectra and iterate over the scores
 
     .. testcode::
 
@@ -73,8 +73,9 @@ class MetadataMatch(BaseSimilarity):
         field
             Specify field name for metadata that should be compared.
         matching_type
-            Specify how field entries should be matched. Can be one of
-            ["equal_match", "difference"].
+            Specify how field entries should be matched. Can be one of ["equal_match", "difference"].
+            "equal_match": Entries must be exactly equal (default). "difference": Entries are considered
+            a match if their numerical difference is less than or equal to "tolerance".
         tolerance
             Specify tolerance below which two values are counted as match.
             This only applied to numerical values.
@@ -119,9 +120,9 @@ class MetadataMatch(BaseSimilarity):
         Parameters
         ----------
         references
-            List/array of reference spectrums.
+            List/array of reference spectra.
         queries
-            List/array of Single query spectrums.
+            List/array of Single query spectra.
         array_type
             Specify the output array type. Can be "numpy" or "sparse".
             Default is "numpy" and will return a numpy array. "sparse" will return a COO-sparse array.
@@ -130,10 +131,14 @@ class MetadataMatch(BaseSimilarity):
             comparison). By using the fact that score[i,j] = score[j,i] the calculation will be about
             2x faster.
         """
-        def collect_entries(spectrums):
+        # pylint: disable=too-many-locals
+        if array_type not in ["numpy", "sparse"]:
+            raise ValueError("array_type must be 'numpy' or 'sparse'.")
+
+        def collect_entries(spectra):
             """Collect metadata entries."""
             entries = []
-            for spectrum in spectrums:
+            for spectrum in spectra:
                 entry = spectrum.get(self.field)
                 if entry is None:
                     msg = f"No {self.field} entry found for spectrum."
@@ -150,25 +155,32 @@ class MetadataMatch(BaseSimilarity):
         entries_query = collect_entries(queries)
 
         if self.matching_type == "equal_match":
-            scores = np.zeros((len(entries_ref), len(entries_query)))
+            if self.tolerance != 0:
+                msg = "Tolerance is set but will be ignored because 'equal_match' does not use tolerance."
+                logger.warning(msg)
+
+            rows, cols = [], []
             for i, entry in enumerate(entries_query):
-                idx = np.where(entries_ref == entry)
-                scores[idx, i] = 1
-            return scores.astype(self.score_datatype)
+                idx = np.where(entries_ref == entry)[0]
+                rows.extend(idx)
+                cols.extend([i] * len(idx))
 
-        if is_symmetric:
-            rows, cols, scores = number_matching_symmetric(entries_ref,
-                                                           self.tolerance)
+            rows = np.array(rows)
+            cols = np.array(cols)
+            scores = np.ones(len(rows))
         else:
-            rows, cols, scores = number_matching(entries_ref, entries_query,
-                                                 self.tolerance)
+            if is_symmetric:
+                rows, cols, scores = number_matching_symmetric(entries_ref,
+                                                               self.tolerance)
+            else:
+                rows, cols, scores = number_matching(entries_ref, entries_query,
+                                                     self.tolerance)
 
-        if array_type == "numpy":
-            scores_array = np.zeros((len(entries_ref), len(entries_query)))
-            scores_array[rows, cols] = scores.astype(self.score_datatype)
-            return scores_array
         if array_type == "sparse":
             scores_array = StackedSparseArray(len(entries_ref), len(entries_query))
             scores_array.add_sparse_data(rows, cols, scores.astype(self.score_datatype), "")
-            return scores_array
-        raise ValueError("")
+        else:
+            scores_array = np.zeros((len(entries_ref), len(entries_query)), dtype=self.score_datatype)
+            scores_array[rows, cols] = scores.astype(self.score_datatype)
+
+        return scores_array

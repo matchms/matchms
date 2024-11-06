@@ -29,8 +29,8 @@ class SimilarityNetwork:
 
         # Use factory to construct a similarity function
         modified_cosine = ModifiedCosine(tolerance=0.2)
-        spectrums = [spectrum_1, spectrum_2]
-        scores = calculate_scores(spectrums, spectrums, modified_cosine)
+        spectra = [spectrum_1, spectrum_2]
+        scores = calculate_scores(spectra, spectra, modified_cosine)
         ms_network = SimilarityNetwork(identifier_key="test_id")
         ms_network.create_network(scores, score_name="ModifiedCosine_score")
 
@@ -65,7 +65,7 @@ class SimilarityNetwork:
         max_links
             Maximum number of links to add per node. Default = 10.
             Due to incoming links, total number of links per node can be higher.
-            The links are populated by looping over the query spectrums.
+            The links are populated by looping over the query spectra.
             Important side note: The max_links restriction is strict which means that
             if scores around max_links are equal still only max_links will be added
             which can results in some random variations (sorting spectra with equal
@@ -101,14 +101,19 @@ class SimilarityNetwork:
         Parameters
         ----------
         scores
-            Matchms Scores object containing all spectrums and pair similarities for
+            Matchms Scores object containing all spectra and pair similarities for
             generating a network.
         """
         if score_name is None:
             score_name = scores.scores.guess_score_name()
         assert self.top_n >= self.max_links, "top_n must be >= max_links"
-        assert np.all(scores.queries == scores.references), \
-            "Expected symmetric scores object with queries==references"
+
+        if scores.queries.shape != scores.references.shape:
+            raise TypeError("Expected symmetric scores")
+
+        if not np.all(scores.queries == scores.references):
+            raise ValueError("Queries and references do not match")
+
         unique_ids = list({s.get(self.identifier_key) for s in scores.queries})
 
         # Initialize network graph, add nodes

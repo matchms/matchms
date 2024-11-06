@@ -33,7 +33,7 @@ def load_from_msp(filename: str,
 
         # Download msp file from MassBank of North America repository at https://mona.fiehnlab.ucdavis.edu/
         file_msp = "MoNA-export-GC-MS-first10.msp"
-        spectrums = list(load_from_msp(file_msp))
+        spectra = list(load_from_msp(file_msp))
     """
     for spectrum in parse_msp_file(filename):
         yield parse_spectrum_dict(
@@ -55,7 +55,7 @@ def parse_msp_file(filename: str) -> Generator[dict, None, None]:
     # Peaks counter. Used to track and count the number of peaks
     peakscount = 0
 
-    with open(filename, 'r', encoding='utf-8') as f:
+    with open(filename, 'r', encoding='utf-8', errors="ignore") as f:
         for line in f:
             rline = line.rstrip()
 

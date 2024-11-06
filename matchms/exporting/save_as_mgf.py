@@ -1,15 +1,15 @@
 from typing import List, Union
 import pyteomics.mgf as py_mgf
 from ..Spectrum import Spectrum
-from ..utils import fingerprint_export_warning
+from ..utils import (filter_empty_spectra, fingerprint_export_warning,
+                     rename_deprecated_params)
 
 
-def save_as_mgf(spectrums: Union[List[Spectrum], Spectrum],
+@rename_deprecated_params(param_mapping={"spectrums": "spectra"}, version="0.26.5")
+def save_as_mgf(spectra: Union[List[Spectrum], Spectrum],
                 filename: str,
                 export_style: str = "matchms"):
     """Save spectrum(s) as mgf file.
-
-    :py:attr:`~matchms.Spectrum.losses` of spectrum will not be saved.
 
     Example:
 
@@ -31,7 +31,7 @@ def save_as_mgf(spectrums: Union[List[Spectrum], Spectrum],
 
     Parameters
     ----------
-    spectrums:
+    spectra:
         Expected input are match.Spectrum.Spectrum() objects.
     filename:
         Provide filename to save spectrum(s).
@@ -39,15 +39,16 @@ def save_as_mgf(spectrums: Union[List[Spectrum], Spectrum],
         Converts the keys to the required export style. One of ["matchms", "massbank", "nist", "riken", "gnps"].
         Default is "matchms"
     """
-    if not isinstance(spectrums, list):
+    if not isinstance(spectra, list):
         # Assume that input was single Spectrum
-        spectrums = [spectrums]
+        spectra = [spectra]
 
-    fingerprint_export_warning(spectrums)
+    spectra = filter_empty_spectra(spectra)
+    fingerprint_export_warning(spectra)
 
-    def spectrum_dict_generator(matchms_spectrums):
+    def spectrum_dict_generator(matchms_spectra):
         """Generates dictionaries in the format expected by py_mgf"""
-        for spectrum in matchms_spectrums:
+        for spectrum in matchms_spectra:
             spectrum_dict = {"m/z array": spectrum.peaks.mz,
                              "intensity array": spectrum.peaks.intensities,
                              "params": spectrum.metadata_dict(export_style)}
@@ -55,4 +56,4 @@ def save_as_mgf(spectrums: Union[List[Spectrum], Spectrum],
                 del spectrum_dict["params"]["fingerprint"]
             yield spectrum_dict
 
-    py_mgf.write(spectrum_dict_generator(spectrums), filename, file_mode="a")
+    py_mgf.write(spectrum_dict_generator(spectra), filename, file_mode="a", encoding="utf-8")

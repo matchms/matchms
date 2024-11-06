@@ -9,8 +9,8 @@ from ..builder_Spectrum import SpectrumBuilder
 
 def load_test_spectra_file(test_filename):
     module_root = os.path.join(os.path.dirname(__file__), "..")
-    spectrums_file = os.path.join(module_root, "testdata", test_filename)
-    spectra = list(load_from_mgf(spectrums_file))
+    spectra_file = os.path.join(module_root, "testdata", test_filename)
+    spectra = list(load_from_mgf(spectra_file))
     return spectra
 
 
@@ -51,11 +51,12 @@ def test_save_as_mgf_spectrum_list():
                                       metadata_harmonization=False).build()
     spectrum2 = builder.with_metadata({"test_field": "test2"},
                                       metadata_harmonization=False).build()
+    spectrum3 = None
 
     # Write to test file
     with tempfile.TemporaryDirectory() as d:
         filename = os.path.join(d, "test.mgf")
-        save_as_mgf([spectrum1, spectrum2], filename)
+        save_as_mgf([spectrum1, spectrum2, spectrum3], filename)
 
         # test if file exists
         assert os.path.isfile(filename)
@@ -66,6 +67,9 @@ def test_save_as_mgf_spectrum_list():
         assert mgf_content[5] == mgf_content[12] == "END IONS\n"
         assert mgf_content[1].split("=")[1] == "test1\n"
         assert mgf_content[8].split("=")[1] == "test2\n"
+
+        end_ion_count_actual = len([x for x in mgf_content if x == "END IONS\n"])
+        assert end_ion_count_actual == 2
 
 
 @pytest.mark.parametrize("style, expected",

@@ -5,25 +5,85 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+## [0.27.0] -2024-07-10
+
+### Changed
+- Avoid using unstable sorting while sorting collected matching peaks [#636](https://github.com/matchms/matchms/pull/636).
+- Losses will no longer be stored as part of a `Spectrum` object, but will be computed on the fly (using `spectrum.losses` or `spectrum.compute_losses(loss_mz_from, loss_mz_to)`)[#681](https://github.com/matchms/matchms/pull/681)
+- Jaccard/Tanimoto `@njit`/numba-based similarity functions were replaced by 10-50x faster numpy matrix multiplications [#638](https://github.com/matchms/matchms/pull/638).
+- Dependencies were updated to allow newer numpy and numba versions [691](https://github.com/matchms/matchms/pull/691).
+- Renamed method names and parameters to align `spectrums` -> `spectra`
+- Python support changed from 3.8 - 3.11 to 3.9 to 3.12, and dependency versions were updated [640](https://github.com/matchms/matchms/pull/640).
+
+### Removed
+- `add_losses()` filter was removed. Losses will no longer be stored as part of a `Spectrum` object, but will be computed on the fly [#681](https://github.com/matchms/matchms/pull/681).
+
+### Fixed
+- Remove empty spectra before exporting to file [#686](https://github.com/matchms/matchms/pull/686).
+- Name position in mirror plots [#678](https://github.com/matchms/matchms/pull/678).
+
+## [0.26.4] -2024-06-14
+
+### Added
+- Added require_maximum_number_of_peaks as filter
+- Added derive_formula_from_smiles as filter
+
+## [0.26.3] -2024-06-07
+
+### Added
+- repair_adduct_and_parent_mass_based_on_smiles does not repair parent mass anymore if it is already close to the smiles
+- repair_paren_mass_from_smiles was added as a filter
+
+## [0.26.2] -2024-06-03
+### Added
+- Added require correct ms level
+
+### Changed
+- Fixed bug in repair_adduct_and_parent_mass_based_on_smiles if mass from smiles is None
+
+## [0.26.1] -2024-06-03
+### Changed
+- Fixed bug. Removing spectra in spectrum processor would break the saving, since trying to save None values.
+
+## [0.26.0] -2024-06-03
+
+## Unreleased
+### Added
+- Added remove_profile_spectra filter
+- Allowed peaks to have any floating point dtype
+- Added require_matching_ionmode_and_adduct filter
+- Added remove_noise_below_frequent_intensities
+
+### Removed:
+- Require_precursor_below_mz is deprecated, require_precursor_mz now also allows for argument maximum_mz 
+
+
+## [0.25.0] -2024-05-21
 ### Added
 - filters `require_formula` and `require_compound_name`. [#627](https://github.com/matchms/matchms/pull/627)
 - filters `require_retention_time` and `require_retention_index`. [#585](https://github.com/matchms/matchms/pull/602)
 
-### changed
+### Changed
 - Removed repair_precursor_is_parent_mass
 - repair_adduct_based_on_smiles does not repair adducts [M]+ and [M]- anymore, since these cases could also be due to a mistake in filling in the parent mass instead of the precursor mz. 
 - repair_parent_mass_is_molar_weight does only repair parent mass and does not change the precursor mz.
 - Change repair_parent_mass_is_mol_wt to repair_parent_mass_is_molar_mass
+- `SpectrumProcessor` will try to incrementally save when destination files are of type .msp or .mgf
+- Use StackedSparseArray for MetadataMatch equal_match when array_type is sparse [#642](https://github.com/matchms/matchms/pull/642)
+- Set RDKIT version to rdkit = ">=2023.3.2,<2023.9.5" to fix installation issues. 
 
 ## [0.24.4] -2024-01-16
-### changed
+### Changed
 - return processing_report by pipeline
 
 ## [0.24.3] -2024-01-16
-### changed
+### Changed
 - Removed repair_precursor_is_parent_mass
 
 - Removed option accept_parent_mass_is_mol_wt in Repair_adduct_based_on_smiles
+- Merged require_precursor_mz and require_precursor_mz_below_mz into require_precursor_mz_below_mz
 - Added repair_adduct_based_on_parent_mass
 - Changed repair_adduct_and_parent_mass_based_on_smiles to update parent mass to the monoisotopic mass of the smiles, instead of updating based on precursor_mz and new adduct. 
 ## [0.24.1] -2024-01-16
@@ -638,7 +698,17 @@ Contains three plot types: `plot_spectrum()` or `spectrum.plot()`, `plot_spectra
 - This is the initial version of Spec2Vec from https://github.com/iomega/Spec2Vec
 - (later splitted into matchms + spec2vec)
 
-[Unreleased]: https://github.com/matchms/matchms/compare/0.24.1...HEAD
+[Unreleased]: https://github.com/matchms/matchms/compare/0.27.0...HEAD
+[0.27.0]: https://github.com/matchms/matchms/compare/0.26.4...0.27.0
+[0.26.4]: https://github.com/matchms/matchms/compare/0.26.3...0.26.4
+[0.26.3]: https://github.com/matchms/matchms/compare/0.26.2...0.26.3
+[0.26.2]: https://github.com/matchms/matchms/compare/0.26.1...0.26.2
+[0.26.1]: https://github.com/matchms/matchms/compare/0.26.0...0.26.1
+[0.26.0]: https://github.com/matchms/matchms/compare/0.25.0...0.26.0
+[0.25.0]: https://github.com/matchms/matchms/compare/0.24.4...0.25.0
+[0.24.4]: https://github.com/matchms/matchms/compare/0.24.3...0.24.4
+[0.24.3]: https://github.com/matchms/matchms/compare/0.24.2...0.24.3
+[0.24.2]: https://github.com/matchms/matchms/compare/0.24.1...0.24.2
 [0.24.1]: https://github.com/matchms/matchms/compare/0.24.0...0.24.1
 [0.24.0]: https://github.com/matchms/matchms/compare/0.23.1...0.24.0
 [0.22.0]: https://github.com/matchms/matchms/compare/0.21.2...0.22.0

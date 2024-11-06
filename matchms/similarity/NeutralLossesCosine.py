@@ -91,7 +91,7 @@ class NeutralLossesCosine(BaseSimilarity):
             if matching_pairs is None:
                 return None
             if matching_pairs.shape[0] > 0:
-                matching_pairs = matching_pairs[np.argsort(matching_pairs[:, 2])[::-1], :]
+                matching_pairs = matching_pairs[np.argsort(matching_pairs[:, 2], kind='mergesort')[::-1], :]
             return matching_pairs
 
         precursor_mz_ref = get_valid_precursor_mz(reference)

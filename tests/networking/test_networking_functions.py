@@ -2,13 +2,13 @@ import numpy as np
 from matchms import calculate_scores
 from matchms.networking.networking_functions import get_top_hits
 from matchms.similarity import FingerprintSimilarity
-from .test_SimilarityNetwork import create_dummy_spectrums
+from .test_SimilarityNetwork import create_dummy_spectra
 
 
 def create_dummy_scores():
-    spectrums = create_dummy_spectrums()
-    references = spectrums[:5]
-    queries = spectrums[5:]
+    spectra = create_dummy_spectra()
+    references = spectra[:5]
+    queries = spectra[5:]
 
     # Create Scores object by calculating dice scores
     similarity_measure = FingerprintSimilarity("dice")

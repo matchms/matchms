@@ -6,6 +6,7 @@ from functools import partial
 from typing import Callable, Dict, Iterable, List, Optional, Tuple, Union
 import numpy as np
 import pandas as pd
+from deprecated import deprecated
 from tqdm import tqdm
 from matchms import Spectrum
 from matchms.exporting import save_spectra
@@ -160,17 +161,19 @@ class SpectrumProcessor:
             spectrum = spectrum_out
         return spectrum
 
-    def process_spectrums(self, spectrums: list,
+    @deprecated(version="0.26.5",
+                reason="This method is deprecated and will be removed in the future. Use 'process_spectra()' instead.")
+    def process_spectrums(self, spectra: list,
                           progress_bar: bool = True,
                           cleaned_spectra_file=None
                           ):
         """
-        Process a list of spectrums with all filters in the processing pipeline.
+        Wrapper method for process_spectra()
 
         Parameters
         ----------
-        spectrums : list[Spectrum]
-            The spectrums to process.
+        spectra : list[Spectrum]
+            The spectra to process.
         create_report: bool, optional
             Creates and outputs a report of the main changes during processing.
             The report will be returned as pandas DataFrame. Default is set to False.
@@ -178,33 +181,65 @@ class SpectrumProcessor:
             Displays progress bar if set to True. Default is True.
         cleaned_spectra_file:
             Path to where the cleaned spectra should be saved.
-
         Returns
         -------
-        Spectrums
-            List containing the processed spectrums.
+        spectra
+            List containing the processed spectra.
+        processing_report
+            A ProcessingReport containing the effect of the filters.
+        """
+        return self.process_spectra(spectra, progress_bar, cleaned_spectra_file)
+
+    def process_spectra(self, spectra: list,
+                          progress_bar: bool = True,
+                          cleaned_spectra_file=None
+                          ):
+        """
+        Process a list of spectra with all filters in the processing pipeline.
+
+        Parameters
+        ----------
+        spectra : list[Spectrum]
+            The spectra to process.
+        create_report: bool, optional
+            Creates and outputs a report of the main changes during processing.
+            The report will be returned as pandas DataFrame. Default is set to False.
+        progress_bar : bool, optional
+            Displays progress bar if set to True. Default is True.
+        cleaned_spectra_file:
+            Path to where the cleaned spectra should be saved.
+        Returns
+        -------
+        spectra
+            List containing the processed spectra.
         processing_report
             A ProcessingReport containing the effect of the filters.
         """
         if cleaned_spectra_file is not None:
             if os.path.exists(cleaned_spectra_file):
                 raise FileExistsError("The specified save references file already exists")
+            ftype = os.path.splitext(cleaned_spectra_file)[1].lower()[1:]
+            incremental_save = ftype in ('mgf', 'msp')
+
         if not self.filters:
             logger.warning("No filters have been specified, so spectra were not filtered")
         processing_report = ProcessingReport(self.filters)
 
-        processed_spectrums = []
-        for s in tqdm(spectrums, disable=(not progress_bar), desc="Processing spectrums"):
+        processed_spectra = []
+        for s in tqdm(spectra, disable=(not progress_bar), desc="Processing spectra"):
             if s is None:
                 continue  # empty spectra will be discarded
             processed_spectrum = self.process_spectrum(s, processing_report)
             if processed_spectrum is not None:
-                processed_spectrums.append(processed_spectrum)
+                processed_spectra.append(processed_spectrum)
 
-        if cleaned_spectra_file is not None:
-            save_spectra(processed_spectrums, cleaned_spectra_file)
+                if cleaned_spectra_file is not None and incremental_save:
+                    save_spectra(processed_spectrum, cleaned_spectra_file, append=True)
 
-        return processed_spectrums, processing_report
+        if cleaned_spectra_file is not None and not incremental_save:
+            save_spectra(processed_spectra, cleaned_spectra_file)
+
+        return processed_spectra, processing_report
 
     @property
     def processing_steps(self):
@@ -279,7 +314,7 @@ class ProcessingReport:
         else:
             self.filter_names = []
         self.counter_changed_metadata = defaultdict(int)
-        self.counter_removed_spectrums = defaultdict(int)
+        self.counter_removed_spectra = defaultdict(int)
         self.counter_changed_peaks = defaultdict(int)
         self.counter_number_processed = 0
 
@@ -288,20 +323,20 @@ class ProcessingReport:
         """Add changes between spectrum_old and spectrum_new to the report.
         """
         if spectrum_new is None:
-            self.counter_removed_spectrums[filter_function_name] += 1
+            self.counter_removed_spectra[filter_function_name] += 1
         else:
             # Add metadata changes
             if spectrum_new.metadata != spectrum_old.metadata:
                 self.counter_changed_metadata[filter_function_name] += 1
             # Add peak changes
-            if spectrum_new.peaks != spectrum_old.peaks or spectrum_new.losses != spectrum_old.losses:
+            if spectrum_new.peaks != spectrum_old.peaks:
                 self.counter_changed_peaks[filter_function_name] += 1
 
     def to_dataframe(self):
         """Create Pandas DataFrame Report of counted spectrum changes."""
         metadata_changed = pd.DataFrame(self.counter_changed_metadata.items(),
                                         columns=["filter", "changed metadata"])
-        removed = pd.DataFrame(self.counter_removed_spectrums.items(),
+        removed = pd.DataFrame(self.counter_removed_spectra.items(),
                                columns=["filter", "removed spectra"])
         peaks_changed = pd.DataFrame(self.counter_changed_peaks.items(),
                                      columns=["filter", "changed mass spectrum"])
@@ -313,23 +348,28 @@ class ProcessingReport:
             if filter_name not in processing_report["filter"].values:
                 processing_report.loc[len(processing_report)] = {"filter": filter_name}
 
-        processing_report = processing_report.set_index("filter").fillna(0)
+        try:
+            with pd.option_context("future.no_silent_downcasting", True):
+                processing_report = processing_report.set_index("filter").infer_objects().fillna(0)
+        except pd.errors.OptionError:
+            processing_report = processing_report.set_index("filter").fillna(0)
+
         return processing_report.astype(int)
 
     def __str__(self):
         pd.set_option('display.max_columns', 4)
         pd.set_option('display.width', 1000)
         report_str = ("----- Spectrum Processing Report -----\n"
-                      f"Number of spectrums processed: {self.counter_number_processed}\n"
-                      f"Number of spectrums removed: {sum(self.counter_removed_spectrums.values())}\n"
+                      f"Number of spectra processed: {self.counter_number_processed}\n"
+                      f"Number of spectra removed: {sum(self.counter_removed_spectra.values())}\n"
                       "Changes during processing:\n"
                       f"{str(self.to_dataframe())}")
         return report_str
 
     def __repr__(self):
         return f"Report({self.counter_number_processed},\
-        {self.counter_removed_spectrums},\
-        {dict(self.counter_removed_spectrums)},\
+        {self.counter_removed_spectra},\
+        {dict(self.counter_removed_spectra)},\
         {dict(self.counter_changed_metadata)},\
         {dict(self.counter_changed_peaks)})"
 

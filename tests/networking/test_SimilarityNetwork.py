@@ -20,33 +20,33 @@ def filename(graph_format):
         yield filepath
 
 
-def create_dummy_spectrums():
-    """Create dummy spectrums"""
+def create_dummy_spectra():
+    """Create dummy spectra"""
     fingerprints1 = [[1, 0, 0], [0, 1, 0], [0, 0, 1], [1, 1, 0], [1, 0, 1]]
     fingerprints2 = [[1, 0, 1], [0, 1, 1], [1, 1, 1]]
-    spectrums = []
+    spectra = []
     for i, fp in enumerate(fingerprints1):
-        spectrums.append(Spectrum(mz=np.array([100, 200.]),
+        spectra.append(Spectrum(mz=np.array([100, 200.]),
                                   intensities=np.array([0.7, 0.1 * i]),
                                   metadata={"spectrum_id": 'ref_spec_'+str(i),
                                             "fingerprint": np.array(fp),
                                             "smiles": 'C1=CC=C2C(=C1)NC(=N2)C3=CC=CO3',
                                             "precursor_mz": 100+50*i}))
     for i, fp in enumerate(fingerprints2):
-        spectrums.append(Spectrum(mz=np.array([100, 200.]),
+        spectra.append(Spectrum(mz=np.array([100, 200.]),
                                   intensities=np.array([0.5, 0.1 * i]),
                                   metadata={"spectrum_id": 'query_spec_'+str(i),
                                             "fingerprint": np.array(fp),
                                             "smiles": 'CC1=C(C=C(C=C1)NC(=O)N(C)C)Cl',
                                             "precursor_mz": 110+50*i}))
-    return spectrums
+    return spectra
 
 
 def create_dummy_scores():
     """Creat asymmetric scores object (references != queries)"""
-    spectrums = create_dummy_spectrums()
-    references = spectrums[:5]
-    queries = spectrums[5:]
+    spectra = create_dummy_spectra()
+    references = spectra[:5]
+    queries = spectra[5:]
 
     # Create Scores object by calculating dice scores
     similarity_measure = FingerprintSimilarity("dice")
@@ -55,20 +55,32 @@ def create_dummy_scores():
 
 
 def create_dummy_scores_symmetric():
-    spectrums = create_dummy_spectrums()
+    spectra = create_dummy_spectra()
 
     # Create Scores object by calculating dice scores
     similarity_measure = FingerprintSimilarity("dice")
-    scores = calculate_scores(spectrums, spectrums, similarity_measure)
+    scores = calculate_scores(spectra, spectra, similarity_measure)
     return scores
 
 
+def create_dummy_scores_symmetric_faulty():
+    scores = create_dummy_scores_symmetric()
+    faulty_spec = Spectrum(mz=np.array([100, 400.]),
+                           intensities=np.array([0.5, 0.1 * 4]),
+                           metadata={"spectrum_id": 'query_spec_400',
+                                     "fingerprint": np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1], [1, 1, 0], [1, 0, 1]]),
+                                     "smiles": 'CC1=C(C=C(C=C1)NC(=O)N(C)C)Cl',
+                                     "precursor_mz": 110 + 50 * 4})
+    scores.queries[0] = faulty_spec
+
+    return scores
+
 def create_dummy_scores_symmetric_modified_cosine():
-    spectrums = create_dummy_spectrums()
+    spectra = create_dummy_spectra()
 
     # Create Scores object by calculating dice scores
     similarity_measure = ModifiedCosine()
-    scores = calculate_scores(spectrums, spectrums, similarity_measure)
+    scores = calculate_scores(spectra, spectra, similarity_measure)
     return scores
 
 
@@ -76,10 +88,17 @@ def test_create_network_symmetric_wrong_input():
     """Test if function is used with non-symmetric scores object"""
     scores = create_dummy_scores()
     msnet = SimilarityNetwork()
-    with pytest.raises(AssertionError) as msg:
+    with pytest.raises(TypeError) as msg:
         msnet.create_network(scores)
 
-    expected_msg = "Expected symmetric scores object with queries==references"
+    expected_msg = "Expected symmetric scores"
+    assert expected_msg in str(msg), "Expected different exception"
+
+    scores = create_dummy_scores_symmetric_faulty()
+    with pytest.raises(ValueError) as msg:
+        msnet.create_network(scores)
+
+    expected_msg = "Queries and references do not match"
     assert expected_msg in str(msg), "Expected different exception"
 
 

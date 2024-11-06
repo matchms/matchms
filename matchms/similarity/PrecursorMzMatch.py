@@ -9,11 +9,11 @@ from .BaseSimilarity import BaseSimilarity
 
 
 class PrecursorMzMatch(BaseSimilarity):
-    """Return True if spectrums match in precursor m/z (within tolerance), and False otherwise.
+    """Return True if spectra match in precursor m/z (within tolerance), and False otherwise.
     The match within tolerance can be calculated based on an absolute m/z difference
     (tolerance_type="Dalton") or based on a relative difference in ppm (tolerance_type="ppm").
 
-    Example to calculate scores between 2 pairs of spectrums and iterate over the scores
+    Example to calculate scores between 2 pairs of spectra and iterate over the scores
 
     .. testcode::
 
@@ -99,9 +99,9 @@ class PrecursorMzMatch(BaseSimilarity):
         Parameters
         ----------
         references
-            List/array of reference spectrums.
+            List/array of reference spectra.
         queries
-            List/array of Single query spectrums.
+            List/array of Single query spectra.
         array_type
             Specify the output array type. Can be "numpy" or "sparse".
             Default is "numpy" and will return a numpy array. "sparse" will return a COO-sparse array.
@@ -110,10 +110,10 @@ class PrecursorMzMatch(BaseSimilarity):
             comparison). By using the fact that score[i,j] = score[j,i] the calculation will be about
             2x faster.
         """
-        def collect_precursormz(spectrums):
+        def collect_precursormz(spectra):
             """Collect precursors."""
             precursors = []
-            for spectrum in spectrums:
+            for spectrum in spectra:
                 precursormz = spectrum.get("precursor_mz")
                 assert precursormz is not None, "Missing precursor m/z."
                 precursors.append(precursormz)

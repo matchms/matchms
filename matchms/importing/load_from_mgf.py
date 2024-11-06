@@ -1,3 +1,4 @@
+import os
 from typing import Generator, TextIO, Union
 from pyteomics.mgf import MGF
 from matchms.importing.parsing_utils import parse_spectrum_dict
@@ -33,8 +34,14 @@ def load_from_mgf(filename: Union[str, TextIO],
         Set to False if metadata harmonization to default keys is not desired.
         The default is True.
     """
-    with MGF(filename, convert_arrays=1) as reader:
-        for pyteomics_spectrum in reader:
-            yield parse_spectrum_dict(
-                spectrum=pyteomics_spectrum,
-                metadata_harmonization=metadata_harmonization)
+    if not os.path.isfile(filename):
+        raise FileNotFoundError(f"The specified file: {filename} doesn't exist.")
+
+    def parse_file():
+        with MGF(filename, convert_arrays=1, encoding="utf-8") as reader:
+            for pyteomics_spectrum in reader:
+                yield parse_spectrum_dict(
+                    spectrum=pyteomics_spectrum,
+                    metadata_harmonization=metadata_harmonization)
+
+    return parse_file()
