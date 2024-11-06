@@ -76,7 +76,6 @@ de Jonge NF, Hecht H, Michael Strobel, Mingxun Wang, van der Hooft JJJ, Huber F.
 
 .. |ReadTheDocs Badge| image:: https://readthedocs.org/projects/matchms/badge/?version=latest
     :alt: Documentation Status
-    :scale: 100%
     :target: https://matchms.readthedocs.io/en/latest/?badge=latest
 
 .. |Sonarcloud Quality Gate Badge| image:: https://sonarcloud.io/api/project_badges/measure?project=matchms_matchms&metric=alert_status
@@ -117,7 +116,7 @@ Installation
 
 Prerequisites:  
 
-- Python 3.9 - 3.12, (higher versions should work as well, but are not yet tested systematically)
+- Python 3.10 - 3.12, (higher versions should work as well, but are not yet tested systematically)
 - Anaconda (recommended)
 
 We recommend installing matchms in a new virtual environment to avoid dependency clashes
