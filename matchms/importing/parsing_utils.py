@@ -55,8 +55,6 @@ def parse_mzml_mzxml_metadata(spectrum_dict: dict) -> dict:
     title = None
     scan_number = None
     precursor_mz = None
-    scan_time = None
-    retention_time = None
 
     first_search = list(find_by_key(spectrum_dict, "precursor"))
     if not first_search:
@@ -85,14 +83,15 @@ def parse_mzml_mzxml_metadata(spectrum_dict: dict) -> dict:
     scan_time = list(find_by_key(spectrum_dict, "scan start time"))
     retention_time = list(find_by_key(spectrum_dict, "retentionTime"))
 
-    return {
+    spectrum_dict.update({
         "charge": charge,
         "scan_number": scan_number,
         "title": title,
         "precursor_mz": precursor_mz,
         "scan_start_time": scan_time,
         "retention_time": retention_time
-        }
+        })
+    return spectrum_dict
 
 
 def sort_by_mz(mz, intensities):
