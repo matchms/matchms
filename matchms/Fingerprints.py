@@ -3,7 +3,7 @@ import logging
 from typing import List, Optional
 import numpy as np
 import pandas as pd
-from rdkit import Chem
+from rdkit import Chem, DataStructs
 from rdkit.Chem.rdchem import Mol
 from rdkit.Chem.rdFingerprintGenerator import (GetMorganGenerator,
                                                GetRDKitFPGenerator)
@@ -13,7 +13,7 @@ from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import (
     is_valid_inchi, is_valid_inchikey)
 from matchms.typing import SpectrumType
 from .utils import to_camel_case
-from rdkit import DataStructs
+
 
 logger = logging.getLogger("matchms")
 
@@ -117,7 +117,7 @@ class Fingerprints:
                     if inchikey_spectrum.get("smiles") or inchikey_spectrum.get("inchi"):
                         unique_spectra[inchikey] = inchikey_spectrum
             except ValueError:
-                logger.warning(f"{spectrum} doesn't have a inchikey. Skipping.")
+                logger.warning("%s doesn't have a inchikey. Skipping.", spectrum)
 
         # Get mols of unique spectra from smiles/inchi
         mols = [_get_mol(spectrum) for spectrum in unique_spectra.values()]
