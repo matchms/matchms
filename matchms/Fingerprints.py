@@ -19,11 +19,30 @@ logger = logging.getLogger("matchms")
 
 
 class Fingerprints:
-    def __init__(self, fingerprint_algorithm: str = "daylight", fingerprint_method: str = "bit", nbits: int = 2048, **kwargs):
+    def __init__(self,
+                 fingerprint_algorithm: str = "daylight",
+                 fingerprint_method: str = "bit",
+                 nbits: int = 2048,
+                 ignore_stereochemistry: bool = False,
+                 **kwargs):
+        """
+
+        Parameters
+        ----------
+        fingerprint_algorithm
+            The fingerprint algorithm to use. Available options: daylight, morgan1, morgan2, morgan3.
+        fingerprint_method
+            The fingerprint method to use. Available options: bit, sparse_bit, count, sparse_count.
+        nbits
+            The number of bits or fingerprint size. Defaults to 2048.
+        ignore_stereochemistry
+            Determines which inchikey version will be used. If set to true the first 14 chars of the inchikey will be used.
+        """
         self.inchikey_fingerprint_mapping = {}
         self.fingerprint_algorithm = fingerprint_algorithm
         self.fingerprint_method = fingerprint_method
         self.nbits = nbits
+        self.ignore_stereochemistry = ignore_stereochemistry
         self.kwargs = kwargs
 
     def __str__(self):
@@ -38,6 +57,7 @@ class Fingerprints:
             "fingerprint_algorithm": self.fingerprint_algorithm,
             "fingerprint_method": self.fingerprint_method,
             "nbits": self.nbits,
+            "ingore_stereochemistry": self.ignore_stereochemistry,
             "additional_keyword_arguments": self.kwargs,
         }
 
@@ -47,7 +67,7 @@ class Fingerprints:
 
     def fingerprints_to_dataframe(self):
         return pd.DataFrame(
-            data={'fingerprint': list(self.inchikey_fingerprint_mapping.values())},
+            data={"fingerprint": list(self.inchikey_fingerprint_mapping.values())},
             index=list(self.inchikey_fingerprint_mapping.keys())
         )
 
@@ -66,7 +86,7 @@ class Fingerprints:
 
         # Double check the form of the inchikey
         if not is_valid_inchikey(inchikey):
-            spectrum = _require_inchikey(spectrum)
+            spectrum = _require_inchikey(spectrum, self.ignore_stereochemistry)
             inchikey = spectrum.get("inchikey")
 
         return self.get_fingerprint_by_inchikey(inchikey)
@@ -86,7 +106,7 @@ class Fingerprints:
     def compute_fingerprints(self, spectra: List[SpectrumType]):
         for spectrum in spectra:
             try:
-                spectrum = _require_inchikey(spectrum)
+                spectrum = _require_inchikey(spectrum, self.ignore_stereochemistry)
 
                 # Fingerprint is in mapping dict -> skip iteration
                 if spectrum.get("inchikey") in self.inchikey_fingerprint_mapping and self.inchikey_fingerprint_mapping[
@@ -109,7 +129,7 @@ class Fingerprints:
         for spectrum in spectra:
             try:
                 # Require inchikeys
-                inchikey_spectrum = _require_inchikey(spectrum)
+                inchikey_spectrum = _require_inchikey(spectrum, self.ignore_stereochemistry)
                 inchikey = inchikey_spectrum.get("inchikey")
 
                 # Add inchikey/spectrum to unique_spectra and ensure smiles or inchi
@@ -144,7 +164,7 @@ def _get_mol(spectrum: SpectrumType) -> Optional[Mol]:
     return mol
 
 
-def _require_inchikey(spectrum_in: SpectrumType) -> SpectrumType:
+def _require_inchikey(spectrum_in: SpectrumType, ignore_stereochemistry: bool) -> SpectrumType:
     spectrum = spectrum_in.clone()
 
     # If inchikey invalid
@@ -159,6 +179,10 @@ def _require_inchikey(spectrum_in: SpectrumType) -> SpectrumType:
     # If Inchikey still missing, raise ValueError
     if not is_valid_inchikey(spectrum.get("inchikey")):
         raise ValueError("Inchikey is missing or invalid.")
+
+    # If ignore_stereochemistry true, use short form of inchikey
+    if ignore_stereochemistry:
+        spectrum.set("inchikey", spectrum.get("inchikey")[:14])
 
     return spectrum
 
