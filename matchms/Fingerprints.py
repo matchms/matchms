@@ -13,7 +13,7 @@ from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import (
     is_valid_inchi, is_valid_inchikey)
 from matchms.typing import SpectrumType
 from .utils import to_camel_case
-
+from rdkit import DataStructs
 
 logger = logging.getLogger("matchms")
 
@@ -102,6 +102,47 @@ class Fingerprints:
                     logger.warning("Computed fingerprint is not a ndarray or invalid.")
             except ValueError:
                 logger.warning("Error computing fingerprint.")
+
+    def compute_fingerprints_fast(self, spectra: List[SpectrumType]):
+        # Get/Set unique spectra via inchikey
+        unique_spectra = {}
+        for spectrum in spectra:
+            try:
+                # Require inchikeys
+                inchikey_spectrum = _require_inchikey(spectrum)
+                inchikey = inchikey_spectrum.get("inchikey")
+
+                # Add inchikey/spectrum to unique_spectra and ensure smiles or inchi
+                if inchikey not in unique_spectra:
+                    if inchikey_spectrum.get("smiles") or inchikey_spectrum.get("inchi"):
+                        unique_spectra[inchikey] = inchikey_spectrum
+            except ValueError:
+                logger.warning(f"{spectrum} doesn't have a inchikey. Skipping.")
+
+        # Get mols of unique spectra from smiles/inchi
+        mols = [_get_mol(spectrum) for spectrum in unique_spectra.values()]
+
+        # Get fingerprints of all mols
+        fingerprints = _mols_to_fingerprints(mols, self.fingerprint_algorithm, self.fingerprint_method, self.nbits,
+                                             **self.kwargs)
+        assert len(fingerprints) == len(unique_spectra)
+
+        # Map inchikey - fingerprint
+        for inchikey, fp in zip(unique_spectra.keys(), fingerprints):
+            if isinstance(fp, np.ndarray) and fp.sum() > 0:
+                self.inchikey_fingerprint_mapping[inchikey] = fp
+
+
+def _get_mol(spectrum: SpectrumType) -> Optional[Mol]:
+    mol = None
+    if spectrum.get("smiles"):
+        return Chem.MolFromSmiles(spectrum.get("smiles"))
+
+    if spectrum.get("inchi"):
+        return Chem.MolFromInchi(spectrum.get("inchi"))
+
+    return mol
+
 
 def _require_inchikey(spectrum_in: SpectrumType) -> SpectrumType:
     spectrum = spectrum_in.clone()
@@ -224,4 +265,38 @@ def _mol_to_fingerprint(mol: Mol, fingerprint_algorithm: str, fingerprint_type: 
 
     return np.array(fingerprint) if fingerprint else None
 
-    # TODO: use GetFingerprints to use multithreading
+
+def _mols_to_fingerprints(mols: List[Mol], fingerprint_algorithm: str, fingerprint_type: str, nbits: int, **kwargs) -> np.ndarray:
+    algorithms = {
+        "daylight": lambda args: GetRDKitFPGenerator(**args),
+        "morgan1": lambda args: GetMorganGenerator(**args, radius=1),
+        "morgan2": lambda args: GetMorganGenerator(**args, radius=2),
+        "morgan3": lambda args: GetMorganGenerator(**args, radius=3)
+    }
+    types = {
+        "bit": "GetFingerprints",
+        "sparse_bit": "GetSparseFingerprints",
+        "count": "GetCountFingerprints",
+        "sparse_count": "GetSparseCountFingerprints"
+    }
+
+    if fingerprint_algorithm not in algorithms:
+        raise ValueError(f"Unkown fingerprint algorithm given. Available algorithms: {list(algorithms.keys())}.")
+    if fingerprint_type not in types:
+        raise ValueError(f"Unkown fingerprint type given. Available types: {list(types.keys())}.")
+
+    args = {"fpSize": nbits, **{to_camel_case(k): v for k, v in kwargs.items()}}
+    generator = algorithms[fingerprint_algorithm](args)
+
+    fingerprint_func = getattr(generator, types[fingerprint_type])
+    fingerprints = fingerprint_func(mols, numThreads=-1)
+
+    out = np.zeros((len(mols), nbits), dtype=np.int8)
+
+    assert len(fingerprints) == len(mols)
+
+    for i, fp in enumerate(fingerprints):
+        if fp is not None:
+            DataStructs.ConvertToNumpyArray(fp, out[i])
+
+    return out
