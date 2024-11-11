@@ -25,7 +25,7 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.13"
-numpy = "^2.0"
+numpy = ">1.24"
 scipy = "^1.14.1"
 pandas = "^2.2.3"
 pillow = "!=9.4.0"
@@ -36,7 +36,7 @@ numba = "^0.60.0"
 pickydict = ">=0.4.0"
 pyteomics = ">=4.6"
 requests = ">=2.31.0"
-sparsestack = "^0.6.0"
+sparsestack = ">=0.6.0"
 tqdm = ">=4.65.0"
 rdkit = "^2024.3.5"
 pyyaml = ">=6.0.1"
