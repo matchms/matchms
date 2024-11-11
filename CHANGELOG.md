@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [0.28.2] - 2024-11-11
+
+### Changed
+- Accept both Numpy 1.x (>1.24) and Numpy 2.x to avoid incompatibilities with other packages.
+
 ## [0.28.1] - 2024-11-06
 
 ### Added
