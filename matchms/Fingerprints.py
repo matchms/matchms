@@ -65,6 +65,10 @@ class Fingerprints:
     def fingerprints(self):
         return self.inchikey_fingerprint_mapping
 
+    @property
+    def fingerprint_count(self):
+        return len(self.inchikey_fingerprint_mapping)
+
     def fingerprints_to_dataframe(self):
         return pd.DataFrame(
             data={"fingerprint": list(self.inchikey_fingerprint_mapping.values())},
