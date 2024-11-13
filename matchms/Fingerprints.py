@@ -7,18 +7,48 @@ from rdkit import Chem, DataStructs
 from rdkit.Chem.rdchem import Mol
 from rdkit.Chem.rdFingerprintGenerator import (GetMorganGenerator,
                                                GetRDKitFPGenerator)
-from matchms.filtering import (derive_inchi_from_smiles,
-                               derive_inchikey_from_inchi)
 from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import (
-    is_valid_inchi, is_valid_inchikey)
+    is_valid_inchi, is_valid_inchikey, is_valid_smiles)
 from matchms.typing import SpectrumType
 from .utils import to_camel_case
 
 
 logger = logging.getLogger("matchms")
 
-
 class Fingerprints:
+    """
+    Computes and stores inchikey-fingerprint mapping for a list of spectra,
+
+    For example
+
+    .. testcode::
+
+        from matchms import Fingerprints
+
+        fpgen = Fingerprints()
+        fpgen.compute_fingerprints(spectra)
+
+        print(fpgen.fingerprints)
+
+    Should output
+
+    .. testoutput::
+
+        {'KFDYZSPFVRTLML-UHFFFAOYSA-N': array([0, 0, 0, ..., 0, 0, 1], dtype=int8),
+        'HINREHSUCWWBNO-UHFFFAOYSA-N': array([1, 1, 1, ..., 0, 0, 1], dtype=int8)}
+
+    Attributes
+    ----------
+    config:
+        The configuration for the fingerprints e.g., used algorithm, nbits, ...
+    fingerprints:
+        The computed fingerprints. Use after compute_fingerprints().
+    fingerprints_count
+        The number of fingerprints computed.
+    to_dataframe
+        A DataFrame containing the inchikey and fingerprint
+
+    """
     def __init__(self,
                  fingerprint_algorithm: str = "daylight",
                  fingerprint_method: str = "bit",
@@ -69,7 +99,8 @@ class Fingerprints:
     def fingerprint_count(self):
         return len(self.inchikey_fingerprint_mapping)
 
-    def fingerprints_to_dataframe(self):
+    @property
+    def to_dataframe(self):
         return pd.DataFrame(
             data={"fingerprint": list(self.inchikey_fingerprint_mapping.values())},
             index=list(self.inchikey_fingerprint_mapping.keys())
@@ -89,8 +120,8 @@ class Fingerprints:
         inchikey = spectrum.get("inchikey")
 
         # Double check the form of the inchikey
-        if not is_valid_inchikey(inchikey):
-            spectrum = _require_inchikey(spectrum, self.ignore_stereochemistry)
+        if not is_valid_inchikey(inchikey) and self.ignore_stereochemistry:
+            spectrum.set("inchikey", spectrum.get("inchikey")[:14])
             inchikey = spectrum.get("inchikey")
 
         return self.get_fingerprint_by_inchikey(inchikey)
@@ -108,38 +139,17 @@ class Fingerprints:
         return fingerprint
 
     def compute_fingerprints(self, spectra: List[SpectrumType]):
-        for spectrum in spectra:
-            try:
-                spectrum = _require_inchikey(spectrum, self.ignore_stereochemistry)
-
-                # Fingerprint is in mapping dict -> skip iteration
-                if spectrum.get("inchikey") in self.inchikey_fingerprint_mapping and self.inchikey_fingerprint_mapping[
-                    spectrum.get("inchikey")] is not None:
-                    continue
-
-                fingerprint = self.compute_fingerprint(spectrum)
-
-                # Incorrect fingerprints will not be added to list
-                if isinstance(fingerprint, np.ndarray) and fingerprint.sum() > 0:
-                    self.inchikey_fingerprint_mapping[spectrum.get("inchikey")] = fingerprint
-                else:
-                    logger.warning("Computed fingerprint is not a ndarray or invalid.")
-            except ValueError:
-                logger.warning("Error computing fingerprint.")
-
-    def compute_fingerprints_fast(self, spectra: List[SpectrumType]):
         # Get/Set unique spectra via inchikey
         unique_spectra = {}
         for spectrum in spectra:
             try:
-                # Require inchikeys
-                inchikey_spectrum = _require_inchikey(spectrum, self.ignore_stereochemistry)
-                inchikey = inchikey_spectrum.get("inchikey")
+                # Validate metadata
+                _validate_metadata(spectrum, self.ignore_stereochemistry)
+                inchikey = spectrum.get("inchikey")
 
                 # Add inchikey/spectrum to unique_spectra and ensure smiles or inchi
                 if inchikey not in unique_spectra:
-                    if inchikey_spectrum.get("smiles") or inchikey_spectrum.get("inchi"):
-                        unique_spectra[inchikey] = inchikey_spectrum
+                    unique_spectra[inchikey] = spectrum
             except ValueError:
                 logger.warning("%s doesn't have a inchikey. Skipping.", spectrum)
 
@@ -168,25 +178,18 @@ def _get_mol(spectrum: SpectrumType) -> Optional[Mol]:
     return mol
 
 
-def _require_inchikey(spectrum_in: SpectrumType, ignore_stereochemistry: bool) -> SpectrumType:
-    spectrum = spectrum_in.clone()
-
-    # If inchikey invalid
-    if not is_valid_inchikey(spectrum.get("inchikey")):
-        # If inchi invalid, derive from smiles
-        if not is_valid_inchi(spectrum.get("inchi")):
-            spectrum = derive_inchi_from_smiles(spectrum)
-
-        # Derive Inchikey from Inchi
-        spectrum = derive_inchikey_from_inchi(spectrum)
-
-    # If Inchikey still missing, raise ValueError
-    if not is_valid_inchikey(spectrum.get("inchikey")):
-        raise ValueError("Inchikey is missing or invalid.")
-
-    # If ignore_stereochemistry true, use short form of inchikey
+def _validate_metadata(spectrum: SpectrumType, ignore_stereochemistry: bool):
     if ignore_stereochemistry:
-        spectrum.set("inchikey", spectrum.get("inchikey")[:14])
+        if len(spectrum.get("inchikey")) > 14:
+            spectrum.set("inchikey", spectrum.get("inchikey")[:14])
+        elif len(spectrum.get("inchikey")) < 14:
+            raise ValueError("Inchikey is missing or invalid.")
+    else:
+        if not is_valid_inchikey(spectrum.get("inchikey")):
+            raise ValueError("Inchikey is missing or invalid.")
+
+    if not is_valid_inchi(spectrum.get("inchi")) and not is_valid_smiles(spectrum.get("smiles")):
+        raise ValueError("Inchi or smiles is missing or invalid.")
 
     return spectrum
 
