@@ -1,21 +1,16 @@
 import logging
-
+import numpy as np
+import pandas as pd
 import pytest
 from rdkit import Chem
 from rdkit.Chem.rdchem import Mol
 from matchms import Spectrum
-from matchms.Fingerprints import (
-    Fingerprints,
-    _get_mol,
-    _validate_metadata,
-    _mols_to_fingerprints,
-    _derive_fingerprint_from_smiles,
-    _derive_fingerprint_from_inchi,
-    _mol_to_fingerprint
-)
+from matchms.Fingerprints import (Fingerprints, _derive_fingerprint_from_inchi,
+                                  _derive_fingerprint_from_smiles, _get_mol,
+                                  _mol_to_fingerprint, _mols_to_fingerprints,
+                                  _validate_metadata)
 from .builder_Spectrum import SpectrumBuilder
-import numpy as np
-import pandas as pd
+
 
 LOGGER = logging.getLogger(__name__)
 
