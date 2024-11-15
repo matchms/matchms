@@ -107,6 +107,19 @@ class Fingerprints:
         )
 
     def get_fingerprint_by_inchikey(self, inchikey: str) -> Optional[np.ndarray]:
+        """
+        Get fingerprint by inchikey.
+
+        Parameters
+        ----------
+        inchikey
+            Inchikey of a spectrum.
+
+        Return:
+        --------------
+        Optional[np.ndarray]
+            The corresponding fingerprint.
+        """
         if inchikey in self.inchikey_fingerprint_mapping:
             return self.inchikey_fingerprint_mapping[inchikey]
 
@@ -117,16 +130,37 @@ class Fingerprints:
         return None
 
     def get_fingerprint_by_spectrum(self, spectrum: SpectrumType) -> Optional[np.ndarray]:
-        inchikey = spectrum.get("inchikey")
+        """
+        Get fingerprint by spectrum.
 
-        # Double check the form of the inchikey
-        if not is_valid_inchikey(inchikey) and self.ignore_stereochemistry:
-            spectrum.set("inchikey", spectrum.get("inchikey")[:14])
-            inchikey = spectrum.get("inchikey")
+        Parameters
+        ----------
+        spectrum
+            Spectrum with a inchikey.
+
+        Return:
+        --------------
+        Optional[np.ndarray]
+            The corresponding fingerprint.
+        """
+        inchikey = spectrum.get("inchikey")
 
         return self.get_fingerprint_by_inchikey(inchikey)
 
     def compute_fingerprint(self, spectrum: SpectrumType) -> Optional[np.ndarray]:
+        """
+        Computes a single fingerprint for a given spectrum.
+
+        Parameters
+        ----------
+        spectrum
+            A spectrum for which a fingerprint is to be calculated.
+
+        Return:
+        --------------
+        Optional[np.ndarray]
+            The corresponding fingerprint.
+        """
         fingerprint = None
         if spectrum.get("smiles"):
             fingerprint = _derive_fingerprint_from_smiles(spectrum.get("smiles"), self.fingerprint_algorithm,
@@ -139,6 +173,19 @@ class Fingerprints:
         return fingerprint
 
     def compute_fingerprints(self, spectra: List[SpectrumType]):
+        """
+        Computes fingerprints for a list of spectra.
+
+        This will first create a dict with unique spectra and then computes fingerprints for all mols.
+        Only valid fingerprints will be added to the mapping.
+        Query specific fingerprints by using get_fingerprint_by_spectrum() or get_fingerprint_by_inchikey()
+
+        Parameters
+        ----------
+        spectra
+            List of Spectrum
+        """
+
         # Get/Set unique spectra via inchikey
         unique_spectra = {}
         for spectrum in spectra:
@@ -168,6 +215,20 @@ class Fingerprints:
 
 
 def _get_mol(spectrum: SpectrumType) -> Optional[Mol]:
+    """
+    Get the molecule either from smiles or inchi.
+
+    Parameter:
+    ----------
+    spectrum: SpectrumType
+        Spectrum to get the mol from.
+
+    Return:
+    --------------
+    Optional[Mol]
+        RDKit Mol object or None if smiles and inchi missing or generation failed.
+    """
+
     mol = None
     if spectrum.get("smiles"):
         return Chem.MolFromSmiles(spectrum.get("smiles"))
@@ -179,13 +240,27 @@ def _get_mol(spectrum: SpectrumType) -> Optional[Mol]:
 
 
 def _validate_metadata(spectrum: SpectrumType, ignore_stereochemistry: bool):
+    """
+    Validates metadata for a given spectrum.
+
+    Checks for a valid inchikey or if stereochemistry is ignored check for a inchikey of 14 chars.
+    Checks if inchi or smiles are valid.
+
+    Parameters
+    ----------
+    spectrum
+        Spectrum to validate
+    ignore_stereochemistry
+        If true, a inchikey should contain 14 chars.
+    """
+    inchikey = spectrum.get("inchikey")
     if ignore_stereochemistry:
-        if len(spectrum.get("inchikey")) > 14:
-            spectrum.set("inchikey", spectrum.get("inchikey")[:14])
-        elif len(spectrum.get("inchikey")) < 14:
+        if len(inchikey) > 14:
+            spectrum.set("inchikey", inchikey[:14])
+        elif len(inchikey) < 14:
             raise ValueError("Inchikey is missing or invalid.")
     else:
-        if not is_valid_inchikey(spectrum.get("inchikey")):
+        if not is_valid_inchikey(inchikey):
             raise ValueError("Inchikey is missing or invalid.")
 
     if not is_valid_inchi(spectrum.get("inchi")) and not is_valid_smiles(spectrum.get("smiles")):
@@ -298,6 +373,30 @@ def _mol_to_fingerprint(mol: Mol, fingerprint_algorithm: str, fingerprint_type: 
 
 
 def _mols_to_fingerprints(mols: List[Mol], fingerprint_algorithm: str, fingerprint_type: str, nbits: int, **kwargs) -> np.ndarray:
+    """
+    Computes a fingerprints for a list of molecules.
+
+    Parameters
+    ----------
+    fingerprint_algorithm
+        Specifies algorithm for deriving fingerprints.
+        Supported algorithms are 'daylight', 'morgan1', 'morgan2', 'morgan3'.
+    fingerprint_type
+        Determine type for deriving molecular fingerprints.
+        Supported types are 'bit', 'sparse_bit', 'count', 'sparse_count'.
+    nbits
+        Dimension or number of bits of generated fingerprint.
+    **kwargs
+        Keyword arguments to pass additional parameters to FingerprintGenerator.
+        The keywords should match the corresponding RDKit implementation (e.g., min_path/max_path for RDKitFPGenerator).
+        See https://rdkit.org/docs/source/rdkit.Chem.rdFingerprintGenerator.html.
+    Return:
+    --------------
+    np.ndarray
+        A np.ndarray of np.ndarrays, containing a fingerprints for each molecule.
+        If the fingerprint for one molecule cannot be computed, the corresponding fingerprint will be a ndarray with zeroes.
+    """
+
     algorithms = {
         "daylight": lambda args: GetRDKitFPGenerator(**args),
         "morgan1": lambda args: GetMorganGenerator(**args, radius=1),
