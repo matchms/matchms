@@ -33,6 +33,7 @@ class Fingerprints:
         spectrum_2 = Spectrum(mz=np.array([100, 150, 200.]),
                               intensities=np.array([0.7, 0.2, 0.1]),
                               metadata={'inchikey': 'CCC0'})
+        spectra = [spectrum_1, spectrum_2]
 
         fpgen = Fingerprints()
         fpgen.compute_fingerprints(spectra)
