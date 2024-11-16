@@ -25,6 +25,7 @@ class Fingerprints:
 
         from matchms import Fingerprints
         from matchms import Spectrum
+        import numpy as np
 
         spectrum_1 = Spectrum(mz=np.array([100, 150, 200.]),
                               intensities=np.array([0.7, 0.2, 0.1]),
