@@ -39,14 +39,14 @@ class Fingerprints:
         fpgen.compute_fingerprints(spectra)
 
         print(fpgen.fingerprint_count)
-        print(type(fpgen.get_fingerprint_by_inchikey(OTMSDBZUPAUEDD-UHFFFAOYSA-N)))
+        print(type(fpgen.get_fingerprint_by_inchikey('OTMSDBZUPAUEDD-UHFFFAOYSA-N')))
 
     Should output
 
     .. testoutput::
 
         2
-        np.ndarray
+        <class 'numpy.ndarray'>
 
     Attributes
     ----------
