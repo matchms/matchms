@@ -24,6 +24,14 @@ class Fingerprints:
     .. testcode::
 
         from matchms import Fingerprints
+        from matchms import Spectrum
+
+        spectrum_1 = Spectrum(mz=np.array([100, 150, 200.]),
+                              intensities=np.array([0.7, 0.2, 0.1]),
+                              metadata={'inchikey': 'CCC'})
+        spectrum_2 = Spectrum(mz=np.array([100, 150, 200.]),
+                              intensities=np.array([0.7, 0.2, 0.1]),
+                              metadata={'inchikey': 'CCC0'})
 
         fpgen = Fingerprints()
         fpgen.compute_fingerprints(spectra)
@@ -34,8 +42,8 @@ class Fingerprints:
 
     .. testoutput::
 
-        {'KFDYZSPFVRTLML-UHFFFAOYSA-N': array([0, 0, 0, ..., 0, 0, 1], dtype=int8),
-        'HINREHSUCWWBNO-UHFFFAOYSA-N': array([1, 1, 1, ..., 0, 0, 1], dtype=int8)}
+        {'CCC': array([0, 0, 0, ..., 0, 0, 1], dtype=int8),
+        'CCC0': array([1, 1, 1, ..., 0, 0, 1], dtype=int8)}
 
     Attributes
     ----------
