@@ -29,23 +29,24 @@ class Fingerprints:
 
         spectrum_1 = Spectrum(mz=np.array([100, 150, 200.]),
                               intensities=np.array([0.7, 0.2, 0.1]),
-                              metadata={'inchikey': 'CCC'})
+                              metadata={"inchikey": "OTMSDBZUPAUEDD-UHFFFAOYSA-N", "smiles":"CC"})
         spectrum_2 = Spectrum(mz=np.array([100, 150, 200.]),
                               intensities=np.array([0.7, 0.2, 0.1]),
-                              metadata={'inchikey': 'CCC0'})
+                              metadata={"inchikey": "UGFAIRIUMAVXCW-UHFFFAOYSA-N","smiles": "[C-]#[O+]"})
         spectra = [spectrum_1, spectrum_2]
 
         fpgen = Fingerprints()
         fpgen.compute_fingerprints(spectra)
 
-        print(fpgen.fingerprints)
+        print(fpgen.fingerprint_count)
+        print(type(fpgen.get_fingerprint_by_inchikey(OTMSDBZUPAUEDD-UHFFFAOYSA-N)))
 
     Should output
 
     .. testoutput::
 
-        {'CCC': array([0, 0, 0, ..., 0, 0, 1], dtype=int8),
-        'CCC0': array([1, 1, 1, ..., 0, 0, 1], dtype=int8)}
+        2
+        np.ndarray
 
     Attributes
     ----------
