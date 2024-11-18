@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import List, Optional
+from typing import Optional
 import numpy as np
 import pandas as pd
 from rdkit import Chem, DataStructs
@@ -183,7 +183,7 @@ class Fingerprints:
 
         return fingerprint
 
-    def compute_fingerprints(self, spectra: List[SpectrumType]):
+    def compute_fingerprints(self, spectra: list[SpectrumType]):
         """
         Computes fingerprints for a list of spectra.
 
@@ -383,7 +383,7 @@ def _mol_to_fingerprint(mol: Mol, fingerprint_algorithm: str, fingerprint_type: 
     return np.array(fingerprint) if fingerprint else None
 
 
-def _mols_to_fingerprints(mols: List[Mol], fingerprint_algorithm: str, fingerprint_type: str, nbits: int, **kwargs) -> np.ndarray:
+def _mols_to_fingerprints(mols: list[Mol], fingerprint_algorithm: str, fingerprint_type: str, nbits: int, **kwargs) -> np.ndarray:
     """
     Computes a fingerprints for a list of molecules.
 
