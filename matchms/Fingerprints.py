@@ -14,6 +14,13 @@ from .utils import to_camel_case
 
 
 logger = logging.getLogger("matchms")
+FP_ALGORITHMS = {
+    "daylight": lambda args: GetRDKitFPGenerator(**args),
+    "morgan1": lambda args: GetMorganGenerator(**args, radius=1),
+    "morgan2": lambda args: GetMorganGenerator(**args, radius=2),
+    "morgan3": lambda args: GetMorganGenerator(**args, radius=3)
+}
+
 
 class Fingerprints:
     """
@@ -356,12 +363,7 @@ def _mol_to_fingerprint(mol: Mol, fingerprint_algorithm: str, fingerprint_type: 
     fingerprint
         Molecular fingerprint.
     """
-    algorithms = {
-        "daylight": lambda args: GetRDKitFPGenerator(**args),
-        "morgan1": lambda args: GetMorganGenerator(**args, radius=1),
-        "morgan2": lambda args: GetMorganGenerator(**args, radius=2),
-        "morgan3": lambda args: GetMorganGenerator(**args, radius=3)
-    }
+
     types = {
         "bit": "GetFingerprint",
         "sparse_bit": "GetSparseFingerprint",
@@ -369,13 +371,13 @@ def _mol_to_fingerprint(mol: Mol, fingerprint_algorithm: str, fingerprint_type: 
         "sparse_count": "GetSparseCountFingerprint"
     }
 
-    if fingerprint_algorithm not in algorithms:
-        raise ValueError(f"Unkown fingerprint algorithm given. Available algorithms: {list(algorithms.keys())}.")
+    if fingerprint_algorithm not in FP_ALGORITHMS:
+        raise ValueError(f"Unkown fingerprint algorithm given. Available algorithms: {list(FP_ALGORITHMS.keys())}.")
     if fingerprint_type not in types:
         raise ValueError(f"Unkown fingerprint type given. Available types: {list(types.keys())}.")
 
     args = {"fpSize": nbits, **{to_camel_case(k): v for k, v in kwargs.items()}}
-    generator = algorithms[fingerprint_algorithm](args)
+    generator = FP_ALGORITHMS[fingerprint_algorithm](args)
 
     fingerprint_func = getattr(generator, types[fingerprint_type])
     fingerprint = fingerprint_func(mol)
@@ -408,12 +410,6 @@ def _mols_to_fingerprints(mols: list[Mol], fingerprint_algorithm: str, fingerpri
         If the fingerprint for one molecule cannot be computed, the corresponding fingerprint will be a ndarray with zeroes.
     """
 
-    algorithms = {
-        "daylight": lambda args: GetRDKitFPGenerator(**args),
-        "morgan1": lambda args: GetMorganGenerator(**args, radius=1),
-        "morgan2": lambda args: GetMorganGenerator(**args, radius=2),
-        "morgan3": lambda args: GetMorganGenerator(**args, radius=3)
-    }
     types = {
         "bit": "GetFingerprints",
         "sparse_bit": "GetSparseFingerprints",
@@ -421,13 +417,13 @@ def _mols_to_fingerprints(mols: list[Mol], fingerprint_algorithm: str, fingerpri
         "sparse_count": "GetSparseCountFingerprints"
     }
 
-    if fingerprint_algorithm not in algorithms:
-        raise ValueError(f"Unkown fingerprint algorithm given. Available algorithms: {list(algorithms.keys())}.")
+    if fingerprint_algorithm not in FP_ALGORITHMS:
+        raise ValueError(f"Unkown fingerprint algorithm given. Available algorithms: {list(FP_ALGORITHMS.keys())}.")
     if fingerprint_type not in types:
         raise ValueError(f"Unkown fingerprint type given. Available types: {list(types.keys())}.")
 
     args = {"fpSize": nbits, **{to_camel_case(k): v for k, v in kwargs.items()}}
-    generator = algorithms[fingerprint_algorithm](args)
+    generator = FP_ALGORITHMS[fingerprint_algorithm](args)
 
     fingerprint_func = getattr(generator, types[fingerprint_type])
     fingerprints = fingerprint_func(mols, numThreads=-1)
