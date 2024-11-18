@@ -111,7 +111,7 @@ class Fingerprints:
         return len(self.inchikey_fingerprint_mapping)
 
     @property
-    def to_dataframe(self):
+    def to_dataframe(self) -> pd.DataFrame:
         return pd.DataFrame(
             data={"fingerprint": list(self.inchikey_fingerprint_mapping.values())},
             index=list(self.inchikey_fingerprint_mapping.keys())
