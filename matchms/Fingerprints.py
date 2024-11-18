@@ -133,6 +133,8 @@ class Fingerprints:
         """
         if inchikey in self.inchikey_fingerprint_mapping:
             return self.inchikey_fingerprint_mapping[inchikey]
+        if (len(inchikey) == 14) and not self.ignore_stereochemistry:
+            raise ValueError("Expected full 27 character InChIKey (or ignore_stereochemistry set to True)")
 
         if not is_valid_inchikey(inchikey):
             logger.warning("The provided inchikey is not valid or may be the short form.")
