@@ -107,7 +107,7 @@ class Fingerprints:
         return self.inchikey_fingerprint_mapping
 
     @property
-    def fingerprint_count(self):
+    def fingerprint_count(self) -> int:
         return len(self.inchikey_fingerprint_mapping)
 
     @property
