@@ -93,7 +93,7 @@ class Fingerprints:
         })
 
     @property
-    def config(self):
+    def config(self) -> dict:
         return {
             "fingerprint_algorithm": self.fingerprint_algorithm,
             "fingerprint_method": self.fingerprint_method,
