@@ -217,10 +217,9 @@ class Fingerprints:
         # Get fingerprints of all mols
         fingerprints = _mols_to_fingerprints(mols, self.fingerprint_algorithm, self.fingerprint_method, self.nbits,
                                              **self.kwargs)
-        assert len(fingerprints) == len(unique_spectra)
 
         # Map inchikey - fingerprint
-        for inchikey, fp in zip(unique_spectra.keys(), fingerprints):
+        for inchikey, fp in zip(unique_spectra.keys(), fingerprints, strict=True):
             if isinstance(fp, np.ndarray) and fp.sum() > 0:
                 self.inchikey_fingerprint_mapping[inchikey] = fp
 
