@@ -252,7 +252,6 @@ def test_mol_to_fingerprints_invalid_cases(fingerprint_algorithm, fingerprint_ty
         )
 
 
-
 def test_mols_to_fingerprints_empty_molecules():
     nbits = 1024
     fingerprints = _mols_to_fingerprints(
