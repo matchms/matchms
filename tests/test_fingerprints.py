@@ -264,8 +264,8 @@ def test_mols_to_fingerprints_empty_molecules():
 
 
 def test_derive_fingerprint_invalid_mol():
-    res = _derive_fingerprint_from_smiles("invalid", "daylight", "bit", 1024)
-    assert res is None
+    fingerprint = _derive_fingerprint_from_smiles("invalid", "daylight", "bit", 1024)
+    assert fingerprint is None
 
-    res = _derive_fingerprint_from_inchi("invalid", "daylight", "bit", 1024)
-    assert res is None
+    fingerprint = _derive_fingerprint_from_inchi("invalid", "daylight", "bit", 1024)
+    assert fingerprint is None
