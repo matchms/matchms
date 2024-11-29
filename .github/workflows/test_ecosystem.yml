@@ -1,0 +1,179 @@
+name: Test Ecosystem
+
+on:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Tag for manually running CI first code check workflow
+        required: False
+        default: ''
+
+jobs:
+  test_dependencies:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        dependent-packages: ["spec2vec", "ms2deepscore", "ms2query"]
+        numpy-version: [1.25, 2.1]
+    outputs:
+      numpy1: ${{ steps.set_numpy_version.outputs.numpy1 }}
+      numpy2: ${{ steps.set_numpy_version.outputs.numpy2 }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependent packages
+        run: |
+          python -m pip install --upgrade pip poetry
+          pip install numpy==${{ matrix.numpy-version }}
+          pip install ${{ matrix.dependent-packages }}
+          pip install .
+          pip check
+        continue-on-error: true
+
+      - name: Set numpy version
+        id: set_numpy_version
+        run: |
+          numpy_version="${{ matrix.numpy-version }}"
+          if [[ $numpy_version == 2* ]]; then
+              echo "numpy2=${numpy_version}" >> "$GITHUB_OUTPUT"
+          else
+              echo "numpy1=${numpy_version}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Save compatibility result
+        run: |
+          set -v
+          mkdir -p ./pr
+
+          version=$(pip show "${{ matrix.dependent-packages }}" | grep Version | awk '{print $2}')
+
+          if pip check; then
+            echo "{\"package\": \"${{ matrix.dependent-packages }}\", \"version\": \"$version\", \"numpy-version\": \"${{ matrix.numpy-version }}\", \"run_success\": true}" >> pr/${{ matrix.numpy-version }}-${{ matrix.dependent-packages }}.json
+          else
+            echo "{\"package\": \"${{ matrix.dependent-packages }}\", \"version\": \"$version\", \"numpy-version\": \"${{ matrix.numpy-version }}\", \"run_success\": false}" >> pr/${{ matrix.numpy-version }}-${{ matrix.dependent-packages }}.json
+          fi
+        shell: bash
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dependency-results-${{ matrix.numpy-version }}-${{ matrix.dependent-packages }}
+          path: pr/
+
+  combine_results:
+    needs: test_dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - env:
+          OUTPUT1: ${{needs.test_dependencies.outputs.numpy1}}
+          OUTPUT2: ${{needs.test_dependencies.outputs.numpy2}}
+        run: |
+          echo "NUMPY1=$OUTPUT1" >> $GITHUB_ENV
+          echo "NUMPY2=$OUTPUT2" >> $GITHUB_ENV
+
+      - uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+          path: pr/
+
+      - name: List files
+        run: |
+          cd pr
+          ls
+
+      - name: Create results table
+        run: |
+          cd pr
+
+          numpy_versions=("$NUMPY1" "$NUMPY2")
+          output_file="dependency-matrix.md"
+
+          echo "| NumPy Version | spec2vec Status | ms2deepscore Status | ms2query Status |" > "$output_file"
+          echo "|---------------|-----------------|---------------------|-----------------|" >> "$output_file"
+
+          process_file() {
+            local file="$1"
+            if [[ -f "$file" ]]; then
+              local package version run_success badge_color
+              package=$(jq -r '.package' "$file")
+              version=$(jq -r '.version' "$file")
+              run_success=$(jq -r '.run_success' "$file")
+              badge_color=$([[ "$run_success" == "true" ]] && echo "green" || echo "red")
+              echo " ![${package}-${version}](https://img.shields.io/badge/${package}-${version}-${badge_color}) |"
+            else
+              echo " |"
+            fi
+          }
+
+          for numpy_version in "${numpy_versions[@]}"; do
+            outstring="| ![numPy-${numpy_version}](https://img.shields.io/badge/numpy-${numpy_version}-lightgrey?logo=numpy) |"
+
+            outstring+=$(process_file "${numpy_version}-spec2vec.json")
+            outstring+=$(process_file "${numpy_version}-ms2deepscore.json")
+            outstring+=$(process_file "${numpy_version}-ms2query.json")
+
+            echo "$outstring" >> "$output_file"
+          done
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dependency-test-matrix
+          path: pr
+
+  comment:
+      needs: combine_results
+      runs-on: ubuntu-latest
+      if: ${{ needs.combine_results.result == 'success' }}
+      steps:
+        - uses: actions/download-artifact@v4
+          with:
+            name: dependency-test-matrix
+            path: pr/
+
+        - name: List files
+          run: |
+            cd pr
+            ls
+
+        - name: Add Pull Request Comment
+          uses: actions/github-script@v7
+          with:
+            script: |
+              const fs = require('fs');
+              const path = require('path');
+
+              const pull_requests = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                commit_sha: context.payload.pull_request.head.sha,
+              });
+
+              if (!pull_requests.data.length) {
+                console.log("No pull requests associated with this commit.");
+                return;
+              }
+
+              const pullRequestNumber = pull_requests.data[0].number;
+              const filePath = path.join('pr', 'dependency-matrix.md');
+
+              if (!fs.existsSync(filePath)) {
+                console.log("File not found:", filePath);
+                return;
+              }
+              const fileContent = fs.readFileSync(filePath, 'utf8');
+
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pullRequestNumber,
+                body: `### Dependency Test Matrix\n\n${fileContent}`,
+              });
