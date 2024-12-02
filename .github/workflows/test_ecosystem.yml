@@ -2,6 +2,9 @@ name: Test Ecosystem
 
 on:
   pull_request:
+  push:
+    branches:
+      - master
   workflow_dispatch:
     inputs:
       tag:
@@ -11,6 +14,7 @@ on:
 
 jobs:
   test_dependencies:
+    name: Test dependencies
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -68,6 +72,7 @@ jobs:
           path: test-output/
 
   combine_results:
+    name: Combine results and write table
     needs: test_dependencies
     runs-on: ubuntu-latest
     steps:
@@ -90,10 +95,15 @@ jobs:
           cd test-output
 
           numpy_versions=("$NUMPY1" "$NUMPY2")
-          output_file="dependency-matrix.md"
+          output_file="dependency-matrix.rst"
 
-          echo "| NumPy Version | spec2vec Status | ms2deepscore Status | ms2query Status |" > "$output_file"
-          echo "|---------------|-----------------|---------------------|-----------------|" >> "$output_file"
+          echo ".. list-table::" > "$output_file"
+          echo "   :header-rows: 1" >> "$output_file"
+          echo "" >> "$output_file"
+          echo "   * - NumPy Version" >> "$output_file"
+          echo "     - spec2vec Status" >> "$output_file"
+          echo "     - ms2deepscore Status" >> "$output_file"
+          echo "     - ms2query Status" >> "$output_file"
 
           process_file() {
             local file="$1"
@@ -103,20 +113,17 @@ jobs:
               version=$(jq -r '.version' "$file")
               run_success=$(jq -r '.run_success' "$file")
               badge_color=$([[ "$run_success" == "true" ]] && echo "green" || echo "red")
-              echo " ![${package}-${version}](https://img.shields.io/badge/${package}-${version}-${badge_color}) |"
+              echo ".. image:: https://img.shields.io/badge/${package}-${version}-${badge_color}"
             else
-              echo " |"
+              echo " "
             fi
           }
 
           for numpy_version in "${numpy_versions[@]}"; do
-            outstring="| ![numPy-${numpy_version}](https://img.shields.io/badge/numpy-${numpy_version}-lightgrey?logo=numpy) |"
-
-            outstring+=$(process_file "${numpy_version}-spec2vec.json")
-            outstring+=$(process_file "${numpy_version}-ms2deepscore.json")
-            outstring+=$(process_file "${numpy_version}-ms2query.json")
-
-            echo "$outstring" >> "$output_file"
+            echo "   * - .. image:: https://img.shields.io/badge/numpy-${numpy_version}-lightgrey?logo=numpy :alt: numpy" >> "$output_file"
+            echo "     - $(process_file "${numpy_version}-spec2vec.json")" >> "$output_file"
+            echo "     - $(process_file "${numpy_version}-ms2deepscore.json")" >> "$output_file"
+            echo "     - $(process_file "${numpy_version}-ms2query.json")" >> "$output_file"
           done
 
       - uses: actions/upload-artifact@v4
@@ -124,51 +131,114 @@ jobs:
           name: dependency-test-matrix
           path: test-output
 
-  comment:
-      needs: combine_results
-      runs-on: ubuntu-latest
-      if: ${{ needs.combine_results.result == 'success' }}
-      steps:
-        - uses: actions/download-artifact@v4
-          with:
-            name: dependency-test-matrix
-            path: test-output/
+  comment_pr:
+    name: Comment PR
+    needs: combine_results
+    runs-on: ubuntu-latest
+    if: ${{ needs.combine_results.result == 'success' && github.ref != 'refs/heads/master' }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dependency-test-matrix
+          path: test-output/
 
-        - name: List files
-          run: |
-            cd test-output
-            ls
+      - name: List files
+        run: |
+          cd test-output
+          ls
 
-        - name: Add Pull Request Comment
-          uses: actions/github-script@v7
-          with:
-            script: |
-              const fs = require('fs');
-              const path = require('path');
+      - name: Add Pull Request Comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
 
-              const pull_requests = await github.rest.repos.listPullRequestsAssociatedWithCommit({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                commit_sha: context.payload.pull_request.head.sha,
-              });
+            const pull_requests = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: context.payload.pull_request.head.sha,
+            });
 
-              if (!pull_requests.data.length) {
-                console.log("No pull requests associated with this commit.");
-                return;
-              }
+            if (!pull_requests.data.length) {
+              console.log("No pull requests associated with this commit.");
+              return;
+            }
 
-              const pullRequestNumber = pull_requests.data[0].number;
-              const filePath = path.join('test-output', 'dependency-matrix.md');
+            const pullRequestNumber = pull_requests.data[0].number;
+            const filePath = path.join('test-output', 'dependency-matrix.rst');
 
-              if (!fs.existsSync(filePath)) {
-                console.log("File not found:", filePath);
-                return;
-              }
-              const fileContent = fs.readFileSync(filePath, 'utf8');
+            if (!fs.existsSync(filePath)) {
+              console.log("File not found:", filePath);
+              return;
+            }
+            const fileContent = fs.readFileSync(filePath, 'utf8');
 
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: pullRequestNumber,
-                body: `### Dependency Test Matrix\n\n${fileContent}`,
-              });
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pullRequestNumber,
+              body: `### Dependency Test Matrix\n\n${fileContent}`,
+            });
+
+  update_readme:
+    name: Update README
+    needs: combine_results
+    runs-on: ubuntu-latest
+    if: ${{ needs.combine_results.result == 'success' && github.ref == 'refs/heads/master' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: dependency-test-matrix
+          path: test-output/
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: List downloaded files
+        run: ls
+
+      - name: Update README with dependency matrix
+        run: |
+          python <<EOF
+          import os
+          import re
+
+          readme_path = "README.rst"
+          matrix_path = os.path.join("test-output", "dependency-matrix.rst")
+
+          start_marker = ".. compatibility matrix start"
+          end_marker = ".. compatibility matrix end"
+
+          with open(matrix_path, "r", encoding="utf-8") as matrix_file:
+              dependency_matrix = matrix_file.read()
+
+          with open(readme_path, "r") as file:
+              content = file.read()
+
+          updated_content = re.sub(
+              f"{re.escape(start_marker)}.*?{re.escape(end_marker)}",
+              f"{start_marker}\n\n{dependency_matrix}\n{end_marker}",
+              content,
+              flags=re.DOTALL,
+          )
+
+          with open(readme_path, "w") as file:
+              file.write(updated_content)
+
+          print("README.rst section updated successfully.")
+          EOF
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add README.rst
+          git commit -m "Update dependency matrix in README"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
