@@ -2,6 +2,7 @@ from matchms.filtering.SpectrumProcessor import SpectrumProcessor
 from . import exporting, filtering, importing, networking, plotting, similarity
 from .__version__ import __version__
 from .calculate_scores import calculate_scores
+from .Fingerprints import Fingerprints
 from .Fragments import Fragments
 from .logging_functions import (_init_logger, set_matchms_logger_level,
                                 set_rdkit_logger_level)
@@ -37,6 +38,7 @@ __all__ = [
     "calculate_scores",
     "exporting",
     "filtering",
+    "Fingerprints",
     "Fragments",
     "importing",
     "Metadata",
