@@ -90,7 +90,7 @@ jobs:
           merge-multiple: true
           path: test-output/
 
-      - name: Create results table
+      - name: Create rst
         run: |
           cd test-output
 
@@ -124,6 +124,40 @@ jobs:
             echo "     - $(process_file "${numpy_version}-spec2vec.json")" >> "$output_file"
             echo "     - $(process_file "${numpy_version}-ms2deepscore.json")" >> "$output_file"
             echo "     - $(process_file "${numpy_version}-ms2query.json")" >> "$output_file"
+          done
+
+      - name: Create md
+        run: |
+          cd test-output
+
+          numpy_versions=("$NUMPY1" "$NUMPY2")
+          output_file="dependency-matrix.md"
+
+          echo "| NumPy Version | spec2vec Status | ms2deepscore Status | ms2query Status |" > "$output_file"
+          echo "|---------------|-----------------|---------------------|-----------------|" >> "$output_file"
+
+          process_file() {
+            local file="$1"
+            if [[ -f "$file" ]]; then
+              local package version run_success badge_color
+              package=$(jq -r '.package' "$file")
+              version=$(jq -r '.version' "$file")
+              run_success=$(jq -r '.run_success' "$file")
+              badge_color=$([[ "$run_success" == "true" ]] && echo "green" || echo "red")
+              echo " ![${package}-${version}](https://img.shields.io/badge/${package}-${version}-${badge_color}) |"
+            else
+              echo " |"
+            fi
+          }
+
+          for numpy_version in "${numpy_versions[@]}"; do
+            outstring="| ![numPy-${numpy_version}](https://img.shields.io/badge/numpy-${numpy_version}-lightgrey?logo=numpy) |"
+
+            outstring+=$(process_file "${numpy_version}-spec2vec.json")
+            outstring+=$(process_file "${numpy_version}-ms2deepscore.json")
+            outstring+=$(process_file "${numpy_version}-ms2query.json")
+
+            echo "$outstring" >> "$output_file"
           done
 
       - uses: actions/upload-artifact@v4
@@ -166,7 +200,7 @@ jobs:
             }
 
             const pullRequestNumber = pull_requests.data[0].number;
-            const filePath = path.join('test-output', 'dependency-matrix.rst');
+            const filePath = path.join('test-output', 'dependency-matrix.md');
 
             if (!fs.existsSync(filePath)) {
               console.log("File not found:", filePath);
@@ -238,7 +272,13 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add README.rst
-          git commit -m "Update dependency matrix in README"
-          git push
+
+          if git diff --cached --exit-code; then
+            echo "No changes to commit."
+          else
+            git commit -m "Update dependency matrix in README"
+            git push
+          fi
+
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
