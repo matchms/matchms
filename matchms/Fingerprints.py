@@ -279,7 +279,7 @@ def _validate_metadata(spectrum: SpectrumType, ignore_stereochemistry: bool):
         elif len(inchikey) < 14:
             raise ValueError("Inchikey is missing or invalid.")
     elif not is_valid_inchikey(inchikey):
-            raise ValueError("Inchikey is missing or invalid.")
+        raise ValueError("Inchikey is missing or invalid.")
 
     if not is_valid_inchi(spectrum.get("inchi")) and not is_valid_smiles(spectrum.get("smiles")):
         raise ValueError("Inchi or smiles is missing or invalid.")
