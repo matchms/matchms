@@ -155,6 +155,23 @@ Ecosystem compatibility
 -----------------------
 
 .. compatibility matrix start
+
+.. list-table::
+   :header-rows: 1
+
+   * - NumPy Version
+     - spec2vec Status
+     - ms2deepscore Status
+     - ms2query Status
+   * - .. image:: https://img.shields.io/badge/numpy-1.25-lightgrey?logo=numpy :alt: numpy
+     - .. image:: https://img.shields.io/badge/spec2vec-0.8.0-red
+     - .. image:: https://img.shields.io/badge/ms2deepscore-2.4.0-green
+     - .. image:: https://img.shields.io/badge/ms2query-1.5.3-red
+   * - .. image:: https://img.shields.io/badge/numpy-2.1-lightgrey?logo=numpy :alt: numpy
+     - .. image:: https://img.shields.io/badge/spec2vec-0.8.0-red
+     - .. image:: https://img.shields.io/badge/ms2deepscore-2.4.0-green
+     - .. image:: https://img.shields.io/badge/ms2query-1.5.3-red
+
 .. compatibility matrix end
 
 Introduction
