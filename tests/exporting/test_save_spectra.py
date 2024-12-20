@@ -62,14 +62,14 @@ def test_spectra(file_name, caplog):
             filename = os.path.join(temp_dir, file_name)
 
             with pytest.raises(ValueError, match=re.escape(f"{ftype} isn't supported for when `append` is True")):
-                save_spectra(spectra=spectrum_list, filepath=filename, append=True)
+                save_spectra(spectra=spectrum_list, file=filename, append=True)
 
     # Test logger warning when using pickle
     if ftype == "pickle":
         with caplog.at_level(logging.ERROR):
             with tempfile.TemporaryDirectory() as temp_dir:
                 filename = os.path.join(temp_dir, file_name)
-                save_spectra(spectra=spectrum_list, filepath=filename, export_style="invalid")
+                save_spectra(spectra=spectrum_list, file=filename, export_style="invalid")
 
         assert "The only available export style for pickle is 'matchms', your export style invalid" in caplog.text
 

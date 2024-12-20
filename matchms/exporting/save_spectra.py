@@ -13,7 +13,7 @@ logger = logging.getLogger("matchms")
 @rename_deprecated_params(param_mapping={"spectrums": "spectra"}, version="0.26.5")
 def save_spectra(
     spectra: List[Spectrum],
-    filepath: str,
+    file: str,
     export_style: str = "matchms",
     append: bool = False,
 ) -> None:
@@ -34,10 +34,10 @@ def save_spectra(
         Only supported for ".mgf", and ".msp" filetypes. If True, will try to append
         to an existing file, instead of creating a new file. Default is `False`.
     """
-    if os.path.exists(filepath) and not append:
-        raise FileExistsError(f"The specified file: {filepath} already exists.")
+    if os.path.exists(file) and not append:
+        raise FileExistsError(f"The specified file: {file} already exists.")
 
-    ftype = os.path.splitext(filepath)[1].lower()[1:]
+    ftype = os.path.splitext(file)[1].lower()[1:]
     if append and ftype not in ("mgf", "msp"):
         raise ValueError(f"{ftype} isn't supported for when `append` is True")
 
@@ -46,24 +46,24 @@ def save_spectra(
 
     if len(spectra) == 0:
         logger.warning("No spectra to save. File will be empty.")
-        open(filepath, "w").close()
+        open(file, "w").close()
         return
 
     if ftype == "json":
-        save_as_json(spectra, filepath, export_style)
+        save_as_json(spectra, file, export_style)
     elif ftype == "mgf":
-        save_as_mgf(spectra, filepath, export_style)
+        save_as_mgf(spectra, file, export_style)
     elif ftype == "msp":
-        save_as_msp(spectra, filepath, style=export_style, mode="a")
+        save_as_msp(spectra, file, style=export_style, mode="a")
     elif ftype == "pickle":
         if export_style != "matchms":
             logger.error(
                 "The only available export style for pickle is 'matchms', your export style %s",
                 export_style,
             )
-        save_as_pickled_file(spectra, filepath)
+        save_as_pickled_file(spectra, file)
     else:
-        raise TypeError(f"File extension of file: {filepath} is not recognized")
+        raise TypeError(f"File extension of file: {file} is not recognized")
 
 
 def save_as_pickled_file(spectra, filename: str) -> None:
