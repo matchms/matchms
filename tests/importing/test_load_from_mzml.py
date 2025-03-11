@@ -1,12 +1,16 @@
 import os
+from pathlib import Path
+import pytest
 from matchms.importing import load_from_mzml
 
 
-def test_load_from_mzml():
+@pytest.mark.parametrize("mzml_file", [
+    (os.path.join(os.path.dirname(__file__), "..", "testdata", "testdata.mzml")),
+    (Path(os.path.join(os.path.dirname(__file__), "..", "testdata", "testdata.mzml")))
+])
+def test_load_from_mzml(mzml_file):
     """Test parsing of mzml file to spectrum objects"""
 
-    module_root = os.path.join(os.path.dirname(__file__), "..")
-    mzml_file = os.path.join(module_root, "testdata", "testdata.mzml")
     spectra = list(load_from_mzml(mzml_file))
 
     assert len(spectra) == 10, "Expected 10 spectra."
