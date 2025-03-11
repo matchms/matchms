@@ -1,14 +1,14 @@
 matchms,massbank,nist,riken,gnps
 spectrum_id,ACCESSION,DB#,,SPECTRUMID
 title,RECORD TITLE,,,TITLE
-record_date,DATE,,,
-authors,AUTHORS,,,
-license,LICENSE,,,
-copyright,COPYRIGHT,,,
+record_date,DATE,,DATE,
+authors,AUTHORS,,AUTHORS,
+license,LICENSE,,LICENSE,
+copyright,COPYRIGHT,,LICENSE,
 publication,PUBLICATION,,,
 comment,COMMENT,Comments,Comment,
 file_name,COMMENT:FILENAME,,,FILENAME
-scans,COMMENT:SCANS,,,SCANS
+scans,COMMENT:SCANS,,SCANNUMBER,SCANS
 principal_investigator,COMMENT:PI,,,PI
 data_collector,COMMENT:DATACOLLECTOR,,,DATACOLLECTOR
 submit_user,COMMENT:SUBMITUSER,,,SUBMITUSER
@@ -46,11 +46,11 @@ organism_name,SP$SCIENTIFIC_NAME,,,ORGANISM
 organism_lineage,SP$LINEAGE,,,
 sample_link,SP$LINK,,,
 sample,SP$SAMPLE,,,
-instrument,AC$INSTRUMENT,Instrument,,INSTRUMENT
+instrument,AC$INSTRUMENT,Instrument,INSTRUMENT,INSTRUMENT
 instrument_type,AC$INSTRUMENT_TYPE,Instrument_type,INSTRUMENTTYPE,SOURCE_INSTRUMENT
-ms_level,AC$MASS_SPECTROMETRY:MS_TYPE,Spectrum_type,,MSLEVEL
+ms_level,AC$MASS_SPECTROMETRY:MS_TYPE,Spectrum_type,MSLEVEL,MSLEVEL
 ionmode,AC$MASS_SPECTROMETRY:ION_MODE,Ion_mode,IONMODE,IONMODE
-charge,AC$MASS_SPECTROMETRY:CHARGE,Charge,,CHARGE
+charge,AC$MASS_SPECTROMETRY:CHARGE,Charge,CHARGE,CHARGE
 collision_energy,AC$MASS_SPECTROMETRY:COLLISION_ENERGY,Collision_energy,COLLISIONENERGY,
 collision_gas,AC$MASS_SPECTROMETRY:COLLSION_GAS,Collision_gas,,
 collection_date,AC$MASS_SPECTROMETRY:DATE,,,
@@ -58,7 +58,7 @@ desolvation_gas,AC$MASS_SPECTROMETRY:DESOLVATION_GAS_FLOW,,,
 fragmentation_mode,AC$MASS_SPECTROMETRY:FRAGMENTATION_MODE,Special_fragmentation,,
 insource_voltage,AC$MASS_SPECTROMETRY:INSOURCE_VOLTAGE,Cone_voltage,,
 ionization_energy,AC$MASS_SPECTROMETRY:IONIZATION_ENERGY,,,
-ionization,AC$MASS_SPECTROMETRY:IONIZATION,Ionization,,
+ionization,AC$MASS_SPECTROMETRY:IONIZATION,Ionization,IONIZATION,
 known_impurity,AC$MASS_SPECTROMETRY:KNOWN_IMPURITY,Known_impurity,,
 maldi_laser,AC$MASS_SPECTROMETRY:LASER,,,
 maldi_matrix,AC$MASS_SPECTROMETRY:MATRIX,,,
@@ -111,3 +111,4 @@ software_system_id,MS$DATA_PROCESSING:SOFTWARE_SYSTEM_ID,,,
 splash,PK$SPLASH,,,
 peakAnnotations,PK$ANNOTATION,,,
 num_peaks,PK$NUM_PEAK,Num Peaks,Num Peaks,
+spectrum_type,,,SPECTRUMTYPE,
