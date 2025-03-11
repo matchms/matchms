@@ -3,11 +3,9 @@ import os
 from typing import IO, Dict, List, Union
 from ..Fragments import Fragments
 from ..Spectrum import Spectrum
-from ..utils import (
-    filter_empty_spectra,
-    fingerprint_export_warning,
-    rename_deprecated_params,
-)
+from ..utils import (filter_empty_spectra, fingerprint_export_warning,
+                     rename_deprecated_params)
+
 
 logger = logging.getLogger("matchms")
 _extensions_not_allowed = ["mzml", "mzxml", "json", "mgf"]
