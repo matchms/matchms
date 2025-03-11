@@ -10,11 +10,11 @@ logger = logging.getLogger("matchms")
 
 
 @rename_deprecated_params(param_mapping={"spectrums": "spectra"}, version="0.26.5")
-def save_as_mgf(
-    spectra: Union[List[Spectrum], Spectrum],
-    filename: str,
-    export_style: str = "matchms",
-):
+def save_as_mgf(spectra: Union[List[Spectrum], Spectrum],
+                filename: str,
+                export_style: str = "matchms",
+                file_mode: str = "a",
+                ) -> None:
     """Save spectrum(s) as mgf file.
 
     Example:
@@ -44,6 +44,9 @@ def save_as_mgf(
     export_style:
         Converts the keys to the required export style. One of ["matchms", "massbank", "nist", "riken", "gnps"].
         Default is "matchms"
+    file_mode: str
+        This is an optional parameter which defines the mode the file will be opened in.  
+        Default is "a" (append). The other option is "w" (write). If set worngly it will default to "a".
     """
     if not isinstance(spectra, list):
         # Assume that input was a single Spectrum.
@@ -63,7 +66,6 @@ def save_as_mgf(
             if "fingerprint" in spectrum_dict["params"]:
                 del spectrum_dict["params"]["fingerprint"]
             yield spectrum_dict
-
-    py_mgf.write(
-        spectrum_dict_generator(spectra), filename, file_mode="a", encoding="utf-8"
-    )
+    if file_mode not in ["a", "w"]:
+        file_mode = "a"
+    py_mgf.write(spectrum_dict_generator(spectra), filename, file_mode=file_mode, encoding="utf-8")
