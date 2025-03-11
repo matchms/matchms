@@ -2,11 +2,9 @@ import logging
 from typing import List, Union
 import pyteomics.mgf as py_mgf
 from ..Spectrum import Spectrum
-from ..utils import (
-    filter_empty_spectra,
-    fingerprint_export_warning,
-    rename_deprecated_params,
-)
+from ..utils import (filter_empty_spectra, fingerprint_export_warning,
+                     rename_deprecated_params)
+
 
 logger = logging.getLogger("matchms")
 
