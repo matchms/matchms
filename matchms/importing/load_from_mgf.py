@@ -6,7 +6,6 @@ from matchms.importing.parsing_utils import parse_spectrum_dict
 from matchms.Spectrum import Spectrum
 
 
-
 def load_from_mgf(filename: Union[str, Path, TextIO],
                   metadata_harmonization: bool = True) -> Generator[Spectrum, None, None]:
     """Load spectrum(s) from mgf file.
