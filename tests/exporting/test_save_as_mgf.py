@@ -28,10 +28,13 @@ def test_save_as_mgf_single_spectrum():
     # Write to test file
     with tempfile.TemporaryDirectory() as d:
         filename = os.path.join(d, "test.mgf")
+        filename2 = os.path.join(d, "test2.mgf")
         save_as_mgf(spectrum, filename)
+        save_as_mgf(spectrum, filename2, file_mode="w")
 
         # test if file exists
         assert os.path.isfile(filename)
+        assert os.path.isfile(filename2)
 
         # Test if content of mgf file is correct
         with open(filename, "r", encoding="utf-8") as f:
