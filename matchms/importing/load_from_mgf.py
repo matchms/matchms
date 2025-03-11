@@ -1,5 +1,4 @@
 import os
-from io import StringIO
 from typing import Generator, TextIO, Union
 from pyteomics.mgf import MGF
 from matchms.importing.parsing_utils import parse_spectrum_dict
@@ -7,7 +6,7 @@ from matchms.Spectrum import Spectrum
 
 
 def load_from_mgf(
-    filename: Union[str, TextIO, StringIO], metadata_harmonization: bool = True
+    filename: Union[str, TextIO], metadata_harmonization: bool = True
 ) -> Generator[Spectrum, None, None]:
     """Load spectrum(s) from mgf file.
 
