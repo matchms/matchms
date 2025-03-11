@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 import pytest
 from matchms import Spectrum
 from matchms.importing import load_from_mgf
@@ -9,6 +10,12 @@ def test_load_from_mgf_using_filepath():
     spectra_file = os.path.join(module_root, "testdata", "pesticides.mgf")
 
     spectra = list(load_from_mgf(spectra_file))
+
+    assert len(spectra) > 0
+    assert isinstance(spectra[0], Spectrum)
+
+    spectra_file_path = Path(module_root).joinpath("testdata", "pesticides.mgf")
+    spectra = list(load_from_mgf(spectra_file_path))
 
     assert len(spectra) > 0
     assert isinstance(spectra[0], Spectrum)
