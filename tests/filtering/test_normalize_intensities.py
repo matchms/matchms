@@ -52,8 +52,9 @@ def test_normalize_intensities_all_zeros(caplog):
 
     spectrum = normalize_intensities(spectrum_in)
 
-    assert spectrum is None, "Expected spectrum to be set to None."
-    msg = "Spectrum with all peak intensities <= 0 was set to None."
+    assert sum(spectrum.peaks.intensities) == 0.0, "Expected spectrum peak intensities to be set to 0."
+    assert max(spectrum.peaks.intensities) == 0.0, "Expected maximum spectrum peak intensity to be 0"
+    msg = "Peak intensities of spectrum with all peak intensities <= 0 were set to 0."
     assert msg in caplog.text, "Expected log message."
 
 
