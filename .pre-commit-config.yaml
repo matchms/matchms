@@ -34,8 +34,9 @@ repos:
         name: pytest
         entry: pytest
         language: system
-        types: [python]
-        
+        pass_filenames: false
+        always_run: true
+
 # sets up .pre-commit-ci.yaml to ensure pre-commit dependencies stay up to date
 ci:
   autoupdate_schedule: weekly
