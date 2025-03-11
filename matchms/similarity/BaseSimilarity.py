@@ -1,8 +1,8 @@
 from abc import abstractmethod
 from typing import List
 import numpy as np
-from tqdm import tqdm
 from sparsestack import StackedSparseArray
+from tqdm import tqdm
 from matchms.typing import SpectrumType
 
 
