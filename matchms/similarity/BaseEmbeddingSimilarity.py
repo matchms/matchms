@@ -1,7 +1,7 @@
 import numpy as np
 from typing import List, Iterable
 from abc import abstractmethod
-from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.metrics.pairwise import cosine_similarity, euclidean_distances
 from matchms.similarity.BaseSimilarity import BaseSimilarity
 from matchms.typing import SpectrumType
 
@@ -14,10 +14,8 @@ except ImportError:
 class BaseEmbeddingSimilarity(BaseSimilarity):
 
     # TODO: add pytests
-    # TODO: add pynndescent to pyproject.toml, as optional dependency?
     # TODO: compute_embeddings save/load from disk?
-    # TODO: not only string `similarity`, but also a function?
-    # TODO: at least cos and eucl similarity
+    # TODO: not only string `metric`, but also a function?
     # TODO: not only PyNNDescent
 
     def __init__(self, similarity: str = "cosine"):  
@@ -26,8 +24,10 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
 
         if self.similarity == "cosine":
             self.pairwise_similarity_fn = cosine_similarity
+        elif self.similarity == "euclidean":
+            self.pairwise_similarity_fn = lambda x, y: -euclidean_distances(x, y)  # - to get similarities from distances
         else:
-            raise ValueError(f"Only cosine and euclidean similarity are supported for now. Got {self.similarity}.")
+            raise ValueError(f"Only cosine and euclidean similarities are supported for now. Got {self.similarity}.")
 
     @abstractmethod
     def compute_embeddings(self, spectra: Iterable[SpectrumType]) -> np.ndarray:
@@ -43,17 +43,21 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
     def pair(self, reference: SpectrumType, query: SpectrumType) -> float:
         return self.matrix([reference], [query])[0, 0]
             
-    def matrix(self, references: List[SpectrumType], queries: List[SpectrumType]) -> np.ndarray:
+    def matrix(
+        self, references: List[SpectrumType], queries: List[SpectrumType], array_type: str = "numpy",
+        is_symmetric: bool = True
+    ) -> np.ndarray:
+        if array_type != "numpy" or not is_symmetric:
+            raise ValueError("Any embedding base similarity matrix is supposed to be dense and symmetric.")
 
         # Compute embeddings
         embs_ref = self.compute_embeddings(references)
         embs_query = self.compute_embeddings(queries)
 
-        # Compute pairwise similarity matrix                
+        # Compute pairwise similarities matrix                
         return self.pairwise_similarity_fn(embs_ref, embs_query)
 
     def generate_ann_index(self, reference_spectra: Iterable[SpectrumType], k: int = 50):
-
         if not pynndescent:
             raise ImportError("pynndescent is not installed. Please install it with `pip install pynndescent`.")
 
@@ -67,7 +71,6 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
         return index
 
     def get_anns(self, query_spectra: Iterable[SpectrumType], k: int = 50):
-
         if self.index is None:
             raise ValueError(
                 "No index generated yet. Please call `generate_ann_index` on your reference spectra first."
@@ -80,4 +83,6 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
         return self.index.query(embs_query, k=k)
 
     def get_index_anns(self):
-        return self.index.neighbor_graph
+        neighbors, distances = self.index.neighbor_graph
+        return neighbors, distances
+
