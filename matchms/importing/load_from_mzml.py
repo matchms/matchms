@@ -1,6 +1,6 @@
-from typing import Union, Generator
-import numpy as np
 from pathlib import Path
+from typing import Generator, Union
+import numpy as np
 from pyteomics.mzml import read
 from matchms.importing.parsing_utils import (parse_mzml_mzxml_metadata,
                                              sort_by_mz)

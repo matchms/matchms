@@ -1,6 +1,6 @@
 import os
-from typing import Generator, TextIO, Union
 from pathlib import Path
+from typing import Generator, TextIO, Union
 from pyteomics.mgf import MGF
 from matchms.importing.parsing_utils import parse_spectrum_dict
 from matchms.Spectrum import Spectrum
