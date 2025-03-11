@@ -222,3 +222,6 @@ class SimilarityNetwork:
     def _export_to_gml(self, filename: str):
         """Save the network as .gml file."""
         nx.write_gml(self.graph, filename)
+
+def leiden_clusterin():
+    pass
