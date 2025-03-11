@@ -323,7 +323,7 @@ To install matchms, do:
   # Install rdkit using conda, rest of dependencies can be installed with pip
   conda install -c conda-forge rdkit
   python -m pip install --upgrade pip
-  pip install --editable .[dev]  # if this won't work try "poetry install --with dev"
+  pip install --editable .[dev]  # if this won't work try `pip install --editable ".[dev]"`, alternatively you can `poetry install --with dev``
 
 Run the linter with:
 

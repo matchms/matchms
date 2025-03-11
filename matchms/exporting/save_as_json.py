@@ -1,11 +1,8 @@
 import json
 from typing import List
 from ..Spectrum import Spectrum
-from ..utils import (
-    filter_empty_spectra,
-    fingerprint_export_warning,
-    rename_deprecated_params,
-)
+from ..utils import (filter_empty_spectra, fingerprint_export_warning,
+                     rename_deprecated_params)
 
 
 @rename_deprecated_params(param_mapping={"spectrums": "spectra"}, version="0.26.5")
