@@ -1,12 +1,13 @@
-from typing import Generator
+from typing import Union, Generator
 import numpy as np
+from pathlib import Path
 from pyteomics.mzml import read
 from matchms.importing.parsing_utils import (parse_mzml_mzxml_metadata,
                                              sort_by_mz)
 from matchms.Spectrum import Spectrum
 
 
-def load_from_mzml(filename: str, ms_level: int = 2,
+def load_from_mzml(filename: Union[str, Path], ms_level: int = 2,
                    metadata_harmonization: bool = True) -> Generator[Spectrum, None, None]:
     """Load spectrum(s) from mzml file.
 
@@ -33,6 +34,9 @@ def load_from_mzml(filename: str, ms_level: int = 2,
         Set to False if metadata harmonization to default keys is not desired.
         The default is True.
     """
+    if isinstance(filename, Path):
+        filename = str(filename)  # pyteomics does not support pathlib.Path
+
     with read(filename, dtype=dict) as reader:
         for pyteomics_spectrum in reader:
             if "ms level" in pyteomics_spectrum and pyteomics_spectrum["ms level"] == ms_level:
