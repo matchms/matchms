@@ -46,7 +46,7 @@ def save_spectra(
 
     if len(spectra) == 0:
         logger.warning("No spectra to save. File will be empty.")
-        with open(file, "w"):
+        with open(file, "w", encoding="utf-8") as f:
             pass
         return
 
