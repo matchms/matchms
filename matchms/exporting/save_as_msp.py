@@ -8,15 +8,17 @@ from ..utils import (filter_empty_spectra, fingerprint_export_warning,
 
 
 logger = logging.getLogger("matchms")
-
-
-_extentions_not_allowed = ["mzml", "mzxml", "json", "mgf"]
+_extensions_not_allowed = ["mzml", "mzxml", "json", "mgf"]
 
 
 @rename_deprecated_params(param_mapping={"spectrums": "spectra"}, version="0.26.5")
-def save_as_msp(spectra: List[Spectrum], filename: str,
-                write_peak_comments: bool = True,
-                mode: str = "a", style: str = "matchms"):
+def save_as_msp(
+    spectra: List[Spectrum],
+    filename: str,
+    write_peak_comments: bool = True,
+    mode: str = "a",
+    style: str = "matchms",
+):
     """Save spectrum(s) as msp file.
 
     Example:
@@ -52,26 +54,34 @@ def save_as_msp(spectra: List[Spectrum], filename: str,
         Converts the keys to required Export style. One of ["massbank", "nist", "riken", "gnps"].
         Default is "matchms"
     """
-    file_extension = filename.split(".")[-1]
-    assert file_extension.lower() not in _extentions_not_allowed, \
-        f"File extension '.{file_extension}' not allowed."
-    if not filename.endswith(".msp"):
-        logger.warning("Spectrum(s) will be stored as msp file with extension .%s",
-                       filename.split(".")[-1])
-    spectra = _ensure_list(spectra)
-    spectra = filter_empty_spectra(spectra)
+    if not isinstance(spectra, list):
+        # Assume that input was a single Spectrum.
+        spectra = [spectra]
 
+    spectra = filter_empty_spectra(spectra)
     fingerprint_export_warning(spectra)
+
+    file_extension = filename.split(".")[-1]
+    assert (
+        file_extension.lower() not in _extensions_not_allowed
+    ), f"File extension '.{file_extension}' not allowed."
+    if not filename.endswith(".msp"):
+        logger.warning(
+            "Spectrum(s) will be stored as msp file with extension .%s",
+            filename.split(".")[-1],
+        )
 
     with open(filename, mode, encoding="utf-8") as outfile:
         for spectrum in spectra:
             _write_spectrum(spectrum, outfile, write_peak_comments, style)
 
 
-def _write_spectrum(spectrum: Spectrum,
-                    outfile: IO,
-                    write_peak_comments: bool,
-                    export_style: str = "matchms"):
+def _write_spectrum(
+    spectrum: Spectrum,
+    outfile: IO,
+    write_peak_comments: bool,
+    export_style: str = "matchms",
+):
     _write_metadata(spectrum.metadata_dict(export_style), outfile)
     if write_peak_comments is True:
         _write_peaks(spectrum.peaks, spectrum.peak_comments, outfile)
@@ -100,7 +110,7 @@ def _format_peak_comment(mz: Union[int, float], peak_comments: Dict):
     peak_comment = peak_comments.get(mz, None)
     if peak_comment is None:
         return ""
-    return f"\t\"{peak_comment}\""
+    return f'\t"{peak_comment}"'
 
 
 def _is_num_peaks(key: str) -> bool:
@@ -113,10 +123,3 @@ def _is_peak_comments(key: str) -> bool:
 
 def _is_fingerprint(key: str) -> bool:
     return key.lower().startswith("fingerprint")
-
-
-def _ensure_list(spectra) -> List[Spectrum]:
-    if not isinstance(spectra, list):
-        # Assume that input was single Spectrum
-        spectra = [spectra]
-    return spectra

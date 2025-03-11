@@ -10,7 +10,9 @@ from ..utils import filter_empty_spectra, rename_deprecated_params
 logger = logging.getLogger("matchms")
 
 
-def _get_metadata_dict(spectrum: Spectrum, include_fields: Optional[List[str]] = None) -> Dict[str, Any]:
+def _get_metadata_dict(
+    spectrum: Spectrum, include_fields: Optional[List[str]] = None
+) -> Dict[str, Any]:
     """Extract keys from spectrum metadata. Will silently continue if a key is not found.
 
     Args:
@@ -26,13 +28,15 @@ def _get_metadata_dict(spectrum: Spectrum, include_fields: Optional[List[str]] =
         logger.warning("'Include_fields' must be 'all' or list of keys.")
         return None
 
-    return {key: spectrum.metadata[key] for key in spectrum.metadata.keys()
-            & include_fields}
+    return {
+        key: spectrum.metadata[key] for key in spectrum.metadata.keys() & include_fields
+    }
 
 
 @rename_deprecated_params(param_mapping={"spectrums": "spectra"}, version="0.26.5")
-def export_metadata_as_json(spectra: List[Spectrum], filename: str,
-                            include_fields: Optional[List[str]] = None):
+def export_metadata_as_json(
+    spectra: List[Spectrum], filename: str, include_fields: Optional[List[str]] = None
+):
     """Export metadata to json file.
 
     Parameters
@@ -51,13 +55,16 @@ def export_metadata_as_json(spectra: List[Spectrum], filename: str,
         if metadata_dict:
             metadata_dicts.append(metadata_dict)
 
-    with open(filename, 'w', encoding="utf-8") as fout:
+    with open(filename, "w", encoding="utf-8") as fout:
         json.dump(metadata_dicts, fout)
 
 
-def export_metadata_as_csv(spectra: List[Spectrum], filename: str,
-                           include_fields: Optional[List[str]] = None,
-                           delimiter: str = ','):
+def export_metadata_as_csv(
+    spectra: List[Spectrum],
+    filename: str,
+    include_fields: Optional[List[str]] = None,
+    delimiter: str = ",",
+):
     """Export metadata to csv file.
 
     Parameters
@@ -75,14 +82,16 @@ def export_metadata_as_csv(spectra: List[Spectrum], filename: str,
     if include_fields is not None:
         metadata, columns = _subset_metadata(include_fields, metadata, columns)
 
-    with open(filename, 'a+', encoding="utf-8") as csvfile:
+    with open(filename, "a+", encoding="utf-8") as csvfile:
         writer = csv.writer(csvfile, delimiter=delimiter)
         writer.writerow(columns)
         for data in metadata:
             writer.writerow(data)
 
 
-def _subset_metadata(include_fields: List[str], metadata: np.array, columns: Set[str]) -> Tuple[np.array, Set[str]]:
+def _subset_metadata(
+    include_fields: List[str], metadata: np.array, columns: Set[str]
+) -> Tuple[np.array, Set[str]]:
     """Subset metadata to 'include_fields' and return intersection of columns.
 
     Parameters

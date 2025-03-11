@@ -11,45 +11,57 @@ logger = logging.getLogger("matchms")
 
 
 @rename_deprecated_params(param_mapping={"spectrums": "spectra"}, version="0.26.5")
-def save_spectra(spectra: List[Spectrum],
-                 file: str,
-                 export_style: str = "matchms",
-                 append: bool = False,
-                 ) -> None:
+def save_spectra(
+    spectra: List[Spectrum],
+    file: str,
+    export_style: str = "matchms",
+    append: bool = False,
+) -> None:
     """Saves spectra as the file type specified.
 
-    The following file extensions can be used:
-    "json", "mgf", "msp"
+    The following file extensions can be used: .json, .mgf, and .msp.
 
     Args:
     -----
     spectra:
         The spectra that are saved.
     file:
-        Path to file containing spectra, with file extension ".json", ".mgf", ".msp"
+        Path to file containing spectra, with file extension ".json", ".mgf", ".msp".
     export_style:
-        Converts the keys to the required export style. One of ["matchms", "massbank", "nist", "riken", "gnps"].
-        Default is "matchms"
+        Converts the keys to the required export style.
+        One of ["matchms", "massbank", "nist", "riken", "gnps"]. Default is "matchms".
     append:
-        Only supported for ".mgf", and ".msp" filetypes. If True, will try to append to an existing file, instead of creating
-        a new file. Default is `False`.
+        Only supported for ".mgf", and ".msp" filetypes. If True, will try to append
+        to an existing file, instead of creating a new file. Default is `False`.
     """
     if os.path.exists(file) and not append:
         raise FileExistsError(f"The specified file: {file} already exists.")
 
     ftype = os.path.splitext(file)[1].lower()[1:]
-    if append and ftype not in ('mgf', 'msp'):
+    if append and ftype not in ("mgf", "msp"):
         raise ValueError(f"{ftype} isn't supported for when `append` is True")
+
+    if not isinstance(spectra, list):
+        spectra = [spectra]
+
+    if len(spectra) == 0:
+        logger.warning("No spectra to save. File will be empty.")
+        with open(file, "w", encoding="utf-8"):
+            pass
+        return
 
     if ftype == "json":
         save_as_json(spectra, file, export_style)
     elif ftype == "mgf":
         save_as_mgf(spectra, file, export_style)
     elif ftype == "msp":
-        save_as_msp(spectra, file, style=export_style, mode='a')
+        save_as_msp(spectra, file, style=export_style, mode="a")
     elif ftype == "pickle":
         if export_style != "matchms":
-            logger.error("The only available export style for pickle is 'matchms', your export style %s", export_style)
+            logger.error(
+                "The only available export style for pickle is 'matchms', your export style %s",
+                export_style,
+            )
         save_as_pickled_file(spectra, file)
     else:
         raise TypeError(f"File extension of file: {file} is not recognized")
