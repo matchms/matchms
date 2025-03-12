@@ -74,8 +74,8 @@ def _write_other_spectrum_attribute(file, spectrum, attr_counter, attr):
 
 def _write_spectrum_attribute_with_unit(file, spectrum, attr_counter, attr):
     term, unit = STANDARDIZED_SPECTRUM_ATTRIBUTES.get(attr)
-    value = spectrum.get(attr)
-    value = re.findall('[\d]+[.,\d]+|[\d]*[.][\d]+|[\d]+', value)[0]
+    # remove non-numeric unit identifiers from value
+    value = re.findall('[\d]+[.,\d]+|[\d]*[.][\d]+|[\d]+', spectrum.get(attr))[0] 
     print(f'[{attr_counter}]{term}={value}', file=file)
     print(f'[{attr_counter}]UO:0000000|unit={unit}', file=file)
 
