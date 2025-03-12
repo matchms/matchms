@@ -21,9 +21,8 @@ def normalize_intensities(spectrum_in: SpectrumType) -> SpectrumType:
     max_intensity = np.max(spectrum.peaks.intensities)
 
     if max_intensity <= 0:
-        logger.warning("Peak intensities of spectrum with all peak intensities <= 0 were set to 0.")
-        zero_intensities = np.zeros(spectrum.peaks.intensities.shape)
-        spectrum.peaks = Fragments(mz=spectrum.peaks.mz, intensities=zero_intensities)
+        logger.warning("Peaks of spectrum with all peak intensities <= 0 were deleted.")
+        spectrum.peaks = Fragments(mz=np.array([]), intensities=np.array([]))
         return spectrum
 
     # Normalize peak intensities
