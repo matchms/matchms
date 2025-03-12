@@ -67,3 +67,15 @@ def test_mapped_attributes(tmp_path):
     with open(outpath, 'r') as file:
         lines = file.readlines()
         assert 'MS:1000465|scan polarity=MS:1000130|positive scan\n' in lines
+
+def test_peak_comments(tmp_path):
+    mz = np.array([35.7], dtype=np.float64)
+    intensities = np.array([1337], dtype=np.float64)
+    metadata = {'peak_comments': {35.7: 'test'}}
+    spectrum = SpectrumBuilder().with_mz(mz).with_intensities(intensities).with_metadata(metadata).build()
+    outpath = tmp_path / "test.mzspeclib"
+    
+    save_as_mzspeclib([spectrum], outpath)
+    with open(outpath, 'r') as file:
+        lines = file.readlines()
+        assert '35.7\t1337\ttest\n' in lines

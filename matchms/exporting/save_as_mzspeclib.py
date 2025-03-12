@@ -17,7 +17,7 @@ SPECTRUM_ATTRIBUTES = {
     'ionmode': 'MS:1000465|scan polarity'
 }
 
-MAPPED_ATTRIBUTE_VALUES = {
+MAPPED_SPECTRUM_ATTRIBUTES = {
     'MS:1000465|scan polarity': {
         'positive': 'MS:1000130|positive scan',
         'negative': 'MS:1000129|negative scan'
@@ -47,12 +47,7 @@ def _write_analyte(file, spectrum):
                 print(f'{attribute}={value}', file=file)
 
 def _write_spectrum_attributes(file, spectrum):
-    for key, attribute in SPECTRUM_ATTRIBUTES.items():
-        value = spectrum.get(key)
-        if attribute in MAPPED_ATTRIBUTE_VALUES.keys():
-            value = MAPPED_ATTRIBUTE_VALUES[attribute].get(value)
-        if value is not None:
-            print(f'{attribute}={value}', file=file)
+    _write_defined_spectrum_attributes(file, spectrum)
     
     spectrum_attributes = spectrum.metadata.keys()
     attr_counter = 1
@@ -65,11 +60,22 @@ def _write_spectrum_attributes(file, spectrum):
 
     print(f'MS:1003059|number of peaks={len(spectrum.peaks)}', file=file)
 
+def _write_defined_spectrum_attributes(file, spectrum):
+    for key, attribute in SPECTRUM_ATTRIBUTES.items():
+        value = spectrum.get(key)
+        if attribute in MAPPED_SPECTRUM_ATTRIBUTES:
+            value = MAPPED_SPECTRUM_ATTRIBUTES[attribute].get(value)        
+        if value is not None:
+            print(f'{attribute}={value}', file=file)
+
 def _write_peaks(file, spectrum):
     print(f'<Peaks>', file=file)
+    peak_comments = spectrum.get('peak_comments', {})
     for i in range(len(spectrum.peaks)):
+        mz = spectrum.peaks.mz[i]
         intensities = '{0:.2f}'.format(spectrum.peaks.intensities[i]).rstrip('0').rstrip('.')
-        print(f'{spectrum.peaks.mz[i]}\t{intensities}\t?', file=file)
+        comment = peak_comments.get(mz, '?')
+        print(f'{mz}\t{intensities}\t{comment}', file=file)
 
 def _has_analyte(spectrum):
     return any([spectrum.get(key) for key in ANALYTE_ATTRIBUTES.keys()])
