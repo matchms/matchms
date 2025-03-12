@@ -1,5 +1,5 @@
 import numpy as np
-from typing import List, Iterable, Union
+from typing import List, Iterable, Union, Optional
 from pathlib import Path
 from abc import abstractmethod
 from sklearn.metrics.pairwise import cosine_similarity, euclidean_distances
@@ -41,7 +41,9 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
             np.ndarray: Embeddings for the spectra. Shape: (n_spectra, n_embedding_features).
         """
 
-    def get_embeddings(self, spectra: Iterable[SpectrumType] = None, npy_path: Union[str, Path] = None) -> np.ndarray:
+    def get_embeddings(
+            self, spectra: Optional[Iterable[SpectrumType]] = None, npy_path: Optional[Union[str, Path]] = None
+        ) -> np.ndarray:
 
         if spectra is None and npy_path is None:
             raise ValueError("Either spectra or npy_path must be provided.")
@@ -76,12 +78,29 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
         # Compute pairwise similarities matrix                
         return self.pairwise_similarity_fn(embs_ref, embs_query)
 
-    def generate_ann_index(self, reference_spectra: Iterable[SpectrumType], k: int = 50):
+    def generate_ann_index(
+            self,
+            reference_spectra: Optional[Iterable[SpectrumType]] = None,
+            embeddings_path: Optional[Union[str, Path]] = None,
+            k: int = 50
+        ):
+        """
+        Generate an ANN index for the reference spectra.
+
+        Args:
+            reference_spectra: List of reference spectra to generate the ANN index for.
+            embeddings_path: If embeddings are already computed, provide the path to the numpy file containing them
+                             instead of `reference_spectra`.
+            k: Number of nearest neighbors to use for the ANN index.
+
+        Returns:
+            pynndescent.NNDescent: ANN index.
+        """
         if not pynndescent:
             raise ImportError("pynndescent is not installed. Please install it with `pip install pynndescent`.")
 
         # Compute reference embeddings
-        embs_ref = self.compute_embeddings(reference_spectra)
+        embs_ref = self.get_embeddings(reference_spectra, embeddings_path)
 
         # Build ANN index
         index = pynndescent.NNDescent(embs_ref, metric=self.similarity, n_neighbors=k)
