@@ -320,7 +320,6 @@ To install matchms, do:
   cd matchms
   conda create --name matchms-dev python=3.11
   conda activate matchms-dev
-  # Install rdkit using conda, rest of dependencies can be installed with poetry
   conda install poetry=1.8
   poetry install
 

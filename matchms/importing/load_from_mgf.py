@@ -1,13 +1,13 @@
 import os
+from pathlib import Path
 from typing import Generator, TextIO, Union
 from pyteomics.mgf import MGF
 from matchms.importing.parsing_utils import parse_spectrum_dict
 from matchms.Spectrum import Spectrum
 
 
-def load_from_mgf(
-    filename: Union[str, TextIO], metadata_harmonization: bool = True
-) -> Generator[Spectrum, None, None]:
+def load_from_mgf(filename: Union[str, Path, TextIO],
+                  metadata_harmonization: bool = True) -> Generator[Spectrum, None, None]:
     """Load spectrum(s) from mgf file.
 
     This function will create ~matchms.Spectrum for every spectrum in the given
@@ -37,6 +37,9 @@ def load_from_mgf(
     """
     if isinstance(filename, str) and not os.path.isfile(filename):
         raise FileNotFoundError(f"The specified file: {filename} doesn't exist.")
+
+    if isinstance(filename, Path):
+        filename = str(filename)  # pyteomics does not support pathlib.Path
 
     def parse_file():
         with MGF(filename, convert_arrays=1, encoding="utf-8") as reader:
