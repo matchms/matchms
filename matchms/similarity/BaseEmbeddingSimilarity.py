@@ -14,14 +14,15 @@ except ImportError:
 
 class BaseEmbeddingSimilarity(BaseSimilarity):
 
+    # TODO: docstrings
     # TODO: add pytests
-    # TODO: compute_embeddings save/load from disk?
     # TODO: not only string `metric`, but also a function?
     # TODO: not only PyNNDescent
 
     def __init__(self, similarity: str = "cosine"):  
         self.similarity = similarity
         self.index = None
+        self.index_backend = None
 
         if self.similarity == "cosine":
             self.pairwise_similarity_fn = cosine_similarity
@@ -82,7 +83,8 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
             self,
             reference_spectra: Optional[Iterable[SpectrumType]] = None,
             embeddings_path: Optional[Union[str, Path]] = None,
-            k: int = 50
+            k: int = 50,
+            index_backend: str = "pynndescent"
         ):
         """
         Build an ANN index for the reference spectra.
@@ -94,19 +96,25 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
             k: Number of nearest neighbors to use for the ANN index.
 
         Returns:
-            pynndescent.NNDescent: ANN index.
+            ANN index object.
         """
-        if not pynndescent:
-            raise ImportError("pynndescent is not installed. Please install it with `pip install pynndescent`.")
 
         # Compute reference embeddings
         embs_ref = self.get_embeddings(reference_spectra, embeddings_path)
 
-        # Build ANN index
-        index = pynndescent.NNDescent(embs_ref, metric=self.similarity, n_neighbors=k)
-        self.index = index
+        if index_backend == "pynndescent":
+            if not pynndescent:
+                raise ImportError("pynndescent is not installed. Please install it with `pip install pynndescent`.")
+            self.index_backend = index_backend
 
-        return index
+            # Build ANN index
+            index = pynndescent.NNDescent(embs_ref, metric=self.similarity, n_neighbors=k)
+        else:
+            raise ValueError(f"Only pynndescent is supported for now. Got {index_backend}.")
+
+        # Keep index in memory
+        self.index = index
+        return self.index
 
     def get_anns(self, query_spectra: Iterable[SpectrumType], k: int = 50):
         if self.index is None:
@@ -118,14 +126,20 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
         embs_query = self.compute_embeddings(query_spectra)
 
         # Get ANN indices
-        neighbors, distances = self.index.query(embs_query, k=k)
-        similarities = self._distances_to_similarities(distances)
+        if self.index_backend == "pynndescent":
+            neighbors, distances = self.index.query(embs_query, k=k)
+            similarities = self._distances_to_similarities(distances)
+        else:
+            raise ValueError(f"Only pynndescent is supported for now. Got {self.index_backend}.")
         return neighbors, similarities
 
     def get_index_anns(self):
-        neighbors, distances = self.index.neighbor_graph
-        similarities = self._distances_to_similarities(distances)
-        return neighbors, similarities
+        if self.index_backend == "pynndescent":
+            neighbors, distances = self.index.neighbor_graph
+            similarities = self._distances_to_similarities(distances)
+            return neighbors, similarities
+        else:
+            raise ValueError(f"Only pynndescent is supported for now. Got {self.index_backend}.")
 
     def _distances_to_similarities(self, distances):
         if self.similarity == "cosine":
