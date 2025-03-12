@@ -1,7 +1,8 @@
+import os
 import re
 from typing import List, TextIO
 from matchms.Spectrum import Spectrum
-import os
+
 
 ANALYTE_ATTRIBUTES = {
     'formula': 'MS:1000866|molecular formula',

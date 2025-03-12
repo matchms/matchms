@@ -1,9 +1,9 @@
-from ..builder_Spectrum import SpectrumBuilder
-import numpy as np
-import os
 import filecmp
-
+import os
+import numpy as np
 from matchms.exporting import save_as_mzspeclib
+from ..builder_Spectrum import SpectrumBuilder
+
 
 def test_creates_file(tmp_path):
     outpath = tmp_path / "test.mzspeclib"
