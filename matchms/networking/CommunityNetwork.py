@@ -13,7 +13,7 @@ class CommunityNetwork:
     Community-based Similarity Network for mass spectral data.
 
     This class creates a k-nearest neighbors graph from spectral similarity scores,
-    computes communities using the Leiden algorithm, and optionally removes intra-community edges.
+    computes communities using the Leiden algorithm, and optionally removes inter-community edges.
 
     Parameters
     ----------
@@ -24,24 +24,24 @@ class CommunityNetwork:
     score_cutoff : Optional[float], default None
         Threshold for similarity scores. Only edges with a similarity score greater or equal to this
         threshold are included. If None, no score-based filtering is applied.
-    remove_intra_community_links : bool, default True
+    remove_inter_community_links : bool, default True
         If True, all edges connecting spectra within the same community are removed.
     """
     def __init__(self,
                  identifier_key: str = "spectrum_id",
                  k: int = 20,
                  score_cutoff: Optional[float] = None,
-                 remove_intra_community_links: bool = True):
+                 remove_inter_community_links: bool = True):
         self.identifier_key = identifier_key
         self.k = k
         self.score_cutoff = score_cutoff
-        self.remove_intra_community_links = remove_intra_community_links
+        self.remove_inter_community_links = remove_inter_community_links
         self.graph: Optional[nx.Graph] = None
 
     def create_network(self, scores: Scores, score_name: Optional[str] = None) -> None:
         """
         Create a k-nearest neighbors graph from spectral similarities, compute communities using the Leiden algorithm,
-        and optionally remove intra-community edges.
+        and optionally remove inter-community edges.
 
         Parameters
         ----------
@@ -74,9 +74,9 @@ class CommunityNetwork:
         # Store the community assignment as node attributes.
         nx.set_node_attributes(self.graph, communities, "community")
 
-        # Optionally remove all intra-community edges.
-        if self.remove_intra_community_links:
-            self.graph = self._remove_intra_community_links(communities)
+        # Optionally remove all inter-community edges.
+        if self.remove_inter_community_links:
+            self.graph = self._remove_inter_community_links(communities)
 
     def _create_knn_graph(self, scores: Scores, score_name: str) -> nx.Graph:
         """
@@ -161,20 +161,23 @@ class CommunityNetwork:
         communities = {reverse_mapping[idx]: community for idx, community in enumerate(membership)}
         return communities
 
-    def _remove_intra_community_links(self, communities: dict) -> None:
+    def _remove_inter_community_links(self, communities: dict) -> None:
         """
-        Remove edges connecting nodes within the same community from the graph.
+        Remove edges connecting nodes in different communities from the graph.
 
         Parameters
         ----------
-        graph : nx.Graph
-            The NetworkX graph from which intra-community edges will be removed.
         communities : dict
             A dictionary mapping each node to its community identifier.
+
+        Returns
+        -------
+        nx.Graph
+            The modified graph with inter-community edges removed.
         """
-        intra_edges = [(u, v) for u, v in list(self.graph.edges())
+        inter_edges = [(u, v) for u, v in list(self.graph.edges())
                        if communities.get(u) != communities.get(v)]
-        self.graph.remove_edges_from(intra_edges)
+        self.graph.remove_edges_from(inter_edges)
         return self.graph
 
     def export_to_file(self, filename: str, graph_format: str = "graphml") -> None:
