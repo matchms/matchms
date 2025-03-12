@@ -118,29 +118,29 @@ def test_create_network_symmetric():
     for u, v, data in graph.edges(data=True):
         assert data.get("weight", 0) >= cutoff, "Edge weight below cutoff found."
 
-def test_remove_intra_community_links():
-    """Test that intra-community edges are removed when remove_intra_community_links=True."""
+def test_remove_inter_community_links():
+    """Test that inter-community edges are removed when remove_inter_community_links=True."""
     cutoff = 0.7
     scores = create_dummy_scores_symmetric()
-    ensnet = CommunityNetwork(score_cutoff=cutoff, k=3, remove_intra_community_links=True)
+    ensnet = CommunityNetwork(score_cutoff=cutoff, k=3, remove_inter_community_links=True)
     ensnet.create_network(scores)
     graph = ensnet.graph
     for u, v in graph.edges():
         community_u = graph.nodes[u].get("community")
         community_v = graph.nodes[v].get("community")
-        assert community_u != community_v, f"Intra-community edge found between {u} and {v}."
+        assert community_u == community_v, f"Inter-community edge found between {u} and {v}."
 
-def test_keep_intra_community_links():
+def test_keep_inter_community_links():
     """
-    Test that when remove_intra_community_links is False the graph may contain edges connecting nodes
+    Test that when remove_inter_community_links is False the graph may contain edges connecting nodes
     of the same community.
     """
     cutoff = 0.7
     scores = create_dummy_scores_symmetric()
-    ensnet = CommunityNetwork(score_cutoff=cutoff, k=3, remove_intra_community_links=False)
+    ensnet = CommunityNetwork(score_cutoff=cutoff, k=3, remove_inter_community_links=False)
     ensnet.create_network(scores)
     graph = ensnet.graph
-    # Depending on the community detection, it is possible that no intra-community edge is present.
+    # Depending on the community detection, it is possible that no inter-community edge is present.
     # Therefore, we only check that the graph structure is intact.
     assert graph.number_of_edges() > 0, "Expected some edges in the network."
 
@@ -149,9 +149,9 @@ def test_create_network_higher_cutoff():
     cutoff_low = 0.7
     cutoff_high = 0.9
     scores = create_dummy_scores_symmetric()
-    ensnet_low = CommunityNetwork(score_cutoff=cutoff_low, k=3, remove_intra_community_links=False)
+    ensnet_low = CommunityNetwork(score_cutoff=cutoff_low, k=3, remove_inter_community_links=False)
     ensnet_low.create_network(scores)
-    ensnet_high = CommunityNetwork(score_cutoff=cutoff_high, k=3, remove_intra_community_links=False)
+    ensnet_high = CommunityNetwork(score_cutoff=cutoff_high, k=3, remove_inter_community_links=False)
     ensnet_high.create_network(scores)
     edges_low = list(ensnet_low.graph.edges())
     edges_high = list(ensnet_high.graph.edges())
@@ -160,9 +160,9 @@ def test_create_network_higher_cutoff():
 def test_create_network_different_k():
     """Test that using a larger k value produces a graph with at least as many edges as with a smaller k."""
     scores = create_dummy_scores_symmetric()
-    ensnet_k_small = CommunityNetwork(score_cutoff=0.7, k=1, remove_intra_community_links=False)
+    ensnet_k_small = CommunityNetwork(score_cutoff=0.7, k=1, remove_inter_community_links=False)
     ensnet_k_small.create_network(scores)
-    ensnet_k_large = CommunityNetwork(score_cutoff=0.7, k=5, remove_intra_community_links=False)
+    ensnet_k_large = CommunityNetwork(score_cutoff=0.7, k=5, remove_inter_community_links=False)
     ensnet_k_large.create_network(scores)
     assert ensnet_k_small.graph.number_of_edges() <= ensnet_k_large.graph.number_of_edges(), (
         "Graph with larger k should have at least as many edges."
@@ -172,7 +172,7 @@ def test_export_to_file(filename, graph_format):
     """Test exporting the graph to a file."""
     cutoff = 0.7
     scores = create_dummy_scores_symmetric_modified_cosine()
-    ensnet = CommunityNetwork(score_cutoff=cutoff, k=3, remove_intra_community_links=False)
+    ensnet = CommunityNetwork(score_cutoff=cutoff, k=3, remove_inter_community_links=False)
     ensnet.create_network(scores, score_name="ModifiedCosine_score")
     ensnet.export_to_file(filename, graph_format)
     assert os.path.isfile(filename), "Exported network file not found."
