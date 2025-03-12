@@ -1,0 +1,61 @@
+<mzSpecLib>
+MS:1003186|library format version=1.0
+MS:1003188|library name=rcx_gc-ei_ms_20201028_perylene
+<AttributeSet Spectrum=all>
+<AttributeSet Analyte=all>
+<AttributeSet Interpretation=all>
+<Spectrum=1>
+MS:1003061|library spectrum name=Perylene
+MS:1003208|experimental precursor monoisotopic m/z=252.09323
+MS:1000465|scan polarity=MS:1000130|positive scan
+[1]MS:1000045|collision energy=70
+[1]UO:0000000|unit=UO:0000266|electronvolt
+MS:1003059|number of peaks=19
+[2]MS:1003275|other attribute name=SCANNUMBER
+[2]MS:1003276|other attribute value=-1
+[3]MS:1003275|other attribute name=RETENTIONTIME
+[3]MS:1003276|other attribute value=-1
+[4]MS:1003275|other attribute name=RETENTIONINDEX
+[4]MS:1003276|other attribute value=2886.9
+[5]MS:1003275|other attribute name=PRECURSORTYPE
+[5]MS:1003276|other attribute value=[M]+
+[6]MS:1003275|other attribute name=SPECTRUMTYPE
+[6]MS:1003276|other attribute value=Centroid
+[7]MS:1003275|other attribute name=AUTHORS
+[7]MS:1003276|other attribute value=Price et al., RECETOX, Masaryk University (CZ)
+[8]MS:1003275|other attribute name=INSTRUMENT
+[8]MS:1003276|other attribute value=Q Exactive GC Orbitrap GC-MS/MS
+[9]MS:1003275|other attribute name=INSTRUMENTTYPE
+[9]MS:1003276|other attribute value=GC-EI-Orbitrap
+[10]MS:1003275|other attribute name=IONIZATION
+[10]MS:1003276|other attribute value=EI+
+[11]MS:1003275|other attribute name=LICENSE
+[11]MS:1003276|other attribute value=CC BY-NC
+[12]MS:1003275|other attribute name=COMMENT
+[12]MS:1003276|other attribute value=
+<Analyte=1>
+MS:1000866|molecular formula=C20H12
+MS:1002894|InChIKey=CSHWQDPOILHKBI-UHFFFAOYSA-N
+MS:1003403|InChI=
+MS:1000868|SMILES formula=C1=CC2=C3C(=C1)C1=CC=CC4=C1C(=CC=C4)C3=CC=C2
+<Peaks>
+112.03071	49892.0	?
+113.03854	87510.0	Theoretical m/z 113.039125, Mass diff 0 (0 ppm), Formula C9H5
+124.03076	100146.0	?
+124.53242	24923.0	?
+125.03855	179254.0	Theoretical m/z 125.039125, Mass diff 0 (0 ppm), Formula C10H5
+125.54019	49039.0	?
+126.04636	131679.0	?
+126.54804	36313.0	?
+222.04645	28905.0	?
+224.06192	55632.0	?
+226.04175	37413.0	?
+246.04646	23286.0	?
+248.06204	140007.0	?
+249.07072	62236.0	Theoretical m/z 249.070425, Mass diff -0.001 (0 ppm), Formula C20H9
+250.07765	641789.0	?
+251.07967	137600.0	?
+252.09323	1955166.0	Theoretical m/z 252.093354, Mass diff 0 (0.49 ppm), SMILES C1=CC=2C=CC=C3C4=CC=CC5=CC=CC(C(=C1)C23)=C54, Annotation [C20H12]+, Rule of HR False
+253.09656	402252.0	?
+254.09985	39987.0	?
+

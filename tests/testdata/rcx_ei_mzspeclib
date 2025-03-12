@@ -1,0 +1,569 @@
+<mzSpecLib>
+MS:1003186|library format version=1.0
+MS:1003188|library name=recetox_exposome_gc-ei-ms_20201028
+<AttributeSet Spectrum=all>
+<AttributeSet Analyte=all>
+<AttributeSet Interpretation=all>
+<Spectrum=1>
+MS:1003061|library spectrum name=Perylene_2H12
+MS:1003208|experimental precursor monoisotopic m/z=264.16858
+MS:1000465|scan polarity=MS:1000130|positive scan
+[1]MS:1000045|collision energy=70
+[1]UO:0000000|unit=UO:0000266|electronvolt
+MS:1003059|number of peaks=33
+[2]MS:1003275|other attribute name=SCANNUMBER
+[2]MS:1003276|other attribute value=-1
+[3]MS:1003275|other attribute name=RETENTIONTIME
+[3]MS:1003276|other attribute value=-1
+[4]MS:1003275|other attribute name=RETENTIONINDEX
+[4]MS:1003276|other attribute value=2876
+[5]MS:1003275|other attribute name=PRECURSORTYPE
+[5]MS:1003276|other attribute value=[M]+
+[6]MS:1003275|other attribute name=SPECTRUMTYPE
+[6]MS:1003276|other attribute value=Centroid
+[7]MS:1003275|other attribute name=AUTHORS
+[7]MS:1003276|other attribute value=Price et al., RECETOX, Masaryk University (CZ)
+[8]MS:1003275|other attribute name=INSTRUMENT
+[8]MS:1003276|other attribute value=Q Exactive GC Orbitrap GC-MS/MS
+[9]MS:1003275|other attribute name=INSTRUMENTTYPE
+[9]MS:1003276|other attribute value=GC-EI-Orbitrap
+[10]MS:1003275|other attribute name=IONIZATION
+[10]MS:1003276|other attribute value=EI+
+[11]MS:1003275|other attribute name=LICENSE
+[11]MS:1003276|other attribute value=CC BY-NC
+[12]MS:1003275|other attribute name=COMMENT
+[12]MS:1003276|other attribute value=
+<Analyte=1>
+MS:1000866|molecular formula=C20H12
+MS:1002894|InChIKey=CSHWQDPOILHKBI-AQZSQYOVSA-N
+MS:1003403|InChI=
+MS:1000868|SMILES formula=[2H]C1=C(C2=C3C(=C1[2H])C4=C(C(=C(C5=C4C(=C(C(=C5[2H])[2H])[2H])C3=C(C(=C2[2H])[2H])[2H])[2H])[2H])[2H])[2H]
+<Peaks>
+116.05576	29277.0	?
+118.06992	49651.0	?
+128.0558	37001.0	?
+130.06996	78584.0	?
+130.57159	17533.0	?
+132.08408	65686.0	?
+132.5858	12593.0	?
+207.0322	39569.0	?
+222.08282	13141.0	?
+223.06346	20762.0	?
+225.04277	18058.0	?
+227.02202	26370.0	?
+232.11204	30354.0	?
+236.1405	22796.0	?
+252.09322	8564.0	?
+256.11212	41765.0	?
+257.11557	8688.0	?
+258.12622	21742.0	?
+259.13446	11564.0	?
+260.14041	248997.0	?
+261.14358	51721.0	?
+262.15466	33597.0	?
+263.16254	63732.0	?
+264.16858	829577.0	?
+265.01968	18286.0	?
+265.17191	176460.0	?
+266.17523	18876.0	?
+283.03036	10261.0	?
+287.00632	11352.0	?
+295.10288	26727.0	?
+299.06152	33379.0	?
+359.0282	67046.0	?
+400.98447	17406.0	?
+
+<Spectrum=2>
+MS:1003061|library spectrum name=Perylene
+MS:1003208|experimental precursor monoisotopic m/z=252.09323
+MS:1000465|scan polarity=MS:1000130|positive scan
+[1]MS:1000045|collision energy=70
+[1]UO:0000000|unit=UO:0000266|electronvolt
+MS:1003059|number of peaks=19
+[2]MS:1003275|other attribute name=SCANNUMBER
+[2]MS:1003276|other attribute value=-1
+[3]MS:1003275|other attribute name=RETENTIONTIME
+[3]MS:1003276|other attribute value=-1
+[4]MS:1003275|other attribute name=RETENTIONINDEX
+[4]MS:1003276|other attribute value=2886.9
+[5]MS:1003275|other attribute name=PRECURSORTYPE
+[5]MS:1003276|other attribute value=[M]+
+[6]MS:1003275|other attribute name=SPECTRUMTYPE
+[6]MS:1003276|other attribute value=Centroid
+[7]MS:1003275|other attribute name=AUTHORS
+[7]MS:1003276|other attribute value=Price et al., RECETOX, Masaryk University (CZ)
+[8]MS:1003275|other attribute name=INSTRUMENT
+[8]MS:1003276|other attribute value=Q Exactive GC Orbitrap GC-MS/MS
+[9]MS:1003275|other attribute name=INSTRUMENTTYPE
+[9]MS:1003276|other attribute value=GC-EI-Orbitrap
+[10]MS:1003275|other attribute name=IONIZATION
+[10]MS:1003276|other attribute value=EI+
+[11]MS:1003275|other attribute name=LICENSE
+[11]MS:1003276|other attribute value=CC BY-NC
+[12]MS:1003275|other attribute name=COMMENT
+[12]MS:1003276|other attribute value=
+<Analyte=1>
+MS:1000866|molecular formula=C20H12
+MS:1002894|InChIKey=CSHWQDPOILHKBI-UHFFFAOYSA-N
+MS:1003403|InChI=
+MS:1000868|SMILES formula=C1=CC2=C3C(=C1)C1=CC=CC4=C1C(=CC=C4)C3=CC=C2
+<Peaks>
+112.03071	49892.0	?
+113.03854	87510.0	Theoretical m/z 113.039125, Mass diff 0 (0 ppm), Formula C9H5
+124.03076	100146.0	?
+124.53242	24923.0	?
+125.03855	179254.0	Theoretical m/z 125.039125, Mass diff 0 (0 ppm), Formula C10H5
+125.54019	49039.0	?
+126.04636	131679.0	?
+126.54804	36313.0	?
+222.04645	28905.0	?
+224.06192	55632.0	?
+226.04175	37413.0	?
+246.04646	23286.0	?
+248.06204	140007.0	?
+249.07072	62236.0	Theoretical m/z 249.070425, Mass diff -0.001 (0 ppm), Formula C20H9
+250.07765	641789.0	?
+251.07967	137600.0	?
+252.09323	1955166.0	Theoretical m/z 252.093354, Mass diff 0 (0.49 ppm), SMILES C1=CC=2C=CC=C3C4=CC=CC5=CC=CC(C(=C1)C23)=C54, Annotation [C20H12]+, Rule of HR False
+253.09656	402252.0	?
+254.09985	39987.0	?
+
+<Spectrum=3>
+MS:1003061|library spectrum name=Phenanthrene_2H10
+MS:1003208|experimental precursor monoisotopic m/z=188.14029
+MS:1000465|scan polarity=MS:1000130|positive scan
+[1]MS:1000045|collision energy=70
+[1]UO:0000000|unit=UO:0000266|electronvolt
+MS:1003059|number of peaks=17
+[2]MS:1003275|other attribute name=SCANNUMBER
+[2]MS:1003276|other attribute value=-1
+[3]MS:1003275|other attribute name=RETENTIONTIME
+[3]MS:1003276|other attribute value=-1
+[4]MS:1003275|other attribute name=RETENTIONINDEX
+[4]MS:1003276|other attribute value=1827.1
+[5]MS:1003275|other attribute name=PRECURSORTYPE
+[5]MS:1003276|other attribute value=[M]+
+[6]MS:1003275|other attribute name=SPECTRUMTYPE
+[6]MS:1003276|other attribute value=Centroid
+[7]MS:1003275|other attribute name=AUTHORS
+[7]MS:1003276|other attribute value=Price et al., RECETOX, Masaryk University (CZ)
+[8]MS:1003275|other attribute name=INSTRUMENT
+[8]MS:1003276|other attribute value=Q Exactive GC Orbitrap GC-MS/MS
+[9]MS:1003275|other attribute name=INSTRUMENTTYPE
+[9]MS:1003276|other attribute value=GC-EI-Orbitrap
+[10]MS:1003275|other attribute name=IONIZATION
+[10]MS:1003276|other attribute value=EI+
+[11]MS:1003275|other attribute name=LICENSE
+[11]MS:1003276|other attribute value=CC BY-NC
+[12]MS:1003275|other attribute name=COMMENT
+[12]MS:1003276|other attribute value=
+<Analyte=1>
+MS:1000866|molecular formula=C14H10
+MS:1002894|InChIKey=YNPNZTXNASCQKK-LHNTUAQVSA-N
+MS:1003403|InChI=
+MS:1000868|SMILES formula=[2H]C1=C(C(=C2C(=C1[2H])C(=C(C3=C(C(=C(C(=C32)[2H])[2H])[2H])[2H])[2H])[2H])[2H])[2H]
+<Peaks>
+76.02767	185421.0	?
+78.0418	256858.0	?
+80.05586	881271.0	?
+90.04181	200162.0	?
+92.06206	537968.0	?
+94.06999	628791.0	?
+156.08402	836513.0	?
+158.09808	477819.0	?
+160.11218	2421148.0	?
+161.11554	310248.0	?
+176.10866	308983.0	?
+184.11224	2784543.0	?
+185.11562	445833.0	?
+186.12637	1283282.0	?
+188.14029	15115275.0	?
+189.1436	2312386.0	?
+190.14688	151400.0	?
+
+<Spectrum=4>
+MS:1003061|library spectrum name=Phenanthrene
+MS:1003208|experimental precursor monoisotopic m/z=178.0775
+MS:1000465|scan polarity=MS:1000130|positive scan
+[1]MS:1000045|collision energy=70
+[1]UO:0000000|unit=UO:0000266|electronvolt
+MS:1003059|number of peaks=19
+[2]MS:1003275|other attribute name=SCANNUMBER
+[2]MS:1003276|other attribute value=-1
+[3]MS:1003275|other attribute name=RETENTIONTIME
+[3]MS:1003276|other attribute value=-1
+[4]MS:1003275|other attribute name=RETENTIONINDEX
+[4]MS:1003276|other attribute value=1832.9
+[5]MS:1003275|other attribute name=PRECURSORTYPE
+[5]MS:1003276|other attribute value=[M]+
+[6]MS:1003275|other attribute name=SPECTRUMTYPE
+[6]MS:1003276|other attribute value=Centroid
+[7]MS:1003275|other attribute name=AUTHORS
+[7]MS:1003276|other attribute value=Price et al., RECETOX, Masaryk University (CZ)
+[8]MS:1003275|other attribute name=INSTRUMENT
+[8]MS:1003276|other attribute value=Q Exactive GC Orbitrap GC-MS/MS
+[9]MS:1003275|other attribute name=INSTRUMENTTYPE
+[9]MS:1003276|other attribute value=GC-EI-Orbitrap
+[10]MS:1003275|other attribute name=IONIZATION
+[10]MS:1003276|other attribute value=EI+
+[11]MS:1003275|other attribute name=LICENSE
+[11]MS:1003276|other attribute value=CC BY-NC
+[12]MS:1003275|other attribute name=COMMENT
+[12]MS:1003276|other attribute value=
+<Analyte=1>
+MS:1000866|molecular formula=C14H10
+MS:1002894|InChIKey=YNPNZTXNASCQKK-UHFFFAOYSA-N
+MS:1003403|InChI=
+MS:1000868|SMILES formula=C1=CC2=C(C=C1)C1=C(C=CC=C1)C=C2
+<Peaks>
+74.01508	137808.0	Theoretical m/z 74.01565, Mass diff 0 (0 ppm), Formula C6H2
+75.02295	278714.0	Theoretical m/z 75.023475, Mass diff 0 (0 ppm), Formula C6H3
+76.03075	608417.0	Theoretical m/z 76.0313, Mass diff 0 (0 ppm), Formula C6H4
+87.02295	304266.0	Theoretical m/z 87.023475, Mass diff 0 (0 ppm), Formula C7H3
+88.03076	497050.0	Theoretical m/z 88.0313, Mass diff 0 (0 ppm), Formula C7H4
+89.03857	441168.0	Theoretical m/z 89.039125, Mass diff 0 (0 ppm), Formula C7H5
+98.01511	150478.0	?
+150.04633	868927.0	?
+151.05415	546351.0	Theoretical m/z 151.054775, Mass diff 0 (0 ppm), Formula C12H7
+152.0619	2275502.0	?
+153.06528	276320.0	?
+169.06468	272559.0	?
+174.04636	365846.0	?
+175.05423	272039.0	Theoretical m/z 175.054775, Mass diff 0 (0 ppm), Formula C14H7
+176.062	3370523.0	Theoretical m/z 176.0626, Mass diff 0 (0 ppm), Formula C14H8
+177.06982	1751846.0	Theoretical m/z 177.070425, Mass diff 0 (0 ppm), Formula C14H9
+178.0775	13724432.0	Theoretical m/z 178.077698, Mass diff 0 (1.11 ppm), SMILES C=1C=CC2=C(C1)C=CC=3C=CC=CC32, Annotation [C14H10]+, Rule of HR False
+179.08078	2250119.0	?
+180.08412	138203.0	?
+
+<Spectrum=5>
+MS:1003061|library spectrum name=Anthracene
+MS:1003208|experimental precursor monoisotopic m/z=178.07754
+MS:1000465|scan polarity=MS:1000130|positive scan
+[1]MS:1000045|collision energy=70
+[1]UO:0000000|unit=UO:0000266|electronvolt
+MS:1003059|number of peaks=21
+[2]MS:1003275|other attribute name=SCANNUMBER
+[2]MS:1003276|other attribute value=-1
+[3]MS:1003275|other attribute name=RETENTIONTIME
+[3]MS:1003276|other attribute value=-1
+[4]MS:1003275|other attribute name=RETENTIONINDEX
+[4]MS:1003276|other attribute value=1844.4
+[5]MS:1003275|other attribute name=PRECURSORTYPE
+[5]MS:1003276|other attribute value=[M]+
+[6]MS:1003275|other attribute name=SPECTRUMTYPE
+[6]MS:1003276|other attribute value=Centroid
+[7]MS:1003275|other attribute name=AUTHORS
+[7]MS:1003276|other attribute value=Price et al., RECETOX, Masaryk University (CZ)
+[8]MS:1003275|other attribute name=INSTRUMENT
+[8]MS:1003276|other attribute value=Q Exactive GC Orbitrap GC-MS/MS
+[9]MS:1003275|other attribute name=INSTRUMENTTYPE
+[9]MS:1003276|other attribute value=GC-EI-Orbitrap
+[10]MS:1003275|other attribute name=IONIZATION
+[10]MS:1003276|other attribute value=EI+
+[11]MS:1003275|other attribute name=LICENSE
+[11]MS:1003276|other attribute value=CC BY-NC
+[12]MS:1003275|other attribute name=COMMENT
+[12]MS:1003276|other attribute value=
+<Analyte=1>
+MS:1000866|molecular formula=C14H10
+MS:1002894|InChIKey=MWPLVEDNUUSJAV-UHFFFAOYSA-N
+MS:1003403|InChI=
+MS:1000868|SMILES formula=C1=CC2=CC3=C(C=CC=C3)C=C2C=C1
+<Peaks>
+74.0151	117371.0	Theoretical m/z 74.01565, Mass diff 0 (0 ppm), Formula C6H2
+75.02296	245305.0	Theoretical m/z 75.023475, Mass diff 0 (0 ppm), Formula C6H3
+76.03077	632686.0	Theoretical m/z 76.0313, Mass diff 0 (0 ppm), Formula C6H4
+87.02297	236214.0	Theoretical m/z 87.023475, Mass diff 0 (0 ppm), Formula C7H3
+88.03078	347832.0	Theoretical m/z 88.0313, Mass diff 0 (0 ppm), Formula C7H4
+89.0386	507288.0	Theoretical m/z 89.039125, Mass diff 0 (0 ppm), Formula C7H5
+91.05425	130861.0	Theoretical m/z 91.054775, Mass diff 0 (0 ppm), Formula C7H7
+126.04636	128356.0	?
+149.04478	126331.0	?
+150.04637	641829.0	?
+151.05415	403195.0	Theoretical m/z 151.054775, Mass diff 0 (0 ppm), Formula C12H7
+152.06195	1369833.0	?
+153.06534	175290.0	?
+169.06471	228827.0	?
+174.04639	255716.0	?
+175.05423	198784.0	Theoretical m/z 175.054775, Mass diff 0 (0 ppm), Formula C14H7
+176.06204	2563053.0	Theoretical m/z 176.0626, Mass diff 0 (0 ppm), Formula C14H8
+177.06984	1182037.0	Theoretical m/z 177.070425, Mass diff 0 (0 ppm), Formula C14H9
+178.07754	11002398.0	Theoretical m/z 178.077698, Mass diff 0 (0.89 ppm), SMILES C=1C=CC=2C=C3C=CC=CC3=CC2C1, Annotation [C14H10]+, Rule of HR False
+179.08081	1778803.0	?
+180.08418	132922.0	?
+
+<Spectrum=6>
+MS:1003061|library spectrum name=Acenaphthylene
+MS:1003208|experimental precursor monoisotopic m/z=152.06192
+MS:1000465|scan polarity=MS:1000130|positive scan
+[1]MS:1000045|collision energy=70
+[1]UO:0000000|unit=UO:0000266|electronvolt
+MS:1003059|number of peaks=19
+[2]MS:1003275|other attribute name=SCANNUMBER
+[2]MS:1003276|other attribute value=-1
+[3]MS:1003275|other attribute name=RETENTIONTIME
+[3]MS:1003276|other attribute value=-1
+[4]MS:1003275|other attribute name=RETENTIONINDEX
+[4]MS:1003276|other attribute value=1501
+[5]MS:1003275|other attribute name=PRECURSORTYPE
+[5]MS:1003276|other attribute value=[M]+
+[6]MS:1003275|other attribute name=SPECTRUMTYPE
+[6]MS:1003276|other attribute value=Centroid
+[7]MS:1003275|other attribute name=AUTHORS
+[7]MS:1003276|other attribute value=Price et al., RECETOX, Masaryk University (CZ)
+[8]MS:1003275|other attribute name=INSTRUMENT
+[8]MS:1003276|other attribute value=Q Exactive GC Orbitrap GC-MS/MS
+[9]MS:1003275|other attribute name=INSTRUMENTTYPE
+[9]MS:1003276|other attribute value=GC-EI-Orbitrap
+[10]MS:1003275|other attribute name=IONIZATION
+[10]MS:1003276|other attribute value=EI+
+[11]MS:1003275|other attribute name=LICENSE
+[11]MS:1003276|other attribute value=CC BY-NC
+[12]MS:1003275|other attribute name=COMMENT
+[12]MS:1003276|other attribute value=
+<Analyte=1>
+MS:1000866|molecular formula=C12H8
+MS:1002894|InChIKey=HXGDTGSAIMULJN-UHFFFAOYSA-N
+MS:1003403|InChI=
+MS:1000868|SMILES formula=C1=CC2=C3C1=CC=CC3=CC=C2
+<Peaks>
+74.01511	482670.0	Theoretical m/z 74.01565, Mass diff 0 (0 ppm), Formula C6H2
+75.02295	550365.0	Theoretical m/z 75.023475, Mass diff 0 (0 ppm), Formula C6H3
+76.03077	725415.0	Theoretical m/z 76.0313, Mass diff 0 (0 ppm), Formula C6H4
+77.03858	588033.0	Theoretical m/z 77.039125, Mass diff 0 (0 ppm), Formula C6H5
+86.01511	256400.0	Theoretical m/z 86.01565, Mass diff 0 (0 ppm), Formula C7H2
+87.02298	375648.0	Theoretical m/z 87.023475, Mass diff 0 (0 ppm), Formula C7H3
+91.05425	2992018.0	Theoretical m/z 91.054775, Mass diff 0 (0 ppm), Formula C7H7
+92.06201	1652944.0	Theoretical m/z 92.0626, Mass diff 0 (0 ppm), Formula C7H8
+93.06988	906934.0	Theoretical m/z 93.070425, Mass diff 0 (0 ppm), Formula C7H9
+98.01514	483853.0	?
+99.02294	312809.0	Theoretical m/z 99.023475, Mass diff 0 (0 ppm), Formula C8H3
+126.04639	589350.0	?
+149.03862	414697.0	Theoretical m/z 149.039125, Mass diff 0 (0 ppm), Formula C12H5
+150.04639	3781501.0	?
+151.05417	3142749.0	Theoretical m/z 151.054775, Mass diff 0 (0 ppm), Formula C12H7
+152.06192	21881232.0	Theoretical m/z 152.062058, Mass diff 0 (0.91 ppm), SMILES C=1C=C2C=CC=C3C=CC(C1)=C23, Annotation [C12H8]+, Rule of HR False
+153.06525	2807302.0	?
+169.0647	1124323.0	?
+179.06026	753608.0	?
+
+<Spectrum=7>
+MS:1003061|library spectrum name=Acenaphthene
+MS:1003208|experimental precursor monoisotopic m/z=154.07741
+MS:1000465|scan polarity=MS:1000130|positive scan
+[1]MS:1000045|collision energy=70
+[1]UO:0000000|unit=UO:0000266|electronvolt
+MS:1003059|number of peaks=18
+[2]MS:1003275|other attribute name=SCANNUMBER
+[2]MS:1003276|other attribute value=-1
+[3]MS:1003275|other attribute name=RETENTIONTIME
+[3]MS:1003276|other attribute value=-1
+[4]MS:1003275|other attribute name=RETENTIONINDEX
+[4]MS:1003276|other attribute value=1528.3
+[5]MS:1003275|other attribute name=PRECURSORTYPE
+[5]MS:1003276|other attribute value=[M]+
+[6]MS:1003275|other attribute name=SPECTRUMTYPE
+[6]MS:1003276|other attribute value=Centroid
+[7]MS:1003275|other attribute name=AUTHORS
+[7]MS:1003276|other attribute value=Price et al., RECETOX, Masaryk University (CZ)
+[8]MS:1003275|other attribute name=INSTRUMENT
+[8]MS:1003276|other attribute value=Q Exactive GC Orbitrap GC-MS/MS
+[9]MS:1003275|other attribute name=INSTRUMENTTYPE
+[9]MS:1003276|other attribute value=GC-EI-Orbitrap
+[10]MS:1003275|other attribute name=IONIZATION
+[10]MS:1003276|other attribute value=EI+
+[11]MS:1003275|other attribute name=LICENSE
+[11]MS:1003276|other attribute value=CC BY-NC
+[12]MS:1003275|other attribute name=COMMENT
+[12]MS:1003276|other attribute value=
+<Analyte=1>
+MS:1000866|molecular formula=C12H10
+MS:1002894|InChIKey=CWRYPZZKDGJXCA-UHFFFAOYSA-N
+MS:1003403|InChI=
+MS:1000868|SMILES formula=C1CC2=C3C1=CC=CC3=CC=C2
+<Peaks>
+74.01509	295758.0	Theoretical m/z 74.01565, Mass diff 0 (0 ppm), Formula C6H2
+75.02295	509657.0	Theoretical m/z 75.023475, Mass diff 0 (0 ppm), Formula C6H3
+76.03075	1635356.0	Theoretical m/z 76.0313, Mass diff 0 (0 ppm), Formula C6H4
+76.53242	205544.0	?
+86.01508	191522.0	Theoretical m/z 86.01565, Mass diff 0 (0 ppm), Formula C7H2
+87.02293	327509.0	Theoretical m/z 87.023475, Mass diff 0 (0 ppm), Formula C7H3
+98.01508	227977.0	?
+126.04635	562426.0	?
+150.04636	1619866.0	?
+151.05418	1937000.0	Theoretical m/z 151.054775, Mass diff 0 (0 ppm), Formula C12H7
+152.06194	9114349.0	?
+153.06969	18918992.0	Theoretical m/z 153.070425, Mass diff 0 (0 ppm), Formula C12H9
+154.07741	12248891.0	Theoretical m/z 154.077698, Mass diff 0 (1.87 ppm), SMILES C=1C=C2C=CC=C3C2=C(C1)CC3, Annotation [C12H10]+, Rule of HR False
+155.0808	1483779.0	?
+165.06972	206834.0	?
+167.08536	417705.0	?
+169.06462	800183.0	?
+179.0602	516826.0	?
+
+<Spectrum=8>
+MS:1003061|library spectrum name=Fluoranthene
+MS:1003208|experimental precursor monoisotopic m/z=202.07756
+MS:1000465|scan polarity=MS:1000130|positive scan
+[1]MS:1000045|collision energy=70
+[1]UO:0000000|unit=UO:0000266|electronvolt
+MS:1003059|number of peaks=17
+[2]MS:1003275|other attribute name=SCANNUMBER
+[2]MS:1003276|other attribute value=-1
+[3]MS:1003275|other attribute name=RETENTIONTIME
+[3]MS:1003276|other attribute value=-1
+[4]MS:1003275|other attribute name=RETENTIONINDEX
+[4]MS:1003276|other attribute value=2102.7
+[5]MS:1003275|other attribute name=PRECURSORTYPE
+[5]MS:1003276|other attribute value=[M]+
+[6]MS:1003275|other attribute name=SPECTRUMTYPE
+[6]MS:1003276|other attribute value=Centroid
+[7]MS:1003275|other attribute name=AUTHORS
+[7]MS:1003276|other attribute value=Price et al., RECETOX, Masaryk University (CZ)
+[8]MS:1003275|other attribute name=INSTRUMENT
+[8]MS:1003276|other attribute value=Q Exactive GC Orbitrap GC-MS/MS
+[9]MS:1003275|other attribute name=INSTRUMENTTYPE
+[9]MS:1003276|other attribute value=GC-EI-Orbitrap
+[10]MS:1003275|other attribute name=IONIZATION
+[10]MS:1003276|other attribute value=EI+
+[11]MS:1003275|other attribute name=LICENSE
+[11]MS:1003276|other attribute value=CC BY-NC
+[12]MS:1003275|other attribute name=COMMENT
+[12]MS:1003276|other attribute value=
+<Analyte=1>
+MS:1000866|molecular formula=C16H10
+MS:1002894|InChIKey=GVEPBJHOBDJJJI-UHFFFAOYSA-N
+MS:1003403|InChI=
+MS:1000868|SMILES formula=C1=CC2=C(C=C1)C1=C3C2=CC=CC3=CC=C1
+<Peaks>
+75.02299	112456.0	Theoretical m/z 75.023475, Mass diff 0 (0 ppm), Formula C6H3
+87.02298	183640.0	Theoretical m/z 87.023475, Mass diff 0 (0 ppm), Formula C7H3
+88.03079	367434.0	Theoretical m/z 88.0313, Mass diff 0 (0 ppm), Formula C7H4
+99.02296	124952.0	Theoretical m/z 99.023475, Mass diff 0 (0 ppm), Formula C8H3
+100.03078	376079.0	?
+101.03863	381288.0	Theoretical m/z 101.039125, Mass diff 0 (0 ppm), Formula C8H5
+150.04642	86059.0	?
+174.04634	246963.0	?
+176.06194	141676.0	Theoretical m/z 176.0626, Mass diff 0 (0 ppm), Formula C14H8
+198.0464	244370.0	?
+199.05429	285767.0	Theoretical m/z 199.054775, Mass diff 0 (0 ppm), Formula C16H7
+200.06207	1958890.0	?
+201.06982	1103710.0	Theoretical m/z 201.070425, Mass diff 0 (0 ppm), Formula C16H9
+202.07756	8104188.0	Theoretical m/z 202.077698, Mass diff 0 (0.69 ppm), SMILES C1=CC=C2C(=C1)C3=CC=CC4=CC=CC2=C43, Annotation [C16H10]+, Rule of HR False
+203.08084	1377015.0	?
+204.08421	98067.0	?
+219.08043	186623.0	?
+
+<Spectrum=9>
+MS:1003061|library spectrum name=Pyrene
+MS:1003208|experimental precursor monoisotopic m/z=202.07759
+MS:1000465|scan polarity=MS:1000130|positive scan
+[1]MS:1000045|collision energy=70
+[1]UO:0000000|unit=UO:0000266|electronvolt
+MS:1003059|number of peaks=16
+[2]MS:1003275|other attribute name=SCANNUMBER
+[2]MS:1003276|other attribute value=-1
+[3]MS:1003275|other attribute name=RETENTIONTIME
+[3]MS:1003276|other attribute value=-1
+[4]MS:1003275|other attribute name=RETENTIONINDEX
+[4]MS:1003276|other attribute value=2154.5
+[5]MS:1003275|other attribute name=PRECURSORTYPE
+[5]MS:1003276|other attribute value=[M]+
+[6]MS:1003275|other attribute name=SPECTRUMTYPE
+[6]MS:1003276|other attribute value=Centroid
+[7]MS:1003275|other attribute name=AUTHORS
+[7]MS:1003276|other attribute value=Price et al., RECETOX, Masaryk University (CZ)
+[8]MS:1003275|other attribute name=INSTRUMENT
+[8]MS:1003276|other attribute value=Q Exactive GC Orbitrap GC-MS/MS
+[9]MS:1003275|other attribute name=INSTRUMENTTYPE
+[9]MS:1003276|other attribute value=GC-EI-Orbitrap
+[10]MS:1003275|other attribute name=IONIZATION
+[10]MS:1003276|other attribute value=EI+
+[11]MS:1003275|other attribute name=LICENSE
+[11]MS:1003276|other attribute value=CC BY-NC
+[12]MS:1003275|other attribute name=COMMENT
+[12]MS:1003276|other attribute value=
+<Analyte=1>
+MS:1000866|molecular formula=C16H10
+MS:1002894|InChIKey=BBEAQIROQSPTKN-UHFFFAOYSA-N
+MS:1003403|InChI=
+MS:1000868|SMILES formula=C1=CC2=C3C(C=CC4=CC=CC(C=C2)=C34)=C1
+<Peaks>
+87.02299	147113.0	Theoretical m/z 87.023475, Mass diff 0 (0 ppm), Formula C7H3
+88.0308	305149.0	Theoretical m/z 88.0313, Mass diff 0 (0 ppm), Formula C7H4
+99.02298	137042.0	Theoretical m/z 99.023475, Mass diff 0 (0 ppm), Formula C8H3
+100.0308	508914.0	?
+101.03864	472094.0	Theoretical m/z 101.039125, Mass diff 0 (0 ppm), Formula C8H5
+101.54032	82430.0	?
+150.04637	80741.0	?
+174.04631	212706.0	?
+198.04643	262925.0	?
+199.05429	295144.0	Theoretical m/z 199.054775, Mass diff 0 (0 ppm), Formula C16H7
+200.06209	1960712.0	?
+201.06982	1270466.0	Theoretical m/z 201.070425, Mass diff 0 (0 ppm), Formula C16H9
+202.07759	7974712.0	Theoretical m/z 202.077698, Mass diff 0 (0.54 ppm), SMILES C=1C=C2C=CC3=CC=CC=4C=CC(C1)=C2C34, Annotation [C16H10]+, Rule of HR False
+203.08086	1335645.0	?
+204.0843	121774.0	?
+219.08044	182944.0	?
+
+<Spectrum=10>
+MS:1003061|library spectrum name=para-Terphenyl
+MS:1003208|experimental precursor monoisotopic m/z=230.10886
+MS:1000465|scan polarity=MS:1000130|positive scan
+[1]MS:1000045|collision energy=70
+[1]UO:0000000|unit=UO:0000266|electronvolt
+MS:1003059|number of peaks=25
+[2]MS:1003275|other attribute name=SCANNUMBER
+[2]MS:1003276|other attribute value=-1
+[3]MS:1003275|other attribute name=RETENTIONTIME
+[3]MS:1003276|other attribute value=-1
+[4]MS:1003275|other attribute name=RETENTIONINDEX
+[4]MS:1003276|other attribute value=2207.5
+[5]MS:1003275|other attribute name=PRECURSORTYPE
+[5]MS:1003276|other attribute value=[M]+
+[6]MS:1003275|other attribute name=SPECTRUMTYPE
+[6]MS:1003276|other attribute value=Centroid
+[7]MS:1003275|other attribute name=AUTHORS
+[7]MS:1003276|other attribute value=Price et al., RECETOX, Masaryk University (CZ)
+[8]MS:1003275|other attribute name=INSTRUMENT
+[8]MS:1003276|other attribute value=Q Exactive GC Orbitrap GC-MS/MS
+[9]MS:1003275|other attribute name=INSTRUMENTTYPE
+[9]MS:1003276|other attribute value=GC-EI-Orbitrap
+[10]MS:1003275|other attribute name=IONIZATION
+[10]MS:1003276|other attribute value=EI+
+[11]MS:1003275|other attribute name=LICENSE
+[11]MS:1003276|other attribute value=CC BY-NC
+[12]MS:1003275|other attribute name=COMMENT
+[12]MS:1003276|other attribute value=
+<Analyte=1>
+MS:1000866|molecular formula=C18H14
+MS:1002894|InChIKey=XJKSTNDFUHDPQJ-UHFFFAOYSA-N
+MS:1003403|InChI=
+MS:1000868|SMILES formula=C1=CC=C(C=C1)C2=CC=C(C=C2)C3=CC=CC=C3
+<Peaks>
+88.03077	233962.0	Theoretical m/z 88.0313, Mass diff 0 (0 ppm), Formula C7H4
+101.03861	353544.0	Theoretical m/z 101.039125, Mass diff 0 (0 ppm), Formula C8H5
+113.03854	437845.0	Theoretical m/z 113.039125, Mass diff 0 (0 ppm), Formula C9H5
+115.05423	690291.0	Theoretical m/z 115.054775, Mass diff 0 (0 ppm), Formula C9H7
+128.062	293046.0	Theoretical m/z 128.0626, Mass diff 0 (0 ppm), Formula C10H8
+151.05412	266397.0	Theoretical m/z 151.054775, Mass diff 0 (0 ppm), Formula C12H7
+152.06195	961184.0	?
+153.06976	409346.0	Theoretical m/z 153.069873, Mass diff 0 (0.74 ppm), SMILES *C=1C=CC(=CC1)C=2C=CC=CC2, Annotation [C12H10-H]+, Rule of HR True
+176.06192	232793.0	Theoretical m/z 176.0626, Mass diff 0 (0 ppm), Formula C14H8
+189.06972	408734.0	Theoretical m/z 189.070425, Mass diff 0 (0 ppm), Formula C15H9
+200.0619	342984.0	?
+201.06986	238974.0	Theoretical m/z 201.070425, Mass diff 0 (0 ppm), Formula C16H9
+202.07758	1292332.0	?
+203.08093	374439.0	?
+213.06973	256631.0	Theoretical m/z 213.070425, Mass diff 0 (0 ppm), Formula C17H9
+215.08548	1220866.0	Theoretical m/z 215.086075, Mass diff 0 (0 ppm), Formula C17H11
+216.08881	217320.0	?
+224.062	181393.0	?
+226.07771	1503774.0	?
+227.08588	1198323.0	Theoretical m/z 227.086075, Mass diff 0 (0 ppm), Formula C18H11
+228.09344	2885510.0	?
+229.10123	1791323.0	?
+230.10886	17890056.0	Theoretical m/z 230.108994, Mass diff 0 (0.58 ppm), SMILES C=1C=CC(=CC1)C=2C=CC(=CC2)C=3C=CC=CC3, Annotation [C18H14]+, Rule of HR False
+231.11214	3536976.0	?
+232.11542	320231.0	?
