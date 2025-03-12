@@ -25,7 +25,7 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
         if self.similarity == "cosine":
             self.pairwise_similarity_fn = cosine_similarity
         elif self.similarity == "euclidean":
-            self.pairwise_similarity_fn = lambda x, y: -euclidean_distances(x, y)  # - to get similarities from distances
+            self.pairwise_similarity_fn = lambda x, y: self._distances_to_similarities(euclidean_distances(x, y))
         else:
             raise ValueError(f"Only cosine and euclidean similarities are supported for now. Got {self.similarity}.")
 
@@ -80,9 +80,19 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
         embs_query = self.compute_embeddings(query_spectra)
 
         # Get ANN indices
-        return self.index.query(embs_query, k=k)
+        neighbors, distances = self.index.query(embs_query, k=k)
+        similarities = self._distances_to_similarities(distances)
+        return neighbors, similarities
 
     def get_index_anns(self):
         neighbors, distances = self.index.neighbor_graph
-        return neighbors, distances
-
+        similarities = self._distances_to_similarities(distances)
+        return neighbors, similarities
+    
+    def _distances_to_similarities(self, distances):
+        if self.similarity == "cosine":
+            return 1 - distances
+        elif self.similarity == "euclidean":
+            return -distances
+        else:
+            raise ValueError(f"Only cosine and euclidean similarities are supported for now. Got {self.similarity}.")
