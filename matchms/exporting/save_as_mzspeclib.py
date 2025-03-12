@@ -1,5 +1,5 @@
 import re
-from typing import List
+from typing import List, TextIO
 from matchms.Spectrum import Spectrum
 import os
 
@@ -30,13 +30,28 @@ STANDARDIZED_SPECTRUM_ATTRIBUTES = {
 }
 
 
-def save_as_mzspeclib(spectra: List[Spectrum], filename: str):
+def save_as_mzspeclib(spectra: List[Spectrum], filename: str) -> None:
+    """
+    Save a list of spectra to a file in mzSpecLib format.
+
+    Parameters:
+    spectra (List[Spectrum]): List of Spectrum objects to save.
+    filename (str): The name of the file to save the spectra to.
+    """
     with open(filename, 'w') as file:
         _write_header(filename, file)
         for idx, spectrum in enumerate(spectra):
             _write_spectrum(file, idx, spectrum)
 
-def _write_spectrum(file, idx, spectrum):
+def _write_spectrum(file: TextIO, idx: int, spectrum: Spectrum) -> None:
+    """
+    Write a single spectrum to the file.
+
+    Parameters:
+    file (TextIO): The file object to write to.
+    idx (int): The index of the spectrum in the list.
+    spectrum (Spectrum): The Spectrum object to write.
+    """
     print(f'<Spectrum={idx + 1}>', file=file)
     _write_spectrum_attributes(file, spectrum)
     if _has_analyte(spectrum):
@@ -44,14 +59,28 @@ def _write_spectrum(file, idx, spectrum):
     _write_peaks(file, spectrum)
     print('', file=file)
 
-def _write_analyte(file, spectrum):
+def _write_analyte(file: TextIO, spectrum: Spectrum) -> None:
+    """
+    Write analyte information for a spectrum to the file.
+
+    Parameters:
+    file (TextIO): The file object to write to.
+    spectrum (Spectrum): The Spectrum object containing analyte information.
+    """
     print('<Analyte=1>', file=file)
     for key, attribute in ANALYTE_ATTRIBUTES.items():
         value = spectrum.get(key)
         if value is not None:
             print(f'{attribute}={value}', file=file)
 
-def _write_spectrum_attributes(file, spectrum):
+def _write_spectrum_attributes(file: TextIO, spectrum: Spectrum) -> None:
+    """
+    Write spectrum attributes to the file.
+
+    Parameters:
+    file (TextIO): The file object to write to.
+    spectrum (Spectrum): The Spectrum object containing attributes.
+    """
     _write_defined_spectrum_attributes(file, spectrum)
     
     spectrum_attributes = spectrum.metadata.keys()
@@ -67,19 +96,57 @@ def _write_spectrum_attributes(file, spectrum):
 
     print(f'MS:1003059|number of peaks={len(spectrum.peaks)}', file=file)
 
-def _write_other_spectrum_attribute(file, spectrum, attr_counter, attr):
+def _write_other_spectrum_attribute(file: TextIO, spectrum: Spectrum, attr_counter: int, attr: str) -> None:
+    """
+    Write other spectrum attributes to the file.
+
+    Parameters:
+    file (TextIO): The file object to write to.
+    spectrum (Spectrum): The Spectrum object containing attributes.
+    attr_counter (int): The counter for the attribute.
+    attr (str): The attribute name.
+    """
     value = spectrum.get(attr)
     print(f'[{attr_counter}]MS:1003275|other attribute name={attr}', file=file)
     print(f'[{attr_counter}]MS:1003276|other attribute value={value}', file=file)
 
-def _write_spectrum_attribute_with_unit(file, spectrum, attr_counter, attr):
+def _write_spectrum_attribute_with_unit(file: TextIO, spectrum: Spectrum, attr_counter: int, attr: str) -> None:
+    """
+    Write spectrum attributes with units to the file.
+
+    Parameters:
+    file (TextIO): The file object to write to.
+    spectrum (Spectrum): The Spectrum object containing attributes.
+    attr_counter (int): The counter for the attribute.
+    attr (str): The attribute name.
+    """
     term, unit = STANDARDIZED_SPECTRUM_ATTRIBUTES.get(attr)
     # remove non-numeric unit identifiers from value
-    value = re.findall('[\d]+[.,\d]+|[\d]*[.][\d]+|[\d]+', spectrum.get(attr))[0] 
+    value = _extract_numeric_value(spectrum.get(attr)) 
     print(f'[{attr_counter}]{term}={value}', file=file)
     print(f'[{attr_counter}]UO:0000000|unit={unit}', file=file)
 
-def _write_defined_spectrum_attributes(file, spectrum):
+def _extract_numeric_value(value: str) -> str:
+    """
+    Extract numeric value from a string.
+
+    Parameters:
+    value (str): The string containing numeric value.
+
+    Returns:
+    str: The extracted numeric value.
+    """
+    value = re.findall('[\d]+[.,\d]+|[\d]*[.][\d]+|[\d]+', value)[0]
+    return value
+
+def _write_defined_spectrum_attributes(file: TextIO, spectrum: Spectrum) -> None:
+    """
+    Write defined spectrum attributes to the file.
+
+    Parameters:
+    file (TextIO): The file object to write to.
+    spectrum (Spectrum): The Spectrum object containing attributes.
+    """
     for key, attribute in SPECTRUM_ATTRIBUTES.items():
         value = spectrum.get(key)
         if attribute in MAPPED_SPECTRUM_ATTRIBUTES:
@@ -87,7 +154,14 @@ def _write_defined_spectrum_attributes(file, spectrum):
         if value is not None:
             print(f'{attribute}={value}', file=file)
 
-def _write_peaks(file, spectrum):
+def _write_peaks(file: TextIO, spectrum: Spectrum) -> None:
+    """
+    Write peaks information for a spectrum to the file.
+
+    Parameters:
+    file (TextIO): The file object to write to.
+    spectrum (Spectrum): The Spectrum object containing peaks information.
+    """
     print(f'<Peaks>', file=file)
     peak_comments = spectrum.get('peak_comments', {})
     for i in range(len(spectrum.peaks)):
@@ -96,10 +170,26 @@ def _write_peaks(file, spectrum):
         comment = peak_comments.get(mz, '?')
         print(f'{mz}\t{intensities}\t{comment}', file=file)
 
-def _has_analyte(spectrum):
+def _has_analyte(spectrum: Spectrum) -> bool:
+    """
+    Check if a spectrum has analyte information.
+
+    Parameters:
+    spectrum (Spectrum): The Spectrum object to check.
+
+    Returns:
+    bool: True if the spectrum has analyte information, False otherwise.
+    """
     return any([spectrum.get(key) for key in ANALYTE_ATTRIBUTES])
 
-def _write_header(filename, file):
+def _write_header(filename: str, file: TextIO) -> None:
+    """
+    Write the header information to the file.
+
+    Parameters:
+    filename (str): The name of the file.
+    file (TextIO): The file object to write to.
+    """
     basename, ext = os.path.splitext(filename)
     name = basename.split(os.path.sep)[-1]
     print('<mzSpecLib>', file=file)
