@@ -180,7 +180,7 @@ def _has_analyte(spectrum: Spectrum) -> bool:
     Returns:
     bool: True if the spectrum has analyte information, False otherwise.
     """
-    return any([spectrum.get(key) for key in ANALYTE_ATTRIBUTES])
+    return any(spectrum.get(key) for key in ANALYTE_ATTRIBUTES)
 
 def _write_header(filename: str, file: TextIO) -> None:
     """
@@ -190,7 +190,7 @@ def _write_header(filename: str, file: TextIO) -> None:
     filename (str): The name of the file.
     file (TextIO): The file object to write to.
     """
-    basename, ext = os.path.splitext(filename)
+    basename, _ = os.path.splitext(filename)
     name = basename.split(os.path.sep)[-1]
     print('<mzSpecLib>', file=file)
     print('MS:1003186|library format version=1.0', file=file)
