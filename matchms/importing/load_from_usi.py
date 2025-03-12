@@ -39,6 +39,10 @@ def load_from_usi(usi: str, server: str = "https://metabolomics-usi.ucsd.edu",
 
     if response.status_code == 404:
         return None
+
+    if not "application/json" in response.headers.get("Content-Type"):
+        return None
+
     # Extract data and create Spectrum object
     try:
         spectral_data = response.json()
