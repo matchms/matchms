@@ -38,7 +38,7 @@ def save_as_mzspeclib(spectra: List[Spectrum], filename: str) -> None:
     spectra (List[Spectrum]): List of Spectrum objects to save.
     filename (str): The name of the file to save the spectra to.
     """
-    with open(filename, 'w') as file:
+    with open(filename, 'w', encoding='UTF-8') as file:
         _write_header(filename, file)
         for idx, spectrum in enumerate(spectra):
             _write_spectrum(file, idx, spectrum)
@@ -136,7 +136,7 @@ def _extract_numeric_value(value: str) -> str:
     Returns:
     str: The extracted numeric value.
     """
-    value = re.findall('[\d]+[.,\d]+|[\d]*[.][\d]+|[\d]+', value)[0]
+    value = re.findall('[\\d]+[.,\\d]+|[\\d]*[.][\\d]+|[\\d]+', value)[0]
     return value
 
 def _write_defined_spectrum_attributes(file: TextIO, spectrum: Spectrum) -> None:
@@ -162,11 +162,11 @@ def _write_peaks(file: TextIO, spectrum: Spectrum) -> None:
     file (TextIO): The file object to write to.
     spectrum (Spectrum): The Spectrum object containing peaks information.
     """
-    print(f'<Peaks>', file=file)
+    print('<Peaks>', file=file)
     peak_comments = spectrum.get('peak_comments', {})
     for i in range(len(spectrum.peaks)):
         mz = spectrum.peaks.mz[i]
-        intensities = '{0:.2f}'.format(spectrum.peaks.intensities[i]).rstrip('0').rstrip('.')
+        intensities = f'{spectrum.peaks.intensities[i]:.2f}'.rstrip('0').rstrip('.')
         comment = peak_comments.get(mz, '?')
         print(f'{mz}\t{intensities}\t{comment}', file=file)
 

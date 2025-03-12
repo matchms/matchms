@@ -15,7 +15,7 @@ def test_has_header(tmp_path):
     outpath = tmp_path / f"{name}.mzspeclib"
     save_as_mzspeclib([], outpath)
 
-    with open(outpath,'r') as file:
+    with open(outpath,'r', encoding='UTF-8') as file:
         lines = file.readlines()
 
         assert lines[0] == '<mzSpecLib>\n'
@@ -30,7 +30,7 @@ def test_has_spectrum(tmp_path):
     outpath = tmp_path / "test.mzspeclib"
     save_as_mzspeclib([spectrum], outpath)
 
-    with open(outpath, 'r') as file:
+    with open(outpath, 'r', encoding='UTF-8') as file:
         lines = file.readlines()
         assert '<Spectrum=1>\n' in lines
         assert '<Peaks>\n' in lines
@@ -54,7 +54,7 @@ def test_write_custom_keys(tmp_path):
     outpath = tmp_path / "test.mzspeclib"
     save_as_mzspeclib([spectrum], outpath)
 
-    with open(outpath, 'r') as file:
+    with open(outpath, 'r', encoding='UTF-8') as file:
         lines = file.readlines()
         assert '[1]MS:1003275|other attribute name=instrument\n' in lines
         assert '[1]MS:1003276|other attribute value=GC Orbitrap\n' in lines
@@ -64,7 +64,7 @@ def test_mapped_attributes(tmp_path):
     spectrum = SpectrumBuilder().with_metadata({'ionmode': 'positive'}).build()
     outpath = tmp_path / "test.mzspeclib"
     save_as_mzspeclib([spectrum], outpath)
-    with open(outpath, 'r') as file:
+    with open(outpath, 'r', encoding='UTF-8') as file:
         lines = file.readlines()
         assert 'MS:1000465|scan polarity=MS:1000130|positive scan\n' in lines
 
@@ -76,7 +76,7 @@ def test_peak_comments(tmp_path):
     outpath = tmp_path / "test.mzspeclib"
     
     save_as_mzspeclib([spectrum], outpath)
-    with open(outpath, 'r') as file:
+    with open(outpath, 'r', encoding='UTF-8') as file:
         lines = file.readlines()
         assert '35.7\t1337\ttest\n' in lines
 
@@ -85,7 +85,7 @@ def test_has_attributes_with_units(tmp_path):
     outpath = tmp_path / "test.mzspeclib"
     save_as_mzspeclib([spectrum], outpath)
 
-    with open(outpath, 'r') as file:
+    with open(outpath, 'r', encoding='UTF-8') as file:
         lines = file.readlines()
         assert '[1]MS:1000045|collision energy=70\n' in lines    
         assert '[1]UO:0000000|unit=UO:0000266|electronvolt\n' in lines    
