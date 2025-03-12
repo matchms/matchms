@@ -34,7 +34,7 @@ def test_has_spectrum(tmp_path):
         lines = file.readlines()
         assert '<Spectrum=1>\n' in lines
         assert '<Peaks>\n' in lines
-        assert len(lines) == 12
+        assert len(lines) == 13
 
 
 def test_has_analyte(tmp_path):
@@ -47,3 +47,23 @@ def test_has_analyte(tmp_path):
     save_as_mzspeclib([spectrum], outpath)
     expected = 'tests/testdata/Hydrogen_chloride.mzspeclib'
     assert filecmp.cmp(outpath, expected)
+
+
+def test_write_custom_keys(tmp_path):
+    spectrum = SpectrumBuilder().with_metadata({'instrument': 'GC Orbitrap'}).build()
+    outpath = tmp_path / "test.mzspeclib"
+    save_as_mzspeclib([spectrum], outpath)
+
+    with open(outpath, 'r') as file:
+        lines = file.readlines()
+        assert '[1]MS:1003275|other attribute name=instrument\n' in lines
+        assert '[1]MS:1003276|other attribute value=GC Orbitrap\n' in lines
+
+
+def test_mapped_attributes(tmp_path):
+    spectrum = SpectrumBuilder().with_metadata({'ionmode': 'positive'}).build()
+    outpath = tmp_path / "test.mzspeclib"
+    save_as_mzspeclib([spectrum], outpath)
+    with open(outpath, 'r') as file:
+        lines = file.readlines()
+        assert 'MS:1000465|scan polarity=MS:1000130|positive scan\n' in lines
