@@ -173,7 +173,7 @@ class CommunityNetwork:
             A dictionary mapping each node to its community identifier.
         """
         intra_edges = [(u, v) for u, v in list(self.graph.edges())
-                       if communities.get(u) == communities.get(v)]
+                       if communities.get(u) != communities.get(v)]
         self.graph.remove_edges_from(intra_edges)
         return self.graph
 
