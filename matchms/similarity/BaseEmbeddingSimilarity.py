@@ -78,17 +78,17 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
         # Compute pairwise similarities matrix                
         return self.pairwise_similarity_fn(embs_ref, embs_query)
 
-    def generate_ann_index(
+    def build_ann_index(
             self,
             reference_spectra: Optional[Iterable[SpectrumType]] = None,
             embeddings_path: Optional[Union[str, Path]] = None,
             k: int = 50
         ):
         """
-        Generate an ANN index for the reference spectra.
+        Build an ANN index for the reference spectra.
 
         Args:
-            reference_spectra: List of reference spectra to generate the ANN index for.
+            reference_spectra: List of reference spectra to build the ANN index for.
             embeddings_path: If embeddings are already computed, provide the path to the numpy file containing them
                              instead of `reference_spectra`.
             k: Number of nearest neighbors to use for the ANN index.
@@ -111,7 +111,7 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
     def get_anns(self, query_spectra: Iterable[SpectrumType], k: int = 50):
         if self.index is None:
             raise ValueError(
-                "No index generated yet. Please call `generate_ann_index` on your reference spectra first."
+                "No index built yet. Please call `build_ann_index` on your reference spectra first."
             )
 
         # Compute query embeddings
