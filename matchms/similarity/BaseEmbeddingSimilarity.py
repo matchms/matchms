@@ -1,5 +1,6 @@
 import numpy as np
-from typing import List, Iterable
+from typing import List, Iterable, Union
+from pathlib import Path
 from abc import abstractmethod
 from sklearn.metrics.pairwise import cosine_similarity, euclidean_distances
 from matchms.similarity.BaseSimilarity import BaseSimilarity
@@ -39,6 +40,24 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
         Returns:
             np.ndarray: Embeddings for the spectra. Shape: (n_spectra, n_embedding_features).
         """
+
+    def get_embeddings(self, spectra: Iterable[SpectrumType] = None, npy_path: Union[str, Path] = None) -> np.ndarray:
+
+        if spectra is None and npy_path is None:
+            raise ValueError("Either spectra or npy_path must be provided.")
+
+        if npy_path is not None:
+            if Path(npy_path).exists():
+                # If file path is provided and exists, load embeddings
+                embs = self.load_embeddings(npy_path)
+            else:
+                # If file path is provided and does not exist, compute embeddings and store them
+                embs = self.compute_embeddings(spectra)
+                self.store_embeddings(npy_path, embs)
+        else:
+            # If no file path is provided, compute embeddings
+            embs = self.compute_embeddings(spectra)
+        return embs
 
     def pair(self, reference: SpectrumType, query: SpectrumType) -> float:
         return self.matrix([reference], [query])[0, 0]
@@ -88,7 +107,7 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
         neighbors, distances = self.index.neighbor_graph
         similarities = self._distances_to_similarities(distances)
         return neighbors, similarities
-    
+
     def _distances_to_similarities(self, distances):
         if self.similarity == "cosine":
             return 1 - distances
@@ -96,3 +115,28 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
             return -distances
         else:
             raise ValueError(f"Only cosine and euclidean similarities are supported for now. Got {self.similarity}.")
+
+    @staticmethod
+    def load_embeddings(npy_path: Union[str, Path]):
+        """Load embeddings from a numpy file.
+        
+        Args:
+            npy_path: Path to the numpy file.
+        
+        Returns:
+            np.ndarray: Embeddings for the spectra. Shape: (n_spectra, n_embedding_features).
+        """
+        embs = np.load(npy_path)
+        if embs.ndim != 2:
+            raise ValueError(f"Expected 2D embeddings array, got {embs.ndim}D array.")
+        return embs
+
+    @staticmethod
+    def store_embeddings(npy_path: Union[str, Path], embs: np.ndarray):
+        """Store embeddings in a numpy file.
+        
+        Args:
+            npy_path: Path to the numpy file.
+            embs: Embeddings array to store.
+        """
+        np.save(npy_path, embs)
