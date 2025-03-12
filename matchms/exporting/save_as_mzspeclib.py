@@ -2,21 +2,51 @@ from typing import List
 from matchms.Spectrum import Spectrum
 import os
 
-def save_as_mzspeclib(spectra: List[Spectrum], filename: str):
+ANALYTE_ATTRIBUTES = {
+    'formula': 'MS:1000866|molecular formula',
+    'smiles': 'MS:1000868|SMILES formula'
+}
 
+SPECTRUM_ATTRIBUTES = {
+    'compound_name': 'MS:1003061|library spectrum name'
+}
+
+def save_as_mzspeclib(spectra: List[Spectrum], filename: str):
     with open(filename, 'w') as file:
         _write_header(filename, file)
         for idx, spectrum in enumerate(spectra):
             _write_spectrum(file, idx, spectrum)
 
-
 def _write_spectrum(file, idx, spectrum):
     print(f'<Spectrum={idx + 1}>', file=file)
+    _write_spectrum_attributes(file, spectrum)
+    _write_analyte(file, spectrum)
+    _write_peaks(file, spectrum)
+    print('', file=file)
+
+def _write_analyte(file, spectrum):
+    if _has_analyte(spectrum):
+        print('<Analyte=1>', file=file)
+        for key, attribute in ANALYTE_ATTRIBUTES.items():
+            value = spectrum.get(key)
+            if value is not None:
+                print(f'{attribute}={value}', file=file)
+
+def _write_spectrum_attributes(file, spectrum):
+    for key, attribute in SPECTRUM_ATTRIBUTES.items():
+        value = spectrum.get(key)
+        if value is not None:
+            print(f'{attribute}={value}', file=file)
     print(f'MS:1003059|number of peaks={len(spectrum.peaks)}', file=file)
+
+def _write_peaks(file, spectrum):
     print(f'<Peaks>', file=file)
     for i in range(len(spectrum.peaks)):
-        print(f'{spectrum.peaks.mz[i]}\t{spectrum.peaks.intensities[i]}\t?', file=file)
+        intensities = '{0:.2f}'.format(spectrum.peaks.intensities[i]).rstrip('0').rstrip('.')
+        print(f'{spectrum.peaks.mz[i]}\t{intensities}\t?', file=file)
 
+def _has_analyte(spectrum):
+    return any([spectrum.get(key) for key in ANALYTE_ATTRIBUTES.keys()])
 
 def _write_header(filename, file):
     basename, ext = os.path.splitext(filename)

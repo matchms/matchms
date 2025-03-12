@@ -1,6 +1,7 @@
 from ..builder_Spectrum import SpectrumBuilder
 import numpy as np
 import os
+import filecmp
 
 from matchms.exporting import save_as_mzspeclib
 
@@ -34,5 +35,15 @@ def test_has_spectrum(tmp_path):
         assert '<Spectrum=1>\n' in lines
         assert '<Peaks>\n' in lines
         assert len(lines) == 12
- 
 
+
+def test_has_analyte(tmp_path):
+    mz = np.array([35, 36, 37, 38], dtype=np.float64)
+    intensities = np.array([169.85, 999, 53.95, 323.71], dtype=np.float64)
+    metadata = {'formula': 'ClH', 'compound_name': 'Hydrogen chloride'}
+    spectrum = SpectrumBuilder().with_mz(mz).with_intensities(intensities).with_metadata(metadata).build()
+
+    outpath = tmp_path / "test.mzspeclib"
+    save_as_mzspeclib([spectrum], outpath)
+    expected = 'tests/testdata/Hydrogen_chloride.mzspeclib'
+    assert filecmp.cmp(outpath, expected)
