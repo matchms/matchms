@@ -67,18 +67,16 @@ class CommunityNetwork:
             raise ValueError("Queries and references in scores do not match.")
 
         # Build the kNN graph from the similarities.
-        knn_graph = self._create_knn_graph(scores, score_name)
+        self.graph = self._create_knn_graph(scores, score_name)
 
         # Compute communities using the Leiden algorithm.
-        communities = self._compute_communities(knn_graph)
+        communities = self._compute_communities(self.graph)
         # Store the community assignment as node attributes.
-        nx.set_node_attributes(knn_graph, communities, "community")
+        nx.set_node_attributes(self.graph, communities, "community")
 
         # Optionally remove all intra-community edges.
         if self.remove_intra_community_links:
-            self._remove_intra_community_links(knn_graph, communities)
-
-        self.graph = knn_graph
+            self.graph = self._remove_intra_community_links(communities)
 
     def _create_knn_graph(self, scores: Scores, score_name: str) -> nx.Graph:
         """
@@ -163,7 +161,7 @@ class CommunityNetwork:
         communities = {reverse_mapping[idx]: community for idx, community in enumerate(membership)}
         return communities
 
-    def _remove_intra_community_links(self, graph: nx.Graph, communities: dict) -> None:
+    def _remove_intra_community_links(self, communities: dict) -> None:
         """
         Remove edges connecting nodes within the same community from the graph.
 
@@ -174,9 +172,10 @@ class CommunityNetwork:
         communities : dict
             A dictionary mapping each node to its community identifier.
         """
-        intra_edges = [(u, v) for u, v in list(graph.edges())
+        intra_edges = [(u, v) for u, v in list(self.graph.edges())
                        if communities.get(u) == communities.get(v)]
-        graph.remove_edges_from(intra_edges)
+        self.graph.remove_edges_from(intra_edges)
+        return self.graph
 
     def export_to_file(self, filename: str, graph_format: str = "graphml") -> None:
         """
