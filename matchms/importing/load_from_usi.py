@@ -8,7 +8,7 @@ from ..Spectrum import Spectrum
 logger = logging.getLogger("matchms")
 
 
-def load_from_usi(usi: str, server: str = "https://metabolomics-usi.ucsd.edu",
+def load_from_usi(usi: str, server: str = "https://metabolomics-usi.gnps2.org",
                   metadata_harmonization: bool = True):
     """Load spectrum from metabolomics USI.
 
