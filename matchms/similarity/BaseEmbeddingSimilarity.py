@@ -116,14 +116,19 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
         self.index = index
         return self.index
 
-    def get_anns(self, query_spectra: Iterable[SpectrumType], k: int = 50):
+    def get_anns(self, query_spectra: Union[Iterable[SpectrumType], np.ndarray], k: int = 50):
         if self.index is None:
             raise ValueError(
                 "No index built yet. Please call `build_ann_index` on your reference spectra first."
             )
-
-        # Compute query embeddings
-        embs_query = self.compute_embeddings(query_spectra)
+    
+        if isinstance(query_spectra, np.ndarray):
+            embs_query = query_spectra
+            if embs_query.ndim != 2:
+                raise ValueError(f"Expected 2D embeddings array, got {embs_query.ndim}D array.")
+        else:
+            # Compute query embeddings
+            embs_query = self.compute_embeddings(query_spectra)
 
         # Get ANN indices
         if self.index_backend == "pynndescent":
