@@ -165,11 +165,11 @@ Ecosystem compatibility
      - ms2query Status
    * - .. image:: https://img.shields.io/badge/numpy-1.25-lightgrey?logo=numpy :alt: numpy
      - .. image:: https://img.shields.io/badge/spec2vec-0.8.0-red
-     - .. image:: https://img.shields.io/badge/ms2deepscore-2.4.0-green
+     - .. image:: https://img.shields.io/badge/ms2deepscore-2.5.1-green
      - .. image:: https://img.shields.io/badge/ms2query-1.5.3-red
    * - .. image:: https://img.shields.io/badge/numpy-2.1-lightgrey?logo=numpy :alt: numpy
      - .. image:: https://img.shields.io/badge/spec2vec-0.8.0-red
-     - .. image:: https://img.shields.io/badge/ms2deepscore-2.4.0-green
+     - .. image:: https://img.shields.io/badge/ms2deepscore-2.5.1-green
      - .. image:: https://img.shields.io/badge/ms2query-1.5.3-red
 
 .. compatibility matrix end
@@ -320,10 +320,8 @@ To install matchms, do:
   cd matchms
   conda create --name matchms-dev python=3.11
   conda activate matchms-dev
-  # Install rdkit using conda, rest of dependencies can be installed with pip
-  conda install -c conda-forge rdkit
-  python -m pip install --upgrade pip
-  pip install --editable .[dev]  # if this won't work try "poetry install --with dev"
+  conda install poetry=1.8
+  poetry install
 
 Run the linter with:
 
