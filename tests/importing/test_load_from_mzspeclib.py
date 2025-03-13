@@ -1,10 +1,13 @@
 import os
 from types import GeneratorType
+from typing import List, Tuple
 
 import numpy as np
 import pytest
 from matchms.Spectrum import Spectrum
 from matchms.importing import load_from_mzspeclib
+
+from matchms.importing.load_from_mzspeclib import _parse_simple_attribute, _parse_composite_attribute
 
 
 module_root = os.path.join(os.path.dirname(__file__), "..")
@@ -50,3 +53,22 @@ def test_spectrum_has_correct_mzs(spectrum):
 def test_has_multiple_spectra():
     multi_spectra_file = os.path.join(module_root, 'testdata','rcx_ei_mzspeclib')
     assert len(list(load_from_mzspeclib(multi_spectra_file))) == 10
+
+def test_read_smiles(spectrum):
+    assert spectrum.get('smiles') == 'C1=CC2=C3C(=C1)C1=CC=CC4=C1C(=CC=C4)C3=CC=C2'
+
+def test_parse_simple_attribute():
+    line = 'MS:1003208|experimental precursor monoisotopic m/z=252.09323'
+    actual = _parse_simple_attribute(line)
+    expected = ('precursor_mz', '252.09323')
+    assert actual == expected
+
+def test_parse_composite_attribute():
+    lines = [
+        '[1]MS:1000045|collision energy=70',
+        '[1]UO:0000000|unit=UO:0000266|electronvolt'
+    ]
+
+    expected = ('collision_energy', '70eV')
+    actual = _parse_composite_attribute(lines)
+    assert actual == expected
