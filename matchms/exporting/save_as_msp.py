@@ -3,7 +3,7 @@ import os
 from typing import IO, Dict, List, Union
 from ..Fragments import Fragments
 from ..Spectrum import Spectrum
-from ..utils import (filter_empty_spectra, fingerprint_export_warning,
+from ..utils import (filter_empty_spectra, fingerprint_export_warning, load_export_key_conversions,
                      rename_deprecated_params)
 
 
@@ -82,25 +82,34 @@ def _write_spectrum(
     write_peak_comments: bool,
     export_style: str = "matchms",
 ):
-    _write_metadata(spectrum.metadata_dict(export_style), outfile)
-    if write_peak_comments is True:
-        _write_peaks(spectrum.peaks, spectrum.peak_comments, outfile)
-    else:
-        _write_peaks(spectrum.peaks, None, outfile)
+    _write_metadata(spectrum, export_style, outfile)
+    _write_peaks(
+        spectrum.peaks,
+        spectrum.peak_comments if write_peak_comments else None,
+        outfile)
     outfile.write(os.linesep)
 
 
 def _write_peaks(peaks: Fragments, peak_comments: Spectrum.peak_comments, outfile: IO):
-    outfile.write(f"NUM PEAKS: {len(peaks)}\n")
     for mz, intensity in zip(peaks.mz, peaks.intensities):
         peak_comment = _format_peak_comment(mz, peak_comments)
         outfile.write(f"{mz}\t{intensity}{peak_comment}\n".expandtabs(12))
 
 
-def _write_metadata(metadata: dict, outfile: IO):
+def _write_metadata(spectrum: Spectrum, export_style: str, outfile: IO):
+    metadata = spectrum.metadata_dict(export_style)
+    key_conversions = load_export_key_conversions(export_style=export_style)
+    metadata.pop(key_conversions['num_peaks'], None)
+    metadata.pop('fingerprint', None)
+
+    compound_name = metadata.pop(key_conversions['compound_name'], None)
+    if compound_name:
+        outfile.write(f"{key_conversions['compound_name'].upper()}: {compound_name}\n")
+
+    peak_comments = metadata.pop('peak_comments', None)
     for key, value in metadata.items():
-        if not (_is_num_peaks(key) or _is_peak_comments(key) or _is_fingerprint(key)):
-            outfile.write(f"{key.upper()}: {value}\n")
+        outfile.write(f"{key.upper()}: {value}\n")
+    outfile.write(f"NUM PEAKS: {len(spectrum.peaks)}\n")
 
 
 def _format_peak_comment(mz: Union[int, float], peak_comments: Dict):

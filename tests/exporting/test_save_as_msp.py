@@ -82,8 +82,16 @@ def test_wrong_filename_exception(caplog):
 def test_file_exists_single_spectrum(spectrum, filename):
     """ Test checking if the file is created. """
     save_as_msp(spectrum, filename)
-
     assert os.path.isfile(filename)
+
+
+def test_name_comes_first(spectrum: Spectrum, filename: str):
+    spectrum.set('ionization','positive')
+    spectrum.set('compound_name', 'test')
+    save_as_msp(spectrum, filename)
+
+    with open(filename, 'r') as file:
+        assert file.readline() == 'COMPOUND_NAME: test\n'
 
 
 def test_stores_all_spectra(filename, data):
