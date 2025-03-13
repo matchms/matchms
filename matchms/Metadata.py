@@ -63,6 +63,7 @@ class Metadata:
         if metadata is None:
             self._data = PickyDict({})
         elif isinstance(metadata, Mapping):
+
             self._data = PickyDict(metadata)
         else:
             raise ValueError("Unexpected data type for metadata (should be dictionary, or None).")

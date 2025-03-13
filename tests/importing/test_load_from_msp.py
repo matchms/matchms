@@ -242,10 +242,13 @@ def test_load_msl():
 def test_load_golm_style_msp():
     module_root = os.path.join(os.path.dirname(__file__), "..")
     spectra_file = os.path.join(module_root, "testdata", "golm.msp")
+    edge_case_spectra_file = os.path.join(module_root, "testdata", "edge_golm.msp")
     actual = list(load_from_msp(spectra_file))
+    edge_case_actual = list(load_from_msp(edge_case_spectra_file))
 
     assert len(actual) == 3
     assert len(actual[0].mz) == 50
+    assert len(edge_case_actual[0].metadata["synonyms"]) == 11
 
 
 def test_load_msp_with_comments_including_quotes():
