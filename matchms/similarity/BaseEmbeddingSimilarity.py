@@ -143,16 +143,14 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
             neighbors, distances = self.index.neighbor_graph
             similarities = self._distances_to_similarities(distances)
             return neighbors, similarities
-        else:
-            raise ValueError(f"Only pynndescent is supported for now. Got {self.index_backend}.")
+        raise ValueError(f"Only pynndescent is supported for now. Got {self.index_backend}.")
 
     def _distances_to_similarities(self, distances):
         if self.similarity == "cosine":
             return 1 - distances
         elif self.similarity == "euclidean":
             return -distances
-        else:
-            raise ValueError(f"Only cosine and euclidean similarities are supported for now. Got {self.similarity}.")
+        raise ValueError(f"Only cosine and euclidean similarities are supported for now. Got {self.similarity}.")
 
     @staticmethod
     def load_embeddings(npy_path: Union[str, Path]):
