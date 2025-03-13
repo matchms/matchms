@@ -84,7 +84,8 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
             reference_spectra: Optional[Iterable[SpectrumType]] = None,
             embeddings_path: Optional[Union[str, Path]] = None,
             k: int = 50,
-            index_backend: str = "pynndescent"
+            index_backend: str = "pynndescent",
+            **index_kwargs
         ):
         """
         Build an ANN index for the reference spectra.
@@ -94,6 +95,8 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
             embeddings_path: If embeddings are already computed, provide the path to the numpy file containing them
                              instead of `reference_spectra`.
             k: Number of nearest neighbors to use for the ANN index.
+            index_backend: Backend to use for ANN index. Currently only "pynndescent" is supported.
+            **index_kwargs: Additional keyword arguments passed to the index constructor.
 
         Returns:
             ANN index object.
@@ -108,7 +111,7 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
             self.index_backend = index_backend
 
             # Build ANN index
-            index = pynndescent.NNDescent(embs_ref, metric=self.similarity, n_neighbors=k)
+            index = pynndescent.NNDescent(embs_ref, metric=self.similarity, n_neighbors=k, **index_kwargs)
         else:
             raise ValueError(f"Only pynndescent is supported for now. Got {index_backend}.")
 
