@@ -90,9 +90,16 @@ def test_name_comes_first(spectrum: Spectrum, filename: str):
     spectrum.set('compound_name', 'test')
     save_as_msp(spectrum, filename)
 
-    with open(filename, 'r') as file:
+    with open(filename, 'r', encoding='UTF-8') as file:
         assert file.readline() == 'COMPOUND_NAME: test\n'
 
+
+def test_peak_sep(spectrum: Spectrum, filename: str):
+    save_as_msp(spectrum, filename, peak_sep='  ')
+
+    with open(filename, 'r', encoding='UTF-8') as file:
+        lines = file.readlines()
+        assert '100.0  0.1\n' in lines
 
 def test_stores_all_spectra(filename, data):
     """ Test checking if all spectra contained in the original file are stored
