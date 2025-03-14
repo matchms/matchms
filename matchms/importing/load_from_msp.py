@@ -80,6 +80,11 @@ def parse_msp_file(filename: str) -> Generator[dict, None, None]:
             # Obtaining the masses and intensities
             if int(params['num peaks']) == peakscount:
                 peakscount = 0
+                # Handles edge cases with GOLM files where the nominal mass is written with a comma instead of a dot
+                nominal_mass = params.get("mw")
+                if nominal_mass and isinstance(nominal_mass, str):
+                    params["mw"] = nominal_mass.replace(',', '.')
+
                 yield {
                     'params': (params),
                     'm/z array': masses,
@@ -137,6 +142,7 @@ def parse_metadata(rline: str, params: dict):
     """
     matches = []
     splitted_line = rline.split(":", 1)
+
     if splitted_line[0].lower() == 'comments' and "=" in splitted_line[1]:
         # This pattern check for different formats.
         # The first checks for compound="caffeine", the second and third "compound=caffeine and the last for parent_mass=12.1
@@ -166,6 +172,18 @@ def parse_metadata(rline: str, params: dict):
     # The latter is captured by these lines.
     if len(matches) == 0:
         params[splitted_line[0].lower()] = splitted_line[1].strip()
+
+    splitted_line = rline.split(":")
+
+    if splitted_line[0].lower() == 'synon' and len(splitted_line) > 2:
+        key = ":".join(splitted_line[:2]).lower().strip()
+        value = splitted_line[2].strip().replace(',', '.') # Handles edge cases with GOLM files where the nominal mass is written with a comma instead of a dot
+        if key == "synon: metb n":
+            params.setdefault(key, []).append(value)
+        else:
+            params[key] = value
+
+
 
 
 def contains_metadata(rline: str) -> bool:

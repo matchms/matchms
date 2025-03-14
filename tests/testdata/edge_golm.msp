@@ -1,0 +1,39 @@
+Name: M000412_A100001-101-xxx_NA_986,12_TRUE_VAR5_ALK_Glyoxylic acid (1MEOX) (1TMS)
+Synon: MST N: Glyoxylic acid (1MEOX) (1TMS)
+Synon: RI: 986,12
+Synon: RI VAR5 ALK: TRUE
+Synon: MST: A100001-101
+Synon: MST ISOTOPE: 101
+Synon: MST ID: A100001-101-xxx_
+Synon: MST SEL MASS: 160|116|89|100|144
+Synon: METB: M000412_no_preferred
+Synon: METB N: alpha-ketoacetic acid
+Synon: METB N: formylformic acid
+Synon: METB N: Glyoxalate
+Synon: METB N: Glyoxalsaeure
+Synon: METB N: Glyoxylate
+Synon: METB N: glyoxylic acid
+Synon: METB N: Glyoxylic acid
+Synon: METB N: Glyoxylsaeure
+Synon: METB N: oxalaldehydic acid
+Synon: METB N: oxoacetic acid
+Synon: METB N: oxoethanoic acid
+Synon: METB CAS: 298-12-4
+Synon: METB KEGG: C00048
+Synon: METB InChI: InChI=1S/C2H2O3/c3-1-2(4)5/h1H,(H,4,5)
+Synon: METB InChIKey: HHLFWLYXYJOTON-UHFFFAOYSA-N
+Synon: METB CLASS: Acid (Oxo)
+Synon: GMD LINK: http://gmd.mpimp-golm.mpg.de/Analytes/60565248-bf50-49fb-b739-3920cf0162da.aspx
+Synon: GMD VERS: 21.Nov.2011 21:54 hummel
+Formula: C6H13NO3Si
+MW: 175,258
+CAS#: 55493-91-9
+Comment: consensus spectrum of 2 spectra per analyte, MPIMP ID and isotopomer, with majority threshold = 60%
+DB#: 21
+Num Peaks: 26
+85:201 86:55 87:10 88:4 89:315
+90:29 91:22 92:1 99:2 100:64
+101:27 102:9 103:4 116:137 117:51
+118:10 128:1 129:5 132:2 144:30
+145:13 146:1 160:1000 161:100 162:38
+163:2
