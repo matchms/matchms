@@ -5,6 +5,7 @@ from abc import abstractmethod
 from sklearn.metrics.pairwise import cosine_similarity, euclidean_distances
 from matchms.similarity.BaseSimilarity import BaseSimilarity
 from matchms.typing import SpectrumType
+import pickle
 
 try:
     import pynndescent
@@ -16,13 +17,14 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
 
     # TODO: docstrings
     # TODO: add pytests
-    # TODO: not only string `metric`, but also a function?
     # TODO: not only PyNNDescent
 
     def __init__(self, similarity: str = "cosine"):  
         self.similarity = similarity
         self.index = None
         self.index_backend = None
+        self.index_kwargs = None
+        self.index_k = None
 
         if self.similarity == "cosine":
             self.pairwise_similarity_fn = cosine_similarity
@@ -41,6 +43,7 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
         Returns:
             np.ndarray: Embeddings for the spectra. Shape: (n_spectra, n_embedding_features).
         """
+        raise NotImplementedError("Subclasses must implement this method.")
 
     def get_embeddings(
             self, spectra: Optional[Iterable[SpectrumType]] = None, npy_path: Optional[Union[str, Path]] = None
@@ -109,6 +112,8 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
             if not pynndescent:
                 raise ImportError("pynndescent is not installed. Please install it with `pip install pynndescent`.")
             self.index_backend = index_backend
+            self.index_k = k
+            self.index_kwargs = index_kwargs
 
             # Build ANN index
             index = pynndescent.NNDescent(embs_ref, metric=self.similarity, n_neighbors=k, **index_kwargs)
@@ -122,8 +127,12 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
     def get_anns(self, query_spectra: Union[Iterable[SpectrumType], np.ndarray], k: int = 50):
         if self.index is None:
             raise ValueError(
-                "No index built yet. Please call `build_ann_index` on your reference spectra first."
+                "No index built yet. Please call `build_ann_index` on your reference spectra or `load_ann_index` if it "
+                "was previously built and stored using `save_ann_index`."
             )
+
+        if k > self.index_k:
+            raise ValueError(f"k ({k}) is larger than the k used to build the index ({self.index_k}).")
     
         if isinstance(query_spectra, np.ndarray):
             embs_query = query_spectra
@@ -179,3 +188,48 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
             embs: Embeddings array to store.
         """
         np.save(npy_path, embs)
+
+    def save_ann_index(self, path: Union[str, Path]):
+        """Save the ANN index to disk.
+        
+        Args:
+            path: Path to save the index to.
+        """
+        if self.index is None:
+            raise ValueError("No index to save. Please build an index first using build_ann_index().")
+        
+        save_dict = {
+            'index': self.index,
+            'backend': self.index_backend,
+            'similarity': self.similarity,
+            'index_kwargs': self.index_kwargs,
+            'index_k': self.index_k
+        }
+        
+        with open(path, 'wb') as f:
+            pickle.dump(save_dict, f)
+
+    def load_ann_index(self, path: Union[str, Path]):
+        """Load an ANN index from disk.
+        
+        Args:
+            path: Path to load the index from.
+            
+        Returns:
+            The loaded ANN index.
+        """
+        with open(path, 'rb') as f:
+            load_dict = pickle.load(f)
+            
+        if load_dict['similarity'] != self.similarity:
+            raise ValueError(
+                f"Loaded index similarity metric ({load_dict['similarity']}) does not match "
+                f"current similarity metric ({self.similarity})"
+            )
+            
+        self.index = load_dict['index']
+        self.index_backend = load_dict['backend']
+        self.index_kwargs = load_dict['index_kwargs']
+        self.index_k = load_dict['index_k']
+        
+        return self.index
