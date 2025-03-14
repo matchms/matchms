@@ -2,6 +2,7 @@ from abc import abstractmethod
 from typing import List
 import numpy as np
 from sparsestack import StackedSparseArray
+from tqdm import tqdm
 from matchms.typing import SpectrumType
 
 
@@ -64,12 +65,13 @@ class BaseSimilarity:
         n_cols = len(queries)
 
         if is_symmetric and n_rows != n_cols:
-            raise ValueError(f"Found unequal number of spectra {n_rows} and {n_cols} in while `is_symmetric` is True.")
+            raise ValueError(f"Found unequal number of spectra {n_rows} and {n_cols} while `is_symmetric` is True.")
 
         idx_row = []
         idx_col = []
         scores = []
-        for i_ref, reference in enumerate(references[:n_rows]):
+        # Wrap the outer loop with tqdm to track progress
+        for i_ref, reference in enumerate(tqdm(references[:n_rows], desc="Calculating similarities")):
             if is_symmetric and self.is_commutative:
                 for i_query, query in enumerate(queries[i_ref:n_cols], start=i_ref):
                     score = self.pair(reference, query)
@@ -128,7 +130,8 @@ class BaseSimilarity:
 
         assert idx_row.shape == idx_col.shape, "col and row indices must be of same shape"
         scores = np.zeros((len(idx_row)), dtype=self.score_datatype)  # TODO: switch to sparse matrix
-        for i, row in enumerate(idx_row):
+        # Use tqdm to track progress through the indices
+        for i, row in enumerate(tqdm(idx_row, desc="Calculating sparse similarities")):
             col = idx_col[i]
             scores[i] = self.pair(references[row], queries[col])
         return scores
