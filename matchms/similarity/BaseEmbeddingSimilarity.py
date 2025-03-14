@@ -1,5 +1,5 @@
 import numpy as np
-from typing import List, Iterable, Union, Optional
+from typing import List, Iterable, Union, Optional, Dict, Any, Tuple
 from pathlib import Path
 from abc import abstractmethod
 from sklearn.metrics.pairwise import cosine_similarity, euclidean_distances
@@ -14,10 +14,29 @@ except ImportError:
 
 
 class BaseEmbeddingSimilarity(BaseSimilarity):
+    """Base class for similarity measures that work with embeddings.
 
-    # TODO: docstrings
-    # TODO: add pytests
-    # TODO: not only PyNNDescent
+    This class provides functionality for computing similarities between spectra based on their
+    embeddings (vector representations). It supports cosine and euclidean similarity metrics,
+    and includes approximate nearest neighbor (ANN) search capabilities.
+
+    Parameters
+    ----------
+    similarity : str
+        The similarity measure to use for comparing embeddings. Default is "cosine".
+        Options are "cosine" or "euclidean".
+
+    Attributes
+    ----------
+    index : object
+        The ANN index object; if built.
+    index_backend : str
+        The backend used for ANN indexing (currently only "pynndescent" supported); if index is built.
+    index_kwargs : dict
+        Additional arguments passed to the ANN index constructor; if index is built.
+    index_k : int
+        Number of nearest neighbors used in the ANN index; if index is built.
+    """
 
     def __init__(self, similarity: str = "cosine"):  
         self.similarity = similarity
@@ -37,18 +56,41 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
     def compute_embeddings(self, spectra: Iterable[SpectrumType]) -> np.ndarray:
         """Compute embeddings for a list of spectra.
         
-        Args:
-            spectra: List of spectra to compute embeddings for.
+        Parameters
+        ----------
+        spectra : Iterable[SpectrumType]
+            List of spectra to compute embeddings for.
             
-        Returns:
-            np.ndarray: Embeddings for the spectra. Shape: (n_spectra, n_embedding_features).
+        Returns
+        -------
+        np.ndarray
+            Embeddings for the spectra. Shape: (n_spectra, n_embedding_features).
         """
         raise NotImplementedError("Subclasses must implement this method.")
 
     def get_embeddings(
             self, spectra: Optional[Iterable[SpectrumType]] = None, npy_path: Optional[Union[str, Path]] = None
         ) -> np.ndarray:
+        """Get embeddings either by computing them or loading from disk.
 
+        Parameters
+        ----------
+        spectra : Optional[Iterable[SpectrumType]]
+            List of spectra to compute embeddings for.
+        npy_path : Optional[Union[str, Path]]
+            Path to load/save embeddings from/to. If provided, embeddings are loaded from disk if it exists,
+            otherwise they are computed and saved on disk to the provided path.
+
+        Returns
+        -------
+        np.ndarray
+            Embeddings array.
+
+        Raises
+        ------
+        ValueError
+            If neither spectra nor npy_path is provided.
+        """
         if spectra is None and npy_path is None:
             raise ValueError("Either spectra or npy_path must be provided.")
 
@@ -66,12 +108,49 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
         return embs
 
     def pair(self, reference: SpectrumType, query: SpectrumType) -> float:
+        """Compute similarity between a pair of spectra.
+
+        Parameters
+        ----------
+        reference : SpectrumType
+            Reference spectrum.
+        query : SpectrumType
+            Query spectrum.
+
+        Returns
+        -------
+        float
+            Similarity score between the spectra.
+        """
         return self.matrix([reference], [query])[0, 0]
             
     def matrix(
         self, references: List[SpectrumType], queries: List[SpectrumType], array_type: str = "numpy",
         is_symmetric: bool = True
     ) -> np.ndarray:
+        """Compute similarity matrix between reference and query spectra.
+
+        Parameters
+        ----------
+        references : List[SpectrumType]
+            List of reference spectra.
+        queries : List[SpectrumType]
+            List of query spectra.
+        array_type : str, optional
+            Type of array to return. Must be "numpy".
+        is_symmetric : bool, optional
+            Whether the matrix is symmetric. Must be True.
+
+        Returns
+        -------
+        np.ndarray
+            Similarity matrix.
+
+        Raises
+        ------
+        ValueError
+            If array_type is not "numpy" or is_symmetric is False.
+        """
         if array_type != "numpy" or not is_symmetric:
             raise ValueError("Any embedding base similarity matrix is supposed to be dense and symmetric.")
 
@@ -89,22 +168,34 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
             k: int = 50,
             index_backend: str = "pynndescent",
             **index_kwargs
-        ):
+        ) -> Any:
+        """Build an ANN index for the reference spectra.
+
+        Parameters
+        ----------
+        reference_spectra : Optional[Iterable[SpectrumType]]
+            List of reference spectra to build the ANN index for.
+        embeddings_path : Optional[Union[str, Path]]
+            If embeddings are already computed, provide the path to the numpy file.
+        k : int, optional
+            Number of nearest neighbors to use for the ANN index.
+        index_backend : str, optional
+            Backend to use for ANN index. Currently only "pynndescent" is supported.
+        **index_kwargs
+            Additional keyword arguments passed to the index constructor.
+
+        Returns
+        -------
+        Any
+            The constructed ANN index.
+
+        Raises
+        ------
+        ImportError
+            If pynndescent is not installed.
+        ValueError
+            If an unsupported index_backend is specified.
         """
-        Build an ANN index for the reference spectra.
-
-        Args:
-            reference_spectra: List of reference spectra to build the ANN index for.
-            embeddings_path: If embeddings are already computed, provide the path to the numpy file containing them
-                             instead of `reference_spectra`.
-            k: Number of nearest neighbors to use for the ANN index.
-            index_backend: Backend to use for ANN index. Currently only "pynndescent" is supported.
-            **index_kwargs: Additional keyword arguments passed to the index constructor.
-
-        Returns:
-            ANN index object.
-        """
-
         # Compute reference embeddings
         embs_ref = self.get_embeddings(reference_spectra, embeddings_path)
 
@@ -124,7 +215,28 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
         self.index = index
         return self.index
 
-    def get_anns(self, query_spectra: Union[Iterable[SpectrumType], np.ndarray], k: int = 50):
+    def get_anns(
+            self, query_spectra: Union[Iterable[SpectrumType], np.ndarray], k: int = 50
+        ) -> Tuple[np.ndarray, np.ndarray]:
+        """Get approximate nearest neighbors for query spectra.
+
+        Parameters
+        ----------
+        query_spectra : Union[Iterable[SpectrumType], np.ndarray]
+            Query spectra or their embeddings.
+        k : int, optional
+            Number of nearest neighbors to return.
+
+        Returns
+        -------
+        Tuple[np.ndarray, np.ndarray]
+            Neighbor indices and similarity scores.
+
+        Raises
+        ------
+        ValueError
+            If no index is built or k is larger than index k.
+        """
         if self.index is None:
             raise ValueError(
                 "No index built yet. Please call `build_ann_index` on your reference spectra or `load_ann_index` if it "
@@ -150,14 +262,43 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
             raise ValueError(f"Only pynndescent is supported for now. Got {self.index_backend}.")
         return neighbors, similarities
 
-    def get_index_anns(self):
+    def get_index_anns(self) -> Tuple[np.ndarray, np.ndarray]:
+        """Get nearest neighbors for all points in the index.
+
+        Returns
+        -------
+        Tuple[np.ndarray, np.ndarray]
+            Neighbor indices and similarity scores.
+
+        Raises
+        ------
+        ValueError
+            If unsupported index backend is used.
+        """
         if self.index_backend == "pynndescent":
             neighbors, distances = self.index.neighbor_graph
             similarities = self._distances_to_similarities(distances)
             return neighbors, similarities
         raise ValueError(f"Only pynndescent is supported for now. Got {self.index_backend}.")
 
-    def _distances_to_similarities(self, distances):
+    def _distances_to_similarities(self, distances: np.ndarray) -> np.ndarray:
+        """Convert distances to similarities based on similarity metric.
+
+        Parameters
+        ----------
+        distances : np.ndarray
+            Distance matrix.
+
+        Returns
+        -------
+        np.ndarray
+            Similarity matrix.
+
+        Raises
+        ------
+        ValueError
+            If unsupported similarity metric is used.
+        """
         if self.similarity == "cosine":
             return 1 - distances
         elif self.similarity == "euclidean":
@@ -165,14 +306,23 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
         raise ValueError(f"Only cosine and euclidean similarities are supported for now. Got {self.similarity}.")
 
     @staticmethod
-    def load_embeddings(npy_path: Union[str, Path]):
+    def load_embeddings(npy_path: Union[str, Path]) -> np.ndarray:
         """Load embeddings from a numpy file.
         
-        Args:
-            npy_path: Path to the numpy file.
+        Parameters
+        ----------
+        npy_path : Union[str, Path]
+            Path to the numpy file.
         
-        Returns:
-            np.ndarray: Embeddings for the spectra. Shape: (n_spectra, n_embedding_features).
+        Returns
+        -------
+        np.ndarray
+            Embeddings array.
+
+        Raises
+        ------
+        ValueError
+            If loaded array is not 2D.
         """
         embs = np.load(npy_path)
         if embs.ndim != 2:
@@ -180,20 +330,30 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
         return embs
 
     @staticmethod
-    def store_embeddings(npy_path: Union[str, Path], embs: np.ndarray):
+    def store_embeddings(npy_path: Union[str, Path], embs: np.ndarray) -> None:
         """Store embeddings in a numpy file.
         
-        Args:
-            npy_path: Path to the numpy file.
-            embs: Embeddings array to store.
+        Parameters
+        ----------
+        npy_path : Union[str, Path]
+            Path to save the embeddings to.
+        embs : np.ndarray
+            Embeddings array to store.
         """
         np.save(npy_path, embs)
 
-    def save_ann_index(self, path: Union[str, Path]):
+    def save_ann_index(self, path: Union[str, Path]) -> None:
         """Save the ANN index to disk.
         
-        Args:
-            path: Path to save the index to.
+        Parameters
+        ----------
+        path : Union[str, Path]
+            Path to save the index to.
+
+        Raises
+        ------
+        ValueError
+            If no index exists to save.
         """
         if self.index is None:
             raise ValueError("No index to save. Please build an index first using build_ann_index().")
@@ -209,14 +369,23 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
         with open(path, 'wb') as f:
             pickle.dump(save_dict, f)
 
-    def load_ann_index(self, path: Union[str, Path]):
+    def load_ann_index(self, path: Union[str, Path]) -> Any:
         """Load an ANN index from disk.
         
-        Args:
-            path: Path to load the index from.
+        Parameters
+        ----------
+        path : Union[str, Path]
+            Path to load the index from.
             
-        Returns:
+        Returns
+        -------
+        Any
             The loaded ANN index.
+
+        Raises
+        ------
+        ValueError
+            If loaded index similarity metric doesn't match current metric.
         """
         with open(path, 'rb') as f:
             load_dict = pickle.load(f)
