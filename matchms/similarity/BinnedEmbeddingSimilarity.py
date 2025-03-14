@@ -5,10 +5,19 @@ from typing import Iterable
 
 
 class BinnedEmbeddingSimilarity(BaseEmbeddingSimilarity):
-    """
-    A similarity measure that bins spectra into a fixed number of bins and uses the binned
+    """A similarity measure that bins spectra into a fixed number of bins and uses the binned
     intensities as embedding features. By default, the similarity between spectra is computed as the cosine
     similarity between their binned representations.
+
+    Parameters
+    ----------
+    similarity : str, optional
+        The similarity measure to use for comparing embeddings. Default is "cosine".
+        Options are "cosine" or "euclidean".
+    max_mz : float, optional
+        The maximum m/z value to consider when binning. Default is 1005.
+    bin_width : float, optional
+        The width of each bin in m/z units. Default is 1.
     """
     def __init__(self, similarity: str = "cosine", max_mz: float = 1005, bin_width: float = 1):
         super().__init__(similarity=similarity)
@@ -16,6 +25,18 @@ class BinnedEmbeddingSimilarity(BaseEmbeddingSimilarity):
         self.bin_width = bin_width
 
     def _bin_spectrum(self, spectrum: SpectrumType) -> np.ndarray:
+        """Bin a spectrum's peaks into fixed-width m/z bins.
+
+        Parameters
+        ----------
+        spectrum : SpectrumType
+            The spectrum to bin.
+
+        Returns
+        -------
+        np.ndarray
+            Array of binned and normalized intensities.
+        """
         # NOTE: copypaste from https://github.com/pluskal-lab/MassSpecGym/blob/f525a5e55a39ec4caa4f1a51e64acd046713179e/massspecgym/data/transforms.py#L97
         mzs = spectrum.peaks.mz
         intensities = spectrum.peaks.intensities
@@ -45,6 +66,18 @@ class BinnedEmbeddingSimilarity(BaseEmbeddingSimilarity):
         return binned_intensities
 
     def compute_embeddings(self, spectra: Iterable[SpectrumType]) -> np.ndarray:
+        """Convert spectra into binned embeddings.
+
+        Parameters
+        ----------
+        spectra : Iterable[SpectrumType]
+            The spectra to convert into embeddings.
+
+        Returns
+        -------
+        np.ndarray
+            Array of shape (n_spectra, n_bins) containing the binned embeddings.
+        """
         spectra_list = list(spectra)
         embeddings = []
 
@@ -53,4 +86,3 @@ class BinnedEmbeddingSimilarity(BaseEmbeddingSimilarity):
             embeddings.append(binned_spectrum)
 
         return np.array(embeddings)
-
