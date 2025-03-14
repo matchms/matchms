@@ -249,6 +249,8 @@ def test_load_golm_style_msp():
     assert len(actual) == 3
     assert len(actual[0].mz) == 50
     assert len(edge_case_actual[0].metadata["synonyms"]) == 11
+    assert edge_case_actual[0].metadata["retention_index"] == 986.12
+    assert "inchi" in edge_case_actual[0].metadata.keys()
 
 
 def test_load_msp_with_comments_including_quotes():
