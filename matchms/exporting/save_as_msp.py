@@ -57,7 +57,7 @@ def save_as_msp(
     peak_sep:
         Separator to use for writing the msp file.
     """
-     # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-arguments
     if not isinstance(spectra, list):
         # Assume that input was a single Spectrum.
         spectra = [spectra]
