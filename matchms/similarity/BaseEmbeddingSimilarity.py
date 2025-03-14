@@ -165,7 +165,7 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
             self,
             reference_spectra: Optional[Iterable[SpectrumType]] = None,
             embeddings_path: Optional[Union[str, Path]] = None,
-            k: int = 50,
+            k: int = 100,
             index_backend: str = "pynndescent",
             **index_kwargs
         ) -> Any:
@@ -216,7 +216,7 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
         return self.index
 
     def get_anns(
-            self, query_spectra: Union[Iterable[SpectrumType], np.ndarray], k: int = 50
+            self, query_spectra: Union[Iterable[SpectrumType], np.ndarray], k: int = 100
         ) -> Tuple[np.ndarray, np.ndarray]:
         """Get approximate nearest neighbors for query spectra.
 
