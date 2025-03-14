@@ -12,10 +12,16 @@ SPECTRUM_ATTRIBUTE_MAPPING = {
     'MS:1002894|InChIKey': 'inchikey',
     'MS:1003403|InChI': 'inchi',
     'MS:1000045|collision energy': 'collision_energy',
+    'MS:1000465|scan polarity': 'ion_mode',
+    'MS:1000868|SMILES formula': 'smiles'
 }
 
 COMPOSITE_VALUE_MAPPINGS = {
-    'UO:0000000|unit': {'UO:0000266|electronvolt': 'eV'},
+    'UO:0000000|unit': {
+        'UO:0000266|electronvolt': 'eV',
+        'UO:0000169|parts per million': 'ppm',
+        'MS:1000040|m/z': 'mz'
+    },
 }
 
 LIBRARY_SECTION_PATTERNS = [
@@ -46,60 +52,46 @@ def _parse_simple_attribute(line:str) -> Tuple[str, str]:
     matches = ATTRIBUTE_PATTERNS[0].search(line)
     return SPECTRUM_ATTRIBUTE_MAPPING[matches.group(1)], _sanitize(matches.group(2))
 
-
 def _parse_composite_attribute(lines: List[str]) -> Tuple[str, str]:
-    ids, terms, values = [ATTRIBUTE_PATTERNS[1].search(x) for x in lines]
+    ids = []
+    terms = []
+    values = []
+    for line in lines:
+        matches = ATTRIBUTE_PATTERNS[1].search(line)
+        ids.append(matches.group(1))
+        terms.append(matches.group(2))
+        values.append(matches.group(3))
+    term = terms[0]
+    value = values[0] + COMPOSITE_VALUE_MAPPINGS[terms[1]][values[1]]
+    return SPECTRUM_ATTRIBUTE_MAPPING[term], _sanitize(value)
 
 
 def load_from_mzspeclib(filename: str) -> Generator[Spectrum, None, None]:
-    spectrum_id = None
-
     with open(filename, 'r', encoding='UTF-8') as file:
-        for line in file:
-            match = re.compile(r'<Spectrum=(\d+)>').search(line)
-            if match:
+        while line := file.readline():
+            if LIBRARY_SECTION_PATTERNS[5].search(line):
                 spectrum_attributes = {}
-                line = file.readline()
-
-            # number_match = re.compile(r'\[(\d+)\]').search(line)
-            # if number_match:
-            #     accessions = []
-            #     values = []
-            #     attr_number = int(number_match.group(1))
-            #     current_attr_number, accession, value = _parse_composite_attribute_line(line)
-            #     accessions.append(accession)
-            #     values.append(value)
-            #     continue
-
-            attr_match = re.compile(r'(MS:\d+\|[^=]+)=(.+)').search(line)
-            if attr_match:
-                tokens = line.split('=')
-                if len(tokens) == 2:
-                    term, value = tokens
-                    if term in SPECTRUM_ATTRIBUTE_MAPPING:
-                        spectrum_attributes[SPECTRUM_ATTRIBUTE_MAPPING[term]] = _sanitize(value)
+                while line := file.readline():
+                    if ATTRIBUTE_PATTERNS[1].search(line):
                         continue
-            
-            analyte_match = re.compile(r'<Analyte=(\d+)>').search(line)
-            if analyte_match:
-                accession = line.split('|')[0]
-                if accession == 'MS:1000868':
-                    spectrum_attributes['smiles'] = line.strip('MS:1000868|SMILES formula=')
-                    continue
-                
-            if '<Peaks>' in line:
-                num_peaks = int(spectrum_attributes['num peaks'])
-                mzs, intensities, comments = _read_peaks(file, num_peaks)
-                spectrum_attributes['peak_comments'] = comments
-                yield Spectrum(mzs, intensities, spectrum_attributes)
+                    elif ATTRIBUTE_PATTERNS[0].search(line):
+                        key, val = _parse_simple_attribute(line)
+                        spectrum_attributes[key] = val
+                        continue                       
+                    if '<Peaks>' in line:
+                        num_peaks = int(spectrum_attributes['num peaks'])
+                        lines = [file.readline() for i in range(num_peaks)]
+                        mzs, intensities, comments = _read_peaks(lines)
+                        spectrum_attributes['peak_comments'] = comments
+                        yield Spectrum(mzs, intensities, spectrum_attributes)
+                        break
 
-def _read_peaks(file, num_peaks):
+def _read_peaks(lines: List[str]):
     mzs = []
     intensities = []
     comments = {}
-    for i in range(num_peaks):
-        line = file.readline()
-        mz, intensity, comment = line.split('\t')
+    for x in lines:
+        mz, intensity, comment = x.split('\t')
 
         mzs.append(float(mz))
         intensities.append(float(intensity))
@@ -110,13 +102,3 @@ def _read_peaks(file, num_peaks):
 
 def _sanitize(value: str) -> str:
     return value.strip().strip('\n').strip('\t')
-
-def _parse_composite_attribute_line(line: str):
-    pattern = re.compile(r'\[(\d+)\](..:\d+\|[^=]+)=(.+)')
-    match = pattern.match(line)
-    if match:
-        attribute_number = int(match.group(1))
-        accession_term = match.group(2)
-        value = match.group(3)
-        return attribute_number, accession_term, value
-    return None
