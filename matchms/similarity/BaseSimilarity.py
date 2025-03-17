@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import List
+from typing import List, Union
 import numpy as np
 from sparsestack import StackedSparseArray
 from tqdm import tqdm
@@ -23,7 +23,7 @@ class BaseSimilarity:
     score_datatype = np.float64
 
     @abstractmethod
-    def pair(self, reference: SpectrumType, query: SpectrumType) -> float:
+    def pair(self, reference: SpectrumType, query: SpectrumType) -> np.ndarray:
         """Method to calculate the similarity for one input pair.
 
         Parameters
@@ -41,7 +41,7 @@ class BaseSimilarity:
 
     def matrix(self, references: List[SpectrumType], queries: List[SpectrumType],
                array_type: str = "numpy",
-               is_symmetric: bool = False) -> np.ndarray:
+               is_symmetric: bool = False) -> Union[np.ndarray, StackedSparseArray]:
         """Optional: Provide optimized method to calculate an np.array of similarity scores
         for given reference and query spectra. If no method is added here, the following naive
         implementation (i.e. a double for-loop) is used.
@@ -136,7 +136,7 @@ class BaseSimilarity:
             scores[i] = self.pair(references[row], queries[col])
         return scores
 
-    def keep_score(self, score):
+    def keep_score(self, score: np.ndarray):
         """In the `.matrix` method scores will be collected in a sparse way.
         Overwrite this method here if values other than `False` or `0` should
         not be stored in the final collection.

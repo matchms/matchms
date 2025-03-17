@@ -4,7 +4,7 @@ from sparsestack import StackedSparseArray
 from matchms.similarity.spectrum_similarity_functions import (
     number_matching, number_matching_ppm, number_matching_symmetric,
     number_matching_symmetric_ppm)
-from matchms.typing import SpectrumType
+from matchms.Spectrum import Spectrum
 from .BaseSimilarity import BaseSimilarity
 
 
@@ -70,7 +70,7 @@ class PrecursorMzMatch(BaseSimilarity):
         assert tolerance_type in ["Dalton", "ppm"], "Expected type from ['Dalton', 'ppm']"
         self.type = tolerance_type
 
-    def pair(self, reference: SpectrumType, query: SpectrumType) -> float:
+    def pair(self, reference: Spectrum, query: Spectrum) -> np.ndarray:
         """Compare precursor m/z between reference and query spectrum.
 
         Parameters
@@ -91,7 +91,7 @@ class PrecursorMzMatch(BaseSimilarity):
         score = abs(precursormz_ref - precursormz_query)/mean_mz <= self.tolerance
         return np.asarray(score, dtype=self.score_datatype)
 
-    def matrix(self, references: List[SpectrumType], queries: List[SpectrumType],
+    def matrix(self, references: List[Spectrum], queries: List[Spectrum],
                array_type: str = "numpy",
                is_symmetric: bool = False) -> np.ndarray:
         """Compare parent masses between all references and queries.

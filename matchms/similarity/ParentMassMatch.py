@@ -3,7 +3,7 @@ import numpy as np
 from sparsestack import StackedSparseArray
 from matchms.similarity.spectrum_similarity_functions import (
     number_matching, number_matching_symmetric)
-from matchms.typing import SpectrumType
+from matchms.Spectrum import Spectrum
 from .BaseSimilarity import BaseSimilarity
 
 
@@ -63,7 +63,7 @@ class ParentMassMatch(BaseSimilarity):
         """
         self.tolerance = tolerance
 
-    def pair(self, reference: SpectrumType, query: SpectrumType) -> float:
+    def pair(self, reference: Spectrum, query: Spectrum) -> np.ndarray:
         """Compare parent masses between reference and query spectrum.
 
         Parameters
@@ -80,7 +80,7 @@ class ParentMassMatch(BaseSimilarity):
         score = abs(parentmass_ref - parentmass_query) <= self.tolerance
         return np.asarray(score, dtype=self.score_datatype)
 
-    def matrix(self, references: List[SpectrumType], queries: List[SpectrumType],
+    def matrix(self, references: List[Spectrum], queries: List[Spectrum],
                array_type: str = "numpy",
                is_symmetric: bool = False) -> np.ndarray:
         """Compare parent masses between all references and queries.

@@ -80,7 +80,7 @@ class FingerprintSimilarity(BaseSimilarity):
         assert similarity_measure in ["cosine", "dice", "jaccard"], "Unknown similarity measure."
         self.similarity_measure = similarity_measure
 
-    def pair(self, reference: SpectrumType, query: SpectrumType) -> float:
+    def pair(self, reference: SpectrumType, query: SpectrumType) -> np.ndarray:
         """Calculate fingerprint based similarity score between two spectra.
 
         Parameters

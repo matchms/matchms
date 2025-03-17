@@ -4,7 +4,7 @@ import numpy as np
 from sparsestack import StackedSparseArray
 from matchms.similarity.spectrum_similarity_functions import (
     number_matching, number_matching_symmetric)
-from matchms.typing import SpectrumType
+from matchms.Spectrum import Spectrum
 from .BaseSimilarity import BaseSimilarity
 
 
@@ -86,7 +86,7 @@ class MetadataMatch(BaseSimilarity):
             "Expected type from ['equal_match', 'difference']"
         self.matching_type = matching_type
 
-    def pair(self, reference: SpectrumType, query: SpectrumType) -> float:
+    def pair(self, reference: Spectrum, query: Spectrum) -> np.ndarray:
         """Compare precursor m/z between reference and query spectrum.
 
         Parameters
@@ -112,7 +112,7 @@ class MetadataMatch(BaseSimilarity):
         logger.warning("Non-numerical entry not compatible with 'difference' method")
         return np.asarray(False, dtype=self.score_datatype)
 
-    def matrix(self, references: List[SpectrumType], queries: List[SpectrumType],
+    def matrix(self, references: List[Spectrum], queries: List[Spectrum],
                array_type: str = "numpy",
                is_symmetric: bool = False) -> np.ndarray:
         """Compare parent masses between all references and queries.
