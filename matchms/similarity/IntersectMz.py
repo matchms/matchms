@@ -1,6 +1,6 @@
 import numpy as np
-from .BaseSimilarity import BaseSimilarity
 from .. import Spectrum
+from .BaseSimilarity import BaseSimilarity
 
 
 class IntersectMz(BaseSimilarity):
