@@ -16,6 +16,11 @@ def add_compound_name(spectrum_in: SpectrumType, clone: Optional[bool] = True) -
         Input spectrum.
     clone:
         Optionally clone the Spectrum.
+
+    Returns
+    -------
+    Spectrum or None
+        Spectrum with added compound name, or `None` if not present.
     """
     if spectrum_in is None:
         return None

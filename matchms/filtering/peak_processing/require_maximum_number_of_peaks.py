@@ -19,6 +19,11 @@ def require_maximum_number_of_peaks(spectrum_in: Spectrum,
         to 'None'.
     clone:
         Optionally clone the Spectrum.
+
+    Returns
+    -------
+    Spectrum or None
+        Untouched Spectrum or 'None'.
     """
     if spectrum_in is None:
         return None

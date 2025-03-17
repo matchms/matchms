@@ -25,6 +25,11 @@ def interpret_pepmass(spectrum_in, clone: Optional[bool] = True) -> Optional[Spe
         Input spectrum.
     clone:
         Optionally clone the Spectrum.
+
+    Returns
+    -------
+    Spectrum or None
+        Spectrum with added pepmass, or `None` if not present.
     """
     if spectrum_in is None:
         return None

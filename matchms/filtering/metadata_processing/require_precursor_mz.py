@@ -24,6 +24,11 @@ def require_precursor_mz(spectrum_in: SpectrumType,
         Set the maximum value for precursor m/z.
     clone:
         Optionally clone the Spectrum.
+
+    Returns
+    -------
+    Spectrum or None
+        Spectrum with precursor_mz, or `None` if not present.
     """
     if spectrum_in is None:
         return None

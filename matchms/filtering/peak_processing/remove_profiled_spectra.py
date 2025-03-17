@@ -24,6 +24,11 @@ def remove_profiled_spectra(spectrum_in: Spectrum, mz_window=0.5, clone: Optiona
         the top k peaks. Default is 50 Da.
     clone:
         Optionally clone the Spectrum.
+
+    Returns
+    -------
+    Spectrum or None
+        None if the spectrum is likely profile data, else the input spectrum.
     """
     if spectrum_in is None:
         return None

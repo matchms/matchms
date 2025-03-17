@@ -25,6 +25,11 @@ def add_precursor_mz(spectrum_in, clone: Optional[bool] = True) -> Optional[Spec
         Input spectrum.
     clone:
         Optionally clone the Spectrum.
+
+    Returns
+    -------
+    Spectrum or None
+        Spectrum with added precursor mz metadata, or `None` if not present.
     """
     if spectrum_in is None:
         return None

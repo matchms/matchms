@@ -18,6 +18,11 @@ def derive_inchikey_from_inchi(spectrum_in: SpectrumType, clone: Optional[bool] 
         Input spectrum.
     clone:
         Optionally clone the Spectrum.
+
+    Returns
+    -------
+    Spectrum or None
+        Spectrum with added INCHIKEY, or `None` if not present.
     """
     if spectrum_in is None:
         return None

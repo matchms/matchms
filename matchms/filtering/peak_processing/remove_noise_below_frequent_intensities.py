@@ -30,6 +30,11 @@ def remove_noise_below_frequent_intensities(spectrum_in: Spectrum,
         The noise level is set to this intensity * noise_level_multiplier.
     clone:
         Optionally clone the Spectrum.
+
+    Returns
+    -------
+    Spectrum or None
+        Spectrum with removed intensities, or `None` if not present.
     """
     if spectrum_in is None:
         return None

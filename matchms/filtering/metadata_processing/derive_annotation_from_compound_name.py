@@ -39,6 +39,11 @@ def derive_annotation_from_compound_name(spectrum_in: Spectrum,
         Acceptable mass difference between query compound and pubchem result.
     clone:
         Optionally clone the Spectrum.
+
+    Returns
+    -------
+    Spectrum or None
+        Spectrum with added annotation, or `None` if not present.
     """
     if spectrum_in is None:
         return None

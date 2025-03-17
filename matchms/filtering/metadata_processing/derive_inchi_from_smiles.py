@@ -18,6 +18,11 @@ def derive_inchi_from_smiles(spectrum_in: SpectrumType, clone: Optional[bool] = 
         Input spectrum.
     clone:
         Optionally clone the Spectrum.
+
+    Returns
+    -------
+    Spectrum or None
+        Spectrum with added INCHI, or `None` if not present.
     """
     if spectrum_in is None:
         return None

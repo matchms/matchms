@@ -27,6 +27,11 @@ def require_minimum_number_of_high_peaks(spectrum_in: SpectrumType, no_peaks: in
         peaks that are searched. Default is 2.
     clone:
         Optionally clone the Spectrum.
+
+    Returns
+    -------
+    Spectrum or None
+        Untouched Spectrum or 'None'.
     """
     if spectrum_in is None:
         return None

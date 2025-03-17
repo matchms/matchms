@@ -25,6 +25,11 @@ def repair_parent_mass_match_smiles_wrapper(spectrum_in: SpectrumType,
         monoisotopic mass derived from the SMILES. Defaults to 0.2.
     clone:
         Optionally clone the Spectrum.
+
+    Returns
+    -------
+    Spectrum or None
+        Spectrum with repaired parent mass, or `None` if not present.
     """
     if spectrum_in is None:
         return None

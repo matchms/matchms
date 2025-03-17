@@ -21,6 +21,11 @@ def clean_adduct(spectrum_in, clone: Optional[bool] = True) -> Optional[Spectrum
         Matchms Spectrum object.
     clone:
         Optionally clone the Spectrum.
+
+    Returns
+    -------
+    Spectrum or None
+        Spectrum with cleaned adduct, or `None` if not present.
     """
     if spectrum_in is None:
         return None

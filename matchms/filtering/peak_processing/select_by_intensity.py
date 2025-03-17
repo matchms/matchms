@@ -19,6 +19,11 @@ def select_by_intensity(spectrum_in: SpectrumType, intensity_from: float = 10.0,
         Set upper threshold for peak intensity. Default is 200.0.
     clone:
         Optionally clone the Spectrum.
+
+    Returns
+    -------
+    Spectrum or None
+        Spectrum with peaks within the specified intensity range, or `None` if not present.
     """
     if spectrum_in is None:
         return None

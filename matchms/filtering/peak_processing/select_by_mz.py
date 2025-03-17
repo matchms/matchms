@@ -17,6 +17,11 @@ def select_by_mz(spectrum_in: SpectrumType, mz_from: float = 0.0,
         Set upper threshold for m/z peak positions. Default is 1000.0.
     clone:
         Optionally clone the Spectrum.
+
+    Returns
+    -------
+    Spectrum or None
+        Spectrum with peaks within the specified mz range, or `None` if not present.
     """
     if spectrum_in is None:
         return None

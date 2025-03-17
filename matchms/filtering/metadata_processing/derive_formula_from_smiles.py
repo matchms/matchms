@@ -19,6 +19,11 @@ def derive_formula_from_smiles(spectrum_in, overwrite=True, clone: Optional[bool
         If True, will overwrite the formula. Default is True.
     clone:
         Optionally clone the Spectrum.
+
+    Returns
+    -------
+    Spectrum or None
+        Spectrum with added molecular formular, or `None` if not present.
     """
 
     if spectrum_in is None:

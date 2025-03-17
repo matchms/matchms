@@ -20,6 +20,11 @@ def remove_peaks_outside_top_k(spectrum_in: SpectrumType, k: int = 6,
         the top k peaks. Default is 50 Da.
     clone:
         Optionally clone the Spectrum.
+
+    Returns
+    -------
+    Spectrum or None
+        Spectrum with removed peaks, or `None` if not present.
     """
     if spectrum_in is None:
         return None

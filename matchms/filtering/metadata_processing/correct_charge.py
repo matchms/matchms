@@ -20,6 +20,11 @@ def correct_charge(spectrum_in: SpectrumType, clone: Optional[bool] = True) -> O
         Input spectrum.
     clone:
         Optionally clone the Spectrum.
+
+    Returns
+    -------
+    Spectrum or None
+        Spectrum with corrected charge derived from ionmode, or `None` if not present.
     """
 
     if spectrum_in is None:

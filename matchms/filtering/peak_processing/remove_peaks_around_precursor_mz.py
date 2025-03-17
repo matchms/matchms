@@ -17,6 +17,11 @@ def remove_peaks_around_precursor_mz(spectrum_in: SpectrumType, mz_tolerance: fl
         within the precursor mz. Default is 17 Da.
     clone:
         Optionally clone the Spectrum.
+
+    Returns
+    -------
+    Spectrum or None
+        Spectrum with removed peaks, or `None` if not present.
     """
     if spectrum_in is None:
         return None

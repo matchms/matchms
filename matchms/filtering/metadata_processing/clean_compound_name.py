@@ -20,6 +20,11 @@ def clean_compound_name(spectrum_in: SpectrumType, clone: Optional[bool] = True)
         Matchms Spectrum object.
     clone:
         Optionally clone the Spectrum.
+
+    Returns
+    -------
+    Spectrum or None
+        Spectrum with cleaned compound name, or `None` if not present.
     """
     if spectrum_in is None:
         return None

@@ -29,6 +29,11 @@ def reduce_to_number_of_peaks(spectrum_in: SpectrumType, n_required: int = 0, n_
         Default is None.
     clone:
         Optionally clone the Spectrum.
+
+    Returns
+    -------
+    Spectrum or None
+        Spectrum with reduced lowest peaks, or `None` if not present.
     """
     def _set_maximum_number_of_peaks_to_keep():
         parent_mass = spectrum.get("parent_mass", None)

@@ -15,6 +15,11 @@ def repair_inchi_inchikey_smiles(spectrum_in: SpectrumType, clone: Optional[bool
         Input spectrum.
     clone:
         Optionally clone the Spectrum.
+
+    Returns
+    -------
+    Spectrum or None
+        Spectrum with repaired INCHI, INCHIKEY and SMILES, or `None` if not present.
     """
     if spectrum_in is None:
         return None

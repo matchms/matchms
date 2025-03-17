@@ -28,6 +28,11 @@ def add_fingerprint(spectrum_in: Optional[SpectrumType], fingerprint_type: str =
         Dimension or number of bits of generated fingerprint. Default is 2048.
     clone:
         Optionally clone the Spectrum.
+
+    Returns
+    -------
+    Spectrum or None
+        Spectrum with added fingerprint derived from SMILES or INCHI, or `None` if not present.
     """
     if spectrum_in is None:
         return None

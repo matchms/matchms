@@ -17,6 +17,11 @@ def harmonize_undefined_inchi(spectrum_in: SpectrumType, undefined: str = "",
         Default is ["", "N/A", "NA", "n/a"].
     clone:
         Optionally clone the Spectrum.
+
+    Returns
+    -------
+    Spectrum or None
+        Spectrum with undefined INCHI if not present or N/A, or `None` if not present.
     """
     if spectrum_in is None:
         return None

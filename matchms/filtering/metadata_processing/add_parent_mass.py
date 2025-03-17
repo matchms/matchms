@@ -44,6 +44,11 @@ def add_parent_mass(spectrum_in: Spectrum, estimate_from_adduct: bool = True,
         Adduct of the form [M+H]+, [M+H]2+, [M-H]- etc are assumed.
     clone:
         Optionally clone the Spectrum.
+
+    Returns
+    -------
+    Spectrum or None
+        Spectrum with added parent mass, or `None` if not present.
     """
     if spectrum_in is None:
         return None

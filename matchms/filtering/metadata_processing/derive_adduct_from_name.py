@@ -25,6 +25,11 @@ def derive_adduct_from_name(spectrum_in: Spectrum,
         Remove found adducts from compound name if set to True. Default is True.
     clone:
         Optionally clone the Spectrum.
+
+    Returns
+    -------
+    Spectrum or None
+        Spectrum with added adduct, or `None` if not present.
     """
     if spectrum_in is None:
         return None

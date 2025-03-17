@@ -19,6 +19,11 @@ def repair_parent_mass_from_smiles(spectrum_in: Spectrum,
         The input spectrum containing annotations to be checked and repaired.
     clone:
         Optionally clone the Spectrum.
+
+    Returns
+    -------
+    Spectrum or None
+        Spectrum with repaired parent mass, or `None` if not present.
     """
     if spectrum_in is None:
         return None

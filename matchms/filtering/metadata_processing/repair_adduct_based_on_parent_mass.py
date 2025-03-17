@@ -23,6 +23,11 @@ def repair_adduct_based_on_parent_mass(spectrum_in: Spectrum,
 
     clone:
         Optionally clone the Spectrum.
+
+    Returns
+    -------
+    Spectrum or None
+        Spectrum with repaired parent adduct, or `None` if not present.
     """
     if spectrum_in is None:
         return None

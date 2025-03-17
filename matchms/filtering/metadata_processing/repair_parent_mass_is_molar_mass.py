@@ -28,6 +28,11 @@ def repair_parent_mass_is_molar_mass(spectrum_in: Spectrum, mass_tolerance: floa
         monoisotopic mass derived from the SMILES.
     clone:
         Optionally clone the Spectrum.
+
+    Returns
+    -------
+    Spectrum or None
+        Spectrum with repaired parent mass, or `None` if not present.
     """
     if spectrum_in is None:
         return None

@@ -26,6 +26,11 @@ def repair_smiles_of_salts(spectrum_in,
         monoisotopic mass derived from the SMILES.
     clone:
         Optionally clone the Spectrum.
+
+    Returns
+    -------
+    Spectrum or None
+        Spectrum with repaired SMILES, or `None` if not present.
     """
     if spectrum_in is None:
         return None
