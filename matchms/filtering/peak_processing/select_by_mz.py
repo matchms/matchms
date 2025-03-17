@@ -4,7 +4,7 @@ from matchms.typing import SpectrumType
 
 
 def select_by_mz(spectrum_in: SpectrumType, mz_from: float = 0.0,
-                 mz_to: float = 1000.0, clone: Optional[bool] = True) -> SpectrumType:
+                 mz_to: float = 1000.0, clone: Optional[bool] = True) -> Optional[SpectrumType]:
     """Keep only peaks between mz_from and mz_to (keep if mz_from >= m/z >= mz_to).
 
     Parameters

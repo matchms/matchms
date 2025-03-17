@@ -8,7 +8,7 @@ from rdkit.Chem.rdMolDescriptors import CalcMolFormula
 logger = logging.getLogger("matchms")
 
 
-def derive_formula_from_smiles(spectrum_in, overwrite=True, clone: Optional[bool] = True):
+def derive_formula_from_smiles(spectrum_in, overwrite=True, clone: Optional[bool] = True) -> Optional[SpectrumType]:
     """Adds the molecule’s formula from SMILES.
 
     Parameters

@@ -4,7 +4,7 @@ from matchms.typing import SpectrumType
 
 
 def select_by_intensity(spectrum_in: SpectrumType, intensity_from: float = 10.0,
-                        intensity_to: float = 200.0, clone: Optional[bool] = True) -> SpectrumType:
+                        intensity_to: float = 200.0, clone: Optional[bool] = True) -> Optional[SpectrumType]:
     """Keep only peaks within set intensity range (keep if
     intensity_from >= intensity >= intensity_to). In most cases it is adviced to
     use :py:func:`select_by_relative_intensity` function instead.

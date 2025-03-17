@@ -19,7 +19,7 @@ logger = logging.getLogger("matchms")
 
 def derive_annotation_from_compound_name(spectrum_in: Spectrum,
                                          annotated_compound_names_file: Optional[str] = None,
-                                         mass_tolerance: float = 0.1, clone: Optional[bool] = True):
+                                         mass_tolerance: float = 0.1, clone: Optional[bool] = True) -> Optional[SpectrumType]:
     """Adds smiles, inchi, inchikey based on compound name by searching pubchem
 
     This filter is only run, if there is not yet a valid smiles or inchi in the metadata.

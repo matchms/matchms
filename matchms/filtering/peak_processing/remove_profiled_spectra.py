@@ -6,7 +6,7 @@ from matchms.Spectrum import Spectrum
 logger = logging.getLogger("matchms")
 
 
-def remove_profiled_spectra(spectrum_in: Spectrum, mz_window=0.5, clone: Optional[bool] = True):
+def remove_profiled_spectra(spectrum_in: Spectrum, mz_window=0.5, clone: Optional[bool] = True) -> Optional[SpectrumType]:
     """Remove profiled spectra
 
     Spectra are removed if within the mz_window of 0.5 of the highest peak at least 2 peaks next to the main peak are of

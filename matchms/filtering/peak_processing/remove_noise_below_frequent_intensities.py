@@ -9,7 +9,7 @@ logger = logging.getLogger("matchms")
 
 def remove_noise_below_frequent_intensities(spectrum_in: Spectrum,
                                             min_count_of_frequent_intensities: int = 5,
-                                            noise_level_multiplier: float = 2.0, clone: Optional[bool] = True):
+                                            noise_level_multiplier: float = 2.0, clone: Optional[bool] = True) -> Optional[SpectrumType]:
     """Removes noise if intensities exactly match frequently
 
     When no noise filtering has been applied to a spectrum, many spectra show repeating intensities.

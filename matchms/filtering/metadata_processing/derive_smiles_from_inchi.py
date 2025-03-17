@@ -9,7 +9,7 @@ from matchms.typing import SpectrumType
 logger = logging.getLogger("matchms")
 
 
-def derive_smiles_from_inchi(spectrum_in: SpectrumType, clone: Optional[bool] = True) -> SpectrumType:
+def derive_smiles_from_inchi(spectrum_in: SpectrumType, clone: Optional[bool] = True) -> Optional[SpectrumType]:
     """Find missing smiles and derive from Inchi where possible.
 
     Parameters

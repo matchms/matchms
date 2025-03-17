@@ -9,7 +9,7 @@ from .clean_adduct import _clean_adduct
 logger = logging.getLogger("matchms")
 
 
-def derive_ionmode(spectrum_in: Spectrum, clone: Optional[bool] = True) -> Spectrum:
+def derive_ionmode(spectrum_in: Spectrum, clone: Optional[bool] = True) -> Optional[SpectrumType]:
     """Derive missing ionmode based on adduct.
 
     Some input formates (e.g. MGF files) do not always provide a correct ionmode.

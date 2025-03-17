@@ -4,7 +4,7 @@ from matchms.typing import SpectrumType
 
 
 def select_by_relative_intensity(spectrum_in: SpectrumType, intensity_from: float = 0.0,
-                                 intensity_to: float = 1.0, clone: Optional[bool] = True) -> SpectrumType:
+                                 intensity_to: float = 1.0, clone: Optional[bool] = True) -> Optional[SpectrumType]:
     """Keep only peaks within set relative intensity range (keep if
     intensity_from >= intensity >= intensity_to).
 

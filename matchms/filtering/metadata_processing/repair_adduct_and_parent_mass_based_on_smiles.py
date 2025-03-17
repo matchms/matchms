@@ -13,7 +13,7 @@ logger = logging.getLogger("matchms")
 
 
 def repair_adduct_and_parent_mass_based_on_smiles(spectrum_in: Spectrum,
-                                                  mass_tolerance: float, clone: Optional[bool] = True):
+                                                  mass_tolerance: float, clone: Optional[bool] = True) -> Optional[SpectrumType]:
     """
     Corrects the adduct and parent mass of a spectrum based on its SMILES representation and the precursor m/z.
 

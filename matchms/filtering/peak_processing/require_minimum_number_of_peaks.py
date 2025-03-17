@@ -9,7 +9,7 @@ logger = logging.getLogger("matchms")
 
 def require_minimum_number_of_peaks(spectrum_in: SpectrumType,
                                     n_required: int = 10,
-                                    ratio_required: Optional[float] = None, clone: Optional[bool] = True) -> SpectrumType:
+                                    ratio_required: Optional[float] = None, clone: Optional[bool] = True) -> Optional[SpectrumType]:
     """Spectrum will be set to None when it has fewer peaks than required.
 
     Parameters

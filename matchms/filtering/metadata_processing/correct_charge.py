@@ -8,7 +8,7 @@ from matchms.typing import SpectrumType
 logger = logging.getLogger("matchms")
 
 
-def correct_charge(spectrum_in: SpectrumType, clone: Optional[bool] = True) -> SpectrumType:
+def correct_charge(spectrum_in: SpectrumType, clone: Optional[bool] = True) -> Optional[SpectrumType]:
     """Correct charge values based on given ionmode.
 
     For some spectra, the charge value is either undefined or inconsistent with its

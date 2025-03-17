@@ -9,7 +9,7 @@ logger = logging.getLogger("matchms")
 
 
 def require_minimum_number_of_high_peaks(spectrum_in: SpectrumType, no_peaks: int = 5,
-                                  intensity_percent: float = 2.0, clone: Optional[bool] = True) -> SpectrumType:
+                                  intensity_percent: float = 2.0, clone: Optional[bool] = True) -> Optional[SpectrumType]:
 
     """Returns None if the number of peaks with relative intensity
        above or equal to intensity_percent is less than no_peaks.

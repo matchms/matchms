@@ -4,7 +4,7 @@ from matchms.filtering.SpeciesString import SpeciesString
 from matchms.typing import SpectrumType
 
 
-def repair_inchi_inchikey_smiles(spectrum_in: SpectrumType, clone: Optional[bool] = True) -> SpectrumType:
+def repair_inchi_inchikey_smiles(spectrum_in: SpectrumType, clone: Optional[bool] = True) -> Optional[SpectrumType]:
     """Check if inchi, inchikey, and smiles entries seem correct. Detect and correct
     if any of those entries clearly belongs into one of the other two fields (e.g.
     inchikey found in inchi field).

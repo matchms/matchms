@@ -10,7 +10,7 @@ def require_precursor_mz(spectrum_in: SpectrumType,
                          minimum_accepted_mz: Optional[float] = 10.0,
                          maximum_mz: Optional[float] = None,
                          clone: Optional[bool] = True
-                         ) -> Union[SpectrumType, None]:
+                         ) -> Optional[SpectrumType]:
 
     """Returns None if there is no precursor_mz or if <= minimum_accepted_mz
 

@@ -98,7 +98,7 @@ def _add_retention(metadata: dict, target_key: str, accepted_keys: List[str]) ->
     return metadata
 
 
-def add_retention_time(spectrum_in: SpectrumType, clone: Optional[bool] = True) -> SpectrumType:
+def add_retention_time(spectrum_in: SpectrumType, clone: Optional[bool] = True) -> Optional[SpectrumType]:
     """Add retention time information to the 'retention_time' key as float.
     Negative values and those not convertible to a float result in 'retention_time'
     being 'None'.
@@ -124,7 +124,7 @@ def add_retention_time(spectrum_in: SpectrumType, clone: Optional[bool] = True) 
     return spectrum
 
 
-def add_retention_index(spectrum_in: SpectrumType, clone: Optional[bool] = True) -> SpectrumType:
+def add_retention_index(spectrum_in: SpectrumType, clone: Optional[bool] = True) -> Optional[SpectrumType]:
     """Add retention index into 'retention_index' key if present.
 
 

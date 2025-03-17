@@ -13,7 +13,7 @@ from matchms.filtering.metadata_processing.require_parent_mass_match_smiles impo
 logger = logging.getLogger("matchms")
 
 
-def repair_not_matching_annotation(spectrum_in: Spectrum, clone: Optional[bool] = True):
+def repair_not_matching_annotation(spectrum_in: Spectrum, clone: Optional[bool] = True) -> Optional[SpectrumType]:
     """
     Repairs mismatches in a spectrum's annotations related to SMILES, InChI, and InChIKey.
 

@@ -13,7 +13,7 @@ _accepted_types = (float, str, int)
 _accepted_missing_entries = ["", "N/A", "NA", "n/a"]
 
 
-def add_precursor_mz(spectrum_in, clone: Optional[bool] = True):
+def add_precursor_mz(spectrum_in, clone: Optional[bool] = True) -> Optional[SpectrumType]:
     """Add precursor_mz to correct field and make it a float.
 
     For missing precursor_mz field: check if there is "pepmass"" entry instead.

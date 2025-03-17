@@ -3,7 +3,7 @@ from matchms.typing import SpectrumType
 
 
 def harmonize_undefined_inchi(spectrum_in: SpectrumType, undefined: str = "",
-                              aliases: List[str] = None, clone: Optional[bool] = True) -> SpectrumType:
+                              aliases: List[str] = None, clone: Optional[bool] = True) -> Optional[SpectrumType]:
     """Replace all aliases for empty/undefined inchi entries by value of ``undefined`` argument.
 
     Parameters

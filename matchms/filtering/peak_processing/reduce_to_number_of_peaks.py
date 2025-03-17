@@ -10,7 +10,7 @@ logger = logging.getLogger("matchms")
 
 
 def reduce_to_number_of_peaks(spectrum_in: SpectrumType, n_required: int = 0, n_max: int = np.inf,
-                              ratio_desired: Optional[float] = None, clone: Optional[bool] = True) -> SpectrumType:
+                              ratio_desired: Optional[float] = None, clone: Optional[bool] = True) -> Optional[SpectrumType]:
     """Lowest intensity peaks will be removed when it has more peaks than desired.
 
     Parameters

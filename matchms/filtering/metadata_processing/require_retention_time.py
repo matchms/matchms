@@ -8,7 +8,7 @@ logger = logging.getLogger("matchms")
 
 def require_retention_time(spectrum_in: SpectrumType,
                            minimum_rt=None,
-                           maximum_rt=None, clone: Optional[bool] = True) -> Union[SpectrumType, None]:
+                           maximum_rt=None, clone: Optional[bool] = True) -> Optional[SpectrumType]:
     """
     This function checks if the input spectrum has a 'retention_time' in its metadata.
     If the input spectrum is None or doesn't have a 'retention_time', the function returns None.

@@ -9,7 +9,7 @@ logger = logging.getLogger("matchms")
 
 
 def repair_adduct_based_on_parent_mass(spectrum_in: Spectrum,
-                                       mass_tolerance: float, clone: Optional[bool] = True):
+                                       mass_tolerance: float, clone: Optional[bool] = True) -> Optional[SpectrumType]:
     """
     Corrects the adduct of a spectrum based on its parent_mass representation and the precursor m/z.
 

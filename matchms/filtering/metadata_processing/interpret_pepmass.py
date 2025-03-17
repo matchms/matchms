@@ -11,7 +11,7 @@ _accepted_types = (float, str, int)
 _accepted_missing_entries = ["", "N/A", "NA", "n/a"]
 
 
-def interpret_pepmass(spectrum_in, clone: Optional[bool] = True):
+def interpret_pepmass(spectrum_in, clone: Optional[bool] = True) -> Optional[SpectrumType]:
     """Reads pepmass field (if present) and adds values to correct field(s).
 
     The field "pepmass" or "PEPMASS" is often used to describe the precursor ion.

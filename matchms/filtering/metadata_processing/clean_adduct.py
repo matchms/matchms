@@ -11,7 +11,7 @@ from matchms.filtering.filter_utils.load_known_adducts import \
 logger = logging.getLogger("matchms")
 
 
-def clean_adduct(spectrum_in, clone: Optional[bool] = True):
+def clean_adduct(spectrum_in, clone: Optional[bool] = True) -> Optional[SpectrumType]:
     """Clean adduct and make it consistent in style.
     Will transform adduct strings of type 'M+H+' to '[M+H]+'.
 

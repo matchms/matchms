@@ -3,7 +3,7 @@ from matchms.Fragments import Fragments
 from matchms.typing import SpectrumType
 
 
-def remove_peaks_around_precursor_mz(spectrum_in: SpectrumType, mz_tolerance: float = 17, clone: Optional[bool] = True) -> SpectrumType:
+def remove_peaks_around_precursor_mz(spectrum_in: SpectrumType, mz_tolerance: float = 17, clone: Optional[bool] = True) -> Optional[SpectrumType]:
 
     """Remove peaks that are within mz_tolerance (in Da) of
        the precursor mz, exlcuding the precursor peak.
