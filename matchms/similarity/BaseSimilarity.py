@@ -48,15 +48,16 @@ class BaseSimilarity:
                 raise ValueError(f"Found unequal number of spectra {len(references)} and {len(queries)} while `is_symmetric` is True.")
 
             # Compute pairwise similarities
-            for i in range(len(references)):
+            for i, reference in enumerate(tqdm(references, "Calculating similarities")):
                 for j in range(i, len(queries)):  # Compute only upper triangle
-                    sim_matrix[i, j] = self.pair(references[i], queries[j])
+                    sim_matrix[i, j] = self.pair(reference, queries[j])
+                    # todo once Scores can handle symmetric compute don't store
                     sim_matrix[j, i] = sim_matrix[i, j]
         else:
             # Compute pairwise similarities
-            for i in range(len(references)):
-                for j in range(len(queries)):
-                    sim_matrix[i, j] = self.pair(references[i], queries[j])
+            for i, reference in enumerate(tqdm(references, "Calculating similarities")):
+                for j, query in enumerate(queries):
+                    sim_matrix[i, j] = self.pair(reference, query)
         return sim_matrix
 
     def old_matrix(self, references: List[SpectrumType], queries: List[SpectrumType],
