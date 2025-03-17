@@ -38,12 +38,15 @@ class BaseSimilarity:
         """
         raise NotImplementedError
 
-    def dense_matrix(self,
+    def matrix(self,
                      references: List[SpectrumType], queries: List[SpectrumType],
                      is_symmetric: bool = False
                      ) -> np.ndarray:
-        sim_matrix = np.zeros((len(references), len(queries)))
+        sim_matrix = np.zeros((len(references), len(queries)), dtype=self.score_datatype)
         if is_symmetric:
+            if len(references) != len(queries):
+                raise ValueError(f"Found unequal number of spectra {len(references)} and {len(queries)} while `is_symmetric` is True.")
+
             # Compute pairwise similarities
             for i in range(len(references)):
                 for j in range(i, len(queries)):  # Compute only upper triangle
@@ -56,7 +59,7 @@ class BaseSimilarity:
                     sim_matrix[i, j] = self.pair(references[i], queries[j])
         return sim_matrix
 
-    def matrix(self, references: List[SpectrumType], queries: List[SpectrumType],
+    def old_matrix(self, references: List[SpectrumType], queries: List[SpectrumType],
                is_symmetric: bool = False) -> np.ndarray:
         """Optional: Provide optimized method to calculate an np.array of similarity scores
         for given reference and query spectra. If no method is added here, the following naive
