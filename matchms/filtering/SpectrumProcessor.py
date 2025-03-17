@@ -153,7 +153,7 @@ class SpectrumProcessor:
         if processing_report is not None:
             processing_report.counter_number_processed += 1
         for filter_func in self.filters:
-            spectrum_out = filter_func(spectrum)
+            spectrum_out = filter_func(spectrum, clone=False)
             if processing_report is not None:
                 processing_report.add_to_report(spectrum, spectrum_out, filter_func.__name__)
             if spectrum_out is None:
@@ -229,7 +229,8 @@ class SpectrumProcessor:
         for s in tqdm(spectra, disable=(not progress_bar), desc="Processing spectra"):
             if s is None:
                 continue  # empty spectra will be discarded
-            processed_spectrum = self.process_spectrum(s, processing_report)
+            spectrum = s.clone()
+            processed_spectrum = self.process_spectrum(spectrum, processing_report)
             if processed_spectrum is not None:
                 processed_spectra.append(processed_spectrum)
 

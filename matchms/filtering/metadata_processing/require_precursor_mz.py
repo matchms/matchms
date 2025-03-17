@@ -8,7 +8,8 @@ logger = logging.getLogger("matchms")
 
 def require_precursor_mz(spectrum_in: SpectrumType,
                          minimum_accepted_mz: Optional[float] = 10.0,
-                         maximum_mz: Optional[float] = None
+                         maximum_mz: Optional[float] = None,
+                         clone: Optional[bool] = True
                          ) -> Union[SpectrumType, None]:
 
     """Returns None if there is no precursor_mz or if <= minimum_accepted_mz
@@ -25,7 +26,7 @@ def require_precursor_mz(spectrum_in: SpectrumType,
     if spectrum_in is None:
         return None
 
-    spectrum = spectrum_in.clone()
+    spectrum = spectrum_in.clone() if clone else spectrum_in
 
     precursor_mz = spectrum.get("precursor_mz", None)
     if precursor_mz is None:

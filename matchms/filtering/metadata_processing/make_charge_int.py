@@ -1,16 +1,18 @@
 import logging
+from typing import Optional
+
 from matchms.typing import SpectrumType
 
 
 logger = logging.getLogger("matchms")
 
 
-def make_charge_int(spectrum_in: SpectrumType) -> SpectrumType:
+def make_charge_int(spectrum_in: SpectrumType, clone: Optional[bool] = True) -> SpectrumType:
     """Convert charge field to integer (if possible)."""
     if spectrum_in is None:
         return None
 
-    spectrum = spectrum_in.clone()
+    spectrum = spectrum_in.clone() if clone else spectrum_in
 
     charge = spectrum.get("charge", None)
     charge_int = _convert_charge_to_int(charge)

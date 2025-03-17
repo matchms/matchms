@@ -19,7 +19,7 @@ logger = logging.getLogger("matchms")
 
 def derive_annotation_from_compound_name(spectrum_in: Spectrum,
                                          annotated_compound_names_file: Optional[str] = None,
-                                         mass_tolerance: float = 0.1):
+                                         mass_tolerance: float = 0.1, clone: Optional[bool] = True):
     """Adds smiles, inchi, inchikey based on compound name by searching pubchem
 
     This filter is only run, if there is not yet a valid smiles or inchi in the metadata.
@@ -40,7 +40,9 @@ def derive_annotation_from_compound_name(spectrum_in: Spectrum,
     """
     if spectrum_in is None:
         return None
-    spectrum = spectrum_in.clone()
+
+    spectrum = spectrum_in.clone() if clone else spectrum_in
+
     # Only run this function if it does not yet have a useful annotation
     if is_valid_inchi(spectrum.get("inchi")) or is_valid_smiles(spectrum.get("smiles")):
         return spectrum

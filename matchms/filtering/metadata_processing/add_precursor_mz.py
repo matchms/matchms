@@ -1,4 +1,6 @@
 import logging
+from typing import Optional
+
 from matchms.utils import get_first_common_element
 
 
@@ -11,7 +13,7 @@ _accepted_types = (float, str, int)
 _accepted_missing_entries = ["", "N/A", "NA", "n/a"]
 
 
-def add_precursor_mz(spectrum_in):
+def add_precursor_mz(spectrum_in, clone: Optional[bool] = True):
     """Add precursor_mz to correct field and make it a float.
 
     For missing precursor_mz field: check if there is "pepmass"" entry instead.
@@ -20,7 +22,7 @@ def add_precursor_mz(spectrum_in):
     if spectrum_in is None:
         return None
 
-    spectrum = spectrum_in.clone()
+    spectrum = spectrum_in.clone() if clone else spectrum_in
 
     metadata_updated = _add_precursor_mz_metadata(spectrum.metadata)
     spectrum.metadata = metadata_updated

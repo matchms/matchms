@@ -1,5 +1,7 @@
 import logging
 import re
+from typing import Optional
+
 from matchms.filtering.filter_utils.interpret_unknown_adduct import \
     get_charge_of_adduct
 from matchms.filtering.filter_utils.load_known_adducts import \
@@ -9,7 +11,7 @@ from matchms.filtering.filter_utils.load_known_adducts import \
 logger = logging.getLogger("matchms")
 
 
-def clean_adduct(spectrum_in):
+def clean_adduct(spectrum_in, clone: Optional[bool] = True):
     """Clean adduct and make it consistent in style.
     Will transform adduct strings of type 'M+H+' to '[M+H]+'.
 
@@ -23,7 +25,8 @@ def clean_adduct(spectrum_in):
     adduct = spectrum_in.get("adduct")
     if adduct is None:
         return spectrum_in
-    spectrum = spectrum_in.clone()
+
+    spectrum = spectrum_in.clone() if clone else spectrum_in
 
     cleaned_adduct = _clean_adduct(adduct, spectrum.get('charge'))
 

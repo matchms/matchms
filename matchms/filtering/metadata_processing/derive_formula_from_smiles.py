@@ -1,4 +1,6 @@
 import logging
+from typing import Optional
+
 from rdkit import Chem
 from rdkit.Chem.rdMolDescriptors import CalcMolFormula
 
@@ -6,10 +8,10 @@ from rdkit.Chem.rdMolDescriptors import CalcMolFormula
 logger = logging.getLogger("matchms")
 
 
-def derive_formula_from_smiles(spectrum_in, overwrite=True):
+def derive_formula_from_smiles(spectrum_in, overwrite=True, clone: Optional[bool] = True):
     if spectrum_in is None:
         return None
-    spectrum = spectrum_in.clone()
+    spectrum = spectrum_in.clone() if clone else spectrum_in
     if spectrum.get("formula") is not None:
         if overwrite is False:
             return spectrum

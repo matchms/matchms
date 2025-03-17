@@ -11,7 +11,7 @@ logger = logging.getLogger("matchms")
 
 
 def add_fingerprint(spectrum_in: Optional[SpectrumType], fingerprint_type: str = "daylight",
-                    nbits: int = 2048) -> Optional[SpectrumType]:
+                    nbits: int = 2048, clone: Optional[bool] = True) -> Optional[SpectrumType]:
     """Add molecular finterprint to spectrum.
 
     If smiles or inchi present in metadata, derive a molecular finterprint and
@@ -30,7 +30,7 @@ def add_fingerprint(spectrum_in: Optional[SpectrumType], fingerprint_type: str =
     if spectrum_in is None:
         return None
 
-    spectrum = spectrum_in.clone()
+    spectrum = spectrum_in.clone() if clone else spectrum_in
 
     # First try to get fingerprint from smiles
     if spectrum.get("smiles", None):

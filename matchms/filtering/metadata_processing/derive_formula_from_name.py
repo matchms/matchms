@@ -1,5 +1,7 @@
 import logging
 import re
+from typing import Optional
+
 from matchms.typing import SpectrumType
 
 
@@ -7,7 +9,7 @@ logger = logging.getLogger("matchms")
 
 
 def derive_formula_from_name(spectrum_in: SpectrumType,
-                             remove_formula_from_name: bool = True) -> SpectrumType:
+                             remove_formula_from_name: bool = True, clone: Optional[bool] = True) -> SpectrumType:
     """Detect and remove misplaced formula in compound name and add to metadata.
 
     Method to find misplaced formulas in compound name based on regular expression.
@@ -24,7 +26,7 @@ def derive_formula_from_name(spectrum_in: SpectrumType,
     if spectrum_in is None:
         return None
 
-    spectrum = spectrum_in.clone()
+    spectrum = spectrum_in.clone() if clone else spectrum_in
 
     if spectrum.get("compound_name", None) is not None:
         name = spectrum.get("compound_name")

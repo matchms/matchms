@@ -13,11 +13,11 @@ logger = logging.getLogger("matchms")
 
 
 def repair_parent_mass_match_smiles_wrapper(spectrum_in: SpectrumType,
-                                            mass_tolerance: float = 0.2) -> Optional[SpectrumType]:
+                                            mass_tolerance: float = 0.2, clone: Optional[bool] = True) -> Optional[SpectrumType]:
     """Wrapper function for repairing a mismatch between parent mass and smiles mass"""
     if spectrum_in is None:
         return None
-    spectrum = spectrum_in.clone()
+    spectrum = spectrum_in.clone() if clone else spectrum_in
 
     filters_to_apply = [repair_smiles_of_salts,
                         repair_parent_mass_is_molar_mass,

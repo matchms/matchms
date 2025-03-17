@@ -1,4 +1,6 @@
 import logging
+from typing import Optional
+
 from matchms import Spectrum
 from matchms.filtering.filter_utils.get_neutral_mass_from_smiles import \
     get_monoisotopic_neutral_mass
@@ -11,7 +13,7 @@ logger = logging.getLogger("matchms")
 
 
 def repair_adduct_and_parent_mass_based_on_smiles(spectrum_in: Spectrum,
-                                                  mass_tolerance: float):
+                                                  mass_tolerance: float, clone: Optional[bool] = True):
     """
     Corrects the adduct and parent mass of a spectrum based on its SMILES representation and the precursor m/z.
 
@@ -31,7 +33,7 @@ def repair_adduct_and_parent_mass_based_on_smiles(spectrum_in: Spectrum,
     """
     if spectrum_in is None:
         return None
-    changed_spectrum = spectrum_in.clone()
+    changed_spectrum = spectrum_in.clone() if clone else spectrum_in
     smiles_mass = get_monoisotopic_neutral_mass(changed_spectrum.get("smiles"))
     if smiles_mass is None:
         return spectrum_in

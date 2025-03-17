@@ -19,7 +19,7 @@ _accepted_missing_entries = ["", "N/A", "NA", "n/a"]
 
 def add_parent_mass(spectrum_in: Spectrum, estimate_from_adduct: bool = True,
                     overwrite_existing_entry: bool = False,
-                    estimate_from_charge: bool = True) -> Optional[Spectrum]:
+                    estimate_from_charge: bool = True, clone: Optional[bool] = True) -> Optional[Spectrum]:
     """Add estimated parent mass to metadata (if not present yet).
 
     Method to calculate the parent mass from given precursor m/z together
@@ -46,7 +46,7 @@ def add_parent_mass(spectrum_in: Spectrum, estimate_from_adduct: bool = True,
     if spectrum_in is None:
         return None
 
-    spectrum = spectrum_in.clone()
+    spectrum = spectrum_in.clone() if clone else spectrum_in
 
     parent_mass = _get_parent_mass(spectrum.metadata)
     if parent_mass is not None and not overwrite_existing_entry:

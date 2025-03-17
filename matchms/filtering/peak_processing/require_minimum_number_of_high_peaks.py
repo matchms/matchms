@@ -1,4 +1,6 @@
 import logging
+from typing import Optional
+
 from matchms.typing import SpectrumType
 from .select_by_relative_intensity import select_by_relative_intensity
 
@@ -7,7 +9,7 @@ logger = logging.getLogger("matchms")
 
 
 def require_minimum_number_of_high_peaks(spectrum_in: SpectrumType, no_peaks: int = 5,
-                                  intensity_percent: float = 2.0) -> SpectrumType:
+                                  intensity_percent: float = 2.0, clone: Optional[bool] = True) -> SpectrumType:
 
     """Returns None if the number of peaks with relative intensity
        above or equal to intensity_percent is less than no_peaks.
@@ -27,7 +29,7 @@ def require_minimum_number_of_high_peaks(spectrum_in: SpectrumType, no_peaks: in
     if spectrum_in is None:
         return None
 
-    spectrum = spectrum_in.clone()
+    spectrum = spectrum_in.clone() if clone else spectrum_in
 
     assert no_peaks >= 1, "no_peaks must be a positive nonzero integer."
     assert 0 <= intensity_percent <= 100, "intensity_percent must be a scalar between 0-100."

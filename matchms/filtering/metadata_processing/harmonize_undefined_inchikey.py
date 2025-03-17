@@ -1,9 +1,9 @@
-from typing import List
+from typing import List, Optional
 from matchms.typing import SpectrumType
 
 
 def harmonize_undefined_inchikey(spectrum_in: SpectrumType, undefined: str = "",
-                                 aliases: List[str] = None) -> SpectrumType:
+                                 aliases: List[str] = None, clone: Optional[bool] = True) -> SpectrumType:
     """Replace all aliases for empty/undefined inchikey entries by ``undefined``.
 
     Parameters
@@ -17,7 +17,7 @@ def harmonize_undefined_inchikey(spectrum_in: SpectrumType, undefined: str = "",
     if spectrum_in is None:
         return None
 
-    spectrum = spectrum_in.clone()
+    spectrum = spectrum_in.clone() if clone else spectrum_in
 
     if aliases is None:
         aliases = [

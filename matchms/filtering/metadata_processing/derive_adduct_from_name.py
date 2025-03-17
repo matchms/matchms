@@ -12,7 +12,7 @@ logger = logging.getLogger("matchms")
 
 
 def derive_adduct_from_name(spectrum_in: Spectrum,
-                            remove_adduct_from_name: bool = True) -> Optional[Spectrum]:
+                            remove_adduct_from_name: bool = True, clone: Optional[bool] = True) -> Optional[Spectrum]:
     """Find adduct in compound name and add to metadata (if not present yet).
 
     Method to interpret the given compound name to find the adduct.
@@ -27,7 +27,7 @@ def derive_adduct_from_name(spectrum_in: Spectrum,
     if spectrum_in is None:
         return None
 
-    spectrum = spectrum_in.clone()
+    spectrum = spectrum_in.clone() if clone else spectrum_in
 
     compound_name = spectrum.get("compound_name", None)
     if compound_name is None:

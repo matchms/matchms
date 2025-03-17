@@ -1,4 +1,6 @@
 import logging
+from typing import Optional
+
 from matchms import Spectrum
 from ..filter_utils.load_known_adducts import load_known_adducts
 
@@ -7,7 +9,7 @@ logger = logging.getLogger("matchms")
 
 
 def repair_adduct_based_on_parent_mass(spectrum_in: Spectrum,
-                                       mass_tolerance: float):
+                                       mass_tolerance: float, clone: Optional[bool] = True):
     """
     Corrects the adduct of a spectrum based on its parent_mass representation and the precursor m/z.
 

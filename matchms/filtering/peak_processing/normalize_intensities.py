@@ -7,13 +7,13 @@ from ...Fragments import Fragments
 logger = logging.getLogger("matchms")
 
 
-def normalize_intensities(spectrum_in: SpectrumType) -> SpectrumType:
+def normalize_intensities(spectrum_in: SpectrumType, clone: Optional[bool] = True) -> SpectrumType:
     """Normalize intensities of peaks to unit height."""
 
     if spectrum_in is None:
         return None
 
-    spectrum = spectrum_in.clone()
+    spectrum = spectrum_in.clone() if clone else spectrum_in
 
     if len(spectrum.peaks) == 0:
         return spectrum

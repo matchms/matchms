@@ -1,5 +1,7 @@
 import logging
 import re
+from typing import Optional
+
 import numpy as np
 from .make_charge_int import _convert_charge_to_int
 
@@ -9,7 +11,7 @@ _accepted_types = (float, str, int)
 _accepted_missing_entries = ["", "N/A", "NA", "n/a"]
 
 
-def interpret_pepmass(spectrum_in):
+def interpret_pepmass(spectrum_in, clone: Optional[bool] = True):
     """Reads pepmass field (if present) and adds values to correct field(s).
 
     The field "pepmass" or "PEPMASS" is often used to describe the precursor ion.
@@ -20,7 +22,7 @@ def interpret_pepmass(spectrum_in):
     if spectrum_in is None:
         return None
 
-    spectrum = spectrum_in.clone()
+    spectrum = spectrum_in.clone() if clone else spectrum_in
 
     metadata_updated = _interpret_pepmass_metadata(spectrum.metadata)
     spectrum.metadata = metadata_updated
@@ -76,7 +78,7 @@ def _get_mz_intensity_charge(pepmass):
                 try:
                     pepmass = float(pepmass)
                 except ValueError:
-                    return None, None, None 
+                    return None, None, None
         length = len(pepmass)
         values = [None, None, None]
         for i in range(length):
