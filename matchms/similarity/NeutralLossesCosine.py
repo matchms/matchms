@@ -1,5 +1,4 @@
 import logging
-from typing import Tuple
 import numpy as np
 from matchms.filtering.metadata_processing.add_precursor_mz import \
     _convert_precursor_mz
