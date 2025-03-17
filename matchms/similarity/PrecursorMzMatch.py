@@ -92,8 +92,7 @@ class PrecursorMzMatch(BaseSimilarity):
         return np.asarray(score, dtype=self.score_datatype)
 
     def matrix(self, references: List[Spectrum], queries: List[Spectrum],
-               array_type: str = "numpy",
-               is_symmetric: bool = False) -> np.ndarray:
+               is_symmetric: bool = False) -> StackedSparseArray:
         """Compare parent masses between all references and queries.
 
         Parameters
@@ -102,9 +101,6 @@ class PrecursorMzMatch(BaseSimilarity):
             List/array of reference spectra.
         queries
             List/array of Single query spectra.
-        array_type
-            Specify the output array type. Can be "numpy" or "sparse".
-            Default is "numpy" and will return a numpy array. "sparse" will return a COO-sparse array.
         is_symmetric
             Set to True when *references* and *queries* are identical (as for instance for an all-vs-all
             comparison). By using the fact that score[i,j] = score[j,i] the calculation will be about
@@ -133,12 +129,7 @@ class PrecursorMzMatch(BaseSimilarity):
         else:
             rows, cols, scores = number_matching_ppm(precursors_ref, precursors_query,
                                                      self.tolerance)
-        if array_type == "numpy":
-            scores_array = np.zeros((len(precursors_ref), len(precursors_query)))
-            scores_array[rows, cols] = scores.astype(self.score_datatype)
-            return scores_array
-        if array_type == "sparse":
-            scores_array = StackedSparseArray(len(precursors_ref), len(precursors_query))
-            scores_array.add_sparse_data(rows, cols, scores.astype(self.score_datatype), "")
-            return scores_array
-        return ValueError("`array_type` can only be 'numpy' or 'sparse'.")
+
+        scores_array = np.zeros((len(precursors_ref), len(precursors_query)))
+        scores_array[rows, cols] = scores.astype(self.score_datatype)
+        return scores_array

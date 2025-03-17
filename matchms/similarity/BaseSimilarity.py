@@ -1,7 +1,6 @@
 from abc import abstractmethod
-from typing import List, Union
+from typing import List
 import numpy as np
-from sparsestack import StackedSparseArray
 from tqdm import tqdm
 from matchms.typing import SpectrumType
 
@@ -58,8 +57,7 @@ class BaseSimilarity:
         return sim_matrix
 
     def matrix(self, references: List[SpectrumType], queries: List[SpectrumType],
-               array_type: str = "numpy",
-               is_symmetric: bool = False) -> Union[np.ndarray, StackedSparseArray]:
+               is_symmetric: bool = False) -> np.ndarray:
         """Optional: Provide optimized method to calculate an np.array of similarity scores
         for given reference and query spectra. If no method is added here, the following naive
         implementation (i.e. a double for-loop) is used.
@@ -70,9 +68,6 @@ class BaseSimilarity:
             List of reference objects
         queries
             List of query objects
-        array_type
-            Specify the output array type. Can be "numpy" or "sparse".
-            Default is "numpy" and will return a numpy array. "sparse" will return a COO-sparse array.
         is_symmetric
             Set to True when *references* and *queries* are identical (as for instance for an all-vs-all
             comparison). By using the fact that score[i,j] = score[j,i] the calculation will be about
@@ -108,16 +103,10 @@ class BaseSimilarity:
         idx_row = np.array(idx_row, dtype=np.int_)
         idx_col = np.array(idx_col, dtype=np.int_)
         scores_data = np.array(scores, dtype=self.score_datatype)
-        # TODO: make StackedSpareseArray the default and add fixed function to output different formats (with code below)
-        if array_type == "numpy":
-            scores_array = np.zeros(shape=(n_rows, n_cols), dtype=self.score_datatype)
-            scores_array[idx_row, idx_col] = scores_data.reshape(-1)
-            return scores_array
-        if array_type == "sparse":
-            scores_array = StackedSparseArray(n_rows, n_cols)
-            scores_array.add_sparse_data(idx_row, idx_col, scores_data, "")
-            return scores_array
-        raise ValueError("array_type must be 'numpy' or 'sparse'.")
+
+        scores_array = np.zeros(shape=(n_rows, n_cols), dtype=self.score_datatype)
+        scores_array[idx_row, idx_col] = scores_data.reshape(-1)
+        return scores_array
 
     def sparse_array(self, references: List[SpectrumType], queries: List[SpectrumType],
                      idx_row, idx_col, is_symmetric: bool = False):

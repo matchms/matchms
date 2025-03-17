@@ -127,7 +127,6 @@ class Scores:
 
     def calculate(self, similarity_function: BaseSimilarity,
                   name: str = None,
-                  array_type: str = "numpy",
                   join_type="left") -> Scores:
         """
         Calculate the similarity between all reference objects vs all query objects using
@@ -142,8 +141,6 @@ class Scores:
             Function which accepts a reference + query object and returns a score or tuple of scores
         name
             Label of the new scores layer. If None, the name of the similarity_function class will be used.
-        array_type
-            Specify the type of array to store and compute the scores. Choose from "numpy" or "sparse".
         join_type
             Choose from left, right, outer, inner to specify the merge type.
         """
@@ -175,7 +172,6 @@ class Scores:
         else:
             new_scores = similarity_function.matrix(self.references,
                                                     self.queries,
-                                                    array_type=array_type,
                                                     is_symmetric=self.is_symmetric)
             if isinstance(new_scores, np.ndarray):
                 self._scores.add_dense_matrix(new_scores, name, join_type=join_type)

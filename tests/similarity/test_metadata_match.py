@@ -80,13 +80,3 @@ def test_metadata_match_numerical(spectra, tolerance, expected):
     scores = calculate_scores(references, queries, similarity_score)
     assert np.all(scores.scores.to_array().tolist() == expected), "Expected different scores."
 
-
-def test_metadata_match_invalid_array_type(spectra):
-    """Test value error if array_type is not 'numpy' or 'sparse' in metadata matching."""
-    references = spectra[:2]
-    queries = spectra[2:]
-
-    similarity_score = MetadataMatch(field="instrument_type")
-
-    with pytest.raises(ValueError, match="array_type must be 'numpy' or 'sparse'."):
-        calculate_scores(references, queries, similarity_score, array_type = "scipy")
