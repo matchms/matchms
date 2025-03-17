@@ -10,7 +10,15 @@ logger = logging.getLogger("matchms")
 
 
 def derive_inchikey_from_inchi(spectrum_in: SpectrumType, clone: Optional[bool] = True) -> SpectrumType:
-    """Find missing InchiKey and derive from Inchi where possible."""
+    """Find missing InchiKey and derive from Inchi where possible.
+
+    Parameters
+    ----------
+    spectrum_in:
+        Input spectrum.
+    clone:
+        Optionally clone the Spectrum.
+    """
     if spectrum_in is None:
         return None
 

@@ -13,6 +13,13 @@ def clean_compound_name(spectrum_in: SpectrumType, clone: Optional[bool] = True)
 
     A list of frequently seen name additions that do not belong to the compound
     name will be removed.
+
+    Parameters
+    ----------
+    spectrum_in:
+        Matchms Spectrum object.
+    clone:
+        Optionally clone the Spectrum.
     """
     if spectrum_in is None:
         return None

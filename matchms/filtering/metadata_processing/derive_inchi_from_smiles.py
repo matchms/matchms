@@ -10,7 +10,15 @@ logger = logging.getLogger("matchms")
 
 
 def derive_inchi_from_smiles(spectrum_in: SpectrumType, clone: Optional[bool] = True) -> SpectrumType:
-    """Find missing Inchi and derive from smiles where possible."""
+    """Find missing Inchi and derive from smiles where possible.
+
+    Parameters
+    ----------
+    spectrum_in:
+        Input spectrum.
+    clone:
+        Optionally clone the Spectrum.
+    """
     if spectrum_in is None:
         return None
 

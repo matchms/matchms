@@ -18,6 +18,16 @@ def repair_parent_mass_is_molar_mass(spectrum_in: Spectrum, mass_tolerance: floa
 
     The molar mass is an average mass based on the average of all common isotopes and will therefore differ from what
     is measured in mass spectrometry.
+
+    Parameters:
+    ----------
+    spectrum_in : Spectrum
+        The input spectrum containing annotations to be checked and repaired.
+    mass_tolerance:
+        Maximum allowed mass difference between the calculated parent mass and the neutral
+        monoisotopic mass derived from the SMILES.
+    clone:
+        Optionally clone the Spectrum.
     """
     if spectrum_in is None:
         return None

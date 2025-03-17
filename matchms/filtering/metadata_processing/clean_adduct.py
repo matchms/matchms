@@ -17,8 +17,10 @@ def clean_adduct(spectrum_in, clone: Optional[bool] = True):
 
     Parameters
     ----------
-    spectrum_in
+    spectrum_in:
         Matchms Spectrum object.
+    clone:
+        Optionally clone the Spectrum.
     """
     if spectrum_in is None:
         return None

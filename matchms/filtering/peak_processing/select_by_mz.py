@@ -9,10 +9,14 @@ def select_by_mz(spectrum_in: SpectrumType, mz_from: float = 0.0,
 
     Parameters
     ----------
+    spectrum_in:
+        Input spectrum.
     mz_from:
         Set lower threshold for m/z peak positions. Default is 0.0.
     mz_to:
         Set upper threshold for m/z peak positions. Default is 1000.0.
+    clone:
+        Optionally clone the Spectrum.
     """
     if spectrum_in is None:
         return None

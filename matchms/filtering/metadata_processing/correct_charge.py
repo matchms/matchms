@@ -16,8 +16,10 @@ def correct_charge(spectrum_in: SpectrumType, clone: Optional[bool] = True) -> S
 
     Parameters
     ----------
-    spectrum_in
+    spectrum_in:
         Input spectrum.
+    clone:
+        Optionally clone the Spectrum.
     """
 
     if spectrum_in is None:

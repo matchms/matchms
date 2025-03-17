@@ -18,6 +18,8 @@ def remove_peaks_outside_top_k(spectrum_in: SpectrumType, k: int = 6,
     mz_window:
         Window of mz values (in Da) that are allowed to lie within
         the top k peaks. Default is 50 Da.
+    clone:
+        Optionally clone the Spectrum.
     """
     if spectrum_in is None:
         return None

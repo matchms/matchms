@@ -22,6 +22,9 @@ def require_correct_ionmode(spectrum_in: SpectrumType,
         Desired ion mode ('positive', 'negative', or 'both'). If not one of these,
         a `ValueError` is raised.
 
+    clone:
+        Optionally clone the Spectrum.
+
     Returns
     -------
     Spectrum or None

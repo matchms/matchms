@@ -31,17 +31,19 @@ def add_parent_mass(spectrum_in: Spectrum, estimate_from_adduct: bool = True,
 
     Parameters
     ----------
-    spectrum_in
+    spectrum_in:
         Input spectrum.
-    estimate_from_adduct
+    estimate_from_adduct:
         When set to True, use adduct to estimate actual molecular mass ("parent mass").
         Default is True. Switches back to charge-based estimate if adduct does not match
         a known adduct.
-    overwrite_existing_entry
+    overwrite_existing_entry:
         Default is False. If set to True, a newly computed value will replace existing ones.
-    estimate_from_charge
+    estimate_from_charge:
         Default is True. If set to True, the charge will be used to estimate the parent mass.
         Adduct of the form [M+H]+, [M+H]2+, [M-H]- etc are assumed.
+    clone:
+        Optionally clone the Spectrum.
     """
     if spectrum_in is None:
         return None

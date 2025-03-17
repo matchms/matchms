@@ -22,6 +22,8 @@ def derive_formula_from_name(spectrum_in: SpectrumType,
         Input spectrum.
     remove_formula_from_name:
         Remove found formula from compound name if set to True. Default is True.
+    clone:
+        Optionally clone the Spectrum.
     """
     if spectrum_in is None:
         return None

@@ -105,8 +105,10 @@ def add_retention_time(spectrum_in: SpectrumType, clone: Optional[bool] = True) 
 
     Parameters
     ----------
-    spectrum
+    spectrum_in:
         Spectrum with retention time information.
+    clone:
+        Optionally clone the Spectrum.
 
     Returns
     -------
@@ -128,8 +130,10 @@ def add_retention_index(spectrum_in: SpectrumType, clone: Optional[bool] = True)
 
     Parameters
     ----------
-    spectrum
+    spectrum_in:
         Spectrum with RI information.
+    clone:
+        Optionally clone the Spectrum.
     Returns
     -------
     Spectrum with RI info stored under 'retention_index'.

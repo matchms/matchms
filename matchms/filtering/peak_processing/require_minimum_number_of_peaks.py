@@ -22,7 +22,8 @@ def require_minimum_number_of_peaks(spectrum_in: SpectrumType,
     ratio_required:
         Set desired ratio between minimum number of peaks and parent mass.
         Default is None.
-
+    clone:
+        Optionally clone the Spectrum.
     """
     if spectrum_in is None:
         return None

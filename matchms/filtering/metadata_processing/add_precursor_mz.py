@@ -18,6 +18,13 @@ def add_precursor_mz(spectrum_in, clone: Optional[bool] = True):
 
     For missing precursor_mz field: check if there is "pepmass"" entry instead.
     For string parsed as precursor_mz: convert to float.
+
+    Parameters
+    ----------
+    spectrum_in:
+        Input spectrum.
+    clone:
+        Optionally clone the Spectrum.
     """
     if spectrum_in is None:
         return None

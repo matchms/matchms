@@ -21,13 +21,15 @@ def remove_noise_below_frequent_intensities(spectrum_in: Spectrum,
 
     Parameters
     ----------
-    spectrum
+    spectrum_in:
         Input spectrum.
     min_count_of_frequent_intensities:
         Minimum number of repeating intensities.
     noise_level_multiplier:
         From all intensities that repeat more than min_count_of_frequent_intensities the highest is selected.
-    The noise level is set to this intensity * noise_level_multiplier.
+        The noise level is set to this intensity * noise_level_multiplier.
+    clone:
+        Optionally clone the Spectrum.
     """
     if spectrum_in is None:
         return None

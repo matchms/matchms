@@ -15,6 +15,8 @@ def remove_peaks_around_precursor_mz(spectrum_in: SpectrumType, mz_tolerance: fl
     mz_tolerance:
         Tolerance of mz values that are not allowed to lie
         within the precursor mz. Default is 17 Da.
+    clone:
+        Optionally clone the Spectrum.
     """
     if spectrum_in is None:
         return None

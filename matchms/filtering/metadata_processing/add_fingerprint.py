@@ -26,6 +26,8 @@ def add_fingerprint(spectrum_in: Optional[SpectrumType], fingerprint_type: str =
         are "daylight", "morgan1", "morgan2", "morgan3". Default is "daylight".
     nbits:
         Dimension or number of bits of generated fingerprint. Default is 2048.
+    clone:
+        Optionally clone the Spectrum.
     """
     if spectrum_in is None:
         return None

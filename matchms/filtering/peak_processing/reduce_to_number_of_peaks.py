@@ -15,7 +15,7 @@ def reduce_to_number_of_peaks(spectrum_in: SpectrumType, n_required: int = 0, n_
 
     Parameters
     ----------
-    spectrum_in
+    spectrum_in:
         Input spectrum.
     n_required:
         Number of minimum required peaks. Spectra with fewer peaks will be set
@@ -27,6 +27,8 @@ def reduce_to_number_of_peaks(spectrum_in: SpectrumType, n_required: int = 0, n_
         For spectra without parent mass (e.g. GCMS spectra) this will raise an
         error when ratio_desired is used.
         Default is None.
+    clone:
+        Optionally clone the Spectrum.
     """
     def _set_maximum_number_of_peaks_to_keep():
         parent_mass = spectrum.get("parent_mass", None)

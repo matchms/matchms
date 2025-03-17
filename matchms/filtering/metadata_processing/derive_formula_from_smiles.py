@@ -9,6 +9,18 @@ logger = logging.getLogger("matchms")
 
 
 def derive_formula_from_smiles(spectrum_in, overwrite=True, clone: Optional[bool] = True):
+    """Adds the molecule’s formula from SMILES.
+
+    Parameters
+    ----------
+    spectrum_in:
+        Input spectrum.
+    overwrite:
+        If True, will overwrite the formula. Default is True.
+    clone:
+        Optionally clone the Spectrum.
+    """
+
     if spectrum_in is None:
         return None
     spectrum = spectrum_in.clone() if clone else spectrum_in

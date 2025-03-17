@@ -8,7 +8,15 @@ logger = logging.getLogger("matchms")
 
 
 def add_compound_name(spectrum_in: SpectrumType, clone: Optional[bool] = True) -> SpectrumType:
-    """Add compound_name to correct field: "compound_name" in metadata."""
+    """Add compound_name to correct field: "compound_name" in metadata.
+
+    Parameters
+    ----------
+    spectrum_in:
+        Input spectrum.
+    clone:
+        Optionally clone the Spectrum.
+    """
     if spectrum_in is None:
         return None
 

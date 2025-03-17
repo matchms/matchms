@@ -20,6 +20,9 @@ def repair_adduct_based_on_parent_mass(spectrum_in: Spectrum,
 
     mass_tolerance : float
         Maximum allowed mass difference between the parent mass and the parent mass based on the adduct.
+
+    clone:
+        Optionally clone the Spectrum.
     """
     if spectrum_in is None:
         return None

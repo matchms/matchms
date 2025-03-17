@@ -8,7 +8,15 @@ logger = logging.getLogger("matchms")
 
 
 def normalize_intensities(spectrum_in: SpectrumType, clone: Optional[bool] = True) -> SpectrumType:
-    """Normalize intensities of peaks to unit height."""
+    """Normalize intensities of peaks to unit height.
+
+    Parameters
+    ----------
+    spectrum_in:
+        Input spectrum.
+    clone:
+        Optionally clone the Spectrum.
+    """
 
     if spectrum_in is None:
         return None

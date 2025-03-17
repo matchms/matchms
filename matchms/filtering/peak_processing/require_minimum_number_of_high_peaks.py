@@ -24,7 +24,9 @@ def require_minimum_number_of_high_peaks(spectrum_in: SpectrumType, no_peaks: in
         Default is 5.
     intensity_percent:
         Minimum relative intensity (as a percentage between 0-100) for
-        peaks that are searched. Default is 2
+        peaks that are searched. Default is 2.
+    clone:
+        Optionally clone the Spectrum.
     """
     if spectrum_in is None:
         return None

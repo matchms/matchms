@@ -34,6 +34,8 @@ def repair_not_matching_annotation(spectrum_in: Spectrum, clone: Optional[bool] 
     ----------
     spectrum_in : Spectrum
         The input spectrum containing annotations to be checked and repaired.
+    clone:
+        Optionally clone the Spectrum.
 
     Returns:
     -------

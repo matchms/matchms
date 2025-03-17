@@ -8,6 +8,13 @@ def repair_inchi_inchikey_smiles(spectrum_in: SpectrumType, clone: Optional[bool
     """Check if inchi, inchikey, and smiles entries seem correct. Detect and correct
     if any of those entries clearly belongs into one of the other two fields (e.g.
     inchikey found in inchi field).
+
+    Parameters
+    ----------
+    spectrum_in:
+        Input spectrum.
+    clone:
+        Optionally clone the Spectrum.
     """
     if spectrum_in is None:
         return None

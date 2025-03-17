@@ -12,10 +12,21 @@ logger = logging.getLogger("matchms")
 
 
 def repair_smiles_of_salts(spectrum_in,
-                           mass_tolerance, clone: Optional[bool] = True):
+                           mass_tolerance: float, clone: Optional[bool] = True):
     """Repairs the smiles of a salt to match the parent mass.
     E.g. C1=NC2=NC=NC(=C2N1)N.Cl is converted to 1=NC2=NC=NC(=C2N1)N if this matches the parent mass
-    Checks if parent mass matches one of the ions"""
+    Checks if parent mass matches one of the ions
+
+    Parameters
+    ----------
+    spectrum_in:
+        Input spectrum.
+    mass_tolerance:
+        Maximum allowed mass difference between the calculated parent mass and the neutral
+        monoisotopic mass derived from the SMILES.
+    clone:
+        Optionally clone the Spectrum.
+    """
     if spectrum_in is None:
         return None
     spectrum = spectrum_in.clone() if clone else spectrum_in

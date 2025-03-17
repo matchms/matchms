@@ -5,7 +5,8 @@ from matchms.typing import SpectrumType
 
 
 def require_parent_mass_match_smiles(spectrum_in: SpectrumType,
-                                     mass_tolerance, clone: Optional[bool] = True) -> Optional[SpectrumType]:
+                                     mass_tolerance,
+                                     clone: Optional[bool] = True) -> Optional[SpectrumType]:
     """
     Validates if the parent mass of the given spectrum matches the mass calculated
     from its associated SMILES string within a specified tolerance.
@@ -18,6 +19,9 @@ def require_parent_mass_match_smiles(spectrum_in: SpectrumType,
     mass_tolerance: float
         The tolerance for the mass difference between the spectrum's parent mass and
         the mass calculated from its SMILES string.
+
+    clone:
+        Optionally clone the Spectrum.
 
     Returns
     -------

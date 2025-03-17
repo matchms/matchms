@@ -11,8 +11,12 @@ def require_retention_index(spectrum_in: SpectrumType, clone: Optional[bool] = T
     If the input spectrum is None or doesn't have a 'retention_index', the function returns None.
     Otherwise, it returns a clone of the input spectrum.
 
-    Parameters:
-    spectrum_in (SpectrumType): The input spectrum to check.
+    Parameters
+    ----------
+    spectrum_in (SpectrumType):
+        The input spectrum to check.
+    clone:
+        Optionally clone the Spectrum.
 
     Returns:
     SpectrumType: A clone of the input spectrum if it has a 'retention_index', None otherwise.

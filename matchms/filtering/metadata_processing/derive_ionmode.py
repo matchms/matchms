@@ -18,8 +18,10 @@ def derive_ionmode(spectrum_in: Spectrum, clone: Optional[bool] = True) -> Spect
 
     Parameters
     ----------
-    spectrum
+    spectrum_in:
         Input spectrum.
+    clone:
+        Optionally clone the Spectrum.
 
     Returns
     -------

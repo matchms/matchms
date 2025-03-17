@@ -14,6 +14,16 @@ def remove_profiled_spectra(spectrum_in: Spectrum, mz_window=0.5, clone: Optiona
 
     Reproduced from MZmine.
     https://github.com/mzmine/mzmine3/blob/master/src/main/java/io/github/mzmine/util/scans/ScanUtils.java#L609
+
+    Parameters
+    ----------
+    spectrum_in:
+        Input spectrum.
+    mz_window:
+        Window of mz values (in Da) that are allowed to lie within
+        the top k peaks. Default is 50 Da.
+    clone:
+        Optionally clone the Spectrum.
     """
     if spectrum_in is None:
         return None

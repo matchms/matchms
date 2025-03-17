@@ -10,10 +10,14 @@ def select_by_relative_intensity(spectrum_in: SpectrumType, intensity_from: floa
 
     Parameters
     ----------
+    spectrum_in:
+        Input spectrum.
     intensity_from:
         Set lower threshold for relative peak intensity. Default is 0.0.
     intensity_to:
         Set upper threshold for relative peak intensity. Default is 1.0.
+    clone:
+        Optionally clone the Spectrum.
     """
     if spectrum_in is None:
         return None

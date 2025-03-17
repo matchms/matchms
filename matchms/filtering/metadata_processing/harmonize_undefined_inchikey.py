@@ -8,11 +8,15 @@ def harmonize_undefined_inchikey(spectrum_in: SpectrumType, undefined: str = "",
 
     Parameters
     ----------
+    spectrum_in:
+        Input spectrum.
     undefined:
         Give desired entry for undefined inchikey fields. Default is "".
     aliases:
         Enter list of strings that are expected to represent undefined entries.
         Default is ["", "N/A", "NA", "n/a", "no data"].
+    clone:
+        Optionally clone the Spectrum.
     """
     if spectrum_in is None:
         return None

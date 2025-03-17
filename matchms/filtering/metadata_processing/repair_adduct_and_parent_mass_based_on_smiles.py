@@ -30,6 +30,9 @@ def repair_adduct_and_parent_mass_based_on_smiles(spectrum_in: Spectrum,
     mass_tolerance : float
         Maximum allowed mass difference between the calculated parent mass and the neutral
         monoisotopic mass derived from the SMILES.
+
+    clone:
+        Optionally clone the Spectrum.
     """
     if spectrum_in is None:
         return None

@@ -17,6 +17,8 @@ def require_maximum_number_of_peaks(spectrum_in: Spectrum,
     maximum_number_of_fragments:
         Number of minimum required peaks. Spectra with fewer peaks will be set
         to 'None'.
+    clone:
+        Optionally clone the Spectrum.
     """
     if spectrum_in is None:
         return None

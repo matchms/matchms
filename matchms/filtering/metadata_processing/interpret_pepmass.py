@@ -18,6 +18,13 @@ def interpret_pepmass(spectrum_in, clone: Optional[bool] = True):
     This function will interpret the values as (mz, intensity, charge) tuple. Those
     will be splitted (if present) added to the fields "precursor_mz",
     "precursor_intensity", and "charge".
+
+    Parameters
+    ----------
+    spectrum_in:
+        Input spectrum.
+    clone:
+        Optionally clone the Spectrum.
     """
     if spectrum_in is None:
         return None

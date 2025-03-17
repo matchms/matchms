@@ -37,6 +37,8 @@ def derive_annotation_from_compound_name(spectrum_in: Spectrum,
         The csv file should contain the columns ["compound_name", "smiles", "inchi", "inchikey", "monoisotopic_mass"]
     mass_tolerance:
         Acceptable mass difference between query compound and pubchem result.
+    clone:
+        Optionally clone the Spectrum.
     """
     if spectrum_in is None:
         return None
