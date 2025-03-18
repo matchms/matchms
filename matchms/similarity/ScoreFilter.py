@@ -2,7 +2,6 @@ from typing import Optional
 
 import numpy as np
 
-
 class FilterScoreByValue:
     def __init__(self, value: float, operator = '>',
                  score_name: Optional[str] = "score"):
@@ -15,9 +14,6 @@ class FilterScoreByValue:
 
         Some scores have multiple scores (e.g. cosine and matches) this function makes sure the score is applied
         to the correct score"""
-        if score.shape != ():
-            raise ValueError("Should be a single score")
-
         if len(score.dtype) > 1:  # if structured array
             score = score[self.score_name]
         return self.filter_function(score)
