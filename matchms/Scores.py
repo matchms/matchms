@@ -156,12 +156,7 @@ class Scores:
             name = similarity_function.__class__.__name__
         if (self.n_rows == 0) or (self.n_cols == 0):
             raise ValueError("Number of elements must be >= 1")
-        if self.n_rows == self.n_cols == 1:
-            score = similarity_function.pair(self.references[0],
-                                             self.queries[0])
-            self._scores.add_dense_matrix(np.array([score]), name)
-        elif is_sparse_advisable():
-
+        if is_sparse_advisable():
             new_scores = similarity_function.sparse_array(references=self.references,
                                                           queries=self.queries,
                                                           mask_indices=Mask(self._scores.row, self._scores.col))
