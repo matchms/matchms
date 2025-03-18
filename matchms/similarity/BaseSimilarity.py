@@ -115,8 +115,8 @@ class BaseSimilarity:
         return scores_array
 
     def sparse_array(self, references: List[SpectrumType], queries: List[SpectrumType],
-                     idx_row, idx_col, is_symmetric: bool = False):
-        """Optional: Provide optimized method to calculate an sparse matrix of similarity scores.
+                     idx_row: np.ndarray, idx_col: np.ndarray) -> np.ndarray:
+        """Optional: Provide optimized method to calculate a sparse matrix of similarity scores.
 
         Compute similarity scores for pairs of reference and query spectra as given by the indices
         idx_row (references) and idx_col (queries). If no method is added here, the following naive
@@ -132,18 +132,9 @@ class BaseSimilarity:
             List/array of row indices
         idx_col
             List/array of column indices
-        is_symmetric
-            Set to True when *references* and *queries* are identical (as for instance for an all-vs-all
-            comparison). By using the fact that score[i,j] = score[j,i] the calculation will be about
-            2x faster.
         """
-        # pylint: disable=too-many-arguments
-        if is_symmetric is True:
-            pass  # TODO: consider implementing faster method for symmetric cases
-
         assert idx_row.shape == idx_col.shape, "col and row indices must be of same shape"
-        scores = np.zeros((len(idx_row)), dtype=self.score_datatype)  # TODO: switch to sparse matrix
-        # Use tqdm to track progress through the indices
+        scores = np.zeros((len(idx_row)), dtype=self.score_datatype)
         for i, row in enumerate(tqdm(idx_row, desc="Calculating sparse similarities")):
             col = idx_col[i]
             scores[i] = self.pair(references[row], queries[col])

@@ -276,8 +276,7 @@ class Pipeline:
             new_scores = similarity_measure.sparse_array(references=self._spectra_references,
                                                          queries=self._spectra_queries,
                                                          idx_row=self.scores.scores.row,
-                                                         idx_col=self.scores.scores.col,
-                                                         is_symmetric=self.is_symmetric)
+                                                         idx_col=self.scores.scores.col)
             self.scores.scores.add_sparse_data(self.scores.scores.row,
                                                self.scores.scores.col,
                                                new_scores,

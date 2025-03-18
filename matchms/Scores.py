@@ -163,8 +163,7 @@ class Scores:
             new_scores = similarity_function.sparse_array(references=self.references,
                                                           queries=self.queries,
                                                           idx_row=self._scores.row,
-                                                          idx_col=self._scores.col,
-                                                          is_symmetric=self.is_symmetric)
+                                                          idx_col=self._scores.col)
             self._scores.add_sparse_data(self._scores.row,
                                          self._scores.col,
                                          new_scores,
