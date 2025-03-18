@@ -52,7 +52,6 @@ class BaseSimilarity:
             for i_ref, reference in enumerate(tqdm(references, "Calculating similarities")):
                 for i_query, query in enumerate(queries[i_ref:], start=i_ref):  # Compute only upper triangle
                     sim_matrix[i_ref, i_query] = self.pair(reference, query)
-                    # todo once Scores can handle symmetric compute don't store
                     sim_matrix[i_query, i_ref] = sim_matrix[i_ref, i_query]
         else:
             # Compute pairwise similarities
