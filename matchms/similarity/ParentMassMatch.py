@@ -1,6 +1,5 @@
 from typing import List
 import numpy as np
-from sparsestack import StackedSparseArray
 from matchms.similarity.spectrum_similarity_functions import (
     number_matching, number_matching_symmetric)
 from matchms.Spectrum import Spectrum
@@ -81,7 +80,7 @@ class ParentMassMatch(BaseSimilarity):
         return np.asarray(score, dtype=self.score_datatype)
 
     def matrix(self, references: List[Spectrum], queries: List[Spectrum],
-               is_symmetric: bool = False) -> StackedSparseArray:
+               is_symmetric: bool = False) -> np.ndarray:
         """Compare parent masses between all references and queries.
 
         Parameters
