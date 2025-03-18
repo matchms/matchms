@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import List, Tuple
+from typing import List
 import numpy as np
 from sparsestack import StackedSparseArray
 from tqdm import tqdm
@@ -182,24 +182,3 @@ class BaseSimilarity:
         """Return a dictionary representation of a similarity function."""
         return {"__Similarity__": self.__class__.__name__,
                 **self.__dict__}
-
-
-def get_indexes_dense_matrix(rows: int, columns: int, is_symmetric=False) -> Tuple[np.ndarray, np.ndarray]:
-    """Computes COO indexes for a dense matrix"""
-    if is_symmetric:
-        if rows != columns:
-            raise ValueError("rows and columns must have same size")
-        idx_row = []
-        idx_col = []
-        for i_row in range(rows):
-            for i_column in range(i_row, columns):  # Compute only upper triangle
-                idx_row.append(i_row)
-                idx_col.append(i_column)
-        idx_row = np.array(idx_row, dtype=np.int_)
-        idx_col = np.array(idx_col, dtype=np.int_)
-    else:
-        # creates a repeating range like [0,1,2,0,1,2]
-        idx_row = np.tile(np.arange(rows), columns)
-        # creates repeating numers in range like [0, 0, 1, 1, 2, 2]
-        idx_col = np.repeat(np.arange(columns), rows)
-    return idx_row, idx_col
