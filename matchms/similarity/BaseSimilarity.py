@@ -1,8 +1,10 @@
 from abc import abstractmethod
-from typing import List
+from typing import List, Tuple
 import numpy as np
 from sparsestack import StackedSparseArray
 from tqdm import tqdm
+
+from matchms.similarity.ScoreFilter import FilterScoreByValue
 from matchms.typing import SpectrumType
 
 
@@ -20,6 +22,7 @@ class BaseSimilarity:
     # Set key characteristics as class attributes
     is_commutative = True
     # Set output data type, e.g. "float" or [("score", "float"), ("matches", "int")]
+    # If you set multiple data types, the main score should be set to "score" this is used as default for filtering.
     score_datatype = np.float64
 
     @abstractmethod
@@ -61,7 +64,8 @@ class BaseSimilarity:
         return sim_matrix
 
     def matrix_with_filter(self, references: List[SpectrumType], queries: List[SpectrumType],
-                           is_symmetric: bool = False) -> StackedSparseArray:
+                           score_filters: Tuple[FilterScoreByValue],
+                           is_symmetric: bool = False, ) -> StackedSparseArray:
         """Optional: Provide optimized method to calculate a sparse matrix with filtering applied directly.
         This is helpfull if the filter function is removing most scores. Important note, per score this takes about 12x
         the amount of memory. Therefore, doing filtering during compute is only worth it if you keep less than 1/12th of
@@ -73,6 +77,12 @@ class BaseSimilarity:
             List of reference objects
         queries
             List of query objects
+        score_filters
+            Tuple of filters that should be applied to each score before scoring. If you want to run without filtering,
+            it is best to run matrix(). Filters can also be run after computing a matrix first, however, for strict
+            filtering this implementation can be more memory efficient. Only use matrix_with_filter if you expect to
+            filter out more than 90% of your data. Otherwise, it is more memory efficient to first run matrix, followed by
+            filtering the matrix.
         is_symmetric
             Set to True when *references* and *queries* are identical (as for instance for an all-vs-all
             comparison). By using the fact that score[i,j] = score[j,i] the calculation will be about
@@ -93,15 +103,16 @@ class BaseSimilarity:
             if is_symmetric and self.is_commutative:
                 for i_query, query in enumerate(queries[i_ref:n_cols], start=i_ref):
                     score = self.pair(reference, query)
-                    if self.keep_score(score):
-                        # todo never store duplicated scores, this should be handled by the scores object.
+                    # Check if the score passes the filter before storing.
+                    if np.all(score_filter.keep_score(score) for score_filter in score_filters):
                         idx_row += [i_ref, i_query]
                         idx_col += [i_query, i_ref]
                         scores += [score, score]
             else:
                 for i_query, query in enumerate(queries[:n_cols]):
                     score = self.pair(reference, query)
-                    if self.keep_score(score):
+                    # Check if the score passes the filter before storing.
+                    if np.all(score_filter.keep_score(score) for score_filter in score_filters):
                         idx_row.append(i_ref)
                         idx_col.append(i_query)
                         scores.append(score)
@@ -141,12 +152,29 @@ class BaseSimilarity:
         return scores
 
     def sparse_array_with_filter(self, references: List[SpectrumType], queries: List[SpectrumType],
-                     idx_row, idx_col) -> StackedSparseArray:
+                     idx_row, idx_col, score_filters: Tuple[FilterScoreByValue]) -> StackedSparseArray:
         """Uses a mask to compute only the required scores and filters scores that do not pass the filter.
 
         This method most of the time does not make sense. It is only worth it if you want to store less than 1/12th
         of the computed scores. This is not the case most of the time, so sparse_array is most of the time the most
         memory efficient.
+
+        Parameters
+        ----------
+        references
+            List of reference objects
+        queries
+            List of query objects
+        idx_row
+            List/array of row indices
+        idx_col
+            List/array of column indices
+        score_filters
+            Tuple of filters that should be applied to each score before scoring. If you want to run without filtering,
+            it is best to run sparse_array(). Filters can also be run after computing a sparse array first, however, for strict
+            filtering this implementation can be more memory efficient. Only use sparse_array_with_filter if you expect to
+            filter out more than 90% of your data. Otherwise, it is more memory efficient to first run matrix, followed by
+            filtering the matrix.
         """
         scores = []
         stored_idx_row = []
@@ -154,7 +182,8 @@ class BaseSimilarity:
         for i, row in enumerate(tqdm(idx_row, desc="Calculating sparse similarities")):
             col = idx_col[i]
             score = self.pair(references[row], queries[col])
-            if self.keep_score(score):
+            # Check if the score passes the filter before storing.
+            if np.all(score_filter.keep_score(score) for score_filter in score_filters):
                 stored_idx_row.append(row)
                 stored_idx_col.append(col)
                 scores.append(score)
@@ -164,19 +193,6 @@ class BaseSimilarity:
         scores_array = StackedSparseArray(len(references), len(queries))
         scores_array.add_sparse_data(idx_row, idx_col, scores_data, "")
         return scores_array
-
-
-    def keep_score(self, score: np.ndarray):
-        """In the `.matrix` method scores will be collected in a sparse way.
-        Overwrite this method here if values other than `False` or `0` should
-        not be stored in the final collection.
-        """
-        if len(score.dtype) > 1:  # if structured array
-            valuelike = True
-            for dtype_name in score.dtype.names:
-                valuelike = valuelike and (score[dtype_name] != 0)
-            return valuelike
-        return score != 0
 
     def to_dict(self) -> dict:
         """Return a dictionary representation of a similarity function."""
