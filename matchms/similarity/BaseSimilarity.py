@@ -60,11 +60,12 @@ class BaseSimilarity:
                     sim_matrix[i, j] = self.pair(reference, query)
         return sim_matrix
 
-    def old_matrix(self, references: List[SpectrumType], queries: List[SpectrumType],
-               is_symmetric: bool = False) -> np.ndarray:
-        """Optional: Provide optimized method to calculate an np.array of similarity scores
-        for given reference and query spectra. If no method is added here, the following naive
-        implementation (i.e. a double for-loop) is used.
+    def matrix_with_filter(self, references: List[SpectrumType], queries: List[SpectrumType],
+                           is_symmetric: bool = False) -> StackedSparseArray:
+        """Optional: Provide optimized method to calculate a sparse matrix with filtering applied directly.
+        This is helpfull if the filter function is removing most scores. Important note, per score this takes about 12x
+        the amount of memory. Therefore, doing filtering during compute is only worth it if you keep less than 1/12th of
+        the scores. Otherwise, it is best to just use matrix, followed by a filter.
 
         Parameters
         ----------
@@ -93,6 +94,7 @@ class BaseSimilarity:
                 for i_query, query in enumerate(queries[i_ref:n_cols], start=i_ref):
                     score = self.pair(reference, query)
                     if self.keep_score(score):
+                        # todo never store duplicated scores, this should be handled by the scores object.
                         idx_row += [i_ref, i_query]
                         idx_col += [i_query, i_ref]
                         scores += [score, score]
@@ -107,9 +109,9 @@ class BaseSimilarity:
         idx_row = np.array(idx_row, dtype=np.int_)
         idx_col = np.array(idx_col, dtype=np.int_)
         scores_data = np.array(scores, dtype=self.score_datatype)
-
-        scores_array = np.zeros(shape=(n_rows, n_cols), dtype=self.score_datatype)
-        scores_array[idx_row, idx_col] = scores_data.reshape(-1)
+        # Todo replace with returning a sparse matrix (stacked is not needed.)
+        scores_array = StackedSparseArray(n_rows, n_cols)
+        scores_array.add_sparse_data(idx_row, idx_col, scores_data, "")
         return scores_array
 
     def sparse_array(self, references: List[SpectrumType], queries: List[SpectrumType],
