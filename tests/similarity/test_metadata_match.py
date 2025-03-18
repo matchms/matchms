@@ -79,4 +79,3 @@ def test_metadata_match_numerical(spectra, tolerance, expected):
                                      matching_type="difference", tolerance=tolerance)
     scores = calculate_scores(references, queries, similarity_score)
     assert np.all(scores.scores.to_array().tolist() == expected), "Expected different scores."
-

@@ -127,7 +127,6 @@ class MetadataMatch(BaseSimilarity):
             comparison). By using the fact that score[i,j] = score[j,i] the calculation will be about
             2x faster.
         """
-        # pylint: disable=too-many-locals
         def collect_entries(spectra):
             """Collect metadata entries."""
             entries = []

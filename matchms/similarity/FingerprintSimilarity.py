@@ -1,6 +1,5 @@
 from typing import List, Union
 import numpy as np
-from sparsestack import StackedSparseArray
 from matchms.typing import SpectrumType
 from .BaseSimilarity import BaseSimilarity
 from .vector_similarity_functions import (cosine_similarity,
@@ -158,4 +157,3 @@ class FingerprintSimilarity(BaseSimilarity):
                                         idx_fingerprints2)] = cosine_similarity_matrix(fingerprints1,
                                                                                        fingerprints2)
         return similarity_matrix.astype(self.score_datatype)
-
