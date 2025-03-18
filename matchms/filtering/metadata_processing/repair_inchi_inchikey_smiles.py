@@ -1,5 +1,4 @@
 from typing import Optional
-
 from matchms.filtering.SpeciesString import SpeciesString
 from matchms.typing import SpectrumType
 

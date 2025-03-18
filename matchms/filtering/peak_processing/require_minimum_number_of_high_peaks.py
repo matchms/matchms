@@ -1,6 +1,5 @@
 import logging
 from typing import Optional
-
 from matchms.typing import SpectrumType
 from .select_by_relative_intensity import select_by_relative_intensity
 

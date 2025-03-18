@@ -1,6 +1,8 @@
 import logging
+from typing import Optional
 import numpy as np
 from matchms.Spectrum import Spectrum
+from matchms.typing import SpectrumType
 
 
 logger = logging.getLogger("matchms")

@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 import numpy as np
 from matchms.typing import SpectrumType
 from ...Fragments import Fragments

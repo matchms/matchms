@@ -1,6 +1,6 @@
 import logging
 from typing import Optional
-
+from matchms.typing import SpectrumType
 from matchms.utils import get_first_common_element
 
 

@@ -1,8 +1,8 @@
 import logging
 import re
 from typing import Optional
-
 import numpy as np
+from matchms.typing import SpectrumType
 from .make_charge_int import _convert_charge_to_int
 
 

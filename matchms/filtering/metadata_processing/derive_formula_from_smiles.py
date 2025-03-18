@@ -1,8 +1,8 @@
 import logging
 from typing import Optional
-
 from rdkit import Chem
 from rdkit.Chem.rdMolDescriptors import CalcMolFormula
+from matchms.typing import SpectrumType
 
 
 logger = logging.getLogger("matchms")

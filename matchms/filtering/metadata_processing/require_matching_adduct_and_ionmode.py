@@ -1,6 +1,8 @@
 import logging
+from typing import Optional
 from matchms.filtering.filter_utils.interpret_unknown_adduct import \
     get_charge_of_adduct
+from matchms.typing import SpectrumType
 
 
 logger = logging.getLogger("matchms")

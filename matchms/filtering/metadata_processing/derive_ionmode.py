@@ -1,7 +1,7 @@
 import logging
 from typing import Optional
-
 from matchms.Spectrum import Spectrum
+from matchms.typing import SpectrumType
 from ..filter_utils.load_known_adducts import load_known_adducts
 from .clean_adduct import _clean_adduct
 

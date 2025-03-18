@@ -1,3 +1,4 @@
+from typing import Optional
 import numpy as np
 from matchms.Fragments import Fragments
 from matchms.typing import SpectrumType

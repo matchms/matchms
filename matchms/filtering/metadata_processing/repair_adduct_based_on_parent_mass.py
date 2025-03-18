@@ -1,7 +1,7 @@
 import logging
 from typing import Optional
-
 from matchms import Spectrum
+from matchms.typing import SpectrumType
 from ..filter_utils.load_known_adducts import load_known_adducts
 
 
@@ -31,7 +31,7 @@ def repair_adduct_based_on_parent_mass(spectrum_in: Spectrum,
     """
     if spectrum_in is None:
         return None
-    changed_spectrum = spectrum_in.clone()
+    changed_spectrum = spectrum_in.clone() if clone else spectrum_in
 
     new_adduct = _get_matching_adduct(precursor_mz=spectrum_in.get("precursor_mz"),
                                       parent_mass=spectrum_in.get("parent_mass"),

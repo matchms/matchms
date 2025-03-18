@@ -1,9 +1,9 @@
 import logging
 from typing import Optional
-
 from matchms import Spectrum
 from matchms.filtering.filter_utils.get_neutral_mass_from_smiles import \
     get_monoisotopic_neutral_mass
+from matchms.typing import SpectrumType
 from ..filter_utils.derive_precursor_mz_and_parent_mass import \
     derive_parent_mass_from_precursor_mz
 from .repair_adduct_based_on_parent_mass import _get_matching_adduct

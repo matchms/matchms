@@ -1,9 +1,9 @@
 import logging
 from typing import Optional
-
 from matchms import Spectrum
 from matchms.filtering.filter_utils.get_neutral_mass_from_smiles import (
     get_molecular_weight_neutral_mass, get_monoisotopic_neutral_mass)
+from matchms.typing import SpectrumType
 
 
 logger = logging.getLogger("matchms")

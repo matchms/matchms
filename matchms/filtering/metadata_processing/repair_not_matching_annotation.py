@@ -1,6 +1,5 @@
 import logging
 from typing import Optional
-
 from matchms import Spectrum
 from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import (
     convert_inchi_to_inchikey, convert_inchi_to_smiles,
@@ -8,6 +7,7 @@ from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import (
     is_valid_smiles)
 from matchms.filtering.metadata_processing.require_parent_mass_match_smiles import \
     _check_smiles_and_parent_mass_match
+from matchms.typing import SpectrumType
 
 
 logger = logging.getLogger("matchms")

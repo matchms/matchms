@@ -1,7 +1,9 @@
 import logging
 import math
+from typing import Optional
 from matchms.filtering.filter_utils.interpret_unknown_adduct import \
     get_multiplier_and_mass_from_adduct
+from matchms.typing import SpectrumType
 
 
 logger = logging.getLogger("matchms")
