@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import List
+from typing import List, Tuple
 import numpy as np
 from sparsestack import StackedSparseArray
 from tqdm import tqdm
@@ -139,6 +139,32 @@ class BaseSimilarity:
             col = idx_col[i]
             scores[i] = self.pair(references[row], queries[col])
         return scores
+
+    def sparse_array_with_filter(self, references: List[SpectrumType], queries: List[SpectrumType],
+                     idx_row, idx_col) -> StackedSparseArray:
+        """Uses a mask to compute only the required scores and filters scores that do not pass the filter.
+
+        This method most of the time does not make sense. It is only worth it if you want to store less than 1/12th
+        of the computed scores. This is not the case most of the time, so sparse_array is most of the time the most
+        memory efficient.
+        """
+        scores = []
+        stored_idx_row = []
+        stored_idx_col = []
+        for i, row in enumerate(tqdm(idx_row, desc="Calculating sparse similarities")):
+            col = idx_col[i]
+            score = self.pair(references[row], queries[col])
+            if self.keep_score(score):
+                stored_idx_row.append(row)
+                stored_idx_col.append(col)
+                scores.append(score)
+        idx_row = np.array(stored_idx_row, dtype=np.int_)
+        idx_col = np.array(stored_idx_col, dtype=np.int_)
+        scores_data = np.array(scores, dtype=self.score_datatype)
+        scores_array = StackedSparseArray(len(references), len(queries))
+        scores_array.add_sparse_data(idx_row, idx_col, scores_data, "")
+        return scores_array
+
 
     def keep_score(self, score: np.ndarray):
         """In the `.matrix` method scores will be collected in a sparse way.
