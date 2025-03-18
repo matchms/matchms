@@ -14,7 +14,7 @@ import matchms.similarity as mssimilarity
 from matchms import Pipeline
 from matchms.importing import load_from_json
 from matchms.Pipeline import create_workflow
-
+from matchms.similarity.Mask import Mask
 
 module_root = os.path.dirname(__file__)
 json_file = os.path.join(module_root, "testdata", "gnps_spectra.json")
@@ -68,8 +68,9 @@ def test_all_scores_and_methods(spectra, similarity_measure):
 
     # Run sparse_array() method
     idx_row, idx_col = np.where(computed_scores_matrix)
+    mask = Mask(idx_row, idx_col)
     computed_scores_sparse = similarity_measure.sparse_array(spectra, spectra,
-                                                             idx_row, idx_col)
+                                                             mask)
     if computed_scores_sparse.dtype.names is None:
         assert np.allclose(computed_scores_sparse, computed_scores_matrix[idx_row, idx_col])
     else:

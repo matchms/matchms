@@ -9,6 +9,7 @@ from sparsestack import StackedSparseArray
 from matchms.importing.load_from_json import scores_json_decoder
 from matchms.similarity import get_similarity_function_by_name
 from matchms.similarity.BaseSimilarity import BaseSimilarity
+from matchms.similarity.Mask import Mask
 from matchms.typing import QueriesType, ReferencesType
 
 
@@ -160,10 +161,10 @@ class Scores:
                                              self.queries[0])
             self._scores.add_dense_matrix(np.array([score]), name)
         elif is_sparse_advisable():
+
             new_scores = similarity_function.sparse_array(references=self.references,
                                                           queries=self.queries,
-                                                          idx_row=self._scores.row,
-                                                          idx_col=self._scores.col)
+                                                          mask_indices=Mask(self._scores.row, self._scores.col))
             self._scores.add_sparse_data(self._scores.row,
                                          self._scores.col,
                                          new_scores,

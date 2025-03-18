@@ -4,6 +4,7 @@ import numpy as np
 from sparsestack import StackedSparseArray
 from tqdm import tqdm
 
+from matchms.similarity.Mask import Mask
 from matchms.similarity.ScoreFilter import FilterScoreByValue
 from matchms.typing import SpectrumType
 
@@ -43,7 +44,7 @@ class BaseSimilarity:
         raise NotImplementedError
 
     def matrix(self,
-                     references: List[SpectrumType], queries: List[SpectrumType],
+                     references: np.ndarray[SpectrumType], queries: np.ndarray[SpectrumType],
                      is_symmetric: bool = False
                      ) -> np.ndarray:
         sim_matrix = np.zeros((len(references), len(queries)), dtype=self.score_datatype)
@@ -126,7 +127,7 @@ class BaseSimilarity:
         return scores_array
 
     def sparse_array(self, references: List[SpectrumType], queries: List[SpectrumType],
-                     idx_row: np.ndarray, idx_col: np.ndarray) -> np.ndarray:
+                     mask_indices: Mask) -> np.ndarray:
         """Optional: Provide optimized method to calculate a sparse matrix of similarity scores.
 
         Compute similarity scores for pairs of reference and query spectra as given by the indices
@@ -139,20 +140,16 @@ class BaseSimilarity:
             List of reference objects
         queries
             List of query objects
-        idx_row
-            List/array of row indices
-        idx_col
-            List/array of column indices
+        mask_indices
+            The row column index pairs for which a score should be calculated.
         """
-        assert idx_row.shape == idx_col.shape, "col and row indices must be of same shape"
-        scores = np.zeros((len(idx_row)), dtype=self.score_datatype)
-        for i, row in enumerate(tqdm(idx_row, desc="Calculating sparse similarities")):
-            col = idx_col[i]
-            scores[i] = self.pair(references[row], queries[col])
+        scores = np.zeros((len(mask_indices)), dtype=self.score_datatype)
+        for i, (i_row, i_col) in enumerate(tqdm(mask_indices, desc="Calculating sparse similarities")):
+            scores[i] = self.pair(references[i_row], queries[i_col])
         return scores
 
     def sparse_array_with_filter(self, references: List[SpectrumType], queries: List[SpectrumType],
-                     idx_row, idx_col, score_filters: Tuple[FilterScoreByValue]) -> StackedSparseArray:
+                                 mask_indices: Mask, score_filters: Tuple[FilterScoreByValue]) -> StackedSparseArray:
         """Uses a mask to compute only the required scores and filters scores that do not pass the filter.
 
         This method most of the time does not make sense. It is only worth it if you want to store less than 1/12th
@@ -165,10 +162,8 @@ class BaseSimilarity:
             List of reference objects
         queries
             List of query objects
-        idx_row
-            List/array of row indices
-        idx_col
-            List/array of column indices
+        mask_indices
+            The row column index pairs for which a score should be calculated.
         score_filters
             Tuple of filters that should be applied to each score before scoring. If you want to run without filtering,
             it is best to run sparse_array(). Filters can also be run after computing a sparse array first, however, for strict
@@ -179,8 +174,7 @@ class BaseSimilarity:
         scores = []
         stored_idx_row = []
         stored_idx_col = []
-        for i, row in enumerate(tqdm(idx_row, desc="Calculating sparse similarities")):
-            col = idx_col[i]
+        for row, col in tqdm(mask_indices, desc="Calculating sparse similarities"):
             score = self.pair(references[row], queries[col])
             # Check if the score passes the filter before storing.
             if np.all(score_filter.keep_score(score) for score_filter in score_filters):
