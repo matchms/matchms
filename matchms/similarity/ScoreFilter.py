@@ -1,6 +1,6 @@
 from typing import Optional
-
 import numpy as np
+
 
 class FilterScoreByValue:
     def __init__(self, value: float, operator = '>',

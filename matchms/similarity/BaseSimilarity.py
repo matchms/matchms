@@ -2,10 +2,9 @@ from abc import abstractmethod
 from typing import List, Tuple
 import numpy as np
 from tqdm import tqdm
-
 from matchms import Scores
-from matchms.similarity.COOMatrix import COOMatrix
 from matchms.similarity.COOIndex import COOIndex
+from matchms.similarity.COOMatrix import COOMatrix
 from matchms.similarity.ScoreFilter import FilterScoreByValue
 from matchms.typing import SpectrumType
 

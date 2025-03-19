@@ -1,5 +1,4 @@
-from typing import Union, Tuple, Iterator
-
+from typing import Iterator, Tuple, Union
 import numpy as np
 
 

@@ -1,6 +1,5 @@
 import numpy as np
 import pytest
-
 from matchms.similarity.ScoreFilter import FilterScoreByValue
 
 
