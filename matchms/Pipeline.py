@@ -5,7 +5,6 @@ from datetime import datetime
 from typing import Callable, Iterable, List, Optional, Union
 from deprecated import deprecated
 import matchms.similarity as mssimilarity
-from matchms.Scores import Scores
 from matchms.filtering.filter_order import ALL_FILTERS
 from matchms.filtering.SpectrumProcessor import (FunctionWithParametersType,
                                                  SpectrumProcessor)
@@ -13,6 +12,7 @@ from matchms.importing.load_spectra import load_list_of_spectrum_files
 from matchms.logging_functions import (add_logging_to_file,
                                        reset_matchms_logger,
                                        set_matchms_logger_level)
+from matchms.Scores import Scores
 from matchms.typing import SpectrumType
 from matchms.yaml_file_functions import (load_workflow_from_yaml_file,
                                          ordered_dump)
