@@ -59,12 +59,5 @@ def calculate_scores(references: ReferencesType, queries: QueriesType,
     """
     scores = Scores(references=references, queries=queries,
                   is_symmetric=is_symmetric)
-
-    name = similarity_function.__class__.__name__
-    if (scores.n_rows == 0) or (scores.n_cols == 0):
-        raise ValueError("Number of elements must be >= 1")
-    new_scores = similarity_function.matrix(scores.references,
-                                            scores.queries,
-                                            is_symmetric=scores.is_symmetric)
-    scores.scores.add_dense_matrix(new_scores, name, join_type="left")
+    scores = similarity_function.calculate_scores(scores)
     return scores
