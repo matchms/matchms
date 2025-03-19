@@ -13,7 +13,7 @@ from matchms.importing.load_spectra import load_list_of_spectrum_files
 from matchms.logging_functions import (add_logging_to_file,
                                        reset_matchms_logger,
                                        set_matchms_logger_level)
-from matchms.similarity.Mask import Mask
+from matchms.similarity.COOIndex import COOIndex
 from matchms.typing import SpectrumType
 from matchms.yaml_file_functions import (load_workflow_from_yaml_file,
                                          ordered_dump)
@@ -276,8 +276,8 @@ class Pipeline:
         else:
             new_scores = similarity_measure.sparse_array(references=self._spectra_references,
                                                          queries=self._spectra_queries,
-                                                         mask_indices=Mask(self.scores.scores.row,
-                                                                           self.scores.scores.col))
+                                                         mask_indices=COOIndex(self.scores.scores.row,
+                                                                               self.scores.scores.col))
             self.scores.scores.add_sparse_data(new_scores.row,
                                                new_scores.column,
                                                new_scores.scores,

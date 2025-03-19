@@ -5,7 +5,7 @@ from tqdm import tqdm
 
 from matchms import Scores
 from matchms.similarity.COOMatrix import COOMatrix
-from matchms.similarity.Mask import Mask
+from matchms.similarity.COOIndex import COOIndex
 from matchms.similarity.ScoreFilter import FilterScoreByValue
 from matchms.typing import SpectrumType
 
@@ -76,7 +76,7 @@ class BaseSimilarity:
         if is_sparse_advisable():
             new_scores = self.sparse_array(references=scores.references,
                                            queries=scores.queries,
-                                           mask_indices=Mask(scores._scores.row, scores._scores.col))
+                                           mask_indices=COOIndex(scores._scores.row, scores._scores.col))
             scores._scores.add_sparse_data(new_scores.row,
                                            new_scores.column,
                                            new_scores.scores,
@@ -166,7 +166,7 @@ class BaseSimilarity:
 
 
     def sparse_array(self, references: List[SpectrumType], queries: List[SpectrumType],
-                     mask_indices: Mask) -> COOMatrix:
+                     mask_indices: COOIndex) -> COOMatrix:
         """Optional: Provide optimized method to calculate a sparse matrix of similarity scores.
 
         Compute similarity scores for pairs of reference and query spectra as given by the indices
@@ -188,7 +188,7 @@ class BaseSimilarity:
         return COOMatrix(row_idx=mask_indices.idx_row, column_idx=mask_indices.idx_col, scores=scores)
 
     def sparse_array_with_filter(self, references: List[SpectrumType], queries: List[SpectrumType],
-                                 mask_indices: Mask, score_filters: Tuple[FilterScoreByValue]) -> COOMatrix:
+                                 mask_indices: COOIndex, score_filters: Tuple[FilterScoreByValue]) -> COOMatrix:
         """Uses a mask to compute only the required scores and filters scores that do not pass the filter.
 
         This method most of the time does not make sense. It is only worth it if you want to store less than 1/12th

@@ -3,8 +3,8 @@ from typing import Union, Tuple, Iterator
 import numpy as np
 
 
-class Mask:
-    """Row and column indexes for a matrix
+class COOIndex:
+    """Row and column indexes for a COO matrix
 
     Can be used as a mask to specify between which pairs similarity scores should be computed"""
     def __init__(self, idx_row: np.ndarray, idx_col: np.ndarray):
@@ -30,10 +30,10 @@ class Mask:
     def __len__(self) -> int:
         return self.length
 
-    def __getitem__(self, item: Union[int, slice]) -> Union[Tuple[np.ndarray, np.ndarray], "Mask"]:
+    def __getitem__(self, item: Union[int, slice]) -> Union[Tuple[np.ndarray, np.ndarray], "COOIndex"]:
         if isinstance(item, int):
             return self._idx_row[item], self._idx_col[item]
         elif isinstance(item, slice):
-            return Mask(self._idx_row[item], self._idx_col[item])  # Return a Mask subset
+            return COOIndex(self._idx_row[item], self._idx_col[item])  # Return a COOIndex subset
         else:
             raise TypeError("Index must be an integer or a slice")
