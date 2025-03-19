@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import Callable, Iterable, List, Optional, Union
 from deprecated import deprecated
 import matchms.similarity as mssimilarity
-from matchms import calculate_scores
+from matchms.Scores import Scores
 from matchms.filtering.filter_order import ALL_FILTERS
 from matchms.filtering.SpectrumProcessor import (FunctionWithParametersType,
                                                  SpectrumProcessor)
@@ -254,7 +254,6 @@ class Pipeline:
     def _apply_similarity_measure(self, computation, i):
         """Run score computations for all listed methods and on all loaded and processed spectra.
         """
-
         def get_similarity_measure(computation):
             if isinstance(computation[0], str):
                 if len(computation) > 1:
@@ -267,21 +266,12 @@ class Pipeline:
             raise TypeError("Unknown similarity measure.")
 
         similarity_measure = get_similarity_measure(computation)
-        # If this is the first score computation:
         if i == 0:
-            self.scores = calculate_scores(self._spectra_references,
-                                           self._spectra_queries,
-                                           similarity_measure,
-                                           is_symmetric=self.is_symmetric)
-        else:
-            new_scores = similarity_measure.sparse_array(references=self._spectra_references,
-                                                         queries=self._spectra_queries,
-                                                         mask_indices=COOIndex(self.scores.scores.row,
-                                                                               self.scores.scores.col))
-            self.scores.scores.add_sparse_data(new_scores.row,
-                                               new_scores.column,
-                                               new_scores.scores,
-                                               similarity_measure.__class__.__name__)
+            # This happens here to make sure scores is not initialized if no scores are set in Pipeline
+            self.scores = Scores(self._spectra_references,
+                                 self._spectra_queries,
+                                 is_symmetric=self.is_symmetric)
+        self.scores = similarity_measure.calculate_scores(self.scores)
 
     def set_logging(self):
         """Set the matchms logger to write messages to file (if defined).
