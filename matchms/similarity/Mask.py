@@ -16,6 +16,14 @@ class Mask:
             raise ValueError('idx_row and idx_col must have same length')
         self.length = self._idx_row.shape[0]
 
+    @property
+    def idx_row(self) -> np.ndarray:
+        return self._idx_row
+
+    @property
+    def idx_col(self) -> np.ndarray:
+        return self._idx_col
+
     def __iter__(self) -> Iterator[Tuple[np.ndarray, np.ndarray]]:
         return zip(self._idx_row, self._idx_col)
 
