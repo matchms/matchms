@@ -73,9 +73,9 @@ def spectra():
 def test_scores_single_pair():
     """Test single pair input."""
     dummy_similarity_function = DummySimilarityFunction()
-    scores = Scores(references=["A"],
-                    queries=["B"])
-    scores.calculate(dummy_similarity_function)
+    scores = calculate_scores(references=["A"],
+                    queries=["B"],
+                     similarity_function=dummy_similarity_function)
     actual_1 = scores.scores[0, 0, 'DummySimilarityFunction_score']
     actual_2 = scores.scores[0, 0, 'DummySimilarityFunction_len']
     assert actual_1 == "AB", "Expected different scores."
@@ -84,9 +84,9 @@ def test_scores_single_pair():
 
 def test_scores_calculate():
     dummy_similarity_function = DummySimilarityFunction()
-    scores = Scores(references=["r0", "r1", "r2"],
-                    queries=["q0", "q1"])
-    scores.calculate(dummy_similarity_function)
+    scores = calculate_scores(references=["r0", "r1", "r2"],
+                              queries=["q0", "q1"],
+                              similarity_function=dummy_similarity_function)
     actual_data = list(scores)
     expected = [
         ("r0", "q0", ["r0q0", 4]),
@@ -101,9 +101,9 @@ def test_scores_calculate():
 
 def test_scores_calculate_parallel():
     dummy_similarity_function = DummySimilarityFunctionParallel()
-    scores = Scores(references=["r0", "r1", "r2"],
-                    queries=["q0", "q1"])
-    scores.calculate(dummy_similarity_function)
+    scores = calculate_scores(references=["r0", "r1", "r2"],
+                              queries=["q0", "q1"],
+                              similarity_function=dummy_similarity_function)
     actual = list(scores)
     expected = [
         ("r0", "q0", ["r0q0", 4]),
@@ -152,9 +152,9 @@ def test_scores_init_with_tuple():
 
 def test_scores_next():
     dummy_similarity_function = DummySimilarityFunction()
-    scores = Scores(references=["r", "rr", "rrr"],
-                    queries=["q", "qq"]).calculate(dummy_similarity_function)
-
+    scores = calculate_scores(references=["r", "rr", "rrr"],
+                              queries=["q", "qq"],
+                              similarity_function=dummy_similarity_function)
     actual = list(scores)
     expected = [
         ("r", "q", ["rq", 2]),
