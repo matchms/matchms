@@ -43,10 +43,10 @@ def test_fingerprint_similarity_parallel_empty_fingerprint(test_method):
                                                       [0, 1.]]), 0.001), "Expected different values."
 
 
-@pytest.mark.parametrize("test_method, expected_score, array_type, set_empty", [("cosine", 0.84515425, "numpy", np.nan),
-                                                         ("jaccard", 0.71428571, "sparse", np.nan),
-                                                         ("dice", 0.83333333, "numpy", 0)])
-def test_fingerprint_similarity_parallel(test_method, expected_score, array_type, set_empty):
+@pytest.mark.parametrize("test_method, expected_score, set_empty", [("cosine", 0.84515425, np.nan),
+                                                         ("jaccard", 0.71428571, np.nan),
+                                                         ("dice", 0.83333333, 0)])
+def test_fingerprint_similarity_parallel(test_method, expected_score, set_empty):
     """Test score matrix with known values for the provided methods."""
     spectrum0 = Spectrum(mz=np.array([], dtype="float"),
                          intensities=np.array([], dtype="float"),
@@ -64,7 +64,7 @@ def test_fingerprint_similarity_parallel(test_method, expected_score, array_type
 
     similarity_measure = FingerprintSimilarity(set_empty_scores=set_empty, similarity_measure=test_method)
     score_matrix = similarity_measure.matrix([spectrum0, spectrum1, spectrum2],
-                                             [spectrum0, spectrum1, spectrum2], array_type=array_type)
+                                             [spectrum0, spectrum1, spectrum2])
     expected_matrix = np.array([[set_empty, set_empty, set_empty],
                                    [set_empty, 1, expected_score],
                                    [set_empty, expected_score, 1]])

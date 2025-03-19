@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0]
+
+### Changed
+- BaseSimilarity is optimized to do more memory efficient compute.
+
+### Added
+- COOIndex, used instead of passing around rows and columns separately for masking
+- COOMatrix, used to have a standardized output from BaseSimilarity
+- FilterScoreByValue, used to filter calculated scores before storing when computing in BaseSimilarity.
+
+### Removed
+- Basesimilarity.matrix() does not have array_type to specify output type. The defualt is a numpy matrix
+- Calculate scores is not a method from scores any more.
+
 ## Unreleased
 
 ## [0.28.2] - 2024-11-11

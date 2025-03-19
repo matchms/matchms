@@ -1,10 +1,9 @@
 import logging
 from typing import List
 import numpy as np
-from sparsestack import StackedSparseArray
 from matchms.similarity.spectrum_similarity_functions import (
     number_matching, number_matching_symmetric)
-from matchms.typing import SpectrumType
+from matchms.Spectrum import Spectrum
 from .BaseSimilarity import BaseSimilarity
 
 
@@ -86,7 +85,7 @@ class MetadataMatch(BaseSimilarity):
             "Expected type from ['equal_match', 'difference']"
         self.matching_type = matching_type
 
-    def pair(self, reference: SpectrumType, query: SpectrumType) -> float:
+    def pair(self, reference: Spectrum, query: Spectrum) -> np.ndarray:
         """Compare precursor m/z between reference and query spectrum.
 
         Parameters
@@ -112,8 +111,7 @@ class MetadataMatch(BaseSimilarity):
         logger.warning("Non-numerical entry not compatible with 'difference' method")
         return np.asarray(False, dtype=self.score_datatype)
 
-    def matrix(self, references: List[SpectrumType], queries: List[SpectrumType],
-               array_type: str = "numpy",
+    def matrix(self, references: List[Spectrum], queries: List[Spectrum],
                is_symmetric: bool = False) -> np.ndarray:
         """Compare parent masses between all references and queries.
 
@@ -123,18 +121,11 @@ class MetadataMatch(BaseSimilarity):
             List/array of reference spectra.
         queries
             List/array of Single query spectra.
-        array_type
-            Specify the output array type. Can be "numpy" or "sparse".
-            Default is "numpy" and will return a numpy array. "sparse" will return a COO-sparse array.
         is_symmetric
             Set to True when *references* and *queries* are identical (as for instance for an all-vs-all
             comparison). By using the fact that score[i,j] = score[j,i] the calculation will be about
             2x faster.
         """
-        # pylint: disable=too-many-locals
-        if array_type not in ["numpy", "sparse"]:
-            raise ValueError("array_type must be 'numpy' or 'sparse'.")
-
         def collect_entries(spectra):
             """Collect metadata entries."""
             entries = []
@@ -176,11 +167,7 @@ class MetadataMatch(BaseSimilarity):
                 rows, cols, scores = number_matching(entries_ref, entries_query,
                                                      self.tolerance)
 
-        if array_type == "sparse":
-            scores_array = StackedSparseArray(len(entries_ref), len(entries_query))
-            scores_array.add_sparse_data(rows, cols, scores.astype(self.score_datatype), "")
-        else:
-            scores_array = np.zeros((len(entries_ref), len(entries_query)), dtype=self.score_datatype)
-            scores_array[rows, cols] = scores.astype(self.score_datatype)
+        scores_array = np.zeros((len(entries_ref), len(entries_query)), dtype=self.score_datatype)
+        scores_array[rows, cols] = scores.astype(self.score_datatype)
 
         return scores_array

@@ -1,4 +1,3 @@
-from typing import Tuple
 import numpy as np
 from scipy.optimize import linear_sum_assignment
 from matchms.similarity.spectrum_similarity_functions import collect_peak_pairs
@@ -40,7 +39,7 @@ class CosineHungarian(BaseSimilarity):
         self.mz_power = mz_power
         self.intensity_power = intensity_power
 
-    def pair(self, reference: SpectrumType, query: SpectrumType) -> Tuple[float, int]:
+    def pair(self, reference: SpectrumType, query: SpectrumType) -> np.ndarray:
         """Calculate cosine score between two spectra.
 
         Parameters
