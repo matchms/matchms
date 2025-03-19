@@ -133,7 +133,6 @@ class BaseSimilarity:
             comparison). By using the fact that score[i,j] = score[j,i] the calculation will be about
             2x faster.
         """
-        #pylint: disable=too-many-locals
         n_rows = len(references)
         n_cols = len(queries)
 

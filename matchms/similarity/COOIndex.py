@@ -32,7 +32,6 @@ class COOIndex:
     def __getitem__(self, item: Union[int, slice]) -> Union[Tuple[np.ndarray, np.ndarray], "COOIndex"]:
         if isinstance(item, int):
             return self._idx_row[item], self._idx_col[item]
-        elif isinstance(item, slice):
+        if isinstance(item, slice):
             return COOIndex(self._idx_row[item], self._idx_col[item])  # Return a COOIndex subset
-        else:
-            raise TypeError("Index must be an integer or a slice")
+        raise TypeError("Index must be an integer or a slice")
