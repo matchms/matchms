@@ -46,9 +46,7 @@ def calculate_scores(references: ReferencesType, queries: QueriesType,
     queries
         List of query objects
     similarity_function
-        Function which accepts a reference + query object and returns a score or tuple of scores
-    array_type
-        Specify the type of array to store and compute the scores. Choose from "numpy" or "sparse".
+        Function which accepts a reference + query object and returns numpy matrix of scores
     is_symmetric
         Set to True when *references* and *queries* are identical (as for instance for an all-vs-all
         comparison). By using the fact that score[i,j] = score[j,i] the calculation will be about
@@ -59,5 +57,14 @@ def calculate_scores(references: ReferencesType, queries: QueriesType,
 
     ~matchms.Scores.Scores
     """
-    return Scores(references=references, queries=queries,
-                  is_symmetric=is_symmetric).calculate(similarity_function)
+    scores = Scores(references=references, queries=queries,
+                  is_symmetric=is_symmetric)
+
+    name = similarity_function.__class__.__name__
+    if (scores.n_rows == 0) or (scores.n_cols == 0):
+        raise ValueError("Number of elements must be >= 1")
+    new_scores = similarity_function.matrix(scores.references,
+                                            scores.queries,
+                                            is_symmetric=scores.is_symmetric)
+    scores._scores.add_dense_matrix(new_scores, name, join_type="left")
+    return scores
