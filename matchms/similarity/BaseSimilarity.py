@@ -1,10 +1,10 @@
 from abc import abstractmethod
 from typing import List, Tuple
 import numpy as np
-from sparsestack import StackedSparseArray
 from tqdm import tqdm
 
 from matchms import Scores
+from matchms.similarity.COOMatrix import COOMatrix
 from matchms.similarity.Mask import Mask
 from matchms.similarity.ScoreFilter import FilterScoreByValue
 from matchms.typing import SpectrumType
@@ -77,9 +77,9 @@ class BaseSimilarity:
             new_scores = self.sparse_array(references=scores.references,
                                            queries=scores.queries,
                                            mask_indices=Mask(scores._scores.row, scores._scores.col))
-            scores._scores.add_sparse_data(scores._scores.row,
-                                           scores._scores.col,
-                                           new_scores,
+            scores._scores.add_sparse_data(new_scores.row,
+                                           new_scores.column,
+                                           new_scores.scores,
                                            name)
         else:
             new_scores = self.matrix(scores.references,
@@ -111,7 +111,7 @@ class BaseSimilarity:
 
     def matrix_with_filter(self, references: List[SpectrumType], queries: List[SpectrumType],
                            score_filters: Tuple[FilterScoreByValue],
-                           is_symmetric: bool = False, ) -> StackedSparseArray:
+                           is_symmetric: bool = False, ) -> COOMatrix:
         """Optional: Provide optimized method to calculate a sparse matrix with filtering applied directly.
         This is helpfull if the filter function is removing most scores. Important note, per score this takes about 12x
         the amount of memory. Therefore, doing filtering during compute is only worth it if you keep less than 1/12th of
@@ -162,17 +162,11 @@ class BaseSimilarity:
                         idx_row.append(i_ref)
                         idx_col.append(i_query)
                         scores.append(score)
+        return COOMatrix(row_idx=idx_row, column_idx=idx_col, scores=scores)
 
-        idx_row = np.array(idx_row, dtype=np.int_)
-        idx_col = np.array(idx_col, dtype=np.int_)
-        scores_data = np.array(scores, dtype=self.score_datatype)
-        # Todo replace with returning a sparse matrix (stacked is not needed.)
-        scores_array = StackedSparseArray(n_rows, n_cols)
-        scores_array.add_sparse_data(idx_row, idx_col, scores_data, "")
-        return scores_array
 
     def sparse_array(self, references: List[SpectrumType], queries: List[SpectrumType],
-                     mask_indices: Mask) -> np.ndarray:
+                     mask_indices: Mask) -> COOMatrix:
         """Optional: Provide optimized method to calculate a sparse matrix of similarity scores.
 
         Compute similarity scores for pairs of reference and query spectra as given by the indices
@@ -191,10 +185,10 @@ class BaseSimilarity:
         scores = np.zeros((len(mask_indices)), dtype=self.score_datatype)
         for i, (i_row, i_col) in enumerate(tqdm(mask_indices, desc="Calculating sparse similarities")):
             scores[i] = self.pair(references[i_row], queries[i_col])
-        return scores
+        return COOMatrix(row_idx=mask_indices.idx_row, column_idx=mask_indices.idx_col, scores=scores)
 
     def sparse_array_with_filter(self, references: List[SpectrumType], queries: List[SpectrumType],
-                                 mask_indices: Mask, score_filters: Tuple[FilterScoreByValue]) -> StackedSparseArray:
+                                 mask_indices: Mask, score_filters: Tuple[FilterScoreByValue]) -> COOMatrix:
         """Uses a mask to compute only the required scores and filters scores that do not pass the filter.
 
         This method most of the time does not make sense. It is only worth it if you want to store less than 1/12th
@@ -217,21 +211,17 @@ class BaseSimilarity:
             filtering the matrix.
         """
         scores = []
-        stored_idx_row = []
-        stored_idx_col = []
+        idx_row = []
+        idx_col = []
         for row, col in tqdm(mask_indices, desc="Calculating sparse similarities"):
             score = self.pair(references[row], queries[col])
             # Check if the score passes the filter before storing.
             if np.all(score_filter.keep_score(score) for score_filter in score_filters):
-                stored_idx_row.append(row)
-                stored_idx_col.append(col)
+                idx_row.append(row)
+                idx_col.append(col)
                 scores.append(score)
-        idx_row = np.array(stored_idx_row, dtype=np.int_)
-        idx_col = np.array(stored_idx_col, dtype=np.int_)
-        scores_data = np.array(scores, dtype=self.score_datatype)
-        scores_array = StackedSparseArray(len(references), len(queries))
-        scores_array.add_sparse_data(idx_row, idx_col, scores_data, "")
-        return scores_array
+        return COOMatrix(row_idx=idx_row, column_idx=idx_col, scores=scores)
+
 
     def to_dict(self) -> dict:
         """Return a dictionary representation of a similarity function."""

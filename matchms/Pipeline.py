@@ -278,9 +278,9 @@ class Pipeline:
                                                          queries=self._spectra_queries,
                                                          mask_indices=Mask(self.scores.scores.row,
                                                                            self.scores.scores.col))
-            self.scores.scores.add_sparse_data(self.scores.scores.row,
-                                               self.scores.scores.col,
-                                               new_scores,
+            self.scores.scores.add_sparse_data(new_scores.row,
+                                               new_scores.column,
+                                               new_scores.scores,
                                                similarity_measure.__class__.__name__)
 
     def set_logging(self):

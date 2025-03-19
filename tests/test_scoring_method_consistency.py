@@ -69,8 +69,9 @@ def test_all_scores_and_methods(spectra, similarity_measure):
     # Run sparse_array() method
     idx_row, idx_col = np.where(computed_scores_matrix)
     mask = Mask(idx_row, idx_col)
-    computed_scores_sparse = similarity_measure.sparse_array(spectra, spectra,
+    computed_scores_coo = similarity_measure.sparse_array(spectra, spectra,
                                                              mask)
+    computed_scores_sparse = computed_scores_coo.scores
     if computed_scores_sparse.dtype.names is None:
         assert np.allclose(computed_scores_sparse, computed_scores_matrix[idx_row, idx_col])
     else:
