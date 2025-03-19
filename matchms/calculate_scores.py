@@ -66,5 +66,5 @@ def calculate_scores(references: ReferencesType, queries: QueriesType,
     new_scores = similarity_function.matrix(scores.references,
                                             scores.queries,
                                             is_symmetric=scores.is_symmetric)
-    scores._scores.add_dense_matrix(new_scores, name, join_type="left")
+    scores.scores.add_dense_matrix(new_scores, name, join_type="left")
     return scores

@@ -66,9 +66,9 @@ class BaseSimilarity:
 
         def is_sparse_advisable():
             return (
-                (len(scores._scores.score_names) > 0)  # already scores in Scores
+                (len(scores.scores.score_names) > 0)  # already scores in Scores
                 and (join_type in ["inner", "left"])  # inner/left join
-                and (len(scores._scores.row) < (scores.n_rows * scores.n_cols) / 2)
+                and (len(scores.scores.row) < (scores.n_rows * scores.n_cols) / 2)
             )
         if name is None:
             name = self.__class__.__name__
@@ -76,8 +76,8 @@ class BaseSimilarity:
         if is_sparse_advisable():
             new_scores = self.sparse_array(references=scores.references,
                                            queries=scores.queries,
-                                           mask_indices=COOIndex(scores._scores.row, scores._scores.col))
-            scores._scores.add_sparse_data(new_scores.row,
+                                           mask_indices=COOIndex(scores.scores.row, scores.scores.col))
+            scores.scores.add_sparse_data(new_scores.row,
                                            new_scores.column,
                                            new_scores.scores,
                                            name)
@@ -85,7 +85,7 @@ class BaseSimilarity:
             new_scores = self.matrix(scores.references,
                                      scores.queries,
                                      is_symmetric=scores.is_symmetric)
-            scores._scores.add_dense_matrix(new_scores, name, join_type=join_type)
+            scores.scores.add_dense_matrix(new_scores, name, join_type=join_type)
         return scores
 
     def matrix(self,
