@@ -4,6 +4,7 @@ import numpy as np
 from sparsestack import StackedSparseArray
 from tqdm import tqdm
 
+from matchms import Scores
 from matchms.similarity.Mask import Mask
 from matchms.similarity.ScoreFilter import FilterScoreByValue
 from matchms.typing import SpectrumType
@@ -42,6 +43,50 @@ class BaseSimilarity:
             np.asarray(score, dtype=self.score_datatype)
         """
         raise NotImplementedError
+
+    def calculate_scores(self, scores: Scores,
+                         name: str = None,
+                         join_type="left") -> Scores:
+        """
+        Calculate the similarity between all reference objects vs all query objects using
+        the most suitable available implementation of the given similarity_function.
+        If Scores object already contains similarity scores, the newly computed measures
+        will be added to a new layer (name --> layer name).
+        Additional scores will be added as specified with join_type, the default being 'left'.
+
+        Parameters
+        ----------
+        scores
+            A scores object containing the references and queries and potentially previously calculated scores.
+        name
+            Label of the new scores layer. If None, the name of the similarity_function class will be used.
+        join_type
+            Choose from left, right, outer, inner to specify the merge type.
+        """
+
+        def is_sparse_advisable():
+            return (
+                (len(scores._scores.score_names) > 0)  # already scores in Scores
+                and (join_type in ["inner", "left"])  # inner/left join
+                and (len(scores._scores.row) < (scores.n_rows * scores.n_cols) / 2)
+            )
+        if name is None:
+            name = self.__class__.__name__
+
+        if is_sparse_advisable():
+            new_scores = self.sparse_array(references=scores.references,
+                                           queries=scores.queries,
+                                           mask_indices=Mask(scores._scores.row, scores._scores.col))
+            scores._scores.add_sparse_data(scores._scores.row,
+                                           scores._scores.col,
+                                           new_scores,
+                                           name)
+        else:
+            new_scores = self.matrix(scores.references,
+                                     scores.queries,
+                                     is_symmetric=scores.is_symmetric)
+            scores._scores.add_dense_matrix(new_scores, name, join_type=join_type)
+        return scores
 
     def matrix(self,
                      references: np.ndarray[SpectrumType], queries: np.ndarray[SpectrumType],
