@@ -13,7 +13,6 @@ from matchms.importing.load_spectra import load_list_of_spectrum_files
 from matchms.logging_functions import (add_logging_to_file,
                                        reset_matchms_logger,
                                        set_matchms_logger_level)
-from matchms.similarity.COOIndex import COOIndex
 from matchms.typing import SpectrumType
 from matchms.yaml_file_functions import (load_workflow_from_yaml_file,
                                          ordered_dump)
