@@ -152,8 +152,18 @@ class SpectrumProcessor:
         """
         if processing_report is not None:
             processing_report.counter_number_processed += 1
+
+        clone = processing_report is not None
+
         for filter_func in self.filters:
-            spectrum_out = filter_func(spectrum, clone=False)
+            method_params = inspect.signature(filter_func).parameters
+
+            if clone and "clone" not in method_params:
+                logger.error("Processing report is set to True, but the filter function %s does not support cloning.", filter_func.__name__)
+
+            # Ensures that filter function can be used, even if it does not support cloning
+            spectrum_out = filter_func(spectrum, **({"clone": clone} if "clone" in method_params else {}))
+
             if processing_report is not None:
                 processing_report.add_to_report(spectrum, spectrum_out, filter_func.__name__)
             if spectrum_out is None:
@@ -165,7 +175,8 @@ class SpectrumProcessor:
                 reason="This method is deprecated and will be removed in the future. Use 'process_spectra()' instead.")
     def process_spectrums(self, spectra: list,
                           progress_bar: bool = True,
-                          cleaned_spectra_file=None
+                          cleaned_spectra_file=None,
+                          create_report: Optional[bool] = False
                           ):
         """
         Wrapper method for process_spectra()
@@ -188,11 +199,12 @@ class SpectrumProcessor:
         processing_report
             A ProcessingReport containing the effect of the filters.
         """
-        return self.process_spectra(spectra, progress_bar, cleaned_spectra_file)
+        return self.process_spectra(spectra, progress_bar, cleaned_spectra_file, create_report)
 
     def process_spectra(self, spectra: list,
                           progress_bar: bool = True,
-                          cleaned_spectra_file=None
+                          cleaned_spectra_file=None,
+                          create_report: Optional[bool] = False
                           ):
         """
         Process a list of spectra with all filters in the processing pipeline.
@@ -223,14 +235,18 @@ class SpectrumProcessor:
 
         if not self.filters:
             logger.warning("No filters have been specified, so spectra were not filtered")
-        processing_report = ProcessingReport(self.filters)
+
+        processing_report = ProcessingReport(self.filters) if create_report else None
 
         processed_spectra = []
         for s in tqdm(spectra, disable=(not progress_bar), desc="Processing spectra"):
             if s is None:
                 continue  # empty spectra will be discarded
-            spectrum = s.clone()
+
+            # Clone spectrum once, if no ProcessingReport is created. ProcessingReport needs cloning in every filter.
+            spectrum = s.clone() if not create_report else s
             processed_spectrum = self.process_spectrum(spectrum, processing_report)
+
             if processed_spectrum is not None:
                 processed_spectra.append(processed_spectrum)
 
