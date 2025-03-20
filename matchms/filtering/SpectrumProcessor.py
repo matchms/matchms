@@ -232,6 +232,8 @@ class SpectrumProcessor:
                 raise FileExistsError("The specified save references file already exists")
             ftype = os.path.splitext(cleaned_spectra_file)[1].lower()[1:]
             incremental_save = ftype in ('mgf', 'msp')
+        else:
+            incremental_save = False
 
         if not self.filters:
             logger.warning("No filters have been specified, so spectra were not filtered")
