@@ -10,12 +10,12 @@ logger = logging.getLogger("matchms")
 
 
 def reduce_to_number_of_peaks(spectrum_in: SpectrumType, n_required: int = 0, n_max: int = np.inf,
-                              ratio_desired: Optional[float] = None) -> SpectrumType:
+                              ratio_desired: Optional[float] = None, clone: Optional[bool] = True) -> Optional[SpectrumType]:
     """Lowest intensity peaks will be removed when it has more peaks than desired.
 
     Parameters
     ----------
-    spectrum_in
+    spectrum_in:
         Input spectrum.
     n_required:
         Number of minimum required peaks. Spectra with fewer peaks will be set
@@ -27,6 +27,13 @@ def reduce_to_number_of_peaks(spectrum_in: SpectrumType, n_required: int = 0, n_
         For spectra without parent mass (e.g. GCMS spectra) this will raise an
         error when ratio_desired is used.
         Default is None.
+    clone:
+        Optionally clone the Spectrum.
+
+    Returns
+    -------
+    Spectrum or None
+        Spectrum with reduced lowest peaks, or `None` if not present.
     """
     def _set_maximum_number_of_peaks_to_keep():
         parent_mass = spectrum.get("parent_mass", None)
@@ -47,7 +54,7 @@ def reduce_to_number_of_peaks(spectrum_in: SpectrumType, n_required: int = 0, n_
     if spectrum_in is None:
         return None
 
-    spectrum = spectrum_in.clone()
+    spectrum = spectrum_in.clone() if clone else spectrum_in
 
     if spectrum.peaks.intensities.size < n_required:
         logger.info("Spectrum with %s (<%s) peaks was set to None.",

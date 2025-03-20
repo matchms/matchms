@@ -1,5 +1,7 @@
 import logging
+from typing import Optional
 from matchms.Spectrum import Spectrum
+from matchms.typing import SpectrumType
 from ..filter_utils.load_known_adducts import load_known_adducts
 from .clean_adduct import _clean_adduct
 
@@ -7,7 +9,7 @@ from .clean_adduct import _clean_adduct
 logger = logging.getLogger("matchms")
 
 
-def derive_ionmode(spectrum_in: Spectrum) -> Spectrum:
+def derive_ionmode(spectrum_in: Spectrum, clone: Optional[bool] = True) -> Optional[SpectrumType]:
     """Derive missing ionmode based on adduct.
 
     Some input formates (e.g. MGF files) do not always provide a correct ionmode.
@@ -16,8 +18,10 @@ def derive_ionmode(spectrum_in: Spectrum) -> Spectrum:
 
     Parameters
     ----------
-    spectrum
+    spectrum_in:
         Input spectrum.
+    clone:
+        Optionally clone the Spectrum.
 
     Returns
     -------
@@ -27,7 +31,7 @@ def derive_ionmode(spectrum_in: Spectrum) -> Spectrum:
     if spectrum_in is None:
         return None
 
-    spectrum = spectrum_in.clone()
+    spectrum = spectrum_in.clone() if clone else spectrum_in
 
     ionmode = spectrum.get("ionmode")
     if ionmode in ["positive", "negative"]:
