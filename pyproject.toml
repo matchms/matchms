@@ -54,7 +54,7 @@ pytest = "^7.4.0"
 pytest-cov = "^4.1.0"
 yapf = "^0.40.1"
 testfixtures = "^7.1.0"
-twine = "^5.1.0"
+twine = "^6.1.0"
 black = "^23.7.0"
 poetry-bumpversion = "^0.3.1"
 
