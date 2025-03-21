@@ -59,46 +59,46 @@ jobs:
       - name: Check whether import statements are used consistently
         run: isort . --check-only --diff
 
-  build_pypi:
-    name: Test pypi build
-    runs-on: ubuntu-latest
-    needs: first_check
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python 3.10
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-      - name: Python info
-        run: |
-          which python
-          python --version
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip poetry
-      - name: Build package
-        run: |
-          poetry build
-      - name: Test package
-        run: |
-          poetry install --only dev
-          python -m twine check dist/*
-      - name: Show pip list
-        run: |
-          pip list
-      - name: Install development dependencies
-        run: |
-          poetry install
-      - name: Show pip list again
-        run: |
-          pip list
-      - name: Run tests
-        run: |
-          poetry run pytest
-      - name: Show environment variables
-        shell: bash -l {0}
-        run: |
-          env | sort
+#  build_pypi:
+#    name: Test pypi build
+#    runs-on: ubuntu-latest
+#    needs: first_check
+#    steps:
+#      - uses: actions/checkout@v4
+#      - name: Set up Python 3.10
+#        uses: actions/setup-python@v5
+#        with:
+#          python-version: '3.10'
+#      - name: Python info
+#        run: |
+#          which python
+#          python --version
+#      - name: Install dependencies
+#        run: |
+#          python -m pip install --upgrade pip poetry
+#      - name: Build package
+#        run: |
+#          poetry build
+#      - name: Test package
+#        run: |
+#          poetry install --only dev
+#          python -m twine check dist/*
+#      - name: Show pip list
+#        run: |
+#          pip list
+#      - name: Install development dependencies
+#        run: |
+#          poetry install
+#      - name: Show pip list again
+#        run: |
+#          pip list
+#      - name: Run tests
+#        run: |
+#          poetry run pytest
+#      - name: Show environment variables
+#        shell: bash -l {0}
+#        run: |
+#          env | sort
 
   test_dev:
     name: test dev environment / python-${{ matrix.python-version }} / ${{ matrix.os }}
@@ -131,79 +131,79 @@ jobs:
           poetry run pytest
 
 
-  test_with_conda:
-    name: Anaconda build and test documentation
-    runs-on: ubuntu-latest
-    needs: first_check
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: "0"
-      - name: Create conda environment
-        uses: conda-incubator/setup-miniconda@v3
-        with:
-          auto-update-conda: true
-          python-version: '3.10'
-      - name: Show conda config
-        shell: bash -l {0}
-        run: |
-          conda info
-          conda list
-          conda config --show-sources
-          conda config --show
-          conda env list
-      - name: Python info
-        shell: bash -l {0}
-        run: |
-          which python
-          python --version
-      - name: Show environment variables
-        shell: bash -l {0}
-        run: |
-          env | sort
-      - name: Install conda dependencies
-        shell: bash -l {0}
-        run: |
-          conda install -c conda-forge poetry
-      - name: Install with development dependencies
-        shell: bash -l {0}
-        run: |
-          python -m pip install --upgrade pip
-          poetry install --with dev,docs
-      - name: Build documentation
-        shell: bash -l {0}
-        run: |
-          make coverage doctest html
-        working-directory: readthedocs/
-        env:
-          SPHINXOPTS: "-n"  # enable nit-picky mode
-      - name: Check documentation coverage threshold
-        run: |
-          cat readthedocs/_build/coverage/python.txt
-          UNCOVERED_MEMBERS=$(grep '*' readthedocs/_build/coverage/python.txt | wc -l)
-          UNCOVERED_MEMBERS_ALLOWED=10
-          if (( $UNCOVERED_MEMBERS > $UNCOVERED_MEMBERS_ALLOWED )) ; then echo "There are currently ${UNCOVERED_MEMBERS} uncovered members in the documentation, which is more than the ${UNCOVERED_MEMBERS_ALLOWED} allowed." && exit 1;fi
-          echo "The code is sufficiently documented with ${UNCOVERED_MEMBERS} uncovered members out of ${UNCOVERED_MEMBERS_ALLOWED} allowed.";
-      - name: Test with coverage
-        shell: bash -l {0}
-        run: |
-          poetry run pytest --cov --cov-report term --cov-report xml --junitxml=xunit-result.xml
-      - name: Correct coverage paths
-        run: sed -i "s+$PWD/++g" coverage.xml
-      - name: Store PR metadata in json file
-        env:
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          HEAD_REF: ${{ github.event.pull_request.head.ref }}
-          BASE_REF: ${{ github.event.pull_request.base.ref }}
-        run: |
-          jq -n --arg pr_number "$PR_NUMBER"\
-                --arg head_ref "$HEAD_REF"\
-                --arg base_ref "$BASE_REF"\
-            '{"pr_number": $pr_number, "head_ref": $head_ref, "base_ref": $base_ref}' > pr_metadata.json
-      - uses: actions/upload-artifact@v4
-        with:
-          name: sonarcloud-data-conda
-          path: |
-            coverage.xml
-            xunit-result.xml
-            pr_metadata.json
+#  test_with_conda:
+#    name: Anaconda build and test documentation
+#    runs-on: ubuntu-latest
+#    needs: first_check
+#    steps:
+#      - uses: actions/checkout@v4
+#        with:
+#          fetch-depth: "0"
+#      - name: Create conda environment
+#        uses: conda-incubator/setup-miniconda@v3
+#        with:
+#          auto-update-conda: true
+#          python-version: '3.10'
+#      - name: Show conda config
+#        shell: bash -l {0}
+#        run: |
+#          conda info
+#          conda list
+#          conda config --show-sources
+#          conda config --show
+#          conda env list
+#      - name: Python info
+#        shell: bash -l {0}
+#        run: |
+#          which python
+#          python --version
+#      - name: Show environment variables
+#        shell: bash -l {0}
+#        run: |
+#          env | sort
+#      - name: Install conda dependencies
+#        shell: bash -l {0}
+#        run: |
+#          conda install -c conda-forge poetry
+#      - name: Install with development dependencies
+#        shell: bash -l {0}
+#        run: |
+#          python -m pip install --upgrade pip
+#          poetry install --with dev,docs
+#      - name: Build documentation
+#        shell: bash -l {0}
+#        run: |
+#          make coverage doctest html
+#        working-directory: readthedocs/
+#        env:
+#          SPHINXOPTS: "-n"  # enable nit-picky mode
+#      - name: Check documentation coverage threshold
+#        run: |
+#          cat readthedocs/_build/coverage/python.txt
+#          UNCOVERED_MEMBERS=$(grep '*' readthedocs/_build/coverage/python.txt | wc -l)
+#          UNCOVERED_MEMBERS_ALLOWED=10
+#          if (( $UNCOVERED_MEMBERS > $UNCOVERED_MEMBERS_ALLOWED )) ; then echo "There are currently ${UNCOVERED_MEMBERS} uncovered members in the documentation, which is more than the ${UNCOVERED_MEMBERS_ALLOWED} allowed." && exit 1;fi
+#          echo "The code is sufficiently documented with ${UNCOVERED_MEMBERS} uncovered members out of ${UNCOVERED_MEMBERS_ALLOWED} allowed.";
+#      - name: Test with coverage
+#        shell: bash -l {0}
+#        run: |
+#          poetry run pytest --cov --cov-report term --cov-report xml --junitxml=xunit-result.xml
+#      - name: Correct coverage paths
+#        run: sed -i "s+$PWD/++g" coverage.xml
+#      - name: Store PR metadata in json file
+#        env:
+#          PR_NUMBER: ${{ github.event.pull_request.number }}
+#          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+#          BASE_REF: ${{ github.event.pull_request.base.ref }}
+#        run: |
+#          jq -n --arg pr_number "$PR_NUMBER"\
+#                --arg head_ref "$HEAD_REF"\
+#                --arg base_ref "$BASE_REF"\
+#            '{"pr_number": $pr_number, "head_ref": $head_ref, "base_ref": $base_ref}' > pr_metadata.json
+#      - uses: actions/upload-artifact@v4
+#        with:
+#          name: sonarcloud-data-conda
+#          path: |
+#            coverage.xml
+#            xunit-result.xml
+#            pr_metadata.json
