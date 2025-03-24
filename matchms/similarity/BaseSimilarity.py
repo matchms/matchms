@@ -52,6 +52,12 @@ class BaseSimilarity:
         """
         raise NotImplementedError
 
+    def select_main_score(self, score: np.ndarray) -> np.ndarray:
+        """Extracts the main score"""
+        if self.only_store_main_score:
+            return score
+        return score[self.main_score_name]
+
     def calculate_scores(self, scores: Scores,
                          filters: Tuple[FilterScoreByValue] = (),
                          name: str = None,
