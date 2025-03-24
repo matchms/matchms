@@ -26,14 +26,14 @@ class BaseSimilarity:
     # If you set multiple data types, the main score should be set to "score" this is used as default for filtering.
     score_datatype = [("score", np.float64)]
 
-    def __init__(self, only_store_main_score: bool = True):
-        self.only_store_main_score = only_store_main_score
-        if self.only_store_main_score:
-            self.main_score_dtype = self.score_datatype[0]
-            self.main_score_name = self.score_datatype[0][0]
-        else:
+    def __init__(self, store_multi_score: bool = False):
+        self.store_multi_score = store_multi_score
+        if self.store_multi_score:
             self.main_score_dtype = self.score_datatype
             self.main_score_name = None
+        else:
+            self.main_score_dtype = self.score_datatype[0]
+            self.main_score_name = self.score_datatype[0][0]
 
     @abstractmethod
     def pair(self, reference: SpectrumType, query: SpectrumType) -> np.ndarray:
@@ -54,7 +54,7 @@ class BaseSimilarity:
 
     def select_main_score(self, score: np.ndarray) -> np.ndarray:
         """Extracts the main score"""
-        if self.only_store_main_score:
+        if self.store_multi_score:
             return score
         return score[self.main_score_name]
 
