@@ -24,7 +24,16 @@ class BaseSimilarity:
     is_commutative = True
     # Set output data type, e.g. "float" or [("score", "float"), ("matches", "int")]
     # If you set multiple data types, the main score should be set to "score" this is used as default for filtering.
-    score_datatype = np.float64
+    score_datatype = [("score", np.float64)]
+
+    def __init__(self, only_store_main_score: bool = True):
+        self.only_store_main_score = only_store_main_score
+        if self.only_store_main_score:
+            self.main_score_dtype = self.score_datatype[0]
+            self.main_score_name = self.score_datatype[0][0]
+        else:
+            self.main_score_dtype = self.score_datatype
+            self.main_score_name = None
 
     @abstractmethod
     def pair(self, reference: SpectrumType, query: SpectrumType) -> np.ndarray:
