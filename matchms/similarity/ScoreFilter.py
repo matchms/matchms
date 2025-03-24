@@ -3,26 +3,69 @@ import numpy as np
 
 
 class FilterScoreByValue:
+    """
+    A filter class to determine whether a given similarity score should be retained
+    based on a threshold value and a comparison operator.
+    """
     def __init__(self, value: float, operator = '>',
                  score_name: Optional[str] = "score"):
+        """
+        Initialize the filter with a threshold value, an operator, and an optional score name.
+
+        Parameters
+        ----------
+        value:
+            The threshold value to be used in the comparison.
+        operator:
+            A string representing the comparison operator.
+            Supported values are '>', '<', '>=', '<=', '==', '!='.
+            Defaults to '>'.
+        score_name:
+            The name of the score to filter on if the score is provided as a structured array.
+            Defaults to "score".
+        """
         self.score_name = score_name
         self.value = np.array(value, dtype=np.float64)
         self.operator = _get_operator(operator)
 
     def keep_score(self, score: np.ndarray) -> bool:
-        """Unpacks the score and runs the filter function.
+        """
+        Determine whether the given score should be kept based on the filtering criteria.
 
-        Some scores have multiple scores (e.g. cosine and matches) this function makes sure the score is applied
-        to the correct score"""
+        If the score is a structured numpy array (i.e., it contains multiple fields), the method
+        extracts the score corresponding to self.score_name before applying the filter.
+
+        Parameters
+        ----------
+        score
+            The similarity score(s) to be evaluated. May be a simple array or a structured array.
+        """
         if len(score.dtype) > 1:  # if structured array
             score = score[self.score_name]
         return self.filter_function(score)
 
     def filter_function(self, score: np.ndarray) -> bool:
+        """
+        Apply the filtering operator to the score.
+
+        Parameters
+        ----------
+        score : np.ndarray
+            The score value (or values) to which the filter operator will be applied.
+        """
         return self.operator(score, self.value)
 
 
 def _get_operator(relation: str):
+    """
+    Retrieve the numpy comparison function corresponding to the provided operator string.
+
+    Parameters
+    ----------
+    relation : str
+        A string representing the desired comparison operator.
+        Expected values are '>', '<', '>=', '<=', '==', or '!='.
+    """
     relation = relation.strip()
     ops = {'>': np.greater,
            '<': np.less,
