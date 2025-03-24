@@ -123,7 +123,7 @@ class BaseSimilarity:
                      references: np.ndarray[SpectrumType], queries: np.ndarray[SpectrumType],
                      is_symmetric: bool = False
                      ) -> np.ndarray:
-        sim_matrix = np.zeros((len(references), len(queries)), dtype=self.score_datatype)
+        sim_matrix = np.zeros((len(references), len(queries)), dtype=self.main_score_dtype)
         if is_symmetric:
             if len(references) != len(queries):
                 raise ValueError(f"Found unequal number of spectra {len(references)} and {len(queries)} while `is_symmetric` is True.")
@@ -131,13 +131,15 @@ class BaseSimilarity:
             # Compute pairwise similarities
             for i_ref, reference in enumerate(tqdm(references, "Calculating similarities")):
                 for i_query, query in enumerate(queries[i_ref:], start=i_ref):  # Compute only upper triangle
-                    sim_matrix[i_ref, i_query] = self.pair(reference, query)
+                    scores = self.pair(reference, query)
+                    sim_matrix[i_ref, i_query] = self.select_main_score(scores)
                     sim_matrix[i_query, i_ref] = sim_matrix[i_ref, i_query]
         else:
             # Compute pairwise similarities
             for i, reference in enumerate(tqdm(references, "Calculating similarities")):
                 for j, query in enumerate(queries):
-                    sim_matrix[i, j] = self.pair(reference, query)
+                    scores = self.pair(reference, query)
+                    sim_matrix[i, j] = self.select_main_score(scores)
         return sim_matrix
 
     def matrix_with_filter(self, references: List[SpectrumType], queries: List[SpectrumType],
@@ -183,6 +185,7 @@ class BaseSimilarity:
                     if np.all(score_filter.keep_score(score) for score_filter in score_filters):
                         idx_row += [i_ref, i_query]
                         idx_col += [i_query, i_ref]
+                        score = self.select_main_score(score)
                         scores += [score, score]
             else:
                 for i_query, query in enumerate(queries[:n_cols]):
@@ -191,6 +194,7 @@ class BaseSimilarity:
                     if np.all(score_filter.keep_score(score) for score_filter in score_filters):
                         idx_row.append(i_ref)
                         idx_col.append(i_query)
+                        score = self.select_main_score(score)
                         scores.append(score)
         return COOMatrix(row_idx=idx_row, column_idx=idx_col, scores=scores)
 
@@ -212,9 +216,9 @@ class BaseSimilarity:
         mask_indices
             The row column index pairs for which a score should be calculated.
         """
-        scores = np.zeros((len(mask_indices)), dtype=self.score_datatype)
+        scores = np.zeros((len(mask_indices)), dtype=self.main_score_dtype)
         for i, (i_row, i_col) in enumerate(tqdm(mask_indices, desc="Calculating sparse similarities")):
-            scores[i] = self.pair(references[i_row], queries[i_col])
+            scores[i] = self.select_main_score(self.pair(references[i_row], queries[i_col]))
         return COOMatrix(row_idx=mask_indices.idx_row, column_idx=mask_indices.idx_col, scores=scores)
 
     def sparse_array_with_filter(self, references: List[SpectrumType], queries: List[SpectrumType],
@@ -249,7 +253,7 @@ class BaseSimilarity:
             if np.all(score_filter.keep_score(score) for score_filter in score_filters):
                 idx_row.append(row)
                 idx_col.append(col)
-                scores.append(score)
+                scores.append(self.select_main_score(score))
         return COOMatrix(row_idx=idx_row, column_idx=idx_col, scores=scores)
 
 
