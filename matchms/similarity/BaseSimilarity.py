@@ -16,14 +16,15 @@ class BaseSimilarity:
 
     Attributes
     ----------
-    is_commutative
+    is_commutative:
        Whether similarity function is commutative, which means that the order of spectra
        does not matter (similarity(A, B) == similarity(B, A)). Default is True.
+    score_datatype:
+        Data type for the score output, e.g. "float" or [("score", "float"), ("matches", "int")].
+        If multiple data types are set, the main score should be set to "score" (used as default for filtering).
     """
     # Set key characteristics as class attributes
     is_commutative = True
-    # Set output data type, e.g. "float" or [("score", "float"), ("matches", "int")]
-    # If you set multiple data types, the main score should be set to "score" this is used as default for filtering.
     score_datatype = np.float64
 
     @abstractmethod
@@ -38,15 +39,17 @@ class BaseSimilarity:
             Single query spectrum.
 
         Returns
-            score as numpy array (using self.score_datatype). For instance returning
+            The similarity score as numpy array (using self.score_datatype). For instance returning
             np.asarray(score, dtype=self.score_datatype)
         """
         raise NotImplementedError
 
-    def calculate_scores(self, scores: Scores,
-                         filters: Tuple[FilterScoreByValue] = (),
-                         name: str = None,
-                         join_type="left") -> Scores:
+    def calculate_scores(
+            self, scores: Scores,
+            filters: Tuple[FilterScoreByValue] = (),
+            name: str = None,
+            join_type="left"
+            ) -> Scores:
         """
         Calculate the similarity between all reference objects vs all query objects using
         the most suitable available implementation of the given similarity_function.
@@ -104,10 +107,25 @@ class BaseSimilarity:
             return scores
         raise ValueError("The methods above should always return COOMatrix or np.ndarray")
 
-    def matrix(self,
-                     references: np.ndarray[SpectrumType], queries: np.ndarray[SpectrumType],
-                     is_symmetric: bool = False
-                     ) -> np.ndarray:
+    def matrix(
+            self,
+            references: np.ndarray[SpectrumType], queries: np.ndarray[SpectrumType],
+            is_symmetric: bool = False
+            ) -> np.ndarray:
+        """
+        Compute a dense similarity matrix for all pairs of reference and query spectra.
+
+        Parameters
+        ----------
+        references:
+            Collection of reference spectra.
+        queries:
+            Collection of query spectra.
+        is_symmetric:
+            Indicates if the similarity matrix is symmetric (e.g., for all-vs-all comparisons).
+            When True, only the upper triangle of the matrix is computed and then mirrored,
+            which can reduce computation time.
+        """
         sim_matrix = np.zeros((len(references), len(queries)), dtype=self.score_datatype)
         if is_symmetric:
             if len(references) != len(queries):
@@ -125,9 +143,12 @@ class BaseSimilarity:
                     sim_matrix[i, j] = self.pair(reference, query)
         return sim_matrix
 
-    def matrix_with_filter(self, references: List[SpectrumType], queries: List[SpectrumType],
-                           score_filters: Tuple[FilterScoreByValue],
-                           is_symmetric: bool = False, ) -> COOMatrix:
+    def matrix_with_filter(
+            self,
+            references: List[SpectrumType], queries: List[SpectrumType],
+            score_filters: Tuple[FilterScoreByValue],
+            is_symmetric: bool = False
+            ) -> COOMatrix:
         """Optional: Provide optimized method to calculate a sparse matrix with filtering applied directly.
         This is helpfull if the filter function is removing most scores. Important note, per score this takes about 12x
         the amount of memory. Therefore, doing filtering during compute is only worth it if you keep less than 1/12th of
@@ -180,8 +201,11 @@ class BaseSimilarity:
         return COOMatrix(row_idx=idx_row, column_idx=idx_col, scores=scores)
 
 
-    def sparse_array(self, references: List[SpectrumType], queries: List[SpectrumType],
-                     mask_indices: COOIndex) -> COOMatrix:
+    def sparse_array(
+            self,
+            references: List[SpectrumType], queries: List[SpectrumType],
+            mask_indices: COOIndex
+            ) -> COOMatrix:
         """Optional: Provide optimized method to calculate a sparse matrix of similarity scores.
 
         Compute similarity scores for pairs of reference and query spectra as given by the indices
@@ -202,8 +226,12 @@ class BaseSimilarity:
             scores[i] = self.pair(references[i_row], queries[i_col])
         return COOMatrix(row_idx=mask_indices.idx_row, column_idx=mask_indices.idx_col, scores=scores)
 
-    def sparse_array_with_filter(self, references: List[SpectrumType], queries: List[SpectrumType],
-                                 mask_indices: COOIndex, score_filters: Tuple[FilterScoreByValue]) -> COOMatrix:
+    def sparse_array_with_filter(
+            self,
+            references: List[SpectrumType], queries: List[SpectrumType],
+            mask_indices: COOIndex,
+            score_filters: Tuple[FilterScoreByValue]
+            ) -> COOMatrix:
         """Uses a mask to compute only the required scores and filters scores that do not pass the filter.
 
         This method most of the time does not make sense. It is only worth it if you want to store less than 1/12th
