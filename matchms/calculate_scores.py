@@ -68,7 +68,6 @@ def create_scores_object_and_calculate_scores(references: ReferencesType, querie
 
 
 def calculate_scores(similarity_metric: BaseSimilarity, scores: Scores,
-                     filters: Tuple[FilterScoreByValue] = (),
                      name: str = None,
                      join_type="left") -> Scores:
     """
@@ -104,17 +103,15 @@ def calculate_scores(similarity_metric: BaseSimilarity, scores: Scores,
     mask_indices = None
     if len(scores.scores.score_names) > 0:
         mask_indices = COOIndex(scores.scores.row, scores.scores.col)
-    elif len(filters) == 0:
-        new_scores = similarity_metric.matrix(references=scores.references, queries=scores.queries,
-                                              score_filters=filters)
+    elif len(similarity_metric.score_filters) == 0:
+        new_scores = similarity_metric.matrix(references=scores.references, queries=scores.queries)
         scores.scores.add_dense_matrix(new_scores,
                                       name,
                                       join_type=join_type)
-
+        return scores
 
     new_scores = similarity_metric.sparse_array(references=scores.references, queries=scores.queries,
-                                                mask_indices=mask_indices,
-                                                score_filters=filters)
+                                                mask_indices=mask_indices)
 
     scores.scores.add_sparse_data(new_scores.row,
                                   new_scores.column,

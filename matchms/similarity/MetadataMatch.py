@@ -1,11 +1,11 @@
 import logging
-from typing import List
+from typing import List, Tuple
 import numpy as np
 from matchms.similarity.spectrum_similarity_functions import (
     number_matching, number_matching_symmetric)
 from matchms.Spectrum import Spectrum
 from .BaseSimilarity import BaseSimilarity
-
+from .ScoreFilter import FilterScoreByValue
 
 logger = logging.getLogger("matchms")
 
@@ -63,9 +63,8 @@ class MetadataMatch(BaseSimilarity):
     is_commutative = True
     score_datatype = bool
 
-    def __init__(self, field: str,
-                 matching_type: str = "equal_match",
-                 tolerance: float = 0.1):
+    def __init__(self, field: str, matching_type: str = "equal_match",
+                 tolerance: float = 0.1, score_filters: Tuple[FilterScoreByValue] = ()):
         """
         Parameters
         ----------
@@ -79,6 +78,7 @@ class MetadataMatch(BaseSimilarity):
             Specify tolerance below which two values are counted as match.
             This only applied to numerical values.
         """
+        super().__init__(score_filters)
         self.field = field
         self.tolerance = tolerance
         assert matching_type in ["equal_match", "difference"], \
@@ -112,7 +112,7 @@ class MetadataMatch(BaseSimilarity):
         return np.asarray(False, dtype=self.score_datatype)
 
     def matrix(self, references: List[Spectrum], queries: List[Spectrum],
-               is_symmetric: bool = False) -> np.ndarray:
+               is_symmetric: bool = False, mask_indices=None) -> np.ndarray:
         """Compare parent masses between all references and queries.
 
         Parameters
@@ -126,6 +126,11 @@ class MetadataMatch(BaseSimilarity):
             comparison). By using the fact that score[i,j] = score[j,i] the calculation will be about
             2x faster.
         """
+        if mask_indices is not None:
+            raise NotImplementedError(f"Mask with matrix compute is not yet supported for {self.__class__.__name__}")
+        if len(self.score_filters) >0:
+            raise NotImplementedError(f"Filters with matrix compute is not yet supported for {self.__class__.__name__}")
+
         def collect_entries(spectra):
             """Collect metadata entries."""
             entries = []

@@ -1,10 +1,11 @@
-from typing import List
+from typing import List, Tuple
 import numpy as np
 from matchms.similarity.spectrum_similarity_functions import (
     number_matching, number_matching_ppm, number_matching_symmetric,
     number_matching_symmetric_ppm)
 from matchms.Spectrum import Spectrum
 from .BaseSimilarity import BaseSimilarity
+from .ScoreFilter import FilterScoreByValue
 
 
 class PrecursorMzMatch(BaseSimilarity):
@@ -55,7 +56,8 @@ class PrecursorMzMatch(BaseSimilarity):
     is_commutative = True
     score_datatype = bool
 
-    def __init__(self, tolerance: float = 0.1, tolerance_type: str = "Dalton"):
+    def __init__(self, tolerance: float = 0.1,
+                 tolerance_type: str = "Dalton", score_filters: Tuple[FilterScoreByValue] = ()):
         """
         Parameters
         ----------
@@ -65,6 +67,7 @@ class PrecursorMzMatch(BaseSimilarity):
             Chose between fixed tolerance in Dalton (="Dalton") or a relative difference
             in ppm (="ppm").
         """
+        super().__init__(score_filters)
         self.tolerance = tolerance
         assert tolerance_type in ["Dalton", "ppm"], "Expected type from ['Dalton', 'ppm']"
         self.type = tolerance_type
@@ -91,7 +94,7 @@ class PrecursorMzMatch(BaseSimilarity):
         return np.asarray(score, dtype=self.score_datatype)
 
     def matrix(self, references: List[Spectrum], queries: List[Spectrum],
-               is_symmetric: bool = False) -> np.ndarray:
+               is_symmetric: bool = False, mask_indices=None) -> np.ndarray:
         """Compare parent masses between all references and queries.
 
         Parameters
@@ -105,6 +108,11 @@ class PrecursorMzMatch(BaseSimilarity):
             comparison). By using the fact that score[i,j] = score[j,i] the calculation will be about
             2x faster.
         """
+        if mask_indices is not None:
+            raise NotImplementedError(f"Mask with matrix compute is not yet supported for {self.__class__.__name__}")
+        if len(self.score_filters) >0:
+            raise NotImplementedError(f"Filters with matrix compute is not yet supported for {self.__class__.__name__}")
+
         def collect_precursormz(spectra):
             """Collect precursors."""
             precursors = []

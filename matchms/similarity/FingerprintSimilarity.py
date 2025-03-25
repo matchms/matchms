@@ -1,7 +1,8 @@
-from typing import List, Union
+from typing import List, Union, Tuple
 import numpy as np
-from matchms.typing import SpectrumType
+from matchms.Spectrum import Spectrum
 from .BaseSimilarity import BaseSimilarity
+from .ScoreFilter import FilterScoreByValue
 from .vector_similarity_functions import (cosine_similarity,
                                           cosine_similarity_matrix,
                                           dice_similarity,
@@ -62,7 +63,7 @@ class FingerprintSimilarity(BaseSimilarity):
     score_datatype = np.float64
 
     def __init__(self, similarity_measure: str = "jaccard",
-                 set_empty_scores: Union[float, int, str] = "nan"):
+                 set_empty_scores: Union[float, int, str] = "nan", score_filters: Tuple[FilterScoreByValue] = ()):
         """
 
         Parameters
@@ -75,11 +76,12 @@ class FingerprintSimilarity(BaseSimilarity):
             where fingprints are missing. The default is "nan", which will return
             np.nan's in such cases.
         """
+        super().__init__(score_filters)
         self.set_empty_scores = set_empty_scores
         assert similarity_measure in ["cosine", "dice", "jaccard"], "Unknown similarity measure."
         self.similarity_measure = similarity_measure
 
-    def pair(self, reference: SpectrumType, query: SpectrumType) -> np.ndarray:
+    def pair(self, reference: Spectrum, query: Spectrum) -> np.ndarray:
         """Calculate fingerprint based similarity score between two spectra.
 
         Parameters
@@ -103,8 +105,8 @@ class FingerprintSimilarity(BaseSimilarity):
 
         raise NotImplementedError
 
-    def matrix(self, references: List[SpectrumType], queries: List[SpectrumType],
-               is_symmetric: bool = False) -> np.array:
+    def matrix(self, references: List[Spectrum], queries: List[Spectrum],
+               is_symmetric: bool = False, mask_indices=None) -> np.array:
         """Calculate matrix of fingerprint based similarity scores.
 
         Parameters
@@ -114,6 +116,11 @@ class FingerprintSimilarity(BaseSimilarity):
         queries:
             List of query spectra.
         """
+        if mask_indices is not None:
+            raise NotImplementedError(f"Mask with matrix compute is not yet supported for {self.__class__.__name__}")
+        if len(self.score_filters) >0:
+            raise NotImplementedError(f"Filters with matrix compute is not yet supported for {self.__class__.__name__}")
+
         def get_fingerprints(spectra):
             for index, spectrum in enumerate(spectra):
                 yield index, spectrum.get("fingerprint")

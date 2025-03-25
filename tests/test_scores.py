@@ -12,8 +12,9 @@ class DummySimilarityFunction(BaseSimilarity):
     """Simple dummy score, only contain pair-wise implementation."""
     score_datatype = [("score", np.str_, 16), ("len", np.int32)]
 
-    def __init__(self):
+    def __init__(self, score_filters = ()):
         """constructor"""
+        super().__init__(score_filters)
 
     def pair(self, reference, query):
         """necessary pair computation method"""
@@ -25,8 +26,9 @@ class DummySimilarityFunctionParallel(BaseSimilarity):
     """Simple dummy score, contains pair-wise and matrix implementation."""
     score_datatype = [("score", np.str_, 16), ("len", "int")]
 
-    def __init__(self):
+    def __init__(self, score_filters =()):
         """constructor"""
+        super().__init__(score_filters)
 
     def pair(self, reference, query):
         """necessary pair computation method"""
@@ -34,7 +36,7 @@ class DummySimilarityFunctionParallel(BaseSimilarity):
         return np.array([(s, len(s))], dtype=self.score_datatype)
 
     def matrix(self, references, queries,
-               is_symmetric: bool = False):
+               is_symmetric: bool = False, mask_indices = None,):
         """additional matrix computation method"""
         shape = len(references), len(queries)
         s = np.empty(shape, dtype=self.score_datatype)
