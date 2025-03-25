@@ -3,6 +3,7 @@
 import numpy as np
 from ..Spectrum import Spectrum
 
+
 COCAINE_PRECURSOR_MZ: float = 304.153137
 
 COCAINE_MZ: np.ndarray = np.array(
