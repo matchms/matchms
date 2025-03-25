@@ -17,6 +17,7 @@ from matchms.Pipeline import create_workflow
 from matchms.similarity.COOIndex import COOIndex
 from matchms.similarity.ScoreFilter import FilterScoreByValue
 
+
 module_root = os.path.dirname(__file__)
 json_file = os.path.join(module_root, "testdata", "gnps_spectra.json")
 # Get similarity measures available in matchms
