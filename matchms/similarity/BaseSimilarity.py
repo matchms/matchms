@@ -203,7 +203,7 @@ class BaseSimilarity:
                         idx_row.append(i_ref)
                         idx_col.append(i_query)
                         scores.append(score)
-        return COOMatrix(row_idx=idx_row, column_idx=idx_col, scores=scores)
+        return COOMatrix(row_idx=idx_row, column_idx=idx_col, scores=scores, scores_dtype=self.score_datatype)
 
 
     def _sparse_array_with_mask_without_filter(self, references: Sequence[SpectrumType], queries: Sequence[SpectrumType],
@@ -229,7 +229,7 @@ class BaseSimilarity:
         scores = np.zeros((len(mask_indices)), dtype=self.score_datatype)
         for i, (i_row, i_col) in enumerate(tqdm(mask_indices, desc="Calculating sparse similarities")):
             scores[i] = self.pair(references[i_row], queries[i_col])
-        return COOMatrix(row_idx=mask_indices.idx_row, column_idx=mask_indices.idx_col, scores=scores)
+        return COOMatrix(row_idx=mask_indices.idx_row, column_idx=mask_indices.idx_col, scores=scores, scores_dtype=self.score_datatype)
 
     def _sparse_array_with_filter(self, references: Sequence[SpectrumType], queries: Sequence[SpectrumType],
                                  mask_indices: COOIndex) -> COOMatrix:
@@ -258,7 +258,7 @@ class BaseSimilarity:
                 idx_row.append(row)
                 idx_col.append(col)
                 scores.append(score)
-        return COOMatrix(row_idx=idx_row, column_idx=idx_col, scores=scores)
+        return COOMatrix(row_idx=idx_row, column_idx=idx_col, scores=scores, scores_dtype=self.score_datatype)
 
 
     def to_dict(self) -> dict:
