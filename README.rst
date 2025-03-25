@@ -320,8 +320,13 @@ To install matchms, do:
   cd matchms
   conda create --name matchms-dev python=3.11
   conda activate matchms-dev
-  conda install poetry=1.8
-  poetry install
+
+  # If you use poetry
+  poetry install --with-dev
+
+  # If you use pip
+  pip install -r dev-requirements.txt
+  pip install --editable .
 
 Run the linter with:
 
