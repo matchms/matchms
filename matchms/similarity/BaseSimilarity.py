@@ -2,7 +2,6 @@ from abc import abstractmethod
 from typing import List, Tuple
 import numpy as np
 from tqdm import tqdm
-from matchms import Scores
 from matchms.similarity.COOIndex import COOIndex
 from matchms.similarity.COOMatrix import COOMatrix
 from matchms.similarity.ScoreFilter import FilterScoreByValue
@@ -42,67 +41,6 @@ class BaseSimilarity:
             np.asarray(score, dtype=self.score_datatype)
         """
         raise NotImplementedError
-
-    def calculate_scores(self, scores: Scores,
-                         filters: Tuple[FilterScoreByValue] = (),
-                         name: str = None,
-                         join_type="left") -> Scores:
-        """
-        Calculate the similarity between all reference objects vs all query objects using
-        the most suitable available implementation of the given similarity_function.
-        If Scores object already contains similarity scores, the newly computed measures
-        will be added to a new layer (name --> layer name).
-        Additional scores will be added as specified with join_type, the default being 'left'.
-
-        Parameters
-        ----------
-        scores
-            A scores object containing the references and queries and potentially previously calculated scores.
-        filters
-            A tuple of filters to apply to the scores, before storing.
-        name
-            Label of the new scores layer. If None, the name of the similarity_function class will be used.
-        join_type
-            Choose from left, right, outer, inner to specify the merge type.
-        """
-        def is_sparse_advisable():
-            return (
-                (len(scores.scores.score_names) > 0)  # already scores in Scores
-                and (join_type in ["inner", "left"])  # inner/left join
-                and (len(scores.scores.row) < (scores.n_rows * scores.n_cols) / 2)
-            )
-        if name is None:
-            name = self.__class__.__name__
-
-        if is_sparse_advisable():
-            if filters == ():
-                new_scores = self.sparse_array(references=scores.references,
-                                           queries=scores.queries,
-                                           mask_indices=COOIndex(scores.scores.row, scores.scores.col))
-            else:
-                new_scores = self.sparse_array_with_filter(references=scores.references,queries=scores.queries,
-                                               mask_indices=COOIndex(scores.scores.row, scores.scores.col),
-                                                           score_filters=filters)
-        else:
-            if filters == ():
-                new_scores = self.matrix(scores.references,
-                                         scores.queries,
-                                         is_symmetric=scores.is_symmetric)
-            else:
-                new_scores = self.matrix_with_filter(scores.references, scores.queries,
-                                                     is_symmetric=scores.is_symmetric, score_filters=filters)
-
-        if isinstance(new_scores, COOMatrix):
-            scores.scores.add_sparse_data(new_scores.row,
-                                          new_scores.column,
-                                          new_scores.scores,
-                                          name,
-                                          join_type="left")
-            return scores
-        if isinstance(new_scores, np.ndarray):
-            scores.scores.add_dense_matrix(new_scores, name, join_type=join_type)
-            return scores
-        raise ValueError("The methods above should always return COOMatrix or np.ndarray")
 
     def matrix(self,
                      references: np.ndarray[SpectrumType], queries: np.ndarray[SpectrumType],

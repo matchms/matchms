@@ -5,6 +5,7 @@ from datetime import datetime
 from typing import Callable, Iterable, List, Optional, Union
 from deprecated import deprecated
 import matchms.similarity as mssimilarity
+from matchms.calculate_scores import calculate_scores
 from matchms.filtering.filter_order import ALL_FILTERS
 from matchms.filtering.SpectrumProcessor import (FunctionWithParametersType,
                                                  SpectrumProcessor)
@@ -270,7 +271,8 @@ class Pipeline:
             self.scores = Scores(self._spectra_references,
                                  self._spectra_queries,
                                  is_symmetric=self.is_symmetric)
-        self.scores = similarity_measure.create_scores_object_and_calculate_scores(self.scores,,
+
+        self.scores = calculate_scores(similarity_measure, self.scores)
 
     def set_logging(self):
         """Set the matchms logger to write messages to file (if defined).
