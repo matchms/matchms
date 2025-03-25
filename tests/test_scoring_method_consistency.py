@@ -118,6 +118,7 @@ def test_matrix_masking_and_filtering(spectra, similarity_measure):
     computed_scores_matrix_with_mask_without_filters = scoring_method.matrix(spectra, spectra, is_symmetric=False, mask_indices=mask_indices)
 
     # todo add a test to check that the values are correct
+    # todo also test is_symmetric
 
 @pytest.mark.parametrize("similarity_measure", list(_score_functions.values()))
 def test_sparse_array_masking_and_filtering(spectra, similarity_measure):
@@ -134,3 +135,4 @@ def test_sparse_array_masking_and_filtering(spectra, similarity_measure):
     computed_scores_matrix_with_mask_without_filters = scoring_method.sparse_array(spectra, spectra, is_symmetric=False, mask_indices=mask_indices)
 
     # todo add a test to check that the values are correct
+    # todo also test is_symmetric
