@@ -1,12 +1,8 @@
 from typing import Tuple
 
-import numpy as np
-
-from . import Scores
 from .Scores import Scores
 from .similarity.BaseSimilarity import BaseSimilarity
 from .similarity.COOIndex import COOIndex
-from .similarity.COOMatrix import COOMatrix
 from .similarity.ScoreFilter import FilterScoreByValue
 from .typing import QueriesType, ReferencesType
 
@@ -71,7 +67,7 @@ def create_scores_object_and_calculate_scores(references: ReferencesType, querie
     return scores
 
 
-def calculate_scores(similarity_metric, scores: Scores,
+def calculate_scores(similarity_metric: BaseSimilarity, scores: Scores,
                      filters: Tuple[FilterScoreByValue] = (),
                      name: str = None,
                      join_type="left") -> Scores:
@@ -95,41 +91,25 @@ def calculate_scores(similarity_metric, scores: Scores,
     join_type
         Choose from left, right, outer, inner to specify the merge type.
     """
-    def is_sparse_advisable():
-        return (
-            (len(scores.scores.score_names) > 0)  # already scores in Scores
-            and (join_type in ["inner", "left"])  # inner/left join
-            and (len(scores.scores.row) < (scores.n_rows * scores.n_cols) / 2)
-        )
+    # todo Currently Scores only supports sparse matrixes, so we never compute a dense matrix,
+    #  since it would anyway be converted to sparse,
+    #  if in the future Scores also supports storing dense matrixes
+    #  we could add more complicated logic here, e.g. checking if the mask is <1/3 of dense
+
+    mask_indices = None
+    if len(scores.scores.score_names) > 0 and (len(scores.scores.row) < (scores.n_rows * scores.n_cols)):
+        mask_indices = COOIndex(scores.scores.row, scores.scores.col)
+
     if name is None:
         name = similarity_metric.__class__.__name__
 
-    if is_sparse_advisable():
-        if filters == ():
-            new_scores = similarity_metric.sparse_array(references=scores.references,
-                                                        queries=scores.queries,
-                                                        mask_indices=COOIndex(scores.scores.row, scores.scores.col))
-        else:
-            new_scores = similarity_metric.sparse_array_with_filter(references=scores.references, queries=scores.queries,
-                                                                    mask_indices=COOIndex(scores.scores.row, scores.scores.col),
-                                                                    score_filters=filters)
-    else:
-        if filters == ():
-            new_scores = similarity_metric.matrix(scores.references,
-                                                  scores.queries,
-                                                  is_symmetric=scores.is_symmetric)
-        else:
-            new_scores = similarity_metric.matrix_with_filter(scores.references, scores.queries,
-                                                              is_symmetric=scores.is_symmetric, score_filters=filters)
+    new_scores = similarity_metric.sparse_array(references=scores.references, queries=scores.queries,
+                                                mask_indices=mask_indices,
+                                                score_filters=filters)
 
-    if isinstance(new_scores, COOMatrix):
-        scores.scores.add_sparse_data(new_scores.row,
-                                      new_scores.column,
-                                      new_scores.scores,
-                                      name,
-                                      join_type="left")
-        return scores
-    if isinstance(new_scores, np.ndarray):
-        scores.scores.add_dense_matrix(new_scores, name, join_type=join_type)
-        return scores
-    raise ValueError("The methods above should always return COOMatrix or np.ndarray")
+    scores.scores.add_sparse_data(new_scores.row,
+                                  new_scores.column,
+                                  new_scores.scores,
+                                  name,
+                                  join_type=join_type)
+    return scores
