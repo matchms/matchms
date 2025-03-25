@@ -3,7 +3,7 @@ import tempfile
 import numpy as np
 import pytest
 import matchms.similarity
-from matchms import calculate_scores
+from matchms import create_scores_object_and_calculate_scores
 from matchms.filtering import add_fingerprint
 from matchms.importing import scores_from_json, scores_from_pickle
 from .builder_Spectrum import SpectrumBuilder
@@ -68,7 +68,7 @@ def symmetrical_scores(similarity_function, spectra):
     queries = spectra
     references = spectra
 
-    scores = calculate_scores(queries, references, similarity_function=similarity_function)
+    scores = create_scores_object_and_calculate_scores(queries, references, similarity_function=similarity_function)
     yield scores
 
 
@@ -78,7 +78,7 @@ def asymmetrical_scores(similarity_function, spectra):
     queries = spectra
     references = spectra[1:3]
 
-    scores = calculate_scores(queries, references, similarity_function=similarity_function)
+    scores = create_scores_object_and_calculate_scores(queries, references, similarity_function=similarity_function)
     yield scores
 
 

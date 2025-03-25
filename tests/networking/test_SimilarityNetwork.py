@@ -2,7 +2,7 @@ import os
 import tempfile
 import numpy as np
 import pytest
-from matchms import Spectrum, calculate_scores
+from matchms import Spectrum, create_scores_object_and_calculate_scores
 from matchms.networking import SimilarityNetwork
 from matchms.similarity import FingerprintSimilarity, ModifiedCosine
 
@@ -50,7 +50,7 @@ def create_dummy_scores():
 
     # Create Scores object by calculating dice scores
     similarity_measure = FingerprintSimilarity("dice")
-    scores = calculate_scores(references, queries, similarity_measure)
+    scores = create_scores_object_and_calculate_scores(references, queries, similarity_measure)
     return scores
 
 
@@ -59,7 +59,7 @@ def create_dummy_scores_symmetric():
 
     # Create Scores object by calculating dice scores
     similarity_measure = FingerprintSimilarity("dice")
-    scores = calculate_scores(spectra, spectra, similarity_measure)
+    scores = create_scores_object_and_calculate_scores(spectra, spectra, similarity_measure)
     return scores
 
 
@@ -80,7 +80,7 @@ def create_dummy_scores_symmetric_modified_cosine():
 
     # Create Scores object by calculating dice scores
     similarity_measure = ModifiedCosine()
-    scores = calculate_scores(spectra, spectra, similarity_measure)
+    scores = create_scores_object_and_calculate_scores(spectra, spectra, similarity_measure)
     return scores
 
 

@@ -2,7 +2,7 @@ import os
 import tempfile
 import numpy as np
 import pytest
-from matchms import Scores, calculate_scores
+from matchms import Scores, create_scores_object_and_calculate_scores
 from matchms.similarity import CosineGreedy, IntersectMz
 from matchms.similarity.BaseSimilarity import BaseSimilarity
 from .builder_Spectrum import SpectrumBuilder
@@ -73,9 +73,8 @@ def spectra():
 def test_scores_single_pair():
     """Test single pair input."""
     dummy_similarity_function = DummySimilarityFunction()
-    scores = calculate_scores(references=["A"],
-                    queries=["B"],
-                     similarity_function=dummy_similarity_function)
+    scores = create_scores_object_and_calculate_scores(references=["A"], queries=["B"],
+                                                       similarity_function=dummy_similarity_function)
     actual_1 = scores.scores[0, 0, 'DummySimilarityFunction_score']
     actual_2 = scores.scores[0, 0, 'DummySimilarityFunction_len']
     assert actual_1 == "AB", "Expected different scores."
@@ -84,9 +83,8 @@ def test_scores_single_pair():
 
 def test_scores_calculate():
     dummy_similarity_function = DummySimilarityFunction()
-    scores = calculate_scores(references=["r0", "r1", "r2"],
-                              queries=["q0", "q1"],
-                              similarity_function=dummy_similarity_function)
+    scores = create_scores_object_and_calculate_scores(references=["r0", "r1", "r2"], queries=["q0", "q1"],
+                                                       similarity_function=dummy_similarity_function)
     actual_data = list(scores)
     expected = [
         ("r0", "q0", ["r0q0", 4]),
@@ -101,9 +99,8 @@ def test_scores_calculate():
 
 def test_scores_calculate_parallel():
     dummy_similarity_function = DummySimilarityFunctionParallel()
-    scores = calculate_scores(references=["r0", "r1", "r2"],
-                              queries=["q0", "q1"],
-                              similarity_function=dummy_similarity_function)
+    scores = create_scores_object_and_calculate_scores(references=["r0", "r1", "r2"], queries=["q0", "q1"],
+                                                       similarity_function=dummy_similarity_function)
     actual = list(scores)
     expected = [
         ("r0", "q0", ["r0q0", 4]),
@@ -152,9 +149,8 @@ def test_scores_init_with_tuple():
 
 def test_scores_next():
     dummy_similarity_function = DummySimilarityFunction()
-    scores = calculate_scores(references=["r", "rr", "rrr"],
-                              queries=["q", "qq"],
-                              similarity_function=dummy_similarity_function)
+    scores = create_scores_object_and_calculate_scores(references=["r", "rr", "rrr"], queries=["q", "qq"],
+                                                       similarity_function=dummy_similarity_function)
     actual = list(scores)
     expected = [
         ("r", "q", ["rq", 2]),
@@ -173,7 +169,7 @@ def test_scores_to_dict():
     spectrum_1.set("precursor_mz", 123.4)
     references = [spectrum_1, spectrum_2]
     queries = [spectrum_3]
-    scores = calculate_scores(references, queries, CosineGreedy())
+    scores = create_scores_object_and_calculate_scores(references, queries, CosineGreedy())
     scores_dict = scores.to_dict()
     expected_dict = [{'id': 'spectrum1', 'precursor_mz': 123.4, 'peaks_json': [[100.0, 0.7], [150.0, 0.2], [200.0, 0.1]]},
                      {'id': 'spectrum2', 'peaks_json': [[100.0, 0.4], [140.0, 0.2], [190.0, 0.1]]}]
@@ -187,7 +183,7 @@ def test_scores_by_referencey():
     references = [spectrum_1, spectrum_2, spectrum_3]
     queries = [spectrum_3, spectrum_4]
 
-    scores = calculate_scores(references, queries, CosineGreedy())
+    scores = create_scores_object_and_calculate_scores(references, queries, CosineGreedy())
     assert scores.shape == (3, 2, 2)
     name_score = scores.score_names[0]
     selected_scores = scores.scores_by_reference(spectrum_2, name_score)
@@ -202,7 +198,7 @@ def test_scores_by_reference_sorted():
     references = [spectrum_1, spectrum_2, spectrum_3]
     queries = [spectrum_3, spectrum_4, spectrum_2]
 
-    scores = calculate_scores(references, queries, CosineGreedy())
+    scores = create_scores_object_and_calculate_scores(references, queries, CosineGreedy())
     name_score = scores.score_names[0]
     selected_scores = scores.scores_by_reference(spectrum_2, name_score, sort=True)
 
@@ -220,7 +216,7 @@ def test_scores_by_referencey_non_tuple_score():
     references = [spectrum_1, spectrum_2, spectrum_3]
     queries = [spectrum_3, spectrum_4]
 
-    scores = calculate_scores(references, queries, IntersectMz())
+    scores = create_scores_object_and_calculate_scores(references, queries, IntersectMz())
     name_score = scores.score_names[0]
     selected_scores = scores.scores_by_reference(spectrum_2, name_score)
 
@@ -237,7 +233,7 @@ def test_scores_by_references_exception():
     faulty_spectrum = builder.with_mz(np.array([200, 350, 400.])).with_intensities(
         np.array([0.7, 0.2, 0.1])).with_metadata({'id': 'spectrum5'}).build()
 
-    scores = calculate_scores(references, queries, CosineGreedy())
+    scores = create_scores_object_and_calculate_scores(references, queries, CosineGreedy())
     name_score = scores.score_names[0]
 
     with pytest.raises(ValueError, match="Given input not found in references."):
@@ -250,7 +246,7 @@ def test_scores_by_query():
     references = [spectrum_1, spectrum_2, spectrum_3]
     queries = [spectrum_2, spectrum_3, spectrum_4]
 
-    scores = calculate_scores(references, queries, CosineGreedy())
+    scores = create_scores_object_and_calculate_scores(references, queries, CosineGreedy())
     name_score = scores.score_names[0]
     selected_scores = scores.scores_by_query(spectrum_4, name_score)
 
@@ -273,7 +269,7 @@ def test_scores_by_query_sorted():
     references = [spectrum_1, spectrum_2, spectrum_3]
     queries = [spectrum_2, spectrum_3, spectrum_4]
 
-    scores = calculate_scores(references, queries, CosineGreedy())
+    scores = create_scores_object_and_calculate_scores(references, queries, CosineGreedy())
     name_score = scores.score_names[0]
     selected_scores = scores.scores_by_query(spectrum_4, name_score, sort=True)
 
@@ -289,7 +285,7 @@ def test_scores_by_query_non_tuple_score():
     references = [spectrum_1, spectrum_2, spectrum_3]
     queries = [spectrum_2, spectrum_3, spectrum_4]
 
-    scores = calculate_scores(references, queries, IntersectMz())
+    scores = create_scores_object_and_calculate_scores(references, queries, IntersectMz())
     name_score = scores.score_names[0]
     selected_scores = scores.scores_by_query(spectrum_4, name_score)
 
@@ -302,7 +298,7 @@ def test_sort_without_name_exception():
     references = [spectrum_1, spectrum_2, spectrum_3]
     queries = [spectrum_2, spectrum_3, spectrum_4]
 
-    scores = calculate_scores(references, queries, CosineGreedy())
+    scores = create_scores_object_and_calculate_scores(references, queries, CosineGreedy())
     with pytest.raises(IndexError) as exception:
         _ = scores.scores_by_query(spectrum_4, sort=True)
     assert "For sorting, score must be specified" in exception.value.args[0]
@@ -321,7 +317,7 @@ def test_scores_by_query_exception():
     faulty_spectrum = builder.with_mz(np.array([200, 350, 400.])).with_intensities(
         np.array([0.7, 0.2, 0.1])).with_metadata({'id': 'spectrum5'}).build()
 
-    scores = calculate_scores(references, queries, CosineGreedy())
+    scores = create_scores_object_and_calculate_scores(references, queries, CosineGreedy())
     name_score = scores.score_names[0]
 
     with pytest.raises(ValueError, match="Given input not found in queries."):
@@ -336,9 +332,10 @@ def test_comparing_symmetric_scores(similarity_function_a, similarity_function_b
     spectrum_1, spectrum_2, spectrum_3, spectrum_4 = spectra()
     spectra_list = [spectrum_1, spectrum_2, spectrum_3, spectrum_4]
 
-    scores_similarity_a = calculate_scores(spectra_list, spectra_list, similarity_function_a)
-    scores_similarity_a_copy = calculate_scores(spectra_list, spectra_list, similarity_function_a)
-    scores_similarity_b = calculate_scores(spectra_list, spectra_list, similarity_function_b)
+    scores_similarity_a = create_scores_object_and_calculate_scores(spectra_list, spectra_list, similarity_function_a)
+    scores_similarity_a_copy = create_scores_object_and_calculate_scores(spectra_list, spectra_list,
+                                                                         similarity_function_a)
+    scores_similarity_b = create_scores_object_and_calculate_scores(spectra_list, spectra_list, similarity_function_b)
 
     assert scores_similarity_a == scores_similarity_a_copy
     assert scores_similarity_a != scores_similarity_b
@@ -352,9 +349,12 @@ def test_comparing_asymmetric_scores(similarity_function_a, similarity_function_
     spectrum_1, spectrum_2, spectrum_3, spectrum_4 = spectra()
     spectra_list = [spectrum_1, spectrum_2, spectrum_3, spectrum_4]
 
-    scores_similarity_a = calculate_scores(spectra_list[0:3], spectra_list, similarity_function_a)
-    scores_similarity_a_copy = calculate_scores(spectra_list[0:3], spectra_list, similarity_function_a)
-    scores_similarity_b = calculate_scores(spectra_list, spectra_list[0:3], similarity_function_b)
+    scores_similarity_a = create_scores_object_and_calculate_scores(spectra_list[0:3], spectra_list,
+                                                                    similarity_function_a)
+    scores_similarity_a_copy = create_scores_object_and_calculate_scores(spectra_list[0:3], spectra_list,
+                                                                         similarity_function_a)
+    scores_similarity_b = create_scores_object_and_calculate_scores(spectra_list, spectra_list[0:3],
+                                                                    similarity_function_b)
 
     assert scores_similarity_a == scores_similarity_a_copy
     assert scores_similarity_a != scores_similarity_b
@@ -369,7 +369,8 @@ def test_comparing_scores_with_same_shape_different_scores_values(similarity_fun
     spectrum_1, spectrum_2, spectrum_3, spectrum_4 = spectra()
     spectra_list = [spectrum_1, spectrum_2, spectrum_3, spectrum_4]
 
-    scores_parametrized = calculate_scores(spectra_list, spectra_list, similarity_function_a)
-    scores_parametrized_mirrored = calculate_scores(spectra_list, spectra_list, similarity_function_b)
+    scores_parametrized = create_scores_object_and_calculate_scores(spectra_list, spectra_list, similarity_function_a)
+    scores_parametrized_mirrored = create_scores_object_and_calculate_scores(spectra_list, spectra_list,
+                                                                             similarity_function_b)
 
     assert scores_parametrized != scores_parametrized_mirrored

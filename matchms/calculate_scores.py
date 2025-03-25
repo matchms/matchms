@@ -3,7 +3,7 @@ from .similarity.BaseSimilarity import BaseSimilarity
 from .typing import QueriesType, ReferencesType
 
 
-def calculate_scores(references: ReferencesType, queries: QueriesType,
+def create_scores_object_and_calculate_scores(references: ReferencesType, queries: QueriesType,
                      similarity_function: BaseSimilarity,
                      is_symmetric: bool = False) -> Scores:
     """Calculate the similarity between all reference objects versus all query objects.

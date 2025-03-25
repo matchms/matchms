@@ -270,7 +270,7 @@ class Pipeline:
             self.scores = Scores(self._spectra_references,
                                  self._spectra_queries,
                                  is_symmetric=self.is_symmetric)
-        self.scores = similarity_measure.calculate_scores(self.scores)
+        self.scores = similarity_measure.create_scores_object_and_calculate_scores(self.scores,,
 
     def set_logging(self):
         """Set the matchms logger to write messages to file (if defined).
