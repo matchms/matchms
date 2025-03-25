@@ -79,7 +79,7 @@ class BaseSimilarity:
             which can reduce computation time.
         """
         if mask_indices is None:
-            return self._matrix_without_mask(references, queries, is_symmetric=is_symmetric)
+            return self._matrix_without_mask_with_filter(references, queries, is_symmetric=is_symmetric)
         return self._matrix_with_mask(references, queries,
                                       mask_indices=mask_indices, is_symmetric=is_symmetric)
 
@@ -97,10 +97,18 @@ class BaseSimilarity:
         #  good idea) do this once we settle on a COO Array format (e.g. using the sparse package)
         raise ValueError("If no masking or score filters is needed, please use matrix() instead")
 
-    def _matrix_without_mask(self,
-                             references: np.ndarray[SpectrumType], queries: np.ndarray[SpectrumType],
-                             is_symmetric: bool = False
-                             ) -> np.ndarray:
+    def _matrix_without_mask_with_filter(self,
+                          references: np.ndarray[SpectrumType], queries: np.ndarray[SpectrumType],
+                          is_symmetric: bool = False):
+        sim_matrix = self._matrix_without_mask_without_filter(references, queries, is_symmetric=is_symmetric)
+        for score_filter in self.score_filters:
+            sim_matrix = score_filter.filter_matrix(sim_matrix)
+        return sim_matrix
+
+    def _matrix_without_mask_without_filter(self,
+                                            references: np.ndarray[SpectrumType], queries: np.ndarray[SpectrumType],
+                                            is_symmetric: bool = False
+                                            ) -> np.ndarray:
         """
         Compute a dense similarity matrix for all pairs of reference and query spectra.
 
@@ -124,8 +132,6 @@ class BaseSimilarity:
             for i_ref, reference in enumerate(tqdm(references, "Calculating similarities")):
                 for i_query, query in enumerate(queries[i_ref:], start=i_ref):  # Compute only upper triangle
                     score = self.pair(reference, query)
-                    if not np.all(score_filter.keep_score(score) for score_filter in self.score_filters):
-                        score = 0
                     sim_matrix[i_ref, i_query] = score
                     sim_matrix[i_query, i_ref] = score
         else:
@@ -133,8 +139,6 @@ class BaseSimilarity:
             for i, reference in enumerate(tqdm(references, "Calculating similarities")):
                 for j, query in enumerate(queries):
                     score = self.pair(reference, query)
-                    if not np.all(score_filter.keep_score(score) for score_filter in self.score_filters):
-                        score = 0
                     sim_matrix[i, j] = score
         return sim_matrix
 
@@ -146,11 +150,11 @@ class BaseSimilarity:
         sim_matrix = np.zeros((len(references), len(queries)), dtype=self.score_datatype)
         for i_row, i_col in tqdm(mask_indices, desc="Calculating sparse similarities"):
             score = self.pair(references[i_row], queries[i_col])
-            if not np.all(score_filter.keep_score(score) for score_filter in self.score_filters):
-                score = 0
-            sim_matrix[i_row, i_col] = score
-            if is_symmetric:
-                sim_matrix[i_col, i_row] = score
+            if np.all(score_filter.keep_score(score) for score_filter in self.score_filters):
+                # if not all filters pass the score is not added (so remains 0)
+                sim_matrix[i_row, i_col] = score
+                if is_symmetric:
+                    sim_matrix[i_col, i_row] = score
         return sim_matrix
 
 
