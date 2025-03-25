@@ -105,20 +105,25 @@ def test_matrix_masking_and_filtering(spectra, similarity_measure):
 
     scoring_method = similarity_measure[0](**similarity_measure[1], score_filters=())
     computed_scores_matrix_no_mask_no_filter = scoring_method.matrix(spectra, spectra, is_symmetric=False, mask_indices=None)
+    print(computed_scores_matrix_no_mask_no_filter)
 
     filters = (FilterScoreByValue(value=0.2, operator=">"), FilterScoreByValue(value=0.8, operator="<"))
     scoring_method = similarity_measure[0](**similarity_measure[1], score_filters=filters)
     computed_scores_matrix_no_mask_with_filter = scoring_method.matrix(spectra, spectra, is_symmetric=False, mask_indices=None)
+    print(computed_scores_matrix_no_mask_with_filter)
 
     mask_indices = COOIndex(np.asarray([0, 1]), np.asarray([0, 1]))
     scoring_method = similarity_measure[0](**similarity_measure[1], score_filters=filters)
     computed_scores_matrix_with_mask_with_filters = scoring_method.matrix(spectra, spectra, is_symmetric=False, mask_indices=mask_indices)
+    print(computed_scores_matrix_with_mask_with_filters)
 
     scoring_method = similarity_measure[0](**similarity_measure[1], score_filters=())
     computed_scores_matrix_with_mask_without_filters = scoring_method.matrix(spectra, spectra, is_symmetric=False, mask_indices=mask_indices)
+    print(computed_scores_matrix_with_mask_without_filters)
 
     # todo add a test to check that the values are correct
     # todo also test is_symmetric
+    # todo add tests for correctly filtering on other value than score (e.g. matches)
 
 @pytest.mark.parametrize("similarity_measure", list(_score_functions.values()))
 def test_sparse_array_masking_and_filtering(spectra, similarity_measure):
@@ -126,13 +131,14 @@ def test_sparse_array_masking_and_filtering(spectra, similarity_measure):
     filters = (FilterScoreByValue(value=0.2, operator=">"), FilterScoreByValue(value=0.8, operator="<"))
     scoring_method = similarity_measure[0](**similarity_measure[1], score_filters=filters)
     computed_scores_matrix_no_mask_with_filter = scoring_method.sparse_array(spectra, spectra, is_symmetric=False, mask_indices=None)
+    print(computed_scores_matrix_no_mask_with_filter)
 
     mask_indices = COOIndex(np.asarray([0, 1]), np.asarray([0, 1]))
     scoring_method = similarity_measure[0](**similarity_measure[1], score_filters=filters)
     computed_scores_matrix_with_mask_with_filters = scoring_method.sparse_array(spectra, spectra, is_symmetric=False, mask_indices=mask_indices)
-
+    print(computed_scores_matrix_with_mask_with_filters)
     scoring_method = similarity_measure[0](**similarity_measure[1], score_filters=())
     computed_scores_matrix_with_mask_without_filters = scoring_method.sparse_array(spectra, spectra, is_symmetric=False, mask_indices=mask_indices)
-
+    print(computed_scores_matrix_with_mask_without_filters)
     # todo add a test to check that the values are correct
     # todo also test is_symmetric
