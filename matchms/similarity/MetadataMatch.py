@@ -65,7 +65,7 @@ class MetadataMatch(BaseSimilarity):
     score_datatype = bool
 
     def __init__(self, field: str, matching_type: str = "equal_match",
-                 tolerance: float = 0.1, score_filters: Tuple[FilterScoreByValue] = ()):
+                 tolerance: float = 0.1, score_filters: Tuple[FilterScoreByValue, ...] = ()):
         """
         Parameters
         ----------

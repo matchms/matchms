@@ -57,7 +57,7 @@ class PrecursorMzMatch(BaseSimilarity):
     score_datatype = bool
 
     def __init__(self, tolerance: float = 0.1,
-                 tolerance_type: str = "Dalton", score_filters: Tuple[FilterScoreByValue] = ()):
+                 tolerance_type: str = "Dalton", score_filters: Tuple[FilterScoreByValue, ...] = ()):
         """
         Parameters
         ----------

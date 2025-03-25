@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import Iterable, List, Tuple
+from typing import Sequence, Tuple
 import numpy as np
 from tqdm import tqdm
 from matchms.similarity.COOIndex import COOIndex
@@ -26,7 +26,7 @@ class BaseSimilarity:
     is_commutative = True
     score_datatype = np.float64
 
-    def __init__(self, score_filters: Tuple[FilterScoreByValue]):
+    def __init__(self, score_filters: Tuple[FilterScoreByValue, ...]):
         """
 
         Attributes
@@ -57,8 +57,8 @@ class BaseSimilarity:
         """
         raise NotImplementedError
 
-    def matrix(self, references: np.ndarray[SpectrumType],
-               queries: np.ndarray[SpectrumType],
+    def matrix(self, references: Sequence[SpectrumType],
+               queries: Sequence[SpectrumType],
                is_symmetric: bool = False,
                mask_indices: COOIndex = None,
                ) -> np.ndarray:
@@ -83,7 +83,7 @@ class BaseSimilarity:
         return self._matrix_with_mask(references, queries,
                                       mask_indices=mask_indices, is_symmetric=is_symmetric)
 
-    def sparse_array(self, references: List[SpectrumType], queries: List[SpectrumType],
+    def sparse_array(self, references: Sequence[SpectrumType], queries: Sequence[SpectrumType],
                      mask_indices: COOIndex = None, is_symmetric = False) -> COOMatrix:
         if len(self.score_filters) == 0 and mask_indices is not None:
             return self._sparse_array_with_mask_without_filter(references, queries, mask_indices=mask_indices)
@@ -98,7 +98,7 @@ class BaseSimilarity:
         raise ValueError("If no masking or score filters is needed, please use matrix() instead")
 
     def _matrix_without_mask_with_filter(self,
-                          references: np.ndarray[SpectrumType], queries: np.ndarray[SpectrumType],
+                          references: Sequence[SpectrumType], queries: Sequence[SpectrumType],
                           is_symmetric: bool = False):
         sim_matrix = self._matrix_without_mask_without_filter(references, queries, is_symmetric=is_symmetric)
         for score_filter in self.score_filters:
@@ -106,7 +106,7 @@ class BaseSimilarity:
         return sim_matrix
 
     def _matrix_without_mask_without_filter(self,
-                                            references: np.ndarray[SpectrumType], queries: np.ndarray[SpectrumType],
+                                            references: Sequence[SpectrumType], queries: Sequence[SpectrumType],
                                             is_symmetric: bool = False
                                             ) -> np.ndarray:
         """
@@ -143,7 +143,7 @@ class BaseSimilarity:
         return sim_matrix
 
     def _matrix_with_mask(self,
-                          references: np.ndarray[SpectrumType], queries: np.ndarray[SpectrumType],
+                          references: Sequence[SpectrumType], queries: Sequence[SpectrumType],
                           mask_indices: COOIndex,
                           is_symmetric: bool = False
                           ) -> np.ndarray:
@@ -158,7 +158,7 @@ class BaseSimilarity:
         return sim_matrix
 
 
-    def _sparse_array_with_filter_without_mask(self, references: Iterable[SpectrumType], queries: Iterable[SpectrumType],
+    def _sparse_array_with_filter_without_mask(self, references: Sequence[SpectrumType], queries: Sequence[SpectrumType],
                            is_symmetric: bool = False, ) -> COOMatrix:
         """Optional: Provide optimized method to calculate a sparse matrix with filtering applied directly.
         This is helpfull if the filter function is removing most scores. Important note, per score this takes about 12x
@@ -206,7 +206,7 @@ class BaseSimilarity:
         return COOMatrix(row_idx=idx_row, column_idx=idx_col, scores=scores)
 
 
-    def _sparse_array_with_mask_without_filter(self, references: List[SpectrumType], queries: List[SpectrumType],
+    def _sparse_array_with_mask_without_filter(self, references: Sequence[SpectrumType], queries: Sequence[SpectrumType],
                      mask_indices: COOIndex) -> COOMatrix:
         """Optional: Provide optimized method to calculate a sparse matrix of similarity scores.
 
@@ -231,7 +231,7 @@ class BaseSimilarity:
             scores[i] = self.pair(references[i_row], queries[i_col])
         return COOMatrix(row_idx=mask_indices.idx_row, column_idx=mask_indices.idx_col, scores=scores)
 
-    def _sparse_array_with_filter(self, references: List[SpectrumType], queries: List[SpectrumType],
+    def _sparse_array_with_filter(self, references: Sequence[SpectrumType], queries: Sequence[SpectrumType],
                                  mask_indices: COOIndex) -> COOMatrix:
         """Uses a mask to compute only the required scores and filters scores that do not pass the filter.
 

@@ -54,7 +54,7 @@ class ParentMassMatch(BaseSimilarity):
     # Set output data type, e.g.  "float" or [("score", "float"), ("matches", "int")]
     score_datatype = bool
 
-    def __init__(self, tolerance: float = 0.1, score_filters: Tuple[FilterScoreByValue] = ()):
+    def __init__(self, tolerance: float = 0.1, score_filters: Tuple[FilterScoreByValue, ...] = ()):
         """
         Parameters
         ----------

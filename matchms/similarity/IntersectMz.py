@@ -39,7 +39,7 @@ class IntersectMz(BaseSimilarity):
 
     """
 
-    def __init__(self, scaling: float = 1.0, score_filters: Tuple[FilterScoreByValue] = ()):
+    def __init__(self, scaling: float = 1.0, score_filters: Tuple[FilterScoreByValue, ...] = ()):
         """Constructor. Here, function parameters are defined.
 
         Parameters

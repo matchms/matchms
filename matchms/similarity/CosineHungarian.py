@@ -25,7 +25,7 @@ class CosineHungarian(BaseSimilarity):
     score_datatype = [("score", np.float64), ("matches", "int")]
 
     def __init__(self, tolerance: float = 0.1, mz_power: float = 0.0,
-                 intensity_power: float = 1.0, score_filters: Tuple[FilterScoreByValue] = ()):
+                 intensity_power: float = 1.0, score_filters: Tuple[FilterScoreByValue, ...] = ()):
         """
         Parameters
         ----------

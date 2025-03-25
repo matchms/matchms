@@ -63,7 +63,7 @@ class FingerprintSimilarity(BaseSimilarity):
     score_datatype = np.float64
 
     def __init__(self, similarity_measure: str = "jaccard",
-                 set_empty_scores: Union[float, int, str] = "nan", score_filters: Tuple[FilterScoreByValue] = ()):
+                 set_empty_scores: Union[float, int, str] = "nan", score_filters: Tuple[FilterScoreByValue, ...] = ()):
         """
 
         Parameters
