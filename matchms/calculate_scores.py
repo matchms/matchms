@@ -1,9 +1,6 @@
-from typing import Tuple
-
 from .Scores import Scores
 from .similarity.BaseSimilarity import BaseSimilarity
 from .similarity.COOIndex import COOIndex
-from .similarity.ScoreFilter import FilterScoreByValue
 from .typing import QueriesType, ReferencesType
 
 

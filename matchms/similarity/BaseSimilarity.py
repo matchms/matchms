@@ -27,6 +27,17 @@ class BaseSimilarity:
     score_datatype = np.float64
 
     def __init__(self, score_filters: Tuple[FilterScoreByValue]):
+        """
+
+        Attributes
+        ----------
+        score_filters:
+            Tuple of filters that should be applied to each score before scoring. If you want to run without filtering,
+            it is best to run matrix(). Filters can also be run after computing a matrix first, however, for strict
+            filtering this implementation can be more memory efficient. Only use matrix_with_filter if you expect to
+            filter out more than 90% of your data. Otherwise, it is more memory efficient to first run matrix, followed by
+            filtering the matrix.
+        """
         self.score_filters = score_filters
 
     @abstractmethod
@@ -48,8 +59,9 @@ class BaseSimilarity:
 
     def matrix(self, references: np.ndarray[SpectrumType],
                queries: np.ndarray[SpectrumType],
+               is_symmetric: bool = False,
                mask_indices: COOIndex = None,
-               is_symmetric: bool = False) -> np.ndarray:
+               ) -> np.ndarray:
         """
         Compute a dense similarity matrix for all pairs of reference and query spectra.
 
@@ -81,7 +93,8 @@ class BaseSimilarity:
             return self._sparse_array_with_filter(references, queries, mask_indices)
 
         # if score_filters is None and mask_indices is None:
-        # todo replace with using matrix followed by a conversion to COO array. (and a warning that this is not a good idea) do this once we settle on a COO Array format (e.g. using the sparse package)
+        # todo replace with using matrix followed by a conversion to COO array. (and a warning that this is not a
+        #  good idea) do this once we settle on a COO Array format (e.g. using the sparse package)
         raise ValueError("If no masking or score filters is needed, please use matrix() instead")
 
     def _matrix_without_mask(self,
@@ -131,7 +144,7 @@ class BaseSimilarity:
                           is_symmetric: bool = False
                           ) -> np.ndarray:
         sim_matrix = np.zeros((len(references), len(queries)), dtype=self.score_datatype)
-        for i, (i_row, i_col) in enumerate(tqdm(mask_indices, desc="Calculating sparse similarities")):
+        for i_row, i_col in tqdm(mask_indices, desc="Calculating sparse similarities"):
             score = self.pair(references[i_row], queries[i_col])
             if not np.all(score_filter.keep_score(score) for score_filter in self.score_filters):
                 score = 0
@@ -154,12 +167,6 @@ class BaseSimilarity:
             List of reference objects
         queries
             List of query objects
-        score_filters
-            Tuple of filters that should be applied to each score before scoring. If you want to run without filtering,
-            it is best to run matrix(). Filters can also be run after computing a matrix first, however, for strict
-            filtering this implementation can be more memory efficient. Only use matrix_with_filter if you expect to
-            filter out more than 90% of your data. Otherwise, it is more memory efficient to first run matrix, followed by
-            filtering the matrix.
         is_symmetric
             Set to True when *references* and *queries* are identical (as for instance for an all-vs-all
             comparison). By using the fact that score[i,j] = score[j,i] the calculation will be about

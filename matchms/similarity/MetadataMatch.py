@@ -131,24 +131,8 @@ class MetadataMatch(BaseSimilarity):
         if len(self.score_filters) >0:
             raise NotImplementedError(f"Filters with matrix compute is not yet supported for {self.__class__.__name__}")
 
-        def collect_entries(spectra):
-            """Collect metadata entries."""
-            entries = []
-            for spectrum in spectra:
-                entry = spectrum.get(self.field)
-                if entry is None:
-                    msg = f"No {self.field} entry found for spectrum."
-                    logger.warning(msg)
-                    entry = np.nan
-                elif self.matching_type == "difference" and not isinstance(entry, (int, float)):
-                    msg = f"Non-numerical entry ({entry}) not compatible with 'difference' method."
-                    logger.warning(msg)
-                    entry = np.nan
-                entries.append(entry)
-            return np.asarray(entries)
-
-        entries_ref = collect_entries(references)
-        entries_query = collect_entries(queries)
+        entries_ref = self.__collect_entries(references)
+        entries_query = self.__collect_entries(queries)
 
         if self.matching_type == "equal_match":
             if self.tolerance != 0:
@@ -176,3 +160,19 @@ class MetadataMatch(BaseSimilarity):
         scores_array[rows, cols] = scores.astype(self.score_datatype)
 
         return scores_array
+
+    def __collect_entries(self, spectra):
+        """Collect metadata entries."""
+        entries = []
+        for spectrum in spectra:
+            entry = spectrum.get(self.field)
+            if entry is None:
+                msg = f"No {self.field} entry found for spectrum."
+                logger.warning(msg)
+                entry = np.nan
+            elif self.matching_type == "difference" and not isinstance(entry, (int, float)):
+                msg = f"Non-numerical entry ({entry}) not compatible with 'difference' method."
+                logger.warning(msg)
+                entry = np.nan
+            entries.append(entry)
+        return np.asarray(entries)

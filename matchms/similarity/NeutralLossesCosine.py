@@ -48,6 +48,7 @@ class NeutralLossesCosine(BaseSimilarity):
             than the precursor-m/z will be ignored (since those would correspond to negative
             "neutral losses").
         """
+        # pylint: disable=too-many-arguments
         super().__init__(score_filters)
         self.tolerance = tolerance
         self.mz_power = mz_power
