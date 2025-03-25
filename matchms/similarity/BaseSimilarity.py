@@ -15,14 +15,15 @@ class BaseSimilarity:
 
     Attributes
     ----------
-    is_commutative
+    is_commutative:
        Whether similarity function is commutative, which means that the order of spectra
        does not matter (similarity(A, B) == similarity(B, A)). Default is True.
+    score_datatype:
+        Data type for the score output, e.g. "float" or [("score", "float"), ("matches", "int")].
+        If multiple data types are set, the main score should be set to "score" (used as default for filtering).
     """
     # Set key characteristics as class attributes
     is_commutative = True
-    # Set output data type, e.g. "float" or [("score", "float"), ("matches", "int")]
-    # If you set multiple data types, the main score should be set to "score" this is used as default for filtering.
     score_datatype = np.float64
 
     def __init__(self, score_filters: Tuple[FilterScoreByValue]):
@@ -40,7 +41,7 @@ class BaseSimilarity:
             Single query spectrum.
 
         Returns
-            score as numpy array (using self.score_datatype). For instance returning
+            The similarity score as numpy array (using self.score_datatype). For instance returning
             np.asarray(score, dtype=self.score_datatype)
         """
         raise NotImplementedError
@@ -49,6 +50,22 @@ class BaseSimilarity:
                queries: np.ndarray[SpectrumType],
                mask_indices: COOIndex = None,
                is_symmetric: bool = False) -> np.ndarray:
+        """
+        Compute a dense similarity matrix for all pairs of reference and query spectra.
+
+        Parameters
+        ----------
+        references:
+            Collection of reference spectra.
+        queries:
+            Collection of query spectra.
+        mask_indices:
+            Indices to calculate scores for the rest is set to 0.
+        is_symmetric:
+            Indicates if the similarity matrix is symmetric (e.g., for all-vs-all comparisons).
+            When True, only the upper triangle of the matrix is computed and then mirrored,
+            which can reduce computation time.
+        """
         if mask_indices is None:
             return self._matrix_without_mask(references, queries, is_symmetric=is_symmetric)
         return self._matrix_with_mask(references, queries,
@@ -71,6 +88,20 @@ class BaseSimilarity:
                              references: np.ndarray[SpectrumType], queries: np.ndarray[SpectrumType],
                              is_symmetric: bool = False
                              ) -> np.ndarray:
+        """
+        Compute a dense similarity matrix for all pairs of reference and query spectra.
+
+        Parameters
+        ----------
+        references:
+            Collection of reference spectra.
+        queries:
+            Collection of query spectra.
+        is_symmetric:
+            Indicates if the similarity matrix is symmetric (e.g., for all-vs-all comparisons).
+            When True, only the upper triangle of the matrix is computed and then mirrored,
+            which can reduce computation time.
+        """
         sim_matrix = np.zeros((len(references), len(queries)), dtype=self.score_datatype)
         if is_symmetric:
             if len(references) != len(queries):
