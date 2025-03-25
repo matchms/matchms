@@ -91,17 +91,26 @@ def calculate_scores(similarity_metric: BaseSimilarity, scores: Scores,
     join_type
         Choose from left, right, outer, inner to specify the merge type.
     """
-    # todo Currently Scores only supports sparse matrixes, so we never compute a dense matrix,
-    #  since it would anyway be converted to sparse,
-    #  if in the future Scores also supports storing dense matrixes
-    #  we could add more complicated logic here, e.g. checking if the mask is <1/3 of dense
-
-    mask_indices = None
-    if len(scores.scores.score_names) > 0 and (len(scores.scores.row) < (scores.n_rows * scores.n_cols)):
-        mask_indices = COOIndex(scores.scores.row, scores.scores.col)
+    # todo Currently Scores only supports sparse matrixes, so it doesn't make a lot of sense to compute a dense matrix,
+    #  we still do this in the case when it is the first run without filters. But it will still be converted to a
+    #  sparse matrix (even though that is less memory efficient)
+    #  If in the future Scores also supports storing dense matrixes
+    #  we could add more complicated logic here, e.g. checking if the mask is <1/3 of dense. Since there are more cases
+    #  where a dense matrix is actually more memory efficient than sparse.
 
     if name is None:
         name = similarity_metric.__class__.__name__
+
+    mask_indices = None
+    if len(scores.scores.score_names) > 0:
+        mask_indices = COOIndex(scores.scores.row, scores.scores.col)
+    elif len(filters) == 0:
+        new_scores = similarity_metric.matrix(references=scores.references, queries=scores.queries,
+                                              score_filters=filters)
+        scores.scores.add_dense_matrix(new_scores,
+                                      name,
+                                      join_type=join_type)
+
 
     new_scores = similarity_metric.sparse_array(references=scores.references, queries=scores.queries,
                                                 mask_indices=mask_indices,
