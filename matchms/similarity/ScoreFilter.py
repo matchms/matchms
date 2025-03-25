@@ -44,6 +44,15 @@ class FilterScoreByValue:
             score = score[self.score_name]
         return self.filter_function(score)
 
+    def filter_matrix(self, scores_matrix: np.ndarray) -> np.ndarray:
+        """Filter all the scores in a matrix, the values that don't pass the filter are set to 0"""
+        if len(scores_matrix.dtype) > 1:  # if structured array
+            mask = self.operator(scores_matrix[self.score_name], self.value)
+            for field in scores_matrix.dtype.names:
+                scores_matrix[field][~mask] = 0
+            return scores_matrix
+        return np.where(self.operator(scores_matrix, self.value), scores_matrix, 0)
+
     def filter_function(self, score: np.ndarray) -> bool:
         """
         Apply the filtering operator to the score.
