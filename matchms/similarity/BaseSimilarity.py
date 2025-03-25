@@ -100,7 +100,7 @@ class BaseSimilarity:
                                           new_scores.column,
                                           new_scores.scores,
                                           name,
-                                          join_type="left")
+                                          join_type=join_type)
             return scores
         if isinstance(new_scores, np.ndarray):
             scores.scores.add_dense_matrix(new_scores, name, join_type=join_type)
