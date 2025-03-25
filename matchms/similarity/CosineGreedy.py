@@ -1,5 +1,4 @@
 from typing import Tuple
-
 import numpy as np
 from matchms.typing import SpectrumType
 from .BaseSimilarity import BaseSimilarity

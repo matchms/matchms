@@ -1,10 +1,8 @@
 from typing import Tuple
-
 import numpy as np
-
-from .ScoreFilter import FilterScoreByValue
 from .. import Spectrum
 from .BaseSimilarity import BaseSimilarity
+from .ScoreFilter import FilterScoreByValue
 
 
 class IntersectMz(BaseSimilarity):

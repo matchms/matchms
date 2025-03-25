@@ -1,4 +1,4 @@
-from typing import List, Union, Tuple
+from typing import List, Tuple, Union
 import numpy as np
 from matchms.Spectrum import Spectrum
 from .BaseSimilarity import BaseSimilarity

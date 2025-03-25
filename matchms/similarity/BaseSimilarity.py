@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import List, Tuple, Iterable
+from typing import Iterable, List, Tuple
 import numpy as np
 from tqdm import tqdm
 from matchms.similarity.COOIndex import COOIndex
@@ -243,12 +243,6 @@ class BaseSimilarity:
             List of query objects
         mask_indices
             The row column index pairs for which a score should be calculated.
-        score_filters
-            Tuple of filters that should be applied to each score before scoring. If you want to run without filtering,
-            it is best to run sparse_array(). Filters can also be run after computing a sparse array first, however, for strict
-            filtering this implementation can be more memory efficient. Only use sparse_array_with_filter if you expect to
-            filter out more than 90% of your data. Otherwise, it is more memory efficient to first run matrix, followed by
-            filtering the matrix.
         """
         scores = []
         idx_row = []

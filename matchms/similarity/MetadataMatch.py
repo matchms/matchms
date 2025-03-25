@@ -7,6 +7,7 @@ from matchms.Spectrum import Spectrum
 from .BaseSimilarity import BaseSimilarity
 from .ScoreFilter import FilterScoreByValue
 
+
 logger = logging.getLogger("matchms")
 
 
