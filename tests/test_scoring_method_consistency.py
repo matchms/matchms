@@ -29,7 +29,8 @@ _score_functions = {
     "parentmassmatch": [mssimilarity.ParentMassMatch, {}],
     "precursormzmatch": [mssimilarity.PrecursorMzMatch, {}],
     "metadatamatch": [mssimilarity.MetadataMatch, {"field": "spectrum_status"}],
-    "modifiedcosine": [mssimilarity.ModifiedCosine, {}]}
+    "modifiedcosine": [mssimilarity.ModifiedCosine, {}]
+    }
 
 
 @pytest.fixture
@@ -103,26 +104,42 @@ def test_consistency_scoring_and_pipeline(spectra, similarity_measure):
 
 @pytest.mark.parametrize("similarity_measure", list(_score_functions.values()))
 def test_matrix_masking_and_filtering(spectra, similarity_measure):
-
     scoring_method = similarity_measure[0](**similarity_measure[1], score_filters=())
-    computed_scores_matrix_no_mask_no_filter = scoring_method.matrix(spectra, spectra, is_symmetric=False, mask_indices=None)
-    print(computed_scores_matrix_no_mask_no_filter)
+    no_mask_no_filter = scoring_method.matrix(spectra, spectra, is_symmetric=False, mask_indices=None)
 
     filters = (FilterScoreByValue(value=0.2, operator=">"), FilterScoreByValue(value=0.8, operator="<"))
     scoring_method = similarity_measure[0](**similarity_measure[1], score_filters=filters)
-    computed_scores_matrix_no_mask_with_filter = scoring_method.matrix(spectra, spectra, is_symmetric=False, mask_indices=None)
-    print(computed_scores_matrix_no_mask_with_filter)
+    no_mask_with_filter = scoring_method.matrix(spectra, spectra, is_symmetric=False, mask_indices=None)
+    # check that the values that are not zero do match with the no_mask_no_filter
+    mask = no_mask_with_filter != np.zeros(1, dtype=scoring_method.score_datatype)
+    assert np.array_equal(no_mask_no_filter[mask], no_mask_with_filter[mask])
 
     mask_indices = COOIndex(np.asarray([0, 1]), np.asarray([0, 1]))
     scoring_method = similarity_measure[0](**similarity_measure[1], score_filters=filters)
-    computed_scores_matrix_with_mask_with_filters = scoring_method.matrix(spectra, spectra, is_symmetric=False, mask_indices=mask_indices)
-    print(computed_scores_matrix_with_mask_with_filters)
+    with_mask_with_filters = scoring_method.matrix(spectra, spectra, is_symmetric=False,
+                                                   mask_indices=mask_indices)
+
+    # Check everything outside mask is zero
+    mask = np.ones_like(with_mask_with_filters, dtype=bool)
+    mask[mask_indices.idx_row , mask_indices.idx_col] = False
+    assert np.all(with_mask_with_filters[mask] == np.zeros(1, dtype=scoring_method.score_datatype))
+    # Check that the non masked values == the filter result.
+    assert np.all(with_mask_with_filters[~mask] == no_mask_with_filter[~mask])
 
     scoring_method = similarity_measure[0](**similarity_measure[1], score_filters=())
-    computed_scores_matrix_with_mask_without_filters = scoring_method.matrix(spectra, spectra, is_symmetric=False, mask_indices=mask_indices)
-    print(computed_scores_matrix_with_mask_without_filters)
+    with_mask_without_filters = scoring_method.matrix(spectra, spectra, is_symmetric=False,
+                                                      mask_indices=mask_indices)
+    # Check everything outside mask is zero
+    mask = np.ones_like(with_mask_without_filters, dtype=bool)
+    mask[mask_indices.idx_row , mask_indices.idx_col] = False
+    assert np.all(with_mask_without_filters[mask] == np.zeros(1, dtype=scoring_method.score_datatype))
+    # Check mask is equal to no filter output
+    assert np.all(with_mask_without_filters[~mask] == no_mask_no_filter[~mask])
 
-    # todo add a test to check that the values are correct
+    assert (no_mask_no_filter.dtype ==
+            no_mask_with_filter.dtype ==
+            with_mask_with_filters.dtype ==
+            with_mask_without_filters.dtype == scoring_method.score_datatype)
     # todo also test is_symmetric
     # todo add tests for correctly filtering on other value than score (e.g. matches)
 
