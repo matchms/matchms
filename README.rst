@@ -322,7 +322,8 @@ To install matchms, do:
   conda activate matchms-dev
 
   # If you use poetry
-  poetry install --with-dev
+  python -m pip install --upgrade pip poetry
+  poetry install --with dev
 
   # If you use pip
   pip install -r dev-requirements.txt
