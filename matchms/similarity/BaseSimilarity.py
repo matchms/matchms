@@ -150,7 +150,7 @@ class BaseSimilarity:
         sim_matrix = np.zeros((len(references), len(queries)), dtype=self.score_datatype)
         for i_row, i_col in tqdm(mask_indices, desc="Calculating sparse similarities"):
             score = self.pair(references[i_row], queries[i_col])
-            if np.all(score_filter.keep_score(score) for score_filter in self.score_filters):
+            if np.all([score_filter.keep_score(score) for score_filter in self.score_filters]):
                 # if not all filters pass the score is not added (so remains 0)
                 sim_matrix[i_row, i_col] = score
                 if is_symmetric:
@@ -191,7 +191,7 @@ class BaseSimilarity:
                 for i_query, query in enumerate(queries[i_ref:n_cols], start=i_ref):
                     score = self.pair(reference, query)
                     # Check if the score passes the filter before storing.
-                    if np.all(score_filter.keep_score(score) for score_filter in self.score_filters):
+                    if np.all([score_filter.keep_score(score) for score_filter in self.score_filters]):
                         idx_row += [i_ref, i_query]
                         idx_col += [i_query, i_ref]
                         scores += [score, score]
@@ -199,7 +199,7 @@ class BaseSimilarity:
                 for i_query, query in enumerate(queries[:n_cols]):
                     score = self.pair(reference, query)
                     # Check if the score passes the filter before storing.
-                    if np.all(score_filter.keep_score(score) for score_filter in self.score_filters):
+                    if np.all([score_filter.keep_score(score) for score_filter in self.score_filters]):
                         idx_row.append(i_ref)
                         idx_col.append(i_query)
                         scores.append(score)
@@ -254,7 +254,7 @@ class BaseSimilarity:
         for row, col in tqdm(mask_indices, desc="Calculating sparse similarities"):
             score = self.pair(references[row], queries[col])
             # Check if the score passes the filter before storing.
-            if np.all(score_filter.keep_score(score) for score_filter in self.score_filters):
+            if np.all([score_filter.keep_score(score) for score_filter in self.score_filters]):
                 idx_row.append(row)
                 idx_col.append(col)
                 scores.append(score)
