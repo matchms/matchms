@@ -79,7 +79,8 @@ class ParentMassMatch(BaseSimilarity):
         assert parentmass_ref is not None and parentmass_query is not None, "Missing parent mass."
 
         score = abs(parentmass_ref - parentmass_query) <= self.tolerance
-        return np.asarray(score, dtype=self.score_datatype)
+        result = np.asarray(score, dtype=self.score_datatype)
+        return result
 
     def _matrix_without_mask_without_filter(self, references: List[Spectrum], queries: List[Spectrum],
                is_symmetric: bool = False) -> np.ndarray:
@@ -115,6 +116,6 @@ class ParentMassMatch(BaseSimilarity):
             rows, cols, scores = number_matching(parentmasses_ref, parentmasses_query,
                                                  self.tolerance)
 
-        scores_array = np.zeros((len(parentmasses_ref), len(parentmasses_query)))
-        scores_array[rows, cols] = scores.astype(self.score_datatype)
+        scores_array = np.zeros((len(parentmasses_ref), len(parentmasses_query)), dtype=self.score_datatype)
+        scores_array[rows, cols] = scores
         return scores_array
