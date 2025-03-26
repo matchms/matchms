@@ -1,8 +1,8 @@
-from typing import List, Union
+from typing import List, Tuple, Union
 import numpy as np
-from sparsestack import StackedSparseArray
-from matchms.typing import SpectrumType
+from matchms.Spectrum import Spectrum
 from .BaseSimilarity import BaseSimilarity
+from .ScoreFilter import FilterScoreByValue
 from .vector_similarity_functions import (cosine_similarity,
                                           cosine_similarity_matrix,
                                           dice_similarity,
@@ -63,7 +63,7 @@ class FingerprintSimilarity(BaseSimilarity):
     score_datatype = np.float64
 
     def __init__(self, similarity_measure: str = "jaccard",
-                 set_empty_scores: Union[float, int, str] = "nan"):
+                 set_empty_scores: Union[float, int, str] = "nan", score_filters: Tuple[FilterScoreByValue, ...] = ()):
         """
 
         Parameters
@@ -76,11 +76,12 @@ class FingerprintSimilarity(BaseSimilarity):
             where fingprints are missing. The default is "nan", which will return
             np.nan's in such cases.
         """
+        super().__init__(score_filters)
         self.set_empty_scores = set_empty_scores
         assert similarity_measure in ["cosine", "dice", "jaccard"], "Unknown similarity measure."
         self.similarity_measure = similarity_measure
 
-    def pair(self, reference: SpectrumType, query: SpectrumType) -> float:
+    def pair(self, reference: Spectrum, query: Spectrum) -> np.ndarray:
         """Calculate fingerprint based similarity score between two spectra.
 
         Parameters
@@ -104,9 +105,8 @@ class FingerprintSimilarity(BaseSimilarity):
 
         raise NotImplementedError
 
-    def matrix(self, references: List[SpectrumType], queries: List[SpectrumType],
-               array_type: str = "numpy",
-               is_symmetric: bool = False) -> np.array:
+    def _matrix_without_mask_without_filter(self, references: List[Spectrum], queries: List[Spectrum],
+                                            is_symmetric: bool = False) -> np.array:
         """Calculate matrix of fingerprint based similarity scores.
 
         Parameters
@@ -115,9 +115,6 @@ class FingerprintSimilarity(BaseSimilarity):
             List of reference spectra.
         queries:
             List of query spectra.
-        array_type
-            Specify the output array type. Can be "numpy" or "sparse".
-            Default is "numpy" and will return a numpy array. "sparse" will return a COO-sparse array
         """
         def get_fingerprints(spectra):
             for index, spectrum in enumerate(spectra):
@@ -161,10 +158,4 @@ class FingerprintSimilarity(BaseSimilarity):
             similarity_matrix[np.ix_(idx_fingerprints1,
                                         idx_fingerprints2)] = cosine_similarity_matrix(fingerprints1,
                                                                                        fingerprints2)
-        if array_type == "sparse":
-            scores_array = StackedSparseArray(len(references), len(queries))
-            scores_array.add_dense_matrix(similarity_matrix.astype(self.score_datatype), "")
-            return scores_array
-        if array_type == "numpy":
-            return similarity_matrix.astype(self.score_datatype)
-        raise NotImplementedError("Output array type is not yet implemented.")
+        return similarity_matrix.astype(self.score_datatype)

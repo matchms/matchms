@@ -7,8 +7,6 @@ from numpy.lib.recfunctions import unstructured_to_structured
 from scipy.sparse import coo_matrix
 from sparsestack import StackedSparseArray
 from matchms.importing.load_from_json import scores_json_decoder
-from matchms.similarity import get_similarity_function_by_name
-from matchms.similarity.BaseSimilarity import BaseSimilarity
 from matchms.typing import QueriesType, ReferencesType
 
 
@@ -77,6 +75,8 @@ class Scores:
 
         self.n_rows = len(references)
         self.n_cols = len(queries)
+        if (self.n_rows == 0) or (self.n_cols == 0):
+            raise ValueError("Number of elements must be >= 1")
         self.references = np.asarray(references)
         self.queries = np.asarray(queries)
         self.is_symmetric = is_symmetric
@@ -124,71 +124,6 @@ class Scores:
 
         assert isinstance(queries, (list, tuple, np.ndarray)),\
             "Expected input argument 'queries' to be list or tuple or np.ndarray."
-
-    def calculate(self, similarity_function: BaseSimilarity,
-                  name: str = None,
-                  array_type: str = "numpy",
-                  join_type="left") -> Scores:
-        """
-        Calculate the similarity between all reference objects vs all query objects using
-        the most suitable available implementation of the given similarity_function.
-        If Scores object already contains similarity scores, the newly computed measures
-        will be added to a new layer (name --> layer name).
-        Additional scores will be added as specified with join_type, the default being 'left'.
-
-        Parameters
-        ----------
-        similarity_function
-            Function which accepts a reference + query object and returns a score or tuple of scores
-        name
-            Label of the new scores layer. If None, the name of the similarity_function class will be used.
-        array_type
-            Specify the type of array to store and compute the scores. Choose from "numpy" or "sparse".
-        join_type
-            Choose from left, right, outer, inner to specify the merge type.
-        """
-        def is_sparse_advisable():
-            return (
-                (len(self._scores.score_names) > 0)  # already scores in Scores
-                and (join_type in ["inner", "left"])  # inner/left join
-                and (len(self._scores.row) < (self.n_rows * self.n_cols)/2)  # fewer than half of scores have entries
-                )
-
-        if name is None:
-            name = similarity_function.__class__.__name__
-        if (self.n_rows == 0) or (self.n_cols == 0):
-            raise ValueError("Number of elements must be >= 1")
-        if self.n_rows == self.n_cols == 1:
-            score = similarity_function.pair(self.references[0],
-                                             self.queries[0])
-            self._scores.add_dense_matrix(np.array([score]), name)
-        elif is_sparse_advisable():
-            new_scores = similarity_function.sparse_array(references=self.references,
-                                                          queries=self.queries,
-                                                          idx_row=self._scores.row,
-                                                          idx_col=self._scores.col,
-                                                          is_symmetric=self.is_symmetric)
-            self._scores.add_sparse_data(self._scores.row,
-                                         self._scores.col,
-                                         new_scores,
-                                         name)
-        else:
-            new_scores = similarity_function.matrix(self.references,
-                                                    self.queries,
-                                                    array_type=array_type,
-                                                    is_symmetric=self.is_symmetric)
-            if isinstance(new_scores, np.ndarray):
-                self._scores.add_dense_matrix(new_scores, name, join_type=join_type)
-            elif len(new_scores.score_names) == 1:
-                new_scores.data.dtype.names = [name]
-                self._scores.add_sparse_data(new_scores.row,
-                                             new_scores.col,
-                                             new_scores.data, "", join_type=join_type)
-            else:
-                self._scores.add_sparse_data(new_scores.row,
-                                             new_scores.col,
-                                             new_scores.data, name, join_type=join_type)
-        return self
 
     def scores_by_reference(self, reference: ReferencesType,
                             name: str = None, sort: bool = False) -> np.ndarray:
@@ -468,14 +403,6 @@ class ScoresBuilder:
         sparsestack.data = unstructured_to_structured(np.array(scores_dict.get("data")),
                                                       dtype=np.dtype(dtype))
         return sparsestack
-
-    @staticmethod
-    def _construct_similarity_functions(similarity_function_dict: dict) -> BaseSimilarity:
-        """
-        Construct similarity function from its serialized form.
-        """
-        similarity_function_class = get_similarity_function_by_name(similarity_function_dict.pop("__Similarity__"))
-        return similarity_function_class(**similarity_function_dict)
 
     @staticmethod
     def _validate_json_input(scores_dict: dict):

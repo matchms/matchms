@@ -1,6 +1,6 @@
 import sys
 import numpy as np
-from matchms import calculate_scores
+from matchms import create_scores_object_and_calculate_scores
 from matchms.networking.networking_functions import get_top_hits
 from matchms.similarity import FingerprintSimilarity
 from .test_SimilarityNetwork import create_dummy_spectra
@@ -13,7 +13,7 @@ def create_dummy_scores():
 
     # Create Scores object by calculating dice scores
     similarity_measure = FingerprintSimilarity("dice")
-    scores = calculate_scores(references, queries, similarity_measure)
+    scores = create_scores_object_and_calculate_scores(references, queries, similarity_measure)
     return scores
 
 
@@ -58,7 +58,7 @@ def test_get_top_hits_by_queries():
     expected_idx_query = {'query_spec_0': np.array([4, 2, 0, 3], dtype=np.int64),
                           'query_spec_1': np.array([1, 2, 3, 4], dtype=np.int64),
                           'query_spec_2': np.array([4, 3, 2, 1, 0], dtype=np.int64)}
-    
+
     # this is needed due to different sorting algorithms in case of ties apparently
     if sys.platform == 'darwin':
         expected_idx_query['query_spec_1'] = np.array([2, 1, 4, 3], dtype=np.int64)
