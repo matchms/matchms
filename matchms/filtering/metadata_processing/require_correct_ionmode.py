@@ -7,7 +7,7 @@ logger = logging.getLogger("matchms")
 
 
 def require_correct_ionmode(spectrum_in: SpectrumType,
-                            ion_mode_to_keep, clone: Optional[bool] = True) -> Optional[SpectrumType]:
+                            ion_mode_to_keep) -> Optional[SpectrumType]:
     """
     Validates the ion mode of a given spectrum. If the spectrum's ion mode
     doesn't match the `ion_mode_to_keep`, it will be removed and a log message
@@ -22,9 +22,6 @@ def require_correct_ionmode(spectrum_in: SpectrumType,
         Desired ion mode ('positive', 'negative', or 'both'). If not one of these,
         a `ValueError` is raised.
 
-    clone:
-        Optionally clone the Spectrum.
-
     Returns
     -------
     Spectrum or None
@@ -32,7 +29,9 @@ def require_correct_ionmode(spectrum_in: SpectrumType,
     """
     if spectrum_in is None:
         return None
-    spectrum = spectrum_in.clone() if clone else spectrum_in
+
+    spectrum = spectrum_in
+
     if ion_mode_to_keep not in {"positive", "negative", "both"}:
         raise ValueError("ion_mode_to_keep should be 'positive', 'negative' or 'both'")
     ion_mode = spectrum.get("ionmode")

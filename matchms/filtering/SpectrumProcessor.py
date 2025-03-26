@@ -158,8 +158,11 @@ class SpectrumProcessor:
         for filter_func in self.filters:
             method_params = inspect.signature(filter_func).parameters
 
-            if clone and "clone" not in method_params:
-                logger.error("Processing report is set to True, but the filter function %s does not support cloning.", filter_func.__name__)
+            if not filter_func.__name__.startswith("require_"):
+                if clone and "clone" not in method_params:
+                    logger.error(
+                        "Processing report is set to True, but the filter function %s does not support cloning.",
+                        filter_func.__name__)
 
             # Ensures that filter function can be used, even if it does not support cloning
             spectrum_out = filter_func(spectrum, **({"clone": clone} if "clone" in method_params else {}))

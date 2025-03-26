@@ -61,8 +61,8 @@ def test_filter_sorting_and_output():
                           'estimate_from_charge': True, 'clone': True})],
     ["derive_adduct_from_name",
      ('derive_adduct_from_name', {'remove_adduct_from_name': True, 'clone': True})],
-    [("require_correct_ionmode", {"ion_mode_to_keep": "both", "clone": True}),
-     ("require_correct_ionmode", {"ion_mode_to_keep": "both", "clone": True})],
+    [("require_correct_ionmode", {"ion_mode_to_keep": "both"}),
+     ("require_correct_ionmode", {"ion_mode_to_keep": "both"})],
 ])
 def test_overwrite_default_settings(filter_step: str, expected):
     """Test if both default settings and set settings are returned in processing steps"""
