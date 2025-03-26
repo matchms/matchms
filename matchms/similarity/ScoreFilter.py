@@ -49,9 +49,9 @@ class FilterScoreByValue:
         if len(scores_matrix.dtype) > 1:  # if structured array
             mask = self.operator(scores_matrix[self.score_name], self.value)
             for field in scores_matrix.dtype.names:
-                scores_matrix[field][~mask] = 0
+                scores_matrix[field][~mask] = np.zeros(1, dtype=scores_matrix.dtype[field])
             return scores_matrix
-        return np.where(self.operator(scores_matrix, self.value), scores_matrix, 0)
+        return np.where(self.operator(scores_matrix, self.value), scores_matrix, np.zeros(1, dtype=scores_matrix.dtype))
 
     def filter_function(self, score: np.ndarray) -> bool:
         """
