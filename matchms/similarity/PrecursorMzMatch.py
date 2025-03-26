@@ -87,10 +87,10 @@ class PrecursorMzMatch(BaseSimilarity):
         assert precursormz_ref is not None and precursormz_query is not None, "Missing precursor m/z."
 
         if self.type == "Dalton":
-            return abs(precursormz_ref - precursormz_query) <= self.tolerance
-
-        mean_mz = (precursormz_ref + precursormz_query) / 2
-        score = abs(precursormz_ref - precursormz_query)/mean_mz <= self.tolerance
+            score = abs(precursormz_ref - precursormz_query) <= self.tolerance
+        else:
+            mean_mz = (precursormz_ref + precursormz_query) / 2
+            score = abs(precursormz_ref - precursormz_query)/mean_mz <= self.tolerance
         return np.asarray(score, dtype=self.score_datatype)
 
     def _matrix_without_mask_without_filter(self, references: List[Spectrum], queries: List[Spectrum],
@@ -132,6 +132,6 @@ class PrecursorMzMatch(BaseSimilarity):
             rows, cols, scores = number_matching_ppm(precursors_ref, precursors_query,
                                                      self.tolerance)
 
-        scores_array = np.zeros((len(precursors_ref), len(precursors_query)))
-        scores_array[rows, cols] = scores.astype(self.score_datatype)
+        scores_array = np.zeros((len(precursors_ref), len(precursors_query)), self.score_datatype)
+        scores_array[rows, cols] = scores
         return scores_array
