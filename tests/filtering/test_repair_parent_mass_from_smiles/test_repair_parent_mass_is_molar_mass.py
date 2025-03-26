@@ -15,7 +15,7 @@ from tests.builder_Spectrum import SpectrumBuilder
                           ("CN1CCCC1C2=CN=CC=C2", "[M-H]-", 10, 162.23, 10, 162.115698455),
                           ])
 def test_repair_parent_mass_is_molar_mass(smiles, adduct, precursor_mz, parent_mass, expected_precursor_mz, expected_parent_mass):
-    # pylint: disable=too-many-arguments, too-many-positional-arguments
+    # pylint: disable=too-many-arguments
     pytest.importorskip("rdkit")
     spectrum_in = SpectrumBuilder().with_metadata({"smiles": smiles,
                                                    "adduct": adduct,

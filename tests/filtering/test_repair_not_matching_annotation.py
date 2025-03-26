@@ -38,7 +38,7 @@ def test_repair_not_matching_annotation_repair_inchikey(smile, inchi, inchikey, 
 ])
 def test_repair_not_matching_annotation_repair_smiles_inchi(smile, inchi, inchikey, parent_mass,
                                                      correct_smiles, correct_inchi, correct_inchikey):
-    # pylint: disable=too-many-arguments, too-many-positional-arguments
+    # pylint: disable=too-many-arguments
     builder = SpectrumBuilder()
     spectrum_in = builder.with_metadata({"smiles": smile,
                                          "inchi": inchi,

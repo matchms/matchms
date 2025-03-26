@@ -62,7 +62,7 @@ def test_repair_smiles_from_compound_name_skip_already_correct():
 def test_repair_smiles_from_compound_name(compound_name, parent_mass, smiles,
                                           expected_smiles,
                                           csv_file_with_real_compound_names, tmp_path):
-    #pylint: disable=too-many-arguments, too-many-positional-arguments
+    #pylint: disable=too-many-arguments
     builder = SpectrumBuilder()
     spectrum_in = builder.with_metadata({"compound_name": compound_name,
                                          "parent_mass": parent_mass,
