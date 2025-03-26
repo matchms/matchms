@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, Union
+from typing import Optional
 from matchms.typing import SpectrumType
 
 
@@ -8,8 +8,9 @@ logger = logging.getLogger("matchms")
 
 def require_precursor_mz(spectrum_in: SpectrumType,
                          minimum_accepted_mz: Optional[float] = 10.0,
-                         maximum_mz: Optional[float] = None
-                         ) -> Union[SpectrumType, None]:
+                         maximum_mz: Optional[float] = None,
+                         clone: Optional[bool] = True
+                         ) -> Optional[SpectrumType]:
 
     """Returns None if there is no precursor_mz or if <= minimum_accepted_mz
 
@@ -21,11 +22,18 @@ def require_precursor_mz(spectrum_in: SpectrumType,
         Set to minimum acceptable value for precursor m/z. Default is set to 10.0.
     maximum_mz:
         Set the maximum value for precursor m/z.
+    clone:
+        Optionally clone the Spectrum.
+
+    Returns
+    -------
+    Spectrum or None
+        Spectrum with precursor_mz, or `None` if not present.
     """
     if spectrum_in is None:
         return None
 
-    spectrum = spectrum_in.clone()
+    spectrum = spectrum_in.clone() if clone else spectrum_in
 
     precursor_mz = spectrum.get("precursor_mz", None)
     if precursor_mz is None:

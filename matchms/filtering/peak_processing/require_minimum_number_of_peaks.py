@@ -9,7 +9,7 @@ logger = logging.getLogger("matchms")
 
 def require_minimum_number_of_peaks(spectrum_in: SpectrumType,
                                     n_required: int = 10,
-                                    ratio_required: Optional[float] = None) -> SpectrumType:
+                                    ratio_required: Optional[float] = None, clone: Optional[bool] = True) -> Optional[SpectrumType]:
     """Spectrum will be set to None when it has fewer peaks than required.
 
     Parameters
@@ -22,12 +22,18 @@ def require_minimum_number_of_peaks(spectrum_in: SpectrumType,
     ratio_required:
         Set desired ratio between minimum number of peaks and parent mass.
         Default is None.
+    clone:
+        Optionally clone the Spectrum.
 
+    Returns
+    -------
+    Spectrum or None
+        Untouched Spectrum or 'None'.
     """
     if spectrum_in is None:
         return None
 
-    spectrum = spectrum_in.clone()
+    spectrum = spectrum_in.clone() if clone else spectrum_in
 
     parent_mass = spectrum.get("parent_mass", None)
     if parent_mass and ratio_required:
