@@ -31,3 +31,6 @@ class COOMatrix:
                                    dtype=scores_dtype)
         elif isinstance(scores, np.ndarray):
             self.scores = scores
+
+    def __str__(self):
+        return f"COOMatrix({self.row}, {self.column}, {self.scores})"
