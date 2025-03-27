@@ -1,13 +1,8 @@
 """Simple test submodule to verify that all reference spectra can be instantiated."""
 
-from matchms.reference_spectra import (
-    aspirin,
-    cocaine,
-    glucose,
-    hydroxy_cholesterol,
-    phenylalanine,
-    salicin,
-)
+from matchms.reference_spectra import (aspirin, cocaine, glucose,
+                                       hydroxy_cholesterol, phenylalanine,
+                                       salicin)
 
 
 def test_aspirin():
