@@ -55,7 +55,7 @@ def _safe_convert_to_float(retention_time: Any) -> Optional[float]:
 
     # logic to read MoNA msp files which specify rt as string with "min" in it
     if isinstance(retention_time, str):
-        retention_time = retention_time.strip()
+        retention_time = retention_time.strip().replace(',', '.')  # Replace commas with dots
         pattern = r'^([+-]?\d*\.?\d+)\s*(min|s|h|ms|sec)$'
         conversion = {"min": 60, "s": 1, "h": 3600, "ms": 1e-3, "sec": 1}
         match = re.search(pattern, retention_time)

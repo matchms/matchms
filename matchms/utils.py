@@ -126,7 +126,6 @@ def _load_key_conversions(file: str, source: str, target: str) -> dict:
         key_conversions = {}
         for row in reader:
             key_conversions[row[source]] = row[target]
-
     return key_conversions
 
 
