@@ -58,12 +58,12 @@ class BaseSimilarity:
         """
         raise NotImplementedError
 
-    def matrix(self,
-               references: Sequence[SpectrumType],
-               queries: Sequence[SpectrumType],
-               is_symmetric: bool = False,
-               mask_indices: COOIndex = None
-              ) -> np.ndarray:
+    def matrix(
+            self,
+            references: Sequence[SpectrumType],
+            queries: Sequence[SpectrumType],
+            is_symmetric: bool = False,
+            mask_indices: COOIndex = None) -> np.ndarray:
         """
         Compute a dense similarity matrix for all pairs of reference and query spectra.
 
@@ -89,11 +89,12 @@ class BaseSimilarity:
         return self._matrix_with_mask(references, queries,
                                       mask_indices=mask_indices, is_symmetric=is_symmetric)
 
-    def sparse_array(self,
-                     references: Sequence[SpectrumType],
-                     queries: Sequence[SpectrumType],
-                     mask_indices: COOIndex = None,
-                     is_symmetric = False) -> COOMatrix:
+    def sparse_array(
+            self,
+            references: Sequence[SpectrumType],
+            queries: Sequence[SpectrumType],
+            mask_indices: COOIndex = None,
+            is_symmetric = False) -> COOMatrix:
         """
         Compute a sparse array (in COO format) of similarity scores.
 
@@ -107,13 +108,13 @@ class BaseSimilarity:
 
         Parameters
         ----------
-        references : Sequence[SpectrumType]
+        references:
             A collection of reference spectra.
-        queries : Sequence[SpectrumType]
+        queries:
             A collection of query spectra.
-        mask_indices : Optional[COOIndex], optional
+        mask_indices:
             A COOIndex instance specifying the (row, column) pairs to compute. Defaults to None.
-        is_symmetric : bool, optional
+        is_symmetric:
             If True, assumes that the matrix is symmetric. Defaults to False.
         """
         if len(self.score_filters) == 0 and mask_indices is not None:
@@ -123,9 +124,8 @@ class BaseSimilarity:
         if len(self.score_filters) != 0 and mask_indices is not None:
             return self._sparse_array_with_filter(references, queries, mask_indices)
 
-        # if score_filters is None and mask_indices is None:
-        # todo replace with using matrix followed by a conversion to COO array. (and a warning that this is not a
-        #  good idea) do this once we settle on a COO Array format (e.g. using the sparse package)
+        # TODO: replace with matrix computation followed by a conversion to COO array.
+        # (and a warning that this is not a good idea) do this once we settle on a COO Array format (e.g. using the sparse package)
         raise ValueError("If no masking or score filters is needed, please use matrix() instead")
 
     # --- Dense Matrix Computations ---
