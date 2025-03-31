@@ -58,7 +58,7 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
         
         Parameters
         ----------
-        spectra : Iterable[SpectrumType]
+        spectra:
             List of spectra to compute embeddings for.
             
         Returns
@@ -69,15 +69,16 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
         raise NotImplementedError("Subclasses must implement this method.")
 
     def get_embeddings(
-            self, spectra: Optional[Iterable[SpectrumType]] = None, npy_path: Optional[Union[str, Path]] = None
-        ) -> np.ndarray:
+            self,
+            spectra: Optional[Iterable[SpectrumType]] = None,
+            npy_path: Optional[Union[str, Path]] = None) -> np.ndarray:
         """Get embeddings either by computing them or loading from disk.
 
         Parameters
         ----------
-        spectra : Optional[Iterable[SpectrumType]]
+        spectra:
             List of spectra to compute embeddings for.
-        npy_path : Optional[Union[str, Path]]
+        npy_path:
             Path to load/save embeddings from/to. If provided, embeddings are loaded from disk if it exists,
             otherwise they are computed and saved on disk to the provided path.
 
@@ -125,20 +126,22 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
         return self.matrix([reference], [query])[0, 0]
             
     def matrix(
-        self, references: List[SpectrumType], queries: List[SpectrumType], array_type: str = "numpy",
-        is_symmetric: bool = True
-    ) -> np.ndarray:
+            self,
+            references: List[SpectrumType],
+            queries: List[SpectrumType],
+            array_type: str = "numpy",
+            is_symmetric: bool = True) -> np.ndarray:
         """Compute similarity matrix between reference and query spectra.
 
         Parameters
         ----------
-        references : List[SpectrumType]
+        references:
             List of reference spectra.
-        queries : List[SpectrumType]
+        queries:
             List of query spectra.
-        array_type : str, optional
+        array_type:
             Type of array to return. Must be "numpy".
-        is_symmetric : bool, optional
+        is_symmetric:
             Whether the matrix is symmetric. Must be True.
 
         Returns
@@ -167,8 +170,7 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
             embeddings_path: Optional[Union[str, Path]] = None,
             k: int = 100,
             index_backend: str = "pynndescent",
-            **index_kwargs
-        ) -> Any:
+            **index_kwargs) -> Any:
         """Build an ANN index for the reference spectra.
 
         Parameters
@@ -216,8 +218,9 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
         return self.index
 
     def get_anns(
-            self, query_spectra: Union[Iterable[SpectrumType], np.ndarray], k: int = 100
-        ) -> Tuple[np.ndarray, np.ndarray]:
+            self,
+            query_spectra: Union[Iterable[SpectrumType], np.ndarray],
+            k: int = 100) -> Tuple[np.ndarray, np.ndarray]:
         """Get approximate nearest neighbors for query spectra.
 
         Parameters
