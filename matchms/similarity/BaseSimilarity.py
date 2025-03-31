@@ -82,7 +82,7 @@ class BaseSimilarity:
             Only the upper triangle is computed and then mirrored. Defaults to False.
         mask_indices:
             A COOIndex instance specifying which pairs to compute.
-            If provided, only the specified index pairs will be computed (others remain zero).
+            If provided, only the specified index pairs will be computed (others remain zero). This is helpful when a previous score already filters out many of the pairs, reducing computation time and memory footprint. 
         """
         if mask_indices is None:
             return self._matrix_without_mask_with_filter(references, queries, is_symmetric=is_symmetric)
