@@ -44,6 +44,7 @@ rdkit = "^2024.3.5"
 pyyaml = ">=6.0.1"
 deprecated = ">=1.2.14"
 pubchempy = "*"
+pynndescent = ">=0.5.13"
 
 [tool.poetry.group.dev.dependencies]
 decorator = "^5.1.1"
