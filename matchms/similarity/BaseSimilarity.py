@@ -130,9 +130,11 @@ class BaseSimilarity:
 
     # --- Dense Matrix Computations ---
 
-    def _matrix_without_mask_with_filter(self,
-                          references: Sequence[SpectrumType], queries: Sequence[SpectrumType],
-                          is_symmetric: bool = False):
+    def _matrix_without_mask_with_filter(
+            self,
+            references: Sequence[SpectrumType],
+            queries: Sequence[SpectrumType],
+            is_symmetric: bool = False) -> np.ndarray:
         """
         Compute a dense similarity matrix without a mask, then apply score filters (if any).
 
@@ -143,10 +145,11 @@ class BaseSimilarity:
             sim_matrix = score_filter.filter_matrix(sim_matrix)
         return sim_matrix
 
-    def _matrix_without_mask_without_filter(self,
-                                            references: Sequence[SpectrumType], queries: Sequence[SpectrumType],
-                                            is_symmetric: bool = False
-                                            ) -> np.ndarray:
+    def _matrix_without_mask_without_filter(
+            self,
+            references: Sequence[SpectrumType],
+            queries: Sequence[SpectrumType],
+            is_symmetric: bool = False) -> np.ndarray:
         """
         Compute a dense similarity matrix for all pairs of reference and query spectra.
 
@@ -180,11 +183,11 @@ class BaseSimilarity:
                     sim_matrix[i, j] = score
         return sim_matrix
 
-    def _matrix_with_mask(self,
-                          references: Sequence[SpectrumType], queries: Sequence[SpectrumType],
-                          mask_indices: COOIndex,
-                          is_symmetric: bool = False
-                          ) -> np.ndarray:
+    def _matrix_with_mask(
+            self,
+            references: Sequence[SpectrumType], queries: Sequence[SpectrumType],
+            mask_indices: COOIndex,
+            is_symmetric: bool = False) -> np.ndarray:
         """
         Compute a dense similarity matrix using a provided mask.
 
@@ -214,8 +217,11 @@ class BaseSimilarity:
 
     # --- Sparse Matrix Computations ---
 
-    def _sparse_array_with_filter_without_mask(self, references: Sequence[SpectrumType], queries: Sequence[SpectrumType],
-                           is_symmetric: bool = False, ) -> COOMatrix:
+    def _sparse_array_with_filter_without_mask(
+            self,
+            references: Sequence[SpectrumType],
+            queries: Sequence[SpectrumType],
+            is_symmetric: bool = False) -> COOMatrix:
         """
         Compute a sparse similarity matrix (COO format) with filtering, without using a mask.
 
@@ -261,9 +267,11 @@ class BaseSimilarity:
                         scores.append(score)
         return COOMatrix(row_idx=idx_row, column_idx=idx_col, scores=scores, scores_dtype=self.score_datatype)
 
-
-    def _sparse_array_with_mask_without_filter(self, references: Sequence[SpectrumType], queries: Sequence[SpectrumType],
-                     mask_indices: COOIndex) -> COOMatrix:
+    def _sparse_array_with_mask_without_filter(
+            self,
+            references: Sequence[SpectrumType],
+            queries: Sequence[SpectrumType],
+            mask_indices: COOIndex) -> COOMatrix:
         """Optional: Provide optimized method to calculate a sparse matrix of similarity scores.
 
         Compute similarity scores for pairs of reference and query spectra as given by the indices
@@ -287,13 +295,19 @@ class BaseSimilarity:
             scores[i] = self.pair(references[i_row], queries[i_col])
         return COOMatrix(row_idx=mask_indices.idx_row, column_idx=mask_indices.idx_col, scores=scores, scores_dtype=self.score_datatype)
 
-    def _sparse_array_with_filter(self, references: Sequence[SpectrumType], queries: Sequence[SpectrumType],
-                                 mask_indices: COOIndex) -> COOMatrix:
-        """Uses a mask to compute only the required scores and filters scores that do not pass the filter.
+    def _sparse_array_with_filter(
+            self,
+            references: Sequence[SpectrumType],
+            queries: Sequence[SpectrumType],
+            mask_indices: COOIndex) -> COOMatrix:
+        """
+        Compute a sparse similarity matrix (COO format) using a mask and applying score filters.
 
-        This method most of the time does not make sense. It is only worth it if you want to store less than 1/12th
-        of the computed scores. This is not the case most of the time, so sparse_array is most of the time the most
-        memory efficient.
+        Only the (row, column) pairs specified in mask_indices are computed, and only scores that pass
+        all filters are stored.
+
+        Please note: If the mask_indices contain more than 1/12th of all indices, this method could become less memory efficient
+        than `_sparse_array_with_filter_without_mask`.
 
         Parameters
         ----------
@@ -302,7 +316,7 @@ class BaseSimilarity:
         queries
             List of query objects
         mask_indices
-            The row column index pairs for which a score should be calculated.
+            Specifies the (row, column) pairs for which to compute scores.
         """
         scores = []
         idx_row = []
