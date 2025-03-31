@@ -55,7 +55,7 @@ pytest-cov = "^4.1.0"
 yapf = "^0.40.1"
 testfixtures = "^7.1.0"
 twine = "^6.1.0"
-black = "^23.7.0"
+black = ">=23.7,<25.0"
 poetry-bumpversion = "^0.3.1"
 pre_commit = "4.1.0"
 
