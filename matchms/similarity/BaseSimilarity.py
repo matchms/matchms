@@ -9,15 +9,17 @@ from matchms.typing import SpectrumType
 
 
 class BaseSimilarity:
-    """Similarity function base class.
-    When building a custom similarity measure, inherit from this class and implement
-    the desired methods.
+    """
+    Base class for similarity functions.
+
+    To implement a custom similarity measure, subclass BaseSimilarity and implement
+    the `pair` method, which calculates the similarity between two spectra.
 
     Attributes
     ----------
     is_commutative:
-       Whether similarity function is commutative, which means that the order of spectra
-       does not matter (similarity(A, B) == similarity(B, A)). Default is True.
+        Indicates whether the similarity function is commutative (i.e. similarity(A, B) == similarity(B, A)).
+        Defaults to True.
     score_datatype:
         Data type for the score output, e.g. "float" or [("score", "float"), ("matches", "int")].
         If multiple data types are set, the main score should be set to "score" (used as default for filtering).
@@ -28,42 +30,46 @@ class BaseSimilarity:
 
     def __init__(self, score_filters: Tuple[FilterScoreByValue, ...]):
         """
-
-        Attributes
+        Parameters
         ----------
         score_filters:
-            Tuple of filters that should be applied to each score before scoring. If you want to run without filtering,
-            it is best to run matrix(). Filters can also be run after computing a matrix first, however, for strict
-            filtering this implementation can be more memory efficient. Only use matrix_with_filter if you expect to
-            filter out more than 90% of your data. Otherwise, it is more memory efficient to first run matrix, followed by
-            filtering the matrix.
+            A tuple of filter objects to apply to each similarity score.
+            - If you do not wish to apply any filtering, pass an empty tuple and use the dense matrix method (`matrix()`).
+            - For cases where you expect to filter out more than 90% of the computed scores, consider using
+              the sparse array methods (see `sparse_array()`).
         """
         self.score_filters = score_filters
 
     @abstractmethod
     def pair(self, reference: SpectrumType, query: SpectrumType) -> np.ndarray:
-        """Method to calculate the similarity for one input pair.
+        """
+        Compute the similarity score for a single pair of spectra.
 
         Parameters
         ----------
         reference
-            Single reference spectrum.
+            A single reference spectrum.
         query
-            Single query spectrum.
+            A single query spectrum.
 
         Returns
-            The similarity score as numpy array (using self.score_datatype). For instance returning
-            np.asarray(score, dtype=self.score_datatype)
+            The similarity score as numpy array (with dtype given by self.score_datatype).
+            For example: return np.asarray(score, dtype=self.score_datatype)
         """
         raise NotImplementedError
 
-    def matrix(self, references: Sequence[SpectrumType],
+    def matrix(self,
+               references: Sequence[SpectrumType],
                queries: Sequence[SpectrumType],
                is_symmetric: bool = False,
-               mask_indices: COOIndex = None,
-               ) -> np.ndarray:
+               mask_indices: COOIndex = None
+              ) -> np.ndarray:
         """
         Compute a dense similarity matrix for all pairs of reference and query spectra.
+
+        Use this method when filtering is either required (with a provided mask) or when working
+        with moderately sized datasets. If no filtering is needed and you don't have a mask, simply
+        pass an empty tuple for `score_filters` and use this method.
 
         Parameters
         ----------
@@ -71,20 +77,45 @@ class BaseSimilarity:
             Collection of reference spectra.
         queries:
             Collection of query spectra.
-        mask_indices:
-            Indices to calculate scores for the rest is set to 0.
         is_symmetric:
-            Indicates if the similarity matrix is symmetric (e.g., for all-vs-all comparisons).
-            When True, only the upper triangle of the matrix is computed and then mirrored,
-            which can reduce computation time.
+            If True, indicates that the similarity matrix is symmetric (i.e., references and queries are the same).
+            Only the upper triangle is computed and then mirrored. Defaults to False.
+        mask_indices:
+            A COOIndex instance specifying which pairs to compute.
+            If provided, only the specified index pairs will be computed (others remain zero).
         """
         if mask_indices is None:
             return self._matrix_without_mask_with_filter(references, queries, is_symmetric=is_symmetric)
         return self._matrix_with_mask(references, queries,
                                       mask_indices=mask_indices, is_symmetric=is_symmetric)
 
-    def sparse_array(self, references: Sequence[SpectrumType], queries: Sequence[SpectrumType],
-                     mask_indices: COOIndex = None, is_symmetric = False) -> COOMatrix:
+    def sparse_array(self,
+                     references: Sequence[SpectrumType],
+                     queries: Sequence[SpectrumType],
+                     mask_indices: COOIndex = None,
+                     is_symmetric = False) -> COOMatrix:
+        """
+        Compute a sparse array (in COO format) of similarity scores.
+
+        Use this method if you expect heavy filtering (i.e. many scores are dropped) or
+        if you want to compute scores only for a selected set of index pairs.
+
+        Note:
+          - If no filtering is required (empty score_filters) and no mask is provided,
+            it is recommended to use `matrix()` and then convert the dense matrix to COO format.
+          - When a mask is provided, only the pairs specified in the mask are computed.
+
+        Parameters
+        ----------
+        references : Sequence[SpectrumType]
+            A collection of reference spectra.
+        queries : Sequence[SpectrumType]
+            A collection of query spectra.
+        mask_indices : Optional[COOIndex], optional
+            A COOIndex instance specifying the (row, column) pairs to compute. Defaults to None.
+        is_symmetric : bool, optional
+            If True, assumes that the matrix is symmetric. Defaults to False.
+        """
         if len(self.score_filters) == 0 and mask_indices is not None:
             return self._sparse_array_with_mask_without_filter(references, queries, mask_indices=mask_indices)
         if len(self.score_filters) != 0 and mask_indices is None:
@@ -97,9 +128,16 @@ class BaseSimilarity:
         #  good idea) do this once we settle on a COO Array format (e.g. using the sparse package)
         raise ValueError("If no masking or score filters is needed, please use matrix() instead")
 
+    # --- Dense Matrix Computations ---
+
     def _matrix_without_mask_with_filter(self,
                           references: Sequence[SpectrumType], queries: Sequence[SpectrumType],
                           is_symmetric: bool = False):
+        """
+        Compute a dense similarity matrix without a mask, then apply score filters (if any).
+
+        This method is used internally by `matrix()` when no mask is provided.
+        """
         sim_matrix = self._matrix_without_mask_without_filter(references, queries, is_symmetric=is_symmetric)
         for score_filter in self.score_filters:
             sim_matrix = score_filter.filter_matrix(sim_matrix)
@@ -147,6 +185,23 @@ class BaseSimilarity:
                           mask_indices: COOIndex,
                           is_symmetric: bool = False
                           ) -> np.ndarray:
+        """
+        Compute a dense similarity matrix using a provided mask.
+
+        Only the (row, column) pairs specified in mask_indices are computed.
+        Score filters are applied to each computed score.
+
+        Parameters
+        ----------
+        references:
+            Collection of reference spectra.
+        queries:
+            Collection of query spectra.
+        mask_indices:
+            Specifies which index pairs to compute.
+        is_symmetric:
+            If True, mirrors the computed score to the symmetric position. Defaults to False.
+        """
         sim_matrix = np.zeros((len(references), len(queries)), dtype=self.score_datatype)
         for i_row, i_col in tqdm(mask_indices, desc="Calculating sparse similarities"):
             score = self.pair(references[i_row], queries[i_col])
@@ -157,13 +212,16 @@ class BaseSimilarity:
                     sim_matrix[i_col, i_row] = score
         return sim_matrix
 
+    # --- Sparse Matrix Computations ---
 
     def _sparse_array_with_filter_without_mask(self, references: Sequence[SpectrumType], queries: Sequence[SpectrumType],
                            is_symmetric: bool = False, ) -> COOMatrix:
-        """Optional: Provide optimized method to calculate a sparse matrix with filtering applied directly.
-        This is helpfull if the filter function is removing most scores. Important note, per score this takes about 12x
-        the amount of memory. Therefore, doing filtering during compute is only worth it if you keep less than 1/12th of
-        the scores. Otherwise, it is best to just use matrix, followed by a filter.
+        """
+        Compute a sparse similarity matrix (COO format) with filtering, without using a mask.
+
+        This method is optimized for cases where filtering drops most scores.
+        Important to note: Memory-wise, this method is only worth using if less than 1/12th of the scores are kept.
+        Otherwise, it is generally better to use the `matrix()` method, followed by a filter.
 
         Parameters
         ----------
@@ -172,9 +230,7 @@ class BaseSimilarity:
         queries
             List of query objects
         is_symmetric
-            Set to True when *references* and *queries* are identical (as for instance for an all-vs-all
-            comparison). By using the fact that score[i,j] = score[j,i] the calculation will be about
-            2x faster.
+            If True, leverages commutativity to compute only half the matrix. Defaults to False.
         """
         n_rows = len(references)
         n_cols = len(queries)
