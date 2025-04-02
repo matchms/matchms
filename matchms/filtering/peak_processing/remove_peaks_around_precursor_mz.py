@@ -1,9 +1,10 @@
+from typing import Optional
 import numpy as np
 from matchms.Fragments import Fragments
 from matchms.typing import SpectrumType
 
 
-def remove_peaks_around_precursor_mz(spectrum_in: SpectrumType, mz_tolerance: float = 17) -> SpectrumType:
+def remove_peaks_around_precursor_mz(spectrum_in: SpectrumType, mz_tolerance: float = 17, clone: Optional[bool] = True) -> Optional[SpectrumType]:
 
     """Remove peaks that are within mz_tolerance (in Da) of
        the precursor mz, exlcuding the precursor peak.
@@ -15,11 +16,18 @@ def remove_peaks_around_precursor_mz(spectrum_in: SpectrumType, mz_tolerance: fl
     mz_tolerance:
         Tolerance of mz values that are not allowed to lie
         within the precursor mz. Default is 17 Da.
+    clone:
+        Optionally clone the Spectrum.
+
+    Returns
+    -------
+    Spectrum or None
+        Spectrum with removed peaks, or `None` if not present.
     """
     if spectrum_in is None:
         return None
 
-    spectrum = spectrum_in.clone()
+    spectrum = spectrum_in.clone() if clone else spectrum_in
 
     precursor_mz = spectrum.get("precursor_mz", None)
     assert precursor_mz is not None, "Precursor mz absent."

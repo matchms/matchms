@@ -115,7 +115,12 @@ def _write_metadata(spectrum: Spectrum, export_style: str, outfile: IO):
         outfile.write(f"{key_conversions['compound_name'].upper()}: {compound_name}\n")
 
     for key, value in metadata.items():
-        outfile.write(f"{key.upper()}: {value}\n")
+        if not (_is_num_peaks(key) or _is_peak_comments(key) or _is_fingerprint(key)):
+            if key.upper().strip() == "SYNON: METB N": # Special case for GOLM
+                for val in value:
+                    outfile.write(f"{key.upper()}: {val}\n")
+            else:
+                outfile.write(f"{key.upper()}: {value}\n")
     outfile.write(f"NUM PEAKS: {len(spectrum.peaks)}\n")
 
 

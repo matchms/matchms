@@ -67,11 +67,17 @@ def test_all_filter_order(early_filters: List[Callable], later_filters: List[Cal
     """Tests if early_filter is run before later_filter"""
     for early_filter in early_filters:
         for later_filter in later_filters:
+            early_filter_index = None
+            later_filter_index = None
+
             for filter_index, filter_function in enumerate(ALL_FILTERS):
                 if early_filter == filter_function:
                     early_filter_index = filter_index
                 if later_filter == filter_function:
                     later_filter_index = filter_index
+
+            assert early_filter_index is not None, f"{early_filter.__name__} not found in ALL_FILTERS"
+            assert later_filter_index is not None, f"{later_filter.__name__} not found in ALL_FILTERS"
             assert later_filter_index > early_filter_index, \
                 f"The filter {early_filter.__name__} should be before {later_filter.__name__}"
 

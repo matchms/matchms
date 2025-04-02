@@ -1,14 +1,16 @@
 import logging
 import math
+from typing import Optional
 from matchms.filtering.filter_utils.interpret_unknown_adduct import \
     get_multiplier_and_mass_from_adduct
+from matchms.typing import SpectrumType
 
 
 logger = logging.getLogger("matchms")
 
 
 def require_matching_adduct_precursor_mz_parent_mass(spectrum,
-                                                     tolerance=0.1):
+                                                     tolerance=0.1) -> Optional[SpectrumType]:
     """Checks if the adduct precursor mz and parent mass match within the tolerance"""
     if spectrum is None:
         return None
