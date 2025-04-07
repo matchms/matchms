@@ -32,6 +32,7 @@ repos:
       # Linter
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix]
+      - id: ruff-format
 
   # Run pytest on commit.
   - repo: local
