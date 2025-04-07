@@ -80,7 +80,8 @@ build-backend = "poetry.core.masonry.api"
 #skip = "readthedocs/conf.py"
 
 [tool.ruff]
-extend-exclude = ["paper", "readthedocs"]
+extend-exclude = ["integration-tests", "paper", "readthedocs"]
+line-length = 159 # default value of medium profile in prospector
 output-format = "grouped"
 
 [tool.ruff.format]
@@ -89,12 +90,38 @@ line-ending = "lf"
 
 [tool.ruff.lint]
 extend-select = ["D", "E", "I"]
-ignore = ["D203", "D212", "D213", "D404"]
+# TODO: some of these rules should be enforced in the future
+ignore = [
+    "D100",
+    "D101",
+    "D102",
+    "D103",
+    "D104",
+    "D105",
+    "D107",
+    "D200",
+    "D201",
+    "D202",
+    "D203",
+    "D204",
+    "D205",
+    "D209",
+    "D210",
+    "D212",
+    "D213",
+    "D4",
+    "E713"
+]
 
 [tool.ruff.lint.isort]
 known-first-party = ["matchms"]
-lines-after-imports = 2
+lines-after-imports = -1
+no-lines-before = ["future", "standard-library", "third-party", "first-party", "local-folder"]
 section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
+
+# disable pydoc for tests
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["D"]
 
 [tool.pytest.ini_options]
 testpaths = [
