@@ -58,6 +58,7 @@ twine = "^5.1.0"
 black = "^23.7.0"
 poetry-bumpversion = "^0.3.1"
 pre-commit = "^4.2.0"
+ruff = "^0.11.4"
 
 [tool.poetry.group.docs.dependencies]
 sphinxcontrib-apidoc = "^0.3.0"
@@ -71,12 +72,29 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry_bumpversion.file."matchms/__version__.py"]
 
-[tool.isort]
-sections = "FUTURE,STDLIB,THIRDPARTY,FIRSTPARTY,LOCALFOLDER"
-no_lines_before = "FUTURE,STDLIB,THIRDPARTY,FIRSTPARTY,LOCALFOLDER"
-lines_after_imports = 2
-known_first_party = "matchms"
-skip = "readthedocs/conf.py"
+#[tool.isort]
+#sections = "FUTURE,STDLIB,THIRDPARTY,FIRSTPARTY,LOCALFOLDER"
+#no_lines_before = "FUTURE,STDLIB,THIRDPARTY,FIRSTPARTY,LOCALFOLDER"
+#lines_after_imports = 2
+#known_first_party = "matchms"
+#skip = "readthedocs/conf.py"
+
+[tool.ruff]
+extend-exclude = ["paper", "readthedocs"]
+output-format = "grouped"
+
+[tool.ruff.format]
+docstring-code-format = true
+line-ending = "lf"
+
+[tool.ruff.lint]
+extend-select = ["D", "E", "I"]
+ignore = ["D203", "D212", "D213", "D404"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["matchms"]
+lines-after-imports = 2
+section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
 
 [tool.pytest.ini_options]
 testpaths = [
