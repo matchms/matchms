@@ -19,19 +19,14 @@ repos:
       - id: debug-statements
       - id: detect-private-key
       - id: end-of-file-fixer
-      - id: pretty-format-json
-        files: \.json$
-        args:
-          - --autofix
       - id: trailing-whitespace
 
-  # Run the Ruff linter.
+  # Run Ruff linter and formatter.
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.11.4
     hooks:
-      # Linter
       - id: ruff
-        args: [--fix, --exit-non-zero-on-fix]
+        args: [ --fix ]
       - id: ruff-format
 
   # Run pytest on commit.
