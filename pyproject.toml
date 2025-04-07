@@ -72,13 +72,6 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry_bumpversion.file."matchms/__version__.py"]
 
-#[tool.isort]
-#sections = "FUTURE,STDLIB,THIRDPARTY,FIRSTPARTY,LOCALFOLDER"
-#no_lines_before = "FUTURE,STDLIB,THIRDPARTY,FIRSTPARTY,LOCALFOLDER"
-#lines_after_imports = 2
-#known_first_party = "matchms"
-#skip = "readthedocs/conf.py"
-
 [tool.ruff]
 extend-exclude = ["integration-tests", "paper", "readthedocs"]
 line-length = 159 # default value of medium profile in prospector
@@ -89,8 +82,9 @@ docstring-code-format = true
 line-ending = "lf"
 
 [tool.ruff.lint]
+# TODO: add some rules in future, eg. W291/292
 extend-select = ["D", "E", "I"]
-# TODO: some of these rules should be enforced in the future
+# TODO: some of these rules should be enforced in the future, eg. E713
 ignore = [
     "D100",
     "D101",
@@ -115,7 +109,7 @@ ignore = [
 
 [tool.ruff.lint.isort]
 known-first-party = ["matchms"]
-lines-after-imports = -1
+lines-after-imports = 2
 no-lines-before = ["future", "standard-library", "third-party", "first-party", "local-folder"]
 section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
 
