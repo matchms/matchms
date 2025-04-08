@@ -1,6 +1,5 @@
 import logging
-from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import (
-    convert_inchi_to_smiles, is_valid_inchi, is_valid_smiles)
+from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import convert_inchi_to_smiles, is_valid_inchi, is_valid_smiles
 from matchms.typing import SpectrumType
 
 

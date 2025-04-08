@@ -1,17 +1,14 @@
 import logging
 from matchms import Spectrum
-from matchms.filtering.filter_utils.get_neutral_mass_from_smiles import \
-    get_monoisotopic_neutral_mass
-from ..filter_utils.derive_precursor_mz_and_parent_mass import \
-    derive_parent_mass_from_precursor_mz
+from matchms.filtering.filter_utils.get_neutral_mass_from_smiles import get_monoisotopic_neutral_mass
+from ..filter_utils.derive_precursor_mz_and_parent_mass import derive_parent_mass_from_precursor_mz
 from .repair_adduct_based_on_parent_mass import _get_matching_adduct
 
 
 logger = logging.getLogger("matchms")
 
 
-def repair_adduct_and_parent_mass_based_on_smiles(spectrum_in: Spectrum,
-                                                  mass_tolerance: float):
+def repair_adduct_and_parent_mass_based_on_smiles(spectrum_in: Spectrum, mass_tolerance: float):
     """
     Corrects the adduct and parent mass of a spectrum based on its SMILES representation and the precursor m/z.
 
@@ -38,9 +35,7 @@ def repair_adduct_and_parent_mass_based_on_smiles(spectrum_in: Spectrum,
     parent_mass = spectrum_in.get("parent_mass")
 
     # First check if the given adduct and precursor mz already match the monoisotopic mass of the smiles
-    estimated_parent_mass = derive_parent_mass_from_precursor_mz(changed_spectrum,
-                                                                 estimate_from_adduct=True,
-                                                                 estimate_from_charge=False)
+    estimated_parent_mass = derive_parent_mass_from_precursor_mz(changed_spectrum, estimate_from_adduct=True, estimate_from_charge=False)
     need_to_update_adduct = False
     if estimated_parent_mass is not None:
         if abs(estimated_parent_mass - smiles_mass) > mass_tolerance:
@@ -50,16 +45,14 @@ def repair_adduct_and_parent_mass_based_on_smiles(spectrum_in: Spectrum,
 
     if need_to_update_adduct:
         # Otherwise check if any of the common adducts matches the smiles mass
-        new_adduct = _get_matching_adduct(precursor_mz=spectrum_in.get("precursor_mz"),
-                                          parent_mass=smiles_mass,
-                                          ion_mode=spectrum_in.get("ionmode"),
-                                          mass_tolerance=mass_tolerance)
+        new_adduct = _get_matching_adduct(
+            precursor_mz=spectrum_in.get("precursor_mz"), parent_mass=smiles_mass, ion_mode=spectrum_in.get("ionmode"), mass_tolerance=mass_tolerance
+        )
         if new_adduct is None:
             return spectrum_in
 
         changed_spectrum.set("adduct", new_adduct)
-        logger.info("Adduct was set from %s to %s",
-                    spectrum_in.get('adduct'), new_adduct)
+        logger.info("Adduct was set from %s to %s", spectrum_in.get("adduct"), new_adduct)
 
     # if no parent_mass is set always overwrite
     if parent_mass is None:

@@ -1,14 +1,10 @@
 from collections.abc import Mapping
 import numpy as np
 from pickydict import PickyDict
-from .filtering.metadata_processing.add_precursor_mz import \
-    _add_precursor_mz_metadata
-from .filtering.metadata_processing.add_retention import (
-    _add_retention, _retention_index_keys, _retention_time_keys)
-from .filtering.metadata_processing.interpret_pepmass import \
-    _interpret_pepmass_metadata
-from .filtering.metadata_processing.make_charge_int import \
-    _convert_charge_to_int
+from .filtering.metadata_processing.add_precursor_mz import _add_precursor_mz_metadata
+from .filtering.metadata_processing.add_retention import _add_retention, _retention_index_keys, _retention_time_keys
+from .filtering.metadata_processing.interpret_pepmass import _interpret_pepmass_metadata
+from .filtering.metadata_processing.make_charge_int import _convert_charge_to_int
 from .utils import load_export_key_conversions, load_known_key_conversions
 
 
@@ -36,19 +32,16 @@ class Metadata:
 
     .. code-block:: python
 
-        metadata = Metadata({"Precursor_MZ": 201.5, "Compound Name": "SuperStuff"},
-                            matchms_key_style=False)
+        metadata = Metadata({"Precursor_MZ": 201.5, "Compound Name": "SuperStuff"}, matchms_key_style=False)
         print(metadata["precursor_mz"])  # => 201.5
         print(metadata["compound_name"])  # => None (now you need to use "compound name")
 
     """
 
-    _key_regex_replacements = {r"\s": "_",
-                           r"[!?.,;:]": ""}
+    _key_regex_replacements = {r"\s": "_", r"[!?.,;:]": ""}
     _key_replacements = load_known_key_conversions()
 
-    def __init__(self, metadata: dict = None,
-                 matchms_key_style: bool = True):
+    def __init__(self, metadata: dict = None, matchms_key_style: bool = True):
         """
 
         Parameters
@@ -75,7 +68,6 @@ class Metadata:
         if self.keys() != other_metadata.keys():
             return False
         for key, value in self.items():
-
             if isinstance(value, np.ndarray):
                 if not np.all(value == other_metadata.get(key)):
                     return False
@@ -129,31 +121,26 @@ class Metadata:
     # Getters and Setters
     # ------------------------------
     def get(self, key: str, default=None):
-        """Retrieve value from :attr:`metadata` dict.
-        """
+        """Retrieve value from :attr:`metadata` dict."""
         return self._data.copy().get(key, default)
 
     def set(self, key: str, value):
-        """Set value in :attr:`metadata` dict.
-        """
+        """Set value in :attr:`metadata` dict."""
         self._data[key] = value
         if self.matchms_key_style is True:
             self.harmonize_keys()
         return self
 
     def keys(self):
-        """Retrieve all keys of :attr:`.metadata` dict.
-        """
+        """Retrieve all keys of :attr:`.metadata` dict."""
         return self._data.keys()
 
     def values(self):
-        """Retrieve all values of :attr:`.metadata` dict.
-        """
+        """Retrieve all values of :attr:`.metadata` dict."""
         return self._data.values()
 
     def items(self):
-        """Retrieve all items (key, value pairs) of :attr:`.metadata` dict.
-        """
+        """Retrieve all items (key, value pairs) of :attr:`.metadata` dict."""
         return self._data.items()
 
     def to_dict(self, export_style: str = "matchms"):

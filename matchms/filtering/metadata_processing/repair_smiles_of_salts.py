@@ -1,16 +1,13 @@
 import itertools
 import logging
-from matchms.filtering.filter_utils.get_neutral_mass_from_smiles import \
-    get_monoisotopic_neutral_mass
-from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import \
-    is_valid_smiles
+from matchms.filtering.filter_utils.get_neutral_mass_from_smiles import get_monoisotopic_neutral_mass
+from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import is_valid_smiles
 
 
 logger = logging.getLogger("matchms")
 
 
-def repair_smiles_of_salts(spectrum_in,
-                           mass_tolerance):
+def repair_smiles_of_salts(spectrum_in, mass_tolerance):
     """Repairs the smiles of a salt to match the parent mass.
     E.g. C1=NC2=NC=NC(=C2N1)N.Cl is converted to 1=NC2=NC=NC(=C2N1)N if this matches the parent mass
     Checks if parent mass matches one of the ions"""
@@ -39,11 +36,9 @@ def repair_smiles_of_salts(spectrum_in,
             spectrum_with_ions = spectrum.clone()
             spectrum_with_ions.set("smiles", ion)
             spectrum_with_ions.set("salt_ions", not_used_ions)
-            logger.info("Removed salt ions: %s from %s to match parent mass",
-                        not_used_ions, smiles)
+            logger.info("Removed salt ions: %s from %s to match parent mass", not_used_ions, smiles)
             return spectrum_with_ions
-    logger.warning("None of the parts of the smile %s match the parent mass: %s",
-                   smiles, parent_mass)
+    logger.warning("None of the parts of the smile %s match the parent mass: %s", smiles, parent_mass)
     return spectrum
 
 

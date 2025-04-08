@@ -1,11 +1,9 @@
 import logging
 from typing import Optional
-from matchms.filtering.filter_utils.derive_precursor_mz_and_parent_mass import \
-    derive_parent_mass_from_precursor_mz
+from matchms.filtering.filter_utils.derive_precursor_mz_and_parent_mass import derive_parent_mass_from_precursor_mz
 from matchms.Spectrum import Spectrum
 from ...utils import get_first_common_element
-from ..filter_utils.get_neutral_mass_from_smiles import \
-    get_monoisotopic_neutral_mass
+from ..filter_utils.get_neutral_mass_from_smiles import get_monoisotopic_neutral_mass
 
 
 logger = logging.getLogger("matchms")
@@ -17,9 +15,9 @@ _accepted_types = (float, str, int)
 _accepted_missing_entries = ["", "N/A", "NA", "n/a"]
 
 
-def add_parent_mass(spectrum_in: Spectrum, estimate_from_adduct: bool = True,
-                    overwrite_existing_entry: bool = False,
-                    estimate_from_charge: bool = True) -> Optional[Spectrum]:
+def add_parent_mass(
+    spectrum_in: Spectrum, estimate_from_adduct: bool = True, overwrite_existing_entry: bool = False, estimate_from_charge: bool = True
+) -> Optional[Spectrum]:
     """Add estimated parent mass to metadata (if not present yet).
 
     Method to calculate the parent mass from given precursor m/z together
@@ -53,8 +51,7 @@ def add_parent_mass(spectrum_in: Spectrum, estimate_from_adduct: bool = True,
         spectrum.set("parent_mass", parent_mass)
         return spectrum
 
-    parent_mass = derive_parent_mass_from_precursor_mz(spectrum, estimate_from_adduct,
-                                                       estimate_from_charge=estimate_from_charge)
+    parent_mass = derive_parent_mass_from_precursor_mz(spectrum, estimate_from_adduct, estimate_from_charge=estimate_from_charge)
 
     if parent_mass is None:
         parent_mass = get_monoisotopic_neutral_mass(spectrum_in.get("smiles"))
@@ -67,8 +64,7 @@ def add_parent_mass(spectrum_in: Spectrum, estimate_from_adduct: bool = True,
 
 
 def _get_parent_mass(metadata):
-    parent_mass_key = get_first_common_element([_default_key] + _accepted_keys,
-                                               metadata.keys())
+    parent_mass_key = get_first_common_element([_default_key] + _accepted_keys, metadata.keys())
     parent_mass = metadata.get(parent_mass_key)
     parent_mass = _convert_entry_to_num(parent_mass)
     if parent_mass not in _accepted_missing_entries:

@@ -1,11 +1,14 @@
 import logging
 from matchms import Spectrum
 from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import (
-    convert_inchi_to_inchikey, convert_inchi_to_smiles,
-    convert_smiles_to_inchi, is_valid_inchi, is_valid_inchikey,
-    is_valid_smiles)
-from matchms.filtering.metadata_processing.require_parent_mass_match_smiles import \
-    _check_smiles_and_parent_mass_match
+    convert_inchi_to_inchikey,
+    convert_inchi_to_smiles,
+    convert_smiles_to_inchi,
+    is_valid_inchi,
+    is_valid_inchikey,
+    is_valid_smiles,
+)
+from matchms.filtering.metadata_processing.require_parent_mass_match_smiles import _check_smiles_and_parent_mass_match
 
 
 logger = logging.getLogger("matchms")
@@ -79,14 +82,15 @@ def _check_repairing_is_possible(smiles, inchi, inchikey) -> bool:
         return True
     if not valid_smiles and not valid_inchi and not valid_inchikey:
         # There is no annotation available
-        logger.info("No valid annotation was available for the spectrum, "
-                    "so repair_not_matching_annotation was not run")
+        logger.info("No valid annotation was available for the spectrum, so repair_not_matching_annotation was not run")
     elif valid_smiles or valid_inchi or valid_inchikey:
         # At least one of the annotations, but some are not.
         # Since if valid_smiles and valid_inchi and valid_inchikey was False
-        logger.warning("Please first run repair_inchi_from_smiles, repair_smiles_from_inchi and repair_inchikey. "
-                       "The spectrum had partly valid annotations, "
-                       "this shows that these repair functions were not yet run.")
+        logger.warning(
+            "Please first run repair_inchi_from_smiles, repair_smiles_from_inchi and repair_inchikey. "
+            "The spectrum had partly valid annotations, "
+            "this shows that these repair functions were not yet run."
+        )
     return False
 
 
@@ -101,20 +105,20 @@ def _repair_smiles_inchi(spectrum):
     inchi_correct = _check_smiles_and_parent_mass_match(smiles_from_inchi, parent_mass, 0.1)
 
     if smiles_correct and inchi_correct:
-        logger.warning("The SMILES and InChI are not matching, but both match the parent mass. "
-                       "SMILES = %s, InChI = %s", smiles, inchi)
+        logger.warning("The SMILES and InChI are not matching, but both match the parent mass. SMILES = %s, InChI = %s", smiles, inchi)
     elif smiles_correct and not inchi_correct:
         inchi_from_smiles = convert_smiles_to_inchi(spectrum.get("smiles"))
         # Repair by using inchi generated from SMILES
-        logger.info("The InChI has been changed from %s to %s. "
-                    "The new InChI matches the parent mass, while the old one did not", inchi, inchi_from_smiles)
+        logger.info("The InChI has been changed from %s to %s. The new InChI matches the parent mass, while the old one did not", inchi, inchi_from_smiles)
         spectrum.set("inchi", inchi_from_smiles)
     elif inchi_correct and not smiles_correct:
         # Repair by using SMILES generated from the inchi
-        logger.info("The SMILES has been changed from %s to %s to match the InChI. "
-                    "The new SMILES matches the parent mass, while the old one did not", smiles, smiles_from_inchi)
+        logger.info(
+            "The SMILES has been changed from %s to %s to match the InChI. The new SMILES matches the parent mass, while the old one did not",
+            smiles,
+            smiles_from_inchi,
+        )
         spectrum.set("smiles", smiles_from_inchi)
     else:
-        logger.warning("Both the Smiles %s and the inchi %s do not match the parent mass %f", smiles, inchi,
-                       parent_mass)
+        logger.warning("Both the Smiles %s and the inchi %s do not match the parent mass %f", smiles, inchi, parent_mass)
     return spectrum

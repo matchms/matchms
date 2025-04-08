@@ -1,6 +1,5 @@
 import numpy as np
-from matchms.filtering.peak_processing.require_maximum_number_of_peaks import \
-    require_maximum_number_of_peaks
+from matchms.filtering.peak_processing.require_maximum_number_of_peaks import require_maximum_number_of_peaks
 from matchms.Spectrum import Spectrum
 
 

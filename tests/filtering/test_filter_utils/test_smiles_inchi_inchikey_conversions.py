@@ -2,8 +2,7 @@ from importlib import reload
 import pytest
 import matchms.filtering.filter_utils.smile_inchi_inchikey_conversions
 import matchms.filtering.metadata_processing.add_fingerprint
-from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import (
-    is_valid_inchi, is_valid_inchikey, is_valid_smiles, mol_converter)
+from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import is_valid_inchi, is_valid_inchikey, is_valid_smiles, mol_converter
 
 
 @pytest.fixture()
@@ -57,7 +56,7 @@ def test_is_valid_inchikey():
         "XYLJNLCSTIOKRM-UHFFFAOYSA-NN",
         "Brcc(NC2=NCN2)-ccc3nccnc1-3",
         "2YLJNLCSTIOKRM-UHFFFAOYSA-N",
-        "XYLJNLCSTIOKRM-aaaaaaaaaa-a"
+        "XYLJNLCSTIOKRM-aaaaaaaaaa-a",
     ]
 
     for inchikey in inchikeys_true:
@@ -71,16 +70,19 @@ def test_is_valid_inchikey_none_input():
     assert not is_valid_inchikey(None), "Expected None entry to give False."
 
 
-@pytest.mark.parametrize("inchi, expected", [
-    ["InChI=1S/C2H7N3/c1-5-2(3)4/h1H3,(H4,3,4,5)", True],
-    ['"InChI=1S/C2H7N3/c1-5-2(3)4/h1H3,(H4,3,4,5)"', True],
-    ["InChI=1S/Ne", True],
-    ["InChI=1S/C14H9Cl5/c15-11-5-1-9(2-6-11)13(14(17,18)19)10-3-7-12(16)8-4-10/h1-8,13H", True],
-    ["1S/C2H7N3/c1-5-2(3)4/h1H3,(H4,3,4,5)", False],
-    ["InChI=1S/C2H7N3/c152(3)4/h1H3,(H4,3,4,5)", False],
-    ["InChI=C2H7N3/c1-5-2(3)4/h1H3,(H4,3,4,5)", False],
-    ["InChI=1S/C2H7N3/c1-5-2(3)", False]
-])
+@pytest.mark.parametrize(
+    "inchi, expected",
+    [
+        ["InChI=1S/C2H7N3/c1-5-2(3)4/h1H3,(H4,3,4,5)", True],
+        ['"InChI=1S/C2H7N3/c1-5-2(3)4/h1H3,(H4,3,4,5)"', True],
+        ["InChI=1S/Ne", True],
+        ["InChI=1S/C14H9Cl5/c15-11-5-1-9(2-6-11)13(14(17,18)19)10-3-7-12(16)8-4-10/h1-8,13H", True],
+        ["1S/C2H7N3/c1-5-2(3)4/h1H3,(H4,3,4,5)", False],
+        ["InChI=1S/C2H7N3/c152(3)4/h1H3,(H4,3,4,5)", False],
+        ["InChI=C2H7N3/c1-5-2(3)4/h1H3,(H4,3,4,5)", False],
+        ["InChI=1S/C2H7N3/c1-5-2(3)", False],
+    ],
+)
 def test_is_valid_inchi(inchi, expected):
     pytest.importorskip("rdkit")
     assert is_valid_inchi(inchi) == expected
@@ -92,21 +94,24 @@ def test_is_valid_inchi_none_input():
     assert not is_valid_inchi(None), "Expected None entry to give False."
 
 
-@pytest.mark.parametrize("smiles, expected", [
-    [r"CN1COCN(CC2=CN=C(Cl)S2)\C1=N\[N+]([O-])=O", True],
-    [r"CN1N(C(=O)C=C1C)c1ccccc1", True],
-    [r"COC(=O)C1=CN=CC=N1", True],
-    [r"C", True],
-    [r"CF", True],
-    [r"C#C", True],
-    [r"C1=CC(=CC=C1C(C2=CC=C(C=C2)Cl)C(Cl)(Cl)Cl)Cl", True],
-    [r"[18FH]", True],
-    [r"F", True],
-    [r"CN1N(C(=O)C=C1C)c1cccccx1", False],
-    [r"CN1COCN(CC2=CN=C(Cl)S2)\C1=N\[N+++]([O-])=O", False],
-    [r"COC(=O[)]C1=CN=CC=N1", False],
-    [r"1S/C2H7N3/c1-5-2(3)4", False]
-])
+@pytest.mark.parametrize(
+    "smiles, expected",
+    [
+        [r"CN1COCN(CC2=CN=C(Cl)S2)\C1=N\[N+]([O-])=O", True],
+        [r"CN1N(C(=O)C=C1C)c1ccccc1", True],
+        [r"COC(=O)C1=CN=CC=N1", True],
+        [r"C", True],
+        [r"CF", True],
+        [r"C#C", True],
+        [r"C1=CC(=CC=C1C(C2=CC=C(C=C2)Cl)C(Cl)(Cl)Cl)Cl", True],
+        [r"[18FH]", True],
+        [r"F", True],
+        [r"CN1N(C(=O)C=C1C)c1cccccx1", False],
+        [r"CN1COCN(CC2=CN=C(Cl)S2)\C1=N\[N+++]([O-])=O", False],
+        [r"COC(=O[)]C1=CN=CC=N1", False],
+        [r"1S/C2H7N3/c1-5-2(3)4", False],
+    ],
+)
 def test_is_valid_smiles(smiles, expected):
     pytest.importorskip("rdkit")
     assert is_valid_smiles(smiles) == expected

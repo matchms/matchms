@@ -1,11 +1,9 @@
 from typing import Optional
-from matchms.filtering.filter_utils.get_neutral_mass_from_smiles import \
-    get_monoisotopic_neutral_mass
+from matchms.filtering.filter_utils.get_neutral_mass_from_smiles import get_monoisotopic_neutral_mass
 from matchms.typing import SpectrumType
 
 
-def require_parent_mass_match_smiles(spectrum_in: SpectrumType,
-                                     mass_tolerance) -> Optional[SpectrumType]:
+def require_parent_mass_match_smiles(spectrum_in: SpectrumType, mass_tolerance) -> Optional[SpectrumType]:
     """
     Validates if the parent mass of the given spectrum matches the mass calculated
     from its associated SMILES string within a specified tolerance.

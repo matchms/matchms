@@ -2,13 +2,11 @@ from pathlib import Path
 from typing import Generator, Union
 import numpy as np
 from pyteomics.mzml import read
-from matchms.importing.parsing_utils import (parse_mzml_mzxml_metadata,
-                                             sort_by_mz)
+from matchms.importing.parsing_utils import parse_mzml_mzxml_metadata, sort_by_mz
 from matchms.Spectrum import Spectrum
 
 
-def load_from_mzml(filename: Union[str, Path], ms_level: int = 2,
-                   metadata_harmonization: bool = True) -> Generator[Spectrum, None, None]:
+def load_from_mzml(filename: Union[str, Path], ms_level: int = 2, metadata_harmonization: bool = True) -> Generator[Spectrum, None, None]:
     """Load spectrum(s) from mzml file.
 
     This function will create ~matchms.Spectrum for every spectrum of desired
@@ -46,5 +44,4 @@ def load_from_mzml(filename: Union[str, Path], ms_level: int = 2,
 
                 mz, intensities = sort_by_mz(mz=mz, intensities=intensities)
 
-                yield Spectrum(mz=mz, intensities=intensities, metadata=metadata,
-                               metadata_harmonization=metadata_harmonization)
+                yield Spectrum(mz=mz, intensities=intensities, metadata=metadata, metadata_harmonization=metadata_harmonization)

@@ -5,19 +5,23 @@ from typing import List
 import pytest
 from matchms.filtering import derive_annotation_from_compound_name
 from matchms.filtering.metadata_processing.derive_annotation_from_compound_name import (
-    _get_pubchem_compound_name_annotation, _load_compound_name_annotations,
-    _pubchem_name_search, _write_compound_name_annotations)
+    _get_pubchem_compound_name_annotation,
+    _load_compound_name_annotations,
+    _pubchem_name_search,
+    _write_compound_name_annotations,
+)
 from ..builder_Spectrum import SpectrumBuilder
 
 
 @pytest.fixture()
 def csv_file_annotated_compound_names(tmp_path):
-    data = [["compound_name", "smiles", "inchi", "inchikey", "monoisotopic_mass"],
-            ["compound_1", "smile_1", "inchi_1", 'inchikey_1', 100],
-            ["compound_2", None, None, None, None],
-            ["compound_3", "CCCCC", "inchi_2", 'inchikey_2', 100],
-            ["compound_3", "C", "inchi_3", 'inchikey_3', 99],
-            ]
+    data = [
+        ["compound_name", "smiles", "inchi", "inchikey", "monoisotopic_mass"],
+        ["compound_1", "smile_1", "inchi_1", "inchikey_1", 100],
+        ["compound_2", None, None, None, None],
+        ["compound_3", "CCCCC", "inchi_2", "inchikey_2", 100],
+        ["compound_3", "C", "inchi_3", "inchikey_3", 99],
+    ]
 
     csv_file_name = os.path.join(tmp_path, "annotated_compounds.csv")
     with open(csv_file_name, "w", encoding="utf-8") as csv_file:
@@ -43,30 +47,26 @@ def csv_file_with_real_compound_names(tmp_path):
 def test_repair_smiles_from_compound_name_skip_already_correct():
     """Tests if already correct annotations are not repaired (even if the compound name does not match)"""
     builder = SpectrumBuilder()
-    spectrum_in = builder.with_metadata({"compound_name": "compound_1",
-                                         "parent_mass": 100.01,
-                                         "smiles": "C1CSSC1CCCCC(=O)O",
-                                         "inchi": None,
-                                         "inchikey": "AGBQKNBQESQNJD-UHFFFAOYSA-N"}).build()
+    spectrum_in = builder.with_metadata(
+        {"compound_name": "compound_1", "parent_mass": 100.01, "smiles": "C1CSSC1CCCCC(=O)O", "inchi": None, "inchikey": "AGBQKNBQESQNJD-UHFFFAOYSA-N"}
+    ).build()
     spectrum = derive_annotation_from_compound_name(spectrum_in, mass_tolerance=0.1)
     assert spectrum_in == spectrum
 
 
-@pytest.mark.parametrize("compound_name, smiles, parent_mass, expected_smiles", [
-    ("PC(18:0/20:4)", "wrong_smiles",
-     809.593, r"CCCCCCCCCCCCCCCCCC(=O)O[C@H](COC(=O)CCC/C=C\C/C=C\C/C=C\C/C=C\CCCCC)COP(=O)([O-])OCC[N+](C)(C)C"),
-    ("glucose", "input_smile_1", 180.0633881, 'C([C@@H]1[C@H]([C@@H]([C@H](C(O1)O)O)O)O)O'),
-    ("this compound does not exist", None, 200.01, None),
-    ("also_does_not_exist_and_not_in_csv", None, 100.01, None),
-])
-def test_repair_smiles_from_compound_name(compound_name, parent_mass, smiles,
-                                          expected_smiles,
-                                          csv_file_with_real_compound_names, tmp_path):
-    #pylint: disable=too-many-arguments
+@pytest.mark.parametrize(
+    "compound_name, smiles, parent_mass, expected_smiles",
+    [
+        ("PC(18:0/20:4)", "wrong_smiles", 809.593, r"CCCCCCCCCCCCCCCCCC(=O)O[C@H](COC(=O)CCC/C=C\C/C=C\C/C=C\C/C=C\CCCCC)COP(=O)([O-])OCC[N+](C)(C)C"),
+        ("glucose", "input_smile_1", 180.0633881, "C([C@@H]1[C@H]([C@@H]([C@H](C(O1)O)O)O)O)O"),
+        ("this compound does not exist", None, 200.01, None),
+        ("also_does_not_exist_and_not_in_csv", None, 100.01, None),
+    ],
+)
+def test_repair_smiles_from_compound_name(compound_name, parent_mass, smiles, expected_smiles, csv_file_with_real_compound_names, tmp_path):
+    # pylint: disable=too-many-arguments
     builder = SpectrumBuilder()
-    spectrum_in = builder.with_metadata({"compound_name": compound_name,
-                                         "parent_mass": parent_mass,
-                                         "smiles": smiles}).build()
+    spectrum_in = builder.with_metadata({"compound_name": compound_name, "parent_mass": parent_mass, "smiles": smiles}).build()
     spectrum = derive_annotation_from_compound_name(spectrum_in, csv_file_with_real_compound_names, mass_tolerance=0.1)
     assert spectrum.get("smiles") == expected_smiles, "Expected different smiles."
     # Run without csv file
@@ -84,74 +84,97 @@ def test_repair_smiles_from_compound_name(compound_name, parent_mass, smiles,
 
 def test_write_compound_names_to_file(tmp_path):
     csv_file_name = os.path.join(tmp_path, "compound_annotation.csv")
-    annotation_1 = [{'compound_name': 'glucose', 'smiles': 'C([C@@H]1[C@H]([C@@H]([C@H](C(O1)O)O)O)O)O',
-                  'inchi': 'InChI=1S/C6H12O6/c7-1-2-3(8)4(9)5(10)6(11)12-2/h2-11H,1H2/t2-,3-,4+,5-,6?/m1/s1',
-                  'inchikey': 'WQZGKKKJIJFFOK-GASJEMHNSA-N', 'monoisotopic_mass': 180.06338810},
-                    {'compound_name': 'glucose', 'smiles': 'test_smiles',
-                     'inchi': 'test_inchi',
-                     'inchikey': 'test_inchikey', 'monoisotopic_mass': 10}
-                    ]
+    annotation_1 = [
+        {
+            "compound_name": "glucose",
+            "smiles": "C([C@@H]1[C@H]([C@@H]([C@H](C(O1)O)O)O)O)O",
+            "inchi": "InChI=1S/C6H12O6/c7-1-2-3(8)4(9)5(10)6(11)12-2/h2-11H,1H2/t2-,3-,4+,5-,6?/m1/s1",
+            "inchikey": "WQZGKKKJIJFFOK-GASJEMHNSA-N",
+            "monoisotopic_mass": 180.06338810,
+        },
+        {"compound_name": "glucose", "smiles": "test_smiles", "inchi": "test_inchi", "inchikey": "test_inchikey", "monoisotopic_mass": 10},
+    ]
     _write_compound_name_annotations(csv_file_name, annotation_1)
     # Run a second time to make sure an alrady existing file can be reused
-    annotation_2 = [{'compound_name': 'compound_2', 'smiles': None,
-                     'inchi': None, 'inchikey': None, 'monoisotopic_mass': None}]
-    _write_compound_name_annotations(csv_file_name,
-                                     annotation_2)
+    annotation_2 = [{"compound_name": "compound_2", "smiles": None, "inchi": None, "inchikey": None, "monoisotopic_mass": None}]
+    _write_compound_name_annotations(csv_file_name, annotation_2)
     assert _load_compound_name_annotations(csv_file_name, "glucose") == annotation_1
     assert replace_nan_with_none(_load_compound_name_annotations(csv_file_name, "compound_2")) == annotation_2
 
 
-@pytest.mark.parametrize("compound_name, expected_output", [
-    ("compound_1", [{'compound_name': 'compound_1', 'smiles': 'smile_1',
-                     'inchi': 'inchi_1',
-                     'inchikey': 'inchikey_1', 'monoisotopic_mass': 100}]),
-    ("compound_2", [{'compound_name': 'compound_2', 'smiles': None,
-                     'inchi': None,
-                     'inchikey': None, 'monoisotopic_mass': None}]), ])
+@pytest.mark.parametrize(
+    "compound_name, expected_output",
+    [
+        ("compound_1", [{"compound_name": "compound_1", "smiles": "smile_1", "inchi": "inchi_1", "inchikey": "inchikey_1", "monoisotopic_mass": 100}]),
+        ("compound_2", [{"compound_name": "compound_2", "smiles": None, "inchi": None, "inchikey": None, "monoisotopic_mass": None}]),
+    ],
+)
 def test_load_compound_name_annotation(compound_name, expected_output, csv_file_annotated_compound_names):
     result = _load_compound_name_annotations(csv_file_annotated_compound_names, compound_name)
     assert replace_nan_with_none(result) == expected_output
 
 
-@pytest.mark.parametrize("compound_name, expected_output", [
-    ("glucose", [{'compound_name': 'glucose', 'smiles': 'C([C@@H]1[C@H]([C@@H]([C@H](C(O1)O)O)O)O)O',
-                  'inchi': 'InChI=1S/C6H12O6/c7-1-2-3(8)4(9)5(10)6(11)12-2/h2-11H,1H2/t2-,3-,4+,5-,6?/m1/s1',
-                  'inchikey': 'WQZGKKKJIJFFOK-GASJEMHNSA-N', 'monoisotopic_mass': 180.06338810}]),
-    ("does_not_exist", [])])
+@pytest.mark.parametrize(
+    "compound_name, expected_output",
+    [
+        (
+            "glucose",
+            [
+                {
+                    "compound_name": "glucose",
+                    "smiles": "C([C@@H]1[C@H]([C@@H]([C@H](C(O1)O)O)O)O)O",
+                    "inchi": "InChI=1S/C6H12O6/c7-1-2-3(8)4(9)5(10)6(11)12-2/h2-11H,1H2/t2-,3-,4+,5-,6?/m1/s1",
+                    "inchikey": "WQZGKKKJIJFFOK-GASJEMHNSA-N",
+                    "monoisotopic_mass": 180.06338810,
+                }
+            ],
+        ),
+        ("does_not_exist", []),
+    ],
+)
 def test_pubchem_name_search(compound_name, expected_output):
     result = _pubchem_name_search(compound_name)
     assert result == expected_output
 
 
-@pytest.mark.parametrize("compound_name, expected_output", [
-    ("compound_1", [{'compound_name': 'compound_1', 'smiles': 'smile_1',
-                     'inchi': 'inchi_1',
-                     'inchikey': 'inchikey_1', 'monoisotopic_mass': 100}]),
-    ("compound_2", [{'compound_name': 'compound_2', 'smiles': None,
-                     'inchi': None,
-                     'inchikey': None, 'monoisotopic_mass': None}]),
-    ("glucose", [{'compound_name': 'glucose', 'smiles': 'C([C@@H]1[C@H]([C@@H]([C@H](C(O1)O)O)O)O)O',
-                  'inchi': 'InChI=1S/C6H12O6/c7-1-2-3(8)4(9)5(10)6(11)12-2/h2-11H,1H2/t2-,3-,4+,5-,6?/m1/s1',
-                  'inchikey': 'WQZGKKKJIJFFOK-GASJEMHNSA-N', 'monoisotopic_mass': 180.06338810}]),
-    ("does_not_exist", [])])
+@pytest.mark.parametrize(
+    "compound_name, expected_output",
+    [
+        ("compound_1", [{"compound_name": "compound_1", "smiles": "smile_1", "inchi": "inchi_1", "inchikey": "inchikey_1", "monoisotopic_mass": 100}]),
+        ("compound_2", [{"compound_name": "compound_2", "smiles": None, "inchi": None, "inchikey": None, "monoisotopic_mass": None}]),
+        (
+            "glucose",
+            [
+                {
+                    "compound_name": "glucose",
+                    "smiles": "C([C@@H]1[C@H]([C@@H]([C@H](C(O1)O)O)O)O)O",
+                    "inchi": "InChI=1S/C6H12O6/c7-1-2-3(8)4(9)5(10)6(11)12-2/h2-11H,1H2/t2-,3-,4+,5-,6?/m1/s1",
+                    "inchikey": "WQZGKKKJIJFFOK-GASJEMHNSA-N",
+                    "monoisotopic_mass": 180.06338810,
+                }
+            ],
+        ),
+        ("does_not_exist", []),
+    ],
+)
 def test_get_compound_name_annotation(compound_name, expected_output, csv_file_annotated_compound_names):
     result = _get_pubchem_compound_name_annotation(compound_name, csv_file_annotated_compound_names)
     assert replace_nan_with_none(result) == expected_output
 
 
-@pytest.mark.parametrize("compound_name, parent_mass, expected_smiles",
-                         [("compound_3", 99.9, "CCCCC"),
-                          ("compound_3", 99.4, "C"),
-                          ("compound_3", 97.0, None),  # Check that the mass_tolerance is used
-                          ])
+@pytest.mark.parametrize(
+    "compound_name, parent_mass, expected_smiles",
+    [
+        ("compound_3", 99.9, "CCCCC"),
+        ("compound_3", 99.4, "C"),
+        ("compound_3", 97.0, None),  # Check that the mass_tolerance is used
+    ],
+)
 def test_find_closest_match_for_multiple_matches(compound_name, parent_mass, expected_smiles, csv_file_annotated_compound_names):
     """Tests if we find the closest parent mass match, if there are multiple possible entries"""
     builder = SpectrumBuilder()
-    spectrum_in = builder.with_metadata({"compound_name": compound_name,
-                                         "parent_mass": parent_mass}).build()
-    result = derive_annotation_from_compound_name(spectrum_in,
-                                                  csv_file_annotated_compound_names,
-                                                  mass_tolerance=1)
+    spectrum_in = builder.with_metadata({"compound_name": compound_name, "parent_mass": parent_mass}).build()
+    result = derive_annotation_from_compound_name(spectrum_in, csv_file_annotated_compound_names, mass_tolerance=1)
     assert result.get("smiles") == expected_smiles
 
 

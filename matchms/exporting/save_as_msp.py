@@ -3,8 +3,7 @@ import os
 from typing import IO, Dict, List, Union
 from ..Fragments import Fragments
 from ..Spectrum import Spectrum
-from ..utils import (filter_empty_spectra, fingerprint_export_warning,
-                     rename_deprecated_params)
+from ..utils import filter_empty_spectra, fingerprint_export_warning, rename_deprecated_params
 
 
 logger = logging.getLogger("matchms")
@@ -30,11 +29,11 @@ def save_as_msp(
         from matchms.exporting import save_as_msp
 
         # Create dummy spectrum
-        spectrum = Spectrum(mz=np.array([100, 200, 300], dtype="float"),
-                            intensities=np.array([10, 10, 500], dtype="float"),
-                            metadata={"charge": -1,
-                                      "inchi": '"InChI=1S/C6H12"',
-                                      "precursor_mz": 222.2})
+        spectrum = Spectrum(
+            mz=np.array([100, 200, 300], dtype="float"),
+            intensities=np.array([10, 10, 500], dtype="float"),
+            metadata={"charge": -1, "inchi": '"InChI=1S/C6H12"', "precursor_mz": 222.2},
+        )
 
         # Write spectrum to test file
         save_as_msp(spectrum, "test.msp")
@@ -62,9 +61,7 @@ def save_as_msp(
     fingerprint_export_warning(spectra)
 
     file_extension = filename.split(".")[-1]
-    assert (
-        file_extension.lower() not in _extensions_not_allowed
-    ), f"File extension '.{file_extension}' not allowed."
+    assert file_extension.lower() not in _extensions_not_allowed, f"File extension '.{file_extension}' not allowed."
     if not filename.endswith(".msp"):
         logger.warning(
             "Spectrum(s) will be stored as msp file with extension .%s",

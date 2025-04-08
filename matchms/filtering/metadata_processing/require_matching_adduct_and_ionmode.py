@@ -1,6 +1,5 @@
 import logging
-from matchms.filtering.filter_utils.interpret_unknown_adduct import \
-    get_charge_of_adduct
+from matchms.filtering.filter_utils.interpret_unknown_adduct import get_charge_of_adduct
 
 
 logger = logging.getLogger("matchms")

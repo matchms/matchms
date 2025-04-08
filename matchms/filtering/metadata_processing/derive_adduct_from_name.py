@@ -1,8 +1,7 @@
 import logging
 import re
 from typing import List, Optional
-from matchms.filtering.filter_utils.interpret_unknown_adduct import \
-    get_multiplier_and_mass_from_adduct
+from matchms.filtering.filter_utils.interpret_unknown_adduct import get_multiplier_and_mass_from_adduct
 from matchms.Spectrum import Spectrum
 from ..filter_utils.load_known_adducts import load_known_adducts
 from .clean_adduct import _clean_adduct
@@ -11,8 +10,7 @@ from .clean_adduct import _clean_adduct
 logger = logging.getLogger("matchms")
 
 
-def derive_adduct_from_name(spectrum_in: Spectrum,
-                            remove_adduct_from_name: bool = True) -> Optional[Spectrum]:
+def derive_adduct_from_name(spectrum_in: Spectrum, remove_adduct_from_name: bool = True) -> Optional[Spectrum]:
     """Find adduct in compound name and add to metadata (if not present yet).
 
     Method to interpret the given compound name to find the adduct.
@@ -32,8 +30,7 @@ def derive_adduct_from_name(spectrum_in: Spectrum,
     compound_name = spectrum.get("compound_name", None)
     if compound_name is None:
         if spectrum.get("name", None) not in [None, ""]:
-            logger.warning("Found 'name' but not 'compound_name' in metadata"
-                           "Apply 'add_compound_name' filter first.")
+            logger.warning("Found 'name' but not 'compound_name' in metadataApply 'add_compound_name' filter first.")
         return spectrum
     # Detect adduct in compound name
     parts_that_look_like_adduct = []
@@ -54,7 +51,7 @@ def derive_adduct_from_name(spectrum_in: Spectrum,
         if best_adduct:
             # Add found adduct to metadata (if not present yet)
             spectrum.set("adduct", best_adduct)
-            logger.info("Added adduct %s from the compound name to metadata.", spectrum.get('adduct'))
+            logger.info("Added adduct %s from the compound name to metadata.", spectrum.get("adduct"))
 
     return spectrum
 
@@ -75,8 +72,10 @@ def _select_best_adduct(list_of_adducts: List[str]) -> Optional[str]:
         return None
     if len(completely_correct_adduct) == 1:
         return completely_correct_adduct[0]
-    logger.warning("Two potential adducts were found in the compound name that are both valid adducts. "
-                   "The first adduct is used. The adducts found are: %s", completely_correct_adduct)
+    logger.warning(
+        "Two potential adducts were found in the compound name that are both valid adducts. The first adduct is used. The adducts found are: %s",
+        completely_correct_adduct,
+    )
     return completely_correct_adduct[0]
 
 

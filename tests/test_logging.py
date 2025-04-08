@@ -2,10 +2,7 @@
 import logging
 import os
 import pytest
-from matchms.logging_functions import (add_logging_to_file,
-                                       reset_matchms_logger,
-                                       set_matchms_logger_level,
-                                       set_rdkit_logger_level)
+from matchms.logging_functions import add_logging_to_file, reset_matchms_logger, set_matchms_logger_level, set_rdkit_logger_level
 
 
 def test_initial_logging(caplog, capsys):
@@ -18,8 +15,7 @@ def test_initial_logging(caplog, capsys):
     assert logger.getEffectiveLevel() == 30, "Expected different logging level"
     assert "info test" not in caplog.text, "Info log should not be shown."
     assert "warning test" in caplog.text, "Warning log should have been shown."
-    assert "warning test" in capsys.readouterr().out, \
-        "Warning log should have been shown to stderr/stdout."
+    assert "warning test" in capsys.readouterr().out, "Warning log should have been shown to stderr/stdout."
     reset_matchms_logger()
 
 
@@ -54,8 +50,7 @@ def test_add_logging_to_file(tmp_path, caplog, capsys):
     expected_log_entry = "test message no.1"
     # Test streamed logs
     assert expected_log_entry in caplog.text, "Expected different log message."
-    assert expected_log_entry in capsys.readouterr().out, \
-        "Expected different log message in output (stdout/stderr)."
+    assert expected_log_entry in capsys.readouterr().out, "Expected different log message in output (stdout/stderr)."
 
     # Test log file
     expected_log_entry = "INFO:matchms:test_logging:test message no.1"
@@ -95,7 +90,7 @@ def test_set_rdkit_logger_level(capfd):
     rdkit = pytest.importorskip("rdkit")
     # create a dummy logger
     logger = rdkit.RDLogger.logger()
-    rdkit_log_levels = ['rdApp.debug', 'rdApp.info', 'rdApp.warning', 'rdApp.error']
+    rdkit_log_levels = ["rdApp.debug", "rdApp.info", "rdApp.warning", "rdApp.error"]
 
     # test all log levels settings
     for set_level, set_level_name in enumerate(rdkit_log_levels):
