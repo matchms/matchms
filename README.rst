@@ -323,23 +323,19 @@ To install matchms, do:
   conda install poetry=1.8
   poetry install
 
-Run the linter with:
+Run the linter and formatter and automatically fix issues with:
 
 .. code-block:: console
 
-  prospector
+  ruff check --fix
+  ruff format
 
-Automatically fix incorrectly sorted imports:
-
-.. code-block:: console
-
-  isort .
-
-Files will be changed in place and need to be committed manually. If you only want to inspect the isort suggestions then simply run:
+You can automate the previous steps by using a pre-commit hook. This will automatically run the linter and formatter
+prior to a commit. In case the linter or formatter fixes issues you have to recommit your code.
 
 .. code-block:: console
 
-  isort --check-only --diff .
+  pre-commit install
 
 
 Run tests (including coverage) with:
