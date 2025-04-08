@@ -1,12 +1,14 @@
 import logging
+from typing import Optional
 import numpy as np
 from matchms.Spectrum import Spectrum
+from matchms.typing import SpectrumType
 
 
 logger = logging.getLogger("matchms")
 
 
-def remove_profiled_spectra(spectrum: Spectrum, mz_window=0.5):
+def remove_profiled_spectra(spectrum_in: Spectrum, mz_window=0.5, clone: Optional[bool] = True) -> Optional[SpectrumType]:
     """Remove profiled spectra
 
     Spectra are removed if within the mz_window of 0.5 of the highest peak at least 2 peaks next to the main peak are of
@@ -14,9 +16,27 @@ def remove_profiled_spectra(spectrum: Spectrum, mz_window=0.5):
 
     Reproduced from MZmine.
     https://github.com/mzmine/mzmine3/blob/master/src/main/java/io/github/mzmine/util/scans/ScanUtils.java#L609
+
+    Parameters
+    ----------
+    spectrum_in:
+        Input spectrum.
+    mz_window:
+        Window of mz values (in Da) that are allowed to lie within
+        the top k peaks. Default is 50 Da.
+    clone:
+        Optionally clone the Spectrum.
+
+    Returns
+    -------
+    Spectrum or None
+        None if the spectrum is likely profile data, else the input spectrum.
     """
-    if spectrum is None:
+    if spectrum_in is None:
         return None
+
+    spectrum = spectrum_in.clone() if clone else spectrum_in
+
     peaks_n = spectrum.mz.shape[0]
     if peaks_n < 3:
         return spectrum

@@ -1,4 +1,5 @@
 import os
+from itertools import chain
 from typing import Generator, List, Optional, Union
 from matchms.importing import load_from_json, load_from_mgf, load_from_msp, load_from_mzml, load_from_mzxml, load_from_pickle, load_from_usi
 from matchms.Spectrum import Spectrum
@@ -52,11 +53,4 @@ def load_list_of_spectrum_files(spectrum_files: Union[List[str], str]) -> Union[
     # If multiple files combine results into one generator
     spectrum_generators = [load_spectra(spectrum_file) for spectrum_file in spectrum_files]
 
-    def chain(*iterables):
-        """Combines multiple iterators (and generators) into a single iterator"""
-        # chain('ABC', 'DEF') --> A B C D E F
-        for it in iterables:
-            for element in it:
-                yield element
-
-    return chain(*spectrum_generators)
+    return chain.from_iterable(spectrum_generators)

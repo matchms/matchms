@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 from matchms import Spectrum
 from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import (
     convert_inchi_to_inchikey,
@@ -9,12 +10,13 @@ from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import (
     is_valid_smiles,
 )
 from matchms.filtering.metadata_processing.require_parent_mass_match_smiles import _check_smiles_and_parent_mass_match
+from matchms.typing import SpectrumType
 
 
 logger = logging.getLogger("matchms")
 
 
-def repair_not_matching_annotation(spectrum_in: Spectrum):
+def repair_not_matching_annotation(spectrum_in: Spectrum, clone: Optional[bool] = True) -> Optional[SpectrumType]:
     """
     Repairs mismatches in a spectrum's annotations related to SMILES, InChI, and InChIKey.
 
@@ -35,6 +37,8 @@ def repair_not_matching_annotation(spectrum_in: Spectrum):
     ----------
     spectrum_in : Spectrum
         The input spectrum containing annotations to be checked and repaired.
+    clone:
+        Optionally clone the Spectrum.
 
     Returns:
     -------
@@ -45,7 +49,7 @@ def repair_not_matching_annotation(spectrum_in: Spectrum):
     if spectrum_in is None:
         return None
 
-    spectrum = spectrum_in.clone()
+    spectrum = spectrum_in.clone() if clone else spectrum_in
 
     if not _check_repairing_is_possible(spectrum.get("smiles"), spectrum.get("inchi"), spectrum.get("inchikey")):
         # Repairing is not possible, since not all annotations are valid entries.

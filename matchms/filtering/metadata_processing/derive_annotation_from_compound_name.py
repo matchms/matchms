@@ -11,12 +11,13 @@ import pandas as pd
 import pubchempy
 from matchms import Spectrum
 from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import is_valid_inchi, is_valid_inchikey, is_valid_smiles
+from matchms.typing import SpectrumType
 
 
 logger = logging.getLogger("matchms")
 
 
-def derive_annotation_from_compound_name(spectrum_in: Spectrum, annotated_compound_names_file: Optional[str] = None, mass_tolerance: float = 0.1):
+def derive_annotation_from_compound_name(spectrum_in: Spectrum, annotated_compound_names_file: Optional[str] = None, mass_tolerance: float = 0.1, clone: Optional[bool] = True) -> Optional[SpectrumType]:
     """Adds smiles, inchi, inchikey based on compound name by searching pubchem
 
     This filter is only run, if there is not yet a valid smiles or inchi in the metadata.
@@ -34,10 +35,19 @@ def derive_annotation_from_compound_name(spectrum_in: Spectrum, annotated_compou
         The csv file should contain the columns ["compound_name", "smiles", "inchi", "inchikey", "monoisotopic_mass"]
     mass_tolerance:
         Acceptable mass difference between query compound and pubchem result.
+    clone:
+        Optionally clone the Spectrum.
+
+    Returns
+    -------
+    Spectrum or None
+        Spectrum with added annotation, or `None` if not present.
     """
     if spectrum_in is None:
         return None
-    spectrum = spectrum_in.clone()
+
+    spectrum = spectrum_in.clone() if clone else spectrum_in
+
     # Only run this function if it does not yet have a useful annotation
     if is_valid_inchi(spectrum.get("inchi")) or is_valid_smiles(spectrum.get("smiles")):
         return spectrum

@@ -26,7 +26,8 @@ def require_parent_mass_match_smiles(spectrum_in: SpectrumType, mass_tolerance) 
     if spectrum_in is None:
         return None
 
-    spectrum = spectrum_in.clone()
+    spectrum = spectrum_in
+
     # Check if parent mass matches the smiles mass
     if _check_smiles_and_parent_mass_match(spectrum.get("smiles"), spectrum.get("parent_mass"), mass_tolerance):
         return spectrum

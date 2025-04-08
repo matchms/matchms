@@ -1,3 +1,4 @@
+import logging
 import os
 import re
 import numpy as np
@@ -49,25 +50,25 @@ def test_filter_sorting_and_output():
     assert actual_filters == expected_filters
     # 2nd way to access the filter names via processing_steps attribute:
     expected_filters = [
-        "make_charge_int",
-        ("derive_adduct_from_name", {"remove_adduct_from_name": True}),
-        "interpret_pepmass",
-        "derive_ionmode",
-        "correct_charge",
+        ("make_charge_int", {"clone": True}),
+        ("derive_adduct_from_name", {"remove_adduct_from_name": True, "clone": True}),
+        ("interpret_pepmass", {"clone": True}),
+        ("derive_ionmode", {"clone": True}),
+        ("correct_charge", {"clone": True}),
     ]
     assert processing.processing_steps == expected_filters
 
 
 @pytest.mark.parametrize(
-    "filter_step, expected",
-    [
-        [
-            ("add_parent_mass", {"estimate_from_adduct": False}),
-            ("add_parent_mass", {"estimate_from_adduct": False, "overwrite_existing_entry": False, "estimate_from_charge": True}),
-        ],
-        ["derive_adduct_from_name", ("derive_adduct_from_name", {"remove_adduct_from_name": True})],
-        [("require_correct_ionmode", {"ion_mode_to_keep": "both"}), ("require_correct_ionmode", {"ion_mode_to_keep": "both"})],
-    ],
+  "filter_step, expected",
+  [
+      [
+          ("add_parent_mass", {"estimate_from_adduct": False, "clone": True}),
+          ("add_parent_mass", {"estimate_from_adduct": False, "overwrite_existing_entry": False, "estimate_from_charge": True, "clone": True})
+      ],
+      ["derive_adduct_from_name", ("derive_adduct_from_name", {"remove_adduct_from_name": True, "clone": True})],
+      [("require_correct_ionmode", {"ion_mode_to_keep": "both"}), ("require_correct_ionmode", {"ion_mode_to_keep": "both"})],
+  ]
 )
 def test_overwrite_default_settings(filter_step: str, expected):
     """Test if both default settings and set settings are returned in processing steps"""
@@ -97,7 +98,8 @@ def test_string_output():
             "correct_charge",
         ]
     )
-    expected_str = "Processing steps:\n- make_charge_int\n- interpret_pepmass\n- derive_ionmode\n- correct_charge\n"
+    expected_str = "Processing steps:\n- - make_charge_int\n  - clone: true\n- - interpret_pepmass\n  - clone: true" "\n- - derive_ionmode\n  - clone: true\n- - correct_charge\n  - clone: true\n"
+
     assert str(processing) == expected_str
 
 
@@ -117,12 +119,13 @@ def test_filter_spectra(spectra):
             "correct_charge",
         ]
     )
-    spectra, _ = processor.process_spectra(spectra)
+    spectra, report = processor.process_spectra(spectra)
 
     assert len(spectra) == 3
     actual_masses = [s.get("precursor_mz") for s in spectra]
     expected_masses = [100, 102, 104]
     assert actual_masses == expected_masses
+    assert report is None
 
 
 def test_filter_spectra_report(spectra):
@@ -135,7 +138,7 @@ def test_filter_spectra_report(spectra):
         ]
     )
     processor.parse_and_add_filter(filter_description=("require_minimum_number_of_peaks", {"n_required": 2}))
-    spectra, report = processor.process_spectra(spectra)
+    spectra, report = processor.process_spectra(spectra, create_report=True)
     assert len(spectra) == 2
     actual_masses = [s.get("precursor_mz") for s in spectra]
     expected_masses = [100, 102]
@@ -172,7 +175,7 @@ def test_processing_report_class(spectra):
     assert re.search(expected_repr_parts, repr(processing_report)) is not None
 
 
-def test_adding_custom_filter(spectra):
+def test_filter_report_filter_does_not_support_cloning(spectra, caplog):
     def nonsense_inchikey(s):
         s_in = s.clone()
         s_in.set("inchikey", "NONSENSE")
@@ -187,17 +190,48 @@ def test_adding_custom_filter(spectra):
         ]
     )
     processor.parse_and_add_filter(nonsense_inchikey)
+
+    with caplog.at_level(logging.ERROR):
+        spectra, report = processor.process_spectra(spectra, create_report=True)
+
+    assert report is not None
+    assert "Processing report is set to True, but the filter function nonsense_inchikey does not support cloning." in caplog.text
+
+
+def test_filter_no_report_filter_skip_cloning(spectra):
+    def test_filter(s, clone=True):
+        assert clone is False, f"Expected clone=False in Filter, but got {clone}"
+        return s
+
+    processor = SpectrumProcessor(filters=())
+    processor.parse_and_add_filter(test_filter)
+    spectra, report = processor.process_spectra(spectra, create_report=False)
+    assert report is None
+
+
+def test_adding_custom_filter(spectra):
+    def nonsense_inchikey(s, clone=True):
+        s_in = s.clone() if clone else s
+        s_in.set("inchikey", "NONSENSE")
+        return s_in
+
+    processor = SpectrumProcessor(filters=["make_charge_int",
+                                           "interpret_pepmass",
+                                           "derive_ionmode",
+                                           "correct_charge",
+                                           ])
+    processor.parse_and_add_filter(nonsense_inchikey)
     filters = processor.filters
     assert filters[-1].__name__ == "nonsense_inchikey"
-    spectra, report = processor.process_spectra(spectra)
+    spectra, report = processor.process_spectra(spectra, create_report=True)
     assert report.counter_number_processed == 3
     assert report.counter_changed_metadata == {"make_charge_int": 2, "interpret_pepmass": 3, "derive_ionmode": 3, "nonsense_inchikey": 3}
     assert spectra[0].get("inchikey") == "NONSENSE", "Custom filter not executed properly"
 
 
 def test_adding_custom_filter_with_parameters(spectra):
-    def nonsense_inchikey_multiple(s, number):
-        s_in = s.clone()
+    def nonsense_inchikey_multiple(s, number, clone=True):
+        s_in = s.clone() if clone else s
         s_in.set("inchikey", number * "NONSENSE")
         return s_in
 
@@ -212,7 +246,7 @@ def test_adding_custom_filter_with_parameters(spectra):
     processor.parse_and_add_filter((nonsense_inchikey_multiple, {"number": 2}))
     filters = processor.filters
     assert filters[-1].__name__ == "nonsense_inchikey_multiple"
-    spectra, report = processor.process_spectra(spectra)
+    spectra, report = processor.process_spectra(spectra, create_report=True)
     assert report.counter_number_processed == 3
     assert report.counter_changed_metadata == {"make_charge_int": 2, "interpret_pepmass": 3, "derive_ionmode": 3, "nonsense_inchikey_multiple": 3}
     assert spectra[0].get("inchikey") == "NONSENSENONSENSE", "Custom filter not executed properly"
@@ -257,7 +291,8 @@ def test_add_matchms_filter_in_position():
 
 
 def test_add_custom_filter_with_parameters(spectra):
-    def nonsense_inchikey_multiple(s, number):
+    def nonsense_inchikey_multiple(s, number, clone=True):
+        s = s.clone() if clone else s
         s.set("inchikey", number * "NONSENSE")
         return s
 
@@ -273,7 +308,7 @@ def test_add_custom_filter_with_parameters(spectra):
     filters = processor.filters
 
     assert filters[-1].__name__ == "nonsense_inchikey_multiple"
-    spectra, _ = processor.process_spectra(spectra)
+    spectra, _ = processor.process_spectra(spectra, create_report=True)
     assert spectra[0].get("inchikey") == "NONSENSENONSENSE", "Custom filter not executed properly"
 
 
@@ -300,8 +335,8 @@ def test_add_matchms_filter(filter_description, spectra):
 @pytest.mark.parametrize(
     "filter_description",
     [
-        ("derive_adduct_from_name", {"remove_adduct_from_name": False}),
-    ],
+        ("derive_adduct_from_name", {"remove_adduct_from_name": False, "clone": True}),
+    ]
 )
 def test_add_duplicated_filter_to_existing_pipeline(filter_description):
     """Tests if adding a filter that is already in the basic pipeline is overwritten and not duplicated"""
@@ -321,16 +356,17 @@ def test_add_filter_twice():
     processor = SpectrumProcessor(filters=())
     processor.parse_and_add_filter(("derive_adduct_from_name", {"remove_adduct_from_name": False}))
     processor.parse_and_add_filter("derive_adduct_from_name")
-    assert processor.processing_steps == [("derive_adduct_from_name", {"remove_adduct_from_name": True})]
+    assert processor.processing_steps == [("derive_adduct_from_name", {"remove_adduct_from_name": True, 'clone': True})]
 
 
 def test_add_all_filter_types(spectra):
-    def nonsense_inchikey_multiple(s, number):
+    def nonsense_inchikey_multiple(s, number, clone=True):
+        s = s.clone() if clone else s
         s.set("inchikey", number * "NONSENSE")
         return s
 
-    def nonsense_inchikey(s):
-        s_in = s.clone()
+    def nonsense_inchikey(s, clone=True):
+        s_in = s.clone() if clone else s
         s_in.set("inchikey", "NONSENSE")
         return s_in
 

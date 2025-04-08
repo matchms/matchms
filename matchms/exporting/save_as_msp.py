@@ -32,7 +32,7 @@ def save_as_msp(
         spectrum = Spectrum(
             mz=np.array([100, 200, 300], dtype="float"),
             intensities=np.array([10, 10, 500], dtype="float"),
-            metadata={"charge": -1, "inchi": '"InChI=1S/C6H12"', "precursor_mz": 222.2},
+            metadata={"charge": -1, "inchi": '"InChI=1S/C6H12"', "precursor_mz": 222.2}
         )
 
         # Write spectrum to test file
@@ -97,7 +97,11 @@ def _write_peaks(peaks: Fragments, peak_comments: Spectrum.peak_comments, outfil
 def _write_metadata(metadata: dict, outfile: IO):
     for key, value in metadata.items():
         if not (_is_num_peaks(key) or _is_peak_comments(key) or _is_fingerprint(key)):
-            outfile.write(f"{key.upper()}: {value}\n")
+            if key.upper().strip() == "SYNON: METB N": # Special case for GOLM
+                for val in value:
+                    outfile.write(f"{key.upper()}: {val}\n")
+            else:
+                outfile.write(f"{key.upper()}: {value}\n")
 
 
 def _format_peak_comment(mz: Union[int, float], peak_comments: Dict):

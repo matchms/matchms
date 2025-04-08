@@ -1,16 +1,29 @@
+from typing import Optional
 from matchms.filtering.SpeciesString import SpeciesString
 from matchms.typing import SpectrumType
 
 
-def repair_inchi_inchikey_smiles(spectrum_in: SpectrumType) -> SpectrumType:
+def repair_inchi_inchikey_smiles(spectrum_in: SpectrumType, clone: Optional[bool] = True) -> Optional[SpectrumType]:
     """Check if inchi, inchikey, and smiles entries seem correct. Detect and correct
     if any of those entries clearly belongs into one of the other two fields (e.g.
     inchikey found in inchi field).
+
+    Parameters
+    ----------
+    spectrum_in:
+        Input spectrum.
+    clone:
+        Optionally clone the Spectrum.
+
+    Returns
+    -------
+    Spectrum or None
+        Spectrum with repaired INCHI, INCHIKEY and SMILES, or `None` if not present.
     """
     if spectrum_in is None:
         return None
 
-    spectrum = spectrum_in.clone()
+    spectrum = spectrum_in.clone() if clone else spectrum_in
 
     # interpret available data and clean each
     inchi = spectrum.get("inchi", "")

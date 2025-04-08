@@ -44,6 +44,7 @@ rdkit = "^2024.3.5"
 pyyaml = ">=6.0.1"
 deprecated = ">=1.2.14"
 pubchempy = "*"
+pynndescent = ">=0.5.13"
 
 [tool.poetry.group.dev.dependencies]
 decorator = "^5.1.1"
@@ -51,7 +52,7 @@ pytest = "^7.4.0"
 pytest-cov = "^4.1.0"
 yapf = "^0.40.1"
 testfixtures = "^7.1.0"
-twine = "^5.1.0"
+twine = "^6.1.0"
 poetry-bumpversion = "^0.3.1"
 pre-commit = "^4.2.0"
 ruff = "^0.11.4"
@@ -60,7 +61,6 @@ ruff = "^0.11.4"
 sphinxcontrib-apidoc = "^0.3.0"
 sphinx-rtd-theme = "^1.2.2"
 sphinx = "<7"
-
 
 [build-system]
 requires = ["poetry-core"]

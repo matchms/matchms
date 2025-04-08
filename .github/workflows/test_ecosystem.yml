@@ -169,6 +169,7 @@ jobs:
     name: Comment PR
     needs: combine_results
     runs-on: ubuntu-latest
+    if: false
     if: ${{ needs.combine_results.result == 'success' && github.ref != 'refs/heads/master' }}
     steps:
       - uses: actions/download-artifact@v4

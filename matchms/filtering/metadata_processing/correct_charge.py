@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 import numpy as np
 from matchms.typing import SpectrumType
 
@@ -6,7 +7,7 @@ from matchms.typing import SpectrumType
 logger = logging.getLogger("matchms")
 
 
-def correct_charge(spectrum_in: SpectrumType) -> SpectrumType:
+def correct_charge(spectrum_in: SpectrumType, clone: Optional[bool] = True) -> Optional[SpectrumType]:
     """Correct charge values based on given ionmode.
 
     For some spectra, the charge value is either undefined or inconsistent with its
@@ -14,14 +15,21 @@ def correct_charge(spectrum_in: SpectrumType) -> SpectrumType:
 
     Parameters
     ----------
-    spectrum_in
+    spectrum_in:
         Input spectrum.
+    clone:
+        Optionally clone the Spectrum.
+
+    Returns
+    -------
+    Spectrum or None
+        Spectrum with corrected charge derived from ionmode, or `None` if not present.
     """
 
     if spectrum_in is None:
         return None
 
-    spectrum = spectrum_in.clone()
+    spectrum = spectrum_in.clone() if clone else spectrum_in
 
     ionmode = spectrum.get("ionmode", None)
     if ionmode:

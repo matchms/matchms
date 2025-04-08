@@ -2,6 +2,7 @@ import logging
 from typing import Optional
 from matchms.filtering.filter_utils.derive_precursor_mz_and_parent_mass import derive_parent_mass_from_precursor_mz
 from matchms.Spectrum import Spectrum
+from matchms.typing import SpectrumType
 from ...utils import get_first_common_element
 from ..filter_utils.get_neutral_mass_from_smiles import get_monoisotopic_neutral_mass
 
@@ -16,8 +17,7 @@ _accepted_missing_entries = ["", "N/A", "NA", "n/a"]
 
 
 def add_parent_mass(
-    spectrum_in: Spectrum, estimate_from_adduct: bool = True, overwrite_existing_entry: bool = False, estimate_from_charge: bool = True
-) -> Optional[Spectrum]:
+    spectrum_in: Spectrum, estimate_from_adduct: bool = True, overwrite_existing_entry: bool = False, estimate_from_charge: bool = True, clone: Optional[bool] = True) -> Optional[SpectrumType]:
     """Add estimated parent mass to metadata (if not present yet).
 
     Method to calculate the parent mass from given precursor m/z together
@@ -29,22 +29,29 @@ def add_parent_mass(
 
     Parameters
     ----------
-    spectrum_in
+    spectrum_in:
         Input spectrum.
-    estimate_from_adduct
+    estimate_from_adduct:
         When set to True, use adduct to estimate actual molecular mass ("parent mass").
         Default is True. Switches back to charge-based estimate if adduct does not match
         a known adduct.
-    overwrite_existing_entry
+    overwrite_existing_entry:
         Default is False. If set to True, a newly computed value will replace existing ones.
-    estimate_from_charge
+    estimate_from_charge:
         Default is True. If set to True, the charge will be used to estimate the parent mass.
         Adduct of the form [M+H]+, [M+H]2+, [M-H]- etc are assumed.
+    clone:
+        Optionally clone the Spectrum.
+
+    Returns
+    -------
+    Spectrum or None
+        Spectrum with added parent mass, or `None` if not present.
     """
     if spectrum_in is None:
         return None
 
-    spectrum = spectrum_in.clone()
+    spectrum = spectrum_in.clone() if clone else spectrum_in
 
     parent_mass = _get_parent_mass(spectrum.metadata)
     if parent_mass is not None and not overwrite_existing_entry:
