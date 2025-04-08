@@ -9,7 +9,6 @@ repos:
     hooks:
       - id: check-builtin-literals
       - id: check-case-conflict
-      - id: check-docstring-first
       - id: check-illegal-windows-names
       - id: check-json
       - id: check-merge-conflict
@@ -18,8 +17,6 @@ repos:
       - id: check-yaml
       - id: debug-statements
       - id: detect-private-key
-      - id: end-of-file-fixer
-      - id: trailing-whitespace
 
   # Run Ruff linter and formatter.
   - repo: https://github.com/astral-sh/ruff-pre-commit
