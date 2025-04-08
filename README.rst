@@ -327,11 +327,11 @@ Run the linter and formatter and automatically fix issues with:
 
 .. code-block:: console
 
-  ruff check --fix
-  ruff format
+  ruff check --fix matchms/YOUR-MODIFIED-FILE.py
+  ruff format matchms/YOUR-MODIFIED-FILE.py
 
-You can automate the previous steps by using a pre-commit hook. This will automatically run the linter and formatter
-prior to a commit. In case the linter or formatter fixes issues you have to recommit your code.
+You can automate the previous steps by using a pre-commit hook. This will automatically run the linter and formatter on
+the modified files before a commit. If the linter or formatter fixes any issues, you will need to recommit your code.
 
 .. code-block:: console
 
