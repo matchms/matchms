@@ -11,7 +11,7 @@ logger = logging.getLogger("matchms")
 
 
 def repair_parent_mass_match_smiles_wrapper(spectrum_in: SpectrumType, mass_tolerance: float = 0.2, clone: Optional[bool] = True) -> Optional[SpectrumType]:
-        """Wrapper function for repairing a mismatch between parent mass and smiles mass
+    """Wrapper function for repairing a mismatch between parent mass and smiles mass
 
     Parameters:
     ----------
