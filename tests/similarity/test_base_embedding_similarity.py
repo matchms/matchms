@@ -13,12 +13,6 @@ class MockEmbeddingSimilarity(BaseEmbeddingSimilarity):
     def compute_embeddings(self, spectra: Iterable[SpectrumType]) -> np.ndarray:
         return np.array([[0.1, 0.2, 0.3]])
 
-    def store_embeddings(self, npy_path: str, embeddings: np.ndarray):
-        pass
-
-    def load_embeddings(self, npy_path: str) -> np.ndarray:
-        return np.array([[0.1, 0.2, 0.3]])
-
 
 @pytest.fixture
 def spectra():
