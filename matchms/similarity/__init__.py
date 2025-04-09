@@ -27,7 +27,6 @@ from .ModifiedCosine import ModifiedCosine
 from .NeutralLossesCosine import NeutralLossesCosine
 from .ParentMassMatch import ParentMassMatch
 from .PrecursorMzMatch import PrecursorMzMatch
-from .BaseEmbeddingSimilarity import BaseEmbeddingSimilarity
 from .BinnedEmbeddingSimilarity import BinnedEmbeddingSimilarity
 __all__ = [
     "CosineGreedy",
@@ -39,7 +38,6 @@ __all__ = [
     "NeutralLossesCosine",
     "ParentMassMatch",
     "PrecursorMzMatch",
-    "BaseEmbeddingSimilarity",
     "BinnedEmbeddingSimilarity"
 ]
 
@@ -55,8 +53,7 @@ def get_similarity_function_by_name(similarity_function_name: str):
     """
     names = __all__
     functions = [CosineGreedy, CosineHungarian, FingerprintSimilarity, IntersectMz, MetadataMatch, ModifiedCosine,
-                 NeutralLossesCosine, ParentMassMatch, PrecursorMzMatch, BaseEmbeddingSimilarity,
-                 BinnedEmbeddingSimilarity]
+                 NeutralLossesCosine, ParentMassMatch, PrecursorMzMatch, BinnedEmbeddingSimilarity]
 
     assert similarity_function_name in names, f"Unknown similarity function: {similarity_function_name}"
     assert len(names) == len(functions), "Number of similarity functions and names do not match"
