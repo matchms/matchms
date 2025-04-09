@@ -68,17 +68,20 @@ def symmetrical_scores(similarity_function, spectra):
     queries = spectra
     references = spectra
 
-    scores = calculate_scores(queries, references, similarity_function=similarity_function)
+    scores = calculate_scores(queries=queries, references=references, similarity_function=similarity_function, is_symmetric=True)
     yield scores
 
 
 @pytest.fixture
 def asymmetrical_scores(similarity_function, spectra):
     """Return asymmetrical scores for each similarity metric that matchms.similarity module exposes."""
+    if similarity_function.__class__.__name__ == "BinnedEmbeddingSimilarity":
+        pytest.skip("BinnedEmbeddingSimilarity can only handle symmetric references/queries.")
+
     queries = spectra
     references = spectra[1:3]
 
-    scores = calculate_scores(queries, references, similarity_function=similarity_function)
+    scores = calculate_scores(queries=queries, references=references, similarity_function=similarity_function)
     yield scores
 
 
