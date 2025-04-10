@@ -304,7 +304,7 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
         """
         if self.similarity == "cosine":
             return 1 - distances
-        elif self.similarity == "euclidean":
+        if self.similarity == "euclidean":
             return -distances
         raise ValueError(f"Only cosine and euclidean similarities are supported for now. Got {self.similarity}.")
 
