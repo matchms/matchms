@@ -1,11 +1,12 @@
-import numpy as np
-from typing import List, Iterable, Union, Optional, Dict, Any, Tuple
-from pathlib import Path
+import pickle
 from abc import abstractmethod
+from pathlib import Path
+from typing import Any, Iterable, List, Optional, Tuple, Union
+import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity, euclidean_distances
 from matchms.similarity.BaseSimilarity import BaseSimilarity
 from matchms.typing import SpectrumType
-import pickle
+
 
 try:
     import pynndescent
@@ -38,7 +39,7 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
         Number of nearest neighbors used in the ANN index; if index is built.
     """
 
-    def __init__(self, similarity: str = "cosine"):  
+    def __init__(self, similarity: str = "cosine"):
         self.similarity = similarity
         self.index = None
         self.index_backend = None
@@ -55,12 +56,12 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
     @abstractmethod
     def compute_embeddings(self, spectra: Iterable[SpectrumType]) -> np.ndarray:
         """Compute embeddings for a list of spectra.
-        
+
         Parameters
         ----------
         spectra:
             List of spectra to compute embeddings for.
-            
+
         Returns
         -------
         np.ndarray
@@ -124,7 +125,7 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
             Similarity score between the spectra.
         """
         return self.matrix([reference], [query])[0, 0]
-            
+
     def matrix(
             self,
             references: List[SpectrumType],
@@ -161,7 +162,7 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
         embs_ref = self.compute_embeddings(references)
         embs_query = self.compute_embeddings(queries)
 
-        # Compute pairwise similarities matrix                
+        # Compute pairwise similarities matrix
         return self.pairwise_similarity_fn(embs_ref, embs_query)
 
     def build_ann_index(
@@ -248,7 +249,7 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
 
         if k > self.index_k:
             raise ValueError(f"k ({k}) is larger than the k used to build the index ({self.index_k}).")
-    
+
         if isinstance(query_spectra, np.ndarray):
             embs_query = query_spectra
             if embs_query.ndim != 2:
@@ -304,19 +305,19 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
         """
         if self.similarity == "cosine":
             return 1 - distances
-        elif self.similarity == "euclidean":
+        if self.similarity == "euclidean":
             return -distances
         raise ValueError(f"Only cosine and euclidean similarities are supported for now. Got {self.similarity}.")
 
     @staticmethod
     def load_embeddings(npy_path: Union[str, Path]) -> np.ndarray:
         """Load embeddings from a numpy file.
-        
+
         Parameters
         ----------
         npy_path : Union[str, Path]
             Path to the numpy file.
-        
+
         Returns
         -------
         np.ndarray
@@ -335,7 +336,7 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
     @staticmethod
     def store_embeddings(npy_path: Union[str, Path], embs: np.ndarray) -> None:
         """Store embeddings in a numpy file.
-        
+
         Parameters
         ----------
         npy_path : Union[str, Path]
@@ -347,7 +348,7 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
 
     def save_ann_index(self, path: Union[str, Path]) -> None:
         """Save the ANN index to disk.
-        
+
         Parameters
         ----------
         path : Union[str, Path]
@@ -360,7 +361,7 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
         """
         if self.index is None:
             raise ValueError("No index to save. Please build an index first using build_ann_index().")
-        
+
         save_dict = {
             'index': self.index,
             'backend': self.index_backend,
@@ -368,18 +369,18 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
             'index_kwargs': self.index_kwargs,
             'index_k': self.index_k
         }
-        
+
         with open(path, 'wb') as f:
             pickle.dump(save_dict, f)
 
     def load_ann_index(self, path: Union[str, Path]) -> Any:
         """Load an ANN index from disk.
-        
+
         Parameters
         ----------
         path : Union[str, Path]
             Path to load the index from.
-            
+
         Returns
         -------
         Any
@@ -392,16 +393,16 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
         """
         with open(path, 'rb') as f:
             load_dict = pickle.load(f)
-            
+
         if load_dict['similarity'] != self.similarity:
             raise ValueError(
                 f"Loaded index similarity metric ({load_dict['similarity']}) does not match "
                 f"current similarity metric ({self.similarity})"
             )
-            
+
         self.index = load_dict['index']
         self.index_backend = load_dict['backend']
         self.index_kwargs = load_dict['index_kwargs']
         self.index_k = load_dict['index_k']
-        
+
         return self.index
