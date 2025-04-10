@@ -1,6 +1,6 @@
-import pytest
-import numpy as np
 from typing import Iterable
+import numpy as np
+import pytest
 from matchms.similarity.BaseEmbeddingSimilarity import BaseEmbeddingSimilarity
 from matchms.typing import SpectrumType
 from tests.builder_Spectrum import SpectrumBuilder

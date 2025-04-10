@@ -1,6 +1,6 @@
+from typing import Iterable
 import numpy as np
 from matchms.typing import SpectrumType
-from typing import Iterable
 from .BaseEmbeddingSimilarity import BaseEmbeddingSimilarity
 
 

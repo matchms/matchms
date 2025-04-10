@@ -1,11 +1,12 @@
-import numpy as np
-from typing import List, Iterable, Union, Optional, Any, Tuple
-from pathlib import Path
+import pickle
 from abc import abstractmethod
+from pathlib import Path
+from typing import Any, Iterable, List, Optional, Tuple, Union
+import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity, euclidean_distances
 from matchms.similarity.BaseSimilarity import BaseSimilarity
 from matchms.typing import SpectrumType
-import pickle
+
 
 try:
     import pynndescent
