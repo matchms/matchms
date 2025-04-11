@@ -70,7 +70,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.ruff]
 extend-exclude = ["integration-tests", "paper", "readthedocs"]
-line-length = 159 # default value of medium profile in prospector
+line-length = 120
 output-format = "grouped"
 
 [tool.ruff.format]
