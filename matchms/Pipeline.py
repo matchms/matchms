@@ -7,15 +7,11 @@ from deprecated import deprecated
 import matchms.similarity as mssimilarity
 from matchms import calculate_scores
 from matchms.filtering.filter_order import ALL_FILTERS
-from matchms.filtering.SpectrumProcessor import (FunctionWithParametersType,
-                                                 SpectrumProcessor)
+from matchms.filtering.SpectrumProcessor import FunctionWithParametersType, SpectrumProcessor
 from matchms.importing.load_spectra import load_list_of_spectrum_files
-from matchms.logging_functions import (add_logging_to_file,
-                                       reset_matchms_logger,
-                                       set_matchms_logger_level)
+from matchms.logging_functions import add_logging_to_file, reset_matchms_logger, set_matchms_logger_level
 from matchms.typing import SpectrumType
-from matchms.yaml_file_functions import (load_workflow_from_yaml_file,
-                                         ordered_dump)
+from matchms.yaml_file_functions import load_workflow_from_yaml_file, ordered_dump
 
 
 _masking_functions = ["filter_by_range"]
@@ -23,11 +19,12 @@ _score_functions = {key.lower(): f for key, f in mssimilarity.__dict__.items() i
 logger = logging.getLogger("matchms")
 
 
-def create_workflow(yaml_file_name: Optional[str] = None,
-                    query_filters: Iterable[Union[str, Callable, FunctionWithParametersType]] = (),
-                    reference_filters: Iterable[Union[str, Callable, FunctionWithParametersType]] = (),
-                    score_computations: Iterable[Union[str, List[dict]]] = (),
-                    ) -> OrderedDict:
+def create_workflow(
+    yaml_file_name: Optional[str] = None,
+    query_filters: Iterable[Union[str, Callable, FunctionWithParametersType]] = (),
+    reference_filters: Iterable[Union[str, Callable, FunctionWithParametersType]] = (),
+    score_computations: Iterable[Union[str, List[dict]]] = (),
+) -> OrderedDict:
     """Creates a workflow that specifies the filters and scores needed to be run by Pipeline
 
     Example code can be found in the docstring of Pipeline.
@@ -49,11 +46,12 @@ def create_workflow(yaml_file_name: Optional[str] = None,
     workflow["reference_filters"] = reference_processor.processing_steps
     workflow["score_computations"] = score_computations
     if yaml_file_name is not None:
-        assert not os.path.exists(yaml_file_name), \
-            "This yaml file name already exists. " \
-            "To use the settings in the yaml file, please use the load_workflow_from_yaml_file function " \
+        assert not os.path.exists(yaml_file_name), (
+            "This yaml file name already exists. "
+            "To use the settings in the yaml file, please use the load_workflow_from_yaml_file function "
             "in yaml_file_functions.py or check the tutorial."
-        with open(yaml_file_name, 'w', encoding="utf-8") as file:
+        )
+        with open(yaml_file_name, "w", encoding="utf-8") as file:
             file.write("# Matchms pipeline config file \n")
             file.write("# Change and adapt fields where necessary \n")
             file.write("# " + 20 * "=" + " \n")
@@ -92,21 +90,21 @@ class Pipeline:
         from matchms.Pipeline import Pipeline, create_workflow
 
         workflow = create_workflow(
-            yaml_file_name="my_config_file.yaml", # The workflow will be stored in a yaml file.
+            yaml_file_name="my_config_file.yaml",  # The workflow will be stored in a yaml file.
             query_filters=[
-               ["add_parent_mass"],
-               ["normalize_intensities"],
-               ["select_by_relative_intensity", {"intensity_from": 0.0, "intensity_to": 1.0}],
-               ["select_by_mz", {"mz_from": 0, "mz_to": 1000}],
-               ["require_minimum_number_of_peaks", {"n_required": 5}]],
+                ["add_parent_mass"],
+                ["normalize_intensities"],
+                ["select_by_relative_intensity", {"intensity_from": 0.0, "intensity_to": 1.0}],
+                ["select_by_mz", {"mz_from": 0, "mz_to": 1000}],
+                ["require_minimum_number_of_peaks", {"n_required": 5}],
+            ],
             reference_filters=["add_fingerprint"],
             score_computations=[
-                ["precursormzmatch",  {"tolerance": 120.0}],
-                ["cosinegreedy", {"tolerance": 1.0}]
-                ["filter_by_range", {"name": "CosineGreedy_score", "low": 0.3}],
+                ["precursormzmatch", {"tolerance": 120.0}],
+                ["cosinegreedy", {"tolerance": 1.0}]["filter_by_range", {"name": "CosineGreedy_score", "low": 0.3}],
                 ["modifiedcosine", {"tolerance": 1.0}],
-                ["filter_by_range", {"name": "ModifiedCosine_score", "low": 0.3}]
-            ]
+                ["filter_by_range", {"name": "ModifiedCosine_score", "low": 0.3}],
+            ],
         )
 
         pipeline = Pipeline(workflow)
@@ -122,16 +120,17 @@ class Pipeline:
     .. code-block:: python
 
         from spec2vec import Spec2Vec
-        workflow = create_workflow(score_computations = [["precursormzmatch",  {"tolerance": 120.0}],
-                                               [Spec2Vec, {"model": "my_spec2vec_model.model"}],
-                                       ["filter_by_range", {"name": "Spec2Vec", "low": 0.3}]])
+
+        workflow = create_workflow(
+            score_computations=[
+                ["precursormzmatch", {"tolerance": 120.0}],
+                [Spec2Vec, {"model": "my_spec2vec_model.model"}],
+                ["filter_by_range", {"name": "Spec2Vec", "low": 0.3}],
+            ]
+        )
     """
 
-    def __init__(self,
-                 workflow: OrderedDict,
-                 progress_bar=True,
-                 logging_level: str = "WARNING",
-                 logging_file: Optional[str] = None):
+    def __init__(self, workflow: OrderedDict, progress_bar=True, logging_level: str = "WARNING", logging_file: Optional[str] = None):
         """
         Parameters
         ----------
@@ -173,10 +172,8 @@ class Pipeline:
             logger.warning("The order of the filters has been changed compared to the Yaml file.")
 
     def check_workflow(self):
-        """Define Pipeline workflow based on a yaml file (config_file).
-        """
-        assert isinstance(self.__workflow, OrderedDict), \
-            f"Workflow is expectd to be a OrderedDict, instead it was of type {type(self.__workflow)}"
+        """Define Pipeline workflow based on a yaml file (config_file)."""
+        assert isinstance(self.__workflow, OrderedDict), f"Workflow is expectd to be a OrderedDict, instead it was of type {type(self.__workflow)}"
         expected_keys = {"query_filters", "reference_filters", "score_computations"}
         assert set(self.__workflow.keys()) == expected_keys
         check_score_computation(score_computations=self.score_computations)
@@ -205,9 +202,9 @@ class Pipeline:
         self.write_to_logfile("--- Processing spectra ---")
         self.write_to_logfile(f"Time: {str(datetime.now())}")
         # Process query spectra
-        spectra, report = self.processing_queries.process_spectra(self._spectra_queries,
-                                                                    progress_bar=self.progress_bar,
-                                                                    cleaned_spectra_file=cleaned_query_file)
+        spectra, report = self.processing_queries.process_spectra(
+            self._spectra_queries, progress_bar=self.progress_bar, cleaned_spectra_file=cleaned_query_file
+        )
         self._spectra_queries = spectra
         self.write_to_logfile(str(report))
         if cleaned_query_file is not None:
@@ -216,7 +213,8 @@ class Pipeline:
         # Process reference spectra (if necessary)
         if self.is_symmetric is False:
             self._spectra_references, report = self.processing_references.process_spectra(
-                self._spectra_references, progress_bar=self.progress_bar, cleaned_spectra_file=cleaned_reference_file)
+                self._spectra_references, progress_bar=self.progress_bar, cleaned_spectra_file=cleaned_reference_file
+            )
             self.write_to_logfile(str(report))
             if cleaned_reference_file is not None:
                 self.write_to_logfile(f"--- Reference spectra written to {cleaned_reference_file} ---")
@@ -239,8 +237,7 @@ class Pipeline:
         return report
 
     def _apply_score_masking(self, computation):
-        """Apply filter to remove scores which are out of the set range.
-        """
+        """Apply filter to remove scores which are out of the set range."""
         if len(computation) == 1:
             name = self.scores.score_names[-1]
             self.scores.filter_by_range(name=name)
@@ -251,8 +248,7 @@ class Pipeline:
             self.scores.filter_by_range(**computation[1])
 
     def _apply_similarity_measure(self, computation, i):
-        """Run score computations for all listed methods and on all loaded and processed spectra.
-        """
+        """Run score computations for all listed methods and on all loaded and processed spectra."""
 
         def get_similarity_measure(computation):
             if isinstance(computation[0], str):
@@ -268,47 +264,36 @@ class Pipeline:
         similarity_measure = get_similarity_measure(computation)
         # If this is the first score computation:
         if i == 0:
-            self.scores = calculate_scores(self._spectra_references,
-                                           self._spectra_queries,
-                                           similarity_measure,
-                                           array_type="sparse",
-                                           is_symmetric=self.is_symmetric)
+            self.scores = calculate_scores(
+                self._spectra_references, self._spectra_queries, similarity_measure, array_type="sparse", is_symmetric=self.is_symmetric
+            )
         else:
-            new_scores = similarity_measure.sparse_array(references=self._spectra_references,
-                                                         queries=self._spectra_queries,
-                                                         idx_row=self.scores.scores.row,
-                                                         idx_col=self.scores.scores.col,
-                                                         is_symmetric=self.is_symmetric)
-            self.scores.scores.add_sparse_data(self.scores.scores.row,
-                                               self.scores.scores.col,
-                                               new_scores,
-                                               similarity_measure.__class__.__name__)
+            new_scores = similarity_measure.sparse_array(
+                references=self._spectra_references,
+                queries=self._spectra_queries,
+                idx_row=self.scores.scores.row,
+                idx_col=self.scores.scores.col,
+                is_symmetric=self.is_symmetric,
+            )
+            self.scores.scores.add_sparse_data(self.scores.scores.row, self.scores.scores.col, new_scores, similarity_measure.__class__.__name__)
 
     def set_logging(self):
-        """Set the matchms logger to write messages to file (if defined).
-        """
+        """Set the matchms logger to write messages to file (if defined)."""
         reset_matchms_logger()
         set_matchms_logger_level(self.logging_level)
         if self.logging_file is not None:
-            add_logging_to_file(self.logging_file,
-                                loglevel=self.logging_level,
-                                remove_stream_handlers=True)
+            add_logging_to_file(self.logging_file, loglevel=self.logging_level, remove_stream_handlers=True)
         else:
-            logger.warning("No logging file was defined."
-                           "Logging messages will not be written to file.")
+            logger.warning("No logging file was defined.Logging messages will not be written to file.")
 
     def write_to_logfile(self, line):
-        """Write message to log file.
-        """
+        """Write message to log file."""
         if self.logging_file is not None:
             with open(self.logging_file, "a", encoding="utf-8") as f:
-                f.write(line + '\n')
+                f.write(line + "\n")
 
-    @deprecated(version="0.26.5",
-                reason="This method is deprecated and will be removed in the future. Use import_spectra() instead.")
-    def import_spectrums(self,
-                         query_files: Union[List[str], str],
-                         reference_files: Optional[Union[List[str], str]] = None):
+    @deprecated(version="0.26.5", reason="This method is deprecated and will be removed in the future. Use import_spectra() instead.")
+    def import_spectrums(self, query_files: Union[List[str], str], reference_files: Optional[Union[List[str], str]] = None):
         """Wrapper method for import_spectra()
 
         Parameters
@@ -321,9 +306,7 @@ class Pipeline:
         """
         return self.import_spectra(query_files, reference_files)
 
-    def import_spectra(self,
-                       query_files: Union[List[str], str],
-                       reference_files: Optional[Union[List[str], str]] = None):
+    def import_spectra(self, query_files: Union[List[str], str], reference_files: Optional[Union[List[str], str]] = None):
         """Import spectra from file(s).
 
         Parameters
@@ -378,8 +361,7 @@ class Pipeline:
         self._initialize_spectrum_processor_references()
 
     @property
-    @deprecated(version="0.26.5",
-                reason="This property is deprecated and will be removed in the future. Use spectra_queries instead.")
+    @deprecated(version="0.26.5", reason="This property is deprecated and will be removed in the future. Use spectra_queries instead.")
     def spectrums_queries(self) -> List[SpectrumType]:
         return self._spectra_queries
 
@@ -388,8 +370,7 @@ class Pipeline:
         return self._spectra_queries
 
     @property
-    @deprecated(version="0.26.5",
-                reason="This property is deprecated and will be removed in the future. Use spectra_references instead.")
+    @deprecated(version="0.26.5", reason="This property is deprecated and will be removed in the future. Use spectra_references instead.")
     def spectrums_references(self) -> List[SpectrumType]:
         return self._spectra_references
 

@@ -3,10 +3,8 @@ from .metadata_processing.add_compound_name import add_compound_name
 from .metadata_processing.add_precursor_mz import add_precursor_mz
 from .metadata_processing.clean_compound_name import clean_compound_name
 from .metadata_processing.correct_charge import correct_charge
-from .metadata_processing.derive_adduct_from_name import \
-    derive_adduct_from_name
-from .metadata_processing.derive_formula_from_name import \
-    derive_formula_from_name
+from .metadata_processing.derive_adduct_from_name import derive_adduct_from_name
+from .metadata_processing.derive_formula_from_name import derive_formula_from_name
 from .metadata_processing.derive_ionmode import derive_ionmode
 from .metadata_processing.interpret_pepmass import interpret_pepmass
 from .metadata_processing.make_charge_int import make_charge_int

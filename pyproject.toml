@@ -48,23 +48,19 @@ pynndescent = ">=0.5.13"
 
 [tool.poetry.group.dev.dependencies]
 decorator = "^5.1.1"
-isort = "^5.12.0"
-pylint = "^2.17.5"
-prospector = {extras = ["with-pyroma"], version = "^1.10.2"}
 pytest = "^7.4.0"
 pytest-cov = "^4.1.0"
 yapf = "^0.40.1"
 testfixtures = "^7.1.0"
 twine = "^6.1.0"
-black = ">=23.7,<25.0"
 poetry-bumpversion = "^0.3.1"
-pre_commit = "4.1.0"
+pre-commit = "^4.2.0"
+ruff = "^0.11.4"
 
 [tool.poetry.group.docs.dependencies]
 sphinxcontrib-apidoc = "^0.3.0"
 sphinx-rtd-theme = "^1.2.2"
 sphinx = "<7"
-
 
 [build-system]
 requires = ["poetry-core"]
@@ -72,12 +68,50 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry_bumpversion.file."matchms/__version__.py"]
 
-[tool.isort]
-sections = "FUTURE,STDLIB,THIRDPARTY,FIRSTPARTY,LOCALFOLDER"
-no_lines_before = "FUTURE,STDLIB,THIRDPARTY,FIRSTPARTY,LOCALFOLDER"
-lines_after_imports = 2
-known_first_party = "matchms"
-skip = "readthedocs/conf.py"
+[tool.ruff]
+extend-exclude = ["integration-tests", "paper", "readthedocs"]
+line-length = 120
+output-format = "grouped"
+
+[tool.ruff.format]
+docstring-code-format = true
+line-ending = "lf"
+
+[tool.ruff.lint]
+# TODO: add some rules in future, eg. W291/292
+extend-select = ["D", "E", "I"]
+# TODO: some of these rules should be enforced in the future, eg. E713
+ignore = [
+    "D100",
+    "D101",
+    "D102",
+    "D103",
+    "D104",
+    "D105",
+    "D107",
+    "D200",
+    "D201",
+    "D202",
+    "D203",
+    "D204",
+    "D205",
+    "D209",
+    "D210",
+    "D212",
+    "D213",
+    "D4",
+    "E713"
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["matchms"]
+lines-after-imports = 2
+no-lines-before = ["future", "standard-library", "third-party", "first-party", "local-folder"]
+section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
+
+# disable pydoc for tests
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["D"]
 
 [tool.pytest.ini_options]
 testpaths = [

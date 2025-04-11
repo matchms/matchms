@@ -3,11 +3,7 @@ import json
 import os
 import numpy as np
 import pytest
-from matchms.exporting.metadata_export import (_get_metadata_dict,
-                                               _subset_metadata,
-                                               export_metadata_as_csv,
-                                               export_metadata_as_json,
-                                               get_metadata_as_array)
+from matchms.exporting.metadata_export import _get_metadata_dict, _subset_metadata, export_metadata_as_csv, export_metadata_as_json, get_metadata_as_array
 from matchms.importing import load_from_msp
 from tests.builder_Spectrum import SpectrumBuilder
 
@@ -34,9 +30,9 @@ def test_get_metadata_as_array(spectra):
     assert len(colnames) == 23
 
 
-@pytest.mark.parametrize("delimiter", [',', '\t'])
+@pytest.mark.parametrize("delimiter", [",", "\t"])
 def test_export_as_csv(tmp_path, spectra, delimiter):
-    extension = {',':'csv', '\t': 'tsv'}
+    extension = {",": "csv", "\t": "tsv"}
     module_root = os.path.join(os.path.dirname(__file__), "..")
     outpath = tmp_path / f"metadata.{extension[delimiter]}"
 

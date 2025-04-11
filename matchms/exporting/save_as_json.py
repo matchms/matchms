@@ -1,8 +1,7 @@
 import json
 from typing import List
 from ..Spectrum import Spectrum
-from ..utils import (filter_empty_spectra, fingerprint_export_warning,
-                     rename_deprecated_params)
+from ..utils import filter_empty_spectra, fingerprint_export_warning, rename_deprecated_params
 
 
 @rename_deprecated_params(param_mapping={"spectrums": "spectra"}, version="0.26.5")
@@ -18,11 +17,11 @@ def save_as_json(spectra: List[Spectrum], filename: str, export_style: str = "ma
         from matchms.exporting import save_as_json
 
         # Create dummy spectrum
-        spectrum = Spectrum(mz=np.array([100, 200, 300], dtype="float"),
-                            intensities=np.array([10, 10, 500], dtype="float"),
-                            metadata={"charge": -1,
-                                      "inchi": '"InChI=1S/C6H12"',
-                                      "precursor_mz": 222.2})
+        spectrum = Spectrum(
+            mz=np.array([100, 200, 300], dtype="float"),
+            intensities=np.array([10, 10, 500], dtype="float"),
+            metadata={"charge": -1, "inchi": '"InChI=1S/C6H12"', "precursor_mz": 222.2},
+        )
 
         # Write spectrum to test file
         save_as_json(spectrum, "test.json")

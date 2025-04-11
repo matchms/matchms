@@ -68,107 +68,60 @@ Should output
    Sketch of matchms spectrum processing.
 
 """
+
 from matchms.filtering.default_filters import default_filters
-from matchms.filtering.metadata_processing.add_compound_name import \
-    add_compound_name
-from matchms.filtering.metadata_processing.add_fingerprint import \
-    add_fingerprint
-from matchms.filtering.metadata_processing.add_parent_mass import \
-    add_parent_mass
-from matchms.filtering.metadata_processing.add_precursor_mz import \
-    add_precursor_mz
-from matchms.filtering.metadata_processing.add_retention import (
-    add_retention_index, add_retention_time)
+from matchms.filtering.metadata_processing.add_compound_name import add_compound_name
+from matchms.filtering.metadata_processing.add_fingerprint import add_fingerprint
+from matchms.filtering.metadata_processing.add_parent_mass import add_parent_mass
+from matchms.filtering.metadata_processing.add_precursor_mz import add_precursor_mz
+from matchms.filtering.metadata_processing.add_retention import add_retention_index, add_retention_time
 from matchms.filtering.metadata_processing.clean_adduct import clean_adduct
-from matchms.filtering.metadata_processing.clean_compound_name import \
-    clean_compound_name
+from matchms.filtering.metadata_processing.clean_compound_name import clean_compound_name
 from matchms.filtering.metadata_processing.correct_charge import correct_charge
-from matchms.filtering.metadata_processing.derive_adduct_from_name import \
-    derive_adduct_from_name
-from matchms.filtering.metadata_processing.derive_annotation_from_compound_name import \
-    derive_annotation_from_compound_name
-from matchms.filtering.metadata_processing.derive_formula_from_name import \
-    derive_formula_from_name
-from matchms.filtering.metadata_processing.derive_formula_from_smiles import \
-    derive_formula_from_smiles
-from matchms.filtering.metadata_processing.derive_inchi_from_smiles import \
-    derive_inchi_from_smiles
-from matchms.filtering.metadata_processing.derive_inchikey_from_inchi import \
-    derive_inchikey_from_inchi
+from matchms.filtering.metadata_processing.derive_adduct_from_name import derive_adduct_from_name
+from matchms.filtering.metadata_processing.derive_annotation_from_compound_name import derive_annotation_from_compound_name
+from matchms.filtering.metadata_processing.derive_formula_from_name import derive_formula_from_name
+from matchms.filtering.metadata_processing.derive_formula_from_smiles import derive_formula_from_smiles
+from matchms.filtering.metadata_processing.derive_inchi_from_smiles import derive_inchi_from_smiles
+from matchms.filtering.metadata_processing.derive_inchikey_from_inchi import derive_inchikey_from_inchi
 from matchms.filtering.metadata_processing.derive_ionmode import derive_ionmode
-from matchms.filtering.metadata_processing.derive_smiles_from_inchi import \
-    derive_smiles_from_inchi
-from matchms.filtering.metadata_processing.harmonize_undefined_inchi import \
-    harmonize_undefined_inchi
-from matchms.filtering.metadata_processing.harmonize_undefined_inchikey import \
-    harmonize_undefined_inchikey
-from matchms.filtering.metadata_processing.harmonize_undefined_smiles import \
-    harmonize_undefined_smiles
-from matchms.filtering.metadata_processing.interpret_pepmass import \
-    interpret_pepmass
-from matchms.filtering.metadata_processing.make_charge_int import \
-    make_charge_int
-from matchms.filtering.metadata_processing.repair_adduct_and_parent_mass_based_on_smiles import \
-    repair_adduct_and_parent_mass_based_on_smiles
-from matchms.filtering.metadata_processing.repair_adduct_based_on_parent_mass import \
-    repair_adduct_based_on_parent_mass
-from matchms.filtering.metadata_processing.repair_inchi_inchikey_smiles import \
-    repair_inchi_inchikey_smiles
-from matchms.filtering.metadata_processing.repair_not_matching_annotation import \
-    repair_not_matching_annotation
-from matchms.filtering.metadata_processing.repair_parent_mass_from_smiles import \
-    repair_parent_mass_from_smiles
-from matchms.filtering.metadata_processing.repair_parent_mass_is_molar_mass import \
-    repair_parent_mass_is_molar_mass
-from matchms.filtering.metadata_processing.repair_parent_mass_match_smiles_wrapper import \
-    repair_parent_mass_match_smiles_wrapper
-from matchms.filtering.metadata_processing.repair_smiles_of_salts import \
-    repair_smiles_of_salts
-from matchms.filtering.metadata_processing.require_compound_name import \
-    require_compound_name
-from matchms.filtering.metadata_processing.require_correct_ionmode import \
-    require_correct_ionmode
-from matchms.filtering.metadata_processing.require_correct_ms_level import \
-    require_correct_ms_level
-from matchms.filtering.metadata_processing.require_formula import \
-    require_formula
-from matchms.filtering.metadata_processing.require_matching_adduct_and_ionmode import \
-    require_matching_adduct_and_ionmode
-from matchms.filtering.metadata_processing.require_matching_adduct_precursor_mz_parent_mass import \
-    require_matching_adduct_precursor_mz_parent_mass
-from matchms.filtering.metadata_processing.require_parent_mass_match_smiles import \
-    require_parent_mass_match_smiles
-from matchms.filtering.metadata_processing.require_precursor_mz import (
-    require_precursor_below_mz, require_precursor_mz)
-from matchms.filtering.metadata_processing.require_retention_index import \
-    require_retention_index
-from matchms.filtering.metadata_processing.require_retention_time import \
-    require_retention_time
-from matchms.filtering.metadata_processing.require_valid_annotation import \
-    require_valid_annotation
-from matchms.filtering.peak_processing.normalize_intensities import \
-    normalize_intensities
-from matchms.filtering.peak_processing.reduce_to_number_of_peaks import \
-    reduce_to_number_of_peaks
-from matchms.filtering.peak_processing.remove_noise_below_frequent_intensities import \
-    remove_noise_below_frequent_intensities
-from matchms.filtering.peak_processing.remove_peaks_around_precursor_mz import \
-    remove_peaks_around_precursor_mz
-from matchms.filtering.peak_processing.remove_peaks_outside_top_k import \
-    remove_peaks_outside_top_k
-from matchms.filtering.peak_processing.remove_profiled_spectra import \
-    remove_profiled_spectra
-from matchms.filtering.peak_processing.require_maximum_number_of_peaks import \
-    require_maximum_number_of_peaks
-from matchms.filtering.peak_processing.require_minimum_number_of_high_peaks import \
-    require_minimum_number_of_high_peaks
-from matchms.filtering.peak_processing.require_minimum_number_of_peaks import \
-    require_minimum_number_of_peaks
-from matchms.filtering.peak_processing.select_by_intensity import \
-    select_by_intensity
+from matchms.filtering.metadata_processing.derive_smiles_from_inchi import derive_smiles_from_inchi
+from matchms.filtering.metadata_processing.harmonize_undefined_inchi import harmonize_undefined_inchi
+from matchms.filtering.metadata_processing.harmonize_undefined_inchikey import harmonize_undefined_inchikey
+from matchms.filtering.metadata_processing.harmonize_undefined_smiles import harmonize_undefined_smiles
+from matchms.filtering.metadata_processing.interpret_pepmass import interpret_pepmass
+from matchms.filtering.metadata_processing.make_charge_int import make_charge_int
+from matchms.filtering.metadata_processing.repair_adduct_and_parent_mass_based_on_smiles import repair_adduct_and_parent_mass_based_on_smiles
+from matchms.filtering.metadata_processing.repair_adduct_based_on_parent_mass import repair_adduct_based_on_parent_mass
+from matchms.filtering.metadata_processing.repair_inchi_inchikey_smiles import repair_inchi_inchikey_smiles
+from matchms.filtering.metadata_processing.repair_not_matching_annotation import repair_not_matching_annotation
+from matchms.filtering.metadata_processing.repair_parent_mass_from_smiles import repair_parent_mass_from_smiles
+from matchms.filtering.metadata_processing.repair_parent_mass_is_molar_mass import repair_parent_mass_is_molar_mass
+from matchms.filtering.metadata_processing.repair_parent_mass_match_smiles_wrapper import repair_parent_mass_match_smiles_wrapper
+from matchms.filtering.metadata_processing.repair_smiles_of_salts import repair_smiles_of_salts
+from matchms.filtering.metadata_processing.require_compound_name import require_compound_name
+from matchms.filtering.metadata_processing.require_correct_ionmode import require_correct_ionmode
+from matchms.filtering.metadata_processing.require_correct_ms_level import require_correct_ms_level
+from matchms.filtering.metadata_processing.require_formula import require_formula
+from matchms.filtering.metadata_processing.require_matching_adduct_and_ionmode import require_matching_adduct_and_ionmode
+from matchms.filtering.metadata_processing.require_matching_adduct_precursor_mz_parent_mass import require_matching_adduct_precursor_mz_parent_mass
+from matchms.filtering.metadata_processing.require_parent_mass_match_smiles import require_parent_mass_match_smiles
+from matchms.filtering.metadata_processing.require_precursor_mz import require_precursor_below_mz, require_precursor_mz
+from matchms.filtering.metadata_processing.require_retention_index import require_retention_index
+from matchms.filtering.metadata_processing.require_retention_time import require_retention_time
+from matchms.filtering.metadata_processing.require_valid_annotation import require_valid_annotation
+from matchms.filtering.peak_processing.normalize_intensities import normalize_intensities
+from matchms.filtering.peak_processing.reduce_to_number_of_peaks import reduce_to_number_of_peaks
+from matchms.filtering.peak_processing.remove_noise_below_frequent_intensities import remove_noise_below_frequent_intensities
+from matchms.filtering.peak_processing.remove_peaks_around_precursor_mz import remove_peaks_around_precursor_mz
+from matchms.filtering.peak_processing.remove_peaks_outside_top_k import remove_peaks_outside_top_k
+from matchms.filtering.peak_processing.remove_profiled_spectra import remove_profiled_spectra
+from matchms.filtering.peak_processing.require_maximum_number_of_peaks import require_maximum_number_of_peaks
+from matchms.filtering.peak_processing.require_minimum_number_of_high_peaks import require_minimum_number_of_high_peaks
+from matchms.filtering.peak_processing.require_minimum_number_of_peaks import require_minimum_number_of_peaks
+from matchms.filtering.peak_processing.select_by_intensity import select_by_intensity
 from matchms.filtering.peak_processing.select_by_mz import select_by_mz
-from matchms.filtering.peak_processing.select_by_relative_intensity import \
-    select_by_relative_intensity
+from matchms.filtering.peak_processing.select_by_relative_intensity import select_by_relative_intensity
 from matchms.filtering.SpeciesString import SpeciesString
 
 

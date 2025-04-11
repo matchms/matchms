@@ -3,12 +3,14 @@ import numpy as np
 from sparsestack import StackedSparseArray
 from matchms.typing import SpectrumType
 from .BaseSimilarity import BaseSimilarity
-from .vector_similarity_functions import (cosine_similarity,
-                                          cosine_similarity_matrix,
-                                          dice_similarity,
-                                          dice_similarity_matrix,
-                                          jaccard_index,
-                                          jaccard_similarity_matrix)
+from .vector_similarity_functions import (
+    cosine_similarity,
+    cosine_similarity_matrix,
+    dice_similarity,
+    dice_similarity_matrix,
+    jaccard_index,
+    jaccard_similarity_matrix,
+)
 
 
 class FingerprintSimilarity(BaseSimilarity):
@@ -57,13 +59,13 @@ class FingerprintSimilarity(BaseSimilarity):
          [0.415 0.444 1.   ]]
 
     """
+
     # Set key characteristics as class attributes
     is_commutative = True
     # Set output data type, e.g.  "float" or [("score", "float"), ("matches", "int")]
     score_datatype = np.float64
 
-    def __init__(self, similarity_measure: str = "jaccard",
-                 set_empty_scores: Union[float, int, str] = "nan"):
+    def __init__(self, similarity_measure: str = "jaccard", set_empty_scores: Union[float, int, str] = "nan"):
         """
 
         Parameters
@@ -104,9 +106,7 @@ class FingerprintSimilarity(BaseSimilarity):
 
         raise NotImplementedError
 
-    def matrix(self, references: List[SpectrumType], queries: List[SpectrumType],
-               array_type: str = "numpy",
-               is_symmetric: bool = False) -> np.array:
+    def matrix(self, references: List[SpectrumType], queries: List[SpectrumType], array_type: str = "numpy", is_symmetric: bool = False) -> np.array:
         """Calculate matrix of fingerprint based similarity scores.
 
         Parameters
@@ -119,6 +119,7 @@ class FingerprintSimilarity(BaseSimilarity):
             Specify the output array type. Can be "numpy" or "sparse".
             Default is "numpy" and will return a numpy array. "sparse" will return a COO-sparse array
         """
+
         def get_fingerprints(spectra):
             for index, spectrum in enumerate(spectra):
                 yield index, spectrum.get("fingerprint")
@@ -144,23 +145,16 @@ class FingerprintSimilarity(BaseSimilarity):
 
         fingerprints1, idx_fingerprints1 = collect_fingerprints(references)
         fingerprints2, idx_fingerprints2 = collect_fingerprints(queries)
-        assert idx_fingerprints1.size > 0 and idx_fingerprints2.size > 0, ("Not enouth molecular fingerprints.",
-                                                                           "Apply 'add_fingerprint'filter first.")
+        assert idx_fingerprints1.size > 0 and idx_fingerprints2.size > 0, ("Not enouth molecular fingerprints.", "Apply 'add_fingerprint'filter first.")
 
         # Calculate similarity score matrix following specified method
         similarity_matrix = create_full_matrix()
         if self.similarity_measure == "jaccard":
-            similarity_matrix[np.ix_(idx_fingerprints1,
-                                        idx_fingerprints2)] = jaccard_similarity_matrix(fingerprints1,
-                                                                                        fingerprints2)
+            similarity_matrix[np.ix_(idx_fingerprints1, idx_fingerprints2)] = jaccard_similarity_matrix(fingerprints1, fingerprints2)
         elif self.similarity_measure == "dice":
-            similarity_matrix[np.ix_(idx_fingerprints1,
-                                        idx_fingerprints2)] = dice_similarity_matrix(fingerprints1,
-                                                                                     fingerprints2)
+            similarity_matrix[np.ix_(idx_fingerprints1, idx_fingerprints2)] = dice_similarity_matrix(fingerprints1, fingerprints2)
         elif self.similarity_measure == "cosine":
-            similarity_matrix[np.ix_(idx_fingerprints1,
-                                        idx_fingerprints2)] = cosine_similarity_matrix(fingerprints1,
-                                                                                       fingerprints2)
+            similarity_matrix[np.ix_(idx_fingerprints1, idx_fingerprints2)] = cosine_similarity_matrix(fingerprints1, fingerprints2)
         if array_type == "sparse":
             scores_array = StackedSparseArray(len(references), len(queries))
             scores_array.add_dense_matrix(similarity_matrix.astype(self.score_datatype), "")

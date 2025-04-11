@@ -1,10 +1,16 @@
 """Test for vector similarity functions. Will run test on both numba compiled
 and fully python-based versions of functions."""
+
 import numpy as np
 import pytest
 from matchms.similarity.vector_similarity_functions import (
-    cosine_similarity, cosine_similarity_matrix, dice_similarity,
-    dice_similarity_matrix, jaccard_index, jaccard_similarity_matrix)
+    cosine_similarity,
+    cosine_similarity_matrix,
+    dice_similarity,
+    dice_similarity_matrix,
+    jaccard_index,
+    jaccard_similarity_matrix,
+)
 
 
 def test_cosine_similarity_compiled():
@@ -33,14 +39,11 @@ def test_cosine_similarity_all_zeros_compiled():
 
 def test_cosine_similarity_matrix_compiled():
     """Test cosine similarity scores calculation."""
-    vectors1 = np.array([[1, 1, 0, 0],
-                            [1, 0, 1, 1]])
-    vectors2 = np.array([[0, 1, 1, 0],
-                            [0, 0, 1, 1]])
+    vectors1 = np.array([[1, 1, 0, 0], [1, 0, 1, 1]])
+    vectors2 = np.array([[0, 1, 1, 0], [0, 0, 1, 1]])
 
     scores = cosine_similarity_matrix(vectors1, vectors2)
-    expected_scores = np.array([[0.5, 0.],
-                                   [0.40824829, 0.81649658]])
+    expected_scores = np.array([[0.5, 0.0], [0.40824829, 0.81649658]])
     assert scores == pytest.approx(expected_scores, 1e-7), "Expected different scores."
 
 
@@ -70,14 +73,11 @@ def test_cosine_similarity_all_zeros():
 
 def test_cosine_similarity_matrix():
     """Test cosine similarity scores calculation."""
-    vectors1 = np.array([[1, 1, 0, 0],
-                            [1, 0, 1, 1]])
-    vectors2 = np.array([[0, 1, 1, 0],
-                            [0, 0, 1, 1]])
+    vectors1 = np.array([[1, 1, 0, 0], [1, 0, 1, 1]])
+    vectors2 = np.array([[0, 1, 1, 0], [0, 0, 1, 1]])
 
     scores = cosine_similarity_matrix(vectors1, vectors2)
-    expected_scores = np.array([[0.5, 0.],
-                                   [0.40824829, 0.81649658]])
+    expected_scores = np.array([[0.5, 0.0], [0.40824829, 0.81649658]])
     assert scores == pytest.approx(expected_scores, 1e-7), "Expected different scores."
 
 
@@ -89,7 +89,7 @@ def test_dice_similarity_compiled():
     score12 = dice_similarity(vector1, vector2)
     score22 = dice_similarity(vector2, vector2)
 
-    assert score12 == 2 * 2/6, "Expected different score."
+    assert score12 == 2 * 2 / 6, "Expected different score."
     assert score11 == score22 == 1.0, "Expected different score."
 
 
@@ -107,14 +107,11 @@ def test_dice_similarity_all_zeros_compiled():
 
 def test_dice_similarity_matrix_compiled():
     """Test dice similarity scores calculation."""
-    vectors1 = np.array([[1, 1, 0, 0],
-                            [0, 0, 1, 1]])
-    vectors2 = np.array([[0, 1, 1, 0],
-                            [1, 0, 1, 1]])
+    vectors1 = np.array([[1, 1, 0, 0], [0, 0, 1, 1]])
+    vectors2 = np.array([[0, 1, 1, 0], [1, 0, 1, 1]])
 
     scores = dice_similarity_matrix(vectors1, vectors2)
-    expected_scores = np.array([[0.5, 0.4],
-                                   [0.5, 0.8]])
+    expected_scores = np.array([[0.5, 0.4], [0.5, 0.8]])
     assert scores == pytest.approx(expected_scores, 1e-7), "Expected different scores."
 
 
@@ -126,7 +123,7 @@ def test_dice_similarity():
     score12 = dice_similarity.py_func(vector1, vector2)
     score22 = dice_similarity.py_func(vector2, vector2)
 
-    assert score12 == 2 * 2/6, "Expected different score."
+    assert score12 == 2 * 2 / 6, "Expected different score."
     assert score11 == score22 == 1.0, "Expected different score."
 
 
@@ -144,14 +141,11 @@ def test_dice_similarity_all_zeros():
 
 def test_dice_similarity_matrix():
     """Test dice similarity scores calculation."""
-    vectors1 = np.array([[1, 1, 0, 0],
-                            [0, 0, 1, 1]])
-    vectors2 = np.array([[0, 1, 1, 0],
-                            [1, 0, 1, 1]])
+    vectors1 = np.array([[1, 1, 0, 0], [0, 0, 1, 1]])
+    vectors2 = np.array([[0, 1, 1, 0], [1, 0, 1, 1]])
 
     scores = dice_similarity_matrix(vectors1, vectors2)
-    expected_scores = np.array([[0.5, 0.4],
-                                   [0.5, 0.8]])
+    expected_scores = np.array([[0.5, 0.4], [0.5, 0.8]])
     assert scores == pytest.approx(expected_scores, 1e-7), "Expected different scores."
 
 
@@ -181,14 +175,11 @@ def test_jaccard_index_all_zeros_compiled():
 
 def test_jaccard_similarity_matrix_compiled():
     """Test jaccard similarity scores calculation."""
-    vectors1 = np.array([[1, 1, 0, 0],
-                            [0, 0, 1, 1]])
-    vectors2 = np.array([[0, 1, 1, 0],
-                            [1, 0, 1, 1]])
+    vectors1 = np.array([[1, 1, 0, 0], [0, 0, 1, 1]])
+    vectors2 = np.array([[0, 1, 1, 0], [1, 0, 1, 1]])
 
     scores = jaccard_similarity_matrix(vectors1, vectors2)
-    expected_scores = np.array([[1/3, 1/4],
-                                   [1/3, 2/3]])
+    expected_scores = np.array([[1 / 3, 1 / 4], [1 / 3, 2 / 3]])
     assert scores == pytest.approx(expected_scores, 1e-7), "Expected different scores."
 
 
@@ -218,12 +209,9 @@ def test_jaccard_index_all_zeros():
 
 def test_jaccard_similarity_matrix():
     """Test jaccard similarity scores calculation."""
-    vectors1 = np.array([[1, 1, 0, 0],
-                            [0, 0, 1, 1]])
-    vectors2 = np.array([[0, 1, 1, 0],
-                            [1, 0, 1, 1]])
+    vectors1 = np.array([[1, 1, 0, 0], [0, 0, 1, 1]])
+    vectors2 = np.array([[0, 1, 1, 0], [1, 0, 1, 1]])
 
     scores = jaccard_similarity_matrix(vectors1, vectors2)
-    expected_scores = np.array([[1/3, 1/4],
-                                   [1/3, 2/3]])
+    expected_scores = np.array([[1 / 3, 1 / 4], [1 / 3, 2 / 3]])
     assert scores == pytest.approx(expected_scores, 1e-7), "Expected different scores."
