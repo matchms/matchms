@@ -37,7 +37,7 @@ jobs:
       - name: Correct coverage paths
         run: sed -i "s+$PWD/++g" coverage.xml
       - name: Run ruff linter
-        run: ruff check --output-format full -o ruff-report.txt
+        run: ruff check --output-format=github
       - name: Store PR metadata in json file
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
