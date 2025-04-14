@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import Sequence, Tuple, Optional
+from typing import Optional, Sequence, Tuple
 import numpy as np
 from tqdm import tqdm
 from matchms.similarity.COOIndex import COOIndex
