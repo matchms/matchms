@@ -155,7 +155,7 @@ def test_sparse_array_masking_and_filtering(spectra, similarity_measure):
     scoring_method = similarity_measure[0](**similarity_measure[1], score_filters=filters)
     computed_scores_matrix_with_mask_with_filters = scoring_method.sparse_array(spectra, spectra, is_symmetric=False, mask_indices=mask_indices)
     print(computed_scores_matrix_with_mask_with_filters)
-    scoring_method = similarity_measure[0](**similarity_measure[1], score_filters=())
+    scoring_method = similarity_measure[0](**similarity_measure[1], score_filters=None)
     computed_scores_matrix_with_mask_without_filters = scoring_method.sparse_array(spectra, spectra, is_symmetric=False, mask_indices=mask_indices)
     print(computed_scores_matrix_with_mask_without_filters)
     # todo add a test to check that the values are correct
