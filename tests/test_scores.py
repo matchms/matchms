@@ -14,6 +14,7 @@ class DummySimilarityFunction(BaseSimilarity):
 
     def __init__(self, score_filters = None):
         """constructor"""
+        # pylint: disable=useless-parent-delegation
         super().__init__(score_filters)
 
     def pair(self, reference, query):
@@ -28,6 +29,7 @@ class DummySimilarityFunctionParallel(BaseSimilarity):
 
     def __init__(self, score_filters = None):
         """constructor"""
+        # pylint: disable=useless-parent-delegation
         super().__init__(score_filters)
 
     def pair(self, reference, query):
