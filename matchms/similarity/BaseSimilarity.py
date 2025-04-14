@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import Sequence, Tuple
+from typing import Sequence, Tuple, Optional
 import numpy as np
 from tqdm import tqdm
 from matchms.similarity.COOIndex import COOIndex
@@ -28,11 +28,11 @@ class BaseSimilarity:
     is_commutative = True
     score_datatype = np.float64
 
-    def __init__(self, score_filters: Tuple[FilterScoreByValue, ...]):
+    def __init__(self, score_filters: Optional[Tuple[FilterScoreByValue, ...]] = None):
         """
         Parameters
         ----------
-        score_filters:
+        score_filters: tuple, optional
             A tuple of filter objects to apply to each similarity score.
             - If you do not wish to apply any filtering, pass an empty tuple and use the dense matrix method (`matrix()`).
             - For cases where you expect to filter out more than 90% of the computed scores, consider using
@@ -83,7 +83,7 @@ class BaseSimilarity:
         mask_indices:
             A COOIndex instance specifying which pairs to compute.
             If provided, only the specified index pairs will be computed (others remain zero).
-            This is helpful when a previous score already filters out many pairs, reducing computation time and memory footprint. 
+            This is helpful when a previous score already filters out many pairs, reducing computation time and memory footprint.
         """
         if mask_indices is None:
             return self._matrix_without_mask_with_filter(references, queries, is_symmetric=is_symmetric)
@@ -118,11 +118,11 @@ class BaseSimilarity:
         is_symmetric:
             If True, assumes that the matrix is symmetric. Defaults to False.
         """
-        if len(self.score_filters) == 0 and mask_indices is not None:
+        if self.score_filters is None and mask_indices:
             return self._sparse_array_with_mask_without_filter(references, queries, mask_indices=mask_indices)
-        if len(self.score_filters) != 0 and mask_indices is None:
+        if self.score_filters and mask_indices is None:
             return self._sparse_array_with_filter_without_mask(references, queries, is_symmetric=is_symmetric)
-        if len(self.score_filters) != 0 and mask_indices is not None:
+        if self.score_filters and mask_indices:
             return self._sparse_array_with_filter(references, queries, mask_indices)
 
         # TODO: replace with matrix computation followed by a conversion to COO array.
@@ -142,8 +142,11 @@ class BaseSimilarity:
         This method is used internally by `matrix()` when no mask is provided.
         """
         sim_matrix = self._matrix_without_mask_without_filter(references, queries, is_symmetric=is_symmetric)
-        for score_filter in self.score_filters:
-            sim_matrix = score_filter.filter_matrix(sim_matrix)
+
+        if self.score_filters:
+            for score_filter in self.score_filters:
+                sim_matrix = score_filter.filter_matrix(sim_matrix)
+
         return sim_matrix
 
     def _matrix_without_mask_without_filter(
@@ -206,6 +209,9 @@ class BaseSimilarity:
         is_symmetric:
             If True, mirrors the computed score to the symmetric position. Defaults to False.
         """
+        if self.score_filters is None:
+            raise ValueError("Score filters must be set to use this method.")
+
         sim_matrix = np.zeros((len(references), len(queries)), dtype=self.score_datatype)
         for i_row, i_col in tqdm(mask_indices, desc="Calculating sparse similarities"):
             score = self.pair(references[i_row], queries[i_col])
@@ -244,6 +250,9 @@ class BaseSimilarity:
 
         if is_symmetric and n_rows != n_cols:
             raise ValueError(f"Found unequal number of spectra {n_rows} and {n_cols} while `is_symmetric` is True.")
+
+        if self.score_filters is None:
+            raise ValueError("Score filters must be set to use this method.")
 
         idx_row = []
         idx_col = []
@@ -288,7 +297,7 @@ class BaseSimilarity:
         mask_indices
             The row column index pairs for which a score should be calculated.
         """
-        if len(self.score_filters) > 0:
+        if self.score_filters:
             raise ValueError("Don't run _sparse_array_with_mask_without_filter if score_filters are set. "
                              "Instead run _sparse_array_with_filter")
         scores = np.zeros((len(mask_indices)), dtype=self.score_datatype)
@@ -319,6 +328,9 @@ class BaseSimilarity:
         mask_indices
             Specifies the (row, column) pairs for which to compute scores.
         """
+        if self.score_filters is None:
+            raise ValueError("Score filters must be set to use this method.")
+
         scores = []
         idx_row = []
         idx_col = []
