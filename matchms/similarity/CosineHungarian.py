@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Optional, Tuple
 import numpy as np
 from scipy.optimize import linear_sum_assignment
 from matchms.similarity.spectrum_similarity_functions import collect_peak_pairs
@@ -25,7 +25,7 @@ class CosineHungarian(BaseSimilarity):
     score_datatype = [("score", np.float64), ("matches", "int")]
 
     def __init__(self, tolerance: float = 0.1, mz_power: float = 0.0,
-                 intensity_power: float = 1.0, score_filters: Tuple[FilterScoreByValue, ...] = ()):
+                 intensity_power: float = 1.0, score_filters: Optional[Tuple[FilterScoreByValue, ...]] = None):
         """
         Parameters
         ----------

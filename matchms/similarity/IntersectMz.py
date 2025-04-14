@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Optional, Tuple
 import numpy as np
 from .. import Spectrum
 from .BaseSimilarity import BaseSimilarity
@@ -39,7 +39,7 @@ class IntersectMz(BaseSimilarity):
 
     """
 
-    def __init__(self, scaling: float = 1.0, score_filters: Tuple[FilterScoreByValue, ...] = ()):
+    def __init__(self, scaling: float = 1.0, score_filters: Optional[Tuple[FilterScoreByValue, ...]] = None):
         """Constructor. Here, function parameters are defined.
 
         Parameters

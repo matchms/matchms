@@ -100,7 +100,7 @@ def calculate_scores(similarity_metric: BaseSimilarity, scores: Scores,
     mask_indices = None
     if len(scores.scores.score_names) > 0:
         mask_indices = COOIndex(scores.scores.row, scores.scores.col)
-    elif len(similarity_metric.score_filters) == 0:
+    elif similarity_metric.score_filters is None:
         new_scores = similarity_metric.matrix(references=scores.references, queries=scores.queries)
         scores.scores.add_dense_matrix(new_scores,
                                       name,

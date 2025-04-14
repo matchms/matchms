@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 import numpy as np
 from matchms.similarity.spectrum_similarity_functions import (
     number_matching, number_matching_symmetric)
@@ -54,7 +54,7 @@ class ParentMassMatch(BaseSimilarity):
     # Set output data type, e.g.  "float" or [("score", "float"), ("matches", "int")]
     score_datatype = bool
 
-    def __init__(self, tolerance: float = 0.1, score_filters: Tuple[FilterScoreByValue, ...] = ()):
+    def __init__(self, tolerance: float = 0.1, score_filters: Optional[Tuple[FilterScoreByValue, ...]] = None):
         """
         Parameters
         ----------

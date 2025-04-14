@@ -1,4 +1,4 @@
-from typing import List, Tuple, Union
+from typing import List, Optional, Tuple, Union
 import numpy as np
 from matchms.Spectrum import Spectrum
 from .BaseSimilarity import BaseSimilarity
@@ -63,7 +63,7 @@ class FingerprintSimilarity(BaseSimilarity):
     score_datatype = np.float64
 
     def __init__(self, similarity_measure: str = "jaccard",
-                 set_empty_scores: Union[float, int, str] = "nan", score_filters: Tuple[FilterScoreByValue, ...] = ()):
+                 set_empty_scores: Union[float, int, str] = "nan", score_filters: Optional[Tuple[FilterScoreByValue, ...]] = None):
         """
 
         Parameters
