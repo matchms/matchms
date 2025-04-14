@@ -1,5 +1,5 @@
 import logging
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 import numpy as np
 from matchms.similarity.spectrum_similarity_functions import (
     number_matching, number_matching_symmetric)
@@ -65,7 +65,7 @@ class MetadataMatch(BaseSimilarity):
     score_datatype = bool
 
     def __init__(self, field: str, matching_type: str = "equal_match",
-                 tolerance: float = 0.1, score_filters: Tuple[FilterScoreByValue, ...] = ()):
+                 tolerance: float = 0.1, score_filters: Optional[Tuple[FilterScoreByValue, ...]] = None):
         """
         Parameters
         ----------

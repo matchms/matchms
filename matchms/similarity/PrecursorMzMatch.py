@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 import numpy as np
 from matchms.similarity.spectrum_similarity_functions import (
     number_matching, number_matching_ppm, number_matching_symmetric,
@@ -57,7 +57,7 @@ class PrecursorMzMatch(BaseSimilarity):
     score_datatype = bool
 
     def __init__(self, tolerance: float = 0.1,
-                 tolerance_type: str = "Dalton", score_filters: Tuple[FilterScoreByValue, ...] = ()):
+                 tolerance_type: str = "Dalton", score_filters: Optional[Tuple[FilterScoreByValue, ...]] = None):
         """
         Parameters
         ----------
