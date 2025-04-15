@@ -3,15 +3,18 @@ from matchms.filtering import harmonize_undefined_inchikey
 from ..builder_Spectrum import SpectrumBuilder
 
 
-@pytest.mark.parametrize("metadata, aliases, undefined, expected", [
-    [{"inchikey": ""}, ["", "N/A", "NA", "n/a", "no data"], "", ""],
-    [{"inchikey": "n/a"}, ["", "N/A", "NA", "n/a", "no data"], "", ""],
-    [{"inchikey": "N/A"}, ["", "N/A", "NA", "n/a", "no data"], "", ""],
-    [{"inchikey": "NA"}, ["", "N/A", "NA", "n/a", "no data"], "", ""],
-    [{"inchikey": "no data"}, ["", "N/A", "NA", "n/a", "no data"], "", ""],
-    [{"inchikey": "nan"}, ["nodata", "NaN", "Nan", "nan"], "", ""],
-    [{"inchikey": "nan"}, ["nodata", "NaN", "Nan", "nan"], "n/a", "n/a"]
-])
+@pytest.mark.parametrize(
+    "metadata, aliases, undefined, expected",
+    [
+        [{"inchikey": ""}, ["", "N/A", "NA", "n/a", "no data"], "", ""],
+        [{"inchikey": "n/a"}, ["", "N/A", "NA", "n/a", "no data"], "", ""],
+        [{"inchikey": "N/A"}, ["", "N/A", "NA", "n/a", "no data"], "", ""],
+        [{"inchikey": "NA"}, ["", "N/A", "NA", "n/a", "no data"], "", ""],
+        [{"inchikey": "no data"}, ["", "N/A", "NA", "n/a", "no data"], "", ""],
+        [{"inchikey": "nan"}, ["nodata", "NaN", "Nan", "nan"], "", ""],
+        [{"inchikey": "nan"}, ["nodata", "NaN", "Nan", "nan"], "n/a", "n/a"],
+    ],
+)
 def test_harmonize_undefined_inchikey(metadata, aliases, undefined, expected):
     spectrum_in = SpectrumBuilder().with_metadata(metadata).build()
 

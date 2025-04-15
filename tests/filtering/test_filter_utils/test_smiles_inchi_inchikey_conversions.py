@@ -2,7 +2,12 @@ from importlib import reload
 import pytest
 import matchms.filtering.filter_utils.smile_inchi_inchikey_conversions
 import matchms.filtering.metadata_processing.add_fingerprint
-from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import is_valid_inchi, is_valid_inchikey, is_valid_smiles, mol_converter
+from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import (
+    is_valid_inchi,
+    is_valid_inchikey,
+    is_valid_smiles,
+    mol_converter,
+)
 
 
 @pytest.fixture()

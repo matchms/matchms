@@ -8,13 +8,13 @@ from matchms.utils import filter_none, get_common_keys
 logger = logging.getLogger("matchms")
 
 
-_retention_time_keys = ["retention_time", "retentiontime", "rt", "scan_start_time",
-                        "rt_query", "rtinseconds"]
+_retention_time_keys = ["retention_time", "retentiontime", "rt", "scan_start_time", "rt_query", "rtinseconds"]
 _retention_index_keys = ["retention_index", "retentionindex", "ri"]
 
 
 def _safe_store_value(metadata: dict, value: Any, target_key: str) -> dict:
-    """Helper function to safely store a value in the target key without throwing an exception, but storing 'None' instead.
+    """
+    Helper function to safely store a value in the target key without throwing an exception, but storing 'None' instead.
 
     Parameters
     ----------
@@ -29,7 +29,7 @@ def _safe_store_value(metadata: dict, value: Any, target_key: str) -> dict:
     -------
     Spectrum with added key.
     """
-    if value is not None:   # one of accepted keys is present
+    if value is not None:  # one of accepted keys is present
         value = _safe_convert_to_float(value)
     metadata[target_key] = value
     return metadata
@@ -55,8 +55,8 @@ def _safe_convert_to_float(retention_time: Any) -> Optional[float]:
 
     # logic to read MoNA msp files which specify rt as string with "min" in it
     if isinstance(retention_time, str):
-        retention_time = retention_time.strip().replace(',', '.')  # Replace commas with dots
-        pattern = r'^([+-]?\d*\.?\d+)\s*(min|s|h|ms|sec)$'
+        retention_time = retention_time.strip().replace(",", ".")  # Replace commas with dots
+        pattern = r"^([+-]?\d*\.?\d+)\s*(min|s|h|ms|sec)$"
         conversion = {"min": 60, "s": 1, "h": 3600, "ms": 1e-3, "sec": 1}
         match = re.search(pattern, retention_time)
 

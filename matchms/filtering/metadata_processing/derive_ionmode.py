@@ -42,8 +42,11 @@ def derive_ionmode(spectrum_in: Spectrum, clone: Optional[bool] = True) -> Optio
 
     if ionmode_from_charge is not None and ionmode_from_adduct is not None:
         if ionmode_from_charge != ionmode_from_adduct:
-            logger.warning("The ionmode based on the charge (%s) does not match the ionmode based on the adduct (%s)",
-                           spectrum.get("charge"), spectrum.get("adduct"))
+            logger.warning(
+                "The ionmode based on the charge (%s) does not match the ionmode based on the adduct (%s)",
+                spectrum.get("charge"),
+                spectrum.get("adduct"),
+            )
             return spectrum
         spectrum.set("ionmode", ionmode_from_charge)
         logger.info("Set ionmode to %s based on the charge and adduct", ionmode_from_charge)
@@ -75,7 +78,6 @@ def _derive_ionmode_from_charge(spectrum):
         return "negative"
     # In this case charge is 0
     return None
-
 
 
 def _derive_ionmode_from_adduct(spectrum):

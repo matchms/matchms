@@ -48,7 +48,13 @@ def test_repair_smiles_from_compound_name_skip_already_correct():
     """Tests if already correct annotations are not repaired (even if the compound name does not match)"""
     builder = SpectrumBuilder()
     spectrum_in = builder.with_metadata(
-        {"compound_name": "compound_1", "parent_mass": 100.01, "smiles": "C1CSSC1CCCCC(=O)O", "inchi": None, "inchikey": "AGBQKNBQESQNJD-UHFFFAOYSA-N"}
+        {
+            "compound_name": "compound_1",
+            "parent_mass": 100.01,
+            "smiles": "C1CSSC1CCCCC(=O)O",
+            "inchi": None,
+            "inchikey": "AGBQKNBQESQNJD-UHFFFAOYSA-N",
+        }
     ).build()
     spectrum = derive_annotation_from_compound_name(spectrum_in, mass_tolerance=0.1)
     assert spectrum_in == spectrum
@@ -57,16 +63,25 @@ def test_repair_smiles_from_compound_name_skip_already_correct():
 @pytest.mark.parametrize(
     "compound_name, smiles, parent_mass, expected_smiles",
     [
-        ("PC(18:0/20:4)", "wrong_smiles", 809.593, r"CCCCCCCCCCCCCCCCCC(=O)O[C@H](COC(=O)CCC/C=C\C/C=C\C/C=C\C/C=C\CCCCC)COP(=O)([O-])OCC[N+](C)(C)C"),
+        (
+            "PC(18:0/20:4)",
+            "wrong_smiles",
+            809.593,
+            r"CCCCCCCCCCCCCCCCCC(=O)O[C@H](COC(=O)CCC/C=C\C/C=C\C/C=C\C/C=C\CCCCC)COP(=O)([O-])OCC[N+](C)(C)C",
+        ),
         ("glucose", "input_smile_1", 180.0633881, "C([C@@H]1[C@H]([C@@H]([C@H](C(O1)O)O)O)O)O"),
         ("this compound does not exist", None, 200.01, None),
         ("also_does_not_exist_and_not_in_csv", None, 100.01, None),
     ],
 )
-def test_repair_smiles_from_compound_name(compound_name, parent_mass, smiles, expected_smiles, csv_file_with_real_compound_names, tmp_path):
+def test_repair_smiles_from_compound_name(
+    compound_name, parent_mass, smiles, expected_smiles, csv_file_with_real_compound_names, tmp_path
+):
     # pylint: disable=too-many-arguments
     builder = SpectrumBuilder()
-    spectrum_in = builder.with_metadata({"compound_name": compound_name, "parent_mass": parent_mass, "smiles": smiles}).build()
+    spectrum_in = builder.with_metadata(
+        {"compound_name": compound_name, "parent_mass": parent_mass, "smiles": smiles}
+    ).build()
     spectrum = derive_annotation_from_compound_name(spectrum_in, csv_file_with_real_compound_names, mass_tolerance=0.1)
     assert spectrum.get("smiles") == expected_smiles, "Expected different smiles."
     # Run without csv file
@@ -92,11 +107,19 @@ def test_write_compound_names_to_file(tmp_path):
             "inchikey": "WQZGKKKJIJFFOK-GASJEMHNSA-N",
             "monoisotopic_mass": 180.06338810,
         },
-        {"compound_name": "glucose", "smiles": "test_smiles", "inchi": "test_inchi", "inchikey": "test_inchikey", "monoisotopic_mass": 10},
+        {
+            "compound_name": "glucose",
+            "smiles": "test_smiles",
+            "inchi": "test_inchi",
+            "inchikey": "test_inchikey",
+            "monoisotopic_mass": 10,
+        },
     ]
     _write_compound_name_annotations(csv_file_name, annotation_1)
     # Run a second time to make sure an alrady existing file can be reused
-    annotation_2 = [{"compound_name": "compound_2", "smiles": None, "inchi": None, "inchikey": None, "monoisotopic_mass": None}]
+    annotation_2 = [
+        {"compound_name": "compound_2", "smiles": None, "inchi": None, "inchikey": None, "monoisotopic_mass": None}
+    ]
     _write_compound_name_annotations(csv_file_name, annotation_2)
     assert _load_compound_name_annotations(csv_file_name, "glucose") == annotation_1
     assert replace_nan_with_none(_load_compound_name_annotations(csv_file_name, "compound_2")) == annotation_2
@@ -105,8 +128,30 @@ def test_write_compound_names_to_file(tmp_path):
 @pytest.mark.parametrize(
     "compound_name, expected_output",
     [
-        ("compound_1", [{"compound_name": "compound_1", "smiles": "smile_1", "inchi": "inchi_1", "inchikey": "inchikey_1", "monoisotopic_mass": 100}]),
-        ("compound_2", [{"compound_name": "compound_2", "smiles": None, "inchi": None, "inchikey": None, "monoisotopic_mass": None}]),
+        (
+            "compound_1",
+            [
+                {
+                    "compound_name": "compound_1",
+                    "smiles": "smile_1",
+                    "inchi": "inchi_1",
+                    "inchikey": "inchikey_1",
+                    "monoisotopic_mass": 100,
+                }
+            ],
+        ),
+        (
+            "compound_2",
+            [
+                {
+                    "compound_name": "compound_2",
+                    "smiles": None,
+                    "inchi": None,
+                    "inchikey": None,
+                    "monoisotopic_mass": None,
+                }
+            ],
+        ),
     ],
 )
 def test_load_compound_name_annotation(compound_name, expected_output, csv_file_annotated_compound_names):
@@ -140,8 +185,30 @@ def test_pubchem_name_search(compound_name, expected_output):
 @pytest.mark.parametrize(
     "compound_name, expected_output",
     [
-        ("compound_1", [{"compound_name": "compound_1", "smiles": "smile_1", "inchi": "inchi_1", "inchikey": "inchikey_1", "monoisotopic_mass": 100}]),
-        ("compound_2", [{"compound_name": "compound_2", "smiles": None, "inchi": None, "inchikey": None, "monoisotopic_mass": None}]),
+        (
+            "compound_1",
+            [
+                {
+                    "compound_name": "compound_1",
+                    "smiles": "smile_1",
+                    "inchi": "inchi_1",
+                    "inchikey": "inchikey_1",
+                    "monoisotopic_mass": 100,
+                }
+            ],
+        ),
+        (
+            "compound_2",
+            [
+                {
+                    "compound_name": "compound_2",
+                    "smiles": None,
+                    "inchi": None,
+                    "inchikey": None,
+                    "monoisotopic_mass": None,
+                }
+            ],
+        ),
         (
             "glucose",
             [
@@ -170,7 +237,9 @@ def test_get_compound_name_annotation(compound_name, expected_output, csv_file_a
         ("compound_3", 97.0, None),  # Check that the mass_tolerance is used
     ],
 )
-def test_find_closest_match_for_multiple_matches(compound_name, parent_mass, expected_smiles, csv_file_annotated_compound_names):
+def test_find_closest_match_for_multiple_matches(
+    compound_name, parent_mass, expected_smiles, csv_file_annotated_compound_names
+):
     """Tests if we find the closest parent mass match, if there are multiple possible entries"""
     builder = SpectrumBuilder()
     spectrum_in = builder.with_metadata({"compound_name": compound_name, "parent_mass": parent_mass}).build()

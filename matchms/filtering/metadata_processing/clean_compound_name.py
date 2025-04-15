@@ -33,8 +33,10 @@ def clean_compound_name(spectrum_in: SpectrumType, clone: Optional[bool] = True)
     if spectrum.get("compound_name", None) is not None:
         name = spectrum.get("compound_name")
     else:
-        assert spectrum.get("name", None) in [None, ""], ("Found 'name' but not 'compound_name' in metadata",
-                                                          "Apply 'add_compound_name' filter first.")
+        assert spectrum.get("name", None) in [None, ""], (
+            "Found 'name' but not 'compound_name' in metadata",
+            "Apply 'add_compound_name' filter first.",
+        )
         return spectrum
 
     # Clean compound name
@@ -78,9 +80,7 @@ def _remove_parts_by_regular_expression(name: str):
 
 def _remove_known_non_compound_parts(name: str):
     """Remove known non compound-name strings from name."""
-    parts_remove = ["Spectral Match to",
-                    "from NIST14",
-                    "Massbank:"]
+    parts_remove = ["Spectral Match to", "from NIST14", "Massbank:"]
     for part in parts_remove:
         name = name.replace(part, "")
     return name.strip("; ")

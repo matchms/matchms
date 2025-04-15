@@ -1,6 +1,9 @@
 import numpy as np
 import pytest
-from matchms.filtering.peak_processing.remove_profiled_spectra import _get_number_of_high_intensity_surounding_peaks, _get_peak_intens_neighbourhood
+from matchms.filtering.peak_processing.remove_profiled_spectra import (
+    _get_number_of_high_intensity_surounding_peaks,
+    _get_peak_intens_neighbourhood,
+)
 
 
 @pytest.mark.parametrize(
@@ -33,5 +36,7 @@ def test_get_peak_intens_neighbourhood(intensities, expected_no_peaks_before, ex
     ],
 )
 def test_get_number_of_high_intensity_surounding_peaks(intensities, mz, expected_no_peaks):
-    number_of_high_intensity_surounding_peaks = _get_number_of_high_intensity_surounding_peaks(np.array(intensities), mz=np.array(mz), mz_window=1.0)
+    number_of_high_intensity_surounding_peaks = _get_number_of_high_intensity_surounding_peaks(
+        np.array(intensities), mz=np.array(mz), mz_window=1.0
+    )
     assert number_of_high_intensity_surounding_peaks == expected_no_peaks

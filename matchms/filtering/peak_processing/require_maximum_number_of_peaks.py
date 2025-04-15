@@ -7,8 +7,9 @@ from matchms.typing import SpectrumType
 logger = logging.getLogger("matchms")
 
 
-def require_maximum_number_of_peaks(spectrum_in: Spectrum,
-                                    maximum_number_of_fragments: int = 1000, clone: Optional[bool] = True) -> Optional[SpectrumType]:
+def require_maximum_number_of_peaks(
+    spectrum_in: Spectrum, maximum_number_of_fragments: int = 1000, clone: Optional[bool] = True
+) -> Optional[SpectrumType]:
     """Spectrum will be set to None when it has more peaks than maximum_number_of_fragments.
 
     Parameters
@@ -32,8 +33,11 @@ def require_maximum_number_of_peaks(spectrum_in: Spectrum,
     spectrum = spectrum_in.clone() if clone else spectrum_in
 
     if spectrum.peaks.intensities.size > maximum_number_of_fragments:
-        logger.info("Spectrum with %s (>%s) peaks was set to None.",
-                    str(spectrum.peaks.intensities.size), str(maximum_number_of_fragments))
+        logger.info(
+            "Spectrum with %s (>%s) peaks was set to None.",
+            str(spectrum.peaks.intensities.size),
+            str(maximum_number_of_fragments),
+        )
         return None
 
     return spectrum

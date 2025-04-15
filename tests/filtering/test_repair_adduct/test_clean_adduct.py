@@ -1,5 +1,9 @@
 import pytest
-from matchms.filtering.metadata_processing.clean_adduct import _add_missing_brackets_to_adduct, _convert_int_charge_to_str, clean_adduct
+from matchms.filtering.metadata_processing.clean_adduct import (
+    _add_missing_brackets_to_adduct,
+    _convert_int_charge_to_str,
+    clean_adduct,
+)
 from tests.builder_Spectrum import SpectrumBuilder
 
 

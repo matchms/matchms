@@ -6,7 +6,9 @@ from matchms.importing.parsing_utils import parse_mzml_mzxml_metadata, sort_by_m
 from matchms.Spectrum import Spectrum
 
 
-def load_from_mzxml(filename: Union[str, Path], ms_level: int = 2, metadata_harmonization: bool = True) -> Generator[Spectrum, None, None]:
+def load_from_mzxml(
+    filename: Union[str, Path], ms_level: int = 2, metadata_harmonization: bool = True
+) -> Generator[Spectrum, None, None]:
     """Load spectrum(s) from mzml file.
 
     This function will create ~matchms.Spectrum for every spectrum of desired
@@ -49,4 +51,6 @@ def load_from_mzxml(filename: Union[str, Path], ms_level: int = 2, metadata_harm
 
                 mz, intensities = sort_by_mz(mz=mz, intensities=intensities)
 
-                yield Spectrum(mz=mz, intensities=intensities, metadata=metadata, metadata_harmonization=metadata_harmonization)
+                yield Spectrum(
+                    mz=mz, intensities=intensities, metadata=metadata, metadata_harmonization=metadata_harmonization
+                )

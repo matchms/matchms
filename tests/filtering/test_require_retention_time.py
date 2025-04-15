@@ -5,7 +5,11 @@ from ..builder_Spectrum import SpectrumBuilder
 
 @pytest.mark.parametrize(
     "metadata, minimum_rt, maximum_rt, expected",
-    [({"retention_time": 1817}, 0, 2000, True), ({"retention_time": 2100}, 0, 2000, False), ({"retention_time": 100}, 200, 2000, False)],
+    [
+        ({"retention_time": 1817}, 0, 2000, True),
+        ({"retention_time": 2100}, 0, 2000, False),
+        ({"retention_time": 100}, 200, 2000, False),
+    ],
 )
 def test_require_retention_time_within_range(metadata, minimum_rt, maximum_rt, expected):
     """Test if function correctly handles spectrum with retention time."""
@@ -14,7 +18,10 @@ def test_require_retention_time_within_range(metadata, minimum_rt, maximum_rt, e
     assert (spectrum is not None) == expected, "Expected a Spectrum object."
 
 
-@pytest.mark.parametrize("metadata, expected", [({"retention_time": 1817}, True), ({"retention_time": 500.12}, True), ({"retention_time": "500.12"}, False)])
+@pytest.mark.parametrize(
+    "metadata, expected",
+    [({"retention_time": 1817}, True), ({"retention_time": 500.12}, True), ({"retention_time": "500.12"}, False)],
+)
 def test_require_retention_time_with_retention_time(metadata, expected):
     """Test if function correctly handles spectrum with retention time."""
     spectrum_in = SpectrumBuilder().with_metadata(metadata).build()

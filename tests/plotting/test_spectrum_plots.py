@@ -68,7 +68,11 @@ def test_plot_spectrum_peak_comments():
     mz = np.linspace(0, 500, n_peaks).astype("float")
     mz.sort()
 
-    spectrum = Spectrum(mz=mz, intensities=np.random.random(n_peaks), metadata={"compound_name": "SuperSubstance", "peak_comments": {100: "known peak"}})
+    spectrum = Spectrum(
+        mz=mz,
+        intensities=np.random.random(n_peaks),
+        metadata={"compound_name": "SuperSubstance", "peak_comments": {100: "known peak"}},
+    )
 
     _, ax = plt.subplots()
     ax = plot_spectrum(spectrum, annotate_ions=True)
@@ -95,7 +99,9 @@ def test_plot_spectra_array_default():
         mz = np.random.randint(0, 1000, n_peaks).astype("float")
         mz.sort()
 
-        spectrum = Spectrum(mz=mz, intensities=np.random.random(n_peaks), metadata={"compound_name": f"Spectrum name {i}"})
+        spectrum = Spectrum(
+            mz=mz, intensities=np.random.random(n_peaks), metadata={"compound_name": f"Spectrum name {i}"}
+        )
         spectra.append(spectrum)
 
     fig, axes = plot_spectra_array(spectra)
@@ -117,7 +123,9 @@ def test_plot_spectra_array():
         mz = np.random.randint(0, 1000, n_peaks).astype("float")
         mz.sort()
 
-        spectrum = Spectrum(mz=mz, intensities=np.random.random(n_peaks), metadata={"compound_name": f"Spectrum name {i}"})
+        spectrum = Spectrum(
+            mz=mz, intensities=np.random.random(n_peaks), metadata={"compound_name": f"Spectrum name {i}"}
+        )
         spectra.append(spectrum)
 
     fig, axes = plot_spectra_array(spectra, n_cols=4, peak_color="darkblue", dpi=150)

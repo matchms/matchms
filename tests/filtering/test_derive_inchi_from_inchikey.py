@@ -9,7 +9,9 @@ def test_derive_inchikey_from_inchi():
     """Test if conversion from inchi and inchikey works."""
     pytest.importorskip("rdkit")
     set_matchms_logger_level("INFO")
-    spectrum_in = SpectrumBuilder().with_metadata({"inchi": '"InChI=1S/C6H12/c1-2-4-6-5-3-1/h1-6H2"', "inchikey": "n/a"}).build()
+    spectrum_in = (
+        SpectrumBuilder().with_metadata({"inchi": '"InChI=1S/C6H12/c1-2-4-6-5-3-1/h1-6H2"', "inchikey": "n/a"}).build()
+    )
 
     with LogCapture() as log:
         spectrum = derive_inchikey_from_inchi(spectrum_in)

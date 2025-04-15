@@ -11,10 +11,10 @@ def require_compound_name(spectrum: SpectrumType) -> Optional[SpectrumType]:
     if spectrum is None:
         return None
 
-    compound_name = spectrum.get('compound_name', None)
+    compound_name = spectrum.get("compound_name", None)
 
     if compound_name:
         return spectrum
-    
+
     logger.info("Spectrum does not contain a compound name.")
     return None

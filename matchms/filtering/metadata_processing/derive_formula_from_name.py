@@ -7,8 +7,9 @@ from matchms.typing import SpectrumType
 logger = logging.getLogger("matchms")
 
 
-def derive_formula_from_name(spectrum_in: SpectrumType,
-                             remove_formula_from_name: bool = True, clone: Optional[bool] = True) -> Optional[SpectrumType]:
+def derive_formula_from_name(
+    spectrum_in: SpectrumType, remove_formula_from_name: bool = True, clone: Optional[bool] = True
+) -> Optional[SpectrumType]:
     """Detect and remove misplaced formula in compound name and add to metadata.
 
     Method to find misplaced formulas in compound name based on regular expression.
@@ -37,8 +38,10 @@ def derive_formula_from_name(spectrum_in: SpectrumType,
     if spectrum.get("compound_name", None) is not None:
         name = spectrum.get("compound_name")
     else:
-        assert spectrum.get("name", None) in [None, ""], ("Found 'name' but not 'compound_name' in metadata",
-                                                          "Apply 'add_compound_name' filter first.")
+        assert spectrum.get("name", None) in [None, ""], (
+            "Found 'name' but not 'compound_name' in metadata",
+            "Apply 'add_compound_name' filter first.",
+        )
         return spectrum
 
     # Detect formula at end of compound name

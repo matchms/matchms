@@ -24,17 +24,22 @@ LOGGER = logging.getLogger(__name__)
 def valid_spectrum() -> Spectrum:
     metadata = {
         "inchikey": "KFDYZSPFVRTLML-UHFFFAOYSA-N",
-        "smiles": "C1COCCN1C2=NC(=NC(=N2)NC3=CC(=C(C=C3)C=CC4=C(C=C(C=C4)NC5=NC(=NC(=N5)Cl)N6CCOCC6)S(=O)(=O)O)S(=O)(=O)O)Cl",
+        "smiles": (
+            "C1COCCN1C2=NC(=NC(=N2)NC3=CC(=C(C=C3)C=CC4=C(C=C(C=C4)NC5=NC(=NC(=N5)Cl)N6CCOCC6)S(=O)(=O)O)S(=O)(=O)O)Cl"
+        ),
     }
     return SpectrumBuilder().with_metadata(metadata).build()
 
 
 @pytest.fixture
 def valid_inchi_spectrum() -> Spectrum:
-    # pylint: disable=line-too-long
     metadata = {
-        "inchi": "InChI=1S/C28H28Cl2N10O8S2/c29-23-33-25(37-27(35-23)39-7-11-47-12-8-39)31-19-5-3-17(21(15-19)49(41,42)43)1-2-18-4-6-20(16-22(18)50(44,45)46)32-26-34-24(30)36-28(38-26)40-9-13-48-14-10-40/h1-6,15-16H,7-14H2,(H,41,42,43)(H,44,45,46)(H,31,33,35,37)(H,32,34,36,38)"  # noqa
-    }  # noqa
+        "inchi": (
+            "InChI=1S/C28H28Cl2N10O8S2/c29-23-33-25(37-27(35-23)39-7-11-47-12-8-39)31-19-5-3-17(21(15-19)49"
+            "(41,42)43)1-2-18-4-6-20(16-22(18)50(44,45)46)32-26-34-24(30)36-28(38-26)40-9-13-48-14-10-40/h1-6,"
+            "15-16H,7-14H2,(H,41,42,43)(H,44,45,46)(H,31,33,35,37)(H,32,34,36,38)"
+        )
+    }
     return SpectrumBuilder().with_metadata(metadata).build()
 
 
@@ -63,16 +68,24 @@ def invalid_inchi_smiles_spectrum() -> Spectrum:
 def invalid_inchikey_spectrum() -> Spectrum:
     metadata = {
         "inchikey": "invalid",
-        # pylint: disable=line-too-long
-        "inchi": "InChI=1S/C28H28Cl2N10O8S2/c29-23-33-25(37-27(35-23)39-7-11-47-12-8-39)31-19-5-3-17(21(15-19)49(41,42)43)1-2-18-4-6-20(16-22(18)50(44,45)46)32-26-34-24(30)36-28(38-26)40-9-13-48-14-10-40/h1-6,15-16H,7-14H2,(H,41,42,43)(H,44,45,46)(H,31,33,35,37)(H,32,34,36,38)",  # noqa: E501
-        "smiles": "C1COCCN1C2=NC(=NC(=N2)NC3=CC(=C(C=C3)C=CC4=C(C=C(C=C4)NC5=NC(=NC(=N5)Cl)N6CCOCC6)S(=O)(=O)O)S(=O)(=O)O)Cl",
+        "inchi": (
+            "InChI=1S/C28H28Cl2N10O8S2/c29-23-33-25(37-27(35-23)39-7-11-47-12-8-39)31-19-5-3-17(21(15-19)49"
+            "(41,42)43)1-2-18-4-6-20(16-22(18)50(44,45)46)32-26-34-24(30)36-28(38-26)40-9-13-48-14-10-40/h1-6,"
+            "15-16H,7-14H2,(H,41,42,43)(H,44,45,46)(H,31,33,35,37)(H,32,34,36,38)"
+        ),
+        "smiles": (
+            "C1COCCN1C2=NC(=NC(=N2)NC3=CC(=C(C=C3)C=CC4=C(C=C(C=C4)NC5=NC(=NC(=N5)Cl)N6CCOCC6)S(=O)(=O)O)S(=O)(=O)O)Cl"
+        ),
     }
     return SpectrumBuilder().with_metadata(metadata).build()
 
 
 @pytest.fixture
 def valid_spectra(valid_spectrum):
-    metadata = {"inchikey": "HINREHSUCWWBNO-UHFFFAOYSA-N", "smiles": "CCOC1=C(C=CC(=C1)C=NNC(=O)COC2=C(C=CC(=C2)C)C(C)C)OC(=O)C3=C(C=C(C=C3)Cl)Cl"}
+    metadata = {
+        "inchikey": "HINREHSUCWWBNO-UHFFFAOYSA-N",
+        "smiles": "CCOC1=C(C=CC(=C1)C=NNC(=O)COC2=C(C=CC(=C2)C)C(C)C)OC(=O)C3=C(C=C(C=C3)Cl)Cl",
+    }
     diff_spectrum = SpectrumBuilder().with_metadata(metadata).build()
 
     return [valid_spectrum, diff_spectrum]
@@ -211,7 +224,9 @@ def test_mols_to_fingerprints_valid(fingerprint_algorithm, fingerprint_type, exp
     mols = [Chem.MolFromSmiles(smi) for smi in smiles]
     nbits = 1024
 
-    fingerprints = _mols_to_fingerprints(mols=mols, fingerprint_algorithm=fingerprint_algorithm, fingerprint_type=fingerprint_type, nbits=nbits)
+    fingerprints = _mols_to_fingerprints(
+        mols=mols, fingerprint_algorithm=fingerprint_algorithm, fingerprint_type=fingerprint_type, nbits=nbits
+    )
     assert fingerprints.shape == expected_shape
     assert fingerprints.dtype == np.int8
     assert np.any(fingerprints)
@@ -230,7 +245,9 @@ def test_mols_to_fingerprints_invalid_cases(fingerprint_algorithm, fingerprint_t
     nbits = 1024
 
     with pytest.raises(exception_type, match=match):
-        _mols_to_fingerprints(mols=mols, fingerprint_algorithm=fingerprint_algorithm, fingerprint_type=fingerprint_type, nbits=nbits)
+        _mols_to_fingerprints(
+            mols=mols, fingerprint_algorithm=fingerprint_algorithm, fingerprint_type=fingerprint_type, nbits=nbits
+        )
 
 
 @pytest.mark.parametrize(
@@ -244,7 +261,12 @@ def test_mol_to_fingerprints_invalid_cases(fingerprint_algorithm, fingerprint_ty
     nbits = 1024
 
     with pytest.raises(exception_type, match=match):
-        _mol_to_fingerprint(mol=Chem.MolFromSmiles("CCO"), fingerprint_algorithm=fingerprint_algorithm, fingerprint_type=fingerprint_type, nbits=nbits)
+        _mol_to_fingerprint(
+            mol=Chem.MolFromSmiles("CCO"),
+            fingerprint_algorithm=fingerprint_algorithm,
+            fingerprint_type=fingerprint_type,
+            nbits=nbits,
+        )
 
 
 def test_mols_to_fingerprints_empty_molecules():

@@ -9,9 +9,12 @@ from matchms.typing import SpectrumType
 logger = logging.getLogger("matchms")
 
 
-def remove_noise_below_frequent_intensities(spectrum_in: Spectrum,
-                                            min_count_of_frequent_intensities: int = 5,
-                                            noise_level_multiplier: float = 2.0, clone: Optional[bool] = True) -> Optional[SpectrumType]:
+def remove_noise_below_frequent_intensities(
+    spectrum_in: Spectrum,
+    min_count_of_frequent_intensities: int = 5,
+    noise_level_multiplier: float = 2.0,
+    clone: Optional[bool] = True,
+) -> Optional[SpectrumType]:
     """Removes noise if intensities exactly match frequently
 
     When no noise filtering has been applied to a spectrum, many spectra show repeating intensities.
@@ -53,8 +56,7 @@ def remove_noise_below_frequent_intensities(spectrum_in: Spectrum,
     return spectrum
 
 
-def _select_highest_frequent_peak(intensities,
-                                  min_count_of_frequent_intensities=5):
+def _select_highest_frequent_peak(intensities, min_count_of_frequent_intensities=5):
     unique_values, counts = np.unique(intensities, return_counts=True)
     mask = counts >= min_count_of_frequent_intensities
     filtered_values = unique_values[mask]

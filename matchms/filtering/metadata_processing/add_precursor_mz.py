@@ -60,8 +60,7 @@ def _convert_precursor_mz(precursor_mz):
 
 
 def _add_precursor_mz_metadata(metadata):
-    precursor_mz_key = get_first_common_element([_default_key] + _accepted_keys,
-                                                metadata.keys())
+    precursor_mz_key = get_first_common_element([_default_key] + _accepted_keys, metadata.keys())
     precursor_mz = metadata.get(precursor_mz_key)
     precursor_mz = _convert_precursor_mz(precursor_mz)
     if isinstance(precursor_mz, (float, int)):
@@ -73,8 +72,9 @@ def _add_precursor_mz_metadata(metadata):
     pepmass = metadata.get("pepmass", None)
     if pepmass is not None and _convert_precursor_mz(pepmass[0]) is not None:
         metadata["precursor_mz"] = pepmass[0]
-        logger.warning("Added precursor_mz entry based on field 'pepmass'."
-                       "Consider running 'interpret_pepmass() filter first.")
+        logger.warning(
+            "Added precursor_mz entry based on field 'pepmass'.Consider running 'interpret_pepmass() filter first."
+        )
         return metadata
 
     logger.warning("No precursor_mz found in metadata.")

@@ -1,12 +1,22 @@
 import numpy as np
 import pytest
 from matchms.constants import PROTON_MASS
-from matchms.filtering.filter_utils.derive_precursor_mz_and_parent_mass import derive_parent_mass_from_precursor_mz, derive_precursor_mz_from_parent_mass
+from matchms.filtering.filter_utils.derive_precursor_mz_and_parent_mass import (
+    derive_parent_mass_from_precursor_mz,
+    derive_precursor_mz_from_parent_mass,
+)
 from tests.builder_Spectrum import SpectrumBuilder
 
 
 @pytest.mark.parametrize(
-    "adduct, expected", [("[M+2Na-H]+", 399.02884), ("[M+H+NH4]2+", 868.9589), ("[2M+FA-H]-", 199.5008995), ("M+H", 442.992724), ("M+H-H2O", 461.003289)]
+    "adduct, expected",
+    [
+        ("[M+2Na-H]+", 399.02884),
+        ("[M+H+NH4]2+", 868.9589),
+        ("[2M+FA-H]-", 199.5008995),
+        ("M+H", 442.992724),
+        ("M+H-H2O", 461.003289),
+    ],
 )
 def test_add_parent_mass_using_adduct(adduct, expected):
     """Test if parent mass is correctly derived from adduct information."""
