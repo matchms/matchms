@@ -7,7 +7,11 @@ from ..builder_Spectrum import SpectrumBuilder
 
 @pytest.mark.parametrize(
     "metadata, expected, check_log",
-    [[{"name": "Testospectrum"}, "Testospectrum", False], [{"title": "Testospectrum"}, "Testospectrum", False], [{"othername": "Testospectrum"}, None, True]],
+    [
+        [{"name": "Testospectrum"}, "Testospectrum", False],
+        [{"title": "Testospectrum"}, "Testospectrum", False],
+        [{"othername": "Testospectrum"}, None, True],
+    ],
 )
 def test_add_compound_name(metadata, expected, check_log):
     set_matchms_logger_level("INFO")

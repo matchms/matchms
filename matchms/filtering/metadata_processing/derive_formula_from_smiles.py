@@ -38,8 +38,9 @@ def derive_formula_from_smiles(spectrum_in, overwrite=True, clone: Optional[bool
     if formula is not None:
         if spectrum.get("formula") is not None:
             if spectrum.get("formula") != formula:
-                logger.info("Overwriting formula. Original formula: %s New formula: %s",
-                            spectrum.get('formula'), formula)
+                logger.info(
+                    "Overwriting formula. Original formula: %s New formula: %s", spectrum.get("formula"), formula
+                )
                 spectrum.set("formula", formula)
         else:
             logger.info("Added formula from SMILES. New Formula: %s", formula)

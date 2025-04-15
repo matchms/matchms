@@ -14,8 +14,20 @@ from ..builder_Spectrum import SpectrumBuilder
 
 @pytest.fixture
 def spectra():
-    s1 = SpectrumBuilder().with_metadata({"charge": "+1", "pepmass": 100}).with_mz([10, 20, 30]).with_intensities([0.1, 0.4, 10]).build()
-    s2 = SpectrumBuilder().with_metadata({"charge": "-1", "pepmass": 102}).with_mz([10, 20, 30]).with_intensities([0.1, 0.2, 1]).build()
+    s1 = (
+        SpectrumBuilder()
+        .with_metadata({"charge": "+1", "pepmass": 100})
+        .with_mz([10, 20, 30])
+        .with_intensities([0.1, 0.4, 10])
+        .build()
+    )
+    s2 = (
+        SpectrumBuilder()
+        .with_metadata({"charge": "-1", "pepmass": 102})
+        .with_mz([10, 20, 30])
+        .with_intensities([0.1, 0.2, 1])
+        .build()
+    )
     s3 = (
         SpectrumBuilder()
         .with_metadata({"charge": -1, "pepmass": 104})
@@ -44,7 +56,13 @@ def test_filter_sorting_and_output():
             "interpret_pepmass",
         ]
     )
-    expected_filters = ["make_charge_int", "derive_adduct_from_name", "interpret_pepmass", "derive_ionmode", "correct_charge"]
+    expected_filters = [
+        "make_charge_int",
+        "derive_adduct_from_name",
+        "interpret_pepmass",
+        "derive_ionmode",
+        "correct_charge",
+    ]
 
     actual_filters = [x.__name__ for x in processing.filters]
     assert actual_filters == expected_filters
@@ -60,15 +78,26 @@ def test_filter_sorting_and_output():
 
 
 @pytest.mark.parametrize(
-  "filter_step, expected",
-  [
-      [
-          ("add_parent_mass", {"estimate_from_adduct": False, "clone": True}),
-          ("add_parent_mass", {"estimate_from_adduct": False, "overwrite_existing_entry": False, "estimate_from_charge": True, "clone": True})
-      ],
-      ["derive_adduct_from_name", ("derive_adduct_from_name", {"remove_adduct_from_name": True, "clone": True})],
-      [("require_correct_ionmode", {"ion_mode_to_keep": "both"}), ("require_correct_ionmode", {"ion_mode_to_keep": "both"})],
-  ]
+    "filter_step, expected",
+    [
+        [
+            ("add_parent_mass", {"estimate_from_adduct": False, "clone": True}),
+            (
+                "add_parent_mass",
+                {
+                    "estimate_from_adduct": False,
+                    "overwrite_existing_entry": False,
+                    "estimate_from_charge": True,
+                    "clone": True,
+                },
+            ),
+        ],
+        ["derive_adduct_from_name", ("derive_adduct_from_name", {"remove_adduct_from_name": True, "clone": True})],
+        [
+            ("require_correct_ionmode", {"ion_mode_to_keep": "both"}),
+            ("require_correct_ionmode", {"ion_mode_to_keep": "both"}),
+        ],
+    ],
 )
 def test_overwrite_default_settings(filter_step: str, expected):
     """Test if both default settings and set settings are returned in processing steps"""
@@ -98,7 +127,10 @@ def test_string_output():
             "correct_charge",
         ]
     )
-    expected_str = "Processing steps:\n- - make_charge_int\n  - clone: true\n- - interpret_pepmass\n  - clone: true" "\n- - derive_ionmode\n  - clone: true\n- - correct_charge\n  - clone: true\n"
+    expected_str = (
+        "Processing steps:\n- - make_charge_int\n  - clone: true\n- - interpret_pepmass\n  - clone: true"
+        "\n- - derive_ionmode\n  - clone: true\n- - correct_charge\n  - clone: true\n"
+    )
 
     assert str(processing) == expected_str
 
@@ -150,12 +182,18 @@ def test_filter_spectra_report(spectra):
     if pd.__version__ >= "2.2.0":
         # Test without pandas silent downcasting
         report_df = report.to_dataframe()
-        assert np.all(report_df.loc[["require_minimum_number_of_peaks", "interpret_pepmass", "correct_charge"]].values == expected_output)
+        assert np.all(
+            report_df.loc[["require_minimum_number_of_peaks", "interpret_pepmass", "correct_charge"]].values
+            == expected_output
+        )
 
         # Test with pandas silent downcasting
         pd.set_option("future.no_silent_downcasting", False)
         report_df = report.to_dataframe()
-        assert np.all(report_df.loc[["require_minimum_number_of_peaks", "interpret_pepmass", "correct_charge"]].values == expected_output)
+        assert np.all(
+            report_df.loc[["require_minimum_number_of_peaks", "interpret_pepmass", "correct_charge"]].values
+            == expected_output
+        )
     else:
         with pytest.raises(pd.errors.OptionError):
             pd.get_option("future.no_silent_downcasting")
@@ -195,7 +233,10 @@ def test_filter_report_filter_does_not_support_cloning(spectra, caplog):
         spectra, report = processor.process_spectra(spectra, create_report=True)
 
     assert report is not None
-    assert "Processing report is set to True, but the filter function nonsense_inchikey does not support cloning." in caplog.text
+    assert (
+        "Processing report is set to True, but the filter function nonsense_inchikey does not support cloning."
+        in caplog.text
+    )
 
 
 def test_filter_no_report_filter_skip_cloning(spectra):
@@ -215,17 +256,25 @@ def test_adding_custom_filter(spectra):
         s_in.set("inchikey", "NONSENSE")
         return s_in
 
-    processor = SpectrumProcessor(filters=["make_charge_int",
-                                           "interpret_pepmass",
-                                           "derive_ionmode",
-                                           "correct_charge",
-                                           ])
+    processor = SpectrumProcessor(
+        filters=[
+            "make_charge_int",
+            "interpret_pepmass",
+            "derive_ionmode",
+            "correct_charge",
+        ]
+    )
     processor.parse_and_add_filter(nonsense_inchikey)
     filters = processor.filters
     assert filters[-1].__name__ == "nonsense_inchikey"
     spectra, report = processor.process_spectra(spectra, create_report=True)
     assert report.counter_number_processed == 3
-    assert report.counter_changed_metadata == {"make_charge_int": 2, "interpret_pepmass": 3, "derive_ionmode": 3, "nonsense_inchikey": 3}
+    assert report.counter_changed_metadata == {
+        "make_charge_int": 2,
+        "interpret_pepmass": 3,
+        "derive_ionmode": 3,
+        "nonsense_inchikey": 3,
+    }
     assert spectra[0].get("inchikey") == "NONSENSE", "Custom filter not executed properly"
 
 
@@ -248,7 +297,12 @@ def test_adding_custom_filter_with_parameters(spectra):
     assert filters[-1].__name__ == "nonsense_inchikey_multiple"
     spectra, report = processor.process_spectra(spectra, create_report=True)
     assert report.counter_number_processed == 3
-    assert report.counter_changed_metadata == {"make_charge_int": 2, "interpret_pepmass": 3, "derive_ionmode": 3, "nonsense_inchikey_multiple": 3}
+    assert report.counter_changed_metadata == {
+        "make_charge_int": 2,
+        "interpret_pepmass": 3,
+        "derive_ionmode": 3,
+        "nonsense_inchikey_multiple": 3,
+    }
     assert spectra[0].get("inchikey") == "NONSENSENONSENSE", "Custom filter not executed properly"
 
 
@@ -314,7 +368,10 @@ def test_add_custom_filter_with_parameters(spectra):
 
 @pytest.mark.parametrize(
     "filter_description",
-    [("require_correct_ionmode", {"ion_mode_to_keep": "negative"}), (msfilters.require_correct_ionmode, {"ion_mode_to_keep": "negative"})],
+    [
+        ("require_correct_ionmode", {"ion_mode_to_keep": "negative"}),
+        (msfilters.require_correct_ionmode, {"ion_mode_to_keep": "negative"}),
+    ],
 )
 def test_add_matchms_filter(filter_description, spectra):
     processor = SpectrumProcessor(
@@ -336,7 +393,7 @@ def test_add_matchms_filter(filter_description, spectra):
     "filter_description",
     [
         ("derive_adduct_from_name", {"remove_adduct_from_name": False, "clone": True}),
-    ]
+    ],
 )
 def test_add_duplicated_filter_to_existing_pipeline(filter_description):
     """Tests if adding a filter that is already in the basic pipeline is overwritten and not duplicated"""
@@ -356,7 +413,7 @@ def test_add_filter_twice():
     processor = SpectrumProcessor(filters=())
     processor.parse_and_add_filter(("derive_adduct_from_name", {"remove_adduct_from_name": False}))
     processor.parse_and_add_filter("derive_adduct_from_name")
-    assert processor.processing_steps == [("derive_adduct_from_name", {"remove_adduct_from_name": True, 'clone': True})]
+    assert processor.processing_steps == [("derive_adduct_from_name", {"remove_adduct_from_name": True, "clone": True})]
 
 
 def test_add_all_filter_types(spectra):
@@ -409,7 +466,9 @@ def test_save_spectra_spectrum_processor(spectra, tmp_path):
 
 
 def test_save_spectra_spectrum_processor_none_spectra(spectra, tmp_path):
-    processor = SpectrumProcessor(BASIC_FILTERS + [(msfilters.require_correct_ionmode, {"ion_mode_to_keep": "positive"})])
+    processor = SpectrumProcessor(
+        BASIC_FILTERS + [(msfilters.require_correct_ionmode, {"ion_mode_to_keep": "positive"})]
+    )
     filename = os.path.join(tmp_path, "spectra.msp")
 
     _, _ = processor.process_spectra(spectra, cleaned_spectra_file=str(filename))

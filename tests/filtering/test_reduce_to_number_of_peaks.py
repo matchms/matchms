@@ -20,9 +20,27 @@ def test_reduce_to_number_of_peaks_no_changes(metadata):
 @pytest.mark.parametrize(
     "mz, intensities, metadata, params, expected",
     [
-        [np.array([10, 20, 30, 40, 50], dtype="float"), np.array([1, 1, 10, 20, 100], dtype="float"), {}, [1, 4, None], [20.0, 30.0, 40.0, 50.0]],
-        [np.array([10, 20, 30, 40], dtype="float"), np.array([0, 1, 10, 100], dtype="float"), {"parent_mass": 20}, [2, 4, 0.1], [30.0, 40.0]],
-        [np.array([10, 20, 30, 40], dtype="float"), np.array([0, 1, 10, 100], dtype="float"), {"parent_mass": 20}, [3, 4, 0.1], [20.0, 30.0, 40.0]],
+        [
+            np.array([10, 20, 30, 40, 50], dtype="float"),
+            np.array([1, 1, 10, 20, 100], dtype="float"),
+            {},
+            [1, 4, None],
+            [20.0, 30.0, 40.0, 50.0],
+        ],
+        [
+            np.array([10, 20, 30, 40], dtype="float"),
+            np.array([0, 1, 10, 100], dtype="float"),
+            {"parent_mass": 20},
+            [2, 4, 0.1],
+            [30.0, 40.0],
+        ],
+        [
+            np.array([10, 20, 30, 40], dtype="float"),
+            np.array([0, 1, 10, 100], dtype="float"),
+            {"parent_mass": 20},
+            [3, 4, 0.1],
+            [20.0, 30.0, 40.0],
+        ],
         [
             np.array([10, 20, 30, 40, 50, 60], dtype="float"),
             np.array([1, 1, 10, 100, 50, 20], dtype="float"),

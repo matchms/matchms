@@ -37,12 +37,16 @@ def clean_adduct(spectrum_in, clone: Optional[bool] = True) -> Optional[Spectrum
 
     if spectrum.get("charge"):
         if spectrum.get("charge") != get_charge_of_adduct(cleaned_adduct):
-            logger.warning("The charge in the adduct: %s and the given charge: %s do not match", adduct, spectrum.get("charge"))
+            logger.warning(
+                "The charge in the adduct: %s and the given charge: %s do not match", adduct, spectrum.get("charge")
+            )
     else:
         # set charge to adduct
         charge_from_adduct = get_charge_of_adduct(cleaned_adduct)
         if charge_from_adduct:
-            logger.info("Unknown charge was derived from adduct: %s, now charge is %s", cleaned_adduct, charge_from_adduct)
+            logger.info(
+                "Unknown charge was derived from adduct: %s, now charge is %s", cleaned_adduct, charge_from_adduct
+            )
             spectrum.set("charge", charge_from_adduct)
 
     if adduct != cleaned_adduct:

@@ -1,5 +1,7 @@
 import pytest
-from matchms.filtering.metadata_processing.require_matching_adduct_and_ionmode import require_matching_adduct_and_ionmode
+from matchms.filtering.metadata_processing.require_matching_adduct_and_ionmode import (
+    require_matching_adduct_and_ionmode,
+)
 from tests.builder_Spectrum import SpectrumBuilder
 
 

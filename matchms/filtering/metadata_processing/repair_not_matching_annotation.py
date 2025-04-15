@@ -109,20 +109,34 @@ def _repair_smiles_inchi(spectrum):
     inchi_correct = _check_smiles_and_parent_mass_match(smiles_from_inchi, parent_mass, 0.1)
 
     if smiles_correct and inchi_correct:
-        logger.warning("The SMILES and InChI are not matching, but both match the parent mass. SMILES = %s, InChI = %s", smiles, inchi)
+        logger.warning(
+            "The SMILES and InChI are not matching, but both match the parent mass. SMILES = %s, InChI = %s",
+            smiles,
+            inchi,
+        )
     elif smiles_correct and not inchi_correct:
         inchi_from_smiles = convert_smiles_to_inchi(spectrum.get("smiles"))
         # Repair by using inchi generated from SMILES
-        logger.info("The InChI has been changed from %s to %s. The new InChI matches the parent mass, while the old one did not", inchi, inchi_from_smiles)
+        logger.info((
+                "The InChI has been changed from %s to %s. The new InChI matches the parent mass, while the old one "
+                "did not"
+            ),
+            inchi,
+            inchi_from_smiles,
+        )
         spectrum.set("inchi", inchi_from_smiles)
     elif inchi_correct and not smiles_correct:
         # Repair by using SMILES generated from the inchi
-        logger.info(
-            "The SMILES has been changed from %s to %s to match the InChI. The new SMILES matches the parent mass, while the old one did not",
+        logger.info((
+            "The SMILES has been changed from %s to %s to match the InChI. The new SMILES matches the parent mass, "
+            "while the old one did not",
+            ),
             smiles,
             smiles_from_inchi,
         )
         spectrum.set("smiles", smiles_from_inchi)
     else:
-        logger.warning("Both the Smiles %s and the inchi %s do not match the parent mass %f", smiles, inchi, parent_mass)
+        logger.warning(
+            "Both the Smiles %s and the inchi %s do not match the parent mass %f", smiles, inchi, parent_mass
+        )
     return spectrum

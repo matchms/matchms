@@ -6,7 +6,11 @@ import pandas as pd
 from rdkit import Chem, DataStructs
 from rdkit.Chem.rdchem import Mol
 from rdkit.Chem.rdFingerprintGenerator import GetMorganGenerator, GetRDKitFPGenerator
-from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import is_valid_inchi, is_valid_inchikey, is_valid_smiles
+from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import (
+    is_valid_inchi,
+    is_valid_inchikey,
+    is_valid_smiles,
+)
 from matchms.typing import SpectrumType
 from .utils import to_camel_case
 
@@ -67,7 +71,12 @@ class Fingerprints:
     """
 
     def __init__(
-        self, fingerprint_algorithm: str = "daylight", fingerprint_method: str = "bit", nbits: int = 2048, ignore_stereochemistry: bool = False, **kwargs
+        self,
+        fingerprint_algorithm: str = "daylight",
+        fingerprint_method: str = "bit",
+        nbits: int = 2048,
+        ignore_stereochemistry: bool = False,
+        **kwargs,
     ):
         """
 
@@ -80,7 +89,7 @@ class Fingerprints:
         nbits
             The number of bits or fingerprint size. Defaults to 2048.
         ignore_stereochemistry
-            Determines which inchikey version will be used. If set to true the first 14 chars of the inchikey will be used.
+            Determines which inchikey version will be used. If set to true the first 14 chars of the inchikey are used.
         """
         self.inchikey_fingerprint_mapping = {}
         self.fingerprint_algorithm = fingerprint_algorithm
@@ -112,7 +121,10 @@ class Fingerprints:
 
     @property
     def to_dataframe(self) -> pd.DataFrame:
-        return pd.DataFrame(data={"fingerprint": list(self.inchikey_fingerprint_mapping.values())}, index=list(self.inchikey_fingerprint_mapping.keys()))
+        return pd.DataFrame(
+            data={"fingerprint": list(self.inchikey_fingerprint_mapping.values())},
+            index=list(self.inchikey_fingerprint_mapping.keys()),
+        )
 
     def get_fingerprint_by_inchikey(self, inchikey: str) -> Optional[np.ndarray]:
         """
@@ -178,7 +190,9 @@ class Fingerprints:
             )
 
         if fingerprint is None and spectrum.get("inchi"):
-            fingerprint = _derive_fingerprint_from_inchi(spectrum.get("inchi"), self.fingerprint_algorithm, self.fingerprint_method, self.nbits, **self.kwargs)
+            fingerprint = _derive_fingerprint_from_inchi(
+                spectrum.get("inchi"), self.fingerprint_algorithm, self.fingerprint_method, self.nbits, **self.kwargs
+            )
 
         return fingerprint
 
@@ -214,7 +228,9 @@ class Fingerprints:
         mols = [_get_mol(spectrum) for spectrum in unique_spectra.values()]
 
         # Get fingerprints of all mols
-        fingerprints = _mols_to_fingerprints(mols, self.fingerprint_algorithm, self.fingerprint_method, self.nbits, **self.kwargs)
+        fingerprints = _mols_to_fingerprints(
+            mols, self.fingerprint_algorithm, self.fingerprint_method, self.nbits, **self.kwargs
+        )
 
         # Map inchikey - fingerprint
         for inchikey, fp in zip(unique_spectra.keys(), fingerprints, strict=True):
@@ -276,7 +292,9 @@ def _validate_metadata(spectrum: SpectrumType, ignore_stereochemistry: bool):
     return spectrum
 
 
-def _derive_fingerprint_from_smiles(smiles: str, fingerprint_algorithm: str, fingerprint_method: str, nbits: int, **kwargs) -> Optional[np.ndarray]:
+def _derive_fingerprint_from_smiles(
+    smiles: str, fingerprint_algorithm: str, fingerprint_method: str, nbits: int, **kwargs
+) -> Optional[np.ndarray]:
     """Calculate molecule fingerprint based on given smiles or inchi (using rdkit).
     Requires conda package *rdkit* to be installed.
 
@@ -301,7 +319,9 @@ def _derive_fingerprint_from_smiles(smiles: str, fingerprint_algorithm: str, fin
     return _mol_to_fingerprint(mol, fingerprint_algorithm, fingerprint_method, nbits, **kwargs)
 
 
-def _derive_fingerprint_from_inchi(inchi: str, fingerprint_algorithm: str, fingerprint_method: str, nbits: int, **kwargs) -> Optional[np.ndarray]:
+def _derive_fingerprint_from_inchi(
+    inchi: str, fingerprint_algorithm: str, fingerprint_method: str, nbits: int, **kwargs
+) -> Optional[np.ndarray]:
     """Calculate molecule fingerprint based on given inchi (using rdkit).
     Requires conda package *rdkit* to be installed.
 
@@ -326,7 +346,9 @@ def _derive_fingerprint_from_inchi(inchi: str, fingerprint_algorithm: str, finge
     return _mol_to_fingerprint(mol, fingerprint_algorithm, fingerprint_method, nbits, **kwargs)
 
 
-def _mol_to_fingerprint(mol: Mol, fingerprint_algorithm: str, fingerprint_type: str, nbits: int, **kwargs) -> Optional[np.ndarray]:
+def _mol_to_fingerprint(
+    mol: Mol, fingerprint_algorithm: str, fingerprint_type: str, nbits: int, **kwargs
+) -> Optional[np.ndarray]:
     """Convert rdkit mol (molecule) to molecular fingerprint.
     Requires conda package *rdkit* to be installed.
 
@@ -353,7 +375,12 @@ def _mol_to_fingerprint(mol: Mol, fingerprint_algorithm: str, fingerprint_type: 
         Molecular fingerprint.
     """
 
-    types = {"bit": "GetFingerprint", "sparse_bit": "GetSparseFingerprint", "count": "GetCountFingerprint", "sparse_count": "GetSparseCountFingerprint"}
+    types = {
+        "bit": "GetFingerprint",
+        "sparse_bit": "GetSparseFingerprint",
+        "count": "GetCountFingerprint",
+        "sparse_count": "GetSparseCountFingerprint",
+    }
 
     if fingerprint_algorithm not in FP_ALGORITHMS:
         raise ValueError(f"Unkown fingerprint algorithm given. Available algorithms: {list(FP_ALGORITHMS.keys())}.")
@@ -369,7 +396,9 @@ def _mol_to_fingerprint(mol: Mol, fingerprint_algorithm: str, fingerprint_type: 
     return np.array(fingerprint) if fingerprint else None
 
 
-def _mols_to_fingerprints(mols: list[Mol], fingerprint_algorithm: str, fingerprint_type: str, nbits: int, **kwargs) -> np.ndarray:
+def _mols_to_fingerprints(
+    mols: list[Mol], fingerprint_algorithm: str, fingerprint_type: str, nbits: int, **kwargs
+) -> np.ndarray:
     """
     Computes a fingerprints for a list of molecules.
 
@@ -391,10 +420,15 @@ def _mols_to_fingerprints(mols: list[Mol], fingerprint_algorithm: str, fingerpri
     --------------
     np.ndarray
         A np.ndarray of np.ndarrays, containing a fingerprints for each molecule.
-        If the fingerprint for one molecule cannot be computed, the corresponding fingerprint will be a ndarray with zeroes.
+        If the fingerprint for a molecule cannot be calculated, the corresponding fingerprint is an ndarray with zeros.
     """
 
-    types = {"bit": "GetFingerprints", "sparse_bit": "GetSparseFingerprints", "count": "GetCountFingerprints", "sparse_count": "GetSparseCountFingerprints"}
+    types = {
+        "bit": "GetFingerprints",
+        "sparse_bit": "GetSparseFingerprints",
+        "count": "GetCountFingerprints",
+        "sparse_count": "GetSparseCountFingerprints",
+    }
 
     if fingerprint_algorithm not in FP_ALGORITHMS:
         raise ValueError(f"Unkown fingerprint algorithm given. Available algorithms: {list(FP_ALGORITHMS.keys())}.")

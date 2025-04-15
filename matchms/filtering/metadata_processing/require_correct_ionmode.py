@@ -6,8 +6,7 @@ from matchms.typing import SpectrumType
 logger = logging.getLogger("matchms")
 
 
-def require_correct_ionmode(spectrum_in: SpectrumType,
-                            ion_mode_to_keep) -> Optional[SpectrumType]:
+def require_correct_ionmode(spectrum_in: SpectrumType, ion_mode_to_keep) -> Optional[SpectrumType]:
     """
     Validates the ion mode of a given spectrum. If the spectrum's ion mode
     doesn't match the `ion_mode_to_keep`, it will be removed and a log message

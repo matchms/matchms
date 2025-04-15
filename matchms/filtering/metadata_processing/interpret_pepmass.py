@@ -52,24 +52,28 @@ def _interpret_pepmass_metadata(metadata):
     charge = _convert_charge_to_int(charge)
 
     if mz is not None:
-        if metadata.get("precursor_mz") is not None\
-            and _substantial_difference(metadata.get("precursor_mz"), mz, atol=0.001):
-            logger.warning("Overwriting existing precursor_mz %s with new one: %s",
-                           metadata.get("precursor_mz"), str(mz))
+        if metadata.get("precursor_mz") is not None and _substantial_difference(
+            metadata.get("precursor_mz"), mz, atol=0.001
+        ):
+            logger.warning(
+                "Overwriting existing precursor_mz %s with new one: %s", metadata.get("precursor_mz"), str(mz)
+            )
         metadata["precursor_mz"] = mz
         logger.info("Added precursor_mz entry based on field 'pepmass'.")
 
     if intensity is not None:
         if metadata.get("precursor_intensity") is not None:
-            logger.warning("Overwriting existing precursor_intensity %s with new one: %s",
-                           metadata.get("precursor_intensity"), str(intensity))
+            logger.warning(
+                "Overwriting existing precursor_intensity %s with new one: %s",
+                metadata.get("precursor_intensity"),
+                str(intensity),
+            )
         metadata["precursor_intensity"] = intensity
         logger.info("Added precursor_intensity entry based on field 'pepmass'.")
 
     if charge is not None:
         if metadata.get("charge") is not None:
-            logger.warning("Overwriting existing charge %s with new one: %s",
-                           metadata.get("charge"), str(charge))
+            logger.warning("Overwriting existing charge %s with new one: %s", metadata.get("charge"), str(charge))
         metadata["charge"] = charge
         logger.info("Added charge entry based on field 'pepmass'.")
 
@@ -81,7 +85,7 @@ def _interpret_pepmass_metadata(metadata):
 def _get_mz_intensity_charge(pepmass):
     try:
         if isinstance(pepmass, str):
-            matches = re.findall(r'\(([^)]+)\)', pepmass)
+            matches = re.findall(r"\(([^)]+)\)", pepmass)
             if len(matches) > 1:
                 raise ValueError("Found more than one tuple in pepmass field.")
             if len(matches) == 1:

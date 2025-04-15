@@ -30,8 +30,8 @@ def _create_test_spectrum_with_intensities(intensities):
 
 @pytest.fixture
 def spectrum() -> Spectrum:
-    mz = np.array([100.00003, 110.2, 200.581], dtype='float')
-    intensities = np.array([0.51, 1.0, 0.011], dtype='float')
+    mz = np.array([100.00003, 110.2, 200.581], dtype="float")
+    intensities = np.array([0.51, 1.0, 0.011], dtype="float")
     metadata = {"precursor_mz": 444.0, "charge": -1}
     builder = SpectrumBuilder().with_mz(mz).with_intensities(intensities).with_metadata(metadata)
     return builder.build()
@@ -39,9 +39,12 @@ def spectrum() -> Spectrum:
 
 def test_spectrum_getters_return_copies():
     """Test if getters return (deep)copies so that edits won't change the original entries."""
-    spectrum = Spectrum(mz=np.array([100.0, 101.0], dtype="float"),
-                        intensities=np.array([0.4, 0.5], dtype="float"),
-                        metadata={"testdata": 1}, metadata_harmonization=False)
+    spectrum = Spectrum(
+        mz=np.array([100.0, 101.0], dtype="float"),
+        intensities=np.array([0.4, 0.5], dtype="float"),
+        metadata={"testdata": 1},
+        metadata_harmonization=False,
+    )
     # Get entries and modify
     testdata = spectrum.get("testdata")
     testdata += 1
@@ -51,7 +54,7 @@ def test_spectrum_getters_return_copies():
     assert np.all(spectrum.peaks.mz == np.array([100.0, 101.0])), "Expected different peaks.mz"
     metadata = spectrum.metadata
     metadata["added_info"] = "this"
-    assert spectrum.metadata == {'testdata': 1}, "Expected metadata to remain unchanged"
+    assert spectrum.metadata == {"testdata": 1}, "Expected metadata to remain unchanged"
 
 
 def test_spectrum_getters(spectrum: Spectrum):
@@ -63,13 +66,17 @@ def test_spectrum_getters(spectrum: Spectrum):
     assert np.allclose(spectrum.peaks.mz[0], 100.00003)
 
 
-@pytest.mark.parametrize("input_dict, expected_dict", [
-    [{"precursor mass": 400.768, "Some Key": "Whatever.", "NEW\tSTUFF": "XYZ"},
-     {"precursor_mz": 400.768, "some_key": "Whatever.", "new_stuff": "XYZ"}],
-    [{"Name": "Whatever123", "ION MODE": "XYZ"},
-     {"compound_name": "Whatever123", "ionmode": "XYZ"}],
-    [{"ri": "200"}, {"retention_index": "200"}]
-])
+@pytest.mark.parametrize(
+    "input_dict, expected_dict",
+    [
+        [
+            {"precursor mass": 400.768, "Some Key": "Whatever.", "NEW\tSTUFF": "XYZ"},
+            {"precursor_mz": 400.768, "some_key": "Whatever.", "new_stuff": "XYZ"},
+        ],
+        [{"Name": "Whatever123", "ION MODE": "XYZ"}, {"compound_name": "Whatever123", "ionmode": "XYZ"}],
+        [{"ri": "200"}, {"retention_index": "200"}],
+    ],
+)
 def test_spectrum_metadata_harmonization(input_dict, expected_dict):
     builder = SpectrumBuilder().with_metadata(input_dict, metadata_harmonization=False)
     spectrum = builder.build()
@@ -82,11 +89,15 @@ def test_comparing_spectra_with_metadata():
         "float_example": 400.768,
         "str_example": "whatever",
         "list_example": [3, 4, "abc"],
-        "fingerprint": np.array([0.1, 5, 1.1])
+        "fingerprint": np.array([0.1, 5, 1.1]),
     }
 
-    builder = SpectrumBuilder().with_mz(np.array([100.0, 101.0], dtype="float")).with_intensities(
-        np.array([0.4, 0.5], dtype="float")).with_metadata(metadata)
+    builder = (
+        SpectrumBuilder()
+        .with_mz(np.array([100.0, 101.0], dtype="float"))
+        .with_intensities(np.array([0.4, 0.5], dtype="float"))
+        .with_metadata(metadata)
+    )
 
     spectrum0 = builder.build()
     spectrum1 = builder.build()
@@ -127,7 +138,8 @@ def test_spectrum_to_dict(spectrum: Spectrum):
     expected_dict = {
         "charge": -1,
         "peaks_json": [[100.00003, 0.51], [110.2, 1.0], [200.581, 0.011]],
-        "precursor_mz": 444.0}
+        "precursor_mz": 444.0,
+    }
     assert spectrum_dict == expected_dict
 
 
@@ -137,13 +149,14 @@ def test_spectrum_to_dict_matchms_style(spectrum: Spectrum):
     expected_dict = {
         "Charge": -1,
         "peaks_json": [[100.00003, 0.51], [110.2, 1.0], [200.581, 0.011]],
-        "PrecursorMZ": 444.0}
+        "PrecursorMZ": 444.0,
+    }
     assert spectrum_dict == expected_dict
 
 
 def test_spectrum_repr_and_str_method():
     # Test the __repr__ and __str__ methods.
-    spectrum = Spectrum(mz=np.array([1., 2., 3.]), intensities=np.array([0, 0.5, 1.]))
+    spectrum = Spectrum(mz=np.array([1.0, 2.0, 3.0]), intensities=np.array([0, 0.5, 1.0]))
     assert repr(spectrum) == str(spectrum) == "Spectrum(precursor m/z=0.00, 3 fragments between 1.0 and 3.0)"
 
     # Test if spectra with empty peak arrays are handled correctly:
@@ -153,10 +166,8 @@ def test_spectrum_repr_and_str_method():
 
 def test_spectrum_hash(spectrum: Spectrum):
     assert hash(spectrum) == 382278160858921722, "Expected different hash."
-    assert spectrum.metadata_hash() == "78c223faa157cc130390", \
-        "Expected different metadata hash."
-    assert spectrum.spectrum_hash() == "c79de5a8b333f780c206", \
-        "Expected different spectrum hash."
+    assert spectrum.metadata_hash() == "78c223faa157cc130390", "Expected different metadata hash."
+    assert spectrum.spectrum_hash() == "c79de5a8b333f780c206", "Expected different spectrum hash."
 
 
 def test_spectrum_hash_mz_sensitivity(spectrum: Spectrum):
@@ -166,10 +177,8 @@ def test_spectrum_hash_mz_sensitivity(spectrum: Spectrum):
     spectrum2 = SpectrumBuilder().from_spectrum(spectrum).with_mz(mz2).build()
 
     assert hash(spectrum) != hash(spectrum2), "Expected hashes to be different."
-    assert spectrum.metadata_hash() == spectrum2.metadata_hash(), \
-        "Expected metadata hashes to be unchanged."
-    assert spectrum.spectrum_hash() != spectrum2.spectrum_hash(), \
-        "Expected spectrum hashes to be different."
+    assert spectrum.metadata_hash() == spectrum2.metadata_hash(), "Expected metadata hashes to be unchanged."
+    assert spectrum.spectrum_hash() != spectrum2.spectrum_hash(), "Expected spectrum hashes to be different."
 
 
 def test_spectrum_hash_intensity_sensitivity(spectrum: Spectrum):
@@ -179,29 +188,27 @@ def test_spectrum_hash_intensity_sensitivity(spectrum: Spectrum):
     spectrum2 = SpectrumBuilder().from_spectrum(spectrum).with_intensities(intensities2).build()
 
     assert hash(spectrum) != hash(spectrum2), "Expected hashes to be different."
-    assert spectrum.metadata_hash() == spectrum2.metadata_hash(), \
-        "Expected metadata hashes to be unchanged."
-    assert spectrum.spectrum_hash() != spectrum2.spectrum_hash(), \
-        "Expected hashes to be different."
+    assert spectrum.metadata_hash() == spectrum2.metadata_hash(), "Expected metadata hashes to be unchanged."
+    assert spectrum.spectrum_hash() != spectrum2.spectrum_hash(), "Expected hashes to be different."
 
 
 def test_spectrum_hash_metadata_sensitivity(spectrum: Spectrum):
     """Test is changes indeed lead to different hashes as expected."""
-    spectrum2 = SpectrumBuilder().from_spectrum(spectrum).with_metadata(
-        {"precursor_mz": 444.1, "charge": -1}).build()
+    spectrum2 = SpectrumBuilder().from_spectrum(spectrum).with_metadata({"precursor_mz": 444.1, "charge": -1}).build()
 
     assert hash(spectrum) != hash(spectrum2), "Expected hashes to be different."
-    assert spectrum.metadata_hash() != spectrum2.metadata_hash(), \
-        "Expected metadata hashes to be different."
-    assert spectrum.spectrum_hash() == spectrum2.spectrum_hash(), \
-        "Expected hashes to be unchanged."
+    assert spectrum.metadata_hash() != spectrum2.metadata_hash(), "Expected metadata hashes to be different."
+    assert spectrum.spectrum_hash() == spectrum2.spectrum_hash(), "Expected hashes to be unchanged."
 
 
 @pytest.mark.parametrize("default_filtering", [True, False])
 def test_spectrum_clone(spectrum, default_filtering):
-    spectrum = SpectrumBuilder().from_spectrum(spectrum).with_metadata(
-        {"precursor_mz": 444.1, "TEST FIELD": "Some Text"},
-        metadata_harmonization=default_filtering).build()
+    spectrum = (
+        SpectrumBuilder()
+        .from_spectrum(spectrum)
+        .with_metadata({"precursor_mz": 444.1, "TEST FIELD": "Some Text"}, metadata_harmonization=default_filtering)
+        .build()
+    )
     spectrum_clone = spectrum.clone()
 
     assert spectrum_clone == spectrum.clone(), "Spectra should be equal"
@@ -211,37 +218,60 @@ def test_spectrum_clone(spectrum, default_filtering):
     assert spectrum_clone != spectrum.clone(), "Only cloned spectrum should have changed"
 
 
-@pytest.mark.parametrize("input_dict, default_filtering, expected", [
-    [{}, True, {}],
-    [{"precursor_mz": 101.01}, True, {"precursor_mz": 101.01}],
-    [{"precursormz": 101.01}, True, {"precursor_mz": 101.01}],
-    [{"precursormz": 101.01}, False, {"precursor_mz": 101.01}],
-    [{"ExactMass": 105.055}, True, {"parent_mass": 105.055}],
-    [{"ExactMass": 105.055, "parent_mass": 107.077}, True, {"parent_mass": 107.077}],
-    [{"charge": "2+"}, True, {"charge": 2}],
-    [{"charge": -1}, True, {"charge": -1}],
-    [{"charge": [-1, 0]}, True, {"charge": -1}],
-    [{"ionmode": "Negative"}, True, {"ionmode": "negative"}],
-    [{"ri": "200"}, True, {"retention_index": 200.0}],
-    [{"rt": "200"}, True, {"retention_time": 200.0}]])
+@pytest.mark.parametrize(
+    "input_dict, default_filtering, expected",
+    [
+        [{}, True, {}],
+        [{"precursor_mz": 101.01}, True, {"precursor_mz": 101.01}],
+        [{"precursormz": 101.01}, True, {"precursor_mz": 101.01}],
+        [{"precursormz": 101.01}, False, {"precursor_mz": 101.01}],
+        [{"ExactMass": 105.055}, True, {"parent_mass": 105.055}],
+        [{"ExactMass": 105.055, "parent_mass": 107.077}, True, {"parent_mass": 107.077}],
+        [{"charge": "2+"}, True, {"charge": 2}],
+        [{"charge": -1}, True, {"charge": -1}],
+        [{"charge": [-1, 0]}, True, {"charge": -1}],
+        [{"ionmode": "Negative"}, True, {"ionmode": "negative"}],
+        [{"ri": "200"}, True, {"retention_index": 200.0}],
+        [{"rt": "200"}, True, {"retention_time": 200.0}],
+    ],
+)
 def test_metadata_default_filtering(spectrum, input_dict, default_filtering, expected):
-    spectrum = SpectrumBuilder().from_spectrum(spectrum).with_metadata(
-        input_dict,
-        metadata_harmonization=default_filtering).build()
-    assert spectrum.metadata == expected, \
-        "Expected different _metadata dictionary."
+    spectrum = (
+        SpectrumBuilder()
+        .from_spectrum(spectrum)
+        .with_metadata(input_dict, metadata_harmonization=default_filtering)
+        .build()
+    )
+    assert spectrum.metadata == expected, "Expected different _metadata dictionary."
 
 
-@pytest.mark.parametrize("mz, loss_mz_to, expected_mz, expected_intensities", [
-    [np.array([100, 150, 200, 300], dtype="float"), 1000, np.array([145, 245, 295, 345], "float"), np.array([1000, 100, 200, 700], "float")],
-    [np.array([100, 150, 200, 450], dtype="float"), 1000, np.array([245, 295, 345], "float"), np.array([100, 200, 700], "float")],
-    [np.array([100, 150, 200, 300], dtype="float"), 250, np.array([145, 245], "float"), np.array([1000, 100], "float")]
-])
+@pytest.mark.parametrize(
+    "mz, loss_mz_to, expected_mz, expected_intensities",
+    [
+        [
+            np.array([100, 150, 200, 300], dtype="float"),
+            1000,
+            np.array([145, 245, 295, 345], "float"),
+            np.array([1000, 100, 200, 700], "float"),
+        ],
+        [
+            np.array([100, 150, 200, 450], dtype="float"),
+            1000,
+            np.array([245, 295, 345], "float"),
+            np.array([100, 200, 700], "float"),
+        ],
+        [
+            np.array([100, 150, 200, 300], dtype="float"),
+            250,
+            np.array([145, 245], "float"),
+            np.array([1000, 100], "float"),
+        ],
+    ],
+)
 def test_compute_losses_parameterized(mz, loss_mz_to, expected_mz, expected_intensities):
     intensities = np.array([700, 200, 100, 1000], "float")
     metadata = {"precursor_mz": 445.0}
-    spectrum = SpectrumBuilder().with_mz(mz).with_intensities(
-        intensities).with_metadata(metadata).build()
+    spectrum = SpectrumBuilder().with_mz(mz).with_intensities(intensities).with_metadata(metadata).build()
 
     losses = spectrum.compute_losses(loss_mz_to=loss_mz_to)
 
@@ -253,8 +283,7 @@ def test_losses_property():
     mz = np.array([100, 150, 200, 300.0])
     intensities = np.array([700, 200, 100, 1000], "float")
     metadata = {"precursor_mz": 445.0}
-    spectrum = SpectrumBuilder().with_mz(mz).with_intensities(
-        intensities).with_metadata(metadata).build()
+    spectrum = SpectrumBuilder().with_mz(mz).with_intensities(intensities).with_metadata(metadata).build()
 
     # Check if class property "losses" works
     losses_default = spectrum.compute_losses()

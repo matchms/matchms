@@ -1,5 +1,7 @@
 import pytest
-from matchms.filtering.metadata_processing.require_matching_adduct_precursor_mz_parent_mass import require_matching_adduct_precursor_mz_parent_mass
+from matchms.filtering.metadata_processing.require_matching_adduct_precursor_mz_parent_mass import (
+    require_matching_adduct_precursor_mz_parent_mass,
+)
 from ..builder_Spectrum import SpectrumBuilder
 
 
@@ -15,7 +17,11 @@ from ..builder_Spectrum import SpectrumBuilder
     ],
 )
 def test_require_matching_adduct_precursor_mz_parent_mass(adduct, parent_mass, precursor_mz, should_be_removed):
-    spectrum_in = SpectrumBuilder().with_metadata({"adduct": adduct, "parent_mass": parent_mass, "precursor_mz": precursor_mz}).build()
+    spectrum_in = (
+        SpectrumBuilder()
+        .with_metadata({"adduct": adduct, "parent_mass": parent_mass, "precursor_mz": precursor_mz})
+        .build()
+    )
     result = require_matching_adduct_precursor_mz_parent_mass(spectrum_in)
     if result is None:
         assert should_be_removed

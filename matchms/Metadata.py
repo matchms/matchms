@@ -56,7 +56,6 @@ class Metadata:
         if metadata is None:
             self._data = PickyDict({})
         elif isinstance(metadata, Mapping):
-
             self._data = PickyDict(metadata)
         else:
             raise ValueError("Unexpected data type for metadata (should be dictionary, or None).")
@@ -114,7 +113,9 @@ class Metadata:
             metadata_filtered["charge"] = charge_int
 
         invalid_entries = ["", "NA", "N/A", "NaN"]
-        metadata_filtered = {k: v for k, v in metadata_filtered.items() if not (isinstance(v, str) and v in invalid_entries)}
+        metadata_filtered = {
+            k: v for k, v in metadata_filtered.items() if not (isinstance(v, str) and v in invalid_entries)
+        }
 
         self.data = metadata_filtered
 

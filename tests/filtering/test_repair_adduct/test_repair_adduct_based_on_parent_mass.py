@@ -19,7 +19,11 @@ def test_repair_adduct_based_on_parent_mass(precursor_mz, parent_mass, expected_
     pytest.importorskip("rdkit")
 
     # CH4 is used as smiles, this has a mass of 16
-    spectrum_in = SpectrumBuilder().with_metadata({"precursor_mz": precursor_mz, "parent_mass": parent_mass, "ionmode": ionmode}).build()
+    spectrum_in = (
+        SpectrumBuilder()
+        .with_metadata({"precursor_mz": precursor_mz, "parent_mass": parent_mass, "ionmode": ionmode})
+        .build()
+    )
     spectrum_out = repair_adduct_based_on_parent_mass(spectrum_in, mass_tolerance=0.1)
     assert spectrum_out.get("adduct") == expected_adduct
     assert abs(spectrum_out.get("parent_mass") - 15.9589) < 0.1

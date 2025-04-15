@@ -1,11 +1,21 @@
 import os
 from itertools import chain
 from typing import Generator, List, Optional, Union
-from matchms.importing import load_from_json, load_from_mgf, load_from_msp, load_from_mzml, load_from_mzxml, load_from_pickle, load_from_usi
+from matchms.importing import (
+    load_from_json,
+    load_from_mgf,
+    load_from_msp,
+    load_from_mzml,
+    load_from_mzxml,
+    load_from_pickle,
+    load_from_usi,
+)
 from matchms.Spectrum import Spectrum
 
 
-def load_spectra(file: str, metadata_harmonization: bool = True, ftype: Optional[str] = None) -> Union[List[Spectrum], Generator[Spectrum, None, None]]:
+def load_spectra(
+    file: str, metadata_harmonization: bool = True, ftype: Optional[str] = None
+) -> Union[List[Spectrum], Generator[Spectrum, None, None]]:
     """Loads spectra from your spectrum file into memory as matchms Spectrum object
 
     The following file extensions can be loaded in with this function:
@@ -45,7 +55,9 @@ def load_spectra(file: str, metadata_harmonization: bool = True, ftype: Optional
     raise TypeError(f"File extension of file: {file} is not recognized")
 
 
-def load_list_of_spectrum_files(spectrum_files: Union[List[str], str]) -> Union[List[Spectrum], Generator[Spectrum, None, None]]:
+def load_list_of_spectrum_files(
+    spectrum_files: Union[List[str], str],
+) -> Union[List[Spectrum], Generator[Spectrum, None, None]]:
     """Combines all spectra in multiple files into a list of spectra"""
     # Just load spectra if it is a single file
     if isinstance(spectrum_files, str):

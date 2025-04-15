@@ -36,12 +36,12 @@ def make_charge_int(spectrum_in: SpectrumType, clone: Optional[bool] = True) -> 
 
 def _convert_charge_to_int(charge):
     """Convert charge to integer if possible, else return None."""
+
     def _try_conversion(charge):
         try:
             return int(charge)
         except ValueError:
-            logger.warning("Found charge (%s) cannot be converted to integer.",
-                           str(charge))
+            logger.warning("Found charge (%s) cannot be converted to integer.", str(charge))
             return None
 
     if charge is None:

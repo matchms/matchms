@@ -5,7 +5,9 @@ from matchms.logging_functions import reset_matchms_logger, set_matchms_logger_l
 from ..builder_Spectrum import SpectrumBuilder
 
 
-@pytest.mark.parametrize("metadata, expected", [[{"precursor_mz": 444.0}, 444.0], [{}, None], [{"pepmass": (444.0, 10)}, 444.0]])
+@pytest.mark.parametrize(
+    "metadata, expected", [[{"precursor_mz": 444.0}, 444.0], [{}, None], [{"pepmass": (444.0, 10)}, 444.0]]
+)
 def test_add_precursor_mz(metadata, expected):
     spectrum_in = SpectrumBuilder().with_metadata(metadata).build()
 

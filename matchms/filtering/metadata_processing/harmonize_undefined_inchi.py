@@ -2,8 +2,9 @@ from typing import List, Optional
 from matchms.typing import SpectrumType
 
 
-def harmonize_undefined_inchi(spectrum_in: SpectrumType, undefined: str = "",
-                              aliases: List[str] = None, clone: Optional[bool] = True) -> Optional[SpectrumType]:
+def harmonize_undefined_inchi(
+    spectrum_in: SpectrumType, undefined: str = "", aliases: List[str] = None, clone: Optional[bool] = True
+) -> Optional[SpectrumType]:
     """Replace all aliases for empty/undefined inchi entries by value of ``undefined`` argument.
 
     Parameters
@@ -29,12 +30,7 @@ def harmonize_undefined_inchi(spectrum_in: SpectrumType, undefined: str = "",
     spectrum = spectrum_in.clone() if clone else spectrum_in
 
     if aliases is None:
-        aliases = [
-            "",
-            "N/A",
-            "NA",
-            "n/a"
-        ]
+        aliases = ["", "N/A", "NA", "n/a"]
 
     inchi = spectrum.get("inchi")
     if inchi is None:

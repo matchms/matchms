@@ -1,5 +1,7 @@
 import pytest
-from matchms.filtering.metadata_processing.repair_adduct_and_parent_mass_based_on_smiles import repair_adduct_and_parent_mass_based_on_smiles
+from matchms.filtering.metadata_processing.repair_adduct_and_parent_mass_based_on_smiles import (
+    repair_adduct_and_parent_mass_based_on_smiles,
+)
 from tests.builder_Spectrum import SpectrumBuilder
 
 
@@ -27,7 +29,9 @@ def test_repair_adduct_and_parent_mass_based_on_smiles(precursor_mz, expected_ad
     pytest.importorskip("rdkit")
 
     # CH4 is used as smiles, this has a mass of 16
-    spectrum_in = SpectrumBuilder().with_metadata({"smiles": "C", "precursor_mz": precursor_mz, "ionmode": ionmode}).build()
+    spectrum_in = (
+        SpectrumBuilder().with_metadata({"smiles": "C", "precursor_mz": precursor_mz, "ionmode": ionmode}).build()
+    )
     spectrum_out = repair_adduct_and_parent_mass_based_on_smiles(spectrum_in, mass_tolerance=0.1)
     assert spectrum_out.get("adduct") == expected_adduct
     if expected_adduct is not None:
@@ -45,13 +49,23 @@ def test_repair_adduct_and_parent_mass_based_on_smiles(precursor_mz, expected_ad
         (19.0, 20.0, "[M+H]+", 20.0, "[M+H]+"),
     ],
 )
-def test_repair_adduct_and_parent_mass_based_on_smiles_correct_parent_mass(precursor_mz, parent_mass, adduct, expected_parent_mass, expected_adduct):
+def test_repair_adduct_and_parent_mass_based_on_smiles_correct_parent_mass(
+    precursor_mz, parent_mass, adduct, expected_parent_mass, expected_adduct
+):
     pytest.importorskip("rdkit")
 
     # CH4 is used as smiles, this has a mass of 16
     spectrum_in = (
         SpectrumBuilder()
-        .with_metadata({"smiles": "C", "adduct": adduct, "precursor_mz": precursor_mz, "parent_mass": parent_mass, "ionmode": "positive"})
+        .with_metadata(
+            {
+                "smiles": "C",
+                "adduct": adduct,
+                "precursor_mz": precursor_mz,
+                "parent_mass": parent_mass,
+                "ionmode": "positive",
+            }
+        )
         .build()
     )
     spectrum_out = repair_adduct_and_parent_mass_based_on_smiles(spectrum_in, mass_tolerance=0.1)

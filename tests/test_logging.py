@@ -2,7 +2,12 @@
 import logging
 import os
 import pytest
-from matchms.logging_functions import add_logging_to_file, reset_matchms_logger, set_matchms_logger_level, set_rdkit_logger_level
+from matchms.logging_functions import (
+    add_logging_to_file,
+    reset_matchms_logger,
+    set_matchms_logger_level,
+    set_rdkit_logger_level,
+)
 
 
 def test_initial_logging(caplog, capsys):

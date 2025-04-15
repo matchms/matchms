@@ -18,7 +18,9 @@ from ..builder_Spectrum import SpectrumBuilder
         [{"name": ""}, True, None, "", None],
     ],
 )
-def test_derive_adduct_from_name_parametrized(metadata: dict, remove_adduct_from_name: bool, expected_adduct, expected_name, removed_adduct):
+def test_derive_adduct_from_name_parametrized(
+    metadata: dict, remove_adduct_from_name: bool, expected_adduct, expected_name, removed_adduct
+):
     set_matchms_logger_level("INFO")
     spectrum_in = SpectrumBuilder().with_metadata(metadata).build()
 
@@ -67,7 +69,19 @@ def test_empty_spectrum():
 
 def test_looks_like_adduct():
     """Test if adducts are correctly identified"""
-    for adduct in ["M+", "M*+", "M+Cl", "[M+H]", "[2M+Na]+", "M+H+K", "[2M+ACN+H]+", "MS+Na", "MS+H", "M3Cl37+Na", "[M+H+H2O]"]:
+    for adduct in [
+        "M+",
+        "M*+",
+        "M+Cl",
+        "[M+H]",
+        "[2M+Na]+",
+        "M+H+K",
+        "[2M+ACN+H]+",
+        "MS+Na",
+        "MS+H",
+        "M3Cl37+Na",
+        "[M+H+H2O]",
+    ]:
         assert _looks_like_adduct(adduct), "Expected this to be identified as adduct"
     for adduct in ["N+", "B*+", "++", "--", "[--]", "H+M+K"]:
         assert not _looks_like_adduct(adduct), "Expected this not to be identified as adduct"

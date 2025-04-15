@@ -10,7 +10,9 @@ from matchms.typing import SpectrumType
 logger = logging.getLogger("matchms")
 
 
-def derive_parent_mass_from_precursor_mz(spectrum: SpectrumType, estimate_from_adduct: bool = True, estimate_from_charge: bool = True) -> Optional[float]:
+def derive_parent_mass_from_precursor_mz(
+    spectrum: SpectrumType, estimate_from_adduct: bool = True, estimate_from_charge: bool = True
+) -> Optional[float]:
     """Use the precursor mz, charge and adduct information to compute the mass of the case compound.
 
     Args:
@@ -111,11 +113,17 @@ def _get_charge(spectrum: SpectrumType):
     if _is_valid_charge(charge):
         return charge
     if spectrum.get("ionmode") == "positive":
-        logger.info("Missing charge entry, but positive ionmode detected. Consider prior run of `correct_charge()` filter.")
+        logger.info(
+            "Missing charge entry, but positive ionmode detected. Consider prior run of `correct_charge()` filter."
+        )
         return 1
     if spectrum.get("ionmode") == "negative":
-        logger.info("Missing charge entry, but negative ionmode detected. Consider prior run of `correct_charge()` filter.")
+        logger.info(
+            "Missing charge entry, but negative ionmode detected. Consider prior run of `correct_charge()` filter."
+        )
         return -1
 
-    logger.warning("Missing charge and ionmode entries. Consider prior run of `derive_ionmode()` and `correct_charge()` filters.")
+    logger.warning(
+        "Missing charge and ionmode entries. Consider prior run of `derive_ionmode()` and `correct_charge()` filters."
+    )
     return 0
