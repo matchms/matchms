@@ -1,0 +1,17 @@
+<mzSpecLib>
+MS:1003186|library format version=1.0
+MS:1003188|library name=test
+<AttributeSet Spectrum=all>
+<AttributeSet Analyte=all>
+<AttributeSet Interpretation=all>
+<Spectrum=1>
+MS:1003061|library spectrum name=Hydrogen chloride
+MS:1003059|number of peaks=4
+<Analyte=1>
+MS:1000866|molecular formula=ClH
+<Peaks>
+35.0	169.85	?
+36.0	999	?
+37.0	53.95	?
+38.0	323.71	?
+
