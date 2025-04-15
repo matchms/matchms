@@ -196,7 +196,7 @@ def rename_deprecated_params(param_mapping: dict, version: str = None) -> Callab
                     new_kwargs[new_param] = kwargs.pop(old_param)
 
                     warning_msg = (
-                        f"Parameter '{old_param}' is deprecated and will be removed in the future."
+                        f"Parameter '{old_param}' is deprecated and will be removed in the future. "
                         f"Use '{new_param}' instead."
                     )
                     if version is not None:
