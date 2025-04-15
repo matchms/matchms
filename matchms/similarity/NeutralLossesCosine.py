@@ -28,7 +28,8 @@ class NeutralLossesCosine(BaseSimilarity):
     # Set output data type, e.g. ("score", "float") or [("score", "float"), ("matches", "int")]
     score_datatype = [("score", np.float64), ("matches", "int")]
 
-    def __init__(self, tolerance: float = 0.1, mz_power: float = 0.0, intensity_power: float = 1.0, ignore_peaks_above_precursor: bool = True):
+    def __init__(self,tolerance: float = 0.1, mz_power: float = 0.0,
+                 intensity_power: float = 1.0, ignore_peaks_above_precursor: bool = True):
         """
         Parameters
         ----------
@@ -67,21 +68,25 @@ class NeutralLossesCosine(BaseSimilarity):
 
         def get_valid_precursor_mz(spectrum):
             """Extract valid precursor_mz from spectrum if possible. If not raise exception."""
-            message_precursor_missing = "Precursor_mz missing. Apply 'add_precursor_mz' filter first."
-            message_precursor_no_number = "Precursor_mz must be of type int or float. Apply 'add_precursor_mz' filter first."
-            message_precursor_below_0 = "Expect precursor to be positive number.Apply 'require_precursor_mz' first"
+            message_missing = "Precursor_mz missing. Apply 'add_precursor_mz' filter first."
+            message_no_number = "Precursor_mz must be of type int or float. Apply 'add_precursor_mz' filter first."
+            message_below_0 = "Expect precursor to be positive number.Apply 'require_precursor_mz' first"
 
             precursor_mz = spectrum.get("precursor_mz", None)
             if not isinstance(precursor_mz, (int, float)):
-                logger.warning(message_precursor_no_number)
+                logger.warning(message_no_number)
             precursor_mz = _convert_precursor_mz(precursor_mz)
-            assert precursor_mz is not None, message_precursor_missing
-            assert precursor_mz > 0, message_precursor_below_0
+            assert precursor_mz is not None, message_missing
+            assert precursor_mz > 0, message_below_0
             return precursor_mz
 
         def get_matching_pairs():
             """Find all pairs of peaks that match within the given tolerance."""
-            matching_pairs = collect_peak_pairs(spec1, spec2, self.tolerance, shift=mass_shift, mz_power=self.mz_power, intensity_power=self.intensity_power)
+            matching_pairs = collect_peak_pairs(
+                spec1, spec2, self.tolerance,
+                shift=mass_shift, mz_power=self.mz_power,
+                intensity_power=self.intensity_power
+            )
             if matching_pairs is None:
                 return None
             if matching_pairs.shape[0] > 0:

@@ -1,5 +1,6 @@
 import numpy as np
 import pytest
+from numpy.linalg import norm as lnorm
 from matchms import Spectrum
 from matchms.similarity import BinnedEmbeddingSimilarity
 
@@ -28,7 +29,7 @@ def test_binned_embedding_similarity_without_parameters():
     expected_vec2 /= np.max(expected_vec2)
 
     # Calculate expected cosine similarity
-    expected_score = np.dot(expected_vec1, expected_vec2) / (np.linalg.norm(expected_vec1) * np.linalg.norm(expected_vec2))
+    expected_score = np.dot(expected_vec1, expected_vec2) / (lnorm(expected_vec1) * lnorm(expected_vec2))
 
     assert score == pytest.approx(expected_score, rel=1e-6), "Expected different cosine score"
 
@@ -55,7 +56,7 @@ def test_binned_embedding_similarity_matrix():
     expected_vec2 /= np.max(expected_vec2)
 
     # Calculate expected cosine similarity
-    expected_score = np.dot(expected_vec1, expected_vec2) / (np.linalg.norm(expected_vec1) * np.linalg.norm(expected_vec2))
+    expected_score = np.dot(expected_vec1, expected_vec2) / (lnorm(expected_vec1) * lnorm(expected_vec2))
 
     assert scores[0, 1] == pytest.approx(expected_score, rel=1e-6), "Expected different cosine score"
     assert np.allclose(scores[0, 0], scores[1, 1], atol=1e-6), "Expected perfect self-similarity"

@@ -19,11 +19,11 @@ def spectra():
     builder = SpectrumBuilder()
     spectrum_1 = builder.with_mz(np.array([100, 150, 200.])) \
         .with_intensities(np.array([0.7, 0.2, 0.1])) \
-        .with_metadata({'id': 'spectrum1', "precursor_mz": 210, "parent_mass": 210, "smiles": "CCC(C)C(C(=O)O)NC(=O)CCl"}) \
+        .with_metadata({'id': 'spectrum1', "precursor_mz": 210, "parent_mass": 210, "smiles": "C(C(=O)O)NC(=O)CCl"}) \
         .build()
     spectrum_2 = builder.with_mz(np.array([100, 140, 190.])) \
         .with_intensities(np.array([0.4, 0.2, 0.1])) \
-        .with_metadata({'id': 'spectrum2', "precursor_mz": 200, "parent_mass": 200, "smiles": "CCC(C)C(C(=O)O)NC(=O)CCl"}) \
+        .with_metadata({'id': 'spectrum2', "precursor_mz": 200, "parent_mass": 200, "smiles": "C(C(=O)O)NC(=O)CCl"}) \
         .build()
     spectrum_3 = builder.with_mz(np.array([110, 140, 195.])) \
         .with_intensities(

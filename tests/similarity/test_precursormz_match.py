@@ -4,10 +4,14 @@ from matchms.similarity import PrecursorMzMatch
 from ..builder_Spectrum import SpectrumBuilder, spectra_factory
 
 
+# Local global variables to make the test easier to read
+T = True
+F = False
+
 @pytest.mark.parametrize('precursor_mz, tolerance, tolerance_type, expected', [
-    [[100.0, 101.0], 0.1, "Dalton", False],
-    [[100.0, 101.0], 2.0, "Dalton", True],
-    [[600.0, 600.001], 2.0, "ppm", True]
+    [[100.0, 101.0], 0.1, "Dalton", F],
+    [[100.0, 101.0], 2.0, "Dalton", T],
+    [[600.0, 600.001], 2.0, "ppm", T]
 ])
 def test_precursormz_match_parameterized(precursor_mz, tolerance, tolerance_type, expected):
     s0, s1 = spectra_factory('precursor_mz', precursor_mz)
@@ -32,9 +36,9 @@ def test_precursormz_match_missing_precursormz():
 
 
 @pytest.mark.parametrize('precursor_mz, tolerance, tolerance_type, expected', [
-    [[100.0, 101.0, 99.0, 98.0], 0.1, "Dalton", [[False, False], [False, False]]],
-    [[100.0, 101.0, 99.0, 98.0], 2.0, "Dalton", [[True, True], [True, False]]],
-    [[100.0, 101.0, 99.99, 98.0], 101.0, "ppm", [[True, False], [False, False]]]
+    [[100.0, 101.0, 99.0, 98.0], 0.1, "Dalton", [[F, F], [F, F]]],
+    [[100.0, 101.0, 99.0, 98.0], 2.0, "Dalton", [[T, T], [T, F]]],
+    [[100.0, 101.0, 99.99, 98.0], 101.0, "ppm", [[T, F], [F, F]]]
 ])
 def test_precursormz_match_array_parameterized(precursor_mz, tolerance, tolerance_type, expected):
     s0, s1, s2, s3 = spectra_factory('precursor_mz', precursor_mz)
@@ -45,15 +49,15 @@ def test_precursormz_match_array_parameterized(precursor_mz, tolerance, toleranc
 
 @pytest.mark.parametrize('precursor_mz, tolerance, tolerance_type, expected', [
     [[100.0, 101.0, 99.95, 98.0], 0.1, "Dalton",
-     [[True, False, True, False], [False, True, False, False], [True, False, True, False], [False, False, False, True]]],
+     [[T, F, T, F], [F, T, F, F], [T, F, T, F], [F, F, F, T]]],
     [[100.0, 101.0, 99.99999, 99.9], 5.0, "ppm",
-     [[True, False, True, False], [False, True, False, False], [True, False, True, False], [False, False, False, True]]]
+     [[T, F, T, F], [F, T, F, F], [T, F, T, F], [F, F, F, T]]]
 ])
 def test_precursormz_match_array_symmetric_parameterized(precursor_mz, tolerance, tolerance_type, expected):
     spectra = spectra_factory('precursor_mz', precursor_mz)
     similarity_score = PrecursorMzMatch(tolerance=tolerance, tolerance_type=tolerance_type)
-    scores = similarity_score.matrix(spectra, spectra, is_symmetric=True)
-    scores2 = similarity_score.matrix(spectra, spectra, is_symmetric=False)
+    scores = similarity_score.matrix(spectra, spectra, is_symmetric=T)
+    scores2 = similarity_score.matrix(spectra, spectra, is_symmetric=F)
 
     assert np.all(scores == scores2), "Expected identical scores"
     assert np.all(scores == np.array(expected)), "Expected different scores"

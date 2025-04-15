@@ -6,6 +6,7 @@ from matchms.similarity import ModifiedCosine
 from ..builder_Spectrum import SpectrumBuilder
 
 
+# ruff: noqa: E501
 def compute_expected_score(spectrum_1, spectrum_2, matches):
     spec1 = spectrum_1.peaks.intensities
     spec2 = spectrum_2.peaks.intensities
