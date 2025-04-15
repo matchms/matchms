@@ -13,6 +13,7 @@ from .vector_similarity_functions import (
 )
 
 
+# ruff: noqa: E501
 class FingerprintSimilarity(BaseSimilarity):
     """Calculate similarity between molecules based on their fingerprints.
 
@@ -106,7 +107,11 @@ class FingerprintSimilarity(BaseSimilarity):
 
         raise NotImplementedError
 
-    def matrix(self, references: List[SpectrumType], queries: List[SpectrumType], array_type: str = "numpy", is_symmetric: bool = False) -> np.array:
+    def matrix(self,
+               references: List[SpectrumType],
+               queries: List[SpectrumType],
+               array_type: str = "numpy",
+               is_symmetric: bool = False) -> np.array:
         """Calculate matrix of fingerprint based similarity scores.
 
         Parameters

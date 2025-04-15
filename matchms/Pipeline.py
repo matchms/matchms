@@ -17,6 +17,7 @@ from matchms.yaml_file_functions import load_workflow_from_yaml_file, ordered_du
 _masking_functions = ["filter_by_range"]
 _score_functions = {key.lower(): f for key, f in mssimilarity.__dict__.items() if callable(f)}
 logger = logging.getLogger("matchms")
+# ruff: noqa: E501
 
 
 def create_workflow(
@@ -130,7 +131,11 @@ class Pipeline:
         )
     """
 
-    def __init__(self, workflow: OrderedDict, progress_bar=True, logging_level: str = "WARNING", logging_file: Optional[str] = None):
+    def __init__(self,
+                 workflow: OrderedDict,
+                 progress_bar=True,
+                 logging_level: str = "WARNING",
+                 logging_file: Optional[str] = None):
         """
         Parameters
         ----------

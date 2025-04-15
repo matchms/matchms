@@ -45,7 +45,8 @@ def get_top_hits(scores: Scores, identifier_key: str = "spectrum_id",
     return get_top_hits_by_references(scores, identifier_key, top_n, score_name, ignore_diagonal)
     
 
-def get_top_hits_by_references(scores: Scores, identifier_key: str, top_n: int, score_name: str, ignore_diagonal: bool)-> Tuple[dict, dict]:
+def get_top_hits_by_references(scores: Scores, identifier_key: str, top_n: int,
+                               score_name: str, ignore_diagonal: bool)-> Tuple[dict, dict]:
     """Get the top hits from the scoring by "references".
     This function differs only slightly from the one by query.
 
@@ -72,7 +73,8 @@ def get_top_hits_by_references(scores: Scores, identifier_key: str, top_n: int, 
     return similars_idx,similars_scores
 
 
-def get_top_hits_by_query(scores: Scores, identifier_key: str, top_n: int, score_name: str, ignore_diagonal: bool)-> Tuple[dict, dict]:
+def get_top_hits_by_query(scores: Scores, identifier_key: str, top_n: int,
+                          score_name: str, ignore_diagonal: bool)-> Tuple[dict, dict]:
     """Get the top hits in the network from the "query" spectra perspective
 
     Args:

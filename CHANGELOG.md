@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Implemented preliminary mzSpecLib export [#757](https://github.com/matchms/matchms/pull/757)
 
+### Changed
+- compound_name is now always the first attribute to be written for each spectrum [#762](https://github.com/matchms/matchms/pull/762)
+- added option to use different peak separators for msp export [#762](https://github.com/matchms/matchms/pull/762)
+
 ## [0.28.2] - 2024-11-11
 
 ### Changed

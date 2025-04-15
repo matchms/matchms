@@ -26,7 +26,10 @@ def test_has_header(tmp_path):
         assert lines[5] == '<AttributeSet Interpretation=all>\n'
 
 def test_has_spectrum(tmp_path):
-    spectrum = SpectrumBuilder().with_mz(np.array([10, 20, 30], dtype=np.float32)).with_intensities(np.array([100, 150, 80], dtype=np.float32)).build()
+    spectrum = SpectrumBuilder() \
+      .with_mz(np.array([10, 20, 30], dtype=np.float32)) \
+      .with_intensities(np.array([100, 150, 80], dtype=np.float32)) \
+      .build()
     outpath = tmp_path / "test.mzspeclib"
     save_as_mzspeclib([spectrum], outpath)
 

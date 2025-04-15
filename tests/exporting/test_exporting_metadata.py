@@ -3,7 +3,13 @@ import json
 import os
 import numpy as np
 import pytest
-from matchms.exporting.metadata_export import _get_metadata_dict, _subset_metadata, export_metadata_as_csv, export_metadata_as_json, get_metadata_as_array
+from matchms.exporting.metadata_export import (
+    _get_metadata_dict,
+    _subset_metadata,
+    export_metadata_as_csv,
+    export_metadata_as_json,
+    get_metadata_as_array,
+)
 from matchms.importing import load_from_msp
 from tests.builder_Spectrum import SpectrumBuilder
 
