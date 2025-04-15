@@ -4,9 +4,9 @@ from matchms.Fragments import Fragments
 from matchms.typing import SpectrumType
 
 
-def remove_peaks_outside_top_k(spectrum_in: SpectrumType, k: int = 6,
-                               mz_window: float = 50, clone: Optional[bool] = True) -> Optional[SpectrumType]:
-
+def remove_peaks_outside_top_k(
+    spectrum_in: SpectrumType, k: int = 6, mz_window: float = 50, clone: Optional[bool] = True
+) -> Optional[SpectrumType]:
     """Remove all peaks which are not within *mz_window* of at least one
        of the *k* highest intensity peaks of the spectrum.
 
@@ -40,8 +40,7 @@ def remove_peaks_outside_top_k(spectrum_in: SpectrumType, k: int = 6,
     indices = [i for i in range(len(mzs)) if i not in top_k]
     keep_idx = top_k.tolist()
     for i in indices:
-
-        compare = abs(mzs[i]-k_ordered_mzs) <= mz_window
+        compare = abs(mzs[i] - k_ordered_mzs) <= mz_window
         if np.any(compare):
             keep_idx.append(i)
 

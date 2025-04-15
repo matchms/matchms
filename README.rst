@@ -329,23 +329,19 @@ To install matchms, do:
   pip install -r dev-requirements.txt
   pip install --editable .
 
-Run the linter with:
+Run the linter and formatter and automatically fix issues with:
 
 .. code-block:: console
 
-  prospector
+  ruff check --fix matchms/YOUR-MODIFIED-FILE.py
+  ruff format matchms/YOUR-MODIFIED-FILE.py
 
-Automatically fix incorrectly sorted imports:
-
-.. code-block:: console
-
-  isort .
-
-Files will be changed in place and need to be committed manually. If you only want to inspect the isort suggestions then simply run:
+You can automate the previous steps by using a pre-commit hook. This will automatically run the linter and formatter on
+the modified files before a commit. If the linter or formatter fixes any issues, you will need to recommit your code.
 
 .. code-block:: console
 
-  isort --check-only --diff .
+  pre-commit install
 
 
 Run tests (including coverage) with:

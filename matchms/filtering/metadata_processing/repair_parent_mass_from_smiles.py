@@ -1,16 +1,16 @@
 import logging
 from typing import Optional
 from matchms import Spectrum
-from matchms.filtering.filter_utils.get_neutral_mass_from_smiles import \
-    get_monoisotopic_neutral_mass
+from matchms.filtering.filter_utils.get_neutral_mass_from_smiles import get_monoisotopic_neutral_mass
 from matchms.typing import SpectrumType
 
 
 logger = logging.getLogger("matchms")
 
 
-def repair_parent_mass_from_smiles(spectrum_in: Spectrum,
-                                        mass_tolerance: float = 0.1, clone: Optional[bool] = True) -> Optional[SpectrumType]:
+def repair_parent_mass_from_smiles(
+    spectrum_in: Spectrum, mass_tolerance: float = 0.1, clone: Optional[bool] = True
+) -> Optional[SpectrumType]:
     """Sets the parent mass to match the smiles mass, if not already close to smiles mass
 
     Parameters:

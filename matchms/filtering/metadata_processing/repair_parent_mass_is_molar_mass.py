@@ -2,14 +2,18 @@ import logging
 from typing import Optional
 from matchms import Spectrum
 from matchms.filtering.filter_utils.get_neutral_mass_from_smiles import (
-    get_molecular_weight_neutral_mass, get_monoisotopic_neutral_mass)
+    get_molecular_weight_neutral_mass,
+    get_monoisotopic_neutral_mass,
+)
 from matchms.typing import SpectrumType
 
 
 logger = logging.getLogger("matchms")
 
 
-def repair_parent_mass_is_molar_mass(spectrum_in: Spectrum, mass_tolerance: float, clone: Optional[bool] = True) -> Optional[SpectrumType]:
+def repair_parent_mass_is_molar_mass(
+    spectrum_in: Spectrum, mass_tolerance: float, clone: Optional[bool] = True
+) -> Optional[SpectrumType]:
     """Changes the parent mass from molar mass into monoistopic mass
 
     Manual entered parent mass is sometimes wrongly added as Molar mass instead of monoisotopic mass
@@ -53,6 +57,7 @@ def repair_parent_mass_is_molar_mass(spectrum_in: Spectrum, mass_tolerance: floa
 
     correct_mass = get_monoisotopic_neutral_mass(smiles)
     spectrum.set("parent_mass", correct_mass)
-    logger.info("Parent mass was molar mass instead of monoisotopic mass corrected from %s to %s",
-                parent_mass, correct_mass)
+    logger.info(
+        "Parent mass was molar mass instead of monoisotopic mass corrected from %s to %s", parent_mass, correct_mass
+    )
     return spectrum

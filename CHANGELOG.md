@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+### Added
+- Implemented preliminary mzSpecLib export [#757](https://github.com/matchms/matchms/pull/757)
 
 ### Changed
 - compound_name is now always the first attribute to be written for each spectrum [#762](https://github.com/matchms/matchms/pull/762)

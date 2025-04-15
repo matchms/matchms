@@ -72,7 +72,7 @@ def load_known_key_conversions(key_conversions_file: str = None) -> dict:
     if key_conversions_file is None:
         key_conversions_file = os.path.join(os.path.dirname(__file__), "data", "known_key_conversions.csv")
     assert os.path.isfile(key_conversions_file), f"Could not find {key_conversions_file}"
-    return _load_key_conversions(key_conversions_file, 'known_synonym', 'matchms_default')
+    return _load_key_conversions(key_conversions_file, "known_synonym", "matchms_default")
 
 
 def load_export_key_conversions(export_key_conversions_file: str = None, export_style: str = None) -> dict:
@@ -95,7 +95,7 @@ def load_export_key_conversions(export_key_conversions_file: str = None, export_
     if export_key_conversions_file is None:
         export_key_conversions_file = os.path.join(os.path.dirname(__file__), "data", "export_key_conversions.csv")
     assert os.path.isfile(export_key_conversions_file), f"Could not find {export_key_conversions_file}"
-    return _load_key_conversions(export_key_conversions_file, 'matchms', export_style)
+    return _load_key_conversions(export_key_conversions_file, "matchms", export_style)
 
 
 @lru_cache(maxsize=4)
@@ -121,7 +121,7 @@ def _load_key_conversions(file: str, source: str, target: str) -> dict:
         A dictionary where the keys are values from the 'source' column and
         the values are from the 'target' column.
     """
-    with open(file, newline='', encoding='utf-8-sig') as csvfile:
+    with open(file, newline="", encoding="utf-8-sig") as csvfile:
         reader = csv.DictReader(csvfile)
         key_conversions = {}
         for row in reader:
@@ -178,6 +178,7 @@ def rename_deprecated_params(param_mapping: dict, version: str = None) -> Callab
     Returns:
         Callable function.
     """
+
     def decorator(func: Callable) -> Callable:
         def wrapper(*args, **kwargs):
             # New args
@@ -194,7 +195,10 @@ def rename_deprecated_params(param_mapping: dict, version: str = None) -> Callab
                 if old_param in kwargs:
                     new_kwargs[new_param] = kwargs.pop(old_param)
 
-                    warning_msg = f"Parameter '{old_param}' is deprecated and will be removed in the future. Use '{new_param}' instead."
+                    warning_msg = (
+                        f"Parameter '{old_param}' is deprecated and will be removed in the future. "
+                        f"Use '{new_param}' instead."
+                    )
                     if version is not None:
                         warning_msg += f" -- Deprecated since version {version}."
 
@@ -215,7 +219,9 @@ def rename_deprecated_params(param_mapping: dict, version: str = None) -> Callab
                     break
 
             return func(*final_args, **new_kwargs)
+
         return wrapper
+
     return decorator
 
 
@@ -233,5 +239,5 @@ def to_camel_case(snake_str: str) -> str:
     -------
     camelCased str
     """
-    components = snake_str.split('_')
-    return components[0] + ''.join(word.capitalize() for word in components[1:])
+    components = snake_str.split("_")
+    return components[0] + "".join(word.capitalize() for word in components[1:])

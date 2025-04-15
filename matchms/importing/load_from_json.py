@@ -10,8 +10,7 @@ from matchms.Spectrum import Spectrum
 logger = logging.getLogger("matchms")
 
 
-def load_from_json(filename: str,
-                   metadata_harmonization: bool = True) -> List[Spectrum]:
+def load_from_json(filename: str, metadata_harmonization: bool = True) -> List[Spectrum]:
     """Load spectrum(s) from json file.
 
     JSON document formatted like the `GNPS Spectra library <https://gnps-external.ucsd.edu/gnpslibrary>`_.
@@ -34,7 +33,7 @@ def load_from_json(filename: str,
         Set to False if metadata harmonization to default keys is not desired.
         The default is True.
     """
-    with open(filename, 'rb') as fin:
+    with open(filename, "rb") as fin:
         spectra = []
         for spectrum_dict in json.load(fin):
             spectrum = as_spectrum(spectrum_dict, metadata_harmonization=metadata_harmonization)
@@ -44,8 +43,7 @@ def load_from_json(filename: str,
     return spectra
 
 
-def as_spectrum(dct: dict,
-                metadata_harmonization: bool = True) -> Union[dict, Spectrum, None]:
+def as_spectrum(dct: dict, metadata_harmonization: bool = True) -> Union[dict, Spectrum, None]:
     """A :py:func:`json.load` object_hook to convert dictionary shaped like
     spectrum into :py:class:`~matchms.Spectrum.Spectrum` object.
 
@@ -58,13 +56,12 @@ def as_spectrum(dct: dict,
     A Spectrum or None when no peaks where found.
     """
     # Recognize Spectrum by peaks_json key
-    if 'peaks_json' in dct:
+    if "peaks_json" in dct:
         return dict2spectrum(dct, metadata_harmonization=metadata_harmonization)
     return None
 
 
-def dict2spectrum(spectrum_dict: dict,
-                  metadata_harmonization: bool) -> Union[Spectrum, None]:
+def dict2spectrum(spectrum_dict: dict, metadata_harmonization: bool) -> Union[Spectrum, None]:
     """Convert dictionary to a :py:class:`~matchms.Spectrum.Spectrum` object.
 
     Parameters
@@ -78,10 +75,7 @@ def dict2spectrum(spectrum_dict: dict,
     A Spectrum or None when no peaks where found.
     """
     not_metadata_fields = ["peaks_json"]
-    parse_fieldnames = {
-        "inchi_aux":"inchiaux",
-        "ion_mode":"ionmode"
-    }
+    parse_fieldnames = {"inchi_aux": "inchiaux", "ion_mode": "ionmode"}
 
     def get_peaks_list(spectrum_dict, fieldname):
         peaks_list = spectrum_dict.get(fieldname)
@@ -98,8 +92,9 @@ def dict2spectrum(spectrum_dict: dict,
         key_parsed = parse_fieldnames.get(key_parsed, key_parsed)
         return key_parsed
 
-    metadata_dict = {parse_fieldname(key): spectrum_dict[key]
-                     for key in spectrum_dict if key not in not_metadata_fields}
+    metadata_dict = {
+        parse_fieldname(key): spectrum_dict[key] for key in spectrum_dict if key not in not_metadata_fields
+    }
     peaks_list = get_peaks_list(spectrum_dict, "peaks_json")
     if len(peaks_list) > 0 and metadata_dict:
         mz = np.array(peaks_list)[:, 0]
@@ -107,17 +102,16 @@ def dict2spectrum(spectrum_dict: dict,
 
         mz, intensities = sort_by_mz(mz=mz, intensities=intensities)
 
-        return Spectrum(mz=mz,
-                        intensities=intensities,
-                        metadata=metadata_dict,
-                        metadata_harmonization=metadata_harmonization)
+        return Spectrum(
+            mz=mz, intensities=intensities, metadata=metadata_dict, metadata_harmonization=metadata_harmonization
+        )
     logger.info("Empty spectrum found (no peaks in 'peaks_json'). Will not be imported.")
     return None
 
 
 def scores_json_decoder(dct):
-    """
-    Object_hook function to convert JSON dictionary with :py:class:`~matchms.Score.Score` object into a python dictionary.
+    """Object_hook function to convert JSON dictionary with :py:class:`~matchms.Score.Score` object into a python
+    dictionary.
     """
     if "__Scores__" not in dct and "__Similarity__" not in dct:
         return dict2spectrum(dct, metadata_harmonization=False)

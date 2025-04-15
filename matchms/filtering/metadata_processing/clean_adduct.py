@@ -1,10 +1,8 @@
 import logging
 import re
 from typing import Optional
-from matchms.filtering.filter_utils.interpret_unknown_adduct import \
-    get_charge_of_adduct
-from matchms.filtering.filter_utils.load_known_adducts import \
-    load_known_adduct_conversions
+from matchms.filtering.filter_utils.interpret_unknown_adduct import get_charge_of_adduct
+from matchms.filtering.filter_utils.load_known_adducts import load_known_adduct_conversions
 from matchms.typing import SpectrumType
 
 
@@ -35,18 +33,20 @@ def clean_adduct(spectrum_in, clone: Optional[bool] = True) -> Optional[Spectrum
 
     spectrum = spectrum_in.clone() if clone else spectrum_in
 
-    cleaned_adduct = _clean_adduct(adduct, spectrum.get('charge'))
+    cleaned_adduct = _clean_adduct(adduct, spectrum.get("charge"))
 
     if spectrum.get("charge"):
         if spectrum.get("charge") != get_charge_of_adduct(cleaned_adduct):
-            logger.warning("The charge in the adduct: %s and the given charge: %s do not match",
-                           adduct, spectrum.get("charge"))
+            logger.warning(
+                "The charge in the adduct: %s and the given charge: %s do not match", adduct, spectrum.get("charge")
+            )
     else:
         # set charge to adduct
         charge_from_adduct = get_charge_of_adduct(cleaned_adduct)
         if charge_from_adduct:
-            logger.info("Unknown charge was derived from adduct: %s, now charge is %s",
-                        cleaned_adduct, charge_from_adduct)
+            logger.info(
+                "Unknown charge was derived from adduct: %s, now charge is %s", cleaned_adduct, charge_from_adduct
+            )
             spectrum.set("charge", charge_from_adduct)
 
     if adduct != cleaned_adduct:
@@ -80,7 +80,8 @@ def _clean_adduct(adduct: str, charge=None) -> str:
 
 
 def _add_missing_brackets_to_adduct(adduct):
-    """Adds missing brackets to an adduct and moves the charge outside. """
+    """Adds missing brackets to an adduct and moves the charge outside."""
+
     def _get_adduct_charge(adduct):
         # Remove parts that can confuse the charge extraction. Because they end with a number and the ] is missing.
         for mol_part in ["CH2", "CH3", "NH3", "NH4", "O2"]:
@@ -101,7 +102,7 @@ def _add_missing_brackets_to_adduct(adduct):
 
     if adduct_charge is None:
         return adduct + "]"
-    return adduct[:-len(adduct_charge)] + "]" + adduct_charge
+    return adduct[: -len(adduct_charge)] + "]" + adduct_charge
 
 
 def _convert_int_charge_to_str(charge):

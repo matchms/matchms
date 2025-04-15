@@ -1,9 +1,7 @@
 from typing import List
 import numpy as np
 from sparsestack import StackedSparseArray
-from matchms.similarity.spectrum_similarity_functions import (
-    number_matching, number_matching_ppm, number_matching_symmetric,
-    number_matching_symmetric_ppm)
+from matchms.similarity.spectrum_similarity_functions import number_matching, number_matching_ppm, number_matching_symmetric, number_matching_symmetric_ppm
 from matchms.typing import SpectrumType
 from .BaseSimilarity import BaseSimilarity
 
@@ -52,6 +50,7 @@ class PrecursorMzMatch(BaseSimilarity):
         Precursor m/z match between 2 and 4 is [np.float64(1.0)]
 
     """
+
     # Set key characteristics as class attributes
     is_commutative = True
     score_datatype = bool
@@ -88,12 +87,10 @@ class PrecursorMzMatch(BaseSimilarity):
             return abs(precursormz_ref - precursormz_query) <= self.tolerance
 
         mean_mz = (precursormz_ref + precursormz_query) / 2
-        score = abs(precursormz_ref - precursormz_query)/mean_mz <= self.tolerance
+        score = abs(precursormz_ref - precursormz_query) / mean_mz <= self.tolerance
         return np.asarray(score, dtype=self.score_datatype)
 
-    def matrix(self, references: List[SpectrumType], queries: List[SpectrumType],
-               array_type: str = "numpy",
-               is_symmetric: bool = False) -> np.ndarray:
+    def matrix(self, references: List[SpectrumType], queries: List[SpectrumType], array_type: str = "numpy", is_symmetric: bool = False) -> np.ndarray:
         """Compare parent masses between all references and queries.
 
         Parameters
@@ -110,6 +107,7 @@ class PrecursorMzMatch(BaseSimilarity):
             comparison). By using the fact that score[i,j] = score[j,i] the calculation will be about
             2x faster.
         """
+
         def collect_precursormz(spectra):
             """Collect precursors."""
             precursors = []
@@ -122,17 +120,13 @@ class PrecursorMzMatch(BaseSimilarity):
         precursors_ref = collect_precursormz(references)
         precursors_query = collect_precursormz(queries)
         if is_symmetric and self.type == "Dalton":
-            rows, cols, scores =  number_matching_symmetric(precursors_ref,
-                                                            self.tolerance)
+            rows, cols, scores = number_matching_symmetric(precursors_ref, self.tolerance)
         elif is_symmetric and self.type == "ppm":
-            rows, cols, scores = number_matching_symmetric_ppm(precursors_ref,
-                                                               self.tolerance)
+            rows, cols, scores = number_matching_symmetric_ppm(precursors_ref, self.tolerance)
         elif self.type == "Dalton":
-            rows, cols, scores = number_matching(precursors_ref, precursors_query,
-                                                 self.tolerance)
+            rows, cols, scores = number_matching(precursors_ref, precursors_query, self.tolerance)
         else:
-            rows, cols, scores = number_matching_ppm(precursors_ref, precursors_query,
-                                                     self.tolerance)
+            rows, cols, scores = number_matching_ppm(precursors_ref, precursors_query, self.tolerance)
         if array_type == "numpy":
             scores_array = np.zeros((len(precursors_ref), len(precursors_query)))
             scores_array[rows, cols] = scores.astype(self.score_datatype)
