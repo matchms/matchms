@@ -73,6 +73,9 @@ def load_from_mzspeclib(filename: str) -> Generator[Spectrum, None, None]:
                 spectrum_attributes = {}
                 while line := file.readline():
                     if ATTRIBUTE_PATTERNS[1].search(line):
+                        lines = [] #TODO
+                        key, val = _parse_composite_attribute(lines)
+                        spectrum_attributes[key] = val
                         continue
                     elif ATTRIBUTE_PATTERNS[0].search(line):
                         key, val = _parse_simple_attribute(line)
