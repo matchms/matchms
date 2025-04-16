@@ -175,8 +175,10 @@ def test_scores_to_dict():
     queries = [spectrum_3]
     scores = calculate_scores(references, queries, CosineGreedy())
     scores_dict = scores.to_dict()
-    expected_dict = [{'id': 'spectrum1', 'precursor_mz': 123.4, 'peaks_json': [[100.0, 0.7], [150.0, 0.2], [200.0, 0.1]]},
-                     {'id': 'spectrum2', 'peaks_json': [[100.0, 0.4], [140.0, 0.2], [190.0, 0.1]]}]
+    expected_dict = [
+        {'id': 'spectrum1', 'precursor_mz': 123.4, 'peaks_json': [[100.0, 0.7], [150.0, 0.2], [200.0, 0.1]]},
+        {'id': 'spectrum2', 'peaks_json': [[100.0, 0.4], [140.0, 0.2], [190.0, 0.1]]}
+    ]
     assert len(scores_dict["references"]) == 2
     assert scores_dict["references"] == expected_dict
 

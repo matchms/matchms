@@ -1,5 +1,7 @@
 import logging
+from typing import Optional
 from matchms.Spectrum import Spectrum
+from matchms.typing import SpectrumType
 from ..filter_utils.load_known_adducts import load_known_adducts
 from .clean_adduct import _clean_adduct
 
@@ -7,7 +9,7 @@ from .clean_adduct import _clean_adduct
 logger = logging.getLogger("matchms")
 
 
-def derive_ionmode(spectrum_in: Spectrum) -> Spectrum:
+def derive_ionmode(spectrum_in: Spectrum, clone: Optional[bool] = True) -> Optional[SpectrumType]:
     """Derive missing ionmode based on adduct.
 
     Some input formates (e.g. MGF files) do not always provide a correct ionmode.
@@ -16,8 +18,10 @@ def derive_ionmode(spectrum_in: Spectrum) -> Spectrum:
 
     Parameters
     ----------
-    spectrum
+    spectrum_in:
         Input spectrum.
+    clone:
+        Optionally clone the Spectrum.
 
     Returns
     -------
@@ -27,7 +31,7 @@ def derive_ionmode(spectrum_in: Spectrum) -> Spectrum:
     if spectrum_in is None:
         return None
 
-    spectrum = spectrum_in.clone()
+    spectrum = spectrum_in.clone() if clone else spectrum_in
 
     ionmode = spectrum.get("ionmode")
     if ionmode in ["positive", "negative"]:
@@ -38,8 +42,11 @@ def derive_ionmode(spectrum_in: Spectrum) -> Spectrum:
 
     if ionmode_from_charge is not None and ionmode_from_adduct is not None:
         if ionmode_from_charge != ionmode_from_adduct:
-            logger.warning("The ionmode based on the charge (%s) does not match the ionmode based on the adduct (%s)",
-                           spectrum.get("charge"), spectrum.get("adduct"))
+            logger.warning(
+                "The ionmode based on the charge (%s) does not match the ionmode based on the adduct (%s)",
+                spectrum.get("charge"),
+                spectrum.get("adduct"),
+            )
             return spectrum
         spectrum.set("ionmode", ionmode_from_charge)
         logger.info("Set ionmode to %s based on the charge and adduct", ionmode_from_charge)
@@ -71,7 +78,6 @@ def _derive_ionmode_from_charge(spectrum):
         return "negative"
     # In this case charge is 0
     return None
-
 
 
 def _derive_ionmode_from_adduct(spectrum):

@@ -1,6 +1,8 @@
 import logging
 import re
+from typing import Optional
 import numpy as np
+from matchms.typing import SpectrumType
 from .make_charge_int import _convert_charge_to_int
 
 
@@ -9,18 +11,30 @@ _accepted_types = (float, str, int)
 _accepted_missing_entries = ["", "N/A", "NA", "n/a"]
 
 
-def interpret_pepmass(spectrum_in):
+def interpret_pepmass(spectrum_in, clone: Optional[bool] = True) -> Optional[SpectrumType]:
     """Reads pepmass field (if present) and adds values to correct field(s).
 
     The field "pepmass" or "PEPMASS" is often used to describe the precursor ion.
     This function will interpret the values as (mz, intensity, charge) tuple. Those
     will be splitted (if present) added to the fields "precursor_mz",
     "precursor_intensity", and "charge".
+
+    Parameters
+    ----------
+    spectrum_in:
+        Input spectrum.
+    clone:
+        Optionally clone the Spectrum.
+
+    Returns
+    -------
+    Spectrum or None
+        Spectrum with added pepmass, or `None` if not present.
     """
     if spectrum_in is None:
         return None
 
-    spectrum = spectrum_in.clone()
+    spectrum = spectrum_in.clone() if clone else spectrum_in
 
     metadata_updated = _interpret_pepmass_metadata(spectrum.metadata)
     spectrum.metadata = metadata_updated
@@ -38,24 +52,28 @@ def _interpret_pepmass_metadata(metadata):
     charge = _convert_charge_to_int(charge)
 
     if mz is not None:
-        if metadata.get("precursor_mz") is not None\
-            and _substantial_difference(metadata.get("precursor_mz"), mz, atol=0.001):
-            logger.warning("Overwriting existing precursor_mz %s with new one: %s",
-                           metadata.get("precursor_mz"), str(mz))
+        if metadata.get("precursor_mz") is not None and _substantial_difference(
+            metadata.get("precursor_mz"), mz, atol=0.001
+        ):
+            logger.warning(
+                "Overwriting existing precursor_mz %s with new one: %s", metadata.get("precursor_mz"), str(mz)
+            )
         metadata["precursor_mz"] = mz
         logger.info("Added precursor_mz entry based on field 'pepmass'.")
 
     if intensity is not None:
         if metadata.get("precursor_intensity") is not None:
-            logger.warning("Overwriting existing precursor_intensity %s with new one: %s",
-                           metadata.get("precursor_intensity"), str(intensity))
+            logger.warning(
+                "Overwriting existing precursor_intensity %s with new one: %s",
+                metadata.get("precursor_intensity"),
+                str(intensity),
+            )
         metadata["precursor_intensity"] = intensity
         logger.info("Added precursor_intensity entry based on field 'pepmass'.")
 
     if charge is not None:
         if metadata.get("charge") is not None:
-            logger.warning("Overwriting existing charge %s with new one: %s",
-                           metadata.get("charge"), str(charge))
+            logger.warning("Overwriting existing charge %s with new one: %s", metadata.get("charge"), str(charge))
         metadata["charge"] = charge
         logger.info("Added charge entry based on field 'pepmass'.")
 
@@ -67,7 +85,7 @@ def _interpret_pepmass_metadata(metadata):
 def _get_mz_intensity_charge(pepmass):
     try:
         if isinstance(pepmass, str):
-            matches = re.findall(r'\(([^)]+)\)', pepmass)
+            matches = re.findall(r"\(([^)]+)\)", pepmass)
             if len(matches) > 1:
                 raise ValueError("Found more than one tuple in pepmass field.")
             if len(matches) == 1:
@@ -76,7 +94,7 @@ def _get_mz_intensity_charge(pepmass):
                 try:
                     pepmass = float(pepmass)
                 except ValueError:
-                    return None, None, None 
+                    return None, None, None
         length = len(pepmass)
         values = [None, None, None]
         for i in range(length):

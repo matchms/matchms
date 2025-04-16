@@ -1,10 +1,8 @@
 import logging
 from typing import Optional, Tuple
 from matchms.constants import PROTON_MASS
-from matchms.filtering.filter_utils.interpret_unknown_adduct import \
-    get_multiplier_and_mass_from_adduct
-from matchms.filtering.filter_utils.load_known_adducts import \
-    load_known_adducts
+from matchms.filtering.filter_utils.interpret_unknown_adduct import get_multiplier_and_mass_from_adduct
+from matchms.filtering.filter_utils.load_known_adducts import load_known_adducts
 from matchms.filtering.metadata_processing.clean_adduct import _clean_adduct
 from matchms.typing import SpectrumType
 
@@ -12,9 +10,9 @@ from matchms.typing import SpectrumType
 logger = logging.getLogger("matchms")
 
 
-def derive_parent_mass_from_precursor_mz(spectrum: SpectrumType,
-                                         estimate_from_adduct: bool = True,
-                                         estimate_from_charge: bool = True) -> Optional[float]:
+def derive_parent_mass_from_precursor_mz(
+    spectrum: SpectrumType, estimate_from_adduct: bool = True, estimate_from_charge: bool = True
+) -> Optional[float]:
     """Use the precursor mz, charge and adduct information to compute the mass of the case compound.
 
     Args:
@@ -34,8 +32,7 @@ def derive_parent_mass_from_precursor_mz(spectrum: SpectrumType,
     charge = _get_charge(spectrum)
 
     if estimate_from_adduct:
-        multiplier, correction_mass = _get_multiplier_and_correction_mass_from_adduct(
-            spectrum.get("adduct"))
+        multiplier, correction_mass = _get_multiplier_and_correction_mass_from_adduct(spectrum.get("adduct"))
         if correction_mass is not None and multiplier is not None:
             parent_mass = (precursor_mz - correction_mass) / multiplier
             return parent_mass
@@ -59,8 +56,7 @@ def derive_precursor_mz_from_parent_mass(spectrum: SpectrumType, estimate_from_a
         logger.warning("Missing parent mass to derive precursor mz.")
         return None
     if estimate_from_adduct:
-        multiplier, correction_mass = _get_multiplier_and_correction_mass_from_adduct(
-            spectrum.get("adduct"))
+        multiplier, correction_mass = _get_multiplier_and_correction_mass_from_adduct(spectrum.get("adduct"))
         if correction_mass is not None and multiplier is not None:
             precursor_mz = parent_mass * multiplier + correction_mass
             return precursor_mz
@@ -116,18 +112,18 @@ def _get_charge(spectrum: SpectrumType):
     charge = spectrum.get("charge")
     if _is_valid_charge(charge):
         return charge
-    if spectrum.get('ionmode') == "positive":
+    if spectrum.get("ionmode") == "positive":
         logger.info(
-            "Missing charge entry, but positive ionmode detected. "
-            "Consider prior run of `correct_charge()` filter.")
+            "Missing charge entry, but positive ionmode detected. Consider prior run of `correct_charge()` filter."
+        )
         return 1
-    if spectrum.get('ionmode') == "negative":
+    if spectrum.get("ionmode") == "negative":
         logger.info(
-            "Missing charge entry, but negative ionmode detected. "
-            "Consider prior run of `correct_charge()` filter.")
+            "Missing charge entry, but negative ionmode detected. Consider prior run of `correct_charge()` filter."
+        )
         return -1
 
     logger.warning(
-        "Missing charge and ionmode entries. "
-        "Consider prior run of `derive_ionmode()` and `correct_charge()` filters.")
+        "Missing charge and ionmode entries. Consider prior run of `derive_ionmode()` and `correct_charge()` filters."
+    )
     return 0

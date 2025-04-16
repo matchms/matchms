@@ -1,27 +1,42 @@
 import logging
 import re
+from typing import Optional
 from matchms.typing import SpectrumType
 
 
 logger = logging.getLogger("matchms")
 
 
-def clean_compound_name(spectrum_in: SpectrumType) -> SpectrumType:
+def clean_compound_name(spectrum_in: SpectrumType, clone: Optional[bool] = True) -> Optional[SpectrumType]:
     """Clean compound name.
 
     A list of frequently seen name additions that do not belong to the compound
     name will be removed.
+
+    Parameters
+    ----------
+    spectrum_in:
+        Matchms Spectrum object.
+    clone:
+        Optionally clone the Spectrum.
+
+    Returns
+    -------
+    Spectrum or None
+        Spectrum with cleaned compound name, or `None` if not present.
     """
     if spectrum_in is None:
         return None
 
-    spectrum = spectrum_in.clone()
+    spectrum = spectrum_in.clone() if clone else spectrum_in
 
     if spectrum.get("compound_name", None) is not None:
         name = spectrum.get("compound_name")
     else:
-        assert spectrum.get("name", None) in [None, ""], ("Found 'name' but not 'compound_name' in metadata",
-                                                          "Apply 'add_compound_name' filter first.")
+        assert spectrum.get("name", None) in [None, ""], (
+            "Found 'name' but not 'compound_name' in metadata",
+            "Apply 'add_compound_name' filter first.",
+        )
         return spectrum
 
     # Clean compound name
@@ -65,9 +80,7 @@ def _remove_parts_by_regular_expression(name: str):
 
 def _remove_known_non_compound_parts(name: str):
     """Remove known non compound-name strings from name."""
-    parts_remove = ["Spectral Match to",
-                    "from NIST14",
-                    "Massbank:"]
+    parts_remove = ["Spectral Match to", "from NIST14", "Massbank:"]
     for part in parts_remove:
         name = name.replace(part, "")
     return name.strip("; ")

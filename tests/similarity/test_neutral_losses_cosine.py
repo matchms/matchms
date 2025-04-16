@@ -6,6 +6,8 @@ from matchms.similarity import NeutralLossesCosine
 from ..builder_Spectrum import SpectrumBuilder
 
 
+# ruff: noqa: E501
+
 def compute_expected_score(spectrum_1, spectrum_2, matches):
     mass1 = spectrum_1.get("precursor_mz")
     mass2 = spectrum_2.get("precursor_mz")

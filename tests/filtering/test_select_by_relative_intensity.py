@@ -12,12 +12,15 @@ def spectrum_in() -> Spectrum:
     return SpectrumBuilder().with_mz(mz).with_intensities(intensities).build()
 
 
-@pytest.mark.parametrize("intensity_from, intensity_to, expected_mz, expected_intensities", [
-    [0, 1, np.array([10, 20, 30, 40], dtype="float"), np.array([1, 10, 100, 1000], dtype="float")],
-    [0.01, 1, np.array([20, 30, 40], dtype="float"), np.array([10, 100, 1000], dtype="float")],
-    [0, 0.99, np.array([10, 20, 30], dtype="float"), np.array([1, 10, 100], dtype="float")],
-    [0.01, 0.99, np.array([20, 30], dtype="float"), np.array([10, 100], dtype="float")]
-])
+@pytest.mark.parametrize(
+    "intensity_from, intensity_to, expected_mz, expected_intensities",
+    [
+        [0, 1, np.array([10, 20, 30, 40], dtype="float"), np.array([1, 10, 100, 1000], dtype="float")],
+        [0.01, 1, np.array([20, 30, 40], dtype="float"), np.array([10, 100, 1000], dtype="float")],
+        [0, 0.99, np.array([10, 20, 30], dtype="float"), np.array([1, 10, 100], dtype="float")],
+        [0.01, 0.99, np.array([20, 30], dtype="float"), np.array([10, 100], dtype="float")],
+    ],
+)
 def test_select_by_relative_intensity(spectrum_in, intensity_from, intensity_to, expected_mz, expected_intensities):
     spectrum = select_by_relative_intensity(spectrum_in, intensity_from=intensity_from, intensity_to=intensity_to)
 

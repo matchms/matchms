@@ -1,15 +1,20 @@
 import logging
+from typing import Optional
 import numpy as np
 from matchms.Fragments import Fragments
 from matchms.Spectrum import Spectrum
+from matchms.typing import SpectrumType
 
 
 logger = logging.getLogger("matchms")
 
 
-def remove_noise_below_frequent_intensities(spectrum: Spectrum,
-                                            min_count_of_frequent_intensities: int = 5,
-                                            noise_level_multiplier: float = 2.0):
+def remove_noise_below_frequent_intensities(
+    spectrum_in: Spectrum,
+    min_count_of_frequent_intensities: int = 5,
+    noise_level_multiplier: float = 2.0,
+    clone: Optional[bool] = True,
+) -> Optional[SpectrumType]:
     """Removes noise if intensities exactly match frequently
 
     When no noise filtering has been applied to a spectrum, many spectra show repeating intensities.
@@ -21,17 +26,25 @@ def remove_noise_below_frequent_intensities(spectrum: Spectrum,
 
     Parameters
     ----------
-    spectrum
+    spectrum_in:
         Input spectrum.
     min_count_of_frequent_intensities:
         Minimum number of repeating intensities.
     noise_level_multiplier:
         From all intensities that repeat more than min_count_of_frequent_intensities the highest is selected.
-    The noise level is set to this intensity * noise_level_multiplier.
+        The noise level is set to this intensity * noise_level_multiplier.
+    clone:
+        Optionally clone the Spectrum.
+
+    Returns
+    -------
+    Spectrum or None
+        Spectrum with removed intensities, or `None` if not present.
     """
-    if spectrum is None:
+    if spectrum_in is None:
         return None
-    spectrum = spectrum.clone()
+
+    spectrum = spectrum_in.clone() if clone else spectrum_in
 
     highest_frequent_peak = _select_highest_frequent_peak(spectrum.intensities, min_count_of_frequent_intensities)
     if highest_frequent_peak != -1:
@@ -43,8 +56,7 @@ def remove_noise_below_frequent_intensities(spectrum: Spectrum,
     return spectrum
 
 
-def _select_highest_frequent_peak(intensities,
-                                  min_count_of_frequent_intensities=5):
+def _select_highest_frequent_peak(intensities, min_count_of_frequent_intensities=5):
     unique_values, counts = np.unique(intensities, return_counts=True)
     mask = counts >= min_count_of_frequent_intensities
     filtered_values = unique_values[mask]

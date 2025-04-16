@@ -1,13 +1,16 @@
 import logging
+from typing import Optional
 from matchms import Spectrum
+from matchms.typing import SpectrumType
 from ..filter_utils.load_known_adducts import load_known_adducts
 
 
 logger = logging.getLogger("matchms")
 
 
-def repair_adduct_based_on_parent_mass(spectrum_in: Spectrum,
-                                       mass_tolerance: float):
+def repair_adduct_based_on_parent_mass(
+    spectrum_in: Spectrum, mass_tolerance: float, clone: Optional[bool] = True
+) -> Optional[SpectrumType]:
     """
     Corrects the adduct of a spectrum based on its parent_mass representation and the precursor m/z.
 
@@ -18,21 +21,30 @@ def repair_adduct_based_on_parent_mass(spectrum_in: Spectrum,
 
     mass_tolerance : float
         Maximum allowed mass difference between the parent mass and the parent mass based on the adduct.
+
+    clone:
+        Optionally clone the Spectrum.
+
+    Returns
+    -------
+    Spectrum or None
+        Spectrum with repaired parent adduct, or `None` if not present.
     """
     if spectrum_in is None:
         return None
-    changed_spectrum = spectrum_in.clone()
+    changed_spectrum = spectrum_in.clone() if clone else spectrum_in
 
-    new_adduct = _get_matching_adduct(precursor_mz=spectrum_in.get("precursor_mz"),
-                                      parent_mass=spectrum_in.get("parent_mass"),
-                                      ion_mode=spectrum_in.get("ionmode"),
-                                      mass_tolerance=mass_tolerance)
+    new_adduct = _get_matching_adduct(
+        precursor_mz=spectrum_in.get("precursor_mz"),
+        parent_mass=spectrum_in.get("parent_mass"),
+        ion_mode=spectrum_in.get("ionmode"),
+        mass_tolerance=mass_tolerance,
+    )
     if new_adduct is None:
         return spectrum_in
 
     changed_spectrum.set("adduct", new_adduct)
-    logger.info("Adduct was set from %s to %s",
-                spectrum_in.get('adduct'), new_adduct)
+    logger.info("Adduct was set from %s to %s", spectrum_in.get("adduct"), new_adduct)
     return changed_spectrum
 
 
@@ -43,8 +55,7 @@ def _get_matching_adduct(precursor_mz, parent_mass, ion_mode, mass_tolerance):
 
     if ion_mode not in ("positive", "negative"):
         if ion_mode is not None:
-            logger.warning("Ionmode: %s not positive, negative or None, first run derive_ionmode",
-                           ion_mode)
+            logger.warning("Ionmode: %s not positive, negative or None, first run derive_ionmode", ion_mode)
         return None
 
     if parent_mass is None:

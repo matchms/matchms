@@ -109,7 +109,8 @@ class Spectrum:
             return f"Spectrum(precursor m/z={precursor_mz_str}, no fragments)"
         min_mz = min(self.peaks.mz)
         max_mz = max(self.peaks.mz)
-        return f"Spectrum(precursor m/z={precursor_mz_str}, {num_peaks} fragments between {min_mz:.1f} and {max_mz:.1f})"
+        rep = f"Spectrum(precursor m/z={precursor_mz_str}, {num_peaks} fragments between {min_mz:.1f} and {max_mz:.1f})"
+        return rep
 
     def __str__(self):
         return self.__repr__()

@@ -204,3 +204,10 @@ record title,title
 title,title
 ac$mass_spectrometry:trap_drive,trap_drive_value
 ch$link:united_nations,united_nations_number
+synon_metb_inchi,inchi
+synon_metb_inchikey,inchikey
+synon_ri,retention_index
+synon_metb_class,compound_class
+synon_metb_kegg,kegg
+synon_metb_n,synonyms
+synon_metb_cas,cas

@@ -1,17 +1,18 @@
 import numpy as np
 import pytest
-from matchms.filtering.metadata_processing.require_precursor_mz import \
-    require_precursor_mz
+from matchms.filtering.metadata_processing.require_precursor_mz import require_precursor_mz
 from ..builder_Spectrum import SpectrumBuilder
 
 
-@pytest.mark.parametrize("metadata, expected", [
-    [{"precursor_mz": 60.}, SpectrumBuilder().with_metadata(
-        {"precursor_mz": 60}).build()],
-    [{"precursor_mz": 0.0}, None],
-    [{"precursor_mz": -3.5}, None],
-    [{}, None]
-])
+@pytest.mark.parametrize(
+    "metadata, expected",
+    [
+        [{"precursor_mz": 60.0}, SpectrumBuilder().with_metadata({"precursor_mz": 60}).build()],
+        [{"precursor_mz": 0.0}, None],
+        [{"precursor_mz": -3.5}, None],
+        [{}, None],
+    ],
+)
 def test_require_precursor_mz(metadata, expected):
     spectrum_in = SpectrumBuilder().with_metadata(metadata).build()
 
@@ -22,13 +23,12 @@ def test_require_precursor_mz(metadata, expected):
 
 def test_if_spectrum_is_cloned():
     """Test if filter is correctly cloning the input spectrum."""
-    spectrum_in = SpectrumBuilder().with_metadata({"precursor_mz": 100.}).build()
+    spectrum_in = SpectrumBuilder().with_metadata({"precursor_mz": 100.0}).build()
 
     spectrum = require_precursor_mz(spectrum_in)
     spectrum.set("testfield", "test")
 
-    assert not spectrum_in.get("testfield"), \
-        "Expected input spectrum to remain unchanged."
+    assert not spectrum_in.get("testfield"), "Expected input spectrum to remain unchanged."
 
 
 def test_require_precursor_mz_with_input_none():

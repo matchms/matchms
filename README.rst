@@ -320,26 +320,28 @@ To install matchms, do:
   cd matchms
   conda create --name matchms-dev python=3.11
   conda activate matchms-dev
-  conda install poetry=1.8
-  poetry install
 
-Run the linter with:
+  # If you use poetry
+  python -m pip install --upgrade pip poetry
+  poetry install --with dev
 
-.. code-block:: console
+  # If you use pip
+  pip install -r dev-requirements.txt
+  pip install --editable .
 
-  prospector
-
-Automatically fix incorrectly sorted imports:
-
-.. code-block:: console
-
-  isort .
-
-Files will be changed in place and need to be committed manually. If you only want to inspect the isort suggestions then simply run:
+Run the linter and formatter and automatically fix issues with:
 
 .. code-block:: console
 
-  isort --check-only --diff .
+  ruff check --fix matchms/YOUR-MODIFIED-FILE.py
+  ruff format matchms/YOUR-MODIFIED-FILE.py
+
+You can automate the previous steps by using a pre-commit hook. This will automatically run the linter and formatter on
+the modified files before a commit. If the linter or formatter fixes any issues, you will need to recommit your code.
+
+.. code-block:: console
+
+  pre-commit install
 
 
 Run tests (including coverage) with:

@@ -8,8 +8,7 @@ from ..Spectrum import Spectrum
 logger = logging.getLogger("matchms")
 
 
-def load_from_usi(usi: str, server: str = "https://metabolomics-usi.gnps2.org",
-                  metadata_harmonization: bool = True):
+def load_from_usi(usi: str, server: str = "https://metabolomics-usi.gnps2.org", metadata_harmonization: bool = True):
     """Load spectrum from metabolomics USI.
 
     USI returns JSON data with keys "peaks", "n_peaks" and "precuror_mz"
@@ -19,7 +18,7 @@ def load_from_usi(usi: str, server: str = "https://metabolomics-usi.gnps2.org",
         from matchms.importing import load_from_usi
 
         spectrum = load_from_usi("mzspec:MASSBANK::accession:SM858102")
-        print(f"Found spectrum with precursor m/z of {spectrum.get("precursor_mz"):.2f}.")
+        print(f"Found spectrum with precursor m/z of {spectrum.get('precursor_mz'):.2f}.")
 
     Parameters
     ----------
@@ -59,8 +58,7 @@ def load_from_usi(usi: str, server: str = "https://metabolomics-usi.gnps2.org",
 
         metadata["precursor_mz"] = spectral_data.get("precursor_mz", None)
 
-        s = Spectrum(mz_array, intensity_array, metadata,
-                     metadata_harmonization=metadata_harmonization)
+        s = Spectrum(mz_array, intensity_array, metadata, metadata_harmonization=metadata_harmonization)
 
         return s
 

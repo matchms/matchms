@@ -4,19 +4,17 @@ from ..builder_Spectrum import SpectrumBuilder
 
 
 def test_derive_inchi_from_smiles():
-    """Test if conversion to inchi works when only smiles is given.
-    """
+    """Test if conversion to inchi works when only smiles is given."""
     pytest.importorskip("rdkit")
     spectrum_in = SpectrumBuilder().with_metadata({"smiles": "C1CCCCC1"}).build()
 
     spectrum = derive_inchi_from_smiles(spectrum_in)
-    inchi = spectrum.get("inchi").replace('"', '')
-    assert inchi == 'InChI=1S/C6H12/c1-2-4-6-5-3-1/h1-6H2', "Expected different InChI"
+    inchi = spectrum.get("inchi").replace('"', "")
+    assert inchi == "InChI=1S/C6H12/c1-2-4-6-5-3-1/h1-6H2", "Expected different InChI"
 
 
 def test_derive_inchi_from_defect_smiles():
-    """Test if conversion to inchi works when only smiles is given.
-    """
+    """Test if conversion to inchi works when only smiles is given."""
     pytest.importorskip("rdkit")
     spectrum_in = SpectrumBuilder().with_metadata({"smiles": "CX1CCCCC1"}).build()
 

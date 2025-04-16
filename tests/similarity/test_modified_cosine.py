@@ -6,6 +6,7 @@ from matchms.similarity import ModifiedCosine
 from ..builder_Spectrum import SpectrumBuilder
 
 
+# ruff: noqa: E501
 def compute_expected_score(spectrum_1, spectrum_2, matches):
     spec1 = spectrum_1.peaks.intensities
     spec2 = spectrum_2.peaks.intensities
@@ -139,5 +140,5 @@ def test_modified_cosine_precursor_mz_as_string(caplog):
 
     assert score["score"] == pytest.approx(0.0, 1e-5), "Expected different modified cosine score."
     assert score["matches"] == 0, "Expected 0 matching peaks."
-    expected_msg = "Precursor_mz must be of type int or float. Apply 'add_precursor_mz' filter first."
+    expected_msg = "Precursor_mz must be int or float. Apply 'add_precursor_mz' filter first."
     assert expected_msg in caplog.text, "Expected different log message"

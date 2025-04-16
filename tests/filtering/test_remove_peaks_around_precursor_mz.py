@@ -8,9 +8,8 @@ from ..builder_Spectrum import SpectrumBuilder
 def spectrum_in():
     mz = np.array([10, 20, 30, 40], dtype="float")
     intensities = np.array([0, 1, 10, 100], dtype="float")
-    metadata = {"precursor_mz": 60.}
-    spectrum_in = SpectrumBuilder().with_mz(mz).with_intensities(
-        intensities).with_metadata(metadata).build()
+    metadata = {"precursor_mz": 60.0}
+    spectrum_in = SpectrumBuilder().with_mz(mz).with_intensities(intensities).with_metadata(metadata).build()
     return spectrum_in
 
 
@@ -26,12 +25,12 @@ def test_remove_peaks_around_precursor_mz_tolerance_20(spectrum_in):
     spectrum = remove_peaks_around_precursor_mz(spectrum_in, mz_tolerance=20)
 
     assert len(spectrum.peaks) == 3, "Expected 3 peaks to remain."
-    assert spectrum.peaks.mz.tolist() == [10., 20., 30.], "Expected different peaks to remain."
+    assert spectrum.peaks.mz.tolist() == [10.0, 20.0, 30.0], "Expected different peaks to remain."
 
 
 def test_if_spectrum_is_cloned():
     """Test if filter is correctly cloning the input spectrum."""
-    spectrum_in = SpectrumBuilder().with_metadata({"precursor_mz": 1.}).build()
+    spectrum_in = SpectrumBuilder().with_metadata({"precursor_mz": 1.0}).build()
 
     spectrum = remove_peaks_around_precursor_mz(spectrum_in)
     spectrum.set("testfield", "test")

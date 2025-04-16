@@ -6,8 +6,9 @@ from matchms.importing.parsing_utils import parse_spectrum_dict
 from matchms.Spectrum import Spectrum
 
 
-def load_from_mgf(filename: Union[str, Path, TextIO],
-                  metadata_harmonization: bool = True) -> Generator[Spectrum, None, None]:
+def load_from_mgf(
+    filename: Union[str, Path, TextIO], metadata_harmonization: bool = True
+) -> Generator[Spectrum, None, None]:
     """Load spectrum(s) from mgf file.
 
     This function will create ~matchms.Spectrum for every spectrum in the given
@@ -23,7 +24,7 @@ def load_from_mgf(filename: Union[str, Path, TextIO],
         spectra_from_path = list(load_from_mgf(file_mgf))
 
         # Or you can read the file in your application
-        with open(file_mgf, 'r') as spectra_file:
+        with open(file_mgf, "r") as spectra_file:
             spectra_from_file = list(load_from_mgf(spectra_file))
 
     Parameters

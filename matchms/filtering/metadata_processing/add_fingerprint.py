@@ -10,8 +10,12 @@ from matchms.typing import SpectrumType
 logger = logging.getLogger("matchms")
 
 
-def add_fingerprint(spectrum_in: Optional[SpectrumType], fingerprint_type: str = "daylight",
-                    nbits: int = 2048) -> Optional[SpectrumType]:
+def add_fingerprint(
+    spectrum_in: Optional[SpectrumType],
+    fingerprint_type: str = "daylight",
+    nbits: int = 2048,
+    clone: Optional[bool] = True,
+) -> Optional[SpectrumType]:
     """Add molecular finterprint to spectrum.
 
     If smiles or inchi present in metadata, derive a molecular finterprint and
@@ -26,11 +30,18 @@ def add_fingerprint(spectrum_in: Optional[SpectrumType], fingerprint_type: str =
         are "daylight", "morgan1", "morgan2", "morgan3". Default is "daylight".
     nbits:
         Dimension or number of bits of generated fingerprint. Default is 2048.
+    clone:
+        Optionally clone the Spectrum.
+
+    Returns
+    -------
+    Spectrum or None
+        Spectrum with added fingerprint derived from SMILES or INCHI, or `None` if not present.
     """
     if spectrum_in is None:
         return None
 
-    spectrum = spectrum_in.clone()
+    spectrum = spectrum_in.clone() if clone else spectrum_in
 
     # First try to get fingerprint from smiles
     if spectrum.get("smiles", None):

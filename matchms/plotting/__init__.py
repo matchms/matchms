@@ -55,6 +55,7 @@ Finally, it is also possible to plot many spectra at once using `plot_spectra_ar
 .. code-block:: python
 
     from matchms.plotting import plot_spectra_array
+
     plot_spectra_array(spectra[:4])
 
 .. figure:: ../_static/spectra-array-plot-example.png
@@ -64,8 +65,8 @@ Finally, it is also possible to plot many spectra at once using `plot_spectra_ar
    Compare many spectra visually using an array plot.
 
 """
-from .spectrum_plots import (plot_spectra_array, plot_spectra_mirror,
-                             plot_spectrum)
+
+from .spectrum_plots import plot_spectra_array, plot_spectra_mirror, plot_spectrum
 
 
 __all__ = [

@@ -1,5 +1,5 @@
-"""Helper functions for parsing metadata.
-"""
+"""Helper functions for parsing metadata."""
+
 import ast
 from typing import Any, Dict, Union
 import numpy as np
@@ -91,8 +91,8 @@ def parse_mzml_mzxml_metadata(spectrum_dict: dict) -> dict:
         "title": title,
         "precursor_mz": precursor_mz,
         "scan_start_time": scan_time,
-        "retention_time": retention_time
-        }
+        "retention_time": retention_time,
+    }
 
 
 def sort_by_mz(mz, intensities):
@@ -104,9 +104,7 @@ def sort_by_mz(mz, intensities):
     return mz, intensities
 
 
-def parse_spectrum_dict(spectrum: Dict,
-                        metadata_harmonization,
-                        spectrum_type = "pyteomics") -> Spectrum:
+def parse_spectrum_dict(spectrum: Dict, metadata_harmonization, spectrum_type="pyteomics") -> Spectrum:
     """Parse a spectrum dict (as read from a msp file for instance) to a matchms Spectrum."""
     metadata = spectrum.get("params", None)
     mz = spectrum["m/z array"]
@@ -122,9 +120,4 @@ def parse_spectrum_dict(spectrum: Dict,
 
     mz, intensities = sort_by_mz(mz=mz, intensities=intensities)
 
-    return Spectrum(
-        mz=mz,
-        intensities=intensities,
-        metadata=metadata,
-        metadata_harmonization=metadata_harmonization
-        )
+    return Spectrum(mz=mz, intensities=intensities, metadata=metadata, metadata_harmonization=metadata_harmonization)

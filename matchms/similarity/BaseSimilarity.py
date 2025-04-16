@@ -90,7 +90,7 @@ class BaseSimilarity:
         idx_row = np.array(idx_row, dtype=np.int_)
         idx_col = np.array(idx_col, dtype=np.int_)
         scores_data = np.array(scores, dtype=self.score_datatype)
-        # TODO: make StackedSpareseArray the default and add fixed function to output different formats (with code below)
+        # TODO: make StackedSparseArray the default and add fixed function to output different formats (with code below)
         if array_type == "numpy":
             scores_array = np.zeros(shape=(n_rows, n_cols), dtype=self.score_datatype)
             scores_array[idx_row, idx_col] = scores_data.reshape(-1)
