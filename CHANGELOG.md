@@ -8,10 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 ### Added
 - Implemented preliminary mzSpecLib export [#757](https://github.com/matchms/matchms/pull/757)
+- added BinnedEmbeddingSimilarity and BaseEmbeddingSimilarity Classes
+
 
 ### Changed
 - compound_name is now always the first attribute to be written for each spectrum [#762](https://github.com/matchms/matchms/pull/762)
 - added option to use different peak separators for msp export [#762](https://github.com/matchms/matchms/pull/762)
+- cloning of Spectra is now optional in filtering and disabled in SpectrumProcessor. 
+  Enable cloning for the use of ProcessingReport with `create_report = True` [#754](https://github.com/matchms/matchms/issues/754)
+- omit prospector, isort, black in favor of ruff
 
 ## [0.28.2] - 2024-11-11
 
