@@ -1,0 +1,171 @@
+import pandas as pd
+import PyPDF2
+
+def extract_data_from_pdf(pdf_path):
+    """
+    Extracts data from the PDF and organizes it into a dictionary.
+
+    Args:
+        pdf_path (str): The path to the PDF file.
+
+    Returns:
+        dict: A dictionary containing the extracted data.
+    """
+
+    data = {
+        "Page1": {},
+        "Part1_Goals": {},
+        "Part2_Competencies": {},
+        "Page5": {}
+    }
+
+    try:
+        with open(pdf_path, "rb") as pdf_file:
+            reader = PyPDF2.PdfReader(pdf_file)
+            number_of_pages = len(reader.pages)
+
+            for page_number in range(number_of_pages):
+                page = reader.pages[page_number]
+                text = page.extract_text()
+
+                if text:
+                    lines = text.split("\n")
+                    if page_number == 0:
+                      data["Page1"] = extract_page1_data(lines)
+                    elif page_number == 1:
+                      data["Part1_Goals"] = extract_part1_goals_data(lines)
+                    elif page_number == 3:
+                      data["Part2_Competencies"] = extract_part2_competencies_data(lines)
+                    elif page_number == 4:
+                      data["Page5"] = extract_page5_data(lines)
+                
+                
+    except FileNotFoundError:
+        print(f"Error: File not found at path: {pdf_path}")
+        return None
+    except Exception as e:
+        print(f"An error occurred during PDF processing: {e}")
+        return None
+
+    return data
+
+def extract_page1_data(lines):
+  page1_data = {}
+  for i in range(len(lines)):
+    if ":" in lines[i]:
+      key, value = lines[i].split(":", 1)
+      page1_data[key.strip()] = value.strip()
+    elif "VIBONA" in lines[i]:
+      page1_data["VIBONA"] = lines[i]
+  return page1_data
+
+def extract_part1_goals_data(lines):
+    part1_data = {"Evaluation Result": [], "Evaluation Result Value": [], "Actual output": [],
+                  "Targeted output": [], "Measure Type": [], "Unit of Measure Type": [],
+                  "Measurement Criteria": [], "The Goal": [], "#": []}
+    
+    # Find the starting index of the table headers
+    start_index = -1
+    for i, line in enumerate(lines):
+      if "Evaluation Result" in line:
+        start_index = i
+        break
+    
+    if start_index != -1:
+      for i in range(start_index + 1, len(lines)):
+        if lines[i].strip():
+          values = lines[i].split()
+          if len(values) >= 9:  # Ensure we have enough columns
+            part1_data["Evaluation Result"].append(float(values[0]) if is_float(values[0]) else None)
+            part1_data["Evaluation Result Value"].append(float(values[1]) if is_float(values[1]) else None)
+            part1_data["Actual output"].append(float(values[2]) if is_float(values[2]) else None)
+            part1_data["Targeted output"].append(float(values[3]) if is_float(values[3]) else None)
+            part1_data["Measure Type"].append(values[4])
+            part1_data["Unit of Measure Type"].append(values[5])
+            part1_data["Measurement Criteria"].append(" ".join(values[6:-1]))
+            part1_data["#"].append(int(values[-1]) if is_int(values[-1]) else None)
+          elif "Total of Evaluation" in lines[i]:
+            part1_data["The Goal"].append(lines[i])
+          elif is_float(lines[i].replace(".","")):
+            part1_data["Evaluation Result"].append(float(lines[i]))
+    return part1_data
+
+def extract_part2_competencies_data(lines):
+    part2_data = {"Evaluation Results": [], "Evaluation Results value": [],
+                  "the output level": [], "required level": [],
+                  "Behavioral Description of Competencies": [],
+                  "Percentage Weight": [], "Competencies": [], "#": []}
+
+    start_index = -1
+    for i, line in enumerate(lines):
+      if "Evaluation Results" in line:
+        start_index = i
+        break
+    
+    if start_index != -1:
+      for i in range(start_index + 1, len(lines)):
+        if lines[i].strip():
+          values = lines[i].split()
+          if len(values) >= 5:
+            part2_data["Evaluation Results"].append(values[0])
+            part2_data["Evaluation Results value"].append(float(values[1]) if is_float(values[1]) else None)
+            part2_data["the output level"].append(float(values[2]) if is_float(values[2]) else None)
+            part2_data["required level"].append(float(values[3]) if is_float(values[3]) else None)
+            part2_data["Behavioral Description of Competencies"].append(" ".join(values[4:]))
+          elif len(values) == 1 and is_float(values[0]):
+            part2_data["#"].append(float(values[0]))
+          elif "Total Evaluation of Competencies" in lines[i]:
+            part2_data["Behavioral Description of Competencies"].append(lines[i])
+          elif "%" in lines[i]:
+            part2_data["Percentage Weight"].append(lines[i])
+          elif not is_float(lines[i]) and not "%" in lines[i] and not "Total Evaluation of Competencies" in lines[i]:
+            part2_data["Competencies"].append(lines[i])
+    return part2_data
+
+def extract_page5_data(lines):
+    page5_data = {}
+    for i in range(len(lines)):
+      if ":" in lines[i]:
+        key, value = lines[i].split(":", 1)
+        page5_data[key.strip()] = value.strip()
+    return page5_data
+
+def is_float(value):
+    try:
+        float(value)
+        return True
+    except ValueError:
+        return False
+
+def is_int(value):
+    try:
+        int(value)
+        return True
+    except ValueError:
+        return False
+
+def create_excel_file(data, output_filename="employee_performance_report.xlsx"):
+    """
+    Creates an Excel file from the extracted data.
+
+    Args:
+        data (dict): The dictionary containing the extracted data.
+        output_filename (str, optional): The name of the output Excel file.
+                                        Defaults to "employee_performance_report.xlsx".
+    """
+
+    with pd.ExcelWriter(output_filename) as writer:
+        for sheet_name, sheet_data in data.items():
+            if sheet_data:
+              pd.DataFrame(sheet_data).to_excel(writer, sheet_name=sheet_name, index=False)
+            else:
+              pd.DataFrame({}).to_excel(writer, sheet_name=sheet_name, index=False) # Create empty sheet
+
+    print(f"Excel file '{output_filename}' created successfully.")
+
+if __name__ == "__main__":
+    pdf_file_path = "HCM_Employee_Performance_Repor_141124.pdf"  # Replace with your PDF file path
+    extracted_data = extract_data_from_pdf(pdf_file_path)
+
+    if extracted_data:
+        create_excel_file(extracted_data)
