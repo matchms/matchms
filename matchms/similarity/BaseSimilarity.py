@@ -38,7 +38,7 @@ class BaseSimilarity:
             - For cases where you expect to filter out more than 90% of the computed scores, consider using
               the sparse array methods (see `sparse_array()`).
         """
-        self.score_filters = score_filters
+        self.score_filters = score_filters if score_filters is not None else ()
 
     @abstractmethod
     def pair(self, reference: SpectrumType, query: SpectrumType) -> np.ndarray:
@@ -118,11 +118,11 @@ class BaseSimilarity:
         is_symmetric:
             If True, assumes that the matrix is symmetric. Defaults to False.
         """
-        if self.score_filters is None and mask_indices:
+        if len(self.score_filters) == 0 and mask_indices:
             return self._sparse_array_with_mask_without_filter(references, queries, mask_indices=mask_indices)
-        if self.score_filters and mask_indices is None:
+        if len(self.score_filters) != 0 and mask_indices is None:
             return self._sparse_array_with_filter_without_mask(references, queries, is_symmetric=is_symmetric)
-        if self.score_filters and mask_indices:
+        if len(self.score_filters) != 0 and mask_indices:
             return self._sparse_array_with_filter(references, queries, mask_indices)
 
         # TODO: replace with matrix computation followed by a conversion to COO array.
@@ -143,9 +143,8 @@ class BaseSimilarity:
         """
         sim_matrix = self._matrix_without_mask_without_filter(references, queries, is_symmetric=is_symmetric)
 
-        if self.score_filters:
-            for score_filter in self.score_filters:
-                sim_matrix = score_filter.filter_matrix(sim_matrix)
+        for score_filter in self.score_filters:
+            sim_matrix = score_filter.filter_matrix(sim_matrix)
 
         return sim_matrix
 
@@ -209,9 +208,6 @@ class BaseSimilarity:
         is_symmetric:
             If True, mirrors the computed score to the symmetric position. Defaults to False.
         """
-        if self.score_filters is None:
-            raise ValueError("Score filters must be set to use this method.")
-
         sim_matrix = np.zeros((len(references), len(queries)), dtype=self.score_datatype)
         for i_row, i_col in tqdm(mask_indices, desc="Calculating sparse similarities"):
             score = self.pair(references[i_row], queries[i_col])
@@ -250,9 +246,6 @@ class BaseSimilarity:
 
         if is_symmetric and n_rows != n_cols:
             raise ValueError(f"Found unequal number of spectra {n_rows} and {n_cols} while `is_symmetric` is True.")
-
-        if self.score_filters is None:
-            raise ValueError("Score filters must be set to use this method.")
 
         idx_row = []
         idx_col = []
@@ -297,7 +290,7 @@ class BaseSimilarity:
         mask_indices
             The row column index pairs for which a score should be calculated.
         """
-        if self.score_filters:
+        if len(self.score_filters) > 0:
             raise ValueError("Don't run _sparse_array_with_mask_without_filter if score_filters are set. "
                              "Instead run _sparse_array_with_filter")
         scores = np.zeros((len(mask_indices)), dtype=self.score_datatype)
@@ -328,9 +321,6 @@ class BaseSimilarity:
         mask_indices
             Specifies the (row, column) pairs for which to compute scores.
         """
-        if self.score_filters is None:
-            raise ValueError("Score filters must be set to use this method.")
-
         scores = []
         idx_row = []
         idx_col = []
