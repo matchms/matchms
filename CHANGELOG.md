@@ -5,18 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## [0.29.0] - 2025-05-06
 ### Added
 - Implemented preliminary mzSpecLib export [#757](https://github.com/matchms/matchms/pull/757)
-- added BinnedEmbeddingSimilarity and BaseEmbeddingSimilarity Classes
-
+- added BinnedEmbeddingSimilarity and BaseEmbeddingSimilarity Classes [#749](https://github.com/matchms/matchms/pull/749)
+- added Fingerprints Class to compute and store inchikey-fingerprint mapping for a list of spectra [#717](https://github.com/matchms/matchms/pull/717)
+- some reference spectra were added [#781](https://github.com/matchms/matchms/pull/781)
 
 ### Changed
-- compound_name is now always the first attribute to be written for each spectrum [#762](https://github.com/matchms/matchms/pull/762)
+- `compound_name` is now always the first attribute to be written for each spectrum [#762](https://github.com/matchms/matchms/pull/762)
 - added option to use different peak separators for msp export [#762](https://github.com/matchms/matchms/pull/762)
-- cloning of Spectra is now optional in filtering and disabled in SpectrumProcessor. 
+- filtering: cloning of Spectra is now optional in filtering and disabled in SpectrumProcessor. 
   Enable cloning for the use of ProcessingReport with `create_report = True` [#754](https://github.com/matchms/matchms/issues/754)
-- omit prospector, isort, black in favor of ruff
+- importing now supports `pathlib.Path` [#738](https://github.com/matchms/matchms/pull/738)
+- exporting: empty spectra are saved as empty file instead of not saving at all [#722](https://github.com/matchms/matchms/pull/722)
+- exporting: `save_as_mgf` now supports write and append mode [#741](https://github.com/matchms/matchms/pull/741)
+- importing: `load_mgf` supports StringIO [#745](https://github.com/matchms/matchms/pull/745)
+- importing: fixed bug `load_from_usi` API call [#759](https://github.com/matchms/matchms/pull/759)
+- filtering: `normalize_intensities` will now set intensities to `0` instead of `None` when peak intensities are 0 [#750](https://github.com/matchms/matchms/pull/750)
+- Support GOLM style MSP files [#763](https://github.com/matchms/matchms/pull/763)
+- omit prospector, isort, black in favor of ruff [#790](https://github.com/matchms/matchms/pull/790)
 
 ## [0.28.2] - 2024-11-11
 
@@ -727,7 +735,11 @@ Contains three plot types: `plot_spectrum()` or `spectrum.plot()`, `plot_spectra
 - This is the initial version of Spec2Vec from https://github.com/iomega/Spec2Vec
 - (later splitted into matchms + spec2vec)
 
-[Unreleased]: https://github.com/matchms/matchms/compare/0.27.0...HEAD
+[Unreleased]: https://github.com/matchms/matchms/compare/0.29.0...HEAD
+[0.29.0]: https://github.com/matchms/matchms/compare/0.28.2...0.29.0
+[0.28.2]: https://github.com/matchms/matchms/compare/0.28.1...0.28.2
+[0.28.1]: https://github.com/matchms/matchms/compare/0.28.0...0.28.1
+[0.28.0]: https://github.com/matchms/matchms/compare/0.27.0...0.28.0
 [0.27.0]: https://github.com/matchms/matchms/compare/0.26.4...0.27.0
 [0.26.4]: https://github.com/matchms/matchms/compare/0.26.3...0.26.4
 [0.26.3]: https://github.com/matchms/matchms/compare/0.26.2...0.26.3
