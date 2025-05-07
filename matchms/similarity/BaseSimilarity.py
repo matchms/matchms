@@ -194,7 +194,7 @@ class BaseSimilarity:
         """
         Compute a dense similarity matrix using a provided mask.
 
-        Only the (row, column) pairs specified in mask_indices are computed.
+        Only the (row, column) pairs specified in mask_indices are computed. All pairs not in mask_indices are set to 0. 
         Score filters are applied to each computed score.
 
         Parameters
