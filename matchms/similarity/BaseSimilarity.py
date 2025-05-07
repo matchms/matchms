@@ -100,7 +100,7 @@ class BaseSimilarity:
         Compute a sparse array (in COO format) of similarity scores.
 
         Use this method if you expect heavy filtering (i.e. many scores are dropped) or
-        if you want to compute scores only for a selected set of index pairs.
+        if you want to compute scores only for a selected set of index pairs. By using sparse_array() this can reduce the memory footprint if many scores are dropped. 
 
         Note:
           - If no filtering is required (empty score_filters) and no mask is provided,
