@@ -69,10 +69,7 @@ class BaseSimilarity:
         """
         Compute a dense similarity matrix for all pairs of reference and query spectra.
 
-        Use this method when filtering is either required (with a provided mask) or when working
-        with moderately sized datasets. If no filtering is needed and you don't have a mask, simply
-        pass an empty tuple for `score_filters` and use this method.
-
+        Use this method when you expect most scores to pass the filtering. For instance if you don't apply any filtering. But also when you expect filtering to filter out less than 90% of all calculated scores. Filters can be added when creating the filter class object.
         Parameters
         ----------
         references:
