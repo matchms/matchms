@@ -91,7 +91,7 @@ class BaseSimilarity:
             return self._matrix_without_mask_with_filter(
                 references, queries, is_symmetric=is_symmetric
             )
-        return self._matrix_with_mask(
+        return self._matrix_with_mask_with_filter(
             references, queries, mask_indices=mask_indices, is_symmetric=is_symmetric
         )
 
@@ -106,7 +106,7 @@ class BaseSimilarity:
         Compute a sparse array (in COO format) of similarity scores.
 
         Use this method if you expect heavy filtering (i.e. many scores are dropped) or
-        if you want to compute scores only for a selected set of index pairs. By using sparse_array() this can reduce
+        if you want to compute scores only for a selected set of index pairs. By using `sparse_array()` this can reduce
         the memory footprint if many scores are dropped.
 
         Note:
@@ -130,11 +130,13 @@ class BaseSimilarity:
                 references, queries, mask_indices=mask_indices
             )
         if len(self.score_filters) != 0 and mask_indices is None:
-            return self._sparse_array_with_filter_without_mask(
+            return self._sparse_array_without_mask_with_filter(
                 references, queries, is_symmetric=is_symmetric
             )
         if len(self.score_filters) != 0 and mask_indices:
-            return self._sparse_array_with_filter(references, queries, mask_indices)
+            return self._sparse_array_with_mask_with_filter(
+                references, queries, mask_indices
+            )
 
         # TODO: replace with matrix computation followed by a conversion to COO array.
         # (and a warning that this is not a good idea) do this once we settle on a COO Array format (e.g. using the sparse package)
@@ -211,7 +213,7 @@ class BaseSimilarity:
                     sim_matrix[i, j] = score
         return sim_matrix
 
-    def _matrix_with_mask(
+    def _matrix_with_mask_with_filter(
         self,
         references: Sequence[SpectrumType],
         queries: Sequence[SpectrumType],
@@ -251,7 +253,7 @@ class BaseSimilarity:
 
     # --- Sparse Matrix Computations ---
 
-    def _sparse_array_with_filter_without_mask(
+    def _sparse_array_without_mask_with_filter(
         self,
         references: Sequence[SpectrumType],
         queries: Sequence[SpectrumType],
@@ -345,7 +347,7 @@ class BaseSimilarity:
         if len(self.score_filters) > 0:
             raise ValueError(
                 "Don't run _sparse_array_with_mask_without_filter if score_filters are set. "
-                "Instead run _sparse_array_with_filter"
+                "Instead run _sparse_array_with_mask_with_filter"
             )
         scores = np.zeros((len(mask_indices)), dtype=self.score_datatype)
         for i, (i_row, i_col) in enumerate(
@@ -359,7 +361,7 @@ class BaseSimilarity:
             scores_dtype=self.score_datatype,
         )
 
-    def _sparse_array_with_filter(
+    def _sparse_array_with_mask_with_filter(
         self,
         references: Sequence[SpectrumType],
         queries: Sequence[SpectrumType],
@@ -372,7 +374,7 @@ class BaseSimilarity:
         all filters are stored.
 
         Please note: If the mask_indices contain more than 1/12th of all indices, this method could become less memory efficient
-        than `_sparse_array_with_filter_without_mask`.
+        than `_sparse_array_without_mask_with_filter`.
 
         Parameters
         ----------
