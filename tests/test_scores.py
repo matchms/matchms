@@ -12,8 +12,9 @@ class DummySimilarityFunction(BaseSimilarity):
     """Simple dummy score, only contain pair-wise implementation."""
     score_datatype = [("score", np.str_, 16), ("len", np.int32)]
 
-    def __init__(self, score_filters = ()):
+    def __init__(self, score_filters = None):
         """constructor"""
+        # pylint: disable=useless-parent-delegation
         super().__init__(score_filters)
 
     def pair(self, reference, query):
@@ -26,8 +27,9 @@ class DummySimilarityFunctionParallel(BaseSimilarity):
     """Simple dummy score, contains pair-wise and matrix implementation."""
     score_datatype = [("score", np.str_, 16), ("len", "int")]
 
-    def __init__(self, score_filters =()):
+    def __init__(self, score_filters = None):
         """constructor"""
+        # pylint: disable=useless-parent-delegation
         super().__init__(score_filters)
 
     def pair(self, reference, query):

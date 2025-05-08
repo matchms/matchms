@@ -1,5 +1,5 @@
 import logging
-from typing import Tuple
+from typing import Optional, Tuple
 import numpy as np
 from matchms.filtering.metadata_processing.add_precursor_mz import \
     _convert_precursor_mz
@@ -31,7 +31,7 @@ class NeutralLossesCosine(BaseSimilarity):
     score_datatype = [("score", np.float64), ("matches", "int")]
 
     def __init__(self, tolerance: float = 0.1, mz_power: float = 0.0, intensity_power: float = 1.0,
-                 ignore_peaks_above_precursor: bool = True, score_filters: Tuple[FilterScoreByValue, ...] = ()):
+                 ignore_peaks_above_precursor: bool = True, score_filters: Optional[Tuple[FilterScoreByValue, ...]] = None):
         """
         Parameters
         ----------
