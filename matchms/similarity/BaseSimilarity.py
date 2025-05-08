@@ -156,6 +156,15 @@ class BaseSimilarity:
         Compute a dense similarity matrix without a mask, then apply score filters (if any).
 
         This method is used internally by `matrix()` when no mask is provided.
+
+        Parameters
+        ----------
+        references:
+            A collection of reference spectra.
+        queries:
+            A collection of query spectra.
+        is_symmetric:
+            If True, mirrors the computed score to the symmetric position. Defaults to False.
         """
         sim_matrix = self._matrix_without_mask_without_filter(
             references, queries, is_symmetric=is_symmetric
