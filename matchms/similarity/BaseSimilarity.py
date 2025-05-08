@@ -69,7 +69,9 @@ class BaseSimilarity:
         """
         Compute a dense similarity matrix for all pairs of reference and query spectra.
 
-        Use this method when you expect most scores to pass the filtering. For instance if you don't apply any filtering. But also when you expect filtering to filter out less than 90% of all calculated scores. Filters can be added when creating the filter class object.
+        Use this method when you expect most scores to pass the filtering. For instance if you don't apply any
+        filtering. But also when you expect filtering to filter out less than 90% of all calculated scores.
+        `score_filters` can be set in `init`'.
         Parameters
         ----------
         references:
