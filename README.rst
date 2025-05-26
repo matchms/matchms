@@ -116,14 +116,14 @@ Installation
 
 Prerequisites:  
 
-- Python 3.10 - 3.12, (higher versions should work as well, but are not yet tested systematically)
+- Python 3.10 - 3.13, (higher versions should work as well, but are not yet tested systematically)
 - Anaconda (recommended)
 
 We recommend installing matchms in a new virtual environment to avoid dependency clashes
 
 .. code-block:: console
 
-  conda create --name matchms python=3.11
+  conda create --name matchms python=3.12
   conda activate matchms
   conda install --channel bioconda --channel conda-forge matchms
 
@@ -318,7 +318,7 @@ To install matchms, do:
 
   git clone https://github.com/matchms/matchms.git
   cd matchms
-  conda create --name matchms-dev python=3.11
+  conda create --name matchms-dev python=3.12
   conda activate matchms-dev
 
   # If you use poetry
