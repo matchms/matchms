@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Added
+- support for python 3.13 [#728](https://github.com/matchms/matchms/issues/728) and [#803](https://github.com/matchms/matchms/issues/803)
+
+### Changed
+- dropped compatibility with numpy `<2.0`
+
 ## [0.29.0] - 2025-05-06
 ### Added
 - Implemented preliminary mzSpecLib export [#757](https://github.com/matchms/matchms/pull/757)
