@@ -22,23 +22,24 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12"
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13"
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.10,<3.13"
-numpy = ">1.24"
-scipy = "^1.14.1"
+python = ">=3.10,<3.14"
+numpy = ">=2.1.0"
+scipy = "^1.15.3"
 pandas = "^2.2.3"
 pillow = "!=9.4.0"
-lxml = "^4.9.3"
+lxml = "^5.4.0"
 matplotlib = ">=3.7"
 networkx = "^3.4.2"
-numba = "^0.60.0"
+numba = "^0.61.0"
 pickydict = ">=0.4.0"
 pyteomics = ">=4.6"
 requests = ">=2.31.0"
-sparsestack = ">=0.6.0"
+sparsestack = ">=0.7.0"
 tqdm = ">=4.65.0"
 rdkit = "^2024.3.5"
 pyyaml = ">=6.0.1"
