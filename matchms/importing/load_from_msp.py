@@ -67,7 +67,7 @@ def parse_msp_file(filename: str) -> Generator[dict, None, None]:
             intensities = np.append(intensities, ints)
 
             if comment is not None:
-                peak_comments.update({masses[-1]: comment})
+                peak_comments.update({float(masses[-1]): comment})
 
             peakscount += len(mz)
 
