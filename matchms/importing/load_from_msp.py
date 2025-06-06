@@ -133,54 +133,59 @@ def parse_metadata(rline: str, params: dict):
     """Reads metadata contained in line into params dict.
 
     The complexity of this function stems from the fact that MSP allows for many different formats of metadata.
+
+    Parameters
+    ----------
+    rline: str
+        The line of the read MSP file that contains metadata.
+    params : dict
+        The params that the key value pairs of the metadata line will be added to.
     """
-    matches = []
     splitted_line = rline.split(":", 1)
+    if len(splitted_line) != 2:
+        return
 
-    if splitted_line[0].lower() == "comments" and "=" in splitted_line[1]:
-        # This pattern check for different formats.
-        # The first checks for compound="caffeine", the second and third "compound=caffeine and the last
-        # for parent_mass=12.1
-        # The second and third almost match the same pattern, but the second is there to ensure tha the pattern
-        # "SMILES=CC(O)C(O)=O" is recognized as 'smiles': 'CC(O)C(O)=O' instead of 'smiles=cc(o)c(o)': 'O'
-        # The third pattern is needed since some keys like DB# should be stored, which is not recognized by the \w regex
-        # Cases like "Smiles=" will not be stores (since len(match) = 1) The reason that we did not change the * to +
-        # in the regex, is that we want to still match to these cases, so that the if len(matches) == 0: below is not
-        # called in cases like comments: "smiles=".
-        pattern = (
-            r'(\S+)="([^"]*)"|'
-            r'"(\w+)=([^"]*)"|'
-            r'"([^"]*)=([^"]*)"|'
-            r"(\S+)=(\d+(?:\.\d*)?)"
-        )
-        matches = re.findall(pattern, splitted_line[1].replace("'", '"'))
-        for match in matches:
-            # Remove the None parts
-            match = [i for i in match if i]
-            # If len is not 2 a pattern was matched like "compound_name="
-            if len(match) == 2:
-                key = match[0]
-                value = match[1]
-                if key.lower().strip() in params.keys() and key.lower().strip() == "smiles":
-                    params[key.lower() + "_2"] = value.strip()
-                else:
-                    params[key.lower().strip()] = value.strip()
-    # msp files can have the format comments: smiles="CC=O" but also the format smiles: CC=O.
-    # The latter is captured by these lines.
-    if len(matches) == 0:
-        params[splitted_line[0].lower()] = splitted_line[1].strip()
+    key, value = splitted_line[0].strip().lower(), splitted_line[1].strip()
 
-    splitted_line = rline.split(":")
+    if key == "comments" and "=" in value:
+        _parse_comments(value, params)
+    elif key == "synon" and rline.count(":") >= 2:
+        _parse_synon(rline, params)
+    else:
+        # Fallback for generic key: value pairs
+        params[key] = value
 
-    if splitted_line[0].lower() == "synon" and len(splitted_line) > 2:
-        key = ":".join(splitted_line[:2]).lower().strip()
-        value = (
-            splitted_line[2].strip().replace(",", ".")
-        )  # Handles edge cases with GOLM files where the nominal mass is written with a comma instead of a dot
-        if key == "synon: metb n":
-            params.setdefault(key, []).append(value)
-        else:
-            params[key] = value
+
+def _parse_comments(value: str, params: dict):
+    """Parses key-value pairs from comments line into params."""
+    value = value.replace("'", '"')  # Normalize quotes
+    pattern = (
+        r'(\S+)="([^"]*)"|'
+        r'"(\w+)=([^"]*)"|'
+        r'"([^"]*)=([^"]*)"|'
+        r"(\S+)=(\d+(?:\.\d*)?)"
+    )
+    for match in re.findall(pattern, value):
+        match = [i for i in match if i]
+        if len(match) == 2:
+            m_key, m_value = match
+            m_key = m_key.strip().lower()
+            m_value = m_value.strip()
+            if m_key == "smiles" and m_key in params:
+                params[f"{m_key}_2"] = m_value
+            else:
+                params[m_key] = m_value
+
+
+def _parse_synon(rline: str, params: dict):
+    """Parses synon lines with multiple colons."""
+    parts = rline.split(":", 2)
+    synon_key = f"{parts[0].strip().lower()}: {parts[1].strip().lower()}"
+    synon_value = parts[2].strip().replace(",", ".")
+    if synon_key == "synon: metb n":
+        params.setdefault(synon_key, []).append(synon_value)
+    else:
+        params[synon_key] = synon_value
 
 
 def contains_metadata(rline: str) -> bool:
