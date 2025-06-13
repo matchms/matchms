@@ -109,7 +109,7 @@ def _parse_line_with_peaks(rline: str) -> Tuple[List[float], List[float], str]:
 
 def get_peak_values(peak: str) -> Tuple[List[float], List[float]]:
     """Get the m/z and intensity value from the line containing the peak information."""
-    tokens = re.findall(r"(\d+(?:\.\d+)?(?:e[-+]?\d+)?)", peak)
+    tokens = re.findall(r"(\d+(?:\.\d+)?(?:[eE][-+]?\d+)?)", peak)
     if len(tokens) % 2 != 0:
         raise RuntimeError("Wrong peak format detected!")
 
