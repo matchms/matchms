@@ -1,7 +1,7 @@
 from typing import Tuple
+import numpy as np
 from numba import njit
 from numba.typed import List
-import numpy as np
 
 
 @njit
