@@ -59,7 +59,7 @@ def test_find_matches(numba_compiled, shift, expected_matches):
     func = get_function(numba_compiled, find_matches)
     matches = func(spec1_mz, spec2_mz, tolerance=0.2, shift=shift)
 
-    assert expected_matches == matches, "Expected different matches."
+    assert np.array_equal(expected_matches, matches), "Expected different matches."
 
 
 @pytest.mark.parametrize("numba_compiled", [True, False])
