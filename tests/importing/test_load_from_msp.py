@@ -2,7 +2,7 @@ import os
 import numpy as np
 import pytest
 from matchms import Spectrum
-from matchms.importing.load_from_msp import load_from_msp, parse_metadata, get_peak_values
+from matchms.importing.load_from_msp import get_peak_values, load_from_msp, parse_metadata
 from tests.builder_Spectrum import SpectrumBuilder
 
 
