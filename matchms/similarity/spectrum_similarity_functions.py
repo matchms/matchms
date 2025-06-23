@@ -32,7 +32,7 @@ def collect_peak_pairs(spec1: np.ndarray, spec2: np.ndarray,
     matching_pairs : numpy array
         Array of found matching peaks.
     """
-    matches = find_matches(spec1[:, 0], spec2[:, 0], tolerance, shift)
+    matches: List = find_matches(spec1[:, 0], spec2[:, 0], tolerance, shift)
     idx1 = [x[0] for x in matches]
     idx2 = [x[1] for x in matches]
     if len(idx1) == 0:
