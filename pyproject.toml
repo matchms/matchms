@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "matchms"
-version = "0.30.0"
+version = "0.30.1"
 description = "Python library for large-scale comparisons and processing of tandem mass spectral data"
 authors = ["matchms developer team <florian.huber@hs-duesseldorf.de>"]
 
