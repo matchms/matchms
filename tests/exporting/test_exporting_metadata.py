@@ -16,8 +16,8 @@ from tests.builder_Spectrum import SpectrumBuilder
 
 def assert_files_equal_ignoring_line_endings(file1, file2):
     with open(file1, "r", encoding="utf-8") as f1, open(file2, "r", encoding="utf-8") as f2:
-        a = f1.readlines()
-        b = f2.readlines()
+        a = f1.read().splitlines()
+        b = f2.read().splitlines()
         assert a == b
     
 
