@@ -56,7 +56,7 @@ def export_metadata_as_json(
             metadata_dicts.append(metadata_dict)
 
     with open(filename, "w", encoding="utf-8") as fout:
-        json.dump(metadata_dicts, fout)
+        fout.write(json.dumps(metadata_dicts, indent=2, sort_keys=True))
 
 
 def export_metadata_as_csv(
