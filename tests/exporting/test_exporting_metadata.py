@@ -1,4 +1,3 @@
-import difflib
 import json
 import os
 import numpy as np
@@ -17,9 +16,9 @@ from tests.builder_Spectrum import SpectrumBuilder
 
 def assert_files_equal_ignoring_line_endings(file1, file2):
     with open(file1, "r", encoding="utf-8") as f1, open(file2, "r", encoding="utf-8") as f2:
-        a = f1.read().replace("\r\n", "\n").replace("\r", "\n").splitlines()
-        b = f2.read().replace("\r\n", "\n").replace("\r", "\n").splitlines()
-        assert a == b, "\n" + "\n".join(difflib.unified_diff(b, a, fromfile=str(file2), tofile=str(file1)))
+        a = f1.readlines()
+        b = f2.readlines()
+        assert a == b
     
 
 @pytest.fixture
