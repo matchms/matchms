@@ -1,7 +1,6 @@
-import filecmp
+import difflib
 import json
 import os
-from difflib import Differ
 import numpy as np
 import pytest
 from matchms.exporting.metadata_export import (
@@ -16,12 +15,11 @@ from matchms.importing import load_from_msp
 from tests.builder_Spectrum import SpectrumBuilder
 
 
-def _files_equal(lhs: str, rhs: str) -> bool:
-    with open(lhs, "r", encoding="utf-8") as f1, open(rhs, "r", encoding="utf-8") as f2:
-        a = f1.readlines()
-        b = f2.readlines()
-        delta = list(Differ().compare(a, b))
-    return all(line.startswith(" ") for line in delta)  # Check if all lines are equal
+def assert_files_equal_ignoring_line_endings(file1, file2):
+    with open(file1, "r", encoding="utf-8") as f1, open(file2, "r", encoding="utf-8") as f2:
+        a = f1.read().replace("\r\n", "\n").replace("\r", "\n").splitlines()
+        b = f2.read().replace("\r\n", "\n").replace("\r", "\n").splitlines()
+        assert a == b, "\n" + "\n".join(difflib.unified_diff(b, a, fromfile=str(file2), tofile=str(file1)))
     
 
 @pytest.fixture
@@ -55,7 +53,7 @@ def test_export_as_csv(tmp_path, spectra, delimiter):
     export_metadata_as_csv(spectra, outpath, delimiter=delimiter)
     expected = os.path.join(module_root, "testdata", f"expected_metadata.{extension[delimiter]}")
 
-    assert _files_equal(outpath, expected)
+    assert_files_equal_ignoring_line_endings(outpath, expected)
 
 
 def test_subset_metadata(spectra):
@@ -76,7 +74,7 @@ def test_export_metadata_as_json(tmp_path, spectra):
 
     expected = os.path.join(module_root, "testdata", "expected_metadata.json")
 
-    assert filecmp.cmp(outpath, expected)
+    assert_files_equal_ignoring_line_endings(outpath, expected)
 
 
 @pytest.mark.parametrize("file_name", ["metadata.csv", "metadata.json"])
