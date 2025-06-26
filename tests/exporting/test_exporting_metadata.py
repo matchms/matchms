@@ -45,7 +45,7 @@ def test_export_as_csv(tmp_path, spectra, delimiter):
     export_metadata_as_csv(spectra, outpath, delimiter=delimiter)
     expected = os.path.join(module_root, "testdata", f"expected_metadata.{extension[delimiter]}")
 
-    filecmp.cmp(outpath, expected)
+    assert filecmp.cmp(outpath, expected)
 
 
 def test_subset_metadata(spectra):
@@ -64,7 +64,7 @@ def test_export_metadata_as_json(tmp_path, spectra):
     expected = os.path.join(module_root, "testdata", "expected_metadata.json")
 
     export_metadata_as_json(spectra, outpath)
-    filecmp.cmp(outpath, expected)
+    assert filecmp.cmp(outpath, expected)
 
 
 @pytest.mark.parametrize("file_name", ["metadata.csv", "metadata.json"])
