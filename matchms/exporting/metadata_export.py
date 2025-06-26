@@ -75,6 +75,8 @@ def export_metadata_as_csv(
         Provide filename to save metadata of spectrum(s) as csv file.
     include_fields:
         Columns to include.
+    delimiter:
+        delimiter to use in the csv file, default is comma (",").
     """
     spectra = filter_empty_spectra(spectra)
     metadata, columns = get_metadata_as_array(spectra)
@@ -82,7 +84,7 @@ def export_metadata_as_csv(
     if include_fields is not None:
         metadata, columns = _subset_metadata(include_fields, metadata, columns)
 
-    with open(filename, "a+", encoding="utf-8") as csvfile:
+    with open(filename, "a+", encoding="utf-8", newline="") as csvfile:
         writer = csv.writer(csvfile, delimiter=delimiter)
         writer.writerow(columns)
         for data in metadata:
