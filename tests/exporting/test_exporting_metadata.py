@@ -1,6 +1,7 @@
 import filecmp
 import json
 import os
+from difflib import Differ
 import numpy as np
 import pytest
 from matchms.exporting.metadata_export import (
@@ -14,6 +15,14 @@ from matchms.exporting.metadata_export import (
 from matchms.importing import load_from_msp
 from tests.builder_Spectrum import SpectrumBuilder
 
+
+def _files_equal(lhs: str, rhs: str) -> bool:
+    with open(lhs, "r", encoding="utf-8") as f1, open(rhs, "r", encoding="utf-8") as f2:
+        a = f1.readlines()
+        b = f2.readlines()
+        delta = list(Differ().compare(a, b))
+    return all(line.startswith(" ") for line in delta)  # Check if all lines are equal
+    
 
 @pytest.fixture
 def spectra():
@@ -46,7 +55,7 @@ def test_export_as_csv(tmp_path, spectra, delimiter):
     export_metadata_as_csv(spectra, outpath, delimiter=delimiter)
     expected = os.path.join(module_root, "testdata", f"expected_metadata.{extension[delimiter]}")
 
-    assert filecmp.cmp(outpath, expected)
+    assert _files_equal(outpath, expected)
 
 
 def test_subset_metadata(spectra):
