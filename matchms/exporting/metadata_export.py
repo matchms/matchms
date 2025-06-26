@@ -45,8 +45,8 @@ def export_metadata_as_json(
         Expected input is a list of  :py:class:`~matchms.Spectrum.Spectrum` objects.
     filename:
         Provide filename to save metadata of spectrum(s) as json file.
-    identifier:
-        Identifier used for naming each spectrum in the output file.
+    include_fields:
+        Columns to include.
     """
     spectra = filter_empty_spectra(spectra)
     metadata_dicts = []
