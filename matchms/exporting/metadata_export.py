@@ -1,7 +1,7 @@
 import csv
 import json
 import logging
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 from ..Spectrum import Spectrum
 from ..utils import filter_empty_spectra, rename_deprecated_params
