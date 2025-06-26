@@ -5,6 +5,7 @@ import numpy as np
 import pytest
 from matchms.exporting.metadata_export import (
     _get_metadata_dict,
+    _get_metadata_keys,
     _subset_metadata,
     export_metadata_as_csv,
     export_metadata_as_json,
@@ -55,15 +56,17 @@ def test_subset_metadata(spectra):
     newdata, newcolnames = _subset_metadata(subset, actual, colnames)
 
     np.testing.assert_equal(newdata, actual[subset])
-    assert newcolnames == set(subset)
+    assert newcolnames == subset
 
 
 def test_export_metadata_as_json(tmp_path, spectra):
     outpath = tmp_path / "metadata.json"
     module_root = os.path.join(os.path.dirname(__file__), "..")
-    expected = os.path.join(module_root, "testdata", "expected_metadata.json")
 
     export_metadata_as_json(spectra, outpath)
+
+    expected = os.path.join(module_root, "testdata", "expected_metadata.json")
+
     assert filecmp.cmp(outpath, expected)
 
 
@@ -84,3 +87,13 @@ def test_export_metadata_none_spectra(tmp_path, spectra, file_name, caplog):
     with open(outpath, "r", encoding="utf-8") as f:
         actual = json.load(f)
         assert len(actual) == 0
+
+
+def test__get_metadata_keys(spectra):
+    """Test that _get_metadata_keys returns the correct keys."""
+    expected_keys = ['author', 'compound_name', 'formula', 'inchi', 'inchikey', 'instrument', 'instrument_type',
+                     'ion_type', 'ionization_energy', 'ionization_mode', 'last_auto-curation', 'license',
+                     'molecular_formula', 'ms_level', 'nominal_mass', 'num_peaks', 'parent_mass',
+                     'precursor_mz', 'smiles', 'smiles_2', 'spectrum_id', 'synonym', 'total_exact_mass']
+    actual_keys = _get_metadata_keys(spectra)
+    assert actual_keys == expected_keys

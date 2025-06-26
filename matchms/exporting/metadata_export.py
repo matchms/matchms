@@ -90,8 +90,8 @@ def export_metadata_as_csv(
 
 
 def _subset_metadata(
-    include_fields: List[str], metadata: np.array, columns: Set[str]
-) -> Tuple[np.array, Set[str]]:
+    include_fields: list[str], metadata: np.array, columns: list[str]
+) -> Tuple[np.array, list[str]]:
     """Subset metadata to 'include_fields' and return intersection of columns.
 
     Parameters
@@ -106,7 +106,9 @@ def _subset_metadata(
     Returns:
         Tuple[np.array, set[str]]: Subset data and columns.
     """
-    return metadata[include_fields], columns.intersection(include_fields)
+    keys_subset = sorted(set(columns).intersection(include_fields))
+    data_subset = metadata[keys_subset]
+    return data_subset, keys_subset
 
 
 def get_metadata_as_array(spectra: List[Spectrum]) -> Tuple[np.array, List[str]]:
@@ -121,9 +123,7 @@ def get_metadata_as_array(spectra: List[Spectrum]) -> Tuple[np.array, List[str]]
         Tuple[np.array, List[str]]: Metadata and union of all columns detected in all spectra.
     """
     spectra = filter_empty_spectra(spectra)
-    keys = spectra[0].metadata.keys()
-    for s in spectra:
-        keys |= s.metadata.keys()
+    keys = _get_metadata_keys(spectra)
 
     values = []
 
@@ -131,5 +131,22 @@ def get_metadata_as_array(spectra: List[Spectrum]) -> Tuple[np.array, List[str]]
         value = tuple((s.get(k) for k in keys))
         values.append(value)
 
-    values_array = np.array(values, dtype=[(k, np.str_) for k in keys])
+    # Create a structured numpy array with keys as field names
+    # and values as the corresponding data.
+    values_array = np.array(values, dtype=[(k, object) for k in keys])
     return values_array, keys
+
+
+def _get_metadata_keys(spectra: List[Spectrum]) -> List[str]:
+    """  Get union of all metadata keys from all spectra.
+
+    Args:
+        spectra (List[Spectrum]): List of spectra to extract metadata keys from.
+
+    Returns:
+        _type_: _description_
+    """
+    keys = spectra[0].metadata.keys()
+    for s in spectra:
+        keys |= s.metadata.keys()
+    return sorted(keys)
