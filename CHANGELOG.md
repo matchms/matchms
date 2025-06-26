@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [dev]
+### Changed
+- Fixed metadata export, column names are now sorted and keys in json as well. Updated tests to be actually functional [#814](https://github.com/matchms/matchms/pull/814)
+
+
 ## [0.30.1] - 2025-06-13
 ### Changed
 - Fix load_from_msp peak_comments numPy scalar instead of value [#807](https://github.com/matchms/matchms/pull/807)

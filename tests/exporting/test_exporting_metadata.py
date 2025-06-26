@@ -1,10 +1,10 @@
-import filecmp
 import json
 import os
 import numpy as np
 import pytest
 from matchms.exporting.metadata_export import (
     _get_metadata_dict,
+    _get_metadata_keys,
     _subset_metadata,
     export_metadata_as_csv,
     export_metadata_as_json,
@@ -13,6 +13,13 @@ from matchms.exporting.metadata_export import (
 from matchms.importing import load_from_msp
 from tests.builder_Spectrum import SpectrumBuilder
 
+
+def assert_files_equal_ignoring_line_endings(file1, file2):
+    with open(file1, "r", encoding="utf-8") as f1, open(file2, "r", encoding="utf-8") as f2:
+        a = f1.read().splitlines()
+        b = f2.read().splitlines()
+        assert a == b
+    
 
 @pytest.fixture
 def spectra():
@@ -45,7 +52,7 @@ def test_export_as_csv(tmp_path, spectra, delimiter):
     export_metadata_as_csv(spectra, outpath, delimiter=delimiter)
     expected = os.path.join(module_root, "testdata", f"expected_metadata.{extension[delimiter]}")
 
-    filecmp.cmp(outpath, expected)
+    assert_files_equal_ignoring_line_endings(outpath, expected)
 
 
 def test_subset_metadata(spectra):
@@ -55,16 +62,18 @@ def test_subset_metadata(spectra):
     newdata, newcolnames = _subset_metadata(subset, actual, colnames)
 
     np.testing.assert_equal(newdata, actual[subset])
-    assert newcolnames == set(subset)
+    assert newcolnames == subset
 
 
 def test_export_metadata_as_json(tmp_path, spectra):
     outpath = tmp_path / "metadata.json"
     module_root = os.path.join(os.path.dirname(__file__), "..")
-    expected = os.path.join(module_root, "testdata", "expected_metadata.json")
 
     export_metadata_as_json(spectra, outpath)
-    filecmp.cmp(outpath, expected)
+
+    expected = os.path.join(module_root, "testdata", "expected_metadata.json")
+
+    assert_files_equal_ignoring_line_endings(outpath, expected)
 
 
 @pytest.mark.parametrize("file_name", ["metadata.csv", "metadata.json"])
@@ -84,3 +93,13 @@ def test_export_metadata_none_spectra(tmp_path, spectra, file_name, caplog):
     with open(outpath, "r", encoding="utf-8") as f:
         actual = json.load(f)
         assert len(actual) == 0
+
+
+def test__get_metadata_keys(spectra):
+    """Test that _get_metadata_keys returns the correct keys."""
+    expected_keys = ['author', 'compound_name', 'formula', 'inchi', 'inchikey', 'instrument', 'instrument_type',
+                     'ion_type', 'ionization_energy', 'ionization_mode', 'last_auto-curation', 'license',
+                     'molecular_formula', 'ms_level', 'nominal_mass', 'num_peaks', 'parent_mass',
+                     'precursor_mz', 'smiles', 'smiles_2', 'spectrum_id', 'synonym', 'total_exact_mass']
+    actual_keys = _get_metadata_keys(spectra)
+    assert actual_keys == expected_keys

@@ -1,7 +1,7 @@
 import csv
 import json
 import logging
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Optional
 import numpy as np
 from ..Spectrum import Spectrum
 from ..utils import filter_empty_spectra, rename_deprecated_params
@@ -11,13 +11,13 @@ logger = logging.getLogger("matchms")
 
 
 def _get_metadata_dict(
-    spectrum: Spectrum, include_fields: Optional[List[str]] = None
-) -> Dict[str, Any]:
+    spectrum: Spectrum, include_fields: Optional[list[str]] = None
+) -> dict[str, Any]:
     """Extract keys from spectrum metadata. Will silently continue if a key is not found.
 
     Args:
         spectrum (Spectrum): Spectrum with metadata to extract.
-        include_fields (List[str] | str): "all" or set of metadata keys to extract.
+        include_fields (list[str] | str): "all" or set of metadata keys to extract.
 
     Returns:
         dict[str, Any]: Dictionary containing the specified keys.
@@ -35,7 +35,7 @@ def _get_metadata_dict(
 
 @rename_deprecated_params(param_mapping={"spectrums": "spectra"}, version="0.26.5")
 def export_metadata_as_json(
-    spectra: List[Spectrum], filename: str, include_fields: Optional[List[str]] = None
+    spectra: list[Spectrum], filename: str, include_fields: Optional[list[str]] = None
 ):
     """Export metadata to json file.
 
@@ -45,8 +45,8 @@ def export_metadata_as_json(
         Expected input is a list of  :py:class:`~matchms.Spectrum.Spectrum` objects.
     filename:
         Provide filename to save metadata of spectrum(s) as json file.
-    identifier:
-        Identifier used for naming each spectrum in the output file.
+    include_fields:
+        Columns to include.
     """
     spectra = filter_empty_spectra(spectra)
     metadata_dicts = []
@@ -56,13 +56,13 @@ def export_metadata_as_json(
             metadata_dicts.append(metadata_dict)
 
     with open(filename, "w", encoding="utf-8") as fout:
-        json.dump(metadata_dicts, fout)
+        fout.write(json.dumps(metadata_dicts, indent=2, sort_keys=True))
 
 
 def export_metadata_as_csv(
-    spectra: List[Spectrum],
+    spectra: list[Spectrum],
     filename: str,
-    include_fields: Optional[List[str]] = None,
+    include_fields: Optional[list[str]] = None,
     delimiter: str = ",",
 ):
     """Export metadata to csv file.
@@ -75,6 +75,8 @@ def export_metadata_as_csv(
         Provide filename to save metadata of spectrum(s) as csv file.
     include_fields:
         Columns to include.
+    delimiter:
+        delimiter to use in the csv file, default is comma (",").
     """
     spectra = filter_empty_spectra(spectra)
     metadata, columns = get_metadata_as_array(spectra)
@@ -82,7 +84,7 @@ def export_metadata_as_csv(
     if include_fields is not None:
         metadata, columns = _subset_metadata(include_fields, metadata, columns)
 
-    with open(filename, "a+", encoding="utf-8") as csvfile:
+    with open(filename, "a+", encoding="utf-8", newline="") as csvfile:
         writer = csv.writer(csvfile, delimiter=delimiter)
         writer.writerow(columns)
         for data in metadata:
@@ -90,8 +92,8 @@ def export_metadata_as_csv(
 
 
 def _subset_metadata(
-    include_fields: List[str], metadata: np.array, columns: Set[str]
-) -> Tuple[np.array, Set[str]]:
+    include_fields: list[str], metadata: np.array, columns: list[str]
+) -> tuple[np.array, list[str]]:
     """Subset metadata to 'include_fields' and return intersection of columns.
 
     Parameters
@@ -104,12 +106,14 @@ def _subset_metadata(
         Set of columns present in data
 
     Returns:
-        Tuple[np.array, set[str]]: Subset data and columns.
+        tuple[np.array, set[str]]: Subset data and columns.
     """
-    return metadata[include_fields], columns.intersection(include_fields)
+    keys_subset = sorted(set(columns).intersection(include_fields))
+    data_subset = metadata[keys_subset]
+    return data_subset, keys_subset
 
 
-def get_metadata_as_array(spectra: List[Spectrum]) -> Tuple[np.array, List[str]]:
+def get_metadata_as_array(spectra: list[Spectrum]) -> tuple[np.array, list[str]]:
     """Extract union of all metadata as numpy array from all spectra.
 
     Parameters
@@ -118,12 +122,10 @@ def get_metadata_as_array(spectra: List[Spectrum]) -> Tuple[np.array, List[str]]
         Spectra from which to collect metadata.
 
     Returns:
-        Tuple[np.array, List[str]]: Metadata and union of all columns detected in all spectra.
+        tuple[np.array, list[str]]: Metadata and union of all columns detected in all spectra.
     """
     spectra = filter_empty_spectra(spectra)
-    keys = spectra[0].metadata.keys()
-    for s in spectra:
-        keys |= s.metadata.keys()
+    keys = _get_metadata_keys(spectra)
 
     values = []
 
@@ -131,5 +133,22 @@ def get_metadata_as_array(spectra: List[Spectrum]) -> Tuple[np.array, List[str]]
         value = tuple((s.get(k) for k in keys))
         values.append(value)
 
-    values_array = np.array(values, dtype=[(k, np.str_) for k in keys])
+    # Create a structured numpy array with keys as field names
+    # and values as the corresponding data.
+    values_array = np.array(values, dtype=[(k, object) for k in keys])
     return values_array, keys
+
+
+def _get_metadata_keys(spectra: list[Spectrum]) -> list[str]:
+    """  Get union of all metadata keys from all spectra.
+
+    Args:
+        spectra (list[Spectrum]): List of spectra to extract metadata keys from.
+
+    Returns:
+        _type_: _description_
+    """
+    keys = spectra[0].metadata.keys()
+    for s in spectra:
+        keys |= s.metadata.keys()
+    return sorted(keys)
