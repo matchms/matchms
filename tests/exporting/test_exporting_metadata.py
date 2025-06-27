@@ -1,6 +1,7 @@
 import json
 import os
 import numpy as np
+import pandas
 import pytest
 from matchms.exporting.metadata_export import (
     _get_metadata_dict,
@@ -50,9 +51,12 @@ def test_export_as_csv(tmp_path, spectra, delimiter):
     outpath = tmp_path / f"metadata.{extension[delimiter]}"
 
     export_metadata_as_csv(spectra, outpath, delimiter=delimiter)
-    expected = os.path.join(module_root, "testdata", f"expected_metadata.{extension[delimiter]}")
+    expected_path = os.path.join(module_root, "testdata", f"expected_metadata.{extension[delimiter]}")
 
-    assert_files_equal_ignoring_line_endings(outpath, expected)
+    actual = pandas.read_csv(outpath, delimiter=delimiter)
+    expected = pandas.read_csv(expected_path, delimiter=delimiter)
+
+    assert actual.equals(expected)
 
 
 def test_subset_metadata(spectra):
