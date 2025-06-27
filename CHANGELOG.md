@@ -753,7 +753,8 @@ Contains three plot types: `plot_spectrum()` or `spectrum.plot()`, `plot_spectra
 - This is the initial version of Spec2Vec from https://github.com/iomega/Spec2Vec
 - (later splitted into matchms + spec2vec)
 
-[Unreleased]: https://github.com/matchms/matchms/compare/0.30.1...HEAD
+[Unreleased]: https://github.com/matchms/matchms/compare/0.30.2...HEAD
+[0.30.2]: https://github.com/matchms/matchms/compare/0.30.1...0.30.2
 [0.30.1]: https://github.com/matchms/matchms/compare/0.30.0...0.30.1
 [0.30.0]: https://github.com/matchms/matchms/compare/0.29.0...0.30.0
 [0.29.0]: https://github.com/matchms/matchms/compare/0.28.2...0.29.0
