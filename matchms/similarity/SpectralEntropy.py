@@ -1,8 +1,8 @@
 from typing import Tuple
 import numpy as np
-from numba import njit
 from matchms.typing import SpectrumType
 from .BaseSimilarity import BaseSimilarity
+from .spectrum_similarity_functions import collect_peak_pairs, score_best_matches_entropy
 
 
 class SpectralEntropy(BaseSimilarity):
@@ -32,7 +32,7 @@ class SpectralEntropy(BaseSimilarity):
 
     """
     is_commutative = True
-    score_datatype = [("score", np.float64)]
+    score_datatype =  np.float64
 
     def __init__(
         self,
@@ -67,111 +67,22 @@ class SpectralEntropy(BaseSimilarity):
         query:
             Query spectrum with sorted peaks (mz, intensities).
         """
-        mz1 = reference.peaks.mz
-        int1 = reference.peaks.intensities
-        mz2 = query.peaks.mz
-        int2 = query.peaks.intensities
+        def get_matching_pairs():
+            """Get pairs of peaks that match within the given tolerance."""
+            matching_pairs = collect_peak_pairs(
+                spec1, spec2, self.tolerance, shift=0.0,
+            )
+            if matching_pairs is None:
+                return None
+            matching_pairs = matching_pairs[np.argsort(matching_pairs[:, 2], kind="mergesort")[::-1], :]
+            return matching_pairs
 
-        score = compute_entropy(
-            mz1, int1,
-            mz2, int2,
-            self.tolerance,
-            self.use_ppm,
-            self.total_norm
+        spec1 = reference.peaks.to_numpy
+        spec2 = query.peaks.to_numpy
+        matching_pairs = get_matching_pairs()
+        if matching_pairs is None:
+            return np.asarray(0.0, dtype=self.score_datatype)
+        score = 1 - score_best_matches_entropy(
+            matching_pairs, spec1, spec2, self.total_norm
         )
-        return np.asarray((score,), dtype=self.score_datatype)
-
-
-@njit
-def compute_entropy(
-    spec1_mz: np.ndarray,
-    spec1_int: np.ndarray,
-    spec2_mz: np.ndarray,
-    spec2_int: np.ndarray,
-    tolerance: float,
-    use_ppm: bool,
-    total_norm: bool
-) -> float:
-    """
-    Compute Jensen–Shannon entropy similarity between two spectra in a single pass.
-
-    This function merges two sorted spectra under a given tolerance (in Daltons or ppm),
-    accumulates the Shannon entropies of each spectrum and their 1:1 mixture,
-    and returns a normalized similarity score:
-
-        similarity = 1 - 2 * (S_mixture - 0.5*(S1 + S2)) / ln(4)
-
-    Parameters
-    ----------
-    spec1_mz:
-        Ascending m/z values for spectrum A.
-    spec1_int:
-        Corresponding intensity values for spectrum A.
-    spec2_mz:
-        Ascending m/z values for spectrum B.
-    spec2_int:
-        Corresponding intensity values for spectrum B.
-    tolerance:
-        Matching tolerance. If `use_ppm` is False, this is in Daltons; otherwise in ppm.
-    use_ppm:
-        Whether to interpret `tolerance` as parts-per-million (ppm).
-    total_norm:
-        If True, normalize intensities by sum; if False, by maximum.
-    """
-    # Determine normalization divisors
-    if total_norm:
-        div1 = spec1_int.sum()
-        div2 = spec2_int.sum()
-    else:
-        div1 = spec1_int.max()
-        div2 = spec2_int.max()
-
-    # Pointers
-    id1, id2 = 0, 0
-    n1, n2 = spec1_mz.shape[0], spec2_mz.shape[0]
-
-    entropy = 0.0
-    while id1 < n1 and id2 < n2:
-        mz1 = spec1_mz[id1]
-        mz2 = spec2_mz[id2]
-
-        # Dynamic ppm tolerance if needed
-        tol = tolerance * 1e-6 * mz1 if use_ppm else tolerance
-
-        # Pre-normalized probabilities
-        p1 = spec1_int[id1] / div1
-        p2 = spec2_int[id2] / div2
-
-        # Branch on m/z comparison
-        if mz1 < mz2 - tol:
-            if p1 > 0:
-                entropy += p1 * np.log(2)
-            id1 += 1
-        elif mz2 < mz1 - tol:
-            if p2 > 0:
-                entropy += p2 * np.log(2)
-            id2 += 1
-        else:
-            # Peaks match within tolerance
-            if p1 > 0:
-                entropy += p1 * np.log (2*p1 / (p1 + p2))
-            if p2 > 0:
-                entropy += p2 * np.log (2*p2 / (p1 + p2))
-            id1 += 1
-            id2 += 1
-
-    # Remaining in spec1
-    while id1 < n1:
-        p1 = spec1_int[id1] / div1
-        if p1 > 0:
-            entropy += p1 * np.log(2)
-        id1 += 1
-
-    # Remaining in spec2
-    while id2 < n2:
-        p2 = spec2_int[id2] / div2
-        if p2 > 0:
-            entropy += p2 * np.log(2)
-        id2 += 1
-
-    return 1 - entropy / np.log(4)
+        return np.asarray(score, dtype=self.score_datatype)
