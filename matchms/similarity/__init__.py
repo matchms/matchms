@@ -6,7 +6,8 @@ Matchms provides a number of frequently used similarity scores to compare mass
 spectra. This includes
 
 * scores based on comparing peak positions and intensities
-  (:class:`~matchms.similarity.CosineGreedy` or :class:`~matchms.similarity.ModifiedCosine`)
+  (:class:`~matchms.similarity.CosineGreedy`, :class:`~matchms.similarity.ModifiedCosine`,
+  or :class:`~matchms.similarity.SpectralEntropy`)
 * simple scores that only assess precursor m/z or parent mass matches
   (:class:`~matchms.similarity.PrecursorMzMatch` or: :class:`~matchms.similarity.ParentMassMatch`)
 * scores assessing molecular similarity if structures (SMILES, InchiKey) are given as metadata
