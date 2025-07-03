@@ -28,6 +28,7 @@ from .ModifiedCosine import ModifiedCosine
 from .NeutralLossesCosine import NeutralLossesCosine
 from .ParentMassMatch import ParentMassMatch
 from .PrecursorMzMatch import PrecursorMzMatch
+from .SpectralEntropy import SpectralEntropy
 
 
 __all__ = [
@@ -40,7 +41,8 @@ __all__ = [
     "NeutralLossesCosine",
     "ParentMassMatch",
     "PrecursorMzMatch",
-    "BinnedEmbeddingSimilarity"
+    "BinnedEmbeddingSimilarity",
+    "SpectralEntropy"
 ]
 
 
