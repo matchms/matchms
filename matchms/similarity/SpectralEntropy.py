@@ -1,8 +1,9 @@
 from typing import Tuple
 import numpy as np
+from numba import njit
 from matchms.typing import SpectrumType
 from .BaseSimilarity import BaseSimilarity
-from .spectrum_similarity_functions import collect_peak_pairs, score_best_matches_entropy
+#from .spectrum_similarity_functions import collect_peak_pairs, score_best_matches_entropy
 
 
 class SpectralEntropy(BaseSimilarity):
@@ -67,22 +68,95 @@ class SpectralEntropy(BaseSimilarity):
         query:
             Query spectrum with sorted peaks (mz, intensities).
         """
-        def get_matching_pairs():
-            """Get pairs of peaks that match within the given tolerance."""
-            matching_pairs = collect_peak_pairs(
-                spec1, spec2, self.tolerance, shift=0.0,
-            )
-            if matching_pairs is None:
-                return None
-            matching_pairs = matching_pairs[np.argsort(matching_pairs[:, 2], kind="mergesort")[::-1], :]
-            return matching_pairs
-
         spec1 = reference.peaks.to_numpy
         spec2 = query.peaks.to_numpy
-        matching_pairs = get_matching_pairs()
-        if matching_pairs is None:
-            return np.asarray(0.0, dtype=self.score_datatype)
-        score = 1 - score_best_matches_entropy(
-            matching_pairs, spec1, spec2, self.total_norm
+
+        score = compute_entropy_optimal(
+            spec1_mz=spec1[:, 0],
+            spec1_int=spec1[:, 1],
+            spec2_mz=spec2[:, 0],
+            spec2_int=spec2[:, 1],
+            tolerance=self.tolerance,
+            use_ppm=self.use_ppm,
+            total_norm=self.total_norm
         )
         return np.asarray(score, dtype=self.score_datatype)
+
+
+@njit
+def compute_entropy_optimal(
+    spec1_mz: np.ndarray,
+    spec1_int: np.ndarray,
+    spec2_mz: np.ndarray,
+    spec2_int: np.ndarray,
+    tolerance: float,
+    use_ppm: bool,
+    total_norm: bool
+) -> float:
+    """
+    Compute Jensen–Shannon entropy similarity with optimal 1:1 peak matching
+    (via a non-crossing max-weight DP), avoiding sub-optimal "first-peak" matches.
+    """
+    # Normalize intensities to probabilities p1, p2
+    if total_norm:
+        div1 = spec1_int.sum()
+        div2 = spec2_int.sum()
+    else:
+        div1 = spec1_int.max()
+        div2 = spec2_int.max()
+
+    n1 = spec1_mz.shape[0]
+    n2 = spec2_mz.shape[0]
+    p1 = spec1_int / div1
+    p2 = spec2_int / div2
+
+    # Pre-compute the "unmatched entropy" baseline:
+    #  Σ p1*ln2 + Σ p2*ln2 = ln(2) * (1 + 1) = 2*ln2  (since each p-vector sums to 1)
+    ln2 = np.log(2.0)
+    UE = 2.0 * ln2
+
+    # Rolling‐array DP for maximum total "entropy‐gain" from matching
+    # weight(i,j) = reduction in entropy if you match i↔j rather than leave them unmatched:
+    #    w = -[ p1*ln(p1/(p1+p2)) + p2*ln(p2/(p1+p2)) ]
+    prev = np.zeros(n2+1, dtype=np.float64)
+    curr = np.zeros(n2+1, dtype=np.float64)
+
+    for i in range(1, n1+1):
+        mz1 = spec1_mz[i-1]
+        # ppm or Dalton tolerance for this peak
+        tol = (tolerance * 1e-6 * mz1) if use_ppm else tolerance
+        low = mz1 - tol
+        high = mz1 + tol
+
+        curr[0] = 0.0
+        for j in range(1, n2+1):
+            # Carry forward the best of skipping one side
+            a = prev[j]
+            b = curr[j-1]
+            best = a if a > b else b
+
+            mz2 = spec2_mz[j-1]
+            if mz2 >= low and mz2 <= high:
+                # compute the match‐gain weight
+                s1 = p1[i-1]
+                s2 = p2[j-1]
+                denom = s1 + s2
+
+                # Only do log if denom > 0 (it always is unless both intensities are zero)
+                w = -(s1 * np.log(s1/denom) + s2 * np.log(s2/denom))
+                # Consider matching:
+                tmp = prev[j-1] + w
+                if tmp > best:
+                    best = tmp
+
+            curr[j] = best
+
+        # Swap rows
+        prev, curr = curr, prev
+
+    # prev[n2] now holds the maximum total entropy‐reduction from all matched pairs
+    total_gain = prev[n2]
+
+    # Reconstruct the actual entropy and similarity ---
+    entropy = UE - total_gain
+    return 1.0 - entropy / np.log(4.0)
