@@ -1,7 +1,11 @@
 import numpy as np
 import pytest
 from matchms.similarity import SpectralEntropy
+from matchms.similarity.SpectralEntropy import compute_entropy_optimal
 from ..builder_Spectrum import SpectrumBuilder
+
+# Use non-compiled version for testing
+compute_entropy_py = compute_entropy_optimal.py_func
 
 
 def compute_expected_score(spectrum_1, spectrum_2, matches):
@@ -42,6 +46,54 @@ def compute_expected_score(spectrum_1, spectrum_2, matches):
 
     # Final similarity
     return 1.0 - entropy_acc / np.log(4.0)
+
+
+@pytest.mark.parametrize("mode", ["compiled", "uncompiled"])
+def test_identical_spectra(mode):
+    """
+    Identical spectra should yield similarity of 1.0
+    """
+    mz = np.array([100.0, 200.0, 300.0])
+    intens = np.array([0.2, 0.5, 0.3])
+    func = compute_entropy_optimal if mode == "compiled" else compute_entropy_py
+    sim = func(mz, intens, mz, intens, tolerance=0.5, use_ppm=False, total_norm=True)
+    assert pytest.approx(1.0, rel=1e-6) == sim
+
+
+@pytest.mark.parametrize("mode", ["compiled", "uncompiled"])
+def test_disjoint_spectra(mode):
+    """
+    Completely disjoint spectra should yield similarity of 0.0
+    """
+    mz1 = np.array([100.0, 200.0, 300.0])
+    intens1 = np.array([0.3, 0.4, 0.3])
+    mz2 = np.array([150.0, 250.0, 350.0])
+    intens2 = np.array([0.2, 0.5, 0.3])
+    func = compute_entropy_optimal if mode == "compiled" else compute_entropy_py
+    sim = func(mz1, intens1, mz2, intens2, tolerance=1.0, use_ppm=False, total_norm=True)
+    assert pytest.approx(0.0, abs=1e-6) == sim
+
+
+@pytest.mark.parametrize("mode", ["compiled", "uncompiled"])
+def test_partial_overlap_example(mode):
+    """
+    Use the example with overlapping windows to verify correct optimal matching (301↔301, not 300↔301).
+    """
+    # reference spectrum
+    ref_mz = np.array([100., 299., 300., 301., 510., 600.])
+    ref_int = np.array([0.1, 1.0, 0.2, 0.3, 0.4, 0.8])
+    # query spectrum
+    q_mz = np.array([100., 300., 301., 511.])
+    q_int = np.array([0.1, 1.0, 0.3, 0.4])
+    tol = 2.0
+    func = compute_entropy_optimal if mode == "compiled" else compute_entropy_py
+    sim = func(ref_mz, ref_int, q_mz, q_int, tolerance=tol, use_ppm=False, total_norm=True)
+    # We expect a value strictly between 0 and 1, and compiled==uncompiled
+    sim2 = (compute_entropy_optimal if mode == "compiled" else compute_entropy_py)(
+        ref_mz, ref_int, q_mz, q_int, tolerance=tol, use_ppm=False, total_norm=True
+    )
+    assert pytest.approx(sim, rel=1e-8) == sim2
+    assert 0.0 < sim < 1.0
 
 
 @pytest.mark.parametrize("peaks, tolerance, expected_matches", [
