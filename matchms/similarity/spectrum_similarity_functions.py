@@ -8,7 +8,6 @@ from numba.typed import List
 def collect_peak_pairs(spec1: np.ndarray, spec2: np.ndarray,
                        tolerance: float, shift: float = 0, mz_power: float = 0.0,
                        intensity_power: float = 1.0):
-    # pylint: disable=too-many-arguments
     """Find matching pairs between two spectra.
 
     Args
@@ -73,6 +72,52 @@ def find_matches(spec1_mz: np.ndarray, spec2_mz: np.ndarray,
     matches = List()
     for peak1_idx in range(spec1_mz.shape[0]):
         mz = spec1_mz[peak1_idx]
+        low_bound = mz - tolerance
+        high_bound = mz + tolerance
+        for peak2_idx in range(lowest_idx, spec2_mz.shape[0]):
+            mz2 = spec2_mz[peak2_idx] + shift
+            if mz2 > high_bound:
+                break
+            if mz2 < low_bound:
+                lowest_idx = peak2_idx + 1
+            else:
+                matches.append((peak1_idx, peak2_idx))
+    return matches
+
+
+@njit
+def find_matches_ppm(
+    spec1_mz: np.ndarray,
+    spec2_mz: np.ndarray,
+    tolerance_ppm: float,
+    shift: float = 0
+    ) -> List:
+    """Faster search for matching peaks.
+    Makes use of the fact that spec1 and spec2 contain ordered peak m/z (from
+    low to high m/z).
+
+    Parameters
+    ----------
+    spec1_mz:
+        Spectrum peak m/z values as numpy array. Peak mz values must be ordered.
+    spec2_mz:
+        Spectrum peak m/z values as numpy array. Peak mz values must be ordered.
+    tolerance_ppm
+        Peaks will be considered a match within ppm based tolerance.
+    shift
+        Shift peaks of second spectra by shift. The default is 0.
+
+    Returns
+    -------
+    matches
+        List containing entries of type (idx1, idx2).
+
+    """
+    lowest_idx = 0
+    matches = List()
+    for peak1_idx in range(spec1_mz.shape[0]):
+        mz = spec1_mz[peak1_idx]
+        tolerance = mz * 1e-6 * tolerance_ppm
         low_bound = mz - tolerance
         high_bound = mz + tolerance
         for peak2_idx in range(lowest_idx, spec2_mz.shape[0]):
