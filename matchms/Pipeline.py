@@ -183,7 +183,7 @@ class Pipeline:
         assert set(self.__workflow.keys()) == expected_keys
         check_score_computation(score_computations=self.score_computations)
 
-    def run(self, query_files, reference_files=None, cleaned_query_file=None, cleaned_reference_file=None):
+    def run(self, query_files, reference_files=None, cleaned_query_file=None, cleaned_reference_file=None, create_report=True):
         """Execute the defined Pipeline workflow.
 
         This method will execute all steps of the workflow.
@@ -208,7 +208,7 @@ class Pipeline:
         self.write_to_logfile(f"Time: {str(datetime.now())}")
         # Process query spectra
         spectra, report = self.processing_queries.process_spectra(
-            self._spectra_queries, progress_bar=self.progress_bar, cleaned_spectra_file=cleaned_query_file
+            self._spectra_queries, progress_bar=self.progress_bar, cleaned_spectra_file=cleaned_query_file, create_report=create_report
         )
         self._spectra_queries = spectra
         self.write_to_logfile(str(report))
@@ -218,7 +218,7 @@ class Pipeline:
         # Process reference spectra (if necessary)
         if self.is_symmetric is False:
             self._spectra_references, report = self.processing_references.process_spectra(
-                self._spectra_references, progress_bar=self.progress_bar, cleaned_spectra_file=cleaned_reference_file
+                self._spectra_references, progress_bar=self.progress_bar, cleaned_spectra_file=cleaned_reference_file, create_report=create_report
             )
             self.write_to_logfile(str(report))
             if cleaned_reference_file is not None:
