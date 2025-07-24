@@ -1,7 +1,6 @@
 import filecmp
-from pathlib import Path
 import os
-
+from pathlib import Path
 import numpy as np
 from matchms.exporting import save_as_mzspeclib
 from ..builder_Spectrum import SpectrumBuilder
