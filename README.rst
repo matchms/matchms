@@ -165,11 +165,11 @@ Ecosystem compatibility
      - ms2query Status
    * - .. image:: https://img.shields.io/badge/numpy-1.25-lightgrey?logo=numpy :alt: numpy
      - .. image:: https://img.shields.io/badge/spec2vec-0.8.0-red
-     - .. image:: https://img.shields.io/badge/ms2deepscore-2.5.2-green
+     - .. image:: https://img.shields.io/badge/ms2deepscore-2.5.3-green
      - .. image:: https://img.shields.io/badge/ms2query-1.5.4-red
    * - .. image:: https://img.shields.io/badge/numpy-2.1-lightgrey?logo=numpy :alt: numpy
      - .. image:: https://img.shields.io/badge/spec2vec-0.8.0-red
-     - .. image:: https://img.shields.io/badge/ms2deepscore-2.5.2-green
+     - .. image:: https://img.shields.io/badge/ms2deepscore-2.5.3-green
      - .. image:: https://img.shields.io/badge/ms2query-1.5.4-red
 
 .. compatibility matrix end
