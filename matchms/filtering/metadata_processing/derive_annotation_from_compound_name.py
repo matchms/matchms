@@ -27,10 +27,12 @@ def derive_annotation_from_compound_name(
     mass_tolerance: float = 0.1,
     clone: Optional[bool] = True,
 ) -> Optional[SpectrumType]:
-    """Adds smiles, inchi, inchikey based on compound name by searching pubchem
+    """Adds inchi, inchikey based on compound name by searching pubchem
+    smiles is not supported anymore by pubchempy, see https://github.com/matchms/matchms/issues/823
+    Smiles can be derived from inchi, by running the filter derive_smiles_from_inchi
 
     This filter is only run, if there is not yet a valid smiles or inchi in the metadata.
-    The smiles, inchi and inchikey are only added if the found annotation is close enough to the parent mass.
+    The inchi and inchikey are only added if the found annotation is close enough to the parent mass.
 
     Parameters
     ----------
