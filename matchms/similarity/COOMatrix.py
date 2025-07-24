@@ -32,5 +32,12 @@ class COOMatrix:
         elif isinstance(scores, np.ndarray):
             self.scores = scores
 
+    def to_dense_matrix(self, nr_of_rows, nr_of_columns) -> np.ndarray:
+        array = np.zeros((nr_of_rows, nr_of_columns),
+                         dtype=self.scores.dtype)
+        if len(self.scores) > 0:
+            array[self.row, self.column] = self.scores.reshape(-1)
+        return array
+
     def __str__(self):
         return f"COOMatrix({self.row}, {self.column}, {self.scores})"
