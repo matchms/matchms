@@ -1,5 +1,6 @@
 import filecmp
 import os
+from pathlib import Path
 import numpy as np
 from matchms.exporting import save_as_mzspeclib
 from ..builder_Spectrum import SpectrumBuilder
@@ -48,7 +49,8 @@ def test_has_analyte(tmp_path):
 
     outpath = tmp_path / "test.mzspeclib"
     save_as_mzspeclib([spectrum], outpath)
-    expected = 'tests/testdata/Hydrogen_chloride.mzspeclib'
+    current_dir = Path(__file__).parent
+    expected = os.path.join(current_dir, "../testdata/Hydrogen_chloride.mzspeclib")
     assert filecmp.cmp(outpath, expected)
 
 
@@ -77,7 +79,7 @@ def test_peak_comments(tmp_path):
     metadata = {'peak_comments': {35.7: 'test'}}
     spectrum = SpectrumBuilder().with_mz(mz).with_intensities(intensities).with_metadata(metadata).build()
     outpath = tmp_path / "test.mzspeclib"
-    
+
     save_as_mzspeclib([spectrum], outpath)
     with open(outpath, 'r', encoding='UTF-8') as file:
         lines = file.readlines()
@@ -90,5 +92,5 @@ def test_has_attributes_with_units(tmp_path):
 
     with open(outpath, 'r', encoding='UTF-8') as file:
         lines = file.readlines()
-        assert '[1]MS:1000045|collision energy=70\n' in lines    
-        assert '[1]UO:0000000|unit=UO:0000266|electronvolt\n' in lines    
+        assert '[1]MS:1000045|collision energy=70\n' in lines
+        assert '[1]UO:0000000|unit=UO:0000266|electronvolt\n' in lines
