@@ -1,6 +1,6 @@
 import filecmp
-import os
 from pathlib import Path
+import os
 
 import numpy as np
 from matchms.exporting import save_as_mzspeclib
