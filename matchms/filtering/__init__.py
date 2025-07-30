@@ -135,12 +135,13 @@ from matchms.filtering.peak_processing.select_by_intensity import select_by_inte
 from matchms.filtering.peak_processing.select_by_mz import select_by_mz
 from matchms.filtering.peak_processing.select_by_relative_intensity import select_by_relative_intensity
 from matchms.filtering.SpeciesString import SpeciesString
-
+from matchms.filtering.metadata_processing.add_precursor_formula import add_precursor_formula
 
 __all__ = [
     "add_compound_name",
     "add_fingerprint",
     "add_parent_mass",
+    "add_precursor_formula",
     "add_precursor_mz",
     "add_retention_index",
     "add_retention_time",
