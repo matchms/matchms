@@ -58,6 +58,7 @@ ALL_FILTERS = [msfilters.require_correct_ms_level,
                msfilters.require_minimum_number_of_peaks,
                msfilters.require_maximum_number_of_peaks,
                msfilters.require_minimum_number_of_high_peaks,
+               msfilters.add_precursor_formula,
                msfilters.add_fingerprint,
                ]
 
