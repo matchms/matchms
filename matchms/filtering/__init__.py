@@ -73,6 +73,7 @@ from matchms.filtering.default_filters import default_filters
 from matchms.filtering.metadata_processing.add_compound_name import add_compound_name
 from matchms.filtering.metadata_processing.add_fingerprint import add_fingerprint
 from matchms.filtering.metadata_processing.add_parent_mass import add_parent_mass
+from matchms.filtering.metadata_processing.add_precursor_formula import add_precursor_formula
 from matchms.filtering.metadata_processing.add_precursor_mz import add_precursor_mz
 from matchms.filtering.metadata_processing.add_retention import add_retention_index, add_retention_time
 from matchms.filtering.metadata_processing.clean_adduct import clean_adduct
@@ -135,7 +136,7 @@ from matchms.filtering.peak_processing.select_by_intensity import select_by_inte
 from matchms.filtering.peak_processing.select_by_mz import select_by_mz
 from matchms.filtering.peak_processing.select_by_relative_intensity import select_by_relative_intensity
 from matchms.filtering.SpeciesString import SpeciesString
-from matchms.filtering.metadata_processing.add_precursor_formula import add_precursor_formula
+
 
 __all__ = [
     "add_compound_name",

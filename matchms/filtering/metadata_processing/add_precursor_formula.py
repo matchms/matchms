@@ -1,9 +1,12 @@
 import logging
-from typing import Optional
-
-from matchms.filtering.filter_utils.interpret_unknown_adduct import get_ions_from_adduct, split_ion, get_charge_of_adduct
 import re
 from collections import Counter
+from typing import Optional
+from matchms.filtering.filter_utils.interpret_unknown_adduct import (
+    get_ions_from_adduct,
+    split_ion,
+)
+
 
 logger = logging.getLogger("matchms")
 
