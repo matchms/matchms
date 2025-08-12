@@ -12,8 +12,8 @@ Code quality checks:
 |ReadTheDocs Badge|
 |Sonarcloud Quality Gate Badge| |Sonarcloud Coverage Badge|
 
-.. image:: readthedocs/_static/matchms_header.png
-   :target: readthedocs/_static/matchms.png
+.. image:: readthedocs/_static/matchms_logo_color_on_black_header.png
+   :target: readthedocs/_static/matchms_logo_color_on_black.png
    :align: left
    :alt: matchms
 
