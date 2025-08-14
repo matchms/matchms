@@ -3,7 +3,6 @@ import numpy as np
 from numba import njit
 from matchms.typing import SpectrumType
 from .BaseSimilarity import BaseSimilarity
-#from .spectrum_similarity_functions import collect_peak_pairs, score_best_matches_entropy
 
 
 class SpectralEntropy(BaseSimilarity):

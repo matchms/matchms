@@ -4,6 +4,7 @@ from matchms.similarity import SpectralEntropy
 from matchms.similarity.SpectralEntropy import compute_entropy_optimal
 from ..builder_Spectrum import SpectrumBuilder
 
+
 # Use non-compiled version for testing
 compute_entropy_py = compute_entropy_optimal.py_func
 
@@ -123,8 +124,9 @@ def test_partial_overlap_example(mode):
         1.0,  [[0, 1, 4], [0, 1, 4]]
     ], [
         [
-            [np.array([100, 199.8, 199.9, 200.0, 200.1, 200.2, 201.], dtype="float"), np.array([0.1, 0.1, 0.1, 0.1, 1.0, 0.1, 0.1], dtype="float")],
-            [np.array([100, 200], dtype="float"), np.array([0.1, 1.0], dtype="float")],
+            [np.array([100, 199.8, 199.9, 200.0, 200.1, 200.2, 201.], dtype="float"),
+             np.array([0.1, 0.1, 0.1, 0.1, 1.0, 0.1, 0.1], dtype="float")],
+            [np.array([100, 200.], dtype="float"), np.array([0.1, 1.0], dtype="float")],
         ],
         1.0,  [[0, 4], [0, 1]]
     ]
