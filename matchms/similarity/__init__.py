@@ -33,6 +33,7 @@ from .SpectralEntropy import SpectralEntropy
 
 
 __all__ = [
+    "BinnedEmbeddingSimilarity",
     "CosineGreedy",
     "CosineHungarian",
     "FingerprintSimilarity",
@@ -42,7 +43,6 @@ __all__ = [
     "NeutralLossesCosine",
     "ParentMassMatch",
     "PrecursorMzMatch",
-    "BinnedEmbeddingSimilarity",
     "SpectralEntropy"
 ]
 
