@@ -1,8 +1,5 @@
-import math
 import multiprocessing as mp
-import os
 import platform
-import sys
 from multiprocessing.shared_memory import SharedMemory
 from typing import List, Optional, Tuple
 import numpy as np
@@ -141,7 +138,9 @@ class FlashSpectralEntropy(BaseSimilarity):
         # identity gate
         if self.identity_precursor_tolerance is not None and pmzA is not None:
             if self.identity_use_ppm:
-                allow = abs(lib.precursor_mz[0] - pmzA) <= (self.identity_precursor_tolerance * 1e-6 * 0.5 * (lib.precursor_mz[0] + pmzA))
+                allow = abs(lib.precursor_mz[0] - pmzA) <= (
+                    self.identity_precursor_tolerance * 1e-6 * 0.5 * (lib.precursor_mz[0] + pmzA)
+                )
             else:
                 allow = abs(lib.precursor_mz[0] - pmzA) <= self.identity_precursor_tolerance
             if not (allow and np.isfinite(lib.precursor_mz[0])):
@@ -299,7 +298,14 @@ class FlashSpectralEntropy(BaseSimilarity):
             for key in metas_.keys():
                 meta = metas_[key]
                 if meta is None:
-                    setattr(lib_local, key, np.zeros(0, dtype=lib_local.dtype if "int" not in key and "spec" not in key else np.int32))
+                    setattr(
+                        lib_local,
+                        key,
+                        np.zeros(
+                            0,
+                            dtype=lib_local.dtype if "int" not in key and "spec" not in key else np.int32
+                        )
+                    )
                 else:
                     shm, arr = _from_shm(meta)
                     # Keep a reference to shm on the object to avoid premature free (attach)
@@ -320,7 +326,8 @@ class FlashSpectralEntropy(BaseSimilarity):
         # parent cleanup
         for shm in shms:
             try:
-                shm.close(); shm.unlink()
+                shm.close()
+                shm.unlink()
             except Exception:
                 pass
 
@@ -397,11 +404,15 @@ def _merge_within(peaks: np.ndarray, max_delta_da: float, dtype: np.dtype) -> np
                 cur_mz = (cur_mz * cur_int + mz[k] * inten[k]) / tot
                 cur_int = tot
             else:
-                cur_mz = mz[k]; cur_int = 0.0
+                cur_mz = mz[k]
+                cur_int = 0.0
         else:
-            new_mz.append(float(cur_mz)); new_int.append(float(cur_int))
-            cur_mz = mz[k]; cur_int = inten[k]
-    new_mz.append(float(cur_mz)); new_int.append(float(cur_int))
+            new_mz.append(float(cur_mz))
+            new_int.append(float(cur_int))
+            cur_mz = mz[k]
+            cur_int = inten[k]
+    new_mz.append(float(cur_mz))
+    new_int.append(float(cur_int))
     out = np.column_stack((np.array(new_mz, dtype=dtype), np.array(new_int, dtype=dtype)))
     return out
 
@@ -626,7 +637,8 @@ def _accumulate_nl_row(scores: np.ndarray,
             drop = s1 > s2
             if np.any(drop):
                 keep = ~drop
-                lib = lib[keep]; cols = cols[keep]
+                lib = lib[keep]
+                cols = cols[keep]
                 prod_idx_slice = prod_idx_slice[keep]
                 if lib.size == 0:
                     continue
