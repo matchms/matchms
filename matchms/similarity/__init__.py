@@ -38,7 +38,7 @@ __all__ = [
     "CosineGreedy",
     "CosineHungarian",
     "FingerprintSimilarity",
-    "FlashSpectralEntropy"
+    "FlashSpectralEntropy",
     "IntersectMz",
     "MetadataMatch",
     "ModifiedCosine",

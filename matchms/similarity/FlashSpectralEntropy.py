@@ -61,7 +61,7 @@ class FlashSpectralEntropy(BaseSimilarity):
 
     """
     is_commutative = True
-    score_datatype = np.float32  # default output dtype
+    score_datatype = np.float32
 
     def __init__(self,
                  tolerance: float = 0.02,
