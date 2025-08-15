@@ -28,7 +28,7 @@ class SpectralEntropy(BaseSimilarity):
 
         entropy = SpectralEntropy(tolerance=0.1)
         result = entropy.pair(ref, qry)
-        print(f"Entropy score = {result['score']:.3f}, matches = {result['matches']}")
+        print(f"Entropy score = {result:.3f}")
 
     """
     is_commutative = True
@@ -36,7 +36,7 @@ class SpectralEntropy(BaseSimilarity):
 
     def __init__(
         self,
-        tolerance: float = 0.1,
+        tolerance: float = 0.01,
         use_ppm: bool = False,
         total_norm: bool = True
     ):
@@ -45,7 +45,7 @@ class SpectralEntropy(BaseSimilarity):
         ----------
         tolerance:
             Matching tolerance. Interpreted in Daltons if `use_ppm` is False,
-            otherwise in ppm. Default is 0.1.
+            otherwise in ppm. Default is 0.01.
         use_ppm:
             If True, interpret `tolerance` as parts-per-million. Default is False.
         total_norm:
@@ -83,6 +83,12 @@ class SpectralEntropy(BaseSimilarity):
 
 
 @njit
+def _xlogx(x: float) -> float:
+    """Compute x*ln(x) with the convention 0*ln(0) = 0."""
+    return 0.0 if x <= 0.0 else x * np.log(x)
+
+
+@njit
 def compute_entropy_optimal(
     spec1_mz: np.ndarray,
     spec1_int: np.ndarray,
@@ -93,9 +99,17 @@ def compute_entropy_optimal(
     total_norm: bool
 ) -> float:
     """
-    Compute Jensen–Shannon entropy similarity with optimal 1:1 peak matching
+    Compute Jensen-Shannon entropy similarity with optimal 1:1 peak matching
     (via a non-crossing max-weight DP), avoiding sub-optimal "first-peak" matches.
     """
+    internal_dtype = np.float32
+
+    n1 = spec1_mz.shape[0]
+    n2 = spec2_mz.shape[0]
+
+    if n1 == 0 or n2 == 0:
+        return 0.0
+
     # Normalize intensities to probabilities p1, p2
     if total_norm:
         div1 = spec1_int.sum()
@@ -104,58 +118,63 @@ def compute_entropy_optimal(
         div1 = spec1_int.max()
         div2 = spec2_int.max()
 
-    n1 = spec1_mz.shape[0]
-    n2 = spec2_mz.shape[0]
     p1 = spec1_int / div1
     p2 = spec2_int / div2
 
-    # Pre-compute the "unmatched entropy" baseline:
-    #  Σ p1*ln2 + Σ p2*ln2 = ln(2) * (1 + 1) = 2*ln2  (since each p-vector sums to 1)
-    ln2 = np.log(2.0)
-    UE = 2.0 * ln2
+    # Rolling DP arrays: store best weight and match count
+    prev = np.zeros(n2 + 1, dtype=internal_dtype)
+    curr = np.zeros(n2 + 1, dtype=internal_dtype)
+    prev_m = np.zeros(n2 + 1, dtype=internal_dtype)
+    curr_m = np.zeros(n2 + 1, dtype=internal_dtype)
 
-    # Rolling‐array DP for maximum total "entropy‐gain" from matching
-    # weight(i,j) = reduction in entropy if you match i↔j rather than leave them unmatched:
-    #    w = -[ p1*ln(p1/(p1+p2)) + p2*ln(p2/(p1+p2)) ]
-    prev = np.zeros(n2+1, dtype=np.float64)
-    curr = np.zeros(n2+1, dtype=np.float64)
-
-    for i in range(1, n1+1):
-        mz1 = spec1_mz[i-1]
-        # ppm or Dalton tolerance for this peak
+    for i in range(1, n1 + 1):
+        mz1 = spec1_mz[i - 1]
         tol = (tolerance * 1e-6 * mz1) if use_ppm else tolerance
         low = mz1 - tol
         high = mz1 + tol
 
         curr[0] = 0.0
-        for j in range(1, n2+1):
-            # Carry forward the best of skipping one side
+        curr_m[0] = 0
+
+        s1 = p1[i - 1]
+        for j in range(1, n2 + 1):
+            # Option 1/2: skip one side (carry the better)
             a = prev[j]
-            b = curr[j-1]
-            best = a if a > b else b
+            b = curr[j - 1]
+            if a > b:
+                best = a
+                best_m = prev_m[j]
+            else:
+                best = b
+                best_m = curr_m[j - 1]
 
-            mz2 = spec2_mz[j-1]
-            if mz2 >= low and mz2 <= high:
-                # compute the match‐gain weight
-                s1 = p1[i-1]
-                s2 = p2[j-1]
-                denom = s1 + s2
-
-                # Only do log if denom > 0 (it always is unless both intensities are zero)
-                w = -(s1 * np.log(s1/denom) + s2 * np.log(s2/denom))
-                # Consider matching:
-                tmp = prev[j-1] + w
-                if tmp > best:
-                    best = tmp
+            # Option 3: match (if within tolerance)
+            mz2 = spec2_mz[j - 1]
+            if (mz2 >= low) and (mz2 <= high):
+                s2 = p2[j - 1]
+                denom = s1 + s2  # >= 0
+                if denom > 0.0:
+                    # Numerically safe xlogx form
+                    w = _xlogx(denom) - _xlogx(s1) - _xlogx(s2)
+                    tmp = prev[j - 1] + w
+                    if (tmp > best) or (tmp == best and prev_m[j - 1] + 1 > best_m):
+                        best = tmp
+                        best_m = prev_m[j - 1] + 1
 
             curr[j] = best
+            curr_m[j] = best_m
 
-        # Swap rows
+        # swap rows
         prev, curr = curr, prev
+        prev_m, curr_m = prev_m, curr_m
 
-    # prev[n2] now holds the maximum total entropy‐reduction from all matched pairs
-    total_gain = prev[n2]
+    total_gain = prev[n2]  # sum of w
+    score = total_gain / np.log(4.0)  # similarity in [0, 1]
 
-    # Reconstruct the actual entropy and similarity ---
-    entropy = UE - total_gain
-    return 1.0 - entropy / np.log(4.0)
+    # Numeric safety
+    if score < 0.0:
+        score = 0.0
+    elif score > 1.0:
+        score = 1.0
+
+    return score
