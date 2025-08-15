@@ -23,6 +23,7 @@ from .BinnedEmbeddingSimilarity import BinnedEmbeddingSimilarity
 from .CosineGreedy import CosineGreedy
 from .CosineHungarian import CosineHungarian
 from .FingerprintSimilarity import FingerprintSimilarity
+from .FlashSpectralEntropy import FlashSpectralEntropy
 from .IntersectMz import IntersectMz
 from .MetadataMatch import MetadataMatch
 from .ModifiedCosine import ModifiedCosine
@@ -37,6 +38,7 @@ __all__ = [
     "CosineGreedy",
     "CosineHungarian",
     "FingerprintSimilarity",
+    "FlashSpectralEntropy"
     "IntersectMz",
     "MetadataMatch",
     "ModifiedCosine",
@@ -58,7 +60,7 @@ def get_similarity_function_by_name(similarity_function_name: str):
     """
     names = __all__
     functions = [BinnedEmbeddingSimilarity, CosineGreedy, CosineHungarian, FingerprintSimilarity,
-                 IntersectMz, MetadataMatch, ModifiedCosine, NeutralLossesCosine,
+                 FlashSpectralEntropy, IntersectMz, MetadataMatch, ModifiedCosine, NeutralLossesCosine,
                  ParentMassMatch, PrecursorMzMatch, SpectralEntropy]
 
     assert similarity_function_name in names, f"Unknown similarity function: {similarity_function_name}"
