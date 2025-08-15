@@ -73,7 +73,10 @@ def test_xlog2_helpers(vals):
     assert np.allclose(got_vec, expected, rtol=0, atol=1e-7)
 
     for v in vals:
-        assert math.isclose(_xlog2_scalar(float(v), np.float32), float(v * math.log2(v)) if v > 0 else 0.0, rel_tol=0, abs_tol=1e-12)
+        assert math.isclose(
+            _xlog2_scalar(float(v), np.float32),
+            float(v * math.log2(v)) if v > 0 else 0.0, rel_tol=0, abs_tol=1e-12
+            )
 
 @pytest.mark.parametrize("m1,m2,tol,use_ppm,expect", [
     (100.0, 100.015, 0.02, False, True),
@@ -225,8 +228,10 @@ def test_dtype_output_and_commutativity():
     f32 = FlashSpectralEntropy(dtype=np.float32, remove_precursor=False, noise_cutoff=0.0)
     f64 = FlashSpectralEntropy(dtype=np.float64, remove_precursor=False, noise_cutoff=0.0)
 
-    s_ab_32 = f32.pair(a, b); s_ba_32 = f32.pair(b, a)
-    s_ab_64 = f64.pair(a, b); s_ba_64 = f64.pair(b, a)
+    s_ab_32 = f32.pair(a, b)
+    s_ba_32 = f32.pair(b, a)
+    s_ab_64 = f64.pair(a, b)
+    s_ba_64 = f64.pair(b, a)
 
     assert s_ab_32.dtype == np.float32 and s_ba_32.dtype == np.float32
     assert s_ab_64.dtype == np.float64 and s_ba_64.dtype == np.float64
