@@ -156,6 +156,24 @@ class FlashSpectralEntropy(BaseSimilarity):
                array_type: str = "numpy",
                is_symmetric: bool = False,
                n_jobs: int = -1) -> np.ndarray:
+        """
+        Calculate matrix of Flash entropy similarity scores.
+        
+        Parameters:
+        ----------
+        references:
+            List of reference spectra.
+        queries:
+            List of query spectra.
+        array_type:
+            Specify the output array type. Can be "numpy" or "sparse".
+            Default is "numpy" and will return a numpy array. "sparse" will return a SparseStacked COO-style array.
+        is_symmetric:
+            If True, the matrix will be symmetric (i.e., references and queries must have the same length).
+            Here has no consequence on runtime.
+        n_jobs:
+            Number of parallel jobs to run. Default is set to -1, which means that all available CPUs minus one will be used.
+        """
         n_rows = len(references)
         n_cols = len(queries)
 
