@@ -171,7 +171,8 @@ class FlashSpectralEntropy(BaseSimilarity):
             If True, the matrix will be symmetric (i.e., references and queries must have the same length).
             Here has no consequence on runtime.
         n_jobs:
-            Number of parallel jobs to run. Default is set to -1, which means that all available CPUs minus one will be used.
+            Number of parallel jobs to run.
+            Default is set to -1, which means that all available CPUs minus one will be used.
         """
         n_rows = len(references)
         n_cols = len(queries)
