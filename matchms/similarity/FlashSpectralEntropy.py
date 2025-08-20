@@ -292,32 +292,10 @@ class FlashSpectralEntropy(BaseSimilarity):
                 shms.append(shm)
             metas[key] = meta
 
-        # initializer: reconstruct lib & cfg in worker
-        def _init_spawn(metas_, cfg_, dtype_str):
-            lib_local = _LibraryIndex(np.dtype(dtype_str))
-            # reconstruct arrays
-            for key in metas_.keys():
-                meta = metas_[key]
-                if meta is None:
-                    setattr(
-                        lib_local,
-                        key,
-                        np.zeros(
-                            0,
-                            dtype=lib_local.dtype if "int" not in key and "spec" not in key else np.int32
-                        )
-                    )
-                else:
-                    shm, arr = _from_shm(meta)
-                    # Keep a reference to shm on the object to avoid premature free (attach)
-                    setattr(lib_local, f"_{key}_shm", shm)
-                    setattr(lib_local, key, arr)
-            _set_globals(lib_local, cfg_)
-
         worker = _row_task_dense #  if array_type == "numpy" else _row_task_sparse (TODO?)
         ctx = mp.get_context("spawn")
         with ctx.Pool(processes=n_jobs,
-                      initializer=_init_spawn,
+                      initializer=_init_spawn_worker,
                       initargs=(metas, cfg, str(self.dtype))) as pool:
             for result in tqdm(pool.imap(worker, row_inputs, chunksize=4),
                                total=n_rows, desc=f"Flash entropy (parallel x{n_jobs})"):
@@ -714,3 +692,29 @@ def _row_task_sparse(args):
     _, row = _row_task_dense((i, q_arr, q_pmz))
     nz = np.nonzero(row)[0]
     return (i, nz.astype(np.int64, copy=False), row[nz])
+
+
+def _init_spawn_worker(metas_, cfg_, dtype_str):
+    """Picklable initializer for Windows spawn."""
+    lib_local = _LibraryIndex(np.dtype(dtype_str))
+
+    def _from_shm(meta):
+        shm = SharedMemory(name=meta["name"])
+        arr = np.ndarray(meta["shape"], dtype=np.dtype(meta["dtype"]), buffer=shm.buf)
+        return shm, arr
+
+    for key, meta in metas_.items():
+        if meta is None:
+            if key in ("peaks_spec_idx", "nl_spec_idx"):
+                arr = np.zeros(0, dtype=np.int32)
+            elif key in ("nl_product_idx",):
+                arr = np.zeros(0, dtype=np.int64)
+            else:
+                arr = np.zeros(0, dtype=lib_local.dtype)
+            setattr(lib_local, key, arr)
+        else:
+            shm, arr = _from_shm(meta)
+            setattr(lib_local, f"_{key}_shm", shm)  # keep handle alive
+            setattr(lib_local, key, arr)
+
+    _set_globals(lib_local, cfg_)
