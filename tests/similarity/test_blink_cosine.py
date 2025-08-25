@@ -1,6 +1,7 @@
 # test_blinkcosine.py
 import numpy as np
 import pytest
+from matchms.similarity import CosineGreedy  # for comparision
 from matchms.similarity.BlinkCosine import BlinkCosine
 from ..builder_Spectrum import SpectrumBuilder
 
@@ -234,3 +235,28 @@ def test_pair_numba_vs_fallback_identical(use_numba_pair):
 
     assert out_a["score"] == pytest.approx(out_b["score"], 1e-12)
     assert out_a["matches"] == out_b["matches"]
+
+
+def test_blinkcosine_upper_bound_cosinegreedy():
+    """BLINK similarity should always be >= CosineGreedy for the same tolerance."""
+    builder = SpectrumBuilder()
+
+    spectrum_1 = builder.with_mz(np.array([100, 200, 300, 400], dtype=float)).with_intensities(
+        np.array([0.5, 0.2, 1.0, 0.3], dtype=float)
+    ).build()
+
+    spectrum_2 = builder.with_mz(np.array([98, 199, 305, 410], dtype=float)).with_intensities(
+        np.array([0.4, 0.3, 0.8, 0.2], dtype=float)
+    ).build()
+
+    tolerance = 5.0
+    cg = CosineGreedy(tolerance=tolerance)
+    bc = BlinkCosine(tolerance=tolerance, bin_width=1.0, prefilter=False)
+
+    score_cg = cg.pair(spectrum_1, spectrum_2)["score"]
+    score_bc = bc.pair(spectrum_1, spectrum_2)["score"]
+
+    # BLINK should give an equal or higher similarity score
+    assert score_bc >= score_cg - 1e-12, \
+        f"Expected BlinkCosine score {score_bc} to be >= CosineGreedy {score_cg}"
+    
