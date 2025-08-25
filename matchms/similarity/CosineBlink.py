@@ -326,11 +326,6 @@ class BlinkCosine(BaseSimilarity):
                 prec = spectrum.get("precursor_mz")
             except Exception:
                 pass
-            if prec is None:
-                try:
-                    prec = spectrum.metadata.get("precursor_mz")
-                except Exception:
-                    pass
             if prec is not None:
                 mask = mz <= float(prec)
                 mz = mz[mask]
