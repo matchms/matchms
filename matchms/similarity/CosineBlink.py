@@ -13,28 +13,51 @@ def _windowed_sum_numba(source_bins: np.ndarray, source_vals: np.ndarray,
                         query_positions: np.ndarray, R: int) -> np.ndarray:
     """
     Two-pointer windowed sum for sorted integer arrays.
-    Sum over source_vals[j] where source_bins[j] ∈ [pos-R, pos+R] for each pos in query_positions.
+
+    For each position `pos` in `query_positions`, compute:
+        sum(source_vals[j]) where source_bins[j] ∈ [pos - R, pos + R]
+
+    Parameters
+    ----------
+    source_bins : np.ndarray
+        Sorted 1D array of integer bin indices (ascending).
+    source_vals : np.ndarray
+        1D array of values aligned to `source_bins`.
+    query_positions : np.ndarray
+        1D array of integer bin positions at which to evaluate the windowed sum.
+    R : int
+        Window radius in bins (inclusive on both sides).
+
+    Returns
+    -------
+    np.ndarray
+        1D array of windowed sums, same length/order as `query_positions`.
     """
-    n = source_bins.size
+    n_bins = source_bins.size
     m = query_positions.size
     out = np.zeros(m, dtype=np.float64)
-    if n == 0 or m == 0:
+    if n_bins == 0 or m == 0:
         return out
-    l = 0
-    r = 0
+
+    left_idx = 0
+    right_idx = 0
     acc = 0.0
+
     for i in range(m):
         pos = query_positions[i]
         left_bound = pos - R
         right_bound = pos + R
+
         # expand right edge
-        while r < n and source_bins[r] <= right_bound:
-            acc += source_vals[r]
-            r += 1
+        while right_idx < n_bins and source_bins[right_idx] <= right_bound:
+            acc += source_vals[right_idx]
+            right_idx += 1
+
         # contract left edge
-        while l < r and source_bins[l] < left_bound:
-            acc -= source_vals[l]
-            l += 1
+        while left_idx < right_idx and source_bins[left_idx] < left_bound:
+            acc -= source_vals[left_idx]
+            left_idx += 1
+
         out[i] = acc
     return out
 
@@ -52,18 +75,17 @@ class BlinkCosine(BaseSimilarity):
 
     Parameters
     ----------
-    tolerance : float
+    tolerance:
         True m/z tolerance (Da). Peaks within +/- tolerance are considered matches. Default 0.01.
-    bin_width : float
+    bin_width:
         Discretization width (Da). Default 0.001 (1 mDa). Effective radius R=floor(tolerance/bin_width).
-    mz_power : float
+    mz_power:
         Power for mz weighting (intensity *= mz**mz_power). Default 0.0.
-    intensity_power : float
+    intensity_power:
         Power for intensity weighting before normalization. Default 1.0 (set 0.5 for sqrt scaling).
-    clip_to_one : bool
+    clip_to_one:
         Clip score to [0,1]. Default True.
 
-    # Extras (not sure what to keep, use_numba could go out)
     use_numba : bool
         Use numba-accelerated pairwise kernel when available. Default True.
     prefilter : bool
@@ -273,7 +295,18 @@ class BlinkCosine(BaseSimilarity):
     # --------------------------- Internal helpers ---------------------------
 
     def _prefilter_arrays(self, mz: np.ndarray, intens: np.ndarray, spectrum: SpectrumType):
-        """Apply BLINK-like prefiltering on raw mz/intensity arrays."""
+        """
+        Apply BLINK-like prefiltering on raw m/z and intensity arrays.
+
+        Parameters
+        ----------
+        mz : np.ndarray
+            1D array of m/z values.
+        intens : np.ndarray
+            1D array of intensities aligned with `mz`.
+        spectrum : SpectrumType
+            Spectrum object (used to read optional metadata like precursor m/z).
+        """
         if mz.size == 0:
             return mz, intens
 
@@ -315,7 +348,27 @@ class BlinkCosine(BaseSimilarity):
         return mz, intens
 
     def _prep_spectrum(self, spectrum: SpectrumType):
-        """Return (unique_bins, normalized_values, counts_per_bin) for one spectrum."""
+        """
+        Prepare a spectrum for scoring.
+
+        Steps
+        -----
+        1) Optional prefiltering
+        2) Optional m/z and intensity weighting
+        3) Integer binning to nearest bin (defined by `bin_width`)
+        4) Aggregation of duplicate bins
+        5) L2 normalization of binned intensities
+
+        Parameters
+        ----------
+        spectrum : SpectrumType
+            Spectrum object with `.peaks.mz` and `.peaks.intensities`.
+
+        Returns
+        -------
+        (np.ndarray, np.ndarray, np.ndarray)
+            Tuple of (unique_bins, normalized_values, counts_per_bin).
+        """
         mz = spectrum.peaks.mz
         intens = spectrum.peaks.intensities
 
@@ -354,7 +407,25 @@ class BlinkCosine(BaseSimilarity):
 
     def _windowed_sum(self, source_bins: np.ndarray, source_vals: np.ndarray,
                       query_positions: np.ndarray, R: int) -> np.ndarray:
-        """Windowed sum, using numba if available, else vectorized prefix sums."""
+        """
+        Windowed sum helper: numba-accelerated where available, else vectorized prefix sums.
+
+        Parameters
+        ----------
+        source_bins : np.ndarray
+            Sorted 1D array of integer bin indices (ascending).
+        source_vals : np.ndarray
+            1D array of values aligned to `source_bins`.
+        query_positions : np.ndarray
+            1D array of integer bin positions at which to evaluate the windowed sum.
+        R : int
+            Window radius in bins (inclusive on both sides).
+
+        Returns
+        -------
+        np.ndarray
+            1D array of windowed sums at `query_positions`.
+        """
         if source_bins.size == 0 or query_positions.size == 0:
             return np.zeros(query_positions.size, dtype=np.float64)
         if self.use_numba:
@@ -371,7 +442,23 @@ class BlinkCosine(BaseSimilarity):
 
     @staticmethod
     def _build_intensity_csr(prepped_list, n_rows: int, offset: int):
-        """Build CSR (rows=bins, cols=spectra) for intensities."""
+        """
+        Build CSR matrix (rows=bins, cols=spectra) for intensities.
+
+        Parameters
+        ----------
+        prepped_list : list of tuples
+            Each item is (bins, vals, counts) as returned by `_prep_spectrum`.
+        n_rows : int
+            Number of bin rows in the global axis.
+        offset : int
+            Row offset to shift bin indices into [0, n_rows).
+
+        Returns
+        -------
+        scipy.sparse.csr_matrix
+            CSR with shape (n_rows, n_spectra).
+        """
         col_indices = []
         row_indices = []
         data = []
@@ -392,7 +479,22 @@ class BlinkCosine(BaseSimilarity):
     def _expand_column_blur(rows: np.ndarray, vals: np.ndarray, R: int, n_rows: int):
         """
         Expand one column's nonzeros to ±R neighbors (box blur).
-        Returns (rows_expanded, data_expanded) with out-of-bounds removed.
+
+        Parameters
+        ----------
+        rows : np.ndarray
+            Row indices (bins) of nonzero entries for a single column.
+        vals : np.ndarray
+            Values aligned with `rows`.
+        R : int
+            Blur radius in bins. If 0, returns inputs unchanged.
+        n_rows : int
+            Total number of rows (for bounds checking).
+
+        Returns
+        -------
+        (np.ndarray, np.ndarray)
+            (rows_expanded, data_expanded) with out-of-bounds rows removed.
         """
         if rows.size == 0:
             return rows, vals
@@ -409,7 +511,25 @@ class BlinkCosine(BaseSimilarity):
         return neigh[mask], data[mask]
 
     def _build_blurred_csr(self, prepped_list, n_rows: int, offset: int, R: int):
-        """Build CSR (rows=bins, cols=batch_size) of blurred, normalized query columns."""
+        """
+        Build CSR (rows=bins, cols=batch_size) of blurred, normalized query columns.
+
+        Parameters
+        ----------
+        prepped_list : list of tuples
+            Batch of prepped spectra, each as (bins, vals, counts).
+        n_rows : int
+            Number of rows in the global bin axis.
+        offset : int
+            Offset applied to bins -> rows.
+        R : int
+            Blur radius in bins.
+
+        Returns
+        -------
+        scipy.sparse.csr_matrix
+            CSR matrix (n_rows, batch_size) with duplicated entries summed.
+        """
         rows_all = []
         cols_all = []
         data_all = []
