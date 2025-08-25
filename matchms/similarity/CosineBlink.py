@@ -1,11 +1,9 @@
-from typing import Tuple, List, Optional
+from typing import List, Optional, Tuple
 import numpy as np
+from numba import njit  # TODO: check if numba is necessary/useful here
 from scipy.sparse import coo_matrix, csr_matrix
 from matchms.typing import SpectrumType
 from .BaseSimilarity import BaseSimilarity
-
-# ---- Optional numba acceleration (pairwise path) --> not much effect? (TODO) ----
-from numba import njit
 
 
 @njit(cache=True, fastmath=True)
