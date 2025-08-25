@@ -8,7 +8,9 @@ from ...Fragments import Fragments
 logger = logging.getLogger("matchms")
 
 
-def normalize_intensities(spectrum_in: SpectrumType, clone: Optional[bool] = True) -> Optional[SpectrumType]:
+def normalize_intensities(
+    spectrum_in: SpectrumType, clone: Optional[bool] = True, scaling: Optional[tuple[float, float]] = None
+) -> Optional[SpectrumType]:
     """Normalize intensities of peaks to unit height.
 
     Parameters
@@ -17,6 +19,9 @@ def normalize_intensities(spectrum_in: SpectrumType, clone: Optional[bool] = Tru
         Input spectrum.
     clone:
         Optionally clone the Spectrum.
+    scaling:
+        Optional tuple (min, max) to scale intensities to specific range.
+        If None, normalizes to 0-1 range.
 
     Returns
     -------
@@ -42,6 +47,15 @@ def normalize_intensities(spectrum_in: SpectrumType, clone: Optional[bool] = Tru
     # Normalize peak intensities
     mz, intensities = spectrum.peaks.mz, spectrum.peaks.intensities
     normalized_intensities = intensities / max_intensity
-    spectrum.peaks = Fragments(mz=mz, intensities=normalized_intensities)
 
+    # Scale intensities to specific range
+    if scaling:
+        min_val, max_val = scaling
+        scaled_intensities = np.interp(
+            normalized_intensities, (normalized_intensities.min(), normalized_intensities.max()), (min_val, max_val)
+        )
+    else:
+        scaled_intensities = normalized_intensities
+
+    spectrum.peaks = Fragments(mz=mz, intensities=scaled_intensities)
     return spectrum
