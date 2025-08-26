@@ -1,6 +1,5 @@
 import numpy as np
 import pytest
-
 from matchms.filtering import remove_precursor_mz
 from matchms.Fragments import Fragments
 from ..builder_Spectrum import SpectrumBuilder
