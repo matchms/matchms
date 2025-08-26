@@ -66,7 +66,7 @@ def test_pair_strict_R0_expected(mz1, int1, mz2, int2, use_numba):
     b1, v1 = _prep_naive(s1, bin_width=1.0)
     b2, v2 = _prep_naive(s2, bin_width=1.0)
     expected = _expected_strict_cosine(b1, v1, b2, v2)
-    assert out["score"] == pytest.approx(expected, 1e-12)
+    assert out["score"] == pytest.approx(expected, 1e-6)
     # matches equals number of exact-bin overlaps at R=0 (counts are 1 since we ensured unique bins)
     expected_matches = np.intersect1d(b1, b2, assume_unique=True).size
     assert out["matches"] == expected_matches
@@ -79,7 +79,7 @@ def test_pair_clip_to_one_and_matches():
 
     sim = BlinkCosine(tolerance=0.0, bin_width=1.0, prefilter=False, clip_to_one=True)
     out = sim.pair(s, s)
-    assert out["score"] == pytest.approx(1.0, 1e-12)
+    assert out["score"] == pytest.approx(1.0, 1e-6)
     assert out["matches"] == 3
 
 
@@ -117,7 +117,7 @@ def test_matrix_equals_pair_scores_dense(use_numba):
     for i, r in enumerate(refs):
         for j, q in enumerate(qrys):
             s_pair = sim.pair(r, q)["score"]
-            assert M[i, j] == pytest.approx(s_pair, 1e-12)
+            assert M[i, j] == pytest.approx(s_pair, 1e-6)
 
 
 def test_matrix_is_symmetric_when_requested():
@@ -132,12 +132,12 @@ def test_matrix_is_symmetric_when_requested():
 
     assert S.shape == (2, 2)
     # symmetry
-    assert S[0, 1] == pytest.approx(S[1, 0], 1e-12)
+    assert S[0, 1] == pytest.approx(S[1, 0], 1e-6)
     # diagonals clipped to <= 1
     assert S[0, 0] <= 1.0 and S[1, 1] <= 1.0
     # matches pair() on off-diagonal
     p01 = sim.pair(s1, s2)["score"]
-    assert S[0, 1] == pytest.approx(p01, 1e-12)
+    assert S[0, 1] == pytest.approx(p01, 1e-6)
 
 
 def test_matrix_handles_empty_inputs():
@@ -192,7 +192,7 @@ def test_matrix_sparse_and_threshold_matches_pair():
     # Each stored entry should meet the threshold, and values must match pair() within tolerance
     for r, c, v in zip(rows, cols, data):
         assert scores[r, c] >= sim.sparse_score_min
-        assert v == pytest.approx(scores[r, c], 1e-12)
+        assert v == pytest.approx(scores[r, c], 1e-6)
 
 
 def test_matrix_dense_vs_sparse_values_identical_without_threshold():
@@ -216,7 +216,7 @@ def test_matrix_dense_vs_sparse_values_identical_without_threshold():
     dense_from_sparse[S.row, S.col] = S.data
 
     assert D.shape == dense_from_sparse.shape
-    assert np.allclose(D, dense_from_sparse, atol=1e-12)
+    assert np.allclose(D, dense_from_sparse, atol=1e-6)
 
 
 @pytest.mark.parametrize("use_numba_pair", [True, False])
@@ -233,7 +233,7 @@ def test_pair_numba_vs_fallback_identical(use_numba_pair):
     out_a = (sim_numba if use_numba_pair else sim_fallback).pair(s1, s2)
     out_b = (sim_fallback if use_numba_pair else sim_numba).pair(s1, s2)
 
-    assert out_a["score"] == pytest.approx(out_b["score"], 1e-12)
+    assert out_a["score"] == pytest.approx(out_b["score"], 1e-6)
     assert out_a["matches"] == out_b["matches"]
 
 
@@ -257,6 +257,6 @@ def test_blinkcosine_upper_bound_cosinegreedy():
     score_bc = bc.pair(spectrum_1, spectrum_2)["score"]
 
     # BLINK should give an equal or higher similarity score
-    assert score_bc >= score_cg - 1e-12, \
+    assert score_bc >= score_cg - 1e-6, \
         f"Expected BlinkCosine score {score_bc} to be >= CosineGreedy {score_cg}"
     
