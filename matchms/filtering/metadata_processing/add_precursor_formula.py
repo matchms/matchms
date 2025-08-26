@@ -64,7 +64,7 @@ def convert_atom_counter_to_str(atom_counter):
     # Filter out non-positive counts defensively
     filtered = {el: int(cnt) for el, cnt in atom_counter.items() if cnt > 0}
 
-    parts: List[str] = []
+    parts: list[str] = []
     # C then H
     if "C" in filtered:
         c = filtered.pop("C")
