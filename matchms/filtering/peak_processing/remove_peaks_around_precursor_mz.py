@@ -8,7 +8,7 @@ def remove_peaks_around_precursor_mz(
     spectrum_in: SpectrumType, mz_tolerance: float = 17, clone: Optional[bool] = True
 ) -> Optional[SpectrumType]:
     """Remove peaks that are within mz_tolerance (in Da) of
-       the precursor mz, exlcuding the precursor peak.
+       the precursor mz, excluding the precursor peak.
 
     Parameters
     ----------
@@ -42,6 +42,7 @@ def remove_peaks_around_precursor_mz(
     assert mz_tolerance >= 0, "mz_tolerance must be a positive scalar."
 
     mzs, intensities = spectrum.peaks.mz, spectrum.peaks.intensities
+    # TODO: the following line is not very robust (e.g., float precision issues)
     peaks_to_remove = (np.abs(precursor_mz - mzs) <= mz_tolerance) & (mzs != precursor_mz)
     new_mzs, new_intensities = mzs[~peaks_to_remove], intensities[~peaks_to_remove]
     spectrum.peaks = Fragments(mz=new_mzs, intensities=new_intensities)
