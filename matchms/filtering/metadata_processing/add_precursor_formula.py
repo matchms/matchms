@@ -12,7 +12,8 @@ logger = logging.getLogger("matchms")
 
 
 def add_precursor_formula(spectrum_in, clone: Optional[bool] = True,):
-    """Adds the precursor formula based on the smiles and adduct"""
+    """Adds the precursor formula based on the molecular formula and adduct.
+    """
     if spectrum_in is None:
         return None
     spectrum_in = spectrum_in.clone() if clone else spectrum_in
@@ -38,7 +39,7 @@ def add_precursor_formula(spectrum_in, clone: Optional[bool] = True,):
                 new_precursor_formula.subtract(convert_formula_string_to_atom_counter(formula))
     has_negative = any(atom_count < 0 for atom_count in new_precursor_formula.values())
     if has_negative:
-        logger.warning(f"The adduct: {adduct}, removes atoms not in the formula: {formula}, "
+        logger.warning(f"The adduct: {adduct} removes atoms not in the formula: {formula_str}, "
                        f"so no precursor_formula could be set")
         return spectrum_in
     spectrum_in.set("precursor_formula", convert_atom_counter_to_str(new_precursor_formula))
