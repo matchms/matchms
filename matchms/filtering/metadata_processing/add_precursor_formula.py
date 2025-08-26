@@ -21,13 +21,16 @@ def add_precursor_formula(spectrum_in, clone: Optional[bool] = True,):
     """
     if spectrum_in is None:
         return None
-    spectrum_in = spectrum_in.clone() if clone else spectrum_in
+    spectrum = spectrum_in.clone() if clone else spectrum_in
 
-    adduct = spectrum_in.get("adduct")
-    formula_str = spectrum_in.get('formula')
+    adduct = spectrum.get("adduct")
+    formula_str = spectrum.get('formula')
     if formula_str is None or adduct is None:
-        logger.info("No formula available, so precursor_formula is not set")
-        return spectrum_in
+        logger.info(
+            f"Missing 'formula' or 'adduct' (formula={formula_str}, adduct={adduct});"\
+            "'precursor_formula' not set."
+            )
+        return spectrum
 
     nr_of_parent_masses, ions_split = get_ions_from_adduct(adduct)
     original_precursor_formula = convert_formula_string_to_atom_counter(formula_str)
@@ -44,27 +47,30 @@ def add_precursor_formula(spectrum_in, clone: Optional[bool] = True,):
                 new_precursor_formula.subtract(convert_formula_string_to_atom_counter(formula))
     has_negative = any(atom_count < 0 for atom_count in new_precursor_formula.values())
     if has_negative:
-        logger.warning(f"The adduct: {adduct} removes atoms not in the formula: {formula_str}, "
-                       f"so no precursor_formula could be set")
-        return spectrum_in
-    spectrum_in.set("precursor_formula", convert_atom_counter_to_str(new_precursor_formula))
-    return spectrum_in
+        logger.warning(
+            f"Adduct {adduct} leads to negative element count with formula {formula_str}."\
+            "'precursor_formula' not set.")
+        return spectrum
+    spectrum.set("precursor_formula", convert_atom_counter_to_str(new_precursor_formula))
+    return spectrum
 
 def convert_formula_string_to_atom_counter(formula_str):
-    """Converts a molecular formula as str to a counter (kind of dict) with the atom counts"""
+    """Parse a simple elemental formula (no parentheses/hydrates/isotopes) into a Counter."""
     atoms_and_counts = re.findall(r'([A-Z][a-z]?)(\d*)', formula_str)
     return Counter({atom: int(count) if count else 1 for atom, count in atoms_and_counts})
 
 def convert_atom_counter_to_str(atom_counter):
-    """Converts a dictionary with atom counts to a str in hill notation (C first, H second rest alphabetically)"""
+    """Format a mapping of element counts into Hill notation (C, H, then alphabetical)."""
     elements = list(atom_counter.keys())
     parts = []
+    # C, then H
     if 'C' in elements:
         parts.append(f"C{atom_counter['C'] if atom_counter['C'] != 1 else ''}")
         elements.remove('C')
     if 'H' in elements:
         parts.append(f"H{atom_counter['H'] if atom_counter['H'] != 1 else ''}")
         elements.remove('H')
+    # Then rest alphabetically
     for el in sorted(elements):
         count = atom_counter[el]
         parts.append(f"{el}{count if count != 1 else ''}")
