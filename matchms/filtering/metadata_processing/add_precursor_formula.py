@@ -61,17 +61,19 @@ def convert_formula_string_to_atom_counter(formula_str):
 
 def convert_atom_counter_to_str(atom_counter):
     """Format a mapping of element counts into Hill notation (C, H, then alphabetical)."""
-    elements = list(atom_counter.keys())
-    parts = []
-    # C, then H
-    if 'C' in elements:
-        parts.append(f"C{atom_counter['C'] if atom_counter['C'] != 1 else ''}")
-        elements.remove('C')
-    if 'H' in elements:
-        parts.append(f"H{atom_counter['H'] if atom_counter['H'] != 1 else ''}")
-        elements.remove('H')
-    # Then rest alphabetically
-    for el in sorted(elements):
-        count = atom_counter[el]
-        parts.append(f"{el}{count if count != 1 else ''}")
-    return ''.join(parts)
+    # Filter out non-positive counts defensively
+    filtered = {el: int(cnt) for el, cnt in atom_counter.items() if cnt > 0}
+
+    parts: List[str] = []
+    # C then H
+    if "C" in filtered:
+        c = filtered.pop("C")
+        parts.append(f"C{'' if c == 1 else c}")
+    if "H" in filtered:
+        h = filtered.pop("H")
+        parts.append(f"H{'' if h == 1 else h}")
+    # Then alphabetical
+    for el in sorted(filtered.keys()):
+        cnt = filtered[el]
+        parts.append(f"{el}{'' if cnt == 1 else cnt}")
+    return "".join(parts)
