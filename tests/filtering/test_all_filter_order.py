@@ -158,6 +158,15 @@ DERIVE_ANNOTATION_FILTERS = [
             ],
         ],
         [[msfilters.require_valid_annotation], [msfilters.repair_parent_mass_from_smiles]],
+        [
+            [
+                msfilters.require_matching_adduct_precursor_mz_parent_mass,
+                msfilters.derive_formula_from_smiles,
+                msfilters.repair_adduct_based_on_parent_mass,
+                msfilters.require_matching_adduct_and_ionmode,
+            ],
+            [msfilters.add_precursor_formula],
+        ],
     ],
 )
 def test_all_filter_order(early_filters: List[Callable], later_filters: List[Callable]):
