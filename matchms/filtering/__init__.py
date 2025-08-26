@@ -127,7 +127,9 @@ from matchms.filtering.peak_processing.remove_noise_below_frequent_intensities i
     remove_noise_below_frequent_intensities,
 )
 from matchms.filtering.peak_processing.remove_peaks_around_precursor_mz import remove_peaks_around_precursor_mz
-from matchms.filtering.peak_processing.remove_peaks_relative_to_precursor_mz import remove_peaks_relative_to_precursor_mz
+from matchms.filtering.peak_processing.remove_peaks_relative_to_precursor_mz import (
+    remove_peaks_relative_to_precursor_mz,
+)
 from matchms.filtering.peak_processing.remove_peaks_outside_top_k import remove_peaks_outside_top_k
 from matchms.filtering.peak_processing.remove_profiled_spectra import remove_profiled_spectra
 from matchms.filtering.peak_processing.require_maximum_number_of_peaks import require_maximum_number_of_peaks

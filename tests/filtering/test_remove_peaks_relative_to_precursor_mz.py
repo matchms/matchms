@@ -48,7 +48,6 @@ def test_default_threshold_removes_greater_than_precursor_minus_1p6():
       Peaks with mz > threshold are removed.
     """
     precursor = 500.0
-    threshold = precursor - 1.6  # 498.4
     s = _build_spectrum(
         precursor_mz=precursor,
         mzs=[100.0, 300.0, 498.3, 498.4, 498.5, 500.0, 501.0, 600.0],
