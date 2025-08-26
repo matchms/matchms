@@ -12,7 +12,12 @@ logger = logging.getLogger("matchms")
 
 
 def add_precursor_formula(spectrum_in, clone: Optional[bool] = True,):
-    """Adds the precursor formula based on the molecular formula and adduct.
+    """Derive and set 'precursor_formula' from neutral 'formula' and 'adduct'.
+
+    Requirements:
+      - spectrum_in must have metadata keys: 'formula' (neutral) and 'adduct'.
+      - 'formula' must be a simple concatenation of element symbols and counts
+        (no parentheses/hydrates/isotopes).
     """
     if spectrum_in is None:
         return None
