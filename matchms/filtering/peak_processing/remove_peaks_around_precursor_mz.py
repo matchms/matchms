@@ -31,11 +31,14 @@ def remove_peaks_around_precursor_mz(
     spectrum = spectrum_in.clone() if clone else spectrum_in
 
     precursor_mz = spectrum.get("precursor_mz", None)
-    assert precursor_mz is not None, "Precursor mz absent."
-    assert isinstance(precursor_mz, (float, int)), (
-        "Expected 'precursor_mz' to be a scalar number.",
-        "Consider applying 'add_precursor_mz' filter first.",
-    )
+    precursor_mz = spectrum.get("precursor_mz", None)
+    if precursor_mz is None:
+        raise ValueError("Undefined 'precursor_mz'.")
+    if not isinstance(precursor_mz, (float, int)):
+        raise ValueError(
+            "Expected 'precursor_mz' to be a scalar number.",
+            "Consider applying 'add_precursor_mz' filter first."
+            )
     assert mz_tolerance >= 0, "mz_tolerance must be a positive scalar."
 
     mzs, intensities = spectrum.peaks.mz, spectrum.peaks.intensities
