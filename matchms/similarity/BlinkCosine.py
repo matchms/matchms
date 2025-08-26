@@ -33,7 +33,7 @@ def _windowed_sum_numba(source_bins: np.ndarray, source_vals: np.ndarray,
     """
     n_bins = source_bins.size
     m = query_positions.size
-    out = np.zeros(m, dtype=np.float64)
+    out = np.zeros(m, dtype=np.float32)
     if n_bins == 0 or m == 0:
         return out
 
@@ -99,13 +99,13 @@ class BlinkCosine(BaseSimilarity):
 
     # Batching (matrix path)
     batch_size : int
-        Number of query spectra per batch in `.matrix()`. Default 256.
+        Number of query spectra per batch in `.matrix()`. Default 1024.
     sparse_score_min : float
         When array_type='sparse', drop scores < sparse_score_min. Default 0.0.
     """
 
     is_commutative = True
-    score_datatype = [("score", np.float64), ("matches", "int")]
+    score_datatype = [("score", np.float32), ("matches", "int")]
 
     def __init__(
         self,
@@ -122,7 +122,7 @@ class BlinkCosine(BaseSimilarity):
         remove_zero_intensities: bool = True,
         top_k: Optional[int] = None,
         # batching
-        batch_size: int = 256,
+        batch_size: int = 1024,
         sparse_score_min: float = 0.0,
     ):
         self.tolerance = float(tolerance)
@@ -165,11 +165,11 @@ class BlinkCosine(BaseSimilarity):
         if qbins.size <= rbins.size:
             win = self._windowed_sum(qbins, qvals, rbins, self._R)
             score = float(np.dot(win, rvals))
-            matches = int(self._windowed_sum(qbins, qcounts.astype(np.float64), rbins, self._R).sum())
+            matches = int(self._windowed_sum(qbins, qcounts.astype(np.float32), rbins, self._R).sum())
         else:
             win = self._windowed_sum(rbins, rvals, qbins, self._R)
             score = float(np.dot(win, qvals))
-            matches = int(self._windowed_sum(rbins, rcounts.astype(np.float64), qbins, self._R).sum())
+            matches = int(self._windowed_sum(rbins, rcounts.astype(np.float32), qbins, self._R).sum())
 
         if self.clip_to_one:
             score = min(score, 1.0)
@@ -216,15 +216,15 @@ class BlinkCosine(BaseSimilarity):
         n_qry = len(prepped_qrys)
         if n_ref == 0 or n_qry == 0:
             if array_type == "numpy":
-                return np.zeros((n_ref, n_qry), dtype=np.float64)
-            return coo_matrix((n_ref, n_qry), dtype=np.float64)
+                return np.zeros((n_ref, n_qry), dtype=np.float32)
+            return coo_matrix((n_ref, n_qry), dtype=np.float32)
 
         # Collect global bin range
         all_bins_list = [b for (b, _, _) in prepped_refs if b.size] + [b for (b, _, _) in prepped_qrys if b.size]
         if not all_bins_list:
             if array_type == "numpy":
-                return np.zeros((n_ref, n_qry), dtype=np.float64)
-            return coo_matrix((n_ref, n_qry), dtype=np.float64)
+                return np.zeros((n_ref, n_qry), dtype=np.float32)
+            return coo_matrix((n_ref, n_qry), dtype=np.float32)
 
         global_min = min(int(b.min()) for b in all_bins_list)
         global_max = max(int(b.max()) for b in all_bins_list)
@@ -236,7 +236,7 @@ class BlinkCosine(BaseSimilarity):
 
         # Output container
         if array_type == "numpy":
-            S = np.zeros((n_ref, n_qry), dtype=np.float64)
+            S = np.zeros((n_ref, n_qry), dtype=np.float32)
         else:
             from scipy.sparse import coo_matrix
             sparse_rows = []
@@ -283,12 +283,12 @@ class BlinkCosine(BaseSimilarity):
                 cols = np.concatenate(sparse_cols) if len(sparse_cols) > 1 else sparse_cols[0]
                 data = np.concatenate(sparse_data) if len(sparse_data) > 1 else sparse_data[0]
             else:
-                rows = np.array([], dtype=np.int64)
-                cols = np.array([], dtype=np.int64)
-                data = np.array([], dtype=np.float64)
+                rows = np.array([], dtype=np.int32)
+                cols = np.array([], dtype=np.int32)
+                data = np.array([], dtype=np.float32)
             if self.clip_to_one and data.size:
                 np.minimum(data, 1.0, out=data)
-            return coo_matrix((data, (rows, cols)), shape=(n_ref, n_qry), dtype=np.float64)
+            return coo_matrix((data, (rows, cols)), shape=(n_ref, n_qry), dtype=np.float32)
 
     # --------------------------- Internal helpers ---------------------------
 
@@ -369,18 +369,18 @@ class BlinkCosine(BaseSimilarity):
             mz, intens = self._prefilter_arrays(mz, intens, spectrum)
 
         if mz.size == 0:
-            return (np.empty(0, dtype=np.int64),
-                    np.empty(0, dtype=np.float64),
-                    np.empty(0, dtype=np.int64))
+            return (np.empty(0, dtype=np.int32),
+                    np.empty(0, dtype=np.float32),
+                    np.empty(0, dtype=np.int32))
 
         # Optional weighting
         if self.mz_power != 0.0:
-            intens = intens * np.power(mz, self.mz_power, dtype=np.float64)
+            intens = intens * np.power(mz, self.mz_power, dtype=np.float32)
         if self.intensity_power != 1.0:
-            intens = np.power(intens, self.intensity_power, dtype=np.float64)
+            intens = np.power(intens, self.intensity_power, dtype=np.float32)
 
         # Bin to nearest integer bin
-        mz_binned = np.floor(mz / self.bin_width + 0.5).astype(np.int64)
+        mz_binned = np.floor(mz / self.bin_width + 0.5).astype(np.int32)
 
         # Aggregate duplicates
         order = np.argsort(mz_binned, kind="mergesort")
@@ -392,11 +392,11 @@ class BlinkCosine(BaseSimilarity):
         # L2 normalize intensities (Sum of all intensities == 1)
         norm = np.linalg.norm(intensity_sum)
         if norm == 0.0:
-            return (np.empty(0, dtype=np.int64),
-                    np.empty(0, dtype=np.float64),
-                    np.empty(0, dtype=np.int64))
+            return (np.empty(0, dtype=np.int32),
+                    np.empty(0, dtype=np.float32),
+                    np.empty(0, dtype=np.int32))
         intensity_sum /= norm
-        return uniq, intensity_sum, counts.astype(np.int64, copy=False)
+        return uniq, intensity_sum, counts.astype(np.int32, copy=False)
 
     def _windowed_sum(self, source_bins: np.ndarray, source_vals: np.ndarray,
                       query_positions: np.ndarray, R: int) -> np.ndarray:
@@ -420,11 +420,11 @@ class BlinkCosine(BaseSimilarity):
             1D array of windowed sums at `query_positions`.
         """
         if source_bins.size == 0 or query_positions.size == 0:
-            return np.zeros(query_positions.size, dtype=np.float64)
+            return np.zeros(query_positions.size, dtype=np.float32)
         if self.use_numba:
             return _windowed_sum_numba(source_bins, source_vals, query_positions, int(R))
         # Vectorized fallback via prefix sums + searchsorted
-        c = np.empty(source_vals.size + 1, dtype=np.float64)
+        c = np.empty(source_vals.size + 1, dtype=np.float32)
         c[0] = 0.0
         c[1:] = np.cumsum(source_vals)
         left = np.searchsorted(source_bins, query_positions - R, side="left")
@@ -459,14 +459,14 @@ class BlinkCosine(BaseSimilarity):
             if bins.size == 0:
                 continue
             row_indices.append(bins + offset)
-            col_indices.append(np.full(bins.size, j, dtype=np.int64))
-            data.append(vals.astype(np.float64, copy=False))
+            col_indices.append(np.full(bins.size, j, dtype=np.int32))
+            data.append(vals.astype(np.float32, copy=False))
         if not row_indices:
-            return csr_matrix((n_rows, len(prepped_list)), dtype=np.float64)
+            return csr_matrix((n_rows, len(prepped_list)), dtype=np.float32)
         rows = np.concatenate(row_indices)
         cols = np.concatenate(col_indices)
         dat = np.concatenate(data)
-        return csr_matrix((dat, (rows, cols)), shape=(n_rows, len(prepped_list)), dtype=np.float64)
+        return csr_matrix((dat, (rows, cols)), shape=(n_rows, len(prepped_list)), dtype=np.float32)
 
     @staticmethod
     def _expand_column_blur(rows: np.ndarray, vals: np.ndarray, R: int, n_rows: int):
@@ -495,10 +495,10 @@ class BlinkCosine(BaseSimilarity):
         if R == 0:
             # no expansion
             return rows, vals
-        offs = np.arange(-R, R + 1, dtype=np.int64)  # length = 2R+1
+        offs = np.arange(-R, R + 1, dtype=np.int32)  # length = 2R+1
         # Broadcast-add and flatten
         neigh = (rows[:, None] + offs[None, :]).ravel()
-        data = np.repeat(vals.astype(np.float64, copy=False), offs.size)
+        data = np.repeat(vals.astype(np.float32, copy=False), offs.size)
         # Clip to valid [0, n_rows)
         mask = (neigh >= 0) & (neigh < n_rows)
         return neigh[mask], data[mask]
@@ -534,14 +534,14 @@ class BlinkCosine(BaseSimilarity):
             if rows_exp.size == 0:
                 continue
             rows_all.append(rows_exp)
-            cols_all.append(np.full(rows_exp.size, j, dtype=np.int64))
+            cols_all.append(np.full(rows_exp.size, j, dtype=np.int32))
             data_all.append(data_exp)
 
         if not rows_all:
-            return csr_matrix((n_rows, len(prepped_list)), dtype=np.float64)
+            return csr_matrix((n_rows, len(prepped_list)), dtype=np.float32)
 
         rows = np.concatenate(rows_all)
         cols = np.concatenate(cols_all)
         dat = np.concatenate(data_all)
         # COO -> CSR automatically sums duplicates (needed when blur windows overlap)
-        return csr_matrix((dat, (rows, cols)), shape=(n_rows, len(prepped_list)), dtype=np.float64)
+        return csr_matrix((dat, (rows, cols)), shape=(n_rows, len(prepped_list)), dtype=np.float32)
