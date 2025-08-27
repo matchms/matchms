@@ -58,7 +58,7 @@ def normalize_intensities(
             raise ValueError("Expected 'scaling' to be a tuple of two numbers (int or float).")
 
         min_val, max_val = scaling
-        if min_val < max_val:
+        if min_val > max_val:
             raise ValueError("Expected 'scaling' to be a tuple where the first value is smaller than the second.")
 
         scaled_intensities = np.interp(
