@@ -286,12 +286,12 @@ Code example:
 
     spectrum1 = load_from_usi(usi1)
     spectrum1 = msfilters.select_by_mz(spectrum1, 0, spectrum1.get("precursor_mz"))
-    spectrum1 = msfilters.remove_peaks_around_precursor_mz(spectrum1,
+    spectrum1 = msfilters.remove_precursor_mz(spectrum1,
                                                            mz_tolerance=0.1)
 
     spectrum2 = load_from_usi(usi2)
     spectrum2 = msfilters.select_by_mz(spectrum2, 0, spectrum1.get("precursor_mz"))
-    spectrum2 = msfilters.remove_peaks_around_precursor_mz(spectrum2,
+    spectrum2 = msfilters.remove_precursor_mz(spectrum2,
                                                            mz_tolerance=0.1)
     # Compute scores:
     similarity_cosine = mssim.CosineGreedy(tolerance=mz_tolerance).pair(spectrum1, spectrum2)

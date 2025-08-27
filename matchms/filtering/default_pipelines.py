@@ -63,7 +63,7 @@ CLEAN_PEAKS = [
 OTHER_FILTERS = [
     matchms.filtering.metadata_processing.require_precursor_mz.require_precursor_below_mz,
     msfilters.select_by_intensity,
-    msfilters.remove_peaks_around_precursor_mz,
+    msfilters.remove_precursor_mz,
     msfilters.remove_peaks_outside_top_k,
     msfilters.require_minimum_number_of_peaks,
     msfilters.add_fingerprint,
