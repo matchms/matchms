@@ -69,3 +69,57 @@ def test_normalize_intensities_empty_spectrum():
     spectrum = normalize_intensities(None)
 
     assert spectrum is None, "Expected spectrum to be None."
+
+
+@pytest.mark.parametrize(
+    "mz, intensities, scaling, expected_intensities",
+    [
+        # Test case 1: Standard normalization (no scaling)
+        [
+            np.array([10.0, 20.0, 30.0, 40.0], dtype="float"),
+            np.array([100.0, 200.0, 300.0, 400.0], dtype="float"),
+            None,
+            np.array([0.25, 0.5, 0.75, 1.0]),
+        ],
+        # Test case 2: Scaling to 0-100
+        [
+            np.array([10.0, 20.0, 30.0, 40.0], dtype="float"),
+            np.array([100.0, 200.0, 300.0, 400.0], dtype="float"),
+            (0, 100),
+            np.array([0, 33.33, 66.66, 100])
+        ],
+        # Test case 3: Scaling to 0-1000
+        [
+            np.array([50.0, 60.0, 70.0], dtype="float"),
+            np.array([10.0, 50.0, 100.0], dtype="float"),
+            (0, 1000),
+            np.array([0, 444.44, 1000]),
+        ],
+        # Test case 4: Custom range scaling
+        [
+            np.array([100.0, 200.0], dtype="float"),
+            np.array([25.0, 75.0], dtype="float"),
+            (10, 90),
+            np.array([10, 90])
+        ],
+        # Test case 5: Single peak
+        [
+            np.array([150.0], dtype="float"),
+            np.array([500.0], dtype="float"),
+            (0, 100),
+            np.array([100.0]),  # Single value should be at max
+        ],
+    ],
+)
+def test_normalize_intensities_scaling(mz, intensities, scaling, expected_intensities):
+    """Test normalize_intensities with various scaling parameters."""
+    spectrum_in = SpectrumBuilder().with_mz(mz).with_intensities(intensities).build()
+
+    spectrum = normalize_intensities(spectrum_in, scaling=scaling)
+    result_intensities = spectrum.peaks.intensities
+
+    assert np.allclose(result_intensities, expected_intensities, atol=1e-2)
+
+    original_order = np.argsort(intensities)
+    result_order = np.argsort(result_intensities)
+    np.testing.assert_array_equal(original_order, result_order)
