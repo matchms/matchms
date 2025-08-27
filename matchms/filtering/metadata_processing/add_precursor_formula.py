@@ -33,7 +33,7 @@ def add_precursor_formula(spectrum_in, clone: Optional[bool] = True,):
         return spectrum
 
     nr_of_parent_masses, ions_split = get_ions_from_adduct(adduct)
-    original_precursor_formula = convert_formula_string_to_atom_counter(formula_str)
+    original_precursor_formula = _convert_formula_string_to_atom_counter(formula_str)
 
     new_precursor_formula = Counter()
     for i in range(nr_of_parent_masses):
@@ -42,24 +42,26 @@ def add_precursor_formula(spectrum_in, clone: Optional[bool] = True,):
         sign, number, formula = split_ion(ion)
         for i in range(number):
             if sign == "+":
-                new_precursor_formula.update(convert_formula_string_to_atom_counter(formula))
+                new_precursor_formula.update(_convert_formula_string_to_atom_counter(formula))
             if sign == "-":
-                new_precursor_formula.subtract(convert_formula_string_to_atom_counter(formula))
+                new_precursor_formula.subtract(_convert_formula_string_to_atom_counter(formula))
     has_negative = any(atom_count < 0 for atom_count in new_precursor_formula.values())
     if has_negative:
         logger.warning(
             f"Adduct {adduct} leads to negative element count with formula {formula_str}."\
             "'precursor_formula' not set.")
         return spectrum
-    spectrum.set("precursor_formula", convert_atom_counter_to_str(new_precursor_formula))
+    spectrum.set("precursor_formula", _convert_atom_counter_to_str(new_precursor_formula))
     return spectrum
 
-def convert_formula_string_to_atom_counter(formula_str):
+
+def _convert_formula_string_to_atom_counter(formula_str):
     """Parse a simple elemental formula (no parentheses/hydrates/isotopes) into a Counter."""
     atoms_and_counts = re.findall(r'([A-Z][a-z]?)(\d*)', formula_str)
     return Counter({atom: int(count) if count else 1 for atom, count in atoms_and_counts})
 
-def convert_atom_counter_to_str(atom_counter):
+
+def _convert_atom_counter_to_str(atom_counter):
     """Format a mapping of element counts into Hill notation (C, H, then alphabetical)."""
     # Filter out non-positive counts defensively
     filtered = {el: int(cnt) for el, cnt in atom_counter.items() if cnt > 0}
