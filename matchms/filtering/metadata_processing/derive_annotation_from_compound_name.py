@@ -135,7 +135,7 @@ def _pubchem_name_search(compound_name: str, name_search_depth=10, max_retries=1
             extracted_results = []
             # extract the needed information:
             for result in results_pubchem:
-                smiles_pubchem = result.isomeric_smiles
+                smiles_pubchem = result.smiles
                 if smiles_pubchem is None:
                     smiles_pubchem = result.canonical_smiles
                 extracted_results.append(
