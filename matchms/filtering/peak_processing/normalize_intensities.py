@@ -50,7 +50,17 @@ def normalize_intensities(
 
     # Scale intensities to specific range
     if scaling:
+        if (
+            not isinstance(scaling, tuple)
+            or len(scaling) != 2
+            or not all(isinstance(val, (int, float)) for val in scaling)
+        ):
+            raise ValueError("Expected 'scaling' to be a tuple of two numbers (int or float).")
+
         min_val, max_val = scaling
+        if min_val < max_val:
+            raise ValueError("Expected 'scaling' to be a tuple where the first value is smaller than the second.")
+
         scaled_intensities = np.interp(
             normalized_intensities, (normalized_intensities.min(), normalized_intensities.max()), (min_val, max_val)
         )
