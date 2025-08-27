@@ -6,7 +6,8 @@ Matchms provides a number of frequently used similarity scores to compare mass
 spectra. This includes
 
 * scores based on comparing peak positions and intensities
-  (:class:`~matchms.similarity.CosineGreedy` or :class:`~matchms.similarity.ModifiedCosine`)
+  (:class:`~matchms.similarity.CosineGreedy`, :class:`~matchms.similarity.ModifiedCosine`,
+  or :class:`~matchms.similarity.SpectralEntropy`)
 * simple scores that only assess precursor m/z or parent mass matches
   (:class:`~matchms.similarity.PrecursorMzMatch` or: :class:`~matchms.similarity.ParentMassMatch`)
 * scores assessing molecular similarity if structures (SMILES, InchiKey) are given as metadata
@@ -28,9 +29,11 @@ from .ModifiedCosine import ModifiedCosine
 from .NeutralLossesCosine import NeutralLossesCosine
 from .ParentMassMatch import ParentMassMatch
 from .PrecursorMzMatch import PrecursorMzMatch
+from .SpectralEntropy import SpectralEntropy
 
 
 __all__ = [
+    "BinnedEmbeddingSimilarity",
     "CosineGreedy",
     "CosineHungarian",
     "FingerprintSimilarity",
@@ -40,7 +43,7 @@ __all__ = [
     "NeutralLossesCosine",
     "ParentMassMatch",
     "PrecursorMzMatch",
-    "BinnedEmbeddingSimilarity"
+    "SpectralEntropy"
 ]
 
 
@@ -54,8 +57,9 @@ def get_similarity_function_by_name(similarity_function_name: str):
         Name of the similarity function.
     """
     names = __all__
-    functions = [CosineGreedy, CosineHungarian, FingerprintSimilarity, IntersectMz, MetadataMatch, ModifiedCosine,
-                 NeutralLossesCosine, ParentMassMatch, PrecursorMzMatch, BinnedEmbeddingSimilarity]
+    functions = [BinnedEmbeddingSimilarity, CosineGreedy, CosineHungarian, FingerprintSimilarity,
+                 IntersectMz, MetadataMatch, ModifiedCosine, NeutralLossesCosine,
+                 ParentMassMatch, PrecursorMzMatch, SpectralEntropy]
 
     assert similarity_function_name in names, f"Unknown similarity function: {similarity_function_name}"
     assert len(names) == len(functions), "Number of similarity functions and names do not match"
