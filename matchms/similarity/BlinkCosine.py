@@ -382,12 +382,9 @@ class BlinkCosine(BaseSimilarity):
         # Bin to nearest integer bin
         mz_binned = np.floor(mz / self.bin_width + 0.5).astype(np.int32)
 
-        # Aggregate duplicates
-        order = np.argsort(mz_binned, kind="mergesort")
-        mz_binned = mz_binned[order]
-        intensity_binned = intens[order]
+        # Aggregate duplicates (sorting not needed since mz values are sorted)
         uniq, idx, counts = np.unique(mz_binned, return_index=True, return_counts=True)
-        intensity_sum = np.add.reduceat(intensity_binned, idx)
+        intensity_sum = np.add.reduceat(intens, idx)
 
         # L2 normalize intensities (Sum of all intensities == 1)
         norm = np.linalg.norm(intensity_sum)
