@@ -7,7 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## unpublished
 ### Added
-- Added add_precursor_formula filter.
+- New `add_precursor_formula` filter [#826](https://github.com/matchms/matchms/pull/826).
+- New `remove_peaks_relative_to_precursor_mz` filter [#833](https://github.com/matchms/matchms/pull/833).
 
 ## [0.30.2] - 2025-06-27
 ### Changed
