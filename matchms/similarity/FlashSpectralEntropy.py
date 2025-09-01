@@ -493,6 +493,10 @@ def _clean_and_weight(peaks: np.ndarray,
 # ===================== library index =====================
 
 class _LibraryIndex:
+    """
+    Compact container for the concatenated (sorted) library peaks and, optionally,
+    the neutral-loss view. All arrays are read-only in workers.
+    """
     __slots__ = (
         "n_specs",
         "peaks_mz", "peaks_int", "peaks_spec_idx",
@@ -671,12 +675,12 @@ def _accumulate_fragment_row_numba(
         if Iq <= 0.0:
             continue
 
-        half_width = _search_window_halfwidth_nb(mz_q, tol, use_ppm)
-        lo = mz_q - half_width
-        hi = mz_q + half_width
+        mz_tolerance = _search_window_halfwidth_nb(mz_q, tol, use_ppm)
+        lo_mz = mz_q - mz_tolerance
+        hi_mz = mz_q + mz_tolerance
 
-        a = np.searchsorted(lib_mz, lo, side='left')
-        b = np.searchsorted(lib_mz, hi, side='right')
+        a = np.searchsorted(lib_mz, lo_mz, side='left')
+        b = np.searchsorted(lib_mz, hi_mz, side='right')
         if a >= b:
             continue
 
@@ -723,12 +727,24 @@ def _accumulate_nl_row_numba(scores: np.ndarray,
                              prefer_fragments: bool,
                              prod_min: np.ndarray, prod_max: np.ndarray) -> None:
     """
-    Numba version of _accumulate_nl_row.
+    Accumulate neutral-loss (NL) contributions for a single row (one reference spectrum).
 
-    Notes:
-      - Pass q_pmz_val=np.nan to indicate 'no precursor' (early return).
-      - When prefer_fragments is True, prod_min/prod_max must be precomputed per query peak
-        (length == len(q_mz)); otherwise pass empty (len 0) arrays.
+    For each reference peak of m/z = m_ref with intensity Iq:
+      - Compute the loss L = precursor_ref - m_ref.
+      - Find all library neutral-loss peaks within tolerance of L using nl_mz (sorted).
+      - For each candidate:
+          * If hybrid mode (prefer_fragments=True), apply two pruning rules:
+              RULE 1: Drop if the candidate's corresponding product-peak index
+                      lies inside ANY fragment window of the current reference spectrum.
+              RULE 2: Drop if the current reference *fragment* also matches the same
+                      library spectrum (i.e., we prefer fragment matches over NL matches).
+          * Add the entropy increment to scores[col].
+
+    Arrays
+    ------
+    nl_* arrays are built from the library (query) spectra with known precursors.
+    nl_product_pos maps each NL entry back to a position in the global product-peak
+    arrays; this is used by hybrid rules.
     """
     if not (nl_mz.size > 0 and q_mz.size > 0):
         return
@@ -750,7 +766,7 @@ def _accumulate_nl_row_numba(scores: np.ndarray,
         if a >= b:
             continue
 
-        # For RULE 2 we need the fragment window for THIS peak:
+        # (Hybrid) fragment window for this reference peak
         ap = 0
         bp = 0
         if prefer_fragments:
@@ -774,7 +790,6 @@ def _accumulate_nl_row_numba(scores: np.ndarray,
             lib = float(nl_int[j])
             col = int(nl_spec[j])
 
-            # Hybrid priority rules
             if prefer_fragments:
                 # RULE 1: drop if product peak falls in ANY fragment window of the query spectrum
                 if _in_any_fragment_window(int(nl_prod_idx[j]), prod_min, prod_max):
@@ -784,8 +799,8 @@ def _accumulate_nl_row_numba(scores: np.ndarray,
                 if ap < bp and _spec_in_fragment_window(col, peaks_spec, ap, bp):
                     continue
 
-            v = _xlog2_scalar_nb(lib + Iq) - _xlog2_scalar_nb(Iq) - _xlog2_scalar_nb(lib)
-            scores[col] += v
+            incr= _xlog2_scalar_nb(lib + Iq) - _xlog2_scalar_nb(Iq) - _xlog2_scalar_nb(lib)
+            scores[col] += incr
 
 
 
@@ -796,12 +811,27 @@ _G_LIB = None
 _G_CFG = None
 
 def _set_globals(lib_obj, cfg):
+    """
+    Install the shared library index and constant config in module-level globals.
+
+    Worker functions read from these globals to avoid re-pickling large arrays
+    for every work item (especially efficient with fork on Unix).
+    """
     global _G_LIB, _G_CFG
     _G_LIB = lib_obj
     _G_CFG = cfg
 
 def _row_task_dense(args):
-    """Compute one row; return (row_index, dense_row_float32)."""
+    """
+    Compute one matrix row for a given reference spectrum.
+
+    Returns
+    -------
+    (row_index, row_scores)
+        `row_scores` is a dense vector of length n_library_spectra in the
+        same float dtype as the index. This function is safe to call from
+        a process pool since it only reads globals set by `_set_globals`.
+    """
     row_idx, q_arr, q_pmz = args
     cfg = _G_CFG
     lib = _G_LIB
