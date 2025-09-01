@@ -159,11 +159,11 @@ class FlashSpectralEntropy(BaseSimilarity):
                 prod_max = np.empty(A.shape[0], dtype=np.int64)
                 for k in range(A.shape[0]):
                     mz1 = float(A[k, 0])
-                    hw = _search_window_halfwidth_nb(mz1, float(self.tolerance), bool(self.use_ppm))
-                    lo = mz1 - hw
-                    hi = mz1 + hw
-                    prod_min[k] = np.searchsorted(lib.peaks_mz, lo, side='left')
-                    prod_max[k] = np.searchsorted(lib.peaks_mz, hi, side='right')
+                    mz_tolerance = _search_window_halfwidth_nb(mz1, float(self.tolerance), bool(self.use_ppm))
+                    lo_mz = mz1 - mz_tolerance
+                    hi_mz = mz1 + mz_tolerance
+                    prod_min[k] = np.searchsorted(lib.peaks_mz, lo_mz, side='left')
+                    prod_max[k] = np.searchsorted(lib.peaks_mz, hi_mz, side='right')
             else:
                 prod_min = np.empty(0, dtype=np.int64)
                 prod_max = np.empty(0, dtype=np.int64)
@@ -191,7 +191,7 @@ class FlashSpectralEntropy(BaseSimilarity):
             else:
                 allow = abs(lib_pmz - pmzA) <= tol
             if not (allow and np.isfinite(lib_pmz)):
-                scores[0] = self.dtype.type(0.0)
+                scores[0] = 0.0
     
         return np.asarray(scores[0], dtype=self.dtype)
 
@@ -771,11 +771,11 @@ def _accumulate_nl_row_numba(scores: np.ndarray,
         bp = 0
         if prefer_fragments:
             mz1 = float(q_mz[i])
-            frag_hw = _search_window_halfwidth_nb(mz1, tol, use_ppm)
-            flo = mz1 - frag_hw
-            fhi = mz1 + frag_hw
-            ap = np.searchsorted(peaks_mz, flo, side='left')
-            bp = np.searchsorted(peaks_mz, fhi, side='right')
+            mz_tolerance = _search_window_halfwidth_nb(mz1, tol, use_ppm)
+            lo_mz = mz1 - mz_tolerance
+            hi_mz = mz1 + mz_tolerance
+            ap = np.searchsorted(peaks_mz, lo_mz, side='left')
+            bp = np.searchsorted(peaks_mz, hi_mz, side='right')
 
         for j in range(a, b):
             nl2 = float(nl_mz[j])
@@ -843,30 +843,32 @@ def _row_task_dense(args):
                                    lib.peaks_mz, lib.peaks_int, lib.peaks_spec_idx,
                                    float(cfg["tol"]), bool(cfg["use_ppm"]))
 
-    prefer_frag = (cfg["mode"] == "hybrid")
-    if prefer_frag:
-        prod_min = np.empty(q_arr.shape[0], dtype=np.int64)
-        prod_max = np.empty(q_arr.shape[0], dtype=np.int64)
-        for k in range(q_arr.shape[0]):                         # <-- use k
-            mz1 = float(q_arr[k, 0])
-            mz_tolerance = _search_window_halfwidth_nb(mz1, float(cfg["tol"]), bool(cfg["use_ppm"]))
-            lo_mz = mz1 - mz_tolerance
-            hi_mz = mz1 + mz_tolerance
-            prod_min[k] = np.searchsorted(lib.peaks_mz, lo_mz, side='left')
-            prod_max[k] = np.searchsorted(lib.peaks_mz, hi_mz, side='right')
-    else:
-        prod_min = np.empty(0, dtype=np.int64)
-        prod_max = np.empty(0, dtype=np.int64)
+    # neutral-loss / hybrid ONLY if library has NL view
+    if cfg["build_nl"]:
+        prefer_frag = (cfg["mode"] == "hybrid")
+        if prefer_frag:
+            prod_min = np.empty(q_arr.shape[0], dtype=np.int64)
+            prod_max = np.empty(q_arr.shape[0], dtype=np.int64)
+            for k in range(q_arr.shape[0]):                         # <-- use k
+                mz1 = float(q_arr[k, 0])
+                mz_tolerance = _search_window_halfwidth_nb(mz1, float(cfg["tol"]), bool(cfg["use_ppm"]))
+                lo_mz = mz1 - mz_tolerance
+                hi_mz = mz1 + mz_tolerance
+                prod_min[k] = np.searchsorted(lib.peaks_mz, lo_mz, side='left')
+                prod_max[k] = np.searchsorted(lib.peaks_mz, hi_mz, side='right')
+        else:
+            prod_min = np.empty(0, dtype=np.int64)
+            prod_max = np.empty(0, dtype=np.int64)
 
-    q_pmz_val = float(q_pmz) if (q_pmz is not None) else np.nan
+        q_pmz_val = float(q_pmz) if (q_pmz is not None) else np.nan
 
-    _accumulate_nl_row_numba(scores,
-                             q_arr[:, 0], q_arr[:, 1], q_pmz_val,
-                             lib.nl_mz, lib.nl_int, lib.nl_spec_idx, lib.nl_product_idx,
-                             lib.peaks_mz, lib.peaks_spec_idx,
-                             float(cfg["tol"]), bool(cfg["use_ppm"]),
-                             prefer_frag,
-                             prod_min, prod_max)
+        _accumulate_nl_row_numba(scores,
+                                q_arr[:, 0], q_arr[:, 1], q_pmz_val,
+                                lib.nl_mz, lib.nl_int, lib.nl_spec_idx, lib.nl_product_idx,
+                                lib.peaks_mz, lib.peaks_spec_idx,
+                                float(cfg["tol"]), bool(cfg["use_ppm"]),
+                                prefer_frag,
+                                prod_min, prod_max)
 
     # identity mask
     if cfg["iden_tol"] is not None and q_pmz is not None:
