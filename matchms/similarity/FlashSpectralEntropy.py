@@ -101,50 +101,98 @@ class FlashSpectralEntropy(BaseSimilarity):
         return cleaned, (None if pmz is None else float(pmz))
 
     def pair(self, reference: SpectrumType, query: SpectrumType) -> np.ndarray:
-        # Convenience, still float32; for speed use .matrix()
+        """
+        Compute Flash entropy similarity for a single (reference, query) pair.
+        Uses the same preprocessing and scoring logic as the matrix path, but
+        builds a tiny 1-spectrum library from the query.
+        """
+        # preprocess both spectra
         A, pmzA = self._prepare(reference)
         B, pmzB = self._prepare(query)
         if A.size == 0 or B.size == 0:
             return np.asarray(0.0, dtype=self.dtype)
-
-        # Build tiny "lib" from B and run the row code
+    
+        # build 1-spec library index from the query (B)
         lib = _LibraryIndex(self.dtype)
         lib.n_specs = 1
         lib.peaks_mz = B[:, 0]
         lib.peaks_int = B[:, 1]
         lib.peaks_spec_idx = np.zeros(B.shape[0], dtype=np.int32)
-        if self.mode in ("neutral_loss", "hybrid") and pmzB is not None:
-            lib.nl_mz = (pmzB - B[:, 0]).astype(self.dtype, copy=False)
-            order = np.argsort(lib.nl_mz)
-            lib.nl_mz = lib.nl_mz[order]
+    
+        if self.mode in ("neutral_loss", "hybrid") and (pmzB is not None):
+            nl_mz = (float(pmzB) - B[:, 0]).astype(self.dtype, copy=False)
+            order = np.argsort(nl_mz)
+            lib.nl_mz = nl_mz[order]
             lib.nl_int = B[:, 1][order]
             lib.nl_spec_idx = np.zeros(B.shape[0], dtype=np.int32)
             lib.nl_product_idx = order.astype(np.int64, copy=False)
         else:
-            lib.nl_mz = lib.nl_int = lib.nl_spec_idx = lib.nl_product_idx = np.zeros(0, dtype=self.dtype)
-        lib.precursor_mz = np.array([pmzB if pmzB is not None else np.nan], dtype=self.dtype)
-
+            lib.nl_mz = np.zeros(0, dtype=self.dtype)
+            lib.nl_int = np.zeros(0, dtype=self.dtype)
+            lib.nl_spec_idx = np.zeros(0, dtype=np.int32)
+            lib.nl_product_idx = np.zeros(0, dtype=np.int64)
+    
+        lib.precursor_mz = np.array(
+            [float(pmzB) if (pmzB is not None) else np.nan],
+            dtype=self.dtype
+        )
+    
+        # compute scores into a 1-length buffer (single library spectrum)
         scores = np.zeros(1, dtype=self.dtype)
-        _accumulate_fragment_row(scores, A[:, 0], A[:, 1],
-                                 lib.peaks_mz, lib.peaks_int, lib.peaks_spec_idx,
-                                 self.tolerance, self.use_ppm, self.dtype)
-        if self.mode in ("neutral_loss", "hybrid"):
-            _accumulate_nl_row(scores, A[:, 0], A[:, 1], pmzA,
-                               lib.nl_mz, lib.nl_int, lib.nl_spec_idx, lib.nl_product_idx,
-                               lib.peaks_mz, lib.peaks_spec_idx,
-                               self.tolerance, self.use_ppm, self.dtype,
-                               prefer_fragments=(self.mode == "hybrid"))
-        # identity gate
-        if self.identity_precursor_tolerance is not None and pmzA is not None:
-            if self.identity_use_ppm:
-                allow = abs(lib.precursor_mz[0] - pmzA) <= (
-                    self.identity_precursor_tolerance * 1e-6 * 0.5 * (lib.precursor_mz[0] + pmzA)
-                )
+    
+        # fragment path
+        _accumulate_fragment_row_numba(
+            scores,
+            A[:, 0].astype(self.dtype, copy=False),
+            A[:, 1].astype(self.dtype, copy=False),
+            lib.peaks_mz, lib.peaks_int, lib.peaks_spec_idx,
+            float(self.tolerance), bool(self.use_ppm)
+        )
+    
+        # neutral-loss / hybrid path (if enabled & query has precursor)
+        if self.mode in ("neutral_loss", "hybrid") and (pmzA is not None):
+            prefer_frag = (self.mode == "hybrid")
+    
+            if prefer_frag:
+                # precompute product-peak windows for ALL reference peaks
+                prod_min = np.empty(A.shape[0], dtype=np.int64)
+                prod_max = np.empty(A.shape[0], dtype=np.int64)
+                for k in range(A.shape[0]):
+                    mz1 = float(A[k, 0])
+                    hw = _search_window_halfwidth_nb(mz1, float(self.tolerance), bool(self.use_ppm))
+                    lo = mz1 - hw
+                    hi = mz1 + hw
+                    prod_min[k] = np.searchsorted(lib.peaks_mz, lo, side='left')
+                    prod_max[k] = np.searchsorted(lib.peaks_mz, hi, side='right')
             else:
-                allow = abs(lib.precursor_mz[0] - pmzA) <= self.identity_precursor_tolerance
-            if not (allow and np.isfinite(lib.precursor_mz[0])):
-                scores[0] = 0.0
-
+                prod_min = np.empty(0, dtype=np.int64)
+                prod_max = np.empty(0, dtype=np.int64)
+    
+            q_pmz_val = float(pmzA) if (pmzA is not None) else np.nan
+    
+            _accumulate_nl_row_numba(
+                scores,
+                A[:, 0].astype(self.dtype, copy=False),
+                A[:, 1].astype(self.dtype, copy=False),
+                q_pmz_val,
+                lib.nl_mz, lib.nl_int, lib.nl_spec_idx, lib.nl_product_idx,
+                lib.peaks_mz, lib.peaks_spec_idx,
+                float(self.tolerance), bool(self.use_ppm),
+                prefer_frag,
+                prod_min, prod_max
+            )
+    
+        # identity gate (optional)
+        if (self.identity_precursor_tolerance is not None) and (pmzA is not None):
+            tol = float(self.identity_precursor_tolerance)
+            lib_pmz = float(lib.precursor_mz[0])
+            if self.identity_use_ppm:
+                allow = abs(lib_pmz - pmzA) <= (tol * 1e-6 * 0.5 * (lib_pmz + pmzA))
+            else:
+                allow = abs(lib_pmz - pmzA) <= tol
+            if not (allow and np.isfinite(lib_pmz)):
+                scores[0] = self.dtype.type(0.0)
+    
         return np.asarray(scores[0], dtype=self.dtype)
 
     # ---- FAST + PARALLEL ----
@@ -232,8 +280,10 @@ class FlashSpectralEntropy(BaseSimilarity):
             iterator = row_inputs
             worker = _row_task_dense #  if array_type == "numpy" else _row_task_sparse (TODO?)
             for item in tqdm(iterator, total=n_rows, desc="Flash entropy (matrix)"):
-                i, row = worker(item)
-                out[i, :] = row
+                row_idx, row = worker(item)
+                # optional sanity check while debugging:
+                # assert 0 <= row_idx < n_rows, (row_idx, n_rows)
+                out[row_idx, :] = row
                 
             if array_type == "numpy":
                 return out
@@ -497,116 +547,161 @@ def _build_library_index(processed_peaks_list: List[np.ndarray],
     return idx
 
 
-# ===================== accumulators (row) =====================
+# --- Numba-accelerated accumulators ------------------------------------------
+from numba import njit
 
-def _accumulate_fragment_row(scores: np.ndarray,
-                             q_mz: np.ndarray, q_int: np.ndarray,
-                             peaks_mz: np.ndarray, peaks_int: np.ndarray, peaks_spec: np.ndarray,
-                             tol: float, use_ppm: bool, dtype: np.dtype):
-    for i in range(q_mz.shape[0]):
+
+@njit(cache=True, nogil=True)
+def _search_window_halfwidth_nb(m: float, tol: float, use_ppm: bool) -> float:
+    if not use_ppm:
+        return tol
+    c = tol * 1e-6
+    denom = 1.0 - 0.5 * c
+    return (c * m) / denom if denom > 0.0 else (c * m * 2.0)
+
+@njit(cache=True, nogil=True)
+def _xlog2_scalar_nb(x: float) -> float:
+    if x <= 0.0:
+        return 0.0
+    return x * np.log2(x)
+
+@njit(cache=True, nogil=True)
+def _accumulate_fragment_row_numba(scores: np.ndarray,
+                                   q_mz: np.ndarray, q_int: np.ndarray,
+                                   peaks_mz: np.ndarray, peaks_int: np.ndarray, peaks_spec: np.ndarray,
+                                   tol: float, use_ppm: bool) -> None:
+    """
+    Numba version of _accumulate_fragment_row.
+    All arrays should be C-contiguous; dtype float32 for *_mz/*_int and int32 for *_spec.
+    """
+    n_q = q_mz.shape[0]
+    for i in range(n_q):
         mz1 = float(q_mz[i])
         Iq = float(q_int[i])
         if Iq <= 0.0:
             continue
-        mz_tolerance = _search_window_halfwidth(mz1, tol, use_ppm, dtype)
+
+        mz_tolerance = _search_window_halfwidth_nb(mz1, tol, use_ppm)
         lo_mz = mz1 - mz_tolerance
         hi_mz = mz1 + mz_tolerance
+
+        # searchsorted on sorted peaks_mz
         a = np.searchsorted(peaks_mz, lo_mz, side='left')
         b = np.searchsorted(peaks_mz, hi_mz, side='right')
         if a >= b:
             continue
-        # refine for symmetric ppm
-        mz2 = peaks_mz[a:b].astype(dtype, copy=False)
-        if use_ppm:
-            mask = np.abs(mz2 - mz1) <= ((tol * 1e-6) * (0.5) * (mz2 + mz1))
-        else:
-            mask = np.abs(mz2 - mz1) <= tol
-        if not np.any(mask):
-            continue
-        lib = peaks_int[a:b][mask].astype(dtype, copy=False)
-        cols = peaks_spec[a:b][mask]
-        v = _xlog2_vec(lib + Iq, dtype) - _xlog2_scalar(Iq, dtype) - _xlog2_vec(lib, dtype)
-        np.add.at(scores, cols, v.astype(dtype, copy=False))
 
-def _accumulate_nl_row(scores: np.ndarray,
-                       q_mz: np.ndarray, q_int: np.ndarray, q_pmz: Optional[float],
-                       nl_mz: np.ndarray, nl_int: np.ndarray, nl_spec: np.ndarray, nl_prod_idx: np.ndarray,
-                       peaks_mz: np.ndarray, peaks_spec: np.ndarray,
-                       tol: float, use_ppm: bool, dtype: np.dtype,
-                       prefer_fragments: bool = False):
-    if q_pmz is None or q_mz.size == 0 or nl_mz.size == 0:
+        # refine for symmetric ppm (or Da) and accumulate directly
+        for j in range(a, b):
+            mz2 = float(peaks_mz[j])
+            # symmetric ppm tight check or Da check
+            if use_ppm:
+                if abs(mz2 - mz1) > (tol * 1e-6) * 0.5 * (mz2 + mz1):
+                    continue
+            else:
+                if abs(mz2 - mz1) > tol:
+                    continue
+
+            lib = float(peaks_int[j])
+            col = int(peaks_spec[j])
+
+            # v = (lib + Iq) log2(lib + Iq) - Iq log2(Iq) - lib log2(lib)
+            v = _xlog2_scalar_nb(lib + Iq) - _xlog2_scalar_nb(Iq) - _xlog2_scalar_nb(lib)
+            scores[col] += v
+
+
+@njit(cache=True, nogil=True)
+def _in_any_fragment_window(prod_idx: int, prod_min: np.ndarray, prod_max: np.ndarray) -> bool:
+    # true if prod_idx falls into ANY [prod_min[k], prod_max[k]) interval
+    # (arrays come precomputed; when prefer_fragments=False, caller passes size 0 arrays)
+    for k in range(prod_min.shape[0]):
+        if prod_idx >= prod_min[k] and prod_idx < prod_max[k]:
+            return True
+    return False
+
+@njit(cache=True, nogil=True)
+def _spec_in_fragment_window(cols_target: int,
+                             peaks_spec: np.ndarray, ap: int, bp: int) -> bool:
+    # true if cols_target appears in peaks_spec[ap:bp]
+    for t in range(ap, bp):
+        if int(peaks_spec[t]) == cols_target:
+            return True
+    return False
+
+
+@njit(cache=True, nogil=True)
+def _accumulate_nl_row_numba(scores: np.ndarray,
+                             q_mz: np.ndarray, q_int: np.ndarray, q_pmz_val: float,  # pass np.nan if unknown
+                             nl_mz: np.ndarray, nl_int: np.ndarray, nl_spec: np.ndarray, nl_prod_idx: np.ndarray,
+                             peaks_mz: np.ndarray, peaks_spec: np.ndarray,
+                             tol: float, use_ppm: bool,
+                             prefer_fragments: bool,
+                             prod_min: np.ndarray, prod_max: np.ndarray) -> None:
+    """
+    Numba version of _accumulate_nl_row.
+
+    Notes:
+      - Pass q_pmz_val=np.nan to indicate 'no precursor' (early return).
+      - When prefer_fragments is True, prod_min/prod_max must be precomputed per query peak
+        (length == len(q_mz)); otherwise pass empty (len 0) arrays.
+    """
+    if not (nl_mz.size > 0 and q_mz.size > 0):
         return
-
-    # Precompute product ranges for each query peak (for hybrid priority)
-    prod_min = np.empty(q_mz.shape[0], dtype=np.int64)
-    prod_max = np.empty(q_mz.shape[0], dtype=np.int64)
-    if prefer_fragments:
-        for i in range(q_mz.shape[0]):
-            mz1 = float(q_mz[i])
-            mz_tolerance = _search_window_halfwidth(mz1, tol, use_ppm, dtype)
-            lo_mz = mz1 - mz_tolerance
-            hi_mz = mz1 + mz_tolerance
-            prod_min[i] = np.searchsorted(peaks_mz, lo_mz, side='left')
-            prod_max[i] = np.searchsorted(peaks_mz, hi_mz, side='right')
+    if np.isnan(q_pmz_val):
+        return
 
     for i in range(q_mz.shape[0]):
         Iq = float(q_int[i])
         if Iq <= 0.0:
             continue
-        loss = float(q_pmz) - float(q_mz[i])
-        mz_tolerance = _search_window_halfwidth(loss, tol, use_ppm, dtype)
+
+        loss = float(q_pmz_val) - float(q_mz[i])
+        mz_tolerance = _search_window_halfwidth_nb(loss, tol, use_ppm)
         lo_mz = loss - mz_tolerance
         hi_mz = loss + mz_tolerance
+
         a = np.searchsorted(nl_mz, lo_mz, side='left')
         b = np.searchsorted(nl_mz, hi_mz, side='right')
         if a >= b:
             continue
 
-        nl2 = nl_mz[a:b].astype(dtype, copy=False)
-        if use_ppm:
-            mask = np.abs(nl2 - loss) <= ((tol * 1e-6) * 0.5 * (nl2 + loss))
-        else:
-            mask = np.abs(nl2 - loss) <= tol
-        if not np.any(mask):
-            continue
-
-        lib = nl_int[a:b][mask].astype(dtype, copy=False)
-        cols = nl_spec[a:b][mask]
-        prod_idx_slice = nl_prod_idx[a:b][mask]
-
+        # For RULE 2 we need the fragment window for THIS peak:
+        ap = 0
+        bp = 0
         if prefer_fragments:
-            # RULE 1: If NL refers to a product peak that lies in any fragment window of this query spectrum
-            # (for any query peak), drop it.
-            s1 = np.searchsorted(prod_min, prod_idx_slice, side='right')
-            s2 = np.searchsorted(prod_max - 1, prod_idx_slice, side='left')
-            drop = s1 > s2
-            if np.any(drop):
-                keep = ~drop
-                lib = lib[keep]
-                cols = cols[keep]
-                prod_idx_slice = prod_idx_slice[keep]
-                if lib.size == 0:
+            mz1 = float(q_mz[i])
+            frag_hw = _search_window_halfwidth_nb(mz1, tol, use_ppm)
+            flo = mz1 - frag_hw
+            fhi = mz1 + frag_hw
+            ap = np.searchsorted(peaks_mz, flo, side='left')
+            bp = np.searchsorted(peaks_mz, fhi, side='right')
+
+        for j in range(a, b):
+            nl2 = float(nl_mz[j])
+            # symmetric ppm / Da check
+            if use_ppm:
+                if abs(nl2 - loss) > (tol * 1e-6) * 0.5 * (nl2 + loss):
+                    continue
+            else:
+                if abs(nl2 - loss) > tol:
                     continue
 
-            # RULE 2 (per-peak): if this query peak also fragment-matches the same library spectrum, drop NL
-            mz1 = float(q_mz[i])
-            mz_tolerance = _search_window_halfwidth(mz1, tol, use_ppm, dtype)
-            lo_mz = mz1 - mz_tolerance
-            hi_mz = mz1 + mz_tolerance
-            ap = np.searchsorted(peaks_mz, lo_mz, side='left')
-            bp = np.searchsorted(peaks_mz, hi_mz, side='right')
-            if ap < bp:
-                cols_frag = np.unique(peaks_spec[ap:bp])
-                if cols_frag.size > 0:
-                    mask2 = ~np.isin(cols, cols_frag, assume_unique=False)
-                    if not np.all(mask2):
-                        cols = cols[mask2]
-                        lib = lib[mask2]
-                        if lib.size == 0:
-                            continue
+            lib = float(nl_int[j])
+            col = int(nl_spec[j])
 
-        v = _xlog2_vec(lib + Iq, dtype) - _xlog2_scalar(Iq, dtype) - _xlog2_vec(lib, dtype)
-        np.add.at(scores, cols, v.astype(dtype, copy=False))
+            # Hybrid priority rules
+            if prefer_fragments:
+                # RULE 1: drop if product peak falls in ANY fragment window of the query spectrum
+                if _in_any_fragment_window(int(nl_prod_idx[j]), prod_min, prod_max):
+                    continue
+
+                # RULE 2 (per-peak): if this query peak also fragment-matches the same library spectrum, drop
+                if ap < bp and _spec_in_fragment_window(col, peaks_spec, ap, bp):
+                    continue
+
+            v = _xlog2_scalar_nb(lib + Iq) - _xlog2_scalar_nb(Iq) - _xlog2_scalar_nb(lib)
+            scores[col] += v
+
 
 
 # ===================== worker plumbing =====================
@@ -622,24 +717,40 @@ def _set_globals(lib_obj, cfg):
 
 def _row_task_dense(args):
     """Compute one row; return (row_index, dense_row_float32)."""
-    i, q_arr, q_pmz = args
+    row_idx, q_arr, q_pmz = args
     cfg = _G_CFG
     lib = _G_LIB
     dtype = lib.dtype
     scores = np.zeros(lib.n_specs, dtype=dtype)
 
-    _accumulate_fragment_row(scores,
-                             q_arr[:, 0], q_arr[:, 1],
-                             lib.peaks_mz, lib.peaks_int, lib.peaks_spec_idx,
-                             cfg["tol"], cfg["use_ppm"], dtype)
+    _accumulate_fragment_row_numba(scores,
+                                   q_arr[:, 0], q_arr[:, 1],
+                                   lib.peaks_mz, lib.peaks_int, lib.peaks_spec_idx,
+                                   float(cfg["tol"]), bool(cfg["use_ppm"]))
 
-    if cfg["build_nl"]:
-        _accumulate_nl_row(scores,
-                           q_arr[:, 0], q_arr[:, 1], q_pmz,
-                           lib.nl_mz, lib.nl_int, lib.nl_spec_idx, lib.nl_product_idx,
-                           lib.peaks_mz, lib.peaks_spec_idx,
-                           cfg["tol"], cfg["use_ppm"], dtype,
-                           prefer_fragments=(cfg["mode"] == "hybrid"))
+    prefer_frag = (cfg["mode"] == "hybrid")
+    if prefer_frag:
+        prod_min = np.empty(q_arr.shape[0], dtype=np.int64)
+        prod_max = np.empty(q_arr.shape[0], dtype=np.int64)
+        for k in range(q_arr.shape[0]):                         # <-- use k
+            mz1 = float(q_arr[k, 0])
+            hw = _search_window_halfwidth_nb(mz1, float(cfg["tol"]), bool(cfg["use_ppm"]))
+            lo = mz1 - hw; hi = mz1 + hw
+            prod_min[k] = np.searchsorted(lib.peaks_mz, lo, side='left')
+            prod_max[k] = np.searchsorted(lib.peaks_mz, hi, side='right')
+    else:
+        prod_min = np.empty(0, dtype=np.int64)
+        prod_max = np.empty(0, dtype=np.int64)
+
+    q_pmz_val = float(q_pmz) if (q_pmz is not None) else np.nan
+
+    _accumulate_nl_row_numba(scores,
+                             q_arr[:, 0], q_arr[:, 1], q_pmz_val,
+                             lib.nl_mz, lib.nl_int, lib.nl_spec_idx, lib.nl_product_idx,
+                             lib.peaks_mz, lib.peaks_spec_idx,
+                             float(cfg["tol"]), bool(cfg["use_ppm"]),
+                             prefer_frag,
+                             prod_min, prod_max)
 
     # identity mask
     if cfg["iden_tol"] is not None and q_pmz is not None:
@@ -650,11 +761,12 @@ def _row_task_dense(args):
         allow &= np.isfinite(lib.precursor_mz)
         scores[~allow] = 0.0
 
-    return (i, scores)
+    return (row_idx, scores)
+
 
 def _row_task_sparse(args):
     """Compute one row; return (row_index, cols, vals)."""
-    i, q_arr, q_pmz = args
-    _, row = _row_task_dense((i, q_arr, q_pmz))
+    row_idx, q_arr, q_pmz = args
+    _, row = _row_task_dense((row_idx, q_arr, q_pmz))
     nz = np.nonzero(row)[0]
-    return (i, nz.astype(np.int64, copy=False), row[nz])
+    return (row_idx, nz.astype(np.int64, copy=False), row[nz])
