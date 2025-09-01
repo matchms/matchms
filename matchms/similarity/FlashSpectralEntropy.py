@@ -2,6 +2,7 @@ import multiprocessing as mp
 import platform
 from typing import List, Optional, Tuple
 import numpy as np
+from numba import njit
 from sparsestack import StackedSparseArray
 from tqdm import tqdm
 from matchms.typing import SpectrumType
@@ -609,8 +610,6 @@ def _build_library_index(processed_peaks_list: List[np.ndarray],
 
 
 # --- Numba-accelerated accumulators ------------------------------------------
-from numba import njit
-
 
 @njit(cache=True, nogil=True)
 def _search_window_halfwidth_nb(m: float, tol: float, use_ppm: bool) -> float:
