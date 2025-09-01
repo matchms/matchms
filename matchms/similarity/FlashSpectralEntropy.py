@@ -387,16 +387,16 @@ def _merge_within(peaks: np.ndarray, max_delta_da: float, dtype: np.dtype) -> np
     if peaks.shape[0] <= 1 or max_delta_da <= 0.0:
         return _as_dtype(peaks, dtype)
     mz = peaks[:, 0].astype(dtype, copy=True)
-    inten = peaks[:, 1].astype(dtype, copy=True)
+    intensities = peaks[:, 1].astype(dtype, copy=True)
     new_mz = []
     new_int = []
     current_mz = mz[0]
-    current_int = inten[0]
+    current_int = intensities[0]
     for k in range(1, mz.shape[0]):
         if (mz[k] - current_mz) <= max_delta_da:
-            total = current_int + inten[k]
+            total = current_int + intensities[k]
             if total > 0:
-                current_mz = (current_mz * current_int + mz[k] * inten[k]) / total
+                current_mz = (current_mz * current_int + mz[k] * intensities[k]) / total
                 current_int = total
             else:
                 current_mz = mz[k]
@@ -405,7 +405,7 @@ def _merge_within(peaks: np.ndarray, max_delta_da: float, dtype: np.dtype) -> np
             new_mz.append(float(current_mz))
             new_int.append(float(current_int))
             current_mz = mz[k]
-            current_int = inten[k]
+            current_int = intensities[k]
     new_mz.append(float(current_mz))
     new_int.append(float(current_int))
     out = np.column_stack((np.array(new_mz, dtype=dtype), np.array(new_int, dtype=dtype)))
@@ -462,7 +462,7 @@ def _clean_and_weight(peaks: np.ndarray,
 
     if remove_precursor and (precursor_mz is not None):
         mask = mz <= (precursor_mz - precursor_window)
-        mz, inten = mz[mask], intensities[mask]
+        mz, intensities = mz[mask], intensities[mask]
         if mz.size == 0:
             return np.empty((0, 2), dtype=dtype)
 
@@ -481,7 +481,7 @@ def _clean_and_weight(peaks: np.ndarray,
         mz, intensities = peaks[:, 0], peaks[:, 1]
     else:
         order = np.argsort(mz)
-        mz, inten = mz[order], intensities[order]
+        mz, intensities = mz[order], intensities[order]
 
     s = float(intensities.sum(dtype=np.float64))
     if s > 0.0 and normalize_to_half:
