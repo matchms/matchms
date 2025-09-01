@@ -34,11 +34,11 @@ class FlashSpectralEntropy(BaseSimilarity):
     mode:
         Matching mode: 'fragment', 'neutral_loss', or 'hybrid' (default is 'fragment').
     remove_precursor:
-        If True, remove precursor peak and peaks within 1.6 Da of it, as suggested by
-        Li & Fiehn (2023). Default is True.
+        If True, remove precursor peak and peaks within precursor_window.
+        Default is True.
     precursor_window:
         If remove_precursor is True, remove peaks within this window around the precursor
-        m/z. Default is 1.6 Da.
+        m/z. Default is 1.6 Da (as suggested by Li & Fiehn(2023)).
     noise_cutoff:
         If > 0, remove peaks with intensities below this fraction of the maximum intensity.
         Default is 0.01 (1%).
@@ -319,7 +319,7 @@ class FlashSpectralEntropy(BaseSimilarity):
         raise NotImplementedError("Output array type is unknown or not yet implemented.")
 
 
-# ===================== float32 helpers =====================
+# ===================== helpers =====================
 
 def _as_dtype(a: np.ndarray, dtype: np.dtype) -> np.ndarray:
     return a.astype(dtype, copy=False) if a.dtype == dtype else a.astype(dtype, copy=True)
@@ -374,24 +374,24 @@ def _merge_within(peaks: np.ndarray, max_delta_da: float, dtype: np.dtype) -> np
     inten = peaks[:, 1].astype(dtype, copy=True)
     new_mz = []
     new_int = []
-    cur_mz = mz[0]
-    cur_int = inten[0]
+    current_mz = mz[0]
+    current_int = inten[0]
     for k in range(1, mz.shape[0]):
-        if (mz[k] - cur_mz) <= max_delta_da:
-            tot = cur_int + inten[k]
-            if tot > 0:
-                cur_mz = (cur_mz * cur_int + mz[k] * inten[k]) / tot
-                cur_int = tot
+        if (mz[k] - current_mz) <= max_delta_da:
+            total = current_int + inten[k]
+            if total > 0:
+                current_mz = (current_mz * current_int + mz[k] * inten[k]) / total
+                current_int = total
             else:
-                cur_mz = mz[k]
-                cur_int = 0.0
+                current_mz = mz[k]
+                current_int = 0.0
         else:
-            new_mz.append(float(cur_mz))
-            new_int.append(float(cur_int))
-            cur_mz = mz[k]
-            cur_int = inten[k]
-    new_mz.append(float(cur_mz))
-    new_int.append(float(cur_int))
+            new_mz.append(float(current_mz))
+            new_int.append(float(current_int))
+            current_mz = mz[k]
+            current_int = inten[k]
+    new_mz.append(float(current_mz))
+    new_int.append(float(current_int))
     out = np.column_stack((np.array(new_mz, dtype=dtype), np.array(new_int, dtype=dtype)))
     return out
 
@@ -542,9 +542,9 @@ def _accumulate_fragment_row(scores: np.ndarray,
         Iq = float(q_int[i])
         if Iq <= 0.0:
             continue
-        Δ = _search_window_halfwidth(m1, tol, use_ppm, dtype)
-        lo = m1 - Δ
-        hi = m1 + Δ
+        delta = _search_window_halfwidth(m1, tol, use_ppm, dtype)
+        lo = m1 - delta
+        hi = m1 + delta
         a = np.searchsorted(peaks_mz, lo, side='left')
         b = np.searchsorted(peaks_mz, hi, side='right')
         if a >= b:
@@ -577,9 +577,9 @@ def _accumulate_nl_row(scores: np.ndarray,
     if prefer_fragments:
         for i in range(q_mz.shape[0]):
             m1 = float(q_mz[i])
-            Δ = _search_window_halfwidth(m1, tol, use_ppm, dtype)
-            lo = m1 - Δ
-            hi = m1 + Δ
+            delta = _search_window_halfwidth(m1, tol, use_ppm, dtype)
+            lo = m1 - delta
+            hi = m1 + delta
             prod_min[i] = np.searchsorted(peaks_mz, lo, side='left')
             prod_max[i] = np.searchsorted(peaks_mz, hi, side='right')
 
@@ -588,9 +588,9 @@ def _accumulate_nl_row(scores: np.ndarray,
         if Iq <= 0.0:
             continue
         loss = float(q_pmz) - float(q_mz[i])
-        Δ = _search_window_halfwidth(loss, tol, use_ppm, dtype)
-        lo = loss - Δ
-        hi = loss + Δ
+        delta = _search_window_halfwidth(loss, tol, use_ppm, dtype)
+        lo = loss - delta
+        hi = loss + delta
         a = np.searchsorted(nl_mz, lo, side='left')
         b = np.searchsorted(nl_mz, hi, side='right')
         if a >= b:
@@ -623,12 +623,12 @@ def _accumulate_nl_row(scores: np.ndarray,
                     continue
 
             # RULE 2 (per-peak): if this query peak also fragment-matches the same library spectrum, drop NL
-            m1 = float(q_mz[i])
-            Δp = _search_window_halfwidth(m1, tol, use_ppm, dtype)
-            lo_p = m1 - Δp
-            hi_p = m1 + Δp
-            ap = np.searchsorted(peaks_mz, lo_p, side='left')
-            bp = np.searchsorted(peaks_mz, hi_p, side='right')
+            mz1 = float(q_mz[i])
+            mz_tolerance = _search_window_halfwidth(mz1, tol, use_ppm, dtype)
+            lo_mz = mz1 - mz_tolerance
+            hi_mz = mz1 + mz_tolerance
+            ap = np.searchsorted(peaks_mz, lo_mz, side='left')
+            bp = np.searchsorted(peaks_mz, hi_mz, side='right')
             if ap < bp:
                 cols_frag = np.unique(peaks_spec[ap:bp])
                 if cols_frag.size > 0:
