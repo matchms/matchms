@@ -419,6 +419,41 @@ def _clean_and_weight(peaks: np.ndarray,
                       normalize_to_half: bool,
                       merge_within_da: float,
                       dtype: np.dtype) -> np.ndarray:
+    """
+    Apply the Flash preprocessing rules to a (mz, intensity) peak list.
+
+    Steps:
+      1) (Optional) Remove all peaks at/above (precursor_mz - precursor_window).
+      2) (Optional) Remove noise: keep peaks with intensity >= noise_cutoff * max(intensity).
+      3) Entropy-weight intensities (Li & Fiehn): raise intensities by a power derived from spectrum entropy.
+      4) (Optional) Merge peaks within a small m/z window by intensity-weighted centroid.
+      5) Sort by m/z and (optional) normalize intensities to sum to 0.5 (recommended in the paper).
+
+    Parameters
+    ----------
+    peaks : ndarray of shape (N, 2)
+        Column 0 = m/z, column 1 = intensity.
+    precursor_mz : float or None
+        Precursor m/z for the spectrum (if known).
+    remove_precursor : bool
+        If True, remove the precursor and near-precursor peaks.
+    precursor_window : float
+        Size (Da) to cut below the precursor (remove m/z > precursor_mz - window).
+    noise_cutoff : float
+        Fraction of max intensity to keep (0.01 means keep peaks >= 1% of max).
+    normalize_to_half : bool
+        If True, scale intensities so their sum is 0.5.
+    merge_within_da : float
+        If > 0, merge peaks that are within this m/z distance.
+    dtype : np.dtype
+        Float dtype for outputs, usually np.float32.
+
+    Returns
+    -------
+    ndarray
+        Cleaned array with columns [mz, intensity], dtype=dtype, sorted by m/z.
+        May be empty with shape (0, 2) if everything is filtered away.
+    """
     if peaks.size == 0:
         return np.empty((0, 2), dtype=dtype)
 
@@ -448,7 +483,7 @@ def _clean_and_weight(peaks: np.ndarray,
         order = np.argsort(mz)
         mz, inten = mz[order], intensities[order]
 
-    s = float(intensitiesn.sum(dtype=np.float64))
+    s = float(intensities.sum(dtype=np.float64))
     if s > 0.0 and normalize_to_half:
         intensities = (intensities * (0.5 / s)).astype(dtype, copy=False)
 
@@ -481,6 +516,28 @@ def _build_library_index(processed_peaks_list: List[np.ndarray],
                          precursor_mz_list: List[Optional[float]],
                          build_neutral_loss: bool,
                          dtype: np.dtype) -> _LibraryIndex:
+    """
+    Build a global, sorted index over all *query* spectra peaks.
+
+    The index concatenates all query peaks into flat arrays, then sorts by m/z.
+    This allows each reference spectrum (a row) to scan efficiently using
+    binary searches into the shared arrays. If `build_neutral_loss` is True, we
+    also construct a parallel set of arrays for neutral-loss peaks (precursor - mz).
+
+    Arrays created (all aligned/sorted):
+      - peaks_mz : float[dtype], all concatenated product (fragment) m/z
+      - peaks_int : float[dtype], matching intensities
+      - peaks_spec_idx : int32, which query spectrum each peak originated from
+      - nl_mz, nl_int, nl_spec_idx, nl_product_idx (optional):
+          neutral-loss m/z for peaks with known precursor,
+          the intensities/spec_idx aligned to nl_mz,
+          and `nl_product_idx` maps back into peaks_mz positions (for hybrid rules)
+
+    Returns
+    -------
+    _LibraryIndex
+        Compact structure used by the row workers to accumulate scores quickly.
+    """
     idx = _LibraryIndex(dtype)
     idx.n_specs = len(processed_peaks_list)
     # store precursor m/z as float32 (NaN when unknown)
@@ -553,6 +610,15 @@ from numba import njit
 
 @njit(cache=True, nogil=True)
 def _search_window_halfwidth_nb(m: float, tol: float, use_ppm: bool) -> float:
+    """
+    Compute half-width of a symmetric search window around a value `mass`.
+
+    If `use_ppm` is False: returns `tol` (Da half-width).
+    If `use_ppm` is True : uses symmetric-ppm definition:
+        |m2 - m1| <= tol[ppm] * 1e-6 * 0.5 * (m1 + m2)
+    which corresponds to a half-window of approximately (tol * 1e-6 * mass),
+    corrected for symmetry.
+    """
     if not use_ppm:
         return tol
     c = tol * 1e-6
@@ -561,53 +627,72 @@ def _search_window_halfwidth_nb(m: float, tol: float, use_ppm: bool) -> float:
 
 @njit(cache=True, nogil=True)
 def _xlog2_scalar_nb(x: float) -> float:
+    """
+    Numerically stable x * log2(x) for scalar x with x <= 0 mapped to 0.
+    """
     if x <= 0.0:
         return 0.0
     return x * np.log2(x)
 
 @njit(cache=True, nogil=True)
-def _accumulate_fragment_row_numba(scores: np.ndarray,
-                                   q_mz: np.ndarray, q_int: np.ndarray,
-                                   peaks_mz: np.ndarray, peaks_int: np.ndarray, peaks_spec: np.ndarray,
-                                   tol: float, use_ppm: bool) -> None:
+def _accumulate_fragment_row_numba(
+    scores: np.ndarray,
+    query_mz: np.ndarray, query_intensity: np.ndarray,
+    lib_mz: np.ndarray, lib_intensity: np.ndarray, lib_spec_index: np.ndarray,
+    tol: float, use_ppm: bool
+) -> None:
     """
-    Numba version of _accumulate_fragment_row.
-    All arrays should be C-contiguous; dtype float32 for *_mz/*_int and int32 for *_spec.
+    Accumulate fragment-based contributions for a single row (one reference spectrum).
+
+    For each query peak (m/z, Iq), find all library peaks whose m/z lies within
+    the symmetric-ppm/Da tolerance window around the query m/z. For each match,
+    add the incremental entropy term to `scores[col]`, where `col` is the index
+    of the library spectrum that the matched library peak belongs to.
+
+    Parameters
+    ----------
+    scores : float[dtype], shape (n_library_spectra,)
+        Output buffer, accumulated in-place.
+    query_mz, query_intensity : float[dtype]
+        Peaks of the reference spectrum being compared (this row).
+    lib_mz, lib_intensity : float[dtype]
+        Global concatenated *query* (library) product peaks, sorted by m/z.
+    lib_spec_index : int32
+        For each entry of lib_mz, the source spectrum index (column) in the library.
+    tol : float
+        Mass tolerance (Da or ppm).
+    use_ppm : bool
+        Whether to treat `tol` as ppm.
     """
-    n_q = q_mz.shape[0]
-    for i in range(n_q):
-        mz1 = float(q_mz[i])
-        Iq = float(q_int[i])
+    n_q = query_mz.shape[0]
+    for q_idx in range(n_q):
+        mz_q = float(query_mz[q_idx])
+        Iq = float(query_intensity[q_idx])
         if Iq <= 0.0:
             continue
 
-        mz_tolerance = _search_window_halfwidth_nb(mz1, tol, use_ppm)
-        lo_mz = mz1 - mz_tolerance
-        hi_mz = mz1 + mz_tolerance
+        half_width = _search_window_halfwidth_nb(mz_q, tol, use_ppm)
+        lo = mz_q - half_width
+        hi = mz_q + half_width
 
-        # searchsorted on sorted peaks_mz
-        a = np.searchsorted(peaks_mz, lo_mz, side='left')
-        b = np.searchsorted(peaks_mz, hi_mz, side='right')
+        a = np.searchsorted(lib_mz, lo, side='left')
+        b = np.searchsorted(lib_mz, hi, side='right')
         if a >= b:
             continue
 
-        # refine for symmetric ppm (or Da) and accumulate directly
         for j in range(a, b):
-            mz2 = float(peaks_mz[j])
-            # symmetric ppm tight check or Da check
+            mz_lib = float(lib_mz[j])
             if use_ppm:
-                if abs(mz2 - mz1) > (tol * 1e-6) * 0.5 * (mz2 + mz1):
+                if abs(mz_lib - mz_q) > (tol * 1e-6) * 0.5 * (mz_lib + mz_q):
                     continue
             else:
-                if abs(mz2 - mz1) > tol:
+                if abs(mz_lib - mz_q) > tol:
                     continue
 
-            lib = float(peaks_int[j])
-            col = int(peaks_spec[j])
-
-            # v = (lib + Iq) log2(lib + Iq) - Iq log2(Iq) - lib log2(lib)
-            v = _xlog2_scalar_nb(lib + Iq) - _xlog2_scalar_nb(Iq) - _xlog2_scalar_nb(lib)
-            scores[col] += v
+            Ilib = float(lib_intensity[j])
+            col = int(lib_spec_index[j])
+            incr = _xlog2_scalar_nb(Ilib + Iq) - _xlog2_scalar_nb(Iq) - _xlog2_scalar_nb(Ilib)
+            scores[col] += incr
 
 
 @njit(cache=True, nogil=True)
