@@ -1,6 +1,5 @@
 import multiprocessing as mp
 import platform
-from multiprocessing.shared_memory import SharedMemory
 from typing import List, Optional, Tuple
 import numpy as np
 from sparsestack import StackedSparseArray
