@@ -423,36 +423,36 @@ def _clean_and_weight(peaks: np.ndarray,
         return np.empty((0, 2), dtype=dtype)
 
     mz = _as_dtype(peaks[:, 0], dtype)
-    inten = _as_dtype(peaks[:, 1], dtype)
+    intensities = _as_dtype(peaks[:, 1], dtype)
 
     if remove_precursor and (precursor_mz is not None):
         mask = mz <= (precursor_mz - precursor_window)
-        mz, inten = mz[mask], inten[mask]
+        mz, inten = mz[mask], intensities[mask]
         if mz.size == 0:
             return np.empty((0, 2), dtype=dtype)
 
     if noise_cutoff and noise_cutoff > 0.0:
         #thr = dtype.type(mz.dtype.type(inten.max()) * noise_cutoff)
-        thr = inten.max() * noise_cutoff
-        mask = inten >= thr
-        mz, inten = mz[mask], inten[mask]
+        thr = intensities.max() * noise_cutoff
+        mask = intensities >= thr
+        mz, intensities = mz[mask], intensities[mask]
         if mz.size == 0:
             return np.empty((0, 2), dtype=dtype)
 
-    inten = _entropy_weight(inten, dtype)
+    intensities = _entropy_weight(intensities, dtype)
 
     if merge_within_da and merge_within_da > 0.0 and mz.size > 1:
-        peaks = _merge_within(np.column_stack((mz, inten)), merge_within_da, dtype)
-        mz, inten = peaks[:, 0], peaks[:, 1]
+        peaks = _merge_within(np.column_stack((mz, intensities)), merge_within_da, dtype)
+        mz, intensities = peaks[:, 0], peaks[:, 1]
     else:
         order = np.argsort(mz)
-        mz, inten = mz[order], inten[order]
+        mz, inten = mz[order], intensities[order]
 
-    s = float(inten.sum(dtype=np.float64))
+    s = float(intensitiesn.sum(dtype=np.float64))
     if s > 0.0 and normalize_to_half:
-        inten = (inten * (0.5 / s)).astype(dtype, copy=False)
+        intensities = (intensities * (0.5 / s)).astype(dtype, copy=False)
 
-    return np.column_stack((mz, inten))
+    return np.column_stack((mz, intensities))
 
 
 # ===================== library index =====================
@@ -734,10 +734,11 @@ def _row_task_dense(args):
         prod_max = np.empty(q_arr.shape[0], dtype=np.int64)
         for k in range(q_arr.shape[0]):                         # <-- use k
             mz1 = float(q_arr[k, 0])
-            hw = _search_window_halfwidth_nb(mz1, float(cfg["tol"]), bool(cfg["use_ppm"]))
-            lo = mz1 - hw; hi = mz1 + hw
-            prod_min[k] = np.searchsorted(lib.peaks_mz, lo, side='left')
-            prod_max[k] = np.searchsorted(lib.peaks_mz, hi, side='right')
+            mz_tolerance = _search_window_halfwidth_nb(mz1, float(cfg["tol"]), bool(cfg["use_ppm"]))
+            lo_mz = mz1 - mz_tolerance
+            hi_mz = mz1 + mz_tolerance
+            prod_min[k] = np.searchsorted(lib.peaks_mz, lo_mz, side='left')
+            prod_max[k] = np.searchsorted(lib.peaks_mz, hi_mz, side='right')
     else:
         prod_min = np.empty(0, dtype=np.int64)
         prod_max = np.empty(0, dtype=np.int64)
