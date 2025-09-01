@@ -538,23 +538,23 @@ def _accumulate_fragment_row(scores: np.ndarray,
                              peaks_mz: np.ndarray, peaks_int: np.ndarray, peaks_spec: np.ndarray,
                              tol: float, use_ppm: bool, dtype: np.dtype):
     for i in range(q_mz.shape[0]):
-        m1 = float(q_mz[i])
+        mz1 = float(q_mz[i])
         Iq = float(q_int[i])
         if Iq <= 0.0:
             continue
-        delta = _search_window_halfwidth(m1, tol, use_ppm, dtype)
-        lo = m1 - delta
-        hi = m1 + delta
-        a = np.searchsorted(peaks_mz, lo, side='left')
-        b = np.searchsorted(peaks_mz, hi, side='right')
+        mz_tolerance = _search_window_halfwidth(mz1, tol, use_ppm, dtype)
+        lo_mz = mz1 - mz_tolerance
+        hi_mz = mz1 + mz_tolerance
+        a = np.searchsorted(peaks_mz, lo_mz, side='left')
+        b = np.searchsorted(peaks_mz, hi_mz, side='right')
         if a >= b:
             continue
         # refine for symmetric ppm
         mz2 = peaks_mz[a:b].astype(dtype, copy=False)
         if use_ppm:
-            mask = np.abs(mz2 - m1) <= ((tol * 1e-6) * (0.5) * (mz2 + m1))
+            mask = np.abs(mz2 - mz1) <= ((tol * 1e-6) * (0.5) * (mz2 + mz1))
         else:
-            mask = np.abs(mz2 - m1) <= tol
+            mask = np.abs(mz2 - mz1) <= tol
         if not np.any(mask):
             continue
         lib = peaks_int[a:b][mask].astype(dtype, copy=False)
@@ -576,23 +576,23 @@ def _accumulate_nl_row(scores: np.ndarray,
     prod_max = np.empty(q_mz.shape[0], dtype=np.int64)
     if prefer_fragments:
         for i in range(q_mz.shape[0]):
-            m1 = float(q_mz[i])
-            delta = _search_window_halfwidth(m1, tol, use_ppm, dtype)
-            lo = m1 - delta
-            hi = m1 + delta
-            prod_min[i] = np.searchsorted(peaks_mz, lo, side='left')
-            prod_max[i] = np.searchsorted(peaks_mz, hi, side='right')
+            mz1 = float(q_mz[i])
+            mz_tolerance = _search_window_halfwidth(mz1, tol, use_ppm, dtype)
+            lo_mz = mz1 - mz_tolerance
+            hi_mz = mz1 + mz_tolerance
+            prod_min[i] = np.searchsorted(peaks_mz, lo_mz, side='left')
+            prod_max[i] = np.searchsorted(peaks_mz, hi_mz, side='right')
 
     for i in range(q_mz.shape[0]):
         Iq = float(q_int[i])
         if Iq <= 0.0:
             continue
         loss = float(q_pmz) - float(q_mz[i])
-        delta = _search_window_halfwidth(loss, tol, use_ppm, dtype)
-        lo = loss - delta
-        hi = loss + delta
-        a = np.searchsorted(nl_mz, lo, side='left')
-        b = np.searchsorted(nl_mz, hi, side='right')
+        mz_tolerance = _search_window_halfwidth(loss, tol, use_ppm, dtype)
+        lo_mz = loss - mz_tolerance
+        hi_mz = loss + mz_tolerance
+        a = np.searchsorted(nl_mz, lo_mz, side='left')
+        b = np.searchsorted(nl_mz, hi_mz, side='right')
         if a >= b:
             continue
 
