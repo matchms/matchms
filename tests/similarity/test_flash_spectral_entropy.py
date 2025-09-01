@@ -4,8 +4,8 @@ import numpy as np
 import pytest
 from matchms.similarity.FlashSpectralEntropy import (
     FlashSpectralEntropy,
-    _accumulate_fragment_row,
-    _accumulate_nl_row,
+    _accumulate_fragment_row_numba,
+    _accumulate_nl_row_numba,
     _clean_and_weight,
     _entropy_weight,
     _LibraryIndex,
@@ -53,9 +53,6 @@ def getattr_py_and_compiled(func):
     out = [(py, "py")]
     if py is not func:
         out.append((func, "compiled"))
-    else:
-        # No compiled version available — still test once
-        pass
     return out
 
 # ----------------------------
@@ -76,7 +73,7 @@ def test_xlog2_helpers(vals):
         assert math.isclose(
             _xlog2_scalar(float(v), np.float32),
             float(v * math.log2(v)) if v > 0 else 0.0, rel_tol=0, abs_tol=1e-12
-            )
+        )
 
 @pytest.mark.parametrize("m1,m2,tol,use_ppm,expect", [
     (100.0, 100.015, 0.02, False, True),
@@ -126,7 +123,7 @@ def test_clean_and_weight_pipeline_precursor_noise_norm_merge():
     intens = np.array([0.05, 0.2, 0.01, 0.2,  0.01], dtype=float)
     pmz = 200.0
     out = _clean_and_weight(
-        np.column_stack([mz, intens]),
+        np.column_stack([mz, intens]).T,
         precursor_mz=pmz,
         remove_precursor=True,
         precursor_window=1.6,   # keep only <= 198.4
@@ -215,7 +212,7 @@ def test_neutral_loss_vs_hybrid_prefer_fragments():
     hyb  = FlashSpectralEntropy(mode="hybrid", **kwargs)
 
     s_frag = float(frag.pair(r, q))
-    s_nl   = float(nl.pair(r, q))       # includes fragments + NL (per implementation)
+    s_nl   = float(nl.pair(r, q))       # fragment + NL (implementation accumulates fragments first)
     s_hyb  = float(hyb.pair(r, q))      # should equal fragment-only score
 
     assert s_frag > 0.0
@@ -242,7 +239,7 @@ def test_dtype_output_and_commutativity():
 # Compiled vs. uncompiled (if Numba present) for helpers
 # ----------------------------
 
-@pytest.mark.parametrize("impl,label", getattr_py_and_compiled(_accumulate_fragment_row))
+@pytest.mark.parametrize("impl,label", getattr_py_and_compiled(_accumulate_fragment_row_numba))
 def test_accumulate_fragment_row_py_vs_compiled(impl, label):
     # Tiny synthetic library of one spectrum with two peaks
     lib_mz  = np.array([100.0, 200.0], dtype=np.float32)
@@ -254,12 +251,13 @@ def test_accumulate_fragment_row_py_vs_compiled(impl, label):
     q_int = np.array([0.25, 0.75], dtype=np.float32)
 
     scores = np.zeros(1, dtype=np.float32)
-    impl(scores, q_mz, q_int, lib_mz, lib_int, lib_sid, 0.02, False, np.float32)
+    # UPDATED SIGNATURE: no dtype arg
+    impl(scores, q_mz, q_int, lib_mz, lib_int, lib_sid, 0.02, False)
     # Expected: both peaks contribute to spectrum 0
     assert scores.shape == (1,)
     assert scores[0] > 0.0
 
-@pytest.mark.parametrize("impl,label", getattr_py_and_compiled(_accumulate_nl_row))
+@pytest.mark.parametrize("impl,label", getattr_py_and_compiled(_accumulate_nl_row_numba))
 def test_accumulate_nl_row_py_vs_compiled(impl, label):
     # Library with pmz=500 and a product at 100 (loss 400)
     nl_mz  = np.array([400.0], dtype=np.float32)
@@ -275,8 +273,11 @@ def test_accumulate_nl_row_py_vs_compiled(impl, label):
     q_pmz = 500.0
 
     scores = np.zeros(1, dtype=np.float32)
+    # UPDATED SIGNATURE: no dtype arg; add empty prod_min/prod_max for prefer_fragments=False
+    prod_min = np.empty(0, dtype=np.int64)
+    prod_max = np.empty(0, dtype=np.int64)
     impl(scores, q_mz, q_int, q_pmz, nl_mz, nl_int, nl_sid, nl_pid,
-         peaks_mz, peaks_sid, 0.1, False, np.float32, prefer_fragments=False)
+         peaks_mz, peaks_sid, 0.1, False, False, prod_min, prod_max)
     assert scores[0] > 0.0
 
 # ----------------------------
@@ -294,7 +295,7 @@ def test_matrix_dense_matches_pair():
     ]
     fse = FlashSpectralEntropy(tolerance=0.1, use_ppm=False, mode="fragment",
                                remove_precursor=False, noise_cutoff=0.0,
-                               normalize_to_half=False, merge_within=0.0, dtype=np.float32)
+                               normalize_to_half=False, merge_within=0.0)
     M = fse.matrix(refs, qs, array_type="numpy", n_jobs=0)
     assert M.shape == (2, 2)
     # Check each cell equals pair()
@@ -315,7 +316,7 @@ def test_matrix_sparse_basic():
     ]
     fse = FlashSpectralEntropy(tolerance=0.1, use_ppm=False, mode="fragment",
                                remove_precursor=False, noise_cutoff=0.0,
-                               normalize_to_half=False, merge_within=0.0, dtype=np.float32)
+                               normalize_to_half=False, merge_within=0.0)
     S = fse.matrix(refs, qs, array_type="sparse", n_jobs=0)
     assert S.shape == (2, 2, 1)
     dense = S.to_array()
@@ -354,9 +355,12 @@ def test_pair_matches_manual_accumulation_fragment_only():
     lib.precursor_mz = np.array([pmzB if pmzB is not None else np.nan], dtype=np.float32)
 
     scores = np.zeros(1, dtype=np.float32)
-    _accumulate_fragment_row(scores, A[:, 0], A[:, 1],
-                             lib.peaks_mz, lib.peaks_int, lib.peaks_spec_idx,
-                             fse.tolerance, fse.use_ppm, np.float32)
+    # UPDATED SIGNATURE: no dtype arg
+    _accumulate_fragment_row_numba(
+        scores, A[:, 0], A[:, 1],
+        lib.peaks_mz, lib.peaks_int, lib.peaks_spec_idx,
+        fse.tolerance, fse.use_ppm
+    )
 
     expected = float(scores[0])
     got = float(fse.pair(r, q))
