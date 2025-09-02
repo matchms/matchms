@@ -90,9 +90,9 @@ class FlashSpectralEntropy(BaseSimilarity):
 
     # ---- per-pair (not parallel path) ----
     def _prepare(self, spectrum: SpectrumType) -> Tuple[np.ndarray, Optional[float]]:
-        arr = spectrum.peaks.to_numpy
+        peaks = spectrum.peaks.to_numpy
         pmz = spectrum.metadata.get("precursor_mz", None)
-        cleaned = _clean_and_weight(arr, pmz,
+        cleaned = _clean_and_weight(peaks, pmz,
                                     remove_precursor=self.remove_precursor,
                                     precursor_window=self.precursor_window,
                                     noise_cutoff=self.noise_cutoff,
@@ -108,24 +108,24 @@ class FlashSpectralEntropy(BaseSimilarity):
         builds a tiny 1-spectrum library from the query.
         """
         # preprocess both spectra
-        A, pmzA = self._prepare(reference)
-        B, pmzB = self._prepare(query)
-        if A.size == 0 or B.size == 0:
+        peaks_1, pmz_1 = self._prepare(reference)
+        peaks_2, pmz_2 = self._prepare(query)
+        if peaks_1.size == 0 or peaks_2.size == 0:
             return np.asarray(0.0, dtype=self.dtype)
     
         # build 1-spec library index from the query (B)
         lib = _LibraryIndex(self.dtype)
         lib.n_specs = 1
-        lib.peaks_mz = B[:, 0]
-        lib.peaks_int = B[:, 1]
-        lib.peaks_spec_idx = np.zeros(B.shape[0], dtype=np.int32)
+        lib.peaks_mz = peaks_2[:, 0]
+        lib.peaks_int = peaks_2[:, 1]
+        lib.peaks_spec_idx = np.zeros(peaks_2.shape[0], dtype=np.int32)
     
-        if self.mode in ("neutral_loss", "hybrid") and (pmzB is not None):
-            nl_mz = (float(pmzB) - B[:, 0]).astype(self.dtype, copy=False)
+        if self.mode in ("neutral_loss", "hybrid") and (pmz_2 is not None):
+            nl_mz = (pmz_2 - peaks_2[:, 0]).astype(self.dtype, copy=False)
             order = np.argsort(nl_mz)
             lib.nl_mz = nl_mz[order]
-            lib.nl_int = B[:, 1][order]
-            lib.nl_spec_idx = np.zeros(B.shape[0], dtype=np.int32)
+            lib.nl_int = peaks_2[:, 1][order]
+            lib.nl_spec_idx = np.zeros(peaks_2.shape[0], dtype=np.int32)
             lib.nl_product_idx = order.astype(np.int64, copy=False)
         else:
             lib.nl_mz = np.zeros(0, dtype=self.dtype)
@@ -134,7 +134,7 @@ class FlashSpectralEntropy(BaseSimilarity):
             lib.nl_product_idx = np.zeros(0, dtype=np.int64)
     
         lib.precursor_mz = np.array(
-            [float(pmzB) if (pmzB is not None) else np.nan],
+            [pmz_2 if (pmz_2 is not None) else np.nan],
             dtype=self.dtype
         )
     
@@ -144,22 +144,22 @@ class FlashSpectralEntropy(BaseSimilarity):
         # fragment path
         _accumulate_fragment_row_numba(
             scores,
-            A[:, 0].astype(self.dtype, copy=False),
-            A[:, 1].astype(self.dtype, copy=False),
+            peaks_1[:, 0].astype(self.dtype, copy=False),
+            peaks_1[:, 1].astype(self.dtype, copy=False),
             lib.peaks_mz, lib.peaks_int, lib.peaks_spec_idx,
             float(self.tolerance), bool(self.use_ppm)
         )
     
         # neutral-loss / hybrid path (if enabled & query has precursor)
-        if self.mode in ("neutral_loss", "hybrid") and (pmzA is not None):
+        if self.mode in ("neutral_loss", "hybrid") and (pmz_1 is not None):
             prefer_frag = (self.mode == "hybrid")
     
             if prefer_frag:
                 # precompute product-peak windows for ALL reference peaks
-                prod_min = np.empty(A.shape[0], dtype=np.int64)
-                prod_max = np.empty(A.shape[0], dtype=np.int64)
-                for k in range(A.shape[0]):
-                    mz1 = float(A[k, 0])
+                prod_min = np.empty(peaks_1.shape[0], dtype=np.int64)
+                prod_max = np.empty(peaks_1.shape[0], dtype=np.int64)
+                for k in range(peaks_1.shape[0]):
+                    mz1 = float(peaks_1[k, 0])
                     mz_tolerance = _search_window_halfwidth_nb(mz1, float(self.tolerance), bool(self.use_ppm))
                     lo_mz = mz1 - mz_tolerance
                     hi_mz = mz1 + mz_tolerance
@@ -169,12 +169,12 @@ class FlashSpectralEntropy(BaseSimilarity):
                 prod_min = np.empty(0, dtype=np.int64)
                 prod_max = np.empty(0, dtype=np.int64)
     
-            q_pmz_val = float(pmzA) if (pmzA is not None) else np.nan
+            q_pmz_val = float(pmz_1) if (pmz_1 is not None) else np.nan
     
             _accumulate_nl_row_numba(
                 scores,
-                A[:, 0].astype(self.dtype, copy=False),
-                A[:, 1].astype(self.dtype, copy=False),
+                peaks_1[:, 0].astype(self.dtype, copy=False),
+                peaks_1[:, 1].astype(self.dtype, copy=False),
                 q_pmz_val,
                 lib.nl_mz, lib.nl_int, lib.nl_spec_idx, lib.nl_product_idx,
                 lib.peaks_mz, lib.peaks_spec_idx,
@@ -184,13 +184,13 @@ class FlashSpectralEntropy(BaseSimilarity):
             )
     
         # identity gate (optional)
-        if (self.identity_precursor_tolerance is not None) and (pmzA is not None):
+        if (self.identity_precursor_tolerance is not None) and (pmz_1 is not None):
             tol = float(self.identity_precursor_tolerance)
             lib_pmz = float(lib.precursor_mz[0])
             if self.identity_use_ppm:
-                allow = abs(lib_pmz - pmzA) <= (tol * 1e-6 * 0.5 * (lib_pmz + pmzA))
+                allow = abs(lib_pmz - pmz_1) <= (tol * 1e-6 * 0.5 * (lib_pmz + pmz_1))
             else:
-                allow = abs(lib_pmz - pmzA) <= tol
+                allow = abs(lib_pmz - pmz_1) <= tol
             if not (allow and np.isfinite(lib_pmz)):
                 scores[0] = 0.0
     
@@ -240,9 +240,9 @@ class FlashSpectralEntropy(BaseSimilarity):
         lib_proc = []
         lib_pmz = []
         for s in queries:
-            arr = s.peaks.to_numpy
+            peaks = s.peaks.to_numpy
             pmz = s.metadata.get("precursor_mz", None)
-            cleaned = _clean_and_weight(arr, pmz,
+            cleaned = _clean_and_weight(peaks, pmz,
                                         remove_precursor=self.remove_precursor,
                                         precursor_window=self.precursor_window,
                                         noise_cutoff=self.noise_cutoff,
@@ -258,11 +258,11 @@ class FlashSpectralEntropy(BaseSimilarity):
         # 2) prepare output
         out = np.zeros((n_rows, n_cols), dtype=self.dtype)
 
-        # 3) prepare row inputs (queries) – we preprocess each reference spectrum here
+        # 3)  preprocess each reference spectrum
         row_inputs = []
         for i, ref in enumerate(references):
-            A, pmzA = self._prepare(ref)
-            row_inputs.append((i, A, pmzA))
+            peaks_r, pmz_r = self._prepare(ref)
+            row_inputs.append((i, peaks_r, pmz_r))
 
         # 4) configuration passed to workers
         cfg = dict(
