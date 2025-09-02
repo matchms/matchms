@@ -73,6 +73,7 @@ from matchms.filtering.default_filters import default_filters
 from matchms.filtering.metadata_processing.add_compound_name import add_compound_name
 from matchms.filtering.metadata_processing.add_fingerprint import add_fingerprint
 from matchms.filtering.metadata_processing.add_parent_mass import add_parent_mass
+from matchms.filtering.metadata_processing.add_precursor_formula import add_precursor_formula
 from matchms.filtering.metadata_processing.add_precursor_mz import add_precursor_mz
 from matchms.filtering.metadata_processing.add_retention import add_retention_index, add_retention_time
 from matchms.filtering.metadata_processing.clean_adduct import clean_adduct
@@ -127,6 +128,9 @@ from matchms.filtering.peak_processing.remove_noise_below_frequent_intensities i
 )
 from matchms.filtering.peak_processing.remove_peaks_around_precursor_mz import remove_peaks_around_precursor_mz
 from matchms.filtering.peak_processing.remove_peaks_outside_top_k import remove_peaks_outside_top_k
+from matchms.filtering.peak_processing.remove_peaks_relative_to_precursor_mz import (
+    remove_peaks_relative_to_precursor_mz,
+)
 from matchms.filtering.peak_processing.remove_profiled_spectra import remove_profiled_spectra
 from matchms.filtering.peak_processing.require_maximum_number_of_peaks import require_maximum_number_of_peaks
 from matchms.filtering.peak_processing.require_minimum_number_of_high_peaks import require_minimum_number_of_high_peaks
@@ -141,6 +145,7 @@ __all__ = [
     "add_compound_name",
     "add_fingerprint",
     "add_parent_mass",
+    "add_precursor_formula",
     "add_precursor_mz",
     "add_retention_index",
     "add_retention_time",
@@ -163,6 +168,7 @@ __all__ = [
     "normalize_intensities",
     "reduce_to_number_of_peaks",
     "remove_peaks_around_precursor_mz",
+    "remove_peaks_relative_to_precursor_mz",
     "remove_peaks_outside_top_k",
     "remove_profiled_spectra",
     "repair_adduct_and_parent_mass_based_on_smiles",

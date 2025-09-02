@@ -31,7 +31,6 @@ python = ">=3.10,<3.14"
 numpy = ">=2.0.0"
 scipy = "^1.15.3"
 pandas = "^2.2.3"
-pillow = "!=9.4.0"
 lxml = "^5.4.0"
 matplotlib = ">=3.7"
 networkx = "^3.4.2"
@@ -44,7 +43,8 @@ tqdm = ">=4.65.0"
 rdkit = "^2024.3.5"
 pyyaml = ">=6.0.1"
 deprecated = ">=1.2.14"
-pubchempy = "*"
+# Update pubchempy once a new version is released on pypi
+pubchempy= { git = "https://github.com/mcs07/PubChemPy.git", rev = "a5d8646" }
 pynndescent = ">=0.5.13"
 
 [tool.poetry.group.dev.dependencies]

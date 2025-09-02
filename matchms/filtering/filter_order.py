@@ -53,11 +53,13 @@ ALL_FILTERS = [msfilters.require_correct_ms_level,
                msfilters.select_by_mz,
                msfilters.select_by_relative_intensity,
                msfilters.remove_peaks_around_precursor_mz,
+               msfilters.remove_peaks_relative_to_precursor_mz,
                msfilters.remove_peaks_outside_top_k,
                msfilters.reduce_to_number_of_peaks,
                msfilters.require_minimum_number_of_peaks,
                msfilters.require_maximum_number_of_peaks,
                msfilters.require_minimum_number_of_high_peaks,
+               msfilters.add_precursor_formula,
                msfilters.add_fingerprint,
                ]
 
