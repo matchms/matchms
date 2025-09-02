@@ -343,7 +343,7 @@ class FlashSpectralEntropy(BaseSimilarity):
         raise NotImplementedError("Output array type is unknown or not yet implemented.")
 
 
-# --- Numba-accelerated accumulators ------------------------------------------
+# ====================== Numba-accelerated accumulators ======================-
 
 @njit(cache=True, nogil=True)
 def _search_window_halfwidth_nb(m: float, tol: float, use_ppm: bool) -> float:

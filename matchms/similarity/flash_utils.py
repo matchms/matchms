@@ -172,9 +172,10 @@ def _clean_and_weight(peaks: np.ndarray,
     Steps:
       1) (Optional) Remove all peaks at/above (precursor_mz - precursor_window).
       2) (Optional) Remove noise: keep peaks with intensity >= noise_cutoff * max(intensity).
-      3) Entropy-weight intensities (Li & Fiehn): raise intensities by a power derived from spectrum entropy.
+      3) (Optional) Entropy-weight intensities (Li & Fiehn): raise intensities by a power derived 
+         from spectrum entropy.
       4) (Optional) Merge peaks within a small m/z window by intensity-weighted centroid.
-      5) Sort by m/z and (optional) normalize intensities to sum to 0.5 (recommended in the paper).
+      5) (Optional) normalize intensities to sum to 0.5 (recommended in the paper).
 
     Parameters
     ----------
@@ -209,12 +210,14 @@ def _clean_and_weight(peaks: np.ndarray,
     mz = _as_dtype(peaks[:, 0], dtype)
     intensities = _as_dtype(peaks[:, 1], dtype)
 
+    # (optional) remove precursor and nearby peaks
     if remove_precursor and (precursor_mz is not None):
         mask = mz <= (precursor_mz - precursor_window)
         mz, intensities = mz[mask], intensities[mask]
         if mz.size == 0:
             return np.empty((0, 2), dtype=dtype)
 
+    # (optional) remove noise peaks below a fraction of max intensity
     if noise_cutoff and noise_cutoff > 0.0:
         thr = intensities.max() * noise_cutoff
         mask = intensities >= thr
@@ -222,18 +225,19 @@ def _clean_and_weight(peaks: np.ndarray,
         if mz.size == 0:
             return np.empty((0, 2), dtype=dtype)
 
+    # (optional) entropy-weight intensities (for flash entropy score)
     intensities = _entropy_weight(intensities, dtype)
 
+    # (optional) merge nearby peaks by intensity-weighted centroid
     if merge_within_da and merge_within_da > 0.0 and mz.size > 1:
         peaks = _merge_within(np.column_stack((mz, intensities)), merge_within_da)
         mz, intensities = peaks[:, 0], peaks[:, 1]
-    else:
-        order = np.argsort(mz)
-        mz, intensities = mz[order], intensities[order]
 
-    s = float(intensities.sum(dtype=np.float64))
-    if s > 0.0 and normalize_to_half:
-        intensities = (intensities * (0.5 / s)).astype(dtype, copy=False)
+    # (optional) normalize intensities to sum to 0.5
+    if normalize_to_half:
+        s = float(intensities.sum(dtype=np.float64))
+        if s > 0.0:
+            intensities = (intensities * (0.5 / s)).astype(dtype, copy=False)
 
     return np.column_stack((mz, intensities))
 
