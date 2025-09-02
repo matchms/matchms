@@ -226,7 +226,12 @@ def _clean_and_weight(peaks: np.ndarray,
             return np.empty((0, 2), dtype=dtype)
 
     # (optional) entropy-weight intensities (for flash entropy score)
-    intensities = _entropy_weight(intensities, dtype)
+    if score_type == "entropy":
+        intensities = _entropy_weight(intensities, dtype)
+    elif score_type == "cosine":
+        pass
+    else:
+        raise ValueError(f"Score type '{score_type}' not recognized.")
 
     # (optional) merge nearby peaks by intensity-weighted centroid
     if merge_within_da and merge_within_da > 0.0 and mz.size > 1:
