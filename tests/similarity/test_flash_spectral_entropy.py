@@ -12,9 +12,9 @@ from matchms.similarity.FlashSpectralEntropy import (
     FlashSpectralEntropy,
     _accumulate_fragment_row_numba,
     _accumulate_nl_row_numba,
+    _search_window_halfwidth_nb,
     _xlog2_scalar,
     _xlog2_vec,
-    _search_window_halfwidth_nb,
 )
 from ..builder_Spectrum import SpectrumBuilder
 
