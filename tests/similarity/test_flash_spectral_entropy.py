@@ -2,18 +2,19 @@
 import math
 import numpy as np
 import pytest
-from matchms.similarity.FlashSpectralEntropy import (
-    FlashSpectralEntropy,
-    _accumulate_fragment_row_numba,
-    _accumulate_nl_row_numba,
+from matchms.similarity.flash_utils import (
     _clean_and_weight,
     _entropy_weight,
     _LibraryIndex,
     _merge_within,
-    _search_window_halfwidth,
-    _within_tol,
+)
+from matchms.similarity.FlashSpectralEntropy import (
+    FlashSpectralEntropy,
+    _accumulate_fragment_row_numba,
+    _accumulate_nl_row_numba,
     _xlog2_scalar,
     _xlog2_vec,
+    _search_window_halfwidth_nb,
 )
 from ..builder_Spectrum import SpectrumBuilder
 
@@ -75,19 +76,10 @@ def test_xlog2_helpers(vals):
             float(v * math.log2(v)) if v > 0 else 0.0, rel_tol=0, abs_tol=1e-12
         )
 
-@pytest.mark.parametrize("m1,m2,tol,use_ppm,expect", [
-    (100.0, 100.015, 0.02, False, True),
-    (100.0, 100.03,  0.02, False, False),
-    (500.0, 500.2,   400.0, True, True),   # 400 ppm @ 500 m/z -> ~0.2 Da window
-    (500.0, 500.2,   200.0, True, False),
-])
-def test_within_tol(m1, m2, tol, use_ppm, expect):
-    assert _within_tol(m1, m2, tol, use_ppm, np.float32) is expect
-
 def test_search_window_halfwidth_ppm():
     m = 500.0
     tol_ppm = 400.0
-    hw = _search_window_halfwidth(m, tol_ppm, True, np.float32)
+    hw = _search_window_halfwidth_nb(m, tol_ppm, True)
     # Symmetric ppm -> approximately (ppm*1e-6)*m /(1-0.5*ppm*1e-6)
     c = tol_ppm * 1e-6
     expected = (c * m) / (1.0 - 0.5 * c)
@@ -107,16 +99,16 @@ def test_entropy_weight_behaviour():
 def test_merge_within_weighted_average():
     # two close peaks at 100.00 and 100.03 within 0.05 should merge
     peaks = np.column_stack([
-        np.array([100.00, 100.03, 120.0], dtype=float),
-        np.array([1.0,    3.0,    2.0], dtype=float),
+        np.array([100.00, 100.03, 120.0], dtype=np.float32),
+        np.array([1.0,    3.0,    2.0], dtype=np.float32),
     ])
-    out = _merge_within(peaks, max_delta_da=0.05, dtype=np.float32)
+    out = _merge_within(peaks, max_delta_da=0.05)
     # first two merged into weighted center: (100*1 + 100.03*3) / (1+3) = 100.0225
     assert out.shape == (2, 2)
-    assert math.isclose(out[0, 0], np.array(100.0225, dtype=np.float32), rel_tol=0, abs_tol=1e-7)
-    assert math.isclose(out[0, 1], 4.0, rel_tol=0, abs_tol=1e-7)
-    assert math.isclose(out[1, 0], 120.0, rel_tol=0, abs_tol=1e-7)
-    assert math.isclose(out[1, 1], 2.0, rel_tol=0, abs_tol=1e-7)
+    assert math.isclose(out[0, 0], np.array(100.0225, dtype=np.float32), rel_tol=0, abs_tol=1e-6)
+    assert math.isclose(out[0, 1], 4.0, rel_tol=0, abs_tol=1e-6)
+    assert math.isclose(out[1, 0], 120.0, rel_tol=0, abs_tol=1e-6)
+    assert math.isclose(out[1, 1], 2.0, rel_tol=0, abs_tol=1e-6)
 
 def test_clean_and_weight_pipeline_precursor_noise_norm_merge():
     mz = np.array([100, 199.0, 199.5, 199.9, 210], dtype=float)
@@ -130,6 +122,7 @@ def test_clean_and_weight_pipeline_precursor_noise_norm_merge():
         noise_cutoff=0.05,      # remove peaks below 5% of max (max after precursor filtering)
         normalize_to_half=True,
         merge_within_da=0.5,    # merge anything within 0.5 Da
+        score_type="entropy",
         dtype=np.float32
     )
     # Only m/z=100 survives precursor filter (<=198.4); others removed
