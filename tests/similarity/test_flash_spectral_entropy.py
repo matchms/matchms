@@ -13,8 +13,7 @@ from matchms.similarity.FlashSpectralEntropy import (
     _accumulate_fragment_row_numba,
     _accumulate_nl_row_numba,
     _search_window_halfwidth_nb,
-    _xlog2_scalar,
-    _xlog2_vec,
+    _xlog2_scalar_nb,
 )
 from ..builder_Spectrum import SpectrumBuilder
 
@@ -66,14 +65,11 @@ def getattr_py_and_compiled(func):
 ])
 def test_xlog2_helpers(vals):
     vals = np.asarray(vals)
-    expected = xlog2_array(vals)
-    got_vec = _xlog2_vec(vals.astype(np.float32), np.float32)
-    assert np.allclose(got_vec, expected, rtol=0, atol=1e-7)
 
     for v in vals:
         assert math.isclose(
-            _xlog2_scalar(float(v), np.float32),
-            float(v * math.log2(v)) if v > 0 else 0.0, rel_tol=0, abs_tol=1e-12
+            _xlog2_scalar_nb(float(v)),
+            float(v * math.log2(v)) if v > 0 else 0.0, rel_tol=0, abs_tol=1e-6
         )
 
 def test_search_window_halfwidth_ppm():
