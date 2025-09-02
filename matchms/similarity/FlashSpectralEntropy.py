@@ -343,22 +343,6 @@ class FlashSpectralEntropy(BaseSimilarity):
         raise NotImplementedError("Output array type is unknown or not yet implemented.")
 
 
-# ===================== helpers =====================
-
-def _xlog2_vec(x: np.ndarray, dtype: np.dtype) -> np.ndarray:
-    # stable x*log2(x) with x=0 -> 0, in requested dtype (float32 default)
-    out = np.zeros_like(x, dtype=dtype)
-    mask = x > 0
-    if np.any(mask):
-        out[mask] = (x[mask] * np.log2(x[mask])).astype(dtype, copy=False)
-    return out
-
-def _xlog2_scalar(x: float, dtype: np.dtype) -> float:
-    if x <= 0.0:
-        return 0.0
-    return x * np.log2(x)
-
-
 # --- Numba-accelerated accumulators ------------------------------------------
 
 @njit(cache=True, nogil=True)
