@@ -8,16 +8,34 @@ class _LibraryIndex:
     """
     Compact container for the concatenated (sorted) library peaks and, optionally,
     the neutral-loss view. All arrays are read-only in workers.
+
+    Contains
+    --------
+    n_specs : int
+        Number of spectra in the library.
+    peaks_mz : float[dtype]
+        All concatenated product (fragment) m/z values, sorted ascending.
+    peaks_int : float[dtype]
+        Corresponding intensities.
+    peaks_spec_idx : int32
+        Which spectrum each peak originated from (index into 0..n_specs-1).
+    nl_mz : float[dtype] or None
+        Neutral-loss m/z for peaks with known precursor, sorted ascending.
+    nl_int : float[dtype] or None
+        Corresponding intensities.
+    nl_spec_idx : int32 or None
+        Which spectrum each neutral-loss peak originated from (index into 0..n_specs-1).
+    nl_product_idx : int64 or None  
+        Maps each neutral-loss peak back into peaks_mz positions (for hybrid rules).
+    spec_l2 : float[dtype] or None
+        Precomputed L2 norm of each spectrum's intensities (for cosine or modified 
+        cosine score).
+    precursor_mz : float[dtype]
+        Precursor m/z for each spectrum (NaN if unknown).
+    dtype : np.dtype
+        Float dtype used for all float arrays. Default is np.float32.
     """
-    __slots__ = (
-        "n_specs",
-        "peaks_mz", "peaks_int", "peaks_spec_idx",
-        "nl_mz", "nl_int", "nl_spec_idx", "nl_product_idx",
-        "spec_l2",
-        "precursor_mz",
-        "dtype",
-    )
-    def __init__(self, dtype: np.dtype):
+    def __init__(self, dtype: np.dtype = np.float32):
         self.n_specs = 0
         self.peaks_mz = None
         self.peaks_int = None
@@ -38,19 +56,24 @@ def _build_library_index(processed_peaks_list: List[np.ndarray],
     """
     Build a global, sorted index over all *query* spectra peaks.
 
-    The index concatenates all query peaks into flat arrays, then sorts by m/z.
+    The index concatenates all (query) spectra peaks into flat arrays, then sorts by m/z.
     This allows each reference spectrum (a row) to scan efficiently using
     binary searches into the shared arrays. If `build_neutral_loss` is True, we
     also construct a parallel set of arrays for neutral-loss peaks (precursor - mz).
 
-    Arrays created (all aligned/sorted):
-      - peaks_mz : float[dtype], all concatenated product (fragment) m/z
-      - peaks_int : float[dtype], matching intensities
-      - peaks_spec_idx : int32, which query spectrum each peak originated from
-      - nl_mz, nl_int, nl_spec_idx, nl_product_idx (optional):
-          neutral-loss m/z for peaks with known precursor,
-          the intensities/spec_idx aligned to nl_mz,
-          and `nl_product_idx` maps back into peaks_mz positions (for hybrid rules)
+    Parameters
+    ----------
+    processed_peaks_list : list of ndarray
+        Each entry is a 2D array of shape (n_peaks, 2) with columns [mz, intensity].
+        May be empty (shape (0, 2)) if all peaks were filtered away.
+    precursor_mz_list : list of float or None
+        Precursor m/z for each spectrum (if known).
+    compute_neutral_loss : bool
+        If True, build the neutral-loss view (for hybrid search (flash entropy) or modified cosine).
+    compute_l2_norm : bool
+        If True, precompute the L2 norm of each spectrum's intensities (for cosine or modified cosine).
+    dtype : np.dtype
+        Float dtype for all arrays. Default is np.float32.
 
     Returns
     -------
