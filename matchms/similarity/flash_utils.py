@@ -83,34 +83,42 @@ def _build_library_index(processed_peaks_list: List[np.ndarray],
     idx = _LibraryIndex(dtype)
     idx.n_specs = len(processed_peaks_list)
 
-    # precursor array
+    # Precursor array
     prec = np.full(idx.n_specs, np.nan, dtype=dtype)
     for k, pmz in enumerate(precursor_mz_list):
         if pmz is not None:
             prec[k] = pmz
     idx.precursor_mz = prec
 
+    # Preallocate l2 norm array if needed (for cosine or modified cosine)
     if compute_l2_norm:
         spec_l2 = np.zeros(idx.n_specs, dtype=dtype)
 
+    # Concatenate all peaks
     counts = [p.shape[0] for p in processed_peaks_list]
     N = int(np.sum(counts))
+    if N > (2**31 - 1):
+        int_dtype = np.int64
+        print(f"Too many total peaks ({N}) to build index using 32-bit integers (now using 64-bit integers).")
+    else:
+        int_dtype = np.int32 
+
     if N == 0:
         idx.peaks_mz = np.zeros(0, dtype=dtype)
         idx.peaks_int = np.zeros(0, dtype=dtype)
-        idx.peaks_spec_idx = np.zeros(0, dtype=np.int32)
+        idx.peaks_spec_idx = np.zeros(0, dtype=int_dtype)
         if compute_neutral_loss:
             idx.nl_mz = np.zeros(0, dtype=dtype)
             idx.nl_int = np.zeros(0, dtype=dtype)
-            idx.nl_spec_idx = np.zeros(0, dtype=np.int32)
-            idx.nl_product_idx = np.zeros(0, dtype=np.int64)
+            idx.nl_spec_idx = np.zeros(0, dtype=int_dtype)
+            idx.nl_product_idx = np.zeros(0, dtype=int_dtype)
         if compute_l2_norm:
             idx.spec_l2 = spec_l2
         return idx
 
     mz_flat = np.empty(N, dtype=dtype)
     int_flat = np.empty(N, dtype=dtype)
-    spec_flat = np.empty(N, dtype=np.int32)
+    spec_flat = np.empty(N, dtype=int_dtype)
 
     write = 0
     for s_i, p in enumerate(processed_peaks_list):
@@ -124,6 +132,7 @@ def _build_library_index(processed_peaks_list: List[np.ndarray],
             spec_l2[s_i] = np.sqrt(np.sum((p[:, 1]).astype(np.float64)**2, dtype=np.float64)).astype(dtype)
         write += n
 
+    # Sort by m/z
     order = np.argsort(mz_flat)
     idx.peaks_mz = mz_flat[order]
     idx.peaks_int = int_flat[order]
@@ -138,14 +147,15 @@ def _build_library_index(processed_peaks_list: List[np.ndarray],
         if src_idx.size == 0:
             idx.nl_mz = np.zeros(0, dtype=dtype)
             idx.nl_int = np.zeros(0, dtype=dtype)
-            idx.nl_spec_idx = np.zeros(0, dtype=np.int32)
-            idx.nl_product_idx = np.zeros(0, dtype=np.int64)
+            idx.nl_spec_idx = np.zeros(0, dtype=int_dtype)
+            idx.nl_product_idx = np.zeros(0, dtype=int_dtype)
         else:
             nl_mz = (pmz_per_peak[src_idx] - mz_flat[src_idx]).astype(dtype, copy=False)
             nl_int = int_flat[src_idx]
             nl_spec = spec_flat[src_idx]
             nl_prod = product_pos[src_idx]
 
+            # Sort neutral-losses by m/z
             order_nl = np.argsort(nl_mz)
             idx.nl_mz = nl_mz[order_nl]
             idx.nl_int = nl_int[order_nl]
