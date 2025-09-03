@@ -21,7 +21,7 @@ class FlashSpectralEntropy(BaseSimilarity):
     through it.
 
     Key options:
-      - mode: 'fragment', 'neutral_loss', or 'hybrid' (fragment-priority).
+      - matching_mode: 'fragment', 'neutral_loss', or 'hybrid' (fragment-priority).
       - tolerance in Da or symmetric ppm (use_ppm=True).
       - cleanup: remove precursor & > (precursor_mz - 1.6), 1% noise removal,
                  entropy weighting, normalize ∑I' = 0.5, optional within-peak merge.
@@ -32,12 +32,16 @@ class FlashSpectralEntropy(BaseSimilarity):
     
     Parameters
     ----------
+    score_type:
+        Score type: 'spectral_entropy' (default) or 'cosine'.
+    matching_mode:
+        Matching mode: 'fragment', 'neutral_loss', or 'hybrid' (default is 'fragment').
+        Chose "hybrid" in combination with score_type="cosine" to approximate
+        the modified cosine score.
     tolerance:
         Matching tolerance in Da or ppm (use_ppm=True). Default is 0.02.
     use_ppm:
         If True, interpret `tolerance` as parts-per-million. Default is False.
-    mode:
-        Matching mode: 'fragment', 'neutral_loss', or 'hybrid' (default is 'fragment').
     remove_precursor:
         If True, remove precursor peak and peaks within precursor_window.
         Default is True.
@@ -66,9 +70,10 @@ class FlashSpectralEntropy(BaseSimilarity):
     score_datatype = np.float32
 
     def __init__(self,
+                 score_type: str = "spectral_entropy",      # 'spectral_entropy' | 'cosine'
+                 matching_mode: str = "fragment",           # 'fragment' | 'neutral_loss' | 'hybrid'
                  tolerance: float = 0.02,
                  use_ppm: bool = False,
-                 mode: str = "fragment",               # 'fragment' | 'neutral_loss' | 'hybrid'
                  remove_precursor: bool = True,
                  precursor_window: float = 1.6,
                  noise_cutoff: float = 0.01,
@@ -77,11 +82,14 @@ class FlashSpectralEntropy(BaseSimilarity):
                  identity_precursor_tolerance: Optional[float] = None,
                  identity_use_ppm: bool = False,
                  dtype: np.dtype = np.float32):
-        if mode not in ("fragment", "neutral_loss", "hybrid"):
+        if score_type not in ("spectral_entropy", "cosine"):
+            raise ValueError("score_type must be 'spectral_entropy' or 'cosine'")
+        if matching_mode not in ("fragment", "neutral_loss", "hybrid"):
             raise ValueError("mode must be 'fragment', 'neutral_loss', or 'hybrid'")
+        self.score_type = score_type
+        self.matching_mode = matching_mode
         self.tolerance = tolerance
         self.use_ppm = use_ppm
-        self.mode = mode
         self.remove_precursor = remove_precursor
         self.precursor_window = precursor_window
         self.noise_cutoff = noise_cutoff
@@ -103,13 +111,13 @@ class FlashSpectralEntropy(BaseSimilarity):
                                     noise_cutoff=self.noise_cutoff,
                                     normalize_to_half=self.normalize_to_half,
                                     merge_within_da=self.merge_within,
-                                    weighing_type="entropy",
+                                    weighing_type=("entropy" if self.score_type == "spectral_entropy" else "cosine"),
                                     dtype=self.dtype)
         return cleaned, (None if pmz is None else float(pmz))
 
     def pair(self, reference: SpectrumType, query: SpectrumType) -> np.ndarray:
         """
-        Compute Flash entropy similarity for a single (reference, query) pair.
+        Compute Flash similarity for a single (reference, query) pair.
         Uses the same preprocessing and scoring logic as the matrix path, but
         builds a tiny 1-spectrum library from the query.
         """
@@ -119,28 +127,14 @@ class FlashSpectralEntropy(BaseSimilarity):
         if peaks_1.size == 0 or peaks_2.size == 0:
             return np.asarray(0.0, dtype=self.dtype)
     
-        # build 1-spec library index from the query (B)
-        lib = _LibraryIndex(self.dtype)
-        lib.n_specs = 1
-        lib.peaks_mz = peaks_2[:, 0]
-        lib.peaks_int = peaks_2[:, 1]
-        lib.peaks_spec_idx = np.zeros(peaks_2.shape[0], dtype=np.int32)
-    
-        if self.mode in ("neutral_loss", "hybrid") and (pmz_2 is not None):
-            nl_mz = (pmz_2 - peaks_2[:, 0]).astype(self.dtype, copy=False)
-            order = np.argsort(nl_mz)
-            lib.nl_mz = nl_mz[order]
-            lib.nl_int = peaks_2[:, 1][order]
-            lib.nl_spec_idx = np.zeros(peaks_2.shape[0], dtype=np.int32)
-            lib.nl_product_idx = order.astype(np.int64, copy=False)
-        else:
-            lib.nl_mz = np.zeros(0, dtype=self.dtype)
-            lib.nl_int = np.zeros(0, dtype=self.dtype)
-            lib.nl_spec_idx = np.zeros(0, dtype=np.int32)
-            lib.nl_product_idx = np.zeros(0, dtype=np.int64)
-    
-        lib.precursor_mz = np.array(
-            [pmz_2 if (pmz_2 is not None) else np.nan],
+        # build 1-spec library index from the query
+        compute_nl = (self.matching_mode in ("neutral_loss", "hybrid"))
+        compute_l2 = (self.score_type == "cosine")
+
+        lib = _build_library_index(
+            [peaks_2], [pmz_2],
+            compute_neutral_loss=compute_nl,
+            compute_l2_norm=compute_l2,
             dtype=self.dtype
         )
     
@@ -157,8 +151,8 @@ class FlashSpectralEntropy(BaseSimilarity):
         )
     
         # neutral-loss / hybrid path (if enabled & query has precursor)
-        if self.mode in ("neutral_loss", "hybrid") and (pmz_1 is not None):
-            prefer_frag = (self.mode == "hybrid")
+        if self.matching_mode in ("neutral_loss", "hybrid") and (pmz_1 is not None):
+            prefer_frag = (self.matching_mode == "hybrid")
     
             if prefer_frag:
                 # precompute product-peak windows for ALL reference peaks
@@ -259,7 +253,7 @@ class FlashSpectralEntropy(BaseSimilarity):
             lib_proc.append(cleaned)
             lib_pmz.append(None if pmz is None else float(pmz))
 
-        compute_nl = (self.mode in ("neutral_loss", "hybrid"))
+        compute_nl = (self.matching_mode in ("neutral_loss", "hybrid"))
         lib = _build_library_index(lib_proc, lib_pmz, compute_neutral_loss=compute_nl, dtype=self.dtype)
 
         # 2) prepare output
@@ -275,7 +269,7 @@ class FlashSpectralEntropy(BaseSimilarity):
         cfg = dict(
             tol=float(self.tolerance),
             use_ppm=bool(self.use_ppm),
-            mode=self.mode,
+            matching_mode=self.matching_mode,
             compute_nl=compute_nl,
             iden_tol=(None if self.identity_precursor_tolerance is None else float(self.identity_precursor_tolerance)),
             iden_use_ppm=bool(self.identity_use_ppm),
@@ -578,7 +572,7 @@ def _row_task_dense(args):
 
     # neutral-loss / hybrid ONLY if library has NL view
     if cfg["compute_nl"]:
-        prefer_frag = (cfg["mode"] == "hybrid")
+        prefer_frag = (cfg["matching_mode"] == "hybrid")
         if prefer_frag:
             prod_min = np.empty(q_arr.shape[0], dtype=np.int64)
             prod_max = np.empty(q_arr.shape[0], dtype=np.int64)

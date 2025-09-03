@@ -137,7 +137,7 @@ def test_pair_fragment_basic(use_ppm, tol):
     s1 = build_spectrum([100, 200, 300], [0.2, 1.0, 0.3], precursor_mz=500.0)
     s2 = build_spectrum([100, 200, 305], [0.2, 0.5, 0.4], precursor_mz=500.0)
 
-    fse = FlashSpectralEntropy(tolerance=tol, use_ppm=use_ppm, mode="fragment",
+    fse = FlashSpectralEntropy(tolerance=tol, use_ppm=use_ppm, matching_mode="fragment",
                                remove_precursor=False, noise_cutoff=0.0,
                                normalize_to_half=False, merge_within=0.0, dtype=np.float32)
     score12 = float(fse.pair(s1, s2))
@@ -150,7 +150,7 @@ def test_pair_returns_zero_when_empty_after_cleanup():
     # After cleanup everything is removed (precursor filter kills all)
     s1 = build_spectrum([199.0, 199.5], [1.0, 0.5], precursor_mz=200.0)
     s2 = build_spectrum([199.2, 199.7], [1.0, 0.5], precursor_mz=200.0)
-    fse = FlashSpectralEntropy(tolerance=0.02, mode="fragment",
+    fse = FlashSpectralEntropy(tolerance=0.02, matching_mode="fragment",
                                remove_precursor=True, precursor_window=1.6,
                                noise_cutoff=0.0, normalize_to_half=True, merge_within=0.0)
     assert float(fse.pair(s1, s2)) == 0.0
@@ -160,28 +160,28 @@ def test_identity_gate_da_and_ppm():
     s2 = build_spectrum([100, 200], [1.0, 1.0], precursor_mz=500.3)
 
     # Base score (no identity gating) is positive
-    base = FlashSpectralEntropy(tolerance=0.02, mode="fragment", remove_precursor=False, noise_cutoff=0.0)
+    base = FlashSpectralEntropy(tolerance=0.02, matching_mode="fragment", remove_precursor=False, noise_cutoff=0.0)
     base_score = float(base.pair(s1, s2))
     assert base_score > 0.0
 
     # Strict Da gating: 0.2 Da allowed -> zero, 0.4 Da allowed -> non-zero
-    gate_da_tight = FlashSpectralEntropy(tolerance=0.02, mode="fragment",
+    gate_da_tight = FlashSpectralEntropy(tolerance=0.02, matching_mode="fragment",
                                          identity_precursor_tolerance=0.2, identity_use_ppm=False,
                                          remove_precursor=False, noise_cutoff=0.0)
     assert float(gate_da_tight.pair(s1, s2)) == 0.0
 
-    gate_da_loose = FlashSpectralEntropy(tolerance=0.02, mode="fragment",
+    gate_da_loose = FlashSpectralEntropy(tolerance=0.02, matching_mode="fragment",
                                          identity_precursor_tolerance=0.5, identity_use_ppm=False,
                                          remove_precursor=False, noise_cutoff=0.0)
     assert float(gate_da_loose.pair(s1, s2)) == pytest.approx(base_score, rel=0, abs=1e-7)
 
     # PPM gating around ~500 m/z: 400 ppm ~0.2 Da window
-    gate_ppm_tight = FlashSpectralEntropy(tolerance=0.02, mode="fragment",
+    gate_ppm_tight = FlashSpectralEntropy(tolerance=0.02, matching_mode="fragment",
                                           identity_precursor_tolerance=300.0, identity_use_ppm=True,
                                           remove_precursor=False, noise_cutoff=0.0)
     assert float(gate_ppm_tight.pair(s1, s2)) == 0.0
 
-    gate_ppm_loose = FlashSpectralEntropy(tolerance=0.02, mode="fragment",
+    gate_ppm_loose = FlashSpectralEntropy(tolerance=0.02, matching_mode="fragment",
                                           identity_precursor_tolerance=800.0, identity_use_ppm=True,
                                           remove_precursor=False, noise_cutoff=0.0)
     assert float(gate_ppm_loose.pair(s1, s2)) == pytest.approx(base_score, rel=0, abs=1e-7)
@@ -196,9 +196,9 @@ def test_neutral_loss_vs_hybrid_prefer_fragments():
     kwargs = dict(tolerance=0.1, use_ppm=False, remove_precursor=False,
                   noise_cutoff=0.0, normalize_to_half=False, merge_within=0.0)
 
-    frag = FlashSpectralEntropy(mode="fragment", **kwargs)
-    nl   = FlashSpectralEntropy(mode="neutral_loss", **kwargs)
-    hyb  = FlashSpectralEntropy(mode="hybrid", **kwargs)
+    frag = FlashSpectralEntropy(matching_mode="fragment", **kwargs)
+    nl   = FlashSpectralEntropy(matching_mode="neutral_loss", **kwargs)
+    hyb  = FlashSpectralEntropy(matching_mode="hybrid", **kwargs)
 
     s_frag = float(frag.pair(r, q))
     s_nl   = float(nl.pair(r, q))       # fragment + NL (implementation accumulates fragments first)
@@ -282,7 +282,7 @@ def test_matrix_dense_matches_pair():
         build_spectrum([100, 205], [1.0, 0.5], precursor_mz=500.0),
         build_spectrum([110, 300], [1.0, 0.3], precursor_mz=600.0),
     ]
-    fse = FlashSpectralEntropy(tolerance=0.1, use_ppm=False, mode="fragment",
+    fse = FlashSpectralEntropy(tolerance=0.1, use_ppm=False, matching_mode="fragment",
                                remove_precursor=False, noise_cutoff=0.0,
                                normalize_to_half=False, merge_within=0.0)
     M = fse.matrix(refs, qs, array_type="numpy", n_jobs=0)
@@ -303,7 +303,7 @@ def test_matrix_sparse_basic():
         build_spectrum([100, 205], [1.0, 0.5], precursor_mz=500.0),
         build_spectrum([110, 300], [1.0, 0.3], precursor_mz=600.0),
     ]
-    fse = FlashSpectralEntropy(tolerance=0.1, use_ppm=False, mode="fragment",
+    fse = FlashSpectralEntropy(tolerance=0.1, use_ppm=False, matching_mode="fragment",
                                remove_precursor=False, noise_cutoff=0.0,
                                normalize_to_half=False, merge_within=0.0)
     S = fse.matrix(refs, qs, array_type="sparse", n_jobs=0)
@@ -324,7 +324,7 @@ def test_pair_matches_manual_accumulation_fragment_only():
     r = build_spectrum([100, 200, 300], [0.2, 1.0, 0.3], precursor_mz=500.0)
     q = build_spectrum([100, 205, 300], [0.2, 0.5, 0.6], precursor_mz=500.0)
 
-    fse = FlashSpectralEntropy(tolerance=0.1, use_ppm=False, mode="fragment",
+    fse = FlashSpectralEntropy(tolerance=0.1, use_ppm=False, matching_mode="fragment",
                                remove_precursor=False, noise_cutoff=0.0,
                                normalize_to_half=False, merge_within=0.0, dtype=np.float32)
 
