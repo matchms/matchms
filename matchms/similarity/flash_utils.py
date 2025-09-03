@@ -187,7 +187,7 @@ def _clean_and_weight(peaks: np.ndarray,
                       noise_cutoff: float,
                       normalize_to_half: bool,
                       merge_within_da: float,
-                      score_type: str,
+                      weighing_type: str,
                       dtype: np.dtype = np.float32) -> np.ndarray:
     """
     Apply the Flash preprocessing rules to a (mz, intensity) peak list.
@@ -216,7 +216,7 @@ def _clean_and_weight(peaks: np.ndarray,
         If True, scale intensities so their sum is 0.5.
     merge_within_da : float
         If > 0, merge peaks that are within this m/z distance.
-    score_type : str
+    weighing_type : str
         One of "cosine" or "entropy". Fragment intensities will be weighted accordingly.
     dtype : np.dtype
         Float dtype for outputs. Default is np.float32.
@@ -249,12 +249,12 @@ def _clean_and_weight(peaks: np.ndarray,
             return np.empty((0, 2), dtype=dtype)
 
     # (optional) entropy-weight intensities (for flash entropy score)
-    if score_type == "entropy":
+    if weighing_type == "entropy":
         intensities = _entropy_weight(intensities, dtype)
-    elif score_type == "cosine":
+    elif weighing_type == "cosine":
         pass
     else:
-        raise ValueError(f"Score type '{score_type}' not recognized.")
+        raise ValueError(f"Score type '{weighing_type}' not recognized.")
 
     # (optional) merge nearby peaks by intensity-weighted centroid
     if merge_within_da and merge_within_da > 0.0 and mz.size > 1:

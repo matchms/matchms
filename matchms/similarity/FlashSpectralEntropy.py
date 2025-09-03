@@ -103,7 +103,7 @@ class FlashSpectralEntropy(BaseSimilarity):
                                     noise_cutoff=self.noise_cutoff,
                                     normalize_to_half=self.normalize_to_half,
                                     merge_within_da=self.merge_within,
-                                    score_type="entropy",
+                                    weighing_type="entropy",
                                     dtype=self.dtype)
         return cleaned, (None if pmz is None else float(pmz))
 
@@ -254,7 +254,7 @@ class FlashSpectralEntropy(BaseSimilarity):
                                         noise_cutoff=self.noise_cutoff,
                                         normalize_to_half=self.normalize_to_half,
                                         merge_within_da=self.merge_within,
-                                        score_type="entropy",
+                                        weighing_type="entropy",
                                         dtype=self.dtype)
             lib_proc.append(cleaned)
             lib_pmz.append(None if pmz is None else float(pmz))

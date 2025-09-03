@@ -118,7 +118,7 @@ def test_clean_and_weight_pipeline_precursor_noise_norm_merge():
         noise_cutoff=0.05,      # remove peaks below 5% of max (max after precursor filtering)
         normalize_to_half=True,
         merge_within_da=0.5,    # merge anything within 0.5 Da
-        score_type="entropy",
+        weighing_type="entropy",
         dtype=np.float32
     )
     # Only m/z=100 survives precursor filter (<=198.4); others removed
