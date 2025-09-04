@@ -7,10 +7,7 @@ from sparsestack import StackedSparseArray
 from tqdm import tqdm
 from matchms.typing import SpectrumType
 from .BaseSimilarity import BaseSimilarity
-from .flash_utils import (
-    _build_library_index,
-    _clean_and_weight,
-)
+from .flash_utils import _build_library_index, _clean_and_weight, _search_window_halfwidth, _within_tol
 
 
 class FlashSimilarity(BaseSimilarity):
@@ -207,7 +204,8 @@ class FlashSimilarity(BaseSimilarity):
                                         noise_cutoff=self.noise_cutoff,
                                         normalize_to_half=self.normalize_to_half,
                                         merge_within_da=self.merge_within,
-                                        weighing_type=("entropy" if self.score_type == "spectral_entropy" else "cosine"),
+                                        weighing_type=("entropy" if self.score_type == "spectral_entropy"\
+                                                       else "cosine"),
                                         dtype=self.dtype)
             lib_proc.append(cleaned)
             lib_pmz.append(None if pmz is None else float(pmz))
@@ -560,15 +558,12 @@ def _row_task_entropy(args):
 def _row_task_sparse(args):
     """Compute one row; return (row_index, cols, vals)."""
     row_idx, q_arr, q_pmz = args
-    _, row = _row_task_dense((row_idx, q_arr, q_pmz))
+    _, row = _row_task_cosine((row_idx, q_arr, q_pmz))
     nz = np.nonzero(row)[0]
     return (row_idx, nz.astype(np.int64, copy=False), row[nz])
 
 
 # ===================== Cosine related =====================
-
-from .flash_utils import _search_window_halfwidth, _within_tol
-
 
 def _collect_candidates_for_row(
     q_mz: np.ndarray, q_int: np.ndarray, q_pmz: Optional[float],
@@ -588,13 +583,15 @@ def _collect_candidates_for_row(
     # fragment candidates
     if matching_mode in ("fragment", "hybrid"):
         for i in range(n_q):
-            mz_q = float(q_mz[i]); Iq = float(q_int[i])
+            mz_q = float(q_mz[i])
+            Iq = float(q_int[i])
             if Iq <= 0.0:
                 continue
-            hw = _search_window_halfwidth(mz_q, tol, use_ppm)
-            lo = mz_q - hw; hi = mz_q + hw
-            a = np.searchsorted(lib.peaks_mz, lo, side='left')
-            b = np.searchsorted(lib.peaks_mz, hi, side='right')
+            mz_tolerance = _search_window_halfwidth(mz_q, tol, use_ppm)
+            lo_mz = mz_q - mz_tolerance
+            hi_mz = mz_q + mz_tolerance
+            a = np.searchsorted(lib.peaks_mz, lo_mz, side='left')
+            b = np.searchsorted(lib.peaks_mz, hi_mz, side='right')
             if a >= b: 
                 continue
             for j in range(a, b):
@@ -620,10 +617,11 @@ def _collect_candidates_for_row(
                 if Iq <= 0.0:
                     continue
                 loss = qpmz - float(q_mz[i])
-                hw = _search_window_halfwidth(loss, tol, use_ppm)
-                lo = loss - hw; hi = loss + hw
-                a = np.searchsorted(lib.nl_mz, lo, side='left')
-                b = np.searchsorted(lib.nl_mz, hi, side='right')
+                mz_tolerance = _search_window_halfwidth(loss, tol, use_ppm)
+                lo_mz = loss - mz_tolerance
+                hi_mz = loss + mz_tolerance
+                a = np.searchsorted(lib.nl_mz, lo_mz, side='left')
+                b = np.searchsorted(lib.nl_mz, hi_mz, side='right')
                 if a >= b:
                     continue
                 for k in range(a, b):
