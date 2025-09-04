@@ -7,7 +7,7 @@ from sparsestack import StackedSparseArray
 from tqdm import tqdm
 from matchms.typing import SpectrumType
 from .BaseSimilarity import BaseSimilarity
-from .flash_utils import _build_library_index, _clean_and_weight, _search_window_halfwidth, _within_tol
+from .flash_utils import _build_library_index, _clean_and_weight, _within_tol
 
 
 class FlashSimilarity(BaseSimilarity):
@@ -583,11 +583,11 @@ def _collect_candidates_for_row(
     # fragment candidates
     if matching_mode in ("fragment", "hybrid"):
         for i in range(n_q):
-            mz_q = float(q_mz[i])
-            Iq = float(q_int[i])
+            mz_q = q_mz[i]
+            Iq = q_int[i]
             if Iq <= 0.0:
                 continue
-            mz_tolerance = _search_window_halfwidth(mz_q, tol, use_ppm)
+            mz_tolerance = _search_window_halfwidth_nb(mz_q, tol, use_ppm)
             lo_mz = mz_q - mz_tolerance
             hi_mz = mz_q + mz_tolerance
             a = np.searchsorted(lib.peaks_mz, lo_mz, side='left')
@@ -595,15 +595,15 @@ def _collect_candidates_for_row(
             if a >= b: 
                 continue
             for j in range(a, b):
-                mz_lib = float(lib.peaks_mz[j])
+                mz_lib = lib.peaks_mz[j]
                 if not _within_tol(mz_q, mz_lib, tol, use_ppm):
                     continue
                 col = int(lib.peaks_spec_idx[j])
-                Ilib = float(lib.peaks_int[j])
+                Ilib = lib.peaks_int[j]
                 score = Iq * Ilib
                 # insert/update best candidate for (i, j) in this col, prefer fragment
                 bucket = by_col.setdefault(col, {})
-                key = (i, int(j))
+                key = (i, j)
                 prev = bucket.get(key)
                 if (prev is None) or (not prev[1] and True):  # prefer fragment over NL
                     bucket[key] = (score, True)
@@ -613,11 +613,11 @@ def _collect_candidates_for_row(
         if (q_pmz is not None) and (lib.nl_mz is not None) and (lib.nl_mz.size > 0):
             qpmz = float(q_pmz)
             for i in range(n_q):
-                Iq = float(q_int[i])
+                Iq = q_int[i]
                 if Iq <= 0.0:
                     continue
-                loss = qpmz - float(q_mz[i])
-                mz_tolerance = _search_window_halfwidth(loss, tol, use_ppm)
+                loss = qpmz - q_mz[i]
+                mz_tolerance = _search_window_halfwidth_nb(loss, tol, use_ppm)
                 lo_mz = loss - mz_tolerance
                 hi_mz = loss + mz_tolerance
                 a = np.searchsorted(lib.nl_mz, lo_mz, side='left')
@@ -628,7 +628,7 @@ def _collect_candidates_for_row(
                     # product peak index in lib arrays
                     j = int(lib.nl_product_idx[k])
                     col = int(lib.nl_spec_idx[k])
-                    Ilib = float(lib.peaks_int[j])
+                    Ilib = lib.peaks_int[j]
                     score = Iq * Ilib
                     bucket = by_col.setdefault(col, {})
                     key = (i, j)
@@ -682,8 +682,8 @@ def _row_task_cosine(args):
     if q_arr.size == 0:
         return (row_idx, np.zeros(lib.n_specs, dtype=dtype))
 
-    q_mz = q_arr[:, 0].astype(float, copy=False)
-    q_int = q_arr[:, 1].astype(float, copy=False)
+    q_mz = q_arr[:, 0]
+    q_int = q_arr[:, 1]
     # L2 norm of reference:
     q_l2 = float(np.sqrt(np.sum(q_int.astype(np.float64)**2, dtype=np.float64)))
     if q_l2 == 0.0:
@@ -693,7 +693,7 @@ def _row_task_cosine(args):
     by_col = _collect_candidates_for_row(
         q_mz, q_int, q_pmz,
         lib,
-        tol=float(cfg["tol"]),
+        tol=cfg["tol"],
         use_ppm=bool(cfg["use_ppm"]),
         matching_mode=cfg["matching_mode"],
     )
@@ -709,11 +709,10 @@ def _row_task_cosine(args):
     # identity gate (optional)
     iden_tol = cfg["iden_tol"]
     if (iden_tol is not None) and (q_pmz is not None):
-        qpmz = float(q_pmz)
         if cfg["iden_use_ppm"]:
-            allow = np.abs(lib.precursor_mz - qpmz) <= (iden_tol * 1e-6 * 0.5 * (lib.precursor_mz + qpmz))
+            allow = np.abs(lib.precursor_mz - q_pmz) <= (iden_tol * 1e-6 * 0.5 * (lib.precursor_mz + q_pmz))
         else:
-            allow = np.abs(lib.precursor_mz - qpmz) <= iden_tol
+            allow = np.abs(lib.precursor_mz - q_pmz) <= iden_tol
         allow &= np.isfinite(lib.precursor_mz)
         out[~allow] = 0.0
 
