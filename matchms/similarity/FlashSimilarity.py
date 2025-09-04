@@ -182,6 +182,7 @@ class FlashSimilarity(BaseSimilarity):
         """
         n_rows = len(references)
         n_cols = len(queries)
+        descriptor = f"Flash {self.score_type} ({self.matching_mode})"
 
         if array_type not in ("numpy", "sparse"):
             raise ValueError("array_type must be 'numpy' or 'sparse'.")
@@ -248,7 +249,7 @@ class FlashSimilarity(BaseSimilarity):
         # 5) run — sequential or parallel
         if n_jobs in (None, 1, 0):
             iterator = row_inputs
-            for item in tqdm(iterator, total=n_rows, desc="Flash entropy (matrix)"):
+            for item in tqdm(iterator, total=n_rows, desc=descriptor+" (matrix)"):
                 row_idx, row = worker(item)
                 out[row_idx, :] = row
         else:
@@ -265,14 +266,14 @@ class FlashSimilarity(BaseSimilarity):
                 ctx = mp.get_context("fork")
                 with ctx.Pool(processes=n_jobs) as pool:
                     for result in tqdm(pool.imap(worker, row_inputs, chunksize=8),
-                                    total=n_rows, desc=f"Flash entropy (parallel x{n_jobs})"):
+                                    total=n_rows, desc=descriptor+f" (parallel x{n_jobs})"):
                         i, row = result
                         out[i, :] = row
             else:
                 # If fork is not available (e.g., certain environments), fall back to sequential with a note.
                 print("FlashSimilarity.matrix: parallel execution requires 'fork'; "
                     "falling back to n_jobs=1.")
-                for item in tqdm(row_inputs, total=n_rows, desc="Flash entropy (matrix)"):
+                for item in tqdm(row_inputs, total=n_rows, desc=descriptor+" (matrix)"):
                     i, row = worker(item)
                     out[i, :] = row
 
