@@ -300,7 +300,7 @@ def _set_globals(lib_obj, cfg):
     _G_CFG = cfg
 
 
-# ====================== Numba-accelerated accumulators ======================-
+# ====================== Numba-accelerated accumulators (entropy) ======================
 
 @njit(cache=True, nogil=True)
 def _search_window_halfwidth_nb(m: float, tol: float, use_ppm: bool) -> float:
@@ -493,10 +493,14 @@ def _accumulate_nl_row_numba(scores: np.ndarray,
             scores[col] += incr
 
 
-
 def _row_task_entropy(args):
     """
     Compute one matrix row for a given reference spectrum.
+
+    Parameters
+    ----------
+    args : tuple
+        (row_index, peaks_array, precursor_mz_or_None)
 
     Returns
     -------
@@ -565,148 +569,370 @@ def _row_task_sparse(args):
 
 # ===================== Cosine related =====================
 
-def _collect_candidates_for_row(
-    q_mz: np.ndarray, q_int: np.ndarray, q_pmz: Optional[float],
-    lib, tol: float, use_ppm: bool, matching_mode: str
-) -> Dict[int, Dict[Tuple[int, int], Tuple[float, bool]]]:
+@njit(cache=True, nogil=True)
+def _within_tol_nb(m1: float, m2: float, tol: float, use_ppm: bool) -> bool:
     """
-    Build candidate matches grouped by column (library spectrum).
-      - Add fragment candidates.
-      - Add NL candidates (if enabled) using pmz shift.
-      - In 'hybrid', fragments simply take precedence for the SAME (i,j) key;
-        otherwise NL is allowed. No global hybrid pruning.
-    Returns: {col: {(ref_idx, lib_prod_idx): I_ref * I_lib}}
-    """
-    n_q = q_mz.shape[0]
-    by_col: Dict[int, Dict[Tuple[int, int], Tuple[float, bool]]] = {}
+    Numba-friendly symmetric tolerance check.
 
-    # fragment candidates
-    if matching_mode in ("fragment", "hybrid"):
-        for i in range(n_q):
-            mz_q = q_mz[i]
-            Iq = q_int[i]
+    Symmetric ppm definition:
+        |m2 - m1| <= tol[ppm] * 1e-6 * 0.5 * (m1 + m2)
+    Otherwise absolute Da tolerance:
+        |m2 - m1| <= tol
+    """
+    if use_ppm:
+        return abs(m2 - m1) <= (tol * 1e-6) * 0.5 * (m1 + m2)
+    else:
+        return abs(m2 - m1) <= tol
+
+
+@njit(cache=True, nogil=True)
+def _count_candidates_per_col_nb(query_mz: np.ndarray,
+                                 query_int: np.ndarray,
+                                 has_pmz: bool,
+                                 query_pmz: float,
+                                 peaks_mz: np.ndarray, peaks_spec_idx: np.ndarray,
+                                 nl_mz: np.ndarray, nl_spec_idx: np.ndarray, nl_prod_idx: np.ndarray,
+                                 tol: float, use_ppm: bool,
+                                 do_frag: bool, do_nl: bool,
+                                 n_cols: int) -> np.ndarray:
+    """
+    Count (fragment + neutral loss) candidate pairs per column (library spectrum).
+
+    Returns
+    -------
+    counts_by_col : int32[n_cols]
+        Number of candidate (i,j) pairs that belong to each library spectrum (column).
+    """
+    counts = np.zeros(n_cols, dtype=np.int32)
+
+    # fragment matches
+    if do_frag:
+        for i in range(query_mz.shape[0]):
+            Iq = float(query_int[i])
             if Iq <= 0.0:
                 continue
-            mz_tolerance = _search_window_halfwidth_nb(mz_q, tol, use_ppm)
-            lo_mz = mz_q - mz_tolerance
-            hi_mz = mz_q + mz_tolerance
-            a = np.searchsorted(lib.peaks_mz, lo_mz, side='left')
-            b = np.searchsorted(lib.peaks_mz, hi_mz, side='right')
-            if a >= b: 
-                continue
+
+            mz = float(query_mz[i])
+            mz_tolerance = _search_window_halfwidth_nb(mz, tol, use_ppm)
+            lo_mz = mz - mz_tolerance
+            hi_mz = mz + mz_tolerance
+            a = np.searchsorted(peaks_mz, lo_mz, side='left')
+            b = np.searchsorted(peaks_mz, hi_mz, side='right')
             for j in range(a, b):
-                mz_lib = lib.peaks_mz[j]
-                if not _within_tol(mz_q, mz_lib, tol, use_ppm):
-                    continue
-                col = int(lib.peaks_spec_idx[j])
-                Ilib = lib.peaks_int[j]
-                score = Iq * Ilib
-                # insert/update best candidate for (i, j) in this col, prefer fragment
-                bucket = by_col.setdefault(col, {})
-                key = (i, j)
-                prev = bucket.get(key)
-                if (prev is None) or (not prev[1] and True):  # prefer fragment over NL
-                    bucket[key] = (score, True)
+                # exact symmetric check to trim the searchsorted window
+                if _within_tol_nb(mz, float(peaks_mz[j]), tol, use_ppm):
+                    col = int(peaks_spec_idx[j])
+                    counts[col] += 1
 
-    # neutral-loss / shifted candidates
-    if matching_mode in ("neutral_loss", "hybrid"):
-        if (q_pmz is not None) and (lib.nl_mz is not None) and (lib.nl_mz.size > 0):
-            qpmz = float(q_pmz)
-            for i in range(n_q):
-                Iq = q_int[i]
-                if Iq <= 0.0:
-                    continue
-                loss = qpmz - q_mz[i]
-                mz_tolerance = _search_window_halfwidth_nb(loss, tol, use_ppm)
-                lo_mz = loss - mz_tolerance
-                hi_mz = loss + mz_tolerance
-                a = np.searchsorted(lib.nl_mz, lo_mz, side='left')
-                b = np.searchsorted(lib.nl_mz, hi_mz, side='right')
-                if a >= b:
-                    continue
-                for k in range(a, b):
-                    # product peak index in lib arrays
-                    j = int(lib.nl_product_idx[k])
-                    col = int(lib.nl_spec_idx[k])
-                    Ilib = lib.peaks_int[j]
-                    score = Iq * Ilib
-                    bucket = by_col.setdefault(col, {})
-                    key = (i, j)
-                    prev = bucket.get(key)
-                    # only add NL if no fragment candidate exists for this (i,j)
-                    if prev is None:
-                        bucket[key] = (score, False)
-                    else:
-                        # if prev exists and is fragment, keep prev (fragment priority)
-                        # if prev exists and is NL, keep max score (identical intensities => same)
-                        if (not prev[1]) and (score > prev[0]):
-                            bucket[key] = (score, False)
+    # neutral-loss matches
+    if do_nl and has_pmz and (nl_mz.size > 0):
+        for i in range(query_mz.shape[0]):
+            Iq = float(query_int[i])
+            if Iq <= 0.0:
+                continue
 
-    return by_col
+            loss = query_pmz - float(query_mz[i])
+            mz_tolerance = _search_window_halfwidth_nb(mz, tol, use_ppm)
+            lo_mz = mz - mz_tolerance
+            hi_mz = mz + mz_tolerance
+            a = np.searchsorted(nl_mz, lo_mz, side='left')
+            b = np.searchsorted(nl_mz, hi_mz, side='right')
+            for k in range(a, b):
+                if _within_tol_nb(loss, float(nl_mz[k]), tol, use_ppm):
+                    col = int(nl_spec_idx[k])
+                    counts[col] += 1
 
-def _greedy_score_col(q_int: np.ndarray,
-                      lib_int: np.ndarray,
-                      candidates_dict: Dict[Tuple[int,int], Tuple[float, bool]]) -> float:
+    return counts
+
+
+@njit(cache=True, nogil=True)
+def _fill_candidates_per_col_nb(query_mz: np.ndarray,
+                                query_int: np.ndarray,
+                                has_pmz: bool, qpmz: float,
+                                peaks_mz: np.ndarray, peaks_int: np.ndarray, peaks_spec_idx: np.ndarray,
+                                nl_mz: np.ndarray, nl_spec_idx: np.ndarray, nl_prod_idx: np.ndarray,
+                                tol: float, use_ppm: bool,
+                                do_frag: bool, do_nl: bool,
+                                col_offsets: np.ndarray,  # int64, length n_cols+1
+                                counts_by_col: np.ndarray  # int64, length n_cols
+                                ) -> tuple:
     """
-    Greedy non-overlapping selection within one column.
-    candidates_dict: {(ref_idx, lib_prod_idx): (score=Iq*Ilib, is_fragment)}
-    """
-    if not candidates_dict:
-        return 0.0
-    # sort by score desc; tie-break: prefer fragment (True > False)
-    cand = [ (sc, frag, i, j) for ((i,j), (sc, frag)) in candidates_dict.items() ]
-    cand.sort(key=lambda x: (x[0], x[1]), reverse=True)
+    Materialize all candidates in CSR-like form grouped by column.
 
-    used_q = set()
-    used_lib = set()
-    dot = 0.0
-    for sc, frag, i, j in cand:
-        if (i in used_q) or (j in used_lib):
+    Parameters
+    ----------
+    col_offsets : int64[n_cols+1]
+        Prefix sums of counts (0, c0, c0+c1, ...).
+    counts_by_col : int64[n_cols]
+        As returned by _count_candidates_per_col_nb.
+
+    Returns
+    -------
+    ref_idx  : int32[n_total]
+    lib_idx  : int32[n_total]
+    score    : float64[n_total]
+    is_frag  : uint8[n_total]   (1 if fragment, 0 if NL)
+    """
+    n_cols = counts_by_col.shape[0]
+    n_total = int(col_offsets[n_cols])
+
+    ref_idx = np.empty(n_total, dtype=np.int32)
+    lib_idx = np.empty(n_total, dtype=np.int32)
+    score   = np.empty(n_total, dtype=np.float64)
+    is_frag = np.empty(n_total, dtype=np.uint8)
+
+    # running write cursors per column
+    pos = col_offsets[:-1].copy()  # int64[n_cols]
+
+    if do_frag:
+        for i in range(query_mz.shape[0]):
+            Iq = float(query_int[i])
+            if Iq <= 0.0:
+                continue
+
+            mz = float(query_mz[i])
+            mz_tolerance = _search_window_halfwidth_nb(m, tol, use_ppm)
+            lo_mz = mz - mz_tolerance
+            hi_mz = mz + mz_tolerance
+            a = np.searchsorted(peaks_mz, lo_mz, side='left')
+            b = np.searchsorted(peaks_mz, hi_mz, side='right')
+            for j in range(a, b):
+                mj = float(peaks_mz[j])
+                if not _within_tol_nb(mz, mj, tol, use_ppm):
+                    continue
+
+                col = int(peaks_spec_idx[j])
+                p = int(pos[col])
+                ref_idx[p] = i
+                lib_idx[p] = j
+                score[p]   = Iq * float(peaks_int[j])
+                is_frag[p] = 1
+                pos[col] = p + 1
+
+    if do_nl and has_pmz and (nl_mz.size > 0):
+        for i in range(query_mz.shape[0]):
+            Iq = float(query_int[i])
+            if Iq <= 0.0:
+                continue
+
+            loss = qpmz - float(query_mz[i])
+            mz_tolerance = _search_window_halfwidth_nb(loss, tol, use_ppm)
+            lo_mz = loss - mz_tolerance
+            hi_mz = loss + mz_tolerance
+            a = np.searchsorted(nl_mz, lo_mz, side='left')
+            b = np.searchsorted(nl_mz, hi_mz, side='right')
+            for k in range(a, b):
+                mk = float(nl_mz[k])
+                if not _within_tol_nb(loss, mk, tol, use_ppm):
+                    continue
+
+                j = int(nl_prod_idx[k])        # product-peak index in global arrays
+                col = int(nl_spec_idx[k])
+                p = int(pos[col])
+                ref_idx[p] = i
+                lib_idx[p] = j
+                score[p]   = Iq * float(peaks_int[j])
+                is_frag[p] = 0
+                pos[col] = p + 1
+
+    return ref_idx, lib_idx, score, is_frag
+
+
+@njit(cache=True, nogil=True)
+def _greedy_scores_all_cols_nb(n_cols: int,
+                               n_q: int,
+                               col_offsets: np.ndarray,        # int64[n_cols+1]
+                               ref_idx: np.ndarray,            # int32[n_total]
+                               lib_idx: np.ndarray,            # int32[n_total]
+                               score: np.ndarray,              # float64[n_total]
+                               is_frag: np.ndarray,            # uint8[n_total]
+                               lib_spec_l2: np.ndarray,        # float64[n_cols]
+                               q_l2: float) -> np.ndarray:
+    """
+    Greedy, non-overlapping selection *per column* with score tie-break by fragment flag.
+
+    For each column c:
+      1) Build its candidate view: indices [start:end)
+      2) Sort by key = score + (is_frag * eps), descending
+      3) Walk candidates; accept if neither query-peak i nor lib-peak j used yet
+      4) Accumulate dot and divide by norms
+
+    Returns
+    -------
+    out : float64[n_cols]
+        Cosine or modified-cosine per library spectrum.
+    """
+    out = np.zeros(n_cols, dtype=np.float64)
+    # Query-peak usage flags (small; re-init per column is cheap)
+    used_q = np.empty(n_q, dtype=np.uint8)
+
+    eps = 1e-12  # tie-break to prefer fragment when scores are equal
+
+    for col in range(n_cols):
+        start = int(col_offsets[col])
+        end   = int(col_offsets[col + 1])
+        size  = end - start
+        if size <= 0:
             continue
-        used_q.add(i)
-        used_lib.add(j)
-        # optional: we could recompute sc = q_int[i] * lib_int[j]; same as stored
-        dot += sc
-    return dot
+
+        # local views
+        s_ref = ref_idx[start:end]
+        s_lib = lib_idx[start:end]
+        s_sc  = score[start:end]
+        s_fg  = is_frag[start:end]
+
+        # key for descending sort (score primary; fragment wins only on exact ties)
+        key = np.empty(size, dtype=np.float64)
+        for t in range(size):
+            key[t] = s_sc[t] + (eps if s_fg[t] == 1 else 0.0)
+        order = np.argsort(-key)  # descending
+
+        # clear query usage (n_q is small)
+        for qi in range(n_q):
+            used_q[qi] = 0
+
+        # track used library *global* j indices for this column only
+        # small dynamic array; at most min(n_q, #uniq j in column)
+        used_lib_j = np.empty(size, dtype=np.int32)
+        used_lib_n = 0
+
+        dot = 0.0
+        for r in range(size):
+            idx = int(order[r])
+            i = int(s_ref[idx])
+            j = int(s_lib[idx])
+
+            if used_q[i] == 1:
+                continue
+
+            # linear membership test over selected lib j's; K remains small
+            seen = False
+            for u in range(used_lib_n):
+                if used_lib_j[u] == j:
+                    seen = True
+                    break
+            if seen:
+                continue
+
+            # accept
+            used_q[i] = 1
+            used_lib_j[used_lib_n] = j
+            used_lib_n += 1
+            dot += float(s_sc[idx])
+
+        denom = q_l2 * float(lib_spec_l2[col])
+        if denom > 0.0 and dot > 0.0:
+            out[col] = dot / denom
+
+    return out
+
+
+# ==================== Row worker (cosine) ====================
 
 def _row_task_cosine(args):
     """
-    Compute one row (reference spectrum vs all library spectra) of Modified Cosine scores.
-    Returns (row_index, row_scores)
+    Compute one row (reference spectrum vs all library spectra) of
+    (modified) cosine scores using a fully Numba-accelerated pipeline.
+
+    Steps (per row / reference spectrum)
+    ------------------------------------
+    1. Build candidate (i,j) pairs against the global, sorted library index:
+         - fragment matches around each reference m/z
+         - neutral-loss matches around (precursor_ref - m/z), if enabled
+    2. Group candidates by target library spectrum (column) in CSR-like form
+       using prefix sums (`col_offsets`).
+    3. For each column, greedily select a maximum-weight, non-overlapping
+       subset of pairs (no query or library peak may be used twice),
+       sorting by score (descending) with a tie-break to prefer fragments.
+    4. Normalize by L2 norms to produce cosine / modified cosine.
+
+    Notes
+    -----
+    * This path does **no global hybrid pruning**, matching your original design;
+      the only hybrid rule is "fragment wins on ties for the same (i, j)".
+    * Identity-gating is applied after scoring (unchanged).
+
+    Parameters
+    ----------
+    args : tuple
+        (row_index, peaks_array, precursor_mz_or_None)
     """
     row_idx, q_arr, q_pmz = args
     lib = _G_LIB
     cfg = _G_CFG
-    dtype = lib.dtype
 
     if q_arr.size == 0:
-        return (row_idx, np.zeros(lib.n_specs, dtype=dtype))
+        return (row_idx, np.zeros(lib.n_specs, dtype=lib.dtype))
 
-    q_mz = q_arr[:, 0]
-    q_int = q_arr[:, 1]
-    # L2 norm of reference:
-    q_l2 = float(np.sqrt(np.sum(q_int.astype(np.float64)**2, dtype=np.float64)))
+    # reference (row) peaks
+    q_mz  = q_arr[:, 0].astype(np.float64, copy=False)
+    q_int = q_arr[:, 1].astype(np.float64, copy=False)
+
+    # L2 norm of the reference
+    q_l2 = float(np.sqrt(np.sum(q_int * q_int, dtype=np.float64)))
     if q_l2 == 0.0:
-        return (row_idx, np.zeros(lib.n_specs, dtype=dtype))
+        return (row_idx, np.zeros(lib.n_specs, dtype=lib.dtype))
 
-    # build candidate pairs grouped by column
-    by_col = _collect_candidates_for_row(
-        q_mz, q_int, q_pmz,
-        lib,
-        tol=cfg["tol"],
-        use_ppm=bool(cfg["use_ppm"]),
-        matching_mode=cfg["matching_mode"],
+    # matching mode flags
+    match_mode = cfg["matching_mode"]
+    do_frag = (match_mode == "fragment") or (match_mode == "hybrid")
+    do_nl   = (match_mode == "neutral_loss") or (match_mode == "hybrid")
+
+    # neutral-loss only if library has NL view and we have a precursor on the row
+    has_pmz = (q_pmz is not None)
+    qpmz = float(q_pmz) if has_pmz else 0.0
+
+    tol = float(cfg["tol"])
+    use_ppm = bool(cfg["use_ppm"])
+
+    n_cols = int(lib.n_specs)
+
+    # 1) count per-column candidates (fragment + NL)
+    counts_by_col = _count_candidates_per_col_nb(
+        q_mz, q_int, has_pmz, qpmz,
+        lib.peaks_mz.astype(np.float64, copy=False),
+        lib.peaks_spec_idx.astype(np.int32, copy=False),
+        (lib.nl_mz.astype(np.float64, copy=False) if (cfg["compute_nl"] and lib.nl_mz is not None) else np.empty(0, np.float64)),
+        (lib.nl_spec_idx.astype(np.int32, copy=False) if (cfg["compute_nl"] and lib.nl_spec_idx is not None) else np.empty(0, np.int32)),
+        (lib.nl_product_idx.astype(np.int32, copy=False) if (cfg["compute_nl"] and lib.nl_product_idx is not None) else np.empty(0, np.int32)),
+        tol, use_ppm, do_frag, (do_nl and cfg["compute_nl"]), n_cols
     )
 
-    # accumulate per column, divide by norms
-    out = np.zeros(lib.n_specs, dtype=dtype)
-    for col, cand_dict in by_col.items():
-        dot = _greedy_score_col(q_int, lib.peaks_int, cand_dict)
-        denom = q_l2 * float(lib.spec_l2[col])
-        if denom > 0.0 and dot > 0.0:
-            out[col] = dot / denom  #dtype.type()
+    # 2) prefix-sum to CSR offsets
+    col_offsets = np.empty(n_cols + 1, dtype=np.int64)
+    col_offsets[0] = 0
+    for c in range(n_cols):
+        col_offsets[c + 1] = col_offsets[c] + counts_by_col[c]
 
-    # identity gate (optional)
+    n_total = int(col_offsets[-1])
+    if n_total == 0:
+        out = np.zeros(n_cols, dtype=lib.dtype)
+    else:
+        # 3) materialize candidates into CSR-like arrays
+        ref_idx, lib_idx, score, is_frag = _fill_candidates_per_col_nb(
+            q_mz, q_int,
+            has_pmz, qpmz,
+            lib.peaks_mz.astype(np.float64, copy=False),
+            lib.peaks_int.astype(np.float64, copy=False),
+            lib.peaks_spec_idx.astype(np.int32, copy=False),
+            (lib.nl_mz.astype(np.float64, copy=False) if (cfg["compute_nl"] and lib.nl_mz is not None) else np.empty(0, np.float64)),
+            (lib.nl_spec_idx.astype(np.int32, copy=False) if (cfg["compute_nl"] and lib.nl_spec_idx is not None) else np.empty(0, np.int32)),
+            (lib.nl_product_idx.astype(np.int32, copy=False) if (cfg["compute_nl"] and lib.nl_product_idx is not None) else np.empty(0, np.int32)),
+            tol, use_ppm, do_frag, (do_nl and cfg["compute_nl"]),
+            col_offsets, counts_by_col
+        )
+
+        # 4) greedy select per column and normalize
+        out64 = _greedy_scores_all_cols_nb(
+            n_cols, q_mz.shape[0],
+            col_offsets,
+            ref_idx, lib_idx, score, is_frag,
+            lib.spec_l2.astype(np.float64, copy=False),
+            q_l2
+        )
+        out = out64.astype(lib.dtype, copy=False)
+
+    # 5) optional identity gate (unchanged)
     iden_tol = cfg["iden_tol"]
     if (iden_tol is not None) and (q_pmz is not None):
         if cfg["iden_use_ppm"]:
@@ -716,4 +942,4 @@ def _row_task_cosine(args):
         allow &= np.isfinite(lib.precursor_mz)
         out[~allow] = 0.0
 
-    return (row_idx, out.astype(dtype, copy=False))
+    return (row_idx, out)
