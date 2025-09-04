@@ -7,7 +7,7 @@ from sparsestack import StackedSparseArray
 from tqdm import tqdm
 from matchms.typing import SpectrumType
 from .BaseSimilarity import BaseSimilarity
-from .flash_utils import _build_library_index, _clean_and_weight, _within_tol
+from .flash_utils import _build_library_index, _clean_and_weight
 
 
 class FlashSimilarity(BaseSimilarity):
@@ -299,6 +299,22 @@ def _set_globals(lib_obj, cfg):
     _G_LIB = lib_obj
     _G_CFG = cfg
 
+# ====================== Numba-accelerated helpers ====================
+
+@njit(cache=True, nogil=True)
+def _search_spec_in_fragment_window(lib_mz: np.ndarray, mz: float, tol: float, use_ppm: bool):
+    """
+    Find the range of indices in lib_mz that fall within the tolerance window of mz.
+    Returns (a, b) such that lib_mz[a:b] are the candidates.
+    """
+    mz_tolerance = _search_window_halfwidth_nb(mz, tol, use_ppm)
+    lo_mz = mz - mz_tolerance
+    hi_mz = mz + mz_tolerance
+
+    a = np.searchsorted(lib_mz, lo_mz, side='left')
+    b = np.searchsorted(lib_mz, hi_mz, side='right')
+    return a, b
+
 
 # ====================== Numba-accelerated accumulators (entropy) ======================
 
@@ -365,12 +381,7 @@ def _accumulate_fragment_row_numba(
         if Iq <= 0.0:
             continue
 
-        mz_tolerance = _search_window_halfwidth_nb(mz_q, tol, use_ppm)
-        lo_mz = mz_q - mz_tolerance
-        hi_mz = mz_q + mz_tolerance
-
-        a = np.searchsorted(lib_mz, lo_mz, side='left')
-        b = np.searchsorted(lib_mz, hi_mz, side='right')
+        a, b = _search_spec_in_fragment_window(lib_mz, mz_q, tol, use_ppm)
         if a >= b:
             continue
 
@@ -447,12 +458,7 @@ def _accumulate_nl_row_numba(scores: np.ndarray,
             continue
 
         loss = float(q_pmz_val) - float(q_mz[i])
-        mz_tolerance = _search_window_halfwidth_nb(loss, tol, use_ppm)
-        lo_mz = loss - mz_tolerance
-        hi_mz = loss + mz_tolerance
-
-        a = np.searchsorted(nl_mz, lo_mz, side='left')
-        b = np.searchsorted(nl_mz, hi_mz, side='right')
+        a, b = _search_spec_in_fragment_window(nl_mz, loss, tol, use_ppm)
         if a >= b:
             continue
 
@@ -461,11 +467,7 @@ def _accumulate_nl_row_numba(scores: np.ndarray,
         bp = 0
         if prefer_fragments:
             mz1 = float(q_mz[i])
-            mz_tolerance = _search_window_halfwidth_nb(mz1, tol, use_ppm)
-            lo_mz = mz1 - mz_tolerance
-            hi_mz = mz1 + mz_tolerance
-            ap = np.searchsorted(peaks_mz, lo_mz, side='left')
-            bp = np.searchsorted(peaks_mz, hi_mz, side='right')
+            ap, bp = _search_spec_in_fragment_window(peaks_mz, mz1, tol, use_ppm)
 
         for j in range(a, b):
             nl2 = float(nl_mz[j])
@@ -528,11 +530,9 @@ def _row_task_entropy(args):
             prod_max = np.empty(q_arr.shape[0], dtype=np.int64)
             for k in range(q_arr.shape[0]):                         # <-- use k
                 mz1 = float(q_arr[k, 0])
-                mz_tolerance = _search_window_halfwidth_nb(mz1, float(cfg["tol"]), bool(cfg["use_ppm"]))
-                lo_mz = mz1 - mz_tolerance
-                hi_mz = mz1 + mz_tolerance
-                prod_min[k] = np.searchsorted(lib.peaks_mz, lo_mz, side='left')
-                prod_max[k] = np.searchsorted(lib.peaks_mz, hi_mz, side='right')
+                a, b = _search_spec_in_fragment_window(lib.peaks_mz, mz1, float(cfg["tol"]), bool(cfg["use_ppm"]))
+                prod_min[k] = a
+                prod_max[k] = b
         else:
             prod_min = np.empty(0, dtype=np.int64)
             prod_max = np.empty(0, dtype=np.int64)
@@ -613,11 +613,7 @@ def _count_candidates_per_col_nb(query_mz: np.ndarray,
                 continue
 
             mz = float(query_mz[i])
-            mz_tolerance = _search_window_halfwidth_nb(mz, tol, use_ppm)
-            lo_mz = mz - mz_tolerance
-            hi_mz = mz + mz_tolerance
-            a = np.searchsorted(peaks_mz, lo_mz, side='left')
-            b = np.searchsorted(peaks_mz, hi_mz, side='right')
+            a, b = _search_spec_in_fragment_window(peaks_mz, mz, tol, use_ppm)
             for j in range(a, b):
                 # exact symmetric check to trim the searchsorted window
                 if _within_tol_nb(mz, float(peaks_mz[j]), tol, use_ppm):
@@ -632,11 +628,7 @@ def _count_candidates_per_col_nb(query_mz: np.ndarray,
                 continue
 
             loss = query_pmz - float(query_mz[i])
-            mz_tolerance = _search_window_halfwidth_nb(mz, tol, use_ppm)
-            lo_mz = mz - mz_tolerance
-            hi_mz = mz + mz_tolerance
-            a = np.searchsorted(nl_mz, lo_mz, side='left')
-            b = np.searchsorted(nl_mz, hi_mz, side='right')
+            a, b = _search_spec_in_fragment_window(nl_mz, loss, tol, use_ppm)
             for k in range(a, b):
                 if _within_tol_nb(loss, float(nl_mz[k]), tol, use_ppm):
                     col = int(nl_spec_idx[k])
@@ -691,11 +683,7 @@ def _fill_candidates_per_col_nb(query_mz: np.ndarray,
                 continue
 
             mz = float(query_mz[i])
-            mz_tolerance = _search_window_halfwidth_nb(m, tol, use_ppm)
-            lo_mz = mz - mz_tolerance
-            hi_mz = mz + mz_tolerance
-            a = np.searchsorted(peaks_mz, lo_mz, side='left')
-            b = np.searchsorted(peaks_mz, hi_mz, side='right')
+            a, b = _search_spec_in_fragment_window(peaks_mz, mz, tol, use_ppm)
             for j in range(a, b):
                 mj = float(peaks_mz[j])
                 if not _within_tol_nb(mz, mj, tol, use_ppm):
@@ -716,11 +704,7 @@ def _fill_candidates_per_col_nb(query_mz: np.ndarray,
                 continue
 
             loss = qpmz - float(query_mz[i])
-            mz_tolerance = _search_window_halfwidth_nb(loss, tol, use_ppm)
-            lo_mz = loss - mz_tolerance
-            hi_mz = loss + mz_tolerance
-            a = np.searchsorted(nl_mz, lo_mz, side='left')
-            b = np.searchsorted(nl_mz, hi_mz, side='right')
+            a, b = _search_spec_in_fragment_window(nl_mz, loss, tol, use_ppm)
             for k in range(a, b):
                 mk = float(nl_mz[k])
                 if not _within_tol_nb(loss, mk, tol, use_ppm):
