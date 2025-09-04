@@ -421,7 +421,7 @@ def _spec_in_fragment_window(cols_target: int,
 
 @njit(cache=True, nogil=True)
 def _accumulate_nl_row_numba(scores: np.ndarray,
-                             q_mz: np.ndarray, q_int: np.ndarray, q_pmz_val: float,  # pass np.nan if unknown
+                             ref_mz: np.ndarray, ref_int: np.ndarray, ref_pmz_val: float,  # pass np.nan if unknown
                              nl_mz: np.ndarray, nl_int: np.ndarray, nl_spec: np.ndarray, nl_prod_idx: np.ndarray,
                              peaks_mz: np.ndarray, peaks_spec: np.ndarray,
                              tol: float, use_ppm: bool,
@@ -447,17 +447,17 @@ def _accumulate_nl_row_numba(scores: np.ndarray,
     nl_product_pos maps each NL entry back to a position in the global product-peak
     arrays; this is used by hybrid rules.
     """
-    if not (nl_mz.size > 0 and q_mz.size > 0):
+    if not (nl_mz.size > 0 and ref_mz.size > 0):
         return
-    if np.isnan(q_pmz_val):
+    if np.isnan(ref_pmz_val):
         return
 
-    for i in range(q_mz.shape[0]):
-        Iq = float(q_int[i])
+    for i in range(ref_mz.shape[0]):
+        Iq = float(ref_int[i])
         if Iq <= 0.0:
             continue
 
-        loss = float(q_pmz_val) - float(q_mz[i])
+        loss = float(ref_pmz_val) - float(ref_mz[i])
         a, b = _search_spec_in_fragment_window(nl_mz, loss, tol, use_ppm)
         if a >= b:
             continue
@@ -466,7 +466,7 @@ def _accumulate_nl_row_numba(scores: np.ndarray,
         ap = 0
         bp = 0
         if prefer_fragments:
-            mz1 = float(q_mz[i])
+            mz1 = float(ref_mz[i])
             ap, bp = _search_spec_in_fragment_window(peaks_mz, mz1, tol, use_ppm)
 
         for j in range(a, b):
@@ -511,14 +511,14 @@ def _row_task_entropy(args):
         same float dtype as the index. This function is safe to call from
         a process pool since it only reads globals set by `_set_globals`.
     """
-    row_idx, q_arr, q_pmz = args
+    row_idx, ref_peaks, ref_pmz = args
     cfg = _G_CFG
     lib = _G_LIB
     dtype = lib.dtype
     scores = np.zeros(lib.n_specs, dtype=dtype)
 
     _accumulate_fragment_row_numba(scores,
-                                   q_arr[:, 0], q_arr[:, 1],
+                                   ref_peaks[:, 0], ref_peaks[:, 1],
                                    lib.peaks_mz, lib.peaks_int, lib.peaks_spec_idx,
                                    float(cfg["tol"]), bool(cfg["use_ppm"]))
 
@@ -526,10 +526,10 @@ def _row_task_entropy(args):
     if cfg["compute_nl"]:
         prefer_frag = (cfg["matching_mode"] == "hybrid")
         if prefer_frag:
-            prod_min = np.empty(q_arr.shape[0], dtype=np.int64)
-            prod_max = np.empty(q_arr.shape[0], dtype=np.int64)
-            for k in range(q_arr.shape[0]):                         # <-- use k
-                mz1 = float(q_arr[k, 0])
+            prod_min = np.empty(ref_peaks.shape[0], dtype=np.int64)
+            prod_max = np.empty(ref_peaks.shape[0], dtype=np.int64)
+            for k in range(ref_peaks.shape[0]):                         # <-- use k
+                mz1 = float(ref_peaks[k, 0])
                 a, b = _search_spec_in_fragment_window(lib.peaks_mz, mz1, float(cfg["tol"]), bool(cfg["use_ppm"]))
                 prod_min[k] = a
                 prod_max[k] = b
@@ -537,10 +537,10 @@ def _row_task_entropy(args):
             prod_min = np.empty(0, dtype=np.int64)
             prod_max = np.empty(0, dtype=np.int64)
 
-        q_pmz_val = float(q_pmz) if (q_pmz is not None) else np.nan
+        ref_pmz_val = float(ref_pmz) if (ref_pmz is not None) else np.nan
 
         _accumulate_nl_row_numba(scores,
-                                q_arr[:, 0], q_arr[:, 1], q_pmz_val,
+                                ref_peaks[:, 0], ref_peaks[:, 1], ref_pmz_val,
                                 lib.nl_mz, lib.nl_int, lib.nl_spec_idx, lib.nl_product_idx,
                                 lib.peaks_mz, lib.peaks_spec_idx,
                                 float(cfg["tol"]), bool(cfg["use_ppm"]),
@@ -548,23 +548,15 @@ def _row_task_entropy(args):
                                 prod_min, prod_max)
 
     # identity mask
-    if cfg["iden_tol"] is not None and q_pmz is not None:
+    if cfg["iden_tol"] is not None and ref_pmz is not None:
         if cfg["iden_use_ppm"]:
-            allow = np.abs(lib.precursor_mz - q_pmz) <= (cfg["iden_tol"] * 1e-6 * 0.5 * (lib.precursor_mz + q_pmz))
+            allow = np.abs(lib.precursor_mz - ref_pmz) <= (cfg["iden_tol"] * 1e-6 * 0.5 * (lib.precursor_mz + ref_pmz))
         else:
-            allow = np.abs(lib.precursor_mz - q_pmz) <= cfg["iden_tol"]
+            allow = np.abs(lib.precursor_mz - ref_pmz) <= cfg["iden_tol"]
         allow &= np.isfinite(lib.precursor_mz)
         scores[~allow] = 0.0
 
     return (row_idx, scores)
-
-
-def _row_task_sparse(args):
-    """Compute one row; return (row_index, cols, vals)."""
-    row_idx, q_arr, q_pmz = args
-    _, row = _row_task_cosine((row_idx, q_arr, q_pmz))
-    nz = np.nonzero(row)[0]
-    return (row_idx, nz.astype(np.int64, copy=False), row[nz])
 
 
 # ===================== Cosine related =====================
@@ -830,30 +822,24 @@ def _row_task_cosine(args):
        sorting by score (descending) with a tie-break to prefer fragments.
     4. Normalize by L2 norms to produce cosine / modified cosine.
 
-    Notes
-    -----
-    * This path does **no global hybrid pruning**, matching your original design;
-      the only hybrid rule is "fragment wins on ties for the same (i, j)".
-    * Identity-gating is applied after scoring (unchanged).
-
     Parameters
     ----------
     args : tuple
         (row_index, peaks_array, precursor_mz_or_None)
     """
-    row_idx, q_arr, q_pmz = args
+    row_idx, ref_peaks, ref_pmz = args
     lib = _G_LIB
     cfg = _G_CFG
 
-    if q_arr.size == 0:
+    if ref_peaks.size == 0:
         return (row_idx, np.zeros(lib.n_specs, dtype=lib.dtype))
 
     # reference (row) peaks
-    q_mz  = q_arr[:, 0].astype(np.float64, copy=False)
-    q_int = q_arr[:, 1].astype(np.float64, copy=False)
+    ref_mz  = ref_peaks[:, 0]
+    ref_int = ref_peaks[:, 1]
 
     # L2 norm of the reference
-    q_l2 = float(np.sqrt(np.sum(q_int * q_int, dtype=np.float64)))
+    q_l2 = float(np.sqrt(np.sum(ref_int * ref_int, dtype=np.float64)))
     if q_l2 == 0.0:
         return (row_idx, np.zeros(lib.n_specs, dtype=lib.dtype))
 
@@ -863,17 +849,17 @@ def _row_task_cosine(args):
     do_nl   = (match_mode == "neutral_loss") or (match_mode == "hybrid")
 
     # neutral-loss only if library has NL view and we have a precursor on the row
-    has_pmz = (q_pmz is not None)
-    qpmz = float(q_pmz) if has_pmz else 0.0
+    has_pmz = (ref_pmz is not None)
+    ref_pmz = float(ref_pmz) if has_pmz else 0.0
 
     tol = float(cfg["tol"])
     use_ppm = bool(cfg["use_ppm"])
 
     n_cols = int(lib.n_specs)
 
-    # 1) count per-column candidates (fragment + NL)
+    # Count per-column candidates (fragment + neutral loss)
     counts_by_col = _count_candidates_per_col_nb(
-        q_mz, q_int, has_pmz, qpmz,
+        ref_mz, ref_int, has_pmz, ref_pmz,
         lib.peaks_mz.astype(np.float64, copy=False),
         lib.peaks_spec_idx.astype(np.int32, copy=False),
         (lib.nl_mz.astype(np.float64, copy=False) if (cfg["compute_nl"] and lib.nl_mz is not None) else np.empty(0, np.float64)),
@@ -882,7 +868,7 @@ def _row_task_cosine(args):
         tol, use_ppm, do_frag, (do_nl and cfg["compute_nl"]), n_cols
     )
 
-    # 2) prefix-sum to CSR offsets
+    # Prefix-sum to CSR offsets
     col_offsets = np.empty(n_cols + 1, dtype=np.int64)
     col_offsets[0] = 0
     for c in range(n_cols):
@@ -892,10 +878,10 @@ def _row_task_cosine(args):
     if n_total == 0:
         out = np.zeros(n_cols, dtype=lib.dtype)
     else:
-        # 3) materialize candidates into CSR-like arrays
+        # Materialize candidates into CSR-like arrays
         ref_idx, lib_idx, score, is_frag = _fill_candidates_per_col_nb(
-            q_mz, q_int,
-            has_pmz, qpmz,
+            ref_mz, ref_int,
+            has_pmz, ref_pmz,
             lib.peaks_mz.astype(np.float64, copy=False),
             lib.peaks_int.astype(np.float64, copy=False),
             lib.peaks_spec_idx.astype(np.int32, copy=False),
@@ -906,9 +892,9 @@ def _row_task_cosine(args):
             col_offsets, counts_by_col
         )
 
-        # 4) greedy select per column and normalize
+        # Greedy select per column and normalize
         out64 = _greedy_scores_all_cols_nb(
-            n_cols, q_mz.shape[0],
+            n_cols, ref_mz.shape[0],
             col_offsets,
             ref_idx, lib_idx, score, is_frag,
             lib.spec_l2.astype(np.float64, copy=False),
@@ -916,13 +902,13 @@ def _row_task_cosine(args):
         )
         out = out64.astype(lib.dtype, copy=False)
 
-    # 5) optional identity gate (unchanged)
+    # Optional identity gate
     iden_tol = cfg["iden_tol"]
-    if (iden_tol is not None) and (q_pmz is not None):
+    if (iden_tol is not None) and (ref_pmz is not None):
         if cfg["iden_use_ppm"]:
-            allow = np.abs(lib.precursor_mz - q_pmz) <= (iden_tol * 1e-6 * 0.5 * (lib.precursor_mz + q_pmz))
+            allow = np.abs(lib.precursor_mz - ref_pmz) <= (iden_tol * 1e-6 * 0.5 * (lib.precursor_mz + ref_pmz))
         else:
-            allow = np.abs(lib.precursor_mz - q_pmz) <= iden_tol
+            allow = np.abs(lib.precursor_mz - ref_pmz) <= iden_tol
         allow &= np.isfinite(lib.precursor_mz)
         out[~allow] = 0.0
 
