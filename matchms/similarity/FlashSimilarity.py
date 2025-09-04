@@ -1,6 +1,6 @@
 import multiprocessing as mp
 import platform
-from typing import List, Dict, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 import numpy as np
 from numba import njit
 from sparsestack import StackedSparseArray
@@ -10,7 +10,6 @@ from .BaseSimilarity import BaseSimilarity
 from .flash_utils import (
     _build_library_index,
     _clean_and_weight,
-    _LibraryIndex,
 )
 
 
