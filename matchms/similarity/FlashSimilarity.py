@@ -40,7 +40,7 @@ class FlashSimilarity(BaseSimilarity):
         If True, interpret `tolerance` as parts-per-million. Default is False.
     remove_precursor:
         If True, remove precursor peak and peaks within precursor_window.
-        Default is True.
+        Default is False.
     precursor_window:
         If remove_precursor is True, remove peaks within this window around the precursor
         m/z. Default is 1.6 Da (as suggested by Li & Fiehn(2023)).
@@ -52,7 +52,7 @@ class FlashSimilarity(BaseSimilarity):
         Default is True.
     merge_within:
         If > 0, merge peaks within this distance (in Da) to a single peak.
-        Default is 0.05 Da.
+        Default is 0.
     identity_precursor_tolerance:
         If not None, enforce identity search behavior by requiring the precursor m/z
         of the query to be within this tolerance of the reference precursor m/z.
@@ -72,11 +72,11 @@ class FlashSimilarity(BaseSimilarity):
                  matching_mode: str = "fragment",           # 'fragment' | 'neutral_loss' | 'hybrid'
                  tolerance: float = 0.02,
                  use_ppm: bool = False,
-                 remove_precursor: bool = True,
+                 remove_precursor: bool = False,
                  precursor_window: float = 1.6,
                  noise_cutoff: float = 0.01,
                  normalize_to_half: bool = True,
-                 merge_within: float = 0.05,
+                 merge_within: float = 0,
                  identity_precursor_tolerance: Optional[float] = None,
                  identity_use_ppm: bool = False,
                  dtype: np.dtype = np.float64):
