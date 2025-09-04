@@ -14,7 +14,7 @@ from .flash_utils import (
 )
 
 
-class FlashSpectralEntropy(BaseSimilarity):
+class FlashSimilarity(BaseSimilarity):
     """
     Flash entropy similarity (Li & Fiehn, 2023) with a fast .matrix() that
     builds a library-wide index over 'queries' and streams all 'references'
@@ -192,7 +192,7 @@ class FlashSpectralEntropy(BaseSimilarity):
 
         # ---- Windows safety fallback ----
         if platform.system() == "Windows" and n_jobs not in (None, 1, 0):
-            print("FlashSpectralEntropy.matrix: n_jobs != 1 is not yet implemented on Windows; "
+            print("FlashSimilarity.matrix: n_jobs != 1 is not yet implemented on Windows; "
                   "falling back to n_jobs=1.")
             n_jobs = 1
 
@@ -270,7 +270,7 @@ class FlashSpectralEntropy(BaseSimilarity):
                         out[i, :] = row
             else:
                 # If fork is not available (e.g., certain environments), fall back to sequential with a note.
-                print("FlashSpectralEntropy.matrix: parallel execution requires 'fork'; "
+                print("FlashSimilarity.matrix: parallel execution requires 'fork'; "
                     "falling back to n_jobs=1.")
                 for item in tqdm(row_inputs, total=n_rows, desc="Flash entropy (matrix)"):
                     i, row = worker(item)
