@@ -1,6 +1,6 @@
 import multiprocessing as mp
 import platform
-from typing import Dict, List, Optional, Tuple
+from typing import List, Optional, Tuple
 import numpy as np
 from numba import njit
 from sparsestack import StackedSparseArray
@@ -109,7 +109,8 @@ class FlashSimilarity(BaseSimilarity):
                                     noise_cutoff=self.noise_cutoff,
                                     normalize_to_half=self.normalize_to_half,
                                     merge_within_da=self.merge_within,
-                                    weighing_type=("entropy" if self.score_type == "spectral_entropy" else "cosine"),
+                                    weighing_type=("entropy" if self.score_type == "spectral_entropy"\
+                                                    else "cosine"),
                                     dtype=self.dtype)
         return cleaned, (None if pmz is None else float(pmz))
 
@@ -143,7 +144,8 @@ class FlashSimilarity(BaseSimilarity):
             use_ppm=bool(self.use_ppm),
             matching_mode=self.matching_mode,
             compute_nl=compute_nl,
-            iden_tol=(None if self.identity_precursor_tolerance is None else float(self.identity_precursor_tolerance)),
+            iden_tol=(None if self.identity_precursor_tolerance is None\
+                      else float(self.identity_precursor_tolerance)),
             iden_use_ppm=bool(self.identity_use_ppm),
         )
         _set_globals(lib, cfg)
@@ -235,7 +237,8 @@ class FlashSimilarity(BaseSimilarity):
             use_ppm=bool(self.use_ppm),
             matching_mode=self.matching_mode,
             compute_nl=compute_nl,
-            iden_tol=(None if self.identity_precursor_tolerance is None else float(self.identity_precursor_tolerance)),
+            iden_tol=(None if self.identity_precursor_tolerance is None\
+                      else float(self.identity_precursor_tolerance)),
             iden_use_ppm=bool(self.identity_use_ppm),
         )
         _set_globals(lib, cfg)
@@ -421,7 +424,7 @@ def _spec_in_fragment_window(cols_target: int,
 
 @njit(cache=True, nogil=True)
 def _accumulate_nl_row_numba(scores: np.ndarray,
-                             ref_mz: np.ndarray, ref_int: np.ndarray, ref_pmz_val: float,  # pass np.nan if unknown
+                             ref_mz: np.ndarray, ref_int: np.ndarray, ref_pmz_val: float,
                              nl_mz: np.ndarray, nl_int: np.ndarray, nl_spec: np.ndarray, nl_prod_idx: np.ndarray,
                              peaks_mz: np.ndarray, peaks_spec: np.ndarray,
                              tol: float, use_ppm: bool,
@@ -860,11 +863,11 @@ def _row_task_cosine(args):
     # Count per-column candidates (fragment + neutral loss)
     counts_by_col = _count_candidates_per_col_nb(
         ref_mz, ref_int, has_pmz, ref_pmz,
-        lib.peaks_mz.astype(np.float64, copy=False),
+        lib.peaks_mz,
         lib.peaks_spec_idx.astype(np.int32, copy=False),
-        (lib.nl_mz.astype(np.float64, copy=False) if (cfg["compute_nl"] and lib.nl_mz is not None) else np.empty(0, np.float64)),
-        (lib.nl_spec_idx.astype(np.int32, copy=False) if (cfg["compute_nl"] and lib.nl_spec_idx is not None) else np.empty(0, np.int32)),
-        (lib.nl_product_idx.astype(np.int32, copy=False) if (cfg["compute_nl"] and lib.nl_product_idx is not None) else np.empty(0, np.int32)),
+        (lib.nl_mz if (cfg["compute_nl"] and lib.nl_mz is not None) else np.empty(0, np.float64)),
+        (lib.nl_spec_idx if (cfg["compute_nl"] and lib.nl_spec_idx is not None) else np.empty(0, np.int32)),
+        (lib.nl_product_idx if (cfg["compute_nl"] and lib.nl_product_idx is not None) else np.empty(0, np.int32)),
         tol, use_ppm, do_frag, (do_nl and cfg["compute_nl"]), n_cols
     )
 
@@ -882,12 +885,12 @@ def _row_task_cosine(args):
         ref_idx, lib_idx, score, is_frag = _fill_candidates_per_col_nb(
             ref_mz, ref_int,
             has_pmz, ref_pmz,
-            lib.peaks_mz.astype(np.float64, copy=False),
-            lib.peaks_int.astype(np.float64, copy=False),
+            lib.peaks_mz,
+            lib.peaks_int,
             lib.peaks_spec_idx.astype(np.int32, copy=False),
-            (lib.nl_mz.astype(np.float64, copy=False) if (cfg["compute_nl"] and lib.nl_mz is not None) else np.empty(0, np.float64)),
-            (lib.nl_spec_idx.astype(np.int32, copy=False) if (cfg["compute_nl"] and lib.nl_spec_idx is not None) else np.empty(0, np.int32)),
-            (lib.nl_product_idx.astype(np.int32, copy=False) if (cfg["compute_nl"] and lib.nl_product_idx is not None) else np.empty(0, np.int32)),
+            (lib.nl_mz if (cfg["compute_nl"] and lib.nl_mz is not None) else np.empty(0, np.float64)),
+            (lib.nl_spec_idx if (cfg["compute_nl"] and lib.nl_spec_idx is not None) else np.empty(0, np.int32)),
+            (lib.nl_product_idx if (cfg["compute_nl"] and lib.nl_product_idx is not None) else np.empty(0, np.int32)),
             tol, use_ppm, do_frag, (do_nl and cfg["compute_nl"]),
             col_offsets, counts_by_col
         )
