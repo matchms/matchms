@@ -36,8 +36,8 @@ class FlashSpectralEntropy(BaseSimilarity):
         Score type: 'spectral_entropy' (default) or 'cosine'.
     matching_mode:
         Matching mode: 'fragment', 'neutral_loss', or 'hybrid' (default is 'fragment').
-        Chose "hybrid" in combination with score_type="cosine" to approximate
-        the modified cosine score.
+        Chose "hybrid" in combination with score_type="cosine" to compute the
+        modified cosine score.
     tolerance:
         Matching tolerance in Da or ppm (use_ppm=True). Default is 0.02.
     use_ppm:
@@ -63,8 +63,10 @@ class FlashSpectralEntropy(BaseSimilarity):
     identity_use_ppm:
         If True, interpret `identity_precursor_tolerance` as ppm. Default is False.
     dtype:
-        Data type for the output scores. Default is np.float32.
-
+        Data type for the output scores. Default is np.float64 which properly accounts
+        for highest resolution MS/MS data (even far beyond current MS/MS possibilties!).
+        To save memory, np.float32 can be used instead, which is sufficient for peak 
+        resolutions up to about 8,000,000.
     """
     is_commutative = True
     score_datatype = np.float32
@@ -81,7 +83,7 @@ class FlashSpectralEntropy(BaseSimilarity):
                  merge_within: float = 0.05,
                  identity_precursor_tolerance: Optional[float] = None,
                  identity_use_ppm: bool = False,
-                 dtype: np.dtype = np.float32):
+                 dtype: np.dtype = np.float64):
         if score_type not in ("spectral_entropy", "cosine"):
             raise ValueError("score_type must be 'spectral_entropy' or 'cosine'")
         if matching_mode not in ("fragment", "neutral_loss", "hybrid"):
