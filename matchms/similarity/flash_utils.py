@@ -326,3 +326,15 @@ def _merge_within(
     out = np.column_stack((np.array(new_mz, dtype=mz.dtype),
                            np.array(new_int, dtype=intensities.dtype)))
     return out
+
+def _within_tol(m1: float, m2: float, tol: float, use_ppm: bool, dtype: np.dtype) -> bool:
+    if not use_ppm:
+        return abs(m1 - m2) <= tol
+    return abs(m1 - m2) <= tol * 1e-6 * (0.5 * (m1 + m2))
+
+def _search_window_halfwidth(m: float, tol: float, use_ppm: bool, dtype: np.dtype) -> float:
+    if not use_ppm:
+        return tol
+    c = tol * 1e-6
+    denom = 1.0 - 0.5 * c
+    return (c * m) / denom if denom > 0 else (c * m * 2.0)
