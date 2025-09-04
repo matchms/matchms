@@ -177,7 +177,7 @@ def _entropy_weight(intensities: np.ndarray, dtype: np.dtype) -> np.ndarray:
     # TODO --> not really necessary: intensities = np.maximum(intensities, 0.0)
     total = float(intensities.sum(dtype=np.float64))  # sum in high precision for stability
     if total <= 0.0:
-        return intensities
+        return intensities.astype(dtype, copy=False)
     p = intensities / total
     with np.errstate(divide="ignore", invalid="ignore"):
         logp = np.zeros_like(p, dtype=dtype)
@@ -198,7 +198,7 @@ def _clean_and_weight(peaks: np.ndarray,
                       normalize_to_half: bool,
                       merge_within_da: float,
                       weighing_type: str,
-                      dtype: np.dtype = np.float32) -> np.ndarray:
+                      dtype: np.dtype = np.float64) -> np.ndarray:
     """
     Apply the Flash preprocessing rules to a (mz, intensity) peak list.
 
@@ -229,7 +229,7 @@ def _clean_and_weight(peaks: np.ndarray,
     weighing_type : str
         One of "cosine" or "entropy". Fragment intensities will be weighted accordingly.
     dtype : np.dtype
-        Float dtype for outputs. Default is np.float32.
+        Float dtype for outputs. Default is np.float64. TODO: should not be handled by this function?
 
     Returns
     -------
@@ -326,15 +326,3 @@ def _merge_within(
     out = np.column_stack((np.array(new_mz, dtype=mz.dtype),
                            np.array(new_int, dtype=intensities.dtype)))
     return out
-
-def _within_tol(m1: float, m2: float, tol: float, use_ppm: bool, dtype: np.dtype) -> bool:
-    if not use_ppm:
-        return abs(m1 - m2) <= tol
-    return abs(m1 - m2) <= tol * 1e-6 * (0.5 * (m1 + m2))
-
-def _search_window_halfwidth(m: float, tol: float, use_ppm: bool, dtype: np.dtype) -> float:
-    if not use_ppm:
-        return tol
-    c = tol * 1e-6
-    denom = 1.0 - 0.5 * c
-    return (c * m) / denom if denom > 0 else (c * m * 2.0)
