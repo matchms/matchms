@@ -122,13 +122,13 @@ class FlashSimilarity(BaseSimilarity):
         
         Careful: This is not the fast intended use; better .matrix() instead.
         """
-        # preprocess both spectra
+        # Preprocess both spectra
         peaks_1, pmz_1 = self._prepare(reference)
         peaks_2, pmz_2 = self._prepare(query)
         if peaks_1.size == 0 or peaks_2.size == 0:
             return np.asarray(0.0, dtype=self.dtype)
     
-        # build 1-spec library index from the query
+        # Build 1-spec library index from the query
         compute_nl = (self.matching_mode in ("neutral_loss", "hybrid"))
         compute_l2 = (self.score_type == "cosine")
 
@@ -154,7 +154,7 @@ class FlashSimilarity(BaseSimilarity):
         _, row = worker((0, peaks_1, pmz_1))
         return np.asarray(row[0], dtype=self.dtype)
 
-    # ---- FAST + PARALLEL ----
+    # FAST + PARALLEL score matrix computation
     def matrix(self,
                references: List[SpectrumType],
                queries: List[SpectrumType],
@@ -223,16 +223,16 @@ class FlashSimilarity(BaseSimilarity):
             dtype=self.dtype
         )
 
-        # 2) Prepare output
+        # Prepare output
         out = np.zeros((n_rows, n_cols), dtype=self.dtype)
 
-        # 3) Prepare rows (references)
+        # Prepare rows (references)
         row_inputs = []
         for i, ref in enumerate(references):
             peaks_r, pmz_r = self._prepare(ref)
             row_inputs.append((i, peaks_r, pmz_r))
 
-        # 4) configuration passed to workers
+        # Configuration passed to workers
         cfg = dict(
             tol=float(self.tolerance),
             use_ppm=bool(self.use_ppm),
@@ -246,7 +246,7 @@ class FlashSimilarity(BaseSimilarity):
         worker = _row_task_entropy if self.score_type == "spectral_entropy" else _row_task_cosine
 
 
-        # 5) run — sequential or parallel
+        # Run — sequential or parallel
         if n_jobs in (None, 1, 0):
             iterator = row_inputs
             for item in tqdm(iterator, total=n_rows, desc=descriptor+" (matrix)"):
@@ -601,7 +601,7 @@ def _count_candidates_per_col_nb(query_mz: np.ndarray,
     """
     counts = np.zeros(n_cols, dtype=np.int32)
 
-    # fragment matches
+    # Fragment matches
     if do_frag:
         for i in range(query_mz.shape[0]):
             Iq = float(query_int[i])
@@ -616,7 +616,7 @@ def _count_candidates_per_col_nb(query_mz: np.ndarray,
                     col = int(peaks_spec_idx[j])
                     counts[col] += 1
 
-    # neutral-loss matches
+    # Neutral-loss matches
     if do_nl and has_pmz and (nl_mz.size > 0):
         for i in range(query_mz.shape[0]):
             Iq = float(query_int[i])
@@ -669,9 +669,10 @@ def _fill_candidates_per_col_nb(query_mz: np.ndarray,
     score   = np.empty(n_total, dtype=np.float64)
     is_frag = np.empty(n_total, dtype=np.uint8)
 
-    # running write cursors per column
-    pos = col_offsets[:-1].copy()  # int64[n_cols]
+    # Running write cursors per column
+    pos = col_offsets[:-1].copy()
 
+    # Fragment matches
     if do_frag:
         for i in range(query_mz.shape[0]):
             Iq = float(query_int[i])
@@ -685,14 +686,15 @@ def _fill_candidates_per_col_nb(query_mz: np.ndarray,
                 if not _within_tol_nb(mz, mj, tol, use_ppm):
                     continue
 
-                col = int(peaks_spec_idx[j])
-                p = int(pos[col])
-                ref_idx[p] = i
-                lib_idx[p] = j
-                score[p]   = Iq * float(peaks_int[j])
-                is_frag[p] = 1
-                pos[col] = p + 1
+                spec_idx = int(peaks_spec_idx[j])
+                col_idx = int(pos[spec_idx])
+                ref_idx[col_idx] = i
+                lib_idx[col_idx] = j
+                score[col_idx]   = Iq * float(peaks_int[j])
+                is_frag[col_idx] = 1
+                pos[spec_idx] = col_idx + 1
 
+    # Neutral-loss matches
     if do_nl and has_pmz and (nl_mz.size > 0):
         for i in range(query_mz.shape[0]):
             Iq = float(query_int[i])
@@ -707,13 +709,13 @@ def _fill_candidates_per_col_nb(query_mz: np.ndarray,
                     continue
 
                 j = int(nl_prod_idx[k])        # product-peak index in global arrays
-                col = int(nl_spec_idx[k])
-                p = int(pos[col])
-                ref_idx[p] = i
-                lib_idx[p] = j
-                score[p]   = Iq * float(peaks_int[j])
-                is_frag[p] = 0
-                pos[col] = p + 1
+                spec_idx = int(nl_spec_idx[k])
+                col_idx = int(pos[spec_idx])
+                ref_idx[col_idx] = i
+                lib_idx[col_idx] = j
+                score[col_idx] = Iq * float(peaks_int[j])
+                is_frag[col_idx] = 0
+                pos[spec_idx] = col_idx + 1
 
     return ref_idx, lib_idx, score, is_frag
 
@@ -755,23 +757,23 @@ def _greedy_scores_all_cols_nb(n_cols: int,
         if size <= 0:
             continue
 
-        # local views
+        # Local views
         s_ref = ref_idx[start:end]
         s_lib = lib_idx[start:end]
-        s_sc  = score[start:end]
-        s_fg  = is_frag[start:end]
+        s_score  = score[start:end]
+        s_frag  = is_frag[start:end]
 
-        # key for descending sort (score primary; fragment wins only on exact ties)
+        # Key for descending sort (score primary; fragment wins only on exact ties)
         key = np.empty(size, dtype=np.float64)
         for t in range(size):
-            key[t] = s_sc[t] + (eps if s_fg[t] == 1 else 0.0)
+            key[t] = s_score[t] + (eps if s_frag[t] == 1 else 0.0)
         order = np.argsort(-key)  # descending
 
-        # clear query usage (n_q is small)
+        # Clear query usage (n_q is small)
         for qi in range(n_q):
             used_q[qi] = 0
 
-        # track used library *global* j indices for this column only
+        # Track used library *global* j indices for this column only
         # small dynamic array; at most min(n_q, #uniq j in column)
         used_lib_j = np.empty(size, dtype=np.int32)
         used_lib_n = 0
@@ -785,7 +787,7 @@ def _greedy_scores_all_cols_nb(n_cols: int,
             if used_q[i] == 1:
                 continue
 
-            # linear membership test over selected lib j's; K remains small
+            # Linear membership test over selected lib j's; K remains small
             seen = False
             for u in range(used_lib_n):
                 if used_lib_j[u] == j:
@@ -794,11 +796,11 @@ def _greedy_scores_all_cols_nb(n_cols: int,
             if seen:
                 continue
 
-            # accept
+            # Accept
             used_q[i] = 1
             used_lib_j[used_lib_n] = j
             used_lib_n += 1
-            dot += float(s_sc[idx])
+            dot += float(s_score[idx])
 
         denom = q_l2 * float(lib_spec_l2[col])
         if denom > 0.0 and dot > 0.0:

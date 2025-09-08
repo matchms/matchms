@@ -96,14 +96,15 @@ def _build_library_index(processed_peaks_list: List[np.ndarray],
 
     # Concatenate all peaks
     counts = [p.shape[0] for p in processed_peaks_list]
-    N = int(np.sum(counts))
-    if N > (2**31 - 1):
+    n_peaks = int(np.sum(counts))
+    if n_peaks > (2**31 - 1):
         int_dtype = np.int64
-        print(f"Too many total peaks ({N}) to build index using 32-bit integers (now using 64-bit integers).")
+        print(f"Too many total peaks ({n_peaks}) to build index using 32-bit integers (now using 64-bit integers).")
     else:
         int_dtype = np.int32 
 
-    if N == 0:
+    # Return empty arrays if no peaks
+    if n_peaks == 0:
         idx.peaks_mz = np.zeros(0, dtype=dtype)
         idx.peaks_int = np.zeros(0, dtype=dtype)
         idx.peaks_spec_idx = np.zeros(0, dtype=int_dtype)
@@ -116,20 +117,20 @@ def _build_library_index(processed_peaks_list: List[np.ndarray],
             idx.spec_l2 = spec_l2
         return idx
 
-    mz_flat = np.empty(N, dtype=dtype)
-    int_flat = np.empty(N, dtype=dtype)
-    spec_flat = np.empty(N, dtype=int_dtype)
+    mz_flat = np.empty(n_peaks, dtype=dtype)
+    int_flat = np.empty(n_peaks, dtype=dtype)
+    spec_flat = np.empty(n_peaks, dtype=int_dtype)
 
     write = 0
-    for s_i, p in enumerate(processed_peaks_list):
-        n = p.shape[0]
+    for spec_id, peaks in enumerate(processed_peaks_list):
+        n = peaks.shape[0]
         if n == 0:
             continue
-        mz_flat[write:write+n] = p[:, 0]
-        int_flat[write:write+n] = p[:, 1]
-        spec_flat[write:write+n] = s_i
+        mz_flat[write:write+n] = peaks[:, 0]
+        int_flat[write:write+n] = peaks[:, 1]
+        spec_flat[write:write+n] = spec_id
         if compute_l2_norm:
-            spec_l2[s_i] = np.sqrt(np.sum((p[:, 1]).astype(np.float64)**2, dtype=np.float64)).astype(dtype)
+            spec_l2[spec_id] = np.sqrt(np.sum((peaks[:, 1]).astype(np.float64)**2, dtype=np.float64)).astype(dtype)
         write += n
 
     # Sort by m/z
@@ -137,12 +138,13 @@ def _build_library_index(processed_peaks_list: List[np.ndarray],
     idx.peaks_mz = mz_flat[order]
     idx.peaks_int = int_flat[order]
     idx.peaks_spec_idx = spec_flat[order]
-    product_pos = np.empty(N, dtype=np.int64)
-    product_pos[order] = np.arange(N, dtype=np.int64)
+    product_pos = np.empty(n_peaks, dtype=np.int64)
+    product_pos[order] = np.arange(n_peaks, dtype=np.int64)
 
+    # Neutral-loss view (if requested)
     if compute_neutral_loss:
-        pmz_per_peak = idx.precursor_mz[spec_flat]  # float32, NaN if unknown
-        have_pmz = ~np.isnan(pmz_per_peak)
+        pmz_per_peak = idx.precursor_mz[spec_flat]
+        have_pmz = ~np.isnan(pmz_per_peak)  # catch cases without precursor m/z
         src_idx = np.nonzero(have_pmz)[0]
         if src_idx.size == 0:
             idx.nl_mz = np.zeros(0, dtype=dtype)
@@ -174,7 +176,6 @@ def _entropy_weight(intensities: np.ndarray, dtype: np.dtype) -> np.ndarray:
     """
     Apply entropy-based weighting to intensities as described by Li & Fiehn (2023).
     """
-    # TODO --> not really necessary: intensities = np.maximum(intensities, 0.0)
     total = float(intensities.sum(dtype=np.float64))  # sum in high precision for stability
     if total <= 0.0:
         return intensities.astype(dtype, copy=False)
@@ -184,8 +185,10 @@ def _entropy_weight(intensities: np.ndarray, dtype: np.dtype) -> np.ndarray:
         mask = p > 0
         logp[mask] = np.log2(p[mask]).astype(dtype, copy=False)
 
-    # entropy in bits
+    # Compute spectral entropy S
     S = float((-p * logp).sum(dtype=np.float64))
+
+    # Compute weight w (used for scaling)
     w = 1.0 if S >= 3.0 else (0.25 + 0.25 * S)
     return np.power(intensities, w).astype(dtype, copy=False)
 
@@ -273,9 +276,9 @@ def _clean_and_weight(peaks: np.ndarray,
 
     # (optional) normalize intensities to sum to 0.5
     if normalize_to_half:
-        s = float(intensities.sum(dtype=np.float64))
-        if s > 0.0:
-            intensities = (intensities * (0.5 / s)).astype(dtype, copy=False)
+        sum_intensities = intensities.sum(dtype=np.float64)
+        if sum_intensities > 0.0:
+            intensities = (intensities * (0.5 / sum_intensities)).astype(dtype, copy=False)
 
     return np.column_stack((mz, intensities))
 
@@ -283,7 +286,9 @@ def _clean_and_weight(peaks: np.ndarray,
 # ===================== smaller helper functions =====================
 
 def _as_dtype(a: np.ndarray, dtype: np.dtype) -> np.ndarray:
-    return a.astype(dtype, copy=False) if a.dtype == dtype else a.astype(dtype, copy=True)
+    if a.dtype == dtype:
+        return a.astype(dtype, copy=False) 
+    return a.astype(dtype, copy=True)
 
 
 def _merge_within(
