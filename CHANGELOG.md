@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## unpublished
 ### Added
+- New `FlashSimilarity` score class [#827](https://github.com/matchms/matchms/pull/8267. This conceptually follows the Flash Entropy proposed by Li & Fiehn (2023) and allows much faster computation than, for instance, `CosineGreedy` or `ModifiedCosine`. It is possible to choose different `score_type` (can be `spectral entropy` or `cosine`) as well as `matching_mode` (can be `fragment`, `neutral_loss` or `hybrid`). To compute modified cosine scores, for instance, this would be `cosine` together with `hybrid`).
 - New `add_precursor_formula` filter [#826](https://github.com/matchms/matchms/pull/826).
 - New `remove_peaks_relative_to_precursor_mz` filter [#833](https://github.com/matchms/matchms/pull/833).
 
