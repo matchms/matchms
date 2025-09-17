@@ -170,7 +170,7 @@ def test_load_compound_name_annotation(compound_name, expected_output, csv_file_
             [
                 {
                     "compound_name": "glucose",
-                    "smiles": None, # Correct: "C([C@@H]1[C@H]([C@@H]([C@H](C(O1)O)O)O)O)O", smiles retrieval is broken
+                    "smiles": "C([C@@H]1[C@H]([C@@H]([C@H](C(O1)O)O)O)O)O",
                     "inchi": "InChI=1S/C6H12O6/c7-1-2-3(8)4(9)5(10)6(11)12-2/h2-11H,1H2/t2-,3-,4+,5-,6?/m1/s1",
                     "inchikey": "WQZGKKKJIJFFOK-GASJEMHNSA-N",
                     "monoisotopic_mass": 180.06338810,
@@ -217,7 +217,7 @@ def test_pubchem_name_search(compound_name, expected_output):
             [
                 {
                     "compound_name": "glucose",
-                    "smiles": None, # "C([C@@H]1[C@H]([C@@H]([C@H](C(O1)O)O)O)O)O" (but smiles retrieval is broken)
+                    "smiles": "C([C@@H]1[C@H]([C@@H]([C@H](C(O1)O)O)O)O)O",
                     "inchi": "InChI=1S/C6H12O6/c7-1-2-3(8)4(9)5(10)6(11)12-2/h2-11H,1H2/t2-,3-,4+,5-,6?/m1/s1",
                     "inchikey": "WQZGKKKJIJFFOK-GASJEMHNSA-N",
                     "monoisotopic_mass": 180.06338810,
