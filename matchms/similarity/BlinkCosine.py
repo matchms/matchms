@@ -1,7 +1,7 @@
 from typing import List, Optional, Tuple
 import numpy as np
 from numba import njit  # TODO: check if numba is necessary/useful here
-from scipy.sparse import coo_matrix, csr_matrix
+from scipy.sparse import coo_array, csr_array
 from matchms.typing import SpectrumType
 from .BaseSimilarity import BaseSimilarity
 
@@ -200,7 +200,7 @@ class BlinkCosine(BaseSimilarity):
 
         Returns
         -------
-        numpy.ndarray or scipy.sparse.coo_matrix
+        numpy.ndarray or scipy.sparse.coo_array
             If array_type == 'numpy': dense (n_ref, n_query)
             If array_type == 'sparse': COO sparse (n_ref, n_query), dropping scores < sparse_score_min
         """
@@ -217,14 +217,14 @@ class BlinkCosine(BaseSimilarity):
         if n_ref == 0 or n_qry == 0:
             if array_type == "numpy":
                 return np.zeros((n_ref, n_qry), dtype=np.float32)
-            return coo_matrix((n_ref, n_qry), dtype=np.float32)
+            return coo_array((n_ref, n_qry), dtype=np.float32)
 
         # Collect global bin range
         all_bins_list = [b for (b, _, _) in prepped_refs if b.size] + [b for (b, _, _) in prepped_qrys if b.size]
         if not all_bins_list:
             if array_type == "numpy":
                 return np.zeros((n_ref, n_qry), dtype=np.float32)
-            return coo_matrix((n_ref, n_qry), dtype=np.float32)
+            return coo_array((n_ref, n_qry), dtype=np.float32)
 
         global_min = min(int(b.min()) for b in all_bins_list)
         global_max = max(int(b.max()) for b in all_bins_list)
@@ -238,7 +238,6 @@ class BlinkCosine(BaseSimilarity):
         if array_type == "numpy":
             S = np.zeros((n_ref, n_qry), dtype=np.float32)
         else:
-            from scipy.sparse import coo_matrix
             sparse_rows = []
             sparse_cols = []
             sparse_data = []
@@ -277,7 +276,6 @@ class BlinkCosine(BaseSimilarity):
                 S = 0.5 * (S + S.T)
             return S
         else:
-            from scipy.sparse import coo_matrix
             if sparse_rows:
                 rows = np.concatenate(sparse_rows) if len(sparse_rows) > 1 else sparse_rows[0]
                 cols = np.concatenate(sparse_cols) if len(sparse_cols) > 1 else sparse_cols[0]
@@ -288,7 +286,7 @@ class BlinkCosine(BaseSimilarity):
                 data = np.array([], dtype=np.float32)
             if self.clip_to_one and data.size:
                 np.minimum(data, 1.0, out=data)
-            return coo_matrix((data, (rows, cols)), shape=(n_ref, n_qry), dtype=np.float32)
+            return coo_array((data, (rows, cols)), shape=(n_ref, n_qry), dtype=np.float32)
 
     # --------------------------- Internal helpers ---------------------------
 
@@ -446,7 +444,7 @@ class BlinkCosine(BaseSimilarity):
 
         Returns
         -------
-        scipy.sparse.csr_matrix
+        scipy.sparse.csr_array
             CSR with shape (n_rows, n_spectra).
         """
         col_indices = []
@@ -459,11 +457,11 @@ class BlinkCosine(BaseSimilarity):
             col_indices.append(np.full(bins.size, j, dtype=np.int32))
             data.append(vals.astype(np.float32, copy=False))
         if not row_indices:
-            return csr_matrix((n_rows, len(prepped_list)), dtype=np.float32)
+            return csr_array((n_rows, len(prepped_list)), dtype=np.float32)
         rows = np.concatenate(row_indices)
         cols = np.concatenate(col_indices)
         dat = np.concatenate(data)
-        return csr_matrix((dat, (rows, cols)), shape=(n_rows, len(prepped_list)), dtype=np.float32)
+        return csr_array((dat, (rows, cols)), shape=(n_rows, len(prepped_list)), dtype=np.float32)
 
     @staticmethod
     def _expand_column_blur(rows: np.ndarray, vals: np.ndarray, R: int, n_rows: int):
@@ -517,7 +515,7 @@ class BlinkCosine(BaseSimilarity):
 
         Returns
         -------
-        scipy.sparse.csr_matrix
+        scipy.sparse.csr_array
             CSR matrix (n_rows, batch_size) with duplicated entries summed.
         """
         rows_all = []
@@ -535,10 +533,10 @@ class BlinkCosine(BaseSimilarity):
             data_all.append(data_exp)
 
         if not rows_all:
-            return csr_matrix((n_rows, len(prepped_list)), dtype=np.float32)
+            return csr_array((n_rows, len(prepped_list)), dtype=np.float32)
 
         rows = np.concatenate(rows_all)
         cols = np.concatenate(cols_all)
         dat = np.concatenate(data_all)
         # COO -> CSR automatically sums duplicates (needed when blur windows overlap)
-        return csr_matrix((dat, (rows, cols)), shape=(n_rows, len(prepped_list)), dtype=np.float32)
+        return csr_array((dat, (rows, cols)), shape=(n_rows, len(prepped_list)), dtype=np.float32)
