@@ -256,7 +256,7 @@ class BlinkCosine(BaseSimilarity):
             if array_type == "numpy":
                 S[:, j0:j1] = scores_batch_sparse.toarray()
             else:
-                scores_batch_sparse = scores_batch_sparse.tocoo()
+                scores_batch_sparse = scores_batch_sparse.asformat("coo")
                 # Apply threshold if requested
                 if self.sparse_score_min > 0.0:
                     mask = np.abs(scores_batch_sparse.data) >= self.sparse_score_min
