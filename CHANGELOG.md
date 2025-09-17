@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## unpublished
 ### Added
+- New `BlinkCosine` similarity score that is largely following the BLINK score proposed by Harwood et al. (2023), representing a fast-to-compute approximation of the Cosine score between MS/MS spectra [#829](https://github.com/matchms/matchms/pull/826).
 - New `add_precursor_formula` filter [#826](https://github.com/matchms/matchms/pull/826).
 - New `remove_peaks_relative_to_precursor_mz` filter [#833](https://github.com/matchms/matchms/pull/833).
 
