@@ -161,7 +161,7 @@ jobs:
       - name: Install conda dependencies
         shell: bash -l {0}
         run: |
-          conda install -c conda-forge poetry
+          conda install -c conda-forge --strict-channel-priority poetry
       - name: Install with development dependencies
         shell: bash -l {0}
         run: |
