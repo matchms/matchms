@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New `add_precursor_formula` filter [#826](https://github.com/matchms/matchms/pull/826).
 - New `remove_peaks_relative_to_precursor_mz` filter [#833](https://github.com/matchms/matchms/pull/833).
 
+### Changed
+- Added Min-Max scaling to normalize intensities filter [#830](https://github.com/matchms/matchms/pull/830).
+
 ## [0.30.2] - 2025-06-27
 ### Changed
 - Fixed metadata export, column names are now sorted and keys in json as well. Updated tests to be actually functional [#814](https://github.com/matchms/matchms/pull/814)
