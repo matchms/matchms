@@ -43,8 +43,7 @@ tqdm = ">=4.65.0"
 rdkit = "^2024.3.5"
 pyyaml = ">=6.0.1"
 deprecated = ">=1.2.14"
-# Update pubchempy once a new version is released on pypi
-pubchempy= { git = "https://github.com/mcs07/PubChemPy.git", rev = "a5d8646" }
+pubchempy = ">=1.0.5"
 pynndescent = ">=0.5.13"
 
 [tool.poetry.group.dev.dependencies]
