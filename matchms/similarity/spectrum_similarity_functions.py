@@ -8,7 +8,6 @@ from numba.typed import List
 def collect_peak_pairs(spec1: np.ndarray, spec2: np.ndarray,
                        tolerance: float, shift: float = 0, mz_power: float = 0.0,
                        intensity_power: float = 1.0):
-    # pylint: disable=too-many-arguments
     """Find matching pairs between two spectra.
 
     Args

@@ -6,7 +6,7 @@ Matchms provides a number of frequently used similarity scores to compare mass
 spectra. This includes
 
 * scores based on comparing peak positions and intensities
-  (:class:`~matchms.similarity.CosineGreedy` or :class:`~matchms.similarity.ModifiedCosine`)
+  (:class:`~matchms.similarity.CosineGreedy`, :class:`~matchms.similarity.ModifiedCosine`
 * simple scores that only assess precursor m/z or parent mass matches
   (:class:`~matchms.similarity.PrecursorMzMatch` or: :class:`~matchms.similarity.ParentMassMatch`)
 * scores assessing molecular similarity if structures (SMILES, InchiKey) are given as metadata
@@ -23,6 +23,7 @@ from .BlinkCosine import BlinkCosine
 from .CosineGreedy import CosineGreedy
 from .CosineHungarian import CosineHungarian
 from .FingerprintSimilarity import FingerprintSimilarity
+from .FlashSimilarity import FlashSimilarity
 from .IntersectMz import IntersectMz
 from .MetadataMatch import MetadataMatch
 from .ModifiedCosine import ModifiedCosine
@@ -37,6 +38,7 @@ __all__ = [
     "CosineGreedy",
     "CosineHungarian",
     "FingerprintSimilarity",
+    "FlashSimilarity",
     "IntersectMz",
     "MetadataMatch",
     "ModifiedCosine",
@@ -58,7 +60,8 @@ def get_similarity_function_by_name(similarity_function_name: str):
     names = __all__
     functions = [BinnedEmbeddingSimilarity, BlinkCosine,
                  CosineGreedy, CosineHungarian,
-                 FingerprintSimilarity, IntersectMz, MetadataMatch, ModifiedCosine,
+                 FingerprintSimilarity, FlashSimilarity,
+                 IntersectMz, MetadataMatch, ModifiedCosine,
                  NeutralLossesCosine, ParentMassMatch, PrecursorMzMatch]
 
     assert similarity_function_name in names, f"Unknown similarity function: {similarity_function_name}"
