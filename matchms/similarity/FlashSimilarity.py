@@ -9,6 +9,8 @@ from tqdm import tqdm
 from matchms.typing import SpectrumType
 from .BaseSimilarity import BaseSimilarity
 from .flash_utils import _build_library_index, _clean_and_weight
+
+
 logger = logging.getLogger("matchms")
 
 
