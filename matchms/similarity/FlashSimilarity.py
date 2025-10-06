@@ -1,3 +1,4 @@
+import logging
 import multiprocessing as mp
 import platform
 from typing import List, Optional, Tuple
@@ -8,6 +9,7 @@ from tqdm import tqdm
 from matchms.typing import SpectrumType
 from .BaseSimilarity import BaseSimilarity
 from .flash_utils import _build_library_index, _clean_and_weight
+logger = logging.getLogger("matchms")
 
 
 class FlashSimilarity(BaseSimilarity):
@@ -122,6 +124,8 @@ class FlashSimilarity(BaseSimilarity):
         
         Careful: This is not the fast intended use; better .matrix() instead.
         """
+        logger.warning("This is not the fast intended use; better use .matrix() instead.")
+
         # Preprocess both spectra
         peaks_1, pmz_1 = self._prepare(reference)
         peaks_2, pmz_2 = self._prepare(query)
