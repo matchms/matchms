@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 import pytest
 from matplotlib import pyplot as plt
@@ -51,6 +52,7 @@ def test_plot_mirror_colors():
         plot_spectra_mirror(spec_a, spec_b, peak_color="green")
 
 
+@pytest.mark.skipif(sys.platform.startswith("win"), reason="TCL not available on win platforms.")
 def test_plot_spectrum_default():
     n_peaks = 100
     mz = np.random.randint(0, 1000, n_peaks).astype("float")
@@ -63,6 +65,7 @@ def test_plot_spectrum_default():
     _assert_ax_ok(ax, n_lines=n_peaks, ylim=1.1, xlabel="m/z", ylabel="Intensity")
 
 
+@pytest.mark.skipif(sys.platform.startswith("win"), reason="TCL not available on win platforms.")
 def test_plot_spectrum_peak_comments():
     n_peaks = 51
     mz = np.linspace(0, 500, n_peaks).astype("float")
@@ -79,6 +82,7 @@ def test_plot_spectrum_peak_comments():
     _assert_ax_ok(ax, n_lines=n_peaks, ylim=1.25, xlabel="m/z", ylabel="Intensity")
 
 
+@pytest.mark.skipif(sys.platform.startswith("win"), reason="TCL not available on win platforms.")
 def test_plot_single_spectrum_plot_spectra_array():
     """Test that inputing a single spectrum doesn't break plot_spectra_array"""
     n_peaks = 50
@@ -90,6 +94,7 @@ def test_plot_single_spectrum_plot_spectra_array():
     plot_spectra_array([spectrum])
 
 
+@pytest.mark.skipif(sys.platform.startswith("win"), reason="TCL not available on win platforms.")
 def test_plot_spectra_array_default():
     n = 9
     n_peaks = 50
@@ -114,6 +119,7 @@ def test_plot_spectra_array_default():
     _assert_ax_ok(axes[-1, -1], n_lines=0, ylim=1, xlabel="", ylabel="")
 
 
+@pytest.mark.skipif(sys.platform.startswith("win"), reason="TCL not available on win platforms.")
 def test_plot_spectra_array():
     n = 10
     n_peaks = 50
