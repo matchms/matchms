@@ -57,8 +57,8 @@ def get_multiplier_and_mass_from_adduct(adduct: str) -> Tuple[Optional[float], O
         return None, None
     added_mass = mass_of_ions - ELECTRON_MASS * charge
 
-    multiplier = 1/abs(charge)*nr_of_parent_masses
-    correction_mass = added_mass/(abs(charge))
+    multiplier = 1 / abs(charge) * nr_of_parent_masses
+    correction_mass = added_mass / (abs(charge))
     return multiplier, correction_mass
 
 
@@ -72,15 +72,13 @@ def get_ions_from_adduct(adduct: str) -> Tuple[int, List[str]]:
     if "[" in adduct:
         ions_part = re.findall((r"\[(.*)\]"), adduct)
         if len(ions_part) != 1:
-            logger.warning("Expected to find brackets [] once, not the case in %s",
-                           adduct)
+            logger.warning("Expected to find brackets [] once, not the case in %s", adduct)
             return None, None
         adduct = ions_part[0]
     # Finds the pattern M or 2M in adduct it makes sure it is in between
-    parent_mass = re.findall(r'(?:^|[+-])([0-9]?M)(?:$|[+-])', adduct)
+    parent_mass = re.findall(r"(?:^|[+-])([0-9]?M)(?:$|[+-])", adduct)
     if len(parent_mass) != 1:
-        logger.warning("The parent mass (e.g. 2M or M) was found %s times in %s",
-                       len(parent_mass), adduct)
+        logger.warning("The parent mass (e.g. 2M or M) was found %s times in %s", len(parent_mass), adduct)
         return None, None
     parent_mass = parent_mass[0]
     if parent_mass == "M":
@@ -88,7 +86,7 @@ def get_ions_from_adduct(adduct: str) -> Tuple[int, List[str]]:
     else:
         nr_of_parent_masses = int(parent_mass[0])
 
-    ions_split = re.findall(r'([+-][0-9a-zA-Z]+)', adduct)
+    ions_split = re.findall(r"([+-][0-9a-zA-Z]+)", adduct)
     ions_split = replace_abbreviations(ions_split)
     return nr_of_parent_masses, ions_split
 
@@ -106,7 +104,7 @@ def split_ion(ion: str) -> Tuple[str, int, str]:
     sign = ion[0]
     ion = ion[1:]
     assert sign in ["+", "-"], "Expected ion to start with + or -"
-    match = re.match(r'^([0-9]+)(.*)', ion)
+    match = re.match(r"^([0-9]+)(.*)", ion)
     if match:
         number = int(match.group(1))
         ion = match.group(2)
@@ -117,9 +115,16 @@ def split_ion(ion: str) -> Tuple[str, int, str]:
 
 def replace_abbreviations(ions_split):
     """Derived from https://github.com/pnnl/MSAC"""
-    abbrev_to_formula = {'ACN': 'CH3CN', 'DMSO': 'C2H6OS', 'FA': 'CH2O2',
-                         'HAc': 'CH3COOH', 'Hac': 'CH3COOH', 'TFA': 'C2HF3O2',
-                         'IsoProp': 'CH3CHOHCH3', 'MeOH': 'CH3OH'}
+    abbrev_to_formula = {
+        "ACN": "CH3CN",
+        "DMSO": "C2H6OS",
+        "FA": "CH2O2",
+        "HAc": "CH3COOH",
+        "Hac": "CH3COOH",
+        "TFA": "C2HF3O2",
+        "IsoProp": "CH3CHOHCH3",
+        "MeOH": "CH3OH",
+    }
     corrected_ions = []
     for ion in ions_split:
         sign, number, ion = split_ion(ion)
@@ -156,8 +161,7 @@ def get_charge_of_adduct(adduct) -> Optional[int]:
         return None
     charge = re.findall((r"\]([0-9]?[+-])"), adduct)
     if len(charge) != 1:
-        logger.warning("Charge was found %s times in adduct %s",
-                       len(charge), adduct)
+        logger.warning("Charge was found %s times in adduct %s", len(charge), adduct)
         return None
     charge = charge[0]
     if len(charge) == 1:
@@ -170,7 +174,7 @@ def get_charge_of_adduct(adduct) -> Optional[int]:
     else:
         logger.warning("Charge is expected of length 1 or 2, but %s was given", charge)
         return None
-    return int(charge_sign+charge_size)
+    return int(charge_sign + charge_size)
 
 
 def get_mass_of_formula(formula):

@@ -31,20 +31,21 @@ class SpectrumProcessor:
         A list of filter functions, see add_filter for all the allowed formats.
     """
 
-    def __init__(self,
-                 filters: Iterable[Union[str,
-                                         Callable,
-                                         FunctionWithParametersType]]):
+    def __init__(self, filters: Iterable[Union[str, Callable, FunctionWithParametersType]]):
         self.filters = []
         self.filter_order = [x.__name__ for x in ALL_FILTERS]
         for filter_name in filters:
             self.parse_and_add_filter(filter_name)
 
-    def parse_and_add_filter(self, filter_description: Union[str,
-                                                             Callable,
-                                                             FunctionWithParametersType,
-                                                             ],
-                             filter_position: Optional[int] = None):
+    def parse_and_add_filter(
+        self,
+        filter_description: Union[
+            str,
+            Callable,
+            FunctionWithParametersType,
+        ],
+        filter_position: Optional[int] = None,
+    ):
         """Adds a filter, by parsing the different allowed inputs.
 
         filter:
@@ -66,19 +67,18 @@ class SpectrumProcessor:
                 filter_function = filter_description[0]
                 filter_args = filter_description[1]
             else:
-                raise ValueError("The filter_function should contain only two values, "
-                                 "the first should be string or callable and the second a dictionary with settings")
+                raise ValueError(
+                    "The filter_function should contain only two values, "
+                    "the first should be string or callable and the second a dictionary with settings"
+                )
         else:
             filter_function = filter_description
         if isinstance(filter_function, str):
             filter_function = load_matchms_filter_from_string(filter_function)
-        self._add_filter_to_filter_order(filter_function.__name__,
-                                         filter_position=filter_position)
+        self._add_filter_to_filter_order(filter_function.__name__, filter_position=filter_position)
         self._store_filter(filter_function, filter_args)
 
-    def _store_filter(self,
-                      new_filter_function: Callable,
-                      filter_params: Optional[Dict[str, any]]):
+    def _store_filter(self, new_filter_function: Callable, filter_params: Optional[Dict[str, any]]):
         """Stores filter, removes duplicates and sorts filters"""
         if not callable(new_filter_function):
             raise TypeError("Expected callable filter function.")
@@ -88,25 +88,25 @@ class SpectrumProcessor:
         # Sort filters according to their order in self.filter_order
         self.filters.sort(key=lambda f: self.filter_order.index(f.__name__))
 
-    def _replace_already_stored_filters(self,
-                                       new_filter_function: Callable):
+    def _replace_already_stored_filters(self, new_filter_function: Callable):
         """Replaces filters that are already stored
 
         This will also overwrite the parameter settings, with the settings that are added last"""
         filter_already_added = False
         for i, filter_function in enumerate(self.filters):
             if new_filter_function.__name__ == filter_function.__name__:
-                logger.warning("The filter %s was already in the filter list, "
-                               "the last added filter parameters are used, "
-                               "check yaml file for details", new_filter_function.__name__)
+                logger.warning(
+                    "The filter %s was already in the filter list, "
+                    "the last added filter parameters are used, "
+                    "check yaml file for details",
+                    new_filter_function.__name__,
+                )
                 self.filters[i] = new_filter_function
                 filter_already_added = True
         if not filter_already_added:
             self.filters.append(new_filter_function)
 
-    def _add_filter_to_filter_order(self,
-                                    filter_function_name,
-                                    filter_position: Optional[int] = None):
+    def _add_filter_to_filter_order(self, filter_function_name, filter_position: Optional[int] = None):
         """Adds the filter name to the filter order list if it is not yet there.
 
         filter_function_name:
@@ -133,8 +133,7 @@ class SpectrumProcessor:
             self.filter_order.insert(order_index, filter_function_name)
         return None
 
-    def process_spectrum(self, spectrum,
-                         processing_report: Optional["ProcessingReport"] = None):
+    def process_spectrum(self, spectrum, processing_report: Optional["ProcessingReport"] = None):
         """
         Process the given spectrum with all filters in the processing pipeline.
 
@@ -162,7 +161,8 @@ class SpectrumProcessor:
                 if clone and "clone" not in method_params:
                     logger.error(
                         "Processing report is set to True, but the filter function %s does not support cloning.",
-                        filter_func.__name__)
+                        filter_func.__name__,
+                    )
 
             # Ensures that filter function can be used, even if it does not support cloning
             spectrum_out = filter_func(spectrum, **({"clone": clone} if "clone" in method_params else {}))
@@ -174,13 +174,13 @@ class SpectrumProcessor:
             spectrum = spectrum_out
         return spectrum
 
-    @deprecated(version="0.26.5",
-                reason="This method is deprecated and will be removed in the future. Use 'process_spectra()' instead.")
-    def process_spectrums(self, spectra: list,
-                          progress_bar: bool = True,
-                          cleaned_spectra_file=None,
-                          create_report: Optional[bool] = False
-                          ):
+    @deprecated(
+        version="0.26.5",
+        reason="This method is deprecated and will be removed in the future. Use 'process_spectra()' instead.",
+    )
+    def process_spectrums(
+        self, spectra: list, progress_bar: bool = True, cleaned_spectra_file=None, create_report: Optional[bool] = False
+    ):
         """
         Wrapper method for process_spectra()
 
@@ -204,11 +204,9 @@ class SpectrumProcessor:
         """
         return self.process_spectra(spectra, progress_bar, cleaned_spectra_file, create_report)
 
-    def process_spectra(self, spectra: list,
-                          progress_bar: bool = True,
-                          cleaned_spectra_file=None,
-                          create_report: Optional[bool] = False
-                          ):
+    def process_spectra(
+        self, spectra: list, progress_bar: bool = True, cleaned_spectra_file=None, create_report: Optional[bool] = False
+    ):
         """
         Process a list of spectra with all filters in the processing pipeline.
 
@@ -234,7 +232,7 @@ class SpectrumProcessor:
             if os.path.exists(cleaned_spectra_file):
                 raise FileExistsError("The specified save references file already exists")
             ftype = os.path.splitext(cleaned_spectra_file)[1].lower()[1:]
-            incremental_save = ftype in ('mgf', 'msp')
+            incremental_save = ftype in ("mgf", "msp")
         else:
             incremental_save = False
 
@@ -288,8 +286,7 @@ def load_matchms_filter_from_string(filter_name):
     return FILTER_FUNCTION_NAMES[filter_name]
 
 
-def create_partial_function(filter_function: Callable,
-                            filter_params: Optional[Dict[str, any]]):
+def create_partial_function(filter_function: Callable, filter_params: Optional[Dict[str, any]]):
     """Adds the filter params to the filter function"""
     if filter_params is not None:
         if not isinstance(filter_params, dict):
@@ -307,9 +304,10 @@ def check_all_parameters_given(func: Callable):
     for parameter, value in signature.parameters.items():
         if value.default is inspect.Parameter.empty:
             parameters_without_value.append(parameter)
-    assert len(parameters_without_value) == 1, \
-        f"More than one parameter of the function {func.__name__} is not specified, " \
+    assert len(parameters_without_value) == 1, (
+        f"More than one parameter of the function {func.__name__} is not specified, "
         f"the parameters not specified are {parameters_without_value}"
+    )
 
 
 def get_parameter_settings(func):
@@ -318,18 +316,18 @@ def get_parameter_settings(func):
     This includes default parameter settings and, but also the settings stored in partial"""
     signature = inspect.signature(func)
     parameter_settings = {
-            parameter: value.default
-            for parameter, value in signature.parameters.items()
-            if value.default is not inspect.Parameter.empty
-        }
+        parameter: value.default
+        for parameter, value in signature.parameters.items()
+        if value.default is not inspect.Parameter.empty
+    }
     if parameter_settings == {}:
         return None
     return parameter_settings
 
 
 class ProcessingReport:
-    """Class to keep track of spectrum changes during filtering.
-    """
+    """Class to keep track of spectrum changes during filtering."""
+
     def __init__(self, filter_functions: Optional[List[Callable]] = None):
         if filter_functions:
             self.filter_names = [filter_function.__name__ for filter_function in filter_functions]
@@ -340,10 +338,8 @@ class ProcessingReport:
         self.counter_changed_peaks = defaultdict(int)
         self.counter_number_processed = 0
 
-    def add_to_report(self, spectrum_old, spectrum_new: Spectrum,
-                      filter_function_name: str):
-        """Add changes between spectrum_old and spectrum_new to the report.
-        """
+    def add_to_report(self, spectrum_old, spectrum_new: Spectrum, filter_function_name: str):
+        """Add changes between spectrum_old and spectrum_new to the report."""
         if spectrum_new is None:
             self.counter_removed_spectra[filter_function_name] += 1
         else:
@@ -356,12 +352,9 @@ class ProcessingReport:
 
     def to_dataframe(self):
         """Create Pandas DataFrame Report of counted spectrum changes."""
-        metadata_changed = pd.DataFrame(self.counter_changed_metadata.items(),
-                                        columns=["filter", "changed metadata"])
-        removed = pd.DataFrame(self.counter_removed_spectra.items(),
-                               columns=["filter", "removed spectra"])
-        peaks_changed = pd.DataFrame(self.counter_changed_peaks.items(),
-                                     columns=["filter", "changed mass spectrum"])
+        metadata_changed = pd.DataFrame(self.counter_changed_metadata.items(), columns=["filter", "changed metadata"])
+        removed = pd.DataFrame(self.counter_removed_spectra.items(), columns=["filter", "removed spectra"])
+        peaks_changed = pd.DataFrame(self.counter_changed_peaks.items(), columns=["filter", "changed mass spectrum"])
         processing_report = pd.merge(removed, metadata_changed, how="outer", on="filter")
         processing_report = pd.merge(processing_report, peaks_changed, how="outer", on="filter")
 
@@ -379,13 +372,15 @@ class ProcessingReport:
         return processing_report.astype(int)
 
     def __str__(self):
-        pd.set_option('display.max_columns', 4)
-        pd.set_option('display.width', 1000)
-        report_str = ("----- Spectrum Processing Report -----\n"
-                      f"Number of spectra processed: {self.counter_number_processed}\n"
-                      f"Number of spectra removed: {sum(self.counter_removed_spectra.values())}\n"
-                      "Changes during processing:\n"
-                      f"{str(self.to_dataframe())}")
+        pd.set_option("display.max_columns", 4)
+        pd.set_option("display.width", 1000)
+        report_str = (
+            "----- Spectrum Processing Report -----\n"
+            f"Number of spectra processed: {self.counter_number_processed}\n"
+            f"Number of spectra removed: {sum(self.counter_removed_spectra.values())}\n"
+            "Changes during processing:\n"
+            f"{str(self.to_dataframe())}"
+        )
         return report_str
 
     def __repr__(self):

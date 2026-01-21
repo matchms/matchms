@@ -30,10 +30,14 @@ def get_function(numba_compiled, f):
 
 
 @pytest.mark.parametrize("numba_compiled", [True, False])
-@pytest.mark.parametrize("shift, expected_pairs, expected_matches", [
-    (0.0, [[2.0, 2.0, 1.0], [3.0, 3.0, 1.0]], (2, 3)),
-    (-5.0, [[0.0, 0.0, 0.01], [1.0, 1.0, 0.01]], (2, 3)),
-    (-20.0, None, None)],)
+@pytest.mark.parametrize(
+    "shift, expected_pairs, expected_matches",
+    [
+        (0.0, [[2.0, 2.0, 1.0], [3.0, 3.0, 1.0]], (2, 3)),
+        (-5.0, [[0.0, 0.0, 0.01], [1.0, 1.0, 0.01]], (2, 3)),
+        (-20.0, None, None),
+    ],
+)
 def test_collect_peak_pairs(numba_compiled, shift, expected_pairs, expected_matches, spectra):
     """Test finding expected peak matches for given tolerance."""
     spec1, spec2 = spectra
@@ -63,9 +67,13 @@ def test_find_matches(numba_compiled, shift, expected_matches):
 
 
 @pytest.mark.parametrize("numba_compiled", [True, False])
-@pytest.mark.parametrize("matching_pairs, expected_score", [
-    ([[2.0, 2.0, 1.0], [3.0, 3.0, 1.0]], (0.990099009900, 2)),
-    ([[0.0, 0.0, 0.01], [1.0, 1.0, 0.01]], (0.009900990099, 2))])
+@pytest.mark.parametrize(
+    "matching_pairs, expected_score",
+    [
+        ([[2.0, 2.0, 1.0], [3.0, 3.0, 1.0]], (0.990099009900, 2)),
+        ([[0.0, 0.0, 0.01], [1.0, 1.0, 0.01]], (0.009900990099, 2)),
+    ],
+)
 def test_score_best_matches(numba_compiled, matching_pairs, expected_score, spectra):
     """Test finding expected peak matches for given tolerance."""
     matching_pairs = np.array(matching_pairs)

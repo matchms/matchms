@@ -6,6 +6,7 @@ the same results.
 Some scoring methods will be omitted because they would require additional processing
 or depencendies (e.g. fingerprint similarity).
 """
+
 import os
 import numpy as np
 import pytest
@@ -22,15 +23,17 @@ json_file = os.path.join(module_root, "testdata", "gnps_spectra.json")
 _score_functions = {
     "cosinegreedy": [mssimilarity.CosineGreedy, {}],
     "cosinehungarian": [mssimilarity.CosineHungarian, {}],
-    #"parentmassmatch": [mssimilarity.ParentMassMatch, {}],
+    # "parentmassmatch": [mssimilarity.ParentMassMatch, {}],
     "precursormzmatch": [mssimilarity.PrecursorMzMatch, {}],
     "metadatamatch": [mssimilarity.MetadataMatch, {"field": "spectrum_status"}],
-    "modifiedcosine": [mssimilarity.ModifiedCosine, {}]}
+    "modifiedcosine": [mssimilarity.ModifiedCosine, {}],
+}
 
 
 @pytest.fixture
 def spectra():
     """Import spectra and apply basic filters."""
+
     def processing(s):
         s = msfilter.default_filters(s)
         s = msfilter.add_parent_mass(s)
@@ -68,13 +71,13 @@ def test_all_scores_and_methods(spectra, similarity_measure):
 
     # Run sparse_array() method
     idx_row, idx_col = np.where(computed_scores_matrix)
-    computed_scores_sparse = similarity_measure.sparse_array(spectra, spectra,
-                                                             idx_row, idx_col)
+    computed_scores_sparse = similarity_measure.sparse_array(spectra, spectra, idx_row, idx_col)
     if computed_scores_sparse.dtype.names is None:
         assert np.allclose(computed_scores_sparse, computed_scores_matrix[idx_row, idx_col])
     else:
-        assert np.allclose(computed_scores_sparse[computed_scores_sparse.dtype.names[0]],
-            computed_scores_matrix[idx_row, idx_col])
+        assert np.allclose(
+            computed_scores_sparse[computed_scores_sparse.dtype.names[0]], computed_scores_matrix[idx_row, idx_col]
+        )
 
 
 @pytest.mark.parametrize("similarity_measure", list(_score_functions.values()))
@@ -84,13 +87,16 @@ def test_consistency_scoring_and_pipeline(spectra, similarity_measure):
     computed_scores_matrix = scoring_method.matrix(spectra, spectra)
 
     # Run pipeline
-    workflow = create_workflow(query_filters=[["add_parent_mass"], ["normalize_intensities"]],
-                               score_computations=[similarity_measure])
+    workflow = create_workflow(
+        query_filters=[["add_parent_mass"], ["normalize_intensities"]], score_computations=[similarity_measure]
+    )
     pipeline = Pipeline(workflow)
     pipeline.run(json_file)
 
     if computed_scores_matrix.dtype.names is None:
         assert np.allclose(pipeline.scores.to_array(), computed_scores_matrix)
     else:
-        assert np.allclose(pipeline.scores.to_array(pipeline.scores.score_names[0]),
-            computed_scores_matrix[computed_scores_matrix.dtype.names[0]])
+        assert np.allclose(
+            pipeline.scores.to_array(pipeline.scores.score_names[0]),
+            computed_scores_matrix[computed_scores_matrix.dtype.names[0]],
+        )

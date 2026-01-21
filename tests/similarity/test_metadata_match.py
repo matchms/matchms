@@ -7,12 +7,9 @@ from tests.builder_Spectrum import SpectrumBuilder
 
 @pytest.fixture
 def spectra():
-    metadata1 = {"instrument_type": "orbitrap",
-                 "retention_time": 100.}
-    metadata2 = {"instrument_type": "qtof",
-                 "retention_time": 100.5}
-    metadata3 = {"instrument_type": "orbitrap",
-                 "retention_time": 105.}
+    metadata1 = {"instrument_type": "orbitrap", "retention_time": 100.0}
+    metadata2 = {"instrument_type": "qtof", "retention_time": 100.5}
+    metadata3 = {"instrument_type": "orbitrap", "retention_time": 105.0}
     metadata4 = {"retention_time": 99.1}
 
     s1 = SpectrumBuilder().with_metadata(metadata1).build()
@@ -57,26 +54,21 @@ def test_metadata_match_strings_wrong_method(spectra, caplog):
 
 def test_metadata_match_numerical_pair(spectra):
     """Test basic metadata matching between string entries."""
-    similarity_score = MetadataMatch(field="retention_time",
-                                     matching_type="difference",
-                                     tolerance=0.6)
+    similarity_score = MetadataMatch(field="retention_time", matching_type="difference", tolerance=0.6)
     score = similarity_score.pair(spectra[0], spectra[1])
     assert score == 1, "Expected different score."
 
 
-@pytest.mark.parametrize("tolerance, expected", [
-    [1.0, [[0, 1], [0, 0]]],
-    [2.0, [[0, 1], [0, 1]]],
-    [10.0, [[1, 1], [1, 1]]],
-    [0.1, [[0, 0], [0, 0]]]
-])
+@pytest.mark.parametrize(
+    "tolerance, expected",
+    [[1.0, [[0, 1], [0, 0]]], [2.0, [[0, 1], [0, 1]]], [10.0, [[1, 1], [1, 1]]], [0.1, [[0, 0], [0, 0]]]],
+)
 def test_metadata_match_numerical(spectra, tolerance, expected):
     """Test basic metadata matching between numerical entries."""
     references = spectra[:2]
     queries = spectra[2:]
 
-    similarity_score = MetadataMatch(field="retention_time",
-                                     matching_type="difference", tolerance=tolerance)
+    similarity_score = MetadataMatch(field="retention_time", matching_type="difference", tolerance=tolerance)
     scores = calculate_scores(references, queries, similarity_score)
     assert np.all(scores.scores.to_array().tolist() == expected), "Expected different scores."
 
@@ -89,4 +81,4 @@ def test_metadata_match_invalid_array_type(spectra):
     similarity_score = MetadataMatch(field="instrument_type")
 
     with pytest.raises(ValueError, match="array_type must be 'numpy' or 'sparse'."):
-        calculate_scores(references, queries, similarity_score, array_type = "scipy")
+        calculate_scores(references, queries, similarity_score, array_type="scipy")

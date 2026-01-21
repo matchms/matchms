@@ -15,4 +15,4 @@ def test_intersect_mz_without_parameters():
     similarity_score = IntersectMz()
     score = similarity_score.pair(spectrum_1, spectrum_2)
 
-    assert score == pytest.approx(1/3, 0.0001), "Expected different score."
+    assert score == pytest.approx(1 / 3, 0.0001), "Expected different score."

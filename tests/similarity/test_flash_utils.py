@@ -14,6 +14,7 @@ from matchms.similarity.flash_utils import (
 # Entropy weighting
 # ----------------------------
 
+
 def test_entropy_weight_behaviour():
     intens = np.array([1.0, 1.0, 1.0, 1.0])
     # entropy of uniform over 4 bins = 2 bits -> w = 0.25 + 0.25 * 2 = 0.75
@@ -42,12 +43,15 @@ def test_entropy_weight_saturation_at_ge3_bits():
 # Merge-within
 # ----------------------------
 
+
 def test_merge_within_weighted_average():
     # two close peaks at 100.00 and 100.03 within 0.05 should merge
-    peaks = np.column_stack([
-        np.array([100.00, 100.03, 120.0], dtype=np.float32),
-        np.array([1.0,    3.0,    2.0], dtype=np.float32),
-    ])
+    peaks = np.column_stack(
+        [
+            np.array([100.00, 100.03, 120.0], dtype=np.float32),
+            np.array([1.0, 3.0, 2.0], dtype=np.float32),
+        ]
+    )
     out = _merge_within(peaks, max_delta_da=0.05)
     # first two merged into weighted center: (100*1 + 100.03*3) / (1+3) = 100.0225
     assert out.shape == (2, 2)
@@ -76,21 +80,22 @@ def test_merge_within_no_merge_and_zero_total_behaviour():
 # Preprocessing pipeline
 # ----------------------------
 
+
 def test_clean_and_weight_pipeline_precursor_noise_norm_merge():
     # Note: pass peaks as shape (N, 2)
     mz = np.array([100, 199.0, 199.5, 199.9, 210], dtype=float)
-    intens = np.array([0.05, 0.2, 0.01, 0.2,  0.01], dtype=float)
+    intens = np.array([0.05, 0.2, 0.01, 0.2, 0.01], dtype=float)
     pmz = 200.0
     out = _clean_and_weight(
         np.column_stack([mz, intens]),
         precursor_mz=pmz,
         remove_precursor=True,
-        precursor_window=1.6,   # keep only <= 198.4
-        noise_cutoff=0.05,      # remove peaks below 5% of max (max AFTER precursor filter)
+        precursor_window=1.6,  # keep only <= 198.4
+        noise_cutoff=0.05,  # remove peaks below 5% of max (max AFTER precursor filter)
         normalize_to_half=True,
-        merge_within_da=0.5,    # merge anything within 0.5 Da
+        merge_within_da=0.5,  # merge anything within 0.5 Da
         weighing_type="entropy",
-        dtype=np.float32
+        dtype=np.float32,
     )
     # Only m/z=100 survives precursor filter (<=198.4); others removed
     assert out.shape[0] == 1
@@ -101,15 +106,17 @@ def test_clean_and_weight_pipeline_precursor_noise_norm_merge():
 
 def test_clean_and_weight_cosine_weighting_no_change_when_not_normalized():
     peaks = np.array([[100.0, 1.0], [150.0, 2.0], [200.0, 3.0]], dtype=float)
-    out = _clean_and_weight(peaks,
-                            precursor_mz=None,
-                            remove_precursor=False,
-                            precursor_window=1.6,
-                            noise_cutoff=0.0,
-                            normalize_to_half=False,   # ensure no scaling applied
-                            merge_within_da=0.0,
-                            weighing_type="cosine",
-                            dtype=np.float32)
+    out = _clean_and_weight(
+        peaks,
+        precursor_mz=None,
+        remove_precursor=False,
+        precursor_window=1.6,
+        noise_cutoff=0.0,
+        normalize_to_half=False,  # ensure no scaling applied
+        merge_within_da=0.0,
+        weighing_type="cosine",
+        dtype=np.float32,
+    )
     assert out.dtype == np.float32
     assert np.allclose(out[:, 0], peaks[:, 0])
     assert np.allclose(out[:, 1], peaks[:, 1])
@@ -118,27 +125,26 @@ def test_clean_and_weight_cosine_weighting_no_change_when_not_normalized():
 def test_clean_and_weight_raises_on_unknown_weighing_type():
     peaks = np.array([[100.0, 1.0]], dtype=float)
     with pytest.raises(ValueError, match="Score type '.*' not recognized"):
-        _clean_and_weight(peaks,
-                          precursor_mz=None,
-                          remove_precursor=False,
-                          precursor_window=1.6,
-                          noise_cutoff=0.0,
-                          normalize_to_half=False,
-                          merge_within_da=0.0,
-                          weighing_type="nope",
-                          dtype=np.float32)
+        _clean_and_weight(
+            peaks,
+            precursor_mz=None,
+            remove_precursor=False,
+            precursor_window=1.6,
+            noise_cutoff=0.0,
+            normalize_to_half=False,
+            merge_within_da=0.0,
+            weighing_type="nope",
+            dtype=np.float32,
+        )
 
 
 # ----------------------------
 # _LibraryIndex / _build_library_index
 # ----------------------------
 
+
 def test_library_index_empty_with_neutral_loss_and_l2():
-    idx = _build_library_index([],
-                               [],
-                               compute_neutral_loss=True,
-                               compute_l2_norm=True,
-                               dtype=np.float32)
+    idx = _build_library_index([], [], compute_neutral_loss=True, compute_l2_norm=True, dtype=np.float32)
     assert isinstance(idx, _LibraryIndex)
     assert idx.n_specs == 0
     assert idx.peaks_mz.size == 0 and idx.peaks_int.size == 0 and idx.peaks_spec_idx.size == 0
@@ -151,10 +157,7 @@ def test_library_index_empty_with_neutral_loss_and_l2():
 def test_library_index_single_spec_no_precursor_no_nl():
     # One spectrum, no precursor -> NL arrays empty; L2 present if requested.
     p = np.array([[100.0, 1.0], [200.0, 2.0]], dtype=np.float32)
-    idx = _build_library_index([p], [None],
-                               compute_neutral_loss=True,
-                               compute_l2_norm=True,
-                               dtype=np.float32)
+    idx = _build_library_index([p], [None], compute_neutral_loss=True, compute_l2_norm=True, dtype=np.float32)
     assert idx.n_specs == 1
     # Peaks sorted ascending
     assert np.allclose(idx.peaks_mz, [100.0, 200.0])
@@ -174,10 +177,9 @@ def test_library_index_two_specs_with_pmz_nl_sorted_and_product_mapping():
     # Spec 1: pmz=510 peaks -> product [150], NL [360]
     p0 = np.array([[100.0, 0.5], [300.0, 0.2]], dtype=np.float32)
     p1 = np.array([[150.0, 0.8]], dtype=np.float32)
-    idx = _build_library_index([p0, p1], [500.0, 510.0],
-                               compute_neutral_loss=True,
-                               compute_l2_norm=True,
-                               dtype=np.float32)
+    idx = _build_library_index(
+        [p0, p1], [500.0, 510.0], compute_neutral_loss=True, compute_l2_norm=True, dtype=np.float32
+    )
 
     # Product arrays are globally sorted by m/z
     assert np.allclose(idx.peaks_mz, [100.0, 150.0, 300.0], atol=1e-12)
@@ -211,10 +213,7 @@ def test_library_index_two_specs_with_pmz_nl_sorted_and_product_mapping():
 
 def test_library_index_dtype_float64_and_values():
     p = np.array([[100.0, 1.0], [200.0, 2.0]], dtype=np.float64)
-    idx = _build_library_index([p], [500.0],
-                               compute_neutral_loss=True,
-                               compute_l2_norm=True,
-                               dtype=np.float64)
+    idx = _build_library_index([p], [500.0], compute_neutral_loss=True, compute_l2_norm=True, dtype=np.float64)
     assert idx.dtype == np.float64
     assert idx.peaks_mz.dtype == np.float64
     assert idx.nl_mz.dtype == np.float64

@@ -58,8 +58,7 @@ class Scores:
         Cosine score between spectrum2 and spectrum4 is 0.61 with 1 matched peaks
     """
 
-    def __init__(self, references: ReferencesType, queries: QueriesType,
-                 is_symmetric: bool = False):
+    def __init__(self, references: ReferencesType, queries: QueriesType, is_symmetric: bool = False):
         """
 
         Parameters
@@ -106,8 +105,7 @@ class Scores:
             if not isinstance(result, tuple):
                 result = (result,)
             self._index += 1
-            return (self.references[self._scores.row[i]],
-                    self.queries[self._scores.col[i]]) + result
+            return (self.references[self._scores.row[i]], self.queries[self._scores.col[i]]) + result
         self._index = 0
         raise StopIteration
 
@@ -119,16 +117,17 @@ class Scores:
 
     @staticmethod
     def _validate_input_arguments(references, queries):
-        assert isinstance(references, (list, tuple, np.ndarray)),\
+        assert isinstance(references, (list, tuple, np.ndarray)), (
             "Expected input argument 'references' to be list or tuple or np.ndarray."
+        )
 
-        assert isinstance(queries, (list, tuple, np.ndarray)),\
+        assert isinstance(queries, (list, tuple, np.ndarray)), (
             "Expected input argument 'queries' to be list or tuple or np.ndarray."
+        )
 
-    def calculate(self, similarity_function: BaseSimilarity,
-                  name: str = None,
-                  array_type: str = "numpy",
-                  join_type="left") -> Scores:
+    def calculate(
+        self, similarity_function: BaseSimilarity, name: str = None, array_type: str = "numpy", join_type="left"
+    ) -> Scores:
         """
         Calculate the similarity between all reference objects vs all query objects using
         the most suitable available implementation of the given similarity_function.
@@ -147,51 +146,44 @@ class Scores:
         join_type
             Choose from left, right, outer, inner to specify the merge type.
         """
+
         def is_sparse_advisable():
             return (
                 (len(self._scores.score_names) > 0)  # already scores in Scores
                 and (join_type in ["inner", "left"])  # inner/left join
-                and (len(self._scores.row) < (self.n_rows * self.n_cols)/2)  # fewer than half of scores have entries
-                )
+                and (len(self._scores.row) < (self.n_rows * self.n_cols) / 2)  # fewer than half of scores have entries
+            )
 
         if name is None:
             name = similarity_function.__class__.__name__
         if (self.n_rows == 0) or (self.n_cols == 0):
             raise ValueError("Number of elements must be >= 1")
         if self.n_rows == self.n_cols == 1:
-            score = similarity_function.pair(self.references[0],
-                                             self.queries[0])
+            score = similarity_function.pair(self.references[0], self.queries[0])
             self._scores.add_dense_matrix(np.array([score]), name)
         elif is_sparse_advisable():
-            new_scores = similarity_function.sparse_array(references=self.references,
-                                                          queries=self.queries,
-                                                          idx_row=self._scores.row,
-                                                          idx_col=self._scores.col,
-                                                          is_symmetric=self.is_symmetric)
-            self._scores.add_sparse_data(self._scores.row,
-                                         self._scores.col,
-                                         new_scores,
-                                         name)
+            new_scores = similarity_function.sparse_array(
+                references=self.references,
+                queries=self.queries,
+                idx_row=self._scores.row,
+                idx_col=self._scores.col,
+                is_symmetric=self.is_symmetric,
+            )
+            self._scores.add_sparse_data(self._scores.row, self._scores.col, new_scores, name)
         else:
-            new_scores = similarity_function.matrix(self.references,
-                                                    self.queries,
-                                                    array_type=array_type,
-                                                    is_symmetric=self.is_symmetric)
+            new_scores = similarity_function.matrix(
+                self.references, self.queries, array_type=array_type, is_symmetric=self.is_symmetric
+            )
             if isinstance(new_scores, np.ndarray):
                 self._scores.add_dense_matrix(new_scores, name, join_type=join_type)
             elif len(new_scores.score_names) == 1:
                 new_scores.data.dtype.names = [name]
-                self._scores.add_sparse_data(new_scores.row,
-                                             new_scores.col,
-                                             new_scores.data, "", join_type=join_type)
+                self._scores.add_sparse_data(new_scores.row, new_scores.col, new_scores.data, "", join_type=join_type)
             else:
-                self._scores.add_sparse_data(new_scores.row,
-                                             new_scores.col,
-                                             new_scores.data, name, join_type=join_type)
+                self._scores.add_sparse_data(new_scores.row, new_scores.col, new_scores.data, name, join_type=join_type)
         return self
 
-    def scores_by_reference(self, reference: ReferencesType,
-                            name: str = None, sort: bool = False) -> np.ndarray:
+    def scores_by_reference(self, reference: ReferencesType, name: str = None, sort: bool = False) -> np.ndarray:
         """Return all scores of given name for the given reference spectrum.
 
         Parameters
@@ -221,12 +213,10 @@ class Scores:
                 query_idx_sorted = np.argsort(scores_for_ref[name])[::-1]
             else:
                 query_idx_sorted = np.argsort(scores_for_ref)[::-1]
-            return list(zip(self.queries[r[query_idx_sorted]],
-                            scores_for_ref[query_idx_sorted].copy()))
+            return list(zip(self.queries[r[query_idx_sorted]], scores_for_ref[query_idx_sorted].copy()))
         return list(zip(self.queries[r], scores_for_ref.copy()))
 
-    def scores_by_query(self, query: QueriesType,
-                        name: str = None, sort: bool = False) -> np.ndarray:
+    def scores_by_query(self, query: QueriesType, name: str = None, sort: bool = False) -> np.ndarray:
         """Return all scores for the given query spectrum.
 
         For example
@@ -291,8 +281,7 @@ class Scores:
                 references_idx_sorted = np.argsort(scores_for_query[name])[::-1]
             else:
                 references_idx_sorted = np.argsort(scores_for_query)[::-1]
-            return list(zip(self.references[c[references_idx_sorted]],
-                            scores_for_query[references_idx_sorted].copy()))
+            return list(zip(self.references[c[references_idx_sorted]], scores_for_query[references_idx_sorted].copy()))
         return list(zip(self.references[c], scores_for_query.copy()))
 
     def to_json(self, filename: str):
@@ -319,10 +308,12 @@ class Scores:
 
     def to_dict(self) -> dict:
         """Return a dictionary representation of scores."""
-        scores_dict = {"__Scores__": True,
-                       "is_symmetric": self.is_symmetric,
-                       "references": [reference.to_dict() for reference in self.references],
-                       "queries": [query.to_dict() for query in self.queries] if not self.is_symmetric else None}
+        scores_dict = {
+            "__Scores__": True,
+            "is_symmetric": self.is_symmetric,
+            "references": [reference.to_dict() for reference in self.references],
+            "queries": [query.to_dict() for query in self.queries] if not self.is_symmetric else None,
+        }
         scores_dict.update(self.scores.to_dict())
         return scores_dict
 
@@ -427,9 +418,7 @@ class ScoresBuilder:
         """
         Build scores object
         """
-        scores = Scores(references=self.references,
-                        queries=self.queries,
-                        is_symmetric=self.is_symmetric)
+        scores = Scores(references=self.references, queries=self.queries, is_symmetric=self.is_symmetric)
         scores._scores = self.scores  # pylint: disable=protected-access
         return scores
 
@@ -465,8 +454,7 @@ class ScoresBuilder:
         dtype = scores_dict.get("dtype")
         if len(dtype[0]) > 1:
             dtype = [(x[0], x[1]) for x in dtype]
-        sparsestack.data = unstructured_to_structured(np.array(scores_dict.get("data")),
-                                                      dtype=np.dtype(dtype))
+        sparsestack.data = unstructured_to_structured(np.array(scores_dict.get("data")), dtype=np.dtype(dtype))
         return sparsestack
 
     @staticmethod
@@ -479,12 +467,24 @@ class ScoresBuilder:
 
     @staticmethod
     def _validate_json_input(scores_dict: dict):
-        if {"__Scores__", "is_symmetric", "references", "queries", "row",
-                "col", "data", "dtype", "n_row", "n_col"} != scores_dict.keys():
-            raise ValueError("Scores JSON file does not match the expected schema.\n\
+        if {
+            "__Scores__",
+            "is_symmetric",
+            "references",
+            "queries",
+            "row",
+            "col",
+            "data",
+            "dtype",
+            "n_row",
+            "n_col",
+        } != scores_dict.keys():
+            raise ValueError(
+                "Scores JSON file does not match the expected schema.\n\
                              Make sure the file contains the following keys:\n\
                              ['__Scores__', 'is_symmetric', 'references', 'queries', 'scores_row',\
-                             'scores_col', 'scores_data', 'scores_dtype']")
+                             'scores_col', 'scores_data', 'scores_dtype']"
+            )
 
 
 class ScoresJSONEncoder(json.JSONEncoder):

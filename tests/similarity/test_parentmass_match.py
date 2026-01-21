@@ -4,12 +4,11 @@ from matchms.similarity import ParentMassMatch
 from ..builder_Spectrum import SpectrumBuilder, spectra_factory
 
 
-@pytest.mark.parametrize('parent_mass, tolerance, expected', [
-    [[100.0, 101.0], 0.1, False],
-    [[100.0, 101.0], 2.0, True]
-])
+@pytest.mark.parametrize(
+    "parent_mass, tolerance, expected", [[[100.0, 101.0], 0.1, False], [[100.0, 101.0], 2.0, True]]
+)
 def test_parentmass_match_parameterized(parent_mass, tolerance, expected):
-    s0, s1 = spectra_factory('parent_mass', parent_mass)
+    s0, s1 = spectra_factory("parent_mass", parent_mass)
     similarity_score = ParentMassMatch(tolerance=tolerance)
     scores = similarity_score.pair(s0, s1)
     assert np.all(scores == np.array(expected)), "Expected different scores."
@@ -30,12 +29,15 @@ def test_parentmass_match_missing_parentmass():
     assert expected_message_part in str(msg.value), "Expected particular error message."
 
 
-@pytest.mark.parametrize('parent_mass, tolerance, expected', [
-    [[100.0, 101.0, 99.0, 98.0], 0.1, [[False, False], [False, False]]],
-    [[100.0, 101.0, 99.0, 98.0], 2.0, [[True, True], [True, False]]]
-])
+@pytest.mark.parametrize(
+    "parent_mass, tolerance, expected",
+    [
+        [[100.0, 101.0, 99.0, 98.0], 0.1, [[False, False], [False, False]]],
+        [[100.0, 101.0, 99.0, 98.0], 2.0, [[True, True], [True, False]]],
+    ],
+)
 def test_parentmass_match_array_parameterized(parent_mass, tolerance, expected):
-    s0, s1, s2, s3 = spectra_factory('parent_mass', parent_mass)
+    s0, s1, s2, s3 = spectra_factory("parent_mass", parent_mass)
     similarity_score = ParentMassMatch(tolerance=tolerance)
     scores = similarity_score.matrix([s0, s1], [s2, s3])
     assert np.all(scores == np.array(expected)), "Expected different scores."
@@ -55,8 +57,14 @@ def test_parentmass_match_array_symmetric():
     scores2 = similarity_score.matrix(spectra, spectra, is_symmetric=False)
 
     assert np.all(scores == scores2), "Expected identical scores"
-    assert np.all(scores == np.array(
-        [[True, False, True, False],
-         [False, True, False, False],
-         [True, False, True, False],
-         [False, False, False, True]])), "Expected different scores"
+    assert np.all(
+        scores
+        == np.array(
+            [
+                [True, False, True, False],
+                [False, True, False, False],
+                [True, False, True, False],
+                [False, False, False, True],
+            ]
+        )
+    ), "Expected different scores"

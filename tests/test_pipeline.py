@@ -29,8 +29,9 @@ def test_pipeline_initial_check_unknown_step():
 
 
 def test_pipeline_symmetric():
-    workflow = create_workflow(score_computations=[["precursormzmatch", {"tolerance": 120.0}],
-                                                   ["modifiedcosine", {"tolerance": 10.0}]])
+    workflow = create_workflow(
+        score_computations=[["precursormzmatch", {"tolerance": 120.0}], ["modifiedcosine", {"tolerance": 10.0}]]
+    )
     pipeline = Pipeline(workflow)
     pipeline.run(spectra_file_msp)
 
@@ -38,18 +39,18 @@ def test_pipeline_symmetric():
     assert pipeline.spectra_queries[0] == pipeline.spectra_references[0]
     assert pipeline.is_symmetric is True
     assert pipeline.scores.scores.shape == (5, 5, 3)
-    assert pipeline.scores.score_names == ('PrecursorMzMatch', 'ModifiedCosine_score', 'ModifiedCosine_matches')
+    assert pipeline.scores.score_names == ("PrecursorMzMatch", "ModifiedCosine_score", "ModifiedCosine_matches")
     all_scores = pipeline.scores.to_array()
-    expected = np.array([[1., 0.30384404],
-                         [0.30384404, 1.]])
+    expected = np.array([[1.0, 0.30384404], [0.30384404, 1.0]])
     assert np.allclose(all_scores["ModifiedCosine_score"][3:, 3:], expected)
     assert np.allclose(all_scores["ModifiedCosine_score"].diagonal(), 1), "Diagonal should all be 1.0"
 
 
 def test_pipeline_symmetric_filters():
-    workflow = create_workflow(query_filters=[[select_by_mz, {"mz_from": 0, "mz_to": 1000}]],
-                               score_computations=[["precursormzmatch", {"tolerance": 120.0}],
-                                                   ["modifiedcosine", {"tolerance": 10.0}]])
+    workflow = create_workflow(
+        query_filters=[[select_by_mz, {"mz_from": 0, "mz_to": 1000}]],
+        score_computations=[["precursormzmatch", {"tolerance": 120.0}], ["modifiedcosine", {"tolerance": 10.0}]],
+    )
     pipeline = Pipeline(workflow)
     pipeline.run(spectra_file_msp)
 
@@ -58,18 +59,21 @@ def test_pipeline_symmetric_filters():
     assert pipeline.spectra_queries[0] == pipeline.spectra_references[0]
     assert pipeline.is_symmetric is True
     assert pipeline.scores.scores.shape == (5, 5, 3)
-    assert pipeline.scores.score_names == ('PrecursorMzMatch', 'ModifiedCosine_score', 'ModifiedCosine_matches')
+    assert pipeline.scores.score_names == ("PrecursorMzMatch", "ModifiedCosine_score", "ModifiedCosine_matches")
     all_scores = pipeline.scores.to_array()
-    expected = np.array([[1., 0.30384404],
-                         [0.30384404, 1.]])
+    expected = np.array([[1.0, 0.30384404], [0.30384404, 1.0]])
     assert np.allclose(all_scores["ModifiedCosine_score"][3:, 3:], expected)
     assert np.allclose(all_scores["ModifiedCosine_score"].diagonal(), 1), "Diagonal should all be 1.0"
 
 
 def test_pipeline_symmetric_masking():
-    workflow = create_workflow(score_computations=[["precursormzmatch", {"tolerance": 120.0}],
-                                                   ["modifiedcosine", {"tolerance": 10.0}],
-                                                   ["filter_by_range", {"low": 0.3, "above_operator": '>='}]])
+    workflow = create_workflow(
+        score_computations=[
+            ["precursormzmatch", {"tolerance": 120.0}],
+            ["modifiedcosine", {"tolerance": 10.0}],
+            ["filter_by_range", {"low": 0.3, "above_operator": ">="}],
+        ]
+    )
     pipeline = Pipeline(workflow)
     pipeline.run(spectra_file_msp)
 
@@ -77,17 +81,17 @@ def test_pipeline_symmetric_masking():
     assert pipeline.spectra_queries[0] == pipeline.spectra_references[0]
     assert pipeline.is_symmetric is True
     assert pipeline.scores.scores.shape == (5, 5, 3)
-    assert pipeline.scores.score_names == ('PrecursorMzMatch', 'ModifiedCosine_score', 'ModifiedCosine_matches')
+    assert pipeline.scores.score_names == ("PrecursorMzMatch", "ModifiedCosine_score", "ModifiedCosine_matches")
     all_scores = pipeline.scores.to_array()
-    expected = np.array([[1., 0.30384404],
-                         [0.30384404, 1.]])
+    expected = np.array([[1.0, 0.30384404], [0.30384404, 1.0]])
     assert np.allclose(all_scores["ModifiedCosine_score"][3:, 3:], expected)
     assert np.allclose(all_scores["ModifiedCosine_score"].diagonal(), 1), "Diagonal should all be 1.0"
 
 
 def test_pipeline_symmetric_custom_score():
-    workflow = create_workflow(score_computations=[["precursormzmatch", {"tolerance": 120.0}],
-                                                   [ModifiedCosine, {"tolerance": 10.0}]])
+    workflow = create_workflow(
+        score_computations=[["precursormzmatch", {"tolerance": 120.0}], [ModifiedCosine, {"tolerance": 10.0}]]
+    )
     pipeline = Pipeline(workflow)
     pipeline.run(spectra_file_msp)
 
@@ -95,18 +99,18 @@ def test_pipeline_symmetric_custom_score():
     assert pipeline.spectra_queries[0] == pipeline.spectra_references[0]
     assert pipeline.is_symmetric is True
     assert pipeline.scores.scores.shape == (5, 5, 3)
-    assert pipeline.scores.score_names == ('PrecursorMzMatch', 'ModifiedCosine_score', 'ModifiedCosine_matches')
+    assert pipeline.scores.score_names == ("PrecursorMzMatch", "ModifiedCosine_score", "ModifiedCosine_matches")
     all_scores = pipeline.scores.to_array()
-    expected = np.array([[1., 0.30384404],
-                         [0.30384404, 1.]])
+    expected = np.array([[1.0, 0.30384404], [0.30384404, 1.0]])
     assert np.allclose(all_scores["ModifiedCosine_score"][3:, 3:], expected)
     assert np.allclose(all_scores["ModifiedCosine_score"].diagonal(), 1), "Diagonal should all be 1.0"
 
 
 def test_pipeline_non_symmetric():
     """Test importing from multiple files and different inputs for query and references."""
-    workflow = create_workflow(score_computations=[["precursormzmatch", {"tolerance": 120.0}],
-                                                   ["modifiedcosine", {"tolerance": 10.0}]])
+    workflow = create_workflow(
+        score_computations=[["precursormzmatch", {"tolerance": 120.0}], ["modifiedcosine", {"tolerance": 10.0}]]
+    )
     pipeline = Pipeline(workflow)
     pipeline.run(spectra_file_msp, [spectra_file_msp, spectra_file_msp])
 
@@ -115,11 +119,10 @@ def test_pipeline_non_symmetric():
     assert pipeline.spectra_queries[0] == pipeline.spectra_references[5]
     assert pipeline.is_symmetric is False
     assert pipeline.scores.scores.shape == (10, 5, 3)
-    assert pipeline.scores.score_names == ('PrecursorMzMatch', 'ModifiedCosine_score', 'ModifiedCosine_matches')
+    assert pipeline.scores.score_names == ("PrecursorMzMatch", "ModifiedCosine_score", "ModifiedCosine_matches")
     all_scores = pipeline.scores.to_array()
     assert np.all(all_scores[:5, :] == all_scores[5:, :])
-    expected = np.array([[1., 0.30384404],
-                         [0.30384404, 1.]])
+    expected = np.array([[1.0, 0.30384404], [0.30384404, 1.0]])
     assert np.allclose(all_scores["ModifiedCosine_score"][8:, 3:], expected)
 
 
@@ -133,10 +136,9 @@ def test_pipeline_from_yaml():
     assert pipeline.spectra_queries[0] == pipeline.spectra_references[0]
     assert pipeline.is_symmetric is True
     assert pipeline.scores.scores.shape == (5, 5, 3)
-    assert pipeline.scores.score_names == ('PrecursorMzMatch', 'ModifiedCosine_score', 'ModifiedCosine_matches')
+    assert pipeline.scores.score_names == ("PrecursorMzMatch", "ModifiedCosine_score", "ModifiedCosine_matches")
     all_scores = pipeline.scores.to_array()
-    expected = np.array([[1., 0.30384404],
-                         [0.30384404, 1.]])
+    expected = np.array([[1.0, 0.30384404], [0.30384404, 1.0]])
     assert np.allclose(all_scores["ModifiedCosine_score"][3:, 3:], expected)
 
 
@@ -144,8 +146,10 @@ def test_pipeline_to_and_from_yaml(tmp_path):
     pytest.importorskip("rdkit")
     config_file = os.path.join(tmp_path, "test_pipeline.yaml")
 
-    workflow = create_workflow(config_file, score_computations=[["precursormzmatch", {"tolerance": 120.0}],
-                                                                ["modifiedcosine", {"tolerance": 10.0}]])
+    workflow = create_workflow(
+        config_file,
+        score_computations=[["precursormzmatch", {"tolerance": 120.0}], ["modifiedcosine", {"tolerance": 10.0}]],
+    )
     assert os.path.exists(config_file)
 
     pipeline = Pipeline(workflow)
@@ -175,35 +179,40 @@ def test_pipeline_logging(tmp_path):
 
 def test_FingerprintSimilarity_pipeline():
     pytest.importorskip("rdkit")
-    workflow = create_workflow(query_filters=["add_fingerprint"], reference_filters=["add_fingerprint"],
-                               score_computations=[
-                                   ["metadatamatch",
-                                    {"field": "precursor_mz", "matching_type": "difference", "tolerance": 50}],
-                                   ["fingerprintsimilarity", {"similarity_measure": "jaccard"}]])
+    workflow = create_workflow(
+        query_filters=["add_fingerprint"],
+        reference_filters=["add_fingerprint"],
+        score_computations=[
+            ["metadatamatch", {"field": "precursor_mz", "matching_type": "difference", "tolerance": 50}],
+            ["fingerprintsimilarity", {"similarity_measure": "jaccard"}],
+        ],
+    )
     pipeline = Pipeline(workflow)
     pipeline.run(spectra_file_msp, spectra_file_msp)
     assert len(pipeline.spectra_queries[0].get("fingerprint")) == 2048
     assert pipeline.scores.scores.shape == (5, 5, 2)
-    assert pipeline.scores.score_names == ('MetadataMatch', 'FingerprintSimilarity')
+    assert pipeline.scores.score_names == ("MetadataMatch", "FingerprintSimilarity")
 
 
 def test_pipeline_changing_workflow():
     """Test if changing workflow after creating Pipeline results in the expected change of the pipeline"""
-    workflow = create_workflow(query_filters=["make_charge_int"], reference_filters=["make_charge_int"],
-                               score_computations=['precursormzmatch'])
+    workflow = create_workflow(
+        query_filters=["make_charge_int"],
+        reference_filters=["make_charge_int"],
+        score_computations=["precursormzmatch"],
+    )
     pipeline = Pipeline(workflow)
     pipeline.query_filters = ["add_fingerprint"]
     pipeline.reference_filters = ["add_fingerprint"]
     pipeline.score_computations = [["modifiedcosine", {"tolerance": 10.0}]]
     pipeline.run(spectra_file_msp, spectra_file_msp)
-    assert len(pipeline.spectra_queries[0].get("fingerprint")) == 2048, \
-        "The query filters were not modified correctly"
-    assert len(pipeline.spectra_references[0].get("fingerprint")) == 2048, \
+    assert len(pipeline.spectra_queries[0].get("fingerprint")) == 2048, "The query filters were not modified correctly"
+    assert len(pipeline.spectra_references[0].get("fingerprint")) == 2048, (
         "The reference filters were not modified correctly"
-    assert pipeline.scores.score_names == ('ModifiedCosine_score', 'ModifiedCosine_matches')
+    )
+    assert pipeline.scores.score_names == ("ModifiedCosine_score", "ModifiedCosine_matches")
     all_scores = pipeline.scores.to_array()
-    expected = np.array([[1., 0.30384404],
-                         [0.30384404, 1.]])
+    expected = np.array([[1.0, 0.30384404], [0.30384404, 1.0]])
     assert np.allclose(all_scores["ModifiedCosine_score"][3:, 3:], expected)
 
 
@@ -227,11 +236,14 @@ def test_add_custom_filter():
             if fragment_of_interest - tolerance < fragment_mz < fragment_of_interest + tolerance:
                 return spectrum_in
         return None
+
     workflow = create_workflow(
-        query_filters=[],)
+        query_filters=[],
+    )
     pipeline = Pipeline(workflow)
-    pipeline.processing_queries.parse_and_add_filter((select_spectra_containing_fragment,
-                                                      {"fragment_of_interest": 103.05, "tolerance": 0.01}))
+    pipeline.processing_queries.parse_and_add_filter(
+        (select_spectra_containing_fragment, {"fragment_of_interest": 103.05, "tolerance": 0.01})
+    )
     pipeline.run(spectra_file_msp)
     cleaned_spectra = pipeline.spectra_queries
     assert len(cleaned_spectra) == 0
@@ -244,9 +256,10 @@ def test_add_custom_filter_to_query_filters():
             if fragment_of_interest - tolerance < fragment_mz < fragment_of_interest + tolerance:
                 return spectrum_in
         return None
+
     workflow = create_workflow(
-        query_filters=[(select_spectra_containing_fragment,
-                                                      {"fragment_of_interest": 103.05, "tolerance": 0.01})],)
+        query_filters=[(select_spectra_containing_fragment, {"fragment_of_interest": 103.05, "tolerance": 0.01})],
+    )
     pipeline = Pipeline(workflow)
     pipeline.run(spectra_file_msp)
     cleaned_spectra = pipeline.spectra_queries

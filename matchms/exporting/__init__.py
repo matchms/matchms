@@ -13,10 +13,4 @@ from .save_as_mzspeclib import save_as_mzspeclib
 from .save_spectra import save_spectra
 
 
-__all__ = [
-    "save_as_json",
-    "save_as_mgf",
-    "save_as_msp",
-    "save_as_mzspeclib",
-    "save_spectra"
-]
+__all__ = ["save_as_json", "save_as_mgf", "save_as_msp", "save_as_mzspeclib", "save_spectra"]

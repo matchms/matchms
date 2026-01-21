@@ -1,14 +1,18 @@
-""" Helper functions to build and handle spectral networks
-"""
+"""Helper functions to build and handle spectral networks"""
+
 from typing import Tuple
 import numpy as np
 from matchms import Scores
 
 
-def get_top_hits(scores: Scores, identifier_key: str = "spectrum_id",
-                 top_n: int = 25, search_by: str = "queries",
-                 score_name: str = None,
-                 ignore_diagonal: bool = False) -> Tuple[dict, dict]:
+def get_top_hits(
+    scores: Scores,
+    identifier_key: str = "spectrum_id",
+    top_n: int = 25,
+    search_by: str = "queries",
+    score_name: str = None,
+    ignore_diagonal: bool = False,
+) -> Tuple[dict, dict]:
     """Get top_n highest scores (and indices) for every entry.
 
     Parameters
@@ -35,18 +39,18 @@ def get_top_hits(scores: Scores, identifier_key: str = "spectrum_id",
         excluded.
     """
     # pylint: disable=protected-access, too-many-arguments
-    assert search_by in ["queries", "references"], \
-        "search_by must be 'queries' or 'references"
+    assert search_by in ["queries", "references"], "search_by must be 'queries' or 'references"
     if score_name is None:
         score_name = scores._scores.guess_score_name()
 
     if search_by == "queries":
         return get_top_hits_by_query(scores, identifier_key, top_n, score_name, ignore_diagonal)
     return get_top_hits_by_references(scores, identifier_key, top_n, score_name, ignore_diagonal)
-    
 
-def get_top_hits_by_references(scores: Scores, identifier_key: str, top_n: int,
-                               score_name: str, ignore_diagonal: bool)-> Tuple[dict, dict]:
+
+def get_top_hits_by_references(
+    scores: Scores, identifier_key: str, top_n: int, score_name: str, ignore_diagonal: bool
+) -> Tuple[dict, dict]:
     """Get the top hits from the scoring by "references".
     This function differs only slightly from the one by query.
 
@@ -70,11 +74,12 @@ def get_top_hits_by_references(scores: Scores, identifier_key: str, top_n: int,
             idx = idx[c[idx] != i]
         similars_idx[spec_id] = c[idx][:top_n]
         similars_scores[spec_id] = v[idx][:top_n]
-    return similars_idx,similars_scores
+    return similars_idx, similars_scores
 
 
-def get_top_hits_by_query(scores: Scores, identifier_key: str, top_n: int,
-                          score_name: str, ignore_diagonal: bool)-> Tuple[dict, dict]:
+def get_top_hits_by_query(
+    scores: Scores, identifier_key: str, top_n: int, score_name: str, ignore_diagonal: bool
+) -> Tuple[dict, dict]:
     """Get the top hits in the network from the "query" spectra perspective
 
     Args:

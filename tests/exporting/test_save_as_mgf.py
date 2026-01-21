@@ -16,14 +16,16 @@ def load_test_spectra_file(test_filename):
 
 def test_save_as_mgf_single_spectrum():
     """Test saving spectrum to .mgf file"""
-    spectrum = SpectrumBuilder().with_mz(
-        np.array([100, 200, 300], dtype="float")).with_intensities(
-            np.array([10, 10, 500], dtype="float")).with_metadata(
-                {"charge": -1,
-                 "inchi": '"InChI=1S/C6H12"',
-                 "pepmass": (100, 10.0),
-                 "test_field": "test"},
-                metadata_harmonization=False).build()
+    spectrum = (
+        SpectrumBuilder()
+        .with_mz(np.array([100, 200, 300], dtype="float"))
+        .with_intensities(np.array([10, 10, 500], dtype="float"))
+        .with_metadata(
+            {"charge": -1, "inchi": '"InChI=1S/C6H12"', "pepmass": (100, 10.0), "test_field": "test"},
+            metadata_harmonization=False,
+        )
+        .build()
+    )
 
     # Write to test file
     with tempfile.TemporaryDirectory() as d:
@@ -50,10 +52,8 @@ def test_save_as_mgf_spectrum_list():
     mz = np.array([100, 200, 300], dtype="float")
     intensities = np.array([10, 10, 500], dtype="float")
     builder = SpectrumBuilder().with_mz(mz).with_intensities(intensities)
-    spectrum1 = builder.with_metadata({"test_field": "test1"},
-                                      metadata_harmonization=False).build()
-    spectrum2 = builder.with_metadata({"test_field": "test2"},
-                                      metadata_harmonization=False).build()
+    spectrum1 = builder.with_metadata({"test_field": "test1"}, metadata_harmonization=False).build()
+    spectrum2 = builder.with_metadata({"test_field": "test2"}, metadata_harmonization=False).build()
     spectrum3 = None
 
     # Write to test file
@@ -75,21 +75,21 @@ def test_save_as_mgf_spectrum_list():
         assert end_ion_count_actual == 2
 
 
-@pytest.mark.parametrize("style, expected",
-                         [("matchms", ["PRECURSOR_MZ=100.1\n", "PRECURSOR_MZ=200.2\n"]),
-                          ("nist", ["PRECURSORMZ=100.1\n", "PRECURSORMZ=200.2\n"]),
-                          ("gnps", ["PEPMASS=100.1\n", "PEPMASS=200.2\n"]),
-                          ])
+@pytest.mark.parametrize(
+    "style, expected",
+    [
+        ("matchms", ["PRECURSOR_MZ=100.1\n", "PRECURSOR_MZ=200.2\n"]),
+        ("nist", ["PRECURSORMZ=100.1\n", "PRECURSORMZ=200.2\n"]),
+        ("gnps", ["PEPMASS=100.1\n", "PEPMASS=200.2\n"]),
+    ],
+)
 def test_save_as_mgf_export_style(style, expected):
-    """Test saving spectrum list to .mgf file using differnt export styles.
-    """
+    """Test saving spectrum list to .mgf file using differnt export styles."""
     mz = np.array([100, 200], dtype="float")
     intensities = np.array([10, 500], dtype="float")
     builder = SpectrumBuilder().with_mz(mz).with_intensities(intensities)
-    spectrum1 = builder.with_metadata({"precursor_mz": 100.1},
-                                      metadata_harmonization=False).build()
-    spectrum2 = builder.with_metadata({"precursor_mz": 200.2},
-                                      metadata_harmonization=False).build()
+    spectrum1 = builder.with_metadata({"precursor_mz": 100.1}, metadata_harmonization=False).build()
+    spectrum2 = builder.with_metadata({"precursor_mz": 200.2}, metadata_harmonization=False).build()
 
     # Write to test file
     with tempfile.TemporaryDirectory() as d:
@@ -103,23 +103,17 @@ def test_save_as_mgf_export_style(style, expected):
         assert mgf_content[7] == expected[1]
 
 
-@pytest.mark.parametrize("charge, ionmode, parent_mass",
-                         [(-1, "negative", 218.5),
-                          (2, "positive", "n/a"),
-                          (None, "n/a", 250)])
+@pytest.mark.parametrize(
+    "charge, ionmode, parent_mass", [(-1, "negative", 218.5), (2, "positive", "n/a"), (None, "n/a", 250)]
+)
 def test_save_load_mgf_consistency(tmpdir, charge, ionmode, parent_mass):
     """Test saving and loading spectrum to .mgf file"""
     mz = np.array([100.1, 200.02, 300.003], dtype="float")
     intensities = np.array([0.01, 0.02, 1.0], dtype="float")
-    metadata = {"precursor_mz": 200.5,
-                "charge": charge,
-                "ionmode": ionmode,
-                "parent_mass": parent_mass}
+    metadata = {"precursor_mz": 200.5, "charge": charge, "ionmode": ionmode, "parent_mass": parent_mass}
     builder = SpectrumBuilder().with_mz(mz).with_intensities(intensities)
-    spectrum1 = builder.with_metadata(metadata,
-                                      metadata_harmonization=True).build()
-    spectrum2 = builder.with_metadata(metadata,
-                                      metadata_harmonization=True).build()
+    spectrum1 = builder.with_metadata(metadata, metadata_harmonization=True).build()
+    spectrum2 = builder.with_metadata(metadata, metadata_harmonization=True).build()
 
     # Write to test file
     filename = os.path.join(tmpdir, "test.mgf")

@@ -18,13 +18,13 @@ class CosineHungarian(BaseSimilarity):
     :class:`~matchms.similarity.CosineGreedy`, but does represent a mathematically proper
     solution to the problem.
     """
+
     # Set key characteristics as class attributes
     is_commutative = True
     # Set output data type, e.g. ("score", "float") or [("score", "float"), ("matches", "int")]
     score_datatype = [("score", np.float64), ("matches", "int")]
 
-    def __init__(self, tolerance: float = 0.1, mz_power: float = 0.0,
-                 intensity_power: float = 1.0):
+    def __init__(self, tolerance: float = 0.1, mz_power: float = 0.0, intensity_power: float = 1.0):
         """
         Parameters
         ----------
@@ -55,14 +55,15 @@ class CosineHungarian(BaseSimilarity):
 
         Tuple with cosine score and number of matched peaks.
         """
+
         def get_matching_pairs():
             """Get pairs of peaks that match within the given tolerance."""
-            matching_pairs = collect_peak_pairs(spec1, spec2, self.tolerance, shift=0.0,
-                                                mz_power=self.mz_power,
-                                                intensity_power=self.intensity_power)
+            matching_pairs = collect_peak_pairs(
+                spec1, spec2, self.tolerance, shift=0.0, mz_power=self.mz_power, intensity_power=self.intensity_power
+            )
             if matching_pairs is None:
                 return None
-            matching_pairs = matching_pairs[np.argsort(matching_pairs[:, 2], kind='mergesort')[::-1], :]
+            matching_pairs = matching_pairs[np.argsort(matching_pairs[:, 2], kind="mergesort")[::-1], :]
             return matching_pairs
 
         def get_matching_pairs_matrix():
@@ -83,8 +84,9 @@ class CosineHungarian(BaseSimilarity):
             matrix_size = (len(paired_peaks1), len(paired_peaks2))
             matching_pairs_matrix = np.ones(matrix_size)
             for i in range(matching_pairs.shape[0]):
-                matching_pairs_matrix[paired_peaks1.index(matching_pairs[i, 0]),
-                                      paired_peaks2.index(matching_pairs[i, 1])] = 1 - matching_pairs[i, 2]
+                matching_pairs_matrix[
+                    paired_peaks1.index(matching_pairs[i, 0]), paired_peaks2.index(matching_pairs[i, 1])
+                ] = 1 - matching_pairs[i, 2]
             return paired_peaks1, paired_peaks2, matching_pairs_matrix
 
         def solve_hungarian():
@@ -100,11 +102,9 @@ class CosineHungarian(BaseSimilarity):
                 return np.asarray((0.0, 0), dtype=self.score_datatype)
             score, used_matches = solve_hungarian()
             # Normalize score:
-            spec1_power = np.power(spec1[:, 0], self.mz_power) \
-                * np.power(spec1[:, 1], self.intensity_power)
-            spec2_power = np.power(spec2[:, 0], self.mz_power) \
-                * np.power(spec2[:, 1], self.intensity_power)
-            score = score/(np.sqrt(np.sum(spec1_power**2)) * np.sqrt(np.sum(spec2_power**2)))
+            spec1_power = np.power(spec1[:, 0], self.mz_power) * np.power(spec1[:, 1], self.intensity_power)
+            spec2_power = np.power(spec2[:, 0], self.mz_power) * np.power(spec2[:, 1], self.intensity_power)
+            score = score / (np.sqrt(np.sum(spec1_power**2)) * np.sqrt(np.sum(spec2_power**2)))
             return np.asarray((score, len(used_matches)), dtype=self.score_datatype)
 
         spec1 = reference.peaks.to_numpy

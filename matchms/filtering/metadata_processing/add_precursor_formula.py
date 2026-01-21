@@ -11,7 +11,10 @@ from matchms.filtering.filter_utils.interpret_unknown_adduct import (
 logger = logging.getLogger("matchms")
 
 
-def add_precursor_formula(spectrum_in, clone: Optional[bool] = True,):
+def add_precursor_formula(
+    spectrum_in,
+    clone: Optional[bool] = True,
+):
     """Derive and set 'precursor_formula' from neutral 'formula' and 'adduct'.
 
     Requirements:
@@ -24,12 +27,11 @@ def add_precursor_formula(spectrum_in, clone: Optional[bool] = True,):
     spectrum = spectrum_in.clone() if clone else spectrum_in
 
     adduct = spectrum.get("adduct")
-    formula_str = spectrum.get('formula')
+    formula_str = spectrum.get("formula")
     if formula_str is None or adduct is None:
         logger.info(
-            f"Missing 'formula' or 'adduct' (formula={formula_str}, adduct={adduct});"\
-            "'precursor_formula' not set."
-            )
+            f"Missing 'formula' or 'adduct' (formula={formula_str}, adduct={adduct});'precursor_formula' not set."
+        )
         return spectrum
 
     nr_of_parent_masses, ions_split = get_ions_from_adduct(adduct)
@@ -48,8 +50,8 @@ def add_precursor_formula(spectrum_in, clone: Optional[bool] = True,):
     has_negative = any(atom_count < 0 for atom_count in new_precursor_formula.values())
     if has_negative:
         logger.warning(
-            f"Adduct {adduct} leads to negative element count with formula {formula_str}."\
-            "'precursor_formula' not set.")
+            f"Adduct {adduct} leads to negative element count with formula {formula_str}.'precursor_formula' not set."
+        )
         return spectrum
     spectrum.set("precursor_formula", _convert_atom_counter_to_str(new_precursor_formula))
     return spectrum
@@ -57,7 +59,7 @@ def add_precursor_formula(spectrum_in, clone: Optional[bool] = True,):
 
 def _convert_formula_string_to_atom_counter(formula_str):
     """Parse a simple elemental formula (no parentheses/hydrates/isotopes) into a Counter."""
-    atoms_and_counts = re.findall(r'([A-Z][a-z]?)(\d*)', formula_str)
+    atoms_and_counts = re.findall(r"([A-Z][a-z]?)(\d*)", formula_str)
     return Counter({atom: int(count) if count else 1 for atom, count in atoms_and_counts})
 
 

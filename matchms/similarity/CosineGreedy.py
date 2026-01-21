@@ -86,8 +86,7 @@ class CosineGreedy(BaseSimilarity):
         def get_matching_pairs():
             """Get pairs of peaks that match within the given tolerance."""
             matching_pairs = collect_peak_pairs(
-                spec1, spec2, self.tolerance, shift=0.0,
-                mz_power=self.mz_power, intensity_power=self.intensity_power
+                spec1, spec2, self.tolerance, shift=0.0, mz_power=self.mz_power, intensity_power=self.intensity_power
             )
             if matching_pairs is None:
                 return None

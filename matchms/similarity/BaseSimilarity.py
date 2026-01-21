@@ -17,6 +17,7 @@ class BaseSimilarity:
        Whether similarity function is commutative, which means that the order of spectra
        does not matter (similarity(A, B) == similarity(B, A)). Default is True.
     """
+
     # Set key characteristics as class attributes
     is_commutative = True
     # Set output data type, e.g. "float" or [("score", "float"), ("matches", "int")]
@@ -39,11 +40,14 @@ class BaseSimilarity:
         """
         raise NotImplementedError
 
-    def matrix(self, references: List[SpectrumType], queries: List[SpectrumType],
-               array_type: str = "numpy",
-               is_symmetric: bool = False,
-               progress_bar: bool = True,
-              ) -> np.ndarray:
+    def matrix(
+        self,
+        references: List[SpectrumType],
+        queries: List[SpectrumType],
+        array_type: str = "numpy",
+        is_symmetric: bool = False,
+        progress_bar: bool = True,
+    ) -> np.ndarray:
         """Optional: Provide optimized method to calculate an np.array of similarity scores
         for given reference and query spectra. If no method is added here, the following naive
         implementation (i.e. a double for-loop) is used.
@@ -64,7 +68,7 @@ class BaseSimilarity:
         progress_bar
             When True a progress bar is shown. Default is True.
         """
-        #pylint: disable=too-many-locals
+        # pylint: disable=too-many-locals
         n_rows = len(references)
         n_cols = len(queries)
 
@@ -75,9 +79,9 @@ class BaseSimilarity:
         idx_col = []
         scores = []
         # Wrap the outer loop with tqdm to track progress
-        for i_ref, reference in enumerate(tqdm(references[:n_rows],
-                                               desc="Calculating similarities",
-                                               disable=not progress_bar)):
+        for i_ref, reference in enumerate(
+            tqdm(references[:n_rows], desc="Calculating similarities", disable=not progress_bar)
+        ):
             if is_symmetric and self.is_commutative:
                 for i_query, query in enumerate(queries[i_ref:n_cols], start=i_ref):
                     score = self.pair(reference, query)
@@ -107,12 +111,15 @@ class BaseSimilarity:
             return scores_array
         raise ValueError("array_type must be 'numpy' or 'sparse'.")
 
-    def sparse_array(self, references: List[SpectrumType],
-                     queries: List[SpectrumType],
-                     idx_row, idx_col,
-                     is_symmetric: bool = False,
-                     progress_bar: bool = True,
-                    ):
+    def sparse_array(
+        self,
+        references: List[SpectrumType],
+        queries: List[SpectrumType],
+        idx_row,
+        idx_col,
+        is_symmetric: bool = False,
+        progress_bar: bool = True,
+    ):
         """Optional: Provide optimized method to calculate an sparse matrix of similarity scores.
 
         Compute similarity scores for pairs of reference and query spectra as given by the indices
@@ -143,9 +150,7 @@ class BaseSimilarity:
         assert idx_row.shape == idx_col.shape, "col and row indices must be of same shape"
         scores = np.zeros((len(idx_row)), dtype=self.score_datatype)  # TODO: switch to sparse matrix
         # Use tqdm to track progress through the indices
-        for i, row in enumerate(tqdm(idx_row,
-                                     desc="Calculating sparse similarities",
-                                     disable=not progress_bar)):
+        for i, row in enumerate(tqdm(idx_row, desc="Calculating sparse similarities", disable=not progress_bar)):
             col = idx_col[i]
             scores[i] = self.pair(references[row], queries[col])
         return scores
@@ -164,5 +169,4 @@ class BaseSimilarity:
 
     def to_dict(self) -> dict:
         """Return a dictionary representation of a similarity function."""
-        return {"__Similarity__": self.__class__.__name__,
-                **self.__dict__}
+        return {"__Similarity__": self.__class__.__name__, **self.__dict__}

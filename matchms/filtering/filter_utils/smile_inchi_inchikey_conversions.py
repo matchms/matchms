@@ -58,11 +58,8 @@ def mol_converter(mol_input: str, input_type: str, output_type: str) -> Optional
     """
     if not _has_rdkit:
         raise ImportError(rdkit_missing_message)
-    input_function = {"inchi": Chem.MolFromInchi,
-                      "smiles": Chem.MolFromSmiles}
-    output_function = {"inchi": Chem.MolToInchi,
-                       "smiles": Chem.MolToSmiles,
-                       "inchikey": Chem.MolToInchiKey}
+    input_function = {"inchi": Chem.MolFromInchi, "smiles": Chem.MolFromSmiles}
+    output_function = {"inchi": Chem.MolToInchi, "smiles": Chem.MolToSmiles, "inchikey": Chem.MolToInchiKey}
 
     mol = input_function[input_type](mol_input.strip('"'))
     if mol is None:
