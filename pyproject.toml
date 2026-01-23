@@ -46,6 +46,7 @@ dependencies = [
   "sparsestack>=0.7.0",
   "tqdm>=4.67.1",
 ]
+[project.urls]
 repository = "https://github.com/matchms/matchms"
 documentation = "https://matchms.readthedocs.io/en/latest/"
 
