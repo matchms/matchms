@@ -4,7 +4,7 @@ version = "0.31.0"
 description = "Python library for large-scale comparisons and processing of tandem mass spectral data"
 readme = "README.rst"
 requires-python = ">=3.10,<3.14"  # blocked because of pynndescent
-license = { text = "Apache-2.0" }
+license = "Apache-2.0"
 authors = [
   { name = "matchms developer team", email = "florian.huber@hs-duesseldorf.de" }
 ]
