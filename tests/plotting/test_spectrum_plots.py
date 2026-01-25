@@ -2,11 +2,11 @@ import matplotlib
 import numpy as np
 import pytest
 
-
-matplotlib.use("Agg")
 from matplotlib import pyplot as plt
 from matchms import Spectrum
 from matchms.plotting import plot_spectra_array, plot_spectra_mirror, plot_spectrum
+
+matplotlib.use("Agg")
 
 
 def _assert_fig_ok(fig, n_plots, dpi, height):
