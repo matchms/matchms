@@ -1,11 +1,11 @@
 default_stages: [pre-commit]
 
 default_language_version:
-  python: python3.11
+  python: python3
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
       - id: check-builtin-literals
       - id: check-case-conflict
@@ -20,7 +20,7 @@ repos:
 
   # Run Ruff linter and formatter.
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.11.4
+    rev: v0.14.13
     hooks:
       - id: ruff
         args: [ --fix ]
