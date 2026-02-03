@@ -318,8 +318,15 @@ To install matchms, do:
 
   git clone https://github.com/matchms/matchms.git
   cd matchms
-  conda create --name matchms-dev python=3.12
+  # Create environment using conda
+  conda create --name matchms-dev python=3.13
   conda activate matchms-dev
+
+  # Create environment using uv
+  uv venv --python 3.13
+
+  # If you use uv
+  uv sync --group dev
 
   # If you use poetry
   python -m pip install --upgrade pip poetry
