@@ -1,1 +1,7 @@
-__version__ = '0.31.0'
+from importlib.metadata import PackageNotFoundError, version
+
+
+try:
+    __version__ = version("matchms")
+except PackageNotFoundError:
+    __version__ = "0+unknown"
