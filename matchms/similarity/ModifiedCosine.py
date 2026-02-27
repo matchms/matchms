@@ -106,16 +106,19 @@ class ModifiedCosine(BaseSimilarity):
         def get_matching_pairs():
             """Find all pairs of peaks that match within the given tolerance."""
             zero_pairs = collect_peak_pairs(
-                spec1, spec2, self.tolerance, shift=0.0,
-                mz_power=self.mz_power, intensity_power=self.intensity_power
+                spec1, spec2, self.tolerance, shift=0.0, mz_power=self.mz_power, intensity_power=self.intensity_power
             )
             precursor_mz_ref = get_valid_precursor_mz(reference)
             precursor_mz_query = get_valid_precursor_mz(query)
 
             mass_shift = precursor_mz_ref - precursor_mz_query
             nonzero_pairs = collect_peak_pairs(
-                spec1, spec2, self.tolerance, shift=mass_shift,
-                mz_power=self.mz_power, intensity_power=self.intensity_power
+                spec1,
+                spec2,
+                self.tolerance,
+                shift=mass_shift,
+                mz_power=self.mz_power,
+                intensity_power=self.intensity_power,
             )
 
             if zero_pairs is None:

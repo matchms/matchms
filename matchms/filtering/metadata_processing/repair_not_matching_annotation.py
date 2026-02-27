@@ -117,7 +117,8 @@ def _repair_smiles_inchi(spectrum):
     elif smiles_correct and not inchi_correct:
         inchi_from_smiles = convert_smiles_to_inchi(spectrum.get("smiles"))
         # Repair by using inchi generated from SMILES
-        logger.info((
+        logger.info(
+            (
                 "The InChI has been changed from %s to %s. The new InChI matches the parent mass, while the old one "
                 "did not"
             ),
@@ -127,9 +128,10 @@ def _repair_smiles_inchi(spectrum):
         spectrum.set("inchi", inchi_from_smiles)
     elif inchi_correct and not smiles_correct:
         # Repair by using SMILES generated from the inchi
-        logger.info((
-            "The SMILES has been changed from %s to %s to match the InChI. The new SMILES matches the parent mass, "
-            "while the old one did not",
+        logger.info(
+            (
+                "The SMILES has been changed from %s to %s to match the InChI. The new SMILES matches the parent mass, "
+                "while the old one did not",
             ),
             smiles,
             smiles_from_inchi,

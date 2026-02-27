@@ -21,12 +21,12 @@ def load_test_spectra_file(test_filename):
     spectra = list(load_from_json(spectra_file))
     return spectra
 
+
 def test_save_and_load_json_single_spectrum(tmp_path, builder):
     """Test saving spectrum to .json file"""
-    spectrum = builder.with_metadata({"charge": -1,
-                                      "inchi": '"InChI=1S/C6H12"',
-                                      "precursor_mz": 222.2,
-                                      "test_field": "test"}).build()
+    spectrum = builder.with_metadata(
+        {"charge": -1, "inchi": '"InChI=1S/C6H12"', "precursor_mz": 222.2, "test_field": "test"}
+    ).build()
     # Write to test file
     filename = os.path.join(tmp_path, "test.json")
     save_as_json(spectrum, filename)
@@ -42,10 +42,8 @@ def test_save_and_load_json_single_spectrum(tmp_path, builder):
 @pytest.mark.parametrize("metadata_harmonization", [True, False])
 def test_save_and_load_json_spectrum_list(metadata_harmonization, tmp_path, builder):
     """Test saving spectrum list to .json file"""
-    spectrum1 = builder.with_metadata({"test_field": "test1"},
-                                      metadata_harmonization=metadata_harmonization).build()
-    spectrum2 = builder.with_metadata({"test_field": "test2"},
-                                      metadata_harmonization=metadata_harmonization).build()
+    spectrum1 = builder.with_metadata({"test_field": "test1"}, metadata_harmonization=metadata_harmonization).build()
+    spectrum2 = builder.with_metadata({"test_field": "test2"}, metadata_harmonization=metadata_harmonization).build()
     spectrum3 = None
 
     # Write to test file
@@ -62,9 +60,7 @@ def test_save_and_load_json_spectrum_list(metadata_harmonization, tmp_path, buil
     assert len(spectrum_imports) == 2
 
 
-@pytest.mark.parametrize("style, expected",
-                         [("matchms", "precursor_mz"),
-                          ("nist", "PrecursorMZ")])
+@pytest.mark.parametrize("style, expected", [("matchms", "precursor_mz"), ("nist", "PrecursorMZ")])
 def test_save_as_json_different_export_styles(tmp_path, builder, style, expected):
     spectrum = builder.with_metadata({"precursor_mz": 123}).build()
     filename = tmp_path / "test_matchms.json"
@@ -76,8 +72,7 @@ def test_save_as_json_different_export_styles(tmp_path, builder, style, expected
 
 
 def test_load_from_json_zero_peaks(tmp_path):
-    spectrum1 = SpectrumBuilder().with_metadata(
-        {"test_field": "test1"}).build()
+    spectrum1 = SpectrumBuilder().with_metadata({"test_field": "test1"}).build()
 
     filename = tmp_path / "test.json"
 
@@ -95,37 +90,31 @@ def test_load_from_json_with_minimal_json(tmp_path, builder):
     filename = tmp_path / "test.json"
     body = '[{"test_field": "test1", "peaks_json": [[100.0, 10.0], [200.0, 10.0], [300.0, 500.0]]}]'
 
-    with open(filename, 'w', encoding="utf-8") as f:
+    with open(filename, "w", encoding="utf-8") as f:
         f.write(body)
 
     spectrum_imports = load_from_json(filename, metadata_harmonization=False)
 
-    expected = builder.with_metadata({"test_field": "test1"},
-                                     metadata_harmonization=False).build()
+    expected = builder.with_metadata({"test_field": "test1"}, metadata_harmonization=False).build()
 
-    assert spectrum_imports == [
-        expected], "Loaded JSON document not identical to expected Spectrum"
+    assert spectrum_imports == [expected], "Loaded JSON document not identical to expected Spectrum"
 
 
 def test_save_as_json_with_minimal_json(tmp_path, builder):
     filename = tmp_path / "test.json"
 
-    spectrum1 = builder.with_metadata({"test_field": "test1"},
-                                      metadata_harmonization=False).build()
+    spectrum1 = builder.with_metadata({"test_field": "test1"}, metadata_harmonization=False).build()
 
     save_as_json([spectrum1], filename)
 
     with open(filename, encoding="utf-8") as f:
         spectrum_imports = json.load(f)
 
-    expected = [{"test_field": "test1", "peaks_json": [
-        [100.0, 10.0], [200.0, 10.0], [300.0, 500.0]]}]
+    expected = [{"test_field": "test1", "peaks_json": [[100.0, 10.0], [200.0, 10.0], [300.0, 500.0]]}]
     assert spectrum_imports == expected, "Saved Spectrum not identical to expected JSON Document"
 
 
-@pytest.mark.parametrize("filename, expected_length", [
-    ["gnps_spectra.json", 5]
-])
+@pytest.mark.parametrize("filename, expected_length", [["gnps_spectra.json", 5]])
 def test_read_gnps_spectra(filename, expected_length):
     actual = load_test_spectra_file(filename)
 

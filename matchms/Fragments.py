@@ -32,6 +32,7 @@ class Fragments:
         Numpy array of peak intensity values.
 
     """
+
     def __init__(self, mz=None, intensities=None):
         assert isinstance(mz, np.ndarray), "Input argument 'mz' should be a np.array."
         assert isinstance(intensities, np.ndarray), "Input argument 'intensities' should be a np.array."
@@ -47,11 +48,12 @@ class Fragments:
     def __eq__(self, other):
         if other is None:
             return False
-        return \
-            self.mz.shape == other.mz.shape and \
-            np.allclose(self.mz, other.mz) and \
-            self.intensities.shape == other.intensities.shape and \
-            np.allclose(self.intensities, other.intensities)
+        return (
+            self.mz.shape == other.mz.shape
+            and np.allclose(self.mz, other.mz)
+            and self.intensities.shape == other.intensities.shape
+            and np.allclose(self.intensities, other.intensities)
+        )
 
     def __len__(self):
         return self._mz.size

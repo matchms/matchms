@@ -4,6 +4,7 @@ import numpy as np
 
 # ===================== library index =====================
 
+
 class _LibraryIndex:
     """
     Compact container for the concatenated (sorted) library peaks and, optionally,
@@ -25,16 +26,17 @@ class _LibraryIndex:
         Corresponding intensities.
     nl_spec_idx : int32 or None
         Which spectrum each neutral-loss peak originated from (index into 0..n_specs-1).
-    nl_product_idx : int64 or None  
+    nl_product_idx : int64 or None
         Maps each neutral-loss peak back into peaks_mz positions (for hybrid rules).
     spec_l2 : float[dtype] or None
-        Precomputed L2 norm of each spectrum's intensities (for cosine or modified 
+        Precomputed L2 norm of each spectrum's intensities (for cosine or modified
         cosine score).
     precursor_mz : float[dtype]
         Precursor m/z for each spectrum (NaN if unknown).
     dtype : np.dtype
         Float dtype used for all float arrays. Default is np.float32.
     """
+
     def __init__(self, dtype: np.dtype = np.float32):
         self.n_specs = 0
         self.peaks_mz = None
@@ -48,11 +50,14 @@ class _LibraryIndex:
         self.precursor_mz = None
         self.dtype = dtype
 
-def _build_library_index(processed_peaks_list: List[np.ndarray],
-                         precursor_mz_list: List[Optional[float]],
-                         compute_neutral_loss: bool = False,
-                         compute_l2_norm: bool = False,
-                         dtype: np.dtype = np.float32) -> _LibraryIndex:
+
+def _build_library_index(
+    processed_peaks_list: List[np.ndarray],
+    precursor_mz_list: List[Optional[float]],
+    compute_neutral_loss: bool = False,
+    compute_l2_norm: bool = False,
+    dtype: np.dtype = np.float32,
+) -> _LibraryIndex:
     """
     Build a global, sorted index over all *query* spectra peaks.
 
@@ -101,7 +106,7 @@ def _build_library_index(processed_peaks_list: List[np.ndarray],
         int_dtype = np.int64
         print(f"Too many total peaks ({n_peaks}) to build index using 32-bit integers (now using 64-bit integers).")
     else:
-        int_dtype = np.int32 
+        int_dtype = np.int32
 
     # Return empty arrays if no peaks
     if n_peaks == 0:
@@ -126,11 +131,11 @@ def _build_library_index(processed_peaks_list: List[np.ndarray],
         n = peaks.shape[0]
         if n == 0:
             continue
-        mz_flat[write:write+n] = peaks[:, 0]
-        int_flat[write:write+n] = peaks[:, 1]
-        spec_flat[write:write+n] = spec_id
+        mz_flat[write : write + n] = peaks[:, 0]
+        int_flat[write : write + n] = peaks[:, 1]
+        spec_flat[write : write + n] = spec_id
         if compute_l2_norm:
-            spec_l2[spec_id] = np.sqrt(np.sum((peaks[:, 1]).astype(np.float64)**2, dtype=np.float64)).astype(dtype)
+            spec_l2[spec_id] = np.sqrt(np.sum((peaks[:, 1]).astype(np.float64) ** 2, dtype=np.float64)).astype(dtype)
         write += n
 
     # Sort by m/z
@@ -172,6 +177,7 @@ def _build_library_index(processed_peaks_list: List[np.ndarray],
 
 # ===================== preprocessing =====================
 
+
 def _entropy_weight(intensities: np.ndarray, dtype: np.dtype) -> np.ndarray:
     """
     Apply entropy-based weighting to intensities as described by Li & Fiehn (2023).
@@ -193,22 +199,24 @@ def _entropy_weight(intensities: np.ndarray, dtype: np.dtype) -> np.ndarray:
     return np.power(intensities, w).astype(dtype, copy=False)
 
 
-def _clean_and_weight(peaks: np.ndarray,
-                      precursor_mz: Optional[float],
-                      remove_precursor: bool,
-                      precursor_window: float,
-                      noise_cutoff: float,
-                      normalize_to_half: bool,
-                      merge_within_da: float,
-                      weighing_type: str,
-                      dtype: np.dtype = np.float64) -> np.ndarray:
+def _clean_and_weight(
+    peaks: np.ndarray,
+    precursor_mz: Optional[float],
+    remove_precursor: bool,
+    precursor_window: float,
+    noise_cutoff: float,
+    normalize_to_half: bool,
+    merge_within_da: float,
+    weighing_type: str,
+    dtype: np.dtype = np.float64,
+) -> np.ndarray:
     """
     Apply the Flash preprocessing rules to a (mz, intensity) peak list.
 
     Steps:
       1) (Optional) Remove all peaks at/above (precursor_mz - precursor_window).
       2) (Optional) Remove noise: keep peaks with intensity >= noise_cutoff * max(intensity).
-      3) (Optional) Entropy-weight intensities (Li & Fiehn): raise intensities by a power derived 
+      3) (Optional) Entropy-weight intensities (Li & Fiehn): raise intensities by a power derived
          from spectrum entropy.
       4) (Optional) Merge peaks within a small m/z window by intensity-weighted centroid.
       5) (Optional) normalize intensities to sum to 0.5 (recommended in the paper).
@@ -285,20 +293,19 @@ def _clean_and_weight(peaks: np.ndarray,
 
 # ===================== smaller helper functions =====================
 
+
 def _as_dtype(a: np.ndarray, dtype: np.dtype) -> np.ndarray:
     if a.dtype == dtype:
-        return a.astype(dtype, copy=False) 
+        return a.astype(dtype, copy=False)
     return a.astype(dtype, copy=True)
 
 
-def _merge_within(
-        peaks: np.ndarray,
-        max_delta_da: float) -> np.ndarray:
+def _merge_within(peaks: np.ndarray, max_delta_da: float) -> np.ndarray:
     """
     Merges peaks within `max_delta_da` of each other by intensity-weighted averaging.
-    
+
     Parameters
-    ---------- 
+    ----------
     peaks : np.ndarray
         2D array of shape (n_peaks, 2) with m/z values in first column and intensities in second column.
     max_delta_da : float
@@ -328,6 +335,5 @@ def _merge_within(
             current_int = intensities[k]
     new_mz.append(current_mz)
     new_int.append(current_int)
-    out = np.column_stack((np.array(new_mz, dtype=mz.dtype),
-                           np.array(new_int, dtype=intensities.dtype)))
+    out = np.column_stack((np.array(new_mz, dtype=mz.dtype), np.array(new_int, dtype=intensities.dtype)))
     return out

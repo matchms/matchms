@@ -11,8 +11,7 @@ def _build_spectrum(precursor_mz, mzs, intensities, clone=True, extra_meta=None)
     if extra_meta:
         md.update(extra_meta)
     s = SpectrumBuilder().with_metadata(md).build()
-    s.peaks = Fragments(mz=np.asarray(mzs, dtype=float),
-                        intensities=np.asarray(intensities, dtype=float))
+    s.peaks = Fragments(mz=np.asarray(mzs, dtype=float), intensities=np.asarray(intensities, dtype=float))
     return s
 
 
@@ -84,9 +83,7 @@ def test_clone_true_does_not_modify_original():
         mzs=[150.0, 199.0, 199.0, 250.0],
         intensities=[1.0, 2.0, 3.0, 4.0],
     )
-    out = remove_peaks_relative_to_precursor_mz(
-        s_in, offset_to_precursor=-1.0, clone=True
-        )
+    out = remove_peaks_relative_to_precursor_mz(s_in, offset_to_precursor=-1.0, clone=True)
 
     # New object when cloned
     assert out is not s_in
@@ -107,9 +104,7 @@ def test_clone_false_modifies_in_place():
         mzs=[100.0, 200.0, 298.5, 310.0],
         intensities=[1.0, 2.0, 3.0, 4.0],
     )
-    out = remove_peaks_relative_to_precursor_mz(
-        s_in, offset_to_precursor=-1.0, clone=False
-        )
+    out = remove_peaks_relative_to_precursor_mz(s_in, offset_to_precursor=-1.0, clone=False)
 
     # Same object when not cloned
     assert out is s_in
@@ -128,9 +123,7 @@ def test_intensity_array_kept_in_lockstep_with_mz():
         mzs=[100.0, 200.0, 248.4, 248.5, 400.0],
         intensities=[0.1, 0.2, 0.3, 0.4, 0.5],
     )
-    out = remove_peaks_relative_to_precursor_mz(
-        s, offset_to_precursor=-1.5
-        )  # threshold 248.5
+    out = remove_peaks_relative_to_precursor_mz(s, offset_to_precursor=-1.5)  # threshold 248.5
     # Remove > 248.5 → drop 400.0, keep 248.5 (equal) and below
     assert np.allclose(out.peaks.mz, [100.0, 200.0, 248.4, 248.5])
     assert np.allclose(out.peaks.intensities, [0.1, 0.2, 0.3, 0.4])

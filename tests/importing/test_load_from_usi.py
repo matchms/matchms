@@ -7,14 +7,18 @@ from ..builder_Spectrum import SpectrumBuilder
 @patch("requests.get")
 def test_normal(mock_get):
     mock_get.return_value = Mock(ok=True)
-    mock_get.return_value.json.return_value = {"peaks": [[1., 2.], [3., 4.]]}
+    mock_get.return_value.json.return_value = {"peaks": [[1.0, 2.0], [3.0, 4.0]]}
     mock_get.return_value.headers.get = Mock(return_value="application/json")
 
     spec = load_from_usi("something")
     expected_metadata = {"usi": "something", "server": "https://metabolomics-usi.gnps2.org", "precursor_mz": None}
-    expected = SpectrumBuilder().with_mz(np.array([1., 3.])).with_intensities(
-        np.array([2., 4.])).with_metadata(expected_metadata,
-                                          metadata_harmonization=True).build()
+    expected = (
+        SpectrumBuilder()
+        .with_mz(np.array([1.0, 3.0]))
+        .with_intensities(np.array([2.0, 4.0]))
+        .with_metadata(expected_metadata, metadata_harmonization=True)
+        .build()
+    )
     assert spec == expected
 
 
@@ -42,10 +46,10 @@ def test_no_peaks(mock_get):
 
 
 def test_api_call():
-    usi = "mzspec:MASSBANK::accession:SM858102" # taken from load_from_usi docstring
+    usi = "mzspec:MASSBANK::accession:SM858102"  # taken from load_from_usi docstring
 
     spec = load_from_usi(usi)
-    
+
     assert spec is not None
     assert hasattr(spec, "peaks")
     assert len(spec.peaks.mz) > 0

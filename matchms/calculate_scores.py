@@ -3,10 +3,13 @@ from .similarity.BaseSimilarity import BaseSimilarity
 from .typing import QueriesType, ReferencesType
 
 
-def calculate_scores(references: ReferencesType, queries: QueriesType,
-                     similarity_function: BaseSimilarity,
-                     array_type: str = "numpy",
-                     is_symmetric: bool = False) -> Scores:
+def calculate_scores(
+    references: ReferencesType,
+    queries: QueriesType,
+    similarity_function: BaseSimilarity,
+    array_type: str = "numpy",
+    is_symmetric: bool = False,
+) -> Scores:
     """Calculate the similarity between all reference objects versus all query objects.
 
     Example to calculate scores between 2 spectra and iterate over the scores
@@ -60,5 +63,6 @@ def calculate_scores(references: ReferencesType, queries: QueriesType,
 
     ~matchms.Scores.Scores
     """
-    return Scores(references=references, queries=queries,
-                  is_symmetric=is_symmetric).calculate(similarity_function, array_type=array_type)
+    return Scores(references=references, queries=queries, is_symmetric=is_symmetric).calculate(
+        similarity_function, array_type=array_type
+    )

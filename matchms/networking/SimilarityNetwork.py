@@ -45,12 +45,16 @@ class SimilarityNetwork:
         ['one', 'two']
 
     """
-    def __init__(self, identifier_key: str = "spectrum_id",
-                 top_n: int = 20,
-                 max_links: int = 10,
-                 score_cutoff: float = 0.7,
-                 link_method: str = 'single',
-                 keep_unconnected_nodes: bool = True):
+
+    def __init__(
+        self,
+        identifier_key: str = "spectrum_id",
+        top_n: int = 20,
+        max_links: int = 10,
+        score_cutoff: float = 0.7,
+        link_method: str = "single",
+        keep_unconnected_nodes: bool = True,
+    ):
         """
         Parameters
         ----------
@@ -121,26 +125,30 @@ class SimilarityNetwork:
         msnet.add_nodes_from(unique_ids)
 
         # Collect location and score of highest scoring candidates for queries and references
-        similars_idx, similars_scores = get_top_hits(scores, identifier_key=self.identifier_key,
-                                                     top_n=self.top_n,
-                                                     search_by="queries",
-                                                     score_name=score_name,
-                                                     ignore_diagonal=True)
+        similars_idx, similars_scores = get_top_hits(
+            scores,
+            identifier_key=self.identifier_key,
+            top_n=self.top_n,
+            search_by="queries",
+            score_name=score_name,
+            ignore_diagonal=True,
+        )
 
         # Add edges based on global threshold (cutoff) for weights
         for i, spec in enumerate(scores.queries):
             query_id = spec.get(self.identifier_key)
-            ref_candidates = np.array([scores.references[x].get(self.identifier_key)
-                                          for x in similars_idx[query_id]])
-            idx = np.where((similars_scores[query_id] >= self.score_cutoff) &
-                              (ref_candidates != query_id))[0][:self.max_links]
+            ref_candidates = np.array([scores.references[x].get(self.identifier_key) for x in similars_idx[query_id]])
+            idx = np.where((similars_scores[query_id] >= self.score_cutoff) & (ref_candidates != query_id))[0][
+                : self.max_links
+            ]
             if self.link_method == "single":
-                new_edges = [(query_id, str(ref_candidates[x]),
-                              float(similars_scores[query_id][x])) for x in idx]
+                new_edges = [(query_id, str(ref_candidates[x]), float(similars_scores[query_id][x])) for x in idx]
             elif self.link_method == "mutual":
-                new_edges = [(query_id, str(ref_candidates[x]),
-                              float(similars_scores[query_id][x]))
-                             for x in idx if i in similars_idx[ref_candidates[x]][:]]
+                new_edges = [
+                    (query_id, str(ref_candidates[x]), float(similars_scores[query_id][x]))
+                    for x in idx
+                    if i in similars_idx[ref_candidates[x]][:]
+                ]
             else:
                 raise ValueError("Link method not kown")
 
@@ -169,14 +177,17 @@ class SimilarityNetwork:
         writer(filename)
 
     def _generate_writer(self, graph_format: str):
-        writer = {"cyjs": self._export_to_cyjs,
-                  "gexf": self._export_to_gexf,
-                  "gml": self._export_to_gml,
-                  "graphml": self.export_to_graphml,
-                  "json": self._export_to_node_link_json}
+        writer = {
+            "cyjs": self._export_to_cyjs,
+            "gexf": self._export_to_gexf,
+            "gml": self._export_to_gml,
+            "graphml": self.export_to_graphml,
+            "json": self._export_to_node_link_json,
+        }
 
-        assert graph_format in writer, "Format not supported.\n" \
-                                       "Please use one of supported formats: 'cyjs', 'gexf', 'gml', 'graphml', 'json'"
+        assert graph_format in writer, (
+            "Format not supported.\nPlease use one of supported formats: 'cyjs', 'gexf', 'gml', 'graphml', 'json'"
+        )
         return writer[graph_format]
 
     def export_to_graphml(self, filename: str):

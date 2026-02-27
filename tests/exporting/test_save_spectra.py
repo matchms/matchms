@@ -14,13 +14,9 @@ def load_test_spectra_file():
     return spectra
 
 
-@pytest.mark.parametrize("file_name",
-                         ["spectra.msp",
-                          "spectra.mgf",
-                          "spectra.json",
-                          "spectra.pickle"])
+@pytest.mark.parametrize("file_name", ["spectra.msp", "spectra.mgf", "spectra.json", "spectra.pickle"])
 def test_spectra(file_name, caplog):
-    """ Utility function to save spectra to msp and load them again.
+    """Utility function to save spectra to msp and load them again.
 
     Params:
     -------
@@ -87,7 +83,7 @@ def test_spectra_invalid_ext():
 
 @pytest.mark.parametrize("file_name", ["spectra.pickle"])
 def test_save_as_pickled_file_none_spectra(file_name):
-    """ Tests only pickled file saving with filtered None valued spectra
+    """Tests only pickled file saving with filtered None valued spectra
 
     Params:
     -------

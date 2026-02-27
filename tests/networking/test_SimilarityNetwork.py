@@ -26,19 +26,31 @@ def create_dummy_spectra():
     fingerprints2 = [[1, 0, 1], [0, 1, 1], [1, 1, 1]]
     spectra = []
     for i, fp in enumerate(fingerprints1):
-        spectra.append(Spectrum(mz=np.array([100, 200.]),
-                                  intensities=np.array([0.7, 0.1 * i]),
-                                  metadata={"spectrum_id": 'ref_spec_'+str(i),
-                                            "fingerprint": np.array(fp),
-                                            "smiles": 'C1=CC=C2C(=C1)NC(=N2)C3=CC=CO3',
-                                            "precursor_mz": 100+50*i}))
+        spectra.append(
+            Spectrum(
+                mz=np.array([100, 200.0]),
+                intensities=np.array([0.7, 0.1 * i]),
+                metadata={
+                    "spectrum_id": "ref_spec_" + str(i),
+                    "fingerprint": np.array(fp),
+                    "smiles": "C1=CC=C2C(=C1)NC(=N2)C3=CC=CO3",
+                    "precursor_mz": 100 + 50 * i,
+                },
+            )
+        )
     for i, fp in enumerate(fingerprints2):
-        spectra.append(Spectrum(mz=np.array([100, 200.]),
-                                  intensities=np.array([0.5, 0.1 * i]),
-                                  metadata={"spectrum_id": 'query_spec_'+str(i),
-                                            "fingerprint": np.array(fp),
-                                            "smiles": 'CC1=C(C=C(C=C1)NC(=O)N(C)C)Cl',
-                                            "precursor_mz": 110+50*i}))
+        spectra.append(
+            Spectrum(
+                mz=np.array([100, 200.0]),
+                intensities=np.array([0.5, 0.1 * i]),
+                metadata={
+                    "spectrum_id": "query_spec_" + str(i),
+                    "fingerprint": np.array(fp),
+                    "smiles": "CC1=C(C=C(C=C1)NC(=O)N(C)C)Cl",
+                    "precursor_mz": 110 + 50 * i,
+                },
+            )
+        )
     return spectra
 
 
@@ -65,15 +77,20 @@ def create_dummy_scores_symmetric():
 
 def create_dummy_scores_symmetric_faulty():
     scores = create_dummy_scores_symmetric()
-    faulty_spec = Spectrum(mz=np.array([100, 400.]),
-                           intensities=np.array([0.5, 0.1 * 4]),
-                           metadata={"spectrum_id": 'query_spec_400',
-                                     "fingerprint": np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1], [1, 1, 0], [1, 0, 1]]),
-                                     "smiles": 'CC1=C(C=C(C=C1)NC(=O)N(C)C)Cl',
-                                     "precursor_mz": 110 + 50 * 4})
+    faulty_spec = Spectrum(
+        mz=np.array([100, 400.0]),
+        intensities=np.array([0.5, 0.1 * 4]),
+        metadata={
+            "spectrum_id": "query_spec_400",
+            "fingerprint": np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1], [1, 1, 0], [1, 0, 1]]),
+            "smiles": "CC1=C(C=C(C=C1)NC(=O)N(C)C)Cl",
+            "precursor_mz": 110 + 50 * 4,
+        },
+    )
     scores.queries[0] = faulty_spec
 
     return scores
+
 
 def create_dummy_scores_symmetric_modified_cosine():
     spectra = create_dummy_spectra()
@@ -112,15 +129,11 @@ def test_create_network_symmetric():
     nodes_list = list(msnet.graph.nodes())
     edges_list = list(msnet.graph.edges())
     edges_list.sort()
-    nodes_without_edges = ['ref_spec_0',
-                           'ref_spec_1',
-                           'ref_spec_2']
+    nodes_without_edges = ["ref_spec_0", "ref_spec_1", "ref_spec_2"]
     assert len(nodes_list) == 8, "Expected different number of nodes"
     assert len(edges_list) == 5, "Expected different number of edges"
-    assert np.all([(x[0] not in nodes_without_edges) for x in edges_list]), \
-        "Expected this node to have no edges"
-    assert np.all([(x[1] not in nodes_without_edges) for x in edges_list]), \
-        "Expected this node to have no edges"
+    assert np.all([(x[0] not in nodes_without_edges) for x in edges_list]), "Expected this node to have no edges"
+    assert np.all([(x[1] not in nodes_without_edges) for x in edges_list]), "Expected this node to have no edges"
 
 
 def test_create_network_symmetric_remove_unconnected_nodes():
@@ -133,11 +146,9 @@ def test_create_network_symmetric_remove_unconnected_nodes():
     nodes_list = list(msnet.graph.nodes())
     edges_list = list(msnet.graph.edges())
     edges_list.sort()
-    nodes_with_edges = ['query_spec_0', 'ref_spec_4',
-                        'query_spec_2', 'ref_spec_3', 'query_spec_1']
+    nodes_with_edges = ["query_spec_0", "ref_spec_4", "query_spec_2", "ref_spec_3", "query_spec_1"]
     assert len(nodes_list) == 5, "Expected different number of nodes"
-    assert np.all([(x in nodes_with_edges) for x in nodes_list]), \
-        "Expected this node to have edges"
+    assert np.all([(x in nodes_with_edges) for x in nodes_list]), "Expected this node to have edges"
 
 
 def test_create_network_symmetric_modified_cosine():
@@ -172,10 +183,8 @@ def test_create_network_symmetric_higher_cutoff():
     edges_list = list(msnet.graph.edges())
     edges_list.sort()
     assert len(edges_list) == 1, "Expected only one link"
-    assert edges_list[0][0] in ['query_spec_0', 'ref_spec_4'], \
-        "Expected different node to have a link"
-    assert edges_list[0][1] in ['query_spec_0', 'ref_spec_4'], \
-        "Expected different node to have a link"
+    assert edges_list[0][0] in ["query_spec_0", "ref_spec_4"], "Expected different node to have a link"
+    assert edges_list[0][1] in ["query_spec_0", "ref_spec_4"], "Expected different node to have a link"
 
 
 def test_create_network_symmetric_mutual_method():
@@ -190,10 +199,9 @@ def test_create_network_symmetric_mutual_method():
     scores_arr[7, 3] = scores_arr[3, 7] = 0.7
     scores._scores.add_dense_matrix(scores_arr, "modified_score")
 
-    msnet = SimilarityNetwork(score_cutoff=cutoff, top_n=3,
-                              max_links=3, link_method="mutual")
+    msnet = SimilarityNetwork(score_cutoff=cutoff, top_n=3, max_links=3, link_method="mutual")
     msnet.create_network(scores, score_name="modified_score")
-    nodes_with_edges = ['query_spec_0', 'query_spec_1', 'query_spec_2', 'ref_spec_4']
+    nodes_with_edges = ["query_spec_0", "query_spec_1", "query_spec_2", "ref_spec_4"]
     edges_list = list(msnet.graph.edges())
     edges_list.sort()
     assert len(edges_list) == 4, "Expected four links"
@@ -210,11 +218,7 @@ def test_create_network_symmetric_max_links_1():
 
     edges_list = list(msnet.graph.edges())
     edges_list.sort()
-    nodes_without_edges = ['ref_spec_0',
-                           'ref_spec_1',
-                           'ref_spec_2']
+    nodes_without_edges = ["ref_spec_0", "ref_spec_1", "ref_spec_2"]
     assert len(edges_list) == 3, "Expected different number of edges"
-    assert np.all([(x[0] not in nodes_without_edges) for x in edges_list]), \
-        "Expected this node to have no edges"
-    assert np.all([(x[1] not in nodes_without_edges) for x in edges_list]), \
-        "Expected this node to have no edges"
+    assert np.all([(x[0] not in nodes_without_edges) for x in edges_list]), "Expected this node to have no edges"
+    assert np.all([(x[1] not in nodes_without_edges) for x in edges_list]), "Expected this node to have no edges"

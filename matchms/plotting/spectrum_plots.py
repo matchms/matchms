@@ -15,15 +15,17 @@ _annotation_kws = {
 }
 
 
-def plot_spectrum(spectrum,
-                  annotate_ions: bool = False,
-                  mirror_intensity: bool = False,
-                  grid: Union[bool, str] = True,
-                  ax: plt.Axes = None,
-                  peak_color="teal",
-                  min_mz: float = None,
-                  max_mz: float = None,
-                  **plt_kwargs) -> plt.Axes:
+def plot_spectrum(
+    spectrum,
+    annotate_ions: bool = False,
+    mirror_intensity: bool = False,
+    grid: Union[bool, str] = True,
+    ax: plt.Axes = None,
+    peak_color="teal",
+    min_mz: float = None,
+    max_mz: float = None,
+    **plt_kwargs,
+) -> plt.Axes:
     """
     Plot a single MS/MS spectrum.
 
@@ -84,8 +86,7 @@ def plot_spectrum(spectrum,
     if annotate_ions and isinstance(spectrum.get("peak_comments"), dict):
         for mz, comment in spectrum.get("peak_comments").items():
             idx = (-abs(spectrum.peaks.mz - mz)).argmax()
-            ax.text(mz, intensities[idx], f"m/z: {mz} \n {comment}",
-                    _annotation_kws)
+            ax.text(mz, intensities[idx], f"m/z: {mz} \n {comment}", _annotation_kws)
 
     ax.set_xlim(min_mz, max_mz)
     ax.yaxis.set_major_formatter(mticker.PercentFormatter(xmax=1.0))
@@ -113,12 +114,9 @@ def plot_spectrum(spectrum,
     return ax
 
 
-def plot_spectra_mirror(spec_top,
-                        spec_bottom,
-                        ax: Optional[plt.Axes] = None,
-                        color_top="darkblue",
-                        color_bottom="teal",
-                        **spectrum_kws) -> plt.Axes:
+def plot_spectra_mirror(
+    spec_top, spec_bottom, ax: Optional[plt.Axes] = None, color_top="darkblue", color_bottom="teal", **spectrum_kws
+) -> plt.Axes:
     """Mirror plot two MS/MS spectra.
 
     Code is largely taken from package "spectrum_utils".
@@ -150,9 +148,10 @@ def plot_spectra_mirror(spec_top,
     if spectrum_kws is None:
         spectrum_kws = {}
 
-    if 'peak_color' in spectrum_kws:
-        raise ValueError("'peak_color' should not be set for `plot_spectra_mirror`. "
-                         "Use 'color_top' and 'color_bottom' instead.")
+    if "peak_color" in spectrum_kws:
+        raise ValueError(
+            "'peak_color' should not be set for `plot_spectra_mirror`. Use 'color_top' and 'color_bottom' instead."
+        )
 
     # Top spectrum.
     plot_spectrum(spec_top, mirror_intensity=False, ax=ax, peak_color=color_top, **spectrum_kws)
@@ -187,9 +186,7 @@ def plot_spectra_mirror(spec_top,
     ax.set_xlim(min_mz, max_mz)
     ax.yaxis.set_major_locator(mticker.AutoLocator())
     ax.yaxis.set_minor_locator(mticker.AutoMinorLocator())
-    ax.yaxis.set_major_formatter(
-        mticker.FuncFormatter(lambda x, pos: f"{abs(x):.0%}")
-    )
+    ax.yaxis.set_major_formatter(mticker.FuncFormatter(lambda x, pos: f"{abs(x):.0%}"))
 
     name1 = "Spectrum 1" if spec_top.get("compound_name") is None else spec_top.get("compound_name")
     name2 = "Spectrum 2" if spec_bottom.get("compound_name") is None else spec_bottom.get("compound_name")
@@ -202,12 +199,9 @@ def plot_spectra_mirror(spec_top,
 
 
 @rename_deprecated_params(param_mapping={"spectrums": "spectra"}, version="0.26.5")
-def plot_spectra_array(spectra,
-                       n_cols: int = 2,
-                       peak_color="darkblue",
-                       dpi: int = 200,
-                       title: str = None,
-                       **spectrum_kws) -> plt.Axes:
+def plot_spectra_array(
+    spectra, n_cols: int = 2, peak_color="darkblue", dpi: int = 200, title: str = None, **spectrum_kws
+) -> plt.Axes:
     """Mirror plot two MS/MS spectra.
 
     Code is largely taken from package "spectrum_utils".
@@ -237,9 +231,9 @@ def plot_spectra_array(spectra,
             if counter >= n_spectra:
                 break
 
-            plot_spectrum(spectra[counter],
-                          mirror_intensity=False, ax=axes[i, j],
-                          peak_color=peak_color, **spectrum_kws)
+            plot_spectrum(
+                spectra[counter], mirror_intensity=False, ax=axes[i, j], peak_color=peak_color, **spectrum_kws
+            )
             axes[i, j].set_title("")
             if spectra[counter].get("compound_name") is None:
                 name = f"Spectrum {i * n_cols + j}"

@@ -86,7 +86,7 @@ def test_normalize_intensities_empty_spectrum():
             np.array([10.0, 20.0, 30.0, 40.0], dtype="float"),
             np.array([100.0, 200.0, 300.0, 400.0], dtype="float"),
             (0, 100),
-            np.array([0, 33.33, 66.66, 100])
+            np.array([0, 33.33, 66.66, 100]),
         ],
         # Test case 3: Scaling to 0-1000
         [
@@ -96,12 +96,7 @@ def test_normalize_intensities_empty_spectrum():
             np.array([0, 444.44, 1000]),
         ],
         # Test case 4: Custom range scaling
-        [
-            np.array([100.0, 200.0], dtype="float"),
-            np.array([25.0, 75.0], dtype="float"),
-            (10, 90),
-            np.array([10, 90])
-        ],
+        [np.array([100.0, 200.0], dtype="float"), np.array([25.0, 75.0], dtype="float"), (10, 90), np.array([10, 90])],
         # Test case 5: Single peak
         [
             np.array([150.0], dtype="float"),

@@ -8,6 +8,7 @@ from ..builder_Spectrum import SpectrumBuilder
 
 # ---------- helpers ----------
 
+
 def _build(builder, mz, intens):
     return builder.with_mz(np.asarray(mz, dtype=float)).with_intensities(np.asarray(intens, dtype=float)).build()
 
@@ -45,14 +46,18 @@ def _prep_naive(s, bin_width=1.0, mz_power=0.0, intensity_power=1.0):
 
 # ---------- tests ----------
 
-@pytest.mark.parametrize("mz1,int1,mz2,int2", [
-    # partial overlap
-    ([100, 200, 300], [1.0, 2.0, 3.0], [200, 400], [5.0, 1.0]),
-    # exact same peaks
-    ([50, 60], [2.0, 2.0], [50, 60], [3.0, 4.0]),
-    # no overlap
-    ([10, 20], [1.0, 1.0], [30, 40], [1.0, 1.0]),
-])
+
+@pytest.mark.parametrize(
+    "mz1,int1,mz2,int2",
+    [
+        # partial overlap
+        ([100, 200, 300], [1.0, 2.0, 3.0], [200, 400], [5.0, 1.0]),
+        # exact same peaks
+        ([50, 60], [2.0, 2.0], [50, 60], [3.0, 4.0]),
+        # no overlap
+        ([10, 20], [1.0, 1.0], [30, 40], [1.0, 1.0]),
+    ],
+)
 @pytest.mark.parametrize("use_numba", [True, False])
 def test_pair_strict_R0_expected(mz1, int1, mz2, int2, use_numba):
     """R=0 via tolerance=0, bin_width=1: score equals cosine of shared binned intensities."""
@@ -174,8 +179,8 @@ def test_matrix_sparse_and_threshold_matches_pair():
         _build(builder, [150, 250], [1.0, 1.0]),
     ]
     qrys = [
-        _build(builder, [100, 201], [1.0, 1.0]),   # near first ref
-        _build(builder, [350], [1.0]),             # no match anywhere
+        _build(builder, [100, 201], [1.0, 1.0]),  # near first ref
+        _build(builder, [350], [1.0]),  # no match anywhere
     ]
 
     sim = BlinkCosine(tolerance=2.0, bin_width=1.0, prefilter=False, sparse_score_min=0.2)
@@ -241,13 +246,17 @@ def test_blinkcosine_upper_bound_cosinegreedy():
     """BLINK similarity should always be >= CosineGreedy for the same tolerance."""
     builder = SpectrumBuilder()
 
-    spectrum_1 = builder.with_mz(np.array([100, 200, 300, 400], dtype=float)).with_intensities(
-        np.array([0.5, 0.2, 1.0, 0.3], dtype=float)
-    ).build()
+    spectrum_1 = (
+        builder.with_mz(np.array([100, 200, 300, 400], dtype=float))
+        .with_intensities(np.array([0.5, 0.2, 1.0, 0.3], dtype=float))
+        .build()
+    )
 
-    spectrum_2 = builder.with_mz(np.array([98, 199, 305, 410], dtype=float)).with_intensities(
-        np.array([0.4, 0.3, 0.8, 0.2], dtype=float)
-    ).build()
+    spectrum_2 = (
+        builder.with_mz(np.array([98, 199, 305, 410], dtype=float))
+        .with_intensities(np.array([0.4, 0.3, 0.8, 0.2], dtype=float))
+        .build()
+    )
 
     tolerance = 5.0
     cg = CosineGreedy(tolerance=tolerance)
@@ -257,6 +266,4 @@ def test_blinkcosine_upper_bound_cosinegreedy():
     score_bc = bc.pair(spectrum_1, spectrum_2)["score"]
 
     # BLINK should give an equal or higher similarity score
-    assert score_bc >= score_cg - 1e-6, \
-        f"Expected BlinkCosine score {score_bc} to be >= CosineGreedy {score_cg}"
-    
+    assert score_bc >= score_cg - 1e-6, f"Expected BlinkCosine score {score_bc} to be >= CosineGreedy {score_cg}"

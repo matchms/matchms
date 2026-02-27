@@ -82,7 +82,8 @@ def _select_best_adduct(list_of_adducts: List[str]) -> Optional[str]:
         return None
     if len(completely_correct_adduct) == 1:
         return completely_correct_adduct[0]
-    logger.warning((
+    logger.warning(
+        (
             "Two potential adducts were found in the compound name that are both valid adducts. The first adduct is "
             "used. The adducts found are: %s",
         ),

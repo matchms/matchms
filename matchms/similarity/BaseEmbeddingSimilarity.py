@@ -70,9 +70,8 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
         raise NotImplementedError("Subclasses must implement this method.")
 
     def get_embeddings(
-            self,
-            spectra: Optional[Iterable[SpectrumType]] = None,
-            npy_path: Optional[Union[str, Path]] = None) -> np.ndarray:
+        self, spectra: Optional[Iterable[SpectrumType]] = None, npy_path: Optional[Union[str, Path]] = None
+    ) -> np.ndarray:
         """Get embeddings either by computing them or loading from disk.
 
         Parameters
@@ -127,11 +126,12 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
         return self.matrix([reference], [query])[0, 0]
 
     def matrix(
-            self,
-            references: List[SpectrumType],
-            queries: List[SpectrumType],
-            array_type: str = "numpy",
-            is_symmetric: bool = True) -> np.ndarray:
+        self,
+        references: List[SpectrumType],
+        queries: List[SpectrumType],
+        array_type: str = "numpy",
+        is_symmetric: bool = True,
+    ) -> np.ndarray:
         """Compute similarity matrix between reference and query spectra.
 
         Parameters
@@ -166,12 +166,13 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
         return self.pairwise_similarity_fn(embs_ref, embs_query)
 
     def build_ann_index(
-            self,
-            reference_spectra: Optional[Iterable[SpectrumType]] = None,
-            embeddings_path: Optional[Union[str, Path]] = None,
-            k: int = 100,
-            index_backend: str = "pynndescent",
-            **index_kwargs) -> Any:
+        self,
+        reference_spectra: Optional[Iterable[SpectrumType]] = None,
+        embeddings_path: Optional[Union[str, Path]] = None,
+        k: int = 100,
+        index_backend: str = "pynndescent",
+        **index_kwargs,
+    ) -> Any:
         """Build an ANN index for the reference spectra.
 
         Parameters
@@ -219,9 +220,8 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
         return self.index
 
     def get_anns(
-            self,
-            query_spectra: Union[Iterable[SpectrumType], np.ndarray],
-            k: int = 100) -> Tuple[np.ndarray, np.ndarray]:
+        self, query_spectra: Union[Iterable[SpectrumType], np.ndarray], k: int = 100
+    ) -> Tuple[np.ndarray, np.ndarray]:
         """Get approximate nearest neighbors for query spectra.
 
         Parameters
@@ -363,14 +363,14 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
             raise ValueError("No index to save. Please build an index first using build_ann_index().")
 
         save_dict = {
-            'index': self.index,
-            'backend': self.index_backend,
-            'similarity': self.similarity,
-            'index_kwargs': self.index_kwargs,
-            'index_k': self.index_k
+            "index": self.index,
+            "backend": self.index_backend,
+            "similarity": self.similarity,
+            "index_kwargs": self.index_kwargs,
+            "index_k": self.index_k,
         }
 
-        with open(path, 'wb') as f:
+        with open(path, "wb") as f:
             pickle.dump(save_dict, f)
 
     def load_ann_index(self, path: Union[str, Path]) -> Any:
@@ -391,18 +391,18 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
         ValueError
             If loaded index similarity metric doesn't match current metric.
         """
-        with open(path, 'rb') as f:
+        with open(path, "rb") as f:
             load_dict = pickle.load(f)
 
-        if load_dict['similarity'] != self.similarity:
+        if load_dict["similarity"] != self.similarity:
             raise ValueError(
                 f"Loaded index similarity metric ({load_dict['similarity']}) does not match "
                 f"current similarity metric ({self.similarity})"
             )
 
-        self.index = load_dict['index']
-        self.index_backend = load_dict['backend']
-        self.index_kwargs = load_dict['index_kwargs']
-        self.index_k = load_dict['index_k']
+        self.index = load_dict["index"]
+        self.index_backend = load_dict["backend"]
+        self.index_kwargs = load_dict["index_kwargs"]
+        self.index_k = load_dict["index_k"]
 
         return self.index

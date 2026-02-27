@@ -10,6 +10,7 @@ from .builder_Spectrum import SpectrumBuilder
 
 class DummySimilarityFunction(BaseSimilarity):
     """Simple dummy score, only contain pair-wise implementation."""
+
     score_datatype = [("score", np.str_, 16), ("len", np.int32)]
 
     def __init__(self):
@@ -23,6 +24,7 @@ class DummySimilarityFunction(BaseSimilarity):
 
 class DummySimilarityFunctionParallel(BaseSimilarity):
     """Simple dummy score, contains pair-wise and matrix implementation."""
+
     score_datatype = [("score", np.str_, 16), ("len", "int")]
 
     def __init__(self):
@@ -33,8 +35,7 @@ class DummySimilarityFunctionParallel(BaseSimilarity):
         s = reference + query
         return np.array([(s, len(s))], dtype=self.score_datatype)
 
-    def matrix(self, references, queries, array_type: str = "numpy",
-               is_symmetric: bool = False):
+    def matrix(self, references, queries, array_type: str = "numpy", is_symmetric: bool = False):
         """additional matrix computation method"""
         shape = len(references), len(queries)
         s = np.empty(shape, dtype=self.score_datatype)
@@ -58,14 +59,30 @@ def filename(file_format):
 
 def spectra():
     builder = SpectrumBuilder()
-    spectrum_1 = builder.with_mz(np.array([100, 150, 200.])).with_intensities(
-        np.array([0.7, 0.2, 0.1])).with_metadata({'id': 'spectrum1'}).build()
-    spectrum_2 = builder.with_mz(np.array([100, 140, 190.])).with_intensities(
-        np.array([0.4, 0.2, 0.1])).with_metadata({'id': 'spectrum2'}).build()
-    spectrum_3 = builder.with_mz(np.array([110, 140, 195.])).with_intensities(
-        np.array([0.6, 0.2, 0.1])).with_metadata({'id': 'spectrum3'}).build()
-    spectrum_4 = builder.with_mz(np.array([100, 150, 200.])).with_intensities(
-        np.array([0.6, 0.1, 0.6])).with_metadata({'id': 'spectrum4'}).build()
+    spectrum_1 = (
+        builder.with_mz(np.array([100, 150, 200.0]))
+        .with_intensities(np.array([0.7, 0.2, 0.1]))
+        .with_metadata({"id": "spectrum1"})
+        .build()
+    )
+    spectrum_2 = (
+        builder.with_mz(np.array([100, 140, 190.0]))
+        .with_intensities(np.array([0.4, 0.2, 0.1]))
+        .with_metadata({"id": "spectrum2"})
+        .build()
+    )
+    spectrum_3 = (
+        builder.with_mz(np.array([110, 140, 195.0]))
+        .with_intensities(np.array([0.6, 0.2, 0.1]))
+        .with_metadata({"id": "spectrum3"})
+        .build()
+    )
+    spectrum_4 = (
+        builder.with_mz(np.array([100, 150, 200.0]))
+        .with_intensities(np.array([0.6, 0.1, 0.6]))
+        .with_metadata({"id": "spectrum4"})
+        .build()
+    )
 
     return spectrum_1, spectrum_2, spectrum_3, spectrum_4
 
@@ -73,19 +90,17 @@ def spectra():
 def test_scores_single_pair():
     """Test single pair input."""
     dummy_similarity_function = DummySimilarityFunction()
-    scores = Scores(references=["A"],
-                    queries=["B"])
+    scores = Scores(references=["A"], queries=["B"])
     scores.calculate(dummy_similarity_function)
-    actual_1 = scores.scores[0, 0, 'DummySimilarityFunction_score']
-    actual_2 = scores.scores[0, 0, 'DummySimilarityFunction_len']
+    actual_1 = scores.scores[0, 0, "DummySimilarityFunction_score"]
+    actual_2 = scores.scores[0, 0, "DummySimilarityFunction_len"]
     assert actual_1 == "AB", "Expected different scores."
     assert actual_2 == 2, "Expected different scores."
 
 
 def test_scores_calculate():
     dummy_similarity_function = DummySimilarityFunction()
-    scores = Scores(references=["r0", "r1", "r2"],
-                    queries=["q0", "q1"])
+    scores = Scores(references=["r0", "r1", "r2"], queries=["q0", "q1"])
     scores.calculate(dummy_similarity_function)
     actual_data = list(scores)
     expected = [
@@ -94,15 +109,14 @@ def test_scores_calculate():
         ("r1", "q0", ["r1q0", 4]),
         ("r1", "q1", ["r1q1", 4]),
         ("r2", "q0", ["r2q0", 4]),
-        ("r2", "q1", ["r2q1", 4])
+        ("r2", "q1", ["r2q1", 4]),
     ]
     assert actual_data == expected, "Expected different scores."
 
 
 def test_scores_calculate_parallel():
     dummy_similarity_function = DummySimilarityFunctionParallel()
-    scores = Scores(references=["r0", "r1", "r2"],
-                    queries=["q0", "q1"])
+    scores = Scores(references=["r0", "r1", "r2"], queries=["q0", "q1"])
     scores.calculate(dummy_similarity_function)
     actual = list(scores)
     expected = [
@@ -111,49 +125,43 @@ def test_scores_calculate_parallel():
         ("r1", "q0", ["r1q0", 4]),
         ("r1", "q1", ["r1q1", 4]),
         ("r2", "q0", ["r2q0", 4]),
-        ("r2", "q1", ["r2q1", 4])
+        ("r2", "q1", ["r2q1", 4]),
     ]
     assert actual == expected, "Expected different scores."
 
 
 def test_scores_init_with_list():
-    scores = Scores(references=["r0", "r1", "r2"],
-                    queries=["q0", "q1"])
+    scores = Scores(references=["r0", "r1", "r2"], queries=["q0", "q1"])
     assert scores.shape == (3, 2, 0), "Expected different scores shape."
 
 
 def test_scores_init_with_numpy_array():
-    scores = Scores(references=np.asarray(["r0", "r1", "r2"]),
-                    queries=np.asarray(["q0", "q1"]))
+    scores = Scores(references=np.asarray(["r0", "r1", "r2"]), queries=np.asarray(["q0", "q1"]))
     assert scores.shape == (3, 2, 0), "Expected different scores shape."
 
 
 def test_scores_init_with_queries_dict():
     with pytest.raises(AssertionError) as msg:
-        _ = Scores(references=["r0", "r1", "r2"],
-                   queries= {"k0": 'q0', "k1": 'q1'})
+        _ = Scores(references=["r0", "r1", "r2"], queries={"k0": "q0", "k1": "q1"})
 
     assert str(msg.value) == "Expected input argument 'queries' to be list or tuple or np.ndarray."
 
 
 def test_scores_init_with_references_dict():
     with pytest.raises(AssertionError) as msg:
-        _ = Scores(references={"k0": "r0", "k1": "r1", "k2": "r2"},
-                   queries=["q0", "q1"])
+        _ = Scores(references={"k0": "r0", "k1": "r1", "k2": "r2"}, queries=["q0", "q1"])
 
     assert str(msg.value) == "Expected input argument 'references' to be list or tuple or np.ndarray."
 
 
 def test_scores_init_with_tuple():
-    scores = Scores(references=("r0", "r1", "r2"),
-                    queries=("q0", "q1"))
+    scores = Scores(references=("r0", "r1", "r2"), queries=("q0", "q1"))
     assert scores.shape == (3, 2, 0), "Expected different scores shape."
 
 
 def test_scores_next():
     dummy_similarity_function = DummySimilarityFunction()
-    scores = Scores(references=["r", "rr", "rrr"],
-                    queries=["q", "qq"]).calculate(dummy_similarity_function)
+    scores = Scores(references=["r", "rr", "rrr"], queries=["q", "qq"]).calculate(dummy_similarity_function)
 
     actual = list(scores)
     expected = [
@@ -162,7 +170,7 @@ def test_scores_next():
         ("rr", "q", ["rrq", 3]),
         ("rr", "qq", ["rrqq", 4]),
         ("rrr", "q", ["rrrq", 4]),
-        ("rrr", "qq", ["rrrqq", 5])
+        ("rrr", "qq", ["rrrqq", 5]),
     ]
     assert actual == expected, "Expected different scores."
 
@@ -176,8 +184,8 @@ def test_scores_to_dict():
     scores = calculate_scores(references, queries, CosineGreedy())
     scores_dict = scores.to_dict()
     expected_dict = [
-        {'id': 'spectrum1', 'precursor_mz': 123.4, 'peaks_json': [[100.0, 0.7], [150.0, 0.2], [200.0, 0.1]]},
-        {'id': 'spectrum2', 'peaks_json': [[100.0, 0.4], [140.0, 0.2], [190.0, 0.1]]}
+        {"id": "spectrum1", "precursor_mz": 123.4, "peaks_json": [[100.0, 0.7], [150.0, 0.2], [200.0, 0.1]]},
+        {"id": "spectrum2", "peaks_json": [[100.0, 0.4], [140.0, 0.2], [190.0, 0.1]]},
     ]
     assert len(scores_dict["references"]) == 2
     assert scores_dict["references"] == expected_dict
@@ -212,8 +220,7 @@ def test_scores_by_reference_sorted():
     assert selected_scores == expected_result, "Expected different scores."
     scores_only = np.array([x[1] for x in selected_scores]).tolist()
     scores_expected = [(1.0, 3), (0.61297133, 1), (0.13631964, 1)]
-    assert np.allclose(scores_only, scores_expected, atol=1e-8), \
-        "Expected different sorted scores."
+    assert np.allclose(scores_only, scores_expected, atol=1e-8), "Expected different sorted scores."
 
 
 def test_scores_by_referencey_non_tuple_score():
@@ -236,8 +243,12 @@ def test_scores_by_references_exception():
     queries = [spectrum_3, spectrum_4]
 
     builder = SpectrumBuilder()
-    faulty_spectrum = builder.with_mz(np.array([200, 350, 400.])).with_intensities(
-        np.array([0.7, 0.2, 0.1])).with_metadata({'id': 'spectrum5'}).build()
+    faulty_spectrum = (
+        builder.with_mz(np.array([200, 350, 400.0]))
+        .with_intensities(np.array([0.7, 0.2, 0.1]))
+        .with_metadata({"id": "spectrum5"})
+        .build()
+    )
 
     scores = calculate_scores(references, queries, CosineGreedy())
     name_score = scores.score_names[0]
@@ -263,14 +274,30 @@ def test_scores_by_query():
 def test_scores_by_query_sorted():
     "Test scores_by_query method with sort=True."
     builder = SpectrumBuilder()
-    spectrum_1 = builder.with_mz(np.array([100, 150, 200.])).with_intensities(
-        np.array([0.7, 0.2, 0.1])).with_metadata({'id': 'spectrum1'}).build()
-    spectrum_2 = builder.with_mz(np.array([100, 140, 190.])).with_intensities(
-        np.array([0.4, 0.2, 0.1])).with_metadata({'id': 'spectrum2'}).build()
-    spectrum_3 = builder.with_mz(np.array([100, 140, 195.])).with_intensities(
-        np.array([0.6, 0.2, 0.1])).with_metadata({'id': 'spectrum3'}).build()
-    spectrum_4 = builder.with_mz(np.array([100, 150, 200.])).with_intensities(
-        np.array([0.6, 0.1, 0.6])).with_metadata({'id': 'spectrum4'}).build()
+    spectrum_1 = (
+        builder.with_mz(np.array([100, 150, 200.0]))
+        .with_intensities(np.array([0.7, 0.2, 0.1]))
+        .with_metadata({"id": "spectrum1"})
+        .build()
+    )
+    spectrum_2 = (
+        builder.with_mz(np.array([100, 140, 190.0]))
+        .with_intensities(np.array([0.4, 0.2, 0.1]))
+        .with_metadata({"id": "spectrum2"})
+        .build()
+    )
+    spectrum_3 = (
+        builder.with_mz(np.array([100, 140, 195.0]))
+        .with_intensities(np.array([0.6, 0.2, 0.1]))
+        .with_metadata({"id": "spectrum3"})
+        .build()
+    )
+    spectrum_4 = (
+        builder.with_mz(np.array([100, 150, 200.0]))
+        .with_intensities(np.array([0.6, 0.1, 0.6]))
+        .with_metadata({"id": "spectrum4"})
+        .build()
+    )
 
     references = [spectrum_1, spectrum_2, spectrum_3]
     queries = [spectrum_2, spectrum_3, spectrum_4]
@@ -281,8 +308,9 @@ def test_scores_by_query_sorted():
 
     expected_result = [(scores.references[i], scores.scores[i, 2]) for i in [0, 2, 1]]
     assert selected_scores == expected_result, "Expected different scores."
-    assert np.allclose(np.array([x[1] for x in selected_scores]).tolist(),
-                       [(0.79636414, 3), (0.65803523, 1), (0.61297133, 1)])
+    assert np.allclose(
+        np.array([x[1] for x in selected_scores]).tolist(), [(0.79636414, 3), (0.65803523, 1), (0.61297133, 1)]
+    )
 
 
 def test_scores_by_query_non_tuple_score():
@@ -320,8 +348,12 @@ def test_scores_by_query_exception():
     queries = [spectrum_2, spectrum_3, spectrum_4]
 
     builder = SpectrumBuilder()
-    faulty_spectrum = builder.with_mz(np.array([200, 350, 400.])).with_intensities(
-        np.array([0.7, 0.2, 0.1])).with_metadata({'id': 'spectrum5'}).build()
+    faulty_spectrum = (
+        builder.with_mz(np.array([200, 350, 400.0]))
+        .with_intensities(np.array([0.7, 0.2, 0.1]))
+        .with_metadata({"id": "spectrum5"})
+        .build()
+    )
 
     scores = calculate_scores(references, queries, CosineGreedy())
     name_score = scores.score_names[0]
@@ -331,8 +363,8 @@ def test_scores_by_query_exception():
 
 
 @pytest.mark.parametrize(
-    "similarity_function_a,similarity_function_b",
-    [(CosineGreedy(), IntersectMz()), (IntersectMz(), CosineGreedy())])
+    "similarity_function_a,similarity_function_b", [(CosineGreedy(), IntersectMz()), (IntersectMz(), CosineGreedy())]
+)
 def test_comparing_symmetric_scores(similarity_function_a, similarity_function_b):
     "Test comparing symmetric scores objects."
     spectrum_1, spectrum_2, spectrum_3, spectrum_4 = spectra()
@@ -347,8 +379,8 @@ def test_comparing_symmetric_scores(similarity_function_a, similarity_function_b
 
 
 @pytest.mark.parametrize(
-    "similarity_function_a,similarity_function_b",
-    [(CosineGreedy(), IntersectMz()), (IntersectMz(), CosineGreedy())])
+    "similarity_function_a,similarity_function_b", [(CosineGreedy(), IntersectMz()), (IntersectMz(), CosineGreedy())]
+)
 def test_comparing_asymmetric_scores(similarity_function_a, similarity_function_b):
     "Test comparing asymmetric scores objects."
     spectrum_1, spectrum_2, spectrum_3, spectrum_4 = spectra()
@@ -364,8 +396,11 @@ def test_comparing_asymmetric_scores(similarity_function_a, similarity_function_
 
 @pytest.mark.parametrize(
     "similarity_function_a,similarity_function_b",
-    [(CosineGreedy(tolerance=0.5, mz_power=0.5), CosineGreedy(tolerance=0.1, mz_power=0.1)),
-     (IntersectMz(scaling=1.0), IntersectMz(scaling=2.0))])
+    [
+        (CosineGreedy(tolerance=0.5, mz_power=0.5), CosineGreedy(tolerance=0.1, mz_power=0.1)),
+        (IntersectMz(scaling=1.0), IntersectMz(scaling=2.0)),
+    ],
+)
 def test_comparing_scores_with_same_shape_different_scores_values(similarity_function_a, similarity_function_b):
     "Test comparing scores objects with same similarity functions but different values of scores."
     spectrum_1, spectrum_2, spectrum_3, spectrum_4 = spectra()

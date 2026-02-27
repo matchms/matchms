@@ -4,10 +4,13 @@ import pytest
 from matchms.importing import load_from_mzxml
 
 
-@pytest.mark.parametrize("mzxml_file", [
-    (os.path.join(os.path.dirname(__file__), "..", "testdata", "testdata.mzXML")),
-    (Path(os.path.join(os.path.dirname(__file__), "..", "testdata", "testdata.mzXML")))
-])
+@pytest.mark.parametrize(
+    "mzxml_file",
+    [
+        (os.path.join(os.path.dirname(__file__), "..", "testdata", "testdata.mzXML")),
+        (Path(os.path.join(os.path.dirname(__file__), "..", "testdata", "testdata.mzXML"))),
+    ],
+)
 def test_load_from_mzxml(mzxml_file):
     """Test parsing of mzxml file to spectrum objects"""
 
@@ -29,5 +32,4 @@ def test_load_from_mzxml_ms_levels():
     for i in range(4):
         ms_level = i + 1
         spectra = list(load_from_mzxml(mzxml_file, ms_level))
-        assert len(spectra) == expected_num_spectra[i], (
-            f"Expected different number of spectra for ms_level={ms_level}")
+        assert len(spectra) == expected_num_spectra[i], f"Expected different number of spectra for ms_level={ms_level}"

@@ -33,10 +33,10 @@ stream of such messages, you can do the following:
 
     from matchms.logging_functions import add_logging_to_file
 
-    add_logging_to_file("sample.log", loglevel="INFO",
-                        remove_stream_handlers=True)
+    add_logging_to_file("sample.log", loglevel="INFO", remove_stream_handlers=True)
 
 """
+
 import logging
 import logging.config
 import sys
@@ -51,8 +51,7 @@ else:
 rdkit_missing_message = "Conda package 'rdkit' is required for this functionality."
 
 
-_formatter = logging.Formatter(
-    '%(asctime)s:%(levelname)s:%(name)s:%(module)s:%(message)s')
+_formatter = logging.Formatter("%(asctime)s:%(levelname)s:%(name)s:%(module)s:%(message)s")
 
 
 def _init_logger(logger_name="matchms"):
@@ -63,7 +62,7 @@ def _init_logger(logger_name="matchms"):
     handler.setLevel(logging.WARNING)
     handler.setFormatter(_formatter)
     logger.addHandler(handler)
-    logger.info('Completed configuring matchms logger.')
+    logger.info("Completed configuring matchms logger.")
 
 
 def set_matchms_logger_level(loglevel: str, logger_name="matchms"):
@@ -83,9 +82,9 @@ def set_matchms_logger_level(loglevel: str, logger_name="matchms"):
         handler.setLevel(level)
 
 
-def add_logging_to_file(filename: str, loglevel: str = "INFO",
-                        remove_stream_handlers: bool = False,
-                        logger_name="matchms"):
+def add_logging_to_file(
+    filename: str, loglevel: str = "INFO", remove_stream_handlers: bool = False, logger_name="matchms"
+):
     """Add logging to file.
 
     Current implementation does not change the initial logging stream,
@@ -143,8 +142,8 @@ def set_rdkit_logger_level(level):
     level
         Refers to rdkit log levels ('rdApp.debug', 'rdApp.info', 'rdApp.warning', 'rdApp.error').
     """
-    rdkit_log_levels = ['rdApp.debug', 'rdApp.info', 'rdApp.warning', 'rdApp.error']
-    
+    rdkit_log_levels = ["rdApp.debug", "rdApp.info", "rdApp.warning", "rdApp.error"]
+
     if not _has_rdkit:
         raise ImportError(rdkit_missing_message)
 

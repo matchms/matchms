@@ -4,8 +4,7 @@ from matchms.typing import SpectrumType
 
 
 def remove_peaks_relative_to_precursor_mz(
-    spectrum_in: SpectrumType, offset_to_precursor: float = -1.6,
-    clone: Optional[bool] = True
+    spectrum_in: SpectrumType, offset_to_precursor: float = -1.6, clone: Optional[bool] = True
 ) -> Optional[SpectrumType]:
     """Remove all peaks with m/z values > precursor-m/z + offset_to_precursor.
 
@@ -39,9 +38,8 @@ def remove_peaks_relative_to_precursor_mz(
         raise ValueError("Undefined 'precursor_mz'.")
     if not isinstance(precursor_mz, (float, int)):
         raise ValueError(
-            "Expected 'precursor_mz' to be a scalar number.",
-            "Consider applying 'add_precursor_mz' filter first."
-            )
+            "Expected 'precursor_mz' to be a scalar number.", "Consider applying 'add_precursor_mz' filter first."
+        )
 
     mzs, intensities = spectrum.peaks.mz, spectrum.peaks.intensities
     peaks_to_remove = mzs > (precursor_mz + offset_to_precursor)

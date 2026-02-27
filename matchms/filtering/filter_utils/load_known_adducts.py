@@ -21,7 +21,7 @@ def load_known_adducts() -> pd.DataFrame:
     known_adducts_file = os.path.join(os.path.dirname(__file__), "..", "..", "data", "known_adducts_table.csv")
     assert os.path.isfile(known_adducts_file), "Could not find known_adducts_table.csv."
 
-    with open(known_adducts_file, newline='', encoding='utf-8-sig') as csvfile:
+    with open(known_adducts_file, newline="", encoding="utf-8-sig") as csvfile:
         adducts_dataframe = pd.read_csv(csvfile)
         assert list(adducts_dataframe.columns) == ["adduct", "ionmode", "charge", "mass_multiplier", "correction_mass"]
     return adducts_dataframe
@@ -29,16 +29,16 @@ def load_known_adducts() -> pd.DataFrame:
 
 @lru_cache(maxsize=4)
 def load_known_adduct_conversions() -> Dict[str, dict]:
-    """Load dictionary of known adduct conversions. Makes sure that file loading is cached.
-    """
-    adduct_conversions_file = os.path.join(os.path.dirname(__file__), "..", "..", "data",
-                                           "known_adduct_conversions.csv")
+    """Load dictionary of known adduct conversions. Makes sure that file loading is cached."""
+    adduct_conversions_file = os.path.join(
+        os.path.dirname(__file__), "..", "..", "data", "known_adduct_conversions.csv"
+    )
     assert os.path.isfile(adduct_conversions_file), "Could not find known_adduct_conversions.csv."
 
-    with open(adduct_conversions_file, newline='', encoding='utf-8-sig') as csvfile:
+    with open(adduct_conversions_file, newline="", encoding="utf-8-sig") as csvfile:
         reader = csv.DictReader(csvfile)
         known_adduct_conversions = {}
         for row in reader:
-            known_adduct_conversions[row['input_adduct']] = row['corrected_adduct']
+            known_adduct_conversions[row["input_adduct"]] = row["corrected_adduct"]
 
     return known_adduct_conversions

@@ -21,11 +21,9 @@ class BinnedEmbeddingSimilarity(BaseEmbeddingSimilarity):
     intensity_power:
         The power to raise the peak intensities. Default is 1.
     """
+
     def __init__(
-        self, similarity: str = "cosine",
-        max_mz: float = 1005,
-        bin_width: float = 1,
-        intensity_power: float = 1
+        self, similarity: str = "cosine", max_mz: float = 1005, bin_width: float = 1, intensity_power: float = 1
     ):
         super().__init__(similarity=similarity)
         self.max_mz = max_mz
@@ -47,7 +45,7 @@ class BinnedEmbeddingSimilarity(BaseEmbeddingSimilarity):
         """
         # NOTE: copypaste from https://github.com/pluskal-lab/MassSpecGym/blob/f525a5e55a39ec4caa4f1a51e64acd046713179e/massspecgym/data/transforms.py#L97
         mzs = spectrum.peaks.mz
-        intensities = spectrum.peaks.intensities ** self.intensity_power
+        intensities = spectrum.peaks.intensities**self.intensity_power
 
         # Calculate the number of bins
         num_bins = int(np.ceil(self.max_mz / self.bin_width))

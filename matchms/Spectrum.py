@@ -67,10 +67,9 @@ class Spectrum:
 
     _peak_comments_mz_tolerance = 1e-05
 
-    def __init__(self, mz: np.array,
-                 intensities: np.array,
-                 metadata: Optional[dict] = None,
-                 metadata_harmonization: bool = True):
+    def __init__(
+        self, mz: np.array, intensities: np.array, metadata: Optional[dict] = None, metadata_harmonization: bool = True
+    ):
         """
 
         Parameters
@@ -91,16 +90,14 @@ class Spectrum:
         self.peaks = Fragments(mz=mz, intensities=intensities)
 
     def __eq__(self, other):
-        return \
-            self.peaks == other.peaks and \
-            self._metadata == other._metadata
+        return self.peaks == other.peaks and self._metadata == other._metadata
 
     def __hash__(self):
         """Return a integer hash which is computed from both
         metadata (see .metadata_hash() method) and spectrum peaks
         (see .spectrum_hash() method)."""
         combined_hash = self.metadata_hash() + self.spectrum_hash()
-        return int.from_bytes(bytearray(combined_hash, 'utf-8'), 'big')
+        return int.from_bytes(bytearray(combined_hash, "utf-8"), "big")
 
     def __repr__(self):
         precursor_mz_str = f"{self.get('precursor_mz', 0.0):.2f}"
@@ -129,10 +126,12 @@ class Spectrum:
 
     def clone(self):
         """Return a deepcopy of the spectrum instance."""
-        clone = Spectrum(mz=self.peaks.mz,
-                         intensities=self.peaks.intensities,
-                         metadata=self._metadata.data,
-                         metadata_harmonization=False)
+        clone = Spectrum(
+            mz=self.peaks.mz,
+            intensities=self.peaks.intensities,
+            metadata=self._metadata.data,
+            metadata_harmonization=False,
+        )
         return clone
 
     def plot(self, figsize=(8, 6), dpi=200, **kwargs):
@@ -148,9 +147,7 @@ class Spectrum:
         ax = plot_spectrum(self, ax=ax, **kwargs)
         return fig, ax
 
-    def plot_against(self, other_spectrum,
-                     figsize=(8, 6), dpi=200,
-                     **spectrum_kws):
+    def plot_against(self, other_spectrum, figsize=(8, 6), dpi=200, **spectrum_kws):
         """Compare two spectra visually in a mirror plot.
 
         To visually compare the peaks of two spectra run
@@ -234,11 +231,8 @@ class Spectrum:
     def losses(self) -> Optional[Fragments]:
         return self.compute_losses()
 
-    def compute_losses(
-            self, loss_mz_from: float = 0.0,
-            loss_mz_to : float = None
-            ) -> Optional[Fragments]:
-        """This will compute the "losses", i.e. the differences between the precursor_mz and 
+    def compute_losses(self, loss_mz_from: float = 0.0, loss_mz_to: float = None) -> Optional[Fragments]:
+        """This will compute the "losses", i.e. the differences between the precursor_mz and
         the individual fragment m/z values. Only losses between loss_mz_from and loss_mz_to
         will be kept.
 
@@ -255,17 +249,17 @@ class Spectrum:
             if loss_mz_to is None:
                 # Set max to precursor_mz
                 loss_mz_to = precursor_mz
-            assert isinstance(precursor_mz, (float, int)), ("Expected 'precursor_mz' to be a scalar number.",
-                                                            "Consider applying 'add_precursor_mz' filter first.")
+            assert isinstance(precursor_mz, (float, int)), (
+                "Expected 'precursor_mz' to be a scalar number.",
+                "Consider applying 'add_precursor_mz' filter first.",
+            )
             peaks_mz, peaks_intensities = self.peaks.mz, self.peaks.intensities
             losses_mz = (precursor_mz - peaks_mz)[::-1]
             losses_intensities = peaks_intensities[::-1]
 
             # Add losses that are within given boundaries
-            mask = np.where((losses_mz >= loss_mz_from)
-                            & (losses_mz <= loss_mz_to))
-            losses = Fragments(mz=losses_mz[mask],
-                               intensities=losses_intensities[mask])
+            mask = np.where((losses_mz >= loss_mz_from) & (losses_mz <= loss_mz_to))
+            losses = Fragments(mz=losses_mz[mask], intensities=losses_intensities[mask])
             return losses
         return None
 
@@ -298,8 +292,7 @@ class Spectrum:
             return None
 
         self._metadata["peak_comments"] = {
-            float(key) if isinstance(key, str) else key: value
-            for key, value in self.metadata["peak_comments"].items()
+            float(key) if isinstance(key, str) else key: value for key, value in self.metadata["peak_comments"].items()
         }
 
         mz_tolerance = self._peak_comments_mz_tolerance

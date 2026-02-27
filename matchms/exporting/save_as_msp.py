@@ -22,7 +22,7 @@ def save_as_msp(
     write_peak_comments: bool = True,
     mode: str = "a",
     style: str = "matchms",
-    peak_sep: str = '\t'
+    peak_sep: str = "\t",
 ):
     """Save spectrum(s) as msp file.
 
@@ -35,11 +35,11 @@ def save_as_msp(
         from matchms.exporting import save_as_msp
 
         # Create dummy spectrum
-        spectrum = Spectrum(mz=np.array([100, 200, 300], dtype="float"),
-                            intensities=np.array([10, 10, 500], dtype="float"),
-                            metadata={"charge": -1,
-                                      "inchi": '"InChI=1S/C6H12"',
-                                      "precursor_mz": 222.2})
+        spectrum = Spectrum(
+            mz=np.array([100, 200, 300], dtype="float"),
+            intensities=np.array([10, 10, 500], dtype="float"),
+            metadata={"charge": -1, "inchi": '"InChI=1S/C6H12"', "precursor_mz": 222.2},
+        )
 
         # Write spectrum to test file
         save_as_msp(spectrum, "test.msp")
@@ -70,9 +70,7 @@ def save_as_msp(
     fingerprint_export_warning(spectra)
 
     file_extension = filename.split(".")[-1]
-    assert (
-        file_extension.lower() not in _extensions_not_allowed
-    ), f"File extension '.{file_extension}' not allowed."
+    assert file_extension.lower() not in _extensions_not_allowed, f"File extension '.{file_extension}' not allowed."
     if not filename.endswith(".msp"):
         logger.warning(
             "Spectrum(s) will be stored as msp file with extension .%s",
@@ -85,18 +83,10 @@ def save_as_msp(
 
 
 def _write_spectrum(
-    spectrum: Spectrum,
-    outfile: IO,
-    write_peak_comments: bool,
-    export_style: str = "matchms",
-    peak_sep: str = '\t'
+    spectrum: Spectrum, outfile: IO, write_peak_comments: bool, export_style: str = "matchms", peak_sep: str = "\t"
 ):
     _write_metadata(spectrum, export_style, outfile)
-    _write_peaks(
-        spectrum.peaks,
-        spectrum.peak_comments if write_peak_comments else None,
-        outfile,
-        peak_sep)
+    _write_peaks(spectrum.peaks, spectrum.peak_comments if write_peak_comments else None, outfile, peak_sep)
     outfile.write(os.linesep)
 
 
@@ -110,17 +100,17 @@ def _write_metadata(spectrum: Spectrum, export_style: str, outfile: IO):
     metadata = spectrum.metadata_dict(export_style)
     key_conversions = load_export_key_conversions(export_style=export_style)
 
-    metadata.pop(key_conversions['num_peaks'], None)
-    metadata.pop('fingerprint', None)
-    metadata.pop('peak_comments', None)
+    metadata.pop(key_conversions["num_peaks"], None)
+    metadata.pop("fingerprint", None)
+    metadata.pop("peak_comments", None)
 
-    compound_name = metadata.pop(key_conversions['compound_name'], None)
+    compound_name = metadata.pop(key_conversions["compound_name"], None)
     if compound_name:
         outfile.write(f"{key_conversions['compound_name'].upper()}: {compound_name}\n")
 
     for key, value in metadata.items():
         if not (_is_num_peaks(key) or _is_peak_comments(key) or _is_fingerprint(key)):
-            if key.upper().strip() == "SYNON: METB N": # Special case for GOLM
+            if key.upper().strip() == "SYNON: METB N":  # Special case for GOLM
                 for val in value:
                     outfile.write(f"{key.upper()}: {val}\n")
             else:
@@ -128,7 +118,7 @@ def _write_metadata(spectrum: Spectrum, export_style: str, outfile: IO):
     outfile.write(f"NUM PEAKS: {len(spectrum.peaks)}\n")
 
 
-def _format_peak_comment(mz: Union[int, float], peak_comments: Dict, peak_sep: str = '\t'):
+def _format_peak_comment(mz: Union[int, float], peak_comments: Dict, peak_sep: str = "\t"):
     """Format peak comment for given mz to return the quoted comment or empty string if no peak comment is present."""
     if not isinstance(peak_comments, dict):
         return ""

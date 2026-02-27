@@ -8,7 +8,7 @@ from ..builder_Spectrum import SpectrumBuilder
     "metadata, expected_formula",
     [
         [{"formula": "C12H15ClN2O3", "adduct": "[M+H]+"}, "C12H16ClN2O3"],
-        [{"formula": "C12H15ClN2O3", "adduct": "[M+H-H2O]+"}, "C12H14ClN2O2"], # multiple adducts
+        [{"formula": "C12H15ClN2O3", "adduct": "[M+H-H2O]+"}, "C12H14ClN2O2"],  # multiple adducts
         [{"formula": "C12H15ClN2O3"}, None],  # no adduct
         [{"adduct": "[M+H-H2O]+"}, None],  # no formula
         [{"formula": "C2H8NO", "adduct": "[2M+H-H2O]+"}, "C4H15N2O"],  # multiple masses
@@ -76,7 +76,7 @@ def test_zero_counts_removed_from_output():
         ("C1H4N1O1", "[M]+", "CH4NO"),
         # No carbon: then alphabetical only
         ("H3N2O1S1", "[M]+", "H3N2OS"),
-    ]
+    ],
 )
 def test_hill_notation_and_ones_omission(formula, adduct, expected):
     s = SpectrumBuilder().with_metadata({"formula": formula, "adduct": adduct}).build()
