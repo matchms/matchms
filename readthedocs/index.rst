@@ -28,7 +28,7 @@ Installation
 
 Prerequisites:
 
-- Python 3.8 - 3.11
+- Python 3.9 - 3.12
 - Anaconda
 
 Install matchms from Anaconda Cloud with
@@ -36,9 +36,9 @@ Install matchms from Anaconda Cloud with
 .. code-block:: console
 
   # install matchms in a new virtual environment to avoid dependency clashes
-  conda create --name matchms python=3.9
+  conda create --name matchms python=3.12
   conda activate matchms
-  conda install --channel nlesc --channel bioconda --channel conda-forge matchms
+  conda install --channel bioconda --channel conda-forge matchms
 
 Example
 =======
