@@ -1,8 +1,8 @@
 import numpy as np
 import pytest
 from matchms import Spectrum
+from matchms.reference_spectra import cocaine, glucose, hydroxy_cholesterol, phenylalanine
 from matchms.similarity import CosineHungarian
-from matchms.reference_spectra import cocaine, glucose, phenylalanine, hydroxy_cholesterol
 
 
 def test_cosine_hungarian_cocaine_glucose():
