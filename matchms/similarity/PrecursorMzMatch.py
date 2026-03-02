@@ -1,14 +1,14 @@
-from typing import List
+from typing import List, Optional, Tuple
 import numpy as np
-from sparsestack import StackedSparseArray
 from matchms.similarity.spectrum_similarity_functions import (
     number_matching,
     number_matching_ppm,
     number_matching_symmetric,
     number_matching_symmetric_ppm,
 )
-from matchms.typing import SpectrumType
+from matchms.Spectrum import Spectrum
 from .BaseSimilarity import BaseSimilarity
+from .ScoreFilter import FilterScoreByValue
 
 
 class PrecursorMzMatch(BaseSimilarity):
@@ -60,7 +60,12 @@ class PrecursorMzMatch(BaseSimilarity):
     is_commutative = True
     score_datatype = bool
 
-    def __init__(self, tolerance: float = 0.1, tolerance_type: str = "Dalton"):
+    def __init__(
+        self,
+        tolerance: float = 0.1,
+        tolerance_type: str = "Dalton",
+        score_filters: Optional[Tuple[FilterScoreByValue, ...]] = None,
+    ):
         """
         Parameters
         ----------
@@ -70,11 +75,12 @@ class PrecursorMzMatch(BaseSimilarity):
             Chose between fixed tolerance in Dalton (="Dalton") or a relative difference
             in ppm (="ppm").
         """
+        super().__init__(score_filters)
         self.tolerance = tolerance
         assert tolerance_type in ["Dalton", "ppm"], "Expected type from ['Dalton', 'ppm']"
         self.type = tolerance_type
 
-    def pair(self, reference: SpectrumType, query: SpectrumType) -> float:
+    def pair(self, reference: Spectrum, query: Spectrum) -> np.ndarray:
         """Compare precursor m/z between reference and query spectrum.
 
         Parameters
@@ -89,17 +95,15 @@ class PrecursorMzMatch(BaseSimilarity):
         assert precursormz_ref is not None and precursormz_query is not None, "Missing precursor m/z."
 
         if self.type == "Dalton":
-            return abs(precursormz_ref - precursormz_query) <= self.tolerance
-
-        mean_mz = (precursormz_ref + precursormz_query) / 2
-        score = abs(precursormz_ref - precursormz_query) / mean_mz <= self.tolerance
+            score = abs(precursormz_ref - precursormz_query) <= self.tolerance
+        else:
+            mean_mz = (precursormz_ref + precursormz_query) / 2
+            score = abs(precursormz_ref - precursormz_query) / mean_mz <= self.tolerance
         return np.asarray(score, dtype=self.score_datatype)
 
-    def matrix(self,
-               references: List[SpectrumType],
-               queries: List[SpectrumType],
-               array_type: str = "numpy",
-               is_symmetric: bool = False) -> np.ndarray:
+    def _matrix_without_mask_without_filter(
+        self, references: List[Spectrum], queries: List[Spectrum], is_symmetric: bool = False
+    ) -> np.ndarray:
         """Compare parent masses between all references and queries.
 
         Parameters
@@ -108,9 +112,6 @@ class PrecursorMzMatch(BaseSimilarity):
             List/array of reference spectra.
         queries
             List/array of Single query spectra.
-        array_type
-            Specify the output array type. Can be "numpy" or "sparse".
-            Default is "numpy" and will return a numpy array. "sparse" will return a COO-sparse array.
         is_symmetric
             Set to True when *references* and *queries* are identical (as for instance for an all-vs-all
             comparison). By using the fact that score[i,j] = score[j,i] the calculation will be about
@@ -136,12 +137,7 @@ class PrecursorMzMatch(BaseSimilarity):
             rows, cols, scores = number_matching(precursors_ref, precursors_query, self.tolerance)
         else:
             rows, cols, scores = number_matching_ppm(precursors_ref, precursors_query, self.tolerance)
-        if array_type == "numpy":
-            scores_array = np.zeros((len(precursors_ref), len(precursors_query)))
-            scores_array[rows, cols] = scores.astype(self.score_datatype)
-            return scores_array
-        if array_type == "sparse":
-            scores_array = StackedSparseArray(len(precursors_ref), len(precursors_query))
-            scores_array.add_sparse_data(rows, cols, scores.astype(self.score_datatype), "")
-            return scores_array
-        return ValueError("`array_type` can only be 'numpy' or 'sparse'.")
+
+        scores_array = np.zeros((len(precursors_ref), len(precursors_query)), self.score_datatype)
+        scores_array[rows, cols] = scores
+        return scores_array

@@ -1,7 +1,7 @@
 from matchms.filtering.SpectrumProcessor import SpectrumProcessor
 from . import exporting, filtering, importing, networking, plotting, similarity
 from .__version__ import __version__
-from .calculate_scores import calculate_scores
+from .calculate_scores import create_scores_object_and_calculate_scores
 from .Fingerprints import Fingerprints
 from .Fragments import Fragments
 from .logging_functions import _init_logger, set_matchms_logger_level, set_rdkit_logger_level
@@ -35,7 +35,7 @@ __author__ = "Matchms developers community"
 __email__ = "florian.huber@hs-duesseldorf.de"
 __all__ = [
     "__version__",
-    "calculate_scores",
+    "create_scores_object_and_calculate_scores",
     "exporting",
     "filtering",
     "Fingerprints",

@@ -1,9 +1,10 @@
 import logging
-from typing import Tuple
+from typing import Optional, Tuple
 import numpy as np
 from matchms.filtering.metadata_processing.add_precursor_mz import _convert_precursor_mz
-from matchms.typing import SpectrumType
+from matchms.Spectrum import Spectrum
 from .BaseSimilarity import BaseSimilarity
+from .ScoreFilter import FilterScoreByValue
 from .spectrum_similarity_functions import collect_peak_pairs, score_best_matches
 
 
@@ -57,7 +58,13 @@ class ModifiedCosine(BaseSimilarity):
     # Set output data type, e.g. ("score", "float") or [("score", "float"), ("matches", "int")]
     score_datatype = [("score", np.float64), ("matches", "int")]
 
-    def __init__(self, tolerance: float = 0.1, mz_power: float = 0.0, intensity_power: float = 1.0):
+    def __init__(
+        self,
+        tolerance: float = 0.1,
+        mz_power: float = 0.0,
+        intensity_power: float = 1.0,
+        score_filters: Optional[Tuple[FilterScoreByValue, ...]] = None,
+    ):
         """
         Parameters
         ----------
@@ -69,11 +76,12 @@ class ModifiedCosine(BaseSimilarity):
         intensity_power:
             The power to raise intensity to in the cosine function. The default is 1.
         """
+        super().__init__(score_filters)
         self.tolerance = tolerance
         self.mz_power = mz_power
         self.intensity_power = intensity_power
 
-    def pair(self, reference: SpectrumType, query: SpectrumType) -> Tuple[float, int]:
+    def pair(self, reference: Spectrum, query: Spectrum) -> np.ndarray:
         """Calculate modified cosine score between two spectra.
 
         Parameters
@@ -106,16 +114,19 @@ class ModifiedCosine(BaseSimilarity):
         def get_matching_pairs():
             """Find all pairs of peaks that match within the given tolerance."""
             zero_pairs = collect_peak_pairs(
-                spec1, spec2, self.tolerance, shift=0.0,
-                mz_power=self.mz_power, intensity_power=self.intensity_power
+                spec1, spec2, self.tolerance, shift=0.0, mz_power=self.mz_power, intensity_power=self.intensity_power
             )
             precursor_mz_ref = get_valid_precursor_mz(reference)
             precursor_mz_query = get_valid_precursor_mz(query)
 
             mass_shift = precursor_mz_ref - precursor_mz_query
             nonzero_pairs = collect_peak_pairs(
-                spec1, spec2, self.tolerance, shift=mass_shift,
-                mz_power=self.mz_power, intensity_power=self.intensity_power
+                spec1,
+                spec2,
+                self.tolerance,
+                shift=mass_shift,
+                mz_power=self.mz_power,
+                intensity_power=self.intensity_power,
             )
 
             if zero_pairs is None:

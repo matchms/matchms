@@ -3,7 +3,7 @@ import tempfile
 import numpy as np
 import pytest
 import matchms.similarity
-from matchms import calculate_scores
+from matchms import create_scores_object_and_calculate_scores
 from matchms.filtering import add_fingerprint
 from matchms.importing import scores_from_json, scores_from_pickle
 from .builder_Spectrum import SpectrumBuilder
@@ -36,24 +36,30 @@ def similarity_function(request):
 @pytest.fixture
 def spectra(similarity_function):
     builder = SpectrumBuilder()
-    spectrum_1 = builder.with_mz(np.array([100, 150, 200.])) \
-        .with_intensities(np.array([0.7, 0.2, 0.1])) \
-        .with_metadata({'id': 'spectrum1', "precursor_mz": 210, "parent_mass": 210, "smiles": "C(C(=O)O)NC(=O)CCl"}) \
+    spectrum_1 = (
+        builder.with_mz(np.array([100, 150, 200.0]))
+        .with_intensities(np.array([0.7, 0.2, 0.1]))
+        .with_metadata({"id": "spectrum1", "precursor_mz": 210, "parent_mass": 210, "smiles": "C(C(=O)O)NC(=O)CCl"})
         .build()
-    spectrum_2 = builder.with_mz(np.array([100, 140, 190.])) \
-        .with_intensities(np.array([0.4, 0.2, 0.1])) \
-        .with_metadata({'id': 'spectrum2', "precursor_mz": 200, "parent_mass": 200, "smiles": "C(C(=O)O)NC(=O)CCl"}) \
+    )
+    spectrum_2 = (
+        builder.with_mz(np.array([100, 140, 190.0]))
+        .with_intensities(np.array([0.4, 0.2, 0.1]))
+        .with_metadata({"id": "spectrum2", "precursor_mz": 200, "parent_mass": 200, "smiles": "C(C(=O)O)NC(=O)CCl"})
         .build()
-    spectrum_3 = builder.with_mz(np.array([110, 140, 195.])) \
-        .with_intensities(
-        np.array([0.6, 0.2, 0.1])) \
-        .with_metadata({'id': 'spectrum3', "precursor_mz": 205, "parent_mass": 205, "smiles": "C(C(=O)O)(NC(=O)O)S"}) \
+    )
+    spectrum_3 = (
+        builder.with_mz(np.array([110, 140, 195.0]))
+        .with_intensities(np.array([0.6, 0.2, 0.1]))
+        .with_metadata({"id": "spectrum3", "precursor_mz": 205, "parent_mass": 205, "smiles": "C(C(=O)O)(NC(=O)O)S"})
         .build()
-    spectrum_4 = builder.with_mz(np.array([100, 150, 200.])) \
-        .with_intensities(
-        np.array([0.6, 0.1, 0.6])) \
-        .with_metadata({'id': 'spectrum4', "precursor_mz": 210, "parent_mass": 210, "smiles": "C(C(=O)O)(NC(=O)O)S"}) \
+    )
+    spectrum_4 = (
+        builder.with_mz(np.array([100, 150, 200.0]))
+        .with_intensities(np.array([0.6, 0.1, 0.6]))
+        .with_metadata({"id": "spectrum4", "precursor_mz": 210, "parent_mass": 210, "smiles": "C(C(=O)O)(NC(=O)O)S"})
         .build()
+    )
 
     spectra = [spectrum_1, spectrum_2, spectrum_3, spectrum_4]
     if similarity_function.__class__.__name__ == "FingerprintSimilarity":
@@ -68,11 +74,8 @@ def symmetrical_scores(similarity_function, spectra):
     queries = spectra
     references = spectra
 
-    scores = calculate_scores(
-        queries=queries,
-        references=references,
-        similarity_function=similarity_function,
-        is_symmetric=True
+    scores = create_scores_object_and_calculate_scores(
+        queries, references, similarity_function=similarity_function, is_symmetric=True
     )
     yield scores
 
@@ -86,7 +89,7 @@ def asymmetrical_scores(similarity_function, spectra):
     queries = spectra
     references = spectra[1:3]
 
-    scores = calculate_scores(queries=queries, references=references, similarity_function=similarity_function)
+    scores = create_scores_object_and_calculate_scores(queries, references, similarity_function=similarity_function)
     yield scores
 
 

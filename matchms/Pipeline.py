@@ -5,11 +5,12 @@ from datetime import datetime
 from typing import Callable, Iterable, List, Optional, Union
 from deprecated import deprecated
 import matchms.similarity as mssimilarity
-from matchms import calculate_scores
+from matchms.calculate_scores import calculate_scores
 from matchms.filtering.filter_order import ALL_FILTERS
 from matchms.filtering.SpectrumProcessor import FunctionWithParametersType, SpectrumProcessor
 from matchms.importing.load_spectra import load_list_of_spectrum_files
 from matchms.logging_functions import add_logging_to_file, reset_matchms_logger, set_matchms_logger_level
+from matchms.Scores import Scores
 from matchms.typing import SpectrumType
 from matchms.yaml_file_functions import load_workflow_from_yaml_file, ordered_dump
 
@@ -131,11 +132,13 @@ class Pipeline:
         )
     """
 
-    def __init__(self,
-                 workflow: OrderedDict,
-                 progress_bar=True,
-                 logging_level: str = "WARNING",
-                 logging_file: Optional[str] = None):
+    def __init__(
+        self,
+        workflow: OrderedDict,
+        progress_bar=True,
+        logging_level: str = "WARNING",
+        logging_file: Optional[str] = None,
+    ):
         """
         Parameters
         ----------
@@ -178,12 +181,21 @@ class Pipeline:
 
     def check_workflow(self):
         """Define Pipeline workflow based on a yaml file (config_file)."""
-        assert isinstance(self.__workflow, OrderedDict), f"Workflow is expectd to be a OrderedDict, instead it was of type {type(self.__workflow)}"
+        assert isinstance(self.__workflow, OrderedDict), (
+            f"Workflow is expectd to be a OrderedDict, instead it was of type {type(self.__workflow)}"
+        )
         expected_keys = {"query_filters", "reference_filters", "score_computations"}
         assert set(self.__workflow.keys()) == expected_keys
         check_score_computation(score_computations=self.score_computations)
 
-    def run(self, query_files, reference_files=None, cleaned_query_file=None, cleaned_reference_file=None, create_report=True):
+    def run(
+        self,
+        query_files,
+        reference_files=None,
+        cleaned_query_file=None,
+        cleaned_reference_file=None,
+        create_report=True,
+    ):
         """Execute the defined Pipeline workflow.
 
         This method will execute all steps of the workflow.
@@ -208,7 +220,10 @@ class Pipeline:
         self.write_to_logfile(f"Time: {str(datetime.now())}")
         # Process query spectra
         spectra, report = self.processing_queries.process_spectra(
-            self._spectra_queries, progress_bar=self.progress_bar, cleaned_spectra_file=cleaned_query_file, create_report=create_report
+            self._spectra_queries,
+            progress_bar=self.progress_bar,
+            cleaned_spectra_file=cleaned_query_file,
+            create_report=create_report,
         )
         self._spectra_queries = spectra
         self.write_to_logfile(str(report))
@@ -218,7 +233,10 @@ class Pipeline:
         # Process reference spectra (if necessary)
         if self.is_symmetric is False:
             self._spectra_references, report = self.processing_references.process_spectra(
-                self._spectra_references, progress_bar=self.progress_bar, cleaned_spectra_file=cleaned_reference_file, create_report=create_report
+                self._spectra_references,
+                progress_bar=self.progress_bar,
+                cleaned_spectra_file=cleaned_reference_file,
+                create_report=create_report,
             )
             self.write_to_logfile(str(report))
             if cleaned_reference_file is not None:
@@ -267,20 +285,11 @@ class Pipeline:
             raise TypeError("Unknown similarity measure.")
 
         similarity_measure = get_similarity_measure(computation)
-        # If this is the first score computation:
         if i == 0:
-            self.scores = calculate_scores(
-                self._spectra_references, self._spectra_queries, similarity_measure, array_type="sparse", is_symmetric=self.is_symmetric
-            )
-        else:
-            new_scores = similarity_measure.sparse_array(
-                references=self._spectra_references,
-                queries=self._spectra_queries,
-                idx_row=self.scores.scores.row,
-                idx_col=self.scores.scores.col,
-                is_symmetric=self.is_symmetric,
-            )
-            self.scores.scores.add_sparse_data(self.scores.scores.row, self.scores.scores.col, new_scores, similarity_measure.__class__.__name__)
+            # This happens here to make sure scores is not initialized if no scores are set in Pipeline
+            self.scores = Scores(self._spectra_references, self._spectra_queries, is_symmetric=self.is_symmetric)
+
+        self.scores = calculate_scores(similarity_measure, self.scores)
 
     def set_logging(self):
         """Set the matchms logger to write messages to file (if defined)."""
@@ -297,8 +306,13 @@ class Pipeline:
             with open(self.logging_file, "a", encoding="utf-8") as f:
                 f.write(line + "\n")
 
-    @deprecated(version="0.26.5", reason="This method is deprecated and will be removed in the future. Use import_spectra() instead.")
-    def import_spectrums(self, query_files: Union[List[str], str], reference_files: Optional[Union[List[str], str]] = None):
+    @deprecated(
+        version="0.26.5",
+        reason="This method is deprecated and will be removed in the future. Use import_spectra() instead.",
+    )
+    def import_spectrums(
+        self, query_files: Union[List[str], str], reference_files: Optional[Union[List[str], str]] = None
+    ):
         """Wrapper method for import_spectra()
 
         Parameters
@@ -311,7 +325,9 @@ class Pipeline:
         """
         return self.import_spectra(query_files, reference_files)
 
-    def import_spectra(self, query_files: Union[List[str], str], reference_files: Optional[Union[List[str], str]] = None):
+    def import_spectra(
+        self, query_files: Union[List[str], str], reference_files: Optional[Union[List[str], str]] = None
+    ):
         """Import spectra from file(s).
 
         Parameters
@@ -366,7 +382,10 @@ class Pipeline:
         self._initialize_spectrum_processor_references()
 
     @property
-    @deprecated(version="0.26.5", reason="This property is deprecated and will be removed in the future. Use spectra_queries instead.")
+    @deprecated(
+        version="0.26.5",
+        reason="This property is deprecated and will be removed in the future. Use spectra_queries instead.",
+    )
     def spectrums_queries(self) -> List[SpectrumType]:
         return self._spectra_queries
 
@@ -375,7 +394,10 @@ class Pipeline:
         return self._spectra_queries
 
     @property
-    @deprecated(version="0.26.5", reason="This property is deprecated and will be removed in the future. Use spectra_references instead.")
+    @deprecated(
+        version="0.26.5",
+        reason="This property is deprecated and will be removed in the future. Use spectra_references instead.",
+    )
     def spectrums_references(self) -> List[SpectrumType]:
         return self._spectra_references
 

@@ -1,10 +1,10 @@
 import logging
-from typing import List
+from typing import List, Optional, Tuple
 import numpy as np
-from sparsestack import StackedSparseArray
 from matchms.similarity.spectrum_similarity_functions import number_matching, number_matching_symmetric
-from matchms.typing import SpectrumType
+from matchms.Spectrum import Spectrum
 from .BaseSimilarity import BaseSimilarity
+from .ScoreFilter import FilterScoreByValue
 
 
 logger = logging.getLogger("matchms")
@@ -64,7 +64,13 @@ class MetadataMatch(BaseSimilarity):
     is_commutative = True
     score_datatype = bool
 
-    def __init__(self, field: str, matching_type: str = "equal_match", tolerance: float = 0.1):
+    def __init__(
+        self,
+        field: str,
+        matching_type: str = "equal_match",
+        tolerance: float = 0.1,
+        score_filters: Optional[Tuple[FilterScoreByValue, ...]] = None,
+    ):
         """
         Parameters
         ----------
@@ -78,12 +84,13 @@ class MetadataMatch(BaseSimilarity):
             Specify tolerance below which two values are counted as match.
             This only applied to numerical values.
         """
+        super().__init__(score_filters)
         self.field = field
         self.tolerance = tolerance
         assert matching_type in ["equal_match", "difference"], "Expected type from ['equal_match', 'difference']"
         self.matching_type = matching_type
 
-    def pair(self, reference: SpectrumType, query: SpectrumType) -> float:
+    def pair(self, reference: Spectrum, query: Spectrum) -> np.ndarray:
         """Compare precursor m/z between reference and query spectrum.
 
         Parameters
@@ -109,11 +116,9 @@ class MetadataMatch(BaseSimilarity):
         logger.warning("Non-numerical entry not compatible with 'difference' method")
         return np.asarray(False, dtype=self.score_datatype)
 
-    def matrix(self,
-               references: List[SpectrumType],
-               queries: List[SpectrumType],
-               array_type: str = "numpy",
-               is_symmetric: bool = False) -> np.ndarray:
+    def _matrix_without_mask_without_filter(
+        self, references: List[Spectrum], queries: List[Spectrum], is_symmetric: bool = False
+    ) -> np.ndarray:
         """Compare parent masses between all references and queries.
 
         Parameters
@@ -122,36 +127,13 @@ class MetadataMatch(BaseSimilarity):
             List/array of reference spectra.
         queries
             List/array of Single query spectra.
-        array_type
-            Specify the output array type. Can be "numpy" or "sparse".
-            Default is "numpy" and will return a numpy array. "sparse" will return a COO-sparse array.
         is_symmetric
             Set to True when *references* and *queries* are identical (as for instance for an all-vs-all
             comparison). By using the fact that score[i,j] = score[j,i] the calculation will be about
             2x faster.
         """
-        # pylint: disable=too-many-locals
-        if array_type not in ["numpy", "sparse"]:
-            raise ValueError("array_type must be 'numpy' or 'sparse'.")
-
-        def collect_entries(spectra):
-            """Collect metadata entries."""
-            entries = []
-            for spectrum in spectra:
-                entry = spectrum.get(self.field)
-                if entry is None:
-                    msg = f"No {self.field} entry found for spectrum."
-                    logger.warning(msg)
-                    entry = np.nan
-                elif self.matching_type == "difference" and not isinstance(entry, (int, float)):
-                    msg = f"Non-numerical entry ({entry}) not compatible with 'difference' method."
-                    logger.warning(msg)
-                    entry = np.nan
-                entries.append(entry)
-            return np.asarray(entries)
-
-        entries_ref = collect_entries(references)
-        entries_query = collect_entries(queries)
+        entries_ref = self.__collect_entries(references)
+        entries_query = self.__collect_entries(queries)
 
         if self.matching_type == "equal_match":
             if self.tolerance != 0:
@@ -173,11 +155,23 @@ class MetadataMatch(BaseSimilarity):
             else:
                 rows, cols, scores = number_matching(entries_ref, entries_query, self.tolerance)
 
-        if array_type == "sparse":
-            scores_array = StackedSparseArray(len(entries_ref), len(entries_query))
-            scores_array.add_sparse_data(rows, cols, scores.astype(self.score_datatype), "")
-        else:
-            scores_array = np.zeros((len(entries_ref), len(entries_query)), dtype=self.score_datatype)
-            scores_array[rows, cols] = scores.astype(self.score_datatype)
+        scores_array = np.zeros((len(entries_ref), len(entries_query)), dtype=self.score_datatype)
+        scores_array[rows, cols] = scores.astype(self.score_datatype)
 
         return scores_array
+
+    def __collect_entries(self, spectra):
+        """Collect metadata entries."""
+        entries = []
+        for spectrum in spectra:
+            entry = spectrum.get(self.field)
+            if entry is None:
+                msg = f"No {self.field} entry found for spectrum."
+                logger.warning(msg)
+                entry = np.nan
+            elif self.matching_type == "difference" and not isinstance(entry, (int, float)):
+                msg = f"Non-numerical entry ({entry}) not compatible with 'difference' method."
+                logger.warning(msg)
+                entry = np.nan
+            entries.append(entry)
+        return np.asarray(entries)
