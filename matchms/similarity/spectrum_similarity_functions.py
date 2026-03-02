@@ -1,13 +1,13 @@
-from typing import List, Tuple
-import numba
+from typing import Tuple
 import numpy as np
+from numba import njit
+from numba.typed import List
 
 
-@numba.njit
+@njit
 def collect_peak_pairs(spec1: np.ndarray, spec2: np.ndarray,
                        tolerance: float, shift: float = 0, mz_power: float = 0.0,
                        intensity_power: float = 1.0):
-    # pylint: disable=too-many-arguments
     """Find matching pairs between two spectra.
 
     Args
@@ -31,7 +31,7 @@ def collect_peak_pairs(spec1: np.ndarray, spec2: np.ndarray,
     matching_pairs : numpy array
         Array of found matching peaks.
     """
-    matches = find_matches(spec1[:, 0], spec2[:, 0], tolerance, shift)
+    matches: List = find_matches(spec1[:, 0], spec2[:, 0], tolerance, shift)
     idx1 = [x[0] for x in matches]
     idx2 = [x[1] for x in matches]
     if len(idx1) == 0:
@@ -44,9 +44,9 @@ def collect_peak_pairs(spec1: np.ndarray, spec2: np.ndarray,
     return np.array(matching_pairs.copy())
 
 
-@numba.njit
+@njit
 def find_matches(spec1_mz: np.ndarray, spec2_mz: np.ndarray,
-                 tolerance: float, shift: float = 0) -> List[Tuple[int, int]]:
+                 tolerance: float, shift: float = 0) -> List:
     """Faster search for matching peaks.
     Makes use of the fact that spec1 and spec2 contain ordered peak m/z (from
     low to high m/z).
@@ -69,7 +69,7 @@ def find_matches(spec1_mz: np.ndarray, spec2_mz: np.ndarray,
 
     """
     lowest_idx = 0
-    matches = []
+    matches = List()
     for peak1_idx in range(spec1_mz.shape[0]):
         mz = spec1_mz[peak1_idx]
         low_bound = mz - tolerance
@@ -85,7 +85,7 @@ def find_matches(spec1_mz: np.ndarray, spec2_mz: np.ndarray,
     return matches
 
 
-@numba.njit(fastmath=True)
+@njit(fastmath=True)
 def score_best_matches(matching_pairs: np.ndarray, spec1: np.ndarray,
                        spec2: np.ndarray, mz_power: float = 0.0,
                        intensity_power: float = 1.0) -> Tuple[float, int]:
@@ -110,7 +110,7 @@ def score_best_matches(matching_pairs: np.ndarray, spec1: np.ndarray,
     return score, used_matches
 
 
-@numba.njit
+@njit
 def number_matching(numbers_1, numbers_2, tolerance):
     """Find all pairs between numbers_1 and numbers_2 which are within tolerance.
     """
@@ -127,7 +127,7 @@ def number_matching(numbers_1, numbers_2, tolerance):
     return np.array(rows), np.array(cols), np.array(data)
 
 
-@numba.njit
+@njit
 def number_matching_symmetric(numbers_1, tolerance):
     """Find all pairs between numbers_1 and numbers_1 which are within tolerance.
     """
@@ -148,7 +148,7 @@ def number_matching_symmetric(numbers_1, tolerance):
     return np.array(rows), np.array(cols), np.array(data)
 
 
-@numba.njit
+@njit
 def number_matching_ppm(numbers_1, numbers_2, tolerance_ppm):
     """Find all pairs between numbers_1 and numbers_2 which are within tolerance.
     """
@@ -166,7 +166,7 @@ def number_matching_ppm(numbers_1, numbers_2, tolerance_ppm):
     return np.array(rows), np.array(cols), np.array(data)
 
 
-@numba.njit
+@njit
 def number_matching_symmetric_ppm(numbers_1, tolerance_ppm):
     """Find all pairs between numbers_1 and numbers_1 which are within tolerance.
     """

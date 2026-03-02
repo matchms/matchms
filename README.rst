@@ -116,14 +116,14 @@ Installation
 
 Prerequisites:  
 
-- Python 3.10 - 3.12, (higher versions should work as well, but are not yet tested systematically)
+- Python 3.10 - 3.13, (higher versions should work as well, but are not yet tested systematically)
 - Anaconda (recommended)
 
 We recommend installing matchms in a new virtual environment to avoid dependency clashes
 
 .. code-block:: console
 
-  conda create --name matchms python=3.11
+  conda create --name matchms python=3.12
   conda activate matchms
   conda install --channel bioconda --channel conda-forge matchms
 
@@ -164,13 +164,13 @@ Ecosystem compatibility
      - ms2deepscore Status
      - ms2query Status
    * - .. image:: https://img.shields.io/badge/numpy-1.25-lightgrey?logo=numpy :alt: numpy
-     - .. image:: https://img.shields.io/badge/spec2vec-0.8.0-red
-     - .. image:: https://img.shields.io/badge/ms2deepscore-2.5.1-green
-     - .. image:: https://img.shields.io/badge/ms2query-1.5.3-red
+     - .. image:: https://img.shields.io/badge/spec2vec-0.9.1-green
+     - .. image:: https://img.shields.io/badge/ms2deepscore-2.7.2-green
+     - .. image:: https://img.shields.io/badge/ms2query-1.5.4-red
    * - .. image:: https://img.shields.io/badge/numpy-2.1-lightgrey?logo=numpy :alt: numpy
-     - .. image:: https://img.shields.io/badge/spec2vec-0.8.0-red
-     - .. image:: https://img.shields.io/badge/ms2deepscore-2.5.1-green
-     - .. image:: https://img.shields.io/badge/ms2query-1.5.3-red
+     - .. image:: https://img.shields.io/badge/spec2vec-0.9.1-green
+     - .. image:: https://img.shields.io/badge/ms2deepscore-2.7.2-green
+     - .. image:: https://img.shields.io/badge/ms2query-1.5.4-red
 
 .. compatibility matrix end
 
@@ -318,28 +318,37 @@ To install matchms, do:
 
   git clone https://github.com/matchms/matchms.git
   cd matchms
-  conda create --name matchms-dev python=3.11
+  # Create environment using conda
+  conda create --name matchms-dev python=3.13
   conda activate matchms-dev
-  conda install poetry=1.8
-  poetry install
 
-Run the linter with:
+  # Create environment using uv
+  uv venv --python 3.13
+
+  # If you use uv
+  uv sync --group dev
+
+  # If you use poetry
+  python -m pip install --upgrade pip poetry
+  poetry install --with dev
+
+  # If you use pip
+  pip install -r dev-requirements.txt
+  pip install --editable .
+
+Run the linter and formatter and automatically fix issues with:
 
 .. code-block:: console
 
-  prospector
+  ruff check --fix matchms/YOUR-MODIFIED-FILE.py
+  ruff format matchms/YOUR-MODIFIED-FILE.py
 
-Automatically fix incorrectly sorted imports:
-
-.. code-block:: console
-
-  isort .
-
-Files will be changed in place and need to be committed manually. If you only want to inspect the isort suggestions then simply run:
+You can automate the previous steps by using a pre-commit hook. This will automatically run the linter and formatter on
+the modified files before a commit. If the linter or formatter fixes any issues, you will need to recommit your code.
 
 .. code-block:: console
 
-  isort --check-only --diff .
+  pre-commit install
 
 
 Run tests (including coverage) with:

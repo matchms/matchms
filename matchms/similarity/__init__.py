@@ -6,7 +6,7 @@ Matchms provides a number of frequently used similarity scores to compare mass
 spectra. This includes
 
 * scores based on comparing peak positions and intensities
-  (:class:`~matchms.similarity.CosineGreedy` or :class:`~matchms.similarity.ModifiedCosine`)
+  (:class:`~matchms.similarity.CosineGreedy`, :class:`~matchms.similarity.ModifiedCosine`
 * simple scores that only assess precursor m/z or parent mass matches
   (:class:`~matchms.similarity.PrecursorMzMatch` or: :class:`~matchms.similarity.ParentMassMatch`)
 * scores assessing molecular similarity if structures (SMILES, InchiKey) are given as metadata
@@ -18,9 +18,12 @@ spectra. This includes
 It is also easily possible to add own custom similarity measures or import external ones
 (such as `Spec2Vec <https://github.com/iomega/spec2vec>`_).
 """
+from .BinnedEmbeddingSimilarity import BinnedEmbeddingSimilarity
+from .BlinkCosine import BlinkCosine
 from .CosineGreedy import CosineGreedy
 from .CosineHungarian import CosineHungarian
 from .FingerprintSimilarity import FingerprintSimilarity
+from .FlashSimilarity import FlashSimilarity
 from .IntersectMz import IntersectMz
 from .MetadataMatch import MetadataMatch
 from .ModifiedCosine import ModifiedCosine
@@ -30,9 +33,12 @@ from .PrecursorMzMatch import PrecursorMzMatch
 
 
 __all__ = [
+    "BinnedEmbeddingSimilarity",
+    "BlinkCosine",
     "CosineGreedy",
     "CosineHungarian",
     "FingerprintSimilarity",
+    "FlashSimilarity",
     "IntersectMz",
     "MetadataMatch",
     "ModifiedCosine",
@@ -52,7 +58,10 @@ def get_similarity_function_by_name(similarity_function_name: str):
         Name of the similarity function.
     """
     names = __all__
-    functions = [CosineGreedy, CosineHungarian, FingerprintSimilarity, IntersectMz, MetadataMatch, ModifiedCosine,
+    functions = [BinnedEmbeddingSimilarity, BlinkCosine,
+                 CosineGreedy, CosineHungarian,
+                 FingerprintSimilarity, FlashSimilarity,
+                 IntersectMz, MetadataMatch, ModifiedCosine,
                  NeutralLossesCosine, ParentMassMatch, PrecursorMzMatch]
 
     assert similarity_function_name in names, f"Unknown similarity function: {similarity_function_name}"

@@ -1,8 +1,11 @@
 from typing import List, Optional, Tuple
 import numpy as np
 from matchms.similarity.spectrum_similarity_functions import (
-    number_matching, number_matching_ppm, number_matching_symmetric,
-    number_matching_symmetric_ppm)
+    number_matching,
+    number_matching_ppm,
+    number_matching_symmetric,
+    number_matching_symmetric_ppm,
+)
 from matchms.Spectrum import Spectrum
 from .BaseSimilarity import BaseSimilarity
 from .ScoreFilter import FilterScoreByValue
@@ -52,12 +55,17 @@ class PrecursorMzMatch(BaseSimilarity):
         Precursor m/z match between 2 and 4 is [np.float64(1.0)]
 
     """
+
     # Set key characteristics as class attributes
     is_commutative = True
     score_datatype = bool
 
-    def __init__(self, tolerance: float = 0.1,
-                 tolerance_type: str = "Dalton", score_filters: Optional[Tuple[FilterScoreByValue, ...]] = None):
+    def __init__(
+        self,
+        tolerance: float = 0.1,
+        tolerance_type: str = "Dalton",
+        score_filters: Optional[Tuple[FilterScoreByValue, ...]] = None,
+    ):
         """
         Parameters
         ----------
@@ -90,11 +98,12 @@ class PrecursorMzMatch(BaseSimilarity):
             score = abs(precursormz_ref - precursormz_query) <= self.tolerance
         else:
             mean_mz = (precursormz_ref + precursormz_query) / 2
-            score = abs(precursormz_ref - precursormz_query)/mean_mz <= self.tolerance
+            score = abs(precursormz_ref - precursormz_query) / mean_mz <= self.tolerance
         return np.asarray(score, dtype=self.score_datatype)
 
-    def _matrix_without_mask_without_filter(self, references: List[Spectrum], queries: List[Spectrum],
-               is_symmetric: bool = False) -> np.ndarray:
+    def _matrix_without_mask_without_filter(
+        self, references: List[Spectrum], queries: List[Spectrum], is_symmetric: bool = False
+    ) -> np.ndarray:
         """Compare parent masses between all references and queries.
 
         Parameters
@@ -108,6 +117,7 @@ class PrecursorMzMatch(BaseSimilarity):
             comparison). By using the fact that score[i,j] = score[j,i] the calculation will be about
             2x faster.
         """
+
         def collect_precursormz(spectra):
             """Collect precursors."""
             precursors = []
@@ -120,17 +130,13 @@ class PrecursorMzMatch(BaseSimilarity):
         precursors_ref = collect_precursormz(references)
         precursors_query = collect_precursormz(queries)
         if is_symmetric and self.type == "Dalton":
-            rows, cols, scores =  number_matching_symmetric(precursors_ref,
-                                                            self.tolerance)
+            rows, cols, scores = number_matching_symmetric(precursors_ref, self.tolerance)
         elif is_symmetric and self.type == "ppm":
-            rows, cols, scores = number_matching_symmetric_ppm(precursors_ref,
-                                                               self.tolerance)
+            rows, cols, scores = number_matching_symmetric_ppm(precursors_ref, self.tolerance)
         elif self.type == "Dalton":
-            rows, cols, scores = number_matching(precursors_ref, precursors_query,
-                                                 self.tolerance)
+            rows, cols, scores = number_matching(precursors_ref, precursors_query, self.tolerance)
         else:
-            rows, cols, scores = number_matching_ppm(precursors_ref, precursors_query,
-                                                     self.tolerance)
+            rows, cols, scores = number_matching_ppm(precursors_ref, precursors_query, self.tolerance)
 
         scores_array = np.zeros((len(precursors_ref), len(precursors_query)), self.score_datatype)
         scores_array[rows, cols] = scores

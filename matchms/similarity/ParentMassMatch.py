@@ -1,7 +1,6 @@
 from typing import List, Optional, Tuple
 import numpy as np
-from matchms.similarity.spectrum_similarity_functions import (
-    number_matching, number_matching_symmetric)
+from matchms.similarity.spectrum_similarity_functions import number_matching, number_matching_symmetric
 from matchms.Spectrum import Spectrum
 from .BaseSimilarity import BaseSimilarity
 from .ScoreFilter import FilterScoreByValue
@@ -49,6 +48,7 @@ class ParentMassMatch(BaseSimilarity):
         Parentmass match between 2 and 4 is [np.float64(1.0)]
 
     """
+
     # Set key characteristics as class attributes
     is_commutative = True
     # Set output data type, e.g.  "float" or [("score", "float"), ("matches", "int")]
@@ -82,8 +82,9 @@ class ParentMassMatch(BaseSimilarity):
         result = np.asarray(score, dtype=self.score_datatype)
         return result
 
-    def _matrix_without_mask_without_filter(self, references: List[Spectrum], queries: List[Spectrum],
-               is_symmetric: bool = False) -> np.ndarray:
+    def _matrix_without_mask_without_filter(
+        self, references: List[Spectrum], queries: List[Spectrum], is_symmetric: bool = False
+    ) -> np.ndarray:
         """Compare parent masses between all references and queries.
 
         Parameters
@@ -97,6 +98,7 @@ class ParentMassMatch(BaseSimilarity):
             comparison). By using the fact that score[i,j] = score[j,i] the calculation will be about
             2x faster.
         """
+
         def collect_parentmasses(spectra):
             """Collect parentmasses."""
             parentmasses = []
@@ -110,11 +112,9 @@ class ParentMassMatch(BaseSimilarity):
         parentmasses_query = collect_parentmasses(queries)
 
         if is_symmetric:  # assuming ref and query are identical
-            rows, cols, scores = number_matching_symmetric(parentmasses_ref,
-                                                           self.tolerance)
+            rows, cols, scores = number_matching_symmetric(parentmasses_ref, self.tolerance)
         else:
-            rows, cols, scores = number_matching(parentmasses_ref, parentmasses_query,
-                                                 self.tolerance)
+            rows, cols, scores = number_matching(parentmasses_ref, parentmasses_query, self.tolerance)
 
         scores_array = np.zeros((len(parentmasses_ref), len(parentmasses_query)), dtype=self.score_datatype)
         scores_array[rows, cols] = scores

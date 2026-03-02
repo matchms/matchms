@@ -22,6 +22,8 @@ def load_from_pickle(filename: str, metadata_harmonization: bool) -> List[Spectr
             raise TypeError("Expected list of spectra")
 
     if metadata_harmonization:
-        loaded_object = [Spectrum(spectrum.mz, spectrum.intensities,
-                                  spectrum.metadata, metadata_harmonization) for spectrum in loaded_object]
+        loaded_object = [
+            Spectrum(spectrum.mz, spectrum.intensities, spectrum.metadata, metadata_harmonization)
+            for spectrum in loaded_object
+        ]
     return loaded_object

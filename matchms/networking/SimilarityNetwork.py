@@ -159,7 +159,7 @@ class SimilarityNetwork:
         filename
             Path to file to write to.
         graph_format
-            Format, in which to store the network graph. Supported formats are: "cyjs", "gexf", "gml", "graphml", "json".
+            Format, in which to store the network. Supported formats are: "cyjs", "gexf", "gml", "graphml", "json".
             Default is "graphml".
         """
         if not self.graph:

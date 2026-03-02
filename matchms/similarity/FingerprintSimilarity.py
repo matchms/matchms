@@ -3,14 +3,17 @@ import numpy as np
 from matchms.Spectrum import Spectrum
 from .BaseSimilarity import BaseSimilarity
 from .ScoreFilter import FilterScoreByValue
-from .vector_similarity_functions import (cosine_similarity,
-                                          cosine_similarity_matrix,
-                                          dice_similarity,
-                                          dice_similarity_matrix,
-                                          jaccard_index,
-                                          jaccard_similarity_matrix)
+from .vector_similarity_functions import (
+    cosine_similarity,
+    cosine_similarity_matrix,
+    dice_similarity,
+    dice_similarity_matrix,
+    jaccard_index,
+    jaccard_similarity_matrix,
+)
 
 
+# ruff: noqa: E501
 class FingerprintSimilarity(BaseSimilarity):
     """Calculate similarity between molecules based on their fingerprints.
 
@@ -57,13 +60,18 @@ class FingerprintSimilarity(BaseSimilarity):
          [0.415 0.444 1.   ]]
 
     """
+
     # Set key characteristics as class attributes
     is_commutative = True
     # Set output data type, e.g.  "float" or [("score", "float"), ("matches", "int")]
     score_datatype = np.float64
 
-    def __init__(self, similarity_measure: str = "jaccard",
-                 set_empty_scores: Union[float, int, str] = "nan", score_filters: Optional[Tuple[FilterScoreByValue, ...]] = None):
+    def __init__(
+        self,
+        similarity_measure: str = "jaccard",
+        set_empty_scores: Union[float, int, str] = "nan",
+        score_filters: Optional[Tuple[FilterScoreByValue, ...]] = None,
+    ):
         """
 
         Parameters
@@ -105,8 +113,9 @@ class FingerprintSimilarity(BaseSimilarity):
 
         raise NotImplementedError
 
-    def _matrix_without_mask_without_filter(self, references: List[Spectrum], queries: List[Spectrum],
-                                            is_symmetric: bool = False) -> np.array:
+    def _matrix_without_mask_without_filter(
+        self, references: List[Spectrum], queries: List[Spectrum], is_symmetric: bool = False
+    ) -> np.array:
         """Calculate matrix of fingerprint based similarity scores.
 
         Parameters
@@ -116,6 +125,7 @@ class FingerprintSimilarity(BaseSimilarity):
         queries:
             List of query spectra.
         """
+
         def get_fingerprints(spectra):
             for index, spectrum in enumerate(spectra):
                 yield index, spectrum.get("fingerprint")
@@ -141,21 +151,23 @@ class FingerprintSimilarity(BaseSimilarity):
 
         fingerprints1, idx_fingerprints1 = collect_fingerprints(references)
         fingerprints2, idx_fingerprints2 = collect_fingerprints(queries)
-        assert idx_fingerprints1.size > 0 and idx_fingerprints2.size > 0, ("Not enouth molecular fingerprints.",
-                                                                           "Apply 'add_fingerprint'filter first.")
+        assert idx_fingerprints1.size > 0 and idx_fingerprints2.size > 0, (
+            "Not enouth molecular fingerprints.",
+            "Apply 'add_fingerprint'filter first.",
+        )
 
         # Calculate similarity score matrix following specified method
         similarity_matrix = create_full_matrix()
         if self.similarity_measure == "jaccard":
-            similarity_matrix[np.ix_(idx_fingerprints1,
-                                        idx_fingerprints2)] = jaccard_similarity_matrix(fingerprints1,
-                                                                                        fingerprints2)
+            similarity_matrix[np.ix_(idx_fingerprints1, idx_fingerprints2)] = jaccard_similarity_matrix(
+                fingerprints1, fingerprints2
+            )
         elif self.similarity_measure == "dice":
-            similarity_matrix[np.ix_(idx_fingerprints1,
-                                        idx_fingerprints2)] = dice_similarity_matrix(fingerprints1,
-                                                                                     fingerprints2)
+            similarity_matrix[np.ix_(idx_fingerprints1, idx_fingerprints2)] = dice_similarity_matrix(
+                fingerprints1, fingerprints2
+            )
         elif self.similarity_measure == "cosine":
-            similarity_matrix[np.ix_(idx_fingerprints1,
-                                        idx_fingerprints2)] = cosine_similarity_matrix(fingerprints1,
-                                                                                       fingerprints2)
+            similarity_matrix[np.ix_(idx_fingerprints1, idx_fingerprints2)] = cosine_similarity_matrix(
+                fingerprints1, fingerprints2
+            )
         return similarity_matrix.astype(self.score_datatype)

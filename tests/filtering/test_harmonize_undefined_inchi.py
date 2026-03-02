@@ -3,14 +3,17 @@ from matchms.filtering import harmonize_undefined_inchi
 from ..builder_Spectrum import SpectrumBuilder
 
 
-@pytest.mark.parametrize("metadata, aliases, undefined, expected", [
-    [{"inchi": ""}, ["", "N/A", "NA", "n/a"], "", ""],
-    [{"inchi": "n/a"}, ["", "N/A", "NA", "n/a"], "", ""],
-    [{"inchi": "N/A"}, ["", "N/A", "NA", "n/a"], "", ""],
-    [{"inchi": "NA"}, ["", "N/A", "NA", "n/a"], "", ""],
-    [{"inchi": "nan"}, ["nodata", "NaN", "Nan", "nan"], "", ""],
-    [{"inchi": "nan"}, ["nodata", "NaN", "Nan", "nan"], "n/a", "n/a"]
-])
+@pytest.mark.parametrize(
+    "metadata, aliases, undefined, expected",
+    [
+        [{"inchi": ""}, ["", "N/A", "NA", "n/a"], "", ""],
+        [{"inchi": "n/a"}, ["", "N/A", "NA", "n/a"], "", ""],
+        [{"inchi": "N/A"}, ["", "N/A", "NA", "n/a"], "", ""],
+        [{"inchi": "NA"}, ["", "N/A", "NA", "n/a"], "", ""],
+        [{"inchi": "nan"}, ["nodata", "NaN", "Nan", "nan"], "", ""],
+        [{"inchi": "nan"}, ["nodata", "NaN", "Nan", "nan"], "n/a", "n/a"],
+    ],
+)
 def test_harmonize_undefined_inchi(metadata, aliases, undefined, expected):
     spectrum_in = SpectrumBuilder().with_metadata(metadata).build()
 

@@ -3,15 +3,18 @@ from matchms.filtering import harmonize_undefined_smiles
 from ..builder_Spectrum import SpectrumBuilder
 
 
-@pytest.mark.parametrize("metadata, aliases, undefined, expected", [
-    [{"smiles": ""}, ["", "N/A", "NA", "n/a", "no data"], "", ""],
-    [{"smiles": "n/a"}, ["", "N/A", "NA", "n/a", "no data"], "", ""],
-    [{"smiles": "N/A"}, ["", "N/A", "NA", "n/a", "no data"], "", ""],
-    [{"smiles": "NA"}, ["", "N/A", "NA", "n/a", "no data"], "", ""],
-    [{"smiles": "no data"}, ["", "N/A", "NA", "n/a", "no data"], "", ""],
-    [{"smiles": "nan"}, ["nodata", "NaN", "Nan", "nan"], "", ""],
-    [{"smiles": "nan"}, ["nodata", "NaN", "Nan", "nan"], "n/a", "n/a"]
-])
+@pytest.mark.parametrize(
+    "metadata, aliases, undefined, expected",
+    [
+        [{"smiles": ""}, ["", "N/A", "NA", "n/a", "no data"], "", ""],
+        [{"smiles": "n/a"}, ["", "N/A", "NA", "n/a", "no data"], "", ""],
+        [{"smiles": "N/A"}, ["", "N/A", "NA", "n/a", "no data"], "", ""],
+        [{"smiles": "NA"}, ["", "N/A", "NA", "n/a", "no data"], "", ""],
+        [{"smiles": "no data"}, ["", "N/A", "NA", "n/a", "no data"], "", ""],
+        [{"smiles": "nan"}, ["nodata", "NaN", "Nan", "nan"], "", ""],
+        [{"smiles": "nan"}, ["nodata", "NaN", "Nan", "nan"], "n/a", "n/a"],
+    ],
+)
 def test_harmonize_undefined_smiles(metadata, aliases, undefined, expected):
     spectrum_in = SpectrumBuilder().with_metadata(metadata).build()
 

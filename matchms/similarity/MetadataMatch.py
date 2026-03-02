@@ -1,8 +1,7 @@
 import logging
 from typing import List, Optional, Tuple
 import numpy as np
-from matchms.similarity.spectrum_similarity_functions import (
-    number_matching, number_matching_symmetric)
+from matchms.similarity.spectrum_similarity_functions import number_matching, number_matching_symmetric
 from matchms.Spectrum import Spectrum
 from .BaseSimilarity import BaseSimilarity
 from .ScoreFilter import FilterScoreByValue
@@ -60,12 +59,18 @@ class MetadataMatch(BaseSimilarity):
         Metadata match between 2 and 3 is [np.True_]
 
     """
+
     # Set key characteristics as class attributes
     is_commutative = True
     score_datatype = bool
 
-    def __init__(self, field: str, matching_type: str = "equal_match",
-                 tolerance: float = 0.1, score_filters: Optional[Tuple[FilterScoreByValue, ...]] = None):
+    def __init__(
+        self,
+        field: str,
+        matching_type: str = "equal_match",
+        tolerance: float = 0.1,
+        score_filters: Optional[Tuple[FilterScoreByValue, ...]] = None,
+    ):
         """
         Parameters
         ----------
@@ -82,8 +87,7 @@ class MetadataMatch(BaseSimilarity):
         super().__init__(score_filters)
         self.field = field
         self.tolerance = tolerance
-        assert matching_type in ["equal_match", "difference"], \
-            "Expected type from ['equal_match', 'difference']"
+        assert matching_type in ["equal_match", "difference"], "Expected type from ['equal_match', 'difference']"
         self.matching_type = matching_type
 
     def pair(self, reference: Spectrum, query: Spectrum) -> np.ndarray:
@@ -102,7 +106,7 @@ class MetadataMatch(BaseSimilarity):
             return np.asarray(False, dtype=self.score_datatype)
 
         if self.matching_type == "equal_match":
-            score = (entry_ref == entry_query)
+            score = entry_ref == entry_query
             return np.asarray(score, dtype=self.score_datatype)
 
         if isinstance(entry_ref, (int, float)) and isinstance(entry_query, (int, float)):
@@ -112,8 +116,9 @@ class MetadataMatch(BaseSimilarity):
         logger.warning("Non-numerical entry not compatible with 'difference' method")
         return np.asarray(False, dtype=self.score_datatype)
 
-    def _matrix_without_mask_without_filter(self, references: List[Spectrum], queries: List[Spectrum],
-               is_symmetric: bool = False) -> np.ndarray:
+    def _matrix_without_mask_without_filter(
+        self, references: List[Spectrum], queries: List[Spectrum], is_symmetric: bool = False
+    ) -> np.ndarray:
         """Compare parent masses between all references and queries.
 
         Parameters
@@ -146,11 +151,9 @@ class MetadataMatch(BaseSimilarity):
             scores = np.ones(len(rows))
         else:
             if is_symmetric:
-                rows, cols, scores = number_matching_symmetric(entries_ref,
-                                                               self.tolerance)
+                rows, cols, scores = number_matching_symmetric(entries_ref, self.tolerance)
             else:
-                rows, cols, scores = number_matching(entries_ref, entries_query,
-                                                     self.tolerance)
+                rows, cols, scores = number_matching(entries_ref, entries_query, self.tolerance)
 
         scores_array = np.zeros((len(entries_ref), len(entries_query)), dtype=self.score_datatype)
         scores_array[rows, cols] = scores.astype(self.score_datatype)

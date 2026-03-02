@@ -36,9 +36,8 @@ jobs:
           poetry run pytest --cov --cov-report term --cov-report xml --junitxml=xunit-result.xml
       - name: Correct coverage paths
         run: sed -i "s+$PWD/++g" coverage.xml
-      - name: Check style against standards using prospector
-        shell: bash -l {0}
-        run: prospector -o grouped -o pylint:pylint-report.txt
+      - name: Run ruff linter
+        run: ruff check --output-format=github
       - name: Store PR metadata in json file
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
@@ -56,8 +55,6 @@ jobs:
             coverage.xml
             xunit-result.xml
             pr_metadata.json
-      - name: Check whether import statements are used consistently
-        run: isort . --check-only --diff
 
   build_pypi:
     name: Test pypi build
@@ -108,7 +105,7 @@ jobs:
       fail-fast: false
       matrix:
         os: ['ubuntu-latest', 'macos-latest', 'windows-latest']
-        python-version: ['3.10', '3.11', '3.12']
+        python-version: ['3.10', '3.11', '3.12', '3.13']
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
@@ -143,7 +140,7 @@ jobs:
         uses: conda-incubator/setup-miniconda@v3
         with:
           auto-update-conda: true
-          python-version: '3.10'
+          python-version: '3.12'
       - name: Show conda config
         shell: bash -l {0}
         run: |
@@ -164,7 +161,7 @@ jobs:
       - name: Install conda dependencies
         shell: bash -l {0}
         run: |
-          conda install -c conda-forge poetry
+          conda install -c conda-forge --strict-channel-priority poetry
       - name: Install with development dependencies
         shell: bash -l {0}
         run: |

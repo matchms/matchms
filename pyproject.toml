@@ -1,86 +1,139 @@
-[tool.poetry]
+[project]
 name = "matchms"
-version = "0.28.2"
+version = "0.31.0"
 description = "Python library for large-scale comparisons and processing of tandem mass spectral data"
-authors = ["matchms developer team <florian.huber@hs-duesseldorf.de>"]
-
-license = "Apache-2.0"
 readme = "README.rst"
+requires-python = ">=3.10,<3.14"  # blocked because of pynndescent
+license = "Apache-2.0"
+authors = [
+  { name = "matchms developer team", email = "florian.huber@hs-duesseldorf.de" }
+]
+keywords = [
+  "fuzzy matching",
+  "fuzzy search",
+  "mass spectrometry",
+  "similarity measures",
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Education",
+  "Intended Audience :: Science/Research",
+  "Natural Language :: English",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+]
+dependencies = [
+  "deprecated>=1.3.1",
+  "lxml>=6.0.2",
+  "matplotlib>=3.10.8",
+  "networkx>=3.4.2,<3.5",
+  "numba>=0.61.2",
+  "numpy>=2.0.0",
+  "pandas>=2.2.3",
+  "pickydict>=0.5.0",
+  "pubchempy>=1.0.5",
+  "pynndescent>=0.6.0",
+  "pyteomics>=4.7.5",
+  "pyyaml>=6.0.3",
+  "rdkit>=2024.3.5",
+  "requests>=2.32.5",
+  "scipy>=1.15.3,<1.16",
+  "sparsestack>=0.7.0",
+  "tqdm>=4.67.1",
+]
+[project.urls]
 repository = "https://github.com/matchms/matchms"
 documentation = "https://matchms.readthedocs.io/en/latest/"
-keywords=[ "similarity measures",
-           "mass spectrometry",
-           "fuzzy matching",
-           "fuzzy search" ]
-classifiers = [
-    "Development Status :: 4 - Beta",
-    "Intended Audience :: Education",
-    "Intended Audience :: Science/Research",
-    "Intended Audience :: Developers",
-    "License :: OSI Approved :: Apache Software License",
-    "Natural Language :: English",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12"
+
+[dependency-groups]
+dev = [
+  "decorator>=5.2.1",
+  "poetry-bumpversion>=0.3.3",
+  "pre-commit>=4.5.1",
+  "pytest>=9.0.2",
+  "pytest-cov>=7.0.0",
+  "ruff>=0.14.13",
+  "testfixtures>=8.3.0,<9",
+  "twine>=6.2.0",
+  "yapf>=0.43.0",
+]
+docs = [
+  "sphinx<=7",
+  "sphinx-rtd-theme>=3.1.0",
+  "sphinxcontrib-apidoc>=0.6.0",
 ]
 
-[tool.poetry.dependencies]
-python = ">=3.10,<3.13"
-numpy = ">1.24"
-scipy = "^1.14.1"
-pandas = "^2.2.3"
-pillow = "!=9.4.0"
-lxml = "^4.9.3"
-matplotlib = ">=3.7"
-networkx = "^3.4.2"
-numba = "^0.60.0"
-pickydict = ">=0.4.0"
-pyteomics = ">=4.6"
-requests = ">=2.31.0"
-sparsestack = ">=0.6.0"
-tqdm = ">=4.65.0"
-rdkit = "^2024.3.5"
-pyyaml = ">=6.0.1"
-deprecated = ">=1.2.14"
-pubchempy = "*"
-
-[tool.poetry.group.dev.dependencies]
-decorator = "^5.1.1"
-isort = "^5.12.0"
-pylint = "^2.17.5"
-prospector = {extras = ["with-pyroma"], version = "^1.10.2"}
-pytest = "^7.4.0"
-pytest-cov = "^4.1.0"
-yapf = "^0.40.1"
-testfixtures = "^7.1.0"
-twine = "^5.1.0"
-black = "^23.7.0"
-poetry-bumpversion = "^0.3.1"
-
-[tool.poetry.group.docs.dependencies]
-sphinxcontrib-apidoc = "^0.3.0"
-sphinx-rtd-theme = "^1.2.2"
-sphinx = "<7"
-
-
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
 
 [tool.poetry_bumpversion.file."matchms/__version__.py"]
 
-[tool.isort]
-sections = "FUTURE,STDLIB,THIRDPARTY,FIRSTPARTY,LOCALFOLDER"
-no_lines_before = "FUTURE,STDLIB,THIRDPARTY,FIRSTPARTY,LOCALFOLDER"
-lines_after_imports = 2
-known_first_party = "matchms"
-skip = "readthedocs/conf.py"
+[tool.ruff]
+extend-exclude = ["integration-tests", "paper", "readthedocs"]
+line-length = 120
+output-format = "grouped"
+
+[tool.ruff.format]
+docstring-code-format = true
+line-ending = "lf"
+
+[tool.ruff.lint]
+# TODO: add some rules in future, eg. W291/292
+extend-select = ["D", "E", "I"]
+# TODO: some of these rules should be enforced in the future, eg. E713
+ignore = [
+  "D100",
+  "D101",
+  "D102",
+  "D103",
+  "D104",
+  "D105",
+  "D107",
+  "D200",
+  "D201",
+  "D202",
+  "D203",
+  "D204",
+  "D205",
+  "D209",
+  "D210",
+  "D212",
+  "D213",
+  "D4",
+  "E713"
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["matchms"]
+lines-after-imports = 2
+no-lines-before = [
+  "future",
+  "standard-library",
+  "third-party",
+  "first-party",
+  "local-folder",
+]
+section-order = [
+  "future",
+  "standard-library",
+  "third-party",
+  "first-party",
+  "local-folder",
+]
+
+# disable pydoc for tests
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["D"]
 
 [tool.pytest.ini_options]
 testpaths = [
-    "tests",
-    "integration-tests",
+  "tests",
+  "integration-tests",
 ]
 
 [build_sphinx]
