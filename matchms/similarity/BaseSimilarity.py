@@ -5,7 +5,7 @@ from tqdm import tqdm
 from matchms.similarity.COOIndex import COOIndex
 from matchms.similarity.COOMatrix import COOMatrix
 from matchms.similarity.ScoreFilter import FilterScoreByValue
-from matchms.typing import SpectrumType
+from matchms.Spectrum import Spectrum
 
 
 class BaseSimilarity:
@@ -42,7 +42,7 @@ class BaseSimilarity:
         self.score_filters = score_filters if score_filters is not None else ()
 
     @abstractmethod
-    def pair(self, reference: SpectrumType, query: SpectrumType) -> np.ndarray:
+    def pair(self, reference: Spectrum, query: Spectrum) -> np.ndarray:
         """
         Compute the similarity score for a single pair of spectra.
 
@@ -61,8 +61,8 @@ class BaseSimilarity:
 
     def matrix(
         self,
-        references: Sequence[SpectrumType],
-        queries: Sequence[SpectrumType],
+        references: Sequence[Spectrum],
+        queries: Sequence[Spectrum],
         is_symmetric: bool = False,
         mask_indices: COOIndex = None,
     ) -> np.ndarray:
@@ -94,8 +94,8 @@ class BaseSimilarity:
 
     def sparse_array(
         self,
-        references: Sequence[SpectrumType],
-        queries: Sequence[SpectrumType],
+        references: Sequence[Spectrum],
+        queries: Sequence[Spectrum],
         mask_indices: COOIndex = None,
         is_symmetric=False,
     ) -> COOMatrix:
@@ -137,8 +137,8 @@ class BaseSimilarity:
 
     def _matrix_without_mask_with_filter(
         self,
-        references: Sequence[SpectrumType],
-        queries: Sequence[SpectrumType],
+        references: Sequence[Spectrum],
+        queries: Sequence[Spectrum],
         is_symmetric: bool = False,
     ) -> np.ndarray:
         """
@@ -164,8 +164,8 @@ class BaseSimilarity:
 
     def _matrix_without_mask_without_filter(
         self,
-        references: Sequence[SpectrumType],
-        queries: Sequence[SpectrumType],
+        references: Sequence[Spectrum],
+        queries: Sequence[Spectrum],
         is_symmetric: bool = False,
     ) -> np.ndarray:
         """
@@ -205,8 +205,8 @@ class BaseSimilarity:
 
     def _matrix_with_mask_with_filter(
         self,
-        references: Sequence[SpectrumType],
-        queries: Sequence[SpectrumType],
+        references: Sequence[Spectrum],
+        queries: Sequence[Spectrum],
         mask_indices: COOIndex,
         is_symmetric: bool = False,
     ) -> np.ndarray:
@@ -241,8 +241,8 @@ class BaseSimilarity:
 
     def _sparse_array_without_mask_with_filter(
         self,
-        references: Sequence[SpectrumType],
-        queries: Sequence[SpectrumType],
+        references: Sequence[Spectrum],
+        queries: Sequence[Spectrum],
         is_symmetric: bool = False,
     ) -> COOMatrix:
         """
@@ -297,8 +297,8 @@ class BaseSimilarity:
 
     def _sparse_array_with_mask_without_filter(
         self,
-        references: Sequence[SpectrumType],
-        queries: Sequence[SpectrumType],
+        references: Sequence[Spectrum],
+        queries: Sequence[Spectrum],
         mask_indices: COOIndex,
     ) -> COOMatrix:
         """Optional: Provide optimized method to calculate a sparse matrix of similarity scores.
@@ -333,8 +333,8 @@ class BaseSimilarity:
 
     def _sparse_array_with_mask_with_filter(
         self,
-        references: Sequence[SpectrumType],
-        queries: Sequence[SpectrumType],
+        references: Sequence[Spectrum],
+        queries: Sequence[Spectrum],
         mask_indices: COOIndex,
     ) -> COOMatrix:
         """
