@@ -194,6 +194,85 @@ def test_entropy_matrix_sparse_basic():
             expect = float(fse.pair(refs[i], qs[j]))
             assert float(dense[i, j]) == pytest.approx(expect, abs=1e-6)
 
+
+def test_entropy_fragment_score_is_bounded_with_overlapping_windows():
+    # Overlapping tolerance windows used to cause many-to-many over-counting.
+    s1 = build_spectrum([100.000, 100.010], [1.0, 1.0], precursor_mz=250.0)
+    s2 = build_spectrum([100.005, 100.015], [1.0, 1.0], precursor_mz=250.0)
+
+    fse = FlashSimilarity(
+        score_type="spectral_entropy",
+        matching_mode="fragment",
+        tolerance=0.02,
+        use_ppm=False,
+        remove_precursor=False,
+        noise_cutoff=0.0,
+        normalize_to_half=True,
+        merge_within=0.0,
+        dtype=np.float64,
+    )
+
+    score = float(fse.pair(s1, s2))
+    assert score <= 1.0 + 1e-7
+
+
+def test_entropy_fragment_ignores_non_positive_peaks_in_pairwise_matching():
+    ref_with_zero = build_spectrum([100.0, 100.1], [0.0, 1.0], precursor_mz=250.0)
+    ref_without_zero = build_spectrum([100.1], [1.0], precursor_mz=250.0)
+    query = build_spectrum([100.05], [1.0], precursor_mz=250.0)
+
+    fse = FlashSimilarity(
+        score_type="spectral_entropy",
+        matching_mode="fragment",
+        tolerance=0.1,
+        use_ppm=False,
+        remove_precursor=False,
+        noise_cutoff=0.0,
+        normalize_to_half=False,
+        merge_within=0.0,
+        dtype=np.float64,
+    )
+
+    expected = float(fse.pair(ref_without_zero, query))
+    assert expected > 0.0
+    assert float(fse.pair(ref_with_zero, query)) == pytest.approx(expected, abs=1e-7)
+
+    matrix_scores = fse.matrix([ref_with_zero, ref_without_zero], [query], array_type="numpy", n_jobs=0)
+    assert float(matrix_scores[0, 0]) == pytest.approx(expected, abs=1e-7)
+    assert float(matrix_scores[1, 0]) == pytest.approx(expected, abs=1e-7)
+
+
+def test_entropy_fragment_matrix_matches_pair_with_sparse_candidate_columns():
+    ref = build_spectrum([100.0, 200.0], [1.0, 0.8], precursor_mz=450.0)
+    queries = [
+        build_spectrum([100.005, 200.003], [1.0, 0.7], precursor_mz=450.0),
+        build_spectrum([100.01, 350.0], [0.9, 0.5], precursor_mz=450.0),
+        build_spectrum([199.99], [0.8], precursor_mz=450.0),
+    ]
+    for shift in range(15):
+        base = 500.0 + 10.0 * shift
+        queries.append(build_spectrum([base, base + 0.3], [1.0, 0.5], precursor_mz=450.0))
+
+    fse = FlashSimilarity(
+        score_type="spectral_entropy",
+        matching_mode="fragment",
+        tolerance=0.02,
+        use_ppm=False,
+        remove_precursor=False,
+        noise_cutoff=0.0,
+        normalize_to_half=False,
+        merge_within=0.0,
+        dtype=np.float64,
+    )
+
+    matrix_scores = fse.matrix([ref], queries, array_type="numpy", n_jobs=0)
+    assert matrix_scores.shape == (1, len(queries))
+    assert np.count_nonzero(matrix_scores[0] > 0.0) == 3
+
+    for j, query in enumerate(queries):
+        expected = float(fse.pair(ref, query))
+        assert float(matrix_scores[0, j]) == pytest.approx(expected, abs=1e-7)
+
 # ----------------------------
 # Cosine / Modified Cosine path + baseline parity
 # ----------------------------
