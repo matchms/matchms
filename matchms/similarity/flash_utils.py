@@ -6,40 +6,51 @@ import numpy as np
 
 class _LibraryIndex:
     """
-    Compact container for the concatenated (sorted) library peaks and, optionally,
-    the neutral-loss view. All arrays are read-only in workers.
+    Compact container for library views used by Numba row workers.
 
-    Contains
-    --------
+    The index stores the same peak information in two layouts:
+
+    1) Global m/z-sorted view (used for candidate window searches):
+       - ``peaks_mz``, ``peaks_int``, ``peaks_spec_idx``.
+    2) Spectrum-major contiguous view (used for pairwise one-to-one scans):
+       - ``spec_offsets``, ``spec_mz``, ``spec_int``.
+
+    All arrays are treated as read-only in worker processes.
+
+    Attributes
+    ----------
     n_specs : int
         Number of spectra in the library.
-    peaks_mz : float[dtype]
-        All concatenated product (fragment) m/z values, sorted ascending.
-    peaks_int : float[dtype]
-        Corresponding intensities.
-    peaks_spec_idx : int32
-        Which spectrum each peak originated from (index into 0..n_specs-1).
-    nl_mz : float[dtype] or None
-        Neutral-loss m/z for peaks with known precursor, sorted ascending.
-    nl_int : float[dtype] or None
-        Corresponding intensities.
-    nl_spec_idx : int32 or None
-        Which spectrum each neutral-loss peak originated from (index into 0..n_specs-1).
-    nl_product_idx : int64 or None  
-        Maps each neutral-loss peak back into peaks_mz positions (for hybrid rules).
-    spec_offsets : int64
-        Prefix offsets for the per-spectrum peak view in `spec_mz` / `spec_int`.
-    spec_mz : float[dtype]
-        Concatenated m/z values in spectrum-major order (spectrum 0, then 1, ...).
-    spec_int : float[dtype]
-        Concatenated intensities in spectrum-major order matching `spec_mz`.
-    spec_l2 : float[dtype] or None
-        Precomputed L2 norm of each spectrum's intensities (for cosine or modified 
-        cosine score).
-    precursor_mz : float[dtype]
-        Precursor m/z for each spectrum (NaN if unknown).
+    peaks_mz : np.ndarray[dtype]
+        Product (fragment) m/z values for all spectra, globally sorted ascending.
+    peaks_int : np.ndarray[dtype]
+        Intensities aligned 1:1 with ``peaks_mz``.
+    peaks_spec_idx : np.ndarray[int32 or int64]
+        Source spectrum id for each entry in ``peaks_mz``.
+    spec_offsets : np.ndarray[int64]
+        Prefix offsets into spectrum-major arrays. Slice for spectrum ``i`` is
+        ``[spec_offsets[i]:spec_offsets[i + 1])``.
+        Invariants: ``len(spec_offsets) == n_specs + 1``, ``spec_offsets[0] == 0``,
+        ``spec_offsets[-1] == total number of peaks``.
+    spec_mz : np.ndarray[dtype]
+        Product m/z values concatenated spectrum-by-spectrum (not globally sorted).
+    spec_int : np.ndarray[dtype]
+        Intensities aligned 1:1 with ``spec_mz``.
+    nl_mz : np.ndarray[dtype] or None
+        Neutral-loss m/z values, globally sorted ascending (only when requested).
+    nl_int : np.ndarray[dtype] or None
+        Intensities aligned 1:1 with ``nl_mz``.
+    nl_spec_idx : np.ndarray[int32 or int64] or None
+        Source spectrum id for each entry in ``nl_mz``.
+    nl_product_idx : np.ndarray[int64] or None
+        For each NL entry, index back into global product arrays
+        (``peaks_mz`` / ``peaks_int``). Used for hybrid de-duplication rules.
+    spec_l2 : np.ndarray[dtype] or None
+        Optional per-spectrum L2 norm of product intensities (cosine paths).
+    precursor_mz : np.ndarray[dtype]
+        Precursor m/z per spectrum. Unknown values are stored as ``NaN``.
     dtype : np.dtype
-        Float dtype used for all float arrays. Default is np.float32.
+        Floating-point dtype used for all float arrays.
     """
     def __init__(self, dtype: np.dtype = np.float32):
         self.n_specs = 0
@@ -63,12 +74,20 @@ def _build_library_index(processed_peaks_list: List[np.ndarray],
                          compute_l2_norm: bool = False,
                          dtype: np.dtype = np.float32) -> _LibraryIndex:
     """
-    Build a global, sorted index over all *query* spectra peaks.
+    Build shared library views over all query spectra peaks.
 
-    The index concatenates all (query) spectra peaks into flat arrays, then sorts by m/z.
-    This allows each reference spectrum (a row) to scan efficiently using
-    binary searches into the shared arrays. If `build_neutral_loss` is True, we
-    also construct a parallel set of arrays for neutral-loss peaks (precursor - mz).
+    Output layout
+    -------------
+    The returned :class:`_LibraryIndex` stores two complementary product-peak views:
+
+    - Global m/z-sorted arrays (``peaks_mz``, ``peaks_int``, ``peaks_spec_idx``)
+      for fast tolerance-window candidate lookup.
+    - Spectrum-major contiguous arrays (``spec_offsets``, ``spec_mz``, ``spec_int``)
+      for one-to-one per-spectrum matching.
+
+    If ``compute_neutral_loss`` is True, neutral-loss arrays are created from
+    ``precursor_mz - product_mz`` for spectra with known precursors and sorted by NL m/z.
+    ``nl_product_idx`` maps each NL entry back to its global product-peak position.
 
     Parameters
     ----------
@@ -78,7 +97,7 @@ def _build_library_index(processed_peaks_list: List[np.ndarray],
     precursor_mz_list : list of float or None
         Precursor m/z for each spectrum (if known).
     compute_neutral_loss : bool
-        If True, build the neutral-loss view (for hybrid search (flash entropy) or modified cosine).
+        If True, build neutral-loss arrays used by hybrid entropy and modified cosine.
     compute_l2_norm : bool
         If True, precompute the L2 norm of each spectrum's intensities (for cosine or modified cosine).
     dtype : np.dtype
@@ -87,7 +106,9 @@ def _build_library_index(processed_peaks_list: List[np.ndarray],
     Returns
     -------
     _LibraryIndex
-        Compact structure used by the row workers to accumulate scores quickly.
+        Compact structure used by row workers to accumulate scores quickly.
+        Empty inputs still return fully initialized arrays (often size 0), with
+        ``spec_offsets`` always shaped ``(n_specs + 1,)``.
     """
     idx = _LibraryIndex(dtype)
     idx.n_specs = len(processed_peaks_list)
