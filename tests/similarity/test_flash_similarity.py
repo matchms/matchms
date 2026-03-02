@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from matchms.similarity import CosineGreedy, ModifiedCosine
+from matchms.similarity import CosineGreedy, ModifiedCosineGreedy
 from matchms.similarity.FlashSimilarity import FlashSimilarity
 from ..builder_Spectrum import SpectrumBuilder
 
@@ -246,7 +246,7 @@ def test_modifiedcosine_pair_matches_baseline_default_tolerance_001():
         merge_within=0.0,
         dtype=np.float64,
     )
-    baseline = ModifiedCosine(tolerance=0.01)
+    baseline = ModifiedCosineGreedy(tolerance=0.01)
 
     s_flash = flash.pair(a, b)
     s_base = baseline.pair(a, b)["score"]

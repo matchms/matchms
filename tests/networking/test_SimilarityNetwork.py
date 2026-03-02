@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 from matchms import Spectrum, calculate_scores
 from matchms.networking import SimilarityNetwork
-from matchms.similarity import FingerprintSimilarity, ModifiedCosine
+from matchms.similarity import FingerprintSimilarity, ModifiedCosineGreedy
 
 
 @pytest.fixture(params=["cyjs", "gexf", "gml", "graphml", "json"])
@@ -79,7 +79,7 @@ def create_dummy_scores_symmetric_modified_cosine():
     spectra = create_dummy_spectra()
 
     # Create Scores object by calculating dice scores
-    similarity_measure = ModifiedCosine()
+    similarity_measure = ModifiedCosineGreedy()
     scores = calculate_scores(spectra, spectra, similarity_measure)
     return scores
 
@@ -141,11 +141,11 @@ def test_create_network_symmetric_remove_unconnected_nodes():
 
 
 def test_create_network_symmetric_modified_cosine():
-    """Test creating a graph from a symmetric Scores object using ModifiedCosine"""
+    """Test creating a graph from a symmetric Scores object using ModifiedCosineGreedy"""
     cutoff = 0.7
     scores = create_dummy_scores_symmetric_modified_cosine()
     msnet = SimilarityNetwork(score_cutoff=cutoff)
-    msnet.create_network(scores, score_name="ModifiedCosine_score")
+    msnet.create_network(scores, score_name="ModifiedCosineGreedy_score")
 
     edges_list = list(msnet.graph.edges())
     edges_list.sort()
@@ -153,11 +153,11 @@ def test_create_network_symmetric_modified_cosine():
 
 
 def test_create_network_export_to_file(filename, graph_format):
-    """Test creating a graph file from a symmetric Scores object using ModifiedCosine"""
+    """Test creating a graph file from a symmetric Scores object using ModifiedCosineGreedy"""
     cutoff = 0.7
     scores = create_dummy_scores_symmetric_modified_cosine()
     msnet = SimilarityNetwork(score_cutoff=cutoff)
-    msnet.create_network(scores, score_name="ModifiedCosine_score")
+    msnet.create_network(scores, score_name="ModifiedCosineGreedy_score")
     msnet.export_to_file(filename, graph_format)
 
     assert os.path.isfile(filename), "network file not found"
