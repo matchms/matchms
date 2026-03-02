@@ -2,6 +2,7 @@ import csv
 import math
 import os
 from typing import List
+import pubchempy
 import pytest
 from matchms.filtering import derive_annotation_from_compound_name
 from matchms.filtering.metadata_processing.derive_annotation_from_compound_name import (
@@ -183,6 +184,25 @@ def test_load_compound_name_annotation(compound_name, expected_output, csv_file_
 def test_pubchem_name_search(compound_name, expected_output):
     result = _pubchem_name_search(compound_name)
     assert result == expected_output
+
+
+def test_pubchem_name_search_handles_timeouterror(monkeypatch):
+    call_count = {"value": 0}
+
+    def _raise_timeout(*args, **kwargs):
+        del args, kwargs
+        call_count["value"] += 1
+        raise TimeoutError("request timed out")
+
+    monkeypatch.setattr(pubchempy, "get_compounds", _raise_timeout)
+    monkeypatch.setattr(
+        "matchms.filtering.metadata_processing.derive_annotation_from_compound_name.time.sleep",
+        lambda _: None,
+    )
+
+    result = _pubchem_name_search("test_name", max_retries=2)
+    assert result == []
+    assert call_count["value"] == 2
 
 
 @pytest.mark.parametrize(
