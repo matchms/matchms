@@ -295,11 +295,13 @@ Code example:
                                                            mz_tolerance=0.1)
     # Compute scores:
     similarity_cosine = mssim.CosineGreedy(tolerance=mz_tolerance).pair(spectrum1, spectrum2)
-    similarity_modified_cosine = mssim.ModifiedCosine(tolerance=mz_tolerance).pair(spectrum1, spectrum2)
+    similarity_modified_cosine = mssim.ModifiedCosineHungarian(tolerance=mz_tolerance).pair(spectrum1, spectrum2)
+    similarity_modified_cosine_approx = mssim.ModifiedCosineGreedy(tolerance=mz_tolerance).pair(spectrum1, spectrum2)
     similarity_neutral_losses = mssim.NeutralLossesCosine(tolerance=mz_tolerance).pair(spectrum1, spectrum2)
 
     print(f"similarity_cosine: {similarity_cosine}")
     print(f"similarity_modified_cosine: {similarity_modified_cosine}")
+    print(f"similarity_modified_cosine_approx: {similarity_modified_cosine_approx}")
     print(f"similarity_neutral_losses: {similarity_neutral_losses}")
 
     spectrum1.plot_against(spectrum2)

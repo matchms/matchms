@@ -15,7 +15,7 @@ class SimilarityNetwork:
 
         import numpy as np
         from matchms import Spectrum, calculate_scores
-        from matchms.similarity import ModifiedCosine
+        from matchms.similarity import ModifiedCosineGreedy
         from matchms.networking import SimilarityNetwork
 
         spectrum_1 = Spectrum(mz=np.array([100, 150, 200.]),
@@ -28,11 +28,11 @@ class SimilarityNetwork:
                                         "test_id": "two"})
 
         # Use factory to construct a similarity function
-        modified_cosine = ModifiedCosine(tolerance=0.2)
+        modified_cosine = ModifiedCosineGreedy(tolerance=0.2)
         spectra = [spectrum_1, spectrum_2]
         scores = calculate_scores(spectra, spectra, modified_cosine)
         ms_network = SimilarityNetwork(identifier_key="test_id")
-        ms_network.create_network(scores, score_name="ModifiedCosine_score")
+        ms_network.create_network(scores, score_name="ModifiedCosineGreedy_score")
 
         nodes = list(ms_network.graph.nodes())
         nodes.sort()
