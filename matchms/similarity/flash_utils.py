@@ -27,6 +27,12 @@ class _LibraryIndex:
         Which spectrum each neutral-loss peak originated from (index into 0..n_specs-1).
     nl_product_idx : int64 or None  
         Maps each neutral-loss peak back into peaks_mz positions (for hybrid rules).
+    spec_offsets : int64
+        Prefix offsets for the per-spectrum peak view in `spec_mz` / `spec_int`.
+    spec_mz : float[dtype]
+        Concatenated m/z values in spectrum-major order (spectrum 0, then 1, ...).
+    spec_int : float[dtype]
+        Concatenated intensities in spectrum-major order matching `spec_mz`.
     spec_l2 : float[dtype] or None
         Precomputed L2 norm of each spectrum's intensities (for cosine or modified 
         cosine score).
@@ -44,6 +50,9 @@ class _LibraryIndex:
         self.nl_int = None
         self.nl_spec_idx = None
         self.nl_product_idx = None
+        self.spec_offsets = None
+        self.spec_mz = None
+        self.spec_int = None
         self.spec_l2 = None
         self.precursor_mz = None
         self.dtype = dtype
@@ -95,8 +104,11 @@ def _build_library_index(processed_peaks_list: List[np.ndarray],
         spec_l2 = np.zeros(idx.n_specs, dtype=dtype)
 
     # Concatenate all peaks
-    counts = [p.shape[0] for p in processed_peaks_list]
-    n_peaks = int(np.sum(counts))
+    counts = np.array([p.shape[0] for p in processed_peaks_list], dtype=np.int64)
+    idx.spec_offsets = np.zeros(idx.n_specs + 1, dtype=np.int64)
+    if idx.n_specs > 0:
+        idx.spec_offsets[1:] = np.cumsum(counts, dtype=np.int64)
+    n_peaks = int(idx.spec_offsets[-1])
     if n_peaks > (2**31 - 1):
         int_dtype = np.int64
         print(f"Too many total peaks ({n_peaks}) to build index using 32-bit integers (now using 64-bit integers).")
@@ -108,6 +120,8 @@ def _build_library_index(processed_peaks_list: List[np.ndarray],
         idx.peaks_mz = np.zeros(0, dtype=dtype)
         idx.peaks_int = np.zeros(0, dtype=dtype)
         idx.peaks_spec_idx = np.zeros(0, dtype=int_dtype)
+        idx.spec_mz = np.zeros(0, dtype=dtype)
+        idx.spec_int = np.zeros(0, dtype=dtype)
         if compute_neutral_loss:
             idx.nl_mz = np.zeros(0, dtype=dtype)
             idx.nl_int = np.zeros(0, dtype=dtype)
@@ -132,6 +146,9 @@ def _build_library_index(processed_peaks_list: List[np.ndarray],
         if compute_l2_norm:
             spec_l2[spec_id] = np.sqrt(np.sum((peaks[:, 1]).astype(np.float64)**2, dtype=np.float64)).astype(dtype)
         write += n
+
+    idx.spec_mz = mz_flat.copy()
+    idx.spec_int = int_flat.copy()
 
     # Sort by m/z
     order = np.argsort(mz_flat)
@@ -183,7 +200,8 @@ def _entropy_weight(intensities: np.ndarray, dtype: np.dtype) -> np.ndarray:
     with np.errstate(divide="ignore", invalid="ignore"):
         logp = np.zeros_like(p, dtype=dtype)
         mask = p > 0
-        logp[mask] = np.log2(p[mask]).astype(dtype, copy=False)
+        # Keep the weighting rule aligned with ms_entropy (natural log entropy).
+        logp[mask] = np.log(p[mask]).astype(dtype, copy=False)
 
     # Compute spectral entropy S
     S = float((-p * logp).sum(dtype=np.float64))
