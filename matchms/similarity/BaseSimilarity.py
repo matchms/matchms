@@ -3,7 +3,7 @@ from abc import abstractmethod
 from typing import Optional, Sequence
 import numpy as np
 import numpy.typing as npt
-from scipy.sparse import coo_matrix
+from scipy.sparse import coo_array
 from tqdm import tqdm
 from matchms.similarity.COOIndex import COOIndex
 from matchms.Spectrum import Spectrum
@@ -85,7 +85,7 @@ class BaseSimilarity:
         queries: Sequence[Spectrum],
         mask_indices: Optional[COOIndex] = None,
         is_symmetric=False,
-    ) -> coo_matrix:
+    ) -> coo_array:
         """
         Compute a sparse array (in COO format) of similarity scores.
 
@@ -195,7 +195,7 @@ class BaseSimilarity:
         references: Sequence[Spectrum],
         queries: Sequence[Spectrum],
         mask_indices: COOIndex,
-    ) -> coo_matrix:
+    ) -> coo_array:
         """Compute similarity scores for pairs of reference and query spectra as given by the indices
         idx_row (references) and idx_col (queries).
 
@@ -211,7 +211,7 @@ class BaseSimilarity:
         scores = np.zeros((len(mask_indices)), dtype=self.score_datatype)
         for i, (i_row, i_col) in enumerate(tqdm(mask_indices, desc="Calculating sparse similarities")):
             scores[i] = self.pair(references[int(i_row)], queries[int(i_col)])
-        return coo_matrix((scores, (mask_indices.idx_row, mask_indices.idx_col)), shape=(len(references), len(queries)))
+        return coo_array((scores, (mask_indices.idx_row, mask_indices.idx_col)), shape=(len(references), len(queries)))
 
     def _sparse_array_without_mask(
         self, references: Sequence[Spectrum], queries: Sequence[Spectrum], is_symmetric: bool
@@ -220,7 +220,7 @@ class BaseSimilarity:
             "It is recommended to use `matrix()`, since this is more memory efficient, when no mask is given"
         )
         matrix = self._matrix_without_mask(references, queries, is_symmetric=is_symmetric)
-        return coo_matrix(matrix)
+        return coo_array(matrix)
 
     def to_dict(self) -> dict:
         """Return a dictionary representation of a similarity function."""
