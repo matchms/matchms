@@ -1,5 +1,7 @@
 import logging
+from typing import Tuple
 import numpy as np
+import numpy.typing as npt
 from matchms.filtering.metadata_processing.add_precursor_mz import _convert_precursor_mz
 from matchms.Spectrum import Spectrum
 from .BaseSimilarity import BaseSimilarity
@@ -77,7 +79,25 @@ class ModifiedCosine(BaseSimilarity):
         self.mz_power = mz_power
         self.intensity_power = intensity_power
 
-    def pair(self, reference: Spectrum, query: Spectrum) -> np.ndarray:
+    def pair(self, reference: Spectrum, query: Spectrum) -> npt.NDArray[np.float64]:
+        """Calculate modified cosine score between two spectra.
+
+        Parameters
+        ----------
+        reference
+            Single reference spectrum.
+        query
+            Single query spectrum.
+
+        Returns
+        -------
+        Modified cosine score between 0 and 1.
+        """
+        return self.pair_scores_and_nr_of_matches(reference, query)[0]
+
+    def pair_scores_and_nr_of_matches(
+        self, reference: Spectrum, query: Spectrum
+    ) -> Tuple[npt.NDArray[np.float64], npt.NDArray[np.int32]]:
         """Calculate modified cosine score between two spectra.
 
         Parameters
@@ -138,6 +158,6 @@ class ModifiedCosine(BaseSimilarity):
         spec2 = query.peaks.to_numpy
         matching_pairs = get_matching_pairs()
         if matching_pairs.shape[0] == 0:
-            return np.asarray((float(0), 0), dtype=self.score_datatype)
+            return np.asarray(float(0), dtype=self.score_datatype), np.asarray(0, dtype=np.int32)
         score, matches = score_best_matches(matching_pairs, spec1, spec2, self.mz_power, self.intensity_power)
-        return np.asarray(score, dtype=self.score_datatype)
+        return np.asarray(score, dtype=self.score_datatype), np.asarray(matches, dtype=np.int32)
