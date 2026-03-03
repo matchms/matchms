@@ -1,8 +1,7 @@
-from typing import List, Optional, Tuple, Union
+from typing import List, Union
 import numpy as np
 from matchms.Spectrum import Spectrum
 from .BaseSimilarity import BaseSimilarity
-from .ScoreFilter import FilterScoreByValue
 from .vector_similarity_functions import (
     cosine_similarity,
     cosine_similarity_matrix,
@@ -70,7 +69,6 @@ class FingerprintSimilarity(BaseSimilarity):
         self,
         similarity_measure: str = "jaccard",
         set_empty_scores: Union[float, int, str] = "nan",
-        score_filters: Optional[Tuple[FilterScoreByValue, ...]] = None,
     ):
         """
 
@@ -84,7 +82,6 @@ class FingerprintSimilarity(BaseSimilarity):
             where fingprints are missing. The default is "nan", which will return
             np.nan's in such cases.
         """
-        super().__init__(score_filters)
         self.set_empty_scores = set_empty_scores
         assert similarity_measure in ["cosine", "dice", "jaccard"], "Unknown similarity measure."
         self.similarity_measure = similarity_measure
@@ -113,7 +110,7 @@ class FingerprintSimilarity(BaseSimilarity):
 
         raise NotImplementedError
 
-    def _matrix_without_mask_without_filter(
+    def _matrix_without_mask(
         self, references: List[Spectrum], queries: List[Spectrum], is_symmetric: bool = False
     ) -> np.array:
         """Calculate matrix of fingerprint based similarity scores.

@@ -1,8 +1,6 @@
-from typing import Optional, Tuple
 import numpy as np
 from .. import Spectrum
 from .BaseSimilarity import BaseSimilarity
-from .ScoreFilter import FilterScoreByValue
 
 
 class IntersectMz(BaseSimilarity):
@@ -39,7 +37,10 @@ class IntersectMz(BaseSimilarity):
 
     """
 
-    def __init__(self, scaling: float = 1.0, score_filters: Optional[Tuple[FilterScoreByValue, ...]] = None):
+    def __init__(
+        self,
+        scaling: float = 1.0,
+    ):
         """Constructor. Here, function parameters are defined.
 
         Parameters
@@ -47,7 +48,6 @@ class IntersectMz(BaseSimilarity):
         scaling
             Scale scores to maximum possible score being 'scaling'.
         """
-        super().__init__(score_filters)
         self.scaling = scaling
 
     def pair(self, reference: Spectrum, query: Spectrum) -> np.ndarray:

@@ -1,4 +1,4 @@
-from typing import List, Optional, Tuple
+from typing import List
 import numpy as np
 from matchms.similarity.spectrum_similarity_functions import (
     number_matching,
@@ -8,7 +8,6 @@ from matchms.similarity.spectrum_similarity_functions import (
 )
 from matchms.Spectrum import Spectrum
 from .BaseSimilarity import BaseSimilarity
-from .ScoreFilter import FilterScoreByValue
 
 
 class PrecursorMzMatch(BaseSimilarity):
@@ -64,7 +63,6 @@ class PrecursorMzMatch(BaseSimilarity):
         self,
         tolerance: float = 0.1,
         tolerance_type: str = "Dalton",
-        score_filters: Optional[Tuple[FilterScoreByValue, ...]] = None,
     ):
         """
         Parameters
@@ -75,7 +73,6 @@ class PrecursorMzMatch(BaseSimilarity):
             Chose between fixed tolerance in Dalton (="Dalton") or a relative difference
             in ppm (="ppm").
         """
-        super().__init__(score_filters)
         self.tolerance = tolerance
         assert tolerance_type in ["Dalton", "ppm"], "Expected type from ['Dalton', 'ppm']"
         self.type = tolerance_type
@@ -101,7 +98,7 @@ class PrecursorMzMatch(BaseSimilarity):
             score = abs(precursormz_ref - precursormz_query) / mean_mz <= self.tolerance
         return np.asarray(score, dtype=self.score_datatype)
 
-    def _matrix_without_mask_without_filter(
+    def _matrix_without_mask(
         self, references: List[Spectrum], queries: List[Spectrum], is_symmetric: bool = False
     ) -> np.ndarray:
         """Compare parent masses between all references and queries.

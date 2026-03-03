@@ -1,10 +1,9 @@
 import logging
-from typing import List, Optional, Tuple
+from typing import List
 import numpy as np
 from matchms.similarity.spectrum_similarity_functions import number_matching, number_matching_symmetric
 from matchms.Spectrum import Spectrum
 from .BaseSimilarity import BaseSimilarity
-from .ScoreFilter import FilterScoreByValue
 
 
 logger = logging.getLogger("matchms")
@@ -69,7 +68,6 @@ class MetadataMatch(BaseSimilarity):
         field: str,
         matching_type: str = "equal_match",
         tolerance: float = 0.1,
-        score_filters: Optional[Tuple[FilterScoreByValue, ...]] = None,
     ):
         """
         Parameters
@@ -84,7 +82,6 @@ class MetadataMatch(BaseSimilarity):
             Specify tolerance below which two values are counted as match.
             This only applied to numerical values.
         """
-        super().__init__(score_filters)
         self.field = field
         self.tolerance = tolerance
         assert matching_type in ["equal_match", "difference"], "Expected type from ['equal_match', 'difference']"
@@ -116,7 +113,7 @@ class MetadataMatch(BaseSimilarity):
         logger.warning("Non-numerical entry not compatible with 'difference' method")
         return np.asarray(False, dtype=self.score_datatype)
 
-    def _matrix_without_mask_without_filter(
+    def _matrix_without_mask(
         self, references: List[Spectrum], queries: List[Spectrum], is_symmetric: bool = False
     ) -> np.ndarray:
         """Compare parent masses between all references and queries.

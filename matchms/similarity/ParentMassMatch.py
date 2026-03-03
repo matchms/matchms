@@ -1,9 +1,8 @@
-from typing import List, Optional, Tuple
+from typing import List
 import numpy as np
 from matchms.similarity.spectrum_similarity_functions import number_matching, number_matching_symmetric
 from matchms.Spectrum import Spectrum
 from .BaseSimilarity import BaseSimilarity
-from .ScoreFilter import FilterScoreByValue
 
 
 class ParentMassMatch(BaseSimilarity):
@@ -54,14 +53,13 @@ class ParentMassMatch(BaseSimilarity):
     # Set output data type, e.g.  "float" or [("score", "float"), ("matches", "int")]
     score_datatype = bool
 
-    def __init__(self, tolerance: float = 0.1, score_filters: Optional[Tuple[FilterScoreByValue, ...]] = None):
+    def __init__(self, tolerance: float = 0.1):
         """
         Parameters
         ----------
         tolerance
             Specify tolerance below which two masses are counted as match.
         """
-        super().__init__(score_filters)
         self.tolerance = tolerance
 
     def pair(self, reference: Spectrum, query: Spectrum) -> np.ndarray:
@@ -82,7 +80,7 @@ class ParentMassMatch(BaseSimilarity):
         result = np.asarray(score, dtype=self.score_datatype)
         return result
 
-    def _matrix_without_mask_without_filter(
+    def _matrix_without_mask(
         self, references: List[Spectrum], queries: List[Spectrum], is_symmetric: bool = False
     ) -> np.ndarray:
         """Compare parent masses between all references and queries.
