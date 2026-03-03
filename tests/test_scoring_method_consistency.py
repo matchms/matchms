@@ -15,7 +15,7 @@ import matchms.similarity as mssimilarity
 from matchms import Pipeline
 from matchms.importing import load_from_json
 from matchms.Pipeline import create_workflow
-from matchms.similarity.COOIndex import COOIndex
+from matchms.similarity.ScoresMask import ScoresMask
 
 
 module_root = os.path.dirname(__file__)
@@ -74,7 +74,7 @@ def test_all_scores_and_methods(spectra, similarity_measure):
 
     # Run sparse_array() method
     idx_row, idx_col = np.where(computed_scores_matrix)
-    mask = COOIndex(idx_row, idx_col)
+    mask = ScoresMask(idx_row, idx_col)
     computed_scores_coo = similarity_measure.sparse_array(spectra, spectra, mask)
     computed_scores_sparse = computed_scores_coo.scores
     if computed_scores_sparse.dtype.names is None:
@@ -112,7 +112,7 @@ def test_matrix_masking(spectra, similarity_measure):
     scoring_method = similarity_measure[0](**similarity_measure[1])
     no_mask = scoring_method.matrix(spectra, spectra, is_symmetric=False, mask_indices=None)
 
-    mask_indices = COOIndex(np.asarray([0, 1]), np.asarray([0, 1]))
+    mask_indices = ScoresMask(np.asarray([0, 1]), np.asarray([0, 1]))
     scoring_method = similarity_measure[0](**similarity_measure[1])
     with_mask = scoring_method.matrix(spectra, spectra, is_symmetric=False, mask_indices=mask_indices)
 
@@ -131,7 +131,7 @@ def test_matrix_masking(spectra, similarity_measure):
 @pytest.mark.parametrize("similarity_measure", list(_score_functions.values()))
 def test_sparse_array_masking(spectra, similarity_measure):
     scoring_method = similarity_measure[0](**similarity_measure[1])
-    mask_indices = COOIndex(np.asarray([0, 1]), np.asarray([0, 1]))
+    mask_indices = ScoresMask(np.asarray([0, 1]), np.asarray([0, 1]))
 
     computed_scores_matrix_with_mask = scoring_method.sparse_array(
         spectra, spectra, is_symmetric=False, mask_indices=mask_indices

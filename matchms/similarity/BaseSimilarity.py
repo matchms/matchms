@@ -5,7 +5,7 @@ import numpy as np
 import numpy.typing as npt
 from scipy.sparse import coo_array
 from tqdm import tqdm
-from matchms.similarity.COOIndex import COOIndex
+from matchms.similarity.ScoresMask import ScoresMask
 from matchms.Spectrum import Spectrum
 
 
@@ -55,7 +55,7 @@ class BaseSimilarity:
         references: Sequence[Spectrum],
         queries: Sequence[Spectrum],
         is_symmetric: bool = False,
-        mask_indices: Optional[COOIndex] = None,
+        mask_indices: Optional[ScoresMask] = None,
     ) -> npt.NDArray:
         """
         Compute a dense similarity matrix for pairs of reference and query spectra.
@@ -83,7 +83,7 @@ class BaseSimilarity:
         self,
         references: Sequence[Spectrum],
         queries: Sequence[Spectrum],
-        mask_indices: Optional[COOIndex] = None,
+        mask_indices: Optional[ScoresMask] = None,
         is_symmetric=False,
     ) -> coo_array:
         """
@@ -159,7 +159,7 @@ class BaseSimilarity:
         self,
         references: Sequence[Spectrum],
         queries: Sequence[Spectrum],
-        mask_indices: COOIndex,
+        mask_indices: ScoresMask,
         is_symmetric: bool = False,
     ) -> np.ndarray:
         """
@@ -194,7 +194,7 @@ class BaseSimilarity:
         self,
         references: Sequence[Spectrum],
         queries: Sequence[Spectrum],
-        mask_indices: COOIndex,
+        mask_indices: ScoresMask,
     ) -> coo_array:
         """Compute similarity scores for pairs of reference and query spectra as given by the indices
         idx_row (references) and idx_col (queries).
