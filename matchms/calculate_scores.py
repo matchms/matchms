@@ -4,9 +4,9 @@ from .similarity.COOIndex import COOIndex
 from .typing import QueriesType, ReferencesType
 
 
-def create_scores_object_and_calculate_scores(references: ReferencesType, queries: QueriesType,
-                     similarity_function: BaseSimilarity,
-                     is_symmetric: bool = False) -> Scores:
+def create_scores_object_and_calculate_scores(
+    references: ReferencesType, queries: QueriesType, similarity_function: BaseSimilarity, is_symmetric: bool = False
+) -> Scores:
     """Calculate the similarity between all reference objects versus all query objects.
 
     Example to calculate scores between 2 spectra and iterate over the scores
@@ -58,15 +58,12 @@ def create_scores_object_and_calculate_scores(references: ReferencesType, querie
 
     ~matchms.Scores.Scores
     """
-    scores = Scores(references=references, queries=queries,
-                  is_symmetric=is_symmetric)
+    scores = Scores(references=references, queries=queries, is_symmetric=is_symmetric)
     scores = calculate_scores(similarity_function, scores)
     return scores
 
 
-def calculate_scores(similarity_metric: BaseSimilarity, scores: Scores,
-                     name: str = None,
-                     join_type="left") -> Scores:
+def calculate_scores(similarity_metric: BaseSimilarity, scores: Scores, name: str = None, join_type="left") -> Scores:
     """
     Calculate the similarity between all reference objects vs all query objects using
     the most suitable available implementation of the given similarity_function.
@@ -97,22 +94,17 @@ def calculate_scores(similarity_metric: BaseSimilarity, scores: Scores,
     if name is None:
         name = similarity_metric.__class__.__name__
 
-    mask_indices = None
-    if len(scores.scores.score_names) > 0:
-        mask_indices = COOIndex(scores.scores.row, scores.scores.col)
-    elif len(similarity_metric.score_filters) == 0:
+    # If no previous scores were calculated, we can directly calculate the full matrix without mask.
+    if len(scores.scores.score_names) == 0:
         new_scores = similarity_metric.matrix(references=scores.references, queries=scores.queries)
-        scores.scores.add_dense_matrix(new_scores,
-                                      name,
-                                      join_type=join_type)
+        scores.scores.add_dense_matrix(new_scores, name, join_type=join_type)
         return scores
 
-    new_scores = similarity_metric.sparse_array(references=scores.references, queries=scores.queries,
-                                                mask_indices=mask_indices)
+    mask_indices = COOIndex(scores.scores.row, scores.scores.col)
 
-    scores.scores.add_sparse_data(new_scores.row,
-                                  new_scores.column,
-                                  new_scores.scores,
-                                  name,
-                                  join_type=join_type)
+    new_scores = similarity_metric.sparse_array(
+        references=scores.references, queries=scores.queries, mask_indices=mask_indices
+    )
+
+    scores.scores.add_sparse_data(new_scores.row, new_scores.column, new_scores.scores, name, join_type=join_type)
     return scores
