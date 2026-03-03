@@ -1,5 +1,7 @@
 import logging
+from typing import Optional, Tuple
 import numpy as np
+import numpy.typing as npt
 from matchms.filtering.metadata_processing.add_precursor_mz import _convert_precursor_mz
 from matchms.Spectrum import Spectrum
 from .BaseSimilarity import BaseSimilarity
@@ -70,7 +72,7 @@ class NeutralLossesCosine(BaseSimilarity):
         self.intensity_power = intensity_power
         self.ignore_peaks_above_precursor = ignore_peaks_above_precursor
 
-    def _get_matching_pairs(self, spec1, spec2, mass_shift: float) -> np.ndarray:
+    def _get_matching_pairs(self, spec1, spec2, mass_shift: float) -> Optional[np.ndarray]:
         """Find all pairs of peaks that match within the given tolerance."""
         matching_pairs = collect_peak_pairs(
             spec1, spec2, self.tolerance, shift=mass_shift, mz_power=self.mz_power, intensity_power=self.intensity_power
@@ -81,7 +83,25 @@ class NeutralLossesCosine(BaseSimilarity):
             matching_pairs = matching_pairs[np.argsort(matching_pairs[:, 2], kind="mergesort")[::-1], :]
         return matching_pairs
 
-    def pair(self, reference: Spectrum, query: Spectrum) -> np.ndarray:
+    def pair(self, reference: Spectrum, query: Spectrum) -> npt.NDArray[np.float64]:
+        """Calculate neutral losses cosine score between two spectra.
+
+        Parameters
+        ----------
+        reference
+            Single reference spectrum.
+        query
+            Single query spectrum.
+
+        Returns
+        -------
+        Cosine score between 0 and 1.
+        """
+        return self.pair_scores_and_nr_of_matches(reference, query)[0]
+
+    def pair_scores_and_nr_of_matches(
+        self, reference: Spectrum, query: Spectrum
+    ) -> Tuple[npt.NDArray[np.float64], npt.NDArray[np.int32]]:
         """Calculate neutral losses cosine score between two spectra.
 
         Parameters
@@ -110,6 +130,6 @@ class NeutralLossesCosine(BaseSimilarity):
 
         matching_pairs = self._get_matching_pairs(spec1, spec2, mass_shift)
         if matching_pairs is None:
-            return np.asarray((float(0), 0), dtype=self.score_datatype)
+            return np.asarray(0.0, dtype=self.score_datatype), np.asarray(0, dtype=np.int32)
         score, matches = score_best_matches(matching_pairs, spec1, spec2, self.mz_power, self.intensity_power)
-        return np.asarray(score, dtype=self.score_datatype)
+        return np.asarray(score, dtype=self.score_datatype), np.asarray(matches, dtype=np.int32)
