@@ -95,7 +95,7 @@ class SimilarityNetwork:
         self.graph: Optional[nx.Graph] = None
         """NetworkX graph. Set after calling create_network()"""
 
-    def create_network(self, scores: Scores, score_name: str = None):
+    def create_network(self, scores, score_name: str = None):
         """
         Function to create network from given top-n similarity values. Expects that
         similarities given in scores are from an all-vs-all comparison including all

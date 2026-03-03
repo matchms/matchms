@@ -5,7 +5,7 @@ import numpy as np
 
 
 def get_top_hits(
-    scores: Scores,
+    scores,
     identifier_key: str = "spectrum_id",
     top_n: int = 25,
     search_by: str = "queries",
@@ -48,7 +48,7 @@ def get_top_hits(
 
 
 def get_top_hits_by_references(
-    scores: Scores, identifier_key: str, top_n: int, score_name: str, ignore_diagonal: bool
+    scores, identifier_key: str, top_n: int, score_name: str, ignore_diagonal: bool
 ) -> Tuple[dict, dict]:
     """Get the top hits from the scoring by "references".
     This function differs only slightly from the one by query.
@@ -77,7 +77,7 @@ def get_top_hits_by_references(
 
 
 def get_top_hits_by_query(
-    scores: Scores, identifier_key: str, top_n: int, score_name: str, ignore_diagonal: bool
+    scores, identifier_key: str, top_n: int, score_name: str, ignore_diagonal: bool
 ) -> Tuple[dict, dict]:
     """Get the top hits in the network from the "query" spectra perspective
 
