@@ -21,7 +21,7 @@ class CosineHungarian(BaseSimilarity):
     """
 
     is_commutative = True
-    score_datatype = [("score", np.float64), ("matches", "int")]
+    score_datatype = np.float64
 
     def __init__(
         self,
@@ -128,23 +128,17 @@ class CosineHungarian(BaseSimilarity):
             # Score uses ALL assignments: phantoms add 1.0 to the sum, cancelling
             # with the len(row_ind) term and contributing 0 to the score.
             score = len(row_ind) - matching_pairs_matrix[row_ind, col_ind].sum()
-            # Match count excludes phantoms (cells still at 1.0).
-            used_matches = [
-                (int(paired_peaks1[x]), int(paired_peaks2[y]))
-                for (x, y) in zip(row_ind, col_ind)
-                if matching_pairs_matrix[x, y] < 1.0
-            ]
-            return score, used_matches
+            return score
 
         def calc_score() -> np.ndarray:
             """Compute the normalised cosine score and match count."""
             if matching_pairs_matrix is None:
-                return np.asarray((0.0, 0), dtype=self.score_datatype)
+                return np.asarray(0.0, dtype=self.score_datatype)
             score, used_matches = solve_hungarian()
             spec1_power = np.power(spec1[:, 0], self.mz_power) * np.power(spec1[:, 1], self.intensity_power)
             spec2_power = np.power(spec2[:, 0], self.mz_power) * np.power(spec2[:, 1], self.intensity_power)
             score = score / (np.sqrt(np.sum(spec1_power**2)) * np.sqrt(np.sum(spec2_power**2)))
-            return np.asarray((score, len(used_matches)), dtype=self.score_datatype)
+            return np.asarray(score, dtype=self.score_datatype)
 
         spec1 = reference.peaks.to_numpy
         spec2 = query.peaks.to_numpy

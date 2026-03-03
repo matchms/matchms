@@ -7,8 +7,9 @@ from .BaseSimilarity import BaseSimilarity
 
 
 @njit(cache=True, fastmath=True)
-def _windowed_sum_numba(source_bins: np.ndarray, source_vals: np.ndarray,
-                        query_positions: np.ndarray, R: int) -> np.ndarray:
+def _windowed_sum_numba(
+    source_bins: np.ndarray, source_vals: np.ndarray, query_positions: np.ndarray, R: int
+) -> np.ndarray:
     """
     Two-pointer windowed sum for sorted integer arrays.
 
@@ -105,7 +106,7 @@ class BlinkCosine(BaseSimilarity):
     """
 
     is_commutative = True
-    score_datatype = [("score", np.float32), ("matches", "int")]
+    score_datatype = [("score", np.float32)]
 
     def __init__(
         self,
@@ -147,7 +148,7 @@ class BlinkCosine(BaseSimilarity):
 
     def pair(self, reference: SpectrumType, query: SpectrumType) -> Tuple[float, int]:
         """Calculate BLINK-style cosine between two spectra.
-        
+
         Parameters
         ----------
         reference:
@@ -159,25 +160,27 @@ class BlinkCosine(BaseSimilarity):
         qbins, qvals, qcounts = self._prep_spectrum(query)
 
         if rbins.size == 0 or qbins.size == 0:
-            return np.asarray((0.0, 0), dtype=self.score_datatype)
+            return np.asarray((0.0), dtype=self.score_datatype)
 
         # Blur smaller side, evaluate at the other's bins
         if qbins.size <= rbins.size:
             win = self._windowed_sum(qbins, qvals, rbins, self._R)
             score = float(np.dot(win, rvals))
-            matches = int(self._windowed_sum(qbins, qcounts.astype(np.float32), rbins, self._R).sum())
         else:
             win = self._windowed_sum(rbins, rvals, qbins, self._R)
             score = float(np.dot(win, qvals))
-            matches = int(self._windowed_sum(rbins, rcounts.astype(np.float32), qbins, self._R).sum())
 
         if self.clip_to_one:
             score = min(score, 1.0)
-        return np.asarray((score, matches), dtype=self.score_datatype)
+        return np.asarray((score))
 
-    def matrix(self, references: List[SpectrumType], queries: List[SpectrumType],
-               array_type: str = "numpy",
-               is_symmetric: bool = False):
+    def matrix(
+        self,
+        references: List[SpectrumType],
+        queries: List[SpectrumType],
+        array_type: str = "numpy",
+        is_symmetric: bool = False,
+    ):
         """
         All-vs-all BLINK-style cosine scores.
 
@@ -331,7 +334,7 @@ class BlinkCosine(BaseSimilarity):
 
         # Keep top-K most intense if requested
         if (self.top_k is not None) and (mz.size > self.top_k):
-            idx = np.argpartition(intens, -self.top_k)[-self.top_k:]
+            idx = np.argpartition(intens, -self.top_k)[-self.top_k :]
             idx.sort()
             mz = mz[idx]
             intens = intens[idx]
@@ -367,9 +370,7 @@ class BlinkCosine(BaseSimilarity):
             mz, intens = self._prefilter_arrays(mz, intens, spectrum)
 
         if mz.size == 0:
-            return (np.empty(0, dtype=np.int32),
-                    np.empty(0, dtype=np.float32),
-                    np.empty(0, dtype=np.int32))
+            return (np.empty(0, dtype=np.int32), np.empty(0, dtype=np.float32), np.empty(0, dtype=np.int32))
 
         # Optional weighting
         if self.mz_power != 0.0:
@@ -387,14 +388,13 @@ class BlinkCosine(BaseSimilarity):
         # L2 normalize intensities (Sum of all intensities == 1)
         norm = np.linalg.norm(intensity_sum)
         if norm == 0.0:
-            return (np.empty(0, dtype=np.int32),
-                    np.empty(0, dtype=np.float32),
-                    np.empty(0, dtype=np.int32))
+            return (np.empty(0, dtype=np.int32), np.empty(0, dtype=np.float32), np.empty(0, dtype=np.int32))
         intensity_sum /= norm
         return uniq, intensity_sum, counts.astype(np.int32, copy=False)
 
-    def _windowed_sum(self, source_bins: np.ndarray, source_vals: np.ndarray,
-                      query_positions: np.ndarray, R: int) -> np.ndarray:
+    def _windowed_sum(
+        self, source_bins: np.ndarray, source_vals: np.ndarray, query_positions: np.ndarray, R: int
+    ) -> np.ndarray:
         """
         Windowed sum helper: numba-accelerated where available, else vectorized prefix sums.
 

@@ -16,8 +16,6 @@ from matchms import Pipeline
 from matchms.importing import load_from_json
 from matchms.Pipeline import create_workflow
 from matchms.similarity.COOIndex import COOIndex
-from matchms.similarity.COOMatrix import COOMatrix
-from matchms.similarity.ScoreFilter import FilterScoreByValue
 
 
 module_root = os.path.dirname(__file__)
@@ -109,11 +107,6 @@ def test_consistency_scoring_and_pipeline(spectra, similarity_measure):
         )
 
 
-def dense_equal_to_sparse(dense_matrix: np.ndarray, sparse_matrix: COOMatrix):
-    densified_matrix = sparse_matrix.to_dense_matrix(dense_matrix.shape[0], dense_matrix.shape[1])
-    assert np.array_equal(densified_matrix, dense_matrix)
-
-
 @pytest.mark.parametrize("similarity_measure", list(_score_functions.values()))
 def test_matrix_masking(spectra, similarity_measure):
     scoring_method = similarity_measure[0](**similarity_measure[1])
@@ -130,11 +123,7 @@ def test_matrix_masking(spectra, similarity_measure):
     # Check that the non masked values == the filter result.
     assert np.all(with_mask[~mask] == no_mask[~mask])
 
-    assert (
-        with_mask.dtype
-        == no_mask.dtype
-        == scoring_method.score_datatype
-    )
+    assert with_mask.dtype == no_mask.dtype == scoring_method.score_datatype
     # todo also test is_symmetric
     # todo add tests for correctly filtering on other value than score (e.g. matches)
 

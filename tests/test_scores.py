@@ -11,7 +11,7 @@ from .builder_Spectrum import SpectrumBuilder
 class DummySimilarityFunction(BaseSimilarity):
     """Simple dummy score, only contain pair-wise implementation."""
 
-    score_datatype = [("score", np.str_, 16), ("len", np.int32)]
+    score_datatype = np.str_, 16
 
     def pair(self, reference, query):
         """necessary pair computation method"""

@@ -3,7 +3,7 @@ from typing import Sequence
 import numpy as np
 from tqdm import tqdm
 from matchms.similarity.COOIndex import COOIndex
-from matchms.similarity.COOMatrix import COOMatrix
+from scipy.sparse import coo_matrix
 from matchms.Spectrum import Spectrum
 
 
@@ -27,6 +27,12 @@ class BaseSimilarity:
     # Set key characteristics as class attributes
     is_commutative = True
     score_datatype = np.float64
+
+    def __init__(self):
+        if len(self.score_datatype) > 1:
+            raise ValueError(
+                "Multiple score output is not supported anymore, a similarity method can only output a single score"
+            )
 
     @abstractmethod
     def pair(self, reference: Spectrum, query: Spectrum) -> np.ndarray:
@@ -81,7 +87,7 @@ class BaseSimilarity:
         queries: Sequence[Spectrum],
         mask_indices: COOIndex = None,
         is_symmetric=False,
-    ) -> COOMatrix:
+    ) -> coo_matrix:
         """
         Compute a sparse array (in COO format) of similarity scores.
 
@@ -90,8 +96,7 @@ class BaseSimilarity:
         the memory footprint if many scores are dropped.
 
         Note:
-          - If no filtering is required (empty score_filters) and no mask is provided,
-            it is recommended to use `matrix()` and then convert the dense matrix to COO format.
+          - If no mask is provided, it is recommended to use `matrix()` and then convert the dense matrix to COO format.
           - When a mask is provided, only the pairs specified in the mask are computed.
 
         Parameters
@@ -195,7 +200,7 @@ class BaseSimilarity:
         references: Sequence[Spectrum],
         queries: Sequence[Spectrum],
         mask_indices: COOIndex,
-    ) -> COOMatrix:
+    ) -> coo_matrix:
         """Compute similarity scores for pairs of reference and query spectra as given by the indices
         idx_row (references) and idx_col (queries).
 
@@ -211,12 +216,7 @@ class BaseSimilarity:
         scores = np.zeros((len(mask_indices)), dtype=self.score_datatype)
         for i, (i_row, i_col) in enumerate(tqdm(mask_indices, desc="Calculating sparse similarities")):
             scores[i] = self.pair(references[i_row], queries[i_col])
-        return COOMatrix(
-            row_idx=mask_indices.idx_row,
-            column_idx=mask_indices.idx_col,
-            scores=scores,
-            scores_dtype=self.score_datatype,
-        )
+        return coo_matrix((scores, (mask_indices.idx_row, mask_indices.idx_col)), shape=(len(references), len(queries)))
 
     def to_dict(self) -> dict:
         """Return a dictionary representation of a similarity function."""

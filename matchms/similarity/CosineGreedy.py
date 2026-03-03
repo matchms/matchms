@@ -49,8 +49,7 @@ class CosineGreedy(BaseSimilarity):
 
     # Set key characteristics as class attributes
     is_commutative = True
-    # Set output data type, e.g. ("score", "float") or [("score", "float"), ("matches", "int")]
-    score_datatype = [("score", np.float64), ("matches", "int")]
+    score_datatype = np.float64
 
     def __init__(
         self,
@@ -104,5 +103,5 @@ class CosineGreedy(BaseSimilarity):
         matching_pairs = get_matching_pairs()
         if matching_pairs is None:
             return np.asarray((float(0), 0), dtype=self.score_datatype)
-        score = score_best_matches(matching_pairs, spec1, spec2, self.mz_power, self.intensity_power)
+        score, best_matches = score_best_matches(matching_pairs, spec1, spec2, self.mz_power, self.intensity_power)
         return np.asarray(score, dtype=self.score_datatype)
