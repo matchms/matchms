@@ -1,3 +1,4 @@
+import logging
 from abc import abstractmethod
 from typing import Optional, Sequence
 import numpy as np
@@ -6,6 +7,9 @@ from scipy.sparse import coo_matrix
 from tqdm import tqdm
 from matchms.similarity.COOIndex import COOIndex
 from matchms.Spectrum import Spectrum
+
+
+logger = logging.getLogger("matchms")
 
 
 class BaseSimilarity:
@@ -212,9 +216,11 @@ class BaseSimilarity:
     def _sparse_array_without_mask(
         self, references: Sequence[Spectrum], queries: Sequence[Spectrum], is_symmetric: bool
     ):
-        # TODO: replace with matrix computation followed by a conversion to COO array.
-        # (and a warning that this is not a good idea) do this once we settle on a COO Array format (e.g. using the sparse package)
-        raise NotImplementedError("If no masking is needed, please use matrix() instead")
+        logger.warning(
+            "It is recommended to use `matrix()`, since this is more memory efficient, when no mask is given"
+        )
+        matrix = self._matrix_without_mask(references, queries, is_symmetric=is_symmetric)
+        return coo_matrix(matrix)
 
     def to_dict(self) -> dict:
         """Return a dictionary representation of a similarity function."""
