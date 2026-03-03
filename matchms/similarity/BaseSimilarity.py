@@ -106,10 +106,7 @@ class BaseSimilarity:
         """
         if mask_indices:
             return self._sparse_array_with_mask(references, queries, mask_indices=mask_indices)
-
-        # TODO: replace with matrix computation followed by a conversion to COO array.
-        # (and a warning that this is not a good idea) do this once we settle on a COO Array format (e.g. using the sparse package)
-        raise ValueError("If no masking is needed, please use matrix() instead")
+        return self._sparse_array_without_mask(references, queries, is_symmetric=is_symmetric)
 
     # --- Dense Matrix Computations ---
 
@@ -211,6 +208,13 @@ class BaseSimilarity:
         for i, (i_row, i_col) in enumerate(tqdm(mask_indices, desc="Calculating sparse similarities")):
             scores[i] = self.pair(references[int(i_row)], queries[int(i_col)])
         return coo_matrix((scores, (mask_indices.idx_row, mask_indices.idx_col)), shape=(len(references), len(queries)))
+
+    def _sparse_array_without_mask(
+        self, references: Sequence[Spectrum], queries: Sequence[Spectrum], is_symmetric: bool
+    ):
+        # TODO: replace with matrix computation followed by a conversion to COO array.
+        # (and a warning that this is not a good idea) do this once we settle on a COO Array format (e.g. using the sparse package)
+        raise NotImplementedError("If no masking is needed, please use matrix() instead")
 
     def to_dict(self) -> dict:
         """Return a dictionary representation of a similarity function."""
