@@ -1,9 +1,10 @@
 from abc import abstractmethod
-from typing import Sequence
+from typing import Optional, Sequence
 import numpy as np
+import numpy.typing as npt
+from scipy.sparse import coo_matrix
 from tqdm import tqdm
 from matchms.similarity.COOIndex import COOIndex
-from scipy.sparse import coo_matrix
 from matchms.Spectrum import Spectrum
 
 
@@ -20,19 +21,12 @@ class BaseSimilarity:
         Indicates whether the similarity function is commutative (i.e. similarity(A, B) == similarity(B, A)).
         Defaults to True.
     score_datatype:
-        Data type for the score output, e.g. "float" or [("score", "float"), ("matches", "int")].
-        If multiple data types are set, the main score should be set to "score" (used as default for filtering).
+        Data type for the score output, e.g. "float" or "int"
     """
 
     # Set key characteristics as class attributes
     is_commutative = True
     score_datatype = np.float64
-
-    def __init__(self):
-        if len(self.score_datatype) > 1:
-            raise ValueError(
-                "Multiple score output is not supported anymore, a similarity method can only output a single score"
-            )
 
     @abstractmethod
     def pair(self, reference: Spectrum, query: Spectrum) -> np.ndarray:
@@ -57,8 +51,8 @@ class BaseSimilarity:
         references: Sequence[Spectrum],
         queries: Sequence[Spectrum],
         is_symmetric: bool = False,
-        mask_indices: COOIndex = None,
-    ) -> np.ndarray:
+        mask_indices: Optional[COOIndex] = None,
+    ) -> npt.NDArray:
         """
         Compute a dense similarity matrix for pairs of reference and query spectra.
         If a mask is given only the pairs of spectra given by the mask will be computed.
@@ -85,7 +79,7 @@ class BaseSimilarity:
         self,
         references: Sequence[Spectrum],
         queries: Sequence[Spectrum],
-        mask_indices: COOIndex = None,
+        mask_indices: Optional[COOIndex] = None,
         is_symmetric=False,
     ) -> coo_matrix:
         """
@@ -187,7 +181,7 @@ class BaseSimilarity:
         # todo implement is_symmetric by converting the mask to symmetric mask
         sim_matrix = np.zeros((len(references), len(queries)), dtype=self.score_datatype)
         for i_row, i_col in tqdm(mask_indices, desc="Calculating sparse similarities"):
-            score = self.pair(references[i_row], queries[i_col])
+            score = self.pair(references[int(i_row)], queries[int(i_col)])
             sim_matrix[i_row, i_col] = score
             if is_symmetric:
                 sim_matrix[i_col, i_row] = score
@@ -215,7 +209,7 @@ class BaseSimilarity:
         """
         scores = np.zeros((len(mask_indices)), dtype=self.score_datatype)
         for i, (i_row, i_col) in enumerate(tqdm(mask_indices, desc="Calculating sparse similarities")):
-            scores[i] = self.pair(references[i_row], queries[i_col])
+            scores[i] = self.pair(references[int(i_row)], queries[int(i_col)])
         return coo_matrix((scores, (mask_indices.idx_row, mask_indices.idx_col)), shape=(len(references), len(queries)))
 
     def to_dict(self) -> dict:
