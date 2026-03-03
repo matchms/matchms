@@ -211,7 +211,11 @@ class BaseSimilarity:
         scores = np.zeros((len(mask_indices)), dtype=self.score_datatype)
         for i, (i_row, i_col) in enumerate(tqdm(mask_indices, desc="Calculating sparse similarities")):
             scores[i] = self.pair(references[int(i_row)], queries[int(i_col)])
-        return coo_array((scores, (mask_indices.idx_row, mask_indices.idx_col)), shape=(len(references), len(queries)))
+        result = coo_array(
+            (scores, (mask_indices.idx_row, mask_indices.idx_col)), shape=(len(references), len(queries))
+        )
+        result.eliminate_zeros()  # Remove zero entries to save memory
+        return result
 
     def _sparse_array_without_mask(
         self, references: Sequence[Spectrum], queries: Sequence[Spectrum], is_symmetric: bool
