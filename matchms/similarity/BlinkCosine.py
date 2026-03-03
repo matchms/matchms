@@ -1,8 +1,10 @@
-from typing import List, Optional, Tuple
+from collections.abc import Sequence
+from typing import Optional, Tuple
 import numpy as np
+import numpy.typing as npt
 from numba import njit  # TODO: check if numba is necessary/useful here
 from scipy.sparse import coo_array, csr_array
-from matchms.typing import SpectrumType
+from matchms.Spectrum import Spectrum
 from .BaseSimilarity import BaseSimilarity
 
 
@@ -106,7 +108,7 @@ class BlinkCosine(BaseSimilarity):
     """
 
     is_commutative = True
-    score_datatype = [("score", np.float32)]
+    score_datatype = np.float32
 
     def __init__(
         self,
@@ -145,9 +147,23 @@ class BlinkCosine(BaseSimilarity):
         self._R = max(0, int(np.floor(self.tolerance / self.bin_width)))
 
     # --------------------------- Public API ---------------------------
-
-    def pair(self, reference: SpectrumType, query: SpectrumType) -> Tuple[float, int]:
+    def pair(self, reference: Spectrum, query: Spectrum) -> npt.NDArray[np.float32]:
         """Calculate BLINK-style cosine between two spectra.
+
+        Parameters
+        ----------
+        reference:
+            Single reference spectrum.
+        query:
+            Single query spectrum.
+        """
+        score, _ = self.pair_scores_and_nr_of_matches(reference, query)
+        return score
+
+    def pair_scores_and_nr_of_matches(
+        self, reference: Spectrum, query: Spectrum
+    ) -> Tuple[npt.NDArray[np.float32], npt.NDArray[np.int32]]:
+        """Calculate BLINK-style cosine between two spectra. Returns both the score and nr_of_matches
 
         Parameters
         ----------
@@ -160,27 +176,28 @@ class BlinkCosine(BaseSimilarity):
         qbins, qvals, qcounts = self._prep_spectrum(query)
 
         if rbins.size == 0 or qbins.size == 0:
-            return np.asarray((0.0), dtype=self.score_datatype)
+            return np.asarray((0.0), dtype=self.score_datatype), np.asarray(0, dtype=np.int32)
 
         # Blur smaller side, evaluate at the other's bins
         if qbins.size <= rbins.size:
             win = self._windowed_sum(qbins, qvals, rbins, self._R)
             score = float(np.dot(win, rvals))
+            matches = int(self._windowed_sum(qbins, qcounts.astype(np.float32), rbins, self._R).sum())
         else:
             win = self._windowed_sum(rbins, rvals, qbins, self._R)
             score = float(np.dot(win, qvals))
+            matches = int(self._windowed_sum(rbins, rcounts.astype(np.float32), qbins, self._R).sum())
 
         if self.clip_to_one:
             score = min(score, 1.0)
-        return np.asarray((score))
+        return np.asarray(score, dtype=self.score_datatype), np.asarray(matches, dtype=np.int32)
 
-    def matrix(
+    def _matrix_without_mask(
         self,
-        references: List[SpectrumType],
-        queries: List[SpectrumType],
-        array_type: str = "numpy",
+        references: Sequence[Spectrum],
+        queries: Sequence[Spectrum],
         is_symmetric: bool = False,
-    ):
+    ) -> npt.NDArray[np.float32]:
         """
         All-vs-all BLINK-style cosine scores.
 
@@ -207,8 +224,6 @@ class BlinkCosine(BaseSimilarity):
             If array_type == 'numpy': dense (n_ref, n_query)
             If array_type == 'sparse': COO sparse (n_ref, n_query), dropping scores < sparse_score_min
         """
-        if array_type not in ("numpy", "sparse"):
-            raise ValueError("array_type must be 'numpy' or 'sparse'.")
 
         # Preprocess all spectra (bins, normalized intensity values)
         prepped_refs = [self._prep_spectrum(s) for s in references]
@@ -218,16 +233,12 @@ class BlinkCosine(BaseSimilarity):
         n_ref = len(prepped_refs)
         n_qry = len(prepped_qrys)
         if n_ref == 0 or n_qry == 0:
-            if array_type == "numpy":
-                return np.zeros((n_ref, n_qry), dtype=np.float32)
-            return coo_array((n_ref, n_qry), dtype=np.float32)
+            return np.zeros((n_ref, n_qry), dtype=np.float32)
 
         # Collect global bin range
         all_bins_list = [b for (b, _, _) in prepped_refs if b.size] + [b for (b, _, _) in prepped_qrys if b.size]
         if not all_bins_list:
-            if array_type == "numpy":
-                return np.zeros((n_ref, n_qry), dtype=np.float32)
-            return coo_array((n_ref, n_qry), dtype=np.float32)
+            return np.zeros((n_ref, n_qry), dtype=np.float32)
 
         global_min = min(int(b.min()) for b in all_bins_list)
         global_max = max(int(b.max()) for b in all_bins_list)
@@ -238,12 +249,7 @@ class BlinkCosine(BaseSimilarity):
         I_ref = self._build_intensity_csr(prepped_refs, n_rows, offset)
 
         # Output container
-        if array_type == "numpy":
-            S = np.zeros((n_ref, n_qry), dtype=np.float32)
-        else:
-            sparse_rows = []
-            sparse_cols = []
-            sparse_data = []
+        S = np.zeros((n_ref, n_qry), dtype=np.float32)
 
         # Batch queries -> blur -> multiply
         j = 0
@@ -256,44 +262,114 @@ class BlinkCosine(BaseSimilarity):
             # scores_batch = I_ref.T @ IQ_blur  -> shape (n_ref, B)
             scores_batch_sparse = I_ref.T @ IQ_blur
 
-            if array_type == "numpy":
-                S[:, j0:j1] = scores_batch_sparse.toarray()
-            else:
-                scores_batch_sparse = scores_batch_sparse.asformat("coo")
-                # Apply threshold if requested
-                if self.sparse_score_min > 0.0:
-                    mask = np.abs(scores_batch_sparse.data) >= self.sparse_score_min
-                else:
-                    mask = np.ones_like(scores_batch_sparse.data, dtype=bool)
-                sparse_rows.append(scores_batch_sparse.row[mask])
-                sparse_cols.append(scores_batch_sparse.col[mask] + j0)
-                sparse_data.append(scores_batch_sparse.data[mask])
+            S[:, j0:j1] = scores_batch_sparse.toarray()
 
             j = j1
 
-        if array_type == "numpy":
-            if self.clip_to_one:
-                np.minimum(S, 1.0, out=S)
-            if is_symmetric and n_ref == n_qry and references is queries:
-                # Optional: enforce exact symmetry (no computational saving here)
-                S = 0.5 * (S + S.T)
-            return S
-        else:
-            if sparse_rows:
-                rows = np.concatenate(sparse_rows) if len(sparse_rows) > 1 else sparse_rows[0]
-                cols = np.concatenate(sparse_cols) if len(sparse_cols) > 1 else sparse_cols[0]
-                data = np.concatenate(sparse_data) if len(sparse_data) > 1 else sparse_data[0]
+        if self.clip_to_one:
+            np.minimum(S, 1.0, out=S)
+        if is_symmetric and n_ref == n_qry and references is queries:
+            # Optional: enforce exact symmetry (no computational saving here)
+            S = 0.5 * (S + S.T)
+        return S
+
+    def _sparse_array_without_mask(
+        self,
+        references: Sequence[Spectrum],
+        queries: Sequence[Spectrum],
+        is_symmetric: bool = False,
+    ) -> coo_array:
+        """
+        All-vs-all BLINK-style cosine scores.
+
+        Implementation:
+        - Build a *global dense bin axis* in integer bins from min to max across refs+queries
+          (rows ~ (max_bin - min_bin + 1)), which keeps matrices sparse.
+        - Build a CSR intensity matrix for refs (rows=bins, cols=ref spectra) after per-spectrum L2 normalization.
+        - For queries, build per-batch *blurred* CSR by expanding each nonzero to its ±R neighbors.
+        - Multiply: scores_batch = (I_ref.T @ I_qry_blur), accumulate into the final output.
+
+        Parameters
+        ----------
+        references:
+            List of reference spectra.
+        queries:
+            List of query spectra.
+        array_type
+            Specify the output array type. Can be "numpy" or "sparse".
+            Default is "numpy" and will return a numpy array. "sparse" will return a COO-sparse array
+
+        Returns
+        -------
+        'sparse': COO sparse (n_ref, n_query)
+        """
+
+        # Preprocess all spectra (bins, normalized intensity values)
+        prepped_refs = [self._prep_spectrum(s) for s in references]
+        prepped_qrys = [self._prep_spectrum(s) for s in queries]
+
+        # Early exit if any side empty
+        n_ref = len(prepped_refs)
+        n_qry = len(prepped_qrys)
+        if n_ref == 0 or n_qry == 0:
+            return coo_array((n_ref, n_qry), dtype=np.float32)
+
+        # Collect global bin range
+        all_bins_list = [b for (b, _, _) in prepped_refs if b.size] + [b for (b, _, _) in prepped_qrys if b.size]
+        if not all_bins_list:
+            return coo_array((n_ref, n_qry), dtype=np.float32)
+
+        global_min = min(int(b.min()) for b in all_bins_list)
+        global_max = max(int(b.max()) for b in all_bins_list)
+        n_rows = int(global_max - global_min + 1)
+        offset = -global_min  # row_index = bin + offset
+
+        # Build reference intensity CSR once
+        I_ref = self._build_intensity_csr(prepped_refs, n_rows, offset)
+
+        # Output container
+
+        sparse_rows = []
+        sparse_cols = []
+        sparse_data = []
+
+        # Batch queries -> blur -> multiply
+        j = 0
+        while j < n_qry:
+            j0 = j
+            j1 = min(j + self.batch_size, n_qry)
+            batch = prepped_qrys[j0:j1]
+            IQ_blur = self._build_blurred_csr(batch, n_rows, offset, self._R)  # blurred queries (rows x B)
+
+            # scores_batch = I_ref.T @ IQ_blur  -> shape (n_ref, B)
+            scores_batch_sparse = I_ref.T @ IQ_blur
+            scores_batch_sparse = scores_batch_sparse.asformat("coo")
+            # Apply threshold if requested
+            if self.sparse_score_min > 0.0:
+                mask = np.abs(scores_batch_sparse.data) >= self.sparse_score_min
             else:
-                rows = np.array([], dtype=np.int32)
-                cols = np.array([], dtype=np.int32)
-                data = np.array([], dtype=np.float32)
-            if self.clip_to_one and data.size:
-                np.minimum(data, 1.0, out=data)
-            return coo_array((data, (rows, cols)), shape=(n_ref, n_qry), dtype=np.float32)
+                mask = np.ones_like(scores_batch_sparse.data, dtype=bool)
+            sparse_rows.append(scores_batch_sparse.row[mask])
+            sparse_cols.append(scores_batch_sparse.col[mask] + j0)
+            sparse_data.append(scores_batch_sparse.data[mask])
+
+            j = j1
+
+        if sparse_rows:
+            rows = np.concatenate(sparse_rows) if len(sparse_rows) > 1 else sparse_rows[0]
+            cols = np.concatenate(sparse_cols) if len(sparse_cols) > 1 else sparse_cols[0]
+            data = np.concatenate(sparse_data) if len(sparse_data) > 1 else sparse_data[0]
+        else:
+            rows = np.array([], dtype=np.int32)
+            cols = np.array([], dtype=np.int32)
+            data = np.array([], dtype=np.float32)
+        if self.clip_to_one and data.size:
+            np.minimum(data, 1.0, out=data)
+        return coo_array((data, (rows, cols)), shape=(n_ref, n_qry), dtype=np.float32)
 
     # --------------------------- Internal helpers ---------------------------
 
-    def _prefilter_arrays(self, mz: np.ndarray, intens: np.ndarray, spectrum: SpectrumType):
+    def _prefilter_arrays(self, mz: np.ndarray, intens: np.ndarray, spectrum: Spectrum):
         """
         Apply BLINK-like prefiltering on raw m/z and intensity arrays.
 
@@ -341,7 +417,7 @@ class BlinkCosine(BaseSimilarity):
 
         return mz, intens
 
-    def _prep_spectrum(self, spectrum: SpectrumType):
+    def _prep_spectrum(self, spectrum: Spectrum):
         """
         Prepare a spectrum for scoring.
 
