@@ -1,5 +1,6 @@
-from typing import List, Union
+from typing import Sequence, Union
 import numpy as np
+import numpy.typing as npt
 from matchms.Spectrum import Spectrum
 from .BaseSimilarity import BaseSimilarity
 from .vector_similarity_functions import (
@@ -111,8 +112,8 @@ class FingerprintSimilarity(BaseSimilarity):
         raise NotImplementedError
 
     def _matrix_without_mask(
-        self, references: List[Spectrum], queries: List[Spectrum], is_symmetric: bool = False
-    ) -> np.array:
+        self, references: Sequence[Spectrum], queries: Sequence[Spectrum], is_symmetric: bool = False
+    ) -> npt.NDArray[np.float64]:
         """Calculate matrix of fingerprint based similarity scores.
 
         Parameters

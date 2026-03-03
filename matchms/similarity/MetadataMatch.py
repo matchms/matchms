@@ -1,5 +1,5 @@
 import logging
-from typing import List
+from typing import List, Sequence
 import numpy as np
 from matchms.similarity.spectrum_similarity_functions import number_matching, number_matching_symmetric
 from matchms.Spectrum import Spectrum
@@ -114,7 +114,7 @@ class MetadataMatch(BaseSimilarity):
         return np.asarray(False, dtype=self.score_datatype)
 
     def _matrix_without_mask(
-        self, references: List[Spectrum], queries: List[Spectrum], is_symmetric: bool = False
+        self, references: Sequence[Spectrum], queries: Sequence[Spectrum], is_symmetric: bool = False
     ) -> np.ndarray:
         """Compare parent masses between all references and queries.
 
