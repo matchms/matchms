@@ -75,10 +75,10 @@ def test_modified_cosine_with_mass_shift(peaks, tolerance, masses, expected_matc
     else:
         modified_cosine = ModifiedCosine(tolerance=tolerance)
 
-    score = modified_cosine.pair(norm_spectrum_1, norm_spectrum_2)
+    score, matches = modified_cosine.pair_scores_and_nr_of_matches(norm_spectrum_1, norm_spectrum_2)
     expected_score = compute_expected_score(norm_spectrum_1, norm_spectrum_2, expected_matches)
-    assert score["score"] == pytest.approx(expected_score, 0.0001), "Expected different cosine score."
-    assert score["matches"] == len(expected_matches), "Expected differnt number of matching peaks."
+    assert score == pytest.approx(expected_score, 0.0001), "Expected different cosine score."
+    assert matches == len(expected_matches), "Expected different number of matching peaks."
 
 
 def test_modified_cosine_order_of_input_spectra():
@@ -97,7 +97,6 @@ def test_modified_cosine_order_of_input_spectra():
     score_1_2 = modified_cosine.pair(norm_spectrum_1, norm_spectrum_2)
     score_2_1 = modified_cosine.pair(norm_spectrum_2, norm_spectrum_1)
 
-    assert score_1_2["score"] == score_2_1["score"], "Expected that the order of the arguments would not matter."
     assert score_1_2 == score_2_1, "Expected that the order of the arguments would not matter."
 
 
@@ -136,9 +135,9 @@ def test_modified_cosine_precursor_mz_as_string(caplog):
     norm_spectrum_1 = normalize_intensities(spectrum_1)
     norm_spectrum_2 = normalize_intensities(spectrum_2)
     modified_cosine = ModifiedCosine(tolerance=1.0)
-    score = modified_cosine.pair(norm_spectrum_1, norm_spectrum_2)
+    score, matches = modified_cosine.pair_scores_and_nr_of_matches(norm_spectrum_1, norm_spectrum_2)
 
-    assert score["score"] == pytest.approx(0.0, 1e-5), "Expected different modified cosine score."
-    assert score["matches"] == 0, "Expected 0 matching peaks."
+    assert score == pytest.approx(0.0, 1e-5), "Expected different modified cosine score."
+    assert matches == 0, "Expected 0 matching peaks."
     expected_msg = "Precursor_mz must be int or float. Apply 'add_precursor_mz' filter first."
     assert expected_msg in caplog.text, "Expected different log message"
