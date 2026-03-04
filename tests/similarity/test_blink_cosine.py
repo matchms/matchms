@@ -8,6 +8,7 @@ from ..builder_Spectrum import SpectrumBuilder
 
 # ---------- helpers ----------
 
+
 def _build(builder, mz, intens):
     return builder.with_mz(np.asarray(mz, dtype=float)).with_intensities(np.asarray(intens, dtype=float)).build()
 
@@ -45,14 +46,18 @@ def _prep_naive(s, bin_width=1.0, mz_power=0.0, intensity_power=1.0):
 
 # ---------- tests ----------
 
-@pytest.mark.parametrize("mz1,int1,mz2,int2", [
-    # partial overlap
-    ([100, 200, 300], [1.0, 2.0, 3.0], [200, 400], [5.0, 1.0]),
-    # exact same peaks
-    ([50, 60], [2.0, 2.0], [50, 60], [3.0, 4.0]),
-    # no overlap
-    ([10, 20], [1.0, 1.0], [30, 40], [1.0, 1.0]),
-])
+
+@pytest.mark.parametrize(
+    "mz1,int1,mz2,int2",
+    [
+        # partial overlap
+        ([100, 200, 300], [1.0, 2.0, 3.0], [200, 400], [5.0, 1.0]),
+        # exact same peaks
+        ([50, 60], [2.0, 2.0], [50, 60], [3.0, 4.0]),
+        # no overlap
+        ([10, 20], [1.0, 1.0], [30, 40], [1.0, 1.0]),
+    ],
+)
 @pytest.mark.parametrize("use_numba", [True, False])
 def test_pair_strict_R0_expected(mz1, int1, mz2, int2, use_numba):
     """R=0 via tolerance=0, bin_width=1: score equals cosine of shared binned intensities."""
@@ -66,10 +71,11 @@ def test_pair_strict_R0_expected(mz1, int1, mz2, int2, use_numba):
     b1, v1 = _prep_naive(s1, bin_width=1.0)
     b2, v2 = _prep_naive(s2, bin_width=1.0)
     expected = _expected_strict_cosine(b1, v1, b2, v2)
-    assert out["score"] == pytest.approx(expected, 1e-6)
+    assert out == pytest.approx(expected, 1e-6)
     # matches equals number of exact-bin overlaps at R=0 (counts are 1 since we ensured unique bins)
+    _, matches = sim.pair_scores_and_nr_of_matches(s1, s2)  # to get matches count
     expected_matches = np.intersect1d(b1, b2, assume_unique=True).size
-    assert out["matches"] == expected_matches
+    assert matches == expected_matches
 
 
 def test_pair_clip_to_one_and_matches():
@@ -78,9 +84,9 @@ def test_pair_clip_to_one_and_matches():
     s = _build(builder, [100, 200, 300], [0.1, 0.2, 1.0])
 
     sim = BlinkCosine(tolerance=0.0, bin_width=1.0, prefilter=False, clip_to_one=True)
-    out = sim.pair(s, s)
-    assert out["score"] == pytest.approx(1.0, 1e-6)
-    assert out["matches"] == 3
+    score, matches = sim.pair_scores_and_nr_of_matches(s, s)
+    assert score == pytest.approx(1.0, 1e-6)
+    assert matches == 3
 
 
 def test_pair_empty_spectrum():
@@ -90,9 +96,9 @@ def test_pair_empty_spectrum():
     s_full = _build(builder, [100, 200], [1.0, 1.0])
 
     sim = BlinkCosine(tolerance=0.0, bin_width=1.0, prefilter=False)
-    out = sim.pair(s_empty, s_full)
-    assert out["score"] == 0.0
-    assert out["matches"] == 0
+    score, matches = sim.pair_scores_and_nr_of_matches(s_empty, s_full)
+    assert score == 0.0
+    assert matches == 0
 
 
 @pytest.mark.parametrize("use_numba", [True, False])
@@ -111,12 +117,12 @@ def test_matrix_equals_pair_scores_dense(use_numba):
 
     # Small radius to allow near matches:
     sim = BlinkCosine(tolerance=5.0, bin_width=1.0, prefilter=False, use_numba=use_numba)
-    M = sim.matrix(refs, qrys, array_type="numpy")
+    M = sim.matrix(refs, qrys)
 
     assert M.shape == (len(refs), len(qrys))
     for i, r in enumerate(refs):
         for j, q in enumerate(qrys):
-            s_pair = sim.pair(r, q)["score"]
+            s_pair = sim.pair(r, q)
             assert M[i, j] == pytest.approx(s_pair, 1e-6)
 
 
@@ -128,7 +134,7 @@ def test_matrix_is_symmetric_when_requested():
     spectra = [s1, s2]
 
     sim = BlinkCosine(tolerance=10.0, bin_width=1.0, prefilter=False)
-    S = sim.matrix(spectra, spectra, array_type="numpy", is_symmetric=True)
+    S = sim.matrix(spectra, spectra, is_symmetric=True)
 
     assert S.shape == (2, 2)
     # symmetry
@@ -136,7 +142,7 @@ def test_matrix_is_symmetric_when_requested():
     # diagonals clipped to <= 1
     assert S[0, 0] <= 1.0 and S[1, 1] <= 1.0
     # matches pair() on off-diagonal
-    p01 = sim.pair(s1, s2)["score"]
+    p01 = sim.pair(s1, s2)
     assert S[0, 1] == pytest.approx(p01, 1e-6)
 
 
@@ -158,14 +164,6 @@ def test_matrix_handles_empty_inputs():
     assert M3[0, 0] == 0.0
 
 
-def test_matrix_invalid_array_type_raises():
-    builder = SpectrumBuilder()
-    s = _build(builder, [100], [1.0])
-    sim = BlinkCosine(prefilter=False)
-    with pytest.raises(ValueError, match="array_type must be 'numpy' or 'sparse'"):
-        sim.matrix([s], [s], array_type="not-valid")
-
-
 def test_matrix_sparse_and_threshold_matches_pair():
     """Sparse output must include exactly the entries with score >= sparse_score_min."""
     builder = SpectrumBuilder()
@@ -174,17 +172,17 @@ def test_matrix_sparse_and_threshold_matches_pair():
         _build(builder, [150, 250], [1.0, 1.0]),
     ]
     qrys = [
-        _build(builder, [100, 201], [1.0, 1.0]),   # near first ref
-        _build(builder, [350], [1.0]),             # no match anywhere
+        _build(builder, [100, 201], [1.0, 1.0]),  # near first ref
+        _build(builder, [350], [1.0]),  # no match anywhere
     ]
 
     sim = BlinkCosine(tolerance=2.0, bin_width=1.0, prefilter=False, sparse_score_min=0.2)
-    S_sparse = sim.matrix(refs, qrys, array_type="sparse")
+    S_sparse = sim.sparse_array(refs, qrys)
     # to COO arrays
     rows, cols, data = S_sparse.row, S_sparse.col, S_sparse.data
 
     # compute all pair scores to know ground truth
-    scores = np.array([[sim.pair(r, q)["score"] for q in qrys] for r in refs])
+    scores = np.array([[sim.pair(r, q) for q in qrys] for r in refs])
     mask = scores >= sim.sparse_score_min
     expected_nnz = mask.sum()
 
@@ -208,8 +206,8 @@ def test_matrix_dense_vs_sparse_values_identical_without_threshold():
     ]
 
     sim = BlinkCosine(tolerance=2.0, bin_width=1.0, prefilter=False, sparse_score_min=0.0)
-    D = sim.matrix(refs, qrys, array_type="numpy")
-    S = sim.matrix(refs, qrys, array_type="sparse").tocoo()
+    D = sim.matrix(refs, qrys)
+    S = sim.sparse_array(refs, qrys)
 
     # Build dense from sparse for comparison
     dense_from_sparse = np.zeros_like(D)
@@ -230,33 +228,35 @@ def test_pair_numba_vs_fallback_identical(use_numba_pair):
     sim_numba = BlinkCosine(tolerance=5.0, bin_width=1.0, prefilter=False, use_numba=True)
     sim_fallback = BlinkCosine(tolerance=5.0, bin_width=1.0, prefilter=False, use_numba=False)
 
-    out_a = (sim_numba if use_numba_pair else sim_fallback).pair(s1, s2)
-    out_b = (sim_fallback if use_numba_pair else sim_numba).pair(s1, s2)
+    score_a, matches_a = (sim_numba if use_numba_pair else sim_fallback).pair_scores_and_nr_of_matches(s1, s2)
+    score_b, matches_b = (sim_fallback if use_numba_pair else sim_numba).pair_scores_and_nr_of_matches(s1, s2)
 
-    assert out_a["score"] == pytest.approx(out_b["score"], 1e-6)
-    assert out_a["matches"] == out_b["matches"]
+    assert score_a == pytest.approx(score_b, 1e-6)
+    assert matches_a == matches_b
 
 
 def test_blinkcosine_upper_bound_cosinegreedy():
     """BLINK similarity should always be >= CosineGreedy for the same tolerance."""
     builder = SpectrumBuilder()
 
-    spectrum_1 = builder.with_mz(np.array([100, 200, 300, 400], dtype=float)).with_intensities(
-        np.array([0.5, 0.2, 1.0, 0.3], dtype=float)
-    ).build()
+    spectrum_1 = (
+        builder.with_mz(np.array([100, 200, 300, 400], dtype=float))
+        .with_intensities(np.array([0.5, 0.2, 1.0, 0.3], dtype=float))
+        .build()
+    )
 
-    spectrum_2 = builder.with_mz(np.array([98, 199, 305, 410], dtype=float)).with_intensities(
-        np.array([0.4, 0.3, 0.8, 0.2], dtype=float)
-    ).build()
+    spectrum_2 = (
+        builder.with_mz(np.array([98, 199, 305, 410], dtype=float))
+        .with_intensities(np.array([0.4, 0.3, 0.8, 0.2], dtype=float))
+        .build()
+    )
 
     tolerance = 5.0
     cg = CosineGreedy(tolerance=tolerance)
     bc = BlinkCosine(tolerance=tolerance, bin_width=1.0, prefilter=False)
 
-    score_cg = cg.pair(spectrum_1, spectrum_2)["score"]
-    score_bc = bc.pair(spectrum_1, spectrum_2)["score"]
+    score_cg = cg.pair(spectrum_1, spectrum_2)
+    score_bc = bc.pair(spectrum_1, spectrum_2)
 
     # BLINK should give an equal or higher similarity score
-    assert score_bc >= score_cg - 1e-6, \
-        f"Expected BlinkCosine score {score_bc} to be >= CosineGreedy {score_cg}"
-    
+    assert score_bc >= score_cg - 1e-6, f"Expected BlinkCosine score {score_bc} to be >= CosineGreedy {score_cg}"
