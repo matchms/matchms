@@ -208,6 +208,11 @@ class BaseSimilarity:
         mask_indices
             The row column index pairs for which a score should be calculated.
         """
+        if mask_indices.coverage > 0.5:
+            logger.warning(
+                "The mask covers more than 50% of the cases, so it is recommended to use `matrix()`, "
+                "since this is more memory efficient."
+            )
         scores = np.zeros((len(mask_indices)), dtype=self.score_datatype)
         for i, (i_row, i_col) in enumerate(tqdm(mask_indices, desc="Calculating sparse similarities")):
             scores[i] = self.pair(references[int(i_row)], queries[int(i_col)])
