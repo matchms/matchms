@@ -50,12 +50,12 @@ def test_cosine_greedy_pair(peaks, tolerance, mz_power, intensity_power, expecte
     spectrum_2 = builder.with_mz(peaks[1][0]).with_intensities(peaks[1][1]).build()
 
     cosine_greedy = CosineGreedy(tolerance=tolerance, mz_power=mz_power, intensity_power=intensity_power)
-    score = cosine_greedy.pair(spectrum_1, spectrum_2)
+    score, matches = cosine_greedy.pair_score_and_nr_of_matches(spectrum_1, spectrum_2)
 
     expected_score = compute_expected_score(mz_power, intensity_power, spectrum_1, spectrum_2, expected_matches)
 
-    assert score["score"] == pytest.approx(expected_score, 0.0001), "Expected different cosine score."
-    assert score["matches"] == len(expected_matches[0]), "Expected different number of matching peaks."
+    assert score == pytest.approx(expected_score, 0.0001), "Expected different cosine score."
+    assert matches == len(expected_matches[0]), "Expected different number of matching peaks."
 
 
 @pytest.mark.parametrize("symmetric", [[True], [False]])
@@ -71,11 +71,9 @@ def test_cosine_greedy_matrix(symmetric):
     cosine_greedy = CosineGreedy()
     scores = cosine_greedy.matrix(spectra, spectra, is_symmetric=symmetric)
 
-    assert scores[0][0][0] == pytest.approx(scores[1][1][0], 0.000001), "Expected different cosine score."
-    assert scores[0][0]["score"] == pytest.approx(scores[1][1]["score"], 0.000001), \
+    assert scores[0][0] == pytest.approx(scores[1][1], 0.000001), \
         "Expected different cosine score."
-    assert scores[0][1][0] == pytest.approx(scores[1][0][0], 0.000001), "Expected different cosine score."
-    assert scores[0][1]["score"] == pytest.approx(scores[1][0]["score"], 0.000001), \
+    assert scores[0][1] == pytest.approx(scores[1][0], 0.000001), \
         "Expected different cosine score."
 
 def test_cosine_greedy_matrix_unsymmetric_error():
@@ -98,4 +96,4 @@ def test_cosine_greedy_matrix_none_matching():
         np.array([0.5, 0.2, 1.0], dtype="float")).build()
     
     scores = CosineGreedy().matrix([spectrum_1], [spectrum_2])
-    assert scores['score'][0][0] == 0.0, "Expected a single score of exactly 0.0."
+    assert scores[0][0] == 0.0, "Expected a single score of exactly 0.0."
