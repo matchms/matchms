@@ -9,11 +9,10 @@ from ..builder_Spectrum import SpectrumBuilder
 # Helpers
 # ----------------------------
 
+
 def build_spectrum(mz, intens, precursor_mz=None):
     """Build a Spectrum via SpectrumBuilder, setting precursor_mz when available."""
-    b = SpectrumBuilder().with_mz(np.asarray(mz, dtype="float")).with_intensities(
-        np.asarray(intens, dtype="float")
-    )
+    b = SpectrumBuilder().with_mz(np.asarray(mz, dtype="float")).with_intensities(np.asarray(intens, dtype="float"))
     if hasattr(b, "with_precursor_mz") and precursor_mz is not None:
         b = b.with_precursor_mz(float(precursor_mz))
     elif precursor_mz is not None and hasattr(b, "with_metadata"):
@@ -24,6 +23,7 @@ def build_spectrum(mz, intens, precursor_mz=None):
 # ----------------------------
 # Spectral-entropy path (public API level)
 # ----------------------------
+
 
 @pytest.mark.parametrize("use_ppm,tol", [(False, 0.1), (True, 100.0)])
 def test_entropy_pair_fragment_commutative_and_positive(use_ppm, tol):
@@ -66,9 +66,7 @@ def test_entropy_identity_gate_da_and_ppm():
     s1 = build_spectrum([100, 200], [1.0, 1.0], precursor_mz=500.0)
     s2 = build_spectrum([100, 200], [1.0, 1.0], precursor_mz=500.3)
 
-    base = FlashSimilarity(
-        tolerance=0.02, matching_mode="fragment", remove_precursor=False, noise_cutoff=0.0
-    )
+    base = FlashSimilarity(tolerance=0.02, matching_mode="fragment", remove_precursor=False, noise_cutoff=0.0)
     base_score = float(base.pair(s1, s2))
     assert base_score > 0.0
 
@@ -194,9 +192,11 @@ def test_entropy_matrix_sparse_basic():
             expect = float(fse.pair(refs[i], qs[j]))
             assert float(dense[i, j]) == pytest.approx(expect, abs=1e-6)
 
+
 # ----------------------------
 # Cosine / Modified Cosine path + baseline parity
 # ----------------------------
+
 
 def test_cosine_pair_matches_cosinegreedy_default_tolerance_001():
     # Build a few pairs with clear fragment matches inside 0.01 Da
@@ -225,7 +225,7 @@ def test_cosine_pair_matches_cosinegreedy_default_tolerance_001():
 
     for a, b in pairs:
         s_flash = flash.pair(a, b)
-        s_base = baseline.pair(a, b)["score"]
+        s_base = baseline.pair(a, b)
         assert s_flash == pytest.approx(s_base, rel=1e-12, abs=1e-12)
 
 
@@ -238,7 +238,7 @@ def test_modifiedcosine_pair_matches_baseline_default_tolerance_001():
 
     flash = FlashSimilarity(
         score_type="cosine",
-        matching_mode="hybrid",          # hybrid + cosine = modified cosine
+        matching_mode="hybrid",  # hybrid + cosine = modified cosine
         tolerance=0.01,
         remove_precursor=False,
         noise_cutoff=0.0,
@@ -249,7 +249,7 @@ def test_modifiedcosine_pair_matches_baseline_default_tolerance_001():
     baseline = ModifiedCosine(tolerance=0.01)
 
     s_flash = flash.pair(a, b)
-    s_base = baseline.pair(a, b)["score"]
+    s_base = baseline.pair(a, b)
     assert s_flash == pytest.approx(s_base, rel=1e-12, abs=1e-12)
 
 
