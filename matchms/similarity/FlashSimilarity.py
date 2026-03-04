@@ -62,11 +62,13 @@ class FlashSimilarity(BaseSimilarity):
         of the query to be within this tolerance of the reference precursor m/z.
     identity_use_ppm:
         If True, interpret `identity_precursor_tolerance` as ppm. Default is False.
-    dtype:
-        Data type for the output scores. Default is np.float64 which properly accounts
+    index_mz_dtype:
+        Data type for internal m/z value handling. Default is  np.float32 can be used instead,
+        which is sufficient for peak resolutions up to about 8,000,000.
+        If desired, np.float64 can be used to properly accounts
         for highest resolution MS/MS data (even far beyond current MS/MS possibilties!).
-        To save memory, np.float32 can be used instead, which is sufficient for peak 
-        resolutions up to about 8,000,000.
+    index_intensity_dtype:
+        data type for internal intensity value handling. Default is float32.
     """
     is_commutative = True
     score_datatype = np.float32
@@ -83,7 +85,9 @@ class FlashSimilarity(BaseSimilarity):
                  merge_within: float = 0,
                  identity_precursor_tolerance: Optional[float] = None,
                  identity_use_ppm: bool = False,
-                 dtype: np.dtype = np.float64):
+                 index_mz_dtype: np.dtype = np.float32,
+                 index_intensity_dtype: np.dtype = np.float32,
+                 ):
         if score_type not in ("spectral_entropy", "cosine"):
             raise ValueError("score_type must be 'spectral_entropy' or 'cosine'")
         if matching_mode not in ("fragment", "neutral_loss", "hybrid"):
@@ -99,9 +103,8 @@ class FlashSimilarity(BaseSimilarity):
         self.merge_within = merge_within
         self.identity_precursor_tolerance = identity_precursor_tolerance
         self.identity_use_ppm = identity_use_ppm
-        self.dtype = dtype
-        # sync default BaseSimilarity
-        self.score_datatype = dtype
+        self.index_mz_dtype = index_mz_dtype
+        self.index_intensity_dtype = index_intensity_dtype
 
     # ---- per-pair (not parallel path) ----
     def _prepare(self, spectrum: SpectrumType) -> Tuple[np.ndarray, Optional[float]]:
@@ -115,7 +118,7 @@ class FlashSimilarity(BaseSimilarity):
                                     merge_within_da=self.merge_within,
                                     weighing_type=("entropy" if self.score_type == "spectral_entropy"\
                                                     else "cosine"),
-                                    dtype=self.dtype)
+                                    mz_dtype=self.index_mz_dtype)
         return cleaned, (None if pmz is None else float(pmz))
 
     def pair(self, reference: SpectrumType, query: SpectrumType) -> np.ndarray:
@@ -132,7 +135,7 @@ class FlashSimilarity(BaseSimilarity):
         peaks_1, pmz_1 = self._prepare(reference)
         peaks_2, pmz_2 = self._prepare(query)
         if peaks_1.size == 0 or peaks_2.size == 0:
-            return np.asarray(0.0, dtype=self.dtype)
+            return np.asarray(0.0, dtype=self.score_datatype)
     
         # Build 1-spec library index from the query
         compute_nl = (self.matching_mode in ("neutral_loss", "hybrid"))
@@ -142,7 +145,8 @@ class FlashSimilarity(BaseSimilarity):
             [peaks_2], [pmz_2],
             compute_neutral_loss=compute_nl,
             compute_l2_norm=compute_l2,
-            dtype=self.dtype
+            mz_dtype=self.index_mz_dtype,
+            intensity_dtype=self.index_intensity_dtype
         )
     
         cfg = dict(
@@ -158,7 +162,7 @@ class FlashSimilarity(BaseSimilarity):
 
         worker = _row_task_entropy if self.score_type == "spectral_entropy" else _row_task_cosine
         _, row = worker((0, peaks_1, pmz_1))
-        return np.asarray(row[0], dtype=self.dtype)
+        return np.asarray(row[0], dtype=self.score_datatype)
 
     # FAST + PARALLEL score matrix computation
     def matrix(self,
@@ -215,7 +219,7 @@ class FlashSimilarity(BaseSimilarity):
                                         merge_within_da=self.merge_within,
                                         weighing_type=("entropy" if self.score_type == "spectral_entropy"\
                                                        else "cosine"),
-                                        dtype=self.dtype)
+                                        mz_dtype=self.index_mz_dtype)
             lib_proc.append(cleaned)
             lib_pmz.append(None if pmz is None else float(pmz))
 
@@ -226,11 +230,12 @@ class FlashSimilarity(BaseSimilarity):
             lib_proc, lib_pmz,
             compute_neutral_loss=compute_nl,
             compute_l2_norm=compute_l2,
-            dtype=self.dtype
+            mz_dtype=self.index_mz_dtype,
+            intensity_dtype=self.index_intensity_dtype,
         )
 
         # Prepare output
-        out = np.zeros((n_rows, n_cols), dtype=self.dtype)
+        out = np.zeros((n_rows, n_cols), dtype=self.score_datatype)
 
         # Prepare rows (references)
         row_inputs = []
@@ -684,8 +689,8 @@ def _row_task_entropy(args):
     row_idx, ref_peaks, ref_pmz = args
     cfg = _G_CFG
     lib = _G_LIB
-    dtype = lib.dtype
-    scores = np.zeros(lib.n_specs, dtype=dtype)
+    score_dtype = lib.score_dtype
+    scores = np.zeros(lib.n_specs, dtype=score_dtype)
 
     if cfg["matching_mode"] == "fragment":
         # Fragment mode uses a two-step algorithm:
@@ -1024,9 +1029,13 @@ def _row_task_cosine(args):
     row_idx, ref_peaks, ref_pmz = args
     lib = _G_LIB
     cfg = _G_CFG
+    score_dtype = lib.score_dtype
+    empty_mz = np.empty(0, dtype=lib.mz_dtype)
+    empty_i32 = np.empty(0, dtype=np.int32)
+    n_cols = int(lib.n_specs)
 
     if ref_peaks.size == 0:
-        return (row_idx, np.zeros(lib.n_specs, dtype=lib.dtype))
+        return (row_idx, np.zeros(lib.n_specs, dtype=score_dtype))
 
     # reference (row) peaks
     ref_mz  = ref_peaks[:, 0]
@@ -1035,31 +1044,48 @@ def _row_task_cosine(args):
     # L2 norm of the reference
     q_l2 = float(np.sqrt(np.sum(ref_int * ref_int, dtype=np.float64)))
     if q_l2 == 0.0:
-        return (row_idx, np.zeros(lib.n_specs, dtype=lib.dtype))
+        return (row_idx, np.zeros(lib.n_specs, dtype=score_dtype))
 
     # matching mode flags
     match_mode = cfg["matching_mode"]
     do_frag = (match_mode == "fragment") or (match_mode == "hybrid")
-    do_nl   = (match_mode == "neutral_loss") or (match_mode == "hybrid")
+    do_nl = (match_mode == "neutral_loss") or (match_mode == "hybrid")
 
     # neutral-loss only if library has NL view and we have a precursor on the row
     has_pmz = (ref_pmz is not None)
-    ref_pmz = float(ref_pmz) if has_pmz else 0.0
+    ref_pmz_val = float(ref_pmz) if has_pmz else 0.0
 
     tol = float(cfg["tol"])
     use_ppm = bool(cfg["use_ppm"])
 
-    n_cols = int(lib.n_specs)
+    # Use NL arrays only if enabled + present
+    use_nl = bool(cfg.get("compute_nl", False)) and (lib.nl_mz is not None) and (lib.nl_mz.size > 0)
+    nl_mz = lib.nl_mz if use_nl else empty_mz
+    nl_spec_idx = lib.nl_spec_idx if use_nl else empty_i32
+    nl_prod_idx = lib.nl_product_idx if use_nl else empty_i32
+
+    peaks_spec_idx = lib.peaks_spec_idx  # should be int32
+    if peaks_spec_idx.dtype != np.int32:
+        # This is a fallback. Better: fix at index build time.
+        peaks_spec_idx = peaks_spec_idx.astype(np.int32, copy=False)
+
+    if nl_spec_idx.dtype != np.int32:
+        nl_spec_idx = nl_spec_idx.astype(np.int32, copy=False)
+    if nl_prod_idx.dtype != np.int32:
+        nl_prod_idx = nl_prod_idx.astype(np.int32, copy=False)
 
     # Count per-column candidates (fragment + neutral loss)
     counts_by_col = _count_candidates_per_col_nb(
-        ref_mz, ref_int, has_pmz, ref_pmz,
+        ref_mz, ref_int, has_pmz, ref_pmz_val,
         lib.peaks_mz,
-        lib.peaks_spec_idx.astype(np.int32, copy=False),
-        (lib.nl_mz if (cfg["compute_nl"] and lib.nl_mz is not None) else np.empty(0, np.float64)),
-        (lib.nl_spec_idx if (cfg["compute_nl"] and lib.nl_spec_idx is not None) else np.empty(0, np.int32)),
-        (lib.nl_product_idx if (cfg["compute_nl"] and lib.nl_product_idx is not None) else np.empty(0, np.int32)),
-        tol, use_ppm, do_frag, (do_nl and cfg["compute_nl"]), n_cols
+        peaks_spec_idx,
+        nl_mz,
+        nl_spec_idx,
+        nl_prod_idx,
+        tol, use_ppm,
+        do_frag,
+        (do_nl and use_nl and has_pmz),
+        n_cols
     )
 
     # Prefix-sum to CSR offsets
@@ -1070,39 +1096,47 @@ def _row_task_cosine(args):
 
     n_total = int(col_offsets[-1])
     if n_total == 0:
-        out = np.zeros(n_cols, dtype=lib.dtype)
+        out = np.zeros(n_cols, dtype=score_dtype)
     else:
         # Materialize candidates into CSR-like arrays
-        ref_idx, lib_idx, score, is_frag = _fill_candidates_per_col_nb(
+        ref_idx, lib_idx, cand_score, is_frag = _fill_candidates_per_col_nb(
             ref_mz, ref_int,
-            has_pmz, ref_pmz,
+            has_pmz, ref_pmz_val,
             lib.peaks_mz,
             lib.peaks_int,
-            lib.peaks_spec_idx.astype(np.int32, copy=False),
-            (lib.nl_mz if (cfg["compute_nl"] and lib.nl_mz is not None) else np.empty(0, np.float64)),
-            (lib.nl_spec_idx if (cfg["compute_nl"] and lib.nl_spec_idx is not None) else np.empty(0, np.int32)),
-            (lib.nl_product_idx if (cfg["compute_nl"] and lib.nl_product_idx is not None) else np.empty(0, np.int32)),
-            tol, use_ppm, do_frag, (do_nl and cfg["compute_nl"]),
-            col_offsets, counts_by_col
+            peaks_spec_idx,
+            nl_mz,
+            nl_spec_idx,
+            nl_prod_idx,
+            tol, use_ppm,
+            do_frag,
+            (do_nl and use_nl and has_pmz),
+            col_offsets,
+            counts_by_col
         )
 
         # Greedy select per column and normalize
         out64 = _greedy_scores_all_cols_nb(
             n_cols, ref_mz.shape[0],
             col_offsets,
-            ref_idx, lib_idx, score, is_frag,
+            ref_idx,
+            lib_idx,
+            cand_score,
+            is_frag,
             lib.spec_l2.astype(np.float64, copy=False),
             q_l2
         )
-        out = out64.astype(lib.dtype, copy=False)
+        out = out64.astype(score_dtype, copy=False)
 
     # Identity gate
-    iden_tol = cfg["iden_tol"]
+    iden_tol = cfg.get("iden_tol", None)
     if (iden_tol is not None) and has_pmz:
-        if cfg["iden_use_ppm"]:
-            allow = np.abs(lib.precursor_mz - ref_pmz) <= (iden_tol * 1e-6 * 0.5 * (lib.precursor_mz + ref_pmz))
+        if cfg.get("iden_use_ppm", False):
+            allow = np.abs(lib.precursor_mz - ref_pmz_val) <= (
+                iden_tol * 1e-6 * 0.5 * (lib.precursor_mz + ref_pmz_val)
+            )
         else:
-            allow = np.abs(lib.precursor_mz - ref_pmz) <= iden_tol
+            allow = np.abs(lib.precursor_mz - ref_pmz_val) <= iden_tol
         allow &= np.isfinite(lib.precursor_mz)
         out[~allow] = 0.0
 
