@@ -277,6 +277,101 @@ def test_entropy_fragment_matrix_matches_pair_with_sparse_candidate_columns():
 # Cosine / Modified Cosine path + baseline parity
 # ----------------------------
 
+def _mc_flash(tolerance):
+    return FlashSimilarity(
+        score_type="cosine",
+        matching_mode="hybrid",  # hybrid + cosine = "modified cosine"
+        tolerance=tolerance,
+        remove_precursor=False,
+        noise_cutoff=0.0,
+        normalize_to_half=True,
+        merge_within=0.0,
+        dtype=np.float64,
+    )
+
+
+@pytest.mark.parametrize(
+    "mz_a,int_a,pmz_a,mz_b,int_b,pmz_b,tol",
+    [
+        # 1) Clean shift, should match
+        pytest.param(
+            [100.0, 200.0, 300.0],
+            [0.8, 1.0, 0.6],
+            500.0,
+            [110.0, 210.002, 300.005],
+            [0.8, 1.0, 0.6],
+            510.0,
+            0.01,
+            id="pure_shift_exploited",
+        ),
+
+        # 2) Mixed: one shared unshifted fragment plus shifted set
+        # Expect both algorithms to pick the same best non-overlapping set.
+        pytest.param(
+            [100.0, 150.0, 200.0, 300.0],
+            [0.8, 0.2, 1.0, 0.6],
+            500.0,
+            [110.0, 150.0, 210.0005, 310.0],
+            [0.8, 0.2, 1.0, 0.6],
+            510.0,
+            0.01,
+            id="mixed_direct_and_shifted",
+        ),
+
+        # 3) Ambiguity: two query peaks within tolerance of the same shifted match
+        # This stresses greedy choice ordering and tie-breaking.
+        pytest.param(
+            [100.0, 200.0],
+            [1.0, 0.5],
+            500.0,
+            [110.0, 110.007, 210.0],
+            [1.0, 1.0, 0.5],
+            510.0,
+            0.01,
+            id="duplicate_candidates_nearby",
+        ),
+
+        # 4) Competition: a direct fragment match competes with a shifted/NL match
+        # Constructed so dot products are close and greedy selection matters.
+        pytest.param(
+            [100.0, 200.0, 250.0],
+            [1.0, 0.9, 0.2],
+            500.0,
+            # 200.0 is a direct match, 100/250 are shift-aligned
+            [110.0, 200.0, 260.0],
+            [1.0, 0.9, 0.2],
+            510.0,
+            0.01,
+            id="direct_competes_with_shifted",
+        ),
+
+        # 5) Edge tolerance: shifted peaks sit near the boundary
+        # To catch subtle differences in symmetric ppm/Da handling or window trimming.
+        pytest.param(
+            [100.0, 200.0, 300.0],
+            [0.8, 1.0, 0.6],
+            500.0,
+            [110.0099, 210.0099, 310.0099],
+            [0.8,  1.0, 0.6],
+            510.0,
+            0.01,
+            id="near_tolerance_boundary",
+        ),
+    ],
+)
+def test_flash_hybrid_cosine_matches_modified_cosine_greedy(mz_a, int_a, pmz_a, mz_b, int_b, pmz_b, tol):
+    a = build_spectrum(mz_a, int_a, precursor_mz=pmz_a)
+    b = build_spectrum(mz_b, int_b, precursor_mz=pmz_b)
+
+    flash = _mc_flash(tol)
+    baseline = ModifiedCosineGreedy(tolerance=tol)
+
+    s_flash = float(flash.pair(a, b))
+    s_base = float(baseline.pair(a, b)["score"])
+
+    assert s_flash == pytest.approx(s_base, rel=1e-12, abs=1e-12)
+
+
 def test_cosine_pair_matches_cosinegreedy_default_tolerance_001():
     # Build a few pairs with clear fragment matches inside 0.01 Da
     pairs = [
@@ -306,30 +401,6 @@ def test_cosine_pair_matches_cosinegreedy_default_tolerance_001():
         s_flash = flash.pair(a, b)
         s_base = baseline.pair(a, b)["score"]
         assert s_flash == pytest.approx(s_base, rel=1e-12, abs=1e-12)
-
-
-def test_modifiedcosine_pair_matches_baseline_default_tolerance_001():
-    # Design pairs where a precursor mass shift should be exploited:
-    # ref peaks at [100, 200, 300] with pmz=500
-    # query peaks are shifted by +10 (pmz=510) -> modified cosine should align them
-    a = build_spectrum([100.0, 200.0, 300.0], [0.8, 1.0, 0.6], precursor_mz=500.0)
-    b = build_spectrum([110.0, 210.002, 300.005], [0.8, 1.0, 0.6], precursor_mz=510.0)
-
-    flash = FlashSimilarity(
-        score_type="cosine",
-        matching_mode="hybrid",          # hybrid + cosine = modified cosine
-        tolerance=0.01,
-        remove_precursor=False,
-        noise_cutoff=0.0,
-        normalize_to_half=True,
-        merge_within=0.0,
-        dtype=np.float64,
-    )
-    baseline = ModifiedCosineGreedy(tolerance=0.01)
-
-    s_flash = flash.pair(a, b)
-    s_base = baseline.pair(a, b)["score"]
-    assert s_flash == pytest.approx(s_base, rel=1e-12, abs=1e-12)
 
 
 def test_cosine_matrix_dense_matches_pair():
