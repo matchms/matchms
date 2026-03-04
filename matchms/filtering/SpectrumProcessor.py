@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 from deprecated import deprecated
 from tqdm import tqdm
-from matchms import Spectrum
+from matchms.Spectrum import Spectrum
 from matchms.exporting import save_spectra
 from matchms.filtering.filter_order import ALL_FILTERS, FILTER_FUNCTION_NAMES
 from matchms.yaml_file_functions import ordered_dump
