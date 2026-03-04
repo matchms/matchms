@@ -121,8 +121,6 @@ def test_sparse_array_masking(spectra, similarity_measure):
     scoring_method = similarity_measure[0](**similarity_measure[1])
     mask_indices = ScoresMask(np.asarray([0, 1]), np.asarray([0, 1]), nrows=len(spectra), ncols=len(spectra))
 
-    computed_scores_matrix_with_mask = scoring_method.sparse_array(
-        spectra, spectra, is_symmetric=False, mask_indices=mask_indices
-    )
+    _ = scoring_method.sparse_array(spectra, spectra, is_symmetric=False, mask_indices=mask_indices)
     # todo add a test to check that the values are correct (maybe also just add it to the method above)
     # todo also test is_symmetric

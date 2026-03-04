@@ -138,7 +138,7 @@ class BaseSimilarity:
         if is_symmetric:
             if len(references) != len(queries):
                 raise ValueError(
-                    f"Found unequal number of spectra {len(references)} and {len(queries)} while `is_symmetric` is True."
+                    f"Found unequal number of spectra {len(references)} and {len(queries)} while `is_symmetric` is True"
                 )
 
             # Compute pairwise similarities for symmetric case
