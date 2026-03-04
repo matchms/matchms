@@ -15,9 +15,11 @@ from matchms.similarity.flash_utils import (
 # ----------------------------
 
 def test_entropy_weight_behaviour():
-    intens = np.array([1.0, 1.0, 1.0, 1.0])
-    # entropy of uniform over 4 bins = 2 bits -> w = 0.25 + 0.25 * 2 = 0.75
-    w = 0.25 + 0.25 * 2.0
+    intens = np.array([1.0, 2.0, 3.0, 4.0], dtype=float)
+    p = intens / intens.sum()
+    # ms_entropy uses natural-log spectral entropy in the weighting step.
+    entropy = float(-np.sum(p * np.log(p)))
+    w = 0.25 + 0.25 * entropy
     expected = np.power(intens, w).astype(np.float32)
     got = _entropy_weight(intens, np.float32)
     assert np.allclose(got, expected, rtol=0, atol=1e-7)
@@ -31,9 +33,9 @@ def test_entropy_weight_zero_total_returns_input():
     assert np.allclose(got, 0.0, atol=0.0)
 
 
-def test_entropy_weight_saturation_at_ge3_bits():
-    # 8 equal bins => entropy = 3.0 bits => w = 1.0 (saturation)
-    intens = np.ones(8, dtype=float)
+def test_entropy_weight_saturation_at_ge3_nats():
+    # 32 equal bins => entropy = ln(32) > 3.0 -> no weighting should be applied.
+    intens = np.ones(32, dtype=float)
     got = _entropy_weight(intens, np.float32)
     assert np.allclose(got, intens.astype(np.float32), atol=0.0)
 
@@ -142,6 +144,8 @@ def test_library_index_empty_with_neutral_loss_and_l2():
     assert isinstance(idx, _LibraryIndex)
     assert idx.n_specs == 0
     assert idx.peaks_mz.size == 0 and idx.peaks_int.size == 0 and idx.peaks_spec_idx.size == 0
+    assert idx.spec_offsets.shape == (1,)
+    assert idx.spec_mz.size == 0 and idx.spec_int.size == 0
     assert idx.nl_mz.size == 0 and idx.nl_int.size == 0 and idx.nl_spec_idx.size == 0 and idx.nl_product_idx.size == 0
     assert idx.spec_l2.size == 0
     assert idx.precursor_mz.size == 0
@@ -156,6 +160,9 @@ def test_library_index_single_spec_no_precursor_no_nl():
                                compute_l2_norm=True,
                                dtype=np.float32)
     assert idx.n_specs == 1
+    assert np.all(idx.spec_offsets == np.array([0, 2], dtype=np.int64))
+    assert np.allclose(idx.spec_mz, [100.0, 200.0])
+    assert np.allclose(idx.spec_int, [1.0, 2.0])
     # Peaks sorted ascending
     assert np.allclose(idx.peaks_mz, [100.0, 200.0])
     assert np.allclose(idx.peaks_int, [1.0, 2.0])
@@ -178,6 +185,11 @@ def test_library_index_two_specs_with_pmz_nl_sorted_and_product_mapping():
                                compute_neutral_loss=True,
                                compute_l2_norm=True,
                                dtype=np.float32)
+
+    # Spectrum-major view keeps per-spectrum ordering.
+    assert np.all(idx.spec_offsets == np.array([0, 2, 3], dtype=np.int64))
+    assert np.allclose(idx.spec_mz, [100.0, 300.0, 150.0], atol=1e-12)
+    assert np.allclose(idx.spec_int, [0.5, 0.2, 0.8], atol=1e-12)
 
     # Product arrays are globally sorted by m/z
     assert np.allclose(idx.peaks_mz, [100.0, 150.0, 300.0], atol=1e-12)

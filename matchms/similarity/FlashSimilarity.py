@@ -331,13 +331,18 @@ def _search_spec_in_fragment_window(lib_mz: np.ndarray, mz: float, tol: float, u
 @njit(cache=True, nogil=True)
 def _search_window_halfwidth_nb(m: float, tol: float, use_ppm: bool) -> float:
     """
-    Compute half-width of a symmetric search window around a value `mass`.
+    Compute half-width of a symmetric search window around mass ``m``.
 
-    If `use_ppm` is False: returns `tol` (Da half-width).
-    If `use_ppm` is True : uses symmetric-ppm definition:
+    If ``use_ppm`` is False: returns ``tol`` (Da half-width).
+    If ``use_ppm`` is True: uses symmetric-ppm definition:
         |m2 - m1| <= tol[ppm] * 1e-6 * 0.5 * (m1 + m2)
     which corresponds to a half-window of approximately (tol * 1e-6 * mass),
     corrected for symmetry.
+
+    Notes
+    -----
+    This helper is only for search-window bounds. Candidate matches are still
+    filtered by exact checks in :func:`_within_tol_nb`.
     """
     if not use_ppm:
         return tol
@@ -353,6 +358,161 @@ def _xlog2_scalar_nb(x: float) -> float:
     if x <= 0.0:
         return 0.0
     return x * np.log2(x)
+
+
+@njit(cache=True, nogil=True)
+def _gather_fragment_candidate_cols_numba(
+    query_mz: np.ndarray,
+    query_intensity: np.ndarray,
+    lib_mz: np.ndarray,
+    lib_spec_index: np.ndarray,
+    tol: float,
+    use_ppm: bool,
+    n_cols: int,
+) -> np.ndarray:
+    """
+    Collect candidate library spectrum ids for fragment matching.
+
+    Parameters
+    ----------
+    query_mz, query_intensity : np.ndarray
+        Reference spectrum peaks for one matrix row. ``query_mz`` must be sorted
+        ascending. Non-positive intensities are ignored.
+    lib_mz : np.ndarray
+        Global library product m/z values sorted ascending.
+    lib_spec_index : np.ndarray
+        Spectrum id for each entry in ``lib_mz``.
+    tol : float
+        Fragment tolerance in Da or ppm.
+    use_ppm : bool
+        Whether ``tol`` is interpreted as ppm.
+    n_cols : int
+        Total number of library spectra.
+
+    Returns
+    -------
+    np.ndarray[int64]
+        Unique candidate spectrum ids with at least one fragment inside
+        tolerance. Order is first-seen scan order (not sorted).
+
+    Notes
+    -----
+    Candidate windows use ``_search_spec_in_fragment_window`` and are trimmed
+    with exact ``_within_tol_nb`` checks.
+    """
+    if n_cols == 0:
+        return np.empty(0, dtype=np.int64)
+
+    seen = np.zeros(n_cols, dtype=np.uint8)
+    candidate_cols = np.empty(n_cols, dtype=np.int64)
+    n_candidates = 0
+
+    for q_idx in range(query_mz.shape[0]):
+        Iq = float(query_intensity[q_idx])
+        if Iq <= 0.0:
+            continue
+
+        mz_q = float(query_mz[q_idx])
+        a, b = _search_spec_in_fragment_window(lib_mz, mz_q, tol, use_ppm)
+        if a >= b:
+            continue
+
+        for j in range(a, b):
+            if not _within_tol_nb(mz_q, float(lib_mz[j]), tol, use_ppm):
+                continue
+            col = int(lib_spec_index[j])
+            if seen[col] == 0:
+                seen[col] = 1
+                candidate_cols[n_candidates] = col
+                n_candidates += 1
+
+    return candidate_cols[:n_candidates]
+
+
+@njit(cache=True, nogil=True)
+def _accumulate_fragment_row_pairwise_numba(
+    scores: np.ndarray,
+    query_mz: np.ndarray,
+    query_intensity: np.ndarray,
+    candidate_cols: np.ndarray,
+    spec_offsets: np.ndarray,
+    spec_mz: np.ndarray,
+    spec_intensity: np.ndarray,
+    tol: float,
+    use_ppm: bool,
+) -> None:
+    """
+    One-to-one entropy accumulation against selected library spectra.
+
+    This follows the same two-pointer matching style as ms_entropy pairwise:
+    peaks are sorted by m/z and each peak can be used at most once.
+
+    Parameters
+    ----------
+    scores : np.ndarray
+        Dense row buffer of length ``n_library_spectra``. Updated in place.
+    query_mz, query_intensity : np.ndarray
+        Reference spectrum peaks for this row. ``query_mz`` must be sorted.
+    candidate_cols : np.ndarray[int64]
+        Spectrum ids that should be scored for this row.
+    spec_offsets : np.ndarray[int64]
+        Prefix offsets into ``spec_mz/spec_int`` (one slice per spectrum).
+    spec_mz, spec_intensity : np.ndarray
+        Spectrum-major product arrays from the library index.
+    tol : float
+        Fragment tolerance in Da or ppm.
+    use_ppm : bool
+        Whether ``tol`` is interpreted as ppm.
+
+    Notes
+    -----
+    Non-positive intensities are skipped before attempting a match, so they do
+    not consume one-to-one pointer advancement.
+    """
+    for candidate_idx in range(candidate_cols.shape[0]):
+        col = int(candidate_cols[candidate_idx])
+        a = 0
+        b = int(spec_offsets[col])
+        b_end = int(spec_offsets[col + 1])
+        if b >= b_end:
+            continue
+
+        score = 0.0
+        while a < query_mz.shape[0] and b < b_end:
+            Iq = float(query_intensity[a])
+            if Iq <= 0.0:
+                a += 1
+                continue
+
+            Ilib = float(spec_intensity[b])
+            if Ilib <= 0.0:
+                b += 1
+                continue
+
+            mz_q = float(query_mz[a])
+            mz_lib = float(spec_mz[b])
+            diff = mz_q - mz_lib
+            max_allowed_mass_difference = _search_window_halfwidth_nb(mz_q, tol, use_ppm)
+
+            if diff < -max_allowed_mass_difference:
+                a += 1
+                continue
+            if diff > max_allowed_mass_difference:
+                b += 1
+                continue
+
+            # Keep exact tolerance trimming consistent with the rest of this module.
+            if _within_tol_nb(mz_q, mz_lib, tol, use_ppm):
+                score += _xlog2_scalar_nb(Ilib + Iq) - _xlog2_scalar_nb(Iq) - _xlog2_scalar_nb(Ilib)
+                a += 1
+                b += 1
+            elif diff < 0.0:
+                a += 1
+            else:
+                b += 1
+
+        scores[col] = score
+
 
 @njit(cache=True, nogil=True)
 def _accumulate_fragment_row_numba(
@@ -527,10 +687,29 @@ def _row_task_entropy(args):
     dtype = lib.dtype
     scores = np.zeros(lib.n_specs, dtype=dtype)
 
-    _accumulate_fragment_row_numba(scores,
-                                   ref_peaks[:, 0], ref_peaks[:, 1],
-                                   lib.peaks_mz, lib.peaks_int, lib.peaks_spec_idx,
-                                   float(cfg["tol"]), bool(cfg["use_ppm"]))
+    if cfg["matching_mode"] == "fragment":
+        # Fragment mode uses a two-step algorithm:
+        # 1) gather candidate columns from the global m/z-sorted index,
+        # 2) run one-to-one pairwise scoring only for those spectra using the
+        #    spectrum-major index layout (spec_offsets/spec_mz/spec_int).
+        candidate_cols = _gather_fragment_candidate_cols_numba(
+            ref_peaks[:, 0], ref_peaks[:, 1],
+            lib.peaks_mz, lib.peaks_spec_idx,
+            float(cfg["tol"]), bool(cfg["use_ppm"]),
+            lib.n_specs,
+        )
+        _accumulate_fragment_row_pairwise_numba(
+            scores,
+            ref_peaks[:, 0], ref_peaks[:, 1],
+            candidate_cols,
+            lib.spec_offsets, lib.spec_mz, lib.spec_int,
+            float(cfg["tol"]), bool(cfg["use_ppm"]),
+        )
+    else:
+        _accumulate_fragment_row_numba(scores,
+                                       ref_peaks[:, 0], ref_peaks[:, 1],
+                                       lib.peaks_mz, lib.peaks_int, lib.peaks_spec_idx,
+                                       float(cfg["tol"]), bool(cfg["use_ppm"]))
 
     # neutral-loss / hybrid ONLY if library has NL view
     if cfg["compute_nl"]:
@@ -580,6 +759,9 @@ def _within_tol_nb(m1: float, m2: float, tol: float, use_ppm: bool) -> bool:
         |m2 - m1| <= tol[ppm] * 1e-6 * 0.5 * (m1 + m2)
     Otherwise absolute Da tolerance:
         |m2 - m1| <= tol
+
+    This is the exact tolerance predicate used to trim search windows produced
+    by :func:`_search_window_halfwidth_nb`.
     """
     if use_ppm:
         return abs(m2 - m1) <= (tol * 1e-6) * 0.5 * (m1 + m2)
