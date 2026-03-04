@@ -1096,9 +1096,9 @@ def _row_task_cosine(args):
         )
         out = out64.astype(lib.dtype, copy=False)
 
-    # Optional identity gate
+    # Identity gate
     iden_tol = cfg["iden_tol"]
-    if (iden_tol is not None) and (ref_pmz is not None):
+    if (iden_tol is not None) and has_pmz:
         if cfg["iden_use_ppm"]:
             allow = np.abs(lib.precursor_mz - ref_pmz) <= (iden_tol * 1e-6 * 0.5 * (lib.precursor_mz + ref_pmz))
         else:
