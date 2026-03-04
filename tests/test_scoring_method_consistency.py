@@ -74,7 +74,7 @@ def test_all_scores_and_methods(spectra, similarity_measure):
 
     # Run sparse_array() method
     idx_row, idx_col = np.where(computed_scores_matrix)
-    mask = ScoresMask(idx_row, idx_col)
+    mask = ScoresMask(idx_row, idx_col, nrows=computed_scores_matrix.shape[0], ncols=computed_scores_matrix.shape[1])
     computed_scores_coo = similarity_measure.sparse_array(spectra, spectra, mask)
     assert np.allclose(computed_scores_coo.data, computed_scores_matrix[idx_row, idx_col])
 
@@ -100,7 +100,7 @@ def test_matrix_masking(spectra, similarity_measure):
     scoring_method = similarity_measure[0](**similarity_measure[1])
     no_mask = scoring_method.matrix(spectra, spectra, is_symmetric=False, mask_indices=None)
 
-    mask_indices = ScoresMask(np.asarray([0, 1]), np.asarray([0, 1]))
+    mask_indices = ScoresMask(np.asarray([0, 1]), np.asarray([0, 1]), nrows=len(spectra), ncols=len(spectra))
     scoring_method = similarity_measure[0](**similarity_measure[1])
     with_mask = scoring_method.matrix(spectra, spectra, is_symmetric=False, mask_indices=mask_indices)
 
@@ -119,7 +119,7 @@ def test_matrix_masking(spectra, similarity_measure):
 @pytest.mark.parametrize("similarity_measure", list(_score_functions.values()))
 def test_sparse_array_masking(spectra, similarity_measure):
     scoring_method = similarity_measure[0](**similarity_measure[1])
-    mask_indices = ScoresMask(np.asarray([0, 1]), np.asarray([0, 1]))
+    mask_indices = ScoresMask(np.asarray([0, 1]), np.asarray([0, 1]), nrows=len(spectra), ncols=len(spectra))
 
     computed_scores_matrix_with_mask = scoring_method.sparse_array(
         spectra, spectra, is_symmetric=False, mask_indices=mask_indices

@@ -91,18 +91,18 @@ def test_from_coo_array_no_warning_above_zero(caplog):
 
 
 def test_len():
-    mask = ScoresMask(np.array([0, 1, 2]), np.array([1, 2, 3]))
+    mask = ScoresMask(np.array([0, 1, 2]), np.array([1, 2, 3]), ncols=4, nrows=4)
     assert len(mask) == 3
 
 
 def test_getitem_int():
-    mask = ScoresMask(np.array([0, 1, 2]), np.array([3, 4, 5]))
+    mask = ScoresMask(np.array([0, 1, 2]), np.array([3, 4, 5]), ncols=6, nrows=3)
     row, col = mask[1]
     assert row == 1 and col == 4
 
 
 def test_getitem_slice():
-    mask = ScoresMask(np.array([0, 1, 2]), np.array([3, 4, 5]))
+    mask = ScoresMask(np.array([0, 1, 2]), np.array([3, 4, 5]), ncols=6, nrows=3)
     sliced = mask[1:]
     assert isinstance(sliced, ScoresMask)
     assert np.array_equal(sliced.idx_row, [1, 2])
@@ -110,6 +110,6 @@ def test_getitem_slice():
 
 
 def test_iter():
-    mask = ScoresMask(np.array([0, 1, 2]), np.array([3, 4, 5]))
+    mask = ScoresMask(np.array([0, 1, 2]), np.array([3, 4, 5]), ncols=6, nrows=3)
     pairs = list(mask)
     assert pairs == [(0, 3), (1, 4), (2, 5)]
