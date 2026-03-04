@@ -209,7 +209,7 @@ def test_entropy_fragment_score_is_bounded_with_overlapping_windows():
         noise_cutoff=0.0,
         normalize_to_half=True,
         merge_within=0.0,
-        dtype=np.float64,
+        index_mz_dtype=np.float64,
     )
 
     score = float(fse.pair(s1, s2))
@@ -230,7 +230,7 @@ def test_entropy_fragment_ignores_non_positive_peaks_in_pairwise_matching():
         noise_cutoff=0.0,
         normalize_to_half=False,
         merge_within=0.0,
-        dtype=np.float64,
+        index_mz_dtype=np.float64,
     )
 
     expected = float(fse.pair(ref_without_zero, query))
@@ -262,7 +262,7 @@ def test_entropy_fragment_matrix_matches_pair_with_sparse_candidate_columns():
         noise_cutoff=0.0,
         normalize_to_half=False,
         merge_within=0.0,
-        dtype=np.float64,
+        index_mz_dtype=np.float64,
     )
 
     matrix_scores = fse.matrix([ref], queries, array_type="numpy", n_jobs=0)
@@ -286,7 +286,7 @@ def _mc_flash(tolerance):
         noise_cutoff=0.0,
         normalize_to_half=True,
         merge_within=0.0,
-        dtype=np.float64,
+        index_mz_dtype=np.float64,
     )
 
 
@@ -364,6 +364,7 @@ def test_flash_hybrid_cosine_matches_modified_cosine_greedy(mz_a, int_a, pmz_a, 
     b = build_spectrum(mz_b, int_b, precursor_mz=pmz_b)
 
     flash = _mc_flash(tol)
+    flash.score_datatype = np.float64
     baseline = ModifiedCosineGreedy(tolerance=tol)
 
     s_flash = float(flash.pair(a, b))
@@ -393,8 +394,9 @@ def test_cosine_pair_matches_cosinegreedy_default_tolerance_001():
         noise_cutoff=0.0,
         normalize_to_half=True,
         merge_within=0.0,
-        dtype=np.float64,
+        index_mz_dtype=np.float64,
     )
+    flash.score_datatype = np.float64
     baseline = CosineGreedy(tolerance=0.01)
 
     for a, b in pairs:
@@ -420,8 +422,9 @@ def test_cosine_matrix_dense_matches_pair():
         noise_cutoff=0.0,
         normalize_to_half=True,
         merge_within=0.0,
-        dtype=np.float64,
+        index_mz_dtype=np.float64,
     )
+    flash.score_datatype = np.float64
     M = flash.matrix(refs, qs, array_type="numpy", n_jobs=0)
     assert M.shape == (2, 2)
     for i, r in enumerate(refs):
@@ -433,8 +436,10 @@ def test_cosine_matrix_dense_matches_pair():
 def test_cosine_dtype_and_commutativity():
     a = build_spectrum([100, 150, 300], [0.5, 1.0, 0.4], precursor_mz=600.0)
     b = build_spectrum([100, 155, 295], [0.5, 0.8, 0.6], precursor_mz=600.0)
-    f32 = FlashSimilarity(score_type="cosine", dtype=np.float32, remove_precursor=False, noise_cutoff=0.0)
-    f64 = FlashSimilarity(score_type="cosine", dtype=np.float64, remove_precursor=False, noise_cutoff=0.0)
+    f32 = FlashSimilarity(score_type="cosine", remove_precursor=False, noise_cutoff=0.0)
+    f64 = FlashSimilarity(score_type="cosine", remove_precursor=False, noise_cutoff=0.0)
+    f32.score_datatype = np.float32
+    f64.score_datatype = np.float64
 
     s_ab_32 = f32.pair(a, b)
     s_ba_32 = f32.pair(b, a)
