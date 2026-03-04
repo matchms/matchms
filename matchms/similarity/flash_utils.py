@@ -49,10 +49,19 @@ class _LibraryIndex:
         Optional per-spectrum L2 norm of product intensities (cosine paths).
     precursor_mz : np.ndarray[dtype]
         Precursor m/z per spectrum. Unknown values are stored as ``NaN``.
-    dtype : np.dtype
-        Floating-point dtype used for all float arrays.
+    mz_dtype : np.dtype
+        Float dtype for m/z values. Default is np.float32.
+    intensity_dtype : np.dtype
+        Float dtype for intensity values. Default is np.float32.
+    score_dtype : np.dtype
+        Float dtype for out scores. Default is np.float32.
     """
-    def __init__(self, dtype: np.dtype = np.float32):
+    def __init__(
+            self,
+            mz_dtype: np.dtype = np.float32,
+            intensity_dtype: np.dtype = np.float32,
+            score_dtype: np.dtype = np.float32,
+            ):
         self.n_specs = 0
         self.peaks_mz = None
         self.peaks_int = None
@@ -66,13 +75,17 @@ class _LibraryIndex:
         self.spec_int = None
         self.spec_l2 = None
         self.precursor_mz = None
-        self.dtype = dtype
+        self.mz_dtype = mz_dtype
+        self.intensity_dtype = intensity_dtype
+        self.score_dtype = score_dtype
 
 def _build_library_index(processed_peaks_list: List[np.ndarray],
                          precursor_mz_list: List[Optional[float]],
                          compute_neutral_loss: bool = False,
                          compute_l2_norm: bool = False,
-                         dtype: np.dtype = np.float32) -> _LibraryIndex:
+                         mz_dtype: np.dtype = np.float32,
+                         intensity_dtype: np.dtype = np.float32,
+                         score_dtype: np.dtype = np.float32,) -> _LibraryIndex:
     """
     Build shared library views over all query spectra peaks.
 
@@ -100,8 +113,12 @@ def _build_library_index(processed_peaks_list: List[np.ndarray],
         If True, build neutral-loss arrays used by hybrid entropy and modified cosine.
     compute_l2_norm : bool
         If True, precompute the L2 norm of each spectrum's intensities (for cosine or modified cosine).
-    dtype : np.dtype
-        Float dtype for all arrays. Default is np.float32.
+    mz_dtype : np.dtype
+        Float dtype for m/z values. Default is np.float32.
+    intensity_dtype : np.dtype
+        Float dtype for intensity values. Default is np.float32.
+    score_dtype : np.dtype
+        Float dtype for out scores. Default is np.float32.
 
     Returns
     -------
@@ -110,11 +127,11 @@ def _build_library_index(processed_peaks_list: List[np.ndarray],
         Empty inputs still return fully initialized arrays (often size 0), with
         ``spec_offsets`` always shaped ``(n_specs + 1,)``.
     """
-    idx = _LibraryIndex(dtype)
+    idx = _LibraryIndex(mz_dtype, intensity_dtype, score_dtype)
     idx.n_specs = len(processed_peaks_list)
 
     # Precursor array
-    prec = np.full(idx.n_specs, np.nan, dtype=dtype)
+    prec = np.full(idx.n_specs, np.nan, dtype=mz_dtype)
     for k, pmz in enumerate(precursor_mz_list):
         if pmz is not None:
             prec[k] = pmz
@@ -122,7 +139,7 @@ def _build_library_index(processed_peaks_list: List[np.ndarray],
 
     # Preallocate l2 norm array if needed (for cosine or modified cosine)
     if compute_l2_norm:
-        spec_l2 = np.zeros(idx.n_specs, dtype=dtype)
+        spec_l2 = np.zeros(idx.n_specs, dtype=mz_dtype)
 
     # Concatenate all peaks
     counts = np.array([p.shape[0] for p in processed_peaks_list], dtype=np.int64)
@@ -134,26 +151,26 @@ def _build_library_index(processed_peaks_list: List[np.ndarray],
         int_dtype = np.int64
         print(f"Too many total peaks ({n_peaks}) to build index using 32-bit integers (now using 64-bit integers).")
     else:
-        int_dtype = np.int32 
+        int_dtype = np.int32
 
     # Return empty arrays if no peaks
     if n_peaks == 0:
-        idx.peaks_mz = np.zeros(0, dtype=dtype)
-        idx.peaks_int = np.zeros(0, dtype=dtype)
+        idx.peaks_mz = np.zeros(0, dtype=mz_dtype)
+        idx.peaks_int = np.zeros(0, dtype=intensity_dtype)
         idx.peaks_spec_idx = np.zeros(0, dtype=int_dtype)
-        idx.spec_mz = np.zeros(0, dtype=dtype)
-        idx.spec_int = np.zeros(0, dtype=dtype)
+        idx.spec_mz = np.zeros(0, dtype=mz_dtype)
+        idx.spec_int = np.zeros(0, dtype=intensity_dtype)
         if compute_neutral_loss:
-            idx.nl_mz = np.zeros(0, dtype=dtype)
-            idx.nl_int = np.zeros(0, dtype=dtype)
+            idx.nl_mz = np.zeros(0, dtype=mz_dtype)
+            idx.nl_int = np.zeros(0, dtype=intensity_dtype)
             idx.nl_spec_idx = np.zeros(0, dtype=int_dtype)
             idx.nl_product_idx = np.zeros(0, dtype=int_dtype)
         if compute_l2_norm:
             idx.spec_l2 = spec_l2
         return idx
 
-    mz_flat = np.empty(n_peaks, dtype=dtype)
-    int_flat = np.empty(n_peaks, dtype=dtype)
+    mz_flat = np.empty(n_peaks, dtype=mz_dtype)
+    int_flat = np.empty(n_peaks, dtype=intensity_dtype)
     spec_flat = np.empty(n_peaks, dtype=int_dtype)
 
     write = 0
@@ -165,7 +182,7 @@ def _build_library_index(processed_peaks_list: List[np.ndarray],
         int_flat[write:write+n] = peaks[:, 1]
         spec_flat[write:write+n] = spec_id
         if compute_l2_norm:
-            spec_l2[spec_id] = np.sqrt(np.sum((peaks[:, 1]).astype(np.float64)**2, dtype=np.float64)).astype(dtype)
+            spec_l2[spec_id] = np.sqrt(np.sum((peaks[:, 1]).astype(np.float64)**2, dtype=np.float64)).astype(mz_dtype)
         write += n
 
     idx.spec_mz = mz_flat.copy()
@@ -185,12 +202,12 @@ def _build_library_index(processed_peaks_list: List[np.ndarray],
         have_pmz = ~np.isnan(pmz_per_peak)  # catch cases without precursor m/z
         src_idx = np.nonzero(have_pmz)[0]
         if src_idx.size == 0:
-            idx.nl_mz = np.zeros(0, dtype=dtype)
-            idx.nl_int = np.zeros(0, dtype=dtype)
+            idx.nl_mz = np.zeros(0, dtype=mz_dtype)
+            idx.nl_int = np.zeros(0, dtype=intensity_dtype)
             idx.nl_spec_idx = np.zeros(0, dtype=int_dtype)
             idx.nl_product_idx = np.zeros(0, dtype=int_dtype)
         else:
-            nl_mz = (pmz_per_peak[src_idx] - mz_flat[src_idx]).astype(dtype, copy=False)
+            nl_mz = (pmz_per_peak[src_idx] - mz_flat[src_idx]).astype(mz_dtype, copy=False)
             nl_int = int_flat[src_idx]
             nl_spec = spec_flat[src_idx]
             nl_prod = product_pos[src_idx]
@@ -210,26 +227,26 @@ def _build_library_index(processed_peaks_list: List[np.ndarray],
 
 # ===================== preprocessing =====================
 
-def _entropy_weight(intensities: np.ndarray, dtype: np.dtype) -> np.ndarray:
+def _entropy_weight(intensities: np.ndarray, intensity_dtype: np.dtype) -> np.ndarray:
     """
     Apply entropy-based weighting to intensities as described by Li & Fiehn (2023).
     """
     total = float(intensities.sum(dtype=np.float64))  # sum in high precision for stability
     if total <= 0.0:
-        return intensities.astype(dtype, copy=False)
+        return intensities.astype(intensity_dtype, copy=False)
     p = intensities / total
     with np.errstate(divide="ignore", invalid="ignore"):
-        logp = np.zeros_like(p, dtype=dtype)
+        logp = np.zeros_like(p, dtype=intensity_dtype)
         mask = p > 0
         # Keep the weighting rule aligned with ms_entropy (natural log entropy).
-        logp[mask] = np.log(p[mask]).astype(dtype, copy=False)
+        logp[mask] = np.log(p[mask]).astype(intensity_dtype, copy=False)
 
     # Compute spectral entropy S
     S = float((-p * logp).sum(dtype=np.float64))
 
     # Compute weight w (used for scaling)
     w = 1.0 if S >= 3.0 else (0.25 + 0.25 * S)
-    return np.power(intensities, w).astype(dtype, copy=False)
+    return np.power(intensities, w).astype(intensity_dtype, copy=False)
 
 
 def _clean_and_weight(peaks: np.ndarray,
@@ -240,7 +257,8 @@ def _clean_and_weight(peaks: np.ndarray,
                       normalize_to_half: bool,
                       merge_within_da: float,
                       weighing_type: str,
-                      dtype: np.dtype = np.float64) -> np.ndarray:
+                      mz_dtype: np.dtype = np.float32,
+                      intensity_dtype: np.dtype = np.float32) -> np.ndarray:
     """
     Apply the Flash preprocessing rules to a (mz, intensity) peak list.
 
@@ -271,7 +289,7 @@ def _clean_and_weight(peaks: np.ndarray,
     weighing_type : str
         One of "cosine" or "entropy". Fragment intensities will be weighted accordingly.
     dtype : np.dtype
-        Float dtype for outputs. Default is np.float64. TODO: should not be handled by this function?
+        Float dtype for outputs. Default is np.float32. TODO: should not be handled by this function?
 
     Returns
     -------
@@ -280,17 +298,17 @@ def _clean_and_weight(peaks: np.ndarray,
         May be empty with shape (0, 2) if everything is filtered away.
     """
     if peaks.size == 0:
-        return np.empty((0, 2), dtype=dtype)
+        return np.empty((0, 2), dtype=mz_dtype)
 
-    mz = _as_dtype(peaks[:, 0], dtype)
-    intensities = _as_dtype(peaks[:, 1], dtype)
+    mz = _as_dtype(peaks[:, 0], mz_dtype)
+    intensities = _as_dtype(peaks[:, 1], intensity_dtype)
 
     # (optional) remove precursor and nearby peaks
     if remove_precursor and (precursor_mz is not None):
         mask = mz <= (precursor_mz - precursor_window)
         mz, intensities = mz[mask], intensities[mask]
         if mz.size == 0:
-            return np.empty((0, 2), dtype=dtype)
+            return np.empty((0, 2), dtype=mz_dtype)
 
     # (optional) remove noise peaks below a fraction of max intensity
     if noise_cutoff and noise_cutoff > 0.0:
@@ -298,11 +316,11 @@ def _clean_and_weight(peaks: np.ndarray,
         mask = intensities >= thr
         mz, intensities = mz[mask], intensities[mask]
         if mz.size == 0:
-            return np.empty((0, 2), dtype=dtype)
+            return np.empty((0, 2), dtype=mz_dtype)
 
     # (optional) entropy-weight intensities (for flash entropy score)
     if weighing_type == "entropy":
-        intensities = _entropy_weight(intensities, dtype)
+        intensities = _entropy_weight(intensities, intensity_dtype)
     elif weighing_type == "cosine":
         pass
     else:
@@ -317,7 +335,7 @@ def _clean_and_weight(peaks: np.ndarray,
     if normalize_to_half:
         sum_intensities = intensities.sum(dtype=np.float64)
         if sum_intensities > 0.0:
-            intensities = (intensities * (0.5 / sum_intensities)).astype(dtype, copy=False)
+            intensities = (intensities * (0.5 / sum_intensities)).astype(intensity_dtype, copy=False)
 
     return np.column_stack((mz, intensities))
 
