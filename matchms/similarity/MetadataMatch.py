@@ -1,5 +1,5 @@
 import logging
-from typing import List, Sequence
+from typing import Sequence
 import numpy as np
 from matchms.similarity.spectrum_similarity_functions import number_matching, number_matching_symmetric
 from matchms.Spectrum import Spectrum

@@ -1,10 +1,10 @@
 from typing import List, Optional, Tuple
 import numpy as np
+import numpy.typing as npt
 from scipy.optimize import linear_sum_assignment
 from matchms.similarity.spectrum_similarity_functions import collect_peak_pairs
 from matchms.Spectrum import Spectrum
 from .BaseSimilarity import BaseSimilarity
-import numpy.typing as npt
 
 
 class CosineHungarian(BaseSimilarity):

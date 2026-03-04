@@ -2,7 +2,7 @@ import logging
 import os
 from collections import OrderedDict
 from datetime import datetime
-from typing import Any, Callable, Iterable, List, Optional, Sequence, Union
+from typing import Callable, Iterable, List, Optional, Sequence, Union
 from deprecated import deprecated
 import matchms.similarity as mssimilarity
 from matchms.filtering.filter_order import ALL_FILTERS

@@ -1,4 +1,4 @@
-from typing import List, Sequence
+from typing import Sequence
 import numpy as np
 from matchms.similarity.spectrum_similarity_functions import (
     number_matching,

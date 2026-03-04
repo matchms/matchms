@@ -8,7 +8,6 @@ from matchms.importing import (
     load_from_mzml,
     load_from_mzxml,
     load_from_pickle,
-    load_from_usi,
 )
 from matchms.Spectrum import Spectrum
 

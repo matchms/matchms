@@ -1,9 +1,7 @@
 """Helper functions to build and handle spectral networks"""
 
-from typing import Sequence, Tuple
 import numpy as np
 from scipy.sparse import coo_array, csr_array
-from matchms.Spectrum import Spectrum
 
 
 def get_top_hits_matrix(matrix: np.ndarray, top_n: int, ignore_diagonal: bool = True) -> tuple[np.ndarray, np.ndarray]:
