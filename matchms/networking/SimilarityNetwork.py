@@ -1,8 +1,10 @@
 import json
-from typing import Optional
+from typing import List, Optional
 import networkx as nx
 import numpy as np
-from .networking_functions import get_top_hits
+from scipy.sparse import coo_array
+from matchms.Spectrum import Spectrum
+from .networking_functions import get_top_hits_coo_array, get_top_hits_matrix
 
 
 class SimilarityNetwork:
@@ -95,7 +97,7 @@ class SimilarityNetwork:
         self.graph: Optional[nx.Graph] = None
         """NetworkX graph. Set after calling create_network()"""
 
-    def create_network(self, scores, score_name: str = None):
+    def create_network(self, scores: coo_array | np.ndarray, spectra: List[Spectrum]):
         """
         Function to create network from given top-n similarity values. Expects that
         similarities given in scores are from an all-vs-all comparison including all
@@ -106,48 +108,55 @@ class SimilarityNetwork:
         scores
             Matchms Scores object containing all spectra and pair similarities for
             generating a network.
+        spectra
+            List of spectra used to generate the network.
         """
-        if score_name is None:
-            score_name = scores.scores.guess_score_name()
         assert self.top_n >= self.max_links, "top_n must be >= max_links"
+        if scores.shape is None:
+            raise ValueError("Expected shape for scores")
+        if len(scores.shape) != 2:
+            raise ValueError("Expected 2D array for scores")
 
-        if scores.queries.shape != scores.references.shape:
-            raise TypeError("Expected symmetric scores")
+        if scores.shape[0] != scores.shape[1] != len(spectra):
+            raise TypeError("Expected symmetric scores, matching length of spectra.")
+        top_n = min(self.top_n, scores.shape[1])
 
-        if not np.all(scores.queries == scores.references):
-            raise ValueError("Queries and references do not match")
+        # Get the highest scores and corresponding indices for each spectrum
+        if isinstance(scores, np.ndarray):
+            highest_scores, indexes_of_top_scores = get_top_hits_matrix(scores, top_n=top_n, ignore_diagonal=True)
+        elif isinstance(scores, coo_array):
+            highest_scores, indexes_of_top_scores = get_top_hits_coo_array(scores, top_n=top_n, ignore_diagonal=True)
+        else:
+            raise ValueError("Expected scores to be either a dense numpy array or a COO sparse array.")
 
-        unique_ids = list({s.get(self.identifier_key) for s in scores.queries})
+        unique_ids = list(s.get(self.identifier_key) for s in spectra)
 
         # Initialize network graph, add nodes
         msnet = nx.Graph()
         msnet.add_nodes_from(unique_ids)
 
-        # Collect location and score of highest scoring candidates for queries and references
-        similars_idx, similars_scores = get_top_hits(
-            scores,
-            identifier_key=self.identifier_key,
-            top_n=self.top_n,
-            search_by="queries",
-            score_name=score_name,
-            ignore_diagonal=True,
-        )
-
         # Add edges based on global threshold (cutoff) for weights
-        for i, spec in enumerate(scores.queries):
-            query_id = spec.get(self.identifier_key)
-            ref_candidates = np.array([scores.references[x].get(self.identifier_key) for x in similars_idx[query_id]])
-            idx = np.where((similars_scores[query_id] >= self.score_cutoff) & (ref_candidates != query_id))[0][
-                : self.max_links
-            ]
+        for row_nr, query_spectrum_id in enumerate(unique_ids):
+            matching_ref_indices = np.where(
+                (highest_scores[row_nr] >= self.score_cutoff) & (indexes_of_top_scores[row_nr] != row_nr)
+            )[0][: self.max_links]
+            # matching_ref_indices = np.where((highest_scores[row_nr] >= self.score_cutoff))[0][: self.max_links]
             if self.link_method == "single":
-                new_edges = [(query_id, str(ref_candidates[x]), float(similars_scores[query_id][x])) for x in idx]
+                new_edges = []
+                for ref_index in matching_ref_indices:
+                    ref_row_nr = indexes_of_top_scores[row_nr][ref_index]
+                    ref_candidate_id = unique_ids[ref_row_nr]
+                    score = float(highest_scores[row_nr][ref_index])
+                    new_edges.append((query_spectrum_id, str(ref_candidate_id), score))
             elif self.link_method == "mutual":
-                new_edges = [
-                    (query_id, str(ref_candidates[x]), float(similars_scores[query_id][x]))
-                    for x in idx
-                    if i in similars_idx[ref_candidates[x]][:]
-                ]
+                new_edges = []
+                for ref_index in matching_ref_indices:
+                    ref_row_nr = indexes_of_top_scores[row_nr][ref_index]
+                    # Check if query is also in top-n of ref
+                    if row_nr in indexes_of_top_scores[ref_row_nr]:
+                        ref_candidate_id = unique_ids[ref_row_nr]
+                        score = float(highest_scores[row_nr][ref_index])
+                        new_edges.append((query_spectrum_id, str(ref_candidate_id), score))
             else:
                 raise ValueError("Link method not kown")
 

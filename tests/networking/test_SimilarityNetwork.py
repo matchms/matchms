@@ -62,8 +62,8 @@ def create_dummy_scores():
 
     # Create Scores object by calculating dice scores
     similarity_measure = FingerprintSimilarity("dice")
-    scores = create_scores_object_and_calculate_scores(references, queries, similarity_measure)
-    return scores
+    scores = similarity_measure.matrix(references, queries)
+    return scores, references
 
 
 def create_dummy_scores_symmetric():
@@ -71,12 +71,12 @@ def create_dummy_scores_symmetric():
 
     # Create Scores object by calculating dice scores
     similarity_measure = FingerprintSimilarity("dice")
-    scores = create_scores_object_and_calculate_scores(spectra, spectra, similarity_measure)
-    return scores
+    scores = similarity_measure.matrix(spectra, spectra, is_symmetric=True)
+    return scores, spectra
 
 
 def create_dummy_scores_symmetric_faulty():
-    scores = create_dummy_scores_symmetric()
+    scores, spectra = create_dummy_scores_symmetric()
     faulty_spec = Spectrum(
         mz=np.array([100, 400.0]),
         intensities=np.array([0.5, 0.1 * 4]),
@@ -87,9 +87,9 @@ def create_dummy_scores_symmetric_faulty():
             "precursor_mz": 110 + 50 * 4,
         },
     )
-    scores.queries[0] = faulty_spec
+    spectra[0] = faulty_spec
 
-    return scores
+    return scores, spectra
 
 
 def create_dummy_scores_symmetric_modified_cosine():
@@ -97,34 +97,27 @@ def create_dummy_scores_symmetric_modified_cosine():
 
     # Create Scores object by calculating dice scores
     similarity_measure = ModifiedCosine()
-    scores = create_scores_object_and_calculate_scores(spectra, spectra, similarity_measure)
-    return scores
+    scores = similarity_measure.matrix(spectra, spectra, is_symmetric=True)
+    return scores, spectra
 
 
 def test_create_network_symmetric_wrong_input():
     """Test if function is used with non-symmetric scores object"""
-    scores = create_dummy_scores()
+    scores, spectra = create_dummy_scores()
     msnet = SimilarityNetwork()
     with pytest.raises(TypeError) as msg:
-        msnet.create_network(scores)
+        msnet.create_network(scores, spectra)
 
     expected_msg = "Expected symmetric scores"
-    assert expected_msg in str(msg), "Expected different exception"
-
-    scores = create_dummy_scores_symmetric_faulty()
-    with pytest.raises(ValueError) as msg:
-        msnet.create_network(scores)
-
-    expected_msg = "Queries and references do not match"
     assert expected_msg in str(msg), "Expected different exception"
 
 
 def test_create_network_symmetric():
     """Test creating a graph from a symmetric Scores object"""
     cutoff = 0.7
-    scores = create_dummy_scores_symmetric()
+    scores, spectra = create_dummy_scores_symmetric()
     msnet = SimilarityNetwork(score_cutoff=cutoff)
-    msnet.create_network(scores)
+    msnet.create_network(scores, spectra)
 
     nodes_list = list(msnet.graph.nodes())
     edges_list = list(msnet.graph.edges())
@@ -139,9 +132,9 @@ def test_create_network_symmetric():
 def test_create_network_symmetric_remove_unconnected_nodes():
     """Test if unconnected nodes are removed"""
     cutoff = 0.7
-    scores = create_dummy_scores_symmetric()
+    scores, spectra = create_dummy_scores_symmetric()
     msnet = SimilarityNetwork(score_cutoff=cutoff, keep_unconnected_nodes=False)
-    msnet.create_network(scores)
+    msnet.create_network(scores, spectra)
 
     nodes_list = list(msnet.graph.nodes())
     edges_list = list(msnet.graph.edges())
@@ -154,9 +147,9 @@ def test_create_network_symmetric_remove_unconnected_nodes():
 def test_create_network_symmetric_modified_cosine():
     """Test creating a graph from a symmetric Scores object using ModifiedCosine"""
     cutoff = 0.7
-    scores = create_dummy_scores_symmetric_modified_cosine()
+    scores, spectra = create_dummy_scores_symmetric_modified_cosine()
     msnet = SimilarityNetwork(score_cutoff=cutoff)
-    msnet.create_network(scores, score_name="ModifiedCosine_score")
+    msnet.create_network(scores, spectra)
 
     edges_list = list(msnet.graph.edges())
     edges_list.sort()
@@ -166,9 +159,9 @@ def test_create_network_symmetric_modified_cosine():
 def test_create_network_export_to_file(filename, graph_format):
     """Test creating a graph file from a symmetric Scores object using ModifiedCosine"""
     cutoff = 0.7
-    scores = create_dummy_scores_symmetric_modified_cosine()
+    scores, spectra = create_dummy_scores_symmetric_modified_cosine()
     msnet = SimilarityNetwork(score_cutoff=cutoff)
-    msnet.create_network(scores, score_name="ModifiedCosine_score")
+    msnet.create_network(scores, spectra)
     msnet.export_to_file(filename, graph_format)
 
     assert os.path.isfile(filename), "network file not found"
@@ -176,9 +169,9 @@ def test_create_network_export_to_file(filename, graph_format):
 
 def test_create_network_symmetric_higher_cutoff():
     cutoff = 0.9
-    scores = create_dummy_scores_symmetric()
+    scores, spectra = create_dummy_scores_symmetric()
     msnet = SimilarityNetwork(score_cutoff=cutoff)
-    msnet.create_network(scores)
+    msnet.create_network(scores, spectra)
 
     edges_list = list(msnet.graph.edges())
     edges_list.sort()
@@ -191,16 +184,14 @@ def test_create_network_symmetric_mutual_method():
     """Test creating a graph from a Scores object"""
     # pylint: disable=protected-access
     cutoff = 0.7
-    scores = create_dummy_scores_symmetric()
-    scores_arr = scores.to_array()
+    scores, spectra = create_dummy_scores_symmetric()
     # change some scores
-    scores_arr[7, 6] = scores_arr[6, 7] = 0.85
-    scores_arr[7, 5] = scores_arr[5, 7] = 0.75
-    scores_arr[7, 3] = scores_arr[3, 7] = 0.7
-    scores._scores.add_dense_matrix(scores_arr, "modified_score")
+    scores[7, 6] = scores[6, 7] = 0.85
+    scores[7, 5] = scores[5, 7] = 0.75
+    scores[7, 3] = scores[3, 7] = 0.7
 
     msnet = SimilarityNetwork(score_cutoff=cutoff, top_n=3, max_links=3, link_method="mutual")
-    msnet.create_network(scores, score_name="modified_score")
+    msnet.create_network(scores, spectra)
     nodes_with_edges = ["query_spec_0", "query_spec_1", "query_spec_2", "ref_spec_4"]
     edges_list = list(msnet.graph.edges())
     edges_list.sort()
@@ -212,9 +203,9 @@ def test_create_network_symmetric_mutual_method():
 def test_create_network_symmetric_max_links_1():
     """Test creating a graph from a Scores object using max_links=1"""
     cutoff = 0.7
-    scores = create_dummy_scores_symmetric()
+    scores, spectra = create_dummy_scores_symmetric()
     msnet = SimilarityNetwork(score_cutoff=cutoff, max_links=1, link_method="single")
-    msnet.create_network(scores)
+    msnet.create_network(scores, spectra)
 
     edges_list = list(msnet.graph.edges())
     edges_list.sort()
