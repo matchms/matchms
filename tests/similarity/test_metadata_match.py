@@ -24,8 +24,8 @@ def test_metadata_match_strings(spectra):
     queries = spectra[2:]
 
     similarity_score = MetadataMatch(field="instrument_type")
-    scores = create_scores_object_and_calculate_scores(references, queries, similarity_score)
-    assert np.all(scores.scores.to_array() == [[1, 0], [0, 0]]), "Expected different scores."
+    scores = similarity_score.matrix(references, queries)
+    assert np.all(scores == [[1, 0], [0, 0]]), "Expected different scores."
 
 
 def test_metadata_match_strings_pair(spectra):
@@ -45,8 +45,8 @@ def test_metadata_match_strings_wrong_method(spectra, caplog):
     queries = spectra[2:]
 
     similarity_score = MetadataMatch(field="instrument_type", matching_type="difference")
-    scores = create_scores_object_and_calculate_scores(references, queries, similarity_score)
-    assert np.all(scores.scores.to_array() == [[0, 0], [0, 0]]), "Expected different scores."
+    scores = similarity_score.matrix(references, queries)
+    assert np.all(scores == [[0, 0], [0, 0]]), "Expected different scores."
     msg = "not compatible with 'difference' method"
     assert msg in caplog.text
 
@@ -68,5 +68,5 @@ def test_metadata_match_numerical(spectra, tolerance, expected):
     queries = spectra[2:]
 
     similarity_score = MetadataMatch(field="retention_time", matching_type="difference", tolerance=tolerance)
-    scores = create_scores_object_and_calculate_scores(references, queries, similarity_score)
-    assert np.all(scores.scores.to_array().tolist() == expected), "Expected different scores."
+    scores = similarity_score.matrix(references, queries)
+    assert np.all(scores == expected), "Expected different scores."
