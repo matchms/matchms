@@ -1,100 +1,54 @@
-""" Helper functions to build and handle spectral networks
-"""
-from typing import Tuple
+"""Helper functions to build and handle spectral networks"""
+
 import numpy as np
-from matchms import Scores
+from scipy.sparse import coo_array, csr_array
 
 
-def get_top_hits(scores: Scores, identifier_key: str = "spectrum_id",
-                 top_n: int = 25, search_by: str = "queries",
-                 score_name: str = None,
-                 ignore_diagonal: bool = False) -> Tuple[dict, dict]:
-    """Get top_n highest scores (and indices) for every entry.
+def get_top_hits_matrix(matrix: np.ndarray, top_n: int, ignore_diagonal: bool = True) -> tuple[np.ndarray, np.ndarray]:
+    top_n = min(top_n, matrix.shape[1] - (1 if ignore_diagonal else 0))
+    if ignore_diagonal:
+        matrix = matrix.copy()
+        np.fill_diagonal(matrix, -np.inf)
+    indexes_of_top_scores = np.argpartition(matrix, -top_n, axis=1)[:, -top_n:]
+    top_scores = np.take_along_axis(matrix, indexes_of_top_scores, axis=1)
 
-    Parameters
-    ----------
-    scores
-        Matchms Scores object containing all similarities.
-    identifier_key
-        Metadata key for unique intentifier for each spectrum in scores.
-        Will also be used for the naming the network nodes. Default is 'spectrum_id'.
-    top_n
-        Return the indexes and scores for the top_n highest scores. Scores between
-        a spectrum with itself (diagonal of scores.scores) will not be taken into
-        account.
-    search_by
-        Chose between 'queries' or 'references' which decides if the top_n matches
-        for every spectrum in scores.queries or in scores.references will be
-        collected and returned.
-    score_name
-        Name of the score that should be used (if scores contains multiple different
-        scores).
-    ignore_diagonal
-        Set to True if scores.scores is symmetric (i.e. if references and queries
-        were the same) and if scores between spectra with themselves should be
-        excluded.
-    """
-    # pylint: disable=protected-access, too-many-arguments
-    assert search_by in ["queries", "references"], \
-        "search_by must be 'queries' or 'references"
-    if score_name is None:
-        score_name = scores._scores.guess_score_name()
+    # Sort descending within each row
+    sort_order = np.argsort(top_scores, axis=1)[:, ::-1]
+    indexes_of_top_scores = np.take_along_axis(indexes_of_top_scores, sort_order, axis=1)
+    highest_scores = np.take_along_axis(top_scores, sort_order, axis=1)
+    return highest_scores, indexes_of_top_scores
 
-    if search_by == "queries":
-        return get_top_hits_by_query(scores, identifier_key, top_n, score_name, ignore_diagonal)
-    return get_top_hits_by_references(scores, identifier_key, top_n, score_name, ignore_diagonal)
-    
 
-def get_top_hits_by_references(scores: Scores, identifier_key: str, top_n: int,
-                               score_name: str, ignore_diagonal: bool)-> Tuple[dict, dict]:
-    """Get the top hits from the scoring by "references".
-    This function differs only slightly from the one by query.
+def get_top_hits_coo_array(
+    coo_array: coo_array, top_n: int, ignore_diagonal: bool = True
+) -> tuple[np.ndarray, np.ndarray]:
+    if coo_array.shape is None:
+        raise ValueError("Shape of input COO array must be defined.")
+    top_n = min(top_n, coo_array.shape[1] - (1 if ignore_diagonal else 0))
 
-    Args:
-        scores (Scores): Scores from which to retrieve the queries.
-        identifier_key (str): Key to use as identifier for the spectra.
-        top_n (int): N for the top N to receive.
-        score_name (str): Score name to retrieve the top hits from.
-        ignore_diagonal (bool): Whether to ignore self matches on the diagonal.
+    csr = csr_array(coo_array)
+    n_rows = coo_array.shape[0]
 
-    Returns:
-        dict, dict: Dictionaries of indices and scores.
-    """
-    similars_idx = {}
-    similars_scores = {}
-    for i, spec in enumerate(scores.references):
-        spec_id = spec.get(identifier_key)
-        _, c, v = scores.scores[i, :, score_name]
-        idx = np.argsort(v)[::-1][:top_n]
+    highest_scores = np.full((n_rows, top_n), np.nan)
+    indexes_of_top_scores = np.full((n_rows, top_n), -1, dtype=int)
+
+    for r in range(n_rows):
+        start, end = csr.indptr[r], csr.indptr[r + 1]
+        row_data = csr.data[start:end].copy()
+        row_cols = csr.indices[start:end]
+
         if ignore_diagonal:
-            idx = idx[c[idx] != i]
-        similars_idx[spec_id] = c[idx][:top_n]
-        similars_scores[spec_id] = v[idx][:top_n]
-    return similars_idx,similars_scores
+            diag_mask = row_cols == r
+            row_data[diag_mask] = -np.inf
 
+        row_top_n = min(top_n, len(row_data))
+        if row_top_n == len(row_data):
+            top_idx = np.argsort(row_data)[::-1]  # sort all
+        else:
+            top_idx = np.argpartition(row_data, -row_top_n)[-row_top_n:]
+            top_idx = top_idx[np.argsort(row_data[top_idx])[::-1]]  # sort top_n
 
-def get_top_hits_by_query(scores: Scores, identifier_key: str, top_n: int,
-                          score_name: str, ignore_diagonal: bool)-> Tuple[dict, dict]:
-    """Get the top hits in the network from the "query" spectra perspective
+        highest_scores[r, :row_top_n] = row_data[top_idx]
+        indexes_of_top_scores[r, :row_top_n] = row_cols[top_idx]
 
-    Args:
-        scores (Scores): scores matrix from which to extract the hits
-        identifier_key (str): Key to use as identifier for the spectra
-        top_n (int): N for the number of spectra to retrieve.
-        score_name (str): Name of the score to retrieve
-        ignore_diagonal (bool): Whether to ignore self hits on the diagonal or not.
-
-    Returns:
-        dict, dict: Dictionaries of indices and scores.
-    """
-    similars_idx = {}
-    similars_scores = {}
-    for i, spec in enumerate(scores.queries):
-        spec_id = spec.get(identifier_key)
-        r, _, v = scores.scores[:, i, score_name]
-        idx = np.argsort(v)[::-1]
-        if ignore_diagonal:
-            idx = idx[r[idx] != i]
-        similars_idx[spec_id] = r[idx][:top_n]
-        similars_scores[spec_id] = v[idx][:top_n]
-    return similars_idx, similars_scores
+    return highest_scores, indexes_of_top_scores

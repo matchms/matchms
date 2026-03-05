@@ -1,8 +1,9 @@
 from typing import List, Optional, Tuple
 import numpy as np
+import numpy.typing as npt
 from scipy.optimize import linear_sum_assignment
 from matchms.similarity.spectrum_similarity_functions import collect_peak_pairs
-from matchms.typing import SpectrumType
+from matchms.Spectrum import Spectrum
 from .BaseSimilarity import BaseSimilarity
 
 
@@ -21,10 +22,14 @@ class CosineHungarian(BaseSimilarity):
     """
 
     is_commutative = True
-    score_datatype = [("score", np.float64), ("matches", "int")]
+    score_datatype = np.float64
 
-    def __init__(self, tolerance: float = 0.1, mz_power: float = 0.0,
-                 intensity_power: float = 1.0):
+    def __init__(
+        self,
+        tolerance: float = 0.1,
+        mz_power: float = 0.0,
+        intensity_power: float = 1.0,
+    ):
         """
         Parameters
         ----------
@@ -40,8 +45,26 @@ class CosineHungarian(BaseSimilarity):
         self.mz_power = mz_power
         self.intensity_power = intensity_power
 
-    def pair(self, reference: SpectrumType, query: SpectrumType) -> Tuple[float, int]:
+    def pair(self, reference: Spectrum, query: Spectrum) -> npt.NDArray[np.float64]:
         """Calculate cosine score between two spectra.
+
+        Parameters
+        ----------
+        reference
+            Single reference spectrum.
+        query
+            Single query spectrum.
+
+        Returns
+        -------
+        Cosine score between 0 and 1.
+        """
+        return self.pair_scores_and_nr_of_matches(reference, query)[0]
+
+    def pair_scores_and_nr_of_matches(
+        self, reference: Spectrum, query: Spectrum
+    ) -> Tuple[npt.NDArray[np.float64], npt.NDArray[np.int32]]:
+        """Calculate cosine score and number of matched peaks between two spectra.
 
         Parameters
         ----------
@@ -54,22 +77,21 @@ class CosineHungarian(BaseSimilarity):
         -------
         Tuple with cosine score and number of matched peaks.
         """
+
         def get_matching_pairs() -> Optional[np.ndarray]:
             """Find all within-tolerance peak pairs, sorted by descending intensity product.
 
             Returns ``None`` when no peaks fall within *tolerance*.
             """
-            matching_pairs = collect_peak_pairs(spec1, spec2, self.tolerance, shift=0.0,
-                                                mz_power=self.mz_power,
-                                                intensity_power=self.intensity_power)
+            matching_pairs = collect_peak_pairs(
+                spec1, spec2, self.tolerance, shift=0.0, mz_power=self.mz_power, intensity_power=self.intensity_power
+            )
             if matching_pairs is None:
                 return None
-            matching_pairs = matching_pairs[np.argsort(matching_pairs[:, 2], kind='mergesort')[::-1], :]
+            matching_pairs = matching_pairs[np.argsort(matching_pairs[:, 2], kind="mergesort")[::-1], :]
             return matching_pairs
 
-        def get_matching_pairs_matrix() -> Tuple[
-            Optional[List[float]], Optional[List[float]], Optional[np.ndarray]
-        ]:
+        def get_matching_pairs_matrix() -> Tuple[Optional[List[float]], Optional[List[float]], Optional[np.ndarray]]:
             """Build a cost matrix for the Hungarian algorithm.
 
             Rows correspond to the unique reference peaks that participate in at
@@ -94,11 +116,12 @@ class CosineHungarian(BaseSimilarity):
             matrix_size = (len(paired_peaks1), len(paired_peaks2))
             cost_matrix = np.ones(matrix_size)
             for i in range(matching_pairs.shape[0]):
-                cost_matrix[paired_peaks1.index(matching_pairs[i, 0]),
-                            paired_peaks2.index(matching_pairs[i, 1])] = 1 - matching_pairs[i, 2]
+                cost_matrix[paired_peaks1.index(matching_pairs[i, 0]), paired_peaks2.index(matching_pairs[i, 1])] = (
+                    1 - matching_pairs[i, 2]
+                )
             return paired_peaks1, paired_peaks2, cost_matrix
 
-        def solve_hungarian() -> Tuple[float, List[Tuple[int, int]]]:
+        def solve_hungarian(matching_pairs_matrix) -> Tuple[float, List[Tuple[int, int]]]:
             """Solve the optimal peak assignment via the Hungarian algorithm.
 
             The algorithm assigns ``min(rows, cols)`` pairs. Some of those
@@ -132,17 +155,15 @@ class CosineHungarian(BaseSimilarity):
             ]
             return score, used_matches
 
-        def calc_score() -> np.ndarray:
+        def calc_score() -> Tuple[npt.NDArray[np.float64], npt.NDArray[np.int32]]:
             """Compute the normalised cosine score and match count."""
             if matching_pairs_matrix is None:
-                return np.asarray((0.0, 0), dtype=self.score_datatype)
-            score, used_matches = solve_hungarian()
-            spec1_power = np.power(spec1[:, 0], self.mz_power) \
-                * np.power(spec1[:, 1], self.intensity_power)
-            spec2_power = np.power(spec2[:, 0], self.mz_power) \
-                * np.power(spec2[:, 1], self.intensity_power)
-            score = score/(np.sqrt(np.sum(spec1_power**2)) * np.sqrt(np.sum(spec2_power**2)))
-            return np.asarray((score, len(used_matches)), dtype=self.score_datatype)
+                return np.asarray(0.0, dtype=self.score_datatype), np.asarray(0, dtype=np.int32)
+            score, used_matches = solve_hungarian(matching_pairs_matrix)
+            spec1_power = np.power(spec1[:, 0], self.mz_power) * np.power(spec1[:, 1], self.intensity_power)
+            spec2_power = np.power(spec2[:, 0], self.mz_power) * np.power(spec2[:, 1], self.intensity_power)
+            score = score / (np.sqrt(np.sum(spec1_power**2)) * np.sqrt(np.sum(spec2_power**2)))
+            return np.asarray(score, dtype=self.score_datatype), np.asarray(len(used_matches), dtype=np.int32)
 
         spec1 = reference.peaks.to_numpy
         spec2 = query.peaks.to_numpy

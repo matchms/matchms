@@ -1,5 +1,5 @@
 import numpy as np
-from matchms.typing import SpectrumType
+from .. import Spectrum
 from .BaseSimilarity import BaseSimilarity
 
 
@@ -37,7 +37,10 @@ class IntersectMz(BaseSimilarity):
 
     """
 
-    def __init__(self, scaling: float = 1.0):
+    def __init__(
+        self,
+        scaling: float = 1.0,
+    ):
         """Constructor. Here, function parameters are defined.
 
         Parameters
@@ -47,7 +50,7 @@ class IntersectMz(BaseSimilarity):
         """
         self.scaling = scaling
 
-    def pair(self, reference: SpectrumType, query: SpectrumType) -> float:
+    def pair(self, reference: Spectrum, query: Spectrum) -> np.ndarray:
         """This will calculate the similarity score between two spectra."""
         mz_ref = set(reference.peaks.mz)
         mz_query = set(query.peaks.mz)

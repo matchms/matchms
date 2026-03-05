@@ -1,13 +1,15 @@
 import logging
-from typing import Tuple
+from typing import Optional, Tuple
 import numpy as np
-from matchms.typing import SpectrumType
+import numpy.typing as npt
+from matchms.Spectrum import Spectrum
 from ._precursor_validation import get_valid_precursor_mz
 from .BaseSimilarity import BaseSimilarity
 from .spectrum_similarity_functions import collect_peak_pairs, score_best_matches
 
 
 logger = logging.getLogger("matchms")
+
 
 class NeutralLossesCosine(BaseSimilarity):
     """Calculate 'neutral losses cosine score' between mass spectra.
@@ -25,10 +27,15 @@ class NeutralLossesCosine(BaseSimilarity):
     # Set key characteristics as class attributes
     is_commutative = True
     # Set output data type, e.g. ("score", "float") or [("score", "float"), ("matches", "int")]
-    score_datatype = [("score", np.float64), ("matches", "int")]
+    score_datatype = np.float64
 
-    def __init__(self,tolerance: float = 0.1, mz_power: float = 0.0,
-                 intensity_power: float = 1.0, ignore_peaks_above_precursor: bool = True):
+    def __init__(
+        self,
+        tolerance: float = 0.1,
+        mz_power: float = 0.0,
+        intensity_power: float = 1.0,
+        ignore_peaks_above_precursor: bool = True,
+    ):
         """
         Parameters
         ----------
@@ -44,25 +51,42 @@ class NeutralLossesCosine(BaseSimilarity):
             than the precursor-m/z will be ignored (since those would correspond to negative
             "neutral losses").
         """
+        # pylint: disable=too-many-arguments
         self.tolerance = tolerance
         self.mz_power = mz_power
         self.intensity_power = intensity_power
         self.ignore_peaks_above_precursor = ignore_peaks_above_precursor
 
-    def _get_matching_pairs(self, spec1, spec2, mass_shift: float) -> np.ndarray:
+    def _get_matching_pairs(self, spec1, spec2, mass_shift: float) -> Optional[np.ndarray]:
         """Find all pairs of peaks that match within the given tolerance."""
         matching_pairs = collect_peak_pairs(
-            spec1, spec2, self.tolerance,
-            shift=mass_shift, mz_power=self.mz_power,
-            intensity_power=self.intensity_power
+            spec1, spec2, self.tolerance, shift=mass_shift, mz_power=self.mz_power, intensity_power=self.intensity_power
         )
         if matching_pairs is None:
             return None
         if matching_pairs.shape[0] > 0:
             matching_pairs = matching_pairs[np.argsort(matching_pairs[:, 2], kind="mergesort")[::-1], :]
         return matching_pairs
-    
-    def pair(self, reference: SpectrumType, query: SpectrumType) -> Tuple[float, int]:
+
+    def pair(self, reference: Spectrum, query: Spectrum) -> npt.NDArray[np.float64]:
+        """Calculate neutral losses cosine score between two spectra.
+
+        Parameters
+        ----------
+        reference
+            Single reference spectrum.
+        query
+            Single query spectrum.
+
+        Returns
+        -------
+        Cosine score between 0 and 1.
+        """
+        return self.pair_scores_and_nr_of_matches(reference, query)[0]
+
+    def pair_scores_and_nr_of_matches(
+        self, reference: Spectrum, query: Spectrum
+    ) -> Tuple[npt.NDArray[np.float64], npt.NDArray[np.int32]]:
         """Calculate neutral losses cosine score between two spectra.
 
         Parameters
@@ -84,13 +108,13 @@ class NeutralLossesCosine(BaseSimilarity):
 
         spec1 = reference.peaks.to_numpy
         spec2 = query.peaks.to_numpy
-        
+
         if self.ignore_peaks_above_precursor:
             spec1 = spec1[np.where(spec1[:, 0] < precursor_mz_ref)]
             spec2 = spec2[np.where(spec2[:, 0] < precursor_mz_query)]
 
         matching_pairs = self._get_matching_pairs(spec1, spec2, mass_shift)
         if matching_pairs is None:
-            return np.asarray((float(0), 0), dtype=self.score_datatype)
-        score = score_best_matches(matching_pairs, spec1, spec2, self.mz_power, self.intensity_power)
-        return np.asarray(score, dtype=self.score_datatype)
+            return np.asarray(0.0, dtype=self.score_datatype), np.asarray(0, dtype=np.int32)
+        score, matches = score_best_matches(matching_pairs, spec1, spec2, self.mz_power, self.intensity_power)
+        return np.asarray(score, dtype=self.score_datatype), np.asarray(matches, dtype=np.int32)

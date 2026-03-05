@@ -49,11 +49,10 @@ def test_modified_cosine_hungarian_reference_pairs(pair):
     left = spectra[pair["left"]]
     right = spectra[pair["right"]]
 
-    score = similarity.pair(left, right)
+    score, matches = similarity.pair_scores_and_nr_of_matches(left, right)
 
-    assert float(score["score"]) == pytest.approx(pair["score"], abs=SCORE_ABS_TOL)
-    assert int(score["matches"]) == pair["matches"]
-
+    assert float(score) == pytest.approx(pair["score"], abs=SCORE_ABS_TOL)
+    assert int(matches) == pair["matches"]
 
 
 def test_modified_cosine_hungarian_reference_matrix():
@@ -69,8 +68,5 @@ def test_modified_cosine_hungarian_reference_matrix():
         i = names.index(pair["left"])
         j = names.index(pair["right"])
 
-        assert float(matrix[i, j]["score"]) == pytest.approx(pair["score"], abs=SCORE_ABS_TOL)
-        assert int(matrix[i, j]["matches"]) == pair["matches"]
-
-        assert float(matrix[j, i]["score"]) == pytest.approx(pair["score"], abs=SCORE_ABS_TOL)
-        assert int(matrix[j, i]["matches"]) == pair["matches"]
+        assert float(matrix[i, j]) == pytest.approx(pair["score"], abs=SCORE_ABS_TOL)
+        assert float(matrix[j, i]) == pytest.approx(pair["score"], abs=SCORE_ABS_TOL)

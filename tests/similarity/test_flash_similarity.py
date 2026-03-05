@@ -9,11 +9,10 @@ from ..builder_Spectrum import SpectrumBuilder
 # Helpers
 # ----------------------------
 
+
 def build_spectrum(mz, intens, precursor_mz=None):
     """Build a Spectrum via SpectrumBuilder, setting precursor_mz when available."""
-    b = SpectrumBuilder().with_mz(np.asarray(mz, dtype="float")).with_intensities(
-        np.asarray(intens, dtype="float")
-    )
+    b = SpectrumBuilder().with_mz(np.asarray(mz, dtype="float")).with_intensities(np.asarray(intens, dtype="float"))
     if hasattr(b, "with_precursor_mz") and precursor_mz is not None:
         b = b.with_precursor_mz(float(precursor_mz))
     elif precursor_mz is not None and hasattr(b, "with_metadata"):
@@ -24,6 +23,7 @@ def build_spectrum(mz, intens, precursor_mz=None):
 # ----------------------------
 # Spectral-entropy path (public API level)
 # ----------------------------
+
 
 @pytest.mark.parametrize("use_ppm,tol", [(False, 0.1), (True, 100.0)])
 def test_entropy_pair_fragment_commutative_and_positive(use_ppm, tol):
@@ -66,9 +66,7 @@ def test_entropy_identity_gate_da_and_ppm():
     s1 = build_spectrum([100, 200], [1.0, 1.0], precursor_mz=500.0)
     s2 = build_spectrum([100, 200], [1.0, 1.0], precursor_mz=500.3)
 
-    base = FlashSimilarity(
-        tolerance=0.02, matching_mode="fragment", remove_precursor=False, noise_cutoff=0.0
-    )
+    base = FlashSimilarity(tolerance=0.02, matching_mode="fragment", remove_precursor=False, noise_cutoff=0.0)
     base_score = float(base.pair(s1, s2))
     assert base_score > 0.0
 
@@ -273,9 +271,11 @@ def test_entropy_fragment_matrix_matches_pair_with_sparse_candidate_columns():
         expected = float(fse.pair(ref, query))
         assert float(matrix_scores[0, j]) == pytest.approx(expected, abs=1e-7)
 
+
 # ----------------------------
 # Cosine / Modified Cosine path + baseline parity
 # ----------------------------
+
 
 def _mc_flash(tolerance):
     return FlashSimilarity(
@@ -304,7 +304,6 @@ def _mc_flash(tolerance):
             0.01,
             id="pure_shift_exploited",
         ),
-
         # 2) Mixed: one shared unshifted fragment plus shifted set
         # Expect both algorithms to pick the same best non-overlapping set.
         pytest.param(
@@ -317,7 +316,6 @@ def _mc_flash(tolerance):
             0.01,
             id="mixed_direct_and_shifted",
         ),
-
         # 3) Ambiguity: two query peaks within tolerance of the same shifted match
         # This stresses greedy choice ordering and tie-breaking.
         pytest.param(
@@ -330,7 +328,6 @@ def _mc_flash(tolerance):
             0.01,
             id="duplicate_candidates_nearby",
         ),
-
         # 4) Competition: a direct fragment match competes with a shifted/NL match
         # Constructed so dot products are close and greedy selection matters.
         pytest.param(
@@ -344,7 +341,6 @@ def _mc_flash(tolerance):
             0.01,
             id="direct_competes_with_shifted",
         ),
-
         # 5) Edge tolerance: shifted peaks sit near the boundary
         # To catch subtle differences in symmetric ppm/Da handling or window trimming.
         pytest.param(
@@ -352,7 +348,7 @@ def _mc_flash(tolerance):
             [0.8, 1.0, 0.6],
             500.0,
             [110.0099, 210.0099, 310.0099],
-            [0.8,  1.0, 0.6],
+            [0.8, 1.0, 0.6],
             510.0,
             0.01,
             id="near_tolerance_boundary",
@@ -367,7 +363,7 @@ def test_flash_hybrid_cosine_matches_modified_cosine_greedy(mz_a, int_a, pmz_a, 
     baseline = ModifiedCosineGreedy(tolerance=tol)
 
     s_flash = float(flash.pair(a, b))
-    s_base = float(baseline.pair(a, b)["score"])
+    s_base = float(baseline.pair(a, b))
 
     assert s_flash == pytest.approx(s_base, rel=1e-12, abs=1e-12)
 
@@ -399,7 +395,7 @@ def test_cosine_pair_matches_cosinegreedy_default_tolerance_001():
 
     for a, b in pairs:
         s_flash = flash.pair(a, b)
-        s_base = baseline.pair(a, b)["score"]
+        s_base = baseline.pair(a, b)
         assert s_flash == pytest.approx(s_base, rel=1e-12, abs=1e-12)
 
 
