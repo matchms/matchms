@@ -1,9 +1,10 @@
 import logging
 from typing import Dict, Tuple
 import numpy as np
+import numpy.typing as npt
 from scipy.optimize import linear_sum_assignment
 from matchms.similarity.spectrum_similarity_functions import collect_peak_pairs
-from matchms.typing import SpectrumType
+from matchms.Spectrum import Spectrum
 from ._precursor_validation import get_valid_precursor_mz
 from .BaseSimilarity import BaseSimilarity
 
@@ -28,7 +29,7 @@ class ModifiedCosineHungarian(BaseSimilarity):
     """
 
     is_commutative = True
-    score_datatype = [("score", np.float64), ("matches", "int")]
+    score_datatype = np.float64
 
     def __init__(self, tolerance: float = 0.1, mz_power: float = 0.0, intensity_power: float = 1.0):
         """Initialize exact modified cosine.
@@ -47,22 +48,31 @@ class ModifiedCosineHungarian(BaseSimilarity):
         self.mz_power = mz_power
         self.intensity_power = intensity_power
 
-    def pair(self, reference: SpectrumType, query: SpectrumType) -> Tuple[float, int]:
+    def pair(self, reference: Spectrum, query: Spectrum) -> npt.NDArray[np.float64]:
+        """Calculate approximate modified cosine score between two spectra."""
+        return self.pair_scores_and_nr_of_matches(reference, query)[0]
+
+    def pair_scores_and_nr_of_matches(
+        self, reference: Spectrum, query: Spectrum
+    ) -> Tuple[npt.NDArray[np.float64], npt.NDArray[np.int32]]:
         """Calculate exact modified cosine score between two spectra."""
 
         def get_matching_pairs():
             """Find all candidate matching peak pairs for unshifted and shifted views."""
             zero_pairs = collect_peak_pairs(
-                spec1, spec2, self.tolerance, shift=0.0,
-                mz_power=self.mz_power, intensity_power=self.intensity_power
+                spec1, spec2, self.tolerance, shift=0.0, mz_power=self.mz_power, intensity_power=self.intensity_power
             )
 
             precursor_mz_ref = get_valid_precursor_mz(reference, logger)
             precursor_mz_query = get_valid_precursor_mz(query, logger)
             mass_shift = precursor_mz_ref - precursor_mz_query
             nonzero_pairs = collect_peak_pairs(
-                spec1, spec2, self.tolerance, shift=mass_shift,
-                mz_power=self.mz_power, intensity_power=self.intensity_power
+                spec1,
+                spec2,
+                self.tolerance,
+                shift=mass_shift,
+                mz_power=self.mz_power,
+                intensity_power=self.intensity_power,
             )
 
             if zero_pairs is None:
@@ -130,17 +140,17 @@ class ModifiedCosineHungarian(BaseSimilarity):
 
         paired_peaks1, paired_peaks2, weights = build_weight_matrix(matching_pairs)
         if weights is None:
-            return np.asarray((0.0, 0), dtype=self.score_datatype)
+            return np.asarray(float(0), dtype=self.score_datatype), np.asarray(0, dtype=np.int32)
 
         score, used_matches = solve_hungarian(weights)
 
         spec1_power = np.power(spec1[:, 0], self.mz_power) * np.power(spec1[:, 1], self.intensity_power)
         spec2_power = np.power(spec2[:, 0], self.mz_power) * np.power(spec2[:, 1], self.intensity_power)
-        denominator = np.sqrt(np.sum(spec1_power ** 2)) * np.sqrt(np.sum(spec2_power ** 2))
+        denominator = np.sqrt(np.sum(spec1_power**2)) * np.sqrt(np.sum(spec2_power**2))
         if denominator > 0:
             score = score / denominator
         else:
             score = 0.0
 
         used_matches = [(paired_peaks1[i], paired_peaks2[j]) for i, j in used_matches]
-        return np.asarray((score, len(used_matches)), dtype=self.score_datatype)
+        return np.asarray(float(score), dtype=self.score_datatype), np.asarray(len(used_matches), dtype=np.int32)
