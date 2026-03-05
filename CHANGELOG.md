@@ -13,14 +13,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- COOIndex, used instead of passing around rows and columns separately for masking
-- COOMatrix, used to have a standardized output from BaseSimilarity
-- FilterScoreByValue, used to filter calculated scores before storing when computing in BaseSimilarity.
+- ScoresMask, which is used to create a mask which can be used to only compute specific scores.
 
 ### Removed
 
 - Basesimilarity.matrix() does not have array_type to specify output type. The defualt is a numpy matrix
-- Calculate scores is not a method from scores any more.
+- The function calculate_scores() was removed, all similarity compute is now done using Basesimilarity methods.
+- Scores is removed, now matchms represents scores as numpy matrix or scipy coo_array
 
 ## [0.31.0] - 2025-10-06
 
