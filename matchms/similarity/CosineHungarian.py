@@ -59,9 +59,9 @@ class CosineHungarian(BaseSimilarity):
         -------
         Cosine score between 0 and 1.
         """
-        return self.pair_score_and_nr_of_matches(reference, query)[0]
+        return self.pair_scores_and_nr_of_matches(reference, query)[0]
 
-    def pair_score_and_nr_of_matches(
+    def pair_scores_and_nr_of_matches(
         self, reference: Spectrum, query: Spectrum
     ) -> Tuple[npt.NDArray[np.float64], npt.NDArray[np.int32]]:
         """Calculate cosine score and number of matched peaks between two spectra.
