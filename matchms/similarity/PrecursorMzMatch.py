@@ -44,14 +44,14 @@ class PrecursorMzMatch(BaseSimilarity):
 
         for (reference, query, score) in scores:
             print(f"Precursor m/z match between {reference.get('id')} and {query.get('id')}" +
-                  f" is {score}")
+                  f" is {bool(score[0])}")
 
     Should output
 
     .. testoutput::
 
-        Precursor m/z match between 1 and 3 is [np.float64(1.0)]
-        Precursor m/z match between 2 and 4 is [np.float64(1.0)]
+        Precursor m/z match between 1 and 3 is True
+        Precursor m/z match between 2 and 4 is True
 
     """
 

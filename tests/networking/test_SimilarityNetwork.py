@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 from matchms import Spectrum
 from matchms.networking import SimilarityNetwork
-from matchms.similarity import FingerprintSimilarity, ModifiedCosine
+from matchms.similarity import FingerprintSimilarity, ModifiedCosineGreedy
 
 
 @pytest.fixture(params=["cyjs", "gexf", "gml", "graphml", "json"])
@@ -96,7 +96,7 @@ def create_dummy_scores_symmetric_modified_cosine():
     spectra = create_dummy_spectra()
 
     # Create Scores object by calculating dice scores
-    similarity_measure = ModifiedCosine()
+    similarity_measure = ModifiedCosineGreedy()
     scores = similarity_measure.matrix(spectra, spectra, is_symmetric=True)
     return scores, spectra
 
@@ -145,7 +145,7 @@ def test_create_network_symmetric_remove_unconnected_nodes():
 
 
 def test_create_network_symmetric_modified_cosine():
-    """Test creating a graph from a symmetric Scores object using ModifiedCosine"""
+    """Test creating a graph from a symmetric Scores object using ModifiedCosineGreedy"""
     cutoff = 0.7
     scores, spectra = create_dummy_scores_symmetric_modified_cosine()
     msnet = SimilarityNetwork(score_cutoff=cutoff)
@@ -157,7 +157,7 @@ def test_create_network_symmetric_modified_cosine():
 
 
 def test_create_network_export_to_file(filename, graph_format):
-    """Test creating a graph file from a symmetric Scores object using ModifiedCosine"""
+    """Test creating a graph file from a symmetric Scores object using ModifiedCosineGreedy"""
     cutoff = 0.7
     scores, spectra = create_dummy_scores_symmetric_modified_cosine()
     msnet = SimilarityNetwork(score_cutoff=cutoff)

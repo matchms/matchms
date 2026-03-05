@@ -148,8 +148,18 @@ def _pubchem_name_search(compound_name: str, name_search_depth=10, max_retries=1
                     }
                 )
             return extracted_results
-        except (pubchempy.ServerError, ConnectionError, ConnectionAbortedError, pubchempy.PubChemHTTPError, URLError):
+        except (
+            pubchempy.ServerError,
+            ConnectionError,
+            ConnectionAbortedError,
+            pubchempy.PubChemHTTPError,
+            URLError,
+            TimeoutError,
+        ):
             # keep retrying when an connection error occurs
+            retries += 1
+            if retries >= max_retries:
+                break
             delay = 2**retries
             delay = min(max_delay, delay)
             print(f"Connection error, trying again, after waiting for {delay} seconds")

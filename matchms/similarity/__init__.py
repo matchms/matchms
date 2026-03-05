@@ -6,7 +6,9 @@ Matchms provides a number of frequently used similarity scores to compare mass
 spectra. This includes
 
 * scores based on comparing peak positions and intensities
-  (:class:`~matchms.similarity.CosineGreedy`, :class:`~matchms.similarity.ModifiedCosine`
+  (:class:`~matchms.similarity.CosineGreedy`,
+  :class:`~matchms.similarity.ModifiedCosineGreedy`,
+  :class:`~matchms.similarity.ModifiedCosineHungarian`)
 * simple scores that only assess precursor m/z or parent mass matches
   (:class:`~matchms.similarity.PrecursorMzMatch` or: :class:`~matchms.similarity.ParentMassMatch`)
 * scores assessing molecular similarity if structures (SMILES, InchiKey) are given as metadata
@@ -26,7 +28,8 @@ from .FingerprintSimilarity import FingerprintSimilarity
 from .FlashSimilarity import FlashSimilarity
 from .IntersectMz import IntersectMz
 from .MetadataMatch import MetadataMatch
-from .ModifiedCosine import ModifiedCosine
+from .ModifiedCosineGreedy import ModifiedCosineGreedy
+from .ModifiedCosineHungarian import ModifiedCosineHungarian
 from .NeutralLossesCosine import NeutralLossesCosine
 from .ParentMassMatch import ParentMassMatch
 from .PrecursorMzMatch import PrecursorMzMatch
@@ -35,13 +38,14 @@ from .PrecursorMzMatch import PrecursorMzMatch
 __all__ = [
     "BinnedEmbeddingSimilarity",
     "BlinkCosine",
+    "ModifiedCosineGreedy",
     "CosineGreedy",
     "CosineHungarian",
     "FingerprintSimilarity",
     "FlashSimilarity",
     "IntersectMz",
     "MetadataMatch",
-    "ModifiedCosine",
+    "ModifiedCosineHungarian",
     "NeutralLossesCosine",
     "ParentMassMatch",
     "PrecursorMzMatch",
@@ -59,9 +63,10 @@ def get_similarity_function_by_name(similarity_function_name: str):
     """
     names = __all__
     functions = [BinnedEmbeddingSimilarity, BlinkCosine,
+                 ModifiedCosineGreedy,
                  CosineGreedy, CosineHungarian,
                  FingerprintSimilarity, FlashSimilarity,
-                 IntersectMz, MetadataMatch, ModifiedCosine,
+                 IntersectMz, MetadataMatch, ModifiedCosineHungarian,
                  NeutralLossesCosine, ParentMassMatch, PrecursorMzMatch]
 
     assert similarity_function_name in names, f"Unknown similarity function: {similarity_function_name}"

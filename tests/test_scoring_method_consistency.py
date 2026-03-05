@@ -22,14 +22,17 @@ module_root = os.path.dirname(__file__)
 json_file = os.path.join(module_root, "testdata", "gnps_spectra.json")
 # Get similarity measures available in matchms
 _score_functions = {
+    "modifiedcosinegreedy": [mssimilarity.ModifiedCosineGreedy, {}],
     "cosinegreedy": [mssimilarity.CosineGreedy, {}],
     "cosinehungarian": [mssimilarity.CosineHungarian, {}],
     # "FingerprintSimilarity": [mssimilarity.FingerprintSimilarity, {}],
     "IntersectMZ": [mssimilarity.IntersectMz, {}],
     "parentmassmatch": [mssimilarity.ParentMassMatch, {}],
     "precursormzmatch": [mssimilarity.PrecursorMzMatch, {}],
+    "modifiedcosine": [mssimilarity.ModifiedCosineGreedy, {}],
+    # "parentmassmatch": [mssimilarity.ParentMassMatch, {}],
+    "modifiedcosinehungarian": [mssimilarity.ModifiedCosineHungarian, {}],
     "metadatamatch": [mssimilarity.MetadataMatch, {"field": "spectrum_status"}],
-    "modifiedcosine": [mssimilarity.ModifiedCosine, {}],
 }
 
 

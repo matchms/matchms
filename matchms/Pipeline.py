@@ -108,9 +108,9 @@ class Pipeline:
             score_computations=[
                 ["precursormzmatch", {"tolerance": 120.0}],
                 ["mask", {"operation": "==", "value": True}],
-                ["cosinegreedy", {"tolerance": 1.0}]["filter_by_range", {"name": "CosineGreedy_score", "low": 0.3}],
+                ["cosinegreedy", {"tolerance": 1.0}],
                 ["mask", {"operation": ">=", "value": 0.3}],
-                ["modifiedcosine", {"tolerance": 1.0}],
+                ["modifiedcosinegreedy", {"tolerance": 1.0}],
             ],
         )
 

@@ -20,6 +20,9 @@ xunit-result.xml
 
 docs/_build
 docs/apidocs
+readthedocs/_build
+readthedocs/api
+uv.lock
 
 # ide
 .idea

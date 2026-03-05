@@ -1,6 +1,6 @@
 [project]
 name = "matchms"
-version = "0.31.0"
+version = "0.32.0"
 description = "Python library for large-scale comparisons and processing of tandem mass spectral data"
 readme = "README.rst"
 requires-python = ">=3.10,<3.14"  # blocked because of pynndescent
@@ -52,6 +52,7 @@ documentation = "https://matchms.readthedocs.io/en/latest/"
 [dependency-groups]
 dev = [
   "decorator>=5.2.1",
+  "ms_entropy>=1.4.0,<1.5",
   "poetry-bumpversion>=0.3.3",
   "pre-commit>=4.5.1",
   "pytest>=9.0.2",

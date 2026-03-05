@@ -49,15 +49,13 @@ class FingerprintSimilarity(BaseSimilarity):
         # Specify type and calculate similarities
         similarity_measure = FingerprintSimilarity("jaccard")
         scores = calculate_scores(spectra, spectra, similarity_measure)
-        print(np.round(scores.scores.to_array(), 3))
+        print(np.round(scores.scores.to_array(), 3).tolist())
 
     Should output
 
     .. testoutput::
 
-        [[1.    0.878 0.415]
-         [0.878 1.    0.444]
-         [0.415 0.444 1.   ]]
+        [[1.0, 0.878, 0.415], [0.878, 1.0, 0.444], [0.415, 0.444, 1.0]]
 
     """
 

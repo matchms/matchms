@@ -22,7 +22,7 @@ class Fragments:
 
     .. testoutput::
 
-       [ 30. 300.]
+        [ 30. 300.]
 
     Attributes
     ----------
