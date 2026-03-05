@@ -363,7 +363,7 @@ def test_flash_hybrid_cosine_matches_modified_cosine_greedy(mz_a, int_a, pmz_a, 
     baseline = ModifiedCosineGreedy(tolerance=tol)
 
     s_flash = float(flash.pair(a, b))
-    s_base = float(baseline.pair(a, b)["score"])
+    s_base = float(baseline.pair(a, b))
 
     assert s_flash == pytest.approx(s_base, rel=1e-12, abs=1e-12)
 
