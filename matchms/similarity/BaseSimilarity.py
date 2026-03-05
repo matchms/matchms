@@ -208,6 +208,8 @@ class BaseSimilarity:
         mask_indices
             The row column index pairs for which a score should be calculated.
         """
+        # todo implement is_symmetric by converting the mask to symmetric mask
+
         if mask_indices.coverage > 0.5:
             logger.warning(
                 "The mask covers more than 50% of the cases, so it is recommended to use `matrix()`, "
