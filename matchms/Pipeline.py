@@ -4,23 +4,15 @@ from collections import OrderedDict
 from datetime import datetime
 from typing import Callable, Iterable, List, Optional, Sequence, Union
 from deprecated import deprecated
-import matchms.similarity as mssimilarity
 from matchms.filtering.filter_order import ALL_FILTERS
 from matchms.filtering.SpectrumProcessor import FunctionWithParametersType, SpectrumProcessor
 from matchms.importing.load_spectra import load_list_of_spectrum_files
 from matchms.logging_functions import add_logging_to_file, reset_matchms_logger, set_matchms_logger_level
-from matchms.similarity.BaseSimilarity import BaseSimilarity
-from matchms.similarity.ScoresMask import ScoresMask
+from matchms.similarity.ComputeScores import ComputeScores, parse_similarity_methods_and_masks
 from matchms.typing import SpectrumType
 from matchms.yaml_file_functions import load_workflow_from_yaml_file, ordered_dump
 
 
-_masking_functions = ["mask"]
-
-_score_functions = {}
-for key, f in mssimilarity.__dict__.items():
-    if isinstance(f, type) and issubclass(f, BaseSimilarity) and f is not BaseSimilarity:
-        _score_functions[key.lower()] = f
 logger = logging.getLogger("matchms")
 # ruff: noqa: E501
 
@@ -155,12 +147,22 @@ class Pipeline:
         self._spectra_queries = []
         self._spectra_references = []
         self.is_symmetric = False
-        self.scores = None
-        self.mask = None
-
         self.logging_level = logging_level
         self.logging_file = logging_file
         self.progress_bar = progress_bar
+
+        # Set up score computation pipeline
+        similarity_methods_and_masks = parse_similarity_methods_and_masks(
+            score_computations=workflow["score_computations"]
+        )
+        self.similarity_score_compute_pipeline = ComputeScores(
+            similarity_methods_and_masks=similarity_methods_and_masks,
+            progress_bar=progress_bar,
+            logging_level=logging_level,
+            logging_file=logging_file,
+        )
+        self.scores = None
+
         self.__workflow = workflow
         self.check_workflow()
 
@@ -192,7 +194,6 @@ class Pipeline:
         )
         expected_keys = {"query_filters", "reference_filters", "score_computations"}
         assert set(self.__workflow.keys()) == expected_keys
-        check_score_computation(score_computations=self.score_computations)
 
     def run(
         self,
@@ -250,50 +251,12 @@ class Pipeline:
         else:
             self._spectra_references = self._spectra_queries
 
-        # Score computation and masking
         self.write_to_logfile("--- Computing scores ---")
-        for computation in self.score_computations:
-            self.write_to_logfile(f"Time: {str(datetime.now())}")
-            if not isinstance(computation, list):
-                computation = [computation]
-            if isinstance(computation[0], str) and computation[0] in _masking_functions:
-                self.write_to_logfile(f"-- Score masking: {computation} --")
-                self._apply_score_masking(computation)
-            else:
-                self.write_to_logfile(f"-- Score computation: {computation} --")
-                self._apply_similarity_measure(computation)
+        self.scores = self.similarity_score_compute_pipeline.run(
+            self.spectra_queries, self.spectra_references, self.is_symmetric
+        )
         self.write_to_logfile(f"--- Pipeline run finished ({str(datetime.now())}) ---")
         return report
-
-    def _apply_score_masking(self, computation):
-        """Apply filter to remove scores which are out of the set range."""
-        if self.scores is None:
-            raise ValueError("No scores have been computed yet, so masking cannot be applied.")
-        self.mask = ScoresMask.from_matrix(self.scores, computation[1]["operation"], computation[1]["value"])
-
-    def _apply_similarity_measure(self, computation):
-        """Run score computations for all listed methods and on all loaded and processed spectra."""
-
-        def get_similarity_measure(computation) -> BaseSimilarity:
-            if isinstance(computation[0], str):
-                if len(computation) > 1:
-                    return _score_functions[computation[0]](**computation[1])
-                return _score_functions[computation[0]]()
-            if callable(computation[0]):
-                if len(computation) > 1:
-                    return computation[0](**computation[1])
-                return computation[0]()
-            raise TypeError("Unknown similarity measure.")
-
-        # todo choose between matrix and sparse array based on coverage of mask
-        similarity_measure = get_similarity_measure(computation)
-        self.scores = similarity_measure.matrix(
-            self._spectra_references, self._spectra_queries, is_symmetric=self.is_symmetric, mask_indices=self.mask
-        )
-        if self.logging_file is not None:
-            add_logging_to_file(self.logging_file, loglevel=self.logging_level, remove_stream_handlers=True)
-        else:
-            logger.warning("No logging file was defined.Logging messages will not be written to file.")
 
     def set_logging(self):
         """Set the matchms logger to write messages to file (if defined)."""
@@ -365,7 +328,8 @@ class Pipeline:
     @score_computations.setter
     def score_computations(self, computations):
         self.__workflow["score_computations"] = computations
-        check_score_computation(score_computations=self.score_computations)
+        similarity_methods_and_masks = parse_similarity_methods_and_masks(score_computations=computations)
+        self.similarity_score_compute_pipeline = ComputeScores(similarity_methods_and_masks)
 
     @property
     def query_filters(self) -> Iterable[Union[str, List[dict]]]:
@@ -419,23 +383,3 @@ def get_unused_filters(yaml_file):
     for filter_function in ALL_FILTERS:
         if filter_function.__name__ not in filters_used:
             print(filter_function.__name__)
-
-
-def check_score_computation(score_computations: Sequence[Union[str, List[dict]]]):
-    """Check if the score computations seem OK before running.
-    Aim is to avoid pipeline crashing after long computation.
-    """
-    # Check if all score compuation steps exist
-    for i, computation in enumerate(score_computations):
-        if not isinstance(computation, list):
-            computation = [computation]
-        if isinstance(computation[0], str) and computation[0] in _masking_functions:
-            if "operation" in computation[1] and "value" in computation[1]:
-                if i == 0 or len(score_computations) == i:
-                    raise ValueError("Masking at the start or end of the score computations is not allowed.")
-                continue
-        if isinstance(computation[0], str) and computation[0] in _score_functions:
-            continue
-        if callable(computation[0]):
-            continue
-        raise ValueError(f"Unknown score computation: {computation[0]}.")
