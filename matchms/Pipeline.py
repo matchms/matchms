@@ -2,61 +2,19 @@ import logging
 import os
 from collections import OrderedDict
 from datetime import datetime
-from typing import Callable, Iterable, List, Optional, Sequence, Union
+from typing import List, Optional, Union
 from deprecated import deprecated
 from matchms.filtering.filter_order import ALL_FILTERS
-from matchms.filtering.SpectrumProcessor import FunctionWithParametersType, SpectrumProcessor
+from matchms.filtering.SpectrumProcessor import SpectrumProcessor
 from matchms.importing.load_spectra import load_list_of_spectrum_files
 from matchms.logging_functions import add_logging_to_file, reset_matchms_logger, set_matchms_logger_level
 from matchms.similarity.ComputeScores import ComputeScores, parse_similarity_methods_and_masks
-from matchms.typing import SpectrumType
+from matchms.Spectrum import Spectrum
 from matchms.yaml_file_functions import load_workflow_from_yaml_file, ordered_dump
 
 
 logger = logging.getLogger("matchms")
 # ruff: noqa: E501
-
-
-def create_workflow(
-    yaml_file_name: Optional[str] = None,
-    query_filters: Iterable[Union[str, Callable, FunctionWithParametersType]] = (),
-    reference_filters: Iterable[Union[str, Callable, FunctionWithParametersType]] = (),
-    score_computations: Iterable[Union[str, List[Union[str, dict]]]] = (),
-) -> OrderedDict:
-    """Creates a workflow that specifies the filters and scores needed to be run by Pipeline
-
-    Example code can be found in the docstring of Pipeline.
-
-    :param yaml_file_name:
-        A yaml file containing the workflow settings will be saved if a file name is specified.
-        If None no yaml file will be saved.
-    :param query_filters:
-        Additional filters that should be applied to the query spectra.
-    :param reference_filters:
-        Additional filters that should be applied to the reference spectra
-    :param score_computations:
-        Score computations that should be performed.
-    """
-    workflow = OrderedDict()
-    queries_processor = SpectrumProcessor(query_filters)
-    workflow["query_filters"] = queries_processor.processing_steps
-    reference_processor = SpectrumProcessor(reference_filters)
-    workflow["reference_filters"] = reference_processor.processing_steps
-    workflow["score_computations"] = score_computations
-    if yaml_file_name is not None:
-        assert not os.path.exists(yaml_file_name), (
-            "This yaml file name already exists. "
-            "To use the settings in the yaml file, please use the load_workflow_from_yaml_file function "
-            "in yaml_file_functions.py or check the tutorial."
-        )
-        with open(yaml_file_name, "w", encoding="utf-8") as file:
-            file.write("# Matchms pipeline config file \n")
-            file.write("# Change and adapt fields where necessary \n")
-            file.write("# " + 20 * "=" + " \n")
-            ordered_dump(workflow, file)
-    workflow["query_filters"] = queries_processor.filters
-    workflow["reference_filters"] = reference_processor.filters
-    return workflow
 
 
 class Pipeline:
@@ -131,7 +89,9 @@ class Pipeline:
 
     def __init__(
         self,
-        workflow: OrderedDict,
+        similarity_methods_and_masks: Optional[ComputeScores] = None,
+        query_filters: Optional[SpectrumProcessor] = None,
+        reference_filters: Optional[SpectrumProcessor] = None,
         progress_bar=True,
         logging_level: str = "WARNING",
         logging_file: Optional[str] = None,
@@ -147,53 +107,63 @@ class Pipeline:
         self._spectra_queries = []
         self._spectra_references = []
         self.is_symmetric = False
+        if self.is_symmetric and reference_filters is not None:
+            raise ValueError("Reference filters cannot be defined if is_symmetric is True.")
         self.logging_level = logging_level
         self.logging_file = logging_file
         self.progress_bar = progress_bar
 
-        # Set up score computation pipeline
-        similarity_methods_and_masks = parse_similarity_methods_and_masks(
-            score_computations=workflow["score_computations"]
-        )
-        self.similarity_score_compute_pipeline = ComputeScores(
-            similarity_methods_and_masks=similarity_methods_and_masks,
+        self.similarity_score_compute_pipeline = similarity_methods_and_masks
+        self.scores = None
+        self.query_filters = query_filters
+        self.reference_filters = reference_filters
+        if self.query_filters is not None:
+            self.write_to_logfile("--- Processing pipeline query spectra: ---")
+            self.write_to_logfile(str(self.query_filters))
+        if self.reference_filters is not None:
+            self.write_to_logfile("--- Processing pipeline reference spectra: ---")
+            self.write_to_logfile(str(self.reference_filters))
+
+    @classmethod
+    def from_yaml(
+        cls,
+        yaml_file_name,
+        progress_bar=True,
+        logging_level: str = "WARNING",
+        logging_file: Optional[str] = None,
+    ):
+        """Initialize Pipeline from yaml file."""
+        workflow = load_workflow_from_yaml_file(yaml_file_name)
+        similarity_score_compute_pipeline = None
+        processing_references = None
+        processing_queries = None
+        if "score_computations" in workflow:
+            # Set up score computation pipeline
+            similarity_methods_and_masks = parse_similarity_methods_and_masks(
+                score_computations=workflow["score_computations"]
+            )
+            similarity_score_compute_pipeline = ComputeScores(
+                similarity_methods_and_masks=similarity_methods_and_masks,
+                progress_bar=progress_bar,
+                logging_level=logging_level,
+                logging_file=logging_file,
+            )
+        if "query_filters" in workflow:
+            processing_queries = SpectrumProcessor(workflow["query_filters"])
+            if processing_queries.processing_steps != workflow["query_filters"]:
+                logger.warning("The order of the query filters has been changed compared to the Yaml file.")
+        if "reference_filters" in workflow:
+            processing_references = SpectrumProcessor(workflow["reference_filters"])
+            if processing_references.processing_steps != workflow["reference_filters"]:
+                logger.warning("The order of the reference filters has been changed compared to the Yaml file.")
+        return cls(
+            similarity_methods_and_masks=similarity_score_compute_pipeline,
+            query_filters=processing_queries,
+            reference_filters=processing_references,
             progress_bar=progress_bar,
             logging_level=logging_level,
             logging_file=logging_file,
         )
-        self.scores = None
-
-        self.__workflow = workflow
-        self.check_workflow()
-
-        self._initialize_spectrum_processor_queries()
-        if self.is_symmetric is False:
-            self._initialize_spectrum_processor_references()
-
-    def _initialize_spectrum_processor_queries(self):
-        """Initialize spectrum processing workflow for the query spectra."""
-        self.write_to_logfile("--- Processing pipeline query spectra: ---")
-        self.processing_queries = SpectrumProcessor(self.__workflow["query_filters"])
-        self.write_to_logfile(str(self.processing_queries))
-        if self.processing_queries.processing_steps != self.__workflow["query_filters"]:
-            logger.warning("The order of the filters has been changed compared to the Yaml file.")
-
-    def _initialize_spectrum_processor_references(self):
-        """Initialize spectrum processing workflow for the reference spectra."""
-        self.write_to_logfile("--- Processing pipeline reference spectra: ---")
-
-        self.processing_references = SpectrumProcessor(self.__workflow["reference_filters"])
-        self.write_to_logfile(str(self.processing_references))
-        if self.processing_queries.processing_steps != self.__workflow["query_filters"]:
-            logger.warning("The order of the filters has been changed compared to the Yaml file.")
-
-    def check_workflow(self):
-        """Define Pipeline workflow based on a yaml file (config_file)."""
-        assert isinstance(self.__workflow, OrderedDict), (
-            f"Workflow is expectd to be a OrderedDict, instead it was of type {type(self.__workflow)}"
-        )
-        expected_keys = {"query_filters", "reference_filters", "score_computations"}
-        assert set(self.__workflow.keys()) == expected_keys
 
     def run(
         self,
@@ -222,24 +192,28 @@ class Pipeline:
         self.write_to_logfile(f"Start time: {str(datetime.now())}")
         self.import_spectra(query_files, reference_files)
 
-        # Processing
-        self.write_to_logfile("--- Processing spectra ---")
-        self.write_to_logfile(f"Time: {str(datetime.now())}")
-        # Process query spectra
-        spectra, report = self.processing_queries.process_spectra(
-            self._spectra_queries,
-            progress_bar=self.progress_bar,
-            cleaned_spectra_file=cleaned_query_file,
-            create_report=create_report,
-        )
-        self._spectra_queries = spectra
-        self.write_to_logfile(str(report))
-        if cleaned_query_file is not None:
-            self.write_to_logfile(f"--- Query spectra written to {cleaned_query_file} ---")
+        if self.query_filters is not None:
+            # Processing
+            self.write_to_logfile("--- Processing spectra ---")
+            self.write_to_logfile(f"Time: {str(datetime.now())}")
+            # Process query spectra
+            spectra, report = self.query_filters.process_spectra(
+                self._spectra_queries,
+                progress_bar=self.progress_bar,
+                cleaned_spectra_file=cleaned_query_file,
+                create_report=create_report,
+            )
+            self._spectra_queries = spectra
+            self.write_to_logfile(str(report))
+            if cleaned_query_file is not None:
+                self.write_to_logfile(f"--- Query spectra written to {cleaned_query_file} ---")
+
+        if self.is_symmetric:
+            self._spectra_references = self._spectra_queries
 
         # Process reference spectra (if necessary)
-        if self.is_symmetric is False:
-            self._spectra_references, report = self.processing_references.process_spectra(
+        if self.reference_filters is not None:
+            self._spectra_references, report = self.reference_filters.process_spectra(
                 self._spectra_references,
                 progress_bar=self.progress_bar,
                 cleaned_spectra_file=cleaned_reference_file,
@@ -248,15 +222,13 @@ class Pipeline:
             self.write_to_logfile(str(report))
             if cleaned_reference_file is not None:
                 self.write_to_logfile(f"--- Reference spectra written to {cleaned_reference_file} ---")
-        else:
-            self._spectra_references = self._spectra_queries
 
-        self.write_to_logfile("--- Computing scores ---")
-        self.scores = self.similarity_score_compute_pipeline.run(
-            self.spectra_queries, self.spectra_references, self.is_symmetric
-        )
+        if self.similarity_score_compute_pipeline is not None:
+            self.write_to_logfile("--- Computing scores ---")
+            self.scores = self.similarity_score_compute_pipeline.run(
+                self.spectra_queries, self.spectra_references, self.is_symmetric
+            )
         self.write_to_logfile(f"--- Pipeline run finished ({str(datetime.now())}) ---")
-        return report
 
     def set_logging(self):
         """Set the matchms logger to write messages to file (if defined)."""
@@ -320,45 +292,16 @@ class Pipeline:
             self._spectra_references = load_list_of_spectrum_files(reference_files)
             self.write_to_logfile(f"Loaded reference spectra from {reference_files}")
 
-    # Getter & Setters
-    @property
-    def score_computations(self) -> Sequence[Union[str, List[dict]]]:
-        return self.__workflow.get("score_computations")
-
-    @score_computations.setter
-    def score_computations(self, computations):
-        self.__workflow["score_computations"] = computations
-        similarity_methods_and_masks = parse_similarity_methods_and_masks(score_computations=computations)
-        self.similarity_score_compute_pipeline = ComputeScores(similarity_methods_and_masks)
-
-    @property
-    def query_filters(self) -> Iterable[Union[str, List[dict]]]:
-        return self.__workflow.get("query_filters")
-
-    @query_filters.setter
-    def query_filters(self, filters: Iterable[Union[str, List[dict]]]):
-        self.__workflow["query_filters"] = filters
-        self._initialize_spectrum_processor_queries()
-
-    @property
-    def reference_filters(self) -> Iterable[Union[str, List[dict]]]:
-        return self.__workflow.get("reference_filters")
-
-    @reference_filters.setter
-    def reference_filters(self, filters: Iterable[Union[str, List[dict]]]):
-        self.__workflow["reference_filters"] = filters
-        self._initialize_spectrum_processor_references()
-
     @property
     @deprecated(
         version="0.26.5",
         reason="This property is deprecated and will be removed in the future. Use spectra_queries instead.",
     )
-    def spectrums_queries(self) -> List[SpectrumType]:
+    def spectrums_queries(self) -> List[Spectrum]:
         return self._spectra_queries
 
     @property
-    def spectra_queries(self) -> List[SpectrumType]:
+    def spectra_queries(self) -> List[Spectrum]:
         return self._spectra_queries
 
     @property
@@ -366,12 +309,29 @@ class Pipeline:
         version="0.26.5",
         reason="This property is deprecated and will be removed in the future. Use spectra_references instead.",
     )
-    def spectrums_references(self) -> List[SpectrumType]:
+    def spectrums_references(self) -> List[Spectrum]:
         return self._spectra_references
 
     @property
-    def spectra_references(self) -> List[SpectrumType]:
+    def spectra_references(self) -> List[Spectrum]:
         return self._spectra_references
+
+    def save_as_yaml(self, yaml_file_name):
+        """Save the current workflow settings as a yaml file."""
+        workflow = OrderedDict()
+        if self.query_filters is not None:
+            workflow["query_filters"] = self.query_filters.processing_steps
+        if self.reference_filters is not None:
+            workflow["reference_filters"] = self.reference_filters.processing_steps
+        if self.similarity_score_compute_pipeline is not None:
+            workflow["score_computations"] = self.similarity_score_compute_pipeline.to_yaml()
+        if os.path.exists(yaml_file_name):
+            raise FileExistsError("The specified yaml file already exists")
+        with open(yaml_file_name, "w", encoding="utf-8") as file:
+            file.write("# Matchms pipeline config file \n")
+            file.write("# Change and adapt fields where necessary \n")
+            file.write("# " + 20 * "=" + " \n")
+            ordered_dump(workflow, file)
 
 
 def get_unused_filters(yaml_file):

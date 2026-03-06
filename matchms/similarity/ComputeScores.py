@@ -1,3 +1,4 @@
+import inspect
 import logging
 from datetime import datetime
 from typing import List, Optional, Sequence, Tuple, Union
@@ -114,6 +115,28 @@ class ComputeScores:
         if self.logging_file is not None:
             with open(self.logging_file, "a", encoding="utf-8") as f:
                 f.write(line + "\n")
+
+    def to_yaml(self):
+        similarity_methods_and_masks_str = []
+        for item in self.similarity_methods_and_masks:
+            if isinstance(item, BaseSimilarity):
+                similarity_methods_and_masks_str.append(extract_class_info(item))
+            else:
+                similarity_methods_and_masks_str.append(["mask", {"operation": item.operation, "value": item.value}])
+
+
+def extract_class_info(instance) -> list[str | dict]:
+    """Extract class name and all __init__ parameters with their current values."""
+    cls = instance.__class__
+    class_name = cls.__name__
+
+    # Get __init__ signature
+    init_sig = inspect.signature(cls.__init__)
+    params = {
+        name: getattr(instance, name, param.default) for name, param in init_sig.parameters.items() if name != "self"
+    }
+
+    return [class_name, params]
 
 
 # A single-item list: [str | Callable]
