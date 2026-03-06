@@ -1,377 +1,545 @@
-import os
-import tempfile
 import numpy as np
 import pytest
-from matchms import Scores, calculate_scores
-from matchms.similarity import CosineGreedy, IntersectMz
-from matchms.similarity.BaseSimilarity import BaseSimilarity
-from .builder_Spectrum import SpectrumBuilder
-
-
-class DummySimilarityFunction(BaseSimilarity):
-    """Simple dummy score, only contain pair-wise implementation."""
-    score_datatype = [("score", np.str_, 16), ("len", np.int32)]
-
-    def __init__(self):
-        """constructor"""
-
-    def pair(self, reference, query):
-        """necessary pair computation method"""
-        s = reference + query
-        return np.array([(s, len(s))], dtype=self.score_datatype)
-
-
-class DummySimilarityFunctionParallel(BaseSimilarity):
-    """Simple dummy score, contains pair-wise and matrix implementation."""
-    score_datatype = [("score", np.str_, 16), ("len", "int")]
-
-    def __init__(self):
-        """constructor"""
-
-    def pair(self, reference, query):
-        """necessary pair computation method"""
-        s = reference + query
-        return np.array([(s, len(s))], dtype=self.score_datatype)
-
-    def matrix(self, references, queries, array_type: str = "numpy",
-               is_symmetric: bool = False):
-        """additional matrix computation method"""
-        shape = len(references), len(queries)
-        s = np.empty(shape, dtype=self.score_datatype)
-        for index_reference, reference in enumerate(references):
-            for index_query, query in enumerate(queries):
-                rq = reference + query
-                s[index_reference, index_query] = rq, len(rq)
-        return s
-
-
-@pytest.fixture(params=["json", "pkl"])
-def file_format(request):
-    yield request.param
-
-
-@pytest.fixture()
-def filename(file_format):
-    with tempfile.TemporaryDirectory() as tmpdir:
-        yield os.path.join(tmpdir, f"test_scores.{file_format}")
-
-
-def spectra():
-    builder = SpectrumBuilder()
-    spectrum_1 = builder.with_mz(np.array([100, 150, 200.])).with_intensities(
-        np.array([0.7, 0.2, 0.1])).with_metadata({'id': 'spectrum1'}).build()
-    spectrum_2 = builder.with_mz(np.array([100, 140, 190.])).with_intensities(
-        np.array([0.4, 0.2, 0.1])).with_metadata({'id': 'spectrum2'}).build()
-    spectrum_3 = builder.with_mz(np.array([110, 140, 195.])).with_intensities(
-        np.array([0.6, 0.2, 0.1])).with_metadata({'id': 'spectrum3'}).build()
-    spectrum_4 = builder.with_mz(np.array([100, 150, 200.])).with_intensities(
-        np.array([0.6, 0.1, 0.6])).with_metadata({'id': 'spectrum4'}).build()
-
-    return spectrum_1, spectrum_2, spectrum_3, spectrum_4
-
-
-def test_scores_single_pair():
-    """Test single pair input."""
-    dummy_similarity_function = DummySimilarityFunction()
-    scores = Scores(references=["A"],
-                    queries=["B"])
-    scores.calculate(dummy_similarity_function)
-    actual_1 = scores.scores[0, 0, 'DummySimilarityFunction_score']
-    actual_2 = scores.scores[0, 0, 'DummySimilarityFunction_len']
-    assert actual_1 == "AB", "Expected different scores."
-    assert actual_2 == 2, "Expected different scores."
-
-
-def test_scores_calculate():
-    dummy_similarity_function = DummySimilarityFunction()
-    scores = Scores(references=["r0", "r1", "r2"],
-                    queries=["q0", "q1"])
-    scores.calculate(dummy_similarity_function)
-    actual_data = list(scores)
-    expected = [
-        ("r0", "q0", ["r0q0", 4]),
-        ("r0", "q1", ["r0q1", 4]),
-        ("r1", "q0", ["r1q0", 4]),
-        ("r1", "q1", ["r1q1", 4]),
-        ("r2", "q0", ["r2q0", 4]),
-        ("r2", "q1", ["r2q1", 4])
-    ]
-    assert actual_data == expected, "Expected different scores."
-
-
-def test_scores_calculate_parallel():
-    dummy_similarity_function = DummySimilarityFunctionParallel()
-    scores = Scores(references=["r0", "r1", "r2"],
-                    queries=["q0", "q1"])
-    scores.calculate(dummy_similarity_function)
-    actual = list(scores)
-    expected = [
-        ("r0", "q0", ["r0q0", 4]),
-        ("r0", "q1", ["r0q1", 4]),
-        ("r1", "q0", ["r1q0", 4]),
-        ("r1", "q1", ["r1q1", 4]),
-        ("r2", "q0", ["r2q0", 4]),
-        ("r2", "q1", ["r2q1", 4])
-    ]
-    assert actual == expected, "Expected different scores."
-
-
-def test_scores_init_with_list():
-    scores = Scores(references=["r0", "r1", "r2"],
-                    queries=["q0", "q1"])
-    assert scores.shape == (3, 2, 0), "Expected different scores shape."
-
-
-def test_scores_init_with_numpy_array():
-    scores = Scores(references=np.asarray(["r0", "r1", "r2"]),
-                    queries=np.asarray(["q0", "q1"]))
-    assert scores.shape == (3, 2, 0), "Expected different scores shape."
-
-
-def test_scores_init_with_queries_dict():
-    with pytest.raises(AssertionError) as msg:
-        _ = Scores(references=["r0", "r1", "r2"],
-                   queries= {"k0": 'q0', "k1": 'q1'})
-
-    assert str(msg.value) == "Expected input argument 'queries' to be list or tuple or np.ndarray."
-
-
-def test_scores_init_with_references_dict():
-    with pytest.raises(AssertionError) as msg:
-        _ = Scores(references={"k0": "r0", "k1": "r1", "k2": "r2"},
-                   queries=["q0", "q1"])
-
-    assert str(msg.value) == "Expected input argument 'references' to be list or tuple or np.ndarray."
-
-
-def test_scores_init_with_tuple():
-    scores = Scores(references=("r0", "r1", "r2"),
-                    queries=("q0", "q1"))
-    assert scores.shape == (3, 2, 0), "Expected different scores shape."
-
-
-def test_scores_next():
-    dummy_similarity_function = DummySimilarityFunction()
-    scores = Scores(references=["r", "rr", "rrr"],
-                    queries=["q", "qq"]).calculate(dummy_similarity_function)
-
-    actual = list(scores)
-    expected = [
-        ("r", "q", ["rq", 2]),
-        ("r", "qq", ["rqq", 3]),
-        ("rr", "q", ["rrq", 3]),
-        ("rr", "qq", ["rrqq", 4]),
-        ("rrr", "q", ["rrrq", 4]),
-        ("rrr", "qq", ["rrrqq", 5])
-    ]
-    assert actual == expected, "Expected different scores."
-
-
-def test_scores_to_dict():
-    """Test if export to Python dictionary works as intended"""
-    spectrum_1, spectrum_2, spectrum_3, _ = spectra()
-    spectrum_1.set("precursor_mz", 123.4)
-    references = [spectrum_1, spectrum_2]
-    queries = [spectrum_3]
-    scores = calculate_scores(references, queries, CosineGreedy())
-    scores_dict = scores.to_dict()
-    expected_dict = [
-        {'id': 'spectrum1', 'precursor_mz': 123.4, 'peaks_json': [[100.0, 0.7], [150.0, 0.2], [200.0, 0.1]]},
-        {'id': 'spectrum2', 'peaks_json': [[100.0, 0.4], [140.0, 0.2], [190.0, 0.1]]}
-    ]
-    assert len(scores_dict["references"]) == 2
-    assert scores_dict["references"] == expected_dict
-
-
-def test_scores_by_referencey():
-    "Test scores_by_reference method."
-    spectrum_1, spectrum_2, spectrum_3, spectrum_4 = spectra()
-    references = [spectrum_1, spectrum_2, spectrum_3]
-    queries = [spectrum_3, spectrum_4]
-
-    scores = calculate_scores(references, queries, CosineGreedy())
-    assert scores.shape == (3, 2, 2)
-    name_score = scores.score_names[0]
-    selected_scores = scores.scores_by_reference(spectrum_2, name_score)
-
-    expected_result = [(scores.queries[i], scores.scores[1, i]) for i in range(2)]
-    assert selected_scores == expected_result, "Expected different scores."
-
-
-def test_scores_by_reference_sorted():
-    "Test scores_by_reference method with sort=True."
-    spectrum_1, spectrum_2, spectrum_3, spectrum_4 = spectra()
-    references = [spectrum_1, spectrum_2, spectrum_3]
-    queries = [spectrum_3, spectrum_4, spectrum_2]
-
-    scores = calculate_scores(references, queries, CosineGreedy())
-    name_score = scores.score_names[0]
-    selected_scores = scores.scores_by_reference(spectrum_2, name_score, sort=True)
-
-    expected_result = [(scores.queries[i], scores.scores[1, i]) for i in [2, 1, 0]]
-    assert selected_scores == expected_result, "Expected different scores."
-    scores_only = np.array([x[1] for x in selected_scores]).tolist()
-    scores_expected = [(1.0, 3), (0.61297133, 1), (0.13631964, 1)]
-    assert np.allclose(scores_only, scores_expected, atol=1e-8), \
-        "Expected different sorted scores."
+from scipy.sparse import coo_array
+from matchms.Scores import Scores, ScoresField, ScoresMask
+
+
+@pytest.fixture
+def dense_scalar_scores():
+    data = {
+        "score": np.array([
+            [1.0, 0.0, 0.5],
+            [0.0, 0.8, 0.0],
+        ], dtype=np.float64)
+    }
+    return Scores(data)
+
+
+@pytest.fixture
+def sparse_scalar_scores():
+    dense = np.array([
+        [1.0, 0.0, 0.5],
+        [0.0, 0.8, 0.0],
+    ], dtype=np.float64)
+    row, col = np.nonzero(dense)
+    coo = coo_array((dense[row, col], (row, col)), shape=dense.shape)
+    return Scores({"score": coo})
+
+
+@pytest.fixture
+def dense_multi_scores():
+    return Scores({
+        "score": np.array([
+            [1.0, 0.0, 0.5],
+            [0.0, 0.8, 0.0],
+        ], dtype=np.float64),
+        "matches": np.array([
+            [3, 0, 2],
+            [0, 4, 0],
+        ], dtype=np.int64),
+    })
+
 
-
-def test_scores_by_referencey_non_tuple_score():
-    "Test scores_by_reference method."
-    spectrum_1, spectrum_2, spectrum_3, spectrum_4 = spectra()
-    references = [spectrum_1, spectrum_2, spectrum_3]
-    queries = [spectrum_3, spectrum_4]
-
-    scores = calculate_scores(references, queries, IntersectMz())
-    name_score = scores.score_names[0]
-    selected_scores = scores.scores_by_reference(spectrum_2, name_score)
-
-    expected_result = [(scores.queries[i], scores.scores[1, i]) for i in range(2)]
-    assert selected_scores == expected_result, "Expected different scores."
-
-
-def test_scores_by_references_exception():
-    spectrum_1, spectrum_2, spectrum_3, spectrum_4 = spectra()
-    references = [spectrum_1, spectrum_2, spectrum_3]
-    queries = [spectrum_3, spectrum_4]
-
-    builder = SpectrumBuilder()
-    faulty_spectrum = builder.with_mz(np.array([200, 350, 400.])).with_intensities(
-        np.array([0.7, 0.2, 0.1])).with_metadata({'id': 'spectrum5'}).build()
-
-    scores = calculate_scores(references, queries, CosineGreedy())
-    name_score = scores.score_names[0]
-
-    with pytest.raises(ValueError, match="Given input not found in references."):
-        scores.scores_by_reference(faulty_spectrum, name_score)
-
-
-def test_scores_by_query():
-    "Test scores_by_query method."
-    spectrum_1, spectrum_2, spectrum_3, spectrum_4 = spectra()
-    references = [spectrum_1, spectrum_2, spectrum_3]
-    queries = [spectrum_2, spectrum_3, spectrum_4]
-
-    scores = calculate_scores(references, queries, CosineGreedy())
-    name_score = scores.score_names[0]
-    selected_scores = scores.scores_by_query(spectrum_4, name_score)
-
-    expected_result = [(scores.references[i], scores.scores[i, 2]) for i in range(2)]
-    assert selected_scores == expected_result, "Expected different scores."
-
-
-def test_scores_by_query_sorted():
-    "Test scores_by_query method with sort=True."
-    builder = SpectrumBuilder()
-    spectrum_1 = builder.with_mz(np.array([100, 150, 200.])).with_intensities(
-        np.array([0.7, 0.2, 0.1])).with_metadata({'id': 'spectrum1'}).build()
-    spectrum_2 = builder.with_mz(np.array([100, 140, 190.])).with_intensities(
-        np.array([0.4, 0.2, 0.1])).with_metadata({'id': 'spectrum2'}).build()
-    spectrum_3 = builder.with_mz(np.array([100, 140, 195.])).with_intensities(
-        np.array([0.6, 0.2, 0.1])).with_metadata({'id': 'spectrum3'}).build()
-    spectrum_4 = builder.with_mz(np.array([100, 150, 200.])).with_intensities(
-        np.array([0.6, 0.1, 0.6])).with_metadata({'id': 'spectrum4'}).build()
-
-    references = [spectrum_1, spectrum_2, spectrum_3]
-    queries = [spectrum_2, spectrum_3, spectrum_4]
-
-    scores = calculate_scores(references, queries, CosineGreedy())
-    name_score = scores.score_names[0]
-    selected_scores = scores.scores_by_query(spectrum_4, name_score, sort=True)
-
-    expected_result = [(scores.references[i], scores.scores[i, 2]) for i in [0, 2, 1]]
-    assert selected_scores == expected_result, "Expected different scores."
-    assert np.allclose(np.array([x[1] for x in selected_scores]).tolist(),
-                       [(0.79636414, 3), (0.65803523, 1), (0.61297133, 1)])
-
-
-def test_scores_by_query_non_tuple_score():
-    "Test scores_by_query method."
-    spectrum_1, spectrum_2, spectrum_3, spectrum_4 = spectra()
-    references = [spectrum_1, spectrum_2, spectrum_3]
-    queries = [spectrum_2, spectrum_3, spectrum_4]
-
-    scores = calculate_scores(references, queries, IntersectMz())
-    name_score = scores.score_names[0]
-    selected_scores = scores.scores_by_query(spectrum_4, name_score)
-
-    expected_result = [(scores.references[i], scores.scores[i, 2]) for i in range(2)]
-    assert selected_scores == expected_result, "Expected different scores."
-
-
-def test_sort_without_name_exception():
-    spectrum_1, spectrum_2, spectrum_3, spectrum_4 = spectra()
-    references = [spectrum_1, spectrum_2, spectrum_3]
-    queries = [spectrum_2, spectrum_3, spectrum_4]
-
-    scores = calculate_scores(references, queries, CosineGreedy())
-    with pytest.raises(IndexError) as exception:
-        _ = scores.scores_by_query(spectrum_4, sort=True)
-    assert "For sorting, score must be specified" in exception.value.args[0]
-
-    with pytest.raises(IndexError) as exception:
-        _ = scores.scores_by_reference(spectrum_3, sort=True)
-    assert "For sorting, score must be specified" in exception.value.args[0]
-
-
-def test_scores_by_query_exception():
-    spectrum_1, spectrum_2, spectrum_3, spectrum_4 = spectra()
-    references = [spectrum_1, spectrum_2, spectrum_3]
-    queries = [spectrum_2, spectrum_3, spectrum_4]
-
-    builder = SpectrumBuilder()
-    faulty_spectrum = builder.with_mz(np.array([200, 350, 400.])).with_intensities(
-        np.array([0.7, 0.2, 0.1])).with_metadata({'id': 'spectrum5'}).build()
-
-    scores = calculate_scores(references, queries, CosineGreedy())
-    name_score = scores.score_names[0]
-
-    with pytest.raises(ValueError, match="Given input not found in queries."):
-        scores.scores_by_query(faulty_spectrum, name_score)
-
-
-@pytest.mark.parametrize(
-    "similarity_function_a,similarity_function_b",
-    [(CosineGreedy(), IntersectMz()), (IntersectMz(), CosineGreedy())])
-def test_comparing_symmetric_scores(similarity_function_a, similarity_function_b):
-    "Test comparing symmetric scores objects."
-    spectrum_1, spectrum_2, spectrum_3, spectrum_4 = spectra()
-    spectra_list = [spectrum_1, spectrum_2, spectrum_3, spectrum_4]
-
-    scores_similarity_a = calculate_scores(spectra_list, spectra_list, similarity_function_a)
-    scores_similarity_a_copy = calculate_scores(spectra_list, spectra_list, similarity_function_a)
-    scores_similarity_b = calculate_scores(spectra_list, spectra_list, similarity_function_b)
-
-    assert scores_similarity_a == scores_similarity_a_copy
-    assert scores_similarity_a != scores_similarity_b
-
-
-@pytest.mark.parametrize(
-    "similarity_function_a,similarity_function_b",
-    [(CosineGreedy(), IntersectMz()), (IntersectMz(), CosineGreedy())])
-def test_comparing_asymmetric_scores(similarity_function_a, similarity_function_b):
-    "Test comparing asymmetric scores objects."
-    spectrum_1, spectrum_2, spectrum_3, spectrum_4 = spectra()
-    spectra_list = [spectrum_1, spectrum_2, spectrum_3, spectrum_4]
-
-    scores_similarity_a = calculate_scores(spectra_list[0:3], spectra_list, similarity_function_a)
-    scores_similarity_a_copy = calculate_scores(spectra_list[0:3], spectra_list, similarity_function_a)
-    scores_similarity_b = calculate_scores(spectra_list, spectra_list[0:3], similarity_function_b)
-
-    assert scores_similarity_a == scores_similarity_a_copy
-    assert scores_similarity_a != scores_similarity_b
-
-
-@pytest.mark.parametrize(
-    "similarity_function_a,similarity_function_b",
-    [(CosineGreedy(tolerance=0.5, mz_power=0.5), CosineGreedy(tolerance=0.1, mz_power=0.1)),
-     (IntersectMz(scaling=1.0), IntersectMz(scaling=2.0))])
-def test_comparing_scores_with_same_shape_different_scores_values(similarity_function_a, similarity_function_b):
-    "Test comparing scores objects with same similarity functions but different values of scores."
-    spectrum_1, spectrum_2, spectrum_3, spectrum_4 = spectra()
-    spectra_list = [spectrum_1, spectrum_2, spectrum_3, spectrum_4]
-
-    scores_parametrized = calculate_scores(spectra_list, spectra_list, similarity_function_a)
-    scores_parametrized_mirrored = calculate_scores(spectra_list, spectra_list, similarity_function_b)
-
-    assert scores_parametrized != scores_parametrized_mirrored
+@pytest.fixture
+def sparse_multi_scores():
+    score = np.array([
+        [1.0, 0.0, 0.5],
+        [0.0, 0.8, 0.0],
+    ], dtype=np.float64)
+    matches = np.array([
+        [3, 0, 2],
+        [0, 4, 0],
+    ], dtype=np.int64)
+
+    row_s, col_s = np.nonzero(score)
+    row_m, col_m = np.nonzero(matches)
+
+    return Scores({
+        "score": coo_array((score[row_s, col_s], (row_s, col_s)), shape=score.shape),
+        "matches": coo_array((matches[row_m, col_m], (row_m, col_m)), shape=matches.shape),
+    })
+
+
+def test_scores_requires_at_least_one_field():
+    with pytest.raises(ValueError, match="at least one score field"):
+        Scores({})
+
+
+def test_scores_requires_same_dense_sparse_kind():
+    dense = np.array([[1.0, 0.0]])
+    sparse = coo_array(([1.0], ([0], [0])), shape=(1, 2))
+
+    with pytest.raises(ValueError, match="either dense or sparse"):
+        Scores({"score": dense, "matches": sparse})
+
+
+def test_scores_requires_same_shape():
+    with pytest.raises(ValueError, match="same shape"):
+        Scores({
+            "score": np.zeros((2, 3)),
+            "matches": np.zeros((3, 2)),
+        })
+
+
+def test_scores_basic_properties_dense_scalar(dense_scalar_scores):
+    scores = dense_scalar_scores
+    assert scores.shape == (2, 3)
+    assert scores.score_fields == ("score",)
+    assert scores.is_scalar is True
+    assert scores.is_sparse is False
+
+
+def test_scores_basic_properties_sparse_multi(sparse_multi_scores):
+    scores = sparse_multi_scores
+    assert scores.shape == (2, 3)
+    assert scores.score_fields == ("score", "matches")
+    assert scores.is_scalar is False
+    assert scores.is_sparse is True
+
+
+def test_scores_repr_contains_shape_and_fields(dense_multi_scores):
+    text = repr(dense_multi_scores)
+    assert "Scores" in text
+    assert "shape=(2, 3)" in text
+    assert "score_fields=('score', 'matches')" in text
+
+
+def test_scores_get_field_returns_scoresfield(dense_multi_scores):
+    field = dense_multi_scores["score"]
+    assert isinstance(field, ScoresField)
+    assert field.shape == (2, 3)
+    assert field.is_sparse is False
+
+
+def test_scores_unknown_field_raises(dense_multi_scores):
+    with pytest.raises(KeyError, match="Unknown field"):
+        dense_multi_scores.to_array("missing")
+
+
+def test_scores_to_array_scalar_dense(dense_scalar_scores):
+    arr = dense_scalar_scores.to_array()
+    expected = np.array([
+        [1.0, 0.0, 0.5],
+        [0.0, 0.8, 0.0],
+    ])
+    np.testing.assert_array_equal(arr, expected)
+
+
+def test_scores_to_array_scalar_sparse(sparse_scalar_scores):
+    arr = sparse_scalar_scores.to_array()
+    expected = np.array([
+        [1.0, 0.0, 0.5],
+        [0.0, 0.8, 0.0],
+    ])
+    np.testing.assert_array_equal(arr, expected)
+
+
+def test_scores_to_array_multi_requires_field(dense_multi_scores):
+    with pytest.raises(KeyError, match="Field name required"):
+        dense_multi_scores.to_array()
+
+
+def test_scores_to_coo_scalar_dense(dense_scalar_scores):
+    coo = dense_scalar_scores.to_coo()
+    assert isinstance(coo, coo_array)
+    np.testing.assert_array_equal(
+        coo.toarray(),
+        np.array([
+            [1.0, 0.0, 0.5],
+            [0.0, 0.8, 0.0],
+        ])
+    )
+
+
+def test_scores_to_coo_multi_specific_field(dense_multi_scores):
+    coo = dense_multi_scores.to_coo("matches")
+    assert isinstance(coo, coo_array)
+    np.testing.assert_array_equal(
+        coo.toarray(),
+        np.array([
+            [3, 0, 2],
+            [0, 4, 0],
+        ])
+    )
+
+
+def test_scoresfield_to_array_dense(dense_multi_scores):
+    field = dense_multi_scores["score"]
+    np.testing.assert_array_equal(
+        field.to_array(),
+        np.array([
+            [1.0, 0.0, 0.5],
+            [0.0, 0.8, 0.0],
+        ])
+    )
+
+
+def test_scoresfield_to_coo_sparse(sparse_multi_scores):
+    field = sparse_multi_scores["matches"]
+    coo = field.to_coo()
+    assert isinstance(coo, coo_array)
+    np.testing.assert_array_equal(
+        coo.toarray(),
+        np.array([
+            [3, 0, 2],
+            [0, 4, 0],
+        ])
+    )
+
+
+def test_scoresfield_getitem_dense(dense_scalar_scores):
+    field = dense_scalar_scores["score"]
+    assert field[0, 0] == 1.0
+    np.testing.assert_array_equal(field[0, :], np.array([1.0, 0.0, 0.5]))
+
+
+def test_scores_scalar_getitem_returns_values(dense_scalar_scores):
+    scores = dense_scalar_scores
+    assert scores[0, 0] == 1.0
+    np.testing.assert_array_equal(scores[0, :], np.array([1.0, 0.0, 0.5]))
+
+
+def test_scores_multi_getitem_tuple_returns_dict(dense_multi_scores):
+    item = dense_multi_scores[0, 2]
+    assert item == {"score": 0.5, "matches": 2}
+
+
+def test_scores_mask_dense_construction():
+    mask = ScoresMask(
+        shape=(2, 3),
+        dense_mask=np.array([
+            [True, False, True],
+            [False, True, False],
+        ])
+    )
+    assert mask.is_sparse is False
+    np.testing.assert_array_equal(
+        mask.to_dense(),
+        np.array([
+            [True, False, True],
+            [False, True, False],
+        ])
+    )
+
+
+def test_scores_mask_sparse_construction():
+    mask = ScoresMask(
+        shape=(2, 3),
+        row=np.array([0, 0, 1]),
+        col=np.array([0, 2, 1]),
+    )
+    assert mask.is_sparse is True
+    np.testing.assert_array_equal(
+        mask.to_dense(),
+        np.array([
+            [True, False, True],
+            [False, True, False],
+        ])
+    )
+
+
+def test_scores_mask_invalid_dense_and_sparse_together():
+    with pytest.raises(ValueError, match="either dense or sparse"):
+        ScoresMask(
+            shape=(2, 2),
+            dense_mask=np.ones((2, 2), dtype=bool),
+            row=np.array([0]),
+            col=np.array([0]),
+        )
+
+
+def test_scores_mask_invalid_sparse_missing_col():
+    with pytest.raises(ValueError, match="both row and col"):
+        ScoresMask(shape=(2, 2), row=np.array([0]))
+
+
+def test_scores_mask_invalid_sparse_shape_mismatch():
+    with pytest.raises(ValueError, match="same shape"):
+        ScoresMask(shape=(2, 2), row=np.array([0, 1]), col=np.array([0]))
+
+
+def test_scores_mask_and_sparse():
+    mask1 = ScoresMask(shape=(2, 3), row=np.array([0, 0, 1]), col=np.array([0, 2, 1]))
+    mask2 = ScoresMask(shape=(2, 3), row=np.array([0, 1]), col=np.array([2, 1]))
+
+    combined = mask1 & mask2
+    assert combined.is_sparse is True
+    np.testing.assert_array_equal(combined.row, np.array([0, 1]))
+    np.testing.assert_array_equal(combined.col, np.array([2, 1]))
+
+
+def test_scores_mask_or_sparse():
+    mask1 = ScoresMask(shape=(2, 3), row=np.array([0]), col=np.array([0]))
+    mask2 = ScoresMask(shape=(2, 3), row=np.array([1]), col=np.array([2]))
+
+    combined = mask1 | mask2
+    assert combined.is_sparse is True
+    np.testing.assert_array_equal(combined.to_dense(), np.array([
+        [True, False, False],
+        [False, False, True],
+    ]))
+
+
+def test_scores_mask_invert_returns_dense():
+    mask = ScoresMask(shape=(2, 2), row=np.array([0]), col=np.array([1]))
+    inverted = ~mask
+    assert inverted.is_sparse is False
+    np.testing.assert_array_equal(
+        inverted.to_dense(),
+        np.array([
+            [True, False],
+            [True, True],
+        ])
+    )
+
+
+def test_scores_mask_incompatible_shapes_raise():
+    mask1 = ScoresMask(shape=(2, 2), dense_mask=np.ones((2, 2), dtype=bool))
+    mask2 = ScoresMask(shape=(3, 2), dense_mask=np.ones((3, 2), dtype=bool))
+
+    with pytest.raises(ValueError, match="Incompatible mask shapes"):
+        _ = mask1 & mask2
+
+
+def test_dense_field_comparison_returns_dense_mask(dense_multi_scores):
+    mask = dense_multi_scores["score"] > 0.5
+    assert isinstance(mask, ScoresMask)
+    assert mask.is_sparse is False
+    np.testing.assert_array_equal(
+        mask.to_dense(),
+        np.array([
+            [True, False, False],
+            [False, True, False],
+        ])
+    )
+
+
+def test_sparse_field_comparison_gt_returns_sparse_mask(sparse_multi_scores):
+    mask = sparse_multi_scores["score"] > 0.5
+    assert isinstance(mask, ScoresMask)
+    assert mask.is_sparse is True
+    np.testing.assert_array_equal(mask.row, np.array([0, 1]))
+    np.testing.assert_array_equal(mask.col, np.array([0, 1]))
+
+
+def test_sparse_field_comparison_ge_returns_sparse_mask(sparse_multi_scores):
+    mask = sparse_multi_scores["score"] >= 0.8
+    assert mask.is_sparse is True
+    np.testing.assert_array_equal(mask.to_dense(), np.array([
+        [True, False, False],
+        [False, True, False],
+    ]))
+
+
+def test_sparse_field_comparison_lt_falls_back_to_dense_mask(sparse_multi_scores):
+    mask = sparse_multi_scores["score"] < 0.7
+    assert mask.is_sparse is False
+    np.testing.assert_array_equal(
+        mask.to_dense(),
+        np.array([
+            [False, True, True],
+            [True, False, True],
+        ])
+    )
+
+
+def test_sparse_field_comparison_eq_falls_back_to_dense_mask(sparse_multi_scores):
+    mask = sparse_multi_scores["score"] == 0.0
+    assert mask.is_sparse is False
+    np.testing.assert_array_equal(
+        mask.to_dense(),
+        np.array([
+            [False, True, False],
+            [True, False, True],
+        ])
+    )
+
+
+def test_scores_filter_with_dense_mask_on_dense_scores(dense_multi_scores):
+    mask = np.array([
+        [True, False, True],
+        [False, True, False],
+    ])
+
+    filtered = dense_multi_scores[mask]
+
+    assert isinstance(filtered, Scores)
+    assert filtered.is_sparse is False
+    np.testing.assert_array_equal(
+        filtered.to_array("score"),
+        np.array([
+            [1.0, 0.0, 0.5],
+            [0.0, 0.8, 0.0],
+        ])
+    )
+    np.testing.assert_array_equal(
+        filtered.to_array("matches"),
+        np.array([
+            [3, 0, 2],
+            [0, 4, 0],
+        ])
+    )
+
+
+def test_scores_filter_with_dense_mask_zeroes_out_dense_scores():
+    scores = Scores({
+        "score": np.array([
+            [1.0, 0.2, 0.5],
+            [0.1, 0.8, 0.0],
+        ]),
+        "matches": np.array([
+            [3, 1, 2],
+            [1, 4, 0],
+        ]),
+    })
+    mask = np.array([
+        [True, False, True],
+        [False, True, False],
+    ])
+
+    filtered = scores[mask]
+
+    np.testing.assert_array_equal(
+        filtered.to_array("score"),
+        np.array([
+            [1.0, 0.0, 0.5],
+            [0.0, 0.8, 0.0],
+        ])
+    )
+    np.testing.assert_array_equal(
+        filtered.to_array("matches"),
+        np.array([
+            [3, 0, 2],
+            [0, 4, 0],
+        ])
+    )
+
+
+def test_scores_filter_with_sparse_mask_on_sparse_scores_preserves_sparse(sparse_multi_scores):
+    mask = sparse_multi_scores["score"] > 0.5
+    filtered = sparse_multi_scores[mask]
+
+    assert isinstance(filtered, Scores)
+    assert filtered.is_sparse is True
+    np.testing.assert_array_equal(
+        filtered.to_array("score"),
+        np.array([
+            [1.0, 0.0, 0.0],
+            [0.0, 0.8, 0.0],
+        ])
+    )
+    np.testing.assert_array_equal(
+        filtered.to_array("matches"),
+        np.array([
+            [3, 0, 0],
+            [0, 4, 0],
+        ])
+    )
+
+
+def test_scores_filter_with_combined_sparse_masks(sparse_multi_scores):
+    mask = (sparse_multi_scores["score"] > 0.5) & (sparse_multi_scores["matches"] >= 4)
+    filtered = sparse_multi_scores[mask]
+
+    np.testing.assert_array_equal(
+        filtered.to_array("score"),
+        np.array([
+            [0.0, 0.0, 0.0],
+            [0.0, 0.8, 0.0],
+        ])
+    )
+    np.testing.assert_array_equal(
+        filtered.to_array("matches"),
+        np.array([
+            [0, 0, 0],
+            [0, 4, 0],
+        ])
+    )
+
+
+def test_scores_filter_with_sparse_or_mask(sparse_multi_scores):
+    mask = (sparse_multi_scores["score"] > 0.9) | (sparse_multi_scores["matches"] >= 4)
+    filtered = sparse_multi_scores[mask]
+
+    np.testing.assert_array_equal(
+        filtered.to_array("score"),
+        np.array([
+            [1.0, 0.0, 0.0],
+            [0.0, 0.8, 0.0],
+        ])
+    )
+
+
+def test_scores_filter_with_inverted_mask(sparse_multi_scores):
+    mask = ~(sparse_multi_scores["score"] > 0.5)
+    filtered = sparse_multi_scores[mask]
+
+    np.testing.assert_array_equal(
+        filtered.to_array("score"),
+        np.array([
+            [0.0, 0.0, 0.5],
+            [0.0, 0.0, 0.0],
+        ])
+    )
+    np.testing.assert_array_equal(
+        filtered.to_array("matches"),
+        np.array([
+            [0, 0, 2],
+            [0, 0, 0],
+        ])
+    )
+
+
+def test_scores_filter_mask_shape_mismatch_raises(dense_scalar_scores):
+    mask = np.ones((3, 3), dtype=bool)
+    with pytest.raises(ValueError, match="Mask has shape"):
+        dense_scalar_scores[mask]
+
+
+def test_scores_filter_with_scoresmask_shape_mismatch_raises(dense_scalar_scores):
+    mask = ScoresMask(shape=(3, 3), dense_mask=np.ones((3, 3), dtype=bool))
+    with pytest.raises(ValueError, match="Mask has shape"):
+        dense_scalar_scores[mask]
+
+
+def test_scores_scalar_threshold_masking_syntax_dense(dense_scalar_scores):
+    filtered = dense_scalar_scores[dense_scalar_scores["score"] > 0.5]
+    np.testing.assert_array_equal(
+        filtered.to_array(),
+        np.array([
+            [1.0, 0.0, 0.0],
+            [0.0, 0.8, 0.0],
+        ])
+    )
+
+
+def test_scores_scalar_threshold_masking_syntax_sparse(sparse_scalar_scores):
+    filtered = sparse_scalar_scores[sparse_scalar_scores["score"] > 0.5]
+    assert filtered.is_sparse is True
+    np.testing.assert_array_equal(
+        filtered.to_array(),
+        np.array([
+            [1.0, 0.0, 0.0],
+            [0.0, 0.8, 0.0],
+        ])
+    )
+
+def test_dense_scalar_scores_direct_comparison_returns_mask(dense_scalar_scores):
+    mask = dense_scalar_scores > 0.5
+
+    assert isinstance(mask, ScoresMask)
+    assert mask.is_sparse is False
+    np.testing.assert_array_equal(
+        mask.to_dense(),
+        np.array([
+            [True, False, False],
+            [False, True, False],
+        ])
+    )
+
+
+def test_dense_scalar_scores_direct_comparison_matches_score_field_comparison(dense_scalar_scores):
+    mask_direct = dense_scalar_scores > 0.5
+    mask_field = dense_scalar_scores["score"] > 0.5
+
+    np.testing.assert_array_equal(mask_direct.to_dense(), mask_field.to_dense())
