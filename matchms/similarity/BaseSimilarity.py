@@ -4,12 +4,14 @@
 # - optionally overwrite keep_score() for default sparse filtering
 # - optionally overwrite matrix() and sparse_matrix() for performance optimizations
 # - users can also pass score_filter=... to sparse_matrix()
+
 from abc import abstractmethod
 from typing import Optional, Sequence
 import numpy as np
 import numpy.typing as npt
 from scipy.sparse import coo_array
 from tqdm import tqdm
+from matchms import Scores
 from matchms.typing import ScoreFilter, SpectrumType
 
 
@@ -93,11 +95,8 @@ class BaseSimilarity:
 
         Returns
         -------
-        np.ndarray or dict[str, np.ndarray]
-            Dense result.
-            - Scalar scores -> one dense NumPy array
-            - Structured scores, one selected field -> one dense NumPy array
-            - Structured scores, multiple selected fields -> dict of arrays
+        Scores
+            Dense score result wrapped in a ``Scores`` container.
         """
         spectra_2, is_symmetric = self._prepare_inputs(spectra_1, spectra_2)
         selected_fields = self._resolve_score_fields(score_fields)
@@ -124,7 +123,7 @@ class BaseSimilarity:
                 if is_symmetric and self.is_commutative and i != j:
                     self._store_in_dense_result(result, j, i, score, selected_fields)
 
-        return result
+        return Scores(result)
 
     def sparse_matrix(
         self,
@@ -165,11 +164,8 @@ class BaseSimilarity:
 
         Returns
         -------
-        scipy.sparse.coo_array or dict[str, scipy.sparse.coo_array]
-            Sparse result.
-            - Scalar scores -> one COO sparse array
-            - Structured scores, one selected field -> one COO sparse array
-            - Structured scores, multiple selected fields -> dict of sparse arrays
+        Scores
+            Sparse score result wrapped in a ``Scores`` container.
         """
         spectra_2, is_symmetric = self._prepare_inputs(spectra_1, spectra_2)
         selected_fields = self._resolve_score_fields(score_fields)
@@ -210,13 +206,14 @@ class BaseSimilarity:
                 out_col.append(i)
                 values.append(score)
 
-        return self._build_sparse_result(
+        sparse_result = self._build_sparse_result(
             idx_row=np.asarray(out_row, dtype=np.int_),
             idx_col=np.asarray(out_col, dtype=np.int_),
             values=np.asarray(values, dtype=self.score_datatype),
             shape=(len(spectra_1), len(spectra_2)),
             selected_fields=selected_fields,
         )
+        return Scores(sparse_result)
 
     def keep_score(self, score) -> bool:
         """Return whether a score should be retained in sparse outputs.
@@ -312,13 +309,10 @@ class BaseSimilarity:
         n_rows: int,
         n_cols: int,
         selected_fields: tuple[str, ...],
-    ):
+    ) -> dict[str, np.ndarray]:
         """Create an empty dense result container."""
         if not self.is_structured_score:
-            return np.zeros((n_rows, n_cols), dtype=self.score_datatype)
-
-        if len(selected_fields) == 1:
-            return np.zeros((n_rows, n_cols), dtype=np.dtype(self.score_datatype)[selected_fields[0]])
+            return {"score": np.zeros((n_rows, n_cols), dtype=self.score_datatype)}
 
         return {
             field: np.zeros((n_rows, n_cols), dtype=np.dtype(self.score_datatype)[field])
@@ -327,7 +321,7 @@ class BaseSimilarity:
 
     def _store_in_dense_result(
         self,
-        result,
+        result: dict[str, np.ndarray],
         i: int,
         j: int,
         score: np.ndarray,
@@ -335,11 +329,7 @@ class BaseSimilarity:
     ) -> None:
         """Store one score in the dense result container."""
         if not self.is_structured_score:
-            result[i, j] = score
-            return
-
-        if len(selected_fields) == 1:
-            result[i, j] = score[selected_fields[0]]
+            result["score"][i, j] = score
             return
 
         for field in selected_fields:
@@ -360,18 +350,12 @@ class BaseSimilarity:
         values: np.ndarray,
         shape: tuple[int, int],
         selected_fields: tuple[str, ...],
-    ):
+    ) -> dict[str, coo_array]:
         """Build sparse output from collected coordinates and values."""
         if not self.is_structured_score:
             sparse = coo_array((values, (idx_row, idx_col)), shape=shape)
             sparse.eliminate_zeros()
-            return sparse
-
-        if len(selected_fields) == 1:
-            field = selected_fields[0]
-            sparse = coo_array((values[field], (idx_row, idx_col)), shape=shape)
-            sparse.eliminate_zeros()
-            return sparse
+            return {"score": sparse}
 
         result = {}
         for field in selected_fields:
