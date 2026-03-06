@@ -1,3 +1,9 @@
+# Subclassing guide:
+# - implement pair()
+# - optionally define score_datatype and score_fields
+# - optionally overwrite keep_score() for default sparse filtering
+# - optionally overwrite matrix() and sparse_matrix() for performance optimizations
+# - users can also pass score_filter=... to sparse_matrix()
 from abc import abstractmethod
 from typing import Optional, Sequence
 import numpy as np
