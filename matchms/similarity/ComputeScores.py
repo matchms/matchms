@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime
-from typing import Callable, List, Optional, Sequence, Union
+from typing import List, Optional, Sequence, Tuple, Union
 import matchms.similarity as mssimilarity
 from matchms.logging_functions import add_logging_to_file, reset_matchms_logger, set_matchms_logger_level
 from matchms.similarity.BaseSimilarity import BaseSimilarity
@@ -8,10 +8,6 @@ from matchms.similarity.ScoresMask import ScoresMask, _get_operator
 from matchms.Spectrum import Spectrum
 
 
-_score_functions = {}
-for key, f in mssimilarity.__dict__.items():
-    if isinstance(f, type) and issubclass(f, BaseSimilarity) and f is not BaseSimilarity:
-        _score_functions[key.lower()] = f
 logger = logging.getLogger("matchms")
 
 
@@ -120,28 +116,40 @@ class ComputeScores:
                 f.write(line + "\n")
 
 
+# A single-item list: [str | Callable]
+ComputationWithoutSettings = Tuple[Union[str, BaseSimilarity]]
+
+# A two-item list: [str | Callable, dict]
+ComputationWithSettings = Tuple[Union[str, BaseSimilarity], dict]
+
+
 def parse_similarity_methods_and_masks(
-    score_computations: Sequence[List[str | dict | Callable]],
+    score_computations: Sequence[Union[str, BaseSimilarity, ComputationWithoutSettings, ComputationWithSettings]],
 ) -> List[Union[BaseSimilarity, MaskSetting]]:
-    """Check if the score computations seem OK before running.
-    Aim is to avoid pipeline crashing after long computation.
+    """Parses the score computations and masks defined in the workflow to return SimilarityMeasures and MaskSettings
+
+    Acceptable input is a list with:
+    - str, Which is a known matchms similarity method.
+    - Callable, A custom similarity method provided as a function.
+    - A list of two elements, where the first element is a str or Callable as defined
     """
     cleaned_score_computations = []
     # Check if all score computation steps exist
     for i, computation in enumerate(score_computations):
-        if not isinstance(computation, list):
-            computation = list(computation)
-        if computation[0] == "mask":
+        if isinstance(computation, (str, BaseSimilarity)):
+            cleaned_score_computations.append(parse_similarity_measure_without_settings(computation))
+        elif computation[0] == "mask":
             if i == 0 or len(score_computations) == i:
                 raise ValueError("Masking at the start or end of the score computations is not allowed.")
-            if not isinstance(computation[1], dict):
-                raise ValueError("Masking settings should be provided as a dictionary.")
-            if "operation" in computation[1] and "value" in computation[1]:
-                cleaned_score_computations.append(MaskSetting(computation[1]["operation"], computation[1]["value"]))
-            else:
-                raise ValueError("Masking settings should contain 'operation' and 'value' keys.")
+            if len(computation) != 2:
+                raise ValueError("Masking settings should be provided as a list of two elements: ['mask', dict].")
+            cleaned_score_computations.append(parse_masking_operation(computation[1]))
+        elif len(computation) == 1:
+            cleaned_score_computations.append(parse_similarity_measure_without_settings(computation[0]))
+        elif len(computation) == 2:
+            cleaned_score_computations.append(parse_similarity_measure_with_settings(computation))
         else:
-            cleaned_score_computations.append(parse_similarity_measure(computation))
+            raise ValueError("Invalid computation format.")
     return cleaned_score_computations
 
 
@@ -154,26 +162,42 @@ def parse_masking_operation(mask_settings: dict) -> MaskSetting:
         raise ValueError("Masking settings should contain 'operation' and 'value' keys.")
 
 
-def parse_similarity_measure(computation: List[str | Callable | dict]) -> BaseSimilarity:
-    """Parses a similarity measure to create an instance of the similarity measure class.
-    The similarity measure can be provided as a string, or as a callable function.
-    If settings are provided, these should be provided as a dictionary in the second element of the list."""
+def get_existing_similarity_measure_by_name(name: str):
+    _score_functions = {}
+    for key, f in mssimilarity.__dict__.items():
+        if isinstance(f, type) and issubclass(f, BaseSimilarity) and f is not BaseSimilarity:
+            _score_functions[key.lower()] = f
+    if name not in _score_functions:
+        raise ValueError(
+            f"Unknown similarity measure name: {name}. "
+            f"Available measures are: {list(_score_functions.keys())}. "
+            f" If you want to use a custom similarity measure, please provide it as a callable function."
+        )
+    return _score_functions[name]
+
+
+def parse_similarity_measure_with_settings(computation: ComputationWithSettings) -> BaseSimilarity:
+    if not isinstance(computation, (list, tuple)) or len(computation) != 2:
+        raise ValueError(
+            "Similarity measure with settings should be provided as a list of two elements: [str | Callable, dict]."
+        )
+    if not isinstance(computation[1], dict):
+        raise ValueError("Settings for similarity measure should be provided as a dictionary.")
+
     if isinstance(computation[0], str):
-        if computation[0] not in _score_functions:
-            raise ValueError(
-                f"Unknown similarity measure name: {computation[0]}."
-                f"Available measures are: {list(_score_functions.keys())}. "
-                f" If you want to use a custom similarity measure, please provide it as a callable function."
-            )
-        if len(computation) > 1:
-            if not isinstance(computation[1], dict):
-                raise ValueError("Settings for similarity measure should be provided as a dictionary.")
-            return _score_functions[computation[0]](**computation[1])
-        return _score_functions[computation[0]]()
-    if callable(computation[0]):
-        if len(computation) > 1:
-            if not isinstance(computation[1], dict):
-                raise ValueError("Settings for similarity measure should be provided as a dictionary.")
-            return computation[0](**computation[1])
-        return computation[0]()
+        return get_existing_similarity_measure_by_name(computation[0])(**computation[1])
+    if (
+        isinstance(computation[0], type)
+        and issubclass(computation[0], BaseSimilarity)
+        and computation[0] is not BaseSimilarity
+    ):
+        return computation[0](**computation[1])
+    raise TypeError("Unknown similarity measure.")
+
+
+def parse_similarity_measure_without_settings(computation: Union[str, BaseSimilarity]) -> BaseSimilarity:
+    if isinstance(computation, str):
+        return get_existing_similarity_measure_by_name(computation)()
+    if isinstance(computation, type) and issubclass(computation, BaseSimilarity) and computation is not BaseSimilarity:
+        return computation()
     raise TypeError("Unknown similarity measure.")
