@@ -300,6 +300,45 @@ def test_sparse_matrix_structured_filter_only_matches_greater_than_two(spectra):
     np.testing.assert_array_equal(scores.toarray(), expected)
 
 
+def test_sparse_matrix_scalar_with_score_filter_range(spectra):
+    similarity = MockScalarSimilarity()
+
+    scores = similarity.sparse_matrix(
+        spectra,
+        score_filter=lambda s: 0.4 <= s <= 0.6,
+        progress_bar=False,
+    )
+
+    expected = np.array([
+        [0.0, 0.0, 0.5, 0.0],
+        [0.0, 0.0, 0.5, 0.0],
+        [0.5, 0.5, 0.0, 0.5],
+        [0.0, 0.0, 0.5, 0.0],
+    ], dtype=np.float64)
+
+    np.testing.assert_array_equal(scores.toarray(), expected)
+
+
+def test_sparse_matrix_structured_with_score_filter_range_on_score_field(spectra):
+    similarity = MockStructuredSimilarity()
+
+    scores = similarity.sparse_matrix(
+        spectra,
+        score_fields=("score",),
+        score_filter=lambda s: 0.4 <= s["score"] <= 0.6,
+        progress_bar=False,
+    )
+
+    expected = np.array([
+        [0.0, 0.0, 0.5, 0.0],
+        [0.0, 0.0, 0.5, 0.0],
+        [0.5, 0.5, 0.0, 0.5],
+        [0.0, 0.0, 0.5, 0.0],
+    ], dtype=np.float64)
+
+    np.testing.assert_array_equal(scores.toarray(), expected)
+
+
 def test_sparse_matrix_with_explicit_indices_scalar(spectra):
     similarity = MockScalarSimilarity()
 
