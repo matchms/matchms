@@ -145,8 +145,78 @@ class ScoresField:
 class Scores:
     """Container for computed matchms scores.
     
-    Stores one or more score fields as either dense numpy arrays or sparse COO arrays.
-    Provides methods for accessing score fields, filtering scores with boolean masks, and slicing.
+    The ``Scores`` class stores the output of one similarity computation and provides
+    a small, intuitive API that works for both dense and sparse score matrices.
+
+    A ``Scores`` instance can represent either:
+
+    - a scalar score matrix with one field, usually ``"score"``
+    - a multi-field score result, for example ``"score"`` and ``"matches"``
+    - dense data stored as NumPy arrays
+    - sparse data stored as SciPy COO arrays
+
+    Parameters
+    ----------
+    data
+        Dictionary mapping score field names to score data.
+        Each value must be either a 2D NumPy array or a SciPy ``coo_array``.
+        All fields must have the same shape and must all be either dense or sparse.
+
+    Notes
+    -----
+    The class is designed to offer a consistent API independent of the underlying
+    storage format.
+
+    Field access
+        Score fields can be accessed by name, for example ``scores["score"]`` or
+        ``scores["matches"]``.
+
+    Scalar scores
+        If only one field is present, direct comparisons are supported, for example
+        ``scores > 0.5``. This is equivalent to ``scores["score"] > 0.5``.
+
+    Masking
+        Boolean masking returns a filtered ``Scores`` object with the same shape.
+        For example, ``scores[scores["score"] > 0.5]`` keeps only entries where the
+        condition is true.
+
+    Slicing
+        Basic slicing is supported, for example ``scores[3, 4]``, ``scores[3, :]``,
+        or ``scores[:, 2]``.
+
+    Conversion
+        Use :meth:`to_array` to obtain a dense NumPy representation and
+        :meth:`to_coo` to obtain a sparse COO representation.
+
+    Examples
+    --------
+    Scalar dense scores:
+
+    >>> scores = Scores({"score": np.array([[1.0, 0.0], [0.3, 0.8]])})
+    >>> scores["score"].to_array()
+    array([[1. , 0. ],
+           [0.3, 0.8]])
+    >>> filtered = scores[scores > 0.5]
+    >>> filtered.to_array()
+    array([[1. , 0. ],
+           [0. , 0.8]])
+
+    Multi-field scores:
+
+    >>> scores = Scores({
+    ...     "score": np.array([[1.0, 0.0], [0.3, 0.8]]),
+    ...     "matches": np.array([[5, 0], [1, 4]])
+    ... })
+    >>> scores["score"].to_array()
+    array([[1. , 0. ],
+           [0.3, 0.8]])
+    >>> scores["matches"].to_array()
+    array([[5, 0],
+           [1, 4]])
+    >>> good = scores[(scores["score"] > 0.2) & (scores["matches"] >= 2)]
+    >>> good.to_array("score")
+    array([[1. , 0. ],
+           [0. , 0.8]])
     """
 
     def __init__(self, data: Dict[str, np.ndarray | coo_array]):
@@ -240,6 +310,30 @@ class Scores:
                 normalized[field] = arr
         return Scores(normalized)
 
+    def __gt__(self, other):
+        """Element-wise comparison for scalar Scores."""
+        return self._compare_scalar(other, "__gt__")
+
+    def __ge__(self, other):
+        """Element-wise comparison for scalar Scores."""
+        return self._compare_scalar(other, "__ge__")
+
+    def __lt__(self, other):
+        """Element-wise comparison for scalar Scores."""
+        return self._compare_scalar(other, "__lt__")
+
+    def __le__(self, other):
+        """Element-wise comparison for scalar Scores."""
+        return self._compare_scalar(other, "__le__")
+
+    def __eq__(self, other):
+        """Element-wise comparison for scalar Scores."""
+        return self._compare_scalar(other, "__eq__")
+
+    def __ne__(self, other):
+        """Element-wise comparison for scalar Scores."""
+        return self._compare_scalar(other, "__ne__")
+
     def _filter_with_scores_mask(self, mask: ScoresMask) -> "Scores":
         if mask.shape != self.shape:
             raise ValueError(f"Mask has shape {mask.shape}, expected {self.shape}.")
@@ -286,4 +380,18 @@ class Scores:
         if field not in self._data:
             raise KeyError(f"Unknown field {field!r}. Available fields: {self.score_fields}.")
         return field
-    
+
+    def _compare_scalar(self, other, method_name: str) -> ScoresMask:
+        """Forward scalar comparisons to the only score field.
+
+        Direct comparisons such as ``scores > 0.5`` are only supported when
+        exactly one score field is present.
+        """
+        if not self.is_scalar:
+            raise TypeError(
+                "Direct comparisons are only supported for scalar Scores. "
+                f"Available score fields: {self.score_fields}."
+            )
+
+        field = self[self.score_fields[0]]
+        return getattr(field, method_name)(other)
