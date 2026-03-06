@@ -1,154 +1,189 @@
 from abc import abstractmethod
-from typing import List
+from typing import Optional, Sequence
 import numpy as np
-from sparsestack import StackedSparseArray
+import numpy.typing as npt
+from scipy.sparse import coo_array
 from tqdm import tqdm
 from matchms.typing import SpectrumType
 
 
 class BaseSimilarity:
     """Similarity function base class.
+
     When building a custom similarity measure, inherit from this class and implement
     the desired methods.
 
     Attributes
     ----------
     is_commutative
-       Whether similarity function is commutative, which means that the order of spectra
-       does not matter (similarity(A, B) == similarity(B, A)). Default is True.
+        Whether the similarity function is commutative, meaning that the order of
+        spectra does not matter: ``similarity(A, B) == similarity(B, A)``.
+        Default is True.
+    score_datatype
+        NumPy dtype of a single score value.
+        Examples are ``np.float64`` for scalar scores or a structured dtype such as
+        ``np.dtype([("score", np.float64), ("matches", np.int64)])`` for multi-field scores.
+    score_fields
+        Names of the score fields. For scalar scores this should usually be
+        ``("score",)``. For structured scores, this should match the dtype field names,
+        for instance ``("score", "matches")``.
     """
-    # Set key characteristics as class attributes
+
     is_commutative = True
-    # Set output data type, e.g. "float" or [("score", "float"), ("matches", "int")]
     score_datatype = np.float64
+    score_fields = ("score",)
 
     @abstractmethod
-    def pair(self, reference: SpectrumType, query: SpectrumType) -> float:
-        """Method to calculate the similarity for one input pair.
+    def pair(self, spectrum_1: SpectrumType, spectrum_2: SpectrumType):
+        """Calculate the similarity for one pair of spectra.
 
         Parameters
         ----------
-        reference
-            Single reference spectrum.
-        query
-            Single query spectrum.
+        spectrum_1
+            First spectrum.
+        spectrum_2
+            Second spectrum.
 
         Returns
-            score as numpy array (using self.score_datatype). For instance returning
-            np.asarray(score, dtype=self.score_datatype)
+        -------
+        score
+            Similarity result for one pair. The returned value should be compatible with
+            ``self.score_datatype``.
+
+        Examples
+        --------
+        Scalar score:
+            ``return np.asarray(score, dtype=self.score_datatype)``
+
+        Structured score:
+            ``return np.asarray((score, matches), dtype=self.score_datatype)``
         """
         raise NotImplementedError
 
-    def matrix(self, references: List[SpectrumType], queries: List[SpectrumType],
-               array_type: str = "numpy",
-               is_symmetric: bool = False,
-               progress_bar: bool = True,
-              ) -> np.ndarray:
-        """Optional: Provide optimized method to calculate an np.array of similarity scores
-        for given reference and query spectra. If no method is added here, the following naive
-        implementation (i.e. a double for-loop) is used.
+    @property
+    def is_structured_score(self) -> bool:
+        """Return True if this similarity returns a structured score."""
+        dtype = np.dtype(self.score_datatype)
+        return dtype.names is not None
+
+    def matrix(
+        self,
+        spectra_1: Sequence[SpectrumType],
+        spectra_2: Optional[Sequence[SpectrumType]] = None,
+        progress_bar: bool = True,
+    ) -> np.ndarray:
+        """Calculate a dense matrix of similarity scores.
 
         Parameters
         ----------
-        references
-            List of reference objects
-        queries
-            List of query objects
-        array_type
-            Specify the output array type. Can be "numpy" or "sparse".
-            Default is "numpy" and will return a numpy array. "sparse" will return a COO-sparse array.
-        is_symmetric
-            Set to True when *references* and *queries* are identical (as for instance for an all-vs-all
-            comparison). By using the fact that score[i,j] = score[j,i] the calculation will be about
-            2x faster.
+        spectra_1
+            First collection of spectra.
+        spectra_2
+            Second collection of spectra. If None, compare ``spectra_1`` against itself.
+            For commutative similarities this will automatically use the symmetric
+            optimization.
         progress_bar
-            When True a progress bar is shown. Default is True.
+            When True, show a progress bar. Default is True.
+
+        Returns
+        -------
+        np.ndarray
+            Dense NumPy array of shape ``(len(spectra_1), len(spectra_2))``.
+            The dtype is ``self.score_datatype``.
+
+            For scalar scores, this will be a standard numeric array.
+            For structured scores, this will be a structured NumPy array.
         """
-        #pylint: disable=too-many-locals
-        n_rows = len(references)
-        n_cols = len(queries)
+        spectra_2, is_symmetric = self._validate_and_prepare_inputs(spectra_1, spectra_2)
 
-        if is_symmetric and n_rows != n_cols:
-            raise ValueError(f"Found unequal number of spectra {n_rows} and {n_cols} while `is_symmetric` is True.")
+        n_rows = len(spectra_1)
+        n_cols = len(spectra_2)
+        scores = np.zeros((n_rows, n_cols), dtype=self.score_datatype)
 
-        idx_row = []
-        idx_col = []
-        scores = []
-        # Wrap the outer loop with tqdm to track progress
-        for i_ref, reference in enumerate(tqdm(references[:n_rows],
-                                               desc="Calculating similarities",
-                                               disable=not progress_bar)):
+        iterator = tqdm(
+            enumerate(spectra_1),
+            total=n_rows,
+            desc="Calculating similarities",
+            disable=not progress_bar,
+        )
+
+        for i, spectrum_1 in iterator:
             if is_symmetric and self.is_commutative:
-                for i_query, query in enumerate(queries[i_ref:n_cols], start=i_ref):
-                    score = self.pair(reference, query)
-                    if self.keep_score(score):
-                        idx_row += [i_ref, i_query]
-                        idx_col += [i_query, i_ref]
-                        scores += [score, score]
+                start_j = i
+                spectra_2_iter = enumerate(spectra_2[i:], start=i)
             else:
-                for i_query, query in enumerate(queries[:n_cols]):
-                    score = self.pair(reference, query)
-                    if self.keep_score(score):
-                        idx_row.append(i_ref)
-                        idx_col.append(i_query)
-                        scores.append(score)
+                start_j = 0
+                spectra_2_iter = enumerate(spectra_2)
 
-        idx_row = np.array(idx_row, dtype=np.int_)
-        idx_col = np.array(idx_col, dtype=np.int_)
-        scores_data = np.array(scores, dtype=self.score_datatype)
-        # TODO: make StackedSparseArray the default and add fixed function to output different formats (with code below)
-        if array_type == "numpy":
-            scores_array = np.zeros(shape=(n_rows, n_cols), dtype=self.score_datatype)
-            scores_array[idx_row, idx_col] = scores_data.reshape(-1)
-            return scores_array
-        if array_type == "sparse":
-            scores_array = StackedSparseArray(n_rows, n_cols)
-            scores_array.add_sparse_data(idx_row, idx_col, scores_data, "")
-            return scores_array
-        raise ValueError("array_type must be 'numpy' or 'sparse'.")
+            for j, spectrum_2 in spectra_2_iter:
+                score = self.pair(spectrum_1, spectrum_2)
+                scores[i, j] = score
 
-    def sparse_array(self, references: List[SpectrumType],
-                     queries: List[SpectrumType],
-                     idx_row, idx_col,
-                     is_symmetric: bool = False,
-                     progress_bar: bool = True,
-                    ):
-        """Optional: Provide optimized method to calculate an sparse matrix of similarity scores.
+                if is_symmetric and self.is_commutative and j != i:
+                    scores[j, i] = score
 
-        Compute similarity scores for pairs of reference and query spectra as given by the indices
-        idx_row (references) and idx_col (queries). If no method is added here, the following naive
-        implementation (i.e. a for-loop) is used.
+        return scores
+
+    def sparse_matrix(
+        self,
+        spectra_1: Sequence[SpectrumType],
+        spectra_2: Optional[Sequence[SpectrumType]] = None,
+        idx_row: Optional[npt.ArrayLike] = None,
+        idx_col: Optional[npt.ArrayLike] = None,
+        progress_bar: bool = True,
+    ):
+        """Calculate sparse similarity results.
 
         Parameters
         ----------
-        references
-            List of reference objects
-        queries
-            List of query objects
+        spectra_1
+            First collection of spectra.
+        spectra_2
+            Second collection of spectra. If None, compare ``spectra_1`` against itself.
         idx_row
-            List/array of row indices
+            Row indices of pairs to compute. If None and ``idx_col`` is also None, all
+            pairwise comparisons are considered and only kept scores are stored.
         idx_col
-            List/array of column indices
-        is_symmetric
-            Set to True when *references* and *queries* are identical (as for instance for an all-vs-all
-            comparison). By using the fact that score[i,j] = score[j,i] the calculation will be about
-            2x faster.
+            Column indices of pairs to compute. Must have the same shape as ``idx_row``.
         progress_bar
-            When True a progress bar is shown. Default is True.
-        """
-        # pylint: disable=too-many-arguments
-        if is_symmetric is True:
-            pass  # TODO: consider implementing faster method for symmetric cases
+            When True, show a progress bar. Default is True.
 
-        assert idx_row.shape == idx_col.shape, "col and row indices must be of same shape"
-        scores = np.zeros((len(idx_row)), dtype=self.score_datatype)  # TODO: switch to sparse matrix
-        # Use tqdm to track progress through the indices
-        for i, row in enumerate(tqdm(idx_row,
-                                     desc="Calculating sparse similarities",
-                                     disable=not progress_bar)):
-            col = idx_col[i]
-            scores[i] = self.pair(references[row], queries[col])
-        return scores
+        Returns
+        -------
+        scipy.sparse.coo_array or dict[str, scipy.sparse.coo_array]
+            Sparse result.
+
+            - For scalar scores, returns one ``coo_array``.
+            - For structured scores, returns a dictionary that maps each score field
+              name to one ``coo_array``.
+        """
+        spectra_2, is_symmetric = self._validate_and_prepare_inputs(spectra_1, spectra_2)
+
+        if idx_row is None and idx_col is None:
+            return self._sparse_from_all_pairs(
+                spectra_1=spectra_1,
+                spectra_2=spectra_2,
+                is_symmetric=is_symmetric,
+                progress_bar=progress_bar,
+            )
+
+        if idx_row is None or idx_col is None:
+            raise ValueError("idx_row and idx_col must either both be given or both be None.")
+
+        idx_row = np.asarray(idx_row, dtype=np.int_)
+        idx_col = np.asarray(idx_col, dtype=np.int_)
+
+        if idx_row.shape != idx_col.shape:
+            raise ValueError("idx_row and idx_col must have the same shape.")
+
+        return self._sparse_from_index_pairs(
+            spectra_1=spectra_1,
+            spectra_2=spectra_2,
+            idx_row=idx_row,
+            idx_col=idx_col,
+            is_symmetric=is_symmetric,
+            progress_bar=progress_bar,
+        )
 
     def keep_score(self, score):
         """In the `.matrix` method scores will be collected in a sparse way.
@@ -164,5 +199,147 @@ class BaseSimilarity:
 
     def to_dict(self) -> dict:
         """Return a dictionary representation of a similarity function."""
-        return {"__Similarity__": self.__class__.__name__,
-                **self.__dict__}
+        return {
+            "__Similarity__": self.__class__.__name__,
+            **self.__dict__
+            }
+
+    def _validate_and_prepare_inputs(
+        self,
+        spectra_1: Sequence[SpectrumType],
+        spectra_2: Optional[Sequence[SpectrumType]],
+    ) -> tuple[Sequence[SpectrumType], bool]:
+        """Validate inputs and determine whether symmetric optimization is possible."""
+        if spectra_2 is None:
+            spectra_2 = spectra_1
+            is_symmetric = True
+        else:
+            is_symmetric = False
+
+        return spectra_2, is_symmetric
+
+    def _sparse_from_all_pairs(
+        self,
+        spectra_1: Sequence[SpectrumType],
+        spectra_2: Sequence[SpectrumType],
+        is_symmetric: bool,
+        progress_bar: bool,
+    ):
+        """Compute sparse results by iterating over all pairs and only storing kept scores."""
+        n_rows = len(spectra_1)
+        n_cols = len(spectra_2)
+
+        idx_row = []
+        idx_col = []
+        values = []
+
+        iterator = tqdm(
+            enumerate(spectra_1),
+            total=n_rows,
+            desc="Calculating sparse similarities",
+            disable=not progress_bar,
+        )
+
+        for i, spectrum_1 in iterator:
+            if is_symmetric and self.is_commutative:
+                spectra_2_iter = enumerate(spectra_2[i:], start=i)
+            else:
+                spectra_2_iter = enumerate(spectra_2)
+
+            for j, spectrum_2 in spectra_2_iter:
+                score = np.asarray(self.pair(spectrum_1, spectrum_2), dtype=self.score_datatype)
+
+                if not self.keep_score(score):
+                    continue
+
+                idx_row.append(i)
+                idx_col.append(j)
+                values.append(score)
+
+                if is_symmetric and self.is_commutative and j != i:
+                    idx_row.append(j)
+                    idx_col.append(i)
+                    values.append(score)
+
+        return self._build_sparse_result(
+            idx_row=np.asarray(idx_row, dtype=np.int_),
+            idx_col=np.asarray(idx_col, dtype=np.int_),
+            values=np.asarray(values, dtype=self.score_datatype),
+            shape=(n_rows, n_cols),
+        )
+
+    def _sparse_from_index_pairs(
+        self,
+        spectra_1: Sequence[SpectrumType],
+        spectra_2: Sequence[SpectrumType],
+        idx_row: np.ndarray,
+        idx_col: np.ndarray,
+        is_symmetric: bool,
+        progress_bar: bool,
+    ):
+        """Compute sparse results for explicitly given index pairs."""
+        n_rows = len(spectra_1)
+        n_cols = len(spectra_2)
+
+        out_row = []
+        out_col = []
+        values = []
+
+        iterator = tqdm(
+            range(len(idx_row)),
+            desc="Calculating sparse similarities",
+            disable=not progress_bar,
+        )
+
+        for k in iterator:
+            i = idx_row[k]
+            j = idx_col[k]
+
+            score = np.asarray(self.pair(spectra_1[i], spectra_2[j]), dtype=self.score_datatype)
+
+            if not self.keep_score(score):
+                continue
+
+            out_row.append(i)
+            out_col.append(j)
+            values.append(score)
+
+            if is_symmetric and self.is_commutative and i != j:
+                out_row.append(j)
+                out_col.append(i)
+                values.append(score)
+
+        return self._build_sparse_result(
+            idx_row=np.asarray(out_row, dtype=np.int_),
+            idx_col=np.asarray(out_col, dtype=np.int_),
+            values=np.asarray(values, dtype=self.score_datatype),
+            shape=(n_rows, n_cols),
+        )
+
+    def _build_sparse_result(
+        self,
+        idx_row: np.ndarray,
+        idx_col: np.ndarray,
+        values: np.ndarray,
+        shape: tuple[int, int],
+    ):
+        """Build sparse result object.
+
+        Returns
+        -------
+        scipy.sparse.coo_array or dict[str, scipy.sparse.coo_array]
+            Scalar scores are returned as a single COO sparse array.
+            Structured scores are returned as one COO sparse array per field.
+        """
+        if self.is_structured_score:
+            result = {}
+            for field in np.dtype(self.score_datatype).names:
+                data = values[field]
+                sparse = coo_array((data, (idx_row, idx_col)), shape=shape)
+                sparse.eliminate_zeros()
+                result[field] = sparse
+            return result
+
+        sparse = coo_array((values, (idx_row, idx_col)), shape=shape)
+        sparse.eliminate_zeros()
+        return sparse
