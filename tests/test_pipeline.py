@@ -2,10 +2,10 @@ import os
 import numpy as np
 import pytest
 from matchms import Pipeline
-from matchms.filtering import select_by_mz
+from matchms.filtering.SpectrumProcessor import SpectrumProcessor
 from matchms.importing.load_spectra import load_spectra
-from matchms.Pipeline import create_workflow
-from matchms.similarity import ModifiedCosineGreedy
+from matchms.similarity import ModifiedCosineGreedy, ModifiedCosineHungarian, PrecursorMzMatch
+from matchms.similarity.ComputeScores import ComputeScores
 from matchms.yaml_file_functions import load_workflow_from_yaml_file
 
 
@@ -13,16 +13,27 @@ module_root = os.path.join(os.path.dirname(__file__), "..")
 spectra_file_msp = os.path.join(module_root, "tests", "testdata", "massbank_five_spectra.msp")
 
 
+def test_pipeline_load_and_save_yaml(tmp_path):
+    pipeline = Pipeline(
+        query_filters=SpectrumProcessor([("select_by_mz", {"mz_from": 0, "mz_to": 1000})]),
+        similarity_methods_and_masks=ComputeScores(
+            [PrecursorMzMatch(tolerance=120.0), ModifiedCosineGreedy(tolerance=10.0)],
+        ),
+        reference_filters=SpectrumProcessor([("select_by_mz", {"mz_from": 0, "mz_to": 1000})]),
+    )
+    pipeline.save_as_yaml(os.path.join(tmp_path, "test_pipeline.yaml"))
+    assert os.path.exists(os.path.join(tmp_path, "test_pipeline.yaml"))
+    new_pipeline = Pipeline.from_yaml(os.path.join(tmp_path, "test_pipeline.yaml"))
+
+
 def test_pipeline_initial_check_missing_file():
-    workflow = create_workflow(score_computations=[["precursormzmatch", {"tolerance": 120.0}]])
-    pipeline = Pipeline(workflow)
+    pipeline = Pipeline()
     with pytest.raises(AssertionError) as msg:
         pipeline.run("non_existing_file.msp")
     assert "not exist" in str(msg.value)
 
 
 def test_pipeline_initial_check_unknown_step():
-
     workflow = create_workflow(score_computations=[["precursormzOOPSmatch", {"tolerance": 120.0}]])
     with pytest.raises(ValueError) as msg:
         Pipeline(workflow)
@@ -37,10 +48,11 @@ def test_pipeline_initial_check_legacy_modified_cosine_name_removed():
 
 
 def test_pipeline_symmetric():
-    workflow = create_workflow(
-        score_computations=[["precursormzmatch", {"tolerance": 120.0}], ["modifiedcosinegreedy", {"tolerance": 10.0}]]
+    pipeline = Pipeline(
+        similarity_methods_and_masks=ComputeScores(
+            [PrecursorMzMatch(tolerance=120.0), ModifiedCosineGreedy(tolerance=10.0)]
+        )
     )
-    pipeline = Pipeline(workflow)
     pipeline.run(spectra_file_msp)
 
     assert len(pipeline.spectra_queries) == 5
@@ -54,13 +66,12 @@ def test_pipeline_symmetric():
 
 
 def test_pipeline_symmetric_modified_cosine_hungarian():
-    workflow = create_workflow(
-        score_computations=[
-            ["precursormzmatch", {"tolerance": 120.0}],
-            ["modifiedcosinehungarian", {"tolerance": 10.0}],
-        ]
+
+    pipeline = Pipeline(
+        similarity_methods_and_masks=ComputeScores(
+            [PrecursorMzMatch(tolerance=120.0), ModifiedCosineHungarian(tolerance=10.0)]
+        )
     )
-    pipeline = Pipeline(workflow)
     pipeline.run(spectra_file_msp)
 
     assert len(pipeline.spectra_queries) == 5
@@ -72,11 +83,12 @@ def test_pipeline_symmetric_modified_cosine_hungarian():
 
 
 def test_pipeline_symmetric_filters():
-    workflow = create_workflow(
-        query_filters=[[select_by_mz, {"mz_from": 0, "mz_to": 1000}]],
-        score_computations=[["precursormzmatch", {"tolerance": 120.0}], ["modifiedcosinegreedy", {"tolerance": 10.0}]],
+    pipeline = Pipeline(
+        query_filters=SpectrumProcessor([("select_by_mz", {"mz_from": 0, "mz_to": 1000})]),
+        similarity_methods_and_masks=ComputeScores(
+            [PrecursorMzMatch(tolerance=120.0), ModifiedCosineGreedy(tolerance=10.0)]
+        ),
     )
-    pipeline = Pipeline(workflow)
     pipeline.run(spectra_file_msp)
 
     assert len(pipeline.spectra_queries) == 5
@@ -260,7 +272,7 @@ def test_add_custom_filter():
         query_filters=[],
     )
     pipeline = Pipeline(workflow)
-    pipeline.processing_queries.parse_and_add_filter(
+    pipeline.query_filters.parse_and_add_filter(
         (select_spectra_containing_fragment, {"fragment_of_interest": 103.05, "tolerance": 0.01})
     )
     pipeline.run(spectra_file_msp)
