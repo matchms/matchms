@@ -427,14 +427,6 @@ class BaseSimilarity:
         for field in selected_fields:
             result[field][i, j] = score[field]
 
-    def _all_pair_indices(self, n_rows: int, n_cols: int, is_symmetric: bool) -> tuple[np.ndarray, np.ndarray]:
-        """Create index pairs for all pairwise comparisons."""
-        if is_symmetric and self.is_commutative:
-            return np.triu_indices(n_rows)
-
-        idx_row, idx_col = np.indices((n_rows, n_cols))
-        return idx_row.ravel(), idx_col.ravel()
-
     def _build_sparse_result(
         self,
         idx_row: np.ndarray,
