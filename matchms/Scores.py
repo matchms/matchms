@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import Dict, Optional
 import numpy as np
 from scipy.sparse import coo_array
+from matchms.typing import ScoresType
 
 
 @dataclass(frozen=True)
@@ -88,7 +89,7 @@ class ScoresField:
     
     Supports array-like access and comparison operations to create boolean masks.
     """
-    _scores: "Scores"
+    _scores: ScoresType
     _field: str
 
     @property
@@ -274,7 +275,7 @@ class Scores:
         row, col = np.nonzero(value)
         return coo_array((value[row, col], (row, col)), shape=value.shape)
 
-    def filter(self, mask) -> "Scores":
+    def filter(self, mask) -> ScoresType:
         if isinstance(mask, ScoresMask):
             return self._filter_with_scores_mask(mask)
 
@@ -334,7 +335,7 @@ class Scores:
         """Element-wise comparison for scalar Scores."""
         return self._compare_scalar(other, "__ne__")
 
-    def _filter_with_scores_mask(self, mask: ScoresMask) -> "Scores":
+    def _filter_with_scores_mask(self, mask: ScoresMask) -> ScoresType:
         if mask.shape != self.shape:
             raise ValueError(f"Mask has shape {mask.shape}, expected {self.shape}.")
 
@@ -343,7 +344,7 @@ class Scores:
 
         return self._filter_with_dense_mask(mask.to_dense())
 
-    def _filter_sparse_with_sparse_mask(self, mask: ScoresMask) -> "Scores":
+    def _filter_sparse_with_sparse_mask(self, mask: ScoresMask) -> ScoresType:
         mask_coords = set(zip(mask.row.tolist(), mask.col.tolist()))
         filtered = {}
 
@@ -360,7 +361,7 @@ class Scores:
 
         return Scores(filtered)
 
-    def _filter_with_dense_mask(self, mask: np.ndarray) -> "Scores":
+    def _filter_with_dense_mask(self, mask: np.ndarray) -> ScoresType:
         filtered = {}
         for field in self.score_fields:
             arr = self.to_array(field)

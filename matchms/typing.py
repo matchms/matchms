@@ -3,6 +3,7 @@ import numpy as np
 
 
 SpectrumType = NewType("Spectrum", object)
+ScoresType = NewType("Scores", object)
 ReferencesType = QueriesType = Union[List[object], Tuple[object], np.ndarray]
 ScoreFilter = Callable[[np.ndarray], bool]
 
