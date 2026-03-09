@@ -170,16 +170,108 @@ class BaseSimilarity:
         spectra_2, is_symmetric = self._prepare_inputs(spectra_1, spectra_2)
         selected_fields = self._resolve_score_fields(score_fields)
 
+        # No explicit indices given, compute all pairwise comparisons and filter
         if idx_row is None and idx_col is None:
-            idx_row, idx_col = self._all_pair_indices(len(spectra_1), len(spectra_2), is_symmetric)
-        elif idx_row is None or idx_col is None:
-            raise ValueError("idx_row and idx_col must either both be given or both be None.")
-        else:
-            idx_row = np.asarray(idx_row, dtype=np.int_)
-            idx_col = np.asarray(idx_col, dtype=np.int_)
-            if idx_row.shape != idx_col.shape:
-                raise ValueError("idx_row and idx_col must have the same shape.")
+            sparse_result = self._sparse_matrix_from_all_pairs(
+                spectra_1=spectra_1,
+                spectra_2=spectra_2,
+                is_symmetric=is_symmetric,
+                selected_fields=selected_fields,
+                score_filter=score_filter,
+                progress_bar=progress_bar,
+            )
+            return Scores(sparse_result)
 
+        # Both idx_row and idx_col must be given for explicit sparse computation
+        if idx_row is None or idx_col is None:
+            raise ValueError("idx_row and idx_col must either both be given or both be None.")
+
+        # Explicit indices given, compute only those pairs and filter
+        idx_row = np.asarray(idx_row, dtype=np.int_)
+        idx_col = np.asarray(idx_col, dtype=np.int_)
+        if idx_row.shape != idx_col.shape:
+            raise ValueError("idx_row and idx_col must have the same shape.")
+
+        # Avoid redundant computations for symmetric commutative similarities
+        if is_symmetric and self.is_commutative:
+            mask = idx_row <= idx_col
+            idx_row = idx_row[mask]
+            idx_col = idx_col[mask]
+
+        sparse_result = self._sparse_matrix_from_explicit_indices(
+            spectra_1=spectra_1,
+            spectra_2=spectra_2,
+            idx_row=idx_row,
+            idx_col=idx_col,
+            is_symmetric=is_symmetric,
+            selected_fields=selected_fields,
+            score_filter=score_filter,
+            progress_bar=progress_bar,
+        )
+        return Scores(sparse_result)
+
+
+    def _sparse_matrix_from_all_pairs(
+        self,
+        spectra_1: Sequence[SpectrumType],
+        spectra_2: Sequence[SpectrumType],
+        is_symmetric: bool,
+        selected_fields: tuple[str, ...],
+        score_filter: Optional[ScoreFilter],
+        progress_bar: bool,
+    ) -> dict[str, coo_array]:
+        """Compute sparse scores directly from all pairwise comparisons."""
+        out_row = []
+        out_col = []
+        values = []
+
+        for i, spectrum_1 in tqdm(
+            enumerate(spectra_1),
+            total=len(spectra_1),
+            desc="Calculating sparse similarities",
+            disable=not progress_bar,
+        ):
+            if is_symmetric and self.is_commutative:
+                pairs = enumerate(spectra_2[i:], start=i)
+            else:
+                pairs = enumerate(spectra_2)
+
+            for j, spectrum_2 in pairs:
+                score = self._as_score(self.pair(spectrum_1, spectrum_2))
+
+                if not self._should_keep(score, score_filter):
+                    continue
+
+                out_row.append(i)
+                out_col.append(j)
+                values.append(score)
+
+                if is_symmetric and self.is_commutative and i != j:
+                    out_row.append(j)
+                    out_col.append(i)
+                    values.append(score)
+
+        return self._build_sparse_result(
+            idx_row=np.asarray(out_row, dtype=np.int_),
+            idx_col=np.asarray(out_col, dtype=np.int_),
+            values=np.asarray(values, dtype=self.score_datatype),
+            shape=(len(spectra_1), len(spectra_2)),
+            selected_fields=selected_fields,
+        )
+
+
+    def _sparse_matrix_from_explicit_indices(
+        self,
+        spectra_1: Sequence[SpectrumType],
+        spectra_2: Sequence[SpectrumType],
+        idx_row: np.ndarray,
+        idx_col: np.ndarray,
+        is_symmetric: bool,
+        selected_fields: tuple[str, ...],
+        score_filter: Optional[ScoreFilter],
+        progress_bar: bool,
+    ) -> dict[str, coo_array]:
+        """Compute sparse scores for explicitly given index pairs."""
         out_row = []
         out_col = []
         values = []
@@ -206,14 +298,14 @@ class BaseSimilarity:
                 out_col.append(i)
                 values.append(score)
 
-        sparse_result = self._build_sparse_result(
+        return self._build_sparse_result(
             idx_row=np.asarray(out_row, dtype=np.int_),
             idx_col=np.asarray(out_col, dtype=np.int_),
             values=np.asarray(values, dtype=self.score_datatype),
             shape=(len(spectra_1), len(spectra_2)),
             selected_fields=selected_fields,
         )
-        return Scores(sparse_result)
+
 
     def keep_score(self, score) -> bool:
         """Return whether a score should be retained in sparse outputs.
