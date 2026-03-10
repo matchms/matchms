@@ -1,4 +1,6 @@
+import json
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Dict, Optional
 import numpy as np
 from scipy.sparse import coo_array
@@ -160,6 +162,10 @@ class Scores:
     array([[1. , 0. ],
            [0. , 0.8]])
     """
+
+    _FORMAT_NAME = "matchms.Scores"
+    _FORMAT_VERSION = 1
+    _METADATA_KEY = "__scores_metadata__"
 
     def __init__(self, data: Dict[str, np.ndarray | coo_array]):
         if not data:
@@ -345,3 +351,118 @@ class Scores:
             )
 
         return ScoresMask(shape=self.shape, dense_mask=op(self.to_array(), other))
+
+
+    # File I/O methods for saving and loading Scores objects to/from .npz files
+    # ---------------------------------------------------------------------------------
+    def save(self, path: str | Path, compressed: bool = True) -> None:
+        """Save the Scores object to a single `.npz` file.
+
+        Parameters
+        ----------
+        path
+            Output file path.
+        compressed
+            If True, use ``numpy.savez_compressed``. Default is True.
+        """
+        path = Path(path)
+
+        metadata = {
+            "format": self._FORMAT_NAME,
+            "version": self._FORMAT_VERSION,
+            "is_sparse": self.is_sparse,
+            "score_fields": list(self.score_fields),
+            "shape": list(self.shape),
+        }
+
+        payload = {
+            self._METADATA_KEY: np.array(json.dumps(metadata)),
+        }
+
+        if self.is_sparse:
+            for field in self.score_fields:
+                coo = self.to_coo(field)
+                payload[f"{field}__row"] = coo.row
+                payload[f"{field}__col"] = coo.col
+                payload[f"{field}__data"] = coo.data
+        else:
+            for field in self.score_fields:
+                payload[field] = self._data[field]
+
+        saver = np.savez_compressed if compressed else np.savez
+        saver(path, **payload)
+
+    @classmethod
+    def load(cls, path: str | Path) -> "Scores":
+        """Load a Scores object from a `.npz` file.
+
+        Parameters
+        ----------
+        path
+            Input file path.
+
+        Returns
+        -------
+        Scores
+            Reconstructed Scores object.
+        """
+        path = Path(path)
+
+        with np.load(path, allow_pickle=False) as npz:
+            if cls._METADATA_KEY not in npz:
+                raise ValueError(
+                    f"File {path} does not contain {cls._FORMAT_NAME} metadata."
+                )
+
+            metadata =  json.loads(str(npz[cls._METADATA_KEY]))
+            cls._validate_metadata(metadata, path)
+
+            is_sparse = bool(metadata["is_sparse"])
+            score_fields = tuple(metadata["score_fields"])
+            shape = tuple(metadata["shape"])
+
+            data = {}
+            if is_sparse:
+                for field in score_fields:
+                    row_key = f"{field}__row"
+                    col_key = f"{field}__col"
+                    data_key = f"{field}__data"
+
+                    missing = [key for key in (row_key, col_key, data_key) if key not in npz]
+                    if missing:
+                        raise ValueError(
+                            f"File {path} is missing sparse data for field {field!r}: {missing}"
+                        )
+
+                    row = npz[row_key]
+                    col = npz[col_key]
+                    values = npz[data_key]
+                    data[field] = coo_array((values, (row, col)), shape=shape)
+            else:
+                for field in score_fields:
+                    if field not in npz:
+                        raise ValueError(
+                            f"File {path} is missing dense data for field {field!r}."
+                        )
+                    data[field] = npz[field]
+
+        return cls(data)
+
+
+    @classmethod
+    def _validate_metadata(cls, metadata: dict, path: Path) -> None:
+        """Validate loaded metadata."""
+        if metadata.get("format") != cls._FORMAT_NAME:
+            raise ValueError(
+                f"File {path} is not a {cls._FORMAT_NAME} file."
+            )
+        if metadata.get("version") != cls._FORMAT_VERSION:
+            raise ValueError(
+                f"Unsupported {cls._FORMAT_NAME} version {metadata.get('version')} in file {path}."
+            )
+        required_keys = {"format", "version", "is_sparse", "score_fields", "shape"}
+        missing = required_keys.difference(metadata)
+        if missing:
+            raise ValueError(
+                f"File {path} is missing metadata keys: {sorted(missing)}"
+            )
