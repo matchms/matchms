@@ -83,66 +83,6 @@ class ScoresMask:
         return ScoresMask(shape=self.shape, row=row, col=col)
 
 
-@dataclass(frozen=True)
-class ScoresField:
-    """View on one score field.
-    
-    Supports array-like access and comparison operations to create boolean masks.
-    """
-    _scores: ScoresType
-    _field: str
-
-    @property
-    def shape(self) -> tuple[int, int]:
-        return self._scores.shape
-
-    @property
-    def is_sparse(self) -> bool:
-        return self._scores.is_sparse
-
-    def to_array(self) -> np.ndarray:
-        return self._scores.to_array(self._field)
-
-    def to_coo(self) -> coo_array:
-        return self._scores.to_coo(self._field)
-
-    def __getitem__(self, key):
-        return self.to_array()[key]
-
-    def __gt__(self, other):
-        return self._compare(other, np.greater, sparse_safe=True)
-
-    def __ge__(self, other):
-        return self._compare(other, np.greater_equal, sparse_safe=True)
-
-    def __lt__(self, other):
-        return self._compare(other, np.less, sparse_safe=False)
-
-    def __le__(self, other):
-        return self._compare(other, np.less_equal, sparse_safe=False)
-
-    def __eq__(self, other):
-        return self._compare(other, np.equal, sparse_safe=False)
-
-    def __ne__(self, other):
-        return self._compare(other, np.not_equal, sparse_safe=False)
-
-    def _compare(self, other, op, sparse_safe: bool) -> ScoresMask:
-        if not self.is_sparse:
-            return ScoresMask(shape=self.shape, dense_mask=op(self.to_array(), other))
-
-        if sparse_safe and other >= 0:
-            coo = self.to_coo()
-            keep = op(coo.data, other)
-            return ScoresMask(
-                shape=self.shape,
-                row=coo.row[keep],
-                col=coo.col[keep],
-            )
-
-        return ScoresMask(shape=self.shape, dense_mask=op(self.to_array(), other))
-
-
 class Scores:
     """Container for computed matchms scores.
     
@@ -170,7 +110,8 @@ class Scores:
 
     Field access
         Score fields can be accessed by name, for example ``scores["score"]`` or
-        ``scores["matches"]``.
+        ``scores["matches"]``. Field selection returns another ``Scores`` object
+        containing only the selected field.
 
     Scalar scores
         If only one field is present, direct comparisons are supported, for example
@@ -285,8 +226,9 @@ class Scores:
         return self._filter_with_dense_mask(mask)
 
     def __getitem__(self, key):
+        """Access fields, apply masks, or slice score data."""
         if isinstance(key, str):
-            return ScoresField(self, key)
+            return Scores({key: self._data[self._resolve_field(key)]})
 
         if isinstance(key, ScoresMask):
             return self.filter(key)
@@ -313,27 +255,27 @@ class Scores:
 
     def __gt__(self, other):
         """Element-wise comparison for scalar Scores."""
-        return self._compare_scalar(other, "__gt__")
+        return self._compare_scalar(other, np.greater, sparse_safe=True)
 
     def __ge__(self, other):
         """Element-wise comparison for scalar Scores."""
-        return self._compare_scalar(other, "__ge__")
+        return self._compare_scalar(other, np.greater_equal, sparse_safe=True)
 
     def __lt__(self, other):
         """Element-wise comparison for scalar Scores."""
-        return self._compare_scalar(other, "__lt__")
+        return self._compare_scalar(other, np.less, sparse_safe=False)
 
     def __le__(self, other):
         """Element-wise comparison for scalar Scores."""
-        return self._compare_scalar(other, "__le__")
+        return self._compare_scalar(other, np.less_equal, sparse_safe=False)
 
     def __eq__(self, other):
         """Element-wise comparison for scalar Scores."""
-        return self._compare_scalar(other, "__eq__")
+        return self._compare_scalar(other, np.equal, sparse_safe=False)
 
     def __ne__(self, other):
         """Element-wise comparison for scalar Scores."""
-        return self._compare_scalar(other, "__ne__")
+        return self._compare_scalar(other, np.not_equal, sparse_safe=False)
 
     def _filter_with_scores_mask(self, mask: ScoresMask) -> ScoresType:
         if mask.shape != self.shape:
@@ -382,17 +324,24 @@ class Scores:
             raise KeyError(f"Unknown field {field!r}. Available fields: {self.score_fields}.")
         return field
 
-    def _compare_scalar(self, other, method_name: str) -> ScoresMask:
-        """Forward scalar comparisons to the only score field.
-
-        Direct comparisons such as ``scores > 0.5`` are only supported when
-        exactly one score field is present.
-        """
+    def _compare_scalar(self, other, op, sparse_safe: bool) -> ScoresMask:
+        """Compare scalar Scores against a value and return a mask."""
         if not self.is_scalar:
             raise TypeError(
                 "Direct comparisons are only supported for scalar Scores. "
                 f"Available score fields: {self.score_fields}."
             )
 
-        field = self[self.score_fields[0]]
-        return getattr(field, method_name)(other)
+        if not self.is_sparse:
+            return ScoresMask(shape=self.shape, dense_mask=op(self.to_array(), other))
+
+        if sparse_safe and other >= 0:
+            coo = self.to_coo()
+            keep = op(coo.data, other)
+            return ScoresMask(
+                shape=self.shape,
+                row=coo.row[keep],
+                col=coo.col[keep],
+            )
+
+        return ScoresMask(shape=self.shape, dense_mask=op(self.to_array(), other))
