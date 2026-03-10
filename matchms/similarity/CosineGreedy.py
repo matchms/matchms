@@ -26,17 +26,17 @@ class CosineGreedy(BaseSimilarity):
         from matchms import Spectrum
         from matchms.similarity import CosineGreedy
 
-        reference = Spectrum(mz=np.array([100, 150, 200.]),
+        spectrum_1 = Spectrum(mz=np.array([100, 150, 200.]),
                              intensities=np.array([0.7, 0.2, 0.1]),
                              metadata={"precursor_mz": 200.0})
-        query = Spectrum(mz=np.array([100, 140, 190.]),
+        spectrum_2 = Spectrum(mz=np.array([100, 140, 190.]),
                          intensities=np.array([0.4, 0.2, 0.1]),
                          metadata={"precursor_mz": 190.0})
 
         # Use factory to construct a similarity function
         cosine_greedy = CosineGreedy(tolerance=0.2)
 
-        score = cosine_greedy.pair(reference, query)
+        score = cosine_greedy.pair(spectrum_1, spectrum_2)
 
         print(f"Cosine score is {score['score']:.2f} with {score['matches']} matched peaks")
 
@@ -48,10 +48,11 @@ class CosineGreedy(BaseSimilarity):
 
     """
 
-    # Set key characteristics as class attributes
+    # Set key characteristics as class attributes (see BaseSimilarity for details).
     is_commutative = True
-    # Set output data type, e.g. ("score", "float") or [("score", "float"), ("matches", "int")]
     score_datatype = [("score", np.float64), ("matches", "int")]
+    score_fields =("score", "matches")
+
 
     def __init__(self, tolerance: float = 0.1, mz_power: float = 0.0, intensity_power: float = 1.0):
         """
@@ -69,20 +70,21 @@ class CosineGreedy(BaseSimilarity):
         self.mz_power = mz_power
         self.intensity_power = intensity_power
 
-    def pair(self, reference: SpectrumType, query: SpectrumType) -> Tuple[float, int]:
+    def pair(self, spectrum_1: SpectrumType, spectrum_2: SpectrumType) -> Tuple[float, int]:
         """Calculate cosine score between two spectra.
 
         Parameters
         ----------
-        reference
-            Single reference spectrum.
-        query
-            Single query spectrum.
+        spectrum_1
+            First spectrum.
+        spectrum_2
+            Second spectrum.
 
         Returns
         -------
         Score
             Tuple with cosine score and number of matched peaks.
+            The score can be access as `score["score"]` and the number of matched peaks as `score["matches"]`.
         """
 
         def get_matching_pairs():
@@ -96,8 +98,8 @@ class CosineGreedy(BaseSimilarity):
             matching_pairs = matching_pairs[np.argsort(matching_pairs[:, 2], kind="mergesort")[::-1], :]
             return matching_pairs
 
-        spec1 = reference.peaks.to_numpy
-        spec2 = query.peaks.to_numpy
+        spec1 = spectrum_1.peaks.to_numpy
+        spec2 = spectrum_2.peaks.to_numpy
         matching_pairs = get_matching_pairs()
         if matching_pairs is None:
             return np.asarray((float(0), 0), dtype=self.score_datatype)
