@@ -1,7 +1,7 @@
 from typing import Generator
 import numpy as np
 import pandas as pd
-import Spectrum
+from matchms.Spectrum import Spectrum
 from scipy.sparse import coo_array, csr_array
 
 
@@ -38,7 +38,7 @@ class SpectraCollection:
 
     @property
     def metadata(self) -> pd.DataFrame:
-        return self._metadata
+        return MetadataProxy(self._metadata, self)
 
     @property
     def fragments(self) -> csr_array:
@@ -110,3 +110,28 @@ class SpectraCollection:
         self._metadata = self._metadata.iloc[indices].reset_index(drop=True)
 
         return self
+
+
+class MetadataProxy(pd.DataFrame):
+    """
+    Metadata proxy class.
+    Used for filter directly on metadata and synchronize fragments.
+    """
+    _metadata = ["_collection"]
+
+    def __init__(self, data, collection=None, *args, **kwargs):
+        super().__init__(data, *args, **kwargs)
+        object.__setattr__(self, "_collection", collection)
+
+    @property
+    def _constructor(self):
+        return MetadataProxy
+
+    def sort_values(self, by, **kwargs):
+        kwargs.pop('inplace', None)
+        sorted_df = super().sort_values(by=by, **kwargs)
+
+        if self._collection is not None:
+            self._collection._reorder(sorted_df.index.values)
+
+        return MetadataProxy(self._collection._metadata, self._collection)
