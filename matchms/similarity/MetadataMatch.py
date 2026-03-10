@@ -110,8 +110,8 @@ class MetadataMatch(BaseSimilarity):
         return np.asarray(False, dtype=self.score_datatype)
 
     def matrix(self,
-               references: List[SpectrumType],
-               queries: List[SpectrumType],
+               spectra_1: List[SpectrumType],
+               spectra_2: List[SpectrumType],
                array_type: str = "numpy",
                is_symmetric: bool = False) -> np.ndarray:
         """Compare parent masses between all references and queries.
@@ -119,9 +119,9 @@ class MetadataMatch(BaseSimilarity):
         Parameters
         ----------
         references
-            List/array of reference spectra.
+            List/array of input spectra.
         queries
-            List/array of Single query spectra.
+            List/array of input spectra.
         array_type
             Specify the output array type. Can be "numpy" or "sparse".
             Default is "numpy" and will return a numpy array. "sparse" will return a COO-sparse array.

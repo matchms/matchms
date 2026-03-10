@@ -162,8 +162,8 @@ class FlashSimilarity(BaseSimilarity):
 
     # FAST + PARALLEL score matrix computation
     def matrix(self,
-               references: List[SpectrumType],
-               queries: List[SpectrumType],
+               spectra_1: List[SpectrumType],
+               spectra_2: List[SpectrumType],
                array_type: str = "numpy",
                is_symmetric: bool = False,
                n_jobs: int = -1) -> np.ndarray:
@@ -172,10 +172,10 @@ class FlashSimilarity(BaseSimilarity):
         
         Parameters:
         ----------
-        references:
-            List of reference spectra.
-        queries:
-            List of query spectra.
+        spectra_1:
+            List of input spectra.
+        spectra_2:
+            List of input spectra.
         array_type:
             Specify the output array type. Can be "numpy" or "sparse".
             Default is "numpy" and will return a numpy array. "sparse" will return a SparseStacked COO-style array.
@@ -204,7 +204,7 @@ class FlashSimilarity(BaseSimilarity):
         # 1) Preprocess LIBRARY once
         lib_proc = []
         lib_pmz = []
-        for s in queries:
+        for s in spectra_2:
             peaks = s.peaks.to_numpy
             pmz = s.metadata.get("precursor_mz", None)
             cleaned = _clean_and_weight(peaks, pmz,

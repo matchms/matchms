@@ -175,7 +175,7 @@ class BlinkCosine(BaseSimilarity):
             score = min(score, 1.0)
         return np.asarray((score, matches), dtype=self.score_datatype)
 
-    def matrix(self, references: List[SpectrumType], queries: List[SpectrumType],
+    def matrix(self, spectra_1: List[SpectrumType], spectra_2: List[SpectrumType],
                array_type: str = "numpy",
                is_symmetric: bool = False):
         """
@@ -190,10 +190,10 @@ class BlinkCosine(BaseSimilarity):
 
         Parameters
         ----------
-        references:
-            List of reference spectra.
-        queries:
-            List of query spectra.
+        spectra_1:
+            List of input spectra.
+        spectra_2:
+            List of input spectra.
         array_type
             Specify the output array type. Can be "numpy" or "sparse".
             Default is "numpy" and will return a numpy array. "sparse" will return a COO-sparse array
@@ -271,7 +271,7 @@ class BlinkCosine(BaseSimilarity):
         if array_type == "numpy":
             if self.clip_to_one:
                 np.minimum(S, 1.0, out=S)
-            if is_symmetric and n_ref == n_qry and references is queries:
+            if is_symmetric and n_ref == n_qry and spectra_1 is spectra_2:
                 # Optional: enforce exact symmetry (no computational saving here)
                 S = 0.5 * (S + S.T)
             return S

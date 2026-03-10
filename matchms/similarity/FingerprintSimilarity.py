@@ -106,18 +106,18 @@ class FingerprintSimilarity(BaseSimilarity):
         raise NotImplementedError
 
     def matrix(self,
-               references: List[SpectrumType],
-               queries: List[SpectrumType],
+               spectra_1: List[SpectrumType],
+               spectra_2: List[SpectrumType],
                array_type: str = "numpy",
                is_symmetric: bool = False) -> np.array:
         """Calculate matrix of fingerprint based similarity scores.
 
         Parameters
         ----------
-        references:
-            List of reference spectra.
-        queries:
-            List of query spectra.
+        spectra_1:
+            List of input spectra.
+        spectra_2:
+            List of input spectra.
         array_type
             Specify the output array type. Can be "numpy" or "sparse".
             Default is "numpy" and will return a numpy array. "sparse" will return a COO-sparse array
