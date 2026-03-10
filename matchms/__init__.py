@@ -8,6 +8,7 @@ from .logging_functions import _init_logger, set_matchms_logger_level, set_rdkit
 from .Metadata import Metadata
 from .Pipeline import Pipeline
 from .Scores import Scores
+from .SpectraCollection import SpectraCollection
 from .Spectrum import Spectrum
 
 
@@ -48,6 +49,7 @@ __all__ = [
     "Scores",
     "set_matchms_logger_level",
     "similarity",
+    "SpectraCollection",
     "Spectrum",
     "SpectrumProcessor",
 ]
