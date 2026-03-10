@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 from scipy.sparse import coo_array
-from matchms.Scores import Scores, ScoresField, ScoresMask
+from matchms.Scores import Scores, ScoresMask
 
 
 @pytest.fixture
@@ -105,10 +105,10 @@ def test_scores_repr_contains_shape_and_fields(dense_multi_scores):
 
 
 def test_scores_get_field_returns_scoresfield(dense_multi_scores):
-    field = dense_multi_scores["score"]
-    assert isinstance(field, ScoresField)
-    assert field.shape == (2, 3)
-    assert field.is_sparse is False
+    subset = dense_multi_scores["score"]
+    assert isinstance(subset, Scores)
+    assert subset.shape == (2, 3)
+    assert subset.is_sparse is False
 
 
 def test_scores_unknown_field_raises(dense_multi_scores):
