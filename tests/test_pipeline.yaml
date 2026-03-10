@@ -25,5 +25,5 @@ reference_filters: processing_queries
 score_computations:
 - - precursormzmatch
   - tolerance: 120.0
-- - modifiedcosine
+- - modifiedcosinegreedy
   - tolerance: 10.0

@@ -6,9 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## unpublished
+
+## [0.31.0] - 2025-10-06
 ### Added
+- New `FlashSimilarity` score class [#827](https://github.com/matchms/matchms/pull/8267. This conceptually follows the Flash Entropy proposed by Li & Fiehn (2023) and allows much faster computation than, for instance, `CosineGreedy` or `ModifiedCosine`. It is possible to choose different `score_type` (can be `spectral entropy` or `cosine`) as well as `matching_mode` (can be `fragment`, `neutral_loss` or `hybrid`). To compute modified cosine scores, for instance, this would be `cosine` together with `hybrid`).
+- New `BlinkCosine` similarity score that is largely following the BLINK score proposed by Harwood et al. (2023), representing a fast-to-compute approximation of the Cosine score between MS/MS spectra [#829](https://github.com/matchms/matchms/pull/826).
 - New `add_precursor_formula` filter [#826](https://github.com/matchms/matchms/pull/826).
 - New `remove_peaks_relative_to_precursor_mz` filter [#833](https://github.com/matchms/matchms/pull/833).
+
+### Changed
+- Added Min-Max scaling to normalize intensities filter [#830](https://github.com/matchms/matchms/pull/830).
 
 ## [0.30.2] - 2025-06-27
 ### Changed
@@ -758,7 +765,8 @@ Contains three plot types: `plot_spectrum()` or `spectrum.plot()`, `plot_spectra
 - This is the initial version of Spec2Vec from https://github.com/iomega/Spec2Vec
 - (later splitted into matchms + spec2vec)
 
-[Unreleased]: https://github.com/matchms/matchms/compare/0.30.2...HEAD
+[Unreleased]: https://github.com/matchms/matchms/compare/0.31.0...HEAD
+[0.31.0]: https://github.com/matchms/matchms/compare/0.30.2...0.31.0
 [0.30.2]: https://github.com/matchms/matchms/compare/0.30.1...0.30.2
 [0.30.1]: https://github.com/matchms/matchms/compare/0.30.0...0.30.1
 [0.30.0]: https://github.com/matchms/matchms/compare/0.29.0...0.30.0

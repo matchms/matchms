@@ -106,6 +106,9 @@ jobs:
       matrix:
         os: ['ubuntu-latest', 'macos-latest', 'windows-latest']
         python-version: ['3.10', '3.11', '3.12', '3.13']
+        exclude:
+          - os: 'macos-latest'
+            python-version: ['3.10', '3.11']
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
@@ -140,7 +143,7 @@ jobs:
         uses: conda-incubator/setup-miniconda@v3
         with:
           auto-update-conda: true
-          python-version: '3.10'
+          python-version: '3.12'
       - name: Show conda config
         shell: bash -l {0}
         run: |
@@ -161,7 +164,7 @@ jobs:
       - name: Install conda dependencies
         shell: bash -l {0}
         run: |
-          conda install -c conda-forge poetry
+          conda install -c conda-forge --strict-channel-priority poetry
       - name: Install with development dependencies
         shell: bash -l {0}
         run: |
