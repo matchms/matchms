@@ -220,42 +220,80 @@ class BaseSimilarity:
         score_filter: Optional[ScoreFilter],
         progress_bar: bool,
     ) -> dict[str, coo_array]:
-        """Compute sparse scores directly from all pairwise comparisons."""
-        out_row = []
-        out_col = []
-        values = []
+        """Compute sparse scores directly from all pairwise comparisons.
+
+        This implementation avoids Python list growth across the full matrix by
+        collecting kept scores row-wise in NumPy arrays and storing trimmed row
+        chunks. This is substantially more memory efficient than repeated append
+        operations for large computations.
+        """
+        n_rows = len(spectra_1)
+        n_cols = len(spectra_2)
+
+        row_chunks = []
+        col_chunks = []
+        value_chunks = []
 
         for i, spectrum_1 in tqdm(
             enumerate(spectra_1),
-            total=len(spectra_1),
+            total=n_rows,
             desc="Calculating sparse similarities",
             disable=not progress_bar,
         ):
             if is_symmetric and self.is_commutative:
-                pairs = enumerate(spectra_2[i:], start=i)
+                start_j = i
+                row_capacity = n_cols - i
             else:
-                pairs = enumerate(spectra_2)
+                start_j = 0
+                row_capacity = n_cols
 
-            for j, spectrum_2 in pairs:
+            row_chunk = np.empty(row_capacity, dtype=np.int_)
+            col_chunk = np.empty(row_capacity, dtype=np.int_)
+            value_chunk = np.empty(row_capacity, dtype=self.score_datatype)
+
+            fill = 0
+            for j in range(start_j, n_cols):
+                spectrum_2 = spectra_2[j]
                 score = self._as_score(self.pair(spectrum_1, spectrum_2))
 
                 if not self._should_keep(score, score_filter):
                     continue
 
-                out_row.append(i)
-                out_col.append(j)
-                values.append(score)
+                row_chunk[fill] = i
+                col_chunk[fill] = j
+                value_chunk[fill] = score
+                fill += 1
 
-                if is_symmetric and self.is_commutative and i != j:
-                    out_row.append(j)
-                    out_col.append(i)
-                    values.append(score)
+            if fill > 0:
+                kept_rows = row_chunk[:fill].copy()
+                kept_cols = col_chunk[:fill].copy()
+                kept_values = value_chunk[:fill].copy()
+
+                row_chunks.append(kept_rows)
+                col_chunks.append(kept_cols)
+                value_chunks.append(kept_values)
+
+                if is_symmetric and self.is_commutative:
+                    offdiag = kept_rows != kept_cols
+                    if np.any(offdiag):
+                        row_chunks.append(kept_cols[offdiag].copy())
+                        col_chunks.append(kept_rows[offdiag].copy())
+                        value_chunks.append(kept_values[offdiag].copy())
+
+        if not row_chunks:
+            idx_row = np.array([], dtype=np.int_)
+            idx_col = np.array([], dtype=np.int_)
+            values = np.array([], dtype=self.score_datatype)
+        else:
+            idx_row = np.concatenate(row_chunks)
+            idx_col = np.concatenate(col_chunks)
+            values = np.concatenate(value_chunks)
 
         return self._build_sparse_result(
-            idx_row=np.asarray(out_row, dtype=np.int_),
-            idx_col=np.asarray(out_col, dtype=np.int_),
-            values=np.asarray(values, dtype=self.score_datatype),
-            shape=(len(spectra_1), len(spectra_2)),
+            idx_row=idx_row,
+            idx_col=idx_col,
+            values=values,
+            shape=(n_rows, n_cols),
             selected_fields=selected_fields,
         )
 
