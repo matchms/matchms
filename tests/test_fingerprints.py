@@ -1,11 +1,9 @@
 import logging
-
 import numpy as np
 import pandas as pd
 import pytest
 import scipy.sparse as sp
 from rdkit.Chem import rdFingerprintGenerator
-
 from matchms import Spectrum
 from matchms.Fingerprints import Fingerprints
 from tests.builder_Spectrum import SpectrumBuilder
@@ -216,7 +214,7 @@ def test_get_fingerprint_by_inchikey_invalid_logs_warning(valid_spectrum, finger
     assert "The provided InChIKey is not valid or may be the short form." in caplog.text
 
 
-def test_get_fingerprint_by_inchikey_short_key_raises_without_ignore_stereochemistry(valid_spectrum, fingerprint_generator):
+def test_get_fingerprint_by_inchikey_short_key_raises(valid_spectrum, fingerprint_generator):
     fp = Fingerprints(fingerprint_generator=fingerprint_generator)
     fp.compute_fingerprints([valid_spectrum])
 
@@ -224,7 +222,7 @@ def test_get_fingerprint_by_inchikey_short_key_raises_without_ignore_stereochemi
         fp.get_fingerprint_by_inchikey("KFDYZSPFVRTLML")
 
 
-def test_get_fingerprint_by_inchikey_short_key_works_with_ignore_stereochemistry(valid_spectrum, fingerprint_generator):
+def test_get_fingerprint_by_inchikey_short_key_works_with_ignore(valid_spectrum, fingerprint_generator):
     fp = Fingerprints(
         fingerprint_generator=fingerprint_generator,
         ignore_stereochemistry=True,
@@ -243,7 +241,12 @@ def test_get_fingerprint_by_spectrum(valid_spectrum, fingerprint_generator):
     assert isinstance(fingerprint, np.ndarray)
 
 
-def test_compute_fingerprint_valid(valid_spectrum, invalid_metadata_spectrum, valid_inchi_spectrum, fingerprint_generator):
+def test_compute_fingerprint_valid(
+        valid_spectrum,
+        invalid_metadata_spectrum,
+        valid_inchi_spectrum,
+        fingerprint_generator
+        ):
     fp = Fingerprints(fingerprint_generator=fingerprint_generator)
 
     assert isinstance(fp.compute_fingerprint(valid_spectrum), np.ndarray)
@@ -321,7 +324,11 @@ def test_compute_fingerprints_replaces_previous_state(valid_spectrum, valid_spec
     }
 
 
-def test_get_fingerprint_by_spectrum_without_inchikey_returns_none(invalid_metadata_spectrum, fingerprint_generator, caplog):
+def test_get_fingerprint_by_spectrum_without_inchikey_returns_none(
+        invalid_metadata_spectrum,
+        fingerprint_generator,
+        caplog
+        ):
     fp = Fingerprints(fingerprint_generator=fingerprint_generator)
     fp.compute_fingerprints([])
 

@@ -2,14 +2,13 @@ from typing import Optional, Sequence, Union
 import numpy as np
 import scipy.sparse as sp
 from chemap.metrics import (
-    tanimoto_similarity,
     tanimoto_similarity_matrix,
 )
 from matchms.Fingerprints import Fingerprints
 from matchms.Scores import Scores
 from matchms.typing import SpectrumType
 from .BaseSimilarity import BaseSimilarity
-from .vector_similarity_functions import cosine_similarity, cosine_similarity_matrix
+from .vector_similarity_functions import cosine_similarity_matrix
 
 
 class FingerprintSimilarity(BaseSimilarity):

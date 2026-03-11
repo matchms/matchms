@@ -215,7 +215,8 @@ def test_get_top_hits_ignore_diagonal():
     for i, spec_id in enumerate(identifiers):
         assert i not in idx_row[spec_id]
         if len(scores_row[spec_id]) > 0:
-            assert not np.any(np.isclose(scores_row[spec_id], dense[i, i])) or dense[i, i] != np.max(scores_row[spec_id])
+            assert not np.any(np.isclose(scores_row[spec_id], dense[i, i]))\
+                or dense[i, i] != np.max(scores_row[spec_id])
 
 
 def test_get_top_hits_ignore_diagonal_requires_square():
