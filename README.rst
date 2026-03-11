@@ -246,8 +246,7 @@ Alternatively, in particular, if you need more room to add custom functions and 
 
     # Calculate Cosine similarity scores between all spectra
     # For other similarity score methods see https://matchms.readthedocs.io/en/latest/api/matchms.similarity.html .
-    scores = calculate_scores(references=spectra,
-                              queries=spectra,
+    scores = calculate_scores(spectra_1=spectra,
                               similarity_function=CosineGreedy())
 
     # Matchms allows to get the best matches for any query using scores_by_query
