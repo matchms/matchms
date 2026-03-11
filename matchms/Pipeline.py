@@ -1,419 +1,419 @@
 import logging
+import operator
 import os
 from collections import OrderedDict
 from datetime import datetime
 from typing import Callable, Iterable, List, Optional, Sequence, Union
-from deprecated import deprecated
+import numpy as np
 import matchms.similarity as mssimilarity
 from matchms.filtering.filter_order import ALL_FILTERS
-from matchms.filtering.SpectrumProcessor import FunctionWithParametersType, SpectrumProcessor
+from matchms.filtering.SpectrumProcessor import (
+    FunctionWithParametersType,
+    SpectrumProcessor,
+)
 from matchms.importing.load_spectra import load_list_of_spectrum_files
-from matchms.logging_functions import add_logging_to_file, reset_matchms_logger, set_matchms_logger_level
+from matchms.logging_functions import (
+    add_logging_to_file,
+    reset_matchms_logger,
+    set_matchms_logger_level,
+)
+from matchms.Scores import Scores, ScoresMask
 from matchms.similarity.BaseSimilarity import BaseSimilarity
-from matchms.similarity.ScoresMask import ScoresMask
 from matchms.typing import SpectrumType
 from matchms.yaml_file_functions import load_workflow_from_yaml_file, ordered_dump
 
 
-_masking_functions = ["mask"]
-
-_score_functions = {}
-for key, f in mssimilarity.__dict__.items():
-    if isinstance(f, type) and issubclass(f, BaseSimilarity) and f is not BaseSimilarity:
-        _score_functions[key.lower()] = f
 logger = logging.getLogger("matchms")
-# ruff: noqa: E501
+
+_MASKING_FUNCTIONS = {"mask"}
+
+_SCORE_FUNCTIONS = {}
+for key, value in mssimilarity.__dict__.items():
+    if isinstance(value, type) and issubclass(value, BaseSimilarity) and value is not BaseSimilarity:
+        _SCORE_FUNCTIONS[key.lower()] = value
 
 
 def create_workflow(
     yaml_file_name: Optional[str] = None,
-    query_filters: Iterable[Union[str, Callable, FunctionWithParametersType]] = (),
-    reference_filters: Iterable[Union[str, Callable, FunctionWithParametersType]] = (),
+    spectra_1_filters: Iterable[Union[str, Callable, FunctionWithParametersType]] = (),
+    spectra_2_filters: Iterable[Union[str, Callable, FunctionWithParametersType]] = (),
     score_computations: Iterable[Union[str, List[Union[str, dict]]]] = (),
 ) -> OrderedDict:
-    """Creates a workflow that specifies the filters and scores needed to be run by Pipeline
-
-    Example code can be found in the docstring of Pipeline.
-
-    :param yaml_file_name:
-        A yaml file containing the workflow settings will be saved if a file name is specified.
-        If None no yaml file will be saved.
-    :param query_filters:
-        Additional filters that should be applied to the query spectra.
-    :param reference_filters:
-        Additional filters that should be applied to the reference spectra
-    :param score_computations:
-        Score computations that should be performed.
-    """
+    """Create a workflow specification for Pipeline."""
     workflow = OrderedDict()
-    queries_processor = SpectrumProcessor(query_filters)
-    workflow["query_filters"] = queries_processor.processing_steps
-    reference_processor = SpectrumProcessor(reference_filters)
-    workflow["reference_filters"] = reference_processor.processing_steps
-    workflow["score_computations"] = score_computations
+
+    processor_1 = SpectrumProcessor(spectra_1_filters)
+    processor_2 = SpectrumProcessor(spectra_2_filters)
+
+    workflow["spectra_1_filters"] = processor_1.processing_steps
+    workflow["spectra_2_filters"] = processor_2.processing_steps
+    workflow["score_computations"] = list(score_computations)
+
     if yaml_file_name is not None:
-        assert not os.path.exists(yaml_file_name), (
-            "This yaml file name already exists. "
-            "To use the settings in the yaml file, please use the load_workflow_from_yaml_file function "
-            "in yaml_file_functions.py or check the tutorial."
-        )
+        if os.path.exists(yaml_file_name):
+            raise FileExistsError(
+                "This yaml file already exists. "
+                "Use load_workflow_from_yaml_file(...) to load an existing workflow."
+            )
         with open(yaml_file_name, "w", encoding="utf-8") as file:
-            file.write("# Matchms pipeline config file \n")
-            file.write("# Change and adapt fields where necessary \n")
-            file.write("# " + 20 * "=" + " \n")
+            file.write("# Matchms pipeline config file\n")
+            file.write("# Change and adapt fields where necessary\n")
+            file.write("# " + 20 * "=" + "\n")
             ordered_dump(workflow, file)
-    workflow["query_filters"] = queries_processor.filters
-    workflow["reference_filters"] = reference_processor.filters
+
     return workflow
 
 
 class Pipeline:
     """Central pipeline class.
 
-    The matchms Pipeline class is meant to make running extensive analysis pipelines
-    fast and easy. It can be used in two different ways. First, a pipeline can be defined
-    using a config file (a yaml file, best to start from the template provided to define
-    your own pipline).
+    The pipeline applies filters to one or two collections of spectra and then
+    executes a sequence of similarity computations and mask steps.
 
-    Once a config file is defined, the pipeline can be executed with the following code:
-
-    .. code-block:: python
-        from matchms.Pipeline import Pipeline, load_workflow_from_yaml_file
-
-        workflow = load_workflow_from_yaml_file("my_config_file.yaml")
-        pipeline = Pipeline(workflow)
-
-        # Optional steps
-        pipeline.logging_file = "my_pipeline.log"
-        pipeline.logging_level = "ERROR"
-
-        pipeline.run("my_spectra.mgf")
-
-    The second way to define a pipeline is via a Python script. The following code is an
-    example of how this works:
-
-    .. code-block:: python
-        from matchms.Pipeline import Pipeline, create_workflow
-
-        workflow = create_workflow(
-            yaml_file_name="my_config_file.yaml",  # The workflow will be stored in a yaml file.
-            query_filters=[
-                ["add_parent_mass"],
-                ["normalize_intensities"],
-                ["select_by_relative_intensity", {"intensity_from": 0.0, "intensity_to": 1.0}],
-                ["select_by_mz", {"mz_from": 0, "mz_to": 1000}],
-                ["require_minimum_number_of_peaks", {"n_required": 5}],
-            ],
-            reference_filters=["add_fingerprint"],
-            score_computations=[
-                ["precursormzmatch", {"tolerance": 120.0}],
-                ["mask", {"operation": "==", "value": True}],
-                ["cosinegreedy", {"tolerance": 1.0}],
-                ["mask", {"operation": ">=", "value": 0.3}],
-                ["modifiedcosinegreedy", {"tolerance": 1.0}],
-            ],
-        )
-
-        pipeline = Pipeline(workflow)
-        pipeline.logging_file = "my_pipeline.log"
-        pipeline.logging_level = "WARNING"
-        pipeline.run("my_query_spectra.mgf", "my_reference_spectra.mgf")
-
-
-    To combine this with custom made scores or available matchms-compatible scores
-    such as `Spec2Vec` or `MS2DeepScore`, it is also possible to pass objects instead of
-    names to create_workflow
-
-    .. code-block:: python
-
-        from spec2vec import Spec2Vec
-
-        workflow = create_workflow(
-            score_computations=[
-                ["precursormzmatch", {"tolerance": 120.0}],
-                ["mask", {"operation": ">=", "value": 0.3}],
-                [Spec2Vec, {"model": "my_spec2vec_model.model"}],
-            ]
-        )
+    Notes
+    -----
+    - If only ``spectra_1`` is provided during :meth:`run`, the pipeline assumes
+      a symmetric all-vs-all computation and sets ``is_symmetric=True``.
+    - If ``spectra_2`` is also provided, the pipeline computes ``spectra_1`` vs
+      ``spectra_2`` and sets ``is_symmetric=False``.
     """
 
     def __init__(
         self,
         workflow: OrderedDict,
-        progress_bar=True,
+        progress_bar: bool = True,
         logging_level: str = "WARNING",
         logging_file: Optional[str] = None,
     ):
-        """
-        Parameters
-        ----------
-        workflow:
-            Contains an orderedDict containing the workflow settings. Can be created using create_workflow.
-        progress_bar:
-            Default is True. Set to False if no progress bar should be displayed.
-        """
-        self._spectra_queries = []
-        self._spectra_references = []
+        self._spectra_1: List[SpectrumType] = []
+        self._spectra_2: Optional[List[SpectrumType]] = None
         self.is_symmetric = False
-        self.scores = None
-        self.mask = None
 
+        self.scores: Optional[Scores] = None
+        self.mask: Optional[ScoresMask] = None
+
+        self.progress_bar = progress_bar
         self.logging_level = logging_level
         self.logging_file = logging_file
-        self.progress_bar = progress_bar
+
         self.__workflow = workflow
         self.check_workflow()
 
-        self._initialize_spectrum_processor_queries()
-        if self.is_symmetric is False:
-            self._initialize_spectrum_processor_references()
+        self.processing_spectra_1: Optional[SpectrumProcessor] = None
+        self.processing_spectra_2: Optional[SpectrumProcessor] = None
 
-    def _initialize_spectrum_processor_queries(self):
-        """Initialize spectrum processing workflow for the query spectra."""
-        self.write_to_logfile("--- Processing pipeline query spectra: ---")
-        self.processing_queries = SpectrumProcessor(self.__workflow["query_filters"])
-        self.write_to_logfile(str(self.processing_queries))
-        if self.processing_queries.processing_steps != self.__workflow["query_filters"]:
-            logger.warning("The order of the filters has been changed compared to the Yaml file.")
+        self._initialize_spectrum_processor_1()
+        self._initialize_spectrum_processor_2()
 
-    def _initialize_spectrum_processor_references(self):
-        """Initialize spectrum processing workflow for the reference spectra."""
-        self.write_to_logfile("--- Processing pipeline reference spectra: ---")
-
-        self.processing_references = SpectrumProcessor(self.__workflow["reference_filters"])
-        self.write_to_logfile(str(self.processing_references))
-        if self.processing_queries.processing_steps != self.__workflow["query_filters"]:
-            logger.warning("The order of the filters has been changed compared to the Yaml file.")
-
-    def check_workflow(self):
-        """Define Pipeline workflow based on a yaml file (config_file)."""
-        assert isinstance(self.__workflow, OrderedDict), (
-            f"Workflow is expectd to be a OrderedDict, instead it was of type {type(self.__workflow)}"
+    @classmethod
+    def from_yaml(
+        cls,
+        yaml_file_name: str,
+        progress_bar: bool = True,
+        logging_level: str = "WARNING",
+        logging_file: Optional[str] = None,
+    ) -> "Pipeline":
+        workflow = load_workflow_from_yaml_file(yaml_file_name)
+        return cls(
+            workflow=workflow,
+            progress_bar=progress_bar,
+            logging_level=logging_level,
+            logging_file=logging_file,
         )
-        expected_keys = {"query_filters", "reference_filters", "score_computations"}
-        assert set(self.__workflow.keys()) == expected_keys
-        check_score_computation(score_computations=self.score_computations)
+
+    def _initialize_spectrum_processor_1(self) -> None:
+        self.write_to_logfile("--- Processing pipeline spectra_1: ---")
+        self.processing_spectra_1 = SpectrumProcessor(self.__workflow["spectra_1_filters"])
+        self.write_to_logfile(str(self.processing_spectra_1))
+        if self.processing_spectra_1.processing_steps != self.__workflow["spectra_1_filters"]:
+            logger.warning("The order of spectra_1 filters has been changed compared to the yaml file.")
+
+    def _initialize_spectrum_processor_2(self) -> None:
+        self.write_to_logfile("--- Processing pipeline spectra_2: ---")
+        self.processing_spectra_2 = SpectrumProcessor(self.__workflow["spectra_2_filters"])
+        self.write_to_logfile(str(self.processing_spectra_2))
+        if self.processing_spectra_2.processing_steps != self.__workflow["spectra_2_filters"]:
+            logger.warning("The order of spectra_2 filters has been changed compared to the yaml file.")
+
+    def check_workflow(self) -> None:
+        if not isinstance(self.__workflow, OrderedDict):
+            raise TypeError(
+                "Workflow is expected to be an OrderedDict, "
+                f"but got type {type(self.__workflow)}."
+            )
+        expected_keys = {"spectra_1_filters", "spectra_2_filters", "score_computations"}
+        if set(self.__workflow.keys()) != expected_keys:
+            raise ValueError(
+                f"Workflow must contain exactly keys {expected_keys}, "
+                f"but got {set(self.__workflow.keys())}."
+            )
+
+        check_score_computation(self.__workflow["score_computations"])
 
     def run(
         self,
-        query_files,
-        reference_files=None,
-        cleaned_query_file=None,
-        cleaned_reference_file=None,
-        create_report=True,
+        spectra_1,
+        spectra_2=None,
+        cleaned_spectra_1_file=None,
+        cleaned_spectra_2_file=None,
+        create_report: bool = True,
     ):
-        """Execute the defined Pipeline workflow.
-
-        This method will execute all steps of the workflow.
-        1) Initializing the log file and importing the spectra
-        2) Spectrum processing (using matchms filters)
-        3) Score Computations
-        """
-        if cleaned_reference_file is not None:
-            if os.path.exists(cleaned_reference_file):
-                raise FileExistsError("The specified save references file already exists")
-        if cleaned_query_file is not None:
-            if os.path.exists(cleaned_query_file):
-                raise FileExistsError("The specified save queries file already exists")
+        """Execute the pipeline workflow."""
+        if cleaned_spectra_1_file is not None and os.path.exists(cleaned_spectra_1_file):
+            raise FileExistsError("The specified cleaned spectra_1 file already exists.")
+        if cleaned_spectra_2_file is not None and os.path.exists(cleaned_spectra_2_file):
+            raise FileExistsError("The specified cleaned spectra_2 file already exists.")
 
         self.set_logging()
         self.write_to_logfile("--- Start running matchms pipeline. ---")
-        self.write_to_logfile(f"Start time: {str(datetime.now())}")
-        self.import_spectra(query_files, reference_files)
+        self.write_to_logfile(f"Start time: {datetime.now()}")
 
-        # Processing
+        self.import_spectra(spectra_1, spectra_2)
+
         self.write_to_logfile("--- Processing spectra ---")
-        self.write_to_logfile(f"Time: {str(datetime.now())}")
-        # Process query spectra
-        spectra, report = self.processing_queries.process_spectra(
-            self._spectra_queries,
-            progress_bar=self.progress_bar,
-            cleaned_spectra_file=cleaned_query_file,
-            create_report=create_report,
-        )
-        self._spectra_queries = spectra
-        self.write_to_logfile(str(report))
-        if cleaned_query_file is not None:
-            self.write_to_logfile(f"--- Query spectra written to {cleaned_query_file} ---")
+        self.write_to_logfile(f"Time: {datetime.now()}")
 
-        # Process reference spectra (if necessary)
-        if self.is_symmetric is False:
-            self._spectra_references, report = self.processing_references.process_spectra(
-                self._spectra_references,
+        report = None
+
+        if self.processing_spectra_1 is not None:
+            self._spectra_1, report = self.processing_spectra_1.process_spectra(
+                self._spectra_1,
                 progress_bar=self.progress_bar,
-                cleaned_spectra_file=cleaned_reference_file,
+                cleaned_spectra_file=cleaned_spectra_1_file,
                 create_report=create_report,
             )
             self.write_to_logfile(str(report))
-            if cleaned_reference_file is not None:
-                self.write_to_logfile(f"--- Reference spectra written to {cleaned_reference_file} ---")
-        else:
-            self._spectra_references = self._spectra_queries
+            if cleaned_spectra_1_file is not None:
+                self.write_to_logfile(f"--- Spectra_1 written to {cleaned_spectra_1_file} ---")
 
-        # Score computation and masking
+        if self.is_symmetric:
+            self._spectra_2 = None
+        else:
+            if self.processing_spectra_2 is not None:
+                self._spectra_2, report = self.processing_spectra_2.process_spectra(
+                    self._spectra_2,
+                    progress_bar=self.progress_bar,
+                    cleaned_spectra_file=cleaned_spectra_2_file,
+                    create_report=create_report,
+                )
+                self.write_to_logfile(str(report))
+                if cleaned_spectra_2_file is not None:
+                    self.write_to_logfile(f"--- Spectra_2 written to {cleaned_spectra_2_file} ---")
+
+        self.scores = None
+        self.mask = None
+
         self.write_to_logfile("--- Computing scores ---")
         for computation in self.score_computations:
-            self.write_to_logfile(f"Time: {str(datetime.now())}")
+            self.write_to_logfile(f"Time: {datetime.now()}")
+
             if not isinstance(computation, list):
                 computation = [computation]
-            if isinstance(computation[0], str) and computation[0] in _masking_functions:
+
+            step_name = computation[0]
+            if isinstance(step_name, str) and step_name.lower() in _MASKING_FUNCTIONS:
                 self.write_to_logfile(f"-- Score masking: {computation} --")
                 self._apply_score_masking(computation)
             else:
                 self.write_to_logfile(f"-- Score computation: {computation} --")
                 self._apply_similarity_measure(computation)
-        self.write_to_logfile(f"--- Pipeline run finished ({str(datetime.now())}) ---")
+
+        self.write_to_logfile(f"--- Pipeline run finished ({datetime.now()}) ---")
         return report
 
-    def _apply_score_masking(self, computation):
-        """Apply filter to remove scores which are out of the set range."""
+    def _apply_score_masking(self, computation) -> None:
         if self.scores is None:
             raise ValueError("No scores have been computed yet, so masking cannot be applied.")
-        self.mask = ScoresMask.from_matrix(self.scores, computation[1]["operation"], computation[1]["value"])
 
-    def _apply_similarity_measure(self, computation):
-        """Run score computations for all listed methods and on all loaded and processed spectra."""
+        params = computation[1] if len(computation) > 1 else {}
+        operation_name = params.get("operation")
+        value = params.get("value")
+        field = params.get("field")
 
-        def get_similarity_measure(computation) -> BaseSimilarity:
-            if isinstance(computation[0], str):
-                if len(computation) > 1:
-                    return _score_functions[computation[0]](**computation[1])
-                return _score_functions[computation[0]]()
-            if callable(computation[0]):
-                if len(computation) > 1:
-                    return computation[0](**computation[1])
-                return computation[0]()
-            raise TypeError("Unknown similarity measure.")
+        if operation_name is None or "value" not in params:
+            raise ValueError(
+                "Mask computation requires parameters {'operation': ..., 'value': ...}."
+            )
 
-        # todo choose between matrix and sparse array based on coverage of mask
-        similarity_measure = get_similarity_measure(computation)
-        self.scores = similarity_measure.matrix(
-            self._spectra_references, self._spectra_queries, is_symmetric=self.is_symmetric, mask_indices=self.mask
+        self.mask = _build_mask_from_scores(
+            scores=self.scores,
+            operation_name=operation_name,
+            value=value,
+            field=field,
         )
-        if self.logging_file is not None:
-            add_logging_to_file(self.logging_file, loglevel=self.logging_level, remove_stream_handlers=True)
-        else:
-            logger.warning("No logging file was defined.Logging messages will not be written to file.")
 
-    def set_logging(self):
-        """Set the matchms logger to write messages to file (if defined)."""
+    def _apply_similarity_measure(self, computation) -> None:
+        similarity_measure = _instantiate_similarity(computation)
+
+        if self.mask is None:
+            self.scores = similarity_measure.matrix(
+                spectra_1=self._spectra_1,
+                spectra_2=self._spectra_2,
+                progress_bar=self.progress_bar,
+            )
+            return
+
+        idx_row, idx_col = _mask_to_index_arrays(self.mask)
+
+        self.scores = similarity_measure.sparse_matrix(
+            spectra_1=self._spectra_1,
+            spectra_2=self._spectra_2,
+            idx_row=idx_row,
+            idx_col=idx_col,
+            progress_bar=self.progress_bar,
+        )
+
+    def set_logging(self) -> None:
         reset_matchms_logger()
         set_matchms_logger_level(self.logging_level)
         if self.logging_file is not None:
-            add_logging_to_file(self.logging_file, loglevel=self.logging_level, remove_stream_handlers=True)
+            add_logging_to_file(
+                self.logging_file,
+                loglevel=self.logging_level,
+                remove_stream_handlers=True,
+            )
         else:
-            logger.warning("No logging file was defined.Logging messages will not be written to file.")
+            logger.warning("No logging file was defined. Logging messages will not be written to file.")
 
-    def write_to_logfile(self, line):
-        """Write message to log file."""
+    def write_to_logfile(self, line: str) -> None:
         if self.logging_file is not None:
-            with open(self.logging_file, "a", encoding="utf-8") as f:
-                f.write(line + "\n")
-
-    @deprecated(
-        version="0.26.5",
-        reason="This method is deprecated and will be removed in the future. Use import_spectra() instead.",
-    )
-    def import_spectrums(
-        self, query_files: Union[List[str], str], reference_files: Optional[Union[List[str], str]] = None
-    ):
-        """Wrapper method for import_spectra()
-
-        Parameters
-        ----------
-        query_files
-            List of files, or single filename, containing the query spectra.
-        reference_files
-            List of files, or single filename, containing the reference spectra.
-            If set to None (default) then all query spectra will be compared to each other.
-        """
-        return self.import_spectra(query_files, reference_files)
+            with open(self.logging_file, "a", encoding="utf-8") as file:
+                file.write(line + "\n")
 
     def import_spectra(
-        self, query_files: Union[List[str], str], reference_files: Optional[Union[List[str], str]] = None
-    ):
-        """Import spectra from file(s).
-
-        Parameters
-        ----------
-        query_files
-            List of files, or single filename, containing the query spectra.
-        reference_files
-            List of files, or single filename, containing the reference spectra.
-            If set to None (default) then all query spectra will be compared to each other.
-        """
-        # import query spectra
+        self,
+        spectra_1: Union[List[str], str],
+        spectra_2: Optional[Union[List[str], str]] = None,
+    ) -> None:
+        """Import one or two spectra collections from file(s)."""
         self.write_to_logfile("--- Importing data ---")
-        self._spectra_queries = load_list_of_spectrum_files(query_files)
+        self._spectra_1 = load_list_of_spectrum_files(spectra_1)
+        self.write_to_logfile(f"Loaded spectra_1 from {spectra_1}")
 
-        self.write_to_logfile(f"Loaded query spectra from {query_files}")
-
-        # import reference spectra
-        if reference_files is None:
+        if spectra_2 is None:
             self.is_symmetric = True
-            self._spectra_references = self._spectra_queries
-            self.write_to_logfile("Reference spectra are equal to the query spectra (is_symmetric = True)")
+            self._spectra_2 = None
+            self.write_to_logfile("No spectra_2 given, using symmetric computation (is_symmetric = True)")
         else:
-            self._spectra_references = load_list_of_spectrum_files(reference_files)
-            self.write_to_logfile(f"Loaded reference spectra from {reference_files}")
+            self.is_symmetric = False
+            self._spectra_2 = load_list_of_spectrum_files(spectra_2)
+            self.write_to_logfile(f"Loaded spectra_2 from {spectra_2}")
 
-    # Getter & Setters
+    def save_as_yaml(self, yaml_file_name: str) -> None:
+        if os.path.exists(yaml_file_name):
+            raise FileExistsError("The specified yaml file already exists.")
+
+        workflow = OrderedDict()
+        workflow["spectra_1_filters"] = self.processing_spectra_1.processing_steps
+        workflow["spectra_2_filters"] = self.processing_spectra_2.processing_steps
+        workflow["score_computations"] = list(self.score_computations)
+
+        with open(yaml_file_name, "w", encoding="utf-8") as file:
+            file.write("# Matchms pipeline config file\n")
+            file.write("# Change and adapt fields where necessary\n")
+            file.write("# " + 20 * "=" + "\n")
+            ordered_dump(workflow, file)
+
     @property
     def score_computations(self) -> Sequence[Union[str, List[dict]]]:
-        return self.__workflow.get("score_computations")
+        return self.__workflow["score_computations"]
 
     @score_computations.setter
     def score_computations(self, computations):
+        check_score_computation(computations)
         self.__workflow["score_computations"] = computations
-        check_score_computation(score_computations=self.score_computations)
 
     @property
-    def query_filters(self) -> Iterable[Union[str, List[dict]]]:
-        return self.__workflow.get("query_filters")
+    def spectra_1_filters(self):
+        return self.__workflow["spectra_1_filters"]
 
-    @query_filters.setter
-    def query_filters(self, filters: Iterable[Union[str, List[dict]]]):
-        self.__workflow["query_filters"] = filters
-        self._initialize_spectrum_processor_queries()
-
-    @property
-    def reference_filters(self) -> Iterable[Union[str, List[dict]]]:
-        return self.__workflow.get("reference_filters")
-
-    @reference_filters.setter
-    def reference_filters(self, filters: Iterable[Union[str, List[dict]]]):
-        self.__workflow["reference_filters"] = filters
-        self._initialize_spectrum_processor_references()
+    @spectra_1_filters.setter
+    def spectra_1_filters(self, filters):
+        self.__workflow["spectra_1_filters"] = filters
+        self._initialize_spectrum_processor_1()
 
     @property
-    @deprecated(
-        version="0.26.5",
-        reason="This property is deprecated and will be removed in the future. Use spectra_queries instead.",
-    )
-    def spectrums_queries(self) -> List[SpectrumType]:
-        return self._spectra_queries
+    def spectra_2_filters(self):
+        return self.__workflow["spectra_2_filters"]
+
+    @spectra_2_filters.setter
+    def spectra_2_filters(self, filters):
+        self.__workflow["spectra_2_filters"] = filters
+        self._initialize_spectrum_processor_2()
 
     @property
-    def spectra_queries(self) -> List[SpectrumType]:
-        return self._spectra_queries
+    def spectra_1(self) -> List[SpectrumType]:
+        return self._spectra_1
 
     @property
-    @deprecated(
-        version="0.26.5",
-        reason="This property is deprecated and will be removed in the future. Use spectra_references instead.",
-    )
-    def spectrums_references(self) -> List[SpectrumType]:
-        return self._spectra_references
+    def spectra_2(self) -> Optional[List[SpectrumType]]:
+        return self._spectra_2
 
-    @property
-    def spectra_references(self) -> List[SpectrumType]:
-        return self._spectra_references
+
+def _instantiate_similarity(computation) -> BaseSimilarity:
+    name_or_callable = computation[0]
+    params = computation[1] if len(computation) > 1 else {}
+
+    if isinstance(name_or_callable, str):
+        similarity_cls = _SCORE_FUNCTIONS.get(name_or_callable.lower())
+        if similarity_cls is None:
+            raise ValueError(f"Unknown score computation: {name_or_callable!r}.")
+        return similarity_cls(**params)
+
+    if callable(name_or_callable):
+        return name_or_callable(**params)
+
+    raise TypeError(f"Unknown similarity specification: {name_or_callable!r}.")
+
+
+def _mask_to_index_arrays(mask: ScoresMask) -> tuple[np.ndarray, np.ndarray]:
+    if mask.is_sparse:
+        return mask.row, mask.col
+    row, col = np.nonzero(mask.dense_mask)
+    return row.astype(np.int_), col.astype(np.int_)
+
+
+def _build_mask_from_scores(
+    scores: Scores,
+    operation_name: str,
+    value,
+    field: Optional[str] = None,
+) -> ScoresMask:
+    operations = {
+        ">": operator.gt,
+        ">=": operator.ge,
+        "<": operator.lt,
+        "<=": operator.le,
+        "==": operator.eq,
+        "!=": operator.ne,
+    }
+
+    if operation_name not in operations:
+        raise ValueError(
+            f"Unknown mask operation {operation_name!r}. Supported operations are: {tuple(operations)}."
+        )
+
+    target = scores if field is None else scores[field]
+
+    try:
+        mask = operations[operation_name](target, value)
+    except TypeError as exc:
+        if field is None and not scores.is_scalar:
+            raise TypeError(
+                "Masking a multi-field Scores object requires specifying a field, "
+                "for example ['mask', {'field': 'score', 'operation': '>=', 'value': 0.3}]."
+            ) from exc
+        raise
+
+    if not isinstance(mask, ScoresMask):
+        raise TypeError("Score comparison did not produce a ScoresMask as expected.")
+
+    return mask
 
 
 def get_unused_filters(yaml_file):
-    """Prints all filter names that are in ALL_FILTERS, but not in the yaml file"""
     workflow = load_workflow_from_yaml_file(yaml_file)
-    processor = SpectrumProcessor(workflow["query_filters"])
+    processor = SpectrumProcessor(workflow["spectra_1_filters"])
 
     filters_used = [filter_function.__name__ for filter_function in processor.filters]
     for filter_function in ALL_FILTERS:
@@ -421,21 +421,37 @@ def get_unused_filters(yaml_file):
             print(filter_function.__name__)
 
 
-def check_score_computation(score_computations: Sequence[Union[str, List[dict]]]):
-    """Check if the score computations seem OK before running.
-    Aim is to avoid pipeline crashing after long computation.
-    """
-    # Check if all score compuation steps exist
+def check_score_computation(score_computations: Sequence[Union[str, List[dict]]]) -> None:
+    if score_computations is None:
+        return
+
+    n_steps = len(score_computations)
+
     for i, computation in enumerate(score_computations):
         if not isinstance(computation, list):
             computation = [computation]
-        if isinstance(computation[0], str) and computation[0] in _masking_functions:
-            if "operation" in computation[1] and "value" in computation[1]:
-                if i == 0 or len(score_computations) == i:
-                    raise ValueError("Masking at the start or end of the score computations is not allowed.")
-                continue
-        if isinstance(computation[0], str) and computation[0] in _score_functions:
+
+        if len(computation) == 0:
+            raise ValueError("Empty score computation step is not allowed.")
+
+        step = computation[0]
+        params = computation[1] if len(computation) > 1 else {}
+
+        if isinstance(step, str) and step.lower() in _MASKING_FUNCTIONS:
+            if "operation" not in params or "value" not in params:
+                raise ValueError(
+                    "Mask computation requires parameters {'operation': ..., 'value': ...}."
+                )
+            if i == 0 or i == n_steps - 1:
+                raise ValueError("Masking at the start or end of score computations is not allowed.")
             continue
-        if callable(computation[0]):
+
+        if isinstance(step, str):
+            if step.lower() not in _SCORE_FUNCTIONS:
+                raise ValueError(f"Unknown score computation: {step!r}.")
             continue
-        raise ValueError(f"Unknown score computation: {computation[0]}.")
+
+        if callable(step):
+            continue
+
+        raise ValueError(f"Unknown score computation: {step!r}.")
