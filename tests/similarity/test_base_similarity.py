@@ -2,11 +2,11 @@ import numpy as np
 import pytest
 from scipy.sparse import coo_array
 from matchms.Scores import Scores
-from matchms.similarity.BaseSimilarity import BaseSimilarity
+from matchms.similarity.BaseSimilarity import BaseSimilarity, BaseSimilarityWithSparse
 from tests.builder_Spectrum import SpectrumBuilder
 
 
-class MockScalarSimilarity(BaseSimilarity):
+class MockScalarSimilarity(BaseSimilarityWithSparse):
     """Simple scalar similarity based on precursor_mz distance."""
 
     score_datatype = np.float64
@@ -19,7 +19,7 @@ class MockScalarSimilarity(BaseSimilarity):
         return np.asarray(score, dtype=self.score_datatype)
 
 
-class MockStructuredSimilarity(BaseSimilarity):
+class MockStructuredSimilarity(BaseSimilarityWithSparse):
     """Structured similarity returning (score, matches)."""
 
     score_datatype = np.dtype([("score", np.float64), ("matches", np.int64)])
@@ -42,7 +42,7 @@ class MockStructuredSimilarity(BaseSimilarity):
         return np.asarray((score, matches), dtype=self.score_datatype)
 
 
-class MockNonCommutativeSimilarity(BaseSimilarity):
+class MockNonCommutativeSimilarity(BaseSimilarityWithSparse):
     """Non-commutative scalar similarity."""
 
     is_commutative = False
@@ -53,6 +53,19 @@ class MockNonCommutativeSimilarity(BaseSimilarity):
         mz_1 = spectrum_1.get("precursor_mz")
         mz_2 = spectrum_2.get("precursor_mz")
         return np.asarray(mz_1 - mz_2, dtype=self.score_datatype)
+
+
+class MockScalarSimilarityWithoutSparse(BaseSimilarity):
+    """Simple scalar similarity without sparse-matrix support."""
+
+    score_datatype = np.float64
+    score_fields = ("score",)
+
+    def pair(self, spectrum_1, spectrum_2):
+        mz_1 = spectrum_1.get("precursor_mz")
+        mz_2 = spectrum_2.get("precursor_mz")
+        score = 1.0 if mz_1 == mz_2 else 0.5 if abs(mz_1 - mz_2) <= 5 else 0.0
+        return np.asarray(score, dtype=self.score_datatype)
 
 
 @pytest.fixture
@@ -454,3 +467,11 @@ def test_mismatching_structured_score_fields_definition_raises(spectra):
 
     with pytest.raises(ValueError, match="score_fields does not match the field names in score_datatype"):
         similarity.matrix(spectra, progress_bar=False)
+
+
+def test_sparse_matrix_not_implemented_for_base_similarity(spectra):
+    similarity = MockScalarSimilarityWithoutSparse()
+
+    with pytest.raises(NotImplementedError) as exc_info:
+        similarity.sparse_matrix(spectra, progress_bar=False)
+        assert "sparse_matrix" in str(exc_info.value)
