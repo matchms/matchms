@@ -139,15 +139,15 @@ class FingerprintSimilarity(BaseSimilarity):
 
         def create_full_matrix():
             """Create matrix for all similarities."""
-            similarity_matrix = np.zeros((len(references), len(queries)))
+            similarity_matrix = np.zeros((len(spectra_1), len(spectra_2)))
             if self.set_empty_scores == "nan":
                 similarity_matrix[:] = np.nan
             elif isinstance(self.set_empty_scores, (float, int)):
                 similarity_matrix[:] = self.set_empty_scores
             return similarity_matrix
 
-        fingerprints1, idx_fingerprints1 = collect_fingerprints(references)
-        fingerprints2, idx_fingerprints2 = collect_fingerprints(queries)
+        fingerprints1, idx_fingerprints1 = collect_fingerprints(spectra_1)
+        fingerprints2, idx_fingerprints2 = collect_fingerprints(spectra_2)
         assert idx_fingerprints1.size > 0 and idx_fingerprints2.size > 0, ("Not enouth molecular fingerprints.", "Apply 'add_fingerprint'filter first.")
 
         # Calculate similarity score matrix following specified method
@@ -159,7 +159,7 @@ class FingerprintSimilarity(BaseSimilarity):
         elif self.similarity_measure == "cosine":
             similarity_matrix[np.ix_(idx_fingerprints1, idx_fingerprints2)] = cosine_similarity_matrix(fingerprints1, fingerprints2)
         if array_type == "sparse":
-            scores_array = StackedSparseArray(len(references), len(queries))
+            scores_array = StackedSparseArray(len(spectra_1), len(spectra_2))
             scores_array.add_dense_matrix(similarity_matrix.astype(self.score_datatype), "")
             return scores_array
         if array_type == "numpy":

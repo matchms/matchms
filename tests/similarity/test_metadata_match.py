@@ -24,11 +24,11 @@ def spectra():
 
 def test_metadata_match_strings(spectra):
     """Test basic metadata matching between string entries."""
-    references = spectra[:2]
-    queries = spectra[2:]
+    spectra_1 = spectra[:2]
+    spectra_2 = spectra[2:]
 
     similarity_score = MetadataMatch(field="instrument_type")
-    scores = calculate_scores(references, queries, similarity_score)
+    scores = calculate_scores(spectra_1, spectra_2, similarity_score)
     assert np.all(scores.scores.to_array() == [[1, 0], [0, 0]]), "Expected different scores."
 
 
@@ -45,11 +45,11 @@ def test_metadata_match_strings_pair(spectra):
 
 def test_metadata_match_strings_wrong_method(spectra, caplog):
     """Test basic metadata matching between string entries."""
-    references = spectra[:2]
-    queries = spectra[2:]
+    spectra_1 = spectra[:2]
+    spectra_2 = spectra[2:]
 
     similarity_score = MetadataMatch(field="instrument_type", matching_type="difference")
-    scores = calculate_scores(references, queries, similarity_score)
+    scores = calculate_scores(spectra_1, spectra_2, similarity_score)
     assert np.all(scores.scores.to_array() == [[0, 0], [0, 0]]), "Expected different scores."
     msg = "not compatible with 'difference' method"
     assert msg in caplog.text
@@ -72,21 +72,21 @@ def test_metadata_match_numerical_pair(spectra):
 ])
 def test_metadata_match_numerical(spectra, tolerance, expected):
     """Test basic metadata matching between numerical entries."""
-    references = spectra[:2]
-    queries = spectra[2:]
+    spectra_1 = spectra[:2]
+    spectra_2 = spectra[2:]
 
     similarity_score = MetadataMatch(field="retention_time",
                                      matching_type="difference", tolerance=tolerance)
-    scores = calculate_scores(references, queries, similarity_score)
+    scores = calculate_scores(spectra_1, spectra_2, similarity_score)
     assert np.all(scores.scores.to_array().tolist() == expected), "Expected different scores."
 
 
 def test_metadata_match_invalid_array_type(spectra):
     """Test value error if array_type is not 'numpy' or 'sparse' in metadata matching."""
-    references = spectra[:2]
-    queries = spectra[2:]
+    spectra_1 = spectra[:2]
+    spectra_2 = spectra[2:]
 
     similarity_score = MetadataMatch(field="instrument_type")
 
     with pytest.raises(ValueError, match="array_type must be 'numpy' or 'sparse'."):
-        calculate_scores(references, queries, similarity_score, array_type = "scipy")
+        calculate_scores(spectra_1, spectra_2, similarity_score, array_type = "scipy")

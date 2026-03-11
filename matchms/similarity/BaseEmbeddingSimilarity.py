@@ -159,8 +159,8 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
             raise ValueError("Any embedding base similarity matrix is supposed to be dense and symmetric.")
 
         # Compute embeddings
-        embs_ref = self.compute_embeddings(references)
-        embs_query = self.compute_embeddings(queries)
+        embs_ref = self.compute_embeddings(spectra_1)
+        embs_query = self.compute_embeddings(spectra_2)
 
         # Compute pairwise similarities matrix
         return self.pairwise_similarity_fn(embs_ref, embs_query)
