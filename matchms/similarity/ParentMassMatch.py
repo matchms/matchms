@@ -34,10 +34,10 @@ class ParentMassMatch(BaseSimilarity):
         queries = [spectrum_3, spectrum_4]
 
         similarity_score = ParentMassMatch(tolerance=5.0)
-        scores = calculate_scores(references, queries, similarity_score)
+        scores = calculate_scores(spectra_1, spectra_2, similarity_score)
 
         for (reference, query, score) in scores:
-            print(f"Parentmass match between {reference.get('id')} and {query.get('id')}" +
+            print(f"Parentmass match between {spectrum_1.get('id')} and {spectrum_2.get('id')}" +
                   f" is {bool(score[0])}")
 
     Should output
@@ -51,8 +51,8 @@ class ParentMassMatch(BaseSimilarity):
 
     # Set key characteristics as class attributes
     is_commutative = True
-    # Set output data type, e.g.  "float" or [("score", "float"), ("matches", "int")]
     score_datatype = bool
+    score_fields = ("score",)
 
     def __init__(self, tolerance: float = 0.1):
         """
@@ -63,7 +63,7 @@ class ParentMassMatch(BaseSimilarity):
         """
         self.tolerance = tolerance
 
-    def pair(self, reference: SpectrumType, query: SpectrumType) -> float:
+    def pair(self, spectrum_1: SpectrumType, spectrum_2: SpectrumType) -> float:
         """Compare parent masses between reference and query spectrum.
 
         Parameters
@@ -73,8 +73,8 @@ class ParentMassMatch(BaseSimilarity):
         query
             Single query spectrum.
         """
-        parentmass_ref = reference.get("parent_mass")
-        parentmass_query = query.get("parent_mass")
+        parentmass_ref = spectrum_1.get("parent_mass")
+        parentmass_query = spectrum_2.get("parent_mass")
         assert parentmass_ref is not None and parentmass_query is not None, "Missing parent mass."
 
         score = abs(parentmass_ref - parentmass_query) <= self.tolerance
@@ -111,8 +111,8 @@ class ParentMassMatch(BaseSimilarity):
                 parentmasses.append(parentmass)
             return np.asarray(parentmasses)
 
-        parentmasses_ref = collect_parentmasses(references)
-        parentmasses_query = collect_parentmasses(queries)
+        parentmasses_ref = collect_parentmasses(spectra_1)
+        parentmasses_query = collect_parentmasses(spectra_2)
 
         if is_symmetric:  # assuming ref and query are identical
             rows, cols, scores = number_matching_symmetric(parentmasses_ref, self.tolerance)

@@ -47,10 +47,10 @@ class IntersectMz(BaseSimilarity):
         """
         self.scaling = scaling
 
-    def pair(self, reference: SpectrumType, query: SpectrumType) -> float:
+    def pair(self, spectrum_1: SpectrumType, spectrum_2: SpectrumType) -> float:
         """This will calculate the similarity score between two spectra."""
-        mz_ref = set(reference.peaks.mz)
-        mz_query = set(query.peaks.mz)
+        mz_ref = set(spectrum_1.peaks.mz)
+        mz_query = set(spectrum_2.peaks.mz)
         intersected = mz_query.intersection(mz_ref)
         unioned = mz_query.union(mz_ref)
 

@@ -28,7 +28,7 @@ def calculate_scores(spectra_1: ReferencesType, spectra_2: QueriesType,
         scores = calculate_scores(spectra, spectra, CosineGreedy())
 
         for (reference, query, score) in scores:
-            print(f"Cosine score between {reference.get('id')} and {query.get('id')}" +
+            print(f"Cosine score between {spectrum_1.get('id')} and {spectrum_2.get('id')}" +
                   f" is {score[0]:.2f} with {score[1]} matched peaks")
 
     Should output

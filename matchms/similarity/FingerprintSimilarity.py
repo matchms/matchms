@@ -59,10 +59,9 @@ class FingerprintSimilarity(BaseSimilarity):
 
     """
 
-    # Set key characteristics as class attributes
     is_commutative = True
-    # Set output data type, e.g.  "float" or [("score", "float"), ("matches", "int")]
     score_datatype = np.float64
+    score_fields = ("score",)
 
     def __init__(self, similarity_measure: str = "jaccard", set_empty_scores: Union[float, int, str] = "nan"):
         """
@@ -81,18 +80,19 @@ class FingerprintSimilarity(BaseSimilarity):
         assert similarity_measure in ["cosine", "dice", "jaccard"], "Unknown similarity measure."
         self.similarity_measure = similarity_measure
 
-    def pair(self, reference: SpectrumType, query: SpectrumType) -> float:
+    def pair(self, spectrum_1: SpectrumType, spectrum_2: SpectrumType) -> float:
         """Calculate fingerprint based similarity score between two spectra.
 
         Parameters
         ----------
-        reference
-            Single reference spectrum.
-        query
-            Single query spectrum.
+        spectrum_1
+            Single spectrum.
+        spectrum_2
+            Single spectrum.
         """
-        fingerprint_ref = reference.get("fingerprint")
-        fingerprint_query = query.get("fingerprint")
+        fingerprint_ref = spectrum_1.get("fingerprint")
+        fingerprint_query = spectrum_2.get("fingerprint")
+
         if self.similarity_measure == "jaccard":
             return jaccard_index(fingerprint_ref, fingerprint_query)
 

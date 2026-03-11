@@ -118,7 +118,7 @@ class FlashSimilarity(BaseSimilarity):
                                     dtype=self.dtype)
         return cleaned, (None if pmz is None else float(pmz))
 
-    def pair(self, reference: SpectrumType, query: SpectrumType) -> np.ndarray:
+    def pair(self, spectrum_1: SpectrumType, spectrum_2: SpectrumType) -> np.ndarray:
         """
         Compute Flash similarity for a single (reference, query) pair.
         Uses the same preprocessing and scoring logic as the matrix path, but builds a tiny
@@ -129,8 +129,8 @@ class FlashSimilarity(BaseSimilarity):
         logger.warning("This is not the fast intended use; better use .matrix() instead.")
 
         # Preprocess both spectra
-        peaks_1, pmz_1 = self._prepare(reference)
-        peaks_2, pmz_2 = self._prepare(query)
+        peaks_1, pmz_1 = self._prepare(spectrum_1)
+        peaks_2, pmz_2 = self._prepare(spectrum_2)
         if peaks_1.size == 0 or peaks_2.size == 0:
             return np.asarray(0.0, dtype=self.dtype)
     
@@ -186,8 +186,8 @@ class FlashSimilarity(BaseSimilarity):
             Number of parallel jobs to run.
             Default is set to -1, which means that all available CPUs minus one will be used.
         """
-        n_rows = len(references)
-        n_cols = len(queries)
+        n_rows = len(spectra_1)
+        n_cols = len(spectra_2)
         descriptor = f"Flash {self.score_type} ({self.matching_mode})"
 
         if array_type not in ("numpy", "sparse"):
@@ -232,9 +232,9 @@ class FlashSimilarity(BaseSimilarity):
         # Prepare output
         out = np.zeros((n_rows, n_cols), dtype=self.dtype)
 
-        # Prepare rows (references)
+        # Prepare rows (spectra_1)
         row_inputs = []
-        for i, ref in enumerate(references):
+        for i, ref in enumerate(spectra_1):
             peaks_r, pmz_r = self._prepare(ref)
             row_inputs.append((i, peaks_r, pmz_r))
 

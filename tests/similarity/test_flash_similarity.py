@@ -243,15 +243,15 @@ def test_entropy_fragment_ignores_non_positive_peaks_in_pairwise_matching():
 
 
 def test_entropy_fragment_matrix_matches_pair_with_sparse_candidate_columns():
-    ref = build_spectrum([100.0, 200.0], [1.0, 0.8], precursor_mz=450.0)
-    queries = [
+    spectrum_1 = build_spectrum([100.0, 200.0], [1.0, 0.8], precursor_mz=450.0)
+    spectra_2 = [
         build_spectrum([100.005, 200.003], [1.0, 0.7], precursor_mz=450.0),
         build_spectrum([100.01, 350.0], [0.9, 0.5], precursor_mz=450.0),
         build_spectrum([199.99], [0.8], precursor_mz=450.0),
     ]
     for shift in range(15):
         base = 500.0 + 10.0 * shift
-        queries.append(build_spectrum([base, base + 0.3], [1.0, 0.5], precursor_mz=450.0))
+        spectra_2.append(build_spectrum([base, base + 0.3], [1.0, 0.5], precursor_mz=450.0))
 
     fse = FlashSimilarity(
         score_type="spectral_entropy",
@@ -265,12 +265,12 @@ def test_entropy_fragment_matrix_matches_pair_with_sparse_candidate_columns():
         dtype=np.float64,
     )
 
-    matrix_scores = fse.matrix([ref], queries, array_type="numpy", n_jobs=0)
-    assert matrix_scores.shape == (1, len(queries))
+    matrix_scores = fse.matrix([spectrum_1], spectra_2, array_type="numpy", n_jobs=0)
+    assert matrix_scores.shape == (1, len(spectra_2))
     assert np.count_nonzero(matrix_scores[0] > 0.0) == 3
 
-    for j, query in enumerate(queries):
-        expected = float(fse.pair(ref, query))
+    for j, query in enumerate(spectra_2):
+        expected = float(fse.pair(spectrum_1, query))
         assert float(matrix_scores[0, j]) == pytest.approx(expected, abs=1e-7)
 
 # ----------------------------

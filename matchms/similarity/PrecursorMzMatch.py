@@ -41,10 +41,10 @@ class PrecursorMzMatch(BaseSimilarity):
         queries = [spectrum_3, spectrum_4]
 
         similarity_score = PrecursorMzMatch(tolerance=5.0, tolerance_type="Dalton")
-        scores = calculate_scores(references, queries, similarity_score)
+        scores = calculate_scores(spectra_1, spectra_2, similarity_score)
 
         for (reference, query, score) in scores:
-            print(f"Precursor m/z match between {reference.get('id')} and {query.get('id')}" +
+            print(f"Precursor m/z match between {spectrum_1.get('id')} and {spectrum_2.get('id')}" +
                   f" is {bool(score[0])}")
 
     Should output
@@ -59,6 +59,7 @@ class PrecursorMzMatch(BaseSimilarity):
     # Set key characteristics as class attributes
     is_commutative = True
     score_datatype = bool
+    score_fields = ("score",)
 
     def __init__(self, tolerance: float = 0.1, tolerance_type: str = "Dalton"):
         """
@@ -74,7 +75,7 @@ class PrecursorMzMatch(BaseSimilarity):
         assert tolerance_type in ["Dalton", "ppm"], "Expected type from ['Dalton', 'ppm']"
         self.type = tolerance_type
 
-    def pair(self, reference: SpectrumType, query: SpectrumType) -> float:
+    def pair(self, spectrum_1: SpectrumType, spectrum_2: SpectrumType) -> float:
         """Compare precursor m/z between reference and query spectrum.
 
         Parameters
@@ -84,8 +85,8 @@ class PrecursorMzMatch(BaseSimilarity):
         query
             Single query spectrum.
         """
-        precursormz_ref = reference.get("precursor_mz")
-        precursormz_query = query.get("precursor_mz")
+        precursormz_ref = spectrum_1.get("precursor_mz")
+        precursormz_query = spectrum_2.get("precursor_mz")
         assert precursormz_ref is not None and precursormz_query is not None, "Missing precursor m/z."
 
         if self.type == "Dalton":
@@ -126,8 +127,8 @@ class PrecursorMzMatch(BaseSimilarity):
                 precursors.append(precursormz)
             return np.asarray(precursors)
 
-        precursors_ref = collect_precursormz(references)
-        precursors_query = collect_precursormz(queries)
+        precursors_ref = collect_precursormz(spectra_1)
+        precursors_query = collect_precursormz(spectra_2)
         if is_symmetric and self.type == "Dalton":
             rows, cols, scores = number_matching_symmetric(precursors_ref, self.tolerance)
         elif is_symmetric and self.type == "ppm":

@@ -1,7 +1,7 @@
 from typing import Optional, Sequence, Tuple
 import numpy as np
 from numba import njit  # TODO: check if numba is necessary/useful here
-from scipy.sparse import coo_array, csr_array
+from scipy.sparse import csr_array
 from matchms.Scores import Scores
 from matchms.typing import SpectrumType
 from .BaseSimilarity import BaseSimilarity
@@ -73,7 +73,7 @@ class BlinkCosine(BaseSimilarity):
 
     * Integer binning with `bin_width` (Da); tolerance window is ± floor(tolerance/bin_width) bins.
     * Per-spectrum L2 normalization (after optional mz/intensity weighting).
-    * Blur only one side (queries in `.matrix()`, smaller spectrum in `.pair()`).
+    * Blur only one side (spectra_2 in `.matrix()`, smaller spectrum in `.pair()`).
 
     Parameters
     ----------
@@ -192,7 +192,7 @@ class BlinkCosine(BaseSimilarity):
         - Build a *global dense bin axis* in integer bins from min to max across refs+queries
           (rows ~ (max_bin - min_bin + 1)), which keeps matrices sparse.
         - Build a CSR intensity matrix for refs (rows=bins, cols=ref spectra) after per-spectrum L2 normalization.
-        - For queries, build per-batch *blurred* CSR by expanding each nonzero to its ±R neighbors.
+        - For spectra_2, build per-batch *blurred* CSR by expanding each nonzero to its ±R neighbors.
         - Multiply: scores_batch = (I_ref.T @ I_qry_blur), accumulate into the final output.
 
         Parameters

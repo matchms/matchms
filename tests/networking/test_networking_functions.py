@@ -8,12 +8,12 @@ from .test_SimilarityNetwork import create_dummy_spectra
 
 def create_dummy_scores():
     spectra = create_dummy_spectra()
-    references = spectra[:5]
-    queries = spectra[5:]
+    spectra_1 = spectra[:5]
+    spectra_2 = spectra[5:]
 
     # Create Scores object by calculating dice scores
     similarity_measure = FingerprintSimilarity("dice")
-    scores = calculate_scores(references, queries, similarity_measure)
+    scores = calculate_scores(spectra_1, queries, similarity_measure)
     return scores
 
 

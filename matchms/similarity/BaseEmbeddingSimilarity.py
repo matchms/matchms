@@ -109,14 +109,14 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
             embs = self.compute_embeddings(spectra)
         return embs
 
-    def pair(self, reference: SpectrumType, query: SpectrumType) -> float:
+    def pair(self, spectrum_1: SpectrumType, spectrum_2: SpectrumType) -> float:
         """Compute similarity between a pair of spectra.
 
         Parameters
         ----------
-        reference : SpectrumType
+        spectrum_1 : SpectrumType
             Reference spectrum.
-        query : SpectrumType
+        spectrum_2 : SpectrumType
             Query spectrum.
 
         Returns
@@ -124,7 +124,7 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
         float
             Similarity score between the spectra.
         """
-        return self.matrix([reference], [query])[0, 0]
+        return self.matrix([spectrum_1], [spectrum_2])[0, 0]
 
     def matrix(
             self,

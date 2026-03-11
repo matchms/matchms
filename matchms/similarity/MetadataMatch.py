@@ -45,10 +45,10 @@ class MetadataMatch(BaseSimilarity):
         queries = [spectrum_3, spectrum_4]
 
         similarity_score = MetadataMatch(field="instrument_type")
-        scores = calculate_scores(references, queries, similarity_score)
+        scores = calculate_scores(spectra_1, spectra_2, similarity_score)
 
         for (reference, query, score) in scores:
-            print(f"Metadata match between {reference.get('id')} and {query.get('id')}" +
+            print(f"Metadata match between {spectrum_1.get('id')} and {spectrum_2.get('id')}" +
                   f" is {bool(score[0])}")
 
     Should output
@@ -83,7 +83,7 @@ class MetadataMatch(BaseSimilarity):
         assert matching_type in ["equal_match", "difference"], "Expected type from ['equal_match', 'difference']"
         self.matching_type = matching_type
 
-    def pair(self, reference: SpectrumType, query: SpectrumType) -> float:
+    def pair(self, spectrum_1: SpectrumType, spectrum_2: SpectrumType) -> float:
         """Compare precursor m/z between reference and query spectrum.
 
         Parameters
@@ -93,8 +93,8 @@ class MetadataMatch(BaseSimilarity):
         query
             Single query spectrum.
         """
-        entry_ref = reference.get(self.field)
-        entry_query = query.get(self.field)
+        entry_ref = spectrum_1.get(self.field)
+        entry_query = spectrum_2.get(self.field)
         if entry_ref is None or entry_query is None:
             return np.asarray(False, dtype=self.score_datatype)
 
@@ -150,8 +150,8 @@ class MetadataMatch(BaseSimilarity):
                 entries.append(entry)
             return np.asarray(entries)
 
-        entries_ref = collect_entries(references)
-        entries_query = collect_entries(queries)
+        entries_ref = collect_entries(spectra_1)
+        entries_query = collect_entries(spectra_2)
 
         if self.matching_type == "equal_match":
             if self.tolerance != 0:

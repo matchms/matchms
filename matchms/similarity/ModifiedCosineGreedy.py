@@ -47,7 +47,7 @@ class ModifiedCosineGreedy(BaseSimilarity):
         self.mz_power = mz_power
         self.intensity_power = intensity_power
 
-    def pair(self, reference: SpectrumType, query: SpectrumType) -> Tuple[float, int]:
+    def pair(self, spectrum_1: SpectrumType, spectrum_2: SpectrumType) -> Tuple[float, int]:
         """Calculate approximate modified cosine score between two spectra."""
 
         def get_matching_pairs():
@@ -56,8 +56,8 @@ class ModifiedCosineGreedy(BaseSimilarity):
                 spec1, spec2, self.tolerance, shift=0.0,
                 mz_power=self.mz_power, intensity_power=self.intensity_power
             )
-            precursor_mz_ref = get_valid_precursor_mz(reference, logger)
-            precursor_mz_query = get_valid_precursor_mz(query, logger)
+            precursor_mz_ref = get_valid_precursor_mz(spectrum_1, logger)
+            precursor_mz_query = get_valid_precursor_mz(spectrum_2, logger)
 
             mass_shift = precursor_mz_ref - precursor_mz_query
             nonzero_pairs = collect_peak_pairs(
@@ -74,8 +74,8 @@ class ModifiedCosineGreedy(BaseSimilarity):
                 matching_pairs = matching_pairs[np.argsort(matching_pairs[:, 2], kind="mergesort")[::-1], :]
             return matching_pairs
 
-        spec1 = reference.peaks.to_numpy
-        spec2 = query.peaks.to_numpy
+        spec1 = spectrum_1.peaks.to_numpy
+        spec2 = spectrum_2.peaks.to_numpy
         matching_pairs = get_matching_pairs()
         if matching_pairs.shape[0] == 0:
             return np.asarray((float(0), 0), dtype=self.score_datatype)
