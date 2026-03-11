@@ -1,8 +1,8 @@
 from typing import Generator
 import numpy as np
 import pandas as pd
-from matchms.Spectrum import Spectrum
 from scipy.sparse import coo_array, csr_array
+from matchms.Spectrum import Spectrum
 
 
 class SpectraCollection:
@@ -42,7 +42,11 @@ class SpectraCollection:
 
     @property
     def fragments(self) -> csr_array:
-        return self._fragments
+        return FragmentsProxy(self._fragments)
+
+    @property
+    def shape(self):
+        return self._fragments.shape[0], self._metadata.shape[1]
 
     def __getitem__(self, idx):
         # csr = self.fragments.tocsr()
@@ -128,10 +132,49 @@ class MetadataProxy(pd.DataFrame):
         return MetadataProxy
 
     def sort_values(self, by, **kwargs):
-        kwargs.pop('inplace', None)
+        kwargs.pop("inplace", None)
         sorted_df = super().sort_values(by=by, **kwargs)
 
         if self._collection is not None:
             self._collection._reorder(sorted_df.index.values)
 
         return MetadataProxy(self._collection._metadata, self._collection)
+
+
+class FragmentsProxy:
+    def __init__(self, csr_array):
+        self._array = csr_array
+
+    def sum(self, axis=1, **kwargs):
+        result = self._array.sum(axis=axis, **kwargs)
+        if axis == 1:
+            return result.A1 if hasattr(result, "A1") else np.asarray(result).flatten()
+        return result
+
+    def max(self, axis: int = 1, **kwargs):
+        return self._array.max(axis=axis, **kwargs)
+
+    def min(self, axis: int = 1, **kwargs):
+        return self._array.min(axis=axis, **kwargs)
+
+    def mean(self, axis: int = 1, **kwargs):
+        return self._array.mean(axis=axis, **kwargs)
+
+    def count(self, axis: int = 1):
+        if axis == 1:
+            return np.diff(self._array.indptr)
+
+        elif axis == 0:
+            return np.bincount(self._array.indices, minlength=self._array.shape[1])
+
+        else:
+            raise ValueError("axis must be 0 or 1")
+
+    def __getattr__(self, name):
+        return getattr(self._array, name)
+
+    def __getitem__(self, key):
+        return self._array[key]
+
+    def __repr__(self):
+        return self._array.__repr__()
