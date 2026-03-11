@@ -101,7 +101,7 @@ def test_consistency_scoring_and_pipeline(spectra, similarity_measure):
 
     # Run pipeline
     workflow = create_workflow(
-        query_filters=[["add_parent_mass"], ["normalize_intensities"]],
+        spectra_2_filters=[["add_parent_mass"], ["normalize_intensities"]],
         score_computations=[similarity_measure],
     )
     pipeline = Pipeline(workflow)
