@@ -81,12 +81,6 @@ autodoc_default_options = {
     "inherited-members": True,
 }
 
-# Only mock truly problematic/heavy optional deps at import time.
-# NOTE: we no longer import matchms in conf.py, so this is mostly for autodoc.
-autodoc_mock_imports = [
-    "rdkit",
-]
-
 napoleon_google_docstring = False
 
 
