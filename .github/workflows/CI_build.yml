@@ -142,6 +142,9 @@ jobs:
       - name: Create conda environment
         uses: conda-incubator/setup-miniconda@v3
         with:
+          miniforge-variant: Miniforge3
+          channels: conda-forge
+          channel-priority: strict
           auto-update-conda: true
           python-version: '3.12'
       - name: Show conda config
