@@ -115,6 +115,31 @@ class SpectraCollection:
 
         return self
 
+    def drop(self, indices: list[int] | np.ndarray):
+        """
+        Removes specified rows (spectra) from both fragments and metadata.
+        Todo: Also remove Spectra by hashes?
+        """
+        all_indices = np.arange(self._fragments.shape[0])
+        keep_mask = ~np.isin(all_indices, indices)
+
+        self._fragments = self._fragments[keep_mask, :]
+        self._metadata = self._metadata.iloc[keep_mask].reset_index(drop=True)
+
+        return self
+
+    def dropna(self):
+        """
+        Removes spectra without peaks.
+        """
+        peaks_per_row = np.diff(self._fragments.indptr)
+        empty_indices = np.where(peaks_per_row == 0)[0]
+
+        if len(empty_indices) > 0:
+            self.drop(empty_indices)
+
+        return self
+
 
 class MetadataProxy(pd.DataFrame):
     """
