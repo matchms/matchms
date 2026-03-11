@@ -30,8 +30,33 @@ def ordered_dump(data: OrderedDict, stream=None, dumper=yaml.SafeDumper, **kwds)
 
 
 def load_workflow_from_yaml_file(yaml_file: str) -> OrderedDict:
-    with open(yaml_file, 'r', encoding="utf-8") as file:
+    """Load a Pipeline workflow from YAML.
+
+    Expected keys are:
+    - spectra_1_filters
+    - spectra_2_filters
+    - score_computations
+
+    For convenience, spectra_2_filters may be set to the string
+    "processing_spectra_1" to reuse spectra_1_filters.
+    """
+    with open(yaml_file, "r", encoding="utf-8") as file:
         workflow = ordered_load(file, yaml.SafeLoader)
-    if workflow["reference_filters"] == "processing_queries":
-        workflow["reference_filters"] = workflow["query_filters"]
+
+    if workflow is None:
+        raise ValueError(f"Workflow file {yaml_file} is empty.")
+
+    if not isinstance(workflow, OrderedDict):
+        workflow = OrderedDict(workflow)
+
+    expected_keys = {"spectra_1_filters", "spectra_2_filters", "score_computations"}
+    if set(workflow.keys()) != expected_keys:
+        raise ValueError(
+            f"Workflow must contain exactly keys {expected_keys}, "
+            f"but got {set(workflow.keys())}."
+        )
+
+    if workflow["spectra_2_filters"] == "processing_spectra_1":
+        workflow["spectra_2_filters"] = workflow["spectra_1_filters"]
+
     return workflow

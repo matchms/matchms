@@ -5,14 +5,14 @@ from scipy.optimize import linear_sum_assignment
 from matchms.similarity.spectrum_similarity_functions import collect_peak_pairs
 from matchms.typing import SpectrumType
 from ._precursor_validation import get_valid_precursor_mz
-from .BaseSimilarity import BaseSimilarity
+from .BaseSimilarity import BaseSimilarityWithSparse
 from .CosineHungarian import CosineHungarian
 
 
 logger = logging.getLogger("matchms")
 
 
-class ModifiedCosineHungarian(BaseSimilarity):
+class ModifiedCosineHungarian(BaseSimilarityWithSparse):
     """Calculate exact modified cosine score between mass spectra.
 
     The modified cosine score quantifies similarity between two mass spectra with

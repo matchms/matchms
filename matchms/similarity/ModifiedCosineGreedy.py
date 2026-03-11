@@ -3,7 +3,7 @@ from typing import Tuple
 import numpy as np
 from matchms.typing import SpectrumType
 from ._precursor_validation import get_valid_precursor_mz
-from .BaseSimilarity import BaseSimilarity
+from .BaseSimilarity import BaseSimilarityWithSparse
 from .CosineGreedy import CosineGreedy
 from .spectrum_similarity_functions import collect_peak_pairs, score_best_matches
 
@@ -11,7 +11,7 @@ from .spectrum_similarity_functions import collect_peak_pairs, score_best_matche
 logger = logging.getLogger("matchms")
 
 
-class ModifiedCosineGreedy(BaseSimilarity):
+class ModifiedCosineGreedy(BaseSimilarityWithSparse):
     """Calculate an approximate modified cosine score between mass spectra.
 
     This implementation solves the peak assignment in a greedy way and is therefore
