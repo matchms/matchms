@@ -1,11 +1,11 @@
 from typing import Tuple
 import numpy as np
 from matchms.typing import SpectrumType
-from .BaseSimilarity import BaseSimilarity
+from .BaseSimilarity import BaseSimilarityWithSparse
 from .spectrum_similarity_functions import collect_peak_pairs, score_best_matches
 
 
-class CosineGreedy(BaseSimilarity):
+class CosineGreedy(BaseSimilarityWithSparse):
     """Calculate 'cosine similarity score' between two spectra.
 
     The cosine score aims at quantifying the similarity between two mass spectra.

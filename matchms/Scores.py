@@ -326,9 +326,14 @@ class Scores:
             if self.is_scalar:
                 return self.score_fields[0]
             raise KeyError(f"Field name required. Available fields: {self.score_fields}.")
-        if field not in self._data:
-            raise KeyError(f"Unknown field {field!r}. Available fields: {self.score_fields}.")
-        return field
+
+        if field in self._data:
+            return field
+
+        if field == "score" and self.is_scalar:
+            return self.score_fields[0]
+
+        raise KeyError(f"Unknown field {field!r}. Available fields: {self.score_fields}.")
 
     def _compare_scalar(self, other, op, sparse_safe: bool) -> ScoresMask:
         """Compare scalar Scores against a value and return a mask."""
