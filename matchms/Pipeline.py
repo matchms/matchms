@@ -99,7 +99,7 @@ class Pipeline:
                 ["select_by_mz", {"mz_from": 0, "mz_to": 1000}],
                 ["require_minimum_number_of_peaks", {"n_required": 5}],
             ],
-            reference_filters=["add_fingerprint"],
+            reference_filters=[],
             score_computations=[
                 ["precursormzmatch", {"tolerance": 120.0}],
                 ["cosinegreedy", {"tolerance": 1.0}],
