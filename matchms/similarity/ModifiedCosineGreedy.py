@@ -4,6 +4,7 @@ import numpy as np
 from matchms.typing import SpectrumType
 from ._precursor_validation import get_valid_precursor_mz
 from .BaseSimilarity import BaseSimilarity
+from .CosineGreedy import CosineGreedy
 from .spectrum_similarity_functions import collect_peak_pairs, score_best_matches
 
 
@@ -50,16 +51,23 @@ class ModifiedCosineGreedy(BaseSimilarity):
     def pair(self, reference: SpectrumType, query: SpectrumType) -> Tuple[float, int]:
         """Calculate approximate modified cosine score between two spectra."""
 
+        precursor_mz_ref = get_valid_precursor_mz(reference, logger)
+        precursor_mz_query = get_valid_precursor_mz(query, logger)
+        mass_shift = precursor_mz_ref - precursor_mz_query
+
+        if abs(mass_shift) <= self.tolerance:
+            return CosineGreedy(
+                tolerance=self.tolerance,
+                mz_power=self.mz_power,
+                intensity_power=self.intensity_power,
+            ).pair(reference, query)
+
         def get_matching_pairs():
             """Find all pairs of peaks that match within the given tolerance."""
             zero_pairs = collect_peak_pairs(
                 spec1, spec2, self.tolerance, shift=0.0,
                 mz_power=self.mz_power, intensity_power=self.intensity_power
             )
-            precursor_mz_ref = get_valid_precursor_mz(reference, logger)
-            precursor_mz_query = get_valid_precursor_mz(query, logger)
-
-            mass_shift = precursor_mz_ref - precursor_mz_query
             nonzero_pairs = collect_peak_pairs(
                 spec1, spec2, self.tolerance, shift=mass_shift,
                 mz_power=self.mz_power, intensity_power=self.intensity_power
