@@ -2,7 +2,9 @@
 # - implement pair()
 # - optionally define score_datatype and score_fields
 # - optionally overwrite keep_score() for default sparse filtering
-# - optionally overwrite matrix() and sparse_matrix() for performance optimizations
+# - optionally overwrite matrix() for performance optimizations
+# - for scores that also provide a sparse score compuation use BaseSimilarityWithSparse
+#  and optionally overwrite sparse_matrix() for performance optimizations
 # - users can also pass score_filter=... to sparse_matrix()
 
 from abc import abstractmethod
@@ -125,6 +127,133 @@ class BaseSimilarity:
 
         return Scores(result)
 
+    def sparse_matrix(
+        self,
+        spectra_1,
+        spectra_2=None,
+        idx_row=None,
+        idx_col=None,
+        score_fields=None,
+        score_filter=None,
+        progress_bar: bool = True,
+    ):
+        """Sparse score computation is not available for this similarity."""
+        raise NotImplementedError(
+            f"{self.__class__.__name__} does not implement sparse_matrix(). "
+            "Use a similarity class derived from BaseSimilarityWithSparse "
+            "or use matrix() instead."
+        )
+
+    def to_dict(self) -> dict:
+        """Return a dictionary representation of the similarity function."""
+        return {
+            "__Similarity__": self.__class__.__name__,
+            **self.__dict__,
+        }
+
+    @property
+    def is_structured_score(self) -> bool:
+        """Return True if this similarity uses a structured score dtype."""
+        return np.dtype(self.score_datatype).names is not None
+
+    # -------------------------------------------------------------------------
+    # Helpers
+    # -------------------------------------------------------------------------
+
+    def _prepare_inputs(
+        self,
+        spectra_1: Sequence[SpectrumType],
+        spectra_2: Optional[Sequence[SpectrumType]],
+    ) -> tuple[Sequence[SpectrumType], bool]:
+        """Prepare input collections and determine symmetry."""
+        if spectra_2 is None:
+            return spectra_1, True
+        return spectra_2, False
+
+    def _available_score_fields(self) -> tuple[str, ...]:
+        """Return the available score fields and validate consistency."""
+        dtype_names = np.dtype(self.score_datatype).names
+
+        if dtype_names is None:
+            if tuple(self.score_fields) != ("score",):
+                raise ValueError("Scalar scores must define score_fields=('score',).")
+            return ("score",)
+
+        dtype_names = tuple(dtype_names)
+        if tuple(self.score_fields) != dtype_names:
+            raise ValueError(
+                "score_fields does not match the field names in score_datatype. "
+                f"Got score_fields={self.score_fields}, dtype names={dtype_names}."
+            )
+        return dtype_names
+
+    def _resolve_score_fields(self, score_fields: Optional[Sequence[str]]) -> tuple[str, ...]:
+        """Validate and resolve the requested score fields."""
+        available_fields = self._available_score_fields()
+
+        if score_fields is None:
+            selected_fields = available_fields
+        else:
+            selected_fields = tuple(score_fields)
+
+        if len(selected_fields) == 0:
+            raise ValueError("score_fields must contain at least one field.")
+
+        unknown = tuple(field for field in selected_fields if field not in available_fields)
+        if unknown:
+            raise ValueError(
+                f"Unknown score field(s): {unknown}. Available fields are: {available_fields}."
+            )
+
+        return selected_fields
+
+    def _as_score(self, score) -> np.ndarray:
+        """Convert one score to the declared score dtype."""
+        return np.asarray(score, dtype=self.score_datatype)
+
+    def _create_dense_result(
+        self,
+        n_rows: int,
+        n_cols: int,
+        selected_fields: tuple[str, ...],
+    ) -> dict[str, np.ndarray]:
+        """Create an empty dense result container."""
+        if not self.is_structured_score:
+            return {"score": np.zeros((n_rows, n_cols), dtype=self.score_datatype)}
+
+        return {
+            field: np.zeros((n_rows, n_cols), dtype=np.dtype(self.score_datatype)[field])
+            for field in selected_fields
+        }
+
+    def _store_in_dense_result(
+        self,
+        result: dict[str, np.ndarray],
+        i: int,
+        j: int,
+        score: np.ndarray,
+        selected_fields: tuple[str, ...],
+    ) -> None:
+        """Store one score in the dense result container."""
+        if not self.is_structured_score:
+            result["score"][i, j] = score
+            return
+
+        for field in selected_fields:
+            result[field][i, j] = score[field]
+
+
+class BaseSimilarityWithSparse(BaseSimilarity):
+    """Base similarity class with a default sparse implementation.
+
+    This class extends BaseSimilarity by providing a default implementation of
+    sparse_matrix() that applies a score filter to the dense results.
+
+    Subclasses can override keep_score() to define the default filtering behavior,
+    and users can also pass a custom score_filter=... to sparse_matrix() for
+    per-call control.
+    """
+   
     def sparse_matrix(
         self,
         spectra_1: Sequence[SpectrumType],
@@ -361,109 +490,11 @@ class BaseSimilarity:
             return all(score[field] != 0 for field in score.dtype.names)
         return bool(score != 0)
 
-    def to_dict(self) -> dict:
-        """Return a dictionary representation of the similarity function."""
-        return {
-            "__Similarity__": self.__class__.__name__,
-            **self.__dict__,
-        }
-
-    @property
-    def is_structured_score(self) -> bool:
-        """Return True if this similarity uses a structured score dtype."""
-        return np.dtype(self.score_datatype).names is not None
-
-    # -------------------------------------------------------------------------
-    # Helpers
-    # -------------------------------------------------------------------------
-
-    def _prepare_inputs(
-        self,
-        spectra_1: Sequence[SpectrumType],
-        spectra_2: Optional[Sequence[SpectrumType]],
-    ) -> tuple[Sequence[SpectrumType], bool]:
-        """Prepare input collections and determine symmetry."""
-        if spectra_2 is None:
-            return spectra_1, True
-        return spectra_2, False
-
-    def _available_score_fields(self) -> tuple[str, ...]:
-        """Return the available score fields and validate consistency."""
-        dtype_names = np.dtype(self.score_datatype).names
-
-        if dtype_names is None:
-            if tuple(self.score_fields) != ("score",):
-                raise ValueError("Scalar scores must define score_fields=('score',).")
-            return ("score",)
-
-        dtype_names = tuple(dtype_names)
-        if tuple(self.score_fields) != dtype_names:
-            raise ValueError(
-                "score_fields does not match the field names in score_datatype. "
-                f"Got score_fields={self.score_fields}, dtype names={dtype_names}."
-            )
-        return dtype_names
-
-    def _resolve_score_fields(self, score_fields: Optional[Sequence[str]]) -> tuple[str, ...]:
-        """Validate and resolve the requested score fields."""
-        available_fields = self._available_score_fields()
-
-        if score_fields is None:
-            selected_fields = available_fields
-        else:
-            selected_fields = tuple(score_fields)
-
-        if len(selected_fields) == 0:
-            raise ValueError("score_fields must contain at least one field.")
-
-        unknown = tuple(field for field in selected_fields if field not in available_fields)
-        if unknown:
-            raise ValueError(
-                f"Unknown score field(s): {unknown}. Available fields are: {available_fields}."
-            )
-
-        return selected_fields
-
-    def _as_score(self, score) -> np.ndarray:
-        """Convert one score to the declared score dtype."""
-        return np.asarray(score, dtype=self.score_datatype)
-
     def _should_keep(self, score: np.ndarray, score_filter: Optional[ScoreFilter]) -> bool:
         """Return whether a score should be kept in sparse output."""
         if score_filter is not None:
             return bool(score_filter(score))
         return self.keep_score(score)
-
-    def _create_dense_result(
-        self,
-        n_rows: int,
-        n_cols: int,
-        selected_fields: tuple[str, ...],
-    ) -> dict[str, np.ndarray]:
-        """Create an empty dense result container."""
-        if not self.is_structured_score:
-            return {"score": np.zeros((n_rows, n_cols), dtype=self.score_datatype)}
-
-        return {
-            field: np.zeros((n_rows, n_cols), dtype=np.dtype(self.score_datatype)[field])
-            for field in selected_fields
-        }
-
-    def _store_in_dense_result(
-        self,
-        result: dict[str, np.ndarray],
-        i: int,
-        j: int,
-        score: np.ndarray,
-        selected_fields: tuple[str, ...],
-    ) -> None:
-        """Store one score in the dense result container."""
-        if not self.is_structured_score:
-            result["score"][i, j] = score
-            return
-
-        for field in selected_fields:
-            result[field][i, j] = score[field]
 
     def _build_sparse_result(
         self,
