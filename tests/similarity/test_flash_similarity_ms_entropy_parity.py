@@ -9,6 +9,7 @@ from matchms.reference_spectra import (
     phenylalanine,
     salicin,
 )
+from matchms.Scores import Scores
 from matchms.similarity.FlashSimilarity import FlashSimilarity
 
 
@@ -50,7 +51,10 @@ def test_flash_entropy_fragment_matches_ms_entropy_on_reference_spectra():
         merge_within=0.0,
         dtype=np.float64,
     )
-    matrix_scores = flash.matrix(refs, refs, array_type="numpy", n_jobs=0)
+    matrix_scores = flash.matrix(refs, n_jobs=0, progress_bar=False)
+
+    assert isinstance(matrix_scores, Scores)
+    matrix_array = matrix_scores.to_array()
 
     for i, spec_a in enumerate(refs):
         for j, spec_b in enumerate(refs):
@@ -64,7 +68,7 @@ def test_flash_entropy_fragment_matches_ms_entropy_on_reference_spectra():
                 )
             )
             score_pair = float(flash.pair(spec_a, spec_b))
-            score_matrix = float(matrix_scores[i, j])
+            score_matrix = float(matrix_array[i, j])
 
             assert score_pair == pytest.approx(expected, rel=1e-6, abs=1e-6)
             assert score_matrix == pytest.approx(expected, rel=1e-6, abs=1e-6)
@@ -86,7 +90,10 @@ def test_flash_entropy_fragment_matches_ms_entropy_on_reference_spectra_ppm():
         merge_within=0.0,
         dtype=np.float64,
     )
-    matrix_scores = flash.matrix(refs, refs, array_type="numpy", n_jobs=0)
+    matrix_scores = flash.matrix(refs, n_jobs=0, progress_bar=False)
+
+    assert isinstance(matrix_scores, Scores)
+    matrix_array = matrix_scores.to_array()
 
     for i, spec_a in enumerate(refs):
         for j, spec_b in enumerate(refs):
@@ -100,7 +107,7 @@ def test_flash_entropy_fragment_matches_ms_entropy_on_reference_spectra_ppm():
                 )
             )
             score_pair = float(flash.pair(spec_a, spec_b))
-            score_matrix = float(matrix_scores[i, j])
+            score_matrix = float(matrix_array[i, j])
 
             assert score_pair == pytest.approx(expected, rel=1e-6, abs=1e-6)
             assert score_matrix == pytest.approx(expected, rel=1e-6, abs=1e-6)

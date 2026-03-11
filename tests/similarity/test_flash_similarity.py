@@ -1,5 +1,6 @@
 import numpy as np
 import pytest
+from matchms.Scores import Scores
 from matchms.similarity import CosineGreedy, ModifiedCosineGreedy
 from matchms.similarity.FlashSimilarity import FlashSimilarity
 from ..builder_Spectrum import SpectrumBuilder
@@ -160,7 +161,12 @@ def test_entropy_matrix_dense_matches_pair():
         normalize_to_half=False,
         merge_within=0.0,
     )
-    M = fse.matrix(refs, qs, array_type="numpy", n_jobs=0)
+    scores = fse.matrix(refs, qs, n_jobs=0, progress_bar=False)
+    assert isinstance(scores, Scores)
+    assert scores.is_sparse is False
+    assert scores.is_scalar is True
+
+    M = scores.to_array()
     assert M.shape == (2, 2)
     for i, r in enumerate(refs):
         for j, q in enumerate(qs):
@@ -168,14 +174,10 @@ def test_entropy_matrix_dense_matches_pair():
             assert float(M[i, j]) == pytest.approx(expected, abs=1e-6)
 
 
-def test_entropy_matrix_sparse_basic():
-    refs = [
+def test_entropy_matrix_self_comparison_returns_scores():
+    spectra = [
         build_spectrum([100, 200], [1.0, 0.5], precursor_mz=500.0),
         build_spectrum([110, 300], [0.3, 1.0], precursor_mz=600.0),
-    ]
-    qs = [
-        build_spectrum([100, 205], [1.0, 0.5], precursor_mz=500.0),
-        build_spectrum([110, 300], [1.0, 0.3], precursor_mz=600.0),
     ]
     fse = FlashSimilarity(
         tolerance=0.1,
@@ -186,13 +188,14 @@ def test_entropy_matrix_sparse_basic():
         normalize_to_half=False,
         merge_within=0.0,
     )
-    S = fse.matrix(refs, qs, array_type="sparse", n_jobs=0)
-    assert S.shape == (2, 2, 1)
-    dense = S.to_array()
-    for i in range(2):
-        for j in range(2):
-            expect = float(fse.pair(refs[i], qs[j]))
-            assert float(dense[i, j]) == pytest.approx(expect, abs=1e-6)
+
+    scores = fse.matrix(spectra, n_jobs=0, progress_bar=False)
+    assert isinstance(scores, Scores)
+    assert scores.shape == (2, 2)
+
+    M = scores.to_array()
+    assert M.shape == (2, 2)
+    assert np.allclose(M, M.T, atol=1e-6)
 
 
 def test_entropy_fragment_score_is_bounded_with_overlapping_windows():
@@ -237,9 +240,10 @@ def test_entropy_fragment_ignores_non_positive_peaks_in_pairwise_matching():
     assert expected > 0.0
     assert float(fse.pair(ref_with_zero, query)) == pytest.approx(expected, abs=1e-7)
 
-    matrix_scores = fse.matrix([ref_with_zero, ref_without_zero], [query], array_type="numpy", n_jobs=0)
-    assert float(matrix_scores[0, 0]) == pytest.approx(expected, abs=1e-7)
-    assert float(matrix_scores[1, 0]) == pytest.approx(expected, abs=1e-7)
+    matrix_scores = fse.matrix([ref_with_zero, ref_without_zero], [query], n_jobs=0, progress_bar=False)
+    M = matrix_scores.to_array()
+    assert float(M[0, 0]) == pytest.approx(expected, abs=1e-7)
+    assert float(M[1, 0]) == pytest.approx(expected, abs=1e-7)
 
 
 def test_entropy_fragment_matrix_matches_pair_with_sparse_candidate_columns():
@@ -265,13 +269,15 @@ def test_entropy_fragment_matrix_matches_pair_with_sparse_candidate_columns():
         dtype=np.float64,
     )
 
-    matrix_scores = fse.matrix([spectrum_1], spectra_2, array_type="numpy", n_jobs=0)
-    assert matrix_scores.shape == (1, len(spectra_2))
-    assert np.count_nonzero(matrix_scores[0] > 0.0) == 3
+    matrix_scores = fse.matrix([spectrum_1], spectra_2, n_jobs=0, progress_bar=False)
+    M = matrix_scores.to_array()
+    assert M.shape == (1, len(spectra_2))
+    assert np.count_nonzero(M[0] > 0.0) == 3
 
     for j, query in enumerate(spectra_2):
         expected = float(fse.pair(spectrum_1, query))
-        assert float(matrix_scores[0, j]) == pytest.approx(expected, abs=1e-7)
+        assert float(M[0, j]) == pytest.approx(expected, abs=1e-7)
+
 
 # ----------------------------
 # Cosine / Modified Cosine path + baseline parity
@@ -304,7 +310,6 @@ def _mc_flash(tolerance):
             0.01,
             id="pure_shift_exploited",
         ),
-
         # 2) Mixed: one shared unshifted fragment plus shifted set
         # Expect both algorithms to pick the same best non-overlapping set.
         pytest.param(
@@ -317,9 +322,8 @@ def _mc_flash(tolerance):
             0.01,
             id="mixed_direct_and_shifted",
         ),
-
         # 3) Ambiguity: two query peaks within tolerance of the same shifted match
-        # This stresses greedy choice ordering and tie-breaking.
+        # This stresses greedy choice ordering and tie-breaking
         pytest.param(
             [100.0, 200.0],
             [1.0, 0.5],
@@ -330,21 +334,18 @@ def _mc_flash(tolerance):
             0.01,
             id="duplicate_candidates_nearby",
         ),
-
         # 4) Competition: a direct fragment match competes with a shifted/NL match
         # Constructed so dot products are close and greedy selection matters.
         pytest.param(
             [100.0, 200.0, 250.0],
             [1.0, 0.9, 0.2],
             500.0,
-            # 200.0 is a direct match, 100/250 are shift-aligned
             [110.0, 200.0, 260.0],
             [1.0, 0.9, 0.2],
             510.0,
             0.01,
             id="direct_competes_with_shifted",
         ),
-
         # 5) Edge tolerance: shifted peaks sit near the boundary
         # To catch subtle differences in symmetric ppm/Da handling or window trimming.
         pytest.param(
@@ -352,7 +353,7 @@ def _mc_flash(tolerance):
             [0.8, 1.0, 0.6],
             500.0,
             [110.0099, 210.0099, 310.0099],
-            [0.8,  1.0, 0.6],
+            [0.8, 1.0, 0.6],
             510.0,
             0.01,
             id="near_tolerance_boundary",
@@ -422,7 +423,9 @@ def test_cosine_matrix_dense_matches_pair():
         merge_within=0.0,
         dtype=np.float64,
     )
-    M = flash.matrix(refs, qs, array_type="numpy", n_jobs=0)
+    scores = flash.matrix(refs, qs, n_jobs=0, progress_bar=False)
+    assert isinstance(scores, Scores)
+    M = scores.to_array()
     assert M.shape == (2, 2)
     for i, r in enumerate(refs):
         for j, q in enumerate(qs):
