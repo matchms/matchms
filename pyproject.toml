@@ -3,7 +3,7 @@ name = "matchms"
 version = "0.32.0"
 description = "Python library for large-scale comparisons and processing of tandem mass spectral data"
 readme = "README.rst"
-requires-python = ">=3.10,<3.14"  # blocked because of pynndescent
+requires-python = ">=3.11,<3.14"  # blocked because of pynndescent
 license = "Apache-2.0"
 authors = [
   { name = "matchms developer team", email = "florian.huber@hs-duesseldorf.de" }
@@ -21,7 +21,6 @@ classifiers = [
   "Intended Audience :: Science/Research",
   "Natural Language :: English",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
