@@ -1,62 +1,79 @@
-from typing import List
+from typing import Optional, Sequence
 import numpy as np
-from sparsestack import StackedSparseArray
+from scipy.sparse import coo_array
+from matchms.Scores import Scores
 from matchms.similarity.spectrum_similarity_functions import (
     number_matching,
     number_matching_ppm,
     number_matching_symmetric,
     number_matching_symmetric_ppm,
 )
-from matchms.typing import SpectrumType
-from .BaseSimilarity import BaseSimilarity
+from matchms.typing import ScoreFilter, SpectrumType
+from .BaseSimilarity import BaseSimilarityWithSparse
 
 
-class PrecursorMzMatch(BaseSimilarity):
-    """Return True if spectra match in precursor m/z (within tolerance), and False otherwise.
-    The match within tolerance can be calculated based on an absolute m/z difference
-    (tolerance_type="Dalton") or based on a relative difference in ppm (tolerance_type="ppm").
+class PrecursorMzMatch(BaseSimilarityWithSparse):
+    """Return True if spectra match in precursor m/z, and False otherwise.
 
-    Example to calculate scores between 2 pairs of spectra and iterate over the scores
+    The match within tolerance can be calculated based on an absolute m/z
+    difference (``tolerance_type="Dalton"``) or based on a relative
+    difference in ppm (``tolerance_type="ppm"``).
+
+    Example to calculate scores between 2 pairs of spectra and inspect the
+    resulting score matrix:
 
     .. testcode::
 
         import numpy as np
-        from matchms import calculate_scores
         from matchms import Spectrum
         from matchms.similarity import PrecursorMzMatch
 
-        spectrum_1 = Spectrum(mz=np.array([]),
-                              intensities=np.array([]),
-                              metadata={"id": "1", "precursor_mz": 100})
-        spectrum_2 = Spectrum(mz=np.array([]),
-                              intensities=np.array([]),
-                              metadata={"id": "2", "precursor_mz": 110})
-        spectrum_3 = Spectrum(mz=np.array([]),
-                              intensities=np.array([]),
-                              metadata={"id": "3", "precursor_mz": 103})
-        spectrum_4 = Spectrum(mz=np.array([]),
-                              intensities=np.array([]),
-                              metadata={"id": "4", "precursor_mz": 111})
-        references = [spectrum_1, spectrum_2]
-        queries = [spectrum_3, spectrum_4]
+        spectrum_1 = Spectrum(
+            mz=np.array([]),
+            intensities=np.array([]),
+            metadata={"id": "1", "precursor_mz": 100},
+        )
+        spectrum_2 = Spectrum(
+            mz=np.array([]),
+            intensities=np.array([]),
+            metadata={"id": "2", "precursor_mz": 110},
+        )
+        spectrum_3 = Spectrum(
+            mz=np.array([]),
+            intensities=np.array([]),
+            metadata={"id": "3", "precursor_mz": 103},
+        )
+        spectrum_4 = Spectrum(
+            mz=np.array([]),
+            intensities=np.array([]),
+            metadata={"id": "4", "precursor_mz": 111},
+        )
 
-        similarity_score = PrecursorMzMatch(tolerance=5.0, tolerance_type="Dalton")
-        scores = calculate_scores(spectra_1, spectra_2, similarity_score)
+        spectra_1 = [spectrum_1, spectrum_2]
+        spectra_2 = [spectrum_3, spectrum_4]
 
-        for (reference, query, score) in scores:
-            print(f"Precursor m/z match between {spectrum_1.get('id')} and {spectrum_2.get('id')}" +
-                  f" is {bool(score[0])}")
+        similarity = PrecursorMzMatch(tolerance=5.0, tolerance_type="Dalton")
+        scores = similarity.matrix(spectra_1, spectra_2)
+
+        score_array = scores.to_array()
+
+        for i, spectrum_1 in enumerate(spectra_1):
+            for j, spectrum_2 in enumerate(spectra_2):
+                print(
+                    f"Precursor m/z match between {spectrum_1.get('id')} and "
+                    f"{spectrum_2.get('id')} is {bool(score_array[i, j])}"
+                )
 
     Should output
 
     .. testoutput::
 
         Precursor m/z match between 1 and 3 is True
+        Precursor m/z match between 1 and 4 is False
+        Precursor m/z match between 2 and 3 is False
         Precursor m/z match between 2 and 4 is True
-
     """
 
-    # Set key characteristics as class attributes
     is_commutative = True
     score_datatype = bool
     score_fields = ("score",)
@@ -66,83 +83,163 @@ class PrecursorMzMatch(BaseSimilarity):
         Parameters
         ----------
         tolerance
-            Specify tolerance below which two m/z are counted as match.
+            Specify tolerance below which two precursor m/z values are counted as match.
         tolerance_type
-            Chose between fixed tolerance in Dalton (="Dalton") or a relative difference
-            in ppm (="ppm").
+            Choose between fixed tolerance in Dalton (``"Dalton"``) or a relative
+            difference in ppm (``"ppm"``).
         """
         self.tolerance = tolerance
         assert tolerance_type in ["Dalton", "ppm"], "Expected type from ['Dalton', 'ppm']"
         self.type = tolerance_type
 
-    def pair(self, spectrum_1: SpectrumType, spectrum_2: SpectrumType) -> float:
-        """Compare precursor m/z between reference and query spectrum.
+    def pair(self, spectrum_1: SpectrumType, spectrum_2: SpectrumType):
+        """Compare precursor m/z between two spectra.
 
         Parameters
         ----------
-        reference
-            Single reference spectrum.
-        query
-            Single query spectrum.
+        spectrum_1
+            First spectrum.
+        spectrum_2
+            Second spectrum.
         """
-        precursormz_ref = spectrum_1.get("precursor_mz")
-        precursormz_query = spectrum_2.get("precursor_mz")
-        assert precursormz_ref is not None and precursormz_query is not None, "Missing precursor m/z."
+        precursor_mz_1 = spectrum_1.get("precursor_mz")
+        precursor_mz_2 = spectrum_2.get("precursor_mz")
+        assert precursor_mz_1 is not None and precursor_mz_2 is not None, "Missing precursor m/z."
 
         if self.type == "Dalton":
-            return abs(precursormz_ref - precursormz_query) <= self.tolerance
+            score = abs(precursor_mz_1 - precursor_mz_2) <= self.tolerance
+            return np.asarray(score, dtype=self.score_datatype)
 
-        mean_mz = (precursormz_ref + precursormz_query) / 2
-        score = abs(precursormz_ref - precursormz_query) / mean_mz <= self.tolerance
+        mean_mz = (precursor_mz_1 + precursor_mz_2) / 2
+        ppm_difference = abs(precursor_mz_1 - precursor_mz_2) / mean_mz * 1e6
+        score = ppm_difference <= self.tolerance
         return np.asarray(score, dtype=self.score_datatype)
 
-    def matrix(self,
-               spectra_1: List[SpectrumType],
-               spectra_2: List[SpectrumType],
-               array_type: str = "numpy",
-               is_symmetric: bool = False) -> np.ndarray:
-        """Compare parent masses between all references and queries.
+    def matrix(
+        self,
+        spectra_1: Sequence[SpectrumType],
+        spectra_2: Optional[Sequence[SpectrumType]] = None,
+        score_fields: Optional[Sequence[str]] = None,
+        progress_bar: bool = True,
+    ) -> Scores:
+        """Compare precursor m/z between all spectra in `spectra_1` and `spectra_2`.
 
         Parameters
         ----------
-        references
-            List/array of input spectra.
-        queries
-            List/array of Single input spectra.
-        array_type
-            Specify the output array type. Can be "numpy" or "sparse".
-            Default is "numpy" and will return a numpy array. "sparse" will return a COO-sparse array.
-        is_symmetric
-            Set to True when *references* and *queries* are identical (as for instance for an all-vs-all
-            comparison). By using the fact that score[i,j] = score[j,i] the calculation will be about
-            2x faster.
+        spectra_1
+            First collection of input spectra.
+        spectra_2
+            Second collection of input spectra. If None, compare `spectra_1`
+            against itself.
+        score_fields
+            Requested score fields. Only ``("score",)`` is supported.
+        progress_bar
+            Included for API compatibility. Not used here because this optimized
+            implementation does not iterate pairwise in Python.
+
+        Returns
+        -------
+        Scores
+            Dense score matrix as a `Scores` object.
         """
+        del progress_bar  # not used in optimized implementation
 
-        def collect_precursormz(spectra):
-            """Collect precursors."""
-            precursors = []
-            for spectrum in spectra:
-                precursormz = spectrum.get("precursor_mz")
-                assert precursormz is not None, "Missing precursor m/z."
-                precursors.append(precursormz)
-            return np.asarray(precursors)
+        selected_fields = self._resolve_score_fields(score_fields)
+        if selected_fields != ("score",):
+            raise NotImplementedError(
+                "PrecursorMzMatch.matrix() supports only score_fields=('score',)."
+            )
 
-        precursors_ref = collect_precursormz(spectra_1)
-        precursors_query = collect_precursormz(spectra_2)
+        spectra_2, is_symmetric = self._prepare_inputs(spectra_1, spectra_2)
+
+        precursor_mz_1 = self._collect_precursor_mz(spectra_1)
+        precursor_mz_2 = self._collect_precursor_mz(spectra_2)
+
         if is_symmetric and self.type == "Dalton":
-            rows, cols, scores = number_matching_symmetric(precursors_ref, self.tolerance)
+            rows, cols, scores = number_matching_symmetric(precursor_mz_1, self.tolerance)
         elif is_symmetric and self.type == "ppm":
-            rows, cols, scores = number_matching_symmetric_ppm(precursors_ref, self.tolerance)
+            rows, cols, scores = number_matching_symmetric_ppm(precursor_mz_1, self.tolerance)
         elif self.type == "Dalton":
-            rows, cols, scores = number_matching(precursors_ref, precursors_query, self.tolerance)
+            rows, cols, scores = number_matching(precursor_mz_1, precursor_mz_2, self.tolerance)
         else:
-            rows, cols, scores = number_matching_ppm(precursors_ref, precursors_query, self.tolerance)
-        if array_type == "numpy":
-            scores_array = np.zeros((len(precursors_ref), len(precursors_query)))
-            scores_array[rows, cols] = scores.astype(self.score_datatype)
-            return scores_array
-        if array_type == "sparse":
-            scores_array = StackedSparseArray(len(precursors_ref), len(precursors_query))
-            scores_array.add_sparse_data(rows, cols, scores.astype(self.score_datatype), "")
-            return scores_array
-        return ValueError("`array_type` can only be 'numpy' or 'sparse'.")
+            rows, cols, scores = number_matching_ppm(precursor_mz_1, precursor_mz_2, self.tolerance)
+
+        score_array = np.zeros((len(precursor_mz_1), len(precursor_mz_2)), dtype=self.score_datatype)
+        score_array[rows, cols] = scores.astype(self.score_datatype, copy=False)
+        return Scores({"score": score_array})
+
+    def sparse_matrix(
+        self,
+        spectra_1: Sequence[SpectrumType],
+        spectra_2: Optional[Sequence[SpectrumType]] = None,
+        idx_row=None,
+        idx_col=None,
+        score_fields: Optional[Sequence[str]] = None,
+        score_filter: Optional[ScoreFilter] = None,
+        progress_bar: bool = True,
+    ) -> Scores:
+        """Compare precursor m/z and return sparse scores.
+
+        This method uses the optimized precursor-m/z matching functions when no
+        explicit indices are provided. If explicit `idx_row` and `idx_col` are
+        given, it falls back to the generic sparse implementation from
+        `BaseSimilarityWithSparse`.
+        """
+        selected_fields = self._resolve_score_fields(score_fields)
+        if selected_fields != ("score",):
+            raise NotImplementedError(
+                "PrecursorMzMatch.sparse_matrix() supports only score_fields=('score',)."
+            )
+
+        if idx_row is not None or idx_col is not None:
+            return super().sparse_matrix(
+                spectra_1=spectra_1,
+                spectra_2=spectra_2,
+                idx_row=idx_row,
+                idx_col=idx_col,
+                score_fields=score_fields,
+                score_filter=score_filter,
+                progress_bar=progress_bar,
+            )
+
+        del progress_bar  # not used in optimized implementation
+
+        spectra_2, is_symmetric = self._prepare_inputs(spectra_1, spectra_2)
+
+        precursor_mz_1 = self._collect_precursor_mz(spectra_1)
+        precursor_mz_2 = self._collect_precursor_mz(spectra_2)
+
+        if is_symmetric and self.type == "Dalton":
+            rows, cols, scores = number_matching_symmetric(precursor_mz_1, self.tolerance)
+        elif is_symmetric and self.type == "ppm":
+            rows, cols, scores = number_matching_symmetric_ppm(precursor_mz_1, self.tolerance)
+        elif self.type == "Dalton":
+            rows, cols, scores = number_matching(precursor_mz_1, precursor_mz_2, self.tolerance)
+        else:
+            rows, cols, scores = number_matching_ppm(precursor_mz_1, precursor_mz_2, self.tolerance)
+
+        scores = scores.astype(self.score_datatype, copy=False)
+
+        if score_filter is not None:
+            keep = np.array([bool(score_filter(np.asarray(v, dtype=self.score_datatype))) for v in scores], dtype=bool)
+            rows = rows[keep]
+            cols = cols[keep]
+            scores = scores[keep]
+
+        sparse = coo_array(
+            (scores, (rows, cols)),
+            shape=(len(precursor_mz_1), len(precursor_mz_2)),
+            dtype=self.score_datatype,
+        )
+        sparse.eliminate_zeros()
+        return Scores({"score": sparse})
+
+    @staticmethod
+    def _collect_precursor_mz(spectra: Sequence[SpectrumType]) -> np.ndarray:
+        """Collect precursor m/z values from spectra."""
+        precursor_mz = []
+        for spectrum in spectra:
+            value = spectrum.get("precursor_mz")
+            assert value is not None, "Missing precursor m/z."
+            precursor_mz.append(value)
+        return np.asarray(precursor_mz)
