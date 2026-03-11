@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from matchms.Scores import Scores
 from matchms.similarity import CosineGreedy, ModifiedCosineGreedy
-from matchms.similarity.FlashSimilarity import FlashSimilarity
+from matchms.similarity.FlashSimilarity import FlashCosine, FlashEntropy
 from ..builder_Spectrum import SpectrumBuilder
 
 
@@ -31,7 +31,7 @@ def test_entropy_pair_fragment_commutative_and_positive(use_ppm, tol):
     s1 = build_spectrum([100, 200, 300], [0.2, 1.0, 0.4], precursor_mz=500.0)
     s2 = build_spectrum([100, 200, 305], [0.1, 0.5, 0.2], precursor_mz=500.0)
 
-    fse = FlashSimilarity(
+    fse = FlashEntropy(
         tolerance=tol,
         use_ppm=use_ppm,
         matching_mode="fragment",
@@ -51,7 +51,7 @@ def test_entropy_pair_returns_zero_when_empty_after_cleanup():
     # Precursor window removes everything
     s1 = build_spectrum([199.0, 199.5], [1.0, 0.5], precursor_mz=200.0)
     s2 = build_spectrum([199.2, 199.7], [1.0, 0.5], precursor_mz=200.0)
-    fse = FlashSimilarity(
+    fse = FlashEntropy(
         tolerance=0.02,
         matching_mode="fragment",
         remove_precursor=True,
@@ -67,14 +67,14 @@ def test_entropy_identity_gate_da_and_ppm():
     s1 = build_spectrum([100, 200], [1.0, 1.0], precursor_mz=500.0)
     s2 = build_spectrum([100, 200], [1.0, 1.0], precursor_mz=500.3)
 
-    base = FlashSimilarity(
+    base = FlashEntropy(
         tolerance=0.02, matching_mode="fragment", remove_precursor=False, noise_cutoff=0.0
     )
     base_score = float(base.pair(s1, s2))
     assert base_score > 0.0
 
     # Strict Da gate
-    gate_da_tight = FlashSimilarity(
+    gate_da_tight = FlashEntropy(
         tolerance=0.02,
         matching_mode="fragment",
         identity_precursor_tolerance=0.2,
@@ -84,7 +84,7 @@ def test_entropy_identity_gate_da_and_ppm():
     )
     assert float(gate_da_tight.pair(s1, s2)) == 0.0
 
-    gate_da_loose = FlashSimilarity(
+    gate_da_loose = FlashEntropy(
         tolerance=0.02,
         matching_mode="fragment",
         identity_precursor_tolerance=0.5,
@@ -95,7 +95,7 @@ def test_entropy_identity_gate_da_and_ppm():
     assert float(gate_da_loose.pair(s1, s2)) == pytest.approx(base_score, abs=1e-7)
 
     # PPM gate
-    gate_ppm_tight = FlashSimilarity(
+    gate_ppm_tight = FlashEntropy(
         tolerance=0.02,
         matching_mode="fragment",
         identity_precursor_tolerance=300.0,
@@ -105,7 +105,7 @@ def test_entropy_identity_gate_da_and_ppm():
     )
     assert float(gate_ppm_tight.pair(s1, s2)) == 0.0
 
-    gate_ppm_loose = FlashSimilarity(
+    gate_ppm_loose = FlashEntropy(
         tolerance=0.02,
         matching_mode="fragment",
         identity_precursor_tolerance=800.0,
@@ -130,9 +130,9 @@ def test_entropy_neutral_loss_vs_hybrid_prefers_fragments():
         merge_within=0.0,
     )
 
-    frag = FlashSimilarity(matching_mode="fragment", **kwargs)
-    nl = FlashSimilarity(matching_mode="neutral_loss", **kwargs)
-    hyb = FlashSimilarity(matching_mode="hybrid", **kwargs)
+    frag = FlashEntropy(matching_mode="fragment", **kwargs)
+    nl = FlashEntropy(matching_mode="neutral_loss", **kwargs)
+    hyb = FlashEntropy(matching_mode="hybrid", **kwargs)
 
     s_frag = float(frag.pair(r, q))
     s_nl = float(nl.pair(r, q))
@@ -152,7 +152,7 @@ def test_entropy_matrix_dense_matches_pair():
         build_spectrum([100, 205], [1.0, 0.5], precursor_mz=500.0),
         build_spectrum([110, 300], [1.0, 0.3], precursor_mz=600.0),
     ]
-    fse = FlashSimilarity(
+    fse = FlashEntropy(
         tolerance=0.1,
         use_ppm=False,
         matching_mode="fragment",
@@ -179,7 +179,7 @@ def test_entropy_matrix_self_comparison_returns_scores():
         build_spectrum([100, 200], [1.0, 0.5], precursor_mz=500.0),
         build_spectrum([110, 300], [0.3, 1.0], precursor_mz=600.0),
     ]
-    fse = FlashSimilarity(
+    fse = FlashEntropy(
         tolerance=0.1,
         use_ppm=False,
         matching_mode="fragment",
@@ -203,8 +203,7 @@ def test_entropy_fragment_score_is_bounded_with_overlapping_windows():
     s1 = build_spectrum([100.000, 100.010], [1.0, 1.0], precursor_mz=250.0)
     s2 = build_spectrum([100.005, 100.015], [1.0, 1.0], precursor_mz=250.0)
 
-    fse = FlashSimilarity(
-        score_type="spectral_entropy",
+    fse = FlashEntropy(
         matching_mode="fragment",
         tolerance=0.02,
         use_ppm=False,
@@ -224,8 +223,7 @@ def test_entropy_fragment_ignores_non_positive_peaks_in_pairwise_matching():
     ref_without_zero = build_spectrum([100.1], [1.0], precursor_mz=250.0)
     query = build_spectrum([100.05], [1.0], precursor_mz=250.0)
 
-    fse = FlashSimilarity(
-        score_type="spectral_entropy",
+    fse = FlashEntropy(
         matching_mode="fragment",
         tolerance=0.1,
         use_ppm=False,
@@ -257,8 +255,7 @@ def test_entropy_fragment_matrix_matches_pair_with_sparse_candidate_columns():
         base = 500.0 + 10.0 * shift
         spectra_2.append(build_spectrum([base, base + 0.3], [1.0, 0.5], precursor_mz=450.0))
 
-    fse = FlashSimilarity(
-        score_type="spectral_entropy",
+    fse = FlashEntropy(
         matching_mode="fragment",
         tolerance=0.02,
         use_ppm=False,
@@ -284,9 +281,8 @@ def test_entropy_fragment_matrix_matches_pair_with_sparse_candidate_columns():
 # ----------------------------
 
 def _mc_flash(tolerance):
-    return FlashSimilarity(
-        score_type="cosine",
-        matching_mode="hybrid",  # hybrid + cosine = "modified cosine"
+    return FlashCosine(
+        matching_mode="hybrid",  # hybrid = "modified cosine"
         tolerance=tolerance,
         remove_precursor=False,
         noise_cutoff=0.0,
@@ -367,10 +363,13 @@ def test_flash_hybrid_cosine_matches_modified_cosine_greedy(mz_a, int_a, pmz_a, 
     flash = _mc_flash(tol)
     baseline = ModifiedCosineGreedy(tolerance=tol)
 
-    s_flash = float(flash.pair(a, b))
+    s_flash = float(flash.pair(a, b)["score"])
     s_base = float(baseline.pair(a, b)["score"])
+    matches_flash = flash.pair(a, b)["matches"]
+    matches_base = baseline.pair(a, b)["matches"]
 
     assert s_flash == pytest.approx(s_base, rel=1e-12, abs=1e-12)
+    assert matches_flash == matches_base
 
 
 def test_cosine_pair_matches_cosinegreedy_default_tolerance_001():
@@ -386,8 +385,7 @@ def test_cosine_pair_matches_cosinegreedy_default_tolerance_001():
         ),
     ]
 
-    flash = FlashSimilarity(
-        score_type="cosine",
+    flash = FlashCosine(
         matching_mode="fragment",
         tolerance=0.01,
         remove_precursor=False,
@@ -399,9 +397,13 @@ def test_cosine_pair_matches_cosinegreedy_default_tolerance_001():
     baseline = CosineGreedy(tolerance=0.01)
 
     for a, b in pairs:
-        s_flash = flash.pair(a, b)
+        s_flash = flash.pair(a, b)["score"]
         s_base = baseline.pair(a, b)["score"]
         assert s_flash == pytest.approx(s_base, rel=1e-12, abs=1e-12)
+
+        matches_flash = flash.pair(a, b)["matches"]
+        matches_base = baseline.pair(a, b)["matches"]
+        assert matches_flash == matches_base
 
 
 def test_cosine_matrix_dense_matches_pair():
@@ -413,8 +415,7 @@ def test_cosine_matrix_dense_matches_pair():
         build_spectrum([100.007, 150.002, 300.000], [0.6, 1.0, 0.4], precursor_mz=500.0),
         build_spectrum([110.004, 250.009, 400.006], [0.5, 0.9, 0.7], precursor_mz=600.0),
     ]
-    flash = FlashSimilarity(
-        score_type="cosine",
+    flash = FlashCosine(
         matching_mode="fragment",
         tolerance=0.01,
         remove_precursor=False,
@@ -425,24 +426,24 @@ def test_cosine_matrix_dense_matches_pair():
     )
     scores = flash.matrix(refs, qs, n_jobs=0, progress_bar=False)
     assert isinstance(scores, Scores)
-    M = scores.to_array()
+    M = scores.to_array("score")
     assert M.shape == (2, 2)
     for i, r in enumerate(refs):
         for j, q in enumerate(qs):
-            expected = float(flash.pair(r, q))
+            expected = float(flash.pair(r, q)["score"])
             assert float(M[i, j]) == pytest.approx(expected, abs=1e-12)
 
 
 def test_cosine_dtype_and_commutativity():
     a = build_spectrum([100, 150, 300], [0.5, 1.0, 0.4], precursor_mz=600.0)
     b = build_spectrum([100, 155, 295], [0.5, 0.8, 0.6], precursor_mz=600.0)
-    f32 = FlashSimilarity(score_type="cosine", dtype=np.float32, remove_precursor=False, noise_cutoff=0.0)
-    f64 = FlashSimilarity(score_type="cosine", dtype=np.float64, remove_precursor=False, noise_cutoff=0.0)
+    f32 = FlashCosine(dtype=np.float32, remove_precursor=False, noise_cutoff=0.0)
+    f64 = FlashCosine(dtype=np.float64, remove_precursor=False, noise_cutoff=0.0)
 
-    s_ab_32 = f32.pair(a, b)
-    s_ba_32 = f32.pair(b, a)
-    s_ab_64 = f64.pair(a, b)
-    s_ba_64 = f64.pair(b, a)
+    s_ab_32 = f32.pair(a, b)["score"]
+    s_ba_32 = f32.pair(b, a)["score"]
+    s_ab_64 = f64.pair(a, b)["score"]
+    s_ba_64 = f64.pair(b, a)["score"]
 
     assert s_ab_32.dtype == np.float32 and s_ba_32.dtype == np.float32
     assert s_ab_64.dtype == np.float64 and s_ba_64.dtype == np.float64

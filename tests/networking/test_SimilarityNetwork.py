@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 from matchms import Scores, Spectrum, calculate_scores
 from matchms.networking import SimilarityNetwork
-from matchms.similarity import FlashSimilarity
+from matchms.similarity import FlashCosine
 
 
 @pytest.fixture(params=["cyjs", "gexf", "gml", "graphml", "json"])
@@ -44,14 +44,14 @@ def create_dummy_scores():
     spectra_1 = spectra[:5]
     spectra_2 = spectra[5:]
 
-    similarity_measure = FlashSimilarity(matching_mode="fragment", score_type="cosine")
+    similarity_measure = FlashCosine(matching_mode="fragment")
     scores = calculate_scores(spectra_1, spectra_2, similarity_measure)
     return scores, spectra_1, spectra_2
 
 
 def create_dummy_scores_symmetric():
     spectra = create_dummy_spectra()
-    similarity_measure = FlashSimilarity(matching_mode="fragment", score_type="cosine")
+    similarity_measure = FlashCosine(matching_mode="fragment")
     scores = calculate_scores(spectra, spectra, similarity_measure)
     return scores, spectra
 

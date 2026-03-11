@@ -6,7 +6,7 @@ from matchms.networking.networking_functions import (
     get_top_hits_by_column,
     get_top_hits_by_row,
 )
-from matchms.similarity import FlashSimilarity
+from matchms.similarity import FlashEntropy
 
 
 def create_dummy_spectra():
@@ -32,7 +32,7 @@ def create_dummy_scores():
     spectra_1 = spectra[:5]
     spectra_2 = spectra[5:]
 
-    similarity_measure = FlashSimilarity(matching_mode="hybrid")
+    similarity_measure = FlashEntropy(matching_mode="hybrid")
     scores = calculate_scores(spectra_1, spectra_2, similarity_measure)
     return scores, spectra_1, spectra_2
 
@@ -198,7 +198,7 @@ def test_get_top_hits_default_identifiers():
 
 def test_get_top_hits_ignore_diagonal():
     spectra = create_dummy_spectra()[:5]
-    similarity_measure = FlashSimilarity(matching_mode="hybrid")
+    similarity_measure = FlashEntropy(matching_mode="hybrid")
     scores = calculate_scores(spectra, spectra, similarity_measure)
     identifiers = [s.get("spectrum_id") for s in spectra]
 

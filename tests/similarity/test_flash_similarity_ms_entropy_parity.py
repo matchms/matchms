@@ -10,7 +10,7 @@ from matchms.reference_spectra import (
     salicin,
 )
 from matchms.Scores import Scores
-from matchms.similarity.FlashSimilarity import FlashSimilarity
+from matchms.similarity.FlashSimilarity import FlashEntropy
 
 
 def _reference_spectra():
@@ -40,8 +40,7 @@ def test_flash_entropy_fragment_matches_ms_entropy_on_reference_spectra():
     refs = _reference_spectra()
     refs_for_ms_entropy = [_normalize_peaks_for_ms_entropy(s) for s in refs]
 
-    flash = FlashSimilarity(
-        score_type="spectral_entropy",
+    flash = FlashEntropy(
         matching_mode="fragment",
         tolerance=tolerance_da,
         use_ppm=False,
@@ -79,8 +78,7 @@ def test_flash_entropy_fragment_matches_ms_entropy_on_reference_spectra_ppm():
     refs = _reference_spectra()
     refs_for_ms_entropy = [_normalize_peaks_for_ms_entropy(s) for s in refs]
 
-    flash = FlashSimilarity(
-        score_type="spectral_entropy",
+    flash = FlashEntropy(
         matching_mode="fragment",
         tolerance=tolerance_ppm,
         use_ppm=True,
