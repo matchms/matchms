@@ -1,11 +1,11 @@
 import logging
 import multiprocessing as mp
 import platform
-from typing import List, Optional, Tuple
+from typing import Optional, Sequence, Tuple
 import numpy as np
 from numba import njit
-from sparsestack import StackedSparseArray
 from tqdm import tqdm
+from matchms.Scores import Scores
 from matchms.typing import SpectrumType
 from .BaseSimilarity import BaseSimilarity
 from .flash_utils import _build_library_index, _clean_and_weight
@@ -70,6 +70,7 @@ class FlashSimilarity(BaseSimilarity):
     """
     is_commutative = True
     score_datatype = np.float32
+    score_fields = ("score",)
 
     def __init__(self,
                  score_type: str = "spectral_entropy",      # 'spectral_entropy' | 'cosine'
@@ -161,72 +162,91 @@ class FlashSimilarity(BaseSimilarity):
         return np.asarray(row[0], dtype=self.dtype)
 
     # FAST + PARALLEL score matrix computation
-    def matrix(self,
-               spectra_1: List[SpectrumType],
-               spectra_2: List[SpectrumType],
-               array_type: str = "numpy",
-               is_symmetric: bool = False,
-               n_jobs: int = -1) -> np.ndarray:
+    def matrix(
+            self,
+            spectra_1: Sequence[SpectrumType],
+            spectra_2: Optional[Sequence[SpectrumType]] = None,
+            score_fields: Optional[Sequence[str]] = None,
+            progress_bar: bool = True,
+            n_jobs: int = -1,
+        ):
         """
-        Calculate matrix of Flash entropy similarity scores.
-        
-        Parameters:
+        Calculate matrix of Flash similarity scores.
+
+        Parameters
         ----------
-        spectra_1:
-            List of input spectra.
-        spectra_2:
-            List of input spectra.
-        array_type:
-            Specify the output array type. Can be "numpy" or "sparse".
-            Default is "numpy" and will return a numpy array. "sparse" will return a SparseStacked COO-style array.
-        is_symmetric:
-            If True, the matrix will be symmetric (i.e., references and queries must have the same length).
-            Here has no consequence on runtime.
-        n_jobs:
+        spectra_1
+            First collection of input spectra.
+        spectra_2
+            Second collection of input spectra. If None, compare `spectra_1`
+            against itself.
+        score_fields
+            Requested score fields. Only ``("score",)`` is supported.
+        progress_bar
+            When True, show a progress bar.
+        n_jobs
             Number of parallel jobs to run.
-            Default is set to -1, which means that all available CPUs minus one will be used.
+            Default is -1, which means that all available CPUs minus one will be used.
+
+        Returns
+        -------
+        Scores
+            Dense score matrix as a ``Scores`` object.
         """
+        selected_fields = self._resolve_score_fields(score_fields)
+        if selected_fields != ("score",):
+            raise NotImplementedError(
+                "FlashSimilarity.matrix() supports only score_fields=('score',)."
+            )
+
+        spectra_2, is_symmetric = self._prepare_inputs(spectra_1, spectra_2)
+
         n_rows = len(spectra_1)
         n_cols = len(spectra_2)
         descriptor = f"Flash {self.score_type} ({self.matching_mode})"
 
-        if array_type not in ("numpy", "sparse"):
-            raise ValueError("array_type must be 'numpy' or 'sparse'.")
         if is_symmetric and n_rows != n_cols:
-            raise ValueError("is_symmetric=True requires same #rows and #cols.")
+            raise ValueError("Self-comparison requires same number of rows and columns.")
 
         # ---- Windows safety fallback ----
         if platform.system() == "Windows" and n_jobs not in (None, 1, 0):
-            print("FlashSimilarity.matrix: n_jobs != 1 is not yet implemented on Windows; "
-                  "falling back to n_jobs=1.")
+            print(
+                "FlashSimilarity.matrix: n_jobs != 1 is not yet implemented on Windows; "
+                "falling back to n_jobs=1."
+            )
             n_jobs = 1
 
-        # 1) Preprocess LIBRARY once
+        # Preprocess library once
         lib_proc = []
         lib_pmz = []
-        for s in spectra_2:
-            peaks = s.peaks.to_numpy
-            pmz = s.metadata.get("precursor_mz", None)
-            cleaned = _clean_and_weight(peaks, pmz,
-                                        remove_precursor=self.remove_precursor,
-                                        precursor_window=self.precursor_window,
-                                        noise_cutoff=self.noise_cutoff,
-                                        normalize_to_half=self.normalize_to_half,
-                                        merge_within_da=self.merge_within,
-                                        weighing_type=("entropy" if self.score_type == "spectral_entropy"\
-                                                       else "cosine"),
-                                        dtype=self.dtype)
+        for spectrum_2 in spectra_2:
+            peaks = spectrum_2.peaks.to_numpy
+            pmz = spectrum_2.metadata.get("precursor_mz", None)
+            cleaned = _clean_and_weight(
+                peaks,
+                pmz,
+                remove_precursor=self.remove_precursor,
+                precursor_window=self.precursor_window,
+                noise_cutoff=self.noise_cutoff,
+                normalize_to_half=self.normalize_to_half,
+                merge_within_da=self.merge_within,
+                weighing_type=(
+                    "entropy" if self.score_type == "spectral_entropy" else "cosine"
+                ),
+                dtype=self.dtype,
+            )
             lib_proc.append(cleaned)
             lib_pmz.append(None if pmz is None else float(pmz))
 
-        compute_nl = (self.matching_mode in ("neutral_loss", "hybrid"))
-        compute_l2 = (self.score_type == "cosine")
+        compute_nl = self.matching_mode in ("neutral_loss", "hybrid")
+        compute_l2 = self.score_type == "cosine"
 
         lib = _build_library_index(
-            lib_proc, lib_pmz,
+            lib_proc,
+            lib_pmz,
             compute_neutral_loss=compute_nl,
             compute_l2_norm=compute_l2,
-            dtype=self.dtype
+            dtype=self.dtype,
         )
 
         # Prepare output
@@ -234,9 +254,9 @@ class FlashSimilarity(BaseSimilarity):
 
         # Prepare rows (spectra_1)
         row_inputs = []
-        for i, ref in enumerate(spectra_1):
-            peaks_r, pmz_r = self._prepare(ref)
-            row_inputs.append((i, peaks_r, pmz_r))
+        for i, spectrum_1 in enumerate(spectra_1):
+            peaks_1, pmz_1 = self._prepare(spectrum_1)
+            row_inputs.append((i, peaks_1, pmz_1))
 
         # Configuration passed to workers
         cfg = dict(
@@ -244,25 +264,30 @@ class FlashSimilarity(BaseSimilarity):
             use_ppm=bool(self.use_ppm),
             matching_mode=self.matching_mode,
             compute_nl=compute_nl,
-            iden_tol=(None if self.identity_precursor_tolerance is None\
-                      else float(self.identity_precursor_tolerance)),
+            iden_tol=(
+                None
+                if self.identity_precursor_tolerance is None
+                else float(self.identity_precursor_tolerance)
+            ),
             iden_use_ppm=bool(self.identity_use_ppm),
         )
         _set_globals(lib, cfg)
         worker = _row_task_entropy if self.score_type == "spectral_entropy" else _row_task_cosine
 
-
         # Run — sequential or parallel
         if n_jobs in (None, 1, 0):
-            iterator = row_inputs
-            for item in tqdm(iterator, total=n_rows, desc=descriptor+" (matrix)"):
+            for item in tqdm(
+                row_inputs,
+                total=n_rows,
+                desc=descriptor + " (matrix)",
+                disable=not progress_bar,
+            ):
                 row_idx, row = worker(item)
                 out[row_idx, :] = row
         else:
-            # Attempt Unix fork-based parallelism (not available on Windows; we already guarded above)
             n_cpus = mp.cpu_count()
             if n_jobs < 0:
-                n_jobs = max(1, n_cpus + 1 + n_jobs)  # e.g., -1 -> n_cpus-1
+                n_jobs = max(1, n_cpus + 1 + n_jobs)  # e.g. -1 -> n_cpus-1
             n_jobs = max(1, min(n_jobs, n_cpus))
 
             start_methods = mp.get_all_start_methods()
@@ -271,25 +296,29 @@ class FlashSimilarity(BaseSimilarity):
             if use_fork:
                 ctx = mp.get_context("fork")
                 with ctx.Pool(processes=n_jobs) as pool:
-                    for result in tqdm(pool.imap(worker, row_inputs, chunksize=8),
-                                    total=n_rows, desc=descriptor+f" (parallel x{n_jobs})"):
+                    for result in tqdm(
+                        pool.imap(worker, row_inputs, chunksize=8),
+                        total=n_rows,
+                        desc=descriptor + f" (parallel x{n_jobs})",
+                        disable=not progress_bar,
+                    ):
                         i, row = result
                         out[i, :] = row
             else:
-                # If fork is not available (e.g., certain environments), fall back to sequential with a note.
-                print("FlashSimilarity.matrix: parallel execution requires 'fork'; "
-                    "falling back to n_jobs=1.")
-                for item in tqdm(row_inputs, total=n_rows, desc=descriptor+" (matrix)"):
+                print(
+                    "FlashSimilarity.matrix: parallel execution requires 'fork'; "
+                    "falling back to n_jobs=1."
+                )
+                for item in tqdm(
+                    row_inputs,
+                    total=n_rows,
+                    desc=descriptor + " (matrix)",
+                    disable=not progress_bar,
+                ):
                     i, row = worker(item)
                     out[i, :] = row
 
-        if array_type == "numpy":
-            return out
-        elif array_type == "sparse":
-            scores_array = StackedSparseArray(n_rows, n_cols)
-            scores_array.add_dense_matrix(out.astype(self.score_datatype), "")
-            return scores_array
-        raise NotImplementedError("Output array type is unknown or not yet implemented.")
+        return Scores({"score": out.astype(self.score_datatype, copy=False)})
 
 
 # ===================== worker plumbing =====================
