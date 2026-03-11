@@ -29,6 +29,7 @@ class ModifiedCosineHungarian(BaseSimilarity):
 
     is_commutative = True
     score_datatype = [("score", np.float64), ("matches", "int")]
+    score_fields = ("score", "matches")
 
     def __init__(self, tolerance: float = 0.1, mz_power: float = 0.0, intensity_power: float = 1.0):
         """Initialize exact modified cosine.
