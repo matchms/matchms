@@ -52,8 +52,8 @@ class ModifiedCosineGreedy(BaseSimilarity):
     def pair(self, spectrum_1: SpectrumType, spectrum_2: SpectrumType) -> Tuple[float, int]:
         """Calculate approximate modified cosine score between two spectra."""
 
-        precursor_mz_ref = get_valid_precursor_mz(reference, logger)
-        precursor_mz_query = get_valid_precursor_mz(query, logger)
+        precursor_mz_ref = get_valid_precursor_mz(spectrum_1, logger)
+        precursor_mz_query = get_valid_precursor_mz(spectrum_2, logger)
         mass_shift = precursor_mz_ref - precursor_mz_query
 
         if abs(mass_shift) <= self.tolerance:
@@ -61,7 +61,7 @@ class ModifiedCosineGreedy(BaseSimilarity):
                 tolerance=self.tolerance,
                 mz_power=self.mz_power,
                 intensity_power=self.intensity_power,
-            ).pair(reference, query)
+            ).pair(spectrum_1, spectrum_2)
 
         def get_matching_pairs():
             """Find all pairs of peaks that match within the given tolerance."""
@@ -69,13 +69,6 @@ class ModifiedCosineGreedy(BaseSimilarity):
                 spec1, spec2, self.tolerance, shift=0.0,
                 mz_power=self.mz_power, intensity_power=self.intensity_power
             )
-<<<<<<< refactor_scores_v2
-            precursor_mz_ref = get_valid_precursor_mz(spectrum_1, logger)
-            precursor_mz_query = get_valid_precursor_mz(spectrum_2, logger)
-
-            mass_shift = precursor_mz_ref - precursor_mz_query
-=======
->>>>>>> master
             nonzero_pairs = collect_peak_pairs(
                 spec1, spec2, self.tolerance, shift=mass_shift,
                 mz_power=self.mz_power, intensity_power=self.intensity_power
