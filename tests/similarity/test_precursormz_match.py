@@ -22,18 +22,15 @@ def test_precursormz_match_parameterized(precursor_mz, tolerance, tolerance_type
 
 
 def test_precursormz_match_missing_precursormz():
-    """Test with missing precursormz."""
+    """Missing precursor_mz entries should return False."""
     builder = SpectrumBuilder()
     spectrum_1 = builder.with_metadata({"precursor_mz": 100.0}).build()
     spectrum_2 = builder.with_metadata({}).build()
 
     similarity_score = PrecursorMzMatch(tolerance=2.0)
 
-    with pytest.raises(AssertionError) as msg:
-        _ = similarity_score.pair(spectrum_1, spectrum_2)
-
-    expected_message_part = "Missing precursor m/z."
-    assert expected_message_part in str(msg.value), "Expected particular error message."
+    score = similarity_score.pair(spectrum_1, spectrum_2)
+    assert score == np.array(False, dtype=bool)
 
 
 @pytest.mark.parametrize('precursor_mz, tolerance, tolerance_type, expected', [
