@@ -25,7 +25,7 @@ from .BlinkCosine import BlinkCosine
 from .CosineGreedy import CosineGreedy
 from .CosineHungarian import CosineHungarian
 from .FingerprintSimilarity import FingerprintSimilarity
-from .FlashSimilarity import FlashSimilarity
+from .FlashSimilarity import FlashCosine, FlashEntropy
 from .IntersectMz import IntersectMz
 from .MetadataMatch import MetadataMatch
 from .ModifiedCosineGreedy import ModifiedCosineGreedy
@@ -42,7 +42,8 @@ __all__ = [
     "CosineGreedy",
     "CosineHungarian",
     "FingerprintSimilarity",
-    "FlashSimilarity",
+    "FlashCosine",
+    "FlashEntropy",
     "IntersectMz",
     "MetadataMatch",
     "ModifiedCosineHungarian",
@@ -65,7 +66,7 @@ def get_similarity_function_by_name(similarity_function_name: str):
     functions = [BinnedEmbeddingSimilarity, BlinkCosine,
                  ModifiedCosineGreedy,
                  CosineGreedy, CosineHungarian,
-                 FingerprintSimilarity, FlashSimilarity,
+                 FingerprintSimilarity, FlashCosine, FlashEntropy,
                  IntersectMz, MetadataMatch, ModifiedCosineHungarian,
                  NeutralLossesCosine, ParentMassMatch, PrecursorMzMatch]
 
