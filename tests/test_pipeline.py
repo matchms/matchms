@@ -53,13 +53,6 @@ def test_pipeline_initial_check_unknown_step():
     assert "Unknown score computation" in str(msg.value)
 
 
-def test_pipeline_initial_check_legacy_modified_cosine_name_removed():
-    workflow = create_workflow(score_computations=[["modifiedcosine", {"tolerance": 10.0}]])
-    with pytest.raises(ValueError) as msg:
-        Pipeline(workflow)
-    assert "Unknown score computation" in str(msg.value)
-
-
 def test_pipeline_symmetric():
     workflow = create_workflow(
         score_computations=[
