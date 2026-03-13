@@ -232,15 +232,18 @@ def _entropy_weight(intensities: np.ndarray, dtype: np.dtype) -> np.ndarray:
     return np.power(intensities, w).astype(dtype, copy=False)
 
 
-def _clean_and_weight(peaks: np.ndarray,
-                      precursor_mz: Optional[float],
-                      remove_precursor: bool,
-                      precursor_window: float,
-                      noise_cutoff: float,
-                      normalize_to_half: bool,
-                      merge_within_da: float,
-                      weighing_type: str,
-                      dtype: np.dtype = np.float64) -> np.ndarray:
+def _clean_and_weight(
+        peaks: np.ndarray,
+        precursor_mz: Optional[float],
+        remove_precursor: bool,
+        precursor_window: float,
+        noise_cutoff: float,
+        normalize_to_half: bool,
+        merge_within_da: float,
+        weighing_type: str,
+        intensity_power: float = 1.0,
+        dtype: np.dtype = np.float64
+        ) -> np.ndarray:
     """
     Apply the Flash preprocessing rules to a (mz, intensity) peak list.
 
@@ -270,6 +273,9 @@ def _clean_and_weight(peaks: np.ndarray,
         If > 0, merge peaks that are within this m/z distance.
     weighing_type : str
         One of "cosine" or "entropy". Fragment intensities will be weighted accordingly.
+        for "cosine", weighing is only changed if intensity_power != 1.0.
+    intensity_power : float
+        The power to raise intensity to in the cosine function. The default is 1.
     dtype : np.dtype
         Float dtype for outputs. Default is np.float64. TODO: should not be handled by this function?
 
@@ -304,7 +310,9 @@ def _clean_and_weight(peaks: np.ndarray,
     if weighing_type == "entropy":
         intensities = _entropy_weight(intensities, dtype)
     elif weighing_type == "cosine":
-        pass
+        if intensity_power != 1.0:
+            # Apply power-based weighing to intensities (for cosine or modified cosine)
+            intensities = np.power(intensities, intensity_power)
     else:
         raise ValueError(f"Score type '{weighing_type}' not recognized.")
 
