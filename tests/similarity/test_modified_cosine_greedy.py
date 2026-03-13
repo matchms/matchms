@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from matchms import Spectrum
 from matchms.filtering import normalize_intensities
-from matchms.similarity import ModifiedCosineGreedy
+from matchms.similarity import CosineGreedy, ModifiedCosineGreedy
 from ..builder_Spectrum import SpectrumBuilder
 
 
@@ -142,3 +142,46 @@ def test_modified_cosine_precursor_mz_as_string(caplog):
     assert score["matches"] == 0, "Expected 0 matching peaks."
     expected_msg = "Precursor_mz must be int or float. Apply 'add_precursor_mz' filter first."
     assert expected_msg in caplog.text, "Expected different log message"
+
+
+@pytest.mark.parametrize("query_precursor_mz", [500.0, 500.5, 501.0])
+def test_modified_cosine_greedy_matches_cosine_greedy_when_precursor_delta_within_tolerance(query_precursor_mz):
+    """Modified cosine greedy should reduce to cosine greedy when |precursor delta| <= tolerance."""
+    tolerance = 1.0
+    reference = Spectrum(
+        mz=np.array([100.0, 101.0, 102.0], dtype="float"),
+        intensities=np.array([1.0, 0.9, 0.8], dtype="float"),
+        metadata={"precursor_mz": 500.0},
+    )
+    query = Spectrum(
+        mz=np.array([100.0, 101.0, 104.0], dtype="float"),
+        intensities=np.array([1.0, 0.9, 0.8], dtype="float"),
+        metadata={"precursor_mz": query_precursor_mz},
+    )
+
+    modified_score = ModifiedCosineGreedy(tolerance=tolerance).pair(reference, query)
+    cosine_score = CosineGreedy(tolerance=tolerance).pair(reference, query)
+
+    assert modified_score["score"] == pytest.approx(cosine_score["score"], abs=1e-12)
+    assert modified_score["matches"] == cosine_score["matches"]
+
+
+def test_modified_cosine_greedy_matches_cosine_greedy_for_negative_boundary_delta():
+    """Modified cosine greedy should reduce to cosine greedy at negative boundary delta as well."""
+    tolerance = 1.0
+    reference = Spectrum(
+        mz=np.array([100.0, 101.0, 102.0], dtype="float"),
+        intensities=np.array([1.0, 0.9, 0.8], dtype="float"),
+        metadata={"precursor_mz": 499.0},
+    )
+    query = Spectrum(
+        mz=np.array([100.0, 101.0, 104.0], dtype="float"),
+        intensities=np.array([1.0, 0.9, 0.8], dtype="float"),
+        metadata={"precursor_mz": 500.0},
+    )
+
+    modified_score = ModifiedCosineGreedy(tolerance=tolerance).pair(reference, query)
+    cosine_score = CosineGreedy(tolerance=tolerance).pair(reference, query)
+
+    assert modified_score["score"] == pytest.approx(cosine_score["score"], abs=1e-12)
+    assert modified_score["matches"] == cosine_score["matches"]
