@@ -109,14 +109,14 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
             embs = self.compute_embeddings(spectra)
         return embs
 
-    def pair(self, reference: SpectrumType, query: SpectrumType) -> float:
+    def pair(self, spectrum_1: SpectrumType, spectrum_2: SpectrumType) -> float:
         """Compute similarity between a pair of spectra.
 
         Parameters
         ----------
-        reference : SpectrumType
+        spectrum_1 : SpectrumType
             Reference spectrum.
-        query : SpectrumType
+        spectrum_2 : SpectrumType
             Query spectrum.
 
         Returns
@@ -124,22 +124,22 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
         float
             Similarity score between the spectra.
         """
-        return self.matrix([reference], [query])[0, 0]
+        return self.matrix([spectrum_1], [spectrum_2])[0, 0]
 
     def matrix(
             self,
-            references: List[SpectrumType],
-            queries: List[SpectrumType],
+            spectra_1: List[SpectrumType],
+            spectra_2: List[SpectrumType],
             array_type: str = "numpy",
             is_symmetric: bool = True) -> np.ndarray:
-        """Compute similarity matrix between reference and query spectra.
+        """Compute similarity matrix between spectra_1 and spectra_2.
 
         Parameters
         ----------
-        references:
-            List of reference spectra.
-        queries:
-            List of query spectra.
+        spectra_1:
+            List of spectra.
+        spectra_2:
+            List of input spectra.
         array_type:
             Type of array to return. Must be "numpy".
         is_symmetric:
@@ -159,8 +159,8 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
             raise ValueError("Any embedding base similarity matrix is supposed to be dense and symmetric.")
 
         # Compute embeddings
-        embs_ref = self.compute_embeddings(references)
-        embs_query = self.compute_embeddings(queries)
+        embs_ref = self.compute_embeddings(spectra_1)
+        embs_query = self.compute_embeddings(spectra_2)
 
         # Compute pairwise similarities matrix
         return self.pairwise_similarity_fn(embs_ref, embs_query)
@@ -172,7 +172,7 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
             k: int = 100,
             index_backend: str = "pynndescent",
             **index_kwargs) -> Any:
-        """Build an ANN index for the reference spectra.
+        """Build an ANN index for the input spectra.
 
         Parameters
         ----------
@@ -222,7 +222,7 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
             self,
             query_spectra: Union[Iterable[SpectrumType], np.ndarray],
             k: int = 100) -> Tuple[np.ndarray, np.ndarray]:
-        """Get approximate nearest neighbors for query spectra.
+        """Get approximate nearest neighbors for input spectra.
 
         Parameters
         ----------

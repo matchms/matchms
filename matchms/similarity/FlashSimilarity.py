@@ -1,11 +1,11 @@
 import logging
 import multiprocessing as mp
 import platform
-from typing import List, Optional, Tuple
+from typing import Optional, Sequence, Tuple
 import numpy as np
 from numba import njit
-from sparsestack import StackedSparseArray
 from tqdm import tqdm
+from matchms.Scores import Scores
 from matchms.typing import SpectrumType
 from .BaseSimilarity import BaseSimilarity
 from .flash_utils import _build_library_index, _clean_and_weight
@@ -14,7 +14,204 @@ from .flash_utils import _build_library_index, _clean_and_weight
 logger = logging.getLogger("matchms")
 
 
-class FlashSimilarity(BaseSimilarity):
+class _BaseFlashSimilarity(BaseSimilarity):
+    """Shared base class for Flash-based similarities."""
+
+    is_commutative = True
+
+    def __init__(
+        self,
+        matching_mode: str = "fragment",           # 'fragment' | 'neutral_loss' | 'hybrid'
+        tolerance: float = 0.02,
+        use_ppm: bool = False,
+        intensity_power: float = 1.0,
+        remove_precursor: bool = False,
+        precursor_window: float = 1.6,
+        noise_cutoff: float = 0.01,
+        normalize_to_half: bool = True,
+        merge_within: float = 0,
+        identity_precursor_tolerance: Optional[float] = None,
+        identity_use_ppm: bool = False,
+        dtype: np.dtype = np.float64,
+    ):
+        if matching_mode not in ("fragment", "neutral_loss", "hybrid"):
+            raise ValueError("matching_mode must be 'fragment', 'neutral_loss', or 'hybrid'")
+
+        self.matching_mode = matching_mode
+        self.tolerance = tolerance
+        self.use_ppm = use_ppm
+        self.intensity_power = intensity_power
+        self.remove_precursor = remove_precursor
+        self.precursor_window = precursor_window
+        self.noise_cutoff = noise_cutoff
+        self.normalize_to_half = normalize_to_half
+        self.merge_within = merge_within
+        self.identity_precursor_tolerance = identity_precursor_tolerance
+        self.identity_use_ppm = identity_use_ppm
+        self.dtype = np.dtype(dtype)
+
+    @property
+    def _weighing_type(self) -> str:
+        raise NotImplementedError
+
+    @property
+    def _compute_l2(self) -> bool:
+        raise NotImplementedError
+
+    @property
+    def _worker(self):
+        raise NotImplementedError
+
+    @property
+    def _descriptor_name(self) -> str:
+        raise NotImplementedError
+
+    def _prepare(self, spectrum: SpectrumType) -> Tuple[np.ndarray, Optional[float]]:
+        peaks = spectrum.peaks.to_numpy
+        pmz = spectrum.metadata.get("precursor_mz", None)
+        cleaned = _clean_and_weight(
+            peaks,
+            pmz,
+            intensity_power=self.intensity_power,
+            remove_precursor=self.remove_precursor,
+            precursor_window=self.precursor_window,
+            noise_cutoff=self.noise_cutoff,
+            normalize_to_half=self.normalize_to_half,
+            merge_within_da=self.merge_within,
+            weighing_type=self._weighing_type,
+            dtype=self.dtype,
+        )
+        return cleaned, (None if pmz is None else float(pmz))
+
+    def _build_library(self, spectra_2: Sequence[SpectrumType]):
+        lib_proc = []
+        lib_pmz = []
+
+        for spectrum_2 in spectra_2:
+            peaks = spectrum_2.peaks.to_numpy
+            pmz = spectrum_2.metadata.get("precursor_mz", None)
+            cleaned = _clean_and_weight(
+                peaks,
+                pmz,
+                intensity_power=self.intensity_power,
+                remove_precursor=self.remove_precursor,
+                precursor_window=self.precursor_window,
+                noise_cutoff=self.noise_cutoff,
+                normalize_to_half=self.normalize_to_half,
+                merge_within_da=self.merge_within,
+                weighing_type=self._weighing_type,
+                dtype=self.dtype,
+            )
+            lib_proc.append(cleaned)
+            lib_pmz.append(None if pmz is None else float(pmz))
+
+        compute_nl = self.matching_mode in ("neutral_loss", "hybrid")
+
+        return _build_library_index(
+            lib_proc,
+            lib_pmz,
+            compute_neutral_loss=compute_nl,
+            compute_l2_norm=self._compute_l2,
+            dtype=self.dtype,
+        )
+
+    def _make_worker_cfg(self) -> dict:
+        return dict(
+            tol=float(self.tolerance),
+            use_ppm=bool(self.use_ppm),
+            matching_mode=self.matching_mode,
+            compute_nl=(self.matching_mode in ("neutral_loss", "hybrid")),
+            iden_tol=(
+                None
+                if self.identity_precursor_tolerance is None
+                else float(self.identity_precursor_tolerance)
+            ),
+            iden_use_ppm=bool(self.identity_use_ppm),
+        )
+
+    def _prepare_row_inputs(self, spectra_1: Sequence[SpectrumType]):
+        row_inputs = []
+        for i, spectrum_1 in enumerate(spectra_1):
+            peaks_1, pmz_1 = self._prepare(spectrum_1)
+            row_inputs.append((i, peaks_1, pmz_1))
+        return row_inputs
+
+    def _run_row_workers(
+        self,
+        row_inputs,
+        lib,
+        cfg,
+        progress_bar: bool,
+        n_jobs: int,
+        descriptor: str,
+    ):
+        _set_globals(lib, cfg)
+        worker = self._worker
+        n_rows = len(row_inputs)
+
+        results = []
+
+        if n_jobs in (None, 1, 0):
+            for item in tqdm(
+                row_inputs,
+                total=n_rows,
+                desc=descriptor + " (matrix)",
+                disable=not progress_bar,
+            ):
+                results.append(worker(item))
+            return results
+
+        # Windows fallback
+        if platform.system() == "Windows":
+            print(
+                f"{self.__class__.__name__}.matrix: n_jobs != 1 is not yet implemented on Windows; "
+                "falling back to n_jobs=1."
+            )
+            for item in tqdm(
+                row_inputs,
+                total=n_rows,
+                desc=descriptor + " (matrix)",
+                disable=not progress_bar,
+            ):
+                results.append(worker(item))
+            return results
+
+        n_cpus = mp.cpu_count()
+        if n_jobs < 0:
+            n_jobs = max(1, n_cpus + 1 + n_jobs)
+        n_jobs = max(1, min(n_jobs, n_cpus))
+
+        start_methods = mp.get_all_start_methods()
+        use_fork = ("fork" in start_methods) and (platform.system() != "Windows")
+
+        if not use_fork:
+            print(
+                f"{self.__class__.__name__}.matrix: parallel execution requires 'fork'; "
+                "falling back to n_jobs=1."
+            )
+            for item in tqdm(
+                row_inputs,
+                total=n_rows,
+                desc=descriptor + " (matrix)",
+                disable=not progress_bar,
+            ):
+                results.append(worker(item))
+            return results
+
+        ctx = mp.get_context("fork")
+        with ctx.Pool(processes=n_jobs) as pool:
+            for result in tqdm(
+                pool.imap(worker, row_inputs, chunksize=8),
+                total=n_rows,
+                desc=descriptor + f" (parallel x{n_jobs})",
+                disable=not progress_bar,
+            ):
+                results.append(result)
+
+        return results
+
+
+class FlashEntropy(_BaseFlashSimilarity):
     """
     Flash entropy similarity (Li & Fiehn, 2023) with a fast .matrix() that
     builds a library-wide index over 'queries' and streams all 'references'
@@ -32,12 +229,8 @@ class FlashSimilarity(BaseSimilarity):
     
     Parameters
     ----------
-    score_type:
-        Score type: 'spectral_entropy' (default) or 'cosine'.
     matching_mode:
         Matching mode: 'fragment', 'neutral_loss', or 'hybrid' (default is 'fragment').
-        Chose "hybrid" in combination with score_type="cosine" to compute the
-        modified cosine score.
     tolerance:
         Matching tolerance in Da or ppm (use_ppm=True). Default is 0.02.
     use_ppm:
@@ -70,57 +263,27 @@ class FlashSimilarity(BaseSimilarity):
     """
     is_commutative = True
     score_datatype = np.float32
+    score_fields = ("score",)
 
-    def __init__(self,
-                 score_type: str = "spectral_entropy",      # 'spectral_entropy' | 'cosine'
-                 matching_mode: str = "fragment",           # 'fragment' | 'neutral_loss' | 'hybrid'
-                 tolerance: float = 0.02,
-                 use_ppm: bool = False,
-                 remove_precursor: bool = False,
-                 precursor_window: float = 1.6,
-                 noise_cutoff: float = 0.01,
-                 normalize_to_half: bool = True,
-                 merge_within: float = 0,
-                 identity_precursor_tolerance: Optional[float] = None,
-                 identity_use_ppm: bool = False,
-                 dtype: np.dtype = np.float64):
-        if score_type not in ("spectral_entropy", "cosine"):
-            raise ValueError("score_type must be 'spectral_entropy' or 'cosine'")
-        if matching_mode not in ("fragment", "neutral_loss", "hybrid"):
-            raise ValueError("mode must be 'fragment', 'neutral_loss', or 'hybrid'")
-        self.score_type = score_type
-        self.matching_mode = matching_mode
-        self.tolerance = tolerance
-        self.use_ppm = use_ppm
-        self.remove_precursor = remove_precursor
-        self.precursor_window = precursor_window
-        self.noise_cutoff = noise_cutoff
-        self.normalize_to_half = normalize_to_half
-        self.merge_within = merge_within
-        self.identity_precursor_tolerance = identity_precursor_tolerance
-        self.identity_use_ppm = identity_use_ppm
-        self.dtype = dtype
-        # sync default BaseSimilarity
-        self.score_datatype = dtype
+    @property
+    def _weighing_type(self) -> str:
+        return "entropy"
 
-    # ---- per-pair (not parallel path) ----
-    def _prepare(self, spectrum: SpectrumType) -> Tuple[np.ndarray, Optional[float]]:
-        peaks = spectrum.peaks.to_numpy
-        pmz = spectrum.metadata.get("precursor_mz", None)
-        cleaned = _clean_and_weight(peaks, pmz,
-                                    remove_precursor=self.remove_precursor,
-                                    precursor_window=self.precursor_window,
-                                    noise_cutoff=self.noise_cutoff,
-                                    normalize_to_half=self.normalize_to_half,
-                                    merge_within_da=self.merge_within,
-                                    weighing_type=("entropy" if self.score_type == "spectral_entropy"\
-                                                    else "cosine"),
-                                    dtype=self.dtype)
-        return cleaned, (None if pmz is None else float(pmz))
+    @property
+    def _compute_l2(self) -> bool:
+        return False
 
-    def pair(self, reference: SpectrumType, query: SpectrumType) -> np.ndarray:
+    @property
+    def _worker(self):
+        return _row_task_entropy
+
+    @property
+    def _descriptor_name(self) -> str:
+        return f"Flash entropy ({self.matching_mode})"
+
+    def pair(self, spectrum_1: SpectrumType, spectrum_2: SpectrumType) -> np.ndarray:
         """
-        Compute Flash similarity for a single (reference, query) pair.
+        Compute Flash Entropy for a single (reference, query) pair.
         Uses the same preprocessing and scoring logic as the matrix path, but builds a tiny
         1-spectrum library from the query.
         
@@ -129,167 +292,249 @@ class FlashSimilarity(BaseSimilarity):
         logger.warning("This is not the fast intended use; better use .matrix() instead.")
 
         # Preprocess both spectra
-        peaks_1, pmz_1 = self._prepare(reference)
-        peaks_2, pmz_2 = self._prepare(query)
+        peaks_1, pmz_1 = self._prepare(spectrum_1)
+        peaks_2, pmz_2 = self._prepare(spectrum_2)
         if peaks_1.size == 0 or peaks_2.size == 0:
             return np.asarray(0.0, dtype=self.dtype)
-    
-        # Build 1-spec library index from the query
-        compute_nl = (self.matching_mode in ("neutral_loss", "hybrid"))
-        compute_l2 = (self.score_type == "cosine")
 
+        compute_nl = self.matching_mode in ("neutral_loss", "hybrid")
         lib = _build_library_index(
-            [peaks_2], [pmz_2],
+            [peaks_2],
+            [pmz_2],
             compute_neutral_loss=compute_nl,
-            compute_l2_norm=compute_l2,
-            dtype=self.dtype
+            compute_l2_norm=False,
+            dtype=self.dtype,
         )
-    
-        cfg = dict(
-            tol=float(self.tolerance),
-            use_ppm=bool(self.use_ppm),
-            matching_mode=self.matching_mode,
-            compute_nl=compute_nl,
-            iden_tol=(None if self.identity_precursor_tolerance is None\
-                      else float(self.identity_precursor_tolerance)),
-            iden_use_ppm=bool(self.identity_use_ppm),
-        )
-        _set_globals(lib, cfg)
-
-        worker = _row_task_entropy if self.score_type == "spectral_entropy" else _row_task_cosine
-        _, row = worker((0, peaks_1, pmz_1))
+        _set_globals(lib, self._make_worker_cfg())
+        _, row = _row_task_entropy((0, peaks_1, pmz_1))
         return np.asarray(row[0], dtype=self.dtype)
 
     # FAST + PARALLEL score matrix computation
-    def matrix(self,
-               references: List[SpectrumType],
-               queries: List[SpectrumType],
-               array_type: str = "numpy",
-               is_symmetric: bool = False,
-               n_jobs: int = -1) -> np.ndarray:
+    def matrix(
+            self,
+            spectra_1: Sequence[SpectrumType],
+            spectra_2: Optional[Sequence[SpectrumType]] = None,
+            score_fields: Optional[Sequence[str]] = None,
+            progress_bar: bool = True,
+            n_jobs: int = -1,
+        ):
         """
-        Calculate matrix of Flash entropy similarity scores.
-        
-        Parameters:
+        Calculate matrix of Flash Entropy scores.
+
+        Parameters
         ----------
-        references:
-            List of reference spectra.
-        queries:
-            List of query spectra.
-        array_type:
-            Specify the output array type. Can be "numpy" or "sparse".
-            Default is "numpy" and will return a numpy array. "sparse" will return a SparseStacked COO-style array.
-        is_symmetric:
-            If True, the matrix will be symmetric (i.e., references and queries must have the same length).
-            Here has no consequence on runtime.
-        n_jobs:
+        spectra_1
+            First collection of input spectra.
+        spectra_2
+            Second collection of input spectra. If None, compare `spectra_1`
+            against itself.
+        score_fields
+            Requested score fields. Only ``("score",)`` is supported.
+        progress_bar
+            When True, show a progress bar.
+        n_jobs
             Number of parallel jobs to run.
-            Default is set to -1, which means that all available CPUs minus one will be used.
+            Default is -1, which means that all available CPUs minus one will be used.
+
+        Returns
+        -------
+        Scores
+            Dense score matrix as a ``Scores`` object.
         """
-        n_rows = len(references)
-        n_cols = len(queries)
-        descriptor = f"Flash {self.score_type} ({self.matching_mode})"
+        selected_fields = self._resolve_score_fields(score_fields)
+        if selected_fields != ("score",):
+            raise NotImplementedError(
+                "FlashEntropy.matrix() supports only score_fields=('score',)."
+            )
 
-        if array_type not in ("numpy", "sparse"):
-            raise ValueError("array_type must be 'numpy' or 'sparse'.")
+        spectra_2, is_symmetric = self._prepare_inputs(spectra_1, spectra_2)
+        n_rows = len(spectra_1)
+        n_cols = len(spectra_2)
+
         if is_symmetric and n_rows != n_cols:
-            raise ValueError("is_symmetric=True requires same #rows and #cols.")
+            raise ValueError("Self-comparison requires same number of rows and columns.")
 
-        # ---- Windows safety fallback ----
-        if platform.system() == "Windows" and n_jobs not in (None, 1, 0):
-            print("FlashSimilarity.matrix: n_jobs != 1 is not yet implemented on Windows; "
-                  "falling back to n_jobs=1.")
-            n_jobs = 1
+        lib = self._build_library(spectra_2)
+        row_inputs = self._prepare_row_inputs(spectra_1)
+        results = self._run_row_workers(
+            row_inputs=row_inputs,
+            lib=lib,
+            cfg=self._make_worker_cfg(),
+            progress_bar=progress_bar,
+            n_jobs=n_jobs,
+            descriptor=self._descriptor_name,
+        )
 
-        # 1) Preprocess LIBRARY once
-        lib_proc = []
-        lib_pmz = []
-        for s in queries:
-            peaks = s.peaks.to_numpy
-            pmz = s.metadata.get("precursor_mz", None)
-            cleaned = _clean_and_weight(peaks, pmz,
-                                        remove_precursor=self.remove_precursor,
-                                        precursor_window=self.precursor_window,
-                                        noise_cutoff=self.noise_cutoff,
-                                        normalize_to_half=self.normalize_to_half,
-                                        merge_within_da=self.merge_within,
-                                        weighing_type=("entropy" if self.score_type == "spectral_entropy"\
-                                                       else "cosine"),
-                                        dtype=self.dtype)
-            lib_proc.append(cleaned)
-            lib_pmz.append(None if pmz is None else float(pmz))
+        out_score = np.zeros((n_rows, n_cols), dtype=self.dtype)
+        for row_idx, row_score in results:
+            out_score[row_idx, :] = row_score
 
-        compute_nl = (self.matching_mode in ("neutral_loss", "hybrid"))
-        compute_l2 = (self.score_type == "cosine")
+        return Scores({"score": out_score.astype(self.score_datatype, copy=False)})
 
+
+class FlashCosine(_BaseFlashSimilarity):
+    """
+    Flash Cosine similarity following the original Flash Entropy (Li & Fiehn, 2023)
+    with a fast .matrix() that builds a library-wide index over 'queries' and streams 
+    all 'references' through it. This corresponds to the "CosineGreedy" scoring logic
+    but with the same fast Flash path as Flash Entropy.
+
+    Key options:
+      - matching_mode: 'fragment', 'neutral_loss', or 'hybrid' (fragment-priority).
+      - tolerance in Da or symmetric ppm (use_ppm=True).
+      - cleanup: remove precursor & > (precursor_mz - 1.6), 1% noise removal,
+                 entropy weighting, normalize ∑I' = 0.5, optional within-peak merge.
+
+    Notes:
+      - .pair() works but is not the fast path. Use .matrix().
+      - For identity-search behavior, pass identity_precursor_tolerance (Da or ppm).
+    
+    Parameters
+    ----------
+    matching_mode:
+        Matching mode: 'fragment', 'neutral_loss', or 'hybrid' (default is 'fragment').
+    tolerance:
+        Matching tolerance in Da or ppm (use_ppm=True). Default is 0.02.
+    use_ppm:
+        If True, interpret `tolerance` as parts-per-million. Default is False.
+    intensity_power:
+        The power to raise intensity to in the cosine function. The default is 1 (no weighting).
+    remove_precursor:
+        If True, remove precursor peak and peaks within precursor_window.
+        Default is False.
+    precursor_window:
+        If remove_precursor is True, remove peaks within this window around the precursor
+        m/z. Default is 1.6 Da (as suggested by Li & Fiehn(2023)).
+    noise_cutoff:
+        If > 0, remove peaks with intensities below this fraction of the maximum intensity.
+        Default is 0.01 (1%).
+    normalize_to_half:
+        If True, normalize intensities such that the sum of intensities is 0.5.
+        Default is True.
+    merge_within:
+        If > 0, merge peaks within this distance (in Da) to a single peak.
+        Default is 0.
+    identity_precursor_tolerance:
+        If not None, enforce identity search behavior by requiring the precursor m/z
+        of the query to be within this tolerance of the reference precursor m/z.
+    identity_use_ppm:
+        If True, interpret `identity_precursor_tolerance` as ppm. Default is False.
+    dtype:
+        Data type for the output scores. Default is np.float64 which properly accounts
+        for highest resolution MS/MS data (even far beyond current MS/MS possibilties!).
+        To save memory, np.float32 can be used instead, which is sufficient for peak 
+        resolutions up to about 8,000,000.
+    """
+
+    score_fields = ("score", "matches")
+
+    def __init__(self, *args, dtype: np.dtype = np.float64, **kwargs):
+        super().__init__(*args, dtype=dtype, **kwargs)
+        self.score_datatype = np.dtype(
+            [("score", self.dtype), ("matches", np.int32)]
+        )
+
+    @property
+    def _weighing_type(self) -> str:
+        return "cosine"
+
+    @property
+    def _compute_l2(self) -> bool:
+        return True
+
+    @property
+    def _worker(self):
+        return _row_task_cosine
+
+    @property
+    def _descriptor_name(self) -> str:
+        return f"Flash cosine ({self.matching_mode})"
+
+    def pair(self, spectrum_1: SpectrumType, spectrum_2: SpectrumType) -> np.ndarray:
+        logger.warning("This is not the fast intended use; better use .matrix() instead.")
+
+        peaks_1, pmz_1 = self._prepare(spectrum_1)
+        peaks_2, pmz_2 = self._prepare(spectrum_2)
+        if peaks_1.size == 0 or peaks_2.size == 0:
+            return np.asarray((0.0, 0), dtype=self.score_datatype)
+
+        compute_nl = self.matching_mode in ("neutral_loss", "hybrid")
         lib = _build_library_index(
-            lib_proc, lib_pmz,
+            [peaks_2],
+            [pmz_2],
             compute_neutral_loss=compute_nl,
-            compute_l2_norm=compute_l2,
-            dtype=self.dtype
+            compute_l2_norm=True,
+            dtype=self.dtype,
+        )
+        _set_globals(lib, self._make_worker_cfg())
+        _, row_score, row_matches = _row_task_cosine((0, peaks_1, pmz_1))
+        return np.asarray((row_score[0], row_matches[0]), dtype=self.score_datatype)
+
+    def matrix(
+        self,
+        spectra_1: Sequence[SpectrumType],
+        spectra_2: Optional[Sequence[SpectrumType]] = None,
+        score_fields: Optional[Sequence[str]] = None,
+        progress_bar: bool = True,
+        n_jobs: int = -1,
+    ):
+        """
+        Calculate matrix of Flash Cosine scores.
+
+        Parameters
+        ----------
+        spectra_1
+            First collection of input spectra.
+        spectra_2
+            Second collection of input spectra. If None, compare `spectra_1`
+            against itself.
+        score_fields
+            Requested score fields. Only ``("score",)`` is supported.
+        progress_bar
+            When True, show a progress bar.
+        n_jobs
+            Number of parallel jobs to run.
+            Default is -1, which means that all available CPUs minus one will be used.
+
+        Returns
+        -------
+        Scores
+            Dense score matrix as a ``Scores`` object.
+        """
+        selected_fields = self._resolve_score_fields(score_fields)
+
+        spectra_2, is_symmetric = self._prepare_inputs(spectra_1, spectra_2)
+        n_rows = len(spectra_1)
+        n_cols = len(spectra_2)
+
+        if is_symmetric and n_rows != n_cols:
+            raise ValueError("Self-comparison requires same number of rows and columns.")
+
+        lib = self._build_library(spectra_2)
+        row_inputs = self._prepare_row_inputs(spectra_1)
+        results = self._run_row_workers(
+            row_inputs=row_inputs,
+            lib=lib,
+            cfg=self._make_worker_cfg(),
+            progress_bar=progress_bar,
+            n_jobs=n_jobs,
+            descriptor=self._descriptor_name,
         )
 
-        # Prepare output
-        out = np.zeros((n_rows, n_cols), dtype=self.dtype)
+        out_score = np.zeros((n_rows, n_cols), dtype=self.dtype)
+        out_matches = np.zeros((n_rows, n_cols), dtype=np.int32)
 
-        # Prepare rows (references)
-        row_inputs = []
-        for i, ref in enumerate(references):
-            peaks_r, pmz_r = self._prepare(ref)
-            row_inputs.append((i, peaks_r, pmz_r))
+        for row_idx, row_score, row_matches in results:
+            out_score[row_idx, :] = row_score
+            out_matches[row_idx, :] = row_matches
 
-        # Configuration passed to workers
-        cfg = dict(
-            tol=float(self.tolerance),
-            use_ppm=bool(self.use_ppm),
-            matching_mode=self.matching_mode,
-            compute_nl=compute_nl,
-            iden_tol=(None if self.identity_precursor_tolerance is None\
-                      else float(self.identity_precursor_tolerance)),
-            iden_use_ppm=bool(self.identity_use_ppm),
-        )
-        _set_globals(lib, cfg)
-        worker = _row_task_entropy if self.score_type == "spectral_entropy" else _row_task_cosine
+        result = {}
+        if "score" in selected_fields:
+            result["score"] = out_score.astype(self.dtype, copy=False)
+        if "matches" in selected_fields:
+            result["matches"] = out_matches
 
-
-        # Run — sequential or parallel
-        if n_jobs in (None, 1, 0):
-            iterator = row_inputs
-            for item in tqdm(iterator, total=n_rows, desc=descriptor+" (matrix)"):
-                row_idx, row = worker(item)
-                out[row_idx, :] = row
-        else:
-            # Attempt Unix fork-based parallelism (not available on Windows; we already guarded above)
-            n_cpus = mp.cpu_count()
-            if n_jobs < 0:
-                n_jobs = max(1, n_cpus + 1 + n_jobs)  # e.g., -1 -> n_cpus-1
-            n_jobs = max(1, min(n_jobs, n_cpus))
-
-            start_methods = mp.get_all_start_methods()
-            use_fork = ("fork" in start_methods) and (platform.system() != "Windows")
-
-            if use_fork:
-                ctx = mp.get_context("fork")
-                with ctx.Pool(processes=n_jobs) as pool:
-                    for result in tqdm(pool.imap(worker, row_inputs, chunksize=8),
-                                    total=n_rows, desc=descriptor+f" (parallel x{n_jobs})"):
-                        i, row = result
-                        out[i, :] = row
-            else:
-                # If fork is not available (e.g., certain environments), fall back to sequential with a note.
-                print("FlashSimilarity.matrix: parallel execution requires 'fork'; "
-                    "falling back to n_jobs=1.")
-                for item in tqdm(row_inputs, total=n_rows, desc=descriptor+" (matrix)"):
-                    i, row = worker(item)
-                    out[i, :] = row
-
-        if array_type == "numpy":
-            return out
-        elif array_type == "sparse":
-            scores_array = StackedSparseArray(n_rows, n_cols)
-            scores_array.add_dense_matrix(out.astype(self.score_datatype), "")
-            return scores_array
-        raise NotImplementedError("Output array type is unknown or not yet implemented.")
+        return Scores(result)
 
 
 # ===================== worker plumbing =====================
@@ -326,8 +571,6 @@ def _search_spec_in_fragment_window(lib_mz: np.ndarray, mz: float, tol: float, u
     return a, b
 
 
-# ====================== Numba-accelerated accumulators (entropy) ======================
-
 @njit(cache=True, nogil=True)
 def _search_window_halfwidth_nb(m: float, tol: float, use_ppm: bool) -> float:
     """
@@ -358,6 +601,24 @@ def _xlog2_scalar_nb(x: float) -> float:
     if x <= 0.0:
         return 0.0
     return x * np.log2(x)
+
+
+@njit(cache=True, nogil=True)
+def _within_tol_nb(m1: float, m2: float, tol: float, use_ppm: bool) -> bool:
+    """
+    Numba-fied symmetric tolerance check.
+
+    Symmetric ppm definition:
+        |m2 - m1| <= tol[ppm] * 1e-6 * 0.5 * (m1 + m2)
+    Otherwise absolute Da tolerance:
+        |m2 - m1| <= tol
+
+    This is the exact tolerance predicate used to trim search windows produced
+    by :func:`_search_window_halfwidth_nb`.
+    """
+    if use_ppm:
+        return abs(m2 - m1) <= (tol * 1e-6) * 0.5 * (m1 + m2)
+    return abs(m2 - m1) <= tol
 
 
 @njit(cache=True, nogil=True)
@@ -748,26 +1009,7 @@ def _row_task_entropy(args):
     return (row_idx, scores)
 
 
-# ===================== Cosine related =====================
-
-@njit(cache=True, nogil=True)
-def _within_tol_nb(m1: float, m2: float, tol: float, use_ppm: bool) -> bool:
-    """
-    Numba-friendly symmetric tolerance check.
-
-    Symmetric ppm definition:
-        |m2 - m1| <= tol[ppm] * 1e-6 * 0.5 * (m1 + m2)
-    Otherwise absolute Da tolerance:
-        |m2 - m1| <= tol
-
-    This is the exact tolerance predicate used to trim search windows produced
-    by :func:`_search_window_halfwidth_nb`.
-    """
-    if use_ppm:
-        return abs(m2 - m1) <= (tol * 1e-6) * 0.5 * (m1 + m2)
-    else:
-        return abs(m2 - m1) <= tol
-
+# ===================== Cosine related helpers =====================
 
 @njit(cache=True, nogil=True)
 def _count_candidates_per_col_nb(query_mz: np.ndarray,
@@ -854,13 +1096,11 @@ def _fill_candidates_per_col_nb(query_mz: np.ndarray,
 
     ref_idx = np.empty(n_total, dtype=np.int32)
     lib_idx = np.empty(n_total, dtype=np.int32)
-    score   = np.empty(n_total, dtype=np.float64)
+    score = np.empty(n_total, dtype=np.float64)
     is_frag = np.empty(n_total, dtype=np.uint8)
 
-    # Running write cursors per column
     pos = col_offsets[:-1].copy()
 
-    # Fragment matches
     if do_frag:
         for i in range(query_mz.shape[0]):
             Iq = float(query_int[i])
@@ -878,11 +1118,10 @@ def _fill_candidates_per_col_nb(query_mz: np.ndarray,
                 col_idx = int(pos[spec_idx])
                 ref_idx[col_idx] = i
                 lib_idx[col_idx] = j
-                score[col_idx]   = Iq * float(peaks_int[j])
+                score[col_idx] = Iq * float(peaks_int[j])
                 is_frag[col_idx] = 1
                 pos[spec_idx] = col_idx + 1
 
-    # Neutral-loss matches
     if do_nl and has_pmz and (nl_mz.size > 0):
         for i in range(query_mz.shape[0]):
             Iq = float(query_int[i])
@@ -896,7 +1135,7 @@ def _fill_candidates_per_col_nb(query_mz: np.ndarray,
                 if not _within_tol_nb(loss, mk, tol, use_ppm):
                     continue
 
-                j = int(nl_prod_idx[k])        # product-peak index in global arrays
+                j = int(nl_prod_idx[k])
                 spec_idx = int(nl_spec_idx[k])
                 col_idx = int(pos[spec_idx])
                 ref_idx[col_idx] = i
@@ -909,15 +1148,17 @@ def _fill_candidates_per_col_nb(query_mz: np.ndarray,
 
 
 @njit(cache=True, nogil=True)
-def _greedy_scores_all_cols_nb(n_cols: int,
-                               n_q: int,
-                               col_offsets: np.ndarray,        # int64[n_cols+1]
-                               ref_idx: np.ndarray,            # int32[n_total]
-                               lib_idx: np.ndarray,            # int32[n_total]
-                               score: np.ndarray,              # float64[n_total]
-                               is_frag: np.ndarray,            # uint8[n_total]
-                               lib_spec_l2: np.ndarray,        # float64[n_cols]
-                               q_l2: float) -> np.ndarray:
+def _greedy_scores_and_matches_all_cols_nb(
+    n_cols: int,
+    n_q: int,
+    col_offsets: np.ndarray,
+    ref_idx: np.ndarray,
+    lib_idx: np.ndarray,
+    score: np.ndarray,
+    is_frag: np.ndarray,
+    lib_spec_l2: np.ndarray,
+    q_l2: float,
+):
     """
     Greedy, non-overlapping selection *per column* with score tie-break by fragment flag.
 
@@ -932,41 +1173,38 @@ def _greedy_scores_all_cols_nb(n_cols: int,
     out : float64[n_cols]
         Cosine or modified-cosine per library spectrum.
     """
-    out = np.zeros(n_cols, dtype=np.float64)
-    # Query-peak usage flags (small; re-init per column is cheap)
+    out_score = np.zeros(n_cols, dtype=np.float64)
+    out_matches = np.zeros(n_cols, dtype=np.int32)
     used_q = np.empty(n_q, dtype=np.uint8)
 
-    eps = 1e-12  # tie-break to prefer fragment when scores are equal
+    eps = 1e-12
 
     for col in range(n_cols):
         start = int(col_offsets[col])
-        end   = int(col_offsets[col + 1])
-        size  = end - start
+        end = int(col_offsets[col + 1])
+        size = end - start
         if size <= 0:
             continue
 
-        # Local views
         s_ref = ref_idx[start:end]
         s_lib = lib_idx[start:end]
-        s_score  = score[start:end]
-        s_frag  = is_frag[start:end]
+        s_score = score[start:end]
+        s_frag = is_frag[start:end]
 
-        # Key for descending sort (score primary; fragment wins only on exact ties)
         key = np.empty(size, dtype=np.float64)
         for t in range(size):
             key[t] = s_score[t] + (eps if s_frag[t] == 1 else 0.0)
-        order = np.argsort(-key)  # descending
+        order = np.argsort(-key)
 
-        # Clear query usage (n_q is small)
         for qi in range(n_q):
             used_q[qi] = 0
 
-        # Track used library *global* j indices for this column only
-        # small dynamic array; at most min(n_q, #uniq j in column)
         used_lib_j = np.empty(size, dtype=np.int32)
         used_lib_n = 0
 
         dot = 0.0
+        n_match = 0
+
         for r in range(size):
             idx = int(order[r])
             i = int(s_ref[idx])
@@ -975,7 +1213,6 @@ def _greedy_scores_all_cols_nb(n_cols: int,
             if used_q[i] == 1:
                 continue
 
-            # Linear membership test over selected lib j's; K remains small
             seen = False
             for u in range(used_lib_n):
                 if used_lib_j[u] == j:
@@ -984,17 +1221,92 @@ def _greedy_scores_all_cols_nb(n_cols: int,
             if seen:
                 continue
 
-            # Accept
             used_q[i] = 1
             used_lib_j[used_lib_n] = j
             used_lib_n += 1
             dot += float(s_score[idx])
+            n_match += 1
 
         denom = q_l2 * float(lib_spec_l2[col])
         if denom > 0.0 and dot > 0.0:
-            out[col] = dot / denom
+            out_score[col] = dot / denom
+        out_matches[col] = n_match
 
-    return out
+    return out_score, out_matches
+
+
+@njit(cache=True, nogil=True)
+def _greedy_scores_and_matches_all_cols_nb(
+    n_cols: int,
+    n_q: int,
+    col_offsets: np.ndarray,
+    ref_idx: np.ndarray,
+    lib_idx: np.ndarray,
+    score: np.ndarray,
+    is_frag: np.ndarray,
+    lib_spec_l2: np.ndarray,
+    q_l2: float,
+):
+    out_score = np.zeros(n_cols, dtype=np.float64)
+    out_matches = np.zeros(n_cols, dtype=np.int32)
+    used_q = np.empty(n_q, dtype=np.uint8)
+
+    eps = 1e-12
+
+    for col in range(n_cols):
+        start = int(col_offsets[col])
+        end = int(col_offsets[col + 1])
+        size = end - start
+        if size <= 0:
+            continue
+
+        s_ref = ref_idx[start:end]
+        s_lib = lib_idx[start:end]
+        s_score = score[start:end]
+        s_frag = is_frag[start:end]
+
+        key = np.empty(size, dtype=np.float64)
+        for t in range(size):
+            key[t] = s_score[t] + (eps if s_frag[t] == 1 else 0.0)
+        order = np.argsort(-key)
+
+        for qi in range(n_q):
+            used_q[qi] = 0
+
+        used_lib_j = np.empty(size, dtype=np.int32)
+        used_lib_n = 0
+
+        dot = 0.0
+        n_match = 0
+
+        for r in range(size):
+            idx = int(order[r])
+            i = int(s_ref[idx])
+            j = int(s_lib[idx])
+
+            if used_q[i] == 1:
+                continue
+
+            seen = False
+            for u in range(used_lib_n):
+                if used_lib_j[u] == j:
+                    seen = True
+                    break
+            if seen:
+                continue
+
+            used_q[i] = 1
+            used_lib_j[used_lib_n] = j
+            used_lib_n += 1
+            dot += float(s_score[idx])
+            n_match += 1
+
+        denom = q_l2 * float(lib_spec_l2[col])
+        if denom > 0.0 and dot > 0.0:
+            out_score[col] = dot / denom
+        out_matches[col] = n_match
+
+    return out_score, out_matches
 
 
 # ==================== Row worker (cosine) ====================
@@ -1026,32 +1338,34 @@ def _row_task_cosine(args):
     cfg = _G_CFG
 
     if ref_peaks.size == 0:
-        return (row_idx, np.zeros(lib.n_specs, dtype=lib.dtype))
+        return (
+            row_idx,
+            np.zeros(lib.n_specs, dtype=lib.dtype),
+            np.zeros(lib.n_specs, dtype=np.int32),
+        )
 
-    # reference (row) peaks
-    ref_mz  = ref_peaks[:, 0]
+    ref_mz = ref_peaks[:, 0]
     ref_int = ref_peaks[:, 1]
 
-    # L2 norm of the reference
     q_l2 = float(np.sqrt(np.sum(ref_int * ref_int, dtype=np.float64)))
     if q_l2 == 0.0:
-        return (row_idx, np.zeros(lib.n_specs, dtype=lib.dtype))
+        return (
+            row_idx,
+            np.zeros(lib.n_specs, dtype=lib.dtype),
+            np.zeros(lib.n_specs, dtype=np.int32),
+        )
 
-    # matching mode flags
     match_mode = cfg["matching_mode"]
     do_frag = (match_mode == "fragment") or (match_mode == "hybrid")
-    do_nl   = (match_mode == "neutral_loss") or (match_mode == "hybrid")
+    do_nl = (match_mode == "neutral_loss") or (match_mode == "hybrid")
 
-    # neutral-loss only if library has NL view and we have a precursor on the row
-    has_pmz = (ref_pmz is not None)
+    has_pmz = ref_pmz is not None
     ref_pmz = float(ref_pmz) if has_pmz else 0.0
 
     tol = float(cfg["tol"])
     use_ppm = bool(cfg["use_ppm"])
-
     n_cols = int(lib.n_specs)
 
-    # Count per-column candidates (fragment + neutral loss)
     counts_by_col = _count_candidates_per_col_nb(
         ref_mz, ref_int, has_pmz, ref_pmz,
         lib.peaks_mz,
@@ -1059,10 +1373,9 @@ def _row_task_cosine(args):
         (lib.nl_mz if (cfg["compute_nl"] and lib.nl_mz is not None) else np.empty(0, np.float64)),
         (lib.nl_spec_idx if (cfg["compute_nl"] and lib.nl_spec_idx is not None) else np.empty(0, np.int32)),
         (lib.nl_product_idx if (cfg["compute_nl"] and lib.nl_product_idx is not None) else np.empty(0, np.int32)),
-        tol, use_ppm, do_frag, (do_nl and cfg["compute_nl"]), n_cols
+        tol, use_ppm, do_frag, (do_nl and cfg["compute_nl"]), n_cols,
     )
 
-    # Prefix-sum to CSR offsets
     col_offsets = np.empty(n_cols + 1, dtype=np.int64)
     col_offsets[0] = 0
     for c in range(n_cols):
@@ -1070,9 +1383,9 @@ def _row_task_cosine(args):
 
     n_total = int(col_offsets[-1])
     if n_total == 0:
-        out = np.zeros(n_cols, dtype=lib.dtype)
+        out_score = np.zeros(n_cols, dtype=lib.dtype)
+        out_matches = np.zeros(n_cols, dtype=np.int32)
     else:
-        # Materialize candidates into CSR-like arrays
         ref_idx, lib_idx, score, is_frag = _fill_candidates_per_col_nb(
             ref_mz, ref_int,
             has_pmz, ref_pmz,
@@ -1083,27 +1396,28 @@ def _row_task_cosine(args):
             (lib.nl_spec_idx if (cfg["compute_nl"] and lib.nl_spec_idx is not None) else np.empty(0, np.int32)),
             (lib.nl_product_idx if (cfg["compute_nl"] and lib.nl_product_idx is not None) else np.empty(0, np.int32)),
             tol, use_ppm, do_frag, (do_nl and cfg["compute_nl"]),
-            col_offsets, counts_by_col
+            col_offsets, counts_by_col,
         )
 
-        # Greedy select per column and normalize
-        out64 = _greedy_scores_all_cols_nb(
+        out_score64, out_matches = _greedy_scores_and_matches_all_cols_nb(
             n_cols, ref_mz.shape[0],
             col_offsets,
             ref_idx, lib_idx, score, is_frag,
             lib.spec_l2.astype(np.float64, copy=False),
-            q_l2
+            q_l2,
         )
-        out = out64.astype(lib.dtype, copy=False)
+        out_score = out_score64.astype(lib.dtype, copy=False)
 
-    # Identity gate
     iden_tol = cfg["iden_tol"]
     if (iden_tol is not None) and has_pmz:
         if cfg["iden_use_ppm"]:
-            allow = np.abs(lib.precursor_mz - ref_pmz) <= (iden_tol * 1e-6 * 0.5 * (lib.precursor_mz + ref_pmz))
+            allow = np.abs(lib.precursor_mz - ref_pmz) <= (
+                iden_tol * 1e-6 * 0.5 * (lib.precursor_mz + ref_pmz)
+            )
         else:
             allow = np.abs(lib.precursor_mz - ref_pmz) <= iden_tol
         allow &= np.isfinite(lib.precursor_mz)
-        out[~allow] = 0.0
+        out_score[~allow] = 0.0
+        out_matches[~allow] = 0
 
-    return (row_idx, out)
+    return row_idx, out_score, out_matches
