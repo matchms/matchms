@@ -3,7 +3,7 @@ from .similarity.BaseSimilarity import BaseSimilarity
 from .typing import QueriesType, ReferencesType
 
 
-def calculate_scores(references: ReferencesType, queries: QueriesType,
+def calculate_scores(spectra_1: ReferencesType, spectra_2: QueriesType,
                      similarity_function: BaseSimilarity,
                      array_type: str = "numpy",
                      is_symmetric: bool = False) -> Scores:
@@ -28,7 +28,7 @@ def calculate_scores(references: ReferencesType, queries: QueriesType,
         scores = calculate_scores(spectra, spectra, CosineGreedy())
 
         for (reference, query, score) in scores:
-            print(f"Cosine score between {reference.get('id')} and {query.get('id')}" +
+            print(f"Cosine score between {spectrum_1.get('id')} and {spectrum_2.get('id')}" +
                   f" is {score[0]:.2f} with {score[1]} matched peaks")
 
     Should output
@@ -42,7 +42,7 @@ def calculate_scores(references: ReferencesType, queries: QueriesType,
 
     Parameters
     ----------
-    references
+    spectra_1
         List of reference objects
     queries
         List of query objects
@@ -51,7 +51,7 @@ def calculate_scores(references: ReferencesType, queries: QueriesType,
     array_type
         Specify the type of array to store and compute the scores. Choose from "numpy" or "sparse".
     is_symmetric
-        Set to True when *references* and *queries* are identical (as for instance for an all-vs-all
+        Set to True when *spectra_1* and *queries* are identical (as for instance for an all-vs-all
         comparison). By using the fact that score[i,j] = score[j,i] the calculation will be about
         2x faster. Default is False.
 
@@ -60,5 +60,4 @@ def calculate_scores(references: ReferencesType, queries: QueriesType,
 
     ~matchms.Scores.Scores
     """
-    return Scores(references=references, queries=queries,
-                  is_symmetric=is_symmetric).calculate(similarity_function, array_type=array_type)
+    return similarity_function.matrix(spectra_1, spectra_2)

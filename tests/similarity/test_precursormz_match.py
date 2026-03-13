@@ -1,5 +1,6 @@
 import numpy as np
 import pytest
+from matchms.Scores import Scores
 from matchms.similarity import PrecursorMzMatch
 from ..builder_Spectrum import SpectrumBuilder, spectra_factory
 
@@ -21,18 +22,15 @@ def test_precursormz_match_parameterized(precursor_mz, tolerance, tolerance_type
 
 
 def test_precursormz_match_missing_precursormz():
-    """Test with missing precursormz."""
+    """Missing precursor_mz entries should return False."""
     builder = SpectrumBuilder()
     spectrum_1 = builder.with_metadata({"precursor_mz": 100.0}).build()
     spectrum_2 = builder.with_metadata({}).build()
 
     similarity_score = PrecursorMzMatch(tolerance=2.0)
 
-    with pytest.raises(AssertionError) as msg:
-        _ = similarity_score.pair(spectrum_1, spectrum_2)
-
-    expected_message_part = "Missing precursor m/z."
-    assert expected_message_part in str(msg.value), "Expected particular error message."
+    score = similarity_score.pair(spectrum_1, spectrum_2)
+    assert score == np.array(False, dtype=bool)
 
 
 @pytest.mark.parametrize('precursor_mz, tolerance, tolerance_type, expected', [
@@ -47,17 +45,52 @@ def test_precursormz_match_array_parameterized(precursor_mz, tolerance, toleranc
     assert np.all(scores == np.array(expected)), "Expected different scores."
 
 
-@pytest.mark.parametrize('precursor_mz, tolerance, tolerance_type, expected', [
-    [[100.0, 101.0, 99.95, 98.0], 0.1, "Dalton",
-     [[T, F, T, F], [F, T, F, F], [T, F, T, F], [F, F, F, T]]],
-    [[100.0, 101.0, 99.99999, 99.9], 5.0, "ppm",
-     [[T, F, T, F], [F, T, F, F], [T, F, T, F], [F, F, F, T]]]
-])
-def test_precursormz_match_array_symmetric_parameterized(precursor_mz, tolerance, tolerance_type, expected):
-    spectra = spectra_factory('precursor_mz', precursor_mz)
-    similarity_score = PrecursorMzMatch(tolerance=tolerance, tolerance_type=tolerance_type)
-    scores = similarity_score.matrix(spectra, spectra, is_symmetric=T)
-    scores2 = similarity_score.matrix(spectra, spectra, is_symmetric=F)
+@pytest.mark.parametrize(
+    "precursor_mz, tolerance, tolerance_type, expected",
+    [
+        (
+            [100.0, 101.0, 99.95, 98.0],
+            0.1,
+            "Dalton",
+            [
+                [T, F, T, F],
+                [F, T, F, F],
+                [T, F, T, F],
+                [F, F, F, T],
+            ],
+        ),
+        (
+            [100.0, 101.0, 99.99999, 99.9],
+            5.0,
+            "ppm",
+            [
+                [T, F, T, F],
+                [F, T, F, F],
+                [T, F, T, F],
+                [F, F, F, T],
+            ],
+        ),
+    ],
+)
+def test_precursormz_match_matrix_symmetric_parameterized(
+    precursor_mz, tolerance, tolerance_type, expected
+):
+    spectra = spectra_factory("precursor_mz", precursor_mz)
+    similarity_score = PrecursorMzMatch(
+        tolerance=tolerance,
+        tolerance_type=tolerance_type,
+    )
 
-    assert np.all(scores == scores2), "Expected identical scores"
-    assert np.all(scores == np.array(expected)), "Expected different scores"
+    scores_self = similarity_score.matrix(spectra)
+    scores_explicit = similarity_score.matrix(spectra, spectra)
+
+    assert isinstance(scores_self, Scores)
+    assert scores_self.is_scalar is True
+    assert scores_self.score_fields == ("score",)
+
+    expected_array = np.array(expected, dtype=bool)
+
+    assert np.array_equal(scores_self.to_array(), scores_explicit.to_array()), \
+        "Expected identical scores for implicit and explicit self-comparison."
+    assert np.array_equal(scores_self.to_array(), expected_array), \
+        "Precursor m/z match matrix differs from expected result."

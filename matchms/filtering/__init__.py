@@ -71,7 +71,6 @@ Should output
 
 from matchms.filtering.default_filters import default_filters
 from matchms.filtering.metadata_processing.add_compound_name import add_compound_name
-from matchms.filtering.metadata_processing.add_fingerprint import add_fingerprint
 from matchms.filtering.metadata_processing.add_parent_mass import add_parent_mass
 from matchms.filtering.metadata_processing.add_precursor_formula import add_precursor_formula
 from matchms.filtering.metadata_processing.add_precursor_mz import add_precursor_mz
@@ -143,7 +142,6 @@ from matchms.filtering.SpeciesString import SpeciesString
 
 __all__ = [
     "add_compound_name",
-    "add_fingerprint",
     "add_parent_mass",
     "add_precursor_formula",
     "add_precursor_mz",

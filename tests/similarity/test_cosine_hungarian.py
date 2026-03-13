@@ -6,7 +6,7 @@ from matchms.similarity import CosineHungarian
 
 
 def test_cosine_hungarian_cocaine_glucose():
-    """Compare output cosine score with own calculation on reference spectra."""
+    """Compare output cosine score with own calculation on input spectra."""
     glucose_spectrum = glucose()
     cocaine_spectrum = cocaine()
 
@@ -25,7 +25,7 @@ def test_cosine_hungarian_cocaine_glucose():
     )
 
 def test_cosine_hungarian_phenylalanine_hydroxy_cholesterol():
-    """Compare output cosine score with own calculation on reference spectra."""
+    """Compare output cosine score with own calculation on input spectra."""
     phenylalanine_spectrum = phenylalanine()
     hydroxy_cholesterol_spectrum = hydroxy_cholesterol()
 
