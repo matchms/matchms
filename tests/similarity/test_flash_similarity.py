@@ -280,10 +280,11 @@ def test_entropy_fragment_matrix_matches_pair_with_sparse_candidate_columns():
 # Cosine / Modified Cosine path + baseline parity
 # ----------------------------
 
-def _mc_flash(tolerance):
+def _mc_flash(tolerance, intensity_power=1.0):
     return FlashCosine(
         matching_mode="hybrid",  # hybrid = "modified cosine"
         tolerance=tolerance,
+        intensity_power=intensity_power,
         remove_precursor=False,
         noise_cutoff=0.0,
         normalize_to_half=True,
@@ -360,16 +361,17 @@ def test_flash_hybrid_cosine_matches_modified_cosine_greedy(mz_a, int_a, pmz_a, 
     a = build_spectrum(mz_a, int_a, precursor_mz=pmz_a)
     b = build_spectrum(mz_b, int_b, precursor_mz=pmz_b)
 
-    flash = _mc_flash(tol)
-    baseline = ModifiedCosineGreedy(tolerance=tol)
+    for intensity_power in [1.0, 0.5]:  # Test with and without intensity weighting!
+        flash = _mc_flash(tol, intensity_power=intensity_power)
+        baseline = ModifiedCosineGreedy(tolerance=tol, intensity_power=intensity_power)
 
-    s_flash = float(flash.pair(a, b)["score"])
-    s_base = float(baseline.pair(a, b)["score"])
-    matches_flash = flash.pair(a, b)["matches"]
-    matches_base = baseline.pair(a, b)["matches"]
+        s_flash = float(flash.pair(a, b)["score"])
+        s_base = float(baseline.pair(a, b)["score"])
+        matches_flash = flash.pair(a, b)["matches"]
+        matches_base = baseline.pair(a, b)["matches"]
 
-    assert s_flash == pytest.approx(s_base, rel=1e-12, abs=1e-12)
-    assert matches_flash == matches_base
+        assert s_flash == pytest.approx(s_base, rel=1e-12, abs=1e-12)
+        assert matches_flash == matches_base
 
 
 def test_cosine_pair_matches_cosinegreedy_default_tolerance_001():

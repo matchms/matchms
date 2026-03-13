@@ -24,6 +24,7 @@ class _BaseFlashSimilarity(BaseSimilarity):
         matching_mode: str = "fragment",           # 'fragment' | 'neutral_loss' | 'hybrid'
         tolerance: float = 0.02,
         use_ppm: bool = False,
+        intensity_power: float = 1.0,
         remove_precursor: bool = False,
         precursor_window: float = 1.6,
         noise_cutoff: float = 0.01,
@@ -39,6 +40,7 @@ class _BaseFlashSimilarity(BaseSimilarity):
         self.matching_mode = matching_mode
         self.tolerance = tolerance
         self.use_ppm = use_ppm
+        self.intensity_power = intensity_power
         self.remove_precursor = remove_precursor
         self.precursor_window = precursor_window
         self.noise_cutoff = noise_cutoff
@@ -70,6 +72,7 @@ class _BaseFlashSimilarity(BaseSimilarity):
         cleaned = _clean_and_weight(
             peaks,
             pmz,
+            intensity_power=self.intensity_power,
             remove_precursor=self.remove_precursor,
             precursor_window=self.precursor_window,
             noise_cutoff=self.noise_cutoff,
@@ -90,6 +93,7 @@ class _BaseFlashSimilarity(BaseSimilarity):
             cleaned = _clean_and_weight(
                 peaks,
                 pmz,
+                intensity_power=self.intensity_power,
                 remove_precursor=self.remove_precursor,
                 precursor_window=self.precursor_window,
                 noise_cutoff=self.noise_cutoff,
@@ -393,6 +397,8 @@ class FlashCosine(_BaseFlashSimilarity):
         Matching tolerance in Da or ppm (use_ppm=True). Default is 0.02.
     use_ppm:
         If True, interpret `tolerance` as parts-per-million. Default is False.
+    intensity_power:
+        The power to raise intensity to in the cosine function. The default is 1 (no weighting).
     remove_precursor:
         If True, remove precursor peak and peaks within precursor_window.
         Default is False.
