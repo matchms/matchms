@@ -22,11 +22,11 @@ It is also easily possible to add own custom similarity measures or import exter
 """
 from .BinnedEmbeddingSimilarity import BinnedEmbeddingSimilarity
 from .BlinkCosine import BlinkCosine
+from .Cosine import Cosine
 from .CosineGreedy import CosineGreedy
 from .CosineHungarian import CosineHungarian
 from .FingerprintSimilarity import FingerprintSimilarity
 from .FlashSimilarity import FlashCosine, FlashEntropy
-from .IntersectMz import IntersectMz
 from .MetadataMatch import MetadataMatch
 from .ModifiedCosine import ModifiedCosine
 from .ModifiedCosineGreedy import ModifiedCosineGreedy
@@ -39,15 +39,15 @@ from .PrecursorMzMatch import PrecursorMzMatch
 __all__ = [
     "BinnedEmbeddingSimilarity",
     "BlinkCosine",
-    "ModifiedCosineGreedy",
+    "Cosine",
     "CosineGreedy",
     "CosineHungarian",
     "FingerprintSimilarity",
     "FlashCosine",
     "FlashEntropy",
-    "IntersectMz",
     "MetadataMatch",
     "ModifiedCosine",
+    "ModifiedCosineGreedy",
     "ModifiedCosineHungarian",
     "NeutralLossesCosine",
     "ParentMassMatch",
@@ -65,12 +65,14 @@ def get_similarity_function_by_name(similarity_function_name: str):
         Name of the similarity function.
     """
     names = __all__
-    functions = [BinnedEmbeddingSimilarity, BlinkCosine,
-                 ModifiedCosineGreedy,
-                 CosineGreedy, CosineHungarian,
-                 FingerprintSimilarity, FlashCosine, FlashEntropy,
-                 IntersectMz, MetadataMatch, ModifiedCosineHungarian,
-                 NeutralLossesCosine, ParentMassMatch, PrecursorMzMatch]
+    functions = [
+        BinnedEmbeddingSimilarity, BlinkCosine,
+        Cosine, CosineGreedy, CosineHungarian,
+        FingerprintSimilarity, FlashCosine, FlashEntropy,
+        MetadataMatch,
+        ModifiedCosine, ModifiedCosineGreedy, ModifiedCosineHungarian,
+        NeutralLossesCosine, ParentMassMatch, PrecursorMzMatch
+        ]
 
     assert similarity_function_name in names, f"Unknown similarity function: {similarity_function_name}"
     assert len(names) == len(functions), "Number of similarity functions and names do not match"
