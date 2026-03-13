@@ -28,6 +28,7 @@ from .FingerprintSimilarity import FingerprintSimilarity
 from .FlashSimilarity import FlashCosine, FlashEntropy
 from .IntersectMz import IntersectMz
 from .MetadataMatch import MetadataMatch
+from .ModifiedCosine import ModifiedCosine
 from .ModifiedCosineGreedy import ModifiedCosineGreedy
 from .ModifiedCosineHungarian import ModifiedCosineHungarian
 from .NeutralLossesCosine import NeutralLossesCosine
@@ -46,6 +47,7 @@ __all__ = [
     "FlashEntropy",
     "IntersectMz",
     "MetadataMatch",
+    "ModifiedCosine",
     "ModifiedCosineHungarian",
     "NeutralLossesCosine",
     "ParentMassMatch",
