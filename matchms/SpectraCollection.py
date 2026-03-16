@@ -10,13 +10,12 @@ class SpectraCollection:
         spectra = list(spectra)
 
         self._metadata = self._construct_metadata(spectra)
-        self._fragments = self._construct_fragments(spectra, bin_size)
-        self.bin_size = bin_size
+        self._fragments = self._construct_fragments(spectra)
 
         if len(self._metadata) != self._fragments.shape[0]:
             raise ValueError("Spectra Metadata/Fragments mismatch.")
 
-    def _construct_fragments(self, spectra: list, bin_size: float = 0.000001):
+    def _construct_fragments(self, spectra: list):
         all_mz = np.concatenate([spec.mz for spec in spectra])
         all_int = np.concatenate([spec.intensities for spec in spectra])
 
