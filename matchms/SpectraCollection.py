@@ -197,14 +197,12 @@ class SpectraCollection:
                 following columns:
                 - 'peak_counts': Number of detected peaks per spectrum.
                 - 'intensity_sums': Total ion current (TIC) per spectrum.
-                - 'avg_mz': Mean m/z value of the detected peaks.
                 - 'intensity_entropy': Shannon entropy of peak intensities,
                     quantifying the spectral complexity/information density.
         """
         peak_counts = np.diff(self._fragments.indptr)
         intensity_sums = np.asarray(self._fragments.sum(axis=1)).flatten()
 
-        avg_mz = np.zeros(len(self))
         entropies = np.zeros(len(self))
         for i in range(len(self)):
             start, end = self._fragments.indptr[i], self._fragments.indptr[i + 1]
@@ -212,21 +210,17 @@ class SpectraCollection:
                 row_int = self._fragments.data[start:end]
                 row_mz = self.bin_to_mz(self._fragments.indices[start:end])
 
-                # Avg MZ
-                avg_mz[i] = np.mean(row_mz)
 
                 # Shannon Entropy: p_i = I_i / sum(I)
                 p = row_int / np.sum(row_int)
                 entropies[i] = -np.sum(p * np.log(p + 1e-12))
             else:
                 entropies[i] = np.nan
-                avg_mz[i] = np.nan
 
         stats = pd.DataFrame({
             "peak_counts": peak_counts,
             "intensity_sums": intensity_sums,
             "intensity_entropy": entropies,
-            "avg_mz": avg_mz,
         }).describe()
 
         stats.attrs["label"] = "SpectraCollection Describe"
@@ -237,7 +231,6 @@ class SpectraCollection:
             return stats.style.format({
                 "peak_counts": "{:,.2f}",
                 "intensity_sums": "{:,.0f}",
-                "avg_mz": "{:.2f}",
                 "intensity_entropy": "{:.2f}"
             }).to_html()
 
