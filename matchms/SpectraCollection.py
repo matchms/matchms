@@ -9,6 +9,7 @@ class SpectraCollection:
     def __init__(self, spectra: list[Spectrum] | Generator[Spectrum, None, None], bin_size=0.000001):
         spectra = list(spectra)
 
+        self.bin_size = bin_size
         self._metadata = self._construct_metadata(spectra)
         self._fragments = self._construct_fragments(spectra)
 
@@ -179,6 +180,11 @@ class SpectraCollection:
         """
         return (bin_idx * self.bin_size) + (self.bin_size / 2)
 
+    def describe(self) -> pd.DataFrame:
+        # peak counts, mz intensite sum, min/max
+        # pandas has count, mean, std, min, max , lower 50 and upper 50 percentile
+
+        return pd.DataFrame()
 
 class MetadataProxy(pd.DataFrame):
     """
