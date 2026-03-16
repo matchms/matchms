@@ -20,7 +20,7 @@ class SpectraCollection:
         all_mz = np.concatenate([spec.mz for spec in spectra])
         all_int = np.concatenate([spec.intensities for spec in spectra])
 
-        bin_idx = np.floor(all_mz / bin_size).astype(int)
+        bin_idx = self.mz_to_bin(all_mz)
         bin_no = bin_idx.max() + 1
 
         lengths = np.array([len(spec.mz) for spec in spectra])
@@ -55,7 +55,7 @@ class SpectraCollection:
         start, end = csr.indptr[idx], csr.indptr[idx + 1]
         cols = csr.indices[start:end]
         intensities = csr.data[start:end]
-        mz = cols * self.bin_size
+        mz = self.bin_to_mz(cols)
 
         return Spectrum(mz=mz, intensities=intensities, metadata=self._metadata.iloc[idx].to_dict())
 
@@ -139,6 +139,46 @@ class SpectraCollection:
             self.drop(empty_indices)
 
         return self
+
+    def mz_to_bin(self, mz: np.ndarray | float) -> np.ndarray:
+        """
+        Convert mz values into bins.
+
+        Uses the bin_size of SpectraCollection and maps mz values into integer bins by flooring them.
+
+        Parameters
+        ----------
+        mz
+            The mz values to bin.
+
+        Return:
+        --------------
+        np.ndarray
+            Bin indices as np.int64.
+
+        TODO:
+        --------------
+        uint64 can lead to conversion issues with scipy sparse -> int64 sufficient?
+        """
+        return np.floor(mz / self.bin_size).astype(np.int64)
+
+    def bin_to_mz(self, bin_idx: np.ndarray | int) -> np.ndarray:
+        """
+        Convert bin indices to mz values.
+
+        Uses the bin_size of SpectraCollection and calculates the mz value at the center of the bin.
+
+        Parameters
+        ----------
+        bin_idx
+            Bin indices/columns to convert.
+
+        Return:
+        --------------
+        np.ndarray
+            The mz values at the center of specified bins.
+        """
+        return (bin_idx * self.bin_size) + (self.bin_size / 2)
 
 
 class MetadataProxy(pd.DataFrame):
