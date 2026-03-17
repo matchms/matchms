@@ -34,6 +34,7 @@ class SpectraCollection:
     def _construct_metadata(self, spectra):
         # data = defaultdict(list)
         # [data[k].append(v) for spectrum in spectra for k, v in spectrum.metadata.items()]
+        # TODO: add minimal Matadata harmonization
 
         # return pd.DataFrame(data)
         records = [spectrum.metadata for spectrum in spectra]
