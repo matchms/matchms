@@ -1,7 +1,8 @@
+from __future__ import annotations
 from typing import Generator
 import numpy as np
 import pandas as pd
-from scipy.sparse import coo_array, csr_array
+from scipy.sparse import coo_array
 from matchms.Spectrum import Spectrum
 
 
@@ -45,7 +46,7 @@ class SpectraCollection:
         return MetadataProxy(self._metadata, self)
 
     @property
-    def fragments(self) -> csr_array:
+    def fragments(self) -> FragmentsProxy:
         return FragmentsProxy(self._fragments)
 
     @property
@@ -238,6 +239,7 @@ class SpectraCollection:
         stats._repr_html_ = _repr_html_
 
         return stats
+
 
 class MetadataProxy(pd.DataFrame):
     """
