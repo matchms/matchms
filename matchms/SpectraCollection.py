@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from scipy.sparse import coo_array
 from matchms.Spectrum import Spectrum
-from .hashing import spectra_hashes
+from .hashing import compute_combined_hashes, spectra_hashes
 
 
 class SpectraCollection:
@@ -81,9 +81,17 @@ class SpectraCollection:
     def __str__(self):
         return self.__repr__()
 
+    @property
+    def spectra_hashes(self):
+        return compute_combined_hashes(self.fragment_hashes, self.metadata_hashes)
+
     @cached_property
     def fragment_hashes(self):
         return spectra_hashes(self.fragments._array, self.bin_to_mz)
+
+    @property
+    def metadata_hashes(self):
+        return pd.util.hash_pandas_object(self._metadata).tolist()
 
     def add_metadata(self, data, col_name: str = None, overwrite: bool = False):
         # TODO: must contain same sorting as present spectra/metadata. Add class bool flag, if data has been sorted?

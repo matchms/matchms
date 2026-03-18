@@ -3,6 +3,7 @@
 import hashlib
 import json
 import numpy as np
+import pandas as pd
 from scipy.sparse import csr_array
 from .Fragments import Fragments
 
@@ -157,3 +158,14 @@ def metadata_hash(metadata: dict, hash_length: int = 20):
     """Compute hash from metadata dictionary."""
     encoded = json.dumps(metadata, sort_keys=True).encode()
     return hashlib.sha256(encoded).hexdigest()[:hash_length]
+
+
+def compute_combined_hashes(fragment_hashes: list[str], metadata_hashes: list[str]) -> list[int]:
+    s_frag = pd.Series(fragment_hashes, dtype=str)
+    s_meta = pd.Series(metadata_hashes, dtype=str)
+
+    combined = s_frag + s_meta
+
+    return combined.map(
+        lambda x: int(hashlib.sha1(x.encode()).hexdigest(), 16)
+    ).tolist()
