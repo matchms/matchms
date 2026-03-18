@@ -89,13 +89,12 @@ class SpectraCollection:
     def fragment_hashes(self):
         return spectra_hashes(self.fragments._array, self.bin_to_mz)
 
-    @property
+    @cached_property
     def metadata_hashes(self):
         return pd.util.hash_pandas_object(self._metadata).tolist()
 
     def add_metadata(self, data, col_name: str = None, overwrite: bool = False):
         # TODO: must contain same sorting as present spectra/metadata. Add class bool flag, if data has been sorted?
-        # TODO: rehash, if something is added
         if isinstance(data, pd.DataFrame):
             new_metadata = data.copy()
 
@@ -128,12 +127,22 @@ class SpectraCollection:
             self._metadata = self._metadata.drop(columns=overlap)
 
         self._metadata = pd.concat([self._metadata, new_metadata], axis=1)
+        self._clear_cache(["metadata_hashes"])
 
     def _reorder(self, indices: np.ndarray):
         self._fragments = self._fragments[indices, :]
         self._metadata = self._metadata.iloc[indices].reset_index(drop=True)
 
         return self
+
+
+    def _clear_cache(self, keys: list[str] = None):
+        if keys is None:
+            keys = ["metadata_hashes", "fragment_hashes", "spectra_hashes"]
+
+        for key in keys:
+            self.__dict__.pop(key, None)
+
 
     def drop(self, indices: list[int] | np.ndarray):
         """
@@ -146,6 +155,7 @@ class SpectraCollection:
         self._fragments = self._fragments[keep_mask, :]
         self._metadata = self._metadata.iloc[keep_mask].reset_index(drop=True)
 
+        self._clear_cache()
         return self
 
     def dropna(self):
@@ -158,6 +168,7 @@ class SpectraCollection:
         if len(empty_indices) > 0:
             self.drop(empty_indices)
 
+        self._clear_cache()
         return self
 
     def mz_to_bin(self, mz: np.ndarray | float) -> np.ndarray:
