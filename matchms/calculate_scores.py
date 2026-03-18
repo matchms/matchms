@@ -1,12 +1,11 @@
+from typing import Sequence
 from .Scores import Scores
 from .similarity.BaseSimilarity import BaseSimilarity
-from .typing import QueriesType, ReferencesType
+from .typing import SpectrumType
 
 
-def calculate_scores(spectra_1: ReferencesType, spectra_2: QueriesType,
-                     similarity_function: BaseSimilarity,
-                     array_type: str = "numpy",
-                     is_symmetric: bool = False) -> Scores:
+def calculate_scores(spectra_1: Sequence[SpectrumType], spectra_2: Sequence[SpectrumType],
+                     similarity_function: BaseSimilarity) -> Scores:
     """Calculate the similarity between all reference objects versus all query objects.
 
     Example to calculate scores between 2 spectra and iterate over the scores
@@ -44,16 +43,10 @@ def calculate_scores(spectra_1: ReferencesType, spectra_2: QueriesType,
     ----------
     spectra_1
         List of reference objects
-    queries
+    spectra_2
         List of query objects
     similarity_function
         Function which accepts a reference + query object and returns a score or tuple of scores
-    array_type
-        Specify the type of array to store and compute the scores. Choose from "numpy" or "sparse".
-    is_symmetric
-        Set to True when *spectra_1* and *queries* are identical (as for instance for an all-vs-all
-        comparison). By using the fact that score[i,j] = score[j,i] the calculation will be about
-        2x faster. Default is False.
 
     Returns
     -------
