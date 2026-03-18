@@ -1,5 +1,6 @@
 import logging
-from typing import Optional, Sequence
+from collections import defaultdict
+from typing import Optional, Sequence, Tuple
 import numpy as np
 from scipy.sparse import coo_array
 from matchms.Scores import Scores
@@ -122,12 +123,10 @@ class MetadataMatch(BaseSimilarityWithSparse):
         self.field = field
         self.tolerance = tolerance
 
-        assert matching_type in ["equal_match", "difference"], \
-            "Expected type from ['equal_match', 'difference']"
+        assert matching_type in ["equal_match", "difference"], "Expected type from ['equal_match', 'difference']"
         self.matching_type = matching_type
 
-        assert tolerance_type in ["Dalton", "ppm"], \
-            "Expected type from ['Dalton', 'ppm']"
+        assert tolerance_type in ["Dalton", "ppm"], "Expected type from ['Dalton', 'ppm']"
         self.tolerance_type = tolerance_type
 
     def pair(self, spectrum_1: SpectrumType, spectrum_2: SpectrumType):
@@ -191,9 +190,7 @@ class MetadataMatch(BaseSimilarityWithSparse):
 
         selected_fields = self._resolve_score_fields(score_fields)
         if selected_fields != ("score",):
-            raise NotImplementedError(
-                "MetadataMatch.matrix() supports only score_fields=('score',)."
-            )
+            raise NotImplementedError("MetadataMatch.matrix() supports only score_fields=('score',).")
 
         spectra_2, is_symmetric = self._prepare_inputs(spectra_1, spectra_2)
 
@@ -224,9 +221,7 @@ class MetadataMatch(BaseSimilarityWithSparse):
         """
         selected_fields = self._resolve_score_fields(score_fields)
         if selected_fields != ("score",):
-            raise NotImplementedError(
-                "MetadataMatch.sparse_matrix() supports only score_fields=('score',)."
-            )
+            raise NotImplementedError("MetadataMatch.sparse_matrix() supports only score_fields=('score',).")
 
         if idx_row is not None or idx_col is not None:
             return super().sparse_matrix(
@@ -304,25 +299,13 @@ class MetadataMatch(BaseSimilarityWithSparse):
         """Find matching indices for optimized matrix / sparse_matrix computation."""
         if self.matching_type == "equal_match":
             if self.tolerance != 0:
-                logger.warning(
-                    "Tolerance is set but will be ignored because 'equal_match' does not use tolerance."
-                )
+                logger.warning("Tolerance is set but will be ignored because 'equal_match' does not use tolerance.")
             if self.tolerance_type != "Dalton":
                 logger.warning(
                     "tolerance_type is set but will be ignored because 'equal_match' does not use tolerance."
                 )
 
-            rows = []
-            cols = []
-            for j, entry in enumerate(entries_2):
-                if entry is _MISSING:
-                    continue
-                idx = np.where(entries_1 == entry)[0]
-                rows.extend(idx)
-                cols.extend([j] * len(idx))
-
-            rows = np.asarray(rows, dtype=np.int_)
-            cols = np.asarray(cols, dtype=np.int_)
+            rows, cols = self._find_matches_hashmap(entries_1, entries_2)
             scores = np.ones(len(rows), dtype=self.score_datatype)
             return rows, cols, scores
 
@@ -334,3 +317,24 @@ class MetadataMatch(BaseSimilarityWithSparse):
         if is_symmetric:
             return number_matching_symmetric_ppm(entries_1, self.tolerance)
         return number_matching_ppm(entries_1, entries_2, self.tolerance)
+
+    @staticmethod
+    def _find_matches_hashmap(entries_1: np.ndarray, entries_2: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+        lookup = defaultdict(list)
+        for i, entry in enumerate(entries_1):
+            if entry is not _MISSING:
+                lookup[entry].append(i)
+
+        rows = []
+        cols = []
+
+        for j, entry in enumerate(entries_2):
+            if entry in lookup:
+                match_indices = lookup[entry]
+                rows.extend(match_indices)
+                cols.extend([j] * len(match_indices))
+
+        rows = np.asarray(rows, dtype=np.int_)
+        cols = np.asarray(cols, dtype=np.int_)
+
+        return rows, cols
