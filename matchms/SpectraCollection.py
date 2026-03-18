@@ -1,5 +1,4 @@
 from __future__ import annotations
-
 from functools import cached_property
 from typing import Generator
 import numpy as np
@@ -7,6 +6,7 @@ import pandas as pd
 from scipy.sparse import coo_array
 from matchms.Spectrum import Spectrum
 from .hashing import spectra_hashes
+
 
 class SpectraCollection:
     def __init__(self, spectra: list[Spectrum] | Generator[Spectrum, None, None], bin_size=0.000001):
@@ -217,8 +217,6 @@ class SpectraCollection:
             start, end = self._fragments.indptr[i], self._fragments.indptr[i + 1]
             if end > start:
                 row_int = self._fragments.data[start:end]
-                row_mz = self.bin_to_mz(self._fragments.indices[start:end])
-
 
                 # Shannon Entropy: p_i = I_i / sum(I)
                 p = row_int / np.sum(row_int)
