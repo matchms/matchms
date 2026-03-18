@@ -1,10 +1,12 @@
 from __future__ import annotations
+
+from functools import cached_property
 from typing import Generator
 import numpy as np
 import pandas as pd
 from scipy.sparse import coo_array
 from matchms.Spectrum import Spectrum
-
+from .hashing import spectra_hashes
 
 class SpectraCollection:
     def __init__(self, spectra: list[Spectrum] | Generator[Spectrum, None, None], bin_size=0.000001):
@@ -79,8 +81,13 @@ class SpectraCollection:
     def __str__(self):
         return self.__repr__()
 
+    @cached_property
+    def fragment_hashes(self):
+        return spectra_hashes(self.fragments._array, self.bin_to_mz)
+
     def add_metadata(self, data, col_name: str = None, overwrite: bool = False):
         # TODO: must contain same sorting as present spectra/metadata. Add class bool flag, if data has been sorted?
+        # TODO: rehash, if something is added
         if isinstance(data, pd.DataFrame):
             new_metadata = data.copy()
 
