@@ -132,8 +132,7 @@ def _get_top_hits_along_rows(
 
     for i in range(matrix.shape[0]):
         values = matrix[i, :]
-        order = np.argsort(values)[::-1]
-
+        order = np.argpartition(values.reshape(1, -1), -top_n, axis=1)[:, -(top_n+1):][::-1]
         if ignore_diagonal:
             order = order[order != i]
 
@@ -156,7 +155,7 @@ def _get_top_hits_along_columns(
 
     for j in range(matrix.shape[1]):
         values = matrix[:, j]
-        order = np.argsort(values)[::-1]
+        order = np.argpartition(values.reshape(1, -1), -top_n, axis=1)[:, -(top_n+1):][::-1]
 
         if ignore_diagonal:
             order = order[order != j]
