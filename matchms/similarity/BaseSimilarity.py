@@ -7,7 +7,7 @@
 #  and optionally overwrite sparse_matrix() for performance optimizations
 # - users can also pass score_filter=... to sparse_matrix()
 
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from typing import Optional, Sequence
 import numpy as np
 import numpy.typing as npt
@@ -17,7 +17,7 @@ from matchms.Scores import Scores
 from matchms.typing import ScoreFilter, SpectrumType
 
 
-class BaseSimilarity:
+class BaseSimilarity(ABC):
     """Similarity function base class.
 
     When building a custom similarity measure, inherit from this class and implement
