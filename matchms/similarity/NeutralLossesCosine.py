@@ -3,13 +3,13 @@ from typing import Tuple
 import numpy as np
 from matchms.typing import SpectrumType
 from ._precursor_validation import get_valid_precursor_mz
-from .BaseSimilarity import BaseSimilarity
+from .BaseSimilarity import BaseSimilarityWithSparse
 from .spectrum_similarity_functions import collect_peak_pairs, score_best_matches
 
 
 logger = logging.getLogger("matchms")
 
-class NeutralLossesCosine(BaseSimilarity):
+class NeutralLossesCosine(BaseSimilarityWithSparse):
     """Calculate 'neutral losses cosine score' between mass spectra.
 
     The neutral losses cosine score aims at quantifying the similarity between two
@@ -24,8 +24,8 @@ class NeutralLossesCosine(BaseSimilarity):
 
     # Set key characteristics as class attributes
     is_commutative = True
-    # Set output data type, e.g. ("score", "float") or [("score", "float"), ("matches", "int")]
     score_datatype = [("score", np.float64), ("matches", "int")]
+    score_fields = ("score", "matches")
 
     def __init__(self,tolerance: float = 0.1, mz_power: float = 0.0,
                  intensity_power: float = 1.0, ignore_peaks_above_precursor: bool = True):
@@ -62,7 +62,7 @@ class NeutralLossesCosine(BaseSimilarity):
             matching_pairs = matching_pairs[np.argsort(matching_pairs[:, 2], kind="mergesort")[::-1], :]
         return matching_pairs
     
-    def pair(self, reference: SpectrumType, query: SpectrumType) -> Tuple[float, int]:
+    def pair(self, spectrum_1: SpectrumType, spectrum_2: SpectrumType) -> Tuple[float, int]:
         """Calculate neutral losses cosine score between two spectra.
 
         Parameters
@@ -78,12 +78,12 @@ class NeutralLossesCosine(BaseSimilarity):
         Tuple with cosine score and number of matched peaks.
         """
 
-        precursor_mz_ref = get_valid_precursor_mz(reference, logger)
-        precursor_mz_query = get_valid_precursor_mz(query, logger)
+        precursor_mz_ref = get_valid_precursor_mz(spectrum_1, logger)
+        precursor_mz_query = get_valid_precursor_mz(spectrum_2, logger)
         mass_shift = precursor_mz_ref - precursor_mz_query
 
-        spec1 = reference.peaks.to_numpy
-        spec2 = query.peaks.to_numpy
+        spec1 = spectrum_1.peaks.to_numpy
+        spec2 = spectrum_2.peaks.to_numpy
         
         if self.ignore_peaks_above_precursor:
             spec1 = spec1[np.where(spec1[:, 0] < precursor_mz_ref)]

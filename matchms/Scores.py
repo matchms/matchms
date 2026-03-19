@@ -1,497 +1,473 @@
-from __future__ import annotations
-import copy
 import json
-import pickle
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Dict, Optional
 import numpy as np
-from numpy.lib.recfunctions import unstructured_to_structured
-from scipy.sparse import coo_matrix
-from sparsestack import StackedSparseArray
-from matchms.importing.load_from_json import scores_json_decoder
-from matchms.similarity import get_similarity_function_by_name
-from matchms.similarity.BaseSimilarity import BaseSimilarity
-from matchms.typing import QueriesType, ReferencesType
+from scipy.sparse import coo_array
+from matchms.typing import ScoresType
+
+
+@dataclass(frozen=True)
+class ScoresMask:
+    """Boolean mask for Scores, stored either densely or as sparse coordinates.
+    
+    Parameters
+    ----------
+    shape
+        Shape of the score matrix this mask applies to.
+    dense_mask
+        Optional dense boolean array of shape `shape`. If provided, `row` and `col` must be None.
+    row
+        Optional array of row indices for sparse representation.
+    col
+        Optional array of column indices for sparse representation. If provided, `dense_mask` must be None.
+    """
+    shape: tuple[int, int]
+    dense_mask: Optional[np.ndarray] = None
+    row: Optional[np.ndarray] = None
+    col: Optional[np.ndarray] = None
+
+    def __post_init__(self):
+        has_dense = self.dense_mask is not None
+        has_sparse = self.row is not None or self.col is not None
+
+        if has_dense and has_sparse:
+            raise ValueError("ScoresMask must be either dense or sparse, not both.")
+        if not has_dense and not has_sparse:
+            raise ValueError("ScoresMask requires either dense_mask or row/col.")
+        if has_sparse:
+            if self.row is None or self.col is None:
+                raise ValueError("Sparse ScoresMask requires both row and col.")
+            if self.row.shape != self.col.shape:
+                raise ValueError("row and col must have the same shape.")
+
+    @property
+    def is_sparse(self) -> bool:
+        return self.dense_mask is None
+
+    def to_dense(self) -> np.ndarray:
+        if self.dense_mask is not None:
+            return self.dense_mask
+        mask = np.zeros(self.shape, dtype=bool)
+        mask[self.row, self.col] = True
+        return mask
+
+    def __and__(self, other: "ScoresMask") -> "ScoresMask":
+        self._check_shape(other)
+        if self.is_sparse and other.is_sparse:
+            return self._from_coord_set(self._coord_set() & other._coord_set())
+        return ScoresMask(shape=self.shape, dense_mask=self.to_dense() & other.to_dense())
+
+    def __or__(self, other: "ScoresMask") -> "ScoresMask":
+        self._check_shape(other)
+        if self.is_sparse and other.is_sparse:
+            return self._from_coord_set(self._coord_set() | other._coord_set())
+        return ScoresMask(shape=self.shape, dense_mask=self.to_dense() | other.to_dense())
+
+    def __invert__(self) -> "ScoresMask":
+        return ScoresMask(shape=self.shape, dense_mask=~self.to_dense())
+
+    def _check_shape(self, other: "ScoresMask") -> None:
+        if self.shape != other.shape:
+            raise ValueError(f"Incompatible mask shapes: {self.shape} and {other.shape}.")
+
+    def _coord_set(self) -> set[tuple[int, int]]:
+        return set(zip(self.row.tolist(), self.col.tolist()))
+
+    def _from_coord_set(self, coords: set[tuple[int, int]]) -> "ScoresMask":
+        if not coords:
+            row = np.array([], dtype=np.int_)
+            col = np.array([], dtype=np.int_)
+        else:
+            coords = sorted(coords)
+            row = np.array([r for r, _ in coords], dtype=np.int_)
+            col = np.array([c for _, c in coords], dtype=np.int_)
+        return ScoresMask(shape=self.shape, row=row, col=col)
 
 
 class Scores:
-    """Contains reference and query spectra and the scores between them.
+    """Container for computed matchms scores.
+    
+    The ``Scores`` class stores the output of one similarity computation and provides
+    a small, intuitive API that works for both dense and sparse score matrices.
 
-    The scores can be retrieved as a matrix with the :py:attr:`Scores.scores` attribute.
-    The reference spectrum, query spectrum, score pairs can also be iterated over in query then reference order.
+    A ``Scores`` instance can represent either:
 
-    Example to calculate scores between 2 spectra and iterate over the scores
+    - a scalar score matrix with one field, usually ``"score"``
+    - a multi-field score result, for example ``"score"`` and ``"matches"``
+    - dense data stored as NumPy arrays
+    - sparse data stored as SciPy COO arrays
 
-    .. testcode::
+    Parameters
+    ----------
+    data
+        Dictionary mapping score field names to score data.
+        Each value must be either a 2D NumPy array or a SciPy ``coo_array``.
+        All fields must have the same shape and must all be either dense or sparse.
 
-        import numpy as np
-        from matchms import calculate_scores
-        from matchms import Spectrum
-        from matchms.similarity import CosineGreedy
+    Notes
+    -----
+    The class is designed to offer a consistent API independent of the underlying
+    storage format.
 
-        spectrum_1 = Spectrum(mz=np.array([100, 150, 200.]),
-                              intensities=np.array([0.7, 0.2, 0.1]),
-                              metadata={'id': 'spectrum1'})
-        spectrum_2 = Spectrum(mz=np.array([100, 140, 190.]),
-                              intensities=np.array([0.4, 0.2, 0.1]),
-                              metadata={'id': 'spectrum2'})
-        spectrum_3 = Spectrum(mz=np.array([110, 140, 195.]),
-                              intensities=np.array([0.6, 0.2, 0.1]),
-                              metadata={'id': 'spectrum3'})
-        spectrum_4 = Spectrum(mz=np.array([100, 150, 200.]),
-                              intensities=np.array([0.6, 0.1, 0.6]),
-                              metadata={'id': 'spectrum4'})
-        references = [spectrum_1, spectrum_2]
-        queries = [spectrum_3, spectrum_4]
+    Field access
+        Score fields can be accessed by name, for example ``scores["score"]`` or
+        ``scores["matches"]``. Field selection returns another ``Scores`` object
+        containing only the selected field.
 
-        similarity_measure = CosineGreedy()
-        scores = calculate_scores(references, queries, similarity_measure)
+    Scalar scores
+        If only one field is present, direct comparisons are supported, for example
+        ``scores > 0.5``. This is equivalent to ``scores["score"] > 0.5``.
 
-        for (reference, query, score) in scores:
-            print(f"Cosine score between {reference.get('id')} and {query.get('id')}" +
-                  f" is {score[0]:.2f} with {score[1]} matched peaks")
+    Masking
+        Boolean masking returns a filtered ``Scores`` object with the same shape.
+        For example, ``scores[scores["score"] > 0.5]`` keeps only entries where the
+        condition is true.
 
-    Should output
+    Slicing
+        Basic slicing is supported, for example ``scores[3, 4]``, ``scores[3, :]``,
+        or ``scores[:, 2]``.
 
-    .. testoutput::
+    Conversion
+        Use :meth:`to_array` to obtain a dense NumPy representation and
+        :meth:`to_coo` to obtain a sparse COO representation.
 
-        Cosine score between spectrum1 and spectrum4 is 0.80 with 3 matched peaks
-        Cosine score between spectrum2 and spectrum3 is 0.14 with 1 matched peaks
-        Cosine score between spectrum2 and spectrum4 is 0.61 with 1 matched peaks
+    Examples
+    --------
+    Scalar dense scores:
+
+    >>> scores = Scores({"score": np.array([[1.0, 0.0], [0.3, 0.8]])})
+    >>> scores["score"].to_array()
+    array([[1. , 0. ],
+           [0.3, 0.8]])
+    >>> filtered = scores[scores > 0.5]
+    >>> filtered.to_array()
+    array([[1. , 0. ],
+           [0. , 0.8]])
+
+    Multi-field scores:
+
+    >>> scores = Scores({
+    ...     "score": np.array([[1.0, 0.0], [0.3, 0.8]]),
+    ...     "matches": np.array([[5, 0], [1, 4]])
+    ... })
+    >>> scores["score"].to_array()
+    array([[1. , 0. ],
+           [0.3, 0.8]])
+    >>> scores["matches"].to_array()
+    array([[5, 0],
+           [1, 4]])
+    >>> good = scores[(scores["score"] > 0.2) & (scores["matches"] >= 2)]
+    >>> good.to_array("score")
+    array([[1. , 0. ],
+           [0. , 0.8]])
     """
 
-    def __init__(self, references: ReferencesType, queries: QueriesType,
-                 is_symmetric: bool = False):
-        """
+    _FORMAT_NAME = "matchms.Scores"
+    _FORMAT_VERSION = 1
+    _METADATA_KEY = "__scores_metadata__"
 
-        Parameters
-        ----------
-        references
-            List of reference objects
-        queries
-            List of query objects
-        is_symmetric
-            Set to True when *references* and *queries* are identical (as for instance for an all-vs-all
-            comparison). By using the fact that score[i,j] = score[j,i] the calculation will be about
-            2x faster. Default is False.
-        """
-        Scores._validate_input_arguments(references, queries)
+    def __init__(self, data: Dict[str, np.ndarray | coo_array]):
+        if not data:
+            raise ValueError("Scores requires at least one score field.")
 
-        self.n_rows = len(references)
-        self.n_cols = len(queries)
-        self.references = np.asarray(references)
-        self.queries = np.asarray(queries)
-        self.is_symmetric = is_symmetric
-        self._scores = StackedSparseArray(self.n_rows, self.n_cols)
-        self._index = 0
+        self._data = dict(data)
+        self._score_fields = tuple(data.keys())
 
-    def __eq__(self, other):
-        if isinstance(other, Scores):
-            if self.n_rows != other.n_rows or self.n_cols != other.n_cols:
-                return False
-            if not np.array_equal(self.references, other.references):
-                return False
-            if not np.array_equal(self.queries, other.queries):
-                return False
-            if self._scores != other._scores:
-                return False
-            return True
-        return NotImplemented
+        first_value = next(iter(self._data.values()))
+        self._is_sparse = isinstance(first_value, coo_array)
+        self._shape = first_value.shape
 
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        if self._index < len(self._scores.col):
-            i = self._index
-            result = [self._scores.data[name][i] for name in self._scores.score_names]
-            if not isinstance(result, tuple):
-                result = (result,)
-            self._index += 1
-            return (self.references[self._scores.row[i]],
-                    self.queries[self._scores.col[i]]) + result
-        self._index = 0
-        raise StopIteration
-
-    def __repr__(self):
-        return self._scores.__repr__()
-
-    def __str__(self):
-        return self._scores.__str__()
-
-    @staticmethod
-    def _validate_input_arguments(references, queries):
-        assert isinstance(references, (list, tuple, np.ndarray)),\
-            "Expected input argument 'references' to be list or tuple or np.ndarray."
-
-        assert isinstance(queries, (list, tuple, np.ndarray)),\
-            "Expected input argument 'queries' to be list or tuple or np.ndarray."
-
-    def calculate(self, similarity_function: BaseSimilarity,
-                  name: str = None,
-                  array_type: str = "numpy",
-                  join_type="left") -> Scores:
-        """
-        Calculate the similarity between all reference objects vs all query objects using
-        the most suitable available implementation of the given similarity_function.
-        If Scores object already contains similarity scores, the newly computed measures
-        will be added to a new layer (name --> layer name).
-        Additional scores will be added as specified with join_type, the default being 'left'.
-
-        Parameters
-        ----------
-        similarity_function
-            Function which accepts a reference + query object and returns a score or tuple of scores
-        name
-            Label of the new scores layer. If None, the name of the similarity_function class will be used.
-        array_type
-            Specify the type of array to store and compute the scores. Choose from "numpy" or "sparse".
-        join_type
-            Choose from left, right, outer, inner to specify the merge type.
-        """
-        def is_sparse_advisable():
-            return (
-                (len(self._scores.score_names) > 0)  # already scores in Scores
-                and (join_type in ["inner", "left"])  # inner/left join
-                and (len(self._scores.row) < (self.n_rows * self.n_cols)/2)  # fewer than half of scores have entries
+        for field, value in self._data.items():
+            if isinstance(value, coo_array) != self._is_sparse:
+                raise ValueError("All score fields must be either dense or sparse.")
+            if value.shape != self._shape:
+                raise ValueError(
+                    f"All score fields must have the same shape. "
+                    f"Field {field!r} has shape {value.shape}, expected {self._shape}."
                 )
 
-        if name is None:
-            name = similarity_function.__class__.__name__
-        if (self.n_rows == 0) or (self.n_cols == 0):
-            raise ValueError("Number of elements must be >= 1")
-        if self.n_rows == self.n_cols == 1:
-            score = similarity_function.pair(self.references[0],
-                                             self.queries[0])
-            self._scores.add_dense_matrix(np.array([score]), name)
-        elif is_sparse_advisable():
-            new_scores = similarity_function.sparse_array(references=self.references,
-                                                          queries=self.queries,
-                                                          idx_row=self._scores.row,
-                                                          idx_col=self._scores.col,
-                                                          is_symmetric=self.is_symmetric)
-            self._scores.add_sparse_data(self._scores.row,
-                                         self._scores.col,
-                                         new_scores,
-                                         name)
-        else:
-            new_scores = similarity_function.matrix(self.references,
-                                                    self.queries,
-                                                    array_type=array_type,
-                                                    is_symmetric=self.is_symmetric)
-            if isinstance(new_scores, np.ndarray):
-                self._scores.add_dense_matrix(new_scores, name, join_type=join_type)
-            elif len(new_scores.score_names) == 1:
-                new_scores.data.dtype.names = [name]
-                self._scores.add_sparse_data(new_scores.row,
-                                             new_scores.col,
-                                             new_scores.data, "", join_type=join_type)
-            else:
-                self._scores.add_sparse_data(new_scores.row,
-                                             new_scores.col,
-                                             new_scores.data, name, join_type=join_type)
-        return self
-
-    def scores_by_reference(self, reference: ReferencesType,
-                            name: str = None, sort: bool = False) -> np.ndarray:
-        """Return all scores of given name for the given reference spectrum.
-
-        Parameters
-        ----------
-        reference
-            Single reference Spectrum.
-        name
-            Name of the score that should be returned (if multiple scores are stored).
-        sort
-            Set to True to obtain the scores in a sorted way (relying on the
-            :meth:`~.BaseSimilarity.sort` function from the given similarity_function).
-        """
-        if name is None and len(self.score_names) > 1 and sort is True:
-            raise IndexError("For sorting, score must be specified")
-
-        idx_array = np.where(self.references == reference)[0]
-        if idx_array.size > 0:
-            selected_idx = int(idx_array[0])
-        else:
-            raise ValueError("Given input not found in references.")
-
-        _, r, scores_for_ref = self._scores[selected_idx, :]
-        if sort:
-            if name is None:
-                name = self._scores.guess_score_name()
-            if scores_for_ref.dtype.type == np.void:
-                query_idx_sorted = np.argsort(scores_for_ref[name])[::-1]
-            else:
-                query_idx_sorted = np.argsort(scores_for_ref)[::-1]
-            return list(zip(self.queries[r[query_idx_sorted]],
-                            scores_for_ref[query_idx_sorted].copy()))
-        return list(zip(self.queries[r], scores_for_ref.copy()))
-
-    def scores_by_query(self, query: QueriesType,
-                        name: str = None, sort: bool = False) -> np.ndarray:
-        """Return all scores for the given query spectrum.
-
-        For example
-
-        .. testcode::
-
-            import numpy as np
-            from matchms import calculate_scores, Scores, Spectrum
-            from matchms.similarity import CosineGreedy
-
-            spectrum_1 = Spectrum(mz=np.array([100, 150, 200.]),
-                                  intensities=np.array([0.7, 0.2, 0.1]),
-                                  metadata={'id': 'spectrum1'})
-            spectrum_2 = Spectrum(mz=np.array([100, 140, 190.]),
-                                  intensities=np.array([0.4, 0.2, 0.1]),
-                                  metadata={'id': 'spectrum2'})
-            spectrum_3 = Spectrum(mz=np.array([110, 140, 195.]),
-                                  intensities=np.array([0.6, 0.2, 0.1]),
-                                  metadata={'id': 'spectrum3'})
-            spectrum_4 = Spectrum(mz=np.array([100, 150, 200.]),
-                                  intensities=np.array([0.6, 0.1, 0.6]),
-                                  metadata={'id': 'spectrum4'})
-            references = [spectrum_1, spectrum_2, spectrum_3]
-            queries = [spectrum_2, spectrum_3, spectrum_4]
-
-            scores = calculate_scores(references, queries, CosineGreedy())
-            selected_scores = scores.scores_by_query(spectrum_4, 'CosineGreedy_score', sort=True)
-            print([float(x[1][0].round(3)) for x in selected_scores])
-
-        Should output
-
-        .. testoutput::
-
-            [0.796, 0.613]
-
-        Parameters
-        ----------
-        query
-            Single query Spectrum.
-        name
-            Name of the score that should be returned (if multiple scores are stored).
-        sort
-            Set to True to obtain the scores in a sorted way (relying on the
-            :meth:`~.BaseSimilarity.sort` function from the given similarity_function).
-
-        """
-        if name is None and len(self.score_names) > 1 and sort is True:
-            raise IndexError("For sorting, score must be specified")
-
-        idx_array = np.where(self.queries == query)[0]
-        if idx_array.size > 0:
-            selected_idx = int(idx_array[0])
-        else:
-            raise ValueError("Given input not found in queries.")
-
-        c, _, scores_for_query = self._scores[:, selected_idx]
-        if sort:
-            if name is None:
-                name = self._scores.guess_score_name()
-            # TODO: add option to use other sorting algorithm
-            if scores_for_query.dtype.type == np.void:
-                references_idx_sorted = np.argsort(scores_for_query[name])[::-1]
-            else:
-                references_idx_sorted = np.argsort(scores_for_query)[::-1]
-            return list(zip(self.references[c[references_idx_sorted]],
-                            scores_for_query[references_idx_sorted].copy()))
-        return list(zip(self.references[c], scores_for_query.copy()))
-
-    def to_json(self, filename: str):
-        """Export :py:class:`~matchms.Scores.Scores` to a JSON file.
-
-        Parameters
-        ----------
-        filename
-            Path to file to write to
-        """
-        with open(filename, "w", encoding="utf-8") as f:
-            json.dump(self, f, cls=ScoresJSONEncoder)
-
-    def to_pickle(self, filename: str):
-        """Export :py:class:`~matchms.Scores.Scores` to a Pickle file.
-
-        Parameters
-        ----------
-        filename
-            Path to file to write to
-        """
-        with open(filename, "wb") as f:
-            pickle.dump(self, f)
-
-    def to_dict(self) -> dict:
-        """Return a dictionary representation of scores."""
-        scores_dict = {"__Scores__": True,
-                       "is_symmetric": self.is_symmetric,
-                       "references": [reference.to_dict() for reference in self.references],
-                       "queries": [query.to_dict() for query in self.queries] if not self.is_symmetric else None}
-        scores_dict.update(self.scores.to_dict())
-        return scores_dict
+    def __repr__(self) -> str:
+        kind = "sparse" if self.is_sparse else "dense"
+        return f"Scores(shape={self.shape}, score_fields={self.score_fields}, kind={kind})"
 
     @property
-    def shape(self):
-        return self._scores.shape
+    def shape(self) -> tuple[int, int]:
+        return self._shape
 
     @property
-    def score_names(self):
-        return self._scores.score_names
+    def score_fields(self) -> tuple[str, ...]:
+        return self._score_fields
 
     @property
-    def scores(self):
-        return self._scores
+    def is_sparse(self) -> bool:
+        return self._is_sparse
 
-    def filter_by_range(self, **kwargs):
-        """Remove all scores for which the score `name` is outside the given range.
+    @property
+    def is_scalar(self) -> bool:
+        return len(self.score_fields) == 1
+
+    def to_array(self, field: Optional[str] = None) -> np.ndarray:
+        field = self._resolve_field(field)
+        value = self._data[field]
+        if self.is_sparse:
+            return value.toarray()
+        return value.copy()
+
+    def to_coo(self, field: Optional[str] = None) -> coo_array:
+        field = self._resolve_field(field)
+        value = self._data[field]
+        if self.is_sparse:
+            return value
+        row, col = np.nonzero(value)
+        return coo_array((value[row, col], (row, col)), shape=value.shape)
+
+    def filter(self, mask) -> ScoresType:
+        if isinstance(mask, ScoresMask):
+            return self._filter_with_scores_mask(mask)
+
+        mask = np.asarray(mask, dtype=bool)
+        if mask.shape != self.shape:
+            raise ValueError(f"Mask has shape {mask.shape}, expected {self.shape}.")
+        return self._filter_with_dense_mask(mask)
+
+    def __getitem__(self, key):
+        """Access fields, apply masks, or slice score data."""
+        if isinstance(key, str):
+            return Scores({key: self._data[self._resolve_field(key)]})
+
+        if isinstance(key, ScoresMask):
+            return self.filter(key)
+
+        if isinstance(key, np.ndarray):
+            return self.filter(key)
+
+        if self.is_scalar:
+            field = self.score_fields[0]
+            return self.to_array(field)[key]
+
+        if isinstance(key, tuple):
+            return {field: self.to_array(field)[key] for field in self.score_fields}
+
+        sliced = {field: self.to_array(field)[key] for field in self.score_fields}
+        normalized = {}
+        for field, value in sliced.items():
+            arr = np.asarray(value)
+            if arr.ndim == 1:
+                normalized[field] = arr.reshape(1, -1)
+            else:
+                normalized[field] = arr
+        return Scores(normalized)
+
+    def __gt__(self, other):
+        """Element-wise comparison for scalar Scores."""
+        return self._compare_scalar(other, np.greater, sparse_safe=True)
+
+    def __ge__(self, other):
+        """Element-wise comparison for scalar Scores."""
+        return self._compare_scalar(other, np.greater_equal, sparse_safe=True)
+
+    def __lt__(self, other):
+        """Element-wise comparison for scalar Scores."""
+        return self._compare_scalar(other, np.less, sparse_safe=False)
+
+    def __le__(self, other):
+        """Element-wise comparison for scalar Scores."""
+        return self._compare_scalar(other, np.less_equal, sparse_safe=False)
+
+    def __eq__(self, other):
+        """Element-wise comparison for scalar Scores."""
+        return self._compare_scalar(other, np.equal, sparse_safe=False)
+
+    def __ne__(self, other):
+        """Element-wise comparison for scalar Scores."""
+        return self._compare_scalar(other, np.not_equal, sparse_safe=False)
+
+    def _filter_with_scores_mask(self, mask: ScoresMask) -> ScoresType:
+        if mask.shape != self.shape:
+            raise ValueError(f"Mask has shape {mask.shape}, expected {self.shape}.")
+
+        if self.is_sparse and mask.is_sparse:
+            return self._filter_sparse_with_sparse_mask(mask)
+
+        return self._filter_with_dense_mask(mask.to_dense())
+
+    def _filter_sparse_with_sparse_mask(self, mask: ScoresMask) -> ScoresType:
+        mask_coords = set(zip(mask.row.tolist(), mask.col.tolist()))
+        filtered = {}
+
+        for field in self.score_fields:
+            coo = self.to_coo(field)
+            keep = np.array(
+                [(r, c) in mask_coords for r, c in zip(coo.row.tolist(), coo.col.tolist())],
+                dtype=bool,
+            )
+            filtered[field] = coo_array(
+                (coo.data[keep], (coo.row[keep], coo.col[keep])),
+                shape=self.shape,
+            )
+
+        return Scores(filtered)
+
+    def _filter_with_dense_mask(self, mask: np.ndarray) -> ScoresType:
+        filtered = {}
+        for field in self.score_fields:
+            arr = self.to_array(field)
+            arr = np.where(mask, arr, 0)
+            if self.is_sparse:
+                row, col = np.nonzero(arr)
+                filtered[field] = coo_array((arr[row, col], (row, col)), shape=self.shape)
+            else:
+                filtered[field] = arr
+        return Scores(filtered)
+
+    def _resolve_field(self, field: Optional[str]) -> str:
+        if field is None:
+            if self.is_scalar:
+                return self.score_fields[0]
+            raise KeyError(f"Field name required. Available fields: {self.score_fields}.")
+
+        if field in self._data:
+            return field
+
+        if field == "score" and self.is_scalar:
+            return self.score_fields[0]
+
+        raise KeyError(f"Unknown field {field!r}. Available fields: {self.score_fields}.")
+
+    def _compare_scalar(self, other, op, sparse_safe: bool) -> ScoresMask:
+        """Compare scalar Scores against a value and return a mask."""
+        if not self.is_scalar:
+            raise TypeError(
+                "Direct comparisons are only supported for scalar Scores. "
+                f"Available score fields: {self.score_fields}."
+            )
+
+        if not self.is_sparse:
+            return ScoresMask(shape=self.shape, dense_mask=op(self.to_array(), other))
+
+        if sparse_safe and other >= 0:
+            coo = self.to_coo()
+            keep = op(coo.data, other)
+            return ScoresMask(
+                shape=self.shape,
+                row=coo.row[keep],
+                col=coo.col[keep],
+            )
+
+        return ScoresMask(shape=self.shape, dense_mask=op(self.to_array(), other))
+
+
+    # File I/O methods for saving and loading Scores objects to/from .npz files
+    # ---------------------------------------------------------------------------------
+    def save(self, path: str | Path, compressed: bool = True) -> None:
+        """Save the Scores object to a single `.npz` file.
 
         Parameters
         ----------
-        kwargs
-            See "Keyword arguments" section below.
-
-        Keyword arguments
-        -----------------
-        name
-            Name of the score which is used for filtering. Run `.score_names` to
-            see all scores stored in the sparse array.
-        low
-            Lower threshold below which all scores will be removed.
-        high
-            Upper threshold above of which all scores will be removed.
-        above_operator
-            Define operator to be used to compare against `low`. Default is '>'.
-            Possible choices are '>', '<', '>=', '<='.
-        below_operator
-            Define operator to be used to compare against `high`. Default is '<'.
-            Possible choices are '>', '<', '>=', '<='.
+        path
+            Output file path.
+        compressed
+            If True, use ``numpy.savez_compressed``. Default is True.
         """
-        self._scores = self._scores.filter_by_range(**kwargs)
+        path = Path(path)
 
-    def to_array(self, name=None) -> np.ndarray:
-        """Scores as numpy array
+        metadata = {
+            "format": self._FORMAT_NAME,
+            "version": self._FORMAT_VERSION,
+            "is_sparse": self.is_sparse,
+            "score_fields": list(self.score_fields),
+            "shape": list(self.shape),
+        }
 
-        For example
+        payload = {
+            self._METADATA_KEY: np.array(json.dumps(metadata)),
+        }
 
-        .. testcode::
+        if self.is_sparse:
+            for field in self.score_fields:
+                coo = self.to_coo(field)
+                payload[f"{field}__row"] = coo.row
+                payload[f"{field}__col"] = coo.col
+                payload[f"{field}__data"] = coo.data
+        else:
+            for field in self.score_fields:
+                payload[field] = self._data[field]
 
-            import numpy as np
-            from matchms import calculate_scores, Scores, Spectrum
-            from matchms.similarity import IntersectMz
+        saver = np.savez_compressed if compressed else np.savez
+        saver(path, **payload)
 
-            spectrum_1 = Spectrum(mz=np.array([100, 150, 200.]),
-                                  intensities=np.array([0.7, 0.2, 0.1]))
-            spectrum_2 = Spectrum(mz=np.array([100, 140, 190.]),
-                                  intensities=np.array([0.4, 0.2, 0.1]))
-            spectra = [spectrum_1, spectrum_2]
-
-            scores = calculate_scores(spectra, spectra, IntersectMz()).to_array()
-
-            print(scores.shape)
-            print(scores.tolist())
-
-        Should output
-
-        .. testoutput::
-
-            (2, 2)
-            [[1.0, 0.2], [0.2, 1.0]]
+    @classmethod
+    def load(cls, path: str | Path) -> "Scores":
+        """Load a Scores object from a `.npz` file.
 
         Parameters
         ----------
-        name
-            Name of the score that should be returned (if multiple scores are stored).
+        path
+            Input file path.
+
+        Returns
+        -------
+        Scores
+            Reconstructed Scores object.
         """
-        return self._scores.to_array(name)
+        path = Path(path)
 
-    def to_coo(self, name=None) -> coo_matrix:
-        """Scores as scipy sparse COO matrix
+        with np.load(path, allow_pickle=False) as npz:
+            if cls._METADATA_KEY not in npz:
+                raise ValueError(
+                    f"File {path} does not contain {cls._FORMAT_NAME} metadata."
+                )
 
-        Parameters
-        ----------
-        name
-            Name of the score that should be returned (if multiple scores are stored).
-        """
-        return self._scores.to_coo(name)
+            metadata =  json.loads(str(npz[cls._METADATA_KEY]))
+            cls._validate_metadata(metadata, path)
 
+            is_sparse = bool(metadata["is_sparse"])
+            score_fields = tuple(metadata["score_fields"])
+            shape = tuple(metadata["shape"])
 
-class ScoresBuilder:
-    """
-    Builder class for :class:`~matchms.Scores`.
-    """
+            data = {}
+            if is_sparse:
+                for field in score_fields:
+                    row_key = f"{field}__row"
+                    col_key = f"{field}__col"
+                    data_key = f"{field}__data"
 
-    def __init__(self):
-        self.references = None
-        self.queries = None
-        self.is_symmetric = None
-        self.scores = None
+                    missing = [key for key in (row_key, col_key, data_key) if key not in npz]
+                    if missing:
+                        raise ValueError(
+                            f"File {path} is missing sparse data for field {field!r}: {missing}"
+                        )
 
-    def build(self) -> Scores:
-        """
-        Build scores object
-        """
-        scores = Scores(references=self.references,
-                        queries=self.queries,
-                        is_symmetric=self.is_symmetric)
-        scores._scores = self.scores  # pylint: disable=protected-access
-        return scores
+                    row = npz[row_key]
+                    col = npz[col_key]
+                    values = npz[data_key]
+                    data[field] = coo_array((values, (row, col)), shape=shape)
+            else:
+                for field in score_fields:
+                    if field not in npz:
+                        raise ValueError(
+                            f"File {path} is missing dense data for field {field!r}."
+                        )
+                    data[field] = npz[field]
 
-    def from_json(self, file_path: str):
-        """
-        Import scores data from a JSON file.
-        Parameters
-        ----------
-        file_path
-            Path to the scores file.
-        """
-        with open(file_path, "rb") as f:
-            scores_dict = json.load(f, object_hook=scores_json_decoder)
-
-        self._validate_json_input(scores_dict)
-
-        self.is_symmetric = scores_dict["is_symmetric"]
-        self.references = scores_dict["references"]
-        self.queries = scores_dict["queries"] if not self.is_symmetric else self.references
-        self.scores = self._restructure_scores(scores_dict)
-
-        return self
-
-    @staticmethod
-    def _restructure_scores(scores_dict: dict) -> StackedSparseArray:
-        """
-        Restructure scores from a nested list to a numpy array. If scores were stored as an array of tuples, restores
-        their original form.
-        """
-        sparsestack = StackedSparseArray(scores_dict.get("n_row"), scores_dict.get("n_col"))
-        sparsestack.row = np.array(scores_dict.get("row"))
-        sparsestack.col = np.array(scores_dict.get("col"))
-        dtype = scores_dict.get("dtype")
-        if len(dtype[0]) > 1:
-            dtype = [(x[0], x[1]) for x in dtype]
-        sparsestack.data = unstructured_to_structured(np.array(scores_dict.get("data")),
-                                                      dtype=np.dtype(dtype))
-        return sparsestack
-
-    @staticmethod
-    def _construct_similarity_functions(similarity_function_dict: dict) -> BaseSimilarity:
-        """
-        Construct similarity function from its serialized form.
-        """
-        similarity_function_class = get_similarity_function_by_name(similarity_function_dict.pop("__Similarity__"))
-        return similarity_function_class(**similarity_function_dict)
-
-    @staticmethod
-    def _validate_json_input(scores_dict: dict):
-        if {"__Scores__", "is_symmetric", "references", "queries", "row",
-                "col", "data", "dtype", "n_row", "n_col"} != scores_dict.keys():
-            raise ValueError("Scores JSON file does not match the expected schema.\n\
-                             Make sure the file contains the following keys:\n\
-                             ['__Scores__', 'is_symmetric', 'references', 'queries', 'scores_row',\
-                             'scores_col', 'scores_data', 'scores_dtype']")
+        return cls(data)
 
 
-class ScoresJSONEncoder(json.JSONEncoder):
-    def default(self, o):
-        """JSON Encoder for a matchms.Scores.Scores object"""
-        class_name = o.__class__.__name__
-        # do isinstance(o, Scores) without importing matchms.Scores
-        if class_name == "Scores":
-            scores = copy.deepcopy(o)
-            return scores.to_dict()
-        return json.JSONEncoder.default(self, o)
+    @classmethod
+    def _validate_metadata(cls, metadata: dict, path: Path) -> None:
+        """Validate loaded metadata."""
+        if metadata.get("format") != cls._FORMAT_NAME:
+            raise ValueError(
+                f"File {path} is not a {cls._FORMAT_NAME} file."
+            )
+        if metadata.get("version") != cls._FORMAT_VERSION:
+            raise ValueError(
+                f"Unsupported {cls._FORMAT_NAME} version {metadata.get('version')} in file {path}."
+            )
+        required_keys = {"format", "version", "is_sparse", "score_fields", "shape"}
+        missing = required_keys.difference(metadata)
+        if missing:
+            raise ValueError(
+                f"File {path} is missing metadata keys: {sorted(missing)}"
+            )

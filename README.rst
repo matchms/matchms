@@ -116,7 +116,7 @@ Installation
 
 Prerequisites:  
 
-- Python 3.10 - 3.13, (higher versions should work as well, but are not yet tested systematically)
+- Python 3.11 - 3.13, (higher versions should work as well, but are not yet tested systematically)
 - Anaconda (recommended)
 
 We recommend installing matchms in a new virtual environment to avoid dependency clashes
@@ -208,7 +208,7 @@ Below is a more advanced code example showing how you can make a specific pipeli
     workflow = create_workflow(
         yaml_file_name=os.path.join(results_folder, "my_config_file.yaml"),  # The workflow will be stored in a yaml file.
         query_filters=DEFAULT_FILTERS,
-        reference_filters=LIBRARY_CLEANING + ["add_fingerprint"],
+        reference_filters=LIBRARY_CLEANING,
         score_computations=[["precursormzmatch", {"tolerance": 100.0}],
                             ["cosinegreedy", {"tolerance": 1.0}],
                             ["filter_by_range", {"name": "CosineGreedy_score", "low": 0.2}]],
