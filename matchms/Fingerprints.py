@@ -192,10 +192,7 @@ class Fingerprints:
         if self._fingerprints is None:
             return pd.DataFrame(index=[])
 
-        if sp.issparse(self._fingerprints):
-            fingerprints = list(self._fingerprints)
-        else:
-            fingerprints = list(self._fingerprints)
+        fingerprints = list(self._fingerprints)
 
         return pd.DataFrame(
             data={"fingerprint": fingerprints},
