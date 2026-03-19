@@ -130,10 +130,56 @@ class SpectraCollection:
         self._clear_cache(["metadata_hashes"])
 
     def _reorder(self, indices: np.ndarray):
+        """
+        Reorders fragments and metadata in SpectrumCollection according to indices synchronically.
+
+        Parameters:
+        -----------
+        inplace : bool
+            Will return a new SpectraCollection, if True and the same if False. Defaults to False.
+        """
         self._fragments = self._fragments[indices, :]
         self._metadata = self._metadata.iloc[indices].reset_index(drop=True)
 
         return self
+
+    def sort(self, by: str | list[str], on: str = "metadata", inplace: bool = False, **kwargs):
+        """
+        Sorts SpectraCollection (fragments AND metadata) by either metadata keyword(s) or fragment function.
+
+        Parameters:
+        -----------
+        by : str | list[str]
+            Either metadata column name or method name in FragmentsProxy (e.g., 'sum').
+        on : str
+            'metadata' (Standard) or 'fragments'.
+        inplace : bool
+            Will return a new, sorted SpectraCollection, if True and the same, sorted if False. Defaults to False.
+        """
+        target = self if inplace else self.copy()
+        ascending = kwargs.get("ascending", True)
+
+        if on == "fragments":
+            if not hasattr(target.fragments, str(by)):
+                raise NotImplementedError(f"'Sorting method {by}' is not implemented in FragmentsProxy.")
+
+            method = getattr(target.fragments, str(by))
+            sort_values = method(axis=1)
+
+            new_indices = np.argsort(sort_values)
+            if not ascending:
+                new_indices = new_indices[::-1]
+
+        elif on == "metadata":
+            sorted_df = target._metadata.sort_values(by=by, **kwargs)
+            new_indices = sorted_df.index.values
+
+        else:
+            raise ValueError("Parameter 'on' must be either 'metadata' or 'fragments'.")
+
+        target._reorder(new_indices)
+
+        return None if inplace else target
 
     def _clear_cache(self, keys: list[str] = None):
         if keys is None:
@@ -142,45 +188,69 @@ class SpectraCollection:
         for key in keys:
             self.__dict__.pop(key, None)
 
-    def drop(self, indices: list[int] | np.ndarray):
+    def drop(self, indices: list[int] | np.ndarray, inplace: bool = False):
         """
         Removes specified rows (spectra) from both fragments and metadata.
-        Todo: Also remove Spectra by hashes?
+
+        Parameters:
+        -----------
+        indices : list[int] | np.ndarray
+            Indices of the rows to remove.
+        inplace : bool
+            Will return a new SpectraCollection, if True and the same if False. Defaults to False.
         """
-        all_indices = np.arange(self._fragments.shape[0])
+        target = self if inplace else self.copy()
+
+        all_indices = np.arange(target._fragments.shape[0])
         keep_mask = ~np.isin(all_indices, indices)
 
-        self._fragments = self._fragments[keep_mask, :]
-        self._metadata = self._metadata.iloc[keep_mask].reset_index(drop=True)
+        target._fragments = target._fragments[keep_mask, :]
+        target._metadata = target._metadata.iloc[keep_mask].reset_index(drop=True)
 
-        self._clear_cache()
-        return self
+        target._clear_cache()
 
-    def dropna(self):
+        return None if inplace else target
+
+    def dropna(self, inplace: bool = False):
         """
         Removes spectra without peaks.
+
+        Parameters:
+        -----------
+        inplace : bool
+            Will return a new SpectraCollection, if True and the same if False. Defaults to False.
         """
         peaks_per_row = np.diff(self._fragments.indptr)
         empty_indices = np.where(peaks_per_row == 0)[0]
 
         if len(empty_indices) > 0:
-            self.drop(empty_indices)
+            return self if inplace else self.copy()
 
-        self._clear_cache()
-        return self
+        return self.drop(empty_indices, inplace=inplace)
 
-    def drop_duplicates(self):
+    def drop_duplicates(self, inplace: bool = False):
         """
         Drops duplicates by spectra hashes.
+
+        Parameters:
+        -----------
+        inplace : bool
+            Will return a new SpectraCollection, if True and the same if False. Defaults to False.
         """
         _, unique_indices = np.unique(self.spectra_hashes, return_index=True)
 
         all_indices = np.arange(len(self.spectra_hashes))
         duplicate_indices = np.setdiff1d(all_indices, unique_indices)
 
-        if len(duplicate_indices) > 0:
-            return self.drop(duplicate_indices)
-        return self
+        return self.drop(duplicate_indices, inplace=inplace)
+
+    def copy(self):
+        new_spec = self.__class__.__new__(self.__class__)
+        new_spec.bin_size = self.bin_size
+        new_spec._metadata = self._metadata.copy()
+        new_spec._fragments = self._fragments.copy()
+
+        return new_spec
 
     def mz_to_bin(self, mz: np.ndarray | float) -> np.ndarray:
         """
@@ -291,14 +361,9 @@ class MetadataProxy(pd.DataFrame):
     def _constructor(self):
         return MetadataProxy
 
-    def sort_values(self, by, **kwargs):
-        kwargs.pop("inplace", None)
-        sorted_df = super().sort_values(by=by, **kwargs)
-
-        if self._collection is not None:
-            self._collection._reorder(sorted_df.index.values)
-
-        return MetadataProxy(self._collection._metadata, self._collection)
+    def sort_values(self, by, inplace=False, **kwargs):
+        result = self._collection.sort(by=by, inplace=inplace, **kwargs)
+        return None if inplace else result.metadata
 
 
 class FragmentsProxy:
