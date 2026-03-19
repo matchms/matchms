@@ -224,9 +224,9 @@ class SpectraCollection:
         empty_indices = np.where(peaks_per_row == 0)[0]
 
         if len(empty_indices) > 0:
-            return self if inplace else self.copy()
+            return self.drop(empty_indices, inplace=inplace)
 
-        return self.drop(empty_indices, inplace=inplace)
+        return self if inplace else self.copy()
 
     def drop_duplicates(self, inplace: bool = False):
         """
