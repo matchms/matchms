@@ -30,6 +30,36 @@ def collection(sample_spectra):
     return SpectraCollection(sample_spectra, bin_size=0.01)
 
 
+def test_getitem_slice(collection):
+    sub_col = collection[0:2]
+
+    assert isinstance(sub_col, SpectraCollection)
+    assert len(sub_col) == 2
+    assert sub_col.metadata["compound_name"].tolist() == ["A", "B"]
+
+    original_sums = collection.fragments.sum(axis=1)
+    sub_sums = sub_col.fragments.sum(axis=1)
+    np.testing.assert_allclose(sub_sums, original_sums[0:2])
+
+
+def test_getitem_list_indices(collection):
+    indices = [0, 2]
+    sub_col = collection[indices]
+
+    assert len(sub_col) == 2
+    assert sub_col.metadata["compound_name"].tolist() == ["A", "C"]
+
+    np.testing.assert_allclose(sub_col.fragments.sum(axis=1), [1.521, 2.02], atol=1e-5)
+
+
+def test_fragments_proxy_slicing(collection):
+    raw_slice = collection.fragments[0:2]
+
+    assert hasattr(raw_slice, "shape")
+    assert raw_slice.shape[0] == 2
+    assert not isinstance(raw_slice, SpectraCollection)
+
+
 def test_metadata_extraction(collection):
     df = collection._metadata
     assert len(df) == 3
@@ -135,3 +165,40 @@ def test_describe(collection):
     assert "peak_counts" in stats.columns
     assert "intensity_sums" in stats.columns
     assert stats.attrs["num_spectra"] == 3
+
+
+def test_filter_by_metadata_mask(collection):
+    mask = collection.metadata["retention_time"] > 120
+    filtered = collection.filter(mask)
+
+    # Should keep B (200) and C (150)
+    assert len(filtered) == 2
+    assert filtered.metadata["compound_name"].tolist() == ["B", "C"]
+    assert filtered.metadata["retention_time"].tolist() == [200, 150]
+
+
+def test_filter_by_fragments_mask(collection):
+    mask = collection.fragments.sum(axis=1) > 2.0
+    filtered = collection.filter(mask)
+
+    assert len(filtered) == 2
+    assert filtered.metadata["compound_name"].tolist() == ["B", "C"]
+
+
+def test_filter_inplace(collection):
+    original_id = id(collection)
+    mask = np.array([True, False, True])  # Keep A and C
+
+    result = collection.filter(mask, inplace=True)
+
+    assert result is None
+    assert id(collection) == original_id
+    assert len(collection) == 2
+    assert collection.metadata["compound_name"].tolist() == ["A", "C"]
+
+
+def test_filter_invalid_length_raises_error(collection):
+    short_mask = np.array([True, False])
+
+    with pytest.raises(ValueError, match=r"Shape of filter mask \(2\) does not fit Items in SpectraCollection \(3\)."):
+        collection.filter(short_mask)

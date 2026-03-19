@@ -56,15 +56,23 @@ class SpectraCollection:
         return self._fragments.shape[0], self._metadata.shape[1]
 
     def __getitem__(self, idx):
-        # csr = self.fragments.tocsr()
-        csr = self._fragments
+        if isinstance(idx, (int, np.integer)):
+            csr = self._fragments
 
-        start, end = csr.indptr[idx], csr.indptr[idx + 1]
-        cols = csr.indices[start:end]
-        intensities = csr.data[start:end]
-        mz = self.bin_to_mz(cols)
+            start, end = csr.indptr[idx], csr.indptr[idx + 1]
+            cols = csr.indices[start:end]
+            intensities = csr.data[start:end]
+            mz = self.bin_to_mz(cols)
 
-        return Spectrum(mz=mz, intensities=intensities, metadata=self._metadata.iloc[idx].to_dict())
+            return Spectrum(mz=mz, intensities=intensities, metadata=self._metadata.iloc[idx].to_dict())
+
+        target = self.copy()
+        if isinstance(idx, slice):
+            indices = np.arange(len(self))[idx]
+        else:
+            indices = idx
+
+        return target._reorder(indices)
 
     def __iter__(self):
         for i in range(self._fragments.shape[0]):
@@ -178,6 +186,55 @@ class SpectraCollection:
             raise ValueError("Parameter 'on' must be either 'metadata' or 'fragments'.")
 
         target._reorder(new_indices)
+
+        return None if inplace else target
+
+    def filter(self, mask: np.ndarray | pd.Series | list[bool], inplace: bool = False):
+        """
+        Filters SpectraCollection by keeping only the spectra where the mask is True.
+
+        This method synchronizes the filtering of both fragments and metadata.
+        It uses boolean indexing from NumPy and Pandas.
+
+        Parameters
+        ----------
+            mask (np.ndarray | pd.Series | list[bool]): A boolean array-like object
+                of the same length as the collection. Rows where the mask is True
+                will be kept; all others will be removed.
+            inplace (bool): If True, modifies the current collection in place and
+                returns None. If False (default), returns a new filtered
+                SpectraCollection instance.
+
+        Returns
+        -------
+            SpectraCollection | None: A new filtered instance if inplace is False,
+                otherwise None.
+
+        Raises
+            ValueError: If the length of the mask does not match the number of spectra in the collection.
+
+        Example:
+            >>> # Filter by metadata
+            >>> filtered_coll = coll.filter(coll.metadata["ms_level"] == 2)
+            >>>
+            >>> # Filter by fragment properties
+            >>> coll.filter(coll.fragments.sum() > 500, inplace=True)
+            >>>
+            >>> # Using an external vectorized filter function
+            >>> mask = filter_min_peaks(coll, n_required=10)
+            >>> coll.filter(mask, inplace=True)
+        """
+        if isinstance(mask, pd.Series):
+            mask = mask.values
+        mask = np.asanyarray(mask, dtype=bool)
+
+        if mask.shape[0] != len(self):
+            raise ValueError(f"Shape of filter mask ({mask.shape[0]}) does not fit Items in SpectraCollection ({len(self)}).")
+
+        target = self if inplace else self.copy()
+
+        keep_indices = np.where(mask)[0]
+        target._reorder(keep_indices)
 
         return None if inplace else target
 
