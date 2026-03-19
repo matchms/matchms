@@ -43,13 +43,17 @@ def spectra():
 
 
 def test_compute_embeddings_not_implemented():
+    class DummyEmbeddingSimilarity(BaseEmbeddingSimilarity):
+        def compute_embeddings(self, spectra):
+            return super().compute_embeddings(spectra)
+
     with pytest.raises(NotImplementedError, match="Subclasses must implement this method."):
-        base_similarity = BaseEmbeddingSimilarity()
+        base_similarity = DummyEmbeddingSimilarity()
         base_similarity.compute_embeddings([])
 
 
 def test_no_input_specified_error():
-    base_similarity = BaseEmbeddingSimilarity()
+    base_similarity = MockEmbeddingSimilarity()
 
     with pytest.raises(ValueError, match="Either spectra or npy_path must be provided."):
         base_similarity.get_embeddings(spectra=None, npy_path=None)
