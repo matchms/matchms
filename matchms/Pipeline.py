@@ -87,7 +87,6 @@ class Pipeline:
     ):
         self._spectra_1: List[SpectrumType] = []
         self._spectra_2: Optional[List[SpectrumType]] = None
-        self.is_symmetric = False
 
         self.scores: Optional[Scores] = None
         self.mask: Optional[ScoresMask] = None
@@ -186,19 +185,16 @@ class Pipeline:
             if cleaned_spectra_1_file is not None:
                 self.write_to_logfile(f"--- Spectra_1 written to {cleaned_spectra_1_file} ---")
 
-        if self.is_symmetric:
-            self._spectra_2 = None
-        else:
-            if self.processing_spectra_2 is not None:
-                self._spectra_2, report = self.processing_spectra_2.process_spectra(
-                    self._spectra_2,
-                    progress_bar=self.progress_bar,
-                    cleaned_spectra_file=cleaned_spectra_2_file,
-                    create_report=create_report,
-                )
-                self.write_to_logfile(str(report))
-                if cleaned_spectra_2_file is not None:
-                    self.write_to_logfile(f"--- Spectra_2 written to {cleaned_spectra_2_file} ---")
+        if self.processing_spectra_2 is not None and self._spectra_2 is not None:
+            self._spectra_2, report = self.processing_spectra_2.process_spectra(
+                self._spectra_2,
+                progress_bar=self.progress_bar,
+                cleaned_spectra_file=cleaned_spectra_2_file,
+                create_report=create_report,
+            )
+            self.write_to_logfile(str(report))
+            if cleaned_spectra_2_file is not None:
+                self.write_to_logfile(f"--- Spectra_2 written to {cleaned_spectra_2_file} ---")
 
         self.scores = None
         self.mask = None
