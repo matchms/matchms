@@ -91,7 +91,7 @@ class SpectraCollection:
 
     @cached_property
     def metadata_hashes(self):
-        return pd.util.hash_pandas_object(self._metadata).tolist()
+        return pd.util.hash_pandas_object(self._metadata, index=False).tolist()
 
     def add_metadata(self, data, col_name: str = None, overwrite: bool = False):
         # TODO: must contain same sorting as present spectra/metadata. Add class bool flag, if data has been sorted?
@@ -135,14 +135,12 @@ class SpectraCollection:
 
         return self
 
-
     def _clear_cache(self, keys: list[str] = None):
         if keys is None:
             keys = ["metadata_hashes", "fragment_hashes", "spectra_hashes"]
 
         for key in keys:
             self.__dict__.pop(key, None)
-
 
     def drop(self, indices: list[int] | np.ndarray):
         """
@@ -171,6 +169,19 @@ class SpectraCollection:
         self._clear_cache()
         return self
 
+    def drop_duplicates(self):
+        """
+        Drops duplicates by spectra hashes.
+        """
+        _, unique_indices = np.unique(self.spectra_hashes, return_index=True)
+
+        all_indices = np.arange(len(self.spectra_hashes))
+        duplicate_indices = np.setdiff1d(all_indices, unique_indices)
+
+        if len(duplicate_indices) > 0:
+            return self.drop(duplicate_indices)
+        return self
+
     def mz_to_bin(self, mz: np.ndarray | float) -> np.ndarray:
         """
         Convert mz values into bins.
@@ -182,13 +193,13 @@ class SpectraCollection:
         mz
             The mz values to bin.
 
-        Return:
-        --------------
+        Returns
+        -------
         np.ndarray
             Bin indices as np.int64.
 
-        TODO:
-        --------------
+        TODO
+        ----
         uint64 can lead to conversion issues with scipy sparse -> int64 sufficient?
         """
         return np.floor(mz / self.bin_size).astype(np.int64)
@@ -204,8 +215,8 @@ class SpectraCollection:
         bin_idx
             Bin indices/columns to convert.
 
-        Return:
-        --------------
+        Returns
+        -------
         np.ndarray
             The mz values at the center of specified bins.
         """

@@ -160,7 +160,7 @@ def metadata_hash(metadata: dict, hash_length: int = 20):
     return hashlib.sha256(encoded).hexdigest()[:hash_length]
 
 
-def compute_combined_hashes(fragment_hashes: list[str], metadata_hashes: list[str]) -> list[int]:
+def compute_combined_hashes(fragment_hashes: list[str] | np.ndarray, metadata_hashes: list[str]) -> list[int]:
     s_frag = pd.Series(fragment_hashes, dtype=str)
     s_meta = pd.Series(metadata_hashes, dtype=str)
 
