@@ -1,22 +1,22 @@
-import pytest
 import numpy as np
 import pandas as pd
-from matchms import Spectrum, SpectraCollection
+import pytest
+from matchms import SpectraCollection, Spectrum
 from tests.builder_Spectrum import SpectrumBuilder
 
 
 @pytest.fixture
 def sample_spectra():
     mz1 = np.array([100.00003, 110.2, 200.581], dtype="float")
-    intensities1 = np.array([0.51, 1.0, 0.011], dtype="float") # Sum 1,521
+    intensities1 = np.array([0.51, 1.0, 0.011], dtype="float")  # Sum 1,521
     metadata1 = {"compound_name": "A", "precursor_mz": 444.0, "charge": -1, "retention_time": 100}
 
     mz2 = np.array([111.00213, 180.2, 332.342], dtype="float")
-    intensities2 = np.array([0.52, 1.0, 0.7], dtype="float") # Sum 2,22
+    intensities2 = np.array([0.52, 1.0, 0.7], dtype="float")  # Sum 2,22
     metadata2 = {"compound_name": "B", "precursor_mz": 565.0, "charge": -1, "retention_time": 200}
 
     mz3 = np.array([111.00213, 200.1, 200.213], dtype="float")
-    intensities3 = np.array([0.52, 0.5, 1], dtype="float") # Sum 2,02
+    intensities3 = np.array([0.52, 0.5, 1], dtype="float")  # Sum 2,02
     metadata3 = {"compound_name": "C", "precursor_mz": 664.0, "charge": -1, "retention_time": 150}
 
     s1 = SpectrumBuilder().with_mz(mz1).with_intensities(intensities1).with_metadata(metadata1).build()
@@ -24,6 +24,7 @@ def sample_spectra():
     s3 = SpectrumBuilder().with_mz(mz3).with_intensities(intensities3).with_metadata(metadata3).build()
 
     return [s1, s2, s3]
+
 
 @pytest.fixture
 def collection(sample_spectra):
@@ -99,7 +100,6 @@ def test_drop_spectra(collection):
     assert new_col.metadata["compound_name"].tolist() == ["A", "C"]
 
     print(new_col[1].mz)
-
 
     assert np.any(np.isclose(new_col[1].mz, 200.105, atol=0.1))
 

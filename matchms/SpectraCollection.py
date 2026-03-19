@@ -229,7 +229,9 @@ class SpectraCollection:
         mask = np.asanyarray(mask, dtype=bool)
 
         if mask.shape[0] != len(self):
-            raise ValueError(f"Shape of filter mask ({mask.shape[0]}) does not fit Items in SpectraCollection ({len(self)}).")
+            raise ValueError(
+                f"Shape of filter mask ({mask.shape[0]}) does not fit Items in SpectraCollection ({len(self)})."
+            )
 
         target = self if inplace else self.copy()
 
@@ -381,22 +383,22 @@ class SpectraCollection:
             else:
                 entropies[i] = np.nan
 
-        stats = pd.DataFrame({
-            "peak_counts": peak_counts,
-            "intensity_sums": intensity_sums,
-            "intensity_entropy": entropies,
-        }).describe()
+        stats = pd.DataFrame(
+            {
+                "peak_counts": peak_counts,
+                "intensity_sums": intensity_sums,
+                "intensity_entropy": entropies,
+            }
+        ).describe()
 
         stats.attrs["label"] = "SpectraCollection Describe"
         stats.attrs["num_spectra"] = len(self)
 
         # Represent values in Jupyter nicely
         def _repr_html_():
-            return stats.style.format({
-                "peak_counts": "{:,.2f}",
-                "intensity_sums": "{:,.0f}",
-                "intensity_entropy": "{:.2f}"
-            }).to_html()
+            return stats.style.format(
+                {"peak_counts": "{:,.2f}", "intensity_sums": "{:,.0f}", "intensity_entropy": "{:.2f}"}
+            ).to_html()
 
         stats._repr_html_ = _repr_html_
 
@@ -408,6 +410,7 @@ class MetadataProxy(pd.DataFrame):
     Metadata proxy class.
     Used for filter directly on metadata and synchronize fragments.
     """
+
     _metadata = ["_collection"]
 
     def __init__(self, data, collection=None, *args, **kwargs):
