@@ -104,7 +104,6 @@ class FingerprintSimilarity(BaseSimilarity):
         self,
         spectra_1: Optional[Sequence[SpectrumType]] = None,
         spectra_2: Optional[Sequence[SpectrumType]] = None,
-        *,
         fingerprints_1: Optional[Fingerprints] = None,
         fingerprints_2: Optional[Fingerprints] = None,
         score_fields: Optional[Sequence[str]] = None,
