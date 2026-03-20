@@ -55,7 +55,7 @@ class SpectraCollection:
         return MetadataProxy(self._metadata, self)
 
     @property
-    def fragments(self):
+    def fragments(self) -> FragmentsProxy:
         return FragmentsProxy(self._fragments)
 
     @property
