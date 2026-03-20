@@ -55,8 +55,8 @@ def test_get_top_hits_by_column():
     }
     expected_idx_col = {
         'query_spec_0': np.array([0, 1, 2, 3, 4]),
-        'query_spec_1': np.array([1, 4, 3, 2, 0]),
-        'query_spec_2': np.array([0, 2, 4, 3, 1])
+        'query_spec_1': np.array([1, 0, 2, 3, 4]),
+        'query_spec_2': np.array([0, 2, 1, 3, 4]),
     }
 
     for key, value in scores_col.items():
@@ -74,14 +74,28 @@ def test_get_top_hits_by_column():
         axis=0,
         identifiers=identifiers,
     )
+
+    expected_scores_col_top2 = {
+        'query_spec_0': np.array([1.0, 0.80566937]),
+        'query_spec_1': np.array([0.34812354, 0.0]),
+        'query_spec_2': np.array([0.612693, 0.39564064]),
+    }
+
     for key, value in scores_col.items():
-        assert np.allclose(value, expected_scores_col[key][:2], atol=1e-5), (
+        assert np.allclose(value, expected_scores_col_top2[key], atol=1e-5), (
             f"Unexpected selected scores for {key} with top_n=2"
         )
-    for key, value in idx_col.items():
-        assert np.array_equal(value, expected_idx_col[key][:2]), (
-            f"Unexpected selected indices for {key} with top_n=2"
-        )
+
+    # Exact result: no tie at cutoff
+    assert np.array_equal(idx_col["query_spec_0"], np.array([0, 1]))
+
+    # Exact result: second-best score is unique
+    assert np.array_equal(idx_col["query_spec_2"], np.array([0, 2]))
+
+    # Tied zeros at cutoff: first must be the best hit, second can be any zero-score index
+    assert idx_col["query_spec_1"][0] == 1
+    assert idx_col["query_spec_1"][1] in {0, 2, 3, 4}
+    assert len(set(idx_col["query_spec_1"])) == 2
 
 
 def test_get_top_hits_by_row():
@@ -106,12 +120,9 @@ def test_get_top_hits_by_row():
         'ref_spec_0': np.array([0, 2, 1]),
         'ref_spec_1': np.array([0, 1, 2]),
         'ref_spec_2': np.array([0, 2, 1]),
-        'ref_spec_3': np.array([0, 2, 1]),
-        'ref_spec_4': np.array([0, 2, 1])}
-
-    # Tie ordering can differ on macOS
-    if sys.platform == "darwin":
-        expected_idx_row["query_spec_1"] = np.array([2, 1, 4, 3], dtype=np.int64)
+        'ref_spec_3': np.array([0, 1, 2]),
+        'ref_spec_4': np.array([0, 1, 2]),
+    }
 
     for key, value in scores_row.items():
         assert np.allclose(value, expected_scores_row[key], atol=1e-5), (
@@ -128,14 +139,33 @@ def test_get_top_hits_by_row():
         axis=1,
         identifiers=identifiers,
     )
+
+    expected_scores_row_top2 = {
+        'ref_spec_0': np.array([1.0, 0.612693]),
+        'ref_spec_1': np.array([0.80566937, 0.34812354]),
+        'ref_spec_2': np.array([0.77583811, 0.39564064]),
+        'ref_spec_3': np.array([0.75247993, 0.0]),
+        'ref_spec_4': np.array([0.73288331, 0.0]),
+    }
+
     for key, value in scores_row.items():
-        assert np.allclose(value, expected_scores_row[key][:2], atol=1e-5), (
+        assert np.allclose(value, expected_scores_row_top2[key], atol=1e-5), (
             f"Unexpected selected scores for {key} with top_n=2"
         )
-    for key, value in idx_row.items():
-        assert np.array_equal(value, expected_idx_row[key][:2]), (
-            f"Unexpected selected indices for {key} with top_n=2"
-        )
+
+    # Exact results: no tie affecting top-2 membership
+    assert np.array_equal(idx_row["ref_spec_0"], np.array([0, 2]))
+    assert np.array_equal(idx_row["ref_spec_1"], np.array([0, 1]))
+    assert np.array_equal(idx_row["ref_spec_2"], np.array([0, 2]))
+
+    # Tied zero at cutoff: second can be either of the zero-score indices
+    assert idx_row["ref_spec_3"][0] == 0
+    assert idx_row["ref_spec_3"][1] in {1, 2}
+    assert len(set(idx_row["ref_spec_3"])) == 2
+
+    assert idx_row["ref_spec_4"][0] == 0
+    assert idx_row["ref_spec_4"][1] in {1, 2}
+    assert len(set(idx_row["ref_spec_4"])) == 2
 
 
 def test_get_top_hits_by_row_wrapper():
