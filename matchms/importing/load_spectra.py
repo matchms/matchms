@@ -1,6 +1,6 @@
 import os
 from itertools import chain
-from typing import Generator, List, Optional, Union
+from typing import Generator, Iterator, List, Optional, Union
 from matchms.importing import (
     load_from_json,
     load_from_mgf,
@@ -8,7 +8,6 @@ from matchms.importing import (
     load_from_mzml,
     load_from_mzxml,
     load_from_pickle,
-    load_from_usi,
 )
 from matchms.Spectrum import Spectrum
 
@@ -26,7 +25,7 @@ def load_spectra(
     -----
     file:
         Path to file containing spectra, with file extension "mzML", "json", "mgf", "msp",
-        "mzxml", "usi" or "pickle"
+        "mzxml" or "pickle"
     ftype:
         Optional. Filetype
     """
@@ -47,8 +46,6 @@ def load_spectra(
         return load_from_msp(file, metadata_harmonization=metadata_harmonization)
     if ftype == "mzxml":
         return load_from_mzxml(file, metadata_harmonization=metadata_harmonization)
-    if ftype == "usi":
-        return load_from_usi(file, metadata_harmonization=metadata_harmonization)
     if ftype == "pickle":
         return load_from_pickle(file, metadata_harmonization)
 
@@ -57,7 +54,7 @@ def load_spectra(
 
 def load_list_of_spectrum_files(
     spectrum_files: Union[List[str], str],
-) -> Union[List[Spectrum], Generator[Spectrum, None, None]]:
+) -> Union[List[Spectrum], Iterator[Spectrum]]:
     """Combines all spectra in multiple files into a list of spectra"""
     # Just load spectra if it is a single file
     if isinstance(spectrum_files, str):

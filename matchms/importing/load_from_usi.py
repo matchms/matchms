@@ -1,5 +1,6 @@
 import json
 import logging
+from typing import Optional
 import numpy as np
 import requests
 from ..Spectrum import Spectrum
@@ -8,7 +9,9 @@ from ..Spectrum import Spectrum
 logger = logging.getLogger("matchms")
 
 
-def load_from_usi(usi: str, server: str = "https://metabolomics-usi.gnps2.org", metadata_harmonization: bool = True):
+def load_from_usi(
+    usi: str, server: str = "https://metabolomics-usi.gnps2.org", metadata_harmonization: bool = True
+) -> Optional[Spectrum]:
     """Load spectrum from metabolomics USI.
 
     USI returns JSON data with keys "peaks", "n_peaks" and "precuror_mz"

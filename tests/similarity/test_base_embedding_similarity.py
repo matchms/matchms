@@ -43,13 +43,17 @@ def spectra():
 
 
 def test_compute_embeddings_not_implemented():
+    class DummyEmbeddingSimilarity(BaseEmbeddingSimilarity):
+        def compute_embeddings(self, spectra):
+            return super().compute_embeddings(spectra)
+
     with pytest.raises(NotImplementedError, match="Subclasses must implement this method."):
-        base_similarity = BaseEmbeddingSimilarity()
+        base_similarity = DummyEmbeddingSimilarity()
         base_similarity.compute_embeddings([])
 
 
 def test_no_input_specified_error():
-    base_similarity = BaseEmbeddingSimilarity()
+    base_similarity = MockEmbeddingSimilarity()
 
     with pytest.raises(ValueError, match="Either spectra or npy_path must be provided."):
         base_similarity.get_embeddings(spectra=None, npy_path=None)
@@ -58,11 +62,11 @@ def test_no_input_specified_error():
 def test_matrix_asymmetric_false_error(spectra):
     base_similarity = MockEmbeddingSimilarity()
 
-    queries = spectra
-    references = spectra[1:3]
+    spectra_1 = spectra[1:3]
+    spectra_2 = spectra
 
     with pytest.raises(ValueError, match="Any embedding base similarity matrix is supposed to be dense and symmetric."):
-        base_similarity.matrix(references, queries, is_symmetric=False)
+        base_similarity.matrix(spectra_1, spectra_2, is_symmetric=False)
 
 
 def test_build_ann_index_missing_backend(spectra):

@@ -3,10 +3,10 @@ import numpy as np
 from scipy.optimize import linear_sum_assignment
 from matchms.similarity.spectrum_similarity_functions import collect_peak_pairs
 from matchms.typing import SpectrumType
-from .BaseSimilarity import BaseSimilarity
+from .BaseSimilarity import BaseSimilarityWithSparse
 
 
-class CosineHungarian(BaseSimilarity):
+class CosineHungarian(BaseSimilarityWithSparse):
     """Calculate 'cosine similarity score' between two spectra using the Hungarian algorithm.
 
     The cosine score quantifies the similarity between two mass spectra by finding
@@ -22,6 +22,7 @@ class CosineHungarian(BaseSimilarity):
 
     is_commutative = True
     score_datatype = [("score", np.float64), ("matches", "int")]
+    score_fields = ("score", "matches")
 
     def __init__(self, tolerance: float = 0.1, mz_power: float = 0.0,
                  intensity_power: float = 1.0):
@@ -40,15 +41,15 @@ class CosineHungarian(BaseSimilarity):
         self.mz_power = mz_power
         self.intensity_power = intensity_power
 
-    def pair(self, reference: SpectrumType, query: SpectrumType) -> Tuple[float, int]:
+    def pair(self, spectrum_1: SpectrumType, spectrum_2: SpectrumType) -> Tuple[float, int]:
         """Calculate cosine score between two spectra.
 
         Parameters
         ----------
-        reference
-            Single reference spectrum.
-        query
-            Single query spectrum.
+        spectrum_1
+            Single spectrum.
+        spectrum_2
+            Single spectrum.
 
         Returns
         -------
@@ -144,8 +145,8 @@ class CosineHungarian(BaseSimilarity):
             score = score/(np.sqrt(np.sum(spec1_power**2)) * np.sqrt(np.sum(spec2_power**2)))
             return np.asarray((score, len(used_matches)), dtype=self.score_datatype)
 
-        spec1 = reference.peaks.to_numpy
-        spec2 = query.peaks.to_numpy
+        spec1 = spectrum_1.peaks.to_numpy
+        spec2 = spectrum_2.peaks.to_numpy
         matching_pairs = get_matching_pairs()
         paired_peaks1, paired_peaks2, matching_pairs_matrix = get_matching_pairs_matrix()
         return calc_score()

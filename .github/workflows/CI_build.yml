@@ -12,14 +12,14 @@ on:
 
 jobs:
   first_check:
-    name: first code check / python-3.10 / ubuntu-latest
+    name: first code check / python-3.12 / ubuntu-latest
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: '3.12'
       - name: Python info
         run: |
           which python
@@ -62,10 +62,10 @@ jobs:
     needs: first_check
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python 3.10
+      - name: Set up Python 3.12
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: '3.12'
       - name: Python info
         run: |
           which python
@@ -105,10 +105,10 @@ jobs:
       fail-fast: false
       matrix:
         os: ['ubuntu-latest', 'macos-latest', 'windows-latest']
-        python-version: ['3.10', '3.11', '3.12', '3.13']
+        python-version: ['3.11', '3.12', '3.13']
         exclude:
           - os: 'macos-latest'
-            python-version: ['3.10', '3.11']
+            python-version: ['3.11']
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
@@ -142,6 +142,9 @@ jobs:
       - name: Create conda environment
         uses: conda-incubator/setup-miniconda@v3
         with:
+          miniforge-variant: Miniforge3
+          channels: conda-forge
+          channel-priority: strict
           auto-update-conda: true
           python-version: '3.12'
       - name: Show conda config
