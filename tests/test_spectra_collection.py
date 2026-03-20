@@ -61,6 +61,17 @@ def test_fragments_proxy_slicing(collection):
     assert not isinstance(raw_slice, SpectraCollection)
 
 
+def test_fragments_mz_slicing(collection):
+    sliced = collection.fragments[:, 100.0:150.0]
+
+    assert sliced.shape[0] == 3
+    assert sliced.shape[1] >= 1
+
+    # Peak around 200 should be absent after slicing
+    mz0, _ = sliced.get_row(0)
+    assert np.all(mz0 < 150.1)
+
+
 def test_metadata_extraction(collection):
     df = collection._metadata
     assert len(df) == 3
@@ -85,6 +96,16 @@ def test_sort_by_rt_descending(collection):
     assert sorted_sums[2] == 1.521
 
 
+def test_sort_inplace(collection):
+    original_id = id(collection)
+
+    result = collection.sort(by="retention_time", on="metadata", ascending=False, inplace=True)
+
+    assert result is None
+    assert id(collection) == original_id
+    assert collection.metadata["compound_name"].tolist() == ["B", "C", "A"]
+
+
 def test_getitem_consistency(collection):
     spec_b = collection[1]
 
@@ -104,12 +125,29 @@ def test_drop_spectra(collection):
     assert np.any(np.isclose(new_col[1].mz, 200.105, atol=0.1))
 
 
+def test_drop_duplicates(sample_spectra):
+    col = SpectraCollection(sample_spectra + [sample_spectra[1]], bin_size=0.01)
+
+    assert len(col) == 4
+    deduped = col.drop_duplicates()
+
+    assert len(deduped) == 3
+    assert deduped.metadata["compound_name"].tolist() == ["A", "B", "C"]
+
+
 def test_add_metadata_series(collection):
     scores = pd.Series([0.95, 0.88, 0.99], name="quality_score")
     collection.add_metadata(scores)
 
     assert "quality_score" in collection.metadata.columns
     assert collection.metadata.loc[2, "quality_score"] == 0.99
+
+
+def test_add_metadata_overwrite(collection):
+    new_rt = pd.Series([10, 20, 30], name="retention_time")
+    collection.add_metadata(new_rt, overwrite=True)
+
+    assert collection.metadata["retention_time"].tolist() == [10, 20, 30]
 
 
 def test_sort_by_metadata(collection):
@@ -136,6 +174,17 @@ def test_drop_indices(collection):
     assert dropped.metadata["compound_name"].tolist() == ["A", "C"]
 
 
+def test_drop_inplace(collection):
+    original_id = id(collection)
+
+    result = collection.drop([1], inplace=True)
+
+    assert result is None
+    assert id(collection) == original_id
+    assert len(collection) == 2
+    assert collection.metadata["compound_name"].tolist() == ["A", "C"]
+
+
 def test_dropna(sample_spectra):
     empty_spec = Spectrum(mz=np.array([]), intensities=np.array([]), metadata={"name": "empty"})
     col = SpectraCollection(sample_spectra + [empty_spec], bin_size=1.0)
@@ -147,8 +196,30 @@ def test_dropna(sample_spectra):
 
 def test_copy(collection):
     cloned = collection.copy()
+
     assert cloned is not collection
-    assert np.array_equal(cloned.fragments.toarray(), collection.fragments.toarray())
+    assert cloned.metadata is not collection.metadata
+    assert cloned.fragments is not collection.fragments
+
+    np.testing.assert_array_equal(
+        cloned._fragments.array.data,
+        collection._fragments.array.data,
+    )
+    np.testing.assert_array_equal(
+        cloned._fragments.array.indptr,
+        collection._fragments.array.indptr,
+    )
+    np.testing.assert_array_equal(
+        cloned._fragments.array.indices,
+        collection._fragments.array.indices,
+    )
+    pd.testing.assert_frame_equal(cloned.metadata, collection.metadata)
+
+    # Mutating the clone should not affect the original
+    cloned.add_metadata(pd.Series([1, 2, 3], name="new_col"))
+
+    assert "new_col" in cloned.metadata.columns
+    assert "new_col" not in collection.metadata.columns
 
 
 def test_mz_bin_conversion(collection):
