@@ -120,6 +120,29 @@ def _get_score_array(scores: Scores, score_name: Optional[str]) -> np.ndarray:
     return scores[score_name].to_array()
 
 
+def _sorted_top_indices(
+    values: np.ndarray,
+    top_n: int,
+    exclude_index: Optional[int] = None,
+) -> np.ndarray:
+    """Return top indices sorted by descending score, ties by ascending index."""
+    if top_n <= 0 or len(values) == 0:
+        return np.array([], dtype=int)
+
+    extra = 1 if exclude_index is not None else 0
+    n_select = min(top_n + extra, len(values))
+
+    candidate_idx = np.argpartition(values, -n_select)[-n_select:]
+
+    if exclude_index is not None:
+        candidate_idx = candidate_idx[candidate_idx != exclude_index]
+
+    # Sort by descending score, then ascending index
+    candidate_scores = values[candidate_idx]
+    order = np.lexsort((candidate_idx, -candidate_scores))
+    return candidate_idx[order][:top_n]
+
+
 def _get_top_hits_along_rows(
     matrix: np.ndarray,
     identifiers: Sequence,
@@ -132,12 +155,11 @@ def _get_top_hits_along_rows(
 
     for i in range(matrix.shape[0]):
         values = matrix[i, :]
-        n_select = min(top_n + (1 if ignore_diagonal else 0), len(values))
-        order = np.argpartition(values, -n_select, axis=-1)[-n_select:][::-1]
-        if ignore_diagonal:
-            order = order[order != i]
-
-        order = order[:top_n]
+        order = _sorted_top_indices(
+            values,
+            top_n=top_n,
+            exclude_index=i if ignore_diagonal else None,
+        )
         similars_idx[identifiers[i]] = order
         similars_scores[identifiers[i]] = values[order]
 
@@ -156,13 +178,11 @@ def _get_top_hits_along_columns(
 
     for j in range(matrix.shape[1]):
         values = matrix[:, j]
-        n_select = min(top_n + (1 if ignore_diagonal else 0), len(values))
-        order = np.argpartition(values, -n_select, axis=-1)[-n_select:][::-1]
-
-        if ignore_diagonal:
-            order = order[order != j]
-
-        order = order[:top_n]
+        order = _sorted_top_indices(
+            values,
+            top_n=top_n,
+            exclude_index=j if ignore_diagonal else None,
+        )
         similars_idx[identifiers[j]] = order
         similars_scores[identifiers[j]] = values[order]
 
