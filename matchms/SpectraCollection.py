@@ -3,13 +3,29 @@ from functools import cached_property
 from typing import Generator
 import numpy as np
 import pandas as pd
-from scipy.sparse import coo_array
 from matchms.Spectrum import Spectrum
-from .hashing import compute_combined_hashes, spectra_hashes
+from .FragmentCollection import CSRFragmentCollection
+from .hashing import compute_combined_hashes
 
 
 class SpectraCollection:
-    def __init__(self, spectra: list[Spectrum] | Generator[Spectrum, None, None], bin_size=0.000001):
+    """Central collection object for matchms spectra datasets.
+
+    This class synchronizes:
+    - metadata stored as a pandas DataFrame
+    - fragments stored in a fragment backend (currently CSRFragmentCollection)
+
+    Notes
+    -----
+    - Rows correspond to spectra.
+    - ``metadata`` and ``fragments`` always have matching row order and length.
+    - Row access returns reconstructed ``Spectrum`` objects.
+    """
+    def __init__(
+        self,
+        spectra: list[Spectrum] | Generator[Spectrum, None, None],
+        bin_size=0.000001,
+    ):
         spectra = list(spectra)
 
         if not spectra:
@@ -23,16 +39,7 @@ class SpectraCollection:
             raise ValueError("Spectra Metadata/Fragments mismatch.")
 
     def _construct_fragments(self, spectra: list):
-        all_mz = np.concatenate([spec.mz for spec in spectra])
-        all_int = np.concatenate([spec.intensities for spec in spectra])
-
-        bin_idx = self.mz_to_bin(all_mz)
-        bin_no = bin_idx.max() + 1
-
-        lengths = np.array([len(spec.mz) for spec in spectra])
-        row_idx = np.repeat(np.arange(len(spectra)), lengths)
-
-        return coo_array((all_int, (row_idx, bin_idx)), shape=(len(spectra), bin_no)).tocsr()  # CSR here!
+        return CSRFragmentCollection(spectra, bin_size=self.bin_size)
 
     def _construct_metadata(self, spectra):
         # data = defaultdict(list)
@@ -48,7 +55,7 @@ class SpectraCollection:
         return MetadataProxy(self._metadata, self)
 
     @property
-    def fragments(self) -> FragmentsProxy:
+    def fragments(self):
         return FragmentsProxy(self._fragments)
 
     @property
@@ -57,14 +64,12 @@ class SpectraCollection:
 
     def __getitem__(self, idx):
         if isinstance(idx, (int, np.integer)):
-            csr = self._fragments
-
-            start, end = csr.indptr[idx], csr.indptr[idx + 1]
-            cols = csr.indices[start:end]
-            intensities = csr.data[start:end]
-            mz = self.bin_to_mz(cols)
-
-            return Spectrum(mz=mz, intensities=intensities, metadata=self._metadata.iloc[idx].to_dict())
+            mz, intensities = self._fragments.get_row(int(idx))
+            return Spectrum(
+                mz=mz,
+                intensities=intensities,
+                metadata=self._metadata.iloc[int(idx)].to_dict(),
+            )
 
         target = self.copy()
         if isinstance(idx, slice):
@@ -83,7 +88,6 @@ class SpectraCollection:
 
     def __repr__(self):
         rep = f"Spectra in list: {len(self._metadata)}"
-
         return rep
 
     def __str__(self):
@@ -95,7 +99,7 @@ class SpectraCollection:
 
     @cached_property
     def fragment_hashes(self):
-        return spectra_hashes(self.fragments._array, self.bin_to_mz)
+        return self._fragments.fragment_hashes
 
     @cached_property
     def metadata_hashes(self):
@@ -105,24 +109,22 @@ class SpectraCollection:
         # TODO: must contain same sorting as present spectra/metadata. Add class bool flag, if data has been sorted?
         if isinstance(data, pd.DataFrame):
             new_metadata = data.copy()
-
-        if isinstance(data, pd.Series):
+        elif isinstance(data, pd.Series):
             col_name = col_name or data.name
             if col_name is None:
                 raise ValueError("Series must have a name or 'col_name' must be provided.")
             new_metadata = pd.DataFrame({col_name: data})
-
-        if isinstance(data, list):
+        elif isinstance(data, list):
             if col_name is None:
                 raise ValueError("'col_name' must be provided.")
             new_metadata = pd.DataFrame({col_name: data})
-
-        if isinstance(data, dict):
+        elif isinstance(data, dict):
             for v in data.values():
                 if not isinstance(v, list):
                     raise ValueError("When data is a dict, values must be of type list.")
-
             new_metadata = pd.DataFrame(data)
+        else:
+            raise TypeError("Data must be pd.DataFrame, pd.Series, list, or dict of lists.")
 
         if new_metadata.shape[0] != len(self):
             raise ValueError("New metadata does not match length of existing metadata entries.")
@@ -139,15 +141,16 @@ class SpectraCollection:
 
     def _reorder(self, indices: np.ndarray):
         """
-        Reorders fragments and metadata in SpectrumCollection according to indices synchronically.
+        Reorders fragments and metadata in SpectraCollection according to indices synchronically.
 
         Parameters:
         -----------
         inplace : bool
             Will return a new SpectraCollection, if True and the same if False. Defaults to False.
         """
-        self._fragments = self._fragments[indices, :]
+        self._fragments = self._fragments.take(indices)
         self._metadata = self._metadata.iloc[indices].reset_index(drop=True)
+        self._clear_cache()
 
         return self
 
@@ -260,10 +263,10 @@ class SpectraCollection:
         """
         target = self if inplace else self.copy()
 
-        all_indices = np.arange(target._fragments.shape[0])
+        all_indices = np.arange(len(target))
         keep_mask = ~np.isin(all_indices, indices)
 
-        target._fragments = target._fragments[keep_mask, :]
+        target._fragments = target._fragments.filter(keep_mask)
         target._metadata = target._metadata.iloc[keep_mask].reset_index(drop=True)
 
         target._clear_cache()
@@ -279,7 +282,7 @@ class SpectraCollection:
         inplace : bool
             Will return a new SpectraCollection, if True and the same if False. Defaults to False.
         """
-        peaks_per_row = np.diff(self._fragments.indptr)
+        peaks_per_row = self._fragments.count(axis=1)
         empty_indices = np.where(peaks_per_row == 0)[0]
 
         if len(empty_indices) > 0:
@@ -326,12 +329,8 @@ class SpectraCollection:
         -------
         np.ndarray
             Bin indices as np.int64.
-
-        TODO
-        ----
-        uint64 can lead to conversion issues with scipy sparse -> int64 sufficient?
         """
-        return np.floor(mz / self.bin_size).astype(np.int64)
+        return self._fragments.mz_to_bin(mz)
 
     def bin_to_mz(self, bin_idx: np.ndarray | int) -> np.ndarray:
         """
@@ -349,7 +348,7 @@ class SpectraCollection:
         np.ndarray
             The mz values at the center of specified bins.
         """
-        return (bin_idx * self.bin_size) + (self.bin_size / 2)
+        return self._fragments.bin_to_mz(bin_idx)
 
     def describe(self) -> pd.DataFrame:
         """
@@ -368,15 +367,13 @@ class SpectraCollection:
                 - 'intensity_entropy': Shannon entropy of peak intensities,
                     quantifying the spectral complexity/information density.
         """
-        peak_counts = np.diff(self._fragments.indptr)
+        peak_counts = self._fragments.count(axis=1)
         intensity_sums = np.asarray(self._fragments.sum(axis=1)).flatten()
 
         entropies = np.zeros(len(self))
         for i in range(len(self)):
-            start, end = self._fragments.indptr[i], self._fragments.indptr[i + 1]
-            if end > start:
-                row_int = self._fragments.data[start:end]
-
+            _, row_int = self._fragments.get_row(i)
+            if len(row_int) > 0:
                 # Shannon Entropy: p_i = I_i / sum(I)
                 p = row_int / np.sum(row_int)
                 entropies[i] = -np.sum(p * np.log(p + 1e-12))
