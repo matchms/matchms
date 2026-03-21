@@ -86,9 +86,12 @@ class SpectraCollection:
     def __len__(self):
         return self._fragments.shape[0]
 
-    def __repr__(self):
-        rep = f"Spectra in list: {len(self._metadata)}"
-        return rep
+    def __repr__(self) -> str:
+        return (
+            f"SpectraCollection(n_spectra={len(self)}, "
+            f"n_metadata_columns={self._metadata.shape[1]}, "
+            f"fragments={self._fragments!r})"
+        )
 
     def __str__(self):
         return self.__repr__()
