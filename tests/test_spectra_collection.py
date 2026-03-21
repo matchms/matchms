@@ -273,3 +273,102 @@ def test_filter_invalid_length_raises_error(collection):
 
     with pytest.raises(ValueError, match=r"Shape of filter mask \(2\) does not fit Items in SpectraCollection \(3\)."):
         collection.filter(short_mask)
+
+
+def test_iteration_returns_spectrum_objects(collection):
+    spectra = list(collection)
+
+    assert len(spectra) == 3
+    assert all(isinstance(s, Spectrum) for s in spectra)
+    assert [s.metadata["compound_name"] for s in spectra] == ["A", "B", "C"]
+
+
+def test_getitem_negative_row_slice(collection):
+    sub_col = collection[-2:]
+
+    assert isinstance(sub_col, SpectraCollection)
+    assert len(sub_col) == 2
+    assert sub_col.metadata["compound_name"].tolist() == ["B", "C"]
+    np.testing.assert_allclose(sub_col.fragments.sum(axis=1), [2.22, 2.02], atol=1e-5)
+
+
+def test_getitem_row_and_mz_slice_returns_collection(collection):
+    sub_col = collection[:2, 100.0:150.0]
+
+    assert isinstance(sub_col, SpectraCollection)
+    assert len(sub_col) == 2
+    assert sub_col.metadata["compound_name"].tolist() == ["A", "B"]
+
+    mz0 = sub_col[0].mz
+    mz1 = sub_col[1].mz
+
+    assert np.all((mz0 >= 100.0) & (mz0 < 150.1))
+    assert np.all((mz1 >= 100.0) & (mz1 < 150.1))
+
+    assert np.sum(sub_col[0].intensities) == pytest.approx(1.51, abs=1e-6)
+    assert np.sum(sub_col[1].intensities) == pytest.approx(0.52, abs=1e-6)
+
+
+def test_getitem_scalar_row_and_mz_slice_returns_spectrum(collection):
+    spec = collection[1, 100.0:200.0]
+
+    assert isinstance(spec, Spectrum)
+    assert spec.metadata["compound_name"] == "B"
+    assert np.all((spec.mz >= 100.0) & (spec.mz < 200.1))
+    assert np.sum(spec.intensities) == pytest.approx(1.52, abs=1e-6)
+
+
+def test_getitem_row_mask_and_mz_slice(collection):
+    mask = np.array([True, False, True])
+    sub_col = collection[mask, 100.0:150.0]
+
+    assert isinstance(sub_col, SpectraCollection)
+    assert len(sub_col) == 2
+    assert sub_col.metadata["compound_name"].tolist() == ["A", "C"]
+
+    assert np.sum(sub_col[0].intensities) == pytest.approx(1.51, abs=1e-6)
+    assert np.sum(sub_col[1].intensities) == pytest.approx(0.52, abs=1e-6)
+
+
+def test_getitem_row_list_and_mz_slice(collection):
+    sub_col = collection[[0, 2], 200.0:250.0]
+
+    assert isinstance(sub_col, SpectraCollection)
+    assert len(sub_col) == 2
+    assert sub_col.metadata["compound_name"].tolist() == ["A", "C"]
+
+    # A has one peak around 200.581, C has two around 200.1 and 200.213
+    assert len(sub_col[0].mz) == 1
+    assert len(sub_col[1].mz) == 2
+    assert np.all(sub_col[0].mz >= 200.0)
+    assert np.all(sub_col[1].mz >= 200.0)
+
+
+def test_getitem_scalar_row_and_mz_slice_empty_result(collection):
+    spec = collection[0, 300.0:400.0]
+
+    assert isinstance(spec, Spectrum)
+    assert spec.metadata["compound_name"] == "A"
+    assert len(spec.mz) == 0
+    assert len(spec.intensities) == 0
+
+
+def test_getitem_tuple_invalid_length_raises(collection):
+    with pytest.raises(IndexError, match="Expected at most two indexers"):
+        _ = collection[0, 1, 2]
+
+
+def test_getitem_invalid_row_mask_length_raises(collection):
+    mask = np.array([True, False])
+
+    with pytest.raises(ValueError, match=r"Shape of row selector \(2\) does not fit Items in SpectraCollection \(3\)."):
+        _ = collection[mask, 100.0:200.0]
+
+
+def test_iteration_after_2d_slice_returns_spectrum_objects(collection):
+    sub_col = collection[:, 100.0:150.0]
+    spectra = list(sub_col)
+
+    assert len(spectra) == 3
+    assert all(isinstance(s, Spectrum) for s in spectra)
+    assert all(np.all((s.mz >= 100.0) & (s.mz < 150.1)) or len(s.mz) == 0 for s in spectra)
