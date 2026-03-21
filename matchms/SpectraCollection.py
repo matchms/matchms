@@ -38,6 +38,19 @@ class SpectraCollection:
         if len(self._metadata) != self._fragments.shape[0]:
             raise ValueError("Spectra Metadata/Fragments mismatch.")
 
+    @classmethod
+    def _from_metadata_and_fragments(
+        cls,
+        metadata: pd.DataFrame,
+        fragments: CSRFragmentCollection,
+        bin_size: float,
+    ) -> "SpectraCollection":
+        obj = cls.__new__(cls)
+        obj.bin_size = bin_size
+        obj._metadata = metadata.reset_index(drop=True)
+        obj._fragments = fragments
+        return obj
+
     def _construct_fragments(self, spectra: list):
         return CSRFragmentCollection(spectra, bin_size=self.bin_size)
 
@@ -62,21 +75,68 @@ class SpectraCollection:
     def shape(self):
         return self._fragments.shape[0], self._metadata.shape[1]
 
-    def __getitem__(self, idx):
+    def _normalize_row_selection(self, idx):
+        """Normalize row selection to integer indices or a scalar int."""
         if isinstance(idx, (int, np.integer)):
-            mz, intensities = self._fragments.get_row(int(idx))
-            return Spectrum(
-                mz=mz,
-                intensities=intensities,
-                metadata=self._metadata.iloc[int(idx)].to_dict(),
+            return int(idx)
+
+        if isinstance(idx, slice):
+            return np.arange(len(self))[idx]
+
+        arr = np.asarray(idx)
+        if arr.dtype == bool:
+            if arr.shape[0] != len(self):
+                raise ValueError(
+                    f"Shape of row selector ({arr.shape[0]}) does not fit Items in SpectraCollection ({len(self)})."
+                )
+            return np.where(arr)[0]
+
+        return arr.astype(np.int64)
+
+    def _spectrum_from_row(self, idx: int) -> Spectrum:
+        mz, intensities = self._fragments.get_row(int(idx))
+        return Spectrum(
+            mz=mz,
+            intensities=intensities,
+            metadata=self._metadata.iloc[int(idx)].to_dict(),
+        )
+
+    def __getitem__(self, idx):
+        # 2D slicing: rows + mz-range
+        if isinstance(idx, tuple):
+            if len(idx) != 2:
+                raise IndexError("Expected at most two indexers: rows, mz-range")
+
+            row_sel, mz_sel = idx
+
+            # scalar row + mz slice -> one Spectrum
+            if isinstance(row_sel, (int, np.integer)):
+                row_idx = int(row_sel)
+                new_fragments = self._fragments[[row_idx], mz_sel]
+                mz, intensities = new_fragments.get_row(0)
+                return Spectrum(
+                    mz=mz,
+                    intensities=intensities,
+                    metadata=self._metadata.iloc[row_idx].to_dict(),
+                )
+
+            row_indices = self._normalize_row_selection(row_sel)
+            new_metadata = self._metadata.iloc[row_indices].reset_index(drop=True)
+            new_fragments = self._fragments[row_indices, mz_sel]
+
+            return self.__class__._from_metadata_and_fragments(
+                metadata=new_metadata,
+                fragments=new_fragments,
+                bin_size=self.bin_size,
             )
 
-        target = self.copy()
-        if isinstance(idx, slice):
-            indices = np.arange(len(self))[idx]
-        else:
-            indices = idx
+        # scalar row -> one Spectrum
+        if isinstance(idx, (int, np.integer)):
+            return self._spectrum_from_row(int(idx))
 
+        # row-only selection -> SpectraCollection
+        indices = self._normalize_row_selection(idx)
+        target = self.copy()
         return target._reorder(indices)
 
     def __iter__(self):
@@ -143,14 +203,6 @@ class SpectraCollection:
         self._clear_cache(["metadata_hashes"])
 
     def _reorder(self, indices: np.ndarray):
-        """
-        Reorders fragments and metadata in SpectraCollection according to indices synchronically.
-
-        Parameters:
-        -----------
-        inplace : bool
-            Will return a new SpectraCollection, if True and the same if False. Defaults to False.
-        """
         self._fragments = self._fragments.take(indices)
         self._metadata = self._metadata.iloc[indices].reset_index(drop=True)
         self._clear_cache()
