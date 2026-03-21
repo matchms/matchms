@@ -1,4 +1,3 @@
-import sys
 import numpy as np
 from matchms import Spectrum, calculate_scores
 from matchms.networking.networking_functions import (
