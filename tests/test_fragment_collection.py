@@ -275,3 +275,115 @@ def test_fragment_hashes_equal_for_identical_input(sample_spectra):
     fragments_2 = CSRFragmentCollection(sample_spectra, bin_size=0.01)
 
     assert np.all(fragments_1.fragment_hashes == fragments_2.fragment_hashes)
+
+
+def test_slice_mz_preserves_global_bin_shape(fragments):
+    sliced = fragments.slice_mz(100.0, 150.0)
+
+    assert sliced.shape[0] == fragments.shape[0]
+    assert sliced.shape[1] == fragments.shape[1]
+
+
+def test_slice_mz_removes_peaks_outside_range(fragments):
+    sliced = fragments.slice_mz(100.0, 150.0)
+
+    # Spectrum 0 originally has peaks near 100, 110, 200 -> only first two should remain
+    mz0, int0 = sliced.get_row(0)
+    assert len(mz0) == 2
+    assert np.all((mz0 >= 100.0) & (mz0 < 150.01))
+    assert np.sum(int0) == pytest.approx(1.51, abs=1e-6)
+
+    # Spectrum 1 originally has peaks near 111, 180, 332 -> only first should remain
+    mz1, int1 = sliced.get_row(1)
+    assert len(mz1) == 1
+    assert np.all((mz1 >= 100.0) & (mz1 < 150.01))
+    assert np.sum(int1) == pytest.approx(0.52, abs=1e-6)
+
+    # Spectrum 2 originally has peaks near 111, 200, 200 -> only first should remain
+    mz2, int2 = sliced.get_row(2)
+    assert len(mz2) == 1
+    assert np.all((mz2 >= 100.0) & (mz2 < 150.01))
+    assert np.sum(int2) == pytest.approx(0.52, abs=1e-6)
+
+
+def test_slice_mz_lower_bound_only(fragments):
+    sliced = fragments.slice_mz(200.0, None)
+
+    mz0, int0 = sliced.get_row(0)
+    assert len(mz0) == 1
+    assert np.all(mz0 >= 200.0)
+    assert np.sum(int0) == pytest.approx(0.011, abs=1e-6)
+
+    mz1, int1 = sliced.get_row(1)
+    assert len(mz1) == 1
+    assert np.all(mz1 >= 200.0)
+    assert np.sum(int1) == pytest.approx(0.7, abs=1e-6)
+
+    mz2, int2 = sliced.get_row(2)
+    assert len(mz2) == 2
+    assert np.all(mz2 >= 200.0)
+    assert np.sum(int2) == pytest.approx(1.5, abs=1e-6)
+
+
+def test_getitem_tuple_mz_slice_preserves_global_bins(fragments):
+    sliced = fragments[:2, 100.0:150.0]
+
+    assert sliced.shape[0] == 2
+    assert sliced.shape[1] == fragments.shape[1]
+
+    mz0, int0 = sliced.get_row(0)
+    assert np.all((mz0 >= 100.0) & (mz0 < 150.01))
+    assert np.sum(int0) == pytest.approx(1.51, abs=1e-6)
+
+    mz1, int1 = sliced.get_row(1)
+    assert np.all((mz1 >= 100.0) & (mz1 < 150.01))
+    assert np.sum(int1) == pytest.approx(0.52, abs=1e-6)
+
+
+def test_to_peak_arrays_matches_get_row(fragments):
+    peak_rows = fragments.to_peak_arrays()
+
+    assert isinstance(peak_rows, list)
+    assert len(peak_rows) == len(fragments)
+
+    for i, (mz, intensities) in enumerate(peak_rows):
+        mz_row, int_row = fragments.get_row(i)
+        np.testing.assert_allclose(mz, mz_row)
+        np.testing.assert_allclose(intensities, int_row)
+
+
+def test_iter_peak_arrays_matches_to_peak_arrays(fragments):
+    peak_rows_from_list = fragments.to_peak_arrays()
+    peak_rows_from_iter = list(fragments.iter_peak_arrays())
+
+    assert len(peak_rows_from_iter) == len(peak_rows_from_list)
+
+    for (mz_a, int_a), (mz_b, int_b) in zip(peak_rows_from_iter, peak_rows_from_list):
+        np.testing.assert_allclose(mz_a, mz_b)
+        np.testing.assert_allclose(int_a, int_b)
+
+
+def test_to_peak_arrays_after_mz_slice_uses_absolute_mz_coordinates(fragments):
+    sliced = fragments.slice_mz(200.0, None)
+    peak_rows = sliced.to_peak_arrays()
+
+    mz0, _ = peak_rows[0]
+    mz1, _ = peak_rows[1]
+    mz2, _ = peak_rows[2]
+
+    assert np.all(mz0 >= 200.0)
+    assert np.all(mz1 >= 200.0)
+    assert np.all(mz2 >= 200.0)
+
+
+def test_slice_mz_empty_result_keeps_shape_and_returns_empty_rows(fragments):
+    sliced = fragments.slice_mz(1000.0, 1200.0)
+
+    assert sliced.shape[0] == fragments.shape[0]
+    assert sliced.shape[1] == fragments.shape[1]
+    assert np.all(sliced.count(axis=1) == 0)
+
+    for i in range(len(sliced)):
+        mz, intensities = sliced.get_row(i)
+        assert len(mz) == 0
+        assert len(intensities) == 0
