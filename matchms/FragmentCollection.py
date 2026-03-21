@@ -4,6 +4,7 @@ import numpy as np
 from scipy.sparse import coo_array, csr_array
 from matchms.Spectrum import Spectrum
 from .hashing import spectra_hashes
+from .typing import FragmentCollectionType
 
 
 class CSRFragmentCollection:
@@ -49,7 +50,7 @@ class CSRFragmentCollection:
         self._array = self._construct_from_spectra_list(spectra)
 
     @classmethod
-    def from_array(cls, array: csr_array, *, bin_size: float = 1e-6) -> "CSRFragmentCollection":
+    def from_array(cls, array: csr_array, *, bin_size: float = 1e-6) -> FragmentCollectionType:
         return cls(array=array, bin_size=bin_size)
 
     def _construct_from_spectra_list(self, spectra: list[Spectrum]) -> csr_array:
@@ -96,7 +97,7 @@ class CSRFragmentCollection:
             f"n_fragments={self._array.data.shape[0]}, bin_size={self.bin_size})"
         )
 
-    def copy(self) -> "CSRFragmentCollection":
+    def copy(self) -> FragmentCollectionType:
         return self.__class__.from_array(self._array.copy(), bin_size=self.bin_size)
 
     def mz_to_bin(self, mz: np.ndarray | float) -> np.ndarray:
@@ -130,16 +131,16 @@ class CSRFragmentCollection:
         """Return all rows as a list of `(mz, intensities)` tuples."""
         return list(self.iter_peak_arrays())
 
-    def take(self, indices: Iterable[int]) -> "CSRFragmentCollection":
+    def take(self, indices: Iterable[int]) -> FragmentCollectionType:
         """Return a new collection with selected rows in the given order."""
         indices = np.asarray(list(indices), dtype=self.index_dtype)
         return self.__class__.from_array(self._array[indices, :], bin_size=self.bin_size)
 
-    def reorder(self, indices: Iterable[int]) -> "CSRFragmentCollection":
+    def reorder(self, indices: Iterable[int]) -> FragmentCollectionType:
         """Alias for take()."""
         return self.take(indices)
 
-    def filter(self, mask: np.ndarray | list[bool]) -> "CSRFragmentCollection":
+    def filter(self, mask: np.ndarray | list[bool]) -> FragmentCollectionType:
         """Return a new collection keeping rows where mask is True."""
         mask = np.asarray(mask, dtype=bool)
         if mask.shape[0] != len(self):
@@ -148,18 +149,18 @@ class CSRFragmentCollection:
             )
         return self.take(np.where(mask)[0])
 
-    def drop(self, indices: Iterable[int]) -> "CSRFragmentCollection":
+    def drop(self, indices: Iterable[int]) -> FragmentCollectionType:
         """Return a new collection with selected rows removed."""
         indices = np.asarray(list(indices), dtype=self.index_dtype)
         all_indices = np.arange(len(self))
         keep_mask = ~np.isin(all_indices, indices)
         return self.take(all_indices[keep_mask])
 
-    def drop_empty(self) -> "CSRFragmentCollection":
+    def drop_empty(self) -> FragmentCollectionType:
         """Return a new collection without rows that have no peaks."""
         return self.filter(self.count(axis=1) > 0)
 
-    def slice_rows(self, rows) -> "CSRFragmentCollection":
+    def slice_rows(self, rows) -> FragmentCollectionType:
         """Return a row-sliced collection."""
         if isinstance(rows, slice):
             indices = np.arange(len(self))[rows]

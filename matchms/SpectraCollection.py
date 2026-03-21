@@ -6,6 +6,7 @@ import pandas as pd
 from matchms.Spectrum import Spectrum
 from .FragmentCollection import CSRFragmentCollection
 from .hashing import compute_combined_hashes
+from .typing import SpectraCollectionType
 
 
 class SpectraCollection:
@@ -44,7 +45,7 @@ class SpectraCollection:
         metadata: pd.DataFrame,
         fragments: CSRFragmentCollection,
         bin_size: float,
-    ) -> "SpectraCollection":
+    ) -> SpectraCollectionType:
         obj = cls.__new__(cls)
         obj.bin_size = bin_size
         obj._metadata = metadata.reset_index(drop=True)
