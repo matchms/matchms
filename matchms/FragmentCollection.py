@@ -121,6 +121,15 @@ class CSRFragmentCollection:
         mz = self.bin_to_mz(cols)
         return mz, intensities.copy()
 
+    def iter_peak_arrays(self):
+        """Yield rows as `(mz, intensities)` tuples."""
+        for i in range(len(self)):
+            yield self.get_row(i)
+
+    def to_peak_arrays(self) -> list[tuple[np.ndarray, np.ndarray]]:
+        """Return all rows as a list of `(mz, intensities)` tuples."""
+        return list(self.iter_peak_arrays())
+
     def take(self, indices: Iterable[int]) -> "CSRFragmentCollection":
         """Return a new collection with selected rows in the given order."""
         indices = np.asarray(list(indices), dtype=self.index_dtype)
@@ -165,17 +174,32 @@ class CSRFragmentCollection:
         raise TypeError("Unsupported row selector.")
 
     def slice_mz(self, mz_min: float | None = None, mz_max: float | None = None):
-        """Return a new collection restricted to an m/z window."""
+        """Return a new collection restricted to an m/z window.
+
+        Notes
+        -----
+        This keeps the global bin coordinate system unchanged.
+        Bins outside the requested m/z range are removed from the data, but the
+        matrix shape and column numbering remain unchanged.
+        """
         start_bin = 0 if mz_min is None else int(self.mz_to_bin(mz_min))
         stop_bin = self.n_bins if mz_max is None else int(self.mz_to_bin(mz_max)) + 1
 
-        start_bin = max(0, start_bin)
-        stop_bin = min(self.n_bins, stop_bin)
+        start_bin = max(0, min(self.n_bins, start_bin))
+        stop_bin = max(0, min(self.n_bins, stop_bin))
 
-        if stop_bin < start_bin:
+        if mz_min is not None and mz_max is not None and mz_max < mz_min:
             raise ValueError("mz_max must be >= mz_min.")
 
-        return self.__class__.from_array(self._array[:, start_bin:stop_bin], bin_size=self.bin_size)
+        coo = self._array.tocoo()
+        keep = (coo.col >= start_bin) & (coo.col < stop_bin)
+
+        new_array = coo_array(
+            (coo.data[keep], (coo.row[keep], coo.col[keep])),
+            shape=self._array.shape,
+        ).tocsr()
+
+        return self.__class__.from_array(new_array, bin_size=self.bin_size)
 
     def __getitem__(self, key):
         """Support row slicing and optional row/column slicing.
