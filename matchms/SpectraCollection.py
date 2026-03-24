@@ -42,10 +42,13 @@ class SpectraCollection:
     @classmethod
     def _from_metadata_and_fragments(
         cls,
-        metadata: pd.DataFrame,
-        fragments: CSRFragmentCollection,
+        metadata: pd.DataFrame | pd.Series,
+        fragments: FragmentCollection,
         bin_size: float,
     ) -> SpectraCollectionType:
+        if isinstance(metadata, pd.Series):
+            metadata = metadata.to_frame().T
+
         obj = cls.__new__(cls)
         obj.bin_size = bin_size
         obj._metadata = metadata.reset_index(drop=True)
@@ -472,7 +475,10 @@ class MetadataProxy(pd.DataFrame):
 
     @property
     def _constructor(self):
-        return MetadataProxy
+        def _c(*args, **kwargs):
+            return MetadataProxy(*args, collection=self._collection, **kwargs)
+
+        return _c
 
     def sort_values(self, by, inplace=False, **kwargs):
         result = self._collection.sort(by=by, inplace=inplace, **kwargs)
