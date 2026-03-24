@@ -1,5 +1,6 @@
+from abc import ABC, abstractmethod
 from functools import cached_property
-from typing import Generator, Iterable
+from typing import Generator, Iterable, Tuple
 import numpy as np
 from scipy.sparse import coo_array, csr_array
 from matchms.Spectrum import Spectrum
@@ -7,7 +8,54 @@ from .hashing import spectra_hashes
 from .typing import FragmentCollectionType
 
 
-class CSRFragmentCollection:
+class FragmentCollection(ABC):
+    @property
+    @abstractmethod
+    def shape(self) -> Tuple[int, int]:
+        """Return (n_spectra, n_bins)."""
+        pass
+
+    @abstractmethod
+    def __len__(self) -> int:
+        pass
+
+    @abstractmethod
+    def copy(self) -> 'FragmentCollection':
+        pass
+
+    @abstractmethod
+    def get_row(self, idx: int) -> Tuple[np.ndarray, np.ndarray]:
+        """Return (mz, intensities) for a single row."""
+        pass
+
+    @abstractmethod
+    def take(self, indices: Iterable[int]) -> 'FragmentCollection':
+        """Return new collection with selected rows."""
+        pass
+
+    @abstractmethod
+    def slice_mz(self, mz_min: float | None = None, mz_max: float | None = None) -> 'FragmentCollection':
+        """Return new collection with restricted m/z range."""
+        pass
+
+    @abstractmethod
+    def sum(self, axis: int = 1) -> np.ndarray:
+        pass
+
+    @abstractmethod
+    def count(self, axis: int = 1) -> np.ndarray:
+        pass
+
+    @abstractmethod
+    def mz_to_bin(self, mz: np.ndarray | float) -> np.ndarray:
+        pass
+
+    @abstractmethod
+    def bin_to_mz(self, bin_idx: np.ndarray | int) -> np.ndarray:
+        pass
+
+
+class CSRFragmentCollection(FragmentCollection):
     """CSR-backed fragment storage for a spectra dataset.
 
     Stores all fragments of a dataset in a binned sparse matrix:

@@ -4,7 +4,7 @@ from typing import Generator
 import numpy as np
 import pandas as pd
 from matchms.Spectrum import Spectrum
-from .FragmentCollection import CSRFragmentCollection
+from .FragmentCollection import CSRFragmentCollection, FragmentCollection
 from .hashing import compute_combined_hashes
 from .typing import SpectraCollectionType
 
@@ -69,8 +69,8 @@ class SpectraCollection:
         return MetadataProxy(self._metadata, self)
 
     @property
-    def fragments(self) -> FragmentsProxy:
-        return FragmentsProxy(self._fragments)
+    def fragments(self) -> FragmentCollection:
+        return self._fragments
 
     @property
     def shape(self):
@@ -477,42 +477,3 @@ class MetadataProxy(pd.DataFrame):
     def sort_values(self, by, inplace=False, **kwargs):
         result = self._collection.sort(by=by, inplace=inplace, **kwargs)
         return None if inplace else result.metadata
-
-
-class FragmentsProxy:
-    def __init__(self, csr_array):
-        self._array = csr_array
-
-    def sum(self, axis=1, **kwargs):
-        result = self._array.sum(axis=axis, **kwargs)
-        if axis == 1:
-            return result.A1 if hasattr(result, "A1") else np.asarray(result).flatten()
-        return result
-
-    def max(self, axis: int = 1, **kwargs):
-        return self._array.max(axis=axis, **kwargs)
-
-    def min(self, axis: int = 1, **kwargs):
-        return self._array.min(axis=axis, **kwargs)
-
-    def mean(self, axis: int = 1, **kwargs):
-        return self._array.mean(axis=axis, **kwargs)
-
-    def count(self, axis: int = 1):
-        if axis == 1:
-            return np.diff(self._array.indptr)
-
-        elif axis == 0:
-            return np.bincount(self._array.indices, minlength=self._array.shape[1])
-
-        else:
-            raise ValueError("axis must be 0 or 1")
-
-    def __getattr__(self, name):
-        return getattr(self._array, name)
-
-    def __getitem__(self, key):
-        return self._array[key]
-
-    def __repr__(self):
-        return self._array.__repr__()
