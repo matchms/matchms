@@ -37,9 +37,6 @@ from .ParentMassMatch import ParentMassMatch
 from .PrecursorMzMatch import PrecursorMzMatch
 
 
-LinearCosine = CosineLinear
-
-
 __all__ = [
     "BinnedEmbeddingSimilarity",
     "BlinkCosine",
@@ -49,7 +46,6 @@ __all__ = [
     "FingerprintSimilarity",
     "FlashSimilarity",
     "IntersectMz",
-    "LinearCosine",
     "MetadataMatch",
     "ModifiedCosineGreedy",
     "ModifiedCosineHungarian",
@@ -77,7 +73,6 @@ def get_similarity_function_by_name(similarity_function_name: str):
         "FingerprintSimilarity": FingerprintSimilarity,
         "FlashSimilarity": FlashSimilarity,
         "IntersectMz": IntersectMz,
-        "LinearCosine": CosineLinear,
         "MetadataMatch": MetadataMatch,
         "ModifiedCosineGreedy": ModifiedCosineGreedy,
         "ModifiedCosineHungarian": ModifiedCosineHungarian,

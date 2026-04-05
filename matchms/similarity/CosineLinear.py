@@ -144,6 +144,3 @@ class CosineLinear(BaseSimilarity):
             scores_array.add_sparse_data(idx_row, idx_col, scores_data, "")
             return scores_array
         raise ValueError("array_type must be 'numpy' or 'sparse'.")
-
-
-LinearCosine = CosineLinear

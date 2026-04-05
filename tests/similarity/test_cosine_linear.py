@@ -1,10 +1,8 @@
-import importlib
 import json
 import os
 import numpy as np
 import pytest
-import matchms.similarity
-from matchms.similarity import CosineHungarian, CosineLinear, LinearCosine, get_similarity_function_by_name
+from matchms.similarity import CosineHungarian, CosineLinear, get_similarity_function_by_name
 from matchms.similarity.cosine_linear_functions import (
     linear_cosine_score,
     sirius_merge_close_peaks,
@@ -219,28 +217,10 @@ def test_empty_spectrum():
     """Pairing an empty spectrum with a non-empty one gives score=0, matches=0."""
     empty = _build_spectrum([], [])
     nonempty = _build_spectrum([100.0, 200.0], [0.5, 0.5])
-    lc = LinearCosine(tolerance=0.1)
+    lc = CosineLinear(tolerance=0.1)
     result = lc.pair(empty, nonempty)
     assert result["score"] == 0.0
     assert result["matches"] == 0
-
-
-def test_linear_cosine_legacy_exports_remain_available():
-    """The old public name should keep working during the rename transition."""
-    assert LinearCosine is CosineLinear
-    assert "LinearCosine" in matchms.similarity.__all__
-    assert get_similarity_function_by_name("LinearCosine") is CosineLinear
-
-
-def test_linear_cosine_legacy_module_imports_remain_available():
-    """Old module paths should resolve to the canonical implementation."""
-    legacy_module = importlib.import_module("matchms.similarity.LinearCosine")
-    legacy_functions = importlib.import_module("matchms.similarity.linear_cosine_functions")
-
-    assert legacy_module.CosineLinear is CosineLinear
-    assert legacy_module.LinearCosine is CosineLinear
-    assert legacy_functions.linear_cosine_score is linear_cosine_score
-    assert legacy_functions.sirius_merge_close_peaks is sirius_merge_close_peaks
 
 
 def test_merge_close_peaks_equal_intensity_prefers_lower_mz():
@@ -380,14 +360,8 @@ def test_matrix_matches_pair():
 
 
 def test_get_similarity_by_name():
-    """Both canonical and legacy names should resolve to CosineLinear."""
+    """The canonical name should resolve to CosineLinear."""
     assert get_similarity_function_by_name("CosineLinear") is CosineLinear
-    assert get_similarity_function_by_name("LinearCosine") is CosineLinear
-
-
-def test_legacy_alias_points_to_cosine_linear():
-    """Compatibility alias should stay available for existing imports."""
-    assert LinearCosine is CosineLinear
 
 
 def test_to_dict_round_trip():
