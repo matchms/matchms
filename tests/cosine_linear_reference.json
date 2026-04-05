@@ -1,5 +1,5 @@
 {
-  "description": "LinearCosine scores after SiriusMerge preprocessing. Ground truth for matchms Python implementation.",
+  "description": "CosineLinear scores after SiriusMerge preprocessing. Ground truth for matchms Python implementation.",
   "parameter_sets": [
     {
       "intensity_power": 1.0,

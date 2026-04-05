@@ -4,13 +4,13 @@ from sparsestack import StackedSparseArray  # type: ignore[import-untyped]
 from tqdm import tqdm  # type: ignore[import-untyped]
 from matchms.typing import SpectrumType
 from .BaseSimilarity import BaseSimilarity
-from .linear_cosine_functions import linear_cosine_score, sirius_merge_close_peaks
+from .cosine_linear_functions import linear_cosine_score, sirius_merge_close_peaks
 
 
-class LinearCosine(BaseSimilarity):
+class CosineLinear(BaseSimilarity):
     """Calculate 'linear cosine similarity score' between two spectra.
 
-    This implements the LinearCosine similarity from SIRIUS (BOECKER lab), which
+    This implements the CosineLinear similarity from SIRIUS (BOECKER lab), which
     achieves O(n+m) time complexity by requiring spectra to be "well-separated"
     (consecutive peaks more than 2x tolerance apart). A preprocessing step
     (sirius_merge_close_peaks) enforces this invariant by greedily merging close
@@ -22,23 +22,23 @@ class LinearCosine(BaseSimilarity):
 
         import numpy as np
         from matchms import Spectrum
-        from matchms.similarity import LinearCosine
+        from matchms.similarity import CosineLinear
 
         reference = Spectrum(mz=np.array([100, 150, 200.]),
                              intensities=np.array([0.7, 0.2, 0.1]))
         query = Spectrum(mz=np.array([100, 140, 190.]),
                          intensities=np.array([0.4, 0.2, 0.1]))
 
-        linear_cosine = LinearCosine(tolerance=0.2)
-        score = linear_cosine.pair(reference, query)
+        cosine_linear = CosineLinear(tolerance=0.2)
+        score = cosine_linear.pair(reference, query)
 
-        print(f"LinearCosine score is {score['score']:.2f} with {score['matches']} matched peaks")
+        print(f"CosineLinear score is {score['score']:.2f} with {score['matches']} matched peaks")
 
     Should output
 
     .. testoutput::
 
-        LinearCosine score is 0.83 with 1 matched peaks
+        CosineLinear score is 0.83 with 1 matched peaks
 
     """
 
@@ -144,3 +144,6 @@ class LinearCosine(BaseSimilarity):
             scores_array.add_sparse_data(idx_row, idx_col, scores_data, "")
             return scores_array
         raise ValueError("array_type must be 'numpy' or 'sparse'.")
+
+
+LinearCosine = CosineLinear

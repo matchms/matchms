@@ -2,15 +2,15 @@ import json
 import os
 import numpy as np
 import pytest
-from matchms.similarity import CosineHungarian, LinearCosine, get_similarity_function_by_name
-from matchms.similarity.linear_cosine_functions import (
+from matchms.similarity import CosineHungarian, CosineLinear, LinearCosine, get_similarity_function_by_name
+from matchms.similarity.cosine_linear_functions import (
     linear_cosine_score,
     sirius_merge_close_peaks,
 )
 from ..builder_Spectrum import SpectrumBuilder
 
 
-REFERENCE_PATH = os.path.join(os.path.dirname(__file__), "..", "linear_cosine_reference.json")
+REFERENCE_PATH = os.path.join(os.path.dirname(__file__), "..", "cosine_linear_reference.json")
 
 with open(REFERENCE_PATH, encoding="utf-8") as f:
     REFERENCE_DATA = json.load(f)
@@ -80,7 +80,7 @@ _SCORE_PARAMS, _SCORE_IDS = _all_score_params()
 
 @pytest.mark.parametrize("param_idx,left,right,expected_score,expected_matches", _SCORE_PARAMS, ids=_SCORE_IDS)
 def test_pairwise_scores(param_idx, left, right, expected_score, expected_matches):
-    """Verify pairwise LinearCosine scores match the reference."""
+    """Verify pairwise CosineLinear scores match the reference."""
     ps = REFERENCE_DATA["parameter_sets"][param_idx]
     tolerance = ps["mz_tolerance"]
     mz_power = ps["mz_power"]
@@ -101,7 +101,7 @@ def test_pairwise_scores(param_idx, left, right, expected_score, expected_matche
         .build()
     )
 
-    linear_cosine = LinearCosine(tolerance=tolerance, mz_power=mz_power, intensity_power=intensity_power)
+    linear_cosine = CosineLinear(tolerance=tolerance, mz_power=mz_power, intensity_power=intensity_power)
     result = linear_cosine.pair(spec_left, spec_right)
 
     assert result["matches"] == expected_matches, f"Expected {expected_matches} matches, got {result['matches']}"
@@ -118,7 +118,7 @@ def test_commutativity(param_idx):
     mz_power = ps["mz_power"]
     intensity_power = ps["intensity_power"]
 
-    linear_cosine = LinearCosine(tolerance=tolerance, mz_power=mz_power, intensity_power=intensity_power)
+    linear_cosine = CosineLinear(tolerance=tolerance, mz_power=mz_power, intensity_power=intensity_power)
     builder = SpectrumBuilder()
     spectra = {}
     for name in COMPOUND_NAMES:
@@ -156,8 +156,8 @@ _HUNGARIAN_PARAMS, _HUNGARIAN_IDS = _all_hungarian_params()
 
 
 @pytest.mark.parametrize("param_idx,left,right", _HUNGARIAN_PARAMS, ids=_HUNGARIAN_IDS)
-def test_hungarian_matches_linear_cosine_on_merged_spectra(param_idx, left, right):
-    """On well-separated (merged) spectra, CosineHungarian must match LinearCosine exactly.
+def test_hungarian_matches_cosine_linear_on_merged_spectra(param_idx, left, right):
+    """On well-separated (merged) spectra, CosineHungarian must match CosineLinear exactly.
 
     After sirius_merge_close_peaks, consecutive m/z gaps exceed 2*tolerance, so each
     peak can match at most one peak in the other spectrum. The optimal Hungarian
@@ -185,16 +185,16 @@ def test_hungarian_matches_linear_cosine_on_merged_spectra(param_idx, left, righ
     )
 
     hungarian = CosineHungarian(tolerance=tolerance, mz_power=mz_power, intensity_power=intensity_power)
-    linear = LinearCosine(tolerance=tolerance, mz_power=mz_power, intensity_power=intensity_power)
+    linear = CosineLinear(tolerance=tolerance, mz_power=mz_power, intensity_power=intensity_power)
 
     result_hungarian = hungarian.pair(spec_left, spec_right)
     result_linear = linear.pair(spec_left, spec_right)
 
     assert result_hungarian["matches"] == result_linear["matches"], (
-        f"Match count differs: Hungarian={result_hungarian['matches']}, LinearCosine={result_linear['matches']}"
+        f"Match count differs: Hungarian={result_hungarian['matches']}, CosineLinear={result_linear['matches']}"
     )
     assert result_hungarian["score"] == pytest.approx(result_linear["score"], abs=1e-9), (
-        f"Score differs: Hungarian={result_hungarian['score']}, LinearCosine={result_linear['score']}"
+        f"Score differs: Hungarian={result_hungarian['score']}, CosineLinear={result_linear['score']}"
     )
 
 
@@ -223,11 +223,21 @@ def test_empty_spectrum():
     assert result["matches"] == 0
 
 
+def test_merge_close_peaks_equal_intensity_prefers_lower_mz():
+    """Equal-intensity merge ties should deterministically keep the lower m/z."""
+    raw = np.array([[100.0, 1.0], [100.15, 1.0], [100.30, 1.0]], dtype=np.float64)
+
+    merged = sirius_merge_close_peaks(raw, 0.1)
+    expected = np.array([[100.0, 2.0], [100.30, 1.0]], dtype=np.float64)
+
+    np.testing.assert_allclose(merged, expected, atol=1e-12)
+
+
 def test_single_peak_match():
     """Two single-peak spectra within tolerance match perfectly."""
     a = _build_spectrum([100.0], [1.0])
     b = _build_spectrum([100.05], [1.0])
-    lc = LinearCosine(tolerance=0.1)
+    lc = CosineLinear(tolerance=0.1)
     result = lc.pair(a, b)
     assert result["score"] == pytest.approx(1.0, abs=1e-9)
     assert result["matches"] == 1
@@ -237,7 +247,7 @@ def test_single_peak_no_match():
     """Two single-peak spectra outside tolerance don't match."""
     a = _build_spectrum([100.0], [1.0])
     b = _build_spectrum([200.0], [1.0])
-    lc = LinearCosine(tolerance=0.1)
+    lc = CosineLinear(tolerance=0.1)
     result = lc.pair(a, b)
     assert result["score"] == 0.0
     assert result["matches"] == 0
@@ -247,7 +257,7 @@ def test_no_overlap():
     """Multi-peak spectra with no overlapping m/z give score=0."""
     a = _build_spectrum([100.0, 200.0, 300.0], [0.5, 0.3, 0.2])
     b = _build_spectrum([400.0, 500.0, 600.0], [0.5, 0.3, 0.2])
-    lc = LinearCosine(tolerance=0.1)
+    lc = CosineLinear(tolerance=0.1)
     result = lc.pair(a, b)
     assert result["score"] == 0.0
     assert result["matches"] == 0
@@ -256,7 +266,7 @@ def test_no_overlap():
 def test_self_similarity():
     """A spectrum compared to itself should yield score=1.0."""
     spec = _build_spectrum([100.0, 200.0, 300.0], [0.7, 0.2, 0.1])
-    lc = LinearCosine(tolerance=0.1)
+    lc = CosineLinear(tolerance=0.1)
     result = lc.pair(spec, spec)
     assert result["score"] == pytest.approx(1.0, abs=1e-9)
 
@@ -265,7 +275,7 @@ def test_all_zero_intensities():
     """All-zero intensities produce score=0.0, matches=0."""
     a = _build_spectrum([100.0, 200.0], [0.0, 0.0])
     b = _build_spectrum([100.0, 200.0], [0.0, 0.0])
-    lc = LinearCosine(tolerance=0.1)
+    lc = CosineLinear(tolerance=0.1)
     result = lc.pair(a, b)
     assert result["score"] == 0.0
     assert result["matches"] == 0
@@ -276,7 +286,7 @@ def test_all_zero_intensities():
 # ---------------------------------------------------------------------------
 
 
-def test_linear_cosine_score_direct():
+def test_cosine_linear_score_direct():
     """Hand-crafted well-separated spectra with analytically derivable score.
 
     spec1: peaks at m/z 100 (intensity 0.6), 200 (intensity 0.8)
@@ -296,7 +306,7 @@ def test_linear_cosine_score_direct():
     assert matches == 2
 
 
-def test_linear_cosine_score_partial_match():
+def test_cosine_linear_score_partial_match():
     """Only one of two peaks matches; verify score analytically.
 
     spec1: m/z 100 (int 0.6), m/z 200 (int 0.8)
@@ -328,7 +338,7 @@ def test_matrix_self_similarity():
         _build_spectrum([150.0, 250.0], [0.5, 0.5]),
         _build_spectrum([100.0, 300.0], [0.9, 0.1]),
     ]
-    lc = LinearCosine(tolerance=0.1)
+    lc = CosineLinear(tolerance=0.1)
     result = lc.matrix(spectra, spectra, is_symmetric=True, progress_bar=False)
     for i in range(len(spectra)):
         assert result[i, i]["score"] == pytest.approx(1.0, abs=1e-9)
@@ -340,7 +350,7 @@ def test_matrix_matches_pair():
         _build_spectrum([100.0, 200.0], [0.7, 0.3]),
         _build_spectrum([100.0, 250.0], [0.5, 0.5]),
     ]
-    lc = LinearCosine(tolerance=0.1)
+    lc = CosineLinear(tolerance=0.1)
     mat = lc.matrix(spectra, spectra, is_symmetric=False, progress_bar=False)
     for i in range(2):
         for j in range(2):
@@ -350,16 +360,21 @@ def test_matrix_matches_pair():
 
 
 def test_get_similarity_by_name():
-    """get_similarity_function_by_name returns LinearCosine class."""
-    cls = get_similarity_function_by_name("LinearCosine")
-    assert cls is LinearCosine
+    """Both canonical and legacy names should resolve to CosineLinear."""
+    assert get_similarity_function_by_name("CosineLinear") is CosineLinear
+    assert get_similarity_function_by_name("LinearCosine") is CosineLinear
+
+
+def test_legacy_alias_points_to_cosine_linear():
+    """Compatibility alias should stay available for existing imports."""
+    assert LinearCosine is CosineLinear
 
 
 def test_to_dict_round_trip():
     """to_dict() keys match constructor params."""
-    lc = LinearCosine(tolerance=0.2, mz_power=1.0, intensity_power=0.5)
+    lc = CosineLinear(tolerance=0.2, mz_power=1.0, intensity_power=0.5)
     d = lc.to_dict()
-    assert d["__Similarity__"] == "LinearCosine"
+    assert d["__Similarity__"] == "CosineLinear"
     assert d["tolerance"] == 0.2
     assert d["mz_power"] == 1.0
     assert d["intensity_power"] == 0.5

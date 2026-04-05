@@ -3,13 +3,48 @@ from numba import njit  # type: ignore[attr-defined, import-untyped]
 
 
 @njit(cache=True)
+def _sorted_peak_order(spec):
+    """Return intensity-sorted indices with deterministic tie-breaking.
+
+    Peaks are primarily sorted by ascending intensity. Equal-intensity peaks are
+    reordered by descending original index, so reverse iteration visits the
+    lower-m/z peak first because input spectra are already sorted by m/z.
+    """
+    order = np.argsort(spec[:, 1])
+    start = 0
+    n = order.shape[0]
+
+    while start < n:
+        end = start + 1
+        intensity = spec[order[start], 1]
+        while end < n and spec[order[end], 1] == intensity:
+            end += 1
+
+        for left in range(start, end):
+            max_pos = left
+            for right in range(left + 1, end):
+                if order[right] > order[max_pos]:
+                    max_pos = right
+            if max_pos != left:
+                tmp = order[left]
+                order[left] = order[max_pos]
+                order[max_pos] = tmp
+
+        start = end
+
+    return order
+
+
+@njit(cache=True)
 def sirius_merge_close_peaks(spec, mz_tolerance):
     """Merge close peaks following the Sirius/BOECKER lab algorithm.
 
     Peaks are merged greedily in descending intensity order. Each unconsumed peak
     adopts its own m/z and sums the intensities of all unconsumed neighbors within
     a merge window of 2 * mz_tolerance. The result is guaranteed to have consecutive
-    m/z gaps > 2 * mz_tolerance.
+    m/z gaps > 2 * mz_tolerance. When multiple peaks share the same intensity,
+    the lower-m/z peak is processed first so the representative peak stays
+    deterministic across NumPy and Numba sort implementations.
 
     Parameters
     ----------
@@ -29,8 +64,8 @@ def sirius_merge_close_peaks(spec, mz_tolerance):
 
     merge_window = 2.0 * mz_tolerance
 
-    # Sort indices by ascending intensity and iterate in reverse (descending)
-    order = np.argsort(spec[:, 1])
+    # Sort indices by ascending intensity and iterate in reverse (descending).
+    order = _sorted_peak_order(spec)
 
     consumed = np.zeros(n, dtype=np.bool_)
     merged_mz = np.empty(n, dtype=np.float64)
@@ -85,7 +120,7 @@ def sirius_merge_close_peaks(spec, mz_tolerance):
 
 @njit(cache=True)
 def linear_cosine_score(spec1, spec2, tolerance, mz_power, intensity_power):
-    """Compute the LinearCosine similarity between two well-separated spectra.
+    """Compute the CosineLinear similarity between two well-separated spectra.
 
     Both spectra must have consecutive m/z gaps > 2 * tolerance (as ensured by
     sirius_merge_close_peaks). Uses an O(n+m) two-pointer sweep.
