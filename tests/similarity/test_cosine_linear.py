@@ -1,7 +1,9 @@
+import importlib
 import json
 import os
 import numpy as np
 import pytest
+import matchms.similarity
 from matchms.similarity import CosineHungarian, CosineLinear, LinearCosine, get_similarity_function_by_name
 from matchms.similarity.cosine_linear_functions import (
     linear_cosine_score,
@@ -221,6 +223,24 @@ def test_empty_spectrum():
     result = lc.pair(empty, nonempty)
     assert result["score"] == 0.0
     assert result["matches"] == 0
+
+
+def test_linear_cosine_legacy_exports_remain_available():
+    """The old public name should keep working during the rename transition."""
+    assert LinearCosine is CosineLinear
+    assert "LinearCosine" in matchms.similarity.__all__
+    assert get_similarity_function_by_name("LinearCosine") is CosineLinear
+
+
+def test_linear_cosine_legacy_module_imports_remain_available():
+    """Old module paths should resolve to the canonical implementation."""
+    legacy_module = importlib.import_module("matchms.similarity.LinearCosine")
+    legacy_functions = importlib.import_module("matchms.similarity.linear_cosine_functions")
+
+    assert legacy_module.CosineLinear is CosineLinear
+    assert legacy_module.LinearCosine is CosineLinear
+    assert legacy_functions.linear_cosine_score is linear_cosine_score
+    assert legacy_functions.sirius_merge_close_peaks is sirius_merge_close_peaks
 
 
 def test_merge_close_peaks_equal_intensity_prefers_lower_mz():

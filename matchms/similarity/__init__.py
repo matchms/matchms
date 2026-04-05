@@ -23,9 +23,9 @@ It is also easily possible to add own custom similarity measures or import exter
 
 from .BinnedEmbeddingSimilarity import BinnedEmbeddingSimilarity
 from .BlinkCosine import BlinkCosine
-from .CosineLinear import CosineLinear, LinearCosine
 from .CosineGreedy import CosineGreedy
 from .CosineHungarian import CosineHungarian
+from .CosineLinear import CosineLinear
 from .FingerprintSimilarity import FingerprintSimilarity
 from .FlashSimilarity import FlashSimilarity
 from .IntersectMz import IntersectMz
@@ -37,17 +37,21 @@ from .ParentMassMatch import ParentMassMatch
 from .PrecursorMzMatch import PrecursorMzMatch
 
 
+LinearCosine = CosineLinear
+
+
 __all__ = [
     "BinnedEmbeddingSimilarity",
     "BlinkCosine",
-    "CosineLinear",
-    "ModifiedCosineGreedy",
     "CosineGreedy",
     "CosineHungarian",
+    "CosineLinear",
     "FingerprintSimilarity",
     "FlashSimilarity",
     "IntersectMz",
+    "LinearCosine",
     "MetadataMatch",
+    "ModifiedCosineGreedy",
     "ModifiedCosineHungarian",
     "NeutralLossesCosine",
     "ParentMassMatch",
