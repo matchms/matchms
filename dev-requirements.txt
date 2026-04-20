@@ -71,7 +71,7 @@ pubchempy==1.0.5 ; python_version >= "3.10" and python_version < "3.14"
 pycparser==3.0 ; python_version >= "3.10" and python_version < "3.14" and (sys_platform == "linux" or sys_platform == "darwin") and implementation_name != "PyPy" and (platform_python_implementation != "PyPy" or sys_platform == "darwin")
 pydantic-core==2.41.5 ; python_version >= "3.10" and python_version < "3.14"
 pydantic==2.12.5 ; python_version >= "3.10" and python_version < "3.14"
-pygments==2.19.2 ; python_version >= "3.10" and python_version < "3.14"
+pygments==2.20.0 ; python_version >= "3.10" and python_version < "3.14"
 pynndescent==0.6.0 ; python_version >= "3.10" and python_version < "3.14"
 pyparsing==3.3.2 ; python_version >= "3.10" and python_version < "3.14"
 pyproject-hooks==1.2.0 ; python_version >= "3.10" and python_version < "3.14"
