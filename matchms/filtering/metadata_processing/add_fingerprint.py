@@ -1,6 +1,7 @@
 import logging
 from typing import Optional
 import numpy as np
+from deprecated import deprecated
 from rdkit import Chem
 from rdkit.Chem import AllChem
 from rdkit.Chem.rdchem import Mol
@@ -10,6 +11,10 @@ from matchms.typing import SpectrumType
 logger = logging.getLogger("matchms")
 
 
+@deprecated(
+    version='1.0.0',
+    reason="Fingerprints will no longer be added to spectra. Use the Fingerprints class instead"
+    )
 def add_fingerprint(
     spectrum_in: Optional[SpectrumType],
     fingerprint_type: str = "daylight",

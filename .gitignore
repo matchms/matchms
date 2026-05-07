@@ -9,6 +9,8 @@ dist
 .cache
 __pycache__
 
+prototyping/
+
 htmlcov
 .coverage
 coverage.xml
