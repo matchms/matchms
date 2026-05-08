@@ -103,7 +103,7 @@ class SpectraCollection:
 
     @property
     def metadata(self) -> pd.DataFrame:
-        return MetadataProxy(self._metadata, self)
+        return MetadataTable(self._metadata, self)
 
     @property
     def fragments(self) -> FragmentCollection:
@@ -507,7 +507,7 @@ class SpectraCollection:
         return stats
 
 
-class MetadataProxy(pd.DataFrame):
+class MetadataTable(pd.DataFrame):
     """
     Metadata proxy class.
     Used for filter directly on metadata and synchronize fragments.
@@ -522,7 +522,7 @@ class MetadataProxy(pd.DataFrame):
     @property
     def _constructor(self):
         def _c(*args, **kwargs):
-            return MetadataProxy(*args, collection=self._collection, **kwargs)
+            return MetadataTable(*args, collection=self._collection, **kwargs)
 
         return _c
 
