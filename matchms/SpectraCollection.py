@@ -211,7 +211,11 @@ class SpectraCollection:
 
             self._metadata = self._metadata.drop(columns=overlap)
 
-        self._metadata = pd.concat([self._metadata, new_metadata], axis=1)
+        new_metadata = new_metadata.reset_index(drop=True)
+        self._metadata = pd.concat(
+            [self._metadata.reset_index(drop=True), new_metadata],
+            axis=1,
+        )
         self._clear_cache(["metadata_hashes"])
 
     def _reorder(self, indices: np.ndarray):

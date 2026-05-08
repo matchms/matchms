@@ -380,3 +380,16 @@ def test_collection_dimension_properties(collection):
 
     # number of bins
     assert collection.n_bins == collection.fragments.shape[1]
+
+
+def test_add_metadata_aligns_by_position_not_index(collection):
+    new_metadata = pd.DataFrame(
+        {"quality_score": [0.95, 0.88, 0.99]},
+        index=[10, 20, 30],
+    )
+
+    collection.add_metadata(new_metadata)
+
+    assert collection.metadata["quality_score"].tolist() == [0.95, 0.88, 0.99]
+    assert not collection.metadata["quality_score"].isna().any()
+    assert collection.metadata["compound_name"].tolist() == ["A", "B", "C"]
