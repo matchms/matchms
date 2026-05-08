@@ -76,8 +76,16 @@ class SpectraCollection:
         return self._fragments
 
     @property
-    def shape(self):
-        return self._fragments.shape[0], self._metadata.shape[1]
+    def n_spectra(self):
+        return self._fragments.shape[0]
+    
+    @property
+    def n_metadata_columns(self):
+        return self._metadata.shape[1]
+
+    @property
+    def n_peaks(self):
+        return self._fragments.shape[1]
 
     def _normalize_row_selection(self, idx):
         """Normalize row selection to integer indices or a scalar int."""
