@@ -280,6 +280,23 @@ class Spectrum:
         self._peaks = value
 
     @property
+    def fragments(self) -> Fragments:
+        """Return the spectrum fragments.
+
+        Alias for :attr:`peaks`.
+
+        Notes
+        -----
+        ``peaks`` is the historic matchms name and remains fully supported.
+        ``fragments`` is provided for naming consistency with ``SpectraCollection``.
+        """
+        return self.peaks
+
+    @fragments.setter
+    def fragments(self, value: Fragments):
+        self.peaks = value
+
+    @property
     def peak_comments(self):
         return self.get("peak_comments")
 
