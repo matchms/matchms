@@ -372,3 +372,11 @@ def test_iteration_after_2d_slice_returns_spectrum_objects(collection):
     assert len(spectra) == 3
     assert all(isinstance(s, Spectrum) for s in spectra)
     assert all(np.all((s.mz >= 100.0) & (s.mz < 150.1)) or len(s.mz) == 0 for s in spectra)
+
+
+def test_collection_dimension_properties(collection):
+    assert collection.n_spectra == 3
+    assert collection.n_metadata_columns == 4
+
+    # number of bins
+    assert collection.n_bins == collection.fragments.shape[1]

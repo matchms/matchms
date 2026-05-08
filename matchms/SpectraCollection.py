@@ -84,7 +84,7 @@ class SpectraCollection:
         return self._metadata.shape[1]
 
     @property
-    def n_peaks(self):
+    def n_bins(self):
         return self._fragments.shape[1]
 
     def _normalize_row_selection(self, idx):
