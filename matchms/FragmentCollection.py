@@ -56,17 +56,35 @@ class FragmentCollection(ABC):
 
 
 class CSRFragmentCollection(FragmentCollection):
-    """CSR-backed fragment storage for a spectra dataset.
+    """CSR-backed, binned fragment storage for a spectra dataset.
 
-    Stores all fragments of a dataset in a binned sparse matrix:
+    Stores all fragments of a dataset in a sparse matrix using CSR format:
+
     - rows correspond to spectra
-    - columns correspond to m/z bins
-    - values correspond to intensities
+    - columns correspond to discrete m/z bins
+    - values correspond to peak intensities
+
+    The m/z values of input peaks are converted to integer bin indices using
+    :meth:`mz_to_bin`. This means that the original m/z values are not stored
+    directly. When spectra are reconstructed, m/z values are returned as bin
+    centers via :meth:`bin_to_mz`.
 
     Notes
     -----
-    This is a binned representation. Reconstructed m/z values are returned as
-    bin centers via :meth:`bin_to_mz`.
+    This is a binned representation and is therefore not necessarily lossless.
+    If multiple peaks from the same spectrum fall into the same m/z bin, they are
+    stored at the same sparse matrix coordinate. During sparse matrix construction,
+    such duplicate coordinates are combined by summing their intensities.
+
+    For example, two peaks in one spectrum that map to the same m/z bin will be
+    represented as a single peak with the summed intensity when the row is
+    reconstructed.
+
+    The choice of ``bin_size`` therefore controls both mass precision and the
+    likelihood of peak merging. Smaller bin sizes preserve m/z differences more
+    closely but may create very large sparse matrix dimensions. Larger bin sizes
+    reduce the number of bins but increase the chance that neighboring peaks are
+    merged.
     """
 
     def __init__(

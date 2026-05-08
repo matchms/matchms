@@ -12,15 +12,49 @@ from .typing import SpectraCollectionType
 class SpectraCollection:
     """Central collection object for matchms spectra datasets.
 
+    A ``SpectraCollection`` stores many spectra in a synchronized, table-like
+    representation. It separates spectrum-level metadata from peak data while
+    preserving a shared row order between both components.
+
     This class synchronizes:
-    - metadata stored as a pandas DataFrame
-    - fragments stored in a fragment backend (currently CSRFragmentCollection)
+
+    - metadata, tabular data kept internally as pandas ``DataFrame``
+    - fragments, stored in a fragment backend, currently ``CSRFragmentCollection``
+
+    Rows correspond to spectra. Metadata row ``i`` and fragment row ``i`` always
+    describe the same spectrum. Operations such as slicing, filtering, sorting,
+    dropping, and deduplication are applied to both metadata and fragments so that
+    this alignment is preserved.
+
+    Compared with a plain ``list[Spectrum]``, this representation is intended to
+    support efficient collection-level operations, including metadata-based
+    filtering, fragment-based filtering, m/z range slicing, sorting, hashing, and
+    summary statistics.
+
+    Individual rows can still be accessed as regular ``Spectrum`` objects. These
+    objects are reconstructed from the stored metadata row and the corresponding
+    fragment row.
 
     Notes
     -----
-    - Rows correspond to spectra.
-    - ``metadata`` and ``fragments`` always have matching row order and length.
-    - Row access returns reconstructed ``Spectrum`` objects.
+    The fragment backend may use an internal representation that differs from the
+    original input spectra. In particular, the default CSR backend stores fragments
+    as a binned sparse matrix. Reconstructed spectra therefore contain m/z values
+    derived from the backend representation, for example bin centers, rather than
+    necessarily the exact original input m/z values.
+
+    The central invariant of this class is:
+
+    ``len(metadata) == len(fragments) == n_spectra``
+
+    and for every row index ``i``:
+
+    ``metadata.iloc[i]`` corresponds to ``fragments.get_row(i)``.
+
+    Direct modifications of internal metadata or fragment storage should be avoided.
+    Use collection-level methods such as ``filter``, ``sort``, ``drop``, and
+    ``add_metadata`` to preserve row alignment and invalidate cached values
+    correctly.
     """
     def __init__(
         self,
