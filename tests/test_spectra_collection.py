@@ -185,12 +185,12 @@ def test_drop_inplace(collection):
     assert collection.metadata["compound_name"].tolist() == ["A", "C"]
 
 
-def test_dropna(sample_spectra):
+def test_drop_empty_spectra(sample_spectra):
     empty_spec = Spectrum(mz=np.array([]), intensities=np.array([]), metadata={"name": "empty"})
     col = SpectraCollection(sample_spectra + [empty_spec], bin_size=1.0)
 
     assert len(col) == 4
-    clean_col = col.dropna()
+    clean_col = col.drop_empty_spectra()
     assert len(clean_col) == 3
 
 

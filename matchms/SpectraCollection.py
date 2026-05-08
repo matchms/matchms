@@ -344,7 +344,7 @@ class SpectraCollection:
 
         return None if inplace else target
 
-    def dropna(self, inplace: bool = False):
+    def drop_empty_spectra(self, inplace: bool = False):
         """
         Removes spectra without peaks.
 
