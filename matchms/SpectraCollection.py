@@ -160,7 +160,7 @@ class SpectraCollection:
     def __str__(self):
         return self.__repr__()
 
-    @property
+    @cached_property
     def spectra_hashes(self):
         return compute_combined_hashes(self.fragment_hashes, self.metadata_hashes)
 
