@@ -355,6 +355,17 @@ def _mc_flash(tolerance, intensity_power=1.0):
             0.01,
             id="near_tolerance_boundary",
         ),
+        # 6) Edge case: mass shift is inside the tolerance, so no shifted matches should be considered at all.
+        pytest.param(
+            [100.0],
+            [1.0],
+            500.009,
+            [99.985, 100.0],
+            [1.0, 0.1],
+            500.0,
+            0.01,
+            id="inside_tolerance_shift",
+        ),
     ],
 )
 def test_flash_hybrid_cosine_matches_modified_cosine_greedy(mz_a, int_a, pmz_a, mz_b, int_b, pmz_b, tol):
