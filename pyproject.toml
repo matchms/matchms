@@ -57,6 +57,7 @@ dev = [
   "pre-commit>=4.5.1",
   "pytest>=9.0.2",
   "pytest-cov>=7.0.0",
+  "pytest-benchmark>=5.1.0",
   "ruff>=0.14.13",
   "testfixtures>=8.3.0,<9",
   "twine>=6.2.0",
@@ -132,6 +133,7 @@ section-order = [
 "tests/**" = ["D"]
 
 [tool.pytest.ini_options]
+addopts = "--benchmark-disable"
 testpaths = [
   "tests",
   "integration-tests",

@@ -4,15 +4,11 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
 from __future__ import annotations
-
 import os
 import sys
+from importlib.metadata import PackageNotFoundError
+from importlib.metadata import version as pkg_version
 from pathlib import Path
-
-try:
-    from importlib.metadata import PackageNotFoundError, version as pkg_version
-except ImportError:  # pragma: no cover (py<3.8)
-    from importlib_metadata import PackageNotFoundError, version as pkg_version  # type: ignore
 
 
 # -- Path setup --------------------------------------------------------------
@@ -84,12 +80,6 @@ autodoc_default_options = {
     "special-members": "__init__,__call__",
     "inherited-members": True,
 }
-
-# Only mock truly problematic/heavy optional deps at import time.
-# NOTE: we no longer import matchms in conf.py, so this is mostly for autodoc.
-autodoc_mock_imports = [
-    "rdkit",
-]
 
 napoleon_google_docstring = False
 
