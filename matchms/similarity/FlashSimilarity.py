@@ -1010,17 +1010,32 @@ def _row_task_entropy(args):
 
 
 # ===================== Cosine related helpers =====================
+@njit(cache=True, nogil=True)
+def _precursor_shift_is_effectively_zero_nb(
+    ref_pmz: float,
+    lib_pmz: float,
+    tol: float,
+    use_ppm: bool,
+) -> bool:
+    if np.isnan(ref_pmz) or np.isnan(lib_pmz):
+        return False
+    return _within_tol_nb(ref_pmz, lib_pmz, tol, use_ppm)
+
 
 @njit(cache=True, nogil=True)
-def _count_candidates_per_col_nb(query_mz: np.ndarray,
-                                 query_int: np.ndarray,
-                                 has_pmz: bool,
-                                 query_pmz: float,
-                                 peaks_mz: np.ndarray, peaks_spec_idx: np.ndarray,
-                                 nl_mz: np.ndarray, nl_spec_idx: np.ndarray, nl_prod_idx: np.ndarray,
-                                 tol: float, use_ppm: bool,
-                                 do_frag: bool, do_nl: bool,
-                                 n_cols: int) -> np.ndarray:
+def _count_candidates_per_col_nb(
+        query_mz: np.ndarray,
+        query_int: np.ndarray,
+        has_pmz: bool,
+        query_pmz: float,
+        peaks_mz: np.ndarray, peaks_spec_idx: np.ndarray,
+        nl_mz: np.ndarray, nl_spec_idx: np.ndarray,
+        nl_prod_idx: np.ndarray,
+        lib_precursor_mz: np.ndarray,
+        tol: float, use_ppm: bool,
+        do_frag: bool, do_nl: bool,
+        n_cols: int
+        ) -> np.ndarray:
     """
     Count (fragment + neutral loss) candidate pairs per column (library spectrum).
 
@@ -1055,25 +1070,39 @@ def _count_candidates_per_col_nb(query_mz: np.ndarray,
 
             loss = query_pmz - float(query_mz[i])
             a, b = _search_spec_in_fragment_window(nl_mz, loss, tol, use_ppm)
+
             for k in range(a, b):
-                if _within_tol_nb(loss, float(nl_mz[k]), tol, use_ppm):
-                    col = int(nl_spec_idx[k])
-                    counts[col] += 1
+                if not _within_tol_nb(loss, float(nl_mz[k]), tol, use_ppm):
+                    continue
+
+                col = int(nl_spec_idx[k])
+
+                # Hybrid ModifiedCosine compatibility:
+                # if precursor masses are within tolerance, the shifted/NL branch
+                # would duplicate fragment matching and should be ignored.
+                if do_frag:
+                    lib_pmz = float(lib_precursor_mz[col])
+                    if _precursor_shift_is_effectively_zero_nb(query_pmz, lib_pmz, tol, use_ppm):
+                        continue
+
+                counts[col] += 1
 
     return counts
 
 
 @njit(cache=True, nogil=True)
-def _fill_candidates_per_col_nb(query_mz: np.ndarray,
-                                query_int: np.ndarray,
-                                has_pmz: bool, qpmz: float,
-                                peaks_mz: np.ndarray, peaks_int: np.ndarray, peaks_spec_idx: np.ndarray,
-                                nl_mz: np.ndarray, nl_spec_idx: np.ndarray, nl_prod_idx: np.ndarray,
-                                tol: float, use_ppm: bool,
-                                do_frag: bool, do_nl: bool,
-                                col_offsets: np.ndarray,  # int64, length n_cols+1
-                                counts_by_col: np.ndarray  # int64, length n_cols
-                                ) -> tuple:
+def _fill_candidates_per_col_nb(
+        query_mz: np.ndarray,
+        query_int: np.ndarray,
+        has_pmz: bool, qpmz: float,
+        peaks_mz: np.ndarray, peaks_int: np.ndarray, peaks_spec_idx: np.ndarray,
+        nl_mz: np.ndarray, nl_spec_idx: np.ndarray, nl_prod_idx: np.ndarray,
+        lib_precursor_mz: np.ndarray,
+        tol: float, use_ppm: bool,
+        do_frag: bool, do_nl: bool,
+        col_offsets: np.ndarray,  # int64, length n_cols+1
+        counts_by_col: np.ndarray  # int64, length n_cols
+        ) -> tuple:
     """
     Materialize all candidates in CSR-like form grouped by column.
 
@@ -1130,13 +1159,21 @@ def _fill_candidates_per_col_nb(query_mz: np.ndarray,
 
             loss = qpmz - float(query_mz[i])
             a, b = _search_spec_in_fragment_window(nl_mz, loss, tol, use_ppm)
+
             for k in range(a, b):
                 mk = float(nl_mz[k])
                 if not _within_tol_nb(loss, mk, tol, use_ppm):
                     continue
 
-                j = int(nl_prod_idx[k])
                 spec_idx = int(nl_spec_idx[k])
+
+                # Same skip as in the count pass.
+                if do_frag:
+                    lib_pmz = float(lib_precursor_mz[spec_idx])
+                    if _precursor_shift_is_effectively_zero_nb(qpmz, lib_pmz, tol, use_ppm):
+                        continue
+
+                j = int(nl_prod_idx[k])
                 col_idx = int(pos[spec_idx])
                 ref_idx[col_idx] = i
                 lib_idx[col_idx] = j
@@ -1373,6 +1410,7 @@ def _row_task_cosine(args):
         (lib.nl_mz if (cfg["compute_nl"] and lib.nl_mz is not None) else np.empty(0, np.float64)),
         (lib.nl_spec_idx if (cfg["compute_nl"] and lib.nl_spec_idx is not None) else np.empty(0, np.int32)),
         (lib.nl_product_idx if (cfg["compute_nl"] and lib.nl_product_idx is not None) else np.empty(0, np.int32)),
+        lib.precursor_mz.astype(np.float64, copy=False),
         tol, use_ppm, do_frag, (do_nl and cfg["compute_nl"]), n_cols,
     )
 
@@ -1395,6 +1433,7 @@ def _row_task_cosine(args):
             (lib.nl_mz if (cfg["compute_nl"] and lib.nl_mz is not None) else np.empty(0, np.float64)),
             (lib.nl_spec_idx if (cfg["compute_nl"] and lib.nl_spec_idx is not None) else np.empty(0, np.int32)),
             (lib.nl_product_idx if (cfg["compute_nl"] and lib.nl_product_idx is not None) else np.empty(0, np.int32)),
+            lib.precursor_mz.astype(np.float64, copy=False),
             tol, use_ppm, do_frag, (do_nl and cfg["compute_nl"]),
             col_offsets, counts_by_col,
         )
