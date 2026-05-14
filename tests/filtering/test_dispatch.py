@@ -290,3 +290,38 @@ def test_collection_filter_forwards_args_and_kwargs_to_spectrum_impl():
     assert result["value"] == 123
     assert result["option"] is True
     assert result["clone"] is False
+
+
+def test_collection_filter_accepts_spectrum_in_keyword():
+    spectrum = _make_spectrum()
+
+    def _dummy_filter_spectrum(spectrum_in, mass_tolerance, clone=True):
+        spectrum = spectrum_in.clone() if clone else spectrum_in
+        spectrum.set("mass_tolerance", mass_tolerance)
+        return spectrum
+
+    public_filter = collection_filter(_dummy_filter_spectrum)
+
+    result = public_filter(spectrum_in=spectrum, mass_tolerance=0.1)
+
+    assert result is not spectrum
+    assert result.get("mass_tolerance") == 0.1
+
+
+def test_collection_filter_accepts_collection_as_spectrum_in_keyword():
+    collection = _make_collection()
+
+    def _dummy_filter_spectrum(spectrum_in, clone=True):
+        return spectrum_in
+
+    def _dummy_filter_collection(spectrum_in, clone=True):
+        return "collection implementation"
+
+    public_filter = collection_filter(
+        _dummy_filter_spectrum,
+        collection_impl=_dummy_filter_collection,
+    )
+
+    result = public_filter(spectrum_in=collection)
+
+    assert result == "collection implementation"
