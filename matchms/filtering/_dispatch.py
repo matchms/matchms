@@ -27,19 +27,17 @@ def collection_filter(
 
     Notes
     -----
-    The spectrum-wise fallback always creates a new SpectraCollection. It does
-    not mutate the input collection in place, even if ``clone=False`` is passed
-    to the public filter.
+    The public wrapper intentionally keeps ``spectrum_in`` as first argument name
+    because many existing matchms filters are called with ``spectrum_in=...``.
     """
-
     @wraps(spectrum_impl)
-    def wrapper(obj, *args, **kwargs):
-        if obj is None:
+    def wrapper(spectrum_in=None, *args, **kwargs):
+        if spectrum_in is None:
             return None
 
-        if isinstance(obj, SpectraCollection):
+        if isinstance(spectrum_in, SpectraCollection):
             if collection_impl is not None:
-                return collection_impl(obj, *args, **kwargs)
+                return collection_impl(spectrum_in, *args, **kwargs)
 
             if allow_spectrum_fallback:
                 if warn_on_fallback:
@@ -52,7 +50,7 @@ def collection_filter(
                     )
 
                 return apply_spectrum_filter_to_collection(
-                    obj,
+                    spectrum_in,
                     spectrum_impl,
                     *args,
                     **kwargs,
@@ -62,16 +60,14 @@ def collection_filter(
                 f"{wrapper.__name__} does not support SpectraCollection."
             )
 
-        # Preserve backward compatibility:
-        # let the original spectrum-level implementation decide whether the
-        # object is acceptable.
-        return spectrum_impl(obj, *args, **kwargs)
+        return spectrum_impl(spectrum_in, *args, **kwargs)
 
     wrapper.__name__ = (
         spectrum_impl.__name__
         .removeprefix("_")
         .removesuffix("_spectrum")
     )
+
     return wrapper
 
 
