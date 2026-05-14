@@ -1,8 +1,10 @@
 import pytest
 from matchms.filtering import repair_not_matching_annotation
+from tests.run_spectrum_and_collection import run_filter_as_spectrum_or_collection
 from ..builder_Spectrum import SpectrumBuilder
 
 
+@pytest.mark.parametrize("as_collection", [False, True], ids=["spectrum", "collection"])
 @pytest.mark.parametrize(
     "smile, inchi, inchikey, correct_inchikey",
     [
@@ -20,16 +22,38 @@ from ..builder_Spectrum import SpectrumBuilder
         ),  # Typo
     ],
 )
-def test_repair_not_matching_annotation_repair_inchikey(smile, inchi, inchikey, correct_inchikey):
-    """Checks if the inchikey is repaired, when smile and inchi already match"""
-    builder = SpectrumBuilder()
-    spectrum_in = builder.with_metadata({"smiles": smile, "inchi": inchi, "inchikey": inchikey}).build()
-    spectrum_out = repair_not_matching_annotation(spectrum_in)
+def test_repair_not_matching_annotation_repair_inchikey(
+    smile,
+    inchi,
+    inchikey,
+    correct_inchikey,
+    as_collection,
+):
+    """Checks if the inchikey is repaired, when smile and inchi already match."""
+    spectrum_in = (
+        SpectrumBuilder()
+        .with_metadata(
+            {
+                "smiles": smile,
+                "inchi": inchi,
+                "inchikey": inchikey,
+            }
+        )
+        .build()
+    )
+
+    spectrum_out = run_filter_as_spectrum_or_collection(
+        repair_not_matching_annotation,
+        spectrum_in,
+        as_collection,
+    )
+
     assert spectrum_out.get("inchikey") == correct_inchikey
     assert spectrum_out.get("smiles") == spectrum_in.get("smiles")
     assert spectrum_out.get("inchi") == spectrum_in.get("inchi")
 
 
+@pytest.mark.parametrize("as_collection", [False, True], ids=["spectrum", "collection"])
 @pytest.mark.parametrize(
     "smile, inchi, inchikey, parent_mass, correct_smiles, correct_inchi, correct_inchikey",
     [
@@ -92,14 +116,35 @@ def test_repair_not_matching_annotation_repair_inchikey(smile, inchi, inchikey, 
     ],
 )
 def test_repair_not_matching_annotation_repair_smiles_inchi(
-    smile, inchi, inchikey, parent_mass, correct_smiles, correct_inchi, correct_inchikey
+    smile,
+    inchi,
+    inchikey,
+    parent_mass,
+    correct_smiles,
+    correct_inchi,
+    correct_inchikey,
+    as_collection,
 ):
     # pylint: disable=too-many-arguments
-    builder = SpectrumBuilder()
-    spectrum_in = builder.with_metadata(
-        {"smiles": smile, "inchi": inchi, "inchikey": inchikey, "parent_mass": parent_mass}
-    ).build()
-    spectrum_out = repair_not_matching_annotation(spectrum_in)
+    spectrum_in = (
+        SpectrumBuilder()
+        .with_metadata(
+            {
+                "smiles": smile,
+                "inchi": inchi,
+                "inchikey": inchikey,
+                "parent_mass": parent_mass,
+            }
+        )
+        .build()
+    )
+
+    spectrum_out = run_filter_as_spectrum_or_collection(
+        repair_not_matching_annotation,
+        spectrum_in,
+        as_collection,
+    )
+
     assert spectrum_out.get("inchikey") == correct_inchikey
     assert spectrum_out.get("smiles") == correct_smiles
     assert spectrum_out.get("inchi") == correct_inchi
