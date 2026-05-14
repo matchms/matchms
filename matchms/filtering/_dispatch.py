@@ -24,17 +24,13 @@ def collection_filter(
         processed spectrum-by-spectrum and converted back to SpectraCollection.
     warn_on_fallback
         If True, warn when falling back to spectrum-wise processing.
-
-    Notes
-    -----
-    The public wrapper intentionally keeps ``spectrum_in`` as first argument name
-    because many existing matchms filters are called with ``spectrum_in=...``.
     """
     @wraps(spectrum_impl)
     def wrapper(spectrum_in=None, *args, **kwargs):
         if spectrum_in is None:
             return None
 
+        # Option (1) --> Handle SpectraCollection
         if isinstance(spectrum_in, SpectraCollection):
             if collection_impl is not None:
                 return collection_impl(spectrum_in, *args, **kwargs)
@@ -59,7 +55,7 @@ def collection_filter(
             raise NotImplementedError(
                 f"{wrapper.__name__} does not support SpectraCollection."
             )
-
+        # Option (2) --> Handle Spectrum
         return spectrum_impl(spectrum_in, *args, **kwargs)
 
     wrapper.__name__ = (
