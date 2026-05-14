@@ -1,14 +1,12 @@
 import warnings
-
 import numpy as np
 import pytest
-
 from matchms import Spectrum
-from matchms.SpectraCollection import SpectraCollection
 from matchms.filtering._dispatch import (
     apply_spectrum_filter_to_collection,
     collection_filter,
 )
+from matchms.SpectraCollection import SpectraCollection
 
 
 def _make_spectrum(identifier="spectrum", mz=None, intensities=None, metadata=None):
