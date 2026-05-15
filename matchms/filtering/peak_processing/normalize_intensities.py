@@ -3,6 +3,7 @@ from numbers import Real
 from typing import Optional
 import numpy as np
 from scipy.sparse import csr_array
+from tqdm.auto import tqdm
 from matchms.filtering._dispatch import collection_filter
 from matchms.SpectraCollection import SpectraCollection
 from matchms.typing import SpectrumType
@@ -91,6 +92,7 @@ def _normalize_intensities_collection(
     spectrum_in: SpectraCollection,
     clone: Optional[bool] = True,
     scale_to_max: float = 1.0,
+    progress_bar: bool = False,
 ) -> SpectraCollection:
     """Normalize intensities row-wise for a SpectraCollection."""
     scale_to_max = _validate_scale_to_max(scale_to_max)
@@ -117,7 +119,7 @@ def _normalize_intensities_collection(
     new_indices_parts = []
     new_indptr = [0]
 
-    for row_idx in range(array.shape[0]):
+    for row_idx in tqdm(range(array.shape[0]), disable=not progress_bar):
         start, end = indptr[row_idx], indptr[row_idx + 1]
 
         if start == end:

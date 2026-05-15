@@ -1,6 +1,7 @@
 import warnings
 from collections.abc import Callable
 from functools import wraps
+from tqdm.auto import tqdm
 from matchms.SpectraCollection import SpectraCollection
 
 
@@ -33,7 +34,11 @@ def collection_filter(
         # Option (1) --> Handle SpectraCollection
         if isinstance(spectrum_in, SpectraCollection):
             if collection_impl is not None:
-                return collection_impl(spectrum_in, *args, **kwargs)
+                return collection_impl(
+                    spectrum_in,
+                    *args,
+                    **kwargs
+                    )
 
             if allow_spectrum_fallback:
                 if warn_on_fallback:
@@ -72,6 +77,7 @@ def apply_spectrum_filter_to_collection(
     spectrum_filter: Callable,
     *args,
     clone: bool = True,
+    progress_bar: bool = False,
     **kwargs,
 ) -> SpectraCollection | None:
     """Apply a spectrum-level filter to all spectra in a collection.
@@ -96,7 +102,7 @@ def apply_spectrum_filter_to_collection(
 
     spectra_out = []
 
-    for spectrum in collection:
+    for spectrum in tqdm(collection, disable=not progress_bar):
         filtered = spectrum_filter(spectrum, *args, clone=False, **kwargs)
         if filtered is not None:
             spectra_out.append(filtered)
