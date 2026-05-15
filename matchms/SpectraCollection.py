@@ -97,9 +97,13 @@ class SpectraCollection:
         # [data[k].append(v) for spectrum in spectra for k, v in spectrum.metadata.items()]
         # TODO: add minimal Matadata harmonization
 
-        # return pd.DataFrame(data)
+        # create and return pd.DataFrame(data)
         records = [spectrum.metadata for spectrum in spectra]
-        return pd.DataFrame.from_records(records)
+        metadata = pd.DataFrame.from_records(records)
+        if len(metadata) != len(spectra):
+            metadata = pd.DataFrame(index=np.arange(len(spectra)))
+
+        return metadata.reset_index(drop=True)
 
     @property
     def metadata(self) -> pd.DataFrame:
