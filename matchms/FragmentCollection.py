@@ -3,6 +3,7 @@ from functools import cached_property
 from typing import Generator, Iterable, Tuple
 import numpy as np
 from scipy.sparse import coo_array, csr_array
+from tqdm.auto import tqdm
 from matchms.Spectrum import Spectrum
 from .hashing import spectra_hashes
 from .typing import FragmentCollectionType
@@ -338,7 +339,11 @@ class CSRFragmentCollection(FragmentCollection):
         return spectra_hashes(self._array, self.bin_to_mz)
 
     # Abstract methods for peak processing filters
-    def keep_top_k_per_row_variable(self, k_per_row: np.ndarray) -> FragmentCollectionType:
+    def keep_top_k_per_row_variable(
+            self,
+            k_per_row: np.ndarray,
+            progress_bar: bool = False,
+            ) -> FragmentCollectionType:
         """Keep the top-k highest-intensity peaks per row.
 
         Parameters
@@ -347,7 +352,8 @@ class CSRFragmentCollection(FragmentCollection):
             One integer value per spectrum row. For each row, only the k highest
             intensity peaks are retained. Remaining peaks are sorted by m/z/bin
             position, preserving normal sparse row order.
-
+        progress_bar:
+            Whether to display a progress bar when processing large collections.
         """
         k_per_row = np.asarray(k_per_row)
 
@@ -366,7 +372,7 @@ class CSRFragmentCollection(FragmentCollection):
         index_parts = []
         indptr = [0]
 
-        for row_idx in range(len(self)):
+        for row_idx in tqdm(range(len(self)), disable=not progress_bar):
             start, end = csr.indptr[row_idx], csr.indptr[row_idx + 1]
             row_data = csr.data[start:end]
             row_indices = csr.indices[start:end]

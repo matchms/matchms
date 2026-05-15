@@ -114,6 +114,7 @@ def _reduce_to_number_of_peaks_collection(
     n_max: int = np.inf,
     ratio_desired: Optional[float] = None,
     clone: Optional[bool] = True,
+    progress_bar: bool = False,
 ) -> Optional[SpectraCollection]:
     """Collection-native implementation of reduce_to_number_of_peaks."""
     peak_counts = collection.fragments.count(axis=1)
@@ -142,7 +143,9 @@ def _reduce_to_number_of_peaks_collection(
     k_per_row = np.minimum(k_per_row, peak_counts).astype(int)
 
     # Rows with fewer than k peaks are unchanged by the backend.
-    target._fragments = target.fragments.keep_top_k_per_row_variable(k_per_row)
+    target._fragments = target.fragments.keep_top_k_per_row_variable(
+        k_per_row, progress_bar=progress_bar
+    )
     target._clear_cache(["fragment_hashes", "spectra_hashes"])
 
     return target
