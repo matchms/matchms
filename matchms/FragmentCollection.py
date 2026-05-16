@@ -66,6 +66,15 @@ class FragmentCollection(ABC):
         pass
 
     @abstractmethod
+    def select_by_relative_intensity(
+        self,
+        intensity_from: float = 0.0,
+        intensity_to: float = 1.0,
+    ) -> "FragmentCollection":
+        """Return new collection with peaks restricted to a row-wise relative intensity range."""
+        pass
+
+    @abstractmethod
     def keep_top_k_per_row_variable(self, k_per_row: np.ndarray) -> 'FragmentCollection':
         """Return new collection with only the top-k intensity peaks per row."""
         pass
@@ -364,6 +373,48 @@ class CSRFragmentCollection(FragmentCollection):
 
         coo = self._array.tocoo()
         keep = (coo.data >= intensity_from) & (coo.data <= intensity_to)
+
+        new_array = coo_array(
+            (coo.data[keep], (coo.row[keep], coo.col[keep])),
+            shape=self._array.shape,
+        ).tocsr()
+
+        return self.__class__.from_array(new_array, bin_size=self.bin_size)
+
+    def select_by_relative_intensity(
+            self,
+            intensity_from: float = 0.0,
+            intensity_to: float = 1.0,
+        ) -> FragmentCollectionType:
+        """Return a new collection keeping peaks within a row-wise relative intensity range."""
+        if intensity_from < 0.0:
+            raise ValueError("'intensity_from' should be larger than or equal to 0.")
+        if intensity_to > 1.0:
+            raise ValueError("'intensity_to' should be smaller than or equal to 1.0.")
+        if intensity_from > intensity_to:
+            raise ValueError(
+                "'intensity_from' should be smaller than or equal to 'intensity_to'."
+            )
+
+        coo = self._array.tocoo()
+
+        if coo.data.size == 0:
+            return self.__class__.from_array(self._array.copy(), bin_size=self.bin_size)
+
+        row_max = self._array.max(axis=1).toarray().ravel()
+
+        nonzero_row_max = row_max[coo.row] > 0
+
+        relative_intensities = np.zeros_like(coo.data, dtype=float)
+        relative_intensities[nonzero_row_max] = (
+            coo.data[nonzero_row_max] / row_max[coo.row[nonzero_row_max]]
+        )
+
+        keep = (
+            nonzero_row_max
+            & (relative_intensities >= intensity_from)
+            & (relative_intensities <= intensity_to)
+        )
 
         new_array = coo_array(
             (coo.data[keep], (coo.row[keep], coo.col[keep])),
