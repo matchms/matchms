@@ -4,7 +4,6 @@ from matchms import Spectrum
 from matchms.filtering import select_by_relative_intensity
 from tests.builder_Spectrum import SpectrumBuilder
 from tests.run_spectrum_and_collection import run_filter_as_spectrum_or_collection
-from ..builder_Spectrum import SpectrumBuilder
 
 
 @pytest.fixture
