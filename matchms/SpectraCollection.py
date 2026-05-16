@@ -104,7 +104,7 @@ class SpectraCollection:
         if len(metadata) == 0:  # allow empty metadata if spectra have no metadata
             metadata = pd.DataFrame(index=np.arange(len(spectra)))
 
-        return metadata.reset_index(drop=True)
+        return harmonize_metadata_table_columns(metadata).reset_index(drop=True)
 
     @property
     def metadata(self) -> pd.DataFrame:
