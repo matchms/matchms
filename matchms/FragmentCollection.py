@@ -55,6 +55,16 @@ class FragmentCollection(ABC):
     def bin_to_mz(self, bin_idx: np.ndarray | int) -> np.ndarray:
         pass
 
+    # Filtering methods for peak processing filters.
+    @abstractmethod
+    def select_by_intensity(
+        self,
+        intensity_from: float = 0.0,
+        intensity_to: float = 1.0,
+    ) -> "FragmentCollection":
+        """Return new collection with peaks restricted to an intensity range."""
+        pass
+
     @abstractmethod
     def keep_top_k_per_row_variable(self, k_per_row: np.ndarray) -> 'FragmentCollection':
         """Return new collection with only the top-k intensity peaks per row."""
@@ -338,7 +348,30 @@ class CSRFragmentCollection(FragmentCollection):
     def fragment_hashes(self):
         return spectra_hashes(self._array, self.bin_to_mz)
 
+    # --------------------------------------------
     # Abstract methods for peak processing filters
+    # --------------------------------------------
+    def select_by_intensity(
+            self,
+            intensity_from: float = 0.0,
+            intensity_to: float = 1.0,
+        ) -> FragmentCollectionType:
+        """Return a new collection keeping peaks within an intensity range."""
+        if intensity_from > intensity_to:
+            raise ValueError(
+                "'intensity_from' should be smaller than or equal to 'intensity_to'."
+            )
+
+        coo = self._array.tocoo()
+        keep = (coo.data >= intensity_from) & (coo.data <= intensity_to)
+
+        new_array = coo_array(
+            (coo.data[keep], (coo.row[keep], coo.col[keep])),
+            shape=self._array.shape,
+        ).tocsr()
+
+        return self.__class__.from_array(new_array, bin_size=self.bin_size)
+
     def keep_top_k_per_row_variable(
             self,
             k_per_row: np.ndarray,
