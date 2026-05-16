@@ -1,5 +1,6 @@
 from typing import List, Optional
 from matchms.typing import SpectrumType
+from matchms.utils import ALIASES_FOR_NONE
 
 
 def harmonize_undefined_inchi(
@@ -30,7 +31,7 @@ def harmonize_undefined_inchi(
     spectrum = spectrum_in.clone() if clone else spectrum_in
 
     if aliases is None:
-        aliases = ["", "N/A", "NA", "n/a"]
+        aliases = ALIASES_FOR_NONE
 
     inchi = spectrum.get("inchi")
     if inchi is None:

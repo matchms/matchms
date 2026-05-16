@@ -1,5 +1,6 @@
 from typing import List, Optional
 from matchms.typing import SpectrumType
+from matchms.utils import ALIASES_FOR_NONE
 
 
 def harmonize_undefined_smiles(
@@ -30,7 +31,7 @@ def harmonize_undefined_smiles(
     spectrum = spectrum_in.clone() if clone else spectrum_in
 
     if aliases is None:
-        aliases = ["", "N/A", "NA", "n/a", "no data"]
+        aliases = ALIASES_FOR_NONE
 
     smiles = spectrum.get("smiles")
     if smiles is None:
