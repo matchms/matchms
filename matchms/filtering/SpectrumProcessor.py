@@ -174,36 +174,6 @@ class SpectrumProcessor:
             spectrum = spectrum_out
         return spectrum
 
-    @deprecated(
-        version="0.26.5",
-        reason="This method is deprecated and will be removed in the future. Use 'process_spectra()' instead.",
-    )
-    def process_spectrums(
-        self, spectra: list, progress_bar: bool = True, cleaned_spectra_file=None, create_report: Optional[bool] = False
-    ):
-        """
-        Wrapper method for process_spectra()
-
-        Parameters
-        ----------
-        spectra : list[Spectrum]
-            The spectra to process.
-        create_report: bool, optional
-            Creates and outputs a report of the main changes during processing.
-            The report will be returned as pandas DataFrame. Default is set to False.
-        progress_bar : bool, optional
-            Displays progress bar if set to True. Default is True.
-        cleaned_spectra_file:
-            Path to where the cleaned spectra should be saved.
-        Returns
-        -------
-        spectra
-            List containing the processed spectra.
-        processing_report
-            A ProcessingReport containing the effect of the filters.
-        """
-        return self.process_spectra(spectra, progress_bar, cleaned_spectra_file, create_report)
-
     def process_spectra(
         self,
         spectra: Iterable[Spectrum],
