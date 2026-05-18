@@ -28,7 +28,7 @@ class SpeciesString:
         dirty : str
             The raw input string representing a chemical structure.
         """
-        self.dirty = dirty
+        self.dirty = "" if dirty is None else dirty
         self.target = None
         self.cleaned = None
         self.guess_target()
