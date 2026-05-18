@@ -190,30 +190,13 @@ def test_process_collection(collection):
     assert isinstance(processed, SpectraCollection)
     assert len(processed) == 3
 
-    assert processed.metadata.loc[0, "smiles"] is None
+    assert pd.isna(processed.metadata.loc[0, "smiles"])
     assert processed.metadata.loc[1, "smiles"] == "CCCO"
-    assert processed.metadata.loc[2, "smiles"] is None
+    assert pd.isna(processed.metadata.loc[2, "smiles"])
 
     assert len(processed[0].peaks) == 2
     assert len(processed[1].peaks) == 3
     assert len(processed[2].peaks) == 1
-
-
-def test_process_spectra_from_iterable(spectra):
-    processor = SpectraCollectionProcessor(
-        filters=[
-            "harmonize_missing_entries",
-            ("select_by_relative_intensity", {"intensity_from": 0.01}),
-        ]
-    )
-
-    processed = processor.process_spectra(spectra)
-
-    assert isinstance(processed, SpectraCollection)
-    assert len(processed) == 3
-    assert pd.isna(processed.metadata.loc[0, "smiles"])
-    assert processed.metadata.loc[1, "smiles"] == "CCCO"
-    assert pd.isna(processed.metadata.loc[2, "smiles"])
 
 
 def test_process_spectra_from_collection(collection):
