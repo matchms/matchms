@@ -1,12 +1,13 @@
 from typing import Optional
 import numpy as np
+from matchms.filtering._dispatch import collection_filter
 from matchms.Fragments import Fragments
 from matchms.typing import SpectrumType
 
 
-def remove_peaks_around_precursor_mz(
-    spectrum_in: SpectrumType, mz_tolerance: float = 17, clone: Optional[bool] = True
-) -> Optional[SpectrumType]:
+def _remove_peaks_around_precursor_mz(
+        spectrum_in: SpectrumType, mz_tolerance: float = 17, clone: Optional[bool] = True
+    ) -> Optional[SpectrumType]:
     """Remove peaks that are within mz_tolerance (in Da) of
        the precursor mz, excluding the precursor peak.
 
@@ -48,3 +49,10 @@ def remove_peaks_around_precursor_mz(
     spectrum.peaks = Fragments(mz=new_mzs, intensities=new_intensities)
 
     return spectrum
+
+
+# wrapper
+remove_peaks_around_precursor_mz = collection_filter(
+    _remove_peaks_around_precursor_mz,
+    collection_impl=None,
+)
