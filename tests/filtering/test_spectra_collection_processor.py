@@ -1,5 +1,5 @@
 import os
-import numpy as np
+import pandas as pd
 import pytest
 from matchms import SpectraCollection
 from matchms import filtering as msfilters
@@ -211,9 +211,9 @@ def test_process_spectra_from_iterable(spectra):
 
     assert isinstance(processed, SpectraCollection)
     assert len(processed) == 3
-    assert processed.metadata.loc[0, "smiles"] is None
+    assert pd.isna(processed.metadata.loc[0, "smiles"])
     assert processed.metadata.loc[1, "smiles"] == "CCCO"
-    assert processed.metadata.loc[2, "smiles"] is None
+    assert pd.isna(processed.metadata.loc[2, "smiles"])
 
 
 def test_process_spectra_from_collection(collection):
@@ -228,7 +228,7 @@ def test_process_spectra_from_collection(collection):
     assert isinstance(processed, SpectraCollection)
     assert len(processed) == len(collection)
     assert processed is not collection
-    assert processed.metadata.loc[0, "smiles"] is None
+    assert pd.isna(processed.metadata.loc[0, "smiles"])
 
 
 def test_process_collection_rejects_non_collection(spectra):

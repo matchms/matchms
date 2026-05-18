@@ -1,3 +1,4 @@
+from matchms.filtering.SpectraCollectionProcessor import SpectraCollectionProcessor
 from matchms.filtering.SpectrumProcessor import SpectrumProcessor
 from . import exporting, filtering, importing, networking, plotting, similarity
 from .__version__ import __version__
@@ -52,6 +53,7 @@ __all__ = [
     "set_matchms_logger_level",
     "similarity",
     "SpectraCollection",
+    "SpectraCollectionProcessor",
     "Spectrum",
     "SpectrumProcessor",
 ]
