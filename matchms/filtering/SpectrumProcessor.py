@@ -6,7 +6,6 @@ from functools import partial
 from typing import Callable, Dict, Iterable, List, Optional, Tuple, Union
 import numpy as np
 import pandas as pd
-from deprecated import deprecated
 from tqdm import tqdm
 from matchms.exporting import save_spectra
 from matchms.filtering.filter_order import ALL_FILTERS, FILTER_FUNCTION_NAMES
