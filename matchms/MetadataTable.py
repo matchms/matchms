@@ -3,6 +3,7 @@ import re
 import pandas as pd
 from .utils import load_known_key_conversions
 
+
 logger = logging.getLogger("matchms")
 _key_regex_replacements = {r"\s": "_", r"[!?.,;:]": ""}
 _key_replacements = load_known_key_conversions()

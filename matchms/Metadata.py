@@ -5,7 +5,7 @@ from .filtering.metadata_processing.add_precursor_mz import _add_precursor_mz_me
 from .filtering.metadata_processing.add_retention import _add_retention, _retention_index_keys, _retention_time_keys
 from .filtering.metadata_processing.interpret_pepmass import _interpret_pepmass_metadata
 from .filtering.metadata_processing.make_charge_int import _convert_charge_to_int
-from .utils import load_export_key_conversions, load_known_key_conversions, ALIASES_FOR_NONE
+from .utils import ALIASES_FOR_NONE, load_export_key_conversions, load_known_key_conversions
 
 
 class Metadata:
