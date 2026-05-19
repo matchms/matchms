@@ -1,4 +1,5 @@
 from typing import Optional
+import numpy as np
 from matchms.filtering._dispatch import collection_filter
 from matchms.Fragments import Fragments
 from matchms.typing import SpectrumType
@@ -44,10 +45,21 @@ def _remove_peaks_relative_to_precursor_mz(
             "Consider applying 'add_precursor_mz' filter first."
             )
 
+    if not isinstance(offset_to_precursor, (float, int, np.floating, np.integer)):
+        raise ValueError("Expected 'offset_to_precursor' to be a scalar number.")
+
+    precursor_mz = float(precursor_mz)
+    offset_to_precursor = float(offset_to_precursor)
+
     mzs, intensities = spectrum.peaks.mz, spectrum.peaks.intensities
-    peaks_to_remove = mzs > (precursor_mz + offset_to_precursor)
-    new_mzs, new_intensities = mzs[~peaks_to_remove], intensities[~peaks_to_remove]
-    spectrum.peaks = Fragments(mz=new_mzs, intensities=new_intensities)
+
+    threshold = precursor_mz + offset_to_precursor
+    peaks_to_remove = mzs > threshold
+
+    spectrum.peaks = Fragments(
+        mz=mzs[~peaks_to_remove],
+        intensities=intensities[~peaks_to_remove],
+    )
 
     return spectrum
 
