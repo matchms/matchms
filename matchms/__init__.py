@@ -1,3 +1,4 @@
+from matchms.filtering.SpectraCollectionProcessor import SpectraCollectionProcessor
 from matchms.filtering.SpectrumProcessor import SpectrumProcessor
 from . import exporting, filtering, importing, networking, plotting, similarity
 from .__version__ import __version__
@@ -6,6 +7,7 @@ from .Fingerprints import Fingerprints
 from .Fragments import Fragments
 from .logging_functions import _init_logger, set_matchms_logger_level, set_rdkit_logger_level
 from .Metadata import Metadata
+from .MetadataTable import MetadataTable
 from .Pipeline import Pipeline
 from .Scores import Scores
 from .SpectraCollection import SpectraCollection
@@ -43,6 +45,7 @@ __all__ = [
     "Fragments",
     "importing",
     "Metadata",
+    "MetadataTable",
     "networking",
     "Pipeline",
     "plotting",
@@ -50,6 +53,7 @@ __all__ = [
     "set_matchms_logger_level",
     "similarity",
     "SpectraCollection",
+    "SpectraCollectionProcessor",
     "Spectrum",
     "SpectrumProcessor",
 ]

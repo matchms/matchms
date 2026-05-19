@@ -3,6 +3,7 @@ from functools import cached_property
 from typing import Generator
 import numpy as np
 import pandas as pd
+from matchms.MetadataTable import MetadataTable, harmonize_metadata_table_columns
 from matchms.Spectrum import Spectrum
 from .FragmentCollection import CSRFragmentCollection, FragmentCollection
 from .hashing import compute_combined_hashes
@@ -97,9 +98,13 @@ class SpectraCollection:
         # [data[k].append(v) for spectrum in spectra for k, v in spectrum.metadata.items()]
         # TODO: add minimal Matadata harmonization
 
-        # return pd.DataFrame(data)
+        # create and return pd.DataFrame(data)
         records = [spectrum.metadata for spectrum in spectra]
-        return pd.DataFrame.from_records(records)
+        metadata = pd.DataFrame.from_records(records)
+        if len(metadata) == 0:  # allow empty metadata if spectra have no metadata
+            metadata = pd.DataFrame(index=np.arange(len(spectra)))
+
+        return harmonize_metadata_table_columns(metadata).reset_index(drop=True)
 
     @property
     def metadata(self) -> pd.DataFrame:
@@ -145,6 +150,7 @@ class SpectraCollection:
             mz=mz,
             intensities=intensities,
             metadata=self._metadata.iloc[int(idx)].to_dict(),
+            metadata_harmonization=False,
         )
 
     def __getitem__(self, idx):
@@ -164,6 +170,7 @@ class SpectraCollection:
                     mz=mz,
                     intensities=intensities,
                     metadata=self._metadata.iloc[row_idx].to_dict(),
+                    metadata_harmonization=False,
                 )
 
             row_indices = self._normalize_row_selection(row_sel)
@@ -251,6 +258,17 @@ class SpectraCollection:
             axis=1,
         )
         self._clear_cache(["metadata_hashes"])
+
+    def harmonize_metadata_columns(self, inplace: bool = False):
+        """Harmonize metadata column names to matchms key style."""
+        target = self if inplace else self.copy()
+
+        target._metadata = harmonize_metadata_table_columns(target._metadata).reset_index(
+            drop=True
+        )
+        target._clear_cache(["metadata_hashes", "spectra_hashes"])
+
+        return None if inplace else target
 
     def _reorder(self, indices: np.ndarray):
         self._fragments = self._fragments.take(indices)
@@ -505,27 +523,3 @@ class SpectraCollection:
         stats._repr_html_ = _repr_html_
 
         return stats
-
-
-class MetadataTable(pd.DataFrame):
-    """
-    Metadata proxy class.
-    Used for filter directly on metadata and synchronize fragments.
-    """
-
-    _metadata = ["_collection"]
-
-    def __init__(self, data, collection=None, *args, **kwargs):
-        super().__init__(data, *args, **kwargs)
-        object.__setattr__(self, "_collection", collection)
-
-    @property
-    def _constructor(self):
-        def _c(*args, **kwargs):
-            return MetadataTable(*args, collection=self._collection, **kwargs)
-
-        return _c
-
-    def sort_values(self, by, inplace=False, **kwargs):
-        result = self._collection.sort(by=by, inplace=inplace, **kwargs)
-        return None if inplace else result.metadata

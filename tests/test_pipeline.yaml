@@ -13,9 +13,8 @@ spectra_1_filters:
 - - add_precursor_mz
 - - require_precursor_mz
 - - add_parent_mass
-- - harmonize_undefined_inchikey
-- - harmonize_undefined_inchi
-- - harmonize_undefined_smiles
+- - harmonize_missing_entries
+  - keys: ["inchi", "inchikey", "smiles"]
 - - repair_inchi_inchikey_smiles
 - - repair_parent_mass_match_smiles_wrapper
 - - normalize_intensities

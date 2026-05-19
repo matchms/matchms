@@ -105,8 +105,8 @@ def test_save_as_mgf_export_style(style, expected):
 
 @pytest.mark.parametrize("charge, ionmode, parent_mass",
                          [(-1, "negative", 218.5),
-                          (2, "positive", "n/a"),
-                          (None, "n/a", 250)])
+                          (2, "positive", "wrong information"),
+                          (None, None, 250)])
 def test_save_load_mgf_consistency(tmpdir, charge, ionmode, parent_mass):
     """Test saving and loading spectrum to .mgf file"""
     mz = np.array([100.1, 200.02, 300.003], dtype="float")

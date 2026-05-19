@@ -8,6 +8,7 @@ from .typing import SpectrumType
 
 
 logger = logging.getLogger("matchms")
+ALIASES_FOR_NONE = ["", "N/A", "NA", "n/a", "NaN", "None", "no data"]
 
 
 def get_first_common_element(first: Iterable[str], second: Iterable[str]) -> str:

@@ -20,9 +20,7 @@ DERIVE_METADATA_IN_WRONG_FIELD = [
     msfilters.repair_inchi_inchikey_smiles,
 ]
 HARMONIZE_METADATA_ENTRIES = [
-    msfilters.harmonize_undefined_inchikey,
-    msfilters.harmonize_undefined_inchi,
-    msfilters.harmonize_undefined_smiles,
+    (msfilters.harmonize_missing_entries, {"keys": ["inchi", "inchikey", "smiles"]}),
     msfilters.clean_adduct,
 ]
 DERIVE_MISSING_METADATA = [

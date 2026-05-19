@@ -1,6 +1,7 @@
 import logging
 from typing import Optional
 from matchms import Spectrum
+from matchms.filtering._dispatch import collection_filter
 from matchms.typing import SpectrumType
 from ..filter_utils.load_known_adducts import load_known_adducts
 
@@ -8,7 +9,7 @@ from ..filter_utils.load_known_adducts import load_known_adducts
 logger = logging.getLogger("matchms")
 
 
-def repair_adduct_based_on_parent_mass(
+def _repair_adduct_based_on_parent_mass(
     spectrum_in: Spectrum, mass_tolerance: float, clone: Optional[bool] = True
 ) -> Optional[SpectrumType]:
     """
@@ -79,3 +80,11 @@ def _get_matching_adduct(precursor_mz, parent_mass, ion_mode, mass_tolerance):
     if mass_differences[smallest_mass_index] < mass_tolerance:
         return adduct
     return None
+
+
+# wrapper
+repair_adduct_based_on_parent_mass = collection_filter(
+    _repair_adduct_based_on_parent_mass,
+    collection_impl=None,
+    allow_spectrum_fallback=True,
+)

@@ -3,6 +3,7 @@ from functools import cached_property
 from typing import Generator, Iterable, Tuple
 import numpy as np
 from scipy.sparse import coo_array, csr_array
+from tqdm.auto import tqdm
 from matchms.Spectrum import Spectrum
 from .hashing import spectra_hashes
 from .typing import FragmentCollectionType
@@ -52,6 +53,30 @@ class FragmentCollection(ABC):
 
     @abstractmethod
     def bin_to_mz(self, bin_idx: np.ndarray | int) -> np.ndarray:
+        pass
+
+    # Filtering methods for peak processing filters.
+    @abstractmethod
+    def select_by_intensity(
+        self,
+        intensity_from: float = 0.0,
+        intensity_to: float = 1.0,
+    ) -> "FragmentCollection":
+        """Return new collection with peaks restricted to an intensity range."""
+        pass
+
+    @abstractmethod
+    def select_by_relative_intensity(
+        self,
+        intensity_from: float = 0.0,
+        intensity_to: float = 1.0,
+    ) -> "FragmentCollection":
+        """Return new collection with peaks restricted to a row-wise relative intensity range."""
+        pass
+
+    @abstractmethod
+    def keep_top_k_per_row_variable(self, k_per_row: np.ndarray) -> 'FragmentCollection':
+        """Return new collection with only the top-k intensity peaks per row."""
         pass
 
 
@@ -331,3 +356,139 @@ class CSRFragmentCollection(FragmentCollection):
     @cached_property
     def fragment_hashes(self):
         return spectra_hashes(self._array, self.bin_to_mz)
+
+    # --------------------------------------------
+    # Abstract methods for peak processing filters
+    # --------------------------------------------
+    def select_by_intensity(
+            self,
+            intensity_from: float = 0.0,
+            intensity_to: float = 1.0,
+        ) -> FragmentCollectionType:
+        """Return a new collection keeping peaks within an intensity range."""
+        if intensity_from > intensity_to:
+            raise ValueError(
+                "'intensity_from' should be smaller than or equal to 'intensity_to'."
+            )
+
+        coo = self._array.tocoo()
+        keep = (coo.data >= intensity_from) & (coo.data <= intensity_to)
+
+        new_array = coo_array(
+            (coo.data[keep], (coo.row[keep], coo.col[keep])),
+            shape=self._array.shape,
+        ).tocsr()
+
+        return self.__class__.from_array(new_array, bin_size=self.bin_size)
+
+    def select_by_relative_intensity(
+            self,
+            intensity_from: float = 0.0,
+            intensity_to: float = 1.0,
+        ) -> FragmentCollectionType:
+        """Return a new collection keeping peaks within a row-wise relative intensity range."""
+        if intensity_from < 0.0:
+            raise ValueError("'intensity_from' should be larger than or equal to 0.")
+        if intensity_to > 1.0:
+            raise ValueError("'intensity_to' should be smaller than or equal to 1.0.")
+        if intensity_from > intensity_to:
+            raise ValueError(
+                "'intensity_from' should be smaller than or equal to 'intensity_to'."
+            )
+
+        coo = self._array.tocoo()
+
+        if coo.data.size == 0:
+            return self.__class__.from_array(self._array.copy(), bin_size=self.bin_size)
+
+        row_max = self._array.max(axis=1).toarray().ravel()
+
+        nonzero_row_max = row_max[coo.row] > 0
+
+        relative_intensities = np.zeros_like(coo.data, dtype=float)
+        relative_intensities[nonzero_row_max] = (
+            coo.data[nonzero_row_max] / row_max[coo.row[nonzero_row_max]]
+        )
+
+        keep = (
+            nonzero_row_max
+            & (relative_intensities >= intensity_from)
+            & (relative_intensities <= intensity_to)
+        )
+
+        new_array = coo_array(
+            (coo.data[keep], (coo.row[keep], coo.col[keep])),
+            shape=self._array.shape,
+        ).tocsr()
+
+        return self.__class__.from_array(new_array, bin_size=self.bin_size)
+
+    def keep_top_k_per_row_variable(
+            self,
+            k_per_row: np.ndarray,
+            progress_bar: bool = False,
+            ) -> FragmentCollectionType:
+        """Keep the top-k highest-intensity peaks per row.
+
+        Parameters
+        ----------
+        k_per_row:
+            One integer value per spectrum row. For each row, only the k highest
+            intensity peaks are retained. Remaining peaks are sorted by m/z/bin
+            position, preserving normal sparse row order.
+        progress_bar:
+            Whether to display a progress bar when processing large collections.
+        """
+        k_per_row = np.asarray(k_per_row)
+
+        if k_per_row.shape[0] != len(self):
+            raise ValueError(
+                f"k_per_row length ({k_per_row.shape[0]}) does not match "
+                f"number of spectra ({len(self)})."
+            )
+
+        if np.any(k_per_row < 0):
+            raise ValueError("k_per_row values must be non-negative.")
+
+        csr = self._array
+
+        data_parts = []
+        index_parts = []
+        indptr = [0]
+
+        for row_idx in tqdm(range(len(self)), disable=not progress_bar):
+            start, end = csr.indptr[row_idx], csr.indptr[row_idx + 1]
+            row_data = csr.data[start:end]
+            row_indices = csr.indices[start:end]
+
+            n_peaks = row_data.size
+            k = int(k_per_row[row_idx])
+
+            if k >= n_peaks:
+                keep = np.arange(n_peaks)
+            elif k == 0:
+                keep = np.array([], dtype=np.int64)
+            else:
+                # Select k largest intensities without fully sorting the row.
+                keep = np.argpartition(row_data, -k)[-k:]
+
+                # Restore m/z/bin order, matching Spectrum implementation behavior.
+                keep = keep[np.argsort(row_indices[keep])]
+
+            data_parts.append(row_data[keep])
+            index_parts.append(row_indices[keep])
+            indptr.append(indptr[-1] + keep.size)
+
+        if len(data_parts) > 0:
+            data = np.concatenate(data_parts).astype(csr.data.dtype, copy=False)
+            indices = np.concatenate(index_parts).astype(csr.indices.dtype, copy=False)
+        else:
+            data = np.array([], dtype=csr.data.dtype)
+            indices = np.array([], dtype=csr.indices.dtype)
+
+        new_array = csr_array(
+            (data, indices, np.asarray(indptr, dtype=csr.indptr.dtype)),
+            shape=csr.shape,
+        )
+
+        return self.__class__.from_array(new_array, bin_size=self.bin_size)
