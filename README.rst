@@ -70,9 +70,9 @@ de Jonge NF, Hecht H, Michael Strobel, Mingxun Wang, van der Hooft JJJ, Huber F.
     :alt: Continuous integration workflow
     :target: https://github.com/matchms/matchms/actions/workflows/CI_first_code_check.yml
 
-.. |CI Build| image:: https://github.com/matchms/matchms/actions/workflows/CI_build.yml/badge.svg
+.. |CI Build| image:: https://github.com/matchms/matchms/actions/workflows/CI_build.yml/badge.svg?branch=master
     :alt: Continuous integration workflow
-    :target: https://github.com/matchms/matchms/actions/workflows/CI_build.yml
+    :target: https://github.com/matchms/matchms/actions/workflows/CI_build.yml?query=branch%3Amaster
 
 .. |ReadTheDocs Badge| image:: https://readthedocs.org/projects/matchms/badge/?version=latest
     :alt: Documentation Status
