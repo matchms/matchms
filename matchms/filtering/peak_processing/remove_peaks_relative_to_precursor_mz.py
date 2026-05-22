@@ -1,4 +1,3 @@
-from typing import Optional
 import numpy as np
 from matchms.filtering._dispatch import collection_filter
 from matchms.Fragments import Fragments
@@ -7,8 +6,8 @@ from matchms.typing import SpectrumType
 
 def _remove_peaks_relative_to_precursor_mz(
     spectrum_in: SpectrumType, offset_to_precursor: float = -1.6,
-    clone: Optional[bool] = True
-) -> Optional[SpectrumType]:
+    clone: bool | None = True
+) -> SpectrumType | None:
     """Remove all peaks with m/z values > precursor-m/z + offset_to_precursor.
 
     If offset_to_precursor is negative, this means that all peaks

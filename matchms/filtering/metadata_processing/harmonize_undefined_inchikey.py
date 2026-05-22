@@ -1,4 +1,3 @@
-from typing import List, Optional
 from deprecated import deprecated
 from matchms.filtering.metadata_processing.harmonize_missing_entries import (
     harmonize_missing_entries,
@@ -14,9 +13,9 @@ from matchms.utils import ALIASES_FOR_NONE
 def harmonize_undefined_inchikey(
     spectrum_in: SpectrumType,
     undefined: str = "",
-    aliases: List[str] = None,
-    clone: Optional[bool] = True,
-) -> Optional[SpectrumType]:
+    aliases: list[str] = None,
+    clone: bool | None = True,
+) -> SpectrumType | None:
     """Replace all aliases for empty/undefined inchikey entries by ``undefined``."""
     if aliases is None:
         aliases = ALIASES_FOR_NONE

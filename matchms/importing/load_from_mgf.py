@@ -1,13 +1,14 @@
 import os
+from collections.abc import Generator
 from pathlib import Path
-from typing import Generator, TextIO, Union
+from typing import TextIO
 from pyteomics.mgf import MGF
 from matchms.importing.parsing_utils import parse_spectrum_dict
 from matchms.Spectrum import Spectrum
 
 
 def load_from_mgf(
-    filename: Union[str, Path, TextIO], metadata_harmonization: bool = True
+    filename: str | Path | TextIO, metadata_harmonization: bool = True
 ) -> Generator[Spectrum, None, None]:
     """Load spectrum(s) from mgf file.
 

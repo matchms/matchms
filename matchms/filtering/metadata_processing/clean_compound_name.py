@@ -1,13 +1,12 @@
 import logging
 import re
-from typing import Optional
 from matchms.typing import SpectrumType
 
 
 logger = logging.getLogger("matchms")
 
 
-def clean_compound_name(spectrum_in: SpectrumType, clone: Optional[bool] = True) -> Optional[SpectrumType]:
+def clean_compound_name(spectrum_in: SpectrumType, clone: bool | None = True) -> SpectrumType | None:
     """Clean compound name.
 
     A list of frequently seen name additions that do not belong to the compound

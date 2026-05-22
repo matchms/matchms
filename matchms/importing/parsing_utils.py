@@ -1,12 +1,12 @@
 """Helper functions for parsing metadata."""
 
 import ast
-from typing import Any, Dict, Union
+from typing import Any
 import numpy as np
 from matchms.Spectrum import Spectrum
 
 
-def find_by_key(data: Union[list, dict], target: str) -> Any:
+def find_by_key(data: list | dict, target: str) -> Any:
     """Helper function to return entries from nested list/dictionary.
 
     Parameters
@@ -104,7 +104,7 @@ def sort_by_mz(mz, intensities):
     return mz, intensities
 
 
-def parse_spectrum_dict(spectrum: Dict, metadata_harmonization, spectrum_type="pyteomics") -> Spectrum:
+def parse_spectrum_dict(spectrum: dict, metadata_harmonization, spectrum_type="pyteomics") -> Spectrum:
     """Parse a spectrum dict (as read from a msp file for instance) to a matchms Spectrum."""
     metadata = spectrum.get("params", None)
     mz = spectrum["m/z array"]

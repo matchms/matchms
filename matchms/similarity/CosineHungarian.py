@@ -1,4 +1,3 @@
-from typing import List, Optional, Tuple
 import numpy as np
 from scipy.optimize import linear_sum_assignment
 from matchms.similarity.spectrum_similarity_functions import collect_peak_pairs
@@ -41,7 +40,7 @@ class CosineHungarian(BaseSimilarityWithSparse):
         self.mz_power = mz_power
         self.intensity_power = intensity_power
 
-    def pair(self, spectrum_1: SpectrumType, spectrum_2: SpectrumType) -> Tuple[float, int]:
+    def pair(self, spectrum_1: SpectrumType, spectrum_2: SpectrumType) -> tuple[float, int]:
         """Calculate cosine score between two spectra.
 
         Parameters
@@ -55,7 +54,7 @@ class CosineHungarian(BaseSimilarityWithSparse):
         -------
         Tuple with cosine score and number of matched peaks.
         """
-        def get_matching_pairs() -> Optional[np.ndarray]:
+        def get_matching_pairs() -> np.ndarray | None:
             """Find all within-tolerance peak pairs, sorted by descending intensity product.
 
             Returns ``None`` when no peaks fall within *tolerance*.
@@ -65,11 +64,11 @@ class CosineHungarian(BaseSimilarityWithSparse):
                                                 intensity_power=self.intensity_power)
             if matching_pairs is None:
                 return None
-            matching_pairs = matching_pairs[np.argsort(matching_pairs[:, 2], kind='mergesort')[::-1], :]
+            matching_pairs = matching_pairs[np.argsort(matching_pairs[:, 2], kind="mergesort")[::-1], :]
             return matching_pairs
 
-        def get_matching_pairs_matrix() -> Tuple[
-            Optional[List[float]], Optional[List[float]], Optional[np.ndarray]
+        def get_matching_pairs_matrix() -> tuple[
+            list[float] | None, list[float] | None, np.ndarray | None
         ]:
             """Build a cost matrix for the Hungarian algorithm.
 
@@ -99,7 +98,7 @@ class CosineHungarian(BaseSimilarityWithSparse):
                             paired_peaks2.index(matching_pairs[i, 1])] = 1 - matching_pairs[i, 2]
             return paired_peaks1, paired_peaks2, cost_matrix
 
-        def solve_hungarian() -> Tuple[float, List[Tuple[int, int]]]:
+        def solve_hungarian() -> tuple[float, list[tuple[int, int]]]:
             """Solve the optimal peak assignment via the Hungarian algorithm.
 
             The algorithm assigns ``min(rows, cols)`` pairs. Some of those
@@ -128,7 +127,7 @@ class CosineHungarian(BaseSimilarityWithSparse):
             # Match count excludes phantoms (cells still at 1.0).
             used_matches = [
                 (int(paired_peaks1[x]), int(paired_peaks2[y]))
-                for (x, y) in zip(row_ind, col_ind)
+                for (x, y) in zip(row_ind, col_ind, strict=True)
                 if matching_pairs_matrix[x, y] < 1.0
             ]
             return score, used_matches

@@ -1,5 +1,4 @@
 import logging
-from typing import Tuple
 import numpy as np
 from matchms.typing import SpectrumType
 from ._precursor_validation import get_valid_precursor_mz
@@ -62,7 +61,7 @@ class NeutralLossesCosine(BaseSimilarityWithSparse):
             matching_pairs = matching_pairs[np.argsort(matching_pairs[:, 2], kind="mergesort")[::-1], :]
         return matching_pairs
     
-    def pair(self, spectrum_1: SpectrumType, spectrum_2: SpectrumType) -> Tuple[float, int]:
+    def pair(self, spectrum_1: SpectrumType, spectrum_2: SpectrumType) -> tuple[float, int]:
         """Calculate neutral losses cosine score between two spectra.
 
         Parameters

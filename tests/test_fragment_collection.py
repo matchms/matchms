@@ -371,7 +371,7 @@ def test_iter_peak_arrays_matches_to_peak_arrays(fragments):
 
     assert len(peak_rows_from_iter) == len(peak_rows_from_list)
 
-    for (mz_a, int_a), (mz_b, int_b) in zip(peak_rows_from_iter, peak_rows_from_list):
+    for (mz_a, int_a), (mz_b, int_b) in zip(peak_rows_from_iter, peak_rows_from_list, strict=True):
         np.testing.assert_allclose(mz_a, mz_b)
         np.testing.assert_allclose(int_a, int_b)
 

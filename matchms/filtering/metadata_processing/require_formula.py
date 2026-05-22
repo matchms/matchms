@@ -1,13 +1,12 @@
 import logging
 import re
-from typing import Optional
 from matchms.typing import SpectrumType
 
 
 logger = logging.getLogger("matchms")
 
 
-def require_formula(spectrum: SpectrumType) -> Optional[SpectrumType]:
+def require_formula(spectrum: SpectrumType) -> SpectrumType | None:
     """Ensure that the molecular formula is present and looks like a valid formula."""
     if spectrum is None:
         return None

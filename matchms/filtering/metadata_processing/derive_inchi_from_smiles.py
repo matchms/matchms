@@ -1,5 +1,4 @@
 import logging
-from typing import Optional
 from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import (
     convert_smiles_to_inchi,
     is_valid_inchi,
@@ -11,7 +10,7 @@ from matchms.typing import SpectrumType
 logger = logging.getLogger("matchms")
 
 
-def derive_inchi_from_smiles(spectrum_in: SpectrumType, clone: Optional[bool] = True) -> Optional[SpectrumType]:
+def derive_inchi_from_smiles(spectrum_in: SpectrumType, clone: bool | None = True) -> SpectrumType | None:
     """Find missing Inchi and derive from smiles where possible.
 
     Parameters

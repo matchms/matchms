@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
+from collections.abc import Generator, Iterable
 from functools import cached_property
-from typing import Generator, Iterable, Tuple
 import numpy as np
 from scipy.sparse import coo_array, csr_array
 from tqdm.auto import tqdm
@@ -10,9 +10,10 @@ from .typing import FragmentCollectionType
 
 
 class FragmentCollection(ABC):
+    """Abstract base class for a collection of spectra fragments."""
     @property
     @abstractmethod
-    def shape(self) -> Tuple[int, int]:
+    def shape(self) -> tuple[int, int]:
         """Return (n_spectra, n_bins)."""
         pass
 
@@ -21,21 +22,21 @@ class FragmentCollection(ABC):
         pass
 
     @abstractmethod
-    def copy(self) -> 'FragmentCollection':
+    def copy(self) -> "FragmentCollection":
         pass
 
     @abstractmethod
-    def get_row(self, idx: int) -> Tuple[np.ndarray, np.ndarray]:
+    def get_row(self, idx: int) -> tuple[np.ndarray, np.ndarray]:
         """Return (mz, intensities) for a single row."""
         pass
 
     @abstractmethod
-    def take(self, indices: Iterable[int]) -> 'FragmentCollection':
+    def take(self, indices: Iterable[int]) -> "FragmentCollection":
         """Return new collection with selected rows."""
         pass
 
     @abstractmethod
-    def slice_mz(self, mz_min: float | None = None, mz_max: float | None = None) -> 'FragmentCollection':
+    def slice_mz(self, mz_min: float | None = None, mz_max: float | None = None) -> "FragmentCollection":
         """Return new collection with restricted m/z range."""
         pass
 
@@ -83,7 +84,7 @@ class FragmentCollection(ABC):
         pass
 
     @abstractmethod
-    def keep_top_k_per_row_variable(self, k_per_row: np.ndarray) -> 'FragmentCollection':
+    def keep_top_k_per_row_variable(self, k_per_row: np.ndarray) -> "FragmentCollection":
         """Return new collection with only the top-k intensity peaks per row."""
         pass
 

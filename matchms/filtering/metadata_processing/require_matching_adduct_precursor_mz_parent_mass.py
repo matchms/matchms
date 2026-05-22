@@ -1,6 +1,5 @@
 import logging
 import math
-from typing import Optional
 from matchms.filtering.filter_utils.interpret_unknown_adduct import get_multiplier_and_mass_from_adduct
 from matchms.typing import SpectrumType
 
@@ -8,7 +7,7 @@ from matchms.typing import SpectrumType
 logger = logging.getLogger("matchms")
 
 
-def require_matching_adduct_precursor_mz_parent_mass(spectrum, tolerance=0.1) -> Optional[SpectrumType]:
+def require_matching_adduct_precursor_mz_parent_mass(spectrum, tolerance=0.1) -> SpectrumType | None:
     """Checks if the adduct precursor mz and parent mass match within the tolerance"""
     if spectrum is None:
         return None
@@ -28,10 +27,10 @@ def require_matching_adduct_precursor_mz_parent_mass(spectrum, tolerance=0.1) ->
         precursor_mz = float(spectrum.get("precursor_mz"))
         parent_mass = float(spectrum.get("parent_mass"))
     except (TypeError, ValueError):
-        logger.warning((
+        logger.warning(
             "precursor_mz or parent mass could not be converted to float, please run add_parent_mass and"
             "add_precursor_mz first"
-        ))
+        )
         return spectrum
 
     multiplier, correction_mass = get_multiplier_and_mass_from_adduct(adduct)

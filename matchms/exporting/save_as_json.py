@@ -1,11 +1,10 @@
 import json
-from typing import List
 from ..Spectrum import Spectrum
 from ..utils import filter_empty_spectra, fingerprint_export_warning, rename_deprecated_params
 
 
 @rename_deprecated_params(param_mapping={"spectrums": "spectra"}, version="0.26.5")
-def save_as_json(spectra: List[Spectrum], filename: str, export_style: str = "matchms"):
+def save_as_json(spectra: list[Spectrum], filename: str, export_style: str = "matchms"):
     """Save spectrum(s) as json file.
 
     Example:
@@ -50,6 +49,7 @@ def save_as_json(spectra: List[Spectrum], filename: str, export_style: str = "ma
 
 
 def create_spectrum_json_encoder(export_style):
+    """Creates a custom JSON encoder for matchms.Spectrum.Spectrum objects."""
     class CustomSpectrumJSONEncoder(json.JSONEncoder):
         def default(self, o):
             """JSON Encoder for a matchms.Spectrum.Spectrum object"""

@@ -1,6 +1,5 @@
 import logging
 import re
-from typing import Optional
 import numpy as np
 from matchms.typing import SpectrumType
 from .make_charge_int import _convert_charge_to_int
@@ -11,7 +10,7 @@ _accepted_types = (float, str, int)
 _accepted_missing_entries = ["", "N/A", "NA", "n/a"]
 
 
-def interpret_pepmass(spectrum_in, clone: Optional[bool] = True) -> Optional[SpectrumType]:
+def interpret_pepmass(spectrum_in, clone: bool | None = True) -> SpectrumType | None:
     """Reads pepmass field (if present) and adds values to correct field(s).
 
     The field "pepmass" or "PEPMASS" is often used to describe the precursor ion.

@@ -2,7 +2,7 @@ import inspect
 import logging
 import os
 from collections import OrderedDict
-from typing import Callable, Dict, Iterable, Optional, Tuple, Union
+from collections.abc import Callable, Iterable
 from matchms.exporting import save_spectra
 from matchms.filtering.filter_order import ALL_FILTERS
 from matchms.filtering.SpectrumProcessor import (
@@ -17,7 +17,7 @@ from matchms.yaml_file_functions import ordered_dump
 
 logger = logging.getLogger("matchms")
 
-FunctionWithParametersType = Tuple[Union[Callable, str], Dict[str, object]]
+FunctionWithParametersType = tuple[Callable | str, dict[str, object]]
 
 
 class SpectraCollectionProcessor:
@@ -85,7 +85,7 @@ class SpectraCollectionProcessor:
         processed = processor.process_spectra(spectra)
     """
 
-    def __init__(self, filters: Iterable[Union[str, Callable, FunctionWithParametersType]]):
+    def __init__(self, filters: Iterable[str | Callable | FunctionWithParametersType]):
         self.filters = []
         self.filter_order = [x.__name__ for x in ALL_FILTERS]
 
@@ -94,8 +94,8 @@ class SpectraCollectionProcessor:
 
     def parse_and_add_filter(
         self,
-        filter_description: Union[str, Callable, FunctionWithParametersType],
-        filter_position: Optional[int] = None,
+        filter_description: str | Callable | FunctionWithParametersType,
+        filter_position: int | None = None,
     ):
         """Add a filter by parsing the allowed filter description formats."""
         filter_args = None
@@ -124,7 +124,7 @@ class SpectraCollectionProcessor:
         )
         self._store_filter(filter_function, filter_args)
 
-    def _store_filter(self, new_filter_function: Callable, filter_params: Optional[Dict[str, object]]):
+    def _store_filter(self, new_filter_function: Callable, filter_params: dict[str, object] | None):
         """Store filter, replace duplicates, and sort filters."""
         if not callable(new_filter_function):
             raise TypeError("Expected callable filter function.")
@@ -156,7 +156,7 @@ class SpectraCollectionProcessor:
         if not filter_already_added:
             self.filters.append(new_filter_function)
 
-    def _add_filter_to_filter_order(self, filter_function_name: str, filter_position: Optional[int] = None):
+    def _add_filter_to_filter_order(self, filter_function_name: str, filter_position: int | None = None):
         """Add the filter name to the filter order list if it is not yet there."""
         if filter_function_name in self.filter_order:
             if filter_position is None:

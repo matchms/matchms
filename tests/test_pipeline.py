@@ -242,7 +242,7 @@ def test_pipeline_logging(tmp_path):
     pipeline.run(spectra_file_msp)
 
     assert os.path.exists(logfile)
-    with open(logfile, "r", encoding="utf-8") as f:
+    with open(logfile, encoding="utf-8") as f:
         content = f.read()
     assert "Start running matchms pipeline" in content
 

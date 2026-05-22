@@ -1,5 +1,4 @@
 import logging
-from typing import Optional
 import numpy as np
 import pandas as pd
 from matchms.filtering._dispatch import collection_filter
@@ -12,8 +11,8 @@ logger = logging.getLogger("matchms")
 
 def _correct_charge_spectrum(
     spectrum_in: SpectrumType,
-    clone: Optional[bool] = True,
-) -> Optional[SpectrumType]:
+    clone: bool | None = True,
+) -> SpectrumType | None:
     """Correct charge values based on given ionmode.
 
     For some spectra, the charge value is either undefined or inconsistent with its
@@ -76,7 +75,7 @@ def _correct_charge_spectrum(
 
 def _correct_charge_collection(
     spectrum_in: SpectraCollection,
-    clone: Optional[bool] = True,
+    clone: bool | None = True,
 ) -> SpectraCollection:
     """Correct charge values based on ionmode for a SpectraCollection."""
     target = spectrum_in.copy() if clone else spectrum_in

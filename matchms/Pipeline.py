@@ -2,8 +2,8 @@ import logging
 import operator
 import os
 from collections import OrderedDict
+from collections.abc import Callable, Iterable, Sequence
 from datetime import datetime
-from typing import Callable, Iterable, List, Optional, Sequence, Union
 import numpy as np
 import matchms.similarity as mssimilarity
 from matchms.filtering.filter_order import ALL_FILTERS
@@ -34,10 +34,10 @@ for key, value in mssimilarity.__dict__.items():
 
 
 def create_workflow(
-    yaml_file_name: Optional[str] = None,
-    spectra_1_filters: Iterable[Union[str, Callable, FunctionWithParametersType]] = (),
-    spectra_2_filters: Iterable[Union[str, Callable, FunctionWithParametersType]] = (),
-    score_computations: Iterable[Union[str, List[Union[str, dict]]]] = (),
+    yaml_file_name: str | None = None,
+    spectra_1_filters: Iterable[str | Callable | FunctionWithParametersType] = (),
+    spectra_2_filters: Iterable[str | Callable | FunctionWithParametersType] = (),
+    score_computations: Iterable[str | list[str | dict]] = (),
 ) -> OrderedDict:
     """Create a workflow specification for Pipeline."""
     workflow = OrderedDict()
@@ -83,13 +83,13 @@ class Pipeline:
         workflow: OrderedDict,
         progress_bar: bool = True,
         logging_level: str = "WARNING",
-        logging_file: Optional[str] = None,
+        logging_file: str | None = None,
     ):
-        self._spectra_1: List[SpectrumType] = []
-        self._spectra_2: Optional[List[SpectrumType]] = None
+        self._spectra_1: list[SpectrumType] = []
+        self._spectra_2: list[SpectrumType] | None = None
 
-        self.scores: Optional[Scores] = None
-        self.mask: Optional[ScoresMask] = None
+        self.scores: Scores | None = None
+        self.mask: ScoresMask | None = None
 
         self.progress_bar = progress_bar
         self.logging_level = logging_level
@@ -98,8 +98,8 @@ class Pipeline:
         self.__workflow = workflow
         self.check_workflow()
 
-        self.processing_spectra_1: Optional[SpectrumProcessor] = None
-        self.processing_spectra_2: Optional[SpectrumProcessor] = None
+        self.processing_spectra_1: SpectrumProcessor | None = None
+        self.processing_spectra_2: SpectrumProcessor | None = None
 
         self._initialize_spectrum_processor_1()
         self._initialize_spectrum_processor_2()
@@ -110,7 +110,7 @@ class Pipeline:
         yaml_file_name: str,
         progress_bar: bool = True,
         logging_level: str = "WARNING",
-        logging_file: Optional[str] = None,
+        logging_file: str | None = None,
     ) -> "Pipeline":
         workflow = load_workflow_from_yaml_file(yaml_file_name)
         return cls(
@@ -278,8 +278,8 @@ class Pipeline:
 
     def import_spectra(
         self,
-        spectra_1: Union[List[str], str],
-        spectra_2: Optional[Union[List[str], str]] = None,
+        spectra_1: list[str] | str,
+        spectra_2: list[str] | str | None = None,
     ) -> None:
         """Import one or two spectra collections from file(s)."""
         self.write_to_logfile("--- Importing data ---")
@@ -311,7 +311,7 @@ class Pipeline:
             ordered_dump(workflow, file)
 
     @property
-    def score_computations(self) -> Sequence[Union[str, List[dict]]]:
+    def score_computations(self) -> Sequence[str | list[dict]]:
         return self.__workflow["score_computations"]
 
     @score_computations.setter
@@ -338,15 +338,16 @@ class Pipeline:
         self._initialize_spectrum_processor_2()
 
     @property
-    def spectra_1(self) -> List[SpectrumType]:
+    def spectra_1(self) -> list[SpectrumType]:
         return self._spectra_1
 
     @property
-    def spectra_2(self) -> Optional[List[SpectrumType]]:
+    def spectra_2(self) -> list[SpectrumType] | None:
         return self._spectra_2
 
 
 def _instantiate_similarity(computation) -> BaseSimilarity:
+    """Instantiate a similarity measure from a score computation specification."""
     name_or_callable = computation[0]
     params = computation[1] if len(computation) > 1 else {}
 
@@ -363,6 +364,7 @@ def _instantiate_similarity(computation) -> BaseSimilarity:
 
 
 def _mask_to_index_arrays(mask: ScoresMask) -> tuple[np.ndarray, np.ndarray]:
+    """Convert a ScoresMask to index arrays for rows and columns."""
     if mask.is_sparse:
         return mask.row, mask.col
     row, col = np.nonzero(mask.dense_mask)
@@ -373,7 +375,7 @@ def _build_mask_from_scores(
     scores: Scores,
     operation_name: str,
     value,
-    field: Optional[str] = None,
+    field: str | None = None,
 ) -> ScoresMask:
     operations = {
         ">": operator.gt,
@@ -408,6 +410,7 @@ def _build_mask_from_scores(
 
 
 def get_unused_filters(yaml_file):
+    """Checks which filters from matchms are not used in the yaml file."""
     workflow = load_workflow_from_yaml_file(yaml_file)
     processor = SpectrumProcessor(workflow["spectra_1_filters"])
 
@@ -417,7 +420,8 @@ def get_unused_filters(yaml_file):
             print(filter_function.__name__)
 
 
-def check_score_computation(score_computations: Sequence[Union[str, List[dict]]]) -> None:
+def check_score_computation(score_computations: Sequence[str | list[dict]]) -> None:
+    """Check if score computations are valid."""
     if score_computations is None:
         return
 

@@ -1,4 +1,3 @@
-from typing import Tuple
 import numpy as np
 from numba import njit
 from numba.typed import List
@@ -88,15 +87,15 @@ def find_matches(spec1_mz: np.ndarray, spec2_mz: np.ndarray,
 @njit(fastmath=True)
 def score_best_matches(matching_pairs: np.ndarray, spec1: np.ndarray,
                        spec2: np.ndarray, mz_power: float = 0.0,
-                       intensity_power: float = 1.0) -> Tuple[float, int]:
+                       intensity_power: float = 1.0) -> tuple[float, int]:
     """Calculate cosine-like score by multiplying matches. Does require a sorted
     list of matching peaks (sorted by intensity product)."""
-    score = float(0.0)
-    used_matches = int(0)
+    score = 0.0
+    used_matches = 0
     used1 = set()
     used2 = set()
     for i in range(matching_pairs.shape[0]):
-        if not matching_pairs[i, 0] in used1 and not matching_pairs[i, 1] in used2:
+        if matching_pairs[i, 0] not in used1 and matching_pairs[i, 1] not in used2:
             score += matching_pairs[i, 2]
             used1.add(matching_pairs[i, 0])  # Every peak can only be paired once
             used2.add(matching_pairs[i, 1])  # Every peak can only be paired once

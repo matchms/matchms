@@ -2,8 +2,9 @@ import inspect
 import logging
 import os
 from collections import OrderedDict, defaultdict
+from collections.abc import Callable, Iterable
 from functools import partial
-from typing import Callable, Dict, Iterable, List, Optional, Tuple, Union
+from typing import Optional
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
@@ -14,7 +15,7 @@ from matchms.yaml_file_functions import ordered_dump
 
 
 logger = logging.getLogger("matchms")
-FunctionWithParametersType = Tuple[Union[Callable, str], Dict[str, any]]
+FunctionWithParametersType = tuple[Callable | str, dict[str, any]]
 
 
 class SpectrumProcessor:
@@ -30,7 +31,7 @@ class SpectrumProcessor:
         A list of filter functions, see add_filter for all the allowed formats.
     """
 
-    def __init__(self, filters: Iterable[Union[str, Callable, FunctionWithParametersType]]):
+    def __init__(self, filters: Iterable[str | Callable | FunctionWithParametersType]):
         self.filters = []
         self.filter_order = [x.__name__ for x in ALL_FILTERS]
         for filter_name in filters:
@@ -38,12 +39,8 @@ class SpectrumProcessor:
 
     def parse_and_add_filter(
         self,
-        filter_description: Union[
-            str,
-            Callable,
-            FunctionWithParametersType,
-        ],
-        filter_position: Optional[int] = None,
+        filter_description: str | Callable | FunctionWithParametersType,
+        filter_position: int | None = None,
     ):
         """Adds a filter, by parsing the different allowed inputs.
 
@@ -77,7 +74,7 @@ class SpectrumProcessor:
         self._add_filter_to_filter_order(filter_function.__name__, filter_position=filter_position)
         self._store_filter(filter_function, filter_args)
 
-    def _store_filter(self, new_filter_function: Callable, filter_params: Optional[Dict[str, any]]):
+    def _store_filter(self, new_filter_function: Callable, filter_params: dict[str, any] | None):
         """Stores filter, removes duplicates and sorts filters"""
         if not callable(new_filter_function):
             raise TypeError("Expected callable filter function.")
@@ -105,7 +102,7 @@ class SpectrumProcessor:
         if not filter_already_added:
             self.filters.append(new_filter_function)
 
-    def _add_filter_to_filter_order(self, filter_function_name, filter_position: Optional[int] = None):
+    def _add_filter_to_filter_order(self, filter_function_name, filter_position: int | None = None):
         """Adds the filter name to the filter order list if it is not yet there.
 
         filter_function_name:
@@ -178,7 +175,7 @@ class SpectrumProcessor:
         spectra: Iterable[Spectrum],
         progress_bar: bool = True,
         cleaned_spectra_file=None,
-        create_report: Optional[bool] = False,
+        create_report: bool | None = False,
     ):
         """
         Process a list of spectra with all filters in the processing pipeline.
@@ -252,6 +249,7 @@ class SpectrumProcessor:
 
 
 def load_matchms_filter_from_string(filter_name):
+    """Loads a matchms filter function from a string."""
     if not isinstance(filter_name, str):
         raise ValueError("Expected a string")
     if filter_name not in FILTER_FUNCTION_NAMES:
@@ -259,7 +257,7 @@ def load_matchms_filter_from_string(filter_name):
     return FILTER_FUNCTION_NAMES[filter_name]
 
 
-def create_partial_function(filter_function: Callable, filter_params: Optional[Dict[str, any]]):
+def create_partial_function(filter_function: Callable, filter_params: dict[str, any] | None):
     """Adds the filter params to the filter function"""
     if filter_params is not None:
         if not isinstance(filter_params, dict):
@@ -301,7 +299,7 @@ def get_parameter_settings(func):
 class ProcessingReport:
     """Class to keep track of spectrum changes during filtering."""
 
-    def __init__(self, filter_functions: Optional[List[Callable]] = None):
+    def __init__(self, filter_functions: list[Callable] | None = None):
         if filter_functions:
             self.filter_names = [filter_function.__name__ for filter_function in filter_functions]
         else:

@@ -1,5 +1,5 @@
+from collections.abc import Generator
 from pathlib import Path
-from typing import Generator, Union
 import numpy as np
 from pyteomics.mzxml import read
 from matchms.importing.parsing_utils import parse_mzml_mzxml_metadata, sort_by_mz
@@ -7,7 +7,7 @@ from matchms.Spectrum import Spectrum
 
 
 def load_from_mzxml(
-    filename: Union[str, Path], ms_level: int = 2, metadata_harmonization: bool = True
+    filename: str | Path, ms_level: int = 2, metadata_harmonization: bool = True
 ) -> Generator[Spectrum, None, None]:
     """Load spectrum(s) from mzml file.
 

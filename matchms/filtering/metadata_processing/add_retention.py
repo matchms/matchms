@@ -1,6 +1,6 @@
 import logging
 import re
-from typing import Any, List, Optional
+from typing import Any
 from matchms.typing import SpectrumType
 from matchms.utils import filter_none, get_common_keys
 
@@ -35,7 +35,7 @@ def _safe_store_value(metadata: dict, value: Any, target_key: str) -> dict:
     return metadata
 
 
-def _safe_convert_to_float(retention_time: Any) -> Optional[float]:
+def _safe_convert_to_float(retention_time: Any) -> float | None:
     """Safely convert value to float. Return 'None' on failure.
 
     Parameters
@@ -73,7 +73,7 @@ def _safe_convert_to_float(retention_time: Any) -> Optional[float]:
     return rt
 
 
-def _add_retention(metadata: dict, target_key: str, accepted_keys: List[str]) -> dict:
+def _add_retention(metadata: dict, target_key: str, accepted_keys: list[str]) -> dict:
     """Add value from one of accepted keys to target key.
 
     Parameters
@@ -98,7 +98,7 @@ def _add_retention(metadata: dict, target_key: str, accepted_keys: List[str]) ->
     return metadata
 
 
-def add_retention_time(spectrum_in: SpectrumType, clone: Optional[bool] = True) -> Optional[SpectrumType]:
+def add_retention_time(spectrum_in: SpectrumType, clone: bool | None = True) -> SpectrumType | None:
     """Add retention time information to the 'retention_time' key as float.
     Negative values and those not convertible to a float result in 'retention_time'
     being 'None'.
@@ -124,7 +124,7 @@ def add_retention_time(spectrum_in: SpectrumType, clone: Optional[bool] = True) 
     return spectrum
 
 
-def add_retention_index(spectrum_in: SpectrumType, clone: Optional[bool] = True) -> Optional[SpectrumType]:
+def add_retention_index(spectrum_in: SpectrumType, clone: bool | None = True) -> SpectrumType | None:
     """Add retention index into 'retention_index' key if present.
 
 

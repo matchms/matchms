@@ -3,8 +3,7 @@ import json
 import logging
 import os
 import time
-from functools import lru_cache
-from typing import List, Optional
+from functools import cache
 from urllib.error import URLError
 import numpy as np
 import pandas as pd
@@ -23,10 +22,10 @@ logger = logging.getLogger("matchms")
 
 def derive_annotation_from_compound_name(
     spectrum_in: Spectrum,
-    annotated_compound_names_file: Optional[str] = None,
+    annotated_compound_names_file: str | None = None,
     mass_tolerance: float = 0.1,
-    clone: Optional[bool] = True,
-) -> Optional[SpectrumType]:
+    clone: bool | None = True,
+) -> SpectrumType | None:
     """Adds inchi, inchikey based on compound name by searching pubchem
     smiles is not supported anymore by pubchempy, see https://github.com/matchms/matchms/issues/823
     Smiles can be derived from inchi, by running the filter derive_smiles_from_inchi
@@ -90,8 +89,8 @@ def derive_annotation_from_compound_name(
     return spectrum
 
 
-@lru_cache(maxsize=None)
-def _get_pubchem_compound_name_annotation(compound_name, csv_file=None) -> List[dict]:
+@cache
+def _get_pubchem_compound_name_annotation(compound_name, csv_file=None) -> list[dict]:
     """Loads compound name annotation from file or gets it from pubchem any new annotation is added to the file
 
     functools.cache, makes sure that previously loaded or calculated compound names do not have to be reloaded.
@@ -121,7 +120,7 @@ def _get_pubchem_compound_name_annotation(compound_name, csv_file=None) -> List[
     return annotated_compound_names
 
 
-def _pubchem_name_search(compound_name: str, name_search_depth=10, max_retries=15) -> List[dict]:
+def _pubchem_name_search(compound_name: str, name_search_depth=10, max_retries=15) -> list[dict]:
     """Search pubmed for compound name"""
     retries = 0
     max_delay = 3600
@@ -195,7 +194,7 @@ def _load_compound_name_annotations(annotated_compound_names_csv, compound_name:
     return matches.to_dict("records")
 
 
-def _write_compound_name_annotations(annotated_compound_names_csv, compound_name_annotations: List[dict]):
+def _write_compound_name_annotations(annotated_compound_names_csv, compound_name_annotations: list[dict]):
     if not os.path.exists(annotated_compound_names_csv):
         with open(annotated_compound_names_csv, "w", encoding="utf8") as f:
             f.write("compound_name,smiles,inchi,inchikey,monoisotopic_mass\n")

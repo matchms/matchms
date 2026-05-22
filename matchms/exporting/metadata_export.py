@@ -1,7 +1,7 @@
 import csv
 import json
 import logging
-from typing import Any, Optional
+from typing import Any
 import numpy as np
 from ..Spectrum import Spectrum
 from ..utils import filter_empty_spectra, rename_deprecated_params
@@ -11,7 +11,7 @@ logger = logging.getLogger("matchms")
 
 
 def _get_metadata_dict(
-    spectrum: Spectrum, include_fields: Optional[list[str]] = None
+    spectrum: Spectrum, include_fields: list[str] | None = None
 ) -> dict[str, Any]:
     """Extract keys from spectrum metadata. Will silently continue if a key is not found.
 
@@ -35,7 +35,7 @@ def _get_metadata_dict(
 
 @rename_deprecated_params(param_mapping={"spectrums": "spectra"}, version="0.26.5")
 def export_metadata_as_json(
-    spectra: list[Spectrum], filename: str, include_fields: Optional[list[str]] = None
+    spectra: list[Spectrum], filename: str, include_fields: list[str] | None = None
 ):
     """Export metadata to json file.
 
@@ -62,7 +62,7 @@ def export_metadata_as_json(
 def export_metadata_as_csv(
     spectra: list[Spectrum],
     filename: str,
-    include_fields: Optional[list[str]] = None,
+    include_fields: list[str] | None = None,
     delimiter: str = ",",
 ):
     """Export metadata to csv file.
@@ -130,7 +130,7 @@ def get_metadata_as_array(spectra: list[Spectrum]) -> tuple[np.array, list[str]]
     values = []
 
     for s in spectra:
-        value = tuple((s.get(k) for k in keys))
+        value = tuple(s.get(k) for k in keys)
         values.append(value)
 
     # Create a structured numpy array with keys as field names

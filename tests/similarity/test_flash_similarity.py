@@ -121,14 +121,14 @@ def test_entropy_neutral_loss_vs_hybrid_prefers_fragments():
     q = build_spectrum([100, 200], [1.0, 1.0], precursor_mz=500.0)
     r = build_spectrum([100, 200], [1.0, 1.0], precursor_mz=500.0)
 
-    kwargs = dict(
-        tolerance=0.1,
-        use_ppm=False,
-        remove_precursor=False,
-        noise_cutoff=0.0,
-        normalize_to_half=False,
-        merge_within=0.0,
-    )
+    kwargs = {
+        "tolerance": 0.1,
+        "use_ppm": False,
+        "remove_precursor": False,
+        "noise_cutoff": 0.0,
+        "normalize_to_half": False,
+        "merge_within": 0.0,
+    }
 
     frag = FlashEntropy(matching_mode="fragment", **kwargs)
     nl = FlashEntropy(matching_mode="neutral_loss", **kwargs)

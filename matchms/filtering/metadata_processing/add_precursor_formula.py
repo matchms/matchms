@@ -1,7 +1,6 @@
 import logging
 import re
 from collections import Counter
-from typing import Optional
 from matchms.filtering.filter_utils.interpret_unknown_adduct import (
     get_ions_from_adduct,
     split_ion,
@@ -11,7 +10,7 @@ from matchms.filtering.filter_utils.interpret_unknown_adduct import (
 logger = logging.getLogger("matchms")
 
 
-def add_precursor_formula(spectrum_in, clone: Optional[bool] = True,):
+def add_precursor_formula(spectrum_in, clone: bool | None = True,):
     """Derive and set 'precursor_formula' from neutral 'formula' and 'adduct'.
 
     Requirements:
@@ -24,7 +23,7 @@ def add_precursor_formula(spectrum_in, clone: Optional[bool] = True,):
     spectrum = spectrum_in.clone() if clone else spectrum_in
 
     adduct = spectrum.get("adduct")
-    formula_str = spectrum.get('formula')
+    formula_str = spectrum.get("formula")
     if formula_str is None or adduct is None:
         logger.info(
             f"Missing 'formula' or 'adduct' (formula={formula_str}, adduct={adduct});"\
@@ -36,11 +35,11 @@ def add_precursor_formula(spectrum_in, clone: Optional[bool] = True,):
     original_precursor_formula = _convert_formula_string_to_atom_counter(formula_str)
 
     new_precursor_formula = Counter()
-    for i in range(nr_of_parent_masses):
+    for _ in range(nr_of_parent_masses):
         new_precursor_formula += original_precursor_formula
     for ion in ions_split:
         sign, number, formula = split_ion(ion)
-        for i in range(number):
+        for _ in range(number):
             if sign == "+":
                 new_precursor_formula.update(_convert_formula_string_to_atom_counter(formula))
             if sign == "-":
@@ -57,7 +56,7 @@ def add_precursor_formula(spectrum_in, clone: Optional[bool] = True,):
 
 def _convert_formula_string_to_atom_counter(formula_str):
     """Parse a simple elemental formula (no parentheses/hydrates/isotopes) into a Counter."""
-    atoms_and_counts = re.findall(r'([A-Z][a-z]?)(\d*)', formula_str)
+    atoms_and_counts = re.findall(r"([A-Z][a-z]?)(\d*)", formula_str)
     return Counter({atom: int(count) if count else 1 for atom, count in atoms_and_counts})
 
 

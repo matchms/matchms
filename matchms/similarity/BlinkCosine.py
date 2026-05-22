@@ -1,4 +1,4 @@
-from typing import Optional, Sequence, Tuple
+from collections.abc import Sequence
 import numpy as np
 from numba import njit  # TODO: check if numba is necessary/useful here
 from scipy.sparse import csr_array
@@ -125,7 +125,7 @@ class BlinkCosine(BaseSimilarity):
         min_relative_intensity: float = 0.01,
         crop_above_precursor: bool = True,
         remove_zero_intensities: bool = True,
-        top_k: Optional[int] = None,
+        top_k: int | None = None,
         # batching
         batch_size: int = 1024,
         sparse_score_min: float = 0.0,
@@ -150,7 +150,7 @@ class BlinkCosine(BaseSimilarity):
 
     # --------------------------- Public API ---------------------------
 
-    def pair(self, spectrum_1: SpectrumType, spectrum_2: SpectrumType) -> Tuple[float, int]:
+    def pair(self, spectrum_1: SpectrumType, spectrum_2: SpectrumType) -> tuple[float, int]:
         """Calculate BLINK-style cosine between two spectra.
         
         Parameters
@@ -181,8 +181,8 @@ class BlinkCosine(BaseSimilarity):
     def matrix(
             self,
             spectra_1: Sequence[SpectrumType],
-            spectra_2: Optional[Sequence[SpectrumType]] = None,
-            score_fields: Optional[Sequence[str]] = None,
+            spectra_2: Sequence[SpectrumType] | None = None,
+            score_fields: Sequence[str] | None = None,
             progress_bar: bool = True,
         ) -> Scores:
         """

@@ -1,4 +1,3 @@
-from typing import Optional, Union
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 import numpy as np
@@ -18,7 +17,7 @@ _annotation_kws = {
 def plot_spectrum(spectrum,
                   annotate_ions: bool = False,
                   mirror_intensity: bool = False,
-                  grid: Union[bool, str] = True,
+                  grid: bool | str = True,
                   ax: plt.Axes = None,
                   peak_color="teal",
                   min_mz: float = None,
@@ -115,7 +114,7 @@ def plot_spectrum(spectrum,
 
 def plot_spectra_mirror(spec_top,
                         spec_bottom,
-                        ax: Optional[plt.Axes] = None,
+                        ax: plt.Axes | None = None,
                         color_top="darkblue",
                         color_bottom="teal",
                         **spectrum_kws) -> plt.Axes:
@@ -150,7 +149,7 @@ def plot_spectra_mirror(spec_top,
     if spectrum_kws is None:
         spectrum_kws = {}
 
-    if 'peak_color' in spectrum_kws:
+    if "peak_color" in spectrum_kws:
         raise ValueError("'peak_color' should not be set for `plot_spectra_mirror`. "
                          "Use 'color_top' and 'color_bottom' instead.")
 

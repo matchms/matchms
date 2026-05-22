@@ -15,7 +15,7 @@ from tests.builder_Spectrum import SpectrumBuilder
 
 
 def assert_files_equal_ignoring_line_endings(file1, file2):
-    with open(file1, "r", encoding="utf-8") as f1, open(file2, "r", encoding="utf-8") as f2:
+    with open(file1, encoding="utf-8") as f1, open(file2, encoding="utf-8") as f2:
         a = f1.read().splitlines()
         b = f2.read().splitlines()
         assert a == b
@@ -83,23 +83,23 @@ def test_export_metadata_none_spectra(tmp_path, spectra, file_name, caplog):
     spectra.append(None)
     export_metadata_as_json(spectra, outpath)
 
-    with open(outpath, "r", encoding="utf-8") as f:
+    with open(outpath, encoding="utf-8") as f:
         actual = json.load(f)
         assert len(actual) == (len(spectra) - 1)
 
     # Test invalid field export config
     export_metadata_as_json(spectra, outpath, "invalid")
     assert "'Include_fields' must be 'all' or list of keys." in caplog.text
-    with open(outpath, "r", encoding="utf-8") as f:
+    with open(outpath, encoding="utf-8") as f:
         actual = json.load(f)
         assert len(actual) == 0
 
 
 def test__get_metadata_keys(spectra):
     """Test that _get_metadata_keys returns the correct keys."""
-    expected_keys = ['author', 'compound_name', 'formula', 'inchi', 'inchikey', 'instrument', 'instrument_type',
-                     'ion_type', 'ionization_energy', 'ionization_mode', 'last_auto-curation', 'license',
-                     'molecular_formula', 'ms_level', 'nominal_mass', 'num_peaks', 'parent_mass',
-                     'precursor_mz', 'smiles', 'smiles_2', 'spectrum_id', 'synonym', 'total_exact_mass']
+    expected_keys = ["author", "compound_name", "formula", "inchi", "inchikey", "instrument", "instrument_type",
+                     "ion_type", "ionization_energy", "ionization_mode", "last_auto-curation", "license",
+                     "molecular_formula", "ms_level", "nominal_mass", "num_peaks", "parent_mass",
+                     "precursor_mz", "smiles", "smiles_2", "spectrum_id", "synonym", "total_exact_mass"]
     actual_keys = _get_metadata_keys(spectra)
     assert actual_keys == expected_keys

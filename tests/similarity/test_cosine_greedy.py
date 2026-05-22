@@ -91,4 +91,4 @@ def test_cosine_greedy_matrix_none_matching():
         np.array([0.5, 0.2, 1.0], dtype="float")).build()
     
     scores = CosineGreedy().matrix([spectrum_1], [spectrum_2])
-    assert scores['score'][0][0] == 0.0, "Expected a single score of exactly 0.0."
+    assert scores["score"][0][0] == 0.0, "Expected a single score of exactly 0.0."

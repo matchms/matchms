@@ -83,14 +83,11 @@ docstring-code-format = true
 line-ending = "lf"
 
 [tool.ruff.lint]
-# TODO: add some rules in future, eg. W291/292
-extend-select = ["D", "E", "I"]
-# TODO: some of these rules should be enforced in the future, eg. E713
+extend-select = ["D", "E", "I", "F", "Q", "UP", "B", "C4"]
+# TODO: some of these rules should be enforced in the future
 ignore = [
   "D100",
-  "D101",
   "D102",
-  "D103",
   "D104",
   "D105",
   "D107",
@@ -105,7 +102,6 @@ ignore = [
   "D212",
   "D213",
   "D4",
-  "E713"
 ]
 
 [tool.ruff.lint.isort]

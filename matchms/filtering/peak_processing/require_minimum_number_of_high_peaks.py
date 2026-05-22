@@ -1,5 +1,4 @@
 import logging
-from typing import Optional
 from matchms.filtering._dispatch import collection_filter
 from matchms.SpectraCollection import SpectraCollection
 from matchms.typing import SpectrumType
@@ -23,8 +22,8 @@ def _require_minimum_number_of_high_peaks_spectrum(
     spectrum_in: SpectrumType,
     no_peaks: int = 5,
     intensity_percent: float = 2.0,
-    clone: Optional[bool] = True,
-) -> Optional[SpectrumType]:
+    clone: bool | None = True,
+) -> SpectrumType | None:
     """Removes spectra if the number of peaks with relative intensity
     above or equal to intensity_percent is less than no_peaks.
 
@@ -79,7 +78,7 @@ def _require_minimum_number_of_high_peaks_collection(
     spectrum_in: SpectraCollection,
     no_peaks: int = 5,
     intensity_percent: float = 2.0,
-    clone: Optional[bool] = True,
+    clone: bool | None = True,
 ) -> SpectraCollection | None:
     """Drop spectra with fewer than no_peaks high relative-intensity peaks."""
     _validate_minimum_high_peaks_parameters(no_peaks, intensity_percent)

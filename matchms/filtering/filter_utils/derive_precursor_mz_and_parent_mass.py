@@ -1,5 +1,4 @@
 import logging
-from typing import Optional, Tuple
 from matchms.constants import PROTON_MASS
 from matchms.filtering.filter_utils.interpret_unknown_adduct import get_multiplier_and_mass_from_adduct
 from matchms.filtering.filter_utils.load_known_adducts import load_known_adducts
@@ -12,7 +11,7 @@ logger = logging.getLogger("matchms")
 
 def derive_parent_mass_from_precursor_mz(
     spectrum: SpectrumType, estimate_from_adduct: bool = True, estimate_from_charge: bool = True
-) -> Optional[float]:
+) -> float | None:
     """Use the precursor mz, charge and adduct information to compute the mass of the case compound.
 
     Args:
@@ -46,7 +45,7 @@ def derive_parent_mass_from_precursor_mz(
     return None
 
 
-def derive_precursor_mz_from_parent_mass(spectrum: SpectrumType, estimate_from_adduct: bool = True) -> Optional[float]:
+def derive_precursor_mz_from_parent_mass(spectrum: SpectrumType, estimate_from_adduct: bool = True) -> float | None:
     """Derives the precursor_mz from the parent mass and adduct or charge"""
     if spectrum is None:
         return None
@@ -72,7 +71,7 @@ def derive_precursor_mz_from_parent_mass(spectrum: SpectrumType, estimate_from_a
     return None
 
 
-def _get_multiplier_and_correction_mass_from_adduct(adduct: str) -> Tuple[int, float]:
+def _get_multiplier_and_correction_mass_from_adduct(adduct: str) -> tuple[int, float]:
     """Get the charge multiplier and correction mass for the specifiec adduct.
 
     Args:

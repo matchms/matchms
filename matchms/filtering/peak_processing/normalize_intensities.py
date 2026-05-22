@@ -1,6 +1,5 @@
 import logging
 from numbers import Real
-from typing import Optional
 import numpy as np
 from scipy.sparse import csr_array
 from tqdm.auto import tqdm
@@ -28,9 +27,9 @@ def _validate_scale_to_max(scale_to_max: float) -> float:
 
 def _normalize_intensities_spectrum(
     spectrum_in: SpectrumType,
-    clone: Optional[bool] = True,
+    clone: bool | None = True,
     scale_to_max: float = 1.0,
-) -> Optional[SpectrumType]:
+) -> SpectrumType | None:
     """Normalize peak intensities relative to the maximum peak intensity.
 
     Intensities are divided by the maximum intensity of the spectrum and then
@@ -90,7 +89,7 @@ def _normalize_intensities_spectrum(
 
 def _normalize_intensities_collection(
     spectrum_in: SpectraCollection,
-    clone: Optional[bool] = True,
+    clone: bool | None = True,
     scale_to_max: float = 1.0,
     progress_bar: bool = False,
 ) -> SpectraCollection:

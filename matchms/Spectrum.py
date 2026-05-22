@@ -1,4 +1,3 @@
-from typing import Optional
 import matplotlib.pyplot as plt
 import numpy as np
 from matchms.plotting.spectrum_plots import plot_spectra_mirror, plot_spectrum
@@ -69,7 +68,7 @@ class Spectrum:
 
     def __init__(self, mz: np.array,
                  intensities: np.array,
-                 metadata: Optional[dict] = None,
+                 metadata: dict | None = None,
                  metadata_harmonization: bool = True):
         """
 
@@ -100,7 +99,7 @@ class Spectrum:
         metadata (see .metadata_hash() method) and spectrum peaks
         (see .spectrum_hash() method)."""
         combined_hash = self.metadata_hash() + self.spectrum_hash()
-        return int.from_bytes(bytearray(combined_hash, 'utf-8'), 'big')
+        return int.from_bytes(bytearray(combined_hash, "utf-8"), "big")
 
     def __repr__(self):
         precursor_mz_str = f"{self.get('precursor_mz', 0.0):.2f}"
@@ -231,13 +230,13 @@ class Spectrum:
         self._metadata.data = value
 
     @property
-    def losses(self) -> Optional[Fragments]:
+    def losses(self) -> Fragments | None:
         return self.compute_losses()
 
     def compute_losses(
             self, loss_mz_from: float = 0.0,
             loss_mz_to : float = None
-            ) -> Optional[Fragments]:
+            ) -> Fragments | None:
         """This will compute the "losses", i.e. the differences between the precursor_mz and 
         the individual fragment m/z values. Only losses between loss_mz_from and loss_mz_to
         will be kept.

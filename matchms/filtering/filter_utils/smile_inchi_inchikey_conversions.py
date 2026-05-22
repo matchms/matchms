@@ -1,42 +1,23 @@
 import re
-from typing import Optional
+from rdkit import Chem
 
 
-try:  # rdkit is not included in pip package
-    from rdkit import Chem
-except ImportError:
-    _has_rdkit = False
-    from collections import UserString
-
-    class ChemMock(UserString):
-        def __call__(self, *args, **kwargs):
-            return self
-
-        def __getattr__(self, key):
-            return self
-
-    Chem = ChemMock("")
-else:
-    _has_rdkit = True
-rdkit_missing_message = "Conda package 'rdkit' is required for this functionality."
-
-
-def convert_smiles_to_inchi(smiles: str) -> Optional[str]:
+def convert_smiles_to_inchi(smiles: str) -> str | None:
     """Convert smiles to inchi using rdkit."""
     return mol_converter(smiles, "smiles", "inchi")
 
 
-def convert_inchi_to_smiles(inchi: str) -> Optional[str]:
+def convert_inchi_to_smiles(inchi: str) -> str | None:
     """Convert inchi to smiles using rdkit."""
     return mol_converter(inchi, "inchi", "smiles")
 
 
-def convert_inchi_to_inchikey(inchi: str) -> Optional[str]:
+def convert_inchi_to_inchikey(inchi: str) -> str | None:
     """Convert inchi to inchikey using rdkit."""
     return mol_converter(inchi, "inchi", "inchikey")
 
 
-def mol_converter(mol_input: str, input_type: str, output_type: str) -> Optional[str]:
+def mol_converter(mol_input: str, input_type: str, output_type: str) -> str | None:
     """Convert molecular representations using rdkit.
 
     Convert from "smiles" or "inchi" to "inchi", "smiles", or "inchikey".
@@ -56,8 +37,7 @@ def mol_converter(mol_input: str, input_type: str, output_type: str) -> Optional
 
     Mol string in output type or None when conversion failure occurs.
     """
-    if not _has_rdkit:
-        raise ImportError(rdkit_missing_message)
+
     input_function = {"inchi": Chem.MolFromInchi,
                       "smiles": Chem.MolFromSmiles}
     output_function = {"inchi": Chem.MolToInchi,
@@ -85,8 +65,6 @@ def is_valid_inchi(inchi: str) -> bool:
     inchi
         Input string to test if it has format of InChI.
     """
-    if not _has_rdkit:
-        raise ImportError(rdkit_missing_message)
 
     # First quick test to avoid excess in-depth testing
     if inchi is None:
@@ -113,8 +91,6 @@ def is_valid_smiles(smiles: str) -> bool:
     smiles
         Input string to test if it can be imported as smiles.
     """
-    if not _has_rdkit:
-        raise ImportError(rdkit_missing_message)
 
     if smiles is None:
         return False

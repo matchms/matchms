@@ -77,5 +77,5 @@ def get_similarity_function_by_name(similarity_function_name: str):
     assert similarity_function_name in names, f"Unknown similarity function: {similarity_function_name}"
     assert len(names) == len(functions), "Number of similarity functions and names do not match"
 
-    mapper = dict(zip(names, functions))
+    mapper = dict(zip(names, functions, strict=True))
     return mapper[similarity_function_name]

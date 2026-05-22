@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, Sequence, Tuple
+from collections.abc import Sequence
 import numpy as np
 from matchms.typing import SpectrumType
 from .BaseSimilarity import BaseSimilarity
@@ -62,7 +62,7 @@ class ModifiedCosine(BaseSimilarity):
         self.intensity_power = intensity_power
         self.use_hungarian = use_hungarian
 
-    def pair(self, spectrum_1: SpectrumType, spectrum_2: SpectrumType) -> Tuple[float, int]:
+    def pair(self, spectrum_1: SpectrumType, spectrum_2: SpectrumType) -> tuple[float, int]:
         """Calculate approximate modified cosine score between two spectra."""
 
         if self.use_hungarian:
@@ -81,8 +81,8 @@ class ModifiedCosine(BaseSimilarity):
     def matrix(
             self,
             spectra_1: Sequence[SpectrumType],
-            spectra_2: Optional[Sequence[SpectrumType]] = None,
-            score_fields: Optional[Sequence[str]] = None,
+            spectra_2: Sequence[SpectrumType] | None = None,
+            score_fields: Sequence[str] | None = None,
             progress_bar: bool = True,
             n_jobs: int = -1,
         ):

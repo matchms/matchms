@@ -1,5 +1,4 @@
 import logging
-from typing import Tuple
 import numpy as np
 from matchms.typing import SpectrumType
 from ._precursor_validation import get_valid_precursor_mz
@@ -49,7 +48,7 @@ class ModifiedCosineGreedy(BaseSimilarityWithSparse):
         self.mz_power = mz_power
         self.intensity_power = intensity_power
 
-    def pair(self, spectrum_1: SpectrumType, spectrum_2: SpectrumType) -> Tuple[float, int]:
+    def pair(self, spectrum_1: SpectrumType, spectrum_2: SpectrumType) -> tuple[float, int]:
         """Calculate approximate modified cosine score between two spectra."""
 
         precursor_mz_ref = get_valid_precursor_mz(spectrum_1, logger)

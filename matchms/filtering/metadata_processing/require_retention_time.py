@@ -1,5 +1,4 @@
 import logging
-from typing import Optional
 from matchms.typing import SpectrumType
 
 
@@ -7,8 +6,8 @@ logger = logging.getLogger("matchms")
 
 
 def require_retention_time(
-    spectrum_in: SpectrumType, minimum_rt=None, maximum_rt=None, clone: Optional[bool] = True
-) -> Optional[SpectrumType]:
+    spectrum_in: SpectrumType, minimum_rt=None, maximum_rt=None, clone: bool | None = True
+) -> SpectrumType | None:
     """
     This function checks if the input spectrum has a 'retention_time' in its metadata.
     If the input spectrum is None or doesn't have a 'retention_time', the function returns None.

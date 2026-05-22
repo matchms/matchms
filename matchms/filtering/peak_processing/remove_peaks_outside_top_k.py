@@ -1,4 +1,3 @@
-from typing import Optional
 import numpy as np
 from matchms.filtering._dispatch import collection_filter
 from matchms.Fragments import Fragments
@@ -6,8 +5,8 @@ from matchms.typing import SpectrumType
 
 
 def _remove_peaks_outside_top_k(
-    spectrum_in: SpectrumType, k: int = 6, mz_window: float = 50, clone: Optional[bool] = True
-) -> Optional[SpectrumType]:
+    spectrum_in: SpectrumType, k: int = 6, mz_window: float = 50, clone: bool | None = True
+) -> SpectrumType | None:
     """Remove all peaks which are not within *mz_window* of at least one
        of the *k* highest intensity peaks of the spectrum.
 
