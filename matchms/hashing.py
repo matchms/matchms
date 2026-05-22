@@ -105,7 +105,7 @@ def _compute_spectrum_hash(
     # Sort by increasing m/z and then by decreasing intensity
     order = np.lexsort((-int_int, mz_int))
 
-    peak_strings = [f"{m}:{i}" for m, i in zip(mz_int[order], int_int[order])]
+    peak_strings = [f"{m}:{i}" for m, i in zip(mz_int[order], int_int[order], strict=True)]
     encoded = " ".join(peak_strings).encode("utf-8")
 
     return hashlib.sha256(encoded).hexdigest()[:hash_length]

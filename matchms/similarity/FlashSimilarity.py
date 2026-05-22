@@ -116,18 +116,18 @@ class _BaseFlashSimilarity(BaseSimilarity):
         )
 
     def _make_worker_cfg(self) -> dict:
-        return dict(
-            tol=float(self.tolerance),
-            use_ppm=bool(self.use_ppm),
-            matching_mode=self.matching_mode,
-            compute_nl=(self.matching_mode in ("neutral_loss", "hybrid")),
-            iden_tol=(
+        return {
+            "tol": float(self.tolerance),
+            "use_ppm": bool(self.use_ppm),
+            "matching_mode": self.matching_mode,
+            "compute_nl": (self.matching_mode in ("neutral_loss", "hybrid")),
+            "iden_tol": (
                 None
                 if self.identity_precursor_tolerance is None
                 else float(self.identity_precursor_tolerance)
             ),
-            iden_use_ppm=bool(self.identity_use_ppm),
-        )
+            "iden_use_ppm": bool(self.identity_use_ppm),
+        }
 
     def _prepare_row_inputs(self, spectra_1: Sequence[SpectrumType]):
         row_inputs = []

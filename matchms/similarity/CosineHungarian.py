@@ -127,7 +127,7 @@ class CosineHungarian(BaseSimilarityWithSparse):
             # Match count excludes phantoms (cells still at 1.0).
             used_matches = [
                 (int(paired_peaks1[x]), int(paired_peaks2[y]))
-                for (x, y) in zip(row_ind, col_ind)
+                for (x, y) in zip(row_ind, col_ind, strict=True)
                 if matching_pairs_matrix[x, y] < 1.0
             ]
             return score, used_matches

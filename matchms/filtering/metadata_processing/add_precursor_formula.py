@@ -35,11 +35,11 @@ def add_precursor_formula(spectrum_in, clone: bool | None = True,):
     original_precursor_formula = _convert_formula_string_to_atom_counter(formula_str)
 
     new_precursor_formula = Counter()
-    for i in range(nr_of_parent_masses):
+    for _ in range(nr_of_parent_masses):
         new_precursor_formula += original_precursor_formula
     for ion in ions_split:
         sign, number, formula = split_ion(ion)
-        for i in range(number):
+        for _ in range(number):
             if sign == "+":
                 new_precursor_formula.update(_convert_formula_string_to_atom_counter(formula))
             if sign == "-":

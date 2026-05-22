@@ -126,7 +126,7 @@ class ModifiedCosineHungarian(BaseSimilarityWithSparse):
 
             score = 0.0
             used_matches = []
-            for i, j in zip(row_ind, col_ind):
+            for i, j in zip(row_ind, col_ind, strict=True):
                 if i < n_rows and j < n_cols and weights[i, j] > 0:
                     score += weights[i, j]
                     used_matches.append((i, j))

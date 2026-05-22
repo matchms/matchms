@@ -65,7 +65,7 @@ def test_user_workflow():
 
     pairs = []
     rows, cols = np.where(strong_mask)
-    for i, j in zip(rows, cols):
+    for i, j in zip(rows, cols, strict=True):
         pairs.append((i, j, score_arr[i, j], matches_arr[i, j]))
 
     pairs_sorted = sorted(pairs, key=lambda x: (x[2], x[3]), reverse=True)

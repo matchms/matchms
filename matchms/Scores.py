@@ -71,7 +71,7 @@ class ScoresMask:
             raise ValueError(f"Incompatible mask shapes: {self.shape} and {other.shape}.")
 
     def _coord_set(self) -> set[tuple[int, int]]:
-        return set(zip(self.row.tolist(), self.col.tolist()))
+        return set(zip(self.row.tolist(), self.col.tolist(), strict=True))
 
     def _from_coord_set(self, coords: set[tuple[int, int]]) -> "ScoresMask":
         if not coords:
@@ -292,13 +292,13 @@ class Scores:
         return self._filter_with_dense_mask(mask.to_dense())
 
     def _filter_sparse_with_sparse_mask(self, mask: ScoresMask) -> ScoresType:
-        mask_coords = set(zip(mask.row.tolist(), mask.col.tolist()))
+        mask_coords = set(zip(mask.row.tolist(), mask.col.tolist(), strict=True))
         filtered = {}
 
         for field in self.score_fields:
             coo = self.to_coo(field)
             keep = np.array(
-                [(r, c) in mask_coords for r, c in zip(coo.row.tolist(), coo.col.tolist())],
+                [(r, c) in mask_coords for r, c in zip(coo.row.tolist(), coo.col.tolist(), strict=True)],
                 dtype=bool,
             )
             filtered[field] = coo_array(

@@ -187,7 +187,7 @@ def rename_deprecated_params(param_mapping: dict, version: str = None) -> Callab
             new_kwargs = kwargs.copy()
 
             # Handle positional arguments
-            for i, (old_param, new_param) in enumerate(param_mapping.items()):
+            for i, (_, new_param) in enumerate(param_mapping.items()):
                 if i < len(new_args):
                     new_kwargs[new_param] = new_args[i]
 

@@ -54,7 +54,7 @@ def load_from_usi(
         if len(peaks) == 0:
             logger.info("Empty spectrum found (no peaks in 'peaks_json'). Will not be imported.")
             return None
-        mz_list, intensity_list = zip(*peaks)
+        mz_list, intensity_list = zip(*peaks, strict=True)
         mz_array = np.array(mz_list)
         intensity_array = np.array(intensity_list)
 

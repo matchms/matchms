@@ -114,7 +114,7 @@ def test_have_metadata(filename, data):
 
     assert len(spectra) == len(data)
 
-    for actual, expected in zip(spectra, data):
+    for actual, expected in zip(spectra, data, strict=True):
         assert actual.metadata == expected.metadata
 
 
@@ -124,7 +124,7 @@ def test_have_peaks(filename, data):
 
     assert len(spectra) == len(data)
 
-    for actual, expected in zip(spectra, data):
+    for actual, expected in zip(spectra, data, strict=True):
         assert actual.peaks == expected.peaks
 
 
@@ -134,7 +134,7 @@ def test_dont_write_peak_comments(filename, data):
 
     assert len(spectra) == len(data)
 
-    for actual, _ in zip(spectra, data):
+    for actual, _ in zip(spectra, data, strict=True):
         assert actual.peak_comments is None, \
             "Expected that no peak comments are written to file"
 

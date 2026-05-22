@@ -101,7 +101,7 @@ def _write_spectrum(
 
 
 def _write_peaks(peaks: Fragments, peak_comments: Spectrum.peak_comments, outfile: IO, peak_sep: str):
-    for mz, intensity in zip(peaks.mz, peaks.intensities):
+    for mz, intensity in zip(peaks.mz, peaks.intensities, strict=True):
         peak_comment = _format_peak_comment(mz, peak_comments, peak_sep)
         outfile.write(f"{mz}{peak_sep}{intensity}{peak_comment}\n")
 
