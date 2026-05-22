@@ -1,5 +1,4 @@
 from collections.abc import Iterable
-from typing import Optional
 from matchms.filtering._dispatch import collection_filter
 from matchms.SpectraCollection import SpectraCollection
 from matchms.typing import SpectrumType
@@ -34,8 +33,8 @@ def _harmonize_missing_entries_spectrum(
         keys: str | Iterable[str] | None = None,
         undefined=None,
         aliases: Iterable | None = None,
-        clone: Optional[bool] = True,
-    ) -> Optional[SpectrumType]:
+        clone: bool | None = True,
+    ) -> SpectrumType | None:
     """Replace aliases for missing metadata entries.
 
     Parameters
@@ -85,7 +84,7 @@ def _harmonize_missing_entries_collection(
         keys: str | Iterable[str] | None = None,
         undefined=None,
         aliases: Iterable | None = None,
-        clone: Optional[bool] = True,
+        clone: bool | None = True,
     ) -> SpectraCollection:
     """Replace aliases for missing metadata entries in a SpectraCollection."""
     target = spectrum_in.copy() if clone else spectrum_in

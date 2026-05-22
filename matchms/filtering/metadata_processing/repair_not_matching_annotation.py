@@ -1,5 +1,4 @@
 import logging
-from typing import Optional
 from matchms import Spectrum
 from matchms.filtering._dispatch import collection_filter
 from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import (
@@ -17,7 +16,7 @@ from matchms.typing import SpectrumType
 logger = logging.getLogger("matchms")
 
 
-def _repair_not_matching_annotation(spectrum_in: Spectrum, clone: Optional[bool] = True) -> Optional[SpectrumType]:
+def _repair_not_matching_annotation(spectrum_in: Spectrum, clone: bool | None = True) -> SpectrumType | None:
     """
     Repairs mismatches in a spectrum's annotations related to SMILES, InChI, and InChIKey.
 

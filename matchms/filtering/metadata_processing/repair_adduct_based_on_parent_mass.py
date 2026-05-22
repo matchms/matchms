@@ -1,5 +1,4 @@
 import logging
-from typing import Optional
 from matchms import Spectrum
 from matchms.filtering._dispatch import collection_filter
 from matchms.typing import SpectrumType
@@ -10,8 +9,8 @@ logger = logging.getLogger("matchms")
 
 
 def _repair_adduct_based_on_parent_mass(
-    spectrum_in: Spectrum, mass_tolerance: float, clone: Optional[bool] = True
-) -> Optional[SpectrumType]:
+    spectrum_in: Spectrum, mass_tolerance: float, clone: bool | None = True
+) -> SpectrumType | None:
     """
     Corrects the adduct of a spectrum based on its parent_mass representation and the precursor m/z.
 

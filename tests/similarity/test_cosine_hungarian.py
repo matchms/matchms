@@ -19,10 +19,8 @@ def test_cosine_hungarian_cocaine_glucose():
     cosine_hungarian = CosineHungarian(tolerance=5.0, mz_power=0.0, intensity_power=1.0)
 
     (similarity, shared_peaks) = cosine_hungarian.pair(glucose_spectrum, cocaine_spectrum)[()]
-    assert similarity == 0.453757948440651, "Expected different cosine score: {}".format(similarity)
-    assert shared_peaks == 5, "Expected different number of matching peaks: {}".format(
-        shared_peaks
-    )
+    assert similarity == 0.453757948440651, f"Expected different cosine score: {similarity}"
+    assert shared_peaks == 5, f"Expected different number of matching peaks: {shared_peaks}"
 
 def test_cosine_hungarian_phenylalanine_hydroxy_cholesterol():
     """Compare output cosine score with own calculation on input spectra."""
@@ -38,10 +36,8 @@ def test_cosine_hungarian_phenylalanine_hydroxy_cholesterol():
     cosine_hungarian = CosineHungarian(tolerance=5.0, mz_power=0.0, intensity_power=1.0)
 
     (similarity, shared_peaks) = cosine_hungarian.pair(phenylalanine_spectrum, hydroxy_cholesterol_spectrum)[()]
-    assert similarity < 0.01, "Expected different cosine score: {}".format(similarity)
-    assert shared_peaks == 19, "Expected different number of matching peaks: {}".format(
-        shared_peaks
-    )
+    assert similarity < 0.01, f"Expected different cosine score: {similarity}"
+    assert shared_peaks == 19, f"Expected different number of matching peaks: {shared_peaks}"
 
 
 def test_cosine_hungarian_without_parameters():

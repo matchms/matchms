@@ -1,4 +1,3 @@
-from typing import Tuple
 import numpy as np
 from matchms.typing import SpectrumType
 from .BaseSimilarity import BaseSimilarityWithSparse
@@ -70,7 +69,7 @@ class CosineGreedy(BaseSimilarityWithSparse):
         self.mz_power = mz_power
         self.intensity_power = intensity_power
 
-    def pair(self, spectrum_1: SpectrumType, spectrum_2: SpectrumType) -> Tuple[float, int]:
+    def pair(self, spectrum_1: SpectrumType, spectrum_2: SpectrumType) -> tuple[float, int]:
         """Calculate cosine score between two spectra.
 
         Parameters

@@ -1,8 +1,8 @@
 import csv
 import logging
 import os
+from collections.abc import Callable, Iterable
 from functools import lru_cache
-from typing import Callable, Iterable, List
 from warnings import warn
 from .typing import SpectrumType
 
@@ -25,7 +25,7 @@ def get_first_common_element(first: Iterable[str], second: Iterable[str]) -> str
     return next((item for item in first if item in second), None)
 
 
-def get_common_keys(first: List[str], second: List[str]) -> List[str]:
+def get_common_keys(first: list[str], second: list[str]) -> list[str]:
     """Get common elements of two sets of strings in a case insensitive way.
 
     Args:
@@ -130,7 +130,7 @@ def _load_key_conversions(file: str, source: str, target: str) -> dict:
     return key_conversions
 
 
-def fingerprint_export_warning(spectra: List[SpectrumType]):
+def fingerprint_export_warning(spectra: list[SpectrumType]):
     """
     Check if any spectrum in the provided list contains a "fingerprint" and log a warning if so.
 
@@ -147,7 +147,7 @@ def fingerprint_export_warning(spectra: List[SpectrumType]):
         logger.warning("fingerprint found but will not be written to file.")
 
 
-def filter_empty_spectra(spectra: List[SpectrumType]) -> List[SpectrumType]:
+def filter_empty_spectra(spectra: list[SpectrumType]) -> list[SpectrumType]:
     """Filter None values in spectra list.
 
     Parameters

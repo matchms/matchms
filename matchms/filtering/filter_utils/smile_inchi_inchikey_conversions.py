@@ -1,5 +1,4 @@
 import re
-from typing import Optional
 
 
 try:  # rdkit is not included in pip package
@@ -21,22 +20,22 @@ else:
 rdkit_missing_message = "Conda package 'rdkit' is required for this functionality."
 
 
-def convert_smiles_to_inchi(smiles: str) -> Optional[str]:
+def convert_smiles_to_inchi(smiles: str) -> str | None:
     """Convert smiles to inchi using rdkit."""
     return mol_converter(smiles, "smiles", "inchi")
 
 
-def convert_inchi_to_smiles(inchi: str) -> Optional[str]:
+def convert_inchi_to_smiles(inchi: str) -> str | None:
     """Convert inchi to smiles using rdkit."""
     return mol_converter(inchi, "inchi", "smiles")
 
 
-def convert_inchi_to_inchikey(inchi: str) -> Optional[str]:
+def convert_inchi_to_inchikey(inchi: str) -> str | None:
     """Convert inchi to inchikey using rdkit."""
     return mol_converter(inchi, "inchi", "inchikey")
 
 
-def mol_converter(mol_input: str, input_type: str, output_type: str) -> Optional[str]:
+def mol_converter(mol_input: str, input_type: str, output_type: str) -> str | None:
     """Convert molecular representations using rdkit.
 
     Convert from "smiles" or "inchi" to "inchi", "smiles", or "inchikey".

@@ -1,5 +1,4 @@
 import logging
-from typing import Optional
 from rdkit import Chem
 from rdkit.Chem.rdMolDescriptors import CalcMolFormula
 from matchms.typing import SpectrumType
@@ -8,7 +7,7 @@ from matchms.typing import SpectrumType
 logger = logging.getLogger("matchms")
 
 
-def derive_formula_from_smiles(spectrum_in, overwrite=True, clone: Optional[bool] = True) -> Optional[SpectrumType]:
+def derive_formula_from_smiles(spectrum_in, overwrite=True, clone: bool | None = True) -> SpectrumType | None:
     """Adds the molecule’s formula from SMILES.
 
     Parameters

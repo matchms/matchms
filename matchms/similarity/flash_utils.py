@@ -1,4 +1,3 @@
-from typing import List, Optional
 import numpy as np
 
 
@@ -68,8 +67,8 @@ class _LibraryIndex:
         self.precursor_mz = None
         self.dtype = dtype
 
-def _build_library_index(processed_peaks_list: List[np.ndarray],
-                         precursor_mz_list: List[Optional[float]],
+def _build_library_index(processed_peaks_list: list[np.ndarray],
+                         precursor_mz_list: list[float | None],
                          compute_neutral_loss: bool = False,
                          compute_l2_norm: bool = False,
                          dtype: np.dtype = np.float32) -> _LibraryIndex:
@@ -234,7 +233,7 @@ def _entropy_weight(intensities: np.ndarray, dtype: np.dtype) -> np.ndarray:
 
 def _clean_and_weight(
         peaks: np.ndarray,
-        precursor_mz: Optional[float],
+        precursor_mz: float | None,
         remove_precursor: bool,
         precursor_window: float,
         noise_cutoff: float,

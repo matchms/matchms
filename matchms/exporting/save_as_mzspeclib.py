@@ -1,6 +1,6 @@
 import os
 import re
-from typing import List, TextIO
+from typing import TextIO
 from matchms.Spectrum import Spectrum
 
 
@@ -31,7 +31,7 @@ STANDARDIZED_SPECTRUM_ATTRIBUTES = {
 }
 
 
-def save_as_mzspeclib(spectra: List[Spectrum], filename: str) -> None:
+def save_as_mzspeclib(spectra: list[Spectrum], filename: str) -> None:
     """
     Save a list of spectra to a file in mzSpecLib format.
 

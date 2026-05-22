@@ -1,4 +1,3 @@
-from typing import Optional
 import numpy as np
 from matchms.filtering._dispatch import collection_filter
 from matchms.Fragments import Fragments
@@ -10,8 +9,8 @@ def _select_by_intensity_spectrum(
         spectrum_in: SpectrumType,
         intensity_from: float = 0.01,
         intensity_to: float = 1.0,
-        clone: Optional[bool] = True
-    ) -> Optional[SpectrumType]:
+        clone: bool | None = True
+    ) -> SpectrumType | None:
     """Keep only peaks within set intensity range (keep if
     intensity_from >= intensity >= intensity_to). In most cases it is adviced to
     use :py:func:`select_by_relative_intensity` function instead.
@@ -59,7 +58,7 @@ def _select_by_intensity_collection(
     spectrum_in: SpectraCollection,
     intensity_from: float = 0.01,
     intensity_to: float = 1.0,
-    clone: Optional[bool] = True,
+    clone: bool | None = True,
 ) -> SpectraCollection:
     """Keep only peaks within set intensity range for a SpectraCollection."""
     if intensity_from > intensity_to:

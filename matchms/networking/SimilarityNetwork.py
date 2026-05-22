@@ -1,5 +1,5 @@
 import json
-from typing import Optional, Sequence
+from collections.abc import Sequence
 import networkx as nx
 import numpy as np
 from matchms import Scores
@@ -86,13 +86,13 @@ class SimilarityNetwork:
         self.score_cutoff = score_cutoff
         self.link_method = link_method
         self.keep_unconnected_nodes = keep_unconnected_nodes
-        self.graph: Optional[nx.Graph] = None
+        self.graph: nx.Graph | None = None
 
     def create_network(
         self,
         scores: Scores,
         identifiers: Sequence[str],
-        score_name: Optional[str] = None,
+        score_name: str | None = None,
     ) -> None:
         """Create a similarity network from a square all-vs-all Scores object.
 

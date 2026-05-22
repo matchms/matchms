@@ -1,5 +1,5 @@
 """Helper functions to build and handle spectral networks."""
-from typing import Optional, Sequence, Tuple
+from collections.abc import Sequence
 import numpy as np
 from matchms import Scores
 
@@ -8,10 +8,10 @@ def get_top_hits(
     scores: Scores,
     top_n: int = 25,
     axis: int = 1,
-    score_name: Optional[str] = None,
-    identifiers: Optional[Sequence] = None,
+    score_name: str | None = None,
+    identifiers: Sequence | None = None,
     ignore_diagonal: bool = False,
-) -> Tuple[dict, dict]:
+) -> tuple[dict, dict]:
     """Get top_n highest scores and corresponding indices for each row or column.
 
     Parameters
@@ -72,10 +72,10 @@ def get_top_hits(
 def get_top_hits_by_row(
     scores: Scores,
     top_n: int = 25,
-    score_name: Optional[str] = None,
-    identifiers: Optional[Sequence] = None,
+    score_name: str | None = None,
+    identifiers: Sequence | None = None,
     ignore_diagonal: bool = False,
-) -> Tuple[dict, dict]:
+) -> tuple[dict, dict]:
     """Get top hits for each row."""
     return get_top_hits(
         scores=scores,
@@ -90,10 +90,10 @@ def get_top_hits_by_row(
 def get_top_hits_by_column(
     scores: Scores,
     top_n: int = 25,
-    score_name: Optional[str] = None,
-    identifiers: Optional[Sequence] = None,
+    score_name: str | None = None,
+    identifiers: Sequence | None = None,
     ignore_diagonal: bool = False,
-) -> Tuple[dict, dict]:
+) -> tuple[dict, dict]:
     """Get top hits for each column."""
     return get_top_hits(
         scores=scores,
@@ -105,7 +105,7 @@ def get_top_hits_by_column(
     )
 
 
-def _get_score_array(scores: Scores, score_name: Optional[str]) -> np.ndarray:
+def _get_score_array(scores: Scores, score_name: str | None) -> np.ndarray:
     """Return the selected score field as a dense NumPy array."""
     if score_name is None:
         if scores.is_scalar:
@@ -123,7 +123,7 @@ def _get_score_array(scores: Scores, score_name: Optional[str]) -> np.ndarray:
 def _sorted_top_indices(
     values: np.ndarray,
     top_n: int,
-    exclude_index: Optional[int] = None,
+    exclude_index: int | None = None,
 ) -> np.ndarray:
     """Return top indices sorted by descending score, ties by ascending index."""
     if top_n <= 0 or len(values) == 0:
@@ -148,7 +148,7 @@ def _get_top_hits_along_rows(
     identifiers: Sequence,
     top_n: int,
     ignore_diagonal: bool,
-) -> Tuple[dict, dict]:
+) -> tuple[dict, dict]:
     """Get top hits for each row."""
     similars_idx = {}
     similars_scores = {}
@@ -171,7 +171,7 @@ def _get_top_hits_along_columns(
     identifiers: Sequence,
     top_n: int,
     ignore_diagonal: bool,
-) -> Tuple[dict, dict]:
+) -> tuple[dict, dict]:
     """Get top hits for each column."""
     similars_idx = {}
     similars_scores = {}

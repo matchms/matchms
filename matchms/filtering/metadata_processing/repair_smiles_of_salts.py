@@ -1,6 +1,5 @@
 import itertools
 import logging
-from typing import Optional
 from matchms.filtering.filter_utils.get_neutral_mass_from_smiles import get_monoisotopic_neutral_mass
 from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import is_valid_smiles
 from matchms.typing import SpectrumType
@@ -9,7 +8,7 @@ from matchms.typing import SpectrumType
 logger = logging.getLogger("matchms")
 
 
-def repair_smiles_of_salts(spectrum_in, mass_tolerance, clone: Optional[bool] = True) -> Optional[SpectrumType]:
+def repair_smiles_of_salts(spectrum_in, mass_tolerance, clone: bool | None = True) -> SpectrumType | None:
     """Repairs the smiles of a salt to match the parent mass.
     E.g. C1=NC2=NC=NC(=C2N1)N.Cl is converted to 1=NC2=NC=NC(=C2N1)N if this matches the parent mass
     Checks if parent mass matches one of the ions

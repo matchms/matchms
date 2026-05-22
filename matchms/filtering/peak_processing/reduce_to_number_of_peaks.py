@@ -1,6 +1,5 @@
 import logging
 from math import ceil
-from typing import Optional
 import numpy as np
 import pandas as pd
 from matchms.filtering._dispatch import collection_filter
@@ -16,9 +15,9 @@ def _reduce_to_number_of_peaks_spectrum(
     spectrum_in: SpectrumType,
     n_required: int = 0,
     n_max: int = np.inf,
-    ratio_desired: Optional[float] = None,
-    clone: Optional[bool] = True,
-) -> Optional[SpectrumType]:
+    ratio_desired: float | None = None,
+    clone: bool | None = True,
+) -> SpectrumType | None:
     """Lowest intensity peaks will be removed when it has more peaks than desired.
 
     Parameters
@@ -112,10 +111,10 @@ def _reduce_to_number_of_peaks_collection(
     collection: SpectraCollection,
     n_required: int = 0,
     n_max: int = np.inf,
-    ratio_desired: Optional[float] = None,
-    clone: Optional[bool] = True,
+    ratio_desired: float | None = None,
+    clone: bool | None = True,
     progress_bar: bool = False,
-) -> Optional[SpectraCollection]:
+) -> SpectraCollection | None:
     """Collection-native implementation of reduce_to_number_of_peaks."""
     peak_counts = collection.fragments.count(axis=1)
 

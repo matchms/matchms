@@ -1,7 +1,8 @@
 import pickle
 from abc import abstractmethod
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Any, Iterable, List, Optional, Tuple, Union
+from typing import Any
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity, euclidean_distances
 from matchms.similarity.BaseSimilarity import BaseSimilarity
@@ -71,8 +72,8 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
 
     def get_embeddings(
             self,
-            spectra: Optional[Iterable[SpectrumType]] = None,
-            npy_path: Optional[Union[str, Path]] = None) -> np.ndarray:
+            spectra: Iterable[SpectrumType] | None = None,
+            npy_path: str | Path | None = None) -> np.ndarray:
         """Get embeddings either by computing them or loading from disk.
 
         Parameters
@@ -128,8 +129,8 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
 
     def matrix(
             self,
-            spectra_1: List[SpectrumType],
-            spectra_2: List[SpectrumType],
+            spectra_1: list[SpectrumType],
+            spectra_2: list[SpectrumType],
             array_type: str = "numpy",
             is_symmetric: bool = True) -> np.ndarray:
         """Compute similarity matrix between spectra_1 and spectra_2.
@@ -167,8 +168,8 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
 
     def build_ann_index(
             self,
-            reference_spectra: Optional[Iterable[SpectrumType]] = None,
-            embeddings_path: Optional[Union[str, Path]] = None,
+            reference_spectra: Iterable[SpectrumType] | None = None,
+            embeddings_path: str | Path | None = None,
             k: int = 100,
             index_backend: str = "pynndescent",
             **index_kwargs) -> Any:
@@ -220,8 +221,8 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
 
     def get_anns(
             self,
-            query_spectra: Union[Iterable[SpectrumType], np.ndarray],
-            k: int = 100) -> Tuple[np.ndarray, np.ndarray]:
+            query_spectra: Iterable[SpectrumType] | np.ndarray,
+            k: int = 100) -> tuple[np.ndarray, np.ndarray]:
         """Get approximate nearest neighbors for input spectra.
 
         Parameters
@@ -266,7 +267,7 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
             raise ValueError(f"Only pynndescent is supported for now. Got {self.index_backend}.")
         return neighbors, similarities
 
-    def get_index_anns(self) -> Tuple[np.ndarray, np.ndarray]:
+    def get_index_anns(self) -> tuple[np.ndarray, np.ndarray]:
         """Get nearest neighbors for all points in the index.
 
         Returns
@@ -310,7 +311,7 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
         raise ValueError(f"Only cosine and euclidean similarities are supported for now. Got {self.similarity}.")
 
     @staticmethod
-    def load_embeddings(npy_path: Union[str, Path]) -> np.ndarray:
+    def load_embeddings(npy_path: str | Path) -> np.ndarray:
         """Load embeddings from a numpy file.
 
         Parameters
@@ -334,7 +335,7 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
         return embs
 
     @staticmethod
-    def store_embeddings(npy_path: Union[str, Path], embs: np.ndarray) -> None:
+    def store_embeddings(npy_path: str | Path, embs: np.ndarray) -> None:
         """Store embeddings in a numpy file.
 
         Parameters
@@ -346,7 +347,7 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
         """
         np.save(npy_path, embs)
 
-    def save_ann_index(self, path: Union[str, Path]) -> None:
+    def save_ann_index(self, path: str | Path) -> None:
         """Save the ANN index to disk.
 
         Parameters
@@ -373,7 +374,7 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
         with open(path, 'wb') as f:
             pickle.dump(save_dict, f)
 
-    def load_ann_index(self, path: Union[str, Path]) -> Any:
+    def load_ann_index(self, path: str | Path) -> Any:
         """Load an ANN index from disk.
 
         Parameters

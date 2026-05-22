@@ -2,7 +2,6 @@
 
 import logging
 import re
-from typing import List, Optional, Tuple
 from matchms.constants import ELECTRON_MASS
 
 
@@ -28,7 +27,7 @@ rdkit_missing_message = "Conda package 'rdkit' is required for this functionalit
 logger = logging.getLogger("matchms")
 
 
-def get_multiplier_and_mass_from_adduct(adduct: str) -> Tuple[Optional[float], Optional[float]]:
+def get_multiplier_and_mass_from_adduct(adduct: str) -> tuple[float | None, float | None]:
     """Get multiplier for charge and the correction mass of an adduct.
 
     The multiplier and correction mass can be used to calculate the parent mass based on the precursor mz.
@@ -62,7 +61,7 @@ def get_multiplier_and_mass_from_adduct(adduct: str) -> Tuple[Optional[float], O
     return multiplier, correction_mass
 
 
-def get_ions_from_adduct(adduct: str) -> Tuple[int, List[str]]:
+def get_ions_from_adduct(adduct: str) -> tuple[int, list[str]]:
     """Returns a list of ions from an adduct and returns the number of parent masses
 
     e.g. '[M+H-H2O]2+' -> (1, ["+H", "-H2O"])
@@ -93,7 +92,7 @@ def get_ions_from_adduct(adduct: str) -> Tuple[int, List[str]]:
     return nr_of_parent_masses, ions_split
 
 
-def split_ion(ion: str) -> Tuple[str, int, str]:
+def split_ion(ion: str) -> tuple[str, int, str]:
     """Separate an ion description string into sign, number and formula.
 
     e.g. +2H2O -> ("+", 2, "H2O")
@@ -145,7 +144,7 @@ def get_mass_of_ion(ions):
     return added_mass
 
 
-def get_charge_of_adduct(adduct) -> Optional[int]:
+def get_charge_of_adduct(adduct) -> int | None:
     """Returns the charge of an adduct
 
     e.g. '[M+H-H2O]2+' -> 2

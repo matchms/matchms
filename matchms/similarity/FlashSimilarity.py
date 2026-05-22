@@ -1,7 +1,7 @@
 import logging
 import multiprocessing as mp
 import platform
-from typing import Optional, Sequence, Tuple
+from collections.abc import Sequence
 import numpy as np
 from numba import njit
 from tqdm import tqdm
@@ -30,7 +30,7 @@ class _BaseFlashSimilarity(BaseSimilarity):
         noise_cutoff: float = 0.01,
         normalize_to_half: bool = True,
         merge_within: float = 0,
-        identity_precursor_tolerance: Optional[float] = None,
+        identity_precursor_tolerance: float | None = None,
         identity_use_ppm: bool = False,
         dtype: np.dtype = np.float64,
     ):
@@ -66,7 +66,7 @@ class _BaseFlashSimilarity(BaseSimilarity):
     def _descriptor_name(self) -> str:
         raise NotImplementedError
 
-    def _prepare(self, spectrum: SpectrumType) -> Tuple[np.ndarray, Optional[float]]:
+    def _prepare(self, spectrum: SpectrumType) -> tuple[np.ndarray, float | None]:
         peaks = spectrum.peaks.to_numpy
         pmz = spectrum.metadata.get("precursor_mz", None)
         cleaned = _clean_and_weight(
@@ -313,8 +313,8 @@ class FlashEntropy(_BaseFlashSimilarity):
     def matrix(
             self,
             spectra_1: Sequence[SpectrumType],
-            spectra_2: Optional[Sequence[SpectrumType]] = None,
-            score_fields: Optional[Sequence[str]] = None,
+            spectra_2: Sequence[SpectrumType] | None = None,
+            score_fields: Sequence[str] | None = None,
             progress_bar: bool = True,
             n_jobs: int = -1,
         ):
@@ -473,8 +473,8 @@ class FlashCosine(_BaseFlashSimilarity):
     def matrix(
         self,
         spectra_1: Sequence[SpectrumType],
-        spectra_2: Optional[Sequence[SpectrumType]] = None,
-        score_fields: Optional[Sequence[str]] = None,
+        spectra_2: Sequence[SpectrumType] | None = None,
+        score_fields: Sequence[str] | None = None,
         progress_bar: bool = True,
         n_jobs: int = -1,
     ):

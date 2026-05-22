@@ -1,5 +1,4 @@
 import logging
-from typing import Optional
 from matchms.typing import SpectrumType
 
 
@@ -8,10 +7,10 @@ logger = logging.getLogger("matchms")
 
 def require_precursor_mz(
     spectrum_in: SpectrumType,
-    minimum_accepted_mz: Optional[float] = 10.0,
-    maximum_mz: Optional[float] = None,
-    clone: Optional[bool] = True,
-) -> Optional[SpectrumType]:
+    minimum_accepted_mz: float | None = 10.0,
+    maximum_mz: float | None = None,
+    clone: bool | None = True,
+) -> SpectrumType | None:
     """Returns None if there is no precursor_mz or if <= minimum_accepted_mz
 
     Parameters

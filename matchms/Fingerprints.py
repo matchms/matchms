@@ -1,7 +1,6 @@
 import json
 import logging
 from dataclasses import dataclass
-from typing import Optional
 import numpy as np
 import pandas as pd
 import scipy.sparse as sp
@@ -22,8 +21,8 @@ logger = logging.getLogger("matchms")
 class _FingerprintRecord:
     """Internal record linking one unique compound to structure metadata."""
     inchikey: str
-    smiles: Optional[str]
-    inchi: Optional[str]
+    smiles: str | None
+    inchi: str | None
 
 
 class Fingerprints:
@@ -142,7 +141,7 @@ class Fingerprints:
         self._inchikeys: list[str] = []
         self._row_by_inchikey: dict[str, int] = {}
         self._records: list[_FingerprintRecord] = []
-        self._fingerprints: Optional[np.ndarray | sp.csr_matrix] = None
+        self._fingerprints: np.ndarray | sp.csr_matrix | None = None
 
     def __str__(self):
         return json.dumps(
@@ -167,7 +166,7 @@ class Fingerprints:
         }
 
     @property
-    def fingerprints(self) -> Optional[np.ndarray | sp.csr_matrix]:
+    def fingerprints(self) -> np.ndarray | sp.csr_matrix | None:
         """Return the stored fingerprint matrix."""
         return self._fingerprints
 
@@ -336,7 +335,7 @@ class Fingerprints:
         )
         return compute_fingerprints(smiles, self.fingerprint_generator, config=config)
 
-    def _record_from_spectrum(self, spectrum: SpectrumType) -> Optional[_FingerprintRecord]:
+    def _record_from_spectrum(self, spectrum: SpectrumType) -> _FingerprintRecord | None:
         """Build validated internal fingerprint record from a spectrum."""
         inchikey = spectrum.get("inchikey")
         smiles = spectrum.get("smiles")
@@ -385,7 +384,7 @@ class Fingerprints:
         return inchikey
 
     @staticmethod
-    def _smiles_from_smiles(smiles: str) -> Optional[str]:
+    def _smiles_from_smiles(smiles: str) -> str | None:
         """Convert valid SMILES to canonical SMILES."""
         mol = Chem.MolFromSmiles(smiles)
         if mol is None:
@@ -393,7 +392,7 @@ class Fingerprints:
         return Chem.MolToSmiles(mol)
 
     @staticmethod
-    def _smiles_from_inchi(inchi: str) -> Optional[str]:
+    def _smiles_from_inchi(inchi: str) -> str | None:
         """Convert valid InChI to canonical SMILES."""
         mol = Chem.MolFromInchi(inchi)
         if mol is None:

@@ -70,7 +70,7 @@ def test_save_as_json_different_export_styles(tmp_path, builder, style, expected
     filename = tmp_path / "test_matchms.json"
     save_as_json([spectrum], str(filename), export_style=style)
 
-    with open(filename, "r", encoding="utf-8") as f:
+    with open(filename, encoding="utf-8") as f:
         data = json.load(f)
         assert expected in data[0]
 

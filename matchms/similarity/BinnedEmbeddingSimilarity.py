@@ -1,4 +1,4 @@
-from typing import Iterable
+from collections.abc import Iterable
 import numpy as np
 from matchms.typing import SpectrumType
 from .BaseEmbeddingSimilarity import BaseEmbeddingSimilarity

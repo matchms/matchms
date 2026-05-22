@@ -1,7 +1,6 @@
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, Optional
 import numpy as np
 from scipy.sparse import coo_array
 from matchms.typing import ScoresType
@@ -23,9 +22,9 @@ class ScoresMask:
         Optional array of column indices for sparse representation. If provided, `dense_mask` must be None.
     """
     shape: tuple[int, int]
-    dense_mask: Optional[np.ndarray] = None
-    row: Optional[np.ndarray] = None
-    col: Optional[np.ndarray] = None
+    dense_mask: np.ndarray | None = None
+    row: np.ndarray | None = None
+    col: np.ndarray | None = None
 
     def __post_init__(self):
         has_dense = self.dense_mask is not None
@@ -167,7 +166,7 @@ class Scores:
     _FORMAT_VERSION = 1
     _METADATA_KEY = "__scores_metadata__"
 
-    def __init__(self, data: Dict[str, np.ndarray | coo_array]):
+    def __init__(self, data: dict[str, np.ndarray | coo_array]):
         if not data:
             raise ValueError("Scores requires at least one score field.")
 
@@ -207,14 +206,14 @@ class Scores:
     def is_scalar(self) -> bool:
         return len(self.score_fields) == 1
 
-    def to_array(self, field: Optional[str] = None) -> np.ndarray:
+    def to_array(self, field: str | None = None) -> np.ndarray:
         field = self._resolve_field(field)
         value = self._data[field]
         if self.is_sparse:
             return value.toarray()
         return value.copy()
 
-    def to_coo(self, field: Optional[str] = None) -> coo_array:
+    def to_coo(self, field: str | None = None) -> coo_array:
         field = self._resolve_field(field)
         value = self._data[field]
         if self.is_sparse:
@@ -321,7 +320,7 @@ class Scores:
                 filtered[field] = arr
         return Scores(filtered)
 
-    def _resolve_field(self, field: Optional[str]) -> str:
+    def _resolve_field(self, field: str | None) -> str:
         if field is None:
             if self.is_scalar:
                 return self.score_fields[0]

@@ -1,5 +1,4 @@
 import logging
-from typing import Dict, Tuple
 import numpy as np
 from scipy.optimize import linear_sum_assignment
 from matchms.similarity.spectrum_similarity_functions import collect_peak_pairs
@@ -49,7 +48,7 @@ class ModifiedCosineHungarian(BaseSimilarityWithSparse):
         self.mz_power = mz_power
         self.intensity_power = intensity_power
 
-    def pair(self, spectrum_1: SpectrumType, spectrum_2: SpectrumType) -> Tuple[float, int]:
+    def pair(self, spectrum_1: SpectrumType, spectrum_2: SpectrumType) -> tuple[float, int]:
         """Calculate exact modified cosine score between two spectra."""
 
         precursor_mz_ref = get_valid_precursor_mz(spectrum_1, logger)
@@ -91,7 +90,7 @@ class ModifiedCosineHungarian(BaseSimilarityWithSparse):
             if matching_pairs.shape[0] == 0:
                 return None, None, None
 
-            deduplicated_edges: Dict[Tuple[int, int], float] = {}
+            deduplicated_edges: dict[tuple[int, int], float] = {}
             for peak_i, peak_j, weight in matching_pairs:
                 edge = (int(peak_i), int(peak_j))
                 current_weight = deduplicated_edges.get(edge)

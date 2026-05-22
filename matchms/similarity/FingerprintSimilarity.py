@@ -1,4 +1,4 @@
-from typing import Optional, Sequence, Union
+from collections.abc import Sequence
 import numpy as np
 import scipy.sparse as sp
 from chemap.metrics import (
@@ -40,7 +40,7 @@ class FingerprintSimilarity(BaseSimilarity):
         self,
         fingerprint_generator,
         similarity_measure: str = "tanimoto",
-        set_empty_scores: Union[float, int, str] = "nan",
+        set_empty_scores: float | int | str = "nan",
         ignore_stereochemistry: bool = False,
         count: bool = False,
         folded: bool = True,
@@ -102,11 +102,11 @@ class FingerprintSimilarity(BaseSimilarity):
 
     def matrix(
         self,
-        spectra_1: Optional[Sequence[SpectrumType]] = None,
-        spectra_2: Optional[Sequence[SpectrumType]] = None,
-        fingerprints_1: Optional[Fingerprints] = None,
-        fingerprints_2: Optional[Fingerprints] = None,
-        score_fields: Optional[Sequence[str]] = None,
+        spectra_1: Sequence[SpectrumType] | None = None,
+        spectra_2: Sequence[SpectrumType] | None = None,
+        fingerprints_1: Fingerprints | None = None,
+        fingerprints_2: Fingerprints | None = None,
+        score_fields: Sequence[str] | None = None,
         progress_bar: bool = True,
     ) -> Scores:
         """Calculate matrix of fingerprint-based similarity scores.
@@ -172,10 +172,10 @@ class FingerprintSimilarity(BaseSimilarity):
 
     def _prepare_fingerprint_inputs(
         self,
-        spectra_1: Optional[Sequence[SpectrumType]],
-        spectra_2: Optional[Sequence[SpectrumType]],
-        fingerprints_1: Optional[Fingerprints],
-        fingerprints_2: Optional[Fingerprints],
+        spectra_1: Sequence[SpectrumType] | None,
+        spectra_2: Sequence[SpectrumType] | None,
+        fingerprints_1: Fingerprints | None,
+        fingerprints_2: Fingerprints | None,
     ) -> tuple[Fingerprints, Fingerprints, bool]:
         """Normalize spectra / fingerprints inputs into two Fingerprints objects."""
         if fingerprints_1 is None and spectra_1 is None:

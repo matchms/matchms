@@ -15,7 +15,7 @@ from tests.builder_Spectrum import SpectrumBuilder
 
 
 def assert_files_equal_ignoring_line_endings(file1, file2):
-    with open(file1, "r", encoding="utf-8") as f1, open(file2, "r", encoding="utf-8") as f2:
+    with open(file1, encoding="utf-8") as f1, open(file2, encoding="utf-8") as f2:
         a = f1.read().splitlines()
         b = f2.read().splitlines()
         assert a == b
@@ -83,14 +83,14 @@ def test_export_metadata_none_spectra(tmp_path, spectra, file_name, caplog):
     spectra.append(None)
     export_metadata_as_json(spectra, outpath)
 
-    with open(outpath, "r", encoding="utf-8") as f:
+    with open(outpath, encoding="utf-8") as f:
         actual = json.load(f)
         assert len(actual) == (len(spectra) - 1)
 
     # Test invalid field export config
     export_metadata_as_json(spectra, outpath, "invalid")
     assert "'Include_fields' must be 'all' or list of keys." in caplog.text
-    with open(outpath, "r", encoding="utf-8") as f:
+    with open(outpath, encoding="utf-8") as f:
         actual = json.load(f)
         assert len(actual) == 0
 

@@ -1,5 +1,4 @@
 import logging
-from typing import Optional
 from matchms.filtering.metadata_processing.repair_adduct_and_parent_mass_based_on_smiles import (
     repair_adduct_and_parent_mass_based_on_smiles,
 )
@@ -13,8 +12,8 @@ logger = logging.getLogger("matchms")
 
 
 def repair_parent_mass_match_smiles_wrapper(
-    spectrum_in: SpectrumType, mass_tolerance: float = 0.2, clone: Optional[bool] = True
-) -> Optional[SpectrumType]:
+    spectrum_in: SpectrumType, mass_tolerance: float = 0.2, clone: bool | None = True
+) -> SpectrumType | None:
     """Wrapper function for repairing a mismatch between parent mass and smiles mass
 
     Parameters:

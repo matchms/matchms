@@ -1,7 +1,6 @@
 import csv
 import os
 from functools import lru_cache
-from typing import Dict
 import pandas as pd
 
 
@@ -28,7 +27,7 @@ def load_known_adducts() -> pd.DataFrame:
 
 
 @lru_cache(maxsize=4)
-def load_known_adduct_conversions() -> Dict[str, dict]:
+def load_known_adduct_conversions() -> dict[str, dict]:
     """Load dictionary of known adduct conversions. Makes sure that file loading is cached.
     """
     adduct_conversions_file = os.path.join(os.path.dirname(__file__), "..", "..", "data",

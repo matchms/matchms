@@ -1,12 +1,11 @@
 import logging
-from typing import Optional
 from matchms.typing import SpectrumType
 
 
 logger = logging.getLogger("matchms")
 
 
-def make_charge_int(spectrum_in: SpectrumType, clone: Optional[bool] = True) -> Optional[SpectrumType]:
+def make_charge_int(spectrum_in: SpectrumType, clone: bool | None = True) -> SpectrumType | None:
     """Convert charge field to integer (if possible).
 
     Parameters

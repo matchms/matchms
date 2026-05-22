@@ -1,6 +1,6 @@
 import os
+from collections.abc import Generator, Iterator
 from itertools import chain
-from typing import Generator, Iterator, List, Optional, Union
 from matchms.importing import (
     load_from_json,
     load_from_mgf,
@@ -13,8 +13,8 @@ from matchms.Spectrum import Spectrum
 
 
 def load_spectra(
-    file: str, metadata_harmonization: bool = True, ftype: Optional[str] = None
-) -> Union[List[Spectrum], Generator[Spectrum, None, None]]:
+    file: str, metadata_harmonization: bool = True, ftype: str | None = None
+) -> list[Spectrum] | Generator[Spectrum, None, None]:
     """Loads spectra from your spectrum file into memory as matchms Spectrum object
 
     The following file extensions can be loaded in with this function:
@@ -53,8 +53,8 @@ def load_spectra(
 
 
 def load_list_of_spectrum_files(
-    spectrum_files: Union[List[str], str],
-) -> Union[List[Spectrum], Iterator[Spectrum]]:
+    spectrum_files: list[str] | str,
+) -> list[Spectrum] | Iterator[Spectrum]:
     """Combines all spectra in multiple files into a list of spectra"""
     # Just load spectra if it is a single file
     if isinstance(spectrum_files, str):

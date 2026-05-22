@@ -1,5 +1,4 @@
 import logging
-from typing import Optional
 from matchms import Spectrum
 from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import (
     convert_inchi_to_inchikey,
@@ -14,7 +13,7 @@ from matchms.typing import SpectrumType
 logger = logging.getLogger("matchms")
 
 
-def require_valid_annotation(spectrum: Spectrum) -> Optional[SpectrumType]:
+def require_valid_annotation(spectrum: Spectrum) -> SpectrumType | None:
     """Removes spectra that are not fully annotated (correct and matching, smiles, inchi and inchikey)"""
     if spectrum is None:
         return None

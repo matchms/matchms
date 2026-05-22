@@ -40,7 +40,7 @@ def load_workflow_from_yaml_file(yaml_file: str) -> OrderedDict:
     For convenience, spectra_2_filters may be set to the string
     "processing_spectra_1" to reuse spectra_1_filters.
     """
-    with open(yaml_file, "r", encoding="utf-8") as file:
+    with open(yaml_file, encoding="utf-8") as file:
         workflow = ordered_load(file, yaml.SafeLoader)
 
     if workflow is None:

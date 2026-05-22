@@ -8,7 +8,7 @@
 # - users can also pass score_filter=... to sparse_matrix()
 
 from abc import ABC, abstractmethod
-from typing import Optional, Sequence
+from collections.abc import Sequence
 import numpy as np
 import numpy.typing as npt
 from scipy.sparse import coo_array
@@ -73,8 +73,8 @@ class BaseSimilarity(ABC):
     def matrix(
         self,
         spectra_1: Sequence[SpectrumType],
-        spectra_2: Optional[Sequence[SpectrumType]] = None,
-        score_fields: Optional[Sequence[str]] = None,
+        spectra_2: Sequence[SpectrumType] | None = None,
+        score_fields: Sequence[str] | None = None,
         progress_bar: bool = True,
     ):
         """Calculate a dense similarity matrix.
@@ -163,7 +163,7 @@ class BaseSimilarity(ABC):
     def _prepare_inputs(
         self,
         spectra_1: Sequence[SpectrumType],
-        spectra_2: Optional[Sequence[SpectrumType]],
+        spectra_2: Sequence[SpectrumType] | None,
     ) -> tuple[Sequence[SpectrumType], bool]:
         """Prepare input collections and determine symmetry."""
         if spectra_2 is None:
@@ -187,7 +187,7 @@ class BaseSimilarity(ABC):
             )
         return dtype_names
 
-    def _resolve_score_fields(self, score_fields: Optional[Sequence[str]]) -> tuple[str, ...]:
+    def _resolve_score_fields(self, score_fields: Sequence[str] | None) -> tuple[str, ...]:
         """Validate and resolve the requested score fields."""
         available_fields = self._available_score_fields()
 
@@ -257,11 +257,11 @@ class BaseSimilarityWithSparse(BaseSimilarity):
     def sparse_matrix(
         self,
         spectra_1: Sequence[SpectrumType],
-        spectra_2: Optional[Sequence[SpectrumType]] = None,
-        idx_row: Optional[npt.ArrayLike] = None,
-        idx_col: Optional[npt.ArrayLike] = None,
-        score_fields: Optional[Sequence[str]] = None,
-        score_filter: Optional[ScoreFilter] = None,
+        spectra_2: Sequence[SpectrumType] | None = None,
+        idx_row: npt.ArrayLike | None = None,
+        idx_col: npt.ArrayLike | None = None,
+        score_fields: Sequence[str] | None = None,
+        score_filter: ScoreFilter | None = None,
         progress_bar: bool = True,
     ):
         """Calculate sparse similarity results.
@@ -346,7 +346,7 @@ class BaseSimilarityWithSparse(BaseSimilarity):
         spectra_2: Sequence[SpectrumType],
         is_symmetric: bool,
         selected_fields: tuple[str, ...],
-        score_filter: Optional[ScoreFilter],
+        score_filter: ScoreFilter | None,
         progress_bar: bool,
     ) -> dict[str, coo_array]:
         """Compute sparse scores directly from all pairwise comparisons.
@@ -435,7 +435,7 @@ class BaseSimilarityWithSparse(BaseSimilarity):
         idx_col: np.ndarray,
         is_symmetric: bool,
         selected_fields: tuple[str, ...],
-        score_filter: Optional[ScoreFilter],
+        score_filter: ScoreFilter | None,
         progress_bar: bool,
     ) -> dict[str, coo_array]:
         """Compute sparse scores for explicitly given index pairs."""
@@ -490,7 +490,7 @@ class BaseSimilarityWithSparse(BaseSimilarity):
             return all(score[field] != 0 for field in score.dtype.names)
         return bool(score != 0)
 
-    def _should_keep(self, score: np.ndarray, score_filter: Optional[ScoreFilter]) -> bool:
+    def _should_keep(self, score: np.ndarray, score_filter: ScoreFilter | None) -> bool:
         """Return whether a score should be kept in sparse output."""
         if score_filter is not None:
             return bool(score_filter(score))

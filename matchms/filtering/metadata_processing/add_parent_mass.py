@@ -1,5 +1,4 @@
 import logging
-from typing import Optional
 from matchms.filtering.filter_utils.derive_precursor_mz_and_parent_mass import derive_parent_mass_from_precursor_mz
 from matchms.Spectrum import Spectrum
 from matchms.typing import SpectrumType
@@ -21,8 +20,8 @@ def add_parent_mass(
     estimate_from_adduct: bool = True,
     overwrite_existing_entry: bool = False,
     estimate_from_charge: bool = True,
-    clone: Optional[bool] = True,
-) -> Optional[SpectrumType]:
+    clone: bool | None = True,
+) -> SpectrumType | None:
     """Add estimated parent mass to metadata (if not present yet).
 
     Method to calculate the parent mass from given precursor m/z together

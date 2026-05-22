@@ -1,5 +1,4 @@
 import logging
-from typing import Optional
 from matchms.constants import PROTON_MASS
 
 
@@ -57,7 +56,7 @@ def get_molecular_weight_neutral_mass(smiles: str) -> float:
     return _get_neutral_mass(smiles, False)
 
 
-def _get_neutral_mass(smiles: str, monoisotopic: bool) -> Optional[float]:
+def _get_neutral_mass(smiles: str, monoisotopic: bool) -> float | None:
     """Get neutral mass of molecule, either average or most abundant monoisotopic mass.
 
     Args:

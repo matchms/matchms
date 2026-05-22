@@ -1,6 +1,6 @@
 from __future__ import annotations
+from collections.abc import Generator
 from functools import cached_property
-from typing import Generator
 import numpy as np
 import pandas as pd
 from matchms.MetadataTable import MetadataTable, harmonize_metadata_table_columns

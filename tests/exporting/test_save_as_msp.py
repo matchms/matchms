@@ -1,7 +1,6 @@
 import logging
 import os
 import tempfile
-from typing import List
 import numpy as np
 import pytest
 from matchms import Spectrum
@@ -42,7 +41,7 @@ def filename():
         yield filename
 
 
-def save_and_reload_spectra(filename, spectra: List[Spectrum], write_peak_comments=True):
+def save_and_reload_spectra(filename, spectra: list[Spectrum], write_peak_comments=True):
     """ Utility function to save spectra to msp and load them again.
 
     Params:
@@ -90,14 +89,14 @@ def test_name_comes_first(spectrum: Spectrum, filename: str):
     spectrum.set('compound_name', 'test')
     save_as_msp(spectrum, filename)
 
-    with open(filename, 'r', encoding='UTF-8') as file:
+    with open(filename, encoding='UTF-8') as file:
         assert file.readline() == 'COMPOUND_NAME: test\n'
 
 
 def test_peak_sep(spectrum: Spectrum, filename: str):
     save_as_msp(spectrum, filename, peak_sep='  ')
 
-    with open(filename, 'r', encoding='UTF-8') as file:
+    with open(filename, encoding='UTF-8') as file:
         lines = file.readlines()
         assert '100.0  0.1\n' in lines
 
@@ -144,7 +143,7 @@ def test_num_peaks_last_metadata_field(filename, data):
     """ Test to check whether the last line before the peaks is NUM PEAKS: ... """
     save_as_msp(data, filename)
 
-    with open(filename, mode='r', encoding="utf-8") as file:
+    with open(filename, encoding="utf-8") as file:
         content = file.readlines()
         for idx, line in enumerate(content):
             if line.startswith('NUM PEAKS: '):

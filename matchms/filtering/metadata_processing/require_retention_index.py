@@ -1,12 +1,11 @@
 import logging
-from typing import Optional
 from matchms.typing import SpectrumType
 
 
 logger = logging.getLogger("matchms")
 
 
-def require_retention_index(spectrum_in: SpectrumType, clone: Optional[bool] = True) -> Optional[SpectrumType]:
+def require_retention_index(spectrum_in: SpectrumType, clone: bool | None = True) -> SpectrumType | None:
     """
     This function checks if the input spectrum has a 'retention_index' in its metadata.
     If the input spectrum is None or doesn't have a 'retention_index', the function returns None.

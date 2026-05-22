@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import IO, Dict, List, Union
+from typing import IO
 from ..Fragments import Fragments
 from ..Spectrum import Spectrum
 from ..utils import (
@@ -17,7 +17,7 @@ _extensions_not_allowed = ["mzml", "mzxml", "json", "mgf"]
 
 @rename_deprecated_params(param_mapping={"spectrums": "spectra"}, version="0.26.5")
 def save_as_msp(
-    spectra: List[Spectrum],
+    spectra: list[Spectrum],
     filename: str,
     write_peak_comments: bool = True,
     mode: str = "a",
@@ -128,7 +128,7 @@ def _write_metadata(spectrum: Spectrum, export_style: str, outfile: IO):
     outfile.write(f"NUM PEAKS: {len(spectrum.peaks)}\n")
 
 
-def _format_peak_comment(mz: Union[int, float], peak_comments: Dict, peak_sep: str = '\t'):
+def _format_peak_comment(mz: int | float, peak_comments: dict, peak_sep: str = '\t'):
     """Format peak comment for given mz to return the quoted comment or empty string if no peak comment is present."""
     if not isinstance(peak_comments, dict):
         return ""

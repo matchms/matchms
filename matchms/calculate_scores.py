@@ -1,4 +1,4 @@
-from typing import Sequence
+from collections.abc import Sequence
 from .Scores import Scores
 from .similarity.BaseSimilarity import BaseSimilarity
 from .typing import SpectrumType

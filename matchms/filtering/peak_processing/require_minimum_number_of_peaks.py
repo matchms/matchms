@@ -1,6 +1,5 @@
 import logging
 from math import ceil
-from typing import Optional
 import numpy as np
 import pandas as pd
 from matchms.filtering._dispatch import collection_filter
@@ -14,9 +13,9 @@ logger = logging.getLogger("matchms")
 def _require_minimum_number_of_peaks_spectrum(
     spectrum_in: SpectrumType,
     n_required: int = 10,
-    ratio_required: Optional[float] = None,
-    clone: Optional[bool] = True,
-) -> Optional[SpectrumType]:
+    ratio_required: float | None = None,
+    clone: bool | None = True,
+) -> SpectrumType | None:
     """Spectrum will be set to None when it has fewer peaks than required.
 
     Parameters
@@ -63,8 +62,8 @@ def _require_minimum_number_of_peaks_spectrum(
 def _require_minimum_number_of_peaks_collection(
     spectrum_in: SpectraCollection,
     n_required: int = 10,
-    ratio_required: Optional[float] = None,
-    clone: Optional[bool] = True,
+    ratio_required: float | None = None,
+    clone: bool | None = True,
 ) -> SpectraCollection | None:
     """Drop spectra with fewer peaks than required."""
     peak_counts = spectrum_in.fragments.count(axis=1)

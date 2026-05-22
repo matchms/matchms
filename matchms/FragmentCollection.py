@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
+from collections.abc import Generator, Iterable
 from functools import cached_property
-from typing import Generator, Iterable, Tuple
 import numpy as np
 from scipy.sparse import coo_array, csr_array
 from tqdm.auto import tqdm
@@ -12,7 +12,7 @@ from .typing import FragmentCollectionType
 class FragmentCollection(ABC):
     @property
     @abstractmethod
-    def shape(self) -> Tuple[int, int]:
+    def shape(self) -> tuple[int, int]:
         """Return (n_spectra, n_bins)."""
         pass
 
@@ -25,7 +25,7 @@ class FragmentCollection(ABC):
         pass
 
     @abstractmethod
-    def get_row(self, idx: int) -> Tuple[np.ndarray, np.ndarray]:
+    def get_row(self, idx: int) -> tuple[np.ndarray, np.ndarray]:
         """Return (mz, intensities) for a single row."""
         pass
 

@@ -1,7 +1,6 @@
 import logging
 import re
 from collections import Counter
-from typing import Optional
 from matchms.filtering.filter_utils.interpret_unknown_adduct import (
     get_ions_from_adduct,
     split_ion,
@@ -11,7 +10,7 @@ from matchms.filtering.filter_utils.interpret_unknown_adduct import (
 logger = logging.getLogger("matchms")
 
 
-def add_precursor_formula(spectrum_in, clone: Optional[bool] = True,):
+def add_precursor_formula(spectrum_in, clone: bool | None = True,):
     """Derive and set 'precursor_formula' from neutral 'formula' and 'adduct'.
 
     Requirements:

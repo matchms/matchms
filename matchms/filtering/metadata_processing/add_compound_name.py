@@ -1,12 +1,11 @@
 import logging
-from typing import Optional
 from matchms.typing import SpectrumType
 
 
 logger = logging.getLogger("matchms")
 
 
-def add_compound_name(spectrum_in: SpectrumType, clone: Optional[bool] = True) -> Optional[SpectrumType]:
+def add_compound_name(spectrum_in: SpectrumType, clone: bool | None = True) -> SpectrumType | None:
     """Add compound_name to correct field: "compound_name" in metadata.
 
     Parameters

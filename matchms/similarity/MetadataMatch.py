@@ -1,6 +1,6 @@
 import logging
 from collections import defaultdict
-from typing import Optional, Sequence, Tuple
+from collections.abc import Sequence
 import numpy as np
 from scipy.sparse import coo_array
 from matchms.Scores import Scores
@@ -167,8 +167,8 @@ class MetadataMatch(BaseSimilarityWithSparse):
     def matrix(
         self,
         spectra_1: Sequence[SpectrumType],
-        spectra_2: Optional[Sequence[SpectrumType]] = None,
-        score_fields: Optional[Sequence[str]] = None,
+        spectra_2: Sequence[SpectrumType] | None = None,
+        score_fields: Sequence[str] | None = None,
         progress_bar: bool = True,
     ) -> Scores:
         """Compare metadata entries between all spectra in `spectra_1` and `spectra_2`.
@@ -206,11 +206,11 @@ class MetadataMatch(BaseSimilarityWithSparse):
     def sparse_matrix(
         self,
         spectra_1: Sequence[SpectrumType],
-        spectra_2: Optional[Sequence[SpectrumType]] = None,
+        spectra_2: Sequence[SpectrumType] | None = None,
         idx_row=None,
         idx_col=None,
-        score_fields: Optional[Sequence[str]] = None,
-        score_filter: Optional[ScoreFilter] = None,
+        score_fields: Sequence[str] | None = None,
+        score_filter: ScoreFilter | None = None,
         progress_bar: bool = True,
     ) -> Scores:
         """Compare metadata entries and return sparse scores.
@@ -319,7 +319,7 @@ class MetadataMatch(BaseSimilarityWithSparse):
         return number_matching_ppm(entries_1, entries_2, self.tolerance)
 
     @staticmethod
-    def _find_matches_hashmap(entries_1: np.ndarray, entries_2: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    def _find_matches_hashmap(entries_1: np.ndarray, entries_2: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         lookup = defaultdict(list)
         for i, entry in enumerate(entries_1):
             if entry is not _MISSING:

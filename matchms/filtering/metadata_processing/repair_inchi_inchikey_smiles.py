@@ -1,4 +1,3 @@
-from typing import Optional
 import pandas as pd
 from matchms import SpectraCollection
 from matchms.filtering._dispatch import collection_filter
@@ -32,8 +31,8 @@ def _repair_species_values(inchi, inchiaux, inchikey, smiles) -> dict[str, str]:
 
 def _repair_inchi_inchikey_smiles_spectrum(
     spectrum_in: SpectrumType,
-    clone: Optional[bool] = True,
-) -> Optional[SpectrumType]:
+    clone: bool | None = True,
+) -> SpectrumType | None:
     """Check if inchi, inchikey, and smiles entries seem correct.
 
     Detect and correct if any of those entries clearly belongs into one of the
@@ -70,7 +69,7 @@ def _repair_species_row(row: pd.Series) -> pd.Series:
 
 def _repair_inchi_inchikey_smiles_collection(
     collection: SpectraCollection,
-    clone: Optional[bool] = True,
+    clone: bool | None = True,
 ) -> SpectraCollection:
     target = collection.copy() if clone else collection
     metadata = target._metadata.copy()

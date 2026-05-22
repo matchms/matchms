@@ -3,7 +3,7 @@ when changing the ALL_FILTERS order in the future"""
 
 import ast
 import os
-from typing import Callable, List
+from collections.abc import Callable
 import pytest
 from matchms import filtering as msfilters
 from matchms.filtering.filter_order import ALL_FILTERS
@@ -169,7 +169,7 @@ DERIVE_ANNOTATION_FILTERS = [
         ],
     ],
 )
-def test_all_filter_order(early_filters: List[Callable], later_filters: List[Callable]):
+def test_all_filter_order(early_filters: list[Callable], later_filters: list[Callable]):
     """Tests if early_filter is run before later_filter"""
     for early_filter in early_filters:
         for later_filter in later_filters:
@@ -197,7 +197,7 @@ def test_all_filters_is_complete():
 
     def get_functions_from_file(file_path):
         """Gets all python functions in a file"""
-        with open(file_path, "r", encoding="utf-8") as file:
+        with open(file_path, encoding="utf-8") as file:
             tree = ast.parse(file.read(), filename=file_path)
         functions = []
         for node in ast.walk(tree):

@@ -1,9 +1,8 @@
 import pickle
-from typing import List
 from matchms.Spectrum import Spectrum
 
 
-def load_from_pickle(filename: str, metadata_harmonization: bool) -> List[Spectrum]:
+def load_from_pickle(filename: str, metadata_harmonization: bool) -> list[Spectrum]:
     """Load spectra stored in pickle
 
     Args:

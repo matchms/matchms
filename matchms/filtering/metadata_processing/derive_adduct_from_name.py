@@ -1,6 +1,5 @@
 import logging
 import re
-from typing import List, Optional
 from matchms.filtering.filter_utils.interpret_unknown_adduct import get_multiplier_and_mass_from_adduct
 from matchms.Spectrum import Spectrum
 from matchms.typing import SpectrumType
@@ -12,8 +11,8 @@ logger = logging.getLogger("matchms")
 
 
 def derive_adduct_from_name(
-    spectrum_in: Spectrum, remove_adduct_from_name: bool = True, clone: Optional[bool] = True
-) -> Optional[SpectrumType]:
+    spectrum_in: Spectrum, remove_adduct_from_name: bool = True, clone: bool | None = True
+) -> SpectrumType | None:
     """Find adduct in compound name and add to metadata (if not present yet).
 
     Method to interpret the given compound name to find the adduct.
@@ -66,7 +65,7 @@ def derive_adduct_from_name(
     return spectrum
 
 
-def _select_best_adduct(list_of_adducts: List[str]) -> Optional[str]:
+def _select_best_adduct(list_of_adducts: list[str]) -> str | None:
     """Selects an adduct that can actually be interpreted (complete with charge and known elements)"""
     unique_cleaned_adducts = list({_clean_adduct(adduct) for adduct in list_of_adducts})
     if len(unique_cleaned_adducts) == 1:

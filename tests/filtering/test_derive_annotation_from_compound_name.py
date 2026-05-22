@@ -1,7 +1,6 @@
 import csv
 import math
 import os
-from typing import List
 import pubchempy
 import pytest
 from matchms.filtering import derive_annotation_from_compound_name
@@ -270,7 +269,7 @@ def test_find_closest_match_for_multiple_matches(
     assert result.get("smiles") == expected_smiles
 
 
-def replace_nan_with_none(matches_found: List[dict]):
+def replace_nan_with_none(matches_found: list[dict]):
     for match in matches_found:
         for key, value in match.items():
             if isinstance(value, float) and math.isnan(value):

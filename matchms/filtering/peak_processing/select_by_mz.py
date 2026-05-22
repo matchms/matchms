@@ -1,4 +1,3 @@
-from typing import Optional
 import numpy as np
 from matchms.filtering._dispatch import collection_filter
 from matchms.Fragments import Fragments
@@ -15,8 +14,8 @@ def _select_by_mz_spectrum(
         spectrum_in: SpectrumType,
         mz_from: float = 0.0,
         mz_to: float = 1000.0,
-        clone: Optional[bool] = True,
-    ) -> Optional[SpectrumType]:
+        clone: bool | None = True,
+    ) -> SpectrumType | None:
     """Keep only peaks between mz_from and mz_to.
 
     Peaks are kept if ``mz_from <= m/z <= mz_to``.
@@ -56,7 +55,7 @@ def _select_by_mz_collection(
         spectrum_in: SpectraCollection,
         mz_from: float = 0.0,
         mz_to: float = 1000.0,
-        clone: Optional[bool] = True,
+        clone: bool | None = True,
     ) -> SpectraCollection:
     """Keep only peaks between mz_from and mz_to for a SpectraCollection."""
     _validate_mz_range(mz_from, mz_to)

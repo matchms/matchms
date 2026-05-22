@@ -9,7 +9,7 @@ def test_version_string_consistency_pyproject_toml():
     repository_root = os.path.join(os.path.dirname(__file__), '..')
     fixture = os.path.join(repository_root, "pyproject.toml")
 
-    with open(fixture, "r", encoding="utf-8") as f:
+    with open(fixture, encoding="utf-8") as f:
         contents = f.read()
 
     match = re.search(r"^version = (?P<semver>.*)$", contents, re.MULTILINE)

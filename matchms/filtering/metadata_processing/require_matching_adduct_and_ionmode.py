@@ -1,5 +1,4 @@
 import logging
-from typing import Optional
 from matchms.filtering.filter_utils.interpret_unknown_adduct import get_charge_of_adduct
 from matchms.typing import SpectrumType
 
@@ -7,7 +6,7 @@ from matchms.typing import SpectrumType
 logger = logging.getLogger("matchms")
 
 
-def require_matching_adduct_and_ionmode(spectrum) -> Optional[SpectrumType]:
+def require_matching_adduct_and_ionmode(spectrum) -> SpectrumType | None:
     if spectrum is None:
         return None
     ionmode = spectrum.get("ionmode")

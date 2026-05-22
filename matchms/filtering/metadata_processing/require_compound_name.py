@@ -1,12 +1,11 @@
 import logging
-from typing import Optional
 from matchms.typing import SpectrumType
 
 
 logger = logging.getLogger("matchms")
 
 
-def require_compound_name(spectrum: SpectrumType) -> Optional[SpectrumType]:
+def require_compound_name(spectrum: SpectrumType) -> SpectrumType | None:
     """Ensure that the compound name is present in the spectrum metadata."""
     if spectrum is None:
         return None

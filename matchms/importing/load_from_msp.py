@@ -1,5 +1,5 @@
 import re
-from typing import Generator, List, Tuple
+from collections.abc import Generator
 import numpy as np
 from matchms.importing.parsing_utils import parse_spectrum_dict
 from matchms.Spectrum import Spectrum
@@ -50,7 +50,7 @@ def parse_msp_file(filename: str) -> Generator[dict, None, None]:
     # Peaks counter. Used to track and count the number of peaks
     peakscount = 0
 
-    with open(filename, "r", encoding="utf-8", errors="ignore") as f:
+    with open(filename, encoding="utf-8", errors="ignore") as f:
         for line in f:
             rline = line.rstrip()
 
@@ -92,7 +92,7 @@ def parse_msp_file(filename: str) -> Generator[dict, None, None]:
                 peak_comments = {}
 
 
-def _parse_line_with_peaks(rline: str) -> Tuple[List[float], List[float], str]:
+def _parse_line_with_peaks(rline: str) -> tuple[list[float], list[float], str]:
     """Parse a line containing peaks consisting of mz and intensity values with optional comments.
 
     Args:
@@ -107,7 +107,7 @@ def _parse_line_with_peaks(rline: str) -> Tuple[List[float], List[float], str]:
     return mz, intensities, comment
 
 
-def get_peak_values(peak: str) -> Tuple[List[float], List[float]]:
+def get_peak_values(peak: str) -> tuple[list[float], list[float]]:
     """Get the m/z and intensity value from the line containing the peak information."""
     tokens = re.findall(r"(\d+(?:\.\d+)?(?:[eE][-+]?\d+)?)", peak)
     if len(tokens) % 2 != 0:
@@ -119,7 +119,7 @@ def get_peak_values(peak: str) -> Tuple[List[float], List[float]]:
     return mz, intensities
 
 
-def get_peak_comment(rline: str) -> Tuple[str, str]:
+def get_peak_comment(rline: str) -> tuple[str, str]:
     """Get the peak comment from the line containing the peak information."""
     try:
         comment = re.findall(r"[\"\'](.*)[\"\']", rline)[0]
