@@ -161,6 +161,7 @@ def metadata_hash(metadata: dict, hash_length: int = 20):
 
 
 def compute_combined_hashes(fragment_hashes: list[str] | np.ndarray, metadata_hashes: list[str]) -> list[int]:
+    """Combine fragment and metadata hashes into a single hash value."""
     s_frag = pd.Series(fragment_hashes, dtype=str)
     s_meta = pd.Series(metadata_hashes, dtype=str)
 

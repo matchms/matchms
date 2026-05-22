@@ -40,15 +40,7 @@ stream of such messages, you can do the following:
 import logging
 import logging.config
 import sys
-
-
-try:
-    from rdkit import RDLogger
-except ImportError:
-    _has_rdkit = False
-else:
-    _has_rdkit = True
-rdkit_missing_message = "Conda package 'rdkit' is required for this functionality."
+from rdkit import RDLogger
 
 
 _formatter = logging.Formatter(
@@ -144,9 +136,6 @@ def set_rdkit_logger_level(level):
         Refers to rdkit log levels ('rdApp.debug', 'rdApp.info', 'rdApp.warning', 'rdApp.error').
     """
     rdkit_log_levels = ['rdApp.debug', 'rdApp.info', 'rdApp.warning', 'rdApp.error']
-    
-    if not _has_rdkit:
-        raise ImportError(rdkit_missing_message)
 
     if level not in rdkit_log_levels:
         raise ValueError(f"Invalid log level. Allowed values are: {rdkit_log_levels}")

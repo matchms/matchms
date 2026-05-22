@@ -7,6 +7,7 @@ logger = logging.getLogger("matchms")
 
 
 def require_matching_adduct_and_ionmode(spectrum) -> SpectrumType | None:
+    """Remove spectra where the adduct and ionmode do not match."""
     if spectrum is None:
         return None
     ionmode = spectrum.get("ionmode")

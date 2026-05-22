@@ -1,23 +1,5 @@
 import re
-
-
-try:  # rdkit is not included in pip package
-    from rdkit import Chem
-except ImportError:
-    _has_rdkit = False
-    from collections import UserString
-
-    class ChemMock(UserString):
-        def __call__(self, *args, **kwargs):
-            return self
-
-        def __getattr__(self, key):
-            return self
-
-    Chem = ChemMock("")
-else:
-    _has_rdkit = True
-rdkit_missing_message = "Conda package 'rdkit' is required for this functionality."
+from rdkit import Chem
 
 
 def convert_smiles_to_inchi(smiles: str) -> str | None:
@@ -55,8 +37,7 @@ def mol_converter(mol_input: str, input_type: str, output_type: str) -> str | No
 
     Mol string in output type or None when conversion failure occurs.
     """
-    if not _has_rdkit:
-        raise ImportError(rdkit_missing_message)
+
     input_function = {"inchi": Chem.MolFromInchi,
                       "smiles": Chem.MolFromSmiles}
     output_function = {"inchi": Chem.MolToInchi,
@@ -84,8 +65,6 @@ def is_valid_inchi(inchi: str) -> bool:
     inchi
         Input string to test if it has format of InChI.
     """
-    if not _has_rdkit:
-        raise ImportError(rdkit_missing_message)
 
     # First quick test to avoid excess in-depth testing
     if inchi is None:
@@ -112,8 +91,6 @@ def is_valid_smiles(smiles: str) -> bool:
     smiles
         Input string to test if it can be imported as smiles.
     """
-    if not _has_rdkit:
-        raise ImportError(rdkit_missing_message)
 
     if smiles is None:
         return False

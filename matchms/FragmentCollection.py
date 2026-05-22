@@ -10,6 +10,7 @@ from .typing import FragmentCollectionType
 
 
 class FragmentCollection(ABC):
+    """Abstract base class for a collection of spectra fragments."""
     @property
     @abstractmethod
     def shape(self) -> tuple[int, int]:

@@ -2,26 +2,8 @@
 
 import logging
 import re
+from rdkit import Chem
 from matchms.constants import ELECTRON_MASS
-
-
-try:  # rdkit is not included in pip package
-    from rdkit import Chem
-except ImportError:
-    _has_rdkit = False
-    from collections import UserString
-
-    class ChemMock(UserString):
-        def __call__(self, *args, **kwargs):
-            return self
-
-        def __getattr__(self, key):
-            return self
-
-    Chem = AllChem = ChemMock("")
-else:
-    _has_rdkit = True
-rdkit_missing_message = "Conda package 'rdkit' is required for this functionality."
 
 
 logger = logging.getLogger("matchms")
@@ -178,8 +160,7 @@ def get_mass_of_formula(formula):
     e.g. "C" returns 12.011 and "CH2" returns 15.035. This can be used to calculate the mass difference of adducts
     Was adapted from: https://bioinformatics.stackexchange.com/questions/6852/
     """
-    if not _has_rdkit:
-        raise ImportError(rdkit_missing_message)
+
     parts = re.findall("[A-Z][a-z]?|[0-9]+", formula)
     mass = 0
 

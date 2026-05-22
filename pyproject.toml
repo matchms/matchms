@@ -88,9 +88,7 @@ extend-select = ["D", "E", "I", "F", "UP"]
 # TODO: some of these rules should be enforced in the future
 ignore = [
   "D100",
-  "D101",
   "D102",
-  "D103",
   "D104",
   "D105",
   "D107",

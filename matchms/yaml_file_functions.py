@@ -18,6 +18,7 @@ def ordered_load(stream, loader=yaml.SafeLoader, object_pairs_hook=OrderedDict) 
 
 
 def ordered_dump(data: OrderedDict, stream=None, dumper=yaml.SafeDumper, **kwds):
+    """Dump an OrderedDict to a YAML string, preserving the order of keys."""
     class OrderedDumper(dumper):
         pass
 

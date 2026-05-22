@@ -249,6 +249,7 @@ class SpectrumProcessor:
 
 
 def load_matchms_filter_from_string(filter_name):
+    """Loads a matchms filter function from a string."""
     if not isinstance(filter_name, str):
         raise ValueError("Expected a string")
     if filter_name not in FILTER_FUNCTION_NAMES:

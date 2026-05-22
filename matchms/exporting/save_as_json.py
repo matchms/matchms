@@ -49,6 +49,7 @@ def save_as_json(spectra: list[Spectrum], filename: str, export_style: str = "ma
 
 
 def create_spectrum_json_encoder(export_style):
+    """Creates a custom JSON encoder for matchms.Spectrum.Spectrum objects."""
     class CustomSpectrumJSONEncoder(json.JSONEncoder):
         def default(self, o):
             """JSON Encoder for a matchms.Spectrum.Spectrum object"""

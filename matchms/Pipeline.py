@@ -347,6 +347,7 @@ class Pipeline:
 
 
 def _instantiate_similarity(computation) -> BaseSimilarity:
+    """Instantiate a similarity measure from a score computation specification."""
     name_or_callable = computation[0]
     params = computation[1] if len(computation) > 1 else {}
 
@@ -363,6 +364,7 @@ def _instantiate_similarity(computation) -> BaseSimilarity:
 
 
 def _mask_to_index_arrays(mask: ScoresMask) -> tuple[np.ndarray, np.ndarray]:
+    """Convert a ScoresMask to index arrays for rows and columns."""
     if mask.is_sparse:
         return mask.row, mask.col
     row, col = np.nonzero(mask.dense_mask)
@@ -408,6 +410,7 @@ def _build_mask_from_scores(
 
 
 def get_unused_filters(yaml_file):
+    """Checks which filters from matchms are not used in the yaml file."""
     workflow = load_workflow_from_yaml_file(yaml_file)
     processor = SpectrumProcessor(workflow["spectra_1_filters"])
 
@@ -418,6 +421,7 @@ def get_unused_filters(yaml_file):
 
 
 def check_score_computation(score_computations: Sequence[str | list[dict]]) -> None:
+    """Check if score computations are valid."""
     if score_computations is None:
         return
 
