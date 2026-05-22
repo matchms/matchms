@@ -30,17 +30,23 @@ class FingerprintSimilarity(BaseSimilarity):
         from matchms.filtering import add_fingerprint
         from matchms.similarity import FingerprintSimilarity
 
-        spectrum_1 = Spectrum(mz=np.array([], dtype="float"),
-                              intensities=np.array([], dtype="float"),
-                              metadata={"smiles": "CCC(C)C(C(=O)O)NC(=O)CCl"})
+        spectrum_1 = Spectrum(
+            mz=np.array([], dtype="float"),
+            intensities=np.array([], dtype="float"),
+            metadata={"smiles": "CCC(C)C(C(=O)O)NC(=O)CCl", "precursor_mz": 200.2}
+            )
 
-        spectrum_2 = Spectrum(mz=np.array([], dtype="float"),
-                              intensities=np.array([], dtype="float"),
-                              metadata={"smiles": "CC(C)C(C(=O)O)NC(=O)CCl"})
+        spectrum_2 = Spectrum(
+            mz=np.array([], dtype="float"),
+            intensities=np.array([], dtype="float"),
+            metadata={"smiles": "CC(C)C(C(=O)O)NC(=O)CCl", "precursor_mz": 200.2}
+        )
 
-        spectrum_3 = Spectrum(mz=np.array([], dtype="float"),
-                              intensities=np.array([], dtype="float"),
-                              metadata={"smiles": "C(C(=O)O)(NC(=O)O)S"})
+        spectrum_3 = Spectrum(
+            mz=np.array([], dtype="float"),
+            intensities=np.array([], dtype="float"),
+            metadata={"smiles": "C(C(=O)O)(NC(=O)O)S", "precursor_mz": 200.2}
+        )
 
         spectra = [spectrum_1, spectrum_2, spectrum_3]
         # Add fingerprints
