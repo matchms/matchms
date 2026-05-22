@@ -83,7 +83,7 @@ docstring-code-format = true
 line-ending = "lf"
 
 [tool.ruff.lint]
-# TODO: add some rules in future, eg. "SIM"]
+# TODO: add some rules in future, eg. "SIM"
 extend-select = ["D", "E", "I", "F", "UP", "B", "C4"]
 # TODO: some of these rules should be enforced in the future
 ignore = [
