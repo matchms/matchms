@@ -566,8 +566,8 @@ def _search_spec_in_fragment_window(lib_mz: np.ndarray, mz: float, tol: float, u
     lo_mz = mz - mz_tolerance
     hi_mz = mz + mz_tolerance
 
-    a = np.searchsorted(lib_mz, lo_mz, side='left')
-    b = np.searchsorted(lib_mz, hi_mz, side='right')
+    a = np.searchsorted(lib_mz, lo_mz, side="left")
+    b = np.searchsorted(lib_mz, hi_mz, side="right")
     return a, b
 
 

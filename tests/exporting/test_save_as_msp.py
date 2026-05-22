@@ -85,20 +85,20 @@ def test_file_exists_single_spectrum(spectrum, filename):
 
 
 def test_name_comes_first(spectrum: Spectrum, filename: str):
-    spectrum.set('ionization','positive')
-    spectrum.set('compound_name', 'test')
+    spectrum.set("ionization","positive")
+    spectrum.set("compound_name", "test")
     save_as_msp(spectrum, filename)
 
-    with open(filename, encoding='UTF-8') as file:
-        assert file.readline() == 'COMPOUND_NAME: test\n'
+    with open(filename, encoding="UTF-8") as file:
+        assert file.readline() == "COMPOUND_NAME: test\n"
 
 
 def test_peak_sep(spectrum: Spectrum, filename: str):
-    save_as_msp(spectrum, filename, peak_sep='  ')
+    save_as_msp(spectrum, filename, peak_sep="  ")
 
-    with open(filename, encoding='UTF-8') as file:
+    with open(filename, encoding="UTF-8") as file:
         lines = file.readlines()
-        assert '100.0  0.1\n' in lines
+        assert "100.0  0.1\n" in lines
 
 def test_stores_all_spectra(filename, data):
     """ Test checking if all spectra contained in the original file are stored
@@ -146,7 +146,7 @@ def test_num_peaks_last_metadata_field(filename, data):
     with open(filename, encoding="utf-8") as file:
         content = file.readlines()
         for idx, line in enumerate(content):
-            if line.startswith('NUM PEAKS: '):
+            if line.startswith("NUM PEAKS: "):
                 num_peaks = int(line.split()[2])
                 peaks = content[idx + 1: idx + num_peaks + 1]
                 for peak in peaks:

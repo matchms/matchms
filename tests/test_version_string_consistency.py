@@ -6,7 +6,7 @@ from matchms import __version__ as expected_version
 def test_version_string_consistency_pyproject_toml():
     """Check whether version in pyproject.toml is consistent with that in matchms.__version__"""
 
-    repository_root = os.path.join(os.path.dirname(__file__), '..')
+    repository_root = os.path.join(os.path.dirname(__file__), "..")
     fixture = os.path.join(repository_root, "pyproject.toml")
 
     with open(fixture, encoding="utf-8") as f:

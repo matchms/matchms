@@ -22,7 +22,7 @@ class FragmentCollection(ABC):
         pass
 
     @abstractmethod
-    def copy(self) -> 'FragmentCollection':
+    def copy(self) -> "FragmentCollection":
         pass
 
     @abstractmethod
@@ -31,12 +31,12 @@ class FragmentCollection(ABC):
         pass
 
     @abstractmethod
-    def take(self, indices: Iterable[int]) -> 'FragmentCollection':
+    def take(self, indices: Iterable[int]) -> "FragmentCollection":
         """Return new collection with selected rows."""
         pass
 
     @abstractmethod
-    def slice_mz(self, mz_min: float | None = None, mz_max: float | None = None) -> 'FragmentCollection':
+    def slice_mz(self, mz_min: float | None = None, mz_max: float | None = None) -> "FragmentCollection":
         """Return new collection with restricted m/z range."""
         pass
 
@@ -84,7 +84,7 @@ class FragmentCollection(ABC):
         pass
 
     @abstractmethod
-    def keep_top_k_per_row_variable(self, k_per_row: np.ndarray) -> 'FragmentCollection':
+    def keep_top_k_per_row_variable(self, k_per_row: np.ndarray) -> "FragmentCollection":
         """Return new collection with only the top-k intensity peaks per row."""
         pass
 

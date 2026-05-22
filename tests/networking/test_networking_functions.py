@@ -14,14 +14,14 @@ def create_dummy_spectra():
     for i in range(5):
         spectra.append(Spectrum(mz=np.array([100, 200.]),
                                   intensities=np.array([0.7, 0.1 * i]),
-                                  metadata={"spectrum_id": 'ref_spec_'+str(i),
-                                            "smiles": 'C1=CC=C2C(=C1)NC(=N2)C3=CC=CO3',
+                                  metadata={"spectrum_id": "ref_spec_"+str(i),
+                                            "smiles": "C1=CC=C2C(=C1)NC(=N2)C3=CC=CO3",
                                             "precursor_mz": 100+50*i}))
     for i in range(3):
         spectra.append(Spectrum(mz=np.array([100 + i, 210.]),
                                   intensities=np.array([0.5, 0.1 * i]),
-                                  metadata={"spectrum_id": 'query_spec_'+str(i),
-                                            "smiles": 'CC1=C(C=C(C=C1)NC(=O)N(C)C)Cl',
+                                  metadata={"spectrum_id": "query_spec_"+str(i),
+                                            "smiles": "CC1=C(C=C(C=C1)NC(=O)N(C)C)Cl",
                                             "precursor_mz": 110+50*i}))
     return spectra
 
@@ -48,14 +48,14 @@ def test_get_top_hits_by_column():
     )
 
     expected_scores_col = {
-        'query_spec_0': np.array([1.        , 0.80566937, 0.77583811, 0.75247993, 0.73288331]),
-        'query_spec_1': np.array([0.34812354, 0.        , 0.        , 0.        , 0.        ]),
-        'query_spec_2': np.array([0.612693  , 0.39564064, 0.        , 0.        , 0.        ])
+        "query_spec_0": np.array([1.        , 0.80566937, 0.77583811, 0.75247993, 0.73288331]),
+        "query_spec_1": np.array([0.34812354, 0.        , 0.        , 0.        , 0.        ]),
+        "query_spec_2": np.array([0.612693  , 0.39564064, 0.        , 0.        , 0.        ])
     }
     expected_idx_col = {
-        'query_spec_0': np.array([0, 1, 2, 3, 4]),
-        'query_spec_1': np.array([1, 0, 2, 3, 4]),
-        'query_spec_2': np.array([0, 2, 1, 3, 4]),
+        "query_spec_0": np.array([0, 1, 2, 3, 4]),
+        "query_spec_1": np.array([1, 0, 2, 3, 4]),
+        "query_spec_2": np.array([0, 2, 1, 3, 4]),
     }
 
     for key, value in scores_col.items():
@@ -75,9 +75,9 @@ def test_get_top_hits_by_column():
     )
 
     expected_scores_col_top2 = {
-        'query_spec_0': np.array([1.0, 0.80566937]),
-        'query_spec_1': np.array([0.34812354, 0.0]),
-        'query_spec_2': np.array([0.612693, 0.39564064]),
+        "query_spec_0": np.array([1.0, 0.80566937]),
+        "query_spec_1": np.array([0.34812354, 0.0]),
+        "query_spec_2": np.array([0.612693, 0.39564064]),
     }
 
     for key, value in scores_col.items():
@@ -109,18 +109,18 @@ def test_get_top_hits_by_row():
     )
 
     expected_scores_row = {
-        'ref_spec_0': np.array([1.      , 0.612693, 0.      ]),
-        'ref_spec_1': np.array([0.80566937, 0.34812354, 0.        ]),
-        'ref_spec_2': np.array([0.77583811, 0.39564064, 0.        ]),
-        'ref_spec_3': np.array([0.75247993, 0.        , 0.        ]),
-        'ref_spec_4': np.array([0.73288331, 0.        , 0.        ])
+        "ref_spec_0": np.array([1.      , 0.612693, 0.      ]),
+        "ref_spec_1": np.array([0.80566937, 0.34812354, 0.        ]),
+        "ref_spec_2": np.array([0.77583811, 0.39564064, 0.        ]),
+        "ref_spec_3": np.array([0.75247993, 0.        , 0.        ]),
+        "ref_spec_4": np.array([0.73288331, 0.        , 0.        ])
     }
     expected_idx_row = {
-        'ref_spec_0': np.array([0, 2, 1]),
-        'ref_spec_1': np.array([0, 1, 2]),
-        'ref_spec_2': np.array([0, 2, 1]),
-        'ref_spec_3': np.array([0, 1, 2]),
-        'ref_spec_4': np.array([0, 1, 2]),
+        "ref_spec_0": np.array([0, 2, 1]),
+        "ref_spec_1": np.array([0, 1, 2]),
+        "ref_spec_2": np.array([0, 2, 1]),
+        "ref_spec_3": np.array([0, 1, 2]),
+        "ref_spec_4": np.array([0, 1, 2]),
     }
 
     for key, value in scores_row.items():
@@ -140,11 +140,11 @@ def test_get_top_hits_by_row():
     )
 
     expected_scores_row_top2 = {
-        'ref_spec_0': np.array([1.0, 0.612693]),
-        'ref_spec_1': np.array([0.80566937, 0.34812354]),
-        'ref_spec_2': np.array([0.77583811, 0.39564064]),
-        'ref_spec_3': np.array([0.75247993, 0.0]),
-        'ref_spec_4': np.array([0.73288331, 0.0]),
+        "ref_spec_0": np.array([1.0, 0.612693]),
+        "ref_spec_1": np.array([0.80566937, 0.34812354]),
+        "ref_spec_2": np.array([0.77583811, 0.39564064]),
+        "ref_spec_3": np.array([0.75247993, 0.0]),
+        "ref_spec_4": np.array([0.73288331, 0.0]),
     }
 
     for key, value in scores_row.items():

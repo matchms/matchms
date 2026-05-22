@@ -23,7 +23,7 @@ def add_precursor_formula(spectrum_in, clone: bool | None = True,):
     spectrum = spectrum_in.clone() if clone else spectrum_in
 
     adduct = spectrum.get("adduct")
-    formula_str = spectrum.get('formula')
+    formula_str = spectrum.get("formula")
     if formula_str is None or adduct is None:
         logger.info(
             f"Missing 'formula' or 'adduct' (formula={formula_str}, adduct={adduct});"\
@@ -56,7 +56,7 @@ def add_precursor_formula(spectrum_in, clone: bool | None = True,):
 
 def _convert_formula_string_to_atom_counter(formula_str):
     """Parse a simple elemental formula (no parentheses/hydrates/isotopes) into a Counter."""
-    atoms_and_counts = re.findall(r'([A-Z][a-z]?)(\d*)', formula_str)
+    atoms_and_counts = re.findall(r"([A-Z][a-z]?)(\d*)", formula_str)
     return Counter({atom: int(count) if count else 1 for atom, count in atoms_and_counts})
 
 

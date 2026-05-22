@@ -58,7 +58,7 @@ def get_ions_from_adduct(adduct: str) -> tuple[int, list[str]]:
             return None, None
         adduct = ions_part[0]
     # Finds the pattern M or 2M in adduct it makes sure it is in between
-    parent_mass = re.findall(r'(?:^|[+-])([0-9]?M)(?:$|[+-])', adduct)
+    parent_mass = re.findall(r"(?:^|[+-])([0-9]?M)(?:$|[+-])", adduct)
     if len(parent_mass) != 1:
         logger.warning("The parent mass (e.g. 2M or M) was found %s times in %s",
                        len(parent_mass), adduct)
@@ -69,7 +69,7 @@ def get_ions_from_adduct(adduct: str) -> tuple[int, list[str]]:
     else:
         nr_of_parent_masses = int(parent_mass[0])
 
-    ions_split = re.findall(r'([+-][0-9a-zA-Z]+)', adduct)
+    ions_split = re.findall(r"([+-][0-9a-zA-Z]+)", adduct)
     ions_split = replace_abbreviations(ions_split)
     return nr_of_parent_masses, ions_split
 
@@ -87,7 +87,7 @@ def split_ion(ion: str) -> tuple[str, int, str]:
     sign = ion[0]
     ion = ion[1:]
     assert sign in ["+", "-"], "Expected ion to start with + or -"
-    match = re.match(r'^([0-9]+)(.*)', ion)
+    match = re.match(r"^([0-9]+)(.*)", ion)
     if match:
         number = int(match.group(1))
         ion = match.group(2)
@@ -98,9 +98,9 @@ def split_ion(ion: str) -> tuple[str, int, str]:
 
 def replace_abbreviations(ions_split):
     """Derived from https://github.com/pnnl/MSAC"""
-    abbrev_to_formula = {'ACN': 'CH3CN', 'DMSO': 'C2H6OS', 'FA': 'CH2O2',
-                         'HAc': 'CH3COOH', 'Hac': 'CH3COOH', 'TFA': 'C2HF3O2',
-                         'IsoProp': 'CH3CHOHCH3', 'MeOH': 'CH3OH'}
+    abbrev_to_formula = {"ACN": "CH3CN", "DMSO": "C2H6OS", "FA": "CH2O2",
+                         "HAc": "CH3COOH", "Hac": "CH3COOH", "TFA": "C2HF3O2",
+                         "IsoProp": "CH3CHOHCH3", "MeOH": "CH3OH"}
     corrected_ions = []
     for ion in ions_split:
         sign, number, ion = split_ion(ion)

@@ -26,14 +26,14 @@ def create_dummy_spectra():
     for i in range(5):
         spectra.append(Spectrum(mz=np.array([100, 200., 210. + 10 * i]),
                                   intensities=np.array([0.2 * i, 0.1 * i, 1.0]),
-                                  metadata={"spectrum_id": 'ref_spec_'+str(i),
-                                            "smiles": 'C1=CC=C2C(=C1)NC(=N2)C3=CC=CO3',
+                                  metadata={"spectrum_id": "ref_spec_"+str(i),
+                                            "smiles": "C1=CC=C2C(=C1)NC(=N2)C3=CC=CO3",
                                             "precursor_mz": 100+20*i}))
     for i in range(3):
         spectra.append(Spectrum(mz=np.array([100., 200.01]),
                                   intensities=np.array([0.5, 0.1 * i]),
-                                  metadata={"spectrum_id": 'query_spec_'+str(i),
-                                            "smiles": 'CC1=C(C=C(C=C1)NC(=O)N(C)C)Cl',
+                                  metadata={"spectrum_id": "query_spec_"+str(i),
+                                            "smiles": "CC1=C(C=C(C=C1)NC(=O)N(C)C)Cl",
                                             "precursor_mz": 120+20*i}))
     return spectra
 
@@ -124,7 +124,7 @@ def test_create_network_symmetric_remove_unconnected_nodes():
     edges_list = list(msnet.graph.edges())
     edges_list.sort()
 
-    nodes_with_edges = ['ref_spec_4', 'query_spec_0', 'query_spec_1', 'query_spec_2']
+    nodes_with_edges = ["ref_spec_4", "query_spec_0", "query_spec_1", "query_spec_2"]
 
     assert len(nodes_list) == 4, "Expected different number of nodes"
     assert np.all([(x in nodes_list) for x in nodes_with_edges]), (
@@ -142,8 +142,8 @@ def test_create_network_symmetric_higher_cutoff():
     edges_list.sort()
 
     assert len(edges_list) == 1, "Expected only one link"
-    assert edges_list[0][0] in ['query_spec_1', 'query_spec_2'], "Expected different node to have a link"
-    assert edges_list[0][1] in ['query_spec_1', 'query_spec_2'], "Expected different node to have a link"
+    assert edges_list[0][0] in ["query_spec_1", "query_spec_2"], "Expected different node to have a link"
+    assert edges_list[0][1] in ["query_spec_1", "query_spec_2"], "Expected different node to have a link"
 
 
 def test_create_network_symmetric_mutual_method():

@@ -3,7 +3,7 @@ import pytest
 from matchms.Fragments import Fragments
 
 
-@pytest.mark.parametrize('dtype', [
+@pytest.mark.parametrize("dtype", [
     np.float16,
     np.float32,
     np.float64,

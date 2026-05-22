@@ -22,7 +22,7 @@ def save_as_msp(
     write_peak_comments: bool = True,
     mode: str = "a",
     style: str = "matchms",
-    peak_sep: str = '\t'
+    peak_sep: str = "\t"
 ):
     """Save spectrum(s) as msp file.
 
@@ -89,7 +89,7 @@ def _write_spectrum(
     outfile: IO,
     write_peak_comments: bool,
     export_style: str = "matchms",
-    peak_sep: str = '\t'
+    peak_sep: str = "\t"
 ):
     _write_metadata(spectrum, export_style, outfile)
     _write_peaks(
@@ -110,11 +110,11 @@ def _write_metadata(spectrum: Spectrum, export_style: str, outfile: IO):
     metadata = spectrum.metadata_dict(export_style)
     key_conversions = load_export_key_conversions(export_style=export_style)
 
-    metadata.pop(key_conversions['num_peaks'], None)
-    metadata.pop('fingerprint', None)
-    metadata.pop('peak_comments', None)
+    metadata.pop(key_conversions["num_peaks"], None)
+    metadata.pop("fingerprint", None)
+    metadata.pop("peak_comments", None)
 
-    compound_name = metadata.pop(key_conversions['compound_name'], None)
+    compound_name = metadata.pop(key_conversions["compound_name"], None)
     if compound_name:
         outfile.write(f"{key_conversions['compound_name'].upper()}: {compound_name}\n")
 
@@ -128,7 +128,7 @@ def _write_metadata(spectrum: Spectrum, export_style: str, outfile: IO):
     outfile.write(f"NUM PEAKS: {len(spectrum.peaks)}\n")
 
 
-def _format_peak_comment(mz: int | float, peak_comments: dict, peak_sep: str = '\t'):
+def _format_peak_comment(mz: int | float, peak_comments: dict, peak_sep: str = "\t"):
     """Format peak comment for given mz to return the quoted comment or empty string if no peak comment is present."""
     if not isinstance(peak_comments, dict):
         return ""

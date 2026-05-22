@@ -149,7 +149,7 @@ def plot_spectra_mirror(spec_top,
     if spectrum_kws is None:
         spectrum_kws = {}
 
-    if 'peak_color' in spectrum_kws:
+    if "peak_color" in spectrum_kws:
         raise ValueError("'peak_color' should not be set for `plot_spectra_mirror`. "
                          "Use 'color_top' and 'color_bottom' instead.")
 

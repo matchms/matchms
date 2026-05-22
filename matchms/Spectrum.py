@@ -99,7 +99,7 @@ class Spectrum:
         metadata (see .metadata_hash() method) and spectrum peaks
         (see .spectrum_hash() method)."""
         combined_hash = self.metadata_hash() + self.spectrum_hash()
-        return int.from_bytes(bytearray(combined_hash, 'utf-8'), 'big')
+        return int.from_bytes(bytearray(combined_hash, "utf-8"), "big")
 
     def __repr__(self):
         precursor_mz_str = f"{self.get('precursor_mz', 0.0):.2f}"

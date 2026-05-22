@@ -95,7 +95,7 @@ def test_load_from_json_with_minimal_json(tmp_path, builder):
     filename = tmp_path / "test.json"
     body = '[{"test_field": "test1", "peaks_json": [[100.0, 10.0], [200.0, 10.0], [300.0, 500.0]]}]'
 
-    with open(filename, 'w', encoding="utf-8") as f:
+    with open(filename, "w", encoding="utf-8") as f:
         f.write(body)
 
     spectrum_imports = load_from_json(filename, metadata_harmonization=False)

@@ -44,7 +44,7 @@ from rdkit import RDLogger
 
 
 _formatter = logging.Formatter(
-    '%(asctime)s:%(levelname)s:%(name)s:%(module)s:%(message)s')
+    "%(asctime)s:%(levelname)s:%(name)s:%(module)s:%(message)s")
 
 
 def _init_logger(logger_name="matchms"):
@@ -55,7 +55,7 @@ def _init_logger(logger_name="matchms"):
     handler.setLevel(logging.WARNING)
     handler.setFormatter(_formatter)
     logger.addHandler(handler)
-    logger.info('Completed configuring matchms logger.')
+    logger.info("Completed configuring matchms logger.")
 
 
 def set_matchms_logger_level(loglevel: str, logger_name="matchms"):
@@ -135,7 +135,7 @@ def set_rdkit_logger_level(level):
     level
         Refers to rdkit log levels ('rdApp.debug', 'rdApp.info', 'rdApp.warning', 'rdApp.error').
     """
-    rdkit_log_levels = ['rdApp.debug', 'rdApp.info', 'rdApp.warning', 'rdApp.error']
+    rdkit_log_levels = ["rdApp.debug", "rdApp.info", "rdApp.warning", "rdApp.error"]
 
     if level not in rdkit_log_levels:
         raise ValueError(f"Invalid log level. Allowed values are: {rdkit_log_levels}")

@@ -97,9 +97,9 @@ def test_export_metadata_none_spectra(tmp_path, spectra, file_name, caplog):
 
 def test__get_metadata_keys(spectra):
     """Test that _get_metadata_keys returns the correct keys."""
-    expected_keys = ['author', 'compound_name', 'formula', 'inchi', 'inchikey', 'instrument', 'instrument_type',
-                     'ion_type', 'ionization_energy', 'ionization_mode', 'last_auto-curation', 'license',
-                     'molecular_formula', 'ms_level', 'nominal_mass', 'num_peaks', 'parent_mass',
-                     'precursor_mz', 'smiles', 'smiles_2', 'spectrum_id', 'synonym', 'total_exact_mass']
+    expected_keys = ["author", "compound_name", "formula", "inchi", "inchikey", "instrument", "instrument_type",
+                     "ion_type", "ionization_energy", "ionization_mode", "last_auto-curation", "license",
+                     "molecular_formula", "ms_level", "nominal_mass", "num_peaks", "parent_mass",
+                     "precursor_mz", "smiles", "smiles_2", "spectrum_id", "synonym", "total_exact_mass"]
     actual_keys = _get_metadata_keys(spectra)
     assert actual_keys == expected_keys
