@@ -45,6 +45,11 @@ that process lists of ``Spectrum`` objects continue to work. New workflows can
 use ``SpectraCollection`` to keep spectrum metadata and peak data synchronized
 while enabling more efficient collection-level operations.
 
+.. image:: readthedocs/_static/matchms_modular_design_v1_0.png
+   :target: readthedocs/_static/matchms_modular_design_v1_0.png
+   :align: left
+   :alt: matchms code design
+
 
 Citation
 ========
