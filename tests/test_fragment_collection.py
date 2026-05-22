@@ -249,6 +249,19 @@ def test_count_axis_0(fragments):
     assert counts.sum() == 9
 
 
+def test_count_peaks_above_relative_intensity(sample_spectra):
+    fragments = CSRFragmentCollection(sample_spectra, bin_size=1e-6)
+
+    counts = fragments.count_peaks_above_relative_intensity(
+        intensity_from=0.5,
+    )
+
+    np.testing.assert_array_equal(
+        counts,
+        np.array([2, 3, 3]),
+    )
+
+
 def test_count_invalid_axis_raises(fragments):
     with pytest.raises(ValueError, match="axis must be 0 or 1"):
         fragments.count(axis=2)
@@ -387,3 +400,19 @@ def test_slice_mz_empty_result_keeps_shape_and_returns_empty_rows(fragments):
         mz, intensities = sliced.get_row(i)
         assert len(mz) == 0
         assert len(intensities) == 0
+
+
+def test_csr_fragment_collection_select_by_relative_intensity():
+    spectrum = (
+        SpectrumBuilder()
+        .with_mz(np.array([10, 20, 30, 40], dtype="float"))
+        .with_intensities(np.array([1, 10, 100, 1000], dtype="float"))
+        .build()
+    )
+    fragments = CSRFragmentCollection([spectrum])
+
+    result = fragments.select_by_relative_intensity(0.01, 0.99)
+    mz, intensities = result.get_row(0)
+
+    np.testing.assert_allclose(mz, np.array([20, 30], dtype="float"), atol=1e-6)
+    np.testing.assert_array_equal(intensities, np.array([10, 100], dtype="float"))

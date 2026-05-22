@@ -393,3 +393,25 @@ def test_add_metadata_aligns_by_position_not_index(collection):
     assert collection.metadata["quality_score"].tolist() == [0.95, 0.88, 0.99]
     assert not collection.metadata["quality_score"].isna().any()
     assert collection.metadata["compound_name"].tolist() == ["A", "B", "C"]
+
+
+def test_spectra_collection_reconstructs_spectrum_without_reharmonizing_metadata():
+    spectrum = Spectrum(
+        mz=np.array([111.01]),
+        intensities=np.array([1.0]),
+        metadata={
+            "Precursor MZ": 100.0,
+            "rt": 5.432,
+            "inchi": "n/a",
+        },
+        metadata_harmonization=False,
+    )
+
+    collection = SpectraCollection([spectrum])
+
+    assert collection.metadata.loc[0, "inchi"] == "n/a"
+    assert collection[0].get("inchi") == "n/a"
+
+    sliced = collection[0, 100.0:120.0]
+
+    assert sliced.get("inchi") == "n/a"

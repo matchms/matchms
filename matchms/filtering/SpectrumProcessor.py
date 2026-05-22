@@ -6,7 +6,6 @@ from functools import partial
 from typing import Callable, Dict, Iterable, List, Optional, Tuple, Union
 import numpy as np
 import pandas as pd
-from deprecated import deprecated
 from tqdm import tqdm
 from matchms.exporting import save_spectra
 from matchms.filtering.filter_order import ALL_FILTERS, FILTER_FUNCTION_NAMES
@@ -173,36 +172,6 @@ class SpectrumProcessor:
                 return None
             spectrum = spectrum_out
         return spectrum
-
-    @deprecated(
-        version="0.26.5",
-        reason="This method is deprecated and will be removed in the future. Use 'process_spectra()' instead.",
-    )
-    def process_spectrums(
-        self, spectra: list, progress_bar: bool = True, cleaned_spectra_file=None, create_report: Optional[bool] = False
-    ):
-        """
-        Wrapper method for process_spectra()
-
-        Parameters
-        ----------
-        spectra : list[Spectrum]
-            The spectra to process.
-        create_report: bool, optional
-            Creates and outputs a report of the main changes during processing.
-            The report will be returned as pandas DataFrame. Default is set to False.
-        progress_bar : bool, optional
-            Displays progress bar if set to True. Default is True.
-        cleaned_spectra_file:
-            Path to where the cleaned spectra should be saved.
-        Returns
-        -------
-        spectra
-            List containing the processed spectra.
-        processing_report
-            A ProcessingReport containing the effect of the filters.
-        """
-        return self.process_spectra(spectra, progress_bar, cleaned_spectra_file, create_report)
 
     def process_spectra(
         self,

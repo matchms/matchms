@@ -1,6 +1,7 @@
 import logging
 from typing import Optional
 import numpy as np
+from matchms.filtering._dispatch import collection_filter
 from matchms.Fragments import Fragments
 from matchms.Spectrum import Spectrum
 from matchms.typing import SpectrumType
@@ -9,7 +10,7 @@ from matchms.typing import SpectrumType
 logger = logging.getLogger("matchms")
 
 
-def remove_noise_below_frequent_intensities(
+def _remove_noise_below_frequent_intensities(
     spectrum_in: Spectrum,
     min_count_of_frequent_intensities: int = 5,
     noise_level_multiplier: float = 2.0,
@@ -65,3 +66,10 @@ def _select_highest_frequent_peak(intensities, min_count_of_frequent_intensities
     if filtered_values.size > 0:
         return filtered_values.max()
     return -1
+
+
+# wrapper
+remove_noise_below_frequent_intensities = collection_filter(
+    _remove_noise_below_frequent_intensities,
+    collection_impl=None,
+)
