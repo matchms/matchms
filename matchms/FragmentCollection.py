@@ -55,6 +55,14 @@ class FragmentCollection(ABC):
     def bin_to_mz(self, bin_idx: np.ndarray | int) -> np.ndarray:
         pass
 
+    @abstractmethod
+    def count_peaks_above_relative_intensity(
+        self,
+        intensity_from: float,
+    ) -> np.ndarray:
+        """Return number of peaks per row with relative intensity >= intensity_from."""
+        pass
+
     # Filtering methods for peak processing filters.
     @abstractmethod
     def select_by_intensity(
@@ -346,6 +354,35 @@ class CSRFragmentCollection(FragmentCollection):
         if axis == 0:
             return np.bincount(self._array.indices, minlength=self._array.shape[1])
         raise ValueError("axis must be 0 or 1")
+
+    def count_peaks_above_relative_intensity(
+            self,
+            intensity_from: float,
+        ) -> np.ndarray:
+        """Return number of peaks per row with relative intensity >= intensity_from."""
+        if intensity_from < 0.0:
+            raise ValueError("'intensity_from' should be larger than or equal to 0.")
+        if intensity_from > 1.0:
+            raise ValueError("'intensity_from' should be smaller than or equal to 1.0.")
+
+        coo = self._array.tocoo()
+        counts = np.zeros(len(self), dtype=np.int64)
+
+        if coo.data.size == 0:
+            return counts
+
+        row_max = self._array.max(axis=1)
+        if hasattr(row_max, "toarray"):
+            row_max = row_max.toarray()
+        row_max = np.asarray(row_max).ravel()
+
+        valid = row_max[coo.row] > 0
+        relative_intensities = np.zeros_like(coo.data, dtype=float)
+        relative_intensities[valid] = coo.data[valid] / row_max[coo.row[valid]]
+
+        keep = valid & (relative_intensities >= intensity_from)
+
+        return np.bincount(coo.row[keep], minlength=len(self))
 
     def row_intensity_sums(self) -> np.ndarray:
         return self.sum(axis=1)

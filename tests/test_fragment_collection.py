@@ -249,6 +249,19 @@ def test_count_axis_0(fragments):
     assert counts.sum() == 9
 
 
+def test_count_peaks_above_relative_intensity(sample_spectra):
+    fragments = CSRFragmentCollection(sample_spectra, bin_size=1e-6)
+
+    counts = fragments.count_peaks_above_relative_intensity(
+        intensity_from=0.5,
+    )
+
+    np.testing.assert_array_equal(
+        counts,
+        np.array([2, 3, 3]),
+    )
+
+
 def test_count_invalid_axis_raises(fragments):
     with pytest.raises(ValueError, match="axis must be 0 or 1"):
         fragments.count(axis=2)
