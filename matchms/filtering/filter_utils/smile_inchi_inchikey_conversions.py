@@ -1,4 +1,5 @@
 import re
+import pandas as pd
 from rdkit import Chem
 
 
@@ -120,3 +121,20 @@ def is_valid_inchikey(inchikey: str) -> bool:
     if re.fullmatch(regexp, inchikey):
         return True
     return False
+
+
+def _as_string_or_none(value):
+    """Return a safe scalar string-or-None value for metadata validators."""
+    if value is None:
+        return None
+
+    try:
+        if pd.isna(value):
+            return None
+    except (TypeError, ValueError):
+        return None
+
+    if isinstance(value, str):
+        return value
+
+    return str(value)
