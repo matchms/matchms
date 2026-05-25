@@ -63,6 +63,8 @@ def _derive_inchikey_from_inchi_collection(
     if "inchikey" not in metadata.columns:
         metadata["inchikey"] = None
 
+    metadata["inchikey"] = metadata["inchikey"].astype("object")
+
     for idx, row in metadata.iterrows():
         inchi = _as_string_or_none(row.get("inchi"))
         inchikey = _as_string_or_none(row.get("inchikey"))

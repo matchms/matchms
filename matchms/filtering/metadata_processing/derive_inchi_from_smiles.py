@@ -67,6 +67,9 @@ def _derive_inchi_from_smiles_collection(
     if "inchi" not in metadata.columns:
         metadata["inchi"] = None
 
+    # Important for pandas >= 3.0 / stricter dtype handling:
+    metadata["inchi"] = metadata["inchi"].astype("object")
+
     for idx, row in metadata.iterrows():
         inchi = _as_string_or_none(row.get("inchi"))
         smiles = _as_string_or_none(row.get("smiles"))

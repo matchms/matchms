@@ -64,6 +64,8 @@ def _derive_smiles_from_inchi_collection(
     if "smiles" not in metadata.columns:
         metadata["smiles"] = None
 
+    metadata["smiles"] = metadata["smiles"].astype("object")
+
     for idx, row in metadata.iterrows():
         inchi = _as_string_or_none(row.get("inchi"))
         smiles = _as_string_or_none(row.get("smiles"))
