@@ -1,6 +1,7 @@
 import logging
 from matchms.filtering._dispatch import collection_filter
 from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import (
+    _as_string_or_none,
     convert_smiles_to_inchi,
     is_valid_inchi,
     is_valid_smiles,
@@ -10,6 +11,9 @@ from matchms.typing import SpectrumType
 
 
 logger = logging.getLogger("matchms")
+
+
+
 
 
 def _derive_inchi_from_smiles_spectrum(
@@ -64,8 +68,8 @@ def _derive_inchi_from_smiles_collection(
         metadata["inchi"] = None
 
     for idx, row in metadata.iterrows():
-        inchi = row.get("inchi")
-        smiles = row.get("smiles")
+        inchi = _as_string_or_none(row.get("inchi"))
+        smiles = _as_string_or_none(row.get("smiles"))
 
         if not is_valid_inchi(inchi) and is_valid_smiles(smiles):
             converted_inchi = convert_smiles_to_inchi(smiles)

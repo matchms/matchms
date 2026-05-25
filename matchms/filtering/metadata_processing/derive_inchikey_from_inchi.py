@@ -1,6 +1,7 @@
 import logging
 from matchms.filtering._dispatch import collection_filter
 from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import (
+    _as_string_or_none,
     convert_inchi_to_inchikey,
     is_valid_inchi,
     is_valid_inchikey,
@@ -63,8 +64,8 @@ def _derive_inchikey_from_inchi_collection(
         metadata["inchikey"] = None
 
     for idx, row in metadata.iterrows():
-        inchi = row.get("inchi")
-        inchikey = row.get("inchikey")
+        inchi = _as_string_or_none(row.get("inchi"))
+        inchikey = _as_string_or_none(row.get("inchikey"))
 
         if is_valid_inchi(inchi) and not is_valid_inchikey(inchikey):
             converted_inchikey = convert_inchi_to_inchikey(inchi)
