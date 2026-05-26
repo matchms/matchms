@@ -117,7 +117,7 @@ class SpectraCollection:
     @property
     def n_spectra(self):
         return self._fragments.shape[0]
-    
+
     @property
     def n_metadata_columns(self):
         return self._metadata.shape[1]
@@ -128,7 +128,7 @@ class SpectraCollection:
 
     def _normalize_row_selection(self, idx):
         """Normalize row selection to integer indices or a scalar int."""
-        if isinstance(idx, (int, np.integer)):
+        if isinstance(idx, int | np.integer):
             return int(idx)
 
         if isinstance(idx, slice):
@@ -162,7 +162,7 @@ class SpectraCollection:
             row_sel, mz_sel = idx
 
             # scalar row + mz slice -> one Spectrum
-            if isinstance(row_sel, (int, np.integer)):
+            if isinstance(row_sel, int | np.integer):
                 row_idx = int(row_sel)
                 new_fragments = self._fragments[[row_idx], mz_sel]
                 mz, intensities = new_fragments.get_row(0)
@@ -184,7 +184,7 @@ class SpectraCollection:
             )
 
         # scalar row -> one Spectrum
-        if isinstance(idx, (int, np.integer)):
+        if isinstance(idx, int | np.integer):
             return self._spectrum_from_row(int(idx))
 
         # row-only selection -> SpectraCollection
