@@ -208,8 +208,7 @@ metadata tables or fragment collections directly.
 
 .. code-block:: python
 
-    from matchms import SpectraCollection
-    from matchms import SpectraCollectionProcessor
+    from matchms import SpectraCollection, SpectraCollectionProcessor
     from matchms.importing import load_from_mgf
 
     spectra = list(load_from_mgf("my_spectra.mgf"))
