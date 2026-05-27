@@ -33,7 +33,7 @@ def test_derive_inchikey_from_inchi(as_collection):
         (
             "matchms",
             "INFO",
-            "Added InChIKey XDTMQSROBMDMFD-UHFFFAOYSA-N to metadata (was converted from inchi)",
+            "Added InChIKey XDTMQSROBMDMFD-UHFFFAOYSA-N to metadata (was converted from InChI)",
         )
     )
     reset_matchms_logger()

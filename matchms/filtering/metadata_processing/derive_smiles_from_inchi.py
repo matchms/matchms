@@ -1,12 +1,13 @@
 import logging
 from matchms.filtering._dispatch import collection_filter
+from matchms.filtering.filter_utils.metadata_conversions import (
+    derive_metadata_column_from_column,
+)
 from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import (
-    _as_string_or_none,
     convert_inchi_to_smiles,
     is_valid_inchi,
     is_valid_smiles,
 )
-from matchms.SpectraCollection import SpectraCollection
 from matchms.typing import SpectrumType
 
 
@@ -14,23 +15,10 @@ logger = logging.getLogger("matchms")
 
 
 def _derive_smiles_from_inchi_spectrum(
-        spectrum_in: SpectrumType,
-        clone: bool | None = True,
-    ) -> SpectrumType | None:
-    """Find missing smiles and derive from Inchi where possible.
-
-    Parameters
-    ----------
-    spectrum_in:
-        Input spectrum.
-    clone:
-        Optionally clone the Spectrum.#
-
-    Returns
-    -------
-    Spectrum or None
-        Spectrum with added SMILES, or `None` if not present.
-    """
+    spectrum_in: SpectrumType,
+    clone: bool | None = True,
+) -> SpectrumType | None:
+    """Find missing smiles and derive from InChI where possible."""
     if spectrum_in is None:
         return None
 
@@ -51,40 +39,21 @@ def _derive_smiles_from_inchi_spectrum(
 
 
 def _derive_smiles_from_inchi_collection(
-    spectrum_in: SpectraCollection,
+    spectrum_in,
     clone: bool | None = True,
-) -> SpectraCollection:
+):
     """Find missing smiles and derive from InChI where possible for a collection."""
-    target = spectrum_in.copy() if clone else spectrum_in
-    metadata = target._metadata.copy()
-
-    if "inchi" not in metadata.columns:
-        return target
-
-    if "smiles" not in metadata.columns:
-        metadata["smiles"] = None
-
-    metadata["smiles"] = metadata["smiles"].astype("object")
-
-    for idx, row in metadata.iterrows():
-        inchi = _as_string_or_none(row.get("inchi"))
-        smiles = _as_string_or_none(row.get("smiles"))
-
-        if not is_valid_smiles(smiles) and is_valid_inchi(inchi):
-            converted_smiles = convert_inchi_to_smiles(inchi)
-            if converted_smiles:
-                metadata.at[idx, "smiles"] = converted_smiles.rstrip()
-                logger.info(
-                    "Added smiles %s to metadata (was converted from InChI)",
-                    converted_smiles,
-                )
-            else:
-                logger.warning("Could not convert InChI %s to smiles.", inchi)
-
-    target._metadata = metadata
-    target._clear_cache(["metadata_hashes", "spectra_hashes"])
-
-    return target
+    return derive_metadata_column_from_column(
+        spectrum_in,
+        source_key="inchi",
+        target_key="smiles",
+        is_valid_source=is_valid_inchi,
+        is_valid_target=is_valid_smiles,
+        converter=convert_inchi_to_smiles,
+        clone=clone,
+        source_label="InChI",
+        target_label="smiles",
+    )
 
 
 derive_smiles_from_inchi = collection_filter(

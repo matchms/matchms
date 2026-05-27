@@ -1,12 +1,13 @@
 import logging
 from matchms.filtering._dispatch import collection_filter
+from matchms.filtering.filter_utils.metadata_conversions import (
+    derive_metadata_column_from_column,
+)
 from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import (
-    _as_string_or_none,
     convert_inchi_to_inchikey,
     is_valid_inchi,
     is_valid_inchikey,
 )
-from matchms.SpectraCollection import SpectraCollection
 from matchms.typing import SpectrumType
 
 
@@ -14,23 +15,10 @@ logger = logging.getLogger("matchms")
 
 
 def _derive_inchikey_from_inchi_spectrum(
-        spectrum_in: SpectrumType,
-        clone: bool | None = True,
-    ) -> SpectrumType | None:
-    """Find missing InchiKey and derive from Inchi where possible.
-
-    Parameters
-    ----------
-    spectrum_in:
-        Input spectrum.
-    clone:
-        Optionally clone the Spectrum.
-
-    Returns
-    -------
-    Spectrum or None
-        Spectrum with added INCHIKEY, or `None` if not present.
-    """
+    spectrum_in: SpectrumType,
+    clone: bool | None = True,
+) -> SpectrumType | None:
+    """Find missing InChIKey and derive from InChI where possible."""
     if spectrum_in is None:
         return None
 
@@ -42,7 +30,7 @@ def _derive_inchikey_from_inchi_spectrum(
         inchikey = convert_inchi_to_inchikey(inchi)
         if inchikey:
             spectrum.set("inchikey", inchikey)
-            logger.info("Added InChIKey %s to metadata (was converted from inchi)", inchikey)
+            logger.info("Added InChIKey %s to metadata (was converted from InChI)", inchikey)
         else:
             logger.warning("Could not convert InChI %s to inchikey.", inchi)
 
@@ -50,40 +38,21 @@ def _derive_inchikey_from_inchi_spectrum(
 
 
 def _derive_inchikey_from_inchi_collection(
-        spectrum_in: SpectraCollection,
-        clone: bool | None = True,
-    ) -> SpectraCollection:
+    spectrum_in,
+    clone: bool | None = True,
+):
     """Find missing InChIKey and derive from InChI where possible for a collection."""
-    target = spectrum_in.copy() if clone else spectrum_in
-    metadata = target._metadata.copy()
-
-    if "inchi" not in metadata.columns:
-        return target
-
-    if "inchikey" not in metadata.columns:
-        metadata["inchikey"] = None
-
-    metadata["inchikey"] = metadata["inchikey"].astype("object")
-
-    for idx, row in metadata.iterrows():
-        inchi = _as_string_or_none(row.get("inchi"))
-        inchikey = _as_string_or_none(row.get("inchikey"))
-
-        if is_valid_inchi(inchi) and not is_valid_inchikey(inchikey):
-            converted_inchikey = convert_inchi_to_inchikey(inchi)
-            if converted_inchikey:
-                metadata.at[idx, "inchikey"] = converted_inchikey
-                logger.info(
-                    "Added InChIKey %s to metadata (was converted from inchi)",
-                    converted_inchikey,
-                )
-            else:
-                logger.warning("Could not convert InChI %s to inchikey.", inchi)
-
-    target._metadata = metadata
-    target._clear_cache(["metadata_hashes", "spectra_hashes"])
-
-    return target
+    return derive_metadata_column_from_column(
+        spectrum_in,
+        source_key="inchi",
+        target_key="inchikey",
+        is_valid_source=is_valid_inchi,
+        is_valid_target=is_valid_inchikey,
+        converter=convert_inchi_to_inchikey,
+        clone=clone,
+        source_label="InChI",
+        target_label="InChIKey",
+    )
 
 
 derive_inchikey_from_inchi = collection_filter(
