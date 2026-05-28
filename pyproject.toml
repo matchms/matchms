@@ -42,7 +42,7 @@ dependencies = [
   "pyyaml>=6.0.3",
   "rdkit>=2024.3.5",
   "requests>=2.32.5",
-  "scipy>=1.15.3,<1.16",
+  "scipy>=1.15.3,<1.17",
   "sparsestack>=0.7.0",
   "tqdm>=4.67.1",
 ]
@@ -69,6 +69,11 @@ docs = [
   "sphinx-rtd-theme>=3.1.0",
   "sphinxcontrib-apidoc>=0.6.0",
 ]
+
+[tool.uv.sources]
+# Temporary: BioGeek's fork adds Python 3.14 support.
+# Revert to PyPI once https://github.com/matchms/sparsestack/pull/31 is merged and released.
+sparsestack = { git = "https://github.com/BioGeek/sparsestack.git", branch = "python3.14" }
 
 [build-system]
 requires = ["pdm-backend"]
