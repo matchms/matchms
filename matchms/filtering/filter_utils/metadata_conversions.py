@@ -22,6 +22,20 @@ def as_string_or_none(value):
     return str(value)
 
 
+def as_float_or_none(value):
+    """Return a safe scalar float-or-None value for metadata calculations."""
+    if value is None or value is pd.NA:
+        return None
+
+    if isinstance(value, (float, np.floating)) and np.isnan(value):
+        return None
+
+    if isinstance(value, (int, float, np.integer, np.floating)):
+        return float(value)
+
+    raise ValueError(f"Expected scalar numeric metadata value, got {type(value).__name__}.")
+
+
 def derive_metadata_column_from_column(
     collection: SpectraCollection,
     *,
