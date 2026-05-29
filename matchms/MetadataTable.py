@@ -1,5 +1,6 @@
 import logging
 import re
+import numpy as np
 import pandas as pd
 from .utils import load_known_key_conversions
 
@@ -102,3 +103,105 @@ class MetadataTable(pd.DataFrame):
             return None
 
         return MetadataTable(harmonized, collection=self._collection)
+
+    def apply_to_rows(
+        self,
+        row_mask,
+        func,
+        *args,
+        inplace: bool = False,
+        **kwargs,
+    ):
+        """Apply a metadata function to selected rows and merge the result back.
+    
+        The function may add or modify metadata columns, but it must preserve the
+        selected rows exactly: same index, same order, same number of rows.
+
+        Parameters
+        ----------
+        row_mask
+            Boolean mask selecting metadata rows.
+        func
+            Function that receives a ``MetadataTable`` or ``DataFrame`` subset as
+            first argument and returns a ``DataFrame``/``MetadataTable`` or ``None``.
+        *args
+            Positional arguments passed to ``func``.
+        inplace
+            If True, update the bound collection metadata in place and return
+            ``None``. If False, return a new ``MetadataTable``.
+        **kwargs
+            Keyword arguments passed to ``func``.
+
+        Returns
+        -------
+        MetadataTable or None
+            Updated metadata table if ``inplace=False``. Otherwise ``None``.
+
+        Notes
+        -----
+        This method only updates metadata. It does not modify fragments.
+        """
+        if isinstance(row_mask, pd.Series):
+            row_mask = row_mask.values
+
+        row_mask = np.asarray(row_mask, dtype=bool)
+
+        if row_mask.shape[0] != len(self):
+            raise ValueError(
+                f"Shape of row mask ({row_mask.shape[0]}) does not fit "
+                f"metadata table ({len(self)})."
+            )
+
+        target = pd.DataFrame(self).copy()
+        row_indices = target.index[row_mask]
+
+        if len(row_indices) == 0:
+            result = MetadataTable(target, collection=self._collection)
+            return None if inplace else result
+
+        subset = target.loc[row_indices].copy()
+
+        processed_subset = func(subset, *args, **kwargs)
+
+        if processed_subset is None:
+            result = MetadataTable(target, collection=self._collection)
+            return None if inplace else result
+
+        processed_subset = pd.DataFrame(processed_subset)
+
+        if len(processed_subset) != len(subset):
+            raise ValueError(
+                f"Function {getattr(func, '__name__', repr(func))} changed the number "
+                f"of metadata rows from {len(subset)} to {len(processed_subset)}. "
+                "MetadataTable.apply_to_rows only supports row-preserving transformations."
+            )
+
+        if not processed_subset.index.equals(subset.index):
+            raise ValueError(
+                f"Function {getattr(func, '__name__', repr(func))} changed the "
+                "metadata row index or row order. MetadataTable.apply_to_rows only "
+                "supports row-preserving metadata transformations."
+            )
+
+        for column in processed_subset.columns:
+            if column not in target.columns:
+                target[column] = None
+                target[column] = target[column].astype("object")
+
+            if processed_subset[column].dtype == "object":
+                target[column] = target[column].astype("object")
+
+            target.loc[row_indices, column] = processed_subset[column].to_numpy(dtype=object)
+
+        if inplace:
+            if self._collection is not None:
+                self._collection._metadata = target.reset_index(drop=True)
+                self._collection._clear_cache(["metadata_hashes", "spectra_hashes"])
+            else:
+                self.drop(columns=list(self.columns), inplace=True)
+                for column in target.columns:
+                    self[column] = target[column].values
+
+            return None
+
+        return MetadataTable(target.reset_index(drop=True), collection=self._collection)
