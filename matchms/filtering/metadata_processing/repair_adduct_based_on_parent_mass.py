@@ -22,16 +22,18 @@ def _repair_adduct_based_on_parent_mass_value(
 ):
     """Return repaired adduct if precursor_mz, parent_mass, and ionmode match a known adduct."""
     new_adduct = _get_matching_adduct(
-        precursor_mz=as_float_or_none(precursor_mz),
-        parent_mass=as_float_or_none(parent_mass),
-        ion_mode=as_string_or_none(ionmode),
+        precursor_mz=precursor_mz,
+        parent_mass=parent_mass,
+        ion_mode=ionmode,
         mass_tolerance=mass_tolerance,
     )
 
     if new_adduct is None:
         return current_adduct
 
-    logger.info("Adduct was set from %s to %s", current_adduct, new_adduct)
+    if new_adduct != current_adduct:
+        logger.info("Adduct was set from %s to %s", current_adduct, new_adduct)
+
     return new_adduct
 
 
@@ -76,18 +78,17 @@ def _repair_adduct_based_on_parent_mass_spectrum(
 
     spectrum = spectrum_in.clone() if clone else spectrum_in
 
-    new_adduct = _get_matching_adduct(
+    repaired_adduct = _repair_adduct_based_on_parent_mass_value(
         precursor_mz=spectrum.get("precursor_mz"),
         parent_mass=spectrum.get("parent_mass"),
-        ion_mode=spectrum.get("ionmode"),
+        ionmode=spectrum.get("ionmode"),
+        current_adduct=spectrum.get("adduct"),
         mass_tolerance=mass_tolerance,
     )
 
-    if new_adduct is None:
-        return spectrum
+    if repaired_adduct is not None:
+        spectrum.set("adduct", repaired_adduct)
 
-    spectrum.set("adduct", new_adduct)
-    logger.info("Adduct was set from %s to %s", spectrum_in.get("adduct"), new_adduct)
     return spectrum
 
 
