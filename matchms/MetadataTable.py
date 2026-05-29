@@ -10,6 +10,23 @@ _key_regex_replacements = {r"\s": "_", r"[!?.,;:]": ""}
 _key_replacements = load_known_key_conversions()
 
 
+def _needs_object_dtype(target_column: pd.Series, values: pd.Series) -> bool:
+    """Return True if target column should be object before assigning values."""
+    if pd.api.types.is_object_dtype(values.dtype):
+        return True
+
+    if pd.api.types.is_string_dtype(values.dtype):
+        return True
+
+    if pd.api.types.is_bool_dtype(target_column.dtype):
+        return not pd.api.types.is_bool_dtype(values.dtype)
+
+    if pd.api.types.is_numeric_dtype(target_column.dtype):
+        return not pd.api.types.is_numeric_dtype(values.dtype)
+
+    return True
+
+
 def harmonize_metadata_column_name(column_name: str) -> str:
     """Return the matchms-style metadata column name."""
     column_name = column_name.lower()
@@ -185,13 +202,16 @@ class MetadataTable(pd.DataFrame):
 
         for column in processed_subset.columns:
             if column not in target.columns:
-                target[column] = None
+                target[column] = pd.Series(index=target.index, dtype="object")
+
+            values = processed_subset[column]
+
+            if _needs_object_dtype(target[column], values):
                 target[column] = target[column].astype("object")
 
-            if processed_subset[column].dtype == "object":
-                target[column] = target[column].astype("object")
-
-            target.loc[row_indices, column] = processed_subset[column].to_numpy(dtype=object)
+            # Important: assign an aligned Series, not values.to_numpy(dtype=object).
+            # This avoids pandas >= 3 failures for numeric columns.
+            target.loc[values.index, column] = values
 
         if inplace:
             if self._collection is not None:
