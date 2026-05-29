@@ -2,18 +2,18 @@ import logging
 import numpy as np
 from matchms.filtering._dispatch import collection_filter
 from matchms.filtering.metadata_processing.repair_adduct_and_parent_mass_based_on_smiles import (
-    repair_adduct_and_parent_mass_based_on_smiles,
     _repair_adduct_and_parent_mass_based_on_smiles_metadata,
+    repair_adduct_and_parent_mass_based_on_smiles,
 )
 from matchms.SpectraCollection import SpectraCollection
 from matchms.typing import SpectrumType
 from .repair_parent_mass_is_molar_mass import (
-    repair_parent_mass_is_molar_mass,
     _repair_parent_mass_is_molar_mass_metadata,
+    repair_parent_mass_is_molar_mass,
 )
 from .repair_smiles_of_salts import (
-    repair_smiles_of_salts,
     _repair_smiles_of_salts_metadata,
+    repair_smiles_of_salts,
 )
 from .require_parent_mass_match_smiles import _check_smiles_and_parent_mass_match
 
