@@ -100,7 +100,6 @@ def _repair_parent_mass_is_molar_mass_collection(
     target = spectrum_in.copy() if clone else spectrum_in
 
     target = target.apply_to_metadata_rows(
-        [True] * len(target),
         _repair_parent_mass_is_molar_mass_metadata,
         mass_tolerance=mass_tolerance,
     )

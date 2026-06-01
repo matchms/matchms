@@ -234,7 +234,6 @@ def _repair_adduct_and_parent_mass_based_on_smiles_collection(
     target = spectrum_in.copy() if clone else spectrum_in
 
     return target.apply_to_metadata_rows(
-        [True] * len(target),
         _repair_adduct_and_parent_mass_based_on_smiles_metadata,
         mass_tolerance=mass_tolerance,
     )
