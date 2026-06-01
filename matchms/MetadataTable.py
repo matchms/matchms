@@ -123,9 +123,9 @@ class MetadataTable(pd.DataFrame):
 
     def apply_to_rows(
         self,
-        row_mask,
         func,
         *args,
+        row_mask=None,
         inplace: bool = False,
         **kwargs,
     ):
@@ -136,13 +136,14 @@ class MetadataTable(pd.DataFrame):
 
         Parameters
         ----------
-        row_mask
-            Boolean mask selecting metadata rows.
         func
             Function that receives a ``MetadataTable`` or ``DataFrame`` subset as
             first argument and returns a ``DataFrame``/``MetadataTable`` or ``None``.
         *args
             Positional arguments passed to ``func``.
+        row_mask
+            Optional boolean mask selecting rows. If ``None``, all rows are passed
+            directly to ``func``.
         inplace
             If True, update the bound collection metadata in place and return
             ``None``. If False, return a new ``MetadataTable``.
@@ -158,16 +159,19 @@ class MetadataTable(pd.DataFrame):
         -----
         This method only updates metadata. It does not modify fragments.
         """
-        if isinstance(row_mask, pd.Series):
-            row_mask = row_mask.values
+        if row_mask is not None:
+            if isinstance(row_mask, pd.Series):
+                row_mask = row_mask.values
 
-        row_mask = np.asarray(row_mask, dtype=bool)
+            row_mask = np.asarray(row_mask, dtype=bool)
 
-        if row_mask.shape[0] != len(self):
-            raise ValueError(
-                f"Shape of row mask ({row_mask.shape[0]}) does not fit "
-                f"metadata table ({len(self)})."
-            )
+            if row_mask.shape[0] != len(self):
+                raise ValueError(
+                    f"Shape of row mask ({row_mask.shape[0]}) does not fit "
+                    f"metadata table ({len(self)})."
+                )
+        else:
+            row_mask = np.ones(len(self), dtype=bool)
 
         target = pd.DataFrame(self).copy()
         row_indices = target.index[row_mask]

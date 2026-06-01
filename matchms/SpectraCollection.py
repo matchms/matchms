@@ -368,9 +368,9 @@ class SpectraCollection:
 
     def apply_to_metadata_rows(
         self,
-        row_mask,
         func,
         *args,
+        row_mask=None,
         inplace: bool = False,
         **kwargs,
     ):
@@ -380,9 +380,9 @@ class SpectraCollection:
         It only modifies metadata and does not change fragments.
         """
         result_metadata = self.metadata.apply_to_rows(
-            row_mask,
             func,
             *args,
+            row_mask=row_mask,
             inplace=inplace,
             **kwargs,
         )

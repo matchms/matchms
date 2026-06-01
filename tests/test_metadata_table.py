@@ -70,8 +70,8 @@ def test_metadata_apply_to_rows_rejects_row_reordering():
 
     with pytest.raises(ValueError, match="row index or row order"):
         collection.metadata.apply_to_rows(
-            [True, True],
             sort_subset,
+            row_mask=[True, True],
         )
 
 
@@ -88,8 +88,8 @@ def test_metadata_apply_to_rows_rejects_row_dropping():
 
     with pytest.raises(ValueError, match="changed the number of metadata rows"):
         collection.metadata.apply_to_rows(
-            [True, True],
             drop_subset_row,
+            row_mask=[True, True],
         )
 
 
@@ -115,8 +115,8 @@ def test_metadata_apply_to_rows_preserves_fragment_alignment():
         return metadata
 
     result = collection.apply_to_metadata_rows(
-        [False, True],
         update_selected,
+        row_mask=[False, True],
     )
 
     assert result[0].metadata.get("id") == "a"
