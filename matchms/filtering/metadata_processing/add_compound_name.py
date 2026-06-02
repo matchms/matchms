@@ -1,39 +1,41 @@
 import logging
-from matchms.typing import SpectrumType
+from matchms.filtering._dispatch import metadata_update_filter
 
 
 logger = logging.getLogger("matchms")
 
 
-def add_compound_name(spectrum_in: SpectrumType, clone: bool | None = True) -> SpectrumType | None:
-    """Add compound_name to correct field: "compound_name" in metadata.
+def _add_compound_name(metadata) -> dict:
+    """Add compound name to the ``compound_name`` metadata field.
+
+    If ``compound_name`` is missing, this filter tries to copy the value from
+    ``name`` first and then from ``title``.
 
     Parameters
     ----------
-    spectrum_in:
-        Input spectrum.
-    clone:
-        Optionally clone the Spectrum.
+    spectrum_in
+        Input spectrum or spectra collection.
+    clone
+        Optionally clone the input before applying the filter. If ``False``,
+        the input object may be modified in place.
 
     Returns
     -------
-    Spectrum or None
-        Spectrum with added compound name, or `None` if not present.
+    Spectrum, SpectraCollection, or None
+        Input object with added ``compound_name`` metadata, or ``None`` if the
+        input was ``None``.
     """
-    if spectrum_in is None:
-        return None
+    if metadata.get("compound_name") is not None:
+        return {}
 
-    spectrum = spectrum_in.clone() if clone else spectrum_in
+    if isinstance(metadata.get("name"), str):
+        return {"compound_name": metadata.get("name")}
 
-    if spectrum.get("compound_name", None) is None:
-        if isinstance(spectrum.get("name", None), str):
-            spectrum.set("compound_name", spectrum.get("name"))
-            return spectrum
+    if isinstance(metadata.get("title"), str):
+        return {"compound_name": metadata.get("title")}
 
-        if isinstance(spectrum.get("title", None), str):
-            spectrum.set("compound_name", spectrum.get("title"))
-            return spectrum
+    logger.info("No compound name found in metadata.")
+    return {}
 
-        logger.info("No compound name found in metadata.")
 
-    return spectrum
+add_compound_name = metadata_update_filter(_add_compound_name)
