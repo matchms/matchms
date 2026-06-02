@@ -1,36 +1,35 @@
 import logging
-from matchms.typing import SpectrumType
+from matchms.filtering._dispatch import metadata_update_filter
+from matchms.filtering.filter_utils.metadata_conversions import is_missing_metadata_value
 
 
 logger = logging.getLogger("matchms")
 
 
-def make_charge_int(spectrum_in: SpectrumType, clone: bool | None = True) -> SpectrumType | None:
-    """Convert charge field to integer (if possible).
+def _make_charge_int(metadata) -> dict:
+    """Convert charge field to integer if possible.
 
     Parameters
     ----------
-    spectrum_in:
-        Input spectrum.
-    clone:
-        Optionally clone the Spectrum.
+    spectrum_in
+        Input spectrum or spectra collection.
+    clone
+        Optionally clone the input before applying the filter. If ``False``,
+        the input object may be modified in place.
 
     Returns
     -------
-    Spectrum or None
-        Spectrum with converted charge, or `None` if not present.
+    Spectrum, SpectraCollection, or None
+        Input object with converted ``charge`` metadata, or ``None`` if the
+        input was ``None``.
     """
-    if spectrum_in is None:
-        return None
-
-    spectrum = spectrum_in.clone() if clone else spectrum_in
-
-    charge = spectrum.get("charge", None)
+    charge = metadata.get("charge", None)
     charge_int = _convert_charge_to_int(charge)
-    if isinstance(charge_int, int):
-        spectrum.set("charge", charge_int)
 
-    return spectrum
+    if isinstance(charge_int, int):
+        return {"charge": charge_int}
+
+    return {}
 
 
 def _convert_charge_to_int(charge):
@@ -39,23 +38,29 @@ def _convert_charge_to_int(charge):
     def _try_conversion(charge):
         try:
             return int(charge)
-        except ValueError:
+        except (ValueError, TypeError):
             logger.warning("Found charge (%s) cannot be converted to integer.", str(charge))
             return None
 
-    if charge is None:
+    if is_missing_metadata_value(charge):
         return None
 
     if isinstance(charge, int):
         return charge
 
-    # Avoid pyteomics ChargeList
+    # Avoid pyteomics ChargeList and similar list-like charges.
     if isinstance(charge, list):
+        if len(charge) == 0:
+            return None
         return _try_conversion(charge[0])
 
-    # convert string charges to int
     if isinstance(charge, str):
         charge = charge.strip().replace("+", "")
         if len(charge) > 1 and charge[-1] == "-":
             charge = "-" + charge.replace("-", "")
         return _try_conversion(charge)
+
+    return _try_conversion(charge)
+
+
+make_charge_int = metadata_update_filter(_make_charge_int)
