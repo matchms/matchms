@@ -2,12 +2,29 @@ import inspect
 import warnings
 from collections.abc import Callable
 from functools import wraps
+from typing import TYPE_CHECKING
 from tqdm.auto import tqdm
 from matchms.filtering.filter_utils.metadata_conversions import (
     apply_metadata_row_filter,
     apply_metadata_updates_to_spectrum,
 )
-from matchms.SpectraCollection import SpectraCollection
+from matchms.typing import SpectraCollectionType
+
+
+if TYPE_CHECKING:
+    from matchms.SpectraCollection import SpectraCollection
+
+
+def _get_spectra_collection_type():
+    """Import SpectraCollection lazily to avoid circular imports."""
+    from matchms.SpectraCollection import SpectraCollection
+
+    return SpectraCollection
+
+
+def _is_spectra_collection(obj) -> bool:
+    """Return True if obj is a SpectraCollection."""
+    return isinstance(obj, _get_spectra_collection_type())
 
 
 def collection_filter(
@@ -37,7 +54,7 @@ def collection_filter(
             return None
 
         # Option (1) --> Handle SpectraCollection
-        if isinstance(spectrum_in, SpectraCollection):
+        if _is_spectra_collection(spectrum_in):
             if collection_impl is not None:
                 return collection_impl(
                     spectrum_in,
@@ -159,7 +176,7 @@ def metadata_update_filter(
         return apply_metadata_updates_to_spectrum(spectrum, updates or {})
 
     def default_collection_impl(
-        spectrum_in: SpectraCollection,
+        spectrum_in: SpectraCollectionType,
         *args,
         clone: bool | None = True,
         **kwargs,
@@ -199,13 +216,13 @@ def metadata_update_filter(
 
 
 def apply_spectrum_filter_to_collection(
-    collection: SpectraCollection,
+    collection: SpectraCollectionType,
     spectrum_filter: Callable,
     *args,
     clone: bool = True,
     progress_bar: bool = False,
     **kwargs,
-) -> SpectraCollection | None:
+) -> SpectraCollectionType | None:
     """Apply a spectrum-level filter to all spectra in a collection.
 
     This is a compatibility fallback for filters without native
