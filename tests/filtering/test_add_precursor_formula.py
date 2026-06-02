@@ -146,7 +146,8 @@ def test_add_precursor_formula_collection_updates_multiple_rows():
     assert len(processed) == 3
     assert processed.metadata.loc[0, "precursor_formula"] == "C12H16ClN2O3"
     assert processed.metadata.loc[1, "precursor_formula"] == "H2O"
-    assert "precursor_formula" not in processed.metadata.columns or processed.metadata.loc[2, "precursor_formula"] != processed.metadata.loc[2, "precursor_formula"]
+    assert ("precursor_formula" not in processed.metadata.columns) \
+        or (processed.metadata.loc[2, "precursor_formula"] != processed.metadata.loc[2, "precursor_formula"])
 
 
 def test_add_precursor_formula_collection_clone_false_modifies_input():
