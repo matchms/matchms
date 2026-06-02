@@ -10,6 +10,7 @@ from matchms.filtering._dispatch import (
     metadata_update_filter,
 )
 from matchms.SpectraCollection import SpectraCollection
+from tests.builder_Spectrum import SpectrumBuilder
 
 
 def _make_spectrum(identifier="spectrum", mz=None, intensities=None, metadata=None):
@@ -502,3 +503,24 @@ def test_metadata_update_filter_uses_custom_collection_impl():
     )
 
     assert public_filter(collection) == "custom collection result"
+
+
+def test_metadata_update_filter_can_write_none_updates_to_collection():
+    def _clear_field(metadata):
+        return {"value": None}
+
+    filter_function = metadata_update_filter(
+        _clear_field,
+        drop_missing_updates=False,
+    )
+
+    collection = SpectraCollection(
+        [
+            SpectrumBuilder().with_metadata({"value": "invalid"}).build(),
+        ]
+    )
+
+    processed = filter_function(collection)
+
+    assert processed.metadata.loc[0, "value"] is None
+
