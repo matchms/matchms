@@ -3,7 +3,6 @@ import re
 from matchms.filtering._dispatch import metadata_update_filter
 from matchms.filtering.filter_utils.interpret_unknown_adduct import get_charge_of_adduct
 from matchms.filtering.filter_utils.load_known_adducts import load_known_adduct_conversions
-from matchms.filtering.filter_utils.metadata_conversions import as_string_or_none
 
 
 logger = logging.getLogger("matchms")

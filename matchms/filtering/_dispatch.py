@@ -2,17 +2,12 @@ import inspect
 import warnings
 from collections.abc import Callable
 from functools import wraps
-from typing import TYPE_CHECKING
 from tqdm.auto import tqdm
 from matchms.filtering.filter_utils.metadata_conversions import (
     apply_metadata_row_filter,
     apply_metadata_updates_to_spectrum,
 )
 from matchms.typing import SpectraCollectionType
-
-
-if TYPE_CHECKING:
-    from matchms.SpectraCollection import SpectraCollection
 
 
 def _get_spectra_collection_type():

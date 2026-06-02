@@ -1,5 +1,4 @@
 import logging
-import numpy as np
 from matchms.filtering._dispatch import metadata_update_filter
 from matchms.filtering.filter_utils.metadata_conversions import is_missing_metadata_value
 from matchms.utils import get_first_common_element
