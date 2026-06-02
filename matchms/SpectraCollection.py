@@ -372,6 +372,7 @@ class SpectraCollection:
         *args,
         row_mask=None,
         inplace: bool = False,
+        drop_missing_updates: bool = True,
         **kwargs,
     ):
         """Apply a metadata function to selected rows and merge the result back.
@@ -379,18 +380,19 @@ class SpectraCollection:
         This is a convenience wrapper around ``self.metadata.apply_to_rows``.
         It only modifies metadata and does not change fragments.
         """
+        target = self if inplace else self.copy()
         result_metadata = self.metadata.apply_to_rows(
             func,
             *args,
             row_mask=row_mask,
             inplace=inplace,
+            drop_missing_updates=drop_missing_updates,
             **kwargs,
         )
 
         if inplace:
             return None
 
-        target = self.copy()
         target._metadata = pd.DataFrame(result_metadata).reset_index(drop=True)
         target._clear_cache(["metadata_hashes", "spectra_hashes"])
         return target

@@ -159,6 +159,7 @@ def metadata_update_filter(
     metadata_impl: Callable,
     *,
     collection_impl: Callable | None = None,
+    drop_missing_updates: bool = True,
 ):
     """Create a Spectrum/SpectraCollection filter from row-wise metadata logic.
 
@@ -188,6 +189,8 @@ def metadata_update_filter(
             *args,
             row_filter=metadata_impl,
             inplace=True,
+            drop_missing_row_updates=drop_missing_updates,
+            drop_missing_updates=drop_missing_updates,
             **kwargs,
         )
 

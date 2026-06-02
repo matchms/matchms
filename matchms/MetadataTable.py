@@ -127,6 +127,7 @@ class MetadataTable(pd.DataFrame):
         *args,
         row_mask=None,
         inplace: bool = False,
+        drop_missing_updates: bool = True,
         **kwargs,
     ):
         """Apply a metadata function to selected rows and merge the result back.
@@ -155,6 +156,11 @@ class MetadataTable(pd.DataFrame):
         inplace
             If True, update the bound collection metadata in place and return
             ``None``. If False, return a new ``MetadataTable``.
+        drop_missing_updates
+            If True, missing values in the DataFrame returned by ``func`` are treated
+            as "no update" and do not overwrite existing metadata values. If False,
+            missing values are treated as explicit updates and will overwrite existing
+            metadata values.
         **kwargs
             Keyword arguments passed to ``func``.
 
@@ -164,7 +170,6 @@ class MetadataTable(pd.DataFrame):
             Updated metadata table if ``inplace=False``. Otherwise ``None``.
         """
         target = pd.DataFrame(self).copy()
-
         if row_mask is None:
             row_indices = target.index
         else:
@@ -198,7 +203,11 @@ class MetadataTable(pd.DataFrame):
             func=func,
         )
 
-        target = self._merge_metadata_updates(target, updates)
+        target = self._merge_metadata_updates(
+            target,
+            updates,
+            drop_missing_updates=drop_missing_updates,
+        )
 
         return self._finalize_apply_to_rows(target, inplace=inplace)
 
@@ -230,6 +239,8 @@ class MetadataTable(pd.DataFrame):
         self,
         target: pd.DataFrame,
         updates: pd.DataFrame,
+        *,
+        drop_missing_updates: bool = True,
     ) -> pd.DataFrame:
         """Merge sparse metadata updates into target."""
         if updates.empty:
@@ -240,14 +251,18 @@ class MetadataTable(pd.DataFrame):
                 target[column] = pd.Series(index=target.index, dtype="object")
 
             values = updates[column]
-            update_mask = values.notna()
 
-            if not update_mask.any():
+            if drop_missing_updates:
+                values_to_assign = values.loc[values.notna()]
+            else:
+                values_to_assign = values
+
+            if values_to_assign.empty:
                 continue
 
-            values_to_assign = values.loc[update_mask]
-
-            if _needs_object_dtype(target[column], values_to_assign):
+            if not drop_missing_updates and values_to_assign.isna().any():
+                target[column] = target[column].astype("object")
+            elif _needs_object_dtype(target[column], values_to_assign):
                 target[column] = target[column].astype("object")
 
             target.loc[values_to_assign.index, column] = values_to_assign
