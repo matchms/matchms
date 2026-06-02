@@ -168,8 +168,8 @@ def metadata_update_filter(
 
         target.apply_to_metadata_rows(
             apply_metadata_row_filter,
-            row_filter=metadata_impl,
             *args,
+            row_filter=metadata_impl,
             inplace=True,
             **kwargs,
         )
