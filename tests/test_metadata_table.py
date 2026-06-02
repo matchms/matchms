@@ -57,40 +57,44 @@ def test_harmonize_metadata_table_columns_keeps_first_non_null_on_conflict():
     assert result.loc[0, "compound_name"] == "A"
 
 
-def test_metadata_apply_to_rows_rejects_row_reordering():
+def test_metadata_apply_to_rows_rejects_updates_for_unselected_rows():
     collection = SpectraCollection(
         [
-            SpectrumBuilder().with_metadata({"id": "a", "value": 2}).build(),
-            SpectrumBuilder().with_metadata({"id": "b", "value": 1}).build(),
+            SpectrumBuilder().with_metadata({"id": "a", "value": 1}).build(),
+            SpectrumBuilder().with_metadata({"id": "b", "value": 2}).build(),
         ]
     )
 
-    def sort_subset(metadata):
-        return metadata.sort_values("value")
+    def update_unselected_row(metadata):
+        return pd.DataFrame({"value": [100]}, index=[1])
 
-    with pytest.raises(ValueError, match="row index or row order"):
+    with pytest.raises(ValueError, match="outside the selected input rows"):
         collection.metadata.apply_to_rows(
-            sort_subset,
-            row_mask=[True, True],
+            update_unselected_row,
+            row_mask=[True, False],
         )
 
 
-def test_metadata_apply_to_rows_rejects_row_dropping():
+def test_metadata_apply_to_rows_allows_sparse_updates():
     collection = SpectraCollection(
         [
-            SpectrumBuilder().with_metadata({"id": "a"}).build(),
-            SpectrumBuilder().with_metadata({"id": "b"}).build(),
+            SpectrumBuilder().with_metadata({"id": "a", "value": 1}).build(),
+            SpectrumBuilder().with_metadata({"id": "b", "value": 2}).build(),
+            SpectrumBuilder().with_metadata({"id": "c", "value": 3}).build(),
         ]
     )
 
-    def drop_subset_row(metadata):
-        return metadata.iloc[:1]
+    def update_only_first_selected_row(metadata):
+        return pd.DataFrame({"value": [100]}, index=[0])
 
-    with pytest.raises(ValueError, match="changed the number of metadata rows"):
-        collection.metadata.apply_to_rows(
-            drop_subset_row,
-            row_mask=[True, True],
-        )
+    result = collection.metadata.apply_to_rows(
+        update_only_first_selected_row,
+        row_mask=[True, True, False],
+    )
+
+    assert result.loc[0, "value"] == 100
+    assert result.loc[1, "value"] == 2
+    assert result.loc[2, "value"] == 3
 
 
 def test_metadata_apply_to_rows_preserves_fragment_alignment():
@@ -110,9 +114,7 @@ def test_metadata_apply_to_rows_preserves_fragment_alignment():
     )
 
     def update_selected(metadata):
-        metadata = metadata.copy()
-        metadata["new"] = "updated"
-        return metadata
+        return pd.DataFrame({"new": ["updated"] * len(metadata)}, index=metadata.index)
 
     result = collection.apply_to_metadata_rows(
         update_selected,
@@ -124,3 +126,37 @@ def test_metadata_apply_to_rows_preserves_fragment_alignment():
     assert result[1].metadata.get("id") == "b"
     assert result[1].metadata.get("new") == "updated"
     assert result[1].peaks.mz[0] == pytest.approx(20.0)
+
+
+def test_metadata_apply_to_rows_rejects_duplicate_update_indices():
+    collection = SpectraCollection(
+        [
+            SpectrumBuilder().with_metadata({"id": "a", "value": 1}).build(),
+            SpectrumBuilder().with_metadata({"id": "b", "value": 2}).build(),
+        ]
+    )
+
+    def duplicate_updates(metadata):
+        return pd.DataFrame({"value": [10, 20]}, index=[0, 0])
+
+    with pytest.raises(ValueError, match="duplicate metadata row updates"):
+        collection.metadata.apply_to_rows(
+            duplicate_updates,
+            row_mask=[True, True],
+        )
+
+
+def test_metadata_apply_to_rows_without_mask_updates_all_rows():
+    collection = SpectraCollection(
+        [
+            SpectrumBuilder().with_metadata({"id": "a", "value": 1}).build(),
+            SpectrumBuilder().with_metadata({"id": "b", "value": 2}).build(),
+        ]
+    )
+
+    def update_all_rows(metadata):
+        return pd.DataFrame({"value": [10, 20]}, index=metadata.index)
+
+    result = collection.metadata.apply_to_rows(update_all_rows)
+
+    assert result["value"].tolist() == [10, 20]

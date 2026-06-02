@@ -131,8 +131,16 @@ class MetadataTable(pd.DataFrame):
     ):
         """Apply a metadata function to selected rows and merge the result back.
     
-        The function may add or modify metadata columns, but it must preserve the
-        selected rows exactly: same index, same order, same number of rows.
+        The function receives a pandas DataFrame containing either all metadata rows
+        or the rows selected by ``row_mask``. It must return a DataFrame with metadata
+        updates.
+
+        The returned update DataFrame may contain fewer rows and fewer columns than
+        the input subset. Its index must be a subset of the selected input rows.
+        Missing values in the update DataFrame are treated as "no update" and do not
+        overwrite existing metadata values.
+
+        This method only updates metadata. It does not modify fragments.
 
         Parameters
         ----------
@@ -154,12 +162,12 @@ class MetadataTable(pd.DataFrame):
         -------
         MetadataTable or None
             Updated metadata table if ``inplace=False``. Otherwise ``None``.
-
-        Notes
-        -----
-        This method only updates metadata. It does not modify fragments.
         """
-        if row_mask is not None:
+        target = pd.DataFrame(self).copy()
+
+        if row_mask is None:
+            row_indices = target.index
+        else:
             if isinstance(row_mask, pd.Series):
                 row_mask = row_mask.values
 
@@ -170,56 +178,95 @@ class MetadataTable(pd.DataFrame):
                     f"Shape of row mask ({row_mask.shape[0]}) does not fit "
                     f"metadata table ({len(self)})."
                 )
-        else:
-            row_mask = np.ones(len(self), dtype=bool)
 
-        target = pd.DataFrame(self).copy()
-        row_indices = target.index[row_mask]
+            row_indices = target.index[row_mask]
 
         if len(row_indices) == 0:
-            result = MetadataTable(target, collection=self._collection)
-            return None if inplace else result
+            return self._finalize_apply_to_rows(target, inplace=inplace)
 
         subset = target.loc[row_indices].copy()
+        updates = func(subset, *args, **kwargs)
 
-        processed_subset = func(subset, *args, **kwargs)
+        if updates is None:
+            return self._finalize_apply_to_rows(target, inplace=inplace)
 
-        if processed_subset is None:
-            result = MetadataTable(target, collection=self._collection)
-            return None if inplace else result
+        updates = pd.DataFrame(updates)
 
-        processed_subset = pd.DataFrame(processed_subset)
+        self._validate_metadata_updates(
+            selected_index=subset.index,
+            updates=updates,
+            func=func,
+        )
 
-        if len(processed_subset) != len(subset):
+        target = self._merge_metadata_updates(target, updates)
+
+        return self._finalize_apply_to_rows(target, inplace=inplace)
+
+
+    def _validate_metadata_updates(
+        self,
+        selected_index: pd.Index,
+        updates: pd.DataFrame,
+        func,
+    ) -> None:
+        """Validate that metadata updates only refer to selected rows."""
+        if updates.empty:
+            return
+
+        if updates.index.has_duplicates:
             raise ValueError(
-                f"Function {getattr(func, '__name__', repr(func))} changed the number "
-                f"of metadata rows from {len(subset)} to {len(processed_subset)}. "
-                "MetadataTable.apply_to_rows only supports row-preserving transformations."
+                f"Function {getattr(func, '__name__', repr(func))} returned "
+                "duplicate metadata row updates."
             )
 
-        if not processed_subset.index.equals(subset.index):
+        if not updates.index.isin(selected_index).all():
             raise ValueError(
-                f"Function {getattr(func, '__name__', repr(func))} changed the "
-                "metadata row index or row order. MetadataTable.apply_to_rows only "
-                "supports row-preserving metadata transformations."
+                f"Function {getattr(func, '__name__', repr(func))} returned "
+                "metadata updates for rows outside the selected input rows."
             )
 
-        for column in processed_subset.columns:
+
+    def _merge_metadata_updates(
+        self,
+        target: pd.DataFrame,
+        updates: pd.DataFrame,
+    ) -> pd.DataFrame:
+        """Merge sparse metadata updates into target."""
+        if updates.empty:
+            return target
+
+        for column in updates.columns:
             if column not in target.columns:
                 target[column] = pd.Series(index=target.index, dtype="object")
 
-            values = processed_subset[column]
+            values = updates[column]
+            update_mask = values.notna()
 
-            if _needs_object_dtype(target[column], values):
+            if not update_mask.any():
+                continue
+
+            values_to_assign = values.loc[update_mask]
+
+            if _needs_object_dtype(target[column], values_to_assign):
                 target[column] = target[column].astype("object")
 
-            # Important: assign an aligned Series, not values.to_numpy(dtype=object).
-            # This avoids pandas >= 3 failures for numeric columns.
-            target.loc[values.index, column] = values
+            target.loc[values_to_assign.index, column] = values_to_assign
+
+        return target
+
+
+    def _finalize_apply_to_rows(
+        self,
+        target: pd.DataFrame,
+        *,
+        inplace: bool,
+    ):
+        """Write back or return metadata after apply_to_rows."""
+        target = target.reset_index(drop=True)
 
         if inplace:
             if self._collection is not None:
-                self._collection._metadata = target.reset_index(drop=True)
+                self._collection._metadata = target
                 self._collection._clear_cache(["metadata_hashes", "spectra_hashes"])
             else:
                 self.drop(columns=list(self.columns), inplace=True)
@@ -228,4 +275,4 @@ class MetadataTable(pd.DataFrame):
 
             return None
 
-        return MetadataTable(target.reset_index(drop=True), collection=self._collection)
+        return MetadataTable(target, collection=self._collection)
