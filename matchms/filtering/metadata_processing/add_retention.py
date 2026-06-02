@@ -138,5 +138,5 @@ def _add_retention(metadata: dict, target_key: str, accepted_keys: list[str]) ->
     return metadata
 
 
-add_retention_time = metadata_update_filter(_add_retention_time)
-add_retention_index = metadata_update_filter(_add_retention_index)
+add_retention_time = metadata_update_filter(_add_retention_time, drop_missing_updates=False)
+add_retention_index = metadata_update_filter(_add_retention_index, drop_missing_updates=False)

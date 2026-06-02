@@ -1,5 +1,7 @@
 import logging
+import numpy as np
 from matchms.filtering._dispatch import metadata_update_filter
+from matchms.filtering.filter_utils.metadata_conversions import is_missing_metadata_value
 from matchms.utils import get_first_common_element
 
 
@@ -63,7 +65,7 @@ def _add_precursor_mz(metadata) -> dict:
 
 def _convert_precursor_mz(precursor_mz):
     """Convert precursor_mz to number if possible. Otherwise return None."""
-    if precursor_mz is None:
+    if is_missing_metadata_value(precursor_mz):
         return None
 
     if isinstance(precursor_mz, str) and precursor_mz in _accepted_missing_entries:
@@ -99,4 +101,4 @@ def _add_precursor_mz_metadata(metadata):
     return metadata
 
 
-add_precursor_mz = metadata_update_filter(_add_precursor_mz)
+add_precursor_mz = metadata_update_filter(_add_precursor_mz, drop_missing_updates=False)
