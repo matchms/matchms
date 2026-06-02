@@ -8,6 +8,9 @@ import pandas as pd
 logger = logging.getLogger("matchms")
 
 
+NO_METADATA_UPDATE = object()
+
+
 def as_string_or_none(value):
     """Return a safe scalar string-or-None value for metadata validators."""
     if value is None or value is pd.NA:
@@ -64,7 +67,8 @@ def apply_metadata_row_filter(
     ``row_filter`` receives one metadata row as a mapping and must return a dict
     with metadata updates.
 
-    Returning ``None`` or an empty dict means "no changes".
+    Returning an empty dict means "no update".
+    Returning {"key": None} means "explicitly set key to None".
 
     Parameters
     ----------
@@ -80,15 +84,23 @@ def apply_metadata_row_filter(
     records = []
 
     if metadata.shape[1] == 0:
-        for _ in metadata.index:
-            updates = row_filter({}, *args, **kwargs)
-            records.append(_normalize_metadata_updates(updates, row_filter))
+        row_iter = ((index, {}) for index in metadata.index)
     else:
-        def _apply_row(row):
-            updates = row_filter(row, *args, **kwargs)
-            return _normalize_metadata_updates(updates, row_filter)
+        row_iter = metadata.iterrows()
 
-        records = metadata.apply(_apply_row, axis=1).tolist()
+    for _, row in row_iter:
+        updates = row_filter(row, *args, **kwargs)
+
+        if updates is None:
+            updates = {}
+
+        if not isinstance(updates, Mapping):
+            raise TypeError(
+                f"Expected metadata row filter to return dict-like updates, "
+                f"got {type(updates).__name__}."
+            )
+
+        records.append(dict(updates))
 
     updated_columns = sorted(
         {
@@ -101,17 +113,25 @@ def apply_metadata_row_filter(
     if not updated_columns:
         return pd.DataFrame(index=metadata.index)
 
-    if drop_missing_row_updates:
-        updates_df = pd.DataFrame.from_records(records, index=metadata.index)
-        updates_df = updates_df.dropna(axis=0, how="all")
-        updates_df = updates_df.dropna(axis=1, how="all")
-        return updates_df
-
     records_with_all_columns = [
-        {column: update_dict.get(column, None) for column in updated_columns}
+        {
+            column: update_dict.get(column, NO_METADATA_UPDATE)
+            for column in updated_columns
+        }
         for update_dict in records
     ]
-    return pd.DataFrame.from_records(records_with_all_columns, index=metadata.index)
+
+    updates_df = pd.DataFrame.from_records(
+        records_with_all_columns,
+        index=metadata.index,
+    )
+
+    if drop_missing_row_updates:
+        updates_df = updates_df.mask(updates_df.map(lambda x: x is NO_METADATA_UPDATE))
+        updates_df = updates_df.dropna(axis=0, how="all")
+        updates_df = updates_df.dropna(axis=1, how="all")
+
+    return updates_df
 
 
 def _normalize_metadata_updates(updates, row_filter):

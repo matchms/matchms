@@ -2,6 +2,7 @@ import logging
 import re
 import numpy as np
 import pandas as pd
+from matchms.filtering.filter_utils.metadata_conversions import NO_METADATA_UPDATE
 from .utils import load_known_key_conversions
 
 
@@ -253,22 +254,25 @@ class MetadataTable(pd.DataFrame):
             values = updates[column]
 
             if drop_missing_updates:
-                values_to_assign = values.loc[values.notna()]
+                update_mask = values.notna()
             else:
-                values_to_assign = values
+                update_mask = values.map(lambda value: value is not NO_METADATA_UPDATE)
+
+            values_to_assign = values.loc[update_mask]
 
             if values_to_assign.empty:
                 continue
 
             if not drop_missing_updates and values_to_assign.isna().any():
                 target[column] = target[column].astype("object")
+                values_to_assign = values_to_assign.astype("object")
+                values_to_assign = values_to_assign.where(values_to_assign.notna(), None)
             elif _needs_object_dtype(target[column], values_to_assign):
                 target[column] = target[column].astype("object")
 
             target.loc[values_to_assign.index, column] = values_to_assign
 
         return target
-
 
     def _finalize_apply_to_rows(
         self,
