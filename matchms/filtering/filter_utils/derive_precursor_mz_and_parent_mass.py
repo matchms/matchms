@@ -10,7 +10,6 @@ from matchms.filtering.filter_utils.metadata_conversions import (
     as_string_or_none,
 )
 from matchms.filtering.metadata_processing.clean_adduct import _clean_adduct
-from matchms.typing import SpectrumType
 
 
 logger = logging.getLogger("matchms")
