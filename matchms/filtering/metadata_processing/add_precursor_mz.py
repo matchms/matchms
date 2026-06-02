@@ -38,14 +38,19 @@ def _add_precursor_mz(metadata) -> dict:
         [_default_key] + _accepted_keys,
         metadata.keys(),
     )
-    precursor_mz = metadata.get(precursor_mz_key)
-    precursor_mz = _convert_precursor_mz(precursor_mz)
 
-    if isinstance(precursor_mz, (float, int)):
-        return {"precursor_mz": float(precursor_mz)}
+    has_precursor_mz_entry = precursor_mz_key is not None
+    has_pepmass_entry = "pepmass" in metadata
 
-    pepmass = metadata.get("pepmass", None)
-    if pepmass is not None:
+    if has_precursor_mz_entry:
+        precursor_mz = metadata.get(precursor_mz_key)
+        precursor_mz = _convert_precursor_mz(precursor_mz)
+
+        if isinstance(precursor_mz, (float, int)):
+            return {"precursor_mz": float(precursor_mz)}
+
+    if has_pepmass_entry:
+        pepmass = metadata.get("pepmass", None)
         try:
             pepmass_precursor_mz = pepmass[0]
         except (TypeError, IndexError):
@@ -59,8 +64,11 @@ def _add_precursor_mz(metadata) -> dict:
             )
             return {"precursor_mz": float(pepmass_precursor_mz)}
 
-    logger.warning("No precursor_mz found in metadata.")
-    return {"precursor_mz": None}
+    if has_precursor_mz_entry or has_pepmass_entry:
+        logger.warning("No precursor_mz found in metadata.")
+        return {"precursor_mz": None}
+
+    return {}
 
 
 def _convert_precursor_mz(precursor_mz):
@@ -93,10 +101,10 @@ def _add_precursor_mz_metadata(metadata):
     metadata = metadata.copy()
     updates = _add_precursor_mz(metadata)
 
-    metadata["precursor_mz"] = updates["precursor_mz"]
-
-    for key in _accepted_keys:
-        metadata.pop(key, None)
+    if "precursor_mz" in updates:
+        metadata["precursor_mz"] = updates["precursor_mz"]
+        for key in _accepted_keys:
+            metadata.pop(key, None)
 
     return metadata
 
