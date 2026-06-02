@@ -3,7 +3,6 @@ import logging
 from collections.abc import Mapping
 import numpy as np
 import pandas as pd
-from matchms.SpectraCollection import SpectraCollection
 
 
 logger = logging.getLogger("matchms")
