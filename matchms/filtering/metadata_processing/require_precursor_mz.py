@@ -62,20 +62,3 @@ def require_precursor_mz(
             )
             return None
     return spectrum
-
-
-def require_precursor_below_mz(spectrum_in: SpectrumType, max_mz: float = 1000) -> SpectrumType:
-    """Returns None if the precursor_mz of a spectrum is above
-       max_mz.
-
-    Parameters
-    ----------
-    spectrum_in:
-        Input spectrum.
-    max_mz:
-        Maximum mz value for the precursor mz of a spectrum.
-        All precursor mz values greater or equal to this
-        will return none. Default is 1000.
-    """
-    logger.warning("require_precursor_below_mz is deprecated, please use require_precursor_mz instead")
-    return require_precursor_mz(spectrum_in, minimum_accepted_mz=0, maximum_mz=max_mz)
