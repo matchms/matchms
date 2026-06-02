@@ -1,10 +1,13 @@
+import inspect
 import warnings
 import numpy as np
+import pandas as pd
 import pytest
 from matchms import Spectrum
 from matchms.filtering._dispatch import (
     apply_spectrum_filter_to_collection,
     collection_filter,
+    metadata_update_filter,
 )
 from matchms.SpectraCollection import SpectraCollection
 
@@ -323,3 +326,179 @@ def test_collection_filter_accepts_collection_as_spectrum_in_keyword():
     result = public_filter(spectrum_in=collection)
 
     assert result == "collection implementation"
+
+
+# --------------------------------------------
+# Tests for medata_update_filter
+# --------------------------------------------
+
+
+def test_metadata_update_filter_preserves_public_name_docstring_and_signature():
+    def _example_metadata_filter(metadata, mass_tolerance: float = 0.1) -> dict:
+        """Example metadata filter docstring."""
+        return {}
+
+    public_filter = metadata_update_filter(_example_metadata_filter)
+
+    signature = inspect.signature(public_filter)
+
+    assert public_filter.__name__ == "example_metadata_filter"
+    assert public_filter.__doc__ == "Example metadata filter docstring."
+
+    assert list(signature.parameters) == [
+        "spectrum_in",
+        "mass_tolerance",
+        "clone",
+    ]
+    assert signature.parameters["spectrum_in"].default is inspect.Parameter.empty
+    assert signature.parameters["mass_tolerance"].default == 0.1
+    assert signature.parameters["clone"].default is True
+
+
+def test_metadata_update_filter_signature_works_for_spectrum_processor_parameter_check():
+    def _example_metadata_filter(metadata, mass_tolerance: float = 0.1) -> dict:
+        return {}
+
+    public_filter = metadata_update_filter(_example_metadata_filter)
+
+    signature = inspect.signature(public_filter)
+    parameters_without_default = [
+        name
+        for name, parameter in signature.parameters.items()
+        if parameter.default is inspect.Parameter.empty
+    ]
+
+    assert parameters_without_default == ["spectrum_in"]
+
+
+def test_metadata_update_filter_clone_false_updates_spectrum_in_place():
+    spectrum = _make_spectrum(metadata={"id": "s1"})
+
+    def _add_metadata(metadata) -> dict:
+        return {"processed": True}
+
+    public_filter = metadata_update_filter(_add_metadata)
+
+    result = public_filter(spectrum, clone=False)
+
+    assert result is spectrum
+    assert spectrum.get("processed") is True
+
+
+def test_metadata_update_filter_updates_collection_metadata():
+    collection = _make_collection()
+
+    def _add_metadata(metadata) -> dict:
+        return {"processed": True}
+
+    public_filter = metadata_update_filter(_add_metadata)
+
+    result = public_filter(collection)
+
+    assert isinstance(result, SpectraCollection)
+    assert result is not collection
+    assert result.metadata["processed"].tolist() == [True, True, True]
+    assert "processed" not in collection.metadata.columns
+
+
+def test_metadata_update_filter_clone_false_updates_collection_in_place():
+    collection = _make_collection()
+
+    def _add_metadata(metadata) -> dict:
+        return {"processed": True}
+
+    public_filter = metadata_update_filter(_add_metadata)
+
+    result = public_filter(collection, clone=False)
+
+    assert result is collection
+    assert collection.metadata["processed"].tolist() == [True, True, True]
+
+
+def test_metadata_update_filter_applies_sparse_collection_updates():
+    collection = _make_collection()
+
+    def _mark_only_s2(metadata) -> dict:
+        if metadata.get("id") == "s2":
+            return {"processed": True}
+        return {}
+
+    public_filter = metadata_update_filter(_mark_only_s2)
+
+    result = public_filter(collection)
+
+    assert pd.isna(result.metadata.loc[0, "processed"])
+    assert result.metadata.loc[1, "processed"] is True
+    assert pd.isna(result.metadata.loc[2, "processed"])
+
+
+def test_metadata_update_filter_forwards_args_and_kwargs_to_metadata_impl():
+    spectrum = _make_spectrum(metadata={"id": "s1"})
+
+    def _add_metadata(metadata, value, *, suffix="", clone_marker=False) -> dict:
+        return {
+            "processed": f"{metadata.get('id')}-{value}{suffix}",
+            "clone_marker": clone_marker,
+        }
+
+    public_filter = metadata_update_filter(_add_metadata)
+
+    result = public_filter(
+        spectrum,
+        123,
+        suffix="-x",
+        clone_marker=True,
+    )
+
+    assert result.get("processed") == "s1-123-x"
+    assert result.get("clone_marker") is True
+
+
+def test_metadata_update_filter_returns_none_for_none_input():
+    def _add_metadata(metadata) -> dict:
+        return {"processed": True}
+
+    public_filter = metadata_update_filter(_add_metadata)
+
+    assert public_filter(None) is None
+
+
+def test_metadata_update_filter_rejects_metadata_impl_with_args():
+    def _bad_metadata_filter(metadata, *args) -> dict:
+        return {}
+
+    with pytest.raises(ValueError, match="must not define \\*args or \\*\\*kwargs"):
+        metadata_update_filter(_bad_metadata_filter)
+
+
+def test_metadata_update_filter_rejects_metadata_impl_with_kwargs():
+    def _bad_metadata_filter(metadata, **kwargs) -> dict:
+        return {}
+
+    with pytest.raises(ValueError, match="must not define \\*args or \\*\\*kwargs"):
+        metadata_update_filter(_bad_metadata_filter)
+
+
+def test_metadata_update_filter_rejects_metadata_impl_with_clone_parameter():
+    def _bad_metadata_filter(metadata, clone=True) -> dict:
+        return {}
+
+    with pytest.raises(ValueError, match="must not define a 'clone' parameter"):
+        metadata_update_filter(_bad_metadata_filter)
+
+
+def test_metadata_update_filter_uses_custom_collection_impl():
+    collection = _make_collection()
+
+    def _metadata_impl(metadata) -> dict:
+        raise AssertionError("Default metadata collection path should not be used.")
+
+    def _collection_impl(spectrum_in, clone=True):
+        return "custom collection result"
+
+    public_filter = metadata_update_filter(
+        _metadata_impl,
+        collection_impl=_collection_impl,
+    )
+
+    assert public_filter(collection) == "custom collection result"
