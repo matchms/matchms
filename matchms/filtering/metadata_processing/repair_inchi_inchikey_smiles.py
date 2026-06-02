@@ -1,4 +1,5 @@
 from matchms.filtering._dispatch import metadata_update_filter
+from matchms.filtering.filter_utils.metadata_conversions import as_string_or_none
 from matchms.filtering.SpeciesString import SpeciesString
 
 
@@ -29,6 +30,12 @@ def _repair_species_values(inchi, inchiaux, inchikey, smiles) -> dict[str, str]:
     }
 
 
+def _metadata_value_or_empty_string(metadata, key: str) -> str:
+    """Return metadata value as string, or empty string for missing values."""
+    value = as_string_or_none(metadata.get(key))
+    return "" if value is None else value
+
+
 def _repair_inchi_inchikey_smiles(metadata) -> dict[str, str]:
     """Check if inchi, inchikey, and smiles entries seem correct.
 
@@ -36,10 +43,10 @@ def _repair_inchi_inchikey_smiles(metadata) -> dict[str, str]:
     other two fields, for example if an inchikey is found in the inchi field.
     """
     return _repair_species_values(
-        metadata.get("inchi", ""),
-        metadata.get("inchiaux", ""),
-        metadata.get("inchikey", ""),
-        metadata.get("smiles", ""),
+        _metadata_value_or_empty_string(metadata, "inchi"),
+        _metadata_value_or_empty_string(metadata, "inchiaux"),
+        _metadata_value_or_empty_string(metadata, "inchikey"),
+        _metadata_value_or_empty_string(metadata, "smiles"),
     )
 
 
