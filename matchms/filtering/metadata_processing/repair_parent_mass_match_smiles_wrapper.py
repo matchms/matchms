@@ -1,18 +1,19 @@
 import logging
 import numpy as np
 from matchms.filtering._dispatch import collection_filter
+from matchms.filtering.filter_utils.metadata_conversions import apply_metadata_row_filter
 from matchms.filtering.metadata_processing.repair_adduct_and_parent_mass_based_on_smiles import (
-    _repair_adduct_and_parent_mass_based_on_smiles_metadata,
+    _repair_adduct_and_parent_mass_based_on_smiles,
     repair_adduct_and_parent_mass_based_on_smiles,
 )
 from matchms.SpectraCollection import SpectraCollection
 from matchms.typing import SpectrumType
 from .repair_parent_mass_is_molar_mass import (
-    _repair_parent_mass_is_molar_mass_metadata,
+    _repair_parent_mass_is_molar_mass,
     repair_parent_mass_is_molar_mass,
 )
 from .repair_smiles_of_salts import (
-    _repair_smiles_of_salts_metadata,
+    _repair_smiles_of_salts,
     repair_smiles_of_salts,
 )
 from .require_parent_mass_match_smiles import _check_smiles_and_parent_mass_match
@@ -26,22 +27,11 @@ def _repair_parent_mass_match_smiles_wrapper_spectrum(
     mass_tolerance: float = 0.2,
     clone: bool | None = True,
 ) -> SpectrumType | None:
-    """Wrapper function for repairing a mismatch between parent mass and smiles mass
+    """Repair a mismatch between parent mass and smiles mass.
 
-    Parameters:
-    ----------
-    spectrum_in : Spectrum
-        The input spectrum containing annotations to be checked and repaired.
-    mass_tolerance:
-        Maximum allowed mass difference between the calculated parent mass and the neutral
-        monoisotopic mass derived from the SMILES. Defaults to 0.2.
-    clone:
-        Optionally clone the Spectrum.
-
-    Returns
-    -------
-    Spectrum or None
-        Spectrum with repaired parent mass, or `None` if not present.
+    The filter tries several increasingly involved repair steps:
+    first salt removal from SMILES, then correction of molar mass to
+    monoisotopic mass, then adduct/parent mass repair based on SMILES.
     """
     if spectrum_in is None:
         return None
@@ -80,9 +70,9 @@ def _repair_parent_mass_match_smiles_wrapper_collection(
     target = spectrum_in.copy() if clone else spectrum_in
 
     metadata_filters_to_apply = [
-        _repair_smiles_of_salts_metadata,
-        _repair_parent_mass_is_molar_mass_metadata,
-        _repair_adduct_and_parent_mass_based_on_smiles_metadata,
+        _repair_smiles_of_salts,
+        _repair_parent_mass_is_molar_mass,
+        _repair_adduct_and_parent_mass_based_on_smiles,
     ]
 
     for metadata_filter in metadata_filters_to_apply:
@@ -94,10 +84,12 @@ def _repair_parent_mass_match_smiles_wrapper_collection(
         if not needs_repair.any():
             return target
 
-        target = target.apply_to_metadata_rows(
-            needs_repair,
-            metadata_filter,
+        target.apply_to_metadata_rows(
+            apply_metadata_row_filter,
+            row_mask=needs_repair,
+            row_filter=metadata_filter,
             mass_tolerance=mass_tolerance,
+            inplace=True,
         )
 
     return target

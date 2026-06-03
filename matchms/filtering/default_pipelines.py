@@ -1,6 +1,5 @@
 """Stores sets of filters for easy pipeline creation."""
 
-import matchms.filtering.metadata_processing.require_precursor_mz
 from matchms import filtering as msfilters
 
 
@@ -60,7 +59,6 @@ CLEAN_PEAKS = [
 ]
 # These filters are in None of the above pipelines
 OTHER_FILTERS = [
-    matchms.filtering.metadata_processing.require_precursor_mz.require_precursor_below_mz,
     msfilters.select_by_intensity,
     msfilters.remove_peaks_around_precursor_mz,
     msfilters.remove_peaks_outside_top_k,
