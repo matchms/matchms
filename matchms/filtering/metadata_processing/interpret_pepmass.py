@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 from matchms.filtering._dispatch import collection_filter
 from matchms.filtering.filter_utils.metadata_conversions import is_missing_metadata_value
-from matchms.typing import SpectrumType, SpectraCollectionType
+from matchms.typing import SpectraCollectionType, SpectrumType
 from .make_charge_int import _convert_charge_to_int
 
 
