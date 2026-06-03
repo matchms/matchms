@@ -7,7 +7,7 @@ from .Fingerprints import Fingerprints
 from .Fragments import Fragments
 from .logging_functions import _init_logger, set_matchms_logger_level
 from .Metadata import Metadata
-from .MetadataTable import MetadataTable
+from .MetadataCollection import MetadataCollection
 from .Pipeline import Pipeline
 from .Scores import Scores
 from .SpectraCollection import SpectraCollection
@@ -28,7 +28,7 @@ __all__ = [
     "Fragments",
     "importing",
     "Metadata",
-    "MetadataTable",
+    "MetadataCollection",
     "networking",
     "Pipeline",
     "plotting",

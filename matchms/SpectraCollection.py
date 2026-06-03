@@ -3,7 +3,7 @@ from collections.abc import Generator
 from functools import cached_property
 import numpy as np
 import pandas as pd
-from matchms.MetadataTable import MetadataTable, harmonize_metadata_table_columns
+from matchms.MetadataCollection import MetadataCollection, harmonize_metadata_collection_columns
 from matchms.Spectrum import Spectrum
 from .FragmentCollection import CSRFragmentCollection, FragmentCollection
 from .hashing import compute_combined_hashes
@@ -104,11 +104,11 @@ class SpectraCollection:
         if len(metadata) == 0:  # allow empty metadata if spectra have no metadata
             metadata = pd.DataFrame(index=np.arange(len(spectra)))
 
-        return harmonize_metadata_table_columns(metadata).reset_index(drop=True)
+        return harmonize_metadata_collection_columns(metadata).reset_index(drop=True)
 
     @property
     def metadata(self) -> pd.DataFrame:
-        return MetadataTable(self._metadata, self)
+        return MetadataCollection(self._metadata, self)
 
     @property
     def fragments(self) -> FragmentCollection:
@@ -263,7 +263,7 @@ class SpectraCollection:
         """Harmonize metadata column names to matchms key style."""
         target = self if inplace else self.copy()
 
-        target._metadata = harmonize_metadata_table_columns(target._metadata).reset_index(
+        target._metadata = harmonize_metadata_collection_columns(target._metadata).reset_index(
             drop=True
         )
         target._clear_cache(["metadata_hashes", "spectra_hashes"])
