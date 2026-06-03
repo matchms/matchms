@@ -1,6 +1,7 @@
 import pytest
 from matchms import SpectraCollection
 from matchms.filtering import repair_inchi_inchikey_smiles
+from tests.run_spectrum_and_collection import run_filter_as_spectrum_or_collection
 from ..builder_Spectrum import SpectrumBuilder
 
 
@@ -41,76 +42,90 @@ TEST_INCHIS = [
 ]
 
 
+@pytest.mark.parametrize("as_collection", [False, True], ids=["spectrum", "collection"])
 @pytest.mark.parametrize(
     "metadata, expected_inchi, expected_inchikey, expected_smiles",
     REPAIR_TEST_CASES,
 )
-def test_repair_inchi_inchikey_smiles_spectrum(metadata, expected_inchi, expected_inchikey, expected_smiles):
+def test_repair_inchi_inchikey_smiles(
+    metadata,
+    expected_inchi,
+    expected_inchikey,
+    expected_smiles,
+    as_collection,
+):
     spectrum_in = SpectrumBuilder().with_metadata(metadata).build()
 
-    spectrum = repair_inchi_inchikey_smiles(spectrum_in)
+    spectrum = run_filter_as_spectrum_or_collection(
+        repair_inchi_inchikey_smiles,
+        spectrum_in,
+        as_collection,
+    )
 
-    assert spectrum is not spectrum_in
     assert spectrum.get("inchi") == expected_inchi
     assert spectrum.get("inchikey") == expected_inchikey
     assert spectrum.get("smiles") == expected_smiles
 
 
-@pytest.mark.parametrize(
-    "metadata, expected_inchi, expected_inchikey, expected_smiles",
-    REPAIR_TEST_CASES,
-)
-def test_repair_inchi_inchikey_smiles_collection(metadata, expected_inchi, expected_inchikey, expected_smiles):
-    spectrum_in = SpectrumBuilder().with_metadata(metadata).build()
-    collection_in = SpectraCollection([spectrum_in])
-
-    collection = repair_inchi_inchikey_smiles(collection_in)
-
-    assert collection is not collection_in
-    assert len(collection) == 1
-    assert collection.metadata.loc[0, "inchi"] == expected_inchi
-    assert collection.metadata.loc[0, "inchikey"] == expected_inchikey
-    assert collection.metadata.loc[0, "smiles"] == expected_smiles
-
-
-def test_repair_inchi_inchikey_smiles_various_inchi_entered_as_smiles_spectrum():
+@pytest.mark.parametrize("as_collection", [False, True], ids=["spectrum", "collection"])
+def test_repair_inchi_inchikey_smiles_various_inchi_entered_as_smiles(as_collection):
     """Test a wider variety of different inchis."""
-
-    builder = SpectrumBuilder()
-
     for inchi in TEST_INCHIS:
-        spectrum_in = builder.with_metadata({"smiles": inchi}).build()
+        spectrum_in = SpectrumBuilder().with_metadata({"smiles": inchi}).build()
 
-        spectrum = repair_inchi_inchikey_smiles(spectrum_in)
+        spectrum = run_filter_as_spectrum_or_collection(
+            repair_inchi_inchikey_smiles,
+            spectrum_in,
+            as_collection,
+        )
 
-        assert spectrum is not spectrum_in
         assert spectrum.get("inchi") == "InChI=" + inchi.replace("InChI=", "").replace('"', "")
         assert spectrum.get("inchikey") == ""
         assert spectrum.get("smiles") == ""
 
 
-def test_repair_inchi_inchikey_smiles_various_inchi_entered_as_smiles_collection():
-    """Test a wider variety of different inchis for SpectraCollection."""
-
+def test_repair_inchi_inchikey_smiles_collection_multiple_rows():
     spectra = [
-        SpectrumBuilder().with_metadata({"smiles": inchi}).build()
-        for inchi in TEST_INCHIS
+        SpectrumBuilder().with_metadata({"smiles": "ABTNALLHJFCFRZ-UHFFFAOYSA-N"}).build(),
+        SpectrumBuilder().with_metadata({"inchi": "C[C@H](Cc1ccccc1)N(C)CC#C"}).build(),
+        SpectrumBuilder().with_metadata({"smiles": TEST_INCHIS[0]}).build(),
     ]
     collection = SpectraCollection(spectra)
 
     repaired = repair_inchi_inchikey_smiles(collection)
 
     assert repaired is not collection
-    assert len(repaired) == len(TEST_INCHIS)
+    assert len(repaired) == 3
 
-    for index, inchi in enumerate(TEST_INCHIS):
-        assert repaired.metadata.loc[index, "inchi"] == "InChI=" + inchi.replace("InChI=", "").replace('"', "")
-        assert repaired.metadata.loc[index, "inchikey"] == ""
-        assert repaired.metadata.loc[index, "smiles"] == ""
+    assert repaired.metadata.loc[0, "inchi"] == ""
+    assert repaired.metadata.loc[0, "inchikey"] == "ABTNALLHJFCFRZ-UHFFFAOYSA-N"
+    assert repaired.metadata.loc[0, "smiles"] == ""
+
+    assert repaired.metadata.loc[1, "inchi"] == ""
+    assert repaired.metadata.loc[1, "inchikey"] == ""
+    assert repaired.metadata.loc[1, "smiles"] == "C[C@H](Cc1ccccc1)N(C)CC#C"
+
+    assert repaired.metadata.loc[2, "inchi"] == "InChI=" + TEST_INCHIS[0].replace("InChI=", "").replace('"', "")
+    assert repaired.metadata.loc[2, "inchikey"] == ""
+    assert repaired.metadata.loc[2, "smiles"] == ""
 
 
-def test_empty_spectrum():
-    spectrum_in = None
-    spectrum = repair_inchi_inchikey_smiles(spectrum_in)
+def test_repair_inchi_inchikey_smiles_clone_false_modifies_collection_in_place():
+    collection = SpectraCollection(
+        [
+            SpectrumBuilder()
+            .with_metadata({"smiles": "ABTNALLHJFCFRZ-UHFFFAOYSA-N"})
+            .build()
+        ]
+    )
+
+    repaired = repair_inchi_inchikey_smiles(collection, clone=False)
+
+    assert repaired is collection
+    assert collection.metadata.loc[0, "inchikey"] == "ABTNALLHJFCFRZ-UHFFFAOYSA-N"
+
+
+def test_repair_inchi_inchikey_smiles_empty_spectrum():
+    spectrum = repair_inchi_inchikey_smiles(None)
 
     assert spectrum is None, "Expected different handling of None spectrum."

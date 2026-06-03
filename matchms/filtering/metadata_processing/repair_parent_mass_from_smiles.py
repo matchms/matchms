@@ -1,41 +1,33 @@
-import logging
-from matchms import Spectrum
-from matchms.filtering.filter_utils.get_neutral_mass_from_smiles import get_monoisotopic_neutral_mass
-from matchms.typing import SpectrumType
+from matchms.filtering._dispatch import metadata_update_filter
+from matchms.filtering.filter_utils.get_neutral_mass_from_smiles import (
+    get_monoisotopic_neutral_mass,
+)
+from matchms.filtering.filter_utils.metadata_conversions import (
+    as_float_or_none,
+    as_string_or_none,
+)
 
 
-logger = logging.getLogger("matchms")
+def _repair_parent_mass_from_smiles(
+    metadata,
+    mass_tolerance: float = 0.1,
+) -> dict:
+    """Set parent mass to match smiles mass if not already close."""
+    smiles = as_string_or_none(metadata.get("smiles"))
+    smiles_mass = get_monoisotopic_neutral_mass(smiles)
 
-
-def repair_parent_mass_from_smiles(
-    spectrum_in: Spectrum, mass_tolerance: float = 0.1, clone: bool | None = True
-) -> SpectrumType | None:
-    """Sets the parent mass to match the smiles mass, if not already close to smiles mass
-
-    Parameters:
-    ----------
-    spectrum_in : Spectrum
-        The input spectrum containing annotations to be checked and repaired.
-    clone:
-        Optionally clone the Spectrum.
-
-    Returns
-    -------
-    Spectrum or None
-        Spectrum with repaired parent mass, or `None` if not present.
-    """
-    if spectrum_in is None:
-        return None
-    changed_spectrum = spectrum_in.clone() if clone else spectrum_in
-    smiles_mass = get_monoisotopic_neutral_mass(changed_spectrum.get("smiles"))
     if smiles_mass is None:
-        return spectrum_in
-    parent_mass = spectrum_in.get("parent_mass")
+        return {}
+
+    parent_mass = as_float_or_none(metadata.get("parent_mass"))
 
     if parent_mass is None:
-        changed_spectrum.set("parent_mass", smiles_mass)
-        return changed_spectrum
+        return {"parent_mass": smiles_mass}
+
     if abs(parent_mass - smiles_mass) > mass_tolerance:
-        changed_spectrum.set("parent_mass", smiles_mass)
-        return changed_spectrum
-    return spectrum_in
+        return {"parent_mass": smiles_mass}
+
+    return {}
+
+
+repair_parent_mass_from_smiles = metadata_update_filter(_repair_parent_mass_from_smiles)

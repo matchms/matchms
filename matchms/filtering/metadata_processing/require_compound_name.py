@@ -1,19 +1,36 @@
 import logging
-from matchms.typing import SpectrumType
+from matchms.filtering._dispatch import metadata_requirement_filter
+from matchms.filtering.filter_utils.metadata_conversions import as_string_or_none
 
 
 logger = logging.getLogger("matchms")
 
 
-def require_compound_name(spectrum: SpectrumType) -> SpectrumType | None:
-    """Ensure that the compound name is present in the spectrum metadata."""
-    if spectrum is None:
-        return None
+def _require_compound_name(metadata) -> bool:
+    """Ensure that the compound name is present in the spectrum metadata.
 
-    compound_name = spectrum.get("compound_name", None)
+    Parameters
+    ----------
+    spectrum_in
+        Input spectrum or spectra collection.
+    clone
+        Optionally clone the input before applying the filter. If ``False``,
+        the input object may be modified in place.
+
+    Returns
+    -------
+    Spectrum, SpectraCollection, or None
+        Spectrum input is returned unchanged if it contains a compound name,
+        otherwise ``None``. SpectraCollection input is returned with rows lacking
+        compound names removed.
+    """
+    compound_name = as_string_or_none(metadata.get("compound_name"))
 
     if compound_name:
-        return spectrum
+        return True
 
     logger.info("Spectrum does not contain a compound name.")
-    return None
+    return False
+
+
+require_compound_name = metadata_requirement_filter(_require_compound_name)

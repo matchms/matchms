@@ -1,44 +1,33 @@
 import logging
+from matchms.filtering._dispatch import metadata_update_filter
+from matchms.filtering.filter_utils.metadata_conversions import as_string_or_none
 from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import (
     convert_inchi_to_smiles,
     is_valid_inchi,
     is_valid_smiles,
 )
-from matchms.typing import SpectrumType
 
 
 logger = logging.getLogger("matchms")
 
 
-def derive_smiles_from_inchi(spectrum_in: SpectrumType, clone: bool | None = True) -> SpectrumType | None:
-    """Find missing smiles and derive from Inchi where possible.
+def _derive_smiles_from_inchi(metadata) -> dict:
+    """Find missing smiles and derive from InChI where possible."""
+    inchi = as_string_or_none(metadata.get("inchi"))
+    smiles = as_string_or_none(metadata.get("smiles"))
 
-    Parameters
-    ----------
-    spectrum_in:
-        Input spectrum.
-    clone:
-        Optionally clone the Spectrum.#
+    if is_valid_smiles(smiles) or not is_valid_inchi(inchi):
+        return {}
 
-    Returns
-    -------
-    Spectrum or None
-        Spectrum with added SMILES, or `None` if not present.
-    """
-    if spectrum_in is None:
-        return None
+    smiles = convert_inchi_to_smiles(inchi)
+    if not smiles:
+        logger.warning("Could not convert InChI %s to smiles.", inchi)
+        return {}
 
-    spectrum = spectrum_in.clone() if clone else spectrum_in
-    inchi = spectrum.get("inchi")
-    smiles = spectrum.get("smiles")
+    smiles = smiles.rstrip()
+    logger.info("Added smiles %s to metadata (was converted from InChI)", smiles)
 
-    if not is_valid_smiles(smiles) and is_valid_inchi(inchi):
-        smiles = convert_inchi_to_smiles(inchi)
-        if smiles:
-            smiles = smiles.rstrip()
-            spectrum.set("smiles", smiles)
-            logger.info("Added smiles %s to metadata (was converted from InChI)", smiles)
-        else:
-            logger.warning("Could not convert InChI %s to smiles.", inchi)
+    return {"smiles": smiles}
 
-    return spectrum
+
+derive_smiles_from_inchi = metadata_update_filter(_derive_smiles_from_inchi)

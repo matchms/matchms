@@ -1,88 +1,203 @@
 import numpy as np
+import pandas as pd
 import pytest
+from matchms import SpectraCollection
 from matchms.filtering import interpret_pepmass
+from tests.run_spectrum_and_collection import run_filter_as_spectrum_or_collection
 from ..builder_Spectrum import SpectrumBuilder
 
 
+@pytest.mark.parametrize("as_collection", [False, True], ids=["spectrum", "collection"])
 @pytest.mark.parametrize(
     "input_pepmass, expected_results",
     [
-        ((None), (None, None, None)),
-        ((896.05), (896.05, None, None)),
+        (None, (None, None, None)),
+        (896.05, (896.05, None, None)),
         ((896.05, None), (896.05, None, None)),
         ((896.05, 1111.2, "2-"), (896.05, 1111.2, -2)),
         ((896.05, 1111.2, "2+"), (896.05, 1111.2, 2)),
         ((896.05, 1111.2, -1), (896.05, 1111.2, -1)),
     ],
 )
-def test_interpret_pepmass(input_pepmass, expected_results):
-    """Test if example inputs are correctly converted"""
+def test_interpret_pepmass(input_pepmass, expected_results, as_collection):
+    """Test if example inputs are correctly converted."""
     mz = np.array([100, 200.0])
     intensities = np.array([0.7, 0.1])
     metadata = {"pepmass": input_pepmass}
-    spectrum_in = SpectrumBuilder().with_mz(mz).with_intensities(intensities).with_metadata(metadata).build()
+    spectrum_in = (
+        SpectrumBuilder()
+        .with_mz(mz)
+        .with_intensities(intensities)
+        .with_metadata(metadata)
+        .build()
+    )
 
-    spectrum = interpret_pepmass(spectrum_in)
-    mz = spectrum.get("precursor_mz")
-    intensity = spectrum.get("precursor_intensity")
-    charge = spectrum.get("charge")
-    assert (mz, intensity, charge) == expected_results, "Expected different 3 values."
+    spectrum = run_filter_as_spectrum_or_collection(
+        interpret_pepmass,
+        spectrum_in,
+        as_collection,
+    )
+
+    actual_results = (
+        spectrum.get("precursor_mz"),
+        spectrum.get("precursor_intensity"),
+        spectrum.get("charge"),
+    )
+
+    assert actual_results == expected_results, "Expected different 3 values."
 
 
-def test_interpret_pepmass_charge_present(caplog):
-    """Test if example inputs are correctly converted when entries already exist"""
+@pytest.mark.parametrize("as_collection", [False, True], ids=["spectrum", "collection"])
+def test_interpret_pepmass_removes_pepmass(as_collection):
+    spectrum_in = SpectrumBuilder().with_metadata({"pepmass": (896.05, 1111.2, "2-")}).build()
+
+    spectrum = run_filter_as_spectrum_or_collection(
+        interpret_pepmass,
+        spectrum_in,
+        as_collection,
+    )
+
+    assert spectrum.get("pepmass") is None
+    assert spectrum.get("precursor_mz") == 896.05
+    assert spectrum.get("precursor_intensity") == 1111.2
+    assert spectrum.get("charge") == -2
+
+
+@pytest.mark.parametrize("as_collection", [False, True], ids=["spectrum", "collection"])
+def test_interpret_pepmass_charge_present(caplog, as_collection):
+    """Test if example inputs are correctly converted when charge already exists."""
     mz = np.array([100, 200.0])
     intensities = np.array([0.7, 0.1])
     metadata = {"pepmass": (896.05, 1111.2, "2-"), "charge": -1}
-    spectrum_in = SpectrumBuilder().with_mz(mz).with_intensities(intensities).with_metadata(metadata).build()
+    spectrum_in = (
+        SpectrumBuilder()
+        .with_mz(mz)
+        .with_intensities(intensities)
+        .with_metadata(metadata)
+        .build()
+    )
 
-    spectrum = interpret_pepmass(spectrum_in)
-    mz = spectrum.get("precursor_mz")
-    intensity = spectrum.get("precursor_intensity")
-    charge = spectrum.get("charge")
-    assert (mz, intensity, charge) == (896.05, 1111.2, -2), "Expected different 3 values."
-    assert "Overwriting existing charge -1 with new one: -2" in caplog.text, "Expected different log message"
+    spectrum = run_filter_as_spectrum_or_collection(
+        interpret_pepmass,
+        spectrum_in,
+        as_collection,
+    )
+
+    actual_results = (
+        spectrum.get("precursor_mz"),
+        spectrum.get("precursor_intensity"),
+        spectrum.get("charge"),
+    )
+
+    assert actual_results == (896.05, 1111.2, -2), "Expected different 3 values."
+    assert "Overwriting existing charge -1 with new one: -2" in caplog.text
 
 
-def test_interpret_pepmass_mz_present(caplog):
-    """Test if example inputs are correctly converted when entries already exist"""
+@pytest.mark.parametrize("as_collection", [False, True], ids=["spectrum", "collection"])
+def test_interpret_pepmass_mz_present(caplog, as_collection):
+    """Test if example inputs are correctly converted when precursor_mz already exists."""
     mz = np.array([100, 200.0])
     intensities = np.array([0.7, 0.1])
     metadata = {"pepmass": (203, 44, "2-"), "precursor_mz": 202}
-    spectrum_in = SpectrumBuilder().with_mz(mz).with_intensities(intensities).with_metadata(metadata).build()
+    spectrum_in = (
+        SpectrumBuilder()
+        .with_mz(mz)
+        .with_intensities(intensities)
+        .with_metadata(metadata)
+        .build()
+    )
 
-    spectrum = interpret_pepmass(spectrum_in)
-    mz = spectrum.get("precursor_mz")
-    intensity = spectrum.get("precursor_intensity")
-    charge = spectrum.get("charge")
-    assert (mz, intensity, charge) == (203, 44, -2), "Expected different 3 values."
-    assert "Overwriting existing precursor_mz 202 with new one: 203" in caplog.text, "Expected different log message"
+    spectrum = run_filter_as_spectrum_or_collection(
+        interpret_pepmass,
+        spectrum_in,
+        as_collection,
+    )
+
+    actual_results = (
+        spectrum.get("precursor_mz"),
+        spectrum.get("precursor_intensity"),
+        spectrum.get("charge"),
+    )
+
+    assert actual_results == (203, 44, -2), "Expected different 3 values."
+    assert "Overwriting existing precursor_mz 202 with new one: 203" in caplog.text
 
 
-def test_interpret_pepmass_intensity_present(caplog):
-    """Test if example inputs are correctly converted when entries already exist"""
+@pytest.mark.parametrize("as_collection", [False, True], ids=["spectrum", "collection"])
+def test_interpret_pepmass_intensity_present(caplog, as_collection):
+    """Test if example inputs are correctly converted when precursor_intensity already exists."""
     mz = np.array([100, 200.0])
     intensities = np.array([0.7, 0.1])
     metadata = {"pepmass": (203, 44, "2-"), "precursor_intensity": 100}
-    spectrum_in = SpectrumBuilder().with_mz(mz).with_intensities(intensities).with_metadata(metadata).build()
-
-    spectrum = interpret_pepmass(spectrum_in)
-    mz = spectrum.get("precursor_mz")
-    intensity = spectrum.get("precursor_intensity")
-    charge = spectrum.get("charge")
-    assert (mz, intensity, charge) == (203, 44, -2), "Expected different 3 values."
-    assert "Overwriting existing precursor_intensity 100 with new one: 44" in caplog.text, (
-        "Expected different log message"
+    spectrum_in = (
+        SpectrumBuilder()
+        .with_mz(mz)
+        .with_intensities(intensities)
+        .with_metadata(metadata)
+        .build()
     )
 
+    spectrum = run_filter_as_spectrum_or_collection(
+        interpret_pepmass,
+        spectrum_in,
+        as_collection,
+    )
 
-def test_empty_spectrum():
-    spectrum_in = None
-    spectrum = interpret_pepmass(spectrum_in)
+    actual_results = (
+        spectrum.get("precursor_mz"),
+        spectrum.get("precursor_intensity"),
+        spectrum.get("charge"),
+    )
 
-    assert spectrum is None, "Expected different handling of None spectrum."
+    assert actual_results == (203, 44, -2), "Expected different 3 values."
+    assert "Overwriting existing precursor_intensity 100 with new one: 44" in caplog.text
 
 
+def test_interpret_pepmass_collection_multiple_rows():
+    collection = SpectraCollection(
+        [
+            SpectrumBuilder().with_metadata({"pepmass": (896.05, 1111.2, "2-")}).build(),
+            SpectrumBuilder().with_metadata({"pepmass": "100.2"}).build(),
+            SpectrumBuilder().with_metadata({"compound_name": "no pepmass"}).build(),
+        ]
+    )
+
+    processed = interpret_pepmass(collection)
+
+    assert processed is not collection
+
+    assert processed.metadata.loc[0, "precursor_mz"] == 896.05
+    assert processed.metadata.loc[0, "precursor_intensity"] == 1111.2
+    assert processed.metadata.loc[0, "charge"] == -2
+
+    assert processed.metadata.loc[1, "precursor_mz"] == 100.2
+    assert pd.isna(processed.metadata.loc[1, "precursor_intensity"])
+    assert pd.isna(processed.metadata.loc[1, "charge"])
+
+    assert "pepmass" not in processed.metadata.columns
+
+
+def test_interpret_pepmass_collection_clone_false_modifies_input():
+    collection = SpectraCollection(
+        [
+            SpectrumBuilder().with_metadata({"pepmass": (896.05, 1111.2, "2-")}).build(),
+        ]
+    )
+
+    processed = interpret_pepmass(collection, clone=False)
+
+    assert processed is collection
+    assert collection.metadata.loc[0, "precursor_mz"] == 896.05
+    assert collection.metadata.loc[0, "precursor_intensity"] == 1111.2
+    assert collection.metadata.loc[0, "charge"] == -2
+    assert "pepmass" not in collection.metadata.columns
+
+
+def test_interpret_pepmass_empty_spectrum():
+    assert interpret_pepmass(None) is None
+
+
+@pytest.mark.parametrize("as_collection", [False, True], ids=["spectrum", "collection"])
 @pytest.mark.parametrize(
     "input_pepmass, expected_results",
     [
@@ -92,12 +207,22 @@ def test_empty_spectrum():
         ["something_random", (None, None, None)],
     ],
 )
-def test_interpret_pepmass_error_v0_22_0(input_pepmass, expected_results):
-    spectrum = SpectrumBuilder().with_metadata({"PEPMASS": input_pepmass}, metadata_harmonization=True).build()
+def test_interpret_pepmass_error_v0_22_0(input_pepmass, expected_results, as_collection):
+    spectrum_in = (
+        SpectrumBuilder()
+        .with_metadata({"PEPMASS": input_pepmass}, metadata_harmonization=True)
+        .build()
+    )
 
-    assert spectrum.get("precursor_mz") == expected_results[0], "Expected different precursor_mz."
-    assert spectrum.get("precursor_intensity") == expected_results[1], "Expected different precursor_intensity."
-    assert spectrum.get("charge") == expected_results[2], "Expected different charge."
+    spectrum = run_filter_as_spectrum_or_collection(
+        interpret_pepmass,
+        spectrum_in,
+        as_collection,
+    )
+
+    assert spectrum.get("precursor_mz") == expected_results[0]
+    assert spectrum.get("precursor_intensity") == expected_results[1]
+    assert spectrum.get("charge") == expected_results[2]
 
 
 def test_load_pepmass_error_issue_452():

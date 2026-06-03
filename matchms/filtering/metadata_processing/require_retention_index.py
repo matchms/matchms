@@ -1,32 +1,26 @@
-import logging
-from matchms.typing import SpectrumType
+from matchms.filtering._dispatch import metadata_requirement_filter
+from matchms.filtering.filter_utils.metadata_conversions import is_missing_metadata_value
 
 
-logger = logging.getLogger("matchms")
-
-
-def require_retention_index(spectrum_in: SpectrumType, clone: bool | None = True) -> SpectrumType | None:
-    """
-    This function checks if the input spectrum has a 'retention_index' in its metadata.
-    If the input spectrum is None or doesn't have a 'retention_index', the function returns None.
-    Otherwise, it returns a clone of the input spectrum.
+def _require_retention_index(metadata) -> bool:
+    """Require retention index to be present.
 
     Parameters
     ----------
-    spectrum_in (SpectrumType):
-        The input spectrum to check.
-    clone:
-        Optionally clone the Spectrum.
+    spectrum_in
+        Input spectrum or spectra collection.
+    clone
+        Optionally clone the input before applying the filter. If ``False``,
+        the input object may be modified in place.
 
-    Returns:
-    SpectrumType: A clone of the input spectrum if it has a 'retention_index', None otherwise.
+    Returns
+    -------
+    Spectrum, SpectraCollection, or None
+        Spectrum input is returned unchanged if ``retention_index`` is present,
+        otherwise ``None``. SpectraCollection input is returned with rows lacking
+        retention index removed.
     """
-    if spectrum_in is None:
-        return None
+    return not is_missing_metadata_value(metadata.get("retention_index"))
 
-    spectrum = spectrum_in.clone() if clone else spectrum_in
 
-    retention_index = spectrum.get("retention_index", None)
-    if retention_index is None:
-        return None
-    return spectrum
+require_retention_index = metadata_requirement_filter(_require_retention_index)

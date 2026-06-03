@@ -1,7 +1,6 @@
 from collections.abc import Iterable
-from matchms.filtering._dispatch import collection_filter
-from matchms.SpectraCollection import SpectraCollection
-from matchms.typing import SpectrumType
+from matchms.filtering._dispatch import metadata_update_filter
+from matchms.filtering.filter_utils.metadata_conversions import is_missing_metadata_value
 from matchms.utils import ALIASES_FOR_NONE
 
 
@@ -19,7 +18,7 @@ def _normalize_keys(keys):
 
 
 def _is_missing_alias(value, aliases) -> bool:
-    if value is None:
+    if is_missing_metadata_value(value):
         return True
 
     try:
@@ -28,19 +27,18 @@ def _is_missing_alias(value, aliases) -> bool:
         return False
 
 
-def _harmonize_missing_entries_spectrum(
-        spectrum_in: SpectrumType,
-        keys: str | Iterable[str] | None = None,
-        undefined=None,
-        aliases: Iterable | None = None,
-        clone: bool | None = True,
-    ) -> SpectrumType | None:
+def _harmonize_missing_entries(
+    metadata,
+    keys: str | Iterable[str] | None = None,
+    undefined=None,
+    aliases: Iterable | None = None,
+) -> dict:
     """Replace aliases for missing metadata entries.
 
     Parameters
     ----------
     spectrum_in
-        Input spectrum.
+        Input spectrum or spectra collection.
     keys
         Metadata key or keys to harmonize. If ``None``, all existing metadata
         keys are harmonized.
@@ -50,72 +48,33 @@ def _harmonize_missing_entries_spectrum(
         Values that should be interpreted as missing. If ``None``,
         ``ALIASES_FOR_NONE`` is used.
     clone
-        Optionally clone the Spectrum.
+        Optionally clone the input before applying the filter. If ``False``,
+        the input object may be modified in place.
 
     Returns
     -------
-    Spectrum or None
-        Spectrum with harmonized missing metadata entries, or ``None`` if input
-        was ``None``.
+    Spectrum, SpectraCollection, or None
+        Input object with harmonized missing metadata entries, or ``None`` if
+        input was ``None``.
     """
-    if spectrum_in is None:
-        return None
-
-    spectrum = spectrum_in.clone() if clone else spectrum_in
-
     if aliases is None:
         aliases = ALIASES_FOR_NONE
     aliases = set(aliases)
 
     keys = _normalize_keys(keys)
     if keys is None:
-        keys = list(spectrum.metadata.keys())
+        keys = list(metadata.keys())
 
+    updates = {}
     for key in keys:
-        value = spectrum.get(key)
+        value = metadata.get(key)
         if _is_missing_alias(value, aliases):
-            spectrum.set(key, undefined)
+            updates[key] = undefined
 
-    return spectrum
-
-
-def _harmonize_missing_entries_collection(
-        spectrum_in: SpectraCollection,
-        keys: str | Iterable[str] | None = None,
-        undefined=None,
-        aliases: Iterable | None = None,
-        clone: bool | None = True,
-    ) -> SpectraCollection:
-    """Replace aliases for missing metadata entries in a SpectraCollection."""
-    target = spectrum_in.copy() if clone else spectrum_in
-
-    if aliases is None:
-        aliases = ALIASES_FOR_NONE
-    aliases = set(aliases)
-
-    keys = _normalize_keys(keys)
-    metadata = target._metadata.copy()
-
-    if keys is None:
-        keys = list(metadata.columns)
-    else:
-        # Preserve Spectrum behavior: missing requested keys are created.
-        for key in keys:
-            if key not in metadata.columns:
-                metadata[key] = undefined
-
-    for key in keys:
-        metadata[key] = metadata[key].map(
-            lambda value: undefined if _is_missing_alias(value, aliases) else value
-        )
-
-    target._metadata = metadata
-    target._clear_cache(["metadata_hashes", "spectra_hashes"])
-
-    return target
+    return updates
 
 
-harmonize_missing_entries = collection_filter(
-    _harmonize_missing_entries_spectrum,
-    collection_impl=_harmonize_missing_entries_collection,
+harmonize_missing_entries = metadata_update_filter(
+    _harmonize_missing_entries,
+    drop_missing_updates=False,
 )

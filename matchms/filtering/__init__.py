@@ -117,7 +117,7 @@ from matchms.filtering.metadata_processing.require_matching_adduct_precursor_mz_
     require_matching_adduct_precursor_mz_parent_mass,
 )
 from matchms.filtering.metadata_processing.require_parent_mass_match_smiles import require_parent_mass_match_smiles
-from matchms.filtering.metadata_processing.require_precursor_mz import require_precursor_below_mz, require_precursor_mz
+from matchms.filtering.metadata_processing.require_precursor_mz import require_precursor_mz
 from matchms.filtering.metadata_processing.require_retention_index import require_retention_index
 from matchms.filtering.metadata_processing.require_retention_time import require_retention_time
 from matchms.filtering.metadata_processing.require_valid_annotation import require_valid_annotation
@@ -189,7 +189,6 @@ __all__ = [
     "require_minimum_number_of_peaks",
     "require_minimum_number_of_high_peaks",
     "require_maximum_number_of_peaks",
-    "require_precursor_below_mz",
     "require_precursor_mz",
     "require_compound_name",
     "require_correct_ms_level",

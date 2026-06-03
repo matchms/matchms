@@ -8,135 +8,217 @@ from urllib.error import URLError
 import numpy as np
 import pandas as pd
 import pubchempy
-from matchms import Spectrum
+from matchms.filtering._dispatch import metadata_update_filter
+from matchms.filtering.filter_utils.metadata_conversions import (
+    as_float_or_none,
+    as_string_or_none,
+)
 from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import (
     is_valid_inchi,
     is_valid_inchikey,
     is_valid_smiles,
 )
-from matchms.typing import SpectrumType
 
 
 logger = logging.getLogger("matchms")
 
 
-def derive_annotation_from_compound_name(
-    spectrum_in: Spectrum,
+def _derive_annotation_from_compound_name(
+    metadata,
     annotated_compound_names_file: str | None = None,
     mass_tolerance: float = 0.1,
-    clone: bool | None = True,
-) -> SpectrumType | None:
-    """Adds inchi, inchikey based on compound name by searching pubchem
-    smiles is not supported anymore by pubchempy, see https://github.com/matchms/matchms/issues/823
-    Smiles can be derived from inchi, by running the filter derive_smiles_from_inchi
+) -> dict:
+    """Add molecular annotations based on compound name by searching PubChem.
 
-    This filter is only run, if there is not yet a valid smiles or inchi in the metadata.
-    The inchi and inchikey are only added if the found annotation is close enough to the parent mass.
+    This filter adds ``smiles``, ``inchi``, and/or ``inchikey`` metadata based on
+    a PubChem compound-name lookup. SMILES lookup is not supported directly by
+    pubchempy anymore, see https://github.com/matchms/matchms/issues/823.
+    SMILES can alternatively be derived from InChI by running
+    ``derive_smiles_from_inchi``.
+
+    The filter is only run if there is not yet a valid SMILES or InChI entry in
+    the metadata. The annotation is only added if the PubChem result has a
+    monoisotopic mass close enough to the spectrum's ``parent_mass``.
 
     Parameters
     ----------
-    spectrum_in:
-        The input spectrum.
-    annotated_compound_names_file: Optional[str]
-        Any compound name that was searched for on pubchem will be added to this file. If a compound name is already
-        in this file it will be used instead of looking up at pubchem. This file can be reused for future runs, speeding
-        up the process.
-        If None. The compound names found will still be cached for this run, but won't be reusable for future runs.
-        The csv file should contain the columns ["compound_name", "smiles", "inchi", "inchikey", "monoisotopic_mass"]
-    mass_tolerance:
-        Acceptable mass difference between query compound and pubchem result.
-    clone:
-        Optionally clone the Spectrum.
+    spectrum_in
+        Input spectrum or spectra collection.
+    annotated_compound_names_file
+        Optional CSV file used as a persistent cache. Any compound name searched
+        on PubChem will be added to this file. If a compound name is already
+        present in the file, the cached annotation is used instead of querying
+        PubChem again.
+
+        The CSV file should contain the columns ``compound_name``, ``smiles``,
+        ``inchi``, ``inchikey``, and ``monoisotopic_mass``.
+    mass_tolerance
+        Acceptable mass difference between query compound and PubChem result.
+        Default is ``0.1``.
+    clone
+        Optionally clone the input before applying the filter. If ``False``, the
+        input object may be modified in place.
 
     Returns
     -------
-    Spectrum or None
-        Spectrum with added annotation, or `None` if not present.
+    Spectrum, SpectraCollection, or None
+        Input object with added annotation metadata, or ``None`` if the input was
+        ``None``.
     """
-    if spectrum_in is None:
-        return None
+    if is_valid_inchi(as_string_or_none(metadata.get("inchi"))):
+        return {}
 
-    spectrum = spectrum_in.clone() if clone else spectrum_in
+    if is_valid_smiles(as_string_or_none(metadata.get("smiles"))):
+        return {}
 
-    # Only run this function if it does not yet have a useful annotation
-    if is_valid_inchi(spectrum.get("inchi")) or is_valid_smiles(spectrum.get("smiles")):
-        return spectrum
-    compound_name = spectrum.get("compound_name")
-    parent_mass = spectrum.get("parent_mass")
+    compound_name = as_string_or_none(metadata.get("compound_name"))
+    parent_mass = as_float_or_none(metadata.get("parent_mass"))
 
-    if _is_plausible_name(compound_name) and parent_mass is not None:
-        compound_name_annotations = _get_pubchem_compound_name_annotation(compound_name, annotated_compound_names_file)
-        if len(compound_name_annotations) > 0:
-            compound_name_annotation_df = pd.DataFrame(compound_name_annotations)
-            mass_differences = np.abs(compound_name_annotation_df["monoisotopic_mass"] - parent_mass)
-            within_mass_tolerance = compound_name_annotation_df[mass_differences < mass_tolerance]
-            if within_mass_tolerance.shape[0] > 0:
-                # Select the match with the smallest mass difference
-                best_match = compound_name_annotation_df.loc[mass_differences.idxmin()]
-                if is_valid_smiles(best_match["smiles"]):
-                    spectrum.set("smiles", best_match["smiles"])
-                    logger.info("Added smiles %s based on the compound name %s", best_match["smiles"], compound_name)
-                if is_valid_inchi(best_match["inchi"]):
-                    spectrum.set("inchi", best_match["inchi"])
-                    logger.info("Added inchi %s based on the compound name %s", best_match["inchi"], compound_name)
-                if is_valid_inchikey(best_match["inchikey"]):
-                    spectrum.set("inchikey", best_match["inchikey"])
-                    logger.info(
-                        "Added inchikey %s based on the compound name %s", best_match["inchikey"], compound_name
-                    )
-                return spectrum
-    logger.info("Could not find a matching annotation on PubChem for the compound name: %s, compound_name")
-    return spectrum
+    if not _is_plausible_name(compound_name) or parent_mass is None:
+        logger.info(
+            "Could not find a matching annotation on PubChem for the compound name: %s",
+            compound_name,
+        )
+        return {}
+
+    compound_name_annotations = _get_pubchem_compound_name_annotation(
+        compound_name,
+        annotated_compound_names_file,
+    )
+
+    if len(compound_name_annotations) == 0:
+        logger.info(
+            "Could not find a matching annotation on PubChem for the compound name: %s",
+            compound_name,
+        )
+        return {}
+
+    annotation_df = pd.DataFrame(compound_name_annotations)
+    annotation_df["monoisotopic_mass"] = pd.to_numeric(
+        annotation_df["monoisotopic_mass"],
+        errors="coerce",
+    )
+
+    annotation_df = annotation_df.dropna(subset=["monoisotopic_mass"])
+    if annotation_df.empty:
+        logger.info(
+            "Could not find a matching annotation on PubChem for the compound name: %s",
+            compound_name,
+        )
+        return {}
+
+    mass_differences = np.abs(annotation_df["monoisotopic_mass"] - parent_mass)
+    within_mass_tolerance = annotation_df[mass_differences < mass_tolerance]
+
+    if within_mass_tolerance.empty:
+        logger.info(
+            "Could not find a matching annotation on PubChem for the compound name: %s",
+            compound_name,
+        )
+        return {}
+
+    best_match = annotation_df.loc[mass_differences.idxmin()]
+    updates = {}
+
+    smiles = as_string_or_none(best_match.get("smiles"))
+    if is_valid_smiles(smiles):
+        updates["smiles"] = smiles
+        logger.info(
+            "Added smiles %s based on the compound name %s",
+            smiles,
+            compound_name,
+        )
+
+    inchi = as_string_or_none(best_match.get("inchi"))
+    if is_valid_inchi(inchi):
+        updates["inchi"] = inchi
+        logger.info(
+            "Added inchi %s based on the compound name %s",
+            inchi,
+            compound_name,
+        )
+
+    inchikey = as_string_or_none(best_match.get("inchikey"))
+    if is_valid_inchikey(inchikey):
+        updates["inchikey"] = inchikey
+        logger.info(
+            "Added inchikey %s based on the compound name %s",
+            inchikey,
+            compound_name,
+        )
+
+    return updates
 
 
 @cache
 def _get_pubchem_compound_name_annotation(compound_name, csv_file=None) -> list[dict]:
-    """Loads compound name annotation from file or gets it from pubchem any new annotation is added to the file
+    """Load compound-name annotation from file or retrieve it from PubChem.
 
-    functools.cache, makes sure that previously loaded or calculated compound names do not have to be reloaded.
-    This reduces the number of time the csv file has to be loaded from memory.
+    ``functools.cache`` ensures that previously loaded or calculated compound
+    names do not have to be reloaded during the same Python session.
     """
     if csv_file is None:
         return _pubchem_name_search(compound_name)
 
-    # Search in previously annotated compound names
-    annotated_compound_names = _load_compound_name_annotations(csv_file, compound_name)
+    annotated_compound_names = _load_compound_name_annotations(
+        csv_file,
+        compound_name,
+    )
+
+    if annotated_compound_names:
+        return annotated_compound_names
+
+    annotated_compound_names = _pubchem_name_search(compound_name)
+
     if not annotated_compound_names:
-        annotated_compound_names = _pubchem_name_search(compound_name)
-        if not annotated_compound_names:
-            _write_compound_name_annotations(
-                csv_file,
-                [
-                    {
-                        "compound_name": compound_name,
-                        "smiles": None,
-                        "inchi": None,
-                        "inchikey": None,
-                        "monoisotopic_mass": None,
-                    }
-                ],
-            )
-        _write_compound_name_annotations(csv_file, annotated_compound_names)
+        _write_compound_name_annotations(
+            csv_file,
+            [
+                {
+                    "compound_name": compound_name,
+                    "smiles": None,
+                    "inchi": None,
+                    "inchikey": None,
+                    "monoisotopic_mass": None,
+                }
+            ],
+        )
+        return []
+
+    _write_compound_name_annotations(csv_file, annotated_compound_names)
     return annotated_compound_names
 
 
-def _pubchem_name_search(compound_name: str, name_search_depth=10, max_retries=15) -> list[dict]:
-    """Search pubmed for compound name"""
+def _pubchem_name_search(
+    compound_name: str,
+    name_search_depth=10,
+    max_retries=15,
+) -> list[dict]:
+    """Search PubChem for a compound name."""
     retries = 0
     max_delay = 3600
+
     while retries < max_retries:
         try:
-            results_pubchem = pubchempy.get_compounds(compound_name, "name", listkey_count=name_search_depth)
+            results_pubchem = pubchempy.get_compounds(
+                compound_name,
+                "name",
+                listkey_count=name_search_depth,
+            )
+
             if len(results_pubchem) == 0 and "_" in compound_name:
                 results_pubchem = pubchempy.get_compounds(
-                    compound_name.replace("_", " "), "name", listkey_count=name_search_depth
+                    compound_name.replace("_", " "),
+                    "name",
+                    listkey_count=name_search_depth,
                 )
+
             extracted_results = []
-            # extract the needed information:
             for result in results_pubchem:
                 smiles_pubchem = result.smiles
                 if smiles_pubchem is None:
                     smiles_pubchem = result.canonical_smiles
+
                 extracted_results.append(
                     {
                         "compound_name": compound_name,
@@ -146,7 +228,9 @@ def _pubchem_name_search(compound_name: str, name_search_depth=10, max_retries=1
                         "monoisotopic_mass": float(result.monoisotopic_mass),
                     }
                 )
+
             return extracted_results
+
         except (
             pubchempy.ServerError,
             ConnectionError,
@@ -155,30 +239,44 @@ def _pubchem_name_search(compound_name: str, name_search_depth=10, max_retries=1
             URLError,
             TimeoutError,
         ):
-            # keep retrying when an connection error occurs
             retries += 1
             if retries >= max_retries:
                 break
-            delay = 2**retries
-            delay = min(max_delay, delay)
-            print(f"Connection error, trying again, after waiting for {delay} seconds")
+
+            delay = min(max_delay, 2**retries)
+            logger.warning(
+                "Connection error while querying PubChem for %s. "
+                "Retrying after %s seconds.",
+                compound_name,
+                delay,
+            )
             time.sleep(delay)
+
         except json.decoder.JSONDecodeError:
-            logger.warning("Compound name: %s resulted in broken json from pubchem", compound_name)
+            logger.warning(
+                "Compound name: %s resulted in broken json from PubChem",
+                compound_name,
+            )
             return []
+
     logger.error(
-        "Compound name: %s could not be loaded due to a connection error after %s tries ",
+        "Compound name: %s could not be loaded due to a connection error after %s tries",
         compound_name,
         str(max_retries),
     )
     return []
 
 
-def _load_compound_name_annotations(annotated_compound_names_csv, compound_name: str):
-    """Loads in the annotated compound names and checks format"""
+def _load_compound_name_annotations(
+    annotated_compound_names_csv,
+    compound_name: str,
+):
+    """Load annotated compound names from CSV and check the expected format."""
     if not os.path.exists(annotated_compound_names_csv):
         return []
+
     annotated_compound_names = pd.read_csv(annotated_compound_names_csv)
+
     assert list(annotated_compound_names.columns) == [
         "compound_name",
         "smiles",
@@ -186,19 +284,26 @@ def _load_compound_name_annotations(annotated_compound_names_csv, compound_name:
         "inchikey",
         "monoisotopic_mass",
     ], (
-        "The annotated_compound_names_csv file does not have the columns compound_name, smiles, inchi, inchikey, "
-        "monoisotopic_mass"
+        "The annotated_compound_names_csv file does not have the columns "
+        "compound_name, smiles, inchi, inchikey, monoisotopic_mass"
     )
 
-    matches = annotated_compound_names[annotated_compound_names["compound_name"] == compound_name]
+    matches = annotated_compound_names[
+        annotated_compound_names["compound_name"] == compound_name
+    ]
+
     return matches.to_dict("records")
 
 
-def _write_compound_name_annotations(annotated_compound_names_csv, compound_name_annotations: list[dict]):
+def _write_compound_name_annotations(
+    annotated_compound_names_csv,
+    compound_name_annotations: list[dict],
+):
     if not os.path.exists(annotated_compound_names_csv):
         with open(annotated_compound_names_csv, "w", encoding="utf8") as f:
             f.write("compound_name,smiles,inchi,inchikey,monoisotopic_mass\n")
-    with open(annotated_compound_names_csv, "a", encoding="utf-8") as csv_file:
+
+    with open(annotated_compound_names_csv, "a", encoding="utf-8", newline="") as csv_file:
         writer = csv.writer(csv_file)
         for compound_name_annotation in compound_name_annotations:
             writer.writerow(
@@ -213,5 +318,10 @@ def _write_compound_name_annotations(annotated_compound_names_csv, compound_name
 
 
 def _is_plausible_name(compound_name):
-    """Simple check if it can be a compound name."""
+    """Return True if compound_name is a plausible compound name."""
     return isinstance(compound_name, str) and len(compound_name) > 4
+
+
+derive_annotation_from_compound_name = metadata_update_filter(
+    _derive_annotation_from_compound_name
+)
