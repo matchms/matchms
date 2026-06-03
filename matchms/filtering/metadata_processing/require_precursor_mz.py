@@ -1,64 +1,86 @@
 import logging
-from matchms.typing import SpectrumType
+from matchms.filtering._dispatch import metadata_requirement_filter
+from matchms.filtering.filter_utils.metadata_conversions import (
+    as_float_or_none,
+    is_missing_metadata_value,
+)
 
 
 logger = logging.getLogger("matchms")
 
 
-def require_precursor_mz(
-    spectrum_in: SpectrumType,
+def _require_precursor_mz(
+    metadata,
     minimum_accepted_mz: float | None = 10.0,
     maximum_mz: float | None = None,
-    clone: bool | None = True,
-) -> SpectrumType | None:
-    """Returns None if there is no precursor_mz or if <= minimum_accepted_mz
+) -> bool:
+    """Require precursor m/z to be present and within optional bounds.
 
     Parameters
     ----------
-    spectrum_in:
-        Input spectrum.
-    minimum_accepted_mz:
-        Set to minimum acceptable value for precursor m/z. Default is set to 10.0.
-    maximum_mz:
-        Set the maximum value for precursor m/z.
-    clone:
-        Optionally clone the Spectrum.
+    spectrum_in
+        Input spectrum or spectra collection.
+    minimum_accepted_mz
+        Minimum accepted precursor m/z. Default is ``10.0``. Use ``None`` to
+        disable the lower bound.
+    maximum_mz
+        Maximum accepted precursor m/z. Default is ``None``.
+    clone
+        Optionally clone the input before applying the filter. If ``False``,
+        the input object may be modified in place.
 
     Returns
     -------
-    Spectrum or None
-        Spectrum with precursor_mz, or `None` if not present.
+    Spectrum, SpectraCollection, or None
+        Spectrum input is returned unchanged if precursor m/z passes the checks,
+        otherwise ``None``. SpectraCollection input is returned with failing rows
+        removed.
     """
-    if spectrum_in is None:
-        return None
+    precursor_mz = metadata.get("precursor_mz", None)
 
-    spectrum = spectrum_in.clone() if clone else spectrum_in
+    if is_missing_metadata_value(precursor_mz):
+        pepmass = metadata.get("pepmass", None)
 
-    precursor_mz = spectrum.get("precursor_mz", None)
-    if precursor_mz is None:
-        pepmass = spectrum.get("pepmass", None)
-        assert pepmass is None or not isinstance(pepmass[0], (float, int)), (
-            "Found 'pepmass' but no 'precursor_mz'. Consider applying 'add_precursor_mz' filter first."
-        )
-        return None
+        if not is_missing_metadata_value(pepmass):
+            try:
+                pepmass_mz = pepmass[0]
+            except (TypeError, IndexError):
+                pepmass_mz = None
 
-    if not isinstance(precursor_mz, (float, int)):
+            assert not isinstance(pepmass_mz, (float, int)), (
+                "Found 'pepmass' but no 'precursor_mz'. Consider applying "
+                "'add_precursor_mz' filter first."
+            )
+
+        return False
+
+    precursor_mz_float = as_float_or_none(precursor_mz)
+
+    if precursor_mz_float is None:
         logger.warning(
-            "Precursor mz was not a number (%s) consider applying 'add_precursor_mz' filter first", precursor_mz
+            "Precursor mz was not a number (%s) consider applying "
+            "'add_precursor_mz' filter first",
+            precursor_mz,
         )
-        return None
-    if minimum_accepted_mz is not None:
-        if precursor_mz < minimum_accepted_mz:
-            logger.info(
-                "Spectrum is removed since precursor mz (%s) was below minimum mz (%s)",
-                precursor_mz,
-                minimum_accepted_mz,
-            )
-            return None
-    if maximum_mz is not None:
-        if precursor_mz > maximum_mz:
-            logger.info(
-                "Spectrum is removed since precursor mz (%s) was above maximum mz (%s)", precursor_mz, maximum_mz
-            )
-            return None
-    return spectrum
+        return False
+
+    if minimum_accepted_mz is not None and precursor_mz_float < minimum_accepted_mz:
+        logger.info(
+            "Spectrum is removed since precursor mz (%s) was below minimum mz (%s)",
+            precursor_mz_float,
+            minimum_accepted_mz,
+        )
+        return False
+
+    if maximum_mz is not None and precursor_mz_float > maximum_mz:
+        logger.info(
+            "Spectrum is removed since precursor mz (%s) was above maximum mz (%s)",
+            precursor_mz_float,
+            maximum_mz,
+        )
+        return False
+
+    return True
+
+
+require_precursor_mz = metadata_requirement_filter(_require_precursor_mz)
