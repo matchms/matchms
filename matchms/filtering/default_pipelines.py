@@ -1,6 +1,5 @@
 """Stores sets of filters for easy pipeline creation."""
 
-import matchms.filtering.metadata_processing.require_precursor_mz
 from matchms import filtering as msfilters
 
 
