@@ -22,6 +22,10 @@ def _is_spectra_collection(obj) -> bool:
     return isinstance(obj, _get_spectra_collection_type())
 
 
+# ----------------------------------
+# Public filter factories
+# 1. General purpose collection_filter for filters with separate spectrum and collection implementations.
+# ----------------------------------
 def collection_filter(
     spectrum_impl: Callable,
     collection_impl: Callable | None = None,
@@ -88,6 +92,10 @@ def collection_filter(
 
     return wrapper
 
+
+# ----------------------------------
+# 2. metadata_update_filter for filters that only update metadata and do not drop spectra.
+# ----------------------------------
 
 def _metadata_filter_signature(metadata_impl: Callable) -> inspect.Signature:
     """Build the public Spectrum-style signature for a metadata-update filter.
@@ -202,6 +210,106 @@ def metadata_update_filter(
     # Set metadata on both functions. The final public_filter is what users and
     # SpectrumProcessor normally see, but setting spectrum_impl as well makes
     # debugging and potential internal checks less surprising.
+    spectrum_impl.__name__ = public_name
+    spectrum_impl.__doc__ = metadata_impl.__doc__
+    spectrum_impl.__signature__ = public_signature
+
+    public_filter.__name__ = public_name
+    public_filter.__doc__ = metadata_impl.__doc__
+    public_filter.__signature__ = public_signature
+
+    return public_filter
+
+
+#----------------------------------
+# 3. Factory for require-type filters that drop spectra/rows based on metadata requirements.
+#----------------------------------
+def _metadata_requirement_signature(metadata_impl: Callable) -> inspect.Signature:
+    """Build the public Spectrum-style signature for a metadata requirement filter."""
+    metadata_signature = inspect.signature(metadata_impl)
+    metadata_parameters = list(metadata_signature.parameters.values())
+
+    if not metadata_parameters:
+        raise ValueError(
+            f"Metadata requirement filter {metadata_impl.__name__} must accept "
+            "metadata as its first parameter."
+        )
+
+    public_parameters = [
+        inspect.Parameter(
+            "spectrum_in",
+            kind=inspect.Parameter.POSITIONAL_OR_KEYWORD,
+        )
+    ]
+
+    for parameter in metadata_parameters[1:]:
+        if parameter.kind in (
+            inspect.Parameter.VAR_POSITIONAL,
+            inspect.Parameter.VAR_KEYWORD,
+        ):
+            raise ValueError(
+                f"Metadata requirement filter {metadata_impl.__name__} must not "
+                "define *args or **kwargs. Use explicit parameters instead."
+            )
+
+        if parameter.name == "clone":
+            raise ValueError(
+                f"Metadata requirement filter {metadata_impl.__name__} must not "
+                "define a 'clone' parameter. Cloning is handled by the factory."
+            )
+
+        public_parameters.append(parameter)
+
+
+    return inspect.Signature(
+        parameters=public_parameters,
+        return_annotation=metadata_signature.return_annotation,
+    )
+
+
+def metadata_requirement_filter(metadata_impl: Callable):
+    """Create a Spectrum/SpectraCollection requirement filter from metadata logic.
+
+    The wrapped metadata function receives one metadata mapping and returns
+    ``True`` if the spectrum/row should be kept and ``False`` if it should be
+    removed.
+
+    For Spectrum input, failed requirements return ``None``.
+    For SpectraCollection input, failed rows are dropped from metadata and
+    fragments.
+    """
+
+    def spectrum_impl(spectrum_in, *args, clone: bool | None = True, **kwargs):
+        if spectrum_in is None:
+            return None
+
+        keep = metadata_impl(spectrum_in.metadata, *args, **kwargs)
+        if not keep:
+            return None
+
+        return spectrum_in.clone() if clone else spectrum_in
+
+    def collection_impl(collection, *args, clone: bool | None = True, **kwargs):
+        target = collection.copy() if clone else collection
+
+        metadata = target.metadata
+
+        keep_mask = metadata.apply(
+            lambda row: bool(metadata_impl(row, *args, **kwargs)),
+            axis=1,
+        ).values
+
+        target.filter(keep_mask, inplace=True)
+        return target
+
+    public_filter = collection_filter(
+        spectrum_impl,
+        collection_impl=collection_impl,
+    )
+
+    public_name = metadata_impl.__name__.removeprefix("_")
+    public_signature = _metadata_requirement_signature(metadata_impl)
+
     spectrum_impl.__name__ = public_name
     spectrum_impl.__doc__ = metadata_impl.__doc__
     spectrum_impl.__signature__ = public_signature
