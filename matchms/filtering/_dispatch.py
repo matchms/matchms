@@ -279,7 +279,7 @@ def metadata_requirement_filter(metadata_impl: Callable):
     fragments.
     """
 
-    def spectrum_impl(spectrum_in, *args, clone: bool | None = True, **kwargs):
+    def spectrum_impl(spectrum_in, *args, **kwargs):
         if spectrum_in is None:
             return None
 
@@ -287,7 +287,7 @@ def metadata_requirement_filter(metadata_impl: Callable):
         if not keep:
             return None
 
-        return spectrum_in.clone() if clone else spectrum_in
+        return spectrum_in
 
     def collection_impl(collection, *args, clone: bool | None = True, **kwargs):
         target = collection.copy() if clone else collection
