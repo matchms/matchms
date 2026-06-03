@@ -98,7 +98,7 @@ SpectraCollection
 ``SpectraCollection`` represents many spectra in a synchronized tabular/sparse
 layout. It separates dataset-level storage into:
 
-- ``MetadataTable``: a pandas-based table where each row corresponds to one
+- ``MetadataCollection``: a pandas-based table where each row corresponds to one
   spectrum.
 - ``FragmentCollection``: a backend for storing all fragment peaks. The default
   backend is ``CSRFragmentCollection``, which stores peaks in a sparse matrix
@@ -170,7 +170,7 @@ For ``Spectrum`` inputs, filters return either a modified ``Spectrum`` or
 ``None`` if the spectrum should be removed.
 
 For ``SpectraCollection`` inputs, filters operate on the full collection. Filters
-that remove spectra drop the corresponding rows from both ``MetadataTable`` and
+that remove spectra drop the corresponding rows from both ``MetadataCollection`` and
 ``FragmentCollection``. If all spectra are removed, the filter may return
 ``None``.
 
@@ -274,7 +274,7 @@ Example: collection-first workflow
 
 This workflow avoids repeatedly converting a full dataset into lists of
 ``Spectrum`` objects. Filters with native collection implementations can operate
-directly on ``MetadataTable`` or ``FragmentCollection``.
+directly on ``MetadataCollection`` or ``FragmentCollection``.
 
 
 Metadata handling
@@ -288,7 +288,7 @@ keys are harmonized to matchms-style names, for example:
     "Precursor MZ" -> "precursor_mz"
     "Compound Name" -> "compound_name"
 
-For collections, metadata is stored in ``MetadataTable``, a pandas-based table.
+For collections, metadata is stored in ``MetadataCollection``, a pandas-based table.
 Column names can be harmonized using the same matchms key conventions.
 
 .. code-block:: python
@@ -516,7 +516,7 @@ only on peak arrays should usually get a native collection implementation.
 
 General recommendations:
 
-- Metadata-only filters should operate on ``MetadataTable``.
+- Metadata-only filters should operate on ``MetadataCollection``.
 - Peak-only filters should operate on ``FragmentCollection``.
 - Filters that drop spectra should return ``None`` for failing ``Spectrum``
   inputs and should drop rows for ``SpectraCollection`` inputs.
