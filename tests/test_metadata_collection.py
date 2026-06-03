@@ -3,8 +3,8 @@ import pandas as pd
 import pytest
 from matchms import SpectraCollection
 from matchms.MetadataCollection import (
-    harmonize_metadata_column_name,
     harmonize_metadata_collection_columns,
+    harmonize_metadata_column_name,
 )
 from tests.builder_Spectrum import SpectrumBuilder
 
