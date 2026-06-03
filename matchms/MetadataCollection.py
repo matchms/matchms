@@ -41,7 +41,7 @@ def harmonize_metadata_column_name(column_name: str) -> str:
     return column_name
 
 
-def harmonize_metadata_table_columns(metadata: pd.DataFrame) -> pd.DataFrame:
+def harmonize_metadata_collection_columns(metadata: pd.DataFrame) -> pd.DataFrame:
     """Return DataFrame with harmonized metadata column names.
 
     If multiple columns map to the same harmonized column name, values are
@@ -82,7 +82,7 @@ def harmonize_metadata_table_columns(metadata: pd.DataFrame) -> pd.DataFrame:
     return harmonized
 
 
-class MetadataTable(pd.DataFrame):
+class MetadataCollection(pd.DataFrame):
     """
     Metadata proxy class.
     Used for filter directly on metadata and synchronize fragments.
@@ -97,7 +97,7 @@ class MetadataTable(pd.DataFrame):
     @property
     def _constructor(self):
         def _c(*args, **kwargs):
-            return MetadataTable(*args, collection=self._collection, **kwargs)
+            return MetadataCollection(*args, collection=self._collection, **kwargs)
 
         return _c
 
@@ -107,7 +107,7 @@ class MetadataTable(pd.DataFrame):
 
     def harmonize_columns(self, inplace: bool = False):
         """Harmonize metadata columns to matchms key style."""
-        harmonized = harmonize_metadata_table_columns(self)
+        harmonized = harmonize_metadata_collection_columns(self)
 
         if inplace:
             self.drop(columns=list(self.columns), inplace=True)
@@ -120,7 +120,7 @@ class MetadataTable(pd.DataFrame):
 
             return None
 
-        return MetadataTable(harmonized, collection=self._collection)
+        return MetadataCollection(harmonized, collection=self._collection)
 
     def apply_to_rows(
         self,
@@ -147,8 +147,8 @@ class MetadataTable(pd.DataFrame):
         Parameters
         ----------
         func
-            Function that receives a ``MetadataTable`` or ``DataFrame`` subset as
-            first argument and returns a ``DataFrame``/``MetadataTable`` or ``None``.
+            Function that receives a ``MetadataCollection`` or ``DataFrame`` subset as
+            first argument and returns a ``DataFrame``/``MetadataCollection`` or ``None``.
         *args
             Positional arguments passed to ``func``.
         row_mask
@@ -156,7 +156,7 @@ class MetadataTable(pd.DataFrame):
             directly to ``func``.
         inplace
             If True, update the bound collection metadata in place and return
-            ``None``. If False, return a new ``MetadataTable``.
+            ``None``. If False, return a new ``MetadataCollection``.
         drop_missing_updates
             If True, missing values in the DataFrame returned by ``func`` are treated
             as "no update" and do not overwrite existing metadata values. If False,
@@ -167,7 +167,7 @@ class MetadataTable(pd.DataFrame):
 
         Returns
         -------
-        MetadataTable or None
+        MetadataCollection or None
             Updated metadata table if ``inplace=False``. Otherwise ``None``.
         """
         target = pd.DataFrame(self).copy()
@@ -294,4 +294,4 @@ class MetadataTable(pd.DataFrame):
 
             return None
 
-        return MetadataTable(target, collection=self._collection)
+        return MetadataCollection(target, collection=self._collection)
