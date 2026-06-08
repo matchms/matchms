@@ -116,7 +116,7 @@ Installation
 
 Prerequisites:  
 
-- Python 3.10 - 3.13, (higher versions should work as well, but are not yet tested systematically)
+- Python 3.10 - 3.14, (higher versions should work as well, but are not yet tested systematically)
 - Anaconda (recommended)
 
 We recommend installing matchms in a new virtual environment to avoid dependency clashes
@@ -321,11 +321,11 @@ To install matchms, do:
   git clone https://github.com/matchms/matchms.git
   cd matchms
   # Create environment using conda
-  conda create --name matchms-dev python=3.13
+  conda create --name matchms-dev python=3.14
   conda activate matchms-dev
 
   # Create environment using uv
-  uv venv --python 3.13
+  uv venv --python 3.14
 
   # If you use uv
   uv sync --group dev
