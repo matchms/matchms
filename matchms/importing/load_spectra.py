@@ -45,7 +45,7 @@ def load_spectra(
     """
     assert os.path.exists(file), f"The specified file: {file} does not exists"
 
-    if ftype is None:
+    if ftype is None or ftype == "auto":
         ftype = os.path.splitext(file)[1].lower()[1:]
     else:
         ftype = ftype.lower()
