@@ -7,7 +7,6 @@ from ..utils import (
     filter_empty_spectra,
     fingerprint_export_warning,
     load_export_key_conversions,
-    rename_deprecated_params,
 )
 
 
@@ -15,7 +14,6 @@ logger = logging.getLogger("matchms")
 _extensions_not_allowed = ["mzml", "mzxml", "json", "mgf"]
 
 
-@rename_deprecated_params(param_mapping={"spectrums": "spectra"}, version="0.26.5")
 def save_as_msp(
     spectra: list[Spectrum],
     filename: str,

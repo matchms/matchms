@@ -1,13 +1,12 @@
 import logging
 import pyteomics.mgf as py_mgf
 from ..Spectrum import Spectrum
-from ..utils import filter_empty_spectra, fingerprint_export_warning, rename_deprecated_params
+from ..utils import filter_empty_spectra, fingerprint_export_warning
 
 
 logger = logging.getLogger("matchms")
 
 
-@rename_deprecated_params(param_mapping={"spectrums": "spectra"}, version="0.26.5")
 def save_as_mgf(
     spectra: list[Spectrum] | Spectrum,
     filename: str,
