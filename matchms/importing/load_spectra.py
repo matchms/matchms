@@ -9,25 +9,39 @@ from matchms.importing import (
     load_from_mzxml,
     load_from_pickle,
 )
+from matchms.SpectraCollection import SpectraCollection
 from matchms.Spectrum import Spectrum
 
 
 def load_spectra(
-    file: str, metadata_harmonization: bool = True, ftype: str | None = None
+    file: str,
+    metadata_harmonization: bool = True,
+    ftype: str | None = "auto",
 ) -> list[Spectrum] | Generator[Spectrum, None, None]:
-    """Loads spectra from your spectrum file into memory as matchms Spectrum object
+    """Load spectra from a file as matchms Spectrum objects.
 
-    The following file extensions can be loaded in with this function:
-    "mzML", "json", "mgf", "msp", "mzxml", "usi" and "pickle".
-    A pickled file is expected to directly contain a list of matchms spectrum objects.
+    The following file extensions can be loaded with this function:
+    ``mzML``, ``json``, ``mgf``, ``msp``, ``mzxml`` and ``pickle``.
 
-    Args:
-    -----
-    file:
-        Path to file containing spectra, with file extension "mzML", "json", "mgf", "msp",
-        "mzxml" or "pickle"
-    ftype:
-        Optional. Filetype
+    A pickled file is expected to directly contain a list of matchms Spectrum
+    objects.
+
+    Parameters
+    ----------
+    file
+        Path to file containing spectra.
+    metadata_harmonization
+        If True, harmonize metadata during import.
+    ftype
+        File type to use for import. By default, ``"auto"`` guesses the file
+        type from the file extension. Alternatively, pass an explicit file type,
+        for example ``"mzml"``, ``"json"``, ``"mgf"``, ``"msp"``, ``"mzxml"``,
+        or ``"pickle"``.
+
+    Returns
+    -------
+    list[Spectrum] or Generator[Spectrum, None, None]
+        Imported spectra.
     """
     assert os.path.exists(file), f"The specified file: {file} does not exists"
 
@@ -50,6 +64,39 @@ def load_spectra(
         return load_from_pickle(file, metadata_harmonization)
 
     raise TypeError(f"File extension of file: {file} is not recognized")
+
+
+def load_ms2_dataset(
+    file: str,
+    metadata_harmonization: bool = True,
+    ftype: str = "auto",
+) -> SpectraCollection:
+    """Load spectra from a file as a SpectraCollection.
+
+    Parameters
+    ----------
+    file
+        Path to file containing spectra.
+    metadata_harmonization
+        If True, harmonize metadata during import.
+    ftype
+        File type to use for import. By default, ``"auto"`` guesses the file
+        type from the file extension. Alternatively, pass an explicit file type,
+        for example ``"mzml"``, ``"json"``, ``"mgf"``, ``"msp"``, ``"mzxml"``,
+        or ``"pickle"``.
+
+    Returns
+    -------
+    SpectraCollection
+        Imported spectra as a collection.
+    """
+    return SpectraCollection(
+        load_spectra(
+            file,
+            metadata_harmonization=metadata_harmonization,
+            ftype=ftype,
+        )
+    )
 
 
 def load_list_of_spectrum_files(
