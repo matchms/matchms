@@ -31,7 +31,10 @@ STANDARDIZED_SPECTRUM_ATTRIBUTES = {
 }
 
 
-def save_as_mzspeclib(spectra: list[Spectrum], filename: str) -> None:
+def save_as_mzspeclib(
+    spectra: list[Spectrum],
+    filename: str
+) -> None:
     """
     Save a list of spectra to a file in mzSpecLib format.
 
@@ -43,6 +46,7 @@ def save_as_mzspeclib(spectra: list[Spectrum], filename: str) -> None:
         _write_header(filename, file)
         for idx, spectrum in enumerate(spectra):
             _write_spectrum(file, idx, spectrum)
+
 
 def _write_spectrum(file: TextIO, idx: int, spectrum: Spectrum) -> None:
     """
@@ -60,6 +64,7 @@ def _write_spectrum(file: TextIO, idx: int, spectrum: Spectrum) -> None:
     _write_peaks(file, spectrum)
     print("", file=file)
 
+
 def _write_analyte(file: TextIO, spectrum: Spectrum) -> None:
     """
     Write analyte information for a spectrum to the file.
@@ -73,6 +78,7 @@ def _write_analyte(file: TextIO, spectrum: Spectrum) -> None:
         value = spectrum.get(key)
         if value is not None:
             print(f"{attribute}={value}", file=file)
+
 
 def _write_spectrum_attributes(file: TextIO, spectrum: Spectrum) -> None:
     """
@@ -97,6 +103,7 @@ def _write_spectrum_attributes(file: TextIO, spectrum: Spectrum) -> None:
 
     print(f"MS:1003059|number of peaks={len(spectrum.peaks)}", file=file)
 
+
 def _write_other_spectrum_attribute(file: TextIO, spectrum: Spectrum, attr_counter: int, attr: str) -> None:
     """
     Write other spectrum attributes to the file.
@@ -110,6 +117,7 @@ def _write_other_spectrum_attribute(file: TextIO, spectrum: Spectrum, attr_count
     value = spectrum.get(attr)
     print(f"[{attr_counter}]MS:1003275|other attribute name={attr}", file=file)
     print(f"[{attr_counter}]MS:1003276|other attribute value={value}", file=file)
+
 
 def _write_spectrum_attribute_with_unit(file: TextIO, spectrum: Spectrum, attr_counter: int, attr: str) -> None:
     """
@@ -127,6 +135,7 @@ def _write_spectrum_attribute_with_unit(file: TextIO, spectrum: Spectrum, attr_c
     print(f"[{attr_counter}]{term}={value}", file=file)
     print(f"[{attr_counter}]UO:0000000|unit={unit}", file=file)
 
+
 def _extract_numeric_value(value: str) -> str:
     """
     Extract numeric value from a string.
@@ -139,6 +148,7 @@ def _extract_numeric_value(value: str) -> str:
     """
     value = re.findall("[\\d]+[.,\\d]+|[\\d]*[.][\\d]+|[\\d]+", value)[0]
     return value
+
 
 def _write_defined_spectrum_attributes(file: TextIO, spectrum: Spectrum) -> None:
     """
@@ -154,6 +164,7 @@ def _write_defined_spectrum_attributes(file: TextIO, spectrum: Spectrum) -> None
             value = MAPPED_SPECTRUM_ATTRIBUTES[attribute].get(value)        
         if value is not None:
             print(f"{attribute}={value}", file=file)
+
 
 def _write_peaks(file: TextIO, spectrum: Spectrum) -> None:
     """
@@ -171,6 +182,7 @@ def _write_peaks(file: TextIO, spectrum: Spectrum) -> None:
         comment = peak_comments.get(mz, "?")
         print(f"{mz}\t{intensities}\t{comment}", file=file)
 
+
 def _has_analyte(spectrum: Spectrum) -> bool:
     """
     Check if a spectrum has analyte information.
@@ -182,6 +194,7 @@ def _has_analyte(spectrum: Spectrum) -> bool:
     bool: True if the spectrum has analyte information, False otherwise.
     """
     return any(spectrum.get(key) for key in ANALYTE_ATTRIBUTES)
+
 
 def _write_header(filename: str, file: TextIO) -> None:
     """
