@@ -1,13 +1,18 @@
-from __future__ import annotations
+import logging
+import os
 from collections.abc import Generator
 from functools import cached_property
 import numpy as np
 import pandas as pd
+from matchms.exporting import save_as_json, save_as_mgf, save_as_msp
 from matchms.MetadataCollection import MetadataCollection, harmonize_metadata_collection_columns
 from matchms.Spectrum import Spectrum
 from .FragmentCollection import CSRFragmentCollection, FragmentCollection
 from .hashing import compute_combined_hashes
 from .typing import SpectraCollectionType
+
+
+logger = logging.getLogger("matchms")
 
 
 class SpectraCollection:
@@ -503,6 +508,95 @@ class SpectraCollection:
             The mz values at the center of specified bins.
         """
         return self._fragments.bin_to_mz(bin_idx)
+
+    def to_json(
+        self,
+        file: str,
+        export_style: str = "matchms",
+        append: bool = False,
+    ) -> None:
+        """Export the spectra collection to a JSON file.
+
+        Parameters
+        ----------
+        file
+            Path to the output file.
+        export_style
+            Metadata key style used during export. One of ``"matchms"``,
+            ``"massbank"``, ``"nist"``, ``"riken"``, or ``"gnps"``.
+            Default is ``"matchms"``.
+        append
+            JSON export does not support appending. If ``True``, a
+            ``ValueError`` is raised.
+        """
+        self._check_export_file(file, append=append, allowed_append_types=())
+
+        if append:
+            raise ValueError("Appending is not supported for JSON export.")
+
+        save_as_json(list(self), file, export_style)
+
+    def to_mgf(
+        self,
+        file: str,
+        export_style: str = "matchms",
+        append: bool = False,
+    ) -> None:
+        """Export the spectra collection to an MGF file.
+
+        Parameters
+        ----------
+        file
+            Path to the output file.
+        export_style
+            Metadata key style used during export. One of ``"matchms"``,
+            ``"massbank"``, ``"nist"``, ``"riken"``, or ``"gnps"``.
+            Default is ``"matchms"``.
+        append
+            If ``True``, append to an existing file. Default is ``False``.
+        """
+        self._check_export_file(file, append=append, allowed_append_types=("mgf",))
+
+        save_as_mgf(list(self), file, export_style)
+
+    def to_msp(
+        self,
+        file: str,
+        export_style: str = "matchms",
+        append: bool = False,
+    ) -> None:
+        """Export the spectra collection to an MSP file.
+
+        Parameters
+        ----------
+        file
+            Path to the output file.
+        export_style
+            Metadata key style used during export. One of ``"matchms"``,
+            ``"massbank"``, ``"nist"``, ``"riken"``, or ``"gnps"``.
+            Default is ``"matchms"``.
+        append
+            If ``True``, append to an existing file. Default is ``False``.
+        """
+        self._check_export_file(file, append=append, allowed_append_types=("msp",))
+
+        mode = "a" if append else "w"
+        save_as_msp(list(self), file, style=export_style, mode=mode)
+
+    @staticmethod
+    def _check_export_file(
+        file: str,
+        append: bool,
+        allowed_append_types: tuple[str, ...],
+    ) -> None:
+        """Validate output file path and append settings."""
+        ftype = os.path.splitext(file)[1].lower()[1:]
+
+        if os.path.exists(file) and not append:
+            raise FileExistsError(f"The specified file: {file} already exists.")
+
+        if append and ftype not in allowed_append_types:
+            raise ValueError(f"{ftype} isn't supported for when `append` is True")
 
     def describe(self) -> pd.DataFrame:
         """
