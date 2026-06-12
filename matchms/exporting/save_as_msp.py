@@ -7,7 +7,6 @@ from ..utils import (
     filter_empty_spectra,
     fingerprint_export_warning,
     load_export_key_conversions,
-    rename_deprecated_params,
 )
 
 
@@ -15,12 +14,11 @@ logger = logging.getLogger("matchms")
 _extensions_not_allowed = ["mzml", "mzxml", "json", "mgf"]
 
 
-@rename_deprecated_params(param_mapping={"spectrums": "spectra"}, version="0.26.5")
 def save_as_msp(
     spectra: list[Spectrum],
     filename: str,
     write_peak_comments: bool = True,
-    mode: str = "a",
+    file_mode: str = "a",
     style: str = "matchms",
     peak_sep: str = "\t"
 ):
@@ -35,11 +33,15 @@ def save_as_msp(
         from matchms.exporting import save_as_msp
 
         # Create dummy spectrum
-        spectrum = Spectrum(mz=np.array([100, 200, 300], dtype="float"),
-                            intensities=np.array([10, 10, 500], dtype="float"),
-                            metadata={"charge": -1,
-                                      "inchi": '"InChI=1S/C6H12"',
-                                      "precursor_mz": 222.2})
+        spectrum = Spectrum(
+            mz=np.array([100, 200, 300], dtype="float"),
+            intensities=np.array([10, 10, 500], dtype="float"),
+            metadata={
+                "charge": -1,
+                "inchi": '"InChI=1S/C6H12"',
+                "precursor_mz": 222.2
+            }
+        )
 
         # Write spectrum to test file
         save_as_msp(spectrum, "test.msp")
@@ -53,7 +55,7 @@ def save_as_msp(
     write_peak_comments:
         Writes peak comments to individual peaks after the respective mz/intensity pair
         when set to True. Default is True.
-    mode:
+    file_mode:
         Mode on how to write to file. One of ["w", "a"] (write/append). Default is append.
     style:
         Converts the keys to required Export style. One of ["massbank", "nist", "riken", "gnps"].
@@ -61,7 +63,6 @@ def save_as_msp(
     peak_sep:
         Separator to use for writing the msp file.
     """
-    # pylint: disable=too-many-arguments
     if not isinstance(spectra, list):
         # Assume that input was a single Spectrum.
         spectra = [spectra]
@@ -79,7 +80,7 @@ def save_as_msp(
             filename.split(".")[-1],
         )
 
-    with open(filename, mode, encoding="utf-8") as outfile:
+    with open(filename, file_mode, encoding="utf-8") as outfile:
         for spectrum in spectra:
             _write_spectrum(spectrum, outfile, write_peak_comments, style, peak_sep)
 

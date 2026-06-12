@@ -3,13 +3,12 @@ import os
 import pickle
 from matchms.exporting import save_as_json, save_as_mgf, save_as_msp
 from matchms.Spectrum import Spectrum
-from matchms.utils import filter_empty_spectra, rename_deprecated_params
+from matchms.utils import filter_empty_spectra
 
 
 logger = logging.getLogger("matchms")
 
 
-@rename_deprecated_params(param_mapping={"spectrums": "spectra"}, version="0.26.5")
 def save_spectra(
     spectra: list[Spectrum],
     file: str,
@@ -52,9 +51,11 @@ def save_spectra(
     if ftype == "json":
         save_as_json(spectra, file, export_style)
     elif ftype == "mgf":
-        save_as_mgf(spectra, file, export_style)
+        file_mode = "a" if append else "w"
+        save_as_mgf(spectra, file, export_style, file_mode=file_mode)
     elif ftype == "msp":
-        save_as_msp(spectra, file, style=export_style, mode="a")
+        file_mode = "a" if append else "w"
+        save_as_msp(spectra, file, style=export_style, file_mode=file_mode)
     elif ftype == "pickle":
         if export_style != "matchms":
             logger.error(

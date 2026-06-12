@@ -161,8 +161,8 @@ def test_num_peaks_last_metadata_field(filename, data):
 @pytest.mark.parametrize("test_file", ["MoNA-export-GC-MS-first10.msp", "massbank_five_spectra.msp"])
 def test_write_append(test_file, filename):
     expected = load_test_spectra_file(test_file)
-    save_as_msp(expected[:2], filename, mode = "a")
-    save_as_msp(expected[2:], filename, mode = "a")
+    save_as_msp(expected[:2], filename, file_mode = "a")
+    save_as_msp(expected[2:], filename, file_mode = "a")
 
     actual = list(load_from_msp(filename))
 
@@ -174,7 +174,7 @@ def test_write_append(test_file, filename):
 def test_save_as_msp_export_style(test_file, expected_file, style, filename):
     expected = load_test_spectra_file(expected_file)
     data = load_test_spectra_file(test_file)
-    save_as_msp(data, filename, mode="w", style=style)
+    save_as_msp(data, filename, file_mode="w", style=style)
     actual = list(load_from_msp(filename))
     assert expected == actual
 
@@ -185,7 +185,7 @@ def test_save_as_msp_from_mgf(test_file, expected_file, filename):
     spectra_file = os.path.join(module_root, "testdata", test_file)
     actual = list(load_from_mgf(spectra_file))
     expected = load_test_spectra_file(expected_file)
-    save_as_msp(actual, filename, mode="w", write_peak_comments=True)
+    save_as_msp(actual, filename, file_mode="w", write_peak_comments=True)
     actual = list(load_from_msp(filename))
     assert expected == actual
 

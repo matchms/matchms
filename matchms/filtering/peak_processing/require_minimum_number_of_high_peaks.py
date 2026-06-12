@@ -83,7 +83,9 @@ def _require_minimum_number_of_high_peaks_collection(
     """Drop spectra with fewer than no_peaks high relative-intensity peaks."""
     _validate_minimum_high_peaks_parameters(no_peaks, intensity_percent)
 
-    high_peak_counts = spectrum_in.fragments.count_peaks_above_relative_intensity(
+    target = spectrum_in.copy() if clone else spectrum_in
+
+    high_peak_counts = target.fragments.count_peaks_above_relative_intensity(
         intensity_from=intensity_percent / 100,
     )
 
@@ -92,7 +94,8 @@ def _require_minimum_number_of_high_peaks_collection(
     if not keep_mask.any():
         return None
 
-    return spectrum_in.filter(keep_mask, inplace=not clone)
+    target.filter(keep_mask, inplace=True)
+    return target
 
 
 require_minimum_number_of_high_peaks = collection_filter(

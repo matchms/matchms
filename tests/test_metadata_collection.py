@@ -3,6 +3,7 @@ import pandas as pd
 import pytest
 from matchms import SpectraCollection
 from matchms.MetadataCollection import (
+    MetadataCollection,
     harmonize_metadata_collection_columns,
     harmonize_metadata_column_name,
 )
@@ -160,3 +161,25 @@ def test_metadata_apply_to_rows_without_mask_updates_all_rows():
     result = collection.metadata.apply_to_rows(update_all_rows)
 
     assert result["value"].tolist() == [10, 20]
+
+
+def test_row_to_dict_converts_missing_and_numpy_scalars():
+    row = pd.Series(
+        {
+            "scan_number": np.int64(0),
+            "precursor_mz": np.float64(123.4),
+            "ionmode": np.nan,
+            "compound_name": "test",
+        }
+    )
+
+    metadata = MetadataCollection.row_to_dict(row)
+
+    assert metadata == {
+        "scan_number": 0,
+        "precursor_mz": 123.4,
+        "ionmode": None,
+        "compound_name": "test",
+    }
+    assert isinstance(metadata["scan_number"], int)
+    assert isinstance(metadata["precursor_mz"], float)

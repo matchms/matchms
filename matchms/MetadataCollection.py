@@ -2,7 +2,10 @@ import logging
 import re
 import numpy as np
 import pandas as pd
-from matchms.filtering.filter_utils.metadata_conversions import NO_METADATA_UPDATE
+from matchms.filtering.filter_utils.metadata_conversions import (
+    NO_METADATA_UPDATE,
+    is_missing_metadata_value,
+)
 from .utils import load_known_key_conversions
 
 
@@ -26,6 +29,17 @@ def _needs_object_dtype(target_column: pd.Series, values: pd.Series) -> bool:
         return not pd.api.types.is_numeric_dtype(values.dtype)
 
     return True
+
+
+def _to_python_metadata_value(value):
+    """Convert pandas/numpy metadata values to JSON-friendly Python values."""
+    if is_missing_metadata_value(value):
+        return None
+
+    if isinstance(value, np.generic):
+        return value.item()
+
+    return value
 
 
 def harmonize_metadata_column_name(column_name: str) -> str:
@@ -211,6 +225,21 @@ class MetadataCollection(pd.DataFrame):
         )
 
         return self._finalize_apply_to_rows(target, inplace=inplace)
+
+
+    @staticmethod
+    def row_to_dict(row: pd.Series) -> dict:
+        """Convert a metadata row to a plain Python metadata dict.
+
+        Pandas missing values such as ``NaN`` and ``pd.NA`` are converted to
+        ``None``. NumPy scalar values such as ``np.int64`` and ``np.float64`` are
+        converted to native Python scalars so reconstructed Spectrum objects can
+        be exported to JSON.
+        """
+        return {
+            key: _to_python_metadata_value(value)
+            for key, value in row.items()
+        }
 
 
     def _validate_metadata_updates(
