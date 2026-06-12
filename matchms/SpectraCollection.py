@@ -154,7 +154,7 @@ class SpectraCollection:
         return Spectrum(
             mz=mz,
             intensities=intensities,
-            metadata=self._metadata.iloc[int(idx)].to_dict(),
+            metadata=MetadataCollection.row_to_dict(self._metadata.iloc[int(idx)]),
             metadata_harmonization=False,
         )
 
@@ -174,7 +174,7 @@ class SpectraCollection:
                 return Spectrum(
                     mz=mz,
                     intensities=intensities,
-                    metadata=self._metadata.iloc[row_idx].to_dict(),
+                    metadata=MetadataCollection.row_to_dict(self._metadata.iloc[row_idx]),
                     metadata_harmonization=False,
                 )
 
@@ -557,7 +557,8 @@ class SpectraCollection:
         """
         self._check_export_file(file, append=append, allowed_append_types=("mgf",))
 
-        save_as_mgf(list(self), file, export_style)
+        mode = "a" if append else "w"
+        save_as_mgf(list(self), file, export_style, file_mode=mode)
 
     def to_msp(
         self,
@@ -581,7 +582,7 @@ class SpectraCollection:
         self._check_export_file(file, append=append, allowed_append_types=("msp",))
 
         mode = "a" if append else "w"
-        save_as_msp(list(self), file, style=export_style, mode=mode)
+        save_as_msp(list(self), file, style=export_style, file_mode=mode)
 
     @staticmethod
     def _check_export_file(
