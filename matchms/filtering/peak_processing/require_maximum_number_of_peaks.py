@@ -56,13 +56,16 @@ def _require_maximum_number_of_peaks_collection(
     clone: bool | None = True,
 ) -> SpectraCollection | None:
     """Drop spectra with more peaks than maximum_number_of_fragments."""
-    peak_counts = spectrum_in.fragments.count(axis=1)
+    target = spectrum_in.copy() if clone else spectrum_in
+
+    peak_counts = target.fragments.count(axis=1)
     keep_mask = peak_counts <= maximum_number_of_fragments
 
     if not keep_mask.any():
         return None
 
-    return spectrum_in.filter(keep_mask, inplace=not clone)
+    target.filter(keep_mask, inplace=True)
+    return target
 
 
 require_maximum_number_of_peaks = collection_filter(

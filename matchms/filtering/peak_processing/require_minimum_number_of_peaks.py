@@ -66,12 +66,14 @@ def _require_minimum_number_of_peaks_collection(
     clone: bool | None = True,
 ) -> SpectraCollection | None:
     """Drop spectra with fewer peaks than required."""
-    peak_counts = spectrum_in.fragments.count(axis=1)
-    thresholds = np.full(len(spectrum_in), n_required, dtype=np.int64)
+    target = spectrum_in.copy() if clone else spectrum_in
 
-    if ratio_required is not None and "parent_mass" in spectrum_in.metadata.columns:
+    peak_counts = target.fragments.count(axis=1)
+    thresholds = np.full(len(target), n_required, dtype=np.int64)
+
+    if ratio_required is not None and "parent_mass" in target.metadata.columns:
         parent_mass = pd.to_numeric(
-            spectrum_in.metadata["parent_mass"],
+            target.metadata["parent_mass"],
             errors="coerce",
         )
 
@@ -88,7 +90,8 @@ def _require_minimum_number_of_peaks_collection(
     if not keep_mask.any():
         return None
 
-    return spectrum_in.filter(keep_mask, inplace=not clone)
+    target.filter(keep_mask, inplace=True)
+    return target
 
 
 require_minimum_number_of_peaks = collection_filter(
