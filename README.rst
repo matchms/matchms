@@ -103,9 +103,9 @@ Similarity scores can be computed from the processed collection:
 
 .. code-block:: python
 
-    from matchms.similarity import FlashCosine
+    from matchms.similarity import ModifiedCosine
 
-    similarity = FlashCosine(matching_mode="hybrid")
+    similarity = Modified(tolerance=0.01)
     scores = similarity.matrix(collection)
 
 
@@ -487,18 +487,18 @@ Collection-based scoring:
 
 .. code-block:: python
 
-    from matchms.similarity import FlashCosine
+    from matchms.similarity import ModifiedCosine
 
-    similarity = FlashCosine(matching_mode="hybrid")
+    similarity = ModifiedCosine(tolerance=0.01)
     scores = similarity.matrix(collection)
 
 Pairwise scoring of individual spectra remains supported:
 
 .. code-block:: python
 
-    from matchms.similarity import CosineGreedy
+    from matchms.similarity import Cosine
 
-    score = CosineGreedy(tolerance=0.1).pair(spectrum_1, spectrum_2)
+    score = Cosine(tolerance=0.1).pair(spectrum_1, spectrum_2)
 
 
 Installation
@@ -506,14 +506,14 @@ Installation
 
 Prerequisites:
 
-- Python 3.11 - 3.13
+- Python 3.11 - 3.14
 - Anaconda or another virtual environment manager is recommended
 
 Install matchms with conda:
 
 .. code-block:: console
 
-    conda create --name matchms python=3.12
+    conda create --name matchms python=3.13
     conda activate matchms
     conda install --channel bioconda --channel conda-forge matchms
 
