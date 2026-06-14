@@ -65,14 +65,14 @@ class SpectraCollection:
     def __init__(
         self,
         spectra: list[Spectrum] | Generator[Spectrum, None, None],
-        bin_size=0.000001,
+        mz_precision=0.000001,
     ):
         spectra = list(spectra)
 
         if not spectra:
             raise ValueError("Spectra must contain at least one Spectrum.")
 
-        self.bin_size = bin_size
+        self.mz_precision = mz_precision
         self._metadata = self._construct_metadata(spectra)
         self._fragments = self._construct_fragments(spectra)
 
@@ -84,19 +84,19 @@ class SpectraCollection:
         cls,
         metadata: pd.DataFrame | pd.Series,
         fragments: FragmentCollection,
-        bin_size: float,
+        mz_precision: float,
     ) -> SpectraCollectionType:
         if isinstance(metadata, pd.Series):
             metadata = metadata.to_frame().T
 
         obj = cls.__new__(cls)
-        obj.bin_size = bin_size
+        obj.mz_precision = mz_precision
         obj._metadata = metadata.reset_index(drop=True)
         obj._fragments = fragments
         return obj
 
     def _construct_fragments(self, spectra: list):
-        return CSRFragmentCollection(spectra, bin_size=self.bin_size)
+        return CSRFragmentCollection(spectra, mz_precision=self.mz_precision)
 
     def _construct_metadata(self, spectra):
         # data = defaultdict(list)
@@ -185,7 +185,7 @@ class SpectraCollection:
             return self.__class__._from_metadata_and_fragments(
                 metadata=new_metadata,
                 fragments=new_fragments,
-                bin_size=self.bin_size,
+                mz_precision=self.mz_precision,
             )
 
         # scalar row -> one Spectrum
@@ -467,7 +467,7 @@ class SpectraCollection:
 
     def copy(self):
         new_spec = self.__class__.__new__(self.__class__)
-        new_spec.bin_size = self.bin_size
+        new_spec.mz_precision = self.mz_precision
         new_spec._metadata = self._metadata.copy()
         new_spec._fragments = self._fragments.copy()
 
@@ -477,7 +477,7 @@ class SpectraCollection:
         """
         Convert mz values into bins.
 
-        Uses the bin_size of SpectraCollection and maps mz values into integer bins by flooring them.
+        Uses the mz_precision of SpectraCollection and maps mz values into integer bins by flooring them.
 
         Parameters
         ----------
@@ -495,7 +495,7 @@ class SpectraCollection:
         """
         Convert bin indices to mz values.
 
-        Uses the bin_size of SpectraCollection and calculates the mz value at the center of the bin.
+        Uses the mz_precision of SpectraCollection and calculates the mz value at the center of the bin.
 
         Parameters
         ----------
