@@ -93,8 +93,8 @@ def mock_bin_to_mz(bin_idx):
     return (bin_idx * 0.1) + (0.1 / 2)
 
 
-def mock_mz_to_bin(mz, bin_size):
-    return np.floor(mz / bin_size).astype(np.int64)
+def mock_mz_to_bin(mz, mz_precision):
+    return np.floor(mz / mz_precision).astype(np.int64)
 
 
 def test_spectra_hashes_consistency(sample_csr_data):
@@ -117,11 +117,11 @@ def test_spectra_hashes_custom_params(sample_csr_data):
 
 
 def test_spectra_hashes_with_collection_mock(spectrum):
-    bin_size = 0.1
+    mz_precision = 0.1
     mz = np.array([100.0, 200.0])
     intensities = np.array([1.0, 0.5])
 
-    bins = mock_mz_to_bin(mz, bin_size)
+    bins = mock_mz_to_bin(mz, mz_precision)
     csr = csr_array((intensities, bins, [0, 2]), shape=(1, 5000))
 
     hashes = spectra_hashes(csr, mock_bin_to_mz)
