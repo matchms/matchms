@@ -89,49 +89,94 @@ class FragmentCollection(ABC):
         pass
 
 
+# Helper functions for peak processing filters
+def _decimal_places_from_mz_precision(mz_precision: float) -> int:
+    """Return decimal places for mz_precision.
+
+    Only powers of ten are supported, for example 1, 0.1, 0.01, 1e-4.
+    """
+    if mz_precision <= 0:
+        raise ValueError("mz_precision must be > 0.")
+
+    exponent = -np.log10(mz_precision)
+    rounded_exponent = int(round(exponent))
+
+    if not np.isclose(exponent, rounded_exponent):
+        raise ValueError(
+            "mz_precision must be a power of ten, for example "
+            "1, 0.1, 0.01, 1e-4, or 1e-5."
+        )
+
+    return max(0, rounded_exponent)
+
+
+def _floor_to_decimal_places(values, decimals: int):
+    """Floor values to a fixed number of decimal places."""
+    factor = 10**decimals
+    return np.floor(np.asarray(values, dtype=float) * factor) / factor
+
+
 class CSRFragmentCollection(FragmentCollection):
-    """CSR-backed, binned fragment storage for a spectra dataset.
+    """CSR-backed, m/z-grid fragment storage for a spectra dataset.
 
     Stores all fragments of a dataset in a sparse matrix using CSR format:
 
     - rows correspond to spectra
-    - columns correspond to discrete m/z bins
+    - columns correspond to discrete m/z grid positions
     - values correspond to peak intensities
 
-    The m/z values of input peaks are converted to integer bin indices using
-    :meth:`mz_to_bin`. This means that the original m/z values are not stored
-    directly. When spectra are reconstructed, m/z values are returned as bin
-    centers via :meth:`bin_to_mz`.
+    The m/z values of input peaks are converted to integer grid/bin indices using
+    :meth:`mz_to_bin`. The grid width is controlled by ``mz_precision``.
+
+    Parameters
+    ----------
+    spectra
+        Spectra used to construct the sparse fragment collection.
+    array
+        Existing CSR sparse array. Pass either ``spectra`` or ``array``, not both.
+    mz_precision
+        Width of one m/z grid step. For example, ``0.01`` stores m/z values at
+        two decimal places, while ``1e-6`` stores values at six decimal places.
+    mz_rounding
+        Strategy used to assign m/z values to grid positions. Supported values:
+
+        - ``"floor"``: ``123.456`` with ``mz_precision=0.01`` becomes ``123.45``.
+        - ``"round"``: ``123.456`` with ``mz_precision=0.01`` becomes ``123.46``.
 
     Notes
     -----
-    This is a binned representation and is therefore not necessarily lossless.
-    If multiple peaks from the same spectrum fall into the same m/z bin, they are
-    stored at the same sparse matrix coordinate. During sparse matrix construction,
-    such duplicate coordinates are combined by summing their intensities.
+    This is a discretized representation and is therefore not necessarily
+    lossless. If multiple peaks from the same spectrum map to the same m/z grid
+    position, they are stored at the same sparse matrix coordinate. During sparse
+    matrix construction, duplicate coordinates are combined by summing their
+    intensities.
 
-    For example, two peaks in one spectrum that map to the same m/z bin will be
-    represented as a single peak with the summed intensity when the row is
-    reconstructed.
-
-    The choice of ``bin_size`` therefore controls both mass precision and the
-    likelihood of peak merging. Smaller bin sizes preserve m/z differences more
-    closely but may create very large sparse matrix dimensions. Larger bin sizes
-    reduce the number of bins but increase the chance that neighboring peaks are
-    merged.
+    Smaller ``mz_precision`` values preserve m/z differences more closely but can
+    create much larger sparse matrices. Larger values reduce the number of grid
+    positions but increase the chance that neighboring peaks are merged.
     """
+
+    _SUPPORTED_MZ_ROUNDING = {"floor", "round"}
 
     def __init__(
         self,
         spectra: list[Spectrum] | Generator[Spectrum, None, None] | None = None,
         *,
         array: csr_array | None = None,
-        bin_size: float = 1e-6,
+        mz_precision: float = 1e-6,
+        mz_rounding: str = "round",
         index_dtype: np.dtype = np.int64,
     ):
-        if bin_size <= 0:
-            raise ValueError("bin_size must be > 0.")
-        self.bin_size = float(bin_size)
+        self._mz_decimals = _decimal_places_from_mz_precision(mz_precision)
+
+        if mz_rounding not in self._SUPPORTED_MZ_ROUNDING:
+            raise ValueError(
+                "mz_rounding must be one of "
+                f"{sorted(self._SUPPORTED_MZ_ROUNDING)}."
+            )
+
+        self.mz_precision = float(mz_precision)
+        self.mz_rounding = mz_rounding
         self.index_dtype = index_dtype
 
         if array is not None:
@@ -150,8 +195,8 @@ class CSRFragmentCollection(FragmentCollection):
         self._array = self._construct_from_spectra_list(spectra)
 
     @classmethod
-    def from_array(cls, array: csr_array, *, bin_size: float = 1e-6) -> FragmentCollectionType:
-        return cls(array=array, bin_size=bin_size)
+    def from_array(cls, array: csr_array, *, mz_precision: float = 1e-6) -> FragmentCollectionType:
+        return cls(array=array, mz_precision=mz_precision)
 
     def _construct_from_spectra_list(self, spectra: list[Spectrum]) -> csr_array:
         lengths = np.array([len(spec.mz) for spec in spectra])
@@ -194,19 +239,40 @@ class CSRFragmentCollection(FragmentCollection):
     def __repr__(self) -> str:
         return (
             f"CSRFragmentCollection(n_spectra={self.n_spectra}, "
-            f"n_fragments={self._array.data.shape[0]}, bin_size={self.bin_size})"
+            f"n_fragments={self._array.data.shape[0]}, mz_precision={self.mz_precision})"
         )
 
     def copy(self) -> FragmentCollectionType:
-        return self.__class__.from_array(self._array.copy(), bin_size=self.bin_size)
+        return self.__class__.from_array(self._array.copy(), mz_precision=self.mz_precision)
 
     def mz_to_bin(self, mz: np.ndarray | float) -> np.ndarray:
-        """Convert m/z values to integer bins."""
-        return np.floor(np.asarray(mz) / self.bin_size).astype(self.index_dtype)
+        """Convert m/z values to integer grid/bin indices.
+
+        The m/z values are first rounded or floored to the decimal precision
+        specified by ``mz_precision`` and then converted to integer indices.
+        """
+        mz_values = np.asarray(mz, dtype=float)
+
+        if self.mz_rounding == "floor":
+            discretized_mz = _floor_to_decimal_places(mz_values, self._mz_decimals)
+        elif self.mz_rounding == "round":
+            discretized_mz = np.round(mz_values, decimals=self._mz_decimals)
+        else:
+            raise ValueError(
+                "mz_rounding must be one of "
+                f"{sorted(self._SUPPORTED_MZ_ROUNDING)}."
+            )
+
+        return np.rint(discretized_mz / self.mz_precision).astype(self.index_dtype)
 
     def bin_to_mz(self, bin_idx: np.ndarray | int) -> np.ndarray:
-        """Convert bin indices to bin-center m/z values."""
-        return (bin_idx * self.bin_size) + (self.bin_size / 2)
+        """Convert integer grid/bin indices back to m/z values.
+
+        No bin-center offset is added. Returned m/z values correspond directly
+        to the discretized grid positions.
+        """
+        mz = np.asarray(bin_idx) * self.mz_precision
+        return np.round(mz, decimals=self._mz_decimals)
 
     def get_row(self, idx: int) -> tuple[np.ndarray, np.ndarray]:
         """Return one spectrum row as (mz, intensities)."""
@@ -234,7 +300,7 @@ class CSRFragmentCollection(FragmentCollection):
     def take(self, indices: Iterable[int]) -> FragmentCollectionType:
         """Return a new collection with selected rows in the given order."""
         indices = np.asarray(list(indices), dtype=self.index_dtype)
-        return self.__class__.from_array(self._array[indices, :], bin_size=self.bin_size)
+        return self.__class__.from_array(self._array[indices, :], mz_precision=self.mz_precision)
 
     def reorder(self, indices: Iterable[int]) -> FragmentCollectionType:
         """Alias for take()."""
@@ -300,7 +366,7 @@ class CSRFragmentCollection(FragmentCollection):
             shape=self._array.shape,
         ).tocsr()
 
-        return self.__class__.from_array(new_array, bin_size=self.bin_size)
+        return self.__class__.from_array(new_array, mz_precision=self.mz_precision)
 
     def __getitem__(self, key):
         """Support row slicing and optional row/column slicing.
@@ -417,7 +483,7 @@ class CSRFragmentCollection(FragmentCollection):
             shape=self._array.shape,
         ).tocsr()
 
-        return self.__class__.from_array(new_array, bin_size=self.bin_size)
+        return self.__class__.from_array(new_array, mz_precision=self.mz_precision)
 
     def select_by_relative_intensity(
             self,
@@ -437,7 +503,7 @@ class CSRFragmentCollection(FragmentCollection):
         coo = self._array.tocoo()
 
         if coo.data.size == 0:
-            return self.__class__.from_array(self._array.copy(), bin_size=self.bin_size)
+            return self.__class__.from_array(self._array.copy(), mz_precision=self.mz_precision)
 
         row_max = self._array.max(axis=1).toarray().ravel()
 
@@ -459,7 +525,7 @@ class CSRFragmentCollection(FragmentCollection):
             shape=self._array.shape,
         ).tocsr()
 
-        return self.__class__.from_array(new_array, bin_size=self.bin_size)
+        return self.__class__.from_array(new_array, mz_precision=self.mz_precision)
 
     def keep_top_k_per_row_variable(
             self,
@@ -529,4 +595,4 @@ class CSRFragmentCollection(FragmentCollection):
             shape=csr.shape,
         )
 
-        return self.__class__.from_array(new_array, bin_size=self.bin_size)
+        return self.__class__.from_array(new_array, mz_precision=self.mz_precision)

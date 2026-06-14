@@ -26,11 +26,11 @@ def sample_spectra():
 
 @pytest.fixture
 def fragments(sample_spectra):
-    return CSRFragmentCollection(sample_spectra, bin_size=0.01)
+    return CSRFragmentCollection(sample_spectra, mz_precision=0.01)
 
 
 def test_construct_from_spectra(sample_spectra):
-    fragments = CSRFragmentCollection(sample_spectra, bin_size=0.01)
+    fragments = CSRFragmentCollection(sample_spectra, mz_precision=0.01)
 
     assert len(fragments) == 3
     assert fragments.n_spectra == 3
@@ -40,21 +40,21 @@ def test_construct_from_spectra(sample_spectra):
 
 
 def test_construct_from_array(fragments):
-    cloned = CSRFragmentCollection.from_array(fragments.array, bin_size=fragments.bin_size)
+    cloned = CSRFragmentCollection.from_array(fragments.array, mz_precision=fragments.mz_precision)
 
     assert len(cloned) == len(fragments)
-    assert cloned.bin_size == fragments.bin_size
+    assert cloned.mz_precision == fragments.mz_precision
     np.testing.assert_array_equal(cloned.array.toarray(), fragments.array.toarray())
 
 
-def test_construct_invalid_bin_size_raises(sample_spectra):
-    with pytest.raises(ValueError, match="bin_size must be > 0"):
-        CSRFragmentCollection(sample_spectra, bin_size=0.0)
+def test_construct_invalid_mz_precision_raises(sample_spectra):
+    with pytest.raises(ValueError, match="mz_precision must be > 0"):
+        CSRFragmentCollection(sample_spectra, mz_precision=0.0)
 
 
 def test_construct_empty_spectra_raises():
     with pytest.raises(ValueError, match="Spectra must contain at least one Spectrum"):
-        CSRFragmentCollection([], bin_size=0.01)
+        CSRFragmentCollection([], mz_precision=0.01)
 
 
 def test_construct_missing_input_raises():
@@ -65,14 +65,14 @@ def test_construct_missing_input_raises():
 def test_construct_array_and_spectra_raises(sample_spectra):
     dummy = csr_array((2, 3))
     with pytest.raises(ValueError, match="Pass either spectra or array, not both"):
-        CSRFragmentCollection(sample_spectra, array=dummy, bin_size=0.01)
+        CSRFragmentCollection(sample_spectra, array=dummy, mz_precision=0.01)
 
 
 def test_repr(fragments):
     rep = repr(fragments)
     assert "CSRFragmentCollection" in rep
     assert "n_spectra=3" in rep
-    assert "bin_size=0.01" in rep
+    assert "mz_precision=0.01" in rep
 
 
 def test_copy(fragments):
@@ -83,14 +83,47 @@ def test_copy(fragments):
     np.testing.assert_array_equal(cloned.array.toarray(), fragments.array.toarray())
 
 
-def test_mz_bin_conversion(fragments):
+@pytest.mark.parametrize(
+    "mz_rounding, exp_bin_idx, exp_back_mz",
+    [("floor", 12345, 123.45), ("round", 12346, 123.46)]
+    )
+def test_mz_bin_conversion(sample_spectra, mz_rounding, exp_bin_idx, exp_back_mz):
+    fragments = CSRFragmentCollection(sample_spectra, mz_precision=0.01, mz_rounding=mz_rounding)
     mz = 123.456
     bin_idx = fragments.mz_to_bin(mz)
     back_mz = fragments.bin_to_mz(bin_idx)
 
-    assert bin_idx == 12345
-    assert back_mz == pytest.approx(123.455)
+    assert bin_idx == exp_bin_idx
+    assert back_mz == pytest.approx(exp_back_mz)
 
+
+@pytest.mark.parametrize(
+    "invalid_precision, part_of_msg",
+    [(0, "mz_precision must be > 0"),
+     (-1e-4, "mz_precision must be > 0"),
+     (0.05, "power of ten"),
+     (0.005, "power of ten"),
+     (2e-6, "power of ten"),
+     ]
+    )
+def test_invalid_mz_precision_raises(invalid_precision, part_of_msg):
+    with pytest.raises(ValueError, match=part_of_msg):
+        CSRFragmentCollection(
+            [Spectrum(mz=np.array([100.0]), intensities=np.array([1.0]))],
+            mz_precision=invalid_precision,
+        )
+
+
+def test_mz_to_bin_round_uses_decimal_precision():
+    fragments = CSRFragmentCollection(
+        [Spectrum(mz=np.array([123.456]), intensities=np.array([1.0]))],
+        mz_precision=0.01,
+        mz_rounding="round",
+    )
+
+    mz, _ = fragments.get_row(0)
+
+    assert mz.tolist() == [123.46]
 
 def test_get_row(fragments):
     mz, intensities = fragments.get_row(0)
@@ -147,7 +180,7 @@ def test_drop(fragments):
 
 def test_drop_empty(sample_spectra):
     empty_spec = Spectrum(mz=np.array([]), intensities=np.array([]), metadata={})
-    fragments = CSRFragmentCollection(sample_spectra + [empty_spec], bin_size=0.01)
+    fragments = CSRFragmentCollection(sample_spectra + [empty_spec], mz_precision=0.01)
 
     assert len(fragments) == 4
     cleaned = fragments.drop_empty()
@@ -250,7 +283,7 @@ def test_count_axis_0(fragments):
 
 
 def test_count_peaks_above_relative_intensity(sample_spectra):
-    fragments = CSRFragmentCollection(sample_spectra, bin_size=1e-6)
+    fragments = CSRFragmentCollection(sample_spectra, mz_precision=1e-6)
 
     counts = fragments.count_peaks_above_relative_intensity(
         intensity_from=0.5,
@@ -284,8 +317,8 @@ def test_fragment_hashes_cached_property(fragments):
 
 
 def test_fragment_hashes_equal_for_identical_input(sample_spectra):
-    fragments_1 = CSRFragmentCollection(sample_spectra, bin_size=0.01)
-    fragments_2 = CSRFragmentCollection(sample_spectra, bin_size=0.01)
+    fragments_1 = CSRFragmentCollection(sample_spectra, mz_precision=0.01)
+    fragments_2 = CSRFragmentCollection(sample_spectra, mz_precision=0.01)
 
     assert np.all(fragments_1.fragment_hashes == fragments_2.fragment_hashes)
 
