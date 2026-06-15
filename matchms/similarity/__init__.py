@@ -20,11 +20,13 @@ spectra. This includes
 It is also easily possible to add own custom similarity measures or import external ones
 (such as `Spec2Vec <https://github.com/iomega/spec2vec>`_).
 """
+
 from .BinnedEmbeddingSimilarity import BinnedEmbeddingSimilarity
 from .BlinkCosine import BlinkCosine
 from .Cosine import Cosine
 from .CosineGreedy import CosineGreedy
 from .CosineHungarian import CosineHungarian
+from .CosineLinear import CosineLinear
 from .FingerprintSimilarity import FingerprintSimilarity
 from .FlashSimilarity import FlashCosine, FlashEntropy
 from .MetadataMatch import MetadataMatch
@@ -42,6 +44,7 @@ __all__ = [
     "Cosine",
     "CosineGreedy",
     "CosineHungarian",
+    "CosineLinear",
     "FingerprintSimilarity",
     "FlashCosine",
     "FlashEntropy",
@@ -64,18 +67,24 @@ def get_similarity_function_by_name(similarity_function_name: str):
     similarity_function_name : str
         Name of the similarity function.
     """
-    names = __all__
-    functions = [
-        BinnedEmbeddingSimilarity, BlinkCosine,
-        Cosine, CosineGreedy, CosineHungarian,
-        FingerprintSimilarity, FlashCosine, FlashEntropy,
-        MetadataMatch,
-        ModifiedCosine, ModifiedCosineGreedy, ModifiedCosineHungarian,
-        NeutralLossesCosine, ParentMassMatch, PrecursorMzMatch
-        ]
+    mapper = {
+        "BinnedEmbeddingSimilarity": BinnedEmbeddingSimilarity,
+        "BlinkCosine": BlinkCosine,
+        "Cosine": Cosine,
+        "CosineLinear": CosineLinear,
+        "CosineGreedy": CosineGreedy,
+        "CosineHungarian": CosineHungarian,
+        "FingerprintSimilarity": FingerprintSimilarity,
+        "FlashCosine": FlashCosine,
+        "FlashEntropy": FlashEntropy,
+        "MetadataMatch": MetadataMatch,
+        "ModifiedCosine": ModifiedCosine,
+        "ModifiedCosineGreedy": ModifiedCosineGreedy,
+        "ModifiedCosineHungarian": ModifiedCosineHungarian,
+        "NeutralLossesCosine": NeutralLossesCosine,
+        "ParentMassMatch": ParentMassMatch,
+        "PrecursorMzMatch": PrecursorMzMatch,
+    }
 
-    assert similarity_function_name in names, f"Unknown similarity function: {similarity_function_name}"
-    assert len(names) == len(functions), "Number of similarity functions and names do not match"
-
-    mapper = dict(zip(names, functions, strict=True))
+    assert similarity_function_name in mapper, f"Unknown similarity function: {similarity_function_name}"
     return mapper[similarity_function_name]
