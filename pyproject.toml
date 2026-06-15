@@ -3,7 +3,7 @@ name = "matchms"
 version = "1.0.0.dev1"
 description = "Python library for large-scale comparisons and processing of tandem mass spectral data"
 readme = "README.rst"
-requires-python = ">=3.11,<3.15"
+requires-python = ">=3.11,<3.14"
 license = "Apache-2.0"
 authors = [
   { name = "matchms developer team", email = "florian.huber@hs-duesseldorf.de" }
