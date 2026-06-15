@@ -359,4 +359,4 @@ def apply_spectrum_filter_to_collection(
     if len(spectra_out) == 0:
         return None
 
-    return collection.__class__(spectra_out, bin_size=collection.bin_size)
+    return collection.__class__(spectra_out, mz_precision=collection.mz_precision)

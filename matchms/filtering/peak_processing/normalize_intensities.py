@@ -162,7 +162,7 @@ def _normalize_intensities_collection(
 
     target._fragments = fragments.__class__.from_array(
         normalized_array,
-        bin_size=fragments.bin_size,
+        mz_precision=fragments.mz_precision,
     )
     target._clear_cache(["fragment_hashes", "spectra_hashes"])
 

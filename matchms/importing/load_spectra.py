@@ -70,6 +70,7 @@ def load_ms2_dataset(
     file: str,
     metadata_harmonization: bool = True,
     ftype: str = "auto",
+    **kwargs,
 ) -> SpectraCollection:
     """Load spectra from a file as a SpectraCollection.
 
@@ -84,6 +85,9 @@ def load_ms2_dataset(
         type from the file extension. Alternatively, pass an explicit file type,
         for example ``"mzml"``, ``"json"``, ``"mgf"``, ``"msp"``, ``"mzxml"``,
         or ``"pickle"``.
+    **kwargs
+        Additional keyword arguments to pass to the SpectraCollection constructor,
+        for example ``mz_precision``.
 
     Returns
     -------
@@ -95,7 +99,8 @@ def load_ms2_dataset(
             file,
             metadata_harmonization=metadata_harmonization,
             ftype=ftype,
-        )
+        ),
+        **kwargs,
     )
 
 

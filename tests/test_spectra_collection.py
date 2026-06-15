@@ -28,7 +28,7 @@ def sample_spectra():
 
 @pytest.fixture
 def collection(sample_spectra):
-    return SpectraCollection(sample_spectra, bin_size=0.01)
+    return SpectraCollection(sample_spectra, mz_precision=0.01)
 
 
 def test_getitem_slice(collection):
@@ -126,7 +126,7 @@ def test_drop_spectra(collection):
 
 
 def test_drop_duplicates(sample_spectra):
-    col = SpectraCollection(sample_spectra + [sample_spectra[1]], bin_size=0.01)
+    col = SpectraCollection(sample_spectra + [sample_spectra[1]], mz_precision=0.01)
 
     assert len(col) == 4
     deduped = col.drop_duplicates()
@@ -187,7 +187,7 @@ def test_drop_inplace(collection):
 
 def test_drop_empty_spectra(sample_spectra):
     empty_spec = Spectrum(mz=np.array([]), intensities=np.array([]), metadata={"name": "empty"})
-    col = SpectraCollection(sample_spectra + [empty_spec], bin_size=1.0)
+    col = SpectraCollection(sample_spectra + [empty_spec], mz_precision=1.0)
 
     assert len(col) == 4
     clean_col = col.drop_empty_spectra()
@@ -222,13 +222,16 @@ def test_copy(collection):
     assert "new_col" not in collection.metadata.columns
 
 
-def test_mz_bin_conversion(collection):
-    mz = 123.456
+@pytest.mark.parametrize(
+    "mz, expected_bin_idx, expected_back_mz",
+    [(123.456, 12346, 123.46), (123.454, 12345, 123.45)]
+    )
+def test_mz_bin_conversion_and_rounding(collection, mz, expected_bin_idx, expected_back_mz):
     bin_idx = collection.mz_to_bin(mz)
     back_mz = collection.bin_to_mz(bin_idx)
 
-    assert bin_idx == 12345
-    assert back_mz == 123.455
+    assert bin_idx == expected_bin_idx
+    assert back_mz == expected_back_mz
 
 
 def test_describe(collection):
