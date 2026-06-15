@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 from matchms import Spectrum
-from matchms.similarity import CosineGreedy, CosineHungarian, CosineLinear, FlashCosine
+from matchms.similarity import CosineFlash, CosineGreedy, CosineHungarian, CosineLinear
 
 
 def _make_synthetic_spectra(n_spectra, n_peaks=30, n_common=50, tolerance=0.02, seed=42):
@@ -53,5 +53,5 @@ def test_bench_cosine_linear(benchmark, n_spectra):
 @pytest.mark.parametrize("n_spectra", SIZES)
 def test_bench_flash_similarity(benchmark, n_spectra):
     spectra = _make_synthetic_spectra(n_spectra)
-    sim = FlashCosine(tolerance=0.02)
+    sim = CosineFlash(tolerance=0.02)
     benchmark(sim.matrix, spectra, n_jobs=1)

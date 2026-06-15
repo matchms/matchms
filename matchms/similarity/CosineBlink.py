@@ -65,7 +65,7 @@ def _windowed_sum_numba(
     return out
 
 
-class BlinkCosine(BaseSimilarity):
+class CosineBlink(BaseSimilarity):
     """
     BLINK-style approximate cosine similarity for mass spectra with fast `.pair()` and `.matrix()`.
     This score is implemented based on the method BLINK, proposed by Harwood et al. (2023,
@@ -212,7 +212,7 @@ class BlinkCosine(BaseSimilarity):
         selected_fields = self._resolve_score_fields(score_fields)
         if selected_fields != ("score",):
             raise NotImplementedError(
-                "BlinkCosine.matrix() currently supports only score_fields=('score',), "
+                "CosineBlink.matrix() currently supports only score_fields=('score',), "
                 "because the optimized matrix implementation computes scores but not matches."
             )
 

@@ -3,7 +3,7 @@ from collections.abc import Sequence
 import numpy as np
 from matchms.typing import SpectrumType
 from .BaseSimilarity import BaseSimilarity
-from .FlashSimilarity import FlashCosine
+from .FlashSimilarity import CosineFlash
 from .ModifiedCosineGreedy import ModifiedCosineGreedy
 from .ModifiedCosineHungarian import ModifiedCosineHungarian
 
@@ -121,7 +121,7 @@ class ModifiedCosine(BaseSimilarity):
                 score_fields=score_fields,
                 progress_bar=progress_bar,
             )
-        modcos = FlashCosine(
+        modcos = CosineFlash(
             matching_mode="hybrid",
             tolerance=self.tolerance,
             intensity_power=self.intensity_power,

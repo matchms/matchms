@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from matchms.Scores import Scores, ScoresMask
 from matchms.similarity import CosineGreedy
-from matchms.similarity.BlinkCosine import BlinkCosine
+from matchms.similarity.CosineBlink import CosineBlink
 from ..builder_Spectrum import SpectrumBuilder
 
 
@@ -25,7 +25,7 @@ def _expected_strict_cosine(bins1, vals1, bins2, vals2):
 
 
 def _prep_naive(s, bin_width=1.0, mz_power=0.0, intensity_power=1.0):
-    """Replicates BlinkCosine _prep_spectrum steps used in tests (prefilter disabled)."""
+    """Replicates CosineBlink _prep_spectrum steps used in tests (prefilter disabled)."""
     mz = s.peaks.mz
     inten = s.peaks.intensities
 
@@ -65,7 +65,7 @@ def test_pair_strict_R0_expected(mz1, int1, mz2, int2, use_numba):
     s1 = _build(builder, mz1, int1)
     s2 = _build(builder, mz2, int2)
 
-    sim = BlinkCosine(tolerance=0.0, bin_width=1.0, prefilter=False, use_numba=use_numba)
+    sim = CosineBlink(tolerance=0.0, bin_width=1.0, prefilter=False, use_numba=use_numba)
     out = sim.pair(s1, s2)
 
     b1, v1 = _prep_naive(s1, bin_width=1.0)
@@ -80,7 +80,7 @@ def test_pair_clip_to_one():
     builder = SpectrumBuilder()
     s = _build(builder, [100, 200, 300], [0.1, 0.2, 1.0])
 
-    sim = BlinkCosine(tolerance=0.0, bin_width=1.0, prefilter=False, clip_to_one=True)
+    sim = CosineBlink(tolerance=0.0, bin_width=1.0, prefilter=False, clip_to_one=True)
     out = sim.pair(s, s)
 
     assert out == pytest.approx(1.0, 1e-6)
@@ -92,7 +92,7 @@ def test_pair_empty_spectrum():
     s_empty = _build(builder, [], [])
     s_full = _build(builder, [100, 200], [1.0, 1.0])
 
-    sim = BlinkCosine(tolerance=0.0, bin_width=1.0, prefilter=False)
+    sim = CosineBlink(tolerance=0.0, bin_width=1.0, prefilter=False)
     out = sim.pair(s_empty, s_full)
 
     assert out == 0.0
@@ -112,7 +112,7 @@ def test_matrix_equals_pair_scores_dense(use_numba):
         _build(builder, [110, 190, 290], [0.5, 0.2, 1.0]),
     ]
 
-    sim = BlinkCosine(tolerance=5.0, bin_width=1.0, prefilter=False, use_numba=use_numba)
+    sim = CosineBlink(tolerance=5.0, bin_width=1.0, prefilter=False, use_numba=use_numba)
     scores = sim.matrix(refs, qrys)
 
     assert isinstance(scores, Scores)
@@ -136,7 +136,7 @@ def test_matrix_self_comparison_is_symmetric():
     s2 = _build(builder, [100, 210, 310], [0.1, 0.2, 1.0])
     spectra = [s1, s2]
 
-    sim = BlinkCosine(tolerance=10.0, bin_width=1.0, prefilter=False)
+    sim = CosineBlink(tolerance=10.0, bin_width=1.0, prefilter=False)
     scores = sim.matrix(spectra)
 
     assert isinstance(scores, Scores)
@@ -150,7 +150,7 @@ def test_matrix_self_comparison_is_symmetric():
 
 
 def test_matrix_handles_empty_inputs():
-    sim = BlinkCosine(tolerance=0.0, bin_width=1.0, prefilter=False)
+    sim = CosineBlink(tolerance=0.0, bin_width=1.0, prefilter=False)
     builder = SpectrumBuilder()
     s = _build(builder, [100], [1.0])
 
@@ -174,7 +174,7 @@ def test_matrix_default_score_fields_returns_score_only():
     refs = [_build(builder, [100, 200], [1.0, 1.0])]
     qrys = [_build(builder, [100, 201], [1.0, 1.0])]
 
-    sim = BlinkCosine(tolerance=2.0, bin_width=1.0, prefilter=False)
+    sim = CosineBlink(tolerance=2.0, bin_width=1.0, prefilter=False)
     scores = sim.matrix(refs, qrys)
 
     assert isinstance(scores, Scores)
@@ -188,7 +188,7 @@ def test_matrix_score_field_selection_still_works():
     refs = [_build(builder, [100, 200], [1.0, 1.0])]
     qrys = [_build(builder, [100, 201], [1.0, 1.0])]
 
-    sim = BlinkCosine(tolerance=2.0, bin_width=1.0, prefilter=False)
+    sim = CosineBlink(tolerance=2.0, bin_width=1.0, prefilter=False)
     scores = sim.matrix(refs, qrys)
     score_only = scores["score"]
 
@@ -210,7 +210,7 @@ def test_scalar_scores_score_alias_behaves_like_scores_itself():
         _build(builder, [350], [1.0]),
     ]
 
-    sim = BlinkCosine(tolerance=2.0, bin_width=1.0, prefilter=False)
+    sim = CosineBlink(tolerance=2.0, bin_width=1.0, prefilter=False)
     scores = sim.matrix(refs, qrys)
     score_view = scores["score"]
 
@@ -229,7 +229,7 @@ def test_sparse_matrix_not_implemented():
     builder = SpectrumBuilder()
     s = _build(builder, [100, 200], [1.0, 1.0])
 
-    sim = BlinkCosine(tolerance=2.0, bin_width=1.0, prefilter=False)
+    sim = CosineBlink(tolerance=2.0, bin_width=1.0, prefilter=False)
 
     with pytest.raises(NotImplementedError, match="sparse_matrix"):
         sim.sparse_matrix([s], [s], progress_bar=False)
@@ -242,8 +242,8 @@ def test_pair_numba_vs_fallback_identical(use_numba_pair):
     s1 = _build(builder, [100, 200, 300, 400], [0.3, 1.0, 0.5, 0.2])
     s2 = _build(builder, [99, 201, 305, 500], [0.2, 0.9, 0.4, 0.1])
 
-    sim_numba = BlinkCosine(tolerance=5.0, bin_width=1.0, prefilter=False, use_numba=True)
-    sim_fallback = BlinkCosine(tolerance=5.0, bin_width=1.0, prefilter=False, use_numba=False)
+    sim_numba = CosineBlink(tolerance=5.0, bin_width=1.0, prefilter=False, use_numba=True)
+    sim_fallback = CosineBlink(tolerance=5.0, bin_width=1.0, prefilter=False, use_numba=False)
 
     out_a = (sim_numba if use_numba_pair else sim_fallback).pair(s1, s2)
     out_b = (sim_fallback if use_numba_pair else sim_numba).pair(s1, s2)
@@ -265,7 +265,7 @@ def test_blinkcosine_upper_bound_cosinegreedy():
 
     tolerance = 5.0
     cg = CosineGreedy(tolerance=tolerance)
-    bc = BlinkCosine(tolerance=tolerance, bin_width=1.0, prefilter=False)
+    bc = CosineBlink(tolerance=tolerance, bin_width=1.0, prefilter=False)
 
     score_cg = cg.pair(spectrum_1, spectrum_2)["score"]
     score_bc = bc.pair(spectrum_1, spectrum_2)

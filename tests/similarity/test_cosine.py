@@ -3,9 +3,9 @@ import pytest
 from matchms import Spectrum
 from matchms.similarity import (
     Cosine,
+    CosineFlash,
     CosineGreedy,
     CosineHungarian,
-    FlashCosine,
 )
 
 
@@ -69,7 +69,7 @@ def test_cosine_matrix_matches_flash_cosine_when_use_hungarian_false():
     spectra = [spectrum_1, spectrum_2, spectrum_3]
 
     wrapped = Cosine(tolerance=0.1, use_hungarian=False)
-    direct = FlashCosine(matching_mode="fragment", tolerance=0.1)
+    direct = CosineFlash(matching_mode="fragment", tolerance=0.1)
 
     wrapped_scores = wrapped.matrix(spectra, progress_bar=False, n_jobs=1)
     direct_scores = direct.matrix(spectra, progress_bar=False, n_jobs=1)
