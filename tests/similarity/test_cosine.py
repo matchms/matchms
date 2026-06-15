@@ -3,9 +3,9 @@ import pytest
 from matchms import Spectrum
 from matchms.similarity import (
     Cosine,
+    CosineFlash,
     CosineGreedy,
     CosineHungarian,
-    CosineFlash,
 )
 
 

@@ -55,8 +55,8 @@ matchms workflows.
 """
 
 from .BinnedEmbeddingSimilarity import BinnedEmbeddingSimilarity
-from .CosineBlink import CosineBlink
 from .Cosine import Cosine
+from .CosineBlink import CosineBlink
 from .CosineGreedy import CosineGreedy
 from .CosineHungarian import CosineHungarian
 from .CosineLinear import CosineLinear

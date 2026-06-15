@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 from matchms import Spectrum
-from matchms.similarity import CosineGreedy, CosineHungarian, CosineLinear, CosineFlash
+from matchms.similarity import CosineFlash, CosineGreedy, CosineHungarian, CosineLinear
 
 
 def _make_synthetic_spectra(n_spectra, n_peaks=30, n_common=50, tolerance=0.02, seed=42):
