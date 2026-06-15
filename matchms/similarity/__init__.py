@@ -11,7 +11,7 @@ These classes choose an appropriate implementation internally and are intended
 as the default choice for most workflows. Users who need a specific algorithmic
 variant can select one of the explicit implementations directly, for example
 :class:`~matchms.similarity.CosineLinear`,
-:class:`~matchms.similarity.FlashCosine`,
+:class:`~matchms.similarity.CosineFlash`,
 :class:`~matchms.similarity.CosineGreedy`, or
 :class:`~matchms.similarity.CosineHungarian`.
 
@@ -20,19 +20,19 @@ Available similarity functions include:
 * cosine-based peak similarity
   (:class:`~matchms.similarity.Cosine`,
   :class:`~matchms.similarity.CosineLinear`,
-  :class:`~matchms.similarity.FlashCosine`,
+  :class:`~matchms.similarity.CosineFlash`,
   :class:`~matchms.similarity.CosineGreedy`,
   :class:`~matchms.similarity.CosineHungarian`)
 * modified cosine similarity for spectra with shifted fragment peaks
   (:class:`~matchms.similarity.ModifiedCosine`,
-  :class:`~matchms.similarity.FlashCosine` with matching_mode="hybrid",
+  :class:`~matchms.similarity.CosineFlash` with matching_mode="hybrid",
   :class:`~matchms.similarity.ModifiedCosineGreedy`,
   :class:`~matchms.similarity.ModifiedCosineHungarian`)
 * neutral-loss-based peak similarity
   (:class:`~matchms.similarity.NeutralLossesCosine`)
 * fast embedding-based or approximate similarity methods
   (:class:`~matchms.similarity.BinnedEmbeddingSimilarity`,
-  :class:`~matchms.similarity.BlinkCosine`,
+  :class:`~matchms.similarity.CosineBlink`,
   :class:`~matchms.similarity.FlashEntropy`)
 * simple precursor or parent-mass matching
   (:class:`~matchms.similarity.PrecursorMzMatch`,
@@ -55,13 +55,13 @@ matchms workflows.
 """
 
 from .BinnedEmbeddingSimilarity import BinnedEmbeddingSimilarity
-from .BlinkCosine import BlinkCosine
+from .CosineBlink import CosineBlink
 from .Cosine import Cosine
 from .CosineGreedy import CosineGreedy
 from .CosineHungarian import CosineHungarian
 from .CosineLinear import CosineLinear
 from .FingerprintSimilarity import FingerprintSimilarity
-from .FlashSimilarity import FlashCosine, FlashEntropy
+from .FlashSimilarity import CosineFlash, FlashEntropy
 from .MetadataMatch import MetadataMatch
 from .ModifiedCosine import ModifiedCosine
 from .ModifiedCosineGreedy import ModifiedCosineGreedy
@@ -73,13 +73,13 @@ from .PrecursorMzMatch import PrecursorMzMatch
 
 __all__ = [
     "BinnedEmbeddingSimilarity",
-    "BlinkCosine",
+    "CosineBlink",
     "Cosine",
     "CosineGreedy",
     "CosineHungarian",
     "CosineLinear",
     "FingerprintSimilarity",
-    "FlashCosine",
+    "CosineFlash",
     "FlashEntropy",
     "MetadataMatch",
     "ModifiedCosine",
@@ -102,13 +102,13 @@ def get_similarity_function_by_name(similarity_function_name: str):
     """
     mapper = {
         "BinnedEmbeddingSimilarity": BinnedEmbeddingSimilarity,
-        "BlinkCosine": BlinkCosine,
+        "CosineBlink": CosineBlink,
         "Cosine": Cosine,
         "CosineLinear": CosineLinear,
         "CosineGreedy": CosineGreedy,
         "CosineHungarian": CosineHungarian,
         "FingerprintSimilarity": FingerprintSimilarity,
-        "FlashCosine": FlashCosine,
+        "CosineFlash": CosineFlash,
         "FlashEntropy": FlashEntropy,
         "MetadataMatch": MetadataMatch,
         "ModifiedCosine": ModifiedCosine,

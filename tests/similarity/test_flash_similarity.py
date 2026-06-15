@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from matchms.Scores import Scores
 from matchms.similarity import CosineGreedy, ModifiedCosineGreedy
-from matchms.similarity.FlashSimilarity import FlashCosine, FlashEntropy
+from matchms.similarity.FlashSimilarity import CosineFlash, FlashEntropy
 from ..builder_Spectrum import SpectrumBuilder
 
 
@@ -281,7 +281,7 @@ def test_entropy_fragment_matrix_matches_pair_with_sparse_candidate_columns():
 # ----------------------------
 
 def _mc_flash(tolerance, intensity_power=1.0):
-    return FlashCosine(
+    return CosineFlash(
         matching_mode="hybrid",  # hybrid = "modified cosine"
         tolerance=tolerance,
         intensity_power=intensity_power,
@@ -398,7 +398,7 @@ def test_cosine_pair_matches_cosinegreedy_default_tolerance_001():
         ),
     ]
 
-    flash = FlashCosine(
+    flash = CosineFlash(
         matching_mode="fragment",
         tolerance=0.01,
         remove_precursor=False,
@@ -428,7 +428,7 @@ def test_cosine_matrix_dense_matches_pair():
         build_spectrum([100.007, 150.002, 300.000], [0.6, 1.0, 0.4], precursor_mz=500.0),
         build_spectrum([110.004, 250.009, 400.006], [0.5, 0.9, 0.7], precursor_mz=600.0),
     ]
-    flash = FlashCosine(
+    flash = CosineFlash(
         matching_mode="fragment",
         tolerance=0.01,
         remove_precursor=False,
@@ -450,8 +450,8 @@ def test_cosine_matrix_dense_matches_pair():
 def test_cosine_dtype_and_commutativity():
     a = build_spectrum([100, 150, 300], [0.5, 1.0, 0.4], precursor_mz=600.0)
     b = build_spectrum([100, 155, 295], [0.5, 0.8, 0.6], precursor_mz=600.0)
-    f32 = FlashCosine(dtype=np.float32, remove_precursor=False, noise_cutoff=0.0)
-    f64 = FlashCosine(dtype=np.float64, remove_precursor=False, noise_cutoff=0.0)
+    f32 = CosineFlash(dtype=np.float32, remove_precursor=False, noise_cutoff=0.0)
+    f64 = CosineFlash(dtype=np.float64, remove_precursor=False, noise_cutoff=0.0)
 
     s_ab_32 = f32.pair(a, b)["score"]
     s_ba_32 = f32.pair(b, a)["score"]

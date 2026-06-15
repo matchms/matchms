@@ -5,7 +5,7 @@ from matchms.typing import SpectrumType
 from .BaseSimilarity import BaseSimilarity
 from .CosineGreedy import CosineGreedy
 from .CosineHungarian import CosineHungarian
-from .FlashSimilarity import FlashCosine
+from .FlashSimilarity import CosineFlash
 
 
 logger = logging.getLogger("matchms")
@@ -116,7 +116,7 @@ class Cosine(BaseSimilarity):
                 progress_bar=progress_bar,
             )
 
-        cosine = FlashCosine(
+        cosine = CosineFlash(
             matching_mode="fragment",
             tolerance=self.tolerance,
             intensity_power=self.intensity_power,

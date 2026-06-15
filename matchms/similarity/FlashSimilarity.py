@@ -372,7 +372,7 @@ class FlashEntropy(_BaseFlashSimilarity):
         return Scores({"score": out_score.astype(self.score_datatype, copy=False)})
 
 
-class FlashCosine(_BaseFlashSimilarity):
+class CosineFlash(_BaseFlashSimilarity):
     """
     Flash Cosine similarity following the original Flash Entropy (Li & Fiehn, 2023)
     with a fast .matrix() that builds a library-wide index over 'queries' and streams 
