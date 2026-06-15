@@ -1,27 +1,13 @@
 import logging
 from typing import Tuple
 import numpy as np
-from matchms.filtering.metadata_processing.add_precursor_mz import _convert_precursor_mz
 from matchms.typing import SpectrumType
+from ._precursor_validation import get_valid_precursor_mz
 from .BaseSimilarity import BaseSimilarity
 from .spectrum_similarity_functions import collect_peak_pairs, score_best_matches
 
 
 logger = logging.getLogger("matchms")
-
-def _get_valid_precursor_mz(spectrum):
-    """Extract valid precursor_mz from spectrum if possible. If not raise exception."""
-    message_missing = "Precursor_mz missing. Apply 'add_precursor_mz' filter first."
-    message_no_number = "Precursor_mz must be of type int or float. Apply 'add_precursor_mz' filter first."
-    message_below_0 = "Expect precursor to be positive number.Apply 'require_precursor_mz' first"
-
-    precursor_mz = spectrum.get("precursor_mz", None)
-    if not isinstance(precursor_mz, (int, float)):
-        logger.warning(message_no_number)
-    precursor_mz = _convert_precursor_mz(precursor_mz)
-    assert precursor_mz is not None, message_missing
-    assert precursor_mz > 0, message_below_0
-    return precursor_mz
 
 class NeutralLossesCosine(BaseSimilarity):
     """Calculate 'neutral losses cosine score' between mass spectra.
@@ -31,7 +17,7 @@ class NeutralLossesCosine(BaseSimilarity):
     peaks of two spectra. Two peaks are considered a potential match if their
     m/z ratios lie within the given 'tolerance' once a mass-shift is applied.
     The mass shift is the difference in precursor-m/z between the two spectra.
-    In general, `ModifiedCosine` is recommended over `NeutralLossesCosine` because
+    In general, `ModifiedCosineGreedy` is recommended over `NeutralLossesCosine` because
     it will on average deliver more reliable results.
 
     """
@@ -92,8 +78,8 @@ class NeutralLossesCosine(BaseSimilarity):
         Tuple with cosine score and number of matched peaks.
         """
 
-        precursor_mz_ref = _get_valid_precursor_mz(reference)
-        precursor_mz_query = _get_valid_precursor_mz(query)
+        precursor_mz_ref = get_valid_precursor_mz(reference, logger)
+        precursor_mz_query = get_valid_precursor_mz(query, logger)
         mass_shift = precursor_mz_ref - precursor_mz_query
 
         spec1 = reference.peaks.to_numpy

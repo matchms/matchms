@@ -27,9 +27,11 @@ class CosineGreedy(BaseSimilarity):
         from matchms.similarity import CosineGreedy
 
         reference = Spectrum(mz=np.array([100, 150, 200.]),
-                             intensities=np.array([0.7, 0.2, 0.1]))
+                             intensities=np.array([0.7, 0.2, 0.1]),
+                             metadata={"precursor_mz": 200.0})
         query = Spectrum(mz=np.array([100, 140, 190.]),
-                         intensities=np.array([0.4, 0.2, 0.1]))
+                         intensities=np.array([0.4, 0.2, 0.1]),
+                         metadata={"precursor_mz": 190.0})
 
         # Use factory to construct a similarity function
         cosine_greedy = CosineGreedy(tolerance=0.2)

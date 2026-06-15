@@ -70,9 +70,9 @@ de Jonge NF, Hecht H, Michael Strobel, Mingxun Wang, van der Hooft JJJ, Huber F.
     :alt: Continuous integration workflow
     :target: https://github.com/matchms/matchms/actions/workflows/CI_first_code_check.yml
 
-.. |CI Build| image:: https://github.com/matchms/matchms/actions/workflows/CI_build.yml/badge.svg
+.. |CI Build| image:: https://github.com/matchms/matchms/actions/workflows/CI_build.yml/badge.svg?branch=master
     :alt: Continuous integration workflow
-    :target: https://github.com/matchms/matchms/actions/workflows/CI_build.yml
+    :target: https://github.com/matchms/matchms/actions/workflows/CI_build.yml?query=branch%3Amaster
 
 .. |ReadTheDocs Badge| image:: https://readthedocs.org/projects/matchms/badge/?version=latest
     :alt: Documentation Status
@@ -116,7 +116,7 @@ Installation
 
 Prerequisites:  
 
-- Python 3.10 - 3.13, (higher versions should work as well, but are not yet tested systematically)
+- Python 3.10 - 3.14, (higher versions should work as well, but are not yet tested systematically)
 - Anaconda (recommended)
 
 We recommend installing matchms in a new virtual environment to avoid dependency clashes
@@ -164,12 +164,12 @@ Ecosystem compatibility
      - ms2deepscore Status
      - ms2query Status
    * - .. image:: https://img.shields.io/badge/numpy-1.25-lightgrey?logo=numpy :alt: numpy
-     - .. image:: https://img.shields.io/badge/spec2vec-0.8.0-green
-     - .. image:: https://img.shields.io/badge/ms2deepscore-2.5.4-green
+     - .. image:: https://img.shields.io/badge/spec2vec-0.9.1-green
+     - .. image:: https://img.shields.io/badge/ms2deepscore-2.9.0-green
      - .. image:: https://img.shields.io/badge/ms2query-1.5.4-red
    * - .. image:: https://img.shields.io/badge/numpy-2.1-lightgrey?logo=numpy :alt: numpy
-     - .. image:: https://img.shields.io/badge/spec2vec-0.8.0-green
-     - .. image:: https://img.shields.io/badge/ms2deepscore-2.5.4-green
+     - .. image:: https://img.shields.io/badge/spec2vec-0.9.1-green
+     - .. image:: https://img.shields.io/badge/ms2deepscore-2.9.0-green
      - .. image:: https://img.shields.io/badge/ms2query-1.5.4-red
 
 .. compatibility matrix end
@@ -295,11 +295,13 @@ Code example:
                                                            mz_tolerance=0.1)
     # Compute scores:
     similarity_cosine = mssim.CosineGreedy(tolerance=mz_tolerance).pair(spectrum1, spectrum2)
-    similarity_modified_cosine = mssim.ModifiedCosine(tolerance=mz_tolerance).pair(spectrum1, spectrum2)
+    similarity_modified_cosine = mssim.ModifiedCosineHungarian(tolerance=mz_tolerance).pair(spectrum1, spectrum2)
+    similarity_modified_cosine_approx = mssim.ModifiedCosineGreedy(tolerance=mz_tolerance).pair(spectrum1, spectrum2)
     similarity_neutral_losses = mssim.NeutralLossesCosine(tolerance=mz_tolerance).pair(spectrum1, spectrum2)
 
     print(f"similarity_cosine: {similarity_cosine}")
     print(f"similarity_modified_cosine: {similarity_modified_cosine}")
+    print(f"similarity_modified_cosine_approx: {similarity_modified_cosine_approx}")
     print(f"similarity_neutral_losses: {similarity_neutral_losses}")
 
     spectrum1.plot_against(spectrum2)
@@ -318,8 +320,15 @@ To install matchms, do:
 
   git clone https://github.com/matchms/matchms.git
   cd matchms
-  conda create --name matchms-dev python=3.12
+  # Create environment using conda
+  conda create --name matchms-dev python=3.14
   conda activate matchms-dev
+
+  # Create environment using uv
+  uv venv --python 3.14
+
+  # If you use uv
+  uv sync --group dev
 
   # If you use poetry
   python -m pip install --upgrade pip poetry

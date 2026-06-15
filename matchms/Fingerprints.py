@@ -38,10 +38,14 @@ class Fingerprints:
 
         spectrum_1 = Spectrum(mz=np.array([100, 150, 200.]),
                               intensities=np.array([0.7, 0.2, 0.1]),
-                              metadata={"inchikey": "OTMSDBZUPAUEDD-UHFFFAOYSA-N", "smiles":"CC"})
+                              metadata={"inchikey": "OTMSDBZUPAUEDD-UHFFFAOYSA-N",
+                                        "smiles":"CC",
+                                        "precursor_mz": 150.0})
         spectrum_2 = Spectrum(mz=np.array([100, 150, 200.]),
                               intensities=np.array([0.7, 0.2, 0.1]),
-                              metadata={"inchikey": "UGFAIRIUMAVXCW-UHFFFAOYSA-N","smiles": "[C-]#[O+]"})
+                              metadata={"inchikey": "UGFAIRIUMAVXCW-UHFFFAOYSA-N",
+                                        "smiles": "[C-]#[O+]",
+                                        "precursor_mz": 150.0})
         spectra = [spectrum_1, spectrum_2]
 
         fpgen = Fingerprints()

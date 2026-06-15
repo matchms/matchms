@@ -384,15 +384,14 @@ class Scores:
             scores = calculate_scores(spectra, spectra, IntersectMz()).to_array()
 
             print(scores.shape)
-            print(scores)
+            print(scores.tolist())
 
         Should output
 
         .. testoutput::
 
-             (2, 2)
-             [[1.  0.2]
-              [0.2 1. ]]
+            (2, 2)
+            [[1.0, 0.2], [0.2, 1.0]]
 
         Parameters
         ----------
