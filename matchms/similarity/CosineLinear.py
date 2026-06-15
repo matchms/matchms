@@ -1,8 +1,8 @@
-from typing import List
+from collections.abc import Sequence
 import numpy as np
-from sparsestack import StackedSparseArray  # type: ignore[import-untyped]
 from tqdm import tqdm  # type: ignore[import-untyped]
 from matchms.typing import SpectrumType
+from matchms.Scores import Scores
 from .BaseSimilarity import BaseSimilarity
 from .cosine_linear_functions import linear_cosine_score, sirius_merge_close_peaks
 
@@ -44,6 +44,7 @@ class CosineLinear(BaseSimilarity):
 
     is_commutative = True
     score_datatype = [("score", np.float64), ("matches", "int")]  # type: ignore[assignment]
+    score_fields = ("score", "matches")
 
     def __init__(self, tolerance: float = 0.1, mz_power: float = 0.0, intensity_power: float = 1.0):
         """
@@ -81,15 +82,20 @@ class CosineLinear(BaseSimilarity):
         spec2 = query.peaks.to_numpy
         spec1 = sirius_merge_close_peaks(spec1, self.tolerance)
         spec2 = sirius_merge_close_peaks(spec2, self.tolerance)
-        score, matches = linear_cosine_score(spec1, spec2, self.tolerance, self.mz_power, self.intensity_power)
+        score, matches = linear_cosine_score(
+            spec1,
+            spec2,
+            self.tolerance,
+            self.mz_power,
+            self.intensity_power,
+        )
         return np.asarray((score, matches), dtype=self.score_datatype)
 
     def matrix(
         self,
-        references: List[SpectrumType],
-        queries: List[SpectrumType],
-        array_type: str = "numpy",
-        is_symmetric: bool = False,
+        spectra_1: Sequence[SpectrumType],
+        spectra_2: Sequence[SpectrumType] | None = None,
+        score_fields: Sequence[str] | None = None,
         progress_bar: bool = True,
     ) -> np.ndarray:
         """Optimized matrix computation that precomputes merged spectra.
@@ -97,50 +103,60 @@ class CosineLinear(BaseSimilarity):
         Each spectrum is merged once (N+M calls to sirius_merge_close_peaks)
         instead of 2*N*M times in the naive double-loop approach.
         """
-        n_rows = len(references)
-        n_cols = len(queries)
+        spectra_2, is_symmetric = self._prepare_inputs(spectra_1, spectra_2)
+        selected_fields = self._resolve_score_fields(score_fields)
 
-        if is_symmetric and n_rows != n_cols:
-            raise ValueError(f"Found unequal number of spectra {n_rows} and {n_cols} while `is_symmetric` is True.")
+        n_rows = len(spectra_1)
+        n_cols = len(spectra_2)
+        result = self._create_dense_result(n_rows, n_cols, selected_fields)
 
-        merged_refs = [sirius_merge_close_peaks(r.peaks.to_numpy, self.tolerance) for r in references]
-        merged_queries = (
-            merged_refs
-            if is_symmetric
-            else [sirius_merge_close_peaks(q.peaks.to_numpy, self.tolerance) for q in queries]
-        )
+        merged_refs = [sirius_merge_close_peaks(r.peaks.to_numpy, self.tolerance) for r in spectra_1]
+        if is_symmetric:
+            merged_queries = merged_refs
+        else:
+            merged_queries = [
+                sirius_merge_close_peaks(spectrum.peaks.to_numpy, self.tolerance)
+                for spectrum in spectra_2
+            ]
 
-        idx_row_list = []
-        idx_col_list = []
-        scores_list = []
+        for i_ref in tqdm(
+            range(n_rows),
+            desc="Calculating similarities",
+            disable=not progress_bar,
+        ):
+            if is_symmetric and self.is_commutative:
+                query_range = range(i_ref, n_cols)
+            else:
+                query_range = range(n_cols)
 
-        for i_ref in tqdm(range(n_rows), desc="Calculating similarities", disable=not progress_bar):
-            j_start = i_ref if (is_symmetric and self.is_commutative) else 0
-            for i_query in range(j_start, n_cols):
+            for i_query in query_range:
                 score, matches = linear_cosine_score(
-                    merged_refs[i_ref], merged_queries[i_query], self.tolerance, self.mz_power, self.intensity_power
+                    merged_refs[i_ref],
+                    merged_queries[i_query],
+                    self.tolerance,
+                    self.mz_power,
+                    self.intensity_power,
                 )
-                result = np.asarray((score, matches), dtype=self.score_datatype)
-                if self.keep_score(result):
-                    if is_symmetric and self.is_commutative:
-                        idx_row_list += [i_ref, i_query]
-                        idx_col_list += [i_query, i_ref]
-                        scores_list += [result, result]
-                    else:
-                        idx_row_list.append(i_ref)
-                        idx_col_list.append(i_query)
-                        scores_list.append(result)
 
-        idx_row = np.array(idx_row_list, dtype=np.int_)
-        idx_col = np.array(idx_col_list, dtype=np.int_)
-        scores_data = np.array(scores_list, dtype=self.score_datatype)
+                score_array = self._as_score((score, matches))
 
-        if array_type == "numpy":
-            scores_array = np.zeros(shape=(n_rows, n_cols), dtype=self.score_datatype)
-            scores_array[idx_row, idx_col] = scores_data.reshape(-1)
-            return scores_array
-        if array_type == "sparse":
-            scores_array = StackedSparseArray(n_rows, n_cols)
-            scores_array.add_sparse_data(idx_row, idx_col, scores_data, "")
-            return scores_array
-        raise ValueError("array_type must be 'numpy' or 'sparse'.")
+                self._store_in_dense_result(
+                    result,
+                    i_ref,
+                    i_query,
+                    score_array,
+                    selected_fields,
+                )
+
+                if is_symmetric and self.is_commutative and i_ref != i_query:
+                    self._store_in_dense_result(
+                        result,
+                        i_query,
+                        i_ref,
+                        score_array,
+                        selected_fields,
+                    )
+
+        return Scores(result)
+
+

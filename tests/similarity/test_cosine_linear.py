@@ -339,7 +339,7 @@ def test_matrix_self_similarity():
         _build_spectrum([100.0, 300.0], [0.9, 0.1]),
     ]
     lc = CosineLinear(tolerance=0.1)
-    result = lc.matrix(spectra, spectra, is_symmetric=True, progress_bar=False)
+    result = lc.matrix(spectra, progress_bar=False)
     for i in range(len(spectra)):
         assert result[i, i]["score"] == pytest.approx(1.0, abs=1e-9)
 
@@ -351,7 +351,7 @@ def test_matrix_matches_pair():
         _build_spectrum([100.0, 250.0], [0.5, 0.5]),
     ]
     lc = CosineLinear(tolerance=0.1)
-    mat = lc.matrix(spectra, spectra, is_symmetric=False, progress_bar=False)
+    mat = lc.matrix(spectra, progress_bar=False)
     for i in range(2):
         for j in range(2):
             pair_result = lc.pair(spectra[i], spectra[j])
