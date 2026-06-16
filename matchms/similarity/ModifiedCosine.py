@@ -43,6 +43,7 @@ class ModifiedCosine(BaseSimilarity):
             tolerance: float = 0.1,
             intensity_power: float = 1.0,
             use_hungarian: bool = False,
+            noise_cutoff: float = 0.01,
             ):
         """Initialize the modified cosine score class.
 
@@ -57,10 +58,14 @@ class ModifiedCosine(BaseSimilarity):
             which means that the greedy algorithm is used to find the best matches.
             The greedy algorithm is typically faster than the Hungarian algorithm, and for most
             applications the results are very similar.
+        noise_cutoff:
+            Minimum relative intensity for a peak to be considered. Default is 0.01.
+            Will only be used if use_hungarian is False.
         """
         self.tolerance = tolerance
         self.intensity_power = intensity_power
         self.use_hungarian = use_hungarian
+        self.noise_cutoff = noise_cutoff
 
     def pair(self, spectrum_1: SpectrumType, spectrum_2: SpectrumType) -> tuple[float, int]:
         """Calculate approximate modified cosine score between two spectra."""
@@ -74,6 +79,7 @@ class ModifiedCosine(BaseSimilarity):
             modcos = ModifiedCosineGreedy(
                 tolerance=self.tolerance,
                 intensity_power=self.intensity_power,
+                noise_cutoff=self.noise_cutoff,
             )
         return modcos.pair(spectrum_1, spectrum_2)
 
@@ -125,7 +131,8 @@ class ModifiedCosine(BaseSimilarity):
             matching_mode="hybrid",
             tolerance=self.tolerance,
             intensity_power=self.intensity_power,
-            )
+            noise_cutoff=self.noise_cutoff,
+        )
 
         return modcos.matrix(
             spectra_1=spectra_1,

@@ -1,7 +1,7 @@
 import numpy as np
 from matchms.typing import SpectrumType
 from .BaseSimilarity import BaseSimilarityWithSparse
-from .spectrum_similarity_functions import collect_peak_pairs, score_best_matches
+from .spectrum_similarity_functions import collect_peak_pairs, filter_noise, score_best_matches
 
 
 class CosineGreedy(BaseSimilarityWithSparse):
@@ -45,6 +45,11 @@ class CosineGreedy(BaseSimilarityWithSparse):
 
         Cosine score is 0.83 with 1 matched peaks
 
+    Unlike in matchms < 1.0, this method also applies a noise filter by default,
+    which removes peaks with intensity below a certain cutoff. This is typically
+    highly beneficial for the performance of the greedy algorithm, and for most
+    applications the results are very similar to the exact assignment variant.
+    If you want to disable this noise filtering, you can set ``noise_cutoff`` to 0 or None.
     """
 
     # Set key characteristics as class attributes (see BaseSimilarity for details).
@@ -53,7 +58,12 @@ class CosineGreedy(BaseSimilarityWithSparse):
     score_fields =("score", "matches")
 
 
-    def __init__(self, tolerance: float = 0.1, mz_power: float = 0.0, intensity_power: float = 1.0):
+    def __init__(
+            self, tolerance: float = 0.1,
+            mz_power: float = 0.0,
+            intensity_power: float = 1.0,
+            noise_cutoff: float = 0.01,
+            ):
         """
         Parameters
         ----------
@@ -64,10 +74,13 @@ class CosineGreedy(BaseSimilarityWithSparse):
             case the peak intensity products will not depend on the m/z ratios.
         intensity_power:
             The power to raise intensity to in the cosine function. The default is 1.
+        noise_cutoff:
+            Minimum relative intensity for a peak to be considered. Default is 0.01.
         """
         self.tolerance = tolerance
         self.mz_power = mz_power
         self.intensity_power = intensity_power
+        self.noise_cutoff = noise_cutoff
 
     def pair(self, spectrum_1: SpectrumType, spectrum_2: SpectrumType) -> tuple[float, int]:
         """Calculate cosine score between two spectra.
@@ -99,6 +112,11 @@ class CosineGreedy(BaseSimilarityWithSparse):
 
         spec1 = spectrum_1.peaks.to_numpy
         spec2 = spectrum_2.peaks.to_numpy
+        # Filter noise from spectra by removing peaks with intensity below a certain cutoff.
+        if self.noise_cutoff and self.noise_cutoff > 0.0:
+            spec1 = np.stack(filter_noise(spec1[:, 0], spec1[:, 1], self.noise_cutoff), axis=-1)
+            spec2 = np.stack(filter_noise(spec2[:, 0], spec2[:, 1], self.noise_cutoff), axis=-1)
+
         matching_pairs = get_matching_pairs()
         if matching_pairs is None:
             return np.asarray((float(0), 0), dtype=self.score_datatype)

@@ -5,6 +5,7 @@ import numpy as np
 import pytest
 from matchms.similarity.spectrum_similarity_functions import (
     collect_peak_pairs,
+    filter_noise,
     find_matches,
     number_matching,
     number_matching_ppm,
@@ -130,3 +131,32 @@ def test_number_matching_symmetric_ppm(numba_compiled):
     assert np.all(scores == np.array([True, True, True, True, True])), "Expected different scores."
     assert np.all(row == np.array([0, 0, 1, 1, 2]))
     assert np.all(col == np.array([0, 1, 0, 1, 2]))
+
+
+def test_filter_noise_removes_peaks_below_relative_cutoff():
+    mz = np.array([100.0, 150.0, 200.0, 250.0])
+    intensities = np.array([49.0, 50.0, 100.0, 5.0])
+
+    filtered_mz, filtered_intensities = filter_noise(
+        mz,
+        intensities,
+        noise_cutoff=0.5,
+    )
+
+    np.testing.assert_array_equal(filtered_mz, np.array([150.0, 200.0]))
+    np.testing.assert_array_equal(filtered_intensities, np.array([50.0, 100.0]))
+
+
+@pytest.mark.parametrize("cutoff", [0.0, 0.01])
+def test_filter_noise_with_zero_or_low_enough_cutoff_keeps_all_peaks(cutoff):
+    mz = np.array([100.0, 150.0, 200.0])
+    intensities = np.array([1.2, 5.0, 100.0])
+
+    filtered_mz, filtered_intensities = filter_noise(
+        mz,
+        intensities,
+        noise_cutoff=cutoff,
+    )
+
+    np.testing.assert_array_equal(filtered_mz, mz)
+    np.testing.assert_array_equal(filtered_intensities, intensities)

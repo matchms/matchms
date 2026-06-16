@@ -28,7 +28,7 @@ class _BaseFlashSimilarity(BaseSimilarity):
         remove_precursor: bool = False,
         precursor_window: float = 1.6,
         noise_cutoff: float = 0.01,
-        normalize_to_half: bool = True,
+        normalize_to_half: bool = False,
         merge_within: float = 0,
         identity_precursor_tolerance: float | None = None,
         identity_use_ppm: bool = False,
@@ -265,6 +265,13 @@ class FlashEntropy(_BaseFlashSimilarity):
     score_datatype = np.float32
     score_fields = ("score",)
 
+    def __init__(self, *args, normalize_to_half: bool = True, **kwargs):
+        super().__init__(
+            *args,
+            normalize_to_half=normalize_to_half,
+            **kwargs,
+        )
+
     @property
     def _weighing_type(self) -> str:
         return "entropy"
@@ -410,7 +417,7 @@ class CosineFlash(_BaseFlashSimilarity):
         Default is 0.01 (1%).
     normalize_to_half:
         If True, normalize intensities such that the sum of intensities is 0.5.
-        Default is True.
+        Default is False.
     merge_within:
         If > 0, merge peaks within this distance (in Da) to a single peak.
         Default is 0.
