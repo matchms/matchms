@@ -29,6 +29,38 @@ def fragments(sample_spectra):
     return CSRFragmentCollection(sample_spectra, mz_precision=0.01)
 
 
+
+@pytest.fixture
+def floor_rounding_fragments():
+    spectra = [
+        _spectrum([100.019, 150.012], [0.1, 0.5]),
+        _spectrum([200.019, 250.012], [0.2, 0.6]),
+    ]
+    return CSRFragmentCollection(
+        spectra,
+        mz_precision=0.01,
+        mz_rounding="floor",
+        index_dtype=np.int32,
+    )
+
+
+def _spectrum(mz, intensities):
+    return Spectrum(
+        mz=np.asarray(mz, dtype="float"),
+        intensities=np.asarray(intensities, dtype="float"),
+    )
+
+
+def _assert_preserves_binning_config(collection):
+    assert collection.mz_precision == pytest.approx(0.01)
+    assert collection.mz_rounding == "floor"
+    assert collection.index_dtype == np.dtype(np.int32)
+
+    # This value distinguishes floor from round at mz_precision=0.01:
+    # floor -> 100.01, round -> 100.02.
+    assert collection.bin_to_mz(collection.mz_to_bin(100.019)) == pytest.approx(100.01)
+
+
 def test_construct_from_spectra(sample_spectra):
     fragments = CSRFragmentCollection(sample_spectra, mz_precision=0.01)
 
@@ -449,3 +481,36 @@ def test_csr_fragment_collection_select_by_relative_intensity():
 
     np.testing.assert_allclose(mz, np.array([20, 30], dtype="float"), atol=1e-6)
     np.testing.assert_array_equal(intensities, np.array([10, 100], dtype="float"))
+
+
+
+def test_csr_fragment_collection_from_array_preserves_binning_config(floor_rounding_fragments):
+    reconstructed = CSRFragmentCollection.from_array(
+        floor_rounding_fragments.array,
+        mz_precision=floor_rounding_fragments.mz_precision,
+        mz_rounding=floor_rounding_fragments.mz_rounding,
+        index_dtype=floor_rounding_fragments.index_dtype,
+    )
+
+    _assert_preserves_binning_config(reconstructed)
+
+
+@pytest.mark.parametrize(
+    "operation",
+    [
+        lambda fragments: fragments.copy(),
+        lambda fragments: fragments.take([1, 0]),
+        lambda fragments: fragments.filter([True, False]),
+        lambda fragments: fragments.slice_mz(mz_min=100.0, mz_max=210.0),
+        lambda fragments: fragments.select_by_intensity(0.15, 0.6),
+        lambda fragments: fragments.select_by_relative_intensity(0.2, 1.0),
+        lambda fragments: fragments.keep_top_k_per_row_variable(np.array([1, 1])),
+    ],
+)
+def test_csr_fragment_collection_derived_collections_preserve_binning_config(
+    floor_rounding_fragments,
+    operation,
+):
+    derived = operation(floor_rounding_fragments)
+
+    _assert_preserves_binning_config(derived)
