@@ -195,8 +195,29 @@ class CSRFragmentCollection(FragmentCollection):
         self._array = self._construct_from_spectra_list(spectra)
 
     @classmethod
-    def from_array(cls, array: csr_array, *, mz_precision: float = 1e-6) -> FragmentCollectionType:
-        return cls(array=array, mz_precision=mz_precision)
+    def from_array(
+        cls,
+        array: csr_array,
+        *,
+        mz_precision: float = 1e-6,
+        mz_rounding: str = "round",
+        index_dtype: np.dtype | type = np.int64,
+    ) -> FragmentCollectionType:
+        return cls(
+            array=array,
+            mz_precision=mz_precision,
+            mz_rounding=mz_rounding,
+            index_dtype=index_dtype,
+        )
+
+    def _from_array(self, array: csr_array) -> FragmentCollectionType:
+        """Return a new collection preserving this collection's binning configuration."""
+        return self.__class__.from_array(
+            array,
+            mz_precision=self.mz_precision,
+            mz_rounding=self.mz_rounding,
+            index_dtype=self.index_dtype,
+        )
 
     def _construct_from_spectra_list(self, spectra: list[Spectrum]) -> csr_array:
         lengths = np.array([len(spec.mz) for spec in spectra])
@@ -243,7 +264,7 @@ class CSRFragmentCollection(FragmentCollection):
         )
 
     def copy(self) -> FragmentCollectionType:
-        return self.__class__.from_array(self._array.copy(), mz_precision=self.mz_precision)
+        return self._from_array(self._array.copy())
 
     def mz_to_bin(self, mz: np.ndarray | float) -> np.ndarray:
         """Convert m/z values to integer grid/bin indices.
@@ -300,7 +321,7 @@ class CSRFragmentCollection(FragmentCollection):
     def take(self, indices: Iterable[int]) -> FragmentCollectionType:
         """Return a new collection with selected rows in the given order."""
         indices = np.asarray(list(indices), dtype=self.index_dtype)
-        return self.__class__.from_array(self._array[indices, :], mz_precision=self.mz_precision)
+        return self._from_array(self._array[indices, :])
 
     def reorder(self, indices: Iterable[int]) -> FragmentCollectionType:
         """Alias for take()."""
@@ -366,7 +387,7 @@ class CSRFragmentCollection(FragmentCollection):
             shape=self._array.shape,
         ).tocsr()
 
-        return self.__class__.from_array(new_array, mz_precision=self.mz_precision)
+        return self._from_array(new_array)
 
     def __getitem__(self, key):
         """Support row slicing and optional row/column slicing.
@@ -483,7 +504,7 @@ class CSRFragmentCollection(FragmentCollection):
             shape=self._array.shape,
         ).tocsr()
 
-        return self.__class__.from_array(new_array, mz_precision=self.mz_precision)
+        return self._from_array(new_array)
 
     def select_by_relative_intensity(
             self,
@@ -503,7 +524,7 @@ class CSRFragmentCollection(FragmentCollection):
         coo = self._array.tocoo()
 
         if coo.data.size == 0:
-            return self.__class__.from_array(self._array.copy(), mz_precision=self.mz_precision)
+            return self._from_array(self._array.copy())
 
         row_max = self._array.max(axis=1).toarray().ravel()
 
@@ -525,7 +546,7 @@ class CSRFragmentCollection(FragmentCollection):
             shape=self._array.shape,
         ).tocsr()
 
-        return self.__class__.from_array(new_array, mz_precision=self.mz_precision)
+        return self._from_array(new_array)
 
     def keep_top_k_per_row_variable(
             self,
@@ -595,4 +616,4 @@ class CSRFragmentCollection(FragmentCollection):
             shape=csr.shape,
         )
 
-        return self.__class__.from_array(new_array, mz_precision=self.mz_precision)
+        return self._from_array(new_array)
