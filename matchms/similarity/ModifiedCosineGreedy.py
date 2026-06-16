@@ -4,7 +4,7 @@ from matchms.typing import SpectrumType
 from ._precursor_validation import get_valid_precursor_mz
 from .BaseSimilarity import BaseSimilarityWithSparse
 from .CosineGreedy import CosineGreedy
-from .spectrum_similarity_functions import collect_peak_pairs, score_best_matches
+from .spectrum_similarity_functions import collect_peak_pairs, filter_noise, score_best_matches
 
 
 logger = logging.getLogger("matchms")
@@ -25,13 +25,24 @@ class ModifiedCosineGreedy(BaseSimilarityWithSparse):
 
     See Watrous et al. [PNAS, 2012, https://www.pnas.org/content/109/26/E1743]
     for further details.
+
+    Unlike in matchms < 1.0, this method also applies a noise filter by default,
+    which removes peaks with intensity below a certain cutoff. This is typically
+    highly beneficial for the performance of the greedy algorithm, and for most
+    applications the results are very similar to the exact assignment variant.
+    If you want to disable this noise filtering, you can set ``noise_cutoff`` to 0 or None.
     """
 
     is_commutative = True
     score_datatype = [("score", np.float64), ("matches", "int")]
     score_fields = ("score", "matches")
 
-    def __init__(self, tolerance: float = 0.1, mz_power: float = 0.0, intensity_power: float = 1.0):
+    def __init__(
+            self, tolerance: float = 0.1,
+            mz_power: float = 0.0,
+            intensity_power: float = 1.0,
+            noise_cutoff: float = 0.01,
+            ):
         """Initialize approximate modified cosine.
 
         Parameters
@@ -43,10 +54,13 @@ class ModifiedCosineGreedy(BaseSimilarityWithSparse):
             case the peak intensity products will not depend on the m/z ratios.
         intensity_power:
             The power to raise intensity to in the cosine function. The default is 1.
+        noise_cutoff:
+            Minimum relative intensity for a peak to be considered. Default is 0.01.
         """
         self.tolerance = tolerance
         self.mz_power = mz_power
         self.intensity_power = intensity_power
+        self.noise_cutoff = noise_cutoff
 
     def pair(self, spectrum_1: SpectrumType, spectrum_2: SpectrumType) -> tuple[float, int]:
         """Calculate approximate modified cosine score between two spectra."""
@@ -84,6 +98,11 @@ class ModifiedCosineGreedy(BaseSimilarityWithSparse):
 
         spec1 = spectrum_1.peaks.to_numpy
         spec2 = spectrum_2.peaks.to_numpy
+        # Filter noise from spectra by removing peaks with intensity below a certain cutoff.
+        if self.noise_cutoff and self.noise_cutoff > 0.0:
+            spec1 = np.stack(filter_noise(spec1[:, 0], spec1[:, 1], self.noise_cutoff), axis=-1)
+            spec2 = np.stack(filter_noise(spec2[:, 0], spec2[:, 1], self.noise_cutoff), axis=-1)
+
         matching_pairs = get_matching_pairs()
         if matching_pairs.shape[0] == 0:
             return np.asarray((float(0), 0), dtype=self.score_datatype)
