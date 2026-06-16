@@ -1,10 +1,11 @@
 import pickle
 from abc import abstractmethod
-from collections.abc import Iterable
+from collections.abc import Iterable, Sequence
 from pathlib import Path
 from typing import Any
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity, euclidean_distances
+from matchms.Scores import Scores
 from matchms.similarity.BaseSimilarity import BaseSimilarity
 from matchms.typing import SpectrumType
 
@@ -39,6 +40,9 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
     index_k : int
         Number of nearest neighbors used in the ANN index; if index is built.
     """
+    is_commutative = True
+    score_datatype = np.float64
+    score_fields = ("score",)
 
     def __init__(self, similarity: str = "cosine"):
         self.similarity = similarity
@@ -99,16 +103,16 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
 
         if npy_path is not None:
             if Path(npy_path).exists():
-                # If file path is provided and exists, load embeddings
-                embs = self.load_embeddings(npy_path)
+                embeddings = self.load_embeddings(npy_path)
             else:
-                # If file path is provided and does not exist, compute embeddings and store them
-                embs = self.compute_embeddings(spectra)
-                self.store_embeddings(npy_path, embs)
+                if spectra is None:
+                    raise ValueError("Spectra must be provided when storing newly computed embeddings.")
+                embeddings = self.compute_embeddings(spectra)
+                self.store_embeddings(npy_path, embeddings)
         else:
-            # If no file path is provided, compute embeddings
-            embs = self.compute_embeddings(spectra)
-        return embs
+            embeddings = self.compute_embeddings(spectra)
+
+        return self._validate_embeddings(embeddings)
 
     def pair(self, spectrum_1: SpectrumType, spectrum_2: SpectrumType) -> float:
         """Compute similarity between a pair of spectra.
@@ -119,32 +123,32 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
             Reference spectrum.
         spectrum_2 : SpectrumType
             Query spectrum.
-
-        Returns
-        -------
-        float
-            Similarity score between the spectra.
         """
-        return self.matrix([spectrum_1], [spectrum_2])[0, 0]
+        score = self.matrix([spectrum_1], [spectrum_2], progress_bar=False).to_array()[0, 0]
+        return np.asarray(score, dtype=self.score_datatype)
 
     def matrix(
-            self,
-            spectra_1: list[SpectrumType],
-            spectra_2: list[SpectrumType],
-            array_type: str = "numpy",
-            is_symmetric: bool = True) -> np.ndarray:
+        self,
+        spectra_1: Sequence[SpectrumType],
+        spectra_2: Sequence[SpectrumType] | None = None,
+        score_fields: Sequence[str] | None = None,
+        progress_bar: bool = True,
+    ) -> Scores:
         """Compute similarity matrix between spectra_1 and spectra_2.
 
         Parameters
         ----------
-        spectra_1:
-            List of spectra.
-        spectra_2:
-            List of input spectra.
-        array_type:
-            Type of array to return. Must be "numpy".
-        is_symmetric:
-            Whether the matrix is symmetric. Must be True.
+        spectra_1
+            First collection of spectra.
+        spectra_2
+            Second collection of spectra. If ``None``, compare ``spectra_1``
+            against itself.
+        score_fields
+            Requested score fields. Embedding similarities expose only
+            ``("score",)``.
+        progress_bar
+            Included for API compatibility. Embeddings are computed in batch and
+            this implementation currently does not display a progress bar.
 
         Returns
         -------
@@ -156,15 +160,46 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
         ValueError
             If array_type is not "numpy" or is_symmetric is False.
         """
-        if array_type != "numpy" or not is_symmetric:
-            raise ValueError("Any embedding base similarity matrix is supposed to be dense and symmetric.")
+        del progress_bar  # Not used in this implementation, but included for API compatibility.
 
-        # Compute embeddings
-        embs_ref = self.compute_embeddings(spectra_1)
-        embs_query = self.compute_embeddings(spectra_2)
+        selected_fields = self._resolve_score_fields(score_fields)
+        if selected_fields != ("score",):
+            raise NotImplementedError(
+                f"{self.__class__.__name__}.matrix() supports only score_fields=('score',)."
+            )
 
-        # Compute pairwise similarities matrix
-        return self.pairwise_similarity_fn(embs_ref, embs_query)
+        spectra_2, is_symmetric = self._prepare_inputs(spectra_1, spectra_2)
+
+        embeddings_1 = self._validate_embeddings(self.compute_embeddings(spectra_1))
+        if is_symmetric:
+            embeddings_2 = embeddings_1
+        else:
+            embeddings_2 = self._validate_embeddings(self.compute_embeddings(spectra_2))
+
+        similarity_matrix = self.pairwise_similarity_fn(embeddings_1, embeddings_2)
+        similarity_matrix = np.asarray(similarity_matrix, dtype=self.score_datatype)
+
+        if similarity_matrix.shape != (len(spectra_1), len(spectra_2)):
+            raise ValueError(
+                "Embedding similarity matrix has unexpected shape "
+                f"{similarity_matrix.shape}; expected {(len(spectra_1), len(spectra_2))}."
+            )
+
+        return Scores({"score": similarity_matrix})
+
+    def compute_similarity_matrix_from_embeddings(
+        self,
+        embeddings_1: np.ndarray,
+        embeddings_2: np.ndarray | None = None,
+    ) -> np.ndarray:
+        """Compute a raw NumPy similarity matrix from precomputed embeddings.
+
+        This helper keeps the old raw-array use case available without changing
+        the public :meth:`matrix` contract inherited from ``BaseSimilarity``.
+        """
+        embeddings_1 = self._validate_embeddings(embeddings_1)
+        embeddings_2 = embeddings_1 if embeddings_2 is None else self._validate_embeddings(embeddings_2)
+        return np.asarray(self.pairwise_similarity_fn(embeddings_1, embeddings_2), dtype=self.score_datatype)
 
     def build_ann_index(
             self,
@@ -201,7 +236,7 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
             If an unsupported index_backend is specified.
         """
         # Compute reference embeddings
-        embs_ref = self.get_embeddings(reference_spectra, embeddings_path)
+        embeddings_reference = self.get_embeddings(reference_spectra, embeddings_path)
 
         if index_backend == "pynndescent":
             if not pynndescent:
@@ -210,12 +245,15 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
             self.index_k = k
             self.index_kwargs = index_kwargs
 
-            # Build ANN index
-            index = pynndescent.NNDescent(embs_ref, metric=self.similarity, n_neighbors=k, **index_kwargs)
+            index = pynndescent.NNDescent(
+                embeddings_reference,
+                metric=self.similarity,
+                n_neighbors=k,
+                **index_kwargs,
+            )
         else:
             raise ValueError(f"Only pynndescent is supported for now. Got {index_backend}.")
 
-        # Keep index in memory
         self.index = index
         return self.index
 
@@ -252,16 +290,12 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
             raise ValueError(f"k ({k}) is larger than the k used to build the index ({self.index_k}).")
 
         if isinstance(query_spectra, np.ndarray):
-            embs_query = query_spectra
-            if embs_query.ndim != 2:
-                raise ValueError(f"Expected 2D embeddings array, got {embs_query.ndim}D array.")
+            embeddings_query = self._validate_embeddings(query_spectra)
         else:
-            # Compute query embeddings
-            embs_query = self.compute_embeddings(query_spectra)
+            embeddings_query = self._validate_embeddings(self.compute_embeddings(query_spectra))
 
-        # Get ANN indices
         if self.index_backend == "pynndescent":
-            neighbors, distances = self.index.query(embs_query, k=k)
+            neighbors, distances = self.index.query(embeddings_query, k=k)
             similarities = self._distances_to_similarities(distances)
         else:
             raise ValueError(f"Only pynndescent is supported for now. Got {self.index_backend}.")
@@ -311,6 +345,16 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
         raise ValueError(f"Only cosine and euclidean similarities are supported for now. Got {self.similarity}.")
 
     @staticmethod
+    def _validate_embeddings(embeddings: np.ndarray) -> np.ndarray:
+        """Validate and return embeddings as a two-dimensional float array."""
+        embeddings = np.asarray(embeddings)
+        if embeddings.ndim != 2:
+            raise ValueError(f"Expected 2D embeddings array, got {embeddings.ndim}D array.")
+        if not np.issubdtype(embeddings.dtype, np.number):
+            raise ValueError("Embeddings must contain numeric values.")
+        return embeddings
+
+    @staticmethod
     def load_embeddings(npy_path: str | Path) -> np.ndarray:
         """Load embeddings from a numpy file.
 
@@ -329,23 +373,22 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
         ValueError
             If loaded array is not 2D.
         """
-        embs = np.load(npy_path)
-        if embs.ndim != 2:
-            raise ValueError(f"Expected 2D embeddings array, got {embs.ndim}D array.")
-        return embs
+        embeddings = np.load(npy_path)
+        return BaseEmbeddingSimilarity._validate_embeddings(embeddings)
 
     @staticmethod
-    def store_embeddings(npy_path: str | Path, embs: np.ndarray) -> None:
+    def store_embeddings(npy_path: str | Path, embeddings: np.ndarray) -> None:
         """Store embeddings in a numpy file.
 
         Parameters
         ----------
         npy_path : Union[str, Path]
             Path to save the embeddings to.
-        embs : np.ndarray
+        embeddings : np.ndarray
             Embeddings array to store.
         """
-        np.save(npy_path, embs)
+        embeddings = BaseEmbeddingSimilarity._validate_embeddings(embeddings)
+        np.save(npy_path, embeddings)
 
     def save_ann_index(self, path: str | Path) -> None:
         """Save the ANN index to disk.
@@ -368,7 +411,7 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
             "backend": self.index_backend,
             "similarity": self.similarity,
             "index_kwargs": self.index_kwargs,
-            "index_k": self.index_k
+            "index_k": self.index_k,
         }
 
         with open(path, "wb") as f:

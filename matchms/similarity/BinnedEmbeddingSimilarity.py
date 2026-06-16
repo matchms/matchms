@@ -5,21 +5,25 @@ from .BaseEmbeddingSimilarity import BaseEmbeddingSimilarity
 
 
 class BinnedEmbeddingSimilarity(BaseEmbeddingSimilarity):
-    """A similarity measure that bins spectra into a fixed number of bins and uses the binned
-    intensities as embedding features. By default, the similarity between spectra is computed as the cosine
-    similarity between their binned representations.
+    """Compare spectra by cosine/euclidean similarity of binned intensities.
+
+    Spectra are converted to fixed-length vectors by summing intensities in
+    equally spaced m/z bins. Each vector is normalized to its maximum bin
+    intensity when that maximum is positive. Empty spectra, spectra without peaks
+    in the configured m/z range, and spectra with only zero intensities produce a
+    zero vector instead of NaNs.
 
     Parameters
     ----------
-    similarity : str, optional
-        The similarity measure to use for comparing embeddings. Default is "cosine".
-        Options are "cosine" or "euclidean".
-    max_mz : float, optional
-        The maximum m/z value to consider when binning. Default is 1005.
-    bin_width : float, optional
-        The width of each bin in m/z units. Default is 1.
-    intensity_power:
-        The power to raise the peak intensities. Default is 1.
+    similarity
+        Similarity measure used for comparing embeddings. Supported values are
+        ``"cosine"`` and ``"euclidean"``.
+    max_mz
+        Maximum m/z value to include. Values outside ``[0, max_mz]`` are ignored.
+    bin_width
+        Width of each m/z bin.
+    intensity_power
+        Power applied to peak intensities before binning.
     """
     def __init__(
         self, similarity: str = "cosine",
@@ -28,9 +32,19 @@ class BinnedEmbeddingSimilarity(BaseEmbeddingSimilarity):
         intensity_power: float = 1
     ):
         super().__init__(similarity=similarity)
+        if max_mz <= 0:
+            raise ValueError("max_mz must be > 0.")
+        if bin_width <= 0:
+            raise ValueError("bin_width must be > 0.")
+
         self.max_mz = max_mz
         self.bin_width = bin_width
         self.intensity_power = intensity_power
+
+    @property
+    def n_bins(self) -> int:
+        """Number of bins used for each embedding vector."""
+        return int(np.floor(self.max_mz / self.bin_width)) + 1
 
     def _bin_spectrum(self, spectrum: SpectrumType) -> np.ndarray:
         """Bin a spectrum's peaks into fixed-width m/z bins.
@@ -45,31 +59,27 @@ class BinnedEmbeddingSimilarity(BaseEmbeddingSimilarity):
         np.ndarray
             Array of binned and normalized intensities.
         """
-        # NOTE: copypaste from https://github.com/pluskal-lab/MassSpecGym/blob/f525a5e55a39ec4caa4f1a51e64acd046713179e/massspecgym/data/transforms.py#L97
         mzs = spectrum.peaks.mz
-        intensities = spectrum.peaks.intensities ** self.intensity_power
+        intensities = spectrum.peaks.intensities
+        binned_intensities = np.zeros(self.n_bins, dtype=np.float64)
 
-        # Calculate the number of bins
-        num_bins = int(np.ceil(self.max_mz / self.bin_width))
+        if mzs.size == 0:
+            return binned_intensities
 
-        # Calculate the bin indices for each mass
-        bin_indices = np.floor(mzs / self.bin_width).astype(int)
+        valid_mask = (mzs >= 0) & (mzs <= self.max_mz)
+        if not np.any(valid_mask):
+            return binned_intensities
 
-        # Filter out mzs that exceed max_mz
-        valid_indices = bin_indices[mzs <= self.max_mz]
-        valid_intensities = intensities[mzs <= self.max_mz]
+        valid_mzs = mzs[valid_mask]
+        valid_intensities = intensities[valid_mask] ** self.intensity_power
 
-        # Clip bin indices to ensure they are within the valid range
-        valid_indices = np.clip(valid_indices, 0, num_bins - 1)
+        bin_indices = np.floor(valid_mzs / self.bin_width).astype(np.int64)
+        bin_indices = np.clip(bin_indices, 0, self.n_bins - 1)
+        np.add.at(binned_intensities, bin_indices, valid_intensities)
 
-        # Initialize an array to store the binned intensities
-        binned_intensities = np.zeros(num_bins)
-
-        # Use np.add.at to sum intensities in the appropriate bins
-        np.add.at(binned_intensities, valid_indices, valid_intensities)
-
-        # Normalize the intensities to relative intensities
-        binned_intensities /= np.max(binned_intensities)
+        max_intensity = np.max(binned_intensities)
+        if max_intensity > 0:
+            binned_intensities /= max_intensity
 
         return binned_intensities
 
@@ -86,11 +96,7 @@ class BinnedEmbeddingSimilarity(BaseEmbeddingSimilarity):
         np.ndarray
             Array of shape (n_spectra, n_bins) containing the binned embeddings.
         """
-        spectra_list = list(spectra)
-        embeddings = []
-
-        for spectrum in spectra_list:
-            binned_spectrum = self._bin_spectrum(spectrum)
-            embeddings.append(binned_spectrum)
-
-        return np.array(embeddings)
+        embeddings = [self._bin_spectrum(spectrum) for spectrum in spectra]
+        if not embeddings:
+            return np.zeros((0, self.n_bins), dtype=np.float64)
+        return np.vstack(embeddings)
