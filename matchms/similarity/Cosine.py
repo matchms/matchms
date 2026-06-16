@@ -38,6 +38,7 @@ class Cosine(BaseSimilarity):
             tolerance: float = 0.1,
             intensity_power: float = 1.0,
             use_hungarian: bool = False,
+            noise_cutoff: float = 0.01,
             ):
         """Initialize cosine score class.
 
@@ -52,10 +53,14 @@ class Cosine(BaseSimilarity):
             which means that the greedy algorithm is used to find the best matches.
             The greedy algorithm is typically faster than the Hungarian algorithm, and for most
             applications the results are very similar.
+        noise_cutoff:
+            Minimum relative intensity for a peak to be considered. Default is 0.01.
+            Will only be used if use_hungarian is False.
         """
         self.tolerance = tolerance
         self.intensity_power = intensity_power
         self.use_hungarian = use_hungarian
+        self.noise_cutoff = noise_cutoff
 
     def pair(self, spectrum_1: SpectrumType, spectrum_2: SpectrumType) -> tuple[float, int]:
         """Calculate approximate modified cosine score between two spectra."""
@@ -69,6 +74,7 @@ class Cosine(BaseSimilarity):
             cosine = CosineGreedy(
                 tolerance=self.tolerance,
                 intensity_power=self.intensity_power,
+                noise_cutoff=self.noise_cutoff,
             )
         return cosine.pair(spectrum_1, spectrum_2)
 
@@ -120,7 +126,8 @@ class Cosine(BaseSimilarity):
             matching_mode="fragment",
             tolerance=self.tolerance,
             intensity_power=self.intensity_power,
-            )
+            noise_cutoff=self.noise_cutoff,
+        )
         return cosine.matrix(
             spectra_1=spectra_1,
             spectra_2=spectra_2,
