@@ -28,7 +28,7 @@ class _BaseFlashSimilarity(BaseSimilarity):
         remove_precursor: bool = False,
         precursor_window: float = 1.6,
         noise_cutoff: float = 0.01,
-        normalize_to_half: bool = True,
+        normalize_to_half: bool = False,
         merge_within: float = 0,
         identity_precursor_tolerance: float | None = None,
         identity_use_ppm: bool = False,
@@ -410,7 +410,7 @@ class CosineFlash(_BaseFlashSimilarity):
         Default is 0.01 (1%).
     normalize_to_half:
         If True, normalize intensities such that the sum of intensities is 0.5.
-        Default is True.
+        Default is False.
     merge_within:
         If > 0, merge peaks within this distance (in Da) to a single peak.
         Default is 0.
