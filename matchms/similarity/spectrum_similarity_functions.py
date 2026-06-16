@@ -4,9 +4,14 @@ from numba.typed import List
 
 
 @njit
-def collect_peak_pairs(spec1: np.ndarray, spec2: np.ndarray,
-                       tolerance: float, shift: float = 0, mz_power: float = 0.0,
-                       intensity_power: float = 1.0):
+def collect_peak_pairs(
+    spec1: np.ndarray,
+    spec2: np.ndarray,
+    tolerance: float,
+    shift: float = 0,
+    mz_power: float = 0.0,
+    intensity_power: float = 1.0
+    ):
     """Find matching pairs between two spectra.
 
     Args
@@ -185,3 +190,24 @@ def number_matching_symmetric_ppm(numbers_1, tolerance_ppm):
                     rows.append(j)
                     cols.append(i)
     return np.array(rows), np.array(cols), np.array(data)
+
+
+def filter_noise(
+        mz: np.ndarray,
+        intensities: np.ndarray,
+        noise_cutoff: float,
+        ) -> np.ndarray:
+    """Filter noise from spectra by removing peaks with intensity below a certain cutoff.
+
+    Parameters
+    ----------
+    mz:
+        Array of m/z values. Must be the same length as intensities.
+    intensities:
+        Array of intensity values. Must be the same length as mz.
+    noise_cutoff:
+        Peaks with intensity below this cutoff (relative to the maximum intensity) will be removed.
+    """
+    thr = intensities.max() * noise_cutoff
+    mask = intensities >= thr
+    return mz[mask], intensities[mask]

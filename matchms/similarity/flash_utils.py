@@ -1,4 +1,5 @@
 import numpy as np
+from .spectrum_similarity_functions import filter_noise
 
 
 # ===================== library index =====================
@@ -299,9 +300,7 @@ def _clean_and_weight(
 
     # (optional) remove noise peaks below a fraction of max intensity
     if noise_cutoff and noise_cutoff > 0.0:
-        thr = intensities.max() * noise_cutoff
-        mask = intensities >= thr
-        mz, intensities = mz[mask], intensities[mask]
+        mz, intensities = filter_noise(mz, intensities, noise_cutoff)
         if mz.size == 0:
             return np.empty((0, 2), dtype=dtype)
 
