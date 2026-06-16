@@ -265,6 +265,13 @@ class FlashEntropy(_BaseFlashSimilarity):
     score_datatype = np.float32
     score_fields = ("score",)
 
+    def __init__(self, *args, normalize_to_half: bool = True, **kwargs):
+        super().__init__(
+            *args,
+            normalize_to_half=normalize_to_half,
+            **kwargs,
+        )
+
     @property
     def _weighing_type(self) -> str:
         return "entropy"

@@ -29,7 +29,7 @@ def test_user_workflow():
             ["select_by_mz", {"mz_from": 0, "mz_to": 1000}],
             ["require_minimum_number_of_peaks", {"n_required": 5}],
         ],
-        score_computations=[["cosinegreedy", {"tolerance": 0.3}]],
+        score_computations=[["cosinegreedy", {"tolerance": 0.3, "noise_cutoff": None}]],
     )
 
     pipeline = Pipeline(workflow)

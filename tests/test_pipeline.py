@@ -71,7 +71,7 @@ def test_pipeline_symmetric():
     assert pipeline.scores is not None
     assert pipeline.scores.shape == (5, 5)
 
-    expected = np.array([[1.0, 0.30384404], [0.30384404, 1.0]])
+    expected = np.array([[1.0, 0.30385111], [0.30385111, 1.0]])
     assert np.allclose(scores[3:, 3:], expected)
     assert np.allclose(np.diag(scores), 1.0), "Diagonal should all be 1.0"
 
@@ -136,7 +136,7 @@ def test_pipeline_symmetric_masking():
     assert pipeline.scores is not None
     assert pipeline.scores.shape == (5, 5)
 
-    expected = np.array([[1.0, 0.30384404], [0.30384404, 1.0]])
+    expected = np.array([[1.0, 0.30385111], [0.30385111, 1.0]])
     assert np.allclose(scores[3:, 3:], expected)
     assert np.allclose(np.diag(scores), 1.0), "Diagonal should all be 1.0"
 
@@ -159,7 +159,7 @@ def test_pipeline_symmetric_custom_score():
     assert pipeline.scores is not None
     assert pipeline.scores.shape == (5, 5)
 
-    expected = np.array([[1.0, 0.30384404], [0.30384404, 1.0]])
+    expected = np.array([[1.0, 0.30385111], [0.30385111, 1.0]])
     assert np.allclose(scores[3:, 3:], expected)
     assert np.allclose(np.diag(scores), 1.0), "Diagonal should all be 1.0"
 
@@ -183,7 +183,7 @@ def test_pipeline_non_symmetric():
     assert pipeline.scores is not None
     assert pipeline.scores.shape == (5, 10)
 
-    expected = np.array([[1.0, 0.30384404], [0.30384404, 1.0]])
+    expected = np.array([[1.0, 0.30385111], [0.30385111, 1.0]])
     assert np.allclose(scores[3:, 8:], expected)
 
 
@@ -203,7 +203,7 @@ def test_pipeline_from_yaml():
     assert pipeline.scores is not None
     assert pipeline.scores.shape == (5, 5)
 
-    expected = np.array([[1.0, 0.30384404], [0.30384404, 1.0]])
+    expected = np.array([[1.0, 0.30385111], [0.30385111, 1.0]])
     assert np.allclose(scores[3:, 3:], expected)
     assert np.allclose(np.diag(scores), 1.0), "Diagonal should all be 1.0"
 
