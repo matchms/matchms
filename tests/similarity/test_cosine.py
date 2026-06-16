@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from matchms import Spectrum
+from matchms import SpectraCollection, Spectrum
 from matchms.similarity import (
     Cosine,
     CosineFlash,
@@ -64,9 +64,13 @@ def test_cosine_pair_matches_hungarian_when_use_hungarian_true():
     assert wrapped_score["matches"] == direct_score["matches"]
 
 
-def test_cosine_matrix_matches_flash_cosine_when_use_hungarian_false():
+@pytest.mark.parametrize("use_collection", [True, False])
+def test_cosine_matrix_matches_flash_cosine_when_use_hungarian_false(use_collection):
     spectrum_1, spectrum_2, spectrum_3 = _make_test_spectra()
     spectra = [spectrum_1, spectrum_2, spectrum_3]
+
+    if use_collection:
+        spectra = SpectraCollection(spectra)
 
     wrapped = Cosine(tolerance=0.1, use_hungarian=False)
     direct = CosineFlash(matching_mode="fragment", tolerance=0.1)
@@ -89,9 +93,12 @@ def test_cosine_matrix_matches_flash_cosine_when_use_hungarian_false():
     )
 
 
-def test_cosine_matrix_matches_hungarian_when_use_hungarian_true():
+@pytest.mark.parametrize("use_collection", [True, False])
+def test_cosine_matrix_matches_hungarian_when_use_hungarian_true(use_collection):
     spectrum_1, spectrum_2, spectrum_3 = _make_test_spectra()
     spectra = [spectrum_1, spectrum_2, spectrum_3]
+    if use_collection:
+        spectra = SpectraCollection(spectra)
 
     wrapped = Cosine(tolerance=0.1, use_hungarian=True)
     direct = CosineHungarian(tolerance=0.1)
@@ -114,9 +121,13 @@ def test_cosine_matrix_matches_hungarian_when_use_hungarian_true():
     )
 
 
-def test_cosine_matrix_score_field_selection():
+@pytest.mark.parametrize("use_collection", [True, False])
+def test_cosine_matrix_score_field_selection(use_collection):
     spectrum_1, spectrum_2, spectrum_3 = _make_test_spectra()
     spectra = [spectrum_1, spectrum_2, spectrum_3]
+
+    if use_collection:
+        spectra = SpectraCollection(spectra)
 
     scores = Cosine(use_hungarian=False).matrix(
         spectra,
@@ -147,10 +158,14 @@ def test_cosine_pair_and_matrix_are_consistent_for_single_pair():
     assert matrix_scores["matches"].to_array()[0, 0] == pair_score["matches"]
 
 
+@pytest.mark.parametrize("use_collection", [True, False])
 @pytest.mark.parametrize("use_hungarian", [False, True])
-def test_cosine_symmetric_matrix_has_expected_fields_and_shape(use_hungarian):
+def test_cosine_symmetric_matrix_has_expected_fields_and_shape(use_hungarian, use_collection):
     spectrum_1, spectrum_2, spectrum_3 = _make_test_spectra()
     spectra = [spectrum_1, spectrum_2, spectrum_3]
+
+    if use_collection:
+        spectra = SpectraCollection(spectra)
 
     kwargs = {"progress_bar": False}
     if not use_hungarian:

@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 from scipy.sparse import coo_array
+from matchms import SpectraCollection
 from matchms.Scores import Scores
 from matchms.similarity.MetadataMatch import MetadataMatch
 from tests.builder_Spectrum import SpectrumBuilder
@@ -148,6 +149,7 @@ def test_metadata_match_numerical_matrix(spectra, tolerance, expected):
     np.testing.assert_array_equal(scores.to_array(), expected)
 
 
+@pytest.mark.parametrize("use_collection", [True, False])
 @pytest.mark.parametrize(
     "tolerance, expected",
     [
@@ -157,10 +159,14 @@ def test_metadata_match_numerical_matrix(spectra, tolerance, expected):
         (0.1, [[False, False], [False, False]]),
     ],
 )
-def test_metadata_match_numerical_sparse_matrix(spectra, tolerance, expected):
+def test_metadata_match_numerical_sparse_matrix(use_collection, spectra, tolerance, expected):
     """Test sparse metadata matching for numerical entries."""
     spectra_1 = spectra[:2]
     spectra_2 = spectra[2:]
+
+    if use_collection:
+        spectra_1 = SpectraCollection(spectra_1)
+        spectra_2 = SpectraCollection(spectra_2)
 
     similarity = MetadataMatch(
         field="retention_time",

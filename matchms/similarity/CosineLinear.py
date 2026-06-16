@@ -63,7 +63,7 @@ class CosineLinear(BaseSimilarity):
         self.mz_power = mz_power
         self.intensity_power = intensity_power
 
-    def pair(self, reference: SpectrumType, query: SpectrumType) -> np.ndarray:  # type: ignore[override]
+    def pair(self, reference: SpectrumType, query: SpectrumType) -> tuple[float, int]:
         """Calculate linear cosine score between two spectra.
 
         Parameters
@@ -97,7 +97,7 @@ class CosineLinear(BaseSimilarity):
         spectra_2: Sequence[SpectrumType] | None = None,
         score_fields: Sequence[str] | None = None,
         progress_bar: bool = True,
-    ) -> np.ndarray:
+    ):
         """Optimized matrix computation that precomputes merged spectra.
 
         Each spectrum is merged once (N+M calls to sirius_merge_close_peaks)
@@ -158,5 +158,3 @@ class CosineLinear(BaseSimilarity):
                     )
 
         return Scores(result)
-
-
