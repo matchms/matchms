@@ -67,7 +67,7 @@ A typical matchms workflow starts by loading an MS/MS dataset directly as a
 
     from matchms.importing import load_ms2_dataset
 
-    collection = load_ms2_dataset("my_spectra.mgf")
+    collection = load_ms2_dataset("my_spectra.mgf")  # you could here specify the required precision, default is: mz_precision=0.000001
 
     print(collection)
     print(collection.metadata.head())
@@ -180,6 +180,7 @@ Individual rows can still be accessed as regular ``Spectrum`` objects:
     print(spectrum.peaks.mz)
     print(spectrum.get("precursor_mz"))
 
+It is also possible to run a simple for loop: ``for spectrum in collection:``
 
 Spectrum
 --------
