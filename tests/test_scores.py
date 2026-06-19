@@ -97,6 +97,56 @@ def test_scores_basic_properties_sparse_multi(sparse_multi_scores):
     assert scores.is_sparse is True
 
 
+def test_scores_copy_dense_is_independent(dense_multi_scores):
+    copied = dense_multi_scores.copy()
+
+    assert isinstance(copied, Scores)
+    assert copied is not dense_multi_scores
+    assert copied.shape == dense_multi_scores.shape
+    assert copied.score_fields == dense_multi_scores.score_fields
+    assert copied.is_sparse is False
+
+    np.testing.assert_array_equal(
+        copied.to_array("score"),
+        dense_multi_scores.to_array("score"),
+    )
+    np.testing.assert_array_equal(
+        copied.to_array("matches"),
+        dense_multi_scores.to_array("matches"),
+    )
+
+    # Mutating the copied object's internal data must not affect the original.
+    copied._data["score"][0, 0] = 999.0
+
+    assert dense_multi_scores.to_array("score")[0, 0] == 1.0
+    assert copied.to_array("score")[0, 0] == 999.0
+
+
+def test_scores_copy_sparse_is_independent(sparse_multi_scores):
+    copied = sparse_multi_scores.copy()
+
+    assert isinstance(copied, Scores)
+    assert copied is not sparse_multi_scores
+    assert copied.shape == sparse_multi_scores.shape
+    assert copied.score_fields == sparse_multi_scores.score_fields
+    assert copied.is_sparse is True
+
+    np.testing.assert_array_equal(
+        copied.to_array("score"),
+        sparse_multi_scores.to_array("score"),
+    )
+    np.testing.assert_array_equal(
+        copied.to_array("matches"),
+        sparse_multi_scores.to_array("matches"),
+    )
+
+    # Mutating the copied sparse data must not affect the original.
+    copied._data["score"].data[0] = 999.0
+
+    assert sparse_multi_scores.to_array("score")[0, 0] == 1.0
+    assert copied.to_array("score")[0, 0] == 999.0
+
+
 def test_scores_repr_contains_shape_and_fields(dense_multi_scores):
     text = repr(dense_multi_scores)
     assert "Scores" in text

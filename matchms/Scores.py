@@ -357,6 +357,20 @@ class Scores:
         return ScoresMask(shape=self.shape, dense_mask=op(self.to_array(), other))
 
 
+    def copy(self) -> ScoresType:
+        """Return a copy of the Scores object.
+
+        Dense score fields are copied as independent NumPy arrays. Sparse score
+        fields are copied as independent SciPy COO arrays. The returned
+        ``Scores`` object preserves the score fields, shape, and storage mode of
+        the original object.
+        """
+        copied_data = {
+            field: value.copy()
+            for field, value in self._data.items()
+        }
+        return self.__class__(copied_data)
+
     # File I/O methods for saving and loading Scores objects to/from .npz files
     # ---------------------------------------------------------------------------------
     def save(self, path: str | Path, compressed: bool = True) -> None:
