@@ -76,14 +76,14 @@ def test_fragments_intensities_wrong_data_type():
     assert str(msg.value) == "Input argument 'intensities' should be a np.array."
 
 
-def test_fragments_dot_clone():
+def test_fragments_dot_copy():
 
     mz = np.array([10, 20, 30], dtype="float")
     intensities = np.array([100, 20, 300], dtype="float")
 
     peaks = Fragments(mz=mz, intensities=intensities)
 
-    peaks_cloned = peaks.clone()
+    peaks_cloned = peaks.copy()
 
     assert peaks == peaks_cloned
     assert peaks is not peaks_cloned
