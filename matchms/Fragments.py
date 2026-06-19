@@ -62,9 +62,13 @@ class Fragments:
     def _is_sorted(self):
         return np.all(self.mz[:-1] <= self.mz[1:])
 
-    def clone(self):
+    def copy(self):
         """Return a deepcopy of the Fragments instance."""
         return Fragments(self.mz, self.intensities)
+
+    def clone(self):
+        """Return a copy of the Fragments instance."""
+        return self.copy()
 
     @property
     def mz(self):
