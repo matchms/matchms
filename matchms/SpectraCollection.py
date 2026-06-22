@@ -2,6 +2,7 @@ import logging
 import os
 from collections.abc import Generator
 from functools import cached_property
+from typing import overload
 import numpy as np
 import pandas as pd
 from matchms.exporting import save_as_json, save_as_mgf, save_as_msp
@@ -62,6 +63,7 @@ class SpectraCollection:
     ``add_metadata`` to preserve row alignment and invalidate cached values
     correctly.
     """
+
     def __init__(
         self,
         spectra: list[Spectrum] | Generator[Spectrum, None, None],
@@ -157,6 +159,15 @@ class SpectraCollection:
             metadata=MetadataCollection.row_to_dict(self._metadata.iloc[int(idx)]),
             metadata_harmonization=False,
         )
+
+    @overload
+    def __getitem__(self, idx: int | np.integer) -> Spectrum: ...
+    @overload
+    def __getitem__(self, idx: slice | list | np.ndarray) -> "SpectraCollection": ...
+    @overload
+    def __getitem__(self, idx: tuple[int | np.integer, slice]) -> Spectrum: ...
+    @overload
+    def __getitem__(self, idx: tuple[slice | list | np.ndarray, slice]) -> "SpectraCollection": ...
 
     def __getitem__(self, idx):
         # 2D slicing: rows + mz-range
@@ -268,9 +279,7 @@ class SpectraCollection:
         """Harmonize metadata column names to matchms key style."""
         target = self if inplace else self.copy()
 
-        target._metadata = harmonize_metadata_collection_columns(target._metadata).reset_index(
-            drop=True
-        )
+        target._metadata = harmonize_metadata_collection_columns(target._metadata).reset_index(drop=True)
         target._clear_cache(["metadata_hashes", "spectra_hashes"])
 
         return None if inplace else target
