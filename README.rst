@@ -105,7 +105,7 @@ Similarity scores can be computed from the processed collection:
 
     from matchms.similarity import ModifiedCosine
 
-    similarity = Modified(tolerance=0.01)
+    similarity = ModifiedCosine(tolerance=0.01)
     scores = similarity.matrix(collection)
 
 
