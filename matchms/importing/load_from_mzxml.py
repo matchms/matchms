@@ -1,9 +1,9 @@
 from pathlib import Path
 from typing import Generator, Union
-from matchms.importing.load_from_mzml import derive_charge_from_polarity, parse_metadata
 import numpy as np
 from pyteomics.mzxml import read
-from matchms.importing.parsing_utils import parse_mzml_mzxml_metadata, sort_by_mz
+from matchms.importing.load_from_mzml import derive_charge_from_polarity, parse_metadata
+from matchms.importing.parsing_utils import sort_by_mz
 from matchms.Spectrum import Spectrum
 
 
