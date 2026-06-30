@@ -76,10 +76,11 @@ def parse_key_value(key, value, first_level=True):
 def derive_charge_from_polarity(flattend_metadata):
     """This is here for historic reasons, it would fit better in the filter correct_charge,
     but since the loader did this automatically before, we kept it here, to not break existing pipelines."""
-    if flattend_metadata["polarity"] == "-":
-        flattend_metadata["charge"] = -1
-    if flattend_metadata["polarity"] == "+":
-        flattend_metadata["charge"] = 1
+    if "polarity" in flattend_metadata:
+        if flattend_metadata["polarity"] == "-":
+            flattend_metadata["charge"] = -1
+        if flattend_metadata["polarity"] == "+":
+            flattend_metadata["charge"] = 1
     return flattend_metadata
 
 
