@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import Generator, Union
+from matchms.importing.load_from_mzml import parse_metadata
 import numpy as np
 from pyteomics.mzxml import read
 from matchms.importing.parsing_utils import parse_mzml_mzxml_metadata, sort_by_mz
@@ -45,12 +46,15 @@ def load_from_mzxml(
                 or "msLevel" in pyteomics_spectrum
                 and pyteomics_spectrum["msLevel"] == ms_level
             ):
-                metadata = parse_mzml_mzxml_metadata(pyteomics_spectrum)
-                mz = np.asarray(pyteomics_spectrum["m/z array"], dtype="float")
-                intensities = np.asarray(pyteomics_spectrum["intensity array"], dtype="float")
+                mz = np.asarray(pyteomics_spectrum.pop("m/z array"), dtype="float")
+                intensities = np.asarray(pyteomics_spectrum.pop("intensity array"), dtype="float")
 
                 mz, intensities = sort_by_mz(mz=mz, intensities=intensities)
+                flattend_metadata = parse_metadata(pyteomics_spectrum)
 
                 yield Spectrum(
-                    mz=mz, intensities=intensities, metadata=metadata, metadata_harmonization=metadata_harmonization
+                    mz=mz,
+                    intensities=intensities,
+                    metadata=flattend_metadata,
+                    metadata_harmonization=metadata_harmonization,
                 )
