@@ -1,6 +1,6 @@
 from pathlib import Path
 from typing import Generator, Union
-from matchms.importing.load_from_mzml import parse_metadata
+from matchms.importing.load_from_mzml import derive_charge_from_polarity, parse_metadata
 import numpy as np
 from pyteomics.mzxml import read
 from matchms.importing.parsing_utils import parse_mzml_mzxml_metadata, sort_by_mz
@@ -51,6 +51,7 @@ def load_from_mzxml(
 
                 mz, intensities = sort_by_mz(mz=mz, intensities=intensities)
                 flattend_metadata = parse_metadata(pyteomics_spectrum)
+                flattend_metadata = derive_charge_from_polarity(flattend_metadata)
 
                 yield Spectrum(
                     mz=mz,

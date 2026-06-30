@@ -45,6 +45,7 @@ def load_from_mzml(
 
                 mz, intensities = sort_by_mz(mz=mz, intensities=intensities)
                 flattend_metadata = parse_metadata(pyteomics_spectrum)
+                flattend_metadata = derive_charge_from_polarity(flattend_metadata)
                 yield Spectrum(
                     mz=mz,
                     intensities=intensities,
@@ -70,6 +71,16 @@ def parse_key_value(key, value, first_level=True):
             yield from parse_key_value(k, v, False)
     else:
         yield key, value
+
+
+def derive_charge_from_polarity(flattend_metadata):
+    """This is here for historic reasons, it would fit better in the filter correct_charge,
+    but since the loader did this automatically before, we kept it here, to not break existing pipelines."""
+    if flattend_metadata["polarity"] == "-":
+        flattend_metadata["charge"] = -1
+    if flattend_metadata["polarity"] == "+":
+        flattend_metadata["charge"] = 1
+    return flattend_metadata
 
 
 def parse_metadata(metadata_dict: dict):

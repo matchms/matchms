@@ -50,11 +50,6 @@ def correct_charge(spectrum_in: SpectrumType, clone: Optional[bool] = True) -> O
     elif charge == 0 and ionmode == "negative":
         charge = -1
         logger.info("Guessed charge to -1 based on negative ionmode")
-    if charge == 0:
-        if spectrum.get("polarity") == "-":
-            charge = -1
-        if spectrum.get("polarity") == "+":
-            charge = 1
     # Correct charge when in conflict with ionmode (trust ionmode more!)
     if np.sign(charge) == 1 and ionmode == "negative":
         logger.info("Changed sign of given charge: %s to match negative ionmode", charge)
