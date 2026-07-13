@@ -150,6 +150,61 @@ def test_add_metadata_overwrite(collection):
     assert collection.metadata["retention_time"].tolist() == [10, 20, 30]
 
 
+def test_drop_metadata(collection):
+    original_fragment_sums = collection.fragments.sum(axis=1)
+
+    reduced = collection.drop_metadata(["charge", "retention_time"])
+
+    assert isinstance(reduced, SpectraCollection)
+    assert reduced is not collection
+    assert reduced.metadata.columns.tolist() == ["compound_name", "precursor_mz"]
+    assert reduced.n_metadata_columns == 2
+
+    # Original collection remains unchanged.
+    assert collection.n_metadata_columns == 4
+    assert "charge" in collection.metadata.columns
+    assert "retention_time" in collection.metadata.columns
+
+    # Dropping metadata must not affect spectra or fragments.
+    assert len(reduced) == len(collection)
+    np.testing.assert_array_equal(
+        reduced.fragments.sum(axis=1),
+        original_fragment_sums,
+    )
+
+
+def test_drop_metadata_inplace(collection):
+    original_id = id(collection)
+    original_fragment_sums = collection.fragments.sum(axis=1)
+
+    result = collection.drop_metadata("charge", inplace=True)
+
+    assert result is None
+    assert id(collection) == original_id
+    assert "charge" not in collection.metadata.columns
+    assert collection.n_metadata_columns == 3
+    assert collection.metadata["compound_name"].tolist() == ["A", "B", "C"]
+
+    np.testing.assert_array_equal(
+        collection.fragments.sum(axis=1),
+        original_fragment_sums,
+    )
+
+
+def test_drop_metadata_missing_column(collection):
+    with pytest.raises(KeyError):
+        collection.drop_metadata("missing_column")
+
+    unchanged = collection.drop_metadata(
+        ["charge", "missing_column"],
+        errors="ignore",
+    )
+
+    assert "charge" not in unchanged.metadata.columns
+    assert unchanged.n_metadata_columns == 3
+    assert collection.n_metadata_columns == 4
+
+
 def test_sort_by_metadata(collection):
     # Sort by retention time (rt): [100, 200, 150] -> [100, 150, 200]
     sorted_col = collection.sort(by="retention_time", on="metadata", inplace=False)

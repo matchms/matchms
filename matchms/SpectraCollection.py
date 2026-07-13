@@ -264,6 +264,39 @@ class SpectraCollection:
         )
         self._clear_cache(["metadata_hashes"])
 
+    def drop_metadata(
+        self,
+        columns: str | list[str],
+        inplace: bool = False,
+        errors: str = "raise",
+    ):
+        """Remove one or more metadata columns.
+
+        Spectrum fragments and the number/order of spectra are left unchanged.
+
+        Parameters
+        ----------
+        columns
+            Metadata column name or list of column names to remove.
+        inplace
+            If True, modify this collection and return None. If False, return a
+            new collection with the selected metadata columns removed.
+        errors
+            Error handling passed to :meth:`pandas.DataFrame.drop`. Use
+            ``"raise"`` (default) to raise a KeyError for missing columns or
+            ``"ignore"`` to silently skip them.
+
+        Returns
+        -------
+        SpectraCollection or None
+            A new collection if ``inplace=False``; otherwise None.
+        """
+        target = self if inplace else self.copy()
+        target._metadata = target._metadata.drop(columns=columns, errors=errors)
+        target._clear_cache(["metadata_hashes", "spectra_hashes"])
+
+        return None if inplace else target
+
     def harmonize_metadata_columns(self, inplace: bool = False):
         """Harmonize metadata column names to matchms key style."""
         target = self if inplace else self.copy()
