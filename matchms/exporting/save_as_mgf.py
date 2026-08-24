@@ -1,6 +1,6 @@
 import logging
 import pyteomics.mgf as py_mgf
-from ..Spectrum import Spectrum
+from ..spectrum import Spectrum
 from ..utils import filter_empty_spectra, fingerprint_export_warning
 
 
@@ -36,7 +36,7 @@ def save_as_mgf(
     Parameters
     ----------
     spectra:
-        Expected input are match.Spectrum.Spectrum() objects.
+        Expected input are match.spectrum.Spectrum() objects.
     filename:
         Provide filename to save spectrum(s).
     export_style:

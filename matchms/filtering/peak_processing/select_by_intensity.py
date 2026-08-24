@@ -1,7 +1,7 @@
 import numpy as np
 from matchms.filtering._dispatch import collection_filter
-from matchms.Fragments import Fragments
-from matchms.SpectraCollection import SpectraCollection
+from matchms.fragments import Fragments
+from matchms.spectra_collection import SpectraCollection
 from matchms.typing import SpectrumType
 
 

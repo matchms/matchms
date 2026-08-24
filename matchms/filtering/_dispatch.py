@@ -12,7 +12,7 @@ from matchms.typing import SpectraCollectionType
 
 def _get_spectra_collection_type():
     """Import SpectraCollection lazily to avoid circular imports."""
-    from matchms.SpectraCollection import SpectraCollection
+    from matchms.spectra_collection import SpectraCollection
 
     return SpectraCollection
 

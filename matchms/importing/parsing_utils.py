@@ -3,7 +3,7 @@
 import ast
 from typing import Any
 import numpy as np
-from matchms.Spectrum import Spectrum
+from matchms.spectrum import Spectrum
 
 
 def find_by_key(data: list | dict, target: str) -> Any:

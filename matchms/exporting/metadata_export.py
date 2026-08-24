@@ -3,7 +3,7 @@ import json
 import logging
 from typing import Any
 import numpy as np
-from ..Spectrum import Spectrum
+from ..spectrum import Spectrum
 from ..utils import filter_empty_spectra, rename_deprecated_params
 
 
@@ -42,7 +42,7 @@ def export_metadata_as_json(
     Parameters
     ----------
     spectra:
-        Expected input is a list of  :py:class:`~matchms.Spectrum.Spectrum` objects.
+        Expected input is a list of  :py:class:`~matchms.spectrum.Spectrum` objects.
     filename:
         Provide filename to save metadata of spectrum(s) as json file.
     include_fields:
@@ -70,7 +70,7 @@ def export_metadata_as_csv(
     Parameters
     ----------
     spectra:
-        Expected input is a list of  :py:class:`~matchms.Spectrum.Spectrum` objects.
+        Expected input is a list of  :py:class:`~matchms.spectrum.Spectrum` objects.
     filename:
         Provide filename to save metadata of spectrum(s) as csv file.
     include_fields:

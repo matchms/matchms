@@ -4,10 +4,10 @@ import scipy.sparse as sp
 from chemap.metrics import (
     tanimoto_similarity_matrix,
 )
-from matchms.Fingerprints import Fingerprints
-from matchms.Scores import Scores
+from matchms.fingerprints import Fingerprints
+from matchms.scores import Scores
 from matchms.typing import SpectrumType
-from .BaseSimilarity import BaseSimilarity
+from .base_similarity import BaseSimilarity
 from .vector_similarity_functions import cosine_similarity_matrix
 
 

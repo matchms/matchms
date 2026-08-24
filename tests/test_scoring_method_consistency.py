@@ -14,8 +14,8 @@ import matchms.filtering as msfilter
 import matchms.similarity as mssimilarity
 from matchms import Pipeline
 from matchms.importing import load_from_json
-from matchms.Pipeline import create_workflow
-from matchms.similarity.BaseSimilarity import BaseSimilarityWithSparse
+from matchms.pipeline import create_workflow
+from matchms.similarity.base_similarity import BaseSimilarityWithSparse
 
 
 module_root = os.path.dirname(__file__)
@@ -24,8 +24,8 @@ json_file = os.path.join(module_root, "testdata", "gnps_spectra.json")
 # Get similarity measures available in matchms
 _score_functions = {
     "modifiedcosinegreedy": [mssimilarity.ModifiedCosineGreedy, {}],
-    "cosinegreedy": [mssimilarity.CosineGreedy, {}],
-    "cosinehungarian": [mssimilarity.CosineHungarian, {}],
+    "cosinegreedy": [mssimilarity.cosine_greedy, {}],
+    "cosinehungarian": [mssimilarity.cosine_hungarian, {}],
     "modifiedcosinehungarian": [mssimilarity.ModifiedCosineHungarian, {}],
     "precursormzmatch": [mssimilarity.PrecursorMzMatch, {}],
     "metadatamatch": [mssimilarity.MetadataMatch, {"field": "spectrum_status"}],

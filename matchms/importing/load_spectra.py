@@ -9,8 +9,8 @@ from matchms.importing import (
     load_from_mzxml,
     load_from_pickle,
 )
-from matchms.SpectraCollection import SpectraCollection
-from matchms.Spectrum import Spectrum
+from matchms.spectra_collection import SpectraCollection
+from matchms.spectrum import Spectrum
 
 
 def load_spectra(

@@ -3,7 +3,7 @@ from math import ceil
 import numpy as np
 import pandas as pd
 from matchms.filtering._dispatch import collection_filter
-from matchms.SpectraCollection import SpectraCollection
+from matchms.spectra_collection import SpectraCollection
 from matchms.typing import SpectrumType
 
 

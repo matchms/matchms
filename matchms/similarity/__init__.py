@@ -54,32 +54,32 @@ External similarity measures, such as
 matchms workflows.
 """
 
-from .BinnedEmbeddingSimilarity import BinnedEmbeddingSimilarity
-from .Cosine import Cosine
-from .CosineBlink import CosineBlink
-from .CosineGreedy import CosineGreedy
-from .CosineHungarian import CosineHungarian
-from .CosineLinear import CosineLinear
-from .FingerprintSimilarity import FingerprintSimilarity
-from .FlashSimilarity import CosineFlash, FlashEntropy
-from .MetadataMatch import MetadataMatch
-from .ModifiedCosine import ModifiedCosine
-from .ModifiedCosineGreedy import ModifiedCosineGreedy
-from .ModifiedCosineHungarian import ModifiedCosineHungarian
-from .NeutralLossesCosine import NeutralLossesCosine
-from .ParentMassMatch import ParentMassMatch
-from .PrecursorMzMatch import PrecursorMzMatch
+from .binned_embedding_similarity import BinnedEmbeddingSimilarity
+from .cosine import Cosine
+from .cosine_blink import CosineBlink
+from .cosine_greedy import CosineGreedy
+from .cosine_hungarian import CosineHungarian
+from .cosine_linear import CosineLinear
+from .fingerprint_similarity import FingerprintSimilarity
+from .flash_similarity import CosineFlash, FlashEntropy
+from .metadata_match import MetadataMatch
+from .modified_cosine import ModifiedCosine
+from .modified_cosine_greedy import ModifiedCosineGreedy
+from .modified_cosine_hungarian import ModifiedCosineHungarian
+from .neutral_losses_cosine import NeutralLossesCosine
+from .parent_mass_match import ParentMassMatch
+from .precursor_mz_match import PrecursorMzMatch
 
 
 __all__ = [
     "BinnedEmbeddingSimilarity",
-    "CosineBlink",
     "Cosine",
+    "CosineBlink",
+    "CosineFlash",
     "CosineGreedy",
     "CosineHungarian",
     "CosineLinear",
     "FingerprintSimilarity",
-    "CosineFlash",
     "FlashEntropy",
     "MetadataMatch",
     "ModifiedCosine",
@@ -101,7 +101,7 @@ def get_similarity_function_by_name(similarity_function_name: str):
         Name of the similarity function.
     """
     mapper = {
-        "BinnedEmbeddingSimilarity": BinnedEmbeddingSimilarity,
+        "BinnedEmbeddingSimilarity": binned_embedding_similarity,
         "CosineBlink": CosineBlink,
         "Cosine": Cosine,
         "CosineLinear": CosineLinear,

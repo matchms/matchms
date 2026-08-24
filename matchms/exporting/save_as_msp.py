@@ -1,8 +1,8 @@
 import logging
 import os
 from typing import IO
-from ..Fragments import Fragments
-from ..Spectrum import Spectrum
+from ..fragments import Fragments
+from ..spectrum import Spectrum
 from ..utils import (
     filter_empty_spectra,
     fingerprint_export_warning,
@@ -49,7 +49,7 @@ def save_as_msp(
     Parameters
     ----------
     spectra:
-        Expected input are match.Spectrum.Spectrum() objects.
+        Expected input are match.spectrum.Spectrum() objects.
     filename:
         Provide filename to save spectrum(s).
     write_peak_comments:

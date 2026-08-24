@@ -1,7 +1,7 @@
 """Submodule providing a reference spectrum for hydroxy-cholesterol."""
 
 import numpy as np
-from ..Spectrum import Spectrum
+from ..spectrum import Spectrum
 
 
 HYDROXY_CHOLESTEROL_PRECURSOR_MZ: float = 385.345

@@ -2,7 +2,7 @@ import logging
 import os
 import pickle
 from matchms.exporting import save_as_json, save_as_mgf, save_as_msp
-from matchms.Spectrum import Spectrum
+from matchms.spectrum import Spectrum
 from matchms.utils import filter_empty_spectra
 
 

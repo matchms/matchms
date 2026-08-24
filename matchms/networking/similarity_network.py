@@ -2,7 +2,7 @@ import json
 from collections.abc import Sequence
 import networkx as nx
 import numpy as np
-from matchms import Scores
+from matchms.typing import ScoresType
 from .networking_functions import get_top_hits
 
 
@@ -90,7 +90,7 @@ class SimilarityNetwork:
 
     def create_network(
         self,
-        scores: Scores,
+        scores: ScoresType,
         identifiers: Sequence[str],
         score_name: str | None = None,
     ) -> None:

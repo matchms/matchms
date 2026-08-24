@@ -138,7 +138,7 @@ from matchms.filtering.peak_processing.require_minimum_number_of_peaks import re
 from matchms.filtering.peak_processing.select_by_intensity import select_by_intensity
 from matchms.filtering.peak_processing.select_by_mz import select_by_mz
 from matchms.filtering.peak_processing.select_by_relative_intensity import select_by_relative_intensity
-from matchms.filtering.SpeciesString import SpeciesString
+from matchms.filtering.species_string import SpeciesString
 
 
 __all__ = [

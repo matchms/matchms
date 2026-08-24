@@ -1,9 +1,9 @@
 from collections.abc import Sequence
 import numpy as np
 from tqdm import tqdm  # type: ignore[import-untyped]
-from matchms.Scores import Scores
+from matchms.scores import Scores
 from matchms.typing import SpectrumType
-from .BaseSimilarity import BaseSimilarity
+from .base_similarity import BaseSimilarity
 from .cosine_linear_functions import linear_cosine_score, sirius_merge_close_peaks
 
 

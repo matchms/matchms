@@ -1,6 +1,6 @@
 import numpy as np
 from matchms.typing import SpectrumType
-from .BaseSimilarity import BaseSimilarityWithSparse
+from .base_similarity import BaseSimilarityWithSparse
 from .spectrum_similarity_functions import collect_peak_pairs, filter_noise, score_best_matches
 
 

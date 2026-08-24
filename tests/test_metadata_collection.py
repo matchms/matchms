@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 from matchms import SpectraCollection
-from matchms.MetadataCollection import (
+from matchms.metadata_collection import (
     MetadataCollection,
     harmonize_metadata_collection_columns,
     harmonize_metadata_column_name,

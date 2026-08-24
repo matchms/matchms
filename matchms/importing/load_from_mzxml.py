@@ -3,7 +3,7 @@ from pathlib import Path
 import numpy as np
 from pyteomics.mzxml import read
 from matchms.importing.parsing_utils import parse_mzml_mzxml_metadata, sort_by_mz
-from matchms.Spectrum import Spectrum
+from matchms.spectrum import Spectrum
 
 
 def load_from_mzxml(

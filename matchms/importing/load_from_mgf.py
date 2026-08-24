@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import TextIO
 from pyteomics.mgf import MGF
 from matchms.importing.parsing_utils import parse_spectrum_dict
-from matchms.Spectrum import Spectrum
+from matchms.spectrum import Spectrum
 
 
 def load_from_mgf(

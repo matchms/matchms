@@ -2,8 +2,8 @@ import numpy as np
 import pytest
 from scipy.sparse import coo_array
 from matchms import SpectraCollection
-from matchms.Scores import Scores
-from matchms.similarity.MetadataMatch import MetadataMatch
+from matchms.scores import Scores
+from matchms.similarity.metadata_match import MetadataMatch
 from tests.builder_Spectrum import SpectrumBuilder
 
 

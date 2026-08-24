@@ -1,7 +1,7 @@
 import logging
 import numpy as np
 from matchms.filtering._dispatch import collection_filter
-from matchms.Spectrum import Spectrum
+from matchms.spectrum import Spectrum
 from matchms.typing import SpectrumType
 
 

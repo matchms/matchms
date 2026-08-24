@@ -2,7 +2,7 @@ import logging
 import numpy as np
 from matchms.typing import SpectrumType
 from ._precursor_validation import get_valid_precursor_mz
-from .BaseSimilarity import BaseSimilarityWithSparse
+from .base_similarity import BaseSimilarityWithSparse
 from .spectrum_similarity_functions import collect_peak_pairs, score_best_matches
 
 

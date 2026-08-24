@@ -1,9 +1,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from matchms.plotting.spectrum_plots import plot_spectra_mirror, plot_spectrum
-from .Fragments import Fragments
+from .fragments import Fragments
 from .hashing import metadata_hash, spectrum_hash
-from .Metadata import Metadata
+from .metadata import Metadata
 
 
 class Spectrum:

@@ -2,9 +2,9 @@ from collections.abc import Sequence
 import numpy as np
 from numba import njit  # TODO: check if numba is necessary/useful here
 from scipy.sparse import csr_array
-from matchms.Scores import Scores
+from matchms.scores import Scores
 from matchms.typing import SpectrumType
-from .BaseSimilarity import BaseSimilarity
+from .base_similarity import BaseSimilarity
 
 
 @njit(cache=True, fastmath=True)

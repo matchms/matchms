@@ -3,7 +3,7 @@ from collections import defaultdict
 from collections.abc import Sequence
 import numpy as np
 from scipy.sparse import coo_array
-from matchms.Scores import Scores
+from matchms.scores import Scores
 from matchms.similarity.spectrum_similarity_functions import (
     number_matching,
     number_matching_ppm,
@@ -11,7 +11,7 @@ from matchms.similarity.spectrum_similarity_functions import (
     number_matching_symmetric_ppm,
 )
 from matchms.typing import ScoreFilter, SpectrumType
-from .BaseSimilarity import BaseSimilarityWithSparse
+from .base_similarity import BaseSimilarityWithSparse
 
 
 logger = logging.getLogger("matchms")

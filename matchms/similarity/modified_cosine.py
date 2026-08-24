@@ -2,10 +2,10 @@ import logging
 from collections.abc import Sequence
 import numpy as np
 from matchms.typing import SpectrumType
-from .BaseSimilarity import BaseSimilarity
-from .FlashSimilarity import CosineFlash
-from .ModifiedCosineGreedy import ModifiedCosineGreedy
-from .ModifiedCosineHungarian import ModifiedCosineHungarian
+from .base_similarity import BaseSimilarity
+from .flash_similarity import CosineFlash
+from .modified_cosine_greedy import ModifiedCosineGreedy
+from .modified_cosine_hungarian import ModifiedCosineHungarian
 
 
 logger = logging.getLogger("matchms")

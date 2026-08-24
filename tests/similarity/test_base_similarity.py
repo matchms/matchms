@@ -1,8 +1,8 @@
 import numpy as np
 import pytest
 from scipy.sparse import coo_array
-from matchms.Scores import Scores
-from matchms.similarity.BaseSimilarity import BaseSimilarity, BaseSimilarityWithSparse
+from matchms.scores import Scores
+from matchms.similarity.base_similarity import BaseSimilarity, BaseSimilarityWithSparse
 from tests.builder_Spectrum import SpectrumBuilder
 
 

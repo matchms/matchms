@@ -124,9 +124,9 @@ def plot_spectra_mirror(spec_top,
 
     Parameters
     ----------
-    spec_top: matchms.Spectrum.Spectrum.Spectrum
+    spec_top: matchms.spectrum.Spectrum
         The spectrum to be plotted on the top.
-    spec_bottom: matchms.Spectrum.Spectrum.Spectrum
+    spec_bottom: matchms.spectrum.Spectrum
         The spectrum to be plotted on the bottom.
     ax:
         Axes instance on which to plot the spectrum. If None the current Axes
@@ -213,7 +213,7 @@ def plot_spectra_array(spectra,
 
     Parameters
     ----------
-    spectra: list of matchms.Spectrum.Spectrum
+    spectra: list of matchms.spectrum.Spectrum
         List of spectra to be plotted in a single figure.
     n_cols:
         Number of spectra to be plotted per row. Default is 4.

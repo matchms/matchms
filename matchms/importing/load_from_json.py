@@ -3,7 +3,7 @@ import json
 import logging
 import numpy as np
 from matchms.importing.parsing_utils import sort_by_mz
-from matchms.Spectrum import Spectrum
+from matchms.spectrum import Spectrum
 
 
 logger = logging.getLogger("matchms")
@@ -44,7 +44,7 @@ def load_from_json(filename: str, metadata_harmonization: bool = True) -> list[S
 
 def as_spectrum(dct: dict, metadata_harmonization: bool = True) -> dict | Spectrum | None:
     """A :py:func:`json.load` object_hook to convert dictionary shaped like
-    spectrum into :py:class:`~matchms.Spectrum.Spectrum` object.
+    spectrum into :py:class:`~matchms.spectrum.Spectrum` object.
 
     Parameters
     ----------
@@ -61,7 +61,7 @@ def as_spectrum(dct: dict, metadata_harmonization: bool = True) -> dict | Spectr
 
 
 def dict2spectrum(spectrum_dict: dict, metadata_harmonization: bool) -> Spectrum | None:
-    """Convert dictionary to a :py:class:`~matchms.Spectrum.Spectrum` object.
+    """Convert dictionary to a :py:class:`~matchms.spectrum.Spectrum` object.
 
     Parameters
     ----------

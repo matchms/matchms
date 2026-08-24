@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 from scipy.sparse import coo_array
-from matchms.Scores import Scores, ScoresMask
+from matchms.scores import Scores, ScoresMask
 
 
 @pytest.fixture

@@ -4,8 +4,8 @@ from scipy.optimize import linear_sum_assignment
 from matchms.similarity.spectrum_similarity_functions import collect_peak_pairs
 from matchms.typing import SpectrumType
 from ._precursor_validation import get_valid_precursor_mz
-from .BaseSimilarity import BaseSimilarityWithSparse
-from .CosineHungarian import CosineHungarian
+from .base_similarity import BaseSimilarityWithSparse
+from .cosine_hungarian import CosineHungarian
 
 
 logger = logging.getLogger("matchms")

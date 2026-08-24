@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 from matchms.filtering import remove_peaks_relative_to_precursor_mz
-from matchms.Fragments import Fragments
+from matchms.fragments import Fragments
 from tests.builder_Spectrum import SpectrumBuilder
 from tests.run_spectrum_and_collection import run_filter_as_spectrum_or_collection
 

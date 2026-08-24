@@ -5,9 +5,9 @@ from functools import cached_property
 import numpy as np
 import pandas as pd
 from matchms.exporting import save_as_json, save_as_mgf, save_as_msp
-from matchms.MetadataCollection import MetadataCollection, harmonize_metadata_collection_columns
-from matchms.Spectrum import Spectrum
-from .FragmentCollection import CSRFragmentCollection, FragmentCollection
+from matchms.metadata_collection import MetadataCollection, harmonize_metadata_collection_columns
+from matchms.spectrum import Spectrum
+from .fragment_collection import CSRFragmentCollection, FragmentCollection
 from .hashing import compute_combined_hashes
 from .typing import SpectraCollectionType
 

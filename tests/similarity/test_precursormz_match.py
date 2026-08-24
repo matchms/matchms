@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from matchms.Scores import Scores
+from matchms.scores import Scores
 from matchms.similarity import PrecursorMzMatch
 from ..builder_Spectrum import SpectrumBuilder, spectra_factory
 

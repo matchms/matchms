@@ -1,5 +1,5 @@
 import pickle
-from matchms.Spectrum import Spectrum
+from matchms.spectrum import Spectrum
 
 
 def load_from_pickle(filename: str, metadata_harmonization: bool) -> list[Spectrum]:

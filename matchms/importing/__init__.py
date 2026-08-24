@@ -9,7 +9,7 @@ made with matchms), from pickle files, or based on a unique spectrum identifier
 (USI) (:meth:`~matchms.importing.load_from_usi`).
 
 The individual ``load_from_*`` functions and :meth:`~matchms.importing.load_spectra`
-return spectra as :class:`~matchms.Spectrum.Spectrum` objects or iterables of
+return spectra as :class:`~matchms.spectrum.Spectrum` objects or iterables of
 Spectrum objects. For collection-based workflows, use
 :meth:`~matchms.importing.load_ms2_dataset` to directly load a file as a
 :class:`~matchms.SpectraCollection.SpectraCollection`.

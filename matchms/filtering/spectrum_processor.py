@@ -10,7 +10,7 @@ import pandas as pd
 from tqdm import tqdm
 from matchms.exporting import save_spectra
 from matchms.filtering.filter_order import ALL_FILTERS, FILTER_FUNCTION_NAMES
-from matchms.Spectrum import Spectrum
+from matchms.spectrum import Spectrum
 from matchms.yaml_file_functions import ordered_dump
 
 

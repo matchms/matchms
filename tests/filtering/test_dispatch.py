@@ -9,7 +9,7 @@ from matchms.filtering._dispatch import (
     collection_filter,
     metadata_update_filter,
 )
-from matchms.SpectraCollection import SpectraCollection
+from matchms.spectra_collection import SpectraCollection
 from tests.builder_Spectrum import SpectrumBuilder
 
 

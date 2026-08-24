@@ -1,7 +1,7 @@
 import os
 import re
 from typing import TextIO
-from matchms.Spectrum import Spectrum
+from matchms.spectrum import Spectrum
 
 
 ANALYTE_ATTRIBUTES = {

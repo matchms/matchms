@@ -2,7 +2,7 @@ import json
 import logging
 import numpy as np
 import requests
-from ..Spectrum import Spectrum
+from ..spectrum import Spectrum
 
 
 logger = logging.getLogger("matchms")

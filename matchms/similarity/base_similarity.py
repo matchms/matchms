@@ -13,7 +13,7 @@ import numpy as np
 import numpy.typing as npt
 from scipy.sparse import coo_array
 from tqdm import tqdm
-from matchms.Scores import Scores
+from matchms.scores import Scores
 from matchms.typing import ScoreFilter, SpectrumType
 
 

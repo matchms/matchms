@@ -4,7 +4,7 @@ from functools import cached_property
 import numpy as np
 from scipy.sparse import coo_array, csr_array
 from tqdm.auto import tqdm
-from matchms.Spectrum import Spectrum
+from matchms.spectrum import Spectrum
 from .hashing import spectra_hashes
 from .typing import FragmentCollectionType
 

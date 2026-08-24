@@ -3,7 +3,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 from scipy.sparse import coo_array
-from matchms.Scores import Scores
+from matchms.scores import Scores
 
 
 @pytest.fixture(params=[True, False])
