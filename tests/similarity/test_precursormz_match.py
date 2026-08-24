@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from matchms.scores import Scores
 from matchms.similarity import PrecursorMzMatch
-from ..builder_Spectrum import SpectrumBuilder, spectra_factory
+from ..builder_spectrum import SpectrumBuilder, spectra_factory
 
 
 # Local global variables to make the test easier to read

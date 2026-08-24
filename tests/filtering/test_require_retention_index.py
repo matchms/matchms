@@ -1,7 +1,7 @@
 import pytest
 from matchms import SpectraCollection
 from matchms.filtering.metadata_processing.require_retention_index import require_retention_index
-from ..builder_Spectrum import SpectrumBuilder
+from ..builder_spectrum import SpectrumBuilder
 
 
 @pytest.mark.parametrize(

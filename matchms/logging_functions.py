@@ -147,5 +147,5 @@ def set_rdkit_logger_level(level):
         RDLogger.EnableLog(rdkit_log_levels[i])
 
     # disable all levels with lower severity
-    for i in range(0, level_index):
+    for i in range(level_index):
         RDLogger.DisableLog(rdkit_log_levels[i])

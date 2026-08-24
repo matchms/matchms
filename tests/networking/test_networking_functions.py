@@ -37,7 +37,7 @@ def create_dummy_scores():
 
 
 def test_get_top_hits_by_column():
-    scores, spectra_1, spectra_2 = create_dummy_scores()
+    scores, _, spectra_2 = create_dummy_scores()
     identifiers = [s.get("spectrum_id") for s in spectra_2]
 
     idx_col, scores_col = get_top_hits(
@@ -98,7 +98,7 @@ def test_get_top_hits_by_column():
 
 
 def test_get_top_hits_by_row():
-    scores, spectra_1, spectra_2 = create_dummy_scores()
+    scores, spectra_1, _ = create_dummy_scores()
     identifiers = [s.get("spectrum_id") for s in spectra_1]
 
     idx_row, scores_row = get_top_hits(

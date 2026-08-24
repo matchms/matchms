@@ -10,7 +10,7 @@ from matchms.filtering._dispatch import (
     metadata_update_filter,
 )
 from matchms.spectra_collection import SpectraCollection
-from tests.builder_Spectrum import SpectrumBuilder
+from tests.builder_spectrum import SpectrumBuilder
 
 
 def _make_spectrum(identifier="spectrum", mz=None, intensities=None, metadata=None):

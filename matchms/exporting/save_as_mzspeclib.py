@@ -62,7 +62,7 @@ def _write_spectrum(file: TextIO, idx: int, spectrum: Spectrum) -> None:
     if _has_analyte(spectrum):
         _write_analyte(file, spectrum)
     _write_peaks(file, spectrum)
-    print("", file=file)
+    print(file=file)
 
 
 def _write_analyte(file: TextIO, spectrum: Spectrum) -> None:

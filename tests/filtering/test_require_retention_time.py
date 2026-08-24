@@ -1,7 +1,7 @@
 import pytest
 from matchms import SpectraCollection
 from matchms.filtering.metadata_processing.require_retention_time import require_retention_time
-from ..builder_Spectrum import SpectrumBuilder
+from ..builder_spectrum import SpectrumBuilder
 
 
 TEST_CASES = [

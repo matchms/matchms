@@ -242,7 +242,7 @@ class SpectraCollection:
         elif isinstance(data, dict):
             for v in data.values():
                 if not isinstance(v, list):
-                    raise ValueError("When data is a dict, values must be of type list.")
+                    raise TypeError("When data is a dict, values must be of type list.")
             new_metadata = pd.DataFrame(data)
         else:
             raise TypeError("Data must be pd.DataFrame, pd.Series, list, or dict of lists.")

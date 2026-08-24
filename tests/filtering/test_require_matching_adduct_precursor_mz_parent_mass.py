@@ -3,7 +3,7 @@ from matchms import SpectraCollection
 from matchms.filtering.metadata_processing.require_matching_adduct_precursor_mz_parent_mass import (
     require_matching_adduct_precursor_mz_parent_mass,
 )
-from ..builder_Spectrum import SpectrumBuilder
+from ..builder_spectrum import SpectrumBuilder
 
 
 TEST_CASES = [

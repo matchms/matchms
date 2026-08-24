@@ -1,7 +1,7 @@
 import math
 import pytest
 from matchms.filtering import repair_parent_mass_is_molar_mass
-from tests.builder_Spectrum import SpectrumBuilder
+from tests.builder_spectrum import SpectrumBuilder
 
 
 @pytest.mark.parametrize(

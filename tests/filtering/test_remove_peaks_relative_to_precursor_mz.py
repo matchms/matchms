@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from matchms.filtering import remove_peaks_relative_to_precursor_mz
 from matchms.fragments import Fragments
-from tests.builder_Spectrum import SpectrumBuilder
+from tests.builder_spectrum import SpectrumBuilder
 from tests.run_spectrum_and_collection import run_filter_as_spectrum_or_collection
 
 
@@ -41,7 +41,7 @@ def test_missing_precursor_mz_raises_value_error(as_collection):
     spectrum = SpectrumBuilder().with_metadata({}).build()
     spectrum.peaks = Fragments(mz=np.array([100.0]), intensities=np.array([1.0]))
 
-    with pytest.raises(ValueError, match="Undefined 'precursor_mz'"):
+    with pytest.raises(TypeError, match="Undefined 'precursor_mz'"):
         run_filter_as_spectrum_or_collection(
             remove_peaks_relative_to_precursor_mz,
             spectrum,
@@ -54,7 +54,7 @@ def test_non_scalar_precursor_mz_raises_value_error(as_collection):
     spectrum = SpectrumBuilder().with_metadata({"precursor_mz": [500.0]}).build()
     spectrum.peaks = Fragments(mz=np.array([100.0]), intensities=np.array([1.0]))
 
-    with pytest.raises(ValueError, match="Expected 'precursor_mz' to be a scalar"):
+    with pytest.raises(TypeError, match="Expected 'precursor_mz' to be a scalar"):
         run_filter_as_spectrum_or_collection(
             remove_peaks_relative_to_precursor_mz,
             spectrum,
@@ -70,7 +70,7 @@ def test_non_scalar_offset_to_precursor_raises_value_error(as_collection):
         intensities=[1.0],
     )
 
-    with pytest.raises(ValueError, match="Expected 'offset_to_precursor' to be a scalar number"):
+    with pytest.raises(TypeError, match="Expected 'offset_to_precursor' to be a scalar number"):
         run_filter_as_spectrum_or_collection(
             remove_peaks_relative_to_precursor_mz,
             spectrum,

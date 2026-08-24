@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 from matchms.exporting import save_as_json
 from matchms.importing import load_from_json
-from tests.builder_Spectrum import SpectrumBuilder
+from tests.builder_spectrum import SpectrumBuilder
 
 
 @pytest.fixture

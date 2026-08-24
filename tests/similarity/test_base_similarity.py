@@ -3,7 +3,7 @@ import pytest
 from scipy.sparse import coo_array
 from matchms.scores import Scores
 from matchms.similarity.base_similarity import BaseSimilarity, BaseSimilarityWithSparse
-from tests.builder_Spectrum import SpectrumBuilder
+from tests.builder_spectrum import SpectrumBuilder
 
 
 class MockScalarSimilarity(BaseSimilarityWithSparse):

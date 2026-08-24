@@ -7,7 +7,7 @@ from matchms.metadata_collection import (
     harmonize_metadata_collection_columns,
     harmonize_metadata_column_name,
 )
-from tests.builder_Spectrum import SpectrumBuilder
+from tests.builder_spectrum import SpectrumBuilder
 
 
 def test_harmonize_metadata_column_name_lowercase_and_regex():

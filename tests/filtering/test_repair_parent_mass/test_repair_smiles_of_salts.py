@@ -2,7 +2,7 @@ import pandas as pd
 import pytest
 from matchms import SpectraCollection
 from matchms.filtering import repair_smiles_of_salts
-from tests.builder_Spectrum import SpectrumBuilder
+from tests.builder_spectrum import SpectrumBuilder
 from tests.run_spectrum_and_collection import run_filter_as_spectrum_or_collection
 
 

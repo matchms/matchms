@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 from matchms.filtering import remove_peaks_around_precursor_mz
-from tests.builder_Spectrum import SpectrumBuilder
+from tests.builder_spectrum import SpectrumBuilder
 from tests.run_spectrum_and_collection import run_filter_as_spectrum_or_collection
 
 
@@ -86,7 +86,7 @@ def test_remove_peaks_around_precursor_with_wrong_precursor_mz(spectrum_in, as_c
     """Test if correct error is raised for precursor_mz as string."""
     spectrum_in.set("precursor_mz", "445.0")
 
-    with pytest.raises(ValueError, match="Expected 'precursor_mz' to be a scalar number."):
+    with pytest.raises(TypeError, match="Expected 'precursor_mz' to be a scalar number."):
         run_filter_as_spectrum_or_collection(
             remove_peaks_around_precursor_mz,
             spectrum_in,

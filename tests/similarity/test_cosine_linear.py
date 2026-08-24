@@ -7,7 +7,7 @@ from matchms.similarity.cosine_linear_functions import (
     linear_cosine_score,
     sirius_merge_close_peaks,
 )
-from ..builder_Spectrum import SpectrumBuilder
+from ..builder_spectrum import SpectrumBuilder
 
 
 REFERENCE_PATH = os.path.join(os.path.dirname(__file__), "..", "cosine_linear_reference.json")

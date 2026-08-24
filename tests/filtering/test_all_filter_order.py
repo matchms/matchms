@@ -95,12 +95,6 @@ DERIVE_ANNOTATION_FILTERS = [
             [msfilters.derive_formula_from_smiles],
         ],
         [
-            [
-                msfilters.remove_profiled_spectra,
-            ],
-            [msfilters.remove_peaks_around_precursor_mz],
-        ],
-        [
             [msfilters.remove_noise_below_frequent_intensities],
             [
                 msfilters.select_by_intensity,
@@ -112,12 +106,6 @@ DERIVE_ANNOTATION_FILTERS = [
                 msfilters.require_minimum_number_of_peaks,
                 msfilters.require_minimum_number_of_high_peaks,
             ],
-        ],
-        [
-            [
-                msfilters.remove_profiled_spectra,
-            ],
-            [msfilters.remove_peaks_around_precursor_mz],
         ],
         [
             [
@@ -142,12 +130,6 @@ DERIVE_ANNOTATION_FILTERS = [
                 msfilters.derive_adduct_from_name,
             ],
             [msfilters.require_matching_adduct_and_ionmode],
-        ],
-        [
-            [
-                msfilters.remove_profiled_spectra,
-            ],
-            [msfilters.remove_peaks_around_precursor_mz],
         ],
         [
             [msfilters.repair_parent_mass_from_smiles],

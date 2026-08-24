@@ -1,7 +1,7 @@
 import pytest
 from matchms import SpectraCollection
 from matchms.filtering import require_formula
-from ..builder_Spectrum import SpectrumBuilder
+from ..builder_spectrum import SpectrumBuilder
 
 
 @pytest.mark.parametrize(

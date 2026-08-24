@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from matchms.filtering import remove_peaks_outside_top_k
 from tests.run_spectrum_and_collection import run_filter_as_spectrum_or_collection
-from ..builder_Spectrum import SpectrumBuilder
+from ..builder_spectrum import SpectrumBuilder
 
 
 @pytest.mark.parametrize("as_collection", [False, True], ids=["spectrum", "collection"])

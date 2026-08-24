@@ -122,8 +122,7 @@ def _write_metadata(spectrum: Spectrum, export_style: str, outfile: IO):
     for key, value in metadata.items():
         if not (_is_num_peaks(key) or _is_peak_comments(key) or _is_fingerprint(key)):
             if key.upper().strip() == "SYNON: METB N": # Special case for GOLM
-                for val in value:
-                    outfile.write(f"{key.upper()}: {val}\n")
+                outfile.writelines(f"{key.upper()}: {val}\n" for val in value)
             else:
                 outfile.write(f"{key.upper()}: {value}\n")
     outfile.write(f"NUM PEAKS: {len(spectrum.peaks)}\n")

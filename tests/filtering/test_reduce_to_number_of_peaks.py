@@ -4,7 +4,7 @@ from testfixtures import LogCapture
 from matchms import SpectraCollection
 from matchms.filtering import reduce_to_number_of_peaks
 from matchms.logging_functions import reset_matchms_logger, set_matchms_logger_level
-from tests.builder_Spectrum import SpectrumBuilder
+from tests.builder_spectrum import SpectrumBuilder
 from tests.run_spectrum_and_collection import run_filter_as_spectrum_or_collection
 
 

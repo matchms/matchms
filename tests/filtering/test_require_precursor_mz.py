@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from matchms import SpectraCollection
 from matchms.filtering.metadata_processing.require_precursor_mz import require_precursor_mz
-from ..builder_Spectrum import SpectrumBuilder
+from ..builder_spectrum import SpectrumBuilder
 
 
 @pytest.mark.parametrize(

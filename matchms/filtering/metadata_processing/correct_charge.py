@@ -41,7 +41,7 @@ def _correct_charge(metadata) -> dict:
 
     raw_charge = metadata.get("charge", None)
     if isinstance(raw_charge, str):
-        raise ValueError(
+        raise TypeError(
             "Charge is given as string. Apply 'make_charge_int' filter first."
         )
 

@@ -3,7 +3,7 @@ import pytest
 from matchms.scores import Scores
 from matchms.similarity import CosineGreedy, ModifiedCosineGreedy
 from matchms.similarity.flash_similarity import CosineFlash, FlashEntropy
-from ..builder_Spectrum import SpectrumBuilder
+from ..builder_spectrum import SpectrumBuilder
 
 
 # ----------------------------

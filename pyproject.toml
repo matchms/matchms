@@ -89,6 +89,7 @@ line-ending = "lf"
 extend-select = ["D", "E", "I", "F", "Q", "UP", "B", "C4"]
 # TODO: some of these rules should be enforced in the future
 ignore = [
+  "BLE001",
   "D100",
   "D102",
   "D104",
@@ -105,7 +106,19 @@ ignore = [
   "D212",
   "D213",
   "D4",
+  "DTZ005",
+  "ISC004",
   "PLC0132",
+  "PIE790",
+  "PERF402",
+  "PYI041",
+  "RET501",
+  "RUF012",
+  "RUF013",
+  "RUF015",
+  "S110",
+  "SIM102",
+  "SIM118",
 ]
 
 [tool.ruff.lint.isort]

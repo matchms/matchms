@@ -160,8 +160,8 @@ class CosineBlink(BaseSimilarity):
         spectrum_2:
             Single query spectrum.
         """
-        rbins, rvals, rcounts = self._prep_spectrum(spectrum_1)
-        qbins, qvals, qcounts = self._prep_spectrum(spectrum_2)
+        rbins, rvals, _ = self._prep_spectrum(spectrum_1)
+        qbins, qvals, _ = self._prep_spectrum(spectrum_2)
 
         if rbins.size == 0 or qbins.size == 0:
             return np.asarray(0.0, dtype=self.score_datatype)
@@ -216,7 +216,7 @@ class CosineBlink(BaseSimilarity):
                 "because the optimized matrix implementation computes scores but not matches."
             )
 
-        spectra_2, is_symmetric = self._prepare_inputs(spectra_1, spectra_2)
+        spectra_2, _ = self._prepare_inputs(spectra_1, spectra_2)
 
         # Preprocess all spectra (bins, normalized intensity values)
         prepped_refs = [self._prep_spectrum(s) for s in spectra_1]

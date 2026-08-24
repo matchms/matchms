@@ -1,7 +1,7 @@
 import pytest
 from matchms import SpectraCollection
 from matchms.filtering.metadata_processing.require_correct_ms_level import require_correct_ms_level
-from ..builder_Spectrum import SpectrumBuilder
+from ..builder_spectrum import SpectrumBuilder
 
 
 TEST_CASES = [

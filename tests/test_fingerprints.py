@@ -6,7 +6,7 @@ import scipy.sparse as sp
 from rdkit.Chem import rdFingerprintGenerator
 from matchms import Spectrum
 from matchms.fingerprints import Fingerprints
-from tests.builder_Spectrum import SpectrumBuilder
+from tests.builder_spectrum import SpectrumBuilder
 
 
 pytest.importorskip("chemap")

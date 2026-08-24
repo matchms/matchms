@@ -3,7 +3,7 @@ import pytest
 from scipy.sparse import csr_array
 from matchms import Spectrum
 from matchms.fragment_collection import CSRFragmentCollection
-from tests.builder_Spectrum import SpectrumBuilder
+from tests.builder_spectrum import SpectrumBuilder
 
 
 @pytest.fixture

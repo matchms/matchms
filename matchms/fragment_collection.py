@@ -99,7 +99,7 @@ def _decimal_places_from_mz_precision(mz_precision: float) -> int:
         raise ValueError("mz_precision must be > 0.")
 
     exponent = -np.log10(mz_precision)
-    rounded_exponent = int(round(exponent))
+    rounded_exponent = round(exponent)
 
     if not np.isclose(exponent, rounded_exponent):
         raise ValueError(

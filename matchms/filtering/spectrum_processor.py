@@ -251,7 +251,7 @@ class SpectrumProcessor:
 def load_matchms_filter_from_string(filter_name):
     """Loads a matchms filter function from a string."""
     if not isinstance(filter_name, str):
-        raise ValueError("Expected a string")
+        raise TypeError("Expected a string")
     if filter_name not in FILTER_FUNCTION_NAMES:
         raise ValueError(f"Unknown filter type: {filter_name} Should be known filter name or function.")
     return FILTER_FUNCTION_NAMES[filter_name]
@@ -350,7 +350,7 @@ class ProcessingReport:
             f"Number of spectra processed: {self.counter_number_processed}\n"
             f"Number of spectra removed: {sum(self.counter_removed_spectra.values())}\n"
             "Changes during processing:\n"
-            f"{str(self.to_dataframe())}"
+            f"{self.to_dataframe()!s}"
         )
         return report_str
 

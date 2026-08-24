@@ -4,7 +4,7 @@ from scipy.sparse import coo_array
 from matchms import SpectraCollection
 from matchms.scores import Scores
 from matchms.similarity.metadata_match import MetadataMatch
-from tests.builder_Spectrum import SpectrumBuilder
+from tests.builder_spectrum import SpectrumBuilder
 
 
 @pytest.fixture

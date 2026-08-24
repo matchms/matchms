@@ -5,7 +5,7 @@ from matchms import SpectraCollection
 from matchms import filtering as msfilters
 from matchms.filtering.spectra_collection_processor import SpectraCollectionProcessor
 from matchms.importing.load_spectra import load_spectra
-from tests.builder_Spectrum import SpectrumBuilder
+from tests.builder_spectrum import SpectrumBuilder
 
 
 @pytest.fixture
