@@ -77,10 +77,7 @@ def _check_smiles_inchi_inchikey_match(smiles, inchi, inchikey) -> bool:
     if inchikey_from_smiles is None:
         return False
 
-    if inchikey[:14] != inchikey_from_smiles[:14]:
-        return False
-
-    return True
+    return inchikey[:14] == inchikey_from_smiles[:14]
 
 
 require_valid_annotation = metadata_requirement_filter(_require_valid_annotation)
