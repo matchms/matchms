@@ -124,7 +124,7 @@ class Metadata:
     # ------------------------------
     def get(self, key: str, default=None):
         """Retrieve value from :attr:`metadata` dict."""
-        return self._data.copy().get(key, default)
+        return self._data.get(key, default)
 
     def set(self, key: str, value):
         """Set value in :attr:`metadata` dict."""

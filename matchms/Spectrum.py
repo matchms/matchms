@@ -223,7 +223,7 @@ class Spectrum:
 
     @property
     def metadata(self):
-        return self._metadata.data.copy()
+        return self._metadata.data
 
     @metadata.setter
     def metadata(self, value):
