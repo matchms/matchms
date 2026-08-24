@@ -24,8 +24,8 @@ json_file = os.path.join(module_root, "testdata", "gnps_spectra.json")
 # Get similarity measures available in matchms
 _score_functions = {
     "modifiedcosinegreedy": [mssimilarity.ModifiedCosineGreedy, {}],
-    "cosinegreedy": [mssimilarity.cosine_greedy, {}],
-    "cosinehungarian": [mssimilarity.cosine_hungarian, {}],
+    "cosinegreedy": [mssimilarity.CosineGreedy, {}],
+    "cosinehungarian": [mssimilarity.CosineHungarian, {}],
     "modifiedcosinehungarian": [mssimilarity.ModifiedCosineHungarian, {}],
     "precursormzmatch": [mssimilarity.PrecursorMzMatch, {}],
     "metadatamatch": [mssimilarity.MetadataMatch, {"field": "spectrum_status"}],

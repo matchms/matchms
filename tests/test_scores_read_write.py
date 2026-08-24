@@ -154,7 +154,7 @@ def test_load_missing_metadata_raises(tmp_path: Path):
     filename = tmp_path / "missing_metadata.npz"
     np.savez(filename, score=np.array([[1.0, 0.0]]))
 
-    with pytest.raises(ValueError, match="does not contain matchms.Scores metadata"):
+    with pytest.raises(ValueError, match="does not contain matchms.scores metadata"):
         Scores.load(filename)
 
 
@@ -169,14 +169,14 @@ def test_load_wrong_format_raises(tmp_path: Path):
     }
     np.savez(filename, __scores_metadata__=np.array(json.dumps(metadata)), score=np.array([[1.0, 0.0]]))
 
-    with pytest.raises(ValueError, match="is not a matchms.Scores file"):
+    with pytest.raises(ValueError, match="is not a matchms.scores file"):
         Scores.load(filename)
 
 
 def test_load_unsupported_version_raises(tmp_path: Path):
     filename = tmp_path / "wrong_version.npz"
     metadata = {
-        "format": "matchms.Scores",
+        "format": "matchms.scores",
         "version": 999,
         "is_sparse": False,
         "score_fields": ["score"],
@@ -184,14 +184,14 @@ def test_load_unsupported_version_raises(tmp_path: Path):
     }
     np.savez(filename, __scores_metadata__=np.array(json.dumps(metadata)), score=np.array([[1.0, 0.0]]))
 
-    with pytest.raises(ValueError, match="Unsupported matchms.Scores version"):
+    with pytest.raises(ValueError, match="Unsupported matchms.scores version"):
         Scores.load(filename)
 
 
 def test_load_missing_dense_field_raises(tmp_path: Path):
     filename = tmp_path / "missing_dense_field.npz"
     metadata = {
-        "format": "matchms.Scores",
+        "format": "matchms.scores",
         "version": 1,
         "is_sparse": False,
         "score_fields": ["score", "matches"],
@@ -210,7 +210,7 @@ def test_load_missing_dense_field_raises(tmp_path: Path):
 def test_load_missing_sparse_row_raises(tmp_path: Path):
     filename = tmp_path / "missing_sparse_row.npz"
     metadata = {
-        "format": "matchms.Scores",
+        "format": "matchms.scores",
         "version": 1,
         "is_sparse": True,
         "score_fields": ["score"],
@@ -230,7 +230,7 @@ def test_load_missing_sparse_row_raises(tmp_path: Path):
 def test_load_missing_sparse_col_raises(tmp_path: Path):
     filename = tmp_path / "missing_sparse_col.npz"
     metadata = {
-        "format": "matchms.Scores",
+        "format": "matchms.scores",
         "version": 1,
         "is_sparse": True,
         "score_fields": ["score"],
@@ -250,7 +250,7 @@ def test_load_missing_sparse_col_raises(tmp_path: Path):
 def test_load_missing_sparse_data_raises(tmp_path: Path):
     filename = tmp_path / "missing_sparse_data.npz"
     metadata = {
-        "format": "matchms.Scores",
+        "format": "matchms.scores",
         "version": 1,
         "is_sparse": True,
         "score_fields": ["score"],
@@ -270,7 +270,7 @@ def test_load_missing_sparse_data_raises(tmp_path: Path):
 def test_load_missing_required_metadata_keys_raises(tmp_path: Path):
     filename = tmp_path / "missing_metadata_keys.npz"
     metadata = {
-        "format": "matchms.Scores",
+        "format": "matchms.scores",
         "version": 1,
         "is_sparse": False,
         # missing score_fields and shape
