@@ -101,7 +101,7 @@ def get_similarity_function_by_name(similarity_function_name: str):
         Name of the similarity function.
     """
     mapper = {
-        "BinnedEmbeddingSimilarity": binned_embedding_similarity,
+        "BinnedEmbeddingSimilarity": BinnedEmbeddingSimilarity,
         "CosineBlink": CosineBlink,
         "Cosine": Cosine,
         "CosineLinear": CosineLinear,

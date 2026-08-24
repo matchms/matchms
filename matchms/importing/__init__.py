@@ -38,8 +38,8 @@ __all__ = [
     "load_from_msp",
     "load_from_mzml",
     "load_from_mzxml",
-    "load_from_usi",
-    "load_spectra",
     "load_from_pickle",
+    "load_from_usi",
     "load_ms2_dataset",
+    "load_spectra",
 ]
