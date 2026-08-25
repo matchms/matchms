@@ -38,7 +38,7 @@ def _harmonize_missing_entries(
     Parameters
     ----------
     spectrum_in
-        Input spectrum or spectra collection.
+        Input :class:`~matchms.spectrum.Spectrum` or :class:`~matchms.spectra_collection.SpectraCollection`.
     keys
         Metadata key or keys to harmonize. If ``None``, all existing metadata
         keys are harmonized.

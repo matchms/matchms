@@ -451,7 +451,8 @@ class SpectraCollection:
         indices : list[int] | np.ndarray
             Indices of the rows to remove.
         inplace : bool
-            Will return a new SpectraCollection, if True and the same if False. Defaults to False.
+            Will return a new :class:`~matchms.spectra_collection.SpectraCollection`, if True
+            and the same if False. Defaults to False.
         """
         target = self if inplace else self.copy()
 
@@ -472,7 +473,7 @@ class SpectraCollection:
         Parameters:
         -----------
         inplace : bool
-            Will return a new SpectraCollection, if True and the same if False. Defaults to False.
+            Will return a new :class:`~matchms.spectra_collection.SpectraCollection`, if True and the same if False. Defaults to False.
         """
         peaks_per_row = self._fragments.count(axis=1)
         empty_indices = np.where(peaks_per_row == 0)[0]
@@ -489,7 +490,8 @@ class SpectraCollection:
         Parameters:
         -----------
         inplace : bool
-            Will return a new SpectraCollection, if True and the same if False. Defaults to False.
+            Will return a new :class:`~matchms.spectra_collection.SpectraCollection`, if True
+            and the same if False. Defaults to False.
         """
         _, unique_indices = np.unique(self.spectra_hashes, return_index=True)
 

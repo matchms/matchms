@@ -14,7 +14,7 @@ def _derive_formula_from_smiles(metadata, overwrite: bool = True) -> dict:
     Parameters
     ----------
     spectrum_in
-        Input spectrum or spectra collection.
+        Input :class:`~matchms.spectrum.Spectrum` or :class:`~matchms.spectra_collection.SpectraCollection`.
     overwrite
         If ``True``, an existing ``formula`` entry will be replaced when the
         formula derived from SMILES differs from the current value.

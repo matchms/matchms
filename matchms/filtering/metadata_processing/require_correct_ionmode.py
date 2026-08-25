@@ -12,7 +12,7 @@ def _require_correct_ionmode(metadata, ion_mode_to_keep) -> bool:
     Parameters
     ----------
     spectrum_in
-        Input spectrum or spectra collection.
+        Input :class:`~matchms.spectrum.Spectrum` or :class:`~matchms.spectra_collection.SpectraCollection`.
     ion_mode_to_keep
         Desired ionmode: ``"positive"``, ``"negative"``, or ``"both"``.
         If ``"both"``, spectra are kept when ionmode is either ``"positive"``

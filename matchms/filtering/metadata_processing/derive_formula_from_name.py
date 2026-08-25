@@ -20,7 +20,7 @@ def _derive_formula_from_name(
     Parameters
     ----------
     spectrum_in
-        Input spectrum or spectra collection.
+        Input :class:`~matchms.spectrum.Spectrum` or :class:`~matchms.spectra_collection.SpectraCollection`.
     remove_formula_from_name
         Remove found formula from compound name if set to ``True``.
         Default is ``True``.

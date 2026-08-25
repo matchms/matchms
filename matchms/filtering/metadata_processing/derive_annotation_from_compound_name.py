@@ -43,7 +43,7 @@ def _derive_annotation_from_compound_name(
     Parameters
     ----------
     spectrum_in
-        Input spectrum or spectra collection.
+        Input :class:`~matchms.spectrum.Spectrum` or :class:`~matchms.spectra_collection.SpectraCollection`.
     annotated_compound_names_file
         Optional CSV file used as a persistent cache. Any compound name searched
         on PubChem will be added to this file. If a compound name is already

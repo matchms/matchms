@@ -31,7 +31,7 @@ def _require_matching_adduct_precursor_mz_parent_mass(
     Parameters
     ----------
     spectrum_in
-        Input spectrum or spectra collection.
+        Input :class:`~matchms.spectrum.Spectrum` or :class:`~matchms.spectra_collection.SpectraCollection`.
     tolerance
         Absolute tolerance used to compare the given parent mass to the parent
         mass implied by ``precursor_mz`` and ``adduct``. Default is ``0.1``.

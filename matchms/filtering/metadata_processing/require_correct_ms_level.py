@@ -8,7 +8,7 @@ def _require_correct_ms_level(metadata, required_ms_level: int = 2) -> bool:
     Parameters
     ----------
     spectrum_in
-        Input spectrum or spectra collection.
+        Input :class:`~matchms.spectrum.Spectrum` or :class:`~matchms.spectra_collection.SpectraCollection`.
     required_ms_level
         Required MS level. Default is ``2``.
     clone
