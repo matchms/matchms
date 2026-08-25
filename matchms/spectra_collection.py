@@ -1,9 +1,10 @@
 import logging
 import os
-from collections.abc import Generator
+from collections.abc import Generator, Iterable
 from functools import cached_property
 import numpy as np
 import pandas as pd
+from scipy.sparse import csr_array, vstack
 from matchms.exporting import save_as_json, save_as_mgf, save_as_msp
 from matchms.metadata_collection import MetadataCollection, harmonize_metadata_collection_columns
 from matchms.spectrum import Spectrum
@@ -94,6 +95,93 @@ class SpectraCollection:
         obj._metadata = metadata.reset_index(drop=True)
         obj._fragments = fragments
         return obj
+
+    @classmethod
+    def concat(cls, collections: Iterable[SpectraCollectionType]) -> SpectraCollectionType:
+        """Concatenate two or more SpectraCollection objects.
+
+        Metadata columns are combined by column name. Columns that are absent
+        from one input collection are filled with missing values (``NaN``) by
+        pandas during concatenation. Fragment rows are appended in the same
+        order as the input collections.
+
+        All input collections must use the same ``mz_precision`` so that their
+        fragment bin coordinates refer to the same m/z grid. Currently,
+        concatenation is implemented for ``CSRFragmentCollection`` backends.
+        """
+        collections = list(collections)
+
+        if len(collections) < 2:
+            raise ValueError("Need at least two SpectraCollection objects to concatenate.")
+
+        for collection in collections:
+            if not isinstance(collection, cls):
+                raise TypeError(
+                    "All objects must be SpectraCollection instances, "
+                    f"but got {type(collection)}."
+                )
+
+        first = collections[0]
+        mz_precision = first.mz_precision
+
+        for collection in collections:
+            if collection.mz_precision != mz_precision:
+                raise ValueError(
+                    "All SpectraCollection objects must have identical mz_precision "
+                    f"values. Got {mz_precision} and {collection.mz_precision}."
+                )
+            if not isinstance(collection.fragments, CSRFragmentCollection):
+                raise TypeError(
+                    "SpectraCollection.concat currently supports only "
+                    "CSRFragmentCollection fragment backends."
+                )
+
+        first_fragments = first.fragments
+        for collection in collections[1:]:
+            fragments = collection.fragments
+            if fragments.mz_rounding != first_fragments.mz_rounding:
+                raise ValueError(
+                    "All SpectraCollection objects must have identical fragment "
+                    "mz_rounding settings."
+                )
+            if fragments.index_dtype != first_fragments.index_dtype:
+                raise ValueError(
+                    "All SpectraCollection objects must have identical fragment "
+                    "index_dtype settings."
+                )
+
+        metadata = pd.concat(
+            [collection._metadata for collection in collections],
+            axis=0,
+            ignore_index=True,
+            sort=False,
+        )
+
+        n_bins = max(collection.fragments.n_bins for collection in collections)
+        arrays = [cls._pad_fragment_array(collection.fragments.array, n_bins) for collection in collections]
+        fragments_array = vstack(arrays, format="csr")
+        fragments = first_fragments.from_array(
+            fragments_array,
+            mz_precision=first_fragments.mz_precision,
+            mz_rounding=first_fragments.mz_rounding,
+            index_dtype=first_fragments.index_dtype,
+        )
+
+        return cls._from_metadata_and_fragments(
+            metadata=metadata,
+            fragments=fragments,
+            mz_precision=mz_precision,
+        )
+
+    @staticmethod
+    def _pad_fragment_array(array: csr_array, n_bins: int) -> csr_array:
+        """Return ``array`` with the same rows and ``n_bins`` columns."""
+        if array.shape[1] == n_bins:
+            return array
+        if array.shape[1] > n_bins:
+            raise ValueError("Cannot pad fragment array to fewer bins.")
+        coo = array.tocoo()
+        return csr_array((coo.data, (coo.row, coo.col)), shape=(array.shape[0], n_bins))
 
     def _construct_fragments(self, spectra: list):
         return CSRFragmentCollection(spectra, mz_precision=self.mz_precision)
@@ -262,7 +350,7 @@ class SpectraCollection:
             [self._metadata.reset_index(drop=True), new_metadata],
             axis=1,
         )
-        self._clear_cache(["metadata_hashes"])
+        self._clear_cache(["metadata_hashes", "spectra_hashes"])
 
     def drop_metadata(
         self,

@@ -473,3 +473,85 @@ def test_spectra_collection_reconstructs_spectrum_without_reharmonizing_metadata
     sliced = collection[0, 100.0:120.0]
 
     assert sliced.get("inchi") == "n/a"
+
+
+def test_concat_preserves_order_and_fragments(sample_spectra):
+    collection_1 = SpectraCollection(sample_spectra[:2], mz_precision=0.01)
+    collection_2 = SpectraCollection(sample_spectra[2:], mz_precision=0.01)
+
+    combined = SpectraCollection.concat([collection_1, collection_2])
+
+    assert isinstance(combined, SpectraCollection)
+    assert len(combined) == 3
+    assert combined.mz_precision == 0.01
+    assert combined.metadata["compound_name"].tolist() == ["A", "B", "C"]
+
+    np.testing.assert_allclose(
+        combined.fragments.sum(axis=1),
+        [1.521, 2.22, 2.02],
+        atol=1e-5,
+    )
+
+
+def test_concat_handles_different_metadata_columns_and_fragment_widths():
+    spectrum_1 = Spectrum(
+        mz=np.array([100.0]),
+        intensities=np.array([1.0]),
+        metadata={"compound_name": "A", "source": "left"},
+    )
+    spectrum_2 = Spectrum(
+        mz=np.array([300.0]),
+        intensities=np.array([2.0]),
+        metadata={"compound_name": "B", "instrument": "right"},
+    )
+
+    collection_1 = SpectraCollection([spectrum_1], mz_precision=0.01)
+    collection_2 = SpectraCollection([spectrum_2], mz_precision=0.01)
+
+    assert collection_1.n_bins < collection_2.n_bins
+
+    combined = SpectraCollection.concat([collection_1, collection_2])
+
+    assert len(combined) == 2
+    assert combined.n_bins == collection_2.n_bins
+
+    assert combined.metadata["compound_name"].tolist() == ["A", "B"]
+    assert combined.metadata.loc[0, "source"] == "left"
+    assert pd.isna(combined.metadata.loc[1, "source"])
+    assert pd.isna(combined.metadata.loc[0, "instrument"])
+    assert combined.metadata.loc[1, "instrument"] == "right"
+
+    np.testing.assert_allclose(combined.fragments.sum(axis=1), [1.0, 2.0])
+    np.testing.assert_allclose(combined[0].mz, [100.0], atol=0.01)
+    np.testing.assert_allclose(combined[1].mz, [300.0], atol=0.01)
+
+
+def test_concat_rejects_different_mz_precision(sample_spectra):
+    collection_1 = SpectraCollection(sample_spectra[:1], mz_precision=0.01)
+    collection_2 = SpectraCollection(sample_spectra[1:2], mz_precision=0.1)
+
+    with pytest.raises(ValueError, match="identical mz_precision"):
+        SpectraCollection.concat([collection_1, collection_2])
+
+
+def test_add_metadata_invalidates_spectra_hashes(collection):
+    # Access hashes first so the cached properties are populated.
+    original_metadata_hashes = collection.metadata_hashes.copy()
+    original_fragment_hashes = collection.fragment_hashes.copy()
+    original_spectra_hashes = collection.spectra_hashes.copy()
+
+    collection.add_metadata(
+        pd.Series([0.95, 0.88, 0.99], name="quality_score")
+    )
+
+    # Metadata changed, so metadata hashes must change.
+    assert collection.metadata_hashes != original_metadata_hashes
+
+    # Fragments did not change.
+    np.testing.assert_array_equal(
+        collection.fragment_hashes,
+        original_fragment_hashes,
+    )
+
+    # Combined spectrum hashes must reflect the metadata change.
+    assert collection.spectra_hashes != original_spectra_hashes
