@@ -4,7 +4,7 @@ from matchms import SpectraCollection
 from matchms.filtering.peak_processing.require_maximum_number_of_peaks import (
     require_maximum_number_of_peaks,
 )
-from matchms.Spectrum import Spectrum
+from matchms.spectrum import Spectrum
 from tests.run_spectrum_and_collection import run_filter_as_spectrum_or_collection
 
 

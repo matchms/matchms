@@ -12,7 +12,7 @@ from matchms.typing import SpectraCollectionType
 
 def _get_spectra_collection_type():
     """Import SpectraCollection lazily to avoid circular imports."""
-    from matchms.SpectraCollection import SpectraCollection
+    from matchms.spectra_collection import SpectraCollection
 
     return SpectraCollection
 
@@ -33,14 +33,15 @@ def collection_filter(
     allow_spectrum_fallback: bool = True,
     warn_on_fallback: bool = False,
 ):
-    """Create a public filter supporting Spectrum and SpectraCollection.
+    """Create a public filter supporting :class:`~matchms.spectrum.Spectrum`
+    and :class:`~matchms.spectra_collection.SpectraCollection`.
 
     Parameters
     ----------
     spectrum_impl
-        Implementation for a single Spectrum.
+        Implementation for a single :class:`~matchms.spectrum.Spectrum`.
     collection_impl
-        Optional native implementation for SpectraCollection.
+        Optional native implementation for :class:`~matchms.spectra_collection.SpectraCollection`.
     allow_spectrum_fallback
         If True, SpectraCollection inputs without a native implementation are
         processed spectrum-by-spectrum and converted back to SpectraCollection.
@@ -274,9 +275,9 @@ def metadata_requirement_filter(metadata_impl: Callable):
     ``True`` if the spectrum/row should be kept and ``False`` if it should be
     removed.
 
-    For Spectrum input, failed requirements return ``None``.
-    For SpectraCollection input, failed rows are dropped from metadata and
-    fragments.
+    For :class:`~matchms.spectrum.Spectrum` input, failed requirements return ``None``.
+    For :class:`~matchms.spectra_collection.SpectraCollection` input, failed rows
+    are dropped from metadata and fragments.
     """
 
     def spectrum_impl(spectrum_in, *args, **kwargs):
@@ -332,7 +333,7 @@ def apply_spectrum_filter_to_collection(
     """Apply a spectrum-level filter to all spectra in a collection.
 
     This is a compatibility fallback for filters without native
-    SpectraCollection implementation.
+    :class:`~matchms.spectra_collection.SpectraCollection` implementation.
 
     Notes
     -----

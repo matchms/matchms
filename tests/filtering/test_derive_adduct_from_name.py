@@ -5,7 +5,7 @@ from matchms.filtering import derive_adduct_from_name
 from matchms.filtering.metadata_processing.derive_adduct_from_name import _looks_like_adduct
 from matchms.logging_functions import reset_matchms_logger, set_matchms_logger_level
 from tests.run_spectrum_and_collection import run_filter_as_spectrum_or_collection
-from ..builder_Spectrum import SpectrumBuilder
+from ..builder_spectrum import SpectrumBuilder
 
 
 @pytest.fixture

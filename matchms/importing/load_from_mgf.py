@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import TextIO
 from pyteomics.mgf import MGF
 from matchms.importing.parsing_utils import parse_spectrum_dict
-from matchms.Spectrum import Spectrum
+from matchms.spectrum import Spectrum
 
 
 def load_from_mgf(
@@ -12,8 +12,8 @@ def load_from_mgf(
 ) -> Generator[Spectrum, None, None]:
     """Load spectrum(s) from mgf file.
 
-    This function will create ~matchms.Spectrum for every spectrum in the given
-    .mgf file (or the file-like object).
+    This function will create :class:`~matchms.spectrum.Spectrum` objects for every spectrum 
+    in the given .mgf file (or the file-like object).
 
     Examples:
 

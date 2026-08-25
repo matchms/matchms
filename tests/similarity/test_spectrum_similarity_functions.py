@@ -13,7 +13,7 @@ from matchms.similarity.spectrum_similarity_functions import (
     number_matching_symmetric_ppm,
     score_best_matches,
 )
-from ..builder_Spectrum import SpectrumBuilder
+from ..builder_spectrum import SpectrumBuilder
 
 
 @pytest.fixture

@@ -5,8 +5,8 @@ from pathlib import Path
 from typing import Any
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity, euclidean_distances
-from matchms.Scores import Scores
-from matchms.similarity.BaseSimilarity import BaseSimilarity
+from matchms.scores import Scores
+from matchms.similarity.base_similarity import BaseSimilarity
 from matchms.typing import SpectrumType
 
 

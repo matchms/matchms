@@ -9,8 +9,8 @@ from matchms.reference_spectra import (
     phenylalanine,
     salicin,
 )
-from matchms.Scores import Scores
-from matchms.similarity.FlashSimilarity import FlashEntropy
+from matchms.scores import Scores
+from matchms.similarity.flash_similarity import FlashEntropy
 
 
 def _reference_spectra():

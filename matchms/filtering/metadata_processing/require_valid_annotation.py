@@ -19,7 +19,7 @@ def _require_valid_annotation(metadata) -> bool:
     Parameters
     ----------
     spectrum_in
-        Input spectrum or spectra collection.
+        Input :class:`~matchms.spectrum.Spectrum` or :class:`~matchms.spectra_collection.SpectraCollection`.
     clone
         Optionally clone the input before applying the filter. If ``False``,
         the input object may be modified in place.
@@ -77,10 +77,7 @@ def _check_smiles_inchi_inchikey_match(smiles, inchi, inchikey) -> bool:
     if inchikey_from_smiles is None:
         return False
 
-    if inchikey[:14] != inchikey_from_smiles[:14]:
-        return False
-
-    return True
+    return inchikey[:14] == inchikey_from_smiles[:14]
 
 
 require_valid_annotation = metadata_requirement_filter(_require_valid_annotation)

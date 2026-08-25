@@ -11,7 +11,7 @@ from matchms.exporting.metadata_export import (
     get_metadata_as_array,
 )
 from matchms.importing import load_from_msp
-from tests.builder_Spectrum import SpectrumBuilder
+from tests.builder_spectrum import SpectrumBuilder
 
 
 def assert_files_equal_ignoring_line_endings(file1, file2):

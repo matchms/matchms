@@ -2,7 +2,7 @@ import pytest
 from matchms import SpectraCollection
 from matchms.filtering import repair_inchi_inchikey_smiles
 from tests.run_spectrum_and_collection import run_filter_as_spectrum_or_collection
-from ..builder_Spectrum import SpectrumBuilder
+from ..builder_spectrum import SpectrumBuilder
 
 
 REPAIR_TEST_CASES = [

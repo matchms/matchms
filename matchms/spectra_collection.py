@@ -5,9 +5,9 @@ from functools import cached_property
 import numpy as np
 import pandas as pd
 from matchms.exporting import save_as_json, save_as_mgf, save_as_msp
-from matchms.MetadataCollection import MetadataCollection, harmonize_metadata_collection_columns
-from matchms.Spectrum import Spectrum
-from .FragmentCollection import CSRFragmentCollection, FragmentCollection
+from matchms.metadata_collection import MetadataCollection, harmonize_metadata_collection_columns
+from matchms.spectrum import Spectrum
+from .fragment_collection import CSRFragmentCollection, FragmentCollection
 from .hashing import compute_combined_hashes
 from .typing import SpectraCollectionType
 
@@ -242,7 +242,7 @@ class SpectraCollection:
         elif isinstance(data, dict):
             for v in data.values():
                 if not isinstance(v, list):
-                    raise ValueError("When data is a dict, values must be of type list.")
+                    raise TypeError("When data is a dict, values must be of type list.")
             new_metadata = pd.DataFrame(data)
         else:
             raise TypeError("Data must be pd.DataFrame, pd.Series, list, or dict of lists.")
@@ -451,7 +451,8 @@ class SpectraCollection:
         indices : list[int] | np.ndarray
             Indices of the rows to remove.
         inplace : bool
-            Will return a new SpectraCollection, if True and the same if False. Defaults to False.
+            Will return a new :class:`~matchms.spectra_collection.SpectraCollection`, if True
+            and the same if False. Defaults to False.
         """
         target = self if inplace else self.copy()
 
@@ -472,7 +473,8 @@ class SpectraCollection:
         Parameters:
         -----------
         inplace : bool
-            Will return a new SpectraCollection, if True and the same if False. Defaults to False.
+            Will return a new :class:`~matchms.spectra_collection.SpectraCollection`,
+            if True and the same if False. Defaults to False.
         """
         peaks_per_row = self._fragments.count(axis=1)
         empty_indices = np.where(peaks_per_row == 0)[0]
@@ -489,7 +491,8 @@ class SpectraCollection:
         Parameters:
         -----------
         inplace : bool
-            Will return a new SpectraCollection, if True and the same if False. Defaults to False.
+            Will return a new :class:`~matchms.spectra_collection.SpectraCollection`, if True
+            and the same if False. Defaults to False.
         """
         _, unique_indices = np.unique(self.spectra_hashes, return_index=True)
 

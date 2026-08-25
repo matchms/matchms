@@ -1,6 +1,6 @@
 import numpy as np
 from matchms.filtering._dispatch import collection_filter
-from matchms.Fragments import Fragments
+from matchms.fragments import Fragments
 from matchms.typing import SpectrumType
 
 
@@ -38,7 +38,7 @@ def _remove_peaks_around_precursor_mz(
         raise ValueError("Undefined 'precursor_mz'.")
 
     if not isinstance(precursor_mz, (float, int, np.floating, np.integer)):
-        raise ValueError(
+        raise TypeError(
             "Expected 'precursor_mz' to be a scalar number. "
             "Consider applying 'add_precursor_mz' filter first."
         )

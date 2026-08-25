@@ -5,13 +5,13 @@ from collections import OrderedDict
 from collections.abc import Callable, Iterable
 from matchms.exporting import save_spectra
 from matchms.filtering.filter_order import ALL_FILTERS
-from matchms.filtering.SpectrumProcessor import (
+from matchms.filtering.spectrum_processor import (
     check_all_parameters_given,
     create_partial_function,
     get_parameter_settings,
     load_matchms_filter_from_string,
 )
-from matchms.SpectraCollection import SpectraCollection
+from matchms.spectra_collection import SpectraCollection
 from matchms.yaml_file_functions import ordered_dump
 
 

@@ -75,9 +75,7 @@ def is_valid_inchi(inchi: str) -> bool:
         return False
     # Proper chemical test
     mol = Chem.MolFromInchi(inchi)
-    if mol:
-        return True
-    return False
+    return bool(mol)
 
 
 def is_valid_smiles(smiles: str) -> bool:
@@ -100,9 +98,7 @@ def is_valid_smiles(smiles: str) -> bool:
         return False
 
     mol = Chem.MolFromSmiles(smiles)
-    if mol:
-        return True
-    return False
+    return bool(mol)
 
 
 def is_valid_inchikey(inchikey: str) -> bool:
@@ -117,6 +113,4 @@ def is_valid_inchikey(inchikey: str) -> bool:
         return False
 
     regexp = r"[A-Z]{14}-[A-Z]{10}-[A-Z]"
-    if re.fullmatch(regexp, inchikey):
-        return True
-    return False
+    return bool(re.fullmatch(regexp, inchikey))

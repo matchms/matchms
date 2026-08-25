@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 from matchms.filtering import select_by_mz
-from tests.builder_Spectrum import SpectrumBuilder
+from tests.builder_spectrum import SpectrumBuilder
 from tests.run_spectrum_and_collection import run_filter_as_spectrum_or_collection
 
 

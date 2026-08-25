@@ -1,6 +1,6 @@
 import numpy as np
 from matchms.filtering._dispatch import collection_filter
-from matchms.Fragments import Fragments
+from matchms.fragments import Fragments
 from matchms.typing import SpectrumType
 
 

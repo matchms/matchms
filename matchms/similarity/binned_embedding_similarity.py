@@ -1,7 +1,7 @@
 from collections.abc import Iterable
 import numpy as np
 from matchms.typing import SpectrumType
-from .BaseEmbeddingSimilarity import BaseEmbeddingSimilarity
+from .base_embedding_similarity import BaseEmbeddingSimilarity
 
 
 class BinnedEmbeddingSimilarity(BaseEmbeddingSimilarity):

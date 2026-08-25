@@ -3,7 +3,7 @@ import numpy as np
 import pytest
 from matchms import Spectrum
 from matchms.importing.load_from_msp import get_peak_values, load_from_msp, parse_metadata
-from tests.builder_Spectrum import SpectrumBuilder
+from tests.builder_spectrum import SpectrumBuilder
 
 
 def assert_matching_inchikey(molecule, expected_inchikey):
@@ -250,7 +250,7 @@ def test_load_golm_style_msp():
     assert len(actual[0].mz) == 50
     assert len(edge_case_actual[0].metadata["synonyms"]) == 11
     assert edge_case_actual[0].metadata["retention_index"] == 986.12
-    assert "inchi" in edge_case_actual[0].metadata.keys()
+    assert "inchi" in edge_case_actual[0].metadata
 
 
 def test_load_msp_with_comments_including_quotes():

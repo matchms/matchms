@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 from matchms.exporting import save_as_mgf
 from matchms.importing import load_from_mgf
-from ..builder_Spectrum import SpectrumBuilder
+from ..builder_spectrum import SpectrumBuilder
 
 
 def load_test_spectra_file(test_filename):

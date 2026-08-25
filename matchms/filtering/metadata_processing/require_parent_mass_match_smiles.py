@@ -14,7 +14,7 @@ def _require_parent_mass_match_smiles(metadata, mass_tolerance) -> bool:
     Parameters
     ----------
     spectrum_in
-        Input spectrum or spectra collection.
+        Input :class:`~matchms.spectrum.Spectrum` or :class:`~matchms.spectra_collection.SpectraCollection`.
     mass_tolerance
         Allowed absolute mass difference between ``parent_mass`` and the
         monoisotopic neutral mass calculated from ``smiles``.

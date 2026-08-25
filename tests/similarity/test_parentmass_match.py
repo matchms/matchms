@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 from matchms.similarity import ParentMassMatch
-from ..builder_Spectrum import SpectrumBuilder, spectra_factory
+from ..builder_spectrum import SpectrumBuilder, spectra_factory
 
 
 @pytest.mark.parametrize("parent_mass, tolerance, expected", [

@@ -23,7 +23,7 @@ def _derive_adduct_from_name(
     Parameters
     ----------
     spectrum_in
-        Input spectrum or spectra collection.
+        Input :class:`~matchms.spectrum.Spectrum` or :class:`~matchms.spectra_collection.SpectraCollection`.
     remove_adduct_from_name
         Remove found adducts from compound name if set to ``True``.
         Default is ``True``.

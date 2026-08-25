@@ -5,9 +5,9 @@ from collections.abc import Sequence
 import numpy as np
 from numba import njit
 from tqdm import tqdm
-from matchms.Scores import Scores
+from matchms.scores import Scores
 from matchms.typing import SpectrumType
-from .BaseSimilarity import BaseSimilarity
+from .base_similarity import BaseSimilarity
 from .flash_utils import _build_library_index, _clean_and_weight
 
 

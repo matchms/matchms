@@ -1,9 +1,9 @@
 import numpy as np
 import pytest
-from matchms.Scores import Scores
+from matchms.scores import Scores
 from matchms.similarity import CosineGreedy, ModifiedCosineGreedy
-from matchms.similarity.FlashSimilarity import CosineFlash, FlashEntropy
-from ..builder_Spectrum import SpectrumBuilder
+from matchms.similarity.flash_similarity import CosineFlash, FlashEntropy
+from ..builder_spectrum import SpectrumBuilder
 
 
 # ----------------------------

@@ -4,9 +4,9 @@ import numpy as np
 from scipy.sparse import csr_array
 from tqdm.auto import tqdm
 from matchms.filtering._dispatch import collection_filter
-from matchms.SpectraCollection import SpectraCollection
+from matchms.spectra_collection import SpectraCollection
 from matchms.typing import SpectrumType
-from ...Fragments import Fragments
+from ...fragments import Fragments
 
 
 logger = logging.getLogger("matchms")

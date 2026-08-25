@@ -1,8 +1,8 @@
 import logging
 import numpy as np
 from matchms.filtering._dispatch import collection_filter
-from matchms.Fragments import Fragments
-from matchms.Spectrum import Spectrum
+from matchms.fragments import Fragments
+from matchms.spectrum import Spectrum
 from matchms.typing import SpectrumType
 
 

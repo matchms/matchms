@@ -28,7 +28,7 @@ def _add_retention_time(metadata) -> dict:
     Parameters
     ----------
     spectrum_in
-        Input spectrum or spectra collection.
+        Input :class:`~matchms.spectrum.Spectrum` or :class:`~matchms.spectra_collection.SpectraCollection`.
     clone
         Optionally clone the input before applying the filter. If ``False``,
         the input object may be modified in place.
@@ -52,7 +52,7 @@ def _add_retention_index(metadata) -> dict:
     Parameters
     ----------
     spectrum_in
-        Input spectrum or spectra collection.
+        Input :class:`~matchms.spectrum.Spectrum` or :class:`~matchms.spectra_collection.SpectraCollection`.
     clone
         Optionally clone the input before applying the filter. If ``False``,
         the input object may be modified in place.

@@ -2,9 +2,9 @@ from collections.abc import Iterable
 import numpy as np
 import pytest
 from matchms import Scores, SpectraCollection
-from matchms.similarity.BaseEmbeddingSimilarity import BaseEmbeddingSimilarity
+from matchms.similarity.base_embedding_similarity import BaseEmbeddingSimilarity
 from matchms.typing import SpectrumType
-from tests.builder_Spectrum import SpectrumBuilder
+from tests.builder_spectrum import SpectrumBuilder
 
 
 class MockEmbeddingSimilarity(BaseEmbeddingSimilarity):

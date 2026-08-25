@@ -38,7 +38,8 @@ def _add_parent_mass(
     Parameters
     ----------
     spectrum_in
-        Input spectrum or spectra collection.
+        Input :class:`~matchms.spectrum.Spectrum`
+        or :class:`~matchms.spectra_collection.SpectraCollection`.
     estimate_from_adduct
         When set to ``True``, use adduct to estimate actual molecular mass
         (``parent_mass``). Switches back to charge-based estimate if adduct does
@@ -56,7 +57,7 @@ def _add_parent_mass(
 
     Returns
     -------
-    Spectrum, SpectraCollection, or None
+    :class:`~matchms.spectrum.Spectrum`, :class:`~matchms.spectra_collection.SpectraCollection`, or None
         Input object with added or updated ``parent_mass`` metadata, or ``None``
         if the input was ``None``.
     """

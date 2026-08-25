@@ -1,5 +1,5 @@
 import pytest
-from matchms.filtering.SpeciesString import SpeciesString
+from matchms.filtering.species_string import SpeciesString
 
 
 @pytest.mark.parametrize(

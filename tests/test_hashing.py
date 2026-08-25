@@ -3,7 +3,7 @@ import pytest
 from scipy.sparse import csr_array
 from matchms import Spectrum
 from matchms.hashing import metadata_hash, spectra_hashes, spectrum_hash, spectrum_hash_arrays
-from .builder_Spectrum import SpectrumBuilder
+from .builder_spectrum import SpectrumBuilder
 
 
 @pytest.fixture

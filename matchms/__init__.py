@@ -1,17 +1,17 @@
-from matchms.filtering.SpectraCollectionProcessor import SpectraCollectionProcessor
-from matchms.filtering.SpectrumProcessor import SpectrumProcessor
+from matchms.filtering.spectra_collection_processor import SpectraCollectionProcessor
+from matchms.filtering.spectrum_processor import SpectrumProcessor
 from . import exporting, filtering, importing, networking, plotting, similarity
 from .__version__ import __version__
 from .calculate_scores import calculate_scores
-from .Fingerprints import Fingerprints
-from .Fragments import Fragments
+from .fingerprints import Fingerprints
+from .fragments import Fragments
 from .logging_functions import _init_logger, set_matchms_logger_level
-from .Metadata import Metadata
-from .MetadataCollection import MetadataCollection
-from .Pipeline import Pipeline
-from .Scores import Scores
-from .SpectraCollection import SpectraCollection
-from .Spectrum import Spectrum
+from .metadata import Metadata
+from .metadata_collection import MetadataCollection
+from .pipeline import Pipeline
+from .scores import Scores
+from .spectra_collection import SpectraCollection
+from .spectrum import Spectrum
 
 
 _init_logger()
@@ -20,23 +20,23 @@ _init_logger()
 __author__ = "Matchms developers community"
 __email__ = "florian.huber@hs-duesseldorf.de"
 __all__ = [
-    "__version__",
-    "calculate_scores",
-    "exporting",
-    "filtering",
     "Fingerprints",
     "Fragments",
-    "importing",
     "Metadata",
     "MetadataCollection",
-    "networking",
     "Pipeline",
-    "plotting",
     "Scores",
-    "set_matchms_logger_level",
-    "similarity",
     "SpectraCollection",
     "SpectraCollectionProcessor",
     "Spectrum",
     "SpectrumProcessor",
+    "__version__",
+    "calculate_scores",
+    "exporting",
+    "filtering",
+    "importing",
+    "networking",
+    "plotting",
+    "set_matchms_logger_level",
+    "similarity",
 ]

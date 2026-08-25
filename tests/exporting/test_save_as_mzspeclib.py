@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 import numpy as np
 from matchms.exporting import save_as_mzspeclib
-from ..builder_Spectrum import SpectrumBuilder
+from ..builder_spectrum import SpectrumBuilder
 
 
 def test_creates_file(tmp_path):

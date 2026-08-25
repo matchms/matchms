@@ -7,9 +7,9 @@ import pytest
 from matchms import SpectrumProcessor
 from matchms import filtering as msfilters
 from matchms.filtering.default_pipelines import BASIC_FILTERS
-from matchms.filtering.SpectrumProcessor import ProcessingReport, create_partial_function, objects_differ
+from matchms.filtering.spectrum_processor import ProcessingReport, create_partial_function, objects_differ
 from matchms.importing.load_spectra import load_spectra
-from ..builder_Spectrum import SpectrumBuilder
+from ..builder_spectrum import SpectrumBuilder
 
 
 @pytest.fixture

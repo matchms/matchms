@@ -1,11 +1,11 @@
 """Helper functions to build and handle spectral networks."""
 from collections.abc import Sequence
 import numpy as np
-from matchms import Scores
+from matchms.typing import ScoresType
 
 
 def get_top_hits(
-    scores: Scores,
+    scores: ScoresType,
     top_n: int = 25,
     axis: int = 1,
     score_name: str | None = None,
@@ -70,7 +70,7 @@ def get_top_hits(
 
 
 def get_top_hits_by_row(
-    scores: Scores,
+    scores: ScoresType,
     top_n: int = 25,
     score_name: str | None = None,
     identifiers: Sequence | None = None,
@@ -88,7 +88,7 @@ def get_top_hits_by_row(
 
 
 def get_top_hits_by_column(
-    scores: Scores,
+    scores: ScoresType,
     top_n: int = 25,
     score_name: str | None = None,
     identifiers: Sequence | None = None,
@@ -105,7 +105,7 @@ def get_top_hits_by_column(
     )
 
 
-def _get_score_array(scores: Scores, score_name: str | None) -> np.ndarray:
+def _get_score_array(scores: ScoresType, score_name: str | None) -> np.ndarray:
     """Return the selected score field as a dense NumPy array."""
     if score_name is None:
         if scores.is_scalar:

@@ -1,6 +1,6 @@
 from matchms.filtering._dispatch import metadata_update_filter
 from matchms.filtering.filter_utils.metadata_conversions import as_string_or_none
-from matchms.filtering.SpeciesString import SpeciesString
+from matchms.filtering.species_string import SpeciesString
 
 
 def _repair_species_values(inchi, inchiaux, inchikey, smiles) -> dict[str, str]:

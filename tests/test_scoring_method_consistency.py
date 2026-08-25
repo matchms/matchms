@@ -14,8 +14,8 @@ import matchms.filtering as msfilter
 import matchms.similarity as mssimilarity
 from matchms import Pipeline
 from matchms.importing import load_from_json
-from matchms.Pipeline import create_workflow
-from matchms.similarity.BaseSimilarity import BaseSimilarityWithSparse
+from matchms.pipeline import create_workflow
+from matchms.similarity.base_similarity import BaseSimilarityWithSparse
 
 
 module_root = os.path.dirname(__file__)

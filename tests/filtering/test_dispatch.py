@@ -9,8 +9,8 @@ from matchms.filtering._dispatch import (
     collection_filter,
     metadata_update_filter,
 )
-from matchms.SpectraCollection import SpectraCollection
-from tests.builder_Spectrum import SpectrumBuilder
+from matchms.spectra_collection import SpectraCollection
+from tests.builder_spectrum import SpectrumBuilder
 
 
 def _make_spectrum(identifier="spectrum", mz=None, intensities=None, metadata=None):

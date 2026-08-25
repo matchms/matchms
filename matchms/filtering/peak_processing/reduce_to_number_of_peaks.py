@@ -3,8 +3,8 @@ from math import ceil
 import numpy as np
 import pandas as pd
 from matchms.filtering._dispatch import collection_filter
-from matchms.Fragments import Fragments
-from matchms.SpectraCollection import SpectraCollection
+from matchms.fragments import Fragments
+from matchms.spectra_collection import SpectraCollection
 from matchms.typing import SpectrumType
 
 
@@ -42,7 +42,7 @@ def _reduce_to_number_of_peaks_spectrum(
     def _set_maximum_number_of_peaks_to_keep():
         parent_mass = spectrum.get("parent_mass", None)
         if parent_mass and ratio_desired:
-            n_desired_by_mass = int(ceil(ratio_desired * parent_mass))
+            n_desired_by_mass = ceil(ratio_desired * parent_mass)
             return min(max(n_required, n_desired_by_mass), n_max)
         if not ratio_desired:
             return n_max

@@ -1,9 +1,9 @@
 import numpy as np
 import pytest
-from matchms.Scores import Scores, ScoresMask
+from matchms.scores import Scores, ScoresMask
 from matchms.similarity import CosineGreedy
-from matchms.similarity.CosineBlink import CosineBlink
-from ..builder_Spectrum import SpectrumBuilder
+from matchms.similarity.cosine_blink import CosineBlink
+from ..builder_spectrum import SpectrumBuilder
 
 
 # ---------- helpers ----------

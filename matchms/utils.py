@@ -206,7 +206,7 @@ def rename_deprecated_params(param_mapping: dict, version: str = None) -> Callab
                     warn(warning_msg, DeprecationWarning, stacklevel=2)
 
             # Remove old params in keyword arguments, if present
-            for old_param in param_mapping.keys():
+            for old_param in param_mapping:
                 new_kwargs.pop(old_param, None)
 
             # Create final args based on new keyword arguments

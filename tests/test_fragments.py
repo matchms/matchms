@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from matchms.Fragments import Fragments
+from matchms.fragments import Fragments
 
 
 @pytest.mark.parametrize("dtype", [

@@ -3,7 +3,7 @@ import pytest
 from matchms import Spectrum
 from matchms.filtering import normalize_intensities
 from matchms.similarity import CosineHungarian, ModifiedCosineGreedy, ModifiedCosineHungarian
-from ..builder_Spectrum import SpectrumBuilder
+from ..builder_spectrum import SpectrumBuilder
 
 
 # ruff: noqa: E501

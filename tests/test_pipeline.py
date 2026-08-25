@@ -3,7 +3,7 @@ import numpy as np
 import pytest
 from matchms import Pipeline
 from matchms.importing.load_spectra import load_spectra
-from matchms.Pipeline import create_workflow
+from matchms.pipeline import create_workflow
 from matchms.similarity import ModifiedCosineGreedy
 from matchms.yaml_file_functions import load_workflow_from_yaml_file
 

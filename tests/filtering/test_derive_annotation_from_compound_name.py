@@ -10,7 +10,7 @@ from matchms.filtering.metadata_processing.derive_annotation_from_compound_name 
     _pubchem_name_search,
     _write_compound_name_annotations,
 )
-from ..builder_Spectrum import SpectrumBuilder
+from ..builder_spectrum import SpectrumBuilder
 
 
 @pytest.fixture()

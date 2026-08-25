@@ -5,7 +5,7 @@ import json
 import numpy as np
 import pandas as pd
 from scipy.sparse import csr_array
-from .Fragments import Fragments
+from .fragments import Fragments
 
 
 def spectrum_hash(peaks: Fragments, hash_length: int = 20, mz_precision: int = 5, intensity_precision: int = 2) -> str:

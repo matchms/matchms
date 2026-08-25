@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 from matchms.filtering import remove_noise_below_frequent_intensities
-from matchms.Spectrum import Spectrum
+from matchms.spectrum import Spectrum
 from tests.run_spectrum_and_collection import run_filter_as_spectrum_or_collection
 
 

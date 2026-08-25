@@ -6,7 +6,7 @@ from matchms.filtering.metadata_processing.repair_adduct_and_parent_mass_based_o
     _repair_adduct_and_parent_mass_based_on_smiles,
     repair_adduct_and_parent_mass_based_on_smiles,
 )
-from matchms.SpectraCollection import SpectraCollection
+from matchms.spectra_collection import SpectraCollection
 from matchms.typing import SpectrumType
 from .repair_parent_mass_is_molar_mass import (
     _repair_parent_mass_is_molar_mass,

@@ -19,7 +19,7 @@ def _require_precursor_mz(
     Parameters
     ----------
     spectrum_in
-        Input spectrum or spectra collection.
+        Input :class:`~matchms.spectrum.Spectrum` or :class:`~matchms.spectra_collection.SpectraCollection`.
     minimum_accepted_mz
         Minimum accepted precursor m/z. Default is ``10.0``. Use ``None`` to
         disable the lower bound.

@@ -1,4 +1,4 @@
-from .MetadataMatch import MetadataMatch
+from .metadata_match import MetadataMatch
 
 
 class ParentMassMatch(MetadataMatch):

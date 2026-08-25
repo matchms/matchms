@@ -3,7 +3,7 @@ from matchms import SpectraCollection
 from matchms.filtering.metadata_processing.require_matching_adduct_and_ionmode import (
     require_matching_adduct_and_ionmode,
 )
-from tests.builder_Spectrum import SpectrumBuilder
+from tests.builder_spectrum import SpectrumBuilder
 
 
 TEST_CASES = [

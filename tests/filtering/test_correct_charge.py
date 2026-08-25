@@ -1,7 +1,7 @@
 import pytest
 from matchms import SpectraCollection
 from matchms.filtering import correct_charge
-from tests.builder_Spectrum import SpectrumBuilder
+from tests.builder_spectrum import SpectrumBuilder
 from tests.run_spectrum_and_collection import run_filter_as_spectrum_or_collection
 
 
@@ -51,7 +51,7 @@ def test_correct_charge_raises_for_non_lowercase_ionmode(as_collection):
 def test_correct_charge_raises_for_string_charge(as_collection):
     spectrum_in = SpectrumBuilder().with_metadata({"charge": "+1"}).build()
 
-    with pytest.raises(ValueError, match="Charge is given as string"):
+    with pytest.raises(TypeError, match="Charge is given as string"):
         run_filter_as_spectrum_or_collection(
             correct_charge,
             spectrum_in,

@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 from matchms import Pipeline
-from matchms.Pipeline import create_workflow
+from matchms.pipeline import create_workflow
 
 
 def _score_matrix(scores):

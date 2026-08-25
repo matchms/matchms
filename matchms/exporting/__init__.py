@@ -2,7 +2,7 @@
 Functions for exporting mass spectral data
 ##########################################
 
-Individual :meth:`~matchms.Spectrum`, or lists of :meth:`~matchms.Spectrum`
+Individual :class:`~matchms.spectrum.Spectrum`, or lists of :class:`~matchms.spectrum.Spectrum`
 can be exported to json, mgf, or msp files.
 """
 

@@ -2,14 +2,14 @@ import re
 from collections.abc import Generator
 import numpy as np
 from matchms.importing.parsing_utils import parse_spectrum_dict
-from matchms.Spectrum import Spectrum
+from matchms.spectrum import Spectrum
 
 
 def load_from_msp(filename: str, metadata_harmonization: bool = True) -> Generator[Spectrum, None, None]:
     """
-    MSP file to a :py:class:`~matchms.Spectrum.Spectrum` objects
+    MSP file to a :class:`~matchms.spectrum.Spectrum` objects
     Function that reads a .msp file and converts the info
-    in :py:class:`~matchms.Spectrum.Spectrum` objects.
+    in :class:`~matchms.spectrum.Spectrum` objects.
 
     Parameters
     ----------

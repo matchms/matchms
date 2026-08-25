@@ -2,8 +2,8 @@ import numpy as np
 import pytest
 from rdkit.Chem import rdFingerprintGenerator
 from matchms import Spectrum
-from matchms.Fingerprints import Fingerprints
-from matchms.Scores import Scores
+from matchms.fingerprints import Fingerprints
+from matchms.scores import Scores
 from matchms.similarity import FingerprintSimilarity
 
 

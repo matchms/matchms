@@ -7,7 +7,7 @@ from datetime import datetime
 import numpy as np
 import matchms.similarity as mssimilarity
 from matchms.filtering.filter_order import ALL_FILTERS
-from matchms.filtering.SpectrumProcessor import (
+from matchms.filtering.spectrum_processor import (
     FunctionWithParametersType,
     SpectrumProcessor,
 )
@@ -17,8 +17,8 @@ from matchms.logging_functions import (
     reset_matchms_logger,
     set_matchms_logger_level,
 )
-from matchms.Scores import Scores, ScoresMask
-from matchms.similarity.BaseSimilarity import BaseSimilarity
+from matchms.scores import Scores, ScoresMask
+from matchms.similarity.base_similarity import BaseSimilarity
 from matchms.typing import SpectrumType
 from matchms.yaml_file_functions import load_workflow_from_yaml_file, ordered_dump
 

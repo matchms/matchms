@@ -162,7 +162,7 @@ class Scores:
            [0. , 0.8]])
     """
 
-    _FORMAT_NAME = "matchms.Scores"
+    _FORMAT_NAME = "matchms.scores"
     _FORMAT_VERSION = 1
     _METADATA_KEY = "__scores_metadata__"
 

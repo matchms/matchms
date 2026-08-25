@@ -6,7 +6,7 @@ import pytest
 from matchms import Spectrum
 from matchms.exporting import save_as_msp
 from matchms.importing import load_from_mgf, load_from_msp
-from ..builder_Spectrum import SpectrumBuilder
+from ..builder_spectrum import SpectrumBuilder
 
 
 @pytest.fixture

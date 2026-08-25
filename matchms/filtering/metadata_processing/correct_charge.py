@@ -19,7 +19,7 @@ def _correct_charge(metadata) -> dict:
     Parameters
     ----------
     spectrum_in
-        Input spectrum or spectra collection.
+        Input :class:`~matchms.spectrum.Spectrum` or :class:`~matchms.spectra_collection.SpectraCollection`.
     clone
         Optionally clone the input before applying the filter. If ``False``,
         the input object may be modified in place.
@@ -41,7 +41,7 @@ def _correct_charge(metadata) -> dict:
 
     raw_charge = metadata.get("charge", None)
     if isinstance(raw_charge, str):
-        raise ValueError(
+        raise TypeError(
             "Charge is given as string. Apply 'make_charge_int' filter first."
         )
 

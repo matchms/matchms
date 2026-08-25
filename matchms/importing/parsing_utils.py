@@ -3,7 +3,7 @@
 import ast
 from typing import Any
 import numpy as np
-from matchms.Spectrum import Spectrum
+from matchms.spectrum import Spectrum
 
 
 def find_by_key(data: list | dict, target: str) -> Any:
@@ -111,7 +111,7 @@ def parse_spectrum_dict(spectrum: dict, metadata_harmonization, spectrum_type="p
     intensities = spectrum["intensity array"]
 
     if spectrum_type == "pyteomics":
-        if "peak_comments" in metadata.keys():
+        if "peak_comments" in metadata:
             metadata["peak_comments"] = ast.literal_eval(str(metadata["peak_comments"]))
     else:
         peak_comments = spectrum["peak comments"]

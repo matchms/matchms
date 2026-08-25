@@ -1,6 +1,6 @@
 import pytest
 from matchms.filtering import require_parent_mass_match_smiles
-from tests.builder_Spectrum import SpectrumBuilder
+from tests.builder_spectrum import SpectrumBuilder
 
 
 @pytest.mark.parametrize(

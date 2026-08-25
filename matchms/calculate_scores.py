@@ -1,6 +1,6 @@
 from collections.abc import Sequence
-from .Scores import Scores
-from .similarity.BaseSimilarity import BaseSimilarity
+from .scores import Scores
+from .similarity.base_similarity import BaseSimilarity
 from .typing import SpectrumType
 
 
@@ -51,6 +51,6 @@ def calculate_scores(spectra_1: Sequence[SpectrumType], spectra_2: Sequence[Spec
     Returns
     -------
 
-    ~matchms.Scores.Scores
+    ~matchms.scores.Scores
     """
     return similarity_function.matrix(spectra_1, spectra_2)
