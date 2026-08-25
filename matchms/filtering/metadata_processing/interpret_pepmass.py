@@ -1,11 +1,17 @@
+from __future__ import annotations
 import logging
 import re
+from typing import TYPE_CHECKING
 import numpy as np
 import pandas as pd
 from matchms.filtering._dispatch import collection_filter
 from matchms.filtering.filter_utils.metadata_conversions import is_missing_metadata_value
-from matchms.typing import SpectraCollectionType, SpectrumType
 from .make_charge_int import _convert_charge_to_int
+
+
+if TYPE_CHECKING:
+    from matchms.spectra_collection import SpectraCollection
+    from matchms.spectrum import Spectrum
 
 
 logger = logging.getLogger("matchms")
@@ -17,7 +23,7 @@ _accepted_missing_entries = ["", "N/A", "NA", "n/a"]
 def _interpret_pepmass_spectrum(
     spectrum_in,
     clone: bool | None = True,
-) -> SpectrumType | None:
+) -> Spectrum | None:
     """Reads pepmass field, if present, and adds values to correct fields.
 
     The field ``pepmass`` or ``PEPMASS`` is often used to describe the precursor
@@ -45,9 +51,9 @@ def _interpret_pepmass_spectrum(
 
 
 def _interpret_pepmass_collection(
-    spectrum_in: SpectraCollectionType,
+    spectrum_in: SpectraCollection,
     clone: bool | None = True,
-) -> SpectraCollectionType:
+) -> SpectraCollection:
     """Reads pepmass field, if present, for a SpectraCollection."""
     target = spectrum_in.copy() if clone else spectrum_in
     metadata = target._metadata.copy()
