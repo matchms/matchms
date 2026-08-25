@@ -350,7 +350,7 @@ class SpectraCollection:
             [self._metadata.reset_index(drop=True), new_metadata],
             axis=1,
         )
-        self._clear_cache(["metadata_hashes"])
+        self._clear_cache(["metadata_hashes", "spectra_hashes"])
 
     def drop_metadata(
         self,
