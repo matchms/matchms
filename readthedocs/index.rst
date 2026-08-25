@@ -1,5 +1,5 @@
 matchms documentation
-====================
+=====================
 
 Matchms is an open-access Python library to **import, process, clean, and compare tandem mass spectrometry (MS/MS) data**.
 It helps you build reproducible workflows from raw spectra to similarity scores and downstream analysis.
