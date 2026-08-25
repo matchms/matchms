@@ -1,6 +1,8 @@
+from __future__ import annotations
 import json
 import logging
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 import numpy as np
 import pandas as pd
 import scipy.sparse as sp
@@ -11,7 +13,10 @@ from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import (
     is_valid_inchikey,
     is_valid_smiles,
 )
-from matchms.typing import SpectrumType
+
+
+if TYPE_CHECKING:
+    from matchms.spectrum import Spectrum
 
 
 logger = logging.getLogger("matchms")
@@ -231,7 +236,7 @@ class Fingerprints:
         logger.warning("Fingerprint is not present for given Spectrum/InChIKey. Use compute_fingerprints() first.")
         return None
 
-    def get_fingerprint_by_spectrum(self, spectrum: SpectrumType):
+    def get_fingerprint_by_spectrum(self, spectrum: Spectrum):
         """Get fingerprint by spectrum.
 
         Parameters
@@ -247,7 +252,7 @@ class Fingerprints:
         inchikey = spectrum.get("inchikey")
         return self.get_fingerprint_by_inchikey(inchikey)
 
-    def compute_fingerprint(self, spectrum: SpectrumType):
+    def compute_fingerprint(self, spectrum: Spectrum):
         """Compute one fingerprint for a given spectrum.
 
         This does not add the fingerprint to the internal storage. It only computes
@@ -273,7 +278,7 @@ class Fingerprints:
             return None
         return self._extract_row(fps, 0)
 
-    def compute_fingerprints(self, spectra: list[SpectrumType]):
+    def compute_fingerprints(self, spectra: list[Spectrum]):
         """Compute fingerprints for a list of spectra.
 
         Fingerprints are computed only for unique compounds, keyed by InChIKey.
@@ -335,7 +340,7 @@ class Fingerprints:
         )
         return compute_fingerprints(smiles, self.fingerprint_generator, config=config)
 
-    def _record_from_spectrum(self, spectrum: SpectrumType) -> _FingerprintRecord | None:
+    def _record_from_spectrum(self, spectrum: Spectrum) -> _FingerprintRecord | None:
         """Build validated internal fingerprint record from a spectrum."""
         inchikey = spectrum.get("inchikey")
         smiles = spectrum.get("smiles")

@@ -1,9 +1,11 @@
+from __future__ import annotations
 import logging
 import operator
 import os
 from collections import OrderedDict
 from collections.abc import Callable, Iterable, Sequence
 from datetime import datetime
+from typing import TYPE_CHECKING
 import numpy as np
 import matchms.similarity as mssimilarity
 from matchms.filtering.filter_order import ALL_FILTERS
@@ -19,9 +21,11 @@ from matchms.logging_functions import (
 )
 from matchms.scores import Scores, ScoresMask
 from matchms.similarity.base_similarity import BaseSimilarity
-from matchms.typing import SpectrumType
 from matchms.yaml_file_functions import load_workflow_from_yaml_file, ordered_dump
 
+
+if TYPE_CHECKING:
+    from matchms.spectrum import Spectrum
 
 logger = logging.getLogger("matchms")
 
@@ -85,8 +89,8 @@ class Pipeline:
         logging_level: str = "WARNING",
         logging_file: str | None = None,
     ):
-        self._spectra_1: list[SpectrumType] = []
-        self._spectra_2: list[SpectrumType] | None = None
+        self._spectra_1: list[Spectrum] = []
+        self._spectra_2: list[Spectrum] | None = None
 
         self.scores: Scores | None = None
         self.mask: ScoresMask | None = None
@@ -338,11 +342,11 @@ class Pipeline:
         self._initialize_spectrum_processor_2()
 
     @property
-    def spectra_1(self) -> list[SpectrumType]:
+    def spectra_1(self) -> list[Spectrum]:
         return self._spectra_1
 
     @property
-    def spectra_2(self) -> list[SpectrumType] | None:
+    def spectra_2(self) -> list[Spectrum] | None:
         return self._spectra_2
 
 

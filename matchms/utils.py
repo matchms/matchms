@@ -1,10 +1,15 @@
+from __future__ import annotations
 import csv
 import logging
 import os
 from collections.abc import Callable, Iterable
 from functools import lru_cache
+from typing import TYPE_CHECKING
 from warnings import warn
-from .typing import SpectrumType
+
+
+if TYPE_CHECKING:
+    from matchms.spectrum import Spectrum
 
 
 logger = logging.getLogger("matchms")
@@ -130,13 +135,13 @@ def _load_key_conversions(file: str, source: str, target: str) -> dict:
     return key_conversions
 
 
-def fingerprint_export_warning(spectra: list[SpectrumType]):
+def fingerprint_export_warning(spectra: list[Spectrum]):
     """
     Check if any spectrum in the provided list contains a "fingerprint" and log a warning if so.
 
     Parameters
     ----------
-    spectra : List[SpectrumType]
+    spectra : List[:class:`matchms.spectrum.Spectrum`]
         A list of spectrum objects to be checked for the presence of a "fingerprint".
 
     Notes
@@ -147,7 +152,7 @@ def fingerprint_export_warning(spectra: list[SpectrumType]):
         logger.warning("fingerprint found but will not be written to file.")
 
 
-def filter_empty_spectra(spectra: list[SpectrumType]) -> list[SpectrumType]:
+def filter_empty_spectra(spectra: list[Spectrum]) -> list[Spectrum]:
     """Filter None values in spectra list.
 
     Parameters
