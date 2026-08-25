@@ -1,10 +1,15 @@
+from __future__ import annotations
 from collections.abc import Sequence
+from typing import TYPE_CHECKING
 from .scores import Scores
 from .similarity.base_similarity import BaseSimilarity
-from .typing import SpectrumType
 
 
-def calculate_scores(spectra_1: Sequence[SpectrumType], spectra_2: Sequence[SpectrumType],
+if TYPE_CHECKING:
+    from matchms.spectrum import Spectrum
+
+
+def calculate_scores(spectra_1: Sequence[Spectrum], spectra_2: Sequence[Spectrum],
                      similarity_function: BaseSimilarity) -> Scores:
     """Calculate the similarity between all reference objects versus all query objects.
 

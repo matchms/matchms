@@ -1,12 +1,14 @@
 from collections.abc import Callable
-from typing import NewType
+from typing import TYPE_CHECKING, Any, TypeAlias
 import numpy as np
 
 
-SpectrumType = NewType("Spectrum", object)
-ScoresType = NewType("Scores", object)
-SpectraCollectionType = NewType("SpectraCollection", object)
-FragmentCollectionType = NewType("FragmentCollection", object)
+if TYPE_CHECKING:
+    from matchms.spectrum import Spectrum
+
+    SpectrumType: TypeAlias = Spectrum
+else:
+    SpectrumType: TypeAlias = Any
 ReferencesType = QueriesType = list[object] | tuple[object] | np.ndarray
 ScoreFilter = Callable[[np.ndarray], bool]
 

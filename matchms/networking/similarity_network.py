@@ -1,9 +1,14 @@
+from __future__ import annotations
 import json
 from collections.abc import Sequence
+from typing import TYPE_CHECKING
 import networkx as nx
 import numpy as np
-from matchms.typing import ScoresType
 from .networking_functions import get_top_hits
+
+
+if TYPE_CHECKING:
+    from matchms import Scores
 
 
 class SimilarityNetwork:
@@ -90,7 +95,7 @@ class SimilarityNetwork:
 
     def create_network(
         self,
-        scores: ScoresType,
+        scores: Scores,
         identifiers: Sequence[str],
         score_name: str | None = None,
     ) -> None:

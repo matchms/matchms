@@ -1,12 +1,12 @@
 from abc import ABC, abstractmethod
 from collections.abc import Generator, Iterable
 from functools import cached_property
+from typing import Self
 import numpy as np
 from scipy.sparse import coo_array, csr_array
 from tqdm.auto import tqdm
 from matchms.spectrum import Spectrum
 from .hashing import spectra_hashes
-from .typing import FragmentCollectionType
 
 
 class FragmentCollection(ABC):
@@ -22,7 +22,7 @@ class FragmentCollection(ABC):
         pass
 
     @abstractmethod
-    def copy(self) -> "FragmentCollection":
+    def copy(self) -> Self:
         pass
 
     @abstractmethod
@@ -31,12 +31,12 @@ class FragmentCollection(ABC):
         pass
 
     @abstractmethod
-    def take(self, indices: Iterable[int]) -> "FragmentCollection":
+    def take(self, indices: Iterable[int]) -> Self:
         """Return new collection with selected rows."""
         pass
 
     @abstractmethod
-    def slice_mz(self, mz_min: float | None = None, mz_max: float | None = None) -> "FragmentCollection":
+    def slice_mz(self, mz_min: float | None = None, mz_max: float | None = None) -> Self:
         """Return new collection with restricted m/z range."""
         pass
 
@@ -70,7 +70,7 @@ class FragmentCollection(ABC):
         self,
         intensity_from: float = 0.0,
         intensity_to: float = 1.0,
-    ) -> "FragmentCollection":
+    ) -> Self:
         """Return new collection with peaks restricted to an intensity range."""
         pass
 
@@ -79,12 +79,12 @@ class FragmentCollection(ABC):
         self,
         intensity_from: float = 0.0,
         intensity_to: float = 1.0,
-    ) -> "FragmentCollection":
+    ) -> Self:
         """Return new collection with peaks restricted to a row-wise relative intensity range."""
         pass
 
     @abstractmethod
-    def keep_top_k_per_row_variable(self, k_per_row: np.ndarray) -> "FragmentCollection":
+    def keep_top_k_per_row_variable(self, k_per_row: np.ndarray) -> Self:
         """Return new collection with only the top-k intensity peaks per row."""
         pass
 
@@ -202,7 +202,7 @@ class CSRFragmentCollection(FragmentCollection):
         mz_precision: float = 1e-6,
         mz_rounding: str = "round",
         index_dtype: np.dtype | type = np.int64,
-    ) -> FragmentCollectionType:
+    ) -> Self:
         return cls(
             array=array,
             mz_precision=mz_precision,
@@ -210,7 +210,7 @@ class CSRFragmentCollection(FragmentCollection):
             index_dtype=index_dtype,
         )
 
-    def _from_array(self, array: csr_array) -> FragmentCollectionType:
+    def _from_array(self, array: csr_array) -> Self:
         """Return a new collection preserving this collection's binning configuration."""
         return self.__class__.from_array(
             array,
@@ -263,7 +263,7 @@ class CSRFragmentCollection(FragmentCollection):
             f"n_fragments={self._array.data.shape[0]}, mz_precision={self.mz_precision})"
         )
 
-    def copy(self) -> FragmentCollectionType:
+    def copy(self) -> Self:
         return self._from_array(self._array.copy())
 
     def mz_to_bin(self, mz: np.ndarray | float) -> np.ndarray:
@@ -318,16 +318,16 @@ class CSRFragmentCollection(FragmentCollection):
         """Return all rows as a list of `(mz, intensities)` tuples."""
         return list(self.iter_peak_arrays())
 
-    def take(self, indices: Iterable[int]) -> FragmentCollectionType:
+    def take(self, indices: Iterable[int]) -> Self:
         """Return a new collection with selected rows in the given order."""
         indices = np.asarray(list(indices), dtype=self.index_dtype)
         return self._from_array(self._array[indices, :])
 
-    def reorder(self, indices: Iterable[int]) -> FragmentCollectionType:
+    def reorder(self, indices: Iterable[int]) -> Self:
         """Alias for take()."""
         return self.take(indices)
 
-    def filter(self, mask: np.ndarray | list[bool]) -> FragmentCollectionType:
+    def filter(self, mask: np.ndarray | list[bool]) -> Self:
         """Return a new collection keeping rows where mask is True."""
         mask = np.asarray(mask, dtype=bool)
         if mask.shape[0] != len(self):
@@ -336,18 +336,18 @@ class CSRFragmentCollection(FragmentCollection):
             )
         return self.take(np.where(mask)[0])
 
-    def drop(self, indices: Iterable[int]) -> FragmentCollectionType:
+    def drop(self, indices: Iterable[int]) -> Self:
         """Return a new collection with selected rows removed."""
         indices = np.asarray(list(indices), dtype=self.index_dtype)
         all_indices = np.arange(len(self))
         keep_mask = ~np.isin(all_indices, indices)
         return self.take(all_indices[keep_mask])
 
-    def drop_empty(self) -> FragmentCollectionType:
+    def drop_empty(self) -> Self:
         """Return a new collection without rows that have no peaks."""
         return self.filter(self.count(axis=1) > 0)
 
-    def slice_rows(self, rows) -> FragmentCollectionType:
+    def slice_rows(self, rows) -> Self:
         """Return a row-sliced collection."""
         if isinstance(rows, slice):
             indices = np.arange(len(self))[rows]
@@ -489,7 +489,7 @@ class CSRFragmentCollection(FragmentCollection):
             self,
             intensity_from: float = 0.0,
             intensity_to: float = 1.0,
-        ) -> FragmentCollectionType:
+        ) -> Self:
         """Return a new collection keeping peaks within an intensity range."""
         if intensity_from > intensity_to:
             raise ValueError(
@@ -510,7 +510,7 @@ class CSRFragmentCollection(FragmentCollection):
             self,
             intensity_from: float = 0.0,
             intensity_to: float = 1.0,
-        ) -> FragmentCollectionType:
+        ) -> Self:
         """Return a new collection keeping peaks within a row-wise relative intensity range."""
         if intensity_from < 0.0:
             raise ValueError("'intensity_from' should be larger than or equal to 0.")
@@ -552,7 +552,7 @@ class CSRFragmentCollection(FragmentCollection):
             self,
             k_per_row: np.ndarray,
             progress_bar: bool = False,
-            ) -> FragmentCollectionType:
+            ) -> Self:
         """Keep the top-k highest-intensity peaks per row.
 
         Parameters

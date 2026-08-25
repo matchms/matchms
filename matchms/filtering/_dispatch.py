@@ -1,13 +1,18 @@
+from __future__ import annotations
 import inspect
 import warnings
 from collections.abc import Callable
 from functools import wraps
+from typing import TYPE_CHECKING
 from tqdm.auto import tqdm
 from matchms.filtering.filter_utils.metadata_conversions import (
     apply_metadata_row_filter,
     apply_metadata_updates_to_spectrum,
 )
-from matchms.typing import SpectraCollectionType
+
+
+if TYPE_CHECKING:
+    from matchms.spectra_collection import SpectraCollection
 
 
 def _get_spectra_collection_type():
@@ -24,7 +29,7 @@ def _is_spectra_collection(obj) -> bool:
 
 # ----------------------------------
 # Public filter factories
-# 1. General purpose collection_filter for filters with separate spectrum and collection implementations.
+# General purpose collection_filter for filters with separate spectrum and collection implementations.
 # ----------------------------------
 def collection_filter(
     spectrum_impl: Callable,
@@ -95,7 +100,7 @@ def collection_filter(
 
 
 # ----------------------------------
-# 2. metadata_update_filter for filters that only update metadata and do not drop spectra.
+# Metadata_update_filter for filters that only update metadata and do not drop spectra.
 # ----------------------------------
 
 def _metadata_filter_signature(metadata_impl: Callable) -> inspect.Signature:
@@ -181,7 +186,7 @@ def metadata_update_filter(
         return apply_metadata_updates_to_spectrum(spectrum, updates or {})
 
     def default_collection_impl(
-        spectrum_in: SpectraCollectionType,
+        spectrum_in: SpectraCollection,
         *args,
         clone: bool | None = True,
         **kwargs,
@@ -223,7 +228,7 @@ def metadata_update_filter(
 
 
 #----------------------------------
-# 3. Factory for require-type filters that drop spectra/rows based on metadata requirements.
+# Factory for require-type filters that drop spectra/rows based on metadata requirements.
 #----------------------------------
 def _metadata_requirement_signature(metadata_impl: Callable) -> inspect.Signature:
     """Build the public Spectrum-style signature for a metadata requirement filter."""
@@ -323,13 +328,13 @@ def metadata_requirement_filter(metadata_impl: Callable):
 
 
 def apply_spectrum_filter_to_collection(
-    collection: SpectraCollectionType,
+    collection: SpectraCollection,
     spectrum_filter: Callable,
     *args,
     clone: bool = True,
     progress_bar: bool = False,
     **kwargs,
-) -> SpectraCollectionType | None:
+) -> SpectraCollection | None:
     """Apply a spectrum-level filter to all spectra in a collection.
 
     This is a compatibility fallback for filters without native
