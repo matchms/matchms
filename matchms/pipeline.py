@@ -5,7 +5,7 @@ import os
 from collections import OrderedDict
 from collections.abc import Callable, Iterable, Sequence
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Self
 import numpy as np
 import matchms.similarity as mssimilarity
 from matchms.filtering.filter_order import ALL_FILTERS
@@ -115,7 +115,7 @@ class Pipeline:
         progress_bar: bool = True,
         logging_level: str = "WARNING",
         logging_file: str | None = None,
-    ) -> "Pipeline":
+    ) -> Self:
         workflow = load_workflow_from_yaml_file(yaml_file_name)
         return cls(
             workflow=workflow,
