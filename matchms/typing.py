@@ -1,5 +1,5 @@
 from collections.abc import Callable
-from typing import Any, TYPE_CHECKING, TypeAlias
+from typing import TYPE_CHECKING, Any, TypeAlias
 import numpy as np
 
 
