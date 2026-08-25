@@ -1,9 +1,9 @@
 import json
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Self
 import numpy as np
 from scipy.sparse import coo_array
-from matchms.typing import ScoresType
 
 
 @dataclass(frozen=True)
@@ -51,29 +51,29 @@ class ScoresMask:
         mask[self.row, self.col] = True
         return mask
 
-    def __and__(self, other: "ScoresMask") -> "ScoresMask":
+    def __and__(self, other: Self) -> Self:
         self._check_shape(other)
         if self.is_sparse and other.is_sparse:
             return self._from_coord_set(self._coord_set() & other._coord_set())
         return ScoresMask(shape=self.shape, dense_mask=self.to_dense() & other.to_dense())
 
-    def __or__(self, other: "ScoresMask") -> "ScoresMask":
+    def __or__(self, other: Self) -> Self:
         self._check_shape(other)
         if self.is_sparse and other.is_sparse:
             return self._from_coord_set(self._coord_set() | other._coord_set())
         return ScoresMask(shape=self.shape, dense_mask=self.to_dense() | other.to_dense())
 
-    def __invert__(self) -> "ScoresMask":
+    def __invert__(self) -> Self:
         return ScoresMask(shape=self.shape, dense_mask=~self.to_dense())
 
-    def _check_shape(self, other: "ScoresMask") -> None:
+    def _check_shape(self, other: Self) -> None:
         if self.shape != other.shape:
             raise ValueError(f"Incompatible mask shapes: {self.shape} and {other.shape}.")
 
     def _coord_set(self) -> set[tuple[int, int]]:
         return set(zip(self.row.tolist(), self.col.tolist(), strict=True))
 
-    def _from_coord_set(self, coords: set[tuple[int, int]]) -> "ScoresMask":
+    def _from_coord_set(self, coords: set[tuple[int, int]]) -> Self:
         if not coords:
             row = np.array([], dtype=np.int_)
             col = np.array([], dtype=np.int_)
@@ -221,7 +221,7 @@ class Scores:
         row, col = np.nonzero(value)
         return coo_array((value[row, col], (row, col)), shape=value.shape)
 
-    def filter(self, mask) -> ScoresType:
+    def filter(self, mask) -> Self:
         if isinstance(mask, ScoresMask):
             return self._filter_with_scores_mask(mask)
 
@@ -282,7 +282,7 @@ class Scores:
         """Element-wise comparison for scalar Scores."""
         return self._compare_scalar(other, np.not_equal, sparse_safe=False)
 
-    def _filter_with_scores_mask(self, mask: ScoresMask) -> ScoresType:
+    def _filter_with_scores_mask(self, mask: ScoresMask) -> Self:
         if mask.shape != self.shape:
             raise ValueError(f"Mask has shape {mask.shape}, expected {self.shape}.")
 
@@ -291,7 +291,7 @@ class Scores:
 
         return self._filter_with_dense_mask(mask.to_dense())
 
-    def _filter_sparse_with_sparse_mask(self, mask: ScoresMask) -> ScoresType:
+    def _filter_sparse_with_sparse_mask(self, mask: ScoresMask) -> Self:
         mask_coords = set(zip(mask.row.tolist(), mask.col.tolist(), strict=True))
         filtered = {}
 
@@ -308,7 +308,7 @@ class Scores:
 
         return Scores(filtered)
 
-    def _filter_with_dense_mask(self, mask: np.ndarray) -> ScoresType:
+    def _filter_with_dense_mask(self, mask: np.ndarray) -> Self:
         filtered = {}
         for field in self.score_fields:
             arr = self.to_array(field)
@@ -357,7 +357,7 @@ class Scores:
         return ScoresMask(shape=self.shape, dense_mask=op(self.to_array(), other))
 
 
-    def copy(self) -> ScoresType:
+    def copy(self) -> Self:
         """Return a copy of the Scores object.
 
         Dense score fields are copied as independent NumPy arrays. Sparse score
@@ -411,7 +411,7 @@ class Scores:
         saver(path, **payload)
 
     @classmethod
-    def load(cls, path: str | Path) -> "Scores":
+    def load(cls, path: str | Path) -> Self:
         """Load a Scores object from a `.npz` file.
 
         Parameters

@@ -2,6 +2,7 @@ import logging
 import os
 from collections.abc import Generator, Iterable
 from functools import cached_property
+from typing import Self
 import numpy as np
 import pandas as pd
 from scipy.sparse import csr_array, vstack
@@ -10,7 +11,6 @@ from matchms.metadata_collection import MetadataCollection, harmonize_metadata_c
 from matchms.spectrum import Spectrum
 from .fragment_collection import CSRFragmentCollection, FragmentCollection
 from .hashing import compute_combined_hashes
-from .typing import SpectraCollectionType
 
 
 logger = logging.getLogger("matchms")
@@ -86,7 +86,7 @@ class SpectraCollection:
         metadata: pd.DataFrame | pd.Series,
         fragments: FragmentCollection,
         mz_precision: float,
-    ) -> SpectraCollectionType:
+    ) -> Self:
         if isinstance(metadata, pd.Series):
             metadata = metadata.to_frame().T
 
@@ -97,7 +97,7 @@ class SpectraCollection:
         return obj
 
     @classmethod
-    def concat(cls, collections: Iterable[SpectraCollectionType]) -> SpectraCollectionType:
+    def concat(cls, collections: Iterable[Self]) -> Self:
         """Concatenate two or more SpectraCollection objects.
 
         Metadata columns are combined by column name. Columns that are absent
