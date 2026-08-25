@@ -4,7 +4,7 @@ import numpy as np
 
 
 if TYPE_CHECKING:
-    from matchms.spectrum import Spectrum
+    from matchms.Spectrum import Spectrum
 
     SpectrumType: TypeAlias = Spectrum
 else:
