@@ -31,7 +31,7 @@ def save_as_json(
     Parameters
     ----------
     spectra:
-        Expected input is a list of  :py:class:`~matchms.spectrum.Spectrum` objects.
+        Expected input is a list of  :class:`~matchms.spectrum.Spectrum` objects.
     filename:
         Provide filename to save spectrum(s).
     export_style:
@@ -52,10 +52,10 @@ def save_as_json(
 
 
 def create_spectrum_json_encoder(export_style):
-    """Creates a custom JSON encoder for matchms.spectrum.Spectrum objects."""
+    """Creates a custom JSON encoder for :class:`~matchms.spectrum.Spectrum` objects."""
     class CustomSpectrumJSONEncoder(json.JSONEncoder):
         def default(self, o):
-            """JSON Encoder for a matchms.spectrum.Spectrum object"""
+            """JSON Encoder for a :class:`~matchms.spectrum.Spectrum` object"""
             if isinstance(o, Spectrum):
                 spec = o.clone().to_dict(export_style)
                 spec.pop("fingerprint", None)

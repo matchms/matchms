@@ -48,9 +48,9 @@ class Spectrum:
 
     Attributes
     ----------
-    peaks: ~matchms.Fragments.Fragments
+    peaks: :class:`~matchms.fragments.Fragments`
         Peaks of spectrum
-    losses: ~matchms.Fragments.Fragments or None
+    losses: :class:`~matchms.fragments.Fragments` or None
         Losses of spectrum, the difference between the precursor and all peaks.
 
         Can be filled with

@@ -36,7 +36,7 @@ def save_as_mgf(
     Parameters
     ----------
     spectra:
-        Expected input are match.spectrum.Spectrum() objects.
+        Expected input are :class:`~matchms.spectrum.Spectrum` objects.
     filename:
         Provide filename to save spectrum(s).
     export_style:

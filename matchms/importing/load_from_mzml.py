@@ -11,8 +11,8 @@ def load_from_mzml(
 ) -> Generator[Spectrum, None, None]:
     """Load spectrum(s) from mzml file.
 
-    This function will create ~matchms.Spectrum for every spectrum of desired
-    ms_level found in a given MzML file. For more extensive parsing options consider
+    This function will create :class:`~matchms.spectrum.Spectrum` objects for every spectrum of the
+    desired ms_level found in a given MzML file. For more extensive parsing options consider
     using pyteomics or pymzml packages.
 
     Example:

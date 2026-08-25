@@ -44,7 +44,7 @@ def load_from_json(filename: str, metadata_harmonization: bool = True) -> list[S
 
 def as_spectrum(dct: dict, metadata_harmonization: bool = True) -> dict | Spectrum | None:
     """A :py:func:`json.load` object_hook to convert dictionary shaped like
-    spectrum into :py:class:`~matchms.spectrum.Spectrum` object.
+    spectrum into :class:`~matchms.spectrum.Spectrum` object.
 
     Parameters
     ----------
@@ -61,7 +61,7 @@ def as_spectrum(dct: dict, metadata_harmonization: bool = True) -> dict | Spectr
 
 
 def dict2spectrum(spectrum_dict: dict, metadata_harmonization: bool) -> Spectrum | None:
-    """Convert dictionary to a :py:class:`~matchms.spectrum.Spectrum` object.
+    """Convert dictionary to a :class:`~matchms.spectrum.Spectrum` object.
 
     Parameters
     ----------
@@ -109,7 +109,7 @@ def dict2spectrum(spectrum_dict: dict, metadata_harmonization: bool) -> Spectrum
 
 
 def scores_json_decoder(dct):
-    """Object_hook function to convert JSON dictionary with :py:class:`~matchms.Score.Score` object into a python
+    """Object_hook function to convert JSON dictionary with :class:`~matchms.Score.Score` object into a python
     dictionary.
     """
     if "__Scores__" not in dct and "__Similarity__" not in dct:

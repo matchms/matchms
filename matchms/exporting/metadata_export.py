@@ -42,7 +42,7 @@ def export_metadata_as_json(
     Parameters
     ----------
     spectra:
-        Expected input is a list of  :py:class:`~matchms.spectrum.Spectrum` objects.
+        Expected input is a list of  :class:`~matchms.spectrum.Spectrum` objects.
     filename:
         Provide filename to save metadata of spectrum(s) as json file.
     include_fields:
@@ -70,7 +70,7 @@ def export_metadata_as_csv(
     Parameters
     ----------
     spectra:
-        Expected input is a list of  :py:class:`~matchms.spectrum.Spectrum` objects.
+        Expected input is a list of  :class:`~matchms.spectrum.Spectrum` objects.
     filename:
         Provide filename to save metadata of spectrum(s) as csv file.
     include_fields:

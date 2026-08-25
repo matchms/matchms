@@ -3,7 +3,7 @@ Functions for plotting one or multiple spectra
 ##############################################
 
 Matchms provides (limited) plotting functionality to display one or multiple
-spectra from :class:`~matchms.Spectrum` objects.
+spectra from :class:`~matchms.spectrum.Spectrum` objects.
 
 Currently this includes 3 different plot types:
 

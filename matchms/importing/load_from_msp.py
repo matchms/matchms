@@ -7,9 +7,9 @@ from matchms.spectrum import Spectrum
 
 def load_from_msp(filename: str, metadata_harmonization: bool = True) -> Generator[Spectrum, None, None]:
     """
-    MSP file to a :py:class:`~matchms.spectrum.Spectrum` objects
+    MSP file to a :class:`~matchms.spectrum.Spectrum` objects
     Function that reads a .msp file and converts the info
-    in :py:class:`~matchms.spectrum.Spectrum` objects.
+    in :class:`~matchms.spectrum.Spectrum` objects.
 
     Parameters
     ----------

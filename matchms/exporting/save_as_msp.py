@@ -49,7 +49,7 @@ def save_as_msp(
     Parameters
     ----------
     spectra:
-        Expected input are match.spectrum.Spectrum() objects.
+        Expected input are matchms.spectrum.Spectrum() objects.
     filename:
         Provide filename to save spectrum(s).
     write_peak_comments:
