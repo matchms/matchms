@@ -473,7 +473,8 @@ class SpectraCollection:
         Parameters:
         -----------
         inplace : bool
-            Will return a new :class:`~matchms.spectra_collection.SpectraCollection`, if True and the same if False. Defaults to False.
+            Will return a new :class:`~matchms.spectra_collection.SpectraCollection`,
+            if True and the same if False. Defaults to False.
         """
         peaks_per_row = self._fragments.count(axis=1)
         empty_indices = np.where(peaks_per_row == 0)[0]
