@@ -1,4 +1,3 @@
-import numpy as np
 import pandas as pd
 import pytest
 from matchms import SpectraCollection
@@ -507,7 +506,6 @@ def test_process_spectrum_filter_returning_none_stops_processing(spectra):
 
     def drop_everything(spectrum, clone=True):
         calls.append("drop")
-        return None
 
     def should_not_run(spectrum, clone=True):
         calls.append("after")
@@ -668,7 +666,6 @@ def test_process_collection_filter_returning_none_stops_processing(collection):
 
     def drop_everything(collection_in, clone=True):
         calls.append("drop")
-        return None
 
     def should_not_run(collection_in, clone=True):
         calls.append("after")
