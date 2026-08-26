@@ -324,22 +324,30 @@ For filters that remove spectra, the behavior depends on the input type:
 
 This keeps the collection synchronized throughout the workflow.
 
+SpectraProcessor
+----------------
 
-SpectraCollectionProcessor
---------------------------
+``SpectraProcessor`` provides a single processing pipeline for both individual
+``Spectrum`` objects and complete ``SpectraCollection`` objects.
 
-``SpectraCollectionProcessor`` applies a sequence of filters to a complete
-``SpectraCollection``. It is intended for workflows where filters operate on
-metadata tables, fragment collections, or complete datasets.
+The processor uses the same ordered list of filters for both execution paths,
+but provides explicit methods for choosing how the pipeline is applied:
+
+- `process_spectrum()` applies all filters sequentially to one ``Spectrum``.
+- `process_collection()` applies each filter to the complete
+  ``SpectraCollection``, allowing collection-native and vectorized filter
+  implementations to be used.
+
+For collection-based workflows:
 
 .. code-block:: python
 
-    from matchms import SpectraCollectionProcessor
+    from matchms import SpectraProcessor
     from matchms.importing import load_ms2_dataset
 
     collection = load_ms2_dataset("my_spectra.mgf")
 
-    processor = SpectraCollectionProcessor(
+    processor = SpectraProcessor(
         filters=[
             "harmonize_missing_entries",
             ("select_by_relative_intensity", {"intensity_from": 0.01}),
@@ -349,8 +357,28 @@ metadata tables, fragment collections, or complete datasets.
 
     processed_collection = processor.process_collection(collection)
 
-``SpectraCollectionProcessor`` uses the same filter-description style as the
-classic ``SpectrumProcessor``:
+For individual spectra, the same processor and filter configuration can be
+used:
+
+.. code-block:: python
+
+    from matchms import SpectraProcessor
+    from matchms.filtering.default_pipelines import BASIC_FILTERS
+    from matchms.importing import load_spectra
+
+    spectra = list(load_spectra("my_spectra.mgf"))
+    processor = SpectraProcessor(BASIC_FILTERS)
+
+    processed_spectra = [
+        processed
+        for spectrum in spectra
+        if (processed := processor.process_spectrum(spectrum)) is not None
+    ]
+
+Both processing methods copy the input once before applying the pipeline, so the
+original ``Spectrum`` or ``SpectraCollection`` is not modified.
+
+``SpectraProcessor`` accepts filter descriptions in several forms:
 
 .. code-block:: python
 
@@ -364,27 +392,52 @@ classic ``SpectrumProcessor``:
 Known matchms filters are ordered according to the matchms filter order. Custom
 filters are appended unless a specific position is supplied.
 
+Processing reports
+------------------
 
-SpectrumProcessor
------------------
-
-``SpectrumProcessor`` remains available for existing spectrum-wise workflows.
-It applies filters to spectra one by one and is useful when working with
-iterables of ``Spectrum`` objects.
+``SpectraProcessor`` can optionally collect a processing report that summarizes
+how much each filter changed the data.
 
 .. code-block:: python
 
-    from matchms import SpectrumProcessor
-    from matchms.filtering.default_pipelines import BASIC_FILTERS
-    from matchms.importing import load_spectra
+    processor = SpectraProcessor(
+        filters=[
+            "harmonize_missing_entries",
+            ("select_by_relative_intensity", {"intensity_from": 0.01}),
+            ("require_minimum_number_of_peaks", {"n_required": 5}),
+        ]
+    )
 
-    spectra = list(load_spectra("my_spectra.mgf"))
+    report = processor.create_processing_report()
 
-    processor = SpectrumProcessor(BASIC_FILTERS)
-    processed_spectra, report = processor.process_spectra(spectra)
+    processed_collection = processor.process_collection(
+        collection,
+        processing_report=report,
+    )
 
-For new dataset-level workflows, prefer ``SpectraCollectionProcessor`` or direct
-collection filtering.
+    print(report.to_dataframe())
+
+The report records, for each filter:
+
+- the number of input spectra,
+- the number of output spectra,
+- the number of removed spectra,
+- the number of spectra with changed metadata,
+- the number of spectra with changed fragments.
+
+Changes are detected using metadata and fragment hashes, so reporting does not
+require keeping full copies of the data before every processing step.
+
+The same reporting mechanism can also be used with ``process_spectrum()``:
+
+.. code-block:: python
+
+    report = processor.create_processing_report()
+
+    processed_spectrum = processor.process_spectrum(
+        spectrum,
+        processing_report=report,
+    )
 
 
 Metadata handling
