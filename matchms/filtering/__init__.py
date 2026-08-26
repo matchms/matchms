@@ -1,73 +1,188 @@
 """
-Processing (or: filtering) mass spectra
-#######################################
+Processing and filtering mass spectra
+######################################
 
-Provided functions will usually only perform a single action to a spectrum.
-This can be changes or corrections of metadata, or peak filtering.
-More complicated processing pipelines can be build by stacking several of
-the provided filters.
+Matchms provides filters for cleaning, harmonizing, and processing mass spectra.
+Individual filters usually perform one specific operation, such as updating
+metadata, removing spectra that do not meet a requirement, or modifying fragment
+peaks.
 
-Because there are numerous filter functions in matchms and because they often
-need to be applied in a specific order, the most feasible workflow for users
-is to use the `SpectraProcessor` class to define a spetrum processing pipeline.
-Here is an example:
+Most matchms filters support both :class:`~matchms.Spectrum` and
+:class:`~matchms.SpectraCollection` input. For processing complete datasets,
+working with a ``SpectraCollection`` is generally preferred because filters can
+operate directly on collection-level metadata and fragment data.
+
+Loading a dataset
+=================
+
+Mass spectra can be loaded directly into a :class:`~matchms.SpectraCollection`
+using :func:`~matchms.importing.load_ms2_dataset`.
+
+For example, using the ``pesticides.mgf`` test dataset included with matchms:
 
 .. testcode::
 
-    import numpy as np
-    from matchms import Spectrum
+    from pathlib import Path
+
+    from matchms.importing import load_ms2_dataset
+
+    file_path = Path("tests/testdata/pesticides.mgf")
+    collection = load_ms2_dataset(file_path)
+
+    print(type(collection).__name__)
+    print(collection.n_spectra > 0)
+
+Should output
+
+.. testoutput::
+
+    SpectraCollection
+    True
+
+
+Processing with SpectraProcessor
+================================
+
+Because matchms contains many filters, and because some filters should be applied
+in a particular order, the recommended way to define a processing workflow is
+with :class:`~matchms.filtering.SpectraProcessor`.
+
+A processor is created from a list of filters. Filters can be specified by name,
+or together with a dictionary containing non-default parameters.
+
+.. testcode::
+
+    from pathlib import Path
+
     from matchms import SpectraProcessor
+    from matchms.importing import load_ms2_dataset
 
-    spectrum = Spectrum(mz=np.array([100, 120, 150, 200.]),
-                        intensities=np.array([200.0, 300.0, 50.0, 1.0]),
-                        metadata={'id': 'spectrum1'})
+    file_path = Path("tests/testdata/pesticides.mgf")
+    collection = load_ms2_dataset(file_path)
 
-    # Users can pick a predefined pipeline from default pipelines, or specify a list of filters
-    processing = SpectraProcessor(["normalize_intensities"])
+    processor = SpectraProcessor(
+        filters=[
+            "harmonize_missing_entries",
+            ("select_by_relative_intensity", {"intensity_from": 0.01}),
+            ("require_minimum_number_of_peaks", {"n_required": 5}),
+        ]
+    )
 
-    # Run the processing pipeline:
-    spectrum_filtered = processing.process_spectrum(spectrum)
-    max_intensity = spectrum_filtered.peaks.intensities.max()
-    print(f"Maximum intensity is {max_intensity:.2f}")
+    processed_collection = processor.process_collection(collection)
+
+    print(type(processed_collection).__name__)
+    print(processed_collection.n_spectra <= collection.n_spectra)
 
 Should output
 
 .. testoutput::
 
-    Maximum intensity is 1.00
+    SpectraCollection
+    True
 
-It is also possible to run each filter function individually. This for instance
-makes sense if users want to develop a highly customized spectrum processing
-routine.
-Example of how to use a single filter function:
+``SpectraProcessor`` orders known matchms filters according to the recommended
+matchms filter order. Custom filter functions can also be added to the same
+pipeline.
+
+The processor provides explicit methods for different processing modes:
+
+- :meth:`~matchms.filtering.SpectraProcessor.process_spectrum` processes one
+  :class:`~matchms.Spectrum`.
+- :meth:`~matchms.filtering.SpectraProcessor.process_spectra` processes an
+  iterable of spectra one spectrum at a time.
+- :meth:`~matchms.filtering.SpectraProcessor.process_collection` processes a
+  complete :class:`~matchms.SpectraCollection`, allowing collection-native
+  implementations to be used.
+
+For dataset-level workflows, ``process_collection`` is generally the preferred
+option.
+
+
+Processing reports
+==================
+
+``SpectraProcessor`` can optionally collect a processing report. The report gives
+a compact overview of how much each processing step changed the dataset.
+
+A report is created explicitly and passed to the processing method:
+
+.. code-block:: python
+
+    report = processor.create_processing_report()
+
+    processed_collection = processor.process_collection(
+        collection,
+        processing_report=report,
+    )
+
+    report_df = report.to_dataframe()
+    print(report_df)
+
+For each filter, the report records:
+
+- the number of input spectra,
+- the number of output spectra,
+- the number of removed spectra,
+- the number of spectra with changed metadata,
+- the number of spectra with changed fragments.
+
+Metadata and fragment changes are detected using hashes. This means that
+reporting does not require keeping a complete copy of the dataset before every
+processing step.
+
+Reporting is optional. If no report is needed, processing can simply be run as:
+
+.. code-block:: python
+
+    processed_collection = processor.process_collection(collection)
+
+
+Running individual filters
+==========================
+
+Filters can also be applied directly without using ``SpectraProcessor``. This is
+useful for simple operations or when developing a highly customized processing
+workflow.
+
+For example:
 
 .. testcode::
 
-    import numpy as np
-    from matchms import Spectrum
-    from matchms.filtering import normalize_intensities
+    from pathlib import Path
 
-    spectrum = Spectrum(mz=np.array([100, 120, 150, 200.]),
-                        intensities=np.array([200.0, 300.0, 50.0, 1.0]),
-                        metadata={'id': 'spectrum1'})
-    spectrum_filtered = normalize_intensities(spectrum)
+    from matchms.filtering import select_by_relative_intensity
+    from matchms.importing import load_ms2_dataset
 
-    max_intensity = spectrum_filtered.peaks.intensities.max()
-    print(f"Maximum intensity is {max_intensity:.2f}")
+    file_path = Path("tests/testdata/pesticides.mgf")
+    collection = load_ms2_dataset(file_path)
+
+    processed_collection = select_by_relative_intensity(
+        collection,
+        intensity_from=0.01,
+    )
+
+    print(type(processed_collection).__name__)
 
 Should output
 
 .. testoutput::
 
-    Maximum intensity is 1.00
+    SpectraCollection
+
+For filters that remove spectra, behavior depends on the input type. A
+:class:`~matchms.Spectrum` that does not meet the filter requirement returns
+``None``. For :class:`~matchms.SpectraCollection` input, failing rows are removed
+from both metadata and fragment data so that the collection remains synchronized
+throughout processing.
+
 
 .. figure:: ../_static/filtering_sketch.png
    :width: 700
    :alt: matchms filtering sketch
 
    Sketch of matchms spectrum processing.
-
 """
+
 
 from matchms.filtering.default_filters import default_filters
 from matchms.filtering.metadata_processing.add_compound_name import add_compound_name
