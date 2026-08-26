@@ -1,5 +1,4 @@
-from matchms.filtering.spectra_collection_processor import SpectraCollectionProcessor
-from matchms.filtering.spectrum_processor import SpectrumProcessor
+from matchms.filtering.spectra_processor import SpectraProcessor
 from . import exporting, filtering, importing, networking, plotting, similarity
 from .__version__ import __version__
 from .calculate_scores import calculate_scores
@@ -27,9 +26,8 @@ __all__ = [
     "Pipeline",
     "Scores",
     "SpectraCollection",
-    "SpectraCollectionProcessor",
+    "SpectraProcessor",
     "Spectrum",
-    "SpectrumProcessor",
     "__version__",
     "calculate_scores",
     "exporting",

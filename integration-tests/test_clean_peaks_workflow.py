@@ -2,7 +2,7 @@ import os
 import numpy as np
 from matchms import Pipeline
 from matchms.importing import load_ms2_dataset, load_from_mgf
-from matchms import SpectraCollectionProcessor, SpectrumProcessor
+from matchms import SpectraProcessor
 from matchms.filtering.default_pipelines import CLEAN_PEAKS
 
 
@@ -17,11 +17,11 @@ def test_clean_peaks_workflow_on_collection_and_spectra_list():
     spectra_list = list(load_from_mgf(spectra_file))
 
     # run processor on collection
-    processor = SpectraCollectionProcessor(CLEAN_PEAKS)
+    processor = SpectraProcessor(CLEAN_PEAKS)
     processed_collection = processor.process_collection(collection)
 
     # run processor on spectra list
-    processor = SpectrumProcessor(CLEAN_PEAKS)
+    processor = SpectraProcessor(CLEAN_PEAKS)
     processed_spectra_list = processor.process_spectra(spectra_list)[0]
 
     assert processed_collection.n_spectra == len(processed_spectra_list)

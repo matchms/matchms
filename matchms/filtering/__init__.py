@@ -9,21 +9,21 @@ the provided filters.
 
 Because there are numerous filter functions in matchms and because they often
 need to be applied in a specific order, the most feasible workflow for users
-is to use the `SpectrumProcessor` class to define a spetrum processing pipeline.
+is to use the `SpectraProcessor` class to define a spetrum processing pipeline.
 Here is an example:
 
 .. testcode::
 
     import numpy as np
     from matchms import Spectrum
-    from matchms import SpectrumProcessor
+    from matchms import SpectraProcessor
 
     spectrum = Spectrum(mz=np.array([100, 120, 150, 200.]),
                         intensities=np.array([200.0, 300.0, 50.0, 1.0]),
                         metadata={'id': 'spectrum1'})
 
     # Users can pick a predefined pipeline from default pipelines, or specify a list of filters
-    processing = SpectrumProcessor(["normalize_intensities"])
+    processing = SpectraProcessor(["normalize_intensities"])
 
     # Run the processing pipeline:
     spectrum_filtered = processing.process_spectrum(spectrum)

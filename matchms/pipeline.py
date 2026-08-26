@@ -9,9 +9,9 @@ from typing import TYPE_CHECKING, Self
 import numpy as np
 import matchms.similarity as mssimilarity
 from matchms.filtering.filter_order import ALL_FILTERS
-from matchms.filtering.spectrum_processor import (
+from matchms.filtering.spectra_processor import (
     FunctionWithParametersType,
-    SpectrumProcessor,
+    SpectraProcessor,
 )
 from matchms.importing.load_spectra import load_list_of_spectrum_files
 from matchms.logging_functions import (
@@ -46,8 +46,8 @@ def create_workflow(
     """Create a workflow specification for Pipeline."""
     workflow = OrderedDict()
 
-    processor_1 = SpectrumProcessor(spectra_1_filters)
-    processor_2 = SpectrumProcessor(spectra_2_filters)
+    processor_1 = SpectraProcessor(spectra_1_filters)
+    processor_2 = SpectraProcessor(spectra_2_filters)
 
     workflow["spectra_1_filters"] = processor_1.processing_steps
     workflow["spectra_2_filters"] = processor_2.processing_steps
@@ -102,8 +102,8 @@ class Pipeline:
         self.__workflow = workflow
         self.check_workflow()
 
-        self.processing_spectra_1: SpectrumProcessor | None = None
-        self.processing_spectra_2: SpectrumProcessor | None = None
+        self.processing_spectra_1: SpectraProcessor | None = None
+        self.processing_spectra_2: SpectraProcessor | None = None
 
         self._initialize_spectrum_processor_1()
         self._initialize_spectrum_processor_2()
@@ -126,14 +126,14 @@ class Pipeline:
 
     def _initialize_spectrum_processor_1(self) -> None:
         self.write_to_logfile("--- Processing pipeline spectra_1: ---")
-        self.processing_spectra_1 = SpectrumProcessor(self.__workflow["spectra_1_filters"])
+        self.processing_spectra_1 = SpectraProcessor(self.__workflow["spectra_1_filters"])
         self.write_to_logfile(str(self.processing_spectra_1))
         if self.processing_spectra_1.processing_steps != self.__workflow["spectra_1_filters"]:
             logger.warning("The order of spectra_1 filters has been changed compared to the yaml file.")
 
     def _initialize_spectrum_processor_2(self) -> None:
         self.write_to_logfile("--- Processing pipeline spectra_2: ---")
-        self.processing_spectra_2 = SpectrumProcessor(self.__workflow["spectra_2_filters"])
+        self.processing_spectra_2 = SpectraProcessor(self.__workflow["spectra_2_filters"])
         self.write_to_logfile(str(self.processing_spectra_2))
         if self.processing_spectra_2.processing_steps != self.__workflow["spectra_2_filters"]:
             logger.warning("The order of spectra_2 filters has been changed compared to the yaml file.")
@@ -416,7 +416,7 @@ def _build_mask_from_scores(
 def get_unused_filters(yaml_file):
     """Checks which filters from matchms are not used in the yaml file."""
     workflow = load_workflow_from_yaml_file(yaml_file)
-    processor = SpectrumProcessor(workflow["spectra_1_filters"])
+    processor = SpectraProcessor(workflow["spectra_1_filters"])
 
     filters_used = [filter_function.__name__ for filter_function in processor.filters]
     for filter_function in ALL_FILTERS:
