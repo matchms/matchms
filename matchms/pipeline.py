@@ -7,7 +7,9 @@ from collections.abc import Callable, Iterable, Sequence
 from datetime import datetime
 from typing import TYPE_CHECKING, Self
 import numpy as np
+from deprecated import deprecated
 import matchms.similarity as mssimilarity
+from matchms.exporting import save_spectra
 from matchms.filtering.filter_order import ALL_FILTERS
 from matchms.filtering.spectra_processor import (
     FunctionWithParametersType,
@@ -68,6 +70,10 @@ def create_workflow(
     return workflow
 
 
+@deprecated(
+    version="1.1.0",
+    reason="This will be dropped in a future version.",
+)
 class Pipeline:
     """Central pipeline class.
 
@@ -179,26 +185,44 @@ class Pipeline:
         report = None
 
         if self.processing_spectra_1 is not None:
-            self._spectra_1, report = self.processing_spectra_1.process_spectra(
-                self._spectra_1,
-                progress_bar=self.progress_bar,
-                cleaned_spectra_file=cleaned_spectra_1_file,
-                create_report=create_report,
+            report = (
+                self.processing_spectra_1.create_processing_report()
+                if create_report
+                else None
             )
-            self.write_to_logfile(str(report))
+            self._spectra_1 = self.processing_spectra_1.process_spectra(
+                self._spectra_1,
+                processing_report=report,
+                progress_bar=self.progress_bar,
+            )
+            if report is not None:
+                self.write_to_logfile(str(report))
+
             if cleaned_spectra_1_file is not None:
-                self.write_to_logfile(f"--- Spectra_1 written to {cleaned_spectra_1_file} ---")
+                save_spectra(self._spectra_1, cleaned_spectra_1_file)
+                self.write_to_logfile(
+                    f"--- Spectra_1 written to {cleaned_spectra_1_file} ---"
+                )
 
         if self.processing_spectra_2 is not None and self._spectra_2 is not None:
-            self._spectra_2, report = self.processing_spectra_2.process_spectra(
-                self._spectra_2,
-                progress_bar=self.progress_bar,
-                cleaned_spectra_file=cleaned_spectra_2_file,
-                create_report=create_report,
+            report = (
+                self.processing_spectra_2.create_processing_report()
+                if create_report
+                else None
             )
-            self.write_to_logfile(str(report))
+            self._spectra_2 = self.processing_spectra_2.process_spectra(
+                self._spectra_2,
+                processing_report=report,
+                progress_bar=self.progress_bar,
+            )
+            if report is not None:
+                self.write_to_logfile(str(report))
+
             if cleaned_spectra_2_file is not None:
-                self.write_to_logfile(f"--- Spectra_2 written to {cleaned_spectra_2_file} ---")
+                save_spectra(self._spectra_2, cleaned_spectra_2_file)
+                self.write_to_logfile(
+                    f"--- Spectra_2 written to {cleaned_spectra_2_file} ---"
+                )
 
         self.scores = None
         self.mask = None
