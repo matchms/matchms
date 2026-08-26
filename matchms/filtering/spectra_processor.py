@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from functools import partial
 import numpy as np
 import pandas as pd
+from tqdm.auto import tqdm
 from matchms.filtering.filter_effects import (
     FILTER_EFFECTS,
     FRAGMENTS,
@@ -375,6 +376,52 @@ class SpectraProcessor:
             working_spectrum = spectrum_out
 
         return working_spectrum
+
+    def process_spectra(
+        self,
+        spectra: Iterable[Spectrum],
+        processing_report: ProcessingReport | None = None,
+        progress_bar: bool = True,
+    ) -> list[Spectrum]:
+        """Process an iterable of Spectrum objects spectrum by spectrum.
+
+        Each spectrum is passed through the complete filter pipeline using
+        :meth:`process_spectrum`. Spectra removed by requirement filters are omitted
+        from the returned list.
+
+        Parameters
+        ----------
+        spectra
+            Iterable of Spectrum objects.
+        processing_report
+            Optional report to which all processing runs are added.
+        progress_bar
+            If True, display a progress bar.
+
+        Returns
+        -------
+        list[Spectrum]
+            Processed spectra. Spectra removed by filters are not included.
+        """
+        processed_spectra = []
+
+        for spectrum in tqdm(
+            spectra,
+            disable=not progress_bar,
+            desc="Processing spectra",
+        ):
+            if spectrum is None:
+                continue
+
+            processed_spectrum = self.process_spectrum(
+                spectrum,
+                processing_report=processing_report,
+            )
+
+            if processed_spectrum is not None:
+                processed_spectra.append(processed_spectrum)
+
+        return processed_spectra
 
     def process_collection(
         self,
