@@ -22,7 +22,7 @@ def test_clean_peaks_workflow_on_collection_and_spectra_list():
 
     # run processor on spectra list
     processor = SpectraProcessor(CLEAN_PEAKS)
-    processed_spectra_list = processor.process_spectra(spectra_list)[0]
+    processed_spectra_list = processor.process_spectra(spectra_list)
 
     assert processed_collection.n_spectra == len(processed_spectra_list)
     num_peaks_in_lst = np.sum([s.fragments.mz.shape[0] for s in processed_spectra_list])
