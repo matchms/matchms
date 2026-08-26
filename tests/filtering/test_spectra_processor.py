@@ -1059,3 +1059,139 @@ def test_get_parameter_settings():
         "clone": True,
     }
     assert get_parameter_settings(filter_without_defaults) is None
+
+
+def test_process_spectra(spectra):
+    processor = SpectraProcessor(
+        filters=[
+            "make_charge_int",
+            "interpret_pepmass",
+            "derive_ionmode",
+            "correct_charge",
+        ]
+    )
+
+    processed = processor.process_spectra(
+        spectra,
+        progress_bar=False,
+    )
+
+    assert len(processed) == 3
+    assert processed is not spectra
+
+    actual_masses = [s.get("precursor_mz") for s in processed]
+    expected_masses = [100, 102, 104]
+
+    assert actual_masses == expected_masses
+
+    # Input spectra should not be modified.
+    assert [s.get("precursor_mz") for s in spectra] == [None, None, None]
+
+
+def test_process_spectra_removes_filtered_spectra(spectra):
+    processor = SpectraProcessor(
+        filters=[
+            ("require_minimum_number_of_peaks", {"n_required": 2}),
+        ]
+    )
+
+    processed = processor.process_spectra(
+        spectra,
+        progress_bar=False,
+    )
+
+    assert len(processed) == 2
+
+    assert len(processed[0].peaks) == 3
+    assert len(processed[1].peaks) == 3
+
+
+def test_process_spectra_skips_none(spectra):
+    processor = SpectraProcessor(filters=())
+
+    spectra_with_none = [
+        spectra[0],
+        None,
+        spectra[1],
+    ]
+
+    processed = processor.process_spectra(
+        spectra_with_none,
+        progress_bar=False,
+    )
+
+    assert len(processed) == 2
+    assert processed[0] == spectra[0]
+    assert processed[1] == spectra[1]
+
+    # Even with no filters, process_spectrum returns a copy.
+    assert processed[0] is not spectra[0]
+    assert processed[1] is not spectra[1]
+
+
+def test_process_spectra_with_processing_report(spectra):
+    processor = SpectraProcessor(
+        filters=[
+            "make_charge_int",
+            "interpret_pepmass",
+            ("require_minimum_number_of_peaks", {"n_required": 2}),
+        ]
+    )
+    report = processor.create_processing_report()
+
+    processed = processor.process_spectra(
+        spectra,
+        processing_report=report,
+        progress_bar=False,
+    )
+
+    assert len(processed) == 2
+    assert report.counter_number_processed == 3
+
+    report_df = report.to_dataframe()
+
+    assert report_df.loc["make_charge_int", "input spectra"] == 3
+    assert report_df.loc["make_charge_int", "output spectra"] == 3
+    assert report_df.loc["make_charge_int", "changed metadata"] == 2
+
+    assert report_df.loc["interpret_pepmass", "input spectra"] == 3
+    assert report_df.loc["interpret_pepmass", "output spectra"] == 3
+    assert report_df.loc["interpret_pepmass", "changed metadata"] == 3
+
+    assert (
+        report_df.loc[
+            "require_minimum_number_of_peaks",
+            "input spectra",
+        ]
+        == 3
+    )
+    assert (
+        report_df.loc[
+            "require_minimum_number_of_peaks",
+            "output spectra",
+        ]
+        == 2
+    )
+    assert (
+        report_df.loc[
+            "require_minimum_number_of_peaks",
+            "removed spectra",
+        ]
+        == 1
+    )
+
+
+def test_process_spectra_accepts_generator(spectra):
+    processor = SpectraProcessor(
+        filters=["make_charge_int"]
+    )
+
+    spectra_generator = (spectrum for spectrum in spectra)
+
+    processed = processor.process_spectra(
+        spectra_generator,
+        progress_bar=False,
+    )
+
+    assert len(processed) == 3
+    assert [s.get("charge") for s in processed] == [1, -1, -1]
