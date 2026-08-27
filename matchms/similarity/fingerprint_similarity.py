@@ -11,6 +11,18 @@ from .base_similarity import BaseSimilarity
 from .vector_similarity_functions import cosine_similarity_matrix
 
 
+def _require_chemap():
+    """Require chemap package and return tanimoto_similarity_matrix function."""
+    try:
+        from chemap.metrics import tanimoto_similarity_matrixs
+    except ImportError as e:
+        raise ImportError(
+            "The 'chemap' package is required for fingerprint similarity calculations. "
+            "Please install it using 'pip install chemap'."
+        ) from e
+    return tanimoto_similarity_matrix
+
+
 class FingerprintSimilarity(BaseSimilarity):
     """Calculate similarity between molecules based on molecular fingerprints.
 
@@ -221,6 +233,8 @@ class FingerprintSimilarity(BaseSimilarity):
 
     def _compute_similarity_matrix(self, fingerprints_1, fingerprints_2) -> np.ndarray:
         """Compute similarity block between two fingerprint matrices."""
+        tanimoto_similarity_matrix = _require_chemap()
+
         if self.similarity_measure == "cosine":
             if sp.issparse(fingerprints_1):
                 fingerprints_1 = fingerprints_1.toarray()
