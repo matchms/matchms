@@ -1,0 +1,98 @@
+name: CI installation checks
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  installation_check:
+    name: install / ${{ matrix.variant }} / python-3.13
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - variant: core
+            install_target: "."
+            expect_chemap: "false"
+            expect_networkx: "false"
+          - variant: fingerprints
+            install_target: ".[fingerprints]"
+            expect_chemap: "true"
+            expect_networkx: "false"
+          - variant: networking
+            install_target: ".[networking]"
+            expect_chemap: "false"
+            expect_networkx: "true"
+          - variant: all
+            install_target: ".[all]"
+            expect_chemap: "true"
+            expect_networkx: "true"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Upgrade pip
+        run: python -m pip install --upgrade pip
+
+      - name: Install matchms variant
+        run: python -m pip install "${{ matrix.install_target }}"
+
+      - name: Check dependency consistency
+        run: python -m pip check
+
+      - name: Check installation
+        env:
+          EXPECT_CHEMAP: ${{ matrix.expect_chemap }}
+          EXPECT_NETWORKX: ${{ matrix.expect_networkx }}
+        run: |
+          python - <<'PY'
+          import importlib.util
+          import os
+
+          import matchms
+
+          expect_chemap = os.environ["EXPECT_CHEMAP"] == "true"
+          expect_networkx = os.environ["EXPECT_NETWORKX"] == "true"
+
+          has_chemap = importlib.util.find_spec("chemap") is not None
+          has_networkx = importlib.util.find_spec("networkx") is not None
+
+          assert has_chemap == expect_chemap, (
+              f"chemap availability: expected {expect_chemap}, got {has_chemap}"
+          )
+          assert has_networkx == expect_networkx, (
+              f"networkx availability: expected {expect_networkx}, got {has_networkx}"
+          )
+
+          print(f"matchms imported successfully: {matchms.__file__}")
+          print(f"chemap installed: {has_chemap}")
+          print(f"networkx installed: {has_networkx}")
+          PY
+
+      - name: Check networking import
+        if: matrix.expect_networkx == 'true'
+        run: |
+          python - <<'PY'
+          from matchms.networking import SimilarityNetwork
+
+          SimilarityNetwork()
+          print("SimilarityNetwork is available.")
+          PY
+
+      - name: Check fingerprint imports
+        if: matrix.expect_chemap == 'true'
+        run: |
+          python - <<'PY'
+          import chemap
+          from matchms import Fingerprints
+
+          print("chemap and matchms.Fingerprints are available.")
+          PY
