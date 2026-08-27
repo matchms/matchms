@@ -84,7 +84,7 @@ class Entropy(BaseSimilarity):
         )
 
     def _matrix_similarity(self) -> FlashEntropy:
-        similarity = FlashEntropy(
+        return FlashEntropy(
             matching_mode="fragment",
             tolerance=self.tolerance,
             use_ppm=self.use_ppm,
@@ -95,12 +95,6 @@ class Entropy(BaseSimilarity):
             merge_within=self.merge_within,
             dtype=self.dtype,
         )
-
-        # FlashEntropy historically declared a float32 score datatype even when
-        # its internal dtype was configured differently. For the public Entropy
-        # wrapper, keep the returned Scores dtype aligned with the requested dtype.
-        similarity.score_datatype = self.dtype
-        return similarity
 
     def pair(self, spectrum_1: SpectrumType, spectrum_2: SpectrumType) -> np.ndarray:
         """Calculate entropy similarity for one spectrum pair."""
