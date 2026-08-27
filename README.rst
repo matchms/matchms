@@ -1,5 +1,3 @@
-`fair-software.nl <https://fair-software.nl/>`_ recommendations:
-
 |GitHub Badge|
 |License Badge|
 |Conda Badge| |Pypi Badge| |Research Software Directory Badge|
@@ -191,7 +189,7 @@ Spectrum
 - ``Metadata``: one spectrum-level metadata dictionary.
 
 ``Spectrum`` is useful for individual spectra, custom spectrum-wise algorithms,
-and backward-compatible workflows.
+and backward-compatible workflows (e.g., for projects partly using matchms < 1.0).
 
 Example:
 
