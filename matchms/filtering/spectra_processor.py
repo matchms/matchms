@@ -84,7 +84,19 @@ class ProcessingReport:
         before: _HashSnapshot,
         after: _HashSnapshot,
     ) -> None:
-        """Add one before/after filter comparison to the report."""
+        """Add one before/after filter comparison to the report.
+        
+        Parameters
+        ----------
+        filter_name
+            Name of the filter step.
+        effect
+            Filter effect type, or None for unknown/custom filters. Can be one of ``REMOVE``, ``METADATA``, or ``FRAGMENTS``.
+        before
+            Hash snapshot of the spectra before the filter was applied.
+        after
+            Hash snapshot of the spectra after the filter was applied.
+        """
         step = self._ensure_filter(filter_name)
         step.n_input += before.n_spectra
         step.n_output += after.n_spectra
@@ -328,6 +340,7 @@ class SpectraProcessor:
             Spectrum to process.
         processing_report
             Optional report to which this processing run is added.
+            When set to None, no report is generated (can save computation time).
 
         Returns
         -------
@@ -395,6 +408,7 @@ class SpectraProcessor:
             Iterable of Spectrum objects.
         processing_report
             Optional report to which all processing runs are added.
+            When set to None, no report is generated (can save computation time).
         progress_bar
             If True, display a progress bar.
 
@@ -437,9 +451,10 @@ class SpectraProcessor:
         Parameters
         ----------
         collection
-            SpectraCollection to process.
+            :class:`matchms.spectra_collection.SpectraCollection` to process.
         processing_report
             Optional report to which this processing run is added.
+            When set to None, no report is generated (can save computation time).
 
         Returns
         -------
@@ -615,7 +630,15 @@ def create_partial_function(
     filter_function: Callable,
     filter_params: dict[str, object] | None,
 ) -> Callable:
-    """Apply configured keyword parameters to a filter function."""
+    """Apply configured keyword parameters to a filter function.
+    
+    Parameters
+    ----------
+    filter_function
+        Filter function to which parameters are applied.
+    filter_params
+        Dictionary of keyword parameters to apply to the filter function.
+    """
     if filter_params is None:
         return filter_function
 
