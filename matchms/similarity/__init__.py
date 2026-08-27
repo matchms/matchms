@@ -1,60 +1,74 @@
 """
-Functions for computing spectra similarities
-############################################
+Functions for computing spectrum similarities
+##############################################
 
-Matchms provides similarity measures for comparing mass spectra and their
-metadata. The recommended high-level entry points for peak-based cosine scoring
-are :class:`~matchms.similarity.Cosine` and
-:class:`~matchms.similarity.ModifiedCosine`.
+Matchms provides similarity measures for comparing mass spectra, spectrum
+metadata, and molecular structures.
 
-These classes choose an appropriate implementation internally and are intended
-as the default choice for most workflows. Users who need a specific algorithmic
-variant can select one of the explicit implementations directly, for example
-:class:`~matchms.similarity.CosineLinear`,
-:class:`~matchms.similarity.CosineFlash`,
-:class:`~matchms.similarity.CosineGreedy`, or
-:class:`~matchms.similarity.CosineHungarian`.
+For peak-based spectral similarity, the recommended high-level entry points are:
 
-Available similarity functions include:
+* :class:`~matchms.similarity.Cosine` for standard cosine similarity,
+* :class:`~matchms.similarity.ModifiedCosine` when precursor-mass shifts should
+  be considered, and
+* :class:`~matchms.similarity.Entropy` for spectral entropy similarity.
 
-* cosine-based peak similarity
-  (:class:`~matchms.similarity.Cosine`,
-  :class:`~matchms.similarity.CosineLinear`,
-  :class:`~matchms.similarity.CosineFlash`,
-  :class:`~matchms.similarity.CosineGreedy`,
-  :class:`~matchms.similarity.CosineHungarian`)
-* modified cosine similarity for spectra with shifted fragment peaks
-  (:class:`~matchms.similarity.ModifiedCosine`,
-  :class:`~matchms.similarity.CosineFlash` with matching_mode="hybrid",
-  :class:`~matchms.similarity.ModifiedCosineGreedy`,
-  :class:`~matchms.similarity.ModifiedCosineHungarian`)
-* neutral-loss-based peak similarity
-  (:class:`~matchms.similarity.NeutralLossesCosine`)
-* entropy-based peak similarity
-  (:class:`~matchms.similarity.Entropy`,
-  :class:`~matchms.similarity.EntropyGreedy`,
-  :class:`~matchms.similarity.FlashEntropy`)
-* fast embedding-based or approximate similarity methods
-  (:class:`~matchms.similarity.BinnedEmbeddingSimilarity`,
-  :class:`~matchms.similarity.CosineBlink`,
-  :class:`~matchms.similarity.FlashEntropy`)
-* simple precursor or parent-mass matching
-  (:class:`~matchms.similarity.PrecursorMzMatch`,
-  :class:`~matchms.similarity.ParentMassMatch`)
-* molecular-structure similarity based on metadata such as SMILES or InChIKey
-  (:class:`~matchms.similarity.FingerprintSimilarity`)
-* metadata-based matching for user-defined fields, for example exact matches in
-  ``instrument_type`` or numerical matches within a tolerance for fields such as
-  ``retention_time`` or ``collision_energy``
-  (:class:`~matchms.similarity.MetadataMatch`)
+These classes select suitable implementations internally and are intended to
+be the default choice for most workflows using :meth:`pair` or :meth:`matrix`.
 
-Custom similarity measures can be added by subclassing
-:class:`~matchms.similarity.BaseSimilarity`. Similarities that also provide
-sparse score computation should subclass
+Specialized implementations
+---------------------------
+
+For applications that require explicit control over the scoring algorithm,
+matchms also exposes the underlying implementations.
+
+Cosine similarity
+~~~~~~~~~~~~~~~~~
+
+* :class:`~matchms.similarity.CosineGreedy`
+* :class:`~matchms.similarity.CosineHungarian`
+* :class:`~matchms.similarity.CosineLinear`
+* :class:`~matchms.similarity.CosineFlash`
+* :class:`~matchms.similarity.CosineBlink`
+
+Modified cosine similarity
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* :class:`~matchms.similarity.ModifiedCosineGreedy`
+* :class:`~matchms.similarity.ModifiedCosineHungarian`
+* :class:`~matchms.similarity.CosineFlash` with ``matching_mode="hybrid"``
+
+Spectral entropy similarity
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* :class:`~matchms.similarity.EntropyGreedy`
+* :class:`~matchms.similarity.FlashEntropy`
+
+Other similarity measures
+-------------------------
+
+Additional similarity measures include:
+
+* :class:`~matchms.similarity.NeutralLossesCosine` for neutral-loss-based
+  spectral similarity,
+* :class:`~matchms.similarity.BinnedEmbeddingSimilarity` for comparison of
+  binned spectrum representations,
+* :class:`~matchms.similarity.FingerprintSimilarity` for molecular fingerprint
+  similarity,
+* :class:`~matchms.similarity.MetadataMatch` for user-defined metadata
+  comparisons,
+* :class:`~matchms.similarity.PrecursorMzMatch` and
+  :class:`~matchms.similarity.ParentMassMatch` for mass-based matching.
+
+Custom similarities
+-------------------
+
+Custom similarity measures can be implemented by subclassing
+:class:`~matchms.similarity.BaseSimilarity`. Similarities that also support
+sparse score computation can subclass
 :class:`~matchms.similarity.BaseSimilarityWithSparse`.
 
 External similarity measures, such as
-`Spec2Vec <https://github.com/iomega/spec2vec>`_, can also be used together with
+`Spec2Vec <https://github.com/iomega/spec2vec>`_, can also be integrated into
 matchms workflows.
 """
 
