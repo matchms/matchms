@@ -236,7 +236,7 @@ def _clean_and_weight(
         peaks: np.ndarray,
         precursor_mz: float | None,
         remove_precursor: bool,
-        precursor_window: float,
+        offset_to_precursor: float,
         noise_cutoff: float,
         normalize_to_half: bool,
         merge_within_da: float,
@@ -248,7 +248,7 @@ def _clean_and_weight(
     Apply the Flash preprocessing rules to a (mz, intensity) peak list.
 
     Steps:
-      1) (Optional) Remove all peaks at/above (precursor_mz - precursor_window).
+      1) (Optional) Remove all peaks at/above (precursor_mz - offset_to_precursor).
       2) (Optional) Remove noise: keep peaks with intensity >= noise_cutoff * max(intensity).
       3) (Optional) Entropy-weight intensities (Li & Fiehn): raise intensities by a power derived 
          from spectrum entropy.
@@ -263,8 +263,8 @@ def _clean_and_weight(
         Precursor m/z for the spectrum (if known).
     remove_precursor : bool
         If True, remove the precursor and near-precursor peaks.
-    precursor_window : float
-        Size (Da) to cut below the precursor (remove m/z > precursor_mz - window).
+    offset_to_precursor : float
+        Size (Da) to cut below the precursor (remove m/z > precursor_mz + offset_to_precursor).
     noise_cutoff : float
         Fraction of max intensity to keep (0.01 means keep peaks >= 1% of max).
     normalize_to_half : bool
@@ -293,7 +293,7 @@ def _clean_and_weight(
 
     # (optional) remove precursor and nearby peaks
     if remove_precursor and (precursor_mz is not None):
-        mask = mz <= (precursor_mz - precursor_window)
+        mask = mz <= (precursor_mz + offset_to_precursor)
         mz, intensities = mz[mask], intensities[mask]
         if mz.size == 0:
             return np.empty((0, 2), dtype=dtype)

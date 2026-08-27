@@ -87,7 +87,7 @@ def test_clean_and_weight_pipeline_precursor_noise_norm_merge():
         np.column_stack([mz, intens]),
         precursor_mz=pmz,
         remove_precursor=True,
-        precursor_window=1.6,   # keep only <= 198.4
+        offset_to_precursor=-1.6,   # keep only <= 198.4
         noise_cutoff=0.05,      # remove peaks below 5% of max (max AFTER precursor filter)
         normalize_to_half=True,
         merge_within_da=0.5,    # merge anything within 0.5 Da
@@ -106,7 +106,7 @@ def test_clean_and_weight_cosine_weighting_no_change_when_not_normalized():
     out = _clean_and_weight(peaks,
                             precursor_mz=None,
                             remove_precursor=False,
-                            precursor_window=1.6,
+                            offset_to_precursor=-1.6,
                             noise_cutoff=0.0,
                             normalize_to_half=False,   # ensure no scaling applied
                             merge_within_da=0.0,
@@ -123,7 +123,7 @@ def test_clean_and_weight_raises_on_unknown_weighing_type():
         _clean_and_weight(peaks,
                           precursor_mz=None,
                           remove_precursor=False,
-                          precursor_window=1.6,
+                          offset_to_precursor=-1.6,
                           noise_cutoff=0.0,
                           normalize_to_half=False,
                           merge_within_da=0.0,

@@ -249,7 +249,7 @@ def test_entropy_greedy_remove_precursor_can_remove_all_peaks():
     score = EntropyGreedy(
         tolerance=0.02,
         remove_precursor=True,
-        precursor_window=1.6,
+        offset_to_precursor=-1.6,
         noise_cutoff=0.0,
     ).pair(spectrum_1, spectrum_2)
 
@@ -271,7 +271,7 @@ def test_entropy_greedy_remove_precursor_keeps_cutoff_boundary():
     score = EntropyGreedy(
         tolerance=0.02,
         remove_precursor=True,
-        precursor_window=1.6,
+        offset_to_precursor=-1.6,
         noise_cutoff=0.0,
     ).pair(spectrum_1, spectrum_2)
 
@@ -440,7 +440,7 @@ def test_entropy_greedy_matches_flash_entropy_after_precursor_cleanup():
     kwargs = {
         "tolerance": 0.02,
         "remove_precursor": True,
-        "precursor_window": 1.5,
+        "offset_to_precursor": -1.5,
         "noise_cutoff": 0.0,
         "dtype": np.float64,
     }
@@ -475,7 +475,7 @@ def test_entropy_pair_matches_entropy_greedy_with_same_configuration():
         "tolerance": 0.02,
         "use_ppm": False,
         "remove_precursor": True,
-        "precursor_window": 0.5,
+        "offset_to_precursor": -0.5,
         "noise_cutoff": 0.0,
         "merge_within": 0.015,
         "dtype": np.float64,
@@ -500,7 +500,7 @@ def test_entropy_matrix_matches_flash_entropy_with_same_configuration():
         "tolerance": 0.01,
         "use_ppm": False,
         "remove_precursor": False,
-        "precursor_window": 1.6,
+        "offset_to_precursor": -1.6,
         "noise_cutoff": 0.0,
         "merge_within": 0.0,
         "dtype": np.float64,

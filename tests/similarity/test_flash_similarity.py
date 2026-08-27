@@ -55,7 +55,7 @@ def test_entropy_pair_returns_zero_when_empty_after_cleanup():
         tolerance=0.02,
         matching_mode="fragment",
         remove_precursor=True,
-        precursor_window=1.6,
+        offset_to_precursor=-1.6,
         noise_cutoff=0.0,
         normalize_to_half=True,
         merge_within=0.0,
