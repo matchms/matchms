@@ -262,15 +262,22 @@ class FlashEntropy(_BaseFlashSimilarity):
         resolutions up to about 8,000,000.
     """
     is_commutative = True
-    score_datatype = np.float32
     score_fields = ("score",)
 
-    def __init__(self, *args, normalize_to_half: bool = True, **kwargs):
+    def __init__(
+        self,
+        *args,
+        normalize_to_half: bool = True,
+        dtype: np.dtype = np.float64,
+        **kwargs,
+    ):
         super().__init__(
             *args,
             normalize_to_half=normalize_to_half,
+            dtype=dtype,
             **kwargs,
         )
+        self.score_datatype = self.dtype
 
     @property
     def _weighing_type(self) -> str:

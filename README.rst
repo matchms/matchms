@@ -1,5 +1,3 @@
-`fair-software.nl <https://fair-software.nl/>`_ recommendations:
-
 |GitHub Badge|
 |License Badge|
 |Conda Badge| |Pypi Badge| |Research Software Directory Badge|
@@ -36,9 +34,9 @@ metabolomics-USI, JSON, and pickle. It provides tools for metadata
 harmonization, metadata validation, peak filtering, spectrum processing,
 collection processing, export, and large-scale spectral similarity calculations.
 
-The classic `Spectrum` API remains supported. Individual spectra are still
-represented as `Spectrum` objects, and existing workflows that process lists
-of spectra continue to work. For new workflows, however, `SpectraCollection`
+The classic `Spectrum` API, which was the default in matchms < 1.0, remains supported.
+Individual spectra are still represented as `Spectrum` objects, and existing workflows
+that process lists of spectra continue to work. For new workflows, however, `SpectraCollection`
 is recommended whenever a complete dataset is imported, cleaned, filtered,
 exported, or compared.
 
@@ -105,7 +103,7 @@ Similarity scores can be computed from the processed collection:
 
     from matchms.similarity import ModifiedCosine
 
-    similarity = Modified(tolerance=0.01)
+    similarity = ModifiedCosine(tolerance=0.01)
     scores = similarity.matrix(collection)
 
 
@@ -191,7 +189,7 @@ Spectrum
 - ``Metadata``: one spectrum-level metadata dictionary.
 
 ``Spectrum`` is useful for individual spectra, custom spectrum-wise algorithms,
-and backward-compatible workflows.
+and backward-compatible workflows (e.g., for projects partly using matchms < 1.0).
 
 Example:
 
@@ -530,21 +528,87 @@ For individual spectra, peak data is available through ``spectrum.peaks``:
     spectrum.peaks.intensities
 
 
-Similarity scoring
-==================
+Similarity measures
+-------------------
 
-Matchms comes with several similarity measures in ``matchms.similarity``.
-Common examples include cosine-based scores, modified cosine scores, neutral
-loss scores, and fast approximate methods.
+Matchms provides several similarity measures in ``matchms.similarity`` for
+comparing mass spectra, spectrum metadata, and molecular structures.
 
-Collection-based scoring:
+For most spectral comparisons, start with one of the high-level classes
+``Cosine``, ``ModifiedCosine``, or ``Entropy``. These classes select suitable
+implementations internally for pairwise and matrix computations. More
+specialized implementations are also available when explicit control over the
+algorithm is needed.
+
+.. list-table:: Similarity measures at a glance
+   :header-rows: 1
+   :widths: 18 22 38 32
+
+   * - Similarity
+     - Recommended class
+     - Typical use
+     - Specialized implementations
+   * - Cosine
+     - ``Cosine``
+     - Standard peak-based spectral similarity.
+     - ``CosineGreedy``,
+       ``CosineHungarian``,
+       ``CosineLinear``,
+       ``CosineFlash``,
+       ``CosineBlink``
+   * - Modified cosine
+     - ``ModifiedCosine``
+     - Spectral similarity allowing fragment matches shifted by the difference
+       in precursor m/z.
+     - ``ModifiedCosineGreedy``,
+       ``ModifiedCosineHungarian``;
+       ``CosineFlash`` with ``matching_mode="hybrid"``
+   * - Spectral entropy
+     - ``Entropy``
+     - Entropy-weighted spectral similarity. A good alternative to cosine-based
+       scoring.
+     - ``EntropyGreedy``,
+       ``FlashEntropy``
+   * - Neutral-loss cosine
+     - ``NeutralLossesCosine``
+     - Compare spectra based on neutral-loss rather than fragment m/z patterns.
+     -
+   * - Binned spectra
+     - ``BinnedEmbeddingSimilarity``
+     - Compare fixed-width binned spectrum representations using cosine or
+       Euclidean similarity.
+     -
+   * - Molecular structure
+     - ``FingerprintSimilarity``
+     - Compare molecular fingerprints derived from structure metadata.
+     -
+   * - Metadata
+     - ``MetadataMatch``
+     - Compare arbitrary metadata fields using exact or tolerance-based matching.
+     -
+   * - Precursor or parent mass
+     - ``PrecursorMzMatch``,
+       ``ParentMassMatch``
+     - Simple matching based on precursor m/z or parent mass.
+     -
+
+Similarity matrices can be computed directly from a collection:
+
+.. code-block:: python
+
+    from matchms.similarity import Entropy
+
+    similarity = Entropy(tolerance=0.02)
+    scores = similarity.matrix(collection)
+
+The same API can be used to compare two collections:
 
 .. code-block:: python
 
     from matchms.similarity import ModifiedCosine
 
     similarity = ModifiedCosine(tolerance=0.01)
-    scores = similarity.matrix(collection)
+    scores = similarity.matrix(references, queries)
 
 Pairwise scoring of individual spectra remains supported:
 
@@ -553,6 +617,13 @@ Pairwise scoring of individual spectra remains supported:
     from matchms.similarity import Cosine
 
     score = Cosine(tolerance=0.1).pair(spectrum_1, spectrum_2)
+
+The specialized classes are useful when a particular implementation is
+required. For example, ``CosineHungarian`` performs optimal peak assignment,
+while ``CosineGreedy`` provides the corresponding greedy approximation.
+``EntropyGreedy`` provides a simple pair-oriented spectral entropy
+implementation, whereas ``FlashEntropy`` is designed for fast matrix
+computations.
 
 
 Installation
@@ -765,8 +836,7 @@ If you want to contribute to matchms development, see the
 License
 =======
 
-Copyright (c) 2026, Düsseldorf University of Applied Sciences &
-Netherlands eScience Center
+Copyright (c) 2026, Düsseldorf University of Applied Sciences
 
 Licensed under the Apache License, Version 2.0. You may not use this file except
 in compliance with the License. You may obtain a copy of the License at:
