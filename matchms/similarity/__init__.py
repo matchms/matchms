@@ -30,6 +30,10 @@ Available similarity functions include:
   :class:`~matchms.similarity.ModifiedCosineHungarian`)
 * neutral-loss-based peak similarity
   (:class:`~matchms.similarity.NeutralLossesCosine`)
+* entropy-based peak similarity
+  (:class:`~matchms.similarity.Entropy`,
+  :class:`~matchms.similarity.EntropyGreedy`,
+  :class:`~matchms.similarity.FlashEntropy`)
 * fast embedding-based or approximate similarity methods
   (:class:`~matchms.similarity.BinnedEmbeddingSimilarity`,
   :class:`~matchms.similarity.CosineBlink`,
