@@ -21,7 +21,7 @@ jobs:
           - variant: fingerprints
             install_target: ".[fingerprints]"
             expect_chemap: "true"
-            expect_networkx: "false"
+            expect_networkx: "true"
           - variant: networking
             install_target: ".[networking]"
             expect_chemap: "false"
