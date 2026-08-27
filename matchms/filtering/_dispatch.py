@@ -214,7 +214,7 @@ def metadata_update_filter(
     public_signature = _metadata_filter_signature(metadata_impl)
 
     # Set metadata on both functions. The final public_filter is what users and
-    # SpectrumProcessor normally see, but setting spectrum_impl as well makes
+    # SpectraProcessor normally see, but setting spectrum_impl as well makes
     # debugging and potential internal checks less surprising.
     spectrum_impl.__name__ = public_name
     spectrum_impl.__doc__ = metadata_impl.__doc__

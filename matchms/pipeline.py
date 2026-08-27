@@ -7,11 +7,13 @@ from collections.abc import Callable, Iterable, Sequence
 from datetime import datetime
 from typing import TYPE_CHECKING, Self
 import numpy as np
+from deprecated import deprecated
 import matchms.similarity as mssimilarity
+from matchms.exporting import save_spectra
 from matchms.filtering.filter_order import ALL_FILTERS
-from matchms.filtering.spectrum_processor import (
+from matchms.filtering.spectra_processor import (
     FunctionWithParametersType,
-    SpectrumProcessor,
+    SpectraProcessor,
 )
 from matchms.importing.load_spectra import load_list_of_spectrum_files
 from matchms.logging_functions import (
@@ -46,8 +48,8 @@ def create_workflow(
     """Create a workflow specification for Pipeline."""
     workflow = OrderedDict()
 
-    processor_1 = SpectrumProcessor(spectra_1_filters)
-    processor_2 = SpectrumProcessor(spectra_2_filters)
+    processor_1 = SpectraProcessor(spectra_1_filters)
+    processor_2 = SpectraProcessor(spectra_2_filters)
 
     workflow["spectra_1_filters"] = processor_1.processing_steps
     workflow["spectra_2_filters"] = processor_2.processing_steps
@@ -68,6 +70,10 @@ def create_workflow(
     return workflow
 
 
+@deprecated(
+    version="1.1.0",
+    reason="This will be dropped in a future version.",
+)
 class Pipeline:
     """Central pipeline class.
 
@@ -102,8 +108,8 @@ class Pipeline:
         self.__workflow = workflow
         self.check_workflow()
 
-        self.processing_spectra_1: SpectrumProcessor | None = None
-        self.processing_spectra_2: SpectrumProcessor | None = None
+        self.processing_spectra_1: SpectraProcessor | None = None
+        self.processing_spectra_2: SpectraProcessor | None = None
 
         self._initialize_spectrum_processor_1()
         self._initialize_spectrum_processor_2()
@@ -126,14 +132,14 @@ class Pipeline:
 
     def _initialize_spectrum_processor_1(self) -> None:
         self.write_to_logfile("--- Processing pipeline spectra_1: ---")
-        self.processing_spectra_1 = SpectrumProcessor(self.__workflow["spectra_1_filters"])
+        self.processing_spectra_1 = SpectraProcessor(self.__workflow["spectra_1_filters"])
         self.write_to_logfile(str(self.processing_spectra_1))
         if self.processing_spectra_1.processing_steps != self.__workflow["spectra_1_filters"]:
             logger.warning("The order of spectra_1 filters has been changed compared to the yaml file.")
 
     def _initialize_spectrum_processor_2(self) -> None:
         self.write_to_logfile("--- Processing pipeline spectra_2: ---")
-        self.processing_spectra_2 = SpectrumProcessor(self.__workflow["spectra_2_filters"])
+        self.processing_spectra_2 = SpectraProcessor(self.__workflow["spectra_2_filters"])
         self.write_to_logfile(str(self.processing_spectra_2))
         if self.processing_spectra_2.processing_steps != self.__workflow["spectra_2_filters"]:
             logger.warning("The order of spectra_2 filters has been changed compared to the yaml file.")
@@ -179,26 +185,44 @@ class Pipeline:
         report = None
 
         if self.processing_spectra_1 is not None:
-            self._spectra_1, report = self.processing_spectra_1.process_spectra(
-                self._spectra_1,
-                progress_bar=self.progress_bar,
-                cleaned_spectra_file=cleaned_spectra_1_file,
-                create_report=create_report,
+            report = (
+                self.processing_spectra_1.create_processing_report()
+                if create_report
+                else None
             )
-            self.write_to_logfile(str(report))
+            self._spectra_1 = self.processing_spectra_1.process_spectra(
+                self._spectra_1,
+                processing_report=report,
+                progress_bar=self.progress_bar,
+            )
+            if report is not None:
+                self.write_to_logfile(str(report))
+
             if cleaned_spectra_1_file is not None:
-                self.write_to_logfile(f"--- Spectra_1 written to {cleaned_spectra_1_file} ---")
+                save_spectra(self._spectra_1, cleaned_spectra_1_file)
+                self.write_to_logfile(
+                    f"--- Spectra_1 written to {cleaned_spectra_1_file} ---"
+                )
 
         if self.processing_spectra_2 is not None and self._spectra_2 is not None:
-            self._spectra_2, report = self.processing_spectra_2.process_spectra(
-                self._spectra_2,
-                progress_bar=self.progress_bar,
-                cleaned_spectra_file=cleaned_spectra_2_file,
-                create_report=create_report,
+            report = (
+                self.processing_spectra_2.create_processing_report()
+                if create_report
+                else None
             )
-            self.write_to_logfile(str(report))
+            self._spectra_2 = self.processing_spectra_2.process_spectra(
+                self._spectra_2,
+                processing_report=report,
+                progress_bar=self.progress_bar,
+            )
+            if report is not None:
+                self.write_to_logfile(str(report))
+
             if cleaned_spectra_2_file is not None:
-                self.write_to_logfile(f"--- Spectra_2 written to {cleaned_spectra_2_file} ---")
+                save_spectra(self._spectra_2, cleaned_spectra_2_file)
+                self.write_to_logfile(
+                    f"--- Spectra_2 written to {cleaned_spectra_2_file} ---"
+                )
 
         self.scores = None
         self.mask = None
@@ -416,7 +440,7 @@ def _build_mask_from_scores(
 def get_unused_filters(yaml_file):
     """Checks which filters from matchms are not used in the yaml file."""
     workflow = load_workflow_from_yaml_file(yaml_file)
-    processor = SpectrumProcessor(workflow["spectra_1_filters"])
+    processor = SpectraProcessor(workflow["spectra_1_filters"])
 
     filters_used = [filter_function.__name__ for filter_function in processor.filters]
     for filter_function in ALL_FILTERS:

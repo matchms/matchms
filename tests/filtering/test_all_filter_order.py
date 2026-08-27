@@ -174,7 +174,7 @@ def test_all_filter_order(early_filters: list[Callable], later_filters: list[Cal
 def test_all_filters_is_complete():
     """Checks that the global varible ALL_FILTERS contains all the available filters
 
-    This is important, since performing tests in the wrong order can make some filters useless.
+    This is important, since performing filters in the wrong order can make some filters useless.
     """
 
     def get_functions_from_file(file_path):
@@ -199,7 +199,7 @@ def test_all_filters_is_complete():
         for script in scripts:
             # Remove __init__
             if script[0] == "_":
-                break
+                continue
             if script[-3:] == ".py":
                 functions = get_functions_from_file(os.path.join(directory_with_filters, script))
                 for function in functions:
