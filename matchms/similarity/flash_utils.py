@@ -248,7 +248,7 @@ def _clean_and_weight(
     Apply the Flash preprocessing rules to a (mz, intensity) peak list.
 
     Steps:
-      1) (Optional) Remove all peaks at/above (precursor_mz - offset_to_precursor).
+      1) (Optional) Remove all peaks above (precursor_mz + offset_to_precursor).
       2) (Optional) Remove noise: keep peaks with intensity >= noise_cutoff * max(intensity).
       3) (Optional) Entropy-weight intensities (Li & Fiehn): raise intensities by a power derived 
          from spectrum entropy.
