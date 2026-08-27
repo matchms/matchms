@@ -8,8 +8,8 @@ from .base_similarity import BaseSimilarityWithSparse
 from .cosine_hungarian import CosineHungarian
 from .default_parameters import (
     DEFAULT_INTENSITY_POWER,
+    DEFAULT_MZ_POWER,
     DEFAULT_MZ_TOLERANCE,
-    DEFAULT_NOISE_CUTOFF,
 )
 
 
@@ -39,7 +39,7 @@ class ModifiedCosineHungarian(BaseSimilarityWithSparse):
     def __init__(
             self,
             tolerance: float = DEFAULT_MZ_TOLERANCE,
-            mz_power: float = 0.0,
+            mz_power: float = DEFAULT_MZ_POWER,
             intensity_power: float = DEFAULT_INTENSITY_POWER
             ):
         """Initialize exact modified cosine.
