@@ -13,6 +13,7 @@ from .default_parameters import (
     DEFAULT_INTENSITY_POWER,
     DEFAULT_MZ_TOLERANCE,
     DEFAULT_NOISE_CUTOFF,
+    DEFAULT_OFFSET_TO_PRECURSOR,
 )
 from .flash_utils import _build_library_index, _clean_and_weight
 
@@ -32,7 +33,7 @@ class _BaseFlashSimilarity(BaseSimilarity):
         use_ppm: bool = False,
         intensity_power: float = DEFAULT_INTENSITY_POWER,
         remove_precursor: bool = False,
-        precursor_window: float = 1.6,
+        offset_to_precursor: float = DEFAULT_OFFSET_TO_PRECURSOR,
         noise_cutoff: float = DEFAULT_NOISE_CUTOFF,
         normalize_to_half: bool = False,
         merge_within: float = 0,
@@ -48,7 +49,7 @@ class _BaseFlashSimilarity(BaseSimilarity):
         self.use_ppm = use_ppm
         self.intensity_power = intensity_power
         self.remove_precursor = remove_precursor
-        self.precursor_window = precursor_window
+        self.offset_to_precursor = offset_to_precursor
         self.noise_cutoff = noise_cutoff
         self.normalize_to_half = normalize_to_half
         self.merge_within = merge_within
@@ -80,7 +81,7 @@ class _BaseFlashSimilarity(BaseSimilarity):
             pmz,
             intensity_power=self.intensity_power,
             remove_precursor=self.remove_precursor,
-            precursor_window=self.precursor_window,
+            offset_to_precursor=self.offset_to_precursor,
             noise_cutoff=self.noise_cutoff,
             normalize_to_half=self.normalize_to_half,
             merge_within_da=self.merge_within,
@@ -101,7 +102,7 @@ class _BaseFlashSimilarity(BaseSimilarity):
                 pmz,
                 intensity_power=self.intensity_power,
                 remove_precursor=self.remove_precursor,
-                precursor_window=self.precursor_window,
+                offset_to_precursor=self.offset_to_precursor,
                 noise_cutoff=self.noise_cutoff,
                 normalize_to_half=self.normalize_to_half,
                 merge_within_da=self.merge_within,
@@ -238,15 +239,16 @@ class FlashEntropy(_BaseFlashSimilarity):
     matching_mode:
         Matching mode: 'fragment', 'neutral_loss', or 'hybrid' (default is 'fragment').
     tolerance:
-        Matching tolerance in Da or ppm (use_ppm=True). Default is 0.02.
+        Matching tolerance in Da or ppm (use_ppm=True). Default is 0.01.
     use_ppm:
         If True, interpret `tolerance` as parts-per-million. Default is False.
     remove_precursor:
-        If True, remove precursor peak and peaks within precursor_window.
+        If True, remove precursor peak and peaks within offset_to_precursor.
         Default is False.
-    precursor_window:
-        If remove_precursor is True, remove peaks within this window around the precursor
-        m/z. Default is 1.6 Da (as suggested by Li & Fiehn(2023)).
+    offset_to_precursor:
+        Offset used when ``remove_precursor=True``. This will only keep 
+        mz values <= precursor_mz + offset_to_precursor. Default is -1.6 Da.
+        (as suggested by Li & Fiehn(2023)).
     noise_cutoff:
         If > 0, remove peaks with intensities below this fraction of the maximum intensity.
         Default is 0.01 (1%).
@@ -420,9 +422,9 @@ class CosineFlash(_BaseFlashSimilarity):
     intensity_power:
         The power to raise intensity to in the cosine function. The default is 1 (no weighting).
     remove_precursor:
-        If True, remove precursor peak and peaks within precursor_window.
+        If True, remove precursor peak and peaks within offset_to_precursor.
         Default is False.
-    precursor_window:
+    offset_to_precursor:
         If remove_precursor is True, remove peaks within this window around the precursor
         m/z. Default is 1.6 Da (as suggested by Li & Fiehn(2023)).
     noise_cutoff:

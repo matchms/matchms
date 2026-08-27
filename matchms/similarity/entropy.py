@@ -5,6 +5,7 @@ from .base_similarity import BaseSimilarity
 from .default_parameters import (
     DEFAULT_MZ_TOLERANCE,
     DEFAULT_NOISE_CUTOFF,
+    DEFAULT_OFFSET_TO_PRECURSOR,
 )
 from .entropy_greedy import EntropyGreedy
 from .flash_similarity import FlashEntropy
@@ -40,9 +41,10 @@ class Entropy(BaseSimilarity):
         If True, interpret ``tolerance`` as a symmetric ppm tolerance.
     remove_precursor
         If True and ``precursor_mz`` metadata are available, remove peaks above
-        ``precursor_mz - precursor_window`` before scoring.
-    precursor_window
-        Window used when ``remove_precursor=True``. Default is 1.6 Da.
+        ``precursor_mz + offset_to_precursor`` before scoring.
+    offset_to_precursor
+        Offset used when ``remove_precursor=True``. This will only keep 
+        mz values <= precursor_mz + offset_to_precursor. Default is -1.6 Da.
     noise_cutoff
         Remove peaks below this fraction of the spectrum's maximum intensity.
         Set to 0 or None to disable. Default is 0.01.
@@ -62,7 +64,7 @@ class Entropy(BaseSimilarity):
         tolerance: float = DEFAULT_MZ_TOLERANCE,
         use_ppm: bool = False,
         remove_precursor: bool = False,
-        precursor_window: float = 1.6,
+        offset_to_precursor: float = DEFAULT_OFFSET_TO_PRECURSOR,
         noise_cutoff: float | None = DEFAULT_NOISE_CUTOFF,
         merge_within: float = 0.0,
         dtype: np.dtype = np.float64,
@@ -70,7 +72,7 @@ class Entropy(BaseSimilarity):
         self.tolerance = tolerance
         self.use_ppm = use_ppm
         self.remove_precursor = remove_precursor
-        self.precursor_window = precursor_window
+        self.offset_to_precursor = offset_to_precursor
         self.noise_cutoff = noise_cutoff
         self.merge_within = merge_within
         self.dtype = np.dtype(dtype)
@@ -81,7 +83,7 @@ class Entropy(BaseSimilarity):
             tolerance=self.tolerance,
             use_ppm=self.use_ppm,
             remove_precursor=self.remove_precursor,
-            precursor_window=self.precursor_window,
+            offset_to_precursor=self.offset_to_precursor,
             noise_cutoff=self.noise_cutoff,
             merge_within=self.merge_within,
             dtype=self.dtype,
@@ -93,7 +95,7 @@ class Entropy(BaseSimilarity):
             tolerance=self.tolerance,
             use_ppm=self.use_ppm,
             remove_precursor=self.remove_precursor,
-            precursor_window=self.precursor_window,
+            offset_to_precursor=self.offset_to_precursor,
             noise_cutoff=self.noise_cutoff,
             normalize_to_half=True,
             merge_within=self.merge_within,
