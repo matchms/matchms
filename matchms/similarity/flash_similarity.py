@@ -13,7 +13,7 @@ from .default_parameters import (
     DEFAULT_INTENSITY_POWER,
     DEFAULT_MZ_TOLERANCE,
     DEFAULT_NOISE_CUTOFF,
-    DEFAULT_OFFSET_TO_PRECURSOR
+    DEFAULT_OFFSET_TO_PRECURSOR,
 )
 from .flash_utils import _build_library_index, _clean_and_weight
 
