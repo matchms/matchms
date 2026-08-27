@@ -91,7 +91,8 @@ class ProcessingReport:
         filter_name
             Name of the filter step.
         effect
-            Filter effect type, or None for unknown/custom filters. Can be one of ``REMOVE``, ``METADATA``, or ``FRAGMENTS``.
+            Filter effect type, or None for unknown/custom filters.
+            Can be one of ``REMOVE``, ``METADATA``, or ``FRAGMENTS``.
         before
             Hash snapshot of the spectra before the filter was applied.
         after
