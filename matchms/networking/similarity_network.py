@@ -2,7 +2,6 @@ from __future__ import annotations
 import json
 from collections.abc import Sequence
 from typing import TYPE_CHECKING
-import networkx as nx
 import numpy as np
 from .networking_functions import get_top_hits
 
