@@ -56,7 +56,8 @@ networking = [
 ]
 
 all = [
-  "matchms[fingerprints,networking]",
+  "chemap>=0.3.5",
+  "networkx>=3.4.2,<3.5",
 ]
 
 [project.urls]
