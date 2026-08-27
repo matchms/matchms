@@ -34,9 +34,9 @@ metabolomics-USI, JSON, and pickle. It provides tools for metadata
 harmonization, metadata validation, peak filtering, spectrum processing,
 collection processing, export, and large-scale spectral similarity calculations.
 
-The classic `Spectrum` API remains supported. Individual spectra are still
-represented as `Spectrum` objects, and existing workflows that process lists
-of spectra continue to work. For new workflows, however, `SpectraCollection`
+The classic `Spectrum` API, which was the default in matchms < 1.0, remains supported.
+Individual spectra are still represented as `Spectrum` objects, and existing workflows
+that process lists of spectra continue to work. For new workflows, however, `SpectraCollection`
 is recommended whenever a complete dataset is imported, cleaned, filtered,
 exported, or compared.
 
@@ -836,8 +836,7 @@ If you want to contribute to matchms development, see the
 License
 =======
 
-Copyright (c) 2026, Düsseldorf University of Applied Sciences &
-Netherlands eScience Center
+Copyright (c) 2026, Düsseldorf University of Applied Sciences
 
 Licensed under the Apache License, Version 2.0. You may not use this file except
 in compliance with the License. You may obtain a copy of the License at:
