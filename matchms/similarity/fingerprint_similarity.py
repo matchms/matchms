@@ -1,9 +1,6 @@
 from collections.abc import Sequence
 import numpy as np
 import scipy.sparse as sp
-from chemap.metrics import (
-    tanimoto_similarity_matrix,
-)
 from matchms.fingerprints import Fingerprints
 from matchms.scores import Scores
 from matchms.typing import SpectrumType
