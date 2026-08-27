@@ -2,6 +2,10 @@ from collections.abc import Sequence
 import numpy as np
 from matchms.typing import SpectrumType
 from .base_similarity import BaseSimilarity
+from .default_parameters import (
+    DEFAULT_MZ_TOLERANCE,
+    DEFAULT_NOISE_CUTOFF,
+)
 from .entropy_greedy import EntropyGreedy
 from .flash_similarity import FlashEntropy
 
@@ -55,11 +59,11 @@ class Entropy(BaseSimilarity):
 
     def __init__(
         self,
-        tolerance: float = 0.02,
+        tolerance: float = DEFAULT_MZ_TOLERANCE,
         use_ppm: bool = False,
         remove_precursor: bool = False,
         precursor_window: float = 1.6,
-        noise_cutoff: float | None = 0.01,
+        noise_cutoff: float | None = DEFAULT_NOISE_CUTOFF,
         merge_within: float = 0.0,
         dtype: np.dtype = np.float64,
     ):

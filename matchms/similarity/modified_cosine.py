@@ -3,6 +3,11 @@ from collections.abc import Sequence
 import numpy as np
 from matchms.typing import SpectrumType
 from .base_similarity import BaseSimilarity
+from .default_parameters import (
+    DEFAULT_INTENSITY_POWER,
+    DEFAULT_MZ_TOLERANCE,
+    DEFAULT_NOISE_CUTOFF,
+)
 from .flash_similarity import CosineFlash
 from .modified_cosine_greedy import ModifiedCosineGreedy
 from .modified_cosine_hungarian import ModifiedCosineHungarian
@@ -40,17 +45,17 @@ class ModifiedCosine(BaseSimilarity):
 
     def __init__(
             self,
-            tolerance: float = 0.1,
-            intensity_power: float = 1.0,
+            tolerance: float = DEFAULT_MZ_TOLERANCE,
+            intensity_power: float = DEFAULT_INTENSITY_POWER,
             use_hungarian: bool = False,
-            noise_cutoff: float = 0.01,
+            noise_cutoff: float = DEFAULT_NOISE_CUTOFF,
             ):
         """Initialize the modified cosine score class.
 
         Parameters
         ----------
         tolerance:
-            Peaks will be considered a match when <= tolerance apart. Default is 0.1.
+            Peaks will be considered a match when <= tolerance apart. Default is 0.01.
         intensity_power:
             The power to raise intensity to in the cosine function. The default is 1.
         use_hungarian:

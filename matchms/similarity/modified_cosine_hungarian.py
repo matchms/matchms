@@ -6,6 +6,11 @@ from matchms.typing import SpectrumType
 from ._precursor_validation import get_valid_precursor_mz
 from .base_similarity import BaseSimilarityWithSparse
 from .cosine_hungarian import CosineHungarian
+from .default_parameters import (
+    DEFAULT_INTENSITY_POWER,
+    DEFAULT_MZ_TOLERANCE,
+    DEFAULT_NOISE_CUTOFF,
+)
 
 
 logger = logging.getLogger("matchms")
@@ -31,13 +36,18 @@ class ModifiedCosineHungarian(BaseSimilarityWithSparse):
     score_datatype = [("score", np.float64), ("matches", "int")]
     score_fields = ("score", "matches")
 
-    def __init__(self, tolerance: float = 0.1, mz_power: float = 0.0, intensity_power: float = 1.0):
+    def __init__(
+            self,
+            tolerance: float = DEFAULT_MZ_TOLERANCE,
+            mz_power: float = 0.0,
+            intensity_power: float = DEFAULT_INTENSITY_POWER
+            ):
         """Initialize exact modified cosine.
 
         Parameters
         ----------
         tolerance:
-            Peaks will be considered a match when <= tolerance apart. Default is 0.1.
+            Peaks will be considered a match when <= tolerance apart. Default is 0.01.
         mz_power:
             The power to raise mz to in the cosine function. The default is 0, in which
             case the peak intensity products will not depend on the m/z ratios.

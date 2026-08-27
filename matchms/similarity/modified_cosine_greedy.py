@@ -4,6 +4,11 @@ from matchms.typing import SpectrumType
 from ._precursor_validation import get_valid_precursor_mz
 from .base_similarity import BaseSimilarityWithSparse
 from .cosine_greedy import CosineGreedy
+from .default_parameters import (
+    DEFAULT_INTENSITY_POWER,
+    DEFAULT_MZ_TOLERANCE,
+    DEFAULT_NOISE_CUTOFF,
+)
 from .spectrum_similarity_functions import collect_peak_pairs, filter_noise, score_best_matches
 
 
@@ -38,17 +43,17 @@ class ModifiedCosineGreedy(BaseSimilarityWithSparse):
     score_fields = ("score", "matches")
 
     def __init__(
-            self, tolerance: float = 0.1,
+            self, tolerance: float = DEFAULT_MZ_TOLERANCE,
             mz_power: float = 0.0,
-            intensity_power: float = 1.0,
-            noise_cutoff: float = 0.01,
+            intensity_power: float = DEFAULT_INTENSITY_POWER,
+            noise_cutoff: float = DEFAULT_NOISE_CUTOFF,
             ):
         """Initialize approximate modified cosine.
 
         Parameters
         ----------
         tolerance:
-            Peaks will be considered a match when <= tolerance apart. Default is 0.1.
+            Peaks will be considered a match when <= tolerance apart. Default is 0.01.
         mz_power:
             The power to raise mz to in the cosine function. The default is 0, in which
             case the peak intensity products will not depend on the m/z ratios.

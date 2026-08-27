@@ -3,6 +3,11 @@ import numpy as np
 from matchms.typing import SpectrumType
 from ._precursor_validation import get_valid_precursor_mz
 from .base_similarity import BaseSimilarityWithSparse
+from .default_parameters import (
+    DEFAULT_INTENSITY_POWER,
+    DEFAULT_MZ_POWER,
+    DEFAULT_MZ_TOLERANCE,
+)
 from .spectrum_similarity_functions import collect_peak_pairs, score_best_matches
 
 
@@ -26,8 +31,13 @@ class NeutralLossesCosine(BaseSimilarityWithSparse):
     score_datatype = [("score", np.float64), ("matches", "int")]
     score_fields = ("score", "matches")
 
-    def __init__(self,tolerance: float = 0.1, mz_power: float = 0.0,
-                 intensity_power: float = 1.0, ignore_peaks_above_precursor: bool = True):
+    def __init__(
+            self,
+            tolerance: float = DEFAULT_MZ_TOLERANCE,
+            mz_power: float = DEFAULT_MZ_POWER,
+            intensity_power: float = DEFAULT_INTENSITY_POWER,
+            ignore_peaks_above_precursor: bool = True
+            ):
         """
         Parameters
         ----------

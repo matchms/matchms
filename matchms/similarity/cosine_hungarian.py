@@ -3,6 +3,11 @@ from scipy.optimize import linear_sum_assignment
 from matchms.similarity.spectrum_similarity_functions import collect_peak_pairs
 from matchms.typing import SpectrumType
 from .base_similarity import BaseSimilarityWithSparse
+from .default_parameters import (
+    DEFAULT_INTENSITY_POWER,
+    DEFAULT_MZ_POWER,
+    DEFAULT_MZ_TOLERANCE,
+)
 
 
 class CosineHungarian(BaseSimilarityWithSparse):
@@ -23,13 +28,16 @@ class CosineHungarian(BaseSimilarityWithSparse):
     score_datatype = [("score", np.float64), ("matches", "int")]
     score_fields = ("score", "matches")
 
-    def __init__(self, tolerance: float = 0.1, mz_power: float = 0.0,
-                 intensity_power: float = 1.0):
+    def __init__(
+            self, tolerance: float = DEFAULT_MZ_TOLERANCE,
+            mz_power: float = DEFAULT_MZ_POWER,
+            intensity_power: float = DEFAULT_INTENSITY_POWER
+            ):
         """
         Parameters
         ----------
         tolerance:
-            Peaks will be considered a match when <= tolerance apart. Default is 0.1.
+            Peaks will be considered a match when <= tolerance apart. Default is 0.01.
         mz_power:
             The power to raise m/z to in the cosine function. The default is 0, in which
             case the peak intensity products will not depend on the m/z ratios.

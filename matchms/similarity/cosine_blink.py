@@ -5,6 +5,12 @@ from scipy.sparse import csr_array
 from matchms.scores import Scores
 from matchms.typing import SpectrumType
 from .base_similarity import BaseSimilarity
+from .default_parameters import (
+    DEFAULT_INTENSITY_POWER,
+    DEFAULT_MZ_POWER,
+    DEFAULT_MZ_TOLERANCE,
+    DEFAULT_NOISE_CUTOFF,
+)
 
 
 @njit(cache=True, fastmath=True)
@@ -114,15 +120,15 @@ class CosineBlink(BaseSimilarity):
 
     def __init__(
         self,
-        tolerance: float = 0.01,
+        tolerance: float = DEFAULT_MZ_TOLERANCE,
         bin_width: float = 0.001,
-        mz_power: float = 0.0,
-        intensity_power: float = 1.0,
+        mz_power: float = DEFAULT_MZ_POWER,
+        intensity_power: float = DEFAULT_INTENSITY_POWER,
         clip_to_one: bool = True,
         # extras
         use_numba: bool = True,
         prefilter: bool = True,
-        min_relative_intensity: float = 0.01,
+        min_relative_intensity: float = DEFAULT_NOISE_CUTOFF,
         crop_above_precursor: bool = True,
         remove_zero_intensities: bool = True,
         top_k: int | None = None,
