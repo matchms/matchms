@@ -11,7 +11,7 @@ from .vector_similarity_functions import cosine_similarity_matrix
 def _require_chemap():
     """Require chemap package and return tanimoto_similarity_matrix function."""
     try:
-        from chemap.metrics import tanimoto_similarity_matrixs
+        from chemap.metrics import tanimoto_similarity_matrix
     except ImportError as e:
         raise ImportError(
             "The 'chemap' package is required for fingerprint similarity calculations. "
