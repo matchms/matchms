@@ -105,7 +105,7 @@ Similarity scores can be computed from the processed collection:
 
     from matchms.similarity import ModifiedCosine
 
-    similarity = Modified(tolerance=0.01)
+    similarity = ModifiedCosine(tolerance=0.01)
     scores = similarity.matrix(collection)
 
 
@@ -530,21 +530,87 @@ For individual spectra, peak data is available through ``spectrum.peaks``:
     spectrum.peaks.intensities
 
 
-Similarity scoring
-==================
+Similarity measures
+-------------------
 
-Matchms comes with several similarity measures in ``matchms.similarity``.
-Common examples include cosine-based scores, modified cosine scores, neutral
-loss scores, and fast approximate methods.
+Matchms provides several similarity measures in ``matchms.similarity`` for
+comparing mass spectra, spectrum metadata, and molecular structures.
 
-Collection-based scoring:
+For most spectral comparisons, start with one of the high-level classes
+``Cosine``, ``ModifiedCosine``, or ``Entropy``. These classes select suitable
+implementations internally for pairwise and matrix computations. More
+specialized implementations are also available when explicit control over the
+algorithm is needed.
+
+.. list-table:: Similarity measures at a glance
+   :header-rows: 1
+   :widths: 18 22 38 32
+
+   * - Similarity
+     - Recommended class
+     - Typical use
+     - Specialized implementations
+   * - Cosine
+     - ``Cosine``
+     - Standard peak-based spectral similarity.
+     - ``CosineGreedy``,
+       ``CosineHungarian``,
+       ``CosineLinear``,
+       ``CosineFlash``,
+       ``CosineBlink``
+   * - Modified cosine
+     - ``ModifiedCosine``
+     - Spectral similarity allowing fragment matches shifted by the difference
+       in precursor m/z.
+     - ``ModifiedCosineGreedy``,
+       ``ModifiedCosineHungarian``;
+       ``CosineFlash`` with ``matching_mode="hybrid"``
+   * - Spectral entropy
+     - ``Entropy``
+     - Entropy-weighted spectral similarity. A good alternative to cosine-based
+       scoring.
+     - ``EntropyGreedy``,
+       ``FlashEntropy``
+   * - Neutral-loss cosine
+     - ``NeutralLossesCosine``
+     - Compare spectra based on neutral-loss rather than fragment m/z patterns.
+     -
+   * - Binned spectra
+     - ``BinnedEmbeddingSimilarity``
+     - Compare fixed-width binned spectrum representations using cosine or
+       Euclidean similarity.
+     -
+   * - Molecular structure
+     - ``FingerprintSimilarity``
+     - Compare molecular fingerprints derived from structure metadata.
+     -
+   * - Metadata
+     - ``MetadataMatch``
+     - Compare arbitrary metadata fields using exact or tolerance-based matching.
+     -
+   * - Precursor or parent mass
+     - ``PrecursorMzMatch``,
+       ``ParentMassMatch``
+     - Simple matching based on precursor m/z or parent mass.
+     -
+
+Similarity matrices can be computed directly from a collection:
+
+.. code-block:: python
+
+    from matchms.similarity import Entropy
+
+    similarity = Entropy(tolerance=0.02)
+    scores = similarity.matrix(collection)
+
+The same API can be used to compare two collections:
 
 .. code-block:: python
 
     from matchms.similarity import ModifiedCosine
 
     similarity = ModifiedCosine(tolerance=0.01)
-    scores = similarity.matrix(collection)
+    scores = similarity.matrix(references, queries)
 
 Pairwise scoring of individual spectra remains supported:
 
@@ -553,6 +619,13 @@ Pairwise scoring of individual spectra remains supported:
     from matchms.similarity import Cosine
 
     score = Cosine(tolerance=0.1).pair(spectrum_1, spectrum_2)
+
+The specialized classes are useful when a particular implementation is
+required. For example, ``CosineHungarian`` performs optimal peak assignment,
+while ``CosineGreedy`` provides the corresponding greedy approximation.
+``EntropyGreedy`` provides a simple pair-oriented spectral entropy
+implementation, whereas ``FlashEntropy`` is designed for fast matrix
+computations.
 
 
 Installation
