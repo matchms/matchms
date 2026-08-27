@@ -8,6 +8,12 @@ from tqdm import tqdm
 from matchms.scores import Scores
 from matchms.typing import SpectrumType
 from .base_similarity import BaseSimilarity
+from .default_parameters import (
+    DEFAULT_DTYPE,
+    DEFAULT_INTENSITY_POWER,
+    DEFAULT_MZ_TOLERANCE,
+    DEFAULT_NOISE_CUTOFF,
+)
 from .flash_utils import _build_library_index, _clean_and_weight
 
 
@@ -22,17 +28,17 @@ class _BaseFlashSimilarity(BaseSimilarity):
     def __init__(
         self,
         matching_mode: str = "fragment",           # 'fragment' | 'neutral_loss' | 'hybrid'
-        tolerance: float = 0.02,
+        tolerance: float = DEFAULT_MZ_TOLERANCE,
         use_ppm: bool = False,
-        intensity_power: float = 1.0,
+        intensity_power: float = DEFAULT_INTENSITY_POWER,
         remove_precursor: bool = False,
         precursor_window: float = 1.6,
-        noise_cutoff: float = 0.01,
+        noise_cutoff: float = DEFAULT_NOISE_CUTOFF,
         normalize_to_half: bool = False,
         merge_within: float = 0,
         identity_precursor_tolerance: float | None = None,
         identity_use_ppm: bool = False,
-        dtype: np.dtype = np.float64,
+        dtype: np.dtype = DEFAULT_DTYPE,
     ):
         if matching_mode not in ("fragment", "neutral_loss", "hybrid"):
             raise ValueError("matching_mode must be 'fragment', 'neutral_loss', or 'hybrid'")
@@ -268,7 +274,7 @@ class FlashEntropy(_BaseFlashSimilarity):
         self,
         *args,
         normalize_to_half: bool = True,
-        dtype: np.dtype = np.float64,
+        dtype: np.dtype = DEFAULT_DTYPE,
         **kwargs,
     ):
         super().__init__(
@@ -408,7 +414,7 @@ class CosineFlash(_BaseFlashSimilarity):
     matching_mode:
         Matching mode: 'fragment', 'neutral_loss', or 'hybrid' (default is 'fragment').
     tolerance:
-        Matching tolerance in Da or ppm (use_ppm=True). Default is 0.02.
+        Matching tolerance in Da or ppm (use_ppm=True). Default is 0.01.
     use_ppm:
         If True, interpret `tolerance` as parts-per-million. Default is False.
     intensity_power:
@@ -442,7 +448,7 @@ class CosineFlash(_BaseFlashSimilarity):
 
     score_fields = ("score", "matches")
 
-    def __init__(self, *args, dtype: np.dtype = np.float64, **kwargs):
+    def __init__(self, *args, dtype: np.dtype = DEFAULT_DTYPE, **kwargs):
         super().__init__(*args, dtype=dtype, **kwargs)
         self.score_datatype = np.dtype(
             [("score", self.dtype), ("matches", np.int32)]

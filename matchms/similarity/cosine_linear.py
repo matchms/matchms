@@ -5,6 +5,11 @@ from matchms.scores import Scores
 from matchms.typing import SpectrumType
 from .base_similarity import BaseSimilarity
 from .cosine_linear_functions import linear_cosine_score, sirius_merge_close_peaks
+from .default_parameters import (
+    DEFAULT_INTENSITY_POWER,
+    DEFAULT_MZ_POWER,
+    DEFAULT_MZ_TOLERANCE,
+)
 
 
 class CosineLinear(BaseSimilarity):
@@ -46,7 +51,12 @@ class CosineLinear(BaseSimilarity):
     score_datatype = [("score", np.float64), ("matches", "int")]  # type: ignore[assignment]
     score_fields = ("score", "matches")
 
-    def __init__(self, tolerance: float = 0.1, mz_power: float = 0.0, intensity_power: float = 1.0):
+    def __init__(
+            self,
+            tolerance: float = DEFAULT_MZ_TOLERANCE,
+            mz_power: float = DEFAULT_MZ_POWER,
+            intensity_power: float = DEFAULT_INTENSITY_POWER
+            ):
         """
         Parameters
         ----------

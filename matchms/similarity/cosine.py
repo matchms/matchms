@@ -5,6 +5,11 @@ from matchms.typing import SpectrumType
 from .base_similarity import BaseSimilarity
 from .cosine_greedy import CosineGreedy
 from .cosine_hungarian import CosineHungarian
+from .default_parameters import (
+    DEFAULT_INTENSITY_POWER,
+    DEFAULT_MZ_TOLERANCE,
+    DEFAULT_NOISE_CUTOFF,
+)
 from .flash_similarity import CosineFlash
 
 
@@ -35,10 +40,10 @@ class Cosine(BaseSimilarity):
 
     def __init__(
             self,
-            tolerance: float = 0.1,
-            intensity_power: float = 1.0,
+            tolerance: float = DEFAULT_MZ_TOLERANCE,
+            intensity_power: float = DEFAULT_INTENSITY_POWER,
             use_hungarian: bool = False,
-            noise_cutoff: float = 0.01,
+            noise_cutoff: float = DEFAULT_NOISE_CUTOFF,
             ):
         """Initialize cosine score class.
 

@@ -1,6 +1,10 @@
 import numpy as np
 from matchms.typing import SpectrumType
 from .base_similarity import BaseSimilarityWithSparse
+from .default_parameters import (
+    DEFAULT_MZ_TOLERANCE,
+    DEFAULT_NOISE_CUTOFF,
+)
 from .flash_utils import _clean_and_weight
 
 
@@ -90,7 +94,7 @@ class EntropyGreedy(BaseSimilarityWithSparse):
     ----------
     tolerance
         Maximum peak m/z difference for a match. Interpreted as Da unless
-        ``use_ppm=True``. Default is 0.02.
+        ``use_ppm=True``. Default is 0.01.
     use_ppm
         If True, interpret ``tolerance`` as a symmetric ppm tolerance.
     remove_precursor
@@ -106,7 +110,7 @@ class EntropyGreedy(BaseSimilarityWithSparse):
         preprocessing. Default is 0.
     dtype
         Floating-point dtype used for preprocessing and the returned score.
-        Default is ``np.float64``.
+        Default is ``np.float``.
     """
 
     is_commutative = True
@@ -115,11 +119,11 @@ class EntropyGreedy(BaseSimilarityWithSparse):
 
     def __init__(
         self,
-        tolerance: float = 0.02,
+        tolerance: float = DEFAULT_MZ_TOLERANCE,
         use_ppm: bool = False,
         remove_precursor: bool = False,
         precursor_window: float = 1.6,
-        noise_cutoff: float | None = 0.01,
+        noise_cutoff: float | None = DEFAULT_NOISE_CUTOFF,
         merge_within: float = 0.0,
         dtype: np.dtype = np.float64,
     ):
