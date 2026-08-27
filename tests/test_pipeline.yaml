@@ -18,7 +18,7 @@ spectra_1_filters:
 - - repair_inchi_inchikey_smiles
 - - repair_parent_mass_match_smiles_wrapper
 - - normalize_intensities
-- - select_by_intensity
+- - select_by_relative_intensity
   - intensity_from: 0.001
 
 spectra_2_filters: processing_spectra_1
