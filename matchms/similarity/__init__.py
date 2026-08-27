@@ -60,6 +60,8 @@ from .cosine_blink import CosineBlink
 from .cosine_greedy import CosineGreedy
 from .cosine_hungarian import CosineHungarian
 from .cosine_linear import CosineLinear
+from .entropy import Entropy
+from .entropy_greedy import EntropyGreedy
 from .fingerprint_similarity import FingerprintSimilarity
 from .flash_similarity import CosineFlash, FlashEntropy
 from .metadata_match import MetadataMatch
@@ -79,6 +81,8 @@ __all__ = [
     "CosineGreedy",
     "CosineHungarian",
     "CosineLinear",
+    "Entropy",
+    "EntropyGreedy",
     "FingerprintSimilarity",
     "FlashEntropy",
     "MetadataMatch",
@@ -107,6 +111,8 @@ def get_similarity_function_by_name(similarity_function_name: str):
         "CosineLinear": CosineLinear,
         "CosineGreedy": CosineGreedy,
         "CosineHungarian": CosineHungarian,
+        "Entropy": Entropy,
+        "EntropyGreedy": EntropyGreedy,
         "FingerprintSimilarity": FingerprintSimilarity,
         "CosineFlash": CosineFlash,
         "FlashEntropy": FlashEntropy,
