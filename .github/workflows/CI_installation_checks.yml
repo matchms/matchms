@@ -2,8 +2,12 @@ name: CI installation checks
 
 on:
   push:
-  pull_request:
   workflow_dispatch:
+    inputs:
+      tag:
+        description: Tag for manually running CI installation checks workflow
+        required: False
+        default: ''
 
 jobs:
   installation_check:
