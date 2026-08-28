@@ -214,6 +214,9 @@ def filter_noise(
     noise_cutoff:
         Peaks with intensity below this cutoff (relative to the maximum intensity) will be removed.
     """
+    if intensities.size == 0:
+        return mz, intensities
+
     thr = intensities.max() * noise_cutoff
     mask = intensities >= thr
     return mz[mask], intensities[mask]
