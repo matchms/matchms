@@ -49,7 +49,12 @@ def test_cosine_greedy_pair(peaks, tolerance, mz_power, intensity_power, expecte
     spectrum_1 = builder.with_mz(peaks[0][0]).with_intensities(peaks[0][1]).build()
     spectrum_2 = builder.with_mz(peaks[1][0]).with_intensities(peaks[1][1]).build()
 
-    cosine_greedy = CosineGreedy(tolerance=tolerance, mz_power=mz_power, intensity_power=intensity_power)
+    cosine_greedy = CosineGreedy(
+        tolerance=tolerance,
+        mz_power=mz_power,
+        intensity_power=intensity_power,
+        remove_precursor=False,  # default is true, but we don't have precursor mz in these tests
+    )
     score = cosine_greedy.pair(spectrum_1, spectrum_2)
 
     expected_score = compute_expected_score(mz_power, intensity_power, spectrum_1, spectrum_2, expected_matches)
@@ -68,7 +73,7 @@ def test_cosine_greedy_matrix(symmetric):
         np.array([0.5, 0.2, 1.0], dtype="float")).build()
 
     spectra = [spectrum_1, spectrum_2]
-    cosine_greedy = CosineGreedy()
+    cosine_greedy = CosineGreedy(remove_precursor=False)
     if symmetric:
         scores = cosine_greedy.matrix(spectra)
     else:
@@ -90,5 +95,5 @@ def test_cosine_greedy_matrix_none_matching():
     spectrum_2 = builder.with_mz(np.array([50, 60, 70], dtype="float")).with_intensities(
         np.array([0.5, 0.2, 1.0], dtype="float")).build()
     
-    scores = CosineGreedy().matrix([spectrum_1], [spectrum_2])
+    scores = CosineGreedy(remove_precursor=False).matrix([spectrum_1], [spectrum_2])
     assert scores["score"][0][0] == 0.0, "Expected a single score of exactly 0.0."
