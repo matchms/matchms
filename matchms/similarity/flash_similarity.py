@@ -237,7 +237,24 @@ class FlashEntropy(_BaseFlashSimilarity):
     Parameters
     ----------
     matching_mode:
-        Matching mode: 'fragment', 'neutral_loss', or 'hybrid' (default is 'fragment').
+        Strategy used to match peaks between spectra.
+
+        - ``"fragment"``:
+        Match fragment m/z values directly. Each peak can be matched at most once.
+
+        - ``"neutral_loss"``:
+        Match neutral losses (precursor_mz - fragment_mz) only. Each peak can be
+        matched at most once. If either spectrum lacks precursor m/z metadata,
+        the score for that pair is zero.
+
+        - ``"hybrid"``:
+        First perform one-to-one fragment matching. Peaks consumed by fragment
+        matches are excluded from subsequent neutral-loss matching. Remaining
+        peaks are then matched one-to-one by neutral loss. If either spectrum
+        lacks precursor m/z metadata, hybrid scoring falls back to fragment-only
+        scoring for that pair.
+
+    Default is ``"fragment"``.
     tolerance:
         Matching tolerance in Da or ppm (use_ppm=True). Default is 0.01.
     use_ppm:
@@ -643,392 +660,453 @@ def _within_tol_nb(m1: float, m2: float, tol: float, use_ppm: bool) -> bool:
     return abs(m2 - m1) <= tol
 
 
+_ENTROPY_MODE_FRAGMENT = 0
+_ENTROPY_MODE_NEUTRAL_LOSS = 1
+_ENTROPY_MODE_HYBRID = 2
+
+
 @njit(cache=True, nogil=True)
-def _gather_fragment_candidate_cols_numba(
-    query_mz: np.ndarray,
-    query_intensity: np.ndarray,
+def _gather_entropy_candidate_cols_numba(
+    ref_mz: np.ndarray,
+    ref_intensity: np.ndarray,
+    ref_pmz: float,
+    has_ref_pmz: bool,
     lib_mz: np.ndarray,
     lib_spec_index: np.ndarray,
-    tol: float,
+    lib_nl_mz: np.ndarray,
+    lib_nl_spec_index: np.ndarray,
+    tolerance: float,
     use_ppm: bool,
     n_cols: int,
+    matching_mode: int,
 ) -> np.ndarray:
-    """
-    Collect candidate library spectrum ids for fragment matching.
+    """Collect library spectra with at least one possible entropy match.
 
-    Parameters
-    ----------
-    query_mz, query_intensity : np.ndarray
-        Reference spectrum peaks for one matrix row. ``query_mz`` must be sorted
-        ascending. Non-positive intensities are ignored.
-    lib_mz : np.ndarray
-        Global library product m/z values sorted ascending.
-    lib_spec_index : np.ndarray
-        Spectrum id for each entry in ``lib_mz``.
-    tol : float
-        Fragment tolerance in Da or ppm.
-    use_ppm : bool
-        Whether ``tol`` is interpreted as ppm.
-    n_cols : int
-        Total number of library spectra.
-
-    Returns
-    -------
-    np.ndarray[int64]
-        Unique candidate spectrum ids with at least one fragment inside
-        tolerance. Order is first-seen scan order (not sorted).
-
-    Notes
-    -----
-    Candidate windows use ``_search_spec_in_fragment_window`` and are trimmed
-    with exact ``_within_tol_nb`` checks.
+    Global fragment and neutral-loss indices are only used for candidate
+    discovery. Exact one-to-one matching is performed later spectrum-by-spectrum.
     """
     if n_cols == 0:
         return np.empty(0, dtype=np.int64)
+
+    do_fragment = matching_mode in (
+        _ENTROPY_MODE_FRAGMENT,
+        _ENTROPY_MODE_HYBRID,
+    )
+    do_neutral_loss = matching_mode in (
+        _ENTROPY_MODE_NEUTRAL_LOSS,
+        _ENTROPY_MODE_HYBRID,
+    )
 
     seen = np.zeros(n_cols, dtype=np.uint8)
     candidate_cols = np.empty(n_cols, dtype=np.int64)
     n_candidates = 0
 
-    for q_idx in range(query_mz.shape[0]):
-        Iq = float(query_intensity[q_idx])
-        if Iq <= 0.0:
-            continue
-
-        mz_q = float(query_mz[q_idx])
-        a, b = _search_spec_in_fragment_window(lib_mz, mz_q, tol, use_ppm)
-        if a >= b:
-            continue
-
-        for j in range(a, b):
-            if not _within_tol_nb(mz_q, float(lib_mz[j]), tol, use_ppm):
+    # Fragment candidates.
+    if do_fragment:
+        for i in range(ref_mz.shape[0]):
+            if ref_intensity[i] <= 0.0:
                 continue
-            col = int(lib_spec_index[j])
-            if seen[col] == 0:
-                seen[col] = 1
-                candidate_cols[n_candidates] = col
-                n_candidates += 1
+
+            mz = float(ref_mz[i])
+            a, b = _search_spec_in_fragment_window(
+                lib_mz,
+                mz,
+                tolerance,
+                use_ppm,
+            )
+
+            for j in range(a, b):
+                if not _within_tol_nb(
+                    mz,
+                    float(lib_mz[j]),
+                    tolerance,
+                    use_ppm,
+                ):
+                    continue
+
+                col = int(lib_spec_index[j])
+                if seen[col] == 0:
+                    seen[col] = 1
+                    candidate_cols[n_candidates] = col
+                    n_candidates += 1
+
+    # Neutral-loss candidates.
+    if (
+        do_neutral_loss
+        and has_ref_pmz
+        and lib_nl_mz.size > 0
+    ):
+        for i in range(ref_mz.shape[0]):
+            if ref_intensity[i] <= 0.0:
+                continue
+
+            loss = ref_pmz - float(ref_mz[i])
+            a, b = _search_spec_in_fragment_window(
+                lib_nl_mz,
+                loss,
+                tolerance,
+                use_ppm,
+            )
+
+            for j in range(a, b):
+                if not _within_tol_nb(
+                    loss,
+                    float(lib_nl_mz[j]),
+                    tolerance,
+                    use_ppm,
+                ):
+                    continue
+
+                col = int(lib_nl_spec_index[j])
+                if seen[col] == 0:
+                    seen[col] = 1
+                    candidate_cols[n_candidates] = col
+                    n_candidates += 1
 
     return candidate_cols[:n_candidates]
 
 
 @njit(cache=True, nogil=True)
-def _accumulate_fragment_row_pairwise_numba(
+def _entropy_increment_nb(
+    intensity_1: float,
+    intensity_2: float,
+) -> float:
+    """Return entropy-similarity contribution of one matched peak pair."""
+    return (
+        _xlog2_scalar_nb(intensity_1 + intensity_2)
+        - _xlog2_scalar_nb(intensity_1)
+        - _xlog2_scalar_nb(intensity_2)
+    )
+
+
+@njit(cache=True, nogil=True)
+def _entropy_fragment_pair_numba(
+    ref_mz: np.ndarray,
+    ref_intensity: np.ndarray,
+    lib_mz: np.ndarray,
+    lib_intensity: np.ndarray,
+    tolerance: float,
+    use_ppm: bool,
+    used_ref: np.ndarray,
+    used_lib: np.ndarray,
+    track_used: bool,
+) -> float:
+    """Score one-to-one fragment matches in ascending m/z order."""
+    i = 0
+    j = 0
+    score = 0.0
+
+    while i < ref_mz.shape[0] and j < lib_mz.shape[0]:
+        if track_used and used_ref[i] != 0:
+            i += 1
+            continue
+
+        if track_used and used_lib[j] != 0:
+            j += 1
+            continue
+
+        intensity_ref = float(ref_intensity[i])
+        intensity_lib = float(lib_intensity[j])
+
+        if intensity_ref <= 0.0:
+            i += 1
+            continue
+
+        if intensity_lib <= 0.0:
+            j += 1
+            continue
+
+        mz_ref = float(ref_mz[i])
+        mz_lib = float(lib_mz[j])
+
+        if _within_tol_nb(
+            mz_ref,
+            mz_lib,
+            tolerance,
+            use_ppm,
+        ):
+            score += _entropy_increment_nb(
+                intensity_ref,
+                intensity_lib,
+            )
+
+            if track_used:
+                used_ref[i] = 1
+                used_lib[j] = 1
+
+            i += 1
+            j += 1
+
+        elif mz_ref < mz_lib:
+            i += 1
+        else:
+            j += 1
+
+    return score
+
+
+@njit(cache=True, nogil=True)
+def _entropy_neutral_loss_pair_numba(
+    ref_mz: np.ndarray,
+    ref_intensity: np.ndarray,
+    ref_pmz: float,
+    lib_mz: np.ndarray,
+    lib_intensity: np.ndarray,
+    lib_pmz: float,
+    tolerance: float,
+    use_ppm: bool,
+    used_ref: np.ndarray,
+    used_lib: np.ndarray,
+    track_used: bool,
+) -> float:
+    """Score one-to-one neutral-loss matches in ascending loss order."""
+    i = ref_mz.shape[0] - 1
+    j = lib_mz.shape[0] - 1
+    score = 0.0
+
+    while i >= 0 and j >= 0:
+        if track_used and used_ref[i] != 0:
+            i -= 1
+            continue
+
+        if track_used and used_lib[j] != 0:
+            j -= 1
+            continue
+
+        intensity_ref = float(ref_intensity[i])
+        intensity_lib = float(lib_intensity[j])
+
+        if intensity_ref <= 0.0:
+            i -= 1
+            continue
+
+        if intensity_lib <= 0.0:
+            j -= 1
+            continue
+
+        loss_ref = ref_pmz - float(ref_mz[i])
+        loss_lib = lib_pmz - float(lib_mz[j])
+
+        if _within_tol_nb(
+            loss_ref,
+            loss_lib,
+            tolerance,
+            use_ppm,
+        ):
+            score += _entropy_increment_nb(
+                intensity_ref,
+                intensity_lib,
+            )
+
+            if track_used:
+                used_ref[i] = 1
+                used_lib[j] = 1
+
+            i -= 1
+            j -= 1
+
+        elif loss_ref < loss_lib:
+            # Moving backwards in fragment m/z increases neutral-loss m/z.
+            i -= 1
+        else:
+            j -= 1
+
+    return score
+
+
+@njit(cache=True, nogil=True)
+def _score_entropy_candidate_cols_numba(
     scores: np.ndarray,
-    query_mz: np.ndarray,
-    query_intensity: np.ndarray,
+    ref_mz: np.ndarray,
+    ref_intensity: np.ndarray,
+    ref_pmz: float,
+    has_ref_pmz: bool,
     candidate_cols: np.ndarray,
     spec_offsets: np.ndarray,
     spec_mz: np.ndarray,
     spec_intensity: np.ndarray,
-    tol: float,
+    lib_precursor_mz: np.ndarray,
+    tolerance: float,
     use_ppm: bool,
+    matching_mode: int,
 ) -> None:
-    """
-    One-to-one entropy accumulation against selected library spectra.
+    """Calculate exact one-to-one entropy scores for candidate spectra."""
+    empty_used = np.empty(0, dtype=np.uint8)
 
-    This follows the same two-pointer matching style as ms_entropy pairwise:
-    peaks are sorted by m/z and each peak can be used at most once.
-
-    Parameters
-    ----------
-    scores : np.ndarray
-        Dense row buffer of length ``n_library_spectra``. Updated in place.
-    query_mz, query_intensity : np.ndarray
-        Reference spectrum peaks for this row. ``query_mz`` must be sorted.
-    candidate_cols : np.ndarray[int64]
-        Spectrum ids that should be scored for this row.
-    spec_offsets : np.ndarray[int64]
-        Prefix offsets into ``spec_mz/spec_int`` (one slice per spectrum).
-    spec_mz, spec_intensity : np.ndarray
-        Spectrum-major product arrays from the library index.
-    tol : float
-        Fragment tolerance in Da or ppm.
-    use_ppm : bool
-        Whether ``tol`` is interpreted as ppm.
-
-    Notes
-    -----
-    Non-positive intensities are skipped before attempting a match, so they do
-    not consume one-to-one pointer advancement.
-    """
     for candidate_idx in range(candidate_cols.shape[0]):
         col = int(candidate_cols[candidate_idx])
-        a = 0
-        b = int(spec_offsets[col])
-        b_end = int(spec_offsets[col + 1])
-        if b >= b_end:
+
+        start = int(spec_offsets[col])
+        end = int(spec_offsets[col + 1])
+
+        if start >= end:
             continue
 
-        score = 0.0
-        while a < query_mz.shape[0] and b < b_end:
-            Iq = float(query_intensity[a])
-            if Iq <= 0.0:
-                a += 1
+        lib_mz = spec_mz[start:end]
+        lib_intensity = spec_intensity[start:end]
+        lib_pmz = float(lib_precursor_mz[col])
+        has_lib_pmz = not np.isnan(lib_pmz)
+
+        if matching_mode == _ENTROPY_MODE_FRAGMENT:
+            scores[col] = _entropy_fragment_pair_numba(
+                ref_mz,
+                ref_intensity,
+                lib_mz,
+                lib_intensity,
+                tolerance,
+                use_ppm,
+                empty_used,
+                empty_used,
+                False,
+            )
+            continue
+
+        if matching_mode == _ENTROPY_MODE_NEUTRAL_LOSS:
+            if not has_ref_pmz or not has_lib_pmz:
                 continue
 
-            Ilib = float(spec_intensity[b])
-            if Ilib <= 0.0:
-                b += 1
-                continue
+            scores[col] = _entropy_neutral_loss_pair_numba(
+                ref_mz,
+                ref_intensity,
+                ref_pmz,
+                lib_mz,
+                lib_intensity,
+                lib_pmz,
+                tolerance,
+                use_ppm,
+                empty_used,
+                empty_used,
+                False,
+            )
+            continue
 
-            mz_q = float(query_mz[a])
-            mz_lib = float(spec_mz[b])
-            diff = mz_q - mz_lib
-            max_allowed_mass_difference = _search_window_halfwidth_nb(mz_q, tol, use_ppm)
+        # Hybrid:
+        # fragment matches have priority. Only peaks not consumed by fragment
+        # matching may subsequently participate in neutral-loss matching.
+        used_ref = np.zeros(ref_mz.shape[0], dtype=np.uint8)
+        used_lib = np.zeros(lib_mz.shape[0], dtype=np.uint8)
 
-            if diff < -max_allowed_mass_difference:
-                a += 1
-                continue
-            if diff > max_allowed_mass_difference:
-                b += 1
-                continue
+        score = _entropy_fragment_pair_numba(
+            ref_mz,
+            ref_intensity,
+            lib_mz,
+            lib_intensity,
+            tolerance,
+            use_ppm,
+            used_ref,
+            used_lib,
+            True,
+        )
 
-            # Keep exact tolerance trimming consistent with the rest of this module.
-            if _within_tol_nb(mz_q, mz_lib, tol, use_ppm):
-                score += _xlog2_scalar_nb(Ilib + Iq) - _xlog2_scalar_nb(Iq) - _xlog2_scalar_nb(Ilib)
-                a += 1
-                b += 1
-            elif diff < 0.0:
-                a += 1
-            else:
-                b += 1
+        if has_ref_pmz and has_lib_pmz:
+            score += _entropy_neutral_loss_pair_numba(
+                ref_mz,
+                ref_intensity,
+                ref_pmz,
+                lib_mz,
+                lib_intensity,
+                lib_pmz,
+                tolerance,
+                use_ppm,
+                used_ref,
+                used_lib,
+                True,
+            )
 
         scores[col] = score
 
 
-@njit(cache=True, nogil=True)
-def _accumulate_fragment_row_numba(
-    scores: np.ndarray,
-    query_mz: np.ndarray, query_intensity: np.ndarray,
-    lib_mz: np.ndarray, lib_intensity: np.ndarray, lib_spec_index: np.ndarray,
-    tol: float, use_ppm: bool
-) -> None:
-    """
-    Accumulate fragment-based contributions for a single row (one reference spectrum).
-
-    For each query peak (m/z, Iq), find all library peaks whose m/z lies within
-    the symmetric-ppm/Da tolerance window around the query m/z. For each match,
-    add the incremental entropy term to `scores[col]`, where `col` is the index
-    of the library spectrum that the matched library peak belongs to.
-
-    Parameters
-    ----------
-    scores : float[dtype], shape (n_library_spectra,)
-        Output buffer, accumulated in-place.
-    query_mz, query_intensity : float[dtype]
-        Peaks of the reference spectrum being compared (this row).
-    lib_mz, lib_intensity : float[dtype]
-        Global concatenated *query* (library) product peaks, sorted by m/z.
-    lib_spec_index : int32
-        For each entry of lib_mz, the source spectrum index (column) in the library.
-    tol : float
-        Mass tolerance (Da or ppm).
-    use_ppm : bool
-        Whether to treat `tol` as ppm.
-    """
-    n_q = query_mz.shape[0]
-    for q_idx in range(n_q):
-        mz_q = float(query_mz[q_idx])
-        Iq = float(query_intensity[q_idx])
-        if Iq <= 0.0:
-            continue
-
-        a, b = _search_spec_in_fragment_window(lib_mz, mz_q, tol, use_ppm)
-        if a >= b:
-            continue
-
-        for j in range(a, b):
-            mz_lib = float(lib_mz[j])
-            if use_ppm:
-                if abs(mz_lib - mz_q) > (tol * 1e-6) * 0.5 * (mz_lib + mz_q):
-                    continue
-            else:
-                if abs(mz_lib - mz_q) > tol:
-                    continue
-
-            Ilib = float(lib_intensity[j])
-            col = int(lib_spec_index[j])
-            incr = _xlog2_scalar_nb(Ilib + Iq) - _xlog2_scalar_nb(Iq) - _xlog2_scalar_nb(Ilib)
-            scores[col] += incr
-
-
-@njit(cache=True, nogil=True)
-def _in_any_fragment_window(prod_idx: int, prod_min: np.ndarray, prod_max: np.ndarray) -> bool:
-    # true if prod_idx falls into ANY [prod_min[k], prod_max[k]) interval
-    # (arrays come precomputed; when prefer_fragments=False, caller passes size 0 arrays)
-    for k in range(prod_min.shape[0]):
-        if prod_idx >= prod_min[k] and prod_idx < prod_max[k]:
-            return True
-    return False
-
-@njit(cache=True, nogil=True)
-def _spec_in_fragment_window(cols_target: int,
-                             peaks_spec: np.ndarray, ap: int, bp: int) -> bool:
-    # true if cols_target appears in peaks_spec[ap:bp]
-    for t in range(ap, bp):
-        if int(peaks_spec[t]) == cols_target:
-            return True
-    return False
-
-
-@njit(cache=True, nogil=True)
-def _accumulate_nl_row_numba(scores: np.ndarray,
-                             ref_mz: np.ndarray, ref_int: np.ndarray, ref_pmz_val: float,
-                             nl_mz: np.ndarray, nl_int: np.ndarray, nl_spec: np.ndarray, nl_prod_idx: np.ndarray,
-                             peaks_mz: np.ndarray, peaks_spec: np.ndarray,
-                             tol: float, use_ppm: bool,
-                             prefer_fragments: bool,
-                             prod_min: np.ndarray, prod_max: np.ndarray) -> None:
-    """
-    Accumulate neutral-loss (NL) contributions for a single row (one reference spectrum).
-
-    For each reference peak of m/z = m_ref with intensity Iq:
-      - Compute the loss L = precursor_ref - m_ref.
-      - Find all library neutral-loss peaks within tolerance of L using nl_mz (sorted).
-      - For each candidate:
-          * If hybrid mode (prefer_fragments=True), apply two pruning rules:
-              RULE 1: Drop if the candidate's corresponding product-peak index
-                      lies inside ANY fragment window of the current reference spectrum.
-              RULE 2: Drop if the current reference *fragment* also matches the same
-                      library spectrum (i.e., we prefer fragment matches over NL matches).
-          * Add the entropy increment to scores[col].
-
-    Arrays
-    ------
-    nl_* arrays are built from the library (query) spectra with known precursors.
-    nl_product_pos maps each NL entry back to a position in the global product-peak
-    arrays; this is used by hybrid rules.
-    """
-    if not (nl_mz.size > 0 and ref_mz.size > 0):
-        return
-    if np.isnan(ref_pmz_val):
-        return
-
-    for i in range(ref_mz.shape[0]):
-        Iq = float(ref_int[i])
-        if Iq <= 0.0:
-            continue
-
-        loss = float(ref_pmz_val) - float(ref_mz[i])
-        a, b = _search_spec_in_fragment_window(nl_mz, loss, tol, use_ppm)
-        if a >= b:
-            continue
-
-        # (Hybrid) fragment window for this reference peak
-        ap = 0
-        bp = 0
-        if prefer_fragments:
-            mz1 = float(ref_mz[i])
-            ap, bp = _search_spec_in_fragment_window(peaks_mz, mz1, tol, use_ppm)
-
-        for j in range(a, b):
-            nl2 = float(nl_mz[j])
-            # symmetric ppm / Da check
-            if use_ppm:
-                if abs(nl2 - loss) > (tol * 1e-6) * 0.5 * (nl2 + loss):
-                    continue
-            else:
-                if abs(nl2 - loss) > tol:
-                    continue
-
-            lib = float(nl_int[j])
-            col = int(nl_spec[j])
-
-            if prefer_fragments:
-                # RULE 1: drop if product peak falls in ANY fragment window of the query spectrum
-                if _in_any_fragment_window(int(nl_prod_idx[j]), prod_min, prod_max):
-                    continue
-
-                # RULE 2 (per-peak): if this query peak also fragment-matches the same library spectrum, drop
-                if ap < bp and _spec_in_fragment_window(col, peaks_spec, ap, bp):
-                    continue
-
-            incr= _xlog2_scalar_nb(lib + Iq) - _xlog2_scalar_nb(Iq) - _xlog2_scalar_nb(lib)
-            scores[col] += incr
-
-
 def _row_task_entropy(args):
-    """
-    Compute one matrix row for a given reference spectrum.
-
-    Parameters
-    ----------
-    args : tuple
-        (row_index, peaks_array, precursor_mz_or_None)
-
-    Returns
-    -------
-    (row_index, row_scores)
-        `row_scores` is a dense vector of length n_library_spectra in the
-        same float dtype as the index. This function is safe to call from
-        a process pool since it only reads globals set by `_set_globals`.
-    """
+    """Compute one FlashEntropy matrix row."""
     row_idx, ref_peaks, ref_pmz = args
+
     cfg = _G_CFG
     lib = _G_LIB
-    dtype = lib.dtype
-    scores = np.zeros(lib.n_specs, dtype=dtype)
+    scores = np.zeros(lib.n_specs, dtype=lib.dtype)
 
-    if cfg["matching_mode"] == "fragment":
-        # Fragment mode uses a two-step algorithm:
-        # 1) gather candidate columns from the global m/z-sorted index,
-        # 2) run one-to-one pairwise scoring only for those spectra using the
-        #    spectrum-major index layout (spec_offsets/spec_mz/spec_int).
-        candidate_cols = _gather_fragment_candidate_cols_numba(
-            ref_peaks[:, 0], ref_peaks[:, 1],
-            lib.peaks_mz, lib.peaks_spec_idx,
-            float(cfg["tol"]), bool(cfg["use_ppm"]),
-            lib.n_specs,
-        )
-        _accumulate_fragment_row_pairwise_numba(
-            scores,
-            ref_peaks[:, 0], ref_peaks[:, 1],
-            candidate_cols,
-            lib.spec_offsets, lib.spec_mz, lib.spec_int,
-            float(cfg["tol"]), bool(cfg["use_ppm"]),
-        )
+    if ref_peaks.size == 0:
+        return row_idx, scores
+
+    matching_mode = cfg["matching_mode"]
+
+    if matching_mode == "fragment":
+        matching_mode_code = _ENTROPY_MODE_FRAGMENT
+    elif matching_mode == "neutral_loss":
+        matching_mode_code = _ENTROPY_MODE_NEUTRAL_LOSS
     else:
-        _accumulate_fragment_row_numba(scores,
-                                       ref_peaks[:, 0], ref_peaks[:, 1],
-                                       lib.peaks_mz, lib.peaks_int, lib.peaks_spec_idx,
-                                       float(cfg["tol"]), bool(cfg["use_ppm"]))
+        matching_mode_code = _ENTROPY_MODE_HYBRID
 
-    # neutral-loss / hybrid ONLY if library has NL view
-    if cfg["compute_nl"]:
-        prefer_frag = (cfg["matching_mode"] == "hybrid")
-        if prefer_frag:
-            prod_min = np.empty(ref_peaks.shape[0], dtype=np.int64)
-            prod_max = np.empty(ref_peaks.shape[0], dtype=np.int64)
-            for k in range(ref_peaks.shape[0]):                         # <-- use k
-                mz1 = float(ref_peaks[k, 0])
-                a, b = _search_spec_in_fragment_window(lib.peaks_mz, mz1, float(cfg["tol"]), bool(cfg["use_ppm"]))
-                prod_min[k] = a
-                prod_max[k] = b
-        else:
-            prod_min = np.empty(0, dtype=np.int64)
-            prod_max = np.empty(0, dtype=np.int64)
+    has_ref_pmz = ref_pmz is not None
+    ref_pmz_value = float(ref_pmz) if has_ref_pmz else np.nan
 
-        ref_pmz_val = float(ref_pmz) if (ref_pmz is not None) else np.nan
+    if matching_mode_code == _ENTROPY_MODE_FRAGMENT:
+        lib_nl_mz = np.empty(0, dtype=lib.dtype)
+        lib_nl_spec_idx = np.empty(0, dtype=np.int32)
+    else:
+        lib_nl_mz = (
+            lib.nl_mz
+            if lib.nl_mz is not None
+            else np.empty(0, dtype=lib.dtype)
+        )
+        lib_nl_spec_idx = (
+            lib.nl_spec_idx
+            if lib.nl_spec_idx is not None
+            else np.empty(0, dtype=np.int32)
+        )
 
-        _accumulate_nl_row_numba(scores,
-                                ref_peaks[:, 0], ref_peaks[:, 1], ref_pmz_val,
-                                lib.nl_mz, lib.nl_int, lib.nl_spec_idx, lib.nl_product_idx,
-                                lib.peaks_mz, lib.peaks_spec_idx,
-                                float(cfg["tol"]), bool(cfg["use_ppm"]),
-                                prefer_frag,
-                                prod_min, prod_max)
+    candidate_cols = _gather_entropy_candidate_cols_numba(
+        ref_peaks[:, 0],
+        ref_peaks[:, 1],
+        ref_pmz_value,
+        has_ref_pmz,
+        lib.peaks_mz,
+        lib.peaks_spec_idx,
+        lib_nl_mz,
+        lib_nl_spec_idx,
+        float(cfg["tol"]),
+        bool(cfg["use_ppm"]),
+        lib.n_specs,
+        matching_mode_code,
+    )
 
-    # identity mask
+    _score_entropy_candidate_cols_numba(
+        scores,
+        ref_peaks[:, 0],
+        ref_peaks[:, 1],
+        ref_pmz_value,
+        has_ref_pmz,
+        candidate_cols,
+        lib.spec_offsets,
+        lib.spec_mz,
+        lib.spec_int,
+        lib.precursor_mz,
+        float(cfg["tol"]),
+        bool(cfg["use_ppm"]),
+        matching_mode_code,
+    )
+
+    # Optional identity-search precursor gate.
     if cfg["iden_tol"] is not None and ref_pmz is not None:
         if cfg["iden_use_ppm"]:
-            allow = np.abs(lib.precursor_mz - ref_pmz) <= (cfg["iden_tol"] * 1e-6 * 0.5 * (lib.precursor_mz + ref_pmz))
+            allow = (
+                np.abs(lib.precursor_mz - ref_pmz)
+                <= (
+                    cfg["iden_tol"]
+                    * 1e-6
+                    * 0.5
+                    * (lib.precursor_mz + ref_pmz)
+                )
+            )
         else:
-            allow = np.abs(lib.precursor_mz - ref_pmz) <= cfg["iden_tol"]
+            allow = (
+                np.abs(lib.precursor_mz - ref_pmz)
+                <= cfg["iden_tol"]
+            )
+
         allow &= np.isfinite(lib.precursor_mz)
         scores[~allow] = 0.0
 
-    return (row_idx, scores)
+    return row_idx, scores
 
 
 # ===================== Cosine related helpers =====================
