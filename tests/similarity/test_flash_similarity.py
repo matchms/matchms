@@ -462,3 +462,226 @@ def test_cosine_dtype_and_commutativity():
     assert s_ab_64.dtype == np.float64 and s_ba_64.dtype == np.float64
     assert float(s_ab_32) == pytest.approx(float(s_ba_32), 1e-6)
     assert float(s_ab_64) == pytest.approx(float(s_ba_64), 1e-12)
+
+
+def test_entropy_neutral_loss_does_not_include_fragment_matches():
+    reference = build_spectrum(
+        [100.0],
+        [1.0],
+        precursor_mz=500.0,
+    )
+    query = build_spectrum(
+        [100.0],
+        [1.0],
+        precursor_mz=510.0,
+    )
+
+    kwargs = {
+        "tolerance": 0.01,
+        "remove_precursor": False,
+        "noise_cutoff": 0.0,
+        "dtype": np.float64,
+    }
+
+    fragment = FlashEntropy(
+        matching_mode="fragment",
+        **kwargs,
+    ).pair(reference, query)
+
+    neutral_loss = FlashEntropy(
+        matching_mode="neutral_loss",
+        **kwargs,
+    ).pair(reference, query)
+
+    assert float(fragment) == pytest.approx(1.0)
+    assert float(neutral_loss) == 0.0
+
+
+def test_entropy_neutral_loss_matches_shifted_fragments():
+    reference = build_spectrum(
+        [100.0],
+        [1.0],
+        precursor_mz=500.0,
+    )
+    query = build_spectrum(
+        [110.0],
+        [1.0],
+        precursor_mz=510.0,
+    )
+
+    kwargs = {
+        "tolerance": 0.01,
+        "remove_precursor": False,
+        "noise_cutoff": 0.0,
+        "dtype": np.float64,
+    }
+
+    fragment = FlashEntropy(
+        matching_mode="fragment",
+        **kwargs,
+    ).pair(reference, query)
+
+    neutral_loss = FlashEntropy(
+        matching_mode="neutral_loss",
+        **kwargs,
+    ).pair(reference, query)
+
+    assert float(fragment) == 0.0
+    assert float(neutral_loss) == pytest.approx(1.0)
+
+
+def test_entropy_hybrid_combines_fragment_and_neutral_loss_matches():
+    reference = build_spectrum(
+        [100.0, 200.0],
+        [1.0, 1.0],
+        precursor_mz=500.0,
+    )
+    query = build_spectrum(
+        [100.0, 210.0],
+        [1.0, 1.0],
+        precursor_mz=510.0,
+    )
+
+    kwargs = {
+        "tolerance": 0.01,
+        "remove_precursor": False,
+        "noise_cutoff": 0.0,
+        "dtype": np.float64,
+    }
+
+    fragment = float(
+        FlashEntropy(matching_mode="fragment", **kwargs).pair(
+            reference, query
+        )
+    )
+    neutral_loss = float(
+        FlashEntropy(matching_mode="neutral_loss", **kwargs).pair(
+            reference, query
+        )
+    )
+    hybrid = float(
+        FlashEntropy(matching_mode="hybrid", **kwargs).pair(
+            reference, query
+        )
+    )
+
+    # 100 <-> 100 contributes 0.5 by fragment m/z.
+    assert fragment == pytest.approx(0.5)
+
+    # 200 <-> 210 contributes 0.5 by matching neutral loss 300.
+    assert neutral_loss == pytest.approx(0.5)
+
+    # Hybrid may use both because they involve different physical peaks.
+    assert hybrid == pytest.approx(1.0)
+
+
+def test_entropy_hybrid_does_not_double_count_fragment_and_neutral_loss():
+    reference = build_spectrum(
+        [100.0, 200.0],
+        [1.0, 1.0],
+        precursor_mz=500.0,
+    )
+    query = build_spectrum(
+        [100.0, 200.0],
+        [1.0, 1.0],
+        precursor_mz=500.0,
+    )
+
+    kwargs = {
+        "tolerance": 0.01,
+        "remove_precursor": False,
+        "noise_cutoff": 0.0,
+        "dtype": np.float64,
+    }
+
+    fragment = float(
+        FlashEntropy(matching_mode="fragment", **kwargs).pair(
+            reference, query
+        )
+    )
+    neutral_loss = float(
+        FlashEntropy(matching_mode="neutral_loss", **kwargs).pair(
+            reference, query
+        )
+    )
+    hybrid = float(
+        FlashEntropy(matching_mode="hybrid", **kwargs).pair(
+            reference, query
+        )
+    )
+
+    assert fragment == pytest.approx(1.0)
+    assert neutral_loss == pytest.approx(1.0)
+
+    # Same physical peaks cannot contribute twice.
+    assert hybrid == pytest.approx(1.0)
+
+
+def test_entropy_matching_modes_without_precursor_mz():
+    reference = build_spectrum([100.0], [1.0])
+    query = build_spectrum([100.0], [1.0])
+
+    kwargs = {
+        "tolerance": 0.01,
+        "remove_precursor": False,
+        "noise_cutoff": 0.0,
+        "dtype": np.float64,
+    }
+
+    fragment = float(
+        FlashEntropy(matching_mode="fragment", **kwargs).pair(
+            reference, query
+        )
+    )
+    neutral_loss = float(
+        FlashEntropy(matching_mode="neutral_loss", **kwargs).pair(
+            reference, query
+        )
+    )
+    hybrid = float(
+        FlashEntropy(matching_mode="hybrid", **kwargs).pair(
+            reference, query
+        )
+    )
+
+    assert fragment == pytest.approx(1.0)
+    assert neutral_loss == 0.0
+    assert hybrid == pytest.approx(fragment)
+
+
+@pytest.mark.parametrize(
+    "matching_mode",
+    ["fragment", "neutral_loss", "hybrid"],
+)
+def test_entropy_matrix_matches_pair_for_all_matching_modes(matching_mode):
+    refs = [
+        build_spectrum([100.0, 200.0], [1.0, 0.5], precursor_mz=500.0),
+        build_spectrum([110.0, 300.0], [0.3, 1.0], precursor_mz=600.0),
+    ]
+    queries = [
+        build_spectrum([100.0, 210.0], [1.0, 0.5], precursor_mz=510.0),
+        build_spectrum([110.0, 300.0], [1.0, 0.3], precursor_mz=600.0),
+    ]
+
+    similarity = FlashEntropy(
+        matching_mode=matching_mode,
+        tolerance=0.01,
+        remove_precursor=False,
+        noise_cutoff=0.0,
+        dtype=np.float64,
+    )
+
+    scores = similarity.matrix(
+        refs,
+        queries,
+        n_jobs=0,
+        progress_bar=False,
+    ).to_array()
+
+    for i, reference in enumerate(refs):
+        for j, query in enumerate(queries):
+            expected = similarity.pair(reference, query)
+            assert scores[i, j] == pytest.approx(
+                float(expected),
+                abs=1e-12,
+            )
