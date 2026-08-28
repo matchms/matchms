@@ -32,8 +32,28 @@ class Entropy(BaseSimilarity):
     Entropy search strategy was introduced by Li & Fiehn, Nature Methods 20,
     1475-1478 (2023), doi:10.1038/s41592-023-02012-9.
 
+    Three matching modes are supported:
+
+    - ``"fragment"``:
+      Match fragment m/z values directly. Each peak can be matched at most once.
+
+    - ``"neutral_loss"``:
+      Match neutral losses (``precursor_mz - fragment_mz``) only. Each peak can
+      be matched at most once. If either spectrum has no precursor m/z, the
+      resulting score is zero.
+
+    - ``"hybrid"``:
+      First perform one-to-one fragment matching. Peaks consumed by fragment
+      matches cannot subsequently participate in neutral-loss matching.
+      Remaining peaks are then matched one-to-one by neutral loss. If either
+      spectrum has no precursor m/z, hybrid matching falls back to fragment-only
+      matching.
+
     Parameters
     ----------
+    matching_mode
+        Matching strategy. Must be ``"fragment"``, ``"neutral_loss"``, or
+        ``"hybrid"``. Default is ``"fragment"``.
     tolerance
         Maximum peak m/z difference for a match. Interpreted as Da unless
         ``use_ppm=True``. Default is 0.02.
@@ -61,6 +81,7 @@ class Entropy(BaseSimilarity):
 
     def __init__(
         self,
+        matching_mode: str = "fragment",
         tolerance: float = DEFAULT_MZ_TOLERANCE,
         use_ppm: bool = False,
         remove_precursor: bool = True,
@@ -69,6 +90,7 @@ class Entropy(BaseSimilarity):
         merge_within: float = 0.0,
         dtype: np.dtype = np.float64,
     ):
+        self.matching_mode = matching_mode
         self.tolerance = tolerance
         self.use_ppm = use_ppm
         self.remove_precursor = remove_precursor
@@ -80,6 +102,7 @@ class Entropy(BaseSimilarity):
 
     def _pair_similarity(self) -> EntropyGreedy:
         return EntropyGreedy(
+            matching_mode=self.matching_mode,
             tolerance=self.tolerance,
             use_ppm=self.use_ppm,
             remove_precursor=self.remove_precursor,
@@ -91,7 +114,7 @@ class Entropy(BaseSimilarity):
 
     def _matrix_similarity(self) -> FlashEntropy:
         return FlashEntropy(
-            matching_mode="fragment",
+            matching_mode=self.matching_mode,
             tolerance=self.tolerance,
             use_ppm=self.use_ppm,
             remove_precursor=self.remove_precursor,
