@@ -1,7 +1,7 @@
 import logging
 import numpy as np
 from scipy.optimize import linear_sum_assignment
-from matchms.similarity.spectrum_similarity_functions import collect_peak_pairs
+from matchms.similarity.spectrum_similarity_functions import _process_spectrum_peaks, collect_peak_pairs
 from matchms.typing import SpectrumType
 from ._precursor_validation import get_valid_precursor_mz
 from .base_similarity import BaseSimilarityWithSparse
@@ -10,6 +10,8 @@ from .default_parameters import (
     DEFAULT_INTENSITY_POWER,
     DEFAULT_MZ_POWER,
     DEFAULT_MZ_TOLERANCE,
+    DEFAULT_NOISE_CUTOFF,
+    DEFAULT_OFFSET_TO_PRECURSOR,
 )
 
 
@@ -40,7 +42,10 @@ class ModifiedCosineHungarian(BaseSimilarityWithSparse):
             self,
             tolerance: float = DEFAULT_MZ_TOLERANCE,
             mz_power: float = DEFAULT_MZ_POWER,
-            intensity_power: float = DEFAULT_INTENSITY_POWER
+            intensity_power: float = DEFAULT_INTENSITY_POWER,
+            noise_cutoff: float = DEFAULT_NOISE_CUTOFF,
+            remove_precursor: bool = True,
+            offset_to_precursor: float = DEFAULT_OFFSET_TO_PRECURSOR,
             ):
         """Initialize exact modified cosine.
 
@@ -53,10 +58,21 @@ class ModifiedCosineHungarian(BaseSimilarityWithSparse):
             case the peak intensity products will not depend on the m/z ratios.
         intensity_power:
             The power to raise intensity to in the cosine function. The default is 1.
+        noise_cutoff:
+            Minimum relative intensity for a peak to be considered. Default is 0.01.
+        remove_precursor:
+            If True and ``precursor_mz`` metadata are available, remove peaks above
+            ``precursor_mz + offset_to_precursor`` before scoring.
+        offset_to_precursor:
+            Offset used when ``remove_precursor=True``. This will only keep
+            m/z values <= precursor_mz + offset_to_precursor. Default is -1.6 Da.
         """
         self.tolerance = tolerance
         self.mz_power = mz_power
         self.intensity_power = intensity_power
+        self.noise_cutoff = noise_cutoff
+        self.remove_precursor = remove_precursor
+        self.offset_to_precursor = offset_to_precursor
 
     def pair(self, spectrum_1: SpectrumType, spectrum_2: SpectrumType) -> tuple[float, int]:
         """Calculate exact modified cosine score between two spectra."""
@@ -70,6 +86,8 @@ class ModifiedCosineHungarian(BaseSimilarityWithSparse):
                 tolerance=self.tolerance,
                 mz_power=self.mz_power,
                 intensity_power=self.intensity_power,
+                remove_precursor=self.remove_precursor,
+                offset_to_precursor=self.offset_to_precursor
             ).pair(spectrum_1, spectrum_2)
 
         def get_matching_pairs():
@@ -142,8 +160,18 @@ class ModifiedCosineHungarian(BaseSimilarityWithSparse):
                     used_matches.append((i, j))
             return score, used_matches
 
-        spec1 = spectrum_1.peaks.to_numpy
-        spec2 = spectrum_2.peaks.to_numpy
+        spec1 = _process_spectrum_peaks(
+            spectrum_1,
+            remove_precursor=self.remove_precursor,
+            offset_to_precursor=self.offset_to_precursor,
+            noise_cutoff=self.noise_cutoff,
+        )
+        spec2 = _process_spectrum_peaks(
+            spectrum_2,
+            remove_precursor=self.remove_precursor,
+            offset_to_precursor=self.offset_to_precursor,
+            noise_cutoff=self.noise_cutoff,
+        )
         matching_pairs = get_matching_pairs()
 
         paired_peaks1, paired_peaks2, weights = build_weight_matrix(matching_pairs)

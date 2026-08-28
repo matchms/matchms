@@ -88,6 +88,9 @@ class ModifiedCosine(BaseSimilarity):
             modcos = ModifiedCosineHungarian(
                 tolerance=self.tolerance,
                 intensity_power=self.intensity_power,
+                noise_cutoff=self.noise_cutoff,
+                remove_precursor=self.remove_precursor,
+                offset_to_precursor=self.offset_to_precursor,
             )
         else:
             modcos = ModifiedCosineGreedy(
@@ -135,6 +138,9 @@ class ModifiedCosine(BaseSimilarity):
             modcos = ModifiedCosineHungarian(
                 tolerance=self.tolerance,
                 intensity_power=self.intensity_power,
+                noise_cutoff=self.noise_cutoff,
+                remove_precursor=self.remove_precursor,
+                offset_to_precursor=self.offset_to_precursor,
             )
 
             return modcos.matrix(
