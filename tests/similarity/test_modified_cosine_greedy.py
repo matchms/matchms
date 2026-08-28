@@ -232,3 +232,28 @@ def test_modified_cosine_remove_precursor():
     assert score_without_precursor["matches"] == 1
 
     assert score_without_precursor["score"] < score_with_precursor["score"]
+
+
+def test_modified_cosine_fallback_matches_configured_cosine_greedy():
+    reference = Spectrum(
+        mz=np.array([100.0, 200.0]),
+        intensities=np.array([1.0, 0.001]),
+        metadata={"precursor_mz": 500.0},
+    )
+    query = Spectrum(
+        mz=np.array([100.0, 200.0]),
+        intensities=np.array([1.0, 0.001]),
+        metadata={"precursor_mz": 500.5},
+    )
+
+    kwargs = {
+        "tolerance": 1.0,
+        "noise_cutoff": None,
+        "remove_precursor": False,
+    }
+
+    modified = ModifiedCosineGreedy(**kwargs).pair(reference, query)
+    cosine = CosineGreedy(**kwargs).pair(reference, query)
+
+    assert modified["score"] == pytest.approx(cosine["score"])
+    assert modified["matches"] == cosine["matches"]

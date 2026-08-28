@@ -166,6 +166,20 @@ def test_filter_noise_with_zero_or_low_enough_cutoff_keeps_all_peaks(cutoff):
     np.testing.assert_array_equal(filtered_intensities, intensities)
 
 
+def test_filter_noise_empty_spectrum():
+    mz = np.array([], dtype=float)
+    intensities = np.array([], dtype=float)
+
+    filtered_mz, filtered_intensities = filter_noise(
+        mz,
+        intensities,
+        noise_cutoff=0.01,
+    )
+
+    assert filtered_mz.size == 0
+    assert filtered_intensities.size == 0
+
+
 def test_filter_peaks_above_precursor():
     mz = np.array([100.0, 198.3, 198.4, 198.5, 200.0])
     intensities = np.array([0.1, 0.2, 0.3, 0.4, 1.0])
