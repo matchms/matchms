@@ -49,7 +49,7 @@ REQUIRE_COMPLETE_ANNOTATION = [
     msfilters.require_matching_adduct_and_ionmode,
 ]
 CLEAN_PEAKS = [
-    (msfilters.select_by_mz, {"mz_from": 0, "mz_to": 1000}),
+    # removed in matchms_v1 (too opinionated) (msfilters.select_by_mz, {"mz_from": 0, "mz_to": 1000}),
     (msfilters.select_by_relative_intensity, {"intensity_from": 0.001}),
     msfilters.remove_peaks_relative_to_precursor_mz,
     (msfilters.reduce_to_number_of_peaks, {"n_max": 1000}),
