@@ -7,6 +7,7 @@ from .default_parameters import (
     DEFAULT_INTENSITY_POWER,
     DEFAULT_MZ_TOLERANCE,
     DEFAULT_NOISE_CUTOFF,
+    DEFAULT_OFFSET_TO_PRECURSOR,
 )
 from .flash_similarity import CosineFlash
 from .modified_cosine_greedy import ModifiedCosineGreedy
@@ -49,6 +50,8 @@ class ModifiedCosine(BaseSimilarity):
             intensity_power: float = DEFAULT_INTENSITY_POWER,
             use_hungarian: bool = False,
             noise_cutoff: float = DEFAULT_NOISE_CUTOFF,
+            remove_precursor: bool = True,
+            offset_to_precursor: float = DEFAULT_OFFSET_TO_PRECURSOR,
             ):
         """Initialize the modified cosine score class.
 
@@ -66,11 +69,17 @@ class ModifiedCosine(BaseSimilarity):
         noise_cutoff:
             Minimum relative intensity for a peak to be considered. Default is 0.01.
             Will only be used if use_hungarian is False.
+        remove_precursor:
+            Whether to remove peaks with m/z values larger than the precursor-m/z (plus offset).
+        offset_to_precursor:
+            The offset to add to the precursor-m/z when removing peaks.
         """
         self.tolerance = tolerance
         self.intensity_power = intensity_power
         self.use_hungarian = use_hungarian
         self.noise_cutoff = noise_cutoff
+        self.remove_precursor = remove_precursor
+        self.offset_to_precursor = offset_to_precursor
 
     def pair(self, spectrum_1: SpectrumType, spectrum_2: SpectrumType) -> tuple[float, int]:
         """Calculate approximate modified cosine score between two spectra."""
@@ -79,12 +88,17 @@ class ModifiedCosine(BaseSimilarity):
             modcos = ModifiedCosineHungarian(
                 tolerance=self.tolerance,
                 intensity_power=self.intensity_power,
+                noise_cutoff=self.noise_cutoff,
+                remove_precursor=self.remove_precursor,
+                offset_to_precursor=self.offset_to_precursor,
             )
         else:
             modcos = ModifiedCosineGreedy(
                 tolerance=self.tolerance,
                 intensity_power=self.intensity_power,
                 noise_cutoff=self.noise_cutoff,
+                remove_precursor=self.remove_precursor,
+                offset_to_precursor=self.offset_to_precursor,
             )
         return modcos.pair(spectrum_1, spectrum_2)
 
@@ -124,6 +138,9 @@ class ModifiedCosine(BaseSimilarity):
             modcos = ModifiedCosineHungarian(
                 tolerance=self.tolerance,
                 intensity_power=self.intensity_power,
+                noise_cutoff=self.noise_cutoff,
+                remove_precursor=self.remove_precursor,
+                offset_to_precursor=self.offset_to_precursor,
             )
 
             return modcos.matrix(
@@ -137,6 +154,8 @@ class ModifiedCosine(BaseSimilarity):
             tolerance=self.tolerance,
             intensity_power=self.intensity_power,
             noise_cutoff=self.noise_cutoff,
+            remove_precursor=self.remove_precursor,
+            offset_to_precursor=self.offset_to_precursor,
         )
 
         return modcos.matrix(

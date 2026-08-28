@@ -28,3 +28,4 @@ score_computations:
   - tolerance: 120.0
 - - modifiedcosinegreedy
   - tolerance: 10.0
+    remove_precursor: False

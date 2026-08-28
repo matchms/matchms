@@ -32,7 +32,7 @@ class _BaseFlashSimilarity(BaseSimilarity):
         tolerance: float = DEFAULT_MZ_TOLERANCE,
         use_ppm: bool = False,
         intensity_power: float = DEFAULT_INTENSITY_POWER,
-        remove_precursor: bool = False,
+        remove_precursor: bool = True,
         offset_to_precursor: float = DEFAULT_OFFSET_TO_PRECURSOR,
         noise_cutoff: float = DEFAULT_NOISE_CUTOFF,
         normalize_to_half: bool = False,
@@ -244,7 +244,7 @@ class FlashEntropy(_BaseFlashSimilarity):
         If True, interpret `tolerance` as parts-per-million. Default is False.
     remove_precursor:
         If True, remove precursor peak and peaks within offset_to_precursor.
-        Default is False.
+        Default is True.
     offset_to_precursor:
         Offset used when ``remove_precursor=True``. This will only keep 
         mz values <= precursor_mz + offset_to_precursor. Default is -1.6 Da.
@@ -423,7 +423,7 @@ class CosineFlash(_BaseFlashSimilarity):
         The power to raise intensity to in the cosine function. The default is 1 (no weighting).
     remove_precursor:
         If True, remove precursor peak and peaks within offset_to_precursor.
-        Default is False.
+        Default is True.
     offset_to_precursor:
         If remove_precursor is True, remove peaks within this window around the precursor
         m/z. Default is 1.6 Da (as suggested by Li & Fiehn(2023)).

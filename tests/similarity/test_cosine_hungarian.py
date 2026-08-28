@@ -10,13 +10,19 @@ def test_cosine_hungarian_cocaine_glucose():
     glucose_spectrum = glucose()
     cocaine_spectrum = cocaine()
 
-    cosine_hungarian = CosineHungarian(tolerance=0.1, mz_power=1.0, intensity_power=1.0)
+    cosine_hungarian = CosineHungarian(
+        tolerance=0.1, mz_power=1.0, intensity_power=1.0,
+        remove_precursor=False, noise_cutoff=None,  # Do not remove precursor peaks for this test
+        )
 
     (similarity, shared_peaks) = cosine_hungarian.pair(glucose_spectrum, cocaine_spectrum)[()]
     assert similarity == 0.0
     assert shared_peaks == 0
 
-    cosine_hungarian = CosineHungarian(tolerance=5.0, mz_power=0.0, intensity_power=1.0)
+    cosine_hungarian = CosineHungarian(
+        tolerance=5.0, mz_power=0.0, intensity_power=1.0,
+        remove_precursor=False, noise_cutoff=None,  # Do not remove precursor peaks for this test
+        )
 
     (similarity, shared_peaks) = cosine_hungarian.pair(glucose_spectrum, cocaine_spectrum)[()]
     assert similarity == 0.453757948440651, f"Expected different cosine score: {similarity}"
@@ -27,13 +33,19 @@ def test_cosine_hungarian_phenylalanine_hydroxy_cholesterol():
     phenylalanine_spectrum = phenylalanine()
     hydroxy_cholesterol_spectrum = hydroxy_cholesterol()
 
-    cosine_hungarian = CosineHungarian(tolerance=0.1, mz_power=1.0, intensity_power=1.0)
+    cosine_hungarian = CosineHungarian(
+        tolerance=0.1, mz_power=1.0, intensity_power=1.0,
+        remove_precursor=False, noise_cutoff=None,  # Do not remove precursor peaks for this test
+        )
 
     (similarity, shared_peaks) = cosine_hungarian.pair(phenylalanine_spectrum, hydroxy_cholesterol_spectrum)[()]
     assert similarity < 0.0001
     assert shared_peaks == 3
 
-    cosine_hungarian = CosineHungarian(tolerance=5.0, mz_power=0.0, intensity_power=1.0)
+    cosine_hungarian = CosineHungarian(
+        tolerance=5.0, mz_power=0.0, intensity_power=1.0,
+        remove_precursor=False, noise_cutoff=None,  # Do not remove precursor peaks for this test
+        )
 
     (similarity, shared_peaks) = cosine_hungarian.pair(phenylalanine_spectrum, hydroxy_cholesterol_spectrum)[()]
     assert similarity < 0.01, f"Expected different cosine score: {similarity}"
@@ -51,7 +63,7 @@ def test_cosine_hungarian_without_parameters():
         mz=np.array([100, 200, 290, 490, 510], dtype="float"),
         intensities=np.array([0.1, 0.2, 1.0, 0.3, 0.4], dtype="float"),
     )
-    cosine_hungarian = CosineHungarian()
+    cosine_hungarian = CosineHungarian(remove_precursor=False, noise_cutoff=None)
     score = cosine_hungarian.pair(spectrum_1, spectrum_2)
 
     # Derive expected cosine score
@@ -88,7 +100,7 @@ def test_cosine_hungarian_matrix_without_parameters():
         mz=np.array([100, 200, 290, 490, 510], dtype="float"),
         intensities=np.array([0.1, 0.2, 1.0, 0.3, 0.4], dtype="float"),
     )
-    cosine_hungarian = CosineHungarian()
+    cosine_hungarian = CosineHungarian(remove_precursor=False, noise_cutoff=None)
     scores = cosine_hungarian.matrix([spectrum_1, spectrum_2], [spectrum_1, spectrum_2])
 
     assert (
@@ -116,7 +128,7 @@ def test_cosine_hungarian_with_tolerance_0_2():
         mz=np.array([100, 300, 301, 511], dtype="float"),
         intensities=np.array([0.1, 1.0, 0.3, 0.4], dtype="float"),
     )
-    cosine_hungarian = CosineHungarian(tolerance=0.2)
+    cosine_hungarian = CosineHungarian(tolerance=0.2, remove_precursor=False, noise_cutoff=None)
     score = cosine_hungarian.pair(spectrum_1, spectrum_2)
 
     # Derive expected cosine score
@@ -152,7 +164,7 @@ def test_cosine_hungarian_with_tolerance_2_0():
         mz=np.array([100, 300, 301, 511], dtype="float"),
         intensities=np.array([0.1, 1.0, 0.3, 0.4], dtype="float"),
     )
-    cosine_hungarian = CosineHungarian(tolerance=2.0)
+    cosine_hungarian = CosineHungarian(tolerance=2.0, remove_precursor=False, noise_cutoff=None)
     score = cosine_hungarian.pair(spectrum_1, spectrum_2)
 
     # Derive expected cosine score
@@ -191,7 +203,7 @@ def test_cosine_hungarian_order_of_arguments():
         metadata={},
     )
 
-    cosine_hungarian = CosineHungarian(tolerance=2.0)
+    cosine_hungarian = CosineHungarian(tolerance=2.0, remove_precursor=False, noise_cutoff=None)
     score_1_2 = cosine_hungarian.pair(spectrum_1, spectrum_2)
     score_2_1 = cosine_hungarian.pair(spectrum_2, spectrum_1)
 
@@ -217,7 +229,7 @@ def test_cosine_hungarian_case_where_greedy_would_fail():
         metadata={},
     )
 
-    cosine_hungarian = CosineHungarian(tolerance=0.01)
+    cosine_hungarian = CosineHungarian(tolerance=0.01, remove_precursor=False, noise_cutoff=None)
     score = cosine_hungarian.pair(spectrum_1, spectrum_2)
     assert score["score"] == pytest.approx(
         0.994475, 0.0001
@@ -239,7 +251,7 @@ def test_cosine_hungarian_case_without_matches():
         metadata={},
     )
 
-    cosine_hungarian = CosineHungarian()
+    cosine_hungarian = CosineHungarian(remove_precursor=False, noise_cutoff=None)
     score = cosine_hungarian.pair(spectrum_1, spectrum_2)
     assert score["score"] == 0.0, "Expected different cosine score."
     assert score["matches"] == 0, "Expected different number of matching peaks."
@@ -261,7 +273,8 @@ def test_cosine_hungarian_with_peak_powers():
         intensities=np.array([0.1, 0.2, 1.0, 0.3, 0.4], dtype="float"),
     )
     cosine_hungarian = CosineHungarian(
-        tolerance=1.0, mz_power=mz_power, intensity_power=intensity_power
+        tolerance=1.0, mz_power=mz_power, intensity_power=intensity_power,
+        remove_precursor=False, noise_cutoff=None,  # Do not remove precursor peaks for this test
     )
     score = cosine_hungarian.pair(spectrum_1, spectrum_2)
 
@@ -319,7 +332,7 @@ def test_cosine_hungarian_phantom_pair_regression():
         intensities=np.array([1.0, 0.5], dtype="float"),
     )
 
-    cosine_hungarian = CosineHungarian(tolerance=2.0)
+    cosine_hungarian = CosineHungarian(tolerance=2.0, remove_precursor=False, noise_cutoff=None)
     score = cosine_hungarian.pair(spectrum_1, spectrum_2)
 
     assert score["matches"] == 1, (
@@ -342,7 +355,7 @@ def test_cosine_hungarian_single_peak_spectra():
         intensities=np.array([0.8], dtype="float"),
     )
 
-    cosine_hungarian = CosineHungarian(tolerance=0.1)
+    cosine_hungarian = CosineHungarian(tolerance=0.1, remove_precursor=False, noise_cutoff=None)
     score = cosine_hungarian.pair(spectrum_1, spectrum_2)
 
     assert score["matches"] == 1, "Expected exactly 1 match for single-peak spectra."
@@ -361,7 +374,7 @@ def test_cosine_hungarian_all_peaks_matching():
         intensities=np.array([0.5, 0.8, 1.0], dtype="float"),
     )
 
-    cosine_hungarian = CosineHungarian(tolerance=0.1)
+    cosine_hungarian = CosineHungarian(tolerance=0.1, remove_precursor=False, noise_cutoff=None)
     score = cosine_hungarian.pair(spectrum_1, spectrum_2)
 
     assert score["matches"] == 3, "Expected all 3 peaks to match."

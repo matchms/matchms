@@ -63,7 +63,7 @@ class Entropy(BaseSimilarity):
         self,
         tolerance: float = DEFAULT_MZ_TOLERANCE,
         use_ppm: bool = False,
-        remove_precursor: bool = False,
+        remove_precursor: bool = True,
         offset_to_precursor: float = DEFAULT_OFFSET_TO_PRECURSOR,
         noise_cutoff: float | None = DEFAULT_NOISE_CUTOFF,
         merge_within: float = 0.0,

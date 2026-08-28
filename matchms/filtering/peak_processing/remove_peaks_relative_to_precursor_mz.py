@@ -20,7 +20,7 @@ def _remove_peaks_relative_to_precursor_mz(
         Input spectrum.
     offset_to_precursor:
         All peaks with mz values > precursor_mz + offset_to_precursor will be removed.
-        Default is -1.6 Da based Flash Entropy article by Li and Fiehn, 2023, Nat. Comm.
+        Default is -1.6 Da based Flash Entropy article by Li and Fiehn, 2023, Nature Methods.
         (see https://www.nature.com/articles/s41592-023-02012-9)
     clone:
         Optionally clone the Spectrum.

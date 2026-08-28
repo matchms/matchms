@@ -264,7 +264,7 @@ def test_blinkcosine_upper_bound_cosinegreedy():
     ).build()
 
     tolerance = 5.0
-    cg = CosineGreedy(tolerance=tolerance)
+    cg = CosineGreedy(tolerance=tolerance, remove_precursor=False)
     bc = CosineBlink(tolerance=tolerance, bin_width=1.0, prefilter=False)
 
     score_cg = cg.pair(spectrum_1, spectrum_2)["score"]

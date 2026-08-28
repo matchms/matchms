@@ -1,5 +1,5 @@
 import numpy as np
-from .spectrum_similarity_functions import filter_noise
+from .spectrum_similarity_functions import filter_noise, filter_peaks_above_precursor
 
 
 # ===================== library index =====================
@@ -293,8 +293,12 @@ def _clean_and_weight(
 
     # (optional) remove precursor and nearby peaks
     if remove_precursor and (precursor_mz is not None):
-        mask = mz <= (precursor_mz + offset_to_precursor)
-        mz, intensities = mz[mask], intensities[mask]
+        mz, intensities = filter_peaks_above_precursor(
+            mz,
+            intensities,
+            precursor_mz,
+            offset_to_precursor,
+        )
         if mz.size == 0:
             return np.empty((0, 2), dtype=dtype)
 

@@ -1,6 +1,12 @@
+import logging
 import numpy as np
 from numba import njit
 from numba.typed import List
+from matchms.similarity._precursor_validation import get_valid_precursor_mz
+from .default_parameters import DEFAULT_OFFSET_TO_PRECURSOR
+
+
+logger = logging.getLogger("matchms")
 
 
 @njit
@@ -208,6 +214,94 @@ def filter_noise(
     noise_cutoff:
         Peaks with intensity below this cutoff (relative to the maximum intensity) will be removed.
     """
+    if intensities.size == 0:
+        return mz, intensities
+
     thr = intensities.max() * noise_cutoff
     mask = intensities >= thr
     return mz[mask], intensities[mask]
+
+
+def filter_peaks_above_precursor(
+    mz: np.ndarray,
+    intensities: np.ndarray,
+    precursor_mz: float | None,
+    offset_to_precursor: float,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Remove peaks above precursor_mz + offset_to_precursor.
+
+    All peaks with mz values > precursor_mz + offset_to_precursor will be removed.
+    A frequently used value is -1.6 Da based Flash Entropy article by Li and Fiehn, 2023, Nature Methods.
+    (see https://www.nature.com/articles/s41592-023-02012-9)
+
+    If precursor_mz is None, return the input arrays unchanged.
+
+    Parameters
+    ----------
+    mz:
+        Array of m/z values. Must be the same length as intensities.
+    intensities:
+        Array of intensity values. Must be the same length as mz.
+    precursor_mz:
+        Precursor m/z value. If None, no peaks will be removed.
+    offset_to_precursor:
+        All peaks with mz values > precursor_mz + offset_to_precursor will be removed.
+    """
+    if precursor_mz is None:
+        return mz, intensities
+
+    mask = mz <= precursor_mz + offset_to_precursor
+    return mz[mask], intensities[mask]
+
+
+def _preprocess_peak_array(
+    peaks: np.ndarray,
+    *,
+    precursor_mz: float | None = None,
+    remove_precursor: bool = False,
+    offset_to_precursor: float = DEFAULT_OFFSET_TO_PRECURSOR,
+    noise_cutoff: float | None = None,
+) -> np.ndarray:
+    """Return a non-mutating preprocessed peak array for similarity scoring."""
+    mz = peaks[:, 0]
+    intensities = peaks[:, 1]
+
+    if remove_precursor:
+        if precursor_mz is None:
+            raise ValueError("Cannot remove precursor peaks when precursor_mz is None.")
+        mz, intensities = filter_peaks_above_precursor(
+            mz,
+            intensities,
+            precursor_mz,
+            offset_to_precursor,
+        )
+
+    if noise_cutoff and noise_cutoff > 0:
+        mz, intensities = filter_noise(mz, intensities, noise_cutoff)
+
+    return np.column_stack((mz, intensities))
+
+
+def _process_spectrum_peaks(
+    spectrum,
+    *,
+    remove_precursor: bool = False,
+    offset_to_precursor: float = DEFAULT_OFFSET_TO_PRECURSOR,
+    noise_cutoff: float | None = None,
+) -> np.ndarray:
+    """Return a non-mutating preprocessed peak array for similarity scoring.
+    
+    This is a convenience wrapper around `_preprocess_peak_array` that extracts the
+    precursor m/z from the spectrum metadata.
+    """
+    if remove_precursor:
+        precursor_mz = get_valid_precursor_mz(spectrum, logger)
+    else:
+        precursor_mz = None
+    return _preprocess_peak_array(
+        spectrum.peaks.to_numpy,
+        precursor_mz=precursor_mz,
+        remove_precursor=remove_precursor,
+        offset_to_precursor=offset_to_precursor,
+        noise_cutoff=noise_cutoff,
+    )

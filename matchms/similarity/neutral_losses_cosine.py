@@ -7,8 +7,10 @@ from .default_parameters import (
     DEFAULT_INTENSITY_POWER,
     DEFAULT_MZ_POWER,
     DEFAULT_MZ_TOLERANCE,
+    DEFAULT_NOISE_CUTOFF,
+    DEFAULT_OFFSET_TO_PRECURSOR,
 )
-from .spectrum_similarity_functions import collect_peak_pairs, score_best_matches
+from .spectrum_similarity_functions import _preprocess_peak_array, collect_peak_pairs, score_best_matches
 
 
 logger = logging.getLogger("matchms")
@@ -36,7 +38,9 @@ class NeutralLossesCosine(BaseSimilarityWithSparse):
             tolerance: float = DEFAULT_MZ_TOLERANCE,
             mz_power: float = DEFAULT_MZ_POWER,
             intensity_power: float = DEFAULT_INTENSITY_POWER,
-            ignore_peaks_above_precursor: bool = True
+            noise_cutoff: float = DEFAULT_NOISE_CUTOFF,
+            remove_precursor: bool = True,
+            offset_to_precursor: float = DEFAULT_OFFSET_TO_PRECURSOR,
             ):
         """
         Parameters
@@ -48,15 +52,21 @@ class NeutralLossesCosine(BaseSimilarityWithSparse):
             case the peak intensity products will not depend on the m/z ratios.
         intensity_power:
             The power to raise intensity to in the cosine function. The default is 1.
-        ignore_peaks_above_precursor:
-            By default this is set to True, meaning that peaks with m/z values larger
-            than the precursor-m/z will be ignored (since those would correspond to negative
-            "neutral losses").
+        noise_cutoff:
+            Minimum relative intensity for a peak to be considered. Default is 0.01.
+        remove_precursor:
+            If True and ``precursor_mz`` metadata are available, remove peaks above
+            ``precursor_mz + offset_to_precursor`` before scoring.
+        offset_to_precursor:
+            Offset used when ``remove_precursor=True``. This will only keep
+            m/z values <= precursor_mz + offset_to_precursor. Default is -1.6 Da.
         """
         self.tolerance = tolerance
         self.mz_power = mz_power
         self.intensity_power = intensity_power
-        self.ignore_peaks_above_precursor = ignore_peaks_above_precursor
+        self.noise_cutoff = noise_cutoff
+        self.remove_precursor = remove_precursor
+        self.offset_to_precursor = offset_to_precursor
 
     def _get_matching_pairs(self, spec1, spec2, mass_shift: float) -> np.ndarray:
         """Find all pairs of peaks that match within the given tolerance."""
@@ -87,16 +97,24 @@ class NeutralLossesCosine(BaseSimilarityWithSparse):
         Tuple with cosine score and number of matched peaks.
         """
 
-        precursor_mz_ref = get_valid_precursor_mz(spectrum_1, logger)
-        precursor_mz_query = get_valid_precursor_mz(spectrum_2, logger)
-        mass_shift = precursor_mz_ref - precursor_mz_query
+        precursor_mz_1 = get_valid_precursor_mz(spectrum_1, logger)
+        precursor_mz_2 = get_valid_precursor_mz(spectrum_2, logger)
+        mass_shift = precursor_mz_1 - precursor_mz_2
 
-        spec1 = spectrum_1.peaks.to_numpy
-        spec2 = spectrum_2.peaks.to_numpy
-        
-        if self.ignore_peaks_above_precursor:
-            spec1 = spec1[np.where(spec1[:, 0] < precursor_mz_ref)]
-            spec2 = spec2[np.where(spec2[:, 0] < precursor_mz_query)]
+        spec1 = _preprocess_peak_array(
+            spectrum_1.peaks.to_numpy,
+            precursor_mz=precursor_mz_1,
+            remove_precursor=self.remove_precursor,
+            offset_to_precursor=self.offset_to_precursor,
+            noise_cutoff=self.noise_cutoff,
+        )
+        spec2 = _preprocess_peak_array(
+            spectrum_2.peaks.to_numpy,
+            precursor_mz=precursor_mz_2,
+            remove_precursor=self.remove_precursor,
+            offset_to_precursor=self.offset_to_precursor,
+            noise_cutoff=self.noise_cutoff,
+        )
 
         matching_pairs = self._get_matching_pairs(spec1, spec2, mass_shift)
         if matching_pairs is None:

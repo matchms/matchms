@@ -2,6 +2,7 @@ from collections.abc import Sequence
 import numpy as np
 from tqdm import tqdm  # type: ignore[import-untyped]
 from matchms.scores import Scores
+from matchms.similarity.spectrum_similarity_functions import _process_spectrum_peaks
 from matchms.typing import SpectrumType
 from .base_similarity import BaseSimilarity
 from .cosine_linear_functions import linear_cosine_score, sirius_merge_close_peaks
@@ -9,6 +10,8 @@ from .default_parameters import (
     DEFAULT_INTENSITY_POWER,
     DEFAULT_MZ_POWER,
     DEFAULT_MZ_TOLERANCE,
+    DEFAULT_NOISE_CUTOFF,
+    DEFAULT_OFFSET_TO_PRECURSOR,
 )
 
 
@@ -55,7 +58,10 @@ class CosineLinear(BaseSimilarity):
             self,
             tolerance: float = DEFAULT_MZ_TOLERANCE,
             mz_power: float = DEFAULT_MZ_POWER,
-            intensity_power: float = DEFAULT_INTENSITY_POWER
+            intensity_power: float = DEFAULT_INTENSITY_POWER,
+            noise_cutoff: float | None = DEFAULT_NOISE_CUTOFF,
+            remove_precursor: bool = False,
+            offset_to_precursor: float = DEFAULT_OFFSET_TO_PRECURSOR
             ):
         """
         Parameters
@@ -68,19 +74,38 @@ class CosineLinear(BaseSimilarity):
             case the peak intensity products will not depend on the m/z ratios.
         intensity_power:
             The power to raise intensity to in the cosine function. The default is 1.
+        noise_cutoff:
+            Minimum relative intensity for a peak to be considered. Default is 0.01.
+        remove_precursor:
+            Whether to remove peaks with m/z values larger than the precursor-m/z (plus offset).
+        offset_to_precursor:
+            The offset to add to the precursor-m/z when removing peaks.
         """
         self.tolerance = tolerance
         self.mz_power = mz_power
         self.intensity_power = intensity_power
+        self.noise_cutoff = noise_cutoff
+        self.remove_precursor = remove_precursor
+        self.offset_to_precursor = offset_to_precursor
 
-    def pair(self, reference: SpectrumType, query: SpectrumType) -> tuple[float, int]:
+    def _prepare_spectrum(self, spectrum: SpectrumType) -> np.ndarray:
+        """Preprocess and merge one spectrum for linear cosine scoring."""
+        peaks = _process_spectrum_peaks(
+            spectrum,
+            remove_precursor=self.remove_precursor,
+            offset_to_precursor=self.offset_to_precursor,
+            noise_cutoff=self.noise_cutoff,
+        )
+        return sirius_merge_close_peaks(peaks, self.tolerance)
+
+    def pair(self, spectrum_1: SpectrumType, spectrum_2: SpectrumType) -> tuple[float, int]:
         """Calculate linear cosine score between two spectra.
 
         Parameters
         ----------
-        reference
+        spectrum_1
             Single reference spectrum.
-        query
+        spectrum_2
             Single query spectrum.
 
         Returns
@@ -88,10 +113,9 @@ class CosineLinear(BaseSimilarity):
         Score
             Tuple with cosine score and number of matched peaks.
         """
-        spec1 = reference.peaks.to_numpy
-        spec2 = query.peaks.to_numpy
-        spec1 = sirius_merge_close_peaks(spec1, self.tolerance)
-        spec2 = sirius_merge_close_peaks(spec2, self.tolerance)
+        spec1 = self._prepare_spectrum(spectrum_1)
+        spec2 = self._prepare_spectrum(spectrum_2)
+
         score, matches = linear_cosine_score(
             spec1,
             spec2,
@@ -108,10 +132,23 @@ class CosineLinear(BaseSimilarity):
         score_fields: Sequence[str] | None = None,
         progress_bar: bool = True,
     ):
-        """Optimized matrix computation that precomputes merged spectra.
+        """Calculate a matrix of linear cosine scores.
 
-        Each spectrum is merged once (N+M calls to sirius_merge_close_peaks)
-        instead of 2*N*M times in the naive double-loop approach.
+        Spectra are preprocessed and merged once before pairwise scoring. This
+        avoids repeating precursor removal, noise filtering, and peak merging for
+        every spectrum pair.
+    
+        Parameters
+        ----------
+        spectra_1
+            First collection of spectra.
+        spectra_2
+            Second collection of spectra. If None, compare ``spectra_1`` against
+            itself.
+        score_fields
+            Score fields to return.
+        progress_bar
+            If True, display a progress bar.
         """
         spectra_2, is_symmetric = self._prepare_inputs(spectra_1, spectra_2)
         selected_fields = self._resolve_score_fields(score_fields)
@@ -120,12 +157,15 @@ class CosineLinear(BaseSimilarity):
         n_cols = len(spectra_2)
         result = self._create_dense_result(n_rows, n_cols, selected_fields)
 
-        merged_refs = [sirius_merge_close_peaks(r.peaks.to_numpy, self.tolerance) for r in spectra_1]
+        merged_refs = [
+            self._prepare_spectrum(spectrum)
+            for spectrum in spectra_1
+        ]
         if is_symmetric:
             merged_queries = merged_refs
         else:
             merged_queries = [
-                sirius_merge_close_peaks(spectrum.peaks.to_numpy, self.tolerance)
+                self._prepare_spectrum(spectrum)
                 for spectrum in spectra_2
             ]
 
