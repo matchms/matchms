@@ -88,6 +88,9 @@ class ModifiedCosineGreedy(BaseSimilarityWithSparse):
                 tolerance=self.tolerance,
                 mz_power=self.mz_power,
                 intensity_power=self.intensity_power,
+                noise_cutoff=self.noise_cutoff,
+                remove_precursor=self.remove_precursor,
+                offset_to_precursor=self.offset_to_precursor
             ).pair(spectrum_1, spectrum_2)
 
         def get_matching_pairs():
