@@ -2,6 +2,7 @@ import json
 import os
 import numpy as np
 import pytest
+from matchms import Spectrum
 from matchms.similarity import CosineHungarian, CosineLinear, get_similarity_function_by_name
 from matchms.similarity.cosine_linear_functions import (
     linear_cosine_score,
@@ -101,7 +102,10 @@ def test_pairwise_scores(param_idx, left, right, expected_score, expected_matche
         .build()
     )
 
-    linear_cosine = CosineLinear(tolerance=tolerance, mz_power=mz_power, intensity_power=intensity_power)
+    linear_cosine = CosineLinear(
+        tolerance=tolerance, mz_power=mz_power, intensity_power=intensity_power,
+        remove_precursor=False, noise_cutoff=None,
+        )
     result = linear_cosine.pair(spec_left, spec_right)
 
     assert result["matches"] == expected_matches, f"Expected {expected_matches} matches, got {result['matches']}"
@@ -118,7 +122,10 @@ def test_commutativity(param_idx):
     mz_power = ps["mz_power"]
     intensity_power = ps["intensity_power"]
 
-    linear_cosine = CosineLinear(tolerance=tolerance, mz_power=mz_power, intensity_power=intensity_power)
+    linear_cosine = CosineLinear(
+        tolerance=tolerance, mz_power=mz_power, intensity_power=intensity_power,
+        remove_precursor=False, noise_cutoff=None,
+    )
     builder = SpectrumBuilder()
     spectra = {}
     for name in COMPOUND_NAMES:
@@ -185,7 +192,10 @@ def test_hungarian_matches_cosine_linear_on_merged_spectra(param_idx, left, righ
     )
 
     hungarian = CosineHungarian(tolerance=tolerance, mz_power=mz_power, intensity_power=intensity_power)
-    linear = CosineLinear(tolerance=tolerance, mz_power=mz_power, intensity_power=intensity_power)
+    linear = CosineLinear(
+        tolerance=tolerance, mz_power=mz_power, intensity_power=intensity_power,
+        remove_precursor=False, noise_cutoff=None,
+        )
 
     result_hungarian = hungarian.pair(spec_left, spec_right)
     result_linear = linear.pair(spec_left, spec_right)
@@ -217,7 +227,7 @@ def test_empty_spectrum():
     """Pairing an empty spectrum with a non-empty one gives score=0, matches=0."""
     empty = _build_spectrum([], [])
     nonempty = _build_spectrum([100.0, 200.0], [0.5, 0.5])
-    lc = CosineLinear(tolerance=0.1)
+    lc = CosineLinear(tolerance=0.1, remove_precursor=False, noise_cutoff=None)
     result = lc.pair(empty, nonempty)
     assert result["score"] == 0.0
     assert result["matches"] == 0
@@ -237,7 +247,7 @@ def test_single_peak_match():
     """Two single-peak spectra within tolerance match perfectly."""
     a = _build_spectrum([100.0], [1.0])
     b = _build_spectrum([100.05], [1.0])
-    lc = CosineLinear(tolerance=0.1)
+    lc = CosineLinear(tolerance=0.1, remove_precursor=False, noise_cutoff=None)
     result = lc.pair(a, b)
     assert result["score"] == pytest.approx(1.0, abs=1e-9)
     assert result["matches"] == 1
@@ -247,7 +257,7 @@ def test_single_peak_no_match():
     """Two single-peak spectra outside tolerance don't match."""
     a = _build_spectrum([100.0], [1.0])
     b = _build_spectrum([200.0], [1.0])
-    lc = CosineLinear(tolerance=0.1)
+    lc = CosineLinear(tolerance=0.1, remove_precursor=False, noise_cutoff=None)
     result = lc.pair(a, b)
     assert result["score"] == 0.0
     assert result["matches"] == 0
@@ -257,7 +267,7 @@ def test_no_overlap():
     """Multi-peak spectra with no overlapping m/z give score=0."""
     a = _build_spectrum([100.0, 200.0, 300.0], [0.5, 0.3, 0.2])
     b = _build_spectrum([400.0, 500.0, 600.0], [0.5, 0.3, 0.2])
-    lc = CosineLinear(tolerance=0.1)
+    lc = CosineLinear(tolerance=0.1, remove_precursor=False, noise_cutoff=None)
     result = lc.pair(a, b)
     assert result["score"] == 0.0
     assert result["matches"] == 0
@@ -266,7 +276,7 @@ def test_no_overlap():
 def test_self_similarity():
     """A spectrum compared to itself should yield score=1.0."""
     spec = _build_spectrum([100.0, 200.0, 300.0], [0.7, 0.2, 0.1])
-    lc = CosineLinear(tolerance=0.1)
+    lc = CosineLinear(tolerance=0.1, remove_precursor=False, noise_cutoff=None)
     result = lc.pair(spec, spec)
     assert result["score"] == pytest.approx(1.0, abs=1e-9)
 
@@ -275,7 +285,7 @@ def test_all_zero_intensities():
     """All-zero intensities produce score=0.0, matches=0."""
     a = _build_spectrum([100.0, 200.0], [0.0, 0.0])
     b = _build_spectrum([100.0, 200.0], [0.0, 0.0])
-    lc = CosineLinear(tolerance=0.1)
+    lc = CosineLinear(tolerance=0.1, remove_precursor=False, noise_cutoff=None)
     result = lc.pair(a, b)
     assert result["score"] == 0.0
     assert result["matches"] == 0
@@ -338,7 +348,7 @@ def test_matrix_self_similarity():
         _build_spectrum([150.0, 250.0], [0.5, 0.5]),
         _build_spectrum([100.0, 300.0], [0.9, 0.1]),
     ]
-    lc = CosineLinear(tolerance=0.1)
+    lc = CosineLinear(tolerance=0.1, remove_precursor=False, noise_cutoff=None)
     result = lc.matrix(spectra, progress_bar=False)
     for i in range(len(spectra)):
         assert result[i, i]["score"] == pytest.approx(1.0, abs=1e-9)
@@ -350,7 +360,7 @@ def test_matrix_matches_pair():
         _build_spectrum([100.0, 200.0], [0.7, 0.3]),
         _build_spectrum([100.0, 250.0], [0.5, 0.5]),
     ]
-    lc = CosineLinear(tolerance=0.1)
+    lc = CosineLinear(tolerance=0.1, remove_precursor=False, noise_cutoff=None)
     mat = lc.matrix(spectra, progress_bar=False)
     for i in range(2):
         for j in range(2):
@@ -372,3 +382,34 @@ def test_to_dict_round_trip():
     assert d["tolerance"] == 0.2
     assert d["mz_power"] == 1.0
     assert d["intensity_power"] == 0.5
+
+
+def test_cosine_linear_pair_matrix_parity_with_precursor_removal():
+    spectrum_1 = Spectrum(
+        mz=np.array([100.0, 150.0, 198.4, 200.0]),
+        intensities=np.array([0.5, 0.4, 0.2, 1.0]),
+        metadata={"precursor_mz": 200.0},
+    )
+    spectrum_2 = Spectrum(
+        mz=np.array([100.0, 150.0, 198.4, 200.0]),
+        intensities=np.array([0.5, 0.4, 0.2, 0.1]),
+        metadata={"precursor_mz": 200.0},
+    )
+
+    similarity = CosineLinear(
+        remove_precursor=True,
+        offset_to_precursor=-1.6,
+        noise_cutoff=0.0,
+    )
+
+    pair_score = similarity.pair(spectrum_1, spectrum_2)
+    matrix_score = similarity.matrix(
+        [spectrum_1],
+        [spectrum_2],
+        progress_bar=False,
+    )
+
+    assert matrix_score["score"].to_array()[0, 0] == pytest.approx(
+        pair_score["score"]
+    )
+    assert matrix_score["matches"].to_array()[0, 0] == pair_score["matches"]
