@@ -7,7 +7,10 @@ from .default_parameters import (
     DEFAULT_INTENSITY_POWER,
     DEFAULT_MZ_POWER,
     DEFAULT_MZ_TOLERANCE,
+    DEFAULT_NOISE_CUTOFF,
+    DEFAULT_OFFSET_TO_PRECURSOR,
 )
+from .spectrum_similarity_functions import _process_spectrum_peaks
 
 
 class CosineHungarian(BaseSimilarityWithSparse):
@@ -31,7 +34,10 @@ class CosineHungarian(BaseSimilarityWithSparse):
     def __init__(
             self, tolerance: float = DEFAULT_MZ_TOLERANCE,
             mz_power: float = DEFAULT_MZ_POWER,
-            intensity_power: float = DEFAULT_INTENSITY_POWER
+            intensity_power: float = DEFAULT_INTENSITY_POWER,
+            noise_cutoff: float = DEFAULT_NOISE_CUTOFF,
+            remove_precursor: bool = True,
+            offset_to_precursor: float = DEFAULT_OFFSET_TO_PRECURSOR,
             ):
         """
         Parameters
@@ -43,11 +49,21 @@ class CosineHungarian(BaseSimilarityWithSparse):
             case the peak intensity products will not depend on the m/z ratios.
         intensity_power:
             The power to raise intensity to in the cosine function. The default is 1.
-
+        noise_cutoff:
+            Minimum relative intensity for a peak to be considered. Default is 0.01.
+        remove_precursor:
+            If True and ``precursor_mz`` metadata are available, remove peaks above
+            ``precursor_mz + offset_to_precursor`` before scoring.
+        offset_to_precursor:
+            Offset used when ``remove_precursor=True``. This will only keep
+            m/z values <= precursor_mz + offset_to_precursor. Default is -1.6 Da.
         """
         self.tolerance = tolerance
         self.mz_power = mz_power
         self.intensity_power = intensity_power
+        self.noise_cutoff = noise_cutoff
+        self.remove_precursor = remove_precursor
+        self.offset_to_precursor = offset_to_precursor
 
     def pair(self, spectrum_1: SpectrumType, spectrum_2: SpectrumType) -> tuple[float, int]:
         """Calculate cosine score between two spectra.
@@ -153,8 +169,18 @@ class CosineHungarian(BaseSimilarityWithSparse):
             score = score/(np.sqrt(np.sum(spec1_power**2)) * np.sqrt(np.sum(spec2_power**2)))
             return np.asarray((score, len(used_matches)), dtype=self.score_datatype)
 
-        spec1 = spectrum_1.peaks.to_numpy
-        spec2 = spectrum_2.peaks.to_numpy
+        spec1 = _process_spectrum_peaks(
+            spectrum_1,
+            remove_precursor=self.remove_precursor,
+            offset_to_precursor=self.offset_to_precursor,
+            noise_cutoff=self.noise_cutoff,
+        )
+        spec2 = _process_spectrum_peaks(
+            spectrum_2,
+            remove_precursor=self.remove_precursor,
+            offset_to_precursor=self.offset_to_precursor,
+            noise_cutoff=self.noise_cutoff,
+        )
         matching_pairs = get_matching_pairs()
         paired_peaks1, paired_peaks2, matching_pairs_matrix = get_matching_pairs_matrix()
         return calc_score()
