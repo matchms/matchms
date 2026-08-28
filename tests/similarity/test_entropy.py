@@ -666,3 +666,117 @@ def test_entropy_matrix_rejects_unknown_score_field():
             n_jobs=0,
             progress_bar=False,
         )
+
+
+@pytest.mark.parametrize("matching_mode", ["fragment", "neutral_loss", "hybrid"])
+def test_entropy_greedy_matches_flash_entropy(matching_mode):
+    reference = build_spectrum(
+        [100.0, 200.0],
+        [1.0, 1.0],
+        precursor_mz=500.0,
+    )
+    query = build_spectrum(
+        [100.0, 210.0],
+        [1.0, 1.0],
+        precursor_mz=510.0,
+    )
+
+    kwargs = {
+        "matching_mode": matching_mode,
+        "tolerance": 0.01,
+        "remove_precursor": False,
+        "noise_cutoff": 0.0,
+        "dtype": np.float64,
+    }
+
+    greedy = float(EntropyGreedy(**kwargs).pair(reference, query))
+    flash = float(FlashEntropy(**kwargs).pair(reference, query))
+
+    assert greedy == pytest.approx(flash, abs=1e-12)
+
+
+def test_entropy_greedy_matching_modes():
+    reference = build_spectrum(
+        [100.0, 200.0],
+        [1.0, 1.0],
+        precursor_mz=500.0,
+    )
+    query = build_spectrum(
+        [100.0, 210.0],
+        [1.0, 1.0],
+        precursor_mz=510.0,
+    )
+
+    kwargs = {
+        "tolerance": 0.01,
+        "remove_precursor": False,
+        "noise_cutoff": 0.0,
+        "dtype": np.float64,
+    }
+
+    fragment = float(
+        EntropyGreedy(matching_mode="fragment", **kwargs).pair(
+            reference, query
+        )
+    )
+    neutral_loss = float(
+        EntropyGreedy(matching_mode="neutral_loss", **kwargs).pair(
+            reference, query
+        )
+    )
+    hybrid = float(
+        EntropyGreedy(matching_mode="hybrid", **kwargs).pair(
+            reference, query
+        )
+    )
+
+    assert fragment == pytest.approx(0.5)
+    assert neutral_loss == pytest.approx(0.5)
+    assert hybrid == pytest.approx(1.0)
+
+
+def test_entropy_greedy_hybrid_does_not_double_count():
+    reference = build_spectrum(
+        [100.0, 200.0],
+        [1.0, 1.0],
+        precursor_mz=500.0,
+    )
+    query = build_spectrum(
+        [100.0, 200.0],
+        [1.0, 1.0],
+        precursor_mz=500.0,
+    )
+
+    similarity = EntropyGreedy(
+        matching_mode="hybrid",
+        tolerance=0.01,
+        remove_precursor=False,
+        noise_cutoff=0.0,
+    )
+
+    assert float(similarity.pair(reference, query)) == pytest.approx(1.0)
+
+
+def test_entropy_greedy_matching_modes_without_precursor():
+    reference = build_spectrum([100.0], [1.0])
+    query = build_spectrum([100.0], [1.0])
+
+    kwargs = {
+        "tolerance": 0.01,
+        "remove_precursor": False,
+        "noise_cutoff": 0.0,
+    }
+
+    fragment = float(
+        EntropyGreedy(matching_mode="fragment", **kwargs).pair(reference, query)
+    )
+    neutral_loss = float(
+        EntropyGreedy(matching_mode="neutral_loss", **kwargs).pair(reference, query)
+    )
+    hybrid = float(
+        EntropyGreedy(matching_mode="hybrid", **kwargs).pair(reference, query)
+    )
+
+    assert fragment == pytest.approx(1.0)
+    assert neutral_loss == 0.0
+    assert hybrid == pytest.approx(fragment)
