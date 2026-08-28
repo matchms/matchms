@@ -71,9 +71,9 @@ def test_modified_cosine_with_mass_shift(peaks, tolerance, masses, expected_matc
     norm_spectrum_1 = normalize_intensities(spectrum_1)
     norm_spectrum_2 = normalize_intensities(spectrum_2)
     if tolerance is None:
-        modified_cosine = ModifiedCosineGreedy()
+        modified_cosine = ModifiedCosineGreedy(remove_precursor=False) # default is true, but here we use non-sensical dummy precursor_mz values
     else:
-        modified_cosine = ModifiedCosineGreedy(tolerance=tolerance)
+        modified_cosine = ModifiedCosineGreedy(tolerance=tolerance, remove_precursor=False)
 
     score = modified_cosine.pair(norm_spectrum_1, norm_spectrum_2)
     expected_score = compute_expected_score(norm_spectrum_1, norm_spectrum_2, expected_matches)
@@ -185,3 +185,50 @@ def test_modified_cosine_greedy_matches_cosine_greedy_for_negative_boundary_delt
 
     assert modified_score["score"] == pytest.approx(cosine_score["score"], abs=1e-12)
     assert modified_score["matches"] == cosine_score["matches"]
+
+
+def test_modified_cosine_remove_precursor():
+    """Test effect of explicitly enabling/disabling precursor removal."""
+    spectrum_1 = Spectrum(
+        mz=np.array([100.0, 150.0, 199.0], dtype="float"),
+        intensities=np.array([1.0, 1.0, 10.0], dtype="float"),
+        metadata={"precursor_mz": 200.0},
+    )
+    spectrum_2 = Spectrum(
+        mz=np.array([100.0, 170.0, 209.0], dtype="float"),
+        intensities=np.array([1.0, 1.0, 10.0], dtype="float"),
+        metadata={"precursor_mz": 210.0},
+    )
+
+    score_with_precursor = ModifiedCosineGreedy(
+        tolerance=0.01,
+        noise_cutoff=0.0,
+        remove_precursor=False,
+    ).pair(spectrum_1, spectrum_2)
+
+    score_without_precursor = ModifiedCosineGreedy(
+        tolerance=0.01,
+        noise_cutoff=0.0,
+        remove_precursor=True,
+        offset_to_precursor=-1.6,
+    ).pair(spectrum_1, spectrum_2)
+
+    # Without precursor removal:
+    # - 100 matches directly.
+    # - 199 matches 209 via the 10 Da precursor mass shift.
+    # - 150 and 170 remain unmatched.
+    expected_with_precursor = (1.0 + 100.0) / 102.0
+
+    # With precursor removal, 199 and 209 are removed because:
+    #   199 > 200 - 1.6
+    #   209 > 210 - 1.6
+    # Only the direct 100 <-> 100 match remains.
+    expected_without_precursor = 1.0 / 2.0
+
+    assert score_with_precursor["score"] == pytest.approx(expected_with_precursor)
+    assert score_with_precursor["matches"] == 2
+
+    assert score_without_precursor["score"] == pytest.approx(expected_without_precursor)
+    assert score_without_precursor["matches"] == 1
+
+    assert score_without_precursor["score"] < score_with_precursor["score"]

@@ -8,8 +8,9 @@ from .default_parameters import (
     DEFAULT_INTENSITY_POWER,
     DEFAULT_MZ_TOLERANCE,
     DEFAULT_NOISE_CUTOFF,
+    DEFAULT_OFFSET_TO_PRECURSOR,
 )
-from .spectrum_similarity_functions import collect_peak_pairs, filter_noise, score_best_matches
+from .spectrum_similarity_functions import _preprocess_peak_array, collect_peak_pairs, score_best_matches
 
 
 logger = logging.getLogger("matchms")
@@ -47,6 +48,8 @@ class ModifiedCosineGreedy(BaseSimilarityWithSparse):
             mz_power: float = 0.0,
             intensity_power: float = DEFAULT_INTENSITY_POWER,
             noise_cutoff: float = DEFAULT_NOISE_CUTOFF,
+            remove_precursor: bool = True,
+            offset_to_precursor: float = DEFAULT_OFFSET_TO_PRECURSOR
             ):
         """Initialize approximate modified cosine.
 
@@ -61,18 +64,24 @@ class ModifiedCosineGreedy(BaseSimilarityWithSparse):
             The power to raise intensity to in the cosine function. The default is 1.
         noise_cutoff:
             Minimum relative intensity for a peak to be considered. Default is 0.01.
+        remove_precursor:
+            Whether to remove peaks with m/z values larger than the precursor-m/z (plus offset).
+        offset_to_precursor:
+            The offset to add to the precursor-m/z when removing peaks.
         """
         self.tolerance = tolerance
         self.mz_power = mz_power
         self.intensity_power = intensity_power
         self.noise_cutoff = noise_cutoff
+        self.remove_precursor = remove_precursor
+        self.offset_to_precursor = offset_to_precursor
 
     def pair(self, spectrum_1: SpectrumType, spectrum_2: SpectrumType) -> tuple[float, int]:
         """Calculate approximate modified cosine score between two spectra."""
 
-        precursor_mz_ref = get_valid_precursor_mz(spectrum_1, logger)
-        precursor_mz_query = get_valid_precursor_mz(spectrum_2, logger)
-        mass_shift = precursor_mz_ref - precursor_mz_query
+        precursor_mz_1 = get_valid_precursor_mz(spectrum_1, logger)
+        precursor_mz_2 = get_valid_precursor_mz(spectrum_2, logger)
+        mass_shift = precursor_mz_1 - precursor_mz_2
 
         if abs(mass_shift) <= self.tolerance:
             return CosineGreedy(
@@ -101,12 +110,20 @@ class ModifiedCosineGreedy(BaseSimilarityWithSparse):
                 matching_pairs = matching_pairs[np.argsort(matching_pairs[:, 2], kind="mergesort")[::-1], :]
             return matching_pairs
 
-        spec1 = spectrum_1.peaks.to_numpy
-        spec2 = spectrum_2.peaks.to_numpy
-        # Filter noise from spectra by removing peaks with intensity below a certain cutoff.
-        if self.noise_cutoff and self.noise_cutoff > 0.0:
-            spec1 = np.stack(filter_noise(spec1[:, 0], spec1[:, 1], self.noise_cutoff), axis=-1)
-            spec2 = np.stack(filter_noise(spec2[:, 0], spec2[:, 1], self.noise_cutoff), axis=-1)
+        spec1 = _preprocess_peak_array(
+            spectrum_1.peaks.to_numpy,
+            precursor_mz=precursor_mz_1,
+            remove_precursor=self.remove_precursor,
+            offset_to_precursor=self.offset_to_precursor,
+            noise_cutoff=self.noise_cutoff,
+        )
+        spec2 = _preprocess_peak_array(
+            spectrum_2.peaks.to_numpy,
+            precursor_mz=precursor_mz_2,
+            remove_precursor=self.remove_precursor,
+            offset_to_precursor=self.offset_to_precursor,
+            noise_cutoff=self.noise_cutoff,
+        )
 
         matching_pairs = get_matching_pairs()
         if matching_pairs.shape[0] == 0:

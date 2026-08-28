@@ -43,6 +43,7 @@ class CosineHungarian(BaseSimilarityWithSparse):
             case the peak intensity products will not depend on the m/z ratios.
         intensity_power:
             The power to raise intensity to in the cosine function. The default is 1.
+
         """
         self.tolerance = tolerance
         self.mz_power = mz_power
