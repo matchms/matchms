@@ -199,8 +199,12 @@ def test_modified_cosine_hungarian_matches_cosine_hungarian_when_precursor_delta
         metadata={"precursor_mz": query_precursor_mz},
     )
 
-    modified_score = ModifiedCosineHungarian(tolerance=tolerance).pair(reference, query)
-    cosine_score = CosineHungarian(tolerance=tolerance).pair(reference, query)
+    modified_score = ModifiedCosineHungarian(
+        tolerance=tolerance, remove_precursor=False, noise_cutoff=None
+    ).pair(reference, query)
+    cosine_score = CosineHungarian(
+        tolerance=tolerance, remove_precursor=False, noise_cutoff=None
+    ).pair(reference, query)
 
     assert modified_score["score"] == pytest.approx(cosine_score["score"], abs=1e-12)
     assert modified_score["matches"] == cosine_score["matches"]
@@ -220,8 +224,10 @@ def test_modified_cosine_hungarian_matches_cosine_hungarian_for_negative_boundar
         metadata={"precursor_mz": 500.0},
     )
 
-    modified_score = ModifiedCosineHungarian(tolerance=tolerance).pair(reference, query)
-    cosine_score = CosineHungarian(tolerance=tolerance).pair(reference, query)
+    modified_score = ModifiedCosineHungarian(
+        tolerance=tolerance, remove_precursor=False, noise_cutoff=None).pair(reference, query)
+    cosine_score = CosineHungarian(
+        tolerance=tolerance, remove_precursor=False, noise_cutoff=None).pair(reference, query)
 
     assert modified_score["score"] == pytest.approx(cosine_score["score"], abs=1e-12)
     assert modified_score["matches"] == cosine_score["matches"]

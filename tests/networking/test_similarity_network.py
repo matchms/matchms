@@ -28,13 +28,13 @@ def create_dummy_spectra():
                                   intensities=np.array([0.2 * i, 0.1 * i, 1.0]),
                                   metadata={"spectrum_id": "ref_spec_"+str(i),
                                             "smiles": "C1=CC=C2C(=C1)NC(=N2)C3=CC=CO3",
-                                            "precursor_mz": 100+20*i}))
+                                            "precursor_mz": 230+20*i}))
     for i in range(3):
         spectra.append(Spectrum(mz=np.array([100., 200.01]),
                                   intensities=np.array([0.5, 0.1 * i]),
                                   metadata={"spectrum_id": "query_spec_"+str(i),
                                             "smiles": "CC1=C(C=C(C=C1)NC(=O)N(C)C)Cl",
-                                            "precursor_mz": 120+20*i}))
+                                            "precursor_mz": 250+20*i}))
     return spectra
 
 

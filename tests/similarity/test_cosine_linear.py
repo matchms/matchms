@@ -191,7 +191,10 @@ def test_hungarian_matches_cosine_linear_on_merged_spectra(param_idx, left, righ
         .build()
     )
 
-    hungarian = CosineHungarian(tolerance=tolerance, mz_power=mz_power, intensity_power=intensity_power)
+    hungarian = CosineHungarian(
+        tolerance=tolerance, mz_power=mz_power, intensity_power=intensity_power,
+        remove_precursor=False, noise_cutoff=None,
+        )
     linear = CosineLinear(
         tolerance=tolerance, mz_power=mz_power, intensity_power=intensity_power,
         remove_precursor=False, noise_cutoff=None,
