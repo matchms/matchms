@@ -117,6 +117,50 @@ class _BaseFlashSimilarity(BaseSimilarity):
 
         return prepared_1, prepared_2, False
 
+    def _optimize_matrix_orientation(
+        self,
+        refs: _PreparedSpectra,
+        queries: _PreparedSpectra,
+        is_symmetric: bool,
+    ) -> tuple[_PreparedSpectra, _PreparedSpectra, bool]:
+        """Orient an asymmetric comparison for efficient Flash searching.
+
+        Flash scoring is computationally asymmetric: reference spectra are streamed
+        one row at a time, while query spectra are indexed once as the library.
+        For commutative similarities it is therefore usually faster to stream the
+        smaller collection and build the library from the larger collection.
+
+        If the inputs are swapped internally, the resulting score matrix must be
+        transposed before returning it so that the public result still has shape
+        ``(len(spectra_1), len(spectra_2))``.
+
+        Parameters
+        ----------
+        refs
+            Prepared first input collection.
+        queries
+            Prepared second input collection.
+        is_symmetric
+            Whether this is a self-comparison originating from ``spectra_2=None``.
+
+        Returns
+        -------
+        refs
+            Prepared collection to stream as reference rows.
+        queries
+            Prepared collection to use as the indexed library.
+        transpose_output
+            Whether the computed matrix must be transposed before returning.
+        """
+        if (
+            is_symmetric
+            or not self.is_commutative
+            or refs.n_specs <= queries.n_specs
+        ):
+            return refs, queries, False
+
+        return queries, refs, True
+
     def _build_library(self, prepared: _PreparedSpectra):
         return _build_library_index_from_prepared(
             prepared,
@@ -369,9 +413,20 @@ class FlashEntropy(_BaseFlashSimilarity):
                 "FlashEntropy.matrix() supports only score_fields=('score',)."
             )
 
-        refs, queries, is_symmetric = self._prepare_matrix_inputs(spectra_1, spectra_2)
+        refs, queries, is_symmetric = self._prepare_matrix_inputs(
+            spectra_1,
+            spectra_2,
+        )
         if is_symmetric and refs.n_specs != queries.n_specs:
-            raise ValueError("Self-comparison requires same number of rows and columns.")
+            raise ValueError(
+                "Self-comparison requires same number of rows and columns."
+            )
+
+        refs, queries, transpose_output = self._optimize_matrix_orientation(
+            refs,
+            queries,
+            is_symmetric,
+        )
 
         lib = self._build_library(queries)
         results = self._run_row_workers(
@@ -383,11 +438,24 @@ class FlashEntropy(_BaseFlashSimilarity):
             descriptor=self._descriptor_name,
         )
 
-        out_score = np.zeros((refs.n_specs, queries.n_specs), dtype=self.dtype)
+        out_score = np.zeros(
+            (refs.n_specs, queries.n_specs),
+            dtype=self.dtype,
+        )
         for row_idx, row_score in results:
             out_score[row_idx, :] = row_score
 
-        return Scores({"score": out_score.astype(self.score_datatype, copy=False)})
+        if transpose_output:
+            out_score = out_score.T
+
+        return Scores(
+            {
+                "score": out_score.astype(
+                    self.score_datatype,
+                    copy=False,
+                )
+            }
+        )
 
 
 class CosineFlash(_BaseFlashSimilarity):
@@ -519,9 +587,20 @@ class CosineFlash(_BaseFlashSimilarity):
         """
         selected_fields = self._resolve_score_fields(score_fields)
 
-        refs, queries, is_symmetric = self._prepare_matrix_inputs(spectra_1, spectra_2)
+        refs, queries, is_symmetric = self._prepare_matrix_inputs(
+            spectra_1,
+            spectra_2,
+        )
         if is_symmetric and refs.n_specs != queries.n_specs:
-            raise ValueError("Self-comparison requires same number of rows and columns.")
+            raise ValueError(
+                "Self-comparison requires same number of rows and columns."
+            )
+
+        refs, queries, transpose_output = self._optimize_matrix_orientation(
+            refs,
+            queries,
+            is_symmetric,
+        )
 
         lib = self._build_library(queries)
         results = self._run_row_workers(
@@ -533,18 +612,34 @@ class CosineFlash(_BaseFlashSimilarity):
             descriptor=self._descriptor_name,
         )
 
-        out_score = np.zeros((refs.n_specs, queries.n_specs), dtype=self.dtype)
-        out_matches = np.zeros((refs.n_specs, queries.n_specs), dtype=np.int32)
+        out_score = np.zeros(
+            (refs.n_specs, queries.n_specs),
+            dtype=self.dtype,
+        )
+        out_matches = np.zeros(
+            (refs.n_specs, queries.n_specs),
+            dtype=np.int32,
+        )
 
         for row_idx, row_score, row_matches in results:
             out_score[row_idx, :] = row_score
             out_matches[row_idx, :] = row_matches
 
+        if transpose_output:
+            out_score = out_score.T
+            out_matches = out_matches.T
+
         result = {}
+
         if "score" in selected_fields:
-            result["score"] = out_score.astype(self.dtype, copy=False)
+            result["score"] = out_score.astype(
+                self.dtype,
+                copy=False,
+            )
+
         if "matches" in selected_fields:
             result["matches"] = out_matches
+
         return Scores(result)
 
 

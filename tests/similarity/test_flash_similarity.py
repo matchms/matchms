@@ -729,3 +729,117 @@ def test_cosine_sc_dtype():
 
     assert score_32["score"].dtype == np.float32
     assert score_64["score"].dtype == np.float64
+
+
+def test_optimize_matrix_orientation_puts_smaller_collection_first():
+    spectra_large = [
+        build_spectrum([100.0 + i], [1.0], precursor_mz=500.0)
+        for i in range(5)
+    ]
+    spectra_small = spectra_large[:2]
+
+    similarity = CosineFlash(
+        remove_precursor=False,
+        noise_cutoff=0.0,
+    )
+
+    refs, queries, is_symmetric = similarity._prepare_matrix_inputs(
+        spectra_large,
+        spectra_small,
+    )
+
+    refs, queries, transpose_output = similarity._optimize_matrix_orientation(
+        refs,
+        queries,
+        is_symmetric,
+    )
+
+    assert refs.n_specs == 2
+    assert queries.n_specs == 5
+
+
+def test_cosine_matrix_swap_preserves_requested_orientation():
+    spectra_large = [
+        build_spectrum(
+            [100.0 + i, 200.0 + i],
+            [1.0, 0.5],
+            precursor_mz=500.0 + i,
+        )
+        for i in range(5)
+    ]
+    spectra_small = spectra_large[:2]
+
+    similarity = CosineFlash(
+        tolerance=0.01,
+        remove_precursor=False,
+        noise_cutoff=0.0,
+        dtype=np.float64,
+    )
+
+    large_small = similarity.matrix(
+        spectra_large,
+        spectra_small,
+        n_jobs=0,
+        progress_bar=False,
+    )
+
+    small_large = similarity.matrix(
+        spectra_small,
+        spectra_large,
+        n_jobs=0,
+        progress_bar=False,
+    )
+
+    assert large_small.shape == (5, 2)
+    assert small_large.shape == (2, 5)
+
+    assert np.array_equal(
+        large_small.to_array("score"),
+        small_large.to_array("score").T,
+    )
+
+    assert np.array_equal(
+        large_small.to_array("matches"),
+        small_large.to_array("matches").T,
+    )
+
+
+def test_entropy_matrix_swap_preserves_requested_orientation():
+    spectra_large = [
+        build_spectrum(
+            [100.0 + i, 200.0 + i],
+            [1.0, 0.5],
+            precursor_mz=500.0 + i,
+        )
+        for i in range(5)
+    ]
+    spectra_small = spectra_large[:2]
+
+    similarity = FlashEntropy(
+        tolerance=0.01,
+        remove_precursor=False,
+        noise_cutoff=0.0,
+        dtype=np.float64,
+    )
+
+    large_small = similarity.matrix(
+        spectra_large,
+        spectra_small,
+        n_jobs=0,
+        progress_bar=False,
+    )
+
+    small_large = similarity.matrix(
+        spectra_small,
+        spectra_large,
+        n_jobs=0,
+        progress_bar=False,
+    )
+
+    assert large_small.shape == (5, 2)
+    assert small_large.shape == (2, 5)
+
+    assert np.array_equal(
+        large_small.to_array("score"),
+        small_large.to_array("score").T,
+    )
