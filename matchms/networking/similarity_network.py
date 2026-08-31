@@ -2,13 +2,26 @@ from __future__ import annotations
 import json
 from collections.abc import Sequence
 from typing import TYPE_CHECKING
-import networkx as nx
 import numpy as np
 from .networking_functions import get_top_hits
 
 
 if TYPE_CHECKING:
     from matchms import Scores
+
+
+try:
+    import networkx as nx
+except ImportError:
+    nx = None
+
+
+def _require_networkx():
+    if nx is None:
+        raise ImportError(
+            "SimilarityNetwork requires the optional 'networkx' dependency. "
+            "Install it with `pip install 'matchms[networking]'`."
+        )
 
 
 class SimilarityNetwork:
@@ -86,6 +99,8 @@ class SimilarityNetwork:
             If True (default), all identifiers are included as nodes even if
             they have no edges. If False, isolated nodes are removed.
         """
+        _require_networkx()
+
         self.top_n = top_n
         self.max_links = max_links
         self.score_cutoff = score_cutoff
