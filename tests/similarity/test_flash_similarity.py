@@ -8,6 +8,8 @@ from matchms.similarity.flash_similarity import (
 )
 from matchms.similarity.flash_similarity_spectrum_list import (
     CosineFlash as CosineFlashSL,
+)
+from matchms.similarity.flash_similarity_spectrum_list import (
     FlashEntropy as FlashEntropySL,
 )
 from ..builder_spectrum import SpectrumBuilder
