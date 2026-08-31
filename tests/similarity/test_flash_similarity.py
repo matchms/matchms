@@ -753,7 +753,7 @@ def test_optimize_matrix_orientation_puts_smaller_collection_first():
         queries,
         is_symmetric,
     )
-
+    assert transpose_output is True
     assert refs.n_specs == 2
     assert queries.n_specs == 5
 
