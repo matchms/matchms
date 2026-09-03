@@ -26,7 +26,7 @@ def matchms_info_logger():
         ({"compound_name": "peptideXYZ [M+H+K]"}, False, "[M+H+K]", "peptideXYZ [M+H+K]", None),
         ({"Name": "peptideXYZ [M+H+K]", "adduct": "M+H"}, True, "M+H", "peptideXYZ", "[M+H+K]"),
         ({"compound_name": "peptideXYZ [M+H+K] C16H12"}, True, "[M+H+K]", "peptideXYZ C16H12", "[M+H+K]"),
-        ({"name": ""}, True, None, "", None),
+        ({"name": ""}, True, None, None, None),
     ],
 )
 def test_derive_adduct_from_name_parametrized(
@@ -177,3 +177,21 @@ def test_looks_like_adduct_accepts_adduct_like_strings(adduct):
 )
 def test_looks_like_adduct_rejects_non_adduct_like_strings(adduct):
     assert not _looks_like_adduct(adduct)
+
+
+@pytest.mark.parametrize("as_collection", [False, True], ids=["spectrum", "collection"])
+def test_derive_adduct_from_name_does_not_create_empty_compound_name(as_collection):
+    spectrum_in = (
+        SpectrumBuilder()
+        .with_metadata({"compound_name": "[M+H]+"})
+        .build()
+    )
+
+    spectrum = run_filter_as_spectrum_or_collection(
+        derive_adduct_from_name,
+        spectrum_in,
+        as_collection,
+    )
+
+    assert spectrum.get("adduct") == "[M+H]+"
+    assert spectrum.get("compound_name") is None
