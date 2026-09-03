@@ -115,3 +115,21 @@ def test_derive_formula_from_name_collection_clone_false_modifies_input():
 
 def test_derive_formula_from_name_empty_spectrum():
     assert derive_formula_from_name(None) is None
+
+
+@pytest.mark.parametrize("as_collection", [False, True], ids=["spectrum", "collection"])
+def test_derive_formula_from_name_does_not_create_empty_compound_name(as_collection):
+    spectrum_in = (
+        SpectrumBuilder()
+        .with_metadata({"compound_name": "C5H12NO2"})
+        .build()
+    )
+
+    spectrum = run_filter_as_spectrum_or_collection(
+        derive_formula_from_name,
+        spectrum_in,
+        as_collection,
+    )
+
+    assert spectrum.get("formula") == "C5H12NO2"
+    assert spectrum.get("compound_name") is None

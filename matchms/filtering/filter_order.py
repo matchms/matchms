@@ -2,7 +2,7 @@ from matchms import filtering as msfilters
 
 
 # List all filters in a functionally working order
-# TODO: Check if some filters might need more than one pass to be fully applied.
+# TODO: Check if some filters might need more than one pass to be fully applied. --> e.g. harmonize_missing_entries
 
 # IMPORTANT!! IF YOU CHANGE ANYTHING HERE PLEASE ADD A TEST to test_all_filter_order.py
 # to ensure it is not changed back by accident later.

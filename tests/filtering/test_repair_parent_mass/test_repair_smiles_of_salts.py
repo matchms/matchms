@@ -2,6 +2,9 @@ import pandas as pd
 import pytest
 from matchms import SpectraCollection
 from matchms.filtering import repair_smiles_of_salts
+from matchms.filtering.metadata_processing.repair_smiles_of_salts import (
+    _create_possible_ions,
+)
 from tests.builder_spectrum import SpectrumBuilder
 from tests.run_spectrum_and_collection import run_filter_as_spectrum_or_collection
 
@@ -150,3 +153,12 @@ def test_repair_smiles_of_salts_collection_clone_false_modifies_input():
     assert repaired is collection
     assert collection.metadata.loc[0, "smiles"] == "C1=NC2=NC=NC(=C2N1)N"
     assert collection.metadata.loc[0, "salt_ions"] == "Cl"
+
+
+def test_create_possible_ions_does_not_include_noop_combination():
+    smiles = "CCO.Cl"
+
+    possible_ions = _create_possible_ions(smiles)
+
+    assert all(removed_ions != "" for _, removed_ions in possible_ions)
+    assert all(ion != smiles for ion, _ in possible_ions)

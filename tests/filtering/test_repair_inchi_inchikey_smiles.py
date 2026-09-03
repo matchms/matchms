@@ -9,27 +9,27 @@ REPAIR_TEST_CASES = [
     [
         {"inchi": "InChI=1/C2H4N4/c3-2-4-1-5-6-2/h1H,(H3,3,4,5,6)/f/h6H,3H2"},
         "InChI=1/C2H4N4/c3-2-4-1-5-6-2/h1H,(H3,3,4,5,6)/f/h6H,3H2",
-        "",
-        "",
+        None,
+        None,
     ],
     [
         {"inchikey": "InChI=1/C2H4N4/c3-2-4-1-5-6-2/h1H,(H3,3,4,5,6)/f/h6H,3H2"},
         "InChI=1/C2H4N4/c3-2-4-1-5-6-2/h1H,(H3,3,4,5,6)/f/h6H,3H2",
-        "",
-        "",
+        None,
+        None,
     ],
     [
         {"smiles": "InChI=1/C2H4N4/c3-2-4-1-5-6-2/h1H,(H3,3,4,5,6)/f/h6H,3H2"},
         "InChI=1/C2H4N4/c3-2-4-1-5-6-2/h1H,(H3,3,4,5,6)/f/h6H,3H2",
-        "",
-        "",
+        None,
+        None,
     ],
-    [{"inchi": "ABTNALLHJFCFRZ-UHFFFAOYSA-N"}, "", "ABTNALLHJFCFRZ-UHFFFAOYSA-N", ""],
-    [{"inchikey": "ABTNALLHJFCFRZ-UHFFFAOYSA-N"}, "", "ABTNALLHJFCFRZ-UHFFFAOYSA-N", ""],
-    [{"smiles": "ABTNALLHJFCFRZ-UHFFFAOYSA-N"}, "", "ABTNALLHJFCFRZ-UHFFFAOYSA-N", ""],
-    [{"inchi": "C[C@H](Cc1ccccc1)N(C)CC#C"}, "", "", "C[C@H](Cc1ccccc1)N(C)CC#C"],
-    [{"inchikey": "C[C@H](Cc1ccccc1)N(C)CC#C"}, "", "", "C[C@H](Cc1ccccc1)N(C)CC#C"],
-    [{"smiles": "C[C@H](Cc1ccccc1)N(C)CC#C"}, "", "", "C[C@H](Cc1ccccc1)N(C)CC#C"],
+    [{"inchi": "ABTNALLHJFCFRZ-UHFFFAOYSA-N"}, None, "ABTNALLHJFCFRZ-UHFFFAOYSA-N", None],
+    [{"inchikey": "ABTNALLHJFCFRZ-UHFFFAOYSA-N"}, None, "ABTNALLHJFCFRZ-UHFFFAOYSA-N", None],
+    [{"smiles": "ABTNALLHJFCFRZ-UHFFFAOYSA-N"}, None, "ABTNALLHJFCFRZ-UHFFFAOYSA-N", None],
+    [{"inchi": "C[C@H](Cc1ccccc1)N(C)CC#C"}, None, None, "C[C@H](Cc1ccccc1)N(C)CC#C"],
+    [{"inchikey": "C[C@H](Cc1ccccc1)N(C)CC#C"}, None, None, "C[C@H](Cc1ccccc1)N(C)CC#C"],
+    [{"smiles": "C[C@H](Cc1ccccc1)N(C)CC#C"}, None, None, "C[C@H](Cc1ccccc1)N(C)CC#C"],
 ]
 
 
@@ -80,8 +80,8 @@ def test_repair_inchi_inchikey_smiles_various_inchi_entered_as_smiles(as_collect
         )
 
         assert spectrum.get("inchi") == "InChI=" + inchi.replace("InChI=", "").replace('"', "")
-        assert spectrum.get("inchikey") == ""
-        assert spectrum.get("smiles") == ""
+        assert spectrum.get("inchikey") is None
+        assert spectrum.get("smiles") is None
 
 
 def test_repair_inchi_inchikey_smiles_collection_multiple_rows():
@@ -97,17 +97,17 @@ def test_repair_inchi_inchikey_smiles_collection_multiple_rows():
     assert repaired is not collection
     assert len(repaired) == 3
 
-    assert repaired.metadata.loc[0, "inchi"] == ""
+    assert repaired.metadata.loc[0, "inchi"] is None
     assert repaired.metadata.loc[0, "inchikey"] == "ABTNALLHJFCFRZ-UHFFFAOYSA-N"
-    assert repaired.metadata.loc[0, "smiles"] == ""
+    assert repaired.metadata.loc[0, "smiles"] is None
 
-    assert repaired.metadata.loc[1, "inchi"] == ""
-    assert repaired.metadata.loc[1, "inchikey"] == ""
+    assert repaired.metadata.loc[1, "inchi"] is None
+    assert repaired.metadata.loc[1, "inchikey"] is None
     assert repaired.metadata.loc[1, "smiles"] == "C[C@H](Cc1ccccc1)N(C)CC#C"
 
     assert repaired.metadata.loc[2, "inchi"] == "InChI=" + TEST_INCHIS[0].replace("InChI=", "").replace('"', "")
-    assert repaired.metadata.loc[2, "inchikey"] == ""
-    assert repaired.metadata.loc[2, "smiles"] == ""
+    assert repaired.metadata.loc[2, "inchikey"] is None
+    assert repaired.metadata.loc[2, "smiles"] is None
 
 
 def test_repair_inchi_inchikey_smiles_clone_false_modifies_collection_in_place():
@@ -129,3 +129,41 @@ def test_repair_inchi_inchikey_smiles_empty_spectrum():
     spectrum = repair_inchi_inchikey_smiles(None)
 
     assert spectrum is None, "Expected different handling of None spectrum."
+
+
+@pytest.mark.parametrize("as_collection", [False, True], ids=["spectrum", "collection"])
+def test_repair_inchi_inchikey_smiles_does_not_create_empty_strings(as_collection):
+    spectrum_in = (
+        SpectrumBuilder()
+        .with_metadata({"smiles": "ABTNALLHJFCFRZ-UHFFFAOYSA-N"})
+        .build()
+    )
+
+    spectrum = run_filter_as_spectrum_or_collection(
+        repair_inchi_inchikey_smiles,
+        spectrum_in,
+        as_collection,
+    )
+
+    assert spectrum.get("inchi") is None
+    assert spectrum.get("inchikey") == "ABTNALLHJFCFRZ-UHFFFAOYSA-N"
+    assert spectrum.get("smiles") is None
+
+
+def test_repair_inchi_inchikey_smiles_collection_uses_missing_values_not_empty_strings():
+    collection = SpectraCollection(
+        [
+            SpectrumBuilder()
+            .with_metadata({"smiles": "ABTNALLHJFCFRZ-UHFFFAOYSA-N"})
+            .build(),
+            SpectrumBuilder()
+            .with_metadata({"inchi": "C[C@H](Cc1ccccc1)N(C)CC#C"})
+            .build(),
+        ]
+    )
+
+    repaired = repair_inchi_inchikey_smiles(collection)
+
+    structure_metadata = repaired.metadata[["inchi", "inchikey", "smiles"]]
+
+    assert not (structure_metadata == "").any().any()
