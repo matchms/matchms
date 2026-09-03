@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 from matchms.exporting import save_as_mgf
 from matchms.importing import load_from_mgf
-from ..builder_Spectrum import SpectrumBuilder
+from ..builder_spectrum import SpectrumBuilder
 
 
 def load_test_spectra_file(test_filename):
@@ -37,7 +37,7 @@ def test_save_as_mgf_single_spectrum():
         assert os.path.isfile(filename2)
 
         # Test if content of mgf file is correct
-        with open(filename, "r", encoding="utf-8") as f:
+        with open(filename, encoding="utf-8") as f:
             mgf_content = f.readlines()
         assert mgf_content[0] == "BEGIN IONS\n"
         assert mgf_content[2] == "CHARGE=1-\n"
@@ -65,7 +65,7 @@ def test_save_as_mgf_spectrum_list():
         assert os.path.isfile(filename)
 
         # Test if content of mgf file is correct
-        with open(filename, "r", encoding="utf-8") as f:
+        with open(filename, encoding="utf-8") as f:
             mgf_content = f.readlines()
         assert mgf_content[5] == mgf_content[12] == "END IONS\n"
         assert mgf_content[1].split("=")[1] == "test1\n"
@@ -97,7 +97,7 @@ def test_save_as_mgf_export_style(style, expected):
         save_as_mgf([spectrum1, spectrum2], filename, export_style=style)
 
         # Test if content of mgf file is correct
-        with open(filename, "r", encoding="utf-8") as f:
+        with open(filename, encoding="utf-8") as f:
             mgf_content = f.readlines()
         assert mgf_content[1] == expected[0]
         assert mgf_content[7] == expected[1]
@@ -105,8 +105,8 @@ def test_save_as_mgf_export_style(style, expected):
 
 @pytest.mark.parametrize("charge, ionmode, parent_mass",
                          [(-1, "negative", 218.5),
-                          (2, "positive", "n/a"),
-                          (None, "n/a", 250)])
+                          (2, "positive", "wrong information"),
+                          (None, None, 250)])
 def test_save_load_mgf_consistency(tmpdir, charge, ionmode, parent_mass):
     """Test saving and loading spectrum to .mgf file"""
     mz = np.array([100.1, 200.02, 300.003], dtype="float")

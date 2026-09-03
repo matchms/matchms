@@ -1,16 +1,16 @@
 import logging
-from typing import Optional
 import numpy as np
-from matchms.Spectrum import Spectrum
+from matchms.filtering._dispatch import collection_filter
+from matchms.spectrum import Spectrum
 from matchms.typing import SpectrumType
 
 
 logger = logging.getLogger("matchms")
 
 
-def remove_profiled_spectra(
-    spectrum_in: Spectrum, mz_window=0.5, clone: Optional[bool] = True
-) -> Optional[SpectrumType]:
+def _remove_profiled_spectra(
+        spectrum_in: Spectrum, mz_window=0.5, clone: bool | None = True
+    ) -> SpectrumType | None:
     """Remove profiled spectra
 
     Spectra are removed if within the mz_window of 0.5 of the highest peak at least 2 peaks next to the main peak are of
@@ -91,3 +91,10 @@ def _get_peak_intens_neighbourhood(intensities):
     nr_of_peaks_above_threshold_before_base_peak = np.argmin(np.flip(threshold_mask[: base_peak_i + 1]))
     nr_of_peaks_above_threshold_after_base_peak = np.argmin(threshold_mask[base_peak_i + 2 :])
     return nr_of_peaks_above_threshold_before_base_peak, nr_of_peaks_above_threshold_after_base_peak
+
+
+# wrapper
+remove_profiled_spectra = collection_filter(
+    _remove_profiled_spectra,
+    collection_impl=None,
+)

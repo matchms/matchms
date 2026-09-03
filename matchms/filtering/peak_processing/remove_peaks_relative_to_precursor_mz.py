@@ -1,12 +1,13 @@
-from typing import Optional
-from matchms.Fragments import Fragments
+import numpy as np
+from matchms.filtering._dispatch import collection_filter
+from matchms.fragments import Fragments
 from matchms.typing import SpectrumType
 
 
-def remove_peaks_relative_to_precursor_mz(
+def _remove_peaks_relative_to_precursor_mz(
     spectrum_in: SpectrumType, offset_to_precursor: float = -1.6,
-    clone: Optional[bool] = True
-) -> Optional[SpectrumType]:
+    clone: bool | None = True
+) -> SpectrumType | None:
     """Remove all peaks with m/z values > precursor-m/z + offset_to_precursor.
 
     If offset_to_precursor is negative, this means that all peaks
@@ -19,7 +20,7 @@ def remove_peaks_relative_to_precursor_mz(
         Input spectrum.
     offset_to_precursor:
         All peaks with mz values > precursor_mz + offset_to_precursor will be removed.
-        Default is -1.6 Da based Flash Entropy article by Li and Fiehn, 2023, Nat. Comm.
+        Default is -1.6 Da based Flash Entropy article by Li and Fiehn, 2023, Nature Methods.
         (see https://www.nature.com/articles/s41592-023-02012-9)
     clone:
         Optionally clone the Spectrum.
@@ -36,16 +37,34 @@ def remove_peaks_relative_to_precursor_mz(
 
     precursor_mz = spectrum.get("precursor_mz", None)
     if precursor_mz is None:
-        raise ValueError("Undefined 'precursor_mz'.")
+        raise TypeError("Undefined 'precursor_mz'.")
     if not isinstance(precursor_mz, (float, int)):
-        raise ValueError(
+        raise TypeError(
             "Expected 'precursor_mz' to be a scalar number.",
             "Consider applying 'add_precursor_mz' filter first."
             )
 
+    if not isinstance(offset_to_precursor, (float, int, np.floating, np.integer)):
+        raise TypeError("Expected 'offset_to_precursor' to be a scalar number.")
+
+    precursor_mz = float(precursor_mz)
+    offset_to_precursor = float(offset_to_precursor)
+
     mzs, intensities = spectrum.peaks.mz, spectrum.peaks.intensities
-    peaks_to_remove = mzs > (precursor_mz + offset_to_precursor)
-    new_mzs, new_intensities = mzs[~peaks_to_remove], intensities[~peaks_to_remove]
-    spectrum.peaks = Fragments(mz=new_mzs, intensities=new_intensities)
+
+    threshold = precursor_mz + offset_to_precursor
+    peaks_to_remove = mzs > threshold
+
+    spectrum.peaks = Fragments(
+        mz=mzs[~peaks_to_remove],
+        intensities=intensities[~peaks_to_remove],
+    )
 
     return spectrum
+
+
+# wrapper
+remove_peaks_relative_to_precursor_mz = collection_filter(
+    _remove_peaks_relative_to_precursor_mz,
+    collection_impl=None,
+)

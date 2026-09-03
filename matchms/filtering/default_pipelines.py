@@ -1,6 +1,5 @@
 """Stores sets of filters for easy pipeline creation."""
 
-import matchms.filtering.metadata_processing.require_precursor_mz
 from matchms import filtering as msfilters
 
 
@@ -20,9 +19,7 @@ DERIVE_METADATA_IN_WRONG_FIELD = [
     msfilters.repair_inchi_inchikey_smiles,
 ]
 HARMONIZE_METADATA_ENTRIES = [
-    msfilters.harmonize_undefined_inchikey,
-    msfilters.harmonize_undefined_inchi,
-    msfilters.harmonize_undefined_smiles,
+    (msfilters.harmonize_missing_entries, {"keys": ["inchi", "inchikey", "smiles"]}),
     msfilters.clean_adduct,
 ]
 DERIVE_MISSING_METADATA = [
@@ -52,7 +49,7 @@ REQUIRE_COMPLETE_ANNOTATION = [
     msfilters.require_matching_adduct_and_ionmode,
 ]
 CLEAN_PEAKS = [
-    (msfilters.select_by_mz, {"mz_from": 0, "mz_to": 1000}),
+    # removed in matchms_v1 (too opinionated) (msfilters.select_by_mz, {"mz_from": 0, "mz_to": 1000}),
     (msfilters.select_by_relative_intensity, {"intensity_from": 0.001}),
     msfilters.remove_peaks_relative_to_precursor_mz,
     (msfilters.reduce_to_number_of_peaks, {"n_max": 1000}),
@@ -62,12 +59,10 @@ CLEAN_PEAKS = [
 ]
 # These filters are in None of the above pipelines
 OTHER_FILTERS = [
-    matchms.filtering.metadata_processing.require_precursor_mz.require_precursor_below_mz,
     msfilters.select_by_intensity,
     msfilters.remove_peaks_around_precursor_mz,
     msfilters.remove_peaks_outside_top_k,
     msfilters.require_minimum_number_of_peaks,
-    msfilters.add_fingerprint,
     msfilters.repair_parent_mass_match_smiles_wrapper,
     msfilters.require_maximum_number_of_peaks,
     (msfilters.repair_adduct_and_parent_mass_based_on_smiles, {"mass_tolerance": 0.1}),

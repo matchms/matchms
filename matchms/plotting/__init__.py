@@ -3,7 +3,7 @@ Functions for plotting one or multiple spectra
 ##############################################
 
 Matchms provides (limited) plotting functionality to display one or multiple
-spectra from :class:`~matchms.Spectrum` objects.
+spectra from :class:`~matchms.spectrum.Spectrum` objects.
 
 Currently this includes 3 different plot types:
 
@@ -70,7 +70,7 @@ from .spectrum_plots import plot_spectra_array, plot_spectra_mirror, plot_spectr
 
 
 __all__ = [
-    "plot_spectrum",
-    "plot_spectra_mirror",
     "plot_spectra_array",
+    "plot_spectra_mirror",
+    "plot_spectrum",
 ]

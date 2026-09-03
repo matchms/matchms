@@ -1,5 +1,3 @@
-`fair-software.nl <https://fair-software.nl/>`_ recommendations:
-
 |GitHub Badge|
 |License Badge|
 |Conda Badge| |Pypi Badge| |Research Software Directory Badge|
@@ -17,17 +15,839 @@ Code quality checks:
    :align: left
    :alt: matchms
 
-Matchms is a versatile open-source Python package developed for importing, processing, cleaning, and comparing mass spectrometry data (MS/MS). It facilitates the implementation of straightforward, reproducible workflows, transforming raw data from common mass spectra file formats into pre- and post-processed spectral data, and enabling large-scale spectral similarity comparisons.
+matchms
+=======
 
-The software supports a range of popular spectral data formats, including mzML, mzXML, msp, metabolomics-USI, MGF, and JSON. Matchms offers an array of tools for metadata cleaning and validation, alongside basic peak filtering, to ensure data accuracy and integrity. A key feature of matchms is its ability to apply various pairwise similarity measures for comparing extensive amounts of spectra. This encompasses not only common Cosine-related scores but also molecular fingerprint-based comparisons and other metadata-related assessments.
+Matchms is an open-source Python package for importing, processing, cleaning,
+exporting, and comparing tandem mass spectrometry data (MS/MS). It supports
+reproducible workflows that transform raw spectra from common file formats into
+cleaned, harmonized, and comparable spectral datasets.
 
-One of the strengths of matchms is its extensibility, allowing users to integrate custom similarity measures. Notable examples of spectrum similarity measures tailored for Matchms include `Spec2Vec <https://github.com/iomega/spec2vec>`_ and `MS2DeepScore <https://github.com/matchms/ms2deepscore>`_. Additionally, Matchms enhances efficiency by using faster similarity measures for initial pre-selection and supports storing results in sparse data formats, enabling the comparison of several hundred thousands of spectra. This combination of features positions Matchms as a comprehensive tool for mass spectrometry data analysis.
+The preferred way to work with matchms is now through
+`SpectraCollection`: a collection-level representation for complete MS/MS
+datasets. A `SpectraCollection` keeps metadata and fragment peak data
+synchronized, supports table-like inspection and filtering, and provides a
+natural basis for scalable dataset-level processing and similarity computation.
+
+Matchms supports popular spectral data formats including mzML, mzXML, MSP, MGF,
+metabolomics-USI, JSON, and pickle. It provides tools for metadata
+harmonization, metadata validation, peak filtering, spectrum processing,
+collection processing, export, and large-scale spectral similarity calculations.
+
+The classic `Spectrum` API, which was the default in matchms < 1.0, remains supported.
+Individual spectra are still represented as `Spectrum` objects, and existing workflows
+that process lists of spectra continue to work. For new workflows, however, `SpectraCollection`
+is recommended whenever a complete dataset is imported, cleaned, filtered,
+exported, or compared.
+
+.. image:: readthedocs/_static/matchms_modular_design_v1_0.png
+   :target: readthedocs/_static/matchms_modular_design_v1_0.png
+   :align: left
+   :alt: matchms code design
+
+
+Citation
+========
 
 If you use matchms in your research, please cite the following software papers:  
 
 F Huber, S. Verhoeven, C. Meijer, H. Spreeuw, E. M. Villanueva Castilla, C. Geng, J.J.J. van der Hooft, S. Rogers, A. Belloum, F. Diblen, J.H. Spaaks, (2020). matchms - processing and similarity evaluation of mass spectrometry data. Journal of Open Source Software, 5(52), 2411, https://doi.org/10.21105/joss.02411
 
 de Jonge NF, Hecht H, Michael Strobel, Mingxun Wang, van der Hooft JJJ, Huber F. (2024). Reproducible MS/MS library cleaning pipeline in matchms. Journal of Cheminformatics, 2024, https://jcheminf.biomedcentral.com/articles/10.1186/s13321-024-00878-1
+
+Quick start: collection-first workflow
+======================================
+
+A typical matchms workflow starts by loading an MS/MS dataset directly as a
+``SpectraCollection``:
+
+.. code-block:: python
+
+    from matchms.importing import load_ms2_dataset
+
+    collection = load_ms2_dataset("my_spectra.mgf")  # you could here specify the required precision, default is: mz_precision=0.000001
+
+    print(collection)
+    print(collection.metadata.head())
+    print(collection.n_spectra)
+
+Filters can then be applied directly to the collection:
+
+.. code-block:: python
+
+    from matchms.filtering import (
+        harmonize_missing_entries,
+        select_by_relative_intensity,
+        require_minimum_number_of_peaks,
+    )
+
+    collection = harmonize_missing_entries(collection)
+    collection = select_by_relative_intensity(
+        collection,
+        intensity_from=0.01,
+        intensity_to=1.0,
+    )
+    collection = require_minimum_number_of_peaks(collection, n_required=5)
+
+The processed collection can be exported again:
+
+.. code-block:: python
+
+    collection.to_mgf("processed_spectra.mgf")
+    collection.to_msp("processed_spectra.msp")
+    collection.to_json("processed_spectra.json")
+
+Similarity scores can be computed from the processed collection:
+
+.. code-block:: python
+
+    from matchms.similarity import ModifiedCosine
+
+    similarity = ModifiedCosine(tolerance=0.01)
+    scores = similarity.matrix(collection)
+
+
+Core concepts
+=============
+
+SpectraCollection
+-----------------
+
+``SpectraCollection`` is the central matchms representation for complete MS/MS
+datasets. It stores many spectra in a synchronized collection layout and keeps
+spectrum-level metadata aligned with fragment peak data.
+
+A collection separates dataset storage into:
+
+- ``MetadataCollection``: a pandas-based table where each row corresponds to one
+  spectrum.
+- ``FragmentCollection``: a backend for storing all fragment peaks. The default
+  backend is ``CSRFragmentCollection``, which stores peaks in a sparse matrix
+  with spectra as rows and binned m/z values as columns.
+
+The central invariant is:
+
+.. code-block:: text
+
+    len(collection.metadata) == len(collection.fragments) == collection.n_spectra
+
+Metadata row ``i`` and fragment row ``i`` always describe the same spectrum.
+Operations such as slicing, filtering, sorting, dropping, and deduplication
+preserve this alignment.
+
+Example:
+
+.. code-block:: python
+
+    from matchms.importing import load_ms2_dataset
+
+    collection = load_ms2_dataset("my_spectra.mgf")
+
+    print(collection)
+    print(collection.metadata.head())
+    print(collection.describe())
+
+    first_spectrum = collection[0]
+
+``SpectraCollection`` supports dataset-level selection while keeping metadata
+and fragment data synchronized:
+
+.. code-block:: python
+
+    # Select spectra by metadata
+    positive = collection.filter(collection.metadata["ionmode"] == "positive")
+
+    # Sort spectra by metadata
+    sorted_collection = collection.sort("precursor_mz")
+
+    # Select spectra and restrict m/z range
+    selected = collection[:100, 50.0:500.0]
+
+    # Drop spectra without peaks
+    collection = collection.drop_empty_spectra()
+
+    # Drop duplicate spectra
+    collection = collection.drop_duplicates()
+
+Individual rows can still be accessed as regular ``Spectrum`` objects:
+
+.. code-block:: python
+
+    spectrum = collection[0]
+
+    print(spectrum.peaks.mz)
+    print(spectrum.get("precursor_mz"))
+
+It is also possible to run a simple for loop: ``for spectrum in collection:``
+
+Spectrum
+--------
+
+``Spectrum`` represents one mass spectrum. It contains:
+
+- ``Fragments``: the m/z and intensity arrays of one spectrum.
+- ``Metadata``: one spectrum-level metadata dictionary.
+
+``Spectrum`` is useful for individual spectra, custom spectrum-wise algorithms,
+and backward-compatible workflows (e.g., for projects partly using matchms < 1.0).
+
+Example:
+
+.. code-block:: python
+
+    import numpy as np
+    from matchms import Spectrum
+
+    spectrum = Spectrum(
+        mz=np.array([100.0, 150.0, 200.0]),
+        intensities=np.array([0.1, 0.5, 1.0]),
+        metadata={
+            "precursor_mz": 201.1,
+            "ionmode": "positive",
+            "smiles": "CCCO",
+        },
+    )
+
+    print(spectrum.peaks.mz)
+    print(spectrum.get("precursor_mz"))
+
+
+Importing datasets
+==================
+
+For new workflows, use ``load_ms2_dataset`` to import a complete dataset as a
+``SpectraCollection``:
+
+.. code-block:: python
+
+    from matchms.importing import load_ms2_dataset
+
+    collection = load_ms2_dataset("my_spectra.mgf")
+
+The file type is detected automatically from the file extension. Supported file
+types include ``mzML``, ``mzXML``, ``mgf``, ``msp``, ``json``, and ``pickle``.
+
+If needed, the file type can be specified explicitly:
+
+.. code-block:: python
+
+    collection = load_ms2_dataset("my_file.txt", ftype="mgf")
+
+Metadata harmonization is enabled by default:
+
+.. code-block:: python
+
+    collection = load_ms2_dataset(
+        "my_spectra.mgf",
+        metadata_harmonization=True,
+    )
+
+For lower-level workflows, individual importers remain available:
+
+.. code-block:: python
+
+    from matchms.importing import load_from_mgf
+
+    spectra = list(load_from_mgf("my_spectra.mgf"))
+
+The helper ``load_spectra`` returns spectra as ``Spectrum`` objects or iterables
+of ``Spectrum`` objects:
+
+.. code-block:: python
+
+    from matchms.importing import load_spectra
+
+    spectra = list(load_spectra("my_spectra.mgf"))
+
+
+Exporting datasets
+==================
+
+``SpectraCollection`` objects can be exported directly:
+
+.. code-block:: python
+
+    collection.to_mgf("processed_spectra.mgf")
+    collection.to_msp("processed_spectra.msp")
+    collection.to_json("processed_spectra.json")
+
+MGF and MSP export support appending to an existing file:
+
+.. code-block:: python
+
+    collection.to_mgf("combined_spectra.mgf", append=True)
+    collection.to_msp("combined_spectra.msp", append=True)
+
+The export style can be selected where supported:
+
+.. code-block:: python
+
+    collection.to_mgf("processed_spectra.mgf", export_style="gnps")
+    collection.to_msp("processed_spectra.msp", export_style="nist")
+
+The classic ``save_spectra`` wrapper remains available for workflows that work
+with individual ``Spectrum`` objects or lists of spectra:
+
+.. code-block:: python
+
+    from matchms.exporting import save_spectra
+
+    save_spectra(spectra, "processed_spectra.mgf")
+
+
+Filtering and processing
+========================
+
+Many matchms filters support both ``Spectrum`` and ``SpectraCollection`` input.
+When a filter receives a collection, it operates on all rows while preserving
+the alignment between metadata and fragment data.
+
+.. code-block:: python
+
+    from matchms.filtering import (
+        harmonize_missing_entries,
+        select_by_relative_intensity,
+        require_minimum_number_of_peaks,
+    )
+
+    collection = harmonize_missing_entries(collection)
+    collection = select_by_relative_intensity(collection, intensity_from=0.01)
+    collection = require_minimum_number_of_peaks(collection, n_required=5)
+
+For filters that remove spectra, the behavior depends on the input type:
+
+- For ``Spectrum`` input, a failing spectrum returns ``None``.
+- For ``SpectraCollection`` input, failing rows are removed from both metadata
+  and fragments.
+
+This keeps the collection synchronized throughout the workflow.
+
+SpectraProcessor
+----------------
+
+``SpectraProcessor`` provides a single processing pipeline for both individual
+``Spectrum`` objects and complete ``SpectraCollection`` objects.
+
+The processor uses the same ordered list of filters for both execution paths,
+but provides explicit methods for choosing how the pipeline is applied:
+
+- `process_spectrum()` applies all filters sequentially to one ``Spectrum``.
+- `process_collection()` applies each filter to the complete
+  ``SpectraCollection``, allowing collection-native and vectorized filter
+  implementations to be used.
+
+For collection-based workflows:
+
+.. code-block:: python
+
+    from matchms import SpectraProcessor
+    from matchms.importing import load_ms2_dataset
+
+    collection = load_ms2_dataset("my_spectra.mgf")
+
+    processor = SpectraProcessor(
+        filters=[
+            "harmonize_missing_entries",
+            ("select_by_relative_intensity", {"intensity_from": 0.01}),
+            ("require_minimum_number_of_peaks", {"n_required": 5}),
+        ]
+    )
+
+    processed_collection = processor.process_collection(collection)
+
+For individual spectra, the same processor and filter configuration can be
+used:
+
+.. code-block:: python
+
+    from matchms import SpectraProcessor
+    from matchms.filtering.default_pipelines import BASIC_FILTERS
+    from matchms.importing import load_spectra
+
+    spectra = list(load_spectra("my_spectra.mgf"))
+    processor = SpectraProcessor(BASIC_FILTERS)
+
+    processed_spectra = [
+        processed
+        for spectrum in spectra
+        if (processed := processor.process_spectrum(spectrum)) is not None
+    ]
+
+Both processing methods copy the input once before applying the pipeline, so the
+original ``Spectrum`` or ``SpectraCollection`` is not modified.
+
+``SpectraProcessor`` accepts filter descriptions in several forms:
+
+.. code-block:: python
+
+    filters = [
+        "harmonize_missing_entries",
+        ("select_by_intensity", {"intensity_from": 10.0, "intensity_to": 1000.0}),
+        custom_filter_function,
+        (custom_filter_with_parameters, {"parameter": "value"}),
+    ]
+
+Known matchms filters are ordered according to the matchms filter order. Custom
+filters are appended unless a specific position is supplied.
+
+Processing reports
+------------------
+
+``SpectraProcessor`` can optionally collect a processing report that summarizes
+how much each filter changed the data.
+
+.. code-block:: python
+
+    processor = SpectraProcessor(
+        filters=[
+            "harmonize_missing_entries",
+            ("select_by_relative_intensity", {"intensity_from": 0.01}),
+            ("require_minimum_number_of_peaks", {"n_required": 5}),
+        ]
+    )
+
+    report = processor.create_processing_report()
+
+    processed_collection = processor.process_collection(
+        collection,
+        processing_report=report,
+    )
+
+    print(report.to_dataframe())
+
+The report records, for each filter:
+
+- the number of input spectra,
+- the number of output spectra,
+- the number of removed spectra,
+- the number of spectra with changed metadata,
+- the number of spectra with changed fragments.
+
+Changes are detected using metadata and fragment hashes, so reporting does not
+require keeping full copies of the data before every processing step.
+
+The same reporting mechanism can also be used with ``process_spectrum()``:
+
+.. code-block:: python
+
+    report = processor.create_processing_report()
+
+    processed_spectrum = processor.process_spectrum(
+        spectrum,
+        processing_report=report,
+    )
+
+
+Metadata handling
+=================
+
+For collections, metadata is stored in ``MetadataCollection``, a pandas-based
+table. Each row corresponds to one spectrum, and columns correspond to metadata
+fields.
+
+.. code-block:: python
+
+    print(collection.metadata.head())
+    print(collection.metadata.columns)
+
+Metadata column names can be harmonized using matchms key conventions:
+
+.. code-block:: python
+
+    collection = collection.harmonize_metadata_columns()
+
+For example:
+
+.. code-block:: python
+
+    "Precursor MZ" -> "precursor_mz"
+    "Compound Name" -> "compound_name"
+
+Missing metadata values can be harmonized with:
+
+.. code-block:: python
+
+    from matchms.filtering import harmonize_missing_entries
+
+    collection = harmonize_missing_entries(collection)
+
+By default, common aliases for missing values such as ``""``, ``"N/A"``,
+``"NA"``, ``"n/a"``, ``"NaN"``, ``"None"``, and ``"no data"`` are interpreted
+as missing entries.
+
+Older specialized filters such as ``harmonize_undefined_inchi``,
+``harmonize_undefined_inchikey``, and ``harmonize_undefined_smiles`` are kept for
+backward compatibility but are deprecated in favor of
+``harmonize_missing_entries``.
+
+For individual spectra, metadata is stored in a ``Metadata`` object and can be
+accessed with:
+
+.. code-block:: python
+
+    spectrum.get("precursor_mz")
+    spectrum.set("compound_name", "example")
+
+
+Peak data handling
+==================
+
+For collections, peak data is stored in a ``FragmentCollection`` backend. The
+default backend is ``CSRFragmentCollection``, which stores peaks in a sparse
+matrix.
+
+This enables efficient dataset-level operations such as:
+
+- counting peaks per spectrum,
+- selecting peaks by intensity,
+- selecting peaks by relative intensity,
+- filtering spectra by number of peaks,
+- slicing m/z ranges,
+- computing fragment hashes,
+- computing summary statistics.
+
+Example:
+
+.. code-block:: python
+
+    peak_counts = collection.fragments.count(axis=1)
+    intensity_sums = collection.fragments.sum(axis=1)
+
+    selected = collection[:, 50.0:500.0]
+
+Because the default collection backend uses binned sparse storage, spectra
+reconstructed from a ``SpectraCollection`` may contain m/z values corresponding
+to bin centers rather than the exact original m/z values. This is important when
+testing for exact m/z equality; use numerical tolerances where appropriate.
+
+For individual spectra, peak data is available through ``spectrum.peaks``:
+
+.. code-block:: python
+
+    spectrum.peaks.mz
+    spectrum.peaks.intensities
+
+
+Similarity measures
+-------------------
+
+Matchms provides several similarity measures in ``matchms.similarity`` for
+comparing mass spectra, spectrum metadata, and molecular structures.
+
+For most spectral comparisons, start with one of the high-level classes
+``Cosine``, ``ModifiedCosine``, or ``Entropy``. These classes select suitable
+implementations internally for pairwise and matrix computations. More
+specialized implementations are also available when explicit control over the
+algorithm is needed.
+
+.. list-table:: Similarity measures at a glance
+   :header-rows: 1
+   :widths: 18 22 38 32
+
+   * - Similarity
+     - Recommended class
+     - Typical use
+     - Specialized implementations
+   * - Cosine
+     - ``Cosine``
+     - Standard peak-based spectral similarity.
+     - ``CosineGreedy``,
+       ``CosineHungarian``,
+       ``CosineLinear``,
+       ``CosineFlash``,
+       ``CosineBlink``
+   * - Modified cosine
+     - ``ModifiedCosine``
+     - Spectral similarity allowing fragment matches shifted by the difference
+       in precursor m/z.
+     - ``ModifiedCosineGreedy``,
+       ``ModifiedCosineHungarian``;
+       ``CosineFlash`` with ``matching_mode="hybrid"``
+   * - Spectral entropy
+     - ``Entropy``
+     - Entropy-weighted spectral similarity. A good alternative to cosine-based
+       scoring.
+     - ``EntropyGreedy``,
+       ``FlashEntropy``
+   * - Neutral-loss cosine
+     - ``NeutralLossesCosine``
+     - Compare spectra based on neutral-loss rather than fragment m/z patterns.
+     -
+   * - Binned spectra
+     - ``BinnedEmbeddingSimilarity``
+     - Compare fixed-width binned spectrum representations using cosine or
+       Euclidean similarity.
+     -
+   * - Molecular structure
+     - ``FingerprintSimilarity``
+     - Compare molecular fingerprints derived from structure metadata.
+     -
+   * - Metadata
+     - ``MetadataMatch``
+     - Compare arbitrary metadata fields using exact or tolerance-based matching.
+     -
+   * - Precursor or parent mass
+     - ``PrecursorMzMatch``,
+       ``ParentMassMatch``
+     - Simple matching based on precursor m/z or parent mass.
+     -
+
+Similarity matrices can be computed directly from a collection:
+
+.. code-block:: python
+
+    from matchms.similarity import Entropy
+
+    similarity = Entropy(tolerance=0.02)
+    scores = similarity.matrix(collection)
+
+The same API can be used to compare two collections:
+
+.. code-block:: python
+
+    from matchms.similarity import ModifiedCosine
+
+    similarity = ModifiedCosine(tolerance=0.01)
+    scores = similarity.matrix(references, queries)
+
+Pairwise scoring of individual spectra remains supported:
+
+.. code-block:: python
+
+    from matchms.similarity import Cosine
+
+    score = Cosine(tolerance=0.1).pair(spectrum_1, spectrum_2)
+
+The specialized classes are useful when a particular implementation is
+required. For example, ``CosineHungarian`` performs optimal peak assignment,
+while ``CosineGreedy`` provides the corresponding greedy approximation.
+``EntropyGreedy`` provides a simple pair-oriented spectral entropy
+implementation, whereas ``FlashEntropy`` is designed for fast matrix
+computations.
+
+
+Installation
+============
+
+Prerequisites:
+
+- Python 3.11 - 3.14
+- Anaconda or another virtual environment manager is recommended
+
+Install matchms with conda:
+
+.. code-block:: console
+
+    conda create --name matchms python=3.13
+    conda activate matchms
+    conda install --channel bioconda --channel conda-forge matchms
+
+
+Documentation for users
+=======================
+
+For more extensive documentation, see:
+
+- `Read the Docs <https://matchms.readthedocs.io/en/latest/>`_
+- `matchms introduction tutorial <https://blog.esciencecenter.nl/build-your-own-mass-spectrometry-analysis-pipeline-in-python-using-matchms-part-i-d96c718c68ee>`_
+- `user documentation <https://matchms.github.io/matchms-docs/intro.html>`_
+
+
+matchms ecosystem
+=================
+
+Additional packages can complement matchms functionality:
+
+- `Spec2Vec <https://github.com/iomega/spec2vec>`_: machine-learning spectral
+  similarity scoring.
+- `MS2DeepScore <https://github.com/matchms/ms2deepscore>`_: supervised
+  deep-learning-based spectral similarity scoring.
+- `matchmsextras <https://github.com/matchms/matchmsextras>`_: additional tools
+  for networks, PubChem search, and plotting.
+- `MS2Query <https://github.com/iomega/ms2query>`_: MS/MS spectral analogue
+  search.
+- `memo <https://github.com/mandelbrot-project/memo>`_: retention-time agnostic
+  alignment of metabolomics samples.
+- `RIAssigner <https://github.com/RECETOX/RIAssigner>`_: retention index
+  calculation for GC-MS data.
+- `MSMetaEnhancer <https://github.com/RECETOX/MSMetaEnhancer>`_: metadata
+  enrichment using web services and computational chemistry packages.
+- `SimMS <https://github.com/PangeAI/SimMS>`_: GPU-based implementations of
+  common similarity classes.
+
+If you know of another package that is compatible with matchms, let us know.
+
+
+Ecosystem compatibility
+-----------------------
+
+.. compatibility matrix start
+
+.. list-table::
+   :header-rows: 1
+
+   * - NumPy Version
+     - spec2vec Status
+     - ms2deepscore Status
+     - ms2query Status
+   * - .. image:: https://img.shields.io/badge/numpy-1.25-lightgrey?logo=numpy
+          :alt: numpy
+     - .. image:: https://img.shields.io/badge/spec2vec-0.9.1-green
+     - .. image:: https://img.shields.io/badge/ms2deepscore-2.7.2-green
+     - .. image:: https://img.shields.io/badge/ms2query-1.5.4-red
+   * - .. image:: https://img.shields.io/badge/numpy-2.1-lightgrey?logo=numpy
+          :alt: numpy
+     - .. image:: https://img.shields.io/badge/spec2vec-0.9.1-green
+     - .. image:: https://img.shields.io/badge/ms2deepscore-2.7.2-green
+     - .. image:: https://img.shields.io/badge/ms2query-1.5.4-red
+
+.. compatibility matrix end
+
+
+Documentation for developers
+============================
+
+Development installation
+------------------------
+
+.. code-block:: console
+
+    git clone https://github.com/matchms/matchms.git
+    cd matchms
+
+    # Create environment using conda
+    conda create --name matchms-dev python=3.13
+    conda activate matchms-dev
+
+    # Or create environment using uv
+    uv venv --python 3.13
+    uv sync --group dev
+
+    # Or install with pip
+    pip install -r dev-requirements.txt
+    pip install --editable .
+
+
+Code quality
+------------
+
+Run the linter and formatter:
+
+.. code-block:: console
+
+    ruff check --fix matchms/YOUR-MODIFIED-FILE.py
+    ruff format matchms/YOUR-MODIFIED-FILE.py
+
+Install pre-commit hooks:
+
+.. code-block:: console
+
+    pre-commit install
+
+Run tests:
+
+.. code-block:: console
+
+    pytest
+
+
+Developer notes: collection-first design
+----------------------------------------
+
+When adding new functionality, prefer ``SpectraCollection`` support from the
+start. New filters should ideally support both ``Spectrum`` and
+``SpectraCollection`` inputs.
+
+For filters with separate spectrum and collection implementations, use
+``collection_filter``:
+
+.. code-block:: python
+
+    def _my_filter_spectrum(spectrum_in, ..., clone=True):
+        ...
+
+    def _my_filter_collection(collection, ..., clone=True):
+        ...
+
+    my_filter = collection_filter(
+        _my_filter_spectrum,
+        collection_impl=_my_filter_collection,
+    )
+
+For metadata-only filters, prefer metadata-level implementations and dispatch
+helpers:
+
+.. code-block:: python
+
+    def _my_metadata_filter(metadata, ...):
+        ...
+
+    my_filter = metadata_update_filter(_my_metadata_filter)
+
+For requirement filters that keep or remove spectra, use a predicate-style
+metadata implementation:
+
+.. code-block:: python
+
+    def _require_my_metadata(metadata, ...) -> bool:
+        ...
+
+    require_my_metadata = metadata_requirement_filter(_require_my_metadata)
+
+General recommendations:
+
+- Prefer collection-native implementations for new filters.
+- Metadata-only filters should operate on ``MetadataCollection`` or metadata rows.
+- Peak-only filters should operate on ``FragmentCollection``.
+- Filters that drop spectra should return ``None`` for failing ``Spectrum``
+  inputs and should drop rows for ``SpectraCollection`` inputs.
+- Filters should preserve alignment between metadata rows and fragment rows.
+- Avoid introducing pandas-specific missing values into reconstructed
+  ``Spectrum`` metadata.
+- Prefer ``ValueError`` over ``assert`` for user-facing validation.
+- Add tests for both ``Spectrum`` and ``SpectraCollection`` behavior whenever a
+  public filter supports both input types.
+
+
+Conda package
+=============
+
+The conda packaging is handled by a `recipe at Bioconda <https://github.com/bioconda/bioconda-recipes/blob/master/recipes/matchms/meta.yaml>`_.
+
+Publishing to PyPI will trigger the creation of a pull request on the Bioconda
+recipes repository. Once the pull request is merged, the new version of matchms
+will appear on `Anaconda <https://anaconda.org/bioconda/matchms>`_.
+
+
+Support
+=======
+
+To get support, join the public
+`Slack channel <https://join.slack.com/t/matchms/shared_invite/zt-2l0t61651-Svv0d5hwl~P5jwV4ZCNFXg>`_.
+
+
+Contributing
+============
+
+If you want to contribute to matchms development, see the
+`contribution guidelines <CONTRIBUTING.md>`_.
+
+
+License
+=======
+
+Copyright (c) 2026, Düsseldorf University of Applied Sciences
+
+Licensed under the Apache License, Version 2.0. You may not use this file except
+in compliance with the License. You may obtain a copy of the License at:
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed
+under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+CONDITIONS OF ANY KIND, either express or implied. See the License for the
+specific language governing permissions and limitations under the License.
+
 
 
 .. |GitHub Badge| image:: https://img.shields.io/badge/github-repo-000.svg?logo=github&labelColor=gray&color=blue
@@ -85,333 +905,3 @@ de Jonge NF, Hecht H, Michael Strobel, Mingxun Wang, van der Hooft JJJ, Huber F.
 .. |Sonarcloud Coverage Badge| image:: https://sonarcloud.io/api/project_badges/measure?project=matchms_matchms&metric=coverage
    :target: https://sonarcloud.io/component_measures?id=matchms_matchms&metric=Coverage&view=list
    :alt: Sonarcloud Coverage
-
-**********************************
-Latest changes (matchms >= 0.18.0)
-**********************************
-
-Pipeline class
-==============
-
-To make typical matchms workflows (data import, processing, score computations) more accessible to users, matchms now offers a `Pipeline` class to handle complex workflows. This also allows to create, import, export, or modify workflows using yaml files. See code examples below (and soon: updated tutorial).
-
-Sparse scores array
-===================
-
-We realized that many matchms-based workflows aim to compare many-to-many spectra whereby not all pairs and scores are equally important. Often, for instance, it will be about searching similar or related spectra/compounds. This also means that often not all scores need to be stored (or computed). For this reason, we now shifted to a sparse handling of scores in matchms (that means: only storing actually computed, non-null values).
-
-.. image:: readthedocs/_static/matchms_sketch.png
-   :target: readthedocs/_static/matchms_sketch.png
-   :align: left
-   :alt: matchms code design
-
-
-***********************
-Documentation for users
-***********************
-For more extensive documentation `see our readthedocs <https://matchms.readthedocs.io/en/latest/>`_, our `matchms introduction tutorial <https://blog.esciencecenter.nl/build-your-own-mass-spectrometry-analysis-pipeline-in-python-using-matchms-part-i-d96c718c68ee>`_ or the `user documentation <https://matchms.github.io/matchms-docs/intro.html>`_.
-
-Installation
-============
-
-Prerequisites:  
-
-- Python 3.10 - 3.14, (higher versions should work as well, but are not yet tested systematically)
-- Anaconda (recommended)
-
-We recommend installing matchms in a new virtual environment to avoid dependency clashes
-
-.. code-block:: console
-
-  conda create --name matchms python=3.12
-  conda activate matchms
-  conda install --channel bioconda --channel conda-forge matchms
-
-matchms ecosystem -> additional functionalities
-===============================================
-
-Additional packages can complement Matchms functionalities.  
-To date, we are aware of:
-
-+ `Spec2Vec <https://github.com/iomega/spec2vec>`_ an alternative machine-learning spectral similarity score that can be installed by `pip install spec2vec` and be imported as `from spec2vec import Spec2Vec` following the same API as the scores in `matchms.similarity`.
-
-+ `MS2DeepScore <https://github.com/matchms/ms2deepscore>`_ a supervised, deep-learning based spectral similarity score that can be installed by `pip install ms2deepscore` and be imported as `from ms2deepscore import MS2DeepScore` following the same API as the scores in `matchms.similarity`.
-
-+ `matchmsextras <https://github.com/matchms/matchmsextras>`_ contains additional functions to create networks based on spectral similarities, run spectrum searchers against `PubChem`, or additional plotting methods.
-
-+ `MS2Query <https://github.com/iomega/ms2query>`_ Reliable and fast MS/MS spectral-based analogue search, running on top of matchms.
-
-+ `memo <https://github.com/mandelbrot-project/memo>`_ a method allowing a Retention Time (RT) agnostic alignment of metabolomics samples using the fragmentation spectra (MS2) of their constituents.
-
-+ `RIAssigner <https://github.com/RECETOX/RIAssigner>`_ a tool for retention index calculation for gas chromatography - mass spectrometry (GC-MS) data.
-
-+ `MSMetaEnhancer <https://github.com/RECETOX/MSMetaEnhancer>`_ is a Python package to collect mass spectral library metadata using various web services and computational chemistry packages.
-
-+ `SimMS <https://github.com/PangeAI/SimMS>`_ is a python package with fast GPU-based implementations of common similarity classes such as `CudaCosineGreedy`, and `CudaModifiedCosine`.
-
-*(if you know of any other packages that are fully compatible with matchms, let us know!)*
-
-Ecosystem compatibility
------------------------
-
-.. compatibility matrix start
-
-.. list-table::
-   :header-rows: 1
-
-   * - NumPy Version
-     - spec2vec Status
-     - ms2deepscore Status
-     - ms2query Status
-   * - .. image:: https://img.shields.io/badge/numpy-1.25-lightgrey?logo=numpy :alt: numpy
-     - .. image:: https://img.shields.io/badge/spec2vec-0.9.1-green
-     - .. image:: https://img.shields.io/badge/ms2deepscore-2.9.0-green
-     - .. image:: https://img.shields.io/badge/ms2query-1.5.4-red
-   * - .. image:: https://img.shields.io/badge/numpy-2.1-lightgrey?logo=numpy :alt: numpy
-     - .. image:: https://img.shields.io/badge/spec2vec-0.9.1-green
-     - .. image:: https://img.shields.io/badge/ms2deepscore-2.9.0-green
-     - .. image:: https://img.shields.io/badge/ms2query-1.5.4-red
-
-.. compatibility matrix end
-
-Introduction
-============
-
-To get started with matchms, we recommend following our `matchms introduction tutorial <https://blog.esciencecenter.nl/build-your-own-mass-spectrometry-analysis-pipeline-in-python-using-matchms-part-i-d96c718c68ee>`_.
-
-Below is an example of using default filter steps for cleaning spectra, 
-followed by calculating the Cosine score between mass Spectra in the `tests/testdata/pesticides.mgf <https://github.com/matchms/matchms/blob/master/tests/testdata/pesticides.mgf>`_ file.
-
-.. code-block:: python
-
-    from matchms.Pipeline import Pipeline, create_workflow
-
-    workflow = create_workflow(
-        yaml_file_name="my_config_file.yaml", # The workflow will be stored in a yaml file, this can be used to rerun your workflow or to share it with others.
-        score_computations=[["cosinegreedy", {"tolerance": 1.0}]],
-        )
-    pipeline = Pipeline(workflow)
-    pipeline.logging_file = "my_pipeline.log"  # for pipeline and logging message
-    pipeline.run("tests/testdata/pesticides.mgf")
-    
-Below is a more advanced code example showing how you can make a specific pipeline for your needs.
-
-.. code-block:: python
-
-    import os
-    from matchms.Pipeline import Pipeline, create_workflow
-    from matchms.filtering.default_pipelines import DEFAULT_FILTERS, LIBRARY_CLEANING
-    
-    results_folder = "./results"
-    os.makedirs(results_folder, exist_ok=True)
-    
-    workflow = create_workflow(
-        yaml_file_name=os.path.join(results_folder, "my_config_file.yaml"),  # The workflow will be stored in a yaml file.
-        query_filters=DEFAULT_FILTERS,
-        reference_filters=LIBRARY_CLEANING + ["add_fingerprint"],
-        score_computations=[["precursormzmatch", {"tolerance": 100.0}],
-                            ["cosinegreedy", {"tolerance": 1.0}],
-                            ["filter_by_range", {"name": "CosineGreedy_score", "low": 0.2}]],
-    )
-    pipeline = Pipeline(workflow)
-    pipeline.logging_file = os.path.join(results_folder, "my_pipeline.log")  # for pipeline and logging message
-    pipeline.logging_level = "WARNING"  # To define the verbosety of the logging
-    pipeline.run("tests/testdata/pesticides.mgf", "my_reference_library.mgf",
-                 cleaned_query_file=os.path.join(results_folder, "cleaned_query_spectra.mgf"),
-                 cleaned_reference_file=os.path.join(results_folder,
-                                                     "cleaned_library_spectra.mgf"))  # choose your own files
-
-
-Alternatively, in particular, if you need more room to add custom functions and steps, the individual steps can run without using the matchms ``Pipeline``:
-
-.. code-block:: python
-    
-    from matchms.importing import load_from_mgf
-    from matchms.filtering import default_filters, normalize_intensities
-    from matchms import calculate_scores
-    from matchms.similarity import CosineGreedy
-
-    # Read spectra from a MGF formatted file, for other formats see https://matchms.readthedocs.io/en/latest/api/matchms.importing.html 
-    file = load_from_mgf("tests/testdata/pesticides.mgf")
-
-    # Apply filters to clean and enhance each spectrum
-    spectra = []
-    for spectrum in file:
-        # Apply default filter to standardize ion mode, correct charge and more.
-        # Default filter is fully explained at https://matchms.readthedocs.io/en/latest/api/matchms.filtering.html .
-        spectrum = default_filters(spectrum)
-        # Scale peak intensities to maximum of 1
-        spectrum = normalize_intensities(spectrum)
-        spectra.append(spectrum)
-
-    # Calculate Cosine similarity scores between all spectra
-    # For other similarity score methods see https://matchms.readthedocs.io/en/latest/api/matchms.similarity.html .
-    scores = calculate_scores(references=spectra,
-                              queries=spectra,
-                              similarity_function=CosineGreedy())
-
-    # Matchms allows to get the best matches for any query using scores_by_query
-    query = spectra[15]  # just an example
-    best_matches = scores.scores_by_query(query, 'CosineGreedy_score', sort=True)
-
-    # Print the calculated scores for each spectrum pair
-    for (reference, score) in best_matches[:10]:
-        # Ignore scores between same spectra
-        if reference is not query:
-            print(f"Reference scan id: {reference.metadata['scans']}")
-            print(f"Query scan id: {query.metadata['scans']}")
-            print(f"Score: {score[0]:.4f}")
-            print(f"Number of matching peaks: {score[1]}")
-            print("----------------------------")
-
-
-Different spectrum similarity scores
-====================================
-
-Matchms comes with numerous different scoring methods in `matchms.similarity` but can also be supplemented by scores from external packages such as `Spec2Vec` or `MS2DeepScore`.
-
-Code example: 
-
-.. code-block:: python
-
-    from matchms.importing import load_from_usi
-    import matchms.filtering as msfilters
-    import matchms.similarity as mssim
-
-
-    usi1 = "mzspec:GNPS:GNPS-LIBRARY:accession:CCMSLIB00000424840"
-    usi2 = "mzspec:MSV000086109:BD5_dil2x_BD5_01_57213:scan:760"
-
-    mz_tolerance = 0.1
-
-    spectrum1 = load_from_usi(usi1)
-    spectrum1 = msfilters.select_by_mz(spectrum1, 0, spectrum1.get("precursor_mz"))
-    spectrum1 = msfilters.remove_peaks_around_precursor_mz(spectrum1,
-                                                           mz_tolerance=0.1)
-
-    spectrum2 = load_from_usi(usi2)
-    spectrum2 = msfilters.select_by_mz(spectrum2, 0, spectrum1.get("precursor_mz"))
-    spectrum2 = msfilters.remove_peaks_around_precursor_mz(spectrum2,
-                                                           mz_tolerance=0.1)
-    # Compute scores:
-    similarity_cosine = mssim.CosineGreedy(tolerance=mz_tolerance).pair(spectrum1, spectrum2)
-    similarity_modified_cosine = mssim.ModifiedCosineHungarian(tolerance=mz_tolerance).pair(spectrum1, spectrum2)
-    similarity_modified_cosine_approx = mssim.ModifiedCosineGreedy(tolerance=mz_tolerance).pair(spectrum1, spectrum2)
-    similarity_neutral_losses = mssim.NeutralLossesCosine(tolerance=mz_tolerance).pair(spectrum1, spectrum2)
-
-    print(f"similarity_cosine: {similarity_cosine}")
-    print(f"similarity_modified_cosine: {similarity_modified_cosine}")
-    print(f"similarity_modified_cosine_approx: {similarity_modified_cosine_approx}")
-    print(f"similarity_neutral_losses: {similarity_neutral_losses}")
-
-    spectrum1.plot_against(spectrum2)
-
-
-****************************
-Documentation for developers
-****************************
-
-Installation
-============
-
-To install matchms, do:
-
-.. code-block:: console
-
-  git clone https://github.com/matchms/matchms.git
-  cd matchms
-  # Create environment using conda
-  conda create --name matchms-dev python=3.14
-  conda activate matchms-dev
-
-  # Create environment using uv
-  uv venv --python 3.14
-
-  # If you use uv
-  uv sync --group dev
-
-  # If you use poetry
-  python -m pip install --upgrade pip poetry
-  poetry install --with dev
-
-  # If you use pip
-  pip install -r dev-requirements.txt
-  pip install --editable .
-
-Run the linter and formatter and automatically fix issues with:
-
-.. code-block:: console
-
-  ruff check --fix matchms/YOUR-MODIFIED-FILE.py
-  ruff format matchms/YOUR-MODIFIED-FILE.py
-
-You can automate the previous steps by using a pre-commit hook. This will automatically run the linter and formatter on
-the modified files before a commit. If the linter or formatter fixes any issues, you will need to recommit your code.
-
-.. code-block:: console
-
-  pre-commit install
-
-
-Run tests (including coverage) with:
-
-.. code-block:: console
-
-  pytest
-
-
-Conda package
-=============
-
-The conda packaging is handled by a `recipe at Bioconda <https://github.com/bioconda/bioconda-recipes/blob/master/recipes/matchms/meta.yaml>`_.
-
-Publishing to PyPI will trigger the creation of a `pull request on the bioconda recipes repository <https://github.com/bioconda/bioconda-recipes/pulls?q=is%3Apr+is%3Aopen+matchms>`_
-Once the PR is merged the new version of matchms will appear on `https://anaconda.org/bioconda/matchms <https://anaconda.org/bioconda/matchms>`_
-
-Flowchart
-=========
-
-.. figure:: paper/flowchart_matchms.png
-  :width: 400
-  :alt: Flowchart
-  
-  Flowchart of matchms workflow. Reference and query spectra are filtered using the same
-  set of set filters (here: filter A and filter B). Once filtered, every reference spectrum is compared to
-  every query spectrum using the matchms.Scores object.
-
-Support
-============
-
-To get support join the public `Slack channel <https://join.slack.com/t/matchms/shared_invite/zt-2l0t61651-Svv0d5hwl~P5jwV4ZCNFXg>`_.
-
-Contributing
-============
-
-If you want to contribute to the development of matchms,
-have a look at the `contribution guidelines <CONTRIBUTING.md>`_.
-
-*******
-License
-*******
-
-Copyright (c) 2024, Düsseldorf University of Applied Sciences & Netherlands eScience Center
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-*******
-Credits
-*******
-
-This package was created with `Cookiecutter
-<https://github.com/audreyr/cookiecutter>`_ and the `NLeSC/python-template
-<https://github.com/NLeSC/python-template>`_.

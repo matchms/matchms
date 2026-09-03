@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 from matchms import Spectrum
-from .builder_Spectrum import SpectrumBuilder
+from .builder_spectrum import SpectrumBuilder
 
 
 @pytest.mark.parametrize("metadata", [

@@ -2,13 +2,15 @@ import json
 import logging
 import numpy as np
 import requests
-from ..Spectrum import Spectrum
+from ..spectrum import Spectrum
 
 
 logger = logging.getLogger("matchms")
 
 
-def load_from_usi(usi: str, server: str = "https://metabolomics-usi.gnps2.org", metadata_harmonization: bool = True):
+def load_from_usi(
+    usi: str, server: str = "https://metabolomics-usi.gnps2.org", metadata_harmonization: bool = True
+) -> Spectrum | None:
     """Load spectrum from metabolomics USI.
 
     USI returns JSON data with keys "peaks", "n_peaks" and "precuror_mz"
@@ -52,7 +54,7 @@ def load_from_usi(usi: str, server: str = "https://metabolomics-usi.gnps2.org", 
         if len(peaks) == 0:
             logger.info("Empty spectrum found (no peaks in 'peaks_json'). Will not be imported.")
             return None
-        mz_list, intensity_list = zip(*peaks)
+        mz_list, intensity_list = zip(*peaks, strict=True)
         mz_array = np.array(mz_list)
         intensity_array = np.array(intensity_list)
 

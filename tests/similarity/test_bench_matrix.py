@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 from matchms import Spectrum
-from matchms.similarity import CosineGreedy, CosineHungarian, CosineLinear, FlashSimilarity
+from matchms.similarity import CosineFlash, CosineGreedy, CosineHungarian, CosineLinear
 
 
 def _make_synthetic_spectra(n_spectra, n_peaks=30, n_common=50, tolerance=0.02, seed=42):
@@ -33,25 +33,25 @@ SIZES = [50, 100, 200]
 def test_bench_cosine_hungarian(benchmark, n_spectra):
     spectra = _make_synthetic_spectra(n_spectra)
     sim = CosineHungarian(tolerance=0.02)
-    benchmark(sim.matrix, spectra, spectra, is_symmetric=True, progress_bar=False)
+    benchmark(sim.matrix, spectra, progress_bar=False)
 
 
 @pytest.mark.parametrize("n_spectra", SIZES)
 def test_bench_cosine_greedy(benchmark, n_spectra):
     spectra = _make_synthetic_spectra(n_spectra)
     sim = CosineGreedy(tolerance=0.02)
-    benchmark(sim.matrix, spectra, spectra, is_symmetric=True, progress_bar=False)
+    benchmark(sim.matrix, spectra, progress_bar=False)
 
 
 @pytest.mark.parametrize("n_spectra", SIZES)
 def test_bench_cosine_linear(benchmark, n_spectra):
     spectra = _make_synthetic_spectra(n_spectra)
     sim = CosineLinear(tolerance=0.02)
-    benchmark(sim.matrix, spectra, spectra, is_symmetric=True, progress_bar=False)
+    benchmark(sim.matrix, spectra, progress_bar=False)
 
 
 @pytest.mark.parametrize("n_spectra", SIZES)
 def test_bench_flash_similarity(benchmark, n_spectra):
     spectra = _make_synthetic_spectra(n_spectra)
-    sim = FlashSimilarity(tolerance=0.02)
-    benchmark(sim.matrix, spectra, spectra, is_symmetric=True, n_jobs=1)
+    sim = CosineFlash(tolerance=0.02)
+    benchmark(sim.matrix, spectra, n_jobs=1)

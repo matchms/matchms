@@ -1,16 +1,15 @@
 import ast
 import json
 import logging
-from typing import List, Union
 import numpy as np
 from matchms.importing.parsing_utils import sort_by_mz
-from matchms.Spectrum import Spectrum
+from matchms.spectrum import Spectrum
 
 
 logger = logging.getLogger("matchms")
 
 
-def load_from_json(filename: str, metadata_harmonization: bool = True) -> List[Spectrum]:
+def load_from_json(filename: str, metadata_harmonization: bool = True) -> list[Spectrum]:
     """Load spectrum(s) from json file.
 
     JSON document formatted like the `GNPS Spectra library <https://gnps-external.ucsd.edu/gnpslibrary>`_.
@@ -43,9 +42,9 @@ def load_from_json(filename: str, metadata_harmonization: bool = True) -> List[S
     return spectra
 
 
-def as_spectrum(dct: dict, metadata_harmonization: bool = True) -> Union[dict, Spectrum, None]:
+def as_spectrum(dct: dict, metadata_harmonization: bool = True) -> dict | Spectrum | None:
     """A :py:func:`json.load` object_hook to convert dictionary shaped like
-    spectrum into :py:class:`~matchms.Spectrum.Spectrum` object.
+    spectrum into :class:`~matchms.spectrum.Spectrum` object.
 
     Parameters
     ----------
@@ -61,8 +60,8 @@ def as_spectrum(dct: dict, metadata_harmonization: bool = True) -> Union[dict, S
     return None
 
 
-def dict2spectrum(spectrum_dict: dict, metadata_harmonization: bool) -> Union[Spectrum, None]:
-    """Convert dictionary to a :py:class:`~matchms.Spectrum.Spectrum` object.
+def dict2spectrum(spectrum_dict: dict, metadata_harmonization: bool) -> Spectrum | None:
+    """Convert dictionary to a :class:`~matchms.spectrum.Spectrum` object.
 
     Parameters
     ----------
@@ -110,7 +109,7 @@ def dict2spectrum(spectrum_dict: dict, metadata_harmonization: bool) -> Union[Sp
 
 
 def scores_json_decoder(dct):
-    """Object_hook function to convert JSON dictionary with :py:class:`~matchms.Score.Score` object into a python
+    """Object_hook function to convert JSON dictionary with :class:`~matchms.Score.Score` object into a python
     dictionary.
     """
     if "__Scores__" not in dct and "__Similarity__" not in dct:

@@ -1,0 +1,153 @@
+import logging
+import numpy as np
+from matchms.typing import SpectrumType
+from .base_similarity import BaseSimilarityWithSparse
+from .default_parameters import (
+    DEFAULT_INTENSITY_POWER,
+    DEFAULT_MZ_POWER,
+    DEFAULT_MZ_TOLERANCE,
+    DEFAULT_NOISE_CUTOFF,
+    DEFAULT_OFFSET_TO_PRECURSOR,
+)
+from .spectrum_similarity_functions import (
+    _process_spectrum_peaks,
+    collect_peak_pairs,
+    score_best_matches,
+)
+
+
+logger = logging.getLogger("matchms")
+
+
+class CosineGreedy(BaseSimilarityWithSparse):
+    """Calculate 'cosine similarity score' between two spectra.
+
+    The cosine score aims at quantifying the similarity between two mass spectra.
+    The score is calculated by finding best possible matches between peaks
+    of two spectra. Two peaks are considered a potential match if their
+    m/z ratios lie within the given 'tolerance'.
+    The underlying peak assignment problem is here solved in a 'greedy' way.
+    This can perform notably faster, but does occasionally deviate slightly from
+    a fully correct solution (as with the Hungarian algorithm, see
+    :class:`~matchms.similarity.CosineHungarian`). In practice this will rarely
+    affect similarity scores notably, in particular for smaller tolerances.
+
+    For example
+
+    .. testcode::
+
+        import numpy as np
+        from matchms import Spectrum
+        from matchms.similarity import CosineGreedy
+
+        spectrum_1 = Spectrum(mz=np.array([100, 150, 200.]),
+                             intensities=np.array([0.7, 0.2, 0.1]),
+                             metadata={"precursor_mz": 200.0})
+        spectrum_2 = Spectrum(mz=np.array([100, 140, 190.]),
+                         intensities=np.array([0.4, 0.2, 0.1]),
+                         metadata={"precursor_mz": 190.0})
+
+        # Use factory to construct a similarity function
+        cosine_greedy = CosineGreedy(tolerance=0.2)
+
+        score = cosine_greedy.pair(spectrum_1, spectrum_2)
+
+        print(f"Cosine score is {score['score']:.2f} with {score['matches']} matched peaks")
+
+    Should output
+
+    .. testoutput::
+
+        Cosine score is 0.83 with 1 matched peaks
+
+    Unlike in matchms < 1.0, this method also applies a noise filter by default,
+    which removes peaks with intensity below a certain cutoff. This is typically
+    highly beneficial for the performance of the greedy algorithm, and for most
+    applications the results are very similar to the exact assignment variant.
+    If you want to disable this noise filtering, you can set ``noise_cutoff`` to 0 or None.
+    """
+
+    # Set key characteristics as class attributes (see BaseSimilarity for details).
+    is_commutative = True
+    score_datatype = [("score", np.float64), ("matches", "int")]
+    score_fields =("score", "matches")
+
+
+    def __init__(
+            self, tolerance: float = DEFAULT_MZ_TOLERANCE,
+            mz_power: float = DEFAULT_MZ_POWER,
+            intensity_power: float = DEFAULT_INTENSITY_POWER,
+            noise_cutoff: float = DEFAULT_NOISE_CUTOFF,
+            remove_precursor: bool = True,
+            offset_to_precursor: float = DEFAULT_OFFSET_TO_PRECURSOR
+            ):
+        """
+        Parameters
+        ----------
+        tolerance:
+            Peaks will be considered a match when <= tolerance apart. Default is 0.01.
+        mz_power:
+            The power to raise m/z to in the cosine function. The default is 0, in which
+            case the peak intensity products will not depend on the m/z ratios.
+        intensity_power:
+            The power to raise intensity to in the cosine function. The default is 1.
+        noise_cutoff:
+            Minimum relative intensity for a peak to be considered. Default is 0.01.
+        remove_precursor:
+            Whether to remove peaks with m/z values larger than the precursor-m/z (plus offset).
+        offset_to_precursor:
+            The offset to add to the precursor-m/z when removing peaks.
+        """
+        self.tolerance = tolerance
+        self.mz_power = mz_power
+        self.intensity_power = intensity_power
+        self.noise_cutoff = noise_cutoff
+        self.remove_precursor = remove_precursor
+        self.offset_to_precursor = offset_to_precursor
+
+    def pair(self, spectrum_1: SpectrumType, spectrum_2: SpectrumType) -> tuple[float, int]:
+        """Calculate cosine score between two spectra.
+
+        Parameters
+        ----------
+        spectrum_1
+            First spectrum.
+        spectrum_2
+            Second spectrum.
+
+        Returns
+        -------
+        Score
+            Tuple with cosine score and number of matched peaks.
+            The score can be access as `score["score"]` and the number of matched peaks as `score["matches"]`.
+        """
+
+        def get_matching_pairs():
+            """Get pairs of peaks that match within the given tolerance."""
+            matching_pairs = collect_peak_pairs(
+                spec1, spec2, self.tolerance, shift=0.0,
+                mz_power=self.mz_power, intensity_power=self.intensity_power
+            )
+            if matching_pairs is None:
+                return None
+            matching_pairs = matching_pairs[np.argsort(matching_pairs[:, 2], kind="mergesort")[::-1], :]
+            return matching_pairs
+
+        spec1 = _process_spectrum_peaks(
+            spectrum_1,
+            remove_precursor=self.remove_precursor,
+            offset_to_precursor=self.offset_to_precursor,
+            noise_cutoff=self.noise_cutoff,
+        )
+        spec2 = _process_spectrum_peaks(
+            spectrum_2,
+            remove_precursor=self.remove_precursor,
+            offset_to_precursor=self.offset_to_precursor,
+            noise_cutoff=self.noise_cutoff,
+        )
+
+        matching_pairs = get_matching_pairs()
+        if matching_pairs is None:
+            return np.asarray((float(0), 0), dtype=self.score_datatype)
+        score = score_best_matches(matching_pairs, spec1, spec2, self.mz_power, self.intensity_power)
+        return np.asarray(score, dtype=self.score_datatype)

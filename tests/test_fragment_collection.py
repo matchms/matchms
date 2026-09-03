@@ -1,0 +1,516 @@
+import numpy as np
+import pytest
+from scipy.sparse import csr_array
+from matchms import Spectrum
+from matchms.fragment_collection import CSRFragmentCollection
+from tests.builder_spectrum import SpectrumBuilder
+
+
+@pytest.fixture
+def sample_spectra():
+    mz1 = np.array([100.00003, 110.2, 200.581], dtype="float")
+    intensities1 = np.array([0.51, 1.0, 0.011], dtype="float")
+
+    mz2 = np.array([111.00213, 180.2, 332.342], dtype="float")
+    intensities2 = np.array([0.52, 1.0, 0.7], dtype="float")
+
+    mz3 = np.array([111.00213, 200.1, 200.213], dtype="float")
+    intensities3 = np.array([0.52, 0.5, 1.0], dtype="float")
+
+    s1 = SpectrumBuilder().with_mz(mz1).with_intensities(intensities1).build()
+    s2 = SpectrumBuilder().with_mz(mz2).with_intensities(intensities2).build()
+    s3 = SpectrumBuilder().with_mz(mz3).with_intensities(intensities3).build()
+
+    return [s1, s2, s3]
+
+
+@pytest.fixture
+def fragments(sample_spectra):
+    return CSRFragmentCollection(sample_spectra, mz_precision=0.01)
+
+
+
+@pytest.fixture
+def floor_rounding_fragments():
+    spectra = [
+        _spectrum([100.019, 150.012], [0.1, 0.5]),
+        _spectrum([200.019, 250.012], [0.2, 0.6]),
+    ]
+    return CSRFragmentCollection(
+        spectra,
+        mz_precision=0.01,
+        mz_rounding="floor",
+        index_dtype=np.int32,
+    )
+
+
+def _spectrum(mz, intensities):
+    return Spectrum(
+        mz=np.asarray(mz, dtype="float"),
+        intensities=np.asarray(intensities, dtype="float"),
+    )
+
+
+def _assert_preserves_binning_config(collection):
+    assert collection.mz_precision == pytest.approx(0.01)
+    assert collection.mz_rounding == "floor"
+    assert collection.index_dtype == np.dtype(np.int32)
+
+    # This value distinguishes floor from round at mz_precision=0.01:
+    # floor -> 100.01, round -> 100.02.
+    assert collection.bin_to_mz(collection.mz_to_bin(100.019)) == pytest.approx(100.01)
+
+
+def test_construct_from_spectra(sample_spectra):
+    fragments = CSRFragmentCollection(sample_spectra, mz_precision=0.01)
+
+    assert len(fragments) == 3
+    assert fragments.n_spectra == 3
+    assert fragments.shape[0] == 3
+    assert fragments.n_bins > 0
+    assert isinstance(fragments.array, csr_array)
+
+
+def test_construct_from_array(fragments):
+    cloned = CSRFragmentCollection.from_array(fragments.array, mz_precision=fragments.mz_precision)
+
+    assert len(cloned) == len(fragments)
+    assert cloned.mz_precision == fragments.mz_precision
+    np.testing.assert_array_equal(cloned.array.toarray(), fragments.array.toarray())
+
+
+def test_construct_invalid_mz_precision_raises(sample_spectra):
+    with pytest.raises(ValueError, match="mz_precision must be > 0"):
+        CSRFragmentCollection(sample_spectra, mz_precision=0.0)
+
+
+def test_construct_empty_spectra_raises():
+    with pytest.raises(ValueError, match="Spectra must contain at least one Spectrum"):
+        CSRFragmentCollection([], mz_precision=0.01)
+
+
+def test_construct_missing_input_raises():
+    with pytest.raises(ValueError, match="Either spectra or array must be provided"):
+        CSRFragmentCollection()
+
+
+def test_construct_array_and_spectra_raises(sample_spectra):
+    dummy = csr_array((2, 3))
+    with pytest.raises(ValueError, match="Pass either spectra or array, not both"):
+        CSRFragmentCollection(sample_spectra, array=dummy, mz_precision=0.01)
+
+
+def test_repr(fragments):
+    rep = repr(fragments)
+    assert "CSRFragmentCollection" in rep
+    assert "n_spectra=3" in rep
+    assert "mz_precision=0.01" in rep
+
+
+def test_copy(fragments):
+    cloned = fragments.copy()
+
+    assert cloned is not fragments
+    assert cloned.array is not fragments.array
+    np.testing.assert_array_equal(cloned.array.toarray(), fragments.array.toarray())
+
+
+@pytest.mark.parametrize(
+    "mz_rounding, exp_bin_idx, exp_back_mz",
+    [("floor", 12345, 123.45), ("round", 12346, 123.46)]
+    )
+def test_mz_bin_conversion(sample_spectra, mz_rounding, exp_bin_idx, exp_back_mz):
+    fragments = CSRFragmentCollection(sample_spectra, mz_precision=0.01, mz_rounding=mz_rounding)
+    mz = 123.456
+    bin_idx = fragments.mz_to_bin(mz)
+    back_mz = fragments.bin_to_mz(bin_idx)
+
+    assert bin_idx == exp_bin_idx
+    assert back_mz == pytest.approx(exp_back_mz)
+
+
+@pytest.mark.parametrize(
+    "invalid_precision, part_of_msg",
+    [(0, "mz_precision must be > 0"),
+     (-1e-4, "mz_precision must be > 0"),
+     (0.05, "power of ten"),
+     (0.005, "power of ten"),
+     (2e-6, "power of ten"),
+     ]
+    )
+def test_invalid_mz_precision_raises(invalid_precision, part_of_msg):
+    with pytest.raises(ValueError, match=part_of_msg):
+        CSRFragmentCollection(
+            [Spectrum(mz=np.array([100.0]), intensities=np.array([1.0]))],
+            mz_precision=invalid_precision,
+        )
+
+
+def test_mz_to_bin_round_uses_decimal_precision():
+    fragments = CSRFragmentCollection(
+        [Spectrum(mz=np.array([123.456]), intensities=np.array([1.0]))],
+        mz_precision=0.01,
+        mz_rounding="round",
+    )
+
+    mz, _ = fragments.get_row(0)
+
+    assert mz.tolist() == [123.46]
+
+def test_get_row(fragments):
+    mz, intensities = fragments.get_row(0)
+
+    assert len(mz) == 3
+    assert len(intensities) == 3
+    assert np.sum(intensities) == pytest.approx(1.521, abs=1e-6)
+
+
+def test_get_row_negative_index(fragments):
+    mz, intensities = fragments.get_row(-1)
+
+    assert len(mz) == 3
+    assert np.sum(intensities) == pytest.approx(2.02, abs=1e-6)
+
+
+def test_get_row_out_of_range_raises(fragments):
+    with pytest.raises(IndexError, match="row index out of range"):
+        fragments.get_row(3)
+
+
+def test_take(fragments):
+    subset = fragments.take([0, 2])
+
+    assert len(subset) == 2
+    np.testing.assert_allclose(subset.sum(axis=1), [1.521, 2.02], atol=1e-6)
+
+
+def test_reorder_alias(fragments):
+    subset = fragments.reorder([2, 0])
+
+    assert len(subset) == 2
+    np.testing.assert_allclose(subset.sum(axis=1), [2.02, 1.521], atol=1e-6)
+
+
+def test_filter(fragments):
+    subset = fragments.filter([True, False, True])
+
+    assert len(subset) == 2
+    np.testing.assert_allclose(subset.sum(axis=1), [1.521, 2.02], atol=1e-6)
+
+
+def test_filter_invalid_length_raises(fragments):
+    with pytest.raises(ValueError, match="Mask length \\(2\\) does not match number of spectra \\(3\\)"):
+        fragments.filter([True, False])
+
+
+def test_drop(fragments):
+    subset = fragments.drop([1])
+
+    assert len(subset) == 2
+    np.testing.assert_allclose(subset.sum(axis=1), [1.521, 2.02], atol=1e-6)
+
+
+def test_drop_empty(sample_spectra):
+    empty_spec = Spectrum(mz=np.array([]), intensities=np.array([]), metadata={})
+    fragments = CSRFragmentCollection(sample_spectra + [empty_spec], mz_precision=0.01)
+
+    assert len(fragments) == 4
+    cleaned = fragments.drop_empty()
+    assert len(cleaned) == 3
+
+
+def test_slice_rows_with_slice(fragments):
+    subset = fragments.slice_rows(slice(0, 2))
+
+    assert len(subset) == 2
+    np.testing.assert_allclose(subset.sum(axis=1), [1.521, 2.22], atol=1e-6)
+
+
+def test_slice_rows_with_int(fragments):
+    subset = fragments.slice_rows(1)
+
+    assert len(subset) == 1
+    np.testing.assert_allclose(subset.sum(axis=1), [2.22], atol=1e-6)
+
+
+def test_slice_rows_with_bool_mask(fragments):
+    subset = fragments.slice_rows(np.array([False, True, True]))
+
+    assert len(subset) == 2
+    np.testing.assert_allclose(subset.sum(axis=1), [2.22, 2.02], atol=1e-6)
+
+
+def test_slice_rows_invalid_selector_raises(fragments):
+    with pytest.raises(TypeError, match="Unsupported row selector"):
+        fragments.slice_rows("invalid")
+
+
+def test_slice_mz(fragments):
+    subset = fragments.slice_mz(100.0, 150.0)
+
+    assert len(subset) == 3
+    assert subset.shape[1] <= fragments.shape[1]
+
+    # First spectrum should keep 100.00003 and 110.2 peaks only
+    mz, intensities = subset.get_row(0)
+    assert len(mz) == 2
+    assert np.sum(intensities) == pytest.approx(1.51, abs=1e-6)
+
+
+def test_slice_mz_invalid_range_raises(fragments):
+    with pytest.raises(ValueError, match="mz_max must be >?= mz_min|mz_max must be >= mz_min"):
+        fragments.slice_mz(200.0, 100.0)
+
+
+def test_getitem_row_slice(fragments):
+    subset = fragments[:2]
+
+    assert isinstance(subset, CSRFragmentCollection)
+    assert len(subset) == 2
+    np.testing.assert_allclose(subset.sum(axis=1), [1.521, 2.22], atol=1e-6)
+
+
+def test_getitem_row_list(fragments):
+    subset = fragments[[0, 2]]
+
+    assert len(subset) == 2
+    np.testing.assert_allclose(subset.sum(axis=1), [1.521, 2.02], atol=1e-6)
+
+
+def test_getitem_tuple_row_and_mz_slice(fragments):
+    subset = fragments[:2, 100.0:200.0]
+
+    assert isinstance(subset, CSRFragmentCollection)
+    assert len(subset) == 2
+
+    mz0, int0 = subset.get_row(0)
+    assert np.all(mz0 < 200.01)
+    assert np.sum(int0) == pytest.approx(1.51, abs=1e-6)
+
+
+def test_getitem_invalid_tuple_length_raises(fragments):
+    with pytest.raises(IndexError, match="Expected at most two indexers"):
+        _ = fragments[0, 1, 2]
+
+
+def test_getitem_invalid_column_selector_raises(fragments):
+    with pytest.raises(TypeError, match="Unsupported column selector"):
+        _ = fragments[:, [1, 2]]
+
+
+def test_sum_axis_1(fragments):
+    sums = fragments.sum(axis=1)
+    np.testing.assert_allclose(sums, [1.521, 2.22, 2.02], atol=1e-6)
+
+
+def test_count_axis_1(fragments):
+    counts = fragments.count(axis=1)
+    np.testing.assert_array_equal(counts, [3, 3, 3])
+
+
+def test_count_axis_0(fragments):
+    counts = fragments.count(axis=0)
+    assert counts.shape[0] == fragments.shape[1]
+    assert counts.sum() == 9
+
+
+def test_count_peaks_above_relative_intensity(sample_spectra):
+    fragments = CSRFragmentCollection(sample_spectra, mz_precision=1e-6)
+
+    counts = fragments.count_peaks_above_relative_intensity(
+        intensity_from=0.5,
+    )
+
+    np.testing.assert_array_equal(
+        counts,
+        np.array([2, 3, 3]),
+    )
+
+
+def test_count_invalid_axis_raises(fragments):
+    with pytest.raises(ValueError, match="axis must be 0 or 1"):
+        fragments.count(axis=2)
+
+
+def test_row_intensity_sums(fragments):
+    np.testing.assert_allclose(fragments.row_intensity_sums(), [1.521, 2.22, 2.02], atol=1e-6)
+
+
+def test_row_peak_counts(fragments):
+    np.testing.assert_array_equal(fragments.row_peak_counts(), [3, 3, 3])
+
+
+def test_fragment_hashes_cached_property(fragments):
+    hashes_1 = fragments.fragment_hashes
+    hashes_2 = fragments.fragment_hashes
+
+    assert len(hashes_1) == len(fragments)
+    assert hashes_1 is hashes_2
+
+
+def test_fragment_hashes_equal_for_identical_input(sample_spectra):
+    fragments_1 = CSRFragmentCollection(sample_spectra, mz_precision=0.01)
+    fragments_2 = CSRFragmentCollection(sample_spectra, mz_precision=0.01)
+
+    assert np.all(fragments_1.fragment_hashes == fragments_2.fragment_hashes)
+
+
+def test_slice_mz_preserves_global_bin_shape(fragments):
+    sliced = fragments.slice_mz(100.0, 150.0)
+
+    assert sliced.shape[0] == fragments.shape[0]
+    assert sliced.shape[1] == fragments.shape[1]
+
+
+def test_slice_mz_removes_peaks_outside_range(fragments):
+    sliced = fragments.slice_mz(100.0, 150.0)
+
+    # Spectrum 0 originally has peaks near 100, 110, 200 -> only first two should remain
+    mz0, int0 = sliced.get_row(0)
+    assert len(mz0) == 2
+    assert np.all((mz0 >= 100.0) & (mz0 < 150.01))
+    assert np.sum(int0) == pytest.approx(1.51, abs=1e-6)
+
+    # Spectrum 1 originally has peaks near 111, 180, 332 -> only first should remain
+    mz1, int1 = sliced.get_row(1)
+    assert len(mz1) == 1
+    assert np.all((mz1 >= 100.0) & (mz1 < 150.01))
+    assert np.sum(int1) == pytest.approx(0.52, abs=1e-6)
+
+    # Spectrum 2 originally has peaks near 111, 200, 200 -> only first should remain
+    mz2, int2 = sliced.get_row(2)
+    assert len(mz2) == 1
+    assert np.all((mz2 >= 100.0) & (mz2 < 150.01))
+    assert np.sum(int2) == pytest.approx(0.52, abs=1e-6)
+
+
+def test_slice_mz_lower_bound_only(fragments):
+    sliced = fragments.slice_mz(200.0, None)
+
+    mz0, int0 = sliced.get_row(0)
+    assert len(mz0) == 1
+    assert np.all(mz0 >= 200.0)
+    assert np.sum(int0) == pytest.approx(0.011, abs=1e-6)
+
+    mz1, int1 = sliced.get_row(1)
+    assert len(mz1) == 1
+    assert np.all(mz1 >= 200.0)
+    assert np.sum(int1) == pytest.approx(0.7, abs=1e-6)
+
+    mz2, int2 = sliced.get_row(2)
+    assert len(mz2) == 2
+    assert np.all(mz2 >= 200.0)
+    assert np.sum(int2) == pytest.approx(1.5, abs=1e-6)
+
+
+def test_getitem_tuple_mz_slice_preserves_global_bins(fragments):
+    sliced = fragments[:2, 100.0:150.0]
+
+    assert sliced.shape[0] == 2
+    assert sliced.shape[1] == fragments.shape[1]
+
+    mz0, int0 = sliced.get_row(0)
+    assert np.all((mz0 >= 100.0) & (mz0 < 150.01))
+    assert np.sum(int0) == pytest.approx(1.51, abs=1e-6)
+
+    mz1, int1 = sliced.get_row(1)
+    assert np.all((mz1 >= 100.0) & (mz1 < 150.01))
+    assert np.sum(int1) == pytest.approx(0.52, abs=1e-6)
+
+
+def test_to_peak_arrays_matches_get_row(fragments):
+    peak_rows = fragments.to_peak_arrays()
+
+    assert isinstance(peak_rows, list)
+    assert len(peak_rows) == len(fragments)
+
+    for i, (mz, intensities) in enumerate(peak_rows):
+        mz_row, int_row = fragments.get_row(i)
+        np.testing.assert_allclose(mz, mz_row)
+        np.testing.assert_allclose(intensities, int_row)
+
+
+def test_iter_peak_arrays_matches_to_peak_arrays(fragments):
+    peak_rows_from_list = fragments.to_peak_arrays()
+    peak_rows_from_iter = list(fragments.iter_peak_arrays())
+
+    assert len(peak_rows_from_iter) == len(peak_rows_from_list)
+
+    for (mz_a, int_a), (mz_b, int_b) in zip(peak_rows_from_iter, peak_rows_from_list, strict=True):
+        np.testing.assert_allclose(mz_a, mz_b)
+        np.testing.assert_allclose(int_a, int_b)
+
+
+def test_to_peak_arrays_after_mz_slice_uses_absolute_mz_coordinates(fragments):
+    sliced = fragments.slice_mz(200.0, None)
+    peak_rows = sliced.to_peak_arrays()
+
+    mz0, _ = peak_rows[0]
+    mz1, _ = peak_rows[1]
+    mz2, _ = peak_rows[2]
+
+    assert np.all(mz0 >= 200.0)
+    assert np.all(mz1 >= 200.0)
+    assert np.all(mz2 >= 200.0)
+
+
+def test_slice_mz_empty_result_keeps_shape_and_returns_empty_rows(fragments):
+    sliced = fragments.slice_mz(1000.0, 1200.0)
+
+    assert sliced.shape[0] == fragments.shape[0]
+    assert sliced.shape[1] == fragments.shape[1]
+    assert np.all(sliced.count(axis=1) == 0)
+
+    for i in range(len(sliced)):
+        mz, intensities = sliced.get_row(i)
+        assert len(mz) == 0
+        assert len(intensities) == 0
+
+
+def test_csr_fragment_collection_select_by_relative_intensity():
+    spectrum = (
+        SpectrumBuilder()
+        .with_mz(np.array([10, 20, 30, 40], dtype="float"))
+        .with_intensities(np.array([1, 10, 100, 1000], dtype="float"))
+        .build()
+    )
+    fragments = CSRFragmentCollection([spectrum])
+
+    result = fragments.select_by_relative_intensity(0.01, 0.99)
+    mz, intensities = result.get_row(0)
+
+    np.testing.assert_allclose(mz, np.array([20, 30], dtype="float"), atol=1e-6)
+    np.testing.assert_array_equal(intensities, np.array([10, 100], dtype="float"))
+
+
+
+def test_csr_fragment_collection_from_array_preserves_binning_config(floor_rounding_fragments):
+    reconstructed = CSRFragmentCollection.from_array(
+        floor_rounding_fragments.array,
+        mz_precision=floor_rounding_fragments.mz_precision,
+        mz_rounding=floor_rounding_fragments.mz_rounding,
+        index_dtype=floor_rounding_fragments.index_dtype,
+    )
+
+    _assert_preserves_binning_config(reconstructed)
+
+
+@pytest.mark.parametrize(
+    "operation",
+    [
+        lambda fragments: fragments.copy(),
+        lambda fragments: fragments.take([1, 0]),
+        lambda fragments: fragments.filter([True, False]),
+        lambda fragments: fragments.slice_mz(mz_min=100.0, mz_max=210.0),
+        lambda fragments: fragments.select_by_intensity(0.15, 0.6),
+        lambda fragments: fragments.select_by_relative_intensity(0.2, 1.0),
+        lambda fragments: fragments.keep_top_k_per_row_variable(np.array([1, 1])),
+    ],
+)
+def test_csr_fragment_collection_derived_collections_preserve_binning_config(
+    floor_rounding_fragments,
+    operation,
+):
+    derived = operation(floor_rounding_fragments)
+
+    _assert_preserves_binning_config(derived)

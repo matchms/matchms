@@ -1,13 +1,19 @@
+from __future__ import annotations
 import csv
 import logging
 import os
+from collections.abc import Callable, Iterable
 from functools import lru_cache
-from typing import Callable, Iterable, List
+from typing import TYPE_CHECKING
 from warnings import warn
-from .typing import SpectrumType
+
+
+if TYPE_CHECKING:
+    from matchms.spectrum import Spectrum
 
 
 logger = logging.getLogger("matchms")
+ALIASES_FOR_NONE = ["", "N/A", "NA", "n/a", "NaN", "None", "no data"]
 
 
 def get_first_common_element(first: Iterable[str], second: Iterable[str]) -> str:
@@ -24,7 +30,7 @@ def get_first_common_element(first: Iterable[str], second: Iterable[str]) -> str
     return next((item for item in first if item in second), None)
 
 
-def get_common_keys(first: List[str], second: List[str]) -> List[str]:
+def get_common_keys(first: list[str], second: list[str]) -> list[str]:
     """Get common elements of two sets of strings in a case insensitive way.
 
     Args:
@@ -129,13 +135,13 @@ def _load_key_conversions(file: str, source: str, target: str) -> dict:
     return key_conversions
 
 
-def fingerprint_export_warning(spectra: List[SpectrumType]):
+def fingerprint_export_warning(spectra: list[Spectrum]):
     """
     Check if any spectrum in the provided list contains a "fingerprint" and log a warning if so.
 
     Parameters
     ----------
-    spectra : List[SpectrumType]
+    spectra : List[:class:`matchms.spectrum.Spectrum`]
         A list of spectrum objects to be checked for the presence of a "fingerprint".
 
     Notes
@@ -146,7 +152,7 @@ def fingerprint_export_warning(spectra: List[SpectrumType]):
         logger.warning("fingerprint found but will not be written to file.")
 
 
-def filter_empty_spectra(spectra: List[SpectrumType]) -> List[SpectrumType]:
+def filter_empty_spectra(spectra: list[Spectrum]) -> list[Spectrum]:
     """Filter None values in spectra list.
 
     Parameters
@@ -186,7 +192,7 @@ def rename_deprecated_params(param_mapping: dict, version: str = None) -> Callab
             new_kwargs = kwargs.copy()
 
             # Handle positional arguments
-            for i, (old_param, new_param) in enumerate(param_mapping.items()):
+            for i, (_, new_param) in enumerate(param_mapping.items()):
                 if i < len(new_args):
                     new_kwargs[new_param] = new_args[i]
 
@@ -205,7 +211,7 @@ def rename_deprecated_params(param_mapping: dict, version: str = None) -> Callab
                     warn(warning_msg, DeprecationWarning, stacklevel=2)
 
             # Remove old params in keyword arguments, if present
-            for old_param in param_mapping.keys():
+            for old_param in param_mapping:
                 new_kwargs.pop(old_param, None)
 
             # Create final args based on new keyword arguments
