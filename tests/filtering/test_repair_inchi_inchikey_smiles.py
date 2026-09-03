@@ -129,3 +129,41 @@ def test_repair_inchi_inchikey_smiles_empty_spectrum():
     spectrum = repair_inchi_inchikey_smiles(None)
 
     assert spectrum is None, "Expected different handling of None spectrum."
+
+
+@pytest.mark.parametrize("as_collection", [False, True], ids=["spectrum", "collection"])
+def test_repair_inchi_inchikey_smiles_does_not_create_empty_strings(as_collection):
+    spectrum_in = (
+        SpectrumBuilder()
+        .with_metadata({"smiles": "ABTNALLHJFCFRZ-UHFFFAOYSA-N"})
+        .build()
+    )
+
+    spectrum = run_filter_as_spectrum_or_collection(
+        repair_inchi_inchikey_smiles,
+        spectrum_in,
+        as_collection,
+    )
+
+    assert spectrum.get("inchi") is None
+    assert spectrum.get("inchikey") == "ABTNALLHJFCFRZ-UHFFFAOYSA-N"
+    assert spectrum.get("smiles") is None
+
+
+def test_repair_inchi_inchikey_smiles_collection_uses_missing_values_not_empty_strings():
+    collection = SpectraCollection(
+        [
+            SpectrumBuilder()
+            .with_metadata({"smiles": "ABTNALLHJFCFRZ-UHFFFAOYSA-N"})
+            .build(),
+            SpectrumBuilder()
+            .with_metadata({"inchi": "C[C@H](Cc1ccccc1)N(C)CC#C"})
+            .build(),
+        ]
+    )
+
+    repaired = repair_inchi_inchikey_smiles(collection)
+
+    structure_metadata = repaired.metadata[["inchi", "inchikey", "smiles"]]
+
+    assert not (structure_metadata == "").any().any()
