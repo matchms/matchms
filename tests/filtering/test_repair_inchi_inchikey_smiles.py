@@ -80,8 +80,8 @@ def test_repair_inchi_inchikey_smiles_various_inchi_entered_as_smiles(as_collect
         )
 
         assert spectrum.get("inchi") == "InChI=" + inchi.replace("InChI=", "").replace('"', "")
-        assert spectrum.get("inchikey") == None
-        assert spectrum.get("smiles") == None
+        assert spectrum.get("inchikey") is None
+        assert spectrum.get("smiles") is None
 
 
 def test_repair_inchi_inchikey_smiles_collection_multiple_rows():
@@ -97,17 +97,17 @@ def test_repair_inchi_inchikey_smiles_collection_multiple_rows():
     assert repaired is not collection
     assert len(repaired) == 3
 
-    assert repaired.metadata.loc[0, "inchi"] == None
+    assert repaired.metadata.loc[0, "inchi"] is None
     assert repaired.metadata.loc[0, "inchikey"] == "ABTNALLHJFCFRZ-UHFFFAOYSA-N"
-    assert repaired.metadata.loc[0, "smiles"] == None
+    assert repaired.metadata.loc[0, "smiles"] is None
 
-    assert repaired.metadata.loc[1, "inchi"] == None
-    assert repaired.metadata.loc[1, "inchikey"] == None
+    assert repaired.metadata.loc[1, "inchi"] is None
+    assert repaired.metadata.loc[1, "inchikey"] is None
     assert repaired.metadata.loc[1, "smiles"] == "C[C@H](Cc1ccccc1)N(C)CC#C"
 
     assert repaired.metadata.loc[2, "inchi"] == "InChI=" + TEST_INCHIS[0].replace("InChI=", "").replace('"', "")
-    assert repaired.metadata.loc[2, "inchikey"] == None
-    assert repaired.metadata.loc[2, "smiles"] == None
+    assert repaired.metadata.loc[2, "inchikey"] is None
+    assert repaired.metadata.loc[2, "smiles"] is None
 
 
 def test_repair_inchi_inchikey_smiles_clone_false_modifies_collection_in_place():
