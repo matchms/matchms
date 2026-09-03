@@ -26,7 +26,7 @@ def matchms_info_logger():
         ({"compound_name": "peptideXYZ [M+H+K]"}, False, "[M+H+K]", "peptideXYZ [M+H+K]", None),
         ({"Name": "peptideXYZ [M+H+K]", "adduct": "M+H"}, True, "M+H", "peptideXYZ", "[M+H+K]"),
         ({"compound_name": "peptideXYZ [M+H+K] C16H12"}, True, "[M+H+K]", "peptideXYZ C16H12", "[M+H+K]"),
-        ({"name": ""}, True, None, None, None),
+        ({"name": ""}, True, None, "", None),
     ],
 )
 def test_derive_adduct_from_name_parametrized(
