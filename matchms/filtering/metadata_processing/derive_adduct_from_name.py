@@ -65,7 +65,7 @@ def _derive_adduct_from_name(
             x for x in name_split if x not in parts_that_look_like_adduct
         )
         name_adduct_removed = name_adduct_removed.strip("; ")
-        updates["compound_name"] = name_adduct_removed
+        updates["compound_name"] = name_adduct_removed or None
         logger.info(
             "Removed adduct %s from compound name.",
             parts_that_look_like_adduct,
@@ -129,4 +129,7 @@ def _looks_like_adduct(adduct):
     return re.search(regexp1, adduct) is not None
 
 
-derive_adduct_from_name = metadata_update_filter(_derive_adduct_from_name)
+derive_adduct_from_name = metadata_update_filter(
+    _derive_adduct_from_name,
+    drop_missing_updates=False,
+)
