@@ -236,29 +236,41 @@ def _merge_packed_rows_numba(
     return out_mz[:write], out_int[:write], out_offsets
 
 
+@njit(cache=True, nogil=True)
+def _compute_l2_by_row_numba(
+    intensities: np.ndarray,
+    offsets: np.ndarray,
+) -> np.ndarray:
+    """Return one float64 L2 norm per packed spectrum without Python row loops."""
+    n_specs = offsets.shape[0] - 1
+    out = np.zeros(n_specs, dtype=np.float64)
+
+    for row in range(n_specs):
+        start = int(offsets[row])
+        end = int(offsets[row + 1])
+        total = 0.0
+        for k in range(start, end):
+            value = float(intensities[k])
+            total += value * value
+        out[row] = np.sqrt(total)
+
+    return out
+
+
 def _compute_l2_by_row(
     intensities: np.ndarray,
     offsets: np.ndarray,
     dtype: np.dtype,
 ) -> np.ndarray:
-    """Return one L2 norm per packed spectrum."""
-    n_specs = offsets.shape[0] - 1
-    out = np.zeros(n_specs, dtype=dtype)
+    """Return one L2 norm per packed spectrum.
 
-    for i in range(n_specs):
-        start = offsets[i]
-        end = offsets[i + 1]
-
-        row = intensities[start:end]
-
-        out[i] = np.sqrt(
-            np.sum(
-                row * row,
-                dtype=np.float64,
-            )
-        )
-
-    return out
+    The row loop is compiled with Numba to avoid Python-level loops over millions
+    of spectra becoming a noticeable part of large Cosine index construction.
+    """
+    return _compute_l2_by_row_numba(
+        intensities,
+        offsets,
+    ).astype(dtype, copy=False)
 
 
 def _prepare_collection(
@@ -472,11 +484,13 @@ def _build_library_index_from_prepared(
     idx.peaks_int = prepared.spec_int[order]
     idx.peaks_spec_idx = spec_flat[order]
 
-    # Map spectrum-major peak positions to positions in the globally sorted arrays.
-    product_pos = np.empty(n_peaks, dtype=np.int64)
-    product_pos[order] = np.arange(n_peaks, dtype=np.int64)
-
     if compute_neutral_loss:
+        # Map spectrum-major peak positions to positions in the globally sorted
+        # product arrays. This mapping can be very large, so allocate it only
+        # when neutral-loss/hybrid indexing actually needs it.
+        product_pos = np.empty(n_peaks, dtype=np.int64)
+        product_pos[order] = np.arange(n_peaks, dtype=np.int64)
+
         pmz_per_peak = prepared.precursor_mz[spec_flat]
         have_pmz = np.isfinite(pmz_per_peak)
         src_idx = np.nonzero(have_pmz)[0]
