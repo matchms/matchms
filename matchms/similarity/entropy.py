@@ -8,6 +8,7 @@ from .default_parameters import (
     DEFAULT_OFFSET_TO_PRECURSOR,
 )
 from .entropy_greedy import EntropyGreedy
+from .flash_index import FlashIndex
 from .flash_similarity import FlashEntropy
 
 
@@ -31,6 +32,10 @@ class Entropy(BaseSimilarity):
     1524-1531 (2021), doi:10.1038/s41592-021-01331-z. The accelerated Flash
     Entropy search strategy was introduced by Li & Fiehn, Nature Methods 20,
     1475-1478 (2023), doi:10.1038/s41592-023-02012-9.
+
+    ``pair`` uses :class:`EntropyGreedy`, ``matrix`` uses the
+    SpectraCollection-native :class:`FlashEntropy`, and :meth:`search` performs
+    sparse repeated search against a persistent :class:`FlashIndex`.
 
     Three matching modes are supported:
 
@@ -112,7 +117,7 @@ class Entropy(BaseSimilarity):
             dtype=self.dtype,
         )
 
-    def _matrix_similarity(self) -> FlashEntropy:
+    def _flash_similarity(self) -> FlashEntropy:
         return FlashEntropy(
             matching_mode=self.matching_mode,
             tolerance=self.tolerance,
@@ -124,6 +129,18 @@ class Entropy(BaseSimilarity):
             merge_within=self.merge_within,
             dtype=self.dtype,
         )
+
+    def build_index(self, spectra) -> FlashIndex:
+        """Build a reusable library index directly from a SpectraCollection."""
+        return self._flash_similarity().build_index(spectra)
+
+    def save_index(self, index: FlashIndex, filename) -> None:
+        """Save a compatible persistent Flash index."""
+        self._flash_similarity().save_index(index, filename)
+
+    def load_index(self, filename) -> FlashIndex:
+        """Load and validate a persistent Flash index."""
+        return self._flash_similarity().load_index(filename)
 
     def pair(self, spectrum_1: SpectrumType, spectrum_2: SpectrumType) -> np.ndarray:
         """Calculate entropy similarity for one spectrum pair."""
@@ -137,11 +154,46 @@ class Entropy(BaseSimilarity):
         progress_bar: bool = True,
         n_jobs: int = -1,
     ):
-        """Calculate a dense matrix of entropy similarity scores."""
-        return self._matrix_similarity().matrix(
+        """Calculate a dense matrix of entropy similarity scores.
+
+        Persistent indices are intentionally not part of this API. Use
+        :meth:`search` for repeated queries against a pre-built library index.
+        """
+        return self._flash_similarity().matrix(
             spectra_1=spectra_1,
             spectra_2=spectra_2,
             score_fields=score_fields,
             progress_bar=progress_bar,
             n_jobs=n_jobs,
+        )
+
+    def search(
+        self,
+        query_spectra,
+        library_index: FlashIndex,
+        *,
+        precursor_tolerance: float | None = None,
+        precursor_use_ppm: bool = False,
+        min_score: float = 0.0,
+        top_k: int | None = 20,
+        query_batch_size: int = 10,
+        n_jobs: int = -1,
+        progress_bar: bool = True,
+    ):
+        """Search query spectra against a persistent Flash library index.
+
+        Results are sparse ``Scores``. Query preprocessing remains
+        SpectraCollection-native, and worker tasks reduce each query row to its
+        retained hits before sending results back to the parent process.
+        """
+        return self._flash_similarity().search(
+            query_spectra=query_spectra,
+            library_index=library_index,
+            precursor_tolerance=precursor_tolerance,
+            precursor_use_ppm=precursor_use_ppm,
+            min_score=min_score,
+            top_k=top_k,
+            query_batch_size=query_batch_size,
+            n_jobs=n_jobs,
+            progress_bar=progress_bar,
         )
