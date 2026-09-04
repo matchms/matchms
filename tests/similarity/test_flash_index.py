@@ -2,10 +2,8 @@
 
 import json
 from types import SimpleNamespace
-
 import numpy as np
 import pytest
-
 from matchms.similarity.flash_index import FlashIndex
 
 

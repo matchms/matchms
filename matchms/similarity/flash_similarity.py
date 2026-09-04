@@ -13,7 +13,6 @@ from tqdm import tqdm
 from matchms.scores import Scores
 from matchms.typing import SpectrumType
 from .base_similarity import BaseSimilarity
-from .flash_index import FlashIndex
 from .default_parameters import (
     DEFAULT_DTYPE,
     DEFAULT_INTENSITY_POWER,
@@ -21,6 +20,7 @@ from .default_parameters import (
     DEFAULT_NOISE_CUTOFF,
     DEFAULT_OFFSET_TO_PRECURSOR,
 )
+from .flash_index import FlashIndex
 from .flash_utils import (
     _build_library_index_from_prepared,
     _prepare_collection,
