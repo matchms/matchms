@@ -5,7 +5,7 @@ import json
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, Self
 import numpy as np
 
 
@@ -59,7 +59,7 @@ class FlashIndex:
         *,
         config: dict[str, Any],
         metadata: dict[str, Any] | None = None,
-    ) -> "FlashIndex":
+    ) -> Self:
         """Wrap an internal SpectraCollection-native ``_LibraryIndex``.
 
         No peak arrays are copied. The expensive preprocessing and global sorting
@@ -152,7 +152,7 @@ class FlashIndex:
                 tmp.unlink()
 
     @classmethod
-    def load(cls, filename: str | Path) -> "FlashIndex":
+    def load(cls, filename: str | Path) -> Self:
         """Load a :class:`FlashIndex` written by :meth:`save`."""
         path = Path(filename)
         with np.load(path, allow_pickle=False) as archive:

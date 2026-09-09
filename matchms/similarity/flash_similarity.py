@@ -120,7 +120,7 @@ class _BaseFlashSimilarity(BaseSimilarity):
         """Return descriptive source metadata that is not used for compatibility checks."""
         fragments = collection.fragments
         return {
-            "n_spectra": int(len(collection)),
+            "n_spectra": len(collection),
             "mz_precision": (
                 None
                 if getattr(collection, "mz_precision", None) is None
@@ -434,15 +434,14 @@ class _BaseFlashSimilarity(BaseSimilarity):
             return results
 
         ctx = mp.get_context("fork")
-        with ctx.Pool(processes=n_jobs) as pool:
-            with tqdm(
-                total=refs.n_specs,
-                desc=self._descriptor_name + f" (search parallel x{n_jobs})",
-                disable=not progress_bar,
-            ) as pbar:
-                for result in pool.imap(worker, batches, chunksize=1):
-                    results.append(result)
-                    pbar.update(result[0])
+        with ctx.Pool(processes=n_jobs) as pool, tqdm(
+            total=refs.n_specs,
+            desc=self._descriptor_name + f" (search parallel x{n_jobs})",
+            disable=not progress_bar,
+        ) as pbar:
+            for result in pool.imap(worker, batches, chunksize=1):
+                results.append(result)
+                pbar.update(result[0])
 
         return results
 
