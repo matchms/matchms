@@ -1,5 +1,5 @@
-import pytest
 import pandas as pd
+import pytest
 from matchms import SpectraCollection
 from matchms.filtering import correct_charge
 from tests.builder_spectrum import SpectrumBuilder

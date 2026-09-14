@@ -1,8 +1,8 @@
-from matchms.filtering.metadata_processing.add_parent_mass import _convert_parent_mass_entry_to_float
 import numpy as np
 import pytest
 from matchms import SpectraCollection
 from matchms.filtering import add_parent_mass
+from matchms.filtering.metadata_processing.add_parent_mass import _convert_parent_mass_entry_to_float
 from tests.run_spectrum_and_collection import run_filter_as_spectrum_or_collection
 from ..builder_spectrum import SpectrumBuilder
 

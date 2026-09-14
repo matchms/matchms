@@ -4,7 +4,6 @@ import numpy as np
 import pandas as pd
 from matchms.filtering.filter_utils.metadata_conversions import (
     NO_METADATA_UPDATE,
-    is_missing_metadata_value,
     metadata_row_to_dict,
 )
 from .metadata import (
