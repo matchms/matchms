@@ -1,4 +1,5 @@
 import pytest
+import pandas as pd
 from matchms import SpectraCollection
 from matchms.filtering import correct_charge
 from tests.builder_spectrum import SpectrumBuilder
@@ -47,18 +48,6 @@ def test_correct_charge_raises_for_non_lowercase_ionmode(as_collection):
         )
 
 
-@pytest.mark.parametrize("as_collection", [False, True], ids=["spectrum", "collection"])
-def test_correct_charge_raises_for_string_charge(as_collection):
-    spectrum_in = SpectrumBuilder().with_metadata({"charge": "+1"}).build()
-
-    with pytest.raises(TypeError, match="Charge is given as string"):
-        run_filter_as_spectrum_or_collection(
-            correct_charge,
-            spectrum_in,
-            as_collection,
-        )
-
-
 def test_correct_charge_collection_multiple_rows():
     collection = SpectraCollection(
         [
@@ -72,6 +61,34 @@ def test_correct_charge_collection_multiple_rows():
 
     assert processed is not collection
     assert processed.metadata["charge"].tolist() == [1, -2, -3]
+
+
+def test_collection_converts_numeric_string_charge():
+    spectrum = (
+        SpectrumBuilder()
+        .with_metadata({"charge": "+1"})
+        .build()
+    )
+
+    collection = SpectraCollection([spectrum])
+
+    assert collection[0].get("charge") == 1
+    assert pd.api.types.is_integer_dtype(
+        collection.metadata["charge"]
+    )
+
+
+def test_correct_charge_collection_raises_for_nonconvertible_string():
+    spectrum = (
+        SpectrumBuilder()
+        .with_metadata({"charge": "invalid"})
+        .build()
+    )
+
+    collection = SpectraCollection([spectrum])
+
+    with pytest.raises(TypeError, match="Charge is given as string"):
+        correct_charge(collection)
 
 
 def test_correct_charge_collection_clone_false_modifies_input():

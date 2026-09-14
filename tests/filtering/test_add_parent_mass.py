@@ -1,3 +1,4 @@
+from matchms.filtering.metadata_processing.add_parent_mass import _convert_parent_mass_entry_to_float
 import numpy as np
 import pytest
 from matchms import SpectraCollection
@@ -73,7 +74,6 @@ def test_add_parent_mass_overwrite(overwrite, expected, as_collection):
         ("exact_mass", 200, 200.0),
         ("parentmass", 200, 200.0),
         ("parent_mass", "n/a", 442.992724),
-        ("parent_mass", "Missing", None)
     ],
 )
 def test_add_parent_mass_already_present(parent_mass_field, parent_mass, expected, as_collection):
@@ -186,3 +186,21 @@ def test_add_parent_mass_collection_clone_false_modifies_input():
 
     assert processed is collection
     assert np.allclose(collection.metadata.loc[0, "parent_mass"], 442.992724, atol=1e-4)
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [
+        (184.1, 184.1),
+        (184, 184.0),
+        (np.float64(184.1), 184.1),
+        ("184.1", 184.1),
+        (" 184.1 ", 184.1),
+        (None, None),
+        (np.nan, None),
+        ("N/A", None),
+        ("invalid", None),
+    ],
+)
+def test_convert_parent_mass_entry_to_float(value, expected):
+    assert _convert_parent_mass_entry_to_float(value) == expected

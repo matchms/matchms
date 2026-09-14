@@ -1,5 +1,6 @@
 import numpy as np
 import pytest
+from matchms import SpectraCollection
 from matchms.filtering import remove_peaks_around_precursor_mz
 from tests.builder_spectrum import SpectrumBuilder
 from tests.run_spectrum_and_collection import run_filter_as_spectrum_or_collection
@@ -81,17 +82,29 @@ def test_remove_peaks_around_precursor_without_precursor_mz(spectrum_in, as_coll
         )
 
 
-@pytest.mark.parametrize("as_collection", [False, True], ids=["spectrum", "collection"])
-def test_remove_peaks_around_precursor_with_wrong_precursor_mz(spectrum_in, as_collection):
-    """Test if correct error is raised for precursor_mz as string."""
+def test_remove_peaks_around_precursor_with_string_precursor_mz(
+    spectrum_in,
+):
     spectrum_in.set("precursor_mz", "445.0")
 
-    with pytest.raises(TypeError, match="Expected 'precursor_mz' to be a scalar number."):
-        run_filter_as_spectrum_or_collection(
-            remove_peaks_around_precursor_mz,
-            spectrum_in,
-            as_collection,
-        )
+    with pytest.raises(
+        TypeError,
+        match="Expected 'precursor_mz' to be a scalar number.",
+    ):
+        remove_peaks_around_precursor_mz(spectrum_in)
+
+
+def test_remove_peaks_collection_converts_numeric_string_precursor_mz(
+    spectrum_in,
+):
+    spectrum_in.set("precursor_mz", "445.0")
+    collection = SpectraCollection([spectrum_in])
+
+    assert collection[0].get("precursor_mz") == 445.0
+
+    processed = remove_peaks_around_precursor_mz(collection)
+
+    assert isinstance(processed, SpectraCollection)
 
 
 @pytest.mark.parametrize("as_collection", [False, True], ids=["spectrum", "collection"])

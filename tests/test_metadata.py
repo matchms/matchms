@@ -124,3 +124,12 @@ def test_metadata_key_mapping(mapping: dict, metadata: dict):
         assert sut[next(iter(metadata))] == next(iter(metadata.values()))
         
     Metadata.set_key_replacements(load_known_key_conversions())
+
+
+def test_metadata_harmonize_values_converts_parent_mass():
+    metadata = Metadata({"parent_mass": "184.063662876"})
+
+    metadata.harmonize_values()
+
+    assert np.isclose(metadata["parent_mass"], 184.063662876)
+    assert isinstance(metadata["parent_mass"], float)
