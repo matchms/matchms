@@ -3,7 +3,7 @@ import numpy as np
 from matchms import Pipeline
 from matchms.importing import load_ms2_dataset, load_from_mgf
 from matchms import SpectraProcessor
-from matchms.filtering.default_pipelines import CLEAN_PEAKS
+from matchms.filtering.default_pipelines import BASIC_FILTERS, CLEAN_PEAKS, REPAIR_ANNOTATION
 
 
 def test_clean_peaks_workflow_on_collection_and_spectra_list():
@@ -17,13 +17,22 @@ def test_clean_peaks_workflow_on_collection_and_spectra_list():
     spectra_list = list(load_from_mgf(spectra_file))
 
     # run processor on collection
-    processor = SpectraProcessor(CLEAN_PEAKS)
-    processed_collection = processor.process_collection(collection)
+    processor = SpectraProcessor(
+        BASIC_FILTERS + CLEAN_PEAKS + REPAIR_ANNOTATION
+        )
+    report = processor.create_processing_report()
+    processed_collection = processor.process_collection(
+        collection,
+        processing_report=report,
+    )
 
     # run processor on spectra list
-    processor = SpectraProcessor(CLEAN_PEAKS)
     processed_spectra_list = processor.process_spectra(spectra_list)
 
-    assert processed_collection.n_spectra == len(processed_spectra_list)
+    assert processed_collection.n_spectra == len(processed_spectra_list) == 58
     num_peaks_in_lst = np.sum([s.fragments.mz.shape[0] for s in processed_spectra_list])
-    assert processed_collection.fragments.count().sum() == num_peaks_in_lst
+    assert processed_collection.fragments.count().sum() == num_peaks_in_lst == 3114
+
+    # check report
+    df = report.to_dataframe()
+    assert df.shape == (25, 5)  # Adjust when filter pipelines change in matchms
