@@ -73,6 +73,7 @@ def test_add_parent_mass_overwrite(overwrite, expected, as_collection):
         ("exact_mass", 200, 200.0),
         ("parentmass", 200, 200.0),
         ("parent_mass", "n/a", 442.992724),
+        ("parent_mass", "Missing", None)
     ],
 )
 def test_add_parent_mass_already_present(parent_mass_field, parent_mass, expected, as_collection):
