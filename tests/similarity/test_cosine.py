@@ -183,3 +183,64 @@ def test_cosine_symmetric_matrix_has_expected_fields_and_shape(use_hungarian, us
     assert matches_arr.shape == (3, 3)
     assert np.allclose(score_arr, score_arr.T, atol=1e-12)
     assert np.array_equal(matches_arr, matches_arr.T)
+
+
+def test_cosine_search_matches_matrix():
+    spectrum_1, spectrum_2, spectrum_3 = _make_test_spectra()
+
+    queries = [spectrum_1, spectrum_2, spectrum_3]
+    library = [spectrum_2, spectrum_3]
+
+    similarity = Cosine(
+        tolerance=0.1,
+        use_hungarian=False,
+        noise_cutoff=0.0,
+    )
+
+    expected = similarity.matrix(
+        queries,
+        library,
+        progress_bar=False,
+        n_jobs=1,
+    )
+
+    index = similarity.build_index(SpectraCollection(library))
+    actual = similarity.search(
+        SpectraCollection(queries),
+        index,
+        progress_bar=False,
+        n_jobs=1,
+    )
+
+    assert actual.score_fields == ("score", "matches")
+    assert actual.shape == expected.shape == (3, 2)
+
+    assert np.allclose(
+        actual["score"].to_array(),
+        expected["score"].to_array(),
+        atol=1e-12,
+        rtol=1e-12,
+    )
+    assert np.array_equal(
+        actual["matches"].to_array(),
+        expected["matches"].to_array(),
+    )
+
+
+def test_cosine_search_supports_score_field_selection():
+    spectrum_1, spectrum_2, spectrum_3 = _make_test_spectra()
+    library = SpectraCollection([spectrum_2, spectrum_3])
+
+    similarity = Cosine(tolerance=0.1, use_hungarian=False)
+    index = similarity.build_index(library)
+
+    scores = similarity.search(
+        [spectrum_1],
+        index,
+        score_fields=("score",),
+        progress_bar=False,
+        n_jobs=1,
+    )
+
+    assert scores.score_fields == ("score",)
+    assert scores.shape == (1, 2)

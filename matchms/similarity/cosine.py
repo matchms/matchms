@@ -11,6 +11,7 @@ from .default_parameters import (
     DEFAULT_NOISE_CUTOFF,
     DEFAULT_OFFSET_TO_PRECURSOR,
 )
+from .flash_index import FlashIndex
 from .flash_similarity import CosineFlash
 
 
@@ -25,14 +26,10 @@ class Cosine(BaseSimilarity):
     mass spectra. Two peaks are considered a potential match if their m/z ratios
     lie within the given ``tolerance``.
 
-    Matchms provides various implementations of the Cosine score which
-    are combined here in what we believe to be the typical best choice for most users.
-
-    By default, the parameter ``use_hungarian`` is set to False, which means that
-    the greedy algorithm is used to find the best matches. This is typically faster
-    than the Hungarian algorithm, and for most applications the results are very similar.
-    If you need the exact optimal solution, you can set ``use_hungarian`` to True,
-    which will use the Hungarian algorithm to find the best matches.
+    ``pair`` uses the greedy or Hungarian pair implementation. ``matrix`` uses
+    the SpectraCollection-native Flash implementation for the default greedy path.
+    For repeated searches against a fixed large library, build a persistent
+    :class:`FlashIndex` once with :meth:`build_index` and use :meth:`search`.
     """
 
     is_commutative = True
@@ -40,14 +37,14 @@ class Cosine(BaseSimilarity):
     score_fields = ("score", "matches")
 
     def __init__(
-            self,
-            tolerance: float = DEFAULT_MZ_TOLERANCE,
-            intensity_power: float = DEFAULT_INTENSITY_POWER,
-            use_hungarian: bool = False,
-            noise_cutoff: float = DEFAULT_NOISE_CUTOFF,
-            remove_precursor: bool = True,
-            offset_to_precursor: float = DEFAULT_OFFSET_TO_PRECURSOR,
-            ):
+        self,
+        tolerance: float = DEFAULT_MZ_TOLERANCE,
+        intensity_power: float = DEFAULT_INTENSITY_POWER,
+        use_hungarian: bool = False,
+        noise_cutoff: float = DEFAULT_NOISE_CUTOFF,
+        remove_precursor: bool = True,
+        offset_to_precursor: float = DEFAULT_OFFSET_TO_PRECURSOR,
+    ):
         """Initialize cosine score class.
 
         Parameters
@@ -76,9 +73,39 @@ class Cosine(BaseSimilarity):
         self.remove_precursor = remove_precursor
         self.offset_to_precursor = offset_to_precursor
 
-    def pair(self, spectrum_1: SpectrumType, spectrum_2: SpectrumType) -> tuple[float, int]:
-        """Calculate approximate modified cosine score between two spectra."""
+    def _flash_similarity(self) -> CosineFlash:
+        if self.use_hungarian:
+            raise ValueError(
+                "Persistent Flash indices/search are unavailable when "
+                "use_hungarian=True."
+            )
+        return CosineFlash(
+            matching_mode="fragment",
+            tolerance=self.tolerance,
+            intensity_power=self.intensity_power,
+            noise_cutoff=self.noise_cutoff,
+            remove_precursor=self.remove_precursor,
+            offset_to_precursor=self.offset_to_precursor,
+        )
 
+    def build_index(self, spectra) -> FlashIndex:
+        """Build a reusable library index.
+
+        When ``spectra`` is already a ``SpectraCollection``, index construction is
+        fully collection-native and operates directly on its CSR fragment backend.
+        """
+        return self._flash_similarity().build_index(spectra)
+
+    def save_index(self, index: FlashIndex, filename) -> None:
+        """Save a compatible persistent Flash index."""
+        self._flash_similarity().save_index(index, filename)
+
+    def load_index(self, filename) -> FlashIndex:
+        """Load and validate a persistent Flash index."""
+        return self._flash_similarity().load_index(filename)
+
+    def pair(self, spectrum_1: SpectrumType, spectrum_2: SpectrumType) -> tuple[float, int]:
+        """Calculate cosine score between two spectra."""
         if self.use_hungarian:
             cosine = CosineHungarian(
                 tolerance=self.tolerance,
@@ -97,17 +124,18 @@ class Cosine(BaseSimilarity):
             )
         return cosine.pair(spectrum_1, spectrum_2)
 
-
     def matrix(
-            self,
-            spectra_1: Sequence[SpectrumType],
-            spectra_2: Sequence[SpectrumType] | None = None,
-            score_fields: Sequence[str] | None = None,
-            progress_bar: bool = True,
-            n_jobs: int = -1,
-        ):
-        """
-        Calculate matrix of Cosine scores.
+        self,
+        spectra_1: Sequence[SpectrumType],
+        spectra_2: Sequence[SpectrumType] | None = None,
+        score_fields: Sequence[str] | None = None,
+        progress_bar: bool = True,
+        n_jobs: int = -1,
+    ):
+        """Calculate a dense matrix of Cosine scores.
+
+        Persistent indices are intentionally not part of this API. Use
+        :meth:`search` for repeated queries against a pre-built library index.
 
         Parameters
         ----------
@@ -144,17 +172,52 @@ class Cosine(BaseSimilarity):
                 progress_bar=progress_bar,
             )
 
-        cosine = CosineFlash(
-            matching_mode="fragment",
-            tolerance=self.tolerance,
-            intensity_power=self.intensity_power,
-            noise_cutoff=self.noise_cutoff,
-            remove_precursor=self.remove_precursor,
-            offset_to_precursor=self.offset_to_precursor,
-        )
-        return cosine.matrix(
+        return self._flash_similarity().matrix(
             spectra_1=spectra_1,
             spectra_2=spectra_2,
+            score_fields=score_fields,
+            progress_bar=progress_bar,
+            n_jobs=n_jobs,
+        )
+
+    def search(
+        self,
+        query_spectra,
+        library_index: FlashIndex,
+        *,
+        score_fields: Sequence[str] | None = None,
+        progress_bar: bool = True,
+        n_jobs: int = -1,
+    ):
+        """Calculate Cosine scores against a pre-built Flash library index.
+
+        This has the same scoring semantics and dense ``Scores`` output as
+        ``matrix(query_spectra, library_spectra)`` on the Flash path. The only
+        difference is that library preprocessing and index construction have
+        already been performed.
+
+        Parameters
+        ----------
+        query_spectra
+            Query collection of input spectra.
+        library_index
+            Pre-built library index to search against.
+        score_fields
+            Requested score fields. Only ``("score",)`` is supported.
+        progress_bar
+            When True, show a progress bar.
+        n_jobs
+            Number of parallel jobs to run.
+            Default is -1, which means that all available CPUs minus one will be used.
+        query_batch_size
+            Number of query rows handled per worker task. This reduces scheduling
+            and inter-process overhead while retaining row-level Flash scoring.
+            A default of 10 is deliberately conservative for very large libraries;
+            values around 10-50 are good candidates for benchmarking.
+        """
+        return self._flash_similarity().search(
+            query_spectra=query_spectra,
+            library_index=library_index,
             score_fields=score_fields,
             progress_bar=progress_bar,
             n_jobs=n_jobs,
