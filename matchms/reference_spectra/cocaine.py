@@ -1,7 +1,7 @@
 """Submodule providing a reference spectrum for cocaine."""
 
 import numpy as np
-from ..Spectrum import Spectrum
+from ..spectrum import Spectrum
 
 
 COCAINE_PRECURSOR_MZ: float = 304.153137

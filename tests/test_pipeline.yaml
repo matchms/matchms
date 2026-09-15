@@ -1,7 +1,7 @@
 # Matchms pipeline config file
 # Change and adapt fields where necessary
 # ====================
-query_filters:
+spectra_1_filters:
 - - make_charge_int
 - - interpret_pepmass
 - - derive_ionmode
@@ -13,17 +13,19 @@ query_filters:
 - - add_precursor_mz
 - - require_precursor_mz
 - - add_parent_mass
-- - harmonize_undefined_inchikey
-- - harmonize_undefined_inchi
-- - harmonize_undefined_smiles
+- - harmonize_missing_entries
+  - keys: ["inchi", "inchikey", "smiles"]
 - - repair_inchi_inchikey_smiles
 - - repair_parent_mass_match_smiles_wrapper
 - - normalize_intensities
-- - select_by_intensity
+- - select_by_relative_intensity
   - intensity_from: 0.001
-reference_filters: processing_queries
+
+spectra_2_filters: processing_spectra_1
+
 score_computations:
 - - precursormzmatch
   - tolerance: 120.0
 - - modifiedcosinegreedy
   - tolerance: 10.0
+    remove_precursor: False

@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from matplotlib import pyplot as plt
 from matchms import Spectrum
-from .builder_Spectrum import SpectrumBuilder
+from .builder_spectrum import SpectrumBuilder
 
 
 def _assert_plots_ok(fig, n_plots, n_lines):

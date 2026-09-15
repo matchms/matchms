@@ -3,7 +3,7 @@ import pytest
 from matchms import Spectrum
 from matchms.filtering import normalize_intensities
 from matchms.similarity import ModifiedCosineGreedy, ModifiedCosineHungarian
-from ..builder_Spectrum import SpectrumBuilder
+from ..builder_spectrum import SpectrumBuilder
 
 
 EXPECTED_MISSING_PRECURSOR = "Precursor_mz missing. Apply 'add_precursor_mz' filter first."

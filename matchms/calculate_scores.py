@@ -1,12 +1,16 @@
-from .Scores import Scores
-from .similarity.BaseSimilarity import BaseSimilarity
-from .typing import QueriesType, ReferencesType
+from __future__ import annotations
+from collections.abc import Sequence
+from typing import TYPE_CHECKING
+from .scores import Scores
+from .similarity.base_similarity import BaseSimilarity
 
 
-def calculate_scores(references: ReferencesType, queries: QueriesType,
-                     similarity_function: BaseSimilarity,
-                     array_type: str = "numpy",
-                     is_symmetric: bool = False) -> Scores:
+if TYPE_CHECKING:
+    from matchms.spectrum import Spectrum
+
+
+def calculate_scores(spectra_1: Sequence[Spectrum], spectra_2: Sequence[Spectrum],
+                     similarity_function: BaseSimilarity) -> Scores:
     """Calculate the similarity between all reference objects versus all query objects.
 
     Example to calculate scores between 2 spectra and iterate over the scores
@@ -28,7 +32,7 @@ def calculate_scores(references: ReferencesType, queries: QueriesType,
         scores = calculate_scores(spectra, spectra, CosineGreedy())
 
         for (reference, query, score) in scores:
-            print(f"Cosine score between {reference.get('id')} and {query.get('id')}" +
+            print(f"Cosine score between {spectrum_1.get('id')} and {spectrum_2.get('id')}" +
                   f" is {score[0]:.2f} with {score[1]} matched peaks")
 
     Should output
@@ -42,23 +46,16 @@ def calculate_scores(references: ReferencesType, queries: QueriesType,
 
     Parameters
     ----------
-    references
+    spectra_1
         List of reference objects
-    queries
+    spectra_2
         List of query objects
     similarity_function
         Function which accepts a reference + query object and returns a score or tuple of scores
-    array_type
-        Specify the type of array to store and compute the scores. Choose from "numpy" or "sparse".
-    is_symmetric
-        Set to True when *references* and *queries* are identical (as for instance for an all-vs-all
-        comparison). By using the fact that score[i,j] = score[j,i] the calculation will be about
-        2x faster. Default is False.
 
     Returns
     -------
 
-    ~matchms.Scores.Scores
+    ~matchms.scores.Scores
     """
-    return Scores(references=references, queries=queries,
-                  is_symmetric=is_symmetric).calculate(similarity_function, array_type=array_type)
+    return similarity_function.matrix(spectra_1, spectra_2)
