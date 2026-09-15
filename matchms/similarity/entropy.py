@@ -172,28 +172,20 @@ class Entropy(BaseSimilarity):
         query_spectra,
         library_index: FlashIndex,
         *,
-        precursor_tolerance: float | None = None,
-        precursor_use_ppm: bool = False,
-        min_score: float = 0.0,
-        top_k: int | None = 20,
-        query_batch_size: int = 10,
-        n_jobs: int = -1,
+        score_fields: Sequence[str] | None = None,
         progress_bar: bool = True,
+        n_jobs: int = -1,
     ):
-        """Search query spectra against a persistent Flash library index.
+        """Calculate entropy scores against a pre-built Flash library index.
 
-        Results are sparse ``Scores``. Query preprocessing remains
-        SpectraCollection-native, and worker tasks reduce each query row to its
-        retained hits before sending results back to the parent process.
+        This has the same scoring semantics and dense ``Scores`` output as
+        ``matrix(query_spectra, library_spectra)``. The only difference is that
+        library preprocessing and index construction have already been performed.
         """
         return self._flash_similarity().search(
             query_spectra=query_spectra,
             library_index=library_index,
-            precursor_tolerance=precursor_tolerance,
-            precursor_use_ppm=precursor_use_ppm,
-            min_score=min_score,
-            top_k=top_k,
-            query_batch_size=query_batch_size,
-            n_jobs=n_jobs,
+            score_fields=score_fields,
             progress_bar=progress_bar,
+            n_jobs=n_jobs,
         )

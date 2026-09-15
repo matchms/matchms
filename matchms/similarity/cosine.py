@@ -185,24 +185,30 @@ class Cosine(BaseSimilarity):
         query_spectra,
         library_index: FlashIndex,
         *,
-        precursor_tolerance: float | None = None,
-        precursor_use_ppm: bool = False,
-        min_score: float = 0.0,
-        min_matches: int | None = None,
-        top_k: int | None = 20,
-        query_batch_size: int = 10,
-        n_jobs: int = -1,
+        score_fields: Sequence[str] | None = None,
         progress_bar: bool = True,
+        n_jobs: int = -1,
     ):
-        """Search query spectra against a persistent Flash library index.
+        """Calculate Cosine scores against a pre-built Flash library index.
 
-        Results are returned as sparse ``Scores`` with shape
-        ``(n_query_spectra, n_library_spectra)``. Each worker handles a batch of
-        query rows and returns only thresholded/top-k hits, avoiding transfer or
-        storage of dense query-by-library result matrices.
+        This has the same scoring semantics and dense ``Scores`` output as
+        ``matrix(query_spectra, library_spectra)`` on the Flash path. The only
+        difference is that library preprocessing and index construction have
+        already been performed.
 
         Parameters
         ----------
+        query_spectra
+            Query collection of input spectra.
+        library_index
+            Pre-built library index to search against.
+        score_fields
+            Requested score fields. Only ``("score",)`` is supported.
+        progress_bar
+            When True, show a progress bar.
+        n_jobs
+            Number of parallel jobs to run.
+            Default is -1, which means that all available CPUs minus one will be used.
         query_batch_size
             Number of query rows handled per worker task. This reduces scheduling
             and inter-process overhead while retaining row-level Flash scoring.
@@ -212,12 +218,7 @@ class Cosine(BaseSimilarity):
         return self._flash_similarity().search(
             query_spectra=query_spectra,
             library_index=library_index,
-            precursor_tolerance=precursor_tolerance,
-            precursor_use_ppm=precursor_use_ppm,
-            min_score=min_score,
-            min_matches=min_matches,
-            top_k=top_k,
-            query_batch_size=query_batch_size,
-            n_jobs=n_jobs,
+            score_fields=score_fields,
             progress_bar=progress_bar,
+            n_jobs=n_jobs,
         )
