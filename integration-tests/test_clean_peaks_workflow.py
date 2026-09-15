@@ -28,7 +28,7 @@ def test_clean_peaks_workflow_on_collection_and_spectra_list():
     # run processor on spectra list
     processed_spectra_list = processor.process_spectra(spectra_list)
 
-    assert processed_collection.n_spectra == len(processed_spectra_list) == 58
+    assert processed_collection.n_spectra == len(processed_spectra_list) == 73
     num_peaks_in_lst = np.sum([s.fragments.mz.shape[0] for s in processed_spectra_list])
     assert processed_collection.fragments.count().sum() == num_peaks_in_lst == 3114
 
@@ -42,7 +42,7 @@ def test_clean_peaks_workflow_on_collection_and_spectra_list():
 
     # load again and check that the number of spectra and peaks is the same
     reloaded_collection = load_ms2_dataset(output_file)
-    assert reloaded_collection.n_spectra == processed_collection.n_spectra == 58
+    assert reloaded_collection.n_spectra == processed_collection.n_spectra == 73
 
 
     # run processor on collection again...
