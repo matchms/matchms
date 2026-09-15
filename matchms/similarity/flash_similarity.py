@@ -115,7 +115,7 @@ class _BaseFlashSimilarity(BaseSimilarity):
         """Return descriptive source metadata that is not used for compatibility checks."""
         fragments = collection.fragments
         return {
-            "n_spectra": int(len(collection)),
+            "n_spectra": len(collection),
             "mz_precision": (
                 None
                 if getattr(collection, "mz_precision", None) is None
