@@ -8,6 +8,7 @@ from tqdm.auto import tqdm
 from matchms.filtering.filter_utils.metadata_conversions import (
     apply_metadata_row_filter,
     apply_metadata_updates_to_spectrum,
+    metadata_row_to_dict,
 )
 
 
@@ -301,7 +302,7 @@ def metadata_requirement_filter(metadata_impl: Callable):
         metadata = target.metadata
 
         keep_mask = metadata.apply(
-            lambda row: bool(metadata_impl(row, *args, **kwargs)),
+            lambda row: bool(metadata_impl(metadata_row_to_dict(row), *args, **kwargs)),
             axis=1,
         ).values
 

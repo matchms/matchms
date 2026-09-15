@@ -555,3 +555,51 @@ def test_add_metadata_invalidates_spectra_hashes(collection):
 
     # Combined spectrum hashes must reflect the metadata change.
     assert collection.spectra_hashes != original_spectra_hashes
+
+
+# add harmonization tests
+# -----------------------
+def test_collection_harmonizes_numeric_metadata_dtype():
+    spectrum = Spectrum(
+        mz=np.array([100.0]),
+        intensities=np.array([1.0]),
+        metadata={
+            "parent_mass": "184.1",
+            "precursor_mz": "185.1",
+        },
+        metadata_harmonization=False,
+    )
+
+    collection = SpectraCollection([spectrum])
+
+    assert pd.api.types.is_float_dtype(
+        collection.metadata["parent_mass"]
+    )
+    assert pd.api.types.is_float_dtype(
+        collection.metadata["precursor_mz"]
+    )
+
+    assert collection.metadata.loc[0, "parent_mass"] == 184.1
+
+
+def test_strict_collection_harmonization_matches_metadata():
+    spectrum = Spectrum(
+        mz=np.array([100.0]),
+        intensities=np.array([1.0]),
+        metadata={"charge": "2+"},
+        metadata_harmonization=False,
+    )
+
+    collection = SpectraCollection([spectrum])
+
+    # Cheap astype cannot interpret "2+".
+    assert collection.metadata.loc[0, "charge"] == "2+"
+
+    strict = collection.harmonize_metadata_types(
+        strict_harmonize=True
+    )
+
+    assert strict.metadata.loc[0, "charge"] == 2
+    assert pd.api.types.is_integer_dtype(
+        strict.metadata["charge"]
+    )

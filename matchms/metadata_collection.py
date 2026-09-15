@@ -4,7 +4,12 @@ import numpy as np
 import pandas as pd
 from matchms.filtering.filter_utils.metadata_conversions import (
     NO_METADATA_UPDATE,
-    is_missing_metadata_value,
+    metadata_row_to_dict,
+)
+from .metadata import (
+    FLOAT_METADATA_KEYS,
+    INT_METADATA_KEYS,
+    Metadata,
 )
 from .utils import load_known_key_conversions
 
@@ -31,17 +36,6 @@ def _needs_object_dtype(target_column: pd.Series, values: pd.Series) -> bool:
     return True
 
 
-def _to_python_metadata_value(value):
-    """Convert pandas/numpy metadata values to JSON-friendly Python values."""
-    if is_missing_metadata_value(value):
-        return None
-
-    if isinstance(value, np.generic):
-        return value.item()
-
-    return value
-
-
 def harmonize_metadata_column_name(column_name: str) -> str:
     """Return the matchms-style metadata column name."""
     column_name = column_name.lower()
@@ -53,6 +47,45 @@ def harmonize_metadata_column_name(column_name: str) -> str:
         column_name = _key_replacements[column_name]
 
     return column_name
+
+
+def _coerce_known_metadata_dtypes(metadata: pd.DataFrame) -> pd.DataFrame:
+    """Try cheap column-wise conversion to canonical metadata dtypes."""
+    metadata = metadata.copy()
+
+    for key in FLOAT_METADATA_KEYS:
+        if key not in metadata.columns:
+            continue
+
+        if pd.api.types.is_float_dtype(metadata[key].dtype):
+            continue
+
+        try:
+            metadata[key] = metadata[key].astype(float)
+        except (TypeError, ValueError):
+            logger.debug(
+                "Could not directly convert metadata column '%s' to float.",
+                key,
+            )
+
+    for key in INT_METADATA_KEYS:
+        if key not in metadata.columns:
+            continue
+
+        if pd.api.types.is_integer_dtype(metadata[key].dtype):
+            continue
+
+        try:
+            # Nullable integer dtype is important because collection metadata
+            # may legitimately contain missing entries.
+            metadata[key] = metadata[key].astype("Int64")
+        except (TypeError, ValueError):
+            logger.debug(
+                "Could not directly convert metadata column '%s' to integer.",
+                key,
+            )
+
+    return metadata
 
 
 def harmonize_metadata_collection_columns(metadata: pd.DataFrame) -> pd.DataFrame:
@@ -92,6 +125,66 @@ def harmonize_metadata_collection_columns(metadata: pd.DataFrame) -> pd.DataFram
             )
 
         harmonized[new_column] = harmonized[new_column].combine_first(values)
+
+    return harmonized
+
+
+def harmonize_metadata_types(
+    metadata: pd.DataFrame,
+    strict_harmonize: bool = False,
+) -> pd.DataFrame:
+    """Harmonize known matchms metadata value types.
+
+    By default, only cheap column-wise dtype conversions are attempted for
+    metadata fields with a defined canonical scalar dtype.
+
+    When ``strict_harmonize=True``, every metadata row is additionally passed
+    through :meth:`Metadata.harmonize_values`. This applies the same semantic
+    harmonization as for ordinary Spectrum metadata, including pepmass
+    interpretation, precursor-m/z derivation, ion-mode normalization,
+    retention handling, parent/parent-mass conversion, charge conversion, and
+    missing-value alias handling.
+
+    Parameters
+    ----------
+    metadata
+        Metadata DataFrame.
+    strict_harmonize
+        If False, only attempt cheap column-wise dtype conversion.
+        If True, additionally perform full row-wise Metadata harmonization.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Harmonized metadata.
+    """
+    harmonized = pd.DataFrame(metadata).copy()
+
+    # Always use the cheap vectorized path first.
+    harmonized = _coerce_known_metadata_dtypes(harmonized)
+
+    if not strict_harmonize:
+        return harmonized
+
+    # Full Spectrum-compatible semantic harmonization.
+    records = []
+
+    for _, row in harmonized.iterrows():
+        row_dict = metadata_row_to_dict(row)
+
+        row_metadata = Metadata(row_dict)
+        row_metadata.harmonize_values()
+
+        records.append(row_metadata.data)
+
+    harmonized = pd.DataFrame.from_records(
+        records,
+        index=harmonized.index,
+    )
+
+    # Row-wise processing may recreate object/float columns, in particular
+    # nullable integer columns, so enforce canonical dtypes once more.
+    harmonized = _coerce_known_metadata_dtypes(harmonized)
 
     return harmonized
 
@@ -229,17 +322,8 @@ class MetadataCollection(pd.DataFrame):
 
     @staticmethod
     def row_to_dict(row: pd.Series) -> dict:
-        """Convert a metadata row to a plain Python metadata dict.
-
-        Pandas missing values such as ``NaN`` and ``pd.NA`` are converted to
-        ``None``. NumPy scalar values such as ``np.int64`` and ``np.float64`` are
-        converted to native Python scalars so reconstructed Spectrum objects can
-        be exported to JSON.
-        """
-        return {
-            key: _to_python_metadata_value(value)
-            for key, value in row.items()
-        }
+        """Convert a metadata row to a plain Python metadata dict."""
+        return metadata_row_to_dict(row)
 
 
     def _validate_metadata_updates(

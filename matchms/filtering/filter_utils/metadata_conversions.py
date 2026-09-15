@@ -40,8 +40,12 @@ def as_float_or_none(value):
 
 
 def is_missing_metadata_value(value) -> bool:
-    """Return True for scalar missing metadata values."""
-    if value is None:
+    """Return True for scalar missing metadata values.
+
+    Non-scalar values, such as lists or NumPy arrays, are not considered
+    missing even if ``pd.isna`` returns an array for them.
+    """
+    if value is None or value is pd.NA:
         return True
 
     try:
@@ -49,10 +53,40 @@ def is_missing_metadata_value(value) -> bool:
     except (TypeError, ValueError):
         return False
 
-    if isinstance(missing, bool):
-        return missing
+    if isinstance(missing, (bool, np.bool_)):
+        return bool(missing)
 
     return False
+
+
+def metadata_value_to_python(value):
+    """Convert a pandas/NumPy metadata scalar to a plain Python value.
+
+    Missing pandas/NumPy scalar values are converted to ``None``.
+    NumPy scalar values are converted to their native Python equivalents.
+
+    Non-scalar metadata values are returned unchanged.
+    """
+    if is_missing_metadata_value(value):
+        return None
+
+    if isinstance(value, np.generic):
+        return value.item()
+
+    return value
+
+
+def metadata_row_to_dict(row: Mapping) -> dict:
+    """Convert a metadata row to a plain Spectrum-style metadata dict.
+
+    This provides the conversion boundary between DataFrame-backed collection
+    metadata and row-wise metadata filters. In particular, pandas missing
+    scalars such as ``pd.NA`` and ``np.nan`` are exposed to filters as ``None``.
+    """
+    return {
+        key: metadata_value_to_python(value)
+        for key, value in row.items()
+    }
 
 
 def apply_metadata_row_filter(
@@ -64,11 +98,17 @@ def apply_metadata_row_filter(
 ) -> pd.DataFrame:
     """Apply a row-wise metadata filter and return updated columns.
 
-    ``row_filter`` receives one metadata row as a mapping and must return a dict
-    with metadata updates.
+    ``row_filter`` receives one metadata row as a plain Python mapping and must
+    return a dict with metadata updates.
+
+    Pandas-specific scalar representations are normalized before the row is
+    passed to ``row_filter``:
+
+    - ``pd.NA`` and ``np.nan`` become ``None``.
+    - NumPy scalars become native Python scalars.
 
     Returning an empty dict means "no update".
-    Returning {"key": None} means "explicitly set key to None".
+    Returning ``{"key": None}`` means "explicitly set key to None".
 
     Parameters
     ----------
@@ -80,6 +120,11 @@ def apply_metadata_row_filter(
         If ``True``, missing values returned by ``row_filter`` are treated as
         "no update" and removed from the returned update table.
         If ``False``, missing values are kept as explicit updates.
+
+    Returns
+    -------
+    pd.DataFrame
+        Sparse table containing metadata updates.
     """
     records = []
 
@@ -89,24 +134,26 @@ def apply_metadata_row_filter(
         row_iter = metadata.iterrows()
 
     for _, row in row_iter:
-        updates = row_filter(row, *args, **kwargs)
+        row_metadata = metadata_row_to_dict(row)
 
-        if updates is None:
-            updates = {}
+        updates = row_filter(
+            row_metadata,
+            *args,
+            **kwargs,
+        )
 
-        if not isinstance(updates, Mapping):
-            raise TypeError(
-                f"Expected metadata row filter to return dict-like updates, "
-                f"got {type(updates).__name__}."
+        records.append(
+            _normalize_metadata_updates(
+                updates,
+                row_filter,
             )
-
-        records.append(dict(updates))
+        )
 
     updated_columns = sorted(
         {
             key
             for update_dict in records
-            for key in update_dict.keys()
+            for key in update_dict
         }
     )
 
@@ -127,7 +174,11 @@ def apply_metadata_row_filter(
     )
 
     if drop_missing_row_updates:
-        updates_df = updates_df.mask(updates_df.map(lambda x: x is NO_METADATA_UPDATE))
+        updates_df = updates_df.mask(
+            updates_df.map(
+                lambda value: value is NO_METADATA_UPDATE
+            )
+        )
         updates_df = updates_df.dropna(axis=0, how="all")
         updates_df = updates_df.dropna(axis=1, how="all")
 
@@ -135,6 +186,7 @@ def apply_metadata_row_filter(
 
 
 def _normalize_metadata_updates(updates, row_filter):
+    """Validate and normalize updates returned by a row-wise metadata filter."""
     if updates is None:
         return {}
 

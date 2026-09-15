@@ -63,7 +63,7 @@ def test_require_retention_time_with_retention_time_spectrum(metadata, expected)
     [
         ({"retention_time": 1817}, True),
         ({"retention_time": 500.12}, True),
-        ({"retention_time": "500.12"}, False),
+        ({"retention_time": "500.12"}, True),
     ],
 )
 def test_require_retention_time_with_retention_time_collection(metadata, expected):
@@ -78,7 +78,7 @@ def test_require_retention_time_with_retention_time_collection(metadata, expecte
 
     if expected:
         assert "retention_time" in filtered.metadata.columns
-        assert filtered.metadata.loc[0, "retention_time"] == metadata["retention_time"]
+        assert filtered.metadata.loc[0, "retention_time"] == float(metadata["retention_time"])
 
 
 def test_require_retention_time_without_retention_time_spectrum():
@@ -117,8 +117,8 @@ def test_require_retention_time_collection_multiple_rows():
     filtered = require_retention_time(collection, minimum_rt=200, maximum_rt=2000)
 
     assert filtered is not collection
-    assert len(filtered) == 2
-    assert filtered.metadata["retention_time"].tolist() == [1817, 500.12]
+    assert len(filtered) == 3
+    assert filtered.metadata["retention_time"].tolist() == [1817, 500.12, 500.12]
 
 
 def test_require_retention_time_collection_clone_false_modifies_input():

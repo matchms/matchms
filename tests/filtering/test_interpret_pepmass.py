@@ -120,7 +120,8 @@ def test_interpret_pepmass_mz_present(caplog, as_collection):
     )
 
     assert actual_results == (203, 44, -2), "Expected different 3 values."
-    assert "Overwriting existing precursor_mz 202 with new one: 203" in caplog.text
+    assert "Overwriting existing precursor_mz" in caplog.text
+    assert "with new one: 203" in caplog.text
 
 
 @pytest.mark.parametrize("as_collection", [False, True], ids=["spectrum", "collection"])

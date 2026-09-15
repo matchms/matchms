@@ -1,4 +1,5 @@
 import logging
+import numpy as np
 from matchms.filtering._dispatch import metadata_update_filter
 from matchms.filtering.filter_utils.derive_precursor_mz_and_parent_mass import (
     derive_parent_mass_from_metadata,
@@ -6,8 +7,11 @@ from matchms.filtering.filter_utils.derive_precursor_mz_and_parent_mass import (
 from matchms.filtering.filter_utils.get_neutral_mass_from_smiles import (
     get_monoisotopic_neutral_mass,
 )
-from matchms.filtering.filter_utils.metadata_conversions import as_string_or_none
-from ...utils import get_first_common_element
+from matchms.filtering.filter_utils.metadata_conversions import (
+    as_string_or_none,
+    is_missing_metadata_value,
+)
+from ...utils import ALIASES_FOR_NONE, get_first_common_element
 
 
 logger = logging.getLogger("matchms")
@@ -15,8 +19,6 @@ logger = logging.getLogger("matchms")
 
 _default_key = "parent_mass"
 _accepted_keys = ["parentmass", "exact_mass"]
-_accepted_types = (float, str, int)
-_accepted_missing_entries = ["", "N/A", "NA", "n/a"]
 
 
 def _add_parent_mass(
@@ -61,12 +63,14 @@ def _add_parent_mass(
         Input object with added or updated ``parent_mass`` metadata, or ``None``
         if the input was ``None``.
     """
-    parent_mass = _get_parent_mass(metadata)
+    parent_mass = _convert_parent_mass_entry_to_float(
+        _get_parent_mass(metadata)
+    )
 
     if parent_mass is not None and not overwrite_existing_entry:
-        # Keep old behavior: normalize accepted aliases such as "parentmass" or
-        # "exact_mass" into the default "parent_mass" key.
-        return {"parent_mass": float(parent_mass)}
+        # Normalize aliases such as "parentmass" or "exact_mass" into the
+        # canonical "parent_mass" key and normalize the value to float.
+        return {"parent_mass": parent_mass}
 
     parent_mass = derive_parent_mass_from_metadata(
         metadata,
@@ -86,34 +90,48 @@ def _add_parent_mass(
 
 
 def _get_parent_mass(metadata):
+    """Return existing parent-mass entry, including accepted aliases."""
     parent_mass_key = get_first_common_element(
         [_default_key] + _accepted_keys,
         metadata.keys(),
     )
-    parent_mass = metadata.get(parent_mass_key)
-    return _convert_entry_to_num(parent_mass)
 
-
-def _convert_entry_to_num(entry):
-    """Convert parent_mass to number if possible. Otherwise return None."""
-    if entry is None:
+    if parent_mass_key is None:
         return None
 
-    if isinstance(entry, str) and entry in _accepted_missing_entries:
-        return None
+    return metadata.get(parent_mass_key)
 
-    if not isinstance(entry, _accepted_types):
-        logger.warning("Found parent_mass of undefined type.")
+
+def _convert_parent_mass_entry_to_float(entry):
+    """Convert a parent-mass metadata entry to float if possible.
+
+    Missing entries and values that cannot safely be interpreted as a scalar
+    number return ``None``.
+    """
+    if is_missing_metadata_value(entry):
         return None
 
     if isinstance(entry, str):
-        try:
-            return float(entry.strip())
-        except ValueError:
-            logger.warning("%s can't be converted to float.", entry)
+        entry = entry.strip()
+
+        if entry in ALIASES_FOR_NONE:
             return None
 
-    return entry
+    if isinstance(entry, (bool, np.bool_)):
+        logger.warning("Found parent_mass of undefined type.")
+        return None
+
+    try:
+        value = float(entry)
+    except (TypeError, ValueError):
+        logger.warning("%r can't be converted to float.", entry)
+        return None
+
+    if not np.isfinite(value):
+        logger.warning("%r isn't a finite parent_mass value.", entry)
+        return None
+
+    return value
 
 
 add_parent_mass = metadata_update_filter(_add_parent_mass)
