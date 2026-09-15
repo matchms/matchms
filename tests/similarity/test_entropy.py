@@ -1,5 +1,6 @@
 import numpy as np
 import pytest
+from matchms import SpectraCollection
 from matchms.scores import Scores
 from matchms.similarity import Entropy, EntropyGreedy
 from matchms.similarity.flash_similarity import FlashEntropy
@@ -780,3 +781,68 @@ def test_entropy_greedy_matching_modes_without_precursor():
     assert fragment == pytest.approx(1.0)
     assert neutral_loss == 0.0
     assert hybrid == pytest.approx(fragment)
+
+
+@pytest.mark.parametrize("matching_mode", ["fragment", "neutral_loss", "hybrid"])
+def test_entropy_search_matches_matrix(matching_mode):
+    queries = [
+        build_spectrum(
+            [100.0, 200.0],
+            [1.0, 0.5],
+            precursor_mz=500.0,
+        ),
+        build_spectrum(
+            [110.0, 300.0],
+            [0.3, 1.0],
+            precursor_mz=600.0,
+        ),
+        build_spectrum(
+            [150.0, 250.0],
+            [0.8, 0.4],
+            precursor_mz=550.0,
+        ),
+    ]
+    library = [
+        build_spectrum(
+            [100.005, 210.0],
+            [1.0, 0.5],
+            precursor_mz=510.0,
+        ),
+        build_spectrum(
+            [110.005, 300.0],
+            [1.0, 0.3],
+            precursor_mz=600.0,
+        ),
+    ]
+
+    similarity = Entropy(
+        matching_mode=matching_mode,
+        tolerance=0.01,
+        remove_precursor=False,
+        noise_cutoff=0.0,
+        dtype=np.float64,
+    )
+
+    expected = similarity.matrix(
+        queries,
+        library,
+        progress_bar=False,
+        n_jobs=1,
+    )
+
+    index = similarity.build_index(SpectraCollection(library))
+    actual = similarity.search(
+        SpectraCollection(queries),
+        index,
+        progress_bar=False,
+        n_jobs=1,
+    )
+
+    assert actual.score_fields == ("score",)
+    assert actual.shape == expected.shape == (3, 2)
+    assert np.allclose(
+        actual.to_array(),
+        expected.to_array(),
+        atol=1e-12,
+        rtol=1e-12,
+    )

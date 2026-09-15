@@ -19,6 +19,7 @@ from .default_parameters import (
     DEFAULT_NOISE_CUTOFF,
     DEFAULT_OFFSET_TO_PRECURSOR,
 )
+from .flash_index import FlashIndex
 from .flash_utils import (
     _build_library_index_from_prepared,
     _prepare_collection,
@@ -82,6 +83,119 @@ class _BaseFlashSimilarity(BaseSimilarity):
     @property
     def _descriptor_name(self) -> str:
         raise NotImplementedError
+
+    @staticmethod
+    def _as_spectra_collection(spectra):
+        """Return input as a SpectraCollection without reconstructing existing collections."""
+        from matchms.spectra_collection import SpectraCollection
+
+        if isinstance(spectra, SpectraCollection):
+            return spectra
+        return SpectraCollection(spectra)
+
+    def _index_config(self) -> dict:
+        """Return parameters that materially affect Flash index construction."""
+        return {
+            "weighing_type": self._weighing_type,
+            "compute_l2_norm": bool(self._compute_l2),
+            "compute_neutral_loss": self.matching_mode in ("neutral_loss", "hybrid"),
+            "intensity_power": float(self.intensity_power),
+            "remove_precursor": bool(self.remove_precursor),
+            "offset_to_precursor": float(self.offset_to_precursor),
+            "noise_cutoff": (
+                None if self.noise_cutoff is None else float(self.noise_cutoff)
+            ),
+            "normalize_to_half": bool(self.normalize_to_half),
+            "merge_within": float(self.merge_within),
+            "dtype": self.dtype.str,
+        }
+
+    @staticmethod
+    def _index_metadata(collection) -> dict:
+        """Return descriptive source metadata that is not used for compatibility checks."""
+        fragments = collection.fragments
+        return {
+            "n_spectra": len(collection),
+            "mz_precision": (
+                None
+                if getattr(collection, "mz_precision", None) is None
+                else float(collection.mz_precision)
+            ),
+            "mz_rounding": getattr(fragments, "mz_rounding", None),
+            "fragment_backend": fragments.__class__.__name__,
+        }
+
+    def _validate_index(self, index: FlashIndex) -> None:
+        """Validate that a persistent index is compatible with this similarity."""
+        if not isinstance(index, FlashIndex):
+            raise TypeError(
+                "library_index must be a FlashIndex. "
+                f"Got {type(index).__name__}."
+            )
+
+        expected = self._index_config()
+        actual = index.config or {}
+
+        # Neutral-loss-capable indices are supersets and can also serve fragment-only
+        # searches. A fragment-only index cannot serve neutral-loss/hybrid searches.
+        if (
+            expected["compute_neutral_loss"]
+            and not actual.get("compute_neutral_loss", False)
+        ):
+            raise ValueError(
+                "The FlashIndex does not contain neutral-loss search arrays, but "
+                f"matching_mode={self.matching_mode!r} requires them."
+            )
+
+        for key, expected_value in expected.items():
+            if key == "compute_neutral_loss":
+                continue
+            actual_value = actual.get(key, None)
+            if actual_value != expected_value:
+                raise ValueError(
+                    "FlashIndex is incompatible with this similarity configuration: "
+                    f"{key}={actual_value!r} in index, expected {expected_value!r}."
+                )
+
+        if self._compute_l2 and index.spec_l2 is None:
+            raise ValueError("Cosine FlashIndex is missing per-spectrum L2 norms.")
+        if (
+            self.matching_mode in ("neutral_loss", "hybrid")
+            and not index.has_neutral_loss_index
+        ):
+            raise ValueError(
+                "FlashIndex is missing neutral-loss arrays required by the selected "
+                "matching mode."
+            )
+
+    def build_index(self, spectra) -> FlashIndex:
+        """Build a reusable Flash index directly from a SpectraCollection.
+
+        Existing ``SpectraCollection`` inputs stay collection-native throughout:
+        preprocessing operates once on the CSR fragment backend and the resulting
+        ``_PreparedSpectra`` is passed directly to
+        ``_build_library_index_from_prepared``. No ``Spectrum`` objects are
+        reconstructed for library construction.
+        """
+        collection = self._as_spectra_collection(spectra)
+        prepared = self._prepare_collection(collection)
+        library = self._build_library(prepared)
+        return FlashIndex.from_library(
+            library,
+            config=self._index_config(),
+            metadata=self._index_metadata(collection),
+        )
+
+    def save_index(self, index: FlashIndex, filename) -> None:
+        """Validate and save a reusable Flash index."""
+        self._validate_index(index)
+        index.save(filename)
+
+    def load_index(self, filename) -> FlashIndex:
+        """Load a persistent Flash index and validate it for this similarity."""
+        index = FlashIndex.load(filename)
+        self._validate_index(index)
+        return index
 
     def _prepare_collection(self, collection) -> _PreparedSpectra:
         """Prepare one complete SpectraCollection for Flash scoring."""
@@ -190,6 +304,7 @@ class _BaseFlashSimilarity(BaseSimilarity):
         progress_bar: bool,
         n_jobs: int,
         descriptor: str,
+        operation: str = "matrix",
     ):
         """Run row workers using integer row ids instead of pickled peak arrays."""
         _set_globals(refs, lib, cfg)
@@ -201,7 +316,7 @@ class _BaseFlashSimilarity(BaseSimilarity):
             for row_idx in tqdm(
                 row_indices,
                 total=refs.n_specs,
-                desc=descriptor + " (matrix)",
+                desc=descriptor + f" ({operation})",
                 disable=not progress_bar,
             ):
                 results.append(worker(row_idx))
@@ -209,13 +324,13 @@ class _BaseFlashSimilarity(BaseSimilarity):
 
         if platform.system() == "Windows":
             print(
-                f"{self.__class__.__name__}.matrix: n_jobs != 1 is not yet "
+                f"{self.__class__.__name__}.{operation}: n_jobs != 1 is not yet "
                 "implemented on Windows; falling back to n_jobs=1."
             )
             for row_idx in tqdm(
                 row_indices,
                 total=refs.n_specs,
-                desc=descriptor + " (matrix)",
+                desc=descriptor + f" ({operation})",
                 disable=not progress_bar,
             ):
                 results.append(worker(row_idx))
@@ -231,13 +346,13 @@ class _BaseFlashSimilarity(BaseSimilarity):
 
         if not use_fork:
             print(
-                f"{self.__class__.__name__}.matrix: parallel execution requires "
+                f"{self.__class__.__name__}.{operation}: parallel execution requires "
                 "'fork'; falling back to n_jobs=1."
             )
             for row_idx in tqdm(
                 row_indices,
                 total=refs.n_specs,
-                desc=descriptor + " (matrix)",
+                desc=descriptor + f" ({operation})",
                 disable=not progress_bar,
             ):
                 results.append(worker(row_idx))
@@ -248,12 +363,109 @@ class _BaseFlashSimilarity(BaseSimilarity):
             for result in tqdm(
                 pool.imap(worker, row_indices, chunksize=8),
                 total=refs.n_specs,
-                desc=descriptor + f" (parallel x{n_jobs})",
+                desc=descriptor + f" ({operation} parallel x{n_jobs})",
                 disable=not progress_bar,
             ):
                 results.append(result)
 
         return results
+
+    def search(
+        self,
+        query_spectra,
+        library_index: FlashIndex,
+        *,
+        score_fields: Sequence[str] | None = None,
+        progress_bar: bool = True,
+        n_jobs: int = -1,
+    ) -> Scores:
+        """Calculate scores against a pre-built Flash library index.
+
+        This is the indexed equivalent of ``matrix(query_spectra, library_spectra)``.
+        Query spectra are preprocessed collection-wise and scored with the same row
+        workers used by :meth:`matrix`; the only skipped work is preprocessing and
+        constructing the library-side Flash index.
+
+        No score thresholding, precursor filtering beyond the similarity object's
+        own configuration, top-k selection, or sparse reduction is performed. The
+        returned ``Scores`` therefore has shape
+        ``(len(query_spectra), library_index.n_specs)`` and contains the same score
+        fields as the corresponding dense ``matrix`` calculation.
+
+        Parameters
+        ----------
+        query_spectra
+            Query spectra or a SpectraCollection.
+        library_index
+            Reusable FlashIndex built with a compatible similarity configuration.
+        score_fields
+            Score fields to return, with the same semantics as :meth:`matrix`.
+        progress_bar
+            When True, show a progress bar.
+        n_jobs
+            Number of parallel jobs. ``-1`` uses all available CPUs minus one.
+
+        Returns
+        -------
+        Scores
+            Dense score matrix for queries versus indexed library spectra.
+        """
+        self._validate_index(library_index)
+        selected_fields = self._resolve_score_fields(score_fields)
+
+        collection = self._as_spectra_collection(query_spectra)
+        refs = self._prepare_collection(collection)
+
+        results = self._run_row_workers(
+            refs=refs,
+            lib=library_index,
+            cfg=self._make_worker_cfg(),
+            progress_bar=progress_bar,
+            n_jobs=n_jobs,
+            descriptor=self._descriptor_name,
+            operation="search",
+        )
+
+        if self._weighing_type == "entropy":
+            if selected_fields != ("score",):
+                raise NotImplementedError(
+                    "FlashEntropy.search() supports only score_fields=('score',)."
+                )
+
+            out_score = np.zeros(
+                (refs.n_specs, library_index.n_specs),
+                dtype=self.dtype,
+            )
+            for row_idx, row_score in results:
+                out_score[row_idx, :] = row_score
+
+            return Scores(
+                {
+                    "score": out_score.astype(
+                        self.score_datatype,
+                        copy=False,
+                    )
+                }
+            )
+
+        out_score = np.zeros(
+            (refs.n_specs, library_index.n_specs),
+            dtype=self.dtype,
+        )
+        out_matches = np.zeros(
+            (refs.n_specs, library_index.n_specs),
+            dtype=np.int32,
+        )
+        for row_idx, row_score, row_matches in results:
+            out_score[row_idx, :] = row_score
+            out_matches[row_idx, :] = row_matches
+
+        result = {}
+        if "score" in selected_fields:
+            result["score"] = out_score.astype(self.dtype, copy=False)
+        if "matches" in selected_fields:
+            result["matches"] = out_matches
+        return Scores(result)
 
 
 class FlashEntropy(_BaseFlashSimilarity):
@@ -1566,3 +1778,5 @@ def _row_task_cosine(row_idx):
         out_matches[~allow] = 0
 
     return row_idx, out_score, out_matches
+
+
