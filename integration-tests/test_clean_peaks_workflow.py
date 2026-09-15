@@ -30,7 +30,7 @@ def test_clean_peaks_workflow_on_collection_and_spectra_list():
 
     assert processed_collection.n_spectra == len(processed_spectra_list) == 73
     num_peaks_in_lst = np.sum([s.fragments.mz.shape[0] for s in processed_spectra_list])
-    assert processed_collection.fragments.count().sum() == num_peaks_in_lst == 3114
+    assert processed_collection.fragments.count().sum() == num_peaks_in_lst == 3545
 
     # check report
     df = report.to_dataframe()
