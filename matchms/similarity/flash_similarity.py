@@ -8,7 +8,6 @@ import platform
 from collections.abc import Sequence
 import numpy as np
 from numba import njit
-from scipy.sparse import coo_array
 from tqdm import tqdm
 from matchms.scores import Scores
 from matchms.typing import SpectrumType
@@ -85,10 +84,6 @@ class _BaseFlashSimilarity(BaseSimilarity):
     def _descriptor_name(self) -> str:
         raise NotImplementedError
 
-    @property
-    def _search_batch_worker(self):
-        raise NotImplementedError
-
     @staticmethod
     def _as_spectra_collection(spectra):
         """Return input as a SpectraCollection without reconstructing existing collections."""
@@ -120,7 +115,7 @@ class _BaseFlashSimilarity(BaseSimilarity):
         """Return descriptive source metadata that is not used for compatibility checks."""
         fragments = collection.fragments
         return {
-            "n_spectra": len(collection),
+            "n_spectra": int(len(collection)),
             "mz_precision": (
                 None
                 if getattr(collection, "mz_precision", None) is None
@@ -309,6 +304,7 @@ class _BaseFlashSimilarity(BaseSimilarity):
         progress_bar: bool,
         n_jobs: int,
         descriptor: str,
+        operation: str = "matrix",
     ):
         """Run row workers using integer row ids instead of pickled peak arrays."""
         _set_globals(refs, lib, cfg)
@@ -320,7 +316,7 @@ class _BaseFlashSimilarity(BaseSimilarity):
             for row_idx in tqdm(
                 row_indices,
                 total=refs.n_specs,
-                desc=descriptor + " (matrix)",
+                desc=descriptor + f" ({operation})",
                 disable=not progress_bar,
             ):
                 results.append(worker(row_idx))
@@ -328,13 +324,13 @@ class _BaseFlashSimilarity(BaseSimilarity):
 
         if platform.system() == "Windows":
             print(
-                f"{self.__class__.__name__}.matrix: n_jobs != 1 is not yet "
+                f"{self.__class__.__name__}.{operation}: n_jobs != 1 is not yet "
                 "implemented on Windows; falling back to n_jobs=1."
             )
             for row_idx in tqdm(
                 row_indices,
                 total=refs.n_specs,
-                desc=descriptor + " (matrix)",
+                desc=descriptor + f" ({operation})",
                 disable=not progress_bar,
             ):
                 results.append(worker(row_idx))
@@ -350,13 +346,13 @@ class _BaseFlashSimilarity(BaseSimilarity):
 
         if not use_fork:
             print(
-                f"{self.__class__.__name__}.matrix: parallel execution requires "
+                f"{self.__class__.__name__}.{operation}: parallel execution requires "
                 "'fork'; falling back to n_jobs=1."
             )
             for row_idx in tqdm(
                 row_indices,
                 total=refs.n_specs,
-                desc=descriptor + " (matrix)",
+                desc=descriptor + f" ({operation})",
                 disable=not progress_bar,
             ):
                 results.append(worker(row_idx))
@@ -367,81 +363,10 @@ class _BaseFlashSimilarity(BaseSimilarity):
             for result in tqdm(
                 pool.imap(worker, row_indices, chunksize=8),
                 total=refs.n_specs,
-                desc=descriptor + f" (parallel x{n_jobs})",
+                desc=descriptor + f" ({operation} parallel x{n_jobs})",
                 disable=not progress_bar,
             ):
                 results.append(result)
-
-        return results
-
-    def _run_search_workers(
-        self,
-        refs: _PreparedSpectra,
-        lib: FlashIndex,
-        cfg: dict,
-        progress_bar: bool,
-        n_jobs: int,
-        query_batch_size: int,
-    ):
-        """Score query batches and return only sparse retained hits from workers."""
-        _set_globals(refs, lib, cfg)
-        worker = self._search_batch_worker
-        batches = [
-            tuple(range(start, min(start + query_batch_size, refs.n_specs)))
-            for start in range(0, refs.n_specs, query_batch_size)
-        ]
-
-        results = []
-        if not batches:
-            return results
-
-        def run_serial(description: str):
-            with tqdm(
-                total=refs.n_specs,
-                desc=description,
-                disable=not progress_bar,
-            ) as pbar:
-                for batch in batches:
-                    result = worker(batch)
-                    results.append(result)
-                    pbar.update(result[0])
-
-        if n_jobs in (None, 1, 0):
-            run_serial(self._descriptor_name + " (search)")
-            return results
-
-        if platform.system() == "Windows":
-            print(
-                f"{self.__class__.__name__}.search: n_jobs != 1 is not yet "
-                "implemented on Windows; falling back to n_jobs=1."
-            )
-            run_serial(self._descriptor_name + " (search)")
-            return results
-
-        n_cpus = mp.cpu_count()
-        if n_jobs < 0:
-            n_jobs = max(1, n_cpus + 1 + n_jobs)
-        n_jobs = max(1, min(n_jobs, n_cpus))
-
-        start_methods = mp.get_all_start_methods()
-        use_fork = "fork" in start_methods and platform.system() != "Windows"
-        if not use_fork:
-            print(
-                f"{self.__class__.__name__}.search: parallel execution requires "
-                "'fork'; falling back to n_jobs=1."
-            )
-            run_serial(self._descriptor_name + " (search)")
-            return results
-
-        ctx = mp.get_context("fork")
-        with ctx.Pool(processes=n_jobs) as pool, tqdm(
-            total=refs.n_specs,
-            desc=self._descriptor_name + f" (search parallel x{n_jobs})",
-            disable=not progress_bar,
-        ) as pbar:
-            for result in pool.imap(worker, batches, chunksize=1):
-                results.append(result)
-                pbar.update(result[0])
 
         return results
 
@@ -450,87 +375,97 @@ class _BaseFlashSimilarity(BaseSimilarity):
         query_spectra,
         library_index: FlashIndex,
         *,
-        precursor_tolerance: float | None = None,
-        precursor_use_ppm: bool = False,
-        min_score: float = 0.0,
-        min_matches: int | None = None,
-        top_k: int | None = 20,
-        query_batch_size: int = 10,
-        n_jobs: int = -1,
+        score_fields: Sequence[str] | None = None,
         progress_bar: bool = True,
+        n_jobs: int = -1,
     ) -> Scores:
-        """Search query spectra against a persistent Flash library index.
+        """Calculate scores against a pre-built Flash library index.
 
-        The query side is preprocessed collection-wise. Workers process batches of
-        query row ids, reduce each dense internal Flash row immediately by
-        ``min_score``/``min_matches``/``top_k``, and return only compact sparse
-        hits to the parent process. Consequently no dense
-        ``n_queries x n_library`` result matrix is materialized and dense
-        library-length rows are not transferred between processes.
+        This is the indexed equivalent of ``matrix(query_spectra, library_spectra)``.
+        Query spectra are preprocessed collection-wise and scored with the same row
+        workers used by :meth:`matrix`; the only skipped work is preprocessing and
+        constructing the library-side Flash index.
+
+        No score thresholding, precursor filtering beyond the similarity object's
+        own configuration, top-k selection, or sparse reduction is performed. The
+        returned ``Scores`` therefore has shape
+        ``(len(query_spectra), library_index.n_specs)`` and contains the same score
+        fields as the corresponding dense ``matrix`` calculation.
+
+        Parameters
+        ----------
+        query_spectra
+            Query spectra or a SpectraCollection.
+        library_index
+            Reusable FlashIndex built with a compatible similarity configuration.
+        score_fields
+            Score fields to return, with the same semantics as :meth:`matrix`.
+        progress_bar
+            When True, show a progress bar.
+        n_jobs
+            Number of parallel jobs. ``-1`` uses all available CPUs minus one.
+
+        Returns
+        -------
+        Scores
+            Dense score matrix for queries versus indexed library spectra.
         """
         self._validate_index(library_index)
-
-        if precursor_tolerance is not None and precursor_tolerance < 0:
-            raise ValueError("precursor_tolerance must be None or >= 0.")
-        if min_score < 0:
-            raise ValueError("min_score must be >= 0.")
-        if min_matches is not None and min_matches < 0:
-            raise ValueError("min_matches must be None or >= 0.")
-        if top_k is not None and top_k <= 0:
-            raise ValueError("top_k must be None or a positive integer.")
-        if query_batch_size <= 0:
-            raise ValueError("query_batch_size must be a positive integer.")
-        if self._weighing_type == "entropy" and min_matches is not None:
-            raise ValueError("min_matches is only available for CosineFlash search.")
+        selected_fields = self._resolve_score_fields(score_fields)
 
         collection = self._as_spectra_collection(query_spectra)
         refs = self._prepare_collection(collection)
 
-        cfg = self._make_worker_cfg()
-        if precursor_tolerance is not None:
-            cfg["iden_tol"] = float(precursor_tolerance)
-            cfg["iden_use_ppm"] = bool(precursor_use_ppm)
-        cfg["search_min_score"] = float(min_score)
-        cfg["search_min_matches"] = (
-            None if min_matches is None else int(min_matches)
-        )
-        cfg["search_top_k"] = None if top_k is None else int(top_k)
-        cfg["search_require_precursor"] = cfg["iden_tol"] is not None
-
-        batch_results = self._run_search_workers(
+        results = self._run_row_workers(
             refs=refs,
             lib=library_index,
-            cfg=cfg,
+            cfg=self._make_worker_cfg(),
             progress_bar=progress_bar,
             n_jobs=n_jobs,
-            query_batch_size=int(query_batch_size),
+            descriptor=self._descriptor_name,
+            operation="search",
         )
 
-        shape = (refs.n_specs, library_index.n_specs)
         if self._weighing_type == "entropy":
-            rows, cols, scores = _combine_entropy_search_batches(batch_results)
+            if selected_fields != ("score",):
+                raise NotImplementedError(
+                    "FlashEntropy.search() supports only score_fields=('score',)."
+                )
+
+            out_score = np.zeros(
+                (refs.n_specs, library_index.n_specs),
+                dtype=self.dtype,
+            )
+            for row_idx, row_score in results:
+                out_score[row_idx, :] = row_score
+
             return Scores(
                 {
-                    "score": coo_array(
-                        (scores.astype(self.dtype, copy=False), (rows, cols)),
-                        shape=shape,
+                    "score": out_score.astype(
+                        self.score_datatype,
+                        copy=False,
                     )
                 }
             )
 
-        rows, cols, scores, matches = _combine_cosine_search_batches(batch_results)
-        return Scores(
-            {
-                "score": coo_array(
-                    (scores.astype(self.dtype, copy=False), (rows, cols)),
-                    shape=shape,
-                ),
-                "matches": coo_array(
-                    (matches.astype(np.int32, copy=False), (rows, cols)),
-                    shape=shape,
-                ),
-            }
+        out_score = np.zeros(
+            (refs.n_specs, library_index.n_specs),
+            dtype=self.dtype,
         )
+        out_matches = np.zeros(
+            (refs.n_specs, library_index.n_specs),
+            dtype=np.int32,
+        )
+        for row_idx, row_score, row_matches in results:
+            out_score[row_idx, :] = row_score
+            out_matches[row_idx, :] = row_matches
+
+        result = {}
+        if "score" in selected_fields:
+            result["score"] = out_score.astype(self.dtype, copy=False)
+        if "matches" in selected_fields:
+            result["matches"] = out_matches
+        return Scores(result)
 
 
 class FlashEntropy(_BaseFlashSimilarity):
@@ -630,10 +565,6 @@ class FlashEntropy(_BaseFlashSimilarity):
     @property
     def _worker(self):
         return _row_task_entropy
-
-    @property
-    def _search_batch_worker(self):
-        return _search_batch_task_entropy
 
     @property
     def _descriptor_name(self) -> str:
@@ -812,10 +743,6 @@ class CosineFlash(_BaseFlashSimilarity):
     @property
     def _worker(self):
         return _row_task_cosine
-
-    @property
-    def _search_batch_worker(self):
-        return _search_batch_task_cosine
 
     @property
     def _descriptor_name(self) -> str:
@@ -1853,135 +1780,3 @@ def _row_task_cosine(row_idx):
     return row_idx, out_score, out_matches
 
 
-# ===================== sparse search reduction =====================
-
-def _select_search_hit_columns(scores, matches, cfg):
-    """Return retained library columns sorted by descending score."""
-    keep = scores > 0.0
-    keep &= scores >= float(cfg["search_min_score"])
-
-    min_matches = cfg.get("search_min_matches")
-    if min_matches is not None:
-        keep &= matches >= int(min_matches)
-
-    cols = np.flatnonzero(keep)
-    if cols.size == 0:
-        return cols.astype(np.int64, copy=False)
-
-    # Deterministic ordering: score descending, then library row ascending.
-    order = np.lexsort((cols, -scores[cols]))
-    cols = cols[order]
-
-    top_k = cfg.get("search_top_k")
-    if top_k is not None and cols.size > int(top_k):
-        cols = cols[: int(top_k)]
-
-    return cols.astype(np.int64, copy=False)
-
-
-def _empty_search_arrays(with_matches: bool):
-    rows = np.empty(0, dtype=np.int64)
-    cols = np.empty(0, dtype=np.int64)
-    scores = np.empty(0, dtype=np.float64)
-    if with_matches:
-        return rows, cols, scores, np.empty(0, dtype=np.int32)
-    return rows, cols, scores
-
-
-def _search_batch_task_entropy(row_indices):
-    """Score and sparsify one batch of entropy query rows inside a worker."""
-    refs = _G_REFS
-    cfg = _G_CFG
-    rows_out = []
-    cols_out = []
-    scores_out = []
-
-    for row_idx in row_indices:
-        row_idx = int(row_idx)
-        if (
-            cfg.get("search_require_precursor", False)
-            and not np.isfinite(float(refs.precursor_mz[row_idx]))
-        ):
-            continue
-
-        _, row_scores = _row_task_entropy(row_idx)
-        dummy_matches = np.empty(0, dtype=np.int32)
-        cols = _select_search_hit_columns(row_scores, dummy_matches, cfg)
-        if cols.size == 0:
-            continue
-        rows_out.append(np.full(cols.size, row_idx, dtype=np.int64))
-        cols_out.append(cols)
-        scores_out.append(row_scores[cols].astype(np.float64, copy=False))
-
-    if not rows_out:
-        rows, cols, scores = _empty_search_arrays(with_matches=False)
-        return len(row_indices), rows, cols, scores
-
-    return (
-        len(row_indices),
-        np.concatenate(rows_out),
-        np.concatenate(cols_out),
-        np.concatenate(scores_out),
-    )
-
-
-def _search_batch_task_cosine(row_indices):
-    """Score and sparsify one batch of cosine query rows inside a worker."""
-    refs = _G_REFS
-    cfg = _G_CFG
-    rows_out = []
-    cols_out = []
-    scores_out = []
-    matches_out = []
-
-    for row_idx in row_indices:
-        row_idx = int(row_idx)
-        if (
-            cfg.get("search_require_precursor", False)
-            and not np.isfinite(float(refs.precursor_mz[row_idx]))
-        ):
-            continue
-
-        _, row_scores, row_matches = _row_task_cosine(row_idx)
-        cols = _select_search_hit_columns(row_scores, row_matches, cfg)
-        if cols.size == 0:
-            continue
-        rows_out.append(np.full(cols.size, row_idx, dtype=np.int64))
-        cols_out.append(cols)
-        scores_out.append(row_scores[cols].astype(np.float64, copy=False))
-        matches_out.append(row_matches[cols].astype(np.int32, copy=False))
-
-    if not rows_out:
-        rows, cols, scores, matches = _empty_search_arrays(with_matches=True)
-        return len(row_indices), rows, cols, scores, matches
-
-    return (
-        len(row_indices),
-        np.concatenate(rows_out),
-        np.concatenate(cols_out),
-        np.concatenate(scores_out),
-        np.concatenate(matches_out),
-    )
-
-
-def _combine_entropy_search_batches(batch_results):
-    nonempty = [result for result in batch_results if result[1].size > 0]
-    if not nonempty:
-        return _empty_search_arrays(with_matches=False)
-    return (
-        np.concatenate([result[1] for result in nonempty]),
-        np.concatenate([result[2] for result in nonempty]),
-        np.concatenate([result[3] for result in nonempty]),
-    )
-
-
-def _combine_cosine_search_batches(batch_results):
-    nonempty = [result for result in batch_results if result[1].size > 0]
-    if not nonempty:
-        return _empty_search_arrays(with_matches=True)
-    return (
-        np.concatenate([result[1] for result in nonempty]),
-        np.concatenate([result[2] for result in nonempty]),
-        np.concatenate([result[3] for result in nonempty]),
-        np.concatenate([result[4] for result in nonempty]),
-    )
