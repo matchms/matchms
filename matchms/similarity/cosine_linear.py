@@ -98,6 +98,16 @@ class CosineLinear(BaseSimilarity):
         )
         return sirius_merge_close_peaks(peaks, self.tolerance)
 
+    def _score(self, prepared_1, prepared_2) -> tuple[float, int]:
+        """Score two outputs of ``_prepare_spectrum``."""
+        return linear_cosine_score(
+            prepared_1,
+            prepared_2,
+            self.tolerance,
+            self.mz_power,
+            self.intensity_power,
+        )
+
     def pair(self, spectrum_1: SpectrumType, spectrum_2: SpectrumType) -> tuple[float, int]:
         """Calculate linear cosine score between two spectra.
 
@@ -113,16 +123,7 @@ class CosineLinear(BaseSimilarity):
         Score
             Tuple with cosine score and number of matched peaks.
         """
-        spec1 = self._prepare_spectrum(spectrum_1)
-        spec2 = self._prepare_spectrum(spectrum_2)
-
-        score, matches = linear_cosine_score(
-            spec1,
-            spec2,
-            self.tolerance,
-            self.mz_power,
-            self.intensity_power,
-        )
+        score, matches = self._score(self._prepare_spectrum(spectrum_1), self._prepare_spectrum(spectrum_2))
         return np.asarray((score, matches), dtype=self.score_datatype)
 
     def matrix(
@@ -180,13 +181,7 @@ class CosineLinear(BaseSimilarity):
                 query_range = range(n_cols)
 
             for i_query in query_range:
-                score, matches = linear_cosine_score(
-                    merged_refs[i_ref],
-                    merged_queries[i_query],
-                    self.tolerance,
-                    self.mz_power,
-                    self.intensity_power,
-                )
+                score, matches = self._score(merged_refs[i_ref], merged_queries[i_query])
 
                 score_array = self._as_score((score, matches))
 
