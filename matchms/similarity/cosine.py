@@ -3,7 +3,7 @@ from collections.abc import Sequence
 import numpy as np
 from matchms.typing import SpectrumType
 from .base_similarity import BaseSimilarity
-from .cosine_greedy import CosineGreedy
+from .cosine_linear import CosineLinear
 from .cosine_hungarian import CosineHungarian
 from .default_parameters import (
     DEFAULT_INTENSITY_POWER,
@@ -26,7 +26,7 @@ class Cosine(BaseSimilarity):
     mass spectra. Two peaks are considered a potential match if their m/z ratios
     lie within the given ``tolerance``.
 
-    ``pair`` uses the greedy or Hungarian pair implementation. ``matrix`` uses
+    ``pair`` uses the linear or Hungarian pair implementation. ``matrix`` uses
     the SpectraCollection-native Flash implementation for the default greedy path.
     For repeated searches against a fixed large library, build a persistent
     :class:`FlashIndex` once with :meth:`build_index` and use :meth:`search`.
@@ -115,7 +115,7 @@ class Cosine(BaseSimilarity):
                 offset_to_precursor=self.offset_to_precursor,
             )
         else:
-            cosine = CosineGreedy(
+            cosine = CosineLinear(
                 tolerance=self.tolerance,
                 intensity_power=self.intensity_power,
                 noise_cutoff=self.noise_cutoff,
