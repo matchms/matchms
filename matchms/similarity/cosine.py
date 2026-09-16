@@ -3,8 +3,8 @@ from collections.abc import Sequence
 import numpy as np
 from matchms.typing import SpectrumType
 from .base_similarity import BaseSimilarity
-from .cosine_linear import CosineLinear
 from .cosine_hungarian import CosineHungarian
+from .cosine_linear import CosineLinear
 from .default_parameters import (
     DEFAULT_INTENSITY_POWER,
     DEFAULT_MZ_TOLERANCE,
