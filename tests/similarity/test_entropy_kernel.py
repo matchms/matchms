@@ -2,8 +2,8 @@
 from types import SimpleNamespace
 import numpy as np
 import pytest
-from matchms.similarity.flash_index import build_entropy_index
 from matchms.similarity._flash_entropy import entropy_rows as search_postings_into
+from matchms.similarity.flash_index import build_entropy_index
 
 
 def pack(peaks, precursors, dtype=np.float64):

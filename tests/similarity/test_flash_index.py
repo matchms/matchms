@@ -80,7 +80,7 @@ def _write_npz_with_metadata(path, metadata, **arrays):
 
 
 def settings(dtype=np.float64):
-    return ('entropy', 1., False, -1.6, 0., True, 0., np.dtype(dtype).str)
+    return ("entropy", 1., False, -1.6, 0., True, 0., np.dtype(dtype).str)
 
 
 def prepared(dtype=np.float64):
@@ -93,21 +93,21 @@ def prepared(dtype=np.float64):
     ), dtype, settings(dtype))
 
 
-def make_index(mode='hybrid', dtype=np.float64):
+def make_index(mode="hybrid", dtype=np.float64):
     p = prepared(dtype)
     return build_entropy_index(p, mode, config=config_from_settings(p.settings),
-                               metadata={'mz_precision': 1e-6, 'custom': 'kept'})
+                               metadata={"mz_precision": 1e-6, "custom": "kept"})
 
 
 def downgrade_to_v2(source, target):
     with np.load(source, allow_pickle=False) as f:
         payload = {name: f[name] for name in f.files}
-    meta = json.loads(str(payload['__metadata__'].item()))
-    meta['version'] = 2
-    for name in ('peaks_pid', 'peaks_xlog2', 'nl_xlog2'):
+    meta = json.loads(str(payload["__metadata__"].item()))
+    meta["version"] = 2
+    for name in ("peaks_pid", "peaks_xlog2", "nl_xlog2"):
         payload.pop(name, None)
-        meta['optional_arrays'].pop(name, None)
-    payload['__metadata__'] = np.asarray(json.dumps(meta))
+        meta["optional_arrays"].pop(name, None)
+    payload["__metadata__"] = np.asarray(json.dumps(meta))
     np.savez(target, **payload)
 
 
@@ -326,31 +326,31 @@ def test_load_rejects_missing_declared_optional_array(tmp_path):
         FlashIndex.load(filename)
 
 
-@pytest.mark.parametrize('mode', ['fragment', 'neutral_loss', 'hybrid'])
-@pytest.mark.parametrize('dtype', [np.float32, np.float64])
+@pytest.mark.parametrize("mode", ["fragment", "neutral_loss", "hybrid"])
+@pytest.mark.parametrize("dtype", [np.float32, np.float64])
 def test_new_public_archive_roundtrip_and_legacy_upgrade(tmp_path, mode, dtype):
     index = make_index(mode, dtype)
-    file = tmp_path/'new.npz'
+    file = tmp_path/"new.npz"
     index.save(file)
     with np.load(file, allow_pickle=False) as f:
-        meta = json.loads(str(f['__metadata__'].item()))
-        assert meta['format'] == 'matchms.flash_index'
-        assert meta['version'] == 3
-        assert 'tolerance' not in meta['config']
-        assert 'matching_mode' not in meta['config']
-    old_file = tmp_path/'old.npz'
+        meta = json.loads(str(f["__metadata__"].item()))
+        assert meta["format"] == "matchms.flash_index"
+        assert meta["version"] == 3
+        assert "tolerance" not in meta["config"]
+        assert "matching_mode" not in meta["config"]
+    old_file = tmp_path/"old.npz"
     downgrade_to_v2(file, old_file)
     old = FlashIndex.load(old_file)
     assert old.peaks_pid is None
     olddata = old.entropy_data()
     newdata = FlashIndex.load(file).entropy_data()
-    for group in ('fragment', 'neutral_loss'):
+    for group in ("fragment", "neutral_loss"):
         for a, b in zip(getattr(newdata, group), getattr(olddata, group), strict=True):
             np.testing.assert_array_equal(a, b)
             assert not b.flags.writeable
     assert old.config == index.config and old.metadata == index.metadata
-    old.save(tmp_path/'resaved.npz')
-    again = FlashIndex.load(tmp_path/'resaved.npz')
+    old.save(tmp_path/"resaved.npz")
+    again = FlashIndex.load(tmp_path/"resaved.npz")
     np.testing.assert_array_equal(again.peaks_pid, old.peaks_pid)
 
 
@@ -361,7 +361,7 @@ def test_legacy_duplicate_order_is_recovered_from_intensities():
     perm = np.array([1, 0, 2, 3, 4])
     inverse = np.argsort(perm)
     values = original.__dict__.copy()
-    for name in ('peaks_mz', 'peaks_int', 'peaks_spec_idx'):
+    for name in ("peaks_mz", "peaks_int", "peaks_spec_idx"):
         values[name] = values[name][perm]
     values.update(peaks_pid=None, peaks_xlog2=None, nl_xlog2=None,
                   nl_product_idx=inverse[original.nl_product_idx])
@@ -370,11 +370,11 @@ def test_legacy_duplicate_order_is_recovered_from_intensities():
         np.testing.assert_array_equal(a, b)
 
 
-@pytest.mark.parametrize('mode', ['fragment', 'neutral_loss', 'hybrid'])
+@pytest.mark.parametrize("mode", ["fragment", "neutral_loss", "hybrid"])
 def test_legacy_loaded_entropy_scores_equal_fresh_index(tmp_path, mode):
     index = make_index(mode)
-    file = tmp_path/'new.npz'
-    oldfile = tmp_path/'old.npz'
+    file = tmp_path/"new.npz"
+    oldfile = tmp_path/"old.npz"
     index.save(file)
     downgrade_to_v2(file, oldfile)
     outputs = []
@@ -384,7 +384,7 @@ def test_legacy_loaded_entropy_scores_equal_fresh_index(tmp_path, mode):
         out = np.empty((p.n_specs, source.n_specs))
         entropy_rows(out, p.spec_offsets, p.spec_mz, p.spec_int, p.precursor_mz,
                      data.fragment, data.neutral_loss, data.precursor_mz, data.n_peaks,
-                     .02, False, {'fragment':0,'neutral_loss':1,'hybrid':2}[mode],
+                     .02, False, {"fragment":0,"neutral_loss":1,"hybrid":2}[mode],
                      -1., False, 0, p.n_specs)
         outputs.append(out)
     np.testing.assert_array_equal(*outputs)
@@ -394,12 +394,12 @@ def test_kernel_cache_is_not_rebuilt_or_serialized(tmp_path, monkeypatch):
     index = make_index()
     data = index.entropy_data()
     def fail():
-        raise AssertionError('Repeated physical-ID construction')
-    monkeypatch.setattr(FlashIndex, '_physical_peak_ids', lambda _: fail())
+        raise AssertionError("Repeated physical-ID construction")
+    monkeypatch.setattr(FlashIndex, "_physical_peak_ids", lambda _: fail())
     assert index.entropy_data() is data
-    index.save(tmp_path/'index.npz')
-    with np.load(tmp_path/'index.npz', allow_pickle=False) as f:
-        assert '_runtime_cache' not in f.files
+    index.save(tmp_path/"index.npz")
+    with np.load(tmp_path/"index.npz", allow_pickle=False) as f:
+        assert "_runtime_cache" not in f.files
 
 
 def test_cosine_casts_only_once_and_does_not_modify_caller():
@@ -417,14 +417,14 @@ def test_cosine_casts_only_once_and_does_not_modify_caller():
     assert not data.peaks_int.flags.writeable
 
 
-@pytest.mark.parametrize('name, value, message', [
-    ('peaks_pid', np.array([0,0,2,3,4]), 'permutation'),
-    ('peaks_pid', np.array([1,0,3,2,4]), 'consistently'),
-    ('peaks_pid', np.arange(5, dtype=float), 'integer'),
-    ('peaks_xlog2', np.ones(5), 'disagrees'),
-    ('spec_offsets', np.array([0.,3.,3.,5.]), 'integers'),
-    ('peaks_spec_idx', np.array([0.,0.,2.,0.,2.]), 'integer'),
-    ('nl_xlog2', np.ones(5), 'disagrees'),
+@pytest.mark.parametrize("name, value, message", [
+    ("peaks_pid", np.array([0,0,2,3,4]), "permutation"),
+    ("peaks_pid", np.array([1,0,3,2,4]), "consistently"),
+    ("peaks_pid", np.arange(5, dtype=float), "integer"),
+    ("peaks_xlog2", np.ones(5), "disagrees"),
+    ("spec_offsets", np.array([0.,3.,3.,5.]), "integers"),
+    ("peaks_spec_idx", np.array([0.,0.,2.,0.,2.]), "integer"),
+    ("nl_xlog2", np.ones(5), "disagrees"),
 ])
 def test_reject_unsafe_postings_before_native_scoring(name, value, message):
     values = make_index().__dict__.copy()
@@ -435,17 +435,17 @@ def test_reject_unsafe_postings_before_native_scoring(name, value, message):
 
 def test_save_preserves_overwrite_policy_and_can_opt_out(tmp_path):
     index = make_index()
-    filename = tmp_path/'a'/'b.npz'
+    filename = tmp_path/"a"/"b.npz"
     index.save(filename)
     index.save(filename)  # The original public FlashIndex overwrites by default.
     with pytest.raises(FileExistsError):
         index.save(filename, overwrite=False)
-    assert not list(filename.parent.glob('*.tmp'))
+    assert not list(filename.parent.glob("*.tmp"))
 
 
 def test_empty_index_and_prepared_slices():
     empty = empty_prepared(np.float64, settings())
-    index = build_entropy_index(empty, 'hybrid', config=config_from_settings(empty.settings))
+    index = build_entropy_index(empty, "hybrid", config=config_from_settings(empty.settings))
     assert index.n_specs == index.n_peaks == 0
     assert index.has_neutral_loss_index
     assert index.entropy_data().neutral_loss[0].size == 0
@@ -458,30 +458,30 @@ def test_empty_index_and_prepared_slices():
 
 def test_bad_required_or_optional_archive(tmp_path):
     index = make_index()
-    file = tmp_path/'orig.npz'
+    file = tmp_path/"orig.npz"
     index.save(file)
     with np.load(file, allow_pickle=False) as f:
-        arrays = {key:f[key] for key in f.files if key != 'spec_offsets'}
-    np.savez(tmp_path/'bad.npz', **arrays)
-    with pytest.raises(ValueError, match='missing required'):
-        FlashIndex.load(tmp_path/'bad.npz')
+        arrays = {key:f[key] for key in f.files if key != "spec_offsets"}
+    np.savez(tmp_path/"bad.npz", **arrays)
+    with pytest.raises(ValueError, match="missing required"):
+        FlashIndex.load(tmp_path/"bad.npz")
 
 
 def test_inconsistent_legacy_views_are_not_silently_repaired():
-    values = make_index('fragment').__dict__.copy()
+    values = make_index("fragment").__dict__.copy()
     values.update(peaks_pid=None, peaks_xlog2=None)
-    values['peaks_int'] = values['peaks_int'].copy()
-    values['peaks_int'][0] += .01
+    values["peaks_int"] = values["peaks_int"].copy()
+    values["peaks_int"][0] += .01
     old = FlashIndex(**values)
-    with pytest.raises(ValueError, match='inconsistent'):
+    with pytest.raises(ValueError, match="inconsistent"):
         old.entropy_data()
 
 
 def test_prepared_rejects_bad_shapes_nonfinite_or_unsorted():
     base = SimpleNamespace(spec_offsets=np.array([0,2]), spec_mz=np.array([200.,100.]),
                            spec_int=np.array([.25,.25]), precursor_mz=np.array([500.]))
-    with pytest.raises(ValueError, match='sorted'):
+    with pytest.raises(ValueError, match="sorted"):
         pack_native(base,np.float64,settings())
     base.spec_mz=np.array([100.,200.]);base.spec_int=np.array([.5,np.nan])
-    with pytest.raises(ValueError, match='finite'):
+    with pytest.raises(ValueError, match="finite"):
         pack_native(base,np.float64,settings())
