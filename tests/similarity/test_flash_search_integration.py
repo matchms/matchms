@@ -46,6 +46,7 @@ def test_public_search_signature(cls):
 @pytest.mark.parametrize('mode',['fragment','neutral_loss','hybrid'])
 @pytest.mark.parametrize('dtype',[np.float32,np.float64])
 def test_search_matrix_prepared_persistence_and_threads(cls,mode,dtype,tmp_path):
+    """Test that all public search methods agree, and that persistence and threads work."""
     queries,library=inputs()
     s=cls(matching_mode=mode,tolerance=.02,dtype=dtype,remove_precursor=False,noise_cutoff=0.)
     before=[x.peaks.to_numpy.copy() for x in library]

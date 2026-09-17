@@ -1,9 +1,9 @@
-"""Independent mathematical reference tests; these do not need matchms installed."""
+"""Independent mathematical reference tests"""
 from types import SimpleNamespace
 import numpy as np
 import pytest
-from upgrade_kernels.flash_index import build_entropy_index
-from upgrade_kernels._flash_entropy import entropy_rows as search_postings_into
+from matchms.similarity.flash_index import build_entropy_index
+from matchms.similarity._flash_entropy import entropy_rows as search_postings_into
 
 
 def pack(peaks, precursors, dtype=np.float64):
