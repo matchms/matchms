@@ -35,6 +35,8 @@ _MATCHING_MODES = {"fragment": 0, "neutral_loss": 1, "hybrid": 2}
 _MAX_SYMMETRIC_PPM = 2_000_000
 
 
+# Helper functions
+# -----------------------------------------------------
 def _nonnegative(value: float, name: str) -> float:
     """Validate a finite, nonnegative numerical parameter."""
     value = float(value)
@@ -103,6 +105,8 @@ def _run_rows(
                     progress.update(futures[future])
 
 
+# Versatile base class for indexed similarity scorers
+# -----------------------------------------------------
 class _BaseFlashSimilarity(BaseSimilarity):
     """Shared preparation, persistence, and dense-search interface.
 
@@ -228,9 +232,14 @@ class _BaseFlashSimilarity(BaseSimilarity):
     def _settings(self) -> tuple:
         """Return the settings that determine prepared peak values."""
         return (
-            self._weighing_type, self.intensity_power, self.remove_precursor,
-            self.offset_to_precursor, self.noise_cutoff or 0.0,
-            self.normalize_to_half, self.merge_within, self.dtype.str,
+            self._weighing_type,
+            self.intensity_power,
+            self.remove_precursor,
+            self.offset_to_precursor,
+            self.noise_cutoff or 0.0,
+            self.normalize_to_half,
+            self.merge_within,
+            self.dtype.str,
         )
 
     def prepare_queries(self, spectra: Sequence[SpectrumType]) -> PreparedSpectra:
@@ -285,6 +294,7 @@ class _BaseFlashSimilarity(BaseSimilarity):
             metadata["mz_precision"] = float(spectra.mz_precision)
         if hasattr(spectra, "fragments"):
             metadata["fragment_backend"] = type(spectra.fragments).__name__
+
         return self.build_index_prepared(self.prepare_queries(spectra), metadata=metadata)
 
     def build_index_prepared(
@@ -292,6 +302,7 @@ class _BaseFlashSimilarity(BaseSimilarity):
     ) -> FlashIndex:
         """Build an index from compatible packed peaks without reprocessing them."""
         self._check_prepared(prepared)
+
         return _build_index(
             prepared, self.matching_mode, self._weighing_type, metadata=metadata,
         )
@@ -365,6 +376,7 @@ class _BaseFlashSimilarity(BaseSimilarity):
         """
         self._check_index(library_index)
         self._resolve_score_fields(score_fields)
+
         return self.search_prepared(
             self.prepare_queries(query_spectra), library_index,
             score_fields=score_fields, progress_bar=progress_bar, n_jobs=n_jobs,
@@ -388,6 +400,7 @@ class _BaseFlashSimilarity(BaseSimilarity):
         self._check_index(library_index)
         self._check_prepared(query_spectra)
         fields = self._resolve_score_fields(score_fields)
+
         return self._score_prepared(query_spectra, library_index, fields, progress_bar, n_jobs)
 
     @abstractmethod
@@ -408,6 +421,7 @@ class _BaseFlashSimilarity(BaseSimilarity):
         if spectra_2 is None:
             return first, first, True
         second = first if spectra_2 is spectra_1 else self.prepare_queries(spectra_2)
+
         return first, second, False
 
     def _optimize_matrix_orientation(self, refs, queries, is_symmetric) -> tuple:
