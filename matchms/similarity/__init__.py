@@ -35,6 +35,7 @@ Modified cosine similarity
 
 * :class:`~matchms.similarity.ModifiedCosineGreedy`
 * :class:`~matchms.similarity.ModifiedCosineHungarian`
+* :class:`~matchms.similarity.ModifiedCosineLinear`
 * :class:`~matchms.similarity.CosineFlash` with ``matching_mode="hybrid"``
 
 Spectral entropy similarity
@@ -86,6 +87,7 @@ from .metadata_match import MetadataMatch
 from .modified_cosine import ModifiedCosine
 from .modified_cosine_greedy import ModifiedCosineGreedy
 from .modified_cosine_hungarian import ModifiedCosineHungarian
+from .modified_cosine_linear import ModifiedCosineLinear
 from .neutral_losses_cosine import NeutralLossesCosine
 from .parent_mass_match import ParentMassMatch
 from .precursor_mz_match import PrecursorMzMatch
@@ -107,6 +109,7 @@ __all__ = [
     "ModifiedCosine",
     "ModifiedCosineGreedy",
     "ModifiedCosineHungarian",
+    "ModifiedCosineLinear",
     "NeutralLossesCosine",
     "ParentMassMatch",
     "PrecursorMzMatch",
@@ -138,6 +141,7 @@ def get_similarity_function_by_name(similarity_function_name: str):
         "ModifiedCosine": ModifiedCosine,
         "ModifiedCosineGreedy": ModifiedCosineGreedy,
         "ModifiedCosineHungarian": ModifiedCosineHungarian,
+        "ModifiedCosineLinear": ModifiedCosineLinear,
         "NeutralLossesCosine": NeutralLossesCosine,
         "ParentMassMatch": ParentMassMatch,
         "PrecursorMzMatch": PrecursorMzMatch,

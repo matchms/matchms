@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from matchms import Spectrum
 from matchms.filtering import normalize_intensities
-from matchms.similarity import ModifiedCosineGreedy, ModifiedCosineHungarian
+from matchms.similarity import ModifiedCosineGreedy, ModifiedCosineHungarian, ModifiedCosineLinear
 from ..builder_spectrum import SpectrumBuilder
 
 
@@ -13,7 +13,7 @@ EXPECTED_PRECURSOR_TYPE_WARNING = "Precursor_mz must be int or float. Apply 'add
 @pytest.mark.parametrize("scenario", ["missing_precursor", "string_precursor"])
 def test_modified_cosine_precursor_messages_consistent(scenario, caplog):
     """Modified cosine variants should emit identical precursor messages."""
-    classes = [ModifiedCosineGreedy, ModifiedCosineHungarian]
+    classes = [ModifiedCosineGreedy, ModifiedCosineHungarian, ModifiedCosineLinear]
     collected_messages = []
 
     if scenario == "missing_precursor":
