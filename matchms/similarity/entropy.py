@@ -1,88 +1,62 @@
-from collections.abc import Sequence
+"""High-level spectral entropy similarity for pairs, matrices, and library search."""
 import numpy as np
-from matchms.typing import SpectrumType
-from .base_similarity import BaseSimilarity
 from .default_parameters import (
+    DEFAULT_DTYPE,
     DEFAULT_MZ_TOLERANCE,
     DEFAULT_NOISE_CUTOFF,
     DEFAULT_OFFSET_TO_PRECURSOR,
 )
-from .entropy_greedy import EntropyGreedy
-from .flash_index import FlashIndex
 from .flash_similarity import FlashEntropy
 
 
-class Entropy(BaseSimilarity):
-    """Calculate spectral entropy similarity between mass spectra.
+class Entropy(FlashEntropy):
+    """Compare mass spectra using entropy-weighted spectral similarity.
 
-    This is the central Matchms entropy-similarity class and should normally be
-    the first choice for users interested in spectral entropy similarity.
-
-    The class combines two implementations behind one API:
-
-    - :meth:`pair` uses :class:`~matchms.similarity.EntropyGreedy`, a compact
-      pair-oriented baseline implementation.
-    - :meth:`matrix` uses :class:`~matchms.similarity.FlashEntropy`, which is the
-      efficient implementation for larger all-vs-all comparisons.
-
-    Both paths use the same entropy weighting, noise filtering, normalization,
-    tolerance definition, and one-to-one fragment matching semantics.
-
-    Spectral entropy similarity was introduced by Li et al., Nature Methods 18,
-    1524-1531 (2021), doi:10.1038/s41592-021-01331-z. The accelerated Flash
-    Entropy search strategy was introduced by Li & Fiehn, Nature Methods 20,
-    1475-1478 (2023), doi:10.1038/s41592-023-02012-9.
-
-    ``pair`` uses :class:`EntropyGreedy`, ``matrix`` uses the
-    SpectraCollection-native :class:`FlashEntropy`, and :meth:`search` performs
-    sparse repeated search against a persistent :class:`FlashIndex`.
-
-    Three matching modes are supported:
-
-    - ``"fragment"``:
-      Match fragment m/z values directly. Each peak can be matched at most once.
-
-    - ``"neutral_loss"``:
-      Match neutral losses (``precursor_mz - fragment_mz``) only. Each peak can
-      be matched at most once. If either spectrum has no precursor m/z, the
-      resulting score is zero.
-
-    - ``"hybrid"``:
-      First perform one-to-one fragment matching. Peaks consumed by fragment
-      matches cannot subsequently participate in neutral-loss matching.
-      Remaining peaks are then matched one-to-one by neutral loss. If either
-      spectrum has no precursor m/z, hybrid matching falls back to fragment-only
-      matching.
+    Intensities are entropy-weighted and normalized to sum to 0.5 per spectrum.
+    A matched pair contributes ``f(I1 + I2) - f(I1) - f(I2)``, with
+    ``f(x) = x * log2(x)`` and ``f(0) = 0``. The sum is returned as a scalar
+    ``score``. ``pair``, ``matrix``, and indexed ``search`` share these rules.
 
     Parameters
     ----------
     matching_mode
-        Matching strategy. Must be ``"fragment"``, ``"neutral_loss"``, or
-        ``"hybrid"``. Default is ``"fragment"``.
+        ``"fragment"`` matches direct fragment coordinates one-to-one in
+        ascending m/z order. ``"neutral_loss"`` matches only
+        ``precursor_mz - fragment_mz`` coordinates, in ascending loss order.
+        ``"hybrid"`` accepts fragment matches first, then loss matches between
+        still-unused peaks. Missing precursors give zero loss-only scores and
+        fragment-only hybrid scores, provided preprocessing retains the spectra.
     tolerance
-        Maximum peak m/z difference for a match. Interpreted as Da unless
-        ``use_ppm=True``. Default is 0.02.
+        Inclusive coordinate tolerance for a match, in Da unless ``use_ppm``
+        is True. In neutral-loss matching, this applies to loss coordinates.
     use_ppm
-        If True, interpret ``tolerance`` as a symmetric ppm tolerance.
+        Interpret tolerance as symmetric ppm rather than Da.
     remove_precursor
-        If True and ``precursor_mz`` metadata are available, remove peaks above
-        ``precursor_mz + offset_to_precursor`` before scoring.
+        Exclude peaks above ``precursor_mz + offset_to_precursor`` during
+        preparation. Missing precursor handling follows the collection cleaner.
     offset_to_precursor
-        Offset used when ``remove_precursor=True``. This will only keep 
-        mz values <= precursor_mz + offset_to_precursor. Default is -1.6 Da.
+        Signed Da offset for the upper peak cutoff. Peaks at the boundary remain.
     noise_cutoff
-        Remove peaks below this fraction of the spectrum's maximum intensity.
-        Set to 0 or None to disable. Default is 0.01.
+        Minimum intensity relative to the maximum after precursor removal.
+        Set to zero or None to disable the noise filter.
     merge_within
-        If > 0, merge neighboring peaks within this m/z distance during
-        preprocessing. Default is 0.
+        Optional within-spectrum merge distance in Da. Zero disables merging.
     dtype
-        Floating-point dtype used for scoring. Default is ``np.float64``.
-    """
+        Float32 or float64 for prepared peaks and the returned score. Calculations
+        within the entropy kernel use float64 arithmetic.
 
-    is_commutative = True
-    score_datatype = np.float64
-    score_fields = ("score",)
+    Notes
+    -----
+    The score formula and entropy weighting follow Li et al., Nature Methods
+    18, 1524-1531 (2021), doi:10.1038/s41592-021-01331-z. Indexed accumulation is
+    based on the Flash Entropy approach of Li and Fiehn, Nature Methods 20,
+    1475-1478 (2023), doi:10.1038/s41592-023-02012-9.
+
+    The index associates globally sorted library peaks with their source spectra.
+    Matching entries are accumulated directly, with peak-use tracking for
+    overlapping windows. Use ``build_index`` and ``search`` for repeated queries;
+    use ``matrix`` for a complete comparison including index construction.
+    """
 
     def __init__(
         self,
@@ -93,99 +67,29 @@ class Entropy(BaseSimilarity):
         offset_to_precursor: float = DEFAULT_OFFSET_TO_PRECURSOR,
         noise_cutoff: float | None = DEFAULT_NOISE_CUTOFF,
         merge_within: float = 0.0,
-        dtype: np.dtype = np.float64,
+        dtype: np.dtype = DEFAULT_DTYPE,
     ):
-        self.matching_mode = matching_mode
-        self.tolerance = tolerance
-        self.use_ppm = use_ppm
-        self.remove_precursor = remove_precursor
-        self.offset_to_precursor = offset_to_precursor
-        self.noise_cutoff = noise_cutoff
-        self.merge_within = merge_within
-        self.dtype = np.dtype(dtype)
-        self.score_datatype = self.dtype
-
-    def _pair_similarity(self) -> EntropyGreedy:
-        return EntropyGreedy(
-            matching_mode=self.matching_mode,
-            tolerance=self.tolerance,
-            use_ppm=self.use_ppm,
-            remove_precursor=self.remove_precursor,
-            offset_to_precursor=self.offset_to_precursor,
-            noise_cutoff=self.noise_cutoff,
-            merge_within=self.merge_within,
-            dtype=self.dtype,
-        )
-
-    def _flash_similarity(self) -> FlashEntropy:
-        return FlashEntropy(
-            matching_mode=self.matching_mode,
-            tolerance=self.tolerance,
-            use_ppm=self.use_ppm,
-            remove_precursor=self.remove_precursor,
-            offset_to_precursor=self.offset_to_precursor,
-            noise_cutoff=self.noise_cutoff,
+        super().__init__(
+            matching_mode=matching_mode,
+            tolerance=tolerance,
+            use_ppm=use_ppm,
+            intensity_power=1.0,
+            remove_precursor=remove_precursor,
+            offset_to_precursor=offset_to_precursor,
+            noise_cutoff=noise_cutoff,
+            merge_within=merge_within,
+            dtype=dtype,
             normalize_to_half=True,
-            merge_within=self.merge_within,
-            dtype=self.dtype,
         )
 
-    def build_index(self, spectra) -> FlashIndex:
-        """Build a reusable library index directly from a SpectraCollection."""
-        return self._flash_similarity().build_index(spectra)
-
-    def save_index(self, index: FlashIndex, filename) -> None:
-        """Save a compatible persistent Flash index."""
-        self._flash_similarity().save_index(index, filename)
-
-    def load_index(self, filename) -> FlashIndex:
-        """Load and validate a persistent Flash index."""
-        return self._flash_similarity().load_index(filename)
-
-    def pair(self, spectrum_1: SpectrumType, spectrum_2: SpectrumType) -> np.ndarray:
-        """Calculate entropy similarity for one spectrum pair."""
-        return self._pair_similarity().pair(spectrum_1, spectrum_2)
-
-    def matrix(
-        self,
-        spectra_1: Sequence[SpectrumType],
-        spectra_2: Sequence[SpectrumType] | None = None,
-        score_fields: Sequence[str] | None = None,
-        progress_bar: bool = True,
-        n_jobs: int = -1,
-    ):
-        """Calculate a dense matrix of entropy similarity scores.
-
-        Persistent indices are intentionally not part of this API. Use
-        :meth:`search` for repeated queries against a pre-built library index.
-        """
-        return self._flash_similarity().matrix(
-            spectra_1=spectra_1,
-            spectra_2=spectra_2,
-            score_fields=score_fields,
-            progress_bar=progress_bar,
-            n_jobs=n_jobs,
+    def to_dict(self) -> dict:
+        """Return the public entropy constructor parameters."""
+        names = (
+            "matching_mode", "tolerance", "use_ppm", "remove_precursor",
+            "offset_to_precursor", "noise_cutoff", "merge_within",
         )
-
-    def search(
-        self,
-        query_spectra,
-        library_index: FlashIndex,
-        *,
-        score_fields: Sequence[str] | None = None,
-        progress_bar: bool = True,
-        n_jobs: int = -1,
-    ):
-        """Calculate entropy scores against a pre-built Flash library index.
-
-        This has the same scoring semantics and dense ``Scores`` output as
-        ``matrix(query_spectra, library_spectra)``. The only difference is that
-        library preprocessing and index construction have already been performed.
-        """
-        return self._flash_similarity().search(
-            query_spectra=query_spectra,
-            library_index=library_index,
-            score_fields=score_fields,
-            progress_bar=progress_bar,
-            n_jobs=n_jobs,
-        )
+        return {
+            "__Similarity__": type(self).__name__,
+            **{name: getattr(self, name) for name in names},
+            "dtype": self.dtype.name,
+        }
