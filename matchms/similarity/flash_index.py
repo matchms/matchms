@@ -444,7 +444,7 @@ class FlashIndex:
             with np.load(filename, allow_pickle=False) as archive:
                 meta = json.loads(str(archive["__metadata__"].item()))
                 if not isinstance(meta, dict):
-                    raise ValueError("Flash index metadata must be a JSON object.")
+                    raise TypeError("Flash index metadata must be a JSON object.")
                 if meta.get("format") != _FLASH_INDEX_FORMAT:
                     raise ValueError(f"Not a matchms Flash index: {meta.get('format')!r}.")
                 version = meta.get("version")
@@ -455,7 +455,7 @@ class FlashIndex:
                     )
                 optional = meta.get("optional_arrays", {})
                 if not isinstance(optional, dict):
-                    raise ValueError("Malformed optional_arrays metadata.")
+                    raise TypeError("Malformed optional_arrays metadata.")
                 arrays = {}
                 for name in _REQUIRED_ARRAYS:
                     if name not in archive:
