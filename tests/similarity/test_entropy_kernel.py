@@ -93,7 +93,9 @@ def test_random_overlaps_duplicates_zeros_and_missing_precursors(seed, mode, dty
     pa = rng.choice([500., 510., 520., np.nan], len(a)).astype(dtype)
     pb = rng.choice([500., 510., 520., np.nan], len(b)).astype(dtype)
     out, _ = run(a, b, pa, pb, mode, dtype, tol, ppm)
-    expected = np.array([[oracle(x,y,p,q,tol,ppm,mode) for y,q in zip(b,pb)] for x,p in zip(a,pa)])
+    expected = np.array([
+        [oracle(x,y,p,q,tol,ppm,mode) for y,q in zip(b, pb, strict=True)] for x,p in zip(a, pa, strict=True)
+        ])
     np.testing.assert_allclose(out, expected, atol=2e-7 if dtype == np.float32 else 2e-14, rtol=2e-7)
     assert np.all(out >= -1e-7) and np.all(out <= 1.0+1e-6)
     reverse, _ = run(b, a, pb, pa, mode, dtype, tol, ppm)
@@ -106,6 +108,7 @@ def test_exact_da_boundary_and_outside(mode):
     a = [np.array([[100., .5]])]
     b = [np.array([[100.125, .5]]), np.array([[np.nextafter(100.125, np.inf), .5]])]
     out, _ = run(a,b,[500.],[500.,500.],mode,tol=.125)
+
     # For NL the subtraction 500-mz can erase a single ulp; compare the actual
     # prepared coordinates rather than impose an incorrect mathematical limit.
     expected = [[oracle(a[0],x,500.,500.,.125,False,mode) for x in b]]

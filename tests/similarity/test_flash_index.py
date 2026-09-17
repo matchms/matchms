@@ -403,7 +403,7 @@ def test_kernel_cache_is_not_rebuilt_or_serialized(tmp_path, monkeypatch):
 
 
 def test_cosine_casts_only_once_and_does_not_modify_caller():
-    p = prepared(np.float32)
+    _ = prepared(np.float32)
     source = make_index(dtype=np.float32)
     source.spec_l2 = np.array([.3, 0., .4], np.float32)
     source.peaks_spec_idx = source.peaks_spec_idx.astype(np.int32)
@@ -482,6 +482,7 @@ def test_prepared_rejects_bad_shapes_nonfinite_or_unsorted():
                            spec_int=np.array([.25,.25]), precursor_mz=np.array([500.]))
     with pytest.raises(ValueError, match="sorted"):
         pack_native(base,np.float64,settings())
-    base.spec_mz=np.array([100.,200.]);base.spec_int=np.array([.5,np.nan])
+    base.spec_mz=np.array([100.,200.])
+    base.spec_int=np.array([.5,np.nan])
     with pytest.raises(ValueError, match="finite"):
         pack_native(base,np.float64,settings())
