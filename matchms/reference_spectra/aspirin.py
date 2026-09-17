@@ -1,7 +1,7 @@
 """Submodule providing a reference spectrum for aspirin."""
 
 import numpy as np
-from ..Spectrum import Spectrum
+from ..spectrum import Spectrum
 
 
 ASPIRIN_PRECURSOR_MZ: float = 181.0490

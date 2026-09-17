@@ -1,6 +1,6 @@
 import os
+from collections.abc import Generator, Iterator
 from itertools import chain
-from typing import Generator, List, Optional, Union
 from matchms.importing import (
     load_from_json,
     load_from_mgf,
@@ -8,31 +8,44 @@ from matchms.importing import (
     load_from_mzml,
     load_from_mzxml,
     load_from_pickle,
-    load_from_usi,
 )
-from matchms.Spectrum import Spectrum
+from matchms.spectra_collection import SpectraCollection
+from matchms.spectrum import Spectrum
 
 
 def load_spectra(
-    file: str, metadata_harmonization: bool = True, ftype: Optional[str] = None
-) -> Union[List[Spectrum], Generator[Spectrum, None, None]]:
-    """Loads spectra from your spectrum file into memory as matchms Spectrum object
+    file: str,
+    metadata_harmonization: bool = True,
+    ftype: str | None = "auto",
+) -> list[Spectrum] | Generator[Spectrum, None, None]:
+    """Load spectra from a file as matchms Spectrum objects.
 
-    The following file extensions can be loaded in with this function:
-    "mzML", "json", "mgf", "msp", "mzxml", "usi" and "pickle".
-    A pickled file is expected to directly contain a list of matchms spectrum objects.
+    The following file extensions can be loaded with this function:
+    ``mzML``, ``json``, ``mgf``, ``msp``, ``mzxml`` and ``pickle``.
 
-    Args:
-    -----
-    file:
-        Path to file containing spectra, with file extension "mzML", "json", "mgf", "msp",
-        "mzxml", "usi" or "pickle"
-    ftype:
-        Optional. Filetype
+    A pickled file is expected to directly contain a list of matchms Spectrum
+    objects.
+
+    Parameters
+    ----------
+    file
+        Path to file containing spectra.
+    metadata_harmonization
+        If True, harmonize metadata during import.
+    ftype
+        File type to use for import. By default, ``"auto"`` guesses the file
+        type from the file extension. Alternatively, pass an explicit file type,
+        for example ``"mzml"``, ``"json"``, ``"mgf"``, ``"msp"``, ``"mzxml"``,
+        or ``"pickle"``.
+
+    Returns
+    -------
+    list[Spectrum] or Generator[Spectrum, None, None]
+        Imported spectra.
     """
     assert os.path.exists(file), f"The specified file: {file} does not exists"
 
-    if ftype is None:
+    if ftype is None or ftype == "auto":
         ftype = os.path.splitext(file)[1].lower()[1:]
     else:
         ftype = ftype.lower()
@@ -47,17 +60,53 @@ def load_spectra(
         return load_from_msp(file, metadata_harmonization=metadata_harmonization)
     if ftype == "mzxml":
         return load_from_mzxml(file, metadata_harmonization=metadata_harmonization)
-    if ftype == "usi":
-        return load_from_usi(file, metadata_harmonization=metadata_harmonization)
     if ftype == "pickle":
         return load_from_pickle(file, metadata_harmonization)
 
     raise TypeError(f"File extension of file: {file} is not recognized")
 
 
+def load_ms2_dataset(
+    file: str,
+    metadata_harmonization: bool = True,
+    ftype: str = "auto",
+    **kwargs,
+) -> SpectraCollection:
+    """Load spectra from a file as a SpectraCollection.
+
+    Parameters
+    ----------
+    file
+        Path to file containing spectra.
+    metadata_harmonization
+        If True, harmonize metadata during import.
+    ftype
+        File type to use for import. By default, ``"auto"`` guesses the file
+        type from the file extension. Alternatively, pass an explicit file type,
+        for example ``"mzml"``, ``"json"``, ``"mgf"``, ``"msp"``, ``"mzxml"``,
+        or ``"pickle"``.
+    **kwargs
+        Additional keyword arguments to pass to the SpectraCollection constructor,
+        for example ``mz_precision``.
+
+    Returns
+    -------
+    SpectraCollection
+        Imported spectra as a collection.
+    """
+    return SpectraCollection(
+        load_spectra(
+            file,
+            metadata_harmonization=metadata_harmonization,
+            ftype=ftype,
+        ),
+        **kwargs,
+    )
+
+
 def load_list_of_spectrum_files(
-    spectrum_files: Union[List[str], str],
-) -> Union[List[Spectrum], Generator[Spectrum, None, None]]:
+    spectrum_files: list[str] | str,
+) -> list[Spectrum] | Iterator[Spectrum]:
     """Combines all spectra in multiple files into a list of spectra"""
     # Just load spectra if it is a single file
     if isinstance(spectrum_files, str):

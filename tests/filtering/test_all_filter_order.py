@@ -3,7 +3,7 @@ when changing the ALL_FILTERS order in the future"""
 
 import ast
 import os
-from typing import Callable, List
+from collections.abc import Callable
 import pytest
 from matchms import filtering as msfilters
 from matchms.filtering.filter_order import ALL_FILTERS
@@ -95,12 +95,6 @@ DERIVE_ANNOTATION_FILTERS = [
             [msfilters.derive_formula_from_smiles],
         ],
         [
-            [
-                msfilters.remove_profiled_spectra,
-            ],
-            [msfilters.remove_peaks_around_precursor_mz],
-        ],
-        [
             [msfilters.remove_noise_below_frequent_intensities],
             [
                 msfilters.select_by_intensity,
@@ -112,12 +106,6 @@ DERIVE_ANNOTATION_FILTERS = [
                 msfilters.require_minimum_number_of_peaks,
                 msfilters.require_minimum_number_of_high_peaks,
             ],
-        ],
-        [
-            [
-                msfilters.remove_profiled_spectra,
-            ],
-            [msfilters.remove_peaks_around_precursor_mz],
         ],
         [
             [
@@ -144,12 +132,6 @@ DERIVE_ANNOTATION_FILTERS = [
             [msfilters.require_matching_adduct_and_ionmode],
         ],
         [
-            [
-                msfilters.remove_profiled_spectra,
-            ],
-            [msfilters.remove_peaks_around_precursor_mz],
-        ],
-        [
             [msfilters.repair_parent_mass_from_smiles],
             [
                 msfilters.repair_adduct_based_on_parent_mass,
@@ -169,7 +151,7 @@ DERIVE_ANNOTATION_FILTERS = [
         ],
     ],
 )
-def test_all_filter_order(early_filters: List[Callable], later_filters: List[Callable]):
+def test_all_filter_order(early_filters: list[Callable], later_filters: list[Callable]):
     """Tests if early_filter is run before later_filter"""
     for early_filter in early_filters:
         for later_filter in later_filters:
@@ -192,12 +174,12 @@ def test_all_filter_order(early_filters: List[Callable], later_filters: List[Cal
 def test_all_filters_is_complete():
     """Checks that the global varible ALL_FILTERS contains all the available filters
 
-    This is important, since performing tests in the wrong order can make some filters useless.
+    This is important, since performing filters in the wrong order can make some filters useless.
     """
 
     def get_functions_from_file(file_path):
         """Gets all python functions in a file"""
-        with open(file_path, "r", encoding="utf-8") as file:
+        with open(file_path, encoding="utf-8") as file:
             tree = ast.parse(file.read(), filename=file_path)
         functions = []
         for node in ast.walk(tree):
@@ -217,7 +199,7 @@ def test_all_filters_is_complete():
         for script in scripts:
             # Remove __init__
             if script[0] == "_":
-                break
+                continue
             if script[-3:] == ".py":
                 functions = get_functions_from_file(os.path.join(directory_with_filters, script))
                 for function in functions:
