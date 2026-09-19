@@ -1,8 +1,9 @@
 
 import logging
-from collections.abc import Mapping
+from collections.abc import Iterable, Mapping
 import numpy as np
 import pandas as pd
+from matchms.utils import ALIASES_FOR_NONE
 
 
 logger = logging.getLogger("matchms")
@@ -57,6 +58,33 @@ def is_missing_metadata_value(value) -> bool:
         return bool(missing)
 
     return False
+
+
+def is_missing_metadata_entry(value, aliases: Iterable | None = None) -> bool:
+    """Return True if a scalar metadata value represents a missing entry.
+
+    This covers the canonical missing values (``None``, ``NaN``, ``pd.NA``) as
+    well as the known string aliases for missing entries
+    (see :data:`matchms.utils.ALIASES_FOR_NONE`).
+
+    Parameters
+    ----------
+    value
+        Metadata value to check.
+    aliases
+        Values that should additionally be interpreted as missing. If ``None``,
+        ``ALIASES_FOR_NONE`` is used.
+    """
+    if is_missing_metadata_value(value):
+        return True
+
+    if aliases is None:
+        aliases = ALIASES_FOR_NONE
+
+    try:
+        return value in aliases
+    except TypeError:
+        return False
 
 
 def metadata_value_to_python(value):

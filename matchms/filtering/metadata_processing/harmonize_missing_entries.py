@@ -1,6 +1,6 @@
 from collections.abc import Iterable
 from matchms.filtering._dispatch import metadata_update_filter
-from matchms.filtering.filter_utils.metadata_conversions import is_missing_metadata_value
+from matchms.filtering.filter_utils.metadata_conversions import is_missing_metadata_entry
 from matchms.utils import ALIASES_FOR_NONE
 
 
@@ -15,16 +15,6 @@ def _normalize_keys(keys):
         return list(keys)
 
     raise TypeError("'keys' must be None, a string, or an iterable of strings.")
-
-
-def _is_missing_alias(value, aliases) -> bool:
-    if is_missing_metadata_value(value):
-        return True
-
-    try:
-        return value in aliases
-    except TypeError:
-        return False
 
 
 def _harmonize_missing_entries(
@@ -68,7 +58,7 @@ def _harmonize_missing_entries(
     updates = {}
     for key in keys:
         value = metadata.get(key)
-        if _is_missing_alias(value, aliases):
+        if is_missing_metadata_entry(value, aliases):
             updates[key] = undefined
 
     return updates

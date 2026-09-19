@@ -139,6 +139,10 @@ For each filter, the report records:
 - the number of spectra with changed metadata,
 - the number of spectra with changed fragments.
 
+The report also counts, per metadata key, how many processed spectra still have
+a missing entry for that key (``report.missing_metadata``). This shows which
+metadata could not be derived or repaired during processing.
+
 Metadata and fragment changes are detected using hashes. This means that
 reporting does not require keeping a complete copy of the dataset before every
 processing step.
