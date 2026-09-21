@@ -11,6 +11,7 @@ import math
 import os
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
+from itertools import pairwise
 from pathlib import Path
 from typing import Any
 import numpy as np
@@ -538,7 +539,7 @@ class EntropySearch(BaseSimilarity):
         if hasattr(spectra, "fragments") and hasattr(spectra, "metadata"):
             fragments = spectra.fragments
             metadata = spectra.metadata
-            precursor = metadata["precursor_mz"] if "precursor_mz" in metadata else None
+            precursor = metadata.get("precursor_mz", None)
             array = getattr(fragments, "array", None)
             if getattr(array, "format", None) == "csr" and hasattr(fragments, "bin_to_mz"):
                 return self._prepare_arrays(
@@ -563,7 +564,7 @@ class EntropySearch(BaseSimilarity):
     def build_index_prepared(self, prepared: _PreparedEntropySpectra) -> FlashIndex:
         """Index already prepared spectra without another cleanup/weighting pass."""
         self._check_prepared(prepared)
-        if prepared.n_specs >= 2**32:
+        if prepared.n_specs >= 2**32:  # hardly necessary, but who knows...
             raise ValueError("EntropySearch supports fewer than 2**32 reference spectra.")
         owners = np.repeat(np.arange(prepared.n_specs, dtype=np.uint32), np.diff(prepared.spec_offsets))
         order = np.argsort(prepared.spec_mz, kind="stable")
@@ -615,7 +616,7 @@ class EntropySearch(BaseSimilarity):
             if span > 0 and math.isfinite(span):
                 step = max(self.index_step, span / (_MAX_DIRECTORY_ENTRIES - 2),
                            8 * np.spacing(max(abs(origin), abs(float(mz[-1])), 1.0)))
-                count = min(_MAX_DIRECTORY_ENTRIES, int(math.ceil(span / step)) + 2)
+                count = min(_MAX_DIRECTORY_ENTRIES, math.ceil(span / step) + 2)
                 edges = origin + np.arange(count, dtype=np.float64) * step
                 starts = np.searchsorted(mz, edges).astype(np.int64)
         view = _SearchView(mz, intensity, terms, owners, _readonly(starts), origin, step)
@@ -642,7 +643,8 @@ class EntropySearch(BaseSimilarity):
         """
         self._check_prepared(query_spectra)
         self._resolve_score_fields(score_fields)
-        if isinstance(n_jobs, (bool, np.bool_)) or not isinstance(n_jobs, (int, np.integer)) or n_jobs == 0 or n_jobs < -1:
+        if isinstance(n_jobs, (bool, np.bool_)) \
+            or not isinstance(n_jobs, (int, np.integer)) or n_jobs == 0 or n_jobs < -1:
             raise ValueError("n_jobs must be a positive integer or -1.")
         view = self.prime_index(library_index)
         prepared = query_spectra
@@ -656,7 +658,7 @@ class EntropySearch(BaseSimilarity):
         cpu_count = getattr(os, "process_cpu_count", os.cpu_count)() or 1
         workers = min(prepared.n_specs, cpu_count if n_jobs == -1 else int(n_jobs))
         boundaries = np.linspace(0, prepared.n_specs, workers + 1, dtype=int)
-        blocks = list(zip(boundaries[:-1], boundaries[1:], strict=True))
+        blocks = list(pairwise(boundaries))
         if workers == 1:
             _score_block(scores, prepared, view, bounds, 0, prepared.n_specs)
         else:
