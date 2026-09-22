@@ -97,7 +97,7 @@ The processed collection can be exported again:
     collection.to_msp("processed_spectra.msp")
     collection.to_json("processed_spectra.json")
 
-Similarity scores can be computed from the processed collection:
+Similarity scores can be computed directly from the processed collection:
 
 .. code-block:: python
 
@@ -105,6 +105,31 @@ Similarity scores can be computed from the processed collection:
 
     similarity = ModifiedCosine(tolerance=0.01)
     scores = similarity.matrix(collection)
+
+For repeated searches against a fixed reference library, build the library index
+once and reuse it:
+
+.. code-block:: python
+
+    library_index = similarity.build_index(collection)
+
+    scores = similarity.search(
+        query_collection,
+        library_index,
+    )
+
+The index can also be saved and loaded again later:
+
+.. code-block:: python
+
+    similarity.save_index(
+        library_index,
+        "modified_cosine_index.npz",
+    )
+
+    library_index = similarity.load_index(
+        "modified_cosine_index.npz"
+    )
 
 
 Core concepts
@@ -534,15 +559,15 @@ Similarity measures
 Matchms provides several similarity measures in ``matchms.similarity`` for
 comparing mass spectra, spectrum metadata, and molecular structures.
 
-For most spectral comparisons, start with one of the high-level classes
-``Cosine``, ``ModifiedCosine``, or ``Entropy``. These classes select suitable
-implementations internally for pairwise and matrix computations. More
-specialized implementations are also available when explicit control over the
-algorithm is needed.
+For most peak-based spectral comparisons, start with one of the high-level
+classes ``Cosine``, ``ModifiedCosine``, ``Entropy``, or ``EntropySearch``.
+These classes provide a common interface for comparing individual spectra,
+computing complete similarity matrices, and, where applicable, repeatedly
+searching a fixed reference library using a reusable index.
 
 .. list-table:: Similarity measures at a glance
    :header-rows: 1
-   :widths: 18 22 38 32
+   :widths: 18 22 42 32
 
    * - Similarity
      - Recommended class
@@ -550,7 +575,8 @@ algorithm is needed.
      - Specialized implementations
    * - Cosine
      - ``Cosine``
-     - Standard peak-based spectral similarity.
+     - Standard peak-based spectral similarity with one-to-one peak matching.
+       Supports reusable library indices for repeated searches.
      - ``CosineGreedy``,
        ``CosineHungarian``,
        ``CosineLinear``,
@@ -558,41 +584,54 @@ algorithm is needed.
        ``CosineBlink``
    * - Modified cosine
      - ``ModifiedCosine``
-     - Spectral similarity allowing fragment matches shifted by the difference
-       in precursor m/z.
+     - Cosine similarity allowing both direct fragment matches and matches
+       shifted by the difference in precursor m/z. Supports reusable library
+       indices for repeated searches.
      - ``ModifiedCosineGreedy``,
-       ``ModifiedCosineHungarian``;
+       ``ModifiedCosineHungarian``,
+       ``ModifiedCosineLinear``;
        ``CosineFlash`` with ``matching_mode="hybrid"``
    * - Spectral entropy
      - ``Entropy``
-     - Entropy-weighted spectral similarity. A good alternative to cosine-based
-       scoring.
+     - General-purpose spectral entropy similarity with explicit one-to-one
+       matching. Supports fragment, neutral-loss, and hybrid matching as well
+       as reusable library indices.
      - ``EntropyGreedy``,
        ``FlashEntropy``
+   * - Search-optimized spectral entropy
+     - ``EntropySearch``
+     - High-throughput fragment-only entropy searches against large reference
+       libraries. Requires sufficiently separated peaks and can optionally
+       merge close peaks during preparation.
+     - -
    * - Neutral-loss cosine
      - ``NeutralLossesCosine``
      - Compare spectra based on neutral-loss rather than fragment m/z patterns.
-     -
+     - -
    * - Binned spectra
      - ``BinnedEmbeddingSimilarity``
      - Compare fixed-width binned spectrum representations using cosine or
        Euclidean similarity.
-     -
+     - -
    * - Molecular structure
      - ``FingerprintSimilarity``
      - Compare molecular fingerprints derived from structure metadata.
-     -
+     - -
    * - Metadata
      - ``MetadataMatch``
      - Compare arbitrary metadata fields using exact or tolerance-based matching.
-     -
+     - -
    * - Precursor or parent mass
      - ``PrecursorMzMatch``,
        ``ParentMassMatch``
      - Simple matching based on precursor m/z or parent mass.
-     -
+     - -
 
-Similarity matrices can be computed directly from a collection:
+
+Pair and matrix comparisons
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Similarity matrices can be computed directly from a ``SpectraCollection``:
 
 .. code-block:: python
 
@@ -610,20 +649,217 @@ The same API can be used to compare two collections:
     similarity = ModifiedCosine(tolerance=0.01)
     scores = similarity.matrix(references, queries)
 
-Pairwise scoring of individual spectra remains supported:
+Rows of the resulting matrix correspond to the first input collection and
+columns to the second.
+
+Pairwise scoring of individual spectra is also supported:
 
 .. code-block:: python
 
     from matchms.similarity import Cosine
 
-    score = Cosine(tolerance=0.1).pair(spectrum_1, spectrum_2)
+    similarity = Cosine(tolerance=0.01)
+    score = similarity.pair(spectrum_1, spectrum_2)
 
-The specialized classes are useful when a particular implementation is
-required. For example, ``CosineHungarian`` performs optimal peak assignment,
-while ``CosineGreedy`` provides the corresponding greedy approximation.
-``EntropyGreedy`` provides a simple pair-oriented spectral entropy
-implementation, whereas ``FlashEntropy`` is designed for fast matrix
-computations.
+
+Repeated library searches with reusable indices
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+``Cosine``, ``ModifiedCosine``, ``Entropy``, and ``EntropySearch`` support
+repeated searches against a fixed reference library.
+
+For this workflow, construct the library index once with ``build_index`` and
+then use ``search`` for one or more query collections:
+
+.. code-block:: python
+
+    from matchms.similarity import Cosine
+
+    similarity = Cosine(tolerance=0.01)
+
+    library_index = similarity.build_index(reference_library)
+
+    scores = similarity.search(
+        query_collection,
+        library_index,
+    )
+
+Unlike ``matrix``, ``search`` always treats the input spectra as queries.
+The returned score matrix therefore has query spectra as rows and reference
+library spectra as columns.
+
+The same workflow is available for modified cosine:
+
+.. code-block:: python
+
+    from matchms.similarity import ModifiedCosine
+
+    similarity = ModifiedCosine(tolerance=0.01)
+
+    library_index = similarity.build_index(reference_library)
+    scores = similarity.search(query_collection, library_index)
+
+and for general spectral entropy similarity:
+
+.. code-block:: python
+
+    from matchms.similarity import Entropy
+
+    similarity = Entropy(
+        matching_mode="fragment",
+        tolerance=0.01,
+    )
+
+    library_index = similarity.build_index(reference_library)
+    scores = similarity.search(query_collection, library_index)
+
+Building the index separately is especially useful when many query batches are
+searched against the same reference library, because the reference spectra do
+not need to be prepared and indexed again for every search.
+
+
+Saving and loading similarity indices
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A built index can be stored on disk and reused in a later Python session:
+
+.. code-block:: python
+
+    similarity.save_index(
+        library_index,
+        "library_index.npz",
+    )
+
+Load it again with a similarity object using the same scoring and preprocessing
+configuration:
+
+.. code-block:: python
+
+    from matchms.similarity import Cosine
+
+    similarity = Cosine(tolerance=0.01)
+
+    library_index = similarity.load_index(
+        "library_index.npz"
+    )
+
+    scores = similarity.search(
+        query_collection,
+        library_index,
+    )
+
+Index compatibility is checked when the index is loaded or used. An index
+should therefore be loaded with a similarity configuration matching the one
+used to create it.
+
+The same ``build_index``, ``save_index``, ``load_index``, and ``search``
+workflow is available for ``Cosine``, ``ModifiedCosine``, ``Entropy``, and
+``EntropySearch``.
+
+For ``Cosine`` and ``ModifiedCosine``, persistent indexed searching uses the
+default indexed greedy implementation. It is not available when
+``use_hungarian=True``.
+
+
+Entropy and EntropySearch
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+``Entropy`` and ``EntropySearch`` calculate spectral entropy similarity but
+make different assumptions about peak matching.
+
+``Entropy`` is the general-purpose implementation. It explicitly resolves
+competing one-to-one peak matches and supports ``"fragment"``,
+``"neutral_loss"``, and ``"hybrid"`` matching. Use ``Entropy`` when general
+matching behavior is required, when tolerance windows may overlap, or when
+neutral-loss or hybrid matching is needed.
+
+Example:
+
+.. code-block:: python
+
+    from matchms.similarity import Entropy
+
+    similarity = Entropy(
+        matching_mode="hybrid",
+        tolerance=0.01,
+    )
+
+    scores = similarity.matrix(collection)
+
+``EntropySearch`` is optimized for repeated fragment-only searches against
+large reference libraries. It requires peaks within each prepared spectrum to
+be sufficiently separated so that candidate matches do not compete for the
+same physical peak. This avoids the additional bookkeeping required by the
+general ``Entropy`` implementation.
+
+By default, close peaks are merged during preparation:
+
+.. code-block:: python
+
+    from matchms.similarity import EntropySearch
+
+    similarity = EntropySearch(
+        tolerance=0.01,
+        peak_separation="merge",
+    )
+
+    library_index = similarity.build_index(reference_library)
+
+    scores = similarity.search(
+        query_collection,
+        library_index,
+    )
+
+Merging close peaks changes the prepared spectrum and can therefore lead to
+scores that differ from ``Entropy``.
+
+If the input spectra are already sufficiently separated, use
+``peak_separation="raise"`` to keep the input peak representation unchanged
+and raise an error when the separation requirement is violated:
+
+.. code-block:: python
+
+    similarity = EntropySearch(
+        tolerance=0.01,
+        peak_separation="raise",
+    )
+
+``EntropySearch`` currently supports fragment matching with an absolute Da
+tolerance. Use ``Entropy`` instead when ppm tolerances, neutral-loss matching,
+hybrid matching, or general one-to-one matching semantics are required.
+
+Like the other indexed similarity classes, an ``EntropySearch`` index can be
+saved and reused:
+
+.. code-block:: python
+
+    similarity.save_index(
+        library_index,
+        "entropy_search_index.npz",
+    )
+
+    library_index = similarity.load_index(
+        "entropy_search_index.npz"
+    )
+
+
+Specialized similarity implementations
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The specialized classes are useful when a particular scoring implementation is
+required.
+
+``CosineGreedy`` provides a simple pair-oriented greedy cosine implementation,
+while ``CosineHungarian`` uses optimal peak assignment. ``CosineLinear`` and
+``CosineBlink`` provide alternative cosine implementations, and ``CosineFlash``
+exposes the indexed Flash-based cosine implementation directly.
+
+For spectral entropy, ``EntropyGreedy`` provides a compact pair-oriented
+implementation and ``FlashEntropy`` exposes the general indexed implementation
+used by ``Entropy``.
+
+For most applications, the high-level ``Cosine``, ``ModifiedCosine``,
+``Entropy``, and ``EntropySearch`` classes are preferred.
 
 
 Installation
