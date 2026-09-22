@@ -145,9 +145,16 @@ section-order = [
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["D"]
 
+[tool.setuptools]
+py-modules = ["matchms"]
+
 [tool.uv]
 package = true
 default-groups = ["dev"]
+
+[tool.uv.build-backend]
+module-root = "."
+module-name = ["matchms"]
 
 [build_sphinx]
 source-dir = "docs"
