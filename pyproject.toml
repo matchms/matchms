@@ -68,8 +68,8 @@ docs = [
 ]
 
 [build-system]
-requires = ["pdm-backend"]
-build-backend = "pdm.backend"
+requires = ["uv_build>=0.11.0,<0.12.0"]
+build-backend = "uv_build"
 
 [tool.pytest.ini_options]
 addopts = "--benchmark-disable"
