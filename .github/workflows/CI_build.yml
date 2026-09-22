@@ -12,14 +12,14 @@ on:
 
 jobs:
   first_check:
-    name: first code check / python-3.13 / ubuntu-latest
+    name: first code check / python-3.12 / ubuntu-latest
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Set up uv
         uses: astral-sh/setup-uv@v5
         with:
-          python-version: '3.13'
+          python-version: '3.12'
           enable-cache: true
           cache-suffix: first-check
       - name: Show environment info
@@ -64,7 +64,7 @@ jobs:
       - name: Set up uv
         uses: astral-sh/setup-uv@v5
         with:
-          python-version: '3.13'
+          python-version: '3.12'
           enable-cache: true
           cache-suffix: build-pypi
       - name: Show environment info
@@ -95,7 +95,7 @@ jobs:
       fail-fast: false
       matrix:
         os: ['ubuntu-latest', 'macos-latest', 'windows-latest']
-        python-version: ['3.11', '3.12', '3.13']
+        python-version: ['3.11', '3.12']
         exclude:
           - os: 'macos-latest'
             python-version: ['3.11']
@@ -130,7 +130,7 @@ jobs:
       - name: Set up uv
         uses: astral-sh/setup-uv@v5
         with:
-          python-version: '3.13'
+          python-version: '3.12'
           enable-cache: true
           cache-suffix: test-docs
       - name: Show environment info

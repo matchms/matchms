@@ -31,7 +31,7 @@ jobs:
       - name: Set up uv
         uses: astral-sh/setup-uv@v5
         with:
-          python-version: "3.13"
+          python-version: "3.12"
 
       - name: Install dependent packages
         run: |
@@ -230,7 +230,7 @@ jobs:
       - name: Set up uv
         uses: astral-sh/setup-uv@v5
         with:
-          python-version: "3.13"
+          python-version: "3.12"
 
       - name: List downloaded files
         run: ls
