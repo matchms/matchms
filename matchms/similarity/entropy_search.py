@@ -1,10 +1,18 @@
-"""Spectral entropy search for spectra with well-separated fragment peaks.
+"""Search-optimized spectral entropy similarity for separated fragment peaks.
 
-This module implements direct accumulation from an inverted fragment index.
-Within-spectrum peak separation removes the need for one-to-one assignment
-bookkeeping. Short matching intervals are processed by a compiled scalar loop;
-long intervals use NumPy's vectorized logarithm followed by compiled scatter-add.
-Neither path approximates the entropy formula or discretizes matching masses.
+This module provides :class:`EntropySearch`, a fragment-only spectral entropy
+implementation designed for repeated searches against large reference libraries.
+It uses an inverted fragment index and requires peaks within each spectrum to be
+separated sufficiently that matching windows cannot create competing one-to-one
+assignments. Close peaks can either be merged during preparation or rejected.
+
+The entropy contribution for an accepted peak pair is the same as in
+:class:`~matchms.similarity.Entropy`. The important behavioral difference is the
+peak-separation requirement: merging close peaks changes the prepared spectrum and
+can therefore change scores relative to the general-purpose ``Entropy`` class.
+Use ``Entropy`` when general one-to-one matching semantics or neutral-loss/hybrid
+modes are required; use ``EntropySearch`` when high-throughput fragment-library
+searches are the priority and the separation requirement is acceptable.
 """
 from __future__ import annotations
 import math
@@ -27,7 +35,7 @@ from .default_parameters import (
 from .flash_index import FlashIndex
 
 
-# These control execution only, not matching, weighting, or score precision.
+# Internal execution parameters
 _VECTOR_MIN_HITS = 512
 _VECTOR_CHUNK_SIZE = 65_536
 _MAX_DIRECTORY_ENTRIES = 2_000_000
@@ -330,67 +338,136 @@ def _score_block(out, prepared, view, bounds, first_row, last_row):
 
 
 class EntropySearch(BaseSimilarity):
-    """Fast fragment entropy similarity for well-separated spectra.
+    """Search-optimized fragment spectral entropy similarity.
 
-    Each nonempty spectrum is filtered, entropy-weighted, and normalized to
-    weighted intensity 0.5. Product m/z values are indexed globally; scores are
-    accumulated directly from matching indexed peaks. Peak separation guarantees
-    one-to-one matches without allocating peak-use state for every reference.
+    ``EntropySearch`` is intended for repeated searches against large spectral
+    libraries. It computes the standard spectral entropy contribution for matching
+    fragment peaks, but gains speed by imposing a stronger peak-separation
+    requirement than :class:`~matchms.similarity.Entropy`.
 
-    The mathematical entropy contribution is unchanged. Native float32 arithmetic
-    is used with ``dtype=np.float32``; small roundoff differences relative to a
-    float64 accumulator are expected. This is not an approximate-logarithm method.
+    Peaks within each prepared spectrum must be separated by more than twice the
+    maximum search tolerance. Under this condition, a query peak cannot compete
+    for multiple reference peaks from the same spectrum, and vice versa. Scores
+    can therefore be accumulated directly from the inverted fragment index without
+    maintaining per-spectrum peak-use state.
+
+    By default, ``peak_separation="merge"`` enforces this condition by merging
+    close peaks before entropy weighting. This can change the spectrum
+    representation and therefore can change scores relative to ``Entropy``. Use
+    ``peak_separation="raise"`` when spectra are already suitably separated and
+    you want the class to reject inputs that violate the search assumption rather
+    than modify them.
+
+    Choosing between ``Entropy`` and ``EntropySearch``
+    --------------------------------------------------
+    Use :class:`~matchms.similarity.Entropy` when you need general one-to-one peak
+    matching, including spectra with overlapping tolerance windows, or when you
+    need neutral-loss, hybrid, or ppm matching. ``Entropy`` explicitly resolves
+    competing matches and therefore preserves the general matching semantics for
+    arbitrary peak layouts.
+
+    Use ``EntropySearch`` for large, repeated fragment-only library searches when
+    absolute Da tolerances are sufficient and the peak-separation requirement is
+    acceptable. In this setting the reusable index avoids the conflict bookkeeping
+    required by the general implementation and can substantially reduce query
+    time. Both classes provide ``pair``, ``matrix``, ``build_index``, and ``search``;
+    the distinction is matching assumptions and performance, not API capability.
 
     Parameters
     ----------
     tolerance
-        Maximum absolute fragment m/z difference in Da, inclusive. Matching uses
-        float64 differences of the stored coordinates.
+        Maximum absolute fragment m/z difference in Da for a match. The boundary
+        is inclusive. ``tolerance`` may be smaller than ``max_tolerance`` when
+        reusing an index prepared for a wider search window.
     max_tolerance
-        Maximum supported search tolerance. Defaults to ``tolerance``. Build an
-        index with a larger value to reuse it with smaller search tolerances.
+        Largest tolerance supported by the prepared spectra and reference index.
+        Defaults to ``tolerance``. Peak separation is enforced with respect to
+        this value so that the same index can safely be reused for any search with
+        ``tolerance <= max_tolerance``.
     peak_separation
-        ``"merge"`` merges close peaks around fixed, most-intense representatives
-        using a radius of 2.1 times ``max_tolerance``. ``"raise"`` requires input
-        peaks to already be separated by more than 2 times ``max_tolerance``.
-        The check includes a small float64 safety margin. Merging changes spectra
-        and is not guaranteed to reproduce another package's centroiding method.
+        Strategy for enforcing the separated-peak requirement. ``"merge"``
+        combines close peaks around fixed, most-intense representatives before
+        entropy weighting. ``"raise"`` leaves peaks unchanged and raises an
+        error when adjacent peaks are too close.
     noise_cutoff
-        Remove peaks below this fraction of the maximum remaining intensity,
-        after optional precursor removal and before merging. Zero or None disables
-        the filter. All nonfinite/negative masses and nonpositive intensities are
-        discarded.
+        Remove peaks below this fraction of the maximum remaining intensity after
+        optional precursor-region removal. Set to 0 or None to disable relative
+        intensity filtering.
     remove_precursor
-        Remove peaks above ``precursor_mz + offset_to_precursor``. Missing or
-        nonpositive precursor values skip this operation for that spectrum.
+        If True and ``precursor_mz`` is available, remove peaks above
+        ``precursor_mz + offset_to_precursor`` during preparation.
     offset_to_precursor
-        Additive precursor cutoff in Da.
+        Signed Da offset used for precursor-region removal.
     intensity_weighting
-        Apply low-entropy intensity weighting. False gives unweighted entropy
-        similarity. Normalization to intensity sum 0.5 is always applied.
+        Apply the low-entropy intensity weighting used by spectral entropy
+        similarity. If False, intensities are normalized to sum to 0.5 but are not
+        entropy-weighted.
     dtype
-        Storage, accumulation, and output dtype: float32 (default) or float64.
+        Floating-point dtype used for prepared intensities, score accumulation,
+        and returned scores. Supported values are ``numpy.float32`` and
+        ``numpy.float64``.
     index_step
-        Mass-directory spacing in Da. This only accelerates exact lookups; it
-        does not bin peaks or change tolerance. Zero disables the directory.
-    matching_mode, use_ppm
-        Only ``matching_mode="fragment"`` and ``use_ppm=False`` are supported.
-        Unsupported modes raise instead of silently selecting another algorithm.
+        Spacing in Da of an auxiliary mass directory used to narrow searches in
+        the globally sorted peak index. This directory accelerates lookup only;
+        matching still uses the original m/z coordinates and ``tolerance``. Set
+        to 0 to disable the directory.
+    matching_mode
+        Must be ``"fragment"``. Neutral-loss and hybrid matching are provided by
+        :class:`~matchms.similarity.Entropy`.
+    use_ppm
+        Must be False. ``EntropySearch`` currently supports absolute Da tolerances
+        only. Use :class:`~matchms.similarity.Entropy` for ppm matching.
+
+    Returns
+    -------
+    Scores
+        ``matrix`` and ``search`` return a :class:`~matchms.scores.Scores` object
+        containing the ``"score"`` field. Search results have query spectra as
+        rows and reference-library spectra as columns.
 
     Notes
     -----
-    ``search(queries, library_index)`` returns query rows and library columns.
-    The existing persistent ``FlashIndex`` is used with a distinct preparation
-    configuration. Index construction and validation occur outside reused search.
-    No existing matchms similarity or saved index format is replaced.
+    ``build_index`` prepares the reference spectra and returns a reusable
+    :class:`~matchms.similarity.flash_index.FlashIndex`. The index stores the
+    preparation settings needed for compatibility checks. ``search`` prepares a
+    query batch and scores it against an existing index, while ``matrix`` includes
+    preparation and index construction for the supplied spectra.
 
-    For apples-to-apples kernel comparisons, give all implementations the same
-    separated peak arrays; use ``peak_separation="raise"`` here and disable
-    additional filtering. With default merging enabled, score equality to the
-    general one-to-one Entropy implementation is not guaranteed.
+    The entropy score itself is not replaced by a simplified formula. Differences
+    from :class:`~matchms.similarity.Entropy` arise primarily when close peaks are
+    merged to satisfy the separated-peak requirement, and small numerical
+    differences can also result from the selected floating-point dtype.
 
-    See Li et al. (2021), doi:10.1038/s41592-021-01331-z, and Li and Fiehn (2023),
-    doi:10.1038/s41592-023-02012-9, for the entropy score and indexed search method.
+    The score definition follows Li et al. (2021),
+    doi:10.1038/s41592-021-01331-z. The indexed-search strategy is related to the
+    Flash Entropy approach described by Li and Fiehn (2023),
+    doi:10.1038/s41592-023-02012-9.
+
+    Examples
+    --------
+    Build a reference index once and reuse it for multiple query batches::
+
+        similarity = EntropySearch(
+            tolerance=0.01,
+            peak_separation="merge",
+        )
+
+        library_index = similarity.build_index(reference_spectra)
+
+        scores = similarity.search(
+            query_spectra,
+            library_index,
+            progress_bar=False,
+            n_jobs=1,
+        )
+
+    If the input spectra are known to satisfy the separation requirement, use
+    ``peak_separation="raise"`` to validate rather than modify them::
+
+        similarity = EntropySearch(
+            tolerance=0.01,
+            peak_separation="raise",
+        )
     """
 
     is_commutative = True
@@ -517,11 +594,26 @@ class EntropySearch(BaseSimilarity):
         )
 
     def prepare_peak_arrays(self, peaks, precursor_mz=None) -> _PreparedEntropySpectra:
-        """Prepare an iterable of raw ``(n_peaks, 2)`` arrays without Spectrum objects.
+        """Prepare raw peak arrays for indexing or repeated searches.
 
-        Useful for cross-package comparisons: the same cleaned, normalized peak
-        arrays can be passed to MSEntropy and here. Do not entropy-weight them
-        beforehand unless ``intensity_weighting=False`` is explicitly intended.
+        Parameters
+        ----------
+        peaks
+            Iterable of arrays with shape ``(n_peaks, 2)`` containing m/z and
+            intensity columns. Empty spectra must use shape ``(0, 2)``.
+        precursor_mz
+            Optional precursor m/z values, one per spectrum.
+
+        Returns
+        -------
+        _PreparedEntropySpectra
+            Internal immutable representation containing filtered, separated,
+            entropy-weighted peak arrays.
+
+        Notes
+        -----
+        Input intensities should be raw or cleaned spectrum intensities, not
+        values that have already undergone EntropySearch weighting.
         """
         arrays = [np.asarray(p, dtype=self.dtype) for p in peaks]
         if any(p.ndim != 2 or p.shape[1] != 2 for p in arrays):
@@ -531,10 +623,11 @@ class EntropySearch(BaseSimilarity):
         return self._prepare_arrays(offsets, combined[:, 0], combined[:, 1], precursor_mz)
 
     def prepare_queries(self, spectra) -> _PreparedEntropySpectra:
-        """Prepare a SpectraCollection or iterable of Spectrum without modifying it.
+        """Prepare spectra using the current EntropySearch configuration.
 
-        CSR collections are read in packed form, avoiding reconstruction of
-        individual Spectrum objects. Other collection backends use get_row().
+        ``SpectraCollection`` instances backed by CSR fragments are read directly
+        from their packed arrays. Other inputs are converted to peak arrays. The
+        input spectra are not modified.
         """
         if hasattr(spectra, "fragments") and hasattr(spectra, "metadata"):
             fragments = spectra.fragments
@@ -558,11 +651,16 @@ class EntropySearch(BaseSimilarity):
             raise ValueError("Use this EntropySearch configuration's prepare_queries()/prepare_peak_arrays() output.")
 
     def build_index(self, spectra) -> FlashIndex:
-        """Prepare spectra and construct an index, including all search caches."""
+        """Prepare reference spectra and build a reusable search index.
+
+        The returned index can be passed to :meth:`search` for multiple query
+        batches. Preparation settings are stored with the index and validated
+        before reuse.
+        """
         return self.build_index_prepared(self.prepare_queries(spectra))
 
     def build_index_prepared(self, prepared: _PreparedEntropySpectra) -> FlashIndex:
-        """Index already prepared spectra without another cleanup/weighting pass."""
+        """Build an index from spectra already prepared by this configuration."""
         self._check_prepared(prepared)
         if prepared.n_specs >= 2**32:  # hardly necessary, but who knows...
             raise ValueError("EntropySearch supports fewer than 2**32 reference spectra.")
@@ -592,10 +690,11 @@ class EntropySearch(BaseSimilarity):
             raise ValueError("Search tolerance must be within the index's configured maximum.")
 
     def prime_index(self, index: FlashIndex) -> _SearchView:
-        """Create read-only runtime caches once; no library scan on cache reuse.
+        """Validate an index and create the read-only runtime search cache.
 
-        build_index() and load_index() call this before returning. Existing
-        generic FlashIndex archives need compatible EntropySearch preparation.
+        The cache contains precomputed entropy terms and the optional mass
+        directory. It is stored only in memory and is recreated after loading an
+        index from disk. Repeated calls reuse the existing cache.
         """
         self._check_index(index)
         key = (_CACHE_PREFIX, self.index_step)
@@ -625,7 +724,12 @@ class EntropySearch(BaseSimilarity):
 
     def search(self, query_spectra, library_index: FlashIndex, *, score_fields=None,
                progress_bar=True, n_jobs=1) -> Scores:
-        """Search raw queries; output shape is (n_queries, n_library_spectra)."""
+        """Prepare and search query spectra against a reusable library index.
+
+        Returns a score matrix with query spectra as rows and indexed reference
+        spectra as columns. Reference preparation and index construction are not
+        repeated.
+        """
         self._check_index(library_index)
         self._resolve_score_fields(score_fields)
         return self.search_prepared(
@@ -635,11 +739,12 @@ class EntropySearch(BaseSimilarity):
 
     def search_prepared(self, query_spectra: _PreparedEntropySpectra, library_index: FlashIndex,
                         *, score_fields=None, progress_bar=False, n_jobs=1) -> Scores:
-        """Score prepared queries; preprocessing and index construction are excluded.
+        """Search queries that were already prepared by this configuration.
 
-        n_jobs=1 is serial. Positive values specify worker threads; -1 uses the
-        available CPUs, capped at the query count. Workers have disjoint output
-        rows and private vector workspaces. There is no implicit GPU execution.
+        This method excludes query preparation and index construction. ``n_jobs=1``
+        runs serially, a positive integer selects that many worker threads, and
+        ``n_jobs=-1`` uses the available CPUs up to the number of query spectra.
+        Workers operate on disjoint output rows.
         """
         self._check_prepared(query_spectra)
         self._resolve_score_fields(score_fields)
@@ -662,8 +767,7 @@ class EntropySearch(BaseSimilarity):
         if workers == 1:
             _score_block(scores, prepared, view, bounds, 0, prepared.n_specs)
         else:
-            # Precompile both signatures before starting threads (not timed away).
-            # Normal benchmark warmup should execute a representative search.
+            # Compile both kernels before entering the worker threads.
             _accumulate_short(scores, prepared.spec_offsets, prepared.spec_int,
                               view.intensity, view.terms, view.spectrum_ids, bounds, 0, 0)
             _scatter_add(scores[0], view.spectrum_ids[:0], np.empty(0, dtype=self.dtype))
@@ -674,11 +778,12 @@ class EntropySearch(BaseSimilarity):
         return Scores({"score": scores})
 
     def matrix(self, spectra_1, spectra_2=None, score_fields=None, progress_bar=True, n_jobs=1) -> Scores:
-        """Compute a complete dense matrix, including preparation and index build.
+        """Compute a complete dense similarity matrix.
 
-        Self-comparison prepares the input only once. Both triangle halves and
-        the diagonal are computed. Rows correspond to spectra_1, columns to
-        spectra_2 (or spectra_1 when omitted).
+        Preparation and reference-index construction are included in this call.
+        When ``spectra_2`` is omitted, the input is prepared only once for the
+        self-comparison. Rows correspond to ``spectra_1`` and columns to
+        ``spectra_2`` (or ``spectra_1`` when omitted).
         """
         self._resolve_score_fields(score_fields)
         queries = self.prepare_queries(spectra_1)
@@ -688,23 +793,23 @@ class EntropySearch(BaseSimilarity):
                                     progress_bar=progress_bar, n_jobs=n_jobs)
 
     def pair(self, spectrum_1, spectrum_2) -> np.ndarray:
-        """Return one scalar entropy similarity using the same preparation rules."""
+        """Compare two spectra using the same preparation and matching rules."""
         scores = self.matrix([spectrum_1], [spectrum_2], progress_bar=False, n_jobs=1)
         return np.asarray(scores.to_array()[0, 0], dtype=self.dtype)
 
     def save_index(self, index: FlashIndex, filename: str | Path, *, overwrite=True) -> None:
-        """Use the existing FlashIndex archive format; runtime caches are omitted."""
+        """Save a compatible reference index using the FlashIndex archive format."""
         self._check_index(index)
         index.save(filename, overwrite=overwrite)
 
     def load_index(self, filename: str | Path) -> FlashIndex:
-        """Load and eagerly validate/cache an EntropySearch-compatible FlashIndex."""
+        """Load, validate, and prime an EntropySearch-compatible FlashIndex."""
         index = FlashIndex.load(filename)
         self.prime_index(index)
         return index
 
     def index_statistics(self, index: FlashIndex) -> dict[str, Any]:
-        """Return storage/workload metadata, not a process peak-memory estimate."""
+        """Return descriptive statistics for a compatible reference index."""
         view = self.prime_index(index)
         return {"n_reference": index.n_specs, "n_peaks": view.mz.size,
                 "dtype": self.dtype.name, "spectrum_id_dtype": view.spectrum_ids.dtype.name,
