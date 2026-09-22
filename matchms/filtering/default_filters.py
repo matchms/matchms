@@ -1,4 +1,5 @@
-from matchms.typing import SpectrumType
+from __future__ import annotations
+from typing import TYPE_CHECKING
 from .metadata_processing.add_compound_name import add_compound_name
 from .metadata_processing.add_precursor_mz import add_precursor_mz
 from .metadata_processing.clean_compound_name import clean_compound_name
@@ -10,7 +11,10 @@ from .metadata_processing.interpret_pepmass import interpret_pepmass
 from .metadata_processing.make_charge_int import make_charge_int
 
 
-def default_filters(spectrum: SpectrumType) -> SpectrumType:
+if TYPE_CHECKING:
+    from matchms.spectrum import Spectrum
+
+def default_filters(spectrum: Spectrum) -> Spectrum:
     """
     Collection of filters that are considered default and that do no require any (factory) arguments.
 

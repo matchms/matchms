@@ -4,7 +4,7 @@ from matchms.filtering.metadata_processing.clean_adduct import (
     _convert_int_charge_to_str,
     clean_adduct,
 )
-from tests.builder_Spectrum import SpectrumBuilder
+from tests.builder_spectrum import SpectrumBuilder
 
 
 @pytest.mark.parametrize(

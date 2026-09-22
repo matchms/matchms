@@ -1,7 +1,7 @@
 """Submodule providing a reference spectrum for salicin."""
 
 import numpy as np
-from ..Spectrum import Spectrum
+from ..spectrum import Spectrum
 
 
 SALICIN_PRECURSOR_MZ: float = 321.0750

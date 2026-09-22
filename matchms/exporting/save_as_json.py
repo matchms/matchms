@@ -1,11 +1,13 @@
 import json
-from typing import List
-from ..Spectrum import Spectrum
-from ..utils import filter_empty_spectra, fingerprint_export_warning, rename_deprecated_params
+from ..spectrum import Spectrum
+from ..utils import filter_empty_spectra, fingerprint_export_warning
 
 
-@rename_deprecated_params(param_mapping={"spectrums": "spectra"}, version="0.26.5")
-def save_as_json(spectra: List[Spectrum], filename: str, export_style: str = "matchms"):
+def save_as_json(
+    spectra: list[Spectrum],
+    filename: str,
+    export_style: str = "matchms"
+    ) -> None:
     """Save spectrum(s) as json file.
 
     Example:
@@ -29,7 +31,7 @@ def save_as_json(spectra: List[Spectrum], filename: str, export_style: str = "ma
     Parameters
     ----------
     spectra:
-        Expected input is a list of  :py:class:`~matchms.Spectrum.Spectrum` objects.
+        Expected input is a list of  :class:`~matchms.spectrum.Spectrum` objects.
     filename:
         Provide filename to save spectrum(s).
     export_style:
@@ -50,9 +52,10 @@ def save_as_json(spectra: List[Spectrum], filename: str, export_style: str = "ma
 
 
 def create_spectrum_json_encoder(export_style):
+    """Creates a custom JSON encoder for :class:`~matchms.spectrum.Spectrum` objects."""
     class CustomSpectrumJSONEncoder(json.JSONEncoder):
         def default(self, o):
-            """JSON Encoder for a matchms.Spectrum.Spectrum object"""
+            """JSON Encoder for a :class:`~matchms.spectrum.Spectrum` object"""
             if isinstance(o, Spectrum):
                 spec = o.clone().to_dict(export_style)
                 spec.pop("fingerprint", None)

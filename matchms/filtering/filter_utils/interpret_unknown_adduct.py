@@ -2,33 +2,14 @@
 
 import logging
 import re
-from typing import List, Optional, Tuple
+from rdkit import Chem
 from matchms.constants import ELECTRON_MASS
-
-
-try:  # rdkit is not included in pip package
-    from rdkit import Chem
-except ImportError:
-    _has_rdkit = False
-    from collections import UserString
-
-    class ChemMock(UserString):
-        def __call__(self, *args, **kwargs):
-            return self
-
-        def __getattr__(self, key):
-            return self
-
-    Chem = AllChem = ChemMock("")
-else:
-    _has_rdkit = True
-rdkit_missing_message = "Conda package 'rdkit' is required for this functionality."
 
 
 logger = logging.getLogger("matchms")
 
 
-def get_multiplier_and_mass_from_adduct(adduct: str) -> Tuple[Optional[float], Optional[float]]:
+def get_multiplier_and_mass_from_adduct(adduct: str) -> tuple[float | None, float | None]:
     """Get multiplier for charge and the correction mass of an adduct.
 
     The multiplier and correction mass can be used to calculate the parent mass based on the precursor mz.
@@ -62,7 +43,7 @@ def get_multiplier_and_mass_from_adduct(adduct: str) -> Tuple[Optional[float], O
     return multiplier, correction_mass
 
 
-def get_ions_from_adduct(adduct: str) -> Tuple[int, List[str]]:
+def get_ions_from_adduct(adduct: str) -> tuple[int, list[str]]:
     """Returns a list of ions from an adduct and returns the number of parent masses
 
     e.g. '[M+H-H2O]2+' -> (1, ["+H", "-H2O"])
@@ -77,7 +58,7 @@ def get_ions_from_adduct(adduct: str) -> Tuple[int, List[str]]:
             return None, None
         adduct = ions_part[0]
     # Finds the pattern M or 2M in adduct it makes sure it is in between
-    parent_mass = re.findall(r'(?:^|[+-])([0-9]?M)(?:$|[+-])', adduct)
+    parent_mass = re.findall(r"(?:^|[+-])([0-9]?M)(?:$|[+-])", adduct)
     if len(parent_mass) != 1:
         logger.warning("The parent mass (e.g. 2M or M) was found %s times in %s",
                        len(parent_mass), adduct)
@@ -88,12 +69,12 @@ def get_ions_from_adduct(adduct: str) -> Tuple[int, List[str]]:
     else:
         nr_of_parent_masses = int(parent_mass[0])
 
-    ions_split = re.findall(r'([+-][0-9a-zA-Z]+)', adduct)
+    ions_split = re.findall(r"([+-][0-9a-zA-Z]+)", adduct)
     ions_split = replace_abbreviations(ions_split)
     return nr_of_parent_masses, ions_split
 
 
-def split_ion(ion: str) -> Tuple[str, int, str]:
+def split_ion(ion: str) -> tuple[str, int, str]:
     """Separate an ion description string into sign, number and formula.
 
     e.g. +2H2O -> ("+", 2, "H2O")
@@ -106,7 +87,7 @@ def split_ion(ion: str) -> Tuple[str, int, str]:
     sign = ion[0]
     ion = ion[1:]
     assert sign in ["+", "-"], "Expected ion to start with + or -"
-    match = re.match(r'^([0-9]+)(.*)', ion)
+    match = re.match(r"^([0-9]+)(.*)", ion)
     if match:
         number = int(match.group(1))
         ion = match.group(2)
@@ -117,9 +98,9 @@ def split_ion(ion: str) -> Tuple[str, int, str]:
 
 def replace_abbreviations(ions_split):
     """Derived from https://github.com/pnnl/MSAC"""
-    abbrev_to_formula = {'ACN': 'CH3CN', 'DMSO': 'C2H6OS', 'FA': 'CH2O2',
-                         'HAc': 'CH3COOH', 'Hac': 'CH3COOH', 'TFA': 'C2HF3O2',
-                         'IsoProp': 'CH3CHOHCH3', 'MeOH': 'CH3OH'}
+    abbrev_to_formula = {"ACN": "CH3CN", "DMSO": "C2H6OS", "FA": "CH2O2",
+                         "HAc": "CH3COOH", "Hac": "CH3COOH", "TFA": "C2HF3O2",
+                         "IsoProp": "CH3CHOHCH3", "MeOH": "CH3OH"}
     corrected_ions = []
     for ion in ions_split:
         sign, number, ion = split_ion(ion)
@@ -145,7 +126,7 @@ def get_mass_of_ion(ions):
     return added_mass
 
 
-def get_charge_of_adduct(adduct) -> Optional[int]:
+def get_charge_of_adduct(adduct) -> int | None:
     """Returns the charge of an adduct
 
     e.g. '[M+H-H2O]2+' -> 2
@@ -179,8 +160,7 @@ def get_mass_of_formula(formula):
     e.g. "C" returns 12.011 and "CH2" returns 15.035. This can be used to calculate the mass difference of adducts
     Was adapted from: https://bioinformatics.stackexchange.com/questions/6852/
     """
-    if not _has_rdkit:
-        raise ImportError(rdkit_missing_message)
+
     parts = re.findall("[A-Z][a-z]?|[0-9]+", formula)
     mass = 0
 

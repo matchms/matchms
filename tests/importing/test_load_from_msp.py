@@ -3,7 +3,7 @@ import numpy as np
 import pytest
 from matchms import Spectrum
 from matchms.importing.load_from_msp import get_peak_values, load_from_msp, parse_metadata
-from tests.builder_Spectrum import SpectrumBuilder
+from tests.builder_spectrum import SpectrumBuilder
 
 
 def assert_matching_inchikey(molecule, expected_inchikey):
@@ -168,7 +168,7 @@ def test_load_from_msp_multiline():
             ]).astype(float),
             metadata={
                 "name": "Compound A",
-                "num peaks": '15'
+                "num peaks": "15"
             }),
         Spectrum(
             mz=np.array([
@@ -179,7 +179,7 @@ def test_load_from_msp_multiline():
             ]).astype(float),
             metadata={
                 "name": "JWH 081",
-                "num peaks": '10',
+                "num peaks": "10",
             })
     ]
 
@@ -229,7 +229,7 @@ def test_load_msl():
         "RETENTION_TIME": 9.648,
         "COMMENT": "RI=1586.2,   9.6481 min TUBE2_28-01-2020_18-48-00|RI:1586.2",
         "SOURCE": "C:\\USERS\\UTILISATEUR\\DESKTOP\\METABOLOME\\calib\\standard.msl",
-        "NUM PEAKS": '30'
+        "NUM PEAKS": "30"
     }
 
     mz = [52,55,56,59,61,62,63,66,68,70,73,75,76,77,80,82,84,85,86,87,89,90,91,92,95,96,98,100,101,102 ]
@@ -250,7 +250,7 @@ def test_load_golm_style_msp():
     assert len(actual[0].mz) == 50
     assert len(edge_case_actual[0].metadata["synonyms"]) == 11
     assert edge_case_actual[0].metadata["retention_index"] == 986.12
-    assert "inchi" in edge_case_actual[0].metadata.keys()
+    assert "inchi" in edge_case_actual[0].metadata
 
 
 def test_load_msp_with_comments_including_quotes():
@@ -275,8 +275,8 @@ def test_load_msp_with_scientific_notation():
 @pytest.mark.parametrize("input_line, expected_output", [
     ['comments: "SMILES="', {}],
     ['comments: SMILES="CC(O)C(O)=O"', {"smiles": "CC(O)C(O)=O"}],
-    ['comments: mass=12.0', {"mass": '12.0'}],
-    ['name: 3,4-DICHLOROPHENOL', {'name': '3,4-DICHLOROPHENOL'}],
+    ["comments: mass=12.0", {"mass": "12.0"}],
+    ["name: 3,4-DICHLOROPHENOL", {"name": "3,4-DICHLOROPHENOL"}],
     ['comments: "SMILES=CC(O)C(O)=O"', {"smiles": "CC(O)C(O)=O"}],
     ['comments: "DB#=JP000001"', {"db#":"JP000001"}],
 ])
