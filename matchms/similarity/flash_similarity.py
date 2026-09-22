@@ -138,7 +138,7 @@ class _BaseFlashSimilarity(BaseSimilarity):
         precursor filtering. Set to zero or None to disable noise filtering.
     normalize_to_half
         Normalize prepared intensities to sum to 0.5. Enabled by default in
-        ``FlashEntropy``; required for the usual entropy-similarity scale.
+        ``EntropyFlash``; required for the usual entropy-similarity scale.
     merge_within
         Optional within-spectrum merge distance, in Da. Zero disables merging.
         Neither scorer requires merging to resolve overlapping matching windows.
@@ -548,7 +548,7 @@ class CosineFlash(_BaseFlashSimilarity):
         return Scores({field: arrays[field] for field in fields})
 
 
-class FlashEntropy(_BaseFlashSimilarity):
+class EntropyFlash(_BaseFlashSimilarity):
     """Entropy similarity accumulated directly from matching indexed peaks.
 
     Fragment matches are consumed one-to-one in ascending m/z order. Neutral-loss

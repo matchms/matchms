@@ -11,7 +11,7 @@ from matchms import SpectraCollection, Spectrum
 from matchms.similarity.cosine import Cosine
 from matchms.similarity.entropy import Entropy
 from matchms.similarity.flash_index import FlashIndex
-from matchms.similarity.flash_similarity import CosineFlash, FlashEntropy
+from matchms.similarity.flash_similarity import CosineFlash, EntropyFlash
 from matchms.similarity.modified_cosine import ModifiedCosine
 
 
@@ -33,7 +33,7 @@ def inputs():
     return queries,library
 
 
-@pytest.mark.parametrize("cls", [Cosine, Entropy, ModifiedCosine, CosineFlash, FlashEntropy])
+@pytest.mark.parametrize("cls", [Cosine, Entropy, ModifiedCosine, CosineFlash, EntropyFlash])
 def test_public_search_signature(cls):
     params=inspect.signature(cls.search).parameters
     assert list(params)==["self", "query_spectra", "library_index", "score_fields", "progress_bar", "n_jobs"]
@@ -43,7 +43,7 @@ def test_public_search_signature(cls):
     assert params["n_jobs"].default == -1
 
 
-@pytest.mark.parametrize("cls", [CosineFlash, FlashEntropy])
+@pytest.mark.parametrize("cls", [CosineFlash, EntropyFlash])
 @pytest.mark.parametrize("mode", ["fragment", "neutral_loss", "hybrid"])
 @pytest.mark.parametrize("dtype", [np.float32, np.float64])
 def test_search_matrix_prepared_persistence_and_threads(cls, mode, dtype, tmp_path):
@@ -93,7 +93,7 @@ def test_public_empty_shapes_and_no_implicit_rebuild(cls, monkeypatch):
         s.search(index, queries, progress_bar=False, n_jobs=1)
 
 
-@pytest.mark.parametrize("cls", [CosineFlash, FlashEntropy])
+@pytest.mark.parametrize("cls", [CosineFlash, EntropyFlash])
 def test_matching_mode_is_capability_not_preprocessing(cls):
     queries, library=inputs()
     kwargs={"tolerance": .02, "noise_cutoff": 0., "remove_precursor": False}
@@ -132,7 +132,7 @@ def test_score_and_match_field_selection_share_public_index(mode):
     np.testing.assert_array_equal(count_only.to_array(), full.to_array("matches"))
 
 
-@pytest.mark.parametrize("cls", [CosineFlash, FlashEntropy])
+@pytest.mark.parametrize("cls", [CosineFlash, EntropyFlash])
 def test_search_after_loading_original_version_two(tmp_path, cls):
     queries, library=inputs()
     s=cls(matching_mode="hybrid", tolerance=.02, noise_cutoff=0., remove_precursor=False)
@@ -173,7 +173,7 @@ def test_cosine_matrix_search_agree_even_for_direction_sensitive_ties():
     np.testing.assert_array_equal(actual.to_array("matches"), expected.to_array("matches"))
 
 
-@pytest.mark.parametrize("cls", [CosineFlash, FlashEntropy])
+@pytest.mark.parametrize("cls", [CosineFlash, EntropyFlash])
 def test_settings_rejection_and_search_time_tolerance_reuse(cls):
     queries, library=inputs()
     a=cls(tolerance=.01)
@@ -181,7 +181,7 @@ def test_settings_rejection_and_search_time_tolerance_reuse(cls):
     cls(tolerance=.2, use_ppm=True).search(queries, index, progress_bar=False, n_jobs=1)
     with pytest.raises(ValueError, match="noise_cutoff"):
         cls(noise_cutoff=.05).search(queries, index, progress_bar=False, n_jobs=1)
-    if cls is FlashEntropy:
+    if cls is EntropyFlash:
         with pytest.raises(ValueError, match="weighing_type"):
             CosineFlash().search(queries, index, progress_bar=False, n_jobs=1)
 
@@ -192,7 +192,7 @@ def test_hungarian_index_rejected_with_original_error_kind():
         Cosine(use_hungarian=True).build_index(library)
 
 
-@pytest.mark.parametrize("cls", [Cosine, Entropy, ModifiedCosine, CosineFlash, FlashEntropy])
+@pytest.mark.parametrize("cls", [Cosine, Entropy, ModifiedCosine, CosineFlash, EntropyFlash])
 def test_to_dict_stays_constructor_only(cls):
     source=cls(tolerance=.02, noise_cutoff=None, dtype=np.float32)
     config=json.loads(json.dumps(source.to_dict()))

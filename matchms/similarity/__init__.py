@@ -62,7 +62,7 @@ Spectral entropy similarity
 
 * :class:`~matchms.similarity.EntropyGreedy` for a direct pair-oriented
   implementation,
-* :class:`~matchms.similarity.FlashEntropy` for the general indexed entropy
+* :class:`~matchms.similarity.EntropyFlash` for the general indexed entropy
   backend used by :class:`~matchms.similarity.Entropy`.
 
 Other similarity measures
@@ -103,7 +103,7 @@ from .entropy import Entropy
 from .entropy_greedy import EntropyGreedy
 from .entropy_search import EntropySearch
 from .fingerprint_similarity import FingerprintSimilarity
-from .flash_similarity import CosineFlash, FlashEntropy
+from .flash_similarity import CosineFlash, EntropyFlash
 from .metadata_match import MetadataMatch
 from .modified_cosine import ModifiedCosine
 from .modified_cosine_greedy import ModifiedCosineGreedy
@@ -123,10 +123,10 @@ __all__ = [
     "CosineHungarian",
     "CosineLinear",
     "Entropy",
+    "EntropyFlash",
     "EntropyGreedy",
     "EntropySearch",
     "FingerprintSimilarity",
-    "FlashEntropy",
     "MetadataMatch",
     "ModifiedCosine",
     "ModifiedCosineGreedy",
@@ -168,7 +168,7 @@ def get_similarity_function_by_name(similarity_function_name: str):
         "EntropyGreedy": EntropyGreedy,
         "EntropySearch": EntropySearch,
         "FingerprintSimilarity": FingerprintSimilarity,
-        "FlashEntropy": FlashEntropy,
+        "EntropyFlash": EntropyFlash,
         "MetadataMatch": MetadataMatch,
         "ModifiedCosine": ModifiedCosine,
         "ModifiedCosineGreedy": ModifiedCosineGreedy,

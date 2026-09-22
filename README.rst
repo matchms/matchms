@@ -597,7 +597,7 @@ searching a fixed reference library using a reusable index.
        matching. Supports fragment, neutral-loss, and hybrid matching as well
        as reusable library indices.
      - ``EntropyGreedy``,
-       ``FlashEntropy``
+       ``EntropyFlash``
    * - Search-optimized spectral entropy
      - ``EntropySearch``
      - High-throughput fragment-only entropy searches against large reference
@@ -716,6 +716,11 @@ and for general spectral entropy similarity:
 Building the index separately is especially useful when many query batches are
 searched against the same reference library, because the reference spectra do
 not need to be prepared and indexed again for every search.
+
+.. image:: readthedocs/_static/matchms_similarity_implementations.png
+   :target: readthedocs/_static/matchms_similarity_implementations.png
+   :align: left
+   :alt: matchms similarity implementations and class inheritances
 
 
 Saving and loading similarity indices
@@ -855,7 +860,7 @@ while ``CosineHungarian`` uses optimal peak assignment. ``CosineLinear`` and
 exposes the indexed Flash-based cosine implementation directly.
 
 For spectral entropy, ``EntropyGreedy`` provides a compact pair-oriented
-implementation and ``FlashEntropy`` exposes the general indexed implementation
+implementation and ``EntropyFlash`` exposes the general indexed implementation
 used by ``Entropy``.
 
 For most applications, the high-level ``Cosine``, ``ModifiedCosine``,
