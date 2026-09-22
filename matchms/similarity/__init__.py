@@ -1,25 +1,44 @@
-"""
-Functions for computing spectrum similarities
-##############################################
+"""Similarity measures for spectra, metadata, and molecular structures.
 
-Matchms provides similarity measures for comparing mass spectra, spectrum
-metadata, and molecular structures.
-
-For peak-based spectral similarity, the recommended high-level entry points are:
+Choosing a peak-based spectral similarity
+-----------------------------------------
+For most workflows, start with one of the public high-level classes:
 
 * :class:`~matchms.similarity.Cosine` for standard cosine similarity,
 * :class:`~matchms.similarity.ModifiedCosine` when precursor-mass shifts should
-  be considered, and
-* :class:`~matchms.similarity.Entropy` for spectral entropy similarity.
+  contribute to matching,
+* :class:`~matchms.similarity.Entropy` for general spectral entropy similarity,
+  and
+* :class:`~matchms.similarity.EntropySearch` for high-throughput fragment-only
+  entropy searches against large reference libraries.
 
-These classes select suitable implementations internally and are intended to
-be the default choice for most workflows using :meth:`pair` or :meth:`matrix`.
+``Cosine``, ``ModifiedCosine``, ``Entropy``, and ``EntropySearch`` all support
+``pair`` and ``matrix`` workflows. Their indexed implementations also provide
+``build_index`` and ``search`` for repeated queries against a fixed library.
+
+Choosing between Entropy and EntropySearch
+------------------------------------------
+Both classes use the spectral entropy score, but they make different assumptions
+about peak matching.
+
+:class:`~matchms.similarity.Entropy` is the general-purpose choice. It explicitly
+handles competing one-to-one peak matches and supports fragment, neutral-loss,
+and hybrid matching with Da or ppm tolerances. Use it when preserving the general
+matching semantics is more important than maximum library-search throughput, or
+when spectra may contain peaks whose tolerance windows overlap.
+
+:class:`~matchms.similarity.EntropySearch` is optimized for repeated fragment-only
+library searches with absolute Da tolerances. It requires peaks within each
+spectrum to be sufficiently separated that candidate matches cannot compete. The
+class can either merge close peaks during preparation or raise an error when this
+requirement is violated. Merging changes the prepared spectrum and can therefore
+change scores relative to ``Entropy``. Use ``EntropySearch`` when this separation
+assumption is acceptable and search throughput is the primary concern.
 
 Specialized implementations
 ---------------------------
-
 For applications that require explicit control over the scoring algorithm,
-matchms also exposes the underlying implementations.
+matchms also exposes lower-level implementations.
 
 Cosine similarity
 ~~~~~~~~~~~~~~~~~
@@ -41,12 +60,13 @@ Modified cosine similarity
 Spectral entropy similarity
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-* :class:`~matchms.similarity.EntropyGreedy`
-* :class:`~matchms.similarity.FlashEntropy`
+* :class:`~matchms.similarity.EntropyGreedy` for a direct pair-oriented
+  implementation,
+* :class:`~matchms.similarity.FlashEntropy` for the general indexed entropy
+  backend used by :class:`~matchms.similarity.Entropy`.
 
 Other similarity measures
 -------------------------
-
 Additional similarity measures include:
 
 * :class:`~matchms.similarity.NeutralLossesCosine` for neutral-loss-based
@@ -62,14 +82,14 @@ Additional similarity measures include:
 
 Custom similarities
 -------------------
-
 Custom similarity measures can be implemented by subclassing
 :class:`~matchms.similarity.BaseSimilarity`. Similarities that also support
 sparse score computation can subclass
 :class:`~matchms.similarity.BaseSimilarityWithSparse`.
 
 External similarity measures, such as
-`Spec2Vec <https://github.com/iomega/spec2vec>`_, can also be integrated into
+`Spec2Vec <https://github.com/iomega/spec2vec>`_ or
+`MS2DeepScore <https://github.com/matchms/ms2deepscore>`_, can also be integrated into
 matchms workflows.
 """
 
@@ -81,6 +101,7 @@ from .cosine_hungarian import CosineHungarian
 from .cosine_linear import CosineLinear
 from .entropy import Entropy
 from .entropy_greedy import EntropyGreedy
+from .entropy_search import EntropySearch
 from .fingerprint_similarity import FingerprintSimilarity
 from .flash_similarity import CosineFlash, FlashEntropy
 from .metadata_match import MetadataMatch
@@ -103,6 +124,7 @@ __all__ = [
     "CosineLinear",
     "Entropy",
     "EntropyGreedy",
+    "EntropySearch",
     "FingerprintSimilarity",
     "FlashEntropy",
     "MetadataMatch",
@@ -117,25 +139,35 @@ __all__ = [
 
 
 def get_similarity_function_by_name(similarity_function_name: str):
-    """
-    Get a similarity function by the name of its class.
+    """Return a similarity class by its public class name.
 
     Parameters
     ----------
-    similarity_function_name : str
-        Name of the similarity function.
+    similarity_function_name
+        Name of the similarity class.
+
+    Returns
+    -------
+    type
+        Matching similarity class.
+
+    Raises
+    ------
+    ValueError
+        If ``similarity_function_name`` is not a known public similarity class.
     """
     mapper = {
         "BinnedEmbeddingSimilarity": BinnedEmbeddingSimilarity,
-        "CosineBlink": CosineBlink,
         "Cosine": Cosine,
-        "CosineLinear": CosineLinear,
+        "CosineBlink": CosineBlink,
+        "CosineFlash": CosineFlash,
         "CosineGreedy": CosineGreedy,
         "CosineHungarian": CosineHungarian,
+        "CosineLinear": CosineLinear,
         "Entropy": Entropy,
         "EntropyGreedy": EntropyGreedy,
+        "EntropySearch": EntropySearch,
         "FingerprintSimilarity": FingerprintSimilarity,
-        "CosineFlash": CosineFlash,
         "FlashEntropy": FlashEntropy,
         "MetadataMatch": MetadataMatch,
         "ModifiedCosine": ModifiedCosine,
@@ -147,5 +179,9 @@ def get_similarity_function_by_name(similarity_function_name: str):
         "PrecursorMzMatch": PrecursorMzMatch,
     }
 
-    assert similarity_function_name in mapper, f"Unknown similarity function: {similarity_function_name}"
-    return mapper[similarity_function_name]
+    try:
+        return mapper[similarity_function_name]
+    except KeyError as exc:
+        raise ValueError(
+            f"Unknown similarity function: {similarity_function_name}"
+        ) from exc
