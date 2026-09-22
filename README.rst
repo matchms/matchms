@@ -597,7 +597,7 @@ searching a fixed reference library using a reusable index.
        matching. Supports fragment, neutral-loss, and hybrid matching as well
        as reusable library indices.
      - ``EntropyGreedy``,
-       ``FlashEntropy``
+       ``EntropyFlash``
    * - Search-optimized spectral entropy
      - ``EntropySearch``
      - High-throughput fragment-only entropy searches against large reference
@@ -855,7 +855,7 @@ while ``CosineHungarian`` uses optimal peak assignment. ``CosineLinear`` and
 exposes the indexed Flash-based cosine implementation directly.
 
 For spectral entropy, ``EntropyGreedy`` provides a compact pair-oriented
-implementation and ``FlashEntropy`` exposes the general indexed implementation
+implementation and ``EntropyFlash`` exposes the general indexed implementation
 used by ``Entropy``.
 
 For most applications, the high-level ``Cosine``, ``ModifiedCosine``,

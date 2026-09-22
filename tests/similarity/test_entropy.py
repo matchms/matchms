@@ -3,7 +3,7 @@ import pytest
 from matchms import SpectraCollection
 from matchms.scores import Scores
 from matchms.similarity import Entropy, EntropyGreedy
-from matchms.similarity.flash_similarity import FlashEntropy
+from matchms.similarity.flash_similarity import EntropyFlash
 from ..builder_spectrum import SpectrumBuilder
 
 
@@ -59,7 +59,7 @@ def test_entropy_greedy_nonmatching_spectra_score_zero():
 
 
 def test_entropy_greedy_one_of_two_equal_peaks_matching_has_known_score():
-    """Independent analytical check, without using FlashEntropy as oracle.
+    """Independent analytical check, without using EntropyFlash as oracle.
 
     With two equal peaks per spectrum, entropy weighting keeps both peaks equal.
     Normalization to sum 0.5 therefore gives intensity 0.25 per peak. If exactly
@@ -316,7 +316,7 @@ def test_entropy_greedy_merge_within_can_restore_peak_match():
 
 
 # ----------------------------
-# EntropyGreedy vs FlashEntropy parity
+# EntropyGreedy vs EntropyFlash parity
 # ----------------------------
 
 
@@ -414,7 +414,7 @@ def test_entropy_greedy_matches_flash_entropy_fragment_pair(
     }
 
     baseline = EntropyGreedy(**kwargs)
-    flash = FlashEntropy(
+    flash = EntropyFlash(
         matching_mode="fragment",
         normalize_to_half=True,
         **kwargs,
@@ -447,7 +447,7 @@ def test_entropy_greedy_matches_flash_entropy_after_precursor_cleanup():
     }
 
     baseline = EntropyGreedy(**kwargs).pair(spectrum_1, spectrum_2)
-    flash = FlashEntropy(
+    flash = EntropyFlash(
         matching_mode="fragment",
         normalize_to_half=True,
         **kwargs,
@@ -513,7 +513,7 @@ def test_entropy_matrix_matches_flash_entropy_with_same_configuration():
         progress_bar=False,
         n_jobs=0,
     )
-    expected = FlashEntropy(
+    expected = EntropyFlash(
         matching_mode="fragment",
         normalize_to_half=True,
         **kwargs,
@@ -691,7 +691,7 @@ def test_entropy_greedy_matches_flash_entropy(matching_mode):
     }
 
     greedy = float(EntropyGreedy(**kwargs).pair(reference, query))
-    flash = float(FlashEntropy(**kwargs).pair(reference, query))
+    flash = float(EntropyFlash(**kwargs).pair(reference, query))
 
     assert greedy == pytest.approx(flash, abs=1e-12)
 

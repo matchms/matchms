@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from matchms import SpectraCollection
 from matchms.scores import Scores
-from matchms.similarity.flash_similarity import CosineFlash, FlashEntropy
+from matchms.similarity.flash_similarity import CosineFlash, EntropyFlash
 from ..builder_spectrum import SpectrumBuilder
 
 
@@ -100,7 +100,7 @@ def _example_cosine_inputs():
 
 
 # -------------------------------------------------------------------------
-# FlashEntropy: input handling and matrix API
+# EntropyFlash: input handling and matrix API
 # -------------------------------------------------------------------------
 
 
@@ -112,7 +112,7 @@ def test_flash_entropy_collection_input_matches_list_input(matching_mode):
     """List and SpectraCollection inputs should produce identical scores."""
     references, queries = _example_entropy_inputs()
 
-    similarity = FlashEntropy(
+    similarity = EntropyFlash(
         matching_mode=matching_mode,
         tolerance=0.01,
         remove_precursor=False,
@@ -165,7 +165,7 @@ def test_flash_entropy_self_comparison_is_symmetric():
         ),
     ]
 
-    similarity = FlashEntropy(
+    similarity = EntropyFlash(
         matching_mode="fragment",
         tolerance=0.01,
         remove_precursor=False,
@@ -206,7 +206,7 @@ def test_flash_entropy_pair_matches_matrix_element():
         precursor_mz=510.0,
     )
 
-    similarity = FlashEntropy(
+    similarity = EntropyFlash(
         matching_mode="hybrid",
         tolerance=0.01,
         remove_precursor=False,
@@ -229,7 +229,7 @@ def test_flash_entropy_rectangular_matrix_preserves_requested_orientation():
     """Rows must correspond to spectra_1 and columns to spectra_2."""
     references, queries = _example_entropy_inputs()
 
-    similarity = FlashEntropy(
+    similarity = EntropyFlash(
         matching_mode="fragment",
         tolerance=0.01,
         remove_precursor=False,
@@ -256,7 +256,7 @@ def test_flash_entropy_rectangular_matrix_preserves_requested_orientation():
 
 
 # -------------------------------------------------------------------------
-# FlashEntropy: matching modes and precursor handling
+# EntropyFlash: matching modes and precursor handling
 # -------------------------------------------------------------------------
 
 
@@ -265,7 +265,7 @@ def test_flash_entropy_neutral_loss_requires_precursor_mz():
     reference = _build_spectrum([100.0], [1.0])
     query = _build_spectrum([100.0], [1.0])
 
-    similarity = FlashEntropy(
+    similarity = EntropyFlash(
         matching_mode="neutral_loss",
         tolerance=0.01,
         remove_precursor=False,
@@ -296,7 +296,7 @@ def test_flash_entropy_hybrid_combines_distinct_fragment_and_loss_matches():
         precursor_mz=510.0,
     )
 
-    similarity = FlashEntropy(
+    similarity = EntropyFlash(
         matching_mode="hybrid",
         tolerance=0.01,
         remove_precursor=False,
@@ -327,7 +327,7 @@ def test_flash_entropy_identity_precursor_gate_excludes_distant_precursor():
         precursor_mz=500.3,
     )
 
-    similarity = FlashEntropy(
+    similarity = EntropyFlash(
         matching_mode="fragment",
         tolerance=0.01,
         identity_precursor_tolerance=0.2,

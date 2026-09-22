@@ -6,10 +6,10 @@ from .default_parameters import (
     DEFAULT_NOISE_CUTOFF,
     DEFAULT_OFFSET_TO_PRECURSOR,
 )
-from .flash_similarity import FlashEntropy
+from .flash_similarity import EntropyFlash
 
 
-class Entropy(FlashEntropy):
+class Entropy(EntropyFlash):
     """Compare mass spectra using entropy-weighted spectral similarity.
 
     Intensities are entropy-weighted and normalized to sum to 0.5 per spectrum.

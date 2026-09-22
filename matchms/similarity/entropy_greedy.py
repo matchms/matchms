@@ -177,7 +177,7 @@ class EntropyGreedy(BaseSimilarityWithSparse):
     entropy similarity. It is intended as the transparent reference
     implementation for single or small numbers of comparisons. For larger
     all-vs-all calculations, use :class:`~matchms.similarity.Entropy`, whose
-    matrix implementation uses :class:`~matchms.similarity.FlashEntropy`.
+    matrix implementation uses :class:`~matchms.similarity.EntropyFlash`.
 
     Intensities are preprocessed using entropy weighting and normalized to a
     total weighted intensity of 0.5 per spectrum.
