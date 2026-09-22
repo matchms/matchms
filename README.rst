@@ -17,6 +17,24 @@ Code quality checks:
    :align: left
    :alt: matchms
 
+
+****************************************
+Larger changes comming up: matchms 1.0 !
+****************************************
+We will soon have a larger change of matchms with an upcoming release of matchms 1.0!
+To already check if your own code is matchms-1.0-ready, you can use the current `development branch <https://github.com/matchms/matchms/tree/development>`_ , e.g., by installing with
+
+.. code-block:: console
+
+    pip install git+https://github.com/matchms/matchms.git@development
+
+Also check the current `matchms 1.0 pull request <https://github.com/matchms/matchms/pull/909>`_ for a more detailed list of upcoming changes.
+
+
+*************
+Former Readme
+*************
+
 Matchms is a versatile open-source Python package developed for importing, processing, cleaning, and comparing mass spectrometry data (MS/MS). It facilitates the implementation of straightforward, reproducible workflows, transforming raw data from common mass spectra file formats into pre- and post-processed spectral data, and enabling large-scale spectral similarity comparisons.
 
 The software supports a range of popular spectral data formats, including mzML, mzXML, msp, metabolomics-USI, MGF, and JSON. Matchms offers an array of tools for metadata cleaning and validation, alongside basic peak filtering, to ensure data accuracy and integrity. A key feature of matchms is its ability to apply various pairwise similarity measures for comparing extensive amounts of spectra. This encompasses not only common Cosine-related scores but also molecular fingerprint-based comparisons and other metadata-related assessments.
