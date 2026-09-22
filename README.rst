@@ -717,6 +717,11 @@ Building the index separately is especially useful when many query batches are
 searched against the same reference library, because the reference spectra do
 not need to be prepared and indexed again for every search.
 
+.. image:: readthedocs/_static/matchms_similarity_implementations.png
+   :target: readthedocs/_static/matchms_similarity_implementations.png
+   :align: left
+   :alt: matchms similarity implementations and class inheritances
+
 
 Saving and loading similarity indices
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
