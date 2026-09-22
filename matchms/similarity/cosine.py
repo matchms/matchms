@@ -14,7 +14,7 @@ from .flash_index import FlashIndex
 from .flash_similarity import CosineFlash
 
 
-class Cosine(...):
+class Cosine(CosineFlash):
     """Compare mass spectra using cosine similarity.
 
     Cosine similarity measures the overlap between two spectra after applying
