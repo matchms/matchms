@@ -14,50 +14,159 @@ from .flash_index import FlashIndex
 from .flash_similarity import CosineFlash
 
 
-class Cosine(CosineFlash):
-    """Compare mass spectra using cosine similarity and matched-peak counts.
+class Cosine(...):
+    """Compare mass spectra using cosine similarity.
 
-    By default, indexed peaks provide candidate matches within ``tolerance``.
-    Independent matches are summed directly; competing matches are resolved by
-    descending intensity-product greedy assignment. ``pair``, ``matrix``, and
-    ``search`` share this preparation and assignment rule.
+    Cosine similarity measures the overlap between two spectra after applying
+    the configured intensity transformation. Peaks are considered candidate
+    matches when their m/z values differ by at most ``tolerance``. Each peak can
+    contribute to at most one accepted match.
 
-    Set ``use_hungarian=True`` for optimal peak assignment in ``pair`` and
-    ``matrix``. This alternative does not provide indexed searches. For a simple
-    spectrum-pair implementation, see :class:`~matchms.similarity.CosineGreedy`.
+    By default, matchms uses an indexed greedy implementation. Candidate matches
+    that cannot conflict with another assignment are accumulated directly.
+    Where multiple candidate matches compete for the same peak, candidates are
+    resolved in descending order of their intensity product. The returned
+    ``matches`` field is the number of peak pairs accepted by this one-to-one
+    assignment.
+
+    The class provides three complementary ways to calculate similarities:
+
+    - :meth:`pair` compares two spectra.
+    - :meth:`matrix` calculates a complete similarity matrix between collections
+      of spectra.
+    - :meth:`build_index` together with :meth:`search` supports repeated queries
+      against a fixed reference library without rebuilding the library index for
+      every query batch.
+
+    ``matrix`` and the indexed ``search`` path use the same peak preparation and
+    matching semantics. ``search(query_spectra, library_index)`` returns query
+    spectra as rows and library spectra as columns.
+
+    Set ``use_hungarian=True`` to replace the greedy peak assignment with an
+    optimal Hungarian assignment for :meth:`pair` and :meth:`matrix`. Hungarian
+    matching is substantially more expensive and does not support persistent
+    indexed searches. For a compact pair-oriented greedy implementation, see
+    :class:`~matchms.similarity.CosineGreedy`.
 
     Parameters
     ----------
     tolerance
-        Maximum m/z difference for a peak match. The boundary is inclusive.
+        Maximum difference between two fragment m/z values for a candidate
+        match. The tolerance boundary is inclusive. Interpreted as Da unless
+        ``use_ppm=True``.
     intensity_power
-        Exponent applied to peak intensities before cosine scoring.
+        Exponent applied to peak intensities before cosine scoring. The default
+        of 1 uses the original intensities; values below 1 reduce the influence
+        of very intense peaks.
     use_hungarian
-        Use Hungarian rather than greedy peak assignment. This selects a
-        different algorithm, not a different preprocessing pipeline.
+        If False, use the indexed greedy assignment used by the default matchms
+        cosine implementation. If True, use Hungarian assignment for ``pair``
+        and ``matrix``. Persistent index construction and ``search`` are not
+        available with Hungarian matching.
     noise_cutoff
-        Relative intensity cutoff after precursor-region removal. Set to zero
-        or None to disable noise filtering.
+        Remove peaks with intensity below this fraction of the largest remaining
+        peak in the spectrum. Set to 0 or None to disable relative-intensity
+        filtering.
     remove_precursor
-        Remove peaks above ``precursor_mz + offset_to_precursor``.
+        If True and ``precursor_mz`` is available, remove peaks above
+        ``precursor_mz + offset_to_precursor`` before scoring.
     offset_to_precursor
-        Signed Da offset defining the precursor-region cutoff.
+        Signed offset in Da used for precursor-region removal. With the default
+        negative value, peaks close to and above the precursor are removed.
     use_ppm
-        Interpret the matching tolerance as symmetric ppm rather than Da.
-        Supported by indexed greedy scoring only.
+        If True, interpret ``tolerance`` as a symmetric ppm tolerance instead
+        of an absolute Da tolerance. Supported by the indexed greedy
+        implementation.
     merge_within
-        Optional within-spectrum merge distance in Da. Zero disables merging.
-        Supported by indexed greedy scoring only.
+        Optional within-spectrum peak-merging distance in Da. Set to 0 to
+        disable merging. Supported by the indexed greedy implementation.
     dtype
-        Float32 or float64 for prepared peaks and returned score values.
+        Floating-point dtype used for prepared peak intensities and similarity
+        scores. Supported values are ``numpy.float32`` and ``numpy.float64``.
+
+    Returns
+    -------
+    Scores
+        ``matrix`` and ``search`` return a
+        :class:`~matchms.scores.Scores` object containing the fields ``"score"``
+        and ``"matches"`` by default. The ``"score"`` field contains cosine
+        similarity values and ``"matches"`` contains the number of accepted
+        peak pairs.
 
     Notes
     -----
-    Results contain ``score`` and ``matches``. To omit the dense count output,
-    pass ``score_fields=("score",)`` to ``matrix`` or ``search``. ``search`` uses
-    a previously built :class:`~matchms.similarity.flash_index.FlashIndex` and
-    returns query rows and library columns. For reproducible indexed workflows,
-    store the preprocessing settings together with the index.
+    The persistent search workflow separates reference-library preparation from
+    query scoring. A library index can therefore be constructed once and reused
+    for many independent query batches::
+
+        similarity = Cosine(tolerance=0.01)
+
+        library_index = similarity.build_index(library_spectra)
+
+        scores = similarity.search(
+            query_spectra,
+            library_index,
+            progress_bar=False,
+            n_jobs=1,
+        )
+
+    The resulting score matrix has shape
+    ``(len(query_spectra), len(library_spectra))``.
+
+    Library indices are represented by
+    :class:`~matchms.similarity.flash_index.FlashIndex`. The index stores the
+    preprocessing configuration required for compatibility checks, so an index
+    created with incompatible preparation settings cannot silently be reused by
+    another similarity configuration.
+
+    For large dense calculations, storing matched-peak counts can require
+    substantial additional memory. If only cosine scores are needed, request
+    the score field explicitly::
+
+        scores = similarity.matrix(
+            spectra,
+            score_fields=("score",),
+            progress_bar=False,
+            n_jobs=1,
+        )
+
+    The same field selection is available for ``search``.
+
+    Examples
+    --------
+    Compare a single pair of spectra::
+
+        similarity = Cosine(tolerance=0.01)
+        result = similarity.pair(spectrum_1, spectrum_2)
+
+        cosine_score = result["score"]
+        n_matches = result["matches"]
+
+    Calculate a complete pairwise matrix::
+
+        scores = similarity.matrix(
+            spectra,
+            progress_bar=False,
+            n_jobs=1,
+        )
+
+    Build a reusable reference index and search it repeatedly::
+
+        index = similarity.build_index(reference_spectra)
+
+        scores_1 = similarity.search(
+            query_batch_1,
+            index,
+            progress_bar=False,
+            n_jobs=1,
+        )
+
+        scores_2 = similarity.search(
+            query_batch_2,
+            index,
+            progress_bar=False,
+            n_jobs=1,
+        )
     """
 
     _default_mode = "fragment"
