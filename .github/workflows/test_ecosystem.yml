@@ -31,11 +31,11 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.14"
 
       - name: Install dependent packages
         run: |
-          python -m pip install --upgrade pip poetry
+          python -m pip install --upgrade pip
           pip install numpy==${{ matrix.numpy-version }}
           pip install ${{ matrix.dependent-packages }}
           pip install .

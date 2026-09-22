@@ -3,11 +3,9 @@ name = "matchms"
 version = "1.0.0.dev1"
 description = "Python library for large-scale comparisons and processing of tandem mass spectral data"
 readme = "README.rst"
-requires-python = ">=3.11,<3.14"
+requires-python = ">=3.11,<3.15"
 license = "Apache-2.0"
-authors = [
-  { name = "matchms developer team", email = "florian.huber@hs-duesseldorf.de" }
-]
+authors = [{ name = "matchms developer team", email = "florian.huber@hs-duesseldorf.de" }]
 keywords = [
   "fuzzy matching",
   "fuzzy search",
@@ -36,19 +34,20 @@ dependencies = [
   "numpy>=2.0.0",
   "pandas>=2.2.3",
   "pickydict>=0.5.0",
+  "psims>=1.3.2",
   "pubchempy>=1.0.5",
   "pynndescent>=0.6.0",
   "pyteomics>=4.7.5",
-  "psims>=1.3.2",
   "pyyaml>=6.0.3",
   "rdkit>=2024.3.5",
   "requests>=2.32.5",
   "scipy>=1.15.3,<1.16",
   "tqdm>=4.67.1",
 ]
+
 [project.urls]
-repository = "https://github.com/matchms/matchms"
 documentation = "https://matchms.readthedocs.io/en/latest/"
+repository = "https://github.com/matchms/matchms"
 
 [dependency-groups]
 dev = [
@@ -57,8 +56,8 @@ dev = [
   "poetry-bumpversion>=0.3.3",
   "pre-commit>=4.5.1",
   "pytest>=9.0.2",
-  "pytest-cov>=7.0.0",
   "pytest-benchmark>=5.1.0",
+  "pytest-cov>=7.0.0",
   "ruff>=0.14.13",
   "testfixtures>=8.3.0,<9",
   "twine>=6.2.0",
@@ -74,7 +73,12 @@ docs = [
 requires = ["pdm-backend"]
 build-backend = "pdm.backend"
 
-[tool.poetry_bumpversion.file."matchms/__version__.py"]
+[tool.pytest.ini_options]
+addopts = "--benchmark-disable"
+testpaths = [
+  "tests",
+  "integration-tests",
+]
 
 [tool.ruff]
 extend-exclude = ["integration-tests", "paper", "readthedocs"]
@@ -143,12 +147,9 @@ section-order = [
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["D"]
 
-[tool.pytest.ini_options]
-addopts = "--benchmark-disable"
-testpaths = [
-  "tests",
-  "integration-tests",
-]
+[tool.uv]
+package = true
+default-groups = ["dev"]
 
 [build_sphinx]
 source-dir = "docs"

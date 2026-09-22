@@ -40,8 +40,8 @@ jobs:
             -Dsonar.pullrequest.branch=${{ env.HEAD_REF }}
             -Dsonar.pullrequest.base=${{ env.BASE_REF }}
 
-  sonarcloud-conda:
-    name: SonarCloud Scan on conda build
+  sonarcloud-docs:
+    name: SonarCloud Scan on docs build
     runs-on: ubuntu-latest
     if: github.event.workflow_run.conclusion == 'success'
     steps:
@@ -54,7 +54,7 @@ jobs:
         uses: dawidd6/action-download-artifact@v6
         with:
           workflow: CI_build.yml
-          name: sonarcloud-data-conda
+          name: sonarcloud-data-docs
           path: ${{ github.workspace }}
       - name: Get PR metadata from json
         run: |

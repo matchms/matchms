@@ -873,15 +873,28 @@ Installation
 Prerequisites:
 
 - Python 3.11 - 3.14
-- Anaconda or another virtual environment manager is recommended
+
+Install matchms with uv (recommended):
+
+.. code-block:: console
+
+    uv pip install matchms
 
 Install matchms with conda:
 
 .. code-block:: console
 
-    conda create --name matchms python=3.13
+    conda create --name matchms python=3.14
     conda activate matchms
     conda install --channel bioconda --channel conda-forge matchms
+
+Install matchms with pip:
+
+.. code-block:: console
+
+    python -m venv matchms
+    source matchms/bin/activate
+    pip install matchms
 
 
 Documentation for users
@@ -956,15 +969,15 @@ Development installation
     git clone https://github.com/matchms/matchms.git
     cd matchms
 
-    # Create environment using conda
-    conda create --name matchms-dev python=3.13
+    # Create environment and install all dependencies with uv (recommended)
+    uv sync --frozen
+
+    # Alternatively, install with conda
+    conda create --name matchms-dev python=3.14
     conda activate matchms-dev
+    pip install -e ".[dev]"
 
-    # Or create environment using uv
-    uv venv --python 3.13
-    uv sync --group dev
-
-    # Or install with pip
+    # Alternatively, install with pip
     pip install -r dev-requirements.txt
     pip install --editable .
 
@@ -976,20 +989,20 @@ Run the linter and formatter:
 
 .. code-block:: console
 
-    ruff check --fix matchms/YOUR-MODIFIED-FILE.py
-    ruff format matchms/YOUR-MODIFIED-FILE.py
+    uv run ruff check --fix matchms/YOUR-MODIFIED-FILE.py
+    uv run ruff format matchms/YOUR-MODIFIED-FILE.py
 
 Install pre-commit hooks:
 
 .. code-block:: console
 
-    pre-commit install
+    uv run pre-commit install
 
 Run tests:
 
 .. code-block:: console
 
-    pytest
+    uv run pytest
 
 
 Developer notes: collection-first design

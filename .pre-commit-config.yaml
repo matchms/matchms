@@ -18,6 +18,12 @@ repos:
       - id: debug-statements
       - id: detect-private-key
 
+  # Keep the uv lockfile in sync with pyproject.toml.
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 0.12.17
+    hooks:
+      - id: uv-lock
+
   # Run Ruff linter and formatter.
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.14.13
