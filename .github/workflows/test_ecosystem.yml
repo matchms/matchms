@@ -28,17 +28,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
         with:
           python-version: "3.13"
 
       - name: Install dependent packages
         run: |
-          python -m pip install --upgrade pip
-          pip install numpy==${{ matrix.numpy-version }}
-          pip install ${{ matrix.dependent-packages }}
-          pip install .
+          uv pip install numpy==${{ matrix.numpy-version }}
+          uv pip install ${{ matrix.dependent-packages }}
+          uv pip install .
           pip check
         continue-on-error: true
 
@@ -57,7 +56,7 @@ jobs:
           set -v
           mkdir -p ./test-output
 
-          version=$(pip show "${{ matrix.dependent-packages }}" | grep Version | awk '{print $2}')
+          version=$(uv pip show "${{ matrix.dependent-packages }}" | grep Version | awk '{print $2}')
 
           if pip check; then
             echo "{\"package\": \"${{ matrix.dependent-packages }}\", \"version\": \"$version\", \"numpy-version\": \"${{ matrix.numpy-version }}\", \"run_success\": true}" >> test-output/${{ matrix.numpy-version }}-${{ matrix.dependent-packages }}.json
@@ -228,10 +227,10 @@ jobs:
           name: dependency-test-matrix
           path: test-output/
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
         with:
-          python-version: "3.11"
+          python-version: "3.13"
 
       - name: List downloaded files
         run: ls
