@@ -17,7 +17,7 @@ Install via uv (recommended)::
 
 Install via conda::
 
-    conda create -n matchms python=3.14
+    conda create -n matchms python=3.13
     conda activate matchms
     conda install -c conda-forge -c bioconda matchms
 

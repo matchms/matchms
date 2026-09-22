@@ -872,7 +872,7 @@ Installation
 
 Prerequisites:
 
-- Python 3.11 - 3.14
+- Python 3.11 - 3.13
 
 Install matchms with uv (recommended):
 
@@ -884,7 +884,7 @@ Install matchms with conda:
 
 .. code-block:: console
 
-    conda create --name matchms python=3.14
+    conda create --name matchms python=3.13
     conda activate matchms
     conda install --channel bioconda --channel conda-forge matchms
 
@@ -973,7 +973,7 @@ Development installation
     uv sync --frozen
 
     # Alternatively, install with conda
-    conda create --name matchms-dev python=3.14
+    conda create --name matchms-dev python=3.13
     conda activate matchms-dev
     pip install -e ".[dev]"
 

@@ -12,14 +12,14 @@ on:
 jobs:
 
   first_check:
-    name: first code check / python-3.14 / ubuntu-latest
+    name: first code check / python-3.13 / ubuntu-latest
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Set up uv
         uses: astral-sh/setup-uv@v5
         with:
-          python-version: '3.14'
+          python-version: '3.13'
           enable-cache: true
           cache-suffix: first-check
       - name: Show environment info
