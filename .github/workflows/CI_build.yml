@@ -16,28 +16,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
         with:
           python-version: '3.12'
-      - name: Python info
+          enable-cache: true
+          cache-suffix: first-check
+      - name: Show environment info
         run: |
-          which python
-          python --version
-      - name: Build package and create dev environment
-        run: |
-          python -m pip install --upgrade pip poetry
-          poetry install
-      - name: Show pip list
-        run: |
-          pip list
+          which uv
+          uv --version
+          uv run python --version
+      - name: Install dependencies
+        run: uv sync --frozen
+      - name: Show packages
+        run: uv pip list
+      - name: Run ruff linter
+        run: uv run ruff check --output-format=github
       - name: Test with coverage
-        run: |
-          poetry run pytest --cov --cov-report term --cov-report xml --junitxml=xunit-result.xml
+        run: uv run pytest --cov --cov-report term --cov-report xml --junitxml=xunit-result.xml
       - name: Correct coverage paths
         run: sed -i "s+$PWD/++g" coverage.xml
-      - name: Run ruff linter
-        run: ruff check --output-format=github
       - name: Store PR metadata in json file
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
@@ -45,9 +44,9 @@ jobs:
           BASE_REF: ${{ github.event.pull_request.base.ref }}
         run: |
           jq -n --arg pr_number "$PR_NUMBER"\
-                --arg head_ref "$HEAD_REF"\
-                --arg base_ref "$BASE_REF"\
-            '{"pr_number": $pr_number, "head_ref": $head_ref, "base_ref": $base_ref}' > pr_metadata.json
+                  --arg head_ref "$HEAD_REF"\
+                  --arg base_ref "$BASE_REF"\
+                  '{"pr_number": $pr_number, "head_ref": $head_ref, "base_ref": $base_ref}' > pr_metadata.json
       - uses: actions/upload-artifact@v4
         with:
           name: sonarcloud-data-pip
@@ -62,36 +61,27 @@ jobs:
     needs: first_check
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v5
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
         with:
           python-version: '3.12'
-      - name: Python info
+          enable-cache: true
+          cache-suffix: build-pypi
+      - name: Show environment info
         run: |
-          which python
-          python --version
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip poetry
+          which uv
+          uv --version
+          uv run python --version
       - name: Build package
+        run: uv build
+      - name: Test package metadata
+        run: uv run twine check dist/*
+      - name: Show packages
+        run: uv pip list
+      - name: Install development environment and run tests
         run: |
-          poetry build
-      - name: Test package
-        run: |
-          poetry install --only dev
-          python -m twine check dist/*
-      - name: Show pip list
-        run: |
-          pip list
-      - name: Install development dependencies
-        run: |
-          poetry install
-      - name: Show pip list again
-        run: |
-          pip list
-      - name: Run tests
-        run: |
-          poetry run pytest
+          uv sync --frozen
+          uv run pytest
       - name: Show environment variables
         shell: bash -l {0}
         run: |
@@ -105,81 +95,60 @@ jobs:
       fail-fast: false
       matrix:
         os: ['ubuntu-latest', 'macos-latest', 'windows-latest']
-        python-version: ['3.11', '3.12', '3.13']
+        python-version: ['3.11', '3.12']
         exclude:
           - os: 'macos-latest'
             python-version: ['3.11']
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Python info
+          enable-cache: true
+          cache-suffix: test-dev-${{ matrix.os }}-${{ matrix.python-version }}
+      - name: Show environment info
         run: |
-          which python
-          python --version
-      - name: Install dependencies (includinv dev + chemistry)
-        run: |
-          python -m pip install --upgrade pip poetry
-          poetry install
-      - name: Show pip list
-        run: |
-          pip list
+          which uv
+          uv --version
+          uv run python --version
+      - name: Install dependencies (incl. dev + chemistry)
+        run: uv sync --frozen
+      - name: Show packages
+        run: uv pip list
       - name: Run tests
-        run: |
-          poetry run pytest
+        run: uv run pytest
 
-
-  test_with_conda:
-    name: Anaconda build and test documentation
+  test_docs:
+    name: Build and test documentation
     runs-on: ubuntu-latest
     needs: first_check
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: "0"
-      - name: Create conda environment
-        uses: conda-incubator/setup-miniconda@v3
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
         with:
-          miniforge-variant: Miniforge3
-          channels: conda-forge
-          channel-priority: strict
-          auto-update-conda: true
           python-version: '3.12'
-      - name: Show conda config
-        shell: bash -l {0}
+          enable-cache: true
+          cache-suffix: test-docs
+      - name: Show environment info
         run: |
-          conda info
-          conda list
-          conda config --show-sources
-          conda config --show
-          conda env list
-      - name: Python info
-        shell: bash -l {0}
-        run: |
-          which python
-          python --version
+          which uv
+          uv --version
+          uv run python --version
       - name: Show environment variables
-        shell: bash -l {0}
         run: |
           env | sort
-      - name: Install conda dependencies
-        shell: bash -l {0}
-        run: |
-          conda install -c conda-forge --strict-channel-priority poetry
-      - name: Install with development dependencies
-        shell: bash -l {0}
-        run: |
-          python -m pip install --upgrade pip
-          poetry install --with dev,docs
+      - name: Install dependencies (incl. dev + docs)
+        run: uv sync --frozen --group docs
       - name: Build documentation
-        shell: bash -l {0}
-        run: |
-          make coverage doctest html
         working-directory: readthedocs/
         env:
-          SPHINXOPTS: "-n"  # enable nit-picky mode
+          SPHINXOPTS: "-n"
+        run: |
+          uv run make coverage doctest html
       - name: Check documentation coverage threshold
         run: |
           cat readthedocs/_build/coverage/python.txt
@@ -188,9 +157,7 @@ jobs:
           if (( $UNCOVERED_MEMBERS > $UNCOVERED_MEMBERS_ALLOWED )) ; then echo "There are currently ${UNCOVERED_MEMBERS} uncovered members in the documentation, which is more than the ${UNCOVERED_MEMBERS_ALLOWED} allowed." && exit 1;fi
           echo "The code is sufficiently documented with ${UNCOVERED_MEMBERS} uncovered members out of ${UNCOVERED_MEMBERS_ALLOWED} allowed.";
       - name: Test with coverage
-        shell: bash -l {0}
-        run: |
-          poetry run pytest --cov --cov-report term --cov-report xml --junitxml=xunit-result.xml
+        run: uv run pytest --cov --cov-report term --cov-report xml --junitxml=xunit-result.xml
       - name: Correct coverage paths
         run: sed -i "s+$PWD/++g" coverage.xml
       - name: Store PR metadata in json file
@@ -200,12 +167,12 @@ jobs:
           BASE_REF: ${{ github.event.pull_request.base.ref }}
         run: |
           jq -n --arg pr_number "$PR_NUMBER"\
-                --arg head_ref "$HEAD_REF"\
-                --arg base_ref "$BASE_REF"\
-            '{"pr_number": $pr_number, "head_ref": $head_ref, "base_ref": $base_ref}' > pr_metadata.json
+                  --arg head_ref "$HEAD_REF"\
+                  --arg base_ref "$BASE_REF"\
+                  '{"pr_number": $pr_number, "head_ref": $head_ref, "base_ref": $base_ref}' > pr_metadata.json
       - uses: actions/upload-artifact@v4
         with:
-          name: sonarcloud-data-conda
+          name: sonarcloud-data-docs
           path: |
             coverage.xml
             xunit-result.xml

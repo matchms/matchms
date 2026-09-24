@@ -4,13 +4,31 @@ on:
   release:
     types: [published]
   workflow_dispatch:
+    inputs:
+      tag:
+        description: Tag for manually running the publish workflow
+        required: False
+        default: ''
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Build and publish to pypi
-        uses: JRubics/poetry-publish@v2.0
         with:
-          pypi_token: ${{ secrets.PYPI_TOKEN }}
+          fetch-depth: 0
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: '3.12'
+          enable-cache: true
+          cache-suffix: publish
+      - name: Show environment info
+        run: |
+          which uv
+          uv --version
+          uv run python --version
+      - name: Build package
+        run: uv build
+      - name: Publish package to PyPI
+        run: uv publish --token ${{ secrets.PYPI_TOKEN }}
