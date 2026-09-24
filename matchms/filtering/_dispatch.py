@@ -8,7 +8,6 @@ from tqdm.auto import tqdm
 from matchms.filtering.filter_utils.metadata_conversions import (
     apply_metadata_row_filter,
     apply_metadata_updates_to_spectrum,
-    metadata_row_to_dict,
 )
 
 
