@@ -64,7 +64,9 @@ class FragmentCollection(ABC):
         """Return number of peaks per row with relative intensity >= intensity_from."""
         pass
 
+    # ------------------------------------------------
     # Filtering methods for peak processing filters.
+    # ------------------------------------------------
     @abstractmethod
     def select_by_intensity(
         self,
@@ -88,8 +90,30 @@ class FragmentCollection(ABC):
         """Return new collection with only the top-k intensity peaks per row."""
         pass
 
+    @abstractmethod
+    def select_by_mz_upper_bound_per_row(
+        self,
+        mz_max: np.ndarray,
+    ) -> Self:
+        """Return peaks with m/z <= a row-specific upper bound.
 
+        Parameters
+        ----------
+        mz_max
+            One maximum allowed m/z value per spectrum row.
+
+        Returns
+        -------
+        FragmentCollection
+            Fragment collection with the same rows and m/z coordinate system,
+            containing only peaks at or below the corresponding row threshold.
+        """
+        pass
+
+
+# ------------------------------------------------
 # Helper functions for peak processing filters
+# ------------------------------------------------
 def _decimal_places_from_mz_precision(mz_precision: float) -> int:
     """Return decimal places for mz_precision.
 
@@ -116,6 +140,9 @@ def _floor_to_decimal_places(values, decimals: int):
     return np.floor(np.asarray(values, dtype=float) * factor) / factor
 
 
+# ------------------------------------------------
+# Actual implementation(s) of efficient FragmentCollections
+# ------------------------------------------------
 class CSRFragmentCollection(FragmentCollection):
     """CSR-backed, m/z-grid fragment storage for a spectra dataset.
 
@@ -545,6 +572,59 @@ class CSRFragmentCollection(FragmentCollection):
             (coo.data[keep], (coo.row[keep], coo.col[keep])),
             shape=self._array.shape,
         ).tocsr()
+
+        return self._from_array(new_array)
+
+    def select_by_mz_upper_bound_per_row(
+        self,
+        mz_max: np.ndarray,
+    ) -> Self:
+        """Keep peaks at or below a row-specific maximum m/z value."""
+        mz_max = np.asarray(mz_max, dtype=float)
+
+        if mz_max.shape != (len(self),):
+            raise ValueError(
+                "mz_max must contain exactly one value per spectrum row."
+            )
+
+        csr = self._array
+
+        if csr.nnz == 0:
+            return self.copy()
+
+        # Stored CSR entries are ordered spectrum by spectrum. 
+        # Expand the row-specific thresholds once so that all stored peaks can be tested
+        # without reconstructing individual Spectrum objects.
+        peaks_per_row = np.diff(csr.indptr)
+        peak_thresholds = np.repeat(mz_max, peaks_per_row)
+
+        peak_mz = self.bin_to_mz(csr.indices)
+        keep = peak_mz <= peak_thresholds
+
+        if np.all(keep):
+            return self.copy()
+
+        # The retained data and column indices remain in CSR row order. 
+        # Construct the new indptr from a cumulative count of retained entries instead of
+        # converting the sparse matrix to COO format.
+        cumulative_kept = np.empty(keep.size + 1, dtype=np.int64)
+        cumulative_kept[0] = 0
+        np.cumsum(
+            keep,
+            dtype=np.int64,
+            out=cumulative_kept[1:],
+        )
+
+        new_indptr = cumulative_kept[csr.indptr]
+
+        new_array = csr_array(
+            (
+                csr.data[keep],
+                csr.indices[keep],
+                new_indptr,
+            ),
+            shape=csr.shape,
+        )
 
         return self._from_array(new_array)
 
