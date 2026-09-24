@@ -274,48 +274,83 @@ def _metadata_requirement_signature(metadata_impl: Callable) -> inspect.Signatur
     )
 
 
-def metadata_requirement_filter(metadata_impl: Callable):
+def metadata_requirement_filter(
+    metadata_impl: Callable,
+    *,
+    collection_impl: Callable | None = None,
+):
     """Create a Spectrum/SpectraCollection requirement filter from metadata logic.
 
     The wrapped metadata function receives one metadata mapping and returns
     ``True`` if the spectrum/row should be kept and ``False`` if it should be
     removed.
 
-    For :class:`~matchms.spectrum.Spectrum` input, failed requirements return ``None``.
-    For :class:`~matchms.spectra_collection.SpectraCollection` input, failed rows
-    are dropped from metadata and fragments.
+    A specialized ``collection_impl`` can be supplied for requirement filters
+    that can process SpectraCollection metadata more efficiently than the
+    default row-wise implementation.
     """
 
     def spectrum_impl(spectrum_in, *args, **kwargs):
         if spectrum_in is None:
             return None
 
-        keep = metadata_impl(spectrum_in.metadata, *args, **kwargs)
+        keep = metadata_impl(
+            spectrum_in.metadata,
+            *args,
+            **kwargs,
+        )
         if not keep:
             return None
 
         return spectrum_in
 
-    def collection_impl(collection, *args, clone: bool | None = True, **kwargs):
-        target = collection.copy() if clone else collection
+    def default_collection_impl(
+        collection,
+        *args,
+        clone: bool | None = True,
+        **kwargs,
+    ):
+        target = (
+            collection.copy()
+            if clone
+            else collection
+        )
 
         metadata = target.metadata
 
         keep_mask = metadata.apply(
-            lambda row: bool(metadata_impl(metadata_row_to_dict(row), *args, **kwargs)),
+            lambda row: bool(
+                metadata_impl(
+                    row,
+                    *args,
+                    **kwargs,
+                )
+            ),
             axis=1,
         ).values
 
-        target.filter(keep_mask, inplace=True)
+        target.filter(
+            keep_mask,
+            inplace=True,
+        )
         return target
 
     public_filter = collection_filter(
         spectrum_impl,
-        collection_impl=collection_impl,
+        collection_impl=(
+            collection_impl
+            if collection_impl is not None
+            else default_collection_impl
+        ),
     )
 
-    public_name = metadata_impl.__name__.removeprefix("_")
-    public_signature = _metadata_requirement_signature(metadata_impl)
+    public_name = (
+        metadata_impl.__name__
+        .removeprefix("_")
+    )
+    public_signature = _metadata_requirement_signature(
+        metadata_impl
+    )
 
     spectrum_impl.__name__ = public_name
     spectrum_impl.__doc__ = metadata_impl.__doc__
