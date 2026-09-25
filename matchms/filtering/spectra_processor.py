@@ -2,7 +2,7 @@ from __future__ import annotations
 import inspect
 import logging
 from collections import OrderedDict
-from collections.abc import Callable, Iterable
+from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass
 from functools import partial
 import numpy as np
@@ -15,13 +15,20 @@ from matchms.filtering.filter_effects import (
     REMOVE,
 )
 from matchms.filtering.filter_order import ALL_FILTERS, FILTER_FUNCTION_NAMES
+from matchms.filtering.filter_utils.metadata_conversions import is_missing_metadata_entry
 from matchms.spectra_collection import SpectraCollection
 from matchms.spectrum import Spectrum
+from matchms.utils import ALIASES_FOR_NONE
 from matchms.yaml_file_functions import ordered_dump
 
 
 logger = logging.getLogger("matchms")
 FunctionWithParametersType = tuple[Callable | str, dict[str, object]]
+
+# Filter used to harmonize missing metadata entries. Steps running after it can
+# introduce new missing values, so it is applied again once processing is done
+# (see https://github.com/matchms/matchms/issues/951).
+MISSING_VALUE_HARMONIZATION_FILTER = "harmonize_missing_entries"
 
 
 @dataclass
@@ -51,6 +58,10 @@ class ProcessingReport:
     how many spectra were removed, and how many retained spectra changed in
     metadata or fragments.
 
+    In addition, it counts how many processed spectra still have missing entries
+    per metadata key. This makes metadata that could not be derived or repaired
+    during processing visible in the final report.
+
     For built-in matchms filters, :mod:`matchms.filtering.filter_effects`
     determines which hashes need to be compared. Unknown/custom filters are
     compared using both metadata and fragment hashes when row counts stay the
@@ -62,10 +73,23 @@ class ProcessingReport:
         self.filter_names = []
         self._steps: dict[str, _ProcessingStepReport] = {}
         self.counter_number_processed = 0
+        self.missing_metadata: dict[str, int] = {}
 
         if filter_functions is not None:
             for filter_function in filter_functions:
                 self._ensure_filter(filter_function.__name__)
+
+    def add_missing_metadata(self, counts: Mapping[str, int]) -> None:
+        """Add counts of metadata entries that are still missing after processing.
+
+        Parameters
+        ----------
+        counts
+            Mapping of metadata key to the number of processed spectra for which
+            that key is still missing.
+        """
+        for key, count in counts.items():
+            self.missing_metadata[key] = self.missing_metadata.get(key, 0) + int(count)
 
     def _ensure_filter(self, filter_name: str) -> _ProcessingStepReport:
         if filter_name not in self._steps:
@@ -199,11 +223,25 @@ class ProcessingReport:
             report[column] = pd.array(report[column], dtype="Int64")
         return report
 
+    def missing_metadata_summary(self) -> str:
+        """Return one aggregated line describing missing metadata entries."""
+        if not self.missing_metadata:
+            return "Missing metadata after processing: none"
+
+        sorted_counts = sorted(
+            self.missing_metadata.items(),
+            key=lambda item: (-item[1], item[0]),
+        )
+        return "Missing metadata after processing: " + ", ".join(
+            f"{key}={count}" for key, count in sorted_counts
+        )
+
     def __str__(self) -> str:
         return (
             "----- Spectra Processing Report -----\n"
             f"Number of spectra processed: {self.counter_number_processed}\n"
             f"Number of spectra removed: {sum(step.removed for step in self._steps.values())}\n"
+            f"{self.missing_metadata_summary()}\n"
             "Changes during processing:\n"
             f"{self.to_dataframe()}"
         )
@@ -227,6 +265,11 @@ class SpectraProcessor:
 
     Both paths clone/copy the input once before processing. Filters that expose a
     ``clone`` parameter are then called with ``clone=False``.
+
+    If the pipeline contains ``harmonize_missing_entries``, that step is applied
+    once more to the final result. Processing steps running after it (such as
+    derive or repair actions) can introduce new missing metadata values, and this
+    keeps the missing-value representation consistent across the whole pipeline.
 
     Parameters
     ----------
@@ -326,6 +369,26 @@ class SpectraProcessor:
         """Return an empty ProcessingReport configured for this pipeline."""
         return ProcessingReport(self.filters)
 
+    @property
+    def missing_value_harmonization(self) -> Callable | None:
+        """Return the configured missing-value harmonization filter, if any.
+
+        Filters running after ``harmonize_missing_entries`` can introduce new
+        missing metadata values. Returning that filter here allows the processor
+        to apply the same harmonization once more to the final result.
+        """
+        for filter_func in self.filters:
+            if filter_func.__name__ == MISSING_VALUE_HARMONIZATION_FILTER:
+                return filter_func
+        return None
+
+    def _harmonize_missing_values(self, spectra):
+        """Apply the configured missing-value harmonization to the final result."""
+        harmonize = self.missing_value_harmonization
+        if harmonize is None:
+            return spectra
+        return _apply_filter(harmonize, spectra)
+
     def process_spectrum(
         self,
         spectrum: Spectrum,
@@ -388,6 +451,13 @@ class SpectraProcessor:
                 return None
 
             working_spectrum = spectrum_out
+
+        working_spectrum = self._harmonize_missing_values(working_spectrum)
+
+        if processing_report is not None:
+            processing_report.add_missing_metadata(
+                _count_missing_metadata_entries(working_spectrum.metadata)
+            )
 
         return working_spectrum
 
@@ -510,6 +580,13 @@ class SpectraProcessor:
 
             working_collection = collection_out
 
+        working_collection = self._harmonize_missing_values(working_collection)
+
+        if processing_report is not None:
+            processing_report.add_missing_metadata(
+                _count_missing_metadata_entries(working_collection.metadata)
+            )
+
         return working_collection
 
     @property
@@ -537,6 +614,38 @@ def _apply_filter(filter_func: Callable, spectra):
     method_params = inspect.signature(filter_func).parameters
     kwargs = {"clone": False} if "clone" in method_params else {}
     return filter_func(spectra, **kwargs)
+
+
+def _count_missing_metadata_entries(metadata) -> dict[str, int]:
+    """Count missing entries per metadata key.
+
+    Accepts Spectrum-style metadata (a mapping of scalar values) or the metadata
+    table of a :class:`~matchms.spectra_collection.SpectraCollection`. Values
+    that are only aliases for missing entries (such as ``""`` or ``"n/a"``) are
+    counted as missing, consistent with ``harmonize_missing_entries``.
+    """
+    if isinstance(metadata, pd.DataFrame):
+        counts = {}
+
+        for column in metadata.columns:
+            values = metadata[column]
+            missing = values.isna()
+
+            if pd.api.types.is_object_dtype(values) or pd.api.types.is_string_dtype(values):
+                missing = missing | values.isin(ALIASES_FOR_NONE)
+
+            n_missing = int(missing.sum())
+            if n_missing:
+                counts[column] = n_missing
+
+        return counts
+
+    counts = {}
+    for key, value in metadata.items():
+        if is_missing_metadata_entry(value):
+            counts[key] = counts.get(key, 0) + 1
+
+    return counts
 
 
 def _take_hash_snapshot(
