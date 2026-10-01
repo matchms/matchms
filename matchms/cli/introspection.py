@@ -1,0 +1,151 @@
+"""Introspection helpers for filters and similarity classes.
+
+Powers ``filter list`` / ``filter describe`` and ``similarity list`` /
+``similarity describe``.
+"""
+
+import inspect
+import re
+from matchms.cli.params import describe_signature
+
+
+def _clean_docstring(doc: str | None) -> str:
+    """Normalize a docstring: strip uniform indentation, drop blank ends."""
+    if not doc:
+        return ""
+    return inspect.cleandoc(doc)
+
+
+def filter_signature(func) -> dict:
+    """Describe one filter function for list/describe commands.
+
+    Returns a JSON-safe dict with the signature, required parameters and
+    whether the filter can be applied to a whole SpectraCollection (i.e. it
+    is wrapped with ``collection_filter``).
+    """
+    signature_info = describe_signature(func)
+    # The first positional parameter is the spectrum input (matchms names it
+    # 'spectrum' or 'spectrum_in'); it is not a user-settable parameter.
+    first_positional = _first_positional(func)
+    if first_positional:
+        signature_info["parameters"].pop(first_positional, None)
+        signature_info["required"] = [p for p in signature_info["required"] if p != first_positional]
+    return {
+        "signature": signature_info,
+        "required": signature_info["required"],
+        "collection_supported": hasattr(func, "__wrapped__"),
+        "docstring": _clean_docstring(func.__doc__),
+        "param_docs": extract_param_docs(func.__doc__),
+    }
+
+
+def _first_positional(func) -> str | None:
+    for name, p in inspect.signature(func).parameters.items():
+        if p.kind in (inspect.Parameter.POSITIONAL_ONLY, inspect.Parameter.POSITIONAL_OR_KEYWORD):
+            return name
+    return None
+
+
+_SECTION_NAMES = {
+    "parameters",
+    "returns",
+    "yields",
+    "notes",
+    "examples",
+    "references",
+    "see also",
+    "raises",
+    "attributes",
+}
+
+_PARAM_RE = re.compile(r"^([A-Za-z_][A-Za-z0-9_]*)\s*:\s*(.*)$")
+
+
+def _section_bounds(lines: list[str]) -> list[tuple[int, str]]:
+    """Return (index, name) of numpy-style section headers in a docstring."""
+    bounds = []
+    for i, line in enumerate(lines):
+        stripped = line.strip()
+        if not stripped:
+            continue
+        # A header is a short name, possibly followed by an underline of dashes.
+        is_dashes_next = i + 1 < len(lines) and set(lines[i + 1].strip()) == {"-"} and lines[i + 1].strip()
+        name = stripped.rstrip(":").strip().lower()
+        if name in _SECTION_NAMES and (is_dashes_next or re.fullmatch(r"[A-Za-z ]+", stripped)):
+            bounds.append((i, name))
+    return bounds
+
+
+def extract_param_docs(docstring: str | None) -> dict[str, str]:
+    """Extract a ``name -> description`` mapping from the Parameters section.
+
+    Handles matchms' numpy-style docstrings where ``Parameters`` is followed
+    by an underline of dashes and each ``name:`` sits at the section's base
+    indent with deeper-indented description lines. Robust to the base indent
+    being 0 (after ``cleandoc``) or non-zero.
+    """
+    doc = _clean_docstring(docstring)
+    if not doc:
+        return {}
+    lines = doc.splitlines()
+
+    bounds = _section_bounds(lines)
+    param_start = None
+    param_end = len(lines)
+    for i, (idx, name) in enumerate(bounds):
+        if name == "parameters":
+            param_start = idx
+            # skip the optional underline of dashes
+            j = idx + 1
+            while j < len(lines) and (not lines[j].strip() or set(lines[j].strip()) == {"-"}):
+                j += 1
+            param_start = j
+            if i + 1 < len(bounds):
+                param_end = bounds[i + 1][0]
+            break
+    if param_start is None:
+        return {}
+
+    section = lines[param_start:param_end]
+    params: dict[str, str] = {}
+    current: str | None = None
+    buffer: list[str] = []
+    param_indent: int | None = None
+
+    def flush():
+        nonlocal current, buffer
+        if current is not None:
+            params[current] = " ".join(buffer).strip()
+        current = None
+        buffer = []
+
+    for line in section:
+        stripped = line.strip()
+        if not stripped:
+            continue
+        indent = len(line) - len(line.lstrip(" "))
+        match = _PARAM_RE.match(stripped)
+
+        if param_indent is None:
+            if match:
+                param_indent = indent
+                current = match.group(1)
+                buffer = [match.group(2).strip()] if match.group(2).strip() else []
+            continue
+
+        if indent == param_indent:
+            if match:
+                flush()
+                current = match.group(1)
+                buffer = [match.group(2).strip()] if match.group(2).strip() else []
+                continue
+            # A base-indent line that is not a parameter ends the param list.
+            flush()
+            break
+
+        # Deeper indent: continuation / description of the current parameter.
+        if current is not None:
+            buffer.append(stripped)
+
+    flush()
+    return params
