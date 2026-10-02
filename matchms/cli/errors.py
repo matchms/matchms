@@ -126,13 +126,23 @@ def _levenshtein(a: str, b: str) -> int:
 
 
 def configure_logging(level: int) -> None:
-    """Route the matchms logger (and the tqdm progress bars) to stderr."""
+    """Route the matchms logger (and the tqdm progress bars) to stderr.
+
+    Any handler previously attached to the matchms logger (including the
+    stdout handler installed by :func:`matchms.logging_functions._init_logger`)
+    is replaced so that CLI output on stdout stays machine-readable.
+    """
     handler = logging.StreamHandler(sys.stderr)
     handler.setFormatter(logging.Formatter("%(levelname)s:%(name)s:%(message)s"))
-    for name in ("matchms", "matchms.cli"):
-        log = logging.getLogger(name)
-        log.setLevel(level)
-        log.handlers[:] = [handler]
+    cli_logger = logging.getLogger("matchms.cli")
+    cli_logger.handlers[:] = []
+    cli_logger.setLevel(level)
+    cli_logger.propagate = False
+    cli_logger.addHandler(handler)
+    matchms_logger = logging.getLogger("matchms")
+    matchms_logger.handlers[:] = []
+    matchms_logger.setLevel(level)
+    matchms_logger.addHandler(handler)
     logging.basicConfig(level=level, stream=sys.stderr, force=False)
     # tqdm already writes to stderr; nothing to reconfigure.
 

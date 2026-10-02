@@ -46,6 +46,52 @@ def _first_positional(func) -> str | None:
     return None
 
 
+def filter_description(func, parameters: dict[str, object] | None = None) -> dict:
+    """JSON-safe description of one filter step (name + parameters)."""
+    entry = {"name": func.__name__}
+    if parameters:
+        entry["parameters"] = parameters
+    return entry
+
+
+def filter_parameter_names(func) -> list[str]:
+    """Return the user-settable parameter names of a filter.
+
+    The first positional input parameter (``spectrum_in``) and the ``clone``
+    flag, which the processor manages internally, are excluded. A trailing
+    ``**kwargs`` marker is added when the filter accepts arbitrary parameters.
+    """
+    first_positional = _first_positional(func)
+    names: list[str] = []
+    has_var_keyword = False
+    for name, p in inspect.signature(func).parameters.items():
+        if name == first_positional or name == "clone":
+            continue
+        if p.kind == inspect.Parameter.VAR_KEYWORD:
+            has_var_keyword = True
+        elif p.kind in (
+            inspect.Parameter.POSITIONAL_OR_KEYWORD,
+            inspect.Parameter.KEYWORD_ONLY,
+        ):
+            names.append(name)
+    if has_var_keyword:
+        names.append("**kwargs")
+    return names
+
+
+def filter_accepts_parameter(func, param_name: str) -> bool:
+    """True when *func* can be called with the given keyword parameter."""
+    first_positional = _first_positional(func)
+    for name, p in inspect.signature(func).parameters.items():
+        if name == first_positional or name == "clone":
+            continue
+        if p.kind == inspect.Parameter.VAR_KEYWORD:
+            return True
+        if name == param_name:
+            return True
+    return False
+
+
 _SECTION_NAMES = {
     "parameters",
     "returns",

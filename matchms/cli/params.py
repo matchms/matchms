@@ -7,8 +7,8 @@ a bool, ``top_k=100`` an int).
 
 import inspect
 import json
-from matchms.cli.errors import CliError
 import numpy as np
+from matchms.cli.errors import CliError
 
 
 def parse_params(pairs: list[str] | None, parameter: str = "--param", operation: str = "") -> dict:
@@ -39,6 +39,52 @@ def parse_params(pairs: list[str] | None, parameter: str = "--param", operation:
                 parameter=parameter,
             )
         params[key] = convert_value(key, raw.strip())
+    return params
+
+
+def parse_scoped_params(pairs: list[str] | None, parameter: str = "--param", operation: str = "") -> dict[str, dict]:
+    """Parse a list of ``filter_name.param=value`` strings.
+
+    Returns ``{filter_name: {param: value}}``. Because filter and parameter
+    names cannot contain dots, the first dot separates the filter from the
+    parameter.
+
+    Raises ``CliError`` (code ``invalid_parameter``) on malformed entries so
+    the agent learns the expected syntax.
+    """
+    params: dict[str, dict] = {}
+    for pair in pairs or []:
+        if "=" not in pair:
+            raise CliError(
+                f"Malformed {parameter} entry '{pair}'. Expected syntax: {parameter} filter_name.param=value",
+                code="invalid_parameter",
+                operation=operation,
+                parameter=parameter,
+                valid_values=["filter_name.param=value"],
+                hint="Examples: --param select_by_mz.mz_from=10.0 --param require_minimum_number_of_peaks.n_required=5",
+            )
+        key, _, raw = pair.partition("=")
+        key = key.strip()
+        if "." not in key:
+            raise CliError(
+                f"Malformed {parameter} entry '{pair}'. Expected syntax: {parameter} filter_name.param=value",
+                code="invalid_parameter",
+                operation=operation,
+                parameter=parameter,
+                valid_values=["filter_name.param=value"],
+                hint="Examples: --param select_by_mz.mz_from=10.0 --param require_minimum_number_of_peaks.n_required=5",
+            )
+        filter_name, _, param_name = key.partition(".")
+        filter_name = filter_name.strip()
+        param_name = param_name.strip()
+        if not filter_name or not param_name:
+            raise CliError(
+                f"Malformed {parameter} entry '{pair}': the filter name and the parameter name are both required.",
+                code="invalid_parameter",
+                operation=operation,
+                parameter=parameter,
+            )
+        params.setdefault(filter_name, {})[param_name] = convert_value(f"{filter_name}.{param_name}", raw.strip())
     return params
 
 

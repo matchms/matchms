@@ -7,13 +7,11 @@ similarity methods, availability of indexed search and the CLI schema version.
 import platform
 import matchms
 from matchms import __version__ as matchms_version
-
 from matchms.cli.introspection import filter_signature
 from matchms.cli.output import CLI_JSON_SCHEMA_VERSION
 from matchms.exporting.save_spectra import SUPPORTED_FILE_FORMATS as OUTPUT_FORMATS
-from matchms.importing.load_spectra import SUPPORTED_FILE_FORMATS as INPUT_FORMATS
-
 from matchms.filtering.filter_order import ALL_FILTERS
+from matchms.importing.load_spectra import SUPPORTED_FILE_FORMATS as INPUT_FORMATS
 
 
 def _filter_inventory() -> list[dict]:
@@ -36,11 +34,11 @@ CLI_NAME = "matchms"
 
 CLI_COMMANDS = {
     "info": "Report environment, supported formats and filters",
+    "filter list": "List all available matchms filters with their default order",
+    "filter info": "Show the description and parameters of one filter",
+    "filter run": "Run a filter pipeline on a spectra file (SpectraProcessor) and emit a report",
     "spectra convert": "Convert a spectra file between supported formats",
     "spectra describe": "Describe a spectra collection (peak counts, intensity sums, entropy)",
-    "filter list": "List all available matchms filters with their default order",
-    "filter describe": "Show the full docstring and parameters of one filter",
-    "filter run": "Run filters on a collection (SpectraCollectionProcessor) and emit a report",
 }
 
 

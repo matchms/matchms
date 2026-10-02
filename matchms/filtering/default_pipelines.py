@@ -82,9 +82,12 @@ LIBRARY_CLEANING = (
 )
 MS2DEEPSCORE_TRAINING = LIBRARY_CLEANING + CLEAN_PEAKS
 
-
-ALL_FILTER_SETS = [
-    filter_set
+FILTER_SETS_BY_NAME = {
+    filter_name: filter_set
     for filter_name, filter_set in locals().items()
-    if not filter_name.startswith("_") and filter_name != "ALL_FILTER_SETS" and isinstance(filter_set, list)
-]
+    if not filter_name.startswith("_")
+    and filter_name not in ("ALL_FILTER_SETS", "FILTER_SETS_BY_NAME")
+    and isinstance(filter_set, list)
+}
+
+ALL_FILTER_SETS = list(FILTER_SETS_BY_NAME.values())
