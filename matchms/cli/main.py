@@ -3,7 +3,8 @@ import logging
 from matchms import __version__ as matchms_version
 from matchms.cli.commands.filter_info import run as run_filter_info
 from matchms.cli.commands.filter_list import run as run_filter_list
-from matchms.cli.commands.filter_run import PIPELINES
+from matchms.cli.commands.filter_pipelines import PIPELINES
+from matchms.cli.commands.filter_pipelines import run as run_filter_pipelines
 from matchms.cli.commands.filter_run import run as run_filter_run
 from matchms.cli.commands.info import run as run_info
 from matchms.cli.commands.spectra_convert import EXPORT_STYLES
@@ -106,9 +107,10 @@ def build_parser() -> argparse.ArgumentParser:
         help="List, inspect and run matchms filters",
         description=(
             "Work with matchms filters. `filter list` shows all filters in their "
-            "default execution order; `filter info` shows the description and "
-            "parameters of a single filter; `filter run` runs a filter pipeline "
-            "on a SpectraCollection and writes the filtered spectra."
+            "default execution order; `filter pipelines` shows all default filter "
+            "pipelines; `filter info` shows the description and parameters of a "
+            "single filter; `filter run` runs a filter pipeline on a "
+            "SpectraCollection and writes the filtered spectra."
         ),
     )
     filter_subparsers = p.add_subparsers(dest="filter_command", metavar="<action>")
@@ -125,6 +127,28 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     pf_list.set_defaults(func=run_filter_list)
+
+    # filter pipelines -------------------------------------------------------
+    pf_pipelines = filter_subparsers.add_parser(
+        "pipelines",
+        parents=[common],
+        help="List all available filter pipelines",
+        description=(
+            "List all filter pipelines defined in matchms.filtering.default_pipelines: their name, a short "
+            "description and the number of filters they contain. The listed names are the valid values for "
+            "--pipeline of `matchms filter run`; when --pipeline is omitted, DEFAULT_FILTERS is used. Pass a "
+            "pipeline name to show the filters of that pipeline in execution order (with any pipeline-specific "
+            "parameters)."
+        ),
+    )
+    pf_pipelines.add_argument(
+        "pipeline_name",
+        nargs="?",
+        default=None,
+        metavar="NAME",
+        help="Name of a pipeline to show its filters in execution order (see the overview when omitted).",
+    )
+    pf_pipelines.set_defaults(func=run_filter_pipelines)
 
     # filter info ----------------------------------------------------------
     pf_info = filter_subparsers.add_parser(

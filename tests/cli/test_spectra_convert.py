@@ -27,9 +27,7 @@ def load_n(file, ftype=None):
 def test_spectra_convert_mgf_to_msp(tmp_path, capsys):
     out = tmp_path / "out.msp"
 
-    exit_code, payload = run_cli(
-        "spectra", "convert", MGF_FILE, str(out), "--json", capsys=capsys
-    )
+    exit_code, payload = run_cli("spectra", "convert", MGF_FILE, str(out), "--json", capsys=capsys)
 
     assert exit_code == 0
     assert payload["ok"] is True
@@ -59,9 +57,7 @@ def test_spectra_convert_matrix(tmp_path, capsys, src, dst_ext):
     n_src = 30 if src == "mgf" else 1
     out = tmp_path / f"out.{dst_ext}"
 
-    exit_code, payload = run_cli(
-        "spectra", "convert", src_file, str(out), "--json", capsys=capsys
-    )
+    exit_code, payload = run_cli("spectra", "convert", src_file, str(out), "--json", capsys=capsys)
 
     assert exit_code == 0
     assert payload["output_format"] == dst_ext
@@ -74,7 +70,13 @@ def test_spectra_convert_explicit_ftype(tmp_path, capsys):
     out = tmp_path / "out.msp"
 
     exit_code, payload = run_cli(
-        "spectra", "convert", MGF_FILE, str(out), "--ftype", "mgf", "--json",
+        "spectra",
+        "convert",
+        MGF_FILE,
+        str(out),
+        "--ftype",
+        "mgf",
+        "--json",
         capsys=capsys,
     )
 
@@ -99,9 +101,7 @@ def test_spectra_convert_missing_input(tmp_path, capsys):
     missing = tmp_path / "nope.mgf"
     out = tmp_path / "out.msp"
 
-    exit_code, payload = run_cli(
-        "spectra", "convert", str(missing), str(out), "--json", capsys=capsys
-    )
+    exit_code, payload = run_cli("spectra", "convert", str(missing), str(out), "--json", capsys=capsys)
 
     assert exit_code == 1
     assert payload["ok"] is False
@@ -121,9 +121,7 @@ def test_spectra_convert_unsupported_input_extension(tmp_path, capsys, bad_ext):
     bad.write_text("junk\n", encoding="utf-8")
     out = tmp_path / "out.msp"
 
-    exit_code, payload = run_cli(
-        "spectra", "convert", str(bad), str(out), "--json", capsys=capsys
-    )
+    exit_code, payload = run_cli("spectra", "convert", str(bad), str(out), "--json", capsys=capsys)
 
     assert exit_code == 1
     assert payload["ok"] is False
@@ -135,9 +133,7 @@ def test_spectra_convert_unsupported_input_extension(tmp_path, capsys, bad_ext):
 def test_spectra_convert_unsupported_output_extension(tmp_path, capsys):
     out = tmp_path / "out.txt"
 
-    exit_code, payload = run_cli(
-        "spectra", "convert", MGF_FILE, str(out), "--json", capsys=capsys
-    )
+    exit_code, payload = run_cli("spectra", "convert", MGF_FILE, str(out), "--json", capsys=capsys)
 
     assert exit_code == 1
     assert payload["ok"] is False
@@ -150,9 +146,7 @@ def test_spectra_convert_output_already_exists(tmp_path, capsys):
     out = tmp_path / "out.msp"
     out.write_text("existing\n", encoding="utf-8")
 
-    exit_code, payload = run_cli(
-        "spectra", "convert", MGF_FILE, str(out), "--json", capsys=capsys
-    )
+    exit_code, payload = run_cli("spectra", "convert", MGF_FILE, str(out), "--json", capsys=capsys)
 
     assert exit_code == 1
     assert payload["ok"] is False
@@ -165,9 +159,7 @@ def test_spectra_convert_append(tmp_path, capsys):
     out = tmp_path / "out.msp"
 
     first, _ = run_cli("spectra", "convert", MGF_FILE, str(out), "--json", capsys=capsys)
-    second, payload = run_cli(
-        "spectra", "convert", MGF_FILE, str(out), "--append", "--json", capsys=capsys
-    )
+    second, payload = run_cli("spectra", "convert", MGF_FILE, str(out), "--append", "--json", capsys=capsys)
 
     assert first == 0
     assert second == 0
@@ -179,9 +171,7 @@ def test_spectra_convert_append(tmp_path, capsys):
 def test_spectra_convert_append_not_supported_for_json(tmp_path, capsys):
     out = tmp_path / "out.json"
 
-    exit_code, payload = run_cli(
-        "spectra", "convert", MGF_FILE, str(out), "--append", "--json", capsys=capsys
-    )
+    exit_code, payload = run_cli("spectra", "convert", MGF_FILE, str(out), "--append", "--json", capsys=capsys)
 
     assert exit_code == 1
     assert payload["ok"] is False
@@ -195,8 +185,14 @@ def test_spectra_convert_export_style_gnps(tmp_path, capsys):
     out = tmp_path / "out.json"
 
     exit_code, payload = run_cli(
-        "spectra", "convert", MSP_FILE, str(out), "--export-style", "gnps",
-        "--json", capsys=capsys,
+        "spectra",
+        "convert",
+        MSP_FILE,
+        str(out),
+        "--export-style",
+        "gnps",
+        "--json",
+        capsys=capsys,
     )
 
     assert exit_code == 0
@@ -208,8 +204,14 @@ def test_spectra_convert_pickle_requires_matchms_style(tmp_path, capsys):
     out = tmp_path / "out.pickle"
 
     exit_code, payload = run_cli(
-        "spectra", "convert", MGF_FILE, str(out), "--export-style", "gnps",
-        "--json", capsys=capsys,
+        "spectra",
+        "convert",
+        MGF_FILE,
+        str(out),
+        "--export-style",
+        "gnps",
+        "--json",
+        capsys=capsys,
     )
 
     assert exit_code == 1
@@ -224,6 +226,4 @@ def test_spectra_convert_invalid_export_style(tmp_path, capsys):
 
     parser = build_parser()
     with pytest.raises(SystemExit):
-        parser.parse_args(
-            ["spectra", "convert", MGF_FILE, str(out), "--export-style", "bogus"]
-        )
+        parser.parse_args(["spectra", "convert", MGF_FILE, str(out), "--export-style", "bogus"])

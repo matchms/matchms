@@ -26,9 +26,7 @@ def test_parse_scoped_params_empty():
 
 
 def test_parse_scoped_params_single():
-    assert parse_scoped_params(["select_by_mz.mz_from=10.0"]) == {
-        "select_by_mz": {"mz_from": 10.0}
-    }
+    assert parse_scoped_params(["select_by_mz.mz_from=10.0"]) == {"select_by_mz": {"mz_from": 10.0}}
 
 
 def test_parse_scoped_params_multiple_filters():
@@ -58,11 +56,11 @@ def test_parse_scoped_params_malformed(raw):
 def test_parse_scoped_params_types():
     result = parse_scoped_params(
         [
-            "f.a=1",          # int
-            "f.b=1.5",        # float
-            "f.c=true",       # bool
-            "f.d=false",      # bool
-            "f.e=hello",      # str
+            "f.a=1",  # int
+            "f.b=1.5",  # float
+            "f.c=true",  # bool
+            "f.d=false",  # bool
+            "f.e=hello",  # str
             'f.g=["x", "y"]',  # list
         ]
     )

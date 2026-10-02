@@ -97,7 +97,10 @@ def _build_pipeline(args, operation: str) -> tuple[str, list]:
                 value=args.pipeline,
                 valid=PIPELINES,
                 kind="pipeline",
-                hint="Use one of the default pipelines from matchms.filtering.default_pipelines (see `matchms info`).",
+                hint=(
+                    "Use one of the pipelines from matchms.filtering.default_pipelines "
+                    "(see `matchms filter pipelines`)."
+                ),
             )
         base_name = args.pipeline
         base = PIPELINES[base_name]

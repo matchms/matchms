@@ -35,6 +35,7 @@ CLI_NAME = "matchms"
 CLI_COMMANDS = {
     "info": "Report environment, supported formats and filters",
     "filter list": "List all available matchms filters with their default order",
+    "filter pipelines": "List all available filter pipelines",
     "filter info": "Show the description and parameters of one filter",
     "filter run": "Run a filter pipeline on a spectra file (SpectraProcessor) and emit a report",
     "spectra convert": "Convert a spectra file between supported formats",
