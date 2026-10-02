@@ -34,8 +34,7 @@ def run(args, ctx) -> int:
             operation=operation,
             input_file=input_file,
             valid_values=sorted(INPUT_FORMATS),
-            hint="Expected a spectra file with a supported extension "
-            "(e.g. .mgf, .msp, .mzml, .mzxml, .json, .pickle).",
+            hint="Expected a spectra file with a supported extension (e.g. .mgf, .msp, .mzml, .mzxml, .json, .pickle).",
         )
 
     input_format = _extension(input_file)

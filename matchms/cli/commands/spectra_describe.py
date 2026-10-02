@@ -30,8 +30,7 @@ def run(args, ctx) -> int:
             operation=operation,
             input_file=file,
             valid_values=sorted(INPUT_FORMATS),
-            hint="Expected a spectra file with a supported extension "
-            "(e.g. .mgf, .msp, .mzml, .mzxml, .json, .pickle).",
+            hint="Expected a spectra file with a supported extension (e.g. .mgf, .msp, .mzml, .mzxml, .json, .pickle).",
         )
 
     collection = _load_collection(file, args.ftype, operation)
