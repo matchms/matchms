@@ -147,23 +147,8 @@ def configure_logging(level: int) -> None:
     # tqdm already writes to stderr; nothing to reconfigure.
 
 
-def log_debug(message: str, *args) -> None:
-    logger.debug(message, *args)
-
-
-def log_info(message: str, *args) -> None:
-    logger.info(message, *args)
-
-
-def log_warning(message: str, *args) -> None:
-    logger.warning(message, *args)
-
-
-def log_error(message: str, *args) -> None:
-    logger.error(message, *args)
-
-
 def format_traceback(exc: BaseException) -> str:
+    """Formats a traceback to display as CLIError"""
     return "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
 
 

@@ -1,7 +1,7 @@
-"""CLI command: matchms info (alias: inspect).
+"""CLI command: matchms info.
 
 Reports matchms/Python versions, supported formats, available filters and
-similarity methods, availability of indexed search and the CLI schema version.
+the CLI schema version.
 """
 
 import platform
@@ -44,6 +44,11 @@ CLI_COMMANDS = {
 
 
 def run(args, ctx) -> int:
+    """Main entrypoint for info command.
+
+    Reports matchms/Python versions, supported formats, available filters and
+    the CLI schema version.
+    """
     payload = {
         "ok": True,
         "cli": {

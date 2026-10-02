@@ -68,6 +68,25 @@ def _log_level(args) -> int:
 
 
 def build_parser() -> argparse.ArgumentParser:
+    """
+    Build and return the main parser for the `matchms` command line interface.
+
+    This function sets up the primary parser for handling the command-line arguments
+    and subcommands used in the `matchms` CLI. The main parser includes general options
+    (such as version printing) and further allows delegation to subcommands for
+    specific tasks like retrieving information (`info`), working with filters (`filter`),
+    or inspecting spectra files (`spectra`).
+
+    Subcommands and their key actions include:
+    - `info`: Report matchms/Python versions, supported I/O formats, filters, and the CLI schema version.
+    - `filter`: List filters, inspect filtering pipelines, show filter details, or run filters on spectra files.
+    - `spectra`: Perform operations on spectra files like descriptive statistics or format conversion.
+
+    Returns
+    -------
+    argparse.ArgumentParser
+        The configured argparse.ArgumentParser object for use with the `matchms` CLI.
+    """
     parser = argparse.ArgumentParser(
         prog="matchms",
         description=("matchms command line interface"),
@@ -319,6 +338,16 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
+    """Main entrypoint for the CLI.
+
+    Builds the actual parser with commands and subcommands.
+    Configures logging, output and verbosity levels.
+
+    Returns
+    -------
+    int
+        Returns int of errors Codes.
+    """
     parser = build_parser()
     args = parser.parse_args(argv)
 

@@ -12,6 +12,7 @@ Rules
 import json
 import sys
 from typing import Any, TextIO
+import numpy as np
 
 
 # Schema version of the CLI's JSON output. Bump when the structure of any
@@ -59,8 +60,6 @@ class OutputContext:
 
 
 def _json_default(value: Any) -> Any:
-    import numpy as np
-
     if isinstance(value, np.integer):
         return int(value)
     if isinstance(value, np.floating):
@@ -73,6 +72,7 @@ def _json_default(value: Any) -> Any:
 
 
 def format_float(value: Any, precision: int = 6) -> str:
+    """Formats a given value as a float with a specified precision."""
     try:
         return f"{float(value):.{precision}g}"
     except (TypeError, ValueError):
