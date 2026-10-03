@@ -48,9 +48,13 @@ def test_filter_list_description_is_first_line(capsys):
     by_name = {e["name"]: e for e in payload["filters"]}
 
     # make_charge_int's docstring starts with "Convert charge field to integer..."
-    assert by_name["make_charge_int"]["description"].startswith("Convert charge field to integer")
+    assert by_name["make_charge_int"]["description"].startswith(
+        "Convert charge field to integer"
+    )
     # select_by_mz's docstring starts with "Keep only peaks between mz_from and mz_to."
-    assert by_name["select_by_mz"]["description"].startswith("Keep only peaks between mz_from and mz_to.")
+    assert by_name["select_by_mz"]["description"].startswith(
+        "Keep only peaks between mz_from and mz_to."
+    )
 
 
 def test_filter_list_table_output(capsys):

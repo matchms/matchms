@@ -48,7 +48,9 @@ def assert_canonical_order(payload):
 def test_filter_run_default_filters_json(tmp_path, capsys):
     out = tmp_path / "out.msp"
 
-    exit_code, payload = run_cli("filter", "run", MGF_FILE, str(out), "--json", capsys=capsys)
+    exit_code, payload = run_cli(
+        "filter", "run", MGF_FILE, str(out), "--json", capsys=capsys
+    )
 
     assert exit_code == 0
     assert payload["ok"] is True
@@ -75,10 +77,15 @@ def test_filter_run_default_pipeline_is_default_filters(tmp_path, capsys):
     from matchms.filtering.default_pipelines import DEFAULT_FILTERS
 
     out = tmp_path / "out.msp"
-    exit_code, payload = run_cli("filter", "run", MGF_FILE, str(out), "--json", capsys=capsys)
+    exit_code, payload = run_cli(
+        "filter", "run", MGF_FILE, str(out), "--json", capsys=capsys
+    )
     assert exit_code == 0
 
-    expected = {entry[0].__name__ if isinstance(entry, (tuple, list)) else entry.__name__ for entry in DEFAULT_FILTERS}
+    expected = {
+        entry[0].__name__ if isinstance(entry, (tuple, list)) else entry.__name__
+        for entry in DEFAULT_FILTERS
+    }
     assert set(filter_names(payload)) == expected
 
 
@@ -102,7 +109,9 @@ def test_filter_run_table_output(tmp_path, capsys):
 def test_filter_run_msp_input(tmp_path, capsys):
     out = tmp_path / "out.mgf"
 
-    exit_code, payload = run_cli("filter", "run", MSP_FILE, str(out), "--json", capsys=capsys)
+    exit_code, payload = run_cli(
+        "filter", "run", MSP_FILE, str(out), "--json", capsys=capsys
+    )
 
     assert exit_code == 0
     assert payload["n_spectra_in"] == N_MSP
@@ -118,19 +127,16 @@ def test_filter_run_pipeline_basic(tmp_path, capsys):
 
     out = tmp_path / "out.msp"
     exit_code, payload = run_cli(
-        "filter",
-        "run",
-        MGF_FILE,
-        str(out),
-        "--pipeline",
-        "BASIC_FILTERS",
-        "--json",
+        "filter", "run", MGF_FILE, str(out), "--pipeline", "BASIC_FILTERS", "--json",
         capsys=capsys,
     )
 
     assert exit_code == 0
     assert payload["pipeline"] == "BASIC_FILTERS"
-    expected = {entry[0].__name__ if isinstance(entry, (tuple, list)) else entry.__name__ for entry in BASIC_FILTERS}
+    expected = {
+        entry[0].__name__ if isinstance(entry, (tuple, list)) else entry.__name__
+        for entry in BASIC_FILTERS
+    }
     assert set(filter_names(payload)) == expected
 
 
@@ -138,7 +144,9 @@ def test_filter_run_invalid_pipeline(tmp_path, capsys):
     out = tmp_path / "out.msp"
     # --pipeline is validated by argparse choices -> SystemExit(2)
     with pytest.raises(SystemExit):
-        build_parser().parse_args(["filter", "run", MGF_FILE, str(out), "--pipeline", "NOPE"])
+        build_parser().parse_args(
+            ["filter", "run", MGF_FILE, str(out), "--pipeline", "NOPE"]
+        )
 
 
 # -- --filter and --param ---------------------------------------------------
@@ -297,7 +305,9 @@ def test_filter_run_report(tmp_path, capsys):
 def test_filter_run_report_counts_add_up(tmp_path, capsys):
     """For a filter that keeps all spectra, input == output and removed == 0."""
     out = tmp_path / "out.msp"
-    exit_code, payload = run_cli("filter", "run", MGF_FILE, str(out), "--report", "--json", capsys=capsys)
+    exit_code, payload = run_cli(
+        "filter", "run", MGF_FILE, str(out), "--report", "--json", capsys=capsys
+    )
     assert exit_code == 0
     first = payload["report"]["steps"][0]
     assert first["input_spectra"] == N_MGF
@@ -312,7 +322,9 @@ def test_filter_run_missing_input(tmp_path, capsys):
     missing = tmp_path / "does_not_exist.mgf"
     out = tmp_path / "out.msp"
 
-    exit_code, payload = run_cli("filter", "run", str(missing), str(out), "--json", capsys=capsys)
+    exit_code, payload = run_cli(
+        "filter", "run", str(missing), str(out), "--json", capsys=capsys
+    )
 
     assert exit_code == 1
     assert payload["ok"] is False
@@ -325,7 +337,9 @@ def test_filter_run_unsupported_input_extension(tmp_path, capsys):
     fake.write_text("not a spectra file\n", encoding="utf-8")
     out = tmp_path / "out.msp"
 
-    exit_code, payload = run_cli("filter", "run", str(fake), str(out), "--json", capsys=capsys)
+    exit_code, payload = run_cli(
+        "filter", "run", str(fake), str(out), "--json", capsys=capsys
+    )
 
     assert exit_code == 1
     assert payload["error"] == "unsupported_input_format"
@@ -335,7 +349,9 @@ def test_filter_run_unsupported_input_extension(tmp_path, capsys):
 def test_filter_run_unsupported_output_extension(tmp_path, capsys):
     out = tmp_path / "out.xyz"
 
-    exit_code, payload = run_cli("filter", "run", MGF_FILE, str(out), "--json", capsys=capsys)
+    exit_code, payload = run_cli(
+        "filter", "run", MGF_FILE, str(out), "--json", capsys=capsys
+    )
 
     assert exit_code == 1
     assert payload["error"] == "unsupported_output_format"
@@ -346,7 +362,9 @@ def test_filter_run_output_exists(tmp_path, capsys):
     out = tmp_path / "out.msp"
     out.write_text("existing\n", encoding="utf-8")
 
-    exit_code, payload = run_cli("filter", "run", MGF_FILE, str(out), "--json", capsys=capsys)
+    exit_code, payload = run_cli(
+        "filter", "run", MGF_FILE, str(out), "--json", capsys=capsys
+    )
 
     assert exit_code == 1
     assert payload["error"] == "file_exists"
@@ -359,7 +377,9 @@ def test_filter_run_empty_input(tmp_path, capsys):
     save_as_mgf([], str(empty), "matchms", file_mode="w")
     out = tmp_path / "out.msp"
 
-    exit_code, payload = run_cli("filter", "run", str(empty), str(out), "--json", capsys=capsys)
+    exit_code, payload = run_cli(
+        "filter", "run", str(empty), str(out), "--json", capsys=capsys
+    )
 
     assert exit_code == 1
     assert payload["error"] == "empty_spectra"
@@ -369,13 +389,7 @@ def test_filter_run_unknown_filter(tmp_path, capsys):
     out = tmp_path / "out.msp"
 
     exit_code, payload = run_cli(
-        "filter",
-        "run",
-        MGF_FILE,
-        str(out),
-        "--filter",
-        "bogus_filter",
-        "--json",
+        "filter", "run", MGF_FILE, str(out), "--filter", "bogus_filter", "--json",
         capsys=capsys,
     )
 
@@ -485,12 +499,16 @@ def test_filter_run_requires_positional_args(tmp_path, capsys):
 def test_filter_run_append_to_msp(tmp_path, capsys):
     out = tmp_path / "out.msp"
 
-    exit_code, _ = run_cli("filter", "run", MGF_FILE, str(out), "--json", capsys=capsys)
+    exit_code, _ = run_cli(
+        "filter", "run", MGF_FILE, str(out), "--json", capsys=capsys
+    )
     assert exit_code == 0
     first_n = load_n(str(out), ftype="msp")
 
     # second run appends instead of erroring
-    exit_code, payload = run_cli("filter", "run", MGF_FILE, str(out), "--append", "--json", capsys=capsys)
+    exit_code, payload = run_cli(
+        "filter", "run", MGF_FILE, str(out), "--append", "--json", capsys=capsys
+    )
     assert exit_code == 0
     assert load_n(str(out), ftype="msp") == first_n + payload["n_spectra_out"]
 
@@ -498,7 +516,9 @@ def test_filter_run_append_to_msp(tmp_path, capsys):
 def test_filter_run_append_unsupported_format(tmp_path, capsys):
     out = tmp_path / "out.json"
 
-    exit_code, payload = run_cli("filter", "run", MGF_FILE, str(out), "--append", "--json", capsys=capsys)
+    exit_code, payload = run_cli(
+        "filter", "run", MGF_FILE, str(out), "--append", "--json", capsys=capsys
+    )
 
     assert exit_code == 1
     assert payload["error"] == "invalid_parameter"

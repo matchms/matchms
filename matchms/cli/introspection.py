@@ -1,7 +1,9 @@
 """Introspection helpers for filters and similarity classes.
 
-Powers ``filter list`` / ``filter describe`` and ``similarity list`` /
-``similarity describe``.
+Powers the ``filter`` and ``similarity`` CLI commands (``list`` and ``info``):
+they turn a filter function or similarity class into a JSON-safe description
+(signature, parameters, docstring) plus the small shared helpers the commands
+use to shape and render that data.
 """
 
 import inspect
@@ -15,6 +17,47 @@ def _clean_docstring(doc: str | None) -> str:
     if not doc:
         return ""
     return inspect.cleandoc(doc)
+
+
+def short_description(docstring: str | None) -> str:
+    """Return the leading sentence of a docstring.
+
+    Cleans the docstring first, then prefers the first line; if that is
+    empty, falls back to the first sentence of the docstring body.
+    """
+    doc = _clean_docstring(docstring)
+    first_line = doc.split("\n", 1)[0].strip() if doc else ""
+    if first_line:
+        return first_line
+    text = " ".join(doc.split()) if doc else ""
+    for end in (".", "!", "?"):
+        idx = text.find(end)
+        if idx != -1:
+            return text[: idx + 1]
+    return text
+
+
+def signature_parameters(info: dict, skip: tuple[str, ...] = ()) -> list[dict]:
+    """Build the CLI parameter table from a ``*signature()`` result.
+
+    ``info`` is the dict returned by :func:`filter_signature` or
+    :func:`similarity_signature`. Each entry carries the parameter name, its
+    type, whether it is required, its default (when any) and the description
+    taken from the docstring (when documented). Parameter names listed in
+    *skip* are dropped (e.g. ``clone``, which the SpectraProcessor manages).
+    """
+    param_docs = info["param_docs"]
+    parameters = []
+    for name, spec in info["signature"]["parameters"].items():
+        if name in skip:
+            continue
+        entry = {"name": name, "type": spec["type"], "required": spec["required"]}
+        if "default" in spec:
+            entry["default"] = spec["default"]
+        if name in param_docs:
+            entry["description"] = param_docs[name]
+        parameters.append(entry)
+    return parameters
 
 
 def filter_signature(func) -> dict:

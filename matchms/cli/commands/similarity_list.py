@@ -9,7 +9,7 @@ Classes that the README does not group are listed under the ``Other`` group;
 no information about them is invented beyond their own docstring.
 """
 
-from matchms.cli.introspection import similarity_signature
+from matchms.cli.introspection import short_description, similarity_signature
 from matchms.cli.output import human_table
 from matchms.similarity import __all__ as SIMILARITY_NAMES
 from matchms.similarity import get_similarity_function_by_name
@@ -71,25 +71,12 @@ GROUPS = (
 )
 
 
-def _short_description(docstring: str) -> str:
-    """Return the leading sentence of a docstring."""
-    first_line = docstring.split("\n", 1)[0].strip() if docstring else ""
-    if first_line:
-        return first_line
-    text = " ".join(docstring.split()) if docstring else ""
-    for end in (".", "!", "?"):
-        idx = text.find(end)
-        if idx != -1:
-            return text[: idx + 1]
-    return text
-
-
 def _row(name: str, group: str) -> dict:
     info = similarity_signature(get_similarity_function_by_name(name))
     return {
         "group": group,
         "name": name,
-        "description": _short_description(info["docstring"]),
+        "description": short_description(info["docstring"]),
         "score_fields": info["score_fields"],
         "methods": info["methods"],
     }

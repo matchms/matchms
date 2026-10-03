@@ -93,6 +93,26 @@ def human_table(columns: list[str], rows: list[list[Any]]) -> str:
     return "\n".join(lines)
 
 
+def indent_text(text: str, prefix: str = "  ") -> str:
+    """Indent every line of *text* with *prefix* for the human-readable output."""
+    return "\n".join(prefix + line for line in text.splitlines())
+
+
+def parameters_table(parameters: list[dict]) -> str:
+    """Render a list of parameter entries (see :func:`introspection.signature_parameters`).
+
+    Used by the ``info`` commands to show name, type, required flag, default
+    and description of one object's constructor / call signature.
+    """
+    return human_table(
+        ["parameter", "type", "required", "default", "description"],
+        [
+            [p["name"], p["type"], p["required"], p.get("default"), p.get("description", "")]
+            for p in parameters
+        ],
+    )
+
+
 def _cell_str(cell: Any) -> str:
     if cell is None:
         return ""
