@@ -7,6 +7,7 @@ Powers ``filter list`` / ``filter describe`` and ``similarity list`` /
 import inspect
 import re
 from matchms.cli.params import describe_signature
+from matchms.similarity.base_similarity import BaseSimilarity
 
 
 def _clean_docstring(doc: str | None) -> str:
@@ -105,6 +106,7 @@ _SECTION_NAMES = {
 }
 
 _PARAM_RE = re.compile(r"^([A-Za-z_][A-Za-z0-9_]*)\s*:\s*(.*)$")
+_BARE_PARAM_RE = re.compile(r"^([A-Za-z_][A-Za-z0-9_]*)$")
 
 
 def _section_bounds(lines: list[str]) -> list[tuple[int, str]]:
@@ -165,25 +167,37 @@ def extract_param_docs(docstring: str | None) -> dict[str, str]:
         current = None
         buffer = []
 
+    def _start_param(stripped: str, indent: int):
+        """Start the description of the parameter named in *stripped*.
+
+        Flushes the description of the previous parameter, if any.
+        """
+        nonlocal current, buffer, param_indent
+        flush()
+        typed = _PARAM_RE.match(stripped)
+        if typed is not None:
+            current = typed.group(1)
+            buffer = [typed.group(2).strip()] if typed.group(2).strip() else []
+        elif _BARE_PARAM_RE.match(stripped) is not None:
+            current = stripped
+            buffer = []
+        else:
+            return False
+        param_indent = indent
+        return True
+
     for line in section:
         stripped = line.strip()
         if not stripped:
             continue
         indent = len(line) - len(line.lstrip(" "))
-        match = _PARAM_RE.match(stripped)
 
         if param_indent is None:
-            if match:
-                param_indent = indent
-                current = match.group(1)
-                buffer = [match.group(2).strip()] if match.group(2).strip() else []
+            _start_param(stripped, indent)
             continue
 
         if indent == param_indent:
-            if match:
-                flush()
-                current = match.group(1)
-                buffer = [match.group(2).strip()] if match.group(2).strip() else []
+            if _start_param(stripped, indent):
                 continue
             # A base-indent line that is not a parameter ends the param list.
             flush()
@@ -195,3 +209,41 @@ def extract_param_docs(docstring: str | None) -> dict[str, str]:
 
     flush()
     return params
+
+
+def similarity_signature(cls: type) -> dict:
+    """Describe one similarity class for the ``similarity list``/``similarity info`` commands.
+
+    Returns a JSON-safe dict with the constructor signature, the documented
+    score fields and which of the common computation methods the class
+    actually implements (``pair``, ``matrix``, ``sparse_matrix``, the indexed
+    search workflow).
+    """
+    signature_info = describe_signature(cls)
+    param_docs = extract_param_docs(cls.__doc__)
+    param_docs.update(extract_param_docs(cls.__init__.__doc__))
+
+    methods = []
+    for method in _SIMILARITY_METHODS:
+        impl = inspect.getattr_static(cls, method, None)
+        if impl is None:
+            continue
+        # ``BaseSimilarity.sparse_matrix`` only raises NotImplementedError.
+        if method == "sparse_matrix" and impl is BaseSimilarity.sparse_matrix:
+            continue
+        methods.append(method)
+
+    return {
+        "signature": signature_info,
+        "required": signature_info["required"],
+        "param_docs": param_docs,
+        "docstring": _clean_docstring(cls.__doc__),
+        "score_fields": list(cls.score_fields),
+        "is_commutative": bool(getattr(cls, "is_commutative", False)),
+        "methods": methods,
+    }
+
+
+# Methods that make up the public scoring surface of a similarity class,
+# checked against the class itself so inherited implementations count.
+_SIMILARITY_METHODS = ("pair", "matrix", "sparse_matrix", "build_index", "search")

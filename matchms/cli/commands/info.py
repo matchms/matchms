@@ -38,6 +38,8 @@ CLI_COMMANDS = {
     "filter pipelines": "List all available filter pipelines",
     "filter info": "Show the description and parameters of one filter",
     "filter run": "Run a filter pipeline on a spectra file (SpectraProcessor) and emit a report",
+    "similarity list": "List all available matchms similarity measures",
+    "similarity info": "Show the description, score fields, methods and parameters of one similarity",
     "spectra convert": "Convert a spectra file between supported formats",
     "spectra describe": "Describe a spectra collection (peak counts, intensity sums, entropy)",
 }

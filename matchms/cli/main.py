@@ -7,6 +7,8 @@ from matchms.cli.commands.filter_pipelines import PIPELINES
 from matchms.cli.commands.filter_pipelines import run as run_filter_pipelines
 from matchms.cli.commands.filter_run import run as run_filter_run
 from matchms.cli.commands.info import run as run_info
+from matchms.cli.commands.similarity_info import run as run_similarity_info
+from matchms.cli.commands.similarity_list import run as run_similarity_list
 from matchms.cli.commands.spectra_convert import EXPORT_STYLES
 from matchms.cli.commands.spectra_convert import run as run_spectra_convert
 from matchms.cli.commands.spectra_describe import run as run_spectra_describe
@@ -80,6 +82,7 @@ def build_parser() -> argparse.ArgumentParser:
     Subcommands and their key actions include:
     - `info`: Report matchms/Python versions, supported I/O formats, filters, and the CLI schema version.
     - `filter`: List filters, inspect filtering pipelines, show filter details, or run filters on spectra files.
+    - `similarity`: List the similarity measures in matchms.similarity (grouped like the README), or show one.
     - `spectra`: Perform operations on spectra files like descriptive statistics or format conversion.
 
     Returns
@@ -259,6 +262,54 @@ def build_parser() -> argparse.ArgumentParser:
         help="Append to the output file instead of overwriting it. Only supported for .mgf and .msp output files.",
     )
     pf_run.set_defaults(func=run_filter_run)
+
+    # -- similarity  --------------------------------------------------------
+    p = subparsers.add_parser(
+        "similarity",
+        parents=[common],
+        help="List and inspect matchms similarity measures",
+        description=(
+            "Work with the similarity measures available in matchms.similarity. "
+            "`similarity list` shows all of them grouped like the README; "
+            "`similarity info` shows the description, score fields, methods and "
+            "constructor parameters of a single similarity."
+        ),
+    )
+    similarity_subparsers = p.add_subparsers(dest="similarity_command", metavar="<action>")
+
+    # similarity list --------------------------------------------------------
+    ps_list = similarity_subparsers.add_parser(
+        "list",
+        parents=[common],
+        help="List all available similarity measures",
+        description=(
+            "List all similarity classes exposed by matchms.similarity, grouped "
+            "like the 'Similarity measures' section of the README (Cosine, "
+            "Modified cosine, Spectral entropy, ...). Shows the group, name, a "
+            "short description and the supported computation methods for each "
+            "class. Classes that are not grouped in the README are listed under "
+            "the 'Other' group."
+        ),
+    )
+    ps_list.set_defaults(func=run_similarity_list)
+
+    # similarity info --------------------------------------------------------
+    ps_info = similarity_subparsers.add_parser(
+        "info",
+        parents=[common],
+        help="Show the description and parameters of one similarity",
+        description=(
+            "Show detailed information about one similarity class: which README "
+            "group it belongs to, what it does (full docstring), the score "
+            "fields it produces, the computation methods it supports and its "
+            "constructor parameters with type, default value and description."
+        ),
+    )
+    ps_info.add_argument(
+        "similarity_name",
+        help="Name of the similarity class to describe (see `matchms similarity list`).",
+    )
+    ps_info.set_defaults(func=run_similarity_info)
 
     # -- spectra  ----------------------------------------------------------
     p = subparsers.add_parser(
