@@ -9,6 +9,13 @@ from matchms.cli.commands.filter_run import run as run_filter_run
 from matchms.cli.commands.info import run as run_info
 from matchms.cli.commands.similarity_info import run as run_similarity_info
 from matchms.cli.commands.similarity_list import run as run_similarity_list
+from matchms.cli.commands.similarity_matrix import (
+    DEFAULT_MAX_DENSE_ENTRIES,
+)
+from matchms.cli.commands.similarity_matrix import (
+    OUTPUT_FORMATS as SIMILARITY_OUTPUT_FORMATS,
+)
+from matchms.cli.commands.similarity_matrix import run as run_similarity_matrix
 from matchms.cli.commands.spectra_convert import EXPORT_STYLES
 from matchms.cli.commands.spectra_convert import run as run_spectra_convert
 from matchms.cli.commands.spectra_describe import run as run_spectra_describe
@@ -82,7 +89,7 @@ def build_parser() -> argparse.ArgumentParser:
     Subcommands and their key actions include:
     - `info`: Report matchms/Python versions, supported I/O formats, filters, and the CLI schema version.
     - `filter`: List filters, inspect filtering pipelines, show filter details, or run filters on spectra files.
-    - `similarity`: List the similarity measures in matchms.similarity (grouped like the README), or show one.
+    - `similarity`: List the similarity measures in matchms.similarity, show one, or compute a similarity matrix between one or two spectra files.
     - `spectra`: Perform operations on spectra files like descriptive statistics or format conversion.
 
     Returns
@@ -267,12 +274,13 @@ def build_parser() -> argparse.ArgumentParser:
     p = subparsers.add_parser(
         "similarity",
         parents=[common],
-        help="List and inspect matchms similarity measures",
+        help="List, inspect and compute matchms similarity measures",
         description=(
             "Work with the similarity measures available in matchms.similarity. "
-            "`similarity list` shows all of them grouped like the README; "
+            "`similarity list` shows all similarity measures"
             "`similarity info` shows the description, score fields, methods and "
-            "constructor parameters of a single similarity."
+            "constructor parameters of a single similarity; `similarity matrix` "
+            "computes a similarity matrix between one or two spectra files."
         ),
     )
     similarity_subparsers = p.add_subparsers(dest="similarity_command", metavar="<action>")
@@ -310,6 +318,103 @@ def build_parser() -> argparse.ArgumentParser:
         help="Name of the similarity class to describe (see `matchms similarity list`).",
     )
     ps_info.set_defaults(func=run_similarity_info)
+
+    # similarity matrix -----------------------------------------------------
+    ps_matrix = similarity_subparsers.add_parser(
+        "matrix",
+        parents=[common],
+        help="Compute a similarity matrix between one or two spectra files",
+        description=(
+            "Compute a similarity matrix between the spectra of SPECTRA_1 "
+            "(rows) and optionally SPECTRA_2 (columns) and write it to -o. "
+            "Without SPECTRA_2 a symmetric all-vs-all matrix over SPECTRA_1 is "
+            "computed. The output extension selects the format: .npz stores the "
+            "Scores artifact, .tsv/.csv store a long format (one row per pair). "
+            "--method selects the similarity (see `matchms similarity list`); "
+            "--mode sparse requires a sparse-capable method and, together with "
+            "--score-min, keeps only pairs with a main score >= value. Stdout "
+            "carries only a summary."
+        ),
+    )
+    ps_matrix.add_argument(
+        "spectra_1",
+        help="Input spectra file for the rows (supported extensions: json, mgf, msp, mzml, mzxml, pickle).",
+    )
+    ps_matrix.add_argument(
+        "spectra_2",
+        nargs="?",
+        default=None,
+        help="Input spectra file for the columns. If omitted, a symmetric all-vs-all "
+        "computation on SPECTRA_1 is run. Supported extensions: json, mgf, msp, mzml, mzxml, pickle.",
+    )
+    ps_matrix.add_argument(
+        "--method",
+        required=True,
+        metavar="NAME",
+        help="Similarity class name, case-insensitive (see `matchms similarity list`).",
+    )
+    ps_matrix.add_argument(
+        "--param",
+        action="append",
+        default=None,
+        metavar="NAME=VALUE",
+        help="Constructor parameter, auto-typed (bool, int, float, JSON); may be "
+        "passed multiple times. Examples: --param tolerance=0.1 --param remove_precursor=true.",
+    )
+    ps_matrix.add_argument(
+        "--tolerance",
+        type=float,
+        default=None,
+        help="Shorthand for --param tolerance=... (not combined with --param tolerance).",
+    )
+    ps_matrix.add_argument(
+        "--mode",
+        default="dense",
+        choices=("dense", "sparse"),
+        help="dense uses matrix(); sparse uses sparse_matrix() (only sparse-capable "
+        "methods support it). Default: %(default)s.",
+    )
+    ps_matrix.add_argument(
+        "--score-min",
+        type=float,
+        default=None,
+        help="--mode sparse only: keep pairs with a main 'score' field >= value.",
+    )
+    ps_matrix.add_argument(
+        "-o",
+        "--output",
+        required=True,
+        metavar="PATH",
+        help=(
+            "Output file; the extension selects the format (."
+            + ", .".join(sorted(SIMILARITY_OUTPUT_FORMATS))
+            + "). An existing file is replaced."
+        ),
+    )
+    ps_matrix.add_argument(
+        "--id-field",
+        default=None,
+        help="Metadata field used as the human-readable row/col identifier in TSV/CSV output "
+        "(row_id/col_id columns). Without it, only indices are written.",
+    )
+    ps_matrix.add_argument(
+        "--max-dense-entries",
+        type=int,
+        default=DEFAULT_MAX_DENSE_ENTRIES,
+        help="Dense mode: fail when n_rows x n_cols exceeds this many entries (default: %(default)s).",
+    )
+    ps_matrix.add_argument(
+        "--top",
+        type=int,
+        default=10,
+        help="Number of top pairs reported in the summary (default: %(default)s).",
+    )
+    ps_matrix.add_argument(
+        "--no-progress",
+        action="store_true",
+        help="Disable the progress bar (it is printed to stderr by default).",
+    )
+    ps_matrix.set_defaults(func=run_similarity_matrix)
 
     # -- spectra  ----------------------------------------------------------
     p = subparsers.add_parser(
