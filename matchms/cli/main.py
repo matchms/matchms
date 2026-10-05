@@ -78,6 +78,15 @@ def _log_level(args) -> int:
     return logging.WARNING
 
 
+def _group_help(parser: argparse.ArgumentParser):
+    """Return a handler that prints the help of a command group and exits with code 2."""
+    def _run(args, ctx) -> int:
+        parser.print_help()
+        return 2
+
+    return _run
+
+
 def build_parser() -> argparse.ArgumentParser:
     """
     Build and return the main parser for the `matchms` command line interface.
@@ -147,6 +156,7 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     filter_subparsers = p.add_subparsers(dest="filter_command", metavar="<action>")
+    p.set_defaults(func=_group_help(p))
 
     # filter list ----------------------------------------------------------
     pf_list = filter_subparsers.add_parser(
@@ -292,6 +302,7 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     similarity_subparsers = p.add_subparsers(dest="similarity_command", metavar="<action>")
+    p.set_defaults(func=_group_help(p))
 
     # similarity list --------------------------------------------------------
     ps_list = similarity_subparsers.add_parser(
@@ -589,6 +600,7 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     spectra_subparsers = p.add_subparsers(dest="spectra_command", metavar="<action>")
+    p.set_defaults(func=_group_help(p))
 
     # spectra describe -----------------------------------------------------
     pd = spectra_subparsers.add_parser(
