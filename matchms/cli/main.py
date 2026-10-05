@@ -175,7 +175,7 @@ def build_parser() -> argparse.ArgumentParser:
     pf_pipelines = filter_subparsers.add_parser(
         "pipelines",
         parents=[common],
-        help="List all available filter pipelines",
+        help="List all available filter pipelines and can show detailed information about a pipeline",
         description=(
             "List all filter pipelines defined in matchms.filtering.default_pipelines: their name, a short "
             "description and the number of filters they contain. The listed names are the valid values for "
@@ -214,7 +214,7 @@ def build_parser() -> argparse.ArgumentParser:
     pf_run = filter_subparsers.add_parser(
         "run",
         parents=[common],
-        help="Run a filter pipeline on a spectra file",
+        help="Run a filter pipeline or a list of filters on a spectra file",
         description=(
             "Run a filter pipeline over a SpectraCollection using SpectraProcessor "
             "and write the filtered spectra to an output file. The base pipeline "

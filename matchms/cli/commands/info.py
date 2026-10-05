@@ -33,9 +33,9 @@ def _filter_inventory() -> list[dict]:
 CLI_NAME = "matchms"
 
 CLI_COMMANDS = {
-    "info": "Report environment, supported formats and filters",
+    "info": "Report environment, supported formats and all commands.",
     "filter list": "List all available matchms filters with their default order",
-    "filter pipelines": "List all available filter pipelines",
+    "filter pipelines": "List all available filter pipelines and can show detailed information about a pipeline",
     "filter info": "Show the description and parameters of one filter",
     "filter run": "Run a filter pipeline on a spectra file (SpectraProcessor) and emit a report",
     "similarity list": "List all available matchms similarity measures",

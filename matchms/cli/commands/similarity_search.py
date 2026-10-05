@@ -19,19 +19,19 @@ import os
 import time
 import numpy as np
 import pandas as pd
-from matchms.cli.commands.similarity_build_index import (
-    _build_params,
-    _check_index_capable,
-    _check_method_params,
-    _check_params_accepted,
-    _effective_params,
-    _extension,
-    _instantiate,
-    _load_collection,
-    _resolve_method,
+from matchms.cli import files, similarity
+from matchms.cli.constants import (
+    ERROR_COMPUTE_ERROR,
+    ERROR_INDEX_INCOMPATIBLE,
+    ERROR_INPUT_NOT_FOUND,
+    ERROR_INVALID_INPUT,
+    ERROR_INVALID_PARAMETER,
+    ERROR_MISSING_DEPENDENCY,
+    ERROR_SAVE_FAILED,
+    INPUT_FORMATS,
 )
 from matchms.cli.errors import CliError, raise_for_unknown_value
-from matchms.importing.load_spectra import SUPPORTED_FILE_FORMATS as INPUT_FORMATS
+from matchms.cli.params import describe_signature
 
 
 CLI_COMMAND = "similarity search"
@@ -48,33 +48,17 @@ def _is_index_path(path: str) -> bool:
 def _validate_output(args, operation: str) -> str:
     """The hit list must be a .tsv or .csv file whose directory exists and is writable."""
     output = args.output
-    output_format = _extension(output)
+    output_format = files.extension_of(output)
     if output_format not in OUTPUT_FORMATS:
         raise CliError(
             f"Output file '{output}' must end in '.tsv' or '.csv'.",
-            code="invalid_parameter",
+            code=ERROR_INVALID_PARAMETER,
             operation=operation,
             parameter="output",
             valid_values=[f".{name}" for name in OUTPUT_FORMATS],
             hint="The hit list is written in a long table format (.tsv or .csv).",
         )
-    out_dir = os.path.dirname(os.path.abspath(output))
-    if not os.path.isdir(out_dir):
-        raise CliError(
-            f"The output directory '{out_dir}' of '{output}' does not exist.",
-            code="save_failed",
-            operation=operation,
-            input_file=output,
-            hint="Create the directory first; the output directory must exist.",
-        )
-    if not os.access(out_dir, os.R_OK | os.W_OK):
-        raise CliError(
-            f"The output directory '{out_dir}' of '{output}' is not writable.",
-            code="save_failed",
-            operation=operation,
-            input_file=output,
-            hint="Choose an output directory that exists and is writable.",
-        )
+    files.validate_output_dir(output, operation)
     return output_format
 
 
@@ -93,7 +77,7 @@ def _validate_args(args, operation: str) -> str:
     if args.top_k is None or args.top_k < 1:
         raise CliError(
             f"--top-k must be a positive integer (>= 1), got {args.top_k}.",
-            code="invalid_parameter",
+            code=ERROR_INVALID_PARAMETER,
             operation=operation,
             parameter="top_k",
             valid_values=["1 or higher"],
@@ -101,7 +85,7 @@ def _validate_args(args, operation: str) -> str:
     if args.batch_size is None or args.batch_size < 1:
         raise CliError(
             f"--batch-size must be a positive integer (>= 1), got {args.batch_size}.",
-            code="invalid_parameter",
+            code=ERROR_INVALID_PARAMETER,
             operation=operation,
             parameter="batch_size",
             valid_values=["1 or higher"],
@@ -109,7 +93,7 @@ def _validate_args(args, operation: str) -> str:
     if args.tolerance is not None and "tolerance" in _param_names(args.param):
         raise CliError(
             "--tolerance and --param tolerance=... may not be combined.",
-            code="invalid_parameter",
+            code=ERROR_INVALID_PARAMETER,
             operation=operation,
             parameter="tolerance",
             hint="Use either the --tolerance shorthand or --param tolerance=..., not both.",
@@ -121,7 +105,7 @@ def _validate_args(args, operation: str) -> str:
             "--library-spectra is only allowed when LIBRARY is an index (.index.npz). "
             "A spectra library already carries its own metadata, so no separate "
             "identifier file is needed.",
-            code="invalid_parameter",
+            code=ERROR_INVALID_PARAMETER,
             operation=operation,
             parameter="library_spectra",
             hint="Remove --library-spectra, or pass an .index.npz file as LIBRARY.",
@@ -130,7 +114,7 @@ def _validate_args(args, operation: str) -> str:
         raise CliError(
             "--library-id-field requires --library-spectra when LIBRARY is an index, "
             "because an index does not store spectrum metadata.",
-            code="invalid_parameter",
+            code=ERROR_INVALID_PARAMETER,
             operation=operation,
             parameter="library_id_field",
             hint="Pass --library-spectra with the spectra file the index was built from.",
@@ -139,12 +123,17 @@ def _validate_args(args, operation: str) -> str:
 
 
 def _validate_library_path(args, operation: str) -> str:
-    """Validate the LIBRARY argument; returns 'index' or 'spectra'."""
+    """Validate the LIBRARY argument; returns 'index' or 'spectra'.
+
+    The library may be a spectra file or a saved index, so the missing-file
+    error lists both the input extensions and the ``.index.npz`` suffix as valid
+    values (a plain :func:`files.validate_input_file` check would not).
+    """
     path = args.library
     if not os.path.exists(path):
         raise CliError(
             f"The specified library file: {path} does not exist.",
-            code="input_not_found",
+            code=ERROR_INPUT_NOT_FOUND,
             operation=operation,
             input_file=path,
             valid_values=[INDEX_SUFFIX] + sorted(INPUT_FORMATS),
@@ -154,48 +143,26 @@ def _validate_library_path(args, operation: str) -> str:
         )
     if _is_index_path(path):
         return "index"
-    file_format = _extension(path)
-    if file_format not in INPUT_FORMATS:
-        raise CliError(
-            f"Library file extension '.{file_format}' of {path} is not a supported input format. "
-            "The input format is detected from the file extension only, so files with a "
-            "non-standard extension cannot be loaded.",
-            code="unsupported_format",
-            operation=operation,
-            input_file=path,
-            valid_values=sorted(INPUT_FORMATS),
-            hint="Use a supported extension such as .mgf, .msp, .mzml, .mzxml, .json or .pickle, "
-            "or pass a .index.npz index built by `similarity build-index`.",
-        )
+    files.validate_input_file(
+        path,
+        operation,
+        kind="library file",
+        valid_values=sorted(INPUT_FORMATS),
+        hint="Use a supported extension such as .mgf, .msp, .mzml, .mzxml, .json or .pickle, "
+        "or pass a .index.npz index built by `similarity build-index`.",
+    )
     return "spectra"
 
 
 def _validate_query_path(args, operation: str) -> str:
     """Validate the QUERIES argument and return its file format."""
-    path = args.queries
-    if not os.path.exists(path):
-        raise CliError(
-            f"The specified query file: {path} does not exist.",
-            code="input_not_found",
-            operation=operation,
-            input_file=path,
-            valid_values=sorted(INPUT_FORMATS),
-            hint="Expected a query spectra file with a supported extension "
-            "(e.g. .mgf, .msp, .mzml, .mzxml, .json, .pickle).",
-        )
-    file_format = _extension(path)
-    if file_format not in INPUT_FORMATS:
-        raise CliError(
-            f"Query file extension '.{file_format}' of {path} is not a supported input format. "
-            "The input format is detected from the file extension only, so files with a "
-            "non-standard extension cannot be loaded.",
-            code="unsupported_format",
-            operation=operation,
-            input_file=path,
-            valid_values=sorted(INPUT_FORMATS),
-            hint="Use a supported extension such as .mgf, .msp, .mzml, .mzxml, .json or .pickle.",
-        )
-    return file_format
+    return files.validate_input_file(
+        args.queries,
+        operation,
+        kind="query file",
+        hint="Expected a query spectra file with a supported extension "
+        "(e.g. .mgf, .msp, .mzml, .mzxml, .json, .pickle).",
+    )
 
 
 def _validate_library_spectra_path(args, operation: str) -> str:
@@ -204,30 +171,16 @@ def _validate_library_spectra_path(args, operation: str) -> str:
     if path is None:
         raise CliError(
             "--library-spectra is required for this check but was not provided.",
-            code="invalid_parameter",
+            code=ERROR_INVALID_PARAMETER,
             operation=operation,
             parameter="library_spectra",
         )
-    if not os.path.exists(path):
-        raise CliError(
-            f"The specified --library-spectra file: {path} does not exist.",
-            code="input_not_found",
-            operation=operation,
-            input_file=path,
-            valid_values=sorted(INPUT_FORMATS),
-            hint="Expected the spectra file the index was built from (a supported spectra extension).",
-        )
-    file_format = _extension(path)
-    if file_format not in INPUT_FORMATS:
-        raise CliError(
-            f"--library-spectra file extension '.{file_format}' of {path} is not a supported input format.",
-            code="unsupported_format",
-            operation=operation,
-            input_file=path,
-            valid_values=sorted(INPUT_FORMATS),
-            hint="Use a supported extension such as .mgf, .msp, .mzml, .mzxml, .json or .pickle.",
-        )
-    return file_format
+    return files.validate_input_file(
+        path,
+        operation,
+        kind="--library-spectra file",
+        hint="Expected the spectra file the index was built from (a supported spectra extension).",
+    )
 
 
 def _check_score_field(cls, name: str, field: str, operation: str) -> None:
@@ -251,7 +204,7 @@ def _load_index(similarity, name: str, path: str, operation: str):
     except (ModuleNotFoundError, ImportError) as exc:
         raise CliError(
             f"A required dependency of the similarity '{name}' is not installed: {exc}",
-            code="missing_dependency",
+            code=ERROR_MISSING_DEPENDENCY,
             operation=operation,
             parameter=name,
             hint="Install the missing dependency and retry.",
@@ -261,7 +214,7 @@ def _load_index(similarity, name: str, path: str, operation: str):
     except Exception as exc:
         raise CliError(
             f"Failed to read the index file {path}: {exc}",
-            code="compute_error",
+            code=ERROR_COMPUTE_ERROR,
             operation=operation,
             input_file=path,
             hint="Check that the file is a valid index built by `similarity build-index` with this matchms version.",
@@ -275,7 +228,7 @@ def _build_index(similarity, name: str, collection, operation: str):
     except (ModuleNotFoundError, ImportError) as exc:
         raise CliError(
             f"A required dependency of the similarity '{name}' is not installed: {exc}",
-            code="missing_dependency",
+            code=ERROR_MISSING_DEPENDENCY,
             operation=operation,
             parameter=name,
             hint="Install the missing dependency and retry.",
@@ -285,7 +238,7 @@ def _build_index(similarity, name: str, collection, operation: str):
         if "use peak_separation='merge'" in message:
             raise CliError(
                 f"The library violates the peak-separation requirement of '{name}' (peak_separation=raise): {message}",
-                code="invalid_input",
+                code=ERROR_INVALID_INPUT,
                 operation=operation,
                 hint="Rebuild with --param peak_separation=merge (close peaks are merged) "
                 "or preprocess the library so no two peaks are closer than 2 * max_tolerance.",
@@ -301,7 +254,7 @@ def _index_incompatible(name: str, source: str, message: str, operation: str) ->
         message = f"{message} Differing parameters: {', '.join(differing)}."
     return CliError(
         f"The library index {source} does not match the similarity '{name}' configuration: {message}",
-        code="index_incompatible",
+        code=ERROR_INDEX_INCOMPATIBLE,
         operation=operation,
         hint="The index was prepared with different --method/--param settings. Rebuild the "
         "index with `similarity build-index` using the same values, or pass the matching "
@@ -323,7 +276,7 @@ def _search_batch(similarity, name: str, batch, library_index, batch_no: int, op
     except (ModuleNotFoundError, ImportError) as exc:
         raise CliError(
             f"A required dependency of the similarity '{name}' is not installed: {exc}",
-            code="missing_dependency",
+            code=ERROR_MISSING_DEPENDENCY,
             operation=operation,
             parameter=name,
             hint="Install the missing dependency and retry.",
@@ -331,14 +284,14 @@ def _search_batch(similarity, name: str, batch, library_index, batch_no: int, op
     except ValueError as exc:
         raise CliError(
             f"The library index does not match the similarity '{name}' configuration (batch {batch_no}): {exc}",
-            code="index_incompatible",
+            code=ERROR_INDEX_INCOMPATIBLE,
             operation=operation,
             hint="The index and the search parameters must use the same preprocessing settings.",
         ) from exc
     except Exception as exc:
         raise CliError(
             f"Similarity search failed (batch {batch_no}): {exc}",
-            code="compute_error",
+            code=ERROR_COMPUTE_ERROR,
             operation=operation,
             hint="Check the similarity method and its parameters, and the input spectra.",
         ) from exc
@@ -406,7 +359,7 @@ def _read_ids(collection, field: str, kind: str, path: str, operation: str) -> l
     if field not in meta.columns:
         raise CliError(
             f"Metadata field '{field}' was not found in the {kind} file {path}.",
-            code="invalid_parameter",
+            code=ERROR_INVALID_PARAMETER,
             operation=operation,
             input_file=path,
             parameter="query_id_field" if kind == "query" else "library_id_field",
@@ -470,7 +423,7 @@ def _write_hit_list(
     except Exception as exc:
         raise CliError(
             f"Failed to write the hit list to {args.output}: {exc}",
-            code="save_failed",
+            code=ERROR_SAVE_FAILED,
             operation=operation,
             input_file=args.output,
         ) from exc
@@ -504,19 +457,19 @@ def _top_hits(
     return result
 
 
-def _prepare_library(args, similarity, method_name: str, library_kind: str, operation: str) -> tuple:
+def _prepare_library(args, similarity_instance, method_name: str, library_kind: str, operation: str) -> tuple:
     """Load or build the library index.
 
     Returns (library_index, n_spectra, meta_source, spectra_file) where meta_source
     is the SpectraCollection whose row order maps to reference_index (for ids).
     """
     if library_kind == "index":
-        index = _load_index(similarity, method_name, args.library, operation)
+        index = _load_index(similarity_instance, method_name, args.library, operation)
         n_spectra = int(index.n_specs)
         meta_source = None
         spectra_file = None
         if args.library_spectra is not None:
-            meta_source = _load_collection(
+            meta_source = files.load_collection(
                 args.library_spectra,
                 _validate_library_spectra_path(args, operation),
                 operation,
@@ -525,7 +478,7 @@ def _prepare_library(args, similarity, method_name: str, library_kind: str, oper
                 raise CliError(
                     f"--library-spectra {args.library_spectra} contains {len(meta_source)} spectra, "
                     f"but the index contains {n_spectra}. They must match.",
-                    code="invalid_input",
+                    code=ERROR_INVALID_INPUT,
                     operation=operation,
                     input_file=args.library_spectra,
                     valid_values=[f"{n_spectra} spectra"],
@@ -534,8 +487,8 @@ def _prepare_library(args, similarity, method_name: str, library_kind: str, oper
             spectra_file = args.library_spectra
         return index, n_spectra, meta_source, spectra_file
 
-    collection = _load_collection(args.library, _extension(args.library), operation)
-    index = _build_index(similarity, method_name, collection, operation)
+    collection = files.load_collection(args.library, files.extension_of(args.library), operation)
+    index = _build_index(similarity_instance, method_name, collection, operation)
     return index, len(collection), collection, args.library
 
 
@@ -545,12 +498,19 @@ def run(args, ctx) -> int:
 
     # 1. Validate arguments (no file is read).
     output_format = _validate_args(args, operation)
-    method_name, cls = _resolve_method(args.method, operation)
-    _check_index_capable(cls, method_name, operation)
-    params = _build_params(args, operation)
-    _check_params_accepted(cls, method_name, params, operation)
-    _check_method_params(method_name, _effective_params(cls, params), operation)
-    similarity = _instantiate(cls, method_name, params, operation)
+    method_name, cls = similarity.resolve_method(
+        args.method,
+        operation,
+        valid=sorted(similarity.INDEX_CAPABLE_NAMES),
+        kind="index-capable similarity method",
+    )
+    similarity.check_index_capable(cls, method_name, operation)
+    params = similarity.build_params(args, operation)
+    signature = describe_signature(cls)
+    similarity.check_params_accepted(cls, method_name, params, operation)
+    effective = similarity.effective_params(signature, params)
+    similarity.check_index_method_params(method_name, effective, operation)
+    similarity_instance = similarity.instantiate(cls, method_name, params, operation)
     _check_score_field(cls, method_name, args.score_field, operation)
 
     library_kind = _validate_library_path(args, operation)
@@ -561,14 +521,14 @@ def run(args, ctx) -> int:
     # 2. Prepare the library (load a saved index or build one on the fly).
     library_index, library_n, library_meta, spectra_file = _prepare_library(
         args,
-        similarity,
+        similarity_instance,
         method_name,
         library_kind,
         operation,
     )
 
     # 3. Load the queries.
-    query_collection = _load_collection(args.queries, query_format, operation)
+    query_collection = files.load_collection(args.queries, query_format, operation)
     n_queries = len(query_collection)
 
     # 4. Resolve the optional identifier columns.
@@ -591,7 +551,7 @@ def run(args, ctx) -> int:
     started = time.perf_counter()
     hits = _search_in_batches(
         args,
-        similarity,
+        similarity_instance,
         method_name,
         library_index,
         query_collection,
@@ -619,7 +579,7 @@ def run(args, ctx) -> int:
         "method": {
             "name": method_name,
             "class": cls.__name__,
-            "params": _effective_params(cls, params),
+            "params": effective,
         },
         "queries": {"file": args.queries, "n_spectra": n_queries},
         "library": {

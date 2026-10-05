@@ -13,17 +13,23 @@ a long format with one row per pair (``row``, ``col``, optional
 file is replaced.
 """
 
-import inspect
 import logging
 import os
 import time
 import numpy as np
 import pandas as pd
-from matchms.cli.errors import CliError, raise_for_unknown_value
+from matchms.cli import files, similarity
+from matchms.cli.constants import (
+    ERROR_COMPUTE_ERROR,
+    ERROR_EMPTY_SPECTRA,
+    ERROR_INVALID_PARAMETER,
+    ERROR_MATRIX_TOO_LARGE,
+    ERROR_SAVE_FAILED,
+    ERROR_UNSUPPORTED_METHOD,
+)
+from matchms.cli.errors import CliError
 from matchms.cli.output import human_table
-from matchms.cli.params import describe_signature, parse_params
-from matchms.importing import load_ms2_dataset
-from matchms.importing.load_spectra import SUPPORTED_FILE_FORMATS as INPUT_FORMATS
+from matchms.cli.params import describe_signature
 from matchms.scores import Scores
 from matchms.similarity import __all__ as SIMILARITY_NAMES
 from matchms.similarity import get_similarity_function_by_name
@@ -48,7 +54,18 @@ logger = logging.getLogger("matchms.cli")
 
 
 def _extension(path: str) -> str | None:
-    return os.path.splitext(path)[1].lower().lstrip(".") or None
+    """Kept for importers; delegates to the shared helper."""
+    return files.extension_of(path)
+
+
+def _resolve_method(name: str, operation: str) -> tuple[str, type]:
+    """Resolve --method to (canonical name, class); all similarities are valid."""
+    return similarity.resolve_method(
+        name,
+        operation,
+        valid=sorted(SIMILARITY_NAMES),
+        kind="similarity method",
+    )
 
 
 def _sparse_capable_names() -> list[str]:
@@ -66,7 +83,7 @@ def _validate_args(args, operation: str) -> str:
     if args.score_min is not None and args.mode != "sparse":
         raise CliError(
             "--score-min is only allowed with --mode sparse.",
-            code="invalid_parameter",
+            code=ERROR_INVALID_PARAMETER,
             operation=operation,
             parameter="score_min",
             valid_values=["--mode sparse"],
@@ -75,142 +92,49 @@ def _validate_args(args, operation: str) -> str:
     if args.top < 0:
         raise CliError(
             f"--top must be a non-negative integer, got {args.top}.",
-            code="invalid_parameter",
+            code=ERROR_INVALID_PARAMETER,
             operation=operation,
             parameter="top",
         )
-    output_format = _extension(args.output)
-    if output_format is None or output_format not in OUTPUT_FORMATS:
-        raise CliError(
-            f"Output file extension '.{output_format}' of {args.output} is not a supported output format.",
-            code="unsupported_format",
-            operation=operation,
-            parameter="output",
-            valid_values=sorted(OUTPUT_FORMATS),
-            hint="Use .npz (Scores artifact) or .tsv/.csv (long format). An existing output file is replaced.",
-        )
-    return output_format
+    return files.validate_output_format(
+        args.output,
+        operation,
+        valid_formats=OUTPUT_FORMATS,
+        hint="Use .npz (Scores artifact) or .tsv/.csv (long format). An existing output file is replaced.",
+    )
 
 
 def _validate_inputs(args, operation: str) -> list[tuple[str, str]]:
-    """Check the input files exist with supported extensions (format is detected
-    from the extension only) and return the (path, format) pairs given.
+    """Check the input files exist with supported extensions and return the
+    (path, format) pairs given (format is detected from the extension only).
     """
     specs = []
     for path in (args.spectra_1, args.spectra_2):
         if path is None:
             continue
-        if not os.path.exists(path):
-            raise CliError(
-                f"The specified input file: {path} does not exist.",
-                code="input_not_found",
-                operation=operation,
-                input_file=path,
-                valid_values=sorted(INPUT_FORMATS),
-                hint="Expected a spectra file with a supported extension (e.g. .mgf, .msp, .mzml, "
-                ".mzxml, .json, .pickle).",
-            )
-        file_format = _extension(path)
-        if file_format is None or file_format not in INPUT_FORMATS:
-            raise CliError(
-                f"Input file extension '.{file_format}' of {path} is not a supported input format. "
-                "The input format is detected from the file extension only, so files with a "
-                "non-standard extension cannot be loaded.",
-                code="unsupported_format",
-                operation=operation,
-                input_file=path,
-                valid_values=sorted(INPUT_FORMATS),
-                hint="Use a supported extension such as .mgf, .msp, .mzml, .mzxml, .json or .pickle.",
-            )
-        specs.append((path, file_format))
+        specs.append(
+            (path, files.validate_input_file(path, operation, kind="input file"))
+        )
     return specs
 
 
-def _resolve_method(name: str, operation: str) -> tuple[str, type]:
-    """Resolve --method to (canonical name, class); case-insensitive.
-
-    An unknown name raises ``unknown_value`` with the valid names and a
-    "Did you mean" suggestion.
-    """
-    lowered = name.lower()
-    for candidate in SIMILARITY_NAMES:
-        if candidate.lower() == lowered:
-            return candidate, get_similarity_function_by_name(candidate)
-    raise_for_unknown_value(
-        operation=operation,
-        parameter="method",
-        value=name,
-        valid=sorted(SIMILARITY_NAMES),
-        kind="similarity method",
-    )
-
-
-def _build_params(args, operation: str) -> dict:
-    """Merge --param NAME=VALUE pairs and the --tolerance shorthand."""
-    params = dict(parse_params(args.param, operation=operation))
-    if args.tolerance is not None:
-        if "tolerance" in params:
-            raise CliError(
-                "--tolerance and --param tolerance=... may not be combined.",
-                code="invalid_parameter",
-                operation=operation,
-                parameter="tolerance",
-                hint="Use either the --tolerance shorthand or --param tolerance=..., not both.",
-            )
-        params["tolerance"] = args.tolerance
-    return params
-
-
-def _check_params_accepted(cls, name: str, params: dict, operation: str) -> None:
-    """Raise ``invalid_parameter`` when a parameter name is not in the constructor."""
-    signature = inspect.signature(cls)
-    var_keyword = any(p.kind == inspect.Parameter.VAR_KEYWORD for p in signature.parameters.values())
-    known = list(signature.parameters)
-    for key in params:
-        if var_keyword or key in known:
-            continue
-        raise CliError(
-            f"The similarity '{name}' does not accept the parameter '{key}'.",
-            code="invalid_parameter",
-            operation=operation,
-            parameter=key,
-            valid_values=known,
-            hint=f"See `matchms similarity info {name}` for the available parameters.",
-        )
-
-
-def _check_method_params(cls, name: str, params: dict, operation: str) -> None:
-    """Method-specific, parameter-level checks (run before any file is loaded).
-
-    - required constructor parameters must be provided (e.g. MetadataMatch's
-      ``field``);
-    - EntropySearch only supports fragment matching with an absolute (Da)
-      tolerance, so ``use_ppm`` / a non-fragment ``matching_mode`` are rejected.
+def _check_method_params(name: str, sig: dict, params: dict, operation: str) -> None:
+    """Method-specific, parameter-level checks for ``matrix`` (before any file is
+    loaded): required constructor parameters must be provided, and EntropySearch
+    only supports fragment matching with an absolute (Da) tolerance.
 
     FingerprintSimilarity's required ``fingerprint_generator`` is an RDKit
-    object and cannot be passed via --param; its usability is instead validated
-    by the structure-metadata check after loading.
+    object and cannot be passed via --param, so it is skipped here and its
+    usability is instead validated by the structure-metadata check after loading.
     """
-    required = describe_signature(cls)["required"]
-    if name == "FingerprintSimilarity":
-        required = [p for p in required if p != "fingerprint_generator"]
-    missing = [p for p in required if p not in params]
-    if missing:
-        raise CliError(
-            f"The similarity '{name}' is missing required parameter(s): {', '.join(missing)}.",
-            code="invalid_parameter",
-            operation=operation,
-            parameter=missing[0],
-            valid_values=required,
-            hint=f"Pass them with --param {missing[0]}=value. "
-            f"See `matchms similarity info {name}` for the required parameters.",
-        )
+    skip = ("fingerprint_generator",) if name == "FingerprintSimilarity" else ()
+    similarity.check_missing_required(name, sig, params, operation, skip=skip)
 
     if name == "EntropySearch":
         if params.get("use_ppm"):
             raise CliError(
                 "EntropySearch only supports an absolute (Da) tolerance, not ppm.",
-                code="invalid_parameter",
+                code=ERROR_INVALID_PARAMETER,
                 operation=operation,
                 parameter="use_ppm",
                 valid_values=["use_ppm=false"],
@@ -219,45 +143,12 @@ def _check_method_params(cls, name: str, params: dict, operation: str) -> None:
         if params.get("matching_mode", "fragment") != "fragment":
             raise CliError(
                 "EntropySearch only supports fragment matching.",
-                code="invalid_parameter",
+                code=ERROR_INVALID_PARAMETER,
                 operation=operation,
                 parameter="matching_mode",
                 valid_values=["fragment"],
                 hint="Pass --param matching_mode=fragment, or use `--method Entropy` for other modes.",
             )
-
-
-def _instantiate(cls, name: str, params: dict, operation: str):
-    """Build the similarity instance, translating validation errors to CliError."""
-    try:
-        return cls(**params)
-    except TypeError as exc:
-        if cls.__name__ == "FingerprintSimilarity":
-            raise CliError(
-                "FingerprintSimilarity requires a fingerprint_generator (an RDKit fingerprint "
-                "generator object) that cannot be passed via --param, so it cannot be run "
-                "directly from the CLI.",
-                code="invalid_parameter",
-                operation=operation,
-                parameter="fingerprint_generator",
-                hint="Compute fingerprint similarity programmatically with "
-                "matchms.similarity.FingerprintSimilarity, or use a peak/metadata-based method.",
-            ) from exc
-        raise CliError(
-            f"Invalid parameter values for the similarity '{name}': {exc}",
-            code="invalid_parameter",
-            operation=operation,
-            parameter=name,
-            hint=f"See `matchms similarity info {name}` for the parameters and their expected values.",
-        ) from exc
-    except ValueError as exc:
-        raise CliError(
-            f"The similarity '{name}' rejected its parameters: {exc}",
-            code="invalid_parameter",
-            operation=operation,
-            parameter=name,
-            hint=f"See `matchms similarity info {name}` for the parameters and their expected values.",
-        ) from exc
 
 
 def _check_sparse_mode(args, name: str, cls, operation: str) -> None:
@@ -268,7 +159,7 @@ def _check_sparse_mode(args, name: str, cls, operation: str) -> None:
         sparse_names = _sparse_capable_names()
         raise CliError(
             f"The similarity '{name}' does not support sparse_matrix().",
-            code="unsupported_method",
+            code=ERROR_UNSUPPORTED_METHOD,
             operation=operation,
             parameter="mode",
             valid_values=sparse_names,
@@ -276,41 +167,6 @@ def _check_sparse_mode(args, name: str, cls, operation: str) -> None:
                 f"These similarities support --mode sparse: {', '.join(sparse_names)}. Otherwise run with --mode dense."
             ),
         )
-
-
-def _effective_params(cls, params: dict) -> dict:
-    """Constructor parameters that will actually be used (defaults + overrides)."""
-    effective = {
-        pname: spec["default"] for pname, spec in describe_signature(cls)["parameters"].items() if "default" in spec
-    }
-    effective.update(params)
-    return effective
-
-
-def _load_collection(path: str, file_format: str, operation: str):
-    try:
-        return load_ms2_dataset(path, ftype=file_format)
-    except ValueError as exc:
-        if "at least one Spectrum" in str(exc):
-            raise CliError(
-                f"No spectra were loaded from {path}; nothing to compare.",
-                code="empty_spectra",
-                operation=operation,
-                input_file=path,
-            ) from exc
-        raise CliError(
-            f"Failed to load spectra from {path}: {exc}",
-            code="compute_error",
-            operation=operation,
-            input_file=path,
-        ) from exc
-    except Exception as exc:
-        raise CliError(
-            f"Failed to load spectra from {path}: {exc}",
-            code="compute_error",
-            operation=operation,
-            input_file=path,
-        ) from exc
 
 
 def _check_structure_metadata(cls, name: str, collections: list, operation: str) -> None:
@@ -323,7 +179,7 @@ def _check_structure_metadata(cls, name: str, collections: list, operation: str)
             raise CliError(
                 f"The similarity '{name}' requires '{_FINGERPRINT_STRUCTURE_KEY}' metadata, "
                 f"but no spectrum in {path} provides one.",
-                code="invalid_parameter",
+                code=ERROR_INVALID_PARAMETER,
                 operation=operation,
                 input_file=path,
                 parameter=_FINGERPRINT_STRUCTURE_KEY,
@@ -339,7 +195,7 @@ def _check_dense_size(n_rows: int, n_cols: int, max_entries: int, operation: str
         raise CliError(
             f"The dense result would have {n_rows} x {n_cols} = {n_rows * n_cols} entries, "
             f"which exceeds --max-dense-entries ({max_entries}).",
-            code="matrix_too_large",
+            code=ERROR_MATRIX_TOO_LARGE,
             operation=operation,
             parameter="max_dense_entries",
             hint="Use --mode sparse --score-min VALUE to keep only the relevant pairs, or raise --max-dense-entries.",
@@ -369,7 +225,7 @@ def _compute(args, similarity, name: str, collection_1, collection_2, operation:
     except NotImplementedError as exc:
         raise CliError(
             f"The similarity '{name}' does not support this computation mode.",
-            code="unsupported_method",
+            code=ERROR_UNSUPPORTED_METHOD,
             operation=operation,
             parameter="mode",
             valid_values=["dense", "sparse"],
@@ -378,7 +234,7 @@ def _compute(args, similarity, name: str, collection_1, collection_2, operation:
     except Exception as exc:
         raise CliError(
             f"Similarity computation failed: {exc}",
-            code="compute_error",
+            code=ERROR_COMPUTE_ERROR,
             operation=operation,
             hint="Check the similarity method and its parameters, and the input spectra "
             "(e.g. FingerprintSimilarity needs InChIKey metadata).",
@@ -391,7 +247,7 @@ def _row_ids(collection, id_field: str, path: str, operation: str) -> list[str]:
     if id_field not in meta.columns:
         raise CliError(
             f"Metadata field '{id_field}' was not found in {path}.",
-            code="invalid_parameter",
+            code=ERROR_INVALID_PARAMETER,
             operation=operation,
             input_file=path,
             parameter="id_field",
@@ -470,7 +326,7 @@ def _save_scores(
         except Exception as exc:
             raise CliError(
                 f"Failed to save the scores to {args.output}: {exc}",
-                code="save_failed",
+                code=ERROR_SAVE_FAILED,
                 operation=operation,
                 input_file=args.output,
             ) from exc
@@ -480,7 +336,7 @@ def _save_scores(
         raise CliError(
             f"Writing a dense result of {n_rows} x {n_cols} pairs to .{output_format} would produce "
             f"{n_rows * n_cols} rows (limit {DENSE_TSV_MAX_ENTRIES}).",
-            code="matrix_too_large",
+            code=ERROR_MATRIX_TOO_LARGE,
             operation=operation,
             parameter="mode",
             hint="Use --mode sparse --score-min VALUE to write only the kept pairs, "
@@ -493,7 +349,7 @@ def _save_scores(
     except Exception as exc:
         raise CliError(
             f"Failed to save the scores to {args.output}: {exc}",
-            code="save_failed",
+            code=ERROR_SAVE_FAILED,
             operation=operation,
             input_file=args.output,
         ) from exc
@@ -547,17 +403,19 @@ def run(args, ctx) -> int:
     input_specs = _validate_inputs(args, operation)
 
     method_name, cls = _resolve_method(args.method, operation)
-    params = _build_params(args, operation)
-    _check_params_accepted(cls, method_name, params, operation)
-    _check_method_params(cls, method_name, params, operation)
+    params = similarity.build_params(args, operation)
+    signature = describe_signature(cls)
+    similarity.check_params_accepted(cls, method_name, params, operation)
+    effective = similarity.effective_params(signature, params)
+    _check_method_params(method_name, signature, params, operation)
     _check_sparse_mode(args, method_name, cls, operation)
 
-    collection_1 = _load_collection(input_specs[0][0], input_specs[0][1], operation)
+    collection_1 = files.load_collection(input_specs[0][0], input_specs[0][1], operation)
     n_rows = len(collection_1)
     if n_rows == 0:
         raise CliError(
             f"No spectra were loaded from {input_specs[0][0]}; nothing to compare.",
-            code="empty_spectra",
+            code=ERROR_EMPTY_SPECTRA,
             operation=operation,
             input_file=input_specs[0][0],
         )
@@ -569,12 +427,12 @@ def run(args, ctx) -> int:
                 "SPECTRA_1 and SPECTRA_2 are the same file; running a two-file (non-symmetric) "
                 "computation. Omit SPECTRA_2 for a symmetric all-vs-all run."
             )
-        collection_2 = _load_collection(input_specs[1][0], input_specs[1][1], operation)
+        collection_2 = files.load_collection(input_specs[1][0], input_specs[1][1], operation)
         n_cols = len(collection_2)
         if n_cols == 0:
             raise CliError(
                 f"No spectra were loaded from {input_specs[1][0]}; nothing to compare.",
-                code="empty_spectra",
+                code=ERROR_EMPTY_SPECTRA,
                 operation=operation,
                 input_file=input_specs[1][0],
             )
@@ -588,7 +446,7 @@ def run(args, ctx) -> int:
     if args.mode == "dense":
         _check_dense_size(n_rows, n_cols, args.max_dense_entries, operation)
 
-    similarity = _instantiate(cls, method_name, params, operation)
+    similarity_instance = similarity.instantiate(cls, method_name, params, operation, fingerprint_hint=True)
 
     row_ids = _row_ids(collection_1, args.id_field, input_specs[0][0], operation) if args.id_field else None
     if row_ids is not None and not symmetric:
@@ -597,7 +455,7 @@ def run(args, ctx) -> int:
         col_ids = row_ids
 
     started = time.perf_counter()
-    scores = _compute(args, similarity, method_name, collection_1, collection_2, operation)
+    scores = _compute(args, similarity_instance, method_name, collection_1, collection_2, operation)
     elapsed = time.perf_counter() - started
 
     format_name = _save_scores(
@@ -630,7 +488,7 @@ def run(args, ctx) -> int:
         "method": {
             "name": method_name,
             "class": cls.__name__,
-            "params": _effective_params(cls, params),
+            "params": effective,
         },
         "mode": args.mode,
         "inputs": {
