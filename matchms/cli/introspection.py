@@ -254,6 +254,28 @@ def extract_param_docs(docstring: str | None) -> dict[str, str]:
     return params
 
 
+def similarity_methods(cls: type) -> list[str]:
+    """The computation methods a similarity class actually implements.
+
+    Checks the public scoring surface (``pair``, ``matrix``, ``sparse_matrix``,
+    the indexed ``build_index``/``search`` workflow) against the class itself so
+    inherited implementations count. This is the single source of truth for
+    method/capability detection: ``similarity list``/``similarity info`` report
+    these, and the index/search commands use it to decide which methods support
+    a reusable library index.
+    """
+    methods = []
+    for method in _SIMILARITY_METHODS:
+        impl = inspect.getattr_static(cls, method, None)
+        if impl is None:
+            continue
+        # ``BaseSimilarity.sparse_matrix`` only raises NotImplementedError.
+        if method == "sparse_matrix" and impl is BaseSimilarity.sparse_matrix:
+            continue
+        methods.append(method)
+    return methods
+
+
 def similarity_signature(cls: type) -> dict:
     """Describe one similarity class for the ``similarity list``/``similarity info`` commands.
 
@@ -266,16 +288,6 @@ def similarity_signature(cls: type) -> dict:
     param_docs = extract_param_docs(cls.__doc__)
     param_docs.update(extract_param_docs(cls.__init__.__doc__))
 
-    methods = []
-    for method in _SIMILARITY_METHODS:
-        impl = inspect.getattr_static(cls, method, None)
-        if impl is None:
-            continue
-        # ``BaseSimilarity.sparse_matrix`` only raises NotImplementedError.
-        if method == "sparse_matrix" and impl is BaseSimilarity.sparse_matrix:
-            continue
-        methods.append(method)
-
     return {
         "signature": signature_info,
         "required": signature_info["required"],
@@ -283,7 +295,7 @@ def similarity_signature(cls: type) -> dict:
         "docstring": _clean_docstring(cls.__doc__),
         "score_fields": list(cls.score_fields),
         "is_commutative": bool(getattr(cls, "is_commutative", False)),
-        "methods": methods,
+        "methods": similarity_methods(cls),
     }
 
 

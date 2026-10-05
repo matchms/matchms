@@ -26,14 +26,32 @@ from matchms.cli.constants import (
     ERROR_UNSUPPORTED_METHOD,
 )
 from matchms.cli.errors import CliError, raise_for_unknown_value
+from matchms.cli.introspection import similarity_methods
 from matchms.cli.params import parse_params
 from matchms.similarity import __all__ as SIMILARITY_NAMES
 from matchms.similarity import get_similarity_function_by_name
 
 
+def _index_capable_names() -> tuple[str, ...]:
+    """Similarity classes that can build a reusable library index.
+
+    Derived from the same :func:`similarity_methods` introspection that
+    ``similarity list`` uses, so the index/search commands and ``similarity list``
+    can never disagree: a class is index-capable exactly when it implements
+    ``build_index()`` (which in matchms always comes with the indexed search
+    workflow). The result is sorted so the valid-value lists are deterministic.
+    """
+    names = [
+        name
+        for name in SIMILARITY_NAMES
+        if "build_index" in similarity_methods(get_similarity_function_by_name(name))
+    ]
+    return tuple(sorted(names))
+
+
 # Similarity classes that can build a reusable library index (they implement
 # build_index() and save_index(); the rest only compute pair/matrix scores).
-INDEX_CAPABLE_NAMES = ("Cosine", "Entropy", "EntropySearch", "ModifiedCosine")
+INDEX_CAPABLE_NAMES = _index_capable_names()
 
 # Entropy matching modes accepted by an index (validated before the constructor
 # so the error code is invalid_parameter, not a constructor error).
