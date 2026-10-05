@@ -80,7 +80,9 @@ def test_spectra_describe_table_output(tmp_path, capsys):
 def test_spectra_describe_missing_file(tmp_path, capsys):
     missing = tmp_path / "does_not_exist.mgf"
 
-    exit_code, payload = run_cli("spectra", "describe", str(missing), "--json", capsys=capsys)
+    exit_code, payload = run_cli(
+        "spectra", "describe", str(missing), "--json", capsys=capsys
+    )
 
     assert exit_code == 1
     assert payload["ok"] is False
@@ -93,7 +95,9 @@ def test_spectra_describe_unsupported_extension(tmp_path, capsys):
     fake = tmp_path / "spectra.txt"
     fake.write_text("not a spectra file\n", encoding="utf-8")
 
-    exit_code, payload = run_cli("spectra", "describe", str(fake), "--json", capsys=capsys)
+    exit_code, payload = run_cli(
+        "spectra", "describe", str(fake), "--json", capsys=capsys
+    )
 
     assert exit_code == 1
     assert payload["ok"] is False

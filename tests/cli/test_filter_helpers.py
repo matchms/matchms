@@ -38,7 +38,9 @@ def test_parse_scoped_params_empty():
 
 
 def test_parse_scoped_params_single():
-    assert parse_scoped_params(["select_by_mz.mz_from=10.0"]) == {"select_by_mz": {"mz_from": 10.0}}
+    assert parse_scoped_params(["select_by_mz.mz_from=10.0"]) == {
+        "select_by_mz": {"mz_from": 10.0}
+    }
 
 
 def test_parse_scoped_params_multiple_filters():
@@ -68,11 +70,11 @@ def test_parse_scoped_params_malformed(raw):
 def test_parse_scoped_params_types():
     result = parse_scoped_params(
         [
-            "f.a=1",  # int
-            "f.b=1.5",  # float
-            "f.c=true",  # bool
-            "f.d=false",  # bool
-            "f.e=hello",  # str
+            "f.a=1",          # int
+            "f.b=1.5",        # float
+            "f.c=true",       # bool
+            "f.d=false",      # bool
+            "f.e=hello",      # str
             'f.g=["x", "y"]',  # list
         ]
     )
@@ -186,24 +188,15 @@ def test_extract_param_docs_class_and_init_fallback():
 def test_similarity_signature_shape():
     info = similarity_signature(CosineGreedy)
     assert set(info) == {
-        "signature",
-        "required",
-        "param_docs",
-        "docstring",
-        "score_fields",
-        "is_commutative",
-        "methods",
+        "signature", "required", "param_docs", "docstring", "score_fields",
+        "is_commutative", "methods",
     }
     assert info["score_fields"] == ["score", "matches"]
     assert info["is_commutative"] is True
     assert info["docstring"].startswith("Calculate 'cosine similarity score'")
     assert set(info["signature"]["parameters"]) == {
-        "tolerance",
-        "mz_power",
-        "intensity_power",
-        "noise_cutoff",
-        "remove_precursor",
-        "offset_to_precursor",
+        "tolerance", "mz_power", "intensity_power",
+        "noise_cutoff", "remove_precursor", "offset_to_precursor",
     }
     assert info["required"] == []
 
@@ -274,12 +267,8 @@ def test_signature_parameters_similarity():
     info = similarity_signature(CosineGreedy)
     params = {p["name"]: p for p in signature_parameters(info)}
     assert set(params) == {
-        "tolerance",
-        "mz_power",
-        "intensity_power",
-        "noise_cutoff",
-        "remove_precursor",
-        "offset_to_precursor",
+        "tolerance", "mz_power", "intensity_power",
+        "noise_cutoff", "remove_precursor", "offset_to_precursor",
     }
     assert params["tolerance"]["default"] == 0.01
     assert "description" in params["tolerance"]

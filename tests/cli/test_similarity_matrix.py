@@ -46,16 +46,8 @@ def run_cli(*argv, capsys):
 def test_matrix_dense_npz_success(tmp_path, capsys):
     out = tmp_path / "m.npz"
     exit_code, payload = run_cli(
-        "similarity",
-        "matrix",
-        MGF_FILE,
-        "--method",
-        "CosineGreedy",
-        "-o",
-        str(out),
-        "--no-progress",
-        "--json",
-        capsys=capsys,
+        "similarity", "matrix", MGF_FILE, "--method", "CosineGreedy",
+        "-o", str(out), "--no-progress", "--json", capsys=capsys,
     )
 
     assert exit_code == 0
@@ -93,16 +85,8 @@ def test_matrix_dense_npz_success(tmp_path, capsys):
 def test_matrix_npz_roundtrip(tmp_path, capsys):
     out = tmp_path / "m.npz"
     exit_code, payload = run_cli(
-        "similarity",
-        "matrix",
-        MGF_FILE,
-        "--method",
-        "CosineGreedy",
-        "-o",
-        str(out),
-        "--no-progress",
-        "--json",
-        capsys=capsys,
+        "similarity", "matrix", MGF_FILE, "--method", "CosineGreedy",
+        "-o", str(out), "--no-progress", "--json", capsys=capsys,
     )
 
     assert exit_code == 0
@@ -115,17 +99,8 @@ def test_matrix_npz_roundtrip(tmp_path, capsys):
 def test_matrix_two_file_nonsymmetric(tmp_path, capsys):
     out = tmp_path / "m.npz"
     exit_code, payload = run_cli(
-        "similarity",
-        "matrix",
-        MSP_FILE,
-        MGF_FILE,
-        "--method",
-        "PrecursorMzMatch",
-        "-o",
-        str(out),
-        "--no-progress",
-        "--json",
-        capsys=capsys,
+        "similarity", "matrix", MSP_FILE, MGF_FILE, "--method", "PrecursorMzMatch",
+        "-o", str(out), "--no-progress", "--json", capsys=capsys,
     )
 
     assert exit_code == 0
@@ -140,16 +115,8 @@ def test_matrix_two_file_nonsymmetric(tmp_path, capsys):
 def test_matrix_method_is_case_insensitive(tmp_path, capsys):
     out = tmp_path / "m.npz"
     exit_code, payload = run_cli(
-        "similarity",
-        "matrix",
-        MGF_FILE,
-        "--method",
-        "cosinegreedy",
-        "-o",
-        str(out),
-        "--no-progress",
-        "--json",
-        capsys=capsys,
+        "similarity", "matrix", MGF_FILE, "--method", "cosinegreedy",
+        "-o", str(out), "--no-progress", "--json", capsys=capsys,
     )
 
     assert exit_code == 0
@@ -170,20 +137,9 @@ def test_every_listed_method_resolves(name, tmp_path, capsys):
 def test_matrix_sparse_mode(tmp_path, capsys):
     out = tmp_path / "m.npz"
     exit_code, payload = run_cli(
-        "similarity",
-        "matrix",
-        MGF_FILE,
-        "--method",
-        "CosineGreedy",
-        "--mode",
-        "sparse",
-        "--score-min",
-        "0.9",
-        "-o",
-        str(out),
-        "--no-progress",
-        "--json",
-        capsys=capsys,
+        "similarity", "matrix", MGF_FILE, "--method", "CosineGreedy",
+        "--mode", "sparse", "--score-min", "0.9",
+        "-o", str(out), "--no-progress", "--json", capsys=capsys,
     )
 
     assert exit_code == 0
@@ -196,20 +152,9 @@ def test_matrix_sparse_mode(tmp_path, capsys):
 def test_matrix_sparse_score_min_keeps_only_high_pairs(tmp_path, capsys):
     out = tmp_path / "m.npz"
     exit_code, payload = run_cli(
-        "similarity",
-        "matrix",
-        MGF_FILE,
-        "--method",
-        "CosineGreedy",
-        "--mode",
-        "sparse",
-        "--score-min",
-        "0.95",
-        "-o",
-        str(out),
-        "--no-progress",
-        "--json",
-        capsys=capsys,
+        "similarity", "matrix", MGF_FILE, "--method", "CosineGreedy",
+        "--mode", "sparse", "--score-min", "0.95",
+        "-o", str(out), "--no-progress", "--json", capsys=capsys,
     )
 
     assert exit_code == 0
@@ -221,18 +166,8 @@ def test_matrix_sparse_score_min_keeps_only_high_pairs(tmp_path, capsys):
 def test_matrix_top_pairs_exclude_diagonal_when_symmetric(tmp_path, capsys):
     out = tmp_path / "m.npz"
     exit_code, payload = run_cli(
-        "similarity",
-        "matrix",
-        MGF_FILE,
-        "--method",
-        "CosineGreedy",
-        "-o",
-        str(out),
-        "--no-progress",
-        "--top",
-        "20",
-        "--json",
-        capsys=capsys,
+        "similarity", "matrix", MGF_FILE, "--method", "CosineGreedy",
+        "-o", str(out), "--no-progress", "--top", "20", "--json", capsys=capsys,
     )
 
     assert exit_code == 0
@@ -244,18 +179,8 @@ def test_matrix_top_pairs_exclude_diagonal_when_symmetric(tmp_path, capsys):
 def test_matrix_top_zero_returns_no_pairs(tmp_path, capsys):
     out = tmp_path / "m.npz"
     exit_code, payload = run_cli(
-        "similarity",
-        "matrix",
-        MGF_FILE,
-        "--method",
-        "CosineGreedy",
-        "-o",
-        str(out),
-        "--no-progress",
-        "--top",
-        "0",
-        "--json",
-        capsys=capsys,
+        "similarity", "matrix", MGF_FILE, "--method", "CosineGreedy",
+        "-o", str(out), "--no-progress", "--top", "0", "--json", capsys=capsys,
     )
 
     assert exit_code == 0
@@ -264,20 +189,10 @@ def test_matrix_top_zero_returns_no_pairs(tmp_path, capsys):
 
 def test_matrix_same_file_twice_is_nonsymmetric(tmp_path, capfd):
     out = tmp_path / "m.npz"
-    exit_code = main(
-        [
-            "similarity",
-            "matrix",
-            MGF_FILE,
-            MGF_FILE,
-            "--method",
-            "PrecursorMzMatch",
-            "-o",
-            str(out),
-            "--no-progress",
-            "--json",
-        ]
-    )
+    exit_code = main([
+        "similarity", "matrix", MGF_FILE, MGF_FILE, "--method", "PrecursorMzMatch",
+        "-o", str(out), "--no-progress", "--json",
+    ])
     captured = capfd.readouterr()
     payload = json.loads(captured.out)
 
@@ -291,22 +206,9 @@ def test_matrix_same_file_twice_is_nonsymmetric(tmp_path, capfd):
 def test_matrix_tsv_with_id_field(tmp_path, capsys):
     out = tmp_path / "m.tsv"
     exit_code = run_cli(
-        "similarity",
-        "matrix",
-        MGF_FILE,
-        "--method",
-        "CosineGreedy",
-        "--mode",
-        "sparse",
-        "--score-min",
-        "0.9",
-        "--id-field",
-        "compound_name",
-        "-o",
-        str(out),
-        "--no-progress",
-        "--json",
-        capsys=capsys,
+        "similarity", "matrix", MGF_FILE, "--method", "CosineGreedy",
+        "--mode", "sparse", "--score-min", "0.9", "--id-field", "compound_name",
+        "-o", str(out), "--no-progress", "--json", capsys=capsys,
     )[0]
 
     assert exit_code == 0
@@ -320,16 +222,8 @@ def test_matrix_tsv_with_id_field(tmp_path, capsys):
 def test_matrix_csv_format(tmp_path, capsys):
     out = tmp_path / "m.csv"
     exit_code, payload = run_cli(
-        "similarity",
-        "matrix",
-        MGF_FILE,
-        "--method",
-        "CosineGreedy",
-        "-o",
-        str(out),
-        "--no-progress",
-        "--json",
-        capsys=capsys,
+        "similarity", "matrix", MGF_FILE, "--method", "CosineGreedy",
+        "-o", str(out), "--no-progress", "--json", capsys=capsys,
     )
 
     assert exit_code == 0
@@ -344,16 +238,8 @@ def test_matrix_output_is_replaced(tmp_path, capsys):
     out.write_bytes(b"stale-bytes")
 
     exit_code, payload = run_cli(
-        "similarity",
-        "matrix",
-        MGF_FILE,
-        "--method",
-        "CosineGreedy",
-        "-o",
-        str(out),
-        "--no-progress",
-        "--json",
-        capsys=capsys,
+        "similarity", "matrix", MGF_FILE, "--method", "CosineGreedy",
+        "-o", str(out), "--no-progress", "--json", capsys=capsys,
     )
 
     assert exit_code == 0
@@ -364,19 +250,10 @@ def test_matrix_output_is_replaced(tmp_path, capsys):
 
 def test_matrix_human_table_output(tmp_path, capsys):
     out = tmp_path / "m.npz"
-    exit_code = main(
-        [
-            "similarity",
-            "matrix",
-            MGF_FILE,
-            "--method",
-            "CosineGreedy",
-            "-o",
-            str(out),
-            "--no-progress",
-            "--table",
-        ]
-    )
+    exit_code = main([
+        "similarity", "matrix", MGF_FILE, "--method", "CosineGreedy",
+        "-o", str(out), "--no-progress", "--table",
+    ])
     text = capsys.readouterr().out
 
     assert exit_code == 0
@@ -397,15 +274,8 @@ def test_matrix_missing_input_file(tmp_path, capsys):
     out = tmp_path / "m.npz"
 
     exit_code, payload = run_cli(
-        "similarity",
-        "matrix",
-        str(missing),
-        "--method",
-        "CosineGreedy",
-        "-o",
-        str(out),
-        "--json",
-        capsys=capsys,
+        "similarity", "matrix", str(missing), "--method", "CosineGreedy",
+        "-o", str(out), "--json", capsys=capsys,
     )
 
     assert exit_code == 1
@@ -421,15 +291,8 @@ def test_matrix_unsupported_input_extension(tmp_path, capsys):
     out = tmp_path / "m.npz"
 
     exit_code, payload = run_cli(
-        "similarity",
-        "matrix",
-        str(fake),
-        "--method",
-        "CosineGreedy",
-        "-o",
-        str(out),
-        "--json",
-        capsys=capsys,
+        "similarity", "matrix", str(fake), "--method", "CosineGreedy",
+        "-o", str(out), "--json", capsys=capsys,
     )
 
     assert exit_code == 1
@@ -442,15 +305,8 @@ def test_matrix_unsupported_output_extension(tmp_path, capsys):
     out = tmp_path / "m.txt"
 
     exit_code, payload = run_cli(
-        "similarity",
-        "matrix",
-        MGF_FILE,
-        "--method",
-        "CosineGreedy",
-        "-o",
-        str(out),
-        "--json",
-        capsys=capsys,
+        "similarity", "matrix", MGF_FILE, "--method", "CosineGreedy",
+        "-o", str(out), "--json", capsys=capsys,
     )
 
     assert exit_code == 1
@@ -462,15 +318,8 @@ def test_matrix_unknown_method(tmp_path, capsys):
     out = tmp_path / "m.npz"
 
     exit_code, payload = run_cli(
-        "similarity",
-        "matrix",
-        MGF_FILE,
-        "--method",
-        "NotARealMethod",
-        "-o",
-        str(out),
-        "--json",
-        capsys=capsys,
+        "similarity", "matrix", MGF_FILE, "--method", "NotARealMethod",
+        "-o", str(out), "--json", capsys=capsys,
     )
 
     assert exit_code == 1
@@ -482,15 +331,8 @@ def test_matrix_method_typo_suggests_closest(tmp_path, capsys):
     out = tmp_path / "m.npz"
 
     exit_code, payload = run_cli(
-        "similarity",
-        "matrix",
-        MGF_FILE,
-        "--method",
-        "CosineGredy",
-        "-o",
-        str(out),
-        "--json",
-        capsys=capsys,
+        "similarity", "matrix", MGF_FILE, "--method", "CosineGredy",
+        "-o", str(out), "--json", capsys=capsys,
     )
 
     assert exit_code == 1
@@ -502,17 +344,8 @@ def test_matrix_sparse_on_nonsparse_method(tmp_path, capsys):
     out = tmp_path / "m.npz"
 
     exit_code, payload = run_cli(
-        "similarity",
-        "matrix",
-        MGF_FILE,
-        "--method",
-        "Cosine",
-        "--mode",
-        "sparse",
-        "-o",
-        str(out),
-        "--json",
-        capsys=capsys,
+        "similarity", "matrix", MGF_FILE, "--method", "Cosine",
+        "--mode", "sparse", "-o", str(out), "--json", capsys=capsys,
     )
 
     assert exit_code == 1
@@ -527,17 +360,8 @@ def test_matrix_sparse_rejects_each_dense_only_method(tmp_path, capsys, dense_na
     out = tmp_path / "m.npz"
 
     exit_code, payload = run_cli(
-        "similarity",
-        "matrix",
-        MGF_FILE,
-        "--method",
-        dense_name,
-        "--mode",
-        "sparse",
-        "-o",
-        str(out),
-        "--json",
-        capsys=capsys,
+        "similarity", "matrix", MGF_FILE, "--method", dense_name,
+        "--mode", "sparse", "-o", str(out), "--json", capsys=capsys,
     )
 
     assert exit_code == 1
@@ -548,17 +372,8 @@ def test_matrix_score_min_in_dense_mode(tmp_path, capsys):
     out = tmp_path / "m.npz"
 
     exit_code, payload = run_cli(
-        "similarity",
-        "matrix",
-        MGF_FILE,
-        "--method",
-        "CosineGreedy",
-        "--score-min",
-        "0.5",
-        "-o",
-        str(out),
-        "--json",
-        capsys=capsys,
+        "similarity", "matrix", MGF_FILE, "--method", "CosineGreedy",
+        "--score-min", "0.5", "-o", str(out), "--json", capsys=capsys,
     )
 
     assert exit_code == 1
@@ -569,17 +384,8 @@ def test_matrix_dense_too_large(tmp_path, capsys):
     out = tmp_path / "m.npz"
 
     exit_code, payload = run_cli(
-        "similarity",
-        "matrix",
-        MGF_FILE,
-        "--method",
-        "CosineGreedy",
-        "--max-dense-entries",
-        "100",
-        "-o",
-        str(out),
-        "--json",
-        capsys=capsys,
+        "similarity", "matrix", MGF_FILE, "--method", "CosineGreedy",
+        "--max-dense-entries", "100", "-o", str(out), "--json", capsys=capsys,
     )
 
     assert exit_code == 1
@@ -591,16 +397,8 @@ def test_matrix_dense_tsv_too_large(tmp_path, monkeypatch, capsys):
     out = tmp_path / "m.tsv"
 
     exit_code, payload = run_cli(
-        "similarity",
-        "matrix",
-        MGF_FILE,
-        "--method",
-        "CosineGreedy",
-        "-o",
-        str(out),
-        "--no-progress",
-        "--json",
-        capsys=capsys,
+        "similarity", "matrix", MGF_FILE, "--method", "CosineGreedy",
+        "-o", str(out), "--no-progress", "--json", capsys=capsys,
     )
 
     assert exit_code == 1
@@ -611,19 +409,8 @@ def test_matrix_tolerance_conflicts_with_param(tmp_path, capsys):
     out = tmp_path / "m.npz"
 
     exit_code, payload = run_cli(
-        "similarity",
-        "matrix",
-        MGF_FILE,
-        "--method",
-        "CosineGreedy",
-        "--tolerance",
-        "0.1",
-        "--param",
-        "tolerance=0.2",
-        "-o",
-        str(out),
-        "--json",
-        capsys=capsys,
+        "similarity", "matrix", MGF_FILE, "--method", "CosineGreedy",
+        "--tolerance", "0.1", "--param", "tolerance=0.2", "-o", str(out), "--json", capsys=capsys,
     )
 
     assert exit_code == 1
@@ -634,17 +421,8 @@ def test_matrix_unknown_parameter_name(tmp_path, capsys):
     out = tmp_path / "m.npz"
 
     exit_code, payload = run_cli(
-        "similarity",
-        "matrix",
-        MGF_FILE,
-        "--method",
-        "CosineGreedy",
-        "--param",
-        "not_a_real_param=1",
-        "-o",
-        str(out),
-        "--json",
-        capsys=capsys,
+        "similarity", "matrix", MGF_FILE, "--method", "CosineGreedy",
+        "--param", "not_a_real_param=1", "-o", str(out), "--json", capsys=capsys,
     )
 
     assert exit_code == 1
@@ -656,15 +434,8 @@ def test_matrix_metadata_match_requires_field(tmp_path, capsys):
     out = tmp_path / "m.npz"
 
     exit_code, payload = run_cli(
-        "similarity",
-        "matrix",
-        MGF_FILE,
-        "--method",
-        "MetadataMatch",
-        "-o",
-        str(out),
-        "--json",
-        capsys=capsys,
+        "similarity", "matrix", MGF_FILE, "--method", "MetadataMatch",
+        "-o", str(out), "--json", capsys=capsys,
     )
 
     assert exit_code == 1
@@ -676,17 +447,8 @@ def test_matrix_entropy_search_rejects_ppm(tmp_path, capsys):
     out = tmp_path / "m.npz"
 
     exit_code, payload = run_cli(
-        "similarity",
-        "matrix",
-        MGF_FILE,
-        "--method",
-        "EntropySearch",
-        "--param",
-        "use_ppm=true",
-        "-o",
-        str(out),
-        "--json",
-        capsys=capsys,
+        "similarity", "matrix", MGF_FILE, "--method", "EntropySearch",
+        "--param", "use_ppm=true", "-o", str(out), "--json", capsys=capsys,
     )
 
     assert exit_code == 1
@@ -698,17 +460,8 @@ def test_matrix_entropy_search_rejects_non_fragment_mode(tmp_path, capsys):
     out = tmp_path / "m.npz"
 
     exit_code, payload = run_cli(
-        "similarity",
-        "matrix",
-        MGF_FILE,
-        "--method",
-        "EntropySearch",
-        "--param",
-        "matching_mode=precursor",
-        "-o",
-        str(out),
-        "--json",
-        capsys=capsys,
+        "similarity", "matrix", MGF_FILE, "--method", "EntropySearch",
+        "--param", "matching_mode=precursor", "-o", str(out), "--json", capsys=capsys,
     )
 
     assert exit_code == 1
@@ -720,15 +473,8 @@ def test_matrix_fingerprint_without_structure(tmp_path, capsys):
     out = tmp_path / "m.npz"
 
     exit_code, payload = run_cli(
-        "similarity",
-        "matrix",
-        MGF_FILE,
-        "--method",
-        "FingerprintSimilarity",
-        "-o",
-        str(out),
-        "--json",
-        capsys=capsys,
+        "similarity", "matrix", MGF_FILE, "--method", "FingerprintSimilarity",
+        "-o", str(out), "--json", capsys=capsys,
     )
 
     assert exit_code == 1
@@ -740,15 +486,8 @@ def test_matrix_fingerprint_requires_generator(tmp_path, capsys):
     out = tmp_path / "m.npz"
 
     exit_code, payload = run_cli(
-        "similarity",
-        "matrix",
-        FINGERPRINT_JSON,
-        "--method",
-        "FingerprintSimilarity",
-        "-o",
-        str(out),
-        "--json",
-        capsys=capsys,
+        "similarity", "matrix", FINGERPRINT_JSON, "--method", "FingerprintSimilarity",
+        "-o", str(out), "--json", capsys=capsys,
     )
 
     assert exit_code == 1
@@ -762,15 +501,8 @@ def test_matrix_empty_collection(tmp_path, capsys):
     out = tmp_path / "m.npz"
 
     exit_code, payload = run_cli(
-        "similarity",
-        "matrix",
-        str(empty),
-        "--method",
-        "CosineGreedy",
-        "-o",
-        str(out),
-        "--json",
-        capsys=capsys,
+        "similarity", "matrix", str(empty), "--method", "CosineGreedy",
+        "-o", str(out), "--json", capsys=capsys,
     )
 
     assert exit_code == 1
