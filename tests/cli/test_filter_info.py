@@ -36,9 +36,7 @@ def test_filter_info_json(capsys):
 
 def test_filter_info_required_parameter(capsys):
     """repair_smiles_of_salts has a required mass_tolerance parameter."""
-    exit_code, payload = run_cli(
-        "filter", "info", "repair_smiles_of_salts", "--json", capsys=capsys
-    )
+    exit_code, payload = run_cli("filter", "info", "repair_smiles_of_salts", "--json", capsys=capsys)
 
     assert exit_code == 0
     assert payload["name"] == "repair_smiles_of_salts"
@@ -80,9 +78,7 @@ def test_filter_info_table_output(capsys):
 
 
 def test_filter_info_unknown_filter(capsys):
-    exit_code, payload = run_cli(
-        "filter", "info", "not_a_filter", "--json", capsys=capsys
-    )
+    exit_code, payload = run_cli("filter", "info", "not_a_filter", "--json", capsys=capsys)
 
     assert exit_code == 1
     assert payload["ok"] is False
