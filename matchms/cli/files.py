@@ -23,9 +23,7 @@ from matchms.cli.errors import CliError
 from matchms.importing import load_ms2_dataset
 
 
-INPUT_HINT = (
-    "Use a supported extension such as .mgf, .msp, .mzml, .mzxml, .json or .pickle."
-)
+INPUT_HINT = "Use a supported extension such as .mgf, .msp, .mzml, .mzxml, .json or .pickle."
 
 
 def extension_of(path: str) -> str | None:

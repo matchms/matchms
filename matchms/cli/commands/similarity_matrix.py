@@ -112,9 +112,7 @@ def _validate_inputs(args, operation: str) -> list[tuple[str, str]]:
     for path in (args.spectra_1, args.spectra_2):
         if path is None:
             continue
-        specs.append(
-            (path, files.validate_input_file(path, operation, kind="input file"))
-        )
+        specs.append((path, files.validate_input_file(path, operation, kind="input file")))
     return specs
 
 

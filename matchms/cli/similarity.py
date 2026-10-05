@@ -42,9 +42,7 @@ def _index_capable_names() -> tuple[str, ...]:
     workflow). The result is sorted so the valid-value lists are deterministic.
     """
     names = [
-        name
-        for name in SIMILARITY_NAMES
-        if "build_index" in similarity_methods(get_similarity_function_by_name(name))
+        name for name in SIMILARITY_NAMES if "build_index" in similarity_methods(get_similarity_function_by_name(name))
     ]
     return tuple(sorted(names))
 
@@ -121,9 +119,7 @@ def effective_params(sig: dict, params: dict) -> dict:
     *sig* is a :func:`~matchms.cli.params.describe_signature` result; compute it
     once per run and share it with :func:`check_missing_required`.
     """
-    effective = {
-        pname: spec["default"] for pname, spec in sig["parameters"].items() if "default" in spec
-    }
+    effective = {pname: spec["default"] for pname, spec in sig["parameters"].items() if "default" in spec}
     effective.update(params)
     return effective
 

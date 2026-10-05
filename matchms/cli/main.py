@@ -80,6 +80,7 @@ def _log_level(args) -> int:
 
 def _group_help(parser: argparse.ArgumentParser):
     """Return a handler that prints the help of a command group and exits with code 2."""
+
     def _run(args, ctx) -> int:
         parser.print_help()
         return 2
