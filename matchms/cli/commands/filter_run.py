@@ -39,8 +39,6 @@ from matchms.importing.load_spectra import SUPPORTED_FILE_FORMATS as INPUT_FORMA
 
 CLI_COMMAND = "filter run"
 
-EXPORT_STYLES = ("matchms", "massbank", "nist", "riken", "gnps")
-
 REPORT_SUFFIX = "_processing_report.json"
 
 REPORT_COLUMNS = (

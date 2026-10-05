@@ -16,6 +16,8 @@ SUPPORTED_FILE_FORMATS = {
     "pickle": "pickled list of matchms Spectrum objects",
 }
 
+EXPORT_STYLES = ("matchms", "massbank", "nist", "riken", "gnps")
+
 
 def save_spectra(
     spectra: list[Spectrum],

@@ -18,11 +18,11 @@ from matchms.cli.commands.similarity_matrix import (
 )
 from matchms.cli.commands.similarity_matrix import run as run_similarity_matrix
 from matchms.cli.commands.similarity_search import run as run_similarity_search
-from matchms.cli.commands.spectra_convert import EXPORT_STYLES
 from matchms.cli.commands.spectra_convert import run as run_spectra_convert
 from matchms.cli.commands.spectra_describe import run as run_spectra_describe
 from matchms.cli.errors import CliError, configure_logging, emit_error, unexpected_error_payload
 from matchms.cli.output import CLI_JSON_SCHEMA_VERSION, OutputContext
+from matchms.exporting.save_spectra import EXPORT_STYLES
 
 
 def _add_common_flags(parser: argparse.ArgumentParser, *, suppress: bool) -> None:
