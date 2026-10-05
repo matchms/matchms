@@ -110,7 +110,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--version",
         action="version",
-        version=f"matchms {matchms_version} (CLI JSON schema v{CLI_JSON_SCHEMA_VERSION})",
+        version=f"matchms {matchms_version} (CLI JSON schema {CLI_JSON_SCHEMA_VERSION})",
         help="Print the matchms version and the CLI JSON schema version.",
     )
     _add_common_flags(parser, suppress=False)
@@ -127,8 +127,8 @@ def build_parser() -> argparse.ArgumentParser:
         parents=[common],
         help="Report versions, supported formats and filters",
         description=(
-            "Report the matchms/Python versions, supported input/output formats, "
-            "all filters (with default order) and the CLI JSON schema version."
+            "Report the matchms/Python/CLI schema versions, supported input/output formats, "
+            "all supported commands (spectra, filter, similarity) and corresponding subcommands."
         ),
     )
     p.set_defaults(func=run_info)
@@ -218,11 +218,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
     pf_run.add_argument(
         "input",
-        help="Path to the input spectra file (supported extensions: json, mgf, msp, mzml, mzxml, pickle).",
+        help="Path to the input spectra file. Supported extensions: json, mgf, msp, mzml, mzxml, pickle.",
     )
     pf_run.add_argument(
         "output",
-        help="Path to the output spectra file (supported extensions: json, mgf, msp, pickle).",
+        help="Path to the output spectra file. Supported extensions: json, mgf, msp, pickle.",
     )
     pf_run.add_argument(
         "--ftype",
@@ -281,7 +281,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="List, inspect, compute, index and search matchms similarity measures",
         description=(
             "Work with the similarity measures available in matchms.similarity. "
-            "`similarity list` shows all similarity measures"
+            "`similarity list` shows all similarity measures. "
             "`similarity info` shows the description, score fields, methods and "
             "constructor parameters of a single similarity; `similarity matrix` "
             "computes a similarity matrix between one or two spectra files; "
@@ -300,11 +300,10 @@ def build_parser() -> argparse.ArgumentParser:
         help="List all available similarity measures",
         description=(
             "List all similarity classes exposed by matchms.similarity, grouped "
-            "like the 'Similarity measures' section of the README (Cosine, "
-            "Modified cosine, Spectral entropy, ...). Shows the group, name, a "
-            "short description and the supported computation methods for each "
-            "class. Classes that are not grouped in the README are listed under "
-            "the 'Other' group."
+            "by 'Similarity measures' (Cosine, Modified cosine, Spectral entropy, "
+            "...). Shows the group, name, a short description and the supported "
+            "computation methods for each class. Unclassified similarity groups are "
+            "listed under the 'Other' group."
         ),
     )
     ps_list.set_defaults(func=run_similarity_list)
@@ -315,7 +314,7 @@ def build_parser() -> argparse.ArgumentParser:
         parents=[common],
         help="Show the description and parameters of one similarity",
         description=(
-            "Show detailed information about one similarity class: which README "
+            "Show detailed information about one similarity class: which similarity "
             "group it belongs to, what it does (full docstring), the score "
             "fields it produces, the computation methods it supports and its "
             "constructor parameters with type, default value and description."
@@ -334,7 +333,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="Compute a similarity matrix between one or two spectra files",
         description=(
             "Compute a similarity matrix between the spectra of SPECTRA_1 "
-            "(rows) and optionally SPECTRA_2 (columns) and write it to -o. "
+            "(rows) and optionally SPECTRA_2 (columns) and write it to an output file. "
             "Without SPECTRA_2 a symmetric all-vs-all matrix over SPECTRA_1 is "
             "computed. The output extension selects the format: .npz stores the "
             "Scores artifact, .tsv/.csv store a long format (one row per pair). "
@@ -346,7 +345,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     ps_matrix.add_argument(
         "spectra_1",
-        help="Input spectra file for the rows (supported extensions: json, mgf, msp, mzml, mzxml, pickle).",
+        help="Input spectra file for the rows. Supported extensions: json, mgf, msp, mzml, mzxml, pickle.",
     )
     ps_matrix.add_argument(
         "spectra_2",
@@ -441,7 +440,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     ps_build_index.add_argument(
         "library",
-        help="Reference spectra file to index (supported extensions: json, mgf, msp, mzml, mzxml, pickle).",
+        help="Reference spectra file to index. Supported extensions: json, mgf, msp, mzml, mzxml, pickle.",
     )
     ps_build_index.add_argument(
         "--method",
@@ -479,7 +478,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="Search a query file against a spectra library or a saved index",
         description=(
             "Search the spectra of QUERIES against a reference LIBRARY and write "
-            "the best matches per query to the -o hit list (.tsv or .csv). LIBRARY "
+            "the best matches per query to an output (.tsv or .csv). LIBRARY "
             "is either a spectra file (the index is built on the fly) or an index "
             "saved by `similarity build-index` (a .index.npz file). --method "
             "selects an index-capable similarity (Cosine, ModifiedCosine, Entropy, "
@@ -568,7 +567,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--output",
         required=True,
         metavar="PATH",
-        help="Hit list (.tsv or .csv); the extension selects the format. An existing file is replaced.",
+        help="Output list (.tsv or .csv); the extension selects the format. An existing file is replaced.",
     )
     ps_search.add_argument(
         "--top",
@@ -604,7 +603,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     pd.add_argument(
         "spectrumfile",
-        help="Path to the spectra file to describe (supported extensions: json, mgf, msp, mzml, mzxml, pickle).",
+        help="Path to the spectra file to describe. Supported extensions: json, mgf, msp, mzml, mzxml, pickle.",
     )
     pd.add_argument(
         "--ftype",
@@ -627,11 +626,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
     pc.add_argument(
         "input",
-        help="Path to the input spectra file (supported extensions: json, mgf, msp, mzml, mzxml, pickle).",
+        help="Path to the input spectra file. Supported extensions: json, mgf, msp, mzml, mzxml, pickle.",
     )
     pc.add_argument(
         "output",
-        help="Path to the output spectra file (supported extensions: json, mgf, msp, pickle).",
+        help="Path to the output spectra file. Supported extensions: json, mgf, msp, pickle.",
     )
     pc.add_argument(
         "--ftype",

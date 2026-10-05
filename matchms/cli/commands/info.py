@@ -38,7 +38,7 @@ CLI_COMMANDS = {
     "filter pipelines": "List all available filter pipelines",
     "filter info": "Show the description and parameters of one filter",
     "filter run": "Run a filter pipeline on a spectra file (SpectraProcessor) and emit a report",
-    "similarity list": "List all available matchms similarity measures (grouped like the README)",
+    "similarity list": "List all available matchms similarity measures",
     "similarity info": "Show the description, score fields, methods and parameters of one similarity",
     "similarity matrix": "Compute a similarity matrix between one or two spectra files and save it (.npz/.tsv/.csv)",
     "similarity build-index": "Build a reusable library index from a spectra file (.index.npz)",

@@ -17,7 +17,7 @@ import numpy as np
 
 # Schema version of the CLI's JSON output. Bump when the structure of any
 # JSON payload changes in a way that consumers must be aware of.
-CLI_JSON_SCHEMA_VERSION = "1.0"
+CLI_JSON_SCHEMA_VERSION = "1.0.0"
 
 
 class OutputContext:

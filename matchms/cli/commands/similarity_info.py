@@ -1,7 +1,7 @@
 """CLI command: matchms similarity info.
 
 Shows detailed information about a single similarity class from
-``matchms.similarity``: which README group it belongs to, a short
+``matchms.similarity``: which similarity group it belongs to, a short
 description, its full docstring, the score fields it produces, the
 computation methods it supports and its constructor parameters (name,
 type, whether it is required, default value and description).

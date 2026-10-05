@@ -1,12 +1,11 @@
 """CLI command: matchms similarity list.
 
-Lists all similarity classes exposed by ``matchms.similarity``, grouped like
-the "Similarity measures" section of the README (Cosine, Modified cosine,
+Lists all similarity classes exposed by ``matchms.similarity``, grouped by
+"Similarity measures" (Cosine, Modified cosine,
 Spectral entropy, ...). Each row shows the group, the class name, a short
 description and the supported computation methods.
 
-Classes that the README does not group are listed under the ``Other`` group;
-no information about them is invented beyond their own docstring.
+Unclassified similarity measures are grouped in ``Other`` group.
 """
 
 from matchms.cli.introspection import short_description, similarity_signature
@@ -19,7 +18,6 @@ CLI_COMMAND = "similarity list"
 
 OTHER_GROUP_NAME = "Other"
 
-# Groups as documented in the README ("Similarity measures" section):
 # (group name, "typical use" description, ordered member classes).
 GROUPS = (
     (
@@ -117,7 +115,7 @@ def _format_human(rows: list[dict]) -> str:
     table_rows = [[row["group"], row["name"], row["description"], row["methods"]] for row in rows]
     return "\n".join(
         [
-            f"Available similarity measures ({len(rows)}), grouped as in the README:",
+            f"Available similarity measures ({len(rows)})",
             "",
             human_table(["group", "name", "description", "methods"], table_rows),
             "",
