@@ -273,9 +273,7 @@ def _check_sparse_mode(args, name: str, cls, operation: str) -> None:
             parameter="mode",
             valid_values=sparse_names,
             hint=(
-                "These similarities support --mode sparse: "
-                f"{', '.join(sparse_names)}. "
-                "Otherwise run with --mode dense."
+                f"These similarities support --mode sparse: {', '.join(sparse_names)}. Otherwise run with --mode dense."
             ),
         )
 
@@ -283,9 +281,7 @@ def _check_sparse_mode(args, name: str, cls, operation: str) -> None:
 def _effective_params(cls, params: dict) -> dict:
     """Constructor parameters that will actually be used (defaults + overrides)."""
     effective = {
-        pname: spec["default"]
-        for pname, spec in describe_signature(cls)["parameters"].items()
-        if "default" in spec
+        pname: spec["default"] for pname, spec in describe_signature(cls)["parameters"].items() if "default" in spec
     }
     effective.update(params)
     return effective
@@ -346,8 +342,7 @@ def _check_dense_size(n_rows: int, n_cols: int, max_entries: int, operation: str
             code="matrix_too_large",
             operation=operation,
             parameter="max_dense_entries",
-            hint="Use --mode sparse --score-min VALUE to keep only the relevant pairs, "
-            "or raise --max-dense-entries.",
+            hint="Use --mode sparse --score-min VALUE to keep only the relevant pairs, or raise --max-dense-entries.",
         )
 
 
@@ -437,16 +432,11 @@ def _long_format_df(scores: Scores, row_ids: list[str] | None, col_ids: list[str
     if scores.is_sparse:
         # Anchor the rows on the field with the most stored values; the other
         # fields are zero-filled at the coordinates they do not cover.
-        anchor_field = max(
-            scores.score_fields, key=lambda field: scores.to_coo(field).nnz
-        )
+        anchor_field = max(scores.score_fields, key=lambda field: scores.to_coo(field).nnz)
         anchor = scores.to_coo(anchor_field)
         row = anchor.row
         col = anchor.col
-        positions = {
-            (int(r), int(c)): i
-            for i, (r, c) in enumerate(zip(row.tolist(), col.tolist(), strict=True))
-        }
+        positions = {(int(r), int(c)): i for i, (r, c) in enumerate(zip(row.tolist(), col.tolist(), strict=True))}
     else:
         n_rows, n_cols = scores.shape
         row = np.repeat(np.arange(n_rows), n_cols)
@@ -461,8 +451,7 @@ def _long_format_df(scores: Scores, row_ids: list[str] | None, col_ids: list[str
         if scores.is_sparse:
             values = np.zeros(len(row), dtype=scores.to_coo(field).dtype)
             field_coo = scores.to_coo(field)
-            for r, c, v in zip(field_coo.row.tolist(), field_coo.col.tolist(),
-                               field_coo.data.tolist(), strict=True):
+            for r, c, v in zip(field_coo.row.tolist(), field_coo.col.tolist(), field_coo.data.tolist(), strict=True):
                 i = positions.get((r, c))
                 if i is not None:
                     values[i] = v
@@ -472,8 +461,9 @@ def _long_format_df(scores: Scores, row_ids: list[str] | None, col_ids: list[str
     return df
 
 
-def _save_scores(args, scores: Scores, output_format: str, row_ids, col_ids,
-                 n_rows: int, n_cols: int, operation: str) -> str:
+def _save_scores(
+    args, scores: Scores, output_format: str, row_ids, col_ids, n_rows: int, n_cols: int, operation: str
+) -> str:
     if output_format == "npz":
         try:
             scores.save(args.output)
@@ -510,8 +500,9 @@ def _save_scores(args, scores: Scores, output_format: str, row_ids, col_ids,
     return output_format
 
 
-def _top_pairs(scores: Scores, symmetric: bool, top: int,
-               row_ids: list[str] | None, col_ids: list[str] | None) -> list[dict]:
+def _top_pairs(
+    scores: Scores, symmetric: bool, top: int, row_ids: list[str] | None, col_ids: list[str] | None
+) -> list[dict]:
     """The top *top* pairs of the main score field (diagonal excluded when symmetric)."""
     main_field = "score" if "score" in scores.score_fields else scores.score_fields[0]
     if scores.is_sparse:
@@ -610,9 +601,13 @@ def run(args, ctx) -> int:
     elapsed = time.perf_counter() - started
 
     format_name = _save_scores(
-        args, scores, output_format,
-        row_ids=row_ids, col_ids=col_ids,
-        n_rows=n_rows, n_cols=n_cols,
+        args,
+        scores,
+        output_format,
+        row_ids=row_ids,
+        col_ids=col_ids,
+        n_rows=n_rows,
+        n_cols=n_cols,
         operation=operation,
     )
 
@@ -640,9 +635,7 @@ def run(args, ctx) -> int:
         "mode": args.mode,
         "inputs": {
             "spectra_1": {"file": input_specs[0][0], "n_spectra": n_rows},
-            "spectra_2": (
-                {"file": input_specs[1][0], "n_spectra": n_cols} if not symmetric else None
-            ),
+            "spectra_2": ({"file": input_specs[1][0], "n_spectra": n_cols} if not symmetric else None),
             "symmetric": symmetric,
         },
         "scores": {
@@ -696,8 +689,11 @@ def _format_human(payload: dict, args) -> str:
     if payload["top_pairs"]:
         id_field = args.id_field
         columns = ["row", "col"] + (["row_id", "col_id"] if id_field else []) + ["value"]
-        lines.append(f"Top {len(payload['top_pairs'])} pairs (main 'score' field"
-                     + (", symmetric diagonal excluded" if inputs["symmetric"] else "") + "):")
+        lines.append(
+            f"Top {len(payload['top_pairs'])} pairs (main 'score' field"
+            + (", symmetric diagonal excluded" if inputs["symmetric"] else "")
+            + "):"
+        )
         lines.append(
             human_table(
                 columns,

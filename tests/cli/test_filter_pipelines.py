@@ -85,9 +85,7 @@ def test_filter_pipelines_overview_table_output(capsys):
 
 
 def test_filter_pipelines_detail_json(capsys):
-    exit_code, payload = run_cli(
-        "filter", "pipelines", "HARMONIZE_METADATA_FIELD_NAMES", "--json", capsys=capsys
-    )
+    exit_code, payload = run_cli("filter", "pipelines", "HARMONIZE_METADATA_FIELD_NAMES", "--json", capsys=capsys)
 
     assert exit_code == 0
     assert payload["ok"] is True
@@ -106,9 +104,7 @@ def test_filter_pipelines_detail_json(capsys):
 
 def test_filter_pipelines_detail_filters_match_filter_set(capsys):
     """The detail filters must mirror the pipeline's filter set exactly."""
-    exit_code, payload = run_cli(
-        "filter", "pipelines", "REQUIRE_COMPLETE_METADATA", "--json", capsys=capsys
-    )
+    exit_code, payload = run_cli("filter", "pipelines", "REQUIRE_COMPLETE_METADATA", "--json", capsys=capsys)
 
     assert exit_code == 0
     filter_set = FILTER_SETS_BY_NAME["REQUIRE_COMPLETE_METADATA"]
@@ -125,15 +121,11 @@ def test_filter_pipelines_detail_filters_match_filter_set(capsys):
 
 def test_filter_pipelines_detail_parameters(capsys):
     """Pipelines with parametrized filters must report those parameters."""
-    exit_code, payload = run_cli(
-        "filter", "pipelines", "REQUIRE_COMPLETE_METADATA", "--json", capsys=capsys
-    )
+    exit_code, payload = run_cli("filter", "pipelines", "REQUIRE_COMPLETE_METADATA", "--json", capsys=capsys)
 
     assert exit_code == 0
     parametrized = [step for step in payload["filters"] if step.get("parameters")]
-    assert parametrized == [
-        {"name": "require_correct_ionmode", "parameters": {"ion_mode_to_keep": "both"}}
-    ]
+    assert parametrized == [{"name": "require_correct_ionmode", "parameters": {"ion_mode_to_keep": "both"}}]
 
 
 def test_filter_pipelines_detail_is_default(capsys):

@@ -106,10 +106,7 @@ def parameters_table(parameters: list[dict]) -> str:
     """
     return human_table(
         ["parameter", "type", "required", "default", "description"],
-        [
-            [p["name"], p["type"], p["required"], p.get("default"), p.get("description", "")]
-            for p in parameters
-        ],
+        [[p["name"], p["type"], p["required"], p.get("default"), p.get("description", "")] for p in parameters],
     )
 
 

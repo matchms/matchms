@@ -49,8 +49,12 @@ def test_similarity_info_json(capsys):
     # parameters are reported with type, required flag and default
     params = {p["name"]: p for p in payload["parameters"]}
     assert set(params) == {
-        "tolerance", "mz_power", "intensity_power",
-        "noise_cutoff", "remove_precursor", "offset_to_precursor",
+        "tolerance",
+        "mz_power",
+        "intensity_power",
+        "noise_cutoff",
+        "remove_precursor",
+        "offset_to_precursor",
     }
     assert params["tolerance"]["required"] is False
     assert params["tolerance"]["default"] == 0.01
@@ -69,9 +73,7 @@ def test_similarity_info_methods_reflect_capability(capsys):
 
 def test_similarity_info_required_parameter(capsys):
     """FingerprintSimilarity has required constructor parameters."""
-    exit_code, payload = run_cli(
-        "similarity", "info", "FingerprintSimilarity", "--json", capsys=capsys
-    )
+    exit_code, payload = run_cli("similarity", "info", "FingerprintSimilarity", "--json", capsys=capsys)
 
     assert exit_code == 0
     assert "fingerprint_generator" in payload["required"]
@@ -100,9 +102,7 @@ def test_similarity_info_parameter_description(capsys):
     exit_code, payload = run_cli("similarity", "info", "Cosine", "--json", capsys=capsys)
     assert exit_code == 0
     params = {p["name"]: p for p in payload["parameters"]}
-    assert params["tolerance"]["description"].startswith(
-        "Maximum difference between two fragment m/z values"
-    )
+    assert params["tolerance"]["description"].startswith("Maximum difference between two fragment m/z values")
     assert "intensity" in params["noise_cutoff"]["description"].lower()
 
 

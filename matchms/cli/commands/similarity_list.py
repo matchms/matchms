@@ -114,13 +114,10 @@ def run(args, ctx) -> int:
 
 
 def _format_human(rows: list[dict]) -> str:
-    table_rows = [
-        [row["group"], row["name"], row["description"], row["methods"]]
-        for row in rows
-    ]
+    table_rows = [[row["group"], row["name"], row["description"], row["methods"]] for row in rows]
     return "\n".join(
         [
-            f"Available similarity measures ({len(rows)}):",
+            f"Available similarity measures ({len(rows)}), grouped as in the README:",
             "",
             human_table(["group", "name", "description", "methods"], table_rows),
             "",

@@ -58,15 +58,25 @@ def test_similarity_list_grouped_like_readme(capsys):
     assert listed[: len(expected_order)] == expected_order
 
     # the Cosine group has the specialized implementations, as in the README
-    assert [
-        entry["name"] for entry in payload["similarities"] if entry["group"] == "Cosine"
-    ] == ["Cosine", "CosineGreedy", "CosineHungarian", "CosineLinear", "CosineFlash", "CosineBlink"]
-    assert [
-        entry["name"] for entry in payload["similarities"] if entry["group"] == "Modified cosine"
-    ] == ["ModifiedCosine", "ModifiedCosineGreedy", "ModifiedCosineHungarian", "ModifiedCosineLinear"]
-    assert [
-        entry["name"] for entry in payload["similarities"] if entry["group"] == "Spectral entropy"
-    ] == ["Entropy", "EntropyGreedy", "EntropyFlash"]
+    assert [entry["name"] for entry in payload["similarities"] if entry["group"] == "Cosine"] == [
+        "Cosine",
+        "CosineGreedy",
+        "CosineHungarian",
+        "CosineLinear",
+        "CosineFlash",
+        "CosineBlink",
+    ]
+    assert [entry["name"] for entry in payload["similarities"] if entry["group"] == "Modified cosine"] == [
+        "ModifiedCosine",
+        "ModifiedCosineGreedy",
+        "ModifiedCosineHungarian",
+        "ModifiedCosineLinear",
+    ]
+    assert [entry["name"] for entry in payload["similarities"] if entry["group"] == "Spectral entropy"] == [
+        "Entropy",
+        "EntropyGreedy",
+        "EntropyFlash",
+    ]
 
 
 def test_similarity_list_ungrouped_classes_in_other(capsys):
@@ -109,9 +119,7 @@ def test_similarity_list_description_is_first_line(capsys):
     by_name = {entry["name"]: entry for entry in payload["similarities"]}
 
     assert by_name["Cosine"]["description"].startswith("Compare mass spectra using cosine similarity.")
-    assert by_name["EntropySearch"]["description"].startswith(
-        "Search-optimized fragment spectral entropy similarity."
-    )
+    assert by_name["EntropySearch"]["description"].startswith("Search-optimized fragment spectral entropy similarity.")
 
 
 def test_similarity_list_table_output(capsys):
