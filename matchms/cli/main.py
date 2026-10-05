@@ -7,6 +7,7 @@ from matchms.cli.commands.filter_pipelines import PIPELINES
 from matchms.cli.commands.filter_pipelines import run as run_filter_pipelines
 from matchms.cli.commands.filter_run import run as run_filter_run
 from matchms.cli.commands.info import run as run_info
+from matchms.cli.commands.similarity_build_index import run as run_similarity_build_index
 from matchms.cli.commands.similarity_info import run as run_similarity_info
 from matchms.cli.commands.similarity_list import run as run_similarity_list
 from matchms.cli.commands.similarity_matrix import (
@@ -16,6 +17,7 @@ from matchms.cli.commands.similarity_matrix import (
     OUTPUT_FORMATS as SIMILARITY_OUTPUT_FORMATS,
 )
 from matchms.cli.commands.similarity_matrix import run as run_similarity_matrix
+from matchms.cli.commands.similarity_search import run as run_similarity_search
 from matchms.cli.commands.spectra_convert import EXPORT_STYLES
 from matchms.cli.commands.spectra_convert import run as run_spectra_convert
 from matchms.cli.commands.spectra_describe import run as run_spectra_describe
@@ -89,7 +91,9 @@ def build_parser() -> argparse.ArgumentParser:
     Subcommands and their key actions include:
     - `info`: Report matchms/Python versions, supported I/O formats, filters, and the CLI schema version.
     - `filter`: List filters, inspect filtering pipelines, show filter details, or run filters on spectra files.
-    - `similarity`: List the similarity measures in matchms.similarity, show one, or compute a similarity matrix between one or two spectra files.
+    - `similarity`: List the similarity measures in matchms.similarity, show one, compute a
+      similarity matrix, build a reusable library index, or search a query file against a
+      library (or a saved index).
     - `spectra`: Perform operations on spectra files like descriptive statistics or format conversion.
 
     Returns
@@ -274,13 +278,17 @@ def build_parser() -> argparse.ArgumentParser:
     p = subparsers.add_parser(
         "similarity",
         parents=[common],
-        help="List, inspect and compute matchms similarity measures",
+        help="List, inspect, compute, index and search matchms similarity measures",
         description=(
             "Work with the similarity measures available in matchms.similarity. "
             "`similarity list` shows all similarity measures"
             "`similarity info` shows the description, score fields, methods and "
             "constructor parameters of a single similarity; `similarity matrix` "
-            "computes a similarity matrix between one or two spectra files."
+            "computes a similarity matrix between one or two spectra files; "
+            "`similarity build-index` builds a reusable library index from a "
+            "spectra file; `similarity search` searches a query file against a "
+            "spectra library (or a saved index) and writes the best matches per "
+            "query to a hit list."
         ),
     )
     similarity_subparsers = p.add_subparsers(dest="similarity_command", metavar="<action>")
@@ -415,6 +423,160 @@ def build_parser() -> argparse.ArgumentParser:
         help="Disable the progress bar (it is printed to stderr by default).",
     )
     ps_matrix.set_defaults(func=run_similarity_matrix)
+
+    # similarity build-index --------------------------------------------
+    ps_build_index = similarity_subparsers.add_parser(
+        "build-index",
+        parents=[common],
+        help="Build a reusable library index from a spectra file",
+        description=(
+            "Build a reusable library index from the reference spectra in "
+            "LIBRARY and save it to -o, which must end in .index.npz. The index "
+            "can later be used by `matchms similarity search` so the reference "
+            "library does not have to be re-prepared for every search. --method "
+            "selects an index-capable similarity (Cosine, ModifiedCosine, "
+            "Entropy, EntropySearch). The index is bound to the exact method and "
+            "parameters it was built with. Stdout carries only a summary."
+        ),
+    )
+    ps_build_index.add_argument(
+        "library",
+        help="Reference spectra file to index (supported extensions: json, mgf, msp, mzml, mzxml, pickle).",
+    )
+    ps_build_index.add_argument(
+        "--method",
+        required=True,
+        metavar="NAME",
+        help="Index-capable similarity class, case-insensitive (Cosine, ModifiedCosine, Entropy, EntropySearch).",
+    )
+    ps_build_index.add_argument(
+        "--param",
+        action="append",
+        default=None,
+        metavar="NAME=VALUE",
+        help="Constructor parameter, auto-typed (bool, int, float, JSON); may be "
+        "passed multiple times. Examples: --param tolerance=0.1 --param remove_precursor=true.",
+    )
+    ps_build_index.add_argument(
+        "--tolerance",
+        type=float,
+        default=None,
+        help="Shorthand for --param tolerance=... (not combined with --param tolerance).",
+    )
+    ps_build_index.add_argument(
+        "-o",
+        "--output",
+        required=True,
+        metavar="PATH",
+        help="Output index file; must end in .index.npz. An existing file is replaced.",
+    )
+    ps_build_index.set_defaults(func=run_similarity_build_index)
+
+    # similarity search -----------------------------------------------------
+    ps_search = similarity_subparsers.add_parser(
+        "search",
+        parents=[common],
+        help="Search a query file against a spectra library or a saved index",
+        description=(
+            "Search the spectra of QUERIES against a reference LIBRARY and write "
+            "the best matches per query to the -o hit list (.tsv or .csv). LIBRARY "
+            "is either a spectra file (the index is built on the fly) or an index "
+            "saved by `similarity build-index` (a .index.npz file). --method "
+            "selects an index-capable similarity (Cosine, ModifiedCosine, Entropy, "
+            "EntropySearch). Queries are the rows of the score matrix and the "
+            "library the columns; a query may be its own best hit. Stdout carries "
+            "only a summary."
+        ),
+    )
+    ps_search.add_argument(
+        "queries",
+        help="Query spectra file (rows of the score matrix; supported extensions: "
+        "json, mgf, msp, mzml, mzxml, pickle).",
+    )
+    ps_search.add_argument(
+        "library",
+        help="Reference library: a spectra file or an index saved by `similarity build-index` "
+        "(recognized by its .index.npz extension).",
+    )
+    ps_search.add_argument(
+        "--method",
+        required=True,
+        metavar="NAME",
+        help="Index-capable similarity class, case-insensitive (Cosine, ModifiedCosine, Entropy, EntropySearch).",
+    )
+    ps_search.add_argument(
+        "--param",
+        action="append",
+        default=None,
+        metavar="NAME=VALUE",
+        help="Constructor parameter, auto-typed (bool, int, float, JSON); may be passed multiple "
+        "times. Must match the configuration used to build the index (for an index library).",
+    )
+    ps_search.add_argument(
+        "--tolerance",
+        type=float,
+        default=None,
+        help="Shorthand for --param tolerance=... (not combined with --param tolerance).",
+    )
+    ps_search.add_argument(
+        "--top-k",
+        type=int,
+        default=5,
+        help="Maximum number of hits kept per query (default: %(default)s).",
+    )
+    ps_search.add_argument(
+        "--min-score",
+        type=float,
+        default=None,
+        help="Only keep hits with a score >= this value (on the --score-field field).",
+    )
+    ps_search.add_argument(
+        "--score-field",
+        default="score",
+        metavar="NAME",
+        help="Score field used for ranking and for --min-score (default: %(default)s).",
+    )
+    ps_search.add_argument(
+        "--query-id-field",
+        default=None,
+        metavar="FIELD",
+        help="Metadata field used as a human-readable identifier for queries "
+        "(e.g. spectrum_id, compound_name); the column is omitted when not set.",
+    )
+    ps_search.add_argument(
+        "--library-id-field",
+        default=None,
+        metavar="FIELD",
+        help="Metadata field used as a human-readable identifier for library spectra; requires "
+        "library metadata (a spectra library, or --library-spectra for an index).",
+    )
+    ps_search.add_argument(
+        "--library-spectra",
+        default=None,
+        metavar="FILE",
+        help="Only when LIBRARY is an index: the spectra file the index was built from, used to "
+        "look up library identifiers. Its spectrum count must match the index.",
+    )
+    ps_search.add_argument(
+        "--batch-size",
+        type=int,
+        default=1000,
+        help="Number of queries searched at once, to limit memory use (default: %(default)s).",
+    )
+    ps_search.add_argument(
+        "-o",
+        "--output",
+        required=True,
+        metavar="PATH",
+        help="Hit list (.tsv or .csv); the extension selects the format. An existing file is replaced.",
+    )
+    ps_search.add_argument(
+        "--top",
+        type=int,
+        default=10,
+        help="Number of best hits (over all queries) shown in the summary (default: %(default)s).",
+    )
+    ps_search.set_defaults(func=run_similarity_search)
 
     # -- spectra  ----------------------------------------------------------
     p = subparsers.add_parser(
