@@ -26,6 +26,7 @@ import os
 import pandas as pd
 from matchms import SpectraProcessor
 from matchms.cli.errors import CliError, raise_for_unknown_value
+from matchms.cli.files import extension_of
 from matchms.cli.introspection import filter_accepts_parameter, filter_parameter_names
 from matchms.cli.output import human_table
 from matchms.cli.params import parse_scoped_params
@@ -50,10 +51,6 @@ REPORT_COLUMNS = (
 )
 
 PIPELINES = FILTER_SETS_BY_NAME
-
-
-def _extension(path: str) -> str | None:
-    return os.path.splitext(path)[1].lower().lstrip(".") or None
 
 
 def _nullable_int(value) -> int | None:
@@ -206,7 +203,7 @@ def run(args, ctx) -> int:
             hint="Expected a spectra file with a supported extension (e.g. .mgf, .msp, .mzml, .mzxml, .json, .pickle).",
         )
 
-    input_format = _extension(input_file)
+    input_format = extension_of(input_file)
     if input_format is None or input_format not in INPUT_FORMATS:
         raise CliError(
             f"Input file extension '.{input_format}' of {input_file} is not a supported input format.",
@@ -216,7 +213,7 @@ def run(args, ctx) -> int:
             valid_values=sorted(INPUT_FORMATS),
         )
 
-    output_format = _extension(output_file)
+    output_format = extension_of(output_file)
     if output_format is None or output_format not in OUTPUT_FORMATS:
         raise CliError(
             f"Output file extension '.{output_format}' of {output_file} is not a supported output format.",

@@ -12,6 +12,7 @@ This replaces the per-command copies of these checks that had drifted apart.
 """
 
 import os
+from pathlib import Path
 from matchms.cli.constants import (
     ERROR_EMPTY_SPECTRA,
     ERROR_INPUT_NOT_FOUND,
@@ -28,7 +29,7 @@ INPUT_HINT = "Use a supported extension such as .mgf, .msp, .mzml, .mzxml, .json
 
 def extension_of(path: str) -> str | None:
     """The lowercase extension of *path* without the dot (``None`` if absent)."""
-    return os.path.splitext(path)[1].lower().lstrip(".") or None
+    return Path(path).suffix.lower().lstrip(".") or None
 
 
 def validate_input_file(
@@ -46,21 +47,24 @@ def validate_input_file(
     when the file is missing and ``unsupported_format`` when the extension is
     not in :data:`INPUT_FORMATS`.
     """
-    if not os.path.exists(path):
+    input_path = Path(path)
+
+    if not input_path.exists():
         raise CliError(
             f"The specified {kind}: {path} does not exist.",
             code=ERROR_INPUT_NOT_FOUND,
             operation=operation,
             input_file=path,
-            valid_values=valid_values if valid_values is not None else sorted(INPUT_FORMATS),
+            valid_values=(valid_values if valid_values is not None else sorted(INPUT_FORMATS)),
             hint=hint or "Expected a spectra file with a supported extension.",
         )
     file_format = extension_of(path)
     if file_format is None or file_format not in INPUT_FORMATS:
         raise CliError(
-            f"{_kind(kind)} extension '.{file_format}' of {path} is not a supported input format. "
-            "The input format is detected from the file extension only, so files with a "
-            "non-standard extension cannot be loaded.",
+            f"{_kind(kind)} extension '.{file_format}' of {path} is not a "
+            "supported input format. The input format is detected from the "
+            "file extension only, so files with a non-standard extension "
+            "cannot be loaded.",
             code=ERROR_UNSUPPORTED_FORMAT,
             operation=operation,
             input_file=path,
@@ -97,8 +101,10 @@ def validate_output_format(
 
 def validate_output_dir(output: str, operation: str) -> None:
     """Raise ``save_failed`` if the directory of *output* is missing or unwritable."""
-    out_dir = os.path.dirname(os.path.abspath(output))
-    if not os.path.isdir(out_dir):
+    output_path = Path(output)
+    out_dir = output_path.absolute().parent
+
+    if not out_dir.is_dir():
         raise CliError(
             f"The output directory '{out_dir}' of '{output}' does not exist.",
             code=ERROR_SAVE_FAILED,
@@ -106,7 +112,8 @@ def validate_output_dir(output: str, operation: str) -> None:
             input_file=output,
             hint="Create the directory first; the output directory must exist.",
         )
-    if not os.access(out_dir, os.R_OK | os.W_OK):
+
+    if not _is_writable(out_dir):
         raise CliError(
             f"The output directory '{out_dir}' of '{output}' is not writable.",
             code=ERROR_SAVE_FAILED,
@@ -134,6 +141,11 @@ def load_collection(path: str, ftype: str, operation: str):
                 input_file=path,
             ) from exc
         raise
+
+
+def _is_writable(path: Path) -> bool:
+    """Return whether *path* appears to be readable and writable."""
+    return os.access(path, os.R_OK | os.W_OK)
 
 
 def _kind(kind: str) -> str:

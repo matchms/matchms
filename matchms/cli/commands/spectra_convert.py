@@ -10,6 +10,7 @@ resolved from the output file extension against the output formats known to
 
 import os
 from matchms.cli.errors import CliError
+from matchms.cli.files import extension_of
 from matchms.exporting import save_spectra
 from matchms.exporting.save_spectra import SUPPORTED_FILE_FORMATS as OUTPUT_FORMATS
 from matchms.importing import load_ms2_dataset
@@ -35,7 +36,7 @@ def run(args, ctx) -> int:
             hint="Expected a spectra file with a supported extension (e.g. .mgf, .msp, .mzml, .mzxml, .json, .pickle).",
         )
 
-    input_format = _extension(input_file)
+    input_format = extension_of(input_file)
     if input_format is None or input_format not in INPUT_FORMATS:
         raise CliError(
             f"Input file extension '.{input_format}' of {input_file} is not a supported input format.",
@@ -45,7 +46,7 @@ def run(args, ctx) -> int:
             valid_values=sorted(INPUT_FORMATS),
         )
 
-    output_format = _extension(output_file)
+    output_format = extension_of(output_file)
     if output_format is None or output_format not in OUTPUT_FORMATS:
         raise CliError(
             f"Output file extension '.{output_format}' of {output_file} is not a supported output format.",
@@ -131,7 +132,3 @@ def run(args, ctx) -> int:
             )
         )
     return 0
-
-
-def _extension(path: str) -> str | None:
-    return os.path.splitext(path)[1].lower().lstrip(".") or None
