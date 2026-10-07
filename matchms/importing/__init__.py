@@ -29,7 +29,7 @@ from .load_from_mzml import load_from_mzml
 from .load_from_mzxml import load_from_mzxml
 from .load_from_pickle import load_from_pickle
 from .load_from_usi import load_from_usi
-from .load_spectra import load_ms2_dataset, load_spectra
+from .load_spectra import SUPPORTED_FILE_FORMATS, load_ms2_dataset, load_spectra
 
 
 __all__ = [
@@ -43,3 +43,5 @@ __all__ = [
     "load_ms2_dataset",
     "load_spectra",
 ]
+
+SUPPORTED_INPUT_FORMATS = {**SUPPORTED_FILE_FORMATS, "usi": "spectrum USI (loaded from a USI server)"}
