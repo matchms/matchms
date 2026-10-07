@@ -7,6 +7,9 @@ from matchms.networking import SimilarityNetwork
 from matchms.similarity import CosineFlash
 
 
+pytest.importorskip("networkx") # skip tests if networkx is not installed
+
+
 @pytest.fixture(params=["cyjs", "gexf", "gml", "graphml", "json"])
 def graph_format(request):
     yield request.param
