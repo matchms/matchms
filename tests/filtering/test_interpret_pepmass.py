@@ -13,6 +13,12 @@ from ..builder_Spectrum import SpectrumBuilder
         ((896.05, 1111.2, "2-"), (896.05, 1111.2, -2)),
         ((896.05, 1111.2, "2+"), (896.05, 1111.2, 2)),
         ((896.05, 1111.2, -1), (896.05, 1111.2, -1)),
+        ("896.05", (896.05, None, None)),
+        ("(896.05, 1111.2)", (896.05, 1111.2, None)),
+        # MGF style "PEPMASS=mz intensity [charge]" kept as a string, e.g. by load_from_msp
+        ("896.05 1111.2", (896.05, 1111.2, None)),
+        ("896.05 1111.2 2-", (896.05, 1111.2, -2)),
+        (" 896.05\t1111.2 ", (896.05, 1111.2, None)),
     ],
 )
 def test_interpret_pepmass(input_pepmass, expected_results):
