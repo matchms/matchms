@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Generator, Union
 import numpy as np
 from pyteomics.mzml import read
-from matchms.importing.parsing_utils import parse_mzml_mzxml_metadata, sort_by_mz
+from matchms.importing.parsing_utils import sort_by_mz
 from matchms.Spectrum import Spectrum
 
 
@@ -40,12 +40,54 @@ def load_from_mzml(
     with read(filename, dtype=dict) as reader:
         for pyteomics_spectrum in reader:
             if "ms level" in pyteomics_spectrum and pyteomics_spectrum["ms level"] == ms_level:
-                metadata = parse_mzml_mzxml_metadata(pyteomics_spectrum)
-                mz = np.asarray(pyteomics_spectrum["m/z array"], dtype="float")
-                intensities = np.asarray(pyteomics_spectrum["intensity array"], dtype="float")
+                mz = np.asarray(pyteomics_spectrum.pop("m/z array"), dtype="float")
+                intensities = np.asarray(pyteomics_spectrum.pop("intensity array"), dtype="float")
 
                 mz, intensities = sort_by_mz(mz=mz, intensities=intensities)
-
+                flattend_metadata = parse_metadata(pyteomics_spectrum)
+                flattend_metadata = derive_charge_from_polarity(flattend_metadata)
                 yield Spectrum(
-                    mz=mz, intensities=intensities, metadata=metadata, metadata_harmonization=metadata_harmonization
+                    mz=mz,
+                    intensities=intensities,
+                    metadata=flattend_metadata,
+                    metadata_harmonization=metadata_harmonization,
                 )
+
+
+def parse_key_value(key, value, first_level=True):
+    if isinstance(value, dict):
+        for k, v in value.items():
+            if k == "count" and not first_level:
+                continue
+            if key is not None:
+                combined_key = key + "-" + k
+            else:
+                combined_key = k
+            yield from parse_key_value(combined_key, v, False)
+    elif isinstance(value, list):
+        if len(value) != 1:
+            raise ValueError("Expected only 1 value, for any mzml with count higher than 1, matchms has no support")
+        for k, v in value[0].items():
+            yield from parse_key_value(k, v, False)
+    else:
+        yield key, value
+
+
+def derive_charge_from_polarity(flattend_metadata):
+    """This is here for historic reasons, it would fit better in the filter correct_charge,
+    but since the loader did this automatically before, we kept it here, to not break existing pipelines."""
+    if "polarity" in flattend_metadata:
+        if flattend_metadata["polarity"] == "-":
+            flattend_metadata["charge"] = -1
+        if flattend_metadata["polarity"] == "+":
+            flattend_metadata["charge"] = 1
+    return flattend_metadata
+
+
+def parse_metadata(metadata_dict: dict):
+    flattend_dict = {}
+    for key, value in parse_key_value(None, metadata_dict):
+        if key in flattend_dict:
+            raise ValueError(f"The key:{key} is duplicated")
+        flattend_dict[key] = value
+    return flattend_dict
