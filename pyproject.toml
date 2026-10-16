@@ -87,6 +87,8 @@ docstring-code-format = true
 line-ending = "lf"
 
 [tool.ruff.lint]
+# Preserve the established base rules when Ruff changes its default selection.
+select = ["E4", "E7", "E9", "F"]
 # TODO: add some rules in future, eg. W291/292
 extend-select = ["D", "E", "I"]
 # TODO: some of these rules should be enforced in the future, eg. E713
