@@ -71,6 +71,10 @@ def reduce_to_number_of_peaks(
     if spectrum.peaks.intensities.size < threshold:
         return spectrum
 
+    if threshold == 0:
+        spectrum.peaks = Fragments(mz=np.array([], dtype="float"), intensities=np.array([], dtype="float"))
+        return spectrum
+
     _remove_lowest_intensity_peaks()
 
     return spectrum
