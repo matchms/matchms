@@ -1,3 +1,4 @@
+import utils.session
 from matchms.filtering.SpectrumProcessor import SpectrumProcessor
 from . import exporting, filtering, importing, networking, plotting, similarity
 from .__version__ import __version__
