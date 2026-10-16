@@ -89,6 +89,31 @@ def test_reduce_to_number_of_peaks_n_max_4():
     np.testing.assert_array_equal(spectrum.peaks.mz, expected, err_msg="Expected different peaks to remain.")
 
 
+@pytest.mark.parametrize("clone", [True, False])
+def test_reduce_to_number_of_peaks_n_max_0(clone):
+    """Test that n_max=0 removes all peaks instead of keeping all of them."""
+    mz = np.array([10, 20, 30, 40], dtype="float")
+    intensities = np.array([0, 1, 10, 100], dtype="float")
+    spectrum_in = SpectrumBuilder().with_mz(mz).with_intensities(intensities).build()
+
+    spectrum = reduce_to_number_of_peaks(spectrum_in, n_max=0, clone=clone)
+
+    assert len(spectrum.peaks) == 0, "Expected all peaks to be removed when n_max=0."
+    assert spectrum.peaks.mz.tolist() == [], "Expected an empty mz array."
+    assert spectrum.peaks.intensities.tolist() == [], "Expected an empty intensities array."
+
+
+def test_reduce_to_number_of_peaks_n_max_0_with_ratio_desired():
+    """Test that n_max=0 takes precedence over the ratio_desired threshold."""
+    mz = np.array([10, 20, 30, 40], dtype="float")
+    intensities = np.array([0, 1, 10, 100], dtype="float")
+    spectrum_in = SpectrumBuilder().with_mz(mz).with_intensities(intensities).with_metadata({"parent_mass": 50}).build()
+
+    spectrum = reduce_to_number_of_peaks(spectrum_in, n_max=0, ratio_desired=0.1)
+
+    assert len(spectrum.peaks) == 0, "Expected all peaks to be removed when n_max=0."
+
+
 def test_reduce_to_number_of_peaks_ratio_given_but_no_parent_mass():
     """A ratio_desired given without parent_mass should raise an exception."""
     mz = np.array([10, 20, 30, 40], dtype="float")
