@@ -2,6 +2,7 @@ import os
 import numpy as np
 import pytest
 from matchms import Spectrum
+from matchms.exporting import save_as_msp
 from matchms.importing.load_from_msp import get_peak_values, load_from_msp, parse_metadata
 from tests.builder_Spectrum import SpectrumBuilder
 
@@ -295,3 +296,37 @@ def test_parse_metadata(input_line, expected_output):
 def test_get_peak_values(line, expected):
     actual = get_peak_values(line)
     assert actual == expected
+
+def test_load_msp_record_without_peaks(tmp_path):
+    msp = tmp_path / "zero_peaks.msp"
+    msp.write_text(
+        "NAME: A\nPRECURSORMZ: 300.1\nFORMULA: C6H6\nSMILES: c1ccccc1\nNum Peaks: 0\n\n"
+        "NAME: B\nPRECURSORMZ: 400.2\nNum Peaks: 2\n50 1\n60 2\n"
+    )
+    spectra = list(load_from_msp(str(msp)))
+
+    assert [s.get("compound_name") for s in spectra] == ["A", "B"]
+    assert len(spectra[0].peaks.mz) == 0
+    assert spectra[0].get("formula") == "C6H6"
+    assert spectra[1].get("formula") is None
+    assert spectra[1].get("smiles") is None
+    np.testing.assert_array_equal(spectra[1].peaks.mz, [50.0, 60.0])
+
+
+def test_save_and_load_msp_spectrum_without_peaks(tmp_path):
+    empty = Spectrum(
+        mz=np.array([], dtype=float),
+        intensities=np.array([], dtype=float),
+        metadata={"compound_name": "A", "precursor_mz": 300.1, "smiles": "c1ccccc1"},
+    )
+    other = Spectrum(
+        mz=np.array([50.0, 60.0]),
+        intensities=np.array([1.0, 2.0]),
+        metadata={"compound_name": "B", "precursor_mz": 400.2},
+    )
+    filename = str(tmp_path / "roundtrip.msp")
+    save_as_msp([empty, other], filename)
+    spectra = list(load_from_msp(filename))
+
+    assert [s.get("compound_name") for s in spectra] == ["A", "B"]
+    assert spectra[1].get("smiles") is None
