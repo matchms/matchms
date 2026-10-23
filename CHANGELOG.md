@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## unpublished
+### Fixed
+- `load_from_msp` reads records with `Num Peaks: 0` as spectra without peaks. Before, such a record was dropped and its metadata was merged into the next spectrum, which also broke the `save_as_msp` round trip.
 
 ## [0.31.0] - 2025-10-06
 ### Added

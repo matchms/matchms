@@ -59,6 +59,14 @@ def parse_msp_file(filename: str) -> Generator[dict, None, None]:
 
             if contains_metadata(rline):
                 parse_metadata(rline, params)
+                if peakscount == 0 and params.get("num peaks") is not None and int(params["num peaks"]) == 0:
+                    # A record without peaks ends at its Num Peaks line. Without this its
+                    # metadata would be merged into the next record.
+                    yield _record_to_dict(params, masses, intensities, peak_comments)
+                    params = {}
+                    masses = []
+                    intensities = []
+                    peak_comments = {}
                 continue
 
             mz, ints, comment = _parse_line_with_peaks(rline)
@@ -74,22 +82,26 @@ def parse_msp_file(filename: str) -> Generator[dict, None, None]:
             # Obtaining the masses and intensities
             if int(params["num peaks"]) == peakscount:
                 peakscount = 0
-                # Handles edge cases with GOLM files where the nominal mass is written with a comma instead of a dot
-                nominal_mass = params.get("mw")
-                if nominal_mass and isinstance(nominal_mass, str):
-                    params["mw"] = nominal_mass.replace(",", ".")
-
-                yield {
-                    "params": (params),
-                    "m/z array": masses,
-                    "intensity array": intensities,
-                    "peak comments": peak_comments,
-                }
+                yield _record_to_dict(params, masses, intensities, peak_comments)
 
                 params = {}
                 masses = []
                 intensities = []
                 peak_comments = {}
+
+
+def _record_to_dict(params: dict, masses, intensities, peak_comments: dict) -> dict:
+    # Handles edge cases with GOLM files where the nominal mass is written with a comma instead of a dot
+    nominal_mass = params.get("mw")
+    if nominal_mass and isinstance(nominal_mass, str):
+        params["mw"] = nominal_mass.replace(",", ".")
+
+    return {
+        "params": (params),
+        "m/z array": np.asarray(masses, dtype=float),
+        "intensity array": np.asarray(intensities, dtype=float),
+        "peak comments": peak_comments,
+    }
 
 
 def _parse_line_with_peaks(rline: str) -> Tuple[List[float], List[float], str]:
