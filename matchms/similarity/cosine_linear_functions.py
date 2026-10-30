@@ -119,6 +119,18 @@ def sirius_merge_close_peaks(spec, mz_tolerance):
 
 
 @njit(cache=True)
+def _weighted_products(spec, mz_power, intensity_power):
+    """Return per-peak products mz**mz_power * intensity**intensity_power and their L2 norm."""
+    n = spec.shape[0]
+    products = np.empty(n, dtype=np.float64)
+    norm = 0.0
+    for i in range(n):
+        products[i] = (spec[i, 0] ** mz_power) * (spec[i, 1] ** intensity_power)
+        norm += products[i] * products[i]
+    return products, np.sqrt(norm)
+
+
+@njit(cache=True)
 def linear_cosine_score(spec1, spec2, tolerance, mz_power, intensity_power):
     """Compute the CosineLinear similarity between two well-separated spectra.
 
@@ -151,25 +163,8 @@ def linear_cosine_score(spec1, spec2, tolerance, mz_power, intensity_power):
     if n1 == 0 or n2 == 0:
         return 0.0, 0
 
-    # Compute weighted products for each spectrum
-    products1 = np.empty(n1, dtype=np.float64)
-    for i in range(n1):
-        products1[i] = (spec1[i, 0] ** mz_power) * (spec1[i, 1] ** intensity_power)
-
-    products2 = np.empty(n2, dtype=np.float64)
-    for i in range(n2):
-        products2[i] = (spec2[i, 0] ** mz_power) * (spec2[i, 1] ** intensity_power)
-
-    # Compute norms
-    norm1 = 0.0
-    for i in range(n1):
-        norm1 += products1[i] * products1[i]
-    norm1 = np.sqrt(norm1)
-
-    norm2 = 0.0
-    for i in range(n2):
-        norm2 += products2[i] * products2[i]
-    norm2 = np.sqrt(norm2)
+    products1, norm1 = _weighted_products(spec1, mz_power, intensity_power)
+    products2, norm2 = _weighted_products(spec2, mz_power, intensity_power)
 
     if norm1 == 0.0 or norm2 == 0.0:
         return 0.0, 0
@@ -190,6 +185,201 @@ def linear_cosine_score(spec1, spec2, tolerance, mz_power, intensity_power):
             i += 1
         else:
             j += 1
+
+    score = matched_sum / (norm1 * norm2)
+    return score, matches
+
+
+@njit(cache=True)
+def _is_well_separated(mz, tolerance):
+    min_gap = 2.0 * tolerance
+    for i in range(1, mz.shape[0]):
+        if mz[i] - mz[i - 1] <= min_gap:
+            return False
+    return True
+
+
+@njit(cache=True)
+def _linear_partners(values1, values2, tolerance, partner1, partner2):
+    """Fill mutual partner indices of within-tolerance pairs, -1 where unmatched."""
+    n1 = values1.shape[0]
+    n2 = values2.shape[0]
+    partner1[:] = -1
+    partner2[:] = -1
+    j = 0
+    for i in range(n1):
+        while j < n2 and values2[j] < values1[i] - tolerance:
+            j += 1
+        if j < n2 and values2[j] <= values1[i] + tolerance:
+            partner1[i] = j
+            partner2[j] = i
+            j += 1
+
+
+@njit(cache=True)
+def _walk_path(start, on_left, direct1, shifted1, direct2, shifted2, visited1, visited2, path_left, path_right):
+    """Walk the alternating direct/shifted path from an endpoint, returning its edge count."""
+    n_edges = 0
+    node = start
+    kind = -1  # edge kind used to reach node, 0 direct, 1 shifted
+    while True:
+        nxt = -1
+        if on_left:
+            visited1[node] = True
+            if kind != 0 and direct1[node] >= 0:
+                kind = 0
+                nxt = direct1[node]
+            elif kind != 1 and shifted1[node] >= 0:
+                kind = 1
+                nxt = shifted1[node]
+            if nxt < 0 or visited2[nxt]:
+                return n_edges
+            path_left[n_edges] = node
+            path_right[n_edges] = nxt
+        else:
+            visited2[node] = True
+            if kind != 0 and direct2[node] >= 0:
+                kind = 0
+                nxt = direct2[node]
+            elif kind != 1 and shifted2[node] >= 0:
+                kind = 1
+                nxt = shifted2[node]
+            if nxt < 0 or visited1[nxt]:
+                return n_edges
+            path_left[n_edges] = nxt
+            path_right[n_edges] = node
+        n_edges += 1
+        node = nxt
+        on_left = not on_left
+
+
+@njit(cache=True)
+def _select_path_edges(n_edges, benefits, dp, selected):
+    """Mark the maximum-weight set of pairwise non-adjacent path edges."""
+    dp[0] = 0.0
+    dp[1] = benefits[0]
+    for k in range(2, n_edges + 1):
+        take = dp[k - 2] + benefits[k - 1]
+        skip = dp[k - 1]
+        dp[k] = max(take, skip)
+
+    for k in range(n_edges):
+        selected[k] = False
+    k = n_edges
+    while k > 0:
+        if k == 1:
+            selected[0] = True
+            break
+        if dp[k - 2] + benefits[k - 1] >= dp[k - 1]:
+            selected[k - 1] = True
+            k -= 2
+        else:
+            k -= 1
+
+
+@njit(cache=True)
+def modified_linear_cosine_score(spec1, spec2, precursor_mz1, precursor_mz2, tolerance, mz_power, intensity_power):
+    """Compute the exact modified cosine between two well-separated spectra in O(n+m).
+
+    SIRIUS linear-time modified cosine. Direct and precursor-shifted matches are found
+    with one two-pointer sweep each, and since every peak has at most one partner of
+    each kind their conflicts form paths solved by dynamic programming.
+
+    Parameters
+    ----------
+    spec1
+        2D array (N, 2) with columns [mz, intensity], sorted ascending m/z,
+        consecutive m/z gaps > 2 * tolerance (as ensured by sirius_merge_close_peaks).
+    spec2
+        2D array (M, 2) with the same layout and precondition.
+    precursor_mz1
+        Precursor m/z of spec1.
+    precursor_mz2
+        Precursor m/z of spec2.
+    tolerance
+        Maximum allowed m/z difference for a match. Shifted matches are only
+        considered when the precursor difference exceeds it.
+    mz_power
+        Power to raise m/z values to.
+    intensity_power
+        Power to raise intensity values to.
+
+    Returns
+    -------
+    score : float
+        Modified cosine similarity score.
+    matches : int
+        Number of matched peak pairs with a nonzero product.
+
+    Raises
+    ------
+    ValueError
+        If either spectrum is not well-separated.
+    """
+    n1 = spec1.shape[0]
+    n2 = spec2.shape[0]
+
+    if n1 == 0 or n2 == 0:
+        return 0.0, 0
+
+    mz1 = spec1[:, 0]
+    mz2 = spec2[:, 0]
+    if not (_is_well_separated(mz1, tolerance) and _is_well_separated(mz2, tolerance)):
+        raise ValueError(
+            "Spectra must be well-separated (m/z gaps > 2 * tolerance), apply sirius_merge_close_peaks first."
+        )
+
+    products1, norm1 = _weighted_products(spec1, mz_power, intensity_power)
+    products2, norm2 = _weighted_products(spec2, mz_power, intensity_power)
+
+    if norm1 == 0.0 or norm2 == 0.0:
+        return 0.0, 0
+
+    direct1 = np.empty(n1, dtype=np.int64)
+    direct2 = np.empty(n2, dtype=np.int64)
+    _linear_partners(mz1, mz2, tolerance, direct1, direct2)
+
+    shifted1 = np.full(n1, -1, dtype=np.int64)
+    shifted2 = np.full(n2, -1, dtype=np.int64)
+    if abs(precursor_mz1 - precursor_mz2) > tolerance:
+        _linear_partners(mz1 - precursor_mz1, mz2 - precursor_mz2, tolerance, shifted1, shifted2)
+        # A pair within tolerance both directly and shifted is a single candidate.
+        for i in range(n1):
+            if shifted1[i] >= 0 and shifted1[i] == direct1[i]:
+                shifted2[shifted1[i]] = -1
+                shifted1[i] = -1
+
+    max_edges = n1 + n2
+    path_left = np.empty(max_edges, dtype=np.int64)
+    path_right = np.empty(max_edges, dtype=np.int64)
+    benefits = np.empty(max_edges, dtype=np.float64)
+    dp = np.empty(max_edges + 1, dtype=np.float64)
+    selected = np.empty(max_edges, dtype=np.bool_)
+    visited1 = np.zeros(n1, dtype=np.bool_)
+    visited2 = np.zeros(n2, dtype=np.bool_)
+
+    matched_sum = 0.0
+    matches = 0
+    # Paths are acyclic, so walking from degree-one endpoints visits every edge.
+    for start in range(max_edges):
+        on_left = start < n1
+        node = start if on_left else start - n1
+        if on_left:
+            if visited1[node] or (direct1[node] >= 0) == (shifted1[node] >= 0):
+                continue
+        elif visited2[node] or (direct2[node] >= 0) == (shifted2[node] >= 0):
+            continue
+
+        n_edges = _walk_path(
+            node, on_left, direct1, shifted1, direct2, shifted2, visited1, visited2, path_left, path_right
+        )
+        for k in range(n_edges):
+            benefits[k] = products1[path_left[k]] * products2[path_right[k]]
+        _select_path_edges(n_edges, benefits, dp, selected)
+        for k in range(n_edges):
+            if selected[k] and benefits[k] != 0.0:
+                matched_sum += benefits[k]
+                matches += 1
 
     score = matched_sum / (norm1 * norm2)
     return score, matches

@@ -10,12 +10,6 @@ from matchms.similarity.base_similarity import BaseSimilarity
 from matchms.typing import SpectrumType
 
 
-try:
-    import pynndescent
-except ImportError:
-    pynndescent = None
-
-
 class BaseEmbeddingSimilarity(BaseSimilarity):
     """Base class for similarity measures that work with embeddings.
 
@@ -239,8 +233,14 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
         embeddings_reference = self.get_embeddings(reference_spectra, embeddings_path)
 
         if index_backend == "pynndescent":
-            if not pynndescent:
-                raise ImportError("pynndescent is not installed. Please install it with `pip install pynndescent`.")
+            try:
+                import pynndescent
+            except ImportError as exc:
+                raise ImportError(
+                    "pynndescent is not installed. "
+                    "Please install it with `pip install pynndescent`."
+                ) from exc
+
             self.index_backend = index_backend
             self.index_k = k
             self.index_kwargs = index_kwargs

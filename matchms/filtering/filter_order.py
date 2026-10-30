@@ -2,7 +2,7 @@ from matchms import filtering as msfilters
 
 
 # List all filters in a functionally working order
-# TODO: Check if some filters might need more than one pass to be fully applied.
+# TODO: Check if some filters might need more than one pass to be fully applied. --> e.g. harmonize_missing_entries
 
 # IMPORTANT!! IF YOU CHANGE ANYTHING HERE PLEASE ADD A TEST to test_all_filter_order.py
 # to ensure it is not changed back by accident later.
@@ -49,7 +49,6 @@ ALL_FILTERS = [
     msfilters.require_retention_time,
     msfilters.require_matching_adduct_and_ionmode,
     msfilters.remove_profiled_spectra,
-    msfilters.normalize_intensities,
     msfilters.remove_noise_below_frequent_intensities,
     msfilters.select_by_intensity,
     msfilters.select_by_mz,
@@ -57,6 +56,8 @@ ALL_FILTERS = [
     msfilters.remove_peaks_around_precursor_mz,
     msfilters.remove_peaks_relative_to_precursor_mz,
     msfilters.remove_peaks_outside_top_k,
+    # final fragment handling step since matchms_v1 (enforce max-intensity is 1.0 after all other filters):
+    msfilters.normalize_intensities,
     msfilters.reduce_to_number_of_peaks,
     msfilters.require_minimum_number_of_peaks,
     msfilters.require_maximum_number_of_peaks,

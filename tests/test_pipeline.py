@@ -57,7 +57,7 @@ def test_pipeline_symmetric():
     workflow = create_workflow(
         score_computations=[
             ["precursormzmatch", {"tolerance": 120.0}],
-            ["modifiedcosinegreedy", {"tolerance": 10.0}],
+            ["modifiedcosinegreedy", {"tolerance": 10.0, "remove_precursor": False}],
         ]
     )
     pipeline = Pipeline(workflow)
@@ -80,7 +80,7 @@ def test_pipeline_symmetric_modified_cosine_hungarian():
     workflow = create_workflow(
         score_computations=[
             ["precursormzmatch", {"tolerance": 120.0}],
-            ["modifiedcosinehungarian", {"tolerance": 10.0}],
+            ["modifiedcosinehungarian", {"tolerance": 10.0, "remove_precursor": False}],
         ]
     )
     pipeline = Pipeline(workflow)
@@ -101,7 +101,7 @@ def test_pipeline_symmetric_filters():
         spectra_1_filters=[("select_by_relative_intensity", {"intensity_from": 0.05})],
         score_computations=[
             ["precursormzmatch", {"tolerance": 120.0}],
-            ["modifiedcosinegreedy", {"tolerance": 10.0}],
+            ["modifiedcosinegreedy", {"tolerance": 10.0, "remove_precursor": False}],
         ],
     )
     pipeline = Pipeline(workflow)
@@ -122,7 +122,7 @@ def test_pipeline_symmetric_masking():
         score_computations=[
             ["precursormzmatch", {"tolerance": 120.0}],
             ["mask", {"field": "score", "value": True, "operation": "=="}],
-            ["modifiedcosinegreedy", {"tolerance": 10.0}],
+            ["modifiedcosinegreedy", {"tolerance": 10.0, "remove_precursor": False}],
         ]
     )
     pipeline = Pipeline(workflow)
@@ -145,7 +145,7 @@ def test_pipeline_symmetric_custom_score():
     workflow = create_workflow(
         score_computations=[
             ["precursormzmatch", {"tolerance": 120.0}],
-            [ModifiedCosineGreedy, {"tolerance": 10.0}],
+            [ModifiedCosineGreedy, {"tolerance": 10.0, "remove_precursor": False}],
         ]
     )
     pipeline = Pipeline(workflow)
@@ -168,7 +168,7 @@ def test_pipeline_non_symmetric():
     workflow = create_workflow(
         score_computations=[
             ["precursormzmatch", {"tolerance": 120.0}],
-            ["modifiedcosinegreedy", {"tolerance": 10.0}],
+            ["modifiedcosinegreedy", {"tolerance": 10.0, "remove_precursor": False}],
         ]
     )
     pipeline = Pipeline(workflow)
@@ -216,7 +216,7 @@ def test_pipeline_to_and_from_yaml(tmp_path):
         config_file,
         score_computations=[
             ["precursormzmatch", {"tolerance": 120.0}],
-            ["modifiedcosinegreedy", {"tolerance": 10.0}],
+            ["modifiedcosinegreedy", {"tolerance": 10.0, "remove_precursor": False}],
         ],
     )
     assert os.path.exists(config_file)
@@ -228,7 +228,6 @@ def test_pipeline_to_and_from_yaml(tmp_path):
     workflow = load_workflow_from_yaml_file(config_file)
     pipeline = Pipeline(workflow)
     pipeline.run(spectra_file_msp)
-
     assert np.allclose(_score_array(pipeline.scores), scores_run1)
 
 
@@ -253,7 +252,7 @@ def test_pipeline_relative_intensity_filter():
         spectra_2_filters=[("select_by_relative_intensity", {"intensity_from": 0.05})],
         score_computations=[
             ["precursormzmatch", {"tolerance": 50}],
-            ["modifiedcosinegreedy", {"tolerance": 10.0}],
+            ["modifiedcosinegreedy", {"tolerance": 10.0, "remove_precursor": False}],
         ],
     )
     pipeline = Pipeline(workflow)
@@ -273,7 +272,9 @@ def test_pipeline_changing_workflow():
 
     pipeline.spectra_1_filters = [("select_by_relative_intensity", {"intensity_from": 0.05})]
     pipeline.spectra_2_filters = [("select_by_relative_intensity", {"intensity_from": 0.05})]
-    pipeline.score_computations = [["modifiedcosinegreedy", {"tolerance": 10.0}]]
+    pipeline.score_computations = [[
+        "modifiedcosinegreedy", {"tolerance": 10.0, "remove_precursor": False}
+        ]]
 
     pipeline.run(spectra_file_msp, spectra_file_msp)
 

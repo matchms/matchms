@@ -1,11 +1,28 @@
 from collections.abc import Mapping
 import numpy as np
 from pickydict import PickyDict
+from .filtering.metadata_processing.add_parent_mass import (
+    _convert_parent_mass_entry_to_float,
+)
 from .filtering.metadata_processing.add_precursor_mz import _add_precursor_mz_metadata
 from .filtering.metadata_processing.add_retention import _add_retention, _retention_index_keys, _retention_time_keys
 from .filtering.metadata_processing.interpret_pepmass import _interpret_pepmass_metadata
 from .filtering.metadata_processing.make_charge_int import _convert_charge_to_int
 from .utils import ALIASES_FOR_NONE, load_export_key_conversions, load_known_key_conversions
+
+
+# Canonical scalar dtypes used by Metadata and SpectraCollection.
+FLOAT_METADATA_KEYS = frozenset({
+    "precursor_mz",
+    "retention_time",
+    "retention_index",
+    "parent",
+    "parent_mass",
+})
+
+INT_METADATA_KEYS = frozenset({
+    "charge",
+})
 
 
 class Metadata:
@@ -87,10 +104,11 @@ class Metadata:
         self._data.key_replacements = Metadata._key_replacements
 
     def harmonize_values(self):
-        """Runs default harmonization of metadata.
+        """Run default metadata value harmonization.
 
-        This includes harmonizing entries for ionmode, retention time and index,
-        charge, as well as the removal of invalid entries ("", "NA", "N/A", "NaN").
+        This includes interpreting pepmass, harmonizing precursor m/z,
+        ion mode, retention time/index, parent and parent mass, charge,
+        and removing known string aliases for missing metadata.
         """
         metadata_filtered = _interpret_pepmass_metadata(self.data)
         metadata_filtered = _add_precursor_mz_metadata(metadata_filtered)
@@ -99,13 +117,30 @@ class Metadata:
             metadata_filtered["ionmode"] = self.get("ionmode").lower()
 
         if metadata_filtered.get("retention_time"):
-            metadata_filtered = _add_retention(metadata_filtered, "retention_time", _retention_time_keys)
+            metadata_filtered = _add_retention(
+                metadata_filtered,
+                "retention_time",
+                _retention_time_keys,
+            )
 
         if metadata_filtered.get("retention_index"):
-            metadata_filtered = _add_retention(metadata_filtered, "retention_index", _retention_index_keys)
+            metadata_filtered = _add_retention(
+                metadata_filtered,
+                "retention_index",
+                _retention_index_keys,
+            )
 
         if metadata_filtered.get("parent"):
-            metadata_filtered["parent"] = float(metadata_filtered.get("parent"))
+            metadata_filtered["parent"] = float(
+                metadata_filtered.get("parent")
+            )
+
+        if "parent_mass" in metadata_filtered:
+            metadata_filtered["parent_mass"] = (
+                _convert_parent_mass_entry_to_float(
+                    metadata_filtered.get("parent_mass")
+                )
+            )
 
         charge = metadata_filtered.get("charge")
         charge_int = _convert_charge_to_int(charge)
@@ -114,7 +149,12 @@ class Metadata:
 
         invalid_entries = ALIASES_FOR_NONE
         metadata_filtered = {
-            k: v for k, v in metadata_filtered.items() if not (isinstance(v, str) and v in invalid_entries)
+            key: value
+            for key, value in metadata_filtered.items()
+            if not (
+                isinstance(value, str)
+                and value in invalid_entries
+            )
         }
 
         self.data = metadata_filtered

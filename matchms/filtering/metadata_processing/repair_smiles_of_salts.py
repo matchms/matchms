@@ -80,7 +80,7 @@ def _create_possible_ions(smiles):
 
     if "." in smiles:
         single_ions = smiles.split(".")
-        for r in range(1, len(single_ions) + 1):
+        for r in range(1, len(single_ions)):
             combinations = itertools.combinations(single_ions, r)
             for combination in combinations:
                 combined_ion = ".".join(combination)

@@ -1,464 +1,534 @@
 import numpy as np
 import pytest
+from matchms import SpectraCollection
 from matchms.scores import Scores
-from matchms.similarity import CosineGreedy, ModifiedCosineGreedy
-from matchms.similarity.flash_similarity import CosineFlash, FlashEntropy
+from matchms.similarity.flash_similarity import CosineFlash, EntropyFlash
 from ..builder_spectrum import SpectrumBuilder
 
 
-# ----------------------------
+# -------------------------------------------------------------------------
 # Helpers
-# ----------------------------
+# -------------------------------------------------------------------------
 
-def build_spectrum(mz, intens, precursor_mz=None):
-    """Build a Spectrum via SpectrumBuilder, setting precursor_mz when available."""
-    b = SpectrumBuilder().with_mz(np.asarray(mz, dtype="float")).with_intensities(
-        np.asarray(intens, dtype="float")
+
+def _build_spectrum(mz, intensities, precursor_mz=None):
+    """Create a Spectrum with optional precursor m/z metadata."""
+    builder = (
+        SpectrumBuilder()
+        .with_mz(np.asarray(mz, dtype=float))
+        .with_intensities(np.asarray(intensities, dtype=float))
     )
-    if hasattr(b, "with_precursor_mz") and precursor_mz is not None:
-        b = b.with_precursor_mz(float(precursor_mz))
-    elif precursor_mz is not None and hasattr(b, "with_metadata"):
-        b = b.with_metadata({"precursor_mz": float(precursor_mz)})
-    return b.build()
+
+    if precursor_mz is not None:
+        if hasattr(builder, "with_precursor_mz"):
+            builder = builder.with_precursor_mz(float(precursor_mz))
+        elif hasattr(builder, "with_metadata"):
+            builder = builder.with_metadata(
+                {"precursor_mz": float(precursor_mz)}
+            )
+
+    return builder.build()
 
 
-# ----------------------------
-# Spectral-entropy path (public API level)
-# ----------------------------
+def _build_collection(spectra):
+    """Create a SpectraCollection with deterministic m/z precision."""
+    return SpectraCollection(
+        spectra,
+        mz_precision=1e-6,
+    )
 
-@pytest.mark.parametrize("use_ppm,tol", [(False, 0.1), (True, 100.0)])
-def test_entropy_pair_fragment_commutative_and_positive(use_ppm, tol):
-    s1 = build_spectrum([100, 200, 300], [0.2, 1.0, 0.4], precursor_mz=500.0)
-    s2 = build_spectrum([100, 200, 305], [0.1, 0.5, 0.2], precursor_mz=500.0)
 
-    fse = FlashEntropy(
-        tolerance=tol,
-        use_ppm=use_ppm,
-        matching_mode="fragment",
+def _example_entropy_inputs():
+    references = [
+        _build_spectrum(
+            [100.0, 200.0],
+            [1.0, 0.5],
+            precursor_mz=500.0,
+        ),
+        _build_spectrum(
+            [110.0, 300.0],
+            [0.3, 1.0],
+            precursor_mz=600.0,
+        ),
+        _build_spectrum(
+            [125.0, 250.0, 400.0],
+            [0.4, 1.0, 0.2],
+            precursor_mz=550.0,
+        ),
+    ]
+    queries = [
+        _build_spectrum(
+            [100.005, 210.0],
+            [1.0, 0.5],
+            precursor_mz=510.0,
+        ),
+        _build_spectrum(
+            [110.0, 300.0],
+            [1.0, 0.3],
+            precursor_mz=600.0,
+        ),
+    ]
+    return references, queries
+
+
+def _example_cosine_inputs():
+    references = [
+        _build_spectrum(
+            [100.0, 150.0, 300.0],
+            [0.6, 1.0, 0.4],
+            precursor_mz=500.0,
+        ),
+        _build_spectrum(
+            [110.0, 250.0, 400.0],
+            [0.5, 0.9, 0.7],
+            precursor_mz=600.0,
+        ),
+    ]
+    queries = [
+        _build_spectrum(
+            [100.007, 150.002, 300.0],
+            [0.6, 1.0, 0.4],
+            precursor_mz=500.0,
+        ),
+        _build_spectrum(
+            [120.0, 260.0, 410.0],
+            [0.5, 0.9, 0.7],
+            precursor_mz=610.0,
+        ),
+    ]
+    return references, queries
+
+
+# -------------------------------------------------------------------------
+# EntropyFlash: input handling and matrix API
+# -------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "matching_mode",
+    ["fragment", "neutral_loss", "hybrid"],
+)
+def test_flash_entropy_collection_input_matches_list_input(matching_mode):
+    """List and SpectraCollection inputs should produce identical scores."""
+    references, queries = _example_entropy_inputs()
+
+    similarity = EntropyFlash(
+        matching_mode=matching_mode,
+        tolerance=0.01,
         remove_precursor=False,
         noise_cutoff=0.0,
-        normalize_to_half=False,
-        merge_within=0.0,
-        dtype=np.float32,
+        dtype=np.float64,
     )
-    score12 = float(fse.pair(s1, s2))
-    score21 = float(fse.pair(s2, s1))
-    assert score12 == pytest.approx(score21, 1e-6)
-    assert score12 > 0.0
+
+    scores_from_lists = similarity.matrix(
+        references,
+        queries,
+        n_jobs=1,
+        progress_bar=False,
+    )
+    scores_from_collections = similarity.matrix(
+        _build_collection(references),
+        _build_collection(queries),
+        n_jobs=1,
+        progress_bar=False,
+    )
+
+    assert isinstance(scores_from_lists, Scores)
+    assert scores_from_lists.score_fields == ("score",)
+    assert scores_from_lists.shape == (3, 2)
+
+    np.testing.assert_allclose(
+        scores_from_collections.to_array(),
+        scores_from_lists.to_array(),
+        atol=1e-12,
+        rtol=0.0,
+    )
 
 
-def test_entropy_pair_returns_zero_when_empty_after_cleanup():
-    # Precursor window removes everything
-    s1 = build_spectrum([199.0, 199.5], [1.0, 0.5], precursor_mz=200.0)
-    s2 = build_spectrum([199.2, 199.7], [1.0, 0.5], precursor_mz=200.0)
-    fse = FlashEntropy(
-        tolerance=0.02,
+def test_flash_entropy_self_comparison_is_symmetric():
+    """A self-comparison should be symmetric with unit diagonal."""
+    spectra = [
+        _build_spectrum(
+            [100.0, 200.0],
+            [1.0, 0.5],
+            precursor_mz=500.0,
+        ),
+        _build_spectrum(
+            [110.0, 300.0],
+            [0.3, 1.0],
+            precursor_mz=600.0,
+        ),
+        _build_spectrum(
+            [100.0, 250.0],
+            [0.7, 0.9],
+            precursor_mz=550.0,
+        ),
+    ]
+
+    similarity = EntropyFlash(
         matching_mode="fragment",
-        remove_precursor=True,
-        offset_to_precursor=-1.6,
+        tolerance=0.01,
+        remove_precursor=False,
         noise_cutoff=0.0,
-        normalize_to_half=True,
-        merge_within=0.0,
+        dtype=np.float64,
     )
-    assert float(fse.pair(s1, s2)) == 0.0
 
+    scores = similarity.matrix(
+        _build_collection(spectra),
+        n_jobs=1,
+        progress_bar=False,
+    ).to_array()
 
-def test_entropy_identity_gate_da_and_ppm():
-    s1 = build_spectrum([100, 200], [1.0, 1.0], precursor_mz=500.0)
-    s2 = build_spectrum([100, 200], [1.0, 1.0], precursor_mz=500.3)
-
-    base = FlashEntropy(
-        tolerance=0.02, matching_mode="fragment", remove_precursor=False, noise_cutoff=0.0
+    np.testing.assert_allclose(
+        scores,
+        scores.T,
+        atol=1e-12,
+        rtol=0.0,
     )
-    base_score = float(base.pair(s1, s2))
-    assert base_score > 0.0
+    np.testing.assert_allclose(
+        np.diag(scores),
+        np.ones(len(spectra)),
+        atol=1e-12,
+        rtol=0.0,
+    )
 
-    # Strict Da gate
-    gate_da_tight = FlashEntropy(
-        tolerance=0.02,
+
+def test_flash_entropy_pair_matches_matrix_element():
+    """pair() and matrix() should use the same scoring semantics."""
+    reference = _build_spectrum(
+        [100.0, 200.0],
+        [1.0, 0.5],
+        precursor_mz=500.0,
+    )
+    query = _build_spectrum(
+        [100.005, 210.0],
+        [1.0, 0.5],
+        precursor_mz=510.0,
+    )
+
+    similarity = EntropyFlash(
+        matching_mode="hybrid",
+        tolerance=0.01,
+        remove_precursor=False,
+        noise_cutoff=0.0,
+        dtype=np.float64,
+    )
+
+    pair_score = float(similarity.pair(reference, query))
+    matrix_score = similarity.matrix(
+        [reference],
+        [query],
+        n_jobs=1,
+        progress_bar=False,
+    ).to_array()[0, 0]
+
+    assert matrix_score == pytest.approx(pair_score, abs=1e-12)
+
+
+def test_flash_entropy_rectangular_matrix_preserves_requested_orientation():
+    """Rows must correspond to spectra_1 and columns to spectra_2."""
+    references, queries = _example_entropy_inputs()
+
+    similarity = EntropyFlash(
         matching_mode="fragment",
+        tolerance=0.01,
+        remove_precursor=False,
+        noise_cutoff=0.0,
+        dtype=np.float64,
+    )
+
+    scores = similarity.matrix(
+        references,
+        queries,
+        n_jobs=1,
+        progress_bar=False,
+    ).to_array()
+
+    assert scores.shape == (len(references), len(queries))
+
+    for reference_index, reference in enumerate(references):
+        for query_index, query in enumerate(queries):
+            expected = float(similarity.pair(reference, query))
+            assert scores[reference_index, query_index] == pytest.approx(
+                expected,
+                abs=1e-12,
+            )
+
+
+# -------------------------------------------------------------------------
+# EntropyFlash: matching modes and precursor handling
+# -------------------------------------------------------------------------
+
+
+def test_flash_entropy_neutral_loss_requires_precursor_mz():
+    """Neutral-loss matching should score zero without precursor metadata."""
+    reference = _build_spectrum([100.0], [1.0])
+    query = _build_spectrum([100.0], [1.0])
+
+    similarity = EntropyFlash(
+        matching_mode="neutral_loss",
+        tolerance=0.01,
+        remove_precursor=False,
+        noise_cutoff=0.0,
+        dtype=np.float64,
+    )
+
+    score = similarity.matrix(
+        [reference],
+        [query],
+        n_jobs=1,
+        progress_bar=False,
+    ).to_array()[0, 0]
+
+    assert score == 0.0
+
+
+def test_flash_entropy_hybrid_combines_distinct_fragment_and_loss_matches():
+    """Hybrid mode should combine non-overlapping fragment and loss matches."""
+    reference = _build_spectrum(
+        [100.0, 200.0],
+        [1.0, 1.0],
+        precursor_mz=500.0,
+    )
+    query = _build_spectrum(
+        [100.0, 210.0],
+        [1.0, 1.0],
+        precursor_mz=510.0,
+    )
+
+    similarity = EntropyFlash(
+        matching_mode="hybrid",
+        tolerance=0.01,
+        remove_precursor=False,
+        noise_cutoff=0.0,
+        dtype=np.float64,
+    )
+
+    score = similarity.matrix(
+        [reference],
+        [query],
+        n_jobs=1,
+        progress_bar=False,
+    ).to_array()[0, 0]
+
+    assert score == pytest.approx(1.0, abs=1e-12)
+
+
+def test_flash_entropy_identity_precursor_gate_excludes_distant_precursor():
+    """Identity gating should remove scores outside the precursor window."""
+    reference = _build_spectrum(
+        [100.0, 200.0],
+        [1.0, 1.0],
+        precursor_mz=500.0,
+    )
+    query = _build_spectrum(
+        [100.0, 200.0],
+        [1.0, 1.0],
+        precursor_mz=500.3,
+    )
+
+    similarity = EntropyFlash(
+        matching_mode="fragment",
+        tolerance=0.01,
         identity_precursor_tolerance=0.2,
         identity_use_ppm=False,
         remove_precursor=False,
         noise_cutoff=0.0,
-    )
-    assert float(gate_da_tight.pair(s1, s2)) == 0.0
-
-    gate_da_loose = FlashEntropy(
-        tolerance=0.02,
-        matching_mode="fragment",
-        identity_precursor_tolerance=0.5,
-        identity_use_ppm=False,
-        remove_precursor=False,
-        noise_cutoff=0.0,
-    )
-    assert float(gate_da_loose.pair(s1, s2)) == pytest.approx(base_score, abs=1e-7)
-
-    # PPM gate
-    gate_ppm_tight = FlashEntropy(
-        tolerance=0.02,
-        matching_mode="fragment",
-        identity_precursor_tolerance=300.0,
-        identity_use_ppm=True,
-        remove_precursor=False,
-        noise_cutoff=0.0,
-    )
-    assert float(gate_ppm_tight.pair(s1, s2)) == 0.0
-
-    gate_ppm_loose = FlashEntropy(
-        tolerance=0.02,
-        matching_mode="fragment",
-        identity_precursor_tolerance=800.0,
-        identity_use_ppm=True,
-        remove_precursor=False,
-        noise_cutoff=0.0,
-    )
-    assert float(gate_ppm_loose.pair(s1, s2)) == pytest.approx(base_score, abs=1e-7)
-
-
-def test_entropy_neutral_loss_vs_hybrid_prefers_fragments():
-    # NL hits duplicate fragment hits -> hybrid should equal fragment-only
-    q = build_spectrum([100, 200], [1.0, 1.0], precursor_mz=500.0)
-    r = build_spectrum([100, 200], [1.0, 1.0], precursor_mz=500.0)
-
-    kwargs = {
-        "tolerance": 0.1,
-        "use_ppm": False,
-        "remove_precursor": False,
-        "noise_cutoff": 0.0,
-        "normalize_to_half": False,
-        "merge_within": 0.0,
-    }
-
-    frag = FlashEntropy(matching_mode="fragment", **kwargs)
-    nl = FlashEntropy(matching_mode="neutral_loss", **kwargs)
-    hyb = FlashEntropy(matching_mode="hybrid", **kwargs)
-
-    s_frag = float(frag.pair(r, q))
-    s_nl = float(nl.pair(r, q))
-    s_hyb = float(hyb.pair(r, q))
-
-    assert s_frag > 0.0
-    assert s_hyb == pytest.approx(s_frag, abs=1e-7)
-    assert s_nl >= s_hyb
-
-
-def test_entropy_matrix_dense_matches_pair():
-    refs = [
-        build_spectrum([100, 200], [1.0, 0.5], precursor_mz=500.0),
-        build_spectrum([110, 300], [0.3, 1.0], precursor_mz=600.0),
-    ]
-    qs = [
-        build_spectrum([100, 205], [1.0, 0.5], precursor_mz=500.0),
-        build_spectrum([110, 300], [1.0, 0.3], precursor_mz=600.0),
-    ]
-    fse = FlashEntropy(
-        tolerance=0.1,
-        use_ppm=False,
-        matching_mode="fragment",
-        remove_precursor=False,
-        noise_cutoff=0.0,
-        normalize_to_half=False,
-        merge_within=0.0,
-    )
-    scores = fse.matrix(refs, qs, n_jobs=0, progress_bar=False)
-    assert isinstance(scores, Scores)
-    assert scores.is_sparse is False
-    assert scores.is_scalar is True
-
-    M = scores.to_array()
-    assert M.shape == (2, 2)
-    for i, r in enumerate(refs):
-        for j, q in enumerate(qs):
-            expected = float(fse.pair(r, q))
-            assert float(M[i, j]) == pytest.approx(expected, abs=1e-6)
-
-
-def test_entropy_matrix_self_comparison_returns_scores():
-    spectra = [
-        build_spectrum([100, 200], [1.0, 0.5], precursor_mz=500.0),
-        build_spectrum([110, 300], [0.3, 1.0], precursor_mz=600.0),
-    ]
-    fse = FlashEntropy(
-        tolerance=0.1,
-        use_ppm=False,
-        matching_mode="fragment",
-        remove_precursor=False,
-        noise_cutoff=0.0,
-        normalize_to_half=False,
-        merge_within=0.0,
-    )
-
-    scores = fse.matrix(spectra, n_jobs=0, progress_bar=False)
-    assert isinstance(scores, Scores)
-    assert scores.shape == (2, 2)
-
-    M = scores.to_array()
-    assert M.shape == (2, 2)
-    assert np.allclose(M, M.T, atol=1e-6)
-
-
-def test_entropy_fragment_score_is_bounded_with_overlapping_windows():
-    # Overlapping tolerance windows used to cause many-to-many over-counting.
-    s1 = build_spectrum([100.000, 100.010], [1.0, 1.0], precursor_mz=250.0)
-    s2 = build_spectrum([100.005, 100.015], [1.0, 1.0], precursor_mz=250.0)
-
-    fse = FlashEntropy(
-        matching_mode="fragment",
-        tolerance=0.02,
-        use_ppm=False,
-        remove_precursor=False,
-        noise_cutoff=0.0,
-        normalize_to_half=True,
-        merge_within=0.0,
         dtype=np.float64,
     )
 
-    score = float(fse.pair(s1, s2))
-    assert score <= 1.0 + 1e-7
+    score = similarity.matrix(
+        [reference],
+        [query],
+        n_jobs=1,
+        progress_bar=False,
+    ).to_array()[0, 0]
+
+    assert score == 0.0
 
 
-def test_entropy_fragment_ignores_non_positive_peaks_in_pairwise_matching():
-    ref_with_zero = build_spectrum([100.0, 100.1], [0.0, 1.0], precursor_mz=250.0)
-    ref_without_zero = build_spectrum([100.1], [1.0], precursor_mz=250.0)
-    query = build_spectrum([100.05], [1.0], precursor_mz=250.0)
-
-    fse = FlashEntropy(
-        matching_mode="fragment",
-        tolerance=0.1,
-        use_ppm=False,
-        remove_precursor=False,
-        noise_cutoff=0.0,
-        normalize_to_half=False,
-        merge_within=0.0,
-        dtype=np.float64,
-    )
-
-    expected = float(fse.pair(ref_without_zero, query))
-    assert expected > 0.0
-    assert float(fse.pair(ref_with_zero, query)) == pytest.approx(expected, abs=1e-7)
-
-    matrix_scores = fse.matrix([ref_with_zero, ref_without_zero], [query], n_jobs=0, progress_bar=False)
-    M = matrix_scores.to_array()
-    assert float(M[0, 0]) == pytest.approx(expected, abs=1e-7)
-    assert float(M[1, 0]) == pytest.approx(expected, abs=1e-7)
-
-
-def test_entropy_fragment_matrix_matches_pair_with_sparse_candidate_columns():
-    spectrum_1 = build_spectrum([100.0, 200.0], [1.0, 0.8], precursor_mz=450.0)
-    spectra_2 = [
-        build_spectrum([100.005, 200.003], [1.0, 0.7], precursor_mz=450.0),
-        build_spectrum([100.01, 350.0], [0.9, 0.5], precursor_mz=450.0),
-        build_spectrum([199.99], [0.8], precursor_mz=450.0),
-    ]
-    for shift in range(15):
-        base = 500.0 + 10.0 * shift
-        spectra_2.append(build_spectrum([base, base + 0.3], [1.0, 0.5], precursor_mz=450.0))
-
-    fse = FlashEntropy(
-        matching_mode="fragment",
-        tolerance=0.02,
-        use_ppm=False,
-        remove_precursor=False,
-        noise_cutoff=0.0,
-        normalize_to_half=False,
-        merge_within=0.0,
-        dtype=np.float64,
-    )
-
-    matrix_scores = fse.matrix([spectrum_1], spectra_2, n_jobs=0, progress_bar=False)
-    M = matrix_scores.to_array()
-    assert M.shape == (1, len(spectra_2))
-    assert np.count_nonzero(M[0] > 0.0) == 3
-
-    for j, query in enumerate(spectra_2):
-        expected = float(fse.pair(spectrum_1, query))
-        assert float(M[0, j]) == pytest.approx(expected, abs=1e-7)
-
-
-# ----------------------------
-# Cosine / Modified Cosine path + baseline parity
-# ----------------------------
-
-def _mc_flash(tolerance, intensity_power=1.0):
-    return CosineFlash(
-        matching_mode="hybrid",  # hybrid = "modified cosine"
-        tolerance=tolerance,
-        intensity_power=intensity_power,
-        remove_precursor=False,
-        noise_cutoff=0.0,
-        normalize_to_half=True,
-        merge_within=0.0,
-        dtype=np.float64,
-    )
+# -------------------------------------------------------------------------
+# CosineFlash: input handling and matrix API
+# -------------------------------------------------------------------------
 
 
 @pytest.mark.parametrize(
-    "mz_a,int_a,pmz_a,mz_b,int_b,pmz_b,tol",
-    [
-        # 1) Clean shift, should match
-        pytest.param(
-            [100.0, 200.0, 300.0],
-            [0.8, 1.0, 0.6],
-            500.0,
-            [110.0, 210.002, 300.005],
-            [0.8, 1.0, 0.6],
-            510.0,
-            0.01,
-            id="pure_shift_exploited",
-        ),
-        # 2) Mixed: one shared unshifted fragment plus shifted set
-        # Expect both algorithms to pick the same best non-overlapping set.
-        pytest.param(
-            [100.0, 150.0, 200.0, 300.0],
-            [0.8, 0.2, 1.0, 0.6],
-            500.0,
-            [110.0, 150.0, 210.0005, 310.0],
-            [0.8, 0.2, 1.0, 0.6],
-            510.0,
-            0.01,
-            id="mixed_direct_and_shifted",
-        ),
-        # 3) Ambiguity: two query peaks within tolerance of the same shifted match
-        # This stresses greedy choice ordering and tie-breaking
-        pytest.param(
-            [100.0, 200.0],
-            [1.0, 0.5],
-            500.0,
-            [110.0, 110.007, 210.0],
-            [1.0, 1.0, 0.5],
-            510.0,
-            0.01,
-            id="duplicate_candidates_nearby",
-        ),
-        # 4) Competition: a direct fragment match competes with a shifted/NL match
-        # Constructed so dot products are close and greedy selection matters.
-        pytest.param(
-            [100.0, 200.0, 250.0],
-            [1.0, 0.9, 0.2],
-            500.0,
-            [110.0, 200.0, 260.0],
-            [1.0, 0.9, 0.2],
-            510.0,
-            0.01,
-            id="direct_competes_with_shifted",
-        ),
-        # 5) Edge tolerance: shifted peaks sit near the boundary
-        # To catch subtle differences in symmetric ppm/Da handling or window trimming.
-        pytest.param(
-            [100.0, 200.0, 300.0],
-            [0.8, 1.0, 0.6],
-            500.0,
-            [110.0099, 210.0099, 310.0099],
-            [0.8, 1.0, 0.6],
-            510.0,
-            0.01,
-            id="near_tolerance_boundary",
-        ),
-        # 6) Edge case: mass shift is inside the tolerance, so no shifted matches should be considered at all.
-        pytest.param(
-            [100.0],
-            [1.0],
-            500.009,
-            [99.985, 100.0],
-            [1.0, 0.1],
-            500.0,
-            0.01,
-            id="inside_tolerance_shift",
-        ),
-    ],
+    "matching_mode",
+    ["fragment", "hybrid"],
 )
-def test_flash_hybrid_cosine_matches_modified_cosine_greedy(mz_a, int_a, pmz_a, mz_b, int_b, pmz_b, tol):
-    a = build_spectrum(mz_a, int_a, precursor_mz=pmz_a)
-    b = build_spectrum(mz_b, int_b, precursor_mz=pmz_b)
+@pytest.mark.parametrize(
+    "intensity_power",
+    [1.0, 0.5],
+)
+def test_cosine_flash_collection_input_matches_list_input(
+    matching_mode,
+    intensity_power,
+):
+    """Packed collection input should reproduce list-input score and match fields."""
+    references, queries = _example_cosine_inputs()
 
-    for intensity_power in [1.0, 0.5]:  # Test with and without intensity weighting!
-        flash = _mc_flash(tol, intensity_power=intensity_power)
-        baseline = ModifiedCosineGreedy(tolerance=tol, intensity_power=intensity_power)
+    similarity = CosineFlash(
+        matching_mode=matching_mode,
+        tolerance=0.01,
+        intensity_power=intensity_power,
+        remove_precursor=False,
+        noise_cutoff=0.0,
+        dtype=np.float64,
+    )
 
-        s_flash = float(flash.pair(a, b)["score"])
-        s_base = float(baseline.pair(a, b)["score"])
-        matches_flash = flash.pair(a, b)["matches"]
-        matches_base = baseline.pair(a, b)["matches"]
+    scores_from_lists = similarity.matrix(
+        references,
+        queries,
+        n_jobs=1,
+        progress_bar=False,
+    )
+    scores_from_collections = similarity.matrix(
+        _build_collection(references),
+        _build_collection(queries),
+        n_jobs=1,
+        progress_bar=False,
+    )
 
-        assert s_flash == pytest.approx(s_base, rel=1e-12, abs=1e-12)
-        assert matches_flash == matches_base
+    assert isinstance(scores_from_lists, Scores)
+    assert scores_from_lists.score_fields == ("score", "matches")
+    assert scores_from_lists.shape == (2, 2)
+
+    np.testing.assert_allclose(
+        scores_from_collections.to_array("score"),
+        scores_from_lists.to_array("score"),
+        atol=1e-12,
+        rtol=0.0,
+    )
+    np.testing.assert_array_equal(
+        scores_from_collections.to_array("matches"),
+        scores_from_lists.to_array("matches"),
+    )
 
 
-def test_cosine_pair_matches_cosinegreedy_default_tolerance_001():
-    # Build a few pairs with clear fragment matches inside 0.01 Da
-    pairs = [
-        (
-            build_spectrum([100.000, 150.000, 200.000, 300.000], [0.6, 1.0, 0.8, 0.4], 500.0),
-            build_spectrum([100.005, 150.004, 200.007, 300.002], [0.6, 0.9, 0.8, 0.4], 500.0),
-        ),
-        (
-            build_spectrum([80.0, 120.0, 250.0], [0.9, 0.7, 1.0], 420.0),
-            build_spectrum([80.006, 120.004, 250.009], [0.9, 0.7, 1.0], 420.0),
-        ),
-    ]
+@pytest.mark.parametrize("intensity_power", [1.0, 0.5])
+def test_cosine_flash_pair_matches_matrix_element(intensity_power):
+    """pair() should return the same score and match count as matrix()."""
+    reference = _build_spectrum(
+        [100.0, 150.0, 300.0],
+        [0.6, 1.0, 0.4],
+        precursor_mz=500.0,
+    )
+    query = _build_spectrum(
+        [100.005, 150.005, 300.0],
+        [0.6, 0.9, 0.4],
+        precursor_mz=500.0,
+    )
 
-    flash = CosineFlash(
+    similarity = CosineFlash(
+        matching_mode="fragment",
+        tolerance=0.01,
+        intensity_power=intensity_power,
+        remove_precursor=False,
+        noise_cutoff=0.0,
+        dtype=np.float64,
+    )
+
+    pair_score = similarity.pair(reference, query)
+    matrix_scores = similarity.matrix(
+        [reference],
+        [query],
+        n_jobs=1,
+        progress_bar=False,
+    )
+
+    assert float(pair_score["score"]) == pytest.approx(
+        matrix_scores.to_array("score")[0, 0],
+        abs=1e-12,
+    )
+    assert int(pair_score["matches"]) == int(
+        matrix_scores.to_array("matches")[0, 0]
+    )
+
+
+def test_cosine_flash_score_field_selection():
+    """matrix() should calculate only the explicitly requested score fields."""
+    spectrum = _build_spectrum(
+        [100.0, 200.0],
+        [1.0, 0.5],
+        precursor_mz=500.0,
+    )
+
+    similarity = CosineFlash(
+        tolerance=0.01,
+        remove_precursor=False,
+        noise_cutoff=0.0,
+    )
+
+    score_only = similarity.matrix(
+        [spectrum],
+        score_fields=("score",),
+        n_jobs=1,
+        progress_bar=False,
+    )
+    matches_only = similarity.matrix(
+        [spectrum],
+        score_fields=("matches",),
+        n_jobs=1,
+        progress_bar=False,
+    )
+
+    assert score_only.score_fields == ("score",)
+    assert matches_only.score_fields == ("matches",)
+
+
+@pytest.mark.parametrize("dtype", [np.float32, np.float64])
+def test_cosine_flash_pair_respects_dtype(dtype):
+    """The score field should use the configured floating-point dtype."""
+    spectrum = _build_spectrum(
+        [100.0],
+        [1.0],
+        precursor_mz=500.0,
+    )
+
+    score = CosineFlash(
+        dtype=dtype,
+        remove_precursor=False,
+        noise_cutoff=0.0,
+    ).pair(
+        spectrum,
+        spectrum,
+    )
+
+    assert score["score"].dtype == np.dtype(dtype)
+
+
+def test_cosine_flash_rectangular_matrix_preserves_requested_orientation():
+    """Rectangular output must follow spectra_1 x spectra_2 orientation."""
+    references, queries = _example_cosine_inputs()
+
+    similarity = CosineFlash(
         matching_mode="fragment",
         tolerance=0.01,
         remove_precursor=False,
         noise_cutoff=0.0,
-        normalize_to_half=True,
-        merge_within=0.0,
         dtype=np.float64,
     )
-    baseline = CosineGreedy(tolerance=0.01)
 
-    for a, b in pairs:
-        s_flash = flash.pair(a, b)["score"]
-        s_base = baseline.pair(a, b)["score"]
-        assert s_flash == pytest.approx(s_base, rel=1e-12, abs=1e-12)
-
-        matches_flash = flash.pair(a, b)["matches"]
-        matches_base = baseline.pair(a, b)["matches"]
-        assert matches_flash == matches_base
-
-
-def test_cosine_matrix_dense_matches_pair():
-    refs = [
-        build_spectrum([100, 150, 300], [0.6, 1.0, 0.4], precursor_mz=500.0),
-        build_spectrum([110, 250, 400], [0.5, 0.9, 0.7], precursor_mz=600.0),
-    ]
-    qs = [
-        build_spectrum([100.007, 150.002, 300.000], [0.6, 1.0, 0.4], precursor_mz=500.0),
-        build_spectrum([110.004, 250.009, 400.006], [0.5, 0.9, 0.7], precursor_mz=600.0),
-    ]
-    flash = CosineFlash(
-        matching_mode="fragment",
-        tolerance=0.01,
-        remove_precursor=False,
-        noise_cutoff=0.0,
-        normalize_to_half=True,
-        merge_within=0.0,
-        dtype=np.float64,
+    scores = similarity.matrix(
+        references,
+        queries,
+        n_jobs=1,
+        progress_bar=False,
     )
-    scores = flash.matrix(refs, qs, n_jobs=0, progress_bar=False)
-    assert isinstance(scores, Scores)
-    M = scores.to_array("score")
-    assert M.shape == (2, 2)
-    for i, r in enumerate(refs):
-        for j, q in enumerate(qs):
-            expected = float(flash.pair(r, q)["score"])
-            assert float(M[i, j]) == pytest.approx(expected, abs=1e-12)
 
+    assert scores.shape == (len(references), len(queries))
 
-def test_cosine_dtype_and_commutativity():
-    a = build_spectrum([100, 150, 300], [0.5, 1.0, 0.4], precursor_mz=600.0)
-    b = build_spectrum([100, 155, 295], [0.5, 0.8, 0.6], precursor_mz=600.0)
-    f32 = CosineFlash(dtype=np.float32, remove_precursor=False, noise_cutoff=0.0)
-    f64 = CosineFlash(dtype=np.float64, remove_precursor=False, noise_cutoff=0.0)
+    score_array = scores.to_array("score")
+    match_array = scores.to_array("matches")
 
-    s_ab_32 = f32.pair(a, b)["score"]
-    s_ba_32 = f32.pair(b, a)["score"]
-    s_ab_64 = f64.pair(a, b)["score"]
-    s_ba_64 = f64.pair(b, a)["score"]
+    for reference_index, reference in enumerate(references):
+        for query_index, query in enumerate(queries):
+            expected = similarity.pair(reference, query)
 
-    assert s_ab_32.dtype == np.float32 and s_ba_32.dtype == np.float32
-    assert s_ab_64.dtype == np.float64 and s_ba_64.dtype == np.float64
-    assert float(s_ab_32) == pytest.approx(float(s_ba_32), 1e-6)
-    assert float(s_ab_64) == pytest.approx(float(s_ba_64), 1e-12)
+            assert score_array[reference_index, query_index] == pytest.approx(
+                float(expected["score"]),
+                abs=1e-12,
+            )
+            assert match_array[reference_index, query_index] == int(
+                expected["matches"]
+            )

@@ -47,6 +47,19 @@ Because matchms contains many filters, and because some filters should be applie
 in a particular order, the recommended way to define a processing workflow is
 with :class:`~matchms.filtering.SpectraProcessor`.
 
+The default filter order is defined in :mod:`~matchms.filtering.filter_order`. This
+order is based on the recommended order of operations for processing mass spectra and
+can be critical for the proper execution of some filters. For example, the ``require_precursor_mz`` filter
+should be applied after the ``interpret_pepmass`` filter, because the latter adds precursor m/z values
+to spectra that are missing them.
+
+Also normalization of peaks can be an execution-order-sentitive operation. For example, if a filter
+removes peaks, the normalization should usually be applied after that filter.
+
+In case you want to apply a filter in a different order, you can either create your own ``SpectraProcessor``
+with a custom filter order. Or simply apply every filter individually in the order you want, without using 
+``SpectraProcessor``.
+
 A processor is created from a list of filters. Filters can be specified by name,
 or together with a dictionary containing non-default parameters.
 

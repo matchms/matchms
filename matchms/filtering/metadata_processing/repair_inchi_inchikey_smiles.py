@@ -3,30 +3,28 @@ from matchms.filtering.filter_utils.metadata_conversions import as_string_or_non
 from matchms.filtering.species_string import SpeciesString
 
 
-def _repair_species_values(inchi, inchiaux, inchikey, smiles) -> dict[str, str]:
-    """Repair and assign inchi, inchikey, and smiles values."""
+def _repair_species_values(
+    inchi, inchiaux, inchikey, smiles
+) -> dict[str, str | None]:
     cleaneds = [SpeciesString(s) for s in [inchi, inchiaux, inchikey, smiles]]
 
     inchis = [
-        c.cleaned
-        for c in cleaneds
+        c.cleaned for c in cleaneds
         if c.target == "inchi" and c.cleaned != ""
     ]
     inchikeys = [
-        c.cleaned
-        for c in cleaneds
+        c.cleaned for c in cleaneds
         if c.target == "inchikey" and c.cleaned != ""
     ]
     smiles_values = [
-        c.cleaned
-        for c in cleaneds
+        c.cleaned for c in cleaneds
         if c.target == "smiles" and c.cleaned != ""
     ]
 
     return {
-        "inchi": inchis[0] if inchis else "",
-        "inchikey": inchikeys[0] if inchikeys else "",
-        "smiles": smiles_values[0] if smiles_values else "",
+        "inchi": inchis[0] if inchis else None,
+        "inchikey": inchikeys[0] if inchikeys else None,
+        "smiles": smiles_values[0] if smiles_values else None,
     }
 
 
@@ -51,5 +49,6 @@ def _repair_inchi_inchikey_smiles(metadata) -> dict[str, str]:
 
 
 repair_inchi_inchikey_smiles = metadata_update_filter(
-    _repair_inchi_inchikey_smiles
+    _repair_inchi_inchikey_smiles,
+    drop_missing_updates=False,
 )

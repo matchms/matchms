@@ -7,7 +7,11 @@ import numpy as np
 import pandas as pd
 from scipy.sparse import csr_array, vstack
 from matchms.exporting import save_as_json, save_as_mgf, save_as_msp
-from matchms.metadata_collection import MetadataCollection, harmonize_metadata_collection_columns
+from matchms.metadata_collection import (
+    MetadataCollection,
+    harmonize_metadata_collection_columns,
+    harmonize_metadata_types,
+)
 from matchms.spectrum import Spectrum
 from .fragment_collection import CSRFragmentCollection, FragmentCollection
 from .hashing import compute_combined_hashes
@@ -187,17 +191,16 @@ class SpectraCollection:
         return CSRFragmentCollection(spectra, mz_precision=self.mz_precision)
 
     def _construct_metadata(self, spectra):
-        # data = defaultdict(list)
-        # [data[k].append(v) for spectrum in spectra for k, v in spectrum.metadata.items()]
-        # TODO: add minimal Matadata harmonization
-
-        # create and return pd.DataFrame(data)
         records = [spectrum.metadata for spectrum in spectra]
         metadata = pd.DataFrame.from_records(records)
-        if len(metadata) == 0:  # allow empty metadata if spectra have no metadata
+
+        if len(metadata) == 0:
             metadata = pd.DataFrame(index=np.arange(len(spectra)))
 
-        return harmonize_metadata_collection_columns(metadata).reset_index(drop=True)
+        metadata = harmonize_metadata_collection_columns(metadata)
+        metadata = harmonize_metadata_types(metadata)
+
+        return metadata.reset_index(drop=True)
 
     @property
     def metadata(self) -> pd.DataFrame:
@@ -350,6 +353,8 @@ class SpectraCollection:
             [self._metadata.reset_index(drop=True), new_metadata],
             axis=1,
         )
+        self._metadata = harmonize_metadata_types(self._metadata)
+
         self._clear_cache(["metadata_hashes", "spectra_hashes"])
 
     def drop_metadata(
@@ -386,12 +391,47 @@ class SpectraCollection:
         return None if inplace else target
 
     def harmonize_metadata_columns(self, inplace: bool = False):
-        """Harmonize metadata column names to matchms key style."""
+        """Harmonize metadata column names to matchms key style.
+        
+        Parameters
+        ----------
+        inplace
+            If True, modify this collection and return None. Otherwise return a
+            harmonized copy.
+        """
         target = self if inplace else self.copy()
 
         target._metadata = harmonize_metadata_collection_columns(target._metadata).reset_index(
             drop=True
         )
+        target._clear_cache(["metadata_hashes", "spectra_hashes"])
+
+        return None if inplace else target
+
+    def harmonize_metadata_types(
+        self,
+        strict_harmonize: bool = False,
+        inplace: bool = False,
+    ):
+        """Harmonize known metadata value types.
+
+        Parameters
+        ----------
+        strict_harmonize
+            If False, only attempt cheap column-wise dtype conversion for known
+            numeric metadata fields. If True, additionally apply the same row-wise
+            semantic harmonization used by :class:`Metadata`.
+        inplace
+            If True, modify this collection and return None. Otherwise return a
+            harmonized copy.
+        """
+        target = self if inplace else self.copy()
+
+        target._metadata = harmonize_metadata_types(
+            target._metadata,
+            strict_harmonize=strict_harmonize,
+        ).reset_index(drop=True)
+
         target._clear_cache(["metadata_hashes", "spectra_hashes"])
 
         return None if inplace else target
@@ -517,9 +557,14 @@ class SpectraCollection:
         )
 
         if inplace:
+            self._metadata = harmonize_metadata_types(self._metadata)
+            self._clear_cache(["metadata_hashes", "spectra_hashes"])
             return None
 
-        target._metadata = pd.DataFrame(result_metadata).reset_index(drop=True)
+        target._metadata = harmonize_metadata_types(
+            pd.DataFrame(result_metadata)
+        ).reset_index(drop=True)
+
         target._clear_cache(["metadata_hashes", "spectra_hashes"])
         return target
 

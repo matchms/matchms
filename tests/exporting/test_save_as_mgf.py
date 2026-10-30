@@ -103,11 +103,21 @@ def test_save_as_mgf_export_style(style, expected):
         assert mgf_content[7] == expected[1]
 
 
-@pytest.mark.parametrize("charge, ionmode, parent_mass",
-                         [(-1, "negative", 218.5),
-                          (2, "positive", "wrong information"),
-                          (None, None, 250)])
-def test_save_load_mgf_consistency(tmpdir, charge, ionmode, parent_mass):
+@pytest.mark.parametrize(
+    "charge, ionmode, parent_mass, expected_parent_mass",
+    [
+        (-1, "negative", 218.5, 218.5),
+        (2, "positive", "wrong information", None),
+        (None, None, 250, 250.0),
+    ],
+)
+def test_save_load_mgf_consistency(
+    tmpdir,
+    charge,
+    ionmode,
+    parent_mass,
+    expected_parent_mass,
+):
     """Test saving and loading spectrum to .mgf file"""
     mz = np.array([100.1, 200.02, 300.003], dtype="float")
     intensities = np.array([0.01, 0.02, 1.0], dtype="float")
@@ -133,7 +143,7 @@ def test_save_load_mgf_consistency(tmpdir, charge, ionmode, parent_mass):
     assert spectrum_imports[0].get("precursor_mz") == 200.5
     assert spectrum_imports[0].get("charge") == charge
     assert spectrum_imports[0].get("ionmode") == ionmode
-    assert spectrum_imports[0].get("parent_mass") == str(parent_mass)
+    assert spectrum_imports[0].get("parent_mass") == expected_parent_mass
 
 
 @pytest.mark.parametrize("test_file", ["testdata.mgf", "pesticides.mgf"])

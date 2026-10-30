@@ -170,6 +170,19 @@ class BaseSimilarity(ABC):
             return spectra_1, True
         return spectra_2, False
 
+    @staticmethod
+    def _as_spectra_collection(
+        spectra,
+        **kwargs,
+        ):
+        """Return spectra as a SpectraCollection."""
+        from matchms.spectra_collection import SpectraCollection
+
+        if isinstance(spectra, SpectraCollection):
+            return spectra
+
+        return SpectraCollection(spectra, **kwargs)
+
     def _available_score_fields(self) -> tuple[str, ...]:
         """Return the available score fields and validate consistency."""
         dtype_names = np.dtype(self.score_datatype).names

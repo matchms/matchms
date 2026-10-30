@@ -5,7 +5,7 @@ from matchms.networking.networking_functions import (
     get_top_hits_by_column,
     get_top_hits_by_row,
 )
-from matchms.similarity import FlashEntropy
+from matchms.similarity import EntropyFlash
 
 
 def create_dummy_spectra():
@@ -16,13 +16,13 @@ def create_dummy_spectra():
                                   intensities=np.array([0.7, 0.1 * i]),
                                   metadata={"spectrum_id": "ref_spec_"+str(i),
                                             "smiles": "C1=CC=C2C(=C1)NC(=N2)C3=CC=CO3",
-                                            "precursor_mz": 100+50*i}))
+                                            "precursor_mz": 210+50*i}))
     for i in range(3):
         spectra.append(Spectrum(mz=np.array([100 + i, 210.]),
                                   intensities=np.array([0.5, 0.1 * i]),
                                   metadata={"spectrum_id": "query_spec_"+str(i),
                                             "smiles": "CC1=C(C=C(C=C1)NC(=O)N(C)C)Cl",
-                                            "precursor_mz": 110+50*i}))
+                                            "precursor_mz": 220+50*i}))
     return spectra
 
 
@@ -31,7 +31,7 @@ def create_dummy_scores():
     spectra_1 = spectra[:5]
     spectra_2 = spectra[5:]
 
-    similarity_measure = FlashEntropy(matching_mode="hybrid")
+    similarity_measure = EntropyFlash(matching_mode="hybrid")
     scores = calculate_scores(spectra_1, spectra_2, similarity_measure)
     return scores, spectra_1, spectra_2
 
@@ -227,7 +227,7 @@ def test_get_top_hits_default_identifiers():
 
 def test_get_top_hits_ignore_diagonal():
     spectra = create_dummy_spectra()[:5]
-    similarity_measure = FlashEntropy(matching_mode="hybrid")
+    similarity_measure = EntropyFlash(matching_mode="hybrid")
     scores = calculate_scores(spectra, spectra, similarity_measure)
     identifiers = [s.get("spectrum_id") for s in spectra]
 

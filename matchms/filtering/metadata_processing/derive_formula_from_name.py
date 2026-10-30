@@ -54,7 +54,7 @@ def _derive_formula_from_name(
 
     if remove_formula_from_name:
         name_formula_removed = " ".join(name.split(" ")[:-1])
-        updates["compound_name"] = name_formula_removed
+        updates["compound_name"] = name_formula_removed or None
         logger.info("Removed formula %s from compound name.", formula_from_name)
 
     if metadata.get("formula", None) is None:
@@ -76,4 +76,7 @@ def _looks_like_formula(formula):
     return (atom_count > 2) and (re.search(regexp, formula) is not None)
 
 
-derive_formula_from_name = metadata_update_filter(_derive_formula_from_name)
+derive_formula_from_name = metadata_update_filter(
+    _derive_formula_from_name,
+    drop_missing_updates=False,
+)

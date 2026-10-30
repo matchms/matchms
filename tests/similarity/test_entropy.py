@@ -1,8 +1,9 @@
 import numpy as np
 import pytest
+from matchms import SpectraCollection
 from matchms.scores import Scores
 from matchms.similarity import Entropy, EntropyGreedy
-from matchms.similarity.flash_similarity import FlashEntropy
+from matchms.similarity.flash_similarity import EntropyFlash
 from ..builder_spectrum import SpectrumBuilder
 
 
@@ -58,7 +59,7 @@ def test_entropy_greedy_nonmatching_spectra_score_zero():
 
 
 def test_entropy_greedy_one_of_two_equal_peaks_matching_has_known_score():
-    """Independent analytical check, without using FlashEntropy as oracle.
+    """Independent analytical check, without using EntropyFlash as oracle.
 
     With two equal peaks per spectrum, entropy weighting keeps both peaks equal.
     Normalization to sum 0.5 therefore gives intensity 0.25 per peak. If exactly
@@ -315,7 +316,7 @@ def test_entropy_greedy_merge_within_can_restore_peak_match():
 
 
 # ----------------------------
-# EntropyGreedy vs FlashEntropy parity
+# EntropyGreedy vs EntropyFlash parity
 # ----------------------------
 
 
@@ -413,7 +414,7 @@ def test_entropy_greedy_matches_flash_entropy_fragment_pair(
     }
 
     baseline = EntropyGreedy(**kwargs)
-    flash = FlashEntropy(
+    flash = EntropyFlash(
         matching_mode="fragment",
         normalize_to_half=True,
         **kwargs,
@@ -446,7 +447,7 @@ def test_entropy_greedy_matches_flash_entropy_after_precursor_cleanup():
     }
 
     baseline = EntropyGreedy(**kwargs).pair(spectrum_1, spectrum_2)
-    flash = FlashEntropy(
+    flash = EntropyFlash(
         matching_mode="fragment",
         normalize_to_half=True,
         **kwargs,
@@ -512,7 +513,7 @@ def test_entropy_matrix_matches_flash_entropy_with_same_configuration():
         progress_bar=False,
         n_jobs=0,
     )
-    expected = FlashEntropy(
+    expected = EntropyFlash(
         matching_mode="fragment",
         normalize_to_half=True,
         **kwargs,
@@ -666,3 +667,182 @@ def test_entropy_matrix_rejects_unknown_score_field():
             n_jobs=0,
             progress_bar=False,
         )
+
+
+@pytest.mark.parametrize("matching_mode", ["fragment", "neutral_loss", "hybrid"])
+def test_entropy_greedy_matches_flash_entropy(matching_mode):
+    reference = build_spectrum(
+        [100.0, 200.0],
+        [1.0, 1.0],
+        precursor_mz=500.0,
+    )
+    query = build_spectrum(
+        [100.0, 210.0],
+        [1.0, 1.0],
+        precursor_mz=510.0,
+    )
+
+    kwargs = {
+        "matching_mode": matching_mode,
+        "tolerance": 0.01,
+        "remove_precursor": False,
+        "noise_cutoff": 0.0,
+        "dtype": np.float64,
+    }
+
+    greedy = float(EntropyGreedy(**kwargs).pair(reference, query))
+    flash = float(EntropyFlash(**kwargs).pair(reference, query))
+
+    assert greedy == pytest.approx(flash, abs=1e-12)
+
+
+def test_entropy_greedy_matching_modes():
+    reference = build_spectrum(
+        [100.0, 200.0],
+        [1.0, 1.0],
+        precursor_mz=500.0,
+    )
+    query = build_spectrum(
+        [100.0, 210.0],
+        [1.0, 1.0],
+        precursor_mz=510.0,
+    )
+
+    kwargs = {
+        "tolerance": 0.01,
+        "remove_precursor": False,
+        "noise_cutoff": 0.0,
+        "dtype": np.float64,
+    }
+
+    fragment = float(
+        EntropyGreedy(matching_mode="fragment", **kwargs).pair(
+            reference, query
+        )
+    )
+    neutral_loss = float(
+        EntropyGreedy(matching_mode="neutral_loss", **kwargs).pair(
+            reference, query
+        )
+    )
+    hybrid = float(
+        EntropyGreedy(matching_mode="hybrid", **kwargs).pair(
+            reference, query
+        )
+    )
+
+    assert fragment == pytest.approx(0.5)
+    assert neutral_loss == pytest.approx(0.5)
+    assert hybrid == pytest.approx(1.0)
+
+
+def test_entropy_greedy_hybrid_does_not_double_count():
+    reference = build_spectrum(
+        [100.0, 200.0],
+        [1.0, 1.0],
+        precursor_mz=500.0,
+    )
+    query = build_spectrum(
+        [100.0, 200.0],
+        [1.0, 1.0],
+        precursor_mz=500.0,
+    )
+
+    similarity = EntropyGreedy(
+        matching_mode="hybrid",
+        tolerance=0.01,
+        remove_precursor=False,
+        noise_cutoff=0.0,
+    )
+
+    assert float(similarity.pair(reference, query)) == pytest.approx(1.0)
+
+
+def test_entropy_greedy_matching_modes_without_precursor():
+    reference = build_spectrum([100.0], [1.0])
+    query = build_spectrum([100.0], [1.0])
+
+    kwargs = {
+        "tolerance": 0.01,
+        "remove_precursor": False,
+        "noise_cutoff": 0.0,
+    }
+
+    fragment = float(
+        EntropyGreedy(matching_mode="fragment", **kwargs).pair(reference, query)
+    )
+    neutral_loss = float(
+        EntropyGreedy(matching_mode="neutral_loss", **kwargs).pair(reference, query)
+    )
+    hybrid = float(
+        EntropyGreedy(matching_mode="hybrid", **kwargs).pair(reference, query)
+    )
+
+    assert fragment == pytest.approx(1.0)
+    assert neutral_loss == 0.0
+    assert hybrid == pytest.approx(fragment)
+
+
+@pytest.mark.parametrize("matching_mode", ["fragment", "neutral_loss", "hybrid"])
+def test_entropy_search_matches_matrix(matching_mode):
+    queries = [
+        build_spectrum(
+            [100.0, 200.0],
+            [1.0, 0.5],
+            precursor_mz=500.0,
+        ),
+        build_spectrum(
+            [110.0, 300.0],
+            [0.3, 1.0],
+            precursor_mz=600.0,
+        ),
+        build_spectrum(
+            [150.0, 250.0],
+            [0.8, 0.4],
+            precursor_mz=550.0,
+        ),
+    ]
+    library = [
+        build_spectrum(
+            [100.005, 210.0],
+            [1.0, 0.5],
+            precursor_mz=510.0,
+        ),
+        build_spectrum(
+            [110.005, 300.0],
+            [1.0, 0.3],
+            precursor_mz=600.0,
+        ),
+    ]
+
+    similarity = Entropy(
+        matching_mode=matching_mode,
+        tolerance=0.01,
+        remove_precursor=False,
+        noise_cutoff=0.0,
+        dtype=np.float64,
+    )
+
+    expected = similarity.matrix(
+        queries,
+        library,
+        progress_bar=False,
+        n_jobs=1,
+    )
+
+    index = similarity.build_index(SpectraCollection(library))
+    actual = similarity.search(
+        SpectraCollection(queries),
+        index,
+        progress_bar=False,
+        n_jobs=1,
+    )
+
+    assert actual.score_fields == ("score",)
+    assert actual.shape == expected.shape == (3, 2)
+    assert np.allclose(
+        actual.to_array(),
+        expected.to_array(),
+        atol=1e-12,
+        rtol=1e-12,
+    )

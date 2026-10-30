@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 from matchms import SpectraCollection
 from matchms.filtering import add_parent_mass
+from matchms.filtering.metadata_processing.add_parent_mass import _convert_parent_mass_entry_to_float
 from tests.run_spectrum_and_collection import run_filter_as_spectrum_or_collection
 from ..builder_spectrum import SpectrumBuilder
 
@@ -185,3 +186,21 @@ def test_add_parent_mass_collection_clone_false_modifies_input():
 
     assert processed is collection
     assert np.allclose(collection.metadata.loc[0, "parent_mass"], 442.992724, atol=1e-4)
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [
+        (184.1, 184.1),
+        (184, 184.0),
+        (np.float64(184.1), 184.1),
+        ("184.1", 184.1),
+        (" 184.1 ", 184.1),
+        (None, None),
+        (np.nan, None),
+        ("N/A", None),
+        ("invalid", None),
+    ],
+)
+def test_convert_parent_mass_entry_to_float(value, expected):
+    assert _convert_parent_mass_entry_to_float(value) == expected
