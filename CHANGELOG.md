@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## unpublished
 ### Added
 - New `ModifiedCosineLinear`, the linear-time exact modified cosine from SIRIUS. Same score as `ModifiedCosineHungarian` on merged spectra.
+- `SpectraProcessor` now applies the configured `harmonize_missing_entries` step once more to the final result, so missing values introduced by later processing steps are handled consistently [#951](https://github.com/matchms/matchms/issues/951).
+- `ProcessingReport` now counts metadata entries that are still missing after processing (`report.missing_metadata`), making failed derivations visible [#951](https://github.com/matchms/matchms/issues/951).
 
 ### Changed
 - `CosineBlink` now computes and returns scores as `np.float64` (`DEFAULT_DTYPE`) by default, consistent with the other similarity scores. The new `dtype` parameter can be set to `np.float32` to reduce memory usage [#880](https://github.com/matchms/matchms/issues/880).
