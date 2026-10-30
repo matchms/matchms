@@ -1,102 +1,59 @@
 name: CI installation checks
 
 on:
-  push:
+  workflow_call:
   workflow_dispatch:
-    inputs:
-      tag:
-        description: Tag for manually running CI installation checks workflow
-        required: False
-        default: ''
+
+permissions:
+  contents: read
 
 jobs:
   installation_check:
-    name: install / ${{ matrix.variant }} / python-3.13
+    name: Install ${{ matrix.variant }} / Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
-
     strategy:
       fail-fast: false
       matrix:
         include:
-          - variant: core
-            install_target: "."
-            expect_chemap: "false"
-            expect_networkx: "false"
-          - variant: fingerprints
-            install_target: ".[fingerprints]"
-            expect_chemap: "true"
-            expect_networkx: "true"
-          - variant: networking
-            install_target: ".[networking]"
-            expect_chemap: "false"
-            expect_networkx: "true"
-          - variant: all
-            install_target: ".[all]"
-            expect_chemap: "true"
-            expect_networkx: "true"
-
+          - {variant: core, python-version: '3.13', install_target: '.', expect_chemap: 'false', expect_networkx: 'false'}
+          - {variant: core, python-version: '3.14', install_target: '.', expect_chemap: 'false', expect_networkx: 'false'}
+          - {variant: networking, python-version: '3.14', install_target: '.[networking]', expect_chemap: 'false', expect_networkx: 'true'}
+          - {variant: fingerprints, python-version: '3.13', install_target: '.[fingerprints]', expect_chemap: 'true', expect_networkx: 'false'}
+          - {variant: all, python-version: '3.13', install_target: '.[all]', expect_chemap: 'true', expect_networkx: 'true'}
     steps:
       - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Set up uv
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
-          python-version: "3.13"
-
-      - name: Upgrade pip
-        run: python -m pip install --upgrade pip
-
-      - name: Install matchms variant
-        run: python -m pip install "${{ matrix.install_target }}"
-
+          python-version: ${{ matrix.python-version }}
+          enable-cache: true
+      - name: Create isolated environment
+        run: uv venv --python ${{ matrix.python-version }}
+      - name: Install selected extra
+        run: uv pip install --python .venv '${{ matrix.install_target }}'
       - name: Check dependency consistency
-        run: python -m pip check
-
-      - name: Check installation
+        run: uv pip check --python .venv
+      - name: Verify imports
+        shell: bash
         env:
           EXPECT_CHEMAP: ${{ matrix.expect_chemap }}
           EXPECT_NETWORKX: ${{ matrix.expect_networkx }}
         run: |
-          python - <<'PY'
+          .venv/bin/python - <<'PY'
           import importlib.util
           import os
-
           import matchms
 
-          expect_chemap = os.environ["EXPECT_CHEMAP"] == "true"
-          expect_networkx = os.environ["EXPECT_NETWORKX"] == "true"
+          for name, env_var in (("chemap", "EXPECT_CHEMAP"), ("networkx", "EXPECT_NETWORKX")):
+              expected = os.environ[env_var] == "true"
+              actual = importlib.util.find_spec(name) is not None
+              assert actual == expected, f"{name}: expected {expected}, got {actual}"
 
-          has_chemap = importlib.util.find_spec("chemap") is not None
-          has_networkx = importlib.util.find_spec("networkx") is not None
-
-          assert has_chemap == expect_chemap, (
-              f"chemap availability: expected {expect_chemap}, got {has_chemap}"
-          )
-          assert has_networkx == expect_networkx, (
-              f"networkx availability: expected {expect_networkx}, got {has_networkx}"
-          )
-
-          print(f"matchms imported successfully: {matchms.__file__}")
-          print(f"chemap installed: {has_chemap}")
-          print(f"networkx installed: {has_networkx}")
-          PY
-
-      - name: Check networking import
-        if: matrix.expect_networkx == 'true'
-        run: |
-          python - <<'PY'
-          from matchms.networking import SimilarityNetwork
-
-          SimilarityNetwork()
-          print("SimilarityNetwork is available.")
-          PY
-
-      - name: Check fingerprint imports
-        if: matrix.expect_chemap == 'true'
-        run: |
-          python - <<'PY'
-          import chemap
-          from matchms import Fingerprints
-
-          print("chemap and matchms.Fingerprints are available.")
+          if os.environ["EXPECT_NETWORKX"] == "true":
+              from matchms.networking import SimilarityNetwork
+              SimilarityNetwork()
+          if os.environ["EXPECT_CHEMAP"] == "true":
+              import chemap
+              from matchms import Fingerprints
+          print("Successful matchms import:", matchms.__file__)
           PY
