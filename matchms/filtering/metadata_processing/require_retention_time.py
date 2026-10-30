@@ -8,6 +8,27 @@ logger = logging.getLogger("matchms")
 
 
 def _require_retention_time(metadata, minimum_rt=None, maximum_rt=None) -> bool:
+    """Require retention time to be present and within optional bounds.
+
+    Parameters
+    ----------
+    spectrum_in
+        Input :class:`~matchms.spectrum.Spectrum` or :class:`~matchms.spectra_collection.SpectraCollection`.
+    minimum_rt
+        Minimum accepted retention time. Default is ``None`` (no lower bound).
+    maximum_rt
+        Maximum accepted retention time. Default is ``None`` (no upper bound).
+    clone
+        Optionally clone the input before applying the filter. If ``False``,
+        the input object may be modified in place.
+
+    Returns
+    -------
+    Spectrum, SpectraCollection, or None
+        Spectrum input is returned unchanged if ``retention_time`` is present
+        and within the bounds, otherwise ``None``. SpectraCollection input is
+        returned with rows lacking a valid retention time removed.
+    """
     retention_time = metadata.get("retention_time", None)
 
     if is_missing_metadata_value(retention_time):

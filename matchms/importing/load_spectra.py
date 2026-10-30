@@ -13,6 +13,16 @@ from matchms.spectra_collection import SpectraCollection
 from matchms.spectrum import Spectrum
 
 
+SUPPORTED_FILE_FORMATS = {
+    "json": "JSON (GNPS or matchms style)",
+    "mgf": "MGF",
+    "msp": "MSP",
+    "mzml": "mzML",
+    "mzxml": "mzXML",
+    "pickle": "pickled list of matchms Spectrum objects",
+}
+
+
 def load_spectra(
     file: str,
     metadata_harmonization: bool = True,
