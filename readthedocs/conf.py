@@ -62,6 +62,8 @@ exclude_patterns = [
 os.environ["SPHINX_APIDOC_OPTIONS"] = "members,show-inheritance"
 
 
+doctest_test_doctest_blocks = ""
+
 # -- sphinxcontrib-apidoc ----------------------------------------------------
 
 apidoc_module_dir = str(PROJECT_ROOT / "matchms")
@@ -78,7 +80,8 @@ apidoc_module_first = True
 
 autodoc_default_options = {
     "special-members": "__init__,__call__",
-    "inherited-members": True,
+    "undoc-members": True,
+    "show-inheritance": True,
 }
 
 napoleon_google_docstring = False
