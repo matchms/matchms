@@ -62,6 +62,8 @@ exclude_patterns = [
 os.environ["SPHINX_APIDOC_OPTIONS"] = "members,show-inheritance"
 
 
+doctest_test_doctest_blocks = ""
+
 # -- sphinxcontrib-apidoc ----------------------------------------------------
 
 apidoc_module_dir = str(PROJECT_ROOT / "matchms")
