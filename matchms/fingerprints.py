@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING
 import numpy as np
 import pandas as pd
 import scipy.sparse as sp
-from chemap import FingerprintConfig, compute_fingerprints
 from rdkit import Chem
 from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import (
     is_valid_inchi,
@@ -17,6 +16,18 @@ from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import (
 
 if TYPE_CHECKING:
     from matchms.spectrum import Spectrum
+
+
+def _require_chemap():
+    try:
+        from chemap import FingerprintConfig, compute_fingerprints
+    except ImportError as exc:
+        raise ImportError(
+            "Fingerprint computation requires the optional 'chemap' dependency. "
+            "Install it with `pip install 'matchms[fingerprints]'`."
+        ) from exc
+
+    return FingerprintConfig, compute_fingerprints
 
 
 logger = logging.getLogger("matchms")
@@ -331,6 +342,8 @@ class Fingerprints:
 
     def _compute_from_smiles(self, smiles: list[str]):
         """Compute fingerprints from SMILES using chemap."""
+        FingerprintConfig, compute_fingerprints = _require_chemap()
+
         config = FingerprintConfig(
             count=self.count,
             folded=self.folded,
