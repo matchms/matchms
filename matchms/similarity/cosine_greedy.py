@@ -58,7 +58,7 @@ class CosineGreedy(BaseSimilarityWithSparse):
 
     .. testoutput::
 
-        Cosine score is 0.83 with 1 matched peaks
+        Cosine score is 0.86 with 1 matched peaks
 
     Unlike in matchms < 1.0, this method also applies a noise filter by default,
     which removes peaks with intensity below a certain cutoff. This is typically

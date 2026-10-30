@@ -80,7 +80,8 @@ apidoc_module_first = True
 
 autodoc_default_options = {
     "special-members": "__init__,__call__",
-    "inherited-members": True,
+    "undoc-members": True,
+    "show-inheritance": True,
 }
 
 napoleon_google_docstring = False
