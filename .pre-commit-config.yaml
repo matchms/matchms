@@ -20,7 +20,7 @@ repos:
 
   # Keep the uv lockfile in sync with pyproject.toml.
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.12.17
+    rev: 0.13.6
     hooks:
       - id: uv-lock
 
