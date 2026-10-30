@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: Tag for manually running CI first code check workflow
+        description: Tag for manually running CI generate dev requirements workflow
         required: False
         default: ''
 
@@ -20,20 +20,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
         with:
           python-version: '3.12'
+          enable-cache: true
+          cache-suffix: generate-reqs
 
-      - name: Build package and create dev environment
-        run: |
-          python -m pip install --upgrade pip poetry
-          poetry self add poetry-plugin-export
-          poetry install
+      - name: Sync dependencies
+        run: uv sync --frozen
 
       - name: Export dev dependencies to dev-requirements.txt
-        run: |
-          poetry export --with dev -f requirements.txt -o dev-requirements.txt --without-hashes
+        run: uv export --group dev --no-hashes -o dev-requirements.txt
 
       - name: Commit and push dev-requirements.txt
         run: |
