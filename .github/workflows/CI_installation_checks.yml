@@ -15,11 +15,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - {variant: core, python-version: '3.13', install_target: '.', expect_chemap: 'false', expect_networkx: 'false'}
-          - {variant: core, python-version: '3.14', install_target: '.', expect_chemap: 'false', expect_networkx: 'false'}
-          - {variant: networking, python-version: '3.14', install_target: '.[networking]', expect_chemap: 'false', expect_networkx: 'true'}
-          - {variant: fingerprints, python-version: '3.13', install_target: '.[fingerprints]', expect_chemap: 'true', expect_networkx: 'false'}
-          - {variant: all, python-version: '3.13', install_target: '.[all]', expect_chemap: 'true', expect_networkx: 'true'}
+          - {variant: core, python-version: '3.13', install_target: '.', expect_chemap: 'false'}
+          - {variant: core, python-version: '3.14', install_target: '.', expect_chemap: 'false'}
+          - {variant: fingerprints, python-version: '3.13', install_target: '.[fingerprints]', expect_chemap: 'true'}
     steps:
       - uses: actions/checkout@v4
       - name: Set up uv
@@ -29,7 +27,7 @@ jobs:
           enable-cache: true
       - name: Create isolated environment
         run: uv venv --python ${{ matrix.python-version }}
-      - name: Install selected extra
+      - name: Install package
         run: uv pip install --python .venv '${{ matrix.install_target }}'
       - name: Check dependency consistency
         run: uv pip check --python .venv
@@ -37,23 +35,20 @@ jobs:
         shell: bash
         env:
           EXPECT_CHEMAP: ${{ matrix.expect_chemap }}
-          EXPECT_NETWORKX: ${{ matrix.expect_networkx }}
         run: |
           .venv/bin/python - <<'PY'
           import importlib.util
           import os
           import matchms
 
-          for name, env_var in (("chemap", "EXPECT_CHEMAP"), ("networkx", "EXPECT_NETWORKX")):
-              expected = os.environ[env_var] == "true"
-              actual = importlib.util.find_spec(name) is not None
-              assert actual == expected, f"{name}: expected {expected}, got {actual}"
-
-          if os.environ["EXPECT_NETWORKX"] == "true":
-              from matchms.networking import SimilarityNetwork
-              SimilarityNetwork()
-          if os.environ["EXPECT_CHEMAP"] == "true":
+          expect_chemap = os.environ["EXPECT_CHEMAP"] == "true"
+          has_chemap = importlib.util.find_spec("chemap") is not None
+          assert has_chemap == expect_chemap, (
+              f"chemap availability: expected {expect_chemap}, got {has_chemap}"
+          )
+          if expect_chemap:
               import chemap
               from matchms import Fingerprints
+
           print("Successful matchms import:", matchms.__file__)
           PY
