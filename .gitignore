@@ -29,7 +29,6 @@ uv.lock
 # ide
 .idea
 .eclipse
-.vscode
 
 # Mac
 .DS_Store
@@ -45,3 +44,5 @@ __pycache__/
 
 # conda build directory
 /_build
+config.bat
+node_modules

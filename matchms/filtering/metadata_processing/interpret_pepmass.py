@@ -91,10 +91,16 @@ def _get_mz_intensity_charge(pepmass):
             if len(matches) == 1:
                 pepmass = matches[0].split(",")
             if len(matches) == 0:
-                try:
-                    pepmass = float(pepmass)
-                except ValueError:
-                    return None, None, None
+                # MGF style "mz [intensity [charge]]", separated by whitespace or commas
+                parts = [part for part in re.split(r"[\s,]+", pepmass.strip()) if part]
+                if len(parts) > 1:
+                    pepmass = parts[:3]
+                else:
+                    try:
+                        pepmass = float(pepmass)
+                    except ValueError:
+                        return None, None, None
+
         length = len(pepmass)
         values = [None, None, None]
         for i in range(length):
