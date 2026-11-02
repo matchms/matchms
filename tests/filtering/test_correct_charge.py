@@ -22,6 +22,11 @@ from tests.run_spectrum_and_collection import run_filter_as_spectrum_or_collecti
         [{"charge": 3}, 3],
         [{"charge": -3}, -3],
         [{"charge": 0}, 0],
+        [{"ionmode": "negative", "adduct": "[M-2H]2-"}, -2],
+        [{"ionmode": "positive", "adduct": "[M+2H]2+", "charge": 0}, 2],
+        [{"ionmode": "positive", "adduct": "M+2H"}, 2],
+        [{"adduct": "[M+H]+"}, 1],
+        [{"ionmode": "positive", "adduct": "[M+H]+", "charge": 3}, 3],
     ],
 )
 def test_correct_charge(metadata, expected, as_collection):
