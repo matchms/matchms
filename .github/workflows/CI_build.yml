@@ -99,12 +99,12 @@ jobs:
           python-version: '3.13'
           enable-cache: true
       - name: Install docs dependencies
-        run: uv sync --frozen --group docs
+        run: uv sync --locked --group docs --extra all
       - name: Build docs and run doctests
         working-directory: readthedocs/
         env:
           SPHINXOPTS: '-n'
-        run: uv run --frozen --group docs make coverage doctest html
+        run: uv run --locked --group docs make coverage doctest html
       - name: Check documentation coverage threshold
         shell: bash
         run: |
