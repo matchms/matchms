@@ -39,10 +39,10 @@ def _reduce_to_number_of_peaks_spectrum(
         Optionally clone the Spectrum.
 
     """
-    if n_required < 0 or not isinstance(n_required, int):
+    if n_required < 0:
         raise ValueError("n_required must be an integer >= 0.")
 
-    if n_max < 1 or not isinstance(n_max, int):
+    if n_max < 1:
         raise ValueError("n_max must be an integer >= 1.")
 
     def _set_maximum_number_of_peaks_to_keep():
