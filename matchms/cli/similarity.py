@@ -23,6 +23,7 @@ the code:
 import inspect
 from matchms.cli.constants import (
     ERROR_INVALID_PARAMETER,
+    ERROR_MISSING_PARAMETER,
     ERROR_UNSUPPORTED_METHOD,
 )
 from matchms.cli.errors import CliError, raise_for_unknown_value
@@ -135,7 +136,7 @@ def check_missing_required(name: str, sig: dict, params: dict, operation: str, *
     if missing:
         raise CliError(
             f"The similarity '{name}' is missing required parameter(s): {', '.join(missing)}.",
-            code=ERROR_INVALID_PARAMETER,
+            code=ERROR_MISSING_PARAMETER,
             operation=operation,
             parameter=missing[0],
             valid_values=required,
