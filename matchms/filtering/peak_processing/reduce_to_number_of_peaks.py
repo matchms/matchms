@@ -29,6 +29,7 @@ def _reduce_to_number_of_peaks_spectrum(
         to 'None'. Default is 1.
     n_max:
         Maximum number of peaks. Remove peaks if more peaks are found. Default is inf.
+        Must be an integer >= 1.
     ratio_desired:
         Set desired ratio between maximum number of peaks and parent mass.
         For spectra without parent mass (e.g. GCMS spectra) this will raise an
@@ -38,6 +39,11 @@ def _reduce_to_number_of_peaks_spectrum(
         Optionally clone the Spectrum.
 
     """
+    if n_required < 0 or not isinstance(n_required, int):
+        raise ValueError("n_required must be an integer >= 0.")
+
+    if n_max < 1 or not isinstance(n_max, int):
+        raise ValueError("n_max must be an integer >= 1.")
 
     def _set_maximum_number_of_peaks_to_keep():
         parent_mass = spectrum.get("parent_mass", None)
