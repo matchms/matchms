@@ -2,103 +2,59 @@ name: CI Build
 
 on:
   pull_request:
-    types: [opened, ready_for_review, closed]
+    types: [opened, synchronize, reopened, ready_for_review]
   workflow_dispatch:
-    inputs:
-      tag:
-        description: Tag for manually running CI Build workflow
-        required: False
-        default: ''
+
+permissions:
+  contents: read
 
 jobs:
   first_check:
-    name: first code check / python-3.12 / ubuntu-latest
+    name: First check / Python 3.13 / Ubuntu
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Set up uv
         uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
-          python-version: '3.12'
+          python-version: '3.13'
           enable-cache: true
-          cache-suffix: first-check
-      - name: Show environment info
-        run: |
-          which uv
-          uv --version
-          uv run python --version
-      - name: Install dependencies
+      - name: Install development dependencies
         run: uv sync --frozen
-      - name: Show packages
-        run: uv pip list
-      - name: Run ruff linter
-        run: uv run ruff check --output-format=github
+      - name: Lint
+        run: uv run --frozen ruff check --output-format=github
       - name: Test with coverage
-        run: uv run pytest --cov --cov-report term --cov-report xml --junitxml=xunit-result.xml
-      - name: Correct coverage paths
+        run: uv run --frozen pytest --cov --cov-report=term --cov-report=xml --junitxml=xunit-result.xml
+      - name: Normalize coverage paths
         run: sed -i "s+$PWD/++g" coverage.xml
-      - name: Store PR metadata in json file
+      - name: Store PR metadata
+        if: github.event_name == 'pull_request'
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           HEAD_REF: ${{ github.event.pull_request.head.ref }}
           BASE_REF: ${{ github.event.pull_request.base.ref }}
         run: |
-          jq -n --arg pr_number "$PR_NUMBER"\
-                  --arg head_ref "$HEAD_REF"\
-                  --arg base_ref "$BASE_REF"\
-                  '{"pr_number": $pr_number, "head_ref": $head_ref, "base_ref": $base_ref}' > pr_metadata.json
+          jq -n --arg pr_number "$PR_NUMBER" --arg head_ref "$HEAD_REF" --arg base_ref "$BASE_REF" \
+            '{"pr_number": $pr_number, "head_ref": $head_ref, "base_ref": $base_ref}' > pr_metadata.json
       - uses: actions/upload-artifact@v4
+        if: always() && github.event_name == 'pull_request'
         with:
           name: sonarcloud-data-pip
           path: |
             coverage.xml
             xunit-result.xml
             pr_metadata.json
-
-  build_pypi:
-    name: Test pypi build
-    runs-on: ubuntu-latest
-    needs: first_check
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up uv
-        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
-        with:
-          python-version: '3.12'
-          enable-cache: true
-          cache-suffix: build-pypi
-      - name: Show environment info
-        run: |
-          which uv
-          uv --version
-          uv run python --version
-      - name: Build package
-        run: uv build
-      - name: Test package metadata
-        run: uv run twine check dist/*
-      - name: Show packages
-        run: uv pip list
-      - name: Install development environment and run tests
-        run: |
-          uv sync --frozen
-          uv run pytest
-      - name: Show environment variables
-        shell: bash -l {0}
-        run: |
-          env | sort
+          if-no-files-found: warn
 
   test_dev:
-    name: test dev environment / python-${{ matrix.python-version }} / ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
+    name: Tests / Python ${{ matrix.python-version }} / ${{ matrix.os }}
     needs: first_check
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: ['ubuntu-latest', 'macos-latest', 'windows-latest']
-        python-version: ['3.11', '3.12']
-        exclude:
-          - os: 'macos-latest'
-            python-version: ['3.11']
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ['3.11', '3.12', '3.13', '3.14']
     steps:
       - uses: actions/checkout@v4
       - name: Set up uv
@@ -106,74 +62,60 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           enable-cache: true
-          cache-suffix: test-dev-${{ matrix.os }}-${{ matrix.python-version }}
-      - name: Show environment info
-        run: |
-          which uv
-          uv --version
-          uv run python --version
-      - name: Install dependencies (incl. dev + chemistry)
+      - name: Install core and dev dependencies (no chemap extra)
         run: uv sync --frozen
-      - name: Show packages
-        run: uv pip list
+      - name: Check interpreter
+        run: uv run --frozen python --version
       - name: Run tests
-        run: uv run pytest
+        run: uv run --frozen pytest
 
-  test_docs:
-    name: Build and test documentation
-    runs-on: ubuntu-latest
+  build_pypi:
+    name: Build and validate distributions
     needs: first_check
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: "0"
       - name: Set up uv
         uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
-          python-version: '3.12'
+          python-version: '3.13'
           enable-cache: true
-          cache-suffix: test-docs
-      - name: Show environment info
-        run: |
-          which uv
-          uv --version
-          uv run python --version
-      - name: Show environment variables
-        run: |
-          env | sort
-      - name: Install dependencies (incl. dev + docs)
+      - name: Build wheel and source distribution
+        run: uv build
+      - name: Validate distribution metadata
+        run: uvx --from twine twine check dist/*
+
+  test_docs:
+    name: Build and test documentation
+    needs: first_check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up uv
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          python-version: '3.13'
+          enable-cache: true
+      - name: Install docs dependencies
         run: uv sync --frozen --group docs
-      - name: Build documentation
+      - name: Build docs and run doctests
         working-directory: readthedocs/
         env:
-          SPHINXOPTS: "-n"
-        run: |
-          uv run make coverage doctest html
+          SPHINXOPTS: '-n'
+        run: uv run --frozen --group docs make coverage doctest html
       - name: Check documentation coverage threshold
+        shell: bash
         run: |
           cat readthedocs/_build/coverage/python.txt
-          UNCOVERED_MEMBERS=$(grep '*' readthedocs/_build/coverage/python.txt | wc -l)
-          UNCOVERED_MEMBERS_ALLOWED=10
-          if (( $UNCOVERED_MEMBERS > $UNCOVERED_MEMBERS_ALLOWED )) ; then echo "There are currently ${UNCOVERED_MEMBERS} uncovered members in the documentation, which is more than the ${UNCOVERED_MEMBERS_ALLOWED} allowed." && exit 1;fi
-          echo "The code is sufficiently documented with ${UNCOVERED_MEMBERS} uncovered members out of ${UNCOVERED_MEMBERS_ALLOWED} allowed.";
-      - name: Test with coverage
-        run: uv run pytest --cov --cov-report term --cov-report xml --junitxml=xunit-result.xml
-      - name: Correct coverage paths
-        run: sed -i "s+$PWD/++g" coverage.xml
-      - name: Store PR metadata in json file
-        env:
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          HEAD_REF: ${{ github.event.pull_request.head.ref }}
-          BASE_REF: ${{ github.event.pull_request.base.ref }}
-        run: |
-          jq -n --arg pr_number "$PR_NUMBER"\
-                  --arg head_ref "$HEAD_REF"\
-                  --arg base_ref "$BASE_REF"\
-                  '{"pr_number": $pr_number, "head_ref": $head_ref, "base_ref": $base_ref}' > pr_metadata.json
-      - uses: actions/upload-artifact@v4
-        with:
-          name: sonarcloud-data-docs
-          path: |
-            coverage.xml
-            xunit-result.xml
-            pr_metadata.json
+          uncovered=$(grep -c '\*' readthedocs/_build/coverage/python.txt || true)
+          if (( uncovered > 10 )); then
+            echo "Too many undocumented members: $uncovered (maximum 10)"
+            exit 1
+          fi
+
+  installation_checks:
+    name: Optional dependency installations
+    needs: first_check
+    uses: ./.github/workflows/CI_installation_checks.yml

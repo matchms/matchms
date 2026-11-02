@@ -2,17 +2,15 @@ name: CI first code check
 
 on:
   push:
+    branches: [master]
   workflow_dispatch:
-    inputs:
-      tag:
-        description: Tag for manually running CI first code check workflow
-        required: False
-        default: ''
+
+permissions:
+  contents: read
 
 jobs:
-
   first_check:
-    name: first code check / python-3.13 / ubuntu-latest
+    name: First check / Python 3.13 / Ubuntu
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -21,36 +19,9 @@ jobs:
         with:
           python-version: '3.13'
           enable-cache: true
-          cache-suffix: first-check
-      - name: Show environment info
-        run: |
-          which uv
-          uv --version
-          uv run python --version
-      - name: Install dependencies
+      - name: Install development dependencies
         run: uv sync --frozen
-      - name: Show packages
-        run: uv pip list
-      - name: Run ruff linter
-        run: uv run ruff check --output-format=github
-      - name: Test with coverage
-        run: uv run pytest --cov --cov-report term --cov-report xml --junitxml=xunit-result.xml
-      - name: Correct coverage paths
-        run: sed -i "s+$PWD/++g" coverage.xml
-      - name: Store PR metadata in json file
-        env:
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          HEAD_REF: ${{ github.event.pull_request.head.ref }}
-          BASE_REF: ${{ github.event.pull_request.base.ref }}
-        run: |
-          jq -n --arg pr_number "$PR_NUMBER"\
-                  --arg head_ref "$HEAD_REF"\
-                  --arg base_ref "$BASE_REF"\
-                  '{"pr_number": $pr_number, "head_ref": $head_ref, "base_ref": $base_ref}' > pr_metadata.json
-      - uses: actions/upload-artifact@v4
-        with:
-          name: sonarcloud-data-pip
-          path: |
-            coverage.xml
-            xunit-result.xml
-            pr_metadata.json
+      - name: Lint
+        run: uv run --frozen ruff check --output-format=github
+      - name: Test
+        run: uv run --frozen pytest
