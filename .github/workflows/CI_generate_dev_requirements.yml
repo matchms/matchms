@@ -2,41 +2,36 @@ name: CI Generate Dev Requirements
 
 on:
   push:
-    branches:
-      - master
+    branches: [master]
     paths:
       - pyproject.toml
+      - uv.lock
   workflow_dispatch:
-    inputs:
-      tag:
-        description: Tag for manually running CI generate dev requirements workflow
-        required: False
-        default: ''
+
+permissions:
+  contents: write
 
 jobs:
   generate-requirements:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
-
       - name: Set up uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
-          python-version: '3.12'
+          python-version: '3.13'
           enable-cache: true
-          cache-suffix: generate-reqs
-
-      - name: Sync dependencies
-        run: uv sync --frozen
-
-      - name: Export dev dependencies to dev-requirements.txt
-        run: uv export --group dev --no-hashes -o dev-requirements.txt
-
-      - name: Commit and push dev-requirements.txt
+      - name: Export development dependencies
+        run: uv export --frozen --group dev --no-hashes --no-emit-project -o dev-requirements.txt
+      - name: Commit changed requirements (if any)
+        shell: bash
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
           git add dev-requirements.txt
-          git commit -m "Update dev-requirements.txt"
+          if git diff --cached --quiet; then
+            echo 'No changes to dev-requirements.txt'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Update dev-requirements.txt'
           git push
