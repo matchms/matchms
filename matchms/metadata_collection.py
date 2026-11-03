@@ -76,9 +76,11 @@ def _coerce_known_metadata_dtypes(metadata: pd.DataFrame) -> pd.DataFrame:
             continue
 
         try:
-            # Nullable integer dtype is important because collection metadata
-            # may legitimately contain missing entries.
-            metadata[key] = metadata[key].astype("Int64")
+            values = pd.to_numeric(
+                metadata[key].to_numpy(dtype=object),
+                errors="raise",
+            )
+            metadata[key] = pd.array(values, dtype="Int64")
         except (TypeError, ValueError):
             logger.debug(
                 "Could not directly convert metadata column '%s' to integer.",
