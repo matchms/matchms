@@ -91,7 +91,7 @@ def load_from_parquet(
     import pyarrow as pa
     import pyarrow.parquet as pq
 
-    schema = _read_parquet_schema(path, pq)
+    schema = _read_parquet_schema(path)
     schema_metadata = decode_schema_metadata(schema.metadata)
 
     resolved_mz_column = resolve_peak_column(
