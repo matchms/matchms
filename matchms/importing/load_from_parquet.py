@@ -172,15 +172,13 @@ def load_from_parquet(
     )
 
 
-def _read_parquet_schema(path: Path, pq):
+def _read_parquet_schema(path: Path):
     """Read schema for a Parquet file or partitioned dataset."""
+    import pyarrow.dataset as ds
+    import pyarrow.parquet as pq
     try:
         return pq.read_schema(path)
     except (OSError, ValueError):
-        try:
-            import pyarrow.dataset as ds
-        except ImportError as exc:  # pragma: no cover - dataset ships with pyarrow.
-            raise ImportError("Partitioned Parquet datasets require pyarrow.dataset.") from exc
         return ds.dataset(path, format="parquet").schema
 
 
