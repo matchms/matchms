@@ -40,7 +40,7 @@ def save_spectra(
         raise ValueError(f"{ftype} isn't supported for when `append` is True")
 
     if ftype == "parquet":
-        raise TypeError("Parquet export is not supported for Spectrum objects. Use SpectraCollection.to_parquet() instead.")
+        raise TypeError("Parquet export is not supported for lists. Use SpectraCollection.to_parquet() instead.")
 
     if not isinstance(spectra, list):
         spectra = [spectra]
