@@ -7,6 +7,7 @@ from matchms.importing import (
     load_from_msp,
     load_from_mzml,
     load_from_mzxml,
+    load_from_parquet,
     load_from_pickle,
 )
 from matchms.spectra_collection import SpectraCollection
@@ -84,21 +85,35 @@ def load_ms2_dataset(
         File type to use for import. By default, ``"auto"`` guesses the file
         type from the file extension. Alternatively, pass an explicit file type,
         for example ``"mzml"``, ``"json"``, ``"mgf"``, ``"msp"``, ``"mzxml"``,
-        or ``"pickle"``.
+        ``"parquet"``, or ``"pickle"``.
     **kwargs
-        Additional keyword arguments to pass to the SpectraCollection constructor,
-        for example ``mz_precision``.
+        Additional keyword arguments. For Parquet input these are passed to
+        ``load_from_parquet`` (for example ``columns``, ``filters``, or
+        ``mz_precision``); for other formats they are passed to the
+        SpectraCollection constructor.
 
     Returns
     -------
     SpectraCollection
         Imported spectra as a collection.
     """
+    resolved_ftype = (
+        os.path.splitext(file)[1].lower()[1:]
+        if ftype is None or ftype == "auto"
+        else ftype.lower()
+    )
+    if resolved_ftype == "parquet":
+        return load_from_parquet(
+            file,
+            metadata_harmonization=metadata_harmonization,
+            **kwargs,
+        )
+
     return SpectraCollection(
         load_spectra(
             file,
             metadata_harmonization=metadata_harmonization,
-            ftype=ftype,
+            ftype=resolved_ftype,
         ),
         **kwargs,
     )
