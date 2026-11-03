@@ -13,6 +13,7 @@ INDEX_CAPABLE = ("Cosine", "CosineFlash", "ModifiedCosine", "Entropy", "EntropyF
 
 # Expected JSON payload key structure (schema snapshot).
 TOP_KEYS = {
+    "schema_version",
     "ok",
     "operation",
     "method",
@@ -694,9 +695,9 @@ def test_search_wrong_output_extension(tmp_path, capsys, bad):
         capsys=capsys,
     )
     assert exit_code == 1
-    assert payload["error"] == "invalid_parameter"
-    assert payload["parameter"] == "output"
-    assert set(payload["valid_values"]) == {".csv", ".tsv"}
+    assert payload["error"]["code"] =="invalid_parameter"
+    assert payload["error"]["parameter"] == "output"
+    assert set(payload["error"]["valid_values"]) == {".csv", ".tsv"}
 
 
 def test_search_missing_queries(tmp_path, capsys):
@@ -714,8 +715,8 @@ def test_search_missing_queries(tmp_path, capsys):
         capsys=capsys,
     )
     assert exit_code == 1
-    assert payload["error"] == "input_not_found"
-    assert payload["input_file"] == str(missing)
+    assert payload["error"]["code"] =="input_not_found"
+    assert payload["error"]["input_file"] == str(missing)
 
 
 def test_search_missing_library(tmp_path, capsys):
@@ -733,8 +734,8 @@ def test_search_missing_library(tmp_path, capsys):
         capsys=capsys,
     )
     assert exit_code == 1
-    assert payload["error"] == "input_not_found"
-    assert set(payload["valid_values"]) == set(INPUT_FORMATS) | {".index.npz"}
+    assert payload["error"]["code"] =="input_not_found"
+    assert set(payload["error"]["valid_values"]) == set(INPUT_FORMATS) | {".index.npz"}
 
 
 def test_search_unsupported_query_extension(tmp_path, capsys):
@@ -753,8 +754,8 @@ def test_search_unsupported_query_extension(tmp_path, capsys):
         capsys=capsys,
     )
     assert exit_code == 1
-    assert payload["error"] == "unsupported_format"
-    assert payload["input_file"] == str(fake)
+    assert payload["error"]["code"] =="unsupported_format"
+    assert payload["error"]["input_file"] == str(fake)
 
 
 def test_search_unsupported_library_extension(tmp_path, capsys):
@@ -773,8 +774,8 @@ def test_search_unsupported_library_extension(tmp_path, capsys):
         capsys=capsys,
     )
     assert exit_code == 1
-    assert payload["error"] == "unsupported_format"
-    assert payload["input_file"] == str(fake)
+    assert payload["error"]["code"] =="unsupported_format"
+    assert payload["error"]["input_file"] == str(fake)
 
 
 @pytest.mark.parametrize("name", ["CosineGreedy", "MetadataMatch", "ParentMassMatch", "EntropyGreedy"])
@@ -792,8 +793,8 @@ def test_search_non_indexed_method(tmp_path, capsys, name):
         capsys=capsys,
     )
     assert exit_code == 1
-    assert payload["error"] == "unsupported_method"
-    assert set(payload["valid_values"]) == set(INDEX_CAPABLE)
+    assert payload["error"]["code"] =="unsupported_method"
+    assert set(payload["error"]["valid_values"]) == set(INDEX_CAPABLE)
 
 
 def test_search_unknown_method_has_suggestion(tmp_path, capsys):
@@ -810,9 +811,9 @@ def test_search_unknown_method_has_suggestion(tmp_path, capsys):
         capsys=capsys,
     )
     assert exit_code == 1
-    assert payload["error"] == "unknown_value"
-    assert payload["parameter"] == "method"
-    assert "Cosine" in payload["valid_values"]
+    assert payload["error"]["code"] =="unknown_value"
+    assert payload["error"]["parameter"] == "method"
+    assert "Cosine" in payload["error"]["valid_values"]
 
 
 def test_search_rejects_use_hungarian(tmp_path, capsys):
@@ -831,8 +832,8 @@ def test_search_rejects_use_hungarian(tmp_path, capsys):
         capsys=capsys,
     )
     assert exit_code == 1
-    assert payload["error"] == "unsupported_method"
-    assert payload["parameter"] == "use_hungarian"
+    assert payload["error"]["code"] =="unsupported_method"
+    assert payload["error"]["parameter"] == "use_hungarian"
 
 
 def test_search_unknown_param_name(tmp_path, capsys):
@@ -851,8 +852,8 @@ def test_search_unknown_param_name(tmp_path, capsys):
         capsys=capsys,
     )
     assert exit_code == 1
-    assert payload["error"] == "invalid_parameter"
-    assert payload["parameter"] == "not_a_param"
+    assert payload["error"]["code"] =="invalid_parameter"
+    assert payload["error"]["parameter"] == "not_a_param"
 
 
 def test_search_unknown_score_field(tmp_path, capsys):
@@ -871,9 +872,9 @@ def test_search_unknown_score_field(tmp_path, capsys):
         capsys=capsys,
     )
     assert exit_code == 1
-    assert payload["error"] == "unknown_value"
-    assert payload["parameter"] == "score_field"
-    assert set(payload["valid_values"]) == {"score", "matches"}
+    assert payload["error"]["code"] =="unknown_value"
+    assert payload["error"]["parameter"] == "score_field"
+    assert set(payload["error"]["valid_values"]) == {"score", "matches"}
 
 
 def test_search_bad_top_k(tmp_path, capsys):
@@ -892,8 +893,8 @@ def test_search_bad_top_k(tmp_path, capsys):
         capsys=capsys,
     )
     assert exit_code == 1
-    assert payload["error"] == "invalid_parameter"
-    assert payload["parameter"] == "top_k"
+    assert payload["error"]["code"] =="invalid_parameter"
+    assert payload["error"]["parameter"] == "top_k"
 
 
 def test_search_bad_batch_size(tmp_path, capsys):
@@ -912,8 +913,8 @@ def test_search_bad_batch_size(tmp_path, capsys):
         capsys=capsys,
     )
     assert exit_code == 1
-    assert payload["error"] == "invalid_parameter"
-    assert payload["parameter"] == "batch_size"
+    assert payload["error"]["code"] =="invalid_parameter"
+    assert payload["error"]["parameter"] == "batch_size"
 
 
 def test_search_tolerance_shorthand_conflict(tmp_path, capsys):
@@ -934,8 +935,8 @@ def test_search_tolerance_shorthand_conflict(tmp_path, capsys):
         capsys=capsys,
     )
     assert exit_code == 1
-    assert payload["error"] == "invalid_parameter"
-    assert payload["parameter"] == "tolerance"
+    assert payload["error"]["code"] =="invalid_parameter"
+    assert payload["error"]["parameter"] == "tolerance"
 
 
 def test_search_library_spectra_with_spectra_library(tmp_path, capsys):
@@ -955,8 +956,8 @@ def test_search_library_spectra_with_spectra_library(tmp_path, capsys):
         capsys=capsys,
     )
     assert exit_code == 1
-    assert payload["error"] == "invalid_parameter"
-    assert payload["parameter"] == "library_spectra"
+    assert payload["error"]["code"] =="invalid_parameter"
+    assert payload["error"]["parameter"] == "library_spectra"
 
 
 def test_search_library_id_field_without_library_spectra(tmp_path, capsys):
@@ -991,8 +992,8 @@ def test_search_library_id_field_without_library_spectra(tmp_path, capsys):
         capsys=capsys,
     )
     assert exit_code == 1
-    assert payload["error"] == "invalid_parameter"
-    assert payload["parameter"] == "library_id_field"
+    assert payload["error"]["code"] =="invalid_parameter"
+    assert payload["error"]["parameter"] == "library_id_field"
 
 
 def test_search_library_spectra_wrong_count(tmp_path, capsys):
@@ -1029,8 +1030,8 @@ def test_search_library_spectra_wrong_count(tmp_path, capsys):
         capsys=capsys,
     )
     assert exit_code == 1
-    assert payload["error"] == "invalid_input"
-    assert payload["input_file"] == two
+    assert payload["error"]["code"] =="invalid_input"
+    assert payload["error"]["input_file"] == two
 
 
 def test_search_index_incompatible_preprocessing(tmp_path, capsys):
@@ -1066,7 +1067,7 @@ def test_search_index_incompatible_preprocessing(tmp_path, capsys):
         capsys=capsys,
     )
     assert exit_code == 1
-    assert payload["error"] == "index_incompatible"
+    assert payload["error"]["code"] =="index_incompatible"
 
 
 def test_search_index_incompatible_same_params_succeeds(tmp_path, capsys):
@@ -1119,7 +1120,7 @@ def test_search_missing_index_file(tmp_path, capsys):
         capsys=capsys,
     )
     assert exit_code == 1
-    assert payload["error"] == "input_not_found"
+    assert payload["error"]["code"] =="input_not_found"
 
 
 def test_search_corrupt_index_file(tmp_path, capsys):
@@ -1139,7 +1140,7 @@ def test_search_corrupt_index_file(tmp_path, capsys):
         capsys=capsys,
     )
     assert exit_code == 1
-    assert payload["error"] in {"compute_error", "index_incompatible"}
+    assert payload["error"]["code"] in {"compute_error", "index_incompatible"}
 
 
 def test_search_empty_queries(tmp_path, capsys):
@@ -1158,8 +1159,8 @@ def test_search_empty_queries(tmp_path, capsys):
         capsys=capsys,
     )
     assert exit_code == 1
-    assert payload["error"] == "empty_spectra"
-    assert payload["input_file"] == empty
+    assert payload["error"]["code"] =="empty_spectra"
+    assert payload["error"]["input_file"] == empty
 
 
 def test_search_empty_library(tmp_path, capsys):
@@ -1178,7 +1179,7 @@ def test_search_empty_library(tmp_path, capsys):
         capsys=capsys,
     )
     assert exit_code == 1
-    assert payload["error"] == "empty_spectra"
+    assert payload["error"]["code"] =="empty_spectra"
 
 
 def test_search_unknown_query_id_field(tmp_path, capsys):
@@ -1197,8 +1198,8 @@ def test_search_unknown_query_id_field(tmp_path, capsys):
         capsys=capsys,
     )
     assert exit_code == 1
-    assert payload["error"] == "invalid_parameter"
-    assert payload["parameter"] == "query_id_field"
+    assert payload["error"]["code"] =="invalid_parameter"
+    assert payload["error"]["parameter"] == "query_id_field"
 
 
 def test_search_output_directory_must_exist(tmp_path, capsys):
@@ -1216,5 +1217,5 @@ def test_search_output_directory_must_exist(tmp_path, capsys):
         capsys=capsys,
     )
     assert exit_code == 1
-    assert payload["error"] == "save_failed"
-    assert payload["input_file"] == str(missing_dir)
+    assert payload["error"]["code"] =="save_failed"
+    assert payload["error"]["input_file"] == str(missing_dir)

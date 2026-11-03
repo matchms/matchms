@@ -1,6 +1,7 @@
 import json
 import os
 import pytest
+from matchms.cli.errors import CliError
 from matchms.cli.main import build_parser, main
 from matchms.exporting.save_spectra import SUPPORTED_FILE_FORMATS as OUTPUT_FORMATS
 from matchms.importing import load_ms2_dataset
@@ -105,9 +106,9 @@ def test_spectra_convert_missing_input(tmp_path, capsys):
 
     assert exit_code == 1
     assert payload["ok"] is False
-    assert payload["error"] == "file_not_found"
-    assert payload["input_file"] == str(missing)
-    assert set(payload["valid_values"]) == set(INPUT_FORMATS)
+    assert payload["error"]["code"] =="file_not_found"
+    assert payload["error"]["input_file"] == str(missing)
+    assert set(payload["error"]["valid_values"]) == set(INPUT_FORMATS)
     assert not out.exists()
 
 
@@ -125,8 +126,8 @@ def test_spectra_convert_unsupported_input_extension(tmp_path, capsys, bad_ext):
 
     assert exit_code == 1
     assert payload["ok"] is False
-    assert payload["error"] == "unsupported_input_format"
-    assert set(payload["valid_values"]) == set(INPUT_FORMATS)
+    assert payload["error"]["code"] =="unsupported_input_format"
+    assert set(payload["error"]["valid_values"]) == set(INPUT_FORMATS)
     assert not out.exists()
 
 
@@ -137,8 +138,8 @@ def test_spectra_convert_unsupported_output_extension(tmp_path, capsys):
 
     assert exit_code == 1
     assert payload["ok"] is False
-    assert payload["error"] == "unsupported_output_format"
-    assert set(payload["valid_values"]) == set(OUTPUT_FORMATS)
+    assert payload["error"]["code"] =="unsupported_output_format"
+    assert set(payload["error"]["valid_values"]) == set(OUTPUT_FORMATS)
     assert not out.exists()
 
 
@@ -150,7 +151,7 @@ def test_spectra_convert_output_already_exists(tmp_path, capsys):
 
     assert exit_code == 1
     assert payload["ok"] is False
-    assert payload["error"] == "file_exists"
+    assert payload["error"]["code"] =="file_exists"
     # output file must be left untouched
     assert out.read_text(encoding="utf-8") == "existing\n"
 
@@ -175,9 +176,9 @@ def test_spectra_convert_append_not_supported_for_json(tmp_path, capsys):
 
     assert exit_code == 1
     assert payload["ok"] is False
-    assert payload["error"] == "invalid_parameter"
-    assert payload["parameter"] == "append"
-    assert set(payload["valid_values"]) == {"mgf", "msp"}
+    assert payload["error"]["code"] =="invalid_parameter"
+    assert payload["error"]["parameter"] == "append"
+    assert set(payload["error"]["valid_values"]) == {"mgf", "msp"}
     assert not out.exists()
 
 
@@ -216,8 +217,8 @@ def test_spectra_convert_pickle_requires_matchms_style(tmp_path, capsys):
 
     assert exit_code == 1
     assert payload["ok"] is False
-    assert payload["error"] == "invalid_parameter"
-    assert payload["parameter"] == "export_style"
+    assert payload["error"]["code"] =="invalid_parameter"
+    assert payload["error"]["parameter"] == "export_style"
     assert not out.exists()
 
 
@@ -225,5 +226,5 @@ def test_spectra_convert_invalid_export_style(tmp_path, capsys):
     out = tmp_path / "out.json"
 
     parser = build_parser()
-    with pytest.raises(SystemExit):
+    with pytest.raises(CliError):
         parser.parse_args(["spectra", "convert", MGF_FILE, str(out), "--export-style", "bogus"])

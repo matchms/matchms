@@ -1,5 +1,6 @@
 import json
 import pytest
+from matchms.cli.errors import CliError
 from matchms.cli.main import build_parser, main
 from matchms.filtering.default_pipelines import FILTER_SETS_BY_NAME
 
@@ -187,12 +188,12 @@ def test_filter_pipelines_unknown_name_error(capsys):
 
     assert exit_code == 1
     assert payload["ok"] is False
-    assert payload["error"] == "unknown_value"
-    assert payload["operation"] == "filter pipelines NOT_A_PIPELINE"
-    assert payload["parameter"] == "pipeline_name"
-    assert "NOT_A_PIPELINE" in payload["message"]
+    assert payload["error"]["code"] =="unknown_value"
+    assert payload["error"]["operation"] == "filter pipelines NOT_A_PIPELINE"
+    assert payload["error"]["parameter"] == "pipeline_name"
+    assert "NOT_A_PIPELINE" in payload["error"]["message"]
     # the valid pipeline names are offered as valid_values
-    assert payload["valid_values"] == sorted(FILTER_SETS_BY_NAME)
+    assert payload["error"]["valid_values"] == sorted(FILTER_SETS_BY_NAME)
 
 
 def test_filter_pipelines_requires_no_action(capsys):
@@ -201,5 +202,5 @@ def test_filter_pipelines_requires_no_action(capsys):
     assert hasattr(args, "func")
     assert args.pipeline_name is None
     # an unknown subcommand still exits with code 2
-    with pytest.raises(SystemExit):
+    with pytest.raises(CliError):
         parser.parse_args(["filter", "bogus"])

@@ -3,6 +3,7 @@
 import json
 import pytest
 from matchms.cli.commands.similarity_list import GROUPS, OTHER_GROUP_NAME
+from matchms.cli.errors import CliError
 from matchms.cli.main import build_parser, main
 from matchms.similarity import (
     Cosine,
@@ -138,22 +139,22 @@ def test_similarity_info_unknown_similarity(capsys):
 
     assert exit_code == 1
     assert payload["ok"] is False
-    assert payload["error"] == "unknown_value"
-    assert "not_a_similarity" in payload["message"]
-    assert "similarity_name" == payload["parameter"]
+    assert payload["error"]["code"] =="unknown_value"
+    assert "not_a_similarity" in payload["error"]["message"]
+    assert "similarity_name" == payload["error"]["parameter"]
     # the list of valid similarities should include real names
-    assert "Cosine" in payload["valid_values"]
-    assert "ModifiedCosine" in payload["valid_values"]
-    assert "not_a_similarity" not in payload["valid_values"]
+    assert "Cosine" in payload["error"]["valid_values"]
+    assert "ModifiedCosine" in payload["error"]["valid_values"]
+    assert "not_a_similarity" not in payload["error"]["valid_values"]
 
 
 def test_similarity_info_requires_similarity_name(capsys):
     parser = build_parser()
 
-    with pytest.raises(SystemExit):
+    with pytest.raises(CliError):
         parser.parse_args(["similarity", "info"])
 
-    with pytest.raises(SystemExit):
+    with pytest.raises(CliError):
         parser.parse_args(["similarity", "info", "Cosine", "Cosine"])
 
 

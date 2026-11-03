@@ -3,6 +3,7 @@ import os
 import pandas as pd
 import pytest
 from matchms.cli.commands import similarity_matrix
+from matchms.cli.errors import CliError
 from matchms.cli.main import build_parser, main
 from matchms.exporting import save_as_mgf
 from matchms.importing.load_spectra import SUPPORTED_FILE_FORMATS as INPUT_FORMATS
@@ -410,9 +411,9 @@ def test_matrix_missing_input_file(tmp_path, capsys):
 
     assert exit_code == 1
     assert payload["ok"] is False
-    assert payload["error"] == "input_not_found"
-    assert payload["input_file"] == str(missing)
-    assert set(payload["valid_values"]) == set(INPUT_FORMATS)
+    assert payload["error"]["code"] =="input_not_found"
+    assert payload["error"]["input_file"] == str(missing)
+    assert set(payload["error"]["valid_values"]) == set(INPUT_FORMATS)
 
 
 def test_matrix_unsupported_input_extension(tmp_path, capsys):
@@ -433,9 +434,9 @@ def test_matrix_unsupported_input_extension(tmp_path, capsys):
     )
 
     assert exit_code == 1
-    assert payload["error"] == "unsupported_format"
-    assert payload["input_file"] == str(fake)
-    assert set(payload["valid_values"]) == set(INPUT_FORMATS)
+    assert payload["error"]["code"] =="unsupported_format"
+    assert payload["error"]["input_file"] == str(fake)
+    assert set(payload["error"]["valid_values"]) == set(INPUT_FORMATS)
 
 
 def test_matrix_unsupported_output_extension(tmp_path, capsys):
@@ -454,8 +455,8 @@ def test_matrix_unsupported_output_extension(tmp_path, capsys):
     )
 
     assert exit_code == 1
-    assert payload["error"] == "unsupported_format"
-    assert set(payload["valid_values"]) == set(OUTPUT_FORMATS)
+    assert payload["error"]["code"] =="unsupported_format"
+    assert set(payload["error"]["valid_values"]) == set(OUTPUT_FORMATS)
 
 
 def test_matrix_unknown_method(tmp_path, capsys):
@@ -474,8 +475,8 @@ def test_matrix_unknown_method(tmp_path, capsys):
     )
 
     assert exit_code == 1
-    assert payload["error"] == "unknown_value"
-    assert set(payload["valid_values"]) == set(SIMILARITY_NAMES)
+    assert payload["error"]["code"] =="unknown_value"
+    assert set(payload["error"]["valid_values"]) == set(SIMILARITY_NAMES)
 
 
 def test_matrix_method_typo_suggests_closest(tmp_path, capsys):
@@ -494,8 +495,8 @@ def test_matrix_method_typo_suggests_closest(tmp_path, capsys):
     )
 
     assert exit_code == 1
-    assert payload["error"] == "unknown_value"
-    assert "Did you mean 'CosineGreedy'?" in payload["hint"]
+    assert payload["error"]["code"] =="unknown_value"
+    assert "Did you mean 'CosineGreedy'?" in payload["error"]["hint"]
 
 
 def test_matrix_sparse_on_nonsparse_method(tmp_path, capsys):
@@ -516,10 +517,10 @@ def test_matrix_sparse_on_nonsparse_method(tmp_path, capsys):
     )
 
     assert exit_code == 1
-    assert payload["error"] == "unsupported_method"
-    assert "Cosine" not in payload["valid_values"]
+    assert payload["error"]["code"] =="unsupported_method"
+    assert "Cosine" not in payload["error"]["valid_values"]
     for name in SPARSE_METHODS:
-        assert name in payload["valid_values"]
+        assert name in payload["error"]["valid_values"]
 
 
 @pytest.mark.parametrize("dense_name", ["Cosine", "Entropy", "ModifiedCosine", "FingerprintSimilarity"])
@@ -541,7 +542,7 @@ def test_matrix_sparse_rejects_each_dense_only_method(tmp_path, capsys, dense_na
     )
 
     assert exit_code == 1
-    assert payload["error"] == "unsupported_method"
+    assert payload["error"]["code"] =="unsupported_method"
 
 
 def test_matrix_score_min_in_dense_mode(tmp_path, capsys):
@@ -562,7 +563,7 @@ def test_matrix_score_min_in_dense_mode(tmp_path, capsys):
     )
 
     assert exit_code == 1
-    assert payload["error"] == "invalid_parameter"
+    assert payload["error"]["code"] =="invalid_parameter"
 
 
 def test_matrix_dense_too_large(tmp_path, capsys):
@@ -583,7 +584,7 @@ def test_matrix_dense_too_large(tmp_path, capsys):
     )
 
     assert exit_code == 1
-    assert payload["error"] == "matrix_too_large"
+    assert payload["error"]["code"] =="matrix_too_large"
 
 
 def test_matrix_dense_tsv_too_large(tmp_path, monkeypatch, capsys):
@@ -604,7 +605,7 @@ def test_matrix_dense_tsv_too_large(tmp_path, monkeypatch, capsys):
     )
 
     assert exit_code == 1
-    assert payload["error"] == "matrix_too_large"
+    assert payload["error"]["code"] =="matrix_too_large"
 
 
 def test_matrix_tolerance_conflicts_with_param(tmp_path, capsys):
@@ -627,7 +628,7 @@ def test_matrix_tolerance_conflicts_with_param(tmp_path, capsys):
     )
 
     assert exit_code == 1
-    assert payload["error"] == "invalid_parameter"
+    assert payload["error"]["code"] =="invalid_parameter"
 
 
 def test_matrix_unknown_parameter_name(tmp_path, capsys):
@@ -648,8 +649,8 @@ def test_matrix_unknown_parameter_name(tmp_path, capsys):
     )
 
     assert exit_code == 1
-    assert payload["error"] == "invalid_parameter"
-    assert payload["parameter"] == "not_a_real_param"
+    assert payload["error"]["code"] =="invalid_parameter"
+    assert payload["error"]["parameter"] == "not_a_real_param"
 
 
 def test_matrix_metadata_match_requires_field(tmp_path, capsys):
@@ -668,8 +669,9 @@ def test_matrix_metadata_match_requires_field(tmp_path, capsys):
     )
 
     assert exit_code == 1
-    assert payload["error"] == "invalid_parameter"
-    assert payload["parameter"] == "field"
+    # a required constructor parameter that was not supplied is `missing_parameter`
+    assert payload["error"]["code"] == "missing_parameter"
+    assert payload["error"]["parameter"] == "field"
 
 
 def test_matrix_entropy_search_rejects_ppm(tmp_path, capsys):
@@ -690,8 +692,8 @@ def test_matrix_entropy_search_rejects_ppm(tmp_path, capsys):
     )
 
     assert exit_code == 1
-    assert payload["error"] == "invalid_parameter"
-    assert payload["parameter"] == "use_ppm"
+    assert payload["error"]["code"] =="invalid_parameter"
+    assert payload["error"]["parameter"] == "use_ppm"
 
 
 def test_matrix_entropy_search_rejects_non_fragment_mode(tmp_path, capsys):
@@ -712,8 +714,8 @@ def test_matrix_entropy_search_rejects_non_fragment_mode(tmp_path, capsys):
     )
 
     assert exit_code == 1
-    assert payload["error"] == "invalid_parameter"
-    assert payload["parameter"] == "matching_mode"
+    assert payload["error"]["code"] =="invalid_parameter"
+    assert payload["error"]["parameter"] == "matching_mode"
 
 
 def test_matrix_fingerprint_without_structure(tmp_path, capsys):
@@ -732,8 +734,8 @@ def test_matrix_fingerprint_without_structure(tmp_path, capsys):
     )
 
     assert exit_code == 1
-    assert payload["error"] == "invalid_parameter"
-    assert payload["parameter"] == "inchikey"
+    assert payload["error"]["code"] =="invalid_parameter"
+    assert payload["error"]["parameter"] == "inchikey"
 
 
 def test_matrix_fingerprint_requires_generator(tmp_path, capsys):
@@ -752,8 +754,8 @@ def test_matrix_fingerprint_requires_generator(tmp_path, capsys):
     )
 
     assert exit_code == 1
-    assert payload["error"] == "invalid_parameter"
-    assert payload["parameter"] == "fingerprint_generator"
+    assert payload["error"]["code"] =="invalid_parameter"
+    assert payload["error"]["parameter"] == "fingerprint_generator"
 
 
 def test_matrix_empty_collection(tmp_path, capsys):
@@ -774,21 +776,21 @@ def test_matrix_empty_collection(tmp_path, capsys):
     )
 
     assert exit_code == 1
-    assert payload["error"] == "empty_spectra"
-    assert payload["input_file"] == str(empty)
+    assert payload["error"]["code"] =="empty_spectra"
+    assert payload["error"]["input_file"] == str(empty)
 
 
 def test_matrix_requires_method(tmp_path):
     parser = build_parser()
 
-    with pytest.raises(SystemExit):
+    with pytest.raises(CliError):
         parser.parse_args(["similarity", "matrix", MGF_FILE, "-o", str(tmp_path / "m.npz")])
 
 
 def test_matrix_requires_output(tmp_path):
     parser = build_parser()
 
-    with pytest.raises(SystemExit):
+    with pytest.raises(CliError):
         parser.parse_args(["similarity", "matrix", MGF_FILE, "--method", "CosineGreedy"])
 
 

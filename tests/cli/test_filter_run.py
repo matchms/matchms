@@ -1,6 +1,7 @@
 import json
 import os
 import pytest
+from matchms.cli.errors import CliError
 from matchms.cli.main import build_parser, main
 from matchms.exporting.save_spectra import SUPPORTED_FILE_FORMATS as OUTPUT_FORMATS
 from matchms.filtering.filter_order import ALL_FILTERS
@@ -136,8 +137,8 @@ def test_filter_run_pipeline_basic(tmp_path, capsys):
 
 def test_filter_run_invalid_pipeline(tmp_path, capsys):
     out = tmp_path / "out.msp"
-    # --pipeline is validated by argparse choices -> SystemExit(2)
-    with pytest.raises(SystemExit):
+    # --pipeline is validated by argparse choices -> parser raises CliError (exit 2)
+    with pytest.raises(CliError):
         build_parser().parse_args(["filter", "run", MGF_FILE, str(out), "--pipeline", "NOPE"])
 
 
@@ -316,8 +317,8 @@ def test_filter_run_missing_input(tmp_path, capsys):
 
     assert exit_code == 1
     assert payload["ok"] is False
-    assert payload["error"] == "file_not_found"
-    assert payload["input_file"] == str(missing)
+    assert payload["error"]["code"] =="file_not_found"
+    assert payload["error"]["input_file"] == str(missing)
 
 
 def test_filter_run_unsupported_input_extension(tmp_path, capsys):
@@ -328,8 +329,8 @@ def test_filter_run_unsupported_input_extension(tmp_path, capsys):
     exit_code, payload = run_cli("filter", "run", str(fake), str(out), "--json", capsys=capsys)
 
     assert exit_code == 1
-    assert payload["error"] == "unsupported_input_format"
-    assert set(payload["valid_values"]) == set(INPUT_FORMATS)
+    assert payload["error"]["code"] =="unsupported_input_format"
+    assert set(payload["error"]["valid_values"]) == set(INPUT_FORMATS)
 
 
 def test_filter_run_unsupported_output_extension(tmp_path, capsys):
@@ -338,8 +339,8 @@ def test_filter_run_unsupported_output_extension(tmp_path, capsys):
     exit_code, payload = run_cli("filter", "run", MGF_FILE, str(out), "--json", capsys=capsys)
 
     assert exit_code == 1
-    assert payload["error"] == "unsupported_output_format"
-    assert set(payload["valid_values"]) == set(OUTPUT_FORMATS)
+    assert payload["error"]["code"] =="unsupported_output_format"
+    assert set(payload["error"]["valid_values"]) == set(OUTPUT_FORMATS)
 
 
 def test_filter_run_output_exists(tmp_path, capsys):
@@ -349,7 +350,7 @@ def test_filter_run_output_exists(tmp_path, capsys):
     exit_code, payload = run_cli("filter", "run", MGF_FILE, str(out), "--json", capsys=capsys)
 
     assert exit_code == 1
-    assert payload["error"] == "file_exists"
+    assert payload["error"]["code"] =="file_exists"
 
 
 def test_filter_run_empty_input(tmp_path, capsys):
@@ -362,7 +363,7 @@ def test_filter_run_empty_input(tmp_path, capsys):
     exit_code, payload = run_cli("filter", "run", str(empty), str(out), "--json", capsys=capsys)
 
     assert exit_code == 1
-    assert payload["error"] == "empty_spectra"
+    assert payload["error"]["code"] =="empty_spectra"
 
 
 def test_filter_run_unknown_filter(tmp_path, capsys):
@@ -381,9 +382,9 @@ def test_filter_run_unknown_filter(tmp_path, capsys):
 
     assert exit_code == 1
     assert payload["ok"] is False
-    assert payload["error"] == "unknown_value"
-    assert "bogus_filter" in payload["message"]
-    assert "select_by_mz" in payload["valid_values"]
+    assert payload["error"]["code"] =="unknown_value"
+    assert "bogus_filter" in payload["error"]["message"]
+    assert "select_by_mz" in payload["error"]["valid_values"]
 
 
 def test_filter_run_param_on_filter_not_in_pipeline(tmp_path, capsys):
@@ -401,9 +402,9 @@ def test_filter_run_param_on_filter_not_in_pipeline(tmp_path, capsys):
     )
 
     assert exit_code == 1
-    assert payload["error"] == "unknown_value"
+    assert payload["error"]["code"] =="unknown_value"
     # the hint should suggest adding the filter
-    assert "--filter" in payload["hint"]
+    assert "--filter" in payload["error"]["hint"]
 
 
 def test_filter_run_param_not_accepted_by_filter(tmp_path, capsys):
@@ -423,10 +424,10 @@ def test_filter_run_param_not_accepted_by_filter(tmp_path, capsys):
     )
 
     assert exit_code == 1
-    assert payload["error"] == "invalid_parameter"
-    assert payload["parameter"] == "select_by_mz.nonexistent"
-    assert "mz_from" in payload["valid_values"]
-    assert "mz_to" in payload["valid_values"]
+    assert payload["error"]["code"] =="invalid_parameter"
+    assert payload["error"]["parameter"] == "select_by_mz.nonexistent"
+    assert "mz_from" in payload["error"]["valid_values"]
+    assert "mz_to" in payload["error"]["valid_values"]
 
 
 def test_filter_run_missing_required_param(tmp_path, capsys):
@@ -445,8 +446,8 @@ def test_filter_run_missing_required_param(tmp_path, capsys):
 
     assert exit_code == 1
     assert payload["ok"] is False
-    assert payload["error"] == "missing_parameter"
-    assert "--param" in payload["hint"]
+    assert payload["error"]["code"] =="missing_parameter"
+    assert "--param" in payload["error"]["hint"]
 
 
 def test_filter_run_malformed_param(tmp_path, capsys):
@@ -464,18 +465,18 @@ def test_filter_run_malformed_param(tmp_path, capsys):
     )
 
     assert exit_code == 1
-    assert payload["error"] == "invalid_parameter"
+    assert payload["error"]["code"] =="invalid_parameter"
 
 
 def test_filter_run_requires_positional_args(tmp_path, capsys):
     parser = build_parser()
 
     # missing output
-    with pytest.raises(SystemExit):
+    with pytest.raises(CliError):
         parser.parse_args(["filter", "run", MGF_FILE])
 
     # both missing
-    with pytest.raises(SystemExit):
+    with pytest.raises(CliError):
         parser.parse_args(["filter", "run"])
 
 
@@ -501,5 +502,5 @@ def test_filter_run_append_unsupported_format(tmp_path, capsys):
     exit_code, payload = run_cli("filter", "run", MGF_FILE, str(out), "--append", "--json", capsys=capsys)
 
     assert exit_code == 1
-    assert payload["error"] == "invalid_parameter"
-    assert payload["parameter"] == "append"
+    assert payload["error"]["code"] =="invalid_parameter"
+    assert payload["error"]["parameter"] == "append"

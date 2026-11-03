@@ -51,8 +51,21 @@ class OutputContext:
         return not self.stream.isatty()
 
     def write_json(self, payload: dict[str, Any]) -> None:
-        self.stream.write(json.dumps(payload, indent=2, default=_json_default))
+        """Write a single JSON document to the output stream.
+
+        Every machine-readable payload is stamped with the CLI schema version
+        (success and error responses alike) so consumers can detect
+        incompatible schema changes.
+        """
+        self.stream.write(json.dumps(self.with_schema_version(payload), indent=2, default=_json_default))
         self.stream.write("\n")
+
+    @staticmethod
+    def with_schema_version(payload: dict[str, Any]) -> dict[str, Any]:
+        """Return *payload* with ``schema_version`` at the top level (idempotent)."""
+        if payload.get("schema_version"):
+            return payload
+        return {"schema_version": CLI_JSON_SCHEMA_VERSION, **payload}
 
     def write_text(self, text: str) -> None:
         if text:

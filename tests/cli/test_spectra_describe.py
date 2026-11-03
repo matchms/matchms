@@ -1,6 +1,7 @@
 import json
 import os
 import pytest
+from matchms.cli.errors import CliError
 from matchms.cli.main import build_parser, main
 from matchms.exporting import save_as_mgf
 from matchms.importing.load_spectra import SUPPORTED_FILE_FORMATS as INPUT_FORMATS
@@ -84,9 +85,9 @@ def test_spectra_describe_missing_file(tmp_path, capsys):
 
     assert exit_code == 1
     assert payload["ok"] is False
-    assert payload["error"] == "file_not_found"
-    assert payload["input_file"] == str(missing)
-    assert set(payload["valid_values"]) == set(INPUT_FORMATS)
+    assert payload["error"]["code"] =="file_not_found"
+    assert payload["error"]["input_file"] == str(missing)
+    assert set(payload["error"]["valid_values"]) == set(INPUT_FORMATS)
 
 
 def test_spectra_describe_unsupported_extension(tmp_path, capsys):
@@ -97,17 +98,17 @@ def test_spectra_describe_unsupported_extension(tmp_path, capsys):
 
     assert exit_code == 1
     assert payload["ok"] is False
-    assert payload["error"] == "unsupported_input_format"
-    assert set(payload["valid_values"]) == set(INPUT_FORMATS)
+    assert payload["error"]["code"] =="unsupported_input_format"
+    assert set(payload["error"]["valid_values"]) == set(INPUT_FORMATS)
 
 
 def test_spectra_describe_requires_spectrumfile(tmp_path, capsys):
     parser = build_parser()
 
-    with pytest.raises(SystemExit):
+    with pytest.raises(CliError):
         parser.parse_args(["spectra", "describe"])
 
-    with pytest.raises(SystemExit):
+    with pytest.raises(CliError):
         parser.parse_args(["spectra", "describe", MGF_FILE, MGF_FILE])
 
 
@@ -119,5 +120,5 @@ def test_spectra_describe_empty_collection(tmp_path, capsys):
 
     assert exit_code == 1
     assert payload["ok"] is False
-    assert payload["error"] == "empty_spectra"
-    assert payload["input_file"] == str(empty)
+    assert payload["error"]["code"] =="empty_spectra"
+    assert payload["error"]["input_file"] == str(empty)

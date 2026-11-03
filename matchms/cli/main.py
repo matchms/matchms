@@ -1,5 +1,6 @@
 import argparse
 import logging
+import sys
 from matchms import __version__ as matchms_version
 from matchms.cli.commands.filter_info import run as run_filter_info
 from matchms.cli.commands.filter_list import run as run_filter_list
@@ -20,8 +21,16 @@ from matchms.cli.commands.similarity_matrix import run as run_similarity_matrix
 from matchms.cli.commands.similarity_search import run as run_similarity_search
 from matchms.cli.commands.spectra_convert import run as run_spectra_convert
 from matchms.cli.commands.spectra_describe import run as run_spectra_describe
-from matchms.cli.errors import CliError, configure_logging, emit_error, unexpected_error_payload
+from matchms.cli.errors import (
+    EXIT_USAGE,
+    CliError,
+    build_error_payload,
+    configure_logging,
+    emit_error,
+    unexpected_error_payload,
+)
 from matchms.cli.output import CLI_JSON_SCHEMA_VERSION, OutputContext
+from matchms.cli.parser import OPERATION_KEY, CliArgumentParser, set_parser_context
 from matchms.exporting.save_spectra import EXPORT_STYLES
 
 
@@ -78,17 +87,84 @@ def _log_level(args) -> int:
     return logging.WARNING
 
 
-def _group_help(parser: argparse.ArgumentParser):
-    """Return a handler that prints the help of a command group and exits with code 2."""
+def _output_flags(argv: list[str]) -> tuple[bool | None, bool | None, bool, bool]:
+    """Recover the output-mode flags from raw *argv* after a failed parse.
+
+    When ``parse_args`` fails the parsed namespace is unavailable, but an agent
+    may still have passed ``--json``/``--table``/``--quiet``/``--verbose``. This
+    scans the raw argument list — independently of the failed parse, and
+    regardless of where the flags sit (before or after the subcommand) — so the
+    error renderer can honour them instead of falling back to terminal
+    auto-detection.
+
+    Returns ``(json_flag, table_flag, quiet, verbose)``. The ``--json``/
+    ``--table`` entries are ``None`` when the flag was not present (so
+    :class:`OutputContext` falls back to its ``isatty`` auto-detection) and
+    ``True`` when it was; ``quiet``/``verbose`` are plain booleans. If both
+    ``--json`` and ``--table`` are present both are reported, and
+    :meth:`OutputContext.machine_mode` already prefers ``--json``.
+    """
+    json_flag: bool | None = None
+    table_flag: bool | None = None
+    quiet = False
+    verbose = False
+    for token in argv:
+        if token == "--json":
+            json_flag = True
+        elif token == "--table":
+            table_flag = True
+        elif token == "--quiet":
+            quiet = True
+        elif token == "--verbose":
+            verbose = True
+    return json_flag, table_flag, quiet, verbose
+
+
+def _context_from_args(args) -> OutputContext:
+    """Build the :class:`OutputContext` for a successfully parsed command.
+
+    Used by both the missing-command branch and the runtime dispatch, where the
+    parsed namespace is available and carries the output-mode flags.
+    """
+    return OutputContext(
+        json_flag=getattr(args, "json", None),
+        table_flag=getattr(args, "table", None),
+        quiet=bool(getattr(args, "quiet", False)),
+        verbose=bool(getattr(args, "verbose", False)),
+    )
+
+
+def _subcommand_names(parser: CliArgumentParser) -> list[str]:
+    """The names of the subcommands of *parser*'s first subparsers action."""
+    for action in parser._actions:
+        if isinstance(action, argparse._SubParsersAction):
+            return sorted(action.choices)
+    return []
+
+
+def _missing_subcommand(operation: str, subcommands: list[str]):
+    """A group given without an action is a usage error (exit code 2)."""
+    return CliError(
+        f"The '{operation}' command requires a subcommand.",
+        code="missing_subcommand",
+        operation=operation,
+        parameter="<subcommand>",
+        valid_values=subcommands,
+        hint="Run 'matchms <command> --help' to see the available subcommands.",
+        exit_code=EXIT_USAGE,
+    )
+
+
+def _require_subcommand(parser: CliArgumentParser, operation: str):
+    """Handler for a command group: a group given without an action is an error."""
 
     def _run(args, ctx) -> int:
-        parser.print_help()
-        return 2
+        raise _missing_subcommand(operation, _subcommand_names(parser))
 
     return _run
 
 
-def build_parser() -> argparse.ArgumentParser:
+def build_parser() -> CliArgumentParser:
     """
     Build and return the main parser for the `matchms` command line interface.
 
@@ -111,12 +187,13 @@ def build_parser() -> argparse.ArgumentParser:
     argparse.ArgumentParser
         The configured argparse.ArgumentParser object for use with the `matchms` CLI.
     """
-    parser = argparse.ArgumentParser(
+    parser = CliArgumentParser(
         prog="matchms",
         description=("matchms command line interface"),
         epilog=("Examples:\n  matchms info --json\n"),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
+    set_parser_context(parser, operation="")
     parser.add_argument(
         "--version",
         action="version",
@@ -128,7 +205,7 @@ def build_parser() -> argparse.ArgumentParser:
     subparsers = parser.add_subparsers(dest="command", metavar="<command>")
 
     # common flags that also work after the subcommand
-    common = argparse.ArgumentParser(add_help=False)
+    common = CliArgumentParser(add_help=False)
     _add_common_flags(common, suppress=True)
 
     # -- info  --------------------------------------------------------------
@@ -142,6 +219,7 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     p.set_defaults(func=run_info)
+    set_parser_context(p, operation="info")
 
     # -- filter  -----------------------------------------------------------
     p = subparsers.add_parser(
@@ -157,7 +235,7 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     filter_subparsers = p.add_subparsers(dest="filter_command", metavar="<action>")
-    p.set_defaults(func=_group_help(p))
+    p.set_defaults(func=_require_subcommand(p, "filter"))
 
     # filter list ----------------------------------------------------------
     pf_list = filter_subparsers.add_parser(
@@ -171,6 +249,7 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     pf_list.set_defaults(func=run_filter_list)
+    set_parser_context(pf_list, operation="filter list")
 
     # filter pipelines -------------------------------------------------------
     pf_pipelines = filter_subparsers.add_parser(
@@ -193,6 +272,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="Name of a pipeline to show its filters in execution order (see the overview when omitted).",
     )
     pf_pipelines.set_defaults(func=run_filter_pipelines)
+    set_parser_context(pf_pipelines, operation="filter pipelines")
 
     # filter info ----------------------------------------------------------
     pf_info = filter_subparsers.add_parser(
@@ -210,6 +290,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="Name of the filter to describe (see `matchms filter list`).",
     )
     pf_info.set_defaults(func=run_filter_info)
+    set_parser_context(pf_info, operation="filter info")
 
     # filter run -----------------------------------------------------------
     pf_run = filter_subparsers.add_parser(
@@ -284,6 +365,8 @@ def build_parser() -> argparse.ArgumentParser:
         help="Append to the output file instead of overwriting it. Only supported for .mgf and .msp output files.",
     )
     pf_run.set_defaults(func=run_filter_run)
+    set_parser_context(pf_run, operation="filter run")
+    set_parser_context(p, operation="filter", subcommands=_subcommand_names(p))
 
     # -- similarity  --------------------------------------------------------
     p = subparsers.add_parser(
@@ -303,7 +386,7 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     similarity_subparsers = p.add_subparsers(dest="similarity_command", metavar="<action>")
-    p.set_defaults(func=_group_help(p))
+    p.set_defaults(func=_require_subcommand(p, "similarity"))
 
     # similarity list --------------------------------------------------------
     ps_list = similarity_subparsers.add_parser(
@@ -319,6 +402,7 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     ps_list.set_defaults(func=run_similarity_list)
+    set_parser_context(ps_list, operation="similarity list")
 
     # similarity info --------------------------------------------------------
     ps_info = similarity_subparsers.add_parser(
@@ -337,6 +421,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="Name of the similarity class to describe (see `matchms similarity list`).",
     )
     ps_info.set_defaults(func=run_similarity_info)
+    set_parser_context(ps_info, operation="similarity info")
 
     # similarity matrix -----------------------------------------------------
     ps_matrix = similarity_subparsers.add_parser(
@@ -434,6 +519,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="Disable the progress bar (it is printed to stderr by default).",
     )
     ps_matrix.set_defaults(func=run_similarity_matrix)
+    set_parser_context(ps_matrix, operation="similarity matrix")
 
     # similarity build-index --------------------------------------------
     ps_build_index = similarity_subparsers.add_parser(
@@ -482,6 +568,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="Output index file; must end in .index.npz. An existing file is replaced.",
     )
     ps_build_index.set_defaults(func=run_similarity_build_index)
+    set_parser_context(ps_build_index, operation="similarity build-index")
 
     # similarity search -----------------------------------------------------
     ps_search = similarity_subparsers.add_parser(
@@ -588,6 +675,8 @@ def build_parser() -> argparse.ArgumentParser:
         help="Number of best hits (over all queries) shown in the summary (default: %(default)s).",
     )
     ps_search.set_defaults(func=run_similarity_search)
+    set_parser_context(ps_search, operation="similarity search")
+    set_parser_context(p, operation="similarity", subcommands=_subcommand_names(p))
 
     # -- spectra  ----------------------------------------------------------
     p = subparsers.add_parser(
@@ -601,7 +690,7 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     spectra_subparsers = p.add_subparsers(dest="spectra_command", metavar="<action>")
-    p.set_defaults(func=_group_help(p))
+    p.set_defaults(func=_require_subcommand(p, "spectra"))
 
     # spectra describe -----------------------------------------------------
     pd = spectra_subparsers.add_parser(
@@ -624,6 +713,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="File type to use for import. Defaults to 'auto', which guesses the file type from the file extension.",
     )
     pd.set_defaults(func=run_spectra_describe)
+    set_parser_context(pd, operation="spectra describe")
 
     # spectra convert ------------------------------------------------------
     pc = spectra_subparsers.add_parser(
@@ -663,35 +753,73 @@ def build_parser() -> argparse.ArgumentParser:
         help="Append to the output file instead of overwriting it. Only supported for .mgf and .msp output files.",
     )
     pc.set_defaults(func=run_spectra_convert)
+    set_parser_context(pc, operation="spectra convert")
+    set_parser_context(p, operation="spectra", subcommands=_subcommand_names(p))
 
     return parser
+
+
+def _command_operation(args) -> str:
+    """The "command subcommand" name of the parsed invocation ("" at top level)."""
+    return getattr(args, OPERATION_KEY, "") or ""
 
 
 def main(argv: list[str] | None = None) -> int:
     """Main entrypoint for the CLI.
 
-    Builds the actual parser with commands and subcommands.
-    Configures logging, output and verbosity levels.
+    The argument parser and the command execution share one controlled error
+    boundary: parser failures are raised by the parser (see
+    :class:`matchms.cli.parser.CliArgumentParser`) and every failure — parser
+    error, :class:`~matchms.cli.errors.CliError`, unexpected exception — is
+    rendered by the same structured renderer into the stable JSON error
+    envelope on stdout (machine mode) and exits with 0/1/2. The output-mode
+    flags (``--json``/``--table``/``--quiet``/``--verbose``) are honoured even
+    when the parse fails, and ``--help``/``--version`` are turned into a
+    returned exit status so :func:`main` never raises ``SystemExit``.
 
     Returns
     -------
     int
-        Returns int of errors Codes.
+        Exit code: 0 success, 1 execution/internal failure, 2 usage error.
     """
+    argv = sys.argv[1:] if argv is None else list(argv)
     parser = build_parser()
-    args = parser.parse_args(argv)
 
+    # The parser error boundary: parse failures are raised (never printed by
+    # the parser) and fall into the renderer below. ``--help``/``--version``
+    # still terminate via argparse's ``SystemExit``; that is caught and turned
+    # into the exit status so ``main`` always returns an int.
+    try:
+        args = parser.parse_args(argv)
+    except CliError as exc:
+        # The namespace is unavailable on failure, so recover the output flags
+        # from the raw argv (honours --json/--table passed by an agent); when
+        # absent, OutputContext falls back to terminal auto-detection.
+        json_flag, table_flag, quiet, verbose = _output_flags(argv)
+        ctx = OutputContext(json_flag=json_flag, table_flag=table_flag, quiet=quiet, verbose=verbose)
+        emit_error(ctx, exc.to_dict())
+        return exc.exit_code
+    except SystemExit as exc:
+        return exc.code if isinstance(exc.code, int) else 0
+
+    # A bare `matchms` invocation (no command) is a usage error. Here the parse
+    # succeeded, so the output flags come straight from the parsed args.
     if not getattr(args, "func", None):
-        parser.print_help()
-        return 2
+        ctx = _context_from_args(args)
+        emit_error(
+            ctx,
+            build_error_payload(
+                "missing_command",
+                "No command was given.",
+                parameter="<command>",
+                valid_values=_subcommand_names(parser),
+                hint="Run 'matchms info --json' for the list of commands, or 'matchms --help' for usage.",
+            ),
+        )
+        return EXIT_USAGE
 
     configure_logging(_log_level(args))
-    ctx = OutputContext(
-        json_flag=getattr(args, "json", None),
-        table_flag=getattr(args, "table", None),
-        quiet=bool(getattr(args, "quiet", False)),
-        verbose=bool(getattr(args, "verbose", False)),
-    )
+    ctx = _context_from_args(args)
 
     try:
         return args.func(args, ctx)
@@ -699,6 +827,8 @@ def main(argv: list[str] | None = None) -> int:
         emit_error(ctx, exc.to_dict())
         return exc.exit_code
     except Exception as exc:
-        operation = getattr(args, "command", "") or ""
-        emit_error(ctx, unexpected_error_payload(exc, operation))
+        emit_error(
+            ctx,
+            unexpected_error_payload(exc, _command_operation(args) or getattr(args, "command", "") or ""),
+        )
         return 1

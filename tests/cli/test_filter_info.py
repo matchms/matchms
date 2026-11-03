@@ -1,5 +1,6 @@
 import json
 import pytest
+from matchms.cli.errors import CliError
 from matchms.cli.main import build_parser, main
 from matchms.filtering.filter_order import ALL_FILTERS, FILTER_FUNCTION_NAMES
 
@@ -82,20 +83,20 @@ def test_filter_info_unknown_filter(capsys):
 
     assert exit_code == 1
     assert payload["ok"] is False
-    assert payload["error"] == "unknown_value"
-    assert "not_a_filter" in payload["message"]
+    assert payload["error"]["code"] =="unknown_value"
+    assert "not_a_filter" in payload["error"]["message"]
     # the list of valid filters should include real names
-    assert "select_by_mz" in payload["valid_values"]
-    assert "make_charge_int" in payload["valid_values"]
+    assert "select_by_mz" in payload["error"]["valid_values"]
+    assert "make_charge_int" in payload["error"]["valid_values"]
 
 
 def test_filter_info_requires_filter_name(capsys):
     parser = build_parser()
 
-    with pytest.raises(SystemExit):
+    with pytest.raises(CliError):
         parser.parse_args(["filter", "info"])
 
-    with pytest.raises(SystemExit):
+    with pytest.raises(CliError):
         parser.parse_args(["filter", "info", "select_by_mz", "select_by_mz"])
 
 
