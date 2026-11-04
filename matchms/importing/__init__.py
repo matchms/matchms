@@ -27,6 +27,7 @@ from .load_from_mgf import load_from_mgf
 from .load_from_msp import load_from_msp
 from .load_from_mzml import load_from_mzml
 from .load_from_mzxml import load_from_mzxml
+from .load_from_parquet import load_from_parquet
 from .load_from_pickle import load_from_pickle
 from .load_from_usi import load_from_usi
 from .load_spectra import load_ms2_dataset, load_spectra
@@ -38,6 +39,7 @@ __all__ = [
     "load_from_msp",
     "load_from_mzml",
     "load_from_mzxml",
+    "load_from_parquet",
     "load_from_pickle",
     "load_from_usi",
     "load_ms2_dataset",

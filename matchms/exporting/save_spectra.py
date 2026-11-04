@@ -39,6 +39,9 @@ def save_spectra(
     if append and ftype not in ("mgf", "msp"):
         raise ValueError(f"{ftype} isn't supported for when `append` is True")
 
+    if ftype == "parquet":
+        raise TypeError("Parquet export is not supported for lists. Use SpectraCollection.to_parquet() instead.")
+
     if not isinstance(spectra, list):
         spectra = [spectra]
 
