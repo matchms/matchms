@@ -9,6 +9,16 @@ from matchms.utils import filter_empty_spectra
 logger = logging.getLogger("matchms")
 
 
+SUPPORTED_FILE_FORMATS = {
+    "json": "JSON (matchms style)",
+    "mgf": "MGF",
+    "msp": "MSP",
+    "pickle": "pickled list of matchms Spectrum objects",
+}
+
+EXPORT_STYLES = ("matchms", "massbank", "nist", "riken", "gnps")
+
+
 def save_spectra(
     spectra: list[Spectrum],
     file: str,

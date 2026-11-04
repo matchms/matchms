@@ -58,6 +58,9 @@ all = [
 documentation = "https://matchms.readthedocs.io/en/latest/"
 repository = "https://github.com/matchms/matchms"
 
+[project.scripts]
+matchms = "matchms.cli.main:main"
+
 [dependency-groups]
 dev = [
   "decorator>=5.2.1",
