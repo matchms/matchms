@@ -56,7 +56,7 @@ def save_as_msp(
     mode:
         Mode on how to write to file. One of ["w", "a"] (write/append). Default is append.
     style:
-        Converts the keys to required Export style. One of ["massbank", "nist", "riken", "gnps"].
+        Converts the keys to required Export style. One of ["massbank", "nist", "riken", "gnps", "sirius"].
         Default is "matchms"
     peak_sep:
         Separator to use for writing the msp file.

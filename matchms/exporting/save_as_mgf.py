@@ -42,8 +42,12 @@ def save_as_mgf(
     filename:
         Provide filename to save spectrum(s).
     export_style:
-        Converts the keys to the required export style. One of ["matchms", "massbank", "nist", "riken", "gnps"].
-        Default is "matchms"
+        Converts the keys to the required export style.
+        One of ["matchms", "massbank", "nist", "riken", "gnps", "sirius"].
+        Default is "matchms".
+        Use "sirius" to write a file that SIRIUS can import: it writes the keys SIRIUS reads
+        (PEPMASS, CHARGE, MSLEVEL, RTINSECONDS, FEATURE_ID, ION, NAME, SCANS, SMILES, INCHI, FORMULA, ...)
+        and leaves out the others. Note that "retention_time" is written as RTINSECONDS without any unit conversion.
     file_mode: str
         This is an optional parameter which defines the mode the file will be opened in.
         Default is "a" (append). The other option is "w" (write). If set worngly it will default to "a".

@@ -193,7 +193,8 @@ class Spectrum:
         Parameters
         ----------
         export_style:
-            Converts the keys to the required export style. One of ["matchms", "massbank", "nist", "riken", "gnps"].
+            Converts the keys to the required export style.
+            One of ["matchms", "massbank", "nist", "riken", "gnps", "sirius"].
             Default is "matchms"
         """
         peaks_list = np.vstack((self.peaks.mz, self.peaks.intensities)).T.tolist()
@@ -209,7 +210,8 @@ class Spectrum:
         Parameters
         ----------
         export_style:
-            Converts the keys to the required export style. One of ["matchms", "massbank", "nist", "riken", "gnps"].
+            Converts the keys to the required export style.
+            One of ["matchms", "massbank", "nist", "riken", "gnps", "sirius"].
             Default is "matchms"
         """
         return self._metadata.to_dict(export_style)
