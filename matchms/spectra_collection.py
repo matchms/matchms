@@ -6,7 +6,7 @@ from typing import Self
 import numpy as np
 import pandas as pd
 from scipy.sparse import csr_array, vstack
-from matchms.exporting import save_as_json, save_as_mgf, save_as_msp
+from matchms.exporting import save_as_json, save_as_mgf, save_as_msp, save_as_parquet
 from matchms.metadata_collection import (
     MetadataCollection,
     harmonize_metadata_collection_columns,
@@ -752,6 +752,53 @@ class SpectraCollection:
 
         mode = "a" if append else "w"
         save_as_msp(list(self), file, style=export_style, file_mode=mode)
+
+    def to_parquet(
+        self,
+        file: str,
+        *,
+        mz_column: str = "mz",
+        intensity_column: str = "intensities",
+        metadata_columns: list[str] | None = None,
+        compression: str | None = "zstd",
+        append: bool = False,
+        **write_table_kwargs,
+    ) -> None:
+        """Export the spectra collection to a Parquet file.
+
+        Parameters
+        ----------
+        file
+            Path to the output file.
+        mz_column
+            Name of the fragment m/z list column.
+        intensity_column
+            Name of the fragment intensity list column.
+        metadata_columns
+            Optional subset of metadata columns to export.
+        compression
+            Parquet compression codec. Default is ``"zstd"``.
+        append
+            Parquet export does not support appending. If ``True``, a
+            ``ValueError`` is raised.
+        **write_table_kwargs
+            Additional keyword arguments passed to
+            ``pyarrow.parquet.write_table``.
+        """
+        self._check_export_file(file, append=append, allowed_append_types=())
+
+        if append:
+            raise ValueError("Appending is not supported for Parquet export.")
+
+        save_as_parquet(
+            self,
+            file,
+            mz_column=mz_column,
+            intensity_column=intensity_column,
+            metadata_columns=metadata_columns,
+            compression=compression,
+            **write_table_kwargs,
+        )
 
     @staticmethod
     def _check_export_file(
