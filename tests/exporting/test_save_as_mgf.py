@@ -126,8 +126,8 @@ def test_save_as_mgf_sirius_style(tmpdir):
     filename = os.path.join(tmpdir, "sirius.mgf")
     save_as_mgf(spectrum, filename, export_style="sirius")
 
-    with open(filename, "r", encoding="utf-8") as f:
-        mgf_lines = [line.strip() for line in f.readlines()]
+    with open(filename, encoding="utf-8") as f:
+        mgf_lines = [line.strip() for line in f]
     for expected_line in ["PEPMASS=183.057",
                           "CHARGE=-1",
                           "MSLEVEL=2",

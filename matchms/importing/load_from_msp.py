@@ -104,14 +104,14 @@ def _record_to_dict(params: dict, masses, intensities, peak_comments: dict) -> d
     }
 
 
-def _parse_line_with_peaks(rline: str) -> Tuple[List[float], List[float], str]:
+def _parse_line_with_peaks(rline: str) -> tuple[list[float], list[float], str]:
     """Parse a line containing peaks consisting of mz and intensity values with optional comments.
 
     Args:
         rline (str): Line with peaks read from the MSP.
 
     Returns:
-        Tuple[List[float], List[float], str]: mz, intensity and peak comments obtained from the line.
+        tuple[list[float], list[float], str]: mz, intensity and peak comments obtained from the line.
     """
     comment, rline = get_peak_comment(rline)
     mz, intensities = get_peak_values(rline)
