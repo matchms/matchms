@@ -9,6 +9,16 @@ from matchms.utils import filter_empty_spectra
 logger = logging.getLogger("matchms")
 
 
+SUPPORTED_FILE_FORMATS = {
+    "json": "JSON (matchms style)",
+    "mgf": "MGF",
+    "msp": "MSP",
+    "pickle": "pickled list of matchms Spectrum objects",
+}
+
+EXPORT_STYLES = ("matchms", "massbank", "nist", "riken", "gnps")
+
+
 def save_spectra(
     spectra: list[Spectrum],
     file: str,
@@ -38,6 +48,9 @@ def save_spectra(
     ftype = os.path.splitext(file)[1].lower()[1:]
     if append and ftype not in ("mgf", "msp"):
         raise ValueError(f"{ftype} isn't supported for when `append` is True")
+
+    if ftype == "parquet":
+        raise TypeError("Parquet export is not supported for lists. Use SpectraCollection.to_parquet() instead.")
 
     if not isinstance(spectra, list):
         spectra = [spectra]

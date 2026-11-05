@@ -12,7 +12,6 @@ from matchms.similarity.flash_utils import (
     _rebuild_offsets,
     _row_ids_from_offsets,
 )
-from matchms.similarity.flash_utils_spectrum_list import _clean_and_weight as _clean_and_weight_old
 from ..builder_spectrum import SpectrumBuilder
 
 
@@ -102,46 +101,6 @@ def test_entropy_weight_saturation_at_three_nats():
         result,
         intensities.astype(np.float32),
         atol=0.0,
-    )
-
-
-def test_clean_and_weight_matches_old_implementation():
-    peaks = np.array(
-        [
-            [100.00, 0.05],
-            [150.00, 1.00],
-            [150.03, 0.50],
-            [198.00, 0.20],
-            [199.00, 0.90],
-        ],
-        dtype=float,
-    )
-
-    kwargs = {
-        "precursor_mz": 200.0,
-        "remove_precursor": True,
-        "offset_to_precursor": -1.6,
-        "noise_cutoff": 0.05,
-        "normalize_to_half": True,
-        "merge_within_da": 0.05,
-        "weighing_type": "entropy",
-        "dtype": np.float32,
-    }
-
-    old = _clean_and_weight_old(
-        peaks,
-        **kwargs,
-    )
-    new = _clean_and_weight(
-        peaks,
-        **kwargs,
-    )
-
-    assert new.dtype == np.float32
-    assert np.allclose(
-        new,
-        old,
-        atol=1e-6,
     )
 
 

@@ -1,10 +1,12 @@
 import logging
 import numpy as np
 from matchms.filtering._dispatch import metadata_update_filter
+from matchms.filtering.filter_utils.interpret_unknown_adduct import get_charge_of_adduct
 from matchms.filtering.filter_utils.metadata_conversions import (
     as_float_or_none,
     as_string_or_none,
 )
+from matchms.filtering.metadata_processing.clean_adduct import _clean_adduct
 
 
 logger = logging.getLogger("matchms")
@@ -48,6 +50,13 @@ def _correct_charge(metadata) -> dict:
     charge = as_float_or_none(raw_charge)
     if charge is None:
         charge = 0
+
+    if charge == 0 and metadata.get("adduct"):
+        # A known adduct gives the charge, including its size, e.g. [M-2H]2- -> -2
+        charge_from_adduct = get_charge_of_adduct(_clean_adduct(metadata.get("adduct")))
+        if charge_from_adduct:
+            charge = charge_from_adduct
+            logger.info("Set charge to %s based on adduct %s", charge, metadata.get("adduct"))
 
     if charge == 0 and ionmode == "positive":
         charge = 1

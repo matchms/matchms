@@ -17,7 +17,7 @@ def test_peak_similarity_default_tolerances_are_consistent():
         mssim.ModifiedCosineHungarian(),
         mssim.Entropy(),
         mssim.EntropyGreedy(),
-        mssim.FlashEntropy(),
+        mssim.EntropyFlash(),
     ]
 
     assert all(

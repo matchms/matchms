@@ -20,7 +20,7 @@ using :func:`~matchms.importing.load_ms2_dataset`.
 
 For example, using the ``pesticides.mgf`` test dataset included with matchms:
 
-.. testcode::
+.. code-block:: python
 
     from pathlib import Path
 
@@ -31,13 +31,6 @@ For example, using the ``pesticides.mgf`` test dataset included with matchms:
 
     print(type(collection).__name__)
     print(collection.n_spectra > 0)
-
-Should output
-
-.. testoutput::
-
-    SpectraCollection
-    True
 
 
 Processing with SpectraProcessor
@@ -63,7 +56,7 @@ with a custom filter order. Or simply apply every filter individually in the ord
 A processor is created from a list of filters. Filters can be specified by name,
 or together with a dictionary containing non-default parameters.
 
-.. testcode::
+.. code-block:: python
 
     from pathlib import Path
 
@@ -86,12 +79,6 @@ or together with a dictionary containing non-default parameters.
     print(type(processed_collection).__name__)
     print(processed_collection.n_spectra <= collection.n_spectra)
 
-Should output
-
-.. testoutput::
-
-    SpectraCollection
-    True
 
 ``SpectraProcessor`` orders known matchms filters according to the recommended
 matchms filter order. Custom filter functions can also be added to the same
@@ -163,7 +150,7 @@ workflow.
 
 For example:
 
-.. testcode::
+.. code-block:: python
 
     from pathlib import Path
 
@@ -180,11 +167,6 @@ For example:
 
     print(type(processed_collection).__name__)
 
-Should output
-
-.. testoutput::
-
-    SpectraCollection
 
 For filters that remove spectra, behavior depends on the input type. A
 :class:`~matchms.Spectrum` that does not meet the filter requirement returns

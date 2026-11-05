@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - `CosineBlink` now computes and returns scores as `np.float64` (`DEFAULT_DTYPE`) by default, consistent with the other similarity scores. The new `dtype` parameter can be set to `np.float32` to reduce memory usage [#880](https://github.com/matchms/matchms/issues/880).
+### Fixed
+- `correct_charge` takes the charge from a known adduct (e.g. `[M-2H]2-` gives -2) before guessing +1/-1 from the ionmode when no charge is given.
 
 ## [0.31.0] - 2025-10-06
 ### Added

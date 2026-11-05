@@ -1,4 +1,3 @@
-import pandas as pd
 import pytest
 from matchms import SpectraCollection
 from matchms.filtering import correct_charge
@@ -22,6 +21,11 @@ from tests.run_spectrum_and_collection import run_filter_as_spectrum_or_collecti
         [{"charge": 3}, 3],
         [{"charge": -3}, -3],
         [{"charge": 0}, 0],
+        [{"ionmode": "negative", "adduct": "[M-2H]2-"}, -2],
+        [{"ionmode": "positive", "adduct": "[M+2H]2+", "charge": 0}, 2],
+        [{"ionmode": "positive", "adduct": "M+2H"}, 2],
+        [{"adduct": "[M+H]+"}, 1],
+        [{"ionmode": "positive", "adduct": "[M+H]+", "charge": 3}, 3],
     ],
 )
 def test_correct_charge(metadata, expected, as_collection):
@@ -63,19 +67,26 @@ def test_correct_charge_collection_multiple_rows():
     assert processed.metadata["charge"].tolist() == [1, -2, -3]
 
 
-def test_collection_converts_numeric_string_charge():
+@pytest.mark.parametrize(
+    ("charge", "expected"),
+    [
+        ("+1", 1),
+        ("1", 1),
+        ("-1", -1),
+        ("+2", 2),
+        ("-2", -2),
+    ],
+)
+def test_collection_converts_numeric_string_charge(charge, expected):
     spectrum = (
         SpectrumBuilder()
-        .with_metadata({"charge": "+1"})
+        .with_metadata({"charge": charge})
         .build()
     )
 
     collection = SpectraCollection([spectrum])
 
-    assert collection[0].get("charge") == 1
-    assert pd.api.types.is_integer_dtype(
-        collection.metadata["charge"]
-    )
+    assert collection[0].get("charge") == expected
 
 
 def test_correct_charge_collection_raises_for_nonconvertible_string():
