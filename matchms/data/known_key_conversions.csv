@@ -15,6 +15,7 @@ precursor_charge,charge
 precursorcharge,charge
 ac$mass_spectrometry:charge,charge
 charge,charge
+charge_state,charge
 ms$data_processing:charge_deconvoluted,charge_deconvolved
 ch$link:chebi,chebi
 ch$link:chempdb,chempdb
@@ -149,6 +150,7 @@ precursormass,precursor_mz
 precursormz,precursor_mz
 precursor,precursor_mz
 ms$focused_ion:precursor_m/z,precursor_mz
+selected_ion_m/z,precursor_mz
 pi,principal_investigator
 comment:pi,principal_investigator
 ch$link:pubchem,pubchem
@@ -202,6 +204,7 @@ targetgaspres,target_gas_pressure
 ac$mass_spectrometry:target_gas_pressure,target_gas_pressure
 record title,title
 title,title
+spectrum_title,title
 ac$mass_spectrometry:trap_drive,trap_drive_value
 ch$link:united_nations,united_nations_number
 synon_metb_inchi,inchi
@@ -211,3 +214,4 @@ synon_metb_class,compound_class
 synon_metb_kegg,kegg
 synon_metb_n,synonyms
 synon_metb_cas,cas
+num,scan_number
