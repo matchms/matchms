@@ -1,7 +1,9 @@
 import logging
 from typing import Optional
 import numpy as np
+from matchms.filtering.filter_utils.interpret_unknown_adduct import get_charge_of_adduct
 from matchms.typing import SpectrumType
+from .clean_adduct import _clean_adduct
 
 
 logger = logging.getLogger("matchms")
@@ -43,6 +45,13 @@ def correct_charge(spectrum_in: SpectrumType, clone: Optional[bool] = True) -> O
 
     if charge is None:
         charge = 0
+
+    if charge == 0 and spectrum.get("adduct"):
+        # A known adduct gives the charge, including its size, e.g. [M-2H]2- -> -2
+        charge_from_adduct = get_charge_of_adduct(_clean_adduct(spectrum.get("adduct")))
+        if charge_from_adduct:
+            charge = charge_from_adduct
+            logger.info("Set charge to %s based on adduct %s", charge, spectrum.get("adduct"))
 
     if charge == 0 and ionmode == "positive":
         charge = 1
