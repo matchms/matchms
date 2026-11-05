@@ -1192,3 +1192,239 @@ def test_process_spectra_accepts_generator(spectra):
 
     assert len(processed) == 3
     assert [s.get("charge") for s in processed] == [1, -1, -1]
+
+
+# -----------------------------------------------------------------------------
+# Missing metadata values (issue #951)
+# -----------------------------------------------------------------------------
+
+
+def _derive_inchikey_failing(spectrum, clone=True):
+    """Stand-in for a derive action that fails and leaves a missing alias."""
+    target = spectrum.clone() if clone else spectrum
+    target.set("inchikey", "n/a")
+    return target
+
+
+def _derive_inchikey_failing_for_collection(collection, clone=True):
+    """Collection version of :func:`_derive_inchikey_failing`."""
+    target = collection.copy() if clone else collection
+    target.add_metadata(
+        ["n/a"] * len(target),
+        col_name="inchikey",
+        overwrite=True,
+    )
+    return target
+
+
+@pytest.fixture
+def spectrum_with_inchi():
+    return (
+        SpectrumBuilder()
+        .with_metadata(
+            {
+                "compound_name": "Caffeine",
+                "precursor_mz": 195.0876,
+                "inchi": "InChI=1S/C8H10N4O2/c1-10-4-9-6-5(10)7(13)12(3)8(14)11(6)2/h4H,1-3H3",
+            }
+        )
+        .with_mz([10, 20, 30])
+        .with_intensities([0.1, 0.4, 10])
+        .build()
+    )
+
+
+def test_missing_values_present_before_processing_are_harmonized(spectra):
+    """Missing entries that already exist before processing stay harmonized."""
+    processor = SpectraProcessor(filters=["harmonize_missing_entries"])
+
+    processed = processor.process_spectrum(spectra[0])
+
+    assert processed.get("smiles") is None
+    assert processed.get("compound_name") == "compound 1"
+
+
+def test_missing_values_created_during_processing_are_harmonized(spectrum_with_inchi):
+    """Regression test for #951: missing values from later steps are harmonized."""
+    processor = SpectraProcessor(
+        filters=[
+            ("harmonize_missing_entries", {"keys": ["inchi", "inchikey"]}),
+            _derive_inchikey_failing,
+        ]
+    )
+
+    processed = processor.process_spectrum(spectrum_with_inchi)
+
+    assert processed.get("inchikey") is None
+
+
+def test_missing_values_created_during_processing_are_harmonized_for_collection(spectrum_with_inchi):
+    """Same as above, but for the collection-wise processing path."""
+    collection = SpectraCollection([spectrum_with_inchi])
+    processor = SpectraProcessor(
+        filters=[
+            ("harmonize_missing_entries", {"keys": ["inchi", "inchikey"]}),
+            _derive_inchikey_failing_for_collection,
+        ]
+    )
+
+    processed = processor.process_collection(collection)
+
+    assert pd.isna(processed.metadata.loc[0, "inchikey"])
+
+
+def test_successful_derivation_is_not_affected(spectrum_with_inchi):
+    """Metadata derived after the harmonization step is kept unchanged."""
+    processor = SpectraProcessor(
+        filters=["harmonize_missing_entries", "derive_inchikey_from_inchi"]
+    )
+
+    processed = processor.process_spectrum(spectrum_with_inchi)
+
+    assert processed.get("inchikey") == "RYYVLZVUVIJVGH-UHFFFAOYSA-N"
+    assert processed.get("inchi") == spectrum_with_inchi.get("inchi")
+    assert processed.get("compound_name") == "Caffeine"
+
+
+def test_missing_value_harmonization_is_idempotent(spectra):
+    """Harmonizing twice gives the same result as harmonizing once."""
+    once = msfilters.harmonize_missing_entries(spectra[0])
+    twice = msfilters.harmonize_missing_entries(once)
+
+    assert twice.metadata == once.metadata
+
+
+def test_pipeline_without_harmonization_keeps_late_missing_alias(spectrum_with_inchi):
+    """Without harmonization, a late-generated missing alias is not normalized."""
+    processor = SpectraProcessor(filters=[_derive_inchikey_failing])
+
+    processed = processor.process_spectrum(spectrum_with_inchi)
+
+    assert processed.get("inchikey") == "n/a"
+
+
+def test_processing_report_counts_existing_missing_metadata(collection):
+    """Explicit missing aliases in input metadata are counted after processing."""
+    processor = SpectraProcessor(filters=["harmonize_missing_entries"])
+    report = processor.create_processing_report()
+
+    processed = processor.process_collection(collection, processing_report=report)
+
+    assert pd.isna(processed.metadata.loc[0, "smiles"])
+    assert pd.isna(processed.metadata.loc[2, "smiles"])
+    assert report.missing_metadata == {"smiles": 2}
+    assert report.missing_metadata_summary() == "Missing metadata after processing: smiles=2"
+    assert "Missing metadata after processing: smiles=2" in str(report)
+
+
+def test_processing_report_without_explicit_missing_values(spectrum_with_inchi):
+    """Present, nonmissing values do not contribute to the missing-value count.
+
+    Whether absent *keys* should be counted is a separate API contract question.
+    """
+    processor = SpectraProcessor(filters=["make_charge_int"])
+    report = processor.create_processing_report()
+
+    processor.process_spectrum(spectrum_with_inchi, processing_report=report)
+
+    assert report.missing_metadata == {}
+    assert report.missing_metadata_summary() == "Missing metadata after processing: none"
+
+# -----------------------------------------------------------------------------
+# Additional issue #951 regression tests
+# -----------------------------------------------------------------------------
+
+
+def test_processing_report_counts_failed_derivation_for_spectrum(spectrum_with_inchi):
+    """A missing alias created after harmonization is counted in the final report."""
+    processor = SpectraProcessor([
+        ("harmonize_missing_entries", {"keys": ["inchi", "inchikey"]}),
+        _derive_inchikey_failing,
+    ])
+    report = processor.create_processing_report()
+
+    processed = processor.process_spectrum(spectrum_with_inchi, processing_report=report)
+
+    assert processed.get("inchikey") is None
+    assert report.missing_metadata == {"inchikey": 1}
+    assert report.counter_number_processed == 1
+
+
+def test_processing_report_counts_failed_derivation_for_collection(spectrum_with_inchi):
+    """The collection path must count the same late-generated missing value."""
+    processor = SpectraProcessor([
+        ("harmonize_missing_entries", {"keys": ["inchi", "inchikey"]}),
+        _derive_inchikey_failing_for_collection,
+    ])
+    report = processor.create_processing_report()
+
+    processed = processor.process_collection(
+        SpectraCollection([spectrum_with_inchi]),
+        processing_report=report,
+    )
+
+    assert pd.isna(processed.metadata.loc[0, "inchikey"])
+    assert report.missing_metadata == {"inchikey": 1}
+    assert report.counter_number_processed == 1
+
+
+def test_missing_metadata_counts_accumulate_across_processing_calls(spectra, collection):
+    """The same report can aggregate Spectrum and SpectraCollection runs."""
+    processor = SpectraProcessor(["harmonize_missing_entries"])
+    report = processor.create_processing_report()
+
+    processor.process_spectrum(spectra[0], processing_report=report)
+    processor.process_collection(collection, processing_report=report)
+    processor.process_spectrum(spectra[2], processing_report=report)
+
+    # One from spectra[0], two from collection, one from spectra[2].
+    assert report.missing_metadata == {"smiles": 4}
+    assert report.counter_number_processed == 5
+
+
+def test_final_harmonization_respects_configured_keys(spectrum_with_inchi):
+    """A second harmonization pass must not normalize fields outside `keys`."""
+    spectrum = spectrum_with_inchi.clone()
+    spectrum.set("smiles", "n/a")
+    processor = SpectraProcessor([
+        ("harmonize_missing_entries", {"keys": ["inchikey"]}),
+        _derive_inchikey_failing,
+    ])
+
+    processed = processor.process_spectrum(spectrum)
+
+    assert processed.get("inchikey") is None
+    assert processed.get("smiles") == "n/a"
+    assert spectrum.get("smiles") == "n/a"
+    assert spectrum.get("inchikey") is None
+
+
+def test_collection_without_harmonization_keeps_late_missing_alias(spectrum_with_inchi):
+    """Automatic final harmonization should only happen when configured."""
+    collection = SpectraCollection([spectrum_with_inchi])
+    processor = SpectraProcessor([_derive_inchikey_failing_for_collection])
+
+    processed = processor.process_collection(collection)
+
+    assert processed.metadata.loc[0, "inchikey"] == "n/a"
+    assert "inchikey" not in collection.metadata.columns
+
+
+def test_missing_value_reports_match_for_explicit_missing_values(spectra):
+    """Both processing modes should count the same explicitly missing values."""
+    processor = SpectraProcessor(["harmonize_missing_entries"])
+    spectrum_report = processor.create_processing_report()
+    collection_report = processor.create_processing_report()
+
+    processor.process_spectra(
+        spectra,
+        processing_report=spectrum_report,
+        progress_bar=False,
+    )
+    processor.process_collection(
+        SpectraCollection(spectra),
+        processing_report=collection_report,
+    )
+
+    assert spectrum_report.missing_metadata == {"smiles": 2}
+    assert collection_report.missing_metadata == spectrum_report.missing_metadata
