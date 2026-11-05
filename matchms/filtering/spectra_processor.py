@@ -15,7 +15,7 @@ from matchms.filtering.filter_effects import (
     REMOVE,
 )
 from matchms.filtering.filter_order import ALL_FILTERS, FILTER_FUNCTION_NAMES
-from matchms.filtering.filter_utils.metadata_conversions import is_missing_metadata_entry
+from matchms.filtering.filter_utils.metadata_conversions import is_missing_metadata_alias
 from matchms.spectra_collection import SpectraCollection
 from matchms.spectrum import Spectrum
 from matchms.utils import ALIASES_FOR_NONE
@@ -616,7 +616,7 @@ def _apply_filter(filter_func: Callable, spectra):
     return filter_func(spectra, **kwargs)
 
 
-def _count_missing_metadata_entries(metadata) -> dict[str, int]:
+def _count_missing_metadata_entries(metadata, aliases = None) -> dict[str, int]:
     """Count missing entries per metadata key.
 
     Accepts Spectrum-style metadata (a mapping of scalar values) or the metadata
@@ -624,6 +624,9 @@ def _count_missing_metadata_entries(metadata) -> dict[str, int]:
     that are only aliases for missing entries (such as ``""`` or ``"n/a"``) are
     counted as missing, consistent with ``harmonize_missing_entries``.
     """
+    if aliases is None:
+        aliases = ALIASES_FOR_NONE
+
     if isinstance(metadata, pd.DataFrame):
         counts = {}
 
@@ -632,7 +635,7 @@ def _count_missing_metadata_entries(metadata) -> dict[str, int]:
             missing = values.isna()
 
             if pd.api.types.is_object_dtype(values) or pd.api.types.is_string_dtype(values):
-                missing = missing | values.isin(ALIASES_FOR_NONE)
+                missing = missing | values.isin(aliases)
 
             n_missing = int(missing.sum())
             if n_missing:
@@ -642,7 +645,7 @@ def _count_missing_metadata_entries(metadata) -> dict[str, int]:
 
     counts = {}
     for key, value in metadata.items():
-        if is_missing_metadata_entry(value):
+        if is_missing_metadata_alias(value, aliases=aliases):
             counts[key] = counts.get(key, 0) + 1
 
     return counts

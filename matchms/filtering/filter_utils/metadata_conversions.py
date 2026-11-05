@@ -60,7 +60,7 @@ def is_missing_metadata_value(value) -> bool:
     return False
 
 
-def is_missing_metadata_entry(value, aliases: Iterable | None = None) -> bool:
+def is_missing_metadata_alias(value, aliases: Iterable | None = None) -> bool:
     """Return True if a scalar metadata value represents a missing entry.
 
     This covers the canonical missing values (``None``, ``NaN``, ``pd.NA``) as
