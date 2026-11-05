@@ -1,6 +1,6 @@
-matchms,massbank,nist,riken,gnps,golm
+matchms,massbank,nist,riken,gnps,golm,sirius
 spectrum_id,ACCESSION,DB#,,SPECTRUMID,spectrum_id,
-title,RECORD TITLE,,,TITLE,title,
+title,RECORD TITLE,,,TITLE,title,TITLE
 record_date,DATE,,,,record_date,
 authors,AUTHORS,,,,authors,
 license,LICENSE,,,,license,
@@ -8,31 +8,31 @@ copyright,COPYRIGHT,,,,copyright,
 publication,PUBLICATION,,,,publication,
 comment,COMMENT,Comments,Comment,,comment,
 file_name,COMMENT:FILENAME,,,FILENAME,file_name,
-scans,COMMENT:SCANS,,,SCANS,scans,
+scans,COMMENT:SCANS,,,SCANS,scans,SCANS
 principal_investigator,COMMENT:PI,,,PI,principal_investigator,
 data_collector,COMMENT:DATACOLLECTOR,,,DATACOLLECTOR,data_collector,
 submit_user,COMMENT:SUBMITUSER,,,SUBMITUSER,submit_user,
 analysis_id,COMMENT:ANALYSIS_ID,,,,analysis_id,
 analysis_name,COMMENT:ANALYSIS_NAME,,,,analysis_name,
 confidence,COMMENT:CONFIDENCE,,,LIBRARYQUALITY,confidence,
-compound_name,CH$NAME,Name,NAME,NAME,NAME,
+compound_name,CH$NAME,Name,NAME,NAME,NAME,NAME
 compound_class,CH$COMPOUND_CLASS,Compound_type,Ontology,,compound_class,
-formula,CH$FORMULA,Formula,FORMULA,,formula,
+formula,CH$FORMULA,Formula,FORMULA,,formula,FORMULA
 parent_mass,CH$EXACT_MASS,ExactMass,,,parent_mass,
 nominal_mass,CH$NOMINAL_MASS,MW,,,nominal_mass,
 salt,COMMENT:SALT,Salt,,,salt,
 salt_mix_cas,COMMENT:SALT_MIX_CAS,Salt_mix_cas,,,salt_mix_cas,
 peptide_sequence,COMMENT:PEPTIDE_SEQUENCE,Peptide_sequence,,SEQ,peptide_sequence,
 peptide_modifications,COMMENT:PEPTIDE_MODIFICATIONS,Peptide_mods,,,peptide_modifications,
-smiles,CH$SMILES,,SMILES,SMILES,smiles,
-inchi,CH$IUPAC,,INCHI,INCHI,Synon: METB InChI,
+smiles,CH$SMILES,,SMILES,SMILES,smiles,SMILES
+inchi,CH$IUPAC,,INCHI,INCHI,Synon: METB InChI,INCHI
 inchi_aux,COMMENT:INCHIAUX,,,INCHIAUX,inchi_aux,
 structure,COMMENT:STRUCTURE,,,,structure,
 cas,CH$LINK:CAS,Related_cas#,,,Synon: METB CAS,
 chebi,CH$LINK:CHEBI,,,,chebi,
 chempdb,CH$LINK:CHEMPDB,,,,chempdb,
 chemspider,CH$LINK:CHEMSPIDER,,,,chemspider,
-inchikey,CH$LINK:INCHIKEY,InChIKey,INCHIKEY,INCHIKEY,Synon: METB InChIKey,
+inchikey,CH$LINK:INCHIKEY,InChIKey,INCHIKEY,INCHIKEY,Synon: METB InChIKey,INCHIKEY
 kegg,CH$LINK:KEGG,,,,Synon: METB KEGG,
 knapsack,CH$LINK:KNAPSACK,,,,knapsack,
 lipidbank,CH$LINK:LIPIDBANK,,,,lipidbank,
@@ -47,10 +47,10 @@ organism_lineage,SP$LINEAGE,,,,organism_lineage,
 sample_link,SP$LINK,,,,sample_link,
 sample,SP$SAMPLE,,,,sample,
 instrument,AC$INSTRUMENT,Instrument,,INSTRUMENT,instrument,
-instrument_type,AC$INSTRUMENT_TYPE,Instrument_type,INSTRUMENTTYPE,SOURCE_INSTRUMENT,instrument_type,
-ms_level,AC$MASS_SPECTROMETRY:MS_TYPE,Spectrum_type,,MSLEVEL,ms_level,
+instrument_type,AC$INSTRUMENT_TYPE,Instrument_type,INSTRUMENTTYPE,SOURCE_INSTRUMENT,instrument_type,SOURCE_INSTRUMENT
+ms_level,AC$MASS_SPECTROMETRY:MS_TYPE,Spectrum_type,,MSLEVEL,ms_level,MSLEVEL
 ionmode,AC$MASS_SPECTROMETRY:ION_MODE,Ion_mode,IONMODE,IONMODE,ionmode,
-charge,AC$MASS_SPECTROMETRY:CHARGE,Charge,,CHARGE,charge,
+charge,AC$MASS_SPECTROMETRY:CHARGE,Charge,,CHARGE,charge,CHARGE
 collision_energy,AC$MASS_SPECTROMETRY:COLLISION_ENERGY,Collision_energy,COLLISIONENERGY,,collision_energy,
 collision_gas,AC$MASS_SPECTROMETRY:COLLSION_GAS,Collision_gas,,,collision_gas,
 collection_date,AC$MASS_SPECTROMETRY:DATE,,,,collection_date,
@@ -83,7 +83,7 @@ column_name,AC$CHROMATOGRAPHY:COLUMN_NAME,,,,column_name,
 column_temperature,AC$CHROMATOGRAPHY:COLUMN_TEMPERATURE,,,,column_temperature,
 gradient,AC$CHROMATOGRAPHY:FLOW_GRADIENT,,,,gradient,
 flow_rate,AC$CHROMATOGRAPHY:FLOW_RATE,,,,flow_rate,
-retention_time,AC$CHROMATOGRAPHY:RETENTION_TIME,,RETENTIONTIME,,retention_time,
+retention_time,AC$CHROMATOGRAPHY:RETENTION_TIME,,RETENTIONTIME,,retention_time,RTINSECONDS
 retention_index,AC$CHROMATOGRAPHY:RETENTION_INDEX,Retention_index,RETENTIONINDEX,,Synon: RI,
 solvent,AC$CHROMATOGRPAHY:SOLVENT,,,,solvent,
 column_pressure,AC$CHROMATOGRPAHY:COLUMN_PRESSURE,Pressure,,,column_pressure,
@@ -97,8 +97,8 @@ derivative_formula,MS$FOCUSED_ION:DERIVATIVE_FORM,,,,derivative_formula,
 derivative_mass,MS$FOCUSED_ION:DERIVATIVE_MASS,,,,derivative_mass,
 derivative_type,MS$FOCUSED_ION:DERIVATIVE_TYPE,,,,derivative_type,
 ion_type,MS$FOCUSED_ION:ION_TYPE,,,,ion_type,
-precursor_mz,MS$FOCUSED_ION:PRECURSOR_M/Z,PrecursorMZ,PRECURSORMZ,PEPMASS,precursor_mz,
-adduct,MS$FOCUSED_ION:PRECURSOR_TYPE,Precursor_type,PRECURSORTYPE,,adduct,
+precursor_mz,MS$FOCUSED_ION:PRECURSOR_M/Z,PrecursorMZ,PRECURSORMZ,PEPMASS,precursor_mz,PEPMASS
+adduct,MS$FOCUSED_ION:PRECURSOR_TYPE,Precursor_type,PRECURSORTYPE,,adduct,ION
 isolation_window_target_mz,MS$FOCUSED_ION:ISOLATION_WIDTH,,,,isolation_window_target_mz,
 peak_width,MS$FOCUSED_ION:PEAK_WIDTH,,,,peak_width,
 isolation_window_lower_offset,MS$FOCUSED_ION:ISOLATION_WINDOW_LOWER_OFFSET,,,,isolation_window_lower_offset,
@@ -111,4 +111,5 @@ software_system_id,MS$DATA_PROCESSING:SOFTWARE_SYSTEM_ID,,,,software_system_id,
 splash,PK$SPLASH,,,,splash,
 peakAnnotations,PK$ANNOTATION,,,,peakAnnotations,
 num_peaks,PK$NUM_PEAK,Num Peaks,Num Peaks,,num_peaks,
+feature_id,,,,,,FEATURE_ID
 synonyms,,,,,Synon: METB N,

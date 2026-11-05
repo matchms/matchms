@@ -35,7 +35,8 @@ def save_as_json(
     filename:
         Provide filename to save spectrum(s).
     export_style:
-        Converts the keys to the required export style. One of ["matchms", "massbank", "nist", "riken", "gnps"].
+        Converts the keys to the required export style.
+        One of ["matchms", "massbank", "nist", "riken", "gnps", "sirius"].
         Default is "matchms"
     """
     if not isinstance(spectra, list):
