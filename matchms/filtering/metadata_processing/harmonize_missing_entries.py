@@ -1,6 +1,6 @@
 from collections.abc import Iterable
 from matchms.filtering._dispatch import metadata_update_filter
-from matchms.filtering.filter_utils.metadata_conversions import is_missing_metadata_entry
+from matchms.filtering.filter_utils.metadata_conversions import is_missing_metadata_alias
 from matchms.utils import ALIASES_FOR_NONE
 
 
@@ -58,7 +58,7 @@ def _harmonize_missing_entries(
     updates = {}
     for key in keys:
         value = metadata.get(key)
-        if is_missing_metadata_entry(value, aliases):
+        if is_missing_metadata_alias(value, aliases):
             updates[key] = undefined
 
     return updates
