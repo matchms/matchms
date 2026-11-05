@@ -643,6 +643,7 @@ def _count_missing_metadata_entries(metadata, aliases = None) -> dict[str, int]:
 
         return counts
 
+    # Fallback when working with lists of Spectrum objects (slower!)
     counts = {}
     for key, value in metadata.items():
         if is_missing_metadata_alias(value, aliases=aliases):
