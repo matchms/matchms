@@ -37,7 +37,7 @@ def save_spectra(
         Path to file containing spectra, with file extension ".json", ".mgf", ".msp".
     export_style:
         Converts the keys to the required export style.
-        One of ["matchms", "massbank", "nist", "riken", "gnps"]. Default is "matchms".
+        One of ["matchms", "massbank", "nist", "riken", "gnps", "sirius"]. Default is "matchms".
     append:
         Only supported for ".mgf", and ".msp" filetypes. If True, will try to append
         to an existing file, instead of creating a new file. Default is `False`.
