@@ -14,6 +14,7 @@ Use ``Entropy`` when general one-to-one matching semantics or neutral-loss/hybri
 modes are required; use ``EntropySearch`` when high-throughput fragment-library
 searches are the priority and the separation requirement is acceptable.
 """
+
 from __future__ import annotations
 import math
 import os
@@ -26,6 +27,7 @@ import numpy as np
 from numba import njit
 from tqdm.auto import tqdm
 from matchms.scores import Scores
+from ._topk import resolve_batch_size, select_topk_row, validate_topk_parameters
 from .base_similarity import BaseSimilarity
 from .default_parameters import (
     DEFAULT_MZ_TOLERANCE,
@@ -33,6 +35,7 @@ from .default_parameters import (
     DEFAULT_OFFSET_TO_PRECURSOR,
 )
 from .flash_index import FlashIndex
+from .topk_results import TopKResults
 
 
 # Internal execution parameters
@@ -84,10 +87,14 @@ class _PreparedEntropySpectra:
             raise ValueError("Invalid prepared-spectrum row slice.")
         first, last = self.spec_offsets[start], self.spec_offsets[stop]
         return _PreparedEntropySpectra(
-            _readonly(self.spec_offsets[start:stop + 1] - first),
-            self.spec_mz[first:last], self.spec_int[first:last],
-            self.precursor_mz[start:stop], self.settings,
-            int(last - first), 0, 0,
+            _readonly(self.spec_offsets[start : stop + 1] - first),
+            self.spec_mz[first:last],
+            self.spec_int[first:last],
+            self.precursor_mz[start:stop],
+            self.settings,
+            int(last - first),
+            0,
+            0,
         )
 
 
@@ -105,9 +112,19 @@ class _SearchView:
 
 
 @njit(cache=True, nogil=True)
-def _prepare_packed(offsets, mz, intensity, precursor, noise_cutoff,
-                    remove_precursor, offset_to_precursor, merge_distance,
-                    minimum_gap, merge, weighted):
+def _prepare_packed(
+    offsets,
+    mz,
+    intensity,
+    precursor,
+    noise_cutoff,
+    remove_precursor,
+    offset_to_precursor,
+    merge_distance,
+    minimum_gap,
+    merge,
+    weighted,
+):
     """Filter, enforce separation, and entropy-weight packed raw spectra.
 
     Close peaks are merged around fixed representatives selected by descending
@@ -128,8 +145,7 @@ def _prepare_packed(offsets, mz, intensity, precursor, noise_cutoff,
         previous = -np.inf
         for p in range(offsets[row], offsets[row + 1]):
             x, value = np.float64(mz[p]), np.float64(intensity[p])
-            if (not np.isfinite(x) or not np.isfinite(value)
-                    or x < 0 or value <= 0 or (use_cutoff and x > cutoff)):
+            if not np.isfinite(x) or not np.isfinite(value) or x < 0 or value <= 0 or (use_cutoff and x > cutoff):
                 filtered += 1
                 continue
             if x < previous:
@@ -251,8 +267,7 @@ def _bisect(mz, value, starts, origin, step, side_right):
         if np.isfinite(position) and 1 <= position < starts.size - 2:
             cell = int(position)
             low, high = int(starts[cell - 1]), int(starts[cell + 2])
-            if ((low > 0 and mz[low - 1] >= value)
-                    or (high < mz.size and mz[high] <= value)):
+            if (low > 0 and mz[low - 1] >= value) or (high < mz.size and mz[high] <= value):
                 low, high = 0, mz.size
     while low < high:
         middle = low + (high - low) // 2
@@ -284,8 +299,9 @@ def _query_windows(query_mz, library_mz, tolerance, starts, origin, step):
 
 
 @njit(cache=True, nogil=True)
-def _accumulate_short(out, offsets, query_intensity, library_intensity, terms,
-                      spectrum_ids, bounds, first_row, last_row):
+def _accumulate_short(
+    out, offsets, query_intensity, library_intensity, terms, spectrum_ids, bounds, first_row, last_row
+):
     """Process short windows without Python calls or per-library matching state."""
     for row in range(first_row, last_row):
         for p in range(offsets[row], offsets[row + 1]):
@@ -309,9 +325,17 @@ def _scatter_add(out, spectrum_ids, contributions):
 
 def _score_block(out, prepared, view, bounds, first_row, last_row):
     """Score disjoint rows; long windows use bounded, per-worker scratch space."""
-    _accumulate_short(out, prepared.spec_offsets, prepared.spec_int,
-                      view.intensity, view.terms, view.spectrum_ids,
-                      bounds, first_row, last_row)
+    _accumulate_short(
+        out,
+        prepared.spec_offsets,
+        prepared.spec_int,
+        view.intensity,
+        view.terms,
+        view.spectrum_ids,
+        bounds,
+        first_row,
+        last_row,
+    )
     first_peak, last_peak = prepared.spec_offsets[[first_row, last_row]]
     window_sizes = bounds[first_peak:last_peak, 1] - bounds[first_peak:last_peak, 0]
     large_peaks = np.flatnonzero(window_sizes >= _VECTOR_MIN_HITS) + first_peak
@@ -327,8 +351,8 @@ def _score_block(out, prepared, view, bounds, first_row, last_row):
         query_term = value * np.log2(value)
         for start in range(low, high, capacity):
             stop = min(start + capacity, high)
-            mixture = mixed[:stop - start]
-            delta = contributions[:stop - start]
+            mixture = mixed[: stop - start]
+            delta = contributions[: stop - start]
             np.add(view.intensity[start:stop], value, out=mixture)
             np.log2(mixture, out=delta)
             np.multiply(mixture, delta, out=delta)
@@ -420,10 +444,12 @@ class EntropySearch(BaseSimilarity):
 
     Returns
     -------
-    Scores
+    Scores or TopKResults
         ``matrix`` and ``search`` return a :class:`~matchms.scores.Scores` object
-        containing the ``"score"`` field. Search results have query spectra as
-        rows and reference-library spectra as columns.
+        containing the ``"score"`` field. Their rows are queries and columns
+        are reference spectra. ``search_topk`` and ``search_prepared_topk``
+        return compact :class:`~matchms.similarity.topk_results.TopKResults`
+        objects containing ranked library IDs and similarity scores.
 
     Notes
     -----
@@ -493,9 +519,12 @@ class EntropySearch(BaseSimilarity):
             raise ValueError("EntropySearch supports fragment matching in Da only.")
         self.tolerance = float(tolerance)
         self.max_tolerance = self.tolerance if max_tolerance is None else float(max_tolerance)
-        if (not math.isfinite(self.tolerance) or self.tolerance < 0
-                or not math.isfinite(self.max_tolerance)
-                or self.max_tolerance < self.tolerance):
+        if (
+            not math.isfinite(self.tolerance)
+            or self.tolerance < 0
+            or not math.isfinite(self.max_tolerance)
+            or self.max_tolerance < self.tolerance
+        ):
             raise ValueError("Require finite 0 <= tolerance <= max_tolerance.")
         if peak_separation not in ("merge", "raise"):
             raise ValueError("peak_separation must be 'merge' or 'raise'.")
@@ -520,20 +549,32 @@ class EntropySearch(BaseSimilarity):
 
     def to_dict(self) -> dict:
         """Return constructor parameters, excluding prepared arrays and caches."""
-        return {"__Similarity__": type(self).__name__, "tolerance": self.tolerance,
-                "max_tolerance": self.max_tolerance, "peak_separation": self.peak_separation,
-                "noise_cutoff": self.noise_cutoff, "remove_precursor": self.remove_precursor,
-                "offset_to_precursor": self.offset_to_precursor,
-                "intensity_weighting": self.intensity_weighting, "dtype": self.dtype.name,
-                "index_step": self.index_step}
+        return {
+            "__Similarity__": type(self).__name__,
+            "tolerance": self.tolerance,
+            "max_tolerance": self.max_tolerance,
+            "peak_separation": self.peak_separation,
+            "noise_cutoff": self.noise_cutoff,
+            "remove_precursor": self.remove_precursor,
+            "offset_to_precursor": self.offset_to_precursor,
+            "intensity_weighting": self.intensity_weighting,
+            "dtype": self.dtype.name,
+            "index_step": self.index_step,
+        }
 
     def _config(self) -> dict:
-        return {"weighing_type": "entropy_separated", "preparation": _PREPARATION_FORMAT,
-                "max_tolerance": self.max_tolerance, "peak_separation": self.peak_separation,
-                "noise_cutoff": self.noise_cutoff, "remove_precursor": self.remove_precursor,
-                "offset_to_precursor": self.offset_to_precursor,
-                "intensity_weighting": self.intensity_weighting, "dtype": self.dtype.str,
-                "normalize_to_half": True}
+        return {
+            "weighing_type": "entropy_separated",
+            "preparation": _PREPARATION_FORMAT,
+            "max_tolerance": self.max_tolerance,
+            "peak_separation": self.peak_separation,
+            "noise_cutoff": self.noise_cutoff,
+            "remove_precursor": self.remove_precursor,
+            "offset_to_precursor": self.offset_to_precursor,
+            "intensity_weighting": self.intensity_weighting,
+            "dtype": self.dtype.str,
+            "normalize_to_half": True,
+        }
 
     def _settings(self) -> tuple:
         return tuple(self._config().items())
@@ -557,6 +598,7 @@ class EntropySearch(BaseSimilarity):
             precursor = np.asarray(values, dtype=np.float64).copy()
         except (ValueError, TypeError):
             import pandas as pd
+
             precursor = pd.to_numeric(pd.Series(values), errors="coerce").to_numpy(dtype=float)
         if precursor.shape != (n,):
             raise ValueError("precursor_mz must have one value per spectrum.")
@@ -565,8 +607,13 @@ class EntropySearch(BaseSimilarity):
 
     def _prepare_arrays(self, offsets, mz, intensities, precursor) -> _PreparedEntropySpectra:
         offsets = np.asarray(offsets)
-        if (offsets.ndim != 1 or not offsets.size or offsets.dtype.kind not in "iu"
-                or offsets[0] != 0 or np.any(offsets[1:] < offsets[:-1])):
+        if (
+            offsets.ndim != 1
+            or not offsets.size
+            or offsets.dtype.kind not in "iu"
+            or offsets[0] != 0
+            or np.any(offsets[1:] < offsets[:-1])
+        ):
             raise ValueError("Peak offsets must be sorted nonnegative integers starting at zero.")
         mz = np.ascontiguousarray(mz, dtype=self.dtype)
         intensities = np.ascontiguousarray(intensities, dtype=self.dtype)
@@ -577,9 +624,17 @@ class EntropySearch(BaseSimilarity):
         gap = self._minimum_gap()
         distance = max(2.1 * self.max_tolerance, gap)
         result = _prepare_packed(
-            offsets, mz, intensities, precursor, self.noise_cutoff,
-            self.remove_precursor, self.offset_to_precursor, distance, gap,
-            self.peak_separation == "merge", self.intensity_weighting,
+            offsets,
+            mz,
+            intensities,
+            precursor,
+            self.noise_cutoff,
+            self.remove_precursor,
+            self.offset_to_precursor,
+            distance,
+            gap,
+            self.peak_separation == "merge",
+            self.intensity_weighting,
         )
         out_offsets, out_mz, out_int, filtered, merged, bad_row, code = result
         if code:
@@ -589,8 +644,14 @@ class EntropySearch(BaseSimilarity):
         if out_mz.size < 0.8 * mz.size:
             out_mz, out_int = out_mz.copy(), out_int.copy()
         return _PreparedEntropySpectra(
-            _readonly(out_offsets), _readonly(out_mz), _readonly(out_int),
-            _readonly(precursor), self._settings(), mz.size, int(filtered), int(merged),
+            _readonly(out_offsets),
+            _readonly(out_mz),
+            _readonly(out_int),
+            _readonly(precursor),
+            self._settings(),
+            mz.size,
+            int(filtered),
+            int(merged),
         )
 
     def prepare_peak_arrays(self, peaks, precursor_mz=None) -> _PreparedEntropySpectra:
@@ -636,7 +697,10 @@ class EntropySearch(BaseSimilarity):
             array = getattr(fragments, "array", None)
             if getattr(array, "format", None) == "csr" and hasattr(fragments, "bin_to_mz"):
                 return self._prepare_arrays(
-                    array.indptr, fragments.bin_to_mz(array.indices), array.data, precursor,
+                    array.indptr,
+                    fragments.bin_to_mz(array.indices),
+                    array.data,
+                    precursor,
                 )
             peaks = [np.column_stack(fragments.get_row(i)) for i in range(len(spectra))]
             return self.prepare_peak_arrays(peaks, precursor)
@@ -667,16 +731,21 @@ class EntropySearch(BaseSimilarity):
         owners = np.repeat(np.arange(prepared.n_specs, dtype=np.uint32), np.diff(prepared.spec_offsets))
         order = np.argsort(prepared.spec_mz, kind="stable")
         index = FlashIndex(
-            n_specs=prepared.n_specs, dtype=self.dtype,
+            n_specs=prepared.n_specs,
+            dtype=self.dtype,
             peaks_mz=_readonly(prepared.spec_mz[order]),
             peaks_int=_readonly(prepared.spec_int[order]),
             peaks_spec_idx=_readonly(owners[order]),
-            spec_offsets=prepared.spec_offsets, spec_mz=prepared.spec_mz,
-            spec_int=prepared.spec_int, precursor_mz=prepared.precursor_mz,
+            spec_offsets=prepared.spec_offsets,
+            spec_mz=prepared.spec_mz,
+            spec_int=prepared.spec_int,
+            precursor_mz=prepared.precursor_mz,
             config=self._config(),
-            metadata={"input_peaks": prepared.n_input_peaks,
-                      "filtered_peaks": prepared.n_filtered_peaks,
-                      "merged_peaks": prepared.n_merged_peaks},
+            metadata={
+                "input_peaks": prepared.n_input_peaks,
+                "filtered_peaks": prepared.n_filtered_peaks,
+                "merged_peaks": prepared.n_merged_peaks,
+            },
         )
         self.prime_index(index)
         return index
@@ -713,8 +782,11 @@ class EntropySearch(BaseSimilarity):
         if mz.size > 1 and self.index_step > 0:
             origin, span = float(mz[0]), float(mz[-1]) - float(mz[0])
             if span > 0 and math.isfinite(span):
-                step = max(self.index_step, span / (_MAX_DIRECTORY_ENTRIES - 2),
-                           8 * np.spacing(max(abs(origin), abs(float(mz[-1])), 1.0)))
+                step = max(
+                    self.index_step,
+                    span / (_MAX_DIRECTORY_ENTRIES - 2),
+                    8 * np.spacing(max(abs(origin), abs(float(mz[-1])), 1.0)),
+                )
                 count = min(_MAX_DIRECTORY_ENTRIES, math.ceil(span / step) + 2)
                 edges = origin + np.arange(count, dtype=np.float64) * step
                 starts = np.searchsorted(mz, edges).astype(np.int64)
@@ -722,8 +794,9 @@ class EntropySearch(BaseSimilarity):
         index._runtime_cache[key] = view
         return view
 
-    def search(self, query_spectra, library_index: FlashIndex, *, score_fields=None,
-               progress_bar=True, n_jobs=1) -> Scores:
+    def search(
+        self, query_spectra, library_index: FlashIndex, *, score_fields=None, progress_bar=True, n_jobs=1
+    ) -> Scores:
         """Prepare and search query spectra against a reusable library index.
 
         Returns a score matrix with query spectra as rows and indexed reference
@@ -733,33 +806,44 @@ class EntropySearch(BaseSimilarity):
         self._check_index(library_index)
         self._resolve_score_fields(score_fields)
         return self.search_prepared(
-            self.prepare_queries(query_spectra), library_index,
-            score_fields=score_fields, progress_bar=progress_bar, n_jobs=n_jobs,
+            self.prepare_queries(query_spectra),
+            library_index,
+            score_fields=score_fields,
+            progress_bar=progress_bar,
+            n_jobs=n_jobs,
         )
 
-    def search_prepared(self, query_spectra: _PreparedEntropySpectra, library_index: FlashIndex,
-                        *, score_fields=None, progress_bar=False, n_jobs=1) -> Scores:
-        """Search queries that were already prepared by this configuration.
-
-        This method excludes query preparation and index construction. ``n_jobs=1``
-        runs serially, a positive integer selects that many worker threads, and
-        ``n_jobs=-1`` uses the available CPUs up to the number of query spectra.
-        Workers operate on disjoint output rows.
-        """
-        self._check_prepared(query_spectra)
-        self._resolve_score_fields(score_fields)
-        if isinstance(n_jobs, (bool, np.bool_)) \
-            or not isinstance(n_jobs, (int, np.integer)) or n_jobs == 0 or n_jobs < -1:
+    @staticmethod
+    def _validate_n_jobs(n_jobs: int) -> None:
+        """Keep dense and retrieval searches consistent about worker counts."""
+        if (
+            isinstance(n_jobs, (bool, np.bool_))
+            or not isinstance(n_jobs, (int, np.integer))
+            or n_jobs == 0
+            or n_jobs < -1
+        ):
             raise ValueError("n_jobs must be a positive integer or -1.")
-        view = self.prime_index(library_index)
-        prepared = query_spectra
-        scores = np.zeros((prepared.n_specs, library_index.n_specs), dtype=self.dtype)
+
+    def _score_into(
+        self,
+        prepared: _PreparedEntropySpectra,
+        view: _SearchView,
+        scores: np.ndarray,
+        *,
+        progress_bar: bool,
+        n_jobs: int,
+    ) -> None:
+        """Score into caller-owned, zero-initialized query-by-library rows.
+
+        Shared by dense search and batched top-k search. Using the same Numba
+        and vectorized kernels preserves the exact existing scoring semantics.
+        The caller owns all buffers; distinct threads write disjoint rows.
+        """
         if not scores.size or not prepared.n_peaks or not view.mz.size:
-            return Scores({"score": scores})
+            return
         # Compile the vector scatter signature during even a small warmup search.
         _scatter_add(scores[0], view.spectrum_ids[:0], np.empty(0, dtype=self.dtype))
-        bounds = _query_windows(prepared.spec_mz, view.mz, self.tolerance,
-                                view.starts, view.origin, view.step)
+        bounds = _query_windows(prepared.spec_mz, view.mz, self.tolerance, view.starts, view.origin, view.step)
         cpu_count = getattr(os, "process_cpu_count", os.cpu_count)() or 1
         workers = min(prepared.n_specs, cpu_count if n_jobs == -1 else int(n_jobs))
         boundaries = np.linspace(0, prepared.n_specs, workers + 1, dtype=int)
@@ -768,14 +852,140 @@ class EntropySearch(BaseSimilarity):
             _score_block(scores, prepared, view, bounds, 0, prepared.n_specs)
         else:
             # Compile both kernels before entering the worker threads.
-            _accumulate_short(scores, prepared.spec_offsets, prepared.spec_int,
-                              view.intensity, view.terms, view.spectrum_ids, bounds, 0, 0)
+            _accumulate_short(
+                scores,
+                prepared.spec_offsets,
+                prepared.spec_int,
+                view.intensity,
+                view.terms,
+                view.spectrum_ids,
+                bounds,
+                0,
+                0,
+            )
             _scatter_add(scores[0], view.spectrum_ids[:0], np.empty(0, dtype=self.dtype))
             with ThreadPoolExecutor(max_workers=workers) as executor:
                 futures = [executor.submit(_score_block, scores, prepared, view, bounds, a, b) for a, b in blocks]
                 for future in tqdm(futures, disable=not progress_bar, desc="EntropySearch query blocks"):
                     future.result()
+
+    def search_prepared(
+        self,
+        query_spectra: _PreparedEntropySpectra,
+        library_index: FlashIndex,
+        *,
+        score_fields=None,
+        progress_bar=False,
+        n_jobs=1,
+    ) -> Scores:
+        """Search already-prepared queries, returning the original dense Scores.
+
+        This method excludes query preparation and index construction. ``n_jobs=1``
+        runs serially, a positive integer selects that many worker threads, and
+        ``n_jobs=-1`` uses the available CPUs up to the number of query spectra.
+        Workers operate on disjoint output rows.
+        """
+        self._check_prepared(query_spectra)
+        self._resolve_score_fields(score_fields)
+        self._validate_n_jobs(n_jobs)
+        view = self.prime_index(library_index)
+        scores = np.zeros((query_spectra.n_specs, library_index.n_specs), dtype=self.dtype)
+        self._score_into(query_spectra, view, scores, progress_bar=progress_bar, n_jobs=n_jobs)
         return Scores({"score": scores})
+
+    def search_topk(
+        self,
+        query_spectra,
+        library_index: FlashIndex,
+        *,
+        k: int = 100,
+        min_score: float = 0.0,
+        batch_size: int | None = None,
+        progress_bar: bool = True,
+        n_jobs: int = 1,
+    ) -> TopKResults:
+        """Prepare queries and return the highest-ranked library hits per query.
+
+        Unlike ``search``, this method never constructs a full query-by-library
+        output matrix. It scores small query batches with the unchanged dense
+        kernel, selects top-k from each row, then reuses the same temporary
+        buffer for subsequent batches. In this PR1 implementation, each *single*
+        query still scores and scans all reference spectra.
+
+        Only scores strictly greater than ``min_score`` are returned. Score ties
+        are broken by ascending library index. If fewer than ``k`` hits qualify,
+        missing hits have index -1 and score 0; see ``TopKResults.valid_counts``.
+
+        With ``batch_size=None`` (default), a target of 64 MiB limits the dense
+        temporary score buffer, capped at 32 query rows. An explicit batch size
+        overrides this target. At least one full library-sized score row is
+        required in PR1, even if that row exceeds 64 MiB.
+        """
+        self._check_index(library_index)
+        validate_topk_parameters(k, min_score, batch_size)
+        self._validate_n_jobs(n_jobs)
+        return self.search_prepared_topk(
+            self.prepare_queries(query_spectra),
+            library_index,
+            k=k,
+            min_score=min_score,
+            batch_size=batch_size,
+            progress_bar=progress_bar,
+            n_jobs=n_jobs,
+        )
+
+    def search_prepared_topk(
+        self,
+        query_spectra: _PreparedEntropySpectra,
+        library_index: FlashIndex,
+        *,
+        k: int = 100,
+        min_score: float = 0.0,
+        batch_size: int | None = None,
+        progress_bar: bool = False,
+        n_jobs: int = 1,
+    ) -> TopKResults:
+        """Exact top-k retrieval using already-prepared queries and an index.
+
+        The returned compact arrays have shape ``(n_queries, k)`` and refer to
+        library row positions, not peak indices. Index preparation and numerical
+        match/score behavior are identical to ``search_prepared``.
+        """
+        self._check_prepared(query_spectra)
+        k, min_score, batch_size = validate_topk_parameters(k, min_score, batch_size)
+        self._validate_n_jobs(n_jobs)
+        view = self.prime_index(library_index)
+        n_queries, n_references = query_spectra.n_specs, library_index.n_specs
+        index_dtype = np.int32 if n_references <= np.iinfo(np.int32).max else np.int64
+        indices = np.full((n_queries, k), -1, dtype=index_dtype)
+        scores = np.zeros((n_queries, k), dtype=self.dtype)
+        valid_counts = np.zeros(n_queries, dtype=np.intp)
+
+        if n_queries:
+            rows_per_batch = resolve_batch_size(
+                batch_size,
+                n_queries,
+                n_references,
+                self.dtype.itemsize,
+            )
+            buffer = np.zeros((rows_per_batch, n_references), dtype=self.dtype)
+            with tqdm(total=n_queries, desc="EntropySearch top-k", disable=not progress_bar) as progress:
+                for first in range(0, n_queries, rows_per_batch):
+                    last = min(first + rows_per_batch, n_queries)
+                    prepared_batch = query_spectra.slice(first, last)
+                    batch_scores = buffer[: last - first]
+                    batch_scores.fill(0.0)
+                    self._score_into(prepared_batch, view, batch_scores, progress_bar=False, n_jobs=n_jobs)
+                    for local_row, dense_row in enumerate(batch_scores):
+                        ids, values = select_topk_row(dense_row, k, min_score)
+                        n_hits = ids.size
+                        destination = first + local_row
+                        valid_counts[destination] = n_hits
+                        indices[destination, :n_hits] = ids
+                        scores[destination, :n_hits] = values
+                    progress.update(last - first)
+
+        return TopKResults(indices, scores, valid_counts, n_references)
 
     def matrix(self, spectra_1, spectra_2=None, score_fields=None, progress_bar=True, n_jobs=1) -> Scores:
         """Compute a complete dense similarity matrix.
@@ -789,8 +999,7 @@ class EntropySearch(BaseSimilarity):
         queries = self.prepare_queries(spectra_1)
         references = queries if spectra_2 is None or spectra_2 is spectra_1 else self.prepare_queries(spectra_2)
         index = self.build_index_prepared(references)
-        return self.search_prepared(queries, index, score_fields=score_fields,
-                                    progress_bar=progress_bar, n_jobs=n_jobs)
+        return self.search_prepared(queries, index, score_fields=score_fields, progress_bar=progress_bar, n_jobs=n_jobs)
 
     def pair(self, spectrum_1, spectrum_2) -> np.ndarray:
         """Compare two spectra using the same preparation and matching rules."""
@@ -811,9 +1020,14 @@ class EntropySearch(BaseSimilarity):
     def index_statistics(self, index: FlashIndex) -> dict[str, Any]:
         """Return descriptive statistics for a compatible reference index."""
         view = self.prime_index(index)
-        return {"n_reference": index.n_specs, "n_peaks": view.mz.size,
-                "dtype": self.dtype.name, "spectrum_id_dtype": view.spectrum_ids.dtype.name,
-                "directory_entries": view.starts.size, "directory_bytes": view.starts.nbytes,
-                "directory_step": view.step if view.starts.size else 0.0,
-                "cached_entropy_bytes": view.terms.nbytes,
-                "prepared_statistics": dict(index.metadata)}
+        return {
+            "n_reference": index.n_specs,
+            "n_peaks": view.mz.size,
+            "dtype": self.dtype.name,
+            "spectrum_id_dtype": view.spectrum_ids.dtype.name,
+            "directory_entries": view.starts.size,
+            "directory_bytes": view.starts.nbytes,
+            "directory_step": view.step if view.starts.size else 0.0,
+            "cached_entropy_bytes": view.terms.nbytes,
+            "prepared_statistics": dict(index.metadata),
+        }
