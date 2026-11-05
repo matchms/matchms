@@ -79,6 +79,7 @@ def test_save_as_mgf_spectrum_list():
                          [("matchms", ["PRECURSOR_MZ=100.1\n", "PRECURSOR_MZ=200.2\n"]),
                           ("nist", ["PRECURSORMZ=100.1\n", "PRECURSORMZ=200.2\n"]),
                           ("gnps", ["PEPMASS=100.1\n", "PEPMASS=200.2\n"]),
+                          ("sirius", ["PEPMASS=100.1\n", "PEPMASS=200.2\n"]),
                           ])
 def test_save_as_mgf_export_style(style, expected):
     """Test saving spectrum list to .mgf file using differnt export styles.
@@ -101,6 +102,53 @@ def test_save_as_mgf_export_style(style, expected):
             mgf_content = f.readlines()
         assert mgf_content[1] == expected[0]
         assert mgf_content[7] == expected[1]
+
+
+def test_save_as_mgf_sirius_style(tmpdir):
+    """The "sirius" style writes the keys SIRIUS reads (see issue #987): PEPMASS instead of
+    PRECURSOR_MZ, MSLEVEL instead of MS_LEVEL, RTINSECONDS instead of RETENTION_TIME, etc.
+    The written file must also still be readable by matchms.
+    """
+    mz = np.array([100.1, 200.02, 300.003], dtype="float")
+    intensities = np.array([0.01, 0.02, 1.0], dtype="float")
+    metadata = {"precursor_mz": 183.057,
+                "charge": -1,
+                "ms_level": "2",
+                "retention_time": 61.2,
+                "ionmode": "negative",
+                "adduct": "[M-H]-",
+                "compound_name": "Fuberidazole",
+                "feature_id": "12",
+                "smiles": "C1=CC=C2C(=C1)NC(=N2)C3=CC=CO3"}
+    spectrum = SpectrumBuilder().with_mz(mz).with_intensities(intensities) \
+        .with_metadata(metadata, metadata_harmonization=True).build()
+
+    filename = os.path.join(tmpdir, "sirius.mgf")
+    save_as_mgf(spectrum, filename, export_style="sirius")
+
+    with open(filename, "r", encoding="utf-8") as f:
+        mgf_lines = [line.strip() for line in f.readlines()]
+    for expected_line in ["PEPMASS=183.057",
+                          "CHARGE=-1",
+                          "MSLEVEL=2",
+                          "RTINSECONDS=61.2",
+                          "ION=[M-H]-",
+                          "NAME=Fuberidazole",
+                          "FEATURE_ID=12",
+                          "SMILES=C1=CC=C2C(=C1)NC(=N2)C3=CC=CO3"]:
+        assert expected_line in mgf_lines
+    # matchms-only keys must not leak into the file, and IONMODE is left out on purpose
+    # (SIRIUS takes the polarity from CHARGE and fails on IONMODE values like "n/a").
+    matchms_keys = ("PRECURSOR_MZ=", "MS_LEVEL=", "RETENTION_TIME=", "IONMODE=", "ADDUCT=", "COMPOUND_NAME=")
+    assert not any(line.startswith(matchms_keys) for line in mgf_lines)
+
+    spectrum_import = list(load_from_mgf(filename))[0]
+    assert spectrum_import.get("precursor_mz") == 183.057
+    assert spectrum_import.get("charge") == -1
+    assert spectrum_import.get("ms_level") == "2"
+    assert spectrum_import.get("retention_time") == 61.2
+    assert spectrum_import.get("compound_name") == "Fuberidazole"
+    assert spectrum_import.get("feature_id") == "12"
 
 
 @pytest.mark.parametrize("charge, ionmode, parent_mass",
