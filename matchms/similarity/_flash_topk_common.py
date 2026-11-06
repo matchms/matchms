@@ -4,10 +4,11 @@ The numerical assignment rules live in the individual entropy/cosine kernels.
 This module only owns epoch-stamped candidate registration and compact hybrid
 peak-use storage, shared by both kernels without dense output rows.
 """
-from __future__ import annotations
 
+from __future__ import annotations
 import numpy as np
 from numba import njit
+
 
 _INITIAL_CAPACITY = 256
 _MAX_EPOCH = int(np.iinfo(np.uint32).max)
@@ -25,10 +26,7 @@ class _FlashTopKWorkspace:
         dtype = np.dtype(dtype)
         index_dtype = np.int32 if n_references <= np.iinfo(np.int32).max else np.int64
         self.scores = np.empty(n_references, dtype=np.float64)
-        self.selection_scores = (
-            self.scores if dtype == np.dtype(np.float64)
-            else np.empty(n_references, dtype=dtype)
-        )
+        self.selection_scores = self.scores if dtype == np.dtype(np.float64) else np.empty(n_references, dtype=dtype)
         self.epochs = np.zeros(n_references, dtype=np.uint32)
         capacity = min(n_references, _INITIAL_CAPACITY)
         self.touched = np.empty(capacity, dtype=index_dtype)

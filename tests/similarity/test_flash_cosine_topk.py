@@ -40,7 +40,7 @@ def _scorer(mode="fragment", dtype=np.float32, *, ppm=False, gate=None,
 
 
 def _expected(dense_scores, dense_matches, k, min_score):
-    n_queries, n_references = dense_scores.shape
+    n_queries, _ = dense_scores.shape
     ids = np.full((n_queries, k), -1, dtype=np.int64)
     vals = np.zeros((n_queries, k), dtype=dense_scores.dtype)
     matches = np.zeros((n_queries, k), dtype=np.int32)

@@ -17,7 +17,6 @@ from numba import njit
 from ._flash_entropy import xlog2
 from ._flash_tolerance import identity_allowed, window, within
 from ._flash_topk_common import (
-    _MAX_EPOCH,
     _FlashTopKWorkspace,
     _register_touched,
 )
