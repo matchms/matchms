@@ -18,16 +18,18 @@ searches are the priority and the separation requirement is acceptable.
 from __future__ import annotations
 import math
 import os
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from itertools import pairwise
 from pathlib import Path
+from threading import local
 from typing import Any
 import numpy as np
 from numba import njit
 from tqdm.auto import tqdm
 from matchms.scores import Scores
-from ._topk import resolve_batch_size, select_topk_row, validate_topk_parameters
+from ._entropy_search_topk import _score_topk_block, _TopKWorkspace
+from ._topk import validate_topk_parameters
 from .base_similarity import BaseSimilarity
 from .default_parameters import (
     DEFAULT_MZ_TOLERANCE,
@@ -487,6 +489,12 @@ class EntropySearch(BaseSimilarity):
             n_jobs=1,
         )
 
+    Retrieve only the highest-scoring matches without constructing a dense
+    query-by-library score matrix::
+
+        hits = similarity.search_topk(query_spectra, library_index, k=100)
+        reference_ids, similarity_scores = hits.get_hits(0)
+
     If the input spectra are known to satisfy the separation requirement, use
     ``peak_separation="raise"`` to validate rather than modify them::
 
@@ -835,8 +843,8 @@ class EntropySearch(BaseSimilarity):
     ) -> None:
         """Score into caller-owned, zero-initialized query-by-library rows.
 
-        Shared by dense search and batched top-k search. Using the same Numba
-        and vectorized kernels preserves the exact existing scoring semantics.
+        This is the original dense scoring path; top-k search instead uses
+        candidate-aware accumulation in ``_entropy_search_topk``.
         The caller owns all buffers; distinct threads write disjoint rows.
         """
         if not scores.size or not prepared.n_peaks or not view.mz.size:
@@ -904,22 +912,20 @@ class EntropySearch(BaseSimilarity):
         progress_bar: bool = True,
         n_jobs: int = 1,
     ) -> TopKResults:
-        """Prepare queries and return the highest-ranked library hits per query.
+        """Prepare queries and retrieve their exact highest-ranked library hits.
 
-        Unlike ``search``, this method never constructs a full query-by-library
-        output matrix. It scores small query batches with the unchanged dense
-        kernel, selects top-k from each row, then reuses the same temporary
-        buffer for subsequent batches. In this PR1 implementation, each *single*
-        query still scores and scans all reference spectra.
+        No dense query-by-library score matrix or row is ever created. Instead,
+        a worker accumulates complete scores for the library IDs reached through
+        inverted peak windows, selects the best ``k`` touched candidates, and
+        reuses its buffers for subsequent queries.
 
-        Only scores strictly greater than ``min_score`` are returned. Score ties
-        are broken by ascending library index. If fewer than ``k`` hits qualify,
-        missing hits have index -1 and score 0; see ``TopKResults.valid_counts``.
+        Only scores strictly greater than ``min_score`` qualify. Ties are broken
+        by ascending reference index; unused output slots contain (-1, 0).
 
-        With ``batch_size=None`` (default), a target of 64 MiB limits the dense
-        temporary score buffer, capped at 32 query rows. An explicit batch size
-        overrides this target. At least one full library-sized score row is
-        required in PR1, even if that row exceeds 64 MiB.
+        ``batch_size`` is preserved from PR1 but now controls the maximum number
+        of query rows per scheduling task, **not** a dense memory allocation.
+        When omitted, tasks are sized automatically for worker load balancing.
+        ``n_jobs`` controls concurrent, independently allocated workspaces.
         """
         self._check_index(library_index)
         validate_topk_parameters(k, min_score, batch_size)
@@ -945,11 +951,13 @@ class EntropySearch(BaseSimilarity):
         progress_bar: bool = False,
         n_jobs: int = 1,
     ) -> TopKResults:
-        """Exact top-k retrieval using already-prepared queries and an index.
+        """Exact, candidate-aware top-k retrieval from prepared query spectra.
 
-        The returned compact arrays have shape ``(n_queries, k)`` and refer to
-        library row positions, not peak indices. Index preparation and numerical
-        match/score behavior are identical to ``search_prepared``.
+        The returned arrays have shape ``(n_queries, k)`` and contain global
+        library spectrum positions, not peak indices. Each worker owns reusable
+        score/epoch arrays of length ``n_references`` and a geometrically grown
+        touched-ID vector; its scoring and selection do not scan all references.
+        The persisted FlashIndex format and dense search semantics are unchanged.
         """
         self._check_prepared(query_spectra)
         k, min_score, batch_size = validate_topk_parameters(k, min_score, batch_size)
@@ -961,29 +969,67 @@ class EntropySearch(BaseSimilarity):
         scores = np.zeros((n_queries, k), dtype=self.dtype)
         valid_counts = np.zeros(n_queries, dtype=np.intp)
 
-        if n_queries:
-            rows_per_batch = resolve_batch_size(
-                batch_size,
-                n_queries,
-                n_references,
-                self.dtype.itemsize,
+        if not n_queries or not query_spectra.n_peaks or not view.mz.size:
+            return TopKResults(indices, scores, valid_counts, n_references)
+
+        # Build the matching windows just once for the entire prepared batch.
+        # These arrays scale with the number of query peaks, not Q * N.
+        bounds = _query_windows(query_spectra.spec_mz, view.mz, self.tolerance, view.starts, view.origin, view.step)
+        cpu_count = getattr(os, "process_cpu_count", os.cpu_count)() or 1
+        workers = min(n_queries, cpu_count if n_jobs == -1 else int(n_jobs))
+        rows_per_task = batch_size if batch_size is not None else max(1, min(32, math.ceil(n_queries / (4 * workers))))
+
+        def run_rows(first: int, last: int, workspace: _TopKWorkspace) -> None:
+            _score_topk_block(
+                query_spectra,
+                view,
+                bounds,
+                workspace,
+                indices,
+                scores,
+                valid_counts,
+                first,
+                last,
+                k,
+                min_score,
+                _VECTOR_MIN_HITS,
+                _VECTOR_CHUNK_SIZE,
             )
-            buffer = np.zeros((rows_per_batch, n_references), dtype=self.dtype)
-            with tqdm(total=n_queries, desc="EntropySearch top-k", disable=not progress_bar) as progress:
-                for first in range(0, n_queries, rows_per_batch):
-                    last = min(first + rows_per_batch, n_queries)
-                    prepared_batch = query_spectra.slice(first, last)
-                    batch_scores = buffer[: last - first]
-                    batch_scores.fill(0.0)
-                    self._score_into(prepared_batch, view, batch_scores, progress_bar=False, n_jobs=n_jobs)
-                    for local_row, dense_row in enumerate(batch_scores):
-                        ids, values = select_topk_row(dense_row, k, min_score)
-                        n_hits = ids.size
-                        destination = first + local_row
-                        valid_counts[destination] = n_hits
-                        indices[destination, :n_hits] = ids
-                        scores[destination, :n_hits] = values
+
+        with tqdm(total=n_queries, desc="EntropySearch top-k", disable=not progress_bar) as progress:
+            # Run one real row on the calling thread to compile both Numba
+            # kernels and the vector scatter path before starting workers.
+            workspace = _TopKWorkspace(n_references, self.dtype)
+            run_rows(0, 1, workspace)
+            progress.update(1)
+            if workers == 1:
+                for first in range(1, n_queries, rows_per_task):
+                    last = min(first + rows_per_task, n_queries)
+                    run_rows(first, last, workspace)
                     progress.update(last - first)
+            elif n_queries > 1:
+                # Thread-local storage reuses the same worker buffers across
+                # scheduling tasks, including when batch_size is very small.
+                del workspace
+                worker_local = local()
+
+                def worker(first: int, last: int) -> None:
+                    state = getattr(worker_local, "workspace", None)
+                    if state is None:
+                        state = _TopKWorkspace(n_references, self.dtype)
+                        worker_local.workspace = state
+                    run_rows(first, last, state)
+
+                with ThreadPoolExecutor(max_workers=workers) as executor:
+                    futures = {
+                        executor.submit(worker, first, min(first + rows_per_task, n_queries)): min(
+                            rows_per_task, n_queries - first
+                        )
+                        for first in range(1, n_queries, rows_per_task)
+                    }
+                    for future in as_completed(futures):
+                        future.result()
+                        progress.update(futures[future])
 
         return TopKResults(indices, scores, valid_counts, n_references)
 
