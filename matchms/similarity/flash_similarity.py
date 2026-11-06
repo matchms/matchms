@@ -1,10 +1,12 @@
 """Indexed spectral similarities with collection-native preprocessing.
 
 A library index stores globally sorted peaks for tolerance-window lookups and
-spectrum-major arrays for normalization and peak identity. Searches return dense
-``Scores`` with query rows and library columns. Numerical kernels release the
+spectrum-major arrays for normalization and peak identity. Dense searches return
+``Scores`` with query rows and library columns. EntropyFlash additionally offers
+exact candidate-aware top-k retrieval without a dense output matrix. Numerical kernels release the
 GIL and can process disjoint query blocks using shared, read-only index arrays.
 """
+
 from __future__ import annotations
 import operator
 import os
@@ -12,13 +14,16 @@ from abc import abstractmethod
 from collections.abc import Callable, Sequence
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
+from threading import local
 import numpy as np
 from tqdm.auto import tqdm
 from matchms.scores import Scores
 from matchms.typing import SpectrumType
 from ._flash_cosine import cosine_rows
 from ._flash_entropy import entropy_rows
+from ._flash_entropy_topk import _EntropyTopKWorkspace, _score_entropy_topk_block
 from ._flash_prepared import PreparedSpectra, empty_prepared, pack_native
+from ._topk import validate_topk_parameters
 from .base_similarity import BaseSimilarity
 from .default_parameters import (
     DEFAULT_DTYPE,
@@ -29,6 +34,7 @@ from .default_parameters import (
 )
 from .flash_index import FlashIndex, config_from_settings
 from .flash_index import build_index as _build_index
+from .topk_results import TopKResults
 
 
 _MATCHING_MODES = {"fragment": 0, "neutral_loss": 1, "hybrid": 2}
@@ -86,20 +92,14 @@ def _run_rows(
         if n_queries == 1:
             return
         block_size = max(1, (n_queries - 1 + 4 * workers - 1) // (4 * workers))
-        blocks = [
-            (start, min(start + block_size, n_queries))
-            for start in range(1, n_queries, block_size)
-        ]
+        blocks = [(start, min(start + block_size, n_queries)) for start in range(1, n_queries, block_size)]
         if workers == 1:
             for start, stop in blocks:
                 run(start, stop)
                 progress.update(stop - start)
         else:
             with ThreadPoolExecutor(max_workers=workers) as pool:
-                futures = {
-                    pool.submit(run, start, stop): stop - start
-                    for start, stop in blocks
-                }
+                futures = {pool.submit(run, start, stop): stop - start for start, stop in blocks}
                 for future in as_completed(futures):
                     future.result()
                     progress.update(futures[future])
@@ -189,15 +189,14 @@ class _BaseFlashSimilarity(BaseSimilarity):
         self.offset_to_precursor = float(offset_to_precursor)
         if not np.isfinite(self.offset_to_precursor):
             raise ValueError("offset_to_precursor must be finite.")
-        self.noise_cutoff = (
-            None if noise_cutoff is None else _nonnegative(noise_cutoff, "noise_cutoff")
-        )
+        self.noise_cutoff = None if noise_cutoff is None else _nonnegative(noise_cutoff, "noise_cutoff")
         if self.noise_cutoff is not None and self.noise_cutoff > 1:
             raise ValueError("noise_cutoff must be <= 1.")
         self.normalize_to_half = bool(normalize_to_half)
         self.merge_within = _nonnegative(merge_within, "merge_within")
         self.identity_precursor_tolerance = (
-            None if identity_precursor_tolerance is None
+            None
+            if identity_precursor_tolerance is None
             else _nonnegative(identity_precursor_tolerance, "identity_precursor_tolerance")
         )
         self.identity_use_ppm = bool(identity_use_ppm)
@@ -212,15 +211,23 @@ class _BaseFlashSimilarity(BaseSimilarity):
             raise ValueError("dtype must be float32 or float64.")
         self.score_datatype = (
             np.dtype([("score", self.dtype), ("matches", np.int32)])
-            if self.score_fields == ("score", "matches") else self.dtype
+            if self.score_fields == ("score", "matches")
+            else self.dtype
         )
 
     def to_dict(self) -> dict:
         """Return JSON-compatible constructor parameters, excluding runtime state."""
         names = (
-            "matching_mode", "tolerance", "use_ppm", "intensity_power",
-            "remove_precursor", "offset_to_precursor", "noise_cutoff",
-            "normalize_to_half", "merge_within", "identity_precursor_tolerance",
+            "matching_mode",
+            "tolerance",
+            "use_ppm",
+            "intensity_power",
+            "remove_precursor",
+            "offset_to_precursor",
+            "noise_cutoff",
+            "normalize_to_half",
+            "merge_within",
+            "identity_precursor_tolerance",
             "identity_use_ppm",
         )
         return {
@@ -298,13 +305,19 @@ class _BaseFlashSimilarity(BaseSimilarity):
         return self.build_index_prepared(self.prepare_queries(spectra), metadata=metadata)
 
     def build_index_prepared(
-        self, prepared: PreparedSpectra, *, metadata: dict | None = None,
+        self,
+        prepared: PreparedSpectra,
+        *,
+        metadata: dict | None = None,
     ) -> FlashIndex:
         """Build an index from compatible packed peaks without reprocessing them."""
         self._check_prepared(prepared)
 
         return _build_index(
-            prepared, self.matching_mode, self._weighing_type, metadata=metadata,
+            prepared,
+            self.matching_mode,
+            self._weighing_type,
+            metadata=metadata,
         )
 
     def _check_prepared(self, prepared: PreparedSpectra) -> None:
@@ -315,9 +328,7 @@ class _BaseFlashSimilarity(BaseSimilarity):
     def _check_index(self, library_index: FlashIndex) -> None:
         """Validate preprocessing settings and the required index capabilities."""
         if not isinstance(library_index, FlashIndex):
-            raise TypeError(
-                "library_index must be a FlashIndex; use search(query_spectra, library_index)."
-            )
+            raise TypeError("library_index must be a FlashIndex; use search(query_spectra, library_index).")
         expected = config_from_settings(self._settings())
         actual = dict(library_index.config)
         if "merge_within" not in actual and "merge_within_da" in actual:
@@ -325,14 +336,12 @@ class _BaseFlashSimilarity(BaseSimilarity):
         actual["dtype"] = library_index.dtype.str
         if "noise_cutoff" in actual:
             actual["noise_cutoff"] = actual["noise_cutoff"] or 0.0
-        different = [
-            name for name, value in expected.items()
-            if name not in actual or actual[name] != value
-        ]
+        different = [name for name, value in expected.items() if name not in actual or actual[name] != value]
         if different:
             raise ValueError(
                 "FlashIndex preprocessing configuration differs for: "
-                + ", ".join(different) + ". Rebuild with matching preprocessing."
+                + ", ".join(different)
+                + ". Rebuild with matching preprocessing."
             )
         if self.matching_mode != "fragment" and not library_index.has_neutral_loss_index:
             raise ValueError(
@@ -378,8 +387,11 @@ class _BaseFlashSimilarity(BaseSimilarity):
         self._resolve_score_fields(score_fields)
 
         return self.search_prepared(
-            self.prepare_queries(query_spectra), library_index,
-            score_fields=score_fields, progress_bar=progress_bar, n_jobs=n_jobs,
+            self.prepare_queries(query_spectra),
+            library_index,
+            score_fields=score_fields,
+            progress_bar=progress_bar,
+            n_jobs=n_jobs,
         )
 
     def search_prepared(
@@ -460,8 +472,11 @@ class _BaseFlashSimilarity(BaseSimilarity):
             first, second, transpose = self._optimize_matrix_orientation(first, second, is_symmetric)
         index = self.build_index_prepared(second)
         scores = self.search_prepared(
-            first, index, score_fields=score_fields,
-            progress_bar=progress_bar, n_jobs=n_jobs,
+            first,
+            index,
+            score_fields=score_fields,
+            progress_bar=progress_bar,
+            n_jobs=n_jobs,
         )
         if transpose:
             return Scores({field: array.T for field, array in scores._data.items()})
@@ -482,7 +497,11 @@ class _BaseFlashSimilarity(BaseSimilarity):
         )
 
     def save_index(
-        self, index: FlashIndex, filename: str | Path, *, overwrite: bool = True,
+        self,
+        index: FlashIndex,
+        filename: str | Path,
+        *,
+        overwrite: bool = True,
     ) -> None:
         """Save an index after checking preparation settings and capabilities."""
         self._check_index(index)
@@ -535,12 +554,28 @@ class CosineFlash(_BaseFlashSimilarity):
         def run(start, stop):
             """Fill an independent query-row block."""
             cosine_rows(
-                scores, counts, queries.spec_offsets, queries.spec_mz, queries.spec_int,
-                queries.precursor_mz, queries.spec_l2,
-                library.peaks_mz, library.peaks_int, library.peaks_spec_idx,
-                library.nl_mz, library.nl_spec_idx, library.nl_product_idx,
-                library.precursor_mz, library.spec_l2,
-                self.tolerance, self.use_ppm, mode, gate, self.identity_use_ppm, start, stop,
+                scores,
+                counts,
+                queries.spec_offsets,
+                queries.spec_mz,
+                queries.spec_int,
+                queries.precursor_mz,
+                queries.spec_l2,
+                library.peaks_mz,
+                library.peaks_int,
+                library.peaks_spec_idx,
+                library.nl_mz,
+                library.nl_spec_idx,
+                library.nl_product_idx,
+                library.precursor_mz,
+                library.spec_l2,
+                self.tolerance,
+                self.use_ppm,
+                mode,
+                gate,
+                self.identity_use_ppm,
+                start,
+                stop,
             )
 
         _run_rows(run, queries.n_specs, n_jobs, progress_bar, f"{type(self).__name__} ({self.matching_mode})")
@@ -567,6 +602,9 @@ class EntropyFlash(_BaseFlashSimilarity):
 
     This implementation was insipred by Flash entropy similarity (Li & Fiehn, 2023).
 
+    Use ``search_topk`` or ``search_prepared_topk`` to retrieve only the best
+    references without creating a dense score matrix.
+
     See :class:`_BaseFlashSimilarity` for preparation and search parameters.
     """
 
@@ -590,12 +628,18 @@ class EntropyFlash(_BaseFlashSimilarity):
         dtype: np.dtype = DEFAULT_DTYPE,
     ):
         super().__init__(
-            matching_mode=matching_mode, tolerance=tolerance, use_ppm=use_ppm,
-            intensity_power=intensity_power, remove_precursor=remove_precursor,
-            offset_to_precursor=offset_to_precursor, noise_cutoff=noise_cutoff,
-            normalize_to_half=normalize_to_half, merge_within=merge_within,
+            matching_mode=matching_mode,
+            tolerance=tolerance,
+            use_ppm=use_ppm,
+            intensity_power=intensity_power,
+            remove_precursor=remove_precursor,
+            offset_to_precursor=offset_to_precursor,
+            noise_cutoff=noise_cutoff,
+            normalize_to_half=normalize_to_half,
+            merge_within=merge_within,
             identity_precursor_tolerance=identity_precursor_tolerance,
-            identity_use_ppm=identity_use_ppm, dtype=dtype,
+            identity_use_ppm=identity_use_ppm,
+            dtype=dtype,
         )
 
     def _score_prepared(self, queries, library_index, fields, progress_bar, n_jobs) -> Scores:
@@ -608,11 +652,162 @@ class EntropyFlash(_BaseFlashSimilarity):
         def run(start, stop):
             """Fill an independent query-row block."""
             entropy_rows(
-                scores, queries.spec_offsets, queries.spec_mz, queries.spec_int,
-                queries.precursor_mz, library.fragment, library.neutral_loss,
-                library.precursor_mz, library.n_peaks,
-                self.tolerance, self.use_ppm, mode, gate, self.identity_use_ppm, start, stop,
+                scores,
+                queries.spec_offsets,
+                queries.spec_mz,
+                queries.spec_int,
+                queries.precursor_mz,
+                library.fragment,
+                library.neutral_loss,
+                library.precursor_mz,
+                library.n_peaks,
+                self.tolerance,
+                self.use_ppm,
+                mode,
+                gate,
+                self.identity_use_ppm,
+                start,
+                stop,
             )
 
         _run_rows(run, queries.n_specs, n_jobs, progress_bar, f"{type(self).__name__} ({self.matching_mode})")
         return Scores({"score": scores})
+
+    def search_topk(
+        self,
+        query_spectra: Sequence[SpectrumType],
+        library_index: FlashIndex,
+        *,
+        k: int = 100,
+        min_score: float = 0.0,
+        batch_size: int | None = None,
+        progress_bar: bool = True,
+        n_jobs: int = 1,
+    ) -> TopKResults:
+        """Return exact top-k ranked references without a dense score matrix.
+
+        Supports fragment, neutral-loss, and hybrid matching, including ppm
+        tolerance and the optional precursor-identity gate. Only scores strictly
+        greater than ``min_score`` are returned, ranked descending by score and
+        ascending by reference index for ties. Library IDs refer to the
+        original persisted index order. ``batch_size`` controls thread task
+        scheduling; no dense score batches are allocated.
+
+        Each worker owns O(n_references) scoring/cursor arrays; hybrid also
+        allocates compact peak-use bitsets. The default single worker limits
+        memory on large libraries; use ``n_jobs`` to trade memory for speed.
+        """
+        self._check_index(library_index)
+        validate_topk_parameters(k, min_score, batch_size)
+        _worker_count(n_jobs, 1)  # Validate even if the prepared queries are empty.
+        return self.search_prepared_topk(
+            self.prepare_queries(query_spectra),
+            library_index,
+            k=k,
+            min_score=min_score,
+            batch_size=batch_size,
+            progress_bar=progress_bar,
+            n_jobs=n_jobs,
+        )
+
+    def search_prepared_topk(
+        self,
+        query_spectra: PreparedSpectra,
+        library_index: FlashIndex,
+        *,
+        k: int = 100,
+        min_score: float = 0.0,
+        batch_size: int | None = None,
+        progress_bar: bool = False,
+        n_jobs: int = 1,
+    ) -> TopKResults:
+        """Retrieve exact top-k hits from previously prepared query spectra.
+
+        Uses the unchanged FlashIndex format and the same ordered one-to-one
+        matching rules as ``search_prepared``. The ranking considers only
+        library spectra whose peaks were actually matched; complete float64
+        scores are cast to the public dtype before comparison and selection.
+        """
+        self._check_index(library_index)
+        self._check_prepared(query_spectra)
+        k, min_score, batch_size = validate_topk_parameters(k, min_score, batch_size)
+        workers = _worker_count(n_jobs, query_spectra.n_specs)
+        n_queries, n_references = query_spectra.n_specs, library_index.n_specs
+        id_dtype = np.int32 if n_references <= np.iinfo(np.int32).max else np.int64
+        indices = np.full((n_queries, k), -1, dtype=id_dtype)
+        scores = np.zeros((n_queries, k), dtype=self.dtype)
+        valid_counts = np.zeros(n_queries, dtype=np.intp)
+        if n_queries == 0 or n_references == 0 or query_spectra.n_peaks == 0:
+            return TopKResults(indices, scores, valid_counts, n_references)
+
+        library = library_index.entropy_data()
+        if library.n_peaks == 0:
+            return TopKResults(indices, scores, valid_counts, n_references)
+        mode = _MATCHING_MODES[self.matching_mode]
+        gate = -1.0 if self.identity_precursor_tolerance is None else self.identity_precursor_tolerance
+        task_size = (
+            batch_size if batch_size is not None else max(1, min(32, (n_queries + 4 * workers - 1) // (4 * workers)))
+        )
+
+        def new_workspace() -> _EntropyTopKWorkspace:
+            return _EntropyTopKWorkspace(
+                n_references,
+                library.n_peaks,
+                self.dtype,
+                mode == 2,
+            )
+
+        def run(first: int, last: int, state: _EntropyTopKWorkspace) -> None:
+            _score_entropy_topk_block(
+                query_spectra,
+                library,
+                state,
+                indices,
+                scores,
+                valid_counts,
+                first,
+                last,
+                k,
+                min_score,
+                mode,
+                self.tolerance,
+                self.use_ppm,
+                gate,
+                self.identity_use_ppm,
+            )
+
+        with tqdm(
+            total=n_queries, desc=f"{type(self).__name__} top-k ({self.matching_mode})", disable=not progress_bar
+        ) as progress:
+            # A real query primes Numba before threads start compiling kernels.
+            state = new_workspace()
+            run(0, 1, state)
+            progress.update(1)
+            if workers == 1:
+                for first in range(1, n_queries, task_size):
+                    last = min(first + task_size, n_queries)
+                    run(first, last, state)
+                    progress.update(last - first)
+            elif n_queries > 1:
+                # Reuse state per thread, not per submitted task. The first
+                # temporary workspace is released before worker allocation.
+                del state
+                worker_local = local()
+
+                def worker(first: int, last: int) -> None:
+                    state = getattr(worker_local, "state", None)
+                    if state is None:
+                        state = new_workspace()
+                        worker_local.state = state
+                    run(first, last, state)
+
+                with ThreadPoolExecutor(max_workers=workers) as pool:
+                    futures = {
+                        pool.submit(worker, first, min(first + task_size, n_queries)): min(task_size, n_queries - first)
+                        for first in range(1, n_queries, task_size)
+                    }
+                    for future in as_completed(futures):
+                        future.result()
+                        progress.update(futures[future])
+
+        return TopKResults(indices, scores, valid_counts, n_references)
