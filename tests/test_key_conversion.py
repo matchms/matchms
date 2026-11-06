@@ -1,5 +1,5 @@
 import pytest
-from .builder_Spectrum import SpectrumBuilder
+from .builder_spectrum import SpectrumBuilder
 
 
 @pytest.mark.parametrize("input_dict, expected, export_style", [

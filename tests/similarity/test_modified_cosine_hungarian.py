@@ -3,7 +3,7 @@ import pytest
 from matchms import Spectrum
 from matchms.filtering import normalize_intensities
 from matchms.similarity import CosineHungarian, ModifiedCosineGreedy, ModifiedCosineHungarian
-from ..builder_Spectrum import SpectrumBuilder
+from ..builder_spectrum import SpectrumBuilder
 
 
 # ruff: noqa: E501
@@ -72,9 +72,9 @@ def test_modified_cosine_hungarian_with_mass_shift(peaks, tolerance, masses, exp
     norm_spectrum_1 = normalize_intensities(spectrum_1)
     norm_spectrum_2 = normalize_intensities(spectrum_2)
     if tolerance is None:
-        modified_cosine = ModifiedCosineHungarian()
+        modified_cosine = ModifiedCosineHungarian(remove_precursor=False, noise_cutoff=None)  # Do not remove precursor peaks for this test
     else:
-        modified_cosine = ModifiedCosineHungarian(tolerance=tolerance)
+        modified_cosine = ModifiedCosineHungarian(tolerance=tolerance, remove_precursor=False, noise_cutoff=None)
 
     score = modified_cosine.pair(norm_spectrum_1, norm_spectrum_2)
     expected_score = compute_expected_score(norm_spectrum_1, norm_spectrum_2, expected_matches)
@@ -94,7 +94,7 @@ def test_modified_cosine_hungarian_order_of_input_spectra():
 
     norm_spectrum_1 = normalize_intensities(spectrum_1)
     norm_spectrum_2 = normalize_intensities(spectrum_2)
-    modified_cosine = ModifiedCosineHungarian(tolerance=2.0)
+    modified_cosine = ModifiedCosineHungarian(tolerance=2.0, remove_precursor=False, noise_cutoff=None)
     score_1_2 = modified_cosine.pair(norm_spectrum_1, norm_spectrum_2)
     score_2_1 = modified_cosine.pair(norm_spectrum_2, norm_spectrum_1)
 
@@ -114,7 +114,7 @@ def test_modified_cosine_hungarian_precursor_mz_as_invalid_string():
 
     norm_spectrum_1 = normalize_intensities(spectrum_1)
     norm_spectrum_2 = normalize_intensities(spectrum_2)
-    modified_cosine = ModifiedCosineHungarian(tolerance=1.0)
+    modified_cosine = ModifiedCosineHungarian(tolerance=1.0, remove_precursor=False, noise_cutoff=None)
     with pytest.raises(AssertionError) as msg:
         _ = modified_cosine.pair(norm_spectrum_1, norm_spectrum_2)
 
@@ -136,7 +136,7 @@ def test_modified_cosine_hungarian_precursor_mz_as_string(caplog):
 
     norm_spectrum_1 = normalize_intensities(spectrum_1)
     norm_spectrum_2 = normalize_intensities(spectrum_2)
-    modified_cosine = ModifiedCosineHungarian(tolerance=1.0)
+    modified_cosine = ModifiedCosineHungarian(tolerance=1.0, remove_precursor=False, noise_cutoff=None)
     score = modified_cosine.pair(norm_spectrum_1, norm_spectrum_2)
 
     assert score["score"] == pytest.approx(0.0, 1e-5), "Expected different modified cosine score."
@@ -155,7 +155,7 @@ def test_modified_cosine_hungarian_reduces_to_cosine_hungarian_for_zero_shift():
                           intensities=np.array([0.9, 1.0], dtype="float"),
                           metadata={"precursor_mz": 500.0})
 
-    modified_cosine_hungarian = ModifiedCosineHungarian(tolerance=0.01)
+    modified_cosine_hungarian = ModifiedCosineHungarian(tolerance=0.01, remove_precursor=False, noise_cutoff=None)
     cosine_hungarian = CosineHungarian(tolerance=0.01)
 
     modified_score = modified_cosine_hungarian.pair(spectrum_1, spectrum_2)
@@ -199,8 +199,12 @@ def test_modified_cosine_hungarian_matches_cosine_hungarian_when_precursor_delta
         metadata={"precursor_mz": query_precursor_mz},
     )
 
-    modified_score = ModifiedCosineHungarian(tolerance=tolerance).pair(reference, query)
-    cosine_score = CosineHungarian(tolerance=tolerance).pair(reference, query)
+    modified_score = ModifiedCosineHungarian(
+        tolerance=tolerance, remove_precursor=False, noise_cutoff=None
+    ).pair(reference, query)
+    cosine_score = CosineHungarian(
+        tolerance=tolerance, remove_precursor=False, noise_cutoff=None
+    ).pair(reference, query)
 
     assert modified_score["score"] == pytest.approx(cosine_score["score"], abs=1e-12)
     assert modified_score["matches"] == cosine_score["matches"]
@@ -220,8 +224,10 @@ def test_modified_cosine_hungarian_matches_cosine_hungarian_for_negative_boundar
         metadata={"precursor_mz": 500.0},
     )
 
-    modified_score = ModifiedCosineHungarian(tolerance=tolerance).pair(reference, query)
-    cosine_score = CosineHungarian(tolerance=tolerance).pair(reference, query)
+    modified_score = ModifiedCosineHungarian(
+        tolerance=tolerance, remove_precursor=False, noise_cutoff=None).pair(reference, query)
+    cosine_score = CosineHungarian(
+        tolerance=tolerance, remove_precursor=False, noise_cutoff=None).pair(reference, query)
 
     assert modified_score["score"] == pytest.approx(cosine_score["score"], abs=1e-12)
     assert modified_score["matches"] == cosine_score["matches"]

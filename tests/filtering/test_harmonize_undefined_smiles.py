@@ -1,6 +1,6 @@
 import pytest
 from matchms.filtering import harmonize_undefined_smiles
-from ..builder_Spectrum import SpectrumBuilder
+from ..builder_spectrum import SpectrumBuilder
 
 
 @pytest.mark.parametrize(

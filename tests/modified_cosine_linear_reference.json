@@ -1,0 +1,4968 @@
+{
+  "description": "ModifiedLinearCosine scores after SiriusMergeClosePeaks, minted from the mass_spectrometry crate at git fd34469.",
+  "parameter_sets": [
+    {
+      "intensity_power": 1.0,
+      "mz_power": 0.0,
+      "mz_tolerance": 0.1,
+      "similarities": [
+        {
+          "left": "aspirin",
+          "matches": 27,
+          "right": "aspirin",
+          "score": 1.0
+        },
+        {
+          "left": "aspirin",
+          "matches": 2,
+          "right": "cocaine",
+          "score": 0.002456543407211956
+        },
+        {
+          "left": "aspirin",
+          "matches": 3,
+          "right": "glucose",
+          "score": 0.23667464513674816
+        },
+        {
+          "left": "aspirin",
+          "matches": 14,
+          "right": "hydroxy_cholesterol",
+          "score": 0.4367908452847611
+        },
+        {
+          "left": "aspirin",
+          "matches": 4,
+          "right": "phenylalanine",
+          "score": 0.038217743130345774
+        },
+        {
+          "left": "aspirin",
+          "matches": 2,
+          "right": "salicin",
+          "score": 0.0016846507521528146
+        },
+        {
+          "left": "aspirin",
+          "matches": 27,
+          "right": "aspirin_ch2",
+          "score": 0.9980880365641426
+        },
+        {
+          "left": "aspirin",
+          "matches": 2,
+          "right": "cocaine_ch2",
+          "score": 0.0026671663899956923
+        },
+        {
+          "left": "aspirin",
+          "matches": 3,
+          "right": "glucose_ch2",
+          "score": 0.2658791799436799
+        },
+        {
+          "left": "aspirin",
+          "matches": 14,
+          "right": "hydroxy_cholesterol_ch2",
+          "score": 0.436669932685065
+        },
+        {
+          "left": "aspirin",
+          "matches": 3,
+          "right": "phenylalanine_ch2",
+          "score": 0.016641638689027245
+        },
+        {
+          "left": "aspirin",
+          "matches": 2,
+          "right": "salicin_ch2",
+          "score": 0.0014698032746120735
+        },
+        {
+          "left": "aspirin",
+          "matches": 27,
+          "right": "aspirin_shift_005",
+          "score": 1.0
+        },
+        {
+          "left": "aspirin",
+          "matches": 27,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 1.0
+        },
+        {
+          "left": "aspirin",
+          "matches": 27,
+          "right": "aspirin_shift_030",
+          "score": 1.0
+        },
+        {
+          "left": "aspirin",
+          "matches": 0,
+          "right": "ladder_a",
+          "score": 0.0
+        },
+        {
+          "left": "aspirin",
+          "matches": 0,
+          "right": "ladder_b",
+          "score": 0.0
+        },
+        {
+          "left": "cocaine",
+          "matches": 9,
+          "right": "cocaine",
+          "score": 0.9999999999999999
+        },
+        {
+          "left": "cocaine",
+          "matches": 0,
+          "right": "glucose",
+          "score": 0.0
+        },
+        {
+          "left": "cocaine",
+          "matches": 3,
+          "right": "hydroxy_cholesterol",
+          "score": 0.017526287755408092
+        },
+        {
+          "left": "cocaine",
+          "matches": 0,
+          "right": "phenylalanine",
+          "score": 0.0
+        },
+        {
+          "left": "cocaine",
+          "matches": 1,
+          "right": "salicin",
+          "score": 0.30256219361859676
+        },
+        {
+          "left": "cocaine",
+          "matches": 3,
+          "right": "aspirin_ch2",
+          "score": 0.002066613245879172
+        },
+        {
+          "left": "cocaine",
+          "matches": 9,
+          "right": "cocaine_ch2",
+          "score": 0.9999336394421551
+        },
+        {
+          "left": "cocaine",
+          "matches": 0,
+          "right": "glucose_ch2",
+          "score": 0.0
+        },
+        {
+          "left": "cocaine",
+          "matches": 2,
+          "right": "hydroxy_cholesterol_ch2",
+          "score": 0.013424384007662191
+        },
+        {
+          "left": "cocaine",
+          "matches": 1,
+          "right": "phenylalanine_ch2",
+          "score": 8.040539210350912e-7
+        },
+        {
+          "left": "cocaine",
+          "matches": 1,
+          "right": "salicin_ch2",
+          "score": 0.26261610312998507
+        },
+        {
+          "left": "cocaine",
+          "matches": 2,
+          "right": "aspirin_shift_005",
+          "score": 0.002456543407211956
+        },
+        {
+          "left": "cocaine",
+          "matches": 2,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 0.002456543407211956
+        },
+        {
+          "left": "cocaine",
+          "matches": 1,
+          "right": "aspirin_shift_030",
+          "score": 0.0008961988263779795
+        },
+        {
+          "left": "cocaine",
+          "matches": 0,
+          "right": "ladder_a",
+          "score": 0.0
+        },
+        {
+          "left": "cocaine",
+          "matches": 0,
+          "right": "ladder_b",
+          "score": 0.0
+        },
+        {
+          "left": "glucose",
+          "matches": 14,
+          "right": "glucose",
+          "score": 1.0
+        },
+        {
+          "left": "glucose",
+          "matches": 8,
+          "right": "hydroxy_cholesterol",
+          "score": 0.011152865111782895
+        },
+        {
+          "left": "glucose",
+          "matches": 3,
+          "right": "phenylalanine",
+          "score": 0.00013679004217621271
+        },
+        {
+          "left": "glucose",
+          "matches": 0,
+          "right": "salicin",
+          "score": 0.0
+        },
+        {
+          "left": "glucose",
+          "matches": 2,
+          "right": "aspirin_ch2",
+          "score": 0.2334586132684988
+        },
+        {
+          "left": "glucose",
+          "matches": 0,
+          "right": "cocaine_ch2",
+          "score": 0.0
+        },
+        {
+          "left": "glucose",
+          "matches": 14,
+          "right": "glucose_ch2",
+          "score": 0.9955757792413543
+        },
+        {
+          "left": "glucose",
+          "matches": 8,
+          "right": "hydroxy_cholesterol_ch2",
+          "score": 0.010881072449049156
+        },
+        {
+          "left": "glucose",
+          "matches": 1,
+          "right": "phenylalanine_ch2",
+          "score": 0.000010896966817084638
+        },
+        {
+          "left": "glucose",
+          "matches": 0,
+          "right": "salicin_ch2",
+          "score": 0.0
+        },
+        {
+          "left": "glucose",
+          "matches": 1,
+          "right": "aspirin_shift_005",
+          "score": 0.004400836755772637
+        },
+        {
+          "left": "glucose",
+          "matches": 0,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 0.0
+        },
+        {
+          "left": "glucose",
+          "matches": 2,
+          "right": "aspirin_shift_030",
+          "score": 0.004642229185825697
+        },
+        {
+          "left": "glucose",
+          "matches": 0,
+          "right": "ladder_a",
+          "score": 0.0
+        },
+        {
+          "left": "glucose",
+          "matches": 0,
+          "right": "ladder_b",
+          "score": 0.0
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 131,
+          "right": "hydroxy_cholesterol",
+          "score": 0.9999999999999998
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 7,
+          "right": "phenylalanine",
+          "score": 0.00706359545936382
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 4,
+          "right": "salicin",
+          "score": 0.018647310888727047
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 17,
+          "right": "aspirin_ch2",
+          "score": 0.4887450335041501
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 2,
+          "right": "cocaine_ch2",
+          "score": 0.016853971541405614
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 8,
+          "right": "glucose_ch2",
+          "score": 0.012755833247013845
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 131,
+          "right": "hydroxy_cholesterol_ch2",
+          "score": 0.9998871596524057
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 8,
+          "right": "phenylalanine_ch2",
+          "score": 0.007174572616430644
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 5,
+          "right": "salicin_ch2",
+          "score": 0.01699210298330739
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 15,
+          "right": "aspirin_shift_005",
+          "score": 0.43708941432896176
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 16,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 0.4378941820645991
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 9,
+          "right": "aspirin_shift_030",
+          "score": 0.0024892774575176703
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 1,
+          "right": "ladder_a",
+          "score": 0.00012927328986116668
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 1,
+          "right": "ladder_b",
+          "score": 0.00007360443331211893
+        },
+        {
+          "left": "phenylalanine",
+          "matches": 23,
+          "right": "phenylalanine",
+          "score": 1.0
+        },
+        {
+          "left": "phenylalanine",
+          "matches": 1,
+          "right": "salicin",
+          "score": 4.640873394762494e-6
+        },
+        {
+          "left": "phenylalanine",
+          "matches": 4,
+          "right": "aspirin_ch2",
+          "score": 0.00943475375243067
+        },
+        {
+          "left": "phenylalanine",
+          "matches": 0,
+          "right": "cocaine_ch2",
+          "score": 0.0
+        },
+        {
+          "left": "phenylalanine",
+          "matches": 2,
+          "right": "glucose_ch2",
+          "score": 0.000977419259414888
+        },
+        {
+          "left": "phenylalanine",
+          "matches": 7,
+          "right": "hydroxy_cholesterol_ch2",
+          "score": 0.0070773438942967875
+        },
+        {
+          "left": "phenylalanine",
+          "matches": 23,
+          "right": "phenylalanine_ch2",
+          "score": 0.9999849967456288
+        },
+        {
+          "left": "phenylalanine",
+          "matches": 1,
+          "right": "salicin_ch2",
+          "score": 4.919967790029213e-6
+        },
+        {
+          "left": "phenylalanine",
+          "matches": 4,
+          "right": "aspirin_shift_005",
+          "score": 0.038217743130345774
+        },
+        {
+          "left": "phenylalanine",
+          "matches": 4,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 0.038205037395861556
+        },
+        {
+          "left": "phenylalanine",
+          "matches": 3,
+          "right": "aspirin_shift_030",
+          "score": 0.035365120479775976
+        },
+        {
+          "left": "phenylalanine",
+          "matches": 1,
+          "right": "ladder_a",
+          "score": 0.000012462310223652668
+        },
+        {
+          "left": "phenylalanine",
+          "matches": 1,
+          "right": "ladder_b",
+          "score": 3.614405471866214e-6
+        },
+        {
+          "left": "salicin",
+          "matches": 21,
+          "right": "salicin",
+          "score": 1.0
+        },
+        {
+          "left": "salicin",
+          "matches": 3,
+          "right": "aspirin_ch2",
+          "score": 0.01768923649811004
+        },
+        {
+          "left": "salicin",
+          "matches": 2,
+          "right": "cocaine_ch2",
+          "score": 0.3078354201727005
+        },
+        {
+          "left": "salicin",
+          "matches": 0,
+          "right": "glucose_ch2",
+          "score": 0.0
+        },
+        {
+          "left": "salicin",
+          "matches": 3,
+          "right": "hydroxy_cholesterol_ch2",
+          "score": 0.015511262978614942
+        },
+        {
+          "left": "salicin",
+          "matches": 1,
+          "right": "phenylalanine_ch2",
+          "score": 9.01043310655157e-6
+        },
+        {
+          "left": "salicin",
+          "matches": 21,
+          "right": "salicin_ch2",
+          "score": 0.995684617166915
+        },
+        {
+          "left": "salicin",
+          "matches": 2,
+          "right": "aspirin_shift_005",
+          "score": 0.0016846507521528146
+        },
+        {
+          "left": "salicin",
+          "matches": 2,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 0.0030894868057079763
+        },
+        {
+          "left": "salicin",
+          "matches": 1,
+          "right": "aspirin_shift_030",
+          "score": 0.00006266239314259699
+        },
+        {
+          "left": "salicin",
+          "matches": 0,
+          "right": "ladder_a",
+          "score": 0.0
+        },
+        {
+          "left": "salicin",
+          "matches": 0,
+          "right": "ladder_b",
+          "score": 0.0
+        },
+        {
+          "left": "aspirin_ch2",
+          "matches": 27,
+          "right": "aspirin_ch2",
+          "score": 1.0
+        },
+        {
+          "left": "aspirin_ch2",
+          "matches": 3,
+          "right": "cocaine_ch2",
+          "score": 0.0021924449818730113
+        },
+        {
+          "left": "aspirin_ch2",
+          "matches": 3,
+          "right": "glucose_ch2",
+          "score": 0.25179164853910846
+        },
+        {
+          "left": "aspirin_ch2",
+          "matches": 17,
+          "right": "hydroxy_cholesterol_ch2",
+          "score": 0.48851270258602847
+        },
+        {
+          "left": "aspirin_ch2",
+          "matches": 4,
+          "right": "phenylalanine_ch2",
+          "score": 0.03316816025291439
+        },
+        {
+          "left": "aspirin_ch2",
+          "matches": 3,
+          "right": "salicin_ch2",
+          "score": 0.020575642289531824
+        },
+        {
+          "left": "aspirin_ch2",
+          "matches": 27,
+          "right": "aspirin_shift_005",
+          "score": 0.9980880365641426
+        },
+        {
+          "left": "aspirin_ch2",
+          "matches": 27,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 0.9980880365641426
+        },
+        {
+          "left": "aspirin_ch2",
+          "matches": 16,
+          "right": "aspirin_shift_030",
+          "score": 0.5082959042751245
+        },
+        {
+          "left": "aspirin_ch2",
+          "matches": 0,
+          "right": "ladder_a",
+          "score": 0.0
+        },
+        {
+          "left": "aspirin_ch2",
+          "matches": 0,
+          "right": "ladder_b",
+          "score": 0.0
+        },
+        {
+          "left": "cocaine_ch2",
+          "matches": 9,
+          "right": "cocaine_ch2",
+          "score": 1.0
+        },
+        {
+          "left": "cocaine_ch2",
+          "matches": 0,
+          "right": "glucose_ch2",
+          "score": 0.0
+        },
+        {
+          "left": "cocaine_ch2",
+          "matches": 2,
+          "right": "hydroxy_cholesterol_ch2",
+          "score": 0.014356670361436443
+        },
+        {
+          "left": "cocaine_ch2",
+          "matches": 1,
+          "right": "phenylalanine_ch2",
+          "score": 1.0529359463337372e-6
+        },
+        {
+          "left": "cocaine_ch2",
+          "matches": 1,
+          "right": "salicin_ch2",
+          "score": 0.26657208134064403
+        },
+        {
+          "left": "cocaine_ch2",
+          "matches": 2,
+          "right": "aspirin_shift_005",
+          "score": 0.0026671663899956923
+        },
+        {
+          "left": "cocaine_ch2",
+          "matches": 2,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 0.0026671663899956923
+        },
+        {
+          "left": "cocaine_ch2",
+          "matches": 1,
+          "right": "aspirin_shift_030",
+          "score": 0.0010833171988604816
+        },
+        {
+          "left": "cocaine_ch2",
+          "matches": 0,
+          "right": "ladder_a",
+          "score": 0.0
+        },
+        {
+          "left": "cocaine_ch2",
+          "matches": 0,
+          "right": "ladder_b",
+          "score": 0.0
+        },
+        {
+          "left": "glucose_ch2",
+          "matches": 14,
+          "right": "glucose_ch2",
+          "score": 1.0
+        },
+        {
+          "left": "glucose_ch2",
+          "matches": 7,
+          "right": "hydroxy_cholesterol_ch2",
+          "score": 0.010373939844713014
+        },
+        {
+          "left": "glucose_ch2",
+          "matches": 3,
+          "right": "phenylalanine_ch2",
+          "score": 0.0001308325231731825
+        },
+        {
+          "left": "glucose_ch2",
+          "matches": 0,
+          "right": "salicin_ch2",
+          "score": 0.0
+        },
+        {
+          "left": "glucose_ch2",
+          "matches": 1,
+          "right": "aspirin_shift_005",
+          "score": 0.018520504026836068
+        },
+        {
+          "left": "glucose_ch2",
+          "matches": 1,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 0.018520504026836068
+        },
+        {
+          "left": "glucose_ch2",
+          "matches": 2,
+          "right": "aspirin_shift_030",
+          "score": 0.018728559213162643
+        },
+        {
+          "left": "glucose_ch2",
+          "matches": 0,
+          "right": "ladder_a",
+          "score": 0.0
+        },
+        {
+          "left": "glucose_ch2",
+          "matches": 0,
+          "right": "ladder_b",
+          "score": 0.0
+        },
+        {
+          "left": "hydroxy_cholesterol_ch2",
+          "matches": 131,
+          "right": "hydroxy_cholesterol_ch2",
+          "score": 1.0
+        },
+        {
+          "left": "hydroxy_cholesterol_ch2",
+          "matches": 8,
+          "right": "phenylalanine_ch2",
+          "score": 0.007189922287250039
+        },
+        {
+          "left": "hydroxy_cholesterol_ch2",
+          "matches": 4,
+          "right": "salicin_ch2",
+          "score": 0.012322794850993031
+        },
+        {
+          "left": "hydroxy_cholesterol_ch2",
+          "matches": 15,
+          "right": "aspirin_shift_005",
+          "score": 0.43696783084030666
+        },
+        {
+          "left": "hydroxy_cholesterol_ch2",
+          "matches": 16,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 0.43789524748155556
+        },
+        {
+          "left": "hydroxy_cholesterol_ch2",
+          "matches": 9,
+          "right": "aspirin_shift_030",
+          "score": 0.002133326930363049
+        },
+        {
+          "left": "hydroxy_cholesterol_ch2",
+          "matches": 1,
+          "right": "ladder_a",
+          "score": 0.00014928718692425983
+        },
+        {
+          "left": "hydroxy_cholesterol_ch2",
+          "matches": 1,
+          "right": "ladder_b",
+          "score": 0.00008499976140563386
+        },
+        {
+          "left": "phenylalanine_ch2",
+          "matches": 23,
+          "right": "phenylalanine_ch2",
+          "score": 1.0
+        },
+        {
+          "left": "phenylalanine_ch2",
+          "matches": 1,
+          "right": "salicin_ch2",
+          "score": 0.000010729010685459362
+        },
+        {
+          "left": "phenylalanine_ch2",
+          "matches": 3,
+          "right": "aspirin_shift_005",
+          "score": 0.016641638689027245
+        },
+        {
+          "left": "phenylalanine_ch2",
+          "matches": 4,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 0.016654613590985197
+        },
+        {
+          "left": "phenylalanine_ch2",
+          "matches": 1,
+          "right": "aspirin_shift_030",
+          "score": 0.016445536813985598
+        },
+        {
+          "left": "phenylalanine_ch2",
+          "matches": 1,
+          "right": "ladder_a",
+          "score": 0.000011821238983406922
+        },
+        {
+          "left": "phenylalanine_ch2",
+          "matches": 1,
+          "right": "ladder_b",
+          "score": 4.743237659575383e-6
+        },
+        {
+          "left": "salicin_ch2",
+          "matches": 21,
+          "right": "salicin_ch2",
+          "score": 1.0
+        },
+        {
+          "left": "salicin_ch2",
+          "matches": 2,
+          "right": "aspirin_shift_005",
+          "score": 0.0014698032746120735
+        },
+        {
+          "left": "salicin_ch2",
+          "matches": 2,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 0.0027137128292482105
+        },
+        {
+          "left": "salicin_ch2",
+          "matches": 1,
+          "right": "aspirin_shift_030",
+          "score": 0.000061959627423229
+        },
+        {
+          "left": "salicin_ch2",
+          "matches": 0,
+          "right": "ladder_a",
+          "score": 0.0
+        },
+        {
+          "left": "salicin_ch2",
+          "matches": 0,
+          "right": "ladder_b",
+          "score": 0.0
+        },
+        {
+          "left": "aspirin_shift_005",
+          "matches": 27,
+          "right": "aspirin_shift_005",
+          "score": 1.0
+        },
+        {
+          "left": "aspirin_shift_005",
+          "matches": 27,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 1.0
+        },
+        {
+          "left": "aspirin_shift_005",
+          "matches": 27,
+          "right": "aspirin_shift_030",
+          "score": 1.0
+        },
+        {
+          "left": "aspirin_shift_005",
+          "matches": 0,
+          "right": "ladder_a",
+          "score": 0.0
+        },
+        {
+          "left": "aspirin_shift_005",
+          "matches": 0,
+          "right": "ladder_b",
+          "score": 0.0
+        },
+        {
+          "left": "aspirin_shift_015_mz_007",
+          "matches": 27,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 1.0
+        },
+        {
+          "left": "aspirin_shift_015_mz_007",
+          "matches": 27,
+          "right": "aspirin_shift_030",
+          "score": 1.0
+        },
+        {
+          "left": "aspirin_shift_015_mz_007",
+          "matches": 0,
+          "right": "ladder_a",
+          "score": 0.0
+        },
+        {
+          "left": "aspirin_shift_015_mz_007",
+          "matches": 0,
+          "right": "ladder_b",
+          "score": 0.0
+        },
+        {
+          "left": "aspirin_shift_030",
+          "matches": 27,
+          "right": "aspirin_shift_030",
+          "score": 1.0
+        },
+        {
+          "left": "aspirin_shift_030",
+          "matches": 0,
+          "right": "ladder_a",
+          "score": 0.0
+        },
+        {
+          "left": "aspirin_shift_030",
+          "matches": 0,
+          "right": "ladder_b",
+          "score": 0.0
+        },
+        {
+          "left": "ladder_a",
+          "matches": 15,
+          "right": "ladder_a",
+          "score": 1.0
+        },
+        {
+          "left": "ladder_a",
+          "matches": 14,
+          "right": "ladder_b",
+          "score": 0.8866508847478288
+        },
+        {
+          "left": "ladder_b",
+          "matches": 15,
+          "right": "ladder_b",
+          "score": 1.0
+        }
+      ]
+    },
+    {
+      "intensity_power": 1.0,
+      "mz_power": 1.0,
+      "mz_tolerance": 0.1,
+      "similarities": [
+        {
+          "left": "aspirin",
+          "matches": 27,
+          "right": "aspirin",
+          "score": 1.0
+        },
+        {
+          "left": "aspirin",
+          "matches": 2,
+          "right": "cocaine",
+          "score": 0.0028754065621033813
+        },
+        {
+          "left": "aspirin",
+          "matches": 3,
+          "right": "glucose",
+          "score": 0.1785463728878813
+        },
+        {
+          "left": "aspirin",
+          "matches": 14,
+          "right": "hydroxy_cholesterol",
+          "score": 0.47806836139860814
+        },
+        {
+          "left": "aspirin",
+          "matches": 4,
+          "right": "phenylalanine",
+          "score": 0.047710922796319236
+        },
+        {
+          "left": "aspirin",
+          "matches": 2,
+          "right": "salicin",
+          "score": 0.002780133362682056
+        },
+        {
+          "left": "aspirin",
+          "matches": 27,
+          "right": "aspirin_ch2",
+          "score": 0.9981239405988824
+        },
+        {
+          "left": "aspirin",
+          "matches": 2,
+          "right": "cocaine_ch2",
+          "score": 0.002906096337285474
+        },
+        {
+          "left": "aspirin",
+          "matches": 3,
+          "right": "glucose_ch2",
+          "score": 0.20678302023870376
+        },
+        {
+          "left": "aspirin",
+          "matches": 14,
+          "right": "hydroxy_cholesterol_ch2",
+          "score": 0.47809037766833923
+        },
+        {
+          "left": "aspirin",
+          "matches": 3,
+          "right": "phenylalanine_ch2",
+          "score": 0.02209022803590405
+        },
+        {
+          "left": "aspirin",
+          "matches": 2,
+          "right": "salicin_ch2",
+          "score": 0.0025165994414740175
+        },
+        {
+          "left": "aspirin",
+          "matches": 27,
+          "right": "aspirin_shift_005",
+          "score": 1.0
+        },
+        {
+          "left": "aspirin",
+          "matches": 27,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 0.9999999992624165
+        },
+        {
+          "left": "aspirin",
+          "matches": 27,
+          "right": "aspirin_shift_030",
+          "score": 1.0
+        },
+        {
+          "left": "aspirin",
+          "matches": 0,
+          "right": "ladder_a",
+          "score": 0.0
+        },
+        {
+          "left": "aspirin",
+          "matches": 0,
+          "right": "ladder_b",
+          "score": 0.0
+        },
+        {
+          "left": "cocaine",
+          "matches": 9,
+          "right": "cocaine",
+          "score": 0.9999999999999999
+        },
+        {
+          "left": "cocaine",
+          "matches": 0,
+          "right": "glucose",
+          "score": 0.0
+        },
+        {
+          "left": "cocaine",
+          "matches": 3,
+          "right": "hydroxy_cholesterol",
+          "score": 0.023407752715656736
+        },
+        {
+          "left": "cocaine",
+          "matches": 0,
+          "right": "phenylalanine",
+          "score": 0.0
+        },
+        {
+          "left": "cocaine",
+          "matches": 1,
+          "right": "salicin",
+          "score": 0.5747054645973072
+        },
+        {
+          "left": "cocaine",
+          "matches": 3,
+          "right": "aspirin_ch2",
+          "score": 0.0024754491590411754
+        },
+        {
+          "left": "cocaine",
+          "matches": 9,
+          "right": "cocaine_ch2",
+          "score": 0.9999859384882409
+        },
+        {
+          "left": "cocaine",
+          "matches": 0,
+          "right": "glucose_ch2",
+          "score": 0.0
+        },
+        {
+          "left": "cocaine",
+          "matches": 2,
+          "right": "hydroxy_cholesterol_ch2",
+          "score": 0.018768409958014536
+        },
+        {
+          "left": "cocaine",
+          "matches": 1,
+          "right": "phenylalanine_ch2",
+          "score": 3.185162071137997e-7
+        },
+        {
+          "left": "cocaine",
+          "matches": 1,
+          "right": "salicin_ch2",
+          "score": 0.5199673535115251
+        },
+        {
+          "left": "cocaine",
+          "matches": 2,
+          "right": "aspirin_shift_005",
+          "score": 0.0028754065621033813
+        },
+        {
+          "left": "cocaine",
+          "matches": 2,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 0.0028752519921934456
+        },
+        {
+          "left": "cocaine",
+          "matches": 1,
+          "right": "aspirin_shift_030",
+          "score": 0.00029674882371045775
+        },
+        {
+          "left": "cocaine",
+          "matches": 0,
+          "right": "ladder_a",
+          "score": 0.0
+        },
+        {
+          "left": "cocaine",
+          "matches": 0,
+          "right": "ladder_b",
+          "score": 0.0
+        },
+        {
+          "left": "glucose",
+          "matches": 14,
+          "right": "glucose",
+          "score": 0.9999999999999999
+        },
+        {
+          "left": "glucose",
+          "matches": 8,
+          "right": "hydroxy_cholesterol",
+          "score": 0.008449854818122942
+        },
+        {
+          "left": "glucose",
+          "matches": 3,
+          "right": "phenylalanine",
+          "score": 0.00012227822148413013
+        },
+        {
+          "left": "glucose",
+          "matches": 0,
+          "right": "salicin",
+          "score": 0.0
+        },
+        {
+          "left": "glucose",
+          "matches": 2,
+          "right": "aspirin_ch2",
+          "score": 0.17865574776596724
+        },
+        {
+          "left": "glucose",
+          "matches": 0,
+          "right": "cocaine_ch2",
+          "score": 0.0
+        },
+        {
+          "left": "glucose",
+          "matches": 14,
+          "right": "glucose_ch2",
+          "score": 0.9948939252479462
+        },
+        {
+          "left": "glucose",
+          "matches": 8,
+          "right": "hydroxy_cholesterol_ch2",
+          "score": 0.008168774460419238
+        },
+        {
+          "left": "glucose",
+          "matches": 1,
+          "right": "phenylalanine_ch2",
+          "score": 6.251768848059718e-6
+        },
+        {
+          "left": "glucose",
+          "matches": 0,
+          "right": "salicin_ch2",
+          "score": 0.0
+        },
+        {
+          "left": "glucose",
+          "matches": 1,
+          "right": "aspirin_shift_005",
+          "score": 0.0034916136178254394
+        },
+        {
+          "left": "glucose",
+          "matches": 0,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 0.0
+        },
+        {
+          "left": "glucose",
+          "matches": 2,
+          "right": "aspirin_shift_030",
+          "score": 0.003599495479405678
+        },
+        {
+          "left": "glucose",
+          "matches": 0,
+          "right": "ladder_a",
+          "score": 0.0
+        },
+        {
+          "left": "glucose",
+          "matches": 0,
+          "right": "ladder_b",
+          "score": 0.0
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 131,
+          "right": "hydroxy_cholesterol",
+          "score": 1.0
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 7,
+          "right": "phenylalanine",
+          "score": 0.008683326844509042
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 4,
+          "right": "salicin",
+          "score": 0.025348379025056638
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 17,
+          "right": "aspirin_ch2",
+          "score": 0.52767756349999
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 2,
+          "right": "cocaine_ch2",
+          "score": 0.023072733348658343
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 8,
+          "right": "glucose_ch2",
+          "score": 0.009870297336285031
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 131,
+          "right": "hydroxy_cholesterol_ch2",
+          "score": 0.9999436363035886
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 8,
+          "right": "phenylalanine_ch2",
+          "score": 0.008636905470320203
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 5,
+          "right": "salicin_ch2",
+          "score": 0.023116846762049583
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 15,
+          "right": "aspirin_shift_005",
+          "score": 0.4781547100478991
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 16,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 0.47835903363728366
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 9,
+          "right": "aspirin_shift_030",
+          "score": 0.0007743185496972685
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 1,
+          "right": "ladder_a",
+          "score": 0.000050076308974526844
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 1,
+          "right": "ladder_b",
+          "score": 0.00002793950374126592
+        },
+        {
+          "left": "phenylalanine",
+          "matches": 23,
+          "right": "phenylalanine",
+          "score": 0.9999999999999998
+        },
+        {
+          "left": "phenylalanine",
+          "matches": 1,
+          "right": "salicin",
+          "score": 2.5441496206976624e-6
+        },
+        {
+          "left": "phenylalanine",
+          "matches": 4,
+          "right": "aspirin_ch2",
+          "score": 0.011296330884355192
+        },
+        {
+          "left": "phenylalanine",
+          "matches": 0,
+          "right": "cocaine_ch2",
+          "score": 0.0
+        },
+        {
+          "left": "phenylalanine",
+          "matches": 2,
+          "right": "glucose_ch2",
+          "score": 0.001079139494891432
+        },
+        {
+          "left": "phenylalanine",
+          "matches": 7,
+          "right": "hydroxy_cholesterol_ch2",
+          "score": 0.008696327866292524
+        },
+        {
+          "left": "phenylalanine",
+          "matches": 23,
+          "right": "phenylalanine_ch2",
+          "score": 0.9999708853845907
+        },
+        {
+          "left": "phenylalanine",
+          "matches": 1,
+          "right": "salicin_ch2",
+          "score": 2.6938499053967126e-6
+        },
+        {
+          "left": "phenylalanine",
+          "matches": 4,
+          "right": "aspirin_shift_005",
+          "score": 0.047710922796319236
+        },
+        {
+          "left": "phenylalanine",
+          "matches": 4,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 0.047698171421017364
+        },
+        {
+          "left": "phenylalanine",
+          "matches": 3,
+          "right": "aspirin_shift_030",
+          "score": 0.04386456013628331
+        },
+        {
+          "left": "phenylalanine",
+          "matches": 1,
+          "right": "ladder_a",
+          "score": 8.3203389239151e-6
+        },
+        {
+          "left": "phenylalanine",
+          "matches": 1,
+          "right": "ladder_b",
+          "score": 2.3646699691243802e-6
+        },
+        {
+          "left": "salicin",
+          "matches": 21,
+          "right": "salicin",
+          "score": 1.0
+        },
+        {
+          "left": "salicin",
+          "matches": 3,
+          "right": "aspirin_ch2",
+          "score": 0.011725111624870712
+        },
+        {
+          "left": "salicin",
+          "matches": 2,
+          "right": "cocaine_ch2",
+          "score": 0.572820173886902
+        },
+        {
+          "left": "salicin",
+          "matches": 0,
+          "right": "glucose_ch2",
+          "score": 0.0
+        },
+        {
+          "left": "salicin",
+          "matches": 3,
+          "right": "hydroxy_cholesterol_ch2",
+          "score": 0.020588998437418963
+        },
+        {
+          "left": "salicin",
+          "matches": 1,
+          "right": "phenylalanine_ch2",
+          "score": 6.313370525852408e-6
+        },
+        {
+          "left": "salicin",
+          "matches": 21,
+          "right": "salicin_ch2",
+          "score": 0.9934374597476062
+        },
+        {
+          "left": "salicin",
+          "matches": 2,
+          "right": "aspirin_shift_005",
+          "score": 0.002780133362682056
+        },
+        {
+          "left": "salicin",
+          "matches": 2,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 0.0031376503509303716
+        },
+        {
+          "left": "salicin",
+          "matches": 1,
+          "right": "aspirin_shift_030",
+          "score": 0.000015229098031502666
+        },
+        {
+          "left": "salicin",
+          "matches": 0,
+          "right": "ladder_a",
+          "score": 0.0
+        },
+        {
+          "left": "salicin",
+          "matches": 0,
+          "right": "ladder_b",
+          "score": 0.0
+        },
+        {
+          "left": "aspirin_ch2",
+          "matches": 27,
+          "right": "aspirin_ch2",
+          "score": 1.0
+        },
+        {
+          "left": "aspirin_ch2",
+          "matches": 3,
+          "right": "cocaine_ch2",
+          "score": 0.0024888166501384305
+        },
+        {
+          "left": "aspirin_ch2",
+          "matches": 3,
+          "right": "glucose_ch2",
+          "score": 0.19665742845034742
+        },
+        {
+          "left": "aspirin_ch2",
+          "matches": 17,
+          "right": "hydroxy_cholesterol_ch2",
+          "score": 0.5276882226889708
+        },
+        {
+          "left": "aspirin_ch2",
+          "matches": 4,
+          "right": "phenylalanine_ch2",
+          "score": 0.04045691905735497
+        },
+        {
+          "left": "aspirin_ch2",
+          "matches": 3,
+          "right": "salicin_ch2",
+          "score": 0.013261717567015018
+        },
+        {
+          "left": "aspirin_ch2",
+          "matches": 27,
+          "right": "aspirin_shift_005",
+          "score": 0.9981239405988824
+        },
+        {
+          "left": "aspirin_ch2",
+          "matches": 27,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 0.9981230190806657
+        },
+        {
+          "left": "aspirin_ch2",
+          "matches": 16,
+          "right": "aspirin_shift_030",
+          "score": 0.5175380871238388
+        },
+        {
+          "left": "aspirin_ch2",
+          "matches": 0,
+          "right": "ladder_a",
+          "score": 0.0
+        },
+        {
+          "left": "aspirin_ch2",
+          "matches": 0,
+          "right": "ladder_b",
+          "score": 0.0
+        },
+        {
+          "left": "cocaine_ch2",
+          "matches": 9,
+          "right": "cocaine_ch2",
+          "score": 0.9999999999999999
+        },
+        {
+          "left": "cocaine_ch2",
+          "matches": 0,
+          "right": "glucose_ch2",
+          "score": 0.0
+        },
+        {
+          "left": "cocaine_ch2",
+          "matches": 2,
+          "right": "hydroxy_cholesterol_ch2",
+          "score": 0.01870814235136646
+        },
+        {
+          "left": "cocaine_ch2",
+          "matches": 1,
+          "right": "phenylalanine_ch2",
+          "score": 3.914186344074895e-7
+        },
+        {
+          "left": "cocaine_ch2",
+          "matches": 1,
+          "right": "salicin_ch2",
+          "score": 0.5181170009764986
+        },
+        {
+          "left": "cocaine_ch2",
+          "matches": 2,
+          "right": "aspirin_shift_005",
+          "score": 0.002906096337285474
+        },
+        {
+          "left": "cocaine_ch2",
+          "matches": 2,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 0.0029059503792813425
+        },
+        {
+          "left": "cocaine_ch2",
+          "matches": 1,
+          "right": "aspirin_shift_030",
+          "score": 0.00033661499400847037
+        },
+        {
+          "left": "cocaine_ch2",
+          "matches": 0,
+          "right": "ladder_a",
+          "score": 0.0
+        },
+        {
+          "left": "cocaine_ch2",
+          "matches": 0,
+          "right": "ladder_b",
+          "score": 0.0
+        },
+        {
+          "left": "glucose_ch2",
+          "matches": 14,
+          "right": "glucose_ch2",
+          "score": 1.0
+        },
+        {
+          "left": "glucose_ch2",
+          "matches": 7,
+          "right": "hydroxy_cholesterol_ch2",
+          "score": 0.008230521467208894
+        },
+        {
+          "left": "glucose_ch2",
+          "matches": 3,
+          "right": "phenylalanine_ch2",
+          "score": 0.00012041065845634425
+        },
+        {
+          "left": "glucose_ch2",
+          "matches": 0,
+          "right": "salicin_ch2",
+          "score": 0.0
+        },
+        {
+          "left": "glucose_ch2",
+          "matches": 1,
+          "right": "aspirin_shift_005",
+          "score": 0.01662804500378544
+        },
+        {
+          "left": "glucose_ch2",
+          "matches": 1,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 0.016628052292940555
+        },
+        {
+          "left": "glucose_ch2",
+          "matches": 2,
+          "right": "aspirin_shift_030",
+          "score": 0.01672516180765195
+        },
+        {
+          "left": "glucose_ch2",
+          "matches": 0,
+          "right": "ladder_a",
+          "score": 0.0
+        },
+        {
+          "left": "glucose_ch2",
+          "matches": 0,
+          "right": "ladder_b",
+          "score": 0.0
+        },
+        {
+          "left": "hydroxy_cholesterol_ch2",
+          "matches": 131,
+          "right": "hydroxy_cholesterol_ch2",
+          "score": 1.0
+        },
+        {
+          "left": "hydroxy_cholesterol_ch2",
+          "matches": 8,
+          "right": "phenylalanine_ch2",
+          "score": 0.008649295252883042
+        },
+        {
+          "left": "hydroxy_cholesterol_ch2",
+          "matches": 4,
+          "right": "salicin_ch2",
+          "score": 0.01819634141096794
+        },
+        {
+          "left": "hydroxy_cholesterol_ch2",
+          "matches": 15,
+          "right": "aspirin_shift_005",
+          "score": 0.4781765716925425
+        },
+        {
+          "left": "hydroxy_cholesterol_ch2",
+          "matches": 16,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 0.47840288718674895
+        },
+        {
+          "left": "hydroxy_cholesterol_ch2",
+          "matches": 9,
+          "right": "aspirin_shift_030",
+          "score": 0.00063742397880534
+        },
+        {
+          "left": "hydroxy_cholesterol_ch2",
+          "matches": 1,
+          "right": "ladder_a",
+          "score": 0.000055694655108309274
+        },
+        {
+          "left": "hydroxy_cholesterol_ch2",
+          "matches": 1,
+          "right": "ladder_b",
+          "score": 0.00003107419569518752
+        },
+        {
+          "left": "phenylalanine_ch2",
+          "matches": 23,
+          "right": "phenylalanine_ch2",
+          "score": 0.9999999999999998
+        },
+        {
+          "left": "phenylalanine_ch2",
+          "matches": 1,
+          "right": "salicin_ch2",
+          "score": 7.5083324959639985e-6
+        },
+        {
+          "left": "phenylalanine_ch2",
+          "matches": 3,
+          "right": "aspirin_shift_005",
+          "score": 0.02209022803590405
+        },
+        {
+          "left": "phenylalanine_ch2",
+          "matches": 4,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 0.022098877561811822
+        },
+        {
+          "left": "phenylalanine_ch2",
+          "matches": 1,
+          "right": "aspirin_shift_030",
+          "score": 0.021873842270463007
+        },
+        {
+          "left": "phenylalanine_ch2",
+          "matches": 1,
+          "right": "ladder_a",
+          "score": 8.703450161307049e-6
+        },
+        {
+          "left": "phenylalanine_ch2",
+          "matches": 1,
+          "right": "ladder_b",
+          "score": 3.4221145309991548e-6
+        },
+        {
+          "left": "salicin_ch2",
+          "matches": 21,
+          "right": "salicin_ch2",
+          "score": 1.0
+        },
+        {
+          "left": "salicin_ch2",
+          "matches": 2,
+          "right": "aspirin_shift_005",
+          "score": 0.0025165994414740175
+        },
+        {
+          "left": "salicin_ch2",
+          "matches": 2,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 0.002832842098393494
+        },
+        {
+          "left": "salicin_ch2",
+          "matches": 1,
+          "right": "aspirin_shift_030",
+          "score": 0.000015039874417459621
+        },
+        {
+          "left": "salicin_ch2",
+          "matches": 0,
+          "right": "ladder_a",
+          "score": 0.0
+        },
+        {
+          "left": "salicin_ch2",
+          "matches": 0,
+          "right": "ladder_b",
+          "score": 0.0
+        },
+        {
+          "left": "aspirin_shift_005",
+          "matches": 27,
+          "right": "aspirin_shift_005",
+          "score": 1.0
+        },
+        {
+          "left": "aspirin_shift_005",
+          "matches": 27,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 0.9999999992624165
+        },
+        {
+          "left": "aspirin_shift_005",
+          "matches": 27,
+          "right": "aspirin_shift_030",
+          "score": 1.0
+        },
+        {
+          "left": "aspirin_shift_005",
+          "matches": 0,
+          "right": "ladder_a",
+          "score": 0.0
+        },
+        {
+          "left": "aspirin_shift_005",
+          "matches": 0,
+          "right": "ladder_b",
+          "score": 0.0
+        },
+        {
+          "left": "aspirin_shift_015_mz_007",
+          "matches": 27,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 0.9999999999999999
+        },
+        {
+          "left": "aspirin_shift_015_mz_007",
+          "matches": 27,
+          "right": "aspirin_shift_030",
+          "score": 0.9999999992624165
+        },
+        {
+          "left": "aspirin_shift_015_mz_007",
+          "matches": 0,
+          "right": "ladder_a",
+          "score": 0.0
+        },
+        {
+          "left": "aspirin_shift_015_mz_007",
+          "matches": 0,
+          "right": "ladder_b",
+          "score": 0.0
+        },
+        {
+          "left": "aspirin_shift_030",
+          "matches": 27,
+          "right": "aspirin_shift_030",
+          "score": 1.0
+        },
+        {
+          "left": "aspirin_shift_030",
+          "matches": 0,
+          "right": "ladder_a",
+          "score": 0.0
+        },
+        {
+          "left": "aspirin_shift_030",
+          "matches": 0,
+          "right": "ladder_b",
+          "score": 0.0
+        },
+        {
+          "left": "ladder_a",
+          "matches": 15,
+          "right": "ladder_a",
+          "score": 1.0
+        },
+        {
+          "left": "ladder_a",
+          "matches": 14,
+          "right": "ladder_b",
+          "score": 0.902636818769084
+        },
+        {
+          "left": "ladder_b",
+          "matches": 15,
+          "right": "ladder_b",
+          "score": 1.0
+        }
+      ]
+    },
+    {
+      "intensity_power": 0.5,
+      "mz_power": 1.0,
+      "mz_tolerance": 0.5,
+      "similarities": [
+        {
+          "left": "aspirin",
+          "matches": 25,
+          "right": "aspirin",
+          "score": 1.0
+        },
+        {
+          "left": "aspirin",
+          "matches": 2,
+          "right": "cocaine",
+          "score": 0.04346514873582308
+        },
+        {
+          "left": "aspirin",
+          "matches": 6,
+          "right": "glucose",
+          "score": 0.569551436128598
+        },
+        {
+          "left": "aspirin",
+          "matches": 19,
+          "right": "hydroxy_cholesterol",
+          "score": 0.5642513000138283
+        },
+        {
+          "left": "aspirin",
+          "matches": 5,
+          "right": "phenylalanine",
+          "score": 0.42163257743089094
+        },
+        {
+          "left": "aspirin",
+          "matches": 3,
+          "right": "salicin",
+          "score": 0.04366281337064915
+        },
+        {
+          "left": "aspirin",
+          "matches": 25,
+          "right": "aspirin_ch2",
+          "score": 0.9992494882152093
+        },
+        {
+          "left": "aspirin",
+          "matches": 2,
+          "right": "cocaine_ch2",
+          "score": 0.043430892136804435
+        },
+        {
+          "left": "aspirin",
+          "matches": 6,
+          "right": "glucose_ch2",
+          "score": 0.6395365516172278
+        },
+        {
+          "left": "aspirin",
+          "matches": 19,
+          "right": "hydroxy_cholesterol_ch2",
+          "score": 0.5642568797712488
+        },
+        {
+          "left": "aspirin",
+          "matches": 6,
+          "right": "phenylalanine_ch2",
+          "score": 0.39108962644890766
+        },
+        {
+          "left": "aspirin",
+          "matches": 3,
+          "right": "salicin_ch2",
+          "score": 0.04179973450809498
+        },
+        {
+          "left": "aspirin",
+          "matches": 25,
+          "right": "aspirin_shift_005",
+          "score": 1.0
+        },
+        {
+          "left": "aspirin",
+          "matches": 25,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 0.9999999963134115
+        },
+        {
+          "left": "aspirin",
+          "matches": 25,
+          "right": "aspirin_shift_030",
+          "score": 1.0
+        },
+        {
+          "left": "aspirin",
+          "matches": 1,
+          "right": "ladder_a",
+          "score": 0.021461388699740475
+        },
+        {
+          "left": "aspirin",
+          "matches": 0,
+          "right": "ladder_b",
+          "score": 0.0
+        },
+        {
+          "left": "cocaine",
+          "matches": 9,
+          "right": "cocaine",
+          "score": 1.0
+        },
+        {
+          "left": "cocaine",
+          "matches": 1,
+          "right": "glucose",
+          "score": 0.006946846185363089
+        },
+        {
+          "left": "cocaine",
+          "matches": 8,
+          "right": "hydroxy_cholesterol",
+          "score": 0.1623897346032323
+        },
+        {
+          "left": "cocaine",
+          "matches": 0,
+          "right": "phenylalanine",
+          "score": 0.0
+        },
+        {
+          "left": "cocaine",
+          "matches": 2,
+          "right": "salicin",
+          "score": 0.5921986674198488
+        },
+        {
+          "left": "cocaine",
+          "matches": 4,
+          "right": "aspirin_ch2",
+          "score": 0.046818398951029946
+        },
+        {
+          "left": "cocaine",
+          "matches": 9,
+          "right": "cocaine_ch2",
+          "score": 0.999909120919066
+        },
+        {
+          "left": "cocaine",
+          "matches": 1,
+          "right": "glucose_ch2",
+          "score": 0.006616569327580143
+        },
+        {
+          "left": "cocaine",
+          "matches": 8,
+          "right": "hydroxy_cholesterol_ch2",
+          "score": 0.15051975121210306
+        },
+        {
+          "left": "cocaine",
+          "matches": 1,
+          "right": "phenylalanine_ch2",
+          "score": 0.0002713318102079918
+        },
+        {
+          "left": "cocaine",
+          "matches": 2,
+          "right": "salicin_ch2",
+          "score": 0.5602906744268104
+        },
+        {
+          "left": "cocaine",
+          "matches": 2,
+          "right": "aspirin_shift_005",
+          "score": 0.04346514873582308
+        },
+        {
+          "left": "cocaine",
+          "matches": 2,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 0.04346221491266907
+        },
+        {
+          "left": "cocaine",
+          "matches": 2,
+          "right": "aspirin_shift_030",
+          "score": 0.04346514873582308
+        },
+        {
+          "left": "cocaine",
+          "matches": 1,
+          "right": "ladder_a",
+          "score": 0.009590823418435212
+        },
+        {
+          "left": "cocaine",
+          "matches": 1,
+          "right": "ladder_b",
+          "score": 0.023508463984031322
+        },
+        {
+          "left": "glucose",
+          "matches": 12,
+          "right": "glucose",
+          "score": 1.0
+        },
+        {
+          "left": "glucose",
+          "matches": 10,
+          "right": "hydroxy_cholesterol",
+          "score": 0.6387299921184425
+        },
+        {
+          "left": "glucose",
+          "matches": 3,
+          "right": "phenylalanine",
+          "score": 0.011114763805691678
+        },
+        {
+          "left": "glucose",
+          "matches": 1,
+          "right": "salicin",
+          "score": 0.12669116578636846
+        },
+        {
+          "left": "glucose",
+          "matches": 4,
+          "right": "aspirin_ch2",
+          "score": 0.5477529631228235
+        },
+        {
+          "left": "glucose",
+          "matches": 1,
+          "right": "cocaine_ch2",
+          "score": 0.007200177686901428
+        },
+        {
+          "left": "glucose",
+          "matches": 12,
+          "right": "glucose_ch2",
+          "score": 0.9981852616101836
+        },
+        {
+          "left": "glucose",
+          "matches": 10,
+          "right": "hydroxy_cholesterol_ch2",
+          "score": 0.6379194273029977
+        },
+        {
+          "left": "glucose",
+          "matches": 1,
+          "right": "phenylalanine_ch2",
+          "score": 0.0013042304871916978
+        },
+        {
+          "left": "glucose",
+          "matches": 0,
+          "right": "salicin_ch2",
+          "score": 0.0
+        },
+        {
+          "left": "glucose",
+          "matches": 6,
+          "right": "aspirin_shift_005",
+          "score": 0.569551436128598
+        },
+        {
+          "left": "glucose",
+          "matches": 6,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 0.5695516056811117
+        },
+        {
+          "left": "glucose",
+          "matches": 5,
+          "right": "aspirin_shift_030",
+          "score": 0.5662100962919777
+        },
+        {
+          "left": "glucose",
+          "matches": 0,
+          "right": "ladder_a",
+          "score": 0.0
+        },
+        {
+          "left": "glucose",
+          "matches": 0,
+          "right": "ladder_b",
+          "score": 0.0
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 115,
+          "right": "hydroxy_cholesterol",
+          "score": 1.0
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 13,
+          "right": "phenylalanine",
+          "score": 0.09552458746528471
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 13,
+          "right": "salicin",
+          "score": 0.18683553402675906
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 20,
+          "right": "aspirin_ch2",
+          "score": 0.5930468641249104
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 8,
+          "right": "cocaine_ch2",
+          "score": 0.15769746202932247
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 10,
+          "right": "glucose_ch2",
+          "score": 0.6257984418862733
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 115,
+          "right": "hydroxy_cholesterol_ch2",
+          "score": 0.9993701728900064
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 13,
+          "right": "phenylalanine_ch2",
+          "score": 0.10051362398966658
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 11,
+          "right": "salicin_ch2",
+          "score": 0.17263874844891414
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 19,
+          "right": "aspirin_shift_005",
+          "score": 0.5642513000138283
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 19,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 0.5642345045793379
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 19,
+          "right": "aspirin_shift_030",
+          "score": 0.5642513000138283
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 9,
+          "right": "ladder_a",
+          "score": 0.042162000793354276
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 9,
+          "right": "ladder_b",
+          "score": 0.04501075033662
+        },
+        {
+          "left": "phenylalanine",
+          "matches": 17,
+          "right": "phenylalanine",
+          "score": 1.0
+        },
+        {
+          "left": "phenylalanine",
+          "matches": 1,
+          "right": "salicin",
+          "score": 0.0022278026324377255
+        },
+        {
+          "left": "phenylalanine",
+          "matches": 6,
+          "right": "aspirin_ch2",
+          "score": 0.25413545622417527
+        },
+        {
+          "left": "phenylalanine",
+          "matches": 0,
+          "right": "cocaine_ch2",
+          "score": 0.0
+        },
+        {
+          "left": "phenylalanine",
+          "matches": 2,
+          "right": "glucose_ch2",
+          "score": 0.027296999282820453
+        },
+        {
+          "left": "phenylalanine",
+          "matches": 13,
+          "right": "hydroxy_cholesterol_ch2",
+          "score": 0.09628442929666561
+        },
+        {
+          "left": "phenylalanine",
+          "matches": 17,
+          "right": "phenylalanine_ch2",
+          "score": 0.9997937504447519
+        },
+        {
+          "left": "phenylalanine",
+          "matches": 1,
+          "right": "salicin_ch2",
+          "score": 0.00238075750798834
+        },
+        {
+          "left": "phenylalanine",
+          "matches": 5,
+          "right": "aspirin_shift_005",
+          "score": 0.42163257743089094
+        },
+        {
+          "left": "phenylalanine",
+          "matches": 5,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 0.42163564648437646
+        },
+        {
+          "left": "phenylalanine",
+          "matches": 6,
+          "right": "aspirin_shift_030",
+          "score": 0.21453435529947673
+        },
+        {
+          "left": "phenylalanine",
+          "matches": 1,
+          "right": "ladder_a",
+          "score": 0.0011709661471919668
+        },
+        {
+          "left": "phenylalanine",
+          "matches": 1,
+          "right": "ladder_b",
+          "score": 0.0006554449697152802
+        },
+        {
+          "left": "salicin",
+          "matches": 20,
+          "right": "salicin",
+          "score": 1.0
+        },
+        {
+          "left": "salicin",
+          "matches": 3,
+          "right": "aspirin_ch2",
+          "score": 0.07391639294579874
+        },
+        {
+          "left": "salicin",
+          "matches": 3,
+          "right": "cocaine_ch2",
+          "score": 0.591454949604139
+        },
+        {
+          "left": "salicin",
+          "matches": 0,
+          "right": "glucose_ch2",
+          "score": 0.0
+        },
+        {
+          "left": "salicin",
+          "matches": 15,
+          "right": "hydroxy_cholesterol_ch2",
+          "score": 0.1699435462166294
+        },
+        {
+          "left": "salicin",
+          "matches": 1,
+          "right": "phenylalanine_ch2",
+          "score": 0.0020990689936813594
+        },
+        {
+          "left": "salicin",
+          "matches": 20,
+          "right": "salicin_ch2",
+          "score": 0.9978439046956834
+        },
+        {
+          "left": "salicin",
+          "matches": 2,
+          "right": "aspirin_shift_005",
+          "score": 0.04017388213213991
+        },
+        {
+          "left": "salicin",
+          "matches": 2,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 0.0401714118382472
+        },
+        {
+          "left": "salicin",
+          "matches": 2,
+          "right": "aspirin_shift_030",
+          "score": 0.04017388213213991
+        },
+        {
+          "left": "salicin",
+          "matches": 3,
+          "right": "ladder_a",
+          "score": 0.20136759749752708
+        },
+        {
+          "left": "salicin",
+          "matches": 3,
+          "right": "ladder_b",
+          "score": 0.2913058326347381
+        },
+        {
+          "left": "aspirin_ch2",
+          "matches": 25,
+          "right": "aspirin_ch2",
+          "score": 1.0
+        },
+        {
+          "left": "aspirin_ch2",
+          "matches": 4,
+          "right": "cocaine_ch2",
+          "score": 0.04710407690002673
+        },
+        {
+          "left": "aspirin_ch2",
+          "matches": 6,
+          "right": "glucose_ch2",
+          "score": 0.5855498337680358
+        },
+        {
+          "left": "aspirin_ch2",
+          "matches": 20,
+          "right": "hydroxy_cholesterol_ch2",
+          "score": 0.5954342394219845
+        },
+        {
+          "left": "aspirin_ch2",
+          "matches": 5,
+          "right": "phenylalanine_ch2",
+          "score": 0.4016236161811045
+        },
+        {
+          "left": "aspirin_ch2",
+          "matches": 3,
+          "right": "salicin_ch2",
+          "score": 0.07462784308658502
+        },
+        {
+          "left": "aspirin_ch2",
+          "matches": 25,
+          "right": "aspirin_shift_005",
+          "score": 0.9992494882152093
+        },
+        {
+          "left": "aspirin_ch2",
+          "matches": 25,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 0.9992478843921159
+        },
+        {
+          "left": "aspirin_ch2",
+          "matches": 25,
+          "right": "aspirin_shift_030",
+          "score": 0.9992494882152093
+        },
+        {
+          "left": "aspirin_ch2",
+          "matches": 1,
+          "right": "ladder_a",
+          "score": 0.014362191341940188
+        },
+        {
+          "left": "aspirin_ch2",
+          "matches": 1,
+          "right": "ladder_b",
+          "score": 0.013887732148038444
+        },
+        {
+          "left": "cocaine_ch2",
+          "matches": 9,
+          "right": "cocaine_ch2",
+          "score": 1.0
+        },
+        {
+          "left": "cocaine_ch2",
+          "matches": 1,
+          "right": "glucose_ch2",
+          "score": 0.006681676218631438
+        },
+        {
+          "left": "cocaine_ch2",
+          "matches": 8,
+          "right": "hydroxy_cholesterol_ch2",
+          "score": 0.1468600912683197
+        },
+        {
+          "left": "cocaine_ch2",
+          "matches": 1,
+          "right": "phenylalanine_ch2",
+          "score": 0.00029271096999842095
+        },
+        {
+          "left": "cocaine_ch2",
+          "matches": 2,
+          "right": "salicin_ch2",
+          "score": 0.5563996607373645
+        },
+        {
+          "left": "cocaine_ch2",
+          "matches": 2,
+          "right": "aspirin_shift_005",
+          "score": 0.043430892136804435
+        },
+        {
+          "left": "cocaine_ch2",
+          "matches": 2,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 0.04342802031470225
+        },
+        {
+          "left": "cocaine_ch2",
+          "matches": 2,
+          "right": "aspirin_shift_030",
+          "score": 0.043430892136804435
+        },
+        {
+          "left": "cocaine_ch2",
+          "matches": 1,
+          "right": "ladder_a",
+          "score": 0.024514713165904565
+        },
+        {
+          "left": "cocaine_ch2",
+          "matches": 1,
+          "right": "ladder_b",
+          "score": 0.0308699778325347
+        },
+        {
+          "left": "glucose_ch2",
+          "matches": 12,
+          "right": "glucose_ch2",
+          "score": 0.9999999999999998
+        },
+        {
+          "left": "glucose_ch2",
+          "matches": 10,
+          "right": "hydroxy_cholesterol_ch2",
+          "score": 0.6264844611904292
+        },
+        {
+          "left": "glucose_ch2",
+          "matches": 3,
+          "right": "phenylalanine_ch2",
+          "score": 0.011540857042521266
+        },
+        {
+          "left": "glucose_ch2",
+          "matches": 1,
+          "right": "salicin_ch2",
+          "score": 0.1399490637712609
+        },
+        {
+          "left": "glucose_ch2",
+          "matches": 6,
+          "right": "aspirin_shift_005",
+          "score": 0.6395365516172278
+        },
+        {
+          "left": "glucose_ch2",
+          "matches": 6,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 0.6395351170315221
+        },
+        {
+          "left": "glucose_ch2",
+          "matches": 5,
+          "right": "aspirin_shift_030",
+          "score": 0.6363464216605487
+        },
+        {
+          "left": "glucose_ch2",
+          "matches": 0,
+          "right": "ladder_a",
+          "score": 0.0
+        },
+        {
+          "left": "glucose_ch2",
+          "matches": 0,
+          "right": "ladder_b",
+          "score": 0.0
+        },
+        {
+          "left": "hydroxy_cholesterol_ch2",
+          "matches": 115,
+          "right": "hydroxy_cholesterol_ch2",
+          "score": 1.0
+        },
+        {
+          "left": "hydroxy_cholesterol_ch2",
+          "matches": 13,
+          "right": "phenylalanine_ch2",
+          "score": 0.10204491871583897
+        },
+        {
+          "left": "hydroxy_cholesterol_ch2",
+          "matches": 12,
+          "right": "salicin_ch2",
+          "score": 0.16292200242450944
+        },
+        {
+          "left": "hydroxy_cholesterol_ch2",
+          "matches": 19,
+          "right": "aspirin_shift_005",
+          "score": 0.5642568797712488
+        },
+        {
+          "left": "hydroxy_cholesterol_ch2",
+          "matches": 19,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 0.5642402041394387
+        },
+        {
+          "left": "hydroxy_cholesterol_ch2",
+          "matches": 19,
+          "right": "aspirin_shift_030",
+          "score": 0.5642568797712488
+        },
+        {
+          "left": "hydroxy_cholesterol_ch2",
+          "matches": 8,
+          "right": "ladder_a",
+          "score": 0.038392620808653896
+        },
+        {
+          "left": "hydroxy_cholesterol_ch2",
+          "matches": 9,
+          "right": "ladder_b",
+          "score": 0.042609727780474366
+        },
+        {
+          "left": "phenylalanine_ch2",
+          "matches": 17,
+          "right": "phenylalanine_ch2",
+          "score": 1.0
+        },
+        {
+          "left": "phenylalanine_ch2",
+          "matches": 1,
+          "right": "salicin_ch2",
+          "score": 0.002243185367378867
+        },
+        {
+          "left": "phenylalanine_ch2",
+          "matches": 6,
+          "right": "aspirin_shift_005",
+          "score": 0.39108962644890766
+        },
+        {
+          "left": "phenylalanine_ch2",
+          "matches": 6,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 0.39108814149207627
+        },
+        {
+          "left": "phenylalanine_ch2",
+          "matches": 5,
+          "right": "aspirin_shift_030",
+          "score": 0.14617286139482497
+        },
+        {
+          "left": "phenylalanine_ch2",
+          "matches": 1,
+          "right": "ladder_a",
+          "score": 0.0012624982499250034
+        },
+        {
+          "left": "phenylalanine_ch2",
+          "matches": 1,
+          "right": "ladder_b",
+          "score": 0.0008312075270207057
+        },
+        {
+          "left": "salicin_ch2",
+          "matches": 20,
+          "right": "salicin_ch2",
+          "score": 1.0
+        },
+        {
+          "left": "salicin_ch2",
+          "matches": 2,
+          "right": "aspirin_shift_005",
+          "score": 0.03820660184157564
+        },
+        {
+          "left": "salicin_ch2",
+          "matches": 2,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 0.038204315832206424
+        },
+        {
+          "left": "salicin_ch2",
+          "matches": 2,
+          "right": "aspirin_shift_030",
+          "score": 0.03820660184157564
+        },
+        {
+          "left": "salicin_ch2",
+          "matches": 3,
+          "right": "ladder_a",
+          "score": 0.23374407556165877
+        },
+        {
+          "left": "salicin_ch2",
+          "matches": 3,
+          "right": "ladder_b",
+          "score": 0.29285849543193937
+        },
+        {
+          "left": "aspirin_shift_005",
+          "matches": 25,
+          "right": "aspirin_shift_005",
+          "score": 1.0
+        },
+        {
+          "left": "aspirin_shift_005",
+          "matches": 25,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 0.9999999963134115
+        },
+        {
+          "left": "aspirin_shift_005",
+          "matches": 25,
+          "right": "aspirin_shift_030",
+          "score": 1.0
+        },
+        {
+          "left": "aspirin_shift_005",
+          "matches": 1,
+          "right": "ladder_a",
+          "score": 0.021461388699740475
+        },
+        {
+          "left": "aspirin_shift_005",
+          "matches": 0,
+          "right": "ladder_b",
+          "score": 0.0
+        },
+        {
+          "left": "aspirin_shift_015_mz_007",
+          "matches": 25,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 1.0
+        },
+        {
+          "left": "aspirin_shift_015_mz_007",
+          "matches": 25,
+          "right": "aspirin_shift_030",
+          "score": 0.9999999963134115
+        },
+        {
+          "left": "aspirin_shift_015_mz_007",
+          "matches": 1,
+          "right": "ladder_a",
+          "score": 0.02147034643204905
+        },
+        {
+          "left": "aspirin_shift_015_mz_007",
+          "matches": 0,
+          "right": "ladder_b",
+          "score": 0.0
+        },
+        {
+          "left": "aspirin_shift_030",
+          "matches": 25,
+          "right": "aspirin_shift_030",
+          "score": 1.0
+        },
+        {
+          "left": "aspirin_shift_030",
+          "matches": 1,
+          "right": "ladder_a",
+          "score": 0.003244697828678674
+        },
+        {
+          "left": "aspirin_shift_030",
+          "matches": 1,
+          "right": "ladder_b",
+          "score": 0.0020102892070553826
+        },
+        {
+          "left": "ladder_a",
+          "matches": 15,
+          "right": "ladder_a",
+          "score": 0.9999999999999999
+        },
+        {
+          "left": "ladder_a",
+          "matches": 14,
+          "right": "ladder_b",
+          "score": 0.9564463801292216
+        },
+        {
+          "left": "ladder_b",
+          "matches": 15,
+          "right": "ladder_b",
+          "score": 1.0
+        }
+      ]
+    },
+    {
+      "intensity_power": 1.0,
+      "mz_power": 0.0,
+      "mz_tolerance": 2.0,
+      "similarities": [
+        {
+          "left": "aspirin",
+          "matches": 11,
+          "right": "aspirin",
+          "score": 1.0
+        },
+        {
+          "left": "aspirin",
+          "matches": 5,
+          "right": "cocaine",
+          "score": 0.023951087589805305
+        },
+        {
+          "left": "aspirin",
+          "matches": 5,
+          "right": "glucose",
+          "score": 0.4927056220112793
+        },
+        {
+          "left": "aspirin",
+          "matches": 10,
+          "right": "hydroxy_cholesterol",
+          "score": 0.4486355561890981
+        },
+        {
+          "left": "aspirin",
+          "matches": 3,
+          "right": "phenylalanine",
+          "score": 0.3288324038483376
+        },
+        {
+          "left": "aspirin",
+          "matches": 4,
+          "right": "salicin",
+          "score": 0.008610968541265241
+        },
+        {
+          "left": "aspirin",
+          "matches": 10,
+          "right": "aspirin_ch2",
+          "score": 0.9278446994594693
+        },
+        {
+          "left": "aspirin",
+          "matches": 5,
+          "right": "cocaine_ch2",
+          "score": 0.023140333288647518
+        },
+        {
+          "left": "aspirin",
+          "matches": 4,
+          "right": "glucose_ch2",
+          "score": 0.5150401249240925
+        },
+        {
+          "left": "aspirin",
+          "matches": 10,
+          "right": "hydroxy_cholesterol_ch2",
+          "score": 0.4456891592930408
+        },
+        {
+          "left": "aspirin",
+          "matches": 4,
+          "right": "phenylalanine_ch2",
+          "score": 0.3000384717887215
+        },
+        {
+          "left": "aspirin",
+          "matches": 4,
+          "right": "salicin_ch2",
+          "score": 0.009019304697850991
+        },
+        {
+          "left": "aspirin",
+          "matches": 11,
+          "right": "aspirin_shift_005",
+          "score": 1.0
+        },
+        {
+          "left": "aspirin",
+          "matches": 11,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 1.0
+        },
+        {
+          "left": "aspirin",
+          "matches": 11,
+          "right": "aspirin_shift_030",
+          "score": 1.0
+        },
+        {
+          "left": "aspirin",
+          "matches": 2,
+          "right": "ladder_a",
+          "score": 0.02349705203989475
+        },
+        {
+          "left": "aspirin",
+          "matches": 1,
+          "right": "ladder_b",
+          "score": 0.007179970999192057
+        },
+        {
+          "left": "cocaine",
+          "matches": 8,
+          "right": "cocaine",
+          "score": 1.0
+        },
+        {
+          "left": "cocaine",
+          "matches": 2,
+          "right": "glucose",
+          "score": 0.039005807747957734
+        },
+        {
+          "left": "cocaine",
+          "matches": 7,
+          "right": "hydroxy_cholesterol",
+          "score": 0.02127604903574709
+        },
+        {
+          "left": "cocaine",
+          "matches": 2,
+          "right": "phenylalanine",
+          "score": 0.015791802880588693
+        },
+        {
+          "left": "cocaine",
+          "matches": 3,
+          "right": "salicin",
+          "score": 0.2993168692272164
+        },
+        {
+          "left": "cocaine",
+          "matches": 4,
+          "right": "aspirin_ch2",
+          "score": 0.0027182492006513465
+        },
+        {
+          "left": "cocaine",
+          "matches": 8,
+          "right": "cocaine_ch2",
+          "score": 0.9999406407664143
+        },
+        {
+          "left": "cocaine",
+          "matches": 3,
+          "right": "glucose_ch2",
+          "score": 0.004752978860836223
+        },
+        {
+          "left": "cocaine",
+          "matches": 8,
+          "right": "hydroxy_cholesterol_ch2",
+          "score": 0.022782891025727628
+        },
+        {
+          "left": "cocaine",
+          "matches": 2,
+          "right": "phenylalanine_ch2",
+          "score": 6.1746651927693485e-6
+        },
+        {
+          "left": "cocaine",
+          "matches": 3,
+          "right": "salicin_ch2",
+          "score": 0.25983577409806163
+        },
+        {
+          "left": "cocaine",
+          "matches": 5,
+          "right": "aspirin_shift_005",
+          "score": 0.023951087589805305
+        },
+        {
+          "left": "cocaine",
+          "matches": 4,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 0.0196742494276905
+        },
+        {
+          "left": "cocaine",
+          "matches": 5,
+          "right": "aspirin_shift_030",
+          "score": 0.023951087589805305
+        },
+        {
+          "left": "cocaine",
+          "matches": 2,
+          "right": "ladder_a",
+          "score": 0.24655821254393856
+        },
+        {
+          "left": "cocaine",
+          "matches": 2,
+          "right": "ladder_b",
+          "score": 0.141587979177345
+        },
+        {
+          "left": "glucose",
+          "matches": 10,
+          "right": "glucose",
+          "score": 0.9999999999999999
+        },
+        {
+          "left": "glucose",
+          "matches": 8,
+          "right": "hydroxy_cholesterol",
+          "score": 0.5488846200458619
+        },
+        {
+          "left": "glucose",
+          "matches": 6,
+          "right": "phenylalanine",
+          "score": 0.1471764369758753
+        },
+        {
+          "left": "glucose",
+          "matches": 5,
+          "right": "salicin",
+          "score": 0.12204820666773421
+        },
+        {
+          "left": "glucose",
+          "matches": 4,
+          "right": "aspirin_ch2",
+          "score": 0.48013166313678174
+        },
+        {
+          "left": "glucose",
+          "matches": 2,
+          "right": "cocaine_ch2",
+          "score": 0.03908398054763818
+        },
+        {
+          "left": "glucose",
+          "matches": 10,
+          "right": "glucose_ch2",
+          "score": 0.9961018939032013
+        },
+        {
+          "left": "glucose",
+          "matches": 7,
+          "right": "hydroxy_cholesterol_ch2",
+          "score": 0.5447248845302001
+        },
+        {
+          "left": "glucose",
+          "matches": 5,
+          "right": "phenylalanine_ch2",
+          "score": 0.15013129483002263
+        },
+        {
+          "left": "glucose",
+          "matches": 3,
+          "right": "salicin_ch2",
+          "score": 0.018375087674455913
+        },
+        {
+          "left": "glucose",
+          "matches": 5,
+          "right": "aspirin_shift_005",
+          "score": 0.4927056220112793
+        },
+        {
+          "left": "glucose",
+          "matches": 5,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 0.4927056220112793
+        },
+        {
+          "left": "glucose",
+          "matches": 5,
+          "right": "aspirin_shift_030",
+          "score": 0.4927056220112793
+        },
+        {
+          "left": "glucose",
+          "matches": 4,
+          "right": "ladder_a",
+          "score": 0.4709131659977753
+        },
+        {
+          "left": "glucose",
+          "matches": 4,
+          "right": "ladder_b",
+          "score": 0.2608718657915246
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 45,
+          "right": "hydroxy_cholesterol",
+          "score": 1.0
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 6,
+          "right": "phenylalanine",
+          "score": 0.06528432432115315
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 11,
+          "right": "salicin",
+          "score": 0.05486780964648385
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 11,
+          "right": "aspirin_ch2",
+          "score": 0.5053976273601268
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 8,
+          "right": "cocaine_ch2",
+          "score": 0.021803853922921442
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 9,
+          "right": "glucose_ch2",
+          "score": 0.49744155309294563
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 42,
+          "right": "hydroxy_cholesterol_ch2",
+          "score": 0.998469395641468
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 6,
+          "right": "phenylalanine_ch2",
+          "score": 0.07043318992896307
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 13,
+          "right": "salicin_ch2",
+          "score": 0.051582227631804645
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 11,
+          "right": "aspirin_shift_005",
+          "score": 0.4409732089095691
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 11,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 0.4376326306376279
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 11,
+          "right": "aspirin_shift_030",
+          "score": 0.44063743755650037
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 9,
+          "right": "ladder_a",
+          "score": 0.04362636231822872
+        },
+        {
+          "left": "hydroxy_cholesterol",
+          "matches": 8,
+          "right": "ladder_b",
+          "score": 0.04483496003939733
+        },
+        {
+          "left": "phenylalanine",
+          "matches": 8,
+          "right": "phenylalanine",
+          "score": 0.9999999999999998
+        },
+        {
+          "left": "phenylalanine",
+          "matches": 2,
+          "right": "salicin",
+          "score": 0.002711376006520811
+        },
+        {
+          "left": "phenylalanine",
+          "matches": 4,
+          "right": "aspirin_ch2",
+          "score": 0.07253045680616872
+        },
+        {
+          "left": "phenylalanine",
+          "matches": 2,
+          "right": "cocaine_ch2",
+          "score": 0.017905569811549144
+        },
+        {
+          "left": "phenylalanine",
+          "matches": 6,
+          "right": "glucose_ch2",
+          "score": 0.1200580029823781
+        },
+        {
+          "left": "phenylalanine",
+          "matches": 6,
+          "right": "hydroxy_cholesterol_ch2",
+          "score": 0.0654518306703564
+        },
+        {
+          "left": "phenylalanine",
+          "matches": 8,
+          "right": "phenylalanine_ch2",
+          "score": 0.9999864660755282
+        },
+        {
+          "left": "phenylalanine",
+          "matches": 2,
+          "right": "salicin_ch2",
+          "score": 0.0029837513022433998
+        },
+        {
+          "left": "phenylalanine",
+          "matches": 3,
+          "right": "aspirin_shift_005",
+          "score": 0.3288324038483376
+        },
+        {
+          "left": "phenylalanine",
+          "matches": 3,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 0.3288324038483376
+        },
+        {
+          "left": "phenylalanine",
+          "matches": 3,
+          "right": "aspirin_shift_030",
+          "score": 0.3288324038483376
+        },
+        {
+          "left": "phenylalanine",
+          "matches": 0,
+          "right": "ladder_a",
+          "score": 0.0
+        },
+        {
+          "left": "phenylalanine",
+          "matches": 0,
+          "right": "ladder_b",
+          "score": 0.0
+        },
+        {
+          "left": "salicin",
+          "matches": 16,
+          "right": "salicin",
+          "score": 0.9999999999999999
+        },
+        {
+          "left": "salicin",
+          "matches": 4,
+          "right": "aspirin_ch2",
+          "score": 0.036291950391509224
+        },
+        {
+          "left": "salicin",
+          "matches": 4,
+          "right": "cocaine_ch2",
+          "score": 0.3039330710951827
+        },
+        {
+          "left": "salicin",
+          "matches": 2,
+          "right": "glucose_ch2",
+          "score": 0.006066204166211765
+        },
+        {
+          "left": "salicin",
+          "matches": 13,
+          "right": "hydroxy_cholesterol_ch2",
+          "score": 0.04853717977172865
+        },
+        {
+          "left": "salicin",
+          "matches": 5,
+          "right": "phenylalanine_ch2",
+          "score": 0.0031932532731692807
+        },
+        {
+          "left": "salicin",
+          "matches": 16,
+          "right": "salicin_ch2",
+          "score": 0.9958666308597084
+        },
+        {
+          "left": "salicin",
+          "matches": 4,
+          "right": "aspirin_shift_005",
+          "score": 0.008610968541265241
+        },
+        {
+          "left": "salicin",
+          "matches": 5,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 0.02379724757514121
+        },
+        {
+          "left": "salicin",
+          "matches": 4,
+          "right": "aspirin_shift_030",
+          "score": 0.008610968541265241
+        },
+        {
+          "left": "salicin",
+          "matches": 7,
+          "right": "ladder_a",
+          "score": 0.3682770091893355
+        },
+        {
+          "left": "salicin",
+          "matches": 6,
+          "right": "ladder_b",
+          "score": 0.43033726048333154
+        },
+        {
+          "left": "aspirin_ch2",
+          "matches": 12,
+          "right": "aspirin_ch2",
+          "score": 0.9999999999999999
+        },
+        {
+          "left": "aspirin_ch2",
+          "matches": 4,
+          "right": "cocaine_ch2",
+          "score": 0.003765335652603054
+        },
+        {
+          "left": "aspirin_ch2",
+          "matches": 6,
+          "right": "glucose_ch2",
+          "score": 0.4892316282082379
+        },
+        {
+          "left": "aspirin_ch2",
+          "matches": 11,
+          "right": "hydroxy_cholesterol_ch2",
+          "score": 0.5137513578338002
+        },
+        {
+          "left": "aspirin_ch2",
+          "matches": 5,
+          "right": "phenylalanine_ch2",
+          "score": 0.3273433356593174
+        },
+        {
+          "left": "aspirin_ch2",
+          "matches": 4,
+          "right": "salicin_ch2",
+          "score": 0.04232039434234608
+        },
+        {
+          "left": "aspirin_ch2",
+          "matches": 11,
+          "right": "aspirin_shift_005",
+          "score": 0.99821566798739
+        },
+        {
+          "left": "aspirin_ch2",
+          "matches": 11,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 0.99821566798739
+        },
+        {
+          "left": "aspirin_ch2",
+          "matches": 11,
+          "right": "aspirin_shift_030",
+          "score": 0.99821566798739
+        },
+        {
+          "left": "aspirin_ch2",
+          "matches": 2,
+          "right": "ladder_a",
+          "score": 0.019549317823730383
+        },
+        {
+          "left": "aspirin_ch2",
+          "matches": 2,
+          "right": "ladder_b",
+          "score": 0.010089098312790047
+        },
+        {
+          "left": "cocaine_ch2",
+          "matches": 8,
+          "right": "cocaine_ch2",
+          "score": 1.0
+        },
+        {
+          "left": "cocaine_ch2",
+          "matches": 3,
+          "right": "glucose_ch2",
+          "score": 0.004758548159865245
+        },
+        {
+          "left": "cocaine_ch2",
+          "matches": 7,
+          "right": "hydroxy_cholesterol_ch2",
+          "score": 0.018984737361951352
+        },
+        {
+          "left": "cocaine_ch2",
+          "matches": 2,
+          "right": "phenylalanine_ch2",
+          "score": 6.141879103604004e-6
+        },
+        {
+          "left": "cocaine_ch2",
+          "matches": 3,
+          "right": "salicin_ch2",
+          "score": 0.2635729139987356
+        },
+        {
+          "left": "cocaine_ch2",
+          "matches": 5,
+          "right": "aspirin_shift_005",
+          "score": 0.023140333288647518
+        },
+        {
+          "left": "cocaine_ch2",
+          "matches": 4,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 0.018236588795060304
+        },
+        {
+          "left": "cocaine_ch2",
+          "matches": 5,
+          "right": "aspirin_shift_030",
+          "score": 0.023140333288647518
+        },
+        {
+          "left": "cocaine_ch2",
+          "matches": 2,
+          "right": "ladder_a",
+          "score": 0.158219509971342
+        },
+        {
+          "left": "cocaine_ch2",
+          "matches": 2,
+          "right": "ladder_b",
+          "score": 0.27323338812291276
+        },
+        {
+          "left": "glucose_ch2",
+          "matches": 10,
+          "right": "glucose_ch2",
+          "score": 1.0
+        },
+        {
+          "left": "glucose_ch2",
+          "matches": 9,
+          "right": "hydroxy_cholesterol_ch2",
+          "score": 0.4967351628698036
+        },
+        {
+          "left": "glucose_ch2",
+          "matches": 6,
+          "right": "phenylalanine_ch2",
+          "score": 0.11778918353360968
+        },
+        {
+          "left": "glucose_ch2",
+          "matches": 4,
+          "right": "salicin_ch2",
+          "score": 0.10570800053417968
+        },
+        {
+          "left": "glucose_ch2",
+          "matches": 4,
+          "right": "aspirin_shift_005",
+          "score": 0.5150401249240925
+        },
+        {
+          "left": "glucose_ch2",
+          "matches": 4,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 0.5150401249240925
+        },
+        {
+          "left": "glucose_ch2",
+          "matches": 4,
+          "right": "aspirin_shift_030",
+          "score": 0.5150401249240925
+        },
+        {
+          "left": "glucose_ch2",
+          "matches": 4,
+          "right": "ladder_a",
+          "score": 0.34875612665296185
+        },
+        {
+          "left": "glucose_ch2",
+          "matches": 4,
+          "right": "ladder_b",
+          "score": 0.23681718881724623
+        },
+        {
+          "left": "hydroxy_cholesterol_ch2",
+          "matches": 46,
+          "right": "hydroxy_cholesterol_ch2",
+          "score": 1.0
+        },
+        {
+          "left": "hydroxy_cholesterol_ch2",
+          "matches": 7,
+          "right": "phenylalanine_ch2",
+          "score": 0.060484687778252784
+        },
+        {
+          "left": "hydroxy_cholesterol_ch2",
+          "matches": 11,
+          "right": "salicin_ch2",
+          "score": 0.046135145520929156
+        },
+        {
+          "left": "hydroxy_cholesterol_ch2",
+          "matches": 11,
+          "right": "aspirin_shift_005",
+          "score": 0.43787978206121625
+        },
+        {
+          "left": "hydroxy_cholesterol_ch2",
+          "matches": 11,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 0.4376751485032284
+        },
+        {
+          "left": "hydroxy_cholesterol_ch2",
+          "matches": 11,
+          "right": "aspirin_shift_030",
+          "score": 0.4378543132397626
+        },
+        {
+          "left": "hydroxy_cholesterol_ch2",
+          "matches": 8,
+          "right": "ladder_a",
+          "score": 0.033629817698628696
+        },
+        {
+          "left": "hydroxy_cholesterol_ch2",
+          "matches": 8,
+          "right": "ladder_b",
+          "score": 0.043900882187583604
+        },
+        {
+          "left": "phenylalanine_ch2",
+          "matches": 8,
+          "right": "phenylalanine_ch2",
+          "score": 1.0
+        },
+        {
+          "left": "phenylalanine_ch2",
+          "matches": 5,
+          "right": "salicin_ch2",
+          "score": 0.003579030060094635
+        },
+        {
+          "left": "phenylalanine_ch2",
+          "matches": 4,
+          "right": "aspirin_shift_005",
+          "score": 0.3000384717887215
+        },
+        {
+          "left": "phenylalanine_ch2",
+          "matches": 4,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 0.3000384717887215
+        },
+        {
+          "left": "phenylalanine_ch2",
+          "matches": 4,
+          "right": "aspirin_shift_030",
+          "score": 0.3000384717887215
+        },
+        {
+          "left": "phenylalanine_ch2",
+          "matches": 1,
+          "right": "ladder_a",
+          "score": 0.0000271099995799548
+        },
+        {
+          "left": "phenylalanine_ch2",
+          "matches": 1,
+          "right": "ladder_b",
+          "score": 0.000041091708799095335
+        },
+        {
+          "left": "salicin_ch2",
+          "matches": 16,
+          "right": "salicin_ch2",
+          "score": 1.0
+        },
+        {
+          "left": "salicin_ch2",
+          "matches": 4,
+          "right": "aspirin_shift_005",
+          "score": 0.009019304697850991
+        },
+        {
+          "left": "salicin_ch2",
+          "matches": 5,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 0.025094874864467983
+        },
+        {
+          "left": "salicin_ch2",
+          "matches": 4,
+          "right": "aspirin_shift_030",
+          "score": 0.009019304697850991
+        },
+        {
+          "left": "salicin_ch2",
+          "matches": 7,
+          "right": "ladder_a",
+          "score": 0.4291750965682783
+        },
+        {
+          "left": "salicin_ch2",
+          "matches": 7,
+          "right": "ladder_b",
+          "score": 0.47579996519399065
+        },
+        {
+          "left": "aspirin_shift_005",
+          "matches": 11,
+          "right": "aspirin_shift_005",
+          "score": 1.0
+        },
+        {
+          "left": "aspirin_shift_005",
+          "matches": 11,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 1.0
+        },
+        {
+          "left": "aspirin_shift_005",
+          "matches": 11,
+          "right": "aspirin_shift_030",
+          "score": 1.0
+        },
+        {
+          "left": "aspirin_shift_005",
+          "matches": 2,
+          "right": "ladder_a",
+          "score": 0.02349705203989475
+        },
+        {
+          "left": "aspirin_shift_005",
+          "matches": 1,
+          "right": "ladder_b",
+          "score": 0.007179970999192057
+        },
+        {
+          "left": "aspirin_shift_015_mz_007",
+          "matches": 11,
+          "right": "aspirin_shift_015_mz_007",
+          "score": 1.0
+        },
+        {
+          "left": "aspirin_shift_015_mz_007",
+          "matches": 11,
+          "right": "aspirin_shift_030",
+          "score": 1.0
+        },
+        {
+          "left": "aspirin_shift_015_mz_007",
+          "matches": 2,
+          "right": "ladder_a",
+          "score": 0.02349705203989475
+        },
+        {
+          "left": "aspirin_shift_015_mz_007",
+          "matches": 1,
+          "right": "ladder_b",
+          "score": 0.007179970999192057
+        },
+        {
+          "left": "aspirin_shift_030",
+          "matches": 11,
+          "right": "aspirin_shift_030",
+          "score": 1.0
+        },
+        {
+          "left": "aspirin_shift_030",
+          "matches": 2,
+          "right": "ladder_a",
+          "score": 0.02349705203989475
+        },
+        {
+          "left": "aspirin_shift_030",
+          "matches": 1,
+          "right": "ladder_b",
+          "score": 0.007179970999192057
+        },
+        {
+          "left": "ladder_a",
+          "matches": 15,
+          "right": "ladder_a",
+          "score": 1.0
+        },
+        {
+          "left": "ladder_a",
+          "matches": 14,
+          "right": "ladder_b",
+          "score": 0.8866508847478288
+        },
+        {
+          "left": "ladder_b",
+          "matches": 15,
+          "right": "ladder_b",
+          "score": 1.0
+        }
+      ]
+    }
+  ],
+  "raw_spectra": {
+    "aspirin": {
+      "intensities": [
+        49377.3984375,
+        53422.1015625,
+        454244.5,
+        57881.0,
+        1997532.0,
+        825848.1875,
+        1153465.5,
+        96202.796875,
+        58626.80078125,
+        44573.80078125,
+        394779.8125,
+        1129287.75,
+        56357.19921875,
+        1654496.5,
+        72487.296875,
+        707899.375,
+        1119356.375,
+        207437.40625,
+        587441.8125,
+        166384.0,
+        9695889.0,
+        2506571.25,
+        5824675.0,
+        6124332.0,
+        78621.796875,
+        34285448.0,
+        18191732.0,
+        69049.296875,
+        120675.8984375
+      ],
+      "mz": [
+        50.01490020751953,
+        51.02280044555664,
+        53.03850173950195,
+        55.0177001953125,
+        65.03839874267578,
+        77.03829956054688,
+        79.05400085449219,
+        80.02539825439453,
+        81.03340148925781,
+        91.0541000366211,
+        92.02539825439453,
+        93.0333023071289,
+        94.04109954833984,
+        95.04900360107422,
+        98.03610229492188,
+        105.0333023071289,
+        105.04450225830078,
+        107.04889678955078,
+        111.04389953613281,
+        120.02030181884766,
+        121.0281982421875,
+        121.03939819335938,
+        133.0281982421875,
+        135.04379272460938,
+        138.0308074951172,
+        149.02310180664062,
+        163.03860473632812,
+        167.03370666503906,
+        181.04910278320312
+      ],
+      "precursor_mz": 181.0489959716797
+    },
+    "aspirin_ch2": {
+      "intensities": [
+        40269.21853077426,
+        49849.25510247617,
+        429657.4910038237,
+        56508.37777681505,
+        1635317.357077258,
+        782902.3342890685,
+        997432.3708580466,
+        79748.7662831578,
+        66929.34156178095,
+        40033.865625298204,
+        370505.92200148734,
+        1081830.3078213856,
+        48140.07522618935,
+        1440370.088821514,
+        77590.48144560753,
+        740187.7638248592,
+        1325731.0824316114,
+        171930.69308642962,
+        535932.584266934,
+        181960.4231491442,
+        10714619.071760325,
+        2464175.467872584,
+        6746077.752975208,
+        6301913.531438543,
+        64954.865125674696,
+        35531027.8419827,
+        21818881.036866378,
+        59339.74757960729,
+        113006.94833320897
+      ],
+      "mz": [
+        50.01490020751953,
+        51.02280044555664,
+        53.03850173950195,
+        55.0177001953125,
+        65.03839874267578,
+        77.03829956054688,
+        79.05400085449219,
+        80.02539825439453,
+        81.03340148925781,
+        105.06975003662109,
+        106.04104825439452,
+        107.0489523071289,
+        108.05674954833984,
+        109.06465360107421,
+        112.05175229492187,
+        119.0489523071289,
+        119.06015225830077,
+        121.06454678955077,
+        125.0595495361328,
+        134.03595181884765,
+        135.0438482421875,
+        135.05504819335937,
+        147.0438482421875,
+        149.05944272460937,
+        152.04645749511718,
+        163.03875180664062,
+        177.05425473632812,
+        181.04935666503906,
+        195.06475278320312
+      ],
+      "precursor_mz": 195.06464597167968
+    },
+    "aspirin_shift_005": {
+      "intensities": [
+        49377.3984375,
+        53422.1015625,
+        454244.5,
+        57881.0,
+        1997532.0,
+        825848.1875,
+        1153465.5,
+        96202.796875,
+        58626.80078125,
+        44573.80078125,
+        394779.8125,
+        1129287.75,
+        56357.19921875,
+        1654496.5,
+        72487.296875,
+        707899.375,
+        1119356.375,
+        207437.40625,
+        587441.8125,
+        166384.0,
+        9695889.0,
+        2506571.25,
+        5824675.0,
+        6124332.0,
+        78621.796875,
+        34285448.0,
+        18191732.0,
+        69049.296875,
+        120675.8984375
+      ],
+      "mz": [
+        50.01490020751953,
+        51.02280044555664,
+        53.03850173950195,
+        55.0177001953125,
+        65.03839874267578,
+        77.03829956054688,
+        79.05400085449219,
+        80.02539825439453,
+        81.03340148925781,
+        91.0541000366211,
+        92.02539825439453,
+        93.0333023071289,
+        94.04109954833984,
+        95.04900360107422,
+        98.03610229492188,
+        105.0333023071289,
+        105.04450225830078,
+        107.04889678955078,
+        111.04389953613281,
+        120.02030181884766,
+        121.0281982421875,
+        121.03939819335938,
+        133.0281982421875,
+        135.04379272460938,
+        138.0308074951172,
+        149.02310180664062,
+        163.03860473632812,
+        167.03370666503906,
+        181.04910278320312
+      ],
+      "precursor_mz": 181.0989959716797
+    },
+    "aspirin_shift_015_mz_007": {
+      "intensities": [
+        49377.3984375,
+        53422.1015625,
+        454244.5,
+        57881.0,
+        1997532.0,
+        825848.1875,
+        1153465.5,
+        96202.796875,
+        58626.80078125,
+        44573.80078125,
+        394779.8125,
+        1129287.75,
+        56357.19921875,
+        1654496.5,
+        72487.296875,
+        707899.375,
+        1119356.375,
+        207437.40625,
+        587441.8125,
+        166384.0,
+        9695889.0,
+        2506571.25,
+        5824675.0,
+        6124332.0,
+        78621.796875,
+        34285448.0,
+        18191732.0,
+        69049.296875,
+        120675.8984375
+      ],
+      "mz": [
+        50.08490020751953,
+        51.09280044555664,
+        53.10850173950195,
+        55.0877001953125,
+        65.10839874267577,
+        77.10829956054687,
+        79.12400085449218,
+        80.09539825439452,
+        81.1034014892578,
+        91.12410003662109,
+        92.09539825439452,
+        93.1033023071289,
+        94.11109954833984,
+        95.11900360107421,
+        98.10610229492187,
+        105.1033023071289,
+        105.11450225830077,
+        107.11889678955077,
+        111.1138995361328,
+        120.09030181884765,
+        121.0981982421875,
+        121.10939819335937,
+        133.0981982421875,
+        135.11379272460937,
+        138.10080749511718,
+        149.09310180664062,
+        163.10860473632812,
+        167.10370666503906,
+        181.11910278320312
+      ],
+      "precursor_mz": 181.1989959716797
+    },
+    "aspirin_shift_030": {
+      "intensities": [
+        49377.3984375,
+        53422.1015625,
+        454244.5,
+        57881.0,
+        1997532.0,
+        825848.1875,
+        1153465.5,
+        96202.796875,
+        58626.80078125,
+        44573.80078125,
+        394779.8125,
+        1129287.75,
+        56357.19921875,
+        1654496.5,
+        72487.296875,
+        707899.375,
+        1119356.375,
+        207437.40625,
+        587441.8125,
+        166384.0,
+        9695889.0,
+        2506571.25,
+        5824675.0,
+        6124332.0,
+        78621.796875,
+        34285448.0,
+        18191732.0,
+        69049.296875,
+        120675.8984375
+      ],
+      "mz": [
+        50.01490020751953,
+        51.02280044555664,
+        53.03850173950195,
+        55.0177001953125,
+        65.03839874267578,
+        77.03829956054688,
+        79.05400085449219,
+        80.02539825439453,
+        81.03340148925781,
+        91.0541000366211,
+        92.02539825439453,
+        93.0333023071289,
+        94.04109954833984,
+        95.04900360107422,
+        98.03610229492188,
+        105.0333023071289,
+        105.04450225830078,
+        107.04889678955078,
+        111.04389953613281,
+        120.02030181884766,
+        121.0281982421875,
+        121.03939819335938,
+        133.0281982421875,
+        135.04379272460938,
+        138.0308074951172,
+        149.02310180664062,
+        163.03860473632812,
+        167.03370666503906,
+        181.04910278320312
+      ],
+      "precursor_mz": 181.3489959716797
+    },
+    "cocaine": {
+      "intensities": [
+        13342.4931640625,
+        3264.133544921875,
+        1584.2747802734375,
+        2382.930908203125,
+        3257.3662109375,
+        133504.296875,
+        1849.14013671875,
+        1391.7344970703125,
+        86052.375
+      ],
+      "mz": [
+        82.06478881835938,
+        105.03324890136719,
+        109.2137451171875,
+        119.04920959472656,
+        150.09140014648438,
+        182.11767578125,
+        185.8046875,
+        226.57907104492188,
+        304.15313720703125
+      ],
+      "precursor_mz": 304.15313720703125
+    },
+    "cocaine_ch2": {
+      "intensities": [
+        11474.340376052334,
+        3471.8779547151985,
+        1825.5450357569962,
+        2406.0355417918427,
+        2720.179060243228,
+        116729.44221947365,
+        1772.380274562744,
+        1294.1958502019288,
+        76860.1867956511
+      ],
+      "mz": [
+        82.06478881835938,
+        105.03324890136719,
+        109.2137451171875,
+        119.04920959472656,
+        150.09140014648438,
+        196.13332578125,
+        199.8203375,
+        240.59472104492187,
+        318.16878720703124
+      ],
+      "precursor_mz": 318.16878720703124
+    },
+    "glucose": {
+      "intensities": [
+        798.85888671875,
+        1257.25341796875,
+        3923.2490234375,
+        1952.9654541015625,
+        169.58734130859375,
+        412.05517578125,
+        309.93951416015625,
+        520.5691528320312,
+        555.742431640625,
+        13786.814453125,
+        1758.81640625,
+        408.8897705078125,
+        892.346923828125,
+        9220.53515625
+      ],
+      "mz": [
+        82.9521484375,
+        105.27044677734375,
+        112.78939819335938,
+        121.20800018310547,
+        129.11669921875,
+        131.10409545898438,
+        131.99069213867188,
+        135.0079345703125,
+        142.50119018554688,
+        143.1029052734375,
+        158.09225463867188,
+        160.23529052734375,
+        173.1004638671875,
+        185.15267944335938
+      ],
+      "precursor_mz": 203.0500030517578
+    },
+    "glucose_ch2": {
+      "intensities": [
+        657.7822875129613,
+        1156.6422849246399,
+        3741.9357465144076,
+        1566.2521002798535,
+        150.547323082335,
+        354.8655986720385,
+        285.6619412618125,
+        433.0523705876488,
+        445.3929101211868,
+        16248.332345702673,
+        1515.6722437493997,
+        384.8959513572611,
+        775.7103292992493,
+        9124.504316460849
+      ],
+      "mz": [
+        82.9521484375,
+        119.28609677734374,
+        126.80504819335937,
+        135.22365018310546,
+        143.13234921875,
+        145.11974545898437,
+        146.00634213867187,
+        149.0235845703125,
+        156.51684018554687,
+        157.1185552734375,
+        172.10790463867187,
+        174.25094052734374,
+        187.1161138671875,
+        199.16832944335937
+      ],
+      "precursor_mz": 217.0656530517578
+    },
+    "hydroxy_cholesterol": {
+      "intensities": [
+        4.979911804199219,
+        22.76545524597168,
+        16.608736038208008,
+        84.7729721069336,
+        70.1302261352539,
+        11.714973449707031,
+        31.98192596435547,
+        54.6028938293457,
+        91.45502471923828,
+        46.11669158935547,
+        37.930030822753906,
+        74.30709075927734,
+        41.61702346801758,
+        54.82719421386719,
+        3.832051992416382,
+        68.11918640136719,
+        102.47864532470703,
+        114.72334289550781,
+        107.7490234375,
+        12.766851425170898,
+        6.9919657707214355,
+        17.365039825439453,
+        16.66510581970215,
+        121.05883026123047,
+        66.69908905029297,
+        78.69119262695312,
+        21.242490768432617,
+        17.179059982299805,
+        18.20996856689453,
+        16.72152328491211,
+        220.09820556640625,
+        7.839384078979492,
+        180.72280883789062,
+        176.1594696044922,
+        85.95611572265625,
+        18.903169631958008,
+        36.61906051635742,
+        14.848514556884766,
+        26.946313858032227,
+        195.63363647460938,
+        74.91039276123047,
+        184.57904052734375,
+        174.89984130859375,
+        63.30851364135742,
+        11.29302978515625,
+        37.8712272644043,
+        325.63116455078125,
+        7.312701225280762,
+        98.87300872802734,
+        323.9468994140625,
+        71.51020050048828,
+        16.049942016601562,
+        64.06538391113281,
+        192.0312957763672,
+        14.154706954956055,
+        120.74943542480469,
+        368.51678466796875,
+        226.59230041503906,
+        28.575651168823242,
+        15.240299224853516,
+        6.454415798187256,
+        176.75949096679688,
+        10.867486953735352,
+        91.04105377197266,
+        85.68934631347656,
+        7.40976095199585,
+        365.319580078125,
+        28.59548568725586,
+        40.71728515625,
+        11.677838325500488,
+        11.328113555908203,
+        145.452392578125,
+        80.11607360839844,
+        263.12127685546875,
+        252.11195373535156,
+        11.013157844543457,
+        319.30462646484375,
+        56.708919525146484,
+        139.7557373046875,
+        57.95003890991211,
+        23.482685089111328,
+        14.781034469604492,
+        22.184133529663086,
+        454.479736328125,
+        154.09349060058594,
+        368.51959228515625,
+        56.954345703125,
+        42.74482345581055,
+        19.643260955810547,
+        88.46149444580078,
+        94.91017150878906,
+        16.44283676147461,
+        413.6416320800781,
+        7.445189952850342,
+        41.74992370605469,
+        87.4764404296875,
+        128.76333618164062,
+        64.6731185913086,
+        14.391298294067383,
+        13.502330780029297,
+        75.39729309082031,
+        49.663108825683594,
+        169.1502685546875,
+        12.27285099029541,
+        152.57940673828125,
+        113.56498718261719,
+        30.96883773803711,
+        16.352489471435547,
+        310.9302673339844,
+        41.87001419067383,
+        20.039594650268555,
+        72.41603088378906,
+        155.0880584716797,
+        234.50889587402344,
+        24.093280792236328,
+        83.27174377441406,
+        53.76711654663086,
+        85.91554260253906,
+        40.05982208251953,
+        35.14933776855469,
+        25.06899642944336,
+        30.073320388793945,
+        9.299103736877441,
+        60.239253997802734,
+        6.9355010986328125,
+        14848.8876953125,
+        179.36614990234375,
+        46.814239501953125,
+        46.517662048339844,
+        447.7222900390625,
+        12.113778114318848
+      ],
+      "mz": [
+        79.30683135986328,
+        81.03689575195312,
+        83.17062377929688,
+        95.11650085449219,
+        97.14131164550781,
+        103.33063507080078,
+        105.13883972167969,
+        107.09952545166016,
+        109.08866882324219,
+        111.17135620117188,
+        117.06755828857422,
+        119.17308044433594,
+        121.16685485839844,
+        123.2113037109375,
+        125.54904174804688,
+        129.06756591796875,
+        131.02584838867188,
+        133.06011962890625,
+        135.1088104248047,
+        137.158203125,
+        139.15988159179688,
+        143.09524536132812,
+        144.09375,
+        145.11795043945312,
+        147.1353759765625,
+        149.23699951171875,
+        151.34097290039062,
+        155.07818603515625,
+        156.218505859375,
+        157.1280059814453,
+        159.12319946289062,
+        160.32916259765625,
+        161.14500427246094,
+        163.19815063476562,
+        165.24586486816406,
+        167.08836364746094,
+        169.13075256347656,
+        170.00128173828125,
+        171.11575317382812,
+        173.205078125,
+        175.22988891601562,
+        177.12167358398438,
+        179.24374389648438,
+        181.1219482421875,
+        182.87095642089844,
+        185.17625427246094,
+        187.16738891601562,
+        188.1353759765625,
+        189.40036010742188,
+        191.18641662597656,
+        193.24972534179688,
+        197.1407470703125,
+        199.20748901367188,
+        201.1502685546875,
+        202.0186767578125,
+        203.1893310546875,
+        205.1939697265625,
+        207.16464233398438,
+        209.1722412109375,
+        210.23471069335938,
+        211.33407592773438,
+        213.27459716796875,
+        214.41952514648438,
+        215.13983154296875,
+        217.144775390625,
+        218.28744506835938,
+        219.20706176757812,
+        221.18212890625,
+        223.02651977539062,
+        224.17459106445312,
+        225.35479736328125,
+        227.09613037109375,
+        229.2921142578125,
+        231.22824096679688,
+        233.22427368164062,
+        239.40975952148438,
+        241.22613525390625,
+        243.17080688476562,
+        245.26358032226562,
+        247.4163818359375,
+        249.43923950195312,
+        251.27462768554688,
+        253.4276123046875,
+        255.29483032226562,
+        257.3571472167969,
+        259.1942138671875,
+        261.2124938964844,
+        263.7592468261719,
+        267.26141357421875,
+        269.2259826660156,
+        271.2661437988281,
+        272.0154724121094,
+        273.28350830078125,
+        274.1671142578125,
+        283.19818115234375,
+        285.3158874511719,
+        287.2102966308594,
+        288.7436218261719,
+        289.4022521972656,
+        291.2339172363281,
+        293.3188171386719,
+        295.0741271972656,
+        297.28076171875,
+        299.34979248046875,
+        301.3092041015625,
+        303.2643127441406,
+        305.2552795410156,
+        309.2677307128906,
+        311.2625427246094,
+        313.286376953125,
+        315.27020263671875,
+        324.4085998535156,
+        325.4278564453125,
+        327.3179626464844,
+        327.93963623046875,
+        329.2793884277344,
+        338.4605407714844,
+        339.4599914550781,
+        340.2881774902344,
+        341.3694152832031,
+        343.32635498046875,
+        349.2816467285156,
+        354.27203369140625,
+        357.4516296386719,
+        365.5164794921875,
+        367.32904052734375,
+        368.2337951660156,
+        368.8748779296875,
+        384.3243103027344,
+        385.3056640625,
+        386.43731689453125
+      ],
+      "precursor_mz": 385.3450012207031
+    },
+    "hydroxy_cholesterol_ch2": {
+      "intensities": [
+        4.560294041370399,
+        24.92257829829753,
+        18.01072211390465,
+        69.55556772313894,
+        69.35260220288704,
+        13.67634308185489,
+        37.55246756112853,
+        55.37661666536369,
+        76.59984520384018,
+        50.59196004303941,
+        36.9666016590205,
+        63.13176625186152,
+        49.082710789970186,
+        56.525289227001885,
+        3.9991580003614526,
+        67.06024380686924,
+        109.78718087763356,
+        91.94248328921756,
+        95.75855020384712,
+        11.170232523820822,
+        7.130702886292324,
+        20.431307743874775,
+        14.041936944303703,
+        132.4006432176079,
+        64.96106864634716,
+        73.38637033117188,
+        21.740833685869248,
+        14.948060255269295,
+        18.390832099997517,
+        16.108858707662616,
+        176.33290134640703,
+        8.801982881104662,
+        144.82989932227662,
+        200.22955807385188,
+        70.19337076165472,
+        19.230793405432667,
+        33.01346331644102,
+        17.15748098557578,
+        24.65276714195806,
+        160.90818835633792,
+        63.60362655217216,
+        189.796633442802,
+        147.08408947320973,
+        62.39168548442323,
+        9.588852973798435,
+        40.88641540481278,
+        371.0085275101247,
+        7.10303217437824,
+        102.99603965190035,
+        370.990276318618,
+        83.20225610914235,
+        18.877563904990314,
+        69.92266328858177,
+        200.88656948347162,
+        13.946837217228353,
+        98.11288872866031,
+        424.033815781912,
+        239.30511418036778,
+        31.56854221151507,
+        18.093611072272783,
+        6.553917915975234,
+        205.8295487822794,
+        9.572301099817025,
+        77.77952641033757,
+        83.05136365589775,
+        6.311170152073351,
+        313.2952786014081,
+        31.99978603409318,
+        48.49923429091315,
+        12.6648107434001,
+        9.792460105860217,
+        124.12251975518528,
+        94.39027439201978,
+        263.5778518444234,
+        207.3546214623948,
+        12.180481860328166,
+        321.1910801671949,
+        58.19538789504827,
+        132.10549876859395,
+        54.9043159494099,
+        20.067535019584138,
+        17.6870982011673,
+        18.533685041985834,
+        371.4825418640413,
+        182.78437910176365,
+        334.07662308685883,
+        66.00891754648688,
+        43.27342954219394,
+        22.263598579325034,
+        90.42697081339239,
+        113.73561666880772,
+        13.581704936611892,
+        334.036956843286,
+        7.978317136577215,
+        38.81316219357033,
+        96.38749212053459,
+        105.71795542743044,
+        76.35069735090657,
+        12.257420076148541,
+        15.52036034433156,
+        74.03730368776704,
+        49.207001646177325,
+        184.69029744843849,
+        12.066752620635663,
+        131.85465723570923,
+        111.08907665896014,
+        34.54875869506375,
+        17.90225976860994,
+        266.05994544414216,
+        36.22170492705881,
+        21.00283351204175,
+        85.8828853155813,
+        145.98364188490132,
+        244.83209002550916,
+        20.203027766477653,
+        72.01091927116315,
+        53.87711215425414,
+        81.45005209891404,
+        47.40564561493998,
+        29.289130362490656,
+        28.48891294511853,
+        35.425558213436965,
+        9.909467860172484,
+        50.65537766690732,
+        5.843044000025892,
+        14865.206581638811,
+        182.3224307534972,
+        44.36407514395718,
+        37.8845590558884,
+        361.7285148960834,
+        11.997508336427785
+      ],
+      "mz": [
+        79.30683135986328,
+        81.03689575195312,
+        83.17062377929688,
+        95.11650085449219,
+        97.14131164550781,
+        103.33063507080078,
+        105.13883972167969,
+        107.09952545166016,
+        109.08866882324219,
+        111.17135620117188,
+        117.06755828857422,
+        119.17308044433594,
+        121.16685485839844,
+        123.2113037109375,
+        125.54904174804688,
+        129.06756591796875,
+        131.02584838867188,
+        133.06011962890625,
+        135.1088104248047,
+        137.158203125,
+        139.15988159179688,
+        143.09524536132812,
+        144.09375,
+        145.11795043945312,
+        147.1353759765625,
+        149.23699951171875,
+        151.34097290039062,
+        155.07818603515625,
+        156.218505859375,
+        157.1280059814453,
+        159.12319946289062,
+        160.32916259765625,
+        161.14500427246094,
+        163.19815063476562,
+        165.24586486816406,
+        167.08836364746094,
+        169.13075256347656,
+        170.00128173828125,
+        171.11575317382812,
+        173.205078125,
+        175.22988891601562,
+        177.12167358398438,
+        179.24374389648438,
+        181.1219482421875,
+        182.87095642089844,
+        185.17625427246094,
+        187.16738891601562,
+        188.1353759765625,
+        189.40036010742188,
+        191.18641662597656,
+        207.26537534179687,
+        211.1563970703125,
+        213.22313901367187,
+        215.1659185546875,
+        216.0343267578125,
+        217.2049810546875,
+        219.2096197265625,
+        221.18029233398437,
+        223.1878912109375,
+        224.25036069335937,
+        225.34972592773437,
+        227.29024716796874,
+        228.43517514648437,
+        229.15548154296874,
+        231.160425390625,
+        232.30309506835937,
+        233.22271176757812,
+        235.19777890625,
+        237.04216977539062,
+        238.19024106445312,
+        239.37044736328124,
+        241.11178037109374,
+        243.3077642578125,
+        245.24389096679687,
+        247.23992368164062,
+        253.42540952148437,
+        255.24178525390624,
+        257.1864568847656,
+        259.2792303222656,
+        261.4320318359375,
+        263.4548895019531,
+        265.29027768554687,
+        267.4432623046875,
+        269.3104803222656,
+        271.37279721679687,
+        273.2098638671875,
+        275.22814389648437,
+        277.77489682617187,
+        281.27706357421874,
+        283.2416326660156,
+        285.2817937988281,
+        286.03112241210937,
+        287.29915830078124,
+        288.1827642578125,
+        297.21383115234374,
+        299.33153745117187,
+        301.22594663085937,
+        302.75927182617187,
+        303.4179021972656,
+        305.2495672363281,
+        307.33446713867187,
+        309.0897771972656,
+        311.29641171875,
+        313.36544248046874,
+        315.3248541015625,
+        317.2799627441406,
+        319.2709295410156,
+        323.2833807128906,
+        325.27819272460937,
+        327.302026953125,
+        329.28585263671874,
+        338.4242498535156,
+        339.4435064453125,
+        341.33361264648437,
+        341.95528623046874,
+        343.29503842773437,
+        352.47619077148437,
+        353.4756414550781,
+        354.30382749023437,
+        355.3850652832031,
+        357.34200498046874,
+        363.2972967285156,
+        368.28768369140624,
+        371.46727963867187,
+        379.5321294921875,
+        381.34469052734374,
+        382.2494451660156,
+        382.8905279296875,
+        398.33996030273437,
+        399.3213140625,
+        400.45296689453124
+      ],
+      "precursor_mz": 399.3606512207031
+    },
+    "ladder_a": {
+      "intensities": [
+        0.8076778867198684,
+        0.9670560982103674,
+        0.8906021227170459,
+        0.8730629557902354,
+        0.6811924386660074,
+        0.3746086766612513,
+        0.8439996740848982,
+        0.5371245329377166,
+        0.5144303925548318,
+        0.14395033682408692,
+        0.787468392356732,
+        0.8961686054840324,
+        0.9181059077503683,
+        0.5643384004252611,
+        0.8297079413524029
+      ],
+      "mz": [
+        100.0,
+        114.01565,
+        128.0313,
+        142.04695,
+        156.0626,
+        170.07825,
+        184.09390000000002,
+        198.10955,
+        212.1252,
+        226.14085,
+        240.1565,
+        254.17215000000002,
+        268.18780000000004,
+        282.20345,
+        296.2191
+      ],
+      "precursor_mz": 400.0
+    },
+    "ladder_b": {
+      "intensities": [
+        0.9912919054157115,
+        0.8181798424884483,
+        0.2091513708492786,
+        0.28365871161407935,
+        0.18910045485260663,
+        0.17270769211420545,
+        0.3864759870707159,
+        0.7528864230748477,
+        0.050120047143800056,
+        0.6482501146596386,
+        0.9359342349301227,
+        0.6752779656761131,
+        0.9734958289463826,
+        0.23856566820483155,
+        0.3589653839717374
+      ],
+      "mz": [
+        100.0,
+        114.01565,
+        128.0313,
+        142.04695,
+        156.0626,
+        170.07825,
+        184.09390000000002,
+        198.10955,
+        212.1252,
+        226.14085,
+        240.1565,
+        254.17215000000002,
+        268.18780000000004,
+        282.20345,
+        296.2191
+      ],
+      "precursor_mz": 414.01565
+    },
+    "phenylalanine": {
+      "intensities": [
+        802.6332397460938,
+        527.747314453125,
+        232.55642700195312,
+        297.47216796875,
+        113.40119934082031,
+        8457614.0,
+        5223.298828125,
+        1784.40185546875,
+        733.6038208007812,
+        514.92333984375,
+        680.6416015625,
+        341.42132568359375,
+        44541.625,
+        596.8916015625,
+        781.1204223632812,
+        2167.02001953125,
+        130.0547637939453,
+        264.5392150878906,
+        1620.135986328125,
+        55389.7890625,
+        364218.59375,
+        4676.8095703125,
+        590.623291015625
+      ],
+      "mz": [
+        84.32965087890625,
+        95.2614517211914,
+        104.25553894042969,
+        107.15116119384766,
+        108.493408203125,
+        120.35417175292969,
+        121.3327407836914,
+        122.17408752441406,
+        123.06144714355469,
+        123.87631225585938,
+        125.26976013183594,
+        127.95097351074219,
+        131.0302734375,
+        131.89881896972656,
+        132.98748779296875,
+        133.96694946289062,
+        135.21780395507812,
+        136.68353271484375,
+        138.05044555664062,
+        148.04901123046875,
+        149.00741577148438,
+        149.6342315673828,
+        150.75448608398438
+      ],
+      "precursor_mz": 166.08599853515625
+    },
+    "phenylalanine_ch2": {
+      "intensities": [
+        753.2763766261678,
+        629.4466617019614,
+        208.5995077943916,
+        344.97336064840005,
+        96.51376328359498,
+        7769739.589951115,
+        5627.99144552087,
+        1985.7569490230526,
+        719.2463191994012,
+        504.6421196365179,
+        577.1254658948815,
+        303.43291557249995,
+        51311.6458144686,
+        550.6186869177625,
+        651.5556059815774,
+        1854.0208589040028,
+        147.3415984806733,
+        278.69438846827194,
+        1644.8958351645424,
+        52104.489139407386,
+        293293.7991031724,
+        5227.4535253091235,
+        498.5077144574001
+      ],
+      "mz": [
+        98.34530087890624,
+        109.2771017211914,
+        118.27118894042968,
+        121.16681119384765,
+        122.509058203125,
+        134.36982175292968,
+        135.3483907836914,
+        136.18973752441406,
+        137.07709714355468,
+        137.89196225585937,
+        139.28541013183593,
+        141.96662351074218,
+        145.0459234375,
+        145.91446896972656,
+        147.00313779296874,
+        147.98259946289062,
+        149.23345395507812,
+        150.69918271484374,
+        152.06609555664062,
+        162.06466123046874,
+        163.02306577148437,
+        163.6498815673828,
+        164.77013608398437
+      ],
+      "precursor_mz": 180.10164853515624
+    },
+    "salicin": {
+      "intensities": [
+        2309.0,
+        1977.0,
+        2003.0,
+        2102.0,
+        2177.0,
+        2127.0,
+        2376.0,
+        2380.0,
+        2703.0,
+        2200.0,
+        2232.0,
+        2923.0,
+        2173.0,
+        2257.0,
+        2367.0,
+        4363.0,
+        31526.0,
+        5119.0,
+        2252.0,
+        2233.0,
+        22755.0
+      ],
+      "mz": [
+        52.27001190185547,
+        55.7410888671875,
+        57.76688003540039,
+        60.32212829589844,
+        64.12008666992188,
+        82.39277648925781,
+        87.0296630859375,
+        91.02012634277344,
+        92.3756332397461,
+        93.13435363769531,
+        112.07272338867188,
+        116.9283676147461,
+        123.044677734375,
+        138.61074829101562,
+        140.95814514160156,
+        146.96142578125,
+        174.9570770263672,
+        184.95059204101562,
+        238.55796813964844,
+        305.4481201171875,
+        321.0744323730469
+      ],
+      "precursor_mz": 321.07501220703125
+    },
+    "salicin_ch2": {
+      "intensities": [
+        2134.925116984392,
+        2113.053649489185,
+        1620.490235984915,
+        2353.5582754299267,
+        2484.503887729518,
+        1904.3709043135539,
+        2419.808132225193,
+        2316.3602123297987,
+        3044.8289760635885,
+        1926.956994896717,
+        1895.1399152304612,
+        2730.771384276773,
+        2267.5119471168314,
+        2221.9541313146724,
+        2624.3712848997884,
+        5113.59752279752,
+        32636.87021139339,
+        5982.235406676559,
+        2214.412307698135,
+        2422.7792375692834,
+        19440.65312161183
+      ],
+      "mz": [
+        52.27001190185547,
+        55.7410888671875,
+        57.76688003540039,
+        60.32212829589844,
+        64.12008666992188,
+        82.39277648925781,
+        87.0296630859375,
+        91.02012634277344,
+        92.3756332397461,
+        93.13435363769531,
+        112.07272338867188,
+        116.9283676147461,
+        123.044677734375,
+        138.61074829101562,
+        140.95814514160156,
+        146.96142578125,
+        188.97272702636718,
+        198.96624204101562,
+        252.57361813964843,
+        319.4637701171875,
+        335.09008237304687
+      ],
+      "precursor_mz": 335.09066220703124
+    }
+  }
+}

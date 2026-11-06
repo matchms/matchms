@@ -3,8 +3,13 @@ pure Python version."""
 
 import numpy as np
 import pytest
+from matchms import Spectrum
 from matchms.similarity.spectrum_similarity_functions import (
+    _preprocess_peak_array,
+    _process_spectrum_peaks,
     collect_peak_pairs,
+    filter_noise,
+    filter_peaks_above_precursor,
     find_matches,
     number_matching,
     number_matching_ppm,
@@ -12,7 +17,7 @@ from matchms.similarity.spectrum_similarity_functions import (
     number_matching_symmetric_ppm,
     score_best_matches,
 )
-from ..builder_Spectrum import SpectrumBuilder
+from ..builder_spectrum import SpectrumBuilder
 
 
 @pytest.fixture
@@ -130,3 +135,172 @@ def test_number_matching_symmetric_ppm(numba_compiled):
     assert np.all(scores == np.array([True, True, True, True, True])), "Expected different scores."
     assert np.all(row == np.array([0, 0, 1, 1, 2]))
     assert np.all(col == np.array([0, 1, 0, 1, 2]))
+
+
+def test_filter_noise_removes_peaks_below_relative_cutoff():
+    mz = np.array([100.0, 150.0, 200.0, 250.0])
+    intensities = np.array([49.0, 50.0, 100.0, 5.0])
+
+    filtered_mz, filtered_intensities = filter_noise(
+        mz,
+        intensities,
+        noise_cutoff=0.5,
+    )
+
+    np.testing.assert_array_equal(filtered_mz, np.array([150.0, 200.0]))
+    np.testing.assert_array_equal(filtered_intensities, np.array([50.0, 100.0]))
+
+
+@pytest.mark.parametrize("cutoff", [0.0, 0.01])
+def test_filter_noise_with_zero_or_low_enough_cutoff_keeps_all_peaks(cutoff):
+    mz = np.array([100.0, 150.0, 200.0])
+    intensities = np.array([1.2, 5.0, 100.0])
+
+    filtered_mz, filtered_intensities = filter_noise(
+        mz,
+        intensities,
+        noise_cutoff=cutoff,
+    )
+
+    np.testing.assert_array_equal(filtered_mz, mz)
+    np.testing.assert_array_equal(filtered_intensities, intensities)
+
+
+def test_filter_noise_empty_spectrum():
+    mz = np.array([], dtype=float)
+    intensities = np.array([], dtype=float)
+
+    filtered_mz, filtered_intensities = filter_noise(
+        mz,
+        intensities,
+        noise_cutoff=0.01,
+    )
+
+    assert filtered_mz.size == 0
+    assert filtered_intensities.size == 0
+
+
+def test_filter_peaks_above_precursor():
+    mz = np.array([100.0, 198.3, 198.4, 198.5, 200.0])
+    intensities = np.array([0.1, 0.2, 0.3, 0.4, 1.0])
+
+    filtered_mz, filtered_intensities = filter_peaks_above_precursor(
+        mz,
+        intensities,
+        precursor_mz=200.0,
+        offset_to_precursor=-1.6,
+    )
+
+    # Cutoff is 200.0 - 1.6 = 198.4.
+    # The peak exactly at the cutoff must be retained.
+    np.testing.assert_array_equal(
+        filtered_mz,
+        np.array([100.0, 198.3, 198.4]),
+    )
+    np.testing.assert_array_equal(
+        filtered_intensities,
+        np.array([0.1, 0.2, 0.3]),
+    )
+
+
+def test_filter_peaks_above_precursor_without_precursor_returns_unchanged():
+    mz = np.array([100.0, 200.0])
+    intensities = np.array([0.2, 1.0])
+
+    filtered_mz, filtered_intensities = filter_peaks_above_precursor(
+        mz,
+        intensities,
+        precursor_mz=None,
+        offset_to_precursor=-1.6,
+    )
+
+    np.testing.assert_array_equal(filtered_mz, mz)
+    np.testing.assert_array_equal(filtered_intensities, intensities)
+
+
+def test_preprocess_peak_array_applies_precursor_and_noise_filtering():
+    peaks = np.array([
+        [100.0, 0.01],
+        [150.0, 0.20],
+        [198.4, 1.00],
+        [199.0, 0.80],
+        [200.0, 0.90],
+    ])
+
+    processed = _preprocess_peak_array(
+        peaks,
+        precursor_mz=200.0,
+        remove_precursor=True,
+        offset_to_precursor=-1.6,
+        noise_cutoff=0.1,
+    )
+
+    # Precursor filtering first removes 199 and 200.
+    # Among the remaining peaks, 198.4 is the base peak, so 100.0
+    # is subsequently removed by the 10% relative noise cutoff.
+    expected = np.array([
+        [150.0, 0.20],
+        [198.4, 1.00],
+    ])
+
+    np.testing.assert_array_equal(processed, expected)
+
+
+def test_preprocess_peak_array_requires_precursor_when_removal_requested():
+    peaks = np.array([
+        [100.0, 0.5],
+        [200.0, 1.0],
+    ])
+
+    with pytest.raises(
+        ValueError,
+        match="Cannot remove precursor peaks when precursor_mz is None",
+    ):
+        _preprocess_peak_array(
+            peaks,
+            precursor_mz=None,
+            remove_precursor=True,
+        )
+
+
+def test_process_spectrum_peaks_uses_spectrum_precursor_mz():
+    spectrum = Spectrum(
+        mz=np.array([100.0, 198.4, 198.5, 200.0]),
+        intensities=np.array([0.2, 0.3, 0.4, 1.0]),
+        metadata={"precursor_mz": 200.0},
+    )
+
+    processed = _process_spectrum_peaks(
+        spectrum,
+        remove_precursor=True,
+        offset_to_precursor=-1.6,
+        noise_cutoff=None,
+    )
+
+    expected = np.array([
+        [100.0, 0.2],
+        [198.4, 0.3],
+    ])
+
+    np.testing.assert_array_equal(processed, expected)
+
+
+def test_process_spectrum_peaks_does_not_require_precursor_when_removal_disabled():
+    spectrum = Spectrum(
+        mz=np.array([100.0, 200.0]),
+        intensities=np.array([0.5, 1.0]),
+    )
+
+    processed = _process_spectrum_peaks(
+        spectrum,
+        remove_precursor=False,
+        noise_cutoff=None,
+    )
+
+    np.testing.assert_array_equal(
+        processed,
+        np.array([
+            [100.0, 0.5],
+            [200.0, 1.0],
+        ]),
+    )

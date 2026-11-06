@@ -1,7 +1,7 @@
 from unittest.mock import Mock, patch
 import numpy as np
 from matchms.importing import load_from_usi
-from ..builder_Spectrum import SpectrumBuilder
+from ..builder_spectrum import SpectrumBuilder
 
 
 @patch("requests.get")

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import logging
 import os
 import pytest
@@ -61,7 +60,7 @@ def test_add_logging_to_file(tmp_path, caplog, capsys):
     expected_log_entry = "INFO:matchms:test_logging:test message no.1"
     assert len(logger.handlers) == 2, "Expected two Handler"
     assert os.path.isfile(filename), "Log file not found."
-    with open(filename, "r", encoding="utf-8") as file:
+    with open(filename, encoding="utf-8") as file:
         logs = file.read()
     assert expected_log_entry in logs, "Expected different log file content"
     reset_matchms_logger()
@@ -84,7 +83,7 @@ def test_add_logging_to_file_only_file(tmp_path, capsys):
     # Test log file
     expected_log_entry = "INFO:matchms:test_logging:test message no.1"
     assert os.path.isfile(filename), "Log file not found."
-    with open(filename, "r", encoding="utf-8") as file:
+    with open(filename, encoding="utf-8") as file:
         logs = file.read()
     assert expected_log_entry in logs, "Expected different log file content"
     reset_matchms_logger()

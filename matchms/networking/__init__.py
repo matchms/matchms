@@ -4,7 +4,7 @@ Functions for creating and analysing spectral networks
 
 """
 from .networking_functions import get_top_hits
-from .SimilarityNetwork import SimilarityNetwork
+from .similarity_network import SimilarityNetwork
 
 
 __all__ = [

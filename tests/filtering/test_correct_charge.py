@@ -1,18 +1,26 @@
-import numpy as np
 import pytest
-from matchms import SpectrumProcessor
+from matchms import SpectraCollection
 from matchms.filtering import correct_charge
-from matchms.filtering.default_pipelines import DEFAULT_FILTERS
-from ..builder_Spectrum import SpectrumBuilder
+from tests.builder_spectrum import SpectrumBuilder
+from tests.run_spectrum_and_collection import run_filter_as_spectrum_or_collection
 
 
+@pytest.mark.parametrize("as_collection", [False, True], ids=["spectrum", "collection"])
 @pytest.mark.parametrize(
     "metadata, expected",
     [
         [{}, 0],
         [{"ionmode": "positive"}, 1],
+        [{"ionmode": "negative"}, -1],
+        [{"ionmode": "positive", "charge": 0}, 1],
+        [{"ionmode": "negative", "charge": 0}, -1],
+        [{"ionmode": "positive", "charge": 2}, 2],
+        [{"ionmode": "negative", "charge": -2}, -2],
         [{"ionmode": "positive", "charge": -2}, 2],
         [{"ionmode": "negative", "charge": 2}, -2],
+        [{"charge": 3}, 3],
+        [{"charge": -3}, -3],
+        [{"charge": 0}, 0],
         [{"ionmode": "negative", "adduct": "[M-2H]2-"}, -2],
         [{"ionmode": "positive", "adduct": "[M+2H]2+", "charge": 0}, 2],
         [{"ionmode": "positive", "adduct": "M+2H"}, 2],
@@ -20,31 +28,111 @@ from ..builder_Spectrum import SpectrumBuilder
         [{"ionmode": "positive", "adduct": "[M+H]+", "charge": 3}, 3],
     ],
 )
-def test_correct_charge(metadata, expected):
+def test_correct_charge(metadata, expected, as_collection):
     spectrum_in = SpectrumBuilder().with_metadata(metadata).build()
 
-    spectrum = correct_charge(spectrum_in)
+    spectrum = run_filter_as_spectrum_or_collection(
+        correct_charge,
+        spectrum_in,
+        as_collection,
+    )
 
     assert spectrum.get("charge") == expected
 
 
-def test_correct_charge_empty_spectrum():
-    spectrum_in = None
-    spectrum = correct_charge(spectrum_in)
+@pytest.mark.parametrize("as_collection", [False, True], ids=["spectrum", "collection"])
+def test_correct_charge_raises_for_non_lowercase_ionmode(as_collection):
+    spectrum_in = SpectrumBuilder().with_metadata({"ionmode": "Positive"}).build()
 
-    assert spectrum is None, "Expected different handling of None spectrum."
+    with pytest.raises(ValueError, match="Ionmode field not harmonized"):
+        run_filter_as_spectrum_or_collection(
+            correct_charge,
+            spectrum_in,
+            as_collection,
+        )
 
 
-def test_correct_charge_multiply_charged_adduct_in_default_pipeline():
-    # MassBank MSP records give Precursor_type and Ion_mode but no charge
-    spectrum_in = (
+def test_correct_charge_collection_multiple_rows():
+    collection = SpectraCollection(
+        [
+            SpectrumBuilder().with_metadata({"ionmode": "positive"}).build(),
+            SpectrumBuilder().with_metadata({"ionmode": "negative", "charge": 2}).build(),
+            SpectrumBuilder().with_metadata({"charge": -3}).build(),
+        ]
+    )
+
+    processed = correct_charge(collection)
+
+    assert processed is not collection
+    assert processed.metadata["charge"].tolist() == [1, -2, -3]
+
+
+@pytest.mark.parametrize(
+    ("charge", "expected"),
+    [
+        ("+1", 1),
+        ("1", 1),
+        ("-1", -1),
+        ("+2", 2),
+        ("-2", -2),
+    ],
+)
+def test_collection_converts_numeric_string_charge(charge, expected):
+    spectrum = (
         SpectrumBuilder()
-        .with_mz(np.array([100.0, 150.0, 200.0]))
-        .with_intensities(np.array([0.1, 1.0, 0.5]))
-        .with_metadata({"precursor_mz": 500.25, "ionmode": "negative", "adduct": "[M-2H]2-"})
+        .with_metadata({"charge": charge})
         .build()
     )
-    spectrum = SpectrumProcessor(DEFAULT_FILTERS).process_spectrum(spectrum_in)
 
-    assert spectrum.get("charge") == -2
-    assert spectrum.get("parent_mass") == pytest.approx(2 * 500.25 + 2 * 1.007276, abs=1e-3)
+    collection = SpectraCollection([spectrum])
+
+    assert collection[0].get("charge") == expected
+
+
+def test_correct_charge_collection_raises_for_nonconvertible_string():
+    spectrum = (
+        SpectrumBuilder()
+        .with_metadata({"charge": "invalid"})
+        .build()
+    )
+
+    collection = SpectraCollection([spectrum])
+
+    with pytest.raises(TypeError, match="Charge is given as string"):
+        correct_charge(collection)
+
+
+def test_correct_charge_collection_clone_false_modifies_input():
+    collection = SpectraCollection(
+        [
+            SpectrumBuilder().with_metadata({"ionmode": "positive"}).build(),
+        ]
+    )
+
+    processed = correct_charge(collection, clone=False)
+
+    assert processed is collection
+    assert collection.metadata.loc[0, "charge"] == 1
+
+
+def test_correct_charge_clone_true_does_not_modify_input_spectrum():
+    spectrum_in = SpectrumBuilder().with_metadata({"ionmode": "positive"}).build()
+
+    spectrum = correct_charge(spectrum_in, clone=True)
+
+    assert spectrum is not spectrum_in
+    assert spectrum.get("charge") == 1
+    assert spectrum_in.get("charge") is None
+
+
+def test_correct_charge_clone_false_modifies_input_spectrum():
+    spectrum_in = SpectrumBuilder().with_metadata({"ionmode": "positive"}).build()
+
+    spectrum = correct_charge(spectrum_in, clone=False)
+
+    assert spectrum is spectrum_in
+    assert spectrum_in.get("charge") == 1
+
+
+def test_correct_charge_empty_spectrum():
+    assert correct_charge(None) is None

@@ -1,5 +1,5 @@
 matchms documentation
-====================
+=====================
 
 Matchms is an open-access Python library to **import, process, clean, and compare tandem mass spectrometry (MS/MS) data**.
 It helps you build reproducible workflows from raw spectra to similarity scores and downstream analysis.
@@ -11,11 +11,15 @@ It helps you build reproducible workflows from raw spectra to similarity scores 
 Get started
 -----------
 
-Install via conda (recommended)::
+Install via uv (recommended)::
 
-   conda create -n matchms python=3.12
-   conda activate matchms
-   conda install -c conda-forge -c bioconda matchms
+    uv pip install matchms
+
+Install via conda::
+
+    conda create -n matchms python=3.13
+    conda activate matchms
+    conda install -c conda-forge -c bioconda matchms
 
 
 Documentation

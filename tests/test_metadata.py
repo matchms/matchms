@@ -98,10 +98,10 @@ def test_metadata_full_setter():
 
 
 @pytest.mark.parametrize("input_dict, expected", [
-    [{'scannumber': '1516', 'spectrumtype': 'N/A', 'formula': 'C8H16NO5P', 'ionization': 'NA', 
-      'compound_name': 'Dicrotophos', 'comment': '', 'precursor_mz': 238.0844}, 
-      {'scannumber': '1516', 'formula': 'C8H16NO5P', 'compound_name': 'Dicrotophos',
-       'precursor_mz': 238.0844}]])
+    [{"scannumber": "1516", "spectrumtype": "N/A", "formula": "C8H16NO5P", "ionization": "NA", 
+      "compound_name": "Dicrotophos", "comment": "", "precursor_mz": 238.0844}, 
+      {"scannumber": "1516", "formula": "C8H16NO5P", "compound_name": "Dicrotophos",
+       "precursor_mz": 238.0844}]])
 def test_remove_invalid_metadata(input_dict, expected):
     metadata = Metadata(input_dict)
     metadata.harmonize_values()
@@ -124,3 +124,12 @@ def test_metadata_key_mapping(mapping: dict, metadata: dict):
         assert sut[next(iter(metadata))] == next(iter(metadata.values()))
         
     Metadata.set_key_replacements(load_known_key_conversions())
+
+
+def test_metadata_harmonize_values_converts_parent_mass():
+    metadata = Metadata({"parent_mass": "184.063662876"})
+
+    metadata.harmonize_values()
+
+    assert np.isclose(metadata["parent_mass"], 184.063662876)
+    assert isinstance(metadata["parent_mass"], float)

@@ -2,56 +2,26 @@ name: CI first code check
 
 on:
   push:
+    branches: [master]
   workflow_dispatch:
-    inputs:
-      tag:
-        description: Tag for manually running CI first code check workflow
-        required: False
-        default: ''
+
+permissions:
+  contents: read
 
 jobs:
-
   first_check:
-    name: first code check / python-3.10 / ubuntu-latest
+    name: First check / Python 3.13 / Ubuntu
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Set up uv
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
-          python-version: '3.10'
-      - name: Python info
-        run: |
-          which python
-          python --version
-      - name: Build package and create dev environment
-        run: |
-          python -m pip install --upgrade pip poetry
-          poetry install
-      - name: Show pip list
-        run: |
-          pip list
-      - name: Test with coverage
-        run: |
-          poetry run pytest --cov --cov-report term --cov-report xml --junitxml=xunit-result.xml
-      - name: Correct coverage paths
-        run: sed -i "s+$PWD/++g" coverage.xml
-      - name: Run ruff linter
-        run: ruff check --output-format=github
-      - name: Store PR metadata in json file
-        env:
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          HEAD_REF: ${{ github.event.pull_request.head.ref }}
-          BASE_REF: ${{ github.event.pull_request.base.ref }}
-        run: |
-          jq -n --arg pr_number "$PR_NUMBER"\
-                --arg head_ref "$HEAD_REF"\
-                --arg base_ref "$BASE_REF"\
-            '{"pr_number": $pr_number, "head_ref": $head_ref, "base_ref": $base_ref}' > pr_metadata.json
-      - uses: actions/upload-artifact@v4
-        with:
-          name: sonarcloud-data-pip
-          path: |
-            coverage.xml
-            xunit-result.xml
-            pr_metadata.json
+          python-version: '3.13'
+          enable-cache: true
+      - name: Install development dependencies
+        run: uv sync --frozen
+      - name: Lint
+        run: uv run --frozen ruff check --output-format=github
+      - name: Test
+        run: uv run --frozen pytest
