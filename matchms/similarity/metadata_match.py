@@ -132,6 +132,8 @@ class MetadataMatch(BaseSimilarityWithSparse):
             logger.warning(
                 "Tolerance is set but will be ignored because 'equal_match' does not use tolerance."
             )
+        if matching_type == "difference" and tolerance is None:
+            raise ValueError("Tolerance must be specified when using 'difference' matching.")
         self.matching_type = matching_type
 
         if tolerance_type not in ["absolute", "ppm"]:
