@@ -1,8 +1,9 @@
 from __future__ import annotations
 import numpy as np
 import pytest
-from matchms.similarity._flash_entropy_topk import _MAX_EPOCH, _EntropyTopKWorkspace
+from matchms.similarity._flash_entropy_topk import _EntropyTopKWorkspace
 from matchms.similarity._flash_prepared import PreparedSpectra, readonly
+from matchms.similarity._flash_topk_common import _MAX_EPOCH
 from matchms.similarity.entropy import Entropy
 from matchms.similarity.flash_similarity import EntropyFlash
 from matchms.similarity.topk_results import TopKResults
