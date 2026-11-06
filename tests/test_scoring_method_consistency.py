@@ -29,7 +29,7 @@ _score_functions = {
     "modifiedcosinehungarian": [mssimilarity.ModifiedCosineHungarian, {}],
     "modifiedcosinelinear": [mssimilarity.ModifiedCosineLinear, {}],
     "precursormzmatch": [mssimilarity.PrecursorMzMatch, {}],
-    "metadatamatch": [mssimilarity.MetadataMatch, {"field": "spectrum_status"}],
+    "metadatamatch": [mssimilarity.MetadataMatch, {"field": "spectrum_status", "matching_type": "equal_match"}],
 }
 
 
