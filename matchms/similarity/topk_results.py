@@ -16,6 +16,9 @@ class TopKResults:
     by ascending library index. ``valid_counts[i]`` is the number of real hits
     for query ``i``; remaining positions are padded with index -1 and score 0.
 
+    For cosine, optional ``matches`` contains one-to-one accepted peak counts
+    for returned hits (and zero padding). Entropy keeps ``matches=None``.
+
     In top-k search, only scores *strictly greater* than ``min_score`` qualify.
     In particular, the default ``min_score=0`` never returns arbitrary zero-score
     library spectra. Omitted pairs must not be interpreted as computed zeroes.
@@ -31,6 +34,7 @@ class TopKResults:
     scores: np.ndarray
     valid_counts: np.ndarray
     n_references: int
+    matches: np.ndarray | None = None
 
     def __post_init__(self) -> None:
         if isinstance(self.n_references, (bool, np.bool_)):
@@ -52,6 +56,13 @@ class TopKResults:
         if np.any(counts > indices.shape[1]) or np.any(counts < 0):
             raise ValueError("valid_counts must be between zero and the requested k.")
 
+        matches = self.matches
+        if matches is not None:
+            if not isinstance(matches, np.ndarray) or matches.shape != indices.shape or matches.dtype.kind not in "iu":
+                raise ValueError("matches must be an integer array shaped like indices.")
+            if np.any(matches < 0):
+                raise ValueError("matches must contain nonnegative match counts.")
+
         for row, length in enumerate(counts):
             n = int(length)
             ids = indices[row, :n]
@@ -60,12 +71,16 @@ class TopKResults:
                 raise ValueError("Valid hits require in-range library IDs and finite scores.")
             if np.any(indices[row, n:] != -1) or np.any(scores[row, n:] != 0):
                 raise ValueError("Unused result entries must be padded by ID -1 and score 0.")
+            if matches is not None and np.any(matches[row, n:] != 0):
+                raise ValueError("Unused match-count positions must be padded by zero.")
             if n > 1 and (
                 np.any(values[1:] > values[:-1]) or np.any((values[1:] == values[:-1]) & (ids[1:] < ids[:-1]))
             ):
                 raise ValueError("Hits must be ordered by descending score, then ascending ID.")
 
-        for name in ("indices", "scores", "valid_counts"):
+        for name in ("indices", "scores", "valid_counts", "matches"):
+            if getattr(self, name) is None:
+                continue
             read_only = getattr(self, name).view()
             read_only.flags.writeable = False
             object.__setattr__(self, name, read_only)
@@ -92,3 +107,10 @@ class TopKResults:
         """Return library IDs and scores for one query, excluding padding."""
         n = int(self.valid_counts[query_index])
         return self.indices[query_index, :n], self.scores[query_index, :n]
+
+    def get_hits_with_matches(self, query_index: int) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Return cosine hit IDs, scores and accepted peak counts without padding."""
+        if self.matches is None:
+            raise ValueError("This top-k result does not include match counts.")
+        n = int(self.valid_counts[query_index])
+        return (self.indices[query_index, :n], self.scores[query_index, :n], self.matches[query_index, :n])
