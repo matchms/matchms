@@ -283,13 +283,13 @@ def test_randomized_exact_ranking_regression():
     rng = np.random.default_rng(1234)
     scorer = _make_scorer(np.float32)
     references = []
-    for i in range(191):
+    for _ in range(191):
         # Distinct mass sites guarantee separation, while repeated sites across
         # spectra produce realistic candidate overlap and score ties.
         masses = np.sort(rng.choice(np.arange(80, 430, 7), size=3, replace=False)).astype(float)
         references.append(np.column_stack((masses, rng.uniform(0.1, 5, 3))))
     queries = []
-    for i in range(29):
+    for _ in range(29):
         masses = np.sort(rng.choice(np.arange(80, 430, 7), size=4, replace=False)).astype(float)
         queries.append(np.column_stack((masses, rng.uniform(0.1, 5, 4))))
     index = scorer.build_index_prepared(scorer.prepare_peak_arrays(references))
