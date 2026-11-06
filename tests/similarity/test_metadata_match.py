@@ -34,7 +34,7 @@ def spectra():
 
 def test_metadata_match_strings_pair(spectra):
     """Test pairwise metadata matching for string entries."""
-    similarity = MetadataMatch(field="instrument_type")
+    similarity = MetadataMatch(field="instrument_type", matching_type="equal_match")
 
     assert similarity.pair(spectra[0], spectra[1]) == np.array(False, dtype=bool)
     assert similarity.pair(spectra[0], spectra[3]) == np.array(False, dtype=bool)
@@ -46,7 +46,7 @@ def test_metadata_match_strings_matrix(spectra):
     spectra_1 = spectra[:2]
     spectra_2 = spectra[2:]
 
-    similarity = MetadataMatch(field="instrument_type")
+    similarity = MetadataMatch(field="instrument_type", matching_type="equal_match")
     scores = similarity.matrix(spectra_1, spectra_2)
 
     expected = np.array([[True, False], [False, False]], dtype=bool)
@@ -63,7 +63,7 @@ def test_metadata_match_strings_sparse_matrix(spectra):
     spectra_1 = spectra[:2]
     spectra_2 = spectra[2:]
 
-    similarity = MetadataMatch(field="instrument_type")
+    similarity = MetadataMatch(field="instrument_type", matching_type="equal_match")
     scores = similarity.sparse_matrix(spectra_1, spectra_2)
 
     expected = np.array([[True, False], [False, False]], dtype=bool)
@@ -77,7 +77,7 @@ def test_metadata_match_strings_sparse_matrix(spectra):
 
 def test_metadata_match_strings_self_comparison_is_symmetric(spectra):
     """Implicit self-comparison should equal explicit self-comparison."""
-    similarity = MetadataMatch(field="instrument_type")
+    similarity = MetadataMatch(field="instrument_type", matching_type="equal_match")
 
     scores_self = similarity.matrix(spectra)
     scores_explicit = similarity.matrix(spectra, spectra)
@@ -87,7 +87,7 @@ def test_metadata_match_strings_self_comparison_is_symmetric(spectra):
 
 def test_metadata_match_strings_wrong_method_pair_logs_warning(spectra, caplog):
     """Difference matching on strings should return False and log a warning."""
-    similarity = MetadataMatch(field="instrument_type", matching_type="difference")
+    similarity = MetadataMatch(field="instrument_type", matching_type="difference", tolerance=1.0)
 
     score = similarity.pair(spectra[0], spectra[2])
 
@@ -95,12 +95,18 @@ def test_metadata_match_strings_wrong_method_pair_logs_warning(spectra, caplog):
     assert "not compatible with 'difference' method" in caplog.text
 
 
+def test_metadata_match_matching_type_differnce_but_no_tolerance(spectra):
+    """Difference matching on strings should return False and log a warning."""
+    with pytest.raises(ValueError, match="Tolerance must be specified when using 'difference' matching."):
+        _ = MetadataMatch(field="instrument_type", matching_type="difference")
+
+
 def test_metadata_match_strings_wrong_method_matrix_logs_warning(spectra, caplog):
     """Difference matching on strings should yield all False in matrix output."""
     spectra_1 = spectra[:2]
     spectra_2 = spectra[2:]
 
-    similarity = MetadataMatch(field="instrument_type", matching_type="difference")
+    similarity = MetadataMatch(field="instrument_type", matching_type="difference", tolerance=1.0)
     scores = similarity.matrix(spectra_1, spectra_2)
 
     expected = np.array([[False, False], [False, False]], dtype=bool)
@@ -200,7 +206,7 @@ def test_metadata_match_equal_match_ignores_tolerance_and_logs_warning(spectra, 
     assert "Tolerance is set but will be ignored" in caplog.text
 
 
-def test_metadata_match_equal_match_ignores_tolerance_type_and_logs_warning(spectra, caplog):
+def test_metadata_match_missing_metadata_entry_logs_warning(spectra, caplog):
     """equal_match should ignore tolerance_type and log a warning."""
     spectra_1 = spectra[:2]
     spectra_2 = spectra[2:]
@@ -215,12 +221,12 @@ def test_metadata_match_equal_match_ignores_tolerance_type_and_logs_warning(spec
     expected = np.array([[True, False], [False, False]], dtype=bool)
 
     np.testing.assert_array_equal(scores.to_array(), expected)
-    assert "tolerance_type is set but will be ignored" in caplog.text
+    assert "No instrument_type entry found for spectrum" in caplog.text
 
 
 def test_metadata_match_missing_entries_return_false_in_pair(spectra):
     """Missing metadata entries should return False in pairwise comparison."""
-    similarity = MetadataMatch(field="instrument_type")
+    similarity = MetadataMatch(field="instrument_type", matching_type="equal_match")
 
     score = similarity.pair(spectra[0], spectra[3])
     assert score == np.array(False, dtype=bool)
@@ -231,7 +237,7 @@ def test_metadata_match_missing_entries_log_warning_in_matrix(spectra, caplog):
     spectra_1 = spectra[:2]
     spectra_2 = spectra[2:]
 
-    similarity = MetadataMatch(field="instrument_type")
+    similarity = MetadataMatch(field="instrument_type", matching_type="equal_match")
     scores = similarity.matrix(spectra_1, spectra_2)
 
     expected = np.array([[True, False], [False, False]], dtype=bool)
@@ -245,7 +251,7 @@ def test_metadata_match_sparse_matrix_with_score_filter(spectra):
     spectra_1 = spectra[:2]
     spectra_2 = spectra[2:]
 
-    similarity = MetadataMatch(field="instrument_type")
+    similarity = MetadataMatch(field="instrument_type", matching_type="equal_match")
     scores = similarity.sparse_matrix(
         spectra_1,
         spectra_2,
@@ -267,7 +273,7 @@ def test_metadata_match_sparse_matrix_with_score_filter(spectra):
 
 def test_metadata_match_sparse_matrix_explicit_indices_fallback(spectra):
     """Explicit idx_row/idx_col should use the generic sparse fallback path."""
-    similarity = MetadataMatch(field="instrument_type")
+    similarity = MetadataMatch(field="instrument_type", matching_type="equal_match")
 
     idx_row = np.array([0, 0, 1])
     idx_col = np.array([0, 1, 1])
@@ -289,7 +295,7 @@ def test_metadata_match_sparse_matrix_explicit_indices_fallback(spectra):
 
 def test_metadata_match_sparse_matrix_requires_matching_idx_shapes(spectra):
     """Explicit sparse indices must have identical shape."""
-    similarity = MetadataMatch(field="instrument_type")
+    similarity = MetadataMatch(field="instrument_type", matching_type="equal_match")
 
     with pytest.raises(ValueError, match="idx_row and idx_col must have the same shape"):
         similarity.sparse_matrix(
@@ -303,7 +309,7 @@ def test_metadata_match_sparse_matrix_requires_matching_idx_shapes(spectra):
 
 def test_metadata_match_unknown_score_field_raises(spectra):
     """Only the score field is supported."""
-    similarity = MetadataMatch(field="instrument_type")
+    similarity = MetadataMatch(field="instrument_type", matching_type="equal_match")
 
     with pytest.raises(ValueError, match="Unknown score field"):
         similarity.matrix(spectra[:2], spectra[2:], score_fields=("missing",))
@@ -311,7 +317,7 @@ def test_metadata_match_unknown_score_field_raises(spectra):
 
 def test_metadata_match_non_score_field_selection_not_supported(spectra):
     """MetadataMatch only supports the score field."""
-    similarity = MetadataMatch(field="instrument_type")
+    similarity = MetadataMatch(field="instrument_type", matching_type="equal_match")
 
     with pytest.raises(ValueError, match="Unknown score field"):
         similarity.matrix(spectra[:2], spectra[2:], score_fields=("matches",))

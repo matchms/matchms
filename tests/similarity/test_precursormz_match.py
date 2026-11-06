@@ -10,8 +10,8 @@ T = True
 F = False
 
 @pytest.mark.parametrize("precursor_mz, tolerance, tolerance_type, expected", [
-    [[100.0, 101.0], 0.1, "Dalton", F],
-    [[100.0, 101.0], 2.0, "Dalton", T],
+    [[100.0, 101.0], 0.1, "absolute", F],
+    [[100.0, 101.0], 2.0, "absolute", T],
     [[600.0, 600.001], 2.0, "ppm", T]
 ])
 def test_precursormz_match_parameterized(precursor_mz, tolerance, tolerance_type, expected):
@@ -34,8 +34,8 @@ def test_precursormz_match_missing_precursormz():
 
 
 @pytest.mark.parametrize("precursor_mz, tolerance, tolerance_type, expected", [
-    [[100.0, 101.0, 99.0, 98.0], 0.1, "Dalton", [[F, F], [F, F]]],
-    [[100.0, 101.0, 99.0, 98.0], 2.0, "Dalton", [[T, T], [T, F]]],
+    [[100.0, 101.0, 99.0, 98.0], 0.1, "absolute", [[F, F], [F, F]]],
+    [[100.0, 101.0, 99.0, 98.0], 2.0, "absolute", [[T, T], [T, F]]],
     [[100.0, 101.0, 99.99, 98.0], 101.0, "ppm", [[T, F], [F, F]]]
 ])
 def test_precursormz_match_array_parameterized(precursor_mz, tolerance, tolerance_type, expected):
@@ -51,7 +51,7 @@ def test_precursormz_match_array_parameterized(precursor_mz, tolerance, toleranc
         (
             [100.0, 101.0, 99.95, 98.0],
             0.1,
-            "Dalton",
+            "absolute",
             [
                 [T, F, T, F],
                 [F, T, F, F],

@@ -7,6 +7,7 @@ should yield the same results as repeated pairwise computations.
 Some scoring methods are omitted because they would require additional processing
 or dependencies (for example fingerprint similarity).
 """
+
 import os
 import numpy as np
 import pytest
@@ -29,13 +30,14 @@ _score_functions = {
     "modifiedcosinehungarian": [mssimilarity.ModifiedCosineHungarian, {}],
     "modifiedcosinelinear": [mssimilarity.ModifiedCosineLinear, {}],
     "precursormzmatch": [mssimilarity.PrecursorMzMatch, {}],
-    "metadatamatch": [mssimilarity.MetadataMatch, {"field": "spectrum_status"}],
+    "metadatamatch": [mssimilarity.MetadataMatch, {"field": "spectrum_status", "matching_type": "equal_match"}],
 }
 
 
 @pytest.fixture
 def spectra():
     """Import spectra and apply basic filters."""
+
     def processing(s):
         s = msfilter.default_filters(s)
         s = msfilter.add_parent_mass(s)

@@ -32,7 +32,7 @@ class MetadataMatch(BaseSimilarityWithSparse):
 
     For numerical differences, the tolerance can be interpreted as:
 
-    - absolute difference in Dalton / raw units (``tolerance_type="Dalton"``)
+    - absolute difference in raw units (``tolerance_type="absolute"``)
     - relative difference in ppm (``tolerance_type="ppm"``)
 
     Example to calculate scores between 2 pairs of spectra and inspect the score matrix
@@ -67,7 +67,10 @@ class MetadataMatch(BaseSimilarityWithSparse):
         spectra_1 = [spectrum_1, spectrum_2]
         spectra_2 = [spectrum_3, spectrum_4]
 
-        similarity = MetadataMatch(field="instrument_type")
+        similarity = MetadataMatch(
+            field="instrument_type",
+            matching_type="equal_match",
+            )
         scores = similarity.matrix(spectra_1, spectra_2)
 
         score_array = scores.to_array()
@@ -97,9 +100,9 @@ class MetadataMatch(BaseSimilarityWithSparse):
     def __init__(
         self,
         field: str,
-        matching_type: str = "equal_match",
-        tolerance: float = 0.1,
-        tolerance_type: str = "Dalton",
+        matching_type: str = "difference",
+        tolerance: float | None = None,
+        tolerance_type: str = "absolute",
     ):
         """
         Parameters
@@ -116,17 +119,23 @@ class MetadataMatch(BaseSimilarityWithSparse):
             Specify tolerance below which two values are counted as match.
             This only applies to numerical values.
         tolerance_type
-            Choose between fixed tolerance in Dalton / raw units (``"Dalton"``)
+            Choose between fixed tolerance in absolute units (``"absolute"``)
             or a relative difference in ppm (``"ppm"``).
             This only applies when ``matching_type="difference"``.
         """
         self.field = field
         self.tolerance = tolerance
 
-        assert matching_type in ["equal_match", "difference"], "Expected type from ['equal_match', 'difference']"
+        if matching_type not in ["equal_match", "difference"]:
+            raise ValueError("Expected type from ['equal_match', 'difference']")
+        if matching_type == "equal_match" and tolerance is not None:
+            logger.warning("Tolerance is set but will be ignored because 'equal_match' does not use tolerance.")
+        if matching_type == "difference" and tolerance is None:
+            raise ValueError("Tolerance must be specified when using 'difference' matching.")
         self.matching_type = matching_type
 
-        assert tolerance_type in ["Dalton", "ppm"], "Expected type from ['Dalton', 'ppm']"
+        if tolerance_type not in ["absolute", "ppm"]:
+            raise ValueError("Expected type from ['absolute', 'ppm']")
         self.tolerance_type = tolerance_type
 
     def pair(self, spectrum_1: SpectrumType, spectrum_2: SpectrumType):
@@ -150,7 +159,7 @@ class MetadataMatch(BaseSimilarityWithSparse):
             return np.asarray(score, dtype=self.score_datatype)
 
         if isinstance(entry_1, (int, float)) and isinstance(entry_2, (int, float)):
-            if self.tolerance_type == "Dalton":
+            if self.tolerance_type == "absolute":
                 score = abs(entry_1 - entry_2) <= self.tolerance
             else:
                 mean_value = (entry_1 + entry_2) / 2
@@ -298,18 +307,11 @@ class MetadataMatch(BaseSimilarityWithSparse):
     ):
         """Find matching indices for optimized matrix / sparse_matrix computation."""
         if self.matching_type == "equal_match":
-            if self.tolerance != 0:
-                logger.warning("Tolerance is set but will be ignored because 'equal_match' does not use tolerance.")
-            if self.tolerance_type != "Dalton":
-                logger.warning(
-                    "tolerance_type is set but will be ignored because 'equal_match' does not use tolerance."
-                )
-
             rows, cols = self._find_matches_hashmap(entries_1, entries_2)
             scores = np.ones(len(rows), dtype=self.score_datatype)
             return rows, cols, scores
 
-        if self.tolerance_type == "Dalton":
+        if self.tolerance_type == "absolute":
             if is_symmetric:
                 return number_matching_symmetric(entries_1, self.tolerance)
             return number_matching(entries_1, entries_2, self.tolerance)
