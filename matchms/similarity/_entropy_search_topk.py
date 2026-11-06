@@ -176,7 +176,7 @@ def _score_topk_block(
         )
 
         # The original dense path scores *all short* windows first, then *all
-        # long* windows. That ordering is preservedeven when the matching windows
+        # long* windows. That ordering is preserved even when the matching windows
         # overlap and float32 additions are not exactly associative.
         for peak in range(first_peak, last_peak):
             low, high = bounds[peak]

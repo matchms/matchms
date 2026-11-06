@@ -2,9 +2,9 @@
 
 A library index stores globally sorted peaks for tolerance-window lookups and
 spectrum-major arrays for normalization and peak identity. Dense searches return
-``Scores`` with query rows and library columns. EntropyFlash additionally offers
-exact candidate-aware top-k retrieval without a dense output matrix. Numerical kernels release the
-GIL and can process disjoint query blocks using shared, read-only index arrays.
+``Scores`` with query rows and library columns. EntropyFlash and CosineFlash
+share exact candidate-aware top-k retrieval without a dense output matrix.
+Numerical kernels release the GIL and share read-only index arrays.
 """
 
 from __future__ import annotations
@@ -20,6 +20,7 @@ from tqdm.auto import tqdm
 from matchms.scores import Scores
 from matchms.typing import SpectrumType
 from ._flash_cosine import cosine_rows
+from ._flash_cosine_topk import _CosineTopKWorkspace, _score_cosine_topk_block
 from ._flash_entropy import entropy_rows
 from ._flash_entropy_topk import _EntropyTopKWorkspace, _score_entropy_topk_block
 from ._flash_prepared import PreparedSpectra, empty_prepared, pack_native
@@ -415,6 +416,172 @@ class _BaseFlashSimilarity(BaseSimilarity):
 
         return self._score_prepared(query_spectra, library_index, fields, progress_bar, n_jobs)
 
+    def search_topk(
+        self,
+        query_spectra: Sequence[SpectrumType],
+        library_index: FlashIndex,
+        *,
+        k: int = 100,
+        min_score: float = 0.0,
+        batch_size: int | None = None,
+        score_fields: Sequence[str] | None = None,
+        progress_bar: bool = True,
+        n_jobs: int = 1,
+    ) -> TopKResults:
+        """Retrieve exact positive top-k matches from an existing FlashIndex.
+
+        Supports fragment, neutral-loss and hybrid matching for both cosine
+        (including modified cosine) and entropy. The numerical assignment
+        rules are scorer-specific, but result shape, ranking, memory-bounded
+        scheduling, and validation are shared. ``batch_size`` controls task
+        scheduling, not allocation of dense score batches. The optional
+        ``matches`` output is available for cosine with ``score_fields``.
+        """
+        self._check_index(library_index)
+        validate_topk_parameters(k, min_score, batch_size)
+        _worker_count(n_jobs, 1)
+        fields = self._resolve_score_fields(score_fields)
+        if "score" not in fields:
+            raise ValueError("Top-k ranking requires the 'score' field.")
+        return self.search_prepared_topk(
+            self.prepare_queries(query_spectra),
+            library_index,
+            k=k,
+            min_score=min_score,
+            batch_size=batch_size,
+            score_fields=score_fields,
+            progress_bar=progress_bar,
+            n_jobs=n_jobs,
+        )
+
+    def search_prepared_topk(
+        self,
+        query_spectra: PreparedSpectra,
+        library_index: FlashIndex,
+        *,
+        k: int = 100,
+        min_score: float = 0.0,
+        batch_size: int | None = None,
+        score_fields: Sequence[str] | None = None,
+        progress_bar: bool = False,
+        n_jobs: int = 1,
+    ) -> TopKResults:
+        """Return ranked candidates without computing a dense result matrix.
+
+        Per-worker workspace is proportional to library size and is reused for
+        the full query batch. Only actually touched reference IDs are ranked.
+        Hits are sorted descending by public-dtype score and then ascending
+        by library ID, with ``score > min_score`` and -1/zero padding.
+        """
+        self._check_index(library_index)
+        self._check_prepared(query_spectra)
+        fields = self._resolve_score_fields(score_fields)
+        if "score" not in fields:
+            raise ValueError("Top-k ranking requires the 'score' field.")
+        k, min_score, batch_size = validate_topk_parameters(k, min_score, batch_size)
+        workers = _worker_count(n_jobs, query_spectra.n_specs)
+        n_queries, n_references = query_spectra.n_specs, library_index.n_specs
+        id_dtype = np.int32 if n_references <= np.iinfo(np.int32).max else np.int64
+        indices = np.full((n_queries, k), -1, dtype=id_dtype)
+        scores = np.zeros((n_queries, k), dtype=self.dtype)
+        valid_counts = np.zeros(n_queries, dtype=np.intp)
+        matches = np.zeros((n_queries, k), dtype=np.int32) if "matches" in fields else None
+        if n_queries == 0 or n_references == 0 or query_spectra.n_peaks == 0:
+            return TopKResults(indices, scores, valid_counts, n_references, matches)
+
+        library = self._topk_library_data(library_index)
+        if library.n_peaks == 0:
+            return TopKResults(indices, scores, valid_counts, n_references, matches)
+        mode = _MATCHING_MODES[self.matching_mode]
+        gate = -1.0 if self.identity_precursor_tolerance is None else self.identity_precursor_tolerance
+        task_size = (
+            batch_size if batch_size is not None else max(1, min(32, (n_queries + 4 * workers - 1) // (4 * workers)))
+        )
+
+        def new_workspace():
+            return self._make_topk_workspace(library, mode)
+
+        def run(first: int, last: int, state) -> None:
+            self._score_topk_block(
+                query_spectra,
+                library,
+                state,
+                indices,
+                scores,
+                valid_counts,
+                matches,
+                first,
+                last,
+                k,
+                min_score,
+                mode,
+                gate,
+            )
+
+        with tqdm(
+            total=n_queries, desc=f"{type(self).__name__} top-k ({self.matching_mode})", disable=not progress_bar
+        ) as progress:
+            # Compile the first actual query before launching worker threads.
+            state = new_workspace()
+            run(0, 1, state)
+            progress.update(1)
+            if workers == 1:
+                for first in range(1, n_queries, task_size):
+                    last = min(first + task_size, n_queries)
+                    run(first, last, state)
+                    progress.update(last - first)
+            elif n_queries > 1:
+                del state
+                worker_local = local()
+
+                def worker(first: int, last: int) -> None:
+                    state = getattr(worker_local, "state", None)
+                    if state is None:
+                        state = new_workspace()
+                        worker_local.state = state
+                    run(first, last, state)
+
+                with ThreadPoolExecutor(max_workers=workers) as pool:
+                    futures = {
+                        pool.submit(worker, first, min(first + task_size, n_queries)): min(task_size, n_queries - first)
+                        for first in range(1, n_queries, task_size)
+                    }
+                    for future in as_completed(futures):
+                        future.result()
+                        progress.update(futures[future])
+
+        return TopKResults(indices, scores, valid_counts, n_references, matches)
+
+    @abstractmethod
+    def _topk_library_data(self, library_index: FlashIndex):
+        """Get the scorer-specific read-only kernel view from the index."""
+        raise NotImplementedError
+
+    @abstractmethod
+    def _make_topk_workspace(self, library, mode: int):
+        """Allocate reusable worker-private scoring and matching state."""
+        raise NotImplementedError
+
+    @abstractmethod
+    def _score_topk_block(
+        self,
+        prepared,
+        library,
+        workspace,
+        indices,
+        scores,
+        valid_counts,
+        matches,
+        first,
+        last,
+        k,
+        min_score,
+        mode,
+        gate,
+    ) -> None:
+        """Write compact top-k rows using scorer-specific exact matching."""
+        raise NotImplementedError
+
     @abstractmethod
     def _score_prepared(
         self,
@@ -582,6 +749,47 @@ class CosineFlash(_BaseFlashSimilarity):
         arrays = {"score": scores, "matches": counts}
         return Scores({field: arrays[field] for field in fields})
 
+    def _topk_library_data(self, library_index):
+        return library_index.cosine_data()
+
+    def _make_topk_workspace(self, library, mode):
+        return _CosineTopKWorkspace(library.n_specs, library.n_peaks, self.dtype, mode == 2)
+
+    def _score_topk_block(
+        self,
+        prepared,
+        library,
+        workspace,
+        indices,
+        scores,
+        valid_counts,
+        matches,
+        first,
+        last,
+        k,
+        min_score,
+        mode,
+        gate,
+    ):
+        _score_cosine_topk_block(
+            prepared,
+            library,
+            workspace,
+            indices,
+            scores,
+            valid_counts,
+            matches,
+            first,
+            last,
+            k,
+            min_score,
+            mode,
+            self.tolerance,
+            self.use_ppm,
+            gate,
+            self.identity_use_ppm,
+        )
+
 
 class EntropyFlash(_BaseFlashSimilarity):
     """Entropy similarity accumulated directly from matching indexed peaks.
@@ -673,141 +881,42 @@ class EntropyFlash(_BaseFlashSimilarity):
         _run_rows(run, queries.n_specs, n_jobs, progress_bar, f"{type(self).__name__} ({self.matching_mode})")
         return Scores({"score": scores})
 
-    def search_topk(
+    def _topk_library_data(self, library_index):
+        return library_index.entropy_data()
+
+    def _make_topk_workspace(self, library, mode):
+        return _EntropyTopKWorkspace(library.n_specs, library.n_peaks, self.dtype, mode == 2)
+
+    def _score_topk_block(
         self,
-        query_spectra: Sequence[SpectrumType],
-        library_index: FlashIndex,
-        *,
-        k: int = 100,
-        min_score: float = 0.0,
-        batch_size: int | None = None,
-        progress_bar: bool = True,
-        n_jobs: int = 1,
-    ) -> TopKResults:
-        """Return exact top-k ranked references without a dense score matrix.
-
-        Supports fragment, neutral-loss, and hybrid matching, including ppm
-        tolerance and the optional precursor-identity gate. Only scores strictly
-        greater than ``min_score`` are returned, ranked descending by score and
-        ascending by reference index for ties. Library IDs refer to the
-        original persisted index order. ``batch_size`` controls thread task
-        scheduling; no dense score batches are allocated.
-
-        Each worker owns O(n_references) scoring/cursor arrays; hybrid also
-        allocates compact peak-use bitsets. The default single worker limits
-        memory on large libraries; use ``n_jobs`` to trade memory for speed.
-        """
-        self._check_index(library_index)
-        validate_topk_parameters(k, min_score, batch_size)
-        _worker_count(n_jobs, 1)  # Validate even if the prepared queries are empty.
-        return self.search_prepared_topk(
-            self.prepare_queries(query_spectra),
-            library_index,
-            k=k,
-            min_score=min_score,
-            batch_size=batch_size,
-            progress_bar=progress_bar,
-            n_jobs=n_jobs,
+        prepared,
+        library,
+        workspace,
+        indices,
+        scores,
+        valid_counts,
+        matches,
+        first,
+        last,
+        k,
+        min_score,
+        mode,
+        gate,
+    ):
+        _score_entropy_topk_block(
+            prepared,
+            library,
+            workspace,
+            indices,
+            scores,
+            valid_counts,
+            first,
+            last,
+            k,
+            min_score,
+            mode,
+            self.tolerance,
+            self.use_ppm,
+            gate,
+            self.identity_use_ppm,
         )
-
-    def search_prepared_topk(
-        self,
-        query_spectra: PreparedSpectra,
-        library_index: FlashIndex,
-        *,
-        k: int = 100,
-        min_score: float = 0.0,
-        batch_size: int | None = None,
-        progress_bar: bool = False,
-        n_jobs: int = 1,
-    ) -> TopKResults:
-        """Retrieve exact top-k hits from previously prepared query spectra.
-
-        Uses the unchanged FlashIndex format and the same ordered one-to-one
-        matching rules as ``search_prepared``. The ranking considers only
-        library spectra whose peaks were actually matched; complete float64
-        scores are cast to the public dtype before comparison and selection.
-        """
-        self._check_index(library_index)
-        self._check_prepared(query_spectra)
-        k, min_score, batch_size = validate_topk_parameters(k, min_score, batch_size)
-        workers = _worker_count(n_jobs, query_spectra.n_specs)
-        n_queries, n_references = query_spectra.n_specs, library_index.n_specs
-        id_dtype = np.int32 if n_references <= np.iinfo(np.int32).max else np.int64
-        indices = np.full((n_queries, k), -1, dtype=id_dtype)
-        scores = np.zeros((n_queries, k), dtype=self.dtype)
-        valid_counts = np.zeros(n_queries, dtype=np.intp)
-        if n_queries == 0 or n_references == 0 or query_spectra.n_peaks == 0:
-            return TopKResults(indices, scores, valid_counts, n_references)
-
-        library = library_index.entropy_data()
-        if library.n_peaks == 0:
-            return TopKResults(indices, scores, valid_counts, n_references)
-        mode = _MATCHING_MODES[self.matching_mode]
-        gate = -1.0 if self.identity_precursor_tolerance is None else self.identity_precursor_tolerance
-        task_size = (
-            batch_size if batch_size is not None else max(1, min(32, (n_queries + 4 * workers - 1) // (4 * workers)))
-        )
-
-        def new_workspace() -> _EntropyTopKWorkspace:
-            return _EntropyTopKWorkspace(
-                n_references,
-                library.n_peaks,
-                self.dtype,
-                mode == 2,
-            )
-
-        def run(first: int, last: int, state: _EntropyTopKWorkspace) -> None:
-            _score_entropy_topk_block(
-                query_spectra,
-                library,
-                state,
-                indices,
-                scores,
-                valid_counts,
-                first,
-                last,
-                k,
-                min_score,
-                mode,
-                self.tolerance,
-                self.use_ppm,
-                gate,
-                self.identity_use_ppm,
-            )
-
-        with tqdm(
-            total=n_queries, desc=f"{type(self).__name__} top-k ({self.matching_mode})", disable=not progress_bar
-        ) as progress:
-            # A real query primes Numba before threads start compiling kernels.
-            state = new_workspace()
-            run(0, 1, state)
-            progress.update(1)
-            if workers == 1:
-                for first in range(1, n_queries, task_size):
-                    last = min(first + task_size, n_queries)
-                    run(first, last, state)
-                    progress.update(last - first)
-            elif n_queries > 1:
-                # Reuse state per thread, not per submitted task. The first
-                # temporary workspace is released before worker allocation.
-                del state
-                worker_local = local()
-
-                def worker(first: int, last: int) -> None:
-                    state = getattr(worker_local, "state", None)
-                    if state is None:
-                        state = new_workspace()
-                        worker_local.state = state
-                    run(first, last, state)
-
-                with ThreadPoolExecutor(max_workers=workers) as pool:
-                    futures = {
-                        pool.submit(worker, first, min(first + task_size, n_queries)): min(task_size, n_queries - first)
-                        for first in range(1, n_queries, task_size)
-                    }
-                    for future in as_completed(futures):
-                        future.result()
-                        progress.update(futures[future])
-
-        return TopKResults(indices, scores, valid_counts, n_references)
