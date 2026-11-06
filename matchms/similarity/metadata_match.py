@@ -101,7 +101,7 @@ class MetadataMatch(BaseSimilarityWithSparse):
         self,
         field: str,
         matching_type: str = "difference",
-        tolerance: float | None= None,
+        tolerance: float | None = None,
         tolerance_type: str = "absolute",
     ):
         """
@@ -129,9 +129,7 @@ class MetadataMatch(BaseSimilarityWithSparse):
         if matching_type not in ["equal_match", "difference"]:
             raise ValueError("Expected type from ['equal_match', 'difference']")
         if matching_type == "equal_match" and tolerance is not None:
-            logger.warning(
-                "Tolerance is set but will be ignored because 'equal_match' does not use tolerance."
-            )
+            logger.warning("Tolerance is set but will be ignored because 'equal_match' does not use tolerance.")
         if matching_type == "difference" and tolerance is None:
             raise ValueError("Tolerance must be specified when using 'difference' matching.")
         self.matching_type = matching_type
@@ -309,7 +307,6 @@ class MetadataMatch(BaseSimilarityWithSparse):
     ):
         """Find matching indices for optimized matrix / sparse_matrix computation."""
         if self.matching_type == "equal_match":
-
             rows, cols = self._find_matches_hashmap(entries_1, entries_2)
             scores = np.ones(len(rows), dtype=self.score_datatype)
             return rows, cols, scores
