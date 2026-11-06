@@ -1,18 +1,13 @@
-"""Selection and bounded-workspace utilities for exact top-k similarity search.
+"""Deterministic partial selection for exact top-k similarity retrieval.
 
-These helpers operate on already-computed dense score rows.
+Both dense-row and touched-candidate selectors rank by descending
+score, then ascending reference ID. They never sort all library spectra.
 """
 
 from __future__ import annotations
 import math
 import operator
 import numpy as np
-
-
-# Only the dense temporary scoring batch is bounded by this target. A single
-# library-sized score row can exceed this budget for exceptionally large indexes.
-_DEFAULT_BATCH_BYTES = 64 * 1024 * 1024
-_MAX_AUTO_BATCH_ROWS = 32
 
 
 def validate_topk_parameters(
@@ -43,29 +38,12 @@ def validate_topk_parameters(
     return k, min_score, batch_size
 
 
-def resolve_batch_size(
-    batch_size: int | None,
-    n_queries: int,
-    n_references: int,
-    itemsize: int,
-) -> int:
-    """Choose a query batch bounded by the 64-MiB default score-buffer budget.
-
-    An explicit batch size overrides the automatic target. The calculation only
-    controls the dense score buffer, not index storage or kernel scratch memory.
-    """
-    if batch_size is None:
-        bytes_per_row = max(1, n_references * itemsize)
-        batch_size = max(1, min(_MAX_AUTO_BATCH_ROWS, _DEFAULT_BATCH_BYTES // bytes_per_row))
-    return min(max(1, n_queries), batch_size)
-
-
 def select_topk_row(
     row: np.ndarray,
     k: int,
     min_score: float,
 ) -> tuple[np.ndarray, np.ndarray]:
-    """Select exact top-k positive hits from one already-computed score row.
+    """Select exact top-k positive hits from one already-computed dense row.
 
     Scores must be strictly greater than ``min_score``. Rankings use descending
     score followed by ascending library ID. ``np.partition`` determines the kth
@@ -94,3 +72,49 @@ def select_topk_row(
     selected_scores = row[selected]
     order = np.lexsort((selected, -selected_scores))
     return selected[order], selected_scores[order]
+
+
+def select_topk_candidates(
+    touched_ids: np.ndarray,
+    score_buffer: np.ndarray,
+    k: int,
+    min_score: float,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Select exact top-k hits from the *touched* subset of an indexed library.
+
+    ``touched_ids`` contains unique reference IDs in arbitrary encounter order;
+    its size may be much smaller than ``score_buffer.size``. This function never
+    scans the complete score buffer. Only scores > ``min_score`` qualify.
+
+    The kth-score boundary is handled explicitly: ties are resolved by choosing
+    the smallest library IDs, independent of posting encounter order. A full
+    ordering is applied only to the final ``k`` hits, not to every candidate.
+    Values remain in the scorer's output dtype, preserving dense-row ranking.
+    """
+    # Gather just the touched subset, not the N-library score buffer.
+    values = score_buffer[touched_ids]
+    qualified = values > min_score
+    ids = touched_ids[qualified]
+    values = values[qualified]
+    if ids.size == 0:
+        return ids, values
+
+    if ids.size > k:
+        boundary = np.partition(values, values.size - k)[values.size - k]
+        above = values > boundary
+        high_ids = ids[above]
+        high_scores = values[above]
+        remaining = k - high_ids.size
+        tied_ids = ids[values == boundary]
+        if tied_ids.size > remaining:
+            tied_ids = np.partition(tied_ids, remaining - 1)[:remaining]
+        ids = np.concatenate((high_ids, tied_ids))
+        values = np.concatenate(
+            (
+                high_scores,
+                np.full(tied_ids.size, boundary, dtype=values.dtype),
+            )
+        )
+
+    order = np.lexsort((ids, -values))
+    return ids[order], values[order]
