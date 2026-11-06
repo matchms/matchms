@@ -15,5 +15,5 @@ class ParentMassMatch(MetadataMatch):
             field="parent_mass",
             matching_type="difference",
             tolerance=tolerance,
-            tolerance_type="Dalton",
+            tolerance_type="absolute",
         )
