@@ -24,6 +24,7 @@ from pathlib import Path
 from typing import Any
 import numpy as np
 from numba import njit
+from scipy.sparse import coo_array
 from tqdm.auto import tqdm
 from matchms.scores import Scores
 from .base_similarity import BaseSimilarity
@@ -39,6 +40,7 @@ from .flash_index import FlashIndex
 _VECTOR_MIN_HITS = 512
 _VECTOR_CHUNK_SIZE = 65_536
 _MAX_DIRECTORY_ENTRIES = 2_000_000
+_TOP_N_BLOCK_BYTES = 64 * 1024**2
 _PREPARATION_FORMAT = "matchms.entropy_search.1"
 _CACHE_PREFIX = "entropy_search.1"
 
@@ -337,6 +339,35 @@ def _score_block(out, prepared, view, bounds, first_row, last_row):
             _scatter_add(out[row], view.spectrum_ids[start:stop], delta)
 
 
+def _top_n_hits(scores: np.ndarray, top_n: int) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Return the ``top_n`` largest positive entries per row as (row, column, value).
+
+    Entries are ordered by row, then by descending value, then by ascending
+    column. Ties at the cut-off are resolved towards the lower column index, so
+    the selection does not depend on the partition order. Zero scores are never
+    returned.
+    """
+    rows, cols = [], []
+    for row in range(scores.shape[0]):
+        values = scores[row]
+        chosen = np.flatnonzero(values > 0)
+        if chosen.size > top_n:
+            # Partition only the positive scores: a row that is mostly zeros is
+            # the slow, equal-key case for a partition of the full row.
+            positive = values[chosen]
+            split = positive.size - top_n
+            cutoff = positive[np.argpartition(positive, split)[split:]].min()
+            above = chosen[positive > cutoff]
+            tied = chosen[positive == cutoff][:top_n - above.size]
+            chosen = np.concatenate((above, tied))
+        chosen = chosen[np.lexsort((chosen, -values[chosen]))]
+        rows.append(np.full(chosen.size, row, dtype=np.int64))
+        cols.append(chosen)
+    rows = np.concatenate(rows) if rows else np.empty(0, dtype=np.int64)
+    cols = np.concatenate(cols) if cols else np.empty(0, dtype=np.int64)
+    return rows, cols, scores[rows, cols]
+
+
 class EntropySearch(BaseSimilarity):
     """Search-optimized fragment spectral entropy similarity.
 
@@ -423,7 +454,9 @@ class EntropySearch(BaseSimilarity):
     Scores
         ``matrix`` and ``search`` return a :class:`~matchms.scores.Scores` object
         containing the ``"score"`` field. Search results have query spectra as
-        rows and reference-library spectra as columns.
+        rows and reference-library spectra as columns. With ``top_n`` set,
+        ``search`` returns a sparse ``Scores`` holding only the best ``top_n``
+        hits of every query.
 
     Notes
     -----
@@ -460,6 +493,14 @@ class EntropySearch(BaseSimilarity):
             progress_bar=False,
             n_jobs=1,
         )
+
+    Large libraries are usually searched for the best few hits only. Pass
+    ``top_n`` to keep the ``top_n`` highest-scoring references per query; the
+    result is then sparse and the full query-by-library matrix is never held in
+    memory::
+
+        hits = similarity.search(query_spectra, library_index, top_n=10)
+        coo = hits.to_coo()  # coo.row, coo.col, coo.data, ranked per query
 
     If the input spectra are known to satisfy the separation requirement, use
     ``peak_separation="raise"`` to validate rather than modify them::
@@ -723,36 +764,54 @@ class EntropySearch(BaseSimilarity):
         return view
 
     def search(self, query_spectra, library_index: FlashIndex, *, score_fields=None,
-               progress_bar=True, n_jobs=1) -> Scores:
+               progress_bar=True, n_jobs=1, top_n: int | None = None) -> Scores:
         """Prepare and search query spectra against a reusable library index.
 
         Returns a score matrix with query spectra as rows and indexed reference
         spectra as columns. Reference preparation and index construction are not
         repeated.
+
+        Parameters
+        ----------
+        top_n
+            Keep only the ``top_n`` highest-scoring reference spectra per query
+            and return a sparse :class:`~matchms.scores.Scores`. Queries are
+            scored in blocks against a bounded scratch buffer, so memory use no
+            longer grows with ``n_queries * n_references``. Hits with a score of
+            zero are not kept. The sparse entries of every query are stored in
+            rank order (descending score, ties towards the lower reference
+            index). ``None`` returns the full dense matrix.
         """
         self._check_index(library_index)
         self._resolve_score_fields(score_fields)
         return self.search_prepared(
             self.prepare_queries(query_spectra), library_index,
-            score_fields=score_fields, progress_bar=progress_bar, n_jobs=n_jobs,
+            score_fields=score_fields, progress_bar=progress_bar, n_jobs=n_jobs, top_n=top_n,
         )
 
     def search_prepared(self, query_spectra: _PreparedEntropySpectra, library_index: FlashIndex,
-                        *, score_fields=None, progress_bar=False, n_jobs=1) -> Scores:
+                        *, score_fields=None, progress_bar=False, n_jobs=1,
+                        top_n: int | None = None) -> Scores:
         """Search queries that were already prepared by this configuration.
 
         This method excludes query preparation and index construction. ``n_jobs=1``
         runs serially, a positive integer selects that many worker threads, and
         ``n_jobs=-1`` uses the available CPUs up to the number of query spectra.
-        Workers operate on disjoint output rows.
+        Workers operate on disjoint output rows. ``top_n`` behaves as in
+        :meth:`search` and returns a sparse result.
         """
         self._check_prepared(query_spectra)
         self._resolve_score_fields(score_fields)
         if isinstance(n_jobs, (bool, np.bool_)) \
             or not isinstance(n_jobs, (int, np.integer)) or n_jobs == 0 or n_jobs < -1:
             raise ValueError("n_jobs must be a positive integer or -1.")
+        if top_n is not None and (isinstance(top_n, (bool, np.bool_))
+                                  or not isinstance(top_n, (int, np.integer)) or top_n < 1):
+            raise ValueError("top_n must be a positive integer or None.")
         view = self.prime_index(library_index)
         prepared = query_spectra
+        if top_n is not None:
+            return self._search_top_n(prepared, library_index, view, int(top_n), n_jobs, progress_bar)
         scores = np.zeros((prepared.n_specs, library_index.n_specs), dtype=self.dtype)
         if not scores.size or not prepared.n_peaks or not view.mz.size:
             return Scores({"score": scores})
@@ -760,22 +819,61 @@ class EntropySearch(BaseSimilarity):
         _scatter_add(scores[0], view.spectrum_ids[:0], np.empty(0, dtype=self.dtype))
         bounds = _query_windows(prepared.spec_mz, view.mz, self.tolerance,
                                 view.starts, view.origin, view.step)
+        workers = self._worker_count(n_jobs, prepared.n_specs)
+        self._score_rows(scores, prepared, view, bounds, workers, progress_bar)
+        return Scores({"score": scores})
+
+    @staticmethod
+    def _worker_count(n_jobs: int, n_rows: int) -> int:
         cpu_count = getattr(os, "process_cpu_count", os.cpu_count)() or 1
-        workers = min(prepared.n_specs, cpu_count if n_jobs == -1 else int(n_jobs))
-        boundaries = np.linspace(0, prepared.n_specs, workers + 1, dtype=int)
-        blocks = list(pairwise(boundaries))
+        return max(1, min(n_rows, cpu_count if n_jobs == -1 else int(n_jobs)))
+
+    def _score_rows(self, scores, prepared, view, bounds, workers, progress_bar) -> None:
+        """Accumulate all rows of ``prepared`` into the zeroed ``scores`` buffer."""
         if workers == 1:
             _score_block(scores, prepared, view, bounds, 0, prepared.n_specs)
-        else:
-            # Compile both kernels before entering the worker threads.
-            _accumulate_short(scores, prepared.spec_offsets, prepared.spec_int,
-                              view.intensity, view.terms, view.spectrum_ids, bounds, 0, 0)
-            _scatter_add(scores[0], view.spectrum_ids[:0], np.empty(0, dtype=self.dtype))
-            with ThreadPoolExecutor(max_workers=workers) as executor:
-                futures = [executor.submit(_score_block, scores, prepared, view, bounds, a, b) for a, b in blocks]
-                for future in tqdm(futures, disable=not progress_bar, desc="EntropySearch query blocks"):
-                    future.result()
-        return Scores({"score": scores})
+            return
+        # Compile both kernels before entering the worker threads.
+        _accumulate_short(scores, prepared.spec_offsets, prepared.spec_int,
+                          view.intensity, view.terms, view.spectrum_ids, bounds, 0, 0)
+        _scatter_add(scores[0], view.spectrum_ids[:0], np.empty(0, dtype=self.dtype))
+        boundaries = np.linspace(0, prepared.n_specs, workers + 1, dtype=int)
+        blocks = list(pairwise(boundaries))
+        with ThreadPoolExecutor(max_workers=workers) as executor:
+            futures = [executor.submit(_score_block, scores, prepared, view, bounds, a, b) for a, b in blocks]
+            for future in tqdm(futures, disable=not progress_bar, desc="EntropySearch query blocks"):
+                future.result()
+
+    def _search_top_n(self, prepared, library_index, view, top_n, n_jobs, progress_bar) -> Scores:
+        """Score queries block-wise and keep the best ``top_n`` references per query."""
+        n_queries, n_references = prepared.n_specs, library_index.n_specs
+        shape = (n_queries, n_references)
+        rows, cols, values = [], [], []
+        if n_queries and n_references and prepared.n_peaks and view.mz.size:
+            bounds = _query_windows(prepared.spec_mz, view.mz, self.tolerance,
+                                    view.starts, view.origin, view.step)
+            block_rows = _TOP_N_BLOCK_BYTES // (n_references * self.dtype.itemsize)
+            block_rows = int(max(1, min(n_queries, block_rows)))
+            scratch = np.zeros((block_rows, n_references), dtype=self.dtype)
+            # Compile the vector scatter signature during even a small warmup search.
+            _scatter_add(scratch[0], view.spectrum_ids[:0], np.empty(0, dtype=self.dtype))
+            starts = range(0, n_queries, block_rows)
+            for start in tqdm(starts, disable=not progress_bar, desc="EntropySearch query blocks"):
+                stop = min(start + block_rows, n_queries)
+                first_peak, last_peak = prepared.spec_offsets[[start, stop]]
+                scores = scratch[:stop - start]
+                scores.fill(0)
+                workers = self._worker_count(n_jobs, stop - start)
+                self._score_rows(scores, prepared.slice(start, stop), view,
+                                 bounds[first_peak:last_peak], workers, False)
+                block_row, block_col, block_value = _top_n_hits(scores, top_n)
+                rows.append(block_row + start)
+                cols.append(block_col)
+                values.append(block_value)
+        rows = np.concatenate(rows) if rows else np.empty(0, dtype=np.int64)
+        cols = np.concatenate(cols) if cols else np.empty(0, dtype=np.int64)
+        values = np.concatenate(values) if values else np.empty(0, dtype=self.dtype)
+        return Scores({"score": coo_array((values, (rows, cols)), shape=shape)})
 
     def matrix(self, spectra_1, spectra_2=None, score_fields=None, progress_bar=True, n_jobs=1) -> Scores:
         """Compute a complete dense similarity matrix.
