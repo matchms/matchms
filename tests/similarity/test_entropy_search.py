@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 from matchms import SpectraCollection
 from matchms.scores import Scores
+from matchms.similarity.entropy_search import EntropySearch
 from matchms.similarity.flash_similarity import CosineFlash, EntropyFlash
 from ..builder_spectrum import SpectrumBuilder
 
@@ -532,3 +533,144 @@ def test_cosine_flash_rectangular_matrix_preserves_requested_orientation():
             assert match_array[reference_index, query_index] == int(
                 expected["matches"]
             )
+
+
+# -------------------------------------------------------------------------
+# EntropySearch: top-N search
+# -------------------------------------------------------------------------
+
+
+def _random_separated_spectrum(rng, n_peaks, precursor_mz=1000.0):
+    """Spectrum whose peaks are at least 0.5 Da apart, as EntropySearch requires."""
+    mz = rng.choice(np.arange(50, 900), size=n_peaks, replace=False) + rng.uniform(0.0, 0.4, n_peaks)
+    intensities = rng.uniform(0.05, 1.0, n_peaks)
+    return _build_spectrum(np.sort(mz), intensities, precursor_mz=precursor_mz)
+
+
+def _top_n_example(seed=0, n_library=60, n_queries=12):
+    rng = np.random.default_rng(seed)
+    library = [_random_separated_spectrum(rng, int(rng.integers(5, 25))) for _ in range(n_library)]
+    queries = []
+    for i in rng.choice(n_library, size=n_queries, replace=False):
+        base = library[i]
+        mz = np.sort(base.peaks.mz + rng.normal(0.0, 0.003, base.peaks.mz.size))
+        scale = rng.uniform(0.5, 1.5, mz.size)
+        queries.append(_build_spectrum(mz, base.peaks.intensities * scale, precursor_mz=1000.0))
+    return library, queries
+
+
+def _expected_top_n(dense_row, top_n):
+    """Columns of the top_n positive scores: descending score, ties by lower column."""
+    order = np.lexsort((np.arange(dense_row.size), -dense_row))
+    return [int(c) for c in order[:top_n] if dense_row[c] > 0]
+
+
+@pytest.mark.parametrize("top_n", [1, 3, 7])
+@pytest.mark.parametrize("n_jobs", [1, 2])
+def test_entropy_search_top_n_matches_dense_search(top_n, n_jobs):
+    library, queries = _top_n_example()
+    similarity = EntropySearch(tolerance=0.01)
+    index = similarity.build_index(library)
+
+    dense = similarity.search(queries, index, progress_bar=False, n_jobs=n_jobs).to_array()
+    hits = similarity.search(queries, index, progress_bar=False, n_jobs=n_jobs, top_n=top_n)
+
+    assert isinstance(hits, Scores)
+    assert hits.is_sparse
+    assert hits.shape == dense.shape
+    assert hits.score_fields == ("score",)
+
+    coo = hits.to_coo()
+    for row in range(dense.shape[0]):
+        expected = _expected_top_n(dense[row], top_n)
+        got = coo.col[coo.row == row]
+        assert list(got) == expected  # same hits, stored in rank order
+        assert np.array_equal(coo.data[coo.row == row], dense[row, expected])
+        assert len(expected) <= top_n
+
+
+def test_entropy_search_top_n_larger_than_library_keeps_all_positive_scores():
+    library, queries = _top_n_example(seed=1)
+    similarity = EntropySearch(tolerance=0.01)
+    index = similarity.build_index(library)
+
+    dense = similarity.search(queries, index, progress_bar=False).to_array()
+    hits = similarity.search(queries, index, progress_bar=False, top_n=10 * len(library))
+
+    assert hits.is_sparse
+    assert hits.to_coo().nnz == int((dense > 0).sum())
+    np.testing.assert_array_equal(hits.to_array(), dense)
+
+
+@pytest.mark.parametrize("dtype", [np.float32, np.float64])
+def test_entropy_search_top_n_is_independent_of_block_size_and_threads(monkeypatch, dtype):
+    from matchms.similarity import entropy_search
+
+    library, queries = _top_n_example(seed=2, n_library=40, n_queries=9)
+    similarity = EntropySearch(tolerance=0.01, dtype=dtype)
+    index = similarity.build_index(library)
+
+    reference = similarity.search(queries, index, progress_bar=False, top_n=4).to_coo()
+    assert reference.data.dtype == dtype
+
+    # One query per block, scored by several worker threads.
+    monkeypatch.setattr(entropy_search, "_TOP_N_BLOCK_BYTES", 1)
+    blocked = similarity.search(queries, index, progress_bar=False, n_jobs=3, top_n=4).to_coo()
+
+    np.testing.assert_array_equal(blocked.row, reference.row)
+    np.testing.assert_array_equal(blocked.col, reference.col)
+    np.testing.assert_array_equal(blocked.data, reference.data)
+
+
+def test_entropy_search_top_n_ties_prefer_lower_library_index():
+    rng = np.random.default_rng(3)
+    a = _random_separated_spectrum(rng, 10)
+    b = _random_separated_spectrum(rng, 10)
+    c = _random_separated_spectrum(rng, 10)
+    similarity = EntropySearch(tolerance=0.01)
+    index = similarity.build_index([a, b, a, a, c])
+
+    top1 = similarity.search([a], index, progress_bar=False, top_n=1).to_coo()
+    top2 = similarity.search([a], index, progress_bar=False, top_n=2).to_coo()
+
+    assert list(top1.col) == [0]
+    assert list(top2.col) == [0, 2]
+    assert top2.data[0] == top2.data[1] == pytest.approx(1.0, abs=1e-6)
+
+
+def test_entropy_search_top_n_empty_inputs():
+    library, _ = _top_n_example(seed=4, n_library=5, n_queries=2)
+    similarity = EntropySearch(tolerance=0.01)
+    index = similarity.build_index(library)
+
+    no_queries = similarity.search([], index, progress_bar=False, top_n=3)
+    assert no_queries.is_sparse
+    assert no_queries.shape == (0, 5)
+    assert no_queries.to_coo().nnz == 0
+
+    no_peaks = similarity.search([_build_spectrum([], [])], index, progress_bar=False, top_n=3)
+    assert no_peaks.shape == (1, 5)
+    assert no_peaks.to_coo().nnz == 0
+
+
+@pytest.mark.parametrize("top_n", [0, -1, 2.5, True])
+def test_entropy_search_top_n_rejects_invalid_values(top_n):
+    library, queries = _top_n_example(seed=5, n_library=5, n_queries=2)
+    similarity = EntropySearch(tolerance=0.01)
+    index = similarity.build_index(library)
+
+    with pytest.raises(ValueError, match="top_n"):
+        similarity.search(queries, index, progress_bar=False, top_n=top_n)
+
+
+def test_entropy_search_top_n_sparse_scores_support_filtering():
+    library, queries = _top_n_example(seed=6)
+    similarity = EntropySearch(tolerance=0.01)
+    index = similarity.build_index(library)
+
+    hits = similarity.search(queries, index, progress_bar=False, top_n=5)
+    strong = hits[hits > 0.5]
+
+    assert strong.is_sparse
+    assert strong.shape == hits.shape
+    assert np.all(strong.to_coo().data > 0.5)
