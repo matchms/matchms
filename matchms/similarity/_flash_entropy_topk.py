@@ -2,8 +2,8 @@
 
 The dense entropy kernel is intentionally left unchanged. This kernel visits the
 same ordered postings and performs the same float64 contribution arithmetic,
-but never creates an output row of length ``n_references``. Each worker owns
-reusable scratch state; only touched library IDs are initialized and ranked.
+but never creates an output row of length ``n_references``. Each worker owns a
+reusable scratch state where only touched library IDs are initialized and ranked.
 
 Hybrid matching needs two kinds of cross-pass state. Physical product peaks are
 tracked with epoch-stamped, 64-peak bitset *words*, not an int64 epoch per peak.
@@ -76,7 +76,7 @@ def _entropy_topk_row(
     peak_word_bits,
     epoch,
 ):
-    """Accumulate a complete row; return touched IDs and dynamically grown buffers.
+    """Accumulate a complete row and returns touched IDs and dynamically grown buffers.
 
     This duplicates the dense kernel's posting traversal and acceptance order,
     including fragment-first hybrid rules and last-peak monotonicity. Only

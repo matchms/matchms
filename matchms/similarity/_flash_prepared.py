@@ -1,4 +1,5 @@
 """Validated, read-only packed spectra shared by indexed similarity kernels."""
+
 from dataclasses import dataclass
 import numpy as np
 
@@ -52,7 +53,7 @@ class PreparedSpectra:
             raise ValueError("Invalid prepared-spectrum slice.")
         peak_start, peak_stop = self.spec_offsets[start], self.spec_offsets[stop]
         return PreparedSpectra(
-            spec_offsets=readonly(self.spec_offsets[start:stop + 1] - peak_start),
+            spec_offsets=readonly(self.spec_offsets[start : stop + 1] - peak_start),
             spec_mz=self.spec_mz[peak_start:peak_stop],
             spec_int=self.spec_int[peak_start:peak_stop],
             precursor_mz=self.precursor_mz[start:stop],
@@ -95,10 +96,7 @@ def pack_native(native, dtype: np.dtype, settings: tuple) -> PreparedSpectra:
             raise ValueError("Prepared peaks must be m/z-sorted within each spectrum.")
 
     norms = getattr(native, "spec_l2", None)
-    norms = (
-        np.zeros(offsets.size - 1, dtype=np.float64)
-        if norms is None else np.asarray(norms, dtype=np.float64)
-    )
+    norms = np.zeros(offsets.size - 1, dtype=np.float64) if norms is None else np.asarray(norms, dtype=np.float64)
     if norms.shape != precursor.shape or not np.all(np.isfinite(norms)) or np.any(norms < 0):
         raise ValueError("Invalid prepared L2 norms.")
     precursor = np.asarray(precursor, dtype=np.float64)

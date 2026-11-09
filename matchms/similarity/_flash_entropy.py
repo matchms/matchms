@@ -4,6 +4,7 @@ Fragment coordinates are traversed in ascending order; neutral-loss coordinates
 are traversed in ascending loss order. Matching state is maintained per library
 spectrum, so overlapping tolerance windows cannot reuse a physical peak.
 """
+
 import numpy as np
 from numba import njit
 from ._flash_tolerance import identity_allowed, window, within
@@ -61,7 +62,8 @@ def entropy_rows(
     for row in range(start_row, stop_row):
         max_query_peaks = max(max_query_peaks, q_offsets[row + 1] - q_offsets[row])
     query_bits = np.zeros(
-        (n_library if mode == 2 else 0, (max_query_peaks + 63) // 64), dtype=np.uint64,
+        (n_library if mode == 2 else 0, (max_query_peaks + 63) // 64),
+        dtype=np.uint64,
     )
 
     for row in range(start_row, stop_row):
@@ -94,9 +96,7 @@ def entropy_rows(
                         continue
                     if not within(coordinate, np.float64(fragment_mz[posting]), tolerance, use_ppm):
                         continue
-                    score[column] += (
-                        xlog2(intensity + library_intensity) - query_term - fragment_terms[posting]
-                    )
+                    score[column] += xlog2(intensity + library_intensity) - query_term - fragment_terms[posting]
                     last_query[column] = query_index
                     last_peak[column] = peak_id
                     if mode == 2:
@@ -129,9 +129,7 @@ def entropy_rows(
                         continue
                     if not within(coordinate, loss_mz[posting], tolerance, use_ppm):
                         continue
-                    score[column] += (
-                        xlog2(intensity + library_intensity) - query_term - loss_terms[posting]
-                    )
+                    score[column] += xlog2(intensity + library_intensity) - query_term - loss_terms[posting]
                     last_query[column] = query_index
                     last_peak[column] = peak_id
 

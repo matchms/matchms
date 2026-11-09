@@ -9,6 +9,7 @@ The candidate counts already needed by the conflict-resolution step are also
 the matched-peak counts for unambiguous spectrum pairs. A separate matching pass
 is therefore unnecessary when counts are requested.
 """
+
 import numpy as np
 from numba import njit
 from ._flash_tolerance import identity_allowed, window, within
@@ -228,7 +229,8 @@ def cosine_rows(
     # every query. The word dimension supports spectra with more than 64 peaks.
     peak_epochs = np.zeros(n_library_peaks if mode == 2 else 0, dtype=np.int64)
     query_bits = np.zeros(
-        (n_library if mode == 2 else 0, (max_query_peaks + 63) // 64), dtype=np.uint64,
+        (n_library if mode == 2 else 0, (max_query_peaks + 63) // 64),
+        dtype=np.uint64,
     )
 
     for row in range(start_row, stop_row):
@@ -322,13 +324,34 @@ def cosine_rows(
             for column in range(n_library):
                 offsets[column + 1] = offsets[column] + candidate_counts[column]
             query_indices, library_indices, products, is_fragment = _collect_conflicting_candidates(
-                query_mz[start:stop], query_int[start:stop], precursor,
-                peaks_mz, peaks_int, peaks_spec, loss_mz, loss_spec, loss_product_index,
-                library_precursor, tolerance, use_ppm, mode, offsets, candidate_counts,
+                query_mz[start:stop],
+                query_int[start:stop],
+                precursor,
+                peaks_mz,
+                peaks_int,
+                peaks_spec,
+                loss_mz,
+                loss_spec,
+                loss_product_index,
+                library_precursor,
+                tolerance,
+                use_ppm,
+                mode,
+                offsets,
+                candidate_counts,
             )
             _resolve_conflicting_matches(
-                scores, matched_peaks, row, stop - start, offsets, query_indices,
-                library_indices, products, is_fragment, library_norms, query_norms[row],
+                scores,
+                matched_peaks,
+                row,
+                stop - start,
+                offsets,
+                query_indices,
+                library_indices,
+                products,
+                is_fragment,
+                library_norms,
+                query_norms[row],
             )
 
         for column in range(n_library):
