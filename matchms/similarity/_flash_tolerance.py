@@ -1,11 +1,17 @@
 """Matching predicates and conservative candidate intervals for indexed peaks."""
+
 import numpy as np
 from numba import njit
 
 
 @njit(cache=True, inline="always")
 def within(a: float, b: float, tol: float, ppm: bool) -> bool:
-    """Test the inclusive Da or symmetric-ppm tolerance on two coordinates."""
+    """Return whether two coordinates match within the inclusive tolerance.
+
+    For ppm, the allowed difference is ``tol * 1e-6 * (a + b) / 2``;
+    for Da, the allowed absolute difference is ``tol``. This is the exact
+    match predicate: callers cannot rely on candidate-window bounds alone.
+    """
     if ppm:
         return abs(a - b) <= tol * 1e-6 * 0.5 * (a + b)
     return abs(a - b) <= tol
@@ -38,7 +44,5 @@ def identity_allowed(query_pmz: float, library_pmz: float, tolerance: float, ppm
     When enabled, both precursors must be finite and match within tolerance.
     """
     return tolerance < 0 or (
-        np.isfinite(query_pmz)
-        and np.isfinite(library_pmz)
-        and within(query_pmz, library_pmz, tolerance, ppm)
+        np.isfinite(query_pmz) and np.isfinite(library_pmz) and within(query_pmz, library_pmz, tolerance, ppm)
     )

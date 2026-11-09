@@ -1,4 +1,5 @@
 """Validated, read-only packed spectra shared by indexed similarity kernels."""
+
 from dataclasses import dataclass
 import numpy as np
 
@@ -16,16 +17,29 @@ def readonly(array: np.ndarray, dtype: np.dtype | None = None) -> np.ndarray:
 
 @dataclass(frozen=True)
 class PreparedSpectra:
-    """Packed output of a similarity's ``prepare_queries`` method.
+    """Read-only spectrum-major peaks used by the Flash scoring kernels.
 
-    ``spec_offsets[i:i + 2]`` delimits spectrum i in ``spec_mz`` and ``spec_int``.
-    Coordinates are sorted within each spectrum, and intensities have already
-    been cleaned and weighted. ``precursor_mz`` and ``spec_l2`` contain one entry
-    per spectrum; unknown precursors are NaN. Entropy uses zero norm placeholders.
+    Attributes
+    ----------
+    spec_offsets
+        CSR-style offsets with ``n_specs + 1`` entries. Spectrum ``i`` spans
+        ``[spec_offsets[i], spec_offsets[i + 1])`` in both peak arrays.
+    spec_mz, spec_int
+        Concatenated, m/z-sorted peaks and preprocessed intensities.
+    precursor_mz
+        Per-spectrum precursor m/z, or ``NaN`` for missing values.
+    spec_l2
+        Per-spectrum intensity L2 norm (cosine); entropy uses zeros.
+    dtype
+        Floating dtype of the peak arrays.
+    settings
+        Immutable preprocessing configuration checked against the scoring index.
 
-    ``settings`` records the preprocessing configuration. Scorers check it at
-    search time without repeatedly scanning the arrays. Instances should be
-    obtained from the similarity API rather than constructed directly.
+    Notes
+    -----
+    Build through ``prepare_queries`` rather than directly constructing this
+    dataclass. Arrays are read-only views; external writable aliases must not
+    be mutated while scoring. ``slice`` shares the underlying peak buffers.
     """
 
     spec_offsets: np.ndarray
@@ -52,7 +66,7 @@ class PreparedSpectra:
             raise ValueError("Invalid prepared-spectrum slice.")
         peak_start, peak_stop = self.spec_offsets[start], self.spec_offsets[stop]
         return PreparedSpectra(
-            spec_offsets=readonly(self.spec_offsets[start:stop + 1] - peak_start),
+            spec_offsets=readonly(self.spec_offsets[start : stop + 1] - peak_start),
             spec_mz=self.spec_mz[peak_start:peak_stop],
             spec_int=self.spec_int[peak_start:peak_stop],
             precursor_mz=self.precursor_mz[start:stop],
@@ -95,10 +109,7 @@ def pack_native(native, dtype: np.dtype, settings: tuple) -> PreparedSpectra:
             raise ValueError("Prepared peaks must be m/z-sorted within each spectrum.")
 
     norms = getattr(native, "spec_l2", None)
-    norms = (
-        np.zeros(offsets.size - 1, dtype=np.float64)
-        if norms is None else np.asarray(norms, dtype=np.float64)
-    )
+    norms = np.zeros(offsets.size - 1, dtype=np.float64) if norms is None else np.asarray(norms, dtype=np.float64)
     if norms.shape != precursor.shape or not np.all(np.isfinite(norms)) or np.any(norms < 0):
         raise ValueError("Invalid prepared L2 norms.")
     precursor = np.asarray(precursor, dtype=np.float64)
