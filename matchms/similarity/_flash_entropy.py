@@ -8,7 +8,6 @@ assignment rules visible without changing their order or floating-point math.
 
 import numpy as np
 from numba import njit
-
 from ._flash_tolerance import identity_allowed, window, within
 
 

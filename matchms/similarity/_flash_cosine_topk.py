@@ -12,16 +12,14 @@ The bundles are unpacked with descriptive names at each helper's entry.
 """
 
 from __future__ import annotations
-
 from typing import TYPE_CHECKING
-
 import numpy as np
 from numba import njit
-
 from ._flash_cosine import _FRAGMENT_SORT_BIAS
 from ._flash_tolerance import identity_allowed, window, within
 from ._flash_topk_common import _FlashTopKWorkspace, _register_touched
 from ._topk import select_topk_candidates
+
 
 if TYPE_CHECKING:
     from ._flash_prepared import PreparedSpectra

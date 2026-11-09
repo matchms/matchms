@@ -17,6 +17,7 @@ import numpy as np
 from numba import njit
 from ._topk import select_topk_candidates
 
+
 if TYPE_CHECKING:
     from .entropy_search import _PreparedEntropySpectra, _SearchView
 

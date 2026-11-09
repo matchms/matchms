@@ -10,16 +10,14 @@ cross-pass matching rules can be reviewed independently.
 """
 
 from __future__ import annotations
-
 from typing import TYPE_CHECKING
-
 import numpy as np
 from numba import njit
-
 from ._flash_entropy import xlog2
 from ._flash_tolerance import identity_allowed, window, within
-from ._flash_topk_common import _MAX_EPOCH, _FlashTopKWorkspace, _register_touched
+from ._flash_topk_common import _FlashTopKWorkspace, _register_touched
 from ._topk import select_topk_candidates
+
 
 if TYPE_CHECKING:
     from ._flash_prepared import PreparedSpectra
