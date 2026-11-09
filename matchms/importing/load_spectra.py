@@ -2,6 +2,7 @@ import os
 from collections.abc import Generator, Iterator
 from itertools import chain
 from matchms.importing import (
+    load_collection_from_mgf,
     load_from_json,
     load_from_mgf,
     load_from_msp,
@@ -99,8 +100,9 @@ def load_ms2_dataset(
     **kwargs
         Additional keyword arguments. For Parquet input these are passed to
         ``load_from_parquet`` (for example ``columns``, ``filters``, or
-        ``mz_precision``); for other formats they are passed to the
-        SpectraCollection constructor.
+        ``mz_precision``); for mgf input to ``load_collection_from_mgf``
+        (``mz_precision``, ``mz_rounding``); for other formats they are passed
+        to the SpectraCollection constructor.
 
     Returns
     -------
@@ -114,6 +116,13 @@ def load_ms2_dataset(
     )
     if resolved_ftype == "parquet":
         return load_from_parquet(
+            file,
+            metadata_harmonization=metadata_harmonization,
+            **kwargs,
+        )
+    if resolved_ftype == "mgf":
+        assert os.path.exists(file), f"The specified file: {file} does not exists"
+        return load_collection_from_mgf(
             file,
             metadata_harmonization=metadata_harmonization,
             **kwargs,

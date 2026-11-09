@@ -6,7 +6,6 @@ from pathlib import Path
 from typing import Any
 import numpy as np
 import pandas as pd
-from scipy.sparse import coo_array, csr_array
 from matchms._parquet import (
     DEFAULT_MZ_PRECISION,
     DEFAULT_MZ_ROUNDING,
@@ -157,10 +156,10 @@ def load_from_parquet(
     resolved_mz_precision = _resolve_mz_precision(mz_precision, schema_metadata)
     resolved_mz_rounding = mz_rounding or schema_metadata.get("matchms_mz_rounding", DEFAULT_MZ_ROUNDING)
 
-    fragments = _build_fragment_collection(
-        lengths=lengths,
-        mz=all_mz,
-        intensities=all_intensities,
+    fragments = CSRFragmentCollection.from_peak_arrays(
+        lengths,
+        all_mz,
+        all_intensities,
         mz_precision=resolved_mz_precision,
         mz_rounding=resolved_mz_rounding,
     )
@@ -214,7 +213,11 @@ def _flatten_list_column(column, *, column_name: str, pa) -> tuple[np.ndarray, n
             f"Peak column {column_name!r} must contain numeric values, got {values.type}."
         )
 
-    flat = np.asarray(values.to_numpy(zero_copy_only=False), dtype=float)
+    # Keep floating dtypes (float32 intensities stay float32); integer and
+    # decimal values are converted to float64.
+    flat = np.asarray(values.to_numpy(zero_copy_only=False))
+    if not np.issubdtype(flat.dtype, np.floating):
+        flat = flat.astype(float)
     if not np.all(np.isfinite(flat)):
         raise ValueError(f"Peak column {column_name!r} contains non-finite values.")
 
@@ -247,36 +250,3 @@ def _resolve_mz_precision(
         return float(stored)
     except ValueError as exc:
         raise ValueError(f"Invalid matchms_mz_precision stored in Parquet metadata: {stored!r}.") from exc
-
-
-def _build_fragment_collection(
-    *,
-    lengths: np.ndarray,
-    mz: np.ndarray,
-    intensities: np.ndarray,
-    mz_precision: float,
-    mz_rounding: str,
-) -> CSRFragmentCollection:
-    n_spectra = len(lengths)
-    template = CSRFragmentCollection.from_array(
-        csr_array((n_spectra, 0), dtype=float),
-        mz_precision=mz_precision,
-        mz_rounding=mz_rounding,
-    )
-
-    if mz.size == 0:
-        return template
-
-    if np.any(mz < 0):
-        raise ValueError("Peak m/z values must be non-negative.")
-
-    bin_idx = template.mz_to_bin(mz)
-    row_idx = np.repeat(np.arange(n_spectra, dtype=np.int64), lengths)
-    n_bins = int(bin_idx.max()) + 1
-
-    fragments_array = coo_array(
-        (intensities, (row_idx, bin_idx)),
-        shape=(n_spectra, n_bins),
-    ).tocsr()
-
-    return template._from_array(fragments_array)

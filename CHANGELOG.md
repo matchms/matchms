@@ -10,12 +10,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New `ModifiedCosineLinear`, the linear-time exact modified cosine from SIRIUS. Same score as `ModifiedCosineHungarian` on merged spectra.
 - `SpectraProcessor` now applies the configured `harmonize_missing_entries` step once more to the final result, so missing values introduced by later processing steps are handled consistently [#951](https://github.com/matchms/matchms/issues/951).
 - `ProcessingReport` now counts metadata entries that are still missing after processing (`report.missing_metadata`), making failed derivations visible [#951](https://github.com/matchms/matchms/issues/951).
+- New `load_collection_from_mgf` importer that reads an mgf file directly into a `SpectraCollection` without creating intermediate `Spectrum` objects; `load_ms2_dataset` uses it for mgf input. Same metadata and fragments as before, several times faster on large libraries. Also new `CSRFragmentCollection.from_peak_arrays` (shared with the Parquet importer) and `matchms.metadata.harmonize_metadata_values` [#916](https://github.com/matchms/matchms/issues/916).
 
 ### Changed
 - `CosineBlink` now computes and returns scores as `np.float64` (`DEFAULT_DTYPE`) by default, consistent with the other similarity scores. The new `dtype` parameter can be set to `np.float32` to reduce memory usage [#880](https://github.com/matchms/matchms/issues/880).
 - New `export_style="sirius"` for `save_as_mgf` (and `save_spectra`, `metadata_dict`) that writes the metadata keys SIRIUS reads (`PEPMASS`, `CHARGE`, `MSLEVEL`, `RTINSECONDS`, `FEATURE_ID`, `ION`, `NAME`, ...), so mgf files exported from matchms can be imported into SIRIUS again [#987](https://github.com/matchms/matchms/issues/987).
 
 ### Fixed
+- `load_from_parquet` and `CSRFragmentCollection.from_peak_arrays` keep float32 intensities instead of converting them to float64 [#1019](https://github.com/matchms/matchms/pull/1019).
 - `load_from_msp` reads records with `Num Peaks: 0` as spectra without peaks. Before, such a record was dropped and its metadata was merged into the next spectrum, which also broke the `save_as_msp` round trip.
 - `correct_charge` takes the charge from a known adduct (e.g. `[M-2H]2-` gives -2) before guessing +1/-1 from the ionmode when no charge is given.
 

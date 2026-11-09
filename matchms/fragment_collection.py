@@ -237,6 +237,69 @@ class CSRFragmentCollection(FragmentCollection):
             index_dtype=index_dtype,
         )
 
+    @classmethod
+    def from_peak_arrays(
+        cls,
+        lengths: np.ndarray,
+        mz: np.ndarray,
+        intensities: np.ndarray,
+        *,
+        mz_precision: float = 1e-6,
+        mz_rounding: str = "round",
+        index_dtype: np.dtype | type = np.int64,
+    ) -> Self:
+        """Build a collection from the concatenated peaks of many spectra.
+
+        ``lengths[i]`` is the number of peaks of spectrum ``i``. ``mz`` and
+        ``intensities`` contain the peaks of all spectra back to back, in row
+        order, so that ``mz[lengths[:i].sum():lengths[:i + 1].sum()]`` are the
+        m/z values of spectrum ``i``. Peaks need not be sorted. As in the
+        Spectrum-based constructor, peaks of one spectrum that fall into the same
+        m/z bin are summed.
+
+        This is the fast path used by the collection importers; it avoids
+        creating :class:`~matchms.spectrum.Spectrum` objects.
+        """
+        lengths = np.asarray(lengths, dtype=np.int64)
+        mz = np.asarray(mz, dtype=float)
+        # Keep the caller's floating dtype (e.g. float32), as the Spectrum-based
+        # constructor does; only non-floating input is converted.
+        intensities = np.asarray(intensities)
+        if not np.issubdtype(intensities.dtype, np.floating):
+            intensities = intensities.astype(float)
+
+        if lengths.ndim != 1 or np.any(lengths < 0):
+            raise ValueError("lengths must be a one-dimensional array of non-negative counts.")
+        if mz.ndim != 1 or mz.shape != intensities.shape:
+            raise ValueError("mz and intensities must be one-dimensional arrays of the same length.")
+        if mz.size != int(lengths.sum()):
+            raise ValueError(
+                f"lengths sum to {int(lengths.sum())} peaks, but {mz.size} peak values were given."
+            )
+
+        n_spectra = lengths.size
+        template = cls.from_array(
+            csr_array((n_spectra, 0), dtype=float),
+            mz_precision=mz_precision,
+            mz_rounding=mz_rounding,
+            index_dtype=index_dtype,
+        )
+        if mz.size == 0:
+            return template
+
+        if np.any(mz < 0):
+            raise ValueError("Peak m/z values must be non-negative.")
+
+        bin_idx = template.mz_to_bin(mz)
+        row_idx = np.repeat(np.arange(n_spectra, dtype=np.int64), lengths)
+        n_bins = int(bin_idx.max()) + 1
+
+        fragments_array = coo_array(
+            (intensities, (row_idx, bin_idx)),
+            shape=(n_spectra, n_bins),
+        ).tocsr()
+        return template._from_array(fragments_array)
+
     def _from_array(self, array: csr_array) -> Self:
         """Return a new collection preserving this collection's binning configuration."""
         return self.__class__.from_array(

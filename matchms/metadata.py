@@ -25,6 +25,66 @@ INT_METADATA_KEYS = frozenset({
 })
 
 
+def harmonize_metadata_values(metadata: Mapping) -> dict:
+    """Return a copy of a plain metadata dictionary with harmonized values.
+
+    This is the value harmonization applied to every :class:`Spectrum` on
+    creation: pepmass interpretation, precursor m/z derivation, lower-case ion
+    mode, retention time/index conversion, parent and parent mass conversion,
+    charge conversion to int, and removal of known string aliases for missing
+    values. Keys are expected to be in matchms style already (see
+    :meth:`Metadata.harmonize_keys`). The function works on plain dictionaries
+    so that collection importers can harmonize many records without creating
+    :class:`Metadata` objects.
+    """
+    metadata_filtered = _interpret_pepmass_metadata(dict(metadata))
+    metadata_filtered = _add_precursor_mz_metadata(metadata_filtered)
+
+    if metadata_filtered.get("ionmode"):
+        metadata_filtered["ionmode"] = metadata_filtered.get("ionmode").lower()
+
+    if metadata_filtered.get("retention_time"):
+        metadata_filtered = _add_retention(
+            metadata_filtered,
+            "retention_time",
+            _retention_time_keys,
+        )
+
+    if metadata_filtered.get("retention_index"):
+        metadata_filtered = _add_retention(
+            metadata_filtered,
+            "retention_index",
+            _retention_index_keys,
+        )
+
+    if metadata_filtered.get("parent"):
+        metadata_filtered["parent"] = float(
+            metadata_filtered.get("parent")
+        )
+
+    if "parent_mass" in metadata_filtered:
+        metadata_filtered["parent_mass"] = (
+            _convert_parent_mass_entry_to_float(
+                metadata_filtered.get("parent_mass")
+            )
+        )
+
+    charge = metadata_filtered.get("charge")
+    charge_int = _convert_charge_to_int(charge)
+    if not isinstance(charge, int) and charge_int is not None:
+        metadata_filtered["charge"] = charge_int
+
+    invalid_entries = ALIASES_FOR_NONE
+    return {
+        key: value
+        for key, value in metadata_filtered.items()
+        if not (
+            isinstance(value, str)
+            and value in invalid_entries
+        )
+    }
+
+
 class Metadata:
     """Class to handle spectrum metadata in matchms.
 
@@ -109,55 +169,9 @@ class Metadata:
         This includes interpreting pepmass, harmonizing precursor m/z,
         ion mode, retention time/index, parent and parent mass, charge,
         and removing known string aliases for missing metadata.
+        See :func:`harmonize_metadata_values`.
         """
-        metadata_filtered = _interpret_pepmass_metadata(self.data)
-        metadata_filtered = _add_precursor_mz_metadata(metadata_filtered)
-
-        if metadata_filtered.get("ionmode"):
-            metadata_filtered["ionmode"] = self.get("ionmode").lower()
-
-        if metadata_filtered.get("retention_time"):
-            metadata_filtered = _add_retention(
-                metadata_filtered,
-                "retention_time",
-                _retention_time_keys,
-            )
-
-        if metadata_filtered.get("retention_index"):
-            metadata_filtered = _add_retention(
-                metadata_filtered,
-                "retention_index",
-                _retention_index_keys,
-            )
-
-        if metadata_filtered.get("parent"):
-            metadata_filtered["parent"] = float(
-                metadata_filtered.get("parent")
-            )
-
-        if "parent_mass" in metadata_filtered:
-            metadata_filtered["parent_mass"] = (
-                _convert_parent_mass_entry_to_float(
-                    metadata_filtered.get("parent_mass")
-                )
-            )
-
-        charge = metadata_filtered.get("charge")
-        charge_int = _convert_charge_to_int(charge)
-        if not isinstance(charge, int) and charge_int is not None:
-            metadata_filtered["charge"] = charge_int
-
-        invalid_entries = ALIASES_FOR_NONE
-        metadata_filtered = {
-            key: value
-            for key, value in metadata_filtered.items()
-            if not (
-                isinstance(value, str)
-                and value in invalid_entries
-            )
-        }
-
-        self.data = metadata_filtered
+        self.data = harmonize_metadata_values(self.data)
 
     # ------------------------------
     # Getters and Setters
