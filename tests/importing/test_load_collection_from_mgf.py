@@ -180,6 +180,18 @@ def test_from_peak_arrays_matches_spectrum_based_construction():
     np.testing.assert_allclose(built.array.data, expected.array.data)
 
 
+def test_from_peak_arrays_keeps_intensity_dtype():
+    lengths = np.array([2, 1])
+    mz = np.array([100.0, 200.0, 300.0])
+
+    built = CSRFragmentCollection.from_peak_arrays(lengths, mz, np.array([1.0, 2.0, 3.0], dtype=np.float32))
+    assert built.array.data.dtype == np.float32
+
+    built = CSRFragmentCollection.from_peak_arrays(lengths, mz, np.array([1, 2, 3]))
+    assert built.array.data.dtype == np.float64
+    np.testing.assert_array_equal(built.array.data, [1.0, 2.0, 3.0])
+
+
 def test_from_peak_arrays_without_peaks_and_with_bad_input():
     empty = CSRFragmentCollection.from_peak_arrays(np.array([0, 0]), np.array([]), np.array([]))
     assert empty.shape == (2, 0)

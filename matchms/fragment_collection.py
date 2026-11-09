@@ -262,7 +262,11 @@ class CSRFragmentCollection(FragmentCollection):
         """
         lengths = np.asarray(lengths, dtype=np.int64)
         mz = np.asarray(mz, dtype=float)
-        intensities = np.asarray(intensities, dtype=float)
+        # Keep the caller's floating dtype (e.g. float32), as the Spectrum-based
+        # constructor does; only non-floating input is converted.
+        intensities = np.asarray(intensities)
+        if not np.issubdtype(intensities.dtype, np.floating):
+            intensities = intensities.astype(float)
 
         if lengths.ndim != 1 or np.any(lengths < 0):
             raise ValueError("lengths must be a one-dimensional array of non-negative counts.")
