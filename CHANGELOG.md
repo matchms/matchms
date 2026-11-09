@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New `export_style="sirius"` for `save_as_mgf` (and `save_spectra`, `metadata_dict`) that writes the metadata keys SIRIUS reads (`PEPMASS`, `CHARGE`, `MSLEVEL`, `RTINSECONDS`, `FEATURE_ID`, `ION`, `NAME`, ...), so mgf files exported from matchms can be imported into SIRIUS again [#987](https://github.com/matchms/matchms/issues/987).
 
 ### Fixed
+- `load_from_parquet` and `CSRFragmentCollection.from_peak_arrays` keep float32 intensities instead of converting them to float64 [#1019](https://github.com/matchms/matchms/pull/1019).
 - `load_from_msp` reads records with `Num Peaks: 0` as spectra without peaks. Before, such a record was dropped and its metadata was merged into the next spectrum, which also broke the `save_as_msp` round trip.
 - `correct_charge` takes the charge from a known adduct (e.g. `[M-2H]2-` gives -2) before guessing +1/-1 from the ionmode when no charge is given.
 

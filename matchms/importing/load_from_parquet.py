@@ -213,7 +213,11 @@ def _flatten_list_column(column, *, column_name: str, pa) -> tuple[np.ndarray, n
             f"Peak column {column_name!r} must contain numeric values, got {values.type}."
         )
 
-    flat = np.asarray(values.to_numpy(zero_copy_only=False), dtype=float)
+    # Keep floating dtypes (float32 intensities stay float32); integer and
+    # decimal values are converted to float64.
+    flat = np.asarray(values.to_numpy(zero_copy_only=False))
+    if not np.issubdtype(flat.dtype, np.floating):
+        flat = flat.astype(float)
     if not np.all(np.isfinite(flat)):
         raise ValueError(f"Peak column {column_name!r} contains non-finite values.")
 

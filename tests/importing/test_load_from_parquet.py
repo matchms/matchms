@@ -72,6 +72,39 @@ def test_load_kaggle_style_columns_and_filters(tmp_path):
     np.testing.assert_allclose(spectra[0].intensities, np.array([1.0, 0.25]))
 
 
+def test_load_from_parquet_keeps_float32_intensities(tmp_path):
+    parquet_file = tmp_path / "float32.parquet"
+    table = pa.table(
+        {
+            "mz": pa.array([[100.0, 200.0], [150.0]], type=pa.list_(pa.float64())),
+            "intensities": pa.array([[1.0, 0.5], [0.25]], type=pa.list_(pa.float32())),
+        }
+    )
+    pq.write_table(table, parquet_file)
+
+    spectra = load_from_parquet(parquet_file)
+
+    assert spectra.fragments.array.data.dtype == np.float32
+    np.testing.assert_allclose(spectra[1].intensities, np.array([0.25]))
+
+
+def test_load_from_parquet_converts_integer_peaks_to_float(tmp_path):
+    parquet_file = tmp_path / "ints.parquet"
+    table = pa.table(
+        {
+            "mz": pa.array([[100, 200]], type=pa.list_(pa.int64())),
+            "intensities": pa.array([[3, 1]], type=pa.list_(pa.int32())),
+        }
+    )
+    pq.write_table(table, parquet_file)
+
+    spectra = load_from_parquet(parquet_file)
+
+    assert spectra.fragments.array.data.dtype == np.float64
+    np.testing.assert_array_equal(spectra[0].mz, np.array([100.0, 200.0]))
+    np.testing.assert_array_equal(spectra[0].intensities, np.array([3.0, 1.0]))
+
+
 def test_load_from_parquet_rejects_mismatched_peak_lengths(tmp_path):
     parquet_file = tmp_path / "bad.parquet"
     table = pa.table(
