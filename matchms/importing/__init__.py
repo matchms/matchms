@@ -12,7 +12,11 @@ The individual ``load_from_*`` functions and :meth:`~matchms.importing.load_spec
 return spectra as :class:`~matchms.spectrum.Spectrum` objects or iterables of
 Spectrum objects. For collection-based workflows, use
 :meth:`~matchms.importing.load_ms2_dataset` to directly load a file as a
-:class:`~matchms.SpectraCollection.SpectraCollection`.
+:class:`~matchms.SpectraCollection.SpectraCollection`. For mgf and Parquet
+input this uses the collection importers
+(:meth:`~matchms.importing.load_collection_from_mgf`,
+:meth:`~matchms.importing.load_from_parquet`), which fill the collection
+directly without creating intermediate Spectrum objects.
 
 For more extensive import options we recommend building custom importers using
 `pyteomics <https://github.com/levitsky/pyteomics>`_ or
@@ -23,7 +27,7 @@ information which is imported via :mod:`~matchms.importing.load_adducts`.
 """
 
 from .load_from_json import load_from_json
-from .load_from_mgf import load_from_mgf
+from .load_from_mgf import load_collection_from_mgf, load_from_mgf
 from .load_from_msp import load_from_msp
 from .load_from_mzml import load_from_mzml
 from .load_from_mzxml import load_from_mzxml
@@ -34,6 +38,7 @@ from .load_spectra import SUPPORTED_FILE_FORMATS, load_ms2_dataset, load_spectra
 
 
 __all__ = [
+    "load_collection_from_mgf",
     "load_from_json",
     "load_from_mgf",
     "load_from_msp",
