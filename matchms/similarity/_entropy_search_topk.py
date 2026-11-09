@@ -12,9 +12,14 @@ dense scorer. Thus float32 additions occur in the same order.
 """
 
 from __future__ import annotations
+from typing import TYPE_CHECKING
 import numpy as np
 from numba import njit
 from ._topk import select_topk_candidates
+
+
+if TYPE_CHECKING:
+    from .entropy_search import _PreparedEntropySpectra, _SearchView
 
 
 _INITIAL_TOUCHED_CAPACITY = 4096
@@ -133,10 +138,64 @@ def _scatter_add_topk(scores, epochs, touched, n_touched, epoch, library_ids, de
     return touched, n_touched
 
 
+def _accumulate_long_windows(
+    view: _SearchView,
+    bounds: np.ndarray,
+    query_intensity: np.ndarray,
+    workspace: _TopKWorkspace,
+    first_peak: int,
+    last_peak: int,
+    vector_min_hits: int,
+    vector_chunk_size: int,
+    touched: np.ndarray,
+    n_touched: int,
+    epoch: int,
+) -> tuple[np.ndarray, int]:
+    """Accumulate high-occupancy windows with bounded vector chunks.
+
+    Long windows are visited after all short windows for this query, matching
+    the original dense scorer's float32 addition order. Each chunk uses the
+    reusable ``mixed`` and ``contributions`` arrays; Numba scatter adds update
+    only the library IDs reached by this query.
+    """
+    for peak in range(first_peak, last_peak):
+        low, high = bounds[peak]
+        width = int(high - low)
+        if width < vector_min_hits:
+            continue
+        workspace.ensure_vector_capacity(
+            min(width, vector_chunk_size),
+            view.intensity.dtype,
+        )
+        capacity = workspace.mixed.size
+        value = query_intensity[peak]
+        query_term = value * np.log2(value)
+        for start in range(int(low), int(high), capacity):
+            stop = min(start + capacity, int(high))
+            mixture = workspace.mixed[: stop - start]
+            delta = workspace.contributions[: stop - start]
+            np.add(view.intensity[start:stop], value, out=mixture)
+            np.log2(mixture, out=delta)
+            np.multiply(mixture, delta, out=delta)
+            np.subtract(delta, view.terms[start:stop], out=delta)
+            np.subtract(delta, query_term, out=delta)
+            touched, n_touched = _scatter_add_topk(
+                workspace.scores,
+                workspace.seen_epochs,
+                touched,
+                n_touched,
+                epoch,
+                view.spectrum_ids[start:stop],
+                delta,
+            )
+
+    return touched, n_touched
+
+
 def _score_topk_block(
-    prepared,
-    view,
-    bounds,
+    prepared: _PreparedEntropySpectra,
+    view: _SearchView,
+    bounds: np.ndarray,
     workspace: _TopKWorkspace,
     indices: np.ndarray,
     scores: np.ndarray,
@@ -175,39 +234,20 @@ def _score_topk_block(
             epoch,
         )
 
-        # The original dense path scores *all short* windows first, then *all
-        # long* windows. That ordering is preservedeven when the matching windows
-        # overlap and float32 additions are not exactly associative.
-        for peak in range(first_peak, last_peak):
-            low, high = bounds[peak]
-            width = int(high - low)
-            if width < vector_min_hits:
-                continue
-            workspace.ensure_vector_capacity(
-                min(width, vector_chunk_size),
-                view.intensity.dtype,
-            )
-            capacity = workspace.mixed.size
-            value = query_intensity[peak]
-            query_term = value * np.log2(value)
-            for start in range(int(low), int(high), capacity):
-                stop = min(start + capacity, int(high))
-                mixture = workspace.mixed[: stop - start]
-                delta = workspace.contributions[: stop - start]
-                np.add(view.intensity[start:stop], value, out=mixture)
-                np.log2(mixture, out=delta)
-                np.multiply(mixture, delta, out=delta)
-                np.subtract(delta, view.terms[start:stop], out=delta)
-                np.subtract(delta, query_term, out=delta)
-                touched, n_touched = _scatter_add_topk(
-                    workspace.scores,
-                    workspace.seen_epochs,
-                    touched,
-                    n_touched,
-                    epoch,
-                    view.spectrum_ids[start:stop],
-                    delta,
-                )
+        # Preserve the dense scorer's ordering: all short, then all long windows.
+        touched, n_touched = _accumulate_long_windows(
+            view,
+            bounds,
+            query_intensity,
+            workspace,
+            first_peak,
+            last_peak,
+            vector_min_hits,
+            vector_chunk_size,
+            touched,
+            n_touched,
+            epoch,
+        )
 
         workspace.touched_ids = touched
         ids, values = select_topk_candidates(
