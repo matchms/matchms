@@ -12,17 +12,29 @@ def create_dummy_spectra():
     """Create dummy spectra"""
     spectra = []
     for i in range(5):
-        spectra.append(Spectrum(mz=np.array([100, 200.]),
-                                  intensities=np.array([0.7, 0.1 * i]),
-                                  metadata={"spectrum_id": "ref_spec_"+str(i),
-                                            "smiles": "C1=CC=C2C(=C1)NC(=N2)C3=CC=CO3",
-                                            "precursor_mz": 210+50*i}))
+        spectra.append(
+            Spectrum(
+                mz=np.array([100, 200.0]),
+                intensities=np.array([0.7, 0.1 * i]),
+                metadata={
+                    "spectrum_id": "ref_spec_" + str(i),
+                    "smiles": "C1=CC=C2C(=C1)NC(=N2)C3=CC=CO3",
+                    "precursor_mz": 210 + 50 * i,
+                },
+            )
+        )
     for i in range(3):
-        spectra.append(Spectrum(mz=np.array([100 + i, 210.]),
-                                  intensities=np.array([0.5, 0.1 * i]),
-                                  metadata={"spectrum_id": "query_spec_"+str(i),
-                                            "smiles": "CC1=C(C=C(C=C1)NC(=O)N(C)C)Cl",
-                                            "precursor_mz": 220+50*i}))
+        spectra.append(
+            Spectrum(
+                mz=np.array([100 + i, 210.0]),
+                intensities=np.array([0.5, 0.1 * i]),
+                metadata={
+                    "spectrum_id": "query_spec_" + str(i),
+                    "smiles": "CC1=C(C=C(C=C1)NC(=O)N(C)C)Cl",
+                    "precursor_mz": 220 + 50 * i,
+                },
+            )
+        )
     return spectra
 
 
@@ -48,9 +60,9 @@ def test_get_top_hits_by_column():
     )
 
     expected_scores_col = {
-        "query_spec_0": np.array([1.        , 0.80566937, 0.77583811, 0.75247993, 0.73288331]),
-        "query_spec_1": np.array([0.34812354, 0.        , 0.        , 0.        , 0.        ]),
-        "query_spec_2": np.array([0.612693  , 0.39564064, 0.        , 0.        , 0.        ])
+        "query_spec_0": np.array([1.0, 0.80566937, 0.77583811, 0.75247993, 0.73288331]),
+        "query_spec_1": np.array([0.34812354, 0.0, 0.0, 0.0, 0.0]),
+        "query_spec_2": np.array([0.612693, 0.39564064, 0.0, 0.0, 0.0]),
     }
     expected_idx_col = {
         "query_spec_0": np.array([0, 1, 2, 3, 4]),
@@ -59,13 +71,9 @@ def test_get_top_hits_by_column():
     }
 
     for key, value in scores_col.items():
-        assert np.allclose(value, expected_scores_col[key], atol=1e-5), (
-            f"Unexpected selected scores for {key}"
-        )
+        assert np.allclose(value, expected_scores_col[key], atol=1e-5), f"Unexpected selected scores for {key}"
     for key, value in idx_col.items():
-        assert np.array_equal(value, expected_idx_col[key]), (
-            f"Unexpected selected indices for {key}"
-        )
+        assert np.array_equal(value, expected_idx_col[key]), f"Unexpected selected indices for {key}"
 
     idx_col, scores_col = get_top_hits(
         scores,
@@ -109,11 +117,11 @@ def test_get_top_hits_by_row():
     )
 
     expected_scores_row = {
-        "ref_spec_0": np.array([1.      , 0.612693, 0.      ]),
-        "ref_spec_1": np.array([0.80566937, 0.34812354, 0.        ]),
-        "ref_spec_2": np.array([0.77583811, 0.39564064, 0.        ]),
-        "ref_spec_3": np.array([0.75247993, 0.        , 0.        ]),
-        "ref_spec_4": np.array([0.73288331, 0.        , 0.        ])
+        "ref_spec_0": np.array([1.0, 0.612693, 0.0]),
+        "ref_spec_1": np.array([0.80566937, 0.34812354, 0.0]),
+        "ref_spec_2": np.array([0.77583811, 0.39564064, 0.0]),
+        "ref_spec_3": np.array([0.75247993, 0.0, 0.0]),
+        "ref_spec_4": np.array([0.73288331, 0.0, 0.0]),
     }
     expected_idx_row = {
         "ref_spec_0": np.array([0, 2, 1]),
@@ -124,13 +132,9 @@ def test_get_top_hits_by_row():
     }
 
     for key, value in scores_row.items():
-        assert np.allclose(value, expected_scores_row[key], atol=1e-5), (
-            f"Unexpected selected scores for {key}"
-        )
+        assert np.allclose(value, expected_scores_row[key], atol=1e-5), f"Unexpected selected scores for {key}"
     for key, value in idx_row.items():
-        assert np.array_equal(value, expected_idx_row[key]), (
-            f"Unexpected selected indices for {key}"
-        )
+        assert np.array_equal(value, expected_idx_row[key]), f"Unexpected selected indices for {key}"
 
     idx_row, scores_row = get_top_hits(
         scores,
@@ -244,8 +248,9 @@ def test_get_top_hits_ignore_diagonal():
     for i, spec_id in enumerate(identifiers):
         assert i not in idx_row[spec_id]
         if len(scores_row[spec_id]) > 0:
-            assert not np.any(np.isclose(scores_row[spec_id], dense[i, i]))\
-                or dense[i, i] != np.max(scores_row[spec_id])
+            assert not np.any(np.isclose(scores_row[spec_id], dense[i, i])) or dense[i, i] != np.max(
+                scores_row[spec_id]
+            )
 
 
 def test_get_top_hits_ignore_diagonal_requires_square():

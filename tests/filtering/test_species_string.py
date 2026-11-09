@@ -10,7 +10,6 @@ from matchms.filtering.species_string import SpeciesString
         ("", None, ""),
         ("n/a", None, ""),
         ("no data", None, ""),
-
         # InChI
         (
             "InChI=1S/CH4/h1H4",
@@ -27,7 +26,6 @@ from matchms.filtering.species_string import SpeciesString
             "inchi",
             "InChI=1S/CH4/h1H4",
         ),
-
         # InChIKey
         (
             "VNWKTOKETHGBQD-UHFFFAOYSA-N",
@@ -39,7 +37,6 @@ from matchms.filtering.species_string import SpeciesString
             "inchikey",
             "VNWKTOKETHGBQD-UHFFFAOYSA-N",
         ),
-
         # SMILES
         (
             "C[C@H](Cc1ccccc1)N(C)CC#C",
@@ -51,7 +48,6 @@ from matchms.filtering.species_string import SpeciesString
             "smiles",
             "CCCO",
         ),
-
         # Invalid / unsupported strings
         (
             "not a valid species string",

@@ -352,7 +352,7 @@ def test_build_index_wrong_extension_raises_before_loading(tmp_path, capsys):
             capsys=capsys,
         )
         assert exit_code == 1
-        assert payload["error"]["code"] =="invalid_parameter"
+        assert payload["error"]["code"] == "invalid_parameter"
         assert payload["error"]["parameter"] == "output"
         assert payload["error"]["valid_values"] == [".index.npz"]
 
@@ -372,7 +372,7 @@ def test_build_index_missing_library(tmp_path, capsys):
     )
 
     assert exit_code == 1
-    assert payload["error"]["code"] =="input_not_found"
+    assert payload["error"]["code"] == "input_not_found"
     assert payload["error"]["input_file"] == str(missing)
     assert set(payload["error"]["valid_values"]) == set(INPUT_FORMATS)
 
@@ -393,7 +393,7 @@ def test_build_index_unsupported_input_extension(tmp_path, capsys):
     )
 
     assert exit_code == 1
-    assert payload["error"]["code"] =="unsupported_format"
+    assert payload["error"]["code"] == "unsupported_format"
     assert payload["error"]["input_file"] == str(fake)
     assert set(payload["error"]["valid_values"]) == set(INPUT_FORMATS)
 
@@ -413,7 +413,7 @@ def test_build_index_non_indexed_method(tmp_path, capsys):
     )
 
     assert exit_code == 1
-    assert payload["error"]["code"] =="unsupported_method"
+    assert payload["error"]["code"] == "unsupported_method"
     assert set(payload["error"]["valid_values"]) == set(INDEX_CAPABLE)
     assert not out.exists()
 
@@ -432,7 +432,7 @@ def test_build_index_rejects_each_non_indexed_method(tmp_path, capsys, name):
         capsys=capsys,
     )
     assert exit_code == 1
-    assert payload["error"]["code"] =="unsupported_method"
+    assert payload["error"]["code"] == "unsupported_method"
 
 
 @pytest.mark.parametrize("method", ["Cosine", "ModifiedCosine"])
@@ -451,7 +451,7 @@ def test_build_index_rejects_use_hungarian(tmp_path, capsys, method):
         capsys=capsys,
     )
     assert exit_code == 1
-    assert payload["error"]["code"] =="unsupported_method"
+    assert payload["error"]["code"] == "unsupported_method"
     assert payload["error"]["parameter"] == "use_hungarian"
 
 
@@ -468,7 +468,7 @@ def test_build_index_unknown_method(tmp_path, capsys):
         capsys=capsys,
     )
     assert exit_code == 1
-    assert payload["error"]["code"] =="unknown_value"
+    assert payload["error"]["code"] == "unknown_value"
     assert set(payload["error"]["valid_values"]) == set(INDEX_CAPABLE)
 
 
@@ -485,7 +485,7 @@ def test_build_index_method_typo_suggests_closest(tmp_path, capsys):
         capsys=capsys,
     )
     assert exit_code == 1
-    assert payload["error"]["code"] =="unknown_value"
+    assert payload["error"]["code"] == "unknown_value"
     assert "Did you mean 'Cosine'?" in payload["error"]["hint"]
 
 
@@ -506,7 +506,7 @@ def test_build_index_tolerance_conflicts_with_param(tmp_path, capsys):
         capsys=capsys,
     )
     assert exit_code == 1
-    assert payload["error"]["code"] =="invalid_parameter"
+    assert payload["error"]["code"] == "invalid_parameter"
     assert payload["error"]["parameter"] == "tolerance"
 
 
@@ -525,7 +525,7 @@ def test_build_index_unknown_parameter_name(tmp_path, capsys):
         capsys=capsys,
     )
     assert exit_code == 1
-    assert payload["error"]["code"] =="invalid_parameter"
+    assert payload["error"]["code"] == "invalid_parameter"
     assert payload["error"]["parameter"] == "not_a_real_param"
 
 
@@ -544,7 +544,7 @@ def test_build_index_entropysearch_rejects_ppm(tmp_path, capsys):
         capsys=capsys,
     )
     assert exit_code == 1
-    assert payload["error"]["code"] =="invalid_parameter"
+    assert payload["error"]["code"] == "invalid_parameter"
     assert payload["error"]["parameter"] == "use_ppm"
 
 
@@ -563,7 +563,7 @@ def test_build_index_entropysearch_rejects_bad_peak_separation(tmp_path, capsys)
         capsys=capsys,
     )
     assert exit_code == 1
-    assert payload["error"]["code"] =="invalid_parameter"
+    assert payload["error"]["code"] == "invalid_parameter"
     assert payload["error"]["parameter"] == "peak_separation"
     assert set(payload["error"]["valid_values"]) == {"merge", "raise"}
 
@@ -583,7 +583,7 @@ def test_build_index_entropy_rejects_bad_matching_mode(tmp_path, capsys):
         capsys=capsys,
     )
     assert exit_code == 1
-    assert payload["error"]["code"] =="invalid_parameter"
+    assert payload["error"]["code"] == "invalid_parameter"
     assert payload["error"]["parameter"] == "matching_mode"
     assert set(payload["error"]["valid_values"]) == {"fragment", "neutral_loss", "hybrid"}
 
@@ -604,7 +604,7 @@ def test_build_index_invalid_parameter_values(tmp_path, capsys):
         capsys=capsys,
     )
     assert exit_code == 1
-    assert payload["error"]["code"] =="invalid_parameter"
+    assert payload["error"]["code"] == "invalid_parameter"
 
 
 def test_build_index_entropysearch_raise_on_close_peaks(tmp_path, capsys):
@@ -624,7 +624,7 @@ def test_build_index_entropysearch_raise_on_close_peaks(tmp_path, capsys):
         capsys=capsys,
     )
     assert exit_code == 1
-    assert payload["error"]["code"] =="invalid_input"
+    assert payload["error"]["code"] == "invalid_input"
     assert "peak_separation" in payload["error"]["hint"]
     assert not out.exists()
 
@@ -642,7 +642,7 @@ def test_build_index_output_directory_missing(tmp_path, capsys):
         capsys=capsys,
     )
     assert exit_code == 1
-    assert payload["error"]["code"] =="save_failed"
+    assert payload["error"]["code"] == "save_failed"
 
 
 def test_build_index_empty_library(tmp_path, capsys):
@@ -660,7 +660,7 @@ def test_build_index_empty_library(tmp_path, capsys):
         capsys=capsys,
     )
     assert exit_code == 1
-    assert payload["error"]["code"] =="empty_spectra"
+    assert payload["error"]["code"] == "empty_spectra"
     assert payload["error"]["input_file"] == str(empty)
 
 

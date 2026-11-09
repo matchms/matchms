@@ -25,8 +25,7 @@ def valid_spectrum() -> Spectrum:
     metadata = {
         "inchikey": "KFDYZSPFVRTLML-UHFFFAOYSA-N",
         "smiles": (
-            "C1COCCN1C2=NC(=NC(=N2)NC3=CC(=C(C=C3)C=CC4=C(C=C(C=C4)NC5=NC(=NC(=N5)Cl)N6CCOCC6)"
-            "S(=O)(=O)O)S(=O)(=O)O)Cl"
+            "C1COCCN1C2=NC(=NC(=N2)NC3=CC(=C(C=C3)C=CC4=C(C=C(C=C4)NC5=NC(=NC(=N5)Cl)N6CCOCC6)S(=O)(=O)O)S(=O)(=O)O)Cl"
         ),
     }
     return SpectrumBuilder().with_metadata(metadata).build()
@@ -83,8 +82,7 @@ def invalid_inchikey_spectrum() -> Spectrum:
     metadata = {
         "inchikey": "invalid",
         "smiles": (
-            "C1COCCN1C2=NC(=NC(=N2)NC3=CC(=C(C=C3)C=CC4=C(C=C(C=C4)NC5=NC(=NC(=N5)Cl)N6CCOCC6)"
-            "S(=O)(=O)O)S(=O)(=O)O)Cl"
+            "C1COCCN1C2=NC(=NC(=N2)NC3=CC(=C(C=C3)C=CC4=C(C=C(C=C4)NC5=NC(=NC(=N5)Cl)N6CCOCC6)S(=O)(=O)O)S(=O)(=O)O)Cl"
         ),
     }
     return SpectrumBuilder().with_metadata(metadata).build()
@@ -242,11 +240,8 @@ def test_get_fingerprint_by_spectrum(valid_spectrum, fingerprint_generator):
 
 
 def test_compute_fingerprint_valid(
-        valid_spectrum,
-        invalid_metadata_spectrum,
-        valid_inchi_spectrum,
-        fingerprint_generator
-        ):
+    valid_spectrum, invalid_metadata_spectrum, valid_inchi_spectrum, fingerprint_generator
+):
     fp = Fingerprints(fingerprint_generator=fingerprint_generator)
 
     assert isinstance(fp.compute_fingerprint(valid_spectrum), np.ndarray)
@@ -325,10 +320,8 @@ def test_compute_fingerprints_replaces_previous_state(valid_spectrum, valid_spec
 
 
 def test_get_fingerprint_by_spectrum_without_inchikey_returns_none(
-        invalid_metadata_spectrum,
-        fingerprint_generator,
-        caplog
-        ):
+    invalid_metadata_spectrum, fingerprint_generator, caplog
+):
     fp = Fingerprints(fingerprint_generator=fingerprint_generator)
     fp.compute_fingerprints([])
 

@@ -1,4 +1,5 @@
 """Modified cosine similarity using direct and precursor-shifted peak matches."""
+
 from .cosine import Cosine
 
 

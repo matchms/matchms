@@ -364,9 +364,7 @@ def test_metadata_update_filter_signature_works_for_spectrum_processor_parameter
 
     signature = inspect.signature(public_filter)
     parameters_without_default = [
-        name
-        for name, parameter in signature.parameters.items()
-        if parameter.default is inspect.Parameter.empty
+        name for name, parameter in signature.parameters.items() if parameter.default is inspect.Parameter.empty
     ]
 
     assert parameters_without_default == ["spectrum_in"]
@@ -523,4 +521,3 @@ def test_metadata_update_filter_can_write_none_updates_to_collection():
     processed = filter_function(collection)
 
     assert processed.metadata.loc[0, "value"] is None
-

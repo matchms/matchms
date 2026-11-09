@@ -6,25 +6,20 @@ from matchms.typing import SpectrumType
 
 
 def _validate_relative_intensity_range(
-        intensity_from: float,
-        intensity_to: float,
-    ) -> None:
+    intensity_from: float,
+    intensity_to: float,
+) -> None:
     if intensity_from < 0.0:
         raise ValueError("'intensity_from' should be larger than or equal to 0.")
     if intensity_to > 1.0:
         raise ValueError("'intensity_to' should be smaller than or equal to 1.0.")
     if intensity_from > intensity_to:
-        raise ValueError(
-            "'intensity_from' should be smaller than or equal to 'intensity_to'."
-        )
+        raise ValueError("'intensity_from' should be smaller than or equal to 'intensity_to'.")
 
 
 def _select_by_relative_intensity_spectrum(
-        spectrum_in: SpectrumType,
-        intensity_from: float = 0.0,
-        intensity_to: float = 1.0,
-        clone: bool | None = True
-    ) -> SpectrumType | None:
+    spectrum_in: SpectrumType, intensity_from: float = 0.0, intensity_to: float = 1.0, clone: bool | None = True
+) -> SpectrumType | None:
     """Keep only peaks within set relative intensity range (keep if
     intensity_from >= intensity >= intensity_to).
 

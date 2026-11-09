@@ -28,10 +28,10 @@ def load_known_adducts() -> pd.DataFrame:
 
 @lru_cache(maxsize=4)
 def load_known_adduct_conversions() -> dict[str, dict]:
-    """Load dictionary of known adduct conversions. Makes sure that file loading is cached.
-    """
-    adduct_conversions_file = os.path.join(os.path.dirname(__file__), "..", "..", "data",
-                                           "known_adduct_conversions.csv")
+    """Load dictionary of known adduct conversions. Makes sure that file loading is cached."""
+    adduct_conversions_file = os.path.join(
+        os.path.dirname(__file__), "..", "..", "data", "known_adduct_conversions.csv"
+    )
     assert os.path.isfile(adduct_conversions_file), "Could not find known_adduct_conversions.csv."
 
     with open(adduct_conversions_file, newline="", encoding="utf-8-sig") as csvfile:

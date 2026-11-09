@@ -36,13 +36,7 @@ def test_add_precursor_mz_only_pepmass_present(caplog, as_collection):
     mz = np.array([], dtype="float")
     intensities = np.array([], dtype="float")
     metadata = {"pepmass": (444.0, 10)}
-    spectrum_in = (
-        SpectrumBuilder()
-        .with_metadata(metadata)
-        .with_mz(mz)
-        .with_intensities(intensities)
-        .build()
-    )
+    spectrum_in = SpectrumBuilder().with_metadata(metadata).with_mz(mz).with_intensities(intensities).build()
 
     spectrum = run_filter_as_spectrum_or_collection(
         add_precursor_mz,
@@ -75,13 +69,7 @@ def test_add_precursor_mz_no_precursor_mz(key, value, expected, as_collection):
     mz = np.array([], dtype="float")
     intensities = np.array([], dtype="float")
     metadata = {key: value}
-    spectrum_in = (
-        SpectrumBuilder()
-        .with_metadata(metadata)
-        .with_mz(mz)
-        .with_intensities(intensities)
-        .build()
-    )
+    spectrum_in = SpectrumBuilder().with_metadata(metadata).with_mz(mz).with_intensities(intensities).build()
 
     spectrum = run_filter_as_spectrum_or_collection(
         add_precursor_mz,
@@ -108,13 +96,7 @@ def test_add_precursor_mz_logging(key, value, expected_log, caplog, as_collectio
     mz = np.array([], dtype="float")
     intensities = np.array([], dtype="float")
     metadata = {key: value}
-    spectrum_in = (
-        SpectrumBuilder()
-        .with_metadata(metadata)
-        .with_mz(mz)
-        .with_intensities(intensities)
-        .build()
-    )
+    spectrum_in = SpectrumBuilder().with_metadata(metadata).with_mz(mz).with_intensities(intensities).build()
 
     _ = run_filter_as_spectrum_or_collection(
         add_precursor_mz,

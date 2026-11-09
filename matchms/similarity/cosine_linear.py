@@ -55,14 +55,14 @@ class CosineLinear(BaseSimilarity):
     score_fields = ("score", "matches")
 
     def __init__(
-            self,
-            tolerance: float = DEFAULT_MZ_TOLERANCE,
-            mz_power: float = DEFAULT_MZ_POWER,
-            intensity_power: float = DEFAULT_INTENSITY_POWER,
-            noise_cutoff: float | None = DEFAULT_NOISE_CUTOFF,
-            remove_precursor: bool = False,
-            offset_to_precursor: float = DEFAULT_OFFSET_TO_PRECURSOR
-            ):
+        self,
+        tolerance: float = DEFAULT_MZ_TOLERANCE,
+        mz_power: float = DEFAULT_MZ_POWER,
+        intensity_power: float = DEFAULT_INTENSITY_POWER,
+        noise_cutoff: float | None = DEFAULT_NOISE_CUTOFF,
+        remove_precursor: bool = False,
+        offset_to_precursor: float = DEFAULT_OFFSET_TO_PRECURSOR,
+    ):
         """
         Parameters
         ----------
@@ -138,7 +138,7 @@ class CosineLinear(BaseSimilarity):
         Spectra are preprocessed and merged once before pairwise scoring. This
         avoids repeating precursor removal, noise filtering, and peak merging for
         every spectrum pair.
-    
+
         Parameters
         ----------
         spectra_1
@@ -158,17 +158,11 @@ class CosineLinear(BaseSimilarity):
         n_cols = len(spectra_2)
         result = self._create_dense_result(n_rows, n_cols, selected_fields)
 
-        merged_refs = [
-            self._prepare_spectrum(spectrum)
-            for spectrum in spectra_1
-        ]
+        merged_refs = [self._prepare_spectrum(spectrum) for spectrum in spectra_1]
         if is_symmetric:
             merged_queries = merged_refs
         else:
-            merged_queries = [
-                self._prepare_spectrum(spectrum)
-                for spectrum in spectra_2
-            ]
+            merged_queries = [self._prepare_spectrum(spectrum) for spectrum in spectra_2]
 
         for i_ref in tqdm(
             range(n_rows),

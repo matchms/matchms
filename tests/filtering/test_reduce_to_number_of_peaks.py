@@ -13,13 +13,7 @@ from tests.run_spectrum_and_collection import run_filter_as_spectrum_or_collecti
 def test_reduce_to_number_of_peaks_no_changes(metadata, as_collection):
     mz = np.array([10, 20, 30, 40], dtype="float")
     intensities = np.array([0, 1, 10, 100], dtype="float")
-    spectrum_in = (
-        SpectrumBuilder()
-        .with_mz(mz)
-        .with_intensities(intensities)
-        .with_metadata(metadata)
-        .build()
-    )
+    spectrum_in = SpectrumBuilder().with_mz(mz).with_intensities(intensities).with_metadata(metadata).build()
 
     spectrum = run_filter_as_spectrum_or_collection(
         reduce_to_number_of_peaks,
@@ -67,13 +61,7 @@ def test_reduce_to_number_of_peaks_no_changes(metadata, as_collection):
     ],
 )
 def test_reduce_to_number_of_peaks(mz, intensities, metadata, params, expected, as_collection):
-    spectrum_in = (
-        SpectrumBuilder()
-        .with_mz(mz)
-        .with_intensities(intensities)
-        .with_metadata(metadata)
-        .build()
-    )
+    spectrum_in = SpectrumBuilder().with_mz(mz).with_intensities(intensities).with_metadata(metadata).build()
     n_required, n_max, ratio_desired = params
 
     spectrum = run_filter_as_spectrum_or_collection(
@@ -100,13 +88,7 @@ def test_reduce_to_number_of_peaks_set_to_none(as_collection):
     set_matchms_logger_level("INFO")
     mz = np.array([10, 20], dtype="float")
     intensities = np.array([0.5, 1], dtype="float")
-    spectrum_in = (
-        SpectrumBuilder()
-        .with_mz(mz)
-        .with_intensities(intensities)
-        .with_metadata({"parent_mass": 50})
-        .build()
-    )
+    spectrum_in = SpectrumBuilder().with_mz(mz).with_intensities(intensities).with_metadata({"parent_mass": 50}).build()
 
     with LogCapture() as log:
         spectrum = run_filter_as_spectrum_or_collection(
@@ -177,11 +159,7 @@ def test_reduce_to_number_of_peaks_ratio_given_but_parent_mass_is_none(as_collec
     mz = np.array([10, 20, 30, 40], dtype="float")
     intensities = np.array([0, 1, 10, 100], dtype="float")
     spectrum_in = (
-        SpectrumBuilder()
-        .with_mz(mz)
-        .with_intensities(intensities)
-        .with_metadata({"parent_mass": None})
-        .build()
+        SpectrumBuilder().with_mz(mz).with_intensities(intensities).with_metadata({"parent_mass": None}).build()
     )
 
     with pytest.raises(Exception) as msg:
@@ -203,13 +181,7 @@ def test_reduce_to_number_of_peaks_desired_5_check_sorting(as_collection):
     mz = np.array([10, 20, 30, 40, 50, 60], dtype="float")
     intensities = np.array([5, 1, 4, 3, 100, 2], dtype="float")
     metadata = {"parent_mass": 20}
-    spectrum_in = (
-        SpectrumBuilder()
-        .with_mz(mz)
-        .with_intensities(intensities)
-        .with_metadata(metadata)
-        .build()
-    )
+    spectrum_in = SpectrumBuilder().with_mz(mz).with_intensities(intensities).with_metadata(metadata).build()
 
     spectrum = run_filter_as_spectrum_or_collection(
         reduce_to_number_of_peaks,

@@ -14,18 +14,14 @@ from ..builder_spectrum import SpectrumBuilder
 def _build_spectrum(mz, intensities, precursor_mz=None):
     """Create a Spectrum with optional precursor m/z metadata."""
     builder = (
-        SpectrumBuilder()
-        .with_mz(np.asarray(mz, dtype=float))
-        .with_intensities(np.asarray(intensities, dtype=float))
+        SpectrumBuilder().with_mz(np.asarray(mz, dtype=float)).with_intensities(np.asarray(intensities, dtype=float))
     )
 
     if precursor_mz is not None:
         if hasattr(builder, "with_precursor_mz"):
             builder = builder.with_precursor_mz(float(precursor_mz))
         elif hasattr(builder, "with_metadata"):
-            builder = builder.with_metadata(
-                {"precursor_mz": float(precursor_mz)}
-            )
+            builder = builder.with_metadata({"precursor_mz": float(precursor_mz)})
 
     return builder.build()
 
@@ -440,9 +436,7 @@ def test_cosine_flash_pair_matches_matrix_element(intensity_power):
         matrix_scores.to_array("score")[0, 0],
         abs=1e-12,
     )
-    assert int(pair_score["matches"]) == int(
-        matrix_scores.to_array("matches")[0, 0]
-    )
+    assert int(pair_score["matches"]) == int(matrix_scores.to_array("matches")[0, 0])
 
 
 def test_cosine_flash_score_field_selection():
@@ -529,6 +523,4 @@ def test_cosine_flash_rectangular_matrix_preserves_requested_orientation():
                 float(expected["score"]),
                 abs=1e-12,
             )
-            assert match_array[reference_index, query_index] == int(
-                expected["matches"]
-            )
+            assert match_array[reference_index, query_index] == int(expected["matches"])

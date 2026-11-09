@@ -96,8 +96,8 @@ def _compute_spectrum_hash(
     str
         The hash of the spectrum.
     """
-    mz_precision_factor = 10 ** mz_precision
-    intensity_precision_factor = 10 ** intensity_precision
+    mz_precision_factor = 10**mz_precision
+    intensity_precision_factor = 10**intensity_precision
 
     mz_int = (mz_array * mz_precision_factor).astype(np.int64)
     int_int = (intensity_array * intensity_precision_factor).astype(np.int64)
@@ -167,6 +167,4 @@ def compute_combined_hashes(fragment_hashes: list[str] | np.ndarray, metadata_ha
 
     combined = s_frag + s_meta
 
-    return combined.map(
-        lambda x: int(hashlib.sha1(x.encode()).hexdigest(), 16)
-    ).tolist()
+    return combined.map(lambda x: int(hashlib.sha1(x.encode()).hexdigest(), 16)).tolist()

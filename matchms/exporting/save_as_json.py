@@ -3,11 +3,7 @@ from ..spectrum import Spectrum
 from ..utils import filter_empty_spectra, fingerprint_export_warning
 
 
-def save_as_json(
-    spectra: list[Spectrum],
-    filename: str,
-    export_style: str = "matchms"
-    ) -> None:
+def save_as_json(spectra: list[Spectrum], filename: str, export_style: str = "matchms") -> None:
     """Save spectrum(s) as json file.
 
     Example:
@@ -54,6 +50,7 @@ def save_as_json(
 
 def create_spectrum_json_encoder(export_style):
     """Creates a custom JSON encoder for :class:`~matchms.spectrum.Spectrum` objects."""
+
     class CustomSpectrumJSONEncoder(json.JSONEncoder):
         def default(self, o):
             """JSON Encoder for a :class:`~matchms.spectrum.Spectrum` object"""

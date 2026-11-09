@@ -20,7 +20,4 @@ def test_peak_similarity_default_tolerances_are_consistent():
         mssim.EntropyFlash(),
     ]
 
-    assert all(
-        similarity.tolerance == DEFAULT_MZ_TOLERANCE
-        for similarity in similarities
-    )
+    assert all(similarity.tolerance == DEFAULT_MZ_TOLERANCE for similarity in similarities)

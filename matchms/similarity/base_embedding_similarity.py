@@ -34,6 +34,7 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
     index_k : int
         Number of nearest neighbors used in the ANN index; if index is built.
     """
+
     is_commutative = True
     score_datatype = np.float64
     score_fields = ("score",)
@@ -69,9 +70,8 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
         raise NotImplementedError("Subclasses must implement this method.")
 
     def get_embeddings(
-            self,
-            spectra: Iterable[SpectrumType] | None = None,
-            npy_path: str | Path | None = None) -> np.ndarray:
+        self, spectra: Iterable[SpectrumType] | None = None, npy_path: str | Path | None = None
+    ) -> np.ndarray:
         """Get embeddings either by computing them or loading from disk.
 
         Parameters
@@ -158,9 +158,7 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
 
         selected_fields = self._resolve_score_fields(score_fields)
         if selected_fields != ("score",):
-            raise NotImplementedError(
-                f"{self.__class__.__name__}.matrix() supports only score_fields=('score',)."
-            )
+            raise NotImplementedError(f"{self.__class__.__name__}.matrix() supports only score_fields=('score',).")
 
         spectra_2, is_symmetric = self._prepare_inputs(spectra_1, spectra_2)
 
@@ -196,12 +194,13 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
         return np.asarray(self.pairwise_similarity_fn(embeddings_1, embeddings_2), dtype=self.score_datatype)
 
     def build_ann_index(
-            self,
-            reference_spectra: Iterable[SpectrumType] | None = None,
-            embeddings_path: str | Path | None = None,
-            k: int = 100,
-            index_backend: str = "pynndescent",
-            **index_kwargs) -> Any:
+        self,
+        reference_spectra: Iterable[SpectrumType] | None = None,
+        embeddings_path: str | Path | None = None,
+        k: int = 100,
+        index_backend: str = "pynndescent",
+        **index_kwargs,
+    ) -> Any:
         """Build an ANN index for the input spectra.
 
         Parameters
@@ -237,8 +236,7 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
                 import pynndescent
             except ImportError as exc:
                 raise ImportError(
-                    "pynndescent is not installed. "
-                    "Please install it with `pip install pynndescent`."
+                    "pynndescent is not installed. Please install it with `pip install pynndescent`."
                 ) from exc
 
             self.index_backend = index_backend
@@ -258,9 +256,8 @@ class BaseEmbeddingSimilarity(BaseSimilarity):
         return self.index
 
     def get_anns(
-            self,
-            query_spectra: Iterable[SpectrumType] | np.ndarray,
-            k: int = 100) -> tuple[np.ndarray, np.ndarray]:
+        self, query_spectra: Iterable[SpectrumType] | np.ndarray, k: int = 100
+    ) -> tuple[np.ndarray, np.ndarray]:
         """Get approximate nearest neighbors for input spectra.
 
         Parameters

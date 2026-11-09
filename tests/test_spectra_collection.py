@@ -277,10 +277,7 @@ def test_copy(collection):
     assert "new_col" not in collection.metadata.columns
 
 
-@pytest.mark.parametrize(
-    "mz, expected_bin_idx, expected_back_mz",
-    [(123.456, 12346, 123.46), (123.454, 12345, 123.45)]
-    )
+@pytest.mark.parametrize("mz, expected_bin_idx, expected_back_mz", [(123.456, 12346, 123.46), (123.454, 12345, 123.45)])
 def test_mz_bin_conversion_and_rounding(collection, mz, expected_bin_idx, expected_back_mz):
     bin_idx = collection.mz_to_bin(mz)
     back_mz = collection.bin_to_mz(bin_idx)
@@ -540,9 +537,7 @@ def test_add_metadata_invalidates_spectra_hashes(collection):
     original_fragment_hashes = collection.fragment_hashes.copy()
     original_spectra_hashes = collection.spectra_hashes.copy()
 
-    collection.add_metadata(
-        pd.Series([0.95, 0.88, 0.99], name="quality_score")
-    )
+    collection.add_metadata(pd.Series([0.95, 0.88, 0.99], name="quality_score"))
 
     # Metadata changed, so metadata hashes must change.
     assert collection.metadata_hashes != original_metadata_hashes
@@ -572,12 +567,8 @@ def test_collection_harmonizes_numeric_metadata_dtype():
 
     collection = SpectraCollection([spectrum])
 
-    assert pd.api.types.is_float_dtype(
-        collection.metadata["parent_mass"]
-    )
-    assert pd.api.types.is_float_dtype(
-        collection.metadata["precursor_mz"]
-    )
+    assert pd.api.types.is_float_dtype(collection.metadata["parent_mass"])
+    assert pd.api.types.is_float_dtype(collection.metadata["precursor_mz"])
 
     assert collection.metadata.loc[0, "parent_mass"] == 184.1
 
@@ -595,11 +586,7 @@ def test_strict_collection_harmonization_matches_metadata():
     # Cheap astype cannot interpret "2+".
     assert collection.metadata.loc[0, "charge"] == "2+"
 
-    strict = collection.harmonize_metadata_types(
-        strict_harmonize=True
-    )
+    strict = collection.harmonize_metadata_types(strict_harmonize=True)
 
     assert strict.metadata.loc[0, "charge"] == 2
-    assert pd.api.types.is_integer_dtype(
-        strict.metadata["charge"]
-    )
+    assert pd.api.types.is_integer_dtype(strict.metadata["charge"])

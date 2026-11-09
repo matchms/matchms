@@ -3,10 +3,10 @@ import re
 
 class SpeciesString:
     """
-    A class to process and clean different types of chemical structure strings including InChI, 
+    A class to process and clean different types of chemical structure strings including InChI,
     InChIKey, and SMILES.
 
-    The class takes a raw input string, determines the intended structure type, and then cleans 
+    The class takes a raw input string, determines the intended structure type, and then cleans
     the string based on its type.
 
     Attributes
@@ -14,11 +14,12 @@ class SpeciesString:
     dirty : str
         Raw input string representing a chemical structure.
     target : str
-        The intended structure type determined from the input string. Could be 'inchi', 'inchikey', 
+        The intended structure type determined from the input string. Could be 'inchi', 'inchikey',
         'smiles', or None if no valid type was identified.
     cleaned : str
-        The cleaned structure string. 
+        The cleaned structure string.
     """
+
     def __init__(self, dirty: str):
         """
         Constructs a new instance of the SpeciesString class.

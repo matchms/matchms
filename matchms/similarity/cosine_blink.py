@@ -16,11 +16,11 @@ from .default_parameters import (
 
 @njit(cache=True, fastmath=True)
 def _windowed_sum_numba(
-        source_bins: np.ndarray,
-        source_vals: np.ndarray,
-        query_positions: np.ndarray,
-        R: int,
-    ) -> np.ndarray:
+    source_bins: np.ndarray,
+    source_vals: np.ndarray,
+    query_positions: np.ndarray,
+    R: int,
+) -> np.ndarray:
     """
     Two-pointer windowed sum for sorted integer arrays.
 
@@ -121,7 +121,7 @@ class CosineBlink(BaseSimilarity):
 
     is_commutative = True
     score_datatype = DEFAULT_DTYPE
-    score_fields = ("score", )
+    score_fields = ("score",)
 
     def __init__(
         self,
@@ -166,7 +166,7 @@ class CosineBlink(BaseSimilarity):
 
     def pair(self, spectrum_1: SpectrumType, spectrum_2: SpectrumType) -> tuple[float, int]:
         """Calculate BLINK-style cosine between two spectra.
-        
+
         Parameters
         ----------
         spectrum_1:
@@ -193,12 +193,12 @@ class CosineBlink(BaseSimilarity):
         return np.asarray(score, dtype=self.score_datatype)
 
     def matrix(
-            self,
-            spectra_1: Sequence[SpectrumType],
-            spectra_2: Sequence[SpectrumType] | None = None,
-            score_fields: Sequence[str] | None = None,
-            progress_bar: bool = True,
-        ) -> Scores:
+        self,
+        spectra_1: Sequence[SpectrumType],
+        spectra_2: Sequence[SpectrumType] | None = None,
+        score_fields: Sequence[str] | None = None,
+        progress_bar: bool = True,
+    ) -> Scores:
         """
         All-vs-all BLINK-style cosine scores.
 
@@ -320,7 +320,7 @@ class CosineBlink(BaseSimilarity):
 
         # Keep top-K most intense if requested
         if (self.top_k is not None) and (mz.size > self.top_k):
-            idx = np.argpartition(intens, -self.top_k)[-self.top_k:]
+            idx = np.argpartition(intens, -self.top_k)[-self.top_k :]
             idx.sort()
             mz = mz[idx]
             intens = intens[idx]
@@ -356,9 +356,7 @@ class CosineBlink(BaseSimilarity):
             mz, intens = self._prefilter_arrays(mz, intens, spectrum)
 
         if mz.size == 0:
-            return (np.empty(0, dtype=np.int32),
-                    np.empty(0, dtype=self.dtype),
-                    np.empty(0, dtype=np.int32))
+            return (np.empty(0, dtype=np.int32), np.empty(0, dtype=self.dtype), np.empty(0, dtype=np.int32))
 
         intens = intens.astype(self.dtype, copy=False)
 
@@ -378,14 +376,13 @@ class CosineBlink(BaseSimilarity):
         # L2 normalize intensities (Sum of all intensities == 1)
         norm = np.linalg.norm(intensity_sum)
         if norm == 0.0:
-            return (np.empty(0, dtype=np.int32),
-                    np.empty(0, dtype=self.dtype),
-                    np.empty(0, dtype=np.int32))
+            return (np.empty(0, dtype=np.int32), np.empty(0, dtype=self.dtype), np.empty(0, dtype=np.int32))
         intensity_sum /= norm
         return uniq, intensity_sum, counts.astype(np.int32, copy=False)
 
-    def _windowed_sum(self, source_bins: np.ndarray, source_vals: np.ndarray,
-                      query_positions: np.ndarray, R: int) -> np.ndarray:
+    def _windowed_sum(
+        self, source_bins: np.ndarray, source_vals: np.ndarray, query_positions: np.ndarray, R: int
+    ) -> np.ndarray:
         """
         Windowed sum helper: numba-accelerated where available, else vectorized prefix sums.
 

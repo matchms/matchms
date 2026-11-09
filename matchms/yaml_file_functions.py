@@ -3,29 +3,28 @@ import yaml
 
 
 def ordered_load(stream, loader=yaml.SafeLoader, object_pairs_hook=OrderedDict) -> OrderedDict:
-    """ Code from https://stackoverflow.com/questions/5121931/in-python-how-can-you-load-yaml-mappings-as-ordereddicts
-    """
+    """Code from https://stackoverflow.com/questions/5121931/in-python-how-can-you-load-yaml-mappings-as-ordereddicts"""
+
     class OrderedLoader(loader):
         pass
 
     def construct_mapping(loader, node):
         loader.flatten_mapping(node)
         return object_pairs_hook(loader.construct_pairs(node))
-    OrderedLoader.add_constructor(
-        yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
-        construct_mapping)
+
+    OrderedLoader.add_constructor(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, construct_mapping)
     return yaml.load(stream, OrderedLoader)
 
 
 def ordered_dump(data: OrderedDict, stream=None, dumper=yaml.SafeDumper, **kwds):
     """Dump an OrderedDict to a YAML string, preserving the order of keys."""
+
     class OrderedDumper(dumper):
         pass
 
     def _dict_representer(dumper, data):
-        return dumper.represent_mapping(
-            yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
-            data.items())
+        return dumper.represent_mapping(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, data.items())
+
     OrderedDumper.add_representer(OrderedDict, _dict_representer)
     return yaml.dump(data, stream, OrderedDumper, **kwds)
 
@@ -52,10 +51,7 @@ def load_workflow_from_yaml_file(yaml_file: str) -> OrderedDict:
 
     expected_keys = {"spectra_1_filters", "spectra_2_filters", "score_computations"}
     if set(workflow.keys()) != expected_keys:
-        raise ValueError(
-            f"Workflow must contain exactly keys {expected_keys}, "
-            f"but got {set(workflow.keys())}."
-        )
+        raise ValueError(f"Workflow must contain exactly keys {expected_keys}, but got {set(workflow.keys())}.")
 
     if workflow["spectra_2_filters"] == "processing_spectra_1":
         workflow["spectra_2_filters"] = workflow["spectra_1_filters"]

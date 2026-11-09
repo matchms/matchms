@@ -5,8 +5,8 @@ from matchms.typing import SpectrumType
 
 
 def _remove_peaks_around_precursor_mz(
-        spectrum_in: SpectrumType, mz_tolerance: float = 17, clone: bool | None = True
-    ) -> SpectrumType | None:
+    spectrum_in: SpectrumType, mz_tolerance: float = 17, clone: bool | None = True
+) -> SpectrumType | None:
     """Remove peaks that are within mz_tolerance (in Da) of
        the precursor mz, excluding the precursor peak.
 
@@ -39,8 +39,7 @@ def _remove_peaks_around_precursor_mz(
 
     if not isinstance(precursor_mz, (float, int, np.floating, np.integer)):
         raise TypeError(
-            "Expected 'precursor_mz' to be a scalar number. "
-            "Consider applying 'add_precursor_mz' filter first."
+            "Expected 'precursor_mz' to be a scalar number. Consider applying 'add_precursor_mz' filter first."
         )
 
     precursor_mz = float(precursor_mz)

@@ -42,7 +42,7 @@ def filename():
 
 
 def save_and_reload_spectra(filename, spectra: list[Spectrum], write_peak_comments=True):
-    """ Utility function to save spectra to msp and load them again.
+    """Utility function to save spectra to msp and load them again.
 
     Params:
     -------
@@ -57,8 +57,9 @@ def save_and_reload_spectra(filename, spectra: list[Spectrum], write_peak_commen
     reloaded_spectra = list(load_from_msp(filename))
     return reloaded_spectra
 
+
 def test_wrong_filename_exception(caplog):
-    """ Test for exception being thrown if output file doesn't end with .msp. """
+    """Test for exception being thrown if output file doesn't end with .msp."""
     with tempfile.TemporaryDirectory() as temp_dir:
         filename = os.path.join(temp_dir, "test.mzml")
 
@@ -79,13 +80,13 @@ def test_wrong_filename_exception(caplog):
 
 # Using tmp_path fixture from pytest: https://docs.pytest.org/en/stable/tmpdir.html#the-tmp-path-fixture
 def test_file_exists_single_spectrum(spectrum, filename):
-    """ Test checking if the file is created. """
+    """Test checking if the file is created."""
     save_as_msp(spectrum, filename)
     assert os.path.isfile(filename)
 
 
 def test_name_comes_first(spectrum: Spectrum, filename: str):
-    spectrum.set("ionization","positive")
+    spectrum.set("ionization", "positive")
     spectrum.set("compound_name", "test")
     save_as_msp(spectrum, filename)
 
@@ -100,16 +101,17 @@ def test_peak_sep(spectrum: Spectrum, filename: str):
         lines = file.readlines()
         assert "100.0  0.1\n" in lines
 
+
 def test_stores_all_spectra(filename, data):
-    """ Test checking if all spectra contained in the original file are stored
-    and loaded back in properly. """
+    """Test checking if all spectra contained in the original file are stored
+    and loaded back in properly."""
     spectra = save_and_reload_spectra(filename, data)
 
     assert len(spectra) == len(data)
 
 
 def test_have_metadata(filename, data):
-    """ Test checking of all metadate is stored correctly. """
+    """Test checking of all metadate is stored correctly."""
     spectra = save_and_reload_spectra(filename, data)
 
     assert len(spectra) == len(data)
@@ -119,7 +121,7 @@ def test_have_metadata(filename, data):
 
 
 def test_have_peaks(filename, data):
-    """ Test checking if all peaks are stored correctly. """
+    """Test checking if all peaks are stored correctly."""
     spectra = save_and_reload_spectra(filename, data)
 
     assert len(spectra) == len(data)
@@ -129,18 +131,17 @@ def test_have_peaks(filename, data):
 
 
 def test_dont_write_peak_comments(filename, data):
-    """ Test checking if no peak comments are written to file. """
+    """Test checking if no peak comments are written to file."""
     spectra = save_and_reload_spectra(filename, data, write_peak_comments=False)
 
     assert len(spectra) == len(data)
 
     for actual, _ in zip(spectra, data, strict=True):
-        assert actual.peak_comments is None, \
-            "Expected that no peak comments are written to file"
+        assert actual.peak_comments is None, "Expected that no peak comments are written to file"
 
 
 def test_num_peaks_last_metadata_field(filename, data):
-    """ Test to check whether the last line before the peaks is NUM PEAKS: ... """
+    """Test to check whether the last line before the peaks is NUM PEAKS: ..."""
     save_as_msp(data, filename)
 
     with open(filename, encoding="utf-8") as file:
@@ -148,7 +149,7 @@ def test_num_peaks_last_metadata_field(filename, data):
         for idx, line in enumerate(content):
             if line.startswith("NUM PEAKS: "):
                 num_peaks = int(line.split()[2])
-                peaks = content[idx + 1: idx + num_peaks + 1]
+                peaks = content[idx + 1 : idx + num_peaks + 1]
                 for peak in peaks:
                     mz, intensity = peak.split()[:2]
                     mz = float(mz)
@@ -161,16 +162,17 @@ def test_num_peaks_last_metadata_field(filename, data):
 @pytest.mark.parametrize("test_file", ["MoNA-export-GC-MS-first10.msp", "massbank_five_spectra.msp"])
 def test_write_append(test_file, filename):
     expected = load_test_spectra_file(test_file)
-    save_as_msp(expected[:2], filename, file_mode = "a")
-    save_as_msp(expected[2:], filename, file_mode = "a")
+    save_as_msp(expected[:2], filename, file_mode="a")
+    save_as_msp(expected[2:], filename, file_mode="a")
 
     actual = list(load_from_msp(filename))
 
     assert expected == actual
 
 
-@pytest.mark.parametrize("test_file, expected_file, style", [
-    ["massbank_five_spectra.msp", "riken_style_five_spectra.msp", "riken"]])
+@pytest.mark.parametrize(
+    "test_file, expected_file, style", [["massbank_five_spectra.msp", "riken_style_five_spectra.msp", "riken"]]
+)
 def test_save_as_msp_export_style(test_file, expected_file, style, filename):
     expected = load_test_spectra_file(expected_file)
     data = load_test_spectra_file(test_file)
@@ -178,8 +180,8 @@ def test_save_as_msp_export_style(test_file, expected_file, style, filename):
     actual = list(load_from_msp(filename))
     assert expected == actual
 
-@pytest.mark.parametrize("test_file, expected_file", [
-    ["save_as_msp_from_mgf.mgf", "save_as_msp_from_mgf.msp"]])
+
+@pytest.mark.parametrize("test_file, expected_file", [["save_as_msp_from_mgf.mgf", "save_as_msp_from_mgf.msp"]])
 def test_save_as_msp_from_mgf(test_file, expected_file, filename):
     module_root = os.path.join(os.path.dirname(__file__), "..")
     spectra_file = os.path.join(module_root, "testdata", test_file)
@@ -189,9 +191,9 @@ def test_save_as_msp_from_mgf(test_file, expected_file, filename):
     actual = list(load_from_msp(filename))
     assert expected == actual
 
+
 def test_filter_none_spectra(filename, data):
-    """ Test for removal of None valued Spectra
-    """
+    """Test for removal of None valued Spectra"""
 
     spectra = data
     spectra.append(None)

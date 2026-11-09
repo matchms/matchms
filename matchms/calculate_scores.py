@@ -9,8 +9,9 @@ if TYPE_CHECKING:
     from matchms.spectrum import Spectrum
 
 
-def calculate_scores(spectra_1: Sequence[Spectrum], spectra_2: Sequence[Spectrum],
-                     similarity_function: BaseSimilarity) -> Scores:
+def calculate_scores(
+    spectra_1: Sequence[Spectrum], spectra_2: Sequence[Spectrum], similarity_function: BaseSimilarity
+) -> Scores:
     """Calculate the similarity between all reference objects versus all query objects.
 
     Parameters

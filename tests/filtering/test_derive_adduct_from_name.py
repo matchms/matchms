@@ -181,11 +181,7 @@ def test_looks_like_adduct_rejects_non_adduct_like_strings(adduct):
 
 @pytest.mark.parametrize("as_collection", [False, True], ids=["spectrum", "collection"])
 def test_derive_adduct_from_name_does_not_create_empty_compound_name(as_collection):
-    spectrum_in = (
-        SpectrumBuilder()
-        .with_metadata({"compound_name": "[M+H]+"})
-        .build()
-    )
+    spectrum_in = SpectrumBuilder().with_metadata({"compound_name": "[M+H]+"}).build()
 
     spectrum = run_filter_as_spectrum_or_collection(
         derive_adduct_from_name,

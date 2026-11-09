@@ -61,14 +61,9 @@ def _remove_noise_below_frequent_intensities(
     if highest_frequent_peak == -1:
         return spectrum
 
-    noise_threshold = (
-        highest_frequent_peak
-        * noise_level_multiplier
-    )
+    noise_threshold = highest_frequent_peak * noise_level_multiplier
 
-    peaks_to_keep = (
-        spectrum.intensities > noise_threshold
-    )
+    peaks_to_keep = spectrum.intensities > noise_threshold
 
     spectrum.peaks = Fragments(
         mz=spectrum.mz[peaks_to_keep],
@@ -119,10 +114,7 @@ def _remove_noise_below_frequent_intensities_collection(
 
         # A repeated value cannot reach the requested count when the complete
         # spectrum contains fewer peaks than that count.
-        if (
-            intensities.size
-            < min_count_of_frequent_intensities
-        ):
+        if intensities.size < min_count_of_frequent_intensities:
             continue
 
         highest_frequent_peak = _select_highest_frequent_peak(
@@ -133,10 +125,7 @@ def _remove_noise_below_frequent_intensities_collection(
         if highest_frequent_peak == -1:
             continue
 
-        noise_threshold = (
-            highest_frequent_peak
-            * noise_level_multiplier
-        )
+        noise_threshold = highest_frequent_peak * noise_level_multiplier
 
         row_keep = intensities > noise_threshold
 
@@ -200,10 +189,7 @@ def _select_highest_frequent_peak(
         return_counts=True,
     )
 
-    mask = (
-        counts
-        >= min_count_of_frequent_intensities
-    )
+    mask = counts >= min_count_of_frequent_intensities
     filtered_values = unique_values[mask]
 
     if filtered_values.size > 0:
@@ -214,7 +200,5 @@ def _select_highest_frequent_peak(
 
 remove_noise_below_frequent_intensities = collection_filter(
     _remove_noise_below_frequent_intensities,
-    collection_impl=(
-        _remove_noise_below_frequent_intensities_collection
-    ),
+    collection_impl=(_remove_noise_below_frequent_intensities_collection),
 )

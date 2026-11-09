@@ -18,11 +18,7 @@ def _xlog2(x: float) -> float:
 
 def _entropy_increment(intensity_1: float, intensity_2: float) -> float:
     """Return the entropy-similarity contribution of one matched peak pair."""
-    return (
-        _xlog2(intensity_1 + intensity_2)
-        - _xlog2(intensity_1)
-        - _xlog2(intensity_2)
-    )
+    return _xlog2(intensity_1 + intensity_2) - _xlog2(intensity_1) - _xlog2(intensity_2)
 
 
 def _within_tolerance(
@@ -241,9 +237,7 @@ class EntropyGreedy(BaseSimilarityWithSparse):
         dtype: np.dtype = np.float64,
     ):
         if matching_mode not in ("fragment", "neutral_loss", "hybrid"):
-            raise ValueError(
-                "matching_mode must be 'fragment', 'neutral_loss', or 'hybrid'."
-            )
+            raise ValueError("matching_mode must be 'fragment', 'neutral_loss', or 'hybrid'.")
         if tolerance < 0:
             raise ValueError("tolerance must be >= 0.")
         if merge_within < 0:
@@ -279,11 +273,7 @@ class EntropyGreedy(BaseSimilarityWithSparse):
             dtype=self.dtype,
         )
 
-        return peaks, (
-            None
-            if precursor_mz is None
-            else float(precursor_mz)
-        )
+        return peaks, (None if precursor_mz is None else float(precursor_mz))
 
     def pair(
         self,

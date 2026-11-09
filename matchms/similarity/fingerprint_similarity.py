@@ -146,9 +146,7 @@ class FingerprintSimilarity(BaseSimilarity):
 
         selected_fields = self._resolve_score_fields(score_fields)
         if selected_fields != ("score",):
-            raise NotImplementedError(
-                "FingerprintSimilarity.matrix() supports only score_fields=('score',)."
-            )
+            raise NotImplementedError("FingerprintSimilarity.matrix() supports only score_fields=('score',).")
 
         fingerprints_1, fingerprints_2, is_symmetric = self._prepare_fingerprint_inputs(
             spectra_1=spectra_1,

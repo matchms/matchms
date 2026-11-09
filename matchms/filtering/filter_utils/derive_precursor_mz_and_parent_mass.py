@@ -21,7 +21,7 @@ def derive_parent_mass_from_metadata(
     estimate_from_charge: bool = True,
 ) -> float | None:
     """Use precursor m/z, charge, and adduct metadata to compute parent mass.
-    
+
     Parameters
     ----------
     metadata
@@ -42,9 +42,7 @@ def derive_parent_mass_from_metadata(
     charge = _get_charge_from_metadata(metadata)
 
     if estimate_from_adduct:
-        multiplier, correction_mass = _get_multiplier_and_correction_mass_from_adduct(
-            metadata.get("adduct")
-        )
+        multiplier, correction_mass = _get_multiplier_and_correction_mass_from_adduct(metadata.get("adduct"))
         if correction_mass is not None and multiplier is not None:
             return (precursor_mz - correction_mass) / multiplier
 
@@ -95,20 +93,17 @@ def _get_charge_from_metadata(metadata: Mapping):
 
     if ionmode == "positive":
         logger.info(
-            "Missing charge entry, but positive ionmode detected. "
-            "Consider prior run of `correct_charge()` filter."
+            "Missing charge entry, but positive ionmode detected. Consider prior run of `correct_charge()` filter."
         )
         return 1
 
     if ionmode == "negative":
         logger.info(
-            "Missing charge entry, but negative ionmode detected. "
-            "Consider prior run of `correct_charge()` filter."
+            "Missing charge entry, but negative ionmode detected. Consider prior run of `correct_charge()` filter."
         )
         return -1
 
     logger.warning(
-        "Missing charge and ionmode entries. Consider prior run of "
-        "`derive_ionmode()` and `correct_charge()` filters."
+        "Missing charge and ionmode entries. Consider prior run of `derive_ionmode()` and `correct_charge()` filters."
     )
     return 0

@@ -41,6 +41,4 @@ def _repair_parent_mass_is_molar_mass(metadata, mass_tolerance: float) -> dict:
     return {"parent_mass": correct_mass}
 
 
-repair_parent_mass_is_molar_mass = metadata_update_filter(
-    _repair_parent_mass_is_molar_mass
-)
+repair_parent_mass_is_molar_mass = metadata_update_filter(_repair_parent_mass_is_molar_mass)

@@ -11,11 +11,7 @@ def test_filter_effects_is_complete():
         with open(file_path, encoding="utf-8") as file:
             tree = ast.parse(file.read(), filename=file_path)
 
-        return [
-            node.name
-            for node in tree.body
-            if isinstance(node, ast.FunctionDef)
-        ]
+        return [node.name for node in tree.body if isinstance(node, ast.FunctionDef)]
 
     current_dir = os.path.dirname(os.path.abspath(__file__))
     filtering_directory = os.path.join(current_dir, "../../matchms/filtering")
@@ -58,6 +54,5 @@ def test_filter_effects_are_valid():
 
     for filter_name, effect in FILTER_EFFECTS.items():
         assert effect in valid_effects, (
-            f"Invalid effect {effect!r} for filter {filter_name!r}. "
-            f"Expected one of {valid_effects}."
+            f"Invalid effect {effect!r} for filter {filter_name!r}. Expected one of {valid_effects}."
         )

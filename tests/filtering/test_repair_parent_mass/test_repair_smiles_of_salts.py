@@ -34,11 +34,7 @@ def test_repair_smiles_of_salts(
     expected_salt_ions,
     as_collection,
 ):
-    spectrum_in = (
-        SpectrumBuilder()
-        .with_metadata({"smiles": smiles, "parent_mass": parent_mass})
-        .build()
-    )
+    spectrum_in = SpectrumBuilder().with_metadata({"smiles": smiles, "parent_mass": parent_mass}).build()
 
     spectrum = run_filter_as_spectrum_or_collection(
         repair_smiles_of_salts,
@@ -53,11 +49,7 @@ def test_repair_smiles_of_salts(
 
 @pytest.mark.parametrize("as_collection", [False, True], ids=["spectrum", "collection"])
 def test_repair_smiles_of_salts_missing_smiles_does_nothing(as_collection):
-    spectrum_in = (
-        SpectrumBuilder()
-        .with_metadata({"parent_mass": 192.027})
-        .build()
-    )
+    spectrum_in = SpectrumBuilder().with_metadata({"parent_mass": 192.027}).build()
 
     spectrum = run_filter_as_spectrum_or_collection(
         repair_smiles_of_salts,

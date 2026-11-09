@@ -25,11 +25,9 @@ class BinnedEmbeddingSimilarity(BaseEmbeddingSimilarity):
     intensity_power
         Power applied to peak intensities before binning.
     """
+
     def __init__(
-        self, similarity: str = "cosine",
-        max_mz: float = 1005,
-        bin_width: float = 1,
-        intensity_power: float = 1
+        self, similarity: str = "cosine", max_mz: float = 1005, bin_width: float = 1, intensity_power: float = 1
     ):
         super().__init__(similarity=similarity)
         if max_mz <= 0:

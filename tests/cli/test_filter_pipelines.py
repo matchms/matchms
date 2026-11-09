@@ -188,7 +188,7 @@ def test_filter_pipelines_unknown_name_error(capsys):
 
     assert exit_code == 1
     assert payload["ok"] is False
-    assert payload["error"]["code"] =="unknown_value"
+    assert payload["error"]["code"] == "unknown_value"
     assert payload["error"]["operation"] == "filter pipelines NOT_A_PIPELINE"
     assert payload["error"]["parameter"] == "pipeline_name"
     assert "NOT_A_PIPELINE" in payload["error"]["message"]

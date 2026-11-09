@@ -171,9 +171,7 @@ def test_incomplete_parameters():
         processor.parse_and_add_filter(custom_filter)
 
     with pytest.raises(ValueError):
-        processor.parse_and_add_filter(
-            ("add_parent_mass", {"estimate_from_adduct": False}, "unexpected")
-        )
+        processor.parse_and_add_filter(("add_parent_mass", {"estimate_from_adduct": False}, "unexpected"))
 
 
 def test_invalid_filter_description_raises():
@@ -296,9 +294,7 @@ def test_add_duplicated_filter_to_existing_pipeline():
             ("select_by_relative_intensity", {"intensity_from": 0.01}),
         ]
     )
-    processor.parse_and_add_filter(
-        ("select_by_relative_intensity", {"intensity_from": 0.1})
-    )
+    processor.parse_and_add_filter(("select_by_relative_intensity", {"intensity_from": 0.1}))
 
     assert len(processor.processing_steps) == 2
     assert (
@@ -314,9 +310,7 @@ def test_add_duplicated_filter_to_existing_pipeline():
 def test_add_filter_twice_uses_last_settings():
     processor = SpectraProcessor(filters=())
 
-    processor.parse_and_add_filter(
-        ("select_by_relative_intensity", {"intensity_from": 0.01})
-    )
+    processor.parse_and_add_filter(("select_by_relative_intensity", {"intensity_from": 0.01}))
     processor.parse_and_add_filter("select_by_relative_intensity")
 
     assert processor.processing_steps == [
@@ -494,9 +488,7 @@ def test_custom_spectrum_filter_without_clone_argument_is_supported(spectra):
 
 
 def test_process_spectrum_requirement_can_remove_spectrum(spectra):
-    processor = SpectraProcessor(
-        filters=[("require_minimum_number_of_peaks", {"n_required": 4})]
-    )
+    processor = SpectraProcessor(filters=[("require_minimum_number_of_peaks", {"n_required": 4})])
 
     assert processor.process_spectrum(spectra[0]) is None
 
@@ -702,9 +694,7 @@ def test_process_collection_passes_clone_false_to_filters(collection):
 
 
 def test_collection_requirement_filter_removes_rows(collection):
-    processor = SpectraProcessor(
-        filters=[("require_minimum_number_of_peaks", {"n_required": 2})]
-    )
+    processor = SpectraProcessor(filters=[("require_minimum_number_of_peaks", {"n_required": 2})])
 
     processed = processor.process_collection(collection)
 
@@ -786,10 +776,7 @@ def test_processing_report_aggregates_multiple_process_spectrum_calls(spectra):
     )
     report = processor.create_processing_report()
 
-    processed = [
-        processor.process_spectrum(spectrum, processing_report=report)
-        for spectrum in spectra
-    ]
+    processed = [processor.process_spectrum(spectrum, processing_report=report) for spectrum in spectra]
     processed = [spectrum for spectrum in processed if spectrum is not None]
 
     assert len(processed) == 2
@@ -879,10 +866,13 @@ def test_remove_filter_report_stops_at_removed_spectrum(spectra):
 
     report_df = report.to_dataframe()
 
-    assert report_df.loc[
-        "require_minimum_number_of_peaks",
-        "removed spectra",
-    ] == 1
+    assert (
+        report_df.loc[
+            "require_minimum_number_of_peaks",
+            "removed spectra",
+        ]
+        == 1
+    )
 
     assert report_df.loc["should_not_run", "input spectra"] == 0
     assert report_df.loc["should_not_run", "output spectra"] == 0
@@ -1179,9 +1169,7 @@ def test_process_spectra_with_processing_report(spectra):
 
 
 def test_process_spectra_accepts_generator(spectra):
-    processor = SpectraProcessor(
-        filters=["make_charge_int"]
-    )
+    processor = SpectraProcessor(filters=["make_charge_int"])
 
     spectra_generator = (spectrum for spectrum in spectra)
 
@@ -1275,9 +1263,7 @@ def test_missing_values_created_during_processing_are_harmonized_for_collection(
 
 def test_successful_derivation_is_not_affected(spectrum_with_inchi):
     """Metadata derived after the harmonization step is kept unchanged."""
-    processor = SpectraProcessor(
-        filters=["harmonize_missing_entries", "derive_inchikey_from_inchi"]
-    )
+    processor = SpectraProcessor(filters=["harmonize_missing_entries", "derive_inchikey_from_inchi"])
 
     processed = processor.process_spectrum(spectrum_with_inchi)
 
@@ -1330,6 +1316,7 @@ def test_processing_report_without_explicit_missing_values(spectrum_with_inchi):
     assert report.missing_metadata == {}
     assert report.missing_metadata_summary() == "Missing metadata after processing: none"
 
+
 # -----------------------------------------------------------------------------
 # Additional issue #951 regression tests
 # -----------------------------------------------------------------------------
@@ -1337,10 +1324,12 @@ def test_processing_report_without_explicit_missing_values(spectrum_with_inchi):
 
 def test_processing_report_counts_failed_derivation_for_spectrum(spectrum_with_inchi):
     """A missing alias created after harmonization is counted in the final report."""
-    processor = SpectraProcessor([
-        ("harmonize_missing_entries", {"keys": ["inchi", "inchikey"]}),
-        _derive_inchikey_failing,
-    ])
+    processor = SpectraProcessor(
+        [
+            ("harmonize_missing_entries", {"keys": ["inchi", "inchikey"]}),
+            _derive_inchikey_failing,
+        ]
+    )
     report = processor.create_processing_report()
 
     processed = processor.process_spectrum(spectrum_with_inchi, processing_report=report)
@@ -1352,10 +1341,12 @@ def test_processing_report_counts_failed_derivation_for_spectrum(spectrum_with_i
 
 def test_processing_report_counts_failed_derivation_for_collection(spectrum_with_inchi):
     """The collection path must count the same late-generated missing value."""
-    processor = SpectraProcessor([
-        ("harmonize_missing_entries", {"keys": ["inchi", "inchikey"]}),
-        _derive_inchikey_failing_for_collection,
-    ])
+    processor = SpectraProcessor(
+        [
+            ("harmonize_missing_entries", {"keys": ["inchi", "inchikey"]}),
+            _derive_inchikey_failing_for_collection,
+        ]
+    )
     report = processor.create_processing_report()
 
     processed = processor.process_collection(
@@ -1386,10 +1377,12 @@ def test_final_harmonization_respects_configured_keys(spectrum_with_inchi):
     """A second harmonization pass must not normalize fields outside `keys`."""
     spectrum = spectrum_with_inchi.clone()
     spectrum.set("smiles", "n/a")
-    processor = SpectraProcessor([
-        ("harmonize_missing_entries", {"keys": ["inchikey"]}),
-        _derive_inchikey_failing,
-    ])
+    processor = SpectraProcessor(
+        [
+            ("harmonize_missing_entries", {"keys": ["inchikey"]}),
+            _derive_inchikey_failing,
+        ]
+    )
 
     processed = processor.process_spectrum(spectrum)
 

@@ -27,13 +27,7 @@ def test_make_charge_int(input_charge, corrected_charge, as_collection):
     mz = np.array([100, 200.0])
     intensities = np.array([0.7, 0.1])
     metadata = {"charge": input_charge}
-    spectrum_in = (
-        SpectrumBuilder()
-        .with_mz(mz)
-        .with_intensities(intensities)
-        .with_metadata(metadata)
-        .build()
-    )
+    spectrum_in = SpectrumBuilder().with_mz(mz).with_intensities(intensities).with_metadata(metadata).build()
 
     spectrum = run_filter_as_spectrum_or_collection(
         make_charge_int,

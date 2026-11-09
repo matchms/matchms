@@ -85,7 +85,7 @@ def test_spectra_describe_missing_file(tmp_path, capsys):
 
     assert exit_code == 1
     assert payload["ok"] is False
-    assert payload["error"]["code"] =="file_not_found"
+    assert payload["error"]["code"] == "file_not_found"
     assert payload["error"]["input_file"] == str(missing)
     assert set(payload["error"]["valid_values"]) == set(INPUT_FORMATS)
 
@@ -98,7 +98,7 @@ def test_spectra_describe_unsupported_extension(tmp_path, capsys):
 
     assert exit_code == 1
     assert payload["ok"] is False
-    assert payload["error"]["code"] =="unsupported_input_format"
+    assert payload["error"]["code"] == "unsupported_input_format"
     assert set(payload["error"]["valid_values"]) == set(INPUT_FORMATS)
 
 
@@ -120,5 +120,5 @@ def test_spectra_describe_empty_collection(tmp_path, capsys):
 
     assert exit_code == 1
     assert payload["ok"] is False
-    assert payload["error"]["code"] =="empty_spectra"
+    assert payload["error"]["code"] == "empty_spectra"
     assert payload["error"]["input_file"] == str(empty)

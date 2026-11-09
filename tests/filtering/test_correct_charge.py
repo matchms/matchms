@@ -78,11 +78,7 @@ def test_correct_charge_collection_multiple_rows():
     ],
 )
 def test_collection_converts_numeric_string_charge(charge, expected):
-    spectrum = (
-        SpectrumBuilder()
-        .with_metadata({"charge": charge})
-        .build()
-    )
+    spectrum = SpectrumBuilder().with_metadata({"charge": charge}).build()
 
     collection = SpectraCollection([spectrum])
 
@@ -90,11 +86,7 @@ def test_collection_converts_numeric_string_charge(charge, expected):
 
 
 def test_correct_charge_collection_raises_for_nonconvertible_string():
-    spectrum = (
-        SpectrumBuilder()
-        .with_metadata({"charge": "invalid"})
-        .build()
-    )
+    spectrum = SpectrumBuilder().with_metadata({"charge": "invalid"}).build()
 
     collection = SpectraCollection([spectrum])
 

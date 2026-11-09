@@ -35,10 +35,14 @@ def get_function(numba_compiled, f):
 
 
 @pytest.mark.parametrize("numba_compiled", [True, False])
-@pytest.mark.parametrize("shift, expected_pairs, expected_matches", [
-    (0.0, [[2.0, 2.0, 1.0], [3.0, 3.0, 1.0]], (2, 3)),
-    (-5.0, [[0.0, 0.0, 0.01], [1.0, 1.0, 0.01]], (2, 3)),
-    (-20.0, None, None)],)
+@pytest.mark.parametrize(
+    "shift, expected_pairs, expected_matches",
+    [
+        (0.0, [[2.0, 2.0, 1.0], [3.0, 3.0, 1.0]], (2, 3)),
+        (-5.0, [[0.0, 0.0, 0.01], [1.0, 1.0, 0.01]], (2, 3)),
+        (-20.0, None, None),
+    ],
+)
 def test_collect_peak_pairs(numba_compiled, shift, expected_pairs, expected_matches, spectra):
     """Test finding expected peak matches for given tolerance."""
     spec1, spec2 = spectra
@@ -68,9 +72,13 @@ def test_find_matches(numba_compiled, shift, expected_matches):
 
 
 @pytest.mark.parametrize("numba_compiled", [True, False])
-@pytest.mark.parametrize("matching_pairs, expected_score", [
-    ([[2.0, 2.0, 1.0], [3.0, 3.0, 1.0]], (0.990099009900, 2)),
-    ([[0.0, 0.0, 0.01], [1.0, 1.0, 0.01]], (0.009900990099, 2))])
+@pytest.mark.parametrize(
+    "matching_pairs, expected_score",
+    [
+        ([[2.0, 2.0, 1.0], [3.0, 3.0, 1.0]], (0.990099009900, 2)),
+        ([[0.0, 0.0, 0.01], [1.0, 1.0, 0.01]], (0.009900990099, 2)),
+    ],
+)
 def test_score_best_matches(numba_compiled, matching_pairs, expected_score, spectra):
     """Test finding expected peak matches for given tolerance."""
     matching_pairs = np.array(matching_pairs)
@@ -219,13 +227,15 @@ def test_filter_peaks_above_precursor_without_precursor_returns_unchanged():
 
 
 def test_preprocess_peak_array_applies_precursor_and_noise_filtering():
-    peaks = np.array([
-        [100.0, 0.01],
-        [150.0, 0.20],
-        [198.4, 1.00],
-        [199.0, 0.80],
-        [200.0, 0.90],
-    ])
+    peaks = np.array(
+        [
+            [100.0, 0.01],
+            [150.0, 0.20],
+            [198.4, 1.00],
+            [199.0, 0.80],
+            [200.0, 0.90],
+        ]
+    )
 
     processed = _preprocess_peak_array(
         peaks,
@@ -238,19 +248,23 @@ def test_preprocess_peak_array_applies_precursor_and_noise_filtering():
     # Precursor filtering first removes 199 and 200.
     # Among the remaining peaks, 198.4 is the base peak, so 100.0
     # is subsequently removed by the 10% relative noise cutoff.
-    expected = np.array([
-        [150.0, 0.20],
-        [198.4, 1.00],
-    ])
+    expected = np.array(
+        [
+            [150.0, 0.20],
+            [198.4, 1.00],
+        ]
+    )
 
     np.testing.assert_array_equal(processed, expected)
 
 
 def test_preprocess_peak_array_requires_precursor_when_removal_requested():
-    peaks = np.array([
-        [100.0, 0.5],
-        [200.0, 1.0],
-    ])
+    peaks = np.array(
+        [
+            [100.0, 0.5],
+            [200.0, 1.0],
+        ]
+    )
 
     with pytest.raises(
         ValueError,
@@ -277,10 +291,12 @@ def test_process_spectrum_peaks_uses_spectrum_precursor_mz():
         noise_cutoff=None,
     )
 
-    expected = np.array([
-        [100.0, 0.2],
-        [198.4, 0.3],
-    ])
+    expected = np.array(
+        [
+            [100.0, 0.2],
+            [198.4, 0.3],
+        ]
+    )
 
     np.testing.assert_array_equal(processed, expected)
 
@@ -299,8 +315,10 @@ def test_process_spectrum_peaks_does_not_require_precursor_when_removal_disabled
 
     np.testing.assert_array_equal(
         processed,
-        np.array([
-            [100.0, 0.5],
-            [200.0, 1.0],
-        ]),
+        np.array(
+            [
+                [100.0, 0.5],
+                [200.0, 1.0],
+            ]
+        ),
     )

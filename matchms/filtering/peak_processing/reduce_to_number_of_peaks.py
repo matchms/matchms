@@ -148,9 +148,7 @@ def _reduce_to_number_of_peaks_collection(
     k_per_row = np.minimum(k_per_row, peak_counts).astype(int)
 
     # Rows with fewer than k peaks are unchanged by the backend.
-    target._fragments = target.fragments.keep_top_k_per_row_variable(
-        k_per_row, progress_bar=progress_bar
-    )
+    target._fragments = target.fragments.keep_top_k_per_row_variable(k_per_row, progress_bar=progress_bar)
     target._clear_cache(["fragment_hashes", "spectra_hashes"])
 
     return target

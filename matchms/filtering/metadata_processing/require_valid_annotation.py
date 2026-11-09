@@ -49,8 +49,7 @@ def _require_valid_annotation(metadata) -> bool:
 
     if not _check_smiles_inchi_inchikey_match(smiles, inchi, inchikey):
         logger.info(
-            "Removed spectrum since smiles, inchi and inchikey do not match. "
-            "Smiles = %s, inchi = %s, inchikey = %s",
+            "Removed spectrum since smiles, inchi and inchikey do not match. Smiles = %s, inchi = %s, inchikey = %s",
             smiles,
             inchi,
             inchikey,

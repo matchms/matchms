@@ -109,7 +109,7 @@ class ProcessingReport:
         after: _HashSnapshot,
     ) -> None:
         """Add one before/after filter comparison to the report.
-        
+
         Parameters
         ----------
         filter_name
@@ -172,7 +172,7 @@ class ProcessingReport:
                 after.fragment_hashes,
             )
 
-        # Unknown/custom filter. 
+        # Unknown/custom filter.
         # If every row disappeared, there are no retained rows whose metadata/fragments need comparison.
         # Otherwise row alignment is only reliable when the number of rows stayed unchanged.
         if after.n_spectra == 0:
@@ -232,9 +232,7 @@ class ProcessingReport:
             self.missing_metadata.items(),
             key=lambda item: (-item[1], item[0]),
         )
-        return "Missing metadata after processing: " + ", ".join(
-            f"{key}={count}" for key, count in sorted_counts
-        )
+        return "Missing metadata after processing: " + ", ".join(f"{key}={count}" for key, count in sorted_counts)
 
     def __str__(self) -> str:
         return (
@@ -247,10 +245,7 @@ class ProcessingReport:
         )
 
     def __repr__(self) -> str:
-        return (
-            f"ProcessingReport(n_processed={self.counter_number_processed}, "
-            f"n_steps={len(self._steps)})"
-        )
+        return f"ProcessingReport(n_processed={self.counter_number_processed}, n_steps={len(self._steps)})"
 
 
 class SpectraProcessor:
@@ -338,8 +333,7 @@ class SpectraProcessor:
         for i, filter_function in enumerate(self.filters):
             if new_filter_function.__name__ == filter_function.__name__:
                 logger.warning(
-                    "The filter %s was already in the filter list. "
-                    "The last added filter parameters are used.",
+                    "The filter %s was already in the filter list. The last added filter parameters are used.",
                     new_filter_function.__name__,
                 )
                 self.filters[i] = new_filter_function
@@ -424,18 +418,13 @@ class SpectraProcessor:
 
         for filter_func in self.filters:
             effect = FILTER_EFFECTS.get(filter_func.__name__)
-            before = (
-                _take_hash_snapshot(working_spectrum, effect)
-                if processing_report is not None
-                else None
-            )
+            before = _take_hash_snapshot(working_spectrum, effect) if processing_report is not None else None
 
             spectrum_out = _apply_filter(filter_func, working_spectrum)
 
             if spectrum_out is not None and not isinstance(spectrum_out, Spectrum):
                 raise TypeError(
-                    f"Filter {filter_func.__name__} returned "
-                    f"{type(spectrum_out).__name__}, expected Spectrum or None."
+                    f"Filter {filter_func.__name__} returned {type(spectrum_out).__name__}, expected Spectrum or None."
                 )
 
             if processing_report is not None:
@@ -455,9 +444,7 @@ class SpectraProcessor:
         working_spectrum = self._harmonize_missing_values(working_spectrum)
 
         if processing_report is not None:
-            processing_report.add_missing_metadata(
-                _count_missing_metadata_entries(working_spectrum.metadata)
-            )
+            processing_report.add_missing_metadata(_count_missing_metadata_entries(working_spectrum.metadata))
 
         return working_spectrum
 
@@ -534,9 +521,7 @@ class SpectraProcessor:
             returns None.
         """
         if not isinstance(collection, SpectraCollection):
-            raise TypeError(
-                "SpectraProcessor.process_collection expects a SpectraCollection."
-            )
+            raise TypeError("SpectraProcessor.process_collection expects a SpectraCollection.")
 
         if not self.filters:
             logger.warning("No filters have been specified, so the collection was not filtered.")
@@ -548,11 +533,7 @@ class SpectraProcessor:
 
         for filter_func in self.filters:
             effect = FILTER_EFFECTS.get(filter_func.__name__)
-            before = (
-                _take_hash_snapshot(working_collection, effect)
-                if processing_report is not None
-                else None
-            )
+            before = _take_hash_snapshot(working_collection, effect) if processing_report is not None else None
 
             collection_out = _apply_filter(filter_func, working_collection)
 
@@ -583,9 +564,7 @@ class SpectraProcessor:
         working_collection = self._harmonize_missing_values(working_collection)
 
         if processing_report is not None:
-            processing_report.add_missing_metadata(
-                _count_missing_metadata_entries(working_collection.metadata)
-            )
+            processing_report.add_missing_metadata(_count_missing_metadata_entries(working_collection.metadata))
 
         return working_collection
 
@@ -616,7 +595,7 @@ def _apply_filter(filter_func: Callable, spectra):
     return filter_func(spectra, **kwargs)
 
 
-def _count_missing_metadata_entries(metadata, aliases = None) -> dict[str, int]:
+def _count_missing_metadata_entries(metadata, aliases=None) -> dict[str, int]:
     """Count missing entries per metadata key.
 
     Accepts Spectrum-style metadata (a mapping of scalar values) or the metadata
@@ -664,16 +643,8 @@ def _take_hash_snapshot(
     needs_fragments = effect == FRAGMENTS or effect is None
 
     if isinstance(spectra, Spectrum):
-        metadata_hashes = (
-            np.asarray([spectra.metadata_hash()], dtype=object)
-            if needs_metadata
-            else None
-        )
-        fragment_hashes = (
-            np.asarray([spectra.spectrum_hash()], dtype=object)
-            if needs_fragments
-            else None
-        )
+        metadata_hashes = np.asarray([spectra.metadata_hash()], dtype=object) if needs_metadata else None
+        fragment_hashes = np.asarray([spectra.spectrum_hash()], dtype=object) if needs_fragments else None
         return _HashSnapshot(
             n_spectra=1,
             metadata_hashes=metadata_hashes,
@@ -681,26 +652,15 @@ def _take_hash_snapshot(
         )
 
     if isinstance(spectra, SpectraCollection):
-        metadata_hashes = (
-            np.asarray(spectra.metadata_hashes).copy()
-            if needs_metadata
-            else None
-        )
-        fragment_hashes = (
-            np.asarray(spectra.fragment_hashes).copy()
-            if needs_fragments
-            else None
-        )
+        metadata_hashes = np.asarray(spectra.metadata_hashes).copy() if needs_metadata else None
+        fragment_hashes = np.asarray(spectra.fragment_hashes).copy() if needs_fragments else None
         return _HashSnapshot(
             n_spectra=len(spectra),
             metadata_hashes=metadata_hashes,
             fragment_hashes=fragment_hashes,
         )
 
-    raise TypeError(
-        "Hash snapshots require Spectrum, SpectraCollection, or None, "
-        f"got {type(spectra).__name__}."
-    )
+    raise TypeError(f"Hash snapshots require Spectrum, SpectraCollection, or None, got {type(spectra).__name__}.")
 
 
 def _count_hash_differences(
@@ -712,8 +672,7 @@ def _count_hash_differences(
         raise ValueError("Required hashes were not captured for processing report.")
     if before_hashes.shape != after_hashes.shape:
         raise ValueError(
-            "Cannot compare hash arrays with different shapes: "
-            f"{before_hashes.shape} and {after_hashes.shape}."
+            f"Cannot compare hash arrays with different shapes: {before_hashes.shape} and {after_hashes.shape}."
         )
     return int(np.count_nonzero(before_hashes != after_hashes))
 
@@ -733,10 +692,7 @@ def load_matchms_filter_from_string(filter_name: str) -> Callable:
     if not isinstance(filter_name, str):
         raise TypeError("Expected a string.")
     if filter_name not in FILTER_FUNCTION_NAMES:
-        raise ValueError(
-            f"Unknown filter type: {filter_name}. Expected a known matchms "
-            "filter name or a callable."
-        )
+        raise ValueError(f"Unknown filter type: {filter_name}. Expected a known matchms filter name or a callable.")
     return FILTER_FUNCTION_NAMES[filter_name]
 
 
@@ -745,7 +701,7 @@ def create_partial_function(
     filter_params: dict[str, object] | None,
 ) -> Callable:
     """Apply configured keyword parameters to a filter function.
-    
+
     Parameters
     ----------
     filter_function
@@ -757,9 +713,7 @@ def create_partial_function(
         return filter_function
 
     if not isinstance(filter_params, dict):
-        raise TypeError(
-            f"Expected a dictionary for filter parameters, got {filter_params}."
-        )
+        raise TypeError(f"Expected a dictionary for filter parameters, got {filter_params}.")
 
     partial_filter_func = partial(filter_function, **filter_params)
     partial_filter_func.__name__ = filter_function.__name__
@@ -770,9 +724,7 @@ def check_all_parameters_given(func: Callable) -> None:
     """Assert that only the spectra input remains as a required parameter."""
     signature = inspect.signature(func)
     parameters_without_value = [
-        parameter
-        for parameter, value in signature.parameters.items()
-        if value.default is inspect.Parameter.empty
+        parameter for parameter, value in signature.parameters.items() if value.default is inspect.Parameter.empty
     ]
 
     assert len(parameters_without_value) == 1, (

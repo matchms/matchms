@@ -58,9 +58,7 @@ def _get_matching_adduct(precursor_mz, parent_mass, ion_mode, mass_tolerance):
     # parent_mass was filled into precursor_mz.
     adducts_df = adducts_df[~adducts_df["adduct"].isin(("[M]+", "[M]-"))]
 
-    parent_masses = (
-        precursor_mz - adducts_df["correction_mass"]
-    ) / adducts_df["mass_multiplier"]
+    parent_masses = (precursor_mz - adducts_df["correction_mass"]) / adducts_df["mass_multiplier"]
     mass_differences = abs(parent_masses - parent_mass)
 
     smallest_mass_index = mass_differences.idxmin()
@@ -72,6 +70,4 @@ def _get_matching_adduct(precursor_mz, parent_mass, ion_mode, mass_tolerance):
     return None
 
 
-repair_adduct_based_on_parent_mass = metadata_update_filter(
-    _repair_adduct_based_on_parent_mass
-)
+repair_adduct_based_on_parent_mass = metadata_update_filter(_repair_adduct_based_on_parent_mass)

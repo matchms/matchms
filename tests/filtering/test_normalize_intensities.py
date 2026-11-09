@@ -55,13 +55,7 @@ def test_normalize_intensities(mz, intensities, expected_mz, expected_intensitie
 )
 def test_normalize_intensities_losses_present(mz, intensities, metadata, expected_losses, as_collection):
     """Test if also losses (if present) are normalized correctly."""
-    spectrum_in = (
-        SpectrumBuilder()
-        .with_mz(mz)
-        .with_intensities(intensities)
-        .with_metadata(metadata)
-        .build()
-    )
+    spectrum_in = SpectrumBuilder().with_mz(mz).with_intensities(intensities).with_metadata(metadata).build()
 
     spectrum = run_filter_as_spectrum_or_collection(
         normalize_intensities,
@@ -203,12 +197,7 @@ def test_normalize_intensities_scale_to_max(mz, intensities, scale_to_max, expec
 @pytest.mark.parametrize("scale_to_max", [0, -1, -100.0])
 def test_normalize_intensities_rejects_non_positive_scale_to_max(scale_to_max, as_collection):
     """Test if invalid scale_to_max values are rejected."""
-    spectrum_in = (
-        SpectrumBuilder()
-        .with_mz(np.array([10.0, 20.0]))
-        .with_intensities(np.array([1.0, 10.0]))
-        .build()
-    )
+    spectrum_in = SpectrumBuilder().with_mz(np.array([10.0, 20.0])).with_intensities(np.array([1.0, 10.0])).build()
 
     with pytest.raises(ValueError, match="'scale_to_max' must be > 0"):
         run_filter_as_spectrum_or_collection(
@@ -223,12 +212,7 @@ def test_normalize_intensities_rejects_non_positive_scale_to_max(scale_to_max, a
 @pytest.mark.parametrize("scale_to_max", ["100", None, (0, 100)])
 def test_normalize_intensities_rejects_non_numeric_scale_to_max(scale_to_max, as_collection):
     """Test if non-numeric scale_to_max values are rejected."""
-    spectrum_in = (
-        SpectrumBuilder()
-        .with_mz(np.array([10.0, 20.0]))
-        .with_intensities(np.array([1.0, 10.0]))
-        .build()
-    )
+    spectrum_in = SpectrumBuilder().with_mz(np.array([10.0, 20.0])).with_intensities(np.array([1.0, 10.0])).build()
 
     with pytest.raises(TypeError, match="'scale_to_max' must be a positive number"):
         run_filter_as_spectrum_or_collection(

@@ -138,9 +138,7 @@ class SimilarityNetwork:
         if n_rows != n_cols:
             raise TypeError("Expected square all-vs-all scores for network creation.")
         if len(identifiers) != n_rows:
-            raise ValueError(
-                f"identifiers must have length {n_rows}, but got {len(identifiers)}."
-            )
+            raise ValueError(f"identifiers must have length {n_rows}, but got {len(identifiers)}.")
 
         if len(set(identifiers)) != len(identifiers):
             raise ValueError("identifiers must be unique.")
@@ -169,19 +167,14 @@ class SimilarityNetwork:
             keep = np.where(candidate_scores >= self.score_cutoff)[0][: self.max_links]
 
             if self.link_method == "single":
-                new_edges = [
-                    (source_id, str(target_ids[k]), float(candidate_scores[k]))
-                    for k in keep
-                ]
+                new_edges = [(source_id, str(target_ids[k]), float(candidate_scores[k])) for k in keep]
             else:  # mutual
                 new_edges = []
                 for k in keep:
                     target_idx = candidate_indices[k]
                     target_id = identifiers[target_idx]
                     if i in similars_idx[target_id][: self.top_n]:
-                        new_edges.append(
-                            (source_id, str(target_id), float(candidate_scores[k]))
-                        )
+                        new_edges.append((source_id, str(target_id), float(candidate_scores[k])))
 
             msnet.add_weighted_edges_from(new_edges)
 
@@ -217,10 +210,7 @@ class SimilarityNetwork:
         }
 
         if graph_format not in writer:
-            raise ValueError(
-                "Format not supported. Please use one of: "
-                "'cyjs', 'gexf', 'gml', 'graphml', 'json'."
-            )
+            raise ValueError("Format not supported. Please use one of: 'cyjs', 'gexf', 'gml', 'graphml', 'json'.")
         return writer[graph_format]
 
     def export_to_graphml(self, filename: str):

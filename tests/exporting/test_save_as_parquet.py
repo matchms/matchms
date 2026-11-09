@@ -31,9 +31,7 @@ def test_save_as_parquet_roundtrip(tmp_path):
 
     assert len(loaded) == len(original)
     assert loaded.mz_precision == pytest.approx(original.mz_precision)
-    assert loaded.fragments.mz_precision == pytest.approx(
-        original.fragments.mz_precision
-    )
+    assert loaded.fragments.mz_precision == pytest.approx(original.fragments.mz_precision)
     assert loaded.fragments.mz_rounding == original.fragments.mz_rounding
     assert list(loaded.metadata["id"]) == ["a", "b"]
 

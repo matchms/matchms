@@ -13,58 +13,80 @@ def compressed(request):
 
 @pytest.fixture
 def dense_scalar_scores():
-    return Scores({
-        "score": np.array([
-            [1.0, 0.0, 0.5],
-            [0.0, 0.8, 0.0],
-        ], dtype=np.float64)
-    })
+    return Scores(
+        {
+            "score": np.array(
+                [
+                    [1.0, 0.0, 0.5],
+                    [0.0, 0.8, 0.0],
+                ],
+                dtype=np.float64,
+            )
+        }
+    )
 
 
 @pytest.fixture
 def dense_multi_scores():
-    return Scores({
-        "score": np.array([
-            [1.0, 0.0, 0.5],
-            [0.0, 0.8, 0.0],
-        ], dtype=np.float64),
-        "matches": np.array([
-            [3, 0, 2],
-            [0, 4, 0],
-        ], dtype=np.int64),
-    })
+    return Scores(
+        {
+            "score": np.array(
+                [
+                    [1.0, 0.0, 0.5],
+                    [0.0, 0.8, 0.0],
+                ],
+                dtype=np.float64,
+            ),
+            "matches": np.array(
+                [
+                    [3, 0, 2],
+                    [0, 4, 0],
+                ],
+                dtype=np.int64,
+            ),
+        }
+    )
 
 
 @pytest.fixture
 def sparse_scalar_scores():
-    dense = np.array([
-        [1.0, 0.0, 0.5],
-        [0.0, 0.8, 0.0],
-    ], dtype=np.float64)
+    dense = np.array(
+        [
+            [1.0, 0.0, 0.5],
+            [0.0, 0.8, 0.0],
+        ],
+        dtype=np.float64,
+    )
     row, col = np.nonzero(dense)
-    return Scores({
-        "score": coo_array((dense[row, col], (row, col)), shape=dense.shape)
-    })
+    return Scores({"score": coo_array((dense[row, col], (row, col)), shape=dense.shape)})
 
 
 @pytest.fixture
 def sparse_multi_scores():
-    score = np.array([
-        [1.0, 0.0, 0.5],
-        [0.0, 0.8, 0.0],
-    ], dtype=np.float64)
-    matches = np.array([
-        [3, 0, 2],
-        [0, 4, 0],
-    ], dtype=np.int64)
+    score = np.array(
+        [
+            [1.0, 0.0, 0.5],
+            [0.0, 0.8, 0.0],
+        ],
+        dtype=np.float64,
+    )
+    matches = np.array(
+        [
+            [3, 0, 2],
+            [0, 4, 0],
+        ],
+        dtype=np.int64,
+    )
 
     row_s, col_s = np.nonzero(score)
     row_m, col_m = np.nonzero(matches)
 
-    return Scores({
-        "score": coo_array((score[row_s, col_s], (row_s, col_s)), shape=score.shape),
-        "matches": coo_array((matches[row_m, col_m], (row_m, col_m)), shape=matches.shape),
-    })
+    return Scores(
+        {
+            "score": coo_array((score[row_s, col_s], (row_s, col_s)), shape=score.shape),
+            "matches": coo_array((matches[row_m, col_m], (row_m, col_m)), shape=matches.shape),
+        }
+    )
 
 
 def assert_scores_equal(scores_a: Scores, scores_b: Scores):
@@ -282,10 +304,12 @@ def test_load_missing_required_metadata_keys_raises(tmp_path: Path):
 
 
 def test_roundtrip_dense_preserves_values_and_dtype(tmp_path: Path):
-    scores = Scores({
-        "score": np.array([[1.0, 0.0], [0.25, 0.75]], dtype=np.float32),
-        "matches": np.array([[5, 0], [1, 4]], dtype=np.int16),
-    })
+    scores = Scores(
+        {
+            "score": np.array([[1.0, 0.0], [0.25, 0.75]], dtype=np.float32),
+            "matches": np.array([[5, 0], [1, 4]], dtype=np.int16),
+        }
+    )
 
     filename = tmp_path / "dtype_roundtrip_dense.npz"
     scores.save(filename)
@@ -302,9 +326,11 @@ def test_roundtrip_sparse_preserves_values_and_dtype(tmp_path: Path):
     col = np.array([0, 1], dtype=np.int32)
     data = np.array([1.0, 0.75], dtype=np.float32)
 
-    scores = Scores({
-        "score": coo_array((data, (row, col)), shape=(2, 2)),
-    })
+    scores = Scores(
+        {
+            "score": coo_array((data, (row, col)), shape=(2, 2)),
+        }
+    )
 
     filename = tmp_path / "dtype_roundtrip_sparse.npz"
     scores.save(filename)

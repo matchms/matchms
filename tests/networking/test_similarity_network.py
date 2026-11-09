@@ -7,7 +7,7 @@ from matchms.networking import SimilarityNetwork
 from matchms.similarity import CosineFlash
 
 
-pytest.importorskip("networkx") # skip tests if networkx is not installed
+pytest.importorskip("networkx")  # skip tests if networkx is not installed
 
 
 @pytest.fixture(params=["cyjs", "gexf", "gml", "graphml", "json"])
@@ -27,17 +27,29 @@ def create_dummy_spectra():
     """Create dummy spectra"""
     spectra = []
     for i in range(5):
-        spectra.append(Spectrum(mz=np.array([100, 200., 210. + 10 * i]),
-                                  intensities=np.array([0.2 * i, 0.1 * i, 1.0]),
-                                  metadata={"spectrum_id": "ref_spec_"+str(i),
-                                            "smiles": "C1=CC=C2C(=C1)NC(=N2)C3=CC=CO3",
-                                            "precursor_mz": 230+20*i}))
+        spectra.append(
+            Spectrum(
+                mz=np.array([100, 200.0, 210.0 + 10 * i]),
+                intensities=np.array([0.2 * i, 0.1 * i, 1.0]),
+                metadata={
+                    "spectrum_id": "ref_spec_" + str(i),
+                    "smiles": "C1=CC=C2C(=C1)NC(=N2)C3=CC=CO3",
+                    "precursor_mz": 230 + 20 * i,
+                },
+            )
+        )
     for i in range(3):
-        spectra.append(Spectrum(mz=np.array([100., 200.01]),
-                                  intensities=np.array([0.5, 0.1 * i]),
-                                  metadata={"spectrum_id": "query_spec_"+str(i),
-                                            "smiles": "CC1=C(C=C(C=C1)NC(=O)N(C)C)Cl",
-                                            "precursor_mz": 250+20*i}))
+        spectra.append(
+            Spectrum(
+                mz=np.array([100.0, 200.01]),
+                intensities=np.array([0.5, 0.1 * i]),
+                metadata={
+                    "spectrum_id": "query_spec_" + str(i),
+                    "smiles": "CC1=C(C=C(C=C1)NC(=O)N(C)C)Cl",
+                    "precursor_mz": 250 + 20 * i,
+                },
+            )
+        )
     return spectra
 
 
@@ -109,12 +121,8 @@ def test_create_network_symmetric():
 
     assert len(nodes_list) == 8, "Expected different number of nodes"
     assert len(edges_list) == 5, "Expected different number of edges"
-    assert np.all([(x[0] not in nodes_without_edges) for x in edges_list]), (
-        "Expected this node to have no edges"
-    )
-    assert np.all([(x[1] not in nodes_without_edges) for x in edges_list]), (
-        "Expected this node to have no edges"
-    )
+    assert np.all([(x[0] not in nodes_without_edges) for x in edges_list]), "Expected this node to have no edges"
+    assert np.all([(x[1] not in nodes_without_edges) for x in edges_list]), "Expected this node to have no edges"
 
 
 def test_create_network_symmetric_remove_unconnected_nodes():
@@ -130,9 +138,7 @@ def test_create_network_symmetric_remove_unconnected_nodes():
     nodes_with_edges = ["ref_spec_4", "query_spec_0", "query_spec_1", "query_spec_2"]
 
     assert len(nodes_list) == 4, "Expected different number of nodes"
-    assert np.all([(x in nodes_list) for x in nodes_with_edges]), (
-        "Expected this node to have edges"
-    )
+    assert np.all([(x in nodes_list) for x in nodes_with_edges]), "Expected this node to have edges"
 
 
 def test_create_network_symmetric_higher_cutoff():
@@ -184,12 +190,8 @@ def test_create_network_symmetric_max_links_1():
     nodes_without_edges = ["ref_spec_0", "ref_spec_1", "ref_spec_2", "ref_spec_3"]
 
     assert len(edges_list) == 3, "Expected different number of edges"
-    assert np.all([(x[0] not in nodes_without_edges) for x in edges_list]), (
-        "Expected this node to have no edges"
-    )
-    assert np.all([(x[1] not in nodes_without_edges) for x in edges_list]), (
-        "Expected this node to have no edges"
-    )
+    assert np.all([(x[0] not in nodes_without_edges) for x in edges_list]), "Expected this node to have no edges"
+    assert np.all([(x[1] not in nodes_without_edges) for x in edges_list]), "Expected this node to have no edges"
 
 
 def test_create_network_invalid_link_method():

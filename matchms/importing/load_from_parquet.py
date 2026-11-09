@@ -175,6 +175,7 @@ def _read_parquet_schema(path: Path):
     """Read schema for a Parquet file or partitioned dataset."""
     import pyarrow.dataset as ds
     import pyarrow.parquet as pq
+
     try:
         return pq.read_schema(path)
     except (OSError, ValueError):
@@ -200,18 +201,10 @@ def _flatten_list_column(column, *, column_name: str, pa) -> tuple[np.ndarray, n
         lengths = np.full(len(array), array.type.list_size, dtype=np.int64)
         values = array.values
     else:
-        raise ValueError(
-            f"Peak column {column_name!r} must be an Arrow list column, got {array.type}."
-        )
+        raise ValueError(f"Peak column {column_name!r} must be an Arrow list column, got {array.type}.")
 
-    if not (
-        pa.types.is_floating(values.type)
-        or pa.types.is_integer(values.type)
-        or pa.types.is_decimal(values.type)
-    ):
-        raise ValueError(
-            f"Peak column {column_name!r} must contain numeric values, got {values.type}."
-        )
+    if not (pa.types.is_floating(values.type) or pa.types.is_integer(values.type) or pa.types.is_decimal(values.type)):
+        raise ValueError(f"Peak column {column_name!r} must contain numeric values, got {values.type}.")
 
     # Keep floating dtypes (float32 intensities stay float32); integer and
     # decimal values are converted to float64.
@@ -225,11 +218,7 @@ def _flatten_list_column(column, *, column_name: str, pa) -> tuple[np.ndarray, n
 
 
 def _metadata_dataframe(table, *, mz_column: str, intensity_column: str) -> pd.DataFrame:
-    metadata_columns = [
-        column
-        for column in table.column_names
-        if column not in (mz_column, intensity_column)
-    ]
+    metadata_columns = [column for column in table.column_names if column not in (mz_column, intensity_column)]
     if not metadata_columns:
         return pd.DataFrame(index=np.arange(table.num_rows))
     return table.select(metadata_columns).to_pandas().reset_index(drop=True)

@@ -11,11 +11,11 @@ def _validate_mz_range(mz_from: float, mz_to: float) -> None:
 
 
 def _select_by_mz_spectrum(
-        spectrum_in: SpectrumType,
-        mz_from: float = 0.0,
-        mz_to: float = 1000.0,
-        clone: bool | None = True,
-    ) -> SpectrumType | None:
+    spectrum_in: SpectrumType,
+    mz_from: float = 0.0,
+    mz_to: float = 1000.0,
+    clone: bool | None = True,
+) -> SpectrumType | None:
     """Keep only peaks between mz_from and mz_to.
 
     Peaks are kept if ``mz_from <= m/z <= mz_to``.
@@ -52,11 +52,11 @@ def _select_by_mz_spectrum(
 
 
 def _select_by_mz_collection(
-        spectrum_in: SpectraCollection,
-        mz_from: float = 0.0,
-        mz_to: float = 1000.0,
-        clone: bool | None = True,
-    ) -> SpectraCollection:
+    spectrum_in: SpectraCollection,
+    mz_from: float = 0.0,
+    mz_to: float = 1000.0,
+    clone: bool | None = True,
+) -> SpectraCollection:
     """Keep only peaks between mz_from and mz_to for a SpectraCollection."""
     _validate_mz_range(mz_from, mz_to)
 

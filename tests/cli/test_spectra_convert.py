@@ -106,7 +106,7 @@ def test_spectra_convert_missing_input(tmp_path, capsys):
 
     assert exit_code == 1
     assert payload["ok"] is False
-    assert payload["error"]["code"] =="file_not_found"
+    assert payload["error"]["code"] == "file_not_found"
     assert payload["error"]["input_file"] == str(missing)
     assert set(payload["error"]["valid_values"]) == set(INPUT_FORMATS)
     assert not out.exists()
@@ -126,7 +126,7 @@ def test_spectra_convert_unsupported_input_extension(tmp_path, capsys, bad_ext):
 
     assert exit_code == 1
     assert payload["ok"] is False
-    assert payload["error"]["code"] =="unsupported_input_format"
+    assert payload["error"]["code"] == "unsupported_input_format"
     assert set(payload["error"]["valid_values"]) == set(INPUT_FORMATS)
     assert not out.exists()
 
@@ -138,7 +138,7 @@ def test_spectra_convert_unsupported_output_extension(tmp_path, capsys):
 
     assert exit_code == 1
     assert payload["ok"] is False
-    assert payload["error"]["code"] =="unsupported_output_format"
+    assert payload["error"]["code"] == "unsupported_output_format"
     assert set(payload["error"]["valid_values"]) == set(OUTPUT_FORMATS)
     assert not out.exists()
 
@@ -151,7 +151,7 @@ def test_spectra_convert_output_already_exists(tmp_path, capsys):
 
     assert exit_code == 1
     assert payload["ok"] is False
-    assert payload["error"]["code"] =="file_exists"
+    assert payload["error"]["code"] == "file_exists"
     # output file must be left untouched
     assert out.read_text(encoding="utf-8") == "existing\n"
 
@@ -176,7 +176,7 @@ def test_spectra_convert_append_not_supported_for_json(tmp_path, capsys):
 
     assert exit_code == 1
     assert payload["ok"] is False
-    assert payload["error"]["code"] =="invalid_parameter"
+    assert payload["error"]["code"] == "invalid_parameter"
     assert payload["error"]["parameter"] == "append"
     assert set(payload["error"]["valid_values"]) == {"mgf", "msp"}
     assert not out.exists()
@@ -217,7 +217,7 @@ def test_spectra_convert_pickle_requires_matchms_style(tmp_path, capsys):
 
     assert exit_code == 1
     assert payload["ok"] is False
-    assert payload["error"]["code"] =="invalid_parameter"
+    assert payload["error"]["code"] == "invalid_parameter"
     assert payload["error"]["parameter"] == "export_style"
     assert not out.exists()
 

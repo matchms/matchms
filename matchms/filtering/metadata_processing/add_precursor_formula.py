@@ -40,8 +40,7 @@ def _add_precursor_formula(metadata) -> dict:
 
     if formula_str is None or adduct is None:
         logger.info(
-            "Missing 'formula' or 'adduct' (formula=%s, adduct=%s); "
-            "'precursor_formula' not set.",
+            "Missing 'formula' or 'adduct' (formula=%s, adduct=%s); 'precursor_formula' not set.",
             formula_str,
             adduct,
         )
@@ -67,24 +66,19 @@ def _add_precursor_formula(metadata) -> dict:
     has_negative = any(atom_count < 0 for atom_count in new_precursor_formula.values())
     if has_negative:
         logger.warning(
-            "Adduct %s leads to negative element count with formula %s. "
-            "'precursor_formula' not set.",
+            "Adduct %s leads to negative element count with formula %s. 'precursor_formula' not set.",
             adduct,
             formula_str,
         )
         return {}
 
-    return {
-        "precursor_formula": _convert_atom_counter_to_str(new_precursor_formula)
-    }
+    return {"precursor_formula": _convert_atom_counter_to_str(new_precursor_formula)}
 
 
 def _convert_formula_string_to_atom_counter(formula_str):
     """Parse a simple elemental formula into a Counter."""
     atoms_and_counts = re.findall(r"([A-Z][a-z]?)(\d*)", formula_str)
-    return Counter(
-        {atom: int(count) if count else 1 for atom, count in atoms_and_counts}
-    )
+    return Counter({atom: int(count) if count else 1 for atom, count in atoms_and_counts})
 
 
 def _convert_atom_counter_to_str(atom_counter):

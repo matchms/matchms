@@ -29,7 +29,6 @@ def fragments(sample_spectra):
     return CSRFragmentCollection(sample_spectra, mz_precision=0.01)
 
 
-
 @pytest.fixture
 def floor_rounding_fragments():
     spectra = [
@@ -115,10 +114,7 @@ def test_copy(fragments):
     np.testing.assert_array_equal(cloned.array.toarray(), fragments.array.toarray())
 
 
-@pytest.mark.parametrize(
-    "mz_rounding, exp_bin_idx, exp_back_mz",
-    [("floor", 12345, 123.45), ("round", 12346, 123.46)]
-    )
+@pytest.mark.parametrize("mz_rounding, exp_bin_idx, exp_back_mz", [("floor", 12345, 123.45), ("round", 12346, 123.46)])
 def test_mz_bin_conversion(sample_spectra, mz_rounding, exp_bin_idx, exp_back_mz):
     fragments = CSRFragmentCollection(sample_spectra, mz_precision=0.01, mz_rounding=mz_rounding)
     mz = 123.456
@@ -131,13 +127,14 @@ def test_mz_bin_conversion(sample_spectra, mz_rounding, exp_bin_idx, exp_back_mz
 
 @pytest.mark.parametrize(
     "invalid_precision, part_of_msg",
-    [(0, "mz_precision must be > 0"),
-     (-1e-4, "mz_precision must be > 0"),
-     (0.05, "power of ten"),
-     (0.005, "power of ten"),
-     (2e-6, "power of ten"),
-     ]
-    )
+    [
+        (0, "mz_precision must be > 0"),
+        (-1e-4, "mz_precision must be > 0"),
+        (0.05, "power of ten"),
+        (0.005, "power of ten"),
+        (2e-6, "power of ten"),
+    ],
+)
 def test_invalid_mz_precision_raises(invalid_precision, part_of_msg):
     with pytest.raises(ValueError, match=part_of_msg):
         CSRFragmentCollection(
@@ -156,6 +153,7 @@ def test_mz_to_bin_round_uses_decimal_precision():
     mz, _ = fragments.get_row(0)
 
     assert mz.tolist() == [123.46]
+
 
 def test_get_row(fragments):
     mz, intensities = fragments.get_row(0)
@@ -481,7 +479,6 @@ def test_csr_fragment_collection_select_by_relative_intensity():
 
     np.testing.assert_allclose(mz, np.array([20, 30], dtype="float"), atol=1e-6)
     np.testing.assert_array_equal(intensities, np.array([10, 100], dtype="float"))
-
 
 
 def test_csr_fragment_collection_from_array_preserves_binning_config(floor_rounding_fragments):

@@ -245,8 +245,7 @@ def _pubchem_name_search(
 
             delay = min(max_delay, 2**retries)
             logger.warning(
-                "Connection error while querying PubChem for %s. "
-                "Retrying after %s seconds.",
+                "Connection error while querying PubChem for %s. Retrying after %s seconds.",
                 compound_name,
                 delay,
             )
@@ -288,9 +287,7 @@ def _load_compound_name_annotations(
         "compound_name, smiles, inchi, inchikey, monoisotopic_mass"
     )
 
-    matches = annotated_compound_names[
-        annotated_compound_names["compound_name"] == compound_name
-    ]
+    matches = annotated_compound_names[annotated_compound_names["compound_name"] == compound_name]
 
     return matches.to_dict("records")
 
@@ -322,6 +319,4 @@ def _is_plausible_name(compound_name):
     return isinstance(compound_name, str) and len(compound_name) > 4
 
 
-derive_annotation_from_compound_name = metadata_update_filter(
-    _derive_annotation_from_compound_name
-)
+derive_annotation_from_compound_name = metadata_update_filter(_derive_annotation_from_compound_name)

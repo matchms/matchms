@@ -19,20 +19,15 @@ from ..builder_spectrum import SpectrumBuilder
 # Helpers
 # -------------------------------------------------------------------------
 
+
 def build_spectrum(mz, intens, precursor_mz=None):
-    builder = (
-        SpectrumBuilder()
-        .with_mz(np.asarray(mz, dtype=float))
-        .with_intensities(np.asarray(intens, dtype=float))
-    )
+    builder = SpectrumBuilder().with_mz(np.asarray(mz, dtype=float)).with_intensities(np.asarray(intens, dtype=float))
 
     if precursor_mz is not None:
         if hasattr(builder, "with_precursor_mz"):
             builder = builder.with_precursor_mz(float(precursor_mz))
         elif hasattr(builder, "with_metadata"):
-            builder = builder.with_metadata(
-                {"precursor_mz": float(precursor_mz)}
-            )
+            builder = builder.with_metadata({"precursor_mz": float(precursor_mz)})
 
     return builder.build()
 
@@ -58,6 +53,7 @@ def prepared_row(prepared, row):
 # -------------------------------------------------------------------------
 # Existing single-spectrum helper behaviour
 # -------------------------------------------------------------------------
+
 
 def test_entropy_weight_behaviour():
     intensities = np.array([1.0, 2.0, 3.0, 4.0], dtype=float)
@@ -149,6 +145,7 @@ def test_clean_and_weight_rejects_unknown_weighing_type():
 # -------------------------------------------------------------------------
 # Packed-row helpers
 # -------------------------------------------------------------------------
+
 
 def test_row_ids_from_offsets():
     offsets = np.array(
@@ -251,6 +248,7 @@ def test_entropy_weight_packed_matches_per_spectrum_weighting():
 # SpectraCollection preprocessing
 # -------------------------------------------------------------------------
 
+
 @pytest.mark.parametrize(
     "weighing_type,normalize_to_half,compute_l2",
     [
@@ -303,9 +301,7 @@ def test_prepare_collection_matches_single_spectrum_preprocessing(
     )
 
     assert prepared.n_specs == len(spectra)
-    assert prepared.spec_offsets.shape == (
-        len(spectra) + 1,
-    )
+    assert prepared.spec_offsets.shape == (len(spectra) + 1,)
 
     for row, spectrum in enumerate(spectra):
         expected = _clean_and_weight(
@@ -315,22 +311,12 @@ def test_prepare_collection_matches_single_spectrum_preprocessing(
                 None,
             ),
             remove_precursor=kwargs["remove_precursor"],
-            offset_to_precursor=kwargs[
-                "offset_to_precursor"
-            ],
+            offset_to_precursor=kwargs["offset_to_precursor"],
             noise_cutoff=kwargs["noise_cutoff"],
-            normalize_to_half=kwargs[
-                "normalize_to_half"
-            ],
-            merge_within_da=kwargs[
-                "merge_within_da"
-            ],
-            weighing_type=kwargs[
-                "weighing_type"
-            ],
-            intensity_power=kwargs[
-                "intensity_power"
-            ],
+            normalize_to_half=kwargs["normalize_to_half"],
+            merge_within_da=kwargs["merge_within_da"],
+            weighing_type=kwargs["weighing_type"],
+            intensity_power=kwargs["intensity_power"],
             dtype=kwargs["dtype"],
         )
 
@@ -415,9 +401,7 @@ def test_prepare_collection_missing_precursor_keeps_peaks():
         row[:, 0],
         [100.0, 300.0],
     )
-    assert np.isnan(
-        prepared.precursor_mz[0]
-    )
+    assert np.isnan(prepared.precursor_mz[0])
 
 
 def test_prepare_collection_relative_noise_filter_is_per_row():
@@ -538,6 +522,7 @@ def test_prepare_collection_rejects_unknown_weighing_type():
 # Library index
 # -------------------------------------------------------------------------
 
+
 def test_library_index_from_prepared_fragment_arrays():
     collection = build_collection(
         build_spectrum(
@@ -634,29 +619,15 @@ def test_library_index_neutral_loss_mapping_points_to_product_peak():
         compute_neutral_loss=True,
     )
 
-    assert np.all(
-        np.diff(idx.nl_mz) >= 0
-    )
+    assert np.all(np.diff(idx.nl_mz) >= 0)
 
     for k in range(idx.nl_mz.size):
-        spectrum_idx = int(
-            idx.nl_spec_idx[k]
-        )
-        precursor_mz = float(
-            idx.precursor_mz[spectrum_idx]
-        )
-        neutral_loss = float(
-            idx.nl_mz[k]
-        )
+        spectrum_idx = int(idx.nl_spec_idx[k])
+        precursor_mz = float(idx.precursor_mz[spectrum_idx])
+        neutral_loss = float(idx.nl_mz[k])
 
-        product_position = int(
-            idx.nl_product_idx[k]
-        )
-        product_mz = float(
-            idx.peaks_mz[
-                product_position
-            ]
-        )
+        product_position = int(idx.nl_product_idx[k])
+        product_mz = float(idx.peaks_mz[product_position])
 
         assert product_mz == pytest.approx(
             precursor_mz - neutral_loss,

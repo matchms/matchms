@@ -11,22 +11,29 @@ def test_cosine_hungarian_cocaine_glucose():
     cocaine_spectrum = cocaine()
 
     cosine_hungarian = CosineHungarian(
-        tolerance=0.1, mz_power=1.0, intensity_power=1.0,
-        remove_precursor=False, noise_cutoff=None,  # Do not remove precursor peaks for this test
-        )
+        tolerance=0.1,
+        mz_power=1.0,
+        intensity_power=1.0,
+        remove_precursor=False,
+        noise_cutoff=None,  # Do not remove precursor peaks for this test
+    )
 
     (similarity, shared_peaks) = cosine_hungarian.pair(glucose_spectrum, cocaine_spectrum)[()]
     assert similarity == 0.0
     assert shared_peaks == 0
 
     cosine_hungarian = CosineHungarian(
-        tolerance=5.0, mz_power=0.0, intensity_power=1.0,
-        remove_precursor=False, noise_cutoff=None,  # Do not remove precursor peaks for this test
-        )
+        tolerance=5.0,
+        mz_power=0.0,
+        intensity_power=1.0,
+        remove_precursor=False,
+        noise_cutoff=None,  # Do not remove precursor peaks for this test
+    )
 
     (similarity, shared_peaks) = cosine_hungarian.pair(glucose_spectrum, cocaine_spectrum)[()]
     assert similarity == 0.453757948440651, f"Expected different cosine score: {similarity}"
     assert shared_peaks == 5, f"Expected different number of matching peaks: {shared_peaks}"
+
 
 def test_cosine_hungarian_phenylalanine_hydroxy_cholesterol():
     """Compare output cosine score with own calculation on input spectra."""
@@ -34,18 +41,24 @@ def test_cosine_hungarian_phenylalanine_hydroxy_cholesterol():
     hydroxy_cholesterol_spectrum = hydroxy_cholesterol()
 
     cosine_hungarian = CosineHungarian(
-        tolerance=0.1, mz_power=1.0, intensity_power=1.0,
-        remove_precursor=False, noise_cutoff=None,  # Do not remove precursor peaks for this test
-        )
+        tolerance=0.1,
+        mz_power=1.0,
+        intensity_power=1.0,
+        remove_precursor=False,
+        noise_cutoff=None,  # Do not remove precursor peaks for this test
+    )
 
     (similarity, shared_peaks) = cosine_hungarian.pair(phenylalanine_spectrum, hydroxy_cholesterol_spectrum)[()]
     assert similarity < 0.0001
     assert shared_peaks == 3
 
     cosine_hungarian = CosineHungarian(
-        tolerance=5.0, mz_power=0.0, intensity_power=1.0,
-        remove_precursor=False, noise_cutoff=None,  # Do not remove precursor peaks for this test
-        )
+        tolerance=5.0,
+        mz_power=0.0,
+        intensity_power=1.0,
+        remove_precursor=False,
+        noise_cutoff=None,  # Do not remove precursor peaks for this test
+    )
 
     (similarity, shared_peaks) = cosine_hungarian.pair(phenylalanine_spectrum, hydroxy_cholesterol_spectrum)[()]
     assert similarity < 0.01, f"Expected different cosine score: {similarity}"
@@ -73,20 +86,13 @@ def test_cosine_hungarian_without_parameters():
         4,
     ]  # Those peaks have matching mz values (within given tolerance)
     multiply_matching_intensities = (
-        spectrum_1.peaks.intensities[expected_matches]
-        * spectrum_2.peaks.intensities[expected_matches]
+        spectrum_1.peaks.intensities[expected_matches] * spectrum_2.peaks.intensities[expected_matches]
     )
-    denominator = np.sqrt((spectrum_1.peaks.intensities**2).sum()) * np.sqrt(
-        (spectrum_2.peaks.intensities**2).sum()
-    )
+    denominator = np.sqrt((spectrum_1.peaks.intensities**2).sum()) * np.sqrt((spectrum_2.peaks.intensities**2).sum())
     expected_score = multiply_matching_intensities.sum() / denominator
 
-    assert score["score"] == pytest.approx(
-        expected_score, 0.0001
-    ), "Expected different cosine score."
-    assert score["matches"] == len(
-        expected_matches
-    ), "Expected different number of matching peaks."
+    assert score["score"] == pytest.approx(expected_score, 0.0001), "Expected different cosine score."
+    assert score["matches"] == len(expected_matches), "Expected different number of matching peaks."
 
 
 def test_cosine_hungarian_matrix_without_parameters():
@@ -103,18 +109,12 @@ def test_cosine_hungarian_matrix_without_parameters():
     cosine_hungarian = CosineHungarian(remove_precursor=False, noise_cutoff=None)
     scores = cosine_hungarian.matrix([spectrum_1, spectrum_2], [spectrum_1, spectrum_2])
 
-    assert (
-        scores[0, 0]["score"] == scores[1, 1]["score"] == 1.0
-    ), "Expected different cosine score."
-    assert (
-        scores[0, 0]["matches"] == scores[1, 1]["matches"] == 5
-    ), "Expected different cosine matches."
-    assert (
-        scores[0, 1]["score"] == scores[1, 0]["score"] == pytest.approx(0.1615384, 1e-6)
-    ), "Expected different cosine score."
-    assert (
-        scores[0, 1]["matches"] == scores[1, 0]["matches"] == 3
-    ), "Expected different cosine matches."
+    assert scores[0, 0]["score"] == scores[1, 1]["score"] == 1.0, "Expected different cosine score."
+    assert scores[0, 0]["matches"] == scores[1, 1]["matches"] == 5, "Expected different cosine matches."
+    assert scores[0, 1]["score"] == scores[1, 0]["score"] == pytest.approx(0.1615384, 1e-6), (
+        "Expected different cosine score."
+    )
+    assert scores[0, 1]["matches"] == scores[1, 0]["matches"] == 3, "Expected different cosine matches."
 
 
 def test_cosine_hungarian_with_tolerance_0_2():
@@ -137,20 +137,13 @@ def test_cosine_hungarian_with_tolerance_0_2():
         [0, 1, 2],
     ]  # Those peaks have matching mz values (within given tolerance)
     multiply_matching_intensities = (
-        spectrum_1.peaks.intensities[expected_matches[0]]
-        * spectrum_2.peaks.intensities[expected_matches[1]]
+        spectrum_1.peaks.intensities[expected_matches[0]] * spectrum_2.peaks.intensities[expected_matches[1]]
     )
-    denominator = np.sqrt((spectrum_1.peaks.intensities**2).sum()) * np.sqrt(
-        (spectrum_2.peaks.intensities**2).sum()
-    )
+    denominator = np.sqrt((spectrum_1.peaks.intensities**2).sum()) * np.sqrt((spectrum_2.peaks.intensities**2).sum())
     expected_score = multiply_matching_intensities.sum() / denominator
 
-    assert score["score"] == pytest.approx(
-        expected_score, 0.0001
-    ), "Expected different cosine score."
-    assert score["matches"] == len(
-        expected_matches[0]
-    ), "Expected different number of matching peaks."
+    assert score["score"] == pytest.approx(expected_score, 0.0001), "Expected different cosine score."
+    assert score["matches"] == len(expected_matches[0]), "Expected different number of matching peaks."
 
 
 def test_cosine_hungarian_with_tolerance_2_0():
@@ -173,20 +166,13 @@ def test_cosine_hungarian_with_tolerance_2_0():
         [0, 1, 2, 3],
     ]  # Those peaks have matching mz values (within given tolerance)
     multiply_matching_intensities = (
-        spectrum_1.peaks.intensities[expected_matches[0]]
-        * spectrum_2.peaks.intensities[expected_matches[1]]
+        spectrum_1.peaks.intensities[expected_matches[0]] * spectrum_2.peaks.intensities[expected_matches[1]]
     )
-    denominator = np.sqrt((spectrum_1.peaks.intensities**2).sum()) * np.sqrt(
-        (spectrum_2.peaks.intensities**2).sum()
-    )
+    denominator = np.sqrt((spectrum_1.peaks.intensities**2).sum()) * np.sqrt((spectrum_2.peaks.intensities**2).sum())
     expected_score = multiply_matching_intensities.sum() / denominator
 
-    assert score["score"] == pytest.approx(
-        expected_score, 0.0001
-    ), "Expected different cosine score."
-    assert score["matches"] == len(
-        expected_matches[0]
-    ), "Expected different number of matching peaks."
+    assert score["score"] == pytest.approx(expected_score, 0.0001), "Expected different cosine score."
+    assert score["matches"] == len(expected_matches[0]), "Expected different number of matching peaks."
 
 
 def test_cosine_hungarian_order_of_arguments():
@@ -207,12 +193,8 @@ def test_cosine_hungarian_order_of_arguments():
     score_1_2 = cosine_hungarian.pair(spectrum_1, spectrum_2)
     score_2_1 = cosine_hungarian.pair(spectrum_2, spectrum_1)
 
-    assert (
-        score_1_2["score"] == score_2_1["score"]
-    ), "Expected that the order of the arguments would not matter."
-    assert (
-        score_1_2 == score_2_1
-    ), "Expected that the order of the arguments would not matter."
+    assert score_1_2["score"] == score_2_1["score"], "Expected that the order of the arguments would not matter."
+    assert score_1_2 == score_2_1, "Expected that the order of the arguments would not matter."
 
 
 def test_cosine_hungarian_case_where_greedy_would_fail():
@@ -231,9 +213,7 @@ def test_cosine_hungarian_case_where_greedy_would_fail():
 
     cosine_hungarian = CosineHungarian(tolerance=0.01, remove_precursor=False, noise_cutoff=None)
     score = cosine_hungarian.pair(spectrum_1, spectrum_2)
-    assert score["score"] == pytest.approx(
-        0.994475, 0.0001
-    ), "Expected different cosine score."
+    assert score["score"] == pytest.approx(0.994475, 0.0001), "Expected different cosine score."
     assert score["matches"] == 2, "Expected different number of matching peaks."
 
 
@@ -273,8 +253,11 @@ def test_cosine_hungarian_with_peak_powers():
         intensities=np.array([0.1, 0.2, 1.0, 0.3, 0.4], dtype="float"),
     )
     cosine_hungarian = CosineHungarian(
-        tolerance=1.0, mz_power=mz_power, intensity_power=intensity_power,
-        remove_precursor=False, noise_cutoff=None,  # Do not remove precursor peaks for this test
+        tolerance=1.0,
+        mz_power=mz_power,
+        intensity_power=intensity_power,
+        remove_precursor=False,
+        noise_cutoff=None,  # Do not remove precursor peaks for this test
     )
     score = cosine_hungarian.pair(spectrum_1, spectrum_2)
 
@@ -290,17 +273,13 @@ def test_cosine_hungarian_with_peak_powers():
         * (mz2[matches] ** mz_power)
         * (intensity2[matches] ** intensity_power)
     )
-    denominator = np.sqrt(
-        (((mz1**mz_power) * (intensity1**intensity_power)) ** 2).sum()
-    ) * np.sqrt((((mz2**mz_power) * (intensity2**intensity_power)) ** 2).sum())
+    denominator = np.sqrt((((mz1**mz_power) * (intensity1**intensity_power)) ** 2).sum()) * np.sqrt(
+        (((mz2**mz_power) * (intensity2**intensity_power)) ** 2).sum()
+    )
     expected_score = multiply_matching_intensities.sum() / denominator
 
-    assert score["score"] == pytest.approx(
-        expected_score, 0.0001
-    ), "Expected different cosine score."
-    assert score["matches"] == len(
-        matches
-    ), "Expected different number of matching peaks."
+    assert score["score"] == pytest.approx(expected_score, 0.0001), "Expected different cosine score."
+    assert score["matches"] == len(matches), "Expected different number of matching peaks."
 
 
 def test_cosine_hungarian_phantom_pair_regression():
@@ -336,8 +315,7 @@ def test_cosine_hungarian_phantom_pair_regression():
     score = cosine_hungarian.pair(spectrum_1, spectrum_2)
 
     assert score["matches"] == 1, (
-        f"Expected 1 real match but got {score['matches']}. "
-        "Phantom pairs from Hungarian assignment should be excluded."
+        f"Expected 1 real match but got {score['matches']}. Phantom pairs from Hungarian assignment should be excluded."
     )
     # Score must reflect the real match (L2->R1, product=1.0) regardless of
     # phantom filtering — phantoms contribute 0 by construction.

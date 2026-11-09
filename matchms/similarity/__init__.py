@@ -182,6 +182,4 @@ def get_similarity_function_by_name(similarity_function_name: str):
     try:
         return mapper[similarity_function_name]
     except KeyError as exc:
-        raise ValueError(
-            f"Unknown similarity function: {similarity_function_name}"
-        ) from exc
+        raise ValueError(f"Unknown similarity function: {similarity_function_name}") from exc

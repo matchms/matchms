@@ -29,13 +29,16 @@ def _prepared(scorer, rows, precursors):
     )
 
 
-def _scorer(mode="fragment", dtype=np.float32, *, ppm=False, gate=None,
-            identity_ppm=False):
+def _scorer(mode="fragment", dtype=np.float32, *, ppm=False, gate=None, identity_ppm=False):
     return CosineFlash(
-        matching_mode=mode, tolerance=55 if ppm else 0.045,
-        use_ppm=ppm, identity_precursor_tolerance=gate,
-        identity_use_ppm=identity_ppm, noise_cutoff=0,
-        remove_precursor=False, dtype=dtype,
+        matching_mode=mode,
+        tolerance=55 if ppm else 0.045,
+        use_ppm=ppm,
+        identity_precursor_tolerance=gate,
+        identity_use_ppm=identity_ppm,
+        noise_cutoff=0,
+        remove_precursor=False,
+        dtype=dtype,
     )
 
 
@@ -56,15 +59,18 @@ def _expected(dense_scores, dense_matches, k, min_score):
     return ids, vals, matches, counts
 
 
-def _check_dense(scorer, ref, query, *, k=3, min_score=0.0, n_jobs=1,
-                 batch_size=None, fields=None):
+def _check_dense(scorer, ref, query, *, k=3, min_score=0.0, n_jobs=1, batch_size=None, fields=None):
     index = scorer.build_index_prepared(ref)
     dense = scorer.search_prepared(query, index, n_jobs=1)
-    expected = _expected(dense._data["score"], dense._data["matches"],
-                         k, min_score)
+    expected = _expected(dense._data["score"], dense._data["matches"], k, min_score)
     result = scorer.search_prepared_topk(
-        query, index, k=k, min_score=min_score, n_jobs=n_jobs,
-        batch_size=batch_size, score_fields=fields,
+        query,
+        index,
+        k=k,
+        min_score=min_score,
+        n_jobs=n_jobs,
+        batch_size=batch_size,
+        score_fields=fields,
     )
     assert isinstance(result, TopKResults)
     assert result.shape == (query.n_specs, k)
@@ -110,16 +116,22 @@ def test_randomized_exact_greedy_and_counts(mode, dtype, ppm, gate):
     refs = _random_rows(302, 24)
     queries = _random_rows(123, 9)
     # Intentionally reuse precursors to trigger hybrid direct-only gating.
-    p_refs = np.array([260, 270, 280, np.nan, 260.03] * 5)[:len(refs)]
-    p_queries = np.array([260, 260.03, np.nan, 280, 270] * 2)[:len(queries)]
-    _check_dense(scorer, _prepared(scorer, refs, p_refs),
-                 _prepared(scorer, queries, p_queries),
-                 k=7, min_score=0.0, n_jobs=3, batch_size=2)
+    p_refs = np.array([260, 270, 280, np.nan, 260.03] * 5)[: len(refs)]
+    p_queries = np.array([260, 260.03, np.nan, 280, 270] * 2)[: len(queries)]
+    _check_dense(
+        scorer,
+        _prepared(scorer, refs, p_refs),
+        _prepared(scorer, queries, p_queries),
+        k=7,
+        min_score=0.0,
+        n_jobs=3,
+        batch_size=2,
+    )
 
 
 @pytest.mark.parametrize("mode", ["fragment", "neutral_loss", "hybrid"])
 @pytest.mark.parametrize("dtype", [np.float32, np.float64])
-@pytest.mark.parametrize("k,min_score", [(1, 0), (2, .2), (10, .7), (3, 1.1)])
+@pytest.mark.parametrize("k,min_score", [(1, 0), (2, 0.2), (10, 0.7), (3, 1.1)])
 def test_competing_matches_ties_and_threshold(mode, dtype, k, min_score):
     scorer = _scorer(mode, dtype)
     refs = [
@@ -138,32 +150,43 @@ def test_competing_matches_ties_and_threshold(mode, dtype, k, min_score):
         [(999, 1)],
         [],
     ]
-    _check_dense(scorer, _prepared(scorer, refs, [300, 300, 310, 300, 280, 300, 380]),
-                 _prepared(scorer, queries, [300, 310, 280, np.nan, 300]),
-                 k=k, min_score=min_score, n_jobs=2, batch_size=1)
+    _check_dense(
+        scorer,
+        _prepared(scorer, refs, [300, 300, 310, 300, 280, 300, 380]),
+        _prepared(scorer, queries, [300, 310, 280, np.nan, 300]),
+        k=k,
+        min_score=min_score,
+        n_jobs=2,
+        batch_size=1,
+    )
 
 
 @pytest.mark.parametrize("mode", ["fragment", "neutral_loss", "hybrid"])
 def test_precursor_identity_ppm(mode):
     scorer = _scorer(mode, ppm=False, gate=30, identity_ppm=True)
-    refs = _prepared(scorer, [[(100, 1)], [(100, 1)], [(100, 1)]],
-                     [300, 300.006, 302])
-    queries = _prepared(scorer, [[(100, 1)], [(100, 1)]],
-                        [300, np.nan])
+    refs = _prepared(scorer, [[(100, 1)], [(100, 1)], [(100, 1)]], [300, 300.006, 302])
+    queries = _prepared(scorer, [[(100, 1)], [(100, 1)]], [300, np.nan])
     _check_dense(scorer, refs, queries, k=4)
 
 
 def test_hybrid_query_and_library_bitsets_exceed_64_peaks():
     scorer = _scorer("hybrid", np.float64)
     mz = np.arange(100, 380, dtype=float)
-    ref_rows = [np.column_stack((mz[:190], np.ones(190))),
-                np.column_stack((mz[2:200], np.arange(198) + 1)),
-                [(100, 1), (150, 2)], []]
-    query_rows = [np.column_stack((mz[:255], np.ones(255))),
-                  [(100, 1)], np.column_stack((mz[40:180], np.ones(140)))]
-    _check_dense(scorer, _prepared(scorer, ref_rows, [480, 490, 480, 480]),
-                 _prepared(scorer, query_rows, [480, 490, 480]),
-                 k=5, n_jobs=2, batch_size=1)
+    ref_rows = [
+        np.column_stack((mz[:190], np.ones(190))),
+        np.column_stack((mz[2:200], np.arange(198) + 1)),
+        [(100, 1), (150, 2)],
+        [],
+    ]
+    query_rows = [np.column_stack((mz[:255], np.ones(255))), [(100, 1)], np.column_stack((mz[40:180], np.ones(140)))]
+    _check_dense(
+        scorer,
+        _prepared(scorer, ref_rows, [480, 490, 480, 480]),
+        _prepared(scorer, query_rows, [480, 490, 480]),
+        k=5,
+        n_jobs=2,
+        batch_size=1,
+    )
 
 
 def test_matches_field_can_be_omitted():
@@ -214,8 +237,7 @@ def test_empty_cases_and_untouched_padding():
     empty = _prepared(scorer, [], [])
     nonempty = _prepared(scorer, [[(100, 1)]], [300])
     no_peaks = _prepared(scorer, [[]], [300])
-    for refs, queries in [(empty, nonempty), (nonempty, empty),
-                          (nonempty, no_peaks)]:
+    for refs, queries in [(empty, nonempty), (nonempty, empty), (nonempty, no_peaks)]:
         _check_dense(scorer, refs, queries, k=4)
 
 
@@ -248,14 +270,15 @@ def test_invalid_score_fields_and_parameters():
 
 def test_topk_results_optional_match_counts_validation_and_immutability():
     from matchms.similarity.topk_results import TopKResults
+
     obj = TopKResults(
         np.array([[0, -1]], dtype=np.int32),
-        np.array([[.7, 0]], dtype=np.float32),
-        np.array([1], dtype=np.int32), 1,
+        np.array([[0.7, 0]], dtype=np.float32),
+        np.array([1], dtype=np.int32),
+        1,
         np.array([[3, 0]], dtype=np.int32),
     )
     assert obj.get_hits_with_matches(0)[2].tolist() == [3]
     assert not obj.matches.flags.writeable
     with pytest.raises(ValueError, match="zero"):
-        TopKResults(obj.indices, obj.scores, obj.valid_counts, 1,
-                    np.array([[3, 1]], dtype=np.int32))
+        TopKResults(obj.indices, obj.scores, obj.valid_counts, 1, np.array([[3, 1]], dtype=np.int32))

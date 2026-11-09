@@ -14,7 +14,7 @@ def load_from_mgf(
 ) -> Generator[Spectrum, None, None]:
     """Load spectrum(s) from mgf file.
 
-    This function will create :class:`~matchms.spectrum.Spectrum` objects for every spectrum 
+    This function will create :class:`~matchms.spectrum.Spectrum` objects for every spectrum
     in the given .mgf file (or the file-like object).
 
     Examples:

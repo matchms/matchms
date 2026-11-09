@@ -97,10 +97,7 @@ def harmonize_metadata_collection_columns(metadata: pd.DataFrame) -> pd.DataFram
     combined row-wise. Existing non-null values are kept, and missing values are
     filled from duplicate columns.
     """
-    rename_map = {
-        column: harmonize_metadata_column_name(str(column))
-        for column in metadata.columns
-    }
+    rename_map = {column: harmonize_metadata_column_name(str(column)) for column in metadata.columns}
 
     harmonized = pd.DataFrame(index=metadata.index)
 
@@ -111,11 +108,7 @@ def harmonize_metadata_collection_columns(metadata: pd.DataFrame) -> pd.DataFram
             harmonized[new_column] = values
             continue
 
-        conflict_mask = (
-            harmonized[new_column].notna()
-            & values.notna()
-            & (harmonized[new_column] != values)
-        )
+        conflict_mask = harmonized[new_column].notna() & values.notna() & (harmonized[new_column] != values)
 
         if conflict_mask.any():
             logger.warning(
@@ -241,7 +234,7 @@ class MetadataCollection(pd.DataFrame):
         **kwargs,
     ):
         """Apply a metadata function to selected rows and merge the result back.
-    
+
         The function receives a pandas DataFrame containing either all metadata rows
         or the rows selected by ``row_mask``. It must return a DataFrame with metadata
         updates.
@@ -289,10 +282,7 @@ class MetadataCollection(pd.DataFrame):
             row_mask = np.asarray(row_mask, dtype=bool)
 
             if row_mask.shape[0] != len(self):
-                raise ValueError(
-                    f"Shape of row mask ({row_mask.shape[0]}) does not fit "
-                    f"metadata table ({len(self)})."
-                )
+                raise ValueError(f"Shape of row mask ({row_mask.shape[0]}) does not fit metadata table ({len(self)}).")
 
             row_indices = target.index[row_mask]
 
@@ -321,12 +311,10 @@ class MetadataCollection(pd.DataFrame):
 
         return self._finalize_apply_to_rows(target, inplace=inplace)
 
-
     @staticmethod
     def row_to_dict(row: pd.Series) -> dict:
         """Convert a metadata row to a plain Python metadata dict."""
         return metadata_row_to_dict(row)
-
 
     def _validate_metadata_updates(
         self,
@@ -340,8 +328,7 @@ class MetadataCollection(pd.DataFrame):
 
         if updates.index.has_duplicates:
             raise ValueError(
-                f"Function {getattr(func, '__name__', repr(func))} returned "
-                "duplicate metadata row updates."
+                f"Function {getattr(func, '__name__', repr(func))} returned duplicate metadata row updates."
             )
 
         if not updates.index.isin(selected_index).all():
@@ -349,7 +336,6 @@ class MetadataCollection(pd.DataFrame):
                 f"Function {getattr(func, '__name__', repr(func))} returned "
                 "metadata updates for rows outside the selected input rows."
             )
-
 
     def _merge_metadata_updates(
         self,

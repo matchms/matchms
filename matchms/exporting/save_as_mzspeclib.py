@@ -8,7 +8,7 @@ ANALYTE_ATTRIBUTES = {
     "formula": "MS:1000866|molecular formula",
     "smiles": "MS:1000868|SMILES formula",
     "inchi": "MS:1003403|InChI",
-    "inchikey": "MS:1002894|InChIKey"
+    "inchikey": "MS:1002894|InChIKey",
 }
 
 SPECTRUM_ATTRIBUTES = {
@@ -16,14 +16,11 @@ SPECTRUM_ATTRIBUTES = {
     "precursor_mz": "MS:1003208|experimental precursor monoisotopic m/z",
     "scans": "MS:1003057|scan number",
     "charge": "MS:1000041|charge state",
-    "ionmode": "MS:1000465|scan polarity"
+    "ionmode": "MS:1000465|scan polarity",
 }
 
 MAPPED_SPECTRUM_ATTRIBUTES = {
-    "MS:1000465|scan polarity": {
-        "positive": "MS:1000130|positive scan",
-        "negative": "MS:1000129|negative scan"
-    }
+    "MS:1000465|scan polarity": {"positive": "MS:1000130|positive scan", "negative": "MS:1000129|negative scan"}
 }
 
 STANDARDIZED_SPECTRUM_ATTRIBUTES = {
@@ -31,10 +28,7 @@ STANDARDIZED_SPECTRUM_ATTRIBUTES = {
 }
 
 
-def save_as_mzspeclib(
-    spectra: list[Spectrum],
-    filename: str
-) -> None:
+def save_as_mzspeclib(spectra: list[Spectrum], filename: str) -> None:
     """
     Save a list of spectra to a file in mzSpecLib format.
 
@@ -89,10 +83,10 @@ def _write_spectrum_attributes(file: TextIO, spectrum: Spectrum) -> None:
     spectrum (Spectrum): The Spectrum object containing attributes.
     """
     _write_defined_spectrum_attributes(file, spectrum)
-    
+
     spectrum_attributes = spectrum.metadata.keys()
     attr_counter = 1
-    
+
     for attr in spectrum_attributes:
         if attr in STANDARDIZED_SPECTRUM_ATTRIBUTES:
             _write_spectrum_attribute_with_unit(file, spectrum, attr_counter, attr)
@@ -131,7 +125,7 @@ def _write_spectrum_attribute_with_unit(file: TextIO, spectrum: Spectrum, attr_c
     """
     term, unit = STANDARDIZED_SPECTRUM_ATTRIBUTES.get(attr)
     # remove non-numeric unit identifiers from value
-    value = _extract_numeric_value(spectrum.get(attr)) 
+    value = _extract_numeric_value(spectrum.get(attr))
     print(f"[{attr_counter}]{term}={value}", file=file)
     print(f"[{attr_counter}]UO:0000000|unit={unit}", file=file)
 
@@ -161,7 +155,7 @@ def _write_defined_spectrum_attributes(file: TextIO, spectrum: Spectrum) -> None
     for key, attribute in SPECTRUM_ATTRIBUTES.items():
         value = spectrum.get(key)
         if attribute in MAPPED_SPECTRUM_ATTRIBUTES:
-            value = MAPPED_SPECTRUM_ATTRIBUTES[attribute].get(value)        
+            value = MAPPED_SPECTRUM_ATTRIBUTES[attribute].get(value)
         if value is not None:
             print(f"{attribute}={value}", file=file)
 

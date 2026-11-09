@@ -49,6 +49,4 @@ def _check_smiles_and_parent_mass_match(smiles, parent_mass, mass_tolerance) -> 
     return abs(parent_mass - smiles_mass) < mass_tolerance
 
 
-require_parent_mass_match_smiles = metadata_requirement_filter(
-    _require_parent_mass_match_smiles
-)
+require_parent_mass_match_smiles = metadata_requirement_filter(_require_parent_mass_match_smiles)

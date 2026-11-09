@@ -38,11 +38,8 @@ def mol_converter(mol_input: str, input_type: str, output_type: str) -> str | No
     Mol string in output type or None when conversion failure occurs.
     """
 
-    input_function = {"inchi": Chem.MolFromInchi,
-                      "smiles": Chem.MolFromSmiles}
-    output_function = {"inchi": Chem.MolToInchi,
-                       "smiles": Chem.MolToSmiles,
-                       "inchikey": Chem.MolToInchiKey}
+    input_function = {"inchi": Chem.MolFromInchi, "smiles": Chem.MolFromSmiles}
+    output_function = {"inchi": Chem.MolToInchi, "smiles": Chem.MolToSmiles, "inchikey": Chem.MolToInchiKey}
 
     mol = input_function[input_type](mol_input.strip('"'))
     if mol is None:
