@@ -17,16 +17,29 @@ def readonly(array: np.ndarray, dtype: np.dtype | None = None) -> np.ndarray:
 
 @dataclass(frozen=True)
 class PreparedSpectra:
-    """Packed output of a similarity's ``prepare_queries`` method.
+    """Read-only spectrum-major peaks used by the Flash scoring kernels.
 
-    ``spec_offsets[i:i + 2]`` delimits spectrum i in ``spec_mz`` and ``spec_int``.
-    Coordinates are sorted within each spectrum, and intensities have already
-    been cleaned and weighted. ``precursor_mz`` and ``spec_l2`` contain one entry
-    per spectrum; unknown precursors are NaN. Entropy uses zero norm placeholders.
+    Attributes
+    ----------
+    spec_offsets
+        CSR-style offsets with ``n_specs + 1`` entries. Spectrum ``i`` spans
+        ``[spec_offsets[i], spec_offsets[i + 1])`` in both peak arrays.
+    spec_mz, spec_int
+        Concatenated, m/z-sorted peaks and preprocessed intensities.
+    precursor_mz
+        Per-spectrum precursor m/z, or ``NaN`` for missing values.
+    spec_l2
+        Per-spectrum intensity L2 norm (cosine); entropy uses zeros.
+    dtype
+        Floating dtype of the peak arrays.
+    settings
+        Immutable preprocessing configuration checked against the scoring index.
 
-    ``settings`` records the preprocessing configuration. Scorers check it at
-    search time without repeatedly scanning the arrays. Instances should be
-    obtained from the similarity API rather than constructed directly.
+    Notes
+    -----
+    Build through ``prepare_queries`` rather than directly constructing this
+    dataclass. Arrays are read-only views; external writable aliases must not
+    be mutated while scoring. ``slice`` shares the underlying peak buffers.
     """
 
     spec_offsets: np.ndarray

@@ -15,11 +15,27 @@ _MAX_EPOCH = int(np.iinfo(np.uint32).max)
 
 
 class _FlashTopKWorkspace:
-    """Common O(n_references) scratch plus growable touched/bitset storage.
+    """Scratch arrays reused by one worker across multiple queries.
 
-    A workspace belongs to exactly one thread. ``scores`` accumulates float64
-    values matching dense Flash kernels; ``selection_scores`` casts final values
-    to the public dtype *before* thresholding and tie-breaking.
+    Parameters
+    ----------
+    n_references
+        Number of library spectra, including entries that will never match.
+    n_peaks
+        Number of physical product peaks in the reference library.
+    dtype
+        Public score dtype. Numerical kernels accumulate in float64;
+        ``selection_scores`` converts candidates to this dtype before ranking.
+    hybrid
+        Whether to allocate physical-peak epoch words and compact query bitsets.
+
+    Notes
+    -----
+    ``epochs`` is a generation stamp per library ID; only the first posting in
+    an epoch initializes ``scores`` and the kernel-specific matching cursors.
+    ``touched`` holds encountered IDs in posting order. ``slots`` maps those
+    IDs into dynamically grown ``query_bits`` rows, avoiding a bitmap over all
+    references. The workspace is *not thread-safe*: give each worker its own.
     """
 
     def __init__(self, n_references: int, n_peaks: int, dtype: np.dtype, hybrid: bool):
@@ -56,10 +72,18 @@ class _FlashTopKWorkspace:
 
 @njit(cache=True, inline="always")
 def _register_touched(epochs, slots, touched, query_bits, n_touched, epoch, column):
-    """Register a reference on first encounter, preserving compact hybrid state.
+    """Register a reference once for the current epoch; grow buffers as needed.
 
-    Return ``is_new`` so each scoring kernel can initialize its own matching
-    cursors and scoring variables, without duplicating allocation bookkeeping.
+    ``epochs`` and ``slots`` are indexed by global reference ID; ``touched`` and
+    ``query_bits`` use compact candidate slots. On first encounter, the query
+    bitset row is cleared and ``is_new`` is true. The scorer must initialize its
+    own per-reference fields only when ``is_new`` is true.
+
+    Returns
+    -------
+    tuple
+        Possibly reallocated ``touched`` and ``query_bits``, updated touched
+        count, and a flag indicating first encounter in the epoch.
     """
     is_new = epochs[column] != epoch
     if is_new:

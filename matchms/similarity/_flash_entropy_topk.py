@@ -1,30 +1,38 @@
-"""Exact touched-candidate top-k retrieval for EntropyFlash and Entropy.
+"""Exact, candidate-aware EntropyFlash retrieval without dense result rows.
 
-The dense entropy kernel is intentionally left unchanged. This kernel visits the
-same ordered postings and performs the same float64 contribution arithmetic,
-but never creates an output row of length ``n_references``. Each worker owns a
-reusable scratch state where only touched library IDs are initialized and ranked.
+The score is accumulated in the same float64 order as the dense entropy
+kernel. A worker initializes state *only when a reference is encountered*,
+then selects the best k references among those touched IDs. Fragment-first
+hybrid matching uses compact query bitmaps and epoch-stamped physical peaks.
 
-Hybrid matching needs two kinds of cross-pass state. Physical product peaks are
-tracked with epoch-stamped, 64-peak bitset *words*, not an int64 epoch per peak.
-Matched query peaks are tracked in a dynamically grown bitmap indexed by the
-slot of each touched library spectrum, not by every library spectrum.
+The two posting sweeps are separate so their different cursor directions and
+cross-pass matching rules can be reviewed independently.
 """
 
 from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import numpy as np
 from numba import njit
+
 from ._flash_entropy import xlog2
 from ._flash_tolerance import identity_allowed, window, within
-from ._flash_topk_common import (
-    _FlashTopKWorkspace,
-    _register_touched,
-)
+from ._flash_topk_common import _MAX_EPOCH, _FlashTopKWorkspace, _register_touched
 from ._topk import select_topk_candidates
+
+if TYPE_CHECKING:
+    from ._flash_prepared import PreparedSpectra
+    from .flash_index import _EntropyKernelData
 
 
 class _EntropyTopKWorkspace(_FlashTopKWorkspace):
-    """Entropy cursors layered over the common epoch/compact-bitset workspace."""
+    """Worker-owned touched-library state and entropy one-to-one cursors.
+
+    ``last_peak`` and ``last_query`` are initialized lazily on a spectrum's
+    first encounter in a query epoch. Their contents for untouched reference
+    IDs are undefined and must not be inspected.
+    """
 
     def __init__(self, n_references: int, n_peaks: int, dtype: np.dtype, hybrid: bool):
         super().__init__(n_references, n_peaks, dtype, hybrid)
@@ -33,8 +41,9 @@ class _EntropyTopKWorkspace(_FlashTopKWorkspace):
 
 
 @njit(cache=True, inline="always")
-def _touch(scores, epochs, last_peak, last_query, slots, touched, query_bits, n_touched, epoch, column, initial_peak):
-    """Register an entropy candidate and initialize its one-to-one cursors."""
+def _touch_entropy(state, touched, query_bits, n_touched, epoch, reference_id, initial_peak):
+    """Register one reference and initialize its entropy cursors if new."""
+    scores, epochs, last_peak, last_query, slots, _, _ = state
     touched, query_bits, n_touched, is_new = _register_touched(
         epochs,
         slots,
@@ -42,158 +51,182 @@ def _touch(scores, epochs, last_peak, last_query, slots, touched, query_bits, n_
         query_bits,
         n_touched,
         epoch,
-        column,
+        reference_id,
     )
     if is_new:
-        scores[column] = 0.0
-        last_peak[column] = initial_peak
-        last_query[column] = -1
+        scores[reference_id] = 0.0
+        last_peak[reference_id] = initial_peak
+        last_query[reference_id] = -1
     return touched, query_bits, n_touched
 
 
 @njit(cache=True, nogil=True)
-def _entropy_topk_row(
-    q_mz,
-    q_int,
-    q_precursor,
-    fragment,
-    neutral_loss,
-    lib_pmz,
-    n_lib_peaks,
-    tolerance,
-    use_ppm,
-    mode,
-    identity_tol,
-    identity_ppm,
-    scores,
-    epochs,
-    last_peak,
-    last_query,
-    slots,
-    touched,
-    query_bits,
-    peak_word_epochs,
-    peak_word_bits,
-    epoch,
-):
-    """Accumulate a complete row and returns touched IDs and dynamically grown buffers.
+def _match_fragment_postings(query, fragment, state, touched, query_bits, n_touched, tolerance, use_ppm, hybrid, epoch):
+    """Accumulate direct matches in ascending fragment and physical-peak order."""
+    query_mz, query_intensity, _ = query
+    mz, intensity_values, entropy_terms, owners, physical_ids = fragment
+    scores, epochs, last_peak, last_query, slots, peak_word_epochs, peak_word_bits = state
 
-    This duplicates the dense kernel's posting traversal and acceptance order,
-    including fragment-first hybrid rules and last-peak monotonicity. Only
-    bookkeeping and final score materialization differ.
-    """
-    fragment_mz, fragment_int, fragment_terms, fragment_spec, fragment_pid = fragment
-    loss_mz, loss_int, loss_terms, loss_spec, loss_pid = neutral_loss
-    n_touched = 0
-    has_precursor = np.isfinite(q_precursor)
-
-    if mode != 1:
-        for query_index in range(q_mz.size):
-            coordinate = np.float64(q_mz[query_index])
-            intensity = np.float64(q_int[query_index])
-            if intensity <= 0.0:
+    for query_peak in range(query_mz.size):
+        coordinate = np.float64(query_mz[query_peak])
+        intensity = np.float64(query_intensity[query_peak])
+        if intensity <= 0.0:
+            continue
+        query_term = xlog2(intensity)
+        first, stop = window(mz, coordinate, tolerance, use_ppm)
+        for posting in range(first, stop):
+            reference_id = owners[posting]
+            physical_peak = physical_ids[posting]
+            if epochs[reference_id] == epoch:
+                if last_query[reference_id] == query_peak or physical_peak <= last_peak[reference_id]:
+                    continue
+            reference_intensity = np.float64(intensity_values[posting])
+            if reference_intensity <= 0.0:
                 continue
-            query_term = xlog2(intensity)
-            left, right = window(fragment_mz, coordinate, tolerance, use_ppm)
-            for posting in range(left, right):
-                column = fragment_spec[posting]
-                peak_id = fragment_pid[posting]
-                if epochs[column] == epoch:
-                    if last_query[column] == query_index or peak_id <= last_peak[column]:
-                        continue
-                library_intensity = np.float64(fragment_int[posting])
-                if library_intensity <= 0.0:
-                    continue
-                if not within(coordinate, np.float64(fragment_mz[posting]), tolerance, use_ppm):
-                    continue
-                touched, query_bits, n_touched = _touch(
-                    scores,
-                    epochs,
-                    last_peak,
-                    last_query,
-                    slots,
-                    touched,
-                    query_bits,
-                    n_touched,
-                    epoch,
-                    column,
-                    -1,
-                )
-                scores[column] += xlog2(intensity + library_intensity) - query_term - fragment_terms[posting]
-                last_query[column] = query_index
-                last_peak[column] = peak_id
-                if mode == 2:
-                    word = peak_id // 64
-                    if peak_word_epochs[word] != epoch:
-                        peak_word_epochs[word] = epoch
-                        peak_word_bits[word] = np.uint64(0)
-                    peak_word_bits[word] |= np.uint64(1) << np.uint64(peak_id % 64)
-                    query_bits[slots[column], query_index // 64] |= np.uint64(1) << np.uint64(query_index % 64)
-
-    if mode != 0 and has_precursor:
-        # The loss pass starts its peak and query cursors afresh. Only references
-        # actually reached by the fragment pass need resetting.
-        for position in range(n_touched):
-            column = touched[position]
-            last_peak[column] = n_lib_peaks
-            last_query[column] = -1
-
-        for query_index in range(q_mz.size - 1, -1, -1):
-            intensity = np.float64(q_int[query_index])
-            if intensity <= 0.0:
+            if not within(coordinate, np.float64(mz[posting]), tolerance, use_ppm):
                 continue
-            coordinate = np.float64(q_precursor) - np.float64(q_mz[query_index])
-            query_term = xlog2(intensity)
-            left, right = window(loss_mz, coordinate, tolerance, use_ppm)
-            for posting in range(left, right):
-                column = loss_spec[posting]
-                peak_id = loss_pid[posting]
-                if epochs[column] == epoch:
-                    if last_query[column] == query_index or peak_id >= last_peak[column]:
-                        continue
-                if mode == 2:
-                    word = peak_id // 64
-                    if peak_word_epochs[word] == epoch and peak_word_bits[word] & (
-                        np.uint64(1) << np.uint64(peak_id % 64)
-                    ):
-                        continue
-                    if epochs[column] == epoch and query_bits[slots[column], query_index // 64] & (
-                        np.uint64(1) << np.uint64(query_index % 64)
-                    ):
-                        continue
-                library_intensity = np.float64(loss_int[posting])
-                if library_intensity <= 0.0:
-                    continue
-                if not within(coordinate, loss_mz[posting], tolerance, use_ppm):
-                    continue
-                touched, query_bits, n_touched = _touch(
-                    scores,
-                    epochs,
-                    last_peak,
-                    last_query,
-                    slots,
-                    touched,
-                    query_bits,
-                    n_touched,
-                    epoch,
-                    column,
-                    n_lib_peaks,
-                )
-                scores[column] += xlog2(intensity + library_intensity) - query_term - loss_terms[posting]
-                last_query[column] = query_index
-                last_peak[column] = peak_id
-
-    if identity_tol >= 0.0:
-        for position in range(n_touched):
-            column = touched[position]
-            if not identity_allowed(q_precursor, lib_pmz[column], identity_tol, identity_ppm):
-                scores[column] = 0.0
+            touched, query_bits, n_touched = _touch_entropy(
+                state,
+                touched,
+                query_bits,
+                n_touched,
+                epoch,
+                reference_id,
+                -1,
+            )
+            scores[reference_id] += xlog2(intensity + reference_intensity) - query_term - entropy_terms[posting]
+            last_query[reference_id] = query_peak
+            last_peak[reference_id] = physical_peak
+            if hybrid:
+                word = physical_peak // 64
+                if peak_word_epochs[word] != epoch:
+                    peak_word_epochs[word] = epoch
+                    peak_word_bits[word] = np.uint64(0)
+                peak_word_bits[word] |= np.uint64(1) << np.uint64(physical_peak % 64)
+                query_bits[slots[reference_id], query_peak // 64] |= np.uint64(1) << np.uint64(query_peak % 64)
     return touched, query_bits, n_touched
 
 
+@njit(cache=True, nogil=True)
+def _match_neutral_loss_postings(
+    query, neutral_loss, state, touched, query_bits, n_touched, n_library_peaks, tolerance, use_ppm, hybrid, epoch
+):
+    """Accumulate losses in ascending loss order, without reusing hybrid peaks."""
+    query_mz, query_intensity, precursor_mz = query
+    mz, intensity_values, entropy_terms, owners, physical_ids = neutral_loss
+    scores, epochs, last_peak, last_query, slots, peak_word_epochs, peak_word_bits = state
+
+    # The neutral-loss sweep uses a reversed physical-peak cursor. Reset only
+    # references encountered during this query's fragment sweep.
+    for position in range(n_touched):
+        reference_id = touched[position]
+        last_peak[reference_id] = n_library_peaks
+        last_query[reference_id] = -1
+
+    for query_peak in range(query_mz.size - 1, -1, -1):
+        intensity = np.float64(query_intensity[query_peak])
+        if intensity <= 0.0:
+            continue
+        coordinate = np.float64(precursor_mz) - np.float64(query_mz[query_peak])
+        query_term = xlog2(intensity)
+        first, stop = window(mz, coordinate, tolerance, use_ppm)
+        for posting in range(first, stop):
+            reference_id = owners[posting]
+            physical_peak = physical_ids[posting]
+            if epochs[reference_id] == epoch:
+                if last_query[reference_id] == query_peak or physical_peak >= last_peak[reference_id]:
+                    continue
+            if hybrid:
+                word = physical_peak // 64
+                if peak_word_epochs[word] == epoch and peak_word_bits[word] & (
+                    np.uint64(1) << np.uint64(physical_peak % 64)
+                ):
+                    continue
+                if epochs[reference_id] == epoch and query_bits[slots[reference_id], query_peak // 64] & (
+                    np.uint64(1) << np.uint64(query_peak % 64)
+                ):
+                    continue
+            reference_intensity = np.float64(intensity_values[posting])
+            if reference_intensity <= 0.0:
+                continue
+            if not within(coordinate, mz[posting], tolerance, use_ppm):
+                continue
+            touched, query_bits, n_touched = _touch_entropy(
+                state,
+                touched,
+                query_bits,
+                n_touched,
+                epoch,
+                reference_id,
+                n_library_peaks,
+            )
+            scores[reference_id] += xlog2(intensity + reference_intensity) - query_term - entropy_terms[posting]
+            last_query[reference_id] = query_peak
+            last_peak[reference_id] = physical_peak
+    return touched, query_bits, n_touched
+
+
+@njit(cache=True, nogil=True)
+def _apply_identity_to_touched(query_precursor, reference_precursors, state, touched, n_touched, tolerance, use_ppm):
+    """Zero candidates outside the optional precursor-identity gate."""
+    scores = state[0]
+    for position in range(n_touched):
+        reference_id = touched[position]
+        if not identity_allowed(query_precursor, reference_precursors[reference_id], tolerance, use_ppm):
+            scores[reference_id] = 0.0
+
+
+@njit(cache=True, nogil=True)
+def _entropy_topk_row(query, fragment, neutral_loss, library_info, settings, state, touched, query_bits, epoch):
+    """Execute both entropy matching passes and return the touched references.
+
+    ``query`` contains m/z, intensity and precursor; ``library_info`` contains
+    precursor m/z and the number of physical peaks. ``settings`` holds matching
+    mode, peak tolerance/ppm and optional identity-gate tolerance/ppm.
+    ``state`` groups worker-owned score, epoch, cursors and hybrid bitset arrays.
+    """
+    _, _, precursor_mz = query
+    library_precursors, n_library_peaks = library_info
+    mode, tolerance, use_ppm, identity_tol, identity_ppm = settings
+    hybrid = mode == 2
+    touched_count = 0
+    if mode != 1:
+        touched, query_bits, touched_count = _match_fragment_postings(
+            query,
+            fragment,
+            state,
+            touched,
+            query_bits,
+            touched_count,
+            tolerance,
+            use_ppm,
+            hybrid,
+            epoch,
+        )
+    if mode != 0 and np.isfinite(precursor_mz):
+        touched, query_bits, touched_count = _match_neutral_loss_postings(
+            query,
+            neutral_loss,
+            state,
+            touched,
+            query_bits,
+            touched_count,
+            n_library_peaks,
+            tolerance,
+            use_ppm,
+            hybrid,
+            epoch,
+        )
+    if identity_tol >= 0.0:
+        _apply_identity_to_touched(
+            precursor_mz, library_precursors, state, touched, touched_count, identity_tol, identity_ppm
+        )
+    return touched, query_bits, touched_count
+
+
 def _score_entropy_topk_block(
-    prepared,
-    library,
+    prepared: PreparedSpectra,
+    library: _EntropyKernelData,
     workspace: _EntropyTopKWorkspace,
     indices: np.ndarray,
     scores: np.ndarray,
@@ -208,51 +241,53 @@ def _score_entropy_topk_block(
     identity_tol: float,
     identity_ppm: bool,
 ) -> None:
-    """Write independent compact rows, reusing only this worker's scratch arrays."""
+    """Score independent query rows using reusable worker-local scratch state.
+
+    ``prepared`` is a read-only packed query batch; ``library`` is its validated
+    entropy index view. Output arrays are preallocated and rows are disjoint
+    between worker calls. Each row writes at most ``k`` indices and scores.
+    """
+    settings = (mode, tolerance, use_ppm, identity_tol, identity_ppm)
+    library_info = (library.precursor_mz, library.n_peaks)
     for row in range(first_row, last_row):
         first = int(prepared.spec_offsets[row])
-        last = int(prepared.spec_offsets[row + 1])
+        stop = int(prepared.spec_offsets[row + 1])
         if mode == 2:
-            workspace.ensure_query_words(last - first)
+            workspace.ensure_query_words(stop - first)
         epoch = workspace.next_epoch()
-        touched, query_bits, n_touched = _entropy_topk_row(
-            prepared.spec_mz[first:last],
-            prepared.spec_int[first:last],
+        query = (
+            prepared.spec_mz[first:stop],
+            prepared.spec_int[first:stop],
             np.float64(prepared.precursor_mz[row]),
-            library.fragment,
-            library.neutral_loss,
-            library.precursor_mz,
-            library.n_peaks,
-            tolerance,
-            use_ppm,
-            mode,
-            identity_tol,
-            identity_ppm,
+        )
+        state = (
             workspace.scores,
             workspace.epochs,
             workspace.last_peak,
             workspace.last_query,
             workspace.slots,
-            workspace.touched,
-            workspace.query_bits,
             workspace.peak_word_epochs,
             workspace.peak_word_bits,
+        )
+        touched, query_bits, touched_count = _entropy_topk_row(
+            query,
+            library.fragment,
+            library.neutral_loss,
+            library_info,
+            settings,
+            state,
+            workspace.touched,
+            workspace.query_bits,
             epoch,
         )
         workspace.touched = touched
         workspace.query_bits = query_bits
-        candidates = touched[:n_touched]
+        candidates = touched[:touched_count]
         if workspace.selection_scores is not workspace.scores:
-            # Dense entropy accumulates in float64 and casts once, on output.
-            # Selection (including ties and cutoff) must use that cast dtype.
+            # The dense scorer also casts its float64 accumulations only once.
             workspace.selection_scores[candidates] = workspace.scores[candidates]
-        ids, values = select_topk_candidates(
-            candidates,
-            workspace.selection_scores,
-            k,
-            min_score,
-        )
-        n_hits = ids.size
-        indices[row, :n_hits] = ids
-        scores[row, :n_hits] = values
-        valid_counts[row] = n_hits
+        ids, values = select_topk_candidates(candidates, workspace.selection_scores, k, min_score)
+        count = ids.size
+        indices[row, :count] = ids
+        scores[row, :count] = values
+        valid_counts[row] = count
