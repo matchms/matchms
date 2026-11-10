@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## unpublished
 
+## [1.0.0.dev] - 2026-11-10
 This development release prepares matchms 1.0 with major changes to collections, similarity scoring, filtering, I/O, and the public API. **Upgrading from 0.x requires attention to the breaking changes below.**
 
 ### Added
@@ -39,6 +40,7 @@ This development release prepares matchms 1.0 with major changes to collections,
 
 ### Deprecated
 
+- Pipeline class will be deprecated in matchms 1.1.0
 - Legacy metadata harmonization helpers such as `harmonize_undefined_inchi()` in favor of `harmonize_missing_entries()`.
 
 ### Removed
@@ -50,6 +52,7 @@ This development release prepares matchms 1.0 with major changes to collections,
 - Missing or unresolvable metadata are handled consistently using `None` rather than empty strings where appropriate; metadata harmonization also runs after later processing steps [#951](https://github.com/matchms/matchms/issues/951).
 - Avoid redundant small precursor-mass shifts in Flash-style modified matching when the mass difference lies within the matching tolerance [#891](https://github.com/matchms/matchms/issues/891).
 - Numerous filtering and scoring edge cases, including empty spectra, overlapping tolerance windows, and consistency between dense and top-k search results; expanded regression coverage.
+- `load_from_parquet()` and `CSRFragmentCollection.from_peak_arrays()` preserve float32 intensities rather than upcasting to float64 [#1019](https://github.com/matchms/matchms/pull/1019).
 
 ### Breaking changes and migration notes
 
@@ -69,7 +72,6 @@ This development release prepares matchms 1.0 with major changes to collections,
 
 ### Fixed
 
-- `load_from_parquet()` and `CSRFragmentCollection.from_peak_arrays()` preserve float32 intensities rather than upcasting to float64 [#1019](https://github.com/matchms/matchms/pull/1019).
 - `load_from_msp()` correctly handles `Num Peaks: 0` records as empty spectra rather than merging their metadata into the following record, by @aaronkanzer [#984](https://github.com/matchms/matchms/pull/984).
 - `correct_charge()` derives charge from a recognized adduct before falling back to the ionmode, by @aaronkanzer [#985](https://github.com/matchms/matchms/pull/985).
 - Corrected the version update in `pyproject.toml`, by @julianpollmann [#845](https://github.com/matchms/matchms/pull/845).
@@ -115,6 +117,7 @@ This development release prepares matchms 1.0 with major changes to collections,
 
 - Tests no longer require Tkinter, by @Adafede [#854](https://github.com/matchms/matchms/pull/854).
 - Edge cases involving phantom pairs and entropy scoring, by @LucaCappelletti94 [#860](https://github.com/matchms/matchms/pull/860), [#863](https://github.com/matchms/matchms/pull/863).
+
 
 ## [0.31.0] - 2025-10-06
 ### Added
