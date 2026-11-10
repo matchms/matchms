@@ -6,12 +6,59 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## unpublished
+
+
+## [0.34.0] - 2026-10-05
 ### Added
-- New `export_style="sirius"` for `save_as_mgf` (and `save_spectra`, `metadata_dict`) that writes the metadata keys SIRIUS reads (`PEPMASS`, `CHARGE`, `MSLEVEL`, `RTINSECONDS`, `FEATURE_ID`, `ION`, `NAME`, ...), so mgf files exported from matchms can be imported into SIRIUS again [#987](https://github.com/matchms/matchms/issues/987).
+- New `export_style="sirius"` for `save_as_mgf` (and `save_spectra`, `metadata_dict`) that writes the metadata keys SIRIUS reads (`PEPMASS`, `CHARGE`, `MSLEVEL`, `RTINSECONDS`, `FEATURE_ID`, `ION`, `NAME`, ...), so mgf files exported from matchms can be imported into SIRIUS again by @starkhushi [#987](https://github.com/matchms/matchms/issues/987).
 
 ### Fixed
 - `load_from_msp` reads records with `Num Peaks: 0` as spectra without peaks. Before, such a record was dropped and its metadata was merged into the next spectrum, which also broke the `save_as_msp` round trip.
 - `correct_charge` takes the charge from a known adduct (e.g. `[M-2H]2-` gives -2) before guessing +1/-1 from the ionmode when no charge is given.
+- Fix version update in pyproject.toml by @julianpollmann in https://github.com/matchms/matchms/pull/845
+- Move dependabot out of workflows by @julianpollmann in https://github.com/matchms/matchms/pull/969
+- Use the adduct charge in correct_charge before guessing from ionmode by @aaronkanzer in [#985](https://github.com/matchms/matchms/pull/985)
+- Remove dev-requirements as manifest from dependabot by @julianpollmann in https://github.com/matchms/matchms/pull/996
+- Read MSP records with Num Peaks: 0 instead of merging them into the next one by @aaronkanzer in https://github.com/matchms/matchms/pull/984
+
+
+## [0.33.1] - 2026-06-08
+
+### Added
+- Add support for Python 3.14 by @BioGeek in [#899](https://github.com/matchms/matchms/pull/899)
+- Add dependabot workflow to exclude dev-requirements.txt from updates by @julianpollmann in https://github.com/matchms/matchms/pull/898
+ 
+
+## [0.33.0] - 2026-05-12
+
+### Added
+- Addition of linear scaling Cosine computation - `LinearCosine` by @LucaCappelletti94 in [#875](https://github.com/matchms/matchms/pull/875)
+
+### Fixed
+- Fixed modified cosine behavior for precursor deltas within tolerance by @LucaCappelletti94 in https://github.com/matchms/matchms/pull/867
+- Prepare v1 (cleaning up, deprecating...) by @florian-huber in https://github.com/matchms/matchms/pull/874
+
+
+## [0.32.0] - 2026-03-04
+
+## Main changes:
+
+- `ModifiedCosine` has now become `ModifiedCosineGreedy` (the implementation was always greedy, so only the name did not match).
+- Exact modified cosine computations (e.g., for benchmarking or method development) can now be computed using `ModifiedCosineHungarian` (thanks @LucaCappelletti94 !)
+
+### Added
+- Add progress bar option (to allow silencing) by @florian-huber in [#843](https://github.com/matchms/matchms/pull/843)
+- Change rdkit version constraint to minimum by @florian-huber in [#844](https://github.com/matchms/matchms/pull/844)
+- Do not use TKinter in tests by @Adafede in https://github.com/matchms/matchms/pull/854
+- Allow for other tools than `poetry` by @Adafede in https://github.com/matchms/matchms/pull/852
+- Update README by @julianpollmann in https://github.com/matchms/matchms/pull/855
+- Update Python version to 3.12 in Read the Docs config by @florian-huber in https://github.com/matchms/matchms/pull/858
+- update recipes for readthedocs by @florian-huber in https://github.com/matchms/matchms/pull/859
+- Calling Ghostbusters on phantom pairs by @LucaCappelletti94 in https://github.com/matchms/matchms/pull/860
+- Exact modified hungarian by @LucaCappelletti94 in https://github.com/matchms/matchms/pull/862
+- Making entropy less entropic, in a good way! by @LucaCappelletti94 in https://github.com/matchms/matchms/pull/863
+- Some more flash similarity refactoring by @florian-huber in https://github.com/matchms/matchms/pull/865
+
 
 ## [0.31.0] - 2025-10-06
 ### Added
@@ -771,7 +818,11 @@ Contains three plot types: `plot_spectrum()` or `spectrum.plot()`, `plot_spectra
 - This is the initial version of Spec2Vec from https://github.com/iomega/Spec2Vec
 - (later splitted into matchms + spec2vec)
 
-[Unreleased]: https://github.com/matchms/matchms/compare/0.31.0...HEAD
+[Unreleased]: https://github.com/matchms/matchms/compare/0.34.0...HEAD
+[0.34.0]: https://github.com/matchms/matchms/compare/0.33.1...0.34.0
+[0.33.1]: https://github.com/matchms/matchms/compare/0.33.0...0.33.1
+[0.33.0]: https://github.com/matchms/matchms/compare/0.32.0...0.33.0
+[0.32.0]: https://github.com/matchms/matchms/compare/0.31.0...0.32.0
 [0.31.0]: https://github.com/matchms/matchms/compare/0.30.2...0.31.0
 [0.30.2]: https://github.com/matchms/matchms/compare/0.30.1...0.30.2
 [0.30.1]: https://github.com/matchms/matchms/compare/0.30.0...0.30.1
