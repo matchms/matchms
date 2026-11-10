@@ -43,12 +43,12 @@ Python — load a complete dataset as a `SpectraCollection`:
 ```python
 from matchms.importing import load_ms2_dataset
 
-collection = load_ms2_dataset("my_spectra.mgf")   # format detected from extension
+collection = load_ms2_dataset("my_spectra.mgf")  # format detected from extension
 # explicit type if the extension is ambiguous:
 collection = load_ms2_dataset("my_file.txt", ftype="mgf")
 
 print(collection.n_spectra, collection.metadata.head(), collection.describe())
-spectrum_0 = collection[0]                         # rows are regular Spectrum objects
+spectrum_0 = collection[0]  # rows are regular Spectrum objects
 ```
 
 - Input formats: `mgf`, `msp`, `mzml`, `mzxml`, `json`, `pickle` and `parquet`
@@ -108,12 +108,14 @@ including processing reports via `create_processing_report()`):
 ```python
 from matchms import SpectraProcessor
 
-processor = SpectraProcessor(filters=[
-    "harmonize_missing_entries",
-    ("select_by_relative_intensity", {"intensity_from": 0.01}),
-    ("require_minimum_number_of_peaks", {"n_required": 5}),
-])
-processed = processor.process_collection(collection)      # or process_spectrum(s)
+processor = SpectraProcessor(
+    filters=[
+        "harmonize_missing_entries",
+        ("select_by_relative_intensity", {"intensity_from": 0.01}),
+        ("require_minimum_number_of_peaks", {"n_required": 5}),
+    ]
+)
+processed = processor.process_collection(collection)  # or process_spectrum(s)
 ```
 
 Known filters are placed in canonical filter order; custom callables are
@@ -180,10 +182,10 @@ Python — collections go straight into the similarity object:
 from matchms.similarity import ModifiedCosine
 
 similarity = ModifiedCosine(tolerance=0.01)
-scores = similarity.matrix(collection)            # or (queries, references)
-scores.shape, scores.score_fields                 # e.g. ('score', 'matches')
-scores.to_array("score")                          # dense numpy matrix
-mask = scores > 0.5                               # comparison operators work
+scores = similarity.matrix(collection)  # or (queries, references)
+scores.shape, scores.score_fields  # e.g. ('score', 'matches')
+scores.to_array("score")  # dense numpy matrix
+mask = scores > 0.5  # comparison operators work
 high = scores.to_array("score")[mask]
 ```
 
@@ -215,9 +217,9 @@ Python:
 
 ```python
 library_index = similarity.build_index(library_collection)
-scores = similarity.search(query_collection, library_index)   # rows = queries
+scores = similarity.search(query_collection, library_index)  # rows = queries
 similarity.save_index(library_index, "lib_index.npz")
-library_index = similarity.load_index("lib_index.npz")        # same configuration!
+library_index = similarity.load_index("lib_index.npz")  # same configuration!
 ```
 
 An index is bound to the exact method + parameters it was built with. A
@@ -235,10 +237,10 @@ The CLI has no network command; use `matchms.networking.SimilarityNetwork`
 from matchms.networking import SimilarityNetwork
 
 net = SimilarityNetwork(
-    top_n=20,          # candidate edges = top_n hits per node (must be >= max_links)
-    max_links=10,      # max outgoing edges kept per node
+    top_n=20,  # candidate edges = top_n hits per node (must be >= max_links)
+    max_links=10,  # max outgoing edges kept per node
     score_cutoff=0.7,  # edge only if score >= cutoff
-    link_method="single",   # or "mutual" (edge only if both nodes rank each other)
+    link_method="single",  # or "mutual" (edge only if both nodes rank each other)
     keep_unconnected_nodes=True,
 )
 net.create_network(scores, identifiers=[s.get("compound_name") for s in spectra])
@@ -249,7 +251,7 @@ The resulting `networkx.Graph` is in `net.graph` (edge weight = score);
 analyze it directly or export it:
 
 ```python
-net.export_to_file("network.graphml")          # default
+net.export_to_file("network.graphml")  # default
 net.export_to_file("network.json", graph_format="cyjs")  # also: json, gexf, gml
 ```
 
@@ -272,7 +274,7 @@ Python — `SpectraCollection` exports directly:
 collection.to_mgf("processed_spectra.mgf")
 collection.to_msp("processed_spectra.msp")
 collection.to_json("processed_spectra.json")
-collection.to_mgf("combined.mgf", append=True)          # mgf/msp only
+collection.to_mgf("combined.mgf", append=True)  # mgf/msp only
 collection.to_msp("nist_style.msp", export_style="nist")
 ```
 
