@@ -48,6 +48,14 @@ from matchms.filtering.species_string import SpeciesString
             "smiles",
             "CCCO",
         ),
+        # Short SMILES (fewer than four characters) are checked with rdkit
+        ("CCO", "smiles", "CCO"),
+        ("CO", "smiles", "CO"),
+        ("CCN", "smiles", "CCN"),
+        ("C=O", "smiles", "C=O"),
+        ("C#N", "smiles", "C#N"),
+        ("C", "smiles", "C"),
+        ("O", "smiles", "O"),
         # Invalid / unsupported strings
         (
             "not a valid species string",
@@ -59,6 +67,12 @@ from matchms.filtering.species_string import SpeciesString
             None,
             "",
         ),
+        # Short placeholders are not mistaken for SMILES
+        ("NA", None, ""),
+        ("nan", None, ""),
+        ("-", None, ""),
+        ("0", None, ""),
+        ("?", None, ""),
     ],
 )
 def test_species_string_guess_target_and_clean(dirty, expected_target, expected_cleaned):

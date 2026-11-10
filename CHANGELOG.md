@@ -48,6 +48,7 @@ This development release prepares matchms 1.0 with major changes to collections,
 - **`add_fingerprint()`**; use the `Fingerprints` class and its `chemap` integration instead.
 
 ### Fixed
+- `repair_inchi_inchikey_smiles` (and `SpeciesString`) kept only SMILES of at least four characters, so valid short SMILES such as `CCO` (ethanol) or `CO` (methanol) were removed by the default filters. Shorter strings are now accepted when rdkit reads them as a molecule.
 
 - Missing or unresolvable metadata are handled consistently using `None` rather than empty strings where appropriate; metadata harmonization also runs after later processing steps [#951](https://github.com/matchms/matchms/issues/951).
 - Avoid redundant small precursor-mass shifts in Flash-style modified matching when the mass difference lies within the matching tolerance [#891](https://github.com/matchms/matchms/issues/891).

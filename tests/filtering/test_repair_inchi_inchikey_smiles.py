@@ -153,3 +153,15 @@ def test_repair_inchi_inchikey_smiles_collection_uses_missing_values_not_empty_s
     structure_metadata = repaired.metadata[["inchi", "inchikey", "smiles"]]
 
     assert not (structure_metadata == "").any().any()
+
+
+@pytest.mark.parametrize("smiles", ["CCO", "CO", "CCN", "C=O", "C"])
+def test_repair_inchi_inchikey_smiles_keeps_short_valid_smiles(smiles):
+    """A valid SMILES of fewer than four characters (e.g. ethanol, methanol) must not be removed."""
+    spectrum_in = SpectrumBuilder().with_metadata({"smiles": smiles}).build()
+
+    spectrum = repair_inchi_inchikey_smiles(spectrum_in)
+
+    assert spectrum.get("smiles") == smiles
+    assert spectrum.get("inchi") is None
+    assert spectrum.get("inchikey") is None

@@ -1,4 +1,13 @@
 import re
+from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import is_valid_smiles
+
+
+_SMILES_PATTERN = r"^([^J][0-9BCOHNSOPIFKcons@+\-\[\]\(\)\\\/%=#$,.~&!|Si|Se|Br|Mg|Na|Cl|Al]{3,})$"
+"""Characters allowed in a SMILES, for strings of at least four characters."""
+
+_MIN_LENGTH_FOR_PATTERN = 4
+"""Shorter strings are too short for the character check to tell a SMILES from a
+placeholder such as ``n/a`` or ``NA``, so they are checked with rdkit instead."""
 
 
 class SpeciesString:
@@ -76,8 +85,10 @@ class SpeciesString:
 
     def clean_as_smiles(self):
         """Search for valid smiles and harmonize it."""
-        regexp = r"^([^J][0-9BCOHNSOPIFKcons@+\-\[\]\(\)\\\/%=#$,.~&!|Si|Se|Br|Mg|Na|Cl|Al]{3,})$"
-        found = re.search(regexp, self.dirty)
+        if _is_short_valid_smiles(self.dirty):
+            self.cleaned = self.dirty
+            return
+        found = re.search(_SMILES_PATTERN, self.dirty)
         if found is None:
             self.cleaned = ""
         else:
@@ -107,6 +118,16 @@ class SpeciesString:
         return re.search(regexp, self.dirty) is not None
 
     def looks_like_a_smiles(self):
-        """Return True if string is made of allowed charcters for smiles."""
-        regexp = r"^([^J][0-9BCOHNSOPIFKcons@+\-\[\]\(\)\\\/%=#$,.~&!|Si|Se|Br|Mg|Na|Cl|Al]{3,})$"
-        return re.search(regexp, self.dirty) is not None
+        """Return True if string is made of allowed characters for smiles.
+
+        Strings shorter than four characters, such as ``CCO`` (ethanol) or
+        ``CO`` (methanol), are accepted when rdkit reads them as a molecule.
+        """
+        if _is_short_valid_smiles(self.dirty):
+            return True
+        return re.search(_SMILES_PATTERN, self.dirty) is not None
+
+
+def _is_short_valid_smiles(value: str) -> bool:
+    """Return True for a string below the pattern length that rdkit parses as SMILES."""
+    return 0 < len(value) < _MIN_LENGTH_FOR_PATTERN and is_valid_smiles(value)
