@@ -6,20 +6,118 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## unpublished
+
+## [1.0.0.dev] - 2026-11-10
+This development release prepares matchms 1.0 with major changes to collections, similarity scoring, filtering, I/O, and the public API. **Upgrading from 0.x requires attention to the breaking changes below.**
+
 ### Added
-- New `ModifiedCosineLinear`, the linear-time exact modified cosine from SIRIUS. Same score as `ModifiedCosineHungarian` on merged spectra.
-- `SpectraProcessor` now applies the configured `harmonize_missing_entries` step once more to the final result, so missing values introduced by later processing steps are handled consistently [#951](https://github.com/matchms/matchms/issues/951).
-- `ProcessingReport` now counts metadata entries that are still missing after processing (`report.missing_metadata`), making failed derivations visible [#951](https://github.com/matchms/matchms/issues/951).
-- New `load_collection_from_mgf` importer that reads an mgf file directly into a `SpectraCollection` without creating intermediate `Spectrum` objects; `load_ms2_dataset` uses it for mgf input. Same metadata and fragments as before, several times faster on large libraries. Also new `CSRFragmentCollection.from_peak_arrays` (shared with the Parquet importer) and `matchms.metadata.harmonize_metadata_values` [#916](https://github.com/matchms/matchms/issues/916).
+
+- **`SpectraCollection`** as the central representation of large spectral datasets, combining a pandas-backed metadata table with sparse `CSRFragmentCollection` peak storage. Metadata and peaks stay aligned during slicing, filtering, sorting, concatenation, and duplicate removal. Collection operations also support spectrum hashes and fragment statistics (peak counts, intensity sums, and intensity entropy) [#869](https://github.com/matchms/matchms/issues/869).
+- Collection-based import/export through `load_ms2_dataset()` and `SpectraCollection.to_mgf()`, `.to_msp()`, and `.to_json()`. The new `load_collection_from_mgf()` imports MGF directly into a `SpectraCollection`, without building intermediate `Spectrum` objects; `load_ms2_dataset()` uses this faster path for MGF files [#921](https://github.com/matchms/matchms/issues/921).
+- Parquet import and export for efficient storage and exchange of large spectral datasets [#1002](https://github.com/matchms/matchms/pull/1002). Added `CSRFragmentCollection.from_peak_arrays()` for constructing sparse fragments directly from packed peak arrays.
+- New high-level **`Cosine` and `ModifiedCosine`** similarity classes, providing a convenient default while retaining explicit greedy, Hungarian, linear, BLINK, and Flash implementations [#869](https://github.com/matchms/matchms/issues/869).
+- **`ModifiedCosineLinear`**, the linear-time modified-cosine implementation based on SIRIUS, which agrees with `ModifiedCosineHungarian` on spectra merged according to the algorithm's tolerance rules.
+- **`Entropy` and `EntropySearch`** as the main entropy interfaces. `Entropy` handles fragment, neutral-loss, and hybrid matching; `EntropySearch` specializes in high-throughput fragment-only library search.
+- Persistent **`FlashIndex`** libraries with `build_index()`, `save_index()`/`load_index()`, and `search()` workflows, enabling repeated queries without rebuilding the reference index. Index-based Flash implementations cover cosine, modified cosine, and entropy similarity [#948](https://github.com/matchms/matchms/pull/948), [#953](https://github.com/matchms/matchms/pull/953).
+- **Exact top-k library retrieval** via `search_topk()` and `search_prepared_topk()` for `EntropySearch`, `EntropyFlash`/`Entropy`, and `CosineFlash` (including modified cosine). The new `TopKResults` stores ranked reference IDs, scores, valid hit counts, and optional accepted peak-match counts, without allocating a dense query-by-library result matrix [#1008](https://github.com/matchms/matchms/pull/1008).
+- **`MetadataMatch`**, a configurable metadata-based similarity class underpinning `ParentMassMatch` and `PrecursorMzMatch`.
+- **`harmonize_missing_entries()`** for consistent handling of undefined metadata, along with `harmonize_metadata_values()` for collection-oriented metadata processing [#951](https://github.com/matchms/matchms/issues/951).
+- **`ProcessingReport.missing_metadata`**, reporting metadata fields that remain missing after processing [#951](https://github.com/matchms/matchms/issues/951).
+- A **matchms command-line interface** for importing, filtering, exporting, computing similarity scores, and querying spectral libraries [#968](https://github.com/matchms/matchms/pull/968).
 
 ### Changed
-- `CosineBlink` now computes and returns scores as `np.float64` (`DEFAULT_DTYPE`) by default, consistent with the other similarity scores. The new `dtype` parameter can be set to `np.float32` to reduce memory usage [#880](https://github.com/matchms/matchms/issues/880).
-- New `export_style="sirius"` for `save_as_mgf` (and `save_spectra`, `metadata_dict`) that writes the metadata keys SIRIUS reads (`PEPMASS`, `CHARGE`, `MSLEVEL`, `RTINSECONDS`, `FEATURE_ID`, `ION`, `NAME`, ...), so mgf files exported from matchms can be imported into SIRIUS again [#987](https://github.com/matchms/matchms/issues/987).
+
+- Replaced the former multi-purpose **`Scores`** implementation with a lightweight score container. Score computation is now the responsibility of similarity classes; `Pipeline` and `SimilarityNetwork` were adapted to this design [#869](https://github.com/matchms/matchms/issues/869).
+- Refactored **`BaseSimilarity`** and introduced `BaseSimilarityWithSparse` to distinguish pair-oriented from optimized matrix implementations. Use `pair()` for individual pairs, `matrix()` for dense calculations, and `sparse_matrix()` where supported. `matrix(spectra_1)` now requests self-comparison without an `is_symmetric` argument; `spectra_1`/`spectra_2` replace the old query/reference arguments in matrix APIs [#869](https://github.com/matchms/matchms/issues/869).
+- Reorganized Flash scoring into dedicated entropy and cosine implementations (`EntropyFlash`/`FlashEntropy` and `CosineFlash`). Native `SpectraCollection` preparation, Numba kernels, and shared candidate-aware top-k infrastructure improve large-library search performance and memory efficiency [#948](https://github.com/matchms/matchms/pull/948), [#953](https://github.com/matchms/matchms/pull/953).
+- Updated cosine- and entropy-based similarity preprocessing: `remove_precursor=True` and `noise_cutoff=0.01` are now defaults. Precursor removal uses the configurable precursor offset; set these options explicitly to reproduce previous behavior [#946](https://github.com/matchms/matchms/issues/946).
+- Most filtering functions now accept either individual `Spectrum` objects or whole `SpectraCollection` objects, using shared collection-aware dispatch. Collection operations update metadata and fragments consistently.
+- **Breaking filter defaults and parameters:** `normalize_intensities()` now uses `scale_to_max` instead of a tuple-valued scaling parameter; `select_by_intensity()` has updated default intensity bounds. Review pipelines that relied on the old defaults.
+- Refined filter ordering to avoid unintended interactions between normalization and later processing steps [#939](https://github.com/matchms/matchms/issues/939).
+- `SpectraProcessor` applies its configured final `harmonize_missing_entries` step after other processing stages so that newly missing metadata are also normalized [#951](https://github.com/matchms/matchms/issues/951).
+- Fingerprint calculation is handled through **`Fingerprints`** with the `chemap` integration, rather than by embedding fingerprints into `Spectrum` metadata.
+- Expanded type hints, API documentation, regression tests, and stricter Ruff linting/formatting; refactored deeply nested entropy/cosine kernels for readability without changing their scoring rules [#896](https://github.com/matchms/matchms/pull/896).
+
+### Deprecated
+
+- Pipeline class will be deprecated in matchms 1.1.0
+- Legacy metadata harmonization helpers such as `harmonize_undefined_inchi()` in favor of `harmonize_missing_entries()`.
+
+### Removed
+
+- **`add_fingerprint()`**; use the `Fingerprints` class and its `chemap` integration instead.
 
 ### Fixed
-- `load_from_parquet` and `CSRFragmentCollection.from_peak_arrays` keep float32 intensities instead of converting them to float64 [#1019](https://github.com/matchms/matchms/pull/1019).
-- `load_from_msp` reads records with `Num Peaks: 0` as spectra without peaks. Before, such a record was dropped and its metadata was merged into the next spectrum, which also broke the `save_as_msp` round trip.
-- `correct_charge` takes the charge from a known adduct (e.g. `[M-2H]2-` gives -2) before guessing +1/-1 from the ionmode when no charge is given.
+
+- Missing or unresolvable metadata are handled consistently using `None` rather than empty strings where appropriate; metadata harmonization also runs after later processing steps [#951](https://github.com/matchms/matchms/issues/951).
+- Avoid redundant small precursor-mass shifts in Flash-style modified matching when the mass difference lies within the matching tolerance [#891](https://github.com/matchms/matchms/issues/891).
+- Numerous filtering and scoring edge cases, including empty spectra, overlapping tolerance windows, and consistency between dense and top-k search results; expanded regression coverage.
+- `load_from_parquet()` and `CSRFragmentCollection.from_peak_arrays()` preserve float32 intensities rather than upcasting to float64 [#1019](https://github.com/matchms/matchms/pull/1019).
+
+### Breaking changes and migration notes
+
+- **Scores API:** `Scores` is no longer the former computation-and-storage object. Update code using legacy score layers, accessors, and score-merging workflows; `Pipeline` and `SimilarityNetwork` now use the new container.
+- **Similarity API:** `matrix()` no longer accepts `is_symmetric`; single-input `matrix(spectra_1)` computes self-similarity. Adapt callers that use the former `references`/`queries` argument names. Sparse scoring is available only for implementations that support `sparse_matrix()`.
+- **Renamed similarity implementations:** The former combined `FlashSimilarity` is replaced by dedicated Flash entropy/cosine classes; `BlinkCosine` is now `CosineBlink`. Prefer `Cosine`, `ModifiedCosine`, or `Entropy` for everyday use.
+- **Preprocessing changes:** Default precursor/noise filtering and changed `normalize_intensities()` / `select_by_intensity()` parameters can affect scores and filtering outcomes; set options explicitly when reproducing analyses from earlier versions.
+- **Fingerprint migration:** Replace `add_fingerprint()` with `Fingerprints` and update any affected pipeline configurations.
+- **Spectrum collection precision:** `CSRFragmentCollection` uses binned m/z coordinates; converting its rows back to individual spectra may return bin centers rather than the exact input peak m/z values. Select `mz_precision` appropriately for downstream analyses.
+
+## [0.34.0] - 2026-11-05
+
+### Changed
+
+- `CosineBlink` now uses `np.float64` (`DEFAULT_DTYPE`) for scores by default, consistent with other similarities; pass `dtype=np.float32` to reduce memory usage [#880](https://github.com/matchms/matchms/issues/880).
+- Added `export_style="sirius"` to `save_as_mgf()` (and the related `save_spectra()` and `metadata_dict()` paths), exporting metadata keys expected by SIRIUS for round-trip compatibility, by @starkhushi [#987](https://github.com/matchms/matchms/pull/987).
+
+### Fixed
+
+- `load_from_msp()` correctly handles `Num Peaks: 0` records as empty spectra rather than merging their metadata into the following record, by @aaronkanzer [#984](https://github.com/matchms/matchms/pull/984).
+- `correct_charge()` derives charge from a recognized adduct before falling back to the ionmode, by @aaronkanzer [#985](https://github.com/matchms/matchms/pull/985).
+- Corrected the version update in `pyproject.toml`, by @julianpollmann [#845](https://github.com/matchms/matchms/pull/845).
+- Updated Dependabot configuration and removed unnecessary development-requirements manifest references, by @julianpollmann [#969](https://github.com/matchms/matchms/pull/969), [#996](https://github.com/matchms/matchms/pull/996).
+
+## [0.33.1] - 2026-06-08
+
+### Added
+
+- Python 3.14 support, by @BioGeek [#899](https://github.com/matchms/matchms/pull/899).
+- Dependabot workflow configuration to exclude development requirements from updates, by @julianpollmann [#898](https://github.com/matchms/matchms/pull/898).
+
+## [0.33.0] - 2026-05-12
+
+### Added
+
+- Linear-scaling cosine computation via `LinearCosine`, by @LucaCappelletti94 [#875](https://github.com/matchms/matchms/pull/875).
+
+### Changed
+
+- Preparatory cleanup and deprecations for matchms 1.0, by @florian-huber [#874](https://github.com/matchms/matchms/pull/874).
+
+### Fixed
+
+- Modified cosine behavior for precursor-mass differences within tolerance, by @LucaCappelletti94 [#867](https://github.com/matchms/matchms/pull/867).
+
+## [0.32.0] - 2026-03-04
+
+### Added
+
+- `ModifiedCosineHungarian` for exact modified cosine comparisons, by @LucaCappelletti94 [#862](https://github.com/matchms/matchms/pull/862).
+- Option to disable progress bars, by @florian-huber [#843](https://github.com/matchms/matchms/pull/843).
+
+### Changed
+
+- Renamed the existing greedy modified-cosine implementation to `ModifiedCosineGreedy` to reflect its actual algorithm.
+- Relaxed the RDKit version constraint to a minimum, by @florian-huber [#844](https://github.com/matchms/matchms/pull/844).
+- Expanded supported development tools beyond Poetry, by @Adafede [#852](https://github.com/matchms/matchms/pull/852).
+- Updated the README and Read the Docs configuration, by @julianpollmann and @florian-huber [#855](https://github.com/matchms/matchms/pull/855), [#858](https://github.com/matchms/matchms/pull/858), [#859](https://github.com/matchms/matchms/pull/859).
+- Additional Flash similarity refactoring, by @florian-huber [#865](https://github.com/matchms/matchms/pull/865).
+
+### Fixed
+
+- Tests no longer require Tkinter, by @Adafede [#854](https://github.com/matchms/matchms/pull/854).
+- Edge cases involving phantom pairs and entropy scoring, by @LucaCappelletti94 [#860](https://github.com/matchms/matchms/pull/860), [#863](https://github.com/matchms/matchms/pull/863).
+
 
 ## [0.31.0] - 2025-10-06
 ### Added
@@ -779,7 +877,11 @@ Contains three plot types: `plot_spectrum()` or `spectrum.plot()`, `plot_spectra
 - This is the initial version of Spec2Vec from https://github.com/iomega/Spec2Vec
 - (later splitted into matchms + spec2vec)
 
-[Unreleased]: https://github.com/matchms/matchms/compare/0.31.0...HEAD
+[Unreleased]: https://github.com/matchms/matchms/compare/0.34.0...HEAD
+[0.34.0]: https://github.com/matchms/matchms/compare/0.33.1...0.34.0
+[0.33.1]: https://github.com/matchms/matchms/compare/0.33.0...0.33.1
+[0.33.0]: https://github.com/matchms/matchms/compare/0.32.0...0.33.0
+[0.32.0]: https://github.com/matchms/matchms/compare/0.31.0...0.32.0
 [0.31.0]: https://github.com/matchms/matchms/compare/0.30.2...0.31.0
 [0.30.2]: https://github.com/matchms/matchms/compare/0.30.1...0.30.2
 [0.30.1]: https://github.com/matchms/matchms/compare/0.30.0...0.30.1
