@@ -91,9 +91,8 @@ def test_linear_partners_mark_unmatched_and_advance_once():
 
 
 @pytest.mark.parametrize(
-        "weights,chosen",
-        [([1.0], [True]), ([1.0, 2.0], [False, True]), ([3.0, 1.0, 3.0], [True, False, True])]
-        )
+    "weights,chosen", [([1.0], [True]), ([1.0, 2.0], [False, True]), ([3.0, 1.0, 3.0], [True, False, True])]
+)
 def test_select_path_edges_finds_optimum(weights, chosen):
     benefits = np.asarray(weights, dtype=float)
     selected = np.zeros(benefits.size, dtype=np.bool_)
@@ -123,7 +122,7 @@ def test_modified_linear_rejects_unmerged_input_and_zero_norm():
 def test_modified_linear_agrees_with_exhaustive_matching(seed):
     rng = np.random.default_rng(seed)
     # Well-separated m/z, but deliberately allow precursor-shift/direct conflicts.
-    masses = np.array([100., 120., 140., 160., 180., 200.])
+    masses = np.array([100.0, 120.0, 140.0, 160.0, 180.0, 200.0])
     left_idx = rng.choice(len(masses), 4, replace=False)
     right_idx = rng.choice(len(masses), 4, replace=False)
     left = _peaks(*sorted(zip(masses[left_idx], rng.choice([0.0, 0.25, 0.5, 1.0], 4), strict=True)))

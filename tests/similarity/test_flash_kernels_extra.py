@@ -46,8 +46,9 @@ def _index(rows, precursors):
     return products, (losses[loss_order], loss_owner, product_positions), pmz
 
 
-def _run_cosine(queries, query_precursors, refs, ref_precursors, *, mode=0, gate=-1.0,
-                ppm=False, with_matches=True, rows=None):
+def _run_cosine(
+    queries, query_precursors, refs, ref_precursors, *, mode=0, gate=-1.0, ppm=False, with_matches=True, rows=None
+):
     offsets, mz, intensities, pmz = _packed(queries, query_precursors)
     product, loss, ref_pmz = _index(refs, ref_precursors)
     norms = np.asarray([np.linalg.norm(np.asarray(r, dtype=float).reshape(-1, 2)[:, 1]) for r in queries])
@@ -55,8 +56,26 @@ def _run_cosine(queries, query_precursors, refs, ref_precursors, *, mode=0, gate
     out = np.full((len(queries), len(refs)), -9.0)
     matched = np.full((len(queries), len(refs)), -9, dtype=np.int32) if with_matches else np.empty((0, 0), np.int32)
     first, stop = rows if rows is not None else (0, len(queries))
-    cosine_rows(out, matched, offsets, mz, intensities, pmz, norms,
-                *product, *loss, ref_pmz, lib_norms, 0.02, ppm, mode, gate, False, first, stop)
+    cosine_rows(
+        out,
+        matched,
+        offsets,
+        mz,
+        intensities,
+        pmz,
+        norms,
+        *product,
+        *loss,
+        ref_pmz,
+        lib_norms,
+        0.02,
+        ppm,
+        mode,
+        gate,
+        False,
+        first,
+        stop,
+    )
     return out, matched
 
 
@@ -77,8 +96,24 @@ def _run_entropy(queries, query_precursors, refs, ref_precursors, *, mode=0, gat
         product_positions,
     )
     out = np.full((len(queries), len(refs)), -9.0)
-    entropy_rows(out, offsets, mz, intensities, pmz, fragment, neutral_loss,
-                 ref_pmz, len(product_mz), 0.02, ppm, mode, gate, False, 0, len(queries))
+    entropy_rows(
+        out,
+        offsets,
+        mz,
+        intensities,
+        pmz,
+        fragment,
+        neutral_loss,
+        ref_pmz,
+        len(product_mz),
+        0.02,
+        ppm,
+        mode,
+        gate,
+        False,
+        0,
+        len(queries),
+    )
     return out
 
 
@@ -99,9 +134,7 @@ def test_dense_cosine_analytic_matching_modes(mode):
 
 
 def test_dense_cosine_competing_query_peaks_count_only_once():
-    out, matched = _run_cosine(
-        [[(100.0, 1), (100.01, 1)]], [500], [[(100.005, 1)]], [500]
-    )
+    out, matched = _run_cosine([[(100.0, 1), (100.01, 1)]], [500], [[(100.005, 1)]], [500])
     assert out[0, 0] == pytest.approx(1 / np.sqrt(2))
     assert matched[0, 0] == 1
 
@@ -109,8 +142,7 @@ def test_dense_cosine_competing_query_peaks_count_only_once():
 def test_dense_cosine_score_only_gate_and_disjoint_row_write():
     queries = [[(100, 1)], [(100, 1)], []]
     refs = [[(100, 1)], [(100, 1)]]
-    out, matched = _run_cosine(queries, [500, 510, np.nan], refs, [500, 520], gate=0.1,
-                               with_matches=False, rows=(1, 2))
+    out, matched = _run_cosine(queries, [500, 510, np.nan], refs, [500, 520], gate=0.1, with_matches=False, rows=(1, 2))
     assert matched.shape == (0, 0)
     assert out[0].tolist() == [-9.0, -9.0]
     assert out[1].tolist() == [0.0, 0.0]
@@ -119,8 +151,8 @@ def test_dense_cosine_score_only_gate_and_disjoint_row_write():
 
 @pytest.mark.parametrize("mode", [0, 1, 2])
 def test_dense_entropy_analytic_matching_modes(mode):
-    refs = [[(100, .25), (200, .25)], [(100, .25), (210, .25)], [(800, .5)]]
-    queries = [[(100, .25), (200, .25)], [], [(777, .5)]]
+    refs = [[(100, 0.25), (200, 0.25)], [(100, 0.25), (210, 0.25)], [(800, 0.5)]]
+    queries = [[(100, 0.25), (200, 0.25)], [], [(777, 0.5)]]
     out = _run_entropy(queries, [500, np.nan, np.nan], refs, [500, 510, 700], mode=mode)
     assert out[0, 0] == pytest.approx(1.0)
     assert out[0, 1] == pytest.approx(1.0 if mode == 2 else 0.5)
@@ -129,8 +161,8 @@ def test_dense_entropy_analytic_matching_modes(mode):
 
 
 def test_dense_entropy_identity_and_no_precursor_loss():
-    refs = [[(100, .5)], [(100, .5)]]
-    queries = [[(100, .5)], [(100, .5)]]
+    refs = [[(100, 0.5)], [(100, 0.5)]]
+    queries = [[(100, 0.5)], [(100, 0.5)]]
     out = _run_entropy(queries, [500, np.nan], refs, [500, 510], mode=0, gate=0.1)
     np.testing.assert_allclose(out, [[1.0, 0.0], [0.0, 0.0]])
     loss_only = _run_entropy(queries, [500, np.nan], refs, [500, 510], mode=1)
@@ -139,8 +171,8 @@ def test_dense_entropy_identity_and_no_precursor_loss():
 
 
 def test_dense_entropy_competing_peaks_do_not_double_count():
-    out = _run_entropy([[(100.0, .25), (100.01, .25)]], [500], [[(100.005, .5)]], [500])
-    pair_score = .75 * np.log2(.75) - .25 * np.log2(.25) - .5 * np.log2(.5)
+    out = _run_entropy([[(100.0, 0.25), (100.01, 0.25)]], [500], [[(100.005, 0.5)]], [500])
+    pair_score = 0.75 * np.log2(0.75) - 0.25 * np.log2(0.25) - 0.5 * np.log2(0.5)
     assert out[0, 0] == pytest.approx(pair_score)
 
 
@@ -152,15 +184,11 @@ def _sort_dense_row(row, k, threshold):
 
 def _reference_example(entropy=False):
     if entropy:
-        references = [[(100, .25), (200, .25)], [(100, .25), (210, .25)],
-                      [(800, .5)], [], [(100, .5)]]
-        queries = [[(100, .25), (200, .25)], [(100, .25), (220, .25)],
-                   [], [(100, .5)], [(999, .5)]]
+        references = [[(100, 0.25), (200, 0.25)], [(100, 0.25), (210, 0.25)], [(800, 0.5)], [], [(100, 0.5)]]
+        queries = [[(100, 0.25), (200, 0.25)], [(100, 0.25), (220, 0.25)], [], [(100, 0.5)], [(999, 0.5)]]
     else:
-        references = [[(100, 1), (200, 1)], [(100, 1), (210, 1)],
-                      [(800, 1)], [], [(100, 1)]]
-        queries = [[(100, 1), (200, 1)], [(100, 1), (220, 1)],
-                   [], [(100, 1)], [(999, 1)]]
+        references = [[(100, 1), (200, 1)], [(100, 1), (210, 1)], [(800, 1)], [], [(100, 1)]]
+        queries = [[(100, 1), (200, 1)], [(100, 1), (220, 1)], [], [(100, 1)], [(999, 1)]]
     return references, queries, [500, 510, 700, np.nan, 500], [500, 520, np.nan, 500, 800]
 
 
@@ -170,9 +198,17 @@ def _prepare_topk_fixture(references, queries, reference_precursors, query_precu
     lib_norm = np.asarray([np.linalg.norm(np.asarray(r, float).reshape(-1, 2)[:, 1]) for r in references])
     q_norm = np.asarray([np.linalg.norm(np.asarray(r, float).reshape(-1, 2)[:, 1]) for r in queries])
     return (
-        SimpleNamespace(spec_offsets=q_offsets, spec_mz=q_mz.astype(dtype), spec_int=q_int.astype(dtype),
-                        precursor_mz=q_pmz, spec_l2=q_norm),
-        products, losses, lib_pmz, lib_norm,
+        SimpleNamespace(
+            spec_offsets=q_offsets,
+            spec_mz=q_mz.astype(dtype),
+            spec_int=q_int.astype(dtype),
+            precursor_mz=q_pmz,
+            spec_l2=q_norm,
+        ),
+        products,
+        losses,
+        lib_pmz,
+        lib_norm,
     )
 
 
@@ -186,29 +222,53 @@ def test_cosine_topk_block_exactly_matches_dense_for_modes_and_matches(mode, dty
     n_references, n_queries, k = len(refs), len(queries), 3
     dense = np.zeros((n_queries, n_references), dtype=dtype)
     dense_matches = np.zeros((n_queries, n_references), dtype=np.int32)
-    cosine_rows(dense, dense_matches, prepared.spec_offsets, prepared.spec_mz, prepared.spec_int,
-                prepared.precursor_mz, prepared.spec_l2, *product, *loss,
-                lib_precursors, lib_norm, 0.02, False, mode, gate, False, 0, n_queries)
+    cosine_rows(
+        dense,
+        dense_matches,
+        prepared.spec_offsets,
+        prepared.spec_mz,
+        prepared.spec_int,
+        prepared.precursor_mz,
+        prepared.spec_l2,
+        *product,
+        *loss,
+        lib_precursors,
+        lib_norm,
+        0.02,
+        False,
+        mode,
+        gate,
+        False,
+        0,
+        n_queries,
+    )
     workspace = _CosineTopKWorkspace(n_references, len(product[0]), dtype, mode == 2)
     ids = np.full((n_queries, k), -1, dtype=np.int32)
     scores = np.zeros((n_queries, k), dtype=dtype)
     matches = np.zeros((n_queries, k), dtype=np.int32) if include_matches else None
     counts = np.zeros(n_queries, np.int64)
-    library = SimpleNamespace(peaks_mz=product[0].astype(dtype), peaks_int=product[1].astype(dtype),
-                              peaks_spec_idx=product[2], nl_mz=loss[0].astype(dtype),
-                              nl_spec_idx=loss[1], nl_product_idx=loss[2],
-                              precursor_mz=lib_precursors, spec_l2=lib_norm)
-    _score_cosine_topk_block(prepared, library, workspace, ids, scores, counts, matches,
-                             0, n_queries, k, 0.0, mode, 0.02, False, gate, False)
+    library = SimpleNamespace(
+        peaks_mz=product[0].astype(dtype),
+        peaks_int=product[1].astype(dtype),
+        peaks_spec_idx=product[2],
+        nl_mz=loss[0].astype(dtype),
+        nl_spec_idx=loss[1],
+        nl_product_idx=loss[2],
+        precursor_mz=lib_precursors,
+        spec_l2=lib_norm,
+    )
+    _score_cosine_topk_block(
+        prepared, library, workspace, ids, scores, counts, matches, 0, n_queries, k, 0.0, mode, 0.02, False, gate, False
+    )
     for row in range(n_queries):
         expected = _sort_dense_row(dense[row], k, 0.0)
-        np.testing.assert_array_equal(ids[row, :len(expected)], expected)
-        np.testing.assert_array_equal(scores[row, :len(expected)], dense[row, expected])
+        np.testing.assert_array_equal(ids[row, : len(expected)], expected)
+        np.testing.assert_array_equal(scores[row, : len(expected)], dense[row, expected])
         if include_matches:
-            np.testing.assert_array_equal(matches[row, :len(expected)], dense_matches[row, expected])
+            np.testing.assert_array_equal(matches[row, : len(expected)], dense_matches[row, expected])
         assert counts[row] == len(expected)
-        np.testing.assert_array_equal(ids[row, len(expected):], -1)
-        np.testing.assert_array_equal(scores[row, len(expected):], 0)
+        np.testing.assert_array_equal(ids[row, len(expected) :], -1)
+        np.testing.assert_array_equal(scores[row, len(expected) :], 0)
 
 
 @pytest.mark.parametrize("mode", [0, 1, 2])
@@ -222,33 +282,52 @@ def test_entropy_topk_block_exactly_matches_dense_with_reused_epochs(mode, dtype
     terms = np.where(intensity > 0, intensity * np.log2(np.where(intensity > 0, intensity, 1)), 0.0)
     fragment = (mz.astype(dtype), intensity.astype(dtype), terms, owners, np.arange(len(mz), dtype=np.int64))
     neutral_loss = (loss[0].astype(dtype), intensity[loss[2]].astype(dtype), terms[loss[2]], loss[1], loss[2])
-    entropy_rows(dense, prepared.spec_offsets, prepared.spec_mz, prepared.spec_int,
-                 prepared.precursor_mz, fragment, neutral_loss, lib_precursors,
-                 len(mz), 0.02, False, mode, -1.0, False, 0, n_queries)
-    library = SimpleNamespace(fragment=fragment, neutral_loss=neutral_loss,
-                              precursor_mz=lib_precursors, n_peaks=len(mz))
+    entropy_rows(
+        dense,
+        prepared.spec_offsets,
+        prepared.spec_mz,
+        prepared.spec_int,
+        prepared.precursor_mz,
+        fragment,
+        neutral_loss,
+        lib_precursors,
+        len(mz),
+        0.02,
+        False,
+        mode,
+        -1.0,
+        False,
+        0,
+        n_queries,
+    )
+    library = SimpleNamespace(
+        fragment=fragment, neutral_loss=neutral_loss, precursor_mz=lib_precursors, n_peaks=len(mz)
+    )
     workspace = _EntropyTopKWorkspace(n_references, len(mz), dtype, mode == 2)
     ids = np.full((n_queries, k), -1, dtype=np.int32)
     scores = np.zeros((n_queries, k), dtype=dtype)
     counts = np.zeros(n_queries, np.int64)
-    _score_entropy_topk_block(prepared, library, workspace, ids, scores, counts,
-                              0, n_queries, k, 0.0, mode, 0.02, False, -1.0, False)
+    _score_entropy_topk_block(
+        prepared, library, workspace, ids, scores, counts, 0, n_queries, k, 0.0, mode, 0.02, False, -1.0, False
+    )
     for row in range(n_queries):
         expected = _sort_dense_row(dense[row], k, 0.0)
-        np.testing.assert_array_equal(ids[row, :len(expected)], expected)
-        np.testing.assert_array_equal(scores[row, :len(expected)], dense[row, expected])
+        np.testing.assert_array_equal(ids[row, : len(expected)], expected)
+        np.testing.assert_array_equal(scores[row, : len(expected)], dense[row, expected])
         assert counts[row] == len(expected)
+
 
 @pytest.mark.parametrize("dtype", [np.float32, np.float64])
 @pytest.mark.parametrize(
     "mode,reference,query,ref_precursor,query_precursor",
     [
-        pytest.param(0, [(100.005, 1), (200, 1)], [(100, 1), (100.01, 2)], 500, 500,
-                     id="fragment_competing_query_peaks"),
-        pytest.param(1, [(100, 1), (200, 1)], [(120, 1), (120.01, 2)], 500, 520,
-                     id="loss_competing_query_peaks"),
-        pytest.param(2, [(100, 2), (200, 1)], [(100, 1), (120, 3)], 500, 520,
-                     id="hybrid_direct_and_loss_same_physical_peak"),
+        pytest.param(
+            0, [(100.005, 1), (200, 1)], [(100, 1), (100.01, 2)], 500, 500, id="fragment_competing_query_peaks"
+        ),
+        pytest.param(1, [(100, 1), (200, 1)], [(120, 1), (120.01, 2)], 500, 520, id="loss_competing_query_peaks"),
+        pytest.param(
+            2, [(100, 2), (200, 1)], [(100, 1), (120, 3)], 500, 520, id="hybrid_direct_and_loss_same_physical_peak"
+        ),
     ],
 )
 def test_cosine_topk_greedy_conflicts_match_dense(mode, reference, query, ref_precursor, query_precursor, dtype):
@@ -261,25 +340,49 @@ def test_cosine_topk_greedy_conflicts_match_dense(mode, reference, query, ref_pr
     n_queries, n_references, k = len(queries), len(refs), 2
     dense = np.zeros((n_queries, n_references), dtype=dtype)
     dense_matches = np.zeros((n_queries, n_references), dtype=np.int32)
-    cosine_rows(dense, dense_matches, prepared.spec_offsets, prepared.spec_mz, prepared.spec_int,
-                prepared.precursor_mz, prepared.spec_l2, *product, *loss,
-                lib_precursors, lib_norm, 0.02, False, mode, -1.0, False, 0, n_queries)
-    library = SimpleNamespace(peaks_mz=product[0].astype(dtype), peaks_int=product[1].astype(dtype),
-                              peaks_spec_idx=product[2], nl_mz=loss[0].astype(dtype),
-                              nl_spec_idx=loss[1], nl_product_idx=loss[2],
-                              precursor_mz=lib_precursors, spec_l2=lib_norm)
+    cosine_rows(
+        dense,
+        dense_matches,
+        prepared.spec_offsets,
+        prepared.spec_mz,
+        prepared.spec_int,
+        prepared.precursor_mz,
+        prepared.spec_l2,
+        *product,
+        *loss,
+        lib_precursors,
+        lib_norm,
+        0.02,
+        False,
+        mode,
+        -1.0,
+        False,
+        0,
+        n_queries,
+    )
+    library = SimpleNamespace(
+        peaks_mz=product[0].astype(dtype),
+        peaks_int=product[1].astype(dtype),
+        peaks_spec_idx=product[2],
+        nl_mz=loss[0].astype(dtype),
+        nl_spec_idx=loss[1],
+        nl_product_idx=loss[2],
+        precursor_mz=lib_precursors,
+        spec_l2=lib_norm,
+    )
     work = _CosineTopKWorkspace(n_references, len(product[0]), dtype, mode == 2)
     indices = np.full((n_queries, k), -1, dtype=np.int32)
     scores = np.zeros((n_queries, k), dtype=dtype)
     matches = np.zeros((n_queries, k), dtype=np.int32)
     counts = np.zeros(n_queries, dtype=np.int64)
-    _score_cosine_topk_block(prepared, library, work, indices, scores, counts, matches,
-                             0, n_queries, k, 0.0, mode, 0.02, False, -1.0, False)
+    _score_cosine_topk_block(
+        prepared, library, work, indices, scores, counts, matches, 0, n_queries, k, 0.0, mode, 0.02, False, -1.0, False
+    )
     for row in range(n_queries):
         expected = _sort_dense_row(dense[row], k, 0.0)
-        np.testing.assert_array_equal(indices[row, :len(expected)], expected)
-        np.testing.assert_array_equal(scores[row, :len(expected)], dense[row, expected])
-        np.testing.assert_array_equal(matches[row, :len(expected)], dense_matches[row, expected])
+        np.testing.assert_array_equal(indices[row, : len(expected)], expected)
+        np.testing.assert_array_equal(scores[row, : len(expected)], dense[row, expected])
+        np.testing.assert_array_equal(matches[row, : len(expected)], dense_matches[row, expected])
         assert counts[row] == len(expected)
     assert counts[1] == 0  # The empty row cannot retain state from earlier queries.
     assert dense_matches[0, 0] == 1  # The two candidate edges share a physical peak.
