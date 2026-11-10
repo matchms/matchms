@@ -30,15 +30,18 @@ synchronized, supports table-like inspection and filtering, and provides a
 natural basis for scalable dataset-level processing and similarity computation.
 
 Matchms supports popular spectral data formats including mzML, mzXML, MSP, MGF,
-metabolomics-USI, JSON, and pickle. It provides tools for metadata
+metabolomics-USI, JSON, pickle, and Parquet. It provides tools for metadata
 harmonization, metadata validation, peak filtering, spectrum processing,
 collection processing, export, and large-scale spectral similarity calculations.
 
-The classic `Spectrum` API, which was the default in matchms < 1.0, remains supported.
-Individual spectra are still represented as `Spectrum` objects, and existing workflows
-that process lists of spectra continue to work. For new workflows, however, `SpectraCollection`
-is recommended whenever a complete dataset is imported, cleaned, filtered,
-exported, or compared.
+The classic ``Spectrum`` API, which was the default in matchms < 1.0, remains supported.
+Individual spectra are still represented as ``Spectrum`` objects, and existing workflows
+that process lists of spectra continue to work.
+For new workflows, however, ``SpectraCollection`` is recommended whenever a
+complete dataset is imported, cleaned, filtered, exported, or compared.
+
+For changes from matchms 0.x, see the `changelog <CHANGELOG.md>`_ and the
+`development documentation <https://matchms.readthedocs.io/en/development/>`_.
 
 .. image:: readthedocs/_static/matchms_modular_design_v1_0.png
    :target: readthedocs/_static/matchms_modular_design_v1_0.png
@@ -65,7 +68,7 @@ A typical matchms workflow starts by loading an MS/MS dataset directly as a
 
     from matchms.importing import load_ms2_dataset
 
-    collection = load_ms2_dataset("my_spectra.mgf")  # you could here specify the required precision, default is: mz_precision=0.000001
+    collection = load_ms2_dataset("my_spectra.mgf")
 
     print(collection)
     print(collection.metadata.head())
@@ -106,17 +109,21 @@ Similarity scores can be computed directly from the processed collection:
     similarity = ModifiedCosine(tolerance=0.01)
     scores = similarity.matrix(collection)
 
-For repeated searches against a fixed reference library, build the library index
-once and reuse it:
+For repeated searches against a fixed reference library, build the library
+index once and reuse it. For large libraries, request only the best hits:
 
 .. code-block:: python
 
+    query_collection = load_ms2_dataset("my_queries.mgf")
     library_index = similarity.build_index(collection)
 
-    scores = similarity.search(
-        query_collection,
-        library_index,
+    top_hits = similarity.search_topk(
+        query_collection, library_index, k=10, min_score=0.1, n_jobs=1
     )
+    reference_indices, similarities = top_hits.get_hits(0)
+
+Use ``similarity.search(query_collection, library_index)`` when the complete
+query-by-reference score matrix is needed.
 
 The index can also be saved and loaded again later:
 
@@ -249,8 +256,10 @@ For new workflows, use ``load_ms2_dataset`` to import a complete dataset as a
 
     collection = load_ms2_dataset("my_spectra.mgf")
 
-The file type is detected automatically from the file extension. Supported file
-types include ``mzML``, ``mzXML``, ``mgf``, ``msp``, ``json``, and ``pickle``.
+The file type is detected automatically from the file extension. Supported
+types include ``mzML``, ``mzXML``, ``mgf``, ``msp``, ``json``, and
+``pickle``. Parquet datasets can be loaded directly with
+``matchms.importing.load_from_parquet`` (requires ``pyarrow``).
 
 If needed, the file type can be specified explicitly:
 
@@ -310,6 +319,10 @@ The export style can be selected where supported:
     collection.to_mgf("processed_spectra.mgf", export_style="gnps")
     collection.to_msp("processed_spectra.msp", export_style="nist")
 
+Parquet datasets can also be exported using
+``matchms.exporting.save_as_parquet``. The Parquet import/export API is
+separate from the collection ``to_mgf``/``to_msp``/``to_json`` methods.
+
 The classic ``save_spectra`` wrapper remains available for workflows that work
 with individual ``Spectrum`` objects or lists of spectra:
 
@@ -356,8 +369,8 @@ SpectraProcessor
 The processor uses the same ordered list of filters for both execution paths,
 but provides explicit methods for choosing how the pipeline is applied:
 
-- `process_spectrum()` applies all filters sequentially to one ``Spectrum``.
-- `process_collection()` applies each filter to the complete
+- ``process_spectrum()`` applies all filters sequentially to one ``Spectrum``.
+- ``process_collection()`` applies each filter to the complete
   ``SpectraCollection``, allowing collection-native and vectorized filter
   implementations to be used.
 
@@ -440,6 +453,9 @@ how much each filter changed the data.
 
     print(report.to_dataframe())
 
+The report also exposes ``report.missing_metadata`` to identify metadata
+entries that remain missing after processing.
+
 The report records, for each filter:
 
 - the number of input spectra,
@@ -483,7 +499,7 @@ Metadata column names can be harmonized using matchms key conventions:
 
 For example:
 
-.. code-block:: python
+.. code-block:: text
 
     "Precursor MZ" -> "precursor_mz"
     "Compound Name" -> "compound_name"
@@ -554,7 +570,7 @@ For individual spectra, peak data is available through ``spectrum.peaks``:
 
 
 Similarity measures
--------------------
+===================
 
 Matchms provides several similarity measures in ``matchms.similarity`` for
 comparing mass spectra, spectrum metadata, and molecular structures.
@@ -628,6 +644,28 @@ searching a fixed reference library using a reusable index.
      - -
 
 
+Default preprocessing for spectral similarities
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The high-level cosine and entropy implementations remove precursor-region
+peaks by default (``remove_precursor=True``) and ignore peaks below a relative
+intensity threshold (``noise_cutoff=0.01``). These settings are part of
+*similarity preparation*; they do not modify the input collection in place.
+For reproducible comparisons with older workflows, configure both explicitly:
+
+.. code-block:: python
+
+    from matchms.similarity import ModifiedCosine
+
+    similarity = ModifiedCosine(
+        tolerance=0.01,
+        remove_precursor=False,
+        noise_cutoff=None,
+    )
+
+Keep preprocessing settings consistent when constructing and reusing an index.
+The exact available options can differ for specialized scoring classes.
+
 Pair and matrix comparisons
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -660,6 +698,25 @@ Pairwise scoring of individual spectra is also supported:
 
     similarity = Cosine(tolerance=0.01)
     score = similarity.pair(spectrum_1, spectrum_2)
+
+
+Working with Scores results
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+``pair()`` returns the score fields for one spectrum pair. ``matrix()`` and
+``search()`` return a lightweight ``Scores`` container with fields such as
+``"score"`` and (for cosine) ``"matches"``. It stores results but does not
+perform score computations itself.
+
+.. code-block:: python
+
+    score_matrix = scores["score"].to_array()
+    high_similarity = scores["score"] > 0.7
+
+Some pair-oriented similarity implementations also support
+``sparse_matrix()`` for calculations where only selected pairs should be
+stored. ``search_topk()`` instead returns a dedicated ``TopKResults`` object
+and should not be treated as a sparse representation of the full matrix.
 
 
 Repeated library searches with reusable indices
@@ -766,6 +823,60 @@ default indexed greedy implementation. It is not available when
 ``use_hungarian=True``.
 
 
+Exact top-k library search
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For large libraries, a dense ``search()`` result can be expensive even when
+only a few high-scoring references are needed. Indexed cosine, modified
+cosine, ``Entropy``, and ``EntropySearch`` therefore provide ``search_topk()``
+and ``search_prepared_topk()``. These methods return the **exact best k hits**
+under the selected similarity scorer, without allocating a dense
+query-by-reference score matrix.
+
+.. code-block:: python
+
+    from matchms.similarity import ModifiedCosine
+
+    similarity = ModifiedCosine(tolerance=0.01)
+    library_index = similarity.build_index(reference_library)
+
+    hits = similarity.search_topk(
+        query_collection,
+        library_index,
+        k=100,
+        min_score=0.1,
+        n_jobs=1,
+    )
+
+    # Reference positions (zero-based) and similarity values for query 0.
+    library_ids, values = hits.get_hits(0)
+
+``TopKResults`` provides ``indices``, ``scores``, and ``valid_counts`` arrays
+with shape ``(n_queries, k)`` for the first two. Each query's hits are sorted
+by decreasing similarity, breaking equal scores by ascending reference ID.
+Only scores *strictly greater* than ``min_score`` are kept (default: ``0``).
+If fewer than ``k`` references qualify, unused entries are padded with
+reference ID ``-1`` and score ``0``; ``get_hits()`` excludes the padding.
+Excluded references must not be interpreted as having a zero similarity.
+
+Cosine and modified-cosine hits can also report accepted peak-match counts:
+
+.. code-block:: python
+
+    library_ids, values, matched_peaks = hits.get_hits_with_matches(0)
+
+These counts are available by default for cosine; specify
+``score_fields=("score",)`` if they are not needed. Entropy top-k results do
+not contain match counts. Top-k retrieval returns ``TopKResults``, **not** a
+truncated ``Scores`` matrix.
+
+The output arrays scale with ``n_queries * k`` instead of
+``n_queries * n_references``. Workers still use library-sized scratch arrays;
+``n_jobs=-1`` can therefore use substantially more memory than ``n_jobs=1``.
+Top-k can also take longer than dense scoring, depending on the workload.
+For repeated searches, ``prepare_queries()`` followed by
+``search_prepared_topk()`` avoids repeating query preprocessing.
+
 Entropy and EntropySearch
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -866,19 +977,63 @@ used by ``Entropy``.
 For most applications, the high-level ``Cosine``, ``ModifiedCosine``,
 ``Entropy``, and ``EntropySearch`` classes are preferred.
 
+Molecular fingerprints are handled through the ``Fingerprints`` class, which
+uses the optional ``chemap`` package for fingerprint generation. The old
+``add_fingerprint`` filter was removed. Install the optional fingerprint
+support with ``pip install 'matchms[fingerprints]'`` when needed.
+
+
+Command-line interface
+======================
+
+matchms also provides a CLI for dataset inspection, conversion, filtering,
+similarity matrices, library index creation, and spectral library searches.
+Run ``matchms --help`` or a subcommand with ``--help`` for all options.
+
+.. code-block:: console
+
+    matchms info --table
+    matchms spectra describe my_spectra.mgf
+    matchms spectra convert my_spectra.mgf converted_spectra.msp
+
+For an indexed modified-cosine search from the command line:
+
+.. code-block:: console
+
+    matchms similarity build-index library.mgf --method ModifiedCosine -o library.index.npz
+    matchms similarity search queries.mgf library.index.npz --method ModifiedCosine --top-k 10 -o hits.tsv
+
+Use the same similarity settings when building and querying an index.
+The CLI supports output as tabular text or machine-readable JSON.
+
 
 Installation
 ============
 
 Prerequisites:
 
-- Python 3.11 - 3.13
+- A compatible Python version (check ``requires-python`` in
+  ``pyproject.toml`` for the development branch). Python 3.13 is used in
+  the examples below.
 
-Install matchms with uv (recommended):
+Install the published matchms release with uv (recommended). Create a
+virtual environment before using ``uv pip install``:
 
 .. code-block:: console
 
+    uv venv --python 3.13
     uv pip install matchms
+
+To try the upcoming matchms 1.0 development version instead, use a fresh
+virtual environment:
+
+.. code-block:: console
+
+    uv venv --python 3.13
+    uv pip install "git+https://github.com/matchms/matchms.git@development"
+
+The default ``uv pip install matchms`` command installs the latest
+published version, which may not yet contain the APIs shown above.
 
 Install matchms with conda:
 
@@ -902,7 +1057,8 @@ Documentation for users
 
 For more extensive documentation, see:
 
-- `Read the Docs <https://matchms.readthedocs.io/en/latest/>`_
+- `Development API documentation <https://matchms.readthedocs.io/en/development/>`_
+- `Latest published documentation <https://matchms.readthedocs.io/en/latest/>`_
 - `matchms introduction tutorial <https://blog.esciencecenter.nl/build-your-own-mass-spectrometry-analysis-pipeline-in-python-using-matchms-part-i-d96c718c68ee>`_
 - `user documentation <https://matchms.github.io/matchms-docs/intro.html>`_
 
@@ -1017,10 +1173,10 @@ For filters with separate spectrum and collection implementations, use
 
 .. code-block:: python
 
-    def _my_filter_spectrum(spectrum_in, ..., clone=True):
+    def _my_filter_spectrum(spectrum_in, *, clone=True):
         ...
 
-    def _my_filter_collection(collection, ..., clone=True):
+    def _my_filter_collection(collection, *, clone=True):
         ...
 
     my_filter = collection_filter(
@@ -1033,7 +1189,7 @@ helpers:
 
 .. code-block:: python
 
-    def _my_metadata_filter(metadata, ...):
+    def _my_metadata_filter(metadata):
         ...
 
     my_filter = metadata_update_filter(_my_metadata_filter)
@@ -1043,7 +1199,7 @@ metadata implementation:
 
 .. code-block:: python
 
-    def _require_my_metadata(metadata, ...) -> bool:
+    def _require_my_metadata(metadata) -> bool:
         ...
 
     require_my_metadata = metadata_requirement_filter(_require_my_metadata)
