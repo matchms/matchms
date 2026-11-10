@@ -36,16 +36,11 @@ def _correct_charge(metadata) -> dict:
     ionmode = as_string_or_none(raw_ionmode)
 
     if ionmode is not None and ionmode != ionmode.lower():
-        raise ValueError(
-            "Ionmode field not harmonized. "
-            "Apply 'make_ionmode_lowercase' filter first."
-        )
+        raise ValueError("Ionmode field not harmonized. Apply 'make_ionmode_lowercase' filter first.")
 
     raw_charge = metadata.get("charge", None)
     if isinstance(raw_charge, str):
-        raise TypeError(
-            "Charge is given as string. Apply 'make_charge_int' filter first."
-        )
+        raise TypeError("Charge is given as string. Apply 'make_charge_int' filter first.")
 
     charge = as_float_or_none(raw_charge)
     if charge is None:

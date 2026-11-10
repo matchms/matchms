@@ -26,25 +26,25 @@ def spectra_collection():
 
     builder = SpectrumBuilder()
     spectrum_1 = (
-        builder.with_mz(np.array([100, 150, 200.]))
+        builder.with_mz(np.array([100, 150, 200.0]))
         .with_intensities(np.array([0.7, 0.2, 0.1]))
         .with_metadata({"id": "spectrum1", "precursor_mz": 210, "parent_mass": 210, "smiles": a})
         .build()
     )
     spectrum_2 = (
-        builder.with_mz(np.array([100, 140, 190.]))
+        builder.with_mz(np.array([100, 140, 190.0]))
         .with_intensities(np.array([0.4, 0.2, 0.1]))
         .with_metadata({"id": "spectrum2", "precursor_mz": 200, "parent_mass": 200, "smiles": a})
         .build()
     )
     spectrum_3 = (
-        builder.with_mz(np.array([110, 140, 195.]))
+        builder.with_mz(np.array([110, 140, 195.0]))
         .with_intensities(np.array([0.6, 0.2, 0.1]))
         .with_metadata({"id": "spectrum3", "precursor_mz": 205, "parent_mass": 205, "smiles": b})
         .build()
     )
     spectrum_4 = (
-        builder.with_mz(np.array([100, 150, 200.]))
+        builder.with_mz(np.array([100, 150, 200.0]))
         .with_intensities(np.array([0.6, 0.1, 0.6]))
         .with_metadata({"id": "spectrum4", "precursor_mz": 210, "parent_mass": 210, "smiles": b})
         .build()

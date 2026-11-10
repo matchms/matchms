@@ -139,7 +139,7 @@ def test_similarity_info_unknown_similarity(capsys):
 
     assert exit_code == 1
     assert payload["ok"] is False
-    assert payload["error"]["code"] =="unknown_value"
+    assert payload["error"]["code"] == "unknown_value"
     assert "not_a_similarity" in payload["error"]["message"]
     assert "similarity_name" == payload["error"]["parameter"]
     # the list of valid similarities should include real names

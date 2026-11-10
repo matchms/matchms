@@ -12,17 +12,21 @@ from .utils import ALIASES_FOR_NONE, load_export_key_conversions, load_known_key
 
 
 # Canonical scalar dtypes used by Metadata and SpectraCollection.
-FLOAT_METADATA_KEYS = frozenset({
-    "precursor_mz",
-    "retention_time",
-    "retention_index",
-    "parent",
-    "parent_mass",
-})
+FLOAT_METADATA_KEYS = frozenset(
+    {
+        "precursor_mz",
+        "retention_time",
+        "retention_index",
+        "parent",
+        "parent_mass",
+    }
+)
 
-INT_METADATA_KEYS = frozenset({
-    "charge",
-})
+INT_METADATA_KEYS = frozenset(
+    {
+        "charge",
+    }
+)
 
 
 def harmonize_metadata_values(metadata: Mapping) -> dict:
@@ -58,16 +62,10 @@ def harmonize_metadata_values(metadata: Mapping) -> dict:
         )
 
     if metadata_filtered.get("parent"):
-        metadata_filtered["parent"] = float(
-            metadata_filtered.get("parent")
-        )
+        metadata_filtered["parent"] = float(metadata_filtered.get("parent"))
 
     if "parent_mass" in metadata_filtered:
-        metadata_filtered["parent_mass"] = (
-            _convert_parent_mass_entry_to_float(
-                metadata_filtered.get("parent_mass")
-            )
-        )
+        metadata_filtered["parent_mass"] = _convert_parent_mass_entry_to_float(metadata_filtered.get("parent_mass"))
 
     charge = metadata_filtered.get("charge")
     charge_int = _convert_charge_to_int(charge)
@@ -78,10 +76,7 @@ def harmonize_metadata_values(metadata: Mapping) -> dict:
     return {
         key: value
         for key, value in metadata_filtered.items()
-        if not (
-            isinstance(value, str)
-            and value in invalid_entries
-        )
+        if not (isinstance(value, str) and value in invalid_entries)
     }
 
 

@@ -11,9 +11,7 @@ def _validate_offset_to_precursor(offset_to_precursor) -> float:
         offset_to_precursor,
         (float, int, np.floating, np.integer),
     ):
-        raise TypeError(
-            "Expected 'offset_to_precursor' to be a scalar number."
-        )
+        raise TypeError("Expected 'offset_to_precursor' to be a scalar number.")
 
     return float(offset_to_precursor)
 
@@ -56,13 +54,10 @@ def _remove_peaks_relative_to_precursor_mz(
 
     if not isinstance(precursor_mz, (float, int)):
         raise TypeError(
-            "Expected 'precursor_mz' to be a scalar number. "
-            "Consider applying 'add_precursor_mz' filter first."
+            "Expected 'precursor_mz' to be a scalar number. Consider applying 'add_precursor_mz' filter first."
         )
 
-    offset_to_precursor = _validate_offset_to_precursor(
-        offset_to_precursor
-    )
+    offset_to_precursor = _validate_offset_to_precursor(offset_to_precursor)
 
     threshold = float(precursor_mz) + offset_to_precursor
 
@@ -84,9 +79,7 @@ def _remove_peaks_relative_to_precursor_mz_collection(
     clone: bool | None = True,
 ) -> SpectraCollection:
     """Remove precursor-region peaks directly from a SpectraCollection."""
-    offset_to_precursor = _validate_offset_to_precursor(
-        offset_to_precursor
-    )
+    offset_to_precursor = _validate_offset_to_precursor(offset_to_precursor)
 
     metadata = spectrum_in.metadata
 
@@ -100,25 +93,17 @@ def _remove_peaks_relative_to_precursor_mz_collection(
         )
     except (TypeError, ValueError) as exc:
         raise TypeError(
-            "Expected 'precursor_mz' to be a scalar. "
-            "Consider applying 'add_precursor_mz' filter first."
+            "Expected 'precursor_mz' to be a scalar. Consider applying 'add_precursor_mz' filter first."
         ) from exc
 
     if np.isnan(precursor_mz).any():
-        raise TypeError(
-            "Undefined 'precursor_mz'. "
-            "Consider applying 'add_precursor_mz' filter first."
-        )
+        raise TypeError("Undefined 'precursor_mz'. Consider applying 'add_precursor_mz' filter first.")
 
     thresholds = precursor_mz + offset_to_precursor
 
     target = spectrum_in.copy() if clone else spectrum_in
 
-    target._fragments = (
-        target.fragments.select_by_mz_upper_bound_per_row(
-            thresholds
-        )
-    )
+    target._fragments = target.fragments.select_by_mz_upper_bound_per_row(thresholds)
     target._clear_cache()
 
     return target

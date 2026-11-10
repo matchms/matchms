@@ -81,11 +81,7 @@ def test_derive_inchi_from_smiles_empty_spectrum():
 
 @pytest.mark.parametrize("missing_value", [None, np.nan, pd.NA])
 def test_derive_inchi_from_smiles_collection_handles_missing_inchi_values(missing_value):
-    spectrum_in = (
-        SpectrumBuilder()
-        .with_metadata({"smiles": "C1CCCCC1", "inchi": missing_value})
-        .build()
-    )
+    spectrum_in = SpectrumBuilder().with_metadata({"smiles": "C1CCCCC1", "inchi": missing_value}).build()
 
     collection = SpectraCollection([spectrum_in])
     processed = derive_inchi_from_smiles(collection)

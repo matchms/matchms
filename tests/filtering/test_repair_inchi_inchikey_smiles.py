@@ -111,13 +111,7 @@ def test_repair_inchi_inchikey_smiles_collection_multiple_rows():
 
 
 def test_repair_inchi_inchikey_smiles_clone_false_modifies_collection_in_place():
-    collection = SpectraCollection(
-        [
-            SpectrumBuilder()
-            .with_metadata({"smiles": "ABTNALLHJFCFRZ-UHFFFAOYSA-N"})
-            .build()
-        ]
-    )
+    collection = SpectraCollection([SpectrumBuilder().with_metadata({"smiles": "ABTNALLHJFCFRZ-UHFFFAOYSA-N"}).build()])
 
     repaired = repair_inchi_inchikey_smiles(collection, clone=False)
 
@@ -133,11 +127,7 @@ def test_repair_inchi_inchikey_smiles_empty_spectrum():
 
 @pytest.mark.parametrize("as_collection", [False, True], ids=["spectrum", "collection"])
 def test_repair_inchi_inchikey_smiles_does_not_create_empty_strings(as_collection):
-    spectrum_in = (
-        SpectrumBuilder()
-        .with_metadata({"smiles": "ABTNALLHJFCFRZ-UHFFFAOYSA-N"})
-        .build()
-    )
+    spectrum_in = SpectrumBuilder().with_metadata({"smiles": "ABTNALLHJFCFRZ-UHFFFAOYSA-N"}).build()
 
     spectrum = run_filter_as_spectrum_or_collection(
         repair_inchi_inchikey_smiles,
@@ -153,12 +143,8 @@ def test_repair_inchi_inchikey_smiles_does_not_create_empty_strings(as_collectio
 def test_repair_inchi_inchikey_smiles_collection_uses_missing_values_not_empty_strings():
     collection = SpectraCollection(
         [
-            SpectrumBuilder()
-            .with_metadata({"smiles": "ABTNALLHJFCFRZ-UHFFFAOYSA-N"})
-            .build(),
-            SpectrumBuilder()
-            .with_metadata({"inchi": "C[C@H](Cc1ccccc1)N(C)CC#C"})
-            .build(),
+            SpectrumBuilder().with_metadata({"smiles": "ABTNALLHJFCFRZ-UHFFFAOYSA-N"}).build(),
+            SpectrumBuilder().with_metadata({"inchi": "C[C@H](Cc1ccccc1)N(C)CC#C"}).build(),
         ]
     )
 

@@ -36,6 +36,7 @@ logger = logging.getLogger("matchms")
 @dataclass(frozen=True)
 class _FingerprintRecord:
     """Internal record linking one unique compound to structure metadata."""
+
     inchikey: str
     smiles: str | None
     inchi: str | None
@@ -237,9 +238,7 @@ class Fingerprints:
             return self._get_row(row_idx)
 
         if len(inchikey) == 14 and not self.ignore_stereochemistry:
-            raise ValueError(
-                "Expected full 27 character InChIKey (or set ignore_stereochemistry=True)."
-            )
+            raise ValueError("Expected full 27 character InChIKey (or set ignore_stereochemistry=True).")
 
         if not is_valid_inchikey(inchikey):
             logger.warning("The provided InChIKey is not valid or may be the short form.")

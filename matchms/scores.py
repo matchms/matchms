@@ -9,7 +9,7 @@ from scipy.sparse import coo_array
 @dataclass(frozen=True)
 class ScoresMask:
     """Boolean mask for Scores, stored either densely or as sparse coordinates.
-    
+
     Parameters
     ----------
     shape
@@ -21,6 +21,7 @@ class ScoresMask:
     col
         Optional array of column indices for sparse representation. If provided, `dense_mask` must be None.
     """
+
     shape: tuple[int, int]
     dense_mask: np.ndarray | None = None
     row: np.ndarray | None = None
@@ -86,7 +87,7 @@ class ScoresMask:
 
 class Scores:
     """Container for computed matchms scores.
-    
+
     The ``Scores`` class stores the output of one similarity computation and provides
     a small, intuitive API that works for both dense and sparse score matrices.
 
@@ -146,10 +147,7 @@ class Scores:
 
     Multi-field scores:
 
-    >>> scores = Scores({
-    ...     "score": np.array([[1.0, 0.0], [0.3, 0.8]]),
-    ...     "matches": np.array([[5, 0], [1, 4]])
-    ... })
+    >>> scores = Scores({"score": np.array([[1.0, 0.0], [0.3, 0.8]]), "matches": np.array([[5, 0], [1, 4]])})
     >>> scores["score"].to_array()
     array([[1. , 0. ],
            [0.3, 0.8]])
@@ -338,8 +336,7 @@ class Scores:
         """Compare scalar Scores against a value and return a mask."""
         if not self.is_scalar:
             raise TypeError(
-                "Direct comparisons are only supported for scalar Scores. "
-                f"Available score fields: {self.score_fields}."
+                f"Direct comparisons are only supported for scalar Scores. Available score fields: {self.score_fields}."
             )
 
         if not self.is_sparse:
@@ -356,7 +353,6 @@ class Scores:
 
         return ScoresMask(shape=self.shape, dense_mask=op(self.to_array(), other))
 
-
     def copy(self) -> Self:
         """Return a copy of the Scores object.
 
@@ -365,10 +361,7 @@ class Scores:
         ``Scores`` object preserves the score fields, shape, and storage mode of
         the original object.
         """
-        copied_data = {
-            field: value.copy()
-            for field, value in self._data.items()
-        }
+        copied_data = {field: value.copy() for field, value in self._data.items()}
         return self.__class__(copied_data)
 
     # File I/O methods for saving and loading Scores objects to/from .npz files
@@ -428,11 +421,9 @@ class Scores:
 
         with np.load(path, allow_pickle=False) as npz:
             if cls._METADATA_KEY not in npz:
-                raise ValueError(
-                    f"File {path} does not contain {cls._FORMAT_NAME} metadata."
-                )
+                raise ValueError(f"File {path} does not contain {cls._FORMAT_NAME} metadata.")
 
-            metadata =  json.loads(str(npz[cls._METADATA_KEY]))
+            metadata = json.loads(str(npz[cls._METADATA_KEY]))
             cls._validate_metadata(metadata, path)
 
             is_sparse = bool(metadata["is_sparse"])
@@ -448,9 +439,7 @@ class Scores:
 
                     missing = [key for key in (row_key, col_key, data_key) if key not in npz]
                     if missing:
-                        raise ValueError(
-                            f"File {path} is missing sparse data for field {field!r}: {missing}"
-                        )
+                        raise ValueError(f"File {path} is missing sparse data for field {field!r}: {missing}")
 
                     row = npz[row_key]
                     col = npz[col_key]
@@ -459,28 +448,19 @@ class Scores:
             else:
                 for field in score_fields:
                     if field not in npz:
-                        raise ValueError(
-                            f"File {path} is missing dense data for field {field!r}."
-                        )
+                        raise ValueError(f"File {path} is missing dense data for field {field!r}.")
                     data[field] = npz[field]
 
         return cls(data)
-
 
     @classmethod
     def _validate_metadata(cls, metadata: dict, path: Path) -> None:
         """Validate loaded metadata."""
         if metadata.get("format") != cls._FORMAT_NAME:
-            raise ValueError(
-                f"File {path} is not a {cls._FORMAT_NAME} file."
-            )
+            raise ValueError(f"File {path} is not a {cls._FORMAT_NAME} file.")
         if metadata.get("version") != cls._FORMAT_VERSION:
-            raise ValueError(
-                f"Unsupported {cls._FORMAT_NAME} version {metadata.get('version')} in file {path}."
-            )
+            raise ValueError(f"Unsupported {cls._FORMAT_NAME} version {metadata.get('version')} in file {path}.")
         required_keys = {"format", "version", "is_sparse", "score_fields", "shape"}
         missing = required_keys.difference(metadata)
         if missing:
-            raise ValueError(
-                f"File {path} is missing metadata keys: {sorted(missing)}"
-            )
+            raise ValueError(f"File {path} is missing metadata keys: {sorted(missing)}")

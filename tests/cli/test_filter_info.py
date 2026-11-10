@@ -83,7 +83,7 @@ def test_filter_info_unknown_filter(capsys):
 
     assert exit_code == 1
     assert payload["ok"] is False
-    assert payload["error"]["code"] =="unknown_value"
+    assert payload["error"]["code"] == "unknown_value"
     assert "not_a_filter" in payload["error"]["message"]
     # the list of valid filters should include real names
     assert "select_by_mz" in payload["error"]["valid_values"]

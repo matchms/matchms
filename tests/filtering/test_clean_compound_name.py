@@ -50,15 +50,9 @@ def test_clean_compound_name_without_compound_name_and_without_name_does_nothing
 def test_clean_compound_name_collection_multiple_rows():
     collection = SpectraCollection(
         [
-            SpectrumBuilder()
-            .with_metadata({"compound_name": "NCGC00160217-01!SOPHOCARPINE"})
-            .build(),
-            SpectrumBuilder()
-            .with_metadata({"compound_name": "MoNA:2346734 Piroxicam (Feldene)"})
-            .build(),
-            SpectrumBuilder()
-            .with_metadata({"compound_name": "Already clean"})
-            .build(),
+            SpectrumBuilder().with_metadata({"compound_name": "NCGC00160217-01!SOPHOCARPINE"}).build(),
+            SpectrumBuilder().with_metadata({"compound_name": "MoNA:2346734 Piroxicam (Feldene)"}).build(),
+            SpectrumBuilder().with_metadata({"compound_name": "Already clean"}).build(),
         ]
     )
 
@@ -72,11 +66,7 @@ def test_clean_compound_name_collection_multiple_rows():
 
 def test_clean_compound_name_collection_clone_false_modifies_input():
     collection = SpectraCollection(
-        [
-            SpectrumBuilder()
-            .with_metadata({"compound_name": "NCGC00160217-01!SOPHOCARPINE"})
-            .build()
-        ]
+        [SpectrumBuilder().with_metadata({"compound_name": "NCGC00160217-01!SOPHOCARPINE"}).build()]
     )
 
     processed = clean_compound_name(collection, clone=False)

@@ -32,9 +32,7 @@ def _require_matching_adduct_and_ionmode(metadata) -> bool:
     if charge_of_adduct is None:
         return False
 
-    if (charge_of_adduct > 0 and ionmode != "positive") or (
-        charge_of_adduct < 0 and ionmode != "negative"
-    ):
+    if (charge_of_adduct > 0 and ionmode != "positive") or (charge_of_adduct < 0 and ionmode != "negative"):
         logger.warning(
             "Ionmode: %s does not correspond to the charge or the adduct %s",
             ionmode,
@@ -45,6 +43,4 @@ def _require_matching_adduct_and_ionmode(metadata) -> bool:
     return True
 
 
-require_matching_adduct_and_ionmode = metadata_requirement_filter(
-    _require_matching_adduct_and_ionmode
-)
+require_matching_adduct_and_ionmode = metadata_requirement_filter(_require_matching_adduct_and_ionmode)

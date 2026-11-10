@@ -53,6 +53,7 @@ def collection_filter(
     warn_on_fallback
         If True, warn when falling back to spectrum-wise processing.
     """
+
     @wraps(spectrum_impl)
     def wrapper(spectrum_in=None, *args, **kwargs):
         if spectrum_in is None:
@@ -61,11 +62,7 @@ def collection_filter(
         # Option (1) --> Handle SpectraCollection
         if _is_spectra_collection(spectrum_in):
             if collection_impl is not None:
-                return collection_impl(
-                    spectrum_in,
-                    *args,
-                    **kwargs
-                    )
+                return collection_impl(spectrum_in, *args, **kwargs)
 
             if allow_spectrum_fallback:
                 if warn_on_fallback:
@@ -84,17 +81,11 @@ def collection_filter(
                     **kwargs,
                 )
 
-            raise NotImplementedError(
-                f"{wrapper.__name__} does not support SpectraCollection."
-            )
+            raise NotImplementedError(f"{wrapper.__name__} does not support SpectraCollection.")
         # Option (2) --> Handle Spectrum
         return spectrum_impl(spectrum_in, *args, **kwargs)
 
-    wrapper.__name__ = (
-        spectrum_impl.__name__
-        .removeprefix("_")
-        .removesuffix("_spectrum")
-    )
+    wrapper.__name__ = spectrum_impl.__name__.removeprefix("_").removesuffix("_spectrum")
 
     return wrapper
 
@@ -102,6 +93,7 @@ def collection_filter(
 # ----------------------------------
 # Metadata_update_filter for filters that only update metadata and do not drop spectra.
 # ----------------------------------
+
 
 def _metadata_filter_signature(metadata_impl: Callable) -> inspect.Signature:
     """Build the public Spectrum-style signature for a metadata-update filter.
@@ -118,10 +110,7 @@ def _metadata_filter_signature(metadata_impl: Callable) -> inspect.Signature:
     metadata_parameters = list(metadata_signature.parameters.values())
 
     if not metadata_parameters:
-        raise ValueError(
-            f"Metadata filter {metadata_impl.__name__} must accept metadata as "
-            "its first parameter."
-        )
+        raise ValueError(f"Metadata filter {metadata_impl.__name__} must accept metadata as its first parameter.")
 
     public_parameters = [
         inspect.Parameter(
@@ -227,9 +216,9 @@ def metadata_update_filter(
     return public_filter
 
 
-#----------------------------------
+# ----------------------------------
 # Factory for require-type filters that drop spectra/rows based on metadata requirements.
-#----------------------------------
+# ----------------------------------
 def _metadata_requirement_signature(metadata_impl: Callable) -> inspect.Signature:
     """Build the public Spectrum-style signature for a metadata requirement filter."""
     metadata_signature = inspect.signature(metadata_impl)
@@ -237,8 +226,7 @@ def _metadata_requirement_signature(metadata_impl: Callable) -> inspect.Signatur
 
     if not metadata_parameters:
         raise ValueError(
-            f"Metadata requirement filter {metadata_impl.__name__} must accept "
-            "metadata as its first parameter."
+            f"Metadata requirement filter {metadata_impl.__name__} must accept metadata as its first parameter."
         )
 
     public_parameters = [
@@ -265,7 +253,6 @@ def _metadata_requirement_signature(metadata_impl: Callable) -> inspect.Signatur
             )
 
         public_parameters.append(parameter)
-
 
     return inspect.Signature(
         parameters=public_parameters,
@@ -309,11 +296,7 @@ def metadata_requirement_filter(
         clone: bool | None = True,
         **kwargs,
     ):
-        target = (
-            collection.copy()
-            if clone
-            else collection
-        )
+        target = collection.copy() if clone else collection
 
         metadata = target.metadata
 
@@ -336,20 +319,11 @@ def metadata_requirement_filter(
 
     public_filter = collection_filter(
         spectrum_impl,
-        collection_impl=(
-            collection_impl
-            if collection_impl is not None
-            else default_collection_impl
-        ),
+        collection_impl=(collection_impl if collection_impl is not None else default_collection_impl),
     )
 
-    public_name = (
-        metadata_impl.__name__
-        .removeprefix("_")
-    )
-    public_signature = _metadata_requirement_signature(
-        metadata_impl
-    )
+    public_name = metadata_impl.__name__.removeprefix("_")
+    public_signature = _metadata_requirement_signature(metadata_impl)
 
     spectrum_impl.__name__ = public_name
     spectrum_impl.__doc__ = metadata_impl.__doc__

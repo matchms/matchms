@@ -1,4 +1,5 @@
 """High-level spectral entropy similarity for pairs, matrices, and library search."""
+
 import numpy as np
 from .default_parameters import (
     DEFAULT_DTYPE,
@@ -85,8 +86,13 @@ class Entropy(EntropyFlash):
     def to_dict(self) -> dict:
         """Return the public entropy constructor parameters."""
         names = (
-            "matching_mode", "tolerance", "use_ppm", "remove_precursor",
-            "offset_to_precursor", "noise_cutoff", "merge_within",
+            "matching_mode",
+            "tolerance",
+            "use_ppm",
+            "remove_precursor",
+            "offset_to_precursor",
+            "noise_cutoff",
+            "merge_within",
         )
         return {
             "__Similarity__": type(self).__name__,

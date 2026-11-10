@@ -77,20 +77,13 @@ def test_require_matching_adduct_precursor_mz_parent_mass_collection_single_row(
 # ----------------------
 # Multi-row collection level tests
 
+
 def test_require_matching_adduct_precursor_mz_parent_mass_collection_multiple_rows():
     spectra = [
-        SpectrumBuilder()
-        .with_metadata({"adduct": "[M+H]+", "parent_mass": 100.0, "precursor_mz": 101.0})
-        .build(),
-        SpectrumBuilder()
-        .with_metadata({"adduct": "[M+H]+", "parent_mass": 100.0, "precursor_mz": 100.0})
-        .build(),
-        SpectrumBuilder()
-        .with_metadata({"adduct": "[M+H]+", "parent_mass": "blabal", "precursor_mz": 100.0})
-        .build(),
-        SpectrumBuilder()
-        .with_metadata({"adduct": "[M-H]-", "parent_mass": 100.0, "precursor_mz": 98.9927})
-        .build(),
+        SpectrumBuilder().with_metadata({"adduct": "[M+H]+", "parent_mass": 100.0, "precursor_mz": 101.0}).build(),
+        SpectrumBuilder().with_metadata({"adduct": "[M+H]+", "parent_mass": 100.0, "precursor_mz": 100.0}).build(),
+        SpectrumBuilder().with_metadata({"adduct": "[M+H]+", "parent_mass": "blabal", "precursor_mz": 100.0}).build(),
+        SpectrumBuilder().with_metadata({"adduct": "[M-H]-", "parent_mass": 100.0, "precursor_mz": 98.9927}).build(),
     ]
     collection = SpectraCollection(spectra)
 
@@ -104,12 +97,8 @@ def test_require_matching_adduct_precursor_mz_parent_mass_collection_multiple_ro
 def test_require_matching_adduct_precursor_mz_parent_mass_collection_clone_false_modifies_input():
     collection = SpectraCollection(
         [
-            SpectrumBuilder()
-            .with_metadata({"adduct": "[M+H]+", "parent_mass": 100.0, "precursor_mz": 101.0})
-            .build(),
-            SpectrumBuilder()
-            .with_metadata({"adduct": "[M+H]+", "parent_mass": 100.0, "precursor_mz": 100.0})
-            .build(),
+            SpectrumBuilder().with_metadata({"adduct": "[M+H]+", "parent_mass": 100.0, "precursor_mz": 101.0}).build(),
+            SpectrumBuilder().with_metadata({"adduct": "[M+H]+", "parent_mass": 100.0, "precursor_mz": 100.0}).build(),
         ]
     )
 

@@ -1,4 +1,5 @@
 """Helper functions to build and handle spectral networks."""
+
 from __future__ import annotations
 from collections.abc import Sequence
 from typing import TYPE_CHECKING
@@ -62,8 +63,7 @@ def get_top_hits(
     else:
         if len(identifiers) != expected_len:
             raise ValueError(
-                f"identifiers must have length {expected_len} for axis={axis}, "
-                f"but got length {len(identifiers)}."
+                f"identifiers must have length {expected_len} for axis={axis}, but got length {len(identifiers)}."
             )
 
     if ignore_diagonal and n_rows != n_cols:

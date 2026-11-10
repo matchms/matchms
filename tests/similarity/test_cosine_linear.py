@@ -103,9 +103,12 @@ def test_pairwise_scores(param_idx, left, right, expected_score, expected_matche
     )
 
     linear_cosine = CosineLinear(
-        tolerance=tolerance, mz_power=mz_power, intensity_power=intensity_power,
-        remove_precursor=False, noise_cutoff=None,
-        )
+        tolerance=tolerance,
+        mz_power=mz_power,
+        intensity_power=intensity_power,
+        remove_precursor=False,
+        noise_cutoff=None,
+    )
     result = linear_cosine.pair(spec_left, spec_right)
 
     assert result["matches"] == expected_matches, f"Expected {expected_matches} matches, got {result['matches']}"
@@ -123,8 +126,11 @@ def test_commutativity(param_idx):
     intensity_power = ps["intensity_power"]
 
     linear_cosine = CosineLinear(
-        tolerance=tolerance, mz_power=mz_power, intensity_power=intensity_power,
-        remove_precursor=False, noise_cutoff=None,
+        tolerance=tolerance,
+        mz_power=mz_power,
+        intensity_power=intensity_power,
+        remove_precursor=False,
+        noise_cutoff=None,
     )
     builder = SpectrumBuilder()
     spectra = {}
@@ -192,13 +198,19 @@ def test_hungarian_matches_cosine_linear_on_merged_spectra(param_idx, left, righ
     )
 
     hungarian = CosineHungarian(
-        tolerance=tolerance, mz_power=mz_power, intensity_power=intensity_power,
-        remove_precursor=False, noise_cutoff=None,
-        )
+        tolerance=tolerance,
+        mz_power=mz_power,
+        intensity_power=intensity_power,
+        remove_precursor=False,
+        noise_cutoff=None,
+    )
     linear = CosineLinear(
-        tolerance=tolerance, mz_power=mz_power, intensity_power=intensity_power,
-        remove_precursor=False, noise_cutoff=None,
-        )
+        tolerance=tolerance,
+        mz_power=mz_power,
+        intensity_power=intensity_power,
+        remove_precursor=False,
+        noise_cutoff=None,
+    )
 
     result_hungarian = hungarian.pair(spec_left, spec_right)
     result_linear = linear.pair(spec_left, spec_right)
@@ -412,7 +424,5 @@ def test_cosine_linear_pair_matrix_parity_with_precursor_removal():
         progress_bar=False,
     )
 
-    assert matrix_score["score"].to_array()[0, 0] == pytest.approx(
-        pair_score["score"]
-    )
+    assert matrix_score["score"].to_array()[0, 0] == pytest.approx(pair_score["score"])
     assert matrix_score["matches"].to_array()[0, 0] == pair_score["matches"]

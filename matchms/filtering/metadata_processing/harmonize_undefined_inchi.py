@@ -7,8 +7,7 @@ from matchms.utils import ALIASES_FOR_NONE
 
 
 @deprecated(
-    version="1.0.0",
-    reason="This will be dropped in a future version. Use `harmonize_missing_entries` instead."
+    version="1.0.0", reason="This will be dropped in a future version. Use `harmonize_missing_entries` instead."
 )
 def harmonize_undefined_inchi(
     spectrum_in: SpectrumType,

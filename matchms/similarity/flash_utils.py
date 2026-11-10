@@ -1,5 +1,4 @@
-"""SpectraCollection-native helpers for Flash-based similarities.
-"""
+"""SpectraCollection-native helpers for Flash-based similarities."""
 
 from __future__ import annotations
 from dataclasses import dataclass
@@ -87,6 +86,7 @@ class _LibraryIndex:
     dtype : np.dtype
         Floating-point dtype used for all float arrays.
     """
+
     def __init__(self, dtype: np.dtype = np.float32):
         self.n_specs = 0
         self.peaks_mz = None
@@ -164,15 +164,12 @@ def _entropy_weight_packed(
     per_peak_totals = totals[spec_idx]
     p = np.zeros(intensities.shape[0], dtype=dtype)
     valid_total = per_peak_totals > 0.0
-    p[valid_total] = (
-        intensities[valid_total] / per_peak_totals[valid_total]
-    ).astype(dtype, copy=False)
+    p[valid_total] = (intensities[valid_total] / per_peak_totals[valid_total]).astype(dtype, copy=False)
 
     entropy_terms = np.zeros(p.shape[0], dtype=np.float64)
     positive = p > 0.0
     entropy_terms[positive] = -(
-        p[positive].astype(np.float64, copy=False)
-        * np.log(p[positive]).astype(np.float64, copy=False)
+        p[positive].astype(np.float64, copy=False) * np.log(p[positive]).astype(np.float64, copy=False)
     )
     entropy = np.bincount(
         spec_idx,
@@ -214,9 +211,7 @@ def _merge_packed_rows_numba(
             if (mz[k] - current_mz) <= max_delta_da:
                 total = current_int + intensities[k]
                 if total > 0.0:
-                    current_mz = (
-                        current_mz * current_int + mz[k] * intensities[k]
-                    ) / total
+                    current_mz = (current_mz * current_int + mz[k] * intensities[k]) / total
                     current_int = total
                 else:
                     current_mz = mz[k]
@@ -417,15 +412,9 @@ def _prepare_collection(
         scale = np.zeros(n_specs, dtype=np.float64)
         nonzero = row_sum > 0.0
         scale[nonzero] = 0.5 / row_sum[nonzero]
-        intensities = (
-            intensities * scale[spec_idx]
-        ).astype(dtype, copy=False)
+        intensities = (intensities * scale[spec_idx]).astype(dtype, copy=False)
 
-    spec_l2 = (
-        _compute_l2_by_row(intensities, offsets, dtype)
-        if compute_l2_norm
-        else None
-    )
+    spec_l2 = _compute_l2_by_row(intensities, offsets, dtype) if compute_l2_norm else None
 
     return _PreparedSpectra(
         n_specs=n_specs,
@@ -501,9 +490,7 @@ def _build_library_index_from_prepared(
             idx.nl_spec_idx = np.zeros(0, dtype=int_dtype)
             idx.nl_product_idx = np.zeros(0, dtype=np.int64)
         else:
-            nl_mz = (
-                pmz_per_peak[src_idx] - prepared.spec_mz[src_idx]
-            ).astype(prepared.dtype, copy=False)
+            nl_mz = (pmz_per_peak[src_idx] - prepared.spec_mz[src_idx]).astype(prepared.dtype, copy=False)
             nl_int = prepared.spec_int[src_idx]
             nl_spec = spec_flat[src_idx]
             nl_prod = product_pos[src_idx]
@@ -521,6 +508,7 @@ def _build_library_index_from_prepared(
 # Spectrum-oriented helpers retained for pair-level compatibility and direct
 # comparison with the old spectrum based implementation.
 # -----------------------------------------------------------------------------
+
 
 def _entropy_weight(intensities: np.ndarray, dtype: np.dtype) -> np.ndarray:
     """Apply entropy-based weighting to one intensity array."""

@@ -3,13 +3,16 @@ import pytest
 from matchms.fragments import Fragments
 
 
-@pytest.mark.parametrize("dtype", [
-    np.float16,
-    np.float32,
-    np.float64,
-    float,
-    "float",
-])
+@pytest.mark.parametrize(
+    "dtype",
+    [
+        np.float16,
+        np.float32,
+        np.float64,
+        float,
+        "float",
+    ],
+)
 def test_fragments_init(dtype):
     mz = np.array([10, 20, 30], dtype=dtype)
     intensities = np.array([100, 20, 300], dtype=dtype)
@@ -97,8 +100,7 @@ def test_fragments_getitem():
     peaks = Fragments(mz=mz, intensities=intensities)
 
     assert np.allclose(peaks[1], np.array(mz[1], intensities[1]))
-    assert np.allclose(peaks[:],
-                          np.stack((peaks.mz, peaks.intensities)))
+    assert np.allclose(peaks[:], np.stack((peaks.mz, peaks.intensities)))
 
 
 def test_fragments_to_numpy():
@@ -108,6 +110,4 @@ def test_fragments_to_numpy():
 
     peaks = Fragments(mz=mz, intensities=intensities)
 
-    assert np.allclose(peaks.to_numpy, np.array([[10., 100.],
-                                                       [20., 99.9],
-                                                       [30., 300.]]))
+    assert np.allclose(peaks.to_numpy, np.array([[10.0, 100.0], [20.0, 99.9], [30.0, 300.0]]))

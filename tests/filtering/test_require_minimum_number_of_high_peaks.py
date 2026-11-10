@@ -46,12 +46,7 @@ def test_require_minimum_number_of_high_peaks(
     expected_is_none,
     as_collection,
 ):
-    spectrum_in = (
-        SpectrumBuilder()
-        .with_mz(peaks[0])
-        .with_intensities(peaks[1])
-        .build()
-    )
+    spectrum_in = SpectrumBuilder().with_mz(peaks[0]).with_intensities(peaks[1]).build()
 
     spectrum = run_filter_as_spectrum_or_collection(
         require_minimum_number_of_high_peaks,

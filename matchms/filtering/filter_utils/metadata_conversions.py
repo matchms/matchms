@@ -1,4 +1,3 @@
-
 import logging
 from collections.abc import Iterable, Mapping
 import numpy as np
@@ -111,10 +110,7 @@ def metadata_row_to_dict(row: Mapping) -> dict:
     metadata and row-wise metadata filters. In particular, pandas missing
     scalars such as ``pd.NA`` and ``np.nan`` are exposed to filters as ``None``.
     """
-    return {
-        key: metadata_value_to_python(value)
-        for key, value in row.items()
-    }
+    return {key: metadata_value_to_python(value) for key, value in row.items()}
 
 
 def apply_metadata_row_filter(
@@ -177,23 +173,13 @@ def apply_metadata_row_filter(
             )
         )
 
-    updated_columns = sorted(
-        {
-            key
-            for update_dict in records
-            for key in update_dict
-        }
-    )
+    updated_columns = sorted({key for update_dict in records for key in update_dict})
 
     if not updated_columns:
         return pd.DataFrame(index=metadata.index)
 
     records_with_all_columns = [
-        {
-            column: update_dict.get(column, NO_METADATA_UPDATE)
-            for column in updated_columns
-        }
-        for update_dict in records
+        {column: update_dict.get(column, NO_METADATA_UPDATE) for column in updated_columns} for update_dict in records
     ]
 
     updates_df = pd.DataFrame.from_records(
@@ -202,11 +188,7 @@ def apply_metadata_row_filter(
     )
 
     if drop_missing_row_updates:
-        updates_df = updates_df.mask(
-            updates_df.map(
-                lambda value: value is NO_METADATA_UPDATE
-            )
-        )
+        updates_df = updates_df.mask(updates_df.map(lambda value: value is NO_METADATA_UPDATE))
         updates_df = updates_df.dropna(axis=0, how="all")
         updates_df = updates_df.dropna(axis=1, how="all")
 

@@ -27,11 +27,7 @@ def test_repair_parent_mass_from_smiles(
     expected_parent_mass,
     as_collection,
 ):
-    spectrum_in = (
-        SpectrumBuilder()
-        .with_metadata({"smiles": smiles, "parent_mass": parent_mass})
-        .build()
-    )
+    spectrum_in = SpectrumBuilder().with_metadata({"smiles": smiles, "parent_mass": parent_mass}).build()
 
     spectrum_out = run_filter_as_spectrum_or_collection(
         repair_parent_mass_from_smiles,
@@ -49,11 +45,7 @@ def test_repair_parent_mass_from_smiles(
 
 @pytest.mark.parametrize("as_collection", [False, True], ids=["spectrum", "collection"])
 def test_repair_parent_mass_from_smiles_adds_missing_parent_mass(as_collection):
-    spectrum_in = (
-        SpectrumBuilder()
-        .with_metadata({"smiles": "CN1CCCC1C2=CN=CC=C2"})
-        .build()
-    )
+    spectrum_in = SpectrumBuilder().with_metadata({"smiles": "CN1CCCC1C2=CN=CC=C2"}).build()
 
     spectrum_out = run_filter_as_spectrum_or_collection(
         repair_parent_mass_from_smiles,
@@ -102,11 +94,7 @@ def test_repair_parent_mass_from_smiles_handles_missing_parent_mass_values(
 
 @pytest.mark.parametrize("as_collection", [False, True], ids=["spectrum", "collection"])
 def test_repair_parent_mass_from_smiles_invalid_smiles_does_nothing(as_collection):
-    spectrum_in = (
-        SpectrumBuilder()
-        .with_metadata({"smiles": "not-a-smiles", "parent_mass": 123.4})
-        .build()
-    )
+    spectrum_in = SpectrumBuilder().with_metadata({"smiles": "not-a-smiles", "parent_mass": 123.4}).build()
 
     spectrum_out = run_filter_as_spectrum_or_collection(
         repair_parent_mass_from_smiles,
@@ -121,11 +109,7 @@ def test_repair_parent_mass_from_smiles_invalid_smiles_does_nothing(as_collectio
 
 @pytest.mark.parametrize("as_collection", [False, True], ids=["spectrum", "collection"])
 def test_repair_parent_mass_from_smiles_missing_smiles_does_nothing(as_collection):
-    spectrum_in = (
-        SpectrumBuilder()
-        .with_metadata({"parent_mass": 123.4})
-        .build()
-    )
+    spectrum_in = SpectrumBuilder().with_metadata({"parent_mass": 123.4}).build()
 
     spectrum_out = run_filter_as_spectrum_or_collection(
         repair_parent_mass_from_smiles,
@@ -311,4 +295,3 @@ def test_repair_parent_mass_from_smiles_collection_clone_false_modifies_input():
         162.115698455,
         abs_tol=1e-9,
     )
-    

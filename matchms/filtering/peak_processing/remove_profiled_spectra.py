@@ -52,9 +52,7 @@ def _remove_profiled_spectra(
         spectrum.mz,
         mz_window,
     ):
-        logger.info(
-            "Spectrum removed because it is likely profile data."
-        )
+        logger.info("Spectrum removed because it is likely profile data.")
         return None
 
     return spectrum
@@ -91,9 +89,7 @@ def _remove_profiled_spectra_collection(
             continue
 
         intensities = array.data[start:end]
-        mz = fragments.bin_to_mz(
-            array.indices[start:end]
-        )
+        mz = fragments.bin_to_mz(array.indices[start:end])
 
         if _is_profiled_spectrum(
             intensities,
@@ -105,11 +101,7 @@ def _remove_profiled_spectra_collection(
     n_removed = int((~keep_mask).sum())
 
     if n_removed == 0:
-        return (
-            spectrum_in.copy()
-            if clone
-            else spectrum_in
-        )
+        return spectrum_in.copy() if clone else spectrum_in
 
     logger.info(
         "Removed %d spectra because they are likely profile data.",
@@ -127,14 +119,8 @@ def _remove_profiled_spectra_collection(
         spectrum_in._reorder(keep_indices)
         return spectrum_in
 
-    filtered_fragments = fragments.take(
-        keep_indices
-    )
-    filtered_metadata = (
-        spectrum_in._metadata
-        .iloc[keep_indices]
-        .reset_index(drop=True)
-    )
+    filtered_fragments = fragments.take(keep_indices)
+    filtered_metadata = spectrum_in._metadata.iloc[keep_indices].reset_index(drop=True)
 
     return spectrum_in.__class__._from_metadata_and_fragments(
         metadata=filtered_metadata,
@@ -152,12 +138,10 @@ def _is_profiled_spectrum(
     if mz.size < 3:
         return False
 
-    number_of_surrounding_peaks = (
-        _get_number_of_high_intensity_surrounding_peaks(
-            intensities,
-            mz,
-            mz_window,
-        )
+    number_of_surrounding_peaks = _get_number_of_high_intensity_surrounding_peaks(
+        intensities,
+        mz,
+        mz_window,
     )
 
     return number_of_surrounding_peaks >= 3
@@ -169,20 +153,16 @@ def _get_number_of_high_intensity_surrounding_peaks(
     mz_window: float,
 ) -> int:
     """Count contiguous high-intensity peaks around the base peak."""
-    intensities_within_mz_window = (
-        _select_intensities_within_mz_window(
-            intensities,
-            mz,
-            mz_window,
-        )
+    intensities_within_mz_window = _select_intensities_within_mz_window(
+        intensities,
+        mz,
+        mz_window,
     )
 
     (
         n_before,
         n_after,
-    ) = _get_peak_intensity_neighbourhood(
-        intensities_within_mz_window
-    )
+    ) = _get_peak_intensity_neighbourhood(intensities_within_mz_window)
 
     # The neighboring-peak counts exclude the base peak itself.
     return int(n_before + n_after + 1)
@@ -194,15 +174,10 @@ def _select_intensities_within_mz_window(
     mz_window: float,
 ) -> np.ndarray:
     """Return intensities strictly within the m/z window around the base peak."""
-    base_peak_index = int(
-        intensities.argmax()
-    )
+    base_peak_index = int(intensities.argmax())
     base_peak_mz = mz[base_peak_index]
 
-    within_mz_window = (
-        (mz > base_peak_mz - mz_window)
-        & (mz < base_peak_mz + mz_window)
-    )
+    within_mz_window = (mz > base_peak_mz - mz_window) & (mz < base_peak_mz + mz_window)
 
     return intensities[within_mz_window]
 
@@ -211,30 +186,16 @@ def _get_peak_intensity_neighbourhood(
     intensities: np.ndarray,
 ) -> tuple[int, int]:
     """Count contiguous >50% intensity neighbors around the base peak."""
-    base_peak_index = int(
-        intensities.argmax()
-    )
-    intensity_threshold = (
-        intensities[base_peak_index] / 2
-    )
+    base_peak_index = int(intensities.argmax())
+    intensity_threshold = intensities[base_peak_index] / 2
 
     # Add False at both boundaries so the first below-threshold position always
     # exists when searching outward from the base peak.
     threshold_mask = np.concatenate([[False], intensities > intensity_threshold, [False]])
 
-    n_before = np.argmin(
-        np.flip(
-            threshold_mask[
-                : base_peak_index + 1
-            ]
-        )
-    )
+    n_before = np.argmin(np.flip(threshold_mask[: base_peak_index + 1]))
 
-    n_after = np.argmin(
-        threshold_mask[
-            base_peak_index + 2 :
-        ]
-    )
+    n_after = np.argmin(threshold_mask[base_peak_index + 2 :])
 
     return int(n_before), int(n_after)
 

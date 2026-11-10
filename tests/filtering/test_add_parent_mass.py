@@ -174,13 +174,7 @@ def test_add_parent_mass_collection_updates_multiple_rows():
 
 
 def test_add_parent_mass_collection_clone_false_modifies_input():
-    collection = SpectraCollection(
-        [
-            SpectrumBuilder()
-            .with_metadata({"precursor_mz": 444.0, "charge": +1})
-            .build()
-        ]
-    )
+    collection = SpectraCollection([SpectrumBuilder().with_metadata({"precursor_mz": 444.0, "charge": +1}).build()])
 
     processed = add_parent_mass(collection, clone=False)
 

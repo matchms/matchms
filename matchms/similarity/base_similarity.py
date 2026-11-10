@@ -174,7 +174,7 @@ class BaseSimilarity(ABC):
     def _as_spectra_collection(
         spectra,
         **kwargs,
-        ):
+    ):
         """Return spectra as a SpectraCollection."""
         from matchms.spectra_collection import SpectraCollection
 
@@ -214,9 +214,7 @@ class BaseSimilarity(ABC):
 
         unknown = tuple(field for field in selected_fields if field not in available_fields)
         if unknown:
-            raise ValueError(
-                f"Unknown score field(s): {unknown}. Available fields are: {available_fields}."
-            )
+            raise ValueError(f"Unknown score field(s): {unknown}. Available fields are: {available_fields}.")
 
         return selected_fields
 
@@ -235,8 +233,7 @@ class BaseSimilarity(ABC):
             return {"score": np.zeros((n_rows, n_cols), dtype=self.score_datatype)}
 
         return {
-            field: np.zeros((n_rows, n_cols), dtype=np.dtype(self.score_datatype)[field])
-            for field in selected_fields
+            field: np.zeros((n_rows, n_cols), dtype=np.dtype(self.score_datatype)[field]) for field in selected_fields
         }
 
     def _store_in_dense_result(
@@ -266,7 +263,7 @@ class BaseSimilarityWithSparse(BaseSimilarity):
     and users can also pass a custom score_filter=... to sparse_matrix() for
     per-call control.
     """
-   
+
     def sparse_matrix(
         self,
         spectra_1: Sequence[SpectrumType],
@@ -351,7 +348,6 @@ class BaseSimilarityWithSparse(BaseSimilarity):
             progress_bar=progress_bar,
         )
         return Scores(sparse_result)
-
 
     def _sparse_matrix_from_all_pairs(
         self,
@@ -439,7 +435,6 @@ class BaseSimilarityWithSparse(BaseSimilarity):
             selected_fields=selected_fields,
         )
 
-
     def _sparse_matrix_from_explicit_indices(
         self,
         spectra_1: Sequence[SpectrumType],
@@ -485,7 +480,6 @@ class BaseSimilarityWithSparse(BaseSimilarity):
             shape=(len(spectra_1), len(spectra_2)),
             selected_fields=selected_fields,
         )
-
 
     def keep_score(self, score) -> bool:
         """Return whether a score should be retained in sparse outputs.

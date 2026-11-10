@@ -59,8 +59,7 @@ def _require_precursor_mz(
                 pepmass_mz = None
 
             assert not isinstance(pepmass_mz, (float, int)), (
-                "Found 'pepmass' but no 'precursor_mz'. Consider applying "
-                "'add_precursor_mz' filter first."
+                "Found 'pepmass' but no 'precursor_mz'. Consider applying 'add_precursor_mz' filter first."
             )
 
         return False
@@ -69,16 +68,12 @@ def _require_precursor_mz(
 
     if precursor_mz_float is None:
         logger.warning(
-            "Precursor mz was not a number (%s) consider applying "
-            "'add_precursor_mz' filter first",
+            "Precursor mz was not a number (%s) consider applying 'add_precursor_mz' filter first",
             precursor_mz,
         )
         return False
 
-    if (
-        minimum_accepted_mz is not None
-        and precursor_mz_float < minimum_accepted_mz
-    ):
+    if minimum_accepted_mz is not None and precursor_mz_float < minimum_accepted_mz:
         logger.info(
             "Spectrum is removed since precursor mz (%s) was below minimum mz (%s)",
             precursor_mz_float,
@@ -86,10 +81,7 @@ def _require_precursor_mz(
         )
         return False
 
-    if (
-        maximum_mz is not None
-        and precursor_mz_float > maximum_mz
-    ):
+    if maximum_mz is not None and precursor_mz_float > maximum_mz:
         logger.info(
             "Spectrum is removed since precursor mz (%s) was above maximum mz (%s)",
             precursor_mz_float,
@@ -111,11 +103,7 @@ def _require_precursor_mz_collection(
     n_spectra = len(spectrum_in)
 
     if n_spectra == 0:
-        return (
-            spectrum_in.copy()
-            if clone
-            else spectrum_in
-        )
+        return spectrum_in.copy() if clone else spectrum_in
 
     # No precursor_mz column is an unusual/error-path situation.
     # Sticking to complete row-wise logic here, including the legacy pepmass check.
@@ -151,10 +139,7 @@ def _require_precursor_mz_collection(
     # Fast path 1:
     # This should be the common SpectraCollection case after metadata harmonization.
     # ---------------------------------------------------------
-    if (
-        pd.api.types.is_integer_dtype(precursor.dtype)
-        or pd.api.types.is_float_dtype(precursor.dtype)
-    ):
+    if pd.api.types.is_integer_dtype(precursor.dtype) or pd.api.types.is_float_dtype(precursor.dtype):
         values = precursor.to_numpy(
             dtype=np.float64,
             na_value=np.nan,
@@ -163,10 +148,7 @@ def _require_precursor_mz_collection(
         keep_mask = ~np.isnan(values)
 
         if minimum_accepted_mz is not None:
-            below_minimum = (
-                keep_mask
-                & (values < minimum_accepted_mz)
-            )
+            below_minimum = keep_mask & (values < minimum_accepted_mz)
 
             if np.any(below_minimum):
                 logger.info(
@@ -178,10 +160,7 @@ def _require_precursor_mz_collection(
             keep_mask[below_minimum] = False
 
         if maximum_mz is not None:
-            above_maximum = (
-                keep_mask
-                & (values > maximum_mz)
-            )
+            above_maximum = keep_mask & (values > maximum_mz)
 
             if np.any(above_maximum):
                 logger.info(
@@ -233,27 +212,16 @@ def _require_precursor_mz_collection(
         )
 
     # Numeric NaN has the same missing-value semantics as the scalar path.
-    keep_mask = (
-        numeric_mask
-        & ~np.isnan(numeric_values)
-    )
+    keep_mask = numeric_mask & ~np.isnan(numeric_values)
 
     if minimum_accepted_mz is not None:
-        keep_mask &= (
-            ~numeric_mask
-            | (numeric_values >= minimum_accepted_mz)
-        )
+        keep_mask &= ~numeric_mask | (numeric_values >= minimum_accepted_mz)
 
     if maximum_mz is not None:
-        keep_mask &= (
-            ~numeric_mask
-            | (numeric_values <= maximum_mz)
-        )
+        keep_mask &= ~numeric_mask | (numeric_values <= maximum_mz)
 
     # Only unusual object-valued entries need the complete scalar logic.
-    fallback_rows = np.flatnonzero(
-        ~numeric_mask
-    )
+    fallback_rows = np.flatnonzero(~numeric_mask)
 
     for row in fallback_rows:
         keep_mask[row] = _require_precursor_mz(

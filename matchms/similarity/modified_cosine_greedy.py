@@ -44,13 +44,14 @@ class ModifiedCosineGreedy(BaseSimilarityWithSparse):
     score_fields = ("score", "matches")
 
     def __init__(
-            self, tolerance: float = DEFAULT_MZ_TOLERANCE,
-            mz_power: float = 0.0,
-            intensity_power: float = DEFAULT_INTENSITY_POWER,
-            noise_cutoff: float = DEFAULT_NOISE_CUTOFF,
-            remove_precursor: bool = True,
-            offset_to_precursor: float = DEFAULT_OFFSET_TO_PRECURSOR
-            ):
+        self,
+        tolerance: float = DEFAULT_MZ_TOLERANCE,
+        mz_power: float = 0.0,
+        intensity_power: float = DEFAULT_INTENSITY_POWER,
+        noise_cutoff: float = DEFAULT_NOISE_CUTOFF,
+        remove_precursor: bool = True,
+        offset_to_precursor: float = DEFAULT_OFFSET_TO_PRECURSOR,
+    ):
         """Initialize approximate modified cosine.
 
         Parameters
@@ -90,18 +91,21 @@ class ModifiedCosineGreedy(BaseSimilarityWithSparse):
                 intensity_power=self.intensity_power,
                 noise_cutoff=self.noise_cutoff,
                 remove_precursor=self.remove_precursor,
-                offset_to_precursor=self.offset_to_precursor
+                offset_to_precursor=self.offset_to_precursor,
             ).pair(spectrum_1, spectrum_2)
 
         def get_matching_pairs():
             """Find all pairs of peaks that match within the given tolerance."""
             zero_pairs = collect_peak_pairs(
-                spec1, spec2, self.tolerance, shift=0.0,
-                mz_power=self.mz_power, intensity_power=self.intensity_power
+                spec1, spec2, self.tolerance, shift=0.0, mz_power=self.mz_power, intensity_power=self.intensity_power
             )
             nonzero_pairs = collect_peak_pairs(
-                spec1, spec2, self.tolerance, shift=mass_shift,
-                mz_power=self.mz_power, intensity_power=self.intensity_power
+                spec1,
+                spec2,
+                self.tolerance,
+                shift=mass_shift,
+                mz_power=self.mz_power,
+                intensity_power=self.intensity_power,
             )
 
             if zero_pairs is None:

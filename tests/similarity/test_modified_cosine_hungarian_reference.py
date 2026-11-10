@@ -44,9 +44,8 @@ def _reference_spectra():
 @pytest.mark.parametrize("pair", REFERENCE_PAIRS)
 def test_modified_cosine_hungarian_reference_pairs(pair):
     similarity = ModifiedCosineHungarian(
-        tolerance=0.1, mz_power=0.0, intensity_power=1.0,
-        remove_precursor=False, noise_cutoff=None
-        )
+        tolerance=0.1, mz_power=0.0, intensity_power=1.0, remove_precursor=False, noise_cutoff=None
+    )
     spectra = _reference_spectra()
 
     left = spectra[pair["left"]]
@@ -56,7 +55,6 @@ def test_modified_cosine_hungarian_reference_pairs(pair):
 
     assert float(score["score"]) == pytest.approx(pair["score"], abs=SCORE_ABS_TOL)
     assert int(score["matches"]) == pair["matches"]
-
 
 
 def test_modified_cosine_hungarian_reference_matrix():

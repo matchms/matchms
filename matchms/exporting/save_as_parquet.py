@@ -93,21 +93,13 @@ def save_as_parquet(
         metadata = pd.DataFrame(collection.metadata).copy()
 
         if metadata_columns is not None:
-            missing = [
-                column
-                for column in metadata_columns
-                if column not in metadata.columns
-            ]
+            missing = [column for column in metadata_columns if column not in metadata.columns]
             if missing:
                 raise ValueError(f"Metadata columns not found: {missing}.")
 
             metadata = metadata.loc[:, list(metadata_columns)].copy()
 
-        collisions = [
-            column
-            for column in (mz_column, intensity_column)
-            if column in metadata.columns
-        ]
+        collisions = [column for column in (mz_column, intensity_column) if column in metadata.columns]
         if collisions:
             raise ValueError(
                 f"Peak column name(s) {collisions} collide with metadata columns. "
@@ -185,10 +177,7 @@ def _csr_fragments_to_arrow(
     # Standard Arrow ListArray uses signed 32-bit offsets.
     n_fragments = int(array.indptr[-1])
     if n_fragments > np.iinfo(np.int32).max:
-        raise ValueError(
-            "Cannot export more than 2^31 - 1 fragments using standard "
-            "Arrow list columns."
-        )
+        raise ValueError("Cannot export more than 2^31 - 1 fragments using standard Arrow list columns.")
 
     offsets = pa.array(
         array.indptr,

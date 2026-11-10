@@ -5,6 +5,7 @@ spectrum-major view retains peak identities and per-spectrum normalization.
 The versioned, non-pickle archive format stores preprocessing settings alongside
 both views. Search tolerances and output selection are independent of the index.
 """
+
 from __future__ import annotations
 import json
 import operator
@@ -21,12 +22,23 @@ _FLASH_INDEX_FORMAT = "matchms.flash_index"
 _FLASH_INDEX_VERSION = 3
 _SUPPORTED_VERSIONS = (2, 3)
 _REQUIRED_ARRAYS = (
-    "peaks_mz", "peaks_int", "peaks_spec_idx", "spec_offsets",
-    "spec_mz", "spec_int", "precursor_mz",
+    "peaks_mz",
+    "peaks_int",
+    "peaks_spec_idx",
+    "spec_offsets",
+    "spec_mz",
+    "spec_int",
+    "precursor_mz",
 )
 _OPTIONAL_ARRAYS = (
-    "spec_l2", "nl_mz", "nl_int", "nl_spec_idx", "nl_product_idx",
-    "peaks_pid", "peaks_xlog2", "nl_xlog2",
+    "spec_l2",
+    "nl_mz",
+    "nl_int",
+    "nl_spec_idx",
+    "nl_product_idx",
+    "peaks_pid",
+    "peaks_xlog2",
+    "nl_xlog2",
 )
 _NL_ARRAYS = ("nl_mz", "nl_int", "nl_spec_idx", "nl_product_idx")
 
@@ -34,6 +46,7 @@ _NL_ARRAYS = ("nl_mz", "nl_int", "nl_spec_idx", "nl_product_idx")
 @dataclass(frozen=True)
 class _EntropyKernelData:
     """Read-only peak views, entropy terms, and physical IDs for the row kernel."""
+
     n_specs: int
     n_peaks: int
     precursor_mz: np.ndarray
@@ -45,6 +58,7 @@ class _EntropyKernelData:
 @dataclass(frozen=True)
 class _CosineKernelData:
     """Read-only argument bundle with one-time dtype conversions."""
+
     n_specs: int
     n_peaks: int
     peaks_mz: np.ndarray
@@ -83,13 +97,18 @@ def _xlog2_array(values: np.ndarray) -> np.ndarray:
 
 
 def _ordered_posting(
-    coordinates, values, xlog, owners, pid, *, reverse_ties: bool = False,
+    coordinates,
+    values,
+    xlog,
+    owners,
+    pid,
+    *,
+    reverse_ties: bool = False,
 ) -> tuple:
     """Keep existing order unless coordinate or physical-ID ordering needs repair."""
     tie_key = -pid if reverse_ties else pid
     needs_sort = coordinates.size > 1 and np.any(
-        (coordinates[1:] < coordinates[:-1])
-        | ((coordinates[1:] == coordinates[:-1]) & (tie_key[1:] < tie_key[:-1]))
+        (coordinates[1:] < coordinates[:-1]) | ((coordinates[1:] == coordinates[:-1]) & (tie_key[1:] < tie_key[:-1]))
     )
     arrays = (coordinates, values, xlog, owners, pid)
     if needs_sort:
@@ -144,6 +163,7 @@ class FlashIndex:
     Public format versions 2 and 3 are readable. Missing derived arrays in older
     indexes are recovered once without reprocessing the source spectra.
     """
+
     n_specs: int
     dtype: np.dtype
     peaks_mz: np.ndarray
@@ -180,14 +200,20 @@ class FlashIndex:
 
     @classmethod
     def from_library(
-        cls, library, *, config: dict, metadata: dict | None = None,
+        cls,
+        library,
+        *,
+        config: dict,
+        metadata: dict | None = None,
     ) -> Self:
         """Wrap the native library arrays without copying them."""
         return cls(
-            n_specs=library.n_specs, dtype=library.dtype,
+            n_specs=library.n_specs,
+            dtype=library.dtype,
             **{name: getattr(library, name) for name in _REQUIRED_ARRAYS},
             **{name: getattr(library, name, None) for name in _OPTIONAL_ARRAYS},
-            config=config, metadata=metadata or {},
+            config=config,
+            metadata=metadata or {},
         )
 
     @property
@@ -248,8 +274,7 @@ class FlashIndex:
             raise ValueError("peaks_mz, peaks_int, and peaks_spec_idx must have identical lengths.")
         if n_peaks != self.spec_mz.size:
             raise ValueError(
-                "Global product view and spectrum-major product view must contain "
-                "the same number of peaks."
+                "Global product view and spectrum-major product view must contain the same number of peaks."
             )
         if n_peaks > 1 and np.any(self.peaks_mz[:-1] > self.peaks_mz[1:]):
             raise ValueError("peaks_mz must be globally sorted in ascending order.")
@@ -273,8 +298,7 @@ class FlashIndex:
         if self.spec_l2 is not None:
             if self.spec_l2.size != self.n_specs:
                 raise ValueError("spec_l2 must have length n_specs.")
-            if (self.spec_l2.dtype.kind != "f" or not np.all(np.isfinite(self.spec_l2))
-                    or np.any(self.spec_l2 < 0)):
+            if self.spec_l2.dtype.kind != "f" or not np.all(np.isfinite(self.spec_l2)) or np.any(self.spec_l2 < 0):
                 raise ValueError("spec_l2 must contain finite, nonnegative floating-point norms.")
         have_nl = [getattr(self, name) is not None for name in _NL_ARRAYS]
         if any(have_nl) and not all(have_nl):
@@ -303,8 +327,9 @@ class FlashIndex:
             self._ids("peaks_pid", self.peaks_pid, n_peaks, "physical peak positions")
             if n_peaks and np.any(np.bincount(self.peaks_pid.astype(np.int64), minlength=n_peaks) != 1):
                 raise ValueError("peaks_pid must be a permutation of physical peak positions.")
-            if (not np.array_equal(self.peaks_mz, self.spec_mz[self.peaks_pid])
-                    or not np.array_equal(self.peaks_int, self.spec_int[self.peaks_pid])):
+            if not np.array_equal(self.peaks_mz, self.spec_mz[self.peaks_pid]) or not np.array_equal(
+                self.peaks_int, self.spec_int[self.peaks_pid]
+            ):
                 raise ValueError("peaks_pid does not map the global and spectrum-major views consistently.")
             starts = self.spec_offsets[self.peaks_spec_idx]
             stops = self.spec_offsets[self.peaks_spec_idx + 1]
@@ -339,9 +364,11 @@ class FlashIndex:
         owners = np.repeat(np.arange(self.n_specs, dtype=np.int64), np.diff(self.spec_offsets))
         local_order = np.lexsort((self.spec_int, self.spec_mz, owners))
         global_order = np.lexsort((self.peaks_int, self.peaks_mz, self.peaks_spec_idx))
-        if (not np.array_equal(owners[local_order], self.peaks_spec_idx[global_order])
-                or not np.array_equal(self.spec_mz[local_order], self.peaks_mz[global_order])
-                or not np.array_equal(self.spec_int[local_order], self.peaks_int[global_order])):
+        if (
+            not np.array_equal(owners[local_order], self.peaks_spec_idx[global_order])
+            or not np.array_equal(self.spec_mz[local_order], self.peaks_mz[global_order])
+            or not np.array_equal(self.spec_int[local_order], self.peaks_int[global_order])
+        ):
             raise ValueError("Global and spectrum-major peak views are inconsistent.")
         physical_ids = np.empty(self.n_peaks, dtype=np.int64)
         physical_ids[global_order] = local_order
@@ -356,12 +383,19 @@ class FlashIndex:
         if self.peaks_xlog2 is None:
             self.peaks_xlog2 = _xlog2_array(self.peaks_int)
         fragment = _ordered_posting(
-            self.peaks_mz, self.peaks_int, self.peaks_xlog2,
-            np.asarray(self.peaks_spec_idx, dtype=np.int64), pid,
+            self.peaks_mz,
+            self.peaks_int,
+            self.peaks_xlog2,
+            np.asarray(self.peaks_spec_idx, dtype=np.int64),
+            pid,
         )
-        empty = (readonly(np.empty(0, np.float64)), readonly(np.empty(0, self.dtype)),
-                 readonly(np.empty(0, np.float64)), readonly(np.empty(0, np.int64)),
-                 readonly(np.empty(0, np.int64)))
+        empty = (
+            readonly(np.empty(0, np.float64)),
+            readonly(np.empty(0, self.dtype)),
+            readonly(np.empty(0, np.float64)),
+            readonly(np.empty(0, np.int64)),
+            readonly(np.empty(0, np.int64)),
+        )
         neutral_loss = empty
         if self.has_neutral_loss_index:
             if self.nl_xlog2 is None:
@@ -369,15 +403,22 @@ class FlashIndex:
             n_pid = pid[self.nl_product_idx]
             # Evaluate precursor-minus-fragment in float64, just like queries.
             # In old archives stored NL coordinates can be rounded to float32.
-            losses = (self.precursor_mz[self.nl_spec_idx].astype(np.float64)
-                      - self.spec_mz[n_pid].astype(np.float64))
+            losses = self.precursor_mz[self.nl_spec_idx].astype(np.float64) - self.spec_mz[n_pid].astype(np.float64)
             neutral_loss = _ordered_posting(
-                losses, self.nl_int, self.nl_xlog2,
-                np.asarray(self.nl_spec_idx, dtype=np.int64), n_pid, reverse_ties=True,
+                losses,
+                self.nl_int,
+                self.nl_xlog2,
+                np.asarray(self.nl_spec_idx, dtype=np.int64),
+                n_pid,
+                reverse_ties=True,
             )
         data = _EntropyKernelData(
-            self.n_specs, self.n_peaks, readonly(self.precursor_mz, np.float64),
-            fragment, neutral_loss, self.dtype,
+            self.n_specs,
+            self.n_peaks,
+            readonly(self.precursor_mz, np.float64),
+            fragment,
+            neutral_loss,
+            self.dtype,
         )
         self._runtime_cache["entropy"] = data
         return data
@@ -392,10 +433,17 @@ class FlashIndex:
         nl_ids = self.nl_spec_idx if self.has_neutral_loss_index else np.empty(0, np.int64)
         nl_pos = self.nl_product_idx if self.has_neutral_loss_index else np.empty(0, np.int64)
         data = _CosineKernelData(
-            self.n_specs, self.n_peaks, readonly(self.peaks_mz), readonly(self.peaks_int),
-            readonly(self.peaks_spec_idx, np.int64), readonly(nl_mz), readonly(nl_ids, np.int64),
-            readonly(nl_pos, np.int64), readonly(self.precursor_mz, np.float64),
-            readonly(self.spec_l2, np.float64), self.dtype,
+            self.n_specs,
+            self.n_peaks,
+            readonly(self.peaks_mz),
+            readonly(self.peaks_int),
+            readonly(self.peaks_spec_idx, np.int64),
+            readonly(nl_mz),
+            readonly(nl_ids, np.int64),
+            readonly(nl_pos, np.int64),
+            readonly(self.precursor_mz, np.float64),
+            readonly(self.spec_l2, np.float64),
+            self.dtype,
         )
         self._runtime_cache["cosine"] = data
         return data
@@ -414,18 +462,25 @@ class FlashIndex:
         if path.exists() and not overwrite:
             raise FileExistsError(path)
         meta = {
-            "format": _FLASH_INDEX_FORMAT, "version": _FLASH_INDEX_VERSION,
-            "n_specs": self.n_specs, "dtype": self.dtype.str,
-            "config": self.config, "metadata": self.metadata,
+            "format": _FLASH_INDEX_FORMAT,
+            "version": _FLASH_INDEX_VERSION,
+            "n_specs": self.n_specs,
+            "dtype": self.dtype.str,
+            "config": self.config,
+            "metadata": self.metadata,
             "optional_arrays": {name: getattr(self, name) is not None for name in _OPTIONAL_ARRAYS},
         }
-        arrays = {name: getattr(self, name) for name in _REQUIRED_ARRAYS + _OPTIONAL_ARRAYS
-                  if getattr(self, name) is not None}
+        arrays = {
+            name: getattr(self, name) for name in _REQUIRED_ARRAYS + _OPTIONAL_ARRAYS if getattr(self, name) is not None
+        }
         payload = json.dumps(meta)  # Validate JSON before opening the temporary file.
         tmp = None
         try:
             with tempfile.NamedTemporaryFile(
-                dir=path.parent, prefix=path.name + ".", suffix=".tmp", delete=False,
+                dir=path.parent,
+                prefix=path.name + ".",
+                suffix=".tmp",
+                delete=False,
             ) as handle:
                 tmp = Path(handle.name)
                 np.savez(handle, __metadata__=np.asarray(payload), **arrays)
@@ -450,8 +505,7 @@ class FlashIndex:
                 version = meta.get("version")
                 if type(version) is not int or version not in _SUPPORTED_VERSIONS:
                     raise ValueError(
-                        f"Unsupported Flash index version {version!r}; "
-                        f"expected one of {_SUPPORTED_VERSIONS}."
+                        f"Unsupported Flash index version {version!r}; expected one of {_SUPPORTED_VERSIONS}."
                     )
                 optional = meta.get("optional_arrays", {})
                 if not isinstance(optional, dict):
@@ -467,13 +521,15 @@ class FlashIndex:
                         raise ValueError(f"Invalid optional-array flag for {name!r}.")
                     if present and name not in archive:
                         raise ValueError(
-                            f"Flash index metadata declares array {name!r}, "
-                            "but the array is missing from the file."
+                            f"Flash index metadata declares array {name!r}, but the array is missing from the file."
                         )
                     arrays[name] = np.asarray(archive[name]) if present else None
                 return cls(
-                    n_specs=meta["n_specs"], dtype=np.dtype(meta["dtype"]),
-                    config=meta.get("config", {}), metadata=meta.get("metadata", {}), **arrays,
+                    n_specs=meta["n_specs"],
+                    dtype=np.dtype(meta["dtype"]),
+                    config=meta.get("config", {}),
+                    metadata=meta.get("metadata", {}),
+                    **arrays,
                 )
         except (KeyError, TypeError, json.JSONDecodeError) as exc:
             raise ValueError("Malformed Flash index archive.") from exc
@@ -487,7 +543,11 @@ class FlashIndex:
 
 
 def build_entropy_index(
-    prepared, mode: str, *, config: dict | None = None, metadata: dict | None = None,
+    prepared,
+    mode: str,
+    *,
+    config: dict | None = None,
+    metadata: dict | None = None,
 ) -> FlashIndex:
     """Construct entropy index views from prepared peaks.
 
@@ -501,7 +561,8 @@ def build_entropy_index(
     n_spectra = prepared.n_specs
     n_peaks = mz.size
     spectrum_ids = np.repeat(
-        np.arange(n_spectra, dtype=np.int64), np.diff(prepared.spec_offsets),
+        np.arange(n_spectra, dtype=np.int64),
+        np.diff(prepared.spec_offsets),
     )
     physical_ids = np.arange(n_peaks, dtype=np.int64)
     precursors = np.asarray(prepared.precursor_mz, dtype=np.float64)

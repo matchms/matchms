@@ -272,9 +272,7 @@ def test_pipeline_changing_workflow():
 
     pipeline.spectra_1_filters = [("select_by_relative_intensity", {"intensity_from": 0.05})]
     pipeline.spectra_2_filters = [("select_by_relative_intensity", {"intensity_from": 0.05})]
-    pipeline.score_computations = [[
-        "modifiedcosinegreedy", {"tolerance": 10.0, "remove_precursor": False}
-        ]]
+    pipeline.score_computations = [["modifiedcosinegreedy", {"tolerance": 10.0, "remove_precursor": False}]]
 
     pipeline.run(spectra_file_msp, spectra_file_msp)
 

@@ -109,11 +109,7 @@ def load_ms2_dataset(
     SpectraCollection
         Imported spectra as a collection.
     """
-    resolved_ftype = (
-        os.path.splitext(file)[1].lower()[1:]
-        if ftype is None or ftype == "auto"
-        else ftype.lower()
-    )
+    resolved_ftype = os.path.splitext(file)[1].lower()[1:] if ftype is None or ftype == "auto" else ftype.lower()
     if resolved_ftype == "parquet":
         return load_from_parquet(
             file,

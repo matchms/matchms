@@ -33,18 +33,17 @@ stream of such messages, you can do the following:
 
     from matchms.logging_functions import add_logging_to_file
 
-    add_logging_to_file("sample.log", loglevel="INFO",
-                        remove_stream_handlers=True)
+    add_logging_to_file("sample.log", loglevel="INFO", remove_stream_handlers=True)
 
 """
+
 import logging
 import logging.config
 import sys
 from rdkit import RDLogger
 
 
-_formatter = logging.Formatter(
-    "%(asctime)s:%(levelname)s:%(name)s:%(module)s:%(message)s")
+_formatter = logging.Formatter("%(asctime)s:%(levelname)s:%(name)s:%(module)s:%(message)s")
 
 
 def _init_logger(logger_name="matchms"):
@@ -75,9 +74,9 @@ def set_matchms_logger_level(loglevel: str, logger_name="matchms"):
         handler.setLevel(level)
 
 
-def add_logging_to_file(filename: str, loglevel: str = "INFO",
-                        remove_stream_handlers: bool = False,
-                        logger_name="matchms"):
+def add_logging_to_file(
+    filename: str, loglevel: str = "INFO", remove_stream_handlers: bool = False, logger_name="matchms"
+):
     """Add logging to file.
 
     Current implementation does not change the initial logging stream,

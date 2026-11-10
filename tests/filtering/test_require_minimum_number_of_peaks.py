@@ -12,13 +12,7 @@ def spectrum_in():
     mz = np.array([10, 20, 30, 40], dtype="float")
     intensities = np.array([0, 1, 10, 100], dtype="float")
     metadata = {"parent_mass": 10}
-    return (
-        SpectrumBuilder()
-        .with_mz(mz)
-        .with_intensities(intensities)
-        .with_metadata(metadata)
-        .build()
-    )
+    return SpectrumBuilder().with_mz(mz).with_intensities(intensities).with_metadata(metadata).build()
 
 
 @pytest.mark.parametrize("as_collection", [False, True], ids=["spectrum", "collection"])

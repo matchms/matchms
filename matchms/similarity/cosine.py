@@ -1,4 +1,5 @@
 """High-level cosine similarity with indexed greedy or Hungarian assignment."""
+
 from collections.abc import Sequence
 import numpy as np
 from matchms.scores import Scores
@@ -202,8 +203,14 @@ class Cosine(CosineFlash):
     def to_dict(self) -> dict:
         """Return constructor parameters without the underlying index state."""
         names = (
-            "tolerance", "intensity_power", "use_hungarian", "noise_cutoff",
-            "remove_precursor", "offset_to_precursor", "use_ppm", "merge_within",
+            "tolerance",
+            "intensity_power",
+            "use_hungarian",
+            "noise_cutoff",
+            "remove_precursor",
+            "offset_to_precursor",
+            "use_ppm",
+            "merge_within",
         )
         return {
             "__Similarity__": type(self).__name__,
@@ -279,15 +286,20 @@ class Cosine(CosineFlash):
         if self.use_hungarian:
             selected = self._resolve_score_fields(score_fields)
             result = self._hungarian().matrix(
-                spectra_1, spectra_2, score_fields=selected, progress_bar=progress_bar,
+                spectra_1,
+                spectra_2,
+                score_fields=selected,
+                progress_bar=progress_bar,
             )
-            return Scores({
-                field: result._data[field].astype(self.score_datatype[field], copy=False)
-                for field in selected
-            })
+            return Scores(
+                {field: result._data[field].astype(self.score_datatype[field], copy=False) for field in selected}
+            )
         return super().matrix(
-            spectra_1, spectra_2, score_fields=score_fields,
-            progress_bar=progress_bar, n_jobs=n_jobs,
+            spectra_1,
+            spectra_2,
+            score_fields=score_fields,
+            progress_bar=progress_bar,
+            n_jobs=n_jobs,
         )
 
     def build_index(self, spectra) -> FlashIndex:

@@ -39,14 +39,14 @@ class ModifiedCosineHungarian(BaseSimilarityWithSparse):
     score_fields = ("score", "matches")
 
     def __init__(
-            self,
-            tolerance: float = DEFAULT_MZ_TOLERANCE,
-            mz_power: float = DEFAULT_MZ_POWER,
-            intensity_power: float = DEFAULT_INTENSITY_POWER,
-            noise_cutoff: float = DEFAULT_NOISE_CUTOFF,
-            remove_precursor: bool = True,
-            offset_to_precursor: float = DEFAULT_OFFSET_TO_PRECURSOR,
-            ):
+        self,
+        tolerance: float = DEFAULT_MZ_TOLERANCE,
+        mz_power: float = DEFAULT_MZ_POWER,
+        intensity_power: float = DEFAULT_INTENSITY_POWER,
+        noise_cutoff: float = DEFAULT_NOISE_CUTOFF,
+        remove_precursor: bool = True,
+        offset_to_precursor: float = DEFAULT_OFFSET_TO_PRECURSOR,
+    ):
         """Initialize exact modified cosine.
 
         Parameters
@@ -88,18 +88,21 @@ class ModifiedCosineHungarian(BaseSimilarityWithSparse):
                 intensity_power=self.intensity_power,
                 noise_cutoff=self.noise_cutoff,
                 remove_precursor=self.remove_precursor,
-                offset_to_precursor=self.offset_to_precursor
+                offset_to_precursor=self.offset_to_precursor,
             ).pair(spectrum_1, spectrum_2)
 
         def get_matching_pairs():
             """Find all candidate matching peak pairs for unshifted and shifted views."""
             zero_pairs = collect_peak_pairs(
-                spec1, spec2, self.tolerance, shift=0.0,
-                mz_power=self.mz_power, intensity_power=self.intensity_power
+                spec1, spec2, self.tolerance, shift=0.0, mz_power=self.mz_power, intensity_power=self.intensity_power
             )
             nonzero_pairs = collect_peak_pairs(
-                spec1, spec2, self.tolerance, shift=mass_shift,
-                mz_power=self.mz_power, intensity_power=self.intensity_power
+                spec1,
+                spec2,
+                self.tolerance,
+                shift=mass_shift,
+                mz_power=self.mz_power,
+                intensity_power=self.intensity_power,
             )
 
             if zero_pairs is None:
@@ -183,7 +186,7 @@ class ModifiedCosineHungarian(BaseSimilarityWithSparse):
 
         spec1_power = np.power(spec1[:, 0], self.mz_power) * np.power(spec1[:, 1], self.intensity_power)
         spec2_power = np.power(spec2[:, 0], self.mz_power) * np.power(spec2[:, 1], self.intensity_power)
-        denominator = np.sqrt(np.sum(spec1_power ** 2)) * np.sqrt(np.sum(spec2_power ** 2))
+        denominator = np.sqrt(np.sum(spec1_power**2)) * np.sqrt(np.sum(spec2_power**2))
         if denominator > 0:
             score = score / denominator
         else:

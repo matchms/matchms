@@ -9,11 +9,11 @@ from ..builder_spectrum import SpectrumBuilder, spectra_factory
 T = True
 F = False
 
-@pytest.mark.parametrize("precursor_mz, tolerance, tolerance_type, expected", [
-    [[100.0, 101.0], 0.1, "absolute", F],
-    [[100.0, 101.0], 2.0, "absolute", T],
-    [[600.0, 600.001], 2.0, "ppm", T]
-])
+
+@pytest.mark.parametrize(
+    "precursor_mz, tolerance, tolerance_type, expected",
+    [[[100.0, 101.0], 0.1, "absolute", F], [[100.0, 101.0], 2.0, "absolute", T], [[600.0, 600.001], 2.0, "ppm", T]],
+)
 def test_precursormz_match_parameterized(precursor_mz, tolerance, tolerance_type, expected):
     s0, s1 = spectra_factory("precursor_mz", precursor_mz)
     similarity_score = PrecursorMzMatch(tolerance=tolerance, tolerance_type=tolerance_type)
@@ -33,11 +33,14 @@ def test_precursormz_match_missing_precursormz():
     assert score == np.array(False, dtype=bool)
 
 
-@pytest.mark.parametrize("precursor_mz, tolerance, tolerance_type, expected", [
-    [[100.0, 101.0, 99.0, 98.0], 0.1, "absolute", [[F, F], [F, F]]],
-    [[100.0, 101.0, 99.0, 98.0], 2.0, "absolute", [[T, T], [T, F]]],
-    [[100.0, 101.0, 99.99, 98.0], 101.0, "ppm", [[T, F], [F, F]]]
-])
+@pytest.mark.parametrize(
+    "precursor_mz, tolerance, tolerance_type, expected",
+    [
+        [[100.0, 101.0, 99.0, 98.0], 0.1, "absolute", [[F, F], [F, F]]],
+        [[100.0, 101.0, 99.0, 98.0], 2.0, "absolute", [[T, T], [T, F]]],
+        [[100.0, 101.0, 99.99, 98.0], 101.0, "ppm", [[T, F], [F, F]]],
+    ],
+)
 def test_precursormz_match_array_parameterized(precursor_mz, tolerance, tolerance_type, expected):
     s0, s1, s2, s3 = spectra_factory("precursor_mz", precursor_mz)
     similarity_score = PrecursorMzMatch(tolerance=tolerance, tolerance_type=tolerance_type)
@@ -72,9 +75,7 @@ def test_precursormz_match_array_parameterized(precursor_mz, tolerance, toleranc
         ),
     ],
 )
-def test_precursormz_match_matrix_symmetric_parameterized(
-    precursor_mz, tolerance, tolerance_type, expected
-):
+def test_precursormz_match_matrix_symmetric_parameterized(precursor_mz, tolerance, tolerance_type, expected):
     spectra = spectra_factory("precursor_mz", precursor_mz)
     similarity_score = PrecursorMzMatch(
         tolerance=tolerance,
@@ -90,7 +91,9 @@ def test_precursormz_match_matrix_symmetric_parameterized(
 
     expected_array = np.array(expected, dtype=bool)
 
-    assert np.array_equal(scores_self.to_array(), scores_explicit.to_array()), \
+    assert np.array_equal(scores_self.to_array(), scores_explicit.to_array()), (
         "Expected identical scores for implicit and explicit self-comparison."
-    assert np.array_equal(scores_self.to_array(), expected_array), \
+    )
+    assert np.array_equal(scores_self.to_array(), expected_array), (
         "Precursor m/z match matrix differs from expected result."
+    )

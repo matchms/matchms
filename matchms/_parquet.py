@@ -68,8 +68,7 @@ def resolve_peak_column(
     if explicit_column is not None:
         if explicit_column not in available:
             raise ValueError(
-                f"Requested {kind} column {explicit_column!r} was not found. "
-                f"Available columns are: {available}."
+                f"Requested {kind} column {explicit_column!r} was not found. Available columns are: {available}."
             )
         return explicit_column
 
@@ -81,8 +80,7 @@ def resolve_peak_column(
         return matches[0]
     if len(matches) > 1:
         raise ValueError(
-            f"Multiple possible {kind} columns were found: {matches}. "
-            f"Pass `{kind}_column=...` explicitly."
+            f"Multiple possible {kind} columns were found: {matches}. Pass `{kind}_column=...` explicitly."
         )
 
     raise ValueError(

@@ -67,6 +67,7 @@ class SpectraCollection:
     ``add_metadata`` to preserve row alignment and invalidate cached values
     correctly.
     """
+
     def __init__(
         self,
         spectra: list[Spectrum] | Generator[Spectrum, None, None],
@@ -120,10 +121,7 @@ class SpectraCollection:
 
         for collection in collections:
             if not isinstance(collection, cls):
-                raise TypeError(
-                    "All objects must be SpectraCollection instances, "
-                    f"but got {type(collection)}."
-                )
+                raise TypeError(f"All objects must be SpectraCollection instances, but got {type(collection)}.")
 
         first = collections[0]
         mz_precision = first.mz_precision
@@ -136,23 +134,16 @@ class SpectraCollection:
                 )
             if not isinstance(collection.fragments, CSRFragmentCollection):
                 raise TypeError(
-                    "SpectraCollection.concat currently supports only "
-                    "CSRFragmentCollection fragment backends."
+                    "SpectraCollection.concat currently supports only CSRFragmentCollection fragment backends."
                 )
 
         first_fragments = first.fragments
         for collection in collections[1:]:
             fragments = collection.fragments
             if fragments.mz_rounding != first_fragments.mz_rounding:
-                raise ValueError(
-                    "All SpectraCollection objects must have identical fragment "
-                    "mz_rounding settings."
-                )
+                raise ValueError("All SpectraCollection objects must have identical fragment mz_rounding settings.")
             if fragments.index_dtype != first_fragments.index_dtype:
-                raise ValueError(
-                    "All SpectraCollection objects must have identical fragment "
-                    "index_dtype settings."
-                )
+                raise ValueError("All SpectraCollection objects must have identical fragment index_dtype settings.")
 
         metadata = pd.concat(
             [collection._metadata for collection in collections],
@@ -392,7 +383,7 @@ class SpectraCollection:
 
     def harmonize_metadata_columns(self, inplace: bool = False):
         """Harmonize metadata column names to matchms key style.
-        
+
         Parameters
         ----------
         inplace
@@ -401,9 +392,7 @@ class SpectraCollection:
         """
         target = self if inplace else self.copy()
 
-        target._metadata = harmonize_metadata_collection_columns(target._metadata).reset_index(
-            drop=True
-        )
+        target._metadata = harmonize_metadata_collection_columns(target._metadata).reset_index(drop=True)
         target._clear_cache(["metadata_hashes", "spectra_hashes"])
 
         return None if inplace else target
@@ -561,9 +550,7 @@ class SpectraCollection:
             self._clear_cache(["metadata_hashes", "spectra_hashes"])
             return None
 
-        target._metadata = harmonize_metadata_types(
-            pd.DataFrame(result_metadata)
-        ).reset_index(drop=True)
+        target._metadata = harmonize_metadata_types(pd.DataFrame(result_metadata)).reset_index(drop=True)
 
         target._clear_cache(["metadata_hashes", "spectra_hashes"])
         return target

@@ -11,6 +11,7 @@ def test_creates_file(tmp_path):
     save_as_mzspeclib([], outpath)
     assert os.path.isfile(outpath)
 
+
 def test_has_header(tmp_path):
     name = "test"
     outpath = tmp_path / f"{name}.mzspeclib"
@@ -26,11 +27,14 @@ def test_has_header(tmp_path):
         assert lines[4] == "<AttributeSet Analyte=all>\n"
         assert lines[5] == "<AttributeSet Interpretation=all>\n"
 
+
 def test_has_spectrum(tmp_path):
-    spectrum = SpectrumBuilder() \
-      .with_mz(np.array([10, 20, 30], dtype=np.float32)) \
-      .with_intensities(np.array([100, 150, 80], dtype=np.float32)) \
-      .build()
+    spectrum = (
+        SpectrumBuilder()
+        .with_mz(np.array([10, 20, 30], dtype=np.float32))
+        .with_intensities(np.array([100, 150, 80], dtype=np.float32))
+        .build()
+    )
     outpath = tmp_path / "test.mzspeclib"
     save_as_mzspeclib([spectrum], outpath)
 
@@ -73,6 +77,7 @@ def test_mapped_attributes(tmp_path):
         lines = file.readlines()
         assert "MS:1000465|scan polarity=MS:1000130|positive scan\n" in lines
 
+
 def test_peak_comments(tmp_path):
     mz = np.array([35.7], dtype=np.float64)
     intensities = np.array([1337], dtype=np.float64)
@@ -84,6 +89,7 @@ def test_peak_comments(tmp_path):
     with open(outpath, encoding="UTF-8") as file:
         lines = file.readlines()
         assert "35.7\t1337\ttest\n" in lines
+
 
 def test_has_attributes_with_units(tmp_path):
     spectrum = SpectrumBuilder().with_metadata({"collision_energy": "70eV"}).build()

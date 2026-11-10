@@ -58,9 +58,7 @@ def build_spectra_collection(
         mz = np.asarray(mz, dtype=float)
         intensities = np.asarray(intensities, dtype=float)
         if mz.ndim != 1 or mz.shape != intensities.shape:
-            raise ValueError(
-                f"Spectrum {len(lengths)} has {mz.size} m/z values but {intensities.size} intensities."
-            )
+            raise ValueError(f"Spectrum {len(lengths)} has {mz.size} m/z values but {intensities.size} intensities.")
         metadata_records.append(_harmonize_record(metadata, key_cache, metadata_harmonization))
         lengths.append(mz.size)
         mz_parts.append(mz)
@@ -141,5 +139,7 @@ def _warn_duplicate_key(key: str, proper_key: str) -> None:
     logger.warning(
         "Key '%s' will be interpreted as '%s'. But this entry already exists. "
         "Please use '%s' if you want to replace the entry.",
-        key, proper_key, proper_key,
+        key,
+        proper_key,
+        proper_key,
     )

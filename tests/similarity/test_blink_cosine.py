@@ -9,12 +9,9 @@ from ..builder_spectrum import SpectrumBuilder
 
 # ---------- helpers ----------
 
+
 def _build(builder, mz, intens):
-    return (
-        builder.with_mz(np.asarray(mz, dtype=float))
-        .with_intensities(np.asarray(intens, dtype=float))
-        .build()
-    )
+    return builder.with_mz(np.asarray(mz, dtype=float)).with_intensities(np.asarray(intens, dtype=float)).build()
 
 
 def _expected_strict_cosine(bins1, vals1, bins2, vals2):
@@ -54,11 +51,15 @@ def _prep_naive(s, bin_width=1.0, mz_power=0.0, intensity_power=1.0):
 
 # ---------- tests ----------
 
-@pytest.mark.parametrize("mz1,int1,mz2,int2", [
-    ([100, 200, 300], [1.0, 2.0, 3.0], [200, 400], [5.0, 1.0]),
-    ([50, 60], [2.0, 2.0], [50, 60], [3.0, 4.0]),
-    ([10, 20], [1.0, 1.0], [30, 40], [1.0, 1.0]),
-])
+
+@pytest.mark.parametrize(
+    "mz1,int1,mz2,int2",
+    [
+        ([100, 200, 300], [1.0, 2.0, 3.0], [200, 400], [5.0, 1.0]),
+        ([50, 60], [2.0, 2.0], [50, 60], [3.0, 4.0]),
+        ([10, 20], [1.0, 1.0], [30, 40], [1.0, 1.0]),
+    ],
+)
 @pytest.mark.parametrize("use_numba", [True, False])
 def test_pair_strict_R0_expected(mz1, int1, mz2, int2, use_numba):
     """R=0 via tolerance=0, bin_width=1: score equals cosine of shared binned intensities."""
@@ -256,13 +257,17 @@ def test_blinkcosine_upper_bound_cosinegreedy():
     """BLINK similarity should always be >= CosineGreedy for the same tolerance."""
     builder = SpectrumBuilder()
 
-    spectrum_1 = builder.with_mz(np.array([100, 200, 300, 400], dtype=float)).with_intensities(
-        np.array([0.5, 0.2, 1.0, 0.3], dtype=float)
-    ).build()
+    spectrum_1 = (
+        builder.with_mz(np.array([100, 200, 300, 400], dtype=float))
+        .with_intensities(np.array([0.5, 0.2, 1.0, 0.3], dtype=float))
+        .build()
+    )
 
-    spectrum_2 = builder.with_mz(np.array([98, 199, 305, 410], dtype=float)).with_intensities(
-        np.array([0.4, 0.3, 0.8, 0.2], dtype=float)
-    ).build()
+    spectrum_2 = (
+        builder.with_mz(np.array([98, 199, 305, 410], dtype=float))
+        .with_intensities(np.array([0.4, 0.3, 0.8, 0.2], dtype=float))
+        .build()
+    )
 
     tolerance = 5.0
     cg = CosineGreedy(tolerance=tolerance, remove_precursor=False)
@@ -302,8 +307,9 @@ def test_dtype_parameter_applies_to_pair_and_matrix(dtype, use_numba):
         _build(builder, [50, 60, 70], [0.2, 0.2, 0.2]),
     ]
     # intensity_power != 1 also exercises the weighting path
-    sim = CosineBlink(tolerance=5.0, bin_width=1.0, prefilter=False, intensity_power=0.5,
-                      use_numba=use_numba, dtype=dtype)
+    sim = CosineBlink(
+        tolerance=5.0, bin_width=1.0, prefilter=False, intensity_power=0.5, use_numba=use_numba, dtype=dtype
+    )
 
     assert sim.score_datatype == dtype
     assert sim.pair(refs[0], qrys[0]).dtype == dtype

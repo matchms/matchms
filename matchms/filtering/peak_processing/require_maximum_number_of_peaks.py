@@ -9,16 +9,16 @@ logger = logging.getLogger("matchms")
 
 
 def _require_maximum_number_of_peaks_spectrum(
-        spectrum_in: Spectrum,
-        maximum_number_of_fragments: int = 1000,
-        clone: bool | None = True,
-    ) -> SpectrumType | None:
+    spectrum_in: Spectrum,
+    maximum_number_of_fragments: int = 1000,
+    clone: bool | None = True,
+) -> SpectrumType | None:
     """Spectrum will be removed when it has more peaks than maximum_number_of_fragments.
 
     For single Spectrum import this will return 'None' when the number of peaks exceeds the
-    maximum_number_of_fragments. For SpectraCollection import, spectra with more peaks than 
+    maximum_number_of_fragments. For SpectraCollection import, spectra with more peaks than
     maximum_number_of_fragments will be removed from the collection.
-    
+
     Parameters
     ----------
     spectrum_in:

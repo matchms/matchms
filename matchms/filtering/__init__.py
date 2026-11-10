@@ -50,7 +50,7 @@ Also normalization of peaks can be an execution-order-sentitive operation. For e
 removes peaks, the normalization should usually be applied after that filter.
 
 In case you want to apply a filter in a different order, you can either create your own ``SpectraProcessor``
-with a custom filter order. Or simply apply every filter individually in the order you want, without using 
+with a custom filter order. Or simply apply every filter individually in the order you want, without using
 ``SpectraProcessor``.
 
 A processor is created from a list of filters. Filters can be specified by name,
@@ -181,7 +181,6 @@ throughout processing.
 
    Sketch of matchms spectrum processing.
 """
-
 
 from matchms.filtering.default_filters import default_filters
 from matchms.filtering.metadata_processing.add_compound_name import add_compound_name

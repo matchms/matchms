@@ -70,17 +70,17 @@ class CosineGreedy(BaseSimilarityWithSparse):
     # Set key characteristics as class attributes (see BaseSimilarity for details).
     is_commutative = True
     score_datatype = [("score", np.float64), ("matches", "int")]
-    score_fields =("score", "matches")
-
+    score_fields = ("score", "matches")
 
     def __init__(
-            self, tolerance: float = DEFAULT_MZ_TOLERANCE,
-            mz_power: float = DEFAULT_MZ_POWER,
-            intensity_power: float = DEFAULT_INTENSITY_POWER,
-            noise_cutoff: float = DEFAULT_NOISE_CUTOFF,
-            remove_precursor: bool = True,
-            offset_to_precursor: float = DEFAULT_OFFSET_TO_PRECURSOR
-            ):
+        self,
+        tolerance: float = DEFAULT_MZ_TOLERANCE,
+        mz_power: float = DEFAULT_MZ_POWER,
+        intensity_power: float = DEFAULT_INTENSITY_POWER,
+        noise_cutoff: float = DEFAULT_NOISE_CUTOFF,
+        remove_precursor: bool = True,
+        offset_to_precursor: float = DEFAULT_OFFSET_TO_PRECURSOR,
+    ):
         """
         Parameters
         ----------
@@ -125,8 +125,7 @@ class CosineGreedy(BaseSimilarityWithSparse):
         def get_matching_pairs():
             """Get pairs of peaks that match within the given tolerance."""
             matching_pairs = collect_peak_pairs(
-                spec1, spec2, self.tolerance, shift=0.0,
-                mz_power=self.mz_power, intensity_power=self.intensity_power
+                spec1, spec2, self.tolerance, shift=0.0, mz_power=self.mz_power, intensity_power=self.intensity_power
             )
             if matching_pairs is None:
                 return None

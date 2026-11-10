@@ -7,20 +7,26 @@ from matchms.scores import Scores, ScoresMask
 @pytest.fixture
 def dense_scalar_scores():
     data = {
-        "score": np.array([
-            [1.0, 0.0, 0.5],
-            [0.0, 0.8, 0.0],
-        ], dtype=np.float64)
+        "score": np.array(
+            [
+                [1.0, 0.0, 0.5],
+                [0.0, 0.8, 0.0],
+            ],
+            dtype=np.float64,
+        )
     }
     return Scores(data)
 
 
 @pytest.fixture
 def sparse_scalar_scores():
-    dense = np.array([
-        [1.0, 0.0, 0.5],
-        [0.0, 0.8, 0.0],
-    ], dtype=np.float64)
+    dense = np.array(
+        [
+            [1.0, 0.0, 0.5],
+            [0.0, 0.8, 0.0],
+        ],
+        dtype=np.float64,
+    )
     row, col = np.nonzero(dense)
     coo = coo_array((dense[row, col], (row, col)), shape=dense.shape)
     return Scores({"score": coo})
@@ -28,36 +34,52 @@ def sparse_scalar_scores():
 
 @pytest.fixture
 def dense_multi_scores():
-    return Scores({
-        "score": np.array([
-            [1.0, 0.0, 0.5],
-            [0.0, 0.8, 0.0],
-        ], dtype=np.float64),
-        "matches": np.array([
-            [3, 0, 2],
-            [0, 4, 0],
-        ], dtype=np.int64),
-    })
+    return Scores(
+        {
+            "score": np.array(
+                [
+                    [1.0, 0.0, 0.5],
+                    [0.0, 0.8, 0.0],
+                ],
+                dtype=np.float64,
+            ),
+            "matches": np.array(
+                [
+                    [3, 0, 2],
+                    [0, 4, 0],
+                ],
+                dtype=np.int64,
+            ),
+        }
+    )
 
 
 @pytest.fixture
 def sparse_multi_scores():
-    score = np.array([
-        [1.0, 0.0, 0.5],
-        [0.0, 0.8, 0.0],
-    ], dtype=np.float64)
-    matches = np.array([
-        [3, 0, 2],
-        [0, 4, 0],
-    ], dtype=np.int64)
+    score = np.array(
+        [
+            [1.0, 0.0, 0.5],
+            [0.0, 0.8, 0.0],
+        ],
+        dtype=np.float64,
+    )
+    matches = np.array(
+        [
+            [3, 0, 2],
+            [0, 4, 0],
+        ],
+        dtype=np.int64,
+    )
 
     row_s, col_s = np.nonzero(score)
     row_m, col_m = np.nonzero(matches)
 
-    return Scores({
-        "score": coo_array((score[row_s, col_s], (row_s, col_s)), shape=score.shape),
-        "matches": coo_array((matches[row_m, col_m], (row_m, col_m)), shape=matches.shape),
-    })
+    return Scores(
+        {
+            "score": coo_array((score[row_s, col_s], (row_s, col_s)), shape=score.shape),
+            "matches": coo_array((matches[row_m, col_m], (row_m, col_m)), shape=matches.shape),
+        }
+    )
 
 
 def test_scores_requires_at_least_one_field():
@@ -75,10 +97,12 @@ def test_scores_requires_same_dense_sparse_kind():
 
 def test_scores_requires_same_shape():
     with pytest.raises(ValueError, match="same shape"):
-        Scores({
-            "score": np.zeros((2, 3)),
-            "matches": np.zeros((3, 2)),
-        })
+        Scores(
+            {
+                "score": np.zeros((2, 3)),
+                "matches": np.zeros((3, 2)),
+            }
+        )
 
 
 def test_scores_basic_properties_dense_scalar(dense_scalar_scores):
@@ -168,19 +192,23 @@ def test_scores_unknown_field_raises(dense_multi_scores):
 
 def test_scores_to_array_scalar_dense(dense_scalar_scores):
     arr = dense_scalar_scores.to_array()
-    expected = np.array([
-        [1.0, 0.0, 0.5],
-        [0.0, 0.8, 0.0],
-    ])
+    expected = np.array(
+        [
+            [1.0, 0.0, 0.5],
+            [0.0, 0.8, 0.0],
+        ]
+    )
     np.testing.assert_array_equal(arr, expected)
 
 
 def test_scores_to_array_scalar_sparse(sparse_scalar_scores):
     arr = sparse_scalar_scores.to_array()
-    expected = np.array([
-        [1.0, 0.0, 0.5],
-        [0.0, 0.8, 0.0],
-    ])
+    expected = np.array(
+        [
+            [1.0, 0.0, 0.5],
+            [0.0, 0.8, 0.0],
+        ]
+    )
     np.testing.assert_array_equal(arr, expected)
 
 
@@ -194,10 +222,12 @@ def test_scores_to_coo_scalar_dense(dense_scalar_scores):
     assert isinstance(coo, coo_array)
     np.testing.assert_array_equal(
         coo.toarray(),
-        np.array([
-            [1.0, 0.0, 0.5],
-            [0.0, 0.8, 0.0],
-        ])
+        np.array(
+            [
+                [1.0, 0.0, 0.5],
+                [0.0, 0.8, 0.0],
+            ]
+        ),
     )
 
 
@@ -206,10 +236,12 @@ def test_scores_to_coo_multi_specific_field(dense_multi_scores):
     assert isinstance(coo, coo_array)
     np.testing.assert_array_equal(
         coo.toarray(),
-        np.array([
-            [3, 0, 2],
-            [0, 4, 0],
-        ])
+        np.array(
+            [
+                [3, 0, 2],
+                [0, 4, 0],
+            ]
+        ),
     )
 
 
@@ -217,10 +249,12 @@ def test_scoresfield_to_array_dense(dense_multi_scores):
     field = dense_multi_scores["score"]
     np.testing.assert_array_equal(
         field.to_array(),
-        np.array([
-            [1.0, 0.0, 0.5],
-            [0.0, 0.8, 0.0],
-        ])
+        np.array(
+            [
+                [1.0, 0.0, 0.5],
+                [0.0, 0.8, 0.0],
+            ]
+        ),
     )
 
 
@@ -230,10 +264,12 @@ def test_scoresfield_to_coo_sparse(sparse_multi_scores):
     assert isinstance(coo, coo_array)
     np.testing.assert_array_equal(
         coo.toarray(),
-        np.array([
-            [3, 0, 2],
-            [0, 4, 0],
-        ])
+        np.array(
+            [
+                [3, 0, 2],
+                [0, 4, 0],
+            ]
+        ),
     )
 
 
@@ -257,18 +293,22 @@ def test_scores_multi_getitem_tuple_returns_dict(dense_multi_scores):
 def test_scores_mask_dense_construction():
     mask = ScoresMask(
         shape=(2, 3),
-        dense_mask=np.array([
-            [True, False, True],
-            [False, True, False],
-        ])
+        dense_mask=np.array(
+            [
+                [True, False, True],
+                [False, True, False],
+            ]
+        ),
     )
     assert mask.is_sparse is False
     np.testing.assert_array_equal(
         mask.to_dense(),
-        np.array([
-            [True, False, True],
-            [False, True, False],
-        ])
+        np.array(
+            [
+                [True, False, True],
+                [False, True, False],
+            ]
+        ),
     )
 
 
@@ -281,10 +321,12 @@ def test_scores_mask_sparse_construction():
     assert mask.is_sparse is True
     np.testing.assert_array_equal(
         mask.to_dense(),
-        np.array([
-            [True, False, True],
-            [False, True, False],
-        ])
+        np.array(
+            [
+                [True, False, True],
+                [False, True, False],
+            ]
+        ),
     )
 
 
@@ -324,10 +366,15 @@ def test_scores_mask_or_sparse():
 
     combined = mask1 | mask2
     assert combined.is_sparse is True
-    np.testing.assert_array_equal(combined.to_dense(), np.array([
-        [True, False, False],
-        [False, False, True],
-    ]))
+    np.testing.assert_array_equal(
+        combined.to_dense(),
+        np.array(
+            [
+                [True, False, False],
+                [False, False, True],
+            ]
+        ),
+    )
 
 
 def test_scores_mask_invert_returns_dense():
@@ -336,10 +383,12 @@ def test_scores_mask_invert_returns_dense():
     assert inverted.is_sparse is False
     np.testing.assert_array_equal(
         inverted.to_dense(),
-        np.array([
-            [True, False],
-            [True, True],
-        ])
+        np.array(
+            [
+                [True, False],
+                [True, True],
+            ]
+        ),
     )
 
 
@@ -357,10 +406,12 @@ def test_dense_field_comparison_returns_dense_mask(dense_multi_scores):
     assert mask.is_sparse is False
     np.testing.assert_array_equal(
         mask.to_dense(),
-        np.array([
-            [True, False, False],
-            [False, True, False],
-        ])
+        np.array(
+            [
+                [True, False, False],
+                [False, True, False],
+            ]
+        ),
     )
 
 
@@ -375,10 +426,15 @@ def test_sparse_field_comparison_gt_returns_sparse_mask(sparse_multi_scores):
 def test_sparse_field_comparison_ge_returns_sparse_mask(sparse_multi_scores):
     mask = sparse_multi_scores["score"] >= 0.8
     assert mask.is_sparse is True
-    np.testing.assert_array_equal(mask.to_dense(), np.array([
-        [True, False, False],
-        [False, True, False],
-    ]))
+    np.testing.assert_array_equal(
+        mask.to_dense(),
+        np.array(
+            [
+                [True, False, False],
+                [False, True, False],
+            ]
+        ),
+    )
 
 
 def test_sparse_field_comparison_lt_falls_back_to_dense_mask(sparse_multi_scores):
@@ -386,10 +442,12 @@ def test_sparse_field_comparison_lt_falls_back_to_dense_mask(sparse_multi_scores
     assert mask.is_sparse is False
     np.testing.assert_array_equal(
         mask.to_dense(),
-        np.array([
-            [False, True, True],
-            [True, False, True],
-        ])
+        np.array(
+            [
+                [False, True, True],
+                [True, False, True],
+            ]
+        ),
     )
 
 
@@ -398,18 +456,22 @@ def test_sparse_field_comparison_eq_falls_back_to_dense_mask(sparse_multi_scores
     assert mask.is_sparse is False
     np.testing.assert_array_equal(
         mask.to_dense(),
-        np.array([
-            [False, True, False],
-            [True, False, True],
-        ])
+        np.array(
+            [
+                [False, True, False],
+                [True, False, True],
+            ]
+        ),
     )
 
 
 def test_scores_filter_with_dense_mask_on_dense_scores(dense_multi_scores):
-    mask = np.array([
-        [True, False, True],
-        [False, True, False],
-    ])
+    mask = np.array(
+        [
+            [True, False, True],
+            [False, True, False],
+        ]
+    )
 
     filtered = dense_multi_scores[mask]
 
@@ -417,51 +479,67 @@ def test_scores_filter_with_dense_mask_on_dense_scores(dense_multi_scores):
     assert filtered.is_sparse is False
     np.testing.assert_array_equal(
         filtered.to_array("score"),
-        np.array([
-            [1.0, 0.0, 0.5],
-            [0.0, 0.8, 0.0],
-        ])
+        np.array(
+            [
+                [1.0, 0.0, 0.5],
+                [0.0, 0.8, 0.0],
+            ]
+        ),
     )
     np.testing.assert_array_equal(
         filtered.to_array("matches"),
-        np.array([
-            [3, 0, 2],
-            [0, 4, 0],
-        ])
+        np.array(
+            [
+                [3, 0, 2],
+                [0, 4, 0],
+            ]
+        ),
     )
 
 
 def test_scores_filter_with_dense_mask_zeroes_out_dense_scores():
-    scores = Scores({
-        "score": np.array([
-            [1.0, 0.2, 0.5],
-            [0.1, 0.8, 0.0],
-        ]),
-        "matches": np.array([
-            [3, 1, 2],
-            [1, 4, 0],
-        ]),
-    })
-    mask = np.array([
-        [True, False, True],
-        [False, True, False],
-    ])
+    scores = Scores(
+        {
+            "score": np.array(
+                [
+                    [1.0, 0.2, 0.5],
+                    [0.1, 0.8, 0.0],
+                ]
+            ),
+            "matches": np.array(
+                [
+                    [3, 1, 2],
+                    [1, 4, 0],
+                ]
+            ),
+        }
+    )
+    mask = np.array(
+        [
+            [True, False, True],
+            [False, True, False],
+        ]
+    )
 
     filtered = scores[mask]
 
     np.testing.assert_array_equal(
         filtered.to_array("score"),
-        np.array([
-            [1.0, 0.0, 0.5],
-            [0.0, 0.8, 0.0],
-        ])
+        np.array(
+            [
+                [1.0, 0.0, 0.5],
+                [0.0, 0.8, 0.0],
+            ]
+        ),
     )
     np.testing.assert_array_equal(
         filtered.to_array("matches"),
-        np.array([
-            [3, 0, 2],
-            [0, 4, 0],
-        ])
+        np.array(
+            [
+                [3, 0, 2],
+                [0, 4, 0],
+            ]
+        ),
     )
 
 
@@ -473,17 +551,21 @@ def test_scores_filter_with_sparse_mask_on_sparse_scores_preserves_sparse(sparse
     assert filtered.is_sparse is True
     np.testing.assert_array_equal(
         filtered.to_array("score"),
-        np.array([
-            [1.0, 0.0, 0.0],
-            [0.0, 0.8, 0.0],
-        ])
+        np.array(
+            [
+                [1.0, 0.0, 0.0],
+                [0.0, 0.8, 0.0],
+            ]
+        ),
     )
     np.testing.assert_array_equal(
         filtered.to_array("matches"),
-        np.array([
-            [3, 0, 0],
-            [0, 4, 0],
-        ])
+        np.array(
+            [
+                [3, 0, 0],
+                [0, 4, 0],
+            ]
+        ),
     )
 
 
@@ -493,17 +575,21 @@ def test_scores_filter_with_combined_sparse_masks(sparse_multi_scores):
 
     np.testing.assert_array_equal(
         filtered.to_array("score"),
-        np.array([
-            [0.0, 0.0, 0.0],
-            [0.0, 0.8, 0.0],
-        ])
+        np.array(
+            [
+                [0.0, 0.0, 0.0],
+                [0.0, 0.8, 0.0],
+            ]
+        ),
     )
     np.testing.assert_array_equal(
         filtered.to_array("matches"),
-        np.array([
-            [0, 0, 0],
-            [0, 4, 0],
-        ])
+        np.array(
+            [
+                [0, 0, 0],
+                [0, 4, 0],
+            ]
+        ),
     )
 
 
@@ -513,10 +599,12 @@ def test_scores_filter_with_sparse_or_mask(sparse_multi_scores):
 
     np.testing.assert_array_equal(
         filtered.to_array("score"),
-        np.array([
-            [1.0, 0.0, 0.0],
-            [0.0, 0.8, 0.0],
-        ])
+        np.array(
+            [
+                [1.0, 0.0, 0.0],
+                [0.0, 0.8, 0.0],
+            ]
+        ),
     )
 
 
@@ -526,17 +614,21 @@ def test_scores_filter_with_inverted_mask(sparse_multi_scores):
 
     np.testing.assert_array_equal(
         filtered.to_array("score"),
-        np.array([
-            [0.0, 0.0, 0.5],
-            [0.0, 0.0, 0.0],
-        ])
+        np.array(
+            [
+                [0.0, 0.0, 0.5],
+                [0.0, 0.0, 0.0],
+            ]
+        ),
     )
     np.testing.assert_array_equal(
         filtered.to_array("matches"),
-        np.array([
-            [0, 0, 2],
-            [0, 0, 0],
-        ])
+        np.array(
+            [
+                [0, 0, 2],
+                [0, 0, 0],
+            ]
+        ),
     )
 
 
@@ -556,10 +648,12 @@ def test_scores_scalar_threshold_masking_syntax_dense(dense_scalar_scores):
     filtered = dense_scalar_scores[dense_scalar_scores["score"] > 0.5]
     np.testing.assert_array_equal(
         filtered.to_array(),
-        np.array([
-            [1.0, 0.0, 0.0],
-            [0.0, 0.8, 0.0],
-        ])
+        np.array(
+            [
+                [1.0, 0.0, 0.0],
+                [0.0, 0.8, 0.0],
+            ]
+        ),
     )
 
 
@@ -568,11 +662,14 @@ def test_scores_scalar_threshold_masking_syntax_sparse(sparse_scalar_scores):
     assert filtered.is_sparse is True
     np.testing.assert_array_equal(
         filtered.to_array(),
-        np.array([
-            [1.0, 0.0, 0.0],
-            [0.0, 0.8, 0.0],
-        ])
+        np.array(
+            [
+                [1.0, 0.0, 0.0],
+                [0.0, 0.8, 0.0],
+            ]
+        ),
     )
+
 
 def test_dense_scalar_scores_direct_comparison_returns_mask(dense_scalar_scores):
     mask = dense_scalar_scores > 0.5
@@ -581,10 +678,12 @@ def test_dense_scalar_scores_direct_comparison_returns_mask(dense_scalar_scores)
     assert mask.is_sparse is False
     np.testing.assert_array_equal(
         mask.to_dense(),
-        np.array([
-            [True, False, False],
-            [False, True, False],
-        ])
+        np.array(
+            [
+                [True, False, False],
+                [False, True, False],
+            ]
+        ),
     )
 
 

@@ -30,7 +30,6 @@ FILTER_EFFECTS = {
     "harmonize_undefined_smiles": METADATA,
     "interpret_pepmass": METADATA,
     "make_charge_int": METADATA,
-
     # FRAGMENTS
     "normalize_intensities": FRAGMENTS,
     "reduce_to_number_of_peaks": FRAGMENTS,
@@ -38,10 +37,8 @@ FILTER_EFFECTS = {
     "remove_peaks_around_precursor_mz": FRAGMENTS,
     "remove_peaks_outside_top_k": FRAGMENTS,
     "remove_peaks_relative_to_precursor_mz": FRAGMENTS,
-
     # REMOVE
     "remove_profiled_spectra": REMOVE,
-
     # REPAIR METADATA
     "repair_adduct_and_parent_mass_based_on_smiles": METADATA,
     "repair_adduct_based_on_parent_mass": METADATA,
@@ -51,7 +48,6 @@ FILTER_EFFECTS = {
     "repair_parent_mass_is_molar_mass": METADATA,
     "repair_parent_mass_match_smiles_wrapper": METADATA,
     "repair_smiles_of_salts": METADATA,
-
     # REMOVE
     "require_compound_name": REMOVE,
     "require_correct_ionmode": REMOVE,
@@ -67,7 +63,6 @@ FILTER_EFFECTS = {
     "require_retention_index": REMOVE,
     "require_retention_time": REMOVE,
     "require_valid_annotation": REMOVE,
-
     # FRAGMENTS
     "select_by_intensity": FRAGMENTS,
     "select_by_mz": FRAGMENTS,

@@ -74,22 +74,30 @@ def spectra():
     b = "C(C(=O)O)(NC(=O)O)S"
 
     builder = SpectrumBuilder()
-    spectrum_1 = builder.with_mz(np.array([100, 150, 200.])) \
-        .with_intensities(np.array([0.7, 0.2, 0.1])) \
-        .with_metadata({"id": "spectrum1", "precursor_mz": 210, "parent_mass": 210, "smiles": a}) \
+    spectrum_1 = (
+        builder.with_mz(np.array([100, 150, 200.0]))
+        .with_intensities(np.array([0.7, 0.2, 0.1]))
+        .with_metadata({"id": "spectrum1", "precursor_mz": 210, "parent_mass": 210, "smiles": a})
         .build()
-    spectrum_2 = builder.with_mz(np.array([100, 140, 190.])) \
-        .with_intensities(np.array([0.4, 0.2, 0.1])) \
-        .with_metadata({"id": "spectrum2", "precursor_mz": 200, "parent_mass": 200, "smiles": a}) \
+    )
+    spectrum_2 = (
+        builder.with_mz(np.array([100, 140, 190.0]))
+        .with_intensities(np.array([0.4, 0.2, 0.1]))
+        .with_metadata({"id": "spectrum2", "precursor_mz": 200, "parent_mass": 200, "smiles": a})
         .build()
-    spectrum_3 = builder.with_mz(np.array([110, 140, 195.])) \
-        .with_intensities(np.array([0.6, 0.2, 0.1])) \
-        .with_metadata({"id": "spectrum3", "precursor_mz": 205, "parent_mass": 205, "smiles": b}) \
+    )
+    spectrum_3 = (
+        builder.with_mz(np.array([110, 140, 195.0]))
+        .with_intensities(np.array([0.6, 0.2, 0.1]))
+        .with_metadata({"id": "spectrum3", "precursor_mz": 205, "parent_mass": 205, "smiles": b})
         .build()
-    spectrum_4 = builder.with_mz(np.array([100, 150, 200.])) \
-        .with_intensities(np.array([0.6, 0.1, 0.6])) \
-        .with_metadata({"id": "spectrum4", "precursor_mz": 210, "parent_mass": 210, "smiles": b}) \
+    )
+    spectrum_4 = (
+        builder.with_mz(np.array([100, 150, 200.0]))
+        .with_intensities(np.array([0.6, 0.1, 0.6]))
+        .with_metadata({"id": "spectrum4", "precursor_mz": 210, "parent_mass": 210, "smiles": b})
         .build()
+    )
 
     yield [spectrum_1, spectrum_2, spectrum_3, spectrum_4]
 
@@ -99,12 +107,15 @@ def test_matrix_scalar_self_comparison_returns_symmetric_dense_scores(spectra):
 
     scores = similarity.matrix(spectra, progress_bar=False)
 
-    expected = np.array([
-        [1.0, 0.0, 0.5, 1.0],
-        [0.0, 1.0, 0.5, 0.0],
-        [0.5, 0.5, 1.0, 0.5],
-        [1.0, 0.0, 0.5, 1.0],
-    ], dtype=np.float64)
+    expected = np.array(
+        [
+            [1.0, 0.0, 0.5, 1.0],
+            [0.0, 1.0, 0.5, 0.0],
+            [0.5, 0.5, 1.0, 0.5],
+            [1.0, 0.0, 0.5, 1.0],
+        ],
+        dtype=np.float64,
+    )
 
     assert isinstance(scores, Scores)
     assert scores.is_sparse is False
@@ -118,10 +129,13 @@ def test_matrix_scalar_two_input_sets_is_not_assumed_symmetric(spectra):
 
     scores = similarity.matrix(spectra[:2], spectra[2:], progress_bar=False)
 
-    expected = np.array([
-        [0.5, 1.0],
-        [0.5, 0.0],
-    ], dtype=np.float64)
+    expected = np.array(
+        [
+            [0.5, 1.0],
+            [0.5, 0.0],
+        ],
+        dtype=np.float64,
+    )
 
     assert isinstance(scores, Scores)
     np.testing.assert_array_equal(scores.to_array(), expected)
@@ -132,12 +146,15 @@ def test_matrix_non_commutative_self_comparison_computes_full_matrix(spectra):
 
     scores = similarity.matrix(spectra, progress_bar=False)
 
-    expected = np.array([
-        [0.0, 10.0, 5.0, 0.0],
-        [-10.0, 0.0, -5.0, -10.0],
-        [-5.0, 5.0, 0.0, -5.0],
-        [0.0, 10.0, 5.0, 0.0],
-    ], dtype=np.float64)
+    expected = np.array(
+        [
+            [0.0, 10.0, 5.0, 0.0],
+            [-10.0, 0.0, -5.0, -10.0],
+            [-5.0, 5.0, 0.0, -5.0],
+            [0.0, 10.0, 5.0, 0.0],
+        ],
+        dtype=np.float64,
+    )
 
     np.testing.assert_array_equal(scores.to_array(), expected)
 
@@ -152,19 +169,25 @@ def test_matrix_structured_all_fields_returns_dense_scores(spectra):
     assert scores.is_scalar is False
     assert set(scores.score_fields) == {"score", "matches"}
 
-    expected_score = np.array([
-        [1.0, 0.0, 0.5, 1.0],
-        [0.0, 1.0, 0.5, 0.0],
-        [0.5, 0.5, 1.0, 0.5],
-        [1.0, 0.0, 0.5, 1.0],
-    ], dtype=np.float64)
+    expected_score = np.array(
+        [
+            [1.0, 0.0, 0.5, 1.0],
+            [0.0, 1.0, 0.5, 0.0],
+            [0.5, 0.5, 1.0, 0.5],
+            [1.0, 0.0, 0.5, 1.0],
+        ],
+        dtype=np.float64,
+    )
 
-    expected_matches = np.array([
-        [3, 0, 2, 3],
-        [0, 3, 2, 0],
-        [2, 2, 3, 2],
-        [3, 0, 2, 3],
-    ], dtype=np.int64)
+    expected_matches = np.array(
+        [
+            [3, 0, 2, 3],
+            [0, 3, 2, 0],
+            [2, 2, 3, 2],
+            [3, 0, 2, 3],
+        ],
+        dtype=np.int64,
+    )
 
     np.testing.assert_array_equal(scores.to_array("score"), expected_score)
     np.testing.assert_array_equal(scores.to_array("matches"), expected_matches)
@@ -175,12 +198,15 @@ def test_matrix_structured_single_field_returns_dense_scores(spectra):
 
     scores = similarity.matrix(spectra, score_fields=("score",), progress_bar=False)
 
-    expected = np.array([
-        [1.0, 0.0, 0.5, 1.0],
-        [0.0, 1.0, 0.5, 0.0],
-        [0.5, 0.5, 1.0, 0.5],
-        [1.0, 0.0, 0.5, 1.0],
-    ], dtype=np.float64)
+    expected = np.array(
+        [
+            [1.0, 0.0, 0.5, 1.0],
+            [0.0, 1.0, 0.5, 0.0],
+            [0.5, 0.5, 1.0, 0.5],
+            [1.0, 0.0, 0.5, 1.0],
+        ],
+        dtype=np.float64,
+    )
 
     assert isinstance(scores, Scores)
     assert scores.is_scalar is True
@@ -200,12 +226,15 @@ def test_sparse_matrix_scalar_self_comparison_returns_sparse_scores(spectra):
 
     scores = similarity.sparse_matrix(spectra, progress_bar=False)
 
-    expected = np.array([
-        [1.0, 0.0, 0.5, 1.0],
-        [0.0, 1.0, 0.5, 0.0],
-        [0.5, 0.5, 1.0, 0.5],
-        [1.0, 0.0, 0.5, 1.0],
-    ], dtype=np.float64)
+    expected = np.array(
+        [
+            [1.0, 0.0, 0.5, 1.0],
+            [0.0, 1.0, 0.5, 0.0],
+            [0.5, 0.5, 1.0, 0.5],
+            [1.0, 0.0, 0.5, 1.0],
+        ],
+        dtype=np.float64,
+    )
 
     assert isinstance(scores, Scores)
     assert scores.is_sparse is True
@@ -223,12 +252,15 @@ def test_sparse_matrix_scalar_with_score_filter(spectra):
         progress_bar=False,
     )
 
-    expected = np.array([
-        [1.0, 0.0, 0.0, 1.0],
-        [0.0, 1.0, 0.0, 0.0],
-        [0.0, 0.0, 1.0, 0.0],
-        [1.0, 0.0, 0.0, 1.0],
-    ], dtype=np.float64)
+    expected = np.array(
+        [
+            [1.0, 0.0, 0.0, 1.0],
+            [0.0, 1.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0],
+            [1.0, 0.0, 0.0, 1.0],
+        ],
+        dtype=np.float64,
+    )
 
     np.testing.assert_array_equal(scores.to_array(), expected)
 
@@ -245,19 +277,25 @@ def test_sparse_matrix_structured_all_fields_returns_sparse_scores(spectra):
     assert isinstance(scores.to_coo("score"), coo_array)
     assert isinstance(scores.to_coo("matches"), coo_array)
 
-    expected_score = np.array([
-        [1.0, 0.0, 0.5, 1.0],
-        [0.0, 1.0, 0.5, 0.0],
-        [0.5, 0.5, 1.0, 0.5],
-        [1.0, 0.0, 0.5, 1.0],
-    ], dtype=np.float64)
+    expected_score = np.array(
+        [
+            [1.0, 0.0, 0.5, 1.0],
+            [0.0, 1.0, 0.5, 0.0],
+            [0.5, 0.5, 1.0, 0.5],
+            [1.0, 0.0, 0.5, 1.0],
+        ],
+        dtype=np.float64,
+    )
 
-    expected_matches = np.array([
-        [3, 0, 2, 3],
-        [0, 3, 2, 0],
-        [2, 2, 3, 2],
-        [3, 0, 2, 3],
-    ], dtype=np.int64)
+    expected_matches = np.array(
+        [
+            [3, 0, 2, 3],
+            [0, 3, 2, 0],
+            [2, 2, 3, 2],
+            [3, 0, 2, 3],
+        ],
+        dtype=np.int64,
+    )
 
     np.testing.assert_array_equal(scores.to_array("score"), expected_score)
     np.testing.assert_array_equal(scores.to_array("matches"), expected_matches)
@@ -272,12 +310,15 @@ def test_sparse_matrix_structured_single_field_returns_sparse_scores(spectra):
         progress_bar=False,
     )
 
-    expected = np.array([
-        [3, 0, 2, 3],
-        [0, 3, 2, 0],
-        [2, 2, 3, 2],
-        [3, 0, 2, 3],
-    ], dtype=np.int64)
+    expected = np.array(
+        [
+            [3, 0, 2, 3],
+            [0, 3, 2, 0],
+            [2, 2, 3, 2],
+            [3, 0, 2, 3],
+        ],
+        dtype=np.int64,
+    )
 
     assert isinstance(scores, Scores)
     assert scores.is_sparse is True
@@ -296,12 +337,15 @@ def test_sparse_matrix_structured_filter_on_multiple_fields_return_only_score(sp
         progress_bar=False,
     )
 
-    expected = np.array([
-        [1.0, 0.0, 0.5, 1.0],
-        [0.0, 1.0, 0.5, 0.0],
-        [0.5, 0.5, 1.0, 0.5],
-        [1.0, 0.0, 0.5, 1.0],
-    ], dtype=np.float64)
+    expected = np.array(
+        [
+            [1.0, 0.0, 0.5, 1.0],
+            [0.0, 1.0, 0.5, 0.0],
+            [0.5, 0.5, 1.0, 0.5],
+            [1.0, 0.0, 0.5, 1.0],
+        ],
+        dtype=np.float64,
+    )
 
     np.testing.assert_array_equal(scores.to_array(), expected)
 
@@ -316,12 +360,15 @@ def test_sparse_matrix_structured_filter_only_matches_greater_than_two(spectra):
         progress_bar=False,
     )
 
-    expected = np.array([
-        [3, 0, 0, 3],
-        [0, 3, 0, 0],
-        [0, 0, 3, 0],
-        [3, 0, 0, 3],
-    ], dtype=np.int64)
+    expected = np.array(
+        [
+            [3, 0, 0, 3],
+            [0, 3, 0, 0],
+            [0, 0, 3, 0],
+            [3, 0, 0, 3],
+        ],
+        dtype=np.int64,
+    )
 
     np.testing.assert_array_equal(scores.to_array(), expected)
 
@@ -335,12 +382,15 @@ def test_sparse_matrix_scalar_with_score_filter_range(spectra):
         progress_bar=False,
     )
 
-    expected = np.array([
-        [0.0, 0.0, 0.5, 0.0],
-        [0.0, 0.0, 0.5, 0.0],
-        [0.5, 0.5, 0.0, 0.5],
-        [0.0, 0.0, 0.5, 0.0],
-    ], dtype=np.float64)
+    expected = np.array(
+        [
+            [0.0, 0.0, 0.5, 0.0],
+            [0.0, 0.0, 0.5, 0.0],
+            [0.5, 0.5, 0.0, 0.5],
+            [0.0, 0.0, 0.5, 0.0],
+        ],
+        dtype=np.float64,
+    )
 
     np.testing.assert_array_equal(scores.to_array(), expected)
 
@@ -355,12 +405,15 @@ def test_sparse_matrix_structured_with_score_filter_range_on_score_field(spectra
         progress_bar=False,
     )
 
-    expected = np.array([
-        [0.0, 0.0, 0.5, 0.0],
-        [0.0, 0.0, 0.5, 0.0],
-        [0.5, 0.5, 0.0, 0.5],
-        [0.0, 0.0, 0.5, 0.0],
-    ], dtype=np.float64)
+    expected = np.array(
+        [
+            [0.0, 0.0, 0.5, 0.0],
+            [0.0, 0.0, 0.5, 0.0],
+            [0.5, 0.5, 0.0, 0.5],
+            [0.0, 0.0, 0.5, 0.0],
+        ],
+        dtype=np.float64,
+    )
 
     np.testing.assert_array_equal(scores.to_array(), expected)
 

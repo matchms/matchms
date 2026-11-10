@@ -15,6 +15,7 @@ from .spectrum_similarity_functions import _preprocess_peak_array, collect_peak_
 
 logger = logging.getLogger("matchms")
 
+
 class NeutralLossesCosine(BaseSimilarityWithSparse):
     """Calculate 'neutral losses cosine score' between mass spectra.
 
@@ -34,14 +35,14 @@ class NeutralLossesCosine(BaseSimilarityWithSparse):
     score_fields = ("score", "matches")
 
     def __init__(
-            self,
-            tolerance: float = DEFAULT_MZ_TOLERANCE,
-            mz_power: float = DEFAULT_MZ_POWER,
-            intensity_power: float = DEFAULT_INTENSITY_POWER,
-            noise_cutoff: float = DEFAULT_NOISE_CUTOFF,
-            remove_precursor: bool = True,
-            offset_to_precursor: float = DEFAULT_OFFSET_TO_PRECURSOR,
-            ):
+        self,
+        tolerance: float = DEFAULT_MZ_TOLERANCE,
+        mz_power: float = DEFAULT_MZ_POWER,
+        intensity_power: float = DEFAULT_INTENSITY_POWER,
+        noise_cutoff: float = DEFAULT_NOISE_CUTOFF,
+        remove_precursor: bool = True,
+        offset_to_precursor: float = DEFAULT_OFFSET_TO_PRECURSOR,
+    ):
         """
         Parameters
         ----------
@@ -71,16 +72,14 @@ class NeutralLossesCosine(BaseSimilarityWithSparse):
     def _get_matching_pairs(self, spec1, spec2, mass_shift: float) -> np.ndarray:
         """Find all pairs of peaks that match within the given tolerance."""
         matching_pairs = collect_peak_pairs(
-            spec1, spec2, self.tolerance,
-            shift=mass_shift, mz_power=self.mz_power,
-            intensity_power=self.intensity_power
+            spec1, spec2, self.tolerance, shift=mass_shift, mz_power=self.mz_power, intensity_power=self.intensity_power
         )
         if matching_pairs is None:
             return None
         if matching_pairs.shape[0] > 0:
             matching_pairs = matching_pairs[np.argsort(matching_pairs[:, 2], kind="mergesort")[::-1], :]
         return matching_pairs
-    
+
     def pair(self, spectrum_1: SpectrumType, spectrum_2: SpectrumType) -> tuple[float, int]:
         """Calculate neutral losses cosine score between two spectra.
 

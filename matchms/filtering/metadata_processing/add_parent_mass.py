@@ -63,9 +63,7 @@ def _add_parent_mass(
         Input object with added or updated ``parent_mass`` metadata, or ``None``
         if the input was ``None``.
     """
-    parent_mass = _convert_parent_mass_entry_to_float(
-        _get_parent_mass(metadata)
-    )
+    parent_mass = _convert_parent_mass_entry_to_float(_get_parent_mass(metadata))
 
     if parent_mass is not None and not overwrite_existing_entry:
         # Normalize aliases such as "parentmass" or "exact_mass" into the

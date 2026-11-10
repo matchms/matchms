@@ -57,11 +57,7 @@ def test_harmonize_missing_entries_selected_keys(as_collection):
 
 @pytest.mark.parametrize("as_collection", [False, True], ids=["spectrum", "collection"])
 def test_harmonize_missing_entries_custom_undefined(as_collection):
-    spectrum_in = (
-        SpectrumBuilder()
-        .with_metadata({"inchi": "n/a"})
-        .build()
-    )
+    spectrum_in = SpectrumBuilder().with_metadata({"inchi": "n/a"}).build()
 
     spectrum = run_filter_as_spectrum_or_collection(
         harmonize_missing_entries,
@@ -76,11 +72,7 @@ def test_harmonize_missing_entries_custom_undefined(as_collection):
 
 @pytest.mark.parametrize("as_collection", [False, True], ids=["spectrum", "collection"])
 def test_harmonize_missing_entries_creates_missing_selected_key(as_collection):
-    spectrum_in = (
-        SpectrumBuilder()
-        .with_metadata({"smiles": "C"})
-        .build()
-    )
+    spectrum_in = SpectrumBuilder().with_metadata({"smiles": "C"}).build()
 
     spectrum = run_filter_as_spectrum_or_collection(
         harmonize_missing_entries,
@@ -95,11 +87,7 @@ def test_harmonize_missing_entries_creates_missing_selected_key(as_collection):
 
 @pytest.mark.parametrize("as_collection", [False, True], ids=["spectrum", "collection"])
 def test_harmonize_missing_entries_accepts_single_key_string(as_collection):
-    spectrum_in = (
-        SpectrumBuilder()
-        .with_metadata({"inchi": "n/a"})
-        .build()
-    )
+    spectrum_in = SpectrumBuilder().with_metadata({"inchi": "n/a"}).build()
 
     spectrum = run_filter_as_spectrum_or_collection(
         harmonize_missing_entries,

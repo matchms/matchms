@@ -11,13 +11,7 @@ def spectrum_in():
     mz = np.array([10, 20, 30, 40], dtype="float")
     intensities = np.array([0, 1, 10, 100], dtype="float")
     metadata = {"precursor_mz": 60.0}
-    spectrum_in = (
-        SpectrumBuilder()
-        .with_mz(mz)
-        .with_intensities(intensities)
-        .with_metadata(metadata)
-        .build()
-    )
+    spectrum_in = SpectrumBuilder().with_mz(mz).with_intensities(intensities).with_metadata(metadata).build()
     return spectrum_in
 
 
@@ -113,13 +107,7 @@ def test_if_precursor_remains(as_collection):
     mz = np.array([10, 20, 400, 410.5], dtype="float")
     intensities = np.array([0, 1, 10, 100], dtype="float")
     metadata = {"precursor_mz": 410.5}
-    spectrum_in = (
-        SpectrumBuilder()
-        .with_mz(mz)
-        .with_intensities(intensities)
-        .with_metadata(metadata)
-        .build()
-    )
+    spectrum_in = SpectrumBuilder().with_mz(mz).with_intensities(intensities).with_metadata(metadata).build()
 
     spectrum = run_filter_as_spectrum_or_collection(
         remove_peaks_around_precursor_mz,
@@ -159,13 +147,7 @@ def test_remove_peaks_around_precursor_mz_tolerance_zero_keeps_all_peaks(as_coll
     mz = np.array([100.0, 101.0, 102.0], dtype="float")
     intensities = np.array([1.0, 2.0, 3.0], dtype="float")
     metadata = {"precursor_mz": 101.0}
-    spectrum_in = (
-        SpectrumBuilder()
-        .with_mz(mz)
-        .with_intensities(intensities)
-        .with_metadata(metadata)
-        .build()
-    )
+    spectrum_in = SpectrumBuilder().with_mz(mz).with_intensities(intensities).with_metadata(metadata).build()
 
     spectrum = run_filter_as_spectrum_or_collection(
         remove_peaks_around_precursor_mz,

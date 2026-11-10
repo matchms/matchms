@@ -84,11 +84,7 @@ def _estimate_parent_mass_from_adduct(metadata):
         return None
 
     adduct_row = match.iloc[0]
-    return (
-        precursor_mz - adduct_row["correction_mass"]
-    ) / adduct_row["mass_multiplier"]
+    return (precursor_mz - adduct_row["correction_mass"]) / adduct_row["mass_multiplier"]
 
 
-repair_adduct_and_parent_mass_based_on_smiles = metadata_update_filter(
-    _repair_adduct_and_parent_mass_based_on_smiles
-)
+repair_adduct_and_parent_mass_based_on_smiles = metadata_update_filter(_repair_adduct_and_parent_mass_based_on_smiles)

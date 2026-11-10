@@ -11,6 +11,7 @@ from .hashing import spectra_hashes
 
 class FragmentCollection(ABC):
     """Abstract base class for a collection of spectra fragments."""
+
     @property
     @abstractmethod
     def shape(self) -> tuple[int, int]:
@@ -126,10 +127,7 @@ def _decimal_places_from_mz_precision(mz_precision: float) -> int:
     rounded_exponent = round(exponent)
 
     if not np.isclose(exponent, rounded_exponent):
-        raise ValueError(
-            "mz_precision must be a power of ten, for example "
-            "1, 0.1, 0.01, 1e-4, or 1e-5."
-        )
+        raise ValueError("mz_precision must be a power of ten, for example 1, 0.1, 0.01, 1e-4, or 1e-5.")
 
     return max(0, rounded_exponent)
 
@@ -197,10 +195,7 @@ class CSRFragmentCollection(FragmentCollection):
         self._mz_decimals = _decimal_places_from_mz_precision(mz_precision)
 
         if mz_rounding not in self._SUPPORTED_MZ_ROUNDING:
-            raise ValueError(
-                "mz_rounding must be one of "
-                f"{sorted(self._SUPPORTED_MZ_ROUNDING)}."
-            )
+            raise ValueError(f"mz_rounding must be one of {sorted(self._SUPPORTED_MZ_ROUNDING)}.")
 
         self.mz_precision = float(mz_precision)
         self.mz_rounding = mz_rounding
@@ -273,9 +268,7 @@ class CSRFragmentCollection(FragmentCollection):
         if mz.ndim != 1 or mz.shape != intensities.shape:
             raise ValueError("mz and intensities must be one-dimensional arrays of the same length.")
         if mz.size != int(lengths.sum()):
-            raise ValueError(
-                f"lengths sum to {int(lengths.sum())} peaks, but {mz.size} peak values were given."
-            )
+            raise ValueError(f"lengths sum to {int(lengths.sum())} peaks, but {mz.size} peak values were given.")
 
         n_spectra = lengths.size
         template = cls.from_array(
@@ -369,10 +362,7 @@ class CSRFragmentCollection(FragmentCollection):
         elif self.mz_rounding == "round":
             discretized_mz = np.round(mz_values, decimals=self._mz_decimals)
         else:
-            raise ValueError(
-                "mz_rounding must be one of "
-                f"{sorted(self._SUPPORTED_MZ_ROUNDING)}."
-            )
+            raise ValueError(f"mz_rounding must be one of {sorted(self._SUPPORTED_MZ_ROUNDING)}.")
 
         return np.rint(discretized_mz / self.mz_precision).astype(self.index_dtype)
 
@@ -421,9 +411,7 @@ class CSRFragmentCollection(FragmentCollection):
         """Return a new collection keeping rows where mask is True."""
         mask = np.asarray(mask, dtype=bool)
         if mask.shape[0] != len(self):
-            raise ValueError(
-                f"Mask length ({mask.shape[0]}) does not match number of spectra ({len(self)})."
-            )
+            raise ValueError(f"Mask length ({mask.shape[0]}) does not match number of spectra ({len(self)}).")
         return self.take(np.where(mask)[0])
 
     def drop(self, indices: Iterable[int]) -> Self:
@@ -534,9 +522,9 @@ class CSRFragmentCollection(FragmentCollection):
         raise ValueError("axis must be 0 or 1")
 
     def count_peaks_above_relative_intensity(
-            self,
-            intensity_from: float,
-        ) -> np.ndarray:
+        self,
+        intensity_from: float,
+    ) -> np.ndarray:
         """Return number of peaks per row with relative intensity >= intensity_from."""
         if intensity_from < 0.0:
             raise ValueError("'intensity_from' should be larger than or equal to 0.")
@@ -576,15 +564,13 @@ class CSRFragmentCollection(FragmentCollection):
     # Abstract methods for peak processing filters
     # --------------------------------------------
     def select_by_intensity(
-            self,
-            intensity_from: float = 0.0,
-            intensity_to: float = 1.0,
-        ) -> Self:
+        self,
+        intensity_from: float = 0.0,
+        intensity_to: float = 1.0,
+    ) -> Self:
         """Return a new collection keeping peaks within an intensity range."""
         if intensity_from > intensity_to:
-            raise ValueError(
-                "'intensity_from' should be smaller than or equal to 'intensity_to'."
-            )
+            raise ValueError("'intensity_from' should be smaller than or equal to 'intensity_to'.")
 
         coo = self._array.tocoo()
         keep = (coo.data >= intensity_from) & (coo.data <= intensity_to)
@@ -597,19 +583,17 @@ class CSRFragmentCollection(FragmentCollection):
         return self._from_array(new_array)
 
     def select_by_relative_intensity(
-            self,
-            intensity_from: float = 0.0,
-            intensity_to: float = 1.0,
-        ) -> Self:
+        self,
+        intensity_from: float = 0.0,
+        intensity_to: float = 1.0,
+    ) -> Self:
         """Return a new collection keeping peaks within a row-wise relative intensity range."""
         if intensity_from < 0.0:
             raise ValueError("'intensity_from' should be larger than or equal to 0.")
         if intensity_to > 1.0:
             raise ValueError("'intensity_to' should be smaller than or equal to 1.0.")
         if intensity_from > intensity_to:
-            raise ValueError(
-                "'intensity_from' should be smaller than or equal to 'intensity_to'."
-            )
+            raise ValueError("'intensity_from' should be smaller than or equal to 'intensity_to'.")
 
         coo = self._array.tocoo()
 
@@ -621,15 +605,9 @@ class CSRFragmentCollection(FragmentCollection):
         nonzero_row_max = row_max[coo.row] > 0
 
         relative_intensities = np.zeros_like(coo.data, dtype=float)
-        relative_intensities[nonzero_row_max] = (
-            coo.data[nonzero_row_max] / row_max[coo.row[nonzero_row_max]]
-        )
+        relative_intensities[nonzero_row_max] = coo.data[nonzero_row_max] / row_max[coo.row[nonzero_row_max]]
 
-        keep = (
-            nonzero_row_max
-            & (relative_intensities >= intensity_from)
-            & (relative_intensities <= intensity_to)
-        )
+        keep = nonzero_row_max & (relative_intensities >= intensity_from) & (relative_intensities <= intensity_to)
 
         new_array = coo_array(
             (coo.data[keep], (coo.row[keep], coo.col[keep])),
@@ -646,16 +624,14 @@ class CSRFragmentCollection(FragmentCollection):
         mz_max = np.asarray(mz_max, dtype=float)
 
         if mz_max.shape != (len(self),):
-            raise ValueError(
-                "mz_max must contain exactly one value per spectrum row."
-            )
+            raise ValueError("mz_max must contain exactly one value per spectrum row.")
 
         csr = self._array
 
         if csr.nnz == 0:
             return self.copy()
 
-        # Stored CSR entries are ordered spectrum by spectrum. 
+        # Stored CSR entries are ordered spectrum by spectrum.
         # Expand the row-specific thresholds once so that all stored peaks can be tested
         # without reconstructing individual Spectrum objects.
         peaks_per_row = np.diff(csr.indptr)
@@ -667,7 +643,7 @@ class CSRFragmentCollection(FragmentCollection):
         if np.all(keep):
             return self.copy()
 
-        # The retained data and column indices remain in CSR row order. 
+        # The retained data and column indices remain in CSR row order.
         # Construct the new indptr from a cumulative count of retained entries instead of
         # converting the sparse matrix to COO format.
         cumulative_kept = np.empty(keep.size + 1, dtype=np.int64)
@@ -692,10 +668,10 @@ class CSRFragmentCollection(FragmentCollection):
         return self._from_array(new_array)
 
     def keep_top_k_per_row_variable(
-            self,
-            k_per_row: np.ndarray,
-            progress_bar: bool = False,
-            ) -> Self:
+        self,
+        k_per_row: np.ndarray,
+        progress_bar: bool = False,
+    ) -> Self:
         """Keep the top-k highest-intensity peaks per row.
 
         Parameters
@@ -710,10 +686,7 @@ class CSRFragmentCollection(FragmentCollection):
         k_per_row = np.asarray(k_per_row)
 
         if k_per_row.shape[0] != len(self):
-            raise ValueError(
-                f"k_per_row length ({k_per_row.shape[0]}) does not match "
-                f"number of spectra ({len(self)})."
-            )
+            raise ValueError(f"k_per_row length ({k_per_row.shape[0]}) does not match number of spectra ({len(self)}).")
 
         if np.any(k_per_row < 0):
             raise ValueError("k_per_row values must be non-negative.")

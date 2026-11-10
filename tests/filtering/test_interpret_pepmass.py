@@ -24,13 +24,7 @@ def test_interpret_pepmass(input_pepmass, expected_results, as_collection):
     mz = np.array([100, 200.0])
     intensities = np.array([0.7, 0.1])
     metadata = {"pepmass": input_pepmass}
-    spectrum_in = (
-        SpectrumBuilder()
-        .with_mz(mz)
-        .with_intensities(intensities)
-        .with_metadata(metadata)
-        .build()
-    )
+    spectrum_in = SpectrumBuilder().with_mz(mz).with_intensities(intensities).with_metadata(metadata).build()
 
     spectrum = run_filter_as_spectrum_or_collection(
         interpret_pepmass,
@@ -69,13 +63,7 @@ def test_interpret_pepmass_charge_present(caplog, as_collection):
     mz = np.array([100, 200.0])
     intensities = np.array([0.7, 0.1])
     metadata = {"pepmass": (896.05, 1111.2, "2-"), "charge": -1}
-    spectrum_in = (
-        SpectrumBuilder()
-        .with_mz(mz)
-        .with_intensities(intensities)
-        .with_metadata(metadata)
-        .build()
-    )
+    spectrum_in = SpectrumBuilder().with_mz(mz).with_intensities(intensities).with_metadata(metadata).build()
 
     spectrum = run_filter_as_spectrum_or_collection(
         interpret_pepmass,
@@ -99,13 +87,7 @@ def test_interpret_pepmass_mz_present(caplog, as_collection):
     mz = np.array([100, 200.0])
     intensities = np.array([0.7, 0.1])
     metadata = {"pepmass": (203, 44, "2-"), "precursor_mz": 202}
-    spectrum_in = (
-        SpectrumBuilder()
-        .with_mz(mz)
-        .with_intensities(intensities)
-        .with_metadata(metadata)
-        .build()
-    )
+    spectrum_in = SpectrumBuilder().with_mz(mz).with_intensities(intensities).with_metadata(metadata).build()
 
     spectrum = run_filter_as_spectrum_or_collection(
         interpret_pepmass,
@@ -130,13 +112,7 @@ def test_interpret_pepmass_intensity_present(caplog, as_collection):
     mz = np.array([100, 200.0])
     intensities = np.array([0.7, 0.1])
     metadata = {"pepmass": (203, 44, "2-"), "precursor_intensity": 100}
-    spectrum_in = (
-        SpectrumBuilder()
-        .with_mz(mz)
-        .with_intensities(intensities)
-        .with_metadata(metadata)
-        .build()
-    )
+    spectrum_in = SpectrumBuilder().with_mz(mz).with_intensities(intensities).with_metadata(metadata).build()
 
     spectrum = run_filter_as_spectrum_or_collection(
         interpret_pepmass,
@@ -209,11 +185,7 @@ def test_interpret_pepmass_empty_spectrum():
     ],
 )
 def test_interpret_pepmass_error_v0_22_0(input_pepmass, expected_results, as_collection):
-    spectrum_in = (
-        SpectrumBuilder()
-        .with_metadata({"PEPMASS": input_pepmass}, metadata_harmonization=True)
-        .build()
-    )
+    spectrum_in = SpectrumBuilder().with_metadata({"PEPMASS": input_pepmass}, metadata_harmonization=True).build()
 
     spectrum = run_filter_as_spectrum_or_collection(
         interpret_pepmass,

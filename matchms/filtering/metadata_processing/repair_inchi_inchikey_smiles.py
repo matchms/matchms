@@ -3,23 +3,12 @@ from matchms.filtering.filter_utils.metadata_conversions import as_string_or_non
 from matchms.filtering.species_string import SpeciesString
 
 
-def _repair_species_values(
-    inchi, inchiaux, inchikey, smiles
-) -> dict[str, str | None]:
+def _repair_species_values(inchi, inchiaux, inchikey, smiles) -> dict[str, str | None]:
     cleaneds = [SpeciesString(s) for s in [inchi, inchiaux, inchikey, smiles]]
 
-    inchis = [
-        c.cleaned for c in cleaneds
-        if c.target == "inchi" and c.cleaned != ""
-    ]
-    inchikeys = [
-        c.cleaned for c in cleaneds
-        if c.target == "inchikey" and c.cleaned != ""
-    ]
-    smiles_values = [
-        c.cleaned for c in cleaneds
-        if c.target == "smiles" and c.cleaned != ""
-    ]
+    inchis = [c.cleaned for c in cleaneds if c.target == "inchi" and c.cleaned != ""]
+    inchikeys = [c.cleaned for c in cleaneds if c.target == "inchikey" and c.cleaned != ""]
+    smiles_values = [c.cleaned for c in cleaneds if c.target == "smiles" and c.cleaned != ""]
 
     return {
         "inchi": inchis[0] if inchis else None,

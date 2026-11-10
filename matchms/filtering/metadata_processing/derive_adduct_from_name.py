@@ -41,10 +41,7 @@ def _derive_adduct_from_name(
 
     if compound_name is None:
         if as_string_or_none(metadata.get("name")) not in [None, ""]:
-            logger.warning(
-                "Found 'name' but not 'compound_name' in metadata. "
-                "Apply 'add_compound_name' filter first."
-            )
+            logger.warning("Found 'name' but not 'compound_name' in metadata. Apply 'add_compound_name' filter first.")
         return {}
 
     parts_that_look_like_adduct = []
@@ -61,9 +58,7 @@ def _derive_adduct_from_name(
     updates = {}
 
     if remove_adduct_from_name:
-        name_adduct_removed = " ".join(
-            x for x in name_split if x not in parts_that_look_like_adduct
-        )
+        name_adduct_removed = " ".join(x for x in name_split if x not in parts_that_look_like_adduct)
         name_adduct_removed = name_adduct_removed.strip("; ")
         updates["compound_name"] = name_adduct_removed or None
         logger.info(

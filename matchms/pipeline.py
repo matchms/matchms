@@ -58,8 +58,7 @@ def create_workflow(
     if yaml_file_name is not None:
         if os.path.exists(yaml_file_name):
             raise FileExistsError(
-                "This yaml file already exists. "
-                "Use load_workflow_from_yaml_file(...) to load an existing workflow."
+                "This yaml file already exists. Use load_workflow_from_yaml_file(...) to load an existing workflow."
             )
         with open(yaml_file_name, "w", encoding="utf-8") as file:
             file.write("# Matchms pipeline config file\n")
@@ -146,15 +145,11 @@ class Pipeline:
 
     def check_workflow(self) -> None:
         if not isinstance(self.__workflow, OrderedDict):
-            raise TypeError(
-                "Workflow is expected to be an OrderedDict, "
-                f"but got type {type(self.__workflow)}."
-            )
+            raise TypeError(f"Workflow is expected to be an OrderedDict, but got type {type(self.__workflow)}.")
         expected_keys = {"spectra_1_filters", "spectra_2_filters", "score_computations"}
         if set(self.__workflow.keys()) != expected_keys:
             raise ValueError(
-                f"Workflow must contain exactly keys {expected_keys}, "
-                f"but got {set(self.__workflow.keys())}."
+                f"Workflow must contain exactly keys {expected_keys}, but got {set(self.__workflow.keys())}."
             )
 
         check_score_computation(self.__workflow["score_computations"])
@@ -185,11 +180,7 @@ class Pipeline:
         report = None
 
         if self.processing_spectra_1 is not None:
-            report = (
-                self.processing_spectra_1.create_processing_report()
-                if create_report
-                else None
-            )
+            report = self.processing_spectra_1.create_processing_report() if create_report else None
             self._spectra_1 = self.processing_spectra_1.process_spectra(
                 self._spectra_1,
                 processing_report=report,
@@ -200,16 +191,10 @@ class Pipeline:
 
             if cleaned_spectra_1_file is not None:
                 save_spectra(self._spectra_1, cleaned_spectra_1_file)
-                self.write_to_logfile(
-                    f"--- Spectra_1 written to {cleaned_spectra_1_file} ---"
-                )
+                self.write_to_logfile(f"--- Spectra_1 written to {cleaned_spectra_1_file} ---")
 
         if self.processing_spectra_2 is not None and self._spectra_2 is not None:
-            report = (
-                self.processing_spectra_2.create_processing_report()
-                if create_report
-                else None
-            )
+            report = self.processing_spectra_2.create_processing_report() if create_report else None
             self._spectra_2 = self.processing_spectra_2.process_spectra(
                 self._spectra_2,
                 processing_report=report,
@@ -220,9 +205,7 @@ class Pipeline:
 
             if cleaned_spectra_2_file is not None:
                 save_spectra(self._spectra_2, cleaned_spectra_2_file)
-                self.write_to_logfile(
-                    f"--- Spectra_2 written to {cleaned_spectra_2_file} ---"
-                )
+                self.write_to_logfile(f"--- Spectra_2 written to {cleaned_spectra_2_file} ---")
 
         self.scores = None
         self.mask = None
@@ -255,9 +238,7 @@ class Pipeline:
         field = params.get("field")
 
         if operation_name is None or "value" not in params:
-            raise ValueError(
-                "Mask computation requires parameters {'operation': ..., 'value': ...}."
-            )
+            raise ValueError("Mask computation requires parameters {'operation': ..., 'value': ...}.")
 
         self.mask = _build_mask_from_scores(
             scores=self.scores,
@@ -415,9 +396,7 @@ def _build_mask_from_scores(
     }
 
     if operation_name not in operations:
-        raise ValueError(
-            f"Unknown mask operation {operation_name!r}. Supported operations are: {tuple(operations)}."
-        )
+        raise ValueError(f"Unknown mask operation {operation_name!r}. Supported operations are: {tuple(operations)}.")
 
     target = scores if field is None else scores[field]
 
@@ -467,9 +446,7 @@ def check_score_computation(score_computations: Sequence[str | list[dict]]) -> N
 
         if isinstance(step, str) and step.lower() in _MASKING_FUNCTIONS:
             if "operation" not in params or "value" not in params:
-                raise ValueError(
-                    "Mask computation requires parameters {'operation': ..., 'value': ...}."
-                )
+                raise ValueError("Mask computation requires parameters {'operation': ..., 'value': ...}.")
             if i == 0 or i == n_steps - 1:
                 raise ValueError("Masking at the start or end of score computations is not allowed.")
             continue

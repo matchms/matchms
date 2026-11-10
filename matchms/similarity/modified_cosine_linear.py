@@ -57,14 +57,14 @@ class ModifiedCosineLinear(CosineLinear):
     """
 
     def __init__(
-            self,
-            tolerance: float = DEFAULT_MZ_TOLERANCE,
-            mz_power: float = DEFAULT_MZ_POWER,
-            intensity_power: float = DEFAULT_INTENSITY_POWER,
-            noise_cutoff: float | None = DEFAULT_NOISE_CUTOFF,
-            remove_precursor: bool = True,
-            offset_to_precursor: float = DEFAULT_OFFSET_TO_PRECURSOR
-            ):
+        self,
+        tolerance: float = DEFAULT_MZ_TOLERANCE,
+        mz_power: float = DEFAULT_MZ_POWER,
+        intensity_power: float = DEFAULT_INTENSITY_POWER,
+        noise_cutoff: float | None = DEFAULT_NOISE_CUTOFF,
+        remove_precursor: bool = True,
+        offset_to_precursor: float = DEFAULT_OFFSET_TO_PRECURSOR,
+    ):
         """
         Parameters
         ----------

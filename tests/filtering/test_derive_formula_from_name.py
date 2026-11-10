@@ -62,11 +62,7 @@ def test_derive_formula_from_name_examples(
     expected_formula,
     as_collection,
 ):
-    spectrum_in = (
-        SpectrumBuilder()
-        .with_metadata({"compound_name": "peptideXYZ [M+H+K] " + string_addition})
-        .build()
-    )
+    spectrum_in = SpectrumBuilder().with_metadata({"compound_name": "peptideXYZ [M+H+K] " + string_addition}).build()
 
     spectrum = run_filter_as_spectrum_or_collection(
         derive_formula_from_name,
@@ -119,11 +115,7 @@ def test_derive_formula_from_name_empty_spectrum():
 
 @pytest.mark.parametrize("as_collection", [False, True], ids=["spectrum", "collection"])
 def test_derive_formula_from_name_does_not_create_empty_compound_name(as_collection):
-    spectrum_in = (
-        SpectrumBuilder()
-        .with_metadata({"compound_name": "C5H12NO2"})
-        .build()
-    )
+    spectrum_in = SpectrumBuilder().with_metadata({"compound_name": "C5H12NO2"}).build()
 
     spectrum = run_filter_as_spectrum_or_collection(
         derive_formula_from_name,

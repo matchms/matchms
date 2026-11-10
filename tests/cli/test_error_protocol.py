@@ -95,7 +95,11 @@ def test_missing_subcommand_exposes_valid_subcommands(capsys):
     error = payload["error"]
     assert error["code"] == "missing_subcommand"
     assert set(error["valid_values"]) == {
-        "list", "info", "matrix", "build-index", "search",
+        "list",
+        "info",
+        "matrix",
+        "build-index",
+        "search",
     }
 
 
@@ -187,9 +191,7 @@ def test_unexpected_exception_is_internal_error(capsys, monkeypatch):
 
     # main.py imports the command's run() directly, so patch the name it holds.
     monkeypatch.setattr(cli_main, "run_spectra_describe", boom)
-    exit_code, out, payload = run_cli(
-        "spectra", "describe", "/x.mgf", "--json", capsys=capsys
-    )
+    exit_code, out, payload = run_cli("spectra", "describe", "/x.mgf", "--json", capsys=capsys)
     assert exit_code == EXIT_INTERNAL == 1
     assert payload["ok"] is False
     assert payload["error"]["code"] == "internal_error"

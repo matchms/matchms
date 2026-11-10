@@ -6,11 +6,8 @@ from matchms.typing import SpectrumType
 
 
 def _select_by_intensity_spectrum(
-        spectrum_in: SpectrumType,
-        intensity_from: float = 0.01,
-        intensity_to: float = 1.0,
-        clone: bool | None = True
-    ) -> SpectrumType | None:
+    spectrum_in: SpectrumType, intensity_from: float = 0.01, intensity_to: float = 1.0, clone: bool | None = True
+) -> SpectrumType | None:
     """Keep only peaks within set intensity range (keep if
     intensity_from >= intensity >= intensity_to). In most cases it is adviced to
     use :py:func:`select_by_relative_intensity` function instead.
@@ -37,9 +34,7 @@ def _select_by_intensity_spectrum(
     spectrum = spectrum_in.clone() if clone else spectrum_in
 
     if intensity_from > intensity_to:
-        raise ValueError(
-            "'intensity_from' should be smaller than or equal to 'intensity_to'."
-        )
+        raise ValueError("'intensity_from' should be smaller than or equal to 'intensity_to'.")
 
     condition = np.logical_and(
         intensity_from <= spectrum.peaks.intensities,
@@ -62,9 +57,7 @@ def _select_by_intensity_collection(
 ) -> SpectraCollection:
     """Keep only peaks within set intensity range for a SpectraCollection."""
     if intensity_from > intensity_to:
-        raise ValueError(
-            "'intensity_from' should be smaller than or equal to 'intensity_to'."
-        )
+        raise ValueError("'intensity_from' should be smaller than or equal to 'intensity_to'.")
 
     target = spectrum_in.copy() if clone else spectrum_in
 

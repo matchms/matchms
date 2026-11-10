@@ -40,10 +40,12 @@ def _cosine_score(vec_1, vec_2):
 
 @pytest.fixture
 def spectra_collection():
-    return SpectraCollection([
-        _spectrum([100, 200, 300], [0.1, 0.2, 1.0]),
-        _spectrum([110, 190, 290], [0.5, 0.2, 1.0]),
-    ])
+    return SpectraCollection(
+        [
+            _spectrum([100, 200, 300], [0.1, 0.2, 1.0]),
+            _spectrum([110, 190, 290], [0.5, 0.2, 1.0]),
+        ]
+    )
 
 
 def test_binned_embedding_similarity_without_parameters():
@@ -91,9 +93,7 @@ def test_binned_embedding_similarity_matrix_self_comparison_uses_spectra_collect
 
 def test_binned_embedding_similarity_parameters_with_spectra_collection():
     """Test binned embedding similarity with different parameters."""
-    spectra = SpectraCollection([
-        _spectrum([100, 200, 300], [0.1, 0.2, 1.0])
-    ])
+    spectra = SpectraCollection([_spectrum([100, 200, 300], [0.1, 0.2, 1.0])])
 
     similarity_1 = BinnedEmbeddingSimilarity(max_mz=500, bin_width=1)
     similarity_2 = BinnedEmbeddingSimilarity(max_mz=500, bin_width=10)
@@ -114,11 +114,13 @@ def test_binned_embedding_similarity_parameters_with_spectra_collection():
 
 
 def test_binned_embedding_similarity_empty_and_zero_spectra_do_not_create_nans():
-    spectra = SpectraCollection([
-        _spectrum([], []),
-        _spectrum([2000, 3000], [1.0, 2.0]),
-        _spectrum([100, 200], [0.0, 0.0]),
-    ])
+    spectra = SpectraCollection(
+        [
+            _spectrum([], []),
+            _spectrum([2000, 3000], [1.0, 2.0]),
+            _spectrum([100, 200], [0.0, 0.0]),
+        ]
+    )
     similarity = BinnedEmbeddingSimilarity()
 
     embeddings = similarity.compute_embeddings(spectra)
@@ -172,16 +174,16 @@ def test_binned_embedding_similarity_ann():
     """Test approximate nearest neighbor search functionality."""
     pytest.importorskip("pynndescent")
 
-    reference_spectra = SpectraCollection([
-        _spectrum(
-            [100 + i, 200 + i, 300 + i],
-            [0.1 + i * 0.01, 0.2 + i * 0.01, 1.0 - i * 0.01],
-        )
-        for i in range(10)
-    ])
-    query_spectra = SpectraCollection([
-        _spectrum([100, 200, 300], [0.11, 0.21, 0.99])
-    ])
+    reference_spectra = SpectraCollection(
+        [
+            _spectrum(
+                [100 + i, 200 + i, 300 + i],
+                [0.1 + i * 0.01, 0.2 + i * 0.01, 1.0 - i * 0.01],
+            )
+            for i in range(10)
+        ]
+    )
+    query_spectra = SpectraCollection([_spectrum([100, 200, 300], [0.11, 0.21, 0.99])])
 
     similarity = BinnedEmbeddingSimilarity()
     similarity.build_ann_index(reference_spectra, k=5)
@@ -205,13 +207,15 @@ def test_binned_embedding_similarity_ann_save_load(tmp_path):
     """Test saving and loading ANN index."""
     pytest.importorskip("pynndescent")
 
-    reference_spectra = SpectraCollection([
-        _spectrum(
-            [100 + i, 200 + i, 300 + i],
-            [0.1 + i * 0.01, 0.2 + i * 0.01, 1.0 - i * 0.01],
-        )
-        for i in range(10)
-    ])
+    reference_spectra = SpectraCollection(
+        [
+            _spectrum(
+                [100 + i, 200 + i, 300 + i],
+                [0.1 + i * 0.01, 0.2 + i * 0.01, 1.0 - i * 0.01],
+            )
+            for i in range(10)
+        ]
+    )
 
     similarity = BinnedEmbeddingSimilarity()
     similarity.build_ann_index(reference_spectra, k=5)
@@ -233,13 +237,15 @@ def test_binned_embedding_similarity_ann_errors():
     """Test error handling in ANN functionality."""
     pytest.importorskip("pynndescent")
 
-    reference_spectra = SpectraCollection([
-        _spectrum(
-            [100 + i, 200 + i, 300 + i],
-            [0.1 + i * 0.01, 0.2 + i * 0.01, 1.0 - i * 0.01],
-        )
-        for i in range(10)
-    ])
+    reference_spectra = SpectraCollection(
+        [
+            _spectrum(
+                [100 + i, 200 + i, 300 + i],
+                [0.1 + i * 0.01, 0.2 + i * 0.01, 1.0 - i * 0.01],
+            )
+            for i in range(10)
+        ]
+    )
 
     similarity = BinnedEmbeddingSimilarity()
 

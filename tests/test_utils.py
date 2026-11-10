@@ -5,7 +5,7 @@ from matchms.utils import rename_deprecated_params
 
 @mark.filterwarnings("ignore::DeprecationWarning")
 def test_rename_deprecated_params():
-    #pylint: disable=no-value-for-parameter
+    # pylint: disable=no-value-for-parameter
     @rename_deprecated_params({"old_param": "new_param"}, version="0.1.0")
     def example_func(new_param, another_param):
         return new_param, another_param
@@ -28,8 +28,10 @@ def test_rename_deprecated_params():
         example_func(old_param="some_value", another_param="another_value")
         assert len(w) == 1
         assert issubclass(w[-1].category, DeprecationWarning)
-        assert ("Parameter 'old_param' is deprecated and will be removed in the future. Use 'new_param' instead. -- "
-                "Deprecated since version 0.1.0") in str(w[-1].message)
+        assert (
+            "Parameter 'old_param' is deprecated and will be removed in the future. Use 'new_param' instead. -- "
+            "Deprecated since version 0.1.0"
+        ) in str(w[-1].message)
 
     # Test if old params got removed
     @rename_deprecated_params({"old": "new"})

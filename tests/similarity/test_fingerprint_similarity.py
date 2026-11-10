@@ -225,9 +225,7 @@ def test_fingerprint_similarity_matrix_mixed_input(
 
 
 @pytest.mark.parametrize("similarity_measure", ["cosine", "tanimoto"])
-def test_fingerprint_similarity_matrix_asymmetric_input(
-    similarity_measure, fingerprint_generator, spectra
-):
+def test_fingerprint_similarity_matrix_asymmetric_input(similarity_measure, fingerprint_generator, spectra):
     similarity = FingerprintSimilarity(
         fingerprint_generator=fingerprint_generator,
         similarity_measure=similarity_measure,
@@ -269,9 +267,7 @@ def test_fingerprint_similarity_with_invalid_spectra_set_empty_nan(
 
 
 @pytest.mark.parametrize("similarity_measure", ["cosine", "tanimoto"])
-def test_fingerprint_similarity_empty_fingerprint_container_raises(
-    similarity_measure, fingerprint_generator
-):
+def test_fingerprint_similarity_empty_fingerprint_container_raises(similarity_measure, fingerprint_generator):
     fps = Fingerprints(
         fingerprint_generator=fingerprint_generator,
         return_csr=False,
@@ -326,9 +322,7 @@ def test_fingerprint_similarity_rejects_duplicate_input_sources(fingerprint_gene
 
 
 @pytest.mark.parametrize("similarity_measure", ["cosine", "tanimoto"])
-def test_fingerprint_similarity_score_field_alias_works(
-    similarity_measure, fingerprint_generator, spectra
-):
+def test_fingerprint_similarity_score_field_alias_works(similarity_measure, fingerprint_generator, spectra):
     similarity = FingerprintSimilarity(
         fingerprint_generator=fingerprint_generator,
         similarity_measure=similarity_measure,
