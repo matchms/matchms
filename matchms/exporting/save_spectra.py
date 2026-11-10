@@ -1,7 +1,7 @@
 import logging
 import os
 import pickle
-from matchms.exporting import save_as_json, save_as_mgf, save_as_msp
+from matchms.exporting import save_as_json, save_as_mgf, save_as_msp, save_as_mzml
 from matchms.spectrum import Spectrum
 from matchms.utils import filter_empty_spectra
 
@@ -13,6 +13,7 @@ SUPPORTED_FILE_FORMATS = {
     "json": "JSON (matchms style)",
     "mgf": "MGF",
     "msp": "MSP",
+    "mzml": "mzML",
     "pickle": "pickled list of matchms Spectrum objects",
 }
 
@@ -27,14 +28,14 @@ def save_spectra(
 ) -> None:
     """Saves spectra as the file type specified.
 
-    The following file extensions can be used: .json, .mgf, and .msp.
+    The following file extensions can be used: .json, .mgf, .msp, .mzml, and .pickle.
 
     Args:
     -----
     spectra:
         The spectra that are saved.
     file:
-        Path to file containing spectra, with file extension ".json", ".mgf", ".msp".
+        Path to file containing spectra, with file extension ".json", ".mgf", ".msp", ".mzml" or ".pickle".
     export_style:
         Converts the keys to the required export style.
         One of ["matchms", "massbank", "nist", "riken", "gnps", "sirius"]. Default is "matchms".
@@ -69,6 +70,8 @@ def save_spectra(
     elif ftype == "msp":
         file_mode = "a" if append else "w"
         save_as_msp(spectra, file, style=export_style, file_mode=file_mode)
+    elif ftype == "mzml":
+        save_as_mzml(spectra, file, export_style)
     elif ftype == "pickle":
         if export_style != "matchms":
             logger.error(

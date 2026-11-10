@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 This development release prepares matchms 1.0 with major changes to collections, similarity scoring, filtering, I/O, and the public API. **Upgrading from 0.x requires attention to the breaking changes below.**
 
 ### Added
+- `save_as_mzml` exporter (psims based). Writes peaks as 64-bit arrays, `precursor_mz`/`precursor_intensity`/`charge`, `ionmode`, `retention_time`, `collision_energy` and `ms_level` as their PSI-MS terms and the other metadata as userParams; `save_spectra` accepts the `.mzml` extension [#707](https://github.com/matchms/matchms/pull/707).
 
 - **`SpectraCollection`** as the central representation of large spectral datasets, combining a pandas-backed metadata table with sparse `CSRFragmentCollection` peak storage. Metadata and peaks stay aligned during slicing, filtering, sorting, concatenation, and duplicate removal. Collection operations also support spectrum hashes and fragment statistics (peak counts, intensity sums, and intensity entropy) [#869](https://github.com/matchms/matchms/issues/869).
 - Collection-based import/export through `load_ms2_dataset()` and `SpectraCollection.to_mgf()`, `.to_msp()`, and `.to_json()`. The new `load_collection_from_mgf()` imports MGF directly into a `SpectraCollection`, without building intermediate `Spectrum` objects; `load_ms2_dataset()` uses this faster path for MGF files [#921](https://github.com/matchms/matchms/issues/921).
