@@ -5,10 +5,8 @@ meaningful branch coverage in Python mode.
 """
 
 from functools import lru_cache
-
 import numpy as np
 import pytest
-
 from matchms.similarity.cosine_linear_functions import (
     _is_well_separated,
     _linear_partners,
@@ -92,7 +90,10 @@ def test_linear_partners_mark_unmatched_and_advance_once():
     np.testing.assert_array_equal(second, [0, 1, -1])
 
 
-@pytest.mark.parametrize("weights,chosen", [([1.0], [True]), ([1.0, 2.0], [False, True]), ([3.0, 1.0, 3.0], [True, False, True])])
+@pytest.mark.parametrize(
+        "weights,chosen",
+        [([1.0], [True]), ([1.0, 2.0], [False, True]), ([3.0, 1.0, 3.0], [True, False, True])]
+        )
 def test_select_path_edges_finds_optimum(weights, chosen):
     benefits = np.asarray(weights, dtype=float)
     selected = np.zeros(benefits.size, dtype=np.bool_)

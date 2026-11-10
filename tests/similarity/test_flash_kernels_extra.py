@@ -4,11 +4,19 @@ Unlike public API parity tests these exercise explicit output-block boundaries,
 empty rows, greedy one-to-one conflicts and the optional match-count buffer.
 """
 
+from types import SimpleNamespace
 import numpy as np
 import pytest
-
 from matchms.similarity._flash_cosine import cosine_rows
+from matchms.similarity._flash_cosine_topk import (
+    _CosineTopKWorkspace,
+    _score_cosine_topk_block,
+)
 from matchms.similarity._flash_entropy import entropy_rows
+from matchms.similarity._flash_entropy_topk import (
+    _EntropyTopKWorkspace,
+    _score_entropy_topk_block,
+)
 
 
 def _packed(rows, precursors):
@@ -134,18 +142,6 @@ def test_dense_entropy_competing_peaks_do_not_double_count():
     out = _run_entropy([[(100.0, .25), (100.01, .25)]], [500], [[(100.005, .5)]], [500])
     pair_score = .75 * np.log2(.75) - .25 * np.log2(.25) - .5 * np.log2(.5)
     assert out[0, 0] == pytest.approx(pair_score)
-
-# The top-k tests exercise the actual kernel row-block machinery directly.
-# All index/reference arrays are constructed explicitly; no high-level scorer
-# preparation can hide cursor, epoch or match-count defects.
-
-from types import SimpleNamespace
-from matchms.similarity._flash_cosine_topk import (
-    _CosineTopKWorkspace, _score_cosine_topk_block,
-)
-from matchms.similarity._flash_entropy_topk import (
-    _EntropyTopKWorkspace, _score_entropy_topk_block,
-)
 
 
 def _sort_dense_row(row, k, threshold):
