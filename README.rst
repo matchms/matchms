@@ -645,7 +645,7 @@ searching a fixed reference library using a reusable index.
 
 
 Default preprocessing for spectral similarities
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------------------------------
 
 The high-level cosine and entropy implementations remove precursor-region
 peaks by default (``remove_precursor=True``) and ignore peaks below a relative
