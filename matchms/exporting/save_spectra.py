@@ -1,18 +1,26 @@
 import logging
 import os
 import pickle
-from typing import List
 from matchms.exporting import save_as_json, save_as_mgf, save_as_msp
-from matchms.Spectrum import Spectrum
-from matchms.utils import filter_empty_spectra, rename_deprecated_params
+from matchms.spectrum import Spectrum
+from matchms.utils import filter_empty_spectra
 
 
 logger = logging.getLogger("matchms")
 
 
-@rename_deprecated_params(param_mapping={"spectrums": "spectra"}, version="0.26.5")
+SUPPORTED_FILE_FORMATS = {
+    "json": "JSON (matchms style)",
+    "mgf": "MGF",
+    "msp": "MSP",
+    "pickle": "pickled list of matchms Spectrum objects",
+}
+
+EXPORT_STYLES = ("matchms", "massbank", "nist", "riken", "gnps")
+
+
 def save_spectra(
-    spectra: List[Spectrum],
+    spectra: list[Spectrum],
     file: str,
     export_style: str = "matchms",
     append: bool = False,
@@ -41,6 +49,9 @@ def save_spectra(
     if append and ftype not in ("mgf", "msp"):
         raise ValueError(f"{ftype} isn't supported for when `append` is True")
 
+    if ftype == "parquet":
+        raise TypeError("Parquet export is not supported for lists. Use SpectraCollection.to_parquet() instead.")
+
     if not isinstance(spectra, list):
         spectra = [spectra]
 
@@ -53,9 +64,11 @@ def save_spectra(
     if ftype == "json":
         save_as_json(spectra, file, export_style)
     elif ftype == "mgf":
-        save_as_mgf(spectra, file, export_style)
+        file_mode = "a" if append else "w"
+        save_as_mgf(spectra, file, export_style, file_mode=file_mode)
     elif ftype == "msp":
-        save_as_msp(spectra, file, style=export_style, mode="a")
+        file_mode = "a" if append else "w"
+        save_as_msp(spectra, file, style=export_style, file_mode=file_mode)
     elif ftype == "pickle":
         if export_style != "matchms":
             logger.error(

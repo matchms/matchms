@@ -1,18 +1,16 @@
 import csv
 import json
 import logging
-from typing import Any, Optional
+from typing import Any
 import numpy as np
-from ..Spectrum import Spectrum
+from ..spectrum import Spectrum
 from ..utils import filter_empty_spectra, rename_deprecated_params
 
 
 logger = logging.getLogger("matchms")
 
 
-def _get_metadata_dict(
-    spectrum: Spectrum, include_fields: Optional[list[str]] = None
-) -> dict[str, Any]:
+def _get_metadata_dict(spectrum: Spectrum, include_fields: list[str] | None = None) -> dict[str, Any]:
     """Extract keys from spectrum metadata. Will silently continue if a key is not found.
 
     Args:
@@ -28,21 +26,17 @@ def _get_metadata_dict(
         logger.warning("'Include_fields' must be 'all' or list of keys.")
         return None
 
-    return {
-        key: spectrum.metadata[key] for key in spectrum.metadata.keys() & include_fields
-    }
+    return {key: spectrum.metadata[key] for key in spectrum.metadata.keys() & include_fields}
 
 
 @rename_deprecated_params(param_mapping={"spectrums": "spectra"}, version="0.26.5")
-def export_metadata_as_json(
-    spectra: list[Spectrum], filename: str, include_fields: Optional[list[str]] = None
-):
+def export_metadata_as_json(spectra: list[Spectrum], filename: str, include_fields: list[str] | None = None):
     """Export metadata to json file.
 
     Parameters
     ----------
     spectra:
-        Expected input is a list of  :py:class:`~matchms.Spectrum.Spectrum` objects.
+        Expected input is a list of  :class:`~matchms.spectrum.Spectrum` objects.
     filename:
         Provide filename to save metadata of spectrum(s) as json file.
     include_fields:
@@ -62,7 +56,7 @@ def export_metadata_as_json(
 def export_metadata_as_csv(
     spectra: list[Spectrum],
     filename: str,
-    include_fields: Optional[list[str]] = None,
+    include_fields: list[str] | None = None,
     delimiter: str = ",",
 ):
     """Export metadata to csv file.
@@ -70,7 +64,7 @@ def export_metadata_as_csv(
     Parameters
     ----------
     spectra:
-        Expected input is a list of  :py:class:`~matchms.Spectrum.Spectrum` objects.
+        Expected input is a list of  :class:`~matchms.spectrum.Spectrum` objects.
     filename:
         Provide filename to save metadata of spectrum(s) as csv file.
     include_fields:
@@ -91,9 +85,7 @@ def export_metadata_as_csv(
             writer.writerow(data)
 
 
-def _subset_metadata(
-    include_fields: list[str], metadata: np.array, columns: list[str]
-) -> tuple[np.array, list[str]]:
+def _subset_metadata(include_fields: list[str], metadata: np.array, columns: list[str]) -> tuple[np.array, list[str]]:
     """Subset metadata to 'include_fields' and return intersection of columns.
 
     Parameters
@@ -130,7 +122,7 @@ def get_metadata_as_array(spectra: list[Spectrum]) -> tuple[np.array, list[str]]
     values = []
 
     for s in spectra:
-        value = tuple((s.get(k) for k in keys))
+        value = tuple(s.get(k) for k in keys)
         values.append(value)
 
     # Create a structured numpy array with keys as field names
@@ -140,7 +132,7 @@ def get_metadata_as_array(spectra: list[Spectrum]) -> tuple[np.array, list[str]]
 
 
 def _get_metadata_keys(spectra: list[Spectrum]) -> list[str]:
-    """  Get union of all metadata keys from all spectra.
+    """Get union of all metadata keys from all spectra.
 
     Args:
         spectra (list[Spectrum]): List of spectra to extract metadata keys from.

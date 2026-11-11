@@ -1,4 +1,5 @@
 """Collection of functions for calculating vector-vector similarities."""
+
 import numba
 import numpy as np
 
@@ -26,7 +27,7 @@ def jaccard_similarity_matrix(references: np.ndarray, queries: np.ndarray) -> np
     references = np.array(references, dtype=np.float32)  # R,N
     queries = np.array(queries, dtype=np.float32)  # Q,N
     intersection = references @ queries.T  # R,N @ N,Q -> R,Q
-    union = np.sum(references, axis=1, keepdims=True) + np.sum(queries,axis=1, keepdims=True).T  # R,1+1,Q -> R,Q
+    union = np.sum(references, axis=1, keepdims=True) + np.sum(queries, axis=1, keepdims=True).T  # R,1+1,Q -> R,Q
     union -= intersection
     jaccard = np.nan_to_num(intersection / union)  # R,Q
     return jaccard
@@ -58,6 +59,7 @@ def dice_similarity_matrix(references: np.ndarray, queries: np.ndarray) -> np.nd
     dice = 2 * np.nan_to_num(intersection / union)  # R,Q
     return dice
 
+
 def cosine_similarity_matrix(references: np.ndarray, queries: np.ndarray) -> np.ndarray:
     """Returns matrix of cosine similarity scores between all-vs-all vectors of
     references and queries.
@@ -80,10 +82,10 @@ def cosine_similarity_matrix(references: np.ndarray, queries: np.ndarray) -> np.
     references = np.array(references, dtype=np.float32)  # R,N
     queries = np.array(queries, dtype=np.float32)  # Q,N
     cosine = references @ queries.T  # R,N @ N,Q -> R,Q
-    r_norm = np.sum(references ** 2, axis=1, keepdims=True)  # R,N -> R,1
-    q_norm = np.sum(queries**2, axis=1, keepdims=True) #  Q,N -> Q,1
+    r_norm = np.sum(references**2, axis=1, keepdims=True)  # R,N -> R,1
+    q_norm = np.sum(queries**2, axis=1, keepdims=True)  #  Q,N -> Q,1
     norm = r_norm @ q_norm.T  # R,N @ N,Q -> R,Q
-    cosine = np.nan_to_num(cosine * norm ** -.5)  # R,Q
+    cosine = np.nan_to_num(cosine * norm**-0.5)  # R,Q
     return cosine
 
 

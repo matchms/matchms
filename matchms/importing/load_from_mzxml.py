@@ -1,18 +1,18 @@
+from collections.abc import Generator
 from pathlib import Path
-from typing import Generator, Union
 import numpy as np
 from pyteomics.mzxml import read
 from matchms.importing.parsing_utils import parse_mzml_mzxml_metadata, sort_by_mz
-from matchms.Spectrum import Spectrum
+from matchms.spectrum import Spectrum
 
 
 def load_from_mzxml(
-    filename: Union[str, Path], ms_level: int = 2, metadata_harmonization: bool = True
+    filename: str | Path, ms_level: int = 2, metadata_harmonization: bool = True
 ) -> Generator[Spectrum, None, None]:
     """Load spectrum(s) from mzml file.
 
-    This function will create ~matchms.Spectrum for every spectrum of desired
-    ms_level found in a given MzXML file. For more extensive parsing options consider
+    This function will create :class:`~matchms.spectrum.Spectrum` objects for every spectrum of the
+    desired ms_level found in a given MzXML file. For more extensive parsing options consider
     using the pyteomics package.
 
     Example:

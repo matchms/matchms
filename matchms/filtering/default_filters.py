@@ -1,4 +1,5 @@
-from matchms.typing import SpectrumType
+from __future__ import annotations
+from typing import TYPE_CHECKING
 from .metadata_processing.add_compound_name import add_compound_name
 from .metadata_processing.add_precursor_mz import add_precursor_mz
 from .metadata_processing.clean_compound_name import clean_compound_name
@@ -10,7 +11,12 @@ from .metadata_processing.interpret_pepmass import interpret_pepmass
 from .metadata_processing.make_charge_int import make_charge_int
 
 
-def default_filters(spectrum: SpectrumType) -> SpectrumType:
+if TYPE_CHECKING:
+    from matchms.spectra_collection import SpectraCollection
+    from matchms.spectrum import Spectrum
+
+
+def default_filters(spectrum_in: Spectrum | SpectraCollection) -> Spectrum | SpectraCollection:
     """
     Collection of filters that are considered default and that do no require any (factory) arguments.
 
@@ -26,8 +32,17 @@ def default_filters(spectrum: SpectrumType) -> SpectrumType:
     8. :meth:`~matchms.filtering.metadata_processing.derive_ionmode`
     9. :meth:`~matchms.filtering.metadata_processing.correct_charge`
 
+    Parameters
+    ----------
+    spectrum_in
+        Input :class:`~matchms.spectrum.Spectrum` or :class:`~matchms.spectra_collection.SpectraCollection`.
+
+    Returns
+    -------
+    Spectrum or SpectraCollection
+        Input object with the default filters applied.
     """
-    spectrum = make_charge_int(spectrum)
+    spectrum = make_charge_int(spectrum_in)
     spectrum = add_compound_name(spectrum)
     spectrum = derive_adduct_from_name(spectrum)
     spectrum = derive_formula_from_name(spectrum)
