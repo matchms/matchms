@@ -1073,6 +1073,13 @@ recipes repository. Once the pull request is merged, the new version of matchms
 will appear on `Anaconda <https://anaconda.org/bioconda/matchms>`_.
 
 
+Agent skill
+===========
+A ``SKILL.md`` for AI coding agents is available at 
+``.agents/skills/matchms/SKILL.md``.
+Copy it into your agent's skills directory to help it use ``matchms`` correctly.
+
+
 Support
 =======
 
