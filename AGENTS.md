@@ -21,7 +21,7 @@ into cleaned, harmonized, and comparable spectral datasets.
 ```text
 matchms/                 # main Python package
 .agents/skills/          # usage skills shipped inside the package (see below)
-matchms/tests/           # pytest suite and test data
+tests/                   # pytest suite and test data
 readthedocs/             # Readthedocs API documentation and examples
 ```
 
