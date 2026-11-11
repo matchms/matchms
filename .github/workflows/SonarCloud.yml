@@ -19,7 +19,7 @@ jobs:
       (
         github.event.workflow_run.event == 'pull_request' ||
         (
-          github.event.workflow_run.event == 'push' &&
+          github.event.workflow_run.event == 'workflow_dispatch' &&
           github.event.workflow_run.head_branch == 'master'
         )
       )
@@ -60,7 +60,7 @@ jobs:
 
       - name: SonarCloud scan (master)
         if: >-
-          github.event.workflow_run.event == 'push' &&
+          github.event.workflow_run.event == 'workflow_dispatch' &&
           github.event.workflow_run.head_branch == 'master'
         uses: sonarsource/sonarcloud-github-action@master
         env:
