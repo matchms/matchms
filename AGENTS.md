@@ -45,7 +45,7 @@ Before making changes, read the "Documentation for developers" section in [`READ
 
 ## Rules
 
-- Run the tests and linters described in that section before proposing a change, and make sure they pass.
+- Run the tests and linters described in "Documentation for developers" section before proposing a change, and make sure they pass.
 - Keep changes focused and minimal. Do not reformat or refactor unrelated code.
 - Keep edits scoped and consistent with the surrounding module.
 - Add or update tests for any behavior change.
