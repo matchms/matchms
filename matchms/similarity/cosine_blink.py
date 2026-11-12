@@ -182,10 +182,10 @@ class CosineBlink(BaseSimilarity):
 
         # Blur smaller side, evaluate at the other's bins
         if qbins.size <= rbins.size:
-            win = self._windowed_sum(qbins, qvals, rbins, self._R)
+            win = self._windowed_sum(qbins, qvals, rbins, self._bin_radius)
             score = float(np.dot(win, rvals))
         else:
-            win = self._windowed_sum(rbins, rvals, qbins, self._R)
+            win = self._windowed_sum(rbins, rvals, qbins, self._bin_radius)
             score = float(np.dot(win, qvals))
 
         if self.clip_to_one:
