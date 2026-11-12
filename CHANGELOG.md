@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - smaller code quality changes based on SonarQube analysis [#1034](https://github.com/matchms/matchms/pull/1034)
 - code quality changes [#1035](https://github.com/matchms/matchms/pull/1035)
 - expand test coverage [#1035](https://github.com/matchms/matchms/pull/1035)
+- Large-scale update of the readthedocs documentation [#1038](https://github.com/matchms/matchms/pull/1038)
 
 ### Fixed
 - Include all extra dependencies into main coverage test run [#1034](https://github.com/matchms/matchms/pull/1034)
