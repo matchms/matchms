@@ -386,7 +386,7 @@ def _prepare_collection(
             n_specs,
             dtype,
         )
-    elif intensity_power != 1.0:
+    elif not np.isclose(intensity_power, 1.0, rtol=0, atol=1e-12):
         intensities = np.power(intensities, intensity_power).astype(dtype, copy=False)
 
     offsets = _rebuild_offsets(spec_idx, n_specs)
@@ -565,7 +565,7 @@ def _clean_and_weight(
     if weighing_type == "entropy":
         intensities = _entropy_weight(intensities, dtype)
     elif weighing_type == "cosine":
-        if intensity_power != 1.0:
+        if not np.isclose(intensity_power, 1.0, rtol=0, atol=1e-12):
             intensities = np.power(intensities, intensity_power).astype(dtype, copy=False)
     else:
         raise ValueError(f"Score type '{weighing_type}' not recognized.")
