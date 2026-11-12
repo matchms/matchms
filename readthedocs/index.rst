@@ -1,31 +1,57 @@
-matchms documentation
-=====================
+matchms 1.0 documentation
+=========================
 
-Matchms is an open-access Python library to **import, process, clean, and compare tandem mass spectrometry (MS/MS) data**.
-It helps you build reproducible workflows from raw spectra to similarity scores and downstream analysis.
+**matchms** is an open-source Python library for importing, cleaning,
+processing, exporting, and comparing tandem mass spectrometry (MS/MS) data.
+Version 1.0 introduces a collection-first workflow for processing large
+spectral datasets while preserving the familiar ``Spectrum`` API.
 
-.. image:: _static/flowchart_matchms.png
-   :width: 800
-   :alt: matchms workflow illustration
+New to matchms? Start with :doc:`installation` and the
+:doc:`getting_started` guide. Upgrading from 0.x? Read
+:doc:`migration_1_0`.
 
-Get started
------------
+.. note::
 
-Install via uv (recommended)::
+   matchms 1.0 is currently available as a pre-release (starting with
+   ``1.0.0.dev1``). The stable ``matchms`` package on your chosen package
+   index may be an earlier release. The examples in these guides target 1.0.
 
-    uv pip install matchms
+User guide
+----------
 
-Install via conda::
+.. toctree::
+   :maxdepth: 2
+   :caption: Working with matchms
 
-    conda create -n matchms python=3.13
-    conda activate matchms
-    conda install -c conda-forge -c bioconda matchms
+   installation
+   getting_started
+   concepts
+   data_io
+   processing
+   similarity
+   command_line
+   migration_1_0
 
-
-Documentation
+API reference
 -------------
 
 .. toctree::
    :maxdepth: 2
+   :caption: Python API
 
-   API reference <api/matchms>
+   api/matchms
+
+Project
+-------
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Community and contributors
+
+   developer_guide
+   citation
+   ecosystem
+
+For more tutorials, see the `matchms user documentation
+<https://matchms.github.io/matchms-docs/>`_. The source code is available
+on `GitHub <https://github.com/matchms/matchms>`_.

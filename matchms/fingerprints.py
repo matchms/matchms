@@ -50,7 +50,7 @@ class Fingerprints:
     dense NumPy array or as a SciPy CSR sparse matrix.
 
     Compared to the older implementation, this refactor is designed for larger
-    scale use cases and delegates fingerprint computation to :mod:`chemap`.
+    scale use cases and delegates fingerprint computation to the optional ``chemap`` package.
 
     Example
     -------

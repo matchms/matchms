@@ -1,119 +1,184 @@
-# Configuration file for the Sphinx documentation builder.
-#
-# For a full list of options:
-# https://www.sphinx-doc.org/en/master/usage/configuration.html
+"""Sphinx configuration for the matchms 1.0 documentation."""
 
 from __future__ import annotations
-import os
+
+import re
 import sys
-from importlib.metadata import PackageNotFoundError
-from importlib.metadata import version as pkg_version
+import tomllib
+from datetime import datetime, timezone
+from importlib.metadata import PackageNotFoundError, version as package_version
 from pathlib import Path
-
-
-# -- Path setup --------------------------------------------------------------
 
 HERE = Path(__file__).resolve().parent
 PROJECT_ROOT = HERE.parent
 sys.path.insert(0, str(PROJECT_ROOT))
-
-
-# -- Project information -----------------------------------------------------
+# Also load the small local Sphinx extension from the docs directory.
+sys.path.insert(0, str(HERE))
 
 project = "matchms"
 author = "matchms development team"
-copyright = "2023, Düsseldorf University of Applied Sciences & Netherlands eScience Center"
+copyright = f"2020-{datetime.now(timezone.utc).year}, matchms contributors"
 
+# The CI docs build installs matchms. For local previews, fall back to the
+# version declared by pyproject.toml instead of importing matchms during setup.
 try:
-    release = pkg_version("matchms")
+    release = package_version("matchms")
 except PackageNotFoundError:
-    # Docs can still build even if the package isn't installed (e.g. local preview),
-    # but you may want to fail hard instead, depending on your policy.
-    release = "0+unknown"
-
-# Optional: keep major.minor as "version"
-version = ".".join(release.split(".")[:2]) if release and release[0].isdigit() else release
-
-
-# -- General configuration ---------------------------------------------------
+    project_config = PROJECT_ROOT / "pyproject.toml"
+    if project_config.exists():
+        with project_config.open("rb") as stream:
+            metadata = tomllib.load(stream)
+        release = (metadata.get("project", {}).get("version")
+                   or metadata.get("tool", {}).get("poetry", {}).get("version")
+                   or "0+unknown")
+    else:
+        release = "0+unknown"
+version = ".".join(release.split(".")[:2]) if release[0].isdigit() else release
 
 extensions = [
+    "sphinx.ext.apidoc",  # Included in Sphinx >= 8.2
     "sphinx.ext.autodoc",
     "sphinx.ext.coverage",
-    "sphinx.ext.intersphinx",
-    "sphinx.ext.viewcode",
-    "sphinx.ext.todo",
     "sphinx.ext.doctest",
+    "sphinx.ext.intersphinx",
     "sphinx.ext.napoleon",
-    "sphinxcontrib.apidoc",
+    "sphinx.ext.viewcode",
+    "sphinx_rtd_theme",  # Registers theme assets/jQuery consistently
+    "_matchms_sphinx_refs",  # Resolve public re-exports to indexed definitions
 ]
 
-templates_path = ["_templates"]
+root_doc = "index"
 language = "en"
+source_suffix = {".rst": "restructuredtext"}
+# Exclude a stale modules.rst from builds created with the previous setup.
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "api/modules.rst"]
 
-exclude_patterns = [
-    "_build",
-    "Thumbs.db",
-    ".DS_Store",
-    "readthedocs/conf.rst",
+# Sphinx's own apidoc replaces the unmaintained sphinxcontrib-apidoc extension.
+# Do not generate undocumented private modules or overwrite hand-written guides.
+apidoc_modules = [
+    {
+        "path": str(PROJECT_ROOT / "matchms"),
+        "destination": "api",
+        "exclude_patterns": ["**/tests/**", "**/test_*.py"],
+        "separate_modules": True,
+        "module_first": True,
+        # index.rst already links api/matchms. Avoid an unused second root.
+        "toc_file": False,
+        "automodule_options": {"members", "show-inheritance"},
+    }
 ]
 
-# Hide undocumented member by excluding default undoc-members option
-os.environ["SPHINX_APIDOC_OPTIONS"] = "members,show-inheritance"
-
+# Document the *public* API from docstrings. Automatically publishing every
+# undocumented member masks missing documentation and inflates the site.
+# Include class methods and properties, not only the classes themselves.
+# On package overview pages the source-read hook explicitly disables members
+# so that re-exports are not documented a second time.
+autodoc_default_options = {
+    "members": True,
+    "show-inheritance": True,
+}
+autoclass_content = "both"
+# Preserve useful type annotations in signatures. The few short aliases that
+# lack cross-project inventory targets are allowlisted below.
+autodoc_typehints = "signature"
+napoleon_google_docstring = False
+napoleon_numpy_docstring = True
+# Attributes sections otherwise create a second .. attribute:: target for
+# properties also documented through :members: (8 duplicates in the log).
+napoleon_use_ivar = True
+# Normalize common short names to the existing intersphinx inventories.
+napoleon_preprocess_types = True
+napoleon_type_aliases = {
+    "np.ndarray": "numpy.ndarray",
+    "pd.DataFrame": "pandas.DataFrame",
+    "pd.Series": "pandas.Series",
+    "plt.Axes": "matplotlib.axes.Axes",
+}
 
 doctest_test_doctest_blocks = ""
 
-# -- sphinxcontrib-apidoc ----------------------------------------------------
-
-apidoc_module_dir = str(PROJECT_ROOT / "matchms")
-apidoc_output_dir = "api"
-apidoc_excluded_paths = [
-    "tests",
-    "readthedocs",
-]
-apidoc_separate_modules = True
-apidoc_module_first = True
-
-
-# -- autodoc -----------------------------------------------------------------
-
-autodoc_default_options = {
-    "special-members": "__init__,__call__",
-    "undoc-members": True,
-    "show-inheritance": True,
-}
-
-napoleon_google_docstring = False
-
-
-# -- HTML output -------------------------------------------------------------
-
 html_theme = "sphinx_rtd_theme"
-
 html_theme_options = {
-    "logo": "matchms.png",
-    "github_user": "matchms",
-    "github_repo": "matchms",
-    "page_width": "1080px",
+    "logo_only": False,
+    "style_external_links": True,
+    "navigation_depth": 4,
+    "collapse_navigation": False,
 }
+html_static_path = ["_static"] if (HERE / "_static").is_dir() else []
+if (HERE / "_static" / "matchms.png").is_file():
+    html_logo = "_static/matchms.png"
 
-html_static_path = ["_static"]
-
-
-# -- todo extension ----------------------------------------------------------
-
-todo_include_todos = True
-
-
-# -- intersphinx -------------------------------------------------------------
-
+# These inventories are useful for NumPy and Python type references. Avoid
+# optional/down dependencies with unreliable inventories in CI.
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
-    "gensim": ("https://radimrehurek.com/gensim", None),
-    "matplotlib": ("https://matplotlib.org", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
-    "pyteomics": ("https://pyteomics.readthedocs.io/en/latest/", None),
-    "rdkit": ("http://rdkit.org/docs", None),
     "scipy": ("https://docs.scipy.org/doc/scipy/", None),
+    # External objects in docstrings: pandas.DataFrame, matplotlib axes, etc.
+    "pandas": ("https://pandas.pydata.org/docs/", None),
+    "matplotlib": ("https://matplotlib.org/stable/", None),
 }
+
+
+# Canonical API objects are defined in module pages, e.g.
+# matchms.spectrum.Spectrum rather than the re-export matchms.Spectrum.
+# Prevent generating a second object target on each package overview page.
+def _package_overviews_without_duplicate_members(app, docname, source):
+    if not docname.startswith("api/"):
+        return
+
+    module = docname.removeprefix("api/")
+    if module != "matchms" and not module.startswith("matchms."):
+        return
+
+    module_path = PROJECT_ROOT.joinpath(*module.split("."))
+    if not (module_path / "__init__.py").is_file():
+        return  # Real implementation module: retain all its members.
+
+    pattern = re.compile(
+        r"(^\.\. automodule::\s+" + re.escape(module) +
+        r"[ \t]*\n)(?P<options>(?:[ \t]+:[\w-]+:.*\n)*)",
+        re.MULTILINE,
+    )
+
+    def keep_module_docstring_only(match):
+        option_lines = match.group("options").splitlines(keepends=True)
+        option_lines = [
+            line for line in option_lines
+            if not re.match(r"^[ \t]+:(?:members|imported-members):", line)
+        ]
+        # The negated flag overrides the global default for this directive.
+        # Simply deleting :members: is not sufficient with Sphinx >= 9.
+        return match.group(1) + "".join(option_lines) + "   :no-members:\n"
+
+    source[0] = pattern.sub(keep_module_docstring_only, source[0], count=1)
+
+
+# Some annotation aliases are short spellings, or refer to private implementation
+# details which do not have public Sphinx targets. Keep this list intentional:
+# never ignore the whole matchms namespace, and never silence all ref warnings.
+nitpick_ignore = {
+    ("py:class", "np.ndarray"),
+    ("py:class", "pd.Series"),
+    ("py:class", "plt.Axes"),
+    ("py:class", "Path"),
+    ("py:class", "csr_array"),
+    ("py:class", "np.dtype"),
+    ("py:class", "numpy.array"),
+    ("py:class", "numpy.float32"),
+    ("py:class", "numpy.float64"),
+}
+
+nitpick_ignore_regex = [
+    (
+        r"py:class",
+        r"matchms\.similarity\.(?:"
+        r"entropy_search\._(?:PreparedEntropySpectra|SearchView)|"
+        r"flash_similarity\._BaseFlashSimilarity|"
+        r"flash_index\._(?:CosineKernelData|EntropyKernelData))",
+    ),
+]
+
+
+def setup(app):
+    app.connect("source-read", _package_overviews_without_duplicate_members)

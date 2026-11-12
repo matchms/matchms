@@ -409,7 +409,7 @@ class SpectraCollection:
         strict_harmonize
             If False, only attempt cheap column-wise dtype conversion for known
             numeric metadata fields. If True, additionally apply the same row-wise
-            semantic harmonization used by :class:`Metadata`.
+            semantic harmonization used by :class:`~matchms.metadata.Metadata`.
         inplace
             If True, modify this collection and return None. Otherwise return a
             harmonized copy.
@@ -471,39 +471,38 @@ class SpectraCollection:
         return None if inplace else target
 
     def filter(self, mask: np.ndarray | pd.Series | list[bool], inplace: bool = False):
-        """
-        Filters SpectraCollection by keeping only the spectra where the mask is True.
+        """Keep spectra selected by a boolean mask.
 
-        This method synchronizes the filtering of both fragments and metadata.
-        It uses boolean indexing from NumPy and Pandas.
+        Both metadata rows and fragment rows are filtered together, preserving
+        their alignment. The mask must have the same length as the collection.
 
         Parameters
         ----------
-            mask (np.ndarray | pd.Series | list[bool]): A boolean array-like object
-                of the same length as the collection. Rows where the mask is True
-                will be kept; all others will be removed.
-            inplace (bool): If True, modifies the current collection in place and
-                returns None. If False (default), returns a new filtered
-                SpectraCollection instance.
+        mask
+            One-dimensional boolean array, pandas Series or list. Rows with
+            ``True`` are retained; rows with ``False`` are removed.
+        inplace
+            If True, modify this collection and return None (default: False).
 
         Returns
         -------
-            SpectraCollection | None: A new filtered instance if inplace is False,
-                otherwise None.
+        SpectraCollection or None
+            A filtered collection when ``inplace=False``, otherwise None.
 
         Raises
-            ValueError: If the length of the mask does not match the number of spectra in the collection.
+        ------
+        ValueError
+            If the length of ``mask`` differs from the collection length.
 
-        Example:
-            >>> # Filter by metadata
-            >>> filtered_coll = coll.filter(coll.metadata["ms_level"] == 2)
-            >>>
-            >>> # Filter by fragment properties
-            >>> coll.filter(coll.fragments.sum() > 500, inplace=True)
-            >>>
-            >>> # Using an external vectorized filter function
-            >>> mask = filter_min_peaks(coll, n_required=10)
-            >>> coll.filter(mask, inplace=True)
+        Examples
+        --------
+        Filter by metadata::
+
+            filtered = collection.filter(collection.metadata["ms_level"] == 2)
+
+        Filter by fragment intensity::
+
+            collection.filter(collection.fragments.sum(axis=1) > 500, inplace=True)
         """
         if isinstance(mask, pd.Series):
             mask = mask.values
@@ -811,13 +810,12 @@ class SpectraCollection:
         entropy based on peak intensities. It then computes summary statistics
         (count, mean, std, min, max, etc.) for the entire collection.
 
-        Returns:
-            pd.DataFrame: A DataFrame containing summary statistics for the
-                following columns:
-                - 'peak_counts': Number of detected peaks per spectrum.
-                - 'intensity_sums': Total ion current (TIC) per spectrum.
-                - 'intensity_entropy': Shannon entropy of peak intensities,
-                    quantifying the spectral complexity/information density.
+        Returns
+        -------
+        pandas.DataFrame
+            Descriptive statistics for the peak counts, summed intensities,
+            and Shannon intensity entropy across the spectra collection.
+            The result has the standard pandas ``describe()`` statistic rows.
         """
         peak_counts = self._fragments.count(axis=1)
         intensity_sums = np.asarray(self._fragments.sum(axis=1)).flatten()
