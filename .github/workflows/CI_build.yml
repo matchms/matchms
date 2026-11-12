@@ -27,6 +27,18 @@ jobs:
         run: uv run --frozen ruff format --check --output-format=github
       - name: Test with coverage
         run: uv run --frozen pytest --cov --cov-report=term --cov-report=xml --junitxml=xunit-result.xml
+      - name: Test Numba kernels without JIT and combine coverage
+        env:
+          NUMBA_DISABLE_JIT: "1"
+        run: |
+          uv run --frozen pytest \
+            -m numba_coverage \
+            --cov \
+            --cov-branch \
+            --cov-append \
+            --cov-report=term-missing \
+            --cov-report=xml \
+            --junitxml=xunit-numba-nojit.xml
       - name: Normalize coverage paths
         run: sed -i "s+$PWD/++g" coverage.xml
       - name: Store PR metadata

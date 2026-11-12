@@ -86,6 +86,9 @@ build-backend = "uv_build"
 
 [tool.pytest.ini_options]
 addopts = "--benchmark-disable"
+markers = [
+    "numba_coverage: fast kernel tests suitable for running without Numba JIT",
+]
 testpaths = [
   "tests",
   "integration-tests",

@@ -19,6 +19,8 @@ from matchms.similarity.cosine_linear_functions import (
 )
 
 
+pytestmark = pytest.mark.numba_coverage
+
 def _peaks(*rows):
     return np.asarray(rows, dtype=np.float64).reshape(-1, 2)
 

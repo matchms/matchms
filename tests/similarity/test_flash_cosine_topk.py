@@ -8,6 +8,8 @@ from matchms.similarity.flash_similarity import CosineFlash
 from matchms.similarity.topk_results import TopKResults
 
 
+pytestmark = pytest.mark.numba_coverage
+
 def _prepared(scorer, rows, precursors):
     mz, intensities, offsets, norms = [], [], [0], []
     for pairs in rows:

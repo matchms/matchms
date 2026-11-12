@@ -19,6 +19,8 @@ from matchms.similarity._flash_entropy_topk import (
 )
 
 
+pytestmark = pytest.mark.numba_coverage
+
 def _packed(rows, precursors):
     sizes = [len(r) for r in rows]
     flat = np.concatenate([np.asarray(row, dtype=np.float64).reshape(-1, 2) for row in rows], axis=0)
