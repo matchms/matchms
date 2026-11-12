@@ -7,8 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## unpublished
 
-### Fixed
+## Changed
+- add test runs without numba JIT [#1034](https://github.com/matchms/matchms/pull/1034)
+- smaller code quality changes based on SonarQube analysis [#1034](https://github.com/matchms/matchms/pull/1034)
 
+### Fixed
+- Include all extra dependencies into main coverage test run [#1034](https://github.com/matchms/matchms/pull/1034)
 - Agent skill: the score-mask example now compares one score field (`scores["score"] > 0.5`), since `Cosine` and `ModifiedCosine` return two fields and reject `scores > 0.5`, and the sparse-mode CLI example uses `CosineGreedy`, since `Cosine` has no `sparse_matrix()` [#959](https://github.com/matchms/matchms/issues/959).
 
 ## [1.0.0.dev] - 2026-11-10
