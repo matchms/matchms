@@ -8,7 +8,7 @@ Code quality checks:
 
 |CI First Code Checks| |CI Build|
 |ReadTheDocs Badge|
-|SonarQube Maintainability Rating| |SonarQube Coverage Badge|
+|SonarQube Maintainability Rating| |SonarQube Security Issues| |SonarQube Coverage Badge|
 
 .. image:: readthedocs/_static/matchms_header.png
    :target: readthedocs/_static/matchms.png
@@ -1318,6 +1318,10 @@ specific language governing permissions and limitations under the License.
 .. |SonarQube Maintainability Rating| image:: https://sonarcloud.io/api/project_badges/measure?project=matchms_matchms&metric=sqale_rating
    :target: https://sonarcloud.io/summary/overall?id=matchms_matchms
    :alt: SonarQube Maintainability Rating
+
+.. |SonarQube Security Issues| image:: https://sonarcloud.io/api/project_badges/measure?project=matchms_matchms&metric=software_quality_security_issues
+   :target: https://sonarcloud.io/summary/overall?id=matchms_matchms
+   :alt: SonarQube Security Issue
 
 .. |SonarQube Coverage Badge| image:: https://sonarcloud.io/api/project_badges/measure?project=matchms_matchms&metric=coverage
    :target: https://sonarcloud.io/component_measures?id=matchms_matchms&metric=Coverage&view=list
