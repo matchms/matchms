@@ -375,7 +375,7 @@ class CosineBlink(BaseSimilarity):
 
         # L2 normalize intensities (Sum of all intensities == 1)
         norm = np.linalg.norm(intensity_sum)
-        if np.isclose(norm, 0.0, rtol=0.0, abs_tol=1e-12):
+        if np.isclose(norm, 0.0, rtol=0.0, atol=1e-12):
             return (np.empty(0, dtype=np.int32), np.empty(0, dtype=self.dtype), np.empty(0, dtype=np.int32))
         intensity_sum /= norm
         return uniq, intensity_sum, counts.astype(np.int32, copy=False)
