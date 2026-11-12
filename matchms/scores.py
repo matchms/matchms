@@ -129,8 +129,8 @@ class Scores:
         or ``scores[:, 2]``.
 
     Conversion
-        Use :meth:`to_array` to obtain a dense NumPy representation and
-        :meth:`to_coo` to obtain a sparse COO representation.
+        Use :meth:`~matchms.scores.Scores.to_array` to obtain a dense NumPy representation and
+        :meth:`~matchms.scores.Scores.to_coo` to obtain a sparse COO representation.
 
     Examples
     --------

@@ -4,7 +4,7 @@ Documentation for developers
 Development installation
 ------------------------
 
-.. code-block:: console
+.. code-block:: bash
 
     git clone https://github.com/matchms/matchms.git
     cd matchms
@@ -25,20 +25,20 @@ Code quality
 
 Run the linter and formatter:
 
-.. code-block:: console
+.. code-block:: bash
 
     uv run ruff check --fix matchms/YOUR-MODIFIED-FILE.py
     uv run ruff format matchms/YOUR-MODIFIED-FILE.py
 
 Install pre-commit hooks:
 
-.. code-block:: console
+.. code-block:: bash
 
     uv run pre-commit install
 
 Run tests:
 
-.. code-block:: console
+.. code-block:: bash
 
     uv run pytest
 
@@ -107,7 +107,7 @@ Building the documentation
 The documentation uses Sphinx 9 and the built-in ``sphinx.ext.apidoc`` extension.
 From the repository root, use the locked environment:
 
-.. code-block:: console
+.. code-block:: bash
 
     uv lock
     uv sync --locked --group docs --extra all
