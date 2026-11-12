@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 import sys
 import tomllib
 from datetime import datetime, timezone
@@ -63,11 +64,16 @@ apidoc_modules = [
 
 # Document the *public* API from docstrings. Automatically publishing every
 # undocumented member masks missing documentation and inflates the site.
+# The generated pages already contain :members:. Keep this OFF globally so
+# package overview pages can show their docstring without re-documenting
+# classes re-exported from matchms.__init__ and subpackage __init__ modules.
 autodoc_default_options = {
-    "members": True,
     "show-inheritance": True,
 }
 autoclass_content = "both"
+# Preserve useful type annotations in signatures. The few short aliases that
+# lack cross-project inventory targets are allowlisted below.
+autodoc_typehints = "signature"
 napoleon_google_docstring = False
 napoleon_numpy_docstring = True
 
@@ -90,4 +96,69 @@ intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
     "scipy": ("https://docs.scipy.org/doc/scipy/", None),
+    # External objects in docstrings: pandas.DataFrame, matplotlib axes, etc.
+    "pandas": ("https://pandas.pydata.org/docs/", None),
+    "matplotlib": ("https://matplotlib.org/stable/", None),
 }
+
+
+# Canonical API objects are defined in module pages, e.g.
+# matchms.spectrum.Spectrum rather than the re-export matchms.Spectrum.
+# Prevent generating a second object target on each package overview page.
+def _package_overviews_without_duplicate_members(app, docname, source):
+    if not docname.startswith("api/"):
+        return
+
+    module = docname.removeprefix("api/")
+    if module != "matchms" and not module.startswith("matchms."):
+        return
+
+    module_path = PROJECT_ROOT.joinpath(*module.split("."))
+    if not (module_path / "__init__.py").is_file():
+        return  # Real implementation module: retain all its members.
+
+    pattern = re.compile(
+        r"(^\.\. automodule::\s+" + re.escape(module) +
+        r"[ \t]*\n)(?P<options>(?:[ \t]+:[\w-]+:.*\n)*)",
+        re.MULTILINE,
+    )
+
+    def keep_module_docstring_only(match):
+        option_lines = match.group("options").splitlines(keepends=True)
+        option_lines = [
+            line for line in option_lines
+            if not re.match(r"^[ \t]+:(?:members|imported-members):", line)
+        ]
+        return match.group(1) + "".join(option_lines)
+
+    source[0] = pattern.sub(keep_module_docstring_only, source[0], count=1)
+
+
+# Some annotation aliases are short spellings, or refer to private implementation
+# details which do not have public Sphinx targets. Keep this list intentional:
+# never ignore the whole matchms namespace, and never silence all ref warnings.
+nitpick_ignore = {
+    ("py:class", "np.ndarray"),
+    ("py:class", "pd.Series"),
+    ("py:class", "plt.Axes"),
+    ("py:class", "Path"),
+    ("py:class", "csr_array"),
+    ("py:class", "np.dtype"),
+    ("py:class", "numpy.array"),
+    ("py:class", "numpy.float32"),
+    ("py:class", "numpy.float64"),
+}
+
+nitpick_ignore_regex = [
+    (
+        r"py:class",
+        r"matchms\.similarity\.(?:"
+        r"entropy_search\._(?:PreparedEntropySpectra|SearchView)|"
+        r"flash_similarity\._BaseFlashSimilarity|"
+        r"flash_index\._(?:CosineKernelData|EntropyKernelData))",
+    ),
+]
+
+
+def setup(app):
+    app.connect("source-read", _package_overviews_without_duplicate_members)
