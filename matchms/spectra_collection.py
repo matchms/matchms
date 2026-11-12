@@ -227,7 +227,7 @@ class SpectraCollection:
                 raise ValueError(
                     f"Shape of row selector ({arr.shape[0]}) does not fit Items in SpectraCollection ({len(self)})."
                 )
-            return np.where(arr)[0]
+            return np.nonzero(arr)[0]
 
         return arr.astype(np.int64)
 
@@ -516,7 +516,7 @@ class SpectraCollection:
 
         target = self if inplace else self.copy()
 
-        keep_indices = np.where(mask)[0]
+        keep_indices = np.nonzero(mask)[0]
         target._reorder(keep_indices)
 
         return None if inplace else target
@@ -597,7 +597,7 @@ class SpectraCollection:
             if True and the same if False. Defaults to False.
         """
         peaks_per_row = self._fragments.count(axis=1)
-        empty_indices = np.where(peaks_per_row == 0)[0]
+        empty_indices = np.nonzero(peaks_per_row == 0)[0]
 
         if len(empty_indices) > 0:
             return self.drop(empty_indices, inplace=inplace)

@@ -1,6 +1,6 @@
 from collections.abc import Sequence
 import numpy as np
-from numba import njit  # TODO: check if numba is necessary/useful here
+from numba import njit
 from scipy.sparse import csr_array
 from matchms.scores import Scores
 from matchms.typing import SpectrumType
@@ -375,7 +375,7 @@ class CosineBlink(BaseSimilarity):
 
         # L2 normalize intensities (Sum of all intensities == 1)
         norm = np.linalg.norm(intensity_sum)
-        if norm == 0.0:
+        if np.isclose(norm, 0.0, rtol=0.0, atol=1e-12):
             return (np.empty(0, dtype=np.int32), np.empty(0, dtype=self.dtype), np.empty(0, dtype=np.int32))
         intensity_sum /= norm
         return uniq, intensity_sum, counts.astype(np.int32, copy=False)

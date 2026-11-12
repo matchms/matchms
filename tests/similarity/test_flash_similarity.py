@@ -6,6 +6,8 @@ from matchms.similarity.flash_similarity import CosineFlash, EntropyFlash
 from ..builder_spectrum import SpectrumBuilder
 
 
+pytestmark = pytest.mark.numba_coverage
+
 # -------------------------------------------------------------------------
 # Helpers
 # -------------------------------------------------------------------------
