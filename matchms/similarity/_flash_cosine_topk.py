@@ -371,7 +371,7 @@ def _cosine_topk_row(query, product_index, loss_index, library_info, matching, s
     reference_precursors, _ = library_info
     mode, tolerance, use_ppm, _, _ = matching
     touched_count = 0
-    if query[0].size == 0 or query_norm == 0.0:
+    if query[0].size == 0 or np.isclose(query_norm, 0.0, rel_tol=0.0, abs_tol=1e-12):
         return touched, query_bits, touched_count
 
     if mode != 1:

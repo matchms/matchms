@@ -166,7 +166,7 @@ def linear_cosine_score(spec1, spec2, tolerance, mz_power, intensity_power):
     products1, norm1 = _weighted_products(spec1, mz_power, intensity_power)
     products2, norm2 = _weighted_products(spec2, mz_power, intensity_power)
 
-    if norm1 == 0.0 or norm2 == 0.0:
+    if np.isclose(norm1, 0.0, rel_tol=0.0, abs_tol=1e-12) or np.isclose(norm2, 0.0, rel_tol=0.0, abs_tol=1e-12):
         return 0.0, 0
 
     # Two-pointer sweep
@@ -332,7 +332,7 @@ def modified_linear_cosine_score(spec1, spec2, precursor_mz1, precursor_mz2, tol
     products1, norm1 = _weighted_products(spec1, mz_power, intensity_power)
     products2, norm2 = _weighted_products(spec2, mz_power, intensity_power)
 
-    if norm1 == 0.0 or norm2 == 0.0:
+    if np.isclose(norm1, 0.0, rel_tol=0.0, abs_tol=1e-12) or np.isclose(norm2, 0.0, rel_tol=0.0, abs_tol=1e-12):
         return 0.0, 0
 
     direct1 = np.empty(n1, dtype=np.int64)

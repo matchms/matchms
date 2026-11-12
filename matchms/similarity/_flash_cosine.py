@@ -380,7 +380,7 @@ def cosine_rows(
     for row in range(start_row, stop_row):
         first, stop = query_offsets[row], query_offsets[row + 1]
         scores[row, :] = 0.0
-        if first == stop or query_norms[row] == 0.0:
+        if first == stop or np.isclose(query_norms[row], 0.0, rel_tol=0.0, abs_tol=1e-12):
             if matched_peaks.shape[0] != 0:
                 matched_peaks[row, :] = 0
             continue
