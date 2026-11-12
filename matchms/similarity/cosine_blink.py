@@ -19,13 +19,13 @@ def _windowed_sum_numba(
     source_bins: np.ndarray,
     source_vals: np.ndarray,
     query_positions: np.ndarray,
-    R: int,
+    bin_radius: int,
 ) -> np.ndarray:
     """
     Two-pointer windowed sum for sorted integer arrays.
 
     For each position `pos` in `query_positions`, compute:
-        sum(source_vals[j]) where source_bins[j] ∈ [pos - R, pos + R]
+        sum(source_vals[j]) where source_bins[j] ∈ [pos - bin_radius, pos + bin_radius]
 
     Parameters
     ----------
@@ -35,7 +35,7 @@ def _windowed_sum_numba(
         1D array of values aligned to `source_bins`.
     query_positions : np.ndarray
         1D array of integer bin positions at which to evaluate the windowed sum.
-    R : int
+    bin_radius : int
         Window radius in bins (inclusive on both sides).
 
     Returns
@@ -44,19 +44,19 @@ def _windowed_sum_numba(
         1D array of windowed sums, same length/order as `query_positions`.
     """
     n_bins = source_bins.size
-    m = query_positions.size
-    out = np.zeros(m, dtype=source_vals.dtype)
-    if n_bins == 0 or m == 0:
+    m_bins = query_positions.size
+    out = np.zeros(m_bins, dtype=source_vals.dtype)
+    if n_bins == 0 or m_bins == 0:
         return out
 
     left_idx = 0
     right_idx = 0
     acc = 0.0
 
-    for i in range(m):
+    for i in range(m_bins):
         pos = query_positions[i]
-        left_bound = pos - R
-        right_bound = pos + R
+        left_bound = pos - bin_radius
+        right_bound = pos + bin_radius
 
         # expand right edge
         while right_idx < n_bins and source_bins[right_idx] <= right_bound:
@@ -160,7 +160,7 @@ class CosineBlink(BaseSimilarity):
         self.dtype = np.dtype(dtype)
         self.score_datatype = self.dtype
 
-        self._R = max(0, int(np.floor(self.tolerance / self.bin_width)))
+        self._bin_radius = max(0, int(np.floor(self.tolerance / self.bin_width)))
 
     # --------------------------- Public API ---------------------------
 
@@ -182,10 +182,10 @@ class CosineBlink(BaseSimilarity):
 
         # Blur smaller side, evaluate at the other's bins
         if qbins.size <= rbins.size:
-            win = self._windowed_sum(qbins, qvals, rbins, self._R)
+            win = self._windowed_sum(qbins, qvals, rbins, self._bin_radius)
             score = float(np.dot(win, rvals))
         else:
-            win = self._windowed_sum(rbins, rvals, qbins, self._R)
+            win = self._windowed_sum(rbins, rvals, qbins, self._bin_radius)
             score = float(np.dot(win, qvals))
 
         if self.clip_to_one:
@@ -254,9 +254,9 @@ class CosineBlink(BaseSimilarity):
         offset = -global_min
 
         # Build reference intensity CSR once
-        I_ref = self._build_intensity_csr(prepped_refs, n_rows, offset, self.dtype)
+        i_ref = self._build_intensity_csr(prepped_refs, n_rows, offset, self.dtype)
 
-        S = np.zeros((n_ref, n_qry), dtype=self.dtype)
+        scores = np.zeros((n_ref, n_qry), dtype=self.dtype)
 
         # Batch queries -> blur -> multiply
         j = 0
@@ -265,17 +265,17 @@ class CosineBlink(BaseSimilarity):
             j1 = min(j + self.batch_size, n_qry)
             batch = prepped_qrys[j0:j1]
 
-            # scores_batch = I_ref.T @ IQ_blur  -> shape (n_ref, B)
-            IQ_blur = self._build_blurred_csr(batch, n_rows, offset, self._R)
-            scores_batch_sparse = I_ref.T @ IQ_blur
+            # scores_batch = i_ref.T @ iq_blur  -> shape (n_ref, B)
+            iq_blur = self._build_blurred_csr(batch, n_rows, offset, self._bin_radius)
+            scores_batch_sparse = i_ref.T @ iq_blur
 
-            S[:, j0:j1] = scores_batch_sparse.toarray()
+            scores[:, j0:j1] = scores_batch_sparse.toarray()
             j = j1
 
         if self.clip_to_one:
-            np.minimum(S, 1.0, out=S)
+            np.minimum(scores, 1.0, out=scores)
 
-        return Scores({"score": S})
+        return Scores({"score": scores})
 
     # --------------------------- Internal helpers ---------------------------
 
@@ -381,7 +381,7 @@ class CosineBlink(BaseSimilarity):
         return uniq, intensity_sum, counts.astype(np.int32, copy=False)
 
     def _windowed_sum(
-        self, source_bins: np.ndarray, source_vals: np.ndarray, query_positions: np.ndarray, R: int
+        self, source_bins: np.ndarray, source_vals: np.ndarray, query_positions: np.ndarray, bin_radius: int
     ) -> np.ndarray:
         """
         Windowed sum helper: numba-accelerated where available, else vectorized prefix sums.
@@ -394,7 +394,7 @@ class CosineBlink(BaseSimilarity):
             1D array of values aligned to `source_bins`.
         query_positions : np.ndarray
             1D array of integer bin positions at which to evaluate the windowed sum.
-        R : int
+        bin_radius : int
             Window radius in bins (inclusive on both sides).
 
         Returns
@@ -405,14 +405,14 @@ class CosineBlink(BaseSimilarity):
         if source_bins.size == 0 or query_positions.size == 0:
             return np.zeros(query_positions.size, dtype=self.dtype)
         if self.use_numba:
-            return _windowed_sum_numba(source_bins, source_vals, query_positions, int(R))
+            return _windowed_sum_numba(source_bins, source_vals, query_positions, int(bin_radius))
         # Vectorized fallback via prefix sums + searchsorted
-        c = np.empty(source_vals.size + 1, dtype=self.dtype)
-        c[0] = 0.0
-        c[1:] = np.cumsum(source_vals)
-        left = np.searchsorted(source_bins, query_positions - R, side="left")
-        right = np.searchsorted(source_bins, query_positions + R, side="right")
-        return c[right] - c[left]
+        c_sums = np.empty(source_vals.size + 1, dtype=self.dtype)
+        c_sums[0] = 0.0
+        c_sums[1:] = np.cumsum(source_vals)
+        left = np.searchsorted(source_bins, query_positions - bin_radius, side="left")
+        right = np.searchsorted(source_bins, query_positions + bin_radius, side="right")
+        return c_sums[right] - c_sums[left]
 
     # ---------- Sparse builders for matrix() ----------
 
@@ -454,7 +454,7 @@ class CosineBlink(BaseSimilarity):
         return csr_array((dat, (rows, cols)), shape=(n_rows, len(prepped_list)), dtype=dtype)
 
     @staticmethod
-    def _expand_column_blur(rows: np.ndarray, vals: np.ndarray, R: int, n_rows: int):
+    def _expand_column_blur(rows: np.ndarray, vals: np.ndarray, bin_radius: int, n_rows: int):
         """
         Expand one column's nonzeros to ±R neighbors (box blur).
 
@@ -464,7 +464,7 @@ class CosineBlink(BaseSimilarity):
             Row indices (bins) of nonzero entries for a single column.
         vals : np.ndarray
             Values aligned with `rows`.
-        R : int
+        bin_radius : int
             Blur radius in bins. If 0, returns inputs unchanged.
         n_rows : int
             Total number of rows (for bounds checking).
@@ -477,10 +477,10 @@ class CosineBlink(BaseSimilarity):
         if rows.size == 0:
             return rows, vals
         # Neighbors offsets
-        if R == 0:
+        if bin_radius == 0:
             # no expansion
             return rows, vals
-        offs = np.arange(-R, R + 1, dtype=np.int32)  # length = 2R+1
+        offs = np.arange(-bin_radius, bin_radius + 1, dtype=np.int32)
         # Broadcast-add and flatten
         neigh = (rows[:, None] + offs[None, :]).ravel()
         data = np.repeat(vals, offs.size)
@@ -488,7 +488,7 @@ class CosineBlink(BaseSimilarity):
         mask = (neigh >= 0) & (neigh < n_rows)
         return neigh[mask], data[mask]
 
-    def _build_blurred_csr(self, prepped_list, n_rows: int, offset: int, R: int):
+    def _build_blurred_csr(self, prepped_list, n_rows: int, offset: int, bin_radius: int):
         """
         Build CSR (rows=bins, cols=batch_size) of blurred, normalized query columns.
 
@@ -500,7 +500,7 @@ class CosineBlink(BaseSimilarity):
             Number of rows in the global bin axis.
         offset : int
             Offset applied to bins -> rows.
-        R : int
+        bin_radius : int
             Blur radius in bins.
 
         Returns
@@ -515,7 +515,7 @@ class CosineBlink(BaseSimilarity):
             if bins.size == 0:
                 continue
             base_rows = bins + offset
-            rows_exp, data_exp = self._expand_column_blur(base_rows, vals, R, n_rows)
+            rows_exp, data_exp = self._expand_column_blur(base_rows, vals, bin_radius, n_rows)
             if rows_exp.size == 0:
                 continue
             rows_all.append(rows_exp)
