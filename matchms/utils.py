@@ -166,13 +166,16 @@ def filter_empty_spectra(spectra: list[Spectrum]) -> list[Spectrum]:
 def rename_deprecated_params(param_mapping: dict, version: str = None) -> Callable:
     """Decorator for renaming old, deprecated parameters.
 
-    Usage example:
-    .. testcode::
-    @rename_deprecated_params({"spectrums": "spectra"}, version="0.1.0")
-    def example_func(spectra: List[Spectrum], another_param: str):
-        some function logic using spectra
+    Example
+    -------
+    .. code-block:: python
 
-    example_func(spectrums: [...], another_param: "some string")
+        @rename_deprecated_params({"spectrums": "spectra"}, version="0.1.0")
+        def example_func(spectra):
+            return len(spectra)
+
+
+        example_func(spectrums=[1, 2])  # Deprecated spelling; returns 2.
 
     Parameters
     ----------
@@ -181,8 +184,10 @@ def rename_deprecated_params(param_mapping: dict, version: str = None) -> Callab
     version
         Version in which the parameters are marked as deprecated.
 
-    Returns:
-        Callable function.
+    Returns
+    -------
+    Callable
+        Decorator accepting a function and returning a compatibility wrapper.
     """
 
     def decorator(func: Callable) -> Callable:

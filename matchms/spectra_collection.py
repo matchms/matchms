@@ -810,13 +810,12 @@ class SpectraCollection:
         entropy based on peak intensities. It then computes summary statistics
         (count, mean, std, min, max, etc.) for the entire collection.
 
-        Returns:
-            pd.DataFrame: A DataFrame containing summary statistics for the
-                following columns:
-                - 'peak_counts': Number of detected peaks per spectrum.
-                - 'intensity_sums': Total ion current (TIC) per spectrum.
-                - 'intensity_entropy': Shannon entropy of peak intensities,
-                    quantifying the spectral complexity/information density.
+        Returns
+        -------
+        pandas.DataFrame
+            Descriptive statistics for the peak counts, summed intensities,
+            and Shannon intensity entropy across the spectra collection.
+            The result has the standard pandas ``describe()`` statistic rows.
         """
         peak_counts = self._fragments.count(axis=1)
         intensity_sums = np.asarray(self._fragments.sum(axis=1)).flatten()

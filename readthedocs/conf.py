@@ -12,6 +12,8 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 PROJECT_ROOT = HERE.parent
 sys.path.insert(0, str(PROJECT_ROOT))
+# Also load the small local Sphinx extension from the docs directory.
+sys.path.insert(0, str(HERE))
 
 project = "matchms"
 author = "matchms development team"
@@ -42,12 +44,14 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
     "sphinx_rtd_theme",  # Registers theme assets/jQuery consistently
+    "_matchms_sphinx_refs",  # Resolve public re-exports to indexed definitions
 ]
 
 root_doc = "index"
 language = "en"
 source_suffix = {".rst": "restructuredtext"}
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+# Exclude a stale modules.rst from builds created with the previous setup.
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "api/modules.rst"]
 
 # Sphinx's own apidoc replaces the unmaintained sphinxcontrib-apidoc extension.
 # Do not generate undocumented private modules or overwrite hand-written guides.
@@ -58,16 +62,19 @@ apidoc_modules = [
         "exclude_patterns": ["**/tests/**", "**/test_*.py"],
         "separate_modules": True,
         "module_first": True,
+        # index.rst already links api/matchms. Avoid an unused second root.
+        "toc_file": False,
         "automodule_options": {"members", "show-inheritance"},
     }
 ]
 
 # Document the *public* API from docstrings. Automatically publishing every
 # undocumented member masks missing documentation and inflates the site.
-# The generated pages already contain :members:. Keep this OFF globally so
-# package overview pages can show their docstring without re-documenting
-# classes re-exported from matchms.__init__ and subpackage __init__ modules.
+# Include class methods and properties, not only the classes themselves.
+# On package overview pages the source-read hook explicitly disables members
+# so that re-exports are not documented a second time.
 autodoc_default_options = {
+    "members": True,
     "show-inheritance": True,
 }
 autoclass_content = "both"
@@ -76,6 +83,17 @@ autoclass_content = "both"
 autodoc_typehints = "signature"
 napoleon_google_docstring = False
 napoleon_numpy_docstring = True
+# Attributes sections otherwise create a second .. attribute:: target for
+# properties also documented through :members: (8 duplicates in the log).
+napoleon_use_ivar = True
+# Normalize common short names to the existing intersphinx inventories.
+napoleon_preprocess_types = True
+napoleon_type_aliases = {
+    "np.ndarray": "numpy.ndarray",
+    "pd.DataFrame": "pandas.DataFrame",
+    "pd.Series": "pandas.Series",
+    "plt.Axes": "matplotlib.axes.Axes",
+}
 
 doctest_test_doctest_blocks = ""
 
@@ -129,7 +147,9 @@ def _package_overviews_without_duplicate_members(app, docname, source):
             line for line in option_lines
             if not re.match(r"^[ \t]+:(?:members|imported-members):", line)
         ]
-        return match.group(1) + "".join(option_lines)
+        # The negated flag overrides the global default for this directive.
+        # Simply deleting :members: is not sufficient with Sphinx >= 9.
+        return match.group(1) + "".join(option_lines) + "   :no-members:\n"
 
     source[0] = pattern.sub(keep_module_docstring_only, source[0], count=1)
 
