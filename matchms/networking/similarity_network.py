@@ -164,7 +164,7 @@ class SimilarityNetwork:
 
             target_ids = np.array([identifiers[j] for j in candidate_indices], dtype=object)
 
-            keep = np.where(candidate_scores >= self.score_cutoff)[0][: self.max_links]
+            keep = np.nonzero(candidate_scores >= self.score_cutoff)[0][: self.max_links]
 
             if self.link_method == "single":
                 new_edges = [(source_id, str(target_ids[k]), float(candidate_scores[k])) for k in keep]
