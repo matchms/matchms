@@ -132,10 +132,7 @@ def _collection_with_precursors(values, *, dtype=object):
     the mixed/object fast path without changing production normalization code.
     """
     spectra = [
-        SpectrumBuilder()
-        .with_mz(np.array([100.0 + i]))
-        .with_intensities(np.array([1.0]))
-        .build()
+        SpectrumBuilder().with_mz(np.array([100.0 + i])).with_intensities(np.array([1.0])).build()
         for i in range(len(values))
     ]
     collection = SpectraCollection(spectra)
@@ -184,11 +181,14 @@ def _assert_kept_rows(filtered, original_row_ids):
     ],
 )
 def test_scalar_precursor_requirement_boundaries(precursor, minimum, maximum, expected):
-    assert _require_precursor_mz(
-        {"precursor_mz": precursor},
-        minimum_accepted_mz=minimum,
-        maximum_mz=maximum,
-    ) is expected
+    assert (
+        _require_precursor_mz(
+            {"precursor_mz": precursor},
+            minimum_accepted_mz=minimum,
+            maximum_mz=maximum,
+        )
+        is expected
+    )
 
 
 @pytest.mark.parametrize("value", ["15.0", "not-a-number", "invalid-mz"])
