@@ -432,6 +432,7 @@ def test_rankings_invariant_to_worker_count_and_scheduling(n_jobs, batch_size):
     found = scorer.search_prepared_topk(prepared, index, k=11, min_score=0.04, n_jobs=n_jobs, batch_size=batch_size)
     _assert_matches_dense(found, dense, 11, 0.04)
 
+
 # ---------------------------------------------------------------------------
 # EntropySearch: configuration, preparation, indexing and dense search
 # ---------------------------------------------------------------------------
@@ -621,9 +622,9 @@ class TestEntropySearchPreparation:
         np.testing.assert_array_equal(merged.spec_mz, [100.0])
         assert merged.n_merged_peaks == 1
         with pytest.raises(ValueError, match="separated"):
-            EntropySearch(
-                tolerance=0.0625, max_tolerance=0.0625, peak_separation="raise"
-            ).prepare_peak_arrays([_peaks((100, 1), (100.125, 1))])
+            EntropySearch(tolerance=0.0625, max_tolerance=0.0625, peak_separation="raise").prepare_peak_arrays(
+                [_peaks((100, 1), (100.125, 1))]
+            )
 
     def test_weighted_and_unweighted_intensities(self):
         raw = [_peaks((100, 9), (200, 1))]
@@ -644,7 +645,9 @@ class TestEntropySearchPreparation:
     def test_underflowed_float32_intensities_are_removed(self):
         smallest = float(np.nextafter(np.float32(0), np.float32(1)))
         scorer = EntropySearch(
-            tolerance=0.01, dtype=np.float32, noise_cutoff=0,
+            tolerance=0.01,
+            dtype=np.float32,
+            noise_cutoff=0,
             intensity_weighting=False,
         )
         prepared = scorer.prepare_peak_arrays([_peaks((100, smallest), (200, 1.0))])
@@ -653,9 +656,7 @@ class TestEntropySearchPreparation:
         assert prepared.n_filtered_peaks == 1
 
     def test_prepared_slices_rebase_offsets_share_peaks_and_check_bounds(self):
-        prepared = _make_scorer().prepare_peak_arrays(
-            [_peaks((100, 1), (200, 1)), _peaks(), _peaks((300, 2))]
-        )
+        prepared = _make_scorer().prepare_peak_arrays([_peaks((100, 1), (200, 1)), _peaks(), _peaks((300, 2))])
         selected = prepared.slice(1, 3)
         np.testing.assert_array_equal(selected.spec_offsets, [0, 0, 1])
         np.testing.assert_array_equal(selected.spec_mz, [300])
@@ -676,10 +677,16 @@ class TestEntropySearchPreparation:
                 np.asarray(mz, np.float64),
                 np.asarray(intensity, np.float64),
                 np.array([500.0]),
-                0.0, False, -1.6, 0.05, scorer._minimum_gap(), merge, False,
+                0.0,
+                False,
+                -1.6,
+                0.05,
+                scorer._minimum_gap(),
+                merge,
+                False,
             )
 
-        offsets, mz, intensity, filtered, merged, row, code = call([100, 200], [1, 2], False)
+        offsets, _, intensity, filtered, merged, row, code = call([100, 200], [1, 2], False)
         np.testing.assert_array_equal(offsets, [0, 2])
         np.testing.assert_allclose(intensity, [1 / 6, 1 / 3])
         assert (filtered, merged, row, code) == (0, 0, -1, 0)
@@ -741,8 +748,12 @@ class TestEntropySearchIndexAndDenseScoring:
         prepared = scorer.prepare_peak_arrays([_peaks((100, 1))])
         index = scorer.build_index_prepared(prepared)
         different = EntropySearch(
-            tolerance=0.01, max_tolerance=0.02, peak_separation="raise", noise_cutoff=0,
-            remove_precursor=False, intensity_weighting=False,
+            tolerance=0.01,
+            max_tolerance=0.02,
+            peak_separation="raise",
+            noise_cutoff=0,
+            remove_precursor=False,
+            intensity_weighting=False,
         )
         with pytest.raises(ValueError, match="prepare_queries"):
             different.build_index_prepared(prepared)
@@ -756,8 +767,12 @@ class TestEntropySearchIndexAndDenseScoring:
     def test_prepared_library_reused_with_smaller_query_tolerance(self):
         broad = _make_scorer(np.float64)
         narrow = EntropySearch(
-            tolerance=0.005, max_tolerance=0.02, peak_separation="raise",
-            noise_cutoff=0, remove_precursor=False, dtype=np.float64,
+            tolerance=0.005,
+            max_tolerance=0.02,
+            peak_separation="raise",
+            noise_cutoff=0,
+            remove_precursor=False,
+            dtype=np.float64,
         )
         lib = broad.build_index_prepared(broad.prepare_peak_arrays([_peaks((100, 1))]))
         queries = broad.prepare_peak_arrays([_peaks((100.007, 1))])
@@ -787,8 +802,12 @@ class TestEntropySearchIndexAndDenseScoring:
         upper = np.nextafter(100.125, np.inf)
         library = np.array([lower, 99.875, 100.125, upper])
         bounds = _query_windows(
-            np.array([100.0]), library, 0.125,
-            np.empty(0, dtype=np.int64), 0.0, 1.0,
+            np.array([100.0]),
+            library,
+            0.125,
+            np.empty(0, dtype=np.int64),
+            0.0,
+            1.0,
         )
         np.testing.assert_array_equal(bounds, [[1, 3]])
 
@@ -861,6 +880,7 @@ class TestEntropySearchIndexAndDenseScoring:
                 return np.array([150.0]), np.array([3.0])
 
         fake_unpacked = SimpleNamespace(fragments=Unpacked(), metadata=metadata)
+
         # The fallback implementation asks the collection for its row count.
         class Collection:
             fragments = fake_unpacked.fragments
@@ -901,4 +921,3 @@ class TestEntropySearchIndexAndDenseScoring:
         assert scorer.search_prepared(empty_query, library).to_array().shape == (0, 2)
         nonempty_query = scorer.prepare_peak_arrays([_peaks((100, 1))])
         np.testing.assert_array_equal(scorer.search_prepared(nonempty_query, library).to_array(), [[0, 0]])
-
