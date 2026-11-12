@@ -10,12 +10,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Changed
 - add test runs without numba JIT [#1034](https://github.com/matchms/matchms/pull/1034)
 - smaller code quality changes based on SonarQube analysis [#1034](https://github.com/matchms/matchms/pull/1034)
+- code quality changes [#1035](https://github.com/matchms/matchms/pull/1035)
+- expand test coverage [#1035](https://github.com/matchms/matchms/pull/1035)
 
 ### Fixed
 - Include all extra dependencies into main coverage test run [#1034](https://github.com/matchms/matchms/pull/1034)
 - Agent skill: the score-mask example now compares one score field (`scores["score"] > 0.5`), since `Cosine` and `ModifiedCosine` return two fields and reject `scores > 0.5`, and the sparse-mode CLI example uses `CosineGreedy`, since `Cosine` has no `sparse_matrix()` [#959](https://github.com/matchms/matchms/issues/959).
+- Use copy for to_numpy() method which with newer pandas versiony can otherwise become read-only [#1035](https://github.com/matchms/matchms/pull/1035)
 
-## [1.0.0.dev] - 2026-11-10
+## [1.0.0.dev1] - 2026-11-10
 This development release prepares matchms 1.0 with major changes to collections, similarity scoring, filtering, I/O, and the public API. **Upgrading from 0.x requires attention to the breaking changes below.**
 
 ### Added
@@ -886,7 +889,8 @@ Contains three plot types: `plot_spectrum()` or `spectrum.plot()`, `plot_spectra
 - This is the initial version of Spec2Vec from https://github.com/iomega/Spec2Vec
 - (later splitted into matchms + spec2vec)
 
-[Unreleased]: https://github.com/matchms/matchms/compare/0.34.0...HEAD
+[Unreleased]: https://github.com/matchms/matchms/compare/1.0.0.dev1...HEAD
+[1.0.0.dev1]: https://github.com/matchms/matchms/compare/0.34.0...1.0.0.dev1
 [0.34.0]: https://github.com/matchms/matchms/compare/0.33.1...0.34.0
 [0.33.1]: https://github.com/matchms/matchms/compare/0.33.0...0.33.1
 [0.33.0]: https://github.com/matchms/matchms/compare/0.32.0...0.33.0
