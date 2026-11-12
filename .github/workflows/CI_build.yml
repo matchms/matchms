@@ -19,15 +19,21 @@ jobs:
         with:
           python-version: '3.13'
           enable-cache: true
-      - name: Install development dependencies
-        run: uv sync --frozen
+      - name: Install development dependencies (including optional extras)
+        run: uv sync --frozen --extra all
       - name: Lint
         run: uv run --frozen ruff check --output-format=github
       - name: Formatter
         run: uv run --frozen ruff format --check --output-format=github
-      - name: Test with coverage
-        run: uv run --frozen pytest --cov --cov-report=term --cov-report=xml --junitxml=xunit-result.xml
-      - name: Test Numba kernels without JIT and combine coverage
+      - name: Test with coverage (JIT enabled)
+        run: |
+          uv run --frozen coverage erase
+          uv run --frozen pytest \
+            --cov \
+            --cov-branch \
+            --cov-report= \
+            --junitxml=xunit-result.xml
+      - name: Test Numba kernels without JIT
         env:
           NUMBA_DISABLE_JIT: "1"
         run: |

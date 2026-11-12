@@ -84,6 +84,9 @@ docs = [
 requires = ["uv_build>=0.13.6,<0.14"]
 build-backend = "uv_build"
 
+[tool.coverage.run]
+branch = true
+
 [tool.pytest.ini_options]
 addopts = "--benchmark-disable"
 markers = [
