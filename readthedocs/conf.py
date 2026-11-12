@@ -1,119 +1,93 @@
-# Configuration file for the Sphinx documentation builder.
-#
-# For a full list of options:
-# https://www.sphinx-doc.org/en/master/usage/configuration.html
+"""Sphinx configuration for the matchms 1.0 documentation."""
 
 from __future__ import annotations
-import os
+
 import sys
-from importlib.metadata import PackageNotFoundError
-from importlib.metadata import version as pkg_version
+import tomllib
+from datetime import datetime, timezone
+from importlib.metadata import PackageNotFoundError, version as package_version
 from pathlib import Path
-
-
-# -- Path setup --------------------------------------------------------------
 
 HERE = Path(__file__).resolve().parent
 PROJECT_ROOT = HERE.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-
-# -- Project information -----------------------------------------------------
-
 project = "matchms"
 author = "matchms development team"
-copyright = "2023, Düsseldorf University of Applied Sciences & Netherlands eScience Center"
+copyright = f"2020-{datetime.now(timezone.utc).year}, matchms contributors"
 
+# The CI docs build installs matchms. For local previews, fall back to the
+# version declared by pyproject.toml instead of importing matchms during setup.
 try:
-    release = pkg_version("matchms")
+    release = package_version("matchms")
 except PackageNotFoundError:
-    # Docs can still build even if the package isn't installed (e.g. local preview),
-    # but you may want to fail hard instead, depending on your policy.
-    release = "0+unknown"
-
-# Optional: keep major.minor as "version"
-version = ".".join(release.split(".")[:2]) if release and release[0].isdigit() else release
-
-
-# -- General configuration ---------------------------------------------------
+    project_config = PROJECT_ROOT / "pyproject.toml"
+    if project_config.exists():
+        with project_config.open("rb") as stream:
+            metadata = tomllib.load(stream)
+        release = (metadata.get("project", {}).get("version")
+                   or metadata.get("tool", {}).get("poetry", {}).get("version")
+                   or "0+unknown")
+    else:
+        release = "0+unknown"
+version = ".".join(release.split(".")[:2]) if release[0].isdigit() else release
 
 extensions = [
+    "sphinx.ext.apidoc",  # Included in Sphinx >= 8.2
     "sphinx.ext.autodoc",
     "sphinx.ext.coverage",
-    "sphinx.ext.intersphinx",
-    "sphinx.ext.viewcode",
-    "sphinx.ext.todo",
     "sphinx.ext.doctest",
+    "sphinx.ext.intersphinx",
     "sphinx.ext.napoleon",
-    "sphinxcontrib.apidoc",
+    "sphinx.ext.viewcode",
+    "sphinx_rtd_theme",  # Registers theme assets/jQuery consistently
 ]
 
-templates_path = ["_templates"]
+root_doc = "index"
 language = "en"
+source_suffix = {".rst": "restructuredtext"}
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
-exclude_patterns = [
-    "_build",
-    "Thumbs.db",
-    ".DS_Store",
-    "readthedocs/conf.rst",
+# Sphinx's own apidoc replaces the unmaintained sphinxcontrib-apidoc extension.
+# Do not generate undocumented private modules or overwrite hand-written guides.
+apidoc_modules = [
+    {
+        "path": str(PROJECT_ROOT / "matchms"),
+        "destination": "api",
+        "exclude_patterns": ["**/tests/**", "**/test_*.py"],
+        "separate_modules": True,
+        "module_first": True,
+        "automodule_options": {"members", "show-inheritance"},
+    }
 ]
 
-# Hide undocumented member by excluding default undoc-members option
-os.environ["SPHINX_APIDOC_OPTIONS"] = "members,show-inheritance"
-
+# Document the *public* API from docstrings. Automatically publishing every
+# undocumented member masks missing documentation and inflates the site.
+autodoc_default_options = {
+    "members": True,
+    "show-inheritance": True,
+}
+autoclass_content = "both"
+napoleon_google_docstring = False
+napoleon_numpy_docstring = True
 
 doctest_test_doctest_blocks = ""
 
-# -- sphinxcontrib-apidoc ----------------------------------------------------
-
-apidoc_module_dir = str(PROJECT_ROOT / "matchms")
-apidoc_output_dir = "api"
-apidoc_excluded_paths = [
-    "tests",
-    "readthedocs",
-]
-apidoc_separate_modules = True
-apidoc_module_first = True
-
-
-# -- autodoc -----------------------------------------------------------------
-
-autodoc_default_options = {
-    "special-members": "__init__,__call__",
-    "undoc-members": True,
-    "show-inheritance": True,
-}
-
-napoleon_google_docstring = False
-
-
-# -- HTML output -------------------------------------------------------------
-
 html_theme = "sphinx_rtd_theme"
-
 html_theme_options = {
-    "logo": "matchms.png",
-    "github_user": "matchms",
-    "github_repo": "matchms",
-    "page_width": "1080px",
+    "logo_only": False,
+    "style_external_links": True,
+    "navigation_depth": 4,
+    "collapse_navigation": False,
 }
+html_static_path = ["_static"] if (HERE / "_static").is_dir() else []
+if (HERE / "_static" / "matchms.png").is_file():
+    html_logo = "_static/matchms.png"
 
-html_static_path = ["_static"]
-
-
-# -- todo extension ----------------------------------------------------------
-
-todo_include_todos = True
-
-
-# -- intersphinx -------------------------------------------------------------
-
+# These inventories are useful for NumPy and Python type references. Avoid
+# optional/down dependencies with unreliable inventories in CI.
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
-    "gensim": ("https://radimrehurek.com/gensim", None),
-    "matplotlib": ("https://matplotlib.org", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
-    "pyteomics": ("https://pyteomics.readthedocs.io/en/latest/", None),
-    "rdkit": ("http://rdkit.org/docs", None),
     "scipy": ("https://docs.scipy.org/doc/scipy/", None),
 }
