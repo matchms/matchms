@@ -169,8 +169,10 @@ One-shot matrix — CLI:
 matchms similarity matrix library.mgf --method ModifiedCosine --tolerance 0.01 -o scores.npz
 # queries vs references:
 matchms similarity matrix queries.mgf library.mgf --method Cosine -o scores.npz
-# large data: sparse mode keeps only pairs >= threshold (.tsv/.csv + --id-field for readable ids)
-matchms similarity matrix big.mgf --method Cosine --mode sparse --score-min 0.1 -o pairs.tsv
+# large data: sparse mode keeps only pairs >= threshold (.tsv/.csv + --id-field for readable ids).
+# It needs a sparse-capable method (`sparse_matrix` in `matchms similarity list`), e.g. CosineGreedy;
+# Cosine / ModifiedCosine are dense + index only.
+matchms similarity matrix big.mgf --method CosineGreedy --mode sparse --score-min 0.1 -o pairs.tsv
 ```
 
 Output: `.npz` (a `Scores` artifact, loadable via `Scores.load`), or
@@ -185,8 +187,8 @@ similarity = ModifiedCosine(tolerance=0.01)
 scores = similarity.matrix(collection)  # or (queries, references)
 scores.shape, scores.score_fields  # e.g. ('score', 'matches')
 scores.to_array("score")  # dense numpy matrix
-mask = scores > 0.5  # comparison operators work
-high = scores.to_array("score")[mask]
+mask = scores["score"] > 0.5  # compare one field; `scores > 0.5` only works for single-field Scores
+high = scores[mask]  # Scores keeping only the pairs where the mask is True (same as scores.filter(mask))
 ```
 
 For classic list-of-`Spectrum` code, the top-level helper is equivalent:
@@ -315,7 +317,8 @@ spectrum.plot_against(reference_spectrum)
   `empty_spectra`, `unknown_value` (name not found — read `valid_values` and
   the "Did you mean" hint), `unsupported_method` (method lacks the required
   capability), `index_incompatible` (rebuild the index), `matrix_too_large`
-  (switch to `--mode sparse --score-min`), `missing_dependency` (e.g. RDKit —
+  (switch to `--mode sparse --score-min` with a sparse-capable method such as
+  `CosineGreedy`), `missing_dependency` (e.g. RDKit —
   do not retry, install it or change method).
 - Formats are detected from the file extension only (CLI); rename files with
   non-standard extensions or use `ftype` in Python / `--ftype` in the CLI.
