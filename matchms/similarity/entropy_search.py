@@ -602,14 +602,19 @@ class EntropySearch(BaseSimilarity):
     def _precursors(values, n: int) -> np.ndarray:
         if values is None:
             return np.full(n, np.nan)
+
         try:
             precursor = np.asarray(values, dtype=np.float64).copy()
         except (ValueError, TypeError):
             import pandas as pd
 
-            precursor = pd.to_numeric(pd.Series(values), errors="coerce").to_numpy(dtype=float)
+            precursor = pd.to_numeric(pd.Series(values), errors="coerce").to_numpy(
+                dtype=np.float64, na_value=np.nan, copy=True
+            )
+
         if precursor.shape != (n,):
             raise ValueError("precursor_mz must have one value per spectrum.")
+
         precursor[~np.isfinite(precursor) | (precursor <= 0)] = np.nan
         return precursor
 

@@ -172,26 +172,26 @@ class Metadata:
     # Getters and Setters
     # ------------------------------
     def get(self, key: str, default=None):
-        """Retrieve value from :attr:`metadata` dict."""
+        """Retrieve an entry from the metadata dictionary."""
         return self._data.get(key, default)
 
     def set(self, key: str, value):
-        """Set value in :attr:`metadata` dict."""
+        """Set an entry in the metadata dictionary."""
         self._data[key] = value
         if self.matchms_key_style is True:
             self.harmonize_keys()
         return self
 
     def keys(self):
-        """Retrieve all keys of :attr:`.metadata` dict."""
+        """Return the metadata keys."""
         return self._data.keys()
 
     def values(self):
-        """Retrieve all values of :attr:`.metadata` dict."""
+        """Return the metadata values."""
         return self._data.values()
 
     def items(self):
-        """Retrieve all items (key, value pairs) of :attr:`.metadata` dict."""
+        """Return metadata key-value pairs."""
         return self._data.items()
 
     def to_dict(self, export_style: str = "matchms"):

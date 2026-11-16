@@ -9,6 +9,9 @@ from matchms.similarity.flash_similarity import EntropyFlash
 from matchms.similarity.topk_results import TopKResults
 
 
+pytestmark = pytest.mark.numba_coverage
+
+
 def _prepared(scorer, spectra, precursors):
     """Build valid, normalized prepared rows with no full Spectrum objects."""
     mz, intensities, offsets = [], [], [0]

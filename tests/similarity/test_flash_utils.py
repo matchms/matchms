@@ -15,6 +15,8 @@ from matchms.similarity.flash_utils import (
 from ..builder_spectrum import SpectrumBuilder
 
 
+pytestmark = pytest.mark.numba_coverage
+
 # -------------------------------------------------------------------------
 # Helpers
 # -------------------------------------------------------------------------

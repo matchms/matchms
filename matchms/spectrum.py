@@ -259,7 +259,7 @@ class Spectrum:
             losses_intensities = peaks_intensities[::-1]
 
             # Add losses that are within given boundaries
-            mask = np.where((losses_mz >= loss_mz_from) & (losses_mz <= loss_mz_to))
+            mask = np.nonzero((losses_mz >= loss_mz_from) & (losses_mz <= loss_mz_to))
             losses = Fragments(mz=losses_mz[mask], intensities=losses_intensities[mask])
             return losses
         return None

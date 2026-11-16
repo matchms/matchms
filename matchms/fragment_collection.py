@@ -412,7 +412,7 @@ class CSRFragmentCollection(FragmentCollection):
         mask = np.asarray(mask, dtype=bool)
         if mask.shape[0] != len(self):
             raise ValueError(f"Mask length ({mask.shape[0]}) does not match number of spectra ({len(self)}).")
-        return self.take(np.where(mask)[0])
+        return self.take(np.nonzero(mask)[0])
 
     def drop(self, indices: Iterable[int]) -> Self:
         """Return a new collection with selected rows removed."""

@@ -1,0 +1,12 @@
+# Automatically detect text files
+* text=auto
+
+# Always use LF for Python files
+*.py text eol=lf
+*.pyi text eol=lf
+
+# Also use LF for project configuration files
+*.toml text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.sh text eol=lf

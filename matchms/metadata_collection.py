@@ -134,7 +134,7 @@ def harmonize_metadata_types(
     metadata fields with a defined canonical scalar dtype.
 
     When ``strict_harmonize=True``, every metadata row is additionally passed
-    through :meth:`Metadata.harmonize_values`. This applies the same semantic
+    through :meth:`~matchms.metadata.Metadata.harmonize_values`. This applies the same semantic
     harmonization as for ordinary Spectrum metadata, including pepmass
     interpretation, precursor-m/z derivation, ion-mode normalization,
     retention handling, parent/parent-mass conversion, charge conversion, and
@@ -204,6 +204,24 @@ class MetadataCollection(pd.DataFrame):
         return _c
 
     def sort_values(self, by, inplace=False, **kwargs):
+        """Sort spectra by metadata values, preserving fragment-row alignment.
+
+        Parameters
+        ----------
+        by
+            Metadata column name or names used for sorting.
+        inplace
+            If True, sort the parent collection in place and return None.
+            Otherwise, return the sorted metadata view.
+        **kwargs
+            Additional keyword arguments forwarded to
+            :meth:`pandas.DataFrame.sort_values`.
+
+        Returns
+        -------
+        MetadataCollection or None
+            Sorted metadata view, or None if ``inplace=True``.
+        """
         result = self._collection.sort(by=by, inplace=inplace, **kwargs)
         return None if inplace else result.metadata
 

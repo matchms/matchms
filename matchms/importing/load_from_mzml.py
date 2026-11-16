@@ -1,9 +1,13 @@
+import logging
 from collections.abc import Generator
 from pathlib import Path
 import numpy as np
 from pyteomics.mzml import read
-from matchms.importing.parsing_utils import parse_mzml_mzxml_metadata, sort_by_mz
+from matchms.importing.parsing_utils import sort_by_mz
 from matchms.spectrum import Spectrum
+
+
+logger = logging.getLogger("matchms")
 
 
 def load_from_mzml(
@@ -40,12 +44,68 @@ def load_from_mzml(
     with read(filename, dtype=dict) as reader:
         for pyteomics_spectrum in reader:
             if "ms level" in pyteomics_spectrum and pyteomics_spectrum["ms level"] == ms_level:
-                metadata = parse_mzml_mzxml_metadata(pyteomics_spectrum)
-                mz = np.asarray(pyteomics_spectrum["m/z array"], dtype="float")
-                intensities = np.asarray(pyteomics_spectrum["intensity array"], dtype="float")
+                mz = np.asarray(pyteomics_spectrum.pop("m/z array"), dtype="float")
+                intensities = np.asarray(pyteomics_spectrum.pop("intensity array"), dtype="float")
 
                 mz, intensities = sort_by_mz(mz=mz, intensities=intensities)
-
+                flattend_metadata = _parse_metadata(pyteomics_spectrum)
+                flattend_metadata = _derive_charge_from_polarity(flattend_metadata)
                 yield Spectrum(
-                    mz=mz, intensities=intensities, metadata=metadata, metadata_harmonization=metadata_harmonization
+                    mz=mz,
+                    intensities=intensities,
+                    metadata=flattend_metadata,
+                    metadata_harmonization=metadata_harmonization,
                 )
+
+
+def _parse_key_value(key, value, first_level=True):
+    if isinstance(value, dict):
+        for k, v in value.items():
+            if k == "count" and not first_level:
+                continue
+            if key is not None:
+                combined_key = key + "-" + k
+            else:
+                combined_key = k
+            yield from _parse_key_value(combined_key, v, False)
+    elif isinstance(value, list):
+        if len(value) == 0:
+            return
+        if len(value) > 1:
+            # Legal in mzML, e.g. a scanWindowList with count=2, or a cvParam
+            # that occurs twice in one spectrum. matchms metadata is flat, so
+            # only the first entry is kept.
+            logger.warning(
+                "Found %d values for '%s' in mzML spectrum, only the first is used.",
+                len(value),
+                key,
+            )
+        first = value[0]
+        if isinstance(first, dict):
+            for k, v in first.items():
+                yield from _parse_key_value(k, v, False)
+        else:
+            # list of plain values (repeated cvParam)
+            yield key, first
+    else:
+        yield key, value
+
+
+def _derive_charge_from_polarity(flattend_metadata):
+    """This is here for historic reasons, it would fit better in the filter correct_charge,
+    but since the loader did this automatically before, we kept it here, to not break existing pipelines."""
+    if "polarity" in flattend_metadata:
+        if flattend_metadata["polarity"] == "-":
+            flattend_metadata["charge"] = -1
+        if flattend_metadata["polarity"] == "+":
+            flattend_metadata["charge"] = 1
+    return flattend_metadata
+
+
+def _parse_metadata(metadata_dict: dict):
+    flattend_dict = {}
+    for key, value in _parse_key_value(None, metadata_dict):
+        if key in flattend_dict:
+            raise ValueError(f"The key:{key} is duplicated")
+        flattend_dict[key] = value
+    return flattend_dict

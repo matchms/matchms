@@ -8,7 +8,7 @@ Code quality checks:
 
 |CI First Code Checks| |CI Build|
 |ReadTheDocs Badge|
-|Sonarcloud Quality Gate Badge| |Sonarcloud Coverage Badge|
+|SonarQube Maintainability Rating| |SonarQube Security Issues| |SonarQube Coverage Badge|
 
 .. image:: readthedocs/_static/matchms_header.png
    :target: readthedocs/_static/matchms.png
@@ -1229,6 +1229,13 @@ recipes repository. Once the pull request is merged, the new version of matchms
 will appear on `Anaconda <https://anaconda.org/bioconda/matchms>`_.
 
 
+Agent skill
+===========
+A ``SKILL.md`` for AI coding agents is available at 
+``.agents/skills/matchms/SKILL.md``.
+Copy it into your agent's skills directory to help it use ``matchms`` correctly.
+
+
 Support
 =======
 
@@ -1308,10 +1315,14 @@ specific language governing permissions and limitations under the License.
     :alt: Documentation Status
     :target: https://matchms.readthedocs.io/en/latest/?badge=latest
 
-.. |Sonarcloud Quality Gate Badge| image:: https://sonarcloud.io/api/project_badges/measure?project=matchms_matchms&metric=alert_status
-   :target: https://sonarcloud.io/dashboard?id=matchms_matchms
-   :alt: Sonarcloud Quality Gate
+.. |SonarQube Maintainability Rating| image:: https://sonarcloud.io/api/project_badges/measure?project=matchms_matchms&metric=sqale_rating
+   :target: https://sonarcloud.io/summary/overall?id=matchms_matchms
+   :alt: SonarQube Maintainability Rating
 
-.. |Sonarcloud Coverage Badge| image:: https://sonarcloud.io/api/project_badges/measure?project=matchms_matchms&metric=coverage
+.. |SonarQube Security Issues| image:: https://sonarcloud.io/api/project_badges/measure?project=matchms_matchms&metric=software_quality_security_issues
+   :target: https://sonarcloud.io/summary/overall?id=matchms_matchms
+   :alt: SonarQube Security Issue
+
+.. |SonarQube Coverage Badge| image:: https://sonarcloud.io/api/project_badges/measure?project=matchms_matchms&metric=coverage
    :target: https://sonarcloud.io/component_measures?id=matchms_matchms&metric=Coverage&view=list
    :alt: Sonarcloud Coverage
