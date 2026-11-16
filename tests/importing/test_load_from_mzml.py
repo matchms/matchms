@@ -27,7 +27,11 @@ def test_load_from_mzml_2():
     mzml_file = os.path.join(os.path.dirname(__file__), "..", "testdata", "tiny.pwiz.1.1.mzML")
     spectra = list(load_from_mzml(mzml_file))
     assert len(spectra) == 1, "Expected 10 spectra."
-    assert spectra[0].metadata == {
+    metadata = dict(spectra[0].metadata)
+    # Different way of parsing dependend on the pyteomics version. Sometimes string sometimes float.
+    assert float(metadata.pop("preset_scan_configuration")) == 4.0
+
+    assert metadata == {
         "index": 1,
         "id": "scan=20",
         "count": 2,
@@ -38,7 +42,6 @@ def test_load_from_mzml_2():
         "scan_window_upper_limit": 905.0,
         "scan_start_time": 5.9905,
         "filter_string": "+ c d Full ms2  445.35@cid35.00 [ 110.00-905.00]",
-        "preset_scan_configuration": 4.0,
         "peak_intensity": 120053.0,
         "activation-collision_energy": 35.0,
         "ms_level": 2,
@@ -53,8 +56,5 @@ def test_load_from_mzml_2():
         "precursor_mz": 445.34,
         "charge": 2,
     }
-    print(spectra[0].mz)
-    print(spectra[0].intensities)
-
     np.testing.assert_array_equal(spectra[0].mz, np.array([0, 2, 4, 6, 8, 10, 12, 14, 16, 18]))
     np.testing.assert_array_equal(spectra[0].intensities, np.array([20, 18, 16, 14, 12, 10, 8, 6, 4, 2]))
