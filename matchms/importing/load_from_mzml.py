@@ -48,8 +48,8 @@ def load_from_mzml(
                 intensities = np.asarray(pyteomics_spectrum.pop("intensity array"), dtype="float")
 
                 mz, intensities = sort_by_mz(mz=mz, intensities=intensities)
-                flattend_metadata = parse_metadata(pyteomics_spectrum)
-                flattend_metadata = derive_charge_from_polarity(flattend_metadata)
+                flattend_metadata = _parse_metadata(pyteomics_spectrum)
+                flattend_metadata = _derive_charge_from_polarity(flattend_metadata)
                 yield Spectrum(
                     mz=mz,
                     intensities=intensities,
@@ -58,7 +58,7 @@ def load_from_mzml(
                 )
 
 
-def parse_key_value(key, value, first_level=True):
+def _parse_key_value(key, value, first_level=True):
     if isinstance(value, dict):
         for k, v in value.items():
             if k == "count" and not first_level:
@@ -67,7 +67,7 @@ def parse_key_value(key, value, first_level=True):
                 combined_key = key + "-" + k
             else:
                 combined_key = k
-            yield from parse_key_value(combined_key, v, False)
+            yield from _parse_key_value(combined_key, v, False)
     elif isinstance(value, list):
         if len(value) == 0:
             return
@@ -83,7 +83,7 @@ def parse_key_value(key, value, first_level=True):
         first = value[0]
         if isinstance(first, dict):
             for k, v in first.items():
-                yield from parse_key_value(k, v, False)
+                yield from _parse_key_value(k, v, False)
         else:
             # list of plain values (repeated cvParam)
             yield key, first
@@ -91,7 +91,7 @@ def parse_key_value(key, value, first_level=True):
         yield key, value
 
 
-def derive_charge_from_polarity(flattend_metadata):
+def _derive_charge_from_polarity(flattend_metadata):
     """This is here for historic reasons, it would fit better in the filter correct_charge,
     but since the loader did this automatically before, we kept it here, to not break existing pipelines."""
     if "polarity" in flattend_metadata:
@@ -102,9 +102,9 @@ def derive_charge_from_polarity(flattend_metadata):
     return flattend_metadata
 
 
-def parse_metadata(metadata_dict: dict):
+def _parse_metadata(metadata_dict: dict):
     flattend_dict = {}
-    for key, value in parse_key_value(None, metadata_dict):
+    for key, value in _parse_key_value(None, metadata_dict):
         if key in flattend_dict:
             raise ValueError(f"The key:{key} is duplicated")
         flattend_dict[key] = value
