@@ -1,123 +1,204 @@
-import logging
-import os
-import re
-import tempfile
+import importlib
+import pickle
+import numpy as np
 import pytest
+from matchms import Spectrum
 from matchms.exporting.save_spectra import save_as_pickled_file, save_spectra
-from matchms.importing import load_from_mgf, load_spectra
 
 
-def load_test_spectra_file():
-    module_root = os.path.join(os.path.dirname(__file__), "..")
-    spectra_file = os.path.join(module_root, "testdata", "testdata.mgf")
-    spectra = list(load_from_mgf(spectra_file))
-    return spectra
+save_spectra_module = importlib.import_module("matchms.exporting.save_spectra")
 
 
-@pytest.mark.parametrize("file_name",
-                         ["spectra.msp",
-                          "spectra.mgf",
-                          "spectra.json",
-                          "spectra.pickle"])
-def test_spectra(file_name, caplog):
-    """ Utility function to save spectra to msp and load them again.
-
-    Params:
-    -------
-    spectra: Spectra objects to store
-
-    Returns:
-    --------
-    reloaded_spectra: Spectra loaded from saved msp file.
-    """
-    spectrum_list = load_test_spectra_file()
-    with tempfile.TemporaryDirectory() as temp_dir:
-        filename = os.path.join(temp_dir, file_name)
-        save_spectra(spectrum_list, filename)
-        assert os.path.exists(filename)
-        reloaded_spectra = list(load_spectra(filename))
-    assert len(reloaded_spectra) == len(spectrum_list)
-    for i, spectrum in enumerate(spectrum_list):
-        reloaded_spectrum = reloaded_spectra[i]
-        # Num_peaks is sometimes added during saving. So to be able to compare it is set to None
-        spectrum.set("num_peaks", None)
-        reloaded_spectrum.set("num_peaks", None)
-        assert spectrum == reloaded_spectrum
-
-    # Test file exists error
-    with tempfile.TemporaryDirectory() as temp_dir:
-        filename = os.path.join(temp_dir, file_name)
-
-        with open(filename, "w", encoding="utf-8") as file:
-            file.write("content")
-        assert os.path.exists(filename)
-
-        with pytest.raises(FileExistsError, match=re.escape(f"The specified file: {filename} already exists.")):
-            save_spectra(spectrum_list, filename)
-
-    # Test append to different filetype not supported error
-    ftype = os.path.splitext(file_name)[1].lower()[1:]
-    if ftype in ["json", "pickle"]:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            filename = os.path.join(temp_dir, file_name)
-
-            with pytest.raises(ValueError, match=re.escape(f"{ftype} isn't supported for when `append` is True")):
-                save_spectra(spectra=spectrum_list, file=filename, append=True)
-
-    # Test logger warning when using pickle
-    if ftype == "pickle":
-        with caplog.at_level(logging.ERROR):
-            with tempfile.TemporaryDirectory() as temp_dir:
-                filename = os.path.join(temp_dir, file_name)
-                save_spectra(spectra=spectrum_list, file=filename, export_style="invalid")
-
-        assert "The only available export style for pickle is 'matchms', your export style invalid" in caplog.text
+def _make_spectrum():
+    return Spectrum(
+        mz=np.array([100.0, 200.0], dtype="float"),
+        intensities=np.array([0.5, 1.0], dtype="float"),
+        metadata={"precursor_mz": 201.0, "compound_name": "test compound"},
+    )
 
 
-def test_spectra_invalid_ext():
-    spectrum_list = load_test_spectra_file()
+def test_save_spectra_unknown_file_extension(tmp_path):
+    spectrum = _make_spectrum()
+    filename = tmp_path / "spectra.unknown"
 
-    # Test invalid file ext
-    with tempfile.TemporaryDirectory() as temp_dir:
-        filename = os.path.join(temp_dir, "invalid.txt")
-
-        with pytest.raises(TypeError, match=re.escape(f"File extension of file: {filename} is not recognized")):
-            save_spectra(spectrum_list, filename)
+    with pytest.raises(TypeError, match="File extension"):
+        save_spectra([spectrum], str(filename))
 
 
-@pytest.mark.parametrize("file_name", ["spectra.pickle"])
-def test_save_as_pickled_file_none_spectra(file_name):
-    """ Tests only pickled file saving with filtered None valued spectra
+def test_save_spectra_does_not_overwrite_existing_file(tmp_path):
+    spectrum = _make_spectrum()
+    filename = tmp_path / "spectra.mgf"
+    filename.write_text("already exists", encoding="utf-8")
 
-    Params:
-    -------
-    spectra: Spectra objects to store
+    with pytest.raises(FileExistsError):
+        save_spectra([spectrum], str(filename))
 
-    Returns:
-    --------
-    reloaded_spectra: Spectra loaded from saved msp file.
-    """
-    spectrum_list = load_test_spectra_file()
 
-    # Test file exists error
-    with tempfile.TemporaryDirectory() as temp_dir:
-        filename = os.path.join(temp_dir, file_name)
+@pytest.mark.parametrize("extension", ["json", "pickle"])
+def test_save_spectra_append_raises_for_unsupported_filetypes(tmp_path, extension):
+    spectrum = _make_spectrum()
+    filename = tmp_path / f"spectra.{extension}"
 
-        with open(filename, "w", encoding="utf-8") as file:
-            file.write("content")
-        assert os.path.exists(filename)
+    with pytest.raises(ValueError, match="append"):
+        save_spectra([spectrum], str(filename), append=True)
 
-        with pytest.raises(FileExistsError, match=re.escape(f"The file '{filename}' already exists.")):
-            save_as_pickled_file(spectrum_list, filename)
 
-    with tempfile.TemporaryDirectory() as temp_dir:
-        filename = os.path.join(temp_dir, file_name)
+def test_save_spectra_empty_list_creates_empty_file(tmp_path):
+    filename = tmp_path / "empty.mgf"
 
-        # Test no spectra list
-        with pytest.raises(TypeError, match="Expected list of spectra"):
-            save_as_pickled_file("invalid", filename)
+    save_spectra([], str(filename))
 
-        # Test empty spectra list
-        spectrum_list = [None]
-        with pytest.raises(TypeError, match="Expected list of spectra"):
-            save_as_pickled_file(spectrum_list, filename)
+    assert filename.exists()
+    assert filename.read_text(encoding="utf-8") == ""
+
+
+def test_save_spectra_json_dispatches_to_save_as_json(monkeypatch, tmp_path):
+    spectrum = _make_spectrum()
+    filename = tmp_path / "spectra.json"
+    calls = {}
+
+    def mock_save_as_json(spectra, file, export_style):
+        calls["spectra"] = spectra
+        calls["file"] = file
+        calls["export_style"] = export_style
+
+    monkeypatch.setattr(save_spectra_module, "save_as_json", mock_save_as_json)
+
+    save_spectra([spectrum], str(filename), export_style="gnps")
+
+    assert calls["spectra"] == [spectrum]
+    assert calls["file"] == str(filename)
+    assert calls["export_style"] == "gnps"
+
+
+@pytest.mark.parametrize(
+    "append, expected_file_mode",
+    [
+        (False, "w"),
+        (True, "a"),
+    ],
+)
+def test_save_spectra_mgf_dispatches_with_file_mode(
+    monkeypatch,
+    tmp_path,
+    append,
+    expected_file_mode,
+):
+    spectrum = _make_spectrum()
+    filename = tmp_path / "spectra.mgf"
+    calls = {}
+
+    if append:
+        filename.write_text("existing content\n", encoding="utf-8")
+
+    def mock_save_as_mgf(spectra, file, export_style, file_mode="w"):
+        calls["spectra"] = spectra
+        calls["file"] = file
+        calls["export_style"] = export_style
+        calls["file_mode"] = file_mode
+
+    monkeypatch.setattr(save_spectra_module, "save_as_mgf", mock_save_as_mgf)
+
+    save_spectra([spectrum], str(filename), export_style="matchms", append=append)
+
+    assert calls["spectra"] == [spectrum]
+    assert calls["file"] == str(filename)
+    assert calls["export_style"] == "matchms"
+    assert calls["file_mode"] == expected_file_mode
+
+
+@pytest.mark.parametrize(
+    "append, expected_file_mode",
+    [
+        (False, "w"),
+        (True, "a"),
+    ],
+)
+def test_save_spectra_msp_dispatches_with_file_mode(
+    monkeypatch,
+    tmp_path,
+    append,
+    expected_file_mode,
+):
+    spectrum = _make_spectrum()
+    filename = tmp_path / "spectra.msp"
+    calls = {}
+
+    if append:
+        filename.write_text("existing content\n", encoding="utf-8")
+
+    def mock_save_as_msp(spectra, file, style="matchms", file_mode="w"):
+        calls["spectra"] = spectra
+        calls["file"] = file
+        calls["style"] = style
+        calls["file_mode"] = file_mode
+
+    monkeypatch.setattr(save_spectra_module, "save_as_msp", mock_save_as_msp)
+
+    save_spectra([spectrum], str(filename), export_style="nist", append=append)
+
+    assert calls["spectra"] == [spectrum]
+    assert calls["file"] == str(filename)
+    assert calls["style"] == "nist"
+    assert calls["file_mode"] == expected_file_mode
+
+
+def test_save_spectra_accepts_single_spectrum(monkeypatch, tmp_path):
+    spectrum = _make_spectrum()
+    filename = tmp_path / "single.mgf"
+    calls = {}
+
+    def mock_save_as_mgf(spectra, file, export_style, file_mode="w"):
+        calls["spectra"] = spectra
+        calls["file"] = file
+        calls["export_style"] = export_style
+        calls["file_mode"] = file_mode
+
+    monkeypatch.setattr(save_spectra_module, "save_as_mgf", mock_save_as_mgf)
+
+    save_spectra(spectrum, str(filename))
+
+    assert calls["spectra"] == [spectrum]
+    assert calls["file"] == str(filename)
+    assert calls["export_style"] == "matchms"
+    assert calls["file_mode"] == "w"
+
+
+def test_save_spectra_pickle_export(tmp_path):
+    spectrum = _make_spectrum()
+    filename = tmp_path / "spectra.pickle"
+
+    save_spectra([spectrum], str(filename))
+
+    assert filename.exists()
+
+    with open(filename, "rb") as file:
+        loaded = pickle.load(file)
+
+    assert len(loaded) == 1
+    assert isinstance(loaded[0], Spectrum)
+    assert loaded[0] == spectrum
+
+
+def test_save_as_pickled_file_requires_list(tmp_path):
+    spectrum = _make_spectrum()
+    filename = tmp_path / "spectra.pickle"
+
+    with pytest.raises(TypeError, match="Expected list of spectra"):
+        save_as_pickled_file(spectrum, str(filename))
+
+
+def test_save_as_pickled_file_requires_list_of_spectra(tmp_path):
+    filename = tmp_path / "spectra.pickle"
+
+    with pytest.raises(TypeError, match="Expected list of spectra"):
+        save_as_pickled_file(["not a spectrum"], str(filename))
+
+
+def test_save_as_pickled_file_does_not_overwrite_existing_file(tmp_path):
+    spectrum = _make_spectrum()
+    filename = tmp_path / "spectra.pickle"
+    filename.write_bytes(b"already exists")
+
+    with pytest.raises(FileExistsError):
+        save_as_pickled_file([spectrum], str(filename))

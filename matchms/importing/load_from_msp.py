@@ -1,15 +1,15 @@
 import re
-from typing import Generator, List, Tuple
+from collections.abc import Generator
 import numpy as np
 from matchms.importing.parsing_utils import parse_spectrum_dict
-from matchms.Spectrum import Spectrum
+from matchms.spectrum import Spectrum
 
 
 def load_from_msp(filename: str, metadata_harmonization: bool = True) -> Generator[Spectrum, None, None]:
     """
-    MSP file to a :py:class:`~matchms.Spectrum.Spectrum` objects
+    MSP file to a :class:`~matchms.spectrum.Spectrum` objects
     Function that reads a .msp file and converts the info
-    in :py:class:`~matchms.Spectrum.Spectrum` objects.
+    in :class:`~matchms.spectrum.Spectrum` objects.
 
     Parameters
     ----------
@@ -50,7 +50,7 @@ def parse_msp_file(filename: str) -> Generator[dict, None, None]:
     # Peaks counter. Used to track and count the number of peaks
     peakscount = 0
 
-    with open(filename, "r", encoding="utf-8", errors="ignore") as f:
+    with open(filename, encoding="utf-8", errors="ignore") as f:
         for line in f:
             rline = line.rstrip()
 
@@ -59,6 +59,14 @@ def parse_msp_file(filename: str) -> Generator[dict, None, None]:
 
             if contains_metadata(rline):
                 parse_metadata(rline, params)
+                if peakscount == 0 and params.get("num peaks") is not None and int(params["num peaks"]) == 0:
+                    # A record without peaks ends at its Num Peaks line. Without this its
+                    # metadata would be merged into the next record.
+                    yield _record_to_dict(params, masses, intensities, peak_comments)
+                    params = {}
+                    masses = []
+                    intensities = []
+                    peak_comments = {}
                 continue
 
             mz, ints, comment = _parse_line_with_peaks(rline)
@@ -74,17 +82,7 @@ def parse_msp_file(filename: str) -> Generator[dict, None, None]:
             # Obtaining the masses and intensities
             if int(params["num peaks"]) == peakscount:
                 peakscount = 0
-                # Handles edge cases with GOLM files where the nominal mass is written with a comma instead of a dot
-                nominal_mass = params.get("mw")
-                if nominal_mass and isinstance(nominal_mass, str):
-                    params["mw"] = nominal_mass.replace(",", ".")
-
-                yield {
-                    "params": (params),
-                    "m/z array": masses,
-                    "intensity array": intensities,
-                    "peak comments": peak_comments,
-                }
+                yield _record_to_dict(params, masses, intensities, peak_comments)
 
                 params = {}
                 masses = []
@@ -92,14 +90,28 @@ def parse_msp_file(filename: str) -> Generator[dict, None, None]:
                 peak_comments = {}
 
 
-def _parse_line_with_peaks(rline: str) -> Tuple[List[float], List[float], str]:
+def _record_to_dict(params: dict, masses, intensities, peak_comments: dict) -> dict:
+    # Handles edge cases with GOLM files where the nominal mass is written with a comma instead of a dot
+    nominal_mass = params.get("mw")
+    if nominal_mass and isinstance(nominal_mass, str):
+        params["mw"] = nominal_mass.replace(",", ".")
+
+    return {
+        "params": (params),
+        "m/z array": np.asarray(masses, dtype=float),
+        "intensity array": np.asarray(intensities, dtype=float),
+        "peak comments": peak_comments,
+    }
+
+
+def _parse_line_with_peaks(rline: str) -> tuple[list[float], list[float], str]:
     """Parse a line containing peaks consisting of mz and intensity values with optional comments.
 
     Args:
         rline (str): Line with peaks read from the MSP.
 
     Returns:
-        Tuple[List[float], List[float], str]: mz, intensity and peak comments obtained from the line.
+        tuple[list[float], list[float], str]: mz, intensity and peak comments obtained from the line.
     """
     comment, rline = get_peak_comment(rline)
     mz, intensities = get_peak_values(rline)
@@ -107,7 +119,7 @@ def _parse_line_with_peaks(rline: str) -> Tuple[List[float], List[float], str]:
     return mz, intensities, comment
 
 
-def get_peak_values(peak: str) -> Tuple[List[float], List[float]]:
+def get_peak_values(peak: str) -> tuple[list[float], list[float]]:
     """Get the m/z and intensity value from the line containing the peak information."""
     tokens = re.findall(r"(\d+(?:\.\d+)?(?:[eE][-+]?\d+)?)", peak)
     if len(tokens) % 2 != 0:
@@ -119,7 +131,7 @@ def get_peak_values(peak: str) -> Tuple[List[float], List[float]]:
     return mz, intensities
 
 
-def get_peak_comment(rline: str) -> Tuple[str, str]:
+def get_peak_comment(rline: str) -> tuple[str, str]:
     """Get the peak comment from the line containing the peak information."""
     try:
         comment = re.findall(r"[\"\'](.*)[\"\']", rline)[0]

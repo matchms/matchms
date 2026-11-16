@@ -1,7 +1,7 @@
 """Submodule providing a reference spectrum for glucose."""
 
 import numpy as np
-from ..Spectrum import Spectrum
+from ..spectrum import Spectrum
 
 
 GLUCOSE_PRECURSOR_MZ: float = 203.05

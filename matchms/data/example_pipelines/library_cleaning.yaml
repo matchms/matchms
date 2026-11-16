@@ -25,9 +25,8 @@ filtering_queries:
   - no_peaks: 5
     intensity_percent: 5.0
 # cleaning annotation
-- - harmonize_undefined_inchikey
-- - harmonize_undefined_inchi
-- - harmonize_undefined_smiles
+- - harmonize_missing_entries
+  - keys: ["inchi", "inchikey", "smiles"]
 - - repair_inchi_inchikey_smiles
 - - derive_inchi_from_smiles
 - - derive_smiles_from_inchi

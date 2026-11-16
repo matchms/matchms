@@ -3,17 +3,16 @@ import pytest
 from matchms import Spectrum
 from matchms.filtering import normalize_intensities
 from matchms.similarity import CosineGreedy, ModifiedCosineGreedy
-from ..builder_Spectrum import SpectrumBuilder
+from ..builder_spectrum import SpectrumBuilder
 
 
-# ruff: noqa: E501
 def compute_expected_score(spectrum_1, spectrum_2, matches):
     spec1 = spectrum_1.peaks.intensities
     spec2 = spectrum_2.peaks.intensities
     peak_pairs_multiplied = 0
     for match in matches:
         peak_pairs_multiplied += spec1[match[0]] * spec2[match[1]]
-    return peak_pairs_multiplied / np.sqrt(np.sum(spec1 ** 2) * np.sum(spec2 ** 2))
+    return peak_pairs_multiplied / np.sqrt(np.sum(spec1**2) * np.sum(spec2**2))
 
 
 def test_modified_cosine_without_precursor_mz():
@@ -35,45 +34,86 @@ def test_modified_cosine_without_precursor_mz():
     assert str(msg.value) == expected_message
 
 
-@pytest.mark.parametrize("peaks, tolerance, masses, expected_matches", [
+@pytest.mark.parametrize(
+    "peaks, tolerance, masses, expected_matches",
     [
         [
-            [np.array([100, 150, 200, 300, 500, 510, 1100], dtype="float"), np.array([700, 200, 100, 1000, 200, 5, 500], dtype="float")],
-            [np.array([55, 105, 205, 304.5, 494.5, 515.5, 1045], dtype="float"), np.array([700, 200, 100, 1000, 200, 5, 500], dtype="float")]
+            [
+                [
+                    np.array([100, 150, 200, 300, 500, 510, 1100], dtype="float"),
+                    np.array([700, 200, 100, 1000, 200, 5, 500], dtype="float"),
+                ],
+                [
+                    np.array([55, 105, 205, 304.5, 494.5, 515.5, 1045], dtype="float"),
+                    np.array([700, 200, 100, 1000, 200, 5, 500], dtype="float"),
+                ],
+            ],
+            None,
+            (1000.0, 1005.0),
+            [(0, 1), (2, 2)],
         ],
-        None, (1000.0, 1005.0), [(0, 1), (2, 2)]
-    ], [
         [
-            [np.array([100, 299, 300, 301, 500, 510], dtype="float"), np.array([10, 500, 100, 200, 20, 100], dtype="float")],
-            [np.array([105, 305, 306, 505, 517], dtype="float"), np.array([10, 500, 100, 20, 100], dtype="float")],
+            [
+                [
+                    np.array([100, 299, 300, 301, 500, 510], dtype="float"),
+                    np.array([10, 500, 100, 200, 20, 100], dtype="float"),
+                ],
+                [np.array([105, 305, 306, 505, 517], dtype="float"), np.array([10, 500, 100, 20, 100], dtype="float")],
+            ],
+            2.0,
+            (1000.0, 1005.0),
+            [(0, 0), (1, 1), (3, 2), (4, 3), (5, 4)],
         ],
-        2.0, (1000.0, 1005.0), [(0, 0), (1, 1), (3, 2), (4, 3), (5, 4)]
-    ], [
         [
-            [np.array([100, 110, 200, 300, 400, 500, 600], dtype="float"), np.array([100, 50, 1, 80, 1, 1, 50], dtype="float")],
-            [np.array([110, 200, 300, 310, 700, 800], dtype="float"), np.array([100, 1, 90, 90, 1, 100], dtype="float")],
+            [
+                [
+                    np.array([100, 110, 200, 300, 400, 500, 600], dtype="float"),
+                    np.array([100, 50, 1, 80, 1, 1, 50], dtype="float"),
+                ],
+                [
+                    np.array([110, 200, 300, 310, 700, 800], dtype="float"),
+                    np.array([100, 1, 90, 90, 1, 100], dtype="float"),
+                ],
+            ],
+            None,
+            (1000.0, 1010.0),
+            [(0, 0), (2, 1), (3, 3)],
         ],
-        None, (1000.0, 1010.0), [(0, 0), (2, 1), (3, 3)]
-    ], [
         [
-            [np.array([100, 200, 300], dtype="float"), np.array([10, 10, 500], dtype="float")],
-            [np.array([120, 220, 320], dtype="float"), np.array([10, 10, 500], dtype="float")],
+            [
+                [np.array([100, 200, 300], dtype="float"), np.array([10, 10, 500], dtype="float")],
+                [np.array([120, 220, 320], dtype="float"), np.array([10, 10, 500], dtype="float")],
+            ],
+            None,
+            (1000.0, 1010.0),
+            [],
         ],
-        None, (1000.0, 1010.0), []
-    ]
-])
+    ],
+)
 def test_modified_cosine_with_mass_shift(peaks, tolerance, masses, expected_matches):
     """Test modified cosine on two spectra with mass shift."""
     builder = SpectrumBuilder()
-    spectrum_1 = builder.with_mz(peaks[0][0]).with_intensities(peaks[0][1]).with_metadata(metadata={"precursor_mz": masses[0]}).build()
-    spectrum_2 = builder.with_mz(peaks[1][0]).with_intensities(peaks[1][1]).with_metadata(metadata={"precursor_mz": masses[1]}).build()
+    spectrum_1 = (
+        builder.with_mz(peaks[0][0])
+        .with_intensities(peaks[0][1])
+        .with_metadata(metadata={"precursor_mz": masses[0]})
+        .build()
+    )
+    spectrum_2 = (
+        builder.with_mz(peaks[1][0])
+        .with_intensities(peaks[1][1])
+        .with_metadata(metadata={"precursor_mz": masses[1]})
+        .build()
+    )
 
     norm_spectrum_1 = normalize_intensities(spectrum_1)
     norm_spectrum_2 = normalize_intensities(spectrum_2)
     if tolerance is None:
-        modified_cosine = ModifiedCosineGreedy()
+        modified_cosine = ModifiedCosineGreedy(
+            remove_precursor=False
+        )  # default is true, but here we use non-sensical dummy precursor_mz values
     else:
-        modified_cosine = ModifiedCosineGreedy(tolerance=tolerance)
+        modified_cosine = ModifiedCosineGreedy(tolerance=tolerance, remove_precursor=False)
 
     score = modified_cosine.pair(norm_spectrum_1, norm_spectrum_2)
     expected_score = compute_expected_score(norm_spectrum_1, norm_spectrum_2, expected_matches)
@@ -83,13 +123,17 @@ def test_modified_cosine_with_mass_shift(peaks, tolerance, masses, expected_matc
 
 def test_modified_cosine_order_of_input_spectra():
     """Test modified cosine on two spectra in changing order."""
-    spectrum_1 = Spectrum(mz=np.array([100, 150, 200, 300, 500, 510, 1100], dtype="float"),
-                          intensities=np.array([700, 200, 100, 1000, 200, 5, 500], dtype="float"),
-                          metadata={"precursor_mz": 1000.0})
+    spectrum_1 = Spectrum(
+        mz=np.array([100, 150, 200, 300, 500, 510, 1100], dtype="float"),
+        intensities=np.array([700, 200, 100, 1000, 200, 5, 500], dtype="float"),
+        metadata={"precursor_mz": 1000.0},
+    )
 
-    spectrum_2 = Spectrum(mz=np.array([55, 105, 205, 304.5, 494.5, 515.5, 1045], dtype="float"),
-                          intensities=np.array([700, 200, 100, 1000, 200, 5, 500], dtype="float"),
-                          metadata={"precursor_mz": 1005.0})
+    spectrum_2 = Spectrum(
+        mz=np.array([55, 105, 205, 304.5, 494.5, 515.5, 1045], dtype="float"),
+        intensities=np.array([700, 200, 100, 1000, 200, 5, 500], dtype="float"),
+        metadata={"precursor_mz": 1005.0},
+    )
 
     norm_spectrum_1 = normalize_intensities(spectrum_1)
     norm_spectrum_2 = normalize_intensities(spectrum_2)
@@ -103,13 +147,17 @@ def test_modified_cosine_order_of_input_spectra():
 
 def test_modified_cosine_precursor_mz_as_invalid_string():
     """Test modified cosine on two spectra with precursor_mz given as string."""
-    spectrum_1 = Spectrum(mz=np.array([100, 200, 300], dtype="float"),
-                          intensities=np.array([10, 10, 500], dtype="float"),
-                          metadata={"precursor_mz": 1000.0})
+    spectrum_1 = Spectrum(
+        mz=np.array([100, 200, 300], dtype="float"),
+        intensities=np.array([10, 10, 500], dtype="float"),
+        metadata={"precursor_mz": 1000.0},
+    )
 
-    spectrum_2 = Spectrum(mz=np.array([120, 220, 320], dtype="float"),
-                          intensities=np.array([10, 10, 500], dtype="float"),
-                          metadata={"precursor_mz": "mz 1005.0"})
+    spectrum_2 = Spectrum(
+        mz=np.array([120, 220, 320], dtype="float"),
+        intensities=np.array([10, 10, 500], dtype="float"),
+        metadata={"precursor_mz": "mz 1005.0"},
+    )
 
     norm_spectrum_1 = normalize_intensities(spectrum_1)
     norm_spectrum_2 = normalize_intensities(spectrum_2)
@@ -123,15 +171,19 @@ def test_modified_cosine_precursor_mz_as_invalid_string():
 
 def test_modified_cosine_precursor_mz_as_string(caplog):
     """Test modified cosine on two spectra with precursor_mz given as string."""
-    spectrum_1 = Spectrum(mz=np.array([100, 200, 300], dtype="float"),
-                          intensities=np.array([10, 10, 500], dtype="float"),
-                          metadata={"precursor_mz": 1000.0},
-                          metadata_harmonization=False)
+    spectrum_1 = Spectrum(
+        mz=np.array([100, 200, 300], dtype="float"),
+        intensities=np.array([10, 10, 500], dtype="float"),
+        metadata={"precursor_mz": 1000.0},
+        metadata_harmonization=False,
+    )
 
-    spectrum_2 = Spectrum(mz=np.array([120, 220, 320], dtype="float"),
-                          intensities=np.array([10, 10, 500], dtype="float"),
-                          metadata={"precursor_mz": "1005.0"},
-                          metadata_harmonization=False)
+    spectrum_2 = Spectrum(
+        mz=np.array([120, 220, 320], dtype="float"),
+        intensities=np.array([10, 10, 500], dtype="float"),
+        metadata={"precursor_mz": "1005.0"},
+        metadata_harmonization=False,
+    )
 
     norm_spectrum_1 = normalize_intensities(spectrum_1)
     norm_spectrum_2 = normalize_intensities(spectrum_2)
@@ -185,3 +237,75 @@ def test_modified_cosine_greedy_matches_cosine_greedy_for_negative_boundary_delt
 
     assert modified_score["score"] == pytest.approx(cosine_score["score"], abs=1e-12)
     assert modified_score["matches"] == cosine_score["matches"]
+
+
+def test_modified_cosine_remove_precursor():
+    """Test effect of explicitly enabling/disabling precursor removal."""
+    spectrum_1 = Spectrum(
+        mz=np.array([100.0, 150.0, 199.0], dtype="float"),
+        intensities=np.array([1.0, 1.0, 10.0], dtype="float"),
+        metadata={"precursor_mz": 200.0},
+    )
+    spectrum_2 = Spectrum(
+        mz=np.array([100.0, 170.0, 209.0], dtype="float"),
+        intensities=np.array([1.0, 1.0, 10.0], dtype="float"),
+        metadata={"precursor_mz": 210.0},
+    )
+
+    score_with_precursor = ModifiedCosineGreedy(
+        tolerance=0.01,
+        noise_cutoff=0.0,
+        remove_precursor=False,
+    ).pair(spectrum_1, spectrum_2)
+
+    score_without_precursor = ModifiedCosineGreedy(
+        tolerance=0.01,
+        noise_cutoff=0.0,
+        remove_precursor=True,
+        offset_to_precursor=-1.6,
+    ).pair(spectrum_1, spectrum_2)
+
+    # Without precursor removal:
+    # - 100 matches directly.
+    # - 199 matches 209 via the 10 Da precursor mass shift.
+    # - 150 and 170 remain unmatched.
+    expected_with_precursor = (1.0 + 100.0) / 102.0
+
+    # With precursor removal, 199 and 209 are removed because:
+    #   199 > 200 - 1.6
+    #   209 > 210 - 1.6
+    # Only the direct 100 <-> 100 match remains.
+    expected_without_precursor = 1.0 / 2.0
+
+    assert score_with_precursor["score"] == pytest.approx(expected_with_precursor)
+    assert score_with_precursor["matches"] == 2
+
+    assert score_without_precursor["score"] == pytest.approx(expected_without_precursor)
+    assert score_without_precursor["matches"] == 1
+
+    assert score_without_precursor["score"] < score_with_precursor["score"]
+
+
+def test_modified_cosine_fallback_matches_configured_cosine_greedy():
+    reference = Spectrum(
+        mz=np.array([100.0, 200.0]),
+        intensities=np.array([1.0, 0.001]),
+        metadata={"precursor_mz": 500.0},
+    )
+    query = Spectrum(
+        mz=np.array([100.0, 200.0]),
+        intensities=np.array([1.0, 0.001]),
+        metadata={"precursor_mz": 500.5},
+    )
+
+    kwargs = {
+        "tolerance": 1.0,
+        "noise_cutoff": None,
+        "remove_precursor": False,
+    }
+
+    modified = ModifiedCosineGreedy(**kwargs).pair(reference, query)
+    cosine = CosineGreedy(**kwargs).pair(reference, query)
+
+    assert modified["score"] == pytest.approx(cosine["score"])
+    assert modified["matches"] == cosine["matches"]

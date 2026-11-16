@@ -1,7 +1,7 @@
 """Submodule providing a reference spectrum for phenylalanine."""
 
 import numpy as np
-from ..Spectrum import Spectrum
+from ..spectrum import Spectrum
 
 
 PHENYLANINE_PRECURSOR_MZ: float = 166.086

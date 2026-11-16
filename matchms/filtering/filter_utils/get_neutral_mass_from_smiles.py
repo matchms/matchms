@@ -1,29 +1,10 @@
 import logging
-from typing import Optional
+from rdkit import Chem
+from rdkit.Chem import Descriptors
 from matchms.constants import PROTON_MASS
 
 
 logger = logging.getLogger("matchms")
-
-
-try:  # rdkit is not included in pip package
-    from rdkit import Chem
-    from rdkit.Chem import Descriptors
-except ImportError:
-    _has_rdkit = False
-    from collections import UserString
-
-    class ChemMock(UserString):
-        def __call__(self, *args, **kwargs):
-            return self
-
-        def __getattr__(self, key):
-            return self
-
-    Chem = AllChem = ChemMock("")
-else:
-    _has_rdkit = True
-rdkit_missing_message = "Conda package 'rdkit' is required for this functionality."
 
 
 def get_monoisotopic_neutral_mass(smiles: str) -> float:
@@ -57,7 +38,7 @@ def get_molecular_weight_neutral_mass(smiles: str) -> float:
     return _get_neutral_mass(smiles, False)
 
 
-def _get_neutral_mass(smiles: str, monoisotopic: bool) -> Optional[float]:
+def _get_neutral_mass(smiles: str, monoisotopic: bool) -> float | None:
     """Get neutral mass of molecule, either average or most abundant monoisotopic mass.
 
     Args:
@@ -70,8 +51,7 @@ def _get_neutral_mass(smiles: str, monoisotopic: bool) -> Optional[float]:
     Returns:
         float: Neutral mass.
     """
-    if not _has_rdkit:
-        raise ImportError(rdkit_missing_message)
+
     if smiles is None:
         return None
     mol = Chem.MolFromSmiles(smiles)

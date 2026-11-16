@@ -1,16 +1,14 @@
 import logging
-from typing import List, Union
 import pyteomics.mgf as py_mgf
-from ..Spectrum import Spectrum
-from ..utils import filter_empty_spectra, fingerprint_export_warning, rename_deprecated_params
+from ..spectrum import Spectrum
+from ..utils import filter_empty_spectra, fingerprint_export_warning
 
 
 logger = logging.getLogger("matchms")
 
 
-@rename_deprecated_params(param_mapping={"spectrums": "spectra"}, version="0.26.5")
 def save_as_mgf(
-    spectra: Union[List[Spectrum], Spectrum],
+    spectra: list[Spectrum] | Spectrum,
     filename: str,
     export_style: str = "matchms",
     file_mode: str = "a",
@@ -38,12 +36,16 @@ def save_as_mgf(
     Parameters
     ----------
     spectra:
-        Expected input are match.Spectrum.Spectrum() objects.
+        Expected input are :class:`~matchms.spectrum.Spectrum` objects.
     filename:
         Provide filename to save spectrum(s).
     export_style:
-        Converts the keys to the required export style. One of ["matchms", "massbank", "nist", "riken", "gnps"].
-        Default is "matchms"
+        Converts the keys to the required export style.
+        One of ["matchms", "massbank", "nist", "riken", "gnps", "sirius"].
+        Default is "matchms".
+        Use "sirius" to write a file that SIRIUS can import: it writes the keys SIRIUS reads
+        (PEPMASS, CHARGE, MSLEVEL, RTINSECONDS, FEATURE_ID, ION, NAME, SCANS, SMILES, INCHI, FORMULA, ...)
+        and leaves out the others. Note that "retention_time" is written as RTINSECONDS without any unit conversion.
     file_mode: str
         This is an optional parameter which defines the mode the file will be opened in.
         Default is "a" (append). The other option is "w" (write). If set worngly it will default to "a".
