@@ -1,9 +1,13 @@
+import logging
 from collections.abc import Generator
 from pathlib import Path
 import numpy as np
 from pyteomics.mzml import read
 from matchms.importing.parsing_utils import sort_by_mz
 from matchms.spectrum import Spectrum
+
+
+logger = logging.getLogger("matchms")
 
 
 def load_from_mzml(
@@ -65,10 +69,24 @@ def parse_key_value(key, value, first_level=True):
                 combined_key = k
             yield from parse_key_value(combined_key, v, False)
     elif isinstance(value, list):
-        if len(value) != 1:
-            raise ValueError("Expected only 1 value, for any mzml with count higher than 1, matchms has no support")
-        for k, v in value[0].items():
-            yield from parse_key_value(k, v, False)
+        if len(value) == 0:
+            return
+        if len(value) > 1:
+            # Legal in mzML, e.g. a scanWindowList with count=2, or a cvParam
+            # that occurs twice in one spectrum. matchms metadata is flat, so
+            # only the first entry is kept.
+            logger.warning(
+                "Found %d values for '%s' in mzML spectrum, only the first is used.",
+                len(value),
+                key,
+            )
+        first = value[0]
+        if isinstance(first, dict):
+            for k, v in first.items():
+                yield from parse_key_value(k, v, False)
+        else:
+            # list of plain values (repeated cvParam)
+            yield key, first
     else:
         yield key, value
 
