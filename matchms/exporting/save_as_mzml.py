@@ -3,6 +3,7 @@ from collections.abc import Mapping
 from pathlib import Path
 import numpy as np
 from psims.mzml.writer import MzMLWriter
+from psims.xml import UserParam
 from ..__version__ import __version__
 from ..spectrum import Spectrum
 from ..utils import filter_empty_spectra, fingerprint_export_warning, load_export_key_conversions
@@ -31,6 +32,21 @@ _HANDLED_KEYS = (
     "num_peaks",
 )
 """Metadata written as PSI-MS terms, or not written at all, rather than as userParams."""
+_SOURCE_FILE_KEYS = (
+    "index",
+    "id",
+    "count",
+    "defaultarraylength",
+    "dataprocessingref",
+    "instrumentconfigurationref",
+    "sourcefileref",
+    "spectrumref",
+)
+"""Metadata that ``load_from_mzml`` takes from XML attributes of the file it reads.
+
+They describe the place of a spectrum in that file and are not written: the written
+file gets its own, and a userParam with the name of an attribute cannot be read back.
+"""
 
 
 def save_as_mzml(
@@ -48,7 +64,10 @@ def save_as_mzml(
     scan polarity, ``retention_time`` as the scan start time, ``collision_energy``
     as the activation and ``ms_level`` as the ms level. All other metadata entries
     are written as userParams of the spectrum, so that a reader that keeps them
-    (and :func:`~matchms.importing.load_from_mzml`) can restore them.
+    (and :func:`~matchms.importing.load_from_mzml`) can restore them. The entries
+    that ``load_from_mzml`` takes from XML attributes of the file it reads (``index``,
+    ``id``, ``count``, ``defaultarraylength`` and the ``...ref`` references) are not
+    written, the new file has its own.
 
     Example:
 
@@ -157,6 +176,8 @@ def _spectrum_arguments(
     metadata = spectrum.metadata_dict(export_style)
     for key in _HANDLED_KEYS:
         metadata.pop(key_conversions.get(key, key), None)
+    for key in _SOURCE_FILE_KEYS:
+        metadata.pop(key, None)
 
     level = _as_int(spectrum.get("ms_level"))
     params: list = [{"ms level": level if level is not None and level > 0 else default_ms_level}]
@@ -202,8 +223,15 @@ def _spectrum_arguments(
     return arguments
 
 
-def _user_params(metadata: Mapping) -> list[dict]:
-    """Return the remaining metadata entries as userParams, one per entry."""
+def _user_params(metadata: Mapping) -> list[UserParam]:
+    """Return the remaining metadata entries as userParams, one per entry.
+
+    The entries are built as ``UserParam`` objects, because psims looks up the name
+    of a plain ``{name: value}`` parameter in the controlled vocabularies first. A
+    metadata key that is also the name of a term (e.g. "count", which the mzML
+    loader returns) would otherwise be written as that term, or raise if the name
+    exists in more than one vocabulary.
+    """
     user_params = []
     for key, value in metadata.items():
         if value is None or (isinstance(value, str) and value == ""):
@@ -212,7 +240,7 @@ def _user_params(metadata: Mapping) -> list[dict]:
             value = value.item()
         if not isinstance(value, (str, int, float)) or isinstance(value, bool):
             value = str(value)
-        user_params.append({str(key): value})
+        user_params.append(UserParam(name=str(key), value=value))
     return user_params
 
 

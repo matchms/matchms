@@ -189,6 +189,61 @@ def test_save_as_mzml_existing_file_round_trip(tmp_path):
         assert copy.get("charge") == original.get("charge")
         assert copy.get("title") == original.get("title")
 
+    # Writing the copy again does not change it, so no entry piles up or gets lost.
+    second_filename = tmp_path / "second_copy.mzML"
+    save_as_mzml(loaded, second_filename)
+    for copy, second_copy in zip(loaded, load_from_mzml(second_filename), strict=True):
+        assert second_copy.metadata == copy.metadata
+
+
+def test_save_as_mzml_writes_keys_named_like_vocabulary_terms_as_user_params(tmp_path):
+    # "instrument" and "sample" are names of PSI-MS terms, "count" exists in two vocabularies.
+    spectrum = _spectrum({"precursor_mz": 301.2, "instrument": "Orbitrap", "sample": "beer", "scan_count": 3})
+    filename = tmp_path / "term_names.mzML"
+
+    save_as_mzml(spectrum, filename)
+    raw = _raw_spectra(filename)[0]
+    xml = filename.read_text(encoding="utf-8")
+
+    assert raw["instrument"] == "Orbitrap"
+    assert raw["sample"] == "beer"
+    assert raw["scan_count"] == 3
+    assert '<userParam name="instrument"' in xml
+    assert '<userParam name="sample"' in xml
+    assert '<cvParam name="instrument"' not in xml
+    assert '<cvParam name="sample"' not in xml
+
+
+def test_save_as_mzml_skips_attributes_of_the_source_file(tmp_path):
+    spectrum = _spectrum(
+        {
+            "precursor_mz": 301.2,
+            "index": 7,
+            "id": "controllerType=0 controllerNumber=1 scan=8",
+            "count": 2,
+            "defaultarraylength": 30,
+            "dataprocessingref": "pwiz_Reader_conversion",
+            "instrumentconfigurationref": "IC1",
+            "sourcefileref": "RAW1",
+            "spectrumref": "controllerType=0 controllerNumber=1 scan=7",
+            "compound_name": "test compound",
+        }
+    )
+    filename = tmp_path / "source_file_keys.mzML"
+
+    save_as_mzml(spectrum, filename)
+    raw = _raw_spectra(filename)[0]
+    xml = filename.read_text(encoding="utf-8")
+
+    # The file has its own values, and the values of the source file are not kept as userParams.
+    assert raw["index"] == 0
+    assert raw["id"] == "index=0"
+    assert raw["defaultArrayLength"] == 3
+    assert raw["compound_name"] == "test compound"
+    for key in ("index", "id", "count", "defaultarraylength", "dataprocessingref", "sourcefileref", "spectrumref"):
+        assert f'<userParam name="{key}"' not in xml
+    assert '<userParam name="instrumentconfigurationref"' not in xml
+
 
 def test_save_spectra_dispatches_mzml_extension(tmp_path):
     spectrum = _spectrum({"precursor_mz": 301.2, "charge": 1})
