@@ -33,7 +33,7 @@ distlib==0.4.3
     # via virtualenv
 docutils==0.22.4
     # via readme-renderer
-filelock==4.0.1
+filelock==4.2.1
     # via
     #   python-discovery
     #   virtualenv
