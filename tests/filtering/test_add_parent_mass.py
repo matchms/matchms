@@ -199,6 +199,7 @@ def test_add_parent_mass_collection_clone_false_modifies_input():
 def test_convert_parent_mass_entry_to_float(value, expected):
     assert _convert_parent_mass_entry_to_float(value) == expected
 
+
 @pytest.mark.parametrize("as_collection", [False, True], ids=["spectrum", "collection"])
 @pytest.mark.parametrize("adduct", ["[M+CH3COO]-", "[M+OAc]-"])
 def test_add_parent_mass_acetate_adducts(adduct, as_collection):
