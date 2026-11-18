@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Load from mzml now loads metadata beside the predefined list of metadata keys before. [#922](https://github.com/matchms/matchms/pull/922)
 
 ### Fixed
+- `[M-e]` is now converted to `[M]+` instead of the negative adduct `[M-e]-` [#1046](https://github.com/matchms/matchms/issues/1046)
 - Include all extra dependencies into main coverage test run [#1034](https://github.com/matchms/matchms/pull/1034)
 - Agent skill: the score-mask example now compares one score field (`scores["score"] > 0.5`), since `Cosine` and `ModifiedCosine` return two fields and reject `scores > 0.5`, and the sparse-mode CLI example uses `CosineGreedy`, since `Cosine` has no `sparse_matrix()` [#959](https://github.com/matchms/matchms/issues/959).
 - Use copy for to_numpy() method which with newer pandas versiony can otherwise become read-only [#1035](https://github.com/matchms/matchms/pull/1035)

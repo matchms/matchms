@@ -19,6 +19,9 @@ from tests.builder_spectrum import SpectrumBuilder
         ("2M+Na", "[2M+Na]+"),
         ("M+NH3+", "[M+NH3]+"),
         ("M-H2O+2H2+", "[M-H2O+2H]2+"),
+        # Losing an electron leaves a positive ion.
+        ("[M-e]", "[M]+"),
+        ("M-e", "[M]+"),
         (None, None),
     ],
 )

@@ -14,6 +14,7 @@ from ..builder_spectrum import SpectrumBuilder
         ["M-H-", -1, None, "negative"],
         ["M+H", None, None, "positive"],
         ["blabla", 3, None, "positive"],
+        ["[M-e]", None, None, "positive"],
     ],
 )
 def test_derive_ionmode(adduct, charge, ionmode, expected_ionmode, as_collection):
