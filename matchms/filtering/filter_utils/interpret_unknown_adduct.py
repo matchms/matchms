@@ -105,6 +105,7 @@ def replace_abbreviations(ions_split):
         "TFA": "C2HF3O2",
         "IsoProp": "CH3CHOHCH3",
         "MeOH": "CH3OH",
+        "OAc": "CH3COO",
     }
     corrected_ions = []
     for ion in ions_split:

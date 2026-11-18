@@ -198,3 +198,21 @@ def test_add_parent_mass_collection_clone_false_modifies_input():
 )
 def test_convert_parent_mass_entry_to_float(value, expected):
     assert _convert_parent_mass_entry_to_float(value) == expected
+
+
+@pytest.mark.parametrize("as_collection", [False, True], ids=["spectrum", "collection"])
+@pytest.mark.parametrize("adduct", ["[M+CH3COO]-", "[M+OAc]-"])
+def test_add_parent_mass_acetate_adducts(adduct, as_collection):
+    """[M+OAc]- is acetate (C2H3O2-) and must give the same parent mass as [M+CH3COO]-."""
+    metadata = {"precursor_mz": 400.0, "adduct": adduct, "charge": -1, "ionmode": "negative"}
+    spectrum_in = SpectrumBuilder().with_metadata(metadata).build()
+
+    spectrum = run_filter_as_spectrum_or_collection(
+        add_parent_mass,
+        spectrum_in,
+        as_collection,
+    )
+
+    assert np.allclose(spectrum.get("parent_mass"), 340.986147, atol=1e-4), (
+        f"Expected parent mass of about 340.986147 for {adduct}."
+    )
