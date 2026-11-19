@@ -15,19 +15,23 @@ virtual environment before using ``uv pip install``:
     uv venv --python 3.13
     uv pip install matchms
 
-To install the matchms 1.0 pre-release (starting with
-``1.0.0.dev1``), allow pre-release packages explicitly:
+To install the matchms >=1.0 run:
 
 .. code-block:: console
 
     uv venv --python 3.13
-    uv pip install --prerelease allow "matchms>=1.0.0.dev1,<2"
+    uv pip install "matchms>=1.0"
 
-For a regular stable installation, ``uv pip install matchms`` installs the
-latest stable release available at the time of installation. It may not yet
-contain the matchms 1.0 APIs described here.
+Or install matchms with pip:
 
-Install matchms with conda:
+.. code-block:: console
+
+    python -m venv matchms
+    source matchms/bin/activate
+    pip install matchms
+
+Matchms can also be installed using conda (from Bioconda), but releases on bioconda may be notably slower,
+so the new matchms >= 1.0 might only later become available via conda.
 
 .. code-block:: console
 
@@ -35,10 +39,3 @@ Install matchms with conda:
     conda activate matchms
     conda install --channel bioconda --channel conda-forge matchms
 
-Install matchms with pip:
-
-.. code-block:: console
-
-    python -m venv matchms
-    source matchms/bin/activate
-    pip install matchms
