@@ -15,8 +15,8 @@ Code quality checks:
    :align: left
    :alt: matchms
 
-matchms
-=======
+matchms 1.0
+===========
 
 Matchms is an open-source Python package for importing, processing, cleaning,
 exporting, and comparing tandem mass spectrometry data (MS/MS). It supports
