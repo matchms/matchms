@@ -10,11 +10,6 @@ New to matchms? Start with :doc:`installation` and the
 :doc:`getting_started` guide. Upgrading from 0.x? Read
 :doc:`migration_1_0`.
 
-.. note::
-
-   matchms 1.0 is currently available as a pre-release (starting with
-   ``1.0.0.dev1``). The stable ``matchms`` package on your chosen package
-   index may be an earlier release. The examples in these guides target 1.0.
 
 User guide
 ----------

@@ -1,6 +1,6 @@
 [project]
 name = "matchms"
-version = "1.0.0.dev1"
+version = "1.0.0"
 description = "Python library for large-scale comparisons and processing of tandem mass spectral data"
 readme = "README.rst"
 requires-python = ">=3.11,<3.15"

@@ -5,9 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## unpublished
+## [1.0.0] - 2026-11-19
 
-## Changed
+### Changed
 - add test runs without numba JIT [#1034](https://github.com/matchms/matchms/pull/1034)
 - smaller code quality changes based on SonarQube analysis [#1034](https://github.com/matchms/matchms/pull/1034)
 - code quality changes [#1035](https://github.com/matchms/matchms/pull/1035)
@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Include all extra dependencies into main coverage test run [#1034](https://github.com/matchms/matchms/pull/1034)
 - Agent skill: the score-mask example now compares one score field (`scores["score"] > 0.5`), since `Cosine` and `ModifiedCosine` return two fields and reject `scores > 0.5`, and the sparse-mode CLI example uses `CosineGreedy`, since `Cosine` has no `sparse_matrix()` [#959](https://github.com/matchms/matchms/issues/959).
 - Use copy for to_numpy() method which with newer pandas versiony can otherwise become read-only [#1035](https://github.com/matchms/matchms/pull/1035)
-- `[M+OAc]-` in the known adducts table used actinium (Ac) instead of acetate, underestimating parent masses by ~184 Da; its correction mass now matches `[M+CH3COO]-`. Unknown adduct interpreter now maps OAc to acetate; by @dhruvavirneni [#1044](https://github.com/matchms/matchms/issues/1044)
+- `[M+OAc]-` in the known adducts table used actinium (Ac) instead of acetate, underestimating parent masses by ~184 Da. Its correction mass now matches `[M+CH3COO]-`. Unknown adduct interpreter now maps OAc to acetate [#1044](https://github.com/matchms/matchms/issues/1044)
 
 ## [1.0.0.dev1] - 2026-11-10
 This development release prepares matchms 1.0 with major changes to collections, similarity scoring, filtering, I/O, and the public API. **Upgrading from 0.x requires attention to the breaking changes below.**
@@ -893,7 +893,8 @@ Contains three plot types: `plot_spectrum()` or `spectrum.plot()`, `plot_spectra
 - This is the initial version of Spec2Vec from https://github.com/iomega/Spec2Vec
 - (later splitted into matchms + spec2vec)
 
-[Unreleased]: https://github.com/matchms/matchms/compare/1.0.0.dev1...HEAD
+[Unreleased]: https://github.com/matchms/matchms/compare/1.0.0...HEAD
+[1.0.0]: https://github.com/matchms/matchms/compare/1.0.0.dev1...1.0.0
 [1.0.0.dev1]: https://github.com/matchms/matchms/compare/0.34.0...1.0.0.dev1
 [0.34.0]: https://github.com/matchms/matchms/compare/0.33.1...0.34.0
 [0.33.1]: https://github.com/matchms/matchms/compare/0.33.0...0.33.1
