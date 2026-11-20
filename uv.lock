@@ -255,7 +255,7 @@ wheels = [
 
 [[package]]
 name = "chemap"
-version = "0.3.8"
+version = "0.3.9"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "joblib" },
@@ -270,9 +270,9 @@ dependencies = [
     { name = "scipy", version = "1.18.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
     { name = "tqdm" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/26/64/a6290d35df351deb848c9d296327e4e6df0886a81a5f0710b5e1bd24e4fb/chemap-0.3.8.tar.gz", hash = "sha256:1fce148e6dc4d47acee5ad5e918ccb447aa05e0ab360bad521b4df653f34f7ab", size = 61191, upload-time = "2026-09-09T15:46:22.05Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/bf/23/22ab2037f47c52bb6e40027777a4134710d48744bb3b7d59bdf4683ab216/chemap-0.3.9.tar.gz", hash = "sha256:804d6debeaa335f0f55948a41b5091b79151863b29db97e655ece5bd9a489339", size = 62870, upload-time = "2026-10-23T13:38:11.604Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/26/d0/e59898e8a09e4760a7404549f7e2ab643ee1b98954ecb6d1612516376e90/chemap-0.3.8-py3-none-any.whl", hash = "sha256:687f5ddbe7b7d7b6833d7e99e89b4b44af16fba94eef20fba46be7abecce5d4d", size = 70586, upload-time = "2026-09-09T15:46:20.72Z" },
+    { url = "https://files.pythonhosted.org/packages/bb/6c/99f8e3529729c09dcff288d554d231d6ecb108a2961fd067eff310097f8b/chemap-0.3.9-py3-none-any.whl", hash = "sha256:ee0536b263beaa12af45ef45c83b4aa67d5330e402055919ea860443be4d80f6", size = 71842, upload-time = "2026-10-23T13:38:10.32Z" },
 ]
 
 [[package]]
