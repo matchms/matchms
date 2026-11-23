@@ -239,7 +239,7 @@ class SpectraCollection(Sequence[Spectrum]):
             metadata=MetadataCollection.row_to_dict(self._metadata.iloc[int(idx)]),
             metadata_harmonization=False,
         )
-    
+
     @overload
     def __getitem__(self, idx: int | np.integer) -> Spectrum: ...
     @overload
