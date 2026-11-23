@@ -30,17 +30,13 @@ _HANDLED_KEYS = (
     "fingerprint",
     "peak_comments",
     "num_peaks",
+    "id",
 )
 """Metadata written as PSI-MS terms, or not written at all, rather than as userParams."""
 _SOURCE_FILE_KEYS = (
     "index",
-    "id",
     "count",
     "defaultarraylength",
-    "dataprocessingref",
-    "instrumentconfigurationref",
-    "sourcefileref",
-    "spectrumref",
 )
 """Metadata that ``load_from_mzml`` takes from XML attributes of the file it reads.
 
@@ -195,7 +191,7 @@ def _spectrum_arguments(
     arguments = {
         "mz_array": np.asarray(spectrum.peaks.mz, dtype=np.float64),
         "intensity_array": np.asarray(spectrum.peaks.intensities, dtype=np.float64),
-        "id": f"index={index}",
+        "id": spectrum.get("id", f"index={index}"),
         "centroided": True,
         "polarity": _polarity(spectrum.get("ionmode"), charge),
         "params": params,

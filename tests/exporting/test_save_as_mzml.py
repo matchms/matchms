@@ -237,13 +237,15 @@ def test_save_as_mzml_skips_attributes_of_the_source_file(tmp_path):
 
     # The file has its own values, and the values of the source file are not kept as userParams.
     assert raw["index"] == 0
-    assert raw["id"] == "index=0"
+    assert raw["id"] == "controllerType=0 controllerNumber=1 scan=8"
+    assert raw["spectrumref"] == "controllerType=0 controllerNumber=1 scan=7"
     assert raw["defaultArrayLength"] == 3
     assert raw["compound_name"] == "test compound"
-    for key in ("index", "id", "count", "defaultarraylength", "dataprocessingref", "sourcefileref", "spectrumref"):
+    assert raw["sourcefileref"] == "RAW1"
+    assert raw["instrumentconfigurationref"] == "IC1"
+    assert raw["dataprocessingref"] == "pwiz_Reader_conversion"
+    for key in ("index", "count", "defaultarraylength"):
         assert f'<userParam name="{key}"' not in xml
-    assert '<userParam name="instrumentconfigurationref"' not in xml
-
 
 def test_save_spectra_dispatches_mzml_extension(tmp_path):
     spectrum = _spectrum({"precursor_mz": 301.2, "charge": 1})
