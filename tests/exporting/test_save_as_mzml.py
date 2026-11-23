@@ -247,6 +247,7 @@ def test_save_as_mzml_skips_attributes_of_the_source_file(tmp_path):
     for key in ("index", "count", "defaultarraylength"):
         assert f'<userParam name="{key}"' not in xml
 
+
 def test_save_spectra_dispatches_mzml_extension(tmp_path):
     spectrum = _spectrum({"precursor_mz": 301.2, "charge": 1})
     filename = tmp_path / "dispatch.mzml"
