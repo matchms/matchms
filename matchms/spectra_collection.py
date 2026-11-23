@@ -20,7 +20,7 @@ from .hashing import compute_combined_hashes
 logger = logging.getLogger("matchms")
 
 
-class SpectraCollection:
+class SpectraCollection(Sequence[Spectrum]):
     """Central collection object for matchms spectra datasets.
 
     A ``SpectraCollection`` stores many spectra in a synchronized, table-like
