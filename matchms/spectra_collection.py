@@ -1,8 +1,8 @@
 import logging
 import os
-from collections.abc import Generator, Iterable
+from collections.abc import Generator, Iterable, Iterator, Sequence
 from functools import cached_property
-from typing import Self
+from typing import Self, overload
 import numpy as np
 import pandas as pd
 from scipy.sparse import csr_array, vstack
@@ -239,6 +239,13 @@ class SpectraCollection:
             metadata=MetadataCollection.row_to_dict(self._metadata.iloc[int(idx)]),
             metadata_harmonization=False,
         )
+    
+    @overload
+    def __getitem__(self, idx: int | np.integer) -> Spectrum: ...
+    @overload
+    def __getitem__(self, idx: slice | list | np.ndarray) -> Self: ...
+    @overload
+    def __getitem__(self, idx: tuple) -> Spectrum | Self: ...
 
     def __getitem__(self, idx):
         # 2D slicing: rows + mz-range
@@ -279,11 +286,11 @@ class SpectraCollection:
         target = self.copy()
         return target._reorder(indices)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Spectrum]:
         for i in range(self._fragments.shape[0]):
             yield self[i]
 
-    def __len__(self):
+    def __len__(self) -> int:
         return self._fragments.shape[0]
 
     def __repr__(self) -> str:
