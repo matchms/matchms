@@ -5,7 +5,7 @@ from matchms import SpectraProcessor
 from matchms.filtering.default_pipelines import BASIC_FILTERS, CLEAN_PEAKS, REPAIR_ANNOTATION
 
 
-def test_clean_peaks_workflow_on_collection_and_spectra_list():
+def test_clean_peaks_workflow_on_collection_and_spectra_list(tmp_path):
     module_root = os.path.join(os.path.dirname(__file__), "..")
     spectra_file = os.path.join(module_root, "tests", "testdata", "pesticides.mgf")
 
@@ -36,14 +36,13 @@ def test_clean_peaks_workflow_on_collection_and_spectra_list():
     df = report.to_dataframe()
     assert df.shape == (25, 5)  # Adjust when filter pipelines change in matchms
 
-    # store cleaned spectra to file
-    output_file = os.path.join(module_root, "tests", "testdata", "pesticides_cleaned.mgf")
+    # store cleaned spectra to a temporary file
+    output_file = str(tmp_path / "pesticides_cleaned.mgf")
     processed_collection.to_mgf(output_file)
 
     # load again and check that the number of spectra and peaks is the same
     reloaded_collection = load_ms2_dataset(output_file)
     assert reloaded_collection.n_spectra == processed_collection.n_spectra == 73
-
 
     # run processor on collection again...
     processor = SpectraProcessor(
