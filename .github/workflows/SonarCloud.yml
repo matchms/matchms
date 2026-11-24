@@ -25,14 +25,14 @@ jobs:
       )
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           repository: ${{ github.repository }}
           ref: ${{ github.event.workflow_run.head_sha }}
           fetch-depth: 0
 
       - name: Download coverage artifact from the successful CI run
-        uses: dawidd6/action-download-artifact@v6
+        uses: dawidd6/action-download-artifact@v28
         with:
           run_id: ${{ github.event.workflow_run.id }}
           name: sonarcloud-data-pip
