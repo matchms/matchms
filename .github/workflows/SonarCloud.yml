@@ -32,7 +32,7 @@ jobs:
           fetch-depth: 0
 
       - name: Download coverage artifact from the successful CI run
-        uses: dawidd6/action-download-artifact@v6
+        uses: dawidd6/action-download-artifact@v28
         with:
           run_id: ${{ github.event.workflow_run.id }}
           name: sonarcloud-data-pip
