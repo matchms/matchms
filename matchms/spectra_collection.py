@@ -18,8 +18,8 @@ from .hashing import compute_combined_hashes
 
 
 logger = logging.getLogger("matchms")
-
-
+MzSelector = slice | list[int] | npt.NDArray[Any]
+RowSelector = slice | list[int] | list[bool] | npt.NDArray[Any] | pd.Series
 class SpectraCollection(Sequence[Spectrum]):
     """Central collection object for matchms spectra datasets.
 
@@ -243,9 +243,9 @@ class SpectraCollection(Sequence[Spectrum]):
     @overload
     def __getitem__(self, idx: int | np.integer) -> Spectrum: ...
     @overload
-    def __getitem__(self, idx: slice | list | np.ndarray) -> Self: ...
+    def __getitem__(self, idx: RowSelector) -> Self: ...
     @overload
-    def __getitem__(self, idx: tuple) -> Spectrum | Self: ...
+    def __getitem__(self, idx: tuple[RowSelector, MzSelector]) -> Spectrum | Self: ...
 
     def __getitem__(self, idx):
         # 2D slicing: rows + mz-range
