@@ -2,8 +2,9 @@ import logging
 import os
 from collections.abc import Generator, Iterable, Iterator, Sequence
 from functools import cached_property
-from typing import Self, overload
+from typing import Any, Self, overload
 import numpy as np
+import numpy.typing as npt
 import pandas as pd
 from scipy.sparse import csr_array, vstack
 from matchms.exporting import save_as_json, save_as_mgf, save_as_msp, save_as_parquet
@@ -245,7 +246,9 @@ class SpectraCollection(Sequence[Spectrum]):
     @overload
     def __getitem__(self, idx: RowSelector) -> Self: ...
     @overload
-    def __getitem__(self, idx: tuple[RowSelector, MzSelector]) -> Spectrum | Self: ...
+    def __getitem__(self, idx: tuple[RowSelector, MzSelector]) -> Self: ...
+    @overload
+    def __getitem__(self, idx: tuple[int | np.integer, MzSelector]) -> Spectrum: ...
 
     def __getitem__(self, idx):
         # 2D slicing: rows + mz-range
