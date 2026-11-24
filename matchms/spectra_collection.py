@@ -21,6 +21,8 @@ from .hashing import compute_combined_hashes
 logger = logging.getLogger("matchms")
 MzSelector = slice | list[int] | npt.NDArray[Any]
 RowSelector = slice | list[int] | list[bool] | npt.NDArray[Any] | pd.Series
+
+
 class SpectraCollection(Sequence[Spectrum]):
     """Central collection object for matchms spectra datasets.
 
