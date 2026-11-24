@@ -1,9 +1,10 @@
 import logging
 import os
-from collections.abc import Generator, Iterable
+from collections.abc import Generator, Iterable, Iterator, Sequence
 from functools import cached_property
-from typing import Self
+from typing import Any, Self, overload
 import numpy as np
+import numpy.typing as npt
 import pandas as pd
 from scipy.sparse import csr_array, vstack
 from matchms.exporting import save_as_json, save_as_mgf, save_as_msp, save_as_parquet
@@ -18,9 +19,11 @@ from .hashing import compute_combined_hashes
 
 
 logger = logging.getLogger("matchms")
+MzSelector = slice | list[int] | npt.NDArray[Any]
+RowSelector = slice | list[int] | list[bool] | npt.NDArray[Any] | pd.Series
 
 
-class SpectraCollection:
+class SpectraCollection(Sequence[Spectrum]):
     """Central collection object for matchms spectra datasets.
 
     A ``SpectraCollection`` stores many spectra in a synchronized, table-like
@@ -240,6 +243,15 @@ class SpectraCollection:
             metadata_harmonization=False,
         )
 
+    @overload
+    def __getitem__(self, idx: int | np.integer) -> Spectrum: ...
+    @overload
+    def __getitem__(self, idx: RowSelector) -> Self: ...
+    @overload
+    def __getitem__(self, idx: tuple[RowSelector, MzSelector]) -> Self: ...
+    @overload
+    def __getitem__(self, idx: tuple[int | np.integer, MzSelector]) -> Spectrum: ...
+
     def __getitem__(self, idx):
         # 2D slicing: rows + mz-range
         if isinstance(idx, tuple):
@@ -279,11 +291,11 @@ class SpectraCollection:
         target = self.copy()
         return target._reorder(indices)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Spectrum]:
         for i in range(self._fragments.shape[0]):
             yield self[i]
 
-    def __len__(self):
+    def __len__(self) -> int:
         return self._fragments.shape[0]
 
     def __repr__(self) -> str:
