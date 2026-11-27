@@ -30,10 +30,10 @@ def _prep_naive(s, bin_width=1.0, mz_power=0.0, intensity_power=1.0):
     if mz.size == 0:
         return np.empty(0, dtype=np.int64), np.empty(0, dtype=float)
 
-    if mz_power != 0.0:
-        inten = inten * np.power(mz, mz_power, dtype=float)
     if intensity_power != 1.0:
         inten = np.power(inten, intensity_power, dtype=float)
+    if mz_power != 0.0:
+        inten = inten * np.power(mz, mz_power, dtype=float)
 
     bins = np.floor(mz / bin_width + 0.5).astype(np.int64)
     order = np.argsort(bins, kind="mergesort")
@@ -330,3 +330,37 @@ def test_float32_and_float64_scores_agree():
         f64.matrix([s1, s2], [s1, s2]).to_array(),
         atol=1e-6,
     )
+
+
+@pytest.mark.parametrize(
+    "mz_power,intensity_power",
+    [
+        (1.0, 0.5),
+        (2.0, 0.5),
+        (3.0, 0.6),
+    ],
+)
+def test_mz_power_and_intensity_power_combined(mz_power, intensity_power):
+    """Peak weighting must compute (mz ** mz_power) * (intensity ** intensity_power)."""
+    builder = SpectrumBuilder()
+    s1 = _build(builder, [100.0, 400.0], [1.0, 1.0])
+    s2 = _build(builder, [100.0, 400.0], [1.0, 0.25])
+
+    blink = CosineBlink(
+        tolerance=0.01,
+        bin_width=0.001,
+        mz_power=mz_power,
+        intensity_power=intensity_power,
+        prefilter=False,
+    )
+    greedy = CosineGreedy(
+        tolerance=0.01,
+        mz_power=mz_power,
+        intensity_power=intensity_power,
+        noise_cutoff=None,
+        remove_precursor=False,
+    )
+
+    expected = float(greedy.pair(s1, s2)["score"])
+    assert float(blink.pair(s1, s2)) == pytest.approx(expected, abs=1e-6)
+    assert float(blink.matrix([s1], [s2]).to_array()[0, 0]) == pytest.approx(expected, abs=1e-6)

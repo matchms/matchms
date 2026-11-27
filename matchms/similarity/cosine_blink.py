@@ -361,10 +361,10 @@ class CosineBlink(BaseSimilarity):
         intens = intens.astype(self.dtype, copy=False)
 
         # Optional weighting
-        if self.mz_power != 0.0:
-            intens = intens * np.power(mz, self.mz_power, dtype=self.dtype)
         if self.intensity_power != 1.0:
             intens = np.power(intens, self.intensity_power, dtype=self.dtype)
+        if self.mz_power != 0.0:
+            intens = intens * np.power(mz, self.mz_power, dtype=self.dtype)
 
         # Bin to nearest integer bin
         mz_binned = np.floor(mz / self.bin_width + 0.5).astype(np.int32)
